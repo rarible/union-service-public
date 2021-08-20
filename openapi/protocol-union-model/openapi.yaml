@@ -1,0 +1,39 @@
+openapi: 3.0.3
+info:
+paths:
+
+components:
+  schemas:
+
+    Test:
+      type: object
+      properties:
+        id:
+          type: integer
+
+    UnionItemEvent:
+      required:
+        - eventId
+        - itemId
+      properties:
+        eventId:
+          type: string
+        itemId:
+          type: string
+
+    UnionOwnershipEvent:
+      required:
+        - eventId
+        - ownershipId
+      properties:
+        eventId:
+          type: string
+        ownershipId:
+          type: string
+
+    UnionOrderEvent:
+      required:
+        - hash
+      properties:
+        hash:
+          type: string

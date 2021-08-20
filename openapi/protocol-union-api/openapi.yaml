@@ -1,0 +1,18 @@
+openapi: 3.0.3
+info:
+  title: OpenAPI definition
+  version: v0.1
+
+paths:
+  "/v0.1/test":
+    get:
+      tags:
+        - test-controller
+      operationId: getTest
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Test"
