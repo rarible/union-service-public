@@ -1,0 +1,23 @@
+application:
+  project: protocol
+
+server:
+  shutdown: graceful
+  port: 8080
+
+spring:
+  application.name: union-api
+  jackson:
+    mapper:
+      ACCEPT_CASE_INSENSITIVE_ENUMS: true
+    deserialization:
+      FAIL_ON_UNKNOWN_PROPERTIES: false
+    default-property-inclusion: non_null
+  main:
+    banner-mode: log
+    web-application-type: reactive
+
+rarible:
+  ethereum:
+    converter:
+      enabled: true

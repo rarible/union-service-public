@@ -1,0 +1,286 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <parent>
+        <groupId>com.rarible</groupId>
+        <artifactId>rarible-parent-pom</artifactId>
+        <version>1.1-SNAPSHOT</version>
+    </parent>
+
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>rarible-union-service</artifactId>
+    <groupId>com.rarible.protocol.union</groupId>
+    <packaging>pom</packaging>
+    <version>1.0-SNAPSHOT</version>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>nexus-snapshots</id>
+            <url>http://nexus.rarible.int/repository/maven-snapshots/</url>
+        </snapshotRepository>
+        <repository>
+            <id>nexus-releases</id>
+            <url>http://nexus.rarible.int/repository/maven-releases/</url>
+        </repository>
+    </distributionManagement>
+
+    <properties>
+        <nexus.maven.public>http://nexus.rarible.int/repository/maven-public</nexus.maven.public>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <kotlin.compiler.jvmTarget>1.8</kotlin.compiler.jvmTarget>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <spring-cloud-gateway.version>2.2.6.RELEASE</spring-cloud-gateway.version>
+        <mockserver-netty.version>5.11.2</mockserver-netty.version>
+        <mockserver.version>1.15.3</mockserver.version>
+
+        <rarible-core.version>1.2-SNAPSHOT</rarible-core.version>
+        <rarible-ethereum.version>1.0-SNAPSHOT</rarible-ethereum.version>
+        <rarible-protocol.ethereum.version>1.12.3</rarible-protocol.ethereum.version>
+        <rarible.codegen.server.version>1.0.1</rarible.codegen.server.version>
+        <rarible.codegen.client.version>1.1.1</rarible.codegen.client.version>
+
+        <openapi.plugin.version>5.1.0</openapi.plugin.version>
+        <model.generator.version>1.2.0</model.generator.version>
+
+        <dev-jna.version>5.7.0</dev-jna.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.rarible.core</groupId>
+                <artifactId>rarible-core-parent</artifactId>
+                <version>${rarible-core.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.rarible.ethereum</groupId>
+                <artifactId>rarible-ethereum-parent</artifactId>
+                <version>${rarible-ethereum.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <!-- ========= Internal dependencies ========== -->
+            <dependency>
+                <groupId>com.rarible.protocol.union</groupId>
+                <artifactId>rarible-union-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.rarible.protocol.union</groupId>
+                <artifactId>rarible-union-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.rarible.protocol.union</groupId>
+                <artifactId>rarible-union-listener</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <!-- =========== Union Protocol-API =========== -->
+            <dependency>
+                <groupId>com.rarible.protocol.union</groupId>
+                <artifactId>protocol-union-model</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.rarible.protocol.union</groupId>
+                <artifactId>protocol-union-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.rarible.protocol.union</groupId>
+                <artifactId>protocol-union-client</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.rarible.protocol.union</groupId>
+                <artifactId>protocol-union-client-starter</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.rarible.protocol.union</groupId>
+                <artifactId>protocol-union-subscriber</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.rarible.protocol.union</groupId>
+                <artifactId>protocol-union-subscriber-starter</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+
+            <!-- ============ Eth Protocol-API ============ -->
+            <dependency>
+                <groupId>com.rarible.protocol</groupId>
+                <artifactId>protocol-client-common</artifactId>
+                <version>${rarible-protocol.ethereum.version}</version>
+            </dependency>
+            <!-- NFT-indexer -->
+            <dependency>
+                <groupId>com.rarible.protocol</groupId>
+                <artifactId>protocol-model-nft</artifactId>
+                <version>${rarible-protocol.ethereum.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.rarible.protocol</groupId>
+                <artifactId>protocol-client-nft-starter</artifactId>
+                <version>${rarible-protocol.ethereum.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.rarible.protocol</groupId>
+                <artifactId>protocol-subscriber-nft-starter</artifactId>
+                <version>${rarible-protocol.ethereum.version}</version>
+            </dependency>
+
+            <!-- Order-indexer -->
+            <dependency>
+                <groupId>com.rarible.protocol</groupId>
+                <artifactId>protocol-model-order</artifactId>
+                <version>${rarible-protocol.ethereum.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.rarible.protocol</groupId>
+                <artifactId>protocol-client-order-starter</artifactId>
+                <version>${rarible-protocol.ethereum.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.rarible.protocol</groupId>
+                <artifactId>protocol-subscriber-order-starter</artifactId>
+                <version>${rarible-protocol.ethereum.version}</version>
+            </dependency>
+
+            <!-- ERC20-indexer -->
+            <dependency>
+                <groupId>com.rarible.protocol</groupId>
+                <artifactId>protocol-model-erc20</artifactId>
+                <version>${rarible-protocol.ethereum.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.rarible.protocol</groupId>
+                <artifactId>protocol-client-erc20-starter</artifactId>
+                <version>${rarible-protocol.ethereum.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.rarible.protocol</groupId>
+                <artifactId>protocol-subscriber-erc20-starter</artifactId>
+                <version>${rarible-protocol.ethereum.version}</version>
+            </dependency>
+
+            <!-- NFT-Order -->
+            <dependency>
+                <groupId>com.rarible.protocol</groupId>
+                <artifactId>protocol-model-nft-order</artifactId>
+                <version>${rarible-protocol.ethereum.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.rarible.protocol</groupId>
+                <artifactId>protocol-client-nft-order-starter</artifactId>
+                <version>${rarible-protocol.ethereum.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.rarible.protocol</groupId>
+                <artifactId>protocol-subscriber-nft-order-starter</artifactId>
+                <version>${rarible-protocol.ethereum.version}</version>
+            </dependency>
+
+            <!-- Unlockable -->
+            <dependency>
+                <groupId>com.rarible.protocol</groupId>
+                <artifactId>protocol-model-unlockable</artifactId>
+                <version>${rarible-protocol.ethereum.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.rarible.protocol</groupId>
+                <artifactId>protocol-client-unlockable-starter</artifactId>
+                <version>${rarible-protocol.ethereum.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.rarible.protocol</groupId>
+                <artifactId>protocol-subscriber-unlockable-starter</artifactId>
+                <version>${rarible-protocol.ethereum.version}</version>
+            </dependency>
+
+            <!-- ================== Other =================== -->
+            <dependency>
+                <groupId>net.java.dev.jna</groupId>
+                <artifactId>jna</artifactId>
+                <version>${dev-jna.version}</version>
+            </dependency>
+
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <dependency>
+            <groupId>io.daonomic.scalether</groupId>
+            <artifactId>domain-test_${scala.major.version}</artifactId>
+            <version>${scalether.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-stdlib</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-reflect</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>properties-maven-plugin</artifactId>
+                <version>1.0-alpha-2</version>
+                <executions>
+                    <execution>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>read-project-properties</goal>
+                        </goals>
+                        <configuration>
+                            <files>
+                                <file>../profiles/${config.file}.properties</file>
+                            </files>
+                            <quiet>true</quiet>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+    <profiles>
+        <profile>
+            <id>DEFAULT</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <config.file>default</config.file>
+            </properties>
+        </profile>
+        <profile>
+            <id>JENKINS</id>
+            <properties>
+                <config.file>jenkins</config.file>
+            </properties>
+        </profile>
+    </profiles>
+    <modules>
+        <module>api</module>
+        <module>core</module>
+        <module>listener</module>
+        <module>openapi</module>
+        <module>test-coverage</module>
+    </modules>
+</project>
