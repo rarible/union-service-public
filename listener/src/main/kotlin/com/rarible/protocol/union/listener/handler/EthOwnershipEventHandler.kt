@@ -1,4 +1,4 @@
-package com.rarible.protocol.nftorder.listener.handler
+package com.rarible.protocol.union.listener.handler
 
 import com.rarible.protocol.dto.NftOwnershipEventDto
 import com.rarible.protocol.union.listener.handler.AbstractEventHandler

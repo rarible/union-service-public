@@ -1,7 +1,6 @@
-package com.rarible.protocol.nftorder.listener.handler
+package com.rarible.protocol.union.listener.handler
 
 import com.rarible.protocol.dto.OrderEventDto
-import com.rarible.protocol.union.listener.handler.AbstractEventHandler
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 

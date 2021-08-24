@@ -11,13 +11,13 @@ import com.rarible.protocol.dto.NftOwnershipEventDto
 import com.rarible.protocol.dto.OrderEventDto
 import com.rarible.protocol.dto.UnionEventTopicProvider
 import com.rarible.protocol.nft.api.subscriber.NftIndexerEventsConsumerFactory
-import com.rarible.protocol.nftorder.listener.handler.EthOrderEventHandler
-import com.rarible.protocol.nftorder.listener.handler.EthOwnershipEventHandler
+import com.rarible.protocol.union.listener.handler.EthOrderEventHandler
 import com.rarible.protocol.order.api.subscriber.OrderIndexerEventsConsumerFactory
 import com.rarible.protocol.union.dto.UnionItemEventDto
 import com.rarible.protocol.union.dto.UnionOrderEventDto
 import com.rarible.protocol.union.dto.UnionOwnershipEventDto
 import com.rarible.protocol.union.listener.handler.EthItemEventHandler
+import com.rarible.protocol.union.listener.handler.EthOwnershipEventHandler
 import io.micrometer.core.instrument.MeterRegistry
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
