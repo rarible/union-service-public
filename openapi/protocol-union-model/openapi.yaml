@@ -219,40 +219,6 @@ components:
 
     #################### Ownership - Eth ####################
 
-    EthPendingOwnershipTransfer:
-      type: object
-      properties:
-        "@type":
-          type: string
-          enum:
-            - TRANSFER
-        from:
-          $ref: "#/components/schemas/EthAddress"
-      required:
-        - "@type"
-        - from
-
-    EthPendingOwnershipRoyalty:
-      type: object
-      properties:
-        "@type":
-          type: string
-          enum:
-            - ROYALTY
-        from:
-          type: array
-          items:
-            $ref: "#/components/schemas/EthRoyalty"
-      required:
-        - "@type"
-        - from
-
-    EthPendingOwnership:
-      type: object
-      oneOf:
-        - $ref: "#/components/schemas/EthPendingOwnershipTransfer"
-        - $ref: "#/components/schemas/EthPendingOwnershipRoyalty"
-
     EthOwnership:
       type: object
       properties:
@@ -287,31 +253,342 @@ components:
         - lazyValue
         - pending
 
+    EthPendingOwnership:
+      type: object
+      oneOf:
+        - $ref: "#/components/schemas/EthPendingOwnershipTransfer"
+        - $ref: "#/components/schemas/EthPendingOwnershipRoyalty"
+
+    EthPendingOwnershipTransfer:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - TRANSFER
+        from:
+          $ref: "#/components/schemas/EthAddress"
+      required:
+        - "@type"
+        - from
+
+    EthPendingOwnershipRoyalty:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - ROYALTY
+        from:
+          type: array
+          items:
+            $ref: "#/components/schemas/EthRoyalty"
+      required:
+        - "@type"
+        - from
+
+    #################### Order - Eth ####################
+
+    EthOrder:
+      type: object
+      properties:
+        type:
+          $ref: "#/components/schemas/EthOrderType"
+        maker:
+          $ref: "#/components/schemas/EthAddress"
+        taker:
+          $ref: "#/components/schemas/EthAddress"
+        make:
+          $ref: "#/components/schemas/EthAsset"
+        take:
+          $ref: "#/components/schemas/EthAsset"
+        salt:
+          $ref: "#/components/schemas/Binary"
+        data:
+          $ref: "#/components/schemas/EthOrderData"
+        signature:
+          $ref: "#/components/schemas/Binary"
+        pending:
+          type: array
+          items:
+            $ref: "#/components/schemas/EthPendingOrder"
+        hash:
+          $ref: "#/components/schemas/Word"
+      required:
+        - type
+        - maker
+        - make
+        - take
+        - salt
+        - data
+        - hash
+
+    EthOrderType:
+      type: string
+      enum:
+        - RARIBLE_V1
+        - RARIBLE_V2
+
+    EthPendingOrder:
+      type: object
+      oneOf:
+        - $ref: "#/components/schemas/EthPendingOrderCancel"
+        - $ref: "#/components/schemas/EthPendingOrderMatch"
+
+    EthPendingOrderCancel:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - CANCEL
+        owner:
+          $ref: "#/components/schemas/EthAddress"
+      required:
+        - "@type"
+
+    EthPendingOrderMatch:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - ORDER_SIDE_MATCH
+        side:
+          type: string
+          enum:
+            - LEFT
+            - RIGHT
+        fill:
+          type: number
+          format: biginteger
+        taker:
+          $ref: "#/components/schemas/EthAddress"
+        counterHash:
+          type: string
+        makeUSD:
+          type: number
+          format: biginteger
+        takeUSD:
+          type: number
+          format: biginteger
+        makePriceUSD:
+          type: number
+          format: biginteger
+        takePriceUSD:
+          type: number
+          format: biginteger
+      required:
+        - "@type"
+        - fill
+
+    EthOrderData:
+      type: object
+      oneOf:
+        - $ref: "#/components/schemas/EthOrderDataLegacy"
+        - $ref: "#/components/schemas/EthOrderDataRaribleV2DataV1"
+
+    EthOrderDataRaribleV2DataV1:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - RARIBLE_V2_DATA_V1
+        payouts:
+          type: array
+          items:
+            $ref: "#/components/schemas/EthOrderPayout"
+        originFees:
+          type: array
+          items:
+            $ref: "#/components/schemas/EthOrderOriginFee"
+      required:
+        - "@type"
+        - payouts
+        - originFees
+
+    EthOrderDataLegacy:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - LEGACY
+        fee:
+          type: number
+          format: biginteger
+      required:
+        - "@type"
+        - fee
+
+    EthOrderPayout:
+      type: object
+      properties:
+        account:
+          $ref: "#/components/schemas/EthAddress"
+        value:
+          type: number
+          format: biginteger
+      required:
+        - account
+        - value
+
+    EthOrderOriginFee:
+      type: object
+      properties:
+        account:
+          $ref: "#/components/schemas/EthAddress"
+        value:
+          type: number
+          format: biginteger
+      required:
+        - account
+        - value
+
+    EthAssetType:
+      type: object
+      properties:
+        contract:
+          $ref: "#/components/schemas/EthAddress"
+      required:
+        - contract
+      oneOf:
+        - $ref: "#/components/schemas/ERC1155LazyAsset"
+        - $ref: "#/components/schemas/ERC721LazyAsset"
+        - $ref: "#/components/schemas/ERC1155Asset"
+        - $ref: "#/components/schemas/ERC721Asset"
+        - $ref: "#/components/schemas/ERC20Asset"
+        - $ref: "#/components/schemas/EthereumAsset"
+
+    EthAsset:
+      type: object
+      properties:
+        assetType:
+          $ref: "#/components/schemas/EthAssetType"
+        value:
+          type: number
+          format: biginteger
+      required:
+        - assetType
+        - value
+
+    ERC1155LazyAsset:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - ERC1155_Lazy
+        tokenId:
+          type: number
+          format: biginteger
+        uri:
+          type: string
+        supply:
+          type: number
+          format: biginteger
+        creators:
+          type: array
+          items:
+            $ref: "#/components/schemas/EthCreator"
+        royalties:
+          type: array
+          items:
+            $ref: "#/components/schemas/EthRoyalty"
+        signature:
+          type: array
+          items:
+            $ref: "#/components/schemas/Binary"
+      required:
+        - "@type"
+        - tokenId
+        - uri
+        - creators
+        - royalties
+        - signature
+
+    ERC721LazyAsset:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - ERC721_Lazy
+        tokenId:
+          type: number
+          format: biginteger
+        uri:
+          type: string
+        creators:
+          type: array
+          items:
+            $ref: "#/components/schemas/EthCreator"
+        royalties:
+          type: array
+          items:
+            $ref: "#/components/schemas/EthRoyalty"
+        signature:
+          type: array
+          items:
+            $ref: "#/components/schemas/Binary"
+      required:
+        - "@type"
+        - tokenId
+        - uri
+        - creators
+        - royalties
+        - signature
+
+    ERC1155Asset:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - ERC1155
+        tokenId:
+          type: number
+          format: biginteger
+      required:
+        - "@type"
+        - tokenId
+
+    ERC721Asset:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - ERC721
+        tokenId:
+          type: number
+          format: biginteger
+      required:
+        - "@type"
+        - tokenId
+
+    ERC20Asset:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - ERC20
+      required:
+        - "@type"
+
+    EthereumAsset:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - ETH
+      required:
+        - "@type"
+
     #################### Item - Flow ####################
-
-    FlowCreator:
-      type: object
-      properties:
-        account:
-          $ref: "#/components/schemas/FlowAddress"
-        value:
-          type: number
-          format: bigdecimal
-      required:
-        - account
-        - value
-
-    FlowRoyalty:
-      type: object
-      properties:
-        account:
-          $ref: "#/components/schemas/FlowAddress"
-        value:
-          type: number
-          format: bigdecimal
-      required:
-        - account
-        - value
 
     FlowItem:
       type: object
@@ -352,6 +629,30 @@ components:
         - owners
         - royalties
 
+    FlowCreator:
+      type: object
+      properties:
+        account:
+          $ref: "#/components/schemas/FlowAddress"
+        value:
+          type: number
+          format: bigdecimal
+      required:
+        - account
+        - value
+
+    FlowRoyalty:
+      type: object
+      properties:
+        account:
+          $ref: "#/components/schemas/FlowAddress"
+        value:
+          type: number
+          format: bigdecimal
+      required:
+        - account
+        - value
+
     #################### Ownership - Flow ####################
 
     FlowOwnership:
@@ -373,6 +674,129 @@ components:
         - contract
         - tokenId
         - owner
+
+    #################### Order - Flow ####################
+
+    FlowOrder:
+      type: object
+      properties:
+        id:
+          type: number
+          format: biginteger
+        type:
+          $ref: "#/components/schemas/FlowOrderType"
+        maker:
+          $ref: "#/components/schemas/FlowAddress"
+        taker:
+          $ref: "#/components/schemas/FlowAddress"
+        make:
+          $ref: "#/components/schemas/FlowAsset"
+        take:
+          $ref: "#/components/schemas/FlowAsset"
+        data:
+          $ref: "#/components/schemas/FlowOrderDataV1"
+      required:
+        - id
+        - type
+        - maker
+        - make
+        - take
+        - data
+
+    FlowOrderType:
+      type: string
+      enum:
+        - RARIBLE_FLOW_V1
+
+    FlowOrderPayout:
+      type: object
+      properties:
+        account:
+          $ref: "#/components/schemas/FlowAddress"
+        value:
+          type: number
+          format: biginteger
+      required:
+        - account
+        - value
+
+    FlowOrderOriginFee:
+      type: object
+      properties:
+        account:
+          $ref: "#/components/schemas/FlowAddress"
+        value:
+          type: number
+          format: biginteger
+      required:
+        - account
+        - value
+
+    FlowOrderDataV1:
+      type: object
+      properties:
+        dataType:
+          type: string
+          enum:
+            - DATA_V1
+        payouts:
+          type: array
+          items:
+            $ref: "#/components/schemas/FlowOrderPayout"
+        originFees:
+          type: array
+          items:
+            $ref: "#/components/schemas/FlowOrderOriginFee"
+      required:
+        - dataType
+        - payouts
+        - originFees
+
+    FlowAsset:
+      type: object
+      properties:
+        assetType:
+          $ref: "#/components/schemas/FlowAssetType"
+        value:
+          type: number
+          format: biginteger
+      required:
+        - assetType
+        - value
+
+    FlowAssetType:
+      type: object
+      properties:
+        contract:
+          $ref: "#/components/schemas/FlowAddress"
+      required:
+        - contract
+      oneOf:
+        - $ref: "#/components/schemas/FlowAssetTypeNft"
+        - $ref: "#/components/schemas/FlowAssetTypeFt"
+
+    FlowAssetTypeNft:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - FLOW_NFT
+        tokenId:
+          type: number
+          format: biginteger
+      required:
+        - "@type"
+
+    FlowAssetTypeFt:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - FLOW_FT
+      required:
+        - "@type"
 
     #################### Referenced Types ####################
 
