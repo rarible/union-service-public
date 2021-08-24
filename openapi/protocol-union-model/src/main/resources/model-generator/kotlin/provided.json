@@ -1,5 +1,9 @@
 {
   "EthAddress": "scalether.domain.Address",
+  "EthOwnershipId": "com.rarible.protocol.union.dto.EthOwnershipId",
+  "EthItemId": "com.rarible.protocol.union.dto.EthItemId",
+  "FlowOwnershipId": "com.rarible.protocol.union.dto.FlowOwnershipId",
+  "FlowItemId": "com.rarible.protocol.union.dto.FlowItemId",
   "FlowAddress": "com.rarible.protocol.union.dto.FlowAddress",
   "FlowContract": "com.rarible.protocol.union.dto.FlowContract"
 }
