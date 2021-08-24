@@ -37,3 +37,264 @@ components:
       properties:
         hash:
           type: string
+
+    #
+    # Union objects
+    #
+    Item:
+      type: "object"
+      properties:
+        mintedAt:
+          type: "string"
+          format: "date-time"
+        lastUpdatedAt:
+          type: "string"
+          format: "date-time"
+        supply:
+          type: number
+          format: biginteger
+        metaURL:
+          type: "string"
+          example: "ipfs://ipfs/QmPe1W8XiUYdsvdpvgWVwekQ7cDQivRMak3YPX15vxvSJs"
+        meta:
+          $ref: "#/components/schemas/Meta"
+        deleted:
+          type: "boolean"
+      oneOf:
+        - $ref: "#/components/schemas/EthItem"
+        - $ref: "#/components/schemas/FlowItem"
+      required:
+        - "mintedAt"
+        - "lastUpdatedAt"
+        - "supply"
+        - "deleted"
+
+    Items:
+      type: "object"
+      properties:
+        total:
+          type: "integer"
+          format: "int64"
+          description: "Number of items were found by request"
+        continuation:
+          type: "string"
+          description: "Continuation token to paginate items search result"
+        items:
+          type: "array"
+          description: "List of found items"
+          items:
+            $ref: "#/components/schemas/Item"
+      required:
+        - "total"
+        - "items"
+
+    Meta:
+      type: "object"
+      properties:
+        name:
+          type: "string"
+        description:
+          type: "string"
+        attributes:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/MetaAttribute"
+        contents:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/MetaContent"
+        raw:
+          $ref: "#/components/schemas/Binary"
+      required:
+        - "name"
+
+    MetaContent:
+      type: "object"
+      properties:
+        typeContent:
+          type: "string"
+        url:
+          type: "string"
+        attributes:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/MetaAttribute"
+      required:
+        - "typeContent"
+        - "url"
+
+    MetaAttribute:
+      type: "object"
+      properties:
+        key:
+          type: "string"
+        value:
+          type: "string"
+      required:
+        - "key"
+        - "value"
+
+    EthRoyalty:
+      type: "object"
+      properties:
+        account:
+          $ref: "#/components/schemas/EthAddress"
+        value:
+          type: number
+          format: biginteger
+
+    EthCreator:
+      type: "object"
+      properties:
+        account:
+          $ref: "#/components/schemas/EthAddress"
+        value:
+          type: number
+          format: bigdecimal
+      required:
+        - "account"
+        - "value"
+
+    EthPendingItem:
+      type: "object"
+      properties:
+        type:
+          type: "string"
+          enum:
+            - "TRANSFER"
+        from:
+          $ref: "#/components/schemas/EthAddress"
+      required:
+        - "type"
+        - "from"
+
+    EthItem:
+      type: "object"
+      properties:
+        "@type":
+          type: string
+          enum:
+            - ETHEREUM
+        blockchain:
+          $ref: "#/components/schemas/EthBlockchain"
+        id:
+          type: "string"
+          example: "{blockchain}:${collection}:${tokenId}"
+        tokenId:
+          type: number
+          format: biginteger
+        collection:
+          $ref: "#/components/schemas/EthAddress"
+        creators:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/EthCreator"
+        owners:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/EthAddress"
+        royalties:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/EthRoyalty"
+        lazySupply:
+          type: number
+          format: biginteger
+        pending:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/EthPendingItem"
+      required:
+        - "blockchain"
+        - "id"
+        - "tokenId"
+        - "collection"
+        - "creators"
+        - "owners"
+        - "royalties"
+        - "lazySupply"
+
+    FlowCreator:
+      type: "object"
+      properties:
+        account:
+          $ref: "#/components/schemas/FlowAddress"
+        value:
+          type: number
+          format: bigdecimal
+      required:
+        - "account"
+        - "value"
+
+    FlowRoyalty:
+      type: "object"
+      properties:
+        account:
+          $ref: "#/components/schemas/FlowAddress"
+        value:
+          type: number
+          format: bigdecimal
+      required:
+        - "account"
+        - "value"
+
+    FlowItem:
+      type: "object"
+      properties:
+        "@type":
+          type: string
+          enum:
+            - FLOW
+        blockchain:
+          type: "string"
+          enum:
+            - "FLOW"
+        id:
+          type: "string"
+          example: "FLOW:${FlowAddress}:${tokenId}"
+        tokenId:
+          type: number
+          format: biginteger
+        collection:
+          type: "string"
+          example: "A.${FlowAddress}.${string}"
+        creators:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/FlowCreator"
+        owners:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/FlowAddress"
+        royalties:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/FlowRoyalty"
+      required:
+        - "blockchain"
+        - "id"
+        - "tokenId"
+        - "collection"
+        - "creators"
+        - "owners"
+        - "royalties"
+
+
+    EthAddress:
+      type: "string"
+      example: "0x60f80121c31a0d46b5279700f9df786054aa5ee5"
+
+    EthBlockchain:
+      type: "string"
+      enum:
+        - "ETHEREUM"
+        - "POLYGON"
+
+    FlowAddress:
+      type: "string"
+      example: "0x5c075acc71f2f41c"
+
+    Word:
+      type: "string"
+    Binary:
+      type: "string"

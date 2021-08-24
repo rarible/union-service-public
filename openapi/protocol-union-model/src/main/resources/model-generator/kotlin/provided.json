@@ -1,0 +1,4 @@
+{
+  "EthAddress": "scalether.domain.Address",
+  "FlowAddress": "com.nftco.flow.sdk.FlowAddress"
+}
