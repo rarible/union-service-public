@@ -1,7 +1,7 @@
 package com.rarible.protocol.union.api.controller
 
-import com.rarible.protocol.nftorder.api.test.IntegrationTest
 import com.rarible.protocol.union.api.client.TestControllerApi
+import com.rarible.protocol.union.api.controller.test.test.IntegrationTest
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
@@ -15,7 +15,7 @@ class TestControllerIt {
     lateinit var testControllerClient: TestControllerApi
 
     @Test
-    fun test() = runBlocking {
+    fun test() = runBlocking<Unit> {
         assertThat(testControllerClient.test.awaitFirst().id).isEqualTo(12)
     }
 

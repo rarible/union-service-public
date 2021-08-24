@@ -1,0 +1,11 @@
+application:
+  environment: test
+
+spring:
+  cloud:
+    service-registry.auto-registration.enabled: false
+    discovery.enabled: false
+    consul.config.enabled: false
+
+logging:
+  logstash.tcp-socket.enabled: false

@@ -1,4 +1,4 @@
-package com.rarible.protocol.nftorder.api.test
+package com.rarible.protocol.union.api.controller.test.test
 
 import com.rarible.core.application.ApplicationEnvironmentInfo
 import com.rarible.protocol.union.api.client.FixedUnionApiServiceUriProvider

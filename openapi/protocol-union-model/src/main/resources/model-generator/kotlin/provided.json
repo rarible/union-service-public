@@ -1,4 +1,5 @@
 {
   "EthAddress": "scalether.domain.Address",
-  "FlowAddress": "com.nftco.flow.sdk.FlowAddress"
+  "FlowAddress": "com.rarible.protocol.union.dto.FlowAddress",
+  "FlowContract": "com.rarible.protocol.union.dto.FlowContract"
 }

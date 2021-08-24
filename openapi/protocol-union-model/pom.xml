@@ -18,10 +18,6 @@
             <artifactId>domain_2.13</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.nftco</groupId>
-            <artifactId>flow-jvm-sdk</artifactId>
-        </dependency>
-        <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
         </dependency>

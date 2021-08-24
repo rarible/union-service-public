@@ -256,8 +256,7 @@ components:
           type: number
           format: biginteger
         collection:
-          type: "string"
-          example: "A.${FlowAddress}.${string}"
+          $ref: "#/components/schemas/FlowContract"
         creators:
           type: "array"
           items:
@@ -279,7 +278,6 @@ components:
         - "owners"
         - "royalties"
 
-
     EthAddress:
       type: "string"
       example: "0x60f80121c31a0d46b5279700f9df786054aa5ee5"
@@ -293,6 +291,9 @@ components:
     FlowAddress:
       type: "string"
       example: "0x5c075acc71f2f41c"
+    FlowContract:
+      type: "string"
+      example: "A.${FlowAddress}.${string}"
 
     Word:
       type: "string"

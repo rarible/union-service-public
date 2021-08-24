@@ -1,4 +1,4 @@
-package com.rarible.protocol.nftorder.api.test
+package com.rarible.protocol.union.api.controller.test.test
 
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
