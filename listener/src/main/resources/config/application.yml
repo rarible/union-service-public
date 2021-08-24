@@ -24,17 +24,6 @@ rarible:
     converter:
       enabled: true
 
-protocol:
-  nft:
-    subscriber:
-      blockchain: ETHEREUM
-  nftorder:
-    subscriber:
-      blockchain: ETHEREUM
-  order:
-    subscriber:
-      blockchain: ETHEREUM
-
 listener:
   event-producer:
     environment: ${application.environment}

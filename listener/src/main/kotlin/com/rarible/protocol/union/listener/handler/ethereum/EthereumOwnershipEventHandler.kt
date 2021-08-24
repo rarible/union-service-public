@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.listener.handler
+package com.rarible.protocol.union.listener.handler.ethereum
 
 import com.rarible.protocol.dto.NftOwnershipEventDto
 import com.rarible.protocol.union.listener.handler.AbstractEventHandler
@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
-class EthOwnershipEventHandler : AbstractEventHandler<NftOwnershipEventDto>() {
+class EthereumOwnershipEventHandler : AbstractEventHandler<NftOwnershipEventDto>() {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
