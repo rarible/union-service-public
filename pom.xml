@@ -37,7 +37,7 @@
 
         <rarible-core.version>1.2-SNAPSHOT</rarible-core.version>
         <rarible-ethereum.version>1.0-SNAPSHOT</rarible-ethereum.version>
-        <rarible-protocol.ethereum.version>1.12.3</rarible-protocol.ethereum.version>
+        <rarible-protocol.ethereum.version>1.13-SNAPSHOT</rarible-protocol.ethereum.version>
         <rarible.codegen.server.version>1.0.1</rarible.codegen.server.version>
         <rarible.codegen.client.version>1.1.1</rarible.codegen.client.version>
 
