@@ -253,6 +253,11 @@ components:
         takePriceUSD:
           type: number
           format: bigdecimal
+        priceHistory:
+          type: array
+          default: [ ]
+          items:
+            $ref: "#/components/schemas/UnionOrderPriceHistoryRecord"
       oneOf:
         - $ref: "#/components/schemas/EthOrder"
         - $ref: "#/components/schemas/FlowOrder"
@@ -262,6 +267,24 @@ components:
         - cancelled
         - createdAt
         - lastUpdatedAt
+        - priceHistory
+
+    UnionOrderPriceHistoryRecord:
+      type: object
+      required:
+        - date
+        - makeValue
+        - takeValue
+      properties:
+        date:
+          type: string
+          format: date-time
+        makeValue:
+          type: number
+          format: bigdecimal
+        takeValue:
+          type: number
+          format: bigdecimal
 
     UnionOrders:
       type: object
@@ -558,8 +581,6 @@ components:
           type: string
           enum:
             - ETHEREUM
-        type:
-          $ref: "#/components/schemas/EthOrderType"
         maker:
           $ref: "#/components/schemas/EthAddress"
         taker:
@@ -570,8 +591,6 @@ components:
           $ref: "#/components/schemas/EthAsset"
         salt:
           type: string
-        data:
-          $ref: "#/components/schemas/EthOrderData"
         signature:
           type: string
         pending:
@@ -589,12 +608,141 @@ components:
         - salt
         - data
         - hash
+      oneOf:
+        - "$ref": "#/components/schemas/EthLegacyOrder"
+        - "$ref": "#/components/schemas/EthRaribleV2Order"
+        - "$ref": "#/components/schemas/EthOpenSeaV1Order"
 
-    EthOrderType:
-      type: string
-      enum:
-        - RARIBLE_V1
-        - RARIBLE_V2
+    EthLegacyOrder:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - RARIBLE_V1
+        data:
+          $ref: "#/components/schemas/EthOrderDataLegacy"
+      required:
+        - "@type"
+        - data
+
+    EthRaribleV2Order:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - RARIBLE_V2
+        data:
+          $ref: "#/components/schemas/EthOrderDataRaribleV2DataV1"
+      required:
+        - "@type"
+        - data
+
+    EthOpenSeaV1Order:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - OPEN_SEA_V1
+        data:
+          $ref: "#/components/schemas/EthOrderOpenSeaV1DataV1"
+      required:
+        - "@type"
+        - data
+
+    EthOrderDataLegacy:
+      type: object
+      properties:
+        fee:
+          type: number
+          format: biginteger
+      required:
+        - fee
+
+    EthOrderDataRaribleV2DataV1:
+      type: object
+      properties:
+        payouts:
+          type: array
+          items:
+            $ref: "#/components/schemas/EthOrderPayout"
+        originFees:
+          type: array
+          items:
+            $ref: "#/components/schemas/EthOrderOriginFee"
+      required:
+        - payouts
+        - originFees
+
+    EthOrderOpenSeaV1DataV1:
+      type: object
+      properties:
+        exchange:
+          $ref: "#/components/schemas/EthAddress"
+        makerRelayerFee:
+          type: number
+          format: biginteger
+        takerRelayerFee:
+          type: number
+          format: biginteger
+        makerProtocolFee:
+          type: number
+          format: biginteger
+        takerProtocolFee:
+          type: number
+          format: biginteger
+        feeRecipient:
+          $ref: "#/components/schemas/EthAddress"
+        feeMethod:
+          type: string
+          enum:
+            - PROTOCOL_FEE
+            - SPLIT_FEE
+        side:
+          type: string
+          enum:
+            - BUY
+            - SELL
+        saleKind:
+          type: string
+          enum:
+            - FIXED_PRICE
+            - DUTCH_AUCTION
+        howToCall:
+          type: string
+          enum:
+            - CALL
+            - DELEGATE_CALL
+        callData:
+          type: string
+        replacementPattern:
+          type: string
+        staticTarget:
+          $ref: "#/components/schemas/EthAddress"
+        staticExtraData:
+          type: string
+        extra:
+          type: number
+          format: biginteger
+      required:
+        - dataType
+        - exchange
+        - makerRelayerFee
+        - takerRelayerFee
+        - makerProtocolFee
+        - takerProtocolFee
+        - feeRecipient
+        - feeMethod
+        - side
+        - saleKind
+        - howToCall
+        - callData
+        - replacementPattern
+        - staticTarget
+        - staticExtraData
+        - extra
 
     EthPendingOrder:
       type: object
@@ -648,46 +796,6 @@ components:
       required:
         - "@type"
         - fill
-
-    EthOrderData:
-      type: object
-      oneOf:
-        - $ref: "#/components/schemas/EthOrderDataLegacy"
-        - $ref: "#/components/schemas/EthOrderDataRaribleV2DataV1"
-
-    EthOrderDataRaribleV2DataV1:
-      type: object
-      properties:
-        "@type":
-          type: string
-          enum:
-            - RARIBLE_V2_DATA_V1
-        payouts:
-          type: array
-          items:
-            $ref: "#/components/schemas/EthOrderPayout"
-        originFees:
-          type: array
-          items:
-            $ref: "#/components/schemas/EthOrderOriginFee"
-      required:
-        - "@type"
-        - payouts
-        - originFees
-
-    EthOrderDataLegacy:
-      type: object
-      properties:
-        "@type":
-          type: string
-          enum:
-            - LEGACY
-        fee:
-          type: number
-          format: biginteger
-      required:
-        - "@type"
-        - fee
 
     EthOrderPayout:
       type: object
