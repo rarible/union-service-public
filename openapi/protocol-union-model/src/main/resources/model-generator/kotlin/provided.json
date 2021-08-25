@@ -1,9 +1,11 @@
 {
-  "EthAddress": "scalether.domain.Address",
-  "EthOwnershipId": "com.rarible.protocol.union.dto.EthOwnershipId",
+  "ItemId": "com.rarible.protocol.union.dto.ItemId",
+  "OwnershipId": "com.rarible.protocol.union.dto.OwnershipId",
+  "EthAddress": "com.rarible.protocol.union.dto.EthAddress",
   "EthItemId": "com.rarible.protocol.union.dto.EthItemId",
-  "FlowOwnershipId": "com.rarible.protocol.union.dto.FlowOwnershipId",
+  "EthOwnershipId": "com.rarible.protocol.union.dto.EthOwnershipId",
   "FlowItemId": "com.rarible.protocol.union.dto.FlowItemId",
+  "FlowOwnershipId": "com.rarible.protocol.union.dto.FlowOwnershipId",
   "FlowAddress": "com.rarible.protocol.union.dto.FlowAddress",
   "FlowContract": "com.rarible.protocol.union.dto.FlowContract"
 }
