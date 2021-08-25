@@ -14,10 +14,6 @@
 
     <dependencies>
         <dependency>
-            <groupId>io.daonomic.scalether</groupId>
-            <artifactId>domain_2.13</artifactId>
-        </dependency>
-        <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
         </dependency>

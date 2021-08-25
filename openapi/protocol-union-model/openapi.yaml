@@ -5,39 +5,12 @@ paths:
 components:
   schemas:
 
-################### TEST ######################
+    ################### TEST ######################
     Test:
       type: object
       properties:
         id:
           type: integer
-
-    UnionItemEvent:
-      required:
-        - eventId
-        - itemId
-      properties:
-        eventId:
-          type: string
-        itemId:
-          type: string
-
-    UnionOwnershipEvent:
-      required:
-        - eventId
-        - ownershipId
-      properties:
-        eventId:
-          type: string
-        ownershipId:
-          type: string
-
-    UnionOrderEvent:
-      required:
-        - hash
-      properties:
-        hash:
-          type: string
 
     #################### Meta - Union ####################
 
@@ -57,7 +30,7 @@ components:
           items:
             $ref: "#/components/schemas/MetaContent"
         raw:
-          $ref: "#/components/schemas/Binary"
+          type: string
       required:
         - name
 
@@ -89,7 +62,7 @@ components:
 
     #################### Item - Union ####################
 
-    Item:
+    UnionItem:
       type: object
       properties:
         mintedAt:
@@ -117,7 +90,7 @@ components:
         - supply
         - deleted
 
-    Items:
+    UnionItems:
       type: object
       properties:
         total:
@@ -131,10 +104,294 @@ components:
           type: array
           description: "List of found items"
           items:
-            $ref: "#/components/schemas/Item"
+            $ref: "#/components/schemas/UnionItem"
       required:
-        - "total"
-        - "items"
+        - total
+        - items
+
+    UnionItemEvent:
+      required:
+        - eventId
+        - itemId
+      properties:
+        eventId:
+          type: string
+        itemId:
+          $ref: "#/components/schemas/ItemId"
+      oneOf:
+        - $ref: "#/components/schemas/UnionItemUpdateEvent"
+        - $ref: "#/components/schemas/UnionItemDeleteEvent"
+
+    UnionItemUpdateEvent:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - UPDATE
+        item:
+          $ref: "#/components/schemas/UnionItem"
+      required:
+        - "@type"
+        - item
+
+    UnionItemDeleteEvent:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - DELETE
+      required:
+        - "@type"
+        - itemId
+
+    #################### Ownership - Union ####################
+
+    UnionOwnership:
+      type: object
+      properties:
+        value:
+          type: number
+          format: biginteger
+        createdAt:
+          type: string
+          format: "date-time"
+      oneOf:
+        - $ref: "#/components/schemas/EthOwnership"
+        - $ref: "#/components/schemas/FlowOwnership"
+      required:
+        - value
+        - createdAt
+
+    UnionOwnerships:
+      type: object
+      properties:
+        total:
+          type: integer
+          format: int64
+          description: "Number of ownerships were found by request"
+        continuation:
+          type: string
+          description: "Continuation token to paginate Ownerships search result"
+        ownerships:
+          type: array
+          description: "List of found ownerships"
+          items:
+            $ref: "#/components/schemas/UnionOwnership"
+      required:
+        - total
+        - ownerships
+
+    UnionOwnershipEvent:
+      properties:
+        eventId:
+          type: string
+        ownershipId:
+          $ref: "#/components/schemas/OwnershipId"
+      required:
+        - eventId
+        - ownershipId
+      oneOf:
+        - $ref: "#/components/schemas/UnionOwnershipUpdateEvent"
+        - $ref: "#/components/schemas/UnionOwnershipDeleteEvent"
+
+    UnionOwnershipUpdateEvent:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - UPDATE
+        ownership:
+          $ref: "#/components/schemas/UnionOwnership"
+      required:
+        - "@type"
+        - ownership
+
+    UnionOwnershipDeleteEvent:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - DELETE
+      required:
+        - "@type"
+
+    #################### Order - Union ####################
+
+    UnionOrder:
+      type: object
+      properties:
+        fill:
+          type: number
+          format: biginteger
+        startedAt:
+          type: string
+          format: "date-time"
+        endedAt:
+          type: string
+          format: "date-time"
+        makeStock:
+          type: number
+          format: bigdecimal
+        cancelled:
+          type: "boolean"
+        createdAt:
+          type: string
+          format: "date-time"
+        lastUpdatedAt:
+          type: string
+          format: "date-time"
+        makeBalance:
+          type: number
+          format: bigdecimal
+        makePriceUSD:
+          type: number
+          format: bigdecimal
+        takePriceUSD:
+          type: number
+          format: bigdecimal
+      oneOf:
+        - $ref: "#/components/schemas/EthOrder"
+        - $ref: "#/components/schemas/FlowOrder"
+      required:
+        - fill
+        - makeStock
+        - cancelled
+        - createdAt
+        - lastUpdatedAt
+
+    UnionOrders:
+      type: object
+      properties:
+        total:
+          type: integer
+          format: int64
+          description: "Number of ownerships were found by request"
+        continuation:
+          type: string
+          description: "Continuation token to paginate Ownerships search result"
+        orders:
+          type: array
+          description: "List of found orders"
+          items:
+            $ref: "#/components/schemas/UnionOrder"
+      required:
+        - total
+        - orders
+
+    UnionOrderEvent:
+      type: object
+      properties:
+        eventId:
+          type: string
+        orderId:
+          type: string
+      required:
+        - eventId
+        - orderId
+      oneOf:
+        - "$ref": "#/components/schemas/UnionOrderUpdateEvent"
+
+    UnionOrderUpdateEvent:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - UPDATE
+        order:
+          "$ref": "#/components/schemas/UnionOrder"
+      required:
+        - "@type"
+        - order
+
+    #################### Activity - Union ####################
+
+    UnionActivity:
+      type: object
+      properties:
+        id:
+          type: string
+        date:
+          type: string
+          format: "date-time"
+      oneOf:
+        - $ref: "#/components/schemas/EthActivity"
+        - $ref: "#/components/schemas/FlowActivity"
+      required:
+        - id
+        - date
+
+    UnionActivities:
+      type: object
+      properties:
+        total:
+          type: integer
+          description: "Number of ownerships were found by request"
+          format: int64
+        continuation:
+          type: string
+          description: "Continuation token to paginate Ownerships search result"
+        activities:
+          type: array
+          description: "List of found activities"
+          items:
+            $ref: "#/components/schemas/UnionActivity"
+      required:
+        - total
+        - activities
+
+    UnionCollection:
+      type: object
+      properties:
+        name:
+          type: string
+        symbol:
+          type: string
+      oneOf:
+        - $ref: "#/components/schemas/EthCollection"
+        - $ref: "#/components/schemas/FlowCollection"
+      required:
+        - name
+
+    UnionCollections:
+      type: object
+      properties:
+        total:
+          type: integer
+          format: int64
+          description: "Number of ownerships were found by request"
+        continuation:
+          type: string
+          description: "Continuation token to paginate Ownerships search result"
+        collections:
+          type: array
+          items:
+            $ref: "#/components/schemas/UnionCollection"
+      required:
+        - total
+        - collections
+
+    ActivityBlockchainInfo:
+      type: object
+      properties:
+        transactionHash:
+          type: string
+        blockHash:
+          type: string
+        blockNumber:
+          type: number
+          format: biginteger
+        logIndex:
+          type: integer
+      required:
+        - transactionHash
+        - blockHash
+        - blockNumber
+        - logIndex
 
     #################### Item - Eth ####################
 
@@ -174,14 +431,14 @@ components:
           items:
             $ref: "#/components/schemas/EthPendingItem"
       required:
-        - "blockchain"
-        - "id"
-        - "tokenId"
-        - "collection"
-        - "creators"
-        - "owners"
-        - "royalties"
-        - "lazySupply"
+        - blockchain
+        - id
+        - tokenId
+        - collection
+        - creators
+        - owners
+        - royalties
+        - lazySupply
 
     EthRoyalty:
       type: object
@@ -201,8 +458,8 @@ components:
           type: number
           format: bigdecimal
       required:
-        - "account"
-        - "value"
+        - account
+        - value
 
     EthPendingItem:
       type: object
@@ -210,18 +467,22 @@ components:
         type:
           type: string
           enum:
-            - "TRANSFER"
+            - TRANSFER
         from:
           $ref: "#/components/schemas/EthAddress"
       required:
-        - "type"
-        - "from"
+        - type
+        - from
 
     #################### Ownership - Eth ####################
 
     EthOwnership:
       type: object
       properties:
+        "@type":
+          type: string
+          enum:
+            - ETHEREUM
         id:
           $ref: "#/components/schemas/EthOwnershipId"
         contract:
@@ -245,6 +506,7 @@ components:
           items:
             $ref: "#/components/schemas/EthPendingOwnership"
       required:
+        - "@type"
         - id
         - contract
         - tokenId
@@ -292,6 +554,10 @@ components:
     EthOrder:
       type: object
       properties:
+        "@type":
+          type: string
+          enum:
+            - ETHEREUM
         type:
           $ref: "#/components/schemas/EthOrderType"
         maker:
@@ -303,18 +569,19 @@ components:
         take:
           $ref: "#/components/schemas/EthAsset"
         salt:
-          $ref: "#/components/schemas/Binary"
+          type: string
         data:
           $ref: "#/components/schemas/EthOrderData"
         signature:
-          $ref: "#/components/schemas/Binary"
+          type: string
         pending:
           type: array
           items:
             $ref: "#/components/schemas/EthPendingOrder"
         hash:
-          $ref: "#/components/schemas/Word"
+          type: string
       required:
+        - "@type"
         - type
         - maker
         - make
@@ -499,7 +766,7 @@ components:
         signature:
           type: array
           items:
-            $ref: "#/components/schemas/Binary"
+            type: string
       required:
         - "@type"
         - tokenId
@@ -531,7 +798,7 @@ components:
         signature:
           type: array
           items:
-            $ref: "#/components/schemas/Binary"
+            type: string
       required:
         - "@type"
         - tokenId
@@ -587,6 +854,329 @@ components:
             - ETH
       required:
         - "@type"
+
+    #################### Activity - Eth ####################
+
+    EthActivity:
+      type: object
+      properties:
+        blockchain:
+          $ref: "#/components/schemas/EthBlockchain"
+      oneOf:
+        - $ref: "#/components/schemas/EthMintActivity"
+        - $ref: "#/components/schemas/EthBurnActivity"
+        - $ref: "#/components/schemas/EthTransferActivity"
+        - $ref: "#/components/schemas/EthOrderMatchActivity"
+        - $ref: "#/components/schemas/EthOrderBidActivity"
+        - $ref: "#/components/schemas/EthOrderListActivity"
+        - $ref: "#/components/schemas/EthOrderCancelBidActivity"
+        - $ref: "#/components/schemas/EthOrderCancelListActivity"
+      required:
+        - blockchain
+
+    EthMintActivity:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - MINT
+        owner:
+          type: array
+          items:
+            $ref: "#/components/schemas/EthAddress"
+        contract:
+          $ref: "#/components/schemas/EthAddress"
+        tokenId:
+          type: number
+          format: biginteger
+        value:
+          type: number
+          format: biginteger
+        blockchainInfo:
+          $ref: "#/components/schemas/ActivityBlockchainInfo"
+      required:
+        - "@type"
+        - owner
+        - contract
+        - tokenId
+        - value
+        - blockchainInfo
+
+    EthBurnActivity:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - BURN
+        owner:
+          type: array
+          items:
+            $ref: "#/components/schemas/EthAddress"
+        contract:
+          $ref: "#/components/schemas/EthAddress"
+        tokenId:
+          type: number
+          format: biginteger
+        value:
+          type: number
+          format: biginteger
+        blockchainInfo:
+          $ref: "#/components/schemas/ActivityBlockchainInfo"
+      required:
+        - "@type"
+        - owner
+        - contract
+        - tokenId
+        - value
+        - blockchainInfo
+
+    EthTransferActivity:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - TRANSFER
+        from:
+          $ref: "#/components/schemas/EthAddress"
+        owner:
+          type: array
+          items:
+            $ref: "#/components/schemas/EthAddress"
+        contract:
+          $ref: "#/components/schemas/EthAddress"
+        tokenId:
+          type: number
+          format: biginteger
+        value:
+          type: number
+          format: biginteger
+        blockchainInfo:
+          $ref: "#/components/schemas/ActivityBlockchainInfo"
+      required:
+        - "@type"
+        - from
+        - owner
+        - contract
+        - tokenId
+        - value
+        - blockchainInfo
+
+    EthOrderActivityMatchSide:
+      type: object
+      properties:
+        maker:
+          $ref: "#/components/schemas/EthAddress"
+        hash:
+          type: string
+        asset:
+          $ref: "#/components/schemas/EthAsset"
+        type:
+          type: string
+          enum:
+            - SELL
+            - BID
+      required:
+        - maker
+        - hash
+        - asset
+        - type
+
+    EthOrderActivitySource:
+      type: string
+      enum:
+        - RARIBLE
+        - OPEN_SEA
+
+    EthOrderMatchActivity:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - MATCH
+        left:
+          $ref: "#/components/schemas/EthOrderActivityMatchSide"
+        right:
+          $ref: "#/components/schemas/EthOrderActivityMatchSide"
+        price:
+          type: number
+          format: bigdecimal
+        priceUSD:
+          type: number
+          format: bigdecimal
+        source:
+          $ref: "#/components/schemas/EthOrderActivitySource"
+        blockchainInfo:
+          $ref: "#/components/schemas/ActivityBlockchainInfo"
+      required:
+        - "@type"
+        - left
+        - right
+        - price
+        - source
+        - blockchainInfo
+
+    EthOrderBidActivity:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - BID
+        hash:
+          type: string
+        maker:
+          $ref: "#/components/schemas/EthAddress"
+        make:
+          $ref: "#/components/schemas/EthAsset"
+        take:
+          $ref: "#/components/schemas/EthAsset"
+        price:
+          type: number
+          format: bigdecimal
+        priceUSD:
+          type: number
+          format: bigdecimal
+        source:
+          $ref: "#/components/schemas/EthOrderActivitySource"
+        blockchainInfo:
+          $ref: "#/components/schemas/ActivityBlockchainInfo"
+      required:
+        - "@type"
+        - hash
+        - maker
+        - make
+        - take
+        - price
+        - source
+        - blockchainInfo
+
+    EthOrderListActivity:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - LIST
+        hash:
+          type: string
+        maker:
+          $ref: "#/components/schemas/EthAddress"
+        make:
+          $ref: "#/components/schemas/EthAsset"
+        take:
+          $ref: "#/components/schemas/EthAsset"
+        price:
+          type: number
+          format: bigdecimal
+        priceUSD:
+          type: number
+          format: bigdecimal
+        source:
+          $ref: "#/components/schemas/EthOrderActivitySource"
+        blockchainInfo:
+          $ref: "#/components/schemas/ActivityBlockchainInfo"
+      required:
+        - "@type"
+        - hash
+        - maker
+        - make
+        - take
+        - price
+        - source
+
+    EthOrderCancelBidActivity:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - CANCEL_BID
+        hash:
+          type: string
+        maker:
+          $ref: "#/components/schemas/EthAddress"
+        make:
+          $ref: "#/components/schemas/EthAsset"
+        take:
+          $ref: "#/components/schemas/EthAsset"
+        source:
+          $ref: "#/components/schemas/EthOrderActivitySource"
+        blockchainInfo:
+          $ref: "#/components/schemas/ActivityBlockchainInfo"
+      required:
+        - "@type"
+        - hash
+        - maker
+        - make
+        - take
+        - source
+        - blockchainInfo
+
+    EthOrderCancelListActivity:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - CANCEL_LIST
+        hash:
+          type: string
+        maker:
+          $ref: "#/components/schemas/EthAddress"
+        make:
+          $ref: "#/components/schemas/EthAsset"
+        take:
+          $ref: "#/components/schemas/EthAsset"
+        source:
+          $ref: "#/components/schemas/EthOrderActivitySource"
+        blockchainInfo:
+          $ref: "#/components/schemas/ActivityBlockchainInfo"
+      required:
+        - "@type"
+        - hash
+        - maker
+        - make
+        - take
+        - source
+        - blockchainInfo
+
+    EthFeaturesCollection:
+      type: string
+      enum:
+        - APPROVE_FOR_ALL
+        - SET_URI_PREFIX
+        - BURN
+        - MINT_WITH_ADDRESS
+        - SECONDARY_SALE_FEES
+        - MINT_AND_TRANSFER
+
+    EthCollection:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - ETHEREUM
+        id:
+          $ref: "#/components/schemas/EthAddress"
+        type:
+          type: string
+          enum:
+            - ERC721
+            - ERC1155
+        owner:
+          $ref: "#/components/schemas/EthAddress"
+        features:
+          $ref: "#/components/schemas/EthFeaturesCollection"
+      required:
+        - "@type"
+        - id
+        - type
+        - features
 
     #################### Item - Flow ####################
 
@@ -658,6 +1248,10 @@ components:
     FlowOwnership:
       type: object
       properties:
+        "@type":
+          type: string
+          enum:
+            - FLOW
         id:
           $ref: "#/components/schemas/FlowOwnershipId"
         contract:
@@ -670,6 +1264,7 @@ components:
           items:
             $ref: "#/components/schemas/FlowAddress"
       required:
+        - "@type"
         - id
         - contract
         - tokenId
@@ -680,6 +1275,10 @@ components:
     FlowOrder:
       type: object
       properties:
+        "@type":
+          type: string
+          enum:
+            - FLOW
         id:
           type: number
           format: biginteger
@@ -798,7 +1397,239 @@ components:
       required:
         - "@type"
 
+    #################### Activity - Flow ####################
+
+    FlowActivity:
+      type: object
+      properties:
+        blockchain:
+          type: string
+          enum:
+            - FLOW
+      oneOf:
+        - $ref: "#/components/schemas/FlowMintActivity"
+        - $ref: "#/components/schemas/FlowBurnActivity"
+        - $ref: "#/components/schemas/FlowTransferActivity"
+        - $ref: "#/components/schemas/FlowOrderMatchActivity"
+        - $ref: "#/components/schemas/FlowOrderListActivity"
+        - $ref: "#/components/schemas/FlowOrderCancelListActivity"
+      required:
+        - blockchain
+
+    FlowMintActivity:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - MINT
+        owner:
+          type: array
+          items:
+            $ref: "#/components/schemas/FlowAddress"
+        contract:
+          $ref: "#/components/schemas/FlowContract"
+        tokenId:
+          type: number
+          format: biginteger
+        value:
+          type: number
+          format: biginteger
+        blockchainInfo:
+          $ref: "#/components/schemas/ActivityBlockchainInfo"
+      required:
+        - "@type"
+        - owner
+        - contract
+        - tokenId
+        - value
+        - blockchainInfo
+
+    FlowBurnActivity:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - BURN
+        owner:
+          type: array
+          items:
+            $ref: "#/components/schemas/FlowAddress"
+        contract:
+          $ref: "#/components/schemas/FlowContract"
+        tokenId:
+          type: number
+          format: biginteger
+        value:
+          type: number
+          format: biginteger
+        blockchainInfo:
+          $ref: "#/components/schemas/ActivityBlockchainInfo"
+      required:
+        - "@type"
+        - owner
+        - contract
+        - tokenId
+        - value
+        - blockchainInfo
+
+    FlowTransferActivity:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - TRANSFER
+        from:
+          $ref: "#/components/schemas/FlowAddress"
+        owner:
+          type: array
+          items:
+            $ref: "#/components/schemas/FlowAddress"
+        contract:
+          $ref: "#/components/schemas/FlowContract"
+        tokenId:
+          type: number
+          format: biginteger
+        value:
+          type: number
+          format: biginteger
+        blockchainInfo:
+          $ref: "#/components/schemas/ActivityBlockchainInfo"
+      required:
+        - "@type"
+        - from
+        - owner
+        - contract
+        - tokenId
+        - value
+        - blockchainInfo
+
+    FlowOrderMatchActivity:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - MATCH
+        left:
+          $ref: "#/components/schemas/FlowOrderActivityMatchSide"
+        right:
+          $ref: "#/components/schemas/FlowOrderActivityMatchSide"
+        price:
+          type: number
+          format: bigdecimal
+        priceUSD:
+          type: number
+          format: bigdecimal
+        blockchainInfo:
+          $ref: "#/components/schemas/ActivityBlockchainInfo"
+      required:
+        - "@type"
+        - left
+        - right
+        - price
+        - blockchainInfo
+
+    FlowOrderListActivity:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - LIST
+        hash:
+          type: string
+        maker:
+          $ref: "#/components/schemas/FlowAddress"
+        make:
+          $ref: "#/components/schemas/FlowAsset"
+        take:
+          $ref: "#/components/schemas/FlowAsset"
+        price:
+          type: number
+          format: bigdecimal
+        priceUSD:
+          type: number
+          format: bigdecimal
+        blockchainInfo:
+          $ref: "#/components/schemas/ActivityBlockchainInfo"
+      required:
+        - "@type"
+        - hash
+        - maker
+        - make
+        - take
+        - price
+        - blockchainInfo
+
+    FlowOrderCancelListActivity:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - CANCEL_LIST
+        hash:
+          type: string
+        maker:
+          $ref: "#/components/schemas/FlowAddress"
+        make:
+          $ref: "#/components/schemas/FlowAsset"
+        take:
+          $ref: "#/components/schemas/FlowAsset"
+        blockchainInfo:
+          $ref: "#/components/schemas/ActivityBlockchainInfo"
+      required:
+        - "@type"
+        - hash
+        - maker
+        - make
+        - take
+        - blockchainInfo
+
+    FlowOrderActivityMatchSide:
+      type: object
+      properties:
+        maker:
+          $ref: "#/components/schemas/FlowAddress"
+        asset:
+          $ref: "#/components/schemas/FlowAsset"
+        type:
+          type: string
+          enum:
+            - SELL
+            - BID
+      required:
+        - maker
+        - asset
+        - type
+
+    FlowCollection:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - FLOW
+        id:
+          $ref: "#/components/schemas/FlowContract"
+        owner:
+          $ref: "#/components/schemas/FlowAddress"
+      required:
+        - "@type"
+        - id
+        - owner
+
     #################### Referenced Types ####################
+
+    ItemId:
+      type: string
+      example: "{blockchain}:${collection}:${tokenId}"
+    OwnershipId:
+      type: string
+      example: "${blockchain}:${collection}:${tokenId}:${owner}"
 
     EthAddress:
       type: string
@@ -827,8 +1658,3 @@ components:
     FlowOwnershipId:
       type: string
       example: "${blockchain}:${collection}:${tokenId}:${owner}"
-
-    Word:
-      type: string
-    Binary:
-      type: string
