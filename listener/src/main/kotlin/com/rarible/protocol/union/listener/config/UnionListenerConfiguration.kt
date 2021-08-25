@@ -10,15 +10,13 @@ import com.rarible.protocol.dto.NftOwnershipEventDto
 import com.rarible.protocol.dto.OrderEventDto
 import com.rarible.protocol.dto.UnionEventTopicProvider
 import com.rarible.protocol.nft.api.subscriber.NftIndexerEventsConsumerFactory
-import com.rarible.protocol.union.listener.handler.ethereum.EthereumOrderEventHandler
 import com.rarible.protocol.order.api.subscriber.OrderIndexerEventsConsumerFactory
 import com.rarible.protocol.union.dto.UnionItemEventDto
 import com.rarible.protocol.union.dto.UnionOrderEventDto
 import com.rarible.protocol.union.dto.UnionOwnershipEventDto
-import com.rarible.protocol.union.listener.handler.ethereum.EthereumCompositeConsumerWorker
+import com.rarible.protocol.union.listener.handler.ethereum.*
 import com.rarible.protocol.union.listener.handler.ethereum.EthereumCompositeConsumerWorker.ConsumerFactory
-import com.rarible.protocol.union.listener.handler.ethereum.EthereumItemEventHandler
-import com.rarible.protocol.union.listener.handler.ethereum.EthereumOwnershipEventHandler
+import com.rarible.protocol.union.listener.handler.ethereum.EthereumCompositeConsumerWorker.ConsumerEventHandlerFactory
 import io.micrometer.core.instrument.MeterRegistry
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
@@ -46,15 +44,17 @@ class UnionListenerConfiguration(
     @Bean
     fun ethereumItemChangeWorker(
         nftIndexerEventsConsumerFactory: NftIndexerEventsConsumerFactory,
-        itemEventHandler: EthereumItemEventHandler
+        eventHandlerFactory: EthereumEventHandlerFactory
     ): EthereumCompositeConsumerWorker<NftItemEventDto> {
         return EthereumCompositeConsumerWorker(
             consumerFactory = ConsumerFactory.wrap { group, blockchain ->
                 nftIndexerEventsConsumerFactory.createItemEventsConsumer(group, blockchain)
             },
+            eventHandlerFactory = ConsumerEventHandlerFactory.wrap { blockchain ->
+                eventHandlerFactory.createItemEventHandler(blockchain)
+            },
             consumerGroup = itemConsumerGroup,
             properties = listenerProperties.monitoringWorker,
-            eventHandler = itemEventHandler,
             meterRegistry = meterRegistry,
             workerName = "itemEventDto"
         )
@@ -63,15 +63,17 @@ class UnionListenerConfiguration(
     @Bean
     fun ethereumOwnershipChangeWorker(
         nftIndexerEventsConsumerFactory: NftIndexerEventsConsumerFactory,
-        ownershipEventHandler: EthereumOwnershipEventHandler
+        eventHandlerFactory: EthereumEventHandlerFactory
     ): EthereumCompositeConsumerWorker<NftOwnershipEventDto> {
         return EthereumCompositeConsumerWorker(
             consumerFactory = ConsumerFactory.wrap { group, blockchain ->
                 nftIndexerEventsConsumerFactory.createOwnershipEventsConsumer(group, blockchain)
             },
+            eventHandlerFactory = ConsumerEventHandlerFactory.wrap { blockchain ->
+                eventHandlerFactory.createOwnershipEventHandler(blockchain)
+            },
             consumerGroup = ownershipConsumerGroup,
             properties = listenerProperties.monitoringWorker,
-            eventHandler = ownershipEventHandler,
             meterRegistry = meterRegistry,
             workerName = "ownershipEventDto"
         )
@@ -80,15 +82,17 @@ class UnionListenerConfiguration(
     @Bean
     fun ethereumOrderChangeWorker(
         orderIndexerEventsConsumerFactory: OrderIndexerEventsConsumerFactory,
-        orderEventHandler: EthereumOrderEventHandler
+        eventHandlerFactory: EthereumEventHandlerFactory
     ): EthereumCompositeConsumerWorker<OrderEventDto> {
         return EthereumCompositeConsumerWorker(
             consumerFactory = ConsumerFactory.wrap { group, blockchain ->
                 orderIndexerEventsConsumerFactory.createOrderEventsConsumer(group, blockchain)
             },
+            eventHandlerFactory = ConsumerEventHandlerFactory.wrap { blockchain ->
+                eventHandlerFactory.createOrderEventHandler(blockchain)
+            },
             consumerGroup = orderConsumerGroup,
             properties = listenerProperties.monitoringWorker,
-            eventHandler = orderEventHandler,
             meterRegistry = meterRegistry,
             workerName = "orderEventDto"
         )
@@ -122,7 +126,7 @@ class UnionListenerConfiguration(
             clientId = "${producerProperties.environment}.protocol-union-listener.order",
             valueSerializerClass = JsonSerializer::class.java,
             valueClass = UnionOrderEventDto::class.java,
-            defaultTopic = UnionEventTopicProvider.getOwnershipTopic(producerProperties.environment),
+            defaultTopic = UnionEventTopicProvider.getOrderTopic(producerProperties.environment),
             bootstrapServers = producerProperties.kafkaReplicaSet
         )
     }

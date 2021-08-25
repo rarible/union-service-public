@@ -13,7 +13,7 @@ class EthereumCompositeConsumerWorker<T>(
     private val consumerGroup: String,
     private val workerName: String,
     private val consumerFactory: ConsumerFactory<T>,
-    private val eventHandler: ConsumerEventHandler<T>,
+    private val eventHandlerFactory: ConsumerEventHandlerFactory<T>,
     private val properties: DaemonWorkerProperties = DaemonWorkerProperties(),
     private val retryProperties: RetryProperties = RetryProperties(),
     private val meterRegistry: MeterRegistry = SimpleMeterRegistry()
@@ -22,8 +22,8 @@ class EthereumCompositeConsumerWorker<T>(
     private val consumerWorkers = Blockchain.values().map { blockchain ->
         ConsumerWorker(
             consumer = consumerFactory.createEventsConsumer(consumerGroup, blockchain),
+            eventHandler = eventHandlerFactory.createEventHandler(blockchain),
             properties = properties,
-            eventHandler = eventHandler,
             retryProperties = retryProperties,
             meterRegistry = meterRegistry,
             workerName = blockchain.name +"_$workerName"
@@ -36,6 +36,20 @@ class EthereumCompositeConsumerWorker<T>(
 
     override fun close() {
         consumerWorkers.forEach { it.close() }
+    }
+
+    interface ConsumerEventHandlerFactory<T> {
+        fun createEventHandler(blockchain: Blockchain): ConsumerEventHandler<T>
+
+        companion object {
+            fun <T> wrap(body: (blockchain: Blockchain) -> ConsumerEventHandler<T>): ConsumerEventHandlerFactory<T> {
+                return object : ConsumerEventHandlerFactory<T> {
+                    override fun createEventHandler(blockchain: Blockchain): ConsumerEventHandler<T> {
+                        return body(blockchain)
+                    }
+                }
+            }
+        }
     }
 
     interface ConsumerFactory<T> {
