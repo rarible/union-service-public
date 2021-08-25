@@ -5,11 +5,10 @@ import com.rarible.core.kafka.RaribleKafkaProducer
 import com.rarible.ethereum.domain.Blockchain
 import com.rarible.protocol.dto.*
 import com.rarible.protocol.union.core.converter.ethereum.UnionOrderEventDtoConverter
+import com.rarible.protocol.union.core.misc.toItemId
 import com.rarible.protocol.union.dto.UnionOrderEventDto
 import com.rarible.protocol.union.listener.handler.AbstractEventHandler
 import org.slf4j.LoggerFactory
-import scalether.domain.Address
-import java.math.BigInteger
 
 class EthereumOrderEventHandler(
     private val blockchain: Blockchain,
@@ -21,21 +20,21 @@ class EthereumOrderEventHandler(
 
     override suspend fun handleSafely(event: OrderEventDto) {
         logger.debug("Received ${blockchain.value} Order event: type=${event::class.java.simpleName}")
-
-        val key = when (event) {
-            is OrderUpdateEventDto ->
-                event.order.key ?: event.orderId
-        }
         val unionEventDto = UnionOrderEventDtoConverter.convert(event, blockchain)
 
         val message = KafkaMessage(
-            key = key,
+            key = event.key,
             value = unionEventDto,
             headers = orderEventHeaders,
             id = event.eventId
         )
         producer.send(message)
     }
+
+    private val OrderEventDto.key: String
+        get() = when (this) {
+            is OrderUpdateEventDto -> order.key ?: orderId
+        }
 
     private val OrderDto.key: String?
         get() = make.assetType.itemId ?: take.assetType.itemId
@@ -49,6 +48,4 @@ class EthereumOrderEventHandler(
             is EthAssetTypeDto, is Erc20AssetTypeDto -> null
             is FlowAssetTypeDto -> throw UnsupportedOperationException("Unsupported assert type ${this.javaClass}") //TODO: I think need to remove from Eth api
         }
-
-    private fun toItemId(contract: Address, tokenId: BigInteger) = "$contract:$tokenId"
 }
