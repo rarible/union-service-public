@@ -16,7 +16,7 @@ object EthUnionOrderEventDtoConverter {
                         is LegacyOrderDto -> {
                             EthLegacyOrderDto(
                                 maker = EthAddressConverter.convert(order.maker),
-                                taker = source.order.taker?.let { EthAddressConverter.convert(order.maker) },
+                                taker = source.order.taker?.let { EthAddressConverter.convert(it) },
                                 make = EthAssetDtoConverter.convert(order.make),
                                 take = EthAssetDtoConverter.convert(order.take),
                                 salt = EthBytesConverter.convert(order.salt),
