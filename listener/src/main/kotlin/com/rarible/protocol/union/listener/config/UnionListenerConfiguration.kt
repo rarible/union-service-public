@@ -10,12 +10,14 @@ import com.rarible.protocol.dto.*
 import com.rarible.protocol.flow.nft.api.subscriber.FlowNftIndexerEventsConsumerFactory
 import com.rarible.protocol.nft.api.subscriber.NftIndexerEventsConsumerFactory
 import com.rarible.protocol.order.api.subscriber.OrderIndexerEventsConsumerFactory
+import com.rarible.protocol.union.dto.UnionEventTopicProvider
 import com.rarible.protocol.union.dto.UnionItemEventDto
 import com.rarible.protocol.union.dto.UnionOrderEventDto
 import com.rarible.protocol.union.dto.UnionOwnershipEventDto
-import com.rarible.protocol.union.listener.handler.ethereum.*
-import com.rarible.protocol.union.listener.handler.ethereum.EthereumCompositeConsumerWorker.ConsumerFactory
+import com.rarible.protocol.union.listener.handler.ethereum.EthereumCompositeConsumerWorker
 import com.rarible.protocol.union.listener.handler.ethereum.EthereumCompositeConsumerWorker.ConsumerEventHandlerFactory
+import com.rarible.protocol.union.listener.handler.ethereum.EthereumCompositeConsumerWorker.ConsumerFactory
+import com.rarible.protocol.union.listener.handler.ethereum.EthereumEventHandlerFactory
 import com.rarible.protocol.union.listener.handler.flow.FlowItemEventHandler
 import com.rarible.protocol.union.listener.handler.flow.FlowOwnershipEventHandler
 import io.micrometer.core.instrument.MeterRegistry

@@ -9,8 +9,24 @@ open class UnionApiClientFactory(
     private val webClientCustomizer: WebClientCustomizer = NoopWebClientCustomizer()
 ) {
 
-    fun createTestUnionApiClient(): TestControllerApi {
-        return TestControllerApi(createApiClient())
+    fun createCollectionApiClient(): CollectionControllerApi {
+        return CollectionControllerApi(createApiClient())
+    }
+
+    fun createItemApiClient(): ItemControllerApi {
+        return ItemControllerApi(createApiClient())
+    }
+
+    fun createOwnershipApiClient(): OwnershipControllerApi {
+        return OwnershipControllerApi(createApiClient())
+    }
+
+    fun createOrderApiClient(): OrderControllerApi {
+        return OrderControllerApi(createApiClient())
+    }
+
+    fun createActivityApiClient(): ActivityControllerApi {
+        return ActivityControllerApi(createApiClient())
     }
 
     private fun createApiClient(): ApiClient {

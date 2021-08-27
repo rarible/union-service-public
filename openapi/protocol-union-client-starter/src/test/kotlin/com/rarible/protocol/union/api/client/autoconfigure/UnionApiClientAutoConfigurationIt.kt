@@ -41,7 +41,7 @@ class UnionApiClientAutoConfigurationIt {
 
         every { webClientCustomizer.customize(any()) } returns Unit
 
-        unionApiClientFactory.createTestUnionApiClient()
+        unionApiClientFactory.createActivityApiClient()
 
         verify { webClientCustomizer.customize(any()) }
     }
