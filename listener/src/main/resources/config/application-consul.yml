@@ -1,0 +1,14 @@
+listener:
+  event-producer:
+    kafka-replica-set: ${kafka.hosts}
+
+protocol:
+  nft:
+    subscriber:
+      broker-replica-set: ${kafka.hosts}
+  order:
+    subscriber:
+      broker-replica-set: ${kafka.hosts}
+  flow-nft:
+    subscriber:
+      broker-replica-set: ${kafka.hosts}

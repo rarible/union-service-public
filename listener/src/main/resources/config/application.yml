@@ -27,4 +27,3 @@ rarible:
 listener:
   event-producer:
     environment: ${application.environment}
-    kafka-replica-set: ${kafka.hosts}
