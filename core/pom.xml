@@ -60,6 +60,16 @@
             <artifactId>protocol-model-unlockable</artifactId>
         </dependency>
 
+        <!-- ============= Flow Protocol-API ============== -->
+        <dependency>
+            <groupId>com.rarible.protocol</groupId>
+            <artifactId>flow-protocol-model-nft</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.rarible.protocol</groupId>
+            <artifactId>flow-protocol-model-order</artifactId>
+        </dependency>
+
         <!-- ================== Spring =================== -->
         <dependency>
             <groupId>org.springframework</groupId>

@@ -4,10 +4,11 @@ import com.rarible.core.kafka.KafkaMessage
 import com.rarible.core.kafka.RaribleKafkaProducer
 import com.rarible.ethereum.domain.Blockchain
 import com.rarible.protocol.dto.*
-import com.rarible.protocol.union.core.converter.ethereum.UnionOrderEventDtoConverter
+import com.rarible.protocol.union.core.converter.ethereum.EthUnionOrderEventDtoConverter
 import com.rarible.protocol.union.core.misc.toItemId
 import com.rarible.protocol.union.dto.UnionOrderEventDto
 import com.rarible.protocol.union.listener.handler.AbstractEventHandler
+import com.rarible.protocol.union.listener.handler.ORDER_EVENT_HEADERS
 import org.slf4j.LoggerFactory
 
 class EthereumOrderEventHandler(
@@ -16,16 +17,14 @@ class EthereumOrderEventHandler(
 ) : AbstractEventHandler<OrderEventDto>() {
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    private val orderEventHeaders = mapOf("protocol.union.order.event.version" to UnionEventTopicProvider.VERSION)
-
     override suspend fun handleSafely(event: OrderEventDto) {
         logger.debug("Received ${blockchain.value} Order event: type=${event::class.java.simpleName}")
-        val unionEventDto = UnionOrderEventDtoConverter.convert(event, blockchain)
+        val unionEventDto = EthUnionOrderEventDtoConverter.convert(event, blockchain)
 
         val message = KafkaMessage(
             key = event.key,
             value = unionEventDto,
-            headers = orderEventHeaders,
+            headers = ORDER_EVENT_HEADERS,
             id = event.eventId
         )
         producer.send(message)

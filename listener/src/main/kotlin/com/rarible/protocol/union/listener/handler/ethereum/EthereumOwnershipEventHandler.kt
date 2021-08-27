@@ -6,11 +6,11 @@ import com.rarible.ethereum.domain.Blockchain
 import com.rarible.protocol.dto.NftOwnershipDeleteEventDto
 import com.rarible.protocol.dto.NftOwnershipEventDto
 import com.rarible.protocol.dto.NftOwnershipUpdateEventDto
-import com.rarible.protocol.dto.UnionEventTopicProvider
-import com.rarible.protocol.union.core.converter.ethereum.UnionOwnershipEventDtoConverter
+import com.rarible.protocol.union.core.converter.ethereum.EthUnionOwnershipEventDtoConverter
 import com.rarible.protocol.union.core.misc.toItemId
 import com.rarible.protocol.union.dto.UnionOwnershipEventDto
 import com.rarible.protocol.union.listener.handler.AbstractEventHandler
+import com.rarible.protocol.union.listener.handler.OWNERSHIP_EVENT_HEADERS
 import org.slf4j.LoggerFactory
 
 class EthereumOwnershipEventHandler(
@@ -19,16 +19,14 @@ class EthereumOwnershipEventHandler(
 ) : AbstractEventHandler<NftOwnershipEventDto>() {
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    private val ownershipEventHeaders = mapOf("protocol.union.ownership.event.version" to UnionEventTopicProvider.VERSION)
-
     override suspend fun handleSafely(event: NftOwnershipEventDto) {
         logger.debug("Received ${blockchain.value} Ownership event: type=${event::class.java.simpleName}")
-        val unionEventDto = UnionOwnershipEventDtoConverter.convert(event, blockchain)
+        val unionEventDto = EthUnionOwnershipEventDtoConverter.convert(event, blockchain)
 
         val message = KafkaMessage(
             key = event.key,
             value = unionEventDto,
-            headers = ownershipEventHeaders,
+            headers = OWNERSHIP_EVENT_HEADERS,
             id = event.eventId
         )
         producer.send(message).ensureSuccess()

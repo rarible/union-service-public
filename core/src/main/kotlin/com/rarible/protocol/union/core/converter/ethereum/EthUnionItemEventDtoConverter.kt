@@ -5,7 +5,7 @@ import com.rarible.protocol.dto.*
 import com.rarible.protocol.union.dto.*
 import java.time.Instant
 
-object UnionItemEventDtoConverter {
+object EthUnionItemEventDtoConverter {
     fun convert(source: NftItemEventDto, blockchain: Blockchain): UnionItemEventDto {
         return when (source) {
             is NftItemUpdateEventDto -> UnionItemUpdateEventDto(

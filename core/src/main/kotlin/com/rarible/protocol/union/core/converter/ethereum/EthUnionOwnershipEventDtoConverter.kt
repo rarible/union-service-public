@@ -4,7 +4,7 @@ import com.rarible.ethereum.domain.Blockchain
 import com.rarible.protocol.dto.*
 import com.rarible.protocol.union.dto.*
 
-object UnionOwnershipEventDtoConverter {
+object EthUnionOwnershipEventDtoConverter {
     fun convert(source: NftOwnershipEventDto, blockchain: Blockchain): UnionOwnershipEventDto {
         return when (source) {
             is NftOwnershipUpdateEventDto -> {
