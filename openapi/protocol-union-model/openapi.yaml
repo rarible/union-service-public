@@ -72,8 +72,7 @@ components:
           type: string
           format: date-time
         supply:
-          type: number
-          format: biginteger
+          $ref: "#/components/schemas/BigInteger"
         metaURL:
           type: string
           example: "ipfs://ipfs/QmPe1W8XiUYdsvdpvgWVwekQ7cDQivRMak3YPX15vxvSJs"
@@ -152,8 +151,7 @@ components:
       type: object
       properties:
         value:
-          type: number
-          format: biginteger
+          $ref: "#/components/schemas/BigInteger"
         createdAt:
           type: string
           format: "date-time"
@@ -225,8 +223,7 @@ components:
       type: object
       properties:
         fill:
-          type: number
-          format: biginteger
+          $ref: "#/components/schemas/BigInteger"
         startedAt:
           type: string
           format: "date-time"
@@ -234,8 +231,7 @@ components:
           type: string
           format: "date-time"
         makeStock:
-          type: number
-          format: bigdecimal
+          $ref: "#/components/schemas/BigDecimal"
         cancelled:
           type: "boolean"
         createdAt:
@@ -245,14 +241,11 @@ components:
           type: string
           format: "date-time"
         makeBalance:
-          type: number
-          format: bigdecimal
+          $ref: "#/components/schemas/BigDecimal"
         makePriceUSD:
-          type: number
-          format: bigdecimal
+          $ref: "#/components/schemas/BigDecimal"
         takePriceUSD:
-          type: number
-          format: bigdecimal
+          $ref: "#/components/schemas/BigDecimal"
         priceHistory:
           type: array
           default: [ ]
@@ -280,11 +273,9 @@ components:
           type: string
           format: date-time
         makeValue:
-          type: number
-          format: bigdecimal
+          $ref: "#/components/schemas/BigDecimal"
         takeValue:
-          type: number
-          format: bigdecimal
+          $ref: "#/components/schemas/BigDecimal"
 
     UnionOrders:
       type: object
@@ -406,8 +397,7 @@ components:
         blockHash:
           type: string
         blockNumber:
-          type: number
-          format: biginteger
+          $ref: "#/components/schemas/BigInteger"
         logIndex:
           type: integer
       required:
@@ -430,8 +420,7 @@ components:
         id:
           $ref: "#/components/schemas/EthItemId"
         tokenId:
-          type: number
-          format: biginteger
+          $ref: "#/components/schemas/BigInteger"
         collection:
           $ref: "#/components/schemas/EthAddress"
         creators:
@@ -447,8 +436,7 @@ components:
           items:
             $ref: "#/components/schemas/EthRoyalty"
         lazySupply:
-          type: number
-          format: biginteger
+          $ref: "#/components/schemas/BigInteger"
         pending:
           type: array
           items:
@@ -469,8 +457,7 @@ components:
         account:
           $ref: "#/components/schemas/EthAddress"
         value:
-          type: number
-          format: biginteger
+          $ref: "#/components/schemas/BigInteger"
 
     EthCreator:
       type: object
@@ -478,8 +465,7 @@ components:
         account:
           $ref: "#/components/schemas/EthAddress"
         value:
-          type: number
-          format: bigdecimal
+          $ref: "#/components/schemas/BigDecimal"
       required:
         - account
         - value
@@ -511,8 +497,7 @@ components:
         contract:
           $ref: "#/components/schemas/EthAddress"
         tokenId:
-          type: number
-          format: biginteger
+          $ref: "#/components/schemas/BigInteger"
         owner:
           type: array
           items:
@@ -522,8 +507,7 @@ components:
           items:
             $ref: "#/components/schemas/EthCreator"
         lazyValue:
-          type: number
-          format: biginteger
+          $ref: "#/components/schemas/BigInteger"
         pending:
           type: array
           items:
@@ -656,8 +640,7 @@ components:
       type: object
       properties:
         fee:
-          type: number
-          format: biginteger
+          $ref: "#/components/schemas/BigInteger"
       required:
         - fee
 
@@ -682,17 +665,13 @@ components:
         exchange:
           $ref: "#/components/schemas/EthAddress"
         makerRelayerFee:
-          type: number
-          format: biginteger
+          $ref: "#/components/schemas/BigInteger"
         takerRelayerFee:
-          type: number
-          format: biginteger
+          $ref: "#/components/schemas/BigInteger"
         makerProtocolFee:
-          type: number
-          format: biginteger
+          $ref: "#/components/schemas/BigInteger"
         takerProtocolFee:
-          type: number
-          format: biginteger
+          $ref: "#/components/schemas/BigInteger"
         feeRecipient:
           $ref: "#/components/schemas/EthAddress"
         feeMethod:
@@ -724,8 +703,7 @@ components:
         staticExtraData:
           type: string
         extra:
-          type: number
-          format: biginteger
+          $ref: "#/components/schemas/BigInteger"
       required:
         - dataType
         - exchange
@@ -775,24 +753,19 @@ components:
             - LEFT
             - RIGHT
         fill:
-          type: number
-          format: biginteger
+          $ref: "#/components/schemas/BigInteger"
         taker:
           $ref: "#/components/schemas/EthAddress"
         counterHash:
           type: string
         makeUSD:
-          type: number
-          format: biginteger
+          $ref: "#/components/schemas/BigInteger"
         takeUSD:
-          type: number
-          format: biginteger
+          $ref: "#/components/schemas/BigInteger"
         makePriceUSD:
-          type: number
-          format: biginteger
+          $ref: "#/components/schemas/BigInteger"
         takePriceUSD:
-          type: number
-          format: biginteger
+          $ref: "#/components/schemas/BigInteger"
       required:
         - "@type"
         - fill
@@ -803,8 +776,7 @@ components:
         account:
           $ref: "#/components/schemas/EthAddress"
         value:
-          type: number
-          format: biginteger
+          $ref: "#/components/schemas/BigInteger"
       required:
         - account
         - value
@@ -815,8 +787,7 @@ components:
         account:
           $ref: "#/components/schemas/EthAddress"
         value:
-          type: number
-          format: biginteger
+          $ref: "#/components/schemas/BigInteger"
       required:
         - account
         - value
@@ -842,8 +813,7 @@ components:
         assetType:
           $ref: "#/components/schemas/EthAssetType"
         value:
-          type: number
-          format: biginteger
+          $ref: "#/components/schemas/BigInteger"
       required:
         - assetType
         - value
@@ -856,13 +826,11 @@ components:
           enum:
             - ERC1155_Lazy
         tokenId:
-          type: number
-          format: biginteger
+          $ref: "#/components/schemas/BigInteger"
         uri:
           type: string
         supply:
-          type: number
-          format: biginteger
+          $ref: "#/components/schemas/BigInteger"
         creators:
           type: array
           items:
@@ -891,8 +859,7 @@ components:
           enum:
             - ERC721_Lazy
         tokenId:
-          type: number
-          format: biginteger
+          $ref: "#/components/schemas/BigInteger"
         uri:
           type: string
         creators:
@@ -923,8 +890,7 @@ components:
           enum:
             - ERC1155
         tokenId:
-          type: number
-          format: biginteger
+          $ref: "#/components/schemas/BigInteger"
       required:
         - "@type"
         - tokenId
@@ -937,8 +903,7 @@ components:
           enum:
             - ERC721
         tokenId:
-          type: number
-          format: biginteger
+          $ref: "#/components/schemas/BigInteger"
       required:
         - "@type"
         - tokenId
@@ -996,11 +961,9 @@ components:
         contract:
           $ref: "#/components/schemas/EthAddress"
         tokenId:
-          type: number
-          format: biginteger
+          $ref: "#/components/schemas/BigInteger"
         value:
-          type: number
-          format: biginteger
+          $ref: "#/components/schemas/BigInteger"
         blockchainInfo:
           $ref: "#/components/schemas/ActivityBlockchainInfo"
       required:
@@ -1025,11 +988,9 @@ components:
         contract:
           $ref: "#/components/schemas/EthAddress"
         tokenId:
-          type: number
-          format: biginteger
+          $ref: "#/components/schemas/BigInteger"
         value:
-          type: number
-          format: biginteger
+          $ref: "#/components/schemas/BigInteger"
         blockchainInfo:
           $ref: "#/components/schemas/ActivityBlockchainInfo"
       required:
@@ -1056,11 +1017,9 @@ components:
         contract:
           $ref: "#/components/schemas/EthAddress"
         tokenId:
-          type: number
-          format: biginteger
+          $ref: "#/components/schemas/BigInteger"
         value:
-          type: number
-          format: biginteger
+          $ref: "#/components/schemas/BigInteger"
         blockchainInfo:
           $ref: "#/components/schemas/ActivityBlockchainInfo"
       required:
@@ -1110,11 +1069,9 @@ components:
         right:
           $ref: "#/components/schemas/EthOrderActivityMatchSide"
         price:
-          type: number
-          format: bigdecimal
+          $ref: "#/components/schemas/BigDecimal"
         priceUSD:
-          type: number
-          format: bigdecimal
+          $ref: "#/components/schemas/BigDecimal"
         source:
           $ref: "#/components/schemas/EthOrderActivitySource"
         blockchainInfo:
@@ -1143,11 +1100,9 @@ components:
         take:
           $ref: "#/components/schemas/EthAsset"
         price:
-          type: number
-          format: bigdecimal
+          $ref: "#/components/schemas/BigDecimal"
         priceUSD:
-          type: number
-          format: bigdecimal
+          $ref: "#/components/schemas/BigDecimal"
         source:
           $ref: "#/components/schemas/EthOrderActivitySource"
         blockchainInfo:
@@ -1178,11 +1133,9 @@ components:
         take:
           $ref: "#/components/schemas/EthAsset"
         price:
-          type: number
-          format: bigdecimal
+          $ref: "#/components/schemas/BigDecimal"
         priceUSD:
-          type: number
-          format: bigdecimal
+          $ref: "#/components/schemas/BigDecimal"
         source:
           $ref: "#/components/schemas/EthOrderActivitySource"
         blockchainInfo:
@@ -1302,8 +1255,7 @@ components:
         id:
           $ref: "#/components/schemas/FlowItemId"
         tokenId:
-          type: number
-          format: biginteger
+          $ref: "#/components/schemas/BigInteger"
         collection:
           $ref: "#/components/schemas/FlowContract"
         creators:
@@ -1333,8 +1285,7 @@ components:
         account:
           $ref: "#/components/schemas/FlowAddress"
         value:
-          type: number
-          format: bigdecimal
+          $ref: "#/components/schemas/BigDecimal"
       required:
         - account
         - value
@@ -1345,8 +1296,7 @@ components:
         account:
           $ref: "#/components/schemas/FlowAddress"
         value:
-          type: number
-          format: bigdecimal
+          $ref: "#/components/schemas/BigDecimal"
       required:
         - account
         - value
@@ -1365,8 +1315,7 @@ components:
         contract:
           $ref: "#/components/schemas/FlowContract"
         tokenId:
-          type: number
-          format: biginteger
+          $ref: "#/components/schemas/BigInteger"
         owner:
           type: array
           items:
@@ -1388,8 +1337,7 @@ components:
           enum:
             - FLOW
         id:
-          type: number
-          format: biginteger
+          $ref: "#/components/schemas/BigInteger"
         type:
           $ref: "#/components/schemas/FlowOrderType"
         maker:
@@ -1421,8 +1369,7 @@ components:
         account:
           $ref: "#/components/schemas/FlowAddress"
         value:
-          type: number
-          format: biginteger
+          $ref: "#/components/schemas/BigInteger"
       required:
         - account
         - value
@@ -1433,8 +1380,7 @@ components:
         account:
           $ref: "#/components/schemas/FlowAddress"
         value:
-          type: number
-          format: biginteger
+          $ref: "#/components/schemas/BigInteger"
       required:
         - account
         - value
@@ -1465,8 +1411,7 @@ components:
         assetType:
           $ref: "#/components/schemas/FlowAssetType"
         value:
-          type: number
-          format: biginteger
+          $ref: "#/components/schemas/BigInteger"
       required:
         - assetType
         - value
@@ -1490,8 +1435,7 @@ components:
           enum:
             - FLOW_NFT
         tokenId:
-          type: number
-          format: biginteger
+          $ref: "#/components/schemas/BigInteger"
       required:
         - "@type"
 
@@ -1538,11 +1482,9 @@ components:
         contract:
           $ref: "#/components/schemas/FlowContract"
         tokenId:
-          type: number
-          format: biginteger
+          $ref: "#/components/schemas/BigInteger"
         value:
-          type: number
-          format: biginteger
+          $ref: "#/components/schemas/BigInteger"
         blockchainInfo:
           $ref: "#/components/schemas/ActivityBlockchainInfo"
       required:
@@ -1567,11 +1509,9 @@ components:
         contract:
           $ref: "#/components/schemas/FlowContract"
         tokenId:
-          type: number
-          format: biginteger
+          $ref: "#/components/schemas/BigInteger"
         value:
-          type: number
-          format: biginteger
+          $ref: "#/components/schemas/BigInteger"
         blockchainInfo:
           $ref: "#/components/schemas/ActivityBlockchainInfo"
       required:
@@ -1598,11 +1538,9 @@ components:
         contract:
           $ref: "#/components/schemas/FlowContract"
         tokenId:
-          type: number
-          format: biginteger
+          $ref: "#/components/schemas/BigInteger"
         value:
-          type: number
-          format: biginteger
+          $ref: "#/components/schemas/BigInteger"
         blockchainInfo:
           $ref: "#/components/schemas/ActivityBlockchainInfo"
       required:
@@ -1626,11 +1564,9 @@ components:
         right:
           $ref: "#/components/schemas/FlowOrderActivityMatchSide"
         price:
-          type: number
-          format: bigdecimal
+          $ref: "#/components/schemas/BigDecimal"
         priceUSD:
-          type: number
-          format: bigdecimal
+          $ref: "#/components/schemas/BigDecimal"
         blockchainInfo:
           $ref: "#/components/schemas/ActivityBlockchainInfo"
       required:
@@ -1656,11 +1592,9 @@ components:
         take:
           $ref: "#/components/schemas/FlowAsset"
         price:
-          type: number
-          format: bigdecimal
+          $ref: "#/components/schemas/BigDecimal"
         priceUSD:
-          type: number
-          format: bigdecimal
+          $ref: "#/components/schemas/BigDecimal"
         blockchainInfo:
           $ref: "#/components/schemas/ActivityBlockchainInfo"
       required:
@@ -1731,6 +1665,13 @@ components:
         - owner
 
     #################### Referenced Types ####################
+
+    BigInteger:
+      type: string
+      example: 123456
+    BigDecimal:
+      type: string
+      example: 123456.789
 
     ItemId:
       type: string
