@@ -1,14 +1,13 @@
 package com.rarible.protocol.union.listener.config
 
 import com.rarible.core.application.ApplicationEnvironmentInfo
+import com.rarible.core.daemon.sequential.ConsumerWorker
 import com.rarible.core.kafka.RaribleKafkaProducer
 import com.rarible.core.kafka.json.JsonSerializer
 import com.rarible.core.task.EnableRaribleTask
 import com.rarible.ethereum.converters.EnableScaletherMongoConversions
-import com.rarible.protocol.dto.NftItemEventDto
-import com.rarible.protocol.dto.NftOwnershipEventDto
-import com.rarible.protocol.dto.OrderEventDto
-import com.rarible.protocol.dto.UnionEventTopicProvider
+import com.rarible.protocol.dto.*
+import com.rarible.protocol.flow.nft.api.subscriber.FlowNftIndexerEventsConsumerFactory
 import com.rarible.protocol.nft.api.subscriber.NftIndexerEventsConsumerFactory
 import com.rarible.protocol.order.api.subscriber.OrderIndexerEventsConsumerFactory
 import com.rarible.protocol.union.dto.UnionItemEventDto
@@ -17,6 +16,8 @@ import com.rarible.protocol.union.dto.UnionOwnershipEventDto
 import com.rarible.protocol.union.listener.handler.ethereum.*
 import com.rarible.protocol.union.listener.handler.ethereum.EthereumCompositeConsumerWorker.ConsumerFactory
 import com.rarible.protocol.union.listener.handler.ethereum.EthereumCompositeConsumerWorker.ConsumerEventHandlerFactory
+import com.rarible.protocol.union.listener.handler.flow.FlowItemEventHandler
+import com.rarible.protocol.union.listener.handler.flow.FlowOwnershipEventHandler
 import io.micrometer.core.instrument.MeterRegistry
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
@@ -97,6 +98,49 @@ class UnionListenerConfiguration(
             workerName = "orderEventDto"
         )
     }
+
+    @Bean
+    fun flowItemChangeWorker(
+        flowNftIndexerEventsConsumerFactory: FlowNftIndexerEventsConsumerFactory,
+        flowItemEventHandler: FlowItemEventHandler
+    ): ConsumerWorker<FlowNftItemEventDto> {
+        return ConsumerWorker(
+            consumer = flowNftIndexerEventsConsumerFactory.createItemEventsConsumer(itemConsumerGroup),
+            properties = listenerProperties.monitoringWorker,
+            eventHandler = flowItemEventHandler,
+            meterRegistry = meterRegistry,
+            workerName = "flowItemEventDto"
+        )
+    }
+
+    @Bean
+    fun flowOwnershipChangeWorker(
+        flowNftIndexerEventsConsumerFactory: FlowNftIndexerEventsConsumerFactory,
+        flowOwnershipEventHandler: FlowOwnershipEventHandler
+    ): ConsumerWorker<FlowOwnershipEventDto> {
+        return ConsumerWorker(
+            consumer = flowNftIndexerEventsConsumerFactory.createOwnershipEventsConsumer(itemConsumerGroup),
+            properties = listenerProperties.monitoringWorker,
+            eventHandler = flowOwnershipEventHandler,
+            meterRegistry = meterRegistry,
+            workerName = "flowItemEventDto"
+        )
+    }
+
+//TODO: Not correct types
+//    @Bean
+//    fun flowOrderChangeWorker(
+//        flowNftIndexerEventsConsumerFactory: FlowNftIndexerEventsConsumerFactory,
+//        flowOrderEventHandler: FlowOrderEventHandler
+//    ): ConsumerWorker<FlowOrderEventDto> {
+//        return ConsumerWorker(
+//            consumer = flowNftIndexerEventsConsumerFactory.createORderEventsConsumer(itemConsumerGroup),
+//            properties = listenerProperties.monitoringWorker,
+//            eventHandler = flowOrderEventHandler,
+//            meterRegistry = meterRegistry,
+//            workerName = "flowOrderEventDto"
+//        )
+//    }
 
     @Bean
     fun unionItemEventProducer(): RaribleKafkaProducer<UnionItemEventDto> {

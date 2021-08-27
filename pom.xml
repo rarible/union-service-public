@@ -50,6 +50,7 @@
         <rarible-core.version>1.2-SNAPSHOT</rarible-core.version>
         <rarible-ethereum.version>1.0-SNAPSHOT</rarible-ethereum.version>
         <rarible-protocol.ethereum.version>1.13-SNAPSHOT</rarible-protocol.ethereum.version>
+        <rarible-protocol.flow.version>2.0.7-SNAPSHOT</rarible-protocol.flow.version>
         <rarible.codegen.server.version>1.0.1</rarible.codegen.server.version>
         <rarible.codegen.client.version>1.1.1</rarible.codegen.client.version>
 
@@ -215,6 +216,31 @@
                 <groupId>com.rarible.protocol</groupId>
                 <artifactId>protocol-subscriber-unlockable-starter</artifactId>
                 <version>${rarible-protocol.ethereum.version}</version>
+            </dependency>
+
+            <!-- ============ Flow Protocol-API ============ -->
+            <!-- NFT-indexer -->
+            <dependency>
+                <groupId>com.rarible.protocol</groupId>
+                <artifactId>flow-protocol-model-nft</artifactId>
+                <version>${rarible-protocol.flow.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.rarible.protocol</groupId>
+                <artifactId>flow-protocol-client-nft-starter</artifactId>
+                <version>${rarible-protocol.flow.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.rarible.protocol</groupId>
+                <artifactId>flow-protocol-subscriber-nft-starter</artifactId>
+                <version>${rarible-protocol.flow.version}</version>
+            </dependency>
+
+            <!-- Order-indexer -->
+            <dependency>
+                <groupId>com.rarible.protocol</groupId>
+                <artifactId>flow-protocol-model-order</artifactId>
+                <version>${rarible-protocol.flow.version}</version>
             </dependency>
 
             <!-- ================== Other =================== -->
