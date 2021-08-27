@@ -4,15 +4,1023 @@ info:
   version: v0.1
 
 paths:
-  "/v0.1/test":
+
+  /v0.1/union/items/{itemId}:
     get:
       tags:
-        - test-controller
-      operationId: getTest
+        - item-controller
+      description: "returns Item by identifier"
+      operationId: getItemById
+      parameters:
+        - name: "itemId"
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: "includeMeta"
+          in: query
+          required: false
+          schema:
+            type: boolean
       responses:
-        '200':
-          description: OK
+        "200":
+          description: "OK"
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Test"
+                $ref: "#/components/schemas/UnionItem"
+        "404":
+          description: "Not Found"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "500":
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  /v0.1/union/items/byOwner:
+    get:
+      tags:
+        - item-controller
+      operationId: getItemsByOwner
+      parameters:
+        - name: "owner"
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: "continuation"
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: "size"
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: "includeMeta"
+          in: query
+          required: false
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnionItems"
+        "500":
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  /v0.1/union/items/byCreator:
+    get:
+      tags:
+        - item-controller
+      operationId: getItemsByCreator
+      parameters:
+        - name: "creator"
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: "continuation"
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: "size"
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: "includeMeta"
+          in: query
+          required: false
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnionItems"
+        "500":
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  /v0.1/union/items/byCollection:
+    get:
+      tags:
+        - item-controller
+      operationId: getItemsByCollection
+      parameters:
+        - name: "collection"
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: "continuation"
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: "size"
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: "includeMeta"
+          in: query
+          required: false
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnionItems"
+        "500":
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  /v0.1/union/items/all:
+    get:
+      tags:
+        - item-controller
+      operationId: getAllItems
+      parameters:
+        - name: "blockchains"
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              $ref: "#/components/schemas/Blockchain"
+        - name: "continuation"
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: "size"
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: "showDeleted"
+          in: query
+          required: false
+          schema:
+            type: boolean
+        - name: "lastUpdatedFrom"
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+        - name: "lastUpdatedTo"
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: "int64"
+        - name: "includeMeta"
+          in: query
+          required: false
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnionItems"
+        "500":
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  #
+  # NFT Ownership Controller
+  #
+
+  /v0.1/union/ownerships/{ownershipId}:
+    get:
+      tags:
+        - ownership-controller
+      operationId: getOwnershipById
+      parameters:
+        - name: "ownershipId"
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnionOwnership"
+        "500":
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  /v0.1/union/ownerships/byItem:
+    get:
+      tags:
+        - ownership-controller
+      operationId: getOwnershipsByItem
+      parameters:
+        - name: "contract"
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: "tokenId"
+          in: query
+          required: true
+          schema:
+            $ref: "#/components/schemas/BigInteger"
+        - name: "continuation"
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: "size"
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnionOwnerships"
+        "500":
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  /v0.1/union/ownerships/all:
+    get:
+      tags:
+        - ownership-controller
+      operationId: getAllOwnerships
+      parameters:
+        - name: "blockchains"
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              $ref: "#/components/schemas/Blockchain"
+        - name: "continuation"
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: "size"
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnionOwnerships"
+        "500":
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  #
+  # NFT Order Controller
+  #
+
+  /v0.1/union/orders/{hashOrId}:
+    get:
+      tags:
+        - order-controller
+      operationId: getOrderByHashOrId
+      parameters:
+        - name: "hashOrId"
+          in: "path"
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnionOrders"
+        "500":
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  /v0.1/union/orders/{hashOrId}/updateMakeStock:
+    get:
+      tags:
+        - order-controller
+      operationId: "updateOrderMakeStock"
+      parameters:
+        - name: "hashOrId"
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnionOrders"
+        "500":
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  /v0.1/union/orders/all:
+    get:
+      tags:
+        - order-controller
+      operationId: getOrdersAll
+      parameters:
+        - name: blockchains
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              $ref: "#/components/schemas/Blockchain"
+        - name: "origin"
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: "continuation"
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: "size"
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnionOrders"
+        "500":
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  /v0.1/union/orders/sell/byMaker:
+    get:
+      tags:
+        - order-controller
+      operationId: getSellOrdersByMaker
+      parameters:
+        - name: "maker"
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: "origin"
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: "continuation"
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: "size"
+          in: query
+          required: false
+          schema:
+            minimum: 1
+            type: integer
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnionOrders"
+        "500":
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  /v0.1/union/orders/sell/byItem:
+    get:
+      tags:
+        - order-controller
+      operationId: getSellOrdersByItem
+      parameters:
+        - name: "contract"
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: "tokenId"
+          in: query
+          required: true
+          schema:
+            $ref: "#/components/schemas/BigInteger"
+        - name: "maker"
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: "origin"
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: "continuation"
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: "size"
+          in: query
+          required: false
+          schema:
+            minimum: 1
+            type: integer
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnionOrders"
+        "500":
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  /v0.1/union/orders/sell/byCollection:
+    get:
+      tags:
+        - order-controller
+      operationId: getSellOrdersByCollection
+      parameters:
+        - name: "collection"
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: "origin"
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: "continuation"
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: "size"
+          in: query
+          required: false
+          schema:
+            minimum: 1
+            type: integer
+            format: int32
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnionOrders"
+        "500":
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  /v0.1/union/orders/sell:
+    get:
+      tags:
+        - order-controller
+      operationId: getSellOrders
+      parameters:
+        - name: "origin"
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: "continuation"
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: "size"
+          in: query
+          required: false
+          schema:
+            minimum: 1
+            type: integer
+            format: int32
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnionOrders"
+        "500":
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  /v0.1/union/orders/bids/byMaker:
+    get:
+      tags:
+        - order-controller
+      operationId: getOrderBidsByMaker
+      parameters:
+        - name: "maker"
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: "origin"
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: "continuation"
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: "size"
+          in: query
+          required: false
+          schema:
+            minimum: 1
+            type: integer
+            format: int32
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnionOrders"
+        "500":
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  /v0.1/union/orders/bids/byItem:
+    get:
+      tags:
+        - order-controller
+      operationId: getOrderBidsByItem
+      parameters:
+        - name: "contract"
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: "tokenId"
+          in: query
+          required: true
+          schema:
+            $ref: "#/components/schemas/BigInteger"
+        - name: "maker"
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: "origin"
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: "continuation"
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: "size"
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnionOrders"
+        "500":
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  #
+  # NFT Activity Controller
+  #
+
+  /v0.1/union/activities/byUser:
+    get:
+      tags:
+        - activity-controller
+      operationId: getActivitiesByUser
+      parameters:
+        - name: "type"
+          in: query
+          required: true
+          schema:
+            type: "array"
+            items:
+              type: string
+              enum:
+                - TRANSFER_FROM
+                - TRANSFER_TO
+                - MINT
+                - BURN
+                - MAKE_BID
+                - GET_BID
+                - LIST
+                - BUY
+                - SELL
+        - name: "user"
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: "continuation"
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: "size"
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnionActivities"
+        "400":
+          description: "Bad request"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "500":
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  /v0.1/union/activities/byItem:
+    get:
+      tags:
+        - activity-controller
+      operationId: getActivitiesByItem
+      parameters:
+        - name: "type"
+          in: query
+          required: true
+          schema:
+            type: "array"
+            items:
+              type: string
+              enum:
+                - TRANSFER
+                - MINT
+                - BURN
+                - BID
+                - LIST
+                - SELL
+        - name: "contract"
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: "tokenId"
+          in: query
+          required: true
+          schema:
+            $ref: "#/components/schemas/BigInteger"
+        - name: "continuation"
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: "size"
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnionActivities"
+        "400":
+          description: "Bad request"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "500":
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  /v0.1/union/activities/byCollection:
+    get:
+      tags:
+        - activity-controller
+      operationId: getActivitiesByCollection
+      parameters:
+        - name: "type"
+          in: query
+          required: true
+          schema:
+            type: "array"
+            items:
+              type: string
+              enum:
+                - TRANSFER
+                - MINT
+                - BURN
+                - BID
+                - LIST
+                - SELL
+        - name: "collection"
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: "continuation"
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: "size"
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnionActivities"
+        "400":
+          description: "Bad request"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "500":
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  /v0.1/union/activities/all:
+    get:
+      tags:
+        - activity-controller
+      operationId: getAllActivities
+      parameters:
+        - name: "blockchains"
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              $ref: "#/components/schemas/Blockchain"
+        - name: "type"
+          in: query
+          required: true
+          schema:
+            type: "array"
+            items:
+              type: string
+              enum:
+                - TRANSFER
+                - MINT
+                - BURN
+                - BID
+                - LIST
+                - SELL
+        - name: "continuation"
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: "size"
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnionActivities"
+        "400":
+          description: "Bad request"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "500":
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  #
+  # NFT Collection Controller
+  #
+
+  /v0.1/union/collections/{collection}:
+    get:
+      tags:
+        - collection-controller
+      description: "Returns Collection by address"
+      operationId: getCollectionById
+      parameters:
+        - name: "collection"
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnionCollection"
+        "500":
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  /v0.1/union/collections/byOwner:
+    get:
+      tags:
+        - collection-controller
+      operationId: getCollectionsByOwner
+      parameters:
+        - name: "owner"
+          in: query
+          description: "owner of searching collections"
+          required: true
+          schema:
+            type: string
+        - name: "continuation"
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: "size"
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnionCollections"
+        "500":
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  /v0.1/union/collections/all:
+    get:
+      tags:
+        - collection-controller
+      operationId: getAllCollections
+      parameters:
+        - name: "blockchains"
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              $ref: "#/components/schemas/Blockchain"
+        - name: "continuation"
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: "size"
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnionCollections"
+        "500":
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"

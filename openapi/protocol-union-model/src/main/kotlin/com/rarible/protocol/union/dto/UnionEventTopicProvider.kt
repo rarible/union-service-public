@@ -1,4 +1,4 @@
-package com.rarible.protocol.dto
+package com.rarible.protocol.union.dto
 
 class UnionEventTopicProvider {
 
