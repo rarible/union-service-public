@@ -32,6 +32,10 @@
         </dependency>
         <dependency>
             <groupId>com.rarible.protocol.union</groupId>
+            <artifactId>protocol-union-model</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.rarible.protocol.union</groupId>
             <artifactId>protocol-union-client-starter</artifactId>
         </dependency>
         <dependency>

@@ -135,41 +135,15 @@ components:
         - items
 
     UnionItemEvent:
-      required:
-        - eventId
-        - itemId
+      type: object
       properties:
         eventId:
           type: string
-        itemId:
-          $ref: "#/components/schemas/ItemId"
+      required:
+        - eventId
       oneOf:
-        - $ref: "#/components/schemas/UnionItemUpdateEvent"
-        - $ref: "#/components/schemas/UnionItemDeleteEvent"
-
-    UnionItemUpdateEvent:
-      type: object
-      properties:
-        "@type":
-          type: string
-          enum:
-            - UPDATE
-        item:
-          $ref: "#/components/schemas/UnionItem"
-      required:
-        - "@type"
-        - item
-
-    UnionItemDeleteEvent:
-      type: object
-      properties:
-        "@type":
-          type: string
-          enum:
-            - DELETE
-      required:
-        - "@type"
-        - itemId
+        - $ref: "#/components/schemas/EthItemEvent"
+        - $ref: "#/components/schemas/FlowItemEvent"
 
     #################### Ownership - Union ####################
 
@@ -208,40 +182,15 @@ components:
         - ownerships
 
     UnionOwnershipEvent:
+      type: object
       properties:
         eventId:
           type: string
-        ownershipId:
-          $ref: "#/components/schemas/OwnershipId"
       required:
         - eventId
-        - ownershipId
       oneOf:
-        - $ref: "#/components/schemas/UnionOwnershipUpdateEvent"
-        - $ref: "#/components/schemas/UnionOwnershipDeleteEvent"
-
-    UnionOwnershipUpdateEvent:
-      type: object
-      properties:
-        "@type":
-          type: string
-          enum:
-            - UPDATE
-        ownership:
-          $ref: "#/components/schemas/UnionOwnership"
-      required:
-        - "@type"
-        - ownership
-
-    UnionOwnershipDeleteEvent:
-      type: object
-      properties:
-        "@type":
-          type: string
-          enum:
-            - DELETE
-      required:
-        - "@type"
+        - $ref: "#/components/schemas/EthOwnershipEvent"
+        - $ref: "#/components/schemas/FlowOwnershipEvent"
 
     #################### Order - Union ####################
 
@@ -434,6 +383,21 @@ components:
 
     #################### Item - Eth ####################
 
+    EthItemId:
+      type: object
+      properties:
+        value:
+          type: string
+          example: "${blockchain}:${token}:${tokenId}"
+        token:
+          $ref: "#/components/schemas/EthAddress"
+        tokenId:
+          $ref: "#/components/schemas/BigInteger"
+      required:
+        - value
+        - token
+        - tokenId
+
     EthItem:
       type: object
       properties:
@@ -509,7 +473,64 @@ components:
         - type
         - from
 
+    EthItemEvent:
+      properties:
+        "@type":
+          type: string
+          enum:
+            - ETHEREUM
+        itemId:
+          $ref: "#/components/schemas/EthItemId"
+      required:
+        - "@type"
+        - itemId
+      oneOf:
+        - $ref: "#/components/schemas/EthItemUpdateEvent"
+        - $ref: "#/components/schemas/EthItemDeleteEvent"
+
+    EthItemUpdateEvent:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - UPDATE
+        item:
+          $ref: "#/components/schemas/EthItem"
+      required:
+        - "@type"
+        - item
+
+    EthItemDeleteEvent:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - DELETE
+      required:
+        - "@type"
+        - itemId
+
     #################### Ownership - Eth ####################
+
+    EthOwnershipId:
+      type: object
+      properties:
+        value:
+          type: string
+          example: "${blockchain}:${token}:${tokenId}:${owner}"
+        token:
+          $ref: "#/components/schemas/EthAddress"
+        tokenId:
+          $ref: "#/components/schemas/BigInteger"
+        owner:
+          $ref: "#/components/schemas/EthAddress"
+      required:
+        - owner
+        - value
+        - token
+        - tokenId
 
     EthOwnership:
       type: object
@@ -518,6 +539,8 @@ components:
           type: string
           enum:
             - ETHEREUM
+        blockchain:
+          $ref: "#/components/schemas/EthBlockchain"
         id:
           $ref: "#/components/schemas/EthOwnershipId"
         contract:
@@ -581,6 +604,44 @@ components:
       required:
         - "@type"
         - from
+
+    EthOwnershipEvent:
+      properties:
+        "@type":
+          type: string
+          enum:
+            - ETHEREUM
+        ownershipId:
+          $ref: "#/components/schemas/EthOwnershipId"
+      required:
+        - "@type"
+        - ownershipId
+      oneOf:
+        - $ref: "#/components/schemas/EthOwnershipUpdateEvent"
+        - $ref: "#/components/schemas/EthOwnershipDeleteEvent"
+
+    EthOwnershipUpdateEvent:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - UPDATE
+        ownership:
+          $ref: "#/components/schemas/EthOwnership"
+      required:
+        - "@type"
+        - ownership
+
+    EthOwnershipDeleteEvent:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - DELETE
+      required:
+        - "@type"
 
     #################### Order - Eth ####################
 
@@ -1267,6 +1328,21 @@ components:
 
     #################### Item - Flow ####################
 
+    FlowItemId:
+      type: object
+      properties:
+        value:
+          type: string
+          example: "${blockchain}:${contract}:${tokenId}"
+        token:
+          $ref: "#/components/schemas/FlowAddress"
+        tokenId:
+          $ref: "#/components/schemas/BigInteger"
+      required:
+        - value
+        - token
+        - tokenId
+
     FlowItem:
       type: object
       properties:
@@ -1327,7 +1403,64 @@ components:
         - account
         - value
 
+    FlowItemEvent:
+      properties:
+        "@type":
+          type: string
+          enum:
+            - FLOW
+        itemId:
+          $ref: "#/components/schemas/FlowItemId"
+      required:
+        - "@type"
+        - itemId
+      oneOf:
+        - $ref: "#/components/schemas/FlowItemUpdateEvent"
+        - $ref: "#/components/schemas/FlowItemDeleteEvent"
+
+    FlowItemUpdateEvent:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - UPDATE
+        item:
+          $ref: "#/components/schemas/FlowItem"
+      required:
+        - "@type"
+        - item
+
+    FlowItemDeleteEvent:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - DELETE
+      required:
+        - "@type"
+        - itemId
+
     #################### Ownership - Flow ####################
+
+    FlowOwnershipId:
+      type: object
+      properties:
+        value:
+          type: string
+          example: "${blockchain}:${collection}:${tokenId}:${owner}"
+        token:
+          $ref: "#/components/schemas/FlowContract"
+        tokenId:
+          $ref: "#/components/schemas/BigInteger"
+        owner:
+          $ref: "#/components/schemas/FlowAddress"
+      required:
+        - value
+        - token
+        - tokenId
+        - owner
 
     FlowOwnership:
       type: object
@@ -1352,6 +1485,47 @@ components:
         - contract
         - tokenId
         - owner
+
+    FlowOwnershipEvent:
+      properties:
+        "@type":
+          type: string
+          enum:
+            - FLOW
+        eventId:
+          type: string
+        ownershipId:
+          $ref: "#/components/schemas/FlowOwnershipId"
+      required:
+        - "@type"
+        - eventId
+        - ownershipId
+      oneOf:
+        - $ref: "#/components/schemas/FlowOwnershipUpdateEvent"
+        - $ref: "#/components/schemas/FlowOwnershipDeleteEvent"
+
+    FlowOwnershipUpdateEvent:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - UPDATE
+        ownership:
+          $ref: "#/components/schemas/FlowOwnership"
+      required:
+        - "@type"
+        - ownership
+
+    FlowOwnershipDeleteEvent:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - DELETE
+      required:
+        - "@type"
 
     #################### Order - Flow ####################
 
@@ -1699,13 +1873,6 @@ components:
       type: string
       example: 123456.789
 
-    ItemId:
-      type: string
-      example: "{blockchain}:${collection}:${tokenId}"
-    OwnershipId:
-      type: string
-      example: "${blockchain}:${collection}:${tokenId}:${owner}"
-
     EthAddress:
       type: string
       example: "0x60f80121c31a0d46b5279700f9df786054aa5ee5"
@@ -1714,12 +1881,6 @@ components:
       enum:
         - ETHEREUM
         - POLYGON
-    EthItemId:
-      type: string
-      example: "{blockchain}:${collection}:${tokenId}"
-    EthOwnershipId:
-      type: string
-      example: "${blockchain}:${collection}:${tokenId}:${owner}"
 
     FlowAddress:
       type: string
@@ -1727,9 +1888,3 @@ components:
     FlowContract:
       type: string
       example: "A.${FlowAddress}.${string}"
-    FlowItemId:
-      type: string
-      example: "FLOW:${FlowAddress}:${tokenId}"
-    FlowOwnershipId:
-      type: string
-      example: "${blockchain}:${collection}:${tokenId}:${owner}"
