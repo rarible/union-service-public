@@ -1,27 +1,30 @@
 package com.rarible.protocol.union.core.converter.ethereum
 
+import com.rarible.core.common.nowMillis
 import com.rarible.ethereum.domain.Blockchain
 import com.rarible.protocol.dto.*
 import com.rarible.protocol.union.dto.*
-import java.time.Instant
+import com.rarible.protocol.union.dto.serializer.eth.EthItemIdParser
 
 object EthUnionItemEventDtoConverter {
+
     fun convert(source: NftItemEventDto, blockchain: Blockchain): UnionItemEventDto {
+        val itemId = EthItemIdParser.parseShort(source.itemId)
         return when (source) {
-            is NftItemUpdateEventDto -> UnionItemUpdateEventDto(
+            is NftItemUpdateEventDto -> EthItemUpdateEventDto(
                 eventId = source.eventId,
-                itemId = ItemId(source.itemId),
+                itemId = itemId,
                 item = EthItemDto(
-                    mintedAt = source.item.date ?: Instant.now(),
-                    lastUpdatedAt = source.item.date ?: Instant.now(),
+                    id = itemId,
+                    mintedAt = source.item.date ?: nowMillis(),
+                    lastUpdatedAt = source.item.date ?: nowMillis(),
                     supply = source.item.supply,
                     metaURL = null, //TODO
-                    blockchain  = convert(blockchain),
+                    blockchain = EthBlockchainConverter.convert(blockchain),
                     meta = source.item.meta?.let { convert(it) },
                     deleted = source.item.deleted ?: false,
-                    id = EthItemId(source.item.id),
                     tokenId = source.item.tokenId,
-                    collection  = EthAddressConverter.convert(source.item.contract),
+                    collection = EthAddressConverter.convert(source.item.contract),
                     creators = source.item.creators.map { EthCreatorDtoConverter.convert(it) },
                     owners = source.item.owners.map { EthAddressConverter.convert(it) },
                     royalties = source.item.royalties.map { EthRoyaltyDtoConverter.convert(it) },
@@ -29,9 +32,9 @@ object EthUnionItemEventDtoConverter {
                     pending = source.item.pending?.map { convert(it) }
                 )
             )
-            is NftItemDeleteEventDto -> UnionItemDeleteEventDto(
+            is NftItemDeleteEventDto -> EthItemDeleteEventDto(
                 eventId = source.eventId,
-                itemId = ItemId(source.eventId) //TODO: Need typed itemId
+                itemId = itemId //TODO: Need typed itemId
             )
         }
     }
@@ -92,13 +95,6 @@ object EthUnionItemEventDtoConverter {
                 )
             }
         )
-    }
-
-    private fun convert(source: Blockchain): EthBlockchainDto {
-        return when (source) {
-            Blockchain.ETHEREUM -> EthBlockchainDto.ETHEREUM
-            Blockchain.POLYGON -> EthBlockchainDto.POLYGON
-        }
     }
 }
 

@@ -1,22 +1,27 @@
 package com.rarible.protocol.union.core.converter.flow
 
-import com.rarible.protocol.dto.*
+import com.rarible.protocol.dto.FlowNftOwnershipDeleteEventDto
+import com.rarible.protocol.dto.FlowNftOwnershipUpdateEventDto
+import com.rarible.protocol.dto.FlowOwnershipEventDto
 import com.rarible.protocol.union.dto.*
+import com.rarible.protocol.union.dto.serializer.flow.FlowOwnershipIdParser
 import org.springframework.core.convert.converter.Converter
 import java.math.BigInteger
 import java.time.Instant
 
 object FlowUnionOwnershipEventDtoConverter : Converter<FlowOwnershipEventDto, UnionOwnershipEventDto> {
+
     override fun convert(source: FlowOwnershipEventDto): UnionOwnershipEventDto {
+        val ownershipId = FlowOwnershipIdParser.parseShort(source.ownershipId)
         return when (source) {
             is FlowNftOwnershipUpdateEventDto -> {
-                UnionOwnershipUpdateEventDto(
+                FlowOwnershipUpdateEventDto(
                     eventId = source.eventId,
-                    ownershipId = OwnershipId(source.ownershipId),
+                    ownershipId = ownershipId,
                     ownership = FlowOwnershipDto(
                         value = BigInteger.ONE,//TODO: Is it right?
                         createdAt = source.ownership.date ?: Instant.now(), //TODO: Must not be null
-                        id  = FlowOwnershipId(source.ownership.id ?: ""), //TODO: Must not be null
+                        id = ownershipId,
                         contract = FlowContract(source.ownership.token),
                         tokenId = source.ownership.tokenId.toBigInteger(), //TODO: Why is it string?
                         owner = listOf(FlowAddress(source.ownership.owner))
@@ -24,9 +29,9 @@ object FlowUnionOwnershipEventDtoConverter : Converter<FlowOwnershipEventDto, Un
                 )
             }
             is FlowNftOwnershipDeleteEventDto -> {
-                UnionOwnershipDeleteEventDto(
+                FlowOwnershipDeleteEventDto(
                     eventId = source.eventId,
-                    ownershipId = OwnershipId(source.ownershipId)
+                    ownershipId = ownershipId
                 )
             }
         }

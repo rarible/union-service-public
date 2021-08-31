@@ -3,19 +3,22 @@ package com.rarible.protocol.union.core.converter.ethereum
 import com.rarible.ethereum.domain.Blockchain
 import com.rarible.protocol.dto.*
 import com.rarible.protocol.union.dto.*
+import com.rarible.protocol.union.dto.serializer.eth.EthOwnershipIdParser
 
 object EthUnionOwnershipEventDtoConverter {
+
     fun convert(source: NftOwnershipEventDto, blockchain: Blockchain): UnionOwnershipEventDto {
+        val ownershipId = EthOwnershipIdParser.parseShort(source.ownershipId)
         return when (source) {
             is NftOwnershipUpdateEventDto -> {
-                UnionOwnershipUpdateEventDto(
+                EthOwnershipUpdateEventDto(
                     eventId = source.eventId,
-                    ownershipId = OwnershipId(source.ownershipId),
+                    ownershipId = ownershipId,
                     ownership = EthOwnershipDto(
-                        //TODO: Need blockchain field
                         value = source.ownership.value,
+                        blockchain = EthBlockchainConverter.convert(blockchain),
                         createdAt = source.ownership.date,
-                        id  = EthOwnershipId(source.ownership.id),
+                        id = ownershipId,
                         contract = EthAddress(source.ownership.contract.prefixed()),
                         tokenId = source.ownership.tokenId,
                         owner = listOf(EthAddressConverter.convert(source.ownership.owner)),
@@ -26,9 +29,9 @@ object EthUnionOwnershipEventDtoConverter {
                 )
             }
             is NftOwnershipDeleteEventDto -> {
-                UnionOwnershipDeleteEventDto(
+                EthOwnershipDeleteEventDto(
                     eventId = source.eventId,
-                    ownershipId = OwnershipId(source.ownershipId)
+                    ownershipId = ownershipId
                 )
             }
         }
