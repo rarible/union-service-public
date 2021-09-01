@@ -282,20 +282,8 @@ components:
         - eventId
         - orderId
       oneOf:
-        - "$ref": "#/components/schemas/UnionOrderUpdateEvent"
-
-    UnionOrderUpdateEvent:
-      type: object
-      properties:
-        "@type":
-          type: string
-          enum:
-            - UPDATE
-        order:
-          "$ref": "#/components/schemas/UnionOrder"
-      required:
-        - "@type"
-        - order
+        - "$ref": "#/components/schemas/EthOrderEvent"
+        - "$ref": "#/components/schemas/FlowOrderEvent"
 
     #################### Activity - Union ####################
 
@@ -475,10 +463,6 @@ components:
 
     EthItemEvent:
       properties:
-        "@type":
-          type: string
-          enum:
-            - ETHEREUM
         itemId:
           $ref: "#/components/schemas/EthItemId"
       required:
@@ -494,7 +478,7 @@ components:
         "@type":
           type: string
           enum:
-            - UPDATE
+            - ETHEREUM_UPDATE
         item:
           $ref: "#/components/schemas/EthItem"
       required:
@@ -507,7 +491,7 @@ components:
         "@type":
           type: string
           enum:
-            - DELETE
+            - ETHEREUM_DELETE
       required:
         - "@type"
         - itemId
@@ -626,7 +610,7 @@ components:
         "@type":
           type: string
           enum:
-            - UPDATE
+            - ETHEREUM_UPDATE
         ownership:
           $ref: "#/components/schemas/EthOwnership"
       required:
@@ -639,7 +623,7 @@ components:
         "@type":
           type: string
           enum:
-            - DELETE
+            - ETHEREUM_DELETE
       required:
         - "@type"
 
@@ -1326,6 +1310,24 @@ components:
         - type
         - features
 
+    EthOrderEvent:
+      type: object
+      oneOf:
+        - "$ref": "#/components/schemas/EthOrderUpdateEvent"
+
+    EthOrderUpdateEvent:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - ETHEREUM_UPDATE
+        order:
+          "$ref": "#/components/schemas/EthOrder"
+      required:
+        - "@type"
+        - order
+
     #################### Item - Flow ####################
 
     FlowItemId:
@@ -1405,10 +1407,6 @@ components:
 
     FlowItemEvent:
       properties:
-        "@type":
-          type: string
-          enum:
-            - FLOW
         itemId:
           $ref: "#/components/schemas/FlowItemId"
       required:
@@ -1424,7 +1422,7 @@ components:
         "@type":
           type: string
           enum:
-            - UPDATE
+            - FLOW_UPDATE
         item:
           $ref: "#/components/schemas/FlowItem"
       required:
@@ -1437,7 +1435,7 @@ components:
         "@type":
           type: string
           enum:
-            - DELETE
+            - FLOW_DELETE
       required:
         - "@type"
         - itemId
@@ -1488,10 +1486,6 @@ components:
 
     FlowOwnershipEvent:
       properties:
-        "@type":
-          type: string
-          enum:
-            - FLOW
         eventId:
           type: string
         ownershipId:
@@ -1510,7 +1504,7 @@ components:
         "@type":
           type: string
           enum:
-            - UPDATE
+            - FLOW_UPDATE
         ownership:
           $ref: "#/components/schemas/FlowOwnership"
       required:
@@ -1523,7 +1517,7 @@ components:
         "@type":
           type: string
           enum:
-            - DELETE
+            - FLOW_DELETE
       required:
         - "@type"
 
@@ -1648,6 +1642,24 @@ components:
             - FLOW_FT
       required:
         - "@type"
+
+    FlowOrderEvent:
+      type: object
+      oneOf:
+        - "$ref": "#/components/schemas/FlowOrderUpdateEvent"
+
+    FlowOrderUpdateEvent:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - FLOW_UPDATE
+        order:
+          "$ref": "#/components/schemas/FlowOrder"
+      required:
+        - "@type"
+        - order
 
     #################### Activity - Flow ####################
 

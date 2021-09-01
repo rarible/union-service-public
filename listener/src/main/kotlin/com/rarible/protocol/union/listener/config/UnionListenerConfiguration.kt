@@ -3,7 +3,6 @@ package com.rarible.protocol.union.listener.config
 import com.rarible.core.application.ApplicationEnvironmentInfo
 import com.rarible.core.daemon.sequential.ConsumerWorker
 import com.rarible.core.kafka.RaribleKafkaProducer
-import com.rarible.core.kafka.json.JsonSerializer
 import com.rarible.core.task.EnableRaribleTask
 import com.rarible.ethereum.converters.EnableScaletherMongoConversions
 import com.rarible.protocol.dto.*
@@ -148,7 +147,7 @@ class UnionListenerConfiguration(
     fun unionItemEventProducer(): RaribleKafkaProducer<UnionItemEventDto> {
         return RaribleKafkaProducer(
             clientId = "${producerProperties.environment}.protocol-union-listener.item",
-            valueSerializerClass = JsonSerializer::class.java,
+            valueSerializerClass = UnionKafkaJsonSerializer::class.java,
             valueClass = UnionItemEventDto::class.java,
             defaultTopic = UnionEventTopicProvider.getItemTopic(producerProperties.environment),
             bootstrapServers = producerProperties.kafkaReplicaSet
@@ -159,7 +158,7 @@ class UnionListenerConfiguration(
     fun unionOwnershipEventProducer(): RaribleKafkaProducer<UnionOwnershipEventDto> {
         return RaribleKafkaProducer(
             clientId = "${producerProperties.environment}.protocol-union-listener.ownership",
-            valueSerializerClass = JsonSerializer::class.java,
+            valueSerializerClass = UnionKafkaJsonSerializer::class.java,
             valueClass = UnionOwnershipEventDto::class.java,
             defaultTopic = UnionEventTopicProvider.getOwnershipTopic(producerProperties.environment),
             bootstrapServers = producerProperties.kafkaReplicaSet
@@ -170,7 +169,7 @@ class UnionListenerConfiguration(
     fun unionOrderEventProducer(): RaribleKafkaProducer<UnionOrderEventDto> {
         return RaribleKafkaProducer(
             clientId = "${producerProperties.environment}.protocol-union-listener.order",
-            valueSerializerClass = JsonSerializer::class.java,
+            valueSerializerClass = UnionKafkaJsonSerializer::class.java,
             valueClass = UnionOrderEventDto::class.java,
             defaultTopic = UnionEventTopicProvider.getOrderTopic(producerProperties.environment),
             bootstrapServers = producerProperties.kafkaReplicaSet
