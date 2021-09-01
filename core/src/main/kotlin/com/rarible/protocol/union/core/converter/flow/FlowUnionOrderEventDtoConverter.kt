@@ -10,7 +10,7 @@ import java.math.BigInteger
 object FlowUnionOrderEventDtoConverter : Converter<FlowOrderEventDto, UnionOrderEventDto> {
     override fun convert(source: FlowOrderEventDto): UnionOrderEventDto {
         return when (source) {
-            is FlowOrderUpdateEventDto -> UnionOrderUpdateEventDto(
+            is FlowOrderUpdateEventDto -> FlowOrderUpdateEventDto(
                 eventId = source.eventId,
                 orderId = source.orderId,
                 order = FlowOrderDto(

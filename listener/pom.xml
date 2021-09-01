@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.rarible.protocol.union</groupId>
         <artifactId>rarible-union-service</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <version>${revision}</version>
     </parent>
 
     <artifactId>rarible-union-listener</artifactId>
@@ -47,11 +47,11 @@
         <!-- =============== Rarible-core ================ -->
         <dependency>
             <groupId>com.rarible.core</groupId>
-            <artifactId>rarible-core-telemetry-starter</artifactId>
+            <artifactId>rarible-core-starter</artifactId>
         </dependency>
         <dependency>
             <groupId>com.rarible.core</groupId>
-            <artifactId>rarible-core-starter</artifactId>
+            <artifactId>rarible-core-task</artifactId>
         </dependency>
         <dependency>
             <groupId>com.rarible.core</groupId>
@@ -60,18 +60,6 @@
         <dependency>
             <groupId>com.rarible.core</groupId>
             <artifactId>rarible-core-kafka</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.rarible.ethereum</groupId>
-            <artifactId>rarible-ethereum-monitoring</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.rarible.ethereum</groupId>
-            <artifactId>rarible-ethereum-starter</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.rarible.ethereum</groupId>
-            <artifactId>rarible-ethereum-listener-log</artifactId>
         </dependency>
         <dependency>
             <groupId>com.rarible.ethereum</groupId>
@@ -87,10 +75,6 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-mongodb-reactive</artifactId>
-        </dependency>
 
         <!-- ================== Test ===================== -->
         <dependency>
@@ -101,11 +85,6 @@
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>mongodb</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

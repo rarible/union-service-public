@@ -9,7 +9,7 @@ object EthUnionOrderEventDtoConverter {
     fun convert(source: OrderEventDto, blockchain: Blockchain): UnionOrderEventDto {
         return when (source) {
             is OrderUpdateEventDto -> {
-                UnionOrderUpdateEventDto(
+                EthOrderUpdateEventDto(
                     eventId = source.eventId,
                     orderId = source.orderId,
                     order = when (val order = source.order) {
