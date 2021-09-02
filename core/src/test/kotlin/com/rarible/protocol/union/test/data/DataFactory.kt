@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.listener.test.data
+package com.rarible.protocol.union.test.data
 
 import com.rarible.core.common.nowMillis
 import com.rarible.core.test.data.randomAddress

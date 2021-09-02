@@ -7,7 +7,7 @@ import com.rarible.protocol.dto.OrderUpdateEventDto
 import com.rarible.protocol.union.core.converter.ethereum.EthTypesConverter
 import com.rarible.protocol.union.listener.test.AbstractIntegrationTest
 import com.rarible.protocol.union.listener.test.IntegrationTest
-import com.rarible.protocol.union.listener.test.data.randomEthLegacyOrderDto
+import com.rarible.protocol.union.test.data.randomEthLegacyOrderDto
 import kotlinx.coroutines.FlowPreview
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test

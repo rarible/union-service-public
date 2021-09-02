@@ -78,13 +78,15 @@
 
         <!-- ================== Test ===================== -->
         <dependency>
-            <groupId>com.rarible.core</groupId>
-            <artifactId>rarible-core-test-common</artifactId>
+            <groupId>com.rarible.protocol.union</groupId>
+            <artifactId>rarible-union-core</artifactId>
+            <classifier>tests</classifier>
+            <type>test-jar</type>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>junit-jupiter</artifactId>
+            <groupId>com.rarible.core</groupId>
+            <artifactId>rarible-core-test-common</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

@@ -8,8 +8,8 @@ import com.rarible.protocol.dto.NftItemEventDto
 import com.rarible.protocol.dto.NftItemUpdateEventDto
 import com.rarible.protocol.union.listener.test.AbstractIntegrationTest
 import com.rarible.protocol.union.listener.test.IntegrationTest
-import com.rarible.protocol.union.listener.test.data.randomEthItemId
-import com.rarible.protocol.union.listener.test.data.randomEthNftItemDto
+import com.rarible.protocol.union.test.data.randomEthItemId
+import com.rarible.protocol.union.test.data.randomEthNftItemDto
 import kotlinx.coroutines.FlowPreview
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
