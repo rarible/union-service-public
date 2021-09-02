@@ -35,6 +35,9 @@ protocol:
     subscriber:
       broker-replica-set: ${kafka.hosts}
       blockchain: ${common.blockchain}
+  activity:
+    subscriber:
+      broker-replica-set: ${kafka.hosts}
   flow-nft:
     subscriber:
       broker-replica-set: ${kafka.hosts}

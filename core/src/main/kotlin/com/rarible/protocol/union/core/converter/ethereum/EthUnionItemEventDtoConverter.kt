@@ -39,8 +39,8 @@ object EthUnionItemEventDtoConverter {
         }
     }
 
-    private fun convert(source: NftItemMetaDto): MetaDto {
-        return MetaDto(
+    private fun convert(source: NftItemMetaDto): UnionMetaDto {
+        return UnionMetaDto(
             name = source.name,
             description = source.description,
             attributes = source.attributes?.map { convert(it) },
@@ -49,8 +49,8 @@ object EthUnionItemEventDtoConverter {
         )
     }
 
-    private fun convert(source: NftItemAttributeDto): MetaAttributeDto {
-        return MetaAttributeDto(
+    private fun convert(source: NftItemAttributeDto): UnionMetaAttributeDto {
+        return UnionMetaAttributeDto(
             key = source.key,
             value = source.value ?: ""
         )
@@ -63,12 +63,12 @@ object EthUnionItemEventDtoConverter {
         )
     }
 
-    private fun convert(source: NftMediaDto): List<MetaContentDto> {
+    private fun convert(source: NftMediaDto): List<UnionMetaContentDto> {
         return source.url.map { urlMap ->
             val type = urlMap.value
             val url = urlMap.key
 
-            MetaContentDto(
+            UnionMetaContentDto(
                 typeContent = type,
                 url = url,
                 attributes = source.meta[type]?.let { convert(it) }
@@ -76,20 +76,20 @@ object EthUnionItemEventDtoConverter {
         }
     }
 
-    private fun convert(source: NftMediaMetaDto): List<MetaAttributeDto> {
+    private fun convert(source: NftMediaMetaDto): List<UnionMetaAttributeDto> {
         return listOfNotNull(
-            MetaAttributeDto(
+            UnionMetaAttributeDto(
                 key = NftMediaMetaDto::type.name,
                 value = source.type
             ),
             source.height?.let {
-                MetaAttributeDto(
+                UnionMetaAttributeDto(
                     key = NftMediaMetaDto::height.name,
                     value = it.toString()
                 )
             },
             source.width?.let {
-                MetaAttributeDto(
+                UnionMetaAttributeDto(
                     key = NftMediaMetaDto::width.name,
                     value = it.toString()
                 )

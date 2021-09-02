@@ -8,6 +8,7 @@ import java.math.BigDecimal
 import java.math.BigInteger
 
 object FlowUnionOrderEventDtoConverter : Converter<FlowOrderEventDto, UnionOrderEventDto> {
+
     override fun convert(source: FlowOrderEventDto): UnionOrderEventDto {
         return when (source) {
             is FlowOrderUpdateEventDto -> FlowOrderUpdateEventDto(

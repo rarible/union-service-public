@@ -19,7 +19,7 @@ object EthUnionOwnershipEventDtoConverter {
                         blockchain = EthBlockchainConverter.convert(blockchain),
                         createdAt = source.ownership.date,
                         id = ownershipId,
-                        contract = EthAddress(source.ownership.contract.prefixed()),
+                        contract = EthAddressConverter.convert(source.ownership.contract),
                         tokenId = source.ownership.tokenId,
                         owner = listOf(EthAddressConverter.convert(source.ownership.owner)),
                         creators = source.ownership.creators.map { EthCreatorDtoConverter.convert(it) },

@@ -4,9 +4,9 @@ import com.rarible.protocol.dto.*
 import com.rarible.protocol.dto.EthAssetTypeDto
 import com.rarible.protocol.dto.FlowAssetTypeDto
 import com.rarible.protocol.union.dto.*
-import com.rarible.protocol.union.dto.EthAssetTypeDto as UnionEthAssetTypeDto
 import org.springframework.core.convert.converter.Converter
 import scalether.domain.Address
+import com.rarible.protocol.union.dto.EthAssetTypeDto as UnionEthAssetTypeDto
 
 object EthAssetTypeDtoConverter: Converter<AssetTypeDto, UnionEthAssetTypeDto> {
     override fun convert(source: AssetTypeDto): UnionEthAssetTypeDto {
@@ -21,7 +21,7 @@ object EthAssetTypeDtoConverter: Converter<AssetTypeDto, UnionEthAssetTypeDto> {
                 uri = source.uri,
                 creators = source.creators.map { EthCreatorDtoConverter.convert(it) },
                 royalties = source.royalties.map { EthRoyaltyDtoConverter.convert(it) },
-                signature = source.signatures.map { EthBytesConverter.convert(it) }
+                signature = source.signatures.map { EthTypesConverter.convert(it) }
             )
             is Erc1155LazyAssetTypeDto -> ERC1155LazyAssetDto(
                 contract = EthAddressConverter.convert(source.contract),
@@ -30,7 +30,7 @@ object EthAssetTypeDtoConverter: Converter<AssetTypeDto, UnionEthAssetTypeDto> {
                 supply = source.supply,
                 creators = source.creators.map { EthCreatorDtoConverter.convert(it) },
                 royalties = source.royalties.map { EthRoyaltyDtoConverter.convert(it) },
-                signature = source.signatures.map { EthBytesConverter.convert(it) }
+                signature = source.signatures.map { EthTypesConverter.convert(it) }
             )
             is FlowAssetTypeDto -> TODO("Need remove from eth protocol-api")
         }

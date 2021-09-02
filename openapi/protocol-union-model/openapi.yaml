@@ -40,7 +40,7 @@ components:
 
     #################### Meta - Union ####################
 
-    Meta:
+    UnionMeta:
       type: object
       properties:
         name:
@@ -50,17 +50,17 @@ components:
         attributes:
           type: array
           items:
-            $ref: "#/components/schemas/MetaAttribute"
+            $ref: "#/components/schemas/UnionMetaAttribute"
         contents:
           type: array
           items:
-            $ref: "#/components/schemas/MetaContent"
+            $ref: "#/components/schemas/UnionMetaContent"
         raw:
           type: string
       required:
         - name
 
-    MetaContent:
+    UnionMetaContent:
       type: object
       properties:
         typeContent:
@@ -70,12 +70,12 @@ components:
         attributes:
           type: array
           items:
-            $ref: "#/components/schemas/MetaAttribute"
+            $ref: "#/components/schemas/UnionMetaAttribute"
       required:
         - typeContent
         - url
 
-    MetaAttribute:
+    UnionMetaAttribute:
       type: object
       properties:
         key:
@@ -103,7 +103,7 @@ components:
           type: string
           example: "ipfs://ipfs/QmPe1W8XiUYdsvdpvgWVwekQ7cDQivRMak3YPX15vxvSJs"
         meta:
-          $ref: "#/components/schemas/Meta"
+          $ref: "#/components/schemas/UnionMeta"
         deleted:
           type: boolean
       oneOf:
@@ -360,7 +360,8 @@ components:
         blockHash:
           type: string
         blockNumber:
-          $ref: "#/components/schemas/BigInteger"
+          type: integer
+          format: int64
         logIndex:
           type: integer
       required:
@@ -1024,7 +1025,7 @@ components:
         "@type":
           type: string
           enum:
-            - MINT
+            - ETHEREUM_MINT
         owner:
           type: array
           items:
@@ -1051,7 +1052,7 @@ components:
         "@type":
           type: string
           enum:
-            - BURN
+            - ETHEREUM_BURN
         owner:
           type: array
           items:
@@ -1078,7 +1079,7 @@ components:
         "@type":
           type: string
           enum:
-            - TRANSFER
+            - ETHEREUM_TRANSFER
         from:
           $ref: "#/components/schemas/EthAddress"
         owner:
@@ -1134,14 +1135,14 @@ components:
         "@type":
           type: string
           enum:
-            - MATCH
+            - ETHEREUM_MATCH
         left:
           $ref: "#/components/schemas/EthOrderActivityMatchSide"
         right:
           $ref: "#/components/schemas/EthOrderActivityMatchSide"
         price:
           $ref: "#/components/schemas/BigDecimal"
-        priceUSD:
+        priceUsd:
           $ref: "#/components/schemas/BigDecimal"
         source:
           $ref: "#/components/schemas/EthOrderActivitySource"
@@ -1161,7 +1162,7 @@ components:
         "@type":
           type: string
           enum:
-            - BID
+            - ETHEREUM_BID
         hash:
           type: string
         maker:
@@ -1172,12 +1173,10 @@ components:
           $ref: "#/components/schemas/EthAsset"
         price:
           $ref: "#/components/schemas/BigDecimal"
-        priceUSD:
+        priceUsd:
           $ref: "#/components/schemas/BigDecimal"
         source:
           $ref: "#/components/schemas/EthOrderActivitySource"
-        blockchainInfo:
-          $ref: "#/components/schemas/ActivityBlockchainInfo"
       required:
         - "@type"
         - hash
@@ -1186,7 +1185,6 @@ components:
         - take
         - price
         - source
-        - blockchainInfo
 
     EthOrderListActivity:
       type: object
@@ -1194,7 +1192,7 @@ components:
         "@type":
           type: string
           enum:
-            - LIST
+            - ETHEREUM_LIST
         hash:
           type: string
         maker:
@@ -1205,12 +1203,10 @@ components:
           $ref: "#/components/schemas/EthAsset"
         price:
           $ref: "#/components/schemas/BigDecimal"
-        priceUSD:
+        priceUsd:
           $ref: "#/components/schemas/BigDecimal"
         source:
           $ref: "#/components/schemas/EthOrderActivitySource"
-        blockchainInfo:
-          $ref: "#/components/schemas/ActivityBlockchainInfo"
       required:
         - "@type"
         - hash
@@ -1226,15 +1222,15 @@ components:
         "@type":
           type: string
           enum:
-            - CANCEL_BID
+            - ETHEREUM_CANCEL_BID
         hash:
           type: string
         maker:
           $ref: "#/components/schemas/EthAddress"
         make:
-          $ref: "#/components/schemas/EthAsset"
+          $ref: "#/components/schemas/EthAssetType"
         take:
-          $ref: "#/components/schemas/EthAsset"
+          $ref: "#/components/schemas/EthAssetType"
         source:
           $ref: "#/components/schemas/EthOrderActivitySource"
         blockchainInfo:
@@ -1254,15 +1250,15 @@ components:
         "@type":
           type: string
           enum:
-            - CANCEL_LIST
+            - ETHEREUM_CANCEL_LIST
         hash:
           type: string
         maker:
           $ref: "#/components/schemas/EthAddress"
         make:
-          $ref: "#/components/schemas/EthAsset"
+          $ref: "#/components/schemas/EthAssetType"
         take:
-          $ref: "#/components/schemas/EthAsset"
+          $ref: "#/components/schemas/EthAssetType"
         source:
           $ref: "#/components/schemas/EthOrderActivitySource"
         blockchainInfo:
@@ -1353,9 +1349,7 @@ components:
           enum:
             - FLOW
         blockchain:
-          type: string
-          enum:
-            - FLOW
+          $ref: "#/components/schemas/FlowBlockchain"
         id:
           $ref: "#/components/schemas/FlowItemId"
         tokenId:
@@ -1667,9 +1661,7 @@ components:
       type: object
       properties:
         blockchain:
-          type: string
-          enum:
-            - FLOW
+          $ref: "#/components/schemas/FlowBlockchain"
       oneOf:
         - $ref: "#/components/schemas/FlowMintActivity"
         - $ref: "#/components/schemas/FlowBurnActivity"
@@ -1686,7 +1678,7 @@ components:
         "@type":
           type: string
           enum:
-            - MINT
+            - FLOW_MINT
         owner:
           type: array
           items:
@@ -1713,7 +1705,7 @@ components:
         "@type":
           type: string
           enum:
-            - BURN
+            - FLOW_BURN
         owner:
           type: array
           items:
@@ -1740,7 +1732,7 @@ components:
         "@type":
           type: string
           enum:
-            - TRANSFER
+            - FLOW_TRANSFER
         from:
           $ref: "#/components/schemas/FlowAddress"
         owner:
@@ -1770,14 +1762,14 @@ components:
         "@type":
           type: string
           enum:
-            - MATCH
+            - FLOW_MATCH
         left:
           $ref: "#/components/schemas/FlowOrderActivityMatchSide"
         right:
           $ref: "#/components/schemas/FlowOrderActivityMatchSide"
         price:
           $ref: "#/components/schemas/BigDecimal"
-        priceUSD:
+        priceUsd:
           $ref: "#/components/schemas/BigDecimal"
         blockchainInfo:
           $ref: "#/components/schemas/ActivityBlockchainInfo"
@@ -1794,7 +1786,7 @@ components:
         "@type":
           type: string
           enum:
-            - LIST
+            - FLOW_LIST
         hash:
           type: string
         maker:
@@ -1805,10 +1797,8 @@ components:
           $ref: "#/components/schemas/FlowAsset"
         price:
           $ref: "#/components/schemas/BigDecimal"
-        priceUSD:
+        priceUsd:
           $ref: "#/components/schemas/BigDecimal"
-        blockchainInfo:
-          $ref: "#/components/schemas/ActivityBlockchainInfo"
       required:
         - "@type"
         - hash
@@ -1816,7 +1806,6 @@ components:
         - make
         - take
         - price
-        - blockchainInfo
 
     FlowOrderCancelListActivity:
       type: object
@@ -1824,7 +1813,7 @@ components:
         "@type":
           type: string
           enum:
-            - CANCEL_LIST
+            - FLOW_CANCEL_LIST
         hash:
           type: string
         maker:
@@ -1833,15 +1822,12 @@ components:
           $ref: "#/components/schemas/FlowAsset"
         take:
           $ref: "#/components/schemas/FlowAsset"
-        blockchainInfo:
-          $ref: "#/components/schemas/ActivityBlockchainInfo"
       required:
         - "@type"
         - hash
         - maker
         - make
         - take
-        - blockchainInfo
 
     FlowOrderActivityMatchSide:
       type: object
@@ -1900,3 +1886,7 @@ components:
     FlowContract:
       type: string
       example: "A.${FlowAddress}.${string}"
+    FlowBlockchain:
+      type: string
+      enum:
+        - FLOW

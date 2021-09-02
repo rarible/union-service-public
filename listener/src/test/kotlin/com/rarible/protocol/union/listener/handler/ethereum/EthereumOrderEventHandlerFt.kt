@@ -4,6 +4,7 @@ import com.rarible.core.test.data.randomString
 import com.rarible.core.test.wait.Wait
 import com.rarible.protocol.dto.OrderEventDto
 import com.rarible.protocol.dto.OrderUpdateEventDto
+import com.rarible.protocol.union.core.converter.ethereum.EthTypesConverter
 import com.rarible.protocol.union.listener.test.AbstractIntegrationTest
 import com.rarible.protocol.union.listener.test.IntegrationTest
 import com.rarible.protocol.union.listener.test.data.randomEthLegacyOrderDto
@@ -18,7 +19,7 @@ class EthereumOrderEventHandlerFt : AbstractIntegrationTest() {
     @Test
     fun `ethereum - update event`() = runWithKafka {
         val ethOrder = randomEthLegacyOrderDto()
-        val ethOrderId = ethOrder.hash.prefixed()
+        val ethOrderId = EthTypesConverter.convert(ethOrder.hash)
         val dto: OrderEventDto = OrderUpdateEventDto(randomString(), ethOrderId, ethOrder)
 
         ethOrderProducer.send(message(dto)).ensureSuccess()

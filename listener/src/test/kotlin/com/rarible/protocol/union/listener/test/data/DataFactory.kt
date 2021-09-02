@@ -6,6 +6,7 @@ import com.rarible.core.test.data.randomBigInt
 import com.rarible.core.test.data.randomInt
 import com.rarible.core.test.data.randomWord
 import com.rarible.protocol.dto.*
+import com.rarible.protocol.union.core.converter.ethereum.EthTypesConverter
 import com.rarible.protocol.union.dto.EthAddress
 import com.rarible.protocol.union.dto.EthItemIdDto
 import com.rarible.protocol.union.dto.EthOwnershipIdDto
@@ -14,19 +15,22 @@ import com.rarible.protocol.union.dto.serializer.eth.EthOwnershipIdParser
 import io.daonomic.rpc.domain.Word
 import scalether.domain.Address
 
+fun randomAddressString() = EthTypesConverter.convert(randomAddress())
+
 fun randomEthPartDto() = randomEthPartDto(randomAddress())
 fun randomEthPartDto(account: Address) = PartDto(account, randomInt())
 
-fun randomEthItemIdShortValue() = "${randomAddress()}:${randomBigInt()}"
+fun randomEthItemIdShortValue() = "${randomAddressString()}:${randomBigInt()}"
 fun randomEthItemIdFullValue() = "ETHEREUM:${randomEthItemIdShortValue()}"
 
 fun randomEthItemId() = EthItemIdParser.parseShort(randomEthItemIdShortValue())
 
-fun randomEthOwnershipIdShortValue() = "${randomEthItemIdShortValue()}:${randomAddress()}"
+fun randomEthOwnershipIdShortValue() = "${randomEthItemIdShortValue()}:${randomAddressString()}"
 fun randomEthOwnershipIdFullValue() = "ETHEREUM:${randomEthOwnershipIdShortValue()}"
 
 fun randomEthOwnershipId() = EthOwnershipIdParser.parseShort(randomEthOwnershipIdShortValue())
-fun randomEthOwnershipId(itemId: EthItemIdDto) = randomEthOwnershipId(itemId, randomAddress().toString())
+fun randomEthOwnershipId(itemId: EthItemIdDto) = randomEthOwnershipId(itemId, randomAddressString())
+
 fun randomEthOwnershipId(itemId: EthItemIdDto, owner: String): EthOwnershipIdDto {
     return EthOwnershipIdDto(
         value = "${itemId.value}:${owner}",

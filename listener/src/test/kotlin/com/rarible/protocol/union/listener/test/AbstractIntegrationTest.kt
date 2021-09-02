@@ -4,6 +4,7 @@ import com.rarible.core.kafka.KafkaMessage
 import com.rarible.core.kafka.RaribleKafkaConsumer
 import com.rarible.core.kafka.RaribleKafkaProducer
 import com.rarible.core.test.data.randomString
+import com.rarible.protocol.dto.ActivityDto
 import com.rarible.protocol.dto.NftItemEventDto
 import com.rarible.protocol.dto.NftOwnershipEventDto
 import com.rarible.protocol.dto.OrderEventDto
@@ -28,6 +29,9 @@ abstract class AbstractIntegrationTest {
     lateinit var ethOrderProducer: RaribleKafkaProducer<OrderEventDto>
 
     @Autowired
+    lateinit var ethActivityProducer: RaribleKafkaProducer<ActivityDto>
+
+    @Autowired
     lateinit var itemConsumer: RaribleKafkaConsumer<UnionItemEventDto>
     var itemEvents: Queue<KafkaMessage<UnionItemEventDto>>? = null
     private var itemJob: Deferred<Unit>? = null
@@ -42,6 +46,11 @@ abstract class AbstractIntegrationTest {
     var orderEvents: Queue<KafkaMessage<UnionOrderEventDto>>? = null
     private var orderJob: Deferred<Unit>? = null
 
+    @Autowired
+    lateinit var activityConsumer: RaribleKafkaConsumer<UnionActivityDto>
+    var activityEvents: Queue<KafkaMessage<UnionActivityDto>>? = null
+    private var activityJob: Deferred<Unit>? = null
+
     fun <T> runWithKafka(block: suspend CoroutineScope.() -> T): T = runBlocking<T> {
         orderEvents = LinkedBlockingQueue()
         orderJob = async { orderConsumer.receive().collect { orderEvents?.add(it) } }
@@ -52,12 +61,16 @@ abstract class AbstractIntegrationTest {
         itemEvents = LinkedBlockingQueue()
         itemJob = async { itemConsumer.receive().collect { itemEvents?.add(it) } }
 
+        activityEvents = LinkedBlockingQueue()
+        activityJob = async { activityConsumer.receive().collect { activityEvents?.add(it) } }
+
         val result = try {
             block()
         } finally {
             itemJob?.cancel()
             ownershipJob?.cancel()
             orderJob?.cancel()
+            activityJob?.cancel()
         }
         result
     }
@@ -85,6 +98,14 @@ abstract class AbstractIntegrationTest {
     fun findEthOrderUpdates(orderId: String): List<KafkaMessage<EthOrderUpdateEventDto>> {
         return filterByValueType(orderEvents as Queue<KafkaMessage<Any>>, EthOrderUpdateEventDto::class.java)
             .filter { it.value.orderId == orderId }
+    }
+
+    fun <T : UnionActivityDto> findEthActivityUpdates(
+        id: String,
+        type: Class<T>
+    ): List<KafkaMessage<T>> {
+        return filterByValueType(activityEvents as Queue<KafkaMessage<Any>>, type)
+            .filter { it.value.id == id }
     }
 
     private fun <T> filterByValueType(messages: Queue<KafkaMessage<Any>>, type: Class<T>): Collection<KafkaMessage<T>> {
