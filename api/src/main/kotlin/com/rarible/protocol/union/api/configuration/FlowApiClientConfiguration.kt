@@ -7,19 +7,26 @@ import org.springframework.context.annotation.Configuration
 @Configuration
 class FlowApiClientConfiguration {
 
-    @Bean
-    fun flowNftItemApi(): FlowNftItemControllerApi = FlowNftItemControllerApi()
+    private val blockchain = "Flow"
 
     @Bean
-    fun flowNftOwnershipApi(): FlowNftOwnershipControllerApi = FlowNftOwnershipControllerApi()
+    fun flowNftItemApi(factory: FlowNftIndexerApiClientFactory): FlowNftItemControllerApi =
+        factory.createNftItemApiClient(blockchain)
 
     @Bean
-    fun flowNftCollectionApi(): FlowNftCollectionControllerApi = FlowNftCollectionControllerApi()
+    fun flowNftOwnershipApi(factory: FlowNftIndexerApiClientFactory): FlowNftOwnershipControllerApi =
+        factory.createNftOwnershipApiClient(blockchain)
 
     @Bean
-    fun flowOrderApi(): FlowOrderControllerApi = FlowOrderControllerApi()
+    fun flowNftCollectionApi(factory: FlowNftIndexerApiClientFactory): FlowNftCollectionControllerApi =
+        factory.createNftCollectionApiClient(blockchain)
 
     @Bean
-    fun flowOrderActivityApi(): FlowNftOrderActivityControllerApi = FlowNftOrderActivityControllerApi()
+    fun flowOrderApi(factory: FlowNftIndexerApiClientFactory): FlowOrderControllerApi =
+        factory.createNftOrderApiClient(blockchain)
+
+    @Bean
+    fun flowOrderActivityApi(factory: FlowNftIndexerApiClientFactory): FlowNftOrderActivityControllerApi =
+        factory.createNftOrderActivityApiClient(blockchain)
 
 }
