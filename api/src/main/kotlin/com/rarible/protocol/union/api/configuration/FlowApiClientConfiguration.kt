@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Configuration
 @Configuration
 class FlowApiClientConfiguration {
 
-    private val blockchain = "Flow"
+    private val blockchain = "flow"
 
     @Bean
     fun flowNftItemApi(factory: FlowNftIndexerApiClientFactory): FlowNftItemControllerApi =

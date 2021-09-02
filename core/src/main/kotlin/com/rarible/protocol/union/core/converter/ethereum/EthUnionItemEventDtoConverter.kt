@@ -4,9 +4,6 @@ import com.rarible.core.common.nowMillis
 import com.rarible.ethereum.domain.Blockchain
 import com.rarible.protocol.dto.*
 import com.rarible.protocol.union.dto.*
-import com.rarible.protocol.union.dto.MetaAttributeDto
-import com.rarible.protocol.union.dto.MetaContentDto
-import com.rarible.protocol.union.dto.MetaDto
 import com.rarible.protocol.union.dto.serializer.eth.EthItemIdParser
 
 object EthUnionItemEventDtoConverter {
