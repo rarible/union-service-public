@@ -55,6 +55,12 @@
             <groupId>com.rarible.protocol</groupId>
             <artifactId>protocol-client-unlockable-starter</artifactId>
         </dependency>
+        <!-- =============== Flow Protocol API =========== -->
+
+        <dependency>
+            <groupId>com.rarible.protocol</groupId>
+            <artifactId>flow-protocol-client-nft-starter</artifactId>
+        </dependency>
 
         <!-- =============== Rarible-core ================ -->
         <dependency>
