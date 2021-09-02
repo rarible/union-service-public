@@ -16,5 +16,9 @@ class UnionEventTopicProvider {
         fun getOrderTopic(environment: String): String {
             return "protocol.$environment.union.order"
         }
+
+        fun getActivityTopic(environment: String): String {
+            return "protocol.$environment.union.activity"
+        }
     }
 }

@@ -6,6 +6,7 @@ import com.rarible.protocol.union.dto.*
 import java.time.Instant
 
 object EthUnionOrderEventDtoConverter {
+
     fun convert(source: OrderEventDto, blockchain: Blockchain): UnionOrderEventDto {
         return when (source) {
             is OrderUpdateEventDto -> {
@@ -19,10 +20,10 @@ object EthUnionOrderEventDtoConverter {
                                 taker = source.order.taker?.let { EthAddressConverter.convert(it) },
                                 make = EthAssetDtoConverter.convert(order.make),
                                 take = EthAssetDtoConverter.convert(order.take),
-                                salt = EthBytesConverter.convert(order.salt),
-                                signature = order.signature?.let { EthBytesConverter.convert(it) },
-                                pending = order.pending?.map {  convert(it) },
-                                hash = EthBytesConverter.convert(order.hash),
+                                salt = EthTypesConverter.convert(order.salt),
+                                signature = order.signature?.let { EthTypesConverter.convert(it) },
+                                pending = order.pending?.map { convert(it) },
+                                hash = EthTypesConverter.convert(order.hash),
                                 fill = order.fill,
                                 startedAt = order.start?.let { Instant.ofEpochSecond(it) },
                                 makeStock = order.makeStock.toBigDecimal(), //TODO: Why big decimal
@@ -44,10 +45,10 @@ object EthUnionOrderEventDtoConverter {
                                 taker = source.order.taker?.let { EthAddressConverter.convert(order.maker) },
                                 make = EthAssetDtoConverter.convert(order.make),
                                 take = EthAssetDtoConverter.convert(order.take),
-                                salt = EthBytesConverter.convert(order.salt),
-                                signature = order.signature?.let { EthBytesConverter.convert(it) },
+                                salt = EthTypesConverter.convert(order.salt),
+                                signature = order.signature?.let { EthTypesConverter.convert(it) },
                                 pending = order.pending?.map { convert(it) },
-                                hash = EthBytesConverter.convert(order.hash),
+                                hash = EthTypesConverter.convert(order.hash),
                                 fill = order.fill,
                                 startedAt = order.start?.let { Instant.ofEpochSecond(it) },
                                 makeStock = order.makeStock.toBigDecimal(), //TODO: Why big decimal
@@ -70,10 +71,10 @@ object EthUnionOrderEventDtoConverter {
                                 taker = source.order.taker?.let { EthAddressConverter.convert(order.maker) },
                                 make = EthAssetDtoConverter.convert(order.make),
                                 take = EthAssetDtoConverter.convert(order.take),
-                                salt = EthBytesConverter.convert(order.salt),
-                                signature = order.signature?.let { EthBytesConverter.convert(it) },
+                                salt = EthTypesConverter.convert(order.salt),
+                                signature = order.signature?.let { EthTypesConverter.convert(it) },
                                 pending = order.pending?.map { convert(it) },
-                                hash = EthBytesConverter.convert(order.hash),
+                                hash = EthTypesConverter.convert(order.hash),
                                 fill = order.fill,
                                 startedAt = order.start?.let { Instant.ofEpochSecond(it) },
                                 makeStock = order.makeStock.toBigDecimal(), //TODO: Why big decimal
@@ -91,14 +92,14 @@ object EthUnionOrderEventDtoConverter {
                                     makerProtocolFee = order.data.makerProtocolFee,
                                     takerProtocolFee = order.data.takerProtocolFee,
                                     feeRecipient = EthAddressConverter.convert(order.data.feeRecipient),
-                                    feeMethod  = convert(order.data.feeMethod),
+                                    feeMethod = convert(order.data.feeMethod),
                                     side = convert(order.data.side),
-                                    saleKind  = convert(order.data.saleKind),
+                                    saleKind = convert(order.data.saleKind),
                                     howToCall = convert(order.data.howToCall),
-                                    callData  = EthBytesConverter.convert(order.data.callData),
-                                    replacementPattern  = EthBytesConverter.convert(order.data.replacementPattern),
-                                    staticTarget  = EthAddressConverter.convert(order.data.staticTarget),
-                                    staticExtraData = EthBytesConverter.convert(order.data.staticExtraData),
+                                    callData = EthTypesConverter.convert(order.data.callData),
+                                    replacementPattern = EthTypesConverter.convert(order.data.replacementPattern),
+                                    staticTarget = EthAddressConverter.convert(order.data.staticTarget),
+                                    staticExtraData = EthTypesConverter.convert(order.data.staticExtraData),
                                     extra = order.data.extra
                                 )
                             )
@@ -143,7 +144,7 @@ object EthUnionOrderEventDtoConverter {
                 side = source.side?.let { convert(it) },
                 fill = source.fill,
                 taker = source.taker?.let { EthAddressConverter.convert(it) },
-                counterHash = source.counterHash?.let { EthBytesConverter.convert(it) },
+                counterHash = source.counterHash?.let { EthTypesConverter.convert(it) },
                 makeUSD = source.makeUsd?.toBigInteger(), //TODO: Need BigDecimal
                 takeUSD = source.takeUsd?.toBigInteger(), //TODO: Need BigDecimal
                 makePriceUSD = source.takePriceUsd?.toBigInteger(), //TODO: Need BigDecimal

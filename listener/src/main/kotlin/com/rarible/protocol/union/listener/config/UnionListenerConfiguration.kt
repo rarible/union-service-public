@@ -6,13 +6,13 @@ import com.rarible.core.kafka.RaribleKafkaProducer
 import com.rarible.core.task.EnableRaribleTask
 import com.rarible.ethereum.converters.EnableScaletherMongoConversions
 import com.rarible.protocol.dto.*
+import com.rarible.protocol.dto.FlowOwnershipEventDto
 import com.rarible.protocol.flow.nft.api.subscriber.FlowNftIndexerEventsConsumerFactory
 import com.rarible.protocol.nft.api.subscriber.NftIndexerEventsConsumerFactory
 import com.rarible.protocol.order.api.subscriber.OrderIndexerEventsConsumerFactory
-import com.rarible.protocol.union.dto.UnionEventTopicProvider
-import com.rarible.protocol.union.dto.UnionItemEventDto
-import com.rarible.protocol.union.dto.UnionOrderEventDto
-import com.rarible.protocol.union.dto.UnionOwnershipEventDto
+import com.rarible.protocol.union.dto.*
+import com.rarible.protocol.union.listener.config.activity.EthActivityEventsConsumerFactory
+import com.rarible.protocol.union.listener.config.activity.EthActivityEventsSubscriberProperties
 import com.rarible.protocol.union.listener.handler.ethereum.EthereumCompositeConsumerWorker
 import com.rarible.protocol.union.listener.handler.ethereum.EthereumCompositeConsumerWorker.ConsumerEventHandlerFactory
 import com.rarible.protocol.union.listener.handler.ethereum.EthereumCompositeConsumerWorker.ConsumerFactory
@@ -30,18 +30,30 @@ import org.springframework.context.annotation.Configuration
 @EnableConfigurationProperties(
     value = [
         UnionEventProducerProperties::class,
-        UnionListenerProperties::class
+        UnionListenerProperties::class,
+        EthActivityEventsSubscriberProperties::class
     ]
 )
 class UnionListenerConfiguration(
-    environmentInfo: ApplicationEnvironmentInfo,
+    private val environmentInfo: ApplicationEnvironmentInfo,
     private val listenerProperties: UnionListenerProperties,
     private val producerProperties: UnionEventProducerProperties,
+    private val ethActivitySubscriberProperties: EthActivityEventsSubscriberProperties,
     private val meterRegistry: MeterRegistry
 ) {
     private val itemConsumerGroup = "${environmentInfo.name}.protocol.union.item"
     private val ownershipConsumerGroup = "${environmentInfo.name}.protocol.union.ownership"
     private val orderConsumerGroup = "${environmentInfo.name}.protocol.union.order"
+    private val activityConsumerGroup = "${environmentInfo.name}.protocol.union.activity"
+
+    @Bean
+    fun ethActivityConsumerFactory(): EthActivityEventsConsumerFactory {
+        return EthActivityEventsConsumerFactory(
+            brokerReplicaSet = ethActivitySubscriberProperties.brokerReplicaSet,
+            host = environmentInfo.host,
+            environment = environmentInfo.name
+        )
+    }
 
     @Bean
     fun ethereumItemChangeWorker(
@@ -97,6 +109,24 @@ class UnionListenerConfiguration(
             properties = listenerProperties.monitoringWorker,
             meterRegistry = meterRegistry,
             workerName = "orderEventDto"
+        )
+    }
+
+    @Bean
+    fun ethereumActivityChangeWorker(
+        eventHandlerFactory: EthereumEventHandlerFactory
+    ): EthereumCompositeConsumerWorker<ActivityDto> {
+        return EthereumCompositeConsumerWorker(
+            consumerFactory = ConsumerFactory.wrap { group, blockchain ->
+                ethActivityConsumerFactory().createActivityConsumer(group, blockchain)
+            },
+            eventHandlerFactory = ConsumerEventHandlerFactory.wrap { blockchain ->
+                eventHandlerFactory.createActivityEventHandler(blockchain)
+            },
+            consumerGroup = activityConsumerGroup,
+            properties = listenerProperties.monitoringWorker,
+            meterRegistry = meterRegistry,
+            workerName = "activityEventDto"
         )
     }
 
@@ -176,4 +206,14 @@ class UnionListenerConfiguration(
         )
     }
 
+    @Bean
+    fun unionActivityEventProducer(): RaribleKafkaProducer<UnionActivityDto> {
+        return RaribleKafkaProducer(
+            clientId = "${producerProperties.environment}.protocol-union-listener.activity",
+            valueSerializerClass = UnionKafkaJsonSerializer::class.java,
+            valueClass = UnionActivityDto::class.java,
+            defaultTopic = UnionEventTopicProvider.getActivityTopic(producerProperties.environment),
+            bootstrapServers = producerProperties.kafkaReplicaSet
+        )
+    }
 }

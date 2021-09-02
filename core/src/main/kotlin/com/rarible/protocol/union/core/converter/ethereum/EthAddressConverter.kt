@@ -6,7 +6,7 @@ import scalether.domain.Address
 
 object EthAddressConverter : Converter<Address, EthAddress> {
     override fun convert(source: Address): EthAddress {
-        return EthAddress(source.prefixed())
+        return EthAddress(EthTypesConverter.convert(source))
     }
 }
 

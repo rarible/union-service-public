@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.listener
 
+import com.rarible.protocol.dto.ActivityDto
 import com.rarible.protocol.dto.NftItemEventDto
 import com.rarible.protocol.dto.NftOwnershipEventDto
 import com.rarible.protocol.dto.OrderEventDto
@@ -12,12 +13,14 @@ import org.springframework.boot.runApplication
 class UnionListenerApplication(
     private val ethItemChangeWorker: EthereumCompositeConsumerWorker<NftItemEventDto>,
     private val ethOwnershipChangeWorker: EthereumCompositeConsumerWorker<NftOwnershipEventDto>,
-    private val ethOrderChangeWorker: EthereumCompositeConsumerWorker<OrderEventDto>
+    private val ethOrderChangeWorker: EthereumCompositeConsumerWorker<OrderEventDto>,
+    private val ethActivityChangeWorker: EthereumCompositeConsumerWorker<ActivityDto>
 ) : CommandLineRunner {
     override fun run(vararg args: String?) {
         ethItemChangeWorker.start()
         ethOwnershipChangeWorker.start()
         ethOrderChangeWorker.start()
+        ethActivityChangeWorker.start()
     }
 }
 

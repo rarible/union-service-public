@@ -5,10 +5,7 @@ import com.rarible.core.kafka.RaribleKafkaConsumer
 import com.rarible.core.kafka.RaribleKafkaProducer
 import com.rarible.core.test.ext.KafkaTestExtension.Companion.kafkaContainer
 import com.rarible.protocol.dto.*
-import com.rarible.protocol.union.dto.UnionEventTopicProvider
-import com.rarible.protocol.union.dto.UnionItemEventDto
-import com.rarible.protocol.union.dto.UnionOrderEventDto
-import com.rarible.protocol.union.dto.UnionOwnershipEventDto
+import com.rarible.protocol.union.dto.*
 import com.rarible.protocol.union.listener.config.UnionKafkaJsonDeserializer
 import com.rarible.protocol.union.listener.config.UnionKafkaJsonSerializer
 import org.apache.kafka.clients.consumer.OffsetResetStrategy
@@ -66,6 +63,20 @@ class IntegrationTestConfiguration {
     }
 
     @Bean
+    fun testActivityConsumer(): RaribleKafkaConsumer<UnionActivityDto> {
+        val topic = UnionEventTopicProvider.getActivityTopic(applicationEnvironmentInfo().name)
+        return RaribleKafkaConsumer(
+            clientId = "test-union-activity-consumer",
+            consumerGroup = "test-union-activity-group",
+            valueDeserializerClass = UnionKafkaJsonDeserializer::class.java,
+            valueClass = UnionActivityDto::class.java,
+            defaultTopic = topic,
+            bootstrapServers = kafkaContainer.kafkaBoostrapServers(),
+            offsetResetStrategy = OffsetResetStrategy.EARLIEST
+        )
+    }
+
+    @Bean
     fun testEthereumItemEventProducer(): RaribleKafkaProducer<NftItemEventDto> {
         return RaribleKafkaProducer(
             clientId = "test.union.item",
@@ -94,6 +105,17 @@ class IntegrationTestConfiguration {
             valueSerializerClass = UnionKafkaJsonSerializer::class.java,
             valueClass = OrderEventDto::class.java,
             defaultTopic = OrderIndexerTopicProvider.getTopic(applicationEnvironmentInfo().name, "ethereum"),
+            bootstrapServers = kafkaContainer.kafkaBoostrapServers()
+        )
+    }
+
+    @Bean
+    fun testEthereumActivityEventProducer(): RaribleKafkaProducer<ActivityDto> {
+        return RaribleKafkaProducer(
+            clientId = "test.union.activity",
+            valueSerializerClass = UnionKafkaJsonSerializer::class.java,
+            valueClass = ActivityDto::class.java,
+            defaultTopic = ActivityTopicProvider.getTopic(applicationEnvironmentInfo().name, "ethereum"),
             bootstrapServers = kafkaContainer.kafkaBoostrapServers()
         )
     }

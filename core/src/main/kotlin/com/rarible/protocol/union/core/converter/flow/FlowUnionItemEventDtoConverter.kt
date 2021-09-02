@@ -23,8 +23,8 @@ object FlowUnionItemEventDtoConverter : Converter<FlowNftItemEventDto, UnionItem
                     lastUpdatedAt = source.item.date ?: Instant.now(),
                     supply = BigInteger.ONE,
                     metaURL = null, //TODO
-                    blockchain = FlowItemDto.Blockchain.FLOW,
-                    meta = MetaDto(name = "", raw = source.item.meta), //TODO: Not full meta
+                    blockchain = FlowBlockchainDto.FLOW,
+                    meta = UnionMetaDto(name = "", raw = source.item.meta), //TODO: Not full meta
                     deleted = false, //TODO: No needed filed
                     id = itemId,
                     tokenId = source.item.tokenId?.toBigInteger() ?: BigInteger.ZERO, //TODO: Must not be null
