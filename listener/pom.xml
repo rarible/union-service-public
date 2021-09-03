@@ -31,17 +31,17 @@
         <!-- ============= Eth Protocol-API ============== -->
         <dependency>
             <groupId>com.rarible.protocol</groupId>
-            <artifactId>protocol-subscriber-nft-starter</artifactId>
+            <artifactId>protocol-subscriber-nft</artifactId>
         </dependency>
         <dependency>
             <groupId>com.rarible.protocol</groupId>
-            <artifactId>protocol-subscriber-order-starter</artifactId>
+            <artifactId>protocol-subscriber-order</artifactId>
         </dependency>
 
         <!-- ============= Flow Protocol-API ============== -->
         <dependency>
             <groupId>com.rarible.protocol</groupId>
-            <artifactId>flow-protocol-subscriber-nft-starter</artifactId>
+            <artifactId>flow-protocol-subscriber-nft</artifactId>
         </dependency>
 
         <!-- =============== Rarible-core ================ -->

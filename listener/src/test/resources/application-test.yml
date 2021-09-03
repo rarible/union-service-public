@@ -23,22 +23,12 @@ rarible:
     converter:
       enabled: true
 
-protocol:
-  nft:
-    subscriber:
-      broker-replica-set: ${kafka.hosts}
-  order:
-    subscriber:
-      broker-replica-set: ${kafka.hosts}
-  activity:
-    subscriber:
-      broker-replica-set: ${kafka.hosts}
-  flow-nft:
-    subscriber:
-      broker-replica-set: ${kafka.hosts}
-
 listener:
-  event-producer:
-    environment: ${application.environment}
-    kafka-replica-set: ${kafka.hosts}
+  producer:
+    broker-replica-set: ${kafka.hosts}
+  consumer:
+    ethereum:
+      broker-replica-set: ${kafka.hosts}
+    flow:
+      broker-replica-set: ${kafka.hosts}
 

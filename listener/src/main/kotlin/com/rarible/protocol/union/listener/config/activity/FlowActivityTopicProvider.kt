@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.listener.config.activity
 
+//TODO remove when appears in flow
 class FlowActivityTopicProvider {
 
     companion object {

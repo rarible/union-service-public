@@ -25,5 +25,13 @@ rarible:
       enabled: true
 
 listener:
-  event-producer:
-    environment: ${application.environment}
+  producer:
+    broker-replica-set: ${kafka.hosts}
+  consumer:
+    ethereum:
+      broker-replica-set: ${kafka.hosts}
+    poygon:
+      broker-replica-set: ${kafka.hosts}
+    flow:
+      broker-replica-set: ${kafka.hosts}
+

@@ -7,9 +7,7 @@ import com.rarible.protocol.union.core.converter.flow.FlowUnionOrderEventDtoConv
 import com.rarible.protocol.union.dto.UnionOrderEventDto
 import com.rarible.protocol.union.listener.handler.AbstractEventHandler
 import org.slf4j.LoggerFactory
-import org.springframework.stereotype.Component
 
-@Component
 class FlowOrderEventHandler(
     private val producer: RaribleKafkaProducer<UnionOrderEventDto>
 ) : AbstractEventHandler<FlowOrderEventDto>() {

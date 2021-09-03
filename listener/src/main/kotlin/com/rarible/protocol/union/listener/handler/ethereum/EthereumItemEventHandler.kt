@@ -10,9 +10,10 @@ import com.rarible.protocol.union.listener.handler.AbstractEventHandler
 import org.slf4j.LoggerFactory
 
 class EthereumItemEventHandler(
-    private val blockchain: Blockchain,
-    private val producer: RaribleKafkaProducer<UnionItemEventDto>
+    private val producer: RaribleKafkaProducer<UnionItemEventDto>,
+    private val blockchain: Blockchain
 ) : AbstractEventHandler<NftItemEventDto>() {
+
     private val logger = LoggerFactory.getLogger(javaClass)
 
     override suspend fun handleSafely(event: NftItemEventDto) {

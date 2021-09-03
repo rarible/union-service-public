@@ -154,7 +154,7 @@
             </dependency>
             <dependency>
                 <groupId>com.rarible.protocol</groupId>
-                <artifactId>protocol-subscriber-nft-starter</artifactId>
+                <artifactId>protocol-subscriber-nft</artifactId>
                 <version>${rarible-protocol.ethereum.version}</version>
             </dependency>
 
@@ -171,7 +171,7 @@
             </dependency>
             <dependency>
                 <groupId>com.rarible.protocol</groupId>
-                <artifactId>protocol-subscriber-order-starter</artifactId>
+                <artifactId>protocol-subscriber-order</artifactId>
                 <version>${rarible-protocol.ethereum.version}</version>
             </dependency>
 
@@ -188,7 +188,7 @@
             </dependency>
             <dependency>
                 <groupId>com.rarible.protocol</groupId>
-                <artifactId>protocol-subscriber-erc20-starter</artifactId>
+                <artifactId>protocol-subscriber-erc20</artifactId>
                 <version>${rarible-protocol.ethereum.version}</version>
             </dependency>
 
@@ -205,7 +205,7 @@
             </dependency>
             <dependency>
                 <groupId>com.rarible.protocol</groupId>
-                <artifactId>protocol-subscriber-nft-order-starter</artifactId>
+                <artifactId>protocol-subscriber-nft-order</artifactId>
                 <version>${rarible-protocol.ethereum.version}</version>
             </dependency>
 
@@ -222,7 +222,7 @@
             </dependency>
             <dependency>
                 <groupId>com.rarible.protocol</groupId>
-                <artifactId>protocol-subscriber-unlockable-starter</artifactId>
+                <artifactId>protocol-subscriber-unlockable</artifactId>
                 <version>${rarible-protocol.ethereum.version}</version>
             </dependency>
 
@@ -240,7 +240,7 @@
             </dependency>
             <dependency>
                 <groupId>com.rarible.protocol</groupId>
-                <artifactId>flow-protocol-subscriber-nft-starter</artifactId>
+                <artifactId>flow-protocol-subscriber-nft</artifactId>
                 <version>${rarible-protocol.flow.version}</version>
             </dependency>
 

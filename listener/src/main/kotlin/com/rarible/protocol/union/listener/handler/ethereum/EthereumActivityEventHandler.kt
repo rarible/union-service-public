@@ -10,8 +10,8 @@ import com.rarible.protocol.union.listener.handler.AbstractEventHandler
 import org.slf4j.LoggerFactory
 
 class EthereumActivityEventHandler(
-    private val blockchain: Blockchain,
-    private val producer: RaribleKafkaProducer<UnionActivityDto>
+    private val producer: RaribleKafkaProducer<UnionActivityDto>,
+    private val blockchain: Blockchain
 ) : AbstractEventHandler<ActivityDto>() {
 
     private val logger = LoggerFactory.getLogger(javaClass)
