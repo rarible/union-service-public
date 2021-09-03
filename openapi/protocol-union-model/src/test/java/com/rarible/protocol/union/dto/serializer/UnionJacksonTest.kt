@@ -67,7 +67,7 @@ class UnionJacksonTest {
     fun `flow itemId`() {
         val itemId = FlowItemIdDto(
             value = "abc:123",
-            token = FlowAddress("abc"),
+            token = FlowContract("abc"),
             tokenId = BigInteger("123")
         )
 

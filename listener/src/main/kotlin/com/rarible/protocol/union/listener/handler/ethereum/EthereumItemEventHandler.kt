@@ -7,7 +7,6 @@ import com.rarible.protocol.dto.NftItemEventDto
 import com.rarible.protocol.union.core.converter.ethereum.EthUnionItemEventDtoConverter
 import com.rarible.protocol.union.dto.UnionItemEventDto
 import com.rarible.protocol.union.listener.handler.AbstractEventHandler
-import com.rarible.protocol.union.listener.handler.ITEM_EVENT_HEADERS
 import org.slf4j.LoggerFactory
 
 class EthereumItemEventHandler(

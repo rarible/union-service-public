@@ -7,7 +7,6 @@ import com.rarible.protocol.union.dto.*
 import com.rarible.protocol.union.dto.serializer.flow.FlowOwnershipIdParser
 import org.springframework.core.convert.converter.Converter
 import java.math.BigInteger
-import java.time.Instant
 
 object FlowUnionOwnershipEventDtoConverter : Converter<FlowOwnershipEventDto, UnionOwnershipEventDto> {
 
@@ -20,9 +19,9 @@ object FlowUnionOwnershipEventDtoConverter : Converter<FlowOwnershipEventDto, Un
                     ownershipId = ownershipId,
                     ownership = FlowOwnershipDto(
                         value = BigInteger.ONE,//TODO: Is it right?
-                        createdAt = source.ownership.date ?: Instant.now(), //TODO: Must not be null
+                        createdAt = source.ownership.createdAt,
                         id = ownershipId,
-                        contract = FlowContract(source.ownership.token),
+                        contract = FlowContract(source.ownership.contract!!),
                         tokenId = source.ownership.tokenId.toBigInteger(), //TODO: Why is it string?
                         owner = listOf(FlowAddress(source.ownership.owner))
                     )

@@ -20,13 +20,13 @@ import scalether.domain.Address
 class EthereumOwnershipEventHandlerFt : AbstractIntegrationTest() {
 
     @Test
-    fun `ethereum - update event`() = runWithKafka {
+    fun `ethereum ownership update event`() = runWithKafka {
         val ethOwnership = randomEthNftOwnershipDto()
         val dto: NftOwnershipEventDto = NftOwnershipUpdateEventDto(randomString(), ethOwnership.id, ethOwnership)
 
         ethOwnershipProducer.send(message(dto)).ensureSuccess()
 
-        Wait.waitAssert() {
+        Wait.waitAssert {
             val messages = findEthOwnershipUpdates(ethOwnership.id)
             Assertions.assertThat(messages).hasSize(1)
             Assertions.assertThat(messages[0].key).isEqualTo(ethOwnership.id)
@@ -35,7 +35,7 @@ class EthereumOwnershipEventHandlerFt : AbstractIntegrationTest() {
     }
 
     @Test
-    fun `ethereum - delete event`() = runWithKafka {
+    fun `ethereum ownership delete event`() = runWithKafka {
 
         val ethOwnershipId = randomEthOwnershipId()
 

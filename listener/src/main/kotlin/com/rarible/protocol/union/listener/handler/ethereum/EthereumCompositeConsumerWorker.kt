@@ -6,6 +6,7 @@ import com.rarible.core.daemon.sequential.ConsumerEventHandler
 import com.rarible.core.daemon.sequential.ConsumerWorker
 import com.rarible.core.kafka.KafkaConsumer
 import com.rarible.ethereum.domain.Blockchain
+import com.rarible.protocol.union.listener.handler.KafkaConsumerWorker
 import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 
@@ -17,7 +18,7 @@ class EthereumCompositeConsumerWorker<T>(
     private val properties: DaemonWorkerProperties = DaemonWorkerProperties(),
     private val retryProperties: RetryProperties = RetryProperties(),
     private val meterRegistry: MeterRegistry = SimpleMeterRegistry()
-) : AutoCloseable {
+) : KafkaConsumerWorker {
 
     private val consumerWorkers = Blockchain.values().map { blockchain ->
         ConsumerWorker(
@@ -26,11 +27,11 @@ class EthereumCompositeConsumerWorker<T>(
             properties = properties,
             retryProperties = retryProperties,
             meterRegistry = meterRegistry,
-            workerName = blockchain.name +"_$workerName"
+            workerName = blockchain.name + "_$workerName"
         )
     }
 
-    fun start() {
+    override fun start() {
         consumerWorkers.forEach { it.start() }
     }
 

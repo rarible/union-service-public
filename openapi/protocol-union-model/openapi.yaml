@@ -1333,7 +1333,7 @@ components:
           type: string
           example: "${blockchain}:${contract}:${tokenId}"
         token:
-          $ref: "#/components/schemas/FlowAddress"
+          $ref: "#/components/schemas/FlowContract"
         tokenId:
           $ref: "#/components/schemas/BigInteger"
       required:
@@ -1525,7 +1525,7 @@ components:
           enum:
             - FLOW
         id:
-          $ref: "#/components/schemas/BigInteger"
+          type: string
         type:
           $ref: "#/components/schemas/FlowOrderType"
         maker:
@@ -1537,7 +1537,7 @@ components:
         take:
           $ref: "#/components/schemas/FlowAsset"
         data:
-          $ref: "#/components/schemas/FlowOrderDataV1"
+          $ref: "#/components/schemas/FlowOrderData"
       required:
         - id
         - type
@@ -1562,24 +1562,9 @@ components:
         - account
         - value
 
-    FlowOrderOriginFee:
+    FlowOrderData:
       type: object
       properties:
-        account:
-          $ref: "#/components/schemas/FlowAddress"
-        value:
-          $ref: "#/components/schemas/BigInteger"
-      required:
-        - account
-        - value
-
-    FlowOrderDataV1:
-      type: object
-      properties:
-        dataType:
-          type: string
-          enum:
-            - DATA_V1
         payouts:
           type: array
           items:
@@ -1587,11 +1572,22 @@ components:
         originFees:
           type: array
           items:
-            $ref: "#/components/schemas/FlowOrderOriginFee"
+            $ref: "#/components/schemas/FlowOrderPayout"
       required:
         - dataType
         - payouts
-        - originFees
+      oneOf:
+        - $ref: "#/components/schemas/FlowOrderDataV1"
+
+    FlowOrderDataV1:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - DATA_V1
+      required:
+        - "@type"
 
     FlowAsset:
       type: object

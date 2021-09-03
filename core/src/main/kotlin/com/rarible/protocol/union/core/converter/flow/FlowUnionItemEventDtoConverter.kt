@@ -1,14 +1,11 @@
 package com.rarible.protocol.union.core.converter.flow
 
-import com.rarible.protocol.dto.FlowNftItemDeleteEventDto
-import com.rarible.protocol.dto.FlowNftItemEventDto
-import com.rarible.protocol.dto.FlowNftItemUpdateEventDto
+import com.rarible.protocol.dto.*
 import com.rarible.protocol.union.dto.*
+import com.rarible.protocol.union.dto.FlowCreatorDto
+import com.rarible.protocol.union.dto.FlowRoyaltyDto
 import com.rarible.protocol.union.dto.serializer.flow.FlowItemIdParser
 import org.springframework.core.convert.converter.Converter
-import java.math.BigDecimal
-import java.math.BigInteger
-import java.time.Instant
 
 object FlowUnionItemEventDtoConverter : Converter<FlowNftItemEventDto, UnionItemEventDto> {
 
@@ -19,24 +16,19 @@ object FlowUnionItemEventDtoConverter : Converter<FlowNftItemEventDto, UnionItem
                 eventId = source.eventId,
                 itemId = itemId,
                 item = FlowItemDto(
-                    mintedAt = source.item.date ?: Instant.now(),
-                    lastUpdatedAt = source.item.date ?: Instant.now(),
-                    supply = BigInteger.ONE,
-                    metaURL = null, //TODO
+                    mintedAt = source.item.mintedAt,
+                    lastUpdatedAt = source.item.lastUpdatedAt,
+                    supply = source.item.supply,
+                    metaURL = source.item.metaUrl,
                     blockchain = FlowBlockchainDto.FLOW,
-                    meta = UnionMetaDto(name = "", raw = source.item.meta), //TODO: Not full meta
-                    deleted = false, //TODO: No needed filed
+                    meta = convert(source.item.meta),
+                    deleted = source.item.deleted,
                     id = itemId,
-                    tokenId = source.item.tokenId?.toBigInteger() ?: BigInteger.ZERO, //TODO: Must not be null
-                    collection = FlowContract(source.item.contract ?: ""),
-                    creators = listOf(
-                        FlowCreatorDto(
-                            FlowAddress(source.item.creator ?: ""),
-                            BigDecimal.ONE
-                        )
-                    ), //TODO: Not suitable type
-                    owners = listOf(FlowAddress(source.item.owner ?: "")), //TODO: Must not be null
-                    royalties = emptyList() //TODO: Does Flow have royalties
+                    tokenId = source.item.tokenId,
+                    collection = FlowContract(source.item.collection),
+                    creators = source.item.creators.map { convert(it) },
+                    owners = source.item.owners.map { FlowAddressConverter.convert(it) },
+                    royalties = source.item.royalties.map { convert(it) }
                 )
             )
             is FlowNftItemDeleteEventDto -> FlowItemDeleteEventDto(
@@ -44,6 +36,48 @@ object FlowUnionItemEventDtoConverter : Converter<FlowNftItemEventDto, UnionItem
                 itemId = itemId
             )
         }
+    }
+
+    private fun convert(source: com.rarible.protocol.dto.FlowCreatorDto): FlowCreatorDto {
+        return FlowCreatorDto(
+            account = FlowAddressConverter.convert(source.account),
+            value = source.value
+        )
+    }
+
+    private fun convert(source: MetaDto?): UnionMetaDto? {
+        if (source == null) {
+            return null
+        }
+        return UnionMetaDto(
+            name = source.name,
+            description = source.description,
+            attributes = source.attributes?.map { convert(it) },
+            contents = source.contents?.map { convert(it) },
+            raw = source.raw.toString() // TODO
+        )
+    }
+
+    private fun convert(source: MetaAttributeDto): UnionMetaAttributeDto {
+        return UnionMetaAttributeDto(
+            key = source.key,
+            value = source.value
+        )
+    }
+
+    private fun convert(source: MetaContentDto): UnionMetaContentDto {
+        return UnionMetaContentDto(
+            typeContent = source.contentType,
+            url = source.url,
+            attributes = source.attributes?.map { convert(it) }
+        )
+    }
+
+    private fun convert(source: com.rarible.protocol.dto.FlowRoyaltyDto): FlowRoyaltyDto {
+        return FlowRoyaltyDto(
+            account = FlowAddressConverter.convert(source.account),
+            value = source.value
+        )
     }
 }
 

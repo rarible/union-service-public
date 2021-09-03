@@ -6,7 +6,6 @@ import com.rarible.protocol.dto.FlowOrderEventDto
 import com.rarible.protocol.union.core.converter.flow.FlowUnionOrderEventDtoConverter
 import com.rarible.protocol.union.dto.UnionOrderEventDto
 import com.rarible.protocol.union.listener.handler.AbstractEventHandler
-import com.rarible.protocol.union.listener.handler.ORDER_EVENT_HEADERS
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 

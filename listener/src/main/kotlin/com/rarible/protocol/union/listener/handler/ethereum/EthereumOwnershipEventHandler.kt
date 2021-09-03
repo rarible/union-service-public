@@ -7,7 +7,6 @@ import com.rarible.protocol.dto.NftOwnershipEventDto
 import com.rarible.protocol.union.core.converter.ethereum.EthUnionOwnershipEventDtoConverter
 import com.rarible.protocol.union.dto.UnionOwnershipEventDto
 import com.rarible.protocol.union.listener.handler.AbstractEventHandler
-import com.rarible.protocol.union.listener.handler.OWNERSHIP_EVENT_HEADERS
 import org.slf4j.LoggerFactory
 
 class EthereumOwnershipEventHandler(

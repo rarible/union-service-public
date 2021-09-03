@@ -6,7 +6,6 @@ import com.rarible.ethereum.domain.Blockchain
 import com.rarible.protocol.dto.ActivityDto
 import com.rarible.protocol.union.core.converter.ethereum.EthUnionActivityDtoConverter
 import com.rarible.protocol.union.dto.UnionActivityDto
-import com.rarible.protocol.union.listener.handler.ACTIVITY_EVENT_HEADERS
 import com.rarible.protocol.union.listener.handler.AbstractEventHandler
 import org.slf4j.LoggerFactory
 

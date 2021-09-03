@@ -6,7 +6,6 @@ import com.rarible.protocol.dto.FlowOwnershipEventDto
 import com.rarible.protocol.union.core.converter.flow.FlowUnionOwnershipEventDtoConverter
 import com.rarible.protocol.union.dto.UnionOwnershipEventDto
 import com.rarible.protocol.union.listener.handler.AbstractEventHandler
-import com.rarible.protocol.union.listener.handler.OWNERSHIP_EVENT_HEADERS
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
