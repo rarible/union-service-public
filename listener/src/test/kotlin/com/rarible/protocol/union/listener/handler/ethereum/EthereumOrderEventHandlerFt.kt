@@ -17,7 +17,7 @@ import org.junit.jupiter.api.Test
 class EthereumOrderEventHandlerFt : AbstractIntegrationTest() {
 
     @Test
-    fun `ethereum - update event`() = runWithKafka {
+    fun `ethereum order update event`() = runWithKafka {
         val ethOrder = randomEthLegacyOrderDto()
         val ethOrderId = EthTypesConverter.convert(ethOrder.hash)
         val dto: OrderEventDto = OrderUpdateEventDto(randomString(), ethOrderId, ethOrder)

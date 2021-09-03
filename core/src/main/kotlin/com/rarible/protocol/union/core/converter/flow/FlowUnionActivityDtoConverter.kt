@@ -3,7 +3,6 @@ package com.rarible.protocol.union.core.converter.flow
 import com.rarible.protocol.dto.*
 import com.rarible.protocol.dto.FlowActivityDto
 import com.rarible.protocol.dto.FlowOrderActivityMatchSideDto
-import com.rarible.protocol.union.core.converter.ethereum.EthTypesConverter
 import com.rarible.protocol.union.dto.*
 import org.springframework.core.convert.converter.Converter
 
@@ -62,8 +61,8 @@ object FlowUnionActivityDtoConverter : Converter<FlowActivityDto, UnionActivityD
                     tokenId = source.tokenId,
                     value = source.value,
                     blockchainInfo = ActivityBlockchainInfoDto(
-                        transactionHash = EthTypesConverter.convert(source.transactionHash),
-                        blockHash = EthTypesConverter.convert(source.blockHash),
+                        transactionHash = source.transactionHash,
+                        blockHash = source.blockHash,
                         blockNumber = source.blockNumber,
                         logIndex = source.logIndex
                     )
@@ -79,8 +78,8 @@ object FlowUnionActivityDtoConverter : Converter<FlowActivityDto, UnionActivityD
                     tokenId = source.tokenId,
                     value = source.value,
                     blockchainInfo = ActivityBlockchainInfoDto(
-                        transactionHash = EthTypesConverter.convert(source.transactionHash),
-                        blockHash = EthTypesConverter.convert(source.blockHash),
+                        transactionHash = source.transactionHash,
+                        blockHash = source.blockHash,
                         blockNumber = source.blockNumber,
                         logIndex = source.logIndex
                     )
@@ -97,8 +96,8 @@ object FlowUnionActivityDtoConverter : Converter<FlowActivityDto, UnionActivityD
                     tokenId = source.tokenId,
                     value = source.value,
                     blockchainInfo = ActivityBlockchainInfoDto(
-                        transactionHash = EthTypesConverter.convert(source.transactionHash),
-                        blockHash = EthTypesConverter.convert(source.blockHash),
+                        transactionHash = source.transactionHash,
+                        blockHash = source.blockHash,
                         blockNumber = source.blockNumber,
                         logIndex = source.logIndex
                     )

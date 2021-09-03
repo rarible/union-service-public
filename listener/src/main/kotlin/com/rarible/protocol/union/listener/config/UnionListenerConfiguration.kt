@@ -6,6 +6,8 @@ import com.rarible.core.kafka.RaribleKafkaProducer
 import com.rarible.core.task.EnableRaribleTask
 import com.rarible.ethereum.converters.EnableScaletherMongoConversions
 import com.rarible.protocol.dto.*
+import com.rarible.protocol.dto.FlowActivityDto
+import com.rarible.protocol.dto.FlowOrderEventDto
 import com.rarible.protocol.dto.FlowOwnershipEventDto
 import com.rarible.protocol.flow.nft.api.subscriber.FlowNftIndexerEventsConsumerFactory
 import com.rarible.protocol.nft.api.subscriber.NftIndexerEventsConsumerFactory
@@ -13,11 +15,16 @@ import com.rarible.protocol.order.api.subscriber.OrderIndexerEventsConsumerFacto
 import com.rarible.protocol.union.dto.*
 import com.rarible.protocol.union.listener.config.activity.EthActivityEventsConsumerFactory
 import com.rarible.protocol.union.listener.config.activity.EthActivityEventsSubscriberProperties
+import com.rarible.protocol.union.listener.config.activity.FlowActivityEventsConsumerFactory
+import com.rarible.protocol.union.listener.config.activity.FlowActivityEventsSubscriberProperties
+import com.rarible.protocol.union.listener.handler.SingleKafkaConsumerWorker
 import com.rarible.protocol.union.listener.handler.ethereum.EthereumCompositeConsumerWorker
 import com.rarible.protocol.union.listener.handler.ethereum.EthereumCompositeConsumerWorker.ConsumerEventHandlerFactory
 import com.rarible.protocol.union.listener.handler.ethereum.EthereumCompositeConsumerWorker.ConsumerFactory
 import com.rarible.protocol.union.listener.handler.ethereum.EthereumEventHandlerFactory
+import com.rarible.protocol.union.listener.handler.flow.FlowActivityEventHandler
 import com.rarible.protocol.union.listener.handler.flow.FlowItemEventHandler
+import com.rarible.protocol.union.listener.handler.flow.FlowOrderEventHandler
 import com.rarible.protocol.union.listener.handler.flow.FlowOwnershipEventHandler
 import io.micrometer.core.instrument.MeterRegistry
 import org.springframework.boot.context.properties.EnableConfigurationProperties
@@ -31,7 +38,8 @@ import org.springframework.context.annotation.Configuration
     value = [
         UnionEventProducerProperties::class,
         UnionListenerProperties::class,
-        EthActivityEventsSubscriberProperties::class
+        EthActivityEventsSubscriberProperties::class,
+        FlowActivityEventsSubscriberProperties::class
     ]
 )
 class UnionListenerConfiguration(
@@ -39,12 +47,16 @@ class UnionListenerConfiguration(
     private val listenerProperties: UnionListenerProperties,
     private val producerProperties: UnionEventProducerProperties,
     private val ethActivitySubscriberProperties: EthActivityEventsSubscriberProperties,
+    private val flowActivitySubscriberProperties: FlowActivityEventsSubscriberProperties,
     private val meterRegistry: MeterRegistry
 ) {
     private val itemConsumerGroup = "${environmentInfo.name}.protocol.union.item"
     private val ownershipConsumerGroup = "${environmentInfo.name}.protocol.union.ownership"
     private val orderConsumerGroup = "${environmentInfo.name}.protocol.union.order"
     private val activityConsumerGroup = "${environmentInfo.name}.protocol.union.activity"
+
+
+    //------------------------ Eth Consumers ------------------------//
 
     @Bean
     fun ethActivityConsumerFactory(): EthActivityEventsConsumerFactory {
@@ -70,7 +82,7 @@ class UnionListenerConfiguration(
             consumerGroup = itemConsumerGroup,
             properties = listenerProperties.monitoringWorker,
             meterRegistry = meterRegistry,
-            workerName = "itemEventDto"
+            workerName = "ethItemEventDto"
         )
     }
 
@@ -89,7 +101,7 @@ class UnionListenerConfiguration(
             consumerGroup = ownershipConsumerGroup,
             properties = listenerProperties.monitoringWorker,
             meterRegistry = meterRegistry,
-            workerName = "ownershipEventDto"
+            workerName = "ethOwnershipEventDto"
         )
     }
 
@@ -108,12 +120,12 @@ class UnionListenerConfiguration(
             consumerGroup = orderConsumerGroup,
             properties = listenerProperties.monitoringWorker,
             meterRegistry = meterRegistry,
-            workerName = "orderEventDto"
+            workerName = "ethOrderEventDto"
         )
     }
 
     @Bean
-    fun ethereumActivityChangeWorker(
+    fun ethereumActivityWorker(
         eventHandlerFactory: EthereumEventHandlerFactory
     ): EthereumCompositeConsumerWorker<ActivityDto> {
         return EthereumCompositeConsumerWorker(
@@ -126,7 +138,18 @@ class UnionListenerConfiguration(
             consumerGroup = activityConsumerGroup,
             properties = listenerProperties.monitoringWorker,
             meterRegistry = meterRegistry,
-            workerName = "activityEventDto"
+            workerName = "ethActivityEventDto"
+        )
+    }
+
+    //------------------------ Flow Consumers ------------------------//
+
+    @Bean
+    fun flowActivityConsumerFactory(): FlowActivityEventsConsumerFactory {
+        return FlowActivityEventsConsumerFactory(
+            brokerReplicaSet = flowActivitySubscriberProperties.brokerReplicaSet,
+            host = environmentInfo.host,
+            environment = environmentInfo.name
         )
     }
 
@@ -134,13 +157,15 @@ class UnionListenerConfiguration(
     fun flowItemChangeWorker(
         flowNftIndexerEventsConsumerFactory: FlowNftIndexerEventsConsumerFactory,
         flowItemEventHandler: FlowItemEventHandler
-    ): ConsumerWorker<FlowNftItemEventDto> {
-        return ConsumerWorker(
-            consumer = flowNftIndexerEventsConsumerFactory.createItemEventsConsumer(itemConsumerGroup),
-            properties = listenerProperties.monitoringWorker,
-            eventHandler = flowItemEventHandler,
-            meterRegistry = meterRegistry,
-            workerName = "flowItemEventDto"
+    ): SingleKafkaConsumerWorker<FlowNftItemEventDto> {
+        return SingleKafkaConsumerWorker(
+            ConsumerWorker(
+                consumer = flowNftIndexerEventsConsumerFactory.createItemEventsConsumer(itemConsumerGroup),
+                properties = listenerProperties.monitoringWorker,
+                eventHandler = flowItemEventHandler,
+                meterRegistry = meterRegistry,
+                workerName = "flowItemEventDto"
+            )
         )
     }
 
@@ -148,30 +173,52 @@ class UnionListenerConfiguration(
     fun flowOwnershipChangeWorker(
         flowNftIndexerEventsConsumerFactory: FlowNftIndexerEventsConsumerFactory,
         flowOwnershipEventHandler: FlowOwnershipEventHandler
-    ): ConsumerWorker<FlowOwnershipEventDto> {
-        return ConsumerWorker(
-            consumer = flowNftIndexerEventsConsumerFactory.createOwnershipEventsConsumer(itemConsumerGroup),
-            properties = listenerProperties.monitoringWorker,
-            eventHandler = flowOwnershipEventHandler,
-            meterRegistry = meterRegistry,
-            workerName = "flowItemEventDto"
+    ): SingleKafkaConsumerWorker<FlowOwnershipEventDto> {
+        return SingleKafkaConsumerWorker(
+            ConsumerWorker(
+                consumer = flowNftIndexerEventsConsumerFactory.createOwnershipEventsConsumer(ownershipConsumerGroup),
+                properties = listenerProperties.monitoringWorker,
+                eventHandler = flowOwnershipEventHandler,
+                meterRegistry = meterRegistry,
+                workerName = "flowOwnershipEventDto"
+            )
         )
     }
 
-//TODO: Not correct types
-//    @Bean
-//    fun flowOrderChangeWorker(
-//        flowNftIndexerEventsConsumerFactory: FlowNftIndexerEventsConsumerFactory,
-//        flowOrderEventHandler: FlowOrderEventHandler
-//    ): ConsumerWorker<FlowOrderEventDto> {
-//        return ConsumerWorker(
-//            consumer = flowNftIndexerEventsConsumerFactory.createORderEventsConsumer(itemConsumerGroup),
-//            properties = listenerProperties.monitoringWorker,
-//            eventHandler = flowOrderEventHandler,
-//            meterRegistry = meterRegistry,
-//            workerName = "flowOrderEventDto"
-//        )
-//    }
+
+    @Bean
+    fun flowOrderChangeWorker(
+        flowNftIndexerEventsConsumerFactory: FlowNftIndexerEventsConsumerFactory,
+        flowOrderEventHandler: FlowOrderEventHandler
+    ): SingleKafkaConsumerWorker<FlowOrderEventDto> {
+        return SingleKafkaConsumerWorker(
+            ConsumerWorker(
+                consumer = flowNftIndexerEventsConsumerFactory.createORderEventsConsumer(orderConsumerGroup),
+                properties = listenerProperties.monitoringWorker,
+                eventHandler = flowOrderEventHandler,
+                meterRegistry = meterRegistry,
+                workerName = "flowOrderEventDto"
+            )
+        )
+    }
+
+    @Bean
+    fun flowActivityWorker(
+        flowActivityConsumerFactory: FlowActivityEventsConsumerFactory,
+        flowActivityEventHandler: FlowActivityEventHandler
+    ): SingleKafkaConsumerWorker<FlowActivityDto> {
+        return SingleKafkaConsumerWorker(
+            ConsumerWorker(
+                consumer = flowActivityConsumerFactory.createActivityConsumer(orderConsumerGroup),
+                properties = listenerProperties.monitoringWorker,
+                eventHandler = flowActivityEventHandler,
+                meterRegistry = meterRegistry,
+                workerName = "flowActivityEventDto"
+            )
+        )
+    }
+
+    //------------------------ Union Producers ------------------------//
 
     @Bean
     fun unionItemEventProducer(): RaribleKafkaProducer<UnionItemEventDto> {

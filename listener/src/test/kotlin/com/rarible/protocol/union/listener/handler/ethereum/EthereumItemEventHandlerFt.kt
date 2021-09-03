@@ -20,7 +20,7 @@ import scalether.domain.Address
 class EthereumItemEventHandlerFt : AbstractIntegrationTest() {
 
     @Test
-    fun `ethereum - update event`() = runWithKafka {
+    fun `ethereum item update event`() = runWithKafka {
         val ethItem = randomEthNftItemDto()
         val dto: NftItemEventDto = NftItemUpdateEventDto(randomString(), ethItem.id, ethItem)
 
@@ -35,7 +35,7 @@ class EthereumItemEventHandlerFt : AbstractIntegrationTest() {
     }
 
     @Test
-    fun `ethereum - delete event`() = runWithKafka {
+    fun `ethereum item delete event`() = runWithKafka {
         val ethItemId = randomEthItemId()
         val deletedDto = NftDeletedItemDto(
             ethItemId.value,

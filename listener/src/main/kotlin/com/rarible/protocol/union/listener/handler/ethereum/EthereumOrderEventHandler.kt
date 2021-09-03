@@ -7,7 +7,6 @@ import com.rarible.protocol.dto.OrderEventDto
 import com.rarible.protocol.union.core.converter.ethereum.EthUnionOrderEventDtoConverter
 import com.rarible.protocol.union.dto.UnionOrderEventDto
 import com.rarible.protocol.union.listener.handler.AbstractEventHandler
-import com.rarible.protocol.union.listener.handler.ORDER_EVENT_HEADERS
 import org.slf4j.LoggerFactory
 
 class EthereumOrderEventHandler(

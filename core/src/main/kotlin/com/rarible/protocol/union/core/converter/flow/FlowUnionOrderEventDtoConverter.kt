@@ -2,10 +2,10 @@ package com.rarible.protocol.union.core.converter.flow
 
 import com.rarible.protocol.dto.FlowOrderEventDto
 import com.rarible.protocol.dto.FlowOrderUpdateEventDto
+import com.rarible.protocol.dto.PayInfoDto
 import com.rarible.protocol.union.dto.*
 import org.springframework.core.convert.converter.Converter
 import java.math.BigDecimal
-import java.math.BigInteger
 
 object FlowUnionOrderEventDtoConverter : Converter<FlowOrderEventDto, UnionOrderEventDto> {
 
@@ -15,7 +15,7 @@ object FlowUnionOrderEventDtoConverter : Converter<FlowOrderEventDto, UnionOrder
                 eventId = source.eventId,
                 orderId = source.orderId,
                 order = FlowOrderDto(
-                    id = BigInteger.ONE, //TODO: In Eth there is not such filed,
+                    id = source.orderId, //TODO: In Eth there is not such filed,
                     type = FlowOrderTypeDto.RARIBLE_FLOW_V1,
                     maker = FlowAddress(source.order.maker),
                     taker = source.order.taker?.let { FlowAddress(it) },
@@ -32,15 +32,25 @@ object FlowUnionOrderEventDtoConverter : Converter<FlowOrderEventDto, UnionOrder
                     makePriceUSD = source.order.amountUsd, //TODO: I think need to rename
                     takePriceUSD = source.order.amountUsd, //TODO: I think need to rename
                     priceHistory = emptyList(),
-                    data = FlowOrderDataV1Dto(
-                        //TODO: Maybe data should be Sealed class like Eth
-                        dataType = FlowOrderDataV1Dto.DataType.DATA_V1,
-                        payouts = source.order.data.payouts.map { TODO() },
-                        originFees = source.order.data.originalFees.map { TODO() }
-                    )
+                    data = convert(source.order.data)
                 )
             )
         }
+    }
+
+    fun convert(source: com.rarible.protocol.dto.FlowOrderDataDto): FlowOrderDataDto {
+        return FlowOrderDataV1Dto(
+            payouts = source.payouts.map { convert(it) },
+            originFees = source.originalFees.map { convert(it) }
+        )
+    }
+
+
+    fun convert(source: PayInfoDto): FlowOrderPayoutDto {
+        return FlowOrderPayoutDto(
+            account = FlowAddressConverter.convert(source.account),
+            value = source.value.toBigInteger() // TODO
+        )
     }
 }
 

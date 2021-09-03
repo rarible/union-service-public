@@ -3,8 +3,8 @@ package com.rarible.protocol.union.listener.config.activity
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.ConstructorBinding
 
-@ConfigurationProperties("protocol.activity.subscriber")
+@ConfigurationProperties("protocol.flow-nft.subscriber")
 @ConstructorBinding
-data class EthActivityEventsSubscriberProperties(
+data class FlowActivityEventsSubscriberProperties(
     val brokerReplicaSet: String
 )

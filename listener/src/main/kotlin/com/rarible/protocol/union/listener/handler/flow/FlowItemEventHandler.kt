@@ -6,7 +6,6 @@ import com.rarible.protocol.dto.FlowNftItemEventDto
 import com.rarible.protocol.union.core.converter.flow.FlowUnionItemEventDtoConverter
 import com.rarible.protocol.union.dto.UnionItemEventDto
 import com.rarible.protocol.union.listener.handler.AbstractEventHandler
-import com.rarible.protocol.union.listener.handler.ITEM_EVENT_HEADERS
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
@@ -18,7 +17,7 @@ class FlowItemEventHandler(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     override suspend fun handleSafely(event: FlowNftItemEventDto) {
-        logger.debug("Received Flow item event: type=", event::class.java.simpleName)
+        logger.debug("Received Flow item event: type={}", event::class.java.simpleName)
 
         val unionEventDto = FlowUnionItemEventDtoConverter.convert(event)
 
