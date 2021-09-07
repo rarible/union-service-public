@@ -1,5 +1,5 @@
 {
-  "EthAddress": "com.rarible.protocol.union.dto.EthAddress",
-  "FlowAddress": "com.rarible.protocol.union.dto.FlowAddress",
-  "FlowContract": "com.rarible.protocol.union.dto.FlowContract"
+  "EthAddress": "com.rarible.protocol.union.dto.ethereum.EthAddress",
+  "FlowAddress": "com.rarible.protocol.union.dto.flow.FlowAddress",
+  "FlowContract": "com.rarible.protocol.union.dto.flow.FlowContract"
 }

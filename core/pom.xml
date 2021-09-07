@@ -58,33 +58,29 @@
         <!-- ============= Eth Protocol-API ============== -->
         <dependency>
             <groupId>com.rarible.protocol</groupId>
-            <artifactId>protocol-model-nft</artifactId>
+            <artifactId>protocol-client-nft-starter</artifactId>
         </dependency>
         <dependency>
             <groupId>com.rarible.protocol</groupId>
-            <artifactId>protocol-model-order</artifactId>
+            <artifactId>protocol-client-order-starter</artifactId>
         </dependency>
         <dependency>
             <groupId>com.rarible.protocol</groupId>
-            <artifactId>protocol-model-erc20</artifactId>
+            <artifactId>protocol-client-erc20-starter</artifactId>
         </dependency>
         <dependency>
             <groupId>com.rarible.protocol</groupId>
-            <artifactId>protocol-model-nft-order</artifactId>
+            <artifactId>protocol-client-nft-order-starter</artifactId>
         </dependency>
         <dependency>
             <groupId>com.rarible.protocol</groupId>
-            <artifactId>protocol-model-unlockable</artifactId>
+            <artifactId>protocol-client-unlockable-starter</artifactId>
         </dependency>
+        <!-- =============== Flow Protocol API =========== -->
 
-        <!-- ============= Flow Protocol-API ============== -->
         <dependency>
             <groupId>com.rarible.protocol</groupId>
-            <artifactId>flow-protocol-model-nft</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.rarible.protocol</groupId>
-            <artifactId>flow-protocol-model-order</artifactId>
+            <artifactId>flow-protocol-client-nft-starter</artifactId>
         </dependency>
 
         <!-- ================== Spring =================== -->

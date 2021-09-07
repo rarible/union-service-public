@@ -43,9 +43,9 @@ class UnionListenerConfiguration(
 ) {
 
     companion object {
-        private val FLOW = "flow"
-        private val ETHEREUM = Blockchain.ETHEREUM.value
-        private val POLYGON = Blockchain.POLYGON.value
+        private val FLOW = FlowBlockchainDto.FLOW.name.toLowerCase()
+        private val ETHEREUM = EthBlockchainDto.ETHEREUM.name.toLowerCase()
+        private val POLYGON = EthBlockchainDto.POLYGON.name.toLowerCase()
     }
 
     private val env = applicationEnvironmentInfo.name
@@ -76,28 +76,28 @@ class UnionListenerConfiguration(
     @Bean
     fun ethereumItemWorker(factory: NftIndexerEventsConsumerFactory): SingleConsumerWorker<NftItemEventDto> {
         val consumer = factory.createItemEventsConsumer(consumerGroup(Entity.ITEM), Blockchain.ETHEREUM)
-        val handler = EthereumItemEventHandler(unionItemEventProducer(), Blockchain.ETHEREUM)
+        val handler = EthereumItemEventHandler(unionItemEventProducer(), EthBlockchainDto.ETHEREUM)
         return createConsumerWorker(consumer, handler, ETHEREUM, Entity.ITEM)
     }
 
     @Bean
     fun ethereumOwnershipWorker(factory: NftIndexerEventsConsumerFactory): SingleConsumerWorker<NftOwnershipEventDto> {
         val consumer = factory.createOwnershipEventsConsumer(consumerGroup(Entity.OWNERSHIP), Blockchain.ETHEREUM)
-        val handler = EthereumOwnershipEventHandler(unionOwnershipEventProducer(), Blockchain.ETHEREUM)
+        val handler = EthereumOwnershipEventHandler(unionOwnershipEventProducer(), EthBlockchainDto.ETHEREUM)
         return createConsumerWorker(consumer, handler, ETHEREUM, Entity.OWNERSHIP)
     }
 
     @Bean
     fun ethereumOrderWorker(factory: OrderIndexerEventsConsumerFactory): SingleConsumerWorker<OrderEventDto> {
         val consumer = factory.createOrderEventsConsumer(consumerGroup(Entity.ORDER), Blockchain.ETHEREUM)
-        val handler = EthereumOrderEventHandler(unionOrderEventProducer(), Blockchain.ETHEREUM)
+        val handler = EthereumOrderEventHandler(unionOrderEventProducer(), EthBlockchainDto.ETHEREUM)
         return createConsumerWorker(consumer, handler, ETHEREUM, Entity.ORDER)
     }
 
     @Bean
     fun ethereumActivityWorker(factory: EthActivityEventsConsumerFactory): SingleConsumerWorker<ActivityDto> {
         val consumer = factory.createActivityConsumer(consumerGroup(Entity.ACTIVITY), Blockchain.ETHEREUM)
-        val handler = EthereumActivityEventHandler(unionActivityEventProducer(), Blockchain.ETHEREUM)
+        val handler = EthereumActivityEventHandler(unionActivityEventProducer(), EthBlockchainDto.ETHEREUM)
         return createConsumerWorker(consumer, handler, ETHEREUM, Entity.ACTIVITY)
     }
 
@@ -105,28 +105,28 @@ class UnionListenerConfiguration(
     @Bean
     fun polygonItemWorker(factory: NftIndexerEventsConsumerFactory): SingleConsumerWorker<NftItemEventDto> {
         val consumer = factory.createItemEventsConsumer(consumerGroup(Entity.ITEM), Blockchain.POLYGON)
-        val handler = EthereumItemEventHandler(unionItemEventProducer(), Blockchain.POLYGON)
+        val handler = EthereumItemEventHandler(unionItemEventProducer(), EthBlockchainDto.POLYGON)
         return createConsumerWorker(consumer, handler, POLYGON, Entity.ITEM)
     }
 
     @Bean
     fun polygonOwnershipWorker(factory: NftIndexerEventsConsumerFactory): SingleConsumerWorker<NftOwnershipEventDto> {
         val consumer = factory.createOwnershipEventsConsumer(consumerGroup(Entity.OWNERSHIP), Blockchain.POLYGON)
-        val handler = EthereumOwnershipEventHandler(unionOwnershipEventProducer(), Blockchain.POLYGON)
+        val handler = EthereumOwnershipEventHandler(unionOwnershipEventProducer(), EthBlockchainDto.POLYGON)
         return createConsumerWorker(consumer, handler, POLYGON, Entity.OWNERSHIP)
     }
 
     @Bean
     fun polygonOrderWorker(factory: OrderIndexerEventsConsumerFactory): SingleConsumerWorker<OrderEventDto> {
         val consumer = factory.createOrderEventsConsumer(consumerGroup(Entity.ORDER), Blockchain.POLYGON)
-        val handler = EthereumOrderEventHandler(unionOrderEventProducer(), Blockchain.POLYGON)
+        val handler = EthereumOrderEventHandler(unionOrderEventProducer(), EthBlockchainDto.POLYGON)
         return createConsumerWorker(consumer, handler, POLYGON, Entity.ORDER)
     }
 
     @Bean
     fun polygonActivityWorker(factory: EthActivityEventsConsumerFactory): SingleConsumerWorker<ActivityDto> {
         val consumer = factory.createActivityConsumer(consumerGroup(Entity.ACTIVITY), Blockchain.POLYGON)
-        val handler = EthereumActivityEventHandler(unionActivityEventProducer(), Blockchain.POLYGON)
+        val handler = EthereumActivityEventHandler(unionActivityEventProducer(), EthBlockchainDto.POLYGON)
         return createConsumerWorker(consumer, handler, POLYGON, Entity.ACTIVITY)
     }
 
@@ -147,28 +147,28 @@ class UnionListenerConfiguration(
     @Bean
     fun flowItemWorker(factory: FlowNftIndexerEventsConsumerFactory): SingleConsumerWorker<FlowNftItemEventDto> {
         val consumer = factory.createItemEventsConsumer(consumerGroup(Entity.ITEM))
-        val handler = FlowItemEventHandler(unionItemEventProducer())
+        val handler = FlowItemEventHandler(unionItemEventProducer(), FlowBlockchainDto.FLOW)
         return createConsumerWorker(consumer, handler, FLOW, Entity.ITEM)
     }
 
     @Bean
     fun flowOwnershipWorker(factory: FlowNftIndexerEventsConsumerFactory): SingleConsumerWorker<FlowOwnershipEventDto> {
         val consumer = factory.createOwnershipEventsConsumer(consumerGroup(Entity.OWNERSHIP))
-        val handler = FlowOwnershipEventHandler(unionOwnershipEventProducer())
+        val handler = FlowOwnershipEventHandler(unionOwnershipEventProducer(), FlowBlockchainDto.FLOW)
         return createConsumerWorker(consumer, handler, FLOW, Entity.OWNERSHIP)
     }
 
     @Bean
     fun flowOrderChangeWorker(factory: FlowNftIndexerEventsConsumerFactory): SingleConsumerWorker<FlowOrderEventDto> {
-        val handler = FlowOrderEventHandler(unionOrderEventProducer())
         val consumer = factory.createORderEventsConsumer(consumerGroup(Entity.ORDER))
+        val handler = FlowOrderEventHandler(unionOrderEventProducer(), FlowBlockchainDto.FLOW)
         return createConsumerWorker(consumer, handler, FLOW, Entity.ORDER)
     }
 
     @Bean
     fun flowActivityWorker(factory: FlowActivityEventsConsumerFactory): SingleConsumerWorker<FlowActivityDto> {
-        val handler = FlowActivityEventHandler(unionActivityEventProducer())
         val consumer = factory.createActivityConsumer(consumerGroup(Entity.ACTIVITY))
+        val handler = FlowActivityEventHandler(unionActivityEventProducer(), FlowBlockchainDto.FLOW)
         return createConsumerWorker(consumer, handler, FLOW, Entity.ACTIVITY)
     }
 

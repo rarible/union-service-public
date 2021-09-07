@@ -8,15 +8,18 @@ import com.rarible.protocol.dto.*
 import com.rarible.protocol.dto.FlowActivityDto
 import com.rarible.protocol.dto.FlowOrderEventDto
 import com.rarible.protocol.dto.FlowOwnershipEventDto
+import com.rarible.protocol.union.core.CoreConfiguration
 import com.rarible.protocol.union.dto.*
-import com.rarible.protocol.union.listener.config.UnionKafkaJsonDeserializer
 import com.rarible.protocol.union.listener.config.UnionKafkaJsonSerializer
 import com.rarible.protocol.union.listener.config.activity.FlowActivityTopicProvider
+import com.rarible.protocol.union.subscriber.UnionKafkaJsonDeserializer
 import org.apache.kafka.clients.consumer.OffsetResetStrategy
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Import
 
 @TestConfiguration
+@Import(CoreConfiguration::class)
 class IntegrationTestConfiguration {
 
     @Bean

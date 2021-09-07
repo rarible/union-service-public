@@ -34,34 +34,6 @@
             <artifactId>protocol-union-api</artifactId>
         </dependency>
 
-        <!-- ============= Eth Protocol-API ============== -->
-        <dependency>
-            <groupId>com.rarible.protocol</groupId>
-            <artifactId>protocol-client-nft-starter</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.rarible.protocol</groupId>
-            <artifactId>protocol-client-order-starter</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.rarible.protocol</groupId>
-            <artifactId>protocol-client-erc20-starter</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.rarible.protocol</groupId>
-            <artifactId>protocol-client-nft-order-starter</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.rarible.protocol</groupId>
-            <artifactId>protocol-client-unlockable-starter</artifactId>
-        </dependency>
-        <!-- =============== Flow Protocol API =========== -->
-
-        <dependency>
-            <groupId>com.rarible.protocol</groupId>
-            <artifactId>flow-protocol-client-nft-starter</artifactId>
-        </dependency>
-
         <!-- =============== Rarible-core ================ -->
         <dependency>
             <groupId>com.rarible.core</groupId>
@@ -82,11 +54,34 @@
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
 
+        <!-- ================== Other =================== -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+        </dependency>
+
         <!-- ================== Test ===================== -->
 
         <dependency>
             <groupId>com.rarible.protocol.union</groupId>
+            <artifactId>rarible-union-core</artifactId>
+            <classifier>tests</classifier>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.rarible.protocol.union</groupId>
             <artifactId>protocol-union-client</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.rarible.core</groupId>
+            <artifactId>rarible-core-test-common</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.mockk</groupId>
+            <artifactId>mockk</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

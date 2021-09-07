@@ -1,13 +1,19 @@
 package com.rarible.protocol.union.api.controller
 
+import com.rarible.protocol.union.api.continuation.ContinuationPaging
+import com.rarible.protocol.union.core.service.ItemServiceRouter
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.IdParser
 import com.rarible.protocol.union.dto.UnionItemDto
 import com.rarible.protocol.union.dto.UnionItemsDto
+import com.rarible.protocol.union.dto.continuation.UnionItemContinuationFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-class ItemController : ItemControllerApi {
+class ItemController(
+    private val router: ItemServiceRouter
+) : ItemControllerApi {
 
     override suspend fun getAllItems(
         blockchains: List<BlockchainDto>?,
@@ -18,14 +24,28 @@ class ItemController : ItemControllerApi {
         lastUpdatedTo: Long?,
         includeMeta: Boolean?
     ): ResponseEntity<UnionItemsDto> {
-        TODO("Not yet implemented")
+        val blockchainPages = router.executeForAll(blockchains) {
+            it.getAllItems(continuation, size, showDeleted, lastUpdatedFrom, lastUpdatedTo, includeMeta)
+        }
+
+        val total = blockchainPages.map { it.total }.sum()
+
+        val combinedPage = ContinuationPaging(
+            UnionItemContinuationFactory.ByLastUpdatedAndId,
+            blockchainPages.flatMap { it.items }
+        ).getPage(size)
+
+        val result = UnionItemsDto(total, combinedPage.continuation.toString(), combinedPage.entities)
+        return ResponseEntity.ok(result)
     }
 
     override suspend fun getItemById(
         itemId: String,
         includeMeta: Boolean?
     ): ResponseEntity<UnionItemDto> {
-        TODO("Not yet implemented")
+        val (blockchain, rawItemId) = IdParser.parse(itemId)
+        val result = router.getService(blockchain).getItemById(rawItemId, includeMeta)
+        return ResponseEntity.ok(result)
     }
 
     override suspend fun getItemsByCollection(
@@ -34,7 +54,9 @@ class ItemController : ItemControllerApi {
         size: Int?,
         includeMeta: Boolean?
     ): ResponseEntity<UnionItemsDto> {
-        TODO("Not yet implemented")
+        val (blockchain, rawCollection) = IdParser.parse(collection)
+        val result = router.getService(blockchain).getItemsByCollection(rawCollection, continuation, size, includeMeta)
+        return ResponseEntity.ok(result)
     }
 
     override suspend fun getItemsByCreator(
@@ -43,7 +65,9 @@ class ItemController : ItemControllerApi {
         size: Int?,
         includeMeta: Boolean?
     ): ResponseEntity<UnionItemsDto> {
-        TODO("Not yet implemented")
+        val (blockchain, rawCreator) = IdParser.parse(creator)
+        val result = router.getService(blockchain).getItemsByCreator(rawCreator, continuation, size, includeMeta)
+        return ResponseEntity.ok(result)
     }
 
     override suspend fun getItemsByOwner(
@@ -52,7 +76,8 @@ class ItemController : ItemControllerApi {
         size: Int?,
         includeMeta: Boolean?
     ): ResponseEntity<UnionItemsDto> {
-        TODO("Not yet implemented")
+        val (blockchain, rawOwner) = IdParser.parse(owner)
+        val result = router.getService(blockchain).getItemsByOwner(rawOwner, continuation, size, includeMeta)
+        return ResponseEntity.ok(result)
     }
-
 }

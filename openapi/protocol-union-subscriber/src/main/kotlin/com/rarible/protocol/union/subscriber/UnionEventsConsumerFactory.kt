@@ -1,7 +1,6 @@
 package com.rarible.protocol.union.subscriber
 
 import com.rarible.core.kafka.RaribleKafkaConsumer
-import com.rarible.core.kafka.json.JsonDeserializer
 import com.rarible.protocol.union.dto.UnionEventTopicProvider
 import com.rarible.protocol.union.dto.UnionItemEventDto
 import com.rarible.protocol.union.dto.UnionOrderEventDto
@@ -19,7 +18,7 @@ class UnionEventsConsumerFactory(
     fun createUnionItemConsumer(consumerGroup: String): RaribleKafkaConsumer<UnionItemEventDto> {
         return RaribleKafkaConsumer(
             clientId = "$clientIdPrefix.union-item-consumer",
-            valueDeserializerClass = JsonDeserializer::class.java,
+            valueDeserializerClass = UnionKafkaJsonDeserializer::class.java,
             valueClass = UnionItemEventDto::class.java,
             consumerGroup = consumerGroup,
             defaultTopic = UnionEventTopicProvider.getItemTopic(environment),
@@ -30,7 +29,7 @@ class UnionEventsConsumerFactory(
     fun createUnionOwnershipConsumer(consumerGroup: String): RaribleKafkaConsumer<UnionOwnershipEventDto> {
         return RaribleKafkaConsumer(
             clientId = "$clientIdPrefix.union-ownership-consumer",
-            valueDeserializerClass = JsonDeserializer::class.java,
+            valueDeserializerClass = UnionKafkaJsonDeserializer::class.java,
             valueClass = UnionOwnershipEventDto::class.java,
             consumerGroup = consumerGroup,
             defaultTopic = UnionEventTopicProvider.getOwnershipTopic(environment),
@@ -41,7 +40,7 @@ class UnionEventsConsumerFactory(
     fun createUnionOrderConsumer(consumerGroup: String): RaribleKafkaConsumer<UnionOrderEventDto> {
         return RaribleKafkaConsumer(
             clientId = "$clientIdPrefix.union-order-consumer",
-            valueDeserializerClass = JsonDeserializer::class.java,
+            valueDeserializerClass = UnionKafkaJsonDeserializer::class.java,
             valueClass = UnionOrderEventDto::class.java,
             consumerGroup = consumerGroup,
             defaultTopic = UnionEventTopicProvider.getOrderTopic(environment),
