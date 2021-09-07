@@ -6,37 +6,43 @@ import com.rarible.core.test.data.randomBigInt
 import com.rarible.core.test.data.randomInt
 import com.rarible.core.test.data.randomWord
 import com.rarible.protocol.dto.*
-import com.rarible.protocol.union.core.converter.ethereum.EthTypesConverter
-import com.rarible.protocol.union.dto.EthAddress
+import com.rarible.protocol.union.core.ethereum.converter.EthConverter
+import com.rarible.protocol.union.dto.EthBlockchainDto
 import com.rarible.protocol.union.dto.EthItemIdDto
 import com.rarible.protocol.union.dto.EthOwnershipIdDto
-import com.rarible.protocol.union.dto.serializer.eth.EthItemIdParser
-import com.rarible.protocol.union.dto.serializer.eth.EthOwnershipIdParser
+import com.rarible.protocol.union.dto.ethereum.EthAddress
+import com.rarible.protocol.union.dto.ethereum.EthItemIdProvider
+import com.rarible.protocol.union.dto.ethereum.EthOwnershipIdProvider
 import io.daonomic.rpc.domain.Word
 import scalether.domain.Address
 
-fun randomAddressString() = EthTypesConverter.convert(randomAddress())
+fun randomAddressString() = EthConverter.convert(randomAddress())
+
+fun randomEthAddress() = EthAddress(EthBlockchainDto.ETHEREUM, randomAddressString())
+fun randomPolygonAddress() = EthAddress(EthBlockchainDto.POLYGON, randomAddressString())
 
 fun randomEthPartDto() = randomEthPartDto(randomAddress())
 fun randomEthPartDto(account: Address) = PartDto(account, randomInt())
 
 fun randomEthItemIdShortValue() = "${randomAddressString()}:${randomBigInt()}"
 fun randomEthItemIdFullValue() = "ETHEREUM:${randomEthItemIdShortValue()}"
+fun randomPolygonItemIdFullValue() = "POLYGON:${randomEthItemIdShortValue()}"
 
-fun randomEthItemId() = EthItemIdParser.parseShort(randomEthItemIdShortValue())
+fun randomEthItemId() = EthItemIdProvider.parseFull(randomEthItemIdFullValue())
 
 fun randomEthOwnershipIdShortValue() = "${randomEthItemIdShortValue()}:${randomAddressString()}"
 fun randomEthOwnershipIdFullValue() = "ETHEREUM:${randomEthOwnershipIdShortValue()}"
+fun randomPolygonOwnershipIdFullValue() = "POLYGON:${randomEthOwnershipIdShortValue()}"
 
-fun randomEthOwnershipId() = EthOwnershipIdParser.parseShort(randomEthOwnershipIdShortValue())
+fun randomEthOwnershipId() = EthOwnershipIdProvider.parseFull(randomEthOwnershipIdFullValue())
 fun randomEthOwnershipId(itemId: EthItemIdDto) = randomEthOwnershipId(itemId, randomAddressString())
-
 fun randomEthOwnershipId(itemId: EthItemIdDto, owner: String): EthOwnershipIdDto {
     return EthOwnershipIdDto(
         value = "${itemId.value}:${owner}",
         token = itemId.token,
         tokenId = itemId.tokenId,
-        owner = EthAddress(owner)
+        owner = EthAddress(EthBlockchainDto.ETHEREUM, owner),
+        blockchain = EthBlockchainDto.ETHEREUM
     )
 }
 
@@ -60,7 +66,7 @@ fun randomEthNftItemDto(itemId: EthItemIdDto, vararg creators: PartDto): NftItem
 
 fun randomEthNftOwnershipDto() = randomEthNftOwnershipDto(randomEthOwnershipId())
 fun randomEthNftOwnershipDto(ownershipId: EthOwnershipIdDto) = randomEthNftOwnershipDto(
-    EthItemIdParser.parseShort("${ownershipId.token.value}:${ownershipId.tokenId}"),
+    EthItemIdProvider.parseShort("${ownershipId.token.value}:${ownershipId.tokenId}", EthBlockchainDto.ETHEREUM),
     PartDto(Address.apply(ownershipId.owner.value), randomInt())
 )
 

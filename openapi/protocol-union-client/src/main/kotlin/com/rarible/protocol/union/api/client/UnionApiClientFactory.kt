@@ -2,6 +2,8 @@ package com.rarible.protocol.union.api.client
 
 import com.rarible.protocol.client.NoopWebClientCustomizer
 import com.rarible.protocol.union.api.ApiClient
+import com.rarible.protocol.union.dto.UnionModelJacksonModule
+import com.rarible.protocol.union.dto.UnionPrimitivesJacksonModule
 import org.springframework.boot.web.reactive.function.client.WebClientCustomizer
 
 open class UnionApiClientFactory(
@@ -30,7 +32,11 @@ open class UnionApiClientFactory(
     }
 
     private fun createApiClient(): ApiClient {
-        return ApiClient(webClientCustomizer)
+        val jacksonMapper = ApiClient.createDefaultObjectMapper()
+            .registerModule(UnionPrimitivesJacksonModule)
+            .registerModule(UnionModelJacksonModule)
+
+        return ApiClient(webClientCustomizer, jacksonMapper)
             .setBasePath(uriProvider.getUri().toASCIIString())
     }
 

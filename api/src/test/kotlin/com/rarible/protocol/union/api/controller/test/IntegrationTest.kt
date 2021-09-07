@@ -9,5 +9,5 @@ import org.springframework.test.context.ActiveProfiles
     properties = ["spring.cloud.bootstrap.enabled=false"]
 )
 @ActiveProfiles("test")
-@Import(value = [ApiTestConfiguration::class])
+@Import(value = [TestApiConfiguration::class])
 annotation class IntegrationTest

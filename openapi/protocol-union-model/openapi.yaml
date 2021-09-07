@@ -9,6 +9,7 @@ components:
       type: string
       enum:
         - ETHEREUM
+        - POLYGON
         - FLOW
 
     ApiError:
@@ -378,12 +379,15 @@ components:
         value:
           type: string
           example: "${blockchain}:${token}:${tokenId}"
+        blockchain:
+          $ref: "#/components/schemas/EthBlockchain"
         token:
           $ref: "#/components/schemas/EthAddress"
         tokenId:
           $ref: "#/components/schemas/BigInteger"
       required:
         - value
+        - blockchain
         - token
         - tokenId
 
@@ -394,8 +398,6 @@ components:
           type: string
           enum:
             - ETHEREUM
-        blockchain:
-          $ref: "#/components/schemas/EthBlockchain"
         id:
           $ref: "#/components/schemas/EthItemId"
         tokenId:
@@ -505,6 +507,8 @@ components:
         value:
           type: string
           example: "${blockchain}:${token}:${tokenId}:${owner}"
+        blockchain:
+          $ref: "#/components/schemas/EthBlockchain"
         token:
           $ref: "#/components/schemas/EthAddress"
         tokenId:
@@ -512,10 +516,11 @@ components:
         owner:
           $ref: "#/components/schemas/EthAddress"
       required:
-        - owner
         - value
+        - blockchain
         - token
         - tokenId
+        - owner
 
     EthOwnership:
       type: object
@@ -524,8 +529,6 @@ components:
           type: string
           enum:
             - ETHEREUM
-        blockchain:
-          $ref: "#/components/schemas/EthBlockchain"
         id:
           $ref: "#/components/schemas/EthOwnershipId"
         contract:
@@ -726,7 +729,7 @@ components:
         originFees:
           type: array
           items:
-            $ref: "#/components/schemas/EthOrderOriginFee"
+            $ref: "#/components/schemas/EthOrderPayout"
       required:
         - payouts
         - originFees
@@ -843,17 +846,6 @@ components:
         - fill
 
     EthOrderPayout:
-      type: object
-      properties:
-        account:
-          $ref: "#/components/schemas/EthAddress"
-        value:
-          $ref: "#/components/schemas/BigInteger"
-      required:
-        - account
-        - value
-
-    EthOrderOriginFee:
       type: object
       properties:
         account:
@@ -1332,12 +1324,15 @@ components:
         value:
           type: string
           example: "${blockchain}:${contract}:${tokenId}"
+        blockchain:
+          $ref: "#/components/schemas/FlowBlockchain"
         token:
           $ref: "#/components/schemas/FlowContract"
         tokenId:
           $ref: "#/components/schemas/BigInteger"
       required:
         - value
+        - blockchain
         - token
         - tokenId
 
@@ -1348,8 +1343,6 @@ components:
           type: string
           enum:
             - FLOW
-        blockchain:
-          $ref: "#/components/schemas/FlowBlockchain"
         id:
           $ref: "#/components/schemas/FlowItemId"
         tokenId:
@@ -1442,6 +1435,8 @@ components:
         value:
           type: string
           example: "${blockchain}:${collection}:${tokenId}:${owner}"
+        blockchain:
+          $ref: "#/components/schemas/FlowBlockchain"
         token:
           $ref: "#/components/schemas/FlowContract"
         tokenId:
@@ -1450,6 +1445,7 @@ components:
           $ref: "#/components/schemas/FlowAddress"
       required:
         - value
+        - blockchain
         - token
         - tokenId
         - owner
