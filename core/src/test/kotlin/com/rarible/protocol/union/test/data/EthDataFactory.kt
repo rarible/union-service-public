@@ -1,10 +1,7 @@
 package com.rarible.protocol.union.test.data
 
 import com.rarible.core.common.nowMillis
-import com.rarible.core.test.data.randomAddress
-import com.rarible.core.test.data.randomBigInt
-import com.rarible.core.test.data.randomInt
-import com.rarible.core.test.data.randomWord
+import com.rarible.core.test.data.*
 import com.rarible.protocol.dto.*
 import com.rarible.protocol.union.core.ethereum.converter.EthConverter
 import com.rarible.protocol.union.dto.EthBlockchainDto
@@ -131,6 +128,20 @@ fun randomEthLegacyOrderDto(make: AssetDto, maker: Address, take: AssetDto): Leg
         priceHistory = listOf()
     )
 }
+
+fun randomEthCollectionDto() = randomEthCollectionDto(randomAddress())
+fun randomEthCollectionDto(id: Address): NftCollectionDto {
+    return NftCollectionDto(
+        id = id,
+        name = randomString(),
+        symbol = randomString(2),
+        type = NftCollectionDto.Type.ERC1155,
+        owner = randomAddress(),
+        features = listOf(NftCollectionDto.Features.values()[randomInt(NftCollectionDto.Features.values().size)]),
+        supportsLazyMint = true
+    )
+}
+
 /*
 fun randomEthOpenSeaV1OrderDto(itemId: ItemId) = randomEthOpenSeaV1OrderDto(itemId, randomAddress())
 fun randomEthOpenSeaV1OrderDto(itemId: ItemId, maker: Address) = randomEthOpenSeaV1OrderDto(

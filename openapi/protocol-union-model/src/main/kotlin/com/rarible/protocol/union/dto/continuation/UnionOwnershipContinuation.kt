@@ -4,7 +4,7 @@ import com.rarible.protocol.union.dto.EthOwnershipDto
 import com.rarible.protocol.union.dto.FlowOwnershipDto
 import com.rarible.protocol.union.dto.UnionOwnershipDto
 
-object UnionOwnershipContinuationFactory {
+object UnionOwnershipContinuation {
 
     object ByLastUpdatedAndId : ContinuationFactory<UnionOwnershipDto, DateIdContinuation> {
         override fun getContinuation(item: UnionOwnershipDto): DateIdContinuation {

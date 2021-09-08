@@ -1264,16 +1264,6 @@ components:
         - source
         - blockchainInfo
 
-    EthFeaturesCollection:
-      type: string
-      enum:
-        - APPROVE_FOR_ALL
-        - SET_URI_PREFIX
-        - BURN
-        - MINT_WITH_ADDRESS
-        - SECONDARY_SALE_FEES
-        - MINT_AND_TRANSFER
-
     EthCollection:
       type: object
       properties:
@@ -1286,16 +1276,29 @@ components:
         type:
           type: string
           enum:
+            - CRYPTO_PUNKS
             - ERC721
             - ERC1155
+        supportsLazyMint:
+          type: boolean
         owner:
           $ref: "#/components/schemas/EthAddress"
         features:
-          $ref: "#/components/schemas/EthFeaturesCollection"
+          type: array
+          items:
+            type: string
+            enum:
+              - APPROVE_FOR_ALL
+              - SET_URI_PREFIX
+              - BURN
+              - MINT_WITH_ADDRESS
+              - SECONDARY_SALE_FEES
+              - MINT_AND_TRANSFER
       required:
         - "@type"
         - id
         - type
+        - supportsLazyMint
         - features
 
     EthOrderEvent:

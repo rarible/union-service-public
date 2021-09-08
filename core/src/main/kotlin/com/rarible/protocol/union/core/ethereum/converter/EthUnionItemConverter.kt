@@ -30,11 +30,11 @@ object EthUnionItemConverter {
         )
     }
 
-    fun convert(items: NftItemsDto, blockchain: EthBlockchainDto): UnionItemsDto {
+    fun convert(page: NftItemsDto, blockchain: EthBlockchainDto): UnionItemsDto {
         return UnionItemsDto(
-            total = items.total,
-            continuation = items.continuation,
-            items = items.items.map { convert(it, blockchain) }
+            total = page.total,
+            continuation = page.continuation,
+            items = page.items.map { convert(it, blockchain) }
         )
     }
 

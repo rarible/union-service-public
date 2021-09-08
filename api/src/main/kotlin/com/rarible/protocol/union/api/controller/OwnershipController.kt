@@ -6,7 +6,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.IdParser
 import com.rarible.protocol.union.dto.UnionOwnershipDto
 import com.rarible.protocol.union.dto.UnionOwnershipsDto
-import com.rarible.protocol.union.dto.continuation.UnionOwnershipContinuationFactory
+import com.rarible.protocol.union.dto.continuation.UnionOwnershipContinuation
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.RestController
 
@@ -27,11 +27,11 @@ class OwnershipController(
         val total = blockchainPages.map { it.total }.sum()
 
         val combinedPage = ContinuationPaging(
-            UnionOwnershipContinuationFactory.ByLastUpdatedAndId,
+            UnionOwnershipContinuation.ByLastUpdatedAndId,
             blockchainPages.flatMap { it.ownerships }
         ).getPage(size)
 
-        val result = UnionOwnershipsDto(total, combinedPage.continuation.toString(), combinedPage.entities)
+        val result = UnionOwnershipsDto(total, combinedPage.printContinuation(), combinedPage.entities)
         return ResponseEntity.ok(result)
     }
 

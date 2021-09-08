@@ -27,11 +27,11 @@ object FlowUnionItemConverter {
         )
     }
 
-    fun convert(items: FlowNftItemsDto, blockchain: FlowBlockchainDto): UnionItemsDto {
+    fun convert(page: FlowNftItemsDto, blockchain: FlowBlockchainDto): UnionItemsDto {
         return UnionItemsDto(
-            total = items.total!!.toLong(), // TODO should be required
-            continuation = items.continuation,
-            items = items.items.map { convert(it, blockchain) }
+            total = page.total!!.toLong(), // TODO should be required
+            continuation = page.continuation,
+            items = page.items.map { convert(it, blockchain) }
         )
     }
 
