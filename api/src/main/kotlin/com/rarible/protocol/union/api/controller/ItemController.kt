@@ -6,7 +6,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.IdParser
 import com.rarible.protocol.union.dto.UnionItemDto
 import com.rarible.protocol.union.dto.UnionItemsDto
-import com.rarible.protocol.union.dto.continuation.UnionItemContinuationFactory
+import com.rarible.protocol.union.dto.continuation.UnionItemContinuation
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.RestController
 
@@ -31,11 +31,11 @@ class ItemController(
         val total = blockchainPages.map { it.total }.sum()
 
         val combinedPage = ContinuationPaging(
-            UnionItemContinuationFactory.ByLastUpdatedAndId,
+            UnionItemContinuation.ByLastUpdatedAndId,
             blockchainPages.flatMap { it.items }
         ).getPage(size)
 
-        val result = UnionItemsDto(total, combinedPage.continuation.toString(), combinedPage.entities)
+        val result = UnionItemsDto(total, combinedPage.printContinuation(), combinedPage.entities)
         return ResponseEntity.ok(result)
     }
 
@@ -55,8 +55,8 @@ class ItemController(
         includeMeta: Boolean?
     ): ResponseEntity<UnionItemsDto> {
         val (blockchain, shortCollection) = IdParser.parse(collection)
-        val result =
-            router.getService(blockchain).getItemsByCollection(shortCollection, continuation, size, includeMeta)
+        val result = router.getService(blockchain)
+            .getItemsByCollection(shortCollection, continuation, size, includeMeta)
         return ResponseEntity.ok(result)
     }
 

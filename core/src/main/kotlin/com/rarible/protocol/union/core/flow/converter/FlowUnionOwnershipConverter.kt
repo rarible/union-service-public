@@ -26,11 +26,11 @@ object FlowUnionOwnershipConverter {
         )
     }
 
-    fun convert(ownerships: FlowNftOwnershipsDto, blockchain: FlowBlockchainDto): UnionOwnershipsDto {
+    fun convert(page: FlowNftOwnershipsDto, blockchain: FlowBlockchainDto): UnionOwnershipsDto {
         return UnionOwnershipsDto(
-            total = ownerships.total.toLong(), // TODO should be long
-            continuation = ownerships.continuation,
-            ownerships = ownerships.ownerships.map { convert(it, blockchain) }
+            total = page.total.toLong(), // TODO should be long
+            continuation = page.continuation,
+            ownerships = page.ownerships.map { convert(it, blockchain) }
         )
     }
 }

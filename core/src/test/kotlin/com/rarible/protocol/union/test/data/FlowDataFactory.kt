@@ -75,6 +75,16 @@ fun randomFlowNftOwnershipDto(itemId: FlowItemIdDto, creator: String): FlowNftOw
     )
 }
 
+fun randomFlowCollectionDto() = randomFlowCollectionDto(randomString())
+fun randomFlowCollectionDto(id: String): FlowNftCollectionDto {
+    return FlowNftCollectionDto(
+        id = id,
+        name = randomString(),
+        symbol = randomString(2),
+        owner = randomString()
+    )
+}
+
 /*
     public final val amount: java.math.BigDecimal /* compiled code */
 

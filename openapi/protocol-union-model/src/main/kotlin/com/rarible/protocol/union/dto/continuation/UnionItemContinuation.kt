@@ -4,7 +4,7 @@ import com.rarible.protocol.union.dto.EthItemDto
 import com.rarible.protocol.union.dto.FlowItemDto
 import com.rarible.protocol.union.dto.UnionItemDto
 
-object UnionItemContinuationFactory {
+object UnionItemContinuation {
 
     object ByLastUpdatedAndId : ContinuationFactory<UnionItemDto, DateIdContinuation> {
         override fun getContinuation(item: UnionItemDto): DateIdContinuation {

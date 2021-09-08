@@ -25,11 +25,11 @@ object EthUnionOwnershipConverter {
         )
     }
 
-    fun convert(ownerships: NftOwnershipsDto, blockchain: EthBlockchainDto): UnionOwnershipsDto {
+    fun convert(page: NftOwnershipsDto, blockchain: EthBlockchainDto): UnionOwnershipsDto {
         return UnionOwnershipsDto(
-            total = ownerships.total,
-            continuation = ownerships.continuation,
-            ownerships = ownerships.ownerships.map { convert(it, blockchain) }
+            total = page.total,
+            continuation = page.continuation,
+            ownerships = page.ownerships.map { convert(it, blockchain) }
         )
     }
 

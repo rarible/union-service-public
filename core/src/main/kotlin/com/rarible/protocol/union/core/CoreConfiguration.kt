@@ -1,13 +1,18 @@
 package com.rarible.protocol.union.core
 
+import com.rarible.protocol.flow.nft.api.client.FlowNftCollectionControllerApi
 import com.rarible.protocol.flow.nft.api.client.FlowNftItemControllerApi
 import com.rarible.protocol.flow.nft.api.client.FlowNftOwnershipControllerApi
+import com.rarible.protocol.nft.api.client.NftCollectionControllerApi
 import com.rarible.protocol.nft.api.client.NftItemControllerApi
 import com.rarible.protocol.nft.api.client.NftOwnershipControllerApi
+import com.rarible.protocol.union.core.ethereum.service.EthereumCollectionService
 import com.rarible.protocol.union.core.ethereum.service.EthereumItemService
 import com.rarible.protocol.union.core.ethereum.service.EthereumOwnershipService
+import com.rarible.protocol.union.core.flow.service.FlowCollectionService
 import com.rarible.protocol.union.core.flow.service.FlowItemService
 import com.rarible.protocol.union.core.flow.service.FlowOwnershipService
+import com.rarible.protocol.union.core.service.CollectionService
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.OwnershipService
 import com.rarible.protocol.union.dto.EthBlockchainDto
@@ -32,6 +37,11 @@ class CoreConfiguration {
         return EthereumOwnershipService(EthBlockchainDto.ETHEREUM, ethereumNftOwnershipApi)
     }
 
+    @Bean
+    fun ethereumCollectionService(@Qualifier("ethereum.collection.api") ethereumNftCollectionApi: NftCollectionControllerApi): CollectionService {
+        return EthereumCollectionService(EthBlockchainDto.ETHEREUM, ethereumNftCollectionApi)
+    }
+
     //--------------------- POLYGON ---------------------//
     @Bean
     fun polygonItemService(@Qualifier("polygon.item.api") ethereumNftItemApi: NftItemControllerApi): ItemService {
@@ -43,6 +53,11 @@ class CoreConfiguration {
         return EthereumOwnershipService(EthBlockchainDto.POLYGON, ethereumNftOwnershipApi)
     }
 
+    @Bean
+    fun polygonCollectionService(@Qualifier("polygon.collection.api") ethereumNftCollectionApi: NftCollectionControllerApi): CollectionService {
+        return EthereumCollectionService(EthBlockchainDto.POLYGON, ethereumNftCollectionApi)
+    }
+
     //---------------------- FLOW -----------------------//
     @Bean
     fun flowItemService(flowNftItemApi: FlowNftItemControllerApi): ItemService {
@@ -52,6 +67,11 @@ class CoreConfiguration {
     @Bean
     fun flowOwnershipService(flowNftOwnershipApi: FlowNftOwnershipControllerApi): OwnershipService {
         return FlowOwnershipService(FlowBlockchainDto.FLOW, flowNftOwnershipApi)
+    }
+
+    @Bean
+    fun flowCollectionService(flowNftCollectionApi: FlowNftCollectionControllerApi): CollectionService {
+        return FlowCollectionService(FlowBlockchainDto.FLOW, flowNftCollectionApi)
     }
 
 }
