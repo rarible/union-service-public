@@ -1,8 +1,10 @@
 package com.rarible.protocol.union.core.flow.converter
 
 import com.rarible.protocol.dto.FlowNftOwnershipDto
+import com.rarible.protocol.dto.FlowNftOwnershipsDto
 import com.rarible.protocol.union.dto.FlowBlockchainDto
 import com.rarible.protocol.union.dto.FlowOwnershipDto
+import com.rarible.protocol.union.dto.UnionOwnershipsDto
 import com.rarible.protocol.union.dto.flow.FlowOwnershipIdProvider
 import java.math.BigInteger
 
@@ -21,6 +23,14 @@ object FlowUnionOwnershipConverter {
             contract = contract,
             tokenId = tokenId,
             owner = listOf(owner)
+        )
+    }
+
+    fun convert(ownerships: FlowNftOwnershipsDto, blockchain: FlowBlockchainDto): UnionOwnershipsDto {
+        return UnionOwnershipsDto(
+            total = ownerships.total.toLong(), // TODO should be long
+            continuation = ownerships.continuation,
+            ownerships = ownerships.ownerships.map { convert(it, blockchain) }
         )
     }
 }

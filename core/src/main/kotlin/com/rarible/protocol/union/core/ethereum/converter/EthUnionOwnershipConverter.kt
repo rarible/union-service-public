@@ -1,9 +1,6 @@
 package com.rarible.protocol.union.core.ethereum.converter
 
-import com.rarible.protocol.dto.ItemHistoryDto
-import com.rarible.protocol.dto.ItemRoyaltyDto
-import com.rarible.protocol.dto.ItemTransferDto
-import com.rarible.protocol.dto.NftOwnershipDto
+import com.rarible.protocol.dto.*
 import com.rarible.protocol.union.dto.*
 import com.rarible.protocol.union.dto.ethereum.EthOwnershipIdProvider
 
@@ -25,6 +22,14 @@ object EthUnionOwnershipConverter {
             creators = source.creators.map { EthConverter.convertToCreator(it, blockchain) },
             lazyValue = source.lazyValue,
             pending = source.pending.map { convert(it, blockchain) }
+        )
+    }
+
+    fun convert(ownerships: NftOwnershipsDto, blockchain: EthBlockchainDto): UnionOwnershipsDto {
+        return UnionOwnershipsDto(
+            total = ownerships.total,
+            continuation = ownerships.continuation,
+            ownerships = ownerships.ownerships.map { convert(it, blockchain) }
         )
     }
 

@@ -43,8 +43,8 @@ class ItemController(
         itemId: String,
         includeMeta: Boolean?
     ): ResponseEntity<UnionItemDto> {
-        val (blockchain, rawItemId) = IdParser.parse(itemId)
-        val result = router.getService(blockchain).getItemById(rawItemId, includeMeta)
+        val (blockchain, shortItemId) = IdParser.parse(itemId)
+        val result = router.getService(blockchain).getItemById(shortItemId, includeMeta)
         return ResponseEntity.ok(result)
     }
 
@@ -54,8 +54,9 @@ class ItemController(
         size: Int?,
         includeMeta: Boolean?
     ): ResponseEntity<UnionItemsDto> {
-        val (blockchain, rawCollection) = IdParser.parse(collection)
-        val result = router.getService(blockchain).getItemsByCollection(rawCollection, continuation, size, includeMeta)
+        val (blockchain, shortCollection) = IdParser.parse(collection)
+        val result =
+            router.getService(blockchain).getItemsByCollection(shortCollection, continuation, size, includeMeta)
         return ResponseEntity.ok(result)
     }
 
@@ -65,8 +66,8 @@ class ItemController(
         size: Int?,
         includeMeta: Boolean?
     ): ResponseEntity<UnionItemsDto> {
-        val (blockchain, rawCreator) = IdParser.parse(creator)
-        val result = router.getService(blockchain).getItemsByCreator(rawCreator, continuation, size, includeMeta)
+        val (blockchain, shortCreator) = IdParser.parse(creator)
+        val result = router.getService(blockchain).getItemsByCreator(shortCreator, continuation, size, includeMeta)
         return ResponseEntity.ok(result)
     }
 
@@ -76,8 +77,8 @@ class ItemController(
         size: Int?,
         includeMeta: Boolean?
     ): ResponseEntity<UnionItemsDto> {
-        val (blockchain, rawOwner) = IdParser.parse(owner)
-        val result = router.getService(blockchain).getItemsByOwner(rawOwner, continuation, size, includeMeta)
+        val (blockchain, shortOwner) = IdParser.parse(owner)
+        val result = router.getService(blockchain).getItemsByOwner(shortOwner, continuation, size, includeMeta)
         return ResponseEntity.ok(result)
     }
 }
