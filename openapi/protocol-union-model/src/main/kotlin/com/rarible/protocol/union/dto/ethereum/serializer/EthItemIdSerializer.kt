@@ -17,6 +17,6 @@ object EthItemIdSerializer : StdSerializer<EthItemIdDto>(EthItemIdDto::class.jav
         provider.defaultSerializeField(EthItemIdDto::blockchain.name, id.blockchain, gen)
         provider.defaultSerializeField(EthItemIdDto::token.name, id.token, gen)
         provider.defaultSerializeField(EthItemIdDto::tokenId.name, id.tokenId, gen)
-        gen.writeEndObject();
+        gen.writeEndObject()
     }
 }

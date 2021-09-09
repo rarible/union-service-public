@@ -8,10 +8,7 @@ import com.rarible.protocol.union.dto.FlowAssetTypeFtDto
 import com.rarible.protocol.union.dto.FlowBlockchainDto
 import com.rarible.protocol.union.dto.FlowItemIdDto
 import com.rarible.protocol.union.dto.FlowOwnershipIdDto
-import com.rarible.protocol.union.dto.flow.FlowAddress
-import com.rarible.protocol.union.dto.flow.FlowContract
-import com.rarible.protocol.union.dto.flow.FlowItemIdProvider
-import com.rarible.protocol.union.dto.flow.FlowOwnershipIdProvider
+import com.rarible.protocol.union.dto.flow.*
 import java.math.BigInteger
 
 fun randomFlowContract() = FlowContract(FlowBlockchainDto.FLOW, randomString(12))
@@ -37,6 +34,10 @@ fun randomFlowOwnershipId(itemId: FlowItemIdDto, owner: String): FlowOwnershipId
         blockchain = FlowBlockchainDto.FLOW
     )
 }
+
+fun randomFlowOrderId() = FlowOrderIdProvider.parseFull(randomFlowOrderIdFullValue())
+fun randomFlowOrderIdFullValue() = randomFlowOrderIdFullValue(randomLong())
+fun randomFlowOrderIdFullValue(id: Long) = "FLOW:$id"
 
 fun randomFlowNftItemDto() = randomFlowNftItemDto(randomFlowItemId(), randomString())
 fun randomFlowNftItemDto(itemId: FlowItemIdDto) = randomFlowNftItemDto(itemId, randomString())
@@ -85,38 +86,9 @@ fun randomFlowCollectionDto(id: String): FlowNftCollectionDto {
     )
 }
 
-/*
-    public final val amount: java.math.BigDecimal /* compiled code */
-
-    public final val amountUsd: java.math.BigDecimal /* compiled code */
-
-    public final val cancelled: kotlin.Boolean /* compiled code */
-
-    public final val collection: kotlin.String /* compiled code */
-
-    public final val createdAt: java.time.Instant /* compiled code */
-
-    public final val data: com.rarible.protocol.dto.FlowOrderDataDto /* compiled code */
-
-    public final val fill: java.math.BigInteger /* compiled code */
-
-    public final val itemId: kotlin.String /* compiled code */
-
-    public final val lastUpdateAt: java.time.Instant /* compiled code */
-
-    public final val make: com.rarible.protocol.dto.FlowAssetDto /* compiled code */
-
-    public final val maker: kotlin.String /* compiled code */
-
-    public final val offeredNftId: kotlin.String? /* compiled code */
-
-    public final val take: com.rarible.protocol.dto.FlowAssetDto? /* compiled code */
-
-    public final val taker: kotlin.String? /* compiled code */
- */
-
-fun randomFlowV1Order(): FlowOrderDto {
+fun randomFlowV1OrderDto(): FlowOrderDto {
     return FlowOrderDto(
+        id = randomLong(),
         itemId = randomFlowItemIdShortValue(),
         maker = randomFlowAddress().value,
         taker = randomFlowAddress().value,

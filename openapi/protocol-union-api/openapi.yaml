@@ -331,13 +331,13 @@ paths:
   # NFT Order Controller
   #
 
-  /v0.1/union/orders/{hashOrId}:
+  /v0.1/union/orders/{id}:
     get:
       tags:
         - order-controller
-      operationId: getOrderByHashOrId
+      operationId: getOrderById
       parameters:
-        - name: "hashOrId"
+        - name: "id"
           in: "path"
           required: true
           schema:
@@ -348,7 +348,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UnionOrders"
+                $ref: "#/components/schemas/UnionOrder"
         "500":
           description: "Internal Server Error"
           content:
@@ -356,13 +356,13 @@ paths:
               schema:
                 $ref: "#/components/schemas/ApiError"
 
-  /v0.1/union/orders/{hashOrId}/updateMakeStock:
+  /v0.1/union/orders/{id}/updateMakeStock:
     get:
       tags:
         - order-controller
       operationId: "updateOrderMakeStock"
       parameters:
-        - name: "hashOrId"
+        - name: "id"
           in: path
           required: true
           schema:
@@ -373,7 +373,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UnionOrders"
+                $ref: "#/components/schemas/UnionOrder"
         "500":
           description: "Internal Server Error"
           content:
@@ -394,6 +394,11 @@ paths:
             type: array
             items:
               $ref: "#/components/schemas/Blockchain"
+        - name: platform
+          in: query
+          required: false
+          schema:
+            "$ref": "#/components/schemas/Platform"
         - name: "origin"
           in: query
           required: false
@@ -429,6 +434,11 @@ paths:
         - order-controller
       operationId: getSellOrdersByMaker
       parameters:
+        - name: platform
+          in: query
+          required: false
+          schema:
+            "$ref": "#/components/schemas/Platform"
         - name: "maker"
           in: query
           required: true
@@ -470,6 +480,11 @@ paths:
         - order-controller
       operationId: getSellOrdersByItem
       parameters:
+        - name: platform
+          in: query
+          required: false
+          schema:
+            "$ref": "#/components/schemas/Platform"
         - name: "contract"
           in: query
           required: true
@@ -521,6 +536,11 @@ paths:
         - order-controller
       operationId: getSellOrdersByCollection
       parameters:
+        - name: platform
+          in: query
+          required: false
+          schema:
+            "$ref": "#/components/schemas/Platform"
         - name: "collection"
           in: query
           required: true
@@ -563,6 +583,18 @@ paths:
         - order-controller
       operationId: getSellOrders
       parameters:
+        - name: "blockchains"
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              $ref: "#/components/schemas/Blockchain"
+        - name: platform
+          in: query
+          required: false
+          schema:
+            "$ref": "#/components/schemas/Platform"
         - name: "origin"
           in: query
           required: false
@@ -600,6 +632,11 @@ paths:
         - order-controller
       operationId: getOrderBidsByMaker
       parameters:
+        - name: platform
+          in: query
+          required: false
+          schema:
+            "$ref": "#/components/schemas/Platform"
         - name: "maker"
           in: query
           required: true
@@ -642,6 +679,11 @@ paths:
         - order-controller
       operationId: getOrderBidsByItem
       parameters:
+        - name: platform
+          in: query
+          required: false
+          schema:
+            "$ref": "#/components/schemas/Platform"
         - name: "contract"
           in: query
           required: true

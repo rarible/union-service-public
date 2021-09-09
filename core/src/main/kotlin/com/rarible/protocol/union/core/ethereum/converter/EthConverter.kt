@@ -4,6 +4,7 @@ import com.rarible.protocol.dto.*
 import com.rarible.protocol.dto.FlowAssetTypeDto
 import com.rarible.protocol.union.dto.*
 import com.rarible.protocol.union.dto.EthAssetTypeDto
+import com.rarible.protocol.union.dto.PlatformDto
 import io.daonomic.rpc.domain.Binary
 import io.daonomic.rpc.domain.Word
 import scalether.domain.Address
@@ -13,6 +14,15 @@ object EthConverter {
     fun convert(address: Address) = address.prefixed()
     fun convert(word: Word) = word.prefixed()
     fun convert(binary: Binary) = binary.prefixed()
+
+    fun convert(source: PlatformDto?): com.rarible.protocol.dto.PlatformDto {
+        return when (source) {
+            null -> com.rarible.protocol.dto.PlatformDto.ALL
+            PlatformDto.ALL -> com.rarible.protocol.dto.PlatformDto.ALL
+            PlatformDto.RARIBLE -> com.rarible.protocol.dto.PlatformDto.RARIBLE
+            PlatformDto.OPEN_SEA -> com.rarible.protocol.dto.PlatformDto.OPEN_SEA
+        }
+    }
 
     fun convertToPayout(source: PartDto, blockchain: EthBlockchainDto): EthOrderPayoutDto {
         return EthOrderPayoutDto(

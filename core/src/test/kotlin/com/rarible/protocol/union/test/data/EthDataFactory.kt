@@ -6,6 +6,7 @@ import com.rarible.protocol.dto.*
 import com.rarible.protocol.union.core.ethereum.converter.EthConverter
 import com.rarible.protocol.union.dto.EthBlockchainDto
 import com.rarible.protocol.union.dto.EthItemIdDto
+import com.rarible.protocol.union.dto.EthOrderIdDto
 import com.rarible.protocol.union.dto.EthOwnershipIdDto
 import com.rarible.protocol.union.dto.ethereum.EthAddress
 import com.rarible.protocol.union.dto.ethereum.EthItemIdProvider
@@ -42,6 +43,14 @@ fun randomEthOwnershipId(itemId: EthItemIdDto, owner: String): EthOwnershipIdDto
         blockchain = EthBlockchainDto.ETHEREUM
     )
 }
+
+fun randomEthOrderId() = EthOrderIdDto(randomWord(), EthBlockchainDto.ETHEREUM)
+fun randomEthOrderIdFullValue() = "ETHEREUM:${randomWord()}"
+fun randomEthOrderIdFullValue(hash: Word) = "ETHEREUM:${EthConverter.convert(hash)}"
+
+fun randomPolygonOrderId() = EthOrderIdDto(randomWord(), EthBlockchainDto.POLYGON)
+fun randomPolygonOrderIdFullValue() = "POLYGON:${randomWord()}"
+fun randomPolygonOrderIdFullValue(hash: Word) = "POLYGON:${EthConverter.convert(hash)}"
 
 fun randomEthNftItemDto() = randomEthNftItemDto(randomEthItemId(), randomEthPartDto())
 fun randomEthNftItemDto(itemId: EthItemIdDto, vararg creators: PartDto): NftItemDto {

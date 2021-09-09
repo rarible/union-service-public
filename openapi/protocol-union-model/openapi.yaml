@@ -5,6 +5,13 @@ paths:
 components:
   schemas:
 
+    Platform:
+      type: string
+      enum:
+        - ALL
+        - RARIBLE
+        - OPEN_SEA
+
     Blockchain:
       type: string
       enum:
@@ -207,7 +214,7 @@ components:
           type: string
           format: "date-time"
         makeStock:
-          $ref: "#/components/schemas/BigDecimal"
+          $ref: "#/components/schemas/BigInteger"
         cancelled:
           type: "boolean"
         createdAt:
@@ -218,9 +225,9 @@ components:
           format: "date-time"
         makeBalance:
           $ref: "#/components/schemas/BigDecimal"
-        makePriceUSD:
+        makePriceUsd:
           $ref: "#/components/schemas/BigDecimal"
-        takePriceUSD:
+        takePriceUsd:
           $ref: "#/components/schemas/BigDecimal"
         priceHistory:
           type: array
@@ -256,10 +263,6 @@ components:
     UnionOrders:
       type: object
       properties:
-        total:
-          type: integer
-          format: int64
-          description: "Number of ownerships were found by request"
         continuation:
           type: string
           description: "Continuation token to paginate Ownerships search result"
@@ -633,6 +636,18 @@ components:
 
     #################### Order - Eth ####################
 
+    EthOrderId:
+      type: object
+      properties:
+        value:
+          type: string
+          example: "${blockchain}:${id}"
+        blockchain:
+          $ref: "#/components/schemas/EthBlockchain"
+      required:
+        - blockchain
+        - value
+
     EthOrder:
       type: object
       properties:
@@ -640,6 +655,8 @@ components:
           type: string
           enum:
             - ETHEREUM
+        id:
+          $ref: "#/components/schemas/EthOrderId"
         maker:
           $ref: "#/components/schemas/EthAddress"
         taker:
@@ -656,17 +673,15 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/EthPendingOrder"
-        hash:
-          type: string
       required:
         - "@type"
+        - id
         - type
         - maker
         - make
         - take
         - salt
         - data
-        - hash
       oneOf:
         - "$ref": "#/components/schemas/EthLegacyOrder"
         - "$ref": "#/components/schemas/EthRaribleV2Order"
@@ -833,14 +848,14 @@ components:
           $ref: "#/components/schemas/EthAddress"
         counterHash:
           type: string
-        makeUSD:
-          $ref: "#/components/schemas/BigInteger"
-        takeUSD:
-          $ref: "#/components/schemas/BigInteger"
-        makePriceUSD:
-          $ref: "#/components/schemas/BigInteger"
-        takePriceUSD:
-          $ref: "#/components/schemas/BigInteger"
+        makeUsd:
+          $ref: "#/components/schemas/BigDecimal"
+        takeUsd:
+          $ref: "#/components/schemas/BigDecimal"
+        makePriceUsd:
+          $ref: "#/components/schemas/BigDecimal"
+        takePriceUsd:
+          $ref: "#/components/schemas/BigDecimal"
       required:
         - "@type"
         - fill
@@ -1516,6 +1531,18 @@ components:
 
     #################### Order - Flow ####################
 
+    FlowOrderId:
+      type: object
+      properties:
+        value:
+          type: string
+          example: "${blockchain}:${id}"
+        blockchain:
+          $ref: "#/components/schemas/FlowBlockchain"
+      required:
+        - blockchain
+        - value
+
     FlowOrder:
       type: object
       properties:
@@ -1524,7 +1551,7 @@ components:
           enum:
             - FLOW
         id:
-          type: string
+          $ref: "#/components/schemas/FlowOrderId"
         type:
           $ref: "#/components/schemas/FlowOrderType"
         maker:
@@ -1538,6 +1565,7 @@ components:
         data:
           $ref: "#/components/schemas/FlowOrderData"
       required:
+        - "@type"
         - id
         - type
         - maker

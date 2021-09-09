@@ -3,15 +3,15 @@ package com.rarible.protocol.union.dto.ethereum.serializer
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.databind.SerializerProvider
 import com.fasterxml.jackson.databind.ser.std.StdSerializer
-import com.rarible.protocol.union.dto.ethereum.EthAddress
+import com.rarible.protocol.union.dto.EthOrderIdDto
 
-object EthAddressSerializer : StdSerializer<EthAddress>(EthAddress::class.java) {
+object EthOrderIdSerializer : StdSerializer<EthOrderIdDto>(EthOrderIdDto::class.java) {
 
-    override fun serialize(value: EthAddress?, gen: JsonGenerator, provider: SerializerProvider?) {
+    override fun serialize(value: EthOrderIdDto?, gen: JsonGenerator, provider: SerializerProvider?) {
         if (value == null) {
             gen.writeNull()
             return
         }
-        gen.writeString(value.toString())
+        gen.writeString("${value.blockchain.name}:${value.value}")
     }
 }

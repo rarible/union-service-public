@@ -6,7 +6,7 @@ import com.rarible.protocol.dto.FlowOrderEventDto
 import com.rarible.protocol.dto.FlowOrderUpdateEventDto
 import com.rarible.protocol.union.listener.test.AbstractIntegrationTest
 import com.rarible.protocol.union.listener.test.IntegrationTest
-import com.rarible.protocol.union.test.data.randomFlowV1Order
+import com.rarible.protocol.union.test.data.randomFlowV1OrderDto
 import kotlinx.coroutines.FlowPreview
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
@@ -17,7 +17,7 @@ class FlowOrderEventHandlerFt : AbstractIntegrationTest() {
 
     @Test
     fun `flow order update event`() = runWithKafka {
-        val flowOrder = randomFlowV1Order()
+        val flowOrder = randomFlowV1OrderDto()
         val flowOrderId = flowOrder.itemId // TODO
         val dto: FlowOrderEventDto = FlowOrderUpdateEventDto(randomString(), flowOrderId, flowOrder)
 
