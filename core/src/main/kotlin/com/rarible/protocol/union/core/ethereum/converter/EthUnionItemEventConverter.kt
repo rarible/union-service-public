@@ -16,7 +16,7 @@ object EthUnionItemEventConverter {
         return when (source) {
             is NftItemUpdateEventDto -> EthItemUpdateEventDto(
                 eventId = source.eventId,
-                itemId = itemId,
+                itemId = itemId, //TODO: Need typed itemId
                 item = EthUnionItemConverter.convert(source.item, blockchain)
             )
             is NftItemDeleteEventDto -> EthItemDeleteEventDto(

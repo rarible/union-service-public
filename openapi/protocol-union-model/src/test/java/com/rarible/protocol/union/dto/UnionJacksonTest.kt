@@ -125,4 +125,26 @@ class UnionJacksonTest {
         assertEquals(itemId, deserialized)
     }
 
+    @Test
+    fun `eth order id`() {
+        val ethOrderId = EthOrderIdDto("754", EthBlockchainDto.ETHEREUM)
+
+        val serialized = mapper.writeValueAsString(ethOrderId)
+        assertEquals("\"ETHEREUM:754\"", serialized)
+
+        val deserialized = mapper.readValue(serialized, EthOrderIdDto::class.java)
+        assertEquals(ethOrderId, deserialized)
+    }
+
+    @Test
+    fun `flow order id`() {
+        val flowOrderId = FlowOrderIdDto("754", FlowBlockchainDto.FLOW)
+
+        val serialized = mapper.writeValueAsString(flowOrderId)
+        assertEquals("\"FLOW:754\"", serialized)
+
+        val deserialized = mapper.readValue(serialized, FlowOrderIdDto::class.java)
+        assertEquals(flowOrderId, deserialized)
+    }
+
 }

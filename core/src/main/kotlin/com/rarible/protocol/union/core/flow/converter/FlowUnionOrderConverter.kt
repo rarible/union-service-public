@@ -2,13 +2,15 @@ package com.rarible.protocol.union.core.flow.converter
 
 import com.rarible.protocol.dto.PayInfoDto
 import com.rarible.protocol.union.dto.*
+import com.rarible.protocol.union.dto.flow.FlowOrderIdProvider
 import java.math.BigDecimal
+import java.math.BigInteger
 
 object FlowUnionOrderConverter {
 
     fun convert(order: com.rarible.protocol.dto.FlowOrderDto, blockchain: FlowBlockchainDto): FlowOrderDto {
         return FlowOrderDto(
-            id = order.itemId, //TODO: there is no correct field
+            id = FlowOrderIdProvider.create(order.id.toString(), blockchain),
             type = FlowOrderTypeDto.RARIBLE_FLOW_V1,
             maker = FlowAddressConverter.convert(order.maker, blockchain),
             taker = order.taker?.let { FlowAddressConverter.convert(it, blockchain) },
@@ -17,13 +19,13 @@ object FlowUnionOrderConverter {
             fill = order.fill,
             startedAt = null, //TODO: No needed filed
             endedAt = null, //TODO: No needed filed
-            makeStock = BigDecimal.ZERO, // TODO: No needed filed
+            makeStock = BigInteger.ZERO, // TODO: No needed filed
             cancelled = order.cancelled,
             createdAt = order.createdAt,
             lastUpdatedAt = order.lastUpdateAt,
             makeBalance = BigDecimal.ZERO, //TODO: Need remove
-            makePriceUSD = order.amountUsd, //TODO: I think need to rename
-            takePriceUSD = order.amountUsd, //TODO: I think need to rename
+            makePriceUsd = order.amountUsd, //TODO: I think need to rename
+            takePriceUsd = order.amountUsd, //TODO: I think need to rename
             priceHistory = emptyList(),
             data = convert(order.data, blockchain)
         )

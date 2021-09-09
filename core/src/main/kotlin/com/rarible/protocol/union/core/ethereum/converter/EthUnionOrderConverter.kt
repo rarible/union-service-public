@@ -2,14 +2,17 @@ package com.rarible.protocol.union.core.ethereum.converter
 
 import com.rarible.protocol.dto.*
 import com.rarible.protocol.union.dto.*
+import com.rarible.protocol.union.dto.ethereum.EthOrderIdProvider
 import java.time.Instant
 
 object EthUnionOrderConverter {
 
     fun convert(order: OrderDto, blockchain: EthBlockchainDto): EthOrderDto {
+        val unionOrderId = EthOrderIdProvider.create(EthConverter.convert(order.hash), blockchain)
         return when (order) {
             is LegacyOrderDto -> {
                 EthLegacyOrderDto(
+                    id = unionOrderId,
                     maker = EthAddressConverter.convert(order.maker, blockchain),
                     taker = order.taker?.let { EthAddressConverter.convert(it, blockchain) },
                     make = EthConverter.convert(order.make, blockchain),
@@ -17,16 +20,15 @@ object EthUnionOrderConverter {
                     salt = EthConverter.convert(order.salt),
                     signature = order.signature?.let { EthConverter.convert(it) },
                     pending = order.pending?.map { convert(it, blockchain) },
-                    hash = EthConverter.convert(order.hash),
                     fill = order.fill,
                     startedAt = order.start?.let { Instant.ofEpochSecond(it) },
-                    makeStock = order.makeStock.toBigDecimal(), //TODO: Why big decimal
+                    makeStock = order.makeStock,
                     cancelled = order.cancelled,
                     createdAt = order.createdAt,
                     lastUpdatedAt = order.lastUpdateAt,
                     makeBalance = order.makeBalance?.toBigDecimal(), //TODO: Need remove
-                    makePriceUSD = order.makePriceUsd,
-                    takePriceUSD = order.takePriceUsd,
+                    makePriceUsd = order.makePriceUsd,
+                    takePriceUsd = order.takePriceUsd,
                     priceHistory = order.priceHistory.map { convert(it) },
                     data = EthOrderDataLegacyDto(
                         fee = order.data.fee.toBigInteger()
@@ -35,6 +37,7 @@ object EthUnionOrderConverter {
             }
             is RaribleV2OrderDto -> {
                 EthRaribleV2OrderDto(
+                    id = unionOrderId,
                     maker = EthAddressConverter.convert(order.maker, blockchain),
                     taker = order.taker?.let { EthAddressConverter.convert(order.maker, blockchain) },
                     make = EthConverter.convert(order.make, blockchain),
@@ -42,16 +45,15 @@ object EthUnionOrderConverter {
                     salt = EthConverter.convert(order.salt),
                     signature = order.signature?.let { EthConverter.convert(it) },
                     pending = order.pending?.map { convert(it, blockchain) },
-                    hash = EthConverter.convert(order.hash),
                     fill = order.fill,
                     startedAt = order.start?.let { Instant.ofEpochSecond(it) },
-                    makeStock = order.makeStock.toBigDecimal(), //TODO: Why big decimal
+                    makeStock = order.makeStock,
                     cancelled = order.cancelled,
                     createdAt = order.createdAt,
                     lastUpdatedAt = order.lastUpdateAt,
                     makeBalance = order.makeBalance?.toBigDecimal(), //TODO: Need remove
-                    makePriceUSD = order.makePriceUsd,
-                    takePriceUSD = order.takePriceUsd,
+                    makePriceUsd = order.makePriceUsd,
+                    takePriceUsd = order.takePriceUsd,
                     priceHistory = order.priceHistory.map { convert(it) },
                     data = EthOrderDataRaribleV2DataV1Dto(
                         payouts = order.data.payouts.map { EthConverter.convertToPayout(it, blockchain) },
@@ -61,6 +63,7 @@ object EthUnionOrderConverter {
             }
             is OpenSeaV1OrderDto -> {
                 EthOpenSeaV1OrderDto(
+                    id = unionOrderId,
                     maker = EthAddressConverter.convert(order.maker, blockchain),
                     taker = order.taker?.let { EthAddressConverter.convert(order.maker, blockchain) },
                     make = EthConverter.convert(order.make, blockchain),
@@ -68,16 +71,15 @@ object EthUnionOrderConverter {
                     salt = EthConverter.convert(order.salt),
                     signature = order.signature?.let { EthConverter.convert(it) },
                     pending = order.pending?.map { convert(it, blockchain) },
-                    hash = EthConverter.convert(order.hash),
                     fill = order.fill,
                     startedAt = order.start?.let { Instant.ofEpochSecond(it) },
-                    makeStock = order.makeStock.toBigDecimal(), //TODO: Why big decimal
+                    makeStock = order.makeStock,
                     cancelled = order.cancelled,
                     createdAt = order.createdAt,
                     lastUpdatedAt = order.lastUpdateAt,
                     makeBalance = order.makeBalance?.toBigDecimal(), //TODO: Need remove
-                    makePriceUSD = order.makePriceUsd,
-                    takePriceUSD = order.takePriceUsd,
+                    makePriceUsd = order.makePriceUsd,
+                    takePriceUsd = order.takePriceUsd,
                     priceHistory = order.priceHistory.map { convert(it) },
                     data = EthOrderOpenSeaV1DataV1Dto(
                         exchange = EthAddressConverter.convert(order.data.exchange, blockchain),
@@ -99,6 +101,13 @@ object EthUnionOrderConverter {
                 )
             }
         }
+    }
+
+    fun convert(source: OrdersPaginationDto, blockchain: EthBlockchainDto): UnionOrdersDto {
+        return UnionOrdersDto(
+            continuation = source.continuation,
+            orders = source.orders.map { convert(it, blockchain) }
+        )
     }
 
     private fun convert(source: OrderOpenSeaV1DataV1Dto.FeeMethod): EthOrderOpenSeaV1DataV1Dto.FeeMethod {
@@ -152,10 +161,10 @@ object EthUnionOrderConverter {
                 fill = source.fill,
                 taker = source.taker?.let { EthAddressConverter.convert(it, blockchain) },
                 counterHash = source.counterHash?.let { EthConverter.convert(it) },
-                makeUSD = source.makeUsd?.toBigInteger(), //TODO: Need BigDecimal
-                takeUSD = source.takeUsd?.toBigInteger(), //TODO: Need BigDecimal
-                makePriceUSD = source.takePriceUsd?.toBigInteger(), //TODO: Need BigDecimal
-                takePriceUSD = source.makePriceUsd?.toBigInteger() //TODO: Need BigDecimal
+                makeUsd = source.makeUsd,
+                takeUsd = source.takeUsd,
+                makePriceUsd = source.takePriceUsd,
+                takePriceUsd = source.makePriceUsd
             )
             is OrderCancelDto -> EthPendingOrderCancelDto(
                 //TODO: Not full object

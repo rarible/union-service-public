@@ -12,6 +12,6 @@ object FlowAddressSerializer : StdSerializer<FlowAddress>(FlowAddress::class.jav
             gen.writeNull()
             return
         }
-        gen.writeString("${value.blockchain.name}:${value.value}")
+        gen.writeString(value.toString())
     }
 }
