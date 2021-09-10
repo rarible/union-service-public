@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.api.continuation
+package com.rarible.protocol.union.core.continuation
 
 import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.core.ethereum.converter.EthUnionItemConverter

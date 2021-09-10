@@ -291,11 +291,32 @@ components:
 
     #################### Activity - Union ####################
 
+    UnionActivityType:
+      type: string
+      enum:
+        - TRANSFER
+        - MINT
+        - BURN
+        - BID
+        - LIST
+        - SELL
+
+    UnionUserActivityType:
+      type: string
+      enum:
+        - TRANSFER_FROM
+        - TRANSFER_TO
+        - MINT
+        - BURN
+        - MAKE_BID
+        - GET_BID
+        - LIST
+        - BUY
+        - SELL
+
     UnionActivity:
       type: object
       properties:
-        id:
-          type: string
         date:
           type: string
           format: "date-time"
@@ -303,16 +324,11 @@ components:
         - $ref: "#/components/schemas/EthActivity"
         - $ref: "#/components/schemas/FlowActivity"
       required:
-        - id
         - date
 
     UnionActivities:
       type: object
       properties:
-        total:
-          type: integer
-          description: "Number of ownerships were found by request"
-          format: int64
         continuation:
           type: string
           description: "Continuation token to paginate Ownerships search result"
@@ -1009,11 +1025,23 @@ components:
 
     #################### Activity - Eth ####################
 
+    EthActivityId:
+      type: object
+      properties:
+        value:
+          type: string
+          example: "${blockchain}:${id}"
+        blockchain:
+          $ref: "#/components/schemas/EthBlockchain"
+      required:
+        - blockchain
+        - value
+
     EthActivity:
       type: object
       properties:
-        blockchain:
-          $ref: "#/components/schemas/EthBlockchain"
+        id:
+          $ref: "#/components/schemas/EthActivityId"
       oneOf:
         - $ref: "#/components/schemas/EthMintActivity"
         - $ref: "#/components/schemas/EthBurnActivity"
@@ -1024,7 +1052,7 @@ components:
         - $ref: "#/components/schemas/EthOrderCancelBidActivity"
         - $ref: "#/components/schemas/EthOrderCancelListActivity"
       required:
-        - blockchain
+        - id
 
     EthMintActivity:
       type: object
@@ -1680,11 +1708,23 @@ components:
 
     #################### Activity - Flow ####################
 
+    FlowActivityId:
+      type: object
+      properties:
+        value:
+          type: string
+          example: "${blockchain}:${id}"
+        blockchain:
+          $ref: "#/components/schemas/FlowBlockchain"
+      required:
+        - blockchain
+        - value
+
     FlowActivity:
       type: object
       properties:
-        blockchain:
-          $ref: "#/components/schemas/FlowBlockchain"
+        id:
+          $ref: "#/components/schemas/FlowActivityId"
       oneOf:
         - $ref: "#/components/schemas/FlowMintActivity"
         - $ref: "#/components/schemas/FlowBurnActivity"
@@ -1693,7 +1733,7 @@ components:
         - $ref: "#/components/schemas/FlowOrderListActivity"
         - $ref: "#/components/schemas/FlowOrderCancelListActivity"
       required:
-        - blockchain
+        - id
 
     FlowMintActivity:
       type: object

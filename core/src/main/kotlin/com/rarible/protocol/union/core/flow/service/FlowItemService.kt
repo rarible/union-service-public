@@ -9,11 +9,9 @@ import com.rarible.protocol.union.dto.UnionItemsDto
 import kotlinx.coroutines.reactive.awaitFirst
 
 class FlowItemService(
-    private val blockchain: FlowBlockchainDto,
+    blockchain: FlowBlockchainDto,
     private val flowNftItemControllerApi: FlowNftItemControllerApi
-) : ItemService {
-
-    override fun getBlockchain() = blockchain.name
+) : AbstractFlowService(blockchain), ItemService {
 
     override suspend fun getAllItems(
         continuation: String?,

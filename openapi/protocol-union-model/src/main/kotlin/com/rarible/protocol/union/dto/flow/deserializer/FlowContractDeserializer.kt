@@ -12,7 +12,7 @@ object FlowContractDeserializer : StdDeserializer<FlowContract>(FlowContract::cl
     override fun deserialize(p: JsonParser, ctxt: DeserializationContext?): FlowContract? {
         val value = p.codec.readValue(p, String::class.java) ?: return null
         val pair = IdParser.parse(value)
-        return FlowContract(FlowBlockchainDto.valueOf(pair.first), pair.second)
+        return FlowContract(FlowBlockchainDto.valueOf(pair.first.name), pair.second)
 
     }
 }

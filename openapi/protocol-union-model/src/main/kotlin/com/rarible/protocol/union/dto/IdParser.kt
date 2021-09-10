@@ -4,7 +4,7 @@ object IdParser {
 
     private const val DELIMITER = ":"
 
-    fun parse(value: String): Pair<String, String> {
+    fun parse(value: String): Pair<BlockchainDto, String> {
         val index = value.indexOf(DELIMITER)
         if (index < 0) {
             throw IllegalArgumentException("Blockchain name not specified in ID: $value")
@@ -12,7 +12,7 @@ object IdParser {
         val blockchain = value.substring(0, index)
         val id = value.substring(index + 1)
 
-        return Pair(blockchain, id)
+        return Pair(BlockchainDto.valueOf(blockchain), id)
     }
 
     fun split(value: String, expectedSize: Int): List<String> {

@@ -151,6 +151,35 @@ fun randomEthCollectionDto(id: Address): NftCollectionDto {
     )
 }
 
+fun randomEthOrderBidActivity(): OrderActivityBidDto {
+    return OrderActivityBidDto(
+        id = randomString(),
+        date = nowMillis(),
+        source = OrderActivityDto.Source.RARIBLE,
+        hash = Word.apply(randomWord()),
+        maker = randomAddress(),
+        make = AssetDto(Erc20AssetTypeDto(randomAddress()), randomBigInt()),
+        take = AssetDto(Erc20AssetTypeDto(randomAddress()), randomBigInt()),
+        price = randomBigDecimal(),
+        priceUsd = randomBigDecimal()
+    )
+}
+
+fun randomEthItemMintActivity(): MintDto {
+    return MintDto(
+        id = randomString(),
+        date = nowMillis(),
+        owner = randomAddress(),
+        contract = randomAddress(),
+        tokenId = randomBigInt(),
+        value = randomBigInt(),
+        transactionHash = Word.apply(randomWord()),
+        blockHash = Word.apply(randomWord()),
+        blockNumber = randomLong(),
+        logIndex = randomInt()
+    )
+}
+
 /*
 fun randomEthOpenSeaV1OrderDto(itemId: ItemId) = randomEthOpenSeaV1OrderDto(itemId, randomAddress())
 fun randomEthOpenSeaV1OrderDto(itemId: ItemId, maker: Address) = randomEthOpenSeaV1OrderDto(

@@ -3,17 +3,19 @@ package com.rarible.protocol.union.core.ethereum.service
 import com.rarible.protocol.nft.api.client.NftOwnershipControllerApi
 import com.rarible.protocol.union.core.ethereum.converter.EthUnionOwnershipConverter
 import com.rarible.protocol.union.core.service.OwnershipService
+import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.EthBlockchainDto
 import com.rarible.protocol.union.dto.UnionOwnershipDto
 import com.rarible.protocol.union.dto.UnionOwnershipsDto
 import kotlinx.coroutines.reactive.awaitFirst
 
 class EthereumOwnershipService(
-    private val blockchain: EthBlockchainDto,
+    blockchain: EthBlockchainDto,
     private val ownershipControllerApi: NftOwnershipControllerApi
-) : OwnershipService {
+) : AbstractEthereumService(blockchain), OwnershipService {
 
-    override fun getBlockchain() = blockchain.name
+    private val commonBlockchain = BlockchainDto.valueOf(blockchain.name)
+    override fun getBlockchain() = commonBlockchain
 
     override suspend fun getAllOwnerships(continuation: String?, size: Int?): UnionOwnershipsDto {
         val ownerships = ownershipControllerApi.getNftAllOwnerships(continuation, size).awaitFirst()

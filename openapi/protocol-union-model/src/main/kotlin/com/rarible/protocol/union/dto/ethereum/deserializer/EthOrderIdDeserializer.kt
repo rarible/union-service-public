@@ -12,6 +12,6 @@ object EthOrderIdDeserializer : StdDeserializer<EthOrderIdDto>(EthOrderIdDto::cl
     override fun deserialize(p: JsonParser, ctxt: DeserializationContext?): EthOrderIdDto? {
         val value = p.codec.readValue(p, String::class.java) ?: return null
         val pair = IdParser.parse(value)
-        return EthOrderIdDto(pair.second, EthBlockchainDto.valueOf(pair.first))
+        return EthOrderIdDto(pair.second, EthBlockchainDto.valueOf(pair.first.name))
     }
 }

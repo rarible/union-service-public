@@ -8,11 +8,11 @@ import com.rarible.protocol.union.dto.FlowOrderActivityMatchSideDto
 object FlowUnionActivityConverter {
 
     fun convert(source: FlowActivityDto, blockchain: FlowBlockchainDto): UnionActivityDto {
+        val unionActivityId = FlowActivityIdDto(source.id, blockchain)
         return when (source) {
             is FlowNftOrderActivitySellDto -> {
                 FlowOrderMatchActivityDto(
-                    blockchain = blockchain,
-                    id = source.id,
+                    id = unionActivityId,
                     date = source.date,
                     left = convert(source.left, blockchain),
                     right = convert(source.right, blockchain),
@@ -28,8 +28,7 @@ object FlowUnionActivityConverter {
             }
             is FlowNftOrderActivityListDto -> {
                 FlowOrderListActivityDto(
-                    blockchain = blockchain,
-                    id = source.id,
+                    id = unionActivityId,
                     date = source.date,
                     price = source.price,
                     priceUsd = source.price, // TODO should be in USD
@@ -41,8 +40,7 @@ object FlowUnionActivityConverter {
             }
             is FlowNftOrderActivityCancelListDto -> {
                 FlowOrderCancelListActivityDto(
-                    blockchain = blockchain,
-                    id = source.id,
+                    id = unionActivityId,
                     date = source.date,
                     hash = source.hash,
                     maker = FlowAddressConverter.convert(source.maker, blockchain),
@@ -52,8 +50,7 @@ object FlowUnionActivityConverter {
             }
             is FlowMintDto -> {
                 FlowMintActivityDto(
-                    blockchain = blockchain,
-                    id = source.id,
+                    id = unionActivityId,
                     date = source.date,
                     owner = listOf(FlowAddressConverter.convert(source.owner, blockchain)),
                     contract = FlowContractConverter.convert(source.contract, blockchain),
@@ -69,8 +66,7 @@ object FlowUnionActivityConverter {
             }
             is FlowBurnDto -> {
                 FlowBurnActivityDto(
-                    blockchain = blockchain,
-                    id = source.id,
+                    id = unionActivityId,
                     date = source.date,
                     owner = listOf(FlowAddressConverter.convert(source.owner, blockchain)),
                     contract = FlowContractConverter.convert(source.contract, blockchain),
@@ -86,8 +82,7 @@ object FlowUnionActivityConverter {
             }
             is FlowTransferDto -> {
                 FlowTransferActivityDto(
-                    blockchain = blockchain,
-                    id = source.id,
+                    id = unionActivityId,
                     date = source.date,
                     from = FlowAddressConverter.convert(source.from, blockchain),
                     owner = listOf(FlowAddressConverter.convert(source.owner, blockchain)),
@@ -103,6 +98,13 @@ object FlowUnionActivityConverter {
                 )
             }
         }
+    }
+
+    fun convert(source: FlowActivitiesDto, blockchain: FlowBlockchainDto): UnionActivitiesDto {
+        return UnionActivitiesDto(
+            continuation = source.continuation,
+            activities = source.items.map { convert(it, blockchain) }
+        )
     }
 
     private fun convert(

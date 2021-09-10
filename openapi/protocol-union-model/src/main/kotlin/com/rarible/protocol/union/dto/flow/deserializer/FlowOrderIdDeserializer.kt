@@ -12,6 +12,6 @@ object FlowOrderIdDeserializer : StdDeserializer<FlowOrderIdDto>(FlowOrderIdDto:
     override fun deserialize(p: JsonParser, ctxt: DeserializationContext?): FlowOrderIdDto? {
         val value = p.codec.readValue(p, String::class.java) ?: return null
         val pair = IdParser.parse(value)
-        return FlowOrderIdDto(pair.second, FlowBlockchainDto.valueOf(pair.first))
+        return FlowOrderIdDto(pair.second, FlowBlockchainDto.valueOf(pair.first.name))
     }
 }

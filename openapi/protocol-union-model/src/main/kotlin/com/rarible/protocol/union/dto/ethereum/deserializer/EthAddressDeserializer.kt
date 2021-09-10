@@ -12,7 +12,7 @@ object EthAddressDeserializer : StdDeserializer<EthAddress>(EthAddress::class.ja
     override fun deserialize(p: JsonParser, ctxt: DeserializationContext?): EthAddress? {
         val value = p.codec.readValue(p, String::class.java) ?: return null
         val pair = IdParser.parse(value)
-        return EthAddress(EthBlockchainDto.valueOf(pair.first), pair.second)
+        return EthAddress(EthBlockchainDto.valueOf(pair.first.name), pair.second)
 
     }
 }

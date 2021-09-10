@@ -80,10 +80,10 @@ abstract class AbstractIntegrationTest {
         val result = try {
             block()
         } finally {
-            itemJob?.cancel()
-            ownershipJob?.cancel()
-            orderJob?.cancel()
-            activityJob?.cancel()
+            itemJob?.cancelAndJoin()
+            ownershipJob?.cancelAndJoin()
+            orderJob?.cancelAndJoin()
+            activityJob?.cancelAndJoin()
         }
         result
     }
@@ -138,13 +138,22 @@ abstract class AbstractIntegrationTest {
             .filter { it.value.orderId == orderId }
     }
 
-    fun <T : UnionActivityDto> findActivityUpdates(
+    fun <T : EthActivityDto> findEthActivityUpdates(
         id: String,
         type: Class<T>
     ): List<KafkaMessage<T>> {
         return filterByValueType(activityEvents as Queue<KafkaMessage<Any>>, type)
-            .filter { it.value.id == id }
+            .filter { it.value.id.value == id }
     }
+
+    fun <T : com.rarible.protocol.union.dto.FlowActivityDto> findFlowActivityUpdates(
+        id: String,
+        type: Class<T>
+    ): List<KafkaMessage<T>> {
+        return filterByValueType(activityEvents as Queue<KafkaMessage<Any>>, type)
+            .filter { it.value.id.value == id }
+    }
+
 
     private fun <T> filterByValueType(messages: Queue<KafkaMessage<Any>>, type: Class<T>): Collection<KafkaMessage<T>> {
         return messages.filter {

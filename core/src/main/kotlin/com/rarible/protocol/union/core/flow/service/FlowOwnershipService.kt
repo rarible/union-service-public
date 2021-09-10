@@ -9,11 +9,9 @@ import com.rarible.protocol.union.dto.UnionOwnershipsDto
 import kotlinx.coroutines.reactive.awaitFirst
 
 class FlowOwnershipService(
-    private val blockchain: FlowBlockchainDto,
+    blockchain: FlowBlockchainDto,
     private val ownershipControllerApi: FlowNftOwnershipControllerApi
-) : OwnershipService {
-
-    override fun getBlockchain() = blockchain.name
+) : AbstractFlowService(blockchain), OwnershipService {
 
     override suspend fun getAllOwnerships(continuation: String?, size: Int?): UnionOwnershipsDto {
         val ownerships = ownershipControllerApi.getNftAllOwnerships(continuation, size).awaitFirst()

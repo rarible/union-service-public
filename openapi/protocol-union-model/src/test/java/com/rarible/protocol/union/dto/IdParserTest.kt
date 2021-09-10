@@ -11,7 +11,7 @@ class IdParserTest {
         val id = "ETHEREUM:abc"
         val pair = IdParser.parse(id)
 
-        assertEquals("ETHEREUM", pair.first)
+        assertEquals(BlockchainDto.ETHEREUM, pair.first)
         assertEquals("abc", pair.second)
     }
 
@@ -28,7 +28,7 @@ class IdParserTest {
         val id = "ETHEREUM:abc:123"
         val pair = IdParser.parse(id)
 
-        assertEquals("ETHEREUM", pair.first)
+        assertEquals(BlockchainDto.ETHEREUM, pair.first)
         assertEquals("abc:123", pair.second)
     }
 

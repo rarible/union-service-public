@@ -2,7 +2,6 @@ package com.rarible.protocol.union.core.flow.converter
 
 import com.rarible.protocol.dto.PayInfoDto
 import com.rarible.protocol.union.dto.*
-import com.rarible.protocol.union.dto.flow.FlowOrderIdProvider
 import java.math.BigDecimal
 import java.math.BigInteger
 
@@ -10,7 +9,7 @@ object FlowUnionOrderConverter {
 
     fun convert(order: com.rarible.protocol.dto.FlowOrderDto, blockchain: FlowBlockchainDto): FlowOrderDto {
         return FlowOrderDto(
-            id = FlowOrderIdProvider.create(order.id.toString(), blockchain),
+            id = FlowOrderIdDto(order.id.toString(), blockchain),
             type = FlowOrderTypeDto.RARIBLE_FLOW_V1,
             maker = FlowAddressConverter.convert(order.maker, blockchain),
             taker = order.taker?.let { FlowAddressConverter.convert(it, blockchain) },
