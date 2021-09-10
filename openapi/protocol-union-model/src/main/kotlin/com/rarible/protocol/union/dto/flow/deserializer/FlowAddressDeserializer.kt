@@ -12,7 +12,7 @@ object FlowAddressDeserializer : StdDeserializer<FlowAddress>(FlowAddress::class
     override fun deserialize(p: JsonParser, ctxt: DeserializationContext?): FlowAddress? {
         val value = p.codec.readValue(p, String::class.java) ?: return null
         val pair = IdParser.parse(value)
-        return FlowAddress(FlowBlockchainDto.valueOf(pair.first), pair.second)
+        return FlowAddress(FlowBlockchainDto.valueOf(pair.first.name), pair.second)
 
     }
 }

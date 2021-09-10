@@ -4,18 +4,16 @@ import com.rarible.protocol.order.api.client.OrderControllerApi
 import com.rarible.protocol.union.core.ethereum.converter.EthConverter
 import com.rarible.protocol.union.core.ethereum.converter.EthUnionOrderConverter
 import com.rarible.protocol.union.core.service.OrderService
-import com.rarible.protocol.union.dto.EthBlockchainDto
-import com.rarible.protocol.union.dto.PlatformDto
-import com.rarible.protocol.union.dto.UnionOrderDto
-import com.rarible.protocol.union.dto.UnionOrdersDto
+import com.rarible.protocol.union.dto.*
 import kotlinx.coroutines.reactive.awaitFirst
 
 class EthereumOrderService(
-    private val blockchain: EthBlockchainDto,
+    blockchain: EthBlockchainDto,
     private val orderControllerApi: OrderControllerApi
-) : OrderService {
+) : AbstractEthereumService(blockchain), OrderService {
 
-    override fun getBlockchain() = blockchain.name
+    private val commonBlockchain = BlockchainDto.valueOf(blockchain.name)
+    override fun getBlockchain() = commonBlockchain
 
     override suspend fun getOrdersAll(
         platform: PlatformDto?,

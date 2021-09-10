@@ -1,6 +1,6 @@
 package com.rarible.protocol.union.api.controller
 
-import com.rarible.protocol.union.api.continuation.ContinuationPaging
+import com.rarible.protocol.union.core.continuation.ContinuationPaging
 import com.rarible.protocol.union.core.service.OrderServiceRouter
 import com.rarible.protocol.union.dto.*
 import com.rarible.protocol.union.dto.continuation.UnionOrderContinuation
@@ -162,11 +162,11 @@ class OrderController(
         return ResponseEntity.ok(result)
     }
 
-    private fun safePair(id: String?, defaultBlockchain: String): Pair<String, String?> {
+    private fun safePair(id: String?, defaultBlockchain: BlockchainDto): Pair<BlockchainDto, String?> {
         return if (id == null) Pair(defaultBlockchain, null) else IdParser.parse(id)
     }
 
-    private fun ensureSameBlockchain(vararg blockchains: String) {
+    private fun ensureSameBlockchain(vararg blockchains: BlockchainDto) {
         val set = blockchains.toSet()
         if (set.size != 1) {
             throw IllegalArgumentException("All of arguments should belong to same blockchain, but received: $set")

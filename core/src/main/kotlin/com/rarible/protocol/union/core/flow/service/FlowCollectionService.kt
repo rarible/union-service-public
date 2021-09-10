@@ -9,11 +9,9 @@ import com.rarible.protocol.union.dto.UnionCollectionsDto
 import kotlinx.coroutines.reactive.awaitFirst
 
 class FlowCollectionService(
-    private val blockchain: FlowBlockchainDto,
+    blockchain: FlowBlockchainDto,
     private val collectionControllerApi: FlowNftCollectionControllerApi
-) : CollectionService {
-
-    override fun getBlockchain() = blockchain.name
+) : AbstractFlowService(blockchain), CollectionService {
 
     override suspend fun getAllCollections(continuation: String?, size: Int?): UnionCollectionsDto {
         val collections = collectionControllerApi.searchNftAllCollections(continuation, size).awaitFirst()

@@ -21,12 +21,12 @@ class FlowItemEventHandlerFt : AbstractIntegrationTest() {
     @Test
     fun `flow item update event`() = runWithKafka {
         val flowItem = randomFlowNftItemDto()
-        val dto: FlowNftItemEventDto = FlowNftItemUpdateEventDto(randomString(), flowItem.id!!, flowItem)
+        val dto: FlowNftItemEventDto = FlowNftItemUpdateEventDto(randomString(), flowItem.id, flowItem)
 
         flowItemProducer.send(message(dto)).ensureSuccess()
 
         Wait.waitAssert {
-            val messages = findFlowItemUpdates(flowItem.id!!)
+            val messages = findFlowItemUpdates(flowItem.id)
             Assertions.assertThat(messages).hasSize(1)
             Assertions.assertThat(messages[0].key).isEqualTo(flowItem.id)
             Assertions.assertThat(messages[0].id).isEqualTo(flowItem.id)

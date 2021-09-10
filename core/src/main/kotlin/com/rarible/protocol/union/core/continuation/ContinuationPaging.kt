@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.api.continuation
+package com.rarible.protocol.union.core.continuation
 
 import com.rarible.protocol.union.dto.continuation.Continuation
 import com.rarible.protocol.union.dto.continuation.ContinuationFactory

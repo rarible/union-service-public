@@ -3,12 +3,16 @@ package com.rarible.protocol.union.test.data
 import com.rarible.core.common.nowMillis
 import com.rarible.core.test.data.*
 import com.rarible.protocol.dto.*
+import com.rarible.protocol.dto.FlowAssetDto
+import com.rarible.protocol.dto.FlowCreatorDto
+import com.rarible.protocol.dto.FlowOrderDataDto
+import com.rarible.protocol.dto.FlowOrderDto
 import com.rarible.protocol.union.core.flow.converter.FlowAddressConverter
-import com.rarible.protocol.union.dto.FlowAssetTypeFtDto
-import com.rarible.protocol.union.dto.FlowBlockchainDto
-import com.rarible.protocol.union.dto.FlowItemIdDto
-import com.rarible.protocol.union.dto.FlowOwnershipIdDto
-import com.rarible.protocol.union.dto.flow.*
+import com.rarible.protocol.union.dto.*
+import com.rarible.protocol.union.dto.flow.FlowAddress
+import com.rarible.protocol.union.dto.flow.FlowContract
+import com.rarible.protocol.union.dto.flow.FlowItemIdProvider
+import com.rarible.protocol.union.dto.flow.FlowOwnershipIdProvider
 import java.math.BigInteger
 
 fun randomFlowContract() = FlowContract(FlowBlockchainDto.FLOW, randomString(12))
@@ -35,7 +39,7 @@ fun randomFlowOwnershipId(itemId: FlowItemIdDto, owner: String): FlowOwnershipId
     )
 }
 
-fun randomFlowOrderId() = FlowOrderIdProvider.parseFull(randomFlowOrderIdFullValue())
+fun randomFlowOrderId() = FlowOrderIdDto(randomLong().toString(), FlowBlockchainDto.FLOW)
 fun randomFlowOrderIdFullValue() = randomFlowOrderIdFullValue(randomLong())
 fun randomFlowOrderIdFullValue(id: Long) = "FLOW:$id"
 
@@ -125,3 +129,15 @@ fun randomFlowNftAssetType(contract: FlowAddress, tokenId: BigInteger) = FlowAss
     tokenId = tokenId,
     value = randomBigDecimal()
 )
+
+fun randomFlowCancelListActivity(): FlowNftOrderActivityCancelListDto {
+    return FlowNftOrderActivityCancelListDto(
+        id = randomString(),
+        date = nowMillis(),
+        hash = randomString(),
+        maker = randomString(),
+        make = FlowAssetFungibleDto(randomString(), randomBigDecimal()),
+        take = FlowAssetFungibleDto(randomString(), randomBigDecimal()),
+        price = randomBigDecimal()
+    )
+}

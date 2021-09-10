@@ -2,13 +2,12 @@ package com.rarible.protocol.union.core.ethereum.converter
 
 import com.rarible.protocol.dto.*
 import com.rarible.protocol.union.dto.*
-import com.rarible.protocol.union.dto.ethereum.EthOrderIdProvider
 import java.time.Instant
 
 object EthUnionOrderConverter {
 
     fun convert(order: OrderDto, blockchain: EthBlockchainDto): EthOrderDto {
-        val unionOrderId = EthOrderIdProvider.create(EthConverter.convert(order.hash), blockchain)
+        val unionOrderId = EthOrderIdDto(EthConverter.convert(order.hash), blockchain)
         return when (order) {
             is LegacyOrderDto -> {
                 EthLegacyOrderDto(

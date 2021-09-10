@@ -9,11 +9,9 @@ import com.rarible.protocol.union.dto.UnionCollectionsDto
 import kotlinx.coroutines.reactive.awaitFirst
 
 class EthereumCollectionService(
-    private val blockchain: EthBlockchainDto,
+    blockchain: EthBlockchainDto,
     private val collectionControllerApi: NftCollectionControllerApi
-) : CollectionService {
-
-    override fun getBlockchain() = blockchain.name
+) : AbstractEthereumService(blockchain), CollectionService {
 
     override suspend fun getAllCollections(continuation: String?, size: Int?): UnionCollectionsDto {
         val collections = collectionControllerApi.searchNftAllCollections(continuation, size).awaitFirst()

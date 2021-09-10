@@ -9,11 +9,9 @@ import com.rarible.protocol.union.dto.UnionItemsDto
 import kotlinx.coroutines.reactive.awaitFirst
 
 class EthereumItemService(
-    private val blockchain: EthBlockchainDto,
+    blockchain: EthBlockchainDto,
     private val itemControllerApi: NftItemControllerApi
-) : ItemService {
-
-    override fun getBlockchain() = blockchain.name
+) : AbstractEthereumService(blockchain), ItemService {
 
     override suspend fun getAllItems(
         continuation: String?,

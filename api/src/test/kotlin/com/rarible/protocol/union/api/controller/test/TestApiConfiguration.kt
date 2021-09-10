@@ -2,9 +2,9 @@ package com.rarible.protocol.union.api.controller.test
 
 import com.rarible.core.application.ApplicationEnvironmentInfo
 import com.rarible.protocol.flow.nft.api.client.*
-import com.rarible.protocol.nft.api.client.NftCollectionControllerApi
-import com.rarible.protocol.nft.api.client.NftItemControllerApi
-import com.rarible.protocol.nft.api.client.NftOwnershipControllerApi
+import com.rarible.protocol.nft.api.client.*
+import com.rarible.protocol.order.api.client.OrderActivityControllerApi
+import com.rarible.protocol.order.api.client.OrderIndexerApiClientFactory
 import com.rarible.protocol.union.api.client.*
 import io.mockk.mockk
 import org.springframework.beans.factory.annotation.Qualifier
@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Lazy
 import org.springframework.context.annotation.Primary
+import org.springframework.web.client.RestTemplate
 import java.net.URI
 
 @Lazy
@@ -22,6 +23,11 @@ class TestApiConfiguration {
     @Bean
     fun applicationEnvironmentInfo(): ApplicationEnvironmentInfo {
         return ApplicationEnvironmentInfo("test", "test.com")
+    }
+
+    @Bean
+    fun testRestTemplate(): RestTemplate {
+        return RestTemplate()
     }
 
     @Bean
@@ -76,12 +82,15 @@ class TestApiConfiguration {
     @Qualifier("ethereum.order.api")
     fun testEthereumOrderApi(): com.rarible.protocol.order.api.client.OrderControllerApi = mockk()
 
-    /*
     @Bean
     @Primary
-    @Qualifier("ethereum.activity.api")
-    fun testEthereumOrderActivityApi(factory: NftOrderApiClientFactory): NftOrderActivityControllerApi = mockk()
-    */
+    @Qualifier("ethereum.activity.api.item")
+    fun testEthereumActivityItemApi(factory: NftIndexerApiClientFactory): NftActivityControllerApi = mockk()
+
+    @Bean
+    @Primary
+    @Qualifier("ethereum.activity.api.order")
+    fun testEthereumActivityOrderApi(factory: OrderIndexerApiClientFactory): OrderActivityControllerApi = mockk()
 
     //--------------------- POLYGON ---------------------//
     @Bean
@@ -104,12 +113,15 @@ class TestApiConfiguration {
     @Qualifier("polygon.order.api")
     fun testPolygonOrderApi(): com.rarible.protocol.order.api.client.OrderControllerApi = mockk()
 
-    /*
     @Bean
     @Primary
-    @Qualifier("polygon.activity.api")
-    fun testPolygonOrderActivityApi(factory: NftOrderApiClientFactory): NftOrderActivityControllerApi = mockk()
-    */
+    @Qualifier("polygon.activity.api.item")
+    fun testPolygonActivityItemApi(factory: NftIndexerApiClientFactory): NftActivityControllerApi = mockk()
+
+    @Bean
+    @Primary
+    @Qualifier("polygon.activity.api.order")
+    fun testPolygonActivityOrderApi(factory: OrderIndexerApiClientFactory): OrderActivityControllerApi = mockk()
 
     //--------------------- FLOW ---------------------//
     @Bean

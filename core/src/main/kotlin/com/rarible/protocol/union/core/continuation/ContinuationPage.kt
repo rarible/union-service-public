@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.api.continuation
+package com.rarible.protocol.union.core.continuation
 
 data class ContinuationPage<T, C>(
     val entities: List<T>,

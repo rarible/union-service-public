@@ -10,11 +10,9 @@ import com.rarible.protocol.union.dto.UnionOrdersDto
 import kotlinx.coroutines.reactive.awaitFirst
 
 class FlowOrderService(
-    private val blockchain: FlowBlockchainDto,
+    blockchain: FlowBlockchainDto,
     private val orderControllerApi: FlowOrderControllerApi
-) : OrderService {
-
-    override fun getBlockchain() = blockchain.name
+) : AbstractFlowService(blockchain), OrderService {
 
     override suspend fun getOrdersAll(
         platform: PlatformDto?,

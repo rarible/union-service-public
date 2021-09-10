@@ -744,22 +744,14 @@ paths:
           schema:
             type: "array"
             items:
-              type: string
-              enum:
-                - TRANSFER_FROM
-                - TRANSFER_TO
-                - MINT
-                - BURN
-                - MAKE_BID
-                - GET_BID
-                - LIST
-                - BUY
-                - SELL
+              $ref: "#/components/schemas/UnionUserActivityType"
         - name: "user"
           in: query
           required: true
           schema:
-            type: string
+            type: array
+            items:
+              type: string
         - name: "continuation"
           in: query
           required: false
@@ -802,14 +794,7 @@ paths:
           schema:
             type: "array"
             items:
-              type: string
-              enum:
-                - TRANSFER
-                - MINT
-                - BURN
-                - BID
-                - LIST
-                - SELL
+              $ref: "#/components/schemas/UnionActivityType"
         - name: "contract"
           in: query
           required: true
@@ -862,14 +847,7 @@ paths:
           schema:
             type: "array"
             items:
-              type: string
-              enum:
-                - TRANSFER
-                - MINT
-                - BURN
-                - BID
-                - LIST
-                - SELL
+              $ref: "#/components/schemas/UnionActivityType"
         - name: "collection"
           in: query
           required: true
@@ -924,14 +902,7 @@ paths:
           schema:
             type: "array"
             items:
-              type: string
-              enum:
-                - TRANSFER
-                - MINT
-                - BURN
-                - BID
-                - LIST
-                - SELL
+              $ref: "#/components/schemas/UnionActivityType"
         - name: "continuation"
           in: query
           required: false
