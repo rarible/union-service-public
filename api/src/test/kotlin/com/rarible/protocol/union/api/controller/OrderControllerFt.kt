@@ -5,6 +5,7 @@ import com.rarible.core.test.data.randomBigInt
 import com.rarible.core.test.data.randomString
 import com.rarible.protocol.dto.OrdersPaginationDto
 import com.rarible.protocol.union.api.client.OrderControllerApi
+import com.rarible.protocol.union.api.configuration.PageSize
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.core.ethereum.converter.EthConverter
@@ -24,10 +25,10 @@ import reactor.kotlin.core.publisher.toMono
 @IntegrationTest
 class OrderControllerFt : AbstractIntegrationTest() {
 
-    private val DEF_CONTINUATION = null
-    private val DEF_SIZE = 5
-    private val DEF_PLATFORM = PlatformDto.ALL
-    private val DEF_ETH_PLATFORM = com.rarible.protocol.dto.PlatformDto.ALL
+    private val continuation: String? = null
+    private val size = PageSize.ORDER.default
+    private val platform = PlatformDto.ALL
+    private val ethPlatform = com.rarible.protocol.dto.PlatformDto.ALL
 
     @Autowired
     lateinit var orderControllerClient: OrderControllerApi
@@ -102,15 +103,15 @@ class OrderControllerFt : AbstractIntegrationTest() {
         val ethOrders = listOf(randomEthLegacyOrderDto(), randomEthLegacyOrderDto())
 
         coEvery {
-            testPolygonOrderApi.getOrdersAll(null, DEF_ETH_PLATFORM, continuation, size)
-        } returns OrdersPaginationDto(polygonOwnerships, DEF_CONTINUATION).toMono()
+            testPolygonOrderApi.getOrdersAll(null, ethPlatform, continuation, size)
+        } returns OrdersPaginationDto(polygonOwnerships, this@OrderControllerFt.continuation).toMono()
 
         coEvery {
-            testEthereumOrderApi.getOrdersAll(null, DEF_ETH_PLATFORM, continuation, size)
-        } returns OrdersPaginationDto(ethOrders, DEF_CONTINUATION).toMono()
+            testEthereumOrderApi.getOrdersAll(null, ethPlatform, continuation, size)
+        } returns OrdersPaginationDto(ethOrders, this@OrderControllerFt.continuation).toMono()
 
         val unionOrders = orderControllerClient.getOrdersAll(
-            blockchains, DEF_PLATFORM, null, continuation, size
+            blockchains, platform, null, continuation, size
         ).awaitFirst()
 
         assertThat(unionOrders.orders).hasSize(3)
@@ -127,11 +128,11 @@ class OrderControllerFt : AbstractIntegrationTest() {
         val ethOrders = listOf(randomEthLegacyOrderDto(), randomEthLegacyOrderDto())
 
         coEvery {
-            testEthereumOrderApi.getOrdersAll(origin.value, DEF_ETH_PLATFORM, continuation, size)
-        } returns OrdersPaginationDto(ethOrders, DEF_CONTINUATION).toMono()
+            testEthereumOrderApi.getOrdersAll(origin.value, ethPlatform, continuation, size)
+        } returns OrdersPaginationDto(ethOrders, this@OrderControllerFt.continuation).toMono()
 
         val unionOrders = orderControllerClient.getOrdersAll(
-            blockchains, DEF_PLATFORM, origin.toString(), continuation, size
+            blockchains, platform, origin.toString(), continuation, size
         ).awaitFirst()
 
         assertThat(unionOrders.orders).hasSize(2)
@@ -152,20 +153,20 @@ class OrderControllerFt : AbstractIntegrationTest() {
                 tokenId.toString(),
                 maker.value,
                 null,
-                DEF_ETH_PLATFORM,
-                DEF_CONTINUATION,
-                DEF_SIZE
+                ethPlatform,
+                continuation,
+                size
             )
-        } returns OrdersPaginationDto(ethOrders, DEF_CONTINUATION).toMono()
+        } returns OrdersPaginationDto(ethOrders, continuation).toMono()
 
         val unionOrders = orderControllerClient.getOrderBidsByItem(
             contract.toString(),
             tokenId.toString(),
-            DEF_PLATFORM,
+            platform,
             maker.toString(),
             null,
-            DEF_CONTINUATION,
-            DEF_SIZE
+            continuation,
+            size
         ).awaitFirst()
 
         assertThat(unionOrders.orders).hasSize(1)
@@ -185,15 +186,15 @@ class OrderControllerFt : AbstractIntegrationTest() {
         val polygonOrders = listOf(randomEthLegacyOrderDto())
 
         coEvery {
-            testPolygonOrderApi.getOrderBidsByMaker(maker.value, null, DEF_ETH_PLATFORM, DEF_CONTINUATION, DEF_SIZE)
-        } returns OrdersPaginationDto(polygonOrders, DEF_CONTINUATION).toMono()
+            testPolygonOrderApi.getOrderBidsByMaker(maker.value, null, ethPlatform, continuation, size)
+        } returns OrdersPaginationDto(polygonOrders, continuation).toMono()
 
         val unionOrders = orderControllerClient.getOrderBidsByMaker(
             maker.toString(),
-            DEF_PLATFORM,
+            platform,
             null,
-            DEF_CONTINUATION,
-            DEF_SIZE
+            continuation,
+            size
         ).awaitFirst()
 
         assertThat(unionOrders.orders).hasSize(1)
@@ -216,15 +217,15 @@ class OrderControllerFt : AbstractIntegrationTest() {
         val ethOrders = listOf(randomEthLegacyOrderDto(), randomEthLegacyOrderDto())
 
         coEvery {
-            testPolygonOrderApi.getSellOrders(null, DEF_ETH_PLATFORM, continuation, size)
-        } returns OrdersPaginationDto(polygonOwnerships, DEF_CONTINUATION).toMono()
+            testPolygonOrderApi.getSellOrders(null, ethPlatform, continuation, size)
+        } returns OrdersPaginationDto(polygonOwnerships, this@OrderControllerFt.continuation).toMono()
 
         coEvery {
-            testEthereumOrderApi.getSellOrders(null, DEF_ETH_PLATFORM, continuation, size)
-        } returns OrdersPaginationDto(ethOrders, DEF_CONTINUATION).toMono()
+            testEthereumOrderApi.getSellOrders(null, ethPlatform, continuation, size)
+        } returns OrdersPaginationDto(ethOrders, this@OrderControllerFt.continuation).toMono()
 
         val unionOrders = orderControllerClient.getSellOrders(
-            blockchains, DEF_PLATFORM, null, continuation, size
+            blockchains, platform, null, continuation, size
         ).awaitFirst()
 
         assertThat(unionOrders.orders).hasSize(3)
@@ -241,11 +242,11 @@ class OrderControllerFt : AbstractIntegrationTest() {
         val ethOrders = listOf(randomEthLegacyOrderDto())
 
         coEvery {
-            testPolygonOrderApi.getSellOrders(origin.value, DEF_ETH_PLATFORM, continuation, size)
-        } returns OrdersPaginationDto(ethOrders, DEF_CONTINUATION).toMono()
+            testPolygonOrderApi.getSellOrders(origin.value, ethPlatform, continuation, size)
+        } returns OrdersPaginationDto(ethOrders, this@OrderControllerFt.continuation).toMono()
 
         val unionOrders = orderControllerClient.getSellOrders(
-            blockchains, DEF_PLATFORM, origin.toString(), continuation, size
+            blockchains, platform, origin.toString(), continuation, size
         ).awaitFirst()
 
         assertThat(unionOrders.orders).hasSize(1)
@@ -261,18 +262,18 @@ class OrderControllerFt : AbstractIntegrationTest() {
             testPolygonOrderApi.getSellOrdersByCollection(
                 collection.value,
                 null,
-                DEF_ETH_PLATFORM,
-                DEF_CONTINUATION,
-                DEF_SIZE
+                ethPlatform,
+                continuation,
+                size
             )
-        } returns OrdersPaginationDto(polygonOrders, DEF_CONTINUATION).toMono()
+        } returns OrdersPaginationDto(polygonOrders, continuation).toMono()
 
         val unionOrders = orderControllerClient.getSellOrdersByCollection(
             collection.toString(),
-            DEF_PLATFORM,
+            platform,
             null,
-            DEF_CONTINUATION,
-            DEF_SIZE
+            continuation,
+            size
         ).awaitFirst()
 
         assertThat(unionOrders.orders).hasSize(1)
@@ -294,20 +295,20 @@ class OrderControllerFt : AbstractIntegrationTest() {
                 tokenId.toString(),
                 maker.value,
                 null,
-                DEF_ETH_PLATFORM,
-                DEF_CONTINUATION,
-                DEF_SIZE
+                ethPlatform,
+                continuation,
+                size
             )
-        } returns OrdersPaginationDto(ethOrders, DEF_CONTINUATION).toMono()
+        } returns OrdersPaginationDto(ethOrders, continuation).toMono()
 
         val unionOrders = orderControllerClient.getSellOrdersByItem(
             contract.toString(),
             tokenId.toString(),
-            DEF_PLATFORM,
+            platform,
             maker.toString(),
             null,
-            DEF_CONTINUATION,
-            DEF_SIZE
+            continuation,
+            size
         ).awaitFirst()
 
         assertThat(unionOrders.orders).hasSize(1)
@@ -322,15 +323,15 @@ class OrderControllerFt : AbstractIntegrationTest() {
         val polygonOrders = listOf(randomEthLegacyOrderDto())
 
         coEvery {
-            testPolygonOrderApi.getSellOrdersByMaker(maker.value, null, DEF_ETH_PLATFORM, DEF_CONTINUATION, DEF_SIZE)
-        } returns OrdersPaginationDto(polygonOrders, DEF_CONTINUATION).toMono()
+            testPolygonOrderApi.getSellOrdersByMaker(maker.value, null, ethPlatform, continuation, size)
+        } returns OrdersPaginationDto(polygonOrders, continuation).toMono()
 
         val unionOrders = orderControllerClient.getSellOrdersByMaker(
             maker.toString(),
-            DEF_PLATFORM,
+            platform,
             null,
-            DEF_CONTINUATION,
-            DEF_SIZE
+            continuation,
+            size
         ).awaitFirst()
 
         assertThat(unionOrders.orders).hasSize(1)
@@ -350,11 +351,11 @@ class OrderControllerFt : AbstractIntegrationTest() {
                 orderControllerClient.getSellOrdersByItem(
                     contract.toString(),
                     tokenId.toString(),
-                    DEF_PLATFORM,
+                    platform,
                     maker.toString(),
                     null,
-                    DEF_CONTINUATION,
-                    DEF_SIZE
+                    continuation,
+                    size
                 ).awaitFirst()
             }
         }

@@ -3,10 +3,7 @@ package com.rarible.protocol.union.core.flow.service
 import com.rarible.protocol.flow.nft.api.client.FlowNftOrderActivityControllerApi
 import com.rarible.protocol.union.core.flow.converter.FlowUnionActivityConverter
 import com.rarible.protocol.union.core.service.ActivityService
-import com.rarible.protocol.union.dto.FlowBlockchainDto
-import com.rarible.protocol.union.dto.UnionActivitiesDto
-import com.rarible.protocol.union.dto.UnionActivityTypeDto
-import com.rarible.protocol.union.dto.UnionUserActivityTypeDto
+import com.rarible.protocol.union.dto.*
 import kotlinx.coroutines.reactive.awaitFirst
 
 class FlowActivityService(
@@ -17,7 +14,8 @@ class FlowActivityService(
     override suspend fun getAllActivities(
         types: List<UnionActivityTypeDto>,
         continuation: String?,
-        size: Int?
+        size: Int,
+        sort: UnionActivitySortDto?
     ): UnionActivitiesDto {
         val rawTypes = types.map { it.name }
         val result = activityControllerApi.getNftOrderAllActivities(rawTypes, continuation, size)
@@ -29,7 +27,8 @@ class FlowActivityService(
         types: List<UnionActivityTypeDto>,
         collection: String,
         continuation: String?,
-        size: Int?
+        size: Int,
+        sort: UnionActivitySortDto?
     ): UnionActivitiesDto {
         val rawTypes = types.map { it.name }
         val result = activityControllerApi.getNftOrderActivitiesByCollection(rawTypes, collection, continuation, size)
@@ -42,7 +41,8 @@ class FlowActivityService(
         contract: String,
         tokenId: String,
         continuation: String?,
-        size: Int?
+        size: Int,
+        sort: UnionActivitySortDto?
     ): UnionActivitiesDto {
         val rawTypes = types.map { it.name }
         val result = activityControllerApi.getNftOrderActivitiesByItem(
@@ -59,7 +59,8 @@ class FlowActivityService(
         types: List<UnionUserActivityTypeDto>,
         users: List<String>,
         continuation: String?,
-        size: Int?
+        size: Int,
+        sort: UnionActivitySortDto?
     ): UnionActivitiesDto {
         val rawTypes = types.map { it.name }
         val result = activityControllerApi.getNftOrderActivitiesByUser(rawTypes, users, continuation, size)

@@ -10,7 +10,7 @@ interface OrderService : BlockchainService {
         platform: PlatformDto?,
         origin: String?,
         continuation: String?,
-        size: Int?
+        size: Int
     ): UnionOrdersDto
 
     suspend fun getOrderById(
@@ -28,7 +28,7 @@ interface OrderService : BlockchainService {
         maker: String?,
         origin: String?,
         continuation: String?,
-        size: Int?
+        size: Int
     ): UnionOrdersDto
 
     suspend fun getOrderBidsByMaker(
@@ -36,14 +36,14 @@ interface OrderService : BlockchainService {
         maker: String,
         origin: String?,
         continuation: String?,
-        size: Int?
+        size: Int
     ): UnionOrdersDto
 
     suspend fun getSellOrders(
         platform: PlatformDto?,
         origin: String?,
         continuation: String?,
-        size: Int?
+        size: Int
     ): UnionOrdersDto
 
     suspend fun getSellOrdersByCollection(
@@ -51,7 +51,7 @@ interface OrderService : BlockchainService {
         collection: String,
         origin: String?,
         continuation: String?,
-        size: Int?
+        size: Int
     ): UnionOrdersDto
 
     suspend fun getSellOrdersByItem(
@@ -61,7 +61,7 @@ interface OrderService : BlockchainService {
         maker: String?,
         origin: String?,
         continuation: String?,
-        size: Int?
+        size: Int
     ): UnionOrdersDto
 
     suspend fun getSellOrdersByMaker(
@@ -69,6 +69,6 @@ interface OrderService : BlockchainService {
         maker: String,
         origin: String?,
         continuation: String?,
-        size: Int?
+        size: Int
     ): UnionOrdersDto
 }

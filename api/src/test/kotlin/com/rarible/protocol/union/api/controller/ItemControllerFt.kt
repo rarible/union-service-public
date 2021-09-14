@@ -5,6 +5,7 @@ import com.rarible.core.test.data.randomString
 import com.rarible.protocol.dto.FlowNftItemsDto
 import com.rarible.protocol.dto.NftItemsDto
 import com.rarible.protocol.union.api.client.ItemControllerApi
+import com.rarible.protocol.union.api.configuration.PageSize
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.dto.*
@@ -24,9 +25,9 @@ import reactor.kotlin.core.publisher.toMono
 @IntegrationTest
 class ItemControllerFt : AbstractIntegrationTest() {
 
-    private val DEF_CONTINUATION = null
-    private val DEF_SIZE = 5
-    private val DEF_META = null
+    private val continuation: String? = null
+    private val size = PageSize.ITEM.default
+    private val meta: Boolean? = null
 
 
     @Autowired
@@ -83,11 +84,11 @@ class ItemControllerFt : AbstractIntegrationTest() {
         val item = randomEthNftItemDto()
 
         coEvery {
-            testEthereumItemApi.getNftItemsByCollection(ethCollectionId.value, DEF_CONTINUATION, DEF_SIZE, DEF_META)
+            testEthereumItemApi.getNftItemsByCollection(ethCollectionId.value, continuation, size, meta)
         } returns NftItemsDto(1, null, listOf(item)).toMono()
 
         val unionItems = itemControllerClient.getItemsByCollection(
-            ethCollectionId.toString(), DEF_CONTINUATION, DEF_SIZE, DEF_META
+            ethCollectionId.toString(), continuation, size, meta
         ).awaitFirst()
 
         val ethItem = unionItems.items[0] as EthItemDto
@@ -100,11 +101,11 @@ class ItemControllerFt : AbstractIntegrationTest() {
         val item = randomEthNftItemDto()
 
         coEvery {
-            testPolygonItemApi.getNftItemsByCollection(polyCollectionId.value, DEF_CONTINUATION, DEF_SIZE, DEF_META)
+            testPolygonItemApi.getNftItemsByCollection(polyCollectionId.value, continuation, size, meta)
         } returns NftItemsDto(1, null, listOf(item)).toMono()
 
         val unionItems = itemControllerClient.getItemsByCollection(
-            polyCollectionId.toString(), DEF_CONTINUATION, DEF_SIZE, DEF_META
+            polyCollectionId.toString(), continuation, size, meta
         ).awaitFirst()
 
         val polyItem = unionItems.items[0] as EthItemDto
@@ -117,11 +118,11 @@ class ItemControllerFt : AbstractIntegrationTest() {
         val item = randomFlowNftItemDto()
 
         coEvery {
-            testFlowItemApi.getNftItemsByCollection(flowCollectionId.value, DEF_CONTINUATION, DEF_SIZE)
+            testFlowItemApi.getNftItemsByCollection(flowCollectionId.value, continuation, size)
         } returns FlowNftItemsDto(1, null, listOf(item)).toMono()
 
         val unionItems = itemControllerClient.getItemsByCollection(
-            flowCollectionId.toString(), DEF_CONTINUATION, DEF_SIZE, DEF_META
+            flowCollectionId.toString(), continuation, size, meta
         ).awaitFirst()
 
         val flowItem = unionItems.items[0] as FlowItemDto
@@ -134,11 +135,11 @@ class ItemControllerFt : AbstractIntegrationTest() {
         val item = randomEthNftItemDto()
 
         coEvery {
-            testEthereumItemApi.getNftItemsByOwner(ethOwnerId.value, DEF_CONTINUATION, DEF_SIZE, DEF_META)
+            testEthereumItemApi.getNftItemsByOwner(ethOwnerId.value, continuation, size, meta)
         } returns NftItemsDto(1, null, listOf(item)).toMono()
 
         val unionItems = itemControllerClient.getItemsByOwner(
-            ethOwnerId.toString(), DEF_CONTINUATION, DEF_SIZE, DEF_META
+            ethOwnerId.toString(), continuation, size, meta
         ).awaitFirst()
 
         val ethItem = unionItems.items[0] as EthItemDto
@@ -151,11 +152,11 @@ class ItemControllerFt : AbstractIntegrationTest() {
         val item = randomEthNftItemDto()
 
         coEvery {
-            testPolygonItemApi.getNftItemsByOwner(polyOwnerId.value, DEF_CONTINUATION, DEF_SIZE, DEF_META)
+            testPolygonItemApi.getNftItemsByOwner(polyOwnerId.value, continuation, size, meta)
         } returns NftItemsDto(1, null, listOf(item)).toMono()
 
         val unionItems = itemControllerClient.getItemsByOwner(
-            polyOwnerId.toString(), DEF_CONTINUATION, DEF_SIZE, DEF_META
+            polyOwnerId.toString(), continuation, size, meta
         ).awaitFirst()
 
         val polyItem = unionItems.items[0] as EthItemDto
@@ -168,11 +169,11 @@ class ItemControllerFt : AbstractIntegrationTest() {
         val item = randomFlowNftItemDto()
 
         coEvery {
-            testFlowItemApi.getNftItemsByOwner(flowOwnerId.value, DEF_CONTINUATION, DEF_SIZE)
+            testFlowItemApi.getNftItemsByOwner(flowOwnerId.value, continuation, size)
         } returns FlowNftItemsDto(1, null, listOf(item)).toMono()
 
         val unionItems = itemControllerClient.getItemsByOwner(
-            flowOwnerId.toString(), DEF_CONTINUATION, DEF_SIZE, DEF_META
+            flowOwnerId.toString(), continuation, size, meta
         ).awaitFirst()
 
         val flowItem = unionItems.items[0] as FlowItemDto
@@ -185,11 +186,11 @@ class ItemControllerFt : AbstractIntegrationTest() {
         val item = randomEthNftItemDto()
 
         coEvery {
-            testEthereumItemApi.getNftItemsByCreator(ethCreatorId.value, DEF_CONTINUATION, DEF_SIZE, DEF_META)
+            testEthereumItemApi.getNftItemsByCreator(ethCreatorId.value, continuation, size, meta)
         } returns NftItemsDto(1, null, listOf(item)).toMono()
 
         val unionItems = itemControllerClient.getItemsByCreator(
-            ethCreatorId.toString(), DEF_CONTINUATION, DEF_SIZE, DEF_META
+            ethCreatorId.toString(), continuation, size, meta
         ).awaitFirst()
 
         val ethItem = unionItems.items[0] as EthItemDto
@@ -202,11 +203,11 @@ class ItemControllerFt : AbstractIntegrationTest() {
         val item = randomEthNftItemDto()
 
         coEvery {
-            testPolygonItemApi.getNftItemsByCreator(polyCreatorId.value, DEF_CONTINUATION, DEF_SIZE, DEF_META)
+            testPolygonItemApi.getNftItemsByCreator(polyCreatorId.value, continuation, size, meta)
         } returns NftItemsDto(1, null, listOf(item)).toMono()
 
         val unionItems = itemControllerClient.getItemsByCreator(
-            polyCreatorId.toString(), DEF_CONTINUATION, DEF_SIZE, DEF_META
+            polyCreatorId.toString(), continuation, size, meta
         ).awaitFirst()
 
         val polyItem = unionItems.items[0] as EthItemDto
@@ -219,11 +220,11 @@ class ItemControllerFt : AbstractIntegrationTest() {
         val item = randomFlowNftItemDto()
 
         coEvery {
-            testFlowItemApi.getNftItemsByCreator(flowCreatorId.value, DEF_CONTINUATION, DEF_SIZE)
+            testFlowItemApi.getNftItemsByCreator(flowCreatorId.value, continuation, size)
         } returns FlowNftItemsDto(1, null, listOf(item)).toMono()
 
         val unionItems = itemControllerClient.getItemsByCreator(
-            flowCreatorId.toString(), DEF_CONTINUATION, DEF_SIZE, DEF_META
+            flowCreatorId.toString(), continuation, size, meta
         ).awaitFirst()
 
         val flowItem = unionItems.items[0] as FlowItemDto

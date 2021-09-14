@@ -13,7 +13,7 @@ class FlowCollectionService(
     private val collectionControllerApi: FlowNftCollectionControllerApi
 ) : AbstractFlowService(blockchain), CollectionService {
 
-    override suspend fun getAllCollections(continuation: String?, size: Int?): UnionCollectionsDto {
+    override suspend fun getAllCollections(continuation: String?, size: Int): UnionCollectionsDto {
         val collections = collectionControllerApi.searchNftAllCollections(continuation, size).awaitFirst()
         return FlowUnionCollectionConverter.convert(collections, blockchain)
     }
@@ -26,7 +26,7 @@ class FlowCollectionService(
     override suspend fun getCollectionsByOwner(
         owner: String,
         continuation: String?,
-        size: Int?
+        size: Int
     ): UnionCollectionsDto {
         val items = collectionControllerApi.searchNftCollectionsByOwner(owner, continuation, size).awaitFirst()
         return FlowUnionCollectionConverter.convert(items, blockchain)

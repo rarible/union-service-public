@@ -18,7 +18,7 @@ object EthUnionCollectionConverter {
             owner = if (source.owner == null) null else EthAddressConverter.convert(
                 source.owner!!,
                 blockchain
-            ), //TODO should be not null?
+            ),
             features = source.features.map { convert(it) }
         )
     }

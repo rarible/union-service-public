@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.api.controller
 
+import com.rarible.protocol.union.api.configuration.PageSize
 import com.rarible.protocol.union.core.continuation.ContinuationPaging
 import com.rarible.protocol.union.core.service.OwnershipServiceRouter
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -20,8 +21,9 @@ class OwnershipController(
         continuation: String?,
         size: Int?
     ): ResponseEntity<UnionOwnershipsDto> {
+        val safeSize = PageSize.OWNERSHIP.limit(size)
         val blockchainPages = router.executeForAll(blockchains) {
-            it.getAllOwnerships(continuation, size)
+            it.getAllOwnerships(continuation, safeSize)
         }
 
         val total = blockchainPages.map { it.total }.sum()
@@ -29,7 +31,7 @@ class OwnershipController(
         val combinedPage = ContinuationPaging(
             UnionOwnershipContinuation.ByLastUpdatedAndId,
             blockchainPages.flatMap { it.ownerships }
-        ).getPage(size)
+        ).getPage(safeSize)
 
         val result = UnionOwnershipsDto(total, combinedPage.printContinuation(), combinedPage.entities)
         return ResponseEntity.ok(result)
@@ -49,8 +51,9 @@ class OwnershipController(
         continuation: String?,
         size: Int?
     ): ResponseEntity<UnionOwnershipsDto> {
+        val safeSize = PageSize.OWNERSHIP.limit(size)
         val (blockchain, shortContract) = IdParser.parse(contract)
-        val result = router.getService(blockchain).getOwnershipsByItem(shortContract, tokenId, continuation, size)
+        val result = router.getService(blockchain).getOwnershipsByItem(shortContract, tokenId, continuation, safeSize)
         return ResponseEntity.ok(result)
     }
 }

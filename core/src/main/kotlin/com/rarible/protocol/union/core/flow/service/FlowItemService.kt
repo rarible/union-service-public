@@ -15,7 +15,7 @@ class FlowItemService(
 
     override suspend fun getAllItems(
         continuation: String?,
-        size: Int?,
+        size: Int,
         showDeleted: Boolean?,
         lastUpdatedFrom: Long?, //TODO not supported by Flow
         lastUpdatedTo: Long?, //TODO not supported by Flow
@@ -36,7 +36,7 @@ class FlowItemService(
     override suspend fun getItemsByCollection(
         collection: String,
         continuation: String?,
-        size: Int?,
+        size: Int,
         includeMeta: Boolean? //TODO not supported by Flow
     ): UnionItemsDto {
         val items = flowNftItemControllerApi.getNftItemsByCollection(collection, continuation, size).awaitFirst()
@@ -46,7 +46,7 @@ class FlowItemService(
     override suspend fun getItemsByCreator(
         creator: String,
         continuation: String?,
-        size: Int?,
+        size: Int,
         includeMeta: Boolean? //TODO not supported by Flow
     ): UnionItemsDto {
         val items = flowNftItemControllerApi.getNftItemsByCreator(creator, continuation, size).awaitFirst()
@@ -56,7 +56,7 @@ class FlowItemService(
     override suspend fun getItemsByOwner(
         owner: String,
         continuation: String?,
-        size: Int?,
+        size: Int,
         includeMeta: Boolean? //TODO not supported by Flow
     ): UnionItemsDto {
         val items = flowNftItemControllerApi.getNftItemsByOwner(owner, continuation, size).awaitFirst()

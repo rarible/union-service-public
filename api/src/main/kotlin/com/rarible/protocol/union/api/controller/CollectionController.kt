@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.api.controller
 
+import com.rarible.protocol.union.api.configuration.PageSize
 import com.rarible.protocol.union.core.continuation.ContinuationPaging
 import com.rarible.protocol.union.core.service.CollectionServiceRouter
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -20,8 +21,9 @@ class CollectionController(
         continuation: String?,
         size: Int?
     ): ResponseEntity<UnionCollectionsDto> {
+        val safeSize = PageSize.COLLECTION.limit(size)
         val blockchainPages = router.executeForAll(blockchains) {
-            it.getAllCollections(continuation, size)
+            it.getAllCollections(continuation, safeSize)
         }
 
         val total = blockchainPages.map { it.total }.sum()
@@ -29,7 +31,7 @@ class CollectionController(
         val combinedPage = ContinuationPaging(
             UnionCollectionContinuation.ById,
             blockchainPages.flatMap { it.collections }
-        ).getPage(size)
+        ).getPage(safeSize)
 
         val result = UnionCollectionsDto(total, combinedPage.printContinuation(), combinedPage.entities)
         return ResponseEntity.ok(result)
@@ -48,8 +50,9 @@ class CollectionController(
         continuation: String?,
         size: Int?
     ): ResponseEntity<UnionCollectionsDto> {
+        val safeSize = PageSize.COLLECTION.limit(size)
         val (blockchain, shortOwner) = IdParser.parse(owner)
-        val result = router.getService(blockchain).getCollectionsByOwner(shortOwner, continuation, size)
+        val result = router.getService(blockchain).getCollectionsByOwner(shortOwner, continuation, safeSize)
         return ResponseEntity.ok(result)
     }
 }

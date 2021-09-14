@@ -52,7 +52,7 @@ object FlowUnionActivityConverter {
                 FlowMintActivityDto(
                     id = unionActivityId,
                     date = source.date,
-                    owner = listOf(FlowAddressConverter.convert(source.owner, blockchain)),
+                    owners = listOf(FlowAddressConverter.convert(source.owner, blockchain)),
                     contract = FlowContractConverter.convert(source.contract, blockchain),
                     tokenId = source.tokenId,
                     value = source.value,
@@ -68,7 +68,7 @@ object FlowUnionActivityConverter {
                 FlowBurnActivityDto(
                     id = unionActivityId,
                     date = source.date,
-                    owner = listOf(FlowAddressConverter.convert(source.owner, blockchain)),
+                    owners = listOf(FlowAddressConverter.convert(source.owner, blockchain)),
                     contract = FlowContractConverter.convert(source.contract, blockchain),
                     tokenId = source.tokenId,
                     value = source.value,
@@ -85,7 +85,7 @@ object FlowUnionActivityConverter {
                     id = unionActivityId,
                     date = source.date,
                     from = FlowAddressConverter.convert(source.from, blockchain),
-                    owner = listOf(FlowAddressConverter.convert(source.owner, blockchain)),
+                    owners = listOf(FlowAddressConverter.convert(source.owner, blockchain)),
                     contract = FlowContractConverter.convert(source.contract, blockchain),
                     tokenId = source.tokenId,
                     value = source.value,

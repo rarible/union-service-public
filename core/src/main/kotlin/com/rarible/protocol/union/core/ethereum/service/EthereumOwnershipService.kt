@@ -17,7 +17,7 @@ class EthereumOwnershipService(
     private val commonBlockchain = BlockchainDto.valueOf(blockchain.name)
     override fun getBlockchain() = commonBlockchain
 
-    override suspend fun getAllOwnerships(continuation: String?, size: Int?): UnionOwnershipsDto {
+    override suspend fun getAllOwnerships(continuation: String?, size: Int): UnionOwnershipsDto {
         val ownerships = ownershipControllerApi.getNftAllOwnerships(continuation, size).awaitFirst()
         return EthUnionOwnershipConverter.convert(ownerships, blockchain)
     }
@@ -31,7 +31,7 @@ class EthereumOwnershipService(
         contract: String,
         tokenId: String,
         continuation: String?,
-        size: Int?
+        size: Int
     ): UnionOwnershipsDto {
         val items = ownershipControllerApi.getNftOwnershipsByItem(contract, tokenId, continuation, size).awaitFirst()
         return EthUnionOwnershipConverter.convert(items, blockchain)

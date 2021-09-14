@@ -15,14 +15,14 @@ object FlowUnionOwnershipConverter {
         val tokenId = ownership.tokenId.toBigInteger() // TODO should be BigInt
         val owner = FlowAddressConverter.convert(ownership.owner, blockchain)
 
-        // TODO add blockchain
         return FlowOwnershipDto(
             id = FlowOwnershipIdProvider.create(contract, tokenId, owner, blockchain),
             value = BigInteger.ONE,//TODO: Is it right?
             createdAt = ownership.createdAt,
             contract = contract,
             tokenId = tokenId,
-            owner = listOf(owner)
+            owners = listOf(owner)
+            // TODO creators =
         )
     }
 

@@ -18,7 +18,7 @@ class FlowOrderService(
         platform: PlatformDto?,
         origin: String?,
         continuation: String?,
-        size: Int?
+        size: Int
     ): UnionOrdersDto {
         return stub()
     }
@@ -41,7 +41,7 @@ class FlowOrderService(
         maker: String?,
         origin: String?,
         continuation: String?,
-        size: Int?
+        size: Int
     ): UnionOrdersDto {
         return stub()
     }
@@ -51,7 +51,7 @@ class FlowOrderService(
         maker: String,
         origin: String?,
         continuation: String?,
-        size: Int?
+        size: Int
     ): UnionOrdersDto {
         return stub()
     }
@@ -60,7 +60,7 @@ class FlowOrderService(
         platform: PlatformDto?,
         origin: String?,
         continuation: String?,
-        size: Int?
+        size: Int
     ): UnionOrdersDto {
         return stub()
     }
@@ -70,7 +70,7 @@ class FlowOrderService(
         collection: String,
         origin: String?,
         continuation: String?,
-        size: Int?
+        size: Int
     ): UnionOrdersDto {
         return stub()
     }
@@ -82,7 +82,7 @@ class FlowOrderService(
         maker: String?,
         origin: String?,
         continuation: String?,
-        size: Int?
+        size: Int
     ): UnionOrdersDto {
         return stub()
     }
@@ -92,7 +92,7 @@ class FlowOrderService(
         maker: String,
         origin: String?,
         continuation: String?,
-        size: Int?
+        size: Int
     ): UnionOrdersDto {
         return stub()
     }

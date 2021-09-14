@@ -4,8 +4,11 @@ import java.time.Instant
 
 data class DateIdContinuation(
     val date: Instant,
-    val id: String
+    val id: String,
+    val asc: Boolean = false
 ) : Continuation<DateIdContinuation> {
+
+    private val sign = if (asc) 1 else -1
 
     override fun toString(): String {
         return "${date.toEpochMilli()}_${id}"
@@ -14,9 +17,9 @@ data class DateIdContinuation(
     override fun compareTo(other: DateIdContinuation): Int {
         val dateDiff = this.date.compareTo(other.date)
         if (dateDiff != 0) {
-            return -dateDiff
+            return sign * dateDiff
         }
-        return -this.id.compareTo(other.id)
+        return sign * this.id.compareTo(other.id)
     }
 
     companion object {

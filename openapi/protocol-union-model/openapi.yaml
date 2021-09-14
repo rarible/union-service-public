@@ -57,16 +57,20 @@ components:
           type: string
         attributes:
           type: array
+          default: [ ]
           items:
             $ref: "#/components/schemas/UnionMetaAttribute"
         contents:
           type: array
+          default: [ ]
           items:
             $ref: "#/components/schemas/UnionMetaContent"
         raw:
           type: string
       required:
         - name
+        - attributes
+        - contents
 
     UnionMetaContent:
       type: object
@@ -77,11 +81,13 @@ components:
           type: string
         attributes:
           type: array
+          default: [ ]
           items:
             $ref: "#/components/schemas/UnionMetaAttribute"
       required:
         - typeContent
         - url
+        - attributes
 
     UnionMetaAttribute:
       type: object
@@ -107,7 +113,7 @@ components:
           format: date-time
         supply:
           $ref: "#/components/schemas/BigInteger"
-        metaURL:
+        metaUrl:
           type: string
           example: "ipfs://ipfs/QmPe1W8XiUYdsvdpvgWVwekQ7cDQivRMak3YPX15vxvSJs"
         meta:
@@ -136,6 +142,7 @@ components:
         items:
           type: array
           description: "List of found items"
+          default: [ ]
           items:
             $ref: "#/components/schemas/UnionItem"
       required:
@@ -182,6 +189,7 @@ components:
           description: "Continuation token to paginate Ownerships search result"
         ownerships:
           type: array
+          default: [ ]
           description: "List of found ownerships"
           items:
             $ref: "#/components/schemas/UnionOwnership"
@@ -223,8 +231,6 @@ components:
         lastUpdatedAt:
           type: string
           format: "date-time"
-        makeBalance:
-          $ref: "#/components/schemas/BigDecimal"
         makePriceUsd:
           $ref: "#/components/schemas/BigDecimal"
         takePriceUsd:
@@ -269,6 +275,7 @@ components:
         orders:
           type: array
           description: "List of found orders"
+          default: [ ]
           items:
             $ref: "#/components/schemas/UnionOrder"
       required:
@@ -290,6 +297,12 @@ components:
         - "$ref": "#/components/schemas/FlowOrderEvent"
 
     #################### Activity - Union ####################
+
+    UnionActivitySort:
+      type: string
+      enum:
+        - LATEST_FIRST
+        - EARLIEST_FIRST
 
     UnionActivityType:
       type: string
@@ -334,6 +347,7 @@ components:
           description: "Continuation token to paginate Ownerships search result"
         activities:
           type: array
+          default: [ ]
           description: "List of found activities"
           items:
             $ref: "#/components/schemas/UnionActivity"
@@ -365,6 +379,7 @@ components:
           type: string
           description: "Continuation token to paginate Ownerships search result"
         collections:
+          default: [ ]
           type: array
           items:
             $ref: "#/components/schemas/UnionCollection"
@@ -425,22 +440,26 @@ components:
           $ref: "#/components/schemas/EthAddress"
         creators:
           type: array
+          default: [ ]
           items:
             $ref: "#/components/schemas/EthCreator"
         owners:
           type: array
+          default: [ ]
           items:
             $ref: "#/components/schemas/EthAddress"
         royalties:
           type: array
+          default: [ ]
           items:
             $ref: "#/components/schemas/EthRoyalty"
         lazySupply:
           $ref: "#/components/schemas/BigInteger"
         pending:
           type: array
+          default: [ ]
           items:
-            $ref: "#/components/schemas/EthPendingItem"
+            $ref: "#/components/schemas/EthItemTransfer"
       required:
         - blockchain
         - id
@@ -450,9 +469,67 @@ components:
         - owners
         - royalties
         - lazySupply
+        - pending
+
+    EthItemHistory:
+      type: object
+      properties:
+        owner:
+          "$ref": "#/components/schemas/EthAddress"
+        contract:
+          "$ref": "#/components/schemas/EthAddress"
+        tokenId:
+          "$ref": "#/components/schemas/BigInteger"
+        value:
+          "$ref": "#/components/schemas/BigInteger"
+        date:
+          type: string
+          format: date-time
+      description: History of item
+      required:
+        - contract
+        - tokenId
+        - date
+      oneOf:
+        - "$ref": "#/components/schemas/EthItemRoyalty"
+        - "$ref": "#/components/schemas/EthItemTransfer"
+
+    EthItemRoyalty:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - ROYALTY
+        royalties:
+          type: array
+          default: [ ]
+          items:
+            "$ref": "#/components/schemas/EthRoyalty"
+      required:
+        - "@type"
+        - royalties
+
+    EthItemTransfer:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - TRANSFER
+        from:
+          "$ref": "#/components/schemas/EthAddress"
+      required:
+        - "@type"
+        - owner
+        - value
+        - from
 
     EthRoyalty:
       type: object
+      required:
+        - account
+        - value
       properties:
         account:
           $ref: "#/components/schemas/EthAddress"
@@ -469,19 +546,6 @@ components:
       required:
         - account
         - value
-
-    EthPendingItem:
-      type: object
-      properties:
-        type:
-          type: string
-          enum:
-            - TRANSFER
-        from:
-          $ref: "#/components/schemas/EthAddress"
-      required:
-        - type
-        - from
 
     EthItemEvent:
       properties:
@@ -554,63 +618,32 @@ components:
           $ref: "#/components/schemas/EthAddress"
         tokenId:
           $ref: "#/components/schemas/BigInteger"
-        owner:
+        owners:
           type: array
+          default: [ ]
           items:
             $ref: "#/components/schemas/EthAddress"
         creators:
           type: array
+          default: [ ]
           items:
             $ref: "#/components/schemas/EthCreator"
         lazyValue:
           $ref: "#/components/schemas/BigInteger"
         pending:
           type: array
+          default: [ ]
           items:
-            $ref: "#/components/schemas/EthPendingOwnership"
+            $ref: "#/components/schemas/EthItemHistory"
       required:
         - "@type"
         - id
         - contract
         - tokenId
-        - owner
+        - owners
         - creators
         - lazyValue
         - pending
-
-    EthPendingOwnership:
-      type: object
-      oneOf:
-        - $ref: "#/components/schemas/EthPendingOwnershipTransfer"
-        - $ref: "#/components/schemas/EthPendingOwnershipRoyalty"
-
-    EthPendingOwnershipTransfer:
-      type: object
-      properties:
-        "@type":
-          type: string
-          enum:
-            - TRANSFER
-        from:
-          $ref: "#/components/schemas/EthAddress"
-      required:
-        - "@type"
-        - from
-
-    EthPendingOwnershipRoyalty:
-      type: object
-      properties:
-        "@type":
-          type: string
-          enum:
-            - ROYALTY
-        from:
-          type: array
-          items:
-            $ref: "#/components/schemas/EthRoyalty"
-      required:
-        - "@type"
-        - from
 
     EthOwnershipEvent:
       properties:
@@ -667,10 +700,6 @@ components:
     EthOrder:
       type: object
       properties:
-        "@type":
-          type: string
-          enum:
-            - ETHEREUM
         id:
           $ref: "#/components/schemas/EthOrderId"
         maker:
@@ -687,10 +716,10 @@ components:
           type: string
         pending:
           type: array
+          default: [ ]
           items:
             $ref: "#/components/schemas/EthPendingOrder"
       required:
-        - "@type"
         - id
         - type
         - maker
@@ -702,6 +731,7 @@ components:
         - "$ref": "#/components/schemas/EthLegacyOrder"
         - "$ref": "#/components/schemas/EthRaribleV2Order"
         - "$ref": "#/components/schemas/EthOpenSeaV1Order"
+        - "$ref": "#/components/schemas/EthCryptoPunksOrder"
 
     EthLegacyOrder:
       type: object
@@ -709,7 +739,7 @@ components:
         "@type":
           type: string
           enum:
-            - RARIBLE_V1
+            - ETH_RARIBLE_V1
         data:
           $ref: "#/components/schemas/EthOrderDataLegacy"
       required:
@@ -722,7 +752,7 @@ components:
         "@type":
           type: string
           enum:
-            - RARIBLE_V2
+            - ETH_RARIBLE_V2
         data:
           $ref: "#/components/schemas/EthOrderDataRaribleV2DataV1"
       required:
@@ -735,12 +765,25 @@ components:
         "@type":
           type: string
           enum:
-            - OPEN_SEA_V1
+            - ETH_OPEN_SEA_V1
         data:
           $ref: "#/components/schemas/EthOrderOpenSeaV1DataV1"
       required:
         - "@type"
         - data
+
+    EthCryptoPunksOrder:
+      type: object
+      required:
+        - "@type"
+        - data
+      properties:
+        "@type":
+          type: string
+          enum:
+            - ETH_CRYPTO_PUNKS
+        data:
+          $ref: "#/components/schemas/EthOrderCryptoPunksData"
 
     EthOrderDataLegacy:
       type: object
@@ -755,10 +798,12 @@ components:
       properties:
         payouts:
           type: array
+          default: [ ]
           items:
             $ref: "#/components/schemas/EthOrderPayout"
         originFees:
           type: array
+          default: [ ]
           items:
             $ref: "#/components/schemas/EthOrderPayout"
       required:
@@ -828,23 +873,34 @@ components:
         - staticExtraData
         - extra
 
+    EthOrderCryptoPunksData:
+      type: object
+      properties:
+        stub:
+          type: string
+          default: "STUB"
+
     EthPendingOrder:
       type: object
+      required:
+        - id
+        - date
+      properties:
+        id:
+          $ref: "#/components/schemas/EthOrderId"
+        make:
+          $ref: "#/components/schemas/EthAsset"
+        take:
+          $ref: "#/components/schemas/EthAsset"
+        date:
+          type: string
+          format: date-time
+        maker:
+          $ref: "#/components/schemas/EthAddress"
       oneOf:
         - $ref: "#/components/schemas/EthPendingOrderCancel"
         - $ref: "#/components/schemas/EthPendingOrderMatch"
-
-    EthPendingOrderCancel:
-      type: object
-      properties:
-        "@type":
-          type: string
-          enum:
-            - CANCEL
-        owner:
-          $ref: "#/components/schemas/EthAddress"
-      required:
-        - "@type"
+        - $ref: "#/components/schemas/EthOnChainOrder"
 
     EthPendingOrderMatch:
       type: object
@@ -876,6 +932,28 @@ components:
         - "@type"
         - fill
 
+    EthPendingOrderCancel:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - CANCEL
+        owner:
+          $ref: "#/components/schemas/EthAddress"
+      required:
+        - "@type"
+
+    EthOnChainOrder:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - ON_CHAIN_ORDER
+      required:
+        - "@type"
+
     EthOrderPayout:
       type: object
       properties:
@@ -887,133 +965,30 @@ components:
         - account
         - value
 
-    EthAssetType:
-      type: object
-      properties:
-        contract:
-          $ref: "#/components/schemas/EthAddress"
-      required:
-        - contract
-      oneOf:
-        - $ref: "#/components/schemas/ERC1155LazyAsset"
-        - $ref: "#/components/schemas/ERC721LazyAsset"
-        - $ref: "#/components/schemas/ERC1155Asset"
-        - $ref: "#/components/schemas/ERC721Asset"
-        - $ref: "#/components/schemas/ERC20Asset"
-        - $ref: "#/components/schemas/EthereumAsset"
-
     EthAsset:
       type: object
       properties:
-        assetType:
+        type:
           $ref: "#/components/schemas/EthAssetType"
         value:
           $ref: "#/components/schemas/BigInteger"
       required:
-        - assetType
+        - type
         - value
 
-    ERC1155LazyAsset:
+    EthAssetType:
       type: object
-      properties:
-        "@type":
-          type: string
-          enum:
-            - ERC1155_Lazy
-        tokenId:
-          $ref: "#/components/schemas/BigInteger"
-        uri:
-          type: string
-        supply:
-          $ref: "#/components/schemas/BigInteger"
-        creators:
-          type: array
-          items:
-            $ref: "#/components/schemas/EthCreator"
-        royalties:
-          type: array
-          items:
-            $ref: "#/components/schemas/EthRoyalty"
-        signature:
-          type: array
-          items:
-            type: string
-      required:
-        - "@type"
-        - tokenId
-        - uri
-        - creators
-        - royalties
-        - signature
+      oneOf:
+        - $ref: "#/components/schemas/EthEthereumAssetType"
+        - $ref: "#/components/schemas/EthErc20AssetType"
+        - $ref: "#/components/schemas/EthErc721AssetType"
+        - $ref: "#/components/schemas/EthErc721LazyAssetType"
+        - $ref: "#/components/schemas/EthErc1155AssetType"
+        - $ref: "#/components/schemas/EthErc1155LazyAssetType"
+        - $ref: "#/components/schemas/EthCryptoPunksAssetType"
+        - $ref: "#/components/schemas/EthGenerativeArtAssetType"
 
-    ERC721LazyAsset:
-      type: object
-      properties:
-        "@type":
-          type: string
-          enum:
-            - ERC721_Lazy
-        tokenId:
-          $ref: "#/components/schemas/BigInteger"
-        uri:
-          type: string
-        creators:
-          type: array
-          items:
-            $ref: "#/components/schemas/EthCreator"
-        royalties:
-          type: array
-          items:
-            $ref: "#/components/schemas/EthRoyalty"
-        signature:
-          type: array
-          items:
-            type: string
-      required:
-        - "@type"
-        - tokenId
-        - uri
-        - creators
-        - royalties
-        - signature
-
-    ERC1155Asset:
-      type: object
-      properties:
-        "@type":
-          type: string
-          enum:
-            - ERC1155
-        tokenId:
-          $ref: "#/components/schemas/BigInteger"
-      required:
-        - "@type"
-        - tokenId
-
-    ERC721Asset:
-      type: object
-      properties:
-        "@type":
-          type: string
-          enum:
-            - ERC721
-        tokenId:
-          $ref: "#/components/schemas/BigInteger"
-      required:
-        - "@type"
-        - tokenId
-
-    ERC20Asset:
-      type: object
-      properties:
-        "@type":
-          type: string
-          enum:
-            - ERC20
-      required:
-        - "@type"
-
-    EthereumAsset:
+    EthEthereumAssetType:
       type: object
       properties:
         "@type":
@@ -1022,6 +997,156 @@ components:
             - ETH
       required:
         - "@type"
+
+    EthErc20AssetType:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - ERC20
+        contract:
+          $ref: "#/components/schemas/EthAddress"
+      required:
+        - "@type"
+        - contract
+
+    EthErc721AssetType:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - ERC721
+        contract:
+          $ref: "#/components/schemas/EthAddress"
+        tokenId:
+          $ref: "#/components/schemas/BigInteger"
+      required:
+        - "@type"
+        - contract
+        - tokenId
+
+    EthErc721LazyAssetType:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - ERC721_Lazy
+        contract:
+          $ref: "#/components/schemas/EthAddress"
+        tokenId:
+          $ref: "#/components/schemas/BigInteger"
+        uri:
+          type: string
+        creators:
+          type: array
+          default: [ ]
+          items:
+            $ref: "#/components/schemas/EthCreator"
+        royalties:
+          type: array
+          default: [ ]
+          items:
+            $ref: "#/components/schemas/EthRoyalty"
+        signatures:
+          type: array
+          default: [ ]
+          items:
+            type: string
+      required:
+        - "@type"
+        - contract
+        - tokenId
+        - uri
+        - creators
+        - royalties
+        - signatures
+
+    EthErc1155AssetType:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - ERC1155
+        contract:
+          $ref: "#/components/schemas/EthAddress"
+        tokenId:
+          $ref: "#/components/schemas/BigInteger"
+      required:
+        - "@type"
+        - contract
+        - tokenId
+
+    EthErc1155LazyAssetType:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - ERC1155_Lazy
+        contract:
+          $ref: "#/components/schemas/EthAddress"
+        tokenId:
+          $ref: "#/components/schemas/BigInteger"
+        uri:
+          type: string
+        supply:
+          $ref: "#/components/schemas/BigInteger"
+        creators:
+          type: array
+          default: [ ]
+          items:
+            $ref: "#/components/schemas/EthCreator"
+        royalties:
+          type: array
+          default: [ ]
+          items:
+            $ref: "#/components/schemas/EthRoyalty"
+        signatures:
+          type: array
+          default: [ ]
+          items:
+            type: string
+      required:
+        - "@type"
+        - contract
+        - tokenId
+        - uri
+        - creators
+        - royalties
+        - signatures
+
+    EthCryptoPunksAssetType:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - "CRYPTO_PUNKS"
+        contract:
+          $ref: "#/components/schemas/EthAddress"
+        punkId:
+          type: integer
+      required:
+        - "@type"
+        - contract
+        - punkId
+
+    EthGenerativeArtAssetType:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - "GEN_ART"
+        contract:
+          $ref: "#/components/schemas/EthAddress"
+      required:
+        - "@type"
+        - contract
 
     #################### Activity - Eth ####################
 
@@ -1061,8 +1186,9 @@ components:
           type: string
           enum:
             - ETHEREUM_MINT
-        owner:
+        owners:
           type: array
+          default: [ ]
           items:
             $ref: "#/components/schemas/EthAddress"
         contract:
@@ -1075,7 +1201,7 @@ components:
           $ref: "#/components/schemas/ActivityBlockchainInfo"
       required:
         - "@type"
-        - owner
+        - owners
         - contract
         - tokenId
         - value
@@ -1088,8 +1214,9 @@ components:
           type: string
           enum:
             - ETHEREUM_BURN
-        owner:
+        owners:
           type: array
+          default: [ ]
           items:
             $ref: "#/components/schemas/EthAddress"
         contract:
@@ -1102,7 +1229,7 @@ components:
           $ref: "#/components/schemas/ActivityBlockchainInfo"
       required:
         - "@type"
-        - owner
+        - owners
         - contract
         - tokenId
         - value
@@ -1117,8 +1244,9 @@ components:
             - ETHEREUM_TRANSFER
         from:
           $ref: "#/components/schemas/EthAddress"
-        owner:
+        owners:
           type: array
+          default: [ ]
           items:
             $ref: "#/components/schemas/EthAddress"
         contract:
@@ -1132,7 +1260,7 @@ components:
       required:
         - "@type"
         - from
-        - owner
+        - owners
         - contract
         - tokenId
         - value
@@ -1163,6 +1291,7 @@ components:
       enum:
         - RARIBLE
         - OPEN_SEA
+        - CRYPTO_PUNKS
 
     EthOrderMatchActivity:
       type: object
@@ -1328,6 +1457,7 @@ components:
           $ref: "#/components/schemas/EthAddress"
         features:
           type: array
+          default: [ ]
           items:
             type: string
             enum:
@@ -1397,14 +1527,17 @@ components:
           $ref: "#/components/schemas/FlowContract"
         creators:
           type: array
+          default: [ ]
           items:
             $ref: "#/components/schemas/FlowCreator"
         owners:
           type: array
+          default: [ ]
           items:
             $ref: "#/components/schemas/FlowAddress"
         royalties:
           type: array
+          default: [ ]
           items:
             $ref: "#/components/schemas/FlowRoyalty"
       required:
@@ -1509,8 +1642,9 @@ components:
           $ref: "#/components/schemas/FlowContract"
         tokenId:
           $ref: "#/components/schemas/BigInteger"
-        owner:
+        owners:
           type: array
+          default: [ ]
           items:
             $ref: "#/components/schemas/FlowAddress"
       required:
@@ -1518,7 +1652,7 @@ components:
         - id
         - contract
         - tokenId
-        - owner
+        - owners
 
     FlowOwnershipEvent:
       properties:
@@ -1572,16 +1706,21 @@ components:
         - value
 
     FlowOrder:
+      properties:
+        id:
+          $ref: "#/components/schemas/FlowOrderId"
+      required:
+        - id
+      oneOf:
+        - $ref: "#/components/schemas/FlowOrderV1"
+
+    FlowOrderV1:
       type: object
       properties:
         "@type":
           type: string
           enum:
-            - FLOW
-        id:
-          $ref: "#/components/schemas/FlowOrderId"
-        type:
-          $ref: "#/components/schemas/FlowOrderType"
+            - FLOW_RARIBLE_V1
         maker:
           $ref: "#/components/schemas/FlowAddress"
         taker:
@@ -1591,20 +1730,30 @@ components:
         take:
           $ref: "#/components/schemas/FlowAsset"
         data:
-          $ref: "#/components/schemas/FlowOrderData"
+          $ref: "#/components/schemas/FlowOrderDataV1"
       required:
         - "@type"
-        - id
-        - type
         - maker
         - make
         - take
         - data
 
-    FlowOrderType:
-      type: string
-      enum:
-        - RARIBLE_FLOW_V1
+    FlowOrderDataV1:
+      type: object
+      properties:
+        payouts:
+          type: array
+          default: [ ]
+          items:
+            $ref: "#/components/schemas/FlowOrderPayout"
+        originFees:
+          type: array
+          default: [ ]
+          items:
+            $ref: "#/components/schemas/FlowOrderPayout"
+      required:
+        - payouts
+        - originFees
 
     FlowOrderPayout:
       type: object
@@ -1617,42 +1766,15 @@ components:
         - account
         - value
 
-    FlowOrderData:
-      type: object
-      properties:
-        payouts:
-          type: array
-          items:
-            $ref: "#/components/schemas/FlowOrderPayout"
-        originFees:
-          type: array
-          items:
-            $ref: "#/components/schemas/FlowOrderPayout"
-      required:
-        - dataType
-        - payouts
-      oneOf:
-        - $ref: "#/components/schemas/FlowOrderDataV1"
-
-    FlowOrderDataV1:
-      type: object
-      properties:
-        "@type":
-          type: string
-          enum:
-            - DATA_V1
-      required:
-        - "@type"
-
     FlowAsset:
       type: object
       properties:
-        assetType:
+        type:
           $ref: "#/components/schemas/FlowAssetType"
         value:
           $ref: "#/components/schemas/BigInteger"
       required:
-        - assetType
+        - type
         - value
 
     FlowAssetType:
@@ -1742,8 +1864,9 @@ components:
           type: string
           enum:
             - FLOW_MINT
-        owner:
+        owners:
           type: array
+          default: [ ]
           items:
             $ref: "#/components/schemas/FlowAddress"
         contract:
@@ -1756,7 +1879,7 @@ components:
           $ref: "#/components/schemas/ActivityBlockchainInfo"
       required:
         - "@type"
-        - owner
+        - owners
         - contract
         - tokenId
         - value
@@ -1769,8 +1892,9 @@ components:
           type: string
           enum:
             - FLOW_BURN
-        owner:
+        owners:
           type: array
+          default: [ ]
           items:
             $ref: "#/components/schemas/FlowAddress"
         contract:
@@ -1783,7 +1907,7 @@ components:
           $ref: "#/components/schemas/ActivityBlockchainInfo"
       required:
         - "@type"
-        - owner
+        - owners
         - contract
         - tokenId
         - value
@@ -1798,8 +1922,9 @@ components:
             - FLOW_TRANSFER
         from:
           $ref: "#/components/schemas/FlowAddress"
-        owner:
+        owners:
           type: array
+          default: [ ]
           items:
             $ref: "#/components/schemas/FlowAddress"
         contract:

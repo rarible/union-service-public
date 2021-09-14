@@ -5,7 +5,7 @@ import com.rarible.protocol.dto.FlowActivityDto
 import com.rarible.protocol.union.dto.FlowOrderCancelListActivityDto
 import com.rarible.protocol.union.listener.test.AbstractIntegrationTest
 import com.rarible.protocol.union.listener.test.IntegrationTest
-import com.rarible.protocol.union.test.data.randomFlowCancelListActivity
+import com.rarible.protocol.union.test.data.randomFlowCancelListActivityDto
 import kotlinx.coroutines.FlowPreview
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
@@ -17,7 +17,7 @@ class FlowActivityEventHandlerFt : AbstractIntegrationTest() {
     @Test
     fun `flow activity event`() = runWithKafka {
 
-        val event: FlowActivityDto = randomFlowCancelListActivity()
+        val event: FlowActivityDto = randomFlowCancelListActivityDto()
 
         flowActivityProducer.send(message(event)).ensureSuccess()
 

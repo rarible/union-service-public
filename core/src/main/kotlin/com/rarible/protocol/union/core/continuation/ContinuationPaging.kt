@@ -9,16 +9,9 @@ class ContinuationPaging<T, C : Continuation<C>, F : ContinuationFactory<T, C>>(
     private val entities: Collection<T>
 ) {
 
-    companion object {
-        private const val DEFAULT_PAGE_SIZE = 10
-    }
-
-    fun getPage(size: Int?): ContinuationPage<T, C> {
+    fun getPage(size: Int): ContinuationPage<T, C> {
         val pageableList = entities.map { PageableEntity(it, factory) }.sorted()
-
-        val preferredPageSize = size ?: DEFAULT_PAGE_SIZE
-        val pageSize = min(preferredPageSize, pageableList.size)
-
+        val pageSize = min(size, pageableList.size)
         val page = pageableList.subList(0, pageSize)
 
         val continuation = if (pageableList.size > pageSize) page.last().continuation else null

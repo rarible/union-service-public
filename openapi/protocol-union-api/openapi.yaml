@@ -762,6 +762,11 @@ paths:
           required: false
           schema:
             type: integer
+        - name: sort
+          in: query
+          required: false
+          schema:
+            "$ref": "#/components/schemas/UnionActivitySort"
       responses:
         "200":
           description: "OK"
@@ -815,6 +820,11 @@ paths:
           required: false
           schema:
             type: integer
+        - name: sort
+          in: query
+          required: false
+          schema:
+            "$ref": "#/components/schemas/UnionActivitySort"
       responses:
         "200":
           description: "OK"
@@ -863,6 +873,11 @@ paths:
           required: false
           schema:
             type: integer
+        - name: sort
+          in: query
+          required: false
+          schema:
+            "$ref": "#/components/schemas/UnionActivitySort"
       responses:
         "200":
           description: "OK"
@@ -914,6 +929,11 @@ paths:
           schema:
             type: integer
             format: int32
+        - name: sort
+          in: query
+          required: false
+          schema:
+            "$ref": "#/components/schemas/UnionActivitySort"
       responses:
         "200":
           description: "OK"

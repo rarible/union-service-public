@@ -14,10 +14,10 @@ object EthUnionItemConverter {
                 tokenId = item.tokenId,
                 blockchain = blockchain
             ),
-            mintedAt = item.date ?: nowMillis(),
+            mintedAt = item.date ?: nowMillis(), // TODO RPN-848
             lastUpdatedAt = item.date ?: nowMillis(),
             supply = item.supply,
-            metaURL = null, //TODO
+            metaUrl = null, //TODO
             meta = item.meta?.let { convert(it) },
             deleted = item.deleted ?: false,
             tokenId = item.tokenId,
@@ -26,7 +26,7 @@ object EthUnionItemConverter {
             owners = item.owners.map { EthAddressConverter.convert(it, blockchain) },
             royalties = item.royalties.map { EthConverter.convertToRoyalty(it, blockchain) },
             lazySupply = item.lazySupply,
-            pending = item.pending?.map { convert(it, blockchain) }
+            pending = item.pending?.map { convert(it, blockchain) } ?: listOf()
         )
     }
 
@@ -38,11 +38,33 @@ object EthUnionItemConverter {
         )
     }
 
+    fun convert(source: ItemTransferDto, blockchain: EthBlockchainDto): EthItemTransferDto {
+        return EthItemTransferDto(
+            owner = EthAddressConverter.convert(source.owner!!, blockchain),
+            contract = EthAddressConverter.convert(source.contract, blockchain),
+            tokenId = source.tokenId,
+            value = source.value!!,
+            date = source.date,
+            from = EthAddressConverter.convert(source.from, blockchain)
+        )
+    }
+
+    fun convert(source: ItemRoyaltyDto, blockchain: EthBlockchainDto): EthItemRoyaltyDto {
+        return EthItemRoyaltyDto(
+            owner = source.owner?.let { EthAddressConverter.convert(it, blockchain) },
+            contract = EthAddressConverter.convert(source.contract, blockchain),
+            tokenId = source.tokenId,
+            value = source.value!!,
+            date = source.date,
+            royalties = source.royalties.map { EthConverter.convertToRoyalty(it, blockchain) }
+        )
+    }
+
     private fun convert(source: NftItemMetaDto): UnionMetaDto {
         return UnionMetaDto(
             name = source.name,
             description = source.description,
-            attributes = source.attributes?.map { convert(it) },
+            attributes = source.attributes?.filter { it.value != null }?.map { convert(it) } ?: listOf(),
             contents = listOfNotNull(source.image, source.animation).flatMap { convert(it) },
             raw = null //TODO
         )
@@ -50,13 +72,13 @@ object EthUnionItemConverter {
 
     private fun convert(source: NftMediaDto): List<UnionMetaContentDto> {
         return source.url.map { urlMap ->
-            val type = urlMap.value
-            val url = urlMap.key
+            val type = urlMap.key
+            val url = urlMap.value
 
             UnionMetaContentDto(
                 typeContent = type,
                 url = url,
-                attributes = source.meta[type]?.let { convert(it) }
+                attributes = source.meta[type]?.let { convert(it) } ?: listOf()
             )
         }
     }
@@ -85,14 +107,7 @@ object EthUnionItemConverter {
     private fun convert(source: NftItemAttributeDto): UnionMetaAttributeDto {
         return UnionMetaAttributeDto(
             key = source.key,
-            value = source.value ?: "" //TODO
-        )
-    }
-
-    private fun convert(source: ItemTransferDto, blockchain: EthBlockchainDto): EthPendingItemDto {
-        return EthPendingItemDto(
-            type = EthPendingItemDto.Type.TRANSFER,
-            from = EthAddressConverter.convert(source.from, blockchain)
+            value = source.value!!
         )
     }
 }

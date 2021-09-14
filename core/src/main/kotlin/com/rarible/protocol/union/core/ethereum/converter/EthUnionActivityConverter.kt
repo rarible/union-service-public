@@ -89,7 +89,7 @@ object EthUnionActivityConverter {
                 EthMintActivityDto(
                     id = unionActivityId,
                     date = source.date,
-                    owner = listOf(EthAddressConverter.convert(source.owner, blockchain)),
+                    owners = listOf(EthAddressConverter.convert(source.owner, blockchain)),
                     contract = EthAddressConverter.convert(source.contract, blockchain),
                     tokenId = source.tokenId,
                     value = source.value,
@@ -105,7 +105,7 @@ object EthUnionActivityConverter {
                 EthBurnActivityDto(
                     id = unionActivityId,
                     date = source.date,
-                    owner = listOf(EthAddressConverter.convert(source.owner, blockchain)),
+                    owners = listOf(EthAddressConverter.convert(source.owner, blockchain)),
                     contract = EthAddressConverter.convert(source.contract, blockchain),
                     tokenId = source.tokenId,
                     value = source.value,
@@ -122,7 +122,7 @@ object EthUnionActivityConverter {
                     id = unionActivityId,
                     date = source.date,
                     from = EthAddressConverter.convert(source.from, blockchain),
-                    owner = listOf(EthAddressConverter.convert(source.owner, blockchain)),
+                    owners = listOf(EthAddressConverter.convert(source.owner, blockchain)),
                     contract = EthAddressConverter.convert(source.contract, blockchain),
                     tokenId = source.tokenId,
                     value = source.value,
@@ -137,7 +137,7 @@ object EthUnionActivityConverter {
         }
     }
 
-    fun convert(source: UnionUserActivityTypeDto): ActivityFilterByUserDto.Types {
+    fun asUserActivityType(source: UnionUserActivityTypeDto): ActivityFilterByUserDto.Types {
         return when (source) {
             UnionUserActivityTypeDto.BURN -> ActivityFilterByUserDto.Types.BURN
             UnionUserActivityTypeDto.BUY -> ActivityFilterByUserDto.Types.BUY
@@ -204,6 +204,7 @@ object EthUnionActivityConverter {
         return when (source) {
             OrderActivityDto.Source.OPEN_SEA -> EthOrderActivitySourceDto.OPEN_SEA
             OrderActivityDto.Source.RARIBLE -> EthOrderActivitySourceDto.RARIBLE
+            OrderActivityDto.Source.CRYPTO_PUNKS -> EthOrderActivitySourceDto.CRYPTO_PUNKS
         }
     }
 
