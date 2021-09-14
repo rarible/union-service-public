@@ -178,7 +178,6 @@ object EthUnionOrderConverter {
 
     private fun convert(source: OrderExchangeHistoryDto, blockchain: EthBlockchainDto): EthPendingOrderDto {
         return when (source) {
-            /* TODO date, hash, make, take are missing*/
             is OrderSideMatchDto -> EthPendingOrderMatchDto(
                 id = EthOrderIdDto(EthConverter.convert(source.hash), blockchain),
                 make = source.make?.let { EthConverter.convert(it, blockchain) },

@@ -6,12 +6,44 @@ import com.rarible.protocol.dto.NftItemMetaDto
 import com.rarible.protocol.dto.NftMediaDto
 import com.rarible.protocol.dto.NftMediaMetaDto
 import com.rarible.protocol.union.dto.EthBlockchainDto
-import com.rarible.protocol.union.dto.EthPendingItemDto
+import com.rarible.protocol.union.test.data.randomEthItemRoyaltyDto
+import com.rarible.protocol.union.test.data.randomEthItemTransferDto
 import com.rarible.protocol.union.test.data.randomEthNftItemDto
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 class EthUnionItemConverterTest {
+
+    @Test
+    fun `item history - transfer`() {
+        val dto = randomEthItemTransferDto()
+
+        val converted = EthUnionItemConverter.convert(dto, EthBlockchainDto.ETHEREUM)
+
+        assertThat(converted.owner.value).isEqualTo(dto.owner!!.prefixed())
+        assertThat(converted.date).isEqualTo(dto.date)
+        assertThat(converted.value).isEqualTo(dto.value)
+        assertThat(converted.contract.value).isEqualTo(dto.contract.prefixed())
+        assertThat(converted.tokenId).isEqualTo(dto.tokenId)
+
+        assertThat(converted.from.value).isEqualTo(dto.from.prefixed())
+    }
+
+    @Test
+    fun `item history - royalty`() {
+        val dto = randomEthItemRoyaltyDto()
+
+        val converted = EthUnionItemConverter.convert(dto, EthBlockchainDto.ETHEREUM)
+
+        assertThat(converted.owner!!.value).isEqualTo(dto.owner!!.prefixed())
+        assertThat(converted.date).isEqualTo(dto.date)
+        assertThat(converted.value).isEqualTo(dto.value)
+        assertThat(converted.contract.value).isEqualTo(dto.contract.prefixed())
+        assertThat(converted.tokenId).isEqualTo(dto.tokenId)
+
+        assertThat(converted.royalties[0].account.value).isEqualTo(dto.royalties[0].account.prefixed())
+        assertThat(converted.royalties[0].value).isEqualTo(dto.royalties[0].value.toBigInteger())
+    }
 
     @Test
     fun item() {
@@ -37,9 +69,12 @@ class EthUnionItemConverterTest {
         assertThat(converted.creators[0].account.value).isEqualTo(dto.creators[0].account.prefixed())
         assertThat(converted.creators[0].value).isEqualTo(dto.creators[0].value.toBigDecimal())
 
-        // TODO ensure that's correct
-        assertThat(converted.pending!![0].from.value).isEqualTo(dto.pending!![0].from.prefixed())
-        assertThat(converted.pending!![0].type).isEqualTo(EthPendingItemDto.Type.TRANSFER)
+        assertThat(converted.pending[0].from.value).isEqualTo(dto.pending!![0].from.prefixed())
+        assertThat(converted.pending[0].owner.value).isEqualTo(dto.pending!![0].owner!!.prefixed())
+        assertThat(converted.pending[0].date).isEqualTo(dto.pending!![0].date)
+        assertThat(converted.pending[0].value).isEqualTo(dto.pending!![0].value)
+        assertThat(converted.pending[0].contract.value).isEqualTo(dto.pending!![0].contract.prefixed())
+        assertThat(converted.pending[0].tokenId).isEqualTo(dto.pending!![0].tokenId)
     }
 
     @Test

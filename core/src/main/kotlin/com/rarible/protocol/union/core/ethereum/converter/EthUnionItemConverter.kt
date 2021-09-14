@@ -38,11 +38,33 @@ object EthUnionItemConverter {
         )
     }
 
+    fun convert(source: ItemTransferDto, blockchain: EthBlockchainDto): EthItemTransferDto {
+        return EthItemTransferDto(
+            owner = EthAddressConverter.convert(source.owner!!, blockchain),
+            contract = EthAddressConverter.convert(source.contract, blockchain),
+            tokenId = source.tokenId,
+            value = source.value!!,
+            date = source.date,
+            from = EthAddressConverter.convert(source.from, blockchain)
+        )
+    }
+
+    fun convert(source: ItemRoyaltyDto, blockchain: EthBlockchainDto): EthItemRoyaltyDto {
+        return EthItemRoyaltyDto(
+            owner = source.owner?.let { EthAddressConverter.convert(it, blockchain) },
+            contract = EthAddressConverter.convert(source.contract, blockchain),
+            tokenId = source.tokenId,
+            value = source.value!!,
+            date = source.date,
+            royalties = source.royalties.map { EthConverter.convertToRoyalty(it, blockchain) }
+        )
+    }
+
     private fun convert(source: NftItemMetaDto): UnionMetaDto {
         return UnionMetaDto(
             name = source.name,
             description = source.description,
-            attributes = source.attributes?.map { convert(it) } ?: listOf(),
+            attributes = source.attributes?.filter { it.value != null }?.map { convert(it) } ?: listOf(),
             contents = listOfNotNull(source.image, source.animation).flatMap { convert(it) },
             raw = null //TODO
         )
@@ -85,15 +107,7 @@ object EthUnionItemConverter {
     private fun convert(source: NftItemAttributeDto): UnionMetaAttributeDto {
         return UnionMetaAttributeDto(
             key = source.key,
-            value = source.value ?: "" //TODO
-        )
-    }
-
-    // TODO is that right?
-    private fun convert(source: ItemTransferDto, blockchain: EthBlockchainDto): EthPendingItemDto {
-        return EthPendingItemDto(
-            type = EthPendingItemDto.Type.TRANSFER,
-            from = EthAddressConverter.convert(source.from, blockchain)
+            value = source.value!!
         )
     }
 }

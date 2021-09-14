@@ -81,6 +81,17 @@ fun randomEthItemTransferDto(): ItemTransferDto {
     )
 }
 
+fun randomEthItemRoyaltyDto(): ItemRoyaltyDto {
+    return ItemRoyaltyDto(
+        owner = randomAddress(),
+        contract = randomAddress(),
+        tokenId = randomBigInt(),
+        value = randomBigInt(),
+        date = nowMillis(),
+        royalties = listOf(randomEthPartDto())
+    )
+}
+
 fun randomEthItemMeta(): NftItemMetaDto {
     return NftItemMetaDto(
         name = randomString(),

@@ -459,7 +459,7 @@ components:
           type: array
           default: [ ]
           items:
-            $ref: "#/components/schemas/EthPendingItem"
+            $ref: "#/components/schemas/EthItemTransfer"
       required:
         - blockchain
         - id
@@ -470,6 +470,60 @@ components:
         - royalties
         - lazySupply
         - pending
+
+    EthItemHistory:
+      type: object
+      properties:
+        owner:
+          "$ref": "#/components/schemas/EthAddress"
+        contract:
+          "$ref": "#/components/schemas/EthAddress"
+        tokenId:
+          "$ref": "#/components/schemas/BigInteger"
+        value:
+          "$ref": "#/components/schemas/BigInteger"
+        date:
+          type: string
+          format: date-time
+      description: History of item
+      required:
+        - contract
+        - tokenId
+        - date
+      oneOf:
+        - "$ref": "#/components/schemas/EthItemRoyalty"
+        - "$ref": "#/components/schemas/EthItemTransfer"
+
+    EthItemRoyalty:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - ROYALTY
+        royalties:
+          type: array
+          default: [ ]
+          items:
+            "$ref": "#/components/schemas/EthRoyalty"
+      required:
+        - "@type"
+        - royalties
+
+    EthItemTransfer:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - TRANSFER
+        from:
+          "$ref": "#/components/schemas/EthAddress"
+      required:
+        - "@type"
+        - owner
+        - value
+        - from
 
     EthRoyalty:
       type: object
@@ -492,19 +546,6 @@ components:
       required:
         - account
         - value
-
-    EthPendingItem:
-      type: object
-      properties:
-        type:
-          type: string
-          enum:
-            - TRANSFER
-        from:
-          $ref: "#/components/schemas/EthAddress"
-      required:
-        - type
-        - from
 
     EthItemEvent:
       properties:
@@ -593,7 +634,7 @@ components:
           type: array
           default: [ ]
           items:
-            $ref: "#/components/schemas/EthPendingOwnership"
+            $ref: "#/components/schemas/EthItemHistory"
       required:
         - "@type"
         - id
@@ -603,41 +644,6 @@ components:
         - creators
         - lazyValue
         - pending
-
-    EthPendingOwnership:
-      type: object
-      oneOf:
-        - $ref: "#/components/schemas/EthPendingOwnershipTransfer"
-        - $ref: "#/components/schemas/EthPendingOwnershipRoyalty"
-
-    EthPendingOwnershipTransfer:
-      type: object
-      properties:
-        "@type":
-          type: string
-          enum:
-            - TRANSFER
-        from:
-          $ref: "#/components/schemas/EthAddress"
-      required:
-        - "@type"
-        - from
-
-    EthPendingOwnershipRoyalty:
-      type: object
-      properties:
-        "@type":
-          type: string
-          enum:
-            - ROYALTY
-        from:
-          type: array
-          default: [ ]
-          items:
-            $ref: "#/components/schemas/EthRoyalty"
-      required:
-        - "@type"
-        - from
 
     EthOwnershipEvent:
       properties:
