@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test
 class EthUnionItemConverterTest {
 
     @Test
-    fun `item history - transfer`() {
+    fun `eth item history - transfer`() {
         val dto = randomEthItemTransferDto()
 
         val converted = EthUnionItemConverter.convert(dto, EthBlockchainDto.ETHEREUM)
@@ -30,7 +30,7 @@ class EthUnionItemConverterTest {
     }
 
     @Test
-    fun `item history - royalty`() {
+    fun `eth item history - royalty`() {
         val dto = randomEthItemRoyaltyDto()
 
         val converted = EthUnionItemConverter.convert(dto, EthBlockchainDto.ETHEREUM)
@@ -46,7 +46,7 @@ class EthUnionItemConverterTest {
     }
 
     @Test
-    fun item() {
+    fun `eth item`() {
         val dto = randomEthNftItemDto()
 
         val converted = EthUnionItemConverter.convert(dto, EthBlockchainDto.ETHEREUM)
@@ -78,7 +78,7 @@ class EthUnionItemConverterTest {
     }
 
     @Test
-    fun `item meta`() {
+    fun `eth item meta`() {
         val item = randomEthNftItemDto().copy(
             meta = NftItemMetaDto(
                 name = "some_nft_meta",

@@ -14,9 +14,9 @@ object FlowUnionOrderConverter {
             make = FlowConverter.convert(order.make, blockchain),
             take = FlowConverter.convert(order.take!!, blockchain), //TODO: Why take is null?
             fill = order.fill,
-            startedAt = null, //TODO: No needed filed
-            endedAt = null, //TODO: No needed filed
-            makeStock = BigInteger.ZERO, // TODO: No needed filed
+            startedAt = null, //TODO: No needed field
+            endedAt = null, //TODO: No needed field
+            makeStock = BigInteger.ZERO, // TODO: No needed field
             cancelled = order.cancelled,
             createdAt = order.createdAt,
             lastUpdatedAt = order.lastUpdateAt,

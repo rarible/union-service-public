@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test
 class EthUnionActivityConverterTest {
 
     @Test
-    fun `order activity match side`() {
+    fun `eth order activity match side`() {
         val dto = randomEthOrderActivityMatch()
         val converted = EthUnionActivityConverter.convert(dto, EthBlockchainDto.ETHEREUM) as EthOrderMatchActivityDto
 
@@ -27,7 +27,7 @@ class EthUnionActivityConverterTest {
     }
 
     @Test
-    fun `order activity bid`() {
+    fun `eth order activity bid`() {
         val dto = randomEthOrderBidActivity()
         val converted = EthUnionActivityConverter.convert(dto, EthBlockchainDto.ETHEREUM) as EthOrderBidActivityDto
 
@@ -42,7 +42,7 @@ class EthUnionActivityConverterTest {
     }
 
     @Test
-    fun `order activity list`() {
+    fun `eth order activity list`() {
         val dto = randomEthOrderListActivity()
         val converted = EthUnionActivityConverter.convert(dto, EthBlockchainDto.ETHEREUM) as EthOrderListActivityDto
 
@@ -57,7 +57,7 @@ class EthUnionActivityConverterTest {
     }
 
     @Test
-    fun `order activity cancel bid`() {
+    fun `eth order activity cancel bid`() {
         val dto = randomEthOrderActivityCancelBid()
         val converted =
             EthUnionActivityConverter.convert(dto, EthBlockchainDto.ETHEREUM) as EthOrderCancelBidActivityDto
@@ -74,7 +74,7 @@ class EthUnionActivityConverterTest {
     }
 
     @Test
-    fun `order activity cancel list`() {
+    fun `eth order activity cancel list`() {
         val dto = randomEthOrderActivityCancelList()
         val converted =
             EthUnionActivityConverter.convert(dto, EthBlockchainDto.ETHEREUM) as EthOrderCancelListActivityDto
@@ -91,7 +91,7 @@ class EthUnionActivityConverterTest {
     }
 
     @Test
-    fun `item activity mint`() {
+    fun `eth item activity mint`() {
         val dto = randomEthItemMintActivity()
         val converted = EthUnionActivityConverter.convert(dto, EthBlockchainDto.ETHEREUM) as EthMintActivityDto
 
@@ -108,7 +108,7 @@ class EthUnionActivityConverterTest {
     }
 
     @Test
-    fun `item activity burn`() {
+    fun `eth item activity burn`() {
         val dto = randomEthItemBurnActivity()
         val converted = EthUnionActivityConverter.convert(dto, EthBlockchainDto.ETHEREUM) as EthBurnActivityDto
 
@@ -125,7 +125,7 @@ class EthUnionActivityConverterTest {
     }
 
     @Test
-    fun `item activity transfer`() {
+    fun `eth item activity transfer`() {
         val dto = randomEthItemTransferActivity()
         val converted = EthUnionActivityConverter.convert(dto, EthBlockchainDto.ETHEREUM) as EthTransferActivityDto
 
@@ -142,7 +142,7 @@ class EthUnionActivityConverterTest {
     }
 
     @Test
-    fun `as user activity type`() {
+    fun `eth activity type as user activity type`() {
         assertThat(EthUnionActivityConverter.asUserActivityType(UnionUserActivityTypeDto.BURN))
             .isEqualTo(ActivityFilterByUserDto.Types.BURN)
 
@@ -172,7 +172,7 @@ class EthUnionActivityConverterTest {
     }
 
     @Test
-    fun `as item activity type`() {
+    fun `eth activity type as item activity type`() {
         assertThat(EthUnionActivityConverter.asItemActivityType(UnionActivityTypeDto.BID))
             .isEqualTo(ActivityFilterByItemDto.Types.BID)
 
@@ -193,7 +193,7 @@ class EthUnionActivityConverterTest {
     }
 
     @Test
-    fun `as collection activity type`() {
+    fun `eth activity type as collection activity type`() {
         assertThat(EthUnionActivityConverter.asCollectionActivityType(UnionActivityTypeDto.BID))
             .isEqualTo(ActivityFilterByCollectionDto.Types.BID)
 
@@ -214,7 +214,7 @@ class EthUnionActivityConverterTest {
     }
 
     @Test
-    fun `as global activity type`() {
+    fun `eth activity type as global activity type`() {
         assertThat(EthUnionActivityConverter.asGlobalActivityType(UnionActivityTypeDto.BID))
             .isEqualTo(ActivityFilterAllDto.Types.BID)
 

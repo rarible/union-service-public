@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test
 class EthActivityFilterConverterTest {
 
     @Test
-    fun `all`() {
+    fun `eth activities all`() {
         val filter = ActivityFilterAllDto(
             types = ActivityFilterAllDto.Types.values().asList()
         )
@@ -22,7 +22,7 @@ class EthActivityFilterConverterTest {
     }
 
     @Test
-    fun `all - empty`() {
+    fun `eth activities all - empty`() {
         val filter = ActivityFilterAllDto(
             types = listOf()
         )
@@ -35,7 +35,7 @@ class EthActivityFilterConverterTest {
     }
 
     @Test
-    fun `by collection`() {
+    fun `eth activities by collection`() {
         val filter = ActivityFilterByCollectionDto(
             types = ActivityFilterByCollectionDto.Types.values().asList(),
             contract = randomAddress()
@@ -52,7 +52,7 @@ class EthActivityFilterConverterTest {
     }
 
     @Test
-    fun `by collection - empty`() {
+    fun `eth activities by collection - empty`() {
         val filter = ActivityFilterByCollectionDto(
             types = listOf(),
             contract = randomAddress()
@@ -66,7 +66,7 @@ class EthActivityFilterConverterTest {
     }
 
     @Test
-    fun `by item`() {
+    fun `eth activities by item`() {
         val filter = ActivityFilterByItemDto(
             types = ActivityFilterByItemDto.Types.values().asList(),
             contract = randomAddress(),
@@ -86,7 +86,7 @@ class EthActivityFilterConverterTest {
     }
 
     @Test
-    fun `by item - empty`() {
+    fun `eth activities by item - empty`() {
         val filter = ActivityFilterByItemDto(
             types = listOf(),
             contract = randomAddress(),
@@ -101,7 +101,7 @@ class EthActivityFilterConverterTest {
     }
 
     @Test
-    fun `by user`() {
+    fun `eth activities by user`() {
         val filter = ActivityFilterByUserDto(
             types = ActivityFilterByUserDto.Types.values().asList(),
             users = listOf(randomAddress(), randomAddress())
@@ -118,7 +118,7 @@ class EthActivityFilterConverterTest {
     }
 
     @Test
-    fun `by user - empty`() {
+    fun `eth activities by user - empty`() {
         val filter = ActivityFilterByUserDto(
             types = listOf(),
             users = listOf(randomAddress(), randomAddress())

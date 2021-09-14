@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test
 class EthUnionOrderConverterTest {
 
     @Test
-    fun legacy() {
+    fun `eth order - legacy`() {
         val dto = randomEthLegacyOrderDto()
 
         val converted = EthUnionOrderConverter.convert(dto, EthBlockchainDto.ETHEREUM) as EthLegacyOrderDto
@@ -41,7 +41,7 @@ class EthUnionOrderConverterTest {
     }
 
     @Test
-    fun `pending - side match`() {
+    fun `eth order pending - side match`() {
         val order = randomEthLegacyOrderDto().copy(pending = listOf(randomEthOrderSideMatchDto()))
         val dto = order.pending!![0] as OrderSideMatchDto
 
@@ -69,7 +69,7 @@ class EthUnionOrderConverterTest {
     }
 
     @Test
-    fun `pending - cancel`() {
+    fun `eth order pending - cancel`() {
         val order = randomEthLegacyOrderDto().copy(pending = listOf(randomEthOrderCancelDto()))
         val dto = order.pending!![0] as OrderCancelDto
 
@@ -88,7 +88,7 @@ class EthUnionOrderConverterTest {
     }
 
     @Test
-    fun `pending - on chain`() {
+    fun `eth order pending - on chain`() {
         val order = randomEthLegacyOrderDto().copy(pending = listOf(randomEthOnChainOrderDto()))
         val dto = order.pending!![0] as OnChainOrderDto
 
@@ -105,7 +105,7 @@ class EthUnionOrderConverterTest {
     }
 
     @Test
-    fun `rarible v2`() {
+    fun `eth order rarible v2`() {
         val dto = randomEthV2OrderDto()
 
         val converted = EthUnionOrderConverter.convert(dto, EthBlockchainDto.ETHEREUM) as EthRaribleV2OrderDto
@@ -140,7 +140,7 @@ class EthUnionOrderConverterTest {
     }
 
     @Test
-    fun `opensea v1`() {
+    fun `eth order opensea v1`() {
         val dto = randomEthOpenSeaV1OrderDto()
 
         val converted = EthUnionOrderConverter.convert(dto, EthBlockchainDto.ETHEREUM) as EthOpenSeaV1OrderDto
@@ -169,7 +169,7 @@ class EthUnionOrderConverterTest {
     }
 
     @Test
-    fun `opensea v1 - data`() {
+    fun `eth order opensea v1 - data`() {
         val order = randomEthOpenSeaV1OrderDto()
         val dto = order.data
 
@@ -194,7 +194,7 @@ class EthUnionOrderConverterTest {
     }
 
     @Test
-    fun `crypto punks`() {
+    fun `eth order crypto punks`() {
         val dto = randomEthCryptoPunksOrderDto()
 
         val converted = EthUnionOrderConverter.convert(dto, EthBlockchainDto.ETHEREUM) as EthCryptoPunksOrderDto

@@ -56,7 +56,7 @@ class ActivityControllerFt : AbstractIntegrationTest() {
     fun `get activities by collection - flow`() = runBlocking<Unit> {
         val types = UnionActivityTypeDto.values().toList()
         val flowCollectionId = randomFlowAddress()
-        val activity = randomFlowCancelListActivity()
+        val activity = randomFlowCancelListActivityDto()
 
         coEvery {
             testFlowActivityApi.getNftOrderActivitiesByCollection(
@@ -117,7 +117,7 @@ class ActivityControllerFt : AbstractIntegrationTest() {
         val types = UnionActivityTypeDto.values().toList()
         val flowItemId = randomFlowAddress()
         val tokenId = randomLong()
-        val activity = randomFlowCancelListActivity()
+        val activity = randomFlowCancelListActivityDto()
 
         coEvery {
             testFlowActivityApi.getNftOrderActivitiesByItem(
@@ -155,7 +155,7 @@ class ActivityControllerFt : AbstractIntegrationTest() {
         val polygonOrderActivity2 = randomEthOrderBidActivity().copy(date = now.minusSeconds(3))
         val polygonItemActivity1 = randomEthItemMintActivity().copy(date = now.minusSeconds(12))
         val polygonItemActivity2 = randomEthItemMintActivity().copy(date = now.minusSeconds(2))
-        val flowActivity = randomFlowCancelListActivity().copy(date = now.minusSeconds(9))
+        val flowActivity = randomFlowCancelListActivityDto().copy(date = now.minusSeconds(9))
 
         val ethOrderActivities = listOf(ethOrderActivity1, ethOrderActivity2, ethOrderActivity3)
         val ethItemActivities = listOf(ethItemActivity1, ethItemActivity2, ethItemActivity3)
@@ -214,7 +214,7 @@ class ActivityControllerFt : AbstractIntegrationTest() {
         val userFlow = randomFlowAddress()
         val size = 3
 
-        val flowActivity = randomFlowCancelListActivity()
+        val flowActivity = randomFlowCancelListActivityDto()
         val ethItemActivity = randomEthItemMintActivity()
 
         coEvery {

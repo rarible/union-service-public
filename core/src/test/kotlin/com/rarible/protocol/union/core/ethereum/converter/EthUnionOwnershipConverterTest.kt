@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test
 class EthUnionOwnershipConverterTest {
 
     @Test
-    fun ownership() {
+    fun `eth ownership`() {
         val dto = randomEthNftOwnershipDto()
 
         val converted = EthUnionOwnershipConverter.convert(dto, EthBlockchainDto.ETHEREUM)

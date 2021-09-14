@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test
 class EthUnionCollectionConverterTest {
 
     @Test
-    fun `convert - erc721`() {
+    fun `eth collection erc721`() {
         val dto = randomEthCollectionDto()
             .copy(features = NftCollectionDto.Features.values().asList())
             .copy(type = NftCollectionDto.Type.ERC721)
@@ -26,7 +26,7 @@ class EthUnionCollectionConverterTest {
     }
 
     @Test
-    fun `convert - erc1155`() {
+    fun `eth collection convert - erc1155`() {
         val dto = randomEthCollectionDto()
             .copy(type = NftCollectionDto.Type.ERC1155)
 
@@ -36,7 +36,7 @@ class EthUnionCollectionConverterTest {
     }
 
     @Test
-    fun `convert - crypto punks`() {
+    fun `eth collection crypto punks`() {
         val dto = randomEthCollectionDto()
             .copy(type = NftCollectionDto.Type.CRYPTO_PUNKS)
 
@@ -46,7 +46,7 @@ class EthUnionCollectionConverterTest {
     }
 
     @Test
-    fun `convert - without owner`() {
+    fun `eth collection without owner`() {
         val dto = randomEthCollectionDto()
             .copy(owner = null)
 

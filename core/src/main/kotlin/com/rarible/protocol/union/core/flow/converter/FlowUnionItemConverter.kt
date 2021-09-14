@@ -64,7 +64,7 @@ object FlowUnionItemConverter {
             description = source.description,
             attributes = source.attributes?.map { convert(it) } ?: listOf(),
             contents = source.contents?.map { convert(it) } ?: listOf(),
-            raw = source.raw.toString() // TODO
+            raw = source.raw
         )
     }
 

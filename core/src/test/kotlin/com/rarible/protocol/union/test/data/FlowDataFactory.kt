@@ -3,12 +3,10 @@ package com.rarible.protocol.union.test.data
 import com.rarible.core.common.nowMillis
 import com.rarible.core.test.data.*
 import com.rarible.protocol.dto.*
-import com.rarible.protocol.dto.FlowAssetDto
-import com.rarible.protocol.dto.FlowCreatorDto
-import com.rarible.protocol.dto.FlowOrderDataDto
-import com.rarible.protocol.dto.FlowOrderDto
-import com.rarible.protocol.union.core.flow.converter.FlowAddressConverter
-import com.rarible.protocol.union.dto.*
+import com.rarible.protocol.union.dto.FlowBlockchainDto
+import com.rarible.protocol.union.dto.FlowItemIdDto
+import com.rarible.protocol.union.dto.FlowOrderIdDto
+import com.rarible.protocol.union.dto.FlowOwnershipIdDto
 import com.rarible.protocol.union.dto.flow.FlowAddress
 import com.rarible.protocol.union.dto.flow.FlowContract
 import com.rarible.protocol.union.dto.flow.FlowItemIdProvider
@@ -52,13 +50,38 @@ fun randomFlowNftItemDto(itemId: FlowItemIdDto, creator: String): FlowNftItemDto
         tokenId = itemId.tokenId,
         mintedAt = nowMillis(),
         lastUpdatedAt = nowMillis(),
-        meta = null,
+        meta = randomFlowMetaDto(),
         creators = listOf(FlowCreatorDto(creator, randomBigDecimal())),
-        owners = emptyList(),
-        royalties = emptyList(),
+        owners = listOf(randomString()),
+        royalties = listOf(FlowRoyaltyDto(randomString(), randomBigDecimal())),
         metaUrl = randomString(),
         supply = randomBigInt(),
         deleted = randomBoolean()
+    )
+}
+
+fun randomFlowMetaDto(): MetaDto {
+    return MetaDto(
+        description = randomString(),
+        name = randomString(),
+        raw = randomString(),
+        attributes = listOf(randomFlowMetaAttributeDto()),
+        contents = listOf(randomFlowMetaContentDto())
+    )
+}
+
+fun randomFlowMetaAttributeDto(): MetaAttributeDto {
+    return MetaAttributeDto(
+        key = randomString(),
+        value = randomString()
+    )
+}
+
+fun randomFlowMetaContentDto(): MetaContentDto {
+    return MetaContentDto(
+        contentType = randomString(),
+        url = randomString(),
+        attributes = listOf(randomFlowMetaAttributeDto())
     )
 }
 
@@ -104,8 +127,8 @@ fun randomFlowV1OrderDto(): FlowOrderDto {
         amount = randomBigDecimal(),
         amountUsd = randomBigDecimal(),
         data = FlowOrderDataDto(
-            payouts = listOf(),
-            originalFees = listOf()
+            payouts = listOf(PayInfoDto(randomString(), randomBigDecimal())),
+            originalFees = listOf(PayInfoDto(randomString(), randomBigDecimal()))
         ),
         collection = randomFlowContract().value,
         lastUpdateAt = nowMillis(),
@@ -114,23 +137,51 @@ fun randomFlowV1OrderDto(): FlowOrderDto {
 }
 
 fun randomFlowAsset(): FlowAssetDto {
-    return randomFlowNftAssetType()
+    return randomFlowNftAsset()
 }
 
 
-fun randomFlowFungibleAssetType() = randomFlowFungibleAssetType(randomFlowAddress())
-fun randomFlowFungibleAssetType(contract: FlowAddress) = FlowAssetTypeFtDto(
-    contract = FlowAddressConverter.convert(contract.value, FlowBlockchainDto.FLOW)
+fun randomFlowFungibleAsset() = randomFlowFungibleAsset(randomFlowAddress())
+fun randomFlowFungibleAsset(contract: FlowAddress) = FlowAssetFungibleDto(
+    value = randomBigDecimal(),
+    contract = contract.value
 )
 
-fun randomFlowNftAssetType() = randomFlowNftAssetType(randomFlowAddress(), randomBigInt())
-fun randomFlowNftAssetType(contract: FlowAddress, tokenId: BigInteger) = FlowAssetNFTDto(
+fun randomFlowNftAsset() = randomFlowNftAsset(randomFlowAddress(), randomBigInt())
+fun randomFlowNftAsset(contract: FlowAddress, tokenId: BigInteger) = FlowAssetNFTDto(
     contract = contract.value,
     tokenId = tokenId,
     value = randomBigDecimal()
 )
 
-fun randomFlowCancelListActivity(): FlowNftOrderActivityCancelListDto {
+fun randomFlowNftOrderActivitySell(): FlowNftOrderActivitySellDto {
+    return FlowNftOrderActivitySellDto(
+        id = randomString(),
+        date = nowMillis(),
+        price = randomBigDecimal(),
+        left = randomFlowOrderActivityMatchSideDto().copy(type = FlowOrderActivityMatchSideDto.Type.BID),
+        right = randomFlowOrderActivityMatchSideDto().copy(type = FlowOrderActivityMatchSideDto.Type.SELL),
+        transactionHash = randomString(),
+        blockHash = randomString(),
+        blockNumber = randomLong(),
+        logIndex = randomInt()
+    )
+}
+
+fun randomFlowNftOrderActivityListDto(): FlowNftOrderActivityListDto {
+    return FlowNftOrderActivityListDto(
+        id = randomString(),
+        date = nowMillis(),
+        hash = randomString(),
+        maker = randomString(),
+        make = FlowAssetFungibleDto(randomString(), randomBigDecimal()),
+        take = FlowAssetFungibleDto(randomString(), randomBigDecimal()),
+        price = randomBigDecimal()
+    )
+}
+
+
+fun randomFlowCancelListActivityDto(): FlowNftOrderActivityCancelListDto {
     return FlowNftOrderActivityCancelListDto(
         id = randomString(),
         date = nowMillis(),
@@ -139,5 +190,59 @@ fun randomFlowCancelListActivity(): FlowNftOrderActivityCancelListDto {
         make = FlowAssetFungibleDto(randomString(), randomBigDecimal()),
         take = FlowAssetFungibleDto(randomString(), randomBigDecimal()),
         price = randomBigDecimal()
+    )
+}
+
+fun randomFlowMintDto(): FlowMintDto {
+    return FlowMintDto(
+        id = randomString(),
+        date = nowMillis(),
+        owner = randomString(),
+        contract = randomString(),
+        tokenId = randomBigInt(),
+        value = randomBigInt(),
+        transactionHash = randomString(),
+        blockHash = randomString(),
+        blockNumber = randomLong(),
+        logIndex = randomInt()
+    )
+}
+
+fun randomFlowTransferDto(): FlowTransferDto {
+    return FlowTransferDto(
+        id = randomString(),
+        date = nowMillis(),
+        owner = randomString(),
+        contract = randomString(),
+        tokenId = randomBigInt(),
+        value = randomBigInt(),
+        from = randomString(),
+        transactionHash = randomString(),
+        blockHash = randomString(),
+        blockNumber = randomLong(),
+        logIndex = randomInt()
+    )
+}
+
+fun randomFlowBurnDto(): FlowBurnDto {
+    return FlowBurnDto(
+        id = randomString(),
+        date = nowMillis(),
+        owner = randomString(),
+        contract = randomString(),
+        tokenId = randomBigInt(),
+        value = randomBigInt(),
+        transactionHash = randomString(),
+        blockHash = randomString(),
+        blockNumber = randomLong(),
+        logIndex = randomInt()
+    )
+}
+
+fun randomFlowOrderActivityMatchSideDto(): FlowOrderActivityMatchSideDto {
+    return FlowOrderActivityMatchSideDto(
+        maker = randomFlowAddress().value,
+        asset = randomFlowAsset(),
+        type = FlowOrderActivityMatchSideDto.Type.values()[randomInt(FlowOrderActivityMatchSideDto.Type.values().size)]
     )
 }
