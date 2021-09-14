@@ -21,14 +21,14 @@ object EthUnionOrderConverter {
                     pending = order.pending?.map { convert(it, blockchain) },
                     fill = order.fill,
                     startedAt = order.start?.let { Instant.ofEpochSecond(it) },
+                    endedAt = order.end?.let { Instant.ofEpochSecond(it) },
                     makeStock = order.makeStock,
                     cancelled = order.cancelled,
                     createdAt = order.createdAt,
                     lastUpdatedAt = order.lastUpdateAt,
-                    makeBalance = order.makeBalance?.toBigDecimal(), //TODO: Need remove
                     makePriceUsd = order.makePriceUsd,
                     takePriceUsd = order.takePriceUsd,
-                    priceHistory = order.priceHistory.map { convert(it) },
+                    priceHistory = order.priceHistory?.map { convert(it) } ?: listOf(),
                     data = EthOrderDataLegacyDto(
                         fee = order.data.fee.toBigInteger()
                     )
@@ -38,7 +38,7 @@ object EthUnionOrderConverter {
                 EthRaribleV2OrderDto(
                     id = unionOrderId,
                     maker = EthAddressConverter.convert(order.maker, blockchain),
-                    taker = order.taker?.let { EthAddressConverter.convert(order.maker, blockchain) },
+                    taker = order.taker?.let { EthAddressConverter.convert(order.taker!!, blockchain) },
                     make = EthConverter.convert(order.make, blockchain),
                     take = EthConverter.convert(order.take, blockchain),
                     salt = EthConverter.convert(order.salt),
@@ -46,14 +46,14 @@ object EthUnionOrderConverter {
                     pending = order.pending?.map { convert(it, blockchain) },
                     fill = order.fill,
                     startedAt = order.start?.let { Instant.ofEpochSecond(it) },
+                    endedAt = order.end?.let { Instant.ofEpochSecond(it) },
                     makeStock = order.makeStock,
                     cancelled = order.cancelled,
                     createdAt = order.createdAt,
                     lastUpdatedAt = order.lastUpdateAt,
-                    makeBalance = order.makeBalance?.toBigDecimal(), //TODO: Need remove
                     makePriceUsd = order.makePriceUsd,
                     takePriceUsd = order.takePriceUsd,
-                    priceHistory = order.priceHistory.map { convert(it) },
+                    priceHistory = order.priceHistory?.map { convert(it) } ?: listOf(),
                     data = EthOrderDataRaribleV2DataV1Dto(
                         payouts = order.data.payouts.map { EthConverter.convertToPayout(it, blockchain) },
                         originFees = order.data.originFees.map { EthConverter.convertToPayout(it, blockchain) }
@@ -64,7 +64,7 @@ object EthUnionOrderConverter {
                 EthOpenSeaV1OrderDto(
                     id = unionOrderId,
                     maker = EthAddressConverter.convert(order.maker, blockchain),
-                    taker = order.taker?.let { EthAddressConverter.convert(order.maker, blockchain) },
+                    taker = order.taker?.let { EthAddressConverter.convert(order.taker!!, blockchain) },
                     make = EthConverter.convert(order.make, blockchain),
                     take = EthConverter.convert(order.take, blockchain),
                     salt = EthConverter.convert(order.salt),
@@ -72,14 +72,14 @@ object EthUnionOrderConverter {
                     pending = order.pending?.map { convert(it, blockchain) },
                     fill = order.fill,
                     startedAt = order.start?.let { Instant.ofEpochSecond(it) },
+                    endedAt = order.end?.let { Instant.ofEpochSecond(it) },
                     makeStock = order.makeStock,
                     cancelled = order.cancelled,
                     createdAt = order.createdAt,
                     lastUpdatedAt = order.lastUpdateAt,
-                    makeBalance = order.makeBalance?.toBigDecimal(), //TODO: Need remove
                     makePriceUsd = order.makePriceUsd,
                     takePriceUsd = order.takePriceUsd,
-                    priceHistory = order.priceHistory.map { convert(it) },
+                    priceHistory = order.priceHistory?.map { convert(it) } ?: listOf(),
                     data = EthOrderOpenSeaV1DataV1Dto(
                         exchange = EthAddressConverter.convert(order.data.exchange, blockchain),
                         makerRelayerFee = order.data.makerRelayerFee,
@@ -97,6 +97,29 @@ object EthUnionOrderConverter {
                         staticExtraData = EthConverter.convert(order.data.staticExtraData),
                         extra = order.data.extra
                     )
+                )
+            }
+            is CryptoPunkOrderDto -> {
+                EthCryptoPunksOrderDto(
+                    id = unionOrderId,
+                    maker = EthAddressConverter.convert(order.maker, blockchain),
+                    taker = order.taker?.let { EthAddressConverter.convert(order.taker!!, blockchain) },
+                    make = EthConverter.convert(order.make, blockchain),
+                    take = EthConverter.convert(order.take, blockchain),
+                    salt = EthConverter.convert(order.salt),
+                    signature = order.signature?.let { EthConverter.convert(it) },
+                    pending = order.pending?.map { convert(it, blockchain) },
+                    fill = order.fill,
+                    startedAt = order.start?.let { Instant.ofEpochSecond(it) },
+                    endedAt = order.end?.let { Instant.ofEpochSecond(it) },
+                    makeStock = order.makeStock,
+                    cancelled = order.cancelled,
+                    createdAt = order.createdAt,
+                    lastUpdatedAt = order.lastUpdateAt,
+                    makePriceUsd = order.makePriceUsd,
+                    takePriceUsd = order.takePriceUsd,
+                    priceHistory = order.priceHistory?.map { convert(it) } ?: listOf(),
+                    data = EthOrderCryptoPunksDataDto()
                 )
             }
         }
@@ -140,7 +163,7 @@ object EthUnionOrderConverter {
 
     private fun convert(source: OrderSideDto): EthPendingOrderMatchDto.Side {
         return when (source) {
-            OrderSideDto.RIGHT -> EthPendingOrderMatchDto.Side.RIGHT //TODO: Maybe need separate type
+            OrderSideDto.RIGHT -> EthPendingOrderMatchDto.Side.RIGHT
             OrderSideDto.LEFT -> EthPendingOrderMatchDto.Side.LEFT
         }
     }
@@ -155,19 +178,36 @@ object EthUnionOrderConverter {
 
     private fun convert(source: OrderExchangeHistoryDto, blockchain: EthBlockchainDto): EthPendingOrderDto {
         return when (source) {
+            /* TODO date, hash, make, take are missing*/
             is OrderSideMatchDto -> EthPendingOrderMatchDto(
+                id = EthOrderIdDto(EthConverter.convert(source.hash), blockchain),
+                make = source.make?.let { EthConverter.convert(it, blockchain) },
+                take = source.take?.let { EthConverter.convert(it, blockchain) },
+                date = source.date,
                 side = source.side?.let { convert(it) },
                 fill = source.fill,
+                maker = source.maker?.let { EthAddressConverter.convert(it, blockchain) },
                 taker = source.taker?.let { EthAddressConverter.convert(it, blockchain) },
                 counterHash = source.counterHash?.let { EthConverter.convert(it) },
                 makeUsd = source.makeUsd,
                 takeUsd = source.takeUsd,
-                makePriceUsd = source.takePriceUsd,
-                takePriceUsd = source.makePriceUsd
+                makePriceUsd = source.makePriceUsd,
+                takePriceUsd = source.takePriceUsd
             )
             is OrderCancelDto -> EthPendingOrderCancelDto(
-                //TODO: Not full object
+                id = EthOrderIdDto(EthConverter.convert(source.hash), blockchain),
+                make = source.make?.let { EthConverter.convert(it, blockchain) },
+                take = source.take?.let { EthConverter.convert(it, blockchain) },
+                date = source.date,
+                maker = source.maker?.let { EthAddressConverter.convert(it, blockchain) },
                 owner = source.owner?.let { EthAddressConverter.convert(it, blockchain) }
+            )
+            is OnChainOrderDto -> EthOnChainOrderDto(
+                id = EthOrderIdDto(EthConverter.convert(source.hash), blockchain),
+                make = source.make?.let { EthConverter.convert(it, blockchain) },
+                take = source.take?.let { EthConverter.convert(it, blockchain) },
+                date = source.date,
+                maker = source.maker?.let { EthAddressConverter.convert(it, blockchain) }
             )
         }
     }

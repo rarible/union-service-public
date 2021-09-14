@@ -16,7 +16,7 @@ object FlowUnionItemConverter {
             mintedAt = item.mintedAt,
             lastUpdatedAt = item.lastUpdatedAt,
             supply = item.supply,
-            metaURL = item.metaUrl,
+            metaUrl = item.metaUrl,
             meta = convert(item.meta),
             deleted = item.deleted,
             tokenId = item.tokenId,
@@ -62,8 +62,8 @@ object FlowUnionItemConverter {
         return UnionMetaDto(
             name = source.name,
             description = source.description,
-            attributes = source.attributes?.map { convert(it) },
-            contents = source.contents?.map { convert(it) },
+            attributes = source.attributes?.map { convert(it) } ?: listOf(),
+            contents = source.contents?.map { convert(it) } ?: listOf(),
             raw = source.raw.toString() // TODO
         )
     }
@@ -79,7 +79,7 @@ object FlowUnionItemConverter {
         return UnionMetaContentDto(
             typeContent = source.contentType,
             url = source.url,
-            attributes = source.attributes?.map { convert(it) }
+            attributes = source.attributes?.map { convert(it) } ?: listOf()
         )
     }
 

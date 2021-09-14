@@ -58,15 +58,59 @@ fun randomEthNftItemDto(itemId: EthItemIdDto, vararg creators: PartDto): NftItem
         id = itemId.value,
         contract = Address.apply(itemId.token.value),
         tokenId = itemId.tokenId,
-        creators = creators.asList(),
+        creators = listOf(randomEthPartDto(Address.apply(itemId.token.value))),
         supply = randomBigInt(),
         lazySupply = randomBigInt(),
-        royalties = emptyList(),
+        royalties = listOf(randomEthPartDto()),
         date = nowMillis(),
-        owners = emptyList(),
-        pending = emptyList(),
+        owners = listOf(randomAddress()),
+        pending = listOf(randomEthItemTransferDto()),
         deleted = false,
-        meta = null
+        meta = randomEthItemMeta()
+    )
+}
+
+fun randomEthItemTransferDto(): ItemTransferDto {
+    return ItemTransferDto(
+        owner = randomAddress(),
+        contract = randomAddress(),
+        tokenId = randomBigInt(),
+        value = randomBigInt(),
+        date = nowMillis(),
+        from = randomAddress()
+    )
+}
+
+fun randomEthItemMeta(): NftItemMetaDto {
+    return NftItemMetaDto(
+        name = randomString(),
+        description = randomString(),
+        attributes = listOf(randomEthItemMetaAttribute()),
+        image = randomEthItemMedia(),
+        animation = randomEthItemMedia()
+    )
+}
+
+fun randomEthItemMetaAttribute(): NftItemAttributeDto {
+    return NftItemAttributeDto(
+        key = randomString(),
+        value = randomString()
+    )
+}
+
+fun randomEthItemMedia(): NftMediaDto {
+    val type = randomString()
+    return NftMediaDto(
+        url = mapOf(Pair(randomString(), randomString())),
+        meta = mapOf(Pair(type, randomEthItemMediaMeta(type)))
+    )
+}
+
+fun randomEthItemMediaMeta(type: String): NftMediaMetaDto {
+    return NftMediaMetaDto(
+        type = type,
+        width = randomInt(400, 1200),
+        height = randomInt(200, 800)
     )
 }
 
@@ -87,7 +131,7 @@ fun randomEthNftOwnershipDto(itemId: EthItemIdDto, creator: PartDto): NftOwnersh
         value = randomBigInt(),
         lazyValue = randomBigInt(),
         date = nowMillis(),
-        pending = emptyList()
+        pending = listOf(randomEthItemTransferDto())
     )
 }
 
@@ -124,68 +168,61 @@ fun randomEthLegacyOrderDto(make: AssetDto, maker: Address, take: AssetDto): Leg
         cancelled = false,
         salt = Word.apply(randomWord()),
         data = OrderDataLegacyDto(randomInt()),
-        signature = null,
+        signature = randomBinary(),
         createdAt = nowMillis(),
         lastUpdateAt = nowMillis(),
-        pending = emptyList(),
+        pending = listOf(randomEthOrderSideMatchDto()),
         hash = Word.apply(randomWord()),
         makeBalance = randomBigInt(),
         makePriceUsd = randomBigInt().toBigDecimal(),
         takePriceUsd = randomBigInt().toBigDecimal(),
-        start = null,
-        end = null,
-        priceHistory = listOf()
+        start = randomInt().toLong(),
+        end = randomInt().toLong(),
+        priceHistory = listOf(randomEthOrderPriceHistoryRecordDto())
     )
 }
 
-fun randomEthCollectionDto() = randomEthCollectionDto(randomAddress())
-fun randomEthCollectionDto(id: Address): NftCollectionDto {
-    return NftCollectionDto(
-        id = id,
-        name = randomString(),
-        symbol = randomString(2),
-        type = NftCollectionDto.Type.ERC1155,
-        owner = randomAddress(),
-        features = listOf(NftCollectionDto.Features.values()[randomInt(NftCollectionDto.Features.values().size)]),
-        supportsLazyMint = true
-    )
-}
-
-fun randomEthOrderBidActivity(): OrderActivityBidDto {
-    return OrderActivityBidDto(
-        id = randomString(),
-        date = nowMillis(),
-        source = OrderActivityDto.Source.RARIBLE,
-        hash = Word.apply(randomWord()),
-        maker = randomAddress(),
-        make = AssetDto(Erc20AssetTypeDto(randomAddress()), randomBigInt()),
-        take = AssetDto(Erc20AssetTypeDto(randomAddress()), randomBigInt()),
-        price = randomBigDecimal(),
-        priceUsd = randomBigDecimal()
-    )
-}
-
-fun randomEthItemMintActivity(): MintDto {
-    return MintDto(
-        id = randomString(),
-        date = nowMillis(),
-        owner = randomAddress(),
-        contract = randomAddress(),
-        tokenId = randomBigInt(),
-        value = randomBigInt(),
-        transactionHash = Word.apply(randomWord()),
-        blockHash = Word.apply(randomWord()),
-        blockNumber = randomLong(),
-        logIndex = randomInt()
-    )
-}
-
-/*
-fun randomEthOpenSeaV1OrderDto(itemId: ItemId) = randomEthOpenSeaV1OrderDto(itemId, randomAddress())
-fun randomEthOpenSeaV1OrderDto(itemId: ItemId, maker: Address) = randomEthOpenSeaV1OrderDto(
-    randomAssetErc721(itemId),
+fun randomEthV2OrderDto() = randomEthV2OrderDto(randomEthAssetErc721(), randomAddress(), randomEthAssetErc20())
+fun randomEthV2OrderDto(itemId: EthItemIdDto) = randomEthV2OrderDto(itemId, randomAddress())
+fun randomEthV2OrderDto(itemId: EthItemIdDto, maker: Address) = randomEthV2OrderDto(
+    randomEthAssetErc721(itemId),
     maker,
-    randomAssetErc20()
+    randomEthAssetErc20()
+)
+
+fun randomEthV2OrderDto(make: AssetDto, maker: Address, take: AssetDto): RaribleV2OrderDto {
+    return RaribleV2OrderDto(
+        maker = maker,
+        taker = randomAddress(),
+        make = make,
+        take = take,
+        fill = randomBigInt(),
+        makeStock = randomBigInt(),
+        cancelled = false,
+        salt = Word.apply(randomWord()),
+        data = OrderRaribleV2DataV1Dto(listOf(randomEthPartDto()), listOf(randomEthPartDto())),
+        signature = randomBinary(),
+        createdAt = nowMillis(),
+        lastUpdateAt = nowMillis(),
+        pending = listOf(randomEthOrderSideMatchDto()),
+        hash = Word.apply(randomWord()),
+        makeBalance = randomBigInt(),
+        makePriceUsd = randomBigInt().toBigDecimal(),
+        takePriceUsd = randomBigInt().toBigDecimal(),
+        start = randomInt().toLong(),
+        end = randomInt().toLong(),
+        priceHistory = listOf(randomEthOrderPriceHistoryRecordDto())
+    )
+}
+
+fun randomEthOpenSeaV1OrderDto() =
+    randomEthOpenSeaV1OrderDto(randomEthAssetErc721(), randomAddress(), randomEthAssetErc20())
+
+fun randomEthOpenSeaV1OrderDto(itemId: EthItemIdDto) = randomEthOpenSeaV1OrderDto(itemId, randomAddress())
+fun randomEthOpenSeaV1OrderDto(itemId: EthItemIdDto, maker: Address) = randomEthOpenSeaV1OrderDto(
+    randomEthAssetErc721(itemId),
+    maker,
+    randomEthAssetErc20()
 )
 
 fun randomEthOpenSeaV1OrderDto(make: AssetDto, maker: Address, take: AssetDto): OpenSeaV1OrderDto {
@@ -197,19 +234,54 @@ fun randomEthOpenSeaV1OrderDto(make: AssetDto, maker: Address, take: AssetDto): 
         fill = randomBigInt(),
         makeStock = randomBigInt(),
         cancelled = false,
-        salt = Word.apply(RandomUtils.nextBytes(32)),
-        data = randomOrderOpenSeaV1DataV1Dto(),
-        signature = null,
+        salt = Word.apply(randomWord()),
+        data = randomEthOrderOpenSeaV1DataV1Dto(),
+        signature = randomBinary(),
         createdAt = nowMillis(),
         lastUpdateAt = nowMillis(),
         pending = emptyList(),
-        hash = Word.apply(RandomUtils.nextBytes(32)),
+        hash = Word.apply(randomWord()),
         makeBalance = randomBigInt(),
         makePriceUsd = randomBigInt().toBigDecimal(),
         takePriceUsd = randomBigInt().toBigDecimal(),
-        start = null,
-        end = null,
-        priceHistory = listOf()
+        start = randomInt().toLong(),
+        end = randomInt().toLong(),
+        priceHistory = listOf(randomEthOrderPriceHistoryRecordDto())
+    )
+}
+
+fun randomEthCryptoPunksOrderDto() =
+    randomEthCryptoPunksOrderDto(randomEthAssetErc721(), randomAddress(), randomEthAssetErc20())
+
+fun randomEthCryptoPunksOrderDto(itemId: EthItemIdDto) = randomEthCryptoPunksOrderDto(itemId, randomAddress())
+fun randomEthCryptoPunksOrderDto(itemId: EthItemIdDto, maker: Address) = randomEthCryptoPunksOrderDto(
+    randomEthAssetErc721(itemId),
+    maker,
+    randomEthAssetErc20()
+)
+
+fun randomEthCryptoPunksOrderDto(make: AssetDto, maker: Address, take: AssetDto): CryptoPunkOrderDto {
+    return CryptoPunkOrderDto(
+        maker = maker,
+        taker = randomAddress(),
+        make = make,
+        take = take,
+        fill = randomBigInt(),
+        makeStock = randomBigInt(),
+        cancelled = false,
+        salt = Word.apply(randomWord()),
+        data = OrderCryptoPunksDataDto(),
+        signature = randomBinary(),
+        createdAt = nowMillis(),
+        lastUpdateAt = nowMillis(),
+        pending = emptyList(),
+        hash = Word.apply(randomWord()),
+        makeBalance = randomBigInt(),
+        makePriceUsd = randomBigInt().toBigDecimal(),
+        takePriceUsd = randomBigInt().toBigDecimal(),
+        start = randomInt().toLong(),
+        end = randomInt().toLong(),
+        priceHistory = listOf(randomEthOrderPriceHistoryRecordDto())
     )
 }
 
@@ -232,4 +304,196 @@ fun randomEthOrderOpenSeaV1DataV1Dto(): OrderOpenSeaV1DataV1Dto {
         extra = randomBigInt()
     )
 }
-*/
+
+
+fun randomEthOrderSideMatchDto(): OrderSideMatchDto {
+    return OrderSideMatchDto(
+        date = nowMillis(),
+        hash = Word.apply(randomWord()),
+        make = randomEthAssetErc721(),
+        take = randomEthAssetErc20(),
+        maker = randomAddress(),
+        side = OrderSideDto.values()[randomInt(OrderSideDto.values().size)],
+        fill = randomBigInt(),
+        taker = randomAddress(),
+        counterHash = Word.apply(randomWord()),
+        makeUsd = randomBigDecimal(),
+        takeUsd = randomBigDecimal(),
+        makePriceUsd = randomBigDecimal(),
+        takePriceUsd = randomBigDecimal()
+    )
+}
+
+fun randomEthOrderCancelDto(): OrderCancelDto {
+    return OrderCancelDto(
+        date = nowMillis(),
+        hash = Word.apply(randomWord()),
+        make = randomEthAssetErc721(),
+        take = randomEthAssetErc20(),
+        maker = randomAddress(),
+        owner = randomAddress()
+    )
+}
+
+
+fun randomEthOnChainOrderDto(): OnChainOrderDto {
+    return OnChainOrderDto(
+        date = nowMillis(),
+        hash = Word.apply(randomWord()),
+        make = randomEthAssetErc721(),
+        take = randomEthAssetErc20(),
+        maker = randomAddress()
+    )
+}
+
+fun randomEthOrderPriceHistoryRecordDto(): OrderPriceHistoryRecordDto {
+    return OrderPriceHistoryRecordDto(
+        date = nowMillis(),
+        makeValue = randomBigDecimal(),
+        takeValue = randomBigDecimal()
+    )
+}
+
+fun randomEthCollectionDto() = randomEthCollectionDto(randomAddress())
+fun randomEthCollectionDto(id: Address): NftCollectionDto {
+    return NftCollectionDto(
+        id = id,
+        name = randomString(),
+        symbol = randomString(2),
+        type = NftCollectionDto.Type.ERC1155,
+        owner = randomAddress(),
+        features = listOf(NftCollectionDto.Features.values()[randomInt(NftCollectionDto.Features.values().size)]),
+        supportsLazyMint = true
+    )
+}
+
+fun randomEthOrderActivityMatch(): OrderActivityMatchDto {
+    return OrderActivityMatchDto(
+        id = randomString(),
+        date = nowMillis(),
+        source = OrderActivityDto.Source.RARIBLE,
+        left = randomEthOrderActivityMatchSide(),
+        right = randomEthOrderActivityMatchSide(),
+        price = randomBigDecimal(),
+        priceUsd = randomBigDecimal(),
+        transactionHash = Word.apply(randomWord()),
+        blockHash = Word.apply(randomWord()),
+        blockNumber = randomLong(),
+        logIndex = randomInt()
+    )
+}
+
+fun randomEthOrderBidActivity(): OrderActivityBidDto {
+    return OrderActivityBidDto(
+        id = randomString(),
+        date = nowMillis(),
+        source = OrderActivityDto.Source.RARIBLE,
+        hash = Word.apply(randomWord()),
+        maker = randomAddress(),
+        make = AssetDto(Erc20AssetTypeDto(randomAddress()), randomBigInt()),
+        take = AssetDto(Erc20AssetTypeDto(randomAddress()), randomBigInt()),
+        price = randomBigDecimal(),
+        priceUsd = randomBigDecimal()
+    )
+}
+
+fun randomEthOrderListActivity(): OrderActivityListDto {
+    return OrderActivityListDto(
+        id = randomString(),
+        date = nowMillis(),
+        source = OrderActivityDto.Source.OPEN_SEA,
+        hash = Word.apply(randomWord()),
+        maker = randomAddress(),
+        make = AssetDto(Erc20AssetTypeDto(randomAddress()), randomBigInt()),
+        take = AssetDto(Erc20AssetTypeDto(randomAddress()), randomBigInt()),
+        price = randomBigDecimal(),
+        priceUsd = randomBigDecimal()
+    )
+}
+
+fun randomEthOrderActivityCancelBid(): OrderActivityCancelBidDto {
+    return OrderActivityCancelBidDto(
+        id = randomString(),
+        date = nowMillis(),
+        source = OrderActivityDto.Source.RARIBLE,
+        transactionHash = Word.apply(randomWord()),
+        blockHash = Word.apply(randomWord()),
+        blockNumber = randomLong(),
+        logIndex = randomInt(),
+        maker = randomAddress(),
+        hash = Word.apply(randomWord()),
+        make = randomEthAssetErc20().assetType,
+        take = randomEthAssetErc721().assetType
+    )
+}
+
+fun randomEthOrderActivityCancelList(): OrderActivityCancelListDto {
+    return OrderActivityCancelListDto(
+        id = randomString(),
+        date = nowMillis(),
+        source = OrderActivityDto.Source.RARIBLE,
+        transactionHash = Word.apply(randomWord()),
+        blockHash = Word.apply(randomWord()),
+        blockNumber = randomLong(),
+        logIndex = randomInt(),
+        maker = randomAddress(),
+        hash = Word.apply(randomWord()),
+        make = randomEthAssetErc20().assetType,
+        take = randomEthAssetErc721().assetType
+    )
+}
+
+fun randomEthItemMintActivity(): MintDto {
+    return MintDto(
+        id = randomString(),
+        date = nowMillis(),
+        owner = randomAddress(),
+        contract = randomAddress(),
+        tokenId = randomBigInt(),
+        value = randomBigInt(),
+        transactionHash = Word.apply(randomWord()),
+        blockHash = Word.apply(randomWord()),
+        blockNumber = randomLong(),
+        logIndex = randomInt()
+    )
+}
+
+fun randomEthItemBurnActivity(): BurnDto {
+    return BurnDto(
+        id = randomString(),
+        date = nowMillis(),
+        owner = randomAddress(),
+        contract = randomAddress(),
+        tokenId = randomBigInt(),
+        value = randomBigInt(),
+        transactionHash = Word.apply(randomWord()),
+        blockHash = Word.apply(randomWord()),
+        blockNumber = randomLong(),
+        logIndex = randomInt()
+    )
+}
+
+fun randomEthItemTransferActivity(): TransferDto {
+    return TransferDto(
+        id = randomString(),
+        date = nowMillis(),
+        owner = randomAddress(),
+        contract = randomAddress(),
+        from = randomAddress(),
+        tokenId = randomBigInt(),
+        value = randomBigInt(),
+        transactionHash = Word.apply(randomWord()),
+        blockHash = Word.apply(randomWord()),
+        blockNumber = randomLong(),
+        logIndex = randomInt()
+    )
+}
+
+fun randomEthOrderActivityMatchSide(): OrderActivityMatchSideDto {
+    return OrderActivityMatchSideDto(
+        maker = randomAddress(),
+        hash = Word.apply(randomWord()),
+        asset = randomEthAssetErc20(),
+        type = OrderActivityMatchSideDto.Type.values()[randomInt(OrderActivityMatchSideDto.Type.values().size)]
+    )
+}

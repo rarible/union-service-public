@@ -30,18 +30,6 @@ class ContinuationPagingTest {
     }
 
     @Test
-    fun `get page - with default size`() {
-        val lastUpdated = nowMillis()
-        val items = (1..15L).map { createItem(lastUpdated.minusMillis(it)) }
-
-        val paging = ContinuationPaging(UnionItemContinuation.ByLastUpdatedAndId, items.shuffled())
-        val page = paging.getPage(null)
-
-        assertThat(page.entities).hasSize(10)
-        assertThat(page.continuation).isNotNull()
-    }
-
-    @Test
     fun `get page - last page`() {
         val lastUpdated = nowMillis()
         val items = (1..15L).map { createItem(lastUpdated.minusMillis(it)) }

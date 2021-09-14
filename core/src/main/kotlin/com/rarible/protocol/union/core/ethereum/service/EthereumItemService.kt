@@ -15,7 +15,7 @@ class EthereumItemService(
 
     override suspend fun getAllItems(
         continuation: String?,
-        size: Int?,
+        size: Int,
         showDeleted: Boolean?,
         lastUpdatedFrom: Long?,
         lastUpdatedTo: Long?,
@@ -43,7 +43,7 @@ class EthereumItemService(
     override suspend fun getItemsByCollection(
         collection: String,
         continuation: String?,
-        size: Int?,
+        size: Int,
         includeMeta: Boolean?
     ): UnionItemsDto {
         val items = itemControllerApi.getNftItemsByCollection(collection, continuation, size, includeMeta).awaitFirst()
@@ -53,7 +53,7 @@ class EthereumItemService(
     override suspend fun getItemsByCreator(
         creator: String,
         continuation: String?,
-        size: Int?,
+        size: Int,
         includeMeta: Boolean?
     ): UnionItemsDto {
         val items = itemControllerApi.getNftItemsByCreator(creator, continuation, size, includeMeta).awaitFirst()
@@ -63,7 +63,7 @@ class EthereumItemService(
     override suspend fun getItemsByOwner(
         owner: String,
         continuation: String?,
-        size: Int?,
+        size: Int,
         includeMeta: Boolean?
     ): UnionItemsDto {
         val items = itemControllerApi.getNftItemsByOwner(owner, continuation, size, includeMeta).awaitFirst()

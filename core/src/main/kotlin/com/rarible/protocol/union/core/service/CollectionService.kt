@@ -7,7 +7,7 @@ interface CollectionService : BlockchainService {
 
     suspend fun getAllCollections(
         continuation: String?,
-        size: Int?
+        size: Int
     ): UnionCollectionsDto
 
     suspend fun getCollectionById(
@@ -17,7 +17,7 @@ interface CollectionService : BlockchainService {
     suspend fun getCollectionsByOwner(
         owner: String,
         continuation: String?,
-        size: Int?
+        size: Int
     ): UnionCollectionsDto
 
 }

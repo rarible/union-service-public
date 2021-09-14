@@ -19,7 +19,7 @@ class EthereumOrderService(
         platform: PlatformDto?,
         origin: String?,
         continuation: String?,
-        size: Int?
+        size: Int
     ): UnionOrdersDto {
         val orders = orderControllerApi.getOrdersAll(
             origin,
@@ -47,7 +47,7 @@ class EthereumOrderService(
         maker: String?,
         origin: String?,
         continuation: String?,
-        size: Int?
+        size: Int
     ): UnionOrdersDto {
         val orders = orderControllerApi.getOrderBidsByItem(
             contract,
@@ -66,7 +66,7 @@ class EthereumOrderService(
         maker: String,
         origin: String?,
         continuation: String?,
-        size: Int?
+        size: Int
     ): UnionOrdersDto {
         val orders = orderControllerApi.getOrderBidsByMaker(
             maker,
@@ -82,7 +82,7 @@ class EthereumOrderService(
         platform: PlatformDto?,
         origin: String?,
         continuation: String?,
-        size: Int?
+        size: Int
     ): UnionOrdersDto {
         val orders = orderControllerApi.getSellOrders(
             origin,
@@ -97,7 +97,7 @@ class EthereumOrderService(
         collection: String,
         origin: String?,
         continuation: String?,
-        size: Int?
+        size: Int
     ): UnionOrdersDto {
         val orders = orderControllerApi.getSellOrdersByCollection(
             collection,
@@ -116,7 +116,7 @@ class EthereumOrderService(
         maker: String?,
         origin: String?,
         continuation: String?,
-        size: Int?
+        size: Int
     ): UnionOrdersDto {
         val orders = orderControllerApi.getSellOrdersByItem(
             contract,
@@ -135,7 +135,7 @@ class EthereumOrderService(
         maker: String,
         origin: String?,
         continuation: String?,
-        size: Int?
+        size: Int
     ): UnionOrdersDto {
         val orders = orderControllerApi.getSellOrdersByMaker(
             maker,

@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.api.controller
 
+import com.rarible.protocol.union.api.configuration.PageSize
 import com.rarible.protocol.union.core.continuation.ContinuationPaging
 import com.rarible.protocol.union.core.service.ActivityServiceRouter
 import com.rarible.protocol.union.dto.*
@@ -18,13 +19,15 @@ class ActivityController(
         type: List<UnionActivityTypeDto>,
         blockchains: List<BlockchainDto>?,
         continuation: String?,
-        size: Int?
+        size: Int?,
+        sort: UnionActivitySortDto?
     ): ResponseEntity<UnionActivitiesDto> {
+        val safeSize = PageSize.ACTIVITY.limit(size)
         val blockchainPages = router.executeForAll(blockchains) {
-            it.getAllActivities(type, continuation, size)
+            it.getAllActivities(type, continuation, safeSize, sort)
         }
 
-        val result = merge(blockchainPages, size)
+        val result = merge(blockchainPages, safeSize, sort)
         return ResponseEntity.ok(result)
     }
 
@@ -32,11 +35,13 @@ class ActivityController(
         type: List<UnionActivityTypeDto>,
         collection: String,
         continuation: String?,
-        size: Int?
+        size: Int?,
+        sort: UnionActivitySortDto?
     ): ResponseEntity<UnionActivitiesDto> {
+        val safeSize = PageSize.ACTIVITY.limit(size)
         val (blockchain, shortCollection) = IdParser.parse(collection)
         val result = router.getService(blockchain)
-            .getActivitiesByCollection(type, shortCollection, continuation, size)
+            .getActivitiesByCollection(type, shortCollection, continuation, safeSize, sort)
         return ResponseEntity.ok(result)
     }
 
@@ -45,11 +50,13 @@ class ActivityController(
         contract: String,
         tokenId: String,
         continuation: String?,
-        size: Int?
+        size: Int?,
+        sort: UnionActivitySortDto?
     ): ResponseEntity<UnionActivitiesDto> {
+        val safeSize = PageSize.ACTIVITY.limit(size)
         val (blockchain, shortContact) = IdParser.parse(contract)
         val result = router.getService(blockchain)
-            .getActivitiesByItem(type, shortContact, tokenId, continuation, size)
+            .getActivitiesByItem(type, shortContact, tokenId, continuation, safeSize, sort)
         return ResponseEntity.ok(result)
     }
 
@@ -57,8 +64,10 @@ class ActivityController(
         type: List<UnionUserActivityTypeDto>,
         user: List<String>,
         continuation: String?,
-        size: Int?
+        size: Int?,
+        sort: UnionActivitySortDto?
     ): ResponseEntity<UnionActivitiesDto> {
+        val safeSize = PageSize.ACTIVITY.limit(size)
         val groupedByBlockchain = user.map { IdParser.parse(it) }
             .groupBy({ it.first }, { it.second })
 
@@ -68,18 +77,27 @@ class ActivityController(
                 val blockchainUsers = it.value
                 async {
                     router.getService(blockchain)
-                        .getActivitiesByUser(type, blockchainUsers, continuation, size)
+                        .getActivitiesByUser(type, blockchainUsers, continuation, safeSize, sort)
                 }
             }
         }.map { it.await() }
 
-        val result = merge(blockchainPages, size)
+        val result = merge(blockchainPages, safeSize, sort)
         return ResponseEntity.ok(result)
     }
 
-    private fun merge(blockchainPages: List<UnionActivitiesDto>, size: Int?): UnionActivitiesDto {
+    private fun merge(
+        blockchainPages: List<UnionActivitiesDto>,
+        size: Int,
+        sort: UnionActivitySortDto?
+    ): UnionActivitiesDto {
+        val continuationFactory = when (sort) {
+            UnionActivitySortDto.EARLIEST_FIRST -> UnionActivityContinuation.ByLastUpdatedAndIdAsc
+            UnionActivitySortDto.LATEST_FIRST, null -> UnionActivityContinuation.ByLastUpdatedAndIdDesc
+        }
+
         val combinedPage = ContinuationPaging(
-            UnionActivityContinuation.ByLastUpdatedAndId,
+            continuationFactory,
             blockchainPages.flatMap { it.activities }
         ).getPage(size)
 

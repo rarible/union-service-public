@@ -2,15 +2,13 @@ package com.rarible.protocol.union.core.flow.converter
 
 import com.rarible.protocol.dto.PayInfoDto
 import com.rarible.protocol.union.dto.*
-import java.math.BigDecimal
 import java.math.BigInteger
 
 object FlowUnionOrderConverter {
 
     fun convert(order: com.rarible.protocol.dto.FlowOrderDto, blockchain: FlowBlockchainDto): FlowOrderDto {
-        return FlowOrderDto(
+        return FlowOrderV1Dto(
             id = FlowOrderIdDto(order.id.toString(), blockchain),
-            type = FlowOrderTypeDto.RARIBLE_FLOW_V1,
             maker = FlowAddressConverter.convert(order.maker, blockchain),
             taker = order.taker?.let { FlowAddressConverter.convert(it, blockchain) },
             make = FlowConverter.convert(order.make, blockchain),
@@ -22,7 +20,6 @@ object FlowUnionOrderConverter {
             cancelled = order.cancelled,
             createdAt = order.createdAt,
             lastUpdatedAt = order.lastUpdateAt,
-            makeBalance = BigDecimal.ZERO, //TODO: Need remove
             makePriceUsd = order.amountUsd, //TODO: I think need to rename
             takePriceUsd = order.amountUsd, //TODO: I think need to rename
             priceHistory = emptyList(),
@@ -33,7 +30,7 @@ object FlowUnionOrderConverter {
     private fun convert(
         source: com.rarible.protocol.dto.FlowOrderDataDto,
         blockchain: FlowBlockchainDto
-    ): FlowOrderDataDto {
+    ): FlowOrderDataV1Dto {
         return FlowOrderDataV1Dto(
             payouts = source.payouts.map { convert(it, blockchain) },
             originFees = source.originalFees.map { convert(it, blockchain) }

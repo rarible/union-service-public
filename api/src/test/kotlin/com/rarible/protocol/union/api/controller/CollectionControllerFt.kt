@@ -6,6 +6,7 @@ import com.rarible.core.test.data.randomString
 import com.rarible.protocol.dto.FlowNftCollectionsDto
 import com.rarible.protocol.dto.NftCollectionsDto
 import com.rarible.protocol.union.api.client.CollectionControllerApi
+import com.rarible.protocol.union.api.configuration.PageSize
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.core.ethereum.converter.EthAddressConverter
@@ -25,8 +26,8 @@ import reactor.kotlin.core.publisher.toMono
 @IntegrationTest
 class CollectionControllerFt : AbstractIntegrationTest() {
 
-    private val DEF_CONTINUATION = null
-    private val DEF_SIZE = 5
+    private val continuation: String? = null
+    private val size = PageSize.COLLECTION.default
 
     @Autowired
     lateinit var collectionControllerClient: CollectionControllerApi
@@ -83,11 +84,11 @@ class CollectionControllerFt : AbstractIntegrationTest() {
         val collectionId = EthAddressConverter.convert(collection.id, EthBlockchainDto.ETHEREUM)
 
         coEvery {
-            testEthereumCollectionApi.searchNftCollectionsByOwner(ethOwnerId.value, DEF_CONTINUATION, DEF_SIZE)
+            testEthereumCollectionApi.searchNftCollectionsByOwner(ethOwnerId.value, continuation, size)
         } returns NftCollectionsDto(1, null, listOf(collection)).toMono()
 
         val unionCollections = collectionControllerClient.getCollectionsByOwner(
-            ethOwnerId.toString(), DEF_CONTINUATION, DEF_SIZE
+            ethOwnerId.toString(), continuation, size
         ).awaitFirst()
 
         val ethCollection = unionCollections.collections[0] as EthCollectionDto
@@ -101,11 +102,11 @@ class CollectionControllerFt : AbstractIntegrationTest() {
         val collectionId = EthAddressConverter.convert(collection.id, EthBlockchainDto.POLYGON)
 
         coEvery {
-            testPolygonCollectionApi.searchNftCollectionsByOwner(polyOwnerId.value, DEF_CONTINUATION, DEF_SIZE)
+            testPolygonCollectionApi.searchNftCollectionsByOwner(polyOwnerId.value, continuation, size)
         } returns NftCollectionsDto(1, null, listOf(collection)).toMono()
 
         val unionCollections = collectionControllerClient.getCollectionsByOwner(
-            polyOwnerId.toString(), DEF_CONTINUATION, DEF_SIZE
+            polyOwnerId.toString(), continuation, size
         ).awaitFirst()
 
         val polyCollection = unionCollections.collections[0] as EthCollectionDto
@@ -118,11 +119,11 @@ class CollectionControllerFt : AbstractIntegrationTest() {
         val collection = randomFlowCollectionDto()
 
         coEvery {
-            testFlowCollectionApi.searchNftCollectionsByOwner(flowOwnerId.value, DEF_CONTINUATION, DEF_SIZE)
+            testFlowCollectionApi.searchNftCollectionsByOwner(flowOwnerId.value, continuation, size)
         } returns FlowNftCollectionsDto(1, null, listOf(collection)).toMono()
 
         val unionCollections = collectionControllerClient.getCollectionsByOwner(
-            flowOwnerId.toString(), DEF_CONTINUATION, DEF_SIZE
+            flowOwnerId.toString(), continuation, size
         ).awaitFirst()
 
         val flowCollection = unionCollections.collections[0] as FlowCollectionDto

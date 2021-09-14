@@ -7,7 +7,7 @@ interface ItemService : BlockchainService {
 
     suspend fun getAllItems(
         continuation: String?,
-        size: Int?,
+        size: Int,
         showDeleted: Boolean?,
         lastUpdatedFrom: Long?,
         lastUpdatedTo: Long?,
@@ -22,21 +22,21 @@ interface ItemService : BlockchainService {
     suspend fun getItemsByCollection(
         collection: String,
         continuation: String?,
-        size: Int?,
+        size: Int,
         includeMeta: Boolean?
     ): UnionItemsDto
 
     suspend fun getItemsByCreator(
         creator: String,
         continuation: String?,
-        size: Int?,
+        size: Int,
         includeMeta: Boolean?
     ): UnionItemsDto
 
     suspend fun getItemsByOwner(
         owner: String,
         continuation: String?,
-        size: Int?,
+        size: Int,
         includeMeta: Boolean?
     ): UnionItemsDto
 

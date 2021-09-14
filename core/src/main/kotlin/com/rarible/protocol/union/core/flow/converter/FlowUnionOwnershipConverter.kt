@@ -22,7 +22,7 @@ object FlowUnionOwnershipConverter {
             createdAt = ownership.createdAt,
             contract = contract,
             tokenId = tokenId,
-            owner = listOf(owner)
+            owners = listOf(owner)
         )
     }
 

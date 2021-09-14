@@ -7,7 +7,7 @@ interface OwnershipService : BlockchainService {
 
     suspend fun getAllOwnerships(
         continuation: String?,
-        size: Int?
+        size: Int
     ): UnionOwnershipsDto
 
     suspend fun getOwnershipById(
@@ -18,7 +18,7 @@ interface OwnershipService : BlockchainService {
         contract: String,
         tokenId: String,
         continuation: String?,
-        size: Int?
+        size: Int
     ): UnionOwnershipsDto
 
 }

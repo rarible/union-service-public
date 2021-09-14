@@ -1,7 +1,6 @@
 package com.rarible.protocol.union.core.ethereum.converter
 
 import com.rarible.protocol.dto.*
-import com.rarible.protocol.dto.FlowAssetTypeDto
 import com.rarible.protocol.union.dto.*
 import com.rarible.protocol.union.dto.EthAssetTypeDto
 import com.rarible.protocol.union.dto.PlatformDto
@@ -14,6 +13,15 @@ object EthConverter {
     fun convert(address: Address) = address.prefixed()
     fun convert(word: Word) = word.prefixed()
     fun convert(binary: Binary) = binary.prefixed()
+
+    fun convert(source: UnionActivitySortDto?): ActivitySortDto {
+        return when (source) {
+            null -> ActivitySortDto.LATEST_FIRST
+            UnionActivitySortDto.EARLIEST_FIRST -> ActivitySortDto.EARLIEST_FIRST
+            UnionActivitySortDto.LATEST_FIRST -> ActivitySortDto.LATEST_FIRST
+        }
+    }
+
 
     fun convert(source: PlatformDto?): com.rarible.protocol.dto.PlatformDto {
         return when (source) {
@@ -47,45 +55,50 @@ object EthConverter {
 
     fun convert(source: AssetDto, blockchain: EthBlockchainDto): EthAssetDto {
         return EthAssetDto(
-            assetType = convert(source.assetType, blockchain),
+            type = convert(source.assetType, blockchain),
             value = source.value
         )
     }
 
     fun convert(source: AssetTypeDto, blockchain: EthBlockchainDto): EthAssetTypeDto {
         return when (source) {
-            is com.rarible.protocol.dto.EthAssetTypeDto -> EthereumAssetDto(
-                contract = EthAddressConverter.convert(Address.ZERO(), blockchain)
+            is com.rarible.protocol.dto.EthAssetTypeDto -> EthEthereumAssetTypeDto(
             )
-            is Erc20AssetTypeDto -> ERC20AssetDto(
+            is Erc20AssetTypeDto -> EthErc20AssetTypeDto(
                 contract = EthAddressConverter.convert(source.contract, blockchain)
             )
-            is Erc721AssetTypeDto -> ERC721AssetDto(
+            is Erc721AssetTypeDto -> EthErc721AssetTypeDto(
                 contract = EthAddressConverter.convert(source.contract, blockchain),
                 tokenId = source.tokenId
             )
-            is Erc1155AssetTypeDto -> ERC1155AssetDto(
+            is Erc1155AssetTypeDto -> EthErc1155AssetTypeDto(
                 contract = EthAddressConverter.convert(source.contract, blockchain),
                 tokenId = source.tokenId
             )
-            is Erc721LazyAssetTypeDto -> ERC721LazyAssetDto(
+            is Erc721LazyAssetTypeDto -> EthErc721LazyAssetTypeDto(
                 contract = EthAddressConverter.convert(source.contract, blockchain),
                 tokenId = source.tokenId,
                 uri = source.uri,
                 creators = source.creators.map { convertToCreator(it, blockchain) },
                 royalties = source.royalties.map { convertToRoyalty(it, blockchain) },
-                signature = source.signatures.map { convert(it) }
+                signatures = source.signatures.map { convert(it) }
             )
-            is Erc1155LazyAssetTypeDto -> ERC1155LazyAssetDto(
+            is Erc1155LazyAssetTypeDto -> EthErc1155LazyAssetTypeDto(
                 contract = EthAddressConverter.convert(source.contract, blockchain),
                 tokenId = source.tokenId,
                 uri = source.uri,
                 supply = source.supply,
                 creators = source.creators.map { convertToCreator(it, blockchain) },
                 royalties = source.royalties.map { convertToRoyalty(it, blockchain) },
-                signature = source.signatures.map { convert(it) }
+                signatures = source.signatures.map { convert(it) }
             )
-            is FlowAssetTypeDto -> TODO("Need remove from eth protocol-api")
+            is CryptoPunksAssetTypeDto -> EthCryptoPunksAssetTypeDto(
+                contract = EthAddressConverter.convert(source.contract, blockchain),
+                punkId = source.punkId
+            )
+            is GenerativeArtAssetTypeDto -> EthGenerativeArtAssetTypeDto(
+                contract = EthAddressConverter.convert(source.contract, blockchain)
+            )
         }
     }
 }

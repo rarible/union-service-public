@@ -18,7 +18,7 @@ object EthUnionOwnershipConverter {
             createdAt = source.date,
             contract = EthAddressConverter.convert(source.contract, blockchain),
             tokenId = source.tokenId,
-            owner = listOf(EthAddressConverter.convert(source.owner, blockchain)),
+            owners = listOf(EthAddressConverter.convert(source.owner, blockchain)),
             creators = source.creators.map { EthConverter.convertToCreator(it, blockchain) },
             lazyValue = source.lazyValue,
             pending = source.pending.map { convert(it, blockchain) }

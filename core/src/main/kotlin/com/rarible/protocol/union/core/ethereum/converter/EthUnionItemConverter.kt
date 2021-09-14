@@ -14,10 +14,10 @@ object EthUnionItemConverter {
                 tokenId = item.tokenId,
                 blockchain = blockchain
             ),
-            mintedAt = item.date ?: nowMillis(),
+            mintedAt = item.date ?: nowMillis(), // TODO RPN-848
             lastUpdatedAt = item.date ?: nowMillis(),
             supply = item.supply,
-            metaURL = null, //TODO
+            metaUrl = null, //TODO
             meta = item.meta?.let { convert(it) },
             deleted = item.deleted ?: false,
             tokenId = item.tokenId,
@@ -26,7 +26,7 @@ object EthUnionItemConverter {
             owners = item.owners.map { EthAddressConverter.convert(it, blockchain) },
             royalties = item.royalties.map { EthConverter.convertToRoyalty(it, blockchain) },
             lazySupply = item.lazySupply,
-            pending = item.pending?.map { convert(it, blockchain) }
+            pending = item.pending?.map { convert(it, blockchain) } ?: listOf()
         )
     }
 
@@ -42,7 +42,7 @@ object EthUnionItemConverter {
         return UnionMetaDto(
             name = source.name,
             description = source.description,
-            attributes = source.attributes?.map { convert(it) },
+            attributes = source.attributes?.map { convert(it) } ?: listOf(),
             contents = listOfNotNull(source.image, source.animation).flatMap { convert(it) },
             raw = null //TODO
         )
@@ -50,13 +50,13 @@ object EthUnionItemConverter {
 
     private fun convert(source: NftMediaDto): List<UnionMetaContentDto> {
         return source.url.map { urlMap ->
-            val type = urlMap.value
-            val url = urlMap.key
+            val type = urlMap.key
+            val url = urlMap.value
 
             UnionMetaContentDto(
                 typeContent = type,
                 url = url,
-                attributes = source.meta[type]?.let { convert(it) }
+                attributes = source.meta[type]?.let { convert(it) } ?: listOf()
             )
         }
     }
@@ -89,6 +89,7 @@ object EthUnionItemConverter {
         )
     }
 
+    // TODO is that right?
     private fun convert(source: ItemTransferDto, blockchain: EthBlockchainDto): EthPendingItemDto {
         return EthPendingItemDto(
             type = EthPendingItemDto.Type.TRANSFER,
