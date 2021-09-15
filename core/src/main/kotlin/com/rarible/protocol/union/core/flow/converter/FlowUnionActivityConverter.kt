@@ -4,11 +4,12 @@ import com.rarible.protocol.dto.*
 import com.rarible.protocol.dto.FlowActivityDto
 import com.rarible.protocol.union.dto.*
 import com.rarible.protocol.union.dto.FlowOrderActivityMatchSideDto
+import com.rarible.protocol.union.dto.flow.FlowActivityIdDto
 
 object FlowUnionActivityConverter {
 
     fun convert(source: FlowActivityDto, blockchain: FlowBlockchainDto): UnionActivityDto {
-        val unionActivityId = FlowActivityIdDto(source.id, blockchain)
+        val unionActivityId = FlowActivityIdDto(blockchain, source.id)
         return when (source) {
             is FlowNftOrderActivitySellDto -> {
                 FlowOrderMatchActivityDto(

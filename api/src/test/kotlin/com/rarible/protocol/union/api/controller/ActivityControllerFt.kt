@@ -45,7 +45,7 @@ class ActivityControllerFt : AbstractIntegrationTest() {
         } returns OrderActivitiesDto(null, listOf(orderActivity)).toMono()
 
         val unionActivities = activityControllerApi.getActivitiesByCollection(
-            types, ethCollectionId.toString(), continuation, size, sort
+            types, ethCollectionId.fullId(), continuation, size, sort
         ).awaitFirst()
 
         assertThat(unionActivities.activities).hasSize(1)
@@ -68,7 +68,7 @@ class ActivityControllerFt : AbstractIntegrationTest() {
         } returns FlowActivitiesDto(1, null, listOf(activity)).toMono()
 
         val unionActivities = activityControllerApi.getActivitiesByCollection(
-            types, flowCollectionId.toString(), continuation, null, sort
+            types, flowCollectionId.fullId(), continuation, null, sort
         ).awaitFirst()
 
         val flowItem = unionActivities.activities[0] as FlowActivityDto
@@ -104,7 +104,7 @@ class ActivityControllerFt : AbstractIntegrationTest() {
         } returns NftActivitiesDto(null, listOf(itemActivity)).toMono()
 
         val unionActivities = activityControllerApi.getActivitiesByItem(
-            types, ethItemId.toString(), tokenId, continuation, 10000000, sort
+            types, ethItemId.fullId(), tokenId, continuation, 10000000, sort
         ).awaitFirst()
 
         assertThat(unionActivities.activities).hasSize(2)
@@ -129,7 +129,7 @@ class ActivityControllerFt : AbstractIntegrationTest() {
         } returns FlowActivitiesDto(1, null, listOf(activity)).toMono()
 
         val unionActivities = activityControllerApi.getActivitiesByItem(
-            types, flowItemId.toString(), tokenId.toString(), continuation, size, sort
+            types, flowItemId.fullId(), tokenId.toString(), continuation, size, sort
         ).awaitFirst()
 
         val flowItem = unionActivities.activities[0] as FlowActivityDto
@@ -231,7 +231,7 @@ class ActivityControllerFt : AbstractIntegrationTest() {
         } returns FlowActivitiesDto(1, null, listOf(flowActivity)).toMono()
 
         val unionActivities = activityControllerApi.getActivitiesByUser(
-            types, listOf(userEth.toString(), userFlow.toString()), null, size, sort
+            types, listOf(userEth.fullId(), userFlow.fullId()), null, size, sort
         ).awaitFirst()
 
         assertThat(unionActivities.activities).hasSize(2)

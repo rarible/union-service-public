@@ -3,7 +3,7 @@ package com.rarible.protocol.union.dto.ethereum.serializer
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.databind.SerializerProvider
 import com.fasterxml.jackson.databind.ser.std.StdSerializer
-import com.rarible.protocol.union.dto.EthOwnershipIdDto
+import com.rarible.protocol.union.dto.ethereum.EthOwnershipIdDto
 
 object EthOwnershipIdSerializer : StdSerializer<EthOwnershipIdDto>(EthOwnershipIdDto::class.java) {
 
@@ -13,7 +13,7 @@ object EthOwnershipIdSerializer : StdSerializer<EthOwnershipIdDto>(EthOwnershipI
             return
         }
         gen.writeStartObject()
-        gen.writeStringField(EthOwnershipIdDto::value.name, "${id.blockchain.name}:${id.value}")
+        gen.writeStringField(EthOwnershipIdDto::value.name, id.fullId())
         provider.defaultSerializeField(EthOwnershipIdDto::blockchain.name, id.blockchain, gen)
         provider.defaultSerializeField(EthOwnershipIdDto::token.name, id.token, gen)
         provider.defaultSerializeField(EthOwnershipIdDto::tokenId.name, id.tokenId, gen)

@@ -9,8 +9,8 @@ import com.rarible.protocol.union.api.configuration.PageSize
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.dto.*
-import com.rarible.protocol.union.dto.ethereum.EthOwnershipIdProvider
-import com.rarible.protocol.union.dto.flow.FlowOwnershipIdProvider
+import com.rarible.protocol.union.dto.ethereum.parser.EthOwnershipIdParser
+import com.rarible.protocol.union.dto.flow.parser.FlowOwnershipIdParser
 import com.rarible.protocol.union.test.data.*
 import io.mockk.coEvery
 import kotlinx.coroutines.FlowPreview
@@ -33,8 +33,8 @@ class OwnershipControllerFt : AbstractIntegrationTest() {
 
     @Test
     fun `get ownership by id - ethereum`() = runBlocking<Unit> {
-        val ownershipIdFull = randomEthOwnershipIdFullValue()
-        val ownershipId = EthOwnershipIdProvider.parseFull(ownershipIdFull)
+        val ownershipIdFull = randomEthOwnershipId().fullId()
+        val ownershipId = EthOwnershipIdParser.parseFull(ownershipIdFull)
         val ownership = randomEthNftOwnershipDto(ownershipId)
 
         coEvery { testEthereumOwnershipApi.getNftOwnershipById(ownershipId.value) } returns ownership.toMono()
@@ -48,8 +48,8 @@ class OwnershipControllerFt : AbstractIntegrationTest() {
 
     @Test
     fun `get ownership by id - polygon`() = runBlocking<Unit> {
-        val ownershipIdFull = randomPolygonOwnershipIdFullValue()
-        val ownershipId = EthOwnershipIdProvider.parseFull(ownershipIdFull)
+        val ownershipIdFull = randomPolygonOwnershipId().fullId()
+        val ownershipId = EthOwnershipIdParser.parseFull(ownershipIdFull)
         val ownership = randomEthNftOwnershipDto(ownershipId)
 
         coEvery { testPolygonOwnershipApi.getNftOwnershipById(ownershipId.value) } returns ownership.toMono()
@@ -63,8 +63,8 @@ class OwnershipControllerFt : AbstractIntegrationTest() {
 
     @Test
     fun `get ownership by id - flow`() = runBlocking<Unit> {
-        val ownershipIdFull = randomFlowOwnershipIdFullValue()
-        val ownershipId = FlowOwnershipIdProvider.parseFull(ownershipIdFull)
+        val ownershipIdFull = randomFlowOwnershipId().fullId()
+        val ownershipId = FlowOwnershipIdParser.parseFull(ownershipIdFull)
         val ownership = randomFlowNftOwnershipDto(ownershipId)
 
         coEvery { testFlowOwnershipApi.getNftOwnershipById(ownershipId.value) } returns ownership.toMono()
@@ -87,7 +87,7 @@ class OwnershipControllerFt : AbstractIntegrationTest() {
         } returns NftOwnershipsDto(1, null, listOf(ownership)).toMono()
 
         val unionOwnerships = ownershipControllerClient.getOwnershipsByItem(
-            ethItemId.toString(), tokenId, continuation, size
+            ethItemId.fullId(), tokenId, continuation, size
         ).awaitFirst()
 
         val ethOwnership = unionOwnerships.ownerships[0] as EthOwnershipDto
@@ -105,7 +105,7 @@ class OwnershipControllerFt : AbstractIntegrationTest() {
         } returns NftOwnershipsDto(1, null, listOf(ownership)).toMono()
 
         val unionOwnerships = ownershipControllerClient.getOwnershipsByItem(
-            polyItemId.toString(), tokenId, continuation, size
+            polyItemId.fullId(), tokenId, continuation, size
         ).awaitFirst()
 
         val polyOwnership = unionOwnerships.ownerships[0] as EthOwnershipDto
@@ -123,7 +123,7 @@ class OwnershipControllerFt : AbstractIntegrationTest() {
         } returns FlowNftOwnershipsDto(1, null, listOf(ownership)).toMono()
 
         val unionOwnerships = ownershipControllerClient.getOwnershipsByItem(
-            flowItemId.toString(), tokenId, continuation, size
+            flowItemId.fullId(), tokenId, continuation, size
         ).awaitFirst()
 
         val flowOwnership = unionOwnerships.ownerships[0] as FlowOwnershipDto

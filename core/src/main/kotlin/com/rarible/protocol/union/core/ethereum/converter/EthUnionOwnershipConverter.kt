@@ -5,13 +5,13 @@ import com.rarible.protocol.union.dto.EthBlockchainDto
 import com.rarible.protocol.union.dto.EthItemHistoryDto
 import com.rarible.protocol.union.dto.EthOwnershipDto
 import com.rarible.protocol.union.dto.UnionOwnershipsDto
-import com.rarible.protocol.union.dto.ethereum.EthOwnershipIdProvider
+import com.rarible.protocol.union.dto.ethereum.EthOwnershipIdDto
 
 object EthUnionOwnershipConverter {
 
     fun convert(source: NftOwnershipDto, blockchain: EthBlockchainDto): EthOwnershipDto {
         return EthOwnershipDto(
-            id = EthOwnershipIdProvider.create(
+            id = EthOwnershipIdDto(
                 token = EthAddressConverter.convert(source.contract, blockchain),
                 tokenId = source.tokenId,
                 owner = EthAddressConverter.convert(source.owner, blockchain),

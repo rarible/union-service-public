@@ -4,42 +4,30 @@ import com.rarible.core.common.nowMillis
 import com.rarible.core.test.data.*
 import com.rarible.protocol.dto.*
 import com.rarible.protocol.union.dto.FlowBlockchainDto
-import com.rarible.protocol.union.dto.FlowItemIdDto
-import com.rarible.protocol.union.dto.FlowOrderIdDto
-import com.rarible.protocol.union.dto.FlowOwnershipIdDto
 import com.rarible.protocol.union.dto.flow.FlowAddress
 import com.rarible.protocol.union.dto.flow.FlowContract
-import com.rarible.protocol.union.dto.flow.FlowItemIdProvider
-import com.rarible.protocol.union.dto.flow.FlowOwnershipIdProvider
+import com.rarible.protocol.union.dto.flow.FlowItemIdDto
+import com.rarible.protocol.union.dto.flow.FlowOwnershipIdDto
+import com.rarible.protocol.union.dto.flow.parser.FlowItemIdParser
 import java.math.BigInteger
 
 fun randomFlowContract() = FlowContract(FlowBlockchainDto.FLOW, randomString(12))
 fun randomFlowAddress() = FlowAddress(FlowBlockchainDto.FLOW, randomString(16))
 
-fun randomFlowItemIdShortValue() = "${randomFlowContract().value}:${randomLong()}"
-fun randomFlowItemIdFullValue() = "FLOW:${randomFlowItemIdShortValue()}"
+fun randomFlowItemId() = FlowItemIdDto(FlowBlockchainDto.FLOW, randomFlowContract(), randomLong().toBigInteger())
+fun randomFlowItemIdShortValue() = randomFlowItemId().value
+fun randomFlowItemIdFullValue() = randomFlowItemId().fullId()
 
-fun randomFlowItemId() = FlowItemIdProvider.parseFull(randomFlowItemIdFullValue())
-
-fun randomFlowOwnershipIdShortValue() = "${randomFlowItemIdShortValue()}:${randomFlowAddress().value}"
-fun randomFlowOwnershipIdFullValue() = "FLOW:${randomFlowOwnershipIdShortValue()}"
-
-fun randomFlowOwnershipId() = FlowOwnershipIdProvider.parseFull(randomFlowOwnershipIdFullValue())
+fun randomFlowOwnershipId() = randomFlowOwnershipId(randomFlowItemId())
 fun randomFlowOwnershipId(itemId: FlowItemIdDto) = randomFlowOwnershipId(itemId, randomFlowAddress().value)
-
 fun randomFlowOwnershipId(itemId: FlowItemIdDto, owner: String): FlowOwnershipIdDto {
     return FlowOwnershipIdDto(
-        value = "${itemId.value}:${owner}",
         token = FlowContract(FlowBlockchainDto.FLOW, itemId.token.value),
         tokenId = itemId.tokenId,
         owner = FlowAddress(FlowBlockchainDto.FLOW, owner),
         blockchain = FlowBlockchainDto.FLOW
     )
 }
-
-fun randomFlowOrderId() = FlowOrderIdDto(randomLong().toString(), FlowBlockchainDto.FLOW)
-fun randomFlowOrderIdFullValue() = randomFlowOrderIdFullValue(randomLong())
-fun randomFlowOrderIdFullValue(id: Long) = "FLOW:$id"
 
 fun randomFlowNftItemDto() = randomFlowNftItemDto(randomFlowItemId(), randomString())
 fun randomFlowNftItemDto(itemId: FlowItemIdDto) = randomFlowNftItemDto(itemId, randomString())
@@ -87,7 +75,7 @@ fun randomFlowMetaContentDto(): MetaContentDto {
 
 fun randomFlowNftOwnershipDto() = randomFlowNftOwnershipDto(randomFlowOwnershipId())
 fun randomFlowNftOwnershipDto(ownershipId: FlowOwnershipIdDto) = randomFlowNftOwnershipDto(
-    FlowItemIdProvider.parseShort("${ownershipId.token.value}:${ownershipId.tokenId}", FlowBlockchainDto.FLOW),
+    FlowItemIdParser.parseShort("${ownershipId.token.value}:${ownershipId.tokenId}", FlowBlockchainDto.FLOW),
     ownershipId.owner.value
 )
 

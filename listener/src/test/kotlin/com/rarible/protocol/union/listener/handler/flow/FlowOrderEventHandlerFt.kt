@@ -18,7 +18,7 @@ class FlowOrderEventHandlerFt : AbstractIntegrationTest() {
     @Test
     fun `flow order update event`() = runWithKafka {
         val flowOrder = randomFlowV1OrderDto()
-        val flowOrderId = flowOrder.itemId // TODO
+        val flowOrderId = flowOrder.id.toString()
         val dto: FlowOrderEventDto = FlowOrderUpdateEventDto(randomString(), flowOrderId, flowOrder)
 
         flowOrderProducer.send(message(dto)).ensureSuccess()

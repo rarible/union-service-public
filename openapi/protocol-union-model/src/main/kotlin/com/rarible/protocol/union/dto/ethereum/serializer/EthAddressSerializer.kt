@@ -12,6 +12,6 @@ object EthAddressSerializer : StdSerializer<EthAddress>(EthAddress::class.java) 
             gen.writeNull()
             return
         }
-        gen.writeString(value.toString())
+        gen.writeString(value.fullId())
     }
 }

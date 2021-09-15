@@ -287,11 +287,8 @@ components:
       properties:
         eventId:
           type: string
-        orderId:
-          type: string
       required:
         - eventId
-        - orderId
       oneOf:
         - "$ref": "#/components/schemas/EthOrderEvent"
         - "$ref": "#/components/schemas/FlowOrderEvent"
@@ -1476,6 +1473,11 @@ components:
 
     EthOrderEvent:
       type: object
+      properties:
+        orderId:
+          "$ref": "#/components/schemas/EthOrderId"
+      required:
+        - orderId
       oneOf:
         - "$ref": "#/components/schemas/EthOrderUpdateEvent"
 
@@ -1812,6 +1814,11 @@ components:
 
     FlowOrderEvent:
       type: object
+      properties:
+        orderId:
+          "$ref": "#/components/schemas/FlowOrderId"
+      required:
+        - orderId
       oneOf:
         - "$ref": "#/components/schemas/FlowOrderUpdateEvent"
 

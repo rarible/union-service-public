@@ -3,13 +3,13 @@ package com.rarible.protocol.union.core.ethereum.converter
 import com.rarible.core.common.nowMillis
 import com.rarible.protocol.dto.*
 import com.rarible.protocol.union.dto.*
-import com.rarible.protocol.union.dto.ethereum.EthItemIdProvider
+import com.rarible.protocol.union.dto.ethereum.EthItemIdDto
 
 object EthUnionItemConverter {
 
     fun convert(item: NftItemDto, blockchain: EthBlockchainDto): EthItemDto {
         return EthItemDto(
-            id = EthItemIdProvider.create(
+            id = EthItemIdDto(
                 token = EthAddressConverter.convert(item.contract, blockchain),
                 tokenId = item.tokenId,
                 blockchain = blockchain

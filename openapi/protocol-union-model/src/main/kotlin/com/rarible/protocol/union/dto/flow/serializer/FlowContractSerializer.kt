@@ -12,6 +12,6 @@ object FlowContractSerializer : StdSerializer<FlowContract>(FlowContract::class.
             gen.writeNull()
             return
         }
-        gen.writeString(value.toString())
+        gen.writeString(value.fullId())
     }
 }

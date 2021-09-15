@@ -8,11 +8,14 @@ object FlowUnionOrderEventConverter {
 
     fun convert(source: FlowOrderEventDto, blockchain: FlowBlockchainDto): UnionOrderEventDto {
         return when (source) {
-            is FlowOrderUpdateEventDto -> FlowOrderUpdateEventDto(
-                eventId = source.eventId,
-                orderId = source.orderId,
-                order = FlowUnionOrderConverter.convert(source.order, blockchain)
-            )
+            is FlowOrderUpdateEventDto -> {
+                val order = FlowUnionOrderConverter.convert(source.order, blockchain)
+                FlowOrderUpdateEventDto(
+                    eventId = source.eventId,
+                    orderId = order.id,
+                    order = order
+                )
+            }
         }
     }
 
