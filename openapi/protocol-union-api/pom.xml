@@ -38,6 +38,9 @@
                 <groupId>com.rarible.protocol</groupId>
                 <artifactId>model-generator-maven-plugin</artifactId>
                 <configuration>
+                    <schema>
+                        <outputFile>${dir.target.classes}/union.yaml</outputFile>
+                    </schema>
                     <dependencies>
                         <dependency>
                             <name>protocol-union-model</name>
@@ -57,7 +60,7 @@
                             <goal>generate</goal>
                         </goals>
                         <configuration>
-                            <inputSpec>${dir.target.classes}/openapi.yaml</inputSpec>
+                            <inputSpec>${dir.target.classes}/union.yaml</inputSpec>
                             <apiPackage>com.rarible.protocol.union.api.controller</apiPackage>
                             <generatorName>rarible-server</generatorName>
                             <generateModels>false</generateModels>
