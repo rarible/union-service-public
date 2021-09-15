@@ -4,7 +4,7 @@ import com.rarible.protocol.dto.*
 import com.rarible.protocol.union.dto.*
 import com.rarible.protocol.union.dto.FlowCreatorDto
 import com.rarible.protocol.union.dto.FlowRoyaltyDto
-import com.rarible.protocol.union.dto.flow.FlowItemIdProvider
+import com.rarible.protocol.union.dto.flow.FlowItemIdDto
 
 object FlowUnionItemConverter {
 
@@ -12,7 +12,11 @@ object FlowUnionItemConverter {
         val collection = FlowContractConverter.convert(item.collection, blockchain)
 
         return FlowItemDto(
-            id = FlowItemIdProvider.create(collection, item.tokenId, blockchain),
+            id = FlowItemIdDto(
+                blockchain = blockchain,
+                token = collection,
+                tokenId = item.tokenId
+            ),
             mintedAt = item.mintedAt,
             lastUpdatedAt = item.lastUpdatedAt,
             supply = item.supply,

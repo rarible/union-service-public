@@ -1,11 +1,12 @@
-package com.rarible.protocol.union.dto.ethereum
+package com.rarible.protocol.union.dto.ethereum.parser
 
 import com.rarible.protocol.union.dto.EthBlockchainDto
-import com.rarible.protocol.union.dto.EthItemIdDto
 import com.rarible.protocol.union.dto.IdParser
+import com.rarible.protocol.union.dto.ethereum.EthAddress
+import com.rarible.protocol.union.dto.ethereum.EthItemIdDto
 import java.math.BigInteger
 
-object EthItemIdProvider {
+object EthItemIdParser {
 
     /**
      * For full qualifiers like "ETHEREUM:abc:123"
@@ -14,7 +15,6 @@ object EthItemIdProvider {
         val parts = IdParser.split(value, 3)
         val blockchain = EthBlockchainDto.valueOf(parts[0])
         return EthItemIdDto(
-            value = "${parts[1]}:${parts[2]}",
             blockchain = blockchain,
             token = EthAddress(blockchain, parts[1]),
             tokenId = BigInteger(parts[2])
@@ -27,19 +27,9 @@ object EthItemIdProvider {
     fun parseShort(value: String, blockchain: EthBlockchainDto): EthItemIdDto {
         val parts = IdParser.split(value, 2)
         return EthItemIdDto(
-            value = value,
             blockchain = blockchain,
             token = EthAddress(blockchain, parts[0]),
             tokenId = BigInteger(parts[1])
-        )
-    }
-
-    fun create(token: EthAddress, tokenId: BigInteger, blockchain: EthBlockchainDto): EthItemIdDto {
-        return EthItemIdDto(
-            blockchain = blockchain,
-            value = "${token.value}:${tokenId}",
-            token = token,
-            tokenId = tokenId
         )
     }
 }

@@ -3,7 +3,7 @@ package com.rarible.protocol.union.dto.flow.serializer
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.databind.SerializerProvider
 import com.fasterxml.jackson.databind.ser.std.StdSerializer
-import com.rarible.protocol.union.dto.FlowOwnershipIdDto
+import com.rarible.protocol.union.dto.flow.FlowOwnershipIdDto
 
 object FlowOwnershipIdSerializer : StdSerializer<FlowOwnershipIdDto>(FlowOwnershipIdDto::class.java) {
 
@@ -13,7 +13,7 @@ object FlowOwnershipIdSerializer : StdSerializer<FlowOwnershipIdDto>(FlowOwnersh
             return
         }
         gen.writeStartObject()
-        gen.writeStringField(FlowOwnershipIdDto::value.name, "${id.blockchain.name}:${id.value}");
+        gen.writeStringField(FlowOwnershipIdDto::value.name, id.fullId())
         provider.defaultSerializeField(FlowOwnershipIdDto::blockchain.name, id.blockchain, gen)
         provider.defaultSerializeField(FlowOwnershipIdDto::token.name, id.token, gen)
         provider.defaultSerializeField(FlowOwnershipIdDto::tokenId.name, id.tokenId, gen)

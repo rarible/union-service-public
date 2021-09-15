@@ -2,12 +2,13 @@ package com.rarible.protocol.union.core.ethereum.converter
 
 import com.rarible.protocol.dto.*
 import com.rarible.protocol.union.dto.*
+import com.rarible.protocol.union.dto.ethereum.EthOrderIdDto
 import java.time.Instant
 
 object EthUnionOrderConverter {
 
     fun convert(order: OrderDto, blockchain: EthBlockchainDto): EthOrderDto {
-        val unionOrderId = EthOrderIdDto(EthConverter.convert(order.hash), blockchain)
+        val unionOrderId = EthOrderIdDto(blockchain, EthConverter.convert(order.hash))
         return when (order) {
             is LegacyOrderDto -> {
                 EthLegacyOrderDto(
@@ -179,7 +180,7 @@ object EthUnionOrderConverter {
     private fun convert(source: OrderExchangeHistoryDto, blockchain: EthBlockchainDto): EthPendingOrderDto {
         return when (source) {
             is OrderSideMatchDto -> EthPendingOrderMatchDto(
-                id = EthOrderIdDto(EthConverter.convert(source.hash), blockchain),
+                id = EthOrderIdDto(blockchain, EthConverter.convert(source.hash)),
                 make = source.make?.let { EthConverter.convert(it, blockchain) },
                 take = source.take?.let { EthConverter.convert(it, blockchain) },
                 date = source.date,
@@ -194,7 +195,7 @@ object EthUnionOrderConverter {
                 takePriceUsd = source.takePriceUsd
             )
             is OrderCancelDto -> EthPendingOrderCancelDto(
-                id = EthOrderIdDto(EthConverter.convert(source.hash), blockchain),
+                id = EthOrderIdDto(blockchain, EthConverter.convert(source.hash)),
                 make = source.make?.let { EthConverter.convert(it, blockchain) },
                 take = source.take?.let { EthConverter.convert(it, blockchain) },
                 date = source.date,
@@ -202,7 +203,7 @@ object EthUnionOrderConverter {
                 owner = source.owner?.let { EthAddressConverter.convert(it, blockchain) }
             )
             is OnChainOrderDto -> EthOnChainOrderDto(
-                id = EthOrderIdDto(EthConverter.convert(source.hash), blockchain),
+                id = EthOrderIdDto(blockchain, EthConverter.convert(source.hash)),
                 make = source.make?.let { EthConverter.convert(it, blockchain) },
                 take = source.take?.let { EthConverter.convert(it, blockchain) },
                 date = source.date,

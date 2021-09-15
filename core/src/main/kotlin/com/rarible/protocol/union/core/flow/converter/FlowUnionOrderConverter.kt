@@ -2,13 +2,14 @@ package com.rarible.protocol.union.core.flow.converter
 
 import com.rarible.protocol.dto.PayInfoDto
 import com.rarible.protocol.union.dto.*
+import com.rarible.protocol.union.dto.flow.FlowOrderIdDto
 import java.math.BigInteger
 
 object FlowUnionOrderConverter {
 
     fun convert(order: com.rarible.protocol.dto.FlowOrderDto, blockchain: FlowBlockchainDto): FlowOrderDto {
         return FlowOrderV1Dto(
-            id = FlowOrderIdDto(order.id.toString(), blockchain),
+            id = FlowOrderIdDto(blockchain, order.id.toString()),
             maker = FlowAddressConverter.convert(order.maker, blockchain),
             taker = order.taker?.let { FlowAddressConverter.convert(it, blockchain) },
             make = FlowConverter.convert(order.make, blockchain),

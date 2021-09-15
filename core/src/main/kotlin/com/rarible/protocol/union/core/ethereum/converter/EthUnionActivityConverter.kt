@@ -2,11 +2,12 @@ package com.rarible.protocol.union.core.ethereum.converter
 
 import com.rarible.protocol.dto.*
 import com.rarible.protocol.union.dto.*
+import com.rarible.protocol.union.dto.ethereum.EthActivityIdDto
 
 object EthUnionActivityConverter {
 
     fun convert(source: ActivityDto, blockchain: EthBlockchainDto): UnionActivityDto {
-        val unionActivityId = EthActivityIdDto(source.id, blockchain)
+        val unionActivityId = EthActivityIdDto(blockchain, source.id)
         return when (source) {
             is OrderActivityMatchDto -> {
                 EthOrderMatchActivityDto(

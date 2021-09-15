@@ -110,7 +110,7 @@ abstract class AbstractIntegrationTest {
 
     fun findEthOrderUpdates(orderId: String): List<KafkaMessage<EthOrderUpdateEventDto>> {
         return filterByValueType(orderEvents as Queue<KafkaMessage<Any>>, EthOrderUpdateEventDto::class.java)
-            .filter { it.value.orderId == orderId }
+            .filter { it.value.orderId.value == orderId }
     }
 
     fun findFlowItemUpdates(itemId: String): List<KafkaMessage<FlowItemUpdateEventDto>> {
@@ -135,7 +135,7 @@ abstract class AbstractIntegrationTest {
 
     fun findFlowOrderUpdates(orderId: String): List<KafkaMessage<FlowOrderUpdateEventDto>> {
         return filterByValueType(orderEvents as Queue<KafkaMessage<Any>>, FlowOrderUpdateEventDto::class.java)
-            .filter { it.value.orderId == orderId }
+            .filter { it.value.orderId.value == orderId }
     }
 
     fun <T : EthActivityDto> findEthActivityUpdates(

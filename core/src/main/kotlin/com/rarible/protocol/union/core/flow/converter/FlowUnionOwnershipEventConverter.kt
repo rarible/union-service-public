@@ -7,12 +7,12 @@ import com.rarible.protocol.union.dto.FlowBlockchainDto
 import com.rarible.protocol.union.dto.FlowOwnershipDeleteEventDto
 import com.rarible.protocol.union.dto.FlowOwnershipUpdateEventDto
 import com.rarible.protocol.union.dto.UnionOwnershipEventDto
-import com.rarible.protocol.union.dto.flow.FlowOwnershipIdProvider
+import com.rarible.protocol.union.dto.flow.parser.FlowOwnershipIdParser
 
 object FlowUnionOwnershipEventConverter {
 
     fun convert(source: FlowOwnershipEventDto, blockchain: FlowBlockchainDto): UnionOwnershipEventDto {
-        val ownershipId = FlowOwnershipIdProvider.parseShort(source.ownershipId, blockchain)
+        val ownershipId = FlowOwnershipIdParser.parseShort(source.ownershipId, blockchain)
         return when (source) {
             is FlowNftOwnershipUpdateEventDto -> {
                 FlowOwnershipUpdateEventDto(

@@ -5,22 +5,19 @@ import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.rarible.protocol.union.dto.EthBlockchainDto
-import com.rarible.protocol.union.dto.EthOwnershipIdDto
-import com.rarible.protocol.union.dto.IdParser
 import com.rarible.protocol.union.dto.ethereum.EthAddress
+import com.rarible.protocol.union.dto.ethereum.EthOwnershipIdDto
 import java.math.BigInteger
 
 object EthOwnershipIdDeserializer : StdDeserializer<EthOwnershipIdDto>(EthOwnershipIdDto::class.java) {
 
     override fun deserialize(p: JsonParser, ctxt: DeserializationContext): EthOwnershipIdDto? {
         val tree: ObjectNode = p.codec.readTree(p) ?: return null
-        val value = tree.get(EthOwnershipIdDto::value.name)
         val blockchain = tree.get(EthOwnershipIdDto::blockchain.name)
         val token = tree.get(EthOwnershipIdDto::token.name)
         val tokenId = tree.get(EthOwnershipIdDto::tokenId.name)
         val owner = tree.get(EthOwnershipIdDto::owner.name)
         return EthOwnershipIdDto(
-            value = IdParser.parse(value.textValue()).second,
             blockchain = EthBlockchainDto.valueOf(blockchain.textValue()),
             token = token.traverse(p.codec).readValueAs(EthAddress::class.java),
             tokenId = tokenId.traverse(p.codec).readValueAs(BigInteger::class.java),

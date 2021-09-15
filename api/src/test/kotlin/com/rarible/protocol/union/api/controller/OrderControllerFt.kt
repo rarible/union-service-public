@@ -10,7 +10,12 @@ import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.core.ethereum.converter.EthConverter
 import com.rarible.protocol.union.dto.*
-import com.rarible.protocol.union.test.data.*
+import com.rarible.protocol.union.dto.ethereum.EthOrderIdDto
+import com.rarible.protocol.union.dto.flow.FlowOrderIdDto
+import com.rarible.protocol.union.test.data.randomEthAddress
+import com.rarible.protocol.union.test.data.randomEthLegacyOrderDto
+import com.rarible.protocol.union.test.data.randomFlowV1OrderDto
+import com.rarible.protocol.union.test.data.randomPolygonAddress
 import io.mockk.coEvery
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.reactive.awaitFirst
@@ -37,7 +42,7 @@ class OrderControllerFt : AbstractIntegrationTest() {
     fun `get order by id - ethereum`() = runBlocking<Unit> {
         val order = randomEthLegacyOrderDto()
         val orderId = EthConverter.convert(order.hash)
-        val orderIdFull = randomEthOrderIdFullValue(order.hash)
+        val orderIdFull = EthOrderIdDto(EthBlockchainDto.ETHEREUM, order.hash.prefixed()).fullId()
 
         coEvery { testEthereumOrderApi.getOrderByHash(orderId) } returns order.toMono()
 
@@ -52,7 +57,7 @@ class OrderControllerFt : AbstractIntegrationTest() {
     fun `get order by id - polygon`() = runBlocking<Unit> {
         val order = randomEthLegacyOrderDto()
         val orderId = EthConverter.convert(order.hash)
-        val orderIdFull = randomPolygonOrderIdFullValue(order.hash)
+        val orderIdFull = EthOrderIdDto(EthBlockchainDto.POLYGON, order.hash.prefixed()).fullId()
 
         coEvery { testPolygonOrderApi.getOrderByHash(orderId) } returns order.toMono()
 
@@ -67,7 +72,7 @@ class OrderControllerFt : AbstractIntegrationTest() {
     fun `get order by id - flow`() = runBlocking<Unit> {
         val order = randomFlowV1OrderDto()
         val orderId = order.id
-        val orderIdFull = randomFlowOrderIdFullValue(orderId)
+        val orderIdFull = FlowOrderIdDto(FlowBlockchainDto.FLOW, orderId.toString()).fullId()
 
         coEvery { testFlowOrderApi.getOrderByOrderId(orderId.toString()) } returns order.toMono()
 
@@ -82,7 +87,7 @@ class OrderControllerFt : AbstractIntegrationTest() {
     fun `update order make stock - ethereum`() = runBlocking<Unit> {
         val order = randomEthLegacyOrderDto()
         val orderId = EthConverter.convert(order.hash)
-        val orderIdFull = randomEthOrderIdFullValue(order.hash)
+        val orderIdFull = EthOrderIdDto(EthBlockchainDto.ETHEREUM, order.hash.prefixed()).fullId()
 
         coEvery { testEthereumOrderApi.updateOrderMakeStock(orderId) } returns order.toMono()
 
@@ -132,7 +137,7 @@ class OrderControllerFt : AbstractIntegrationTest() {
         } returns OrdersPaginationDto(ethOrders, this@OrderControllerFt.continuation).toMono()
 
         val unionOrders = orderControllerClient.getOrdersAll(
-            blockchains, platform, origin.toString(), continuation, size
+            blockchains, platform, origin.fullId(), continuation, size
         ).awaitFirst()
 
         assertThat(unionOrders.orders).hasSize(2)
@@ -160,10 +165,10 @@ class OrderControllerFt : AbstractIntegrationTest() {
         } returns OrdersPaginationDto(ethOrders, continuation).toMono()
 
         val unionOrders = orderControllerClient.getOrderBidsByItem(
-            contract.toString(),
+            contract.fullId(),
             tokenId.toString(),
             platform,
-            maker.toString(),
+            maker.fullId(),
             null,
             continuation,
             size
@@ -190,7 +195,7 @@ class OrderControllerFt : AbstractIntegrationTest() {
         } returns OrdersPaginationDto(polygonOrders, continuation).toMono()
 
         val unionOrders = orderControllerClient.getOrderBidsByMaker(
-            maker.toString(),
+            maker.fullId(),
             platform,
             null,
             continuation,
@@ -246,7 +251,7 @@ class OrderControllerFt : AbstractIntegrationTest() {
         } returns OrdersPaginationDto(ethOrders, this@OrderControllerFt.continuation).toMono()
 
         val unionOrders = orderControllerClient.getSellOrders(
-            blockchains, platform, origin.toString(), continuation, size
+            blockchains, platform, origin.fullId(), continuation, size
         ).awaitFirst()
 
         assertThat(unionOrders.orders).hasSize(1)
@@ -269,7 +274,7 @@ class OrderControllerFt : AbstractIntegrationTest() {
         } returns OrdersPaginationDto(polygonOrders, continuation).toMono()
 
         val unionOrders = orderControllerClient.getSellOrdersByCollection(
-            collection.toString(),
+            collection.fullId(),
             platform,
             null,
             continuation,
@@ -302,10 +307,10 @@ class OrderControllerFt : AbstractIntegrationTest() {
         } returns OrdersPaginationDto(ethOrders, continuation).toMono()
 
         val unionOrders = orderControllerClient.getSellOrdersByItem(
-            contract.toString(),
+            contract.fullId(),
             tokenId.toString(),
             platform,
-            maker.toString(),
+            maker.fullId(),
             null,
             continuation,
             size
@@ -327,7 +332,7 @@ class OrderControllerFt : AbstractIntegrationTest() {
         } returns OrdersPaginationDto(polygonOrders, continuation).toMono()
 
         val unionOrders = orderControllerClient.getSellOrdersByMaker(
-            maker.toString(),
+            maker.fullId(),
             platform,
             null,
             continuation,
@@ -349,10 +354,10 @@ class OrderControllerFt : AbstractIntegrationTest() {
         catchThrowable {
             runBlocking {
                 orderControllerClient.getSellOrdersByItem(
-                    contract.toString(),
+                    contract.fullId(),
                     tokenId.toString(),
                     platform,
-                    maker.toString(),
+                    maker.fullId(),
                     null,
                     continuation,
                     size

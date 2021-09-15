@@ -1,15 +1,16 @@
 package com.rarible.protocol.union.dto.flow
 
 import com.rarible.protocol.union.dto.FlowBlockchainDto
+import com.rarible.protocol.union.dto.flow.parser.FlowItemIdParser
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-class FlowItemIdProviderTest {
+class FlowItemIdParserTest {
 
     @Test
     fun `parse full`() {
         val value = "FLOW:abc:123"
-        val itemId = FlowItemIdProvider.parseFull(value)
+        val itemId = FlowItemIdParser.parseFull(value)
         assertEquals(FlowBlockchainDto.FLOW, itemId.blockchain)
         assertEquals("123", itemId.tokenId.toString())
         assertEquals("abc", itemId.token.value)
@@ -18,7 +19,7 @@ class FlowItemIdProviderTest {
     @Test
     fun `parse short`() {
         val value = "abc:123"
-        val itemId = FlowItemIdProvider.parseShort(value, FlowBlockchainDto.FLOW)
+        val itemId = FlowItemIdParser.parseShort(value, FlowBlockchainDto.FLOW)
         assertEquals(FlowBlockchainDto.FLOW, itemId.blockchain)
         assertEquals("123", itemId.tokenId.toString())
         assertEquals("abc", itemId.token.value)

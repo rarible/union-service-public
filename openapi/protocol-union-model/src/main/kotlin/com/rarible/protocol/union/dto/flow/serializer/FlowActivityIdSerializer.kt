@@ -3,7 +3,7 @@ package com.rarible.protocol.union.dto.flow.serializer
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.databind.SerializerProvider
 import com.fasterxml.jackson.databind.ser.std.StdSerializer
-import com.rarible.protocol.union.dto.FlowActivityIdDto
+import com.rarible.protocol.union.dto.flow.FlowActivityIdDto
 
 object FlowActivityIdSerializer : StdSerializer<FlowActivityIdDto>(FlowActivityIdDto::class.java) {
 
@@ -12,6 +12,6 @@ object FlowActivityIdSerializer : StdSerializer<FlowActivityIdDto>(FlowActivityI
             gen.writeNull()
             return
         }
-        gen.writeString("${value.blockchain.name}:${value.value}")
+        gen.writeString(value.fullId())
     }
 }
