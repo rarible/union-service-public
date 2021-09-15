@@ -5,7 +5,7 @@ import java.io.InputStream
 object UnionOpenapiReader {
 
     fun getOpenapi(): InputStream {
-        return UnionOpenapiReader::class.java.getResourceAsStream("/openapi.yaml")
+        return UnionOpenapiReader::class.java.getResourceAsStream("/union.yaml")
     }
 
 }

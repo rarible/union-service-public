@@ -5,7 +5,7 @@ info:
 
 paths:
 
-  /v0.1/union/items/{itemId}:
+  /v0.1/items/{itemId}:
     get:
       tags:
         - item-controller
@@ -42,7 +42,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ApiError"
 
-  /v0.1/union/items/byOwner:
+  /v0.1/items/byOwner:
     get:
       tags:
         - item-controller
@@ -82,7 +82,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ApiError"
 
-  /v0.1/union/items/byCreator:
+  /v0.1/items/byCreator:
     get:
       tags:
         - item-controller
@@ -122,7 +122,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ApiError"
 
-  /v0.1/union/items/byCollection:
+  /v0.1/items/byCollection:
     get:
       tags:
         - item-controller
@@ -162,7 +162,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ApiError"
 
-  /v0.1/union/items/all:
+  /v0.1/items/all:
     get:
       tags:
         - item-controller
@@ -225,7 +225,7 @@ paths:
   # NFT Ownership Controller
   #
 
-  /v0.1/union/ownerships/{ownershipId}:
+  /v0.1/ownerships/{ownershipId}:
     get:
       tags:
         - ownership-controller
@@ -250,7 +250,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ApiError"
 
-  /v0.1/union/ownerships/byItem:
+  /v0.1/ownerships/byItem:
     get:
       tags:
         - ownership-controller
@@ -290,7 +290,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ApiError"
 
-  /v0.1/union/ownerships/all:
+  /v0.1/ownerships/all:
     get:
       tags:
         - ownership-controller
@@ -331,7 +331,7 @@ paths:
   # NFT Order Controller
   #
 
-  /v0.1/union/orders/{id}:
+  /v0.1/orders/{id}:
     get:
       tags:
         - order-controller
@@ -356,7 +356,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ApiError"
 
-  /v0.1/union/orders/{id}/updateMakeStock:
+  /v0.1/orders/{id}/updateMakeStock:
     get:
       tags:
         - order-controller
@@ -381,7 +381,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ApiError"
 
-  /v0.1/union/orders/all:
+  /v0.1/orders/all:
     get:
       tags:
         - order-controller
@@ -428,7 +428,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ApiError"
 
-  /v0.1/union/orders/sell/byMaker:
+  /v0.1/orders/sell/byMaker:
     get:
       tags:
         - order-controller
@@ -474,7 +474,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ApiError"
 
-  /v0.1/union/orders/sell/byItem:
+  /v0.1/orders/sell/byItem:
     get:
       tags:
         - order-controller
@@ -530,7 +530,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ApiError"
 
-  /v0.1/union/orders/sell/byCollection:
+  /v0.1/orders/sell/byCollection:
     get:
       tags:
         - order-controller
@@ -577,7 +577,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ApiError"
 
-  /v0.1/union/orders/sell:
+  /v0.1/orders/sell:
     get:
       tags:
         - order-controller
@@ -626,7 +626,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ApiError"
 
-  /v0.1/union/orders/bids/byMaker:
+  /v0.1/orders/bids/byMaker:
     get:
       tags:
         - order-controller
@@ -673,7 +673,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ApiError"
 
-  /v0.1/union/orders/bids/byItem:
+  /v0.1/orders/bids/byItem:
     get:
       tags:
         - order-controller
@@ -732,7 +732,7 @@ paths:
   # NFT Activity Controller
   #
 
-  /v0.1/union/activities/byUser:
+  /v0.1/activities/byUser:
     get:
       tags:
         - activity-controller
@@ -787,7 +787,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ApiError"
 
-  /v0.1/union/activities/byItem:
+  /v0.1/activities/byItem:
     get:
       tags:
         - activity-controller
@@ -845,7 +845,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ApiError"
 
-  /v0.1/union/activities/byCollection:
+  /v0.1/activities/byCollection:
     get:
       tags:
         - activity-controller
@@ -898,7 +898,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ApiError"
 
-  /v0.1/union/activities/all:
+  /v0.1/activities/all:
     get:
       tags:
         - activity-controller
@@ -958,7 +958,7 @@ paths:
   # NFT Collection Controller
   #
 
-  /v0.1/union/collections/{collection}:
+  /v0.1/collections/{collection}:
     get:
       tags:
         - collection-controller
@@ -984,7 +984,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ApiError"
 
-  /v0.1/union/collections/byOwner:
+  /v0.1/collections/byOwner:
     get:
       tags:
         - collection-controller
@@ -1020,7 +1020,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ApiError"
 
-  /v0.1/union/collections/all:
+  /v0.1/collections/all:
     get:
       tags:
         - collection-controller

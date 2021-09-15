@@ -59,6 +59,7 @@
                     <dependencies>
                         <dependency>
                             <name>protocol-union-api</name>
+                            <schemaFile>union.yaml</schemaFile>
                             <packageName>${generator.package}</packageName>
                         </dependency>
                     </dependencies>
