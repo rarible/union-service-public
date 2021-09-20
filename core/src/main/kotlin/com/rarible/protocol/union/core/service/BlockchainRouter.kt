@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.core.service
 
+import com.rarible.core.client.WebClientResponseProxyException
 import com.rarible.protocol.union.dto.BlockchainDto
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -42,8 +43,11 @@ abstract class BlockchainRouter<T : BlockchainService>(
     ): T? {
         return try {
             clientCall()
-        } catch (e: Exception) {
-            logger.error("Unexpected exception during HTTP call: ", e)
+        } catch (e: WebClientResponseProxyException) {
+            logger.warn("Received an error from API Client: {} with message: {}", e.data, e.message)
+            null
+        } catch (e: Throwable) {
+            logger.error("Unexpected error from API Client: {}", e.message, e)
             null
         }
     }

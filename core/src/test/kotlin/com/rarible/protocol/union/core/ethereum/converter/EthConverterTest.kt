@@ -118,7 +118,7 @@ class EthConverterTest {
         assertThat(converted.creators[0].value).isEqualTo(assetType.creators[0].value.toBigDecimal())
         assertThat(converted.creators[0].account.value).isEqualTo(assetType.creators[0].account.prefixed())
         assertThat(converted.royalties[0].value).isEqualTo(assetType.royalties[0].value.toBigInteger())
-        assertThat(converted.royalties[0].account!!.value).isEqualTo(assetType.royalties[0].account.prefixed())
+        assertThat(converted.royalties[0].account.value).isEqualTo(assetType.royalties[0].account.prefixed())
         assertThat(converted.signatures[0]).isEqualTo(assetType.signatures[0].prefixed())
     }
 

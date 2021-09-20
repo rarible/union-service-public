@@ -11,7 +11,7 @@ class EthActivityFilterConverterTest {
     @Test
     fun `eth activities all`() {
         val filter = ActivityFilterAllDto(
-            types = ActivityFilterAllDto.Types.values().asList()
+            types = ActivityFilterAllTypeDto.values().asList()
         )
 
         val itemFilter = EthActivityFilterConverter.asItemActivityFilter(filter) as NftActivityFilterAllDto
@@ -37,7 +37,7 @@ class EthActivityFilterConverterTest {
     @Test
     fun `eth activities by collection`() {
         val filter = ActivityFilterByCollectionDto(
-            types = ActivityFilterByCollectionDto.Types.values().asList(),
+            types = ActivityFilterByCollectionTypeDto.values().asList(),
             contract = randomAddress()
         )
 
@@ -68,7 +68,7 @@ class EthActivityFilterConverterTest {
     @Test
     fun `eth activities by item`() {
         val filter = ActivityFilterByItemDto(
-            types = ActivityFilterByItemDto.Types.values().asList(),
+            types = ActivityFilterByItemTypeDto.values().asList(),
             contract = randomAddress(),
             tokenId = randomBigInt()
         )
@@ -103,7 +103,7 @@ class EthActivityFilterConverterTest {
     @Test
     fun `eth activities by user`() {
         val filter = ActivityFilterByUserDto(
-            types = ActivityFilterByUserDto.Types.values().asList(),
+            types = ActivityFilterByUserTypeDto.values().asList(),
             users = listOf(randomAddress(), randomAddress())
         )
 

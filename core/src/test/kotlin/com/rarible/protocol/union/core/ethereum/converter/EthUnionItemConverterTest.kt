@@ -20,7 +20,7 @@ class EthUnionItemConverterTest {
 
         val converted = EthUnionItemConverter.convert(dto, EthBlockchainDto.ETHEREUM)
 
-        assertThat(converted.owner.value).isEqualTo(dto.owner!!.prefixed())
+        assertThat(converted.owner.value).isEqualTo(dto.owner.prefixed())
         assertThat(converted.date).isEqualTo(dto.date)
         assertThat(converted.value).isEqualTo(dto.value)
         assertThat(converted.contract.value).isEqualTo(dto.contract.prefixed())
@@ -70,7 +70,7 @@ class EthUnionItemConverterTest {
         assertThat(converted.creators[0].value).isEqualTo(dto.creators[0].value.toBigDecimal())
 
         assertThat(converted.pending[0].from.value).isEqualTo(dto.pending!![0].from.prefixed())
-        assertThat(converted.pending[0].owner.value).isEqualTo(dto.pending!![0].owner!!.prefixed())
+        assertThat(converted.pending[0].owner.value).isEqualTo(dto.pending!![0].owner.prefixed())
         assertThat(converted.pending[0].date).isEqualTo(dto.pending!![0].date)
         assertThat(converted.pending[0].value).isEqualTo(dto.pending!![0].value)
         assertThat(converted.pending[0].contract.value).isEqualTo(dto.pending!![0].contract.prefixed())

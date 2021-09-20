@@ -138,50 +138,50 @@ object EthUnionActivityConverter {
         }
     }
 
-    fun asUserActivityType(source: UnionUserActivityTypeDto): ActivityFilterByUserDto.Types {
+    fun asUserActivityType(source: UnionUserActivityTypeDto): ActivityFilterByUserTypeDto {
         return when (source) {
-            UnionUserActivityTypeDto.BURN -> ActivityFilterByUserDto.Types.BURN
-            UnionUserActivityTypeDto.BUY -> ActivityFilterByUserDto.Types.BUY
-            UnionUserActivityTypeDto.GET_BID -> ActivityFilterByUserDto.Types.GET_BID
-            UnionUserActivityTypeDto.LIST -> ActivityFilterByUserDto.Types.LIST
-            UnionUserActivityTypeDto.MAKE_BID -> ActivityFilterByUserDto.Types.MAKE_BID
-            UnionUserActivityTypeDto.MINT -> ActivityFilterByUserDto.Types.MINT
-            UnionUserActivityTypeDto.SELL -> ActivityFilterByUserDto.Types.SELL
-            UnionUserActivityTypeDto.TRANSFER_FROM -> ActivityFilterByUserDto.Types.TRANSFER_FROM
-            UnionUserActivityTypeDto.TRANSFER_TO -> ActivityFilterByUserDto.Types.TRANSFER_TO
+            UnionUserActivityTypeDto.BURN -> ActivityFilterByUserTypeDto.BURN
+            UnionUserActivityTypeDto.BUY -> ActivityFilterByUserTypeDto.BUY
+            UnionUserActivityTypeDto.GET_BID -> ActivityFilterByUserTypeDto.GET_BID
+            UnionUserActivityTypeDto.LIST -> ActivityFilterByUserTypeDto.LIST
+            UnionUserActivityTypeDto.MAKE_BID -> ActivityFilterByUserTypeDto.MAKE_BID
+            UnionUserActivityTypeDto.MINT -> ActivityFilterByUserTypeDto.MINT
+            UnionUserActivityTypeDto.SELL -> ActivityFilterByUserTypeDto.SELL
+            UnionUserActivityTypeDto.TRANSFER_FROM -> ActivityFilterByUserTypeDto.TRANSFER_FROM
+            UnionUserActivityTypeDto.TRANSFER_TO -> ActivityFilterByUserTypeDto.TRANSFER_TO
         }
     }
 
-    fun asItemActivityType(source: UnionActivityTypeDto): ActivityFilterByItemDto.Types {
+    fun asItemActivityType(source: UnionActivityTypeDto): ActivityFilterByItemTypeDto {
         return when (source) {
-            UnionActivityTypeDto.BID -> ActivityFilterByItemDto.Types.BID
-            UnionActivityTypeDto.BURN -> ActivityFilterByItemDto.Types.BURN
-            UnionActivityTypeDto.LIST -> ActivityFilterByItemDto.Types.LIST
-            UnionActivityTypeDto.MINT -> ActivityFilterByItemDto.Types.MINT
-            UnionActivityTypeDto.SELL -> ActivityFilterByItemDto.Types.MATCH
-            UnionActivityTypeDto.TRANSFER -> ActivityFilterByItemDto.Types.TRANSFER
+            UnionActivityTypeDto.BID -> ActivityFilterByItemTypeDto.BID
+            UnionActivityTypeDto.BURN -> ActivityFilterByItemTypeDto.BURN
+            UnionActivityTypeDto.LIST -> ActivityFilterByItemTypeDto.LIST
+            UnionActivityTypeDto.MINT -> ActivityFilterByItemTypeDto.MINT
+            UnionActivityTypeDto.SELL -> ActivityFilterByItemTypeDto.MATCH
+            UnionActivityTypeDto.TRANSFER -> ActivityFilterByItemTypeDto.TRANSFER
         }
     }
 
-    fun asCollectionActivityType(source: UnionActivityTypeDto): ActivityFilterByCollectionDto.Types {
+    fun asCollectionActivityType(source: UnionActivityTypeDto): ActivityFilterByCollectionTypeDto {
         return when (source) {
-            UnionActivityTypeDto.BID -> ActivityFilterByCollectionDto.Types.BID
-            UnionActivityTypeDto.BURN -> ActivityFilterByCollectionDto.Types.BURN
-            UnionActivityTypeDto.LIST -> ActivityFilterByCollectionDto.Types.LIST
-            UnionActivityTypeDto.MINT -> ActivityFilterByCollectionDto.Types.MINT
-            UnionActivityTypeDto.SELL -> ActivityFilterByCollectionDto.Types.MATCH
-            UnionActivityTypeDto.TRANSFER -> ActivityFilterByCollectionDto.Types.TRANSFER
+            UnionActivityTypeDto.BID -> ActivityFilterByCollectionTypeDto.BID
+            UnionActivityTypeDto.BURN -> ActivityFilterByCollectionTypeDto.BURN
+            UnionActivityTypeDto.LIST -> ActivityFilterByCollectionTypeDto.LIST
+            UnionActivityTypeDto.MINT -> ActivityFilterByCollectionTypeDto.MINT
+            UnionActivityTypeDto.SELL -> ActivityFilterByCollectionTypeDto.MATCH
+            UnionActivityTypeDto.TRANSFER -> ActivityFilterByCollectionTypeDto.TRANSFER
         }
     }
 
-    fun asGlobalActivityType(source: UnionActivityTypeDto): ActivityFilterAllDto.Types {
+    fun asGlobalActivityType(source: UnionActivityTypeDto): ActivityFilterAllTypeDto {
         return when (source) {
-            UnionActivityTypeDto.BID -> ActivityFilterAllDto.Types.BID
-            UnionActivityTypeDto.BURN -> ActivityFilterAllDto.Types.BURN
-            UnionActivityTypeDto.LIST -> ActivityFilterAllDto.Types.LIST
-            UnionActivityTypeDto.MINT -> ActivityFilterAllDto.Types.MINT
-            UnionActivityTypeDto.SELL -> ActivityFilterAllDto.Types.SELL
-            UnionActivityTypeDto.TRANSFER -> ActivityFilterAllDto.Types.TRANSFER
+            UnionActivityTypeDto.BID -> ActivityFilterAllTypeDto.BID
+            UnionActivityTypeDto.BURN -> ActivityFilterAllTypeDto.BURN
+            UnionActivityTypeDto.LIST -> ActivityFilterAllTypeDto.LIST
+            UnionActivityTypeDto.MINT -> ActivityFilterAllTypeDto.MINT
+            UnionActivityTypeDto.SELL -> ActivityFilterAllTypeDto.SELL
+            UnionActivityTypeDto.TRANSFER -> ActivityFilterAllTypeDto.TRANSFER
         }
     }
 

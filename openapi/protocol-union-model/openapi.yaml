@@ -19,33 +19,6 @@ components:
         - POLYGON
         - FLOW
 
-    ApiError:
-      type: object
-      properties:
-        status:
-          type: integer
-          format: int32
-        code:
-          type: string
-          enum:
-            - UNKNOWN
-            - BAD_REQUEST
-            - VALIDATION
-            - ITEM_NOT_FOUND
-            - LAZY_ITEM_NOT_FOUND
-            - TOKEN_NOT_FOUND
-            - TOKEN_URI_NOT_FOUND
-            - TOKEN_PROPERTIES_EXTRACT
-            - OWNERSHIP_NOT_FOUND
-            - COLLECTION_NOT_FOUND
-            - INCORRECT_LAZY_NFT
-        message:
-          type: string
-      required:
-        - code
-        - message
-        - status
-
     #################### Meta - Union ####################
 
     UnionMeta:
@@ -402,6 +375,51 @@ components:
         - blockNumber
         - logIndex
 
+    #################### Union - Errors ####################
+
+    UnionApiErrorEntityNotFound:
+      required:
+        - code
+        - message
+      type: object
+      properties:
+        code:
+          type: string
+          enum:
+            - NOT_FOUND
+          default: NOT_FOUND
+        message:
+          type: string
+
+    UnionApiErrorBadRequest:
+      required:
+        - code
+        - message
+      type: object
+      properties:
+        code:
+          type: string
+          enum:
+            - BAD_REQUEST
+            - VALIDATION
+          default: BAD_REQUEST
+        message:
+          type: string
+
+    UnionApiErrorServerError:
+      required:
+        - code
+        - message
+      type: object
+      properties:
+        code:
+          type: string
+          enum:
+            - UNKNOWN
+          default: UNKNOWN
+        message:
+          type: string
+
     #################### Item - Eth ####################
 
     EthItemId:
@@ -684,15 +702,7 @@ components:
 
     EthOrderId:
       type: object
-      properties:
-        value:
-          type: string
-          example: "${blockchain}:${id}"
-        blockchain:
-          $ref: "#/components/schemas/EthBlockchain"
-      required:
-        - blockchain
-        - value
+      example: "${blockchain}:${id}"
 
     EthOrder:
       type: object
@@ -1148,16 +1158,8 @@ components:
     #################### Activity - Eth ####################
 
     EthActivityId:
-      type: object
-      properties:
-        value:
-          type: string
-          example: "${blockchain}:${id}"
-        blockchain:
-          $ref: "#/components/schemas/EthBlockchain"
-      required:
-        - blockchain
-        - value
+      type: string
+      example: "${blockchain}:${id}"
 
     EthActivity:
       type: object
@@ -1697,15 +1699,7 @@ components:
 
     FlowOrderId:
       type: object
-      properties:
-        value:
-          type: string
-          example: "${blockchain}:${id}"
-        blockchain:
-          $ref: "#/components/schemas/FlowBlockchain"
-      required:
-        - blockchain
-        - value
+      example: "${blockchain}:${id}"
 
     FlowOrder:
       properties:
@@ -1839,15 +1833,7 @@ components:
 
     FlowActivityId:
       type: object
-      properties:
-        value:
-          type: string
-          example: "${blockchain}:${id}"
-        blockchain:
-          $ref: "#/components/schemas/FlowBlockchain"
-      required:
-        - blockchain
-        - value
+      example: "${blockchain}:${id}"
 
     FlowActivity:
       type: object

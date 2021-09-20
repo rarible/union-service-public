@@ -14,7 +14,7 @@ object FlowUnionOrderConverter {
             taker = order.taker?.let { FlowAddressConverter.convert(it, blockchain) },
             make = FlowConverter.convert(order.make, blockchain),
             take = FlowConverter.convert(order.take!!, blockchain), //TODO: Why take is null?
-            fill = order.fill,
+            fill = order.fill.toBigInteger(), // TODO should be BigInt
             startedAt = null, //TODO: No needed field
             endedAt = null, //TODO: No needed field
             makeStock = BigInteger.ZERO, // TODO: No needed field
