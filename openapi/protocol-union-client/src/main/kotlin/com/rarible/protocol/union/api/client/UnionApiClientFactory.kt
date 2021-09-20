@@ -27,6 +27,10 @@ open class UnionApiClientFactory(
         return OrderControllerApi(createApiClient())
     }
 
+    fun createSignatureApiClient(): SignatureControllerApi {
+        return SignatureControllerApi(createApiClient())
+    }
+
     fun createActivityApiClient(): ActivityControllerApi {
         return ActivityControllerApi(createApiClient())
     }

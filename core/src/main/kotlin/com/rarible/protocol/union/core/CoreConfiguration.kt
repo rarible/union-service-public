@@ -7,6 +7,7 @@ import com.rarible.protocol.nft.api.client.NftItemControllerApi
 import com.rarible.protocol.nft.api.client.NftOwnershipControllerApi
 import com.rarible.protocol.order.api.client.OrderActivityControllerApi
 import com.rarible.protocol.order.api.client.OrderControllerApi
+import com.rarible.protocol.order.api.client.OrderSignatureControllerApi
 import com.rarible.protocol.union.core.ethereum.service.*
 import com.rarible.protocol.union.core.flow.service.*
 import com.rarible.protocol.union.core.service.*
@@ -43,6 +44,11 @@ class CoreConfiguration {
     }
 
     @Bean
+    fun ethereumSignatureService(@Qualifier("ethereum.signature.api") ethereumSignatureApi: OrderSignatureControllerApi): SignatureService {
+        return EthereumSignatureService(EthBlockchainDto.ETHEREUM, ethereumSignatureApi)
+    }
+
+    @Bean
     fun ethereumActivityService(
         @Qualifier("ethereum.activity.api.item") ethereumActivityItemApi: NftActivityControllerApi,
         @Qualifier("ethereum.activity.api.order") ethereumActivityOrderApi: OrderActivityControllerApi
@@ -72,6 +78,11 @@ class CoreConfiguration {
     }
 
     @Bean
+    fun polygonSignatureService(@Qualifier("polygon.signature.api") ethereumSignatureApi: OrderSignatureControllerApi): SignatureService {
+        return EthereumSignatureService(EthBlockchainDto.POLYGON, ethereumSignatureApi)
+    }
+
+    @Bean
     fun polygonActivityService(
         @Qualifier("polygon.activity.api.item") polygonActivityItemApi: NftActivityControllerApi,
         @Qualifier("polygon.activity.api.order") polygonActivityOrderApi: OrderActivityControllerApi
@@ -98,6 +109,11 @@ class CoreConfiguration {
     @Bean
     fun flowOrderService(flowOrderApi: FlowOrderControllerApi): OrderService {
         return FlowOrderService(FlowBlockchainDto.FLOW, flowOrderApi)
+    }
+
+    @Bean
+    fun flowSignatureService(flowOrderApi: FlowOrderControllerApi): SignatureService {
+        return FlowSignatureService(FlowBlockchainDto.FLOW) // TODO implement it later
     }
 
     @Bean

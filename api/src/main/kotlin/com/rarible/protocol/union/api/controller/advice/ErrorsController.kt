@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.server.ServerWebInputException
 
-@RestControllerAdvice(basePackages = ["com.rarible.protocol.nft.api.controller"])
+@RestControllerAdvice(basePackages = ["com.rarible.protocol.union.api.controller"])
 class ErrorsController {
     private val logger = LoggerFactory.getLogger(this::class.java)
 

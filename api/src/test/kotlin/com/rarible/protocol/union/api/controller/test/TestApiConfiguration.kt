@@ -52,6 +52,11 @@ class TestApiConfiguration {
     }
 
     @Bean
+    fun testUnionSignatureControllerApi(unionApiClientFactory: UnionApiClientFactory): SignatureControllerApi {
+        return unionApiClientFactory.createSignatureApiClient()
+    }
+
+    @Bean
     fun testUnionCollectionControllerApi(unionApiClientFactory: UnionApiClientFactory): CollectionControllerApi {
         return unionApiClientFactory.createCollectionApiClient()
     }
@@ -84,6 +89,11 @@ class TestApiConfiguration {
 
     @Bean
     @Primary
+    @Qualifier("ethereum.signature.api")
+    fun testEthereumSignatureApi(): com.rarible.protocol.order.api.client.OrderSignatureControllerApi = mockk()
+
+    @Bean
+    @Primary
     @Qualifier("ethereum.activity.api.item")
     fun testEthereumActivityItemApi(factory: NftIndexerApiClientFactory): NftActivityControllerApi = mockk()
 
@@ -112,6 +122,11 @@ class TestApiConfiguration {
     @Primary
     @Qualifier("polygon.order.api")
     fun testPolygonOrderApi(): com.rarible.protocol.order.api.client.OrderControllerApi = mockk()
+
+    @Bean
+    @Primary
+    @Qualifier("polygon.signature.api")
+    fun testPolygonSignatureApi(): com.rarible.protocol.order.api.client.OrderSignatureControllerApi = mockk()
 
     @Bean
     @Primary

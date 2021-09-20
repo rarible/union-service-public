@@ -19,6 +19,22 @@ components:
         - POLYGON
         - FLOW
 
+    #################### Sign - Union ####################
+
+    UnionSignatureValidationForm:
+      required:
+        - signer
+        - message
+        - signature
+      type: object
+      properties:
+        signer:
+          type: string
+        message:
+          type: string
+        signature:
+          type: string
+
     #################### Meta - Union ####################
 
     UnionMeta:

@@ -4,6 +4,7 @@ import com.rarible.protocol.nft.api.client.*
 import com.rarible.protocol.order.api.client.OrderActivityControllerApi
 import com.rarible.protocol.order.api.client.OrderControllerApi
 import com.rarible.protocol.order.api.client.OrderIndexerApiClientFactory
+import com.rarible.protocol.order.api.client.OrderSignatureControllerApi
 import com.rarible.protocol.union.dto.BlockchainDto
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Bean
@@ -37,6 +38,11 @@ class EthereumConfiguration {
         factory.createOrderApiClient(ethereum)
 
     @Bean
+    @Qualifier("ethereum.signature.api")
+    fun ethereumSignatureApi(factory: OrderIndexerApiClientFactory): OrderSignatureControllerApi =
+        factory.createOrderSignatureApiClient(ethereum)
+
+    @Bean
     @Qualifier("ethereum.activity.api.item")
     fun ethereumActivityItemApi(factory: NftIndexerApiClientFactory): NftActivityControllerApi =
         factory.createNftActivityApiClient(ethereum)
@@ -66,6 +72,11 @@ class EthereumConfiguration {
     @Qualifier("polygon.order.api")
     fun polygonOrderApi(factory: OrderIndexerApiClientFactory): OrderControllerApi =
         factory.createOrderApiClient(polygon)
+
+    @Bean
+    @Qualifier("polygon.signature.api")
+    fun polygonSignatureApi(factory: OrderIndexerApiClientFactory): OrderSignatureControllerApi =
+        factory.createOrderSignatureApiClient(polygon)
 
     @Bean
     @Qualifier("polygon.activity.api.item")
