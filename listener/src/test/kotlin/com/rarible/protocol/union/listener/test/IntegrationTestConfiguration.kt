@@ -111,7 +111,7 @@ class IntegrationTestConfiguration {
             clientId = "test.union.ethereum.order",
             valueSerializerClass = UnionKafkaJsonSerializer::class.java,
             valueClass = OrderEventDto::class.java,
-            defaultTopic = OrderIndexerTopicProvider.getTopic(applicationEnvironmentInfo().name, "ethereum"),
+            defaultTopic = OrderIndexerTopicProvider.getUpdateTopic(applicationEnvironmentInfo().name, "ethereum"),
             bootstrapServers = kafkaContainer.kafkaBoostrapServers()
         )
     }

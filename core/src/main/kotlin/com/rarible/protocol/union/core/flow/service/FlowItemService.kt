@@ -18,16 +18,14 @@ class FlowItemService(
         size: Int,
         showDeleted: Boolean?,
         lastUpdatedFrom: Long?, //TODO not supported by Flow
-        lastUpdatedTo: Long?, //TODO not supported by Flow
-        includeMeta: Boolean? //TODO not supported by Flow
+        lastUpdatedTo: Long? //TODO not supported by Flow
     ): UnionItemsDto {
         val items = flowNftItemControllerApi.getNftAllItems(continuation, size, showDeleted).awaitFirst()
         return FlowUnionItemConverter.convert(items, blockchain)
     }
 
     override suspend fun getItemById(
-        itemId: String,
-        includeMeta: Boolean? //TODO not supported by Flow
+        itemId: String
     ): UnionItemDto {
         val item = flowNftItemControllerApi.getNftItemById(itemId).awaitFirst()
         return FlowUnionItemConverter.convert(item, blockchain)
@@ -36,8 +34,7 @@ class FlowItemService(
     override suspend fun getItemsByCollection(
         collection: String,
         continuation: String?,
-        size: Int,
-        includeMeta: Boolean? //TODO not supported by Flow
+        size: Int
     ): UnionItemsDto {
         val items = flowNftItemControllerApi.getNftItemsByCollection(collection, continuation, size).awaitFirst()
         return FlowUnionItemConverter.convert(items, blockchain)
@@ -46,8 +43,7 @@ class FlowItemService(
     override suspend fun getItemsByCreator(
         creator: String,
         continuation: String?,
-        size: Int,
-        includeMeta: Boolean? //TODO not supported by Flow
+        size: Int
     ): UnionItemsDto {
         val items = flowNftItemControllerApi.getNftItemsByCreator(creator, continuation, size).awaitFirst()
         return FlowUnionItemConverter.convert(items, blockchain)
@@ -56,8 +52,7 @@ class FlowItemService(
     override suspend fun getItemsByOwner(
         owner: String,
         continuation: String?,
-        size: Int,
-        includeMeta: Boolean? //TODO not supported by Flow
+        size: Int
     ): UnionItemsDto {
         val items = flowNftItemControllerApi.getNftItemsByOwner(owner, continuation, size).awaitFirst()
         return FlowUnionItemConverter.convert(items, blockchain)

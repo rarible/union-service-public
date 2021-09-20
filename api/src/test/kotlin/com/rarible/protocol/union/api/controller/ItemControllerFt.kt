@@ -27,7 +27,6 @@ class ItemControllerFt : AbstractIntegrationTest() {
 
     private val continuation: String? = null
     private val size = PageSize.ITEM.default
-    private val meta: Boolean? = null
 
 
     @Autowired
@@ -39,9 +38,9 @@ class ItemControllerFt : AbstractIntegrationTest() {
         val itemId = EthItemIdParser.parseFull(itemIdFull)
         val item = randomEthNftItemDto(itemId)
 
-        coEvery { testEthereumItemApi.getNftItemById(itemId.value, true) } returns item.toMono()
+        coEvery { testEthereumItemApi.getNftItemById(itemId.value) } returns item.toMono()
 
-        val unionItem = itemControllerClient.getItemById(itemIdFull, true).awaitFirst()
+        val unionItem = itemControllerClient.getItemById(itemIdFull).awaitFirst()
         val ethItem = unionItem as EthItemDto
 
         assertThat(ethItem.id.value).isEqualTo(itemId.value)
@@ -54,9 +53,9 @@ class ItemControllerFt : AbstractIntegrationTest() {
         val itemId = EthItemIdParser.parseFull(itemIdFull)
         val item = randomEthNftItemDto(itemId)
 
-        coEvery { testPolygonItemApi.getNftItemById(itemId.value, true) } returns item.toMono()
+        coEvery { testPolygonItemApi.getNftItemById(itemId.value) } returns item.toMono()
 
-        val unionItem = itemControllerClient.getItemById(itemIdFull, true).awaitFirst()
+        val unionItem = itemControllerClient.getItemById(itemIdFull).awaitFirst()
         val polyItem = unionItem as EthItemDto
 
         assertThat(polyItem.id.value).isEqualTo(itemId.value)
@@ -71,7 +70,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
 
         coEvery { testFlowItemApi.getNftItemById(itemId.value) } returns item.toMono()
 
-        val unionItem = itemControllerClient.getItemById(itemIdFull, false).awaitFirst()
+        val unionItem = itemControllerClient.getItemById(itemIdFull).awaitFirst()
         val flowItem = unionItem as FlowItemDto
 
         assertThat(flowItem.id.value).isEqualTo(itemId.value)
@@ -84,11 +83,11 @@ class ItemControllerFt : AbstractIntegrationTest() {
         val item = randomEthNftItemDto()
 
         coEvery {
-            testEthereumItemApi.getNftItemsByCollection(ethCollectionId.value, continuation, size, meta)
+            testEthereumItemApi.getNftItemsByCollection(ethCollectionId.value, continuation, size)
         } returns NftItemsDto(1, null, listOf(item)).toMono()
 
         val unionItems = itemControllerClient.getItemsByCollection(
-            ethCollectionId.fullId(), continuation, size, meta
+            ethCollectionId.fullId(), continuation, size
         ).awaitFirst()
 
         val ethItem = unionItems.items[0] as EthItemDto
@@ -101,11 +100,11 @@ class ItemControllerFt : AbstractIntegrationTest() {
         val item = randomEthNftItemDto()
 
         coEvery {
-            testPolygonItemApi.getNftItemsByCollection(polyCollectionId.value, continuation, size, meta)
+            testPolygonItemApi.getNftItemsByCollection(polyCollectionId.value, continuation, size)
         } returns NftItemsDto(1, null, listOf(item)).toMono()
 
         val unionItems = itemControllerClient.getItemsByCollection(
-            polyCollectionId.fullId(), continuation, size, meta
+            polyCollectionId.fullId(), continuation, size
         ).awaitFirst()
 
         val polyItem = unionItems.items[0] as EthItemDto
@@ -122,7 +121,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
         } returns FlowNftItemsDto(1, null, listOf(item)).toMono()
 
         val unionItems = itemControllerClient.getItemsByCollection(
-            flowCollectionId.fullId(), continuation, size, meta
+            flowCollectionId.fullId(), continuation, size
         ).awaitFirst()
 
         val flowItem = unionItems.items[0] as FlowItemDto
@@ -135,11 +134,11 @@ class ItemControllerFt : AbstractIntegrationTest() {
         val item = randomEthNftItemDto()
 
         coEvery {
-            testEthereumItemApi.getNftItemsByOwner(ethOwnerId.value, continuation, size, meta)
+            testEthereumItemApi.getNftItemsByOwner(ethOwnerId.value, continuation, size)
         } returns NftItemsDto(1, null, listOf(item)).toMono()
 
         val unionItems = itemControllerClient.getItemsByOwner(
-            ethOwnerId.fullId(), continuation, size, meta
+            ethOwnerId.fullId(), continuation, size
         ).awaitFirst()
 
         val ethItem = unionItems.items[0] as EthItemDto
@@ -152,11 +151,11 @@ class ItemControllerFt : AbstractIntegrationTest() {
         val item = randomEthNftItemDto()
 
         coEvery {
-            testPolygonItemApi.getNftItemsByOwner(polyOwnerId.value, continuation, size, meta)
+            testPolygonItemApi.getNftItemsByOwner(polyOwnerId.value, continuation, size)
         } returns NftItemsDto(1, null, listOf(item)).toMono()
 
         val unionItems = itemControllerClient.getItemsByOwner(
-            polyOwnerId.fullId(), continuation, size, meta
+            polyOwnerId.fullId(), continuation, size
         ).awaitFirst()
 
         val polyItem = unionItems.items[0] as EthItemDto
@@ -173,7 +172,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
         } returns FlowNftItemsDto(1, null, listOf(item)).toMono()
 
         val unionItems = itemControllerClient.getItemsByOwner(
-            flowOwnerId.fullId(), continuation, size, meta
+            flowOwnerId.fullId(), continuation, size
         ).awaitFirst()
 
         val flowItem = unionItems.items[0] as FlowItemDto
@@ -186,11 +185,11 @@ class ItemControllerFt : AbstractIntegrationTest() {
         val item = randomEthNftItemDto()
 
         coEvery {
-            testEthereumItemApi.getNftItemsByCreator(ethCreatorId.value, continuation, size, meta)
+            testEthereumItemApi.getNftItemsByCreator(ethCreatorId.value, continuation, size)
         } returns NftItemsDto(1, null, listOf(item)).toMono()
 
         val unionItems = itemControllerClient.getItemsByCreator(
-            ethCreatorId.fullId(), continuation, size, meta
+            ethCreatorId.fullId(), continuation, size
         ).awaitFirst()
 
         val ethItem = unionItems.items[0] as EthItemDto
@@ -203,11 +202,11 @@ class ItemControllerFt : AbstractIntegrationTest() {
         val item = randomEthNftItemDto()
 
         coEvery {
-            testPolygonItemApi.getNftItemsByCreator(polyCreatorId.value, continuation, size, meta)
+            testPolygonItemApi.getNftItemsByCreator(polyCreatorId.value, continuation, size)
         } returns NftItemsDto(1, null, listOf(item)).toMono()
 
         val unionItems = itemControllerClient.getItemsByCreator(
-            polyCreatorId.fullId(), continuation, size, meta
+            polyCreatorId.fullId(), continuation, size
         ).awaitFirst()
 
         val polyItem = unionItems.items[0] as EthItemDto
@@ -224,7 +223,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
         } returns FlowNftItemsDto(1, null, listOf(item)).toMono()
 
         val unionItems = itemControllerClient.getItemsByCreator(
-            flowCreatorId.fullId(), continuation, size, meta
+            flowCreatorId.fullId(), continuation, size
         ).awaitFirst()
 
         val flowItem = unionItems.items[0] as FlowItemDto
@@ -240,7 +239,6 @@ class ItemControllerFt : AbstractIntegrationTest() {
         val size = 3
         val lastUpdatedFrom = nowMillis().minusSeconds(120).toEpochMilli()
         val lastUpdatedTo = nowMillis().plusSeconds(120).toEpochMilli()
-        val includeMeta = true
 
         val flowItems = listOf(randomFlowNftItemDto(), randomFlowNftItemDto())
         val ethItems = listOf(randomEthNftItemDto(), randomEthNftItemDto())
@@ -255,13 +253,12 @@ class ItemControllerFt : AbstractIntegrationTest() {
                 size,
                 showDeleted,
                 lastUpdatedFrom,
-                lastUpdatedTo,
-                includeMeta
+                lastUpdatedTo
             )
         } returns NftItemsDto(2, null, ethItems).toMono()
 
         val unionItems = itemControllerClient.getAllItems(
-            blockchains, continuation, size, showDeleted, lastUpdatedFrom, lastUpdatedTo, includeMeta
+            blockchains, continuation, size, showDeleted, lastUpdatedFrom, lastUpdatedTo
         ).awaitFirst()
 
         assertThat(unionItems.items).hasSize(3)

@@ -10,34 +10,29 @@ interface ItemService : BlockchainService {
         size: Int,
         showDeleted: Boolean?,
         lastUpdatedFrom: Long?,
-        lastUpdatedTo: Long?,
-        includeMeta: Boolean?
+        lastUpdatedTo: Long?
     ): UnionItemsDto
 
     suspend fun getItemById(
-        itemId: String,
-        includeMeta: Boolean?
+        itemId: String
     ): UnionItemDto
 
     suspend fun getItemsByCollection(
         collection: String,
         continuation: String?,
-        size: Int,
-        includeMeta: Boolean?
+        size: Int
     ): UnionItemsDto
 
     suspend fun getItemsByCreator(
         creator: String,
         continuation: String?,
-        size: Int,
-        includeMeta: Boolean?
+        size: Int
     ): UnionItemsDto
 
     suspend fun getItemsByOwner(
         owner: String,
         continuation: String?,
-        size: Int,
-        includeMeta: Boolean?
+        size: Int
     ): UnionItemsDto
 
 }

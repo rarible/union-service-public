@@ -22,12 +22,11 @@ class ItemController(
         size: Int?,
         showDeleted: Boolean?,
         lastUpdatedFrom: Long?,
-        lastUpdatedTo: Long?,
-        includeMeta: Boolean?
+        lastUpdatedTo: Long?
     ): ResponseEntity<UnionItemsDto> {
         val safeSize = PageSize.ITEM.limit(size)
         val blockchainPages = router.executeForAll(blockchains) {
-            it.getAllItems(continuation, safeSize, showDeleted, lastUpdatedFrom, lastUpdatedTo, includeMeta)
+            it.getAllItems(continuation, safeSize, showDeleted, lastUpdatedFrom, lastUpdatedTo)
         }
 
         val total = blockchainPages.map { it.total }.sum()
@@ -42,48 +41,44 @@ class ItemController(
     }
 
     override suspend fun getItemById(
-        itemId: String,
-        includeMeta: Boolean?
+        itemId: String
     ): ResponseEntity<UnionItemDto> {
         val (blockchain, shortItemId) = IdParser.parse(itemId)
-        val result = router.getService(blockchain).getItemById(shortItemId, includeMeta)
+        val result = router.getService(blockchain).getItemById(shortItemId)
         return ResponseEntity.ok(result)
     }
 
     override suspend fun getItemsByCollection(
         collection: String,
         continuation: String?,
-        size: Int?,
-        includeMeta: Boolean?
+        size: Int?
     ): ResponseEntity<UnionItemsDto> {
         val safeSize = PageSize.ITEM.limit(size)
         val (blockchain, shortCollection) = IdParser.parse(collection)
         val result = router.getService(blockchain)
-            .getItemsByCollection(shortCollection, continuation, safeSize, includeMeta)
+            .getItemsByCollection(shortCollection, continuation, safeSize)
         return ResponseEntity.ok(result)
     }
 
     override suspend fun getItemsByCreator(
         creator: String,
         continuation: String?,
-        size: Int?,
-        includeMeta: Boolean?
+        size: Int?
     ): ResponseEntity<UnionItemsDto> {
         val safeSize = PageSize.ITEM.limit(size)
         val (blockchain, shortCreator) = IdParser.parse(creator)
-        val result = router.getService(blockchain).getItemsByCreator(shortCreator, continuation, safeSize, includeMeta)
+        val result = router.getService(blockchain).getItemsByCreator(shortCreator, continuation, safeSize)
         return ResponseEntity.ok(result)
     }
 
     override suspend fun getItemsByOwner(
         owner: String,
         continuation: String?,
-        size: Int?,
-        includeMeta: Boolean?
+        size: Int?
     ): ResponseEntity<UnionItemsDto> {
         val safeSize = PageSize.ITEM.limit(size)
         val (blockchain, shortOwner) = IdParser.parse(owner)
-        val result = router.getService(blockchain).getItemsByOwner(shortOwner, continuation, safeSize, includeMeta)
+        val result = router.getService(blockchain).getItemsByOwner(shortOwner, continuation, safeSize)
         return ResponseEntity.ok(result)
     }
 }

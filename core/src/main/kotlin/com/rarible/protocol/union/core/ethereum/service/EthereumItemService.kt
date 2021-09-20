@@ -18,55 +18,49 @@ class EthereumItemService(
         size: Int,
         showDeleted: Boolean?,
         lastUpdatedFrom: Long?,
-        lastUpdatedTo: Long?,
-        includeMeta: Boolean?
+        lastUpdatedTo: Long?
     ): UnionItemsDto {
         val items = itemControllerApi.getNftAllItems(
             continuation,
             size,
             showDeleted,
             lastUpdatedFrom,
-            lastUpdatedTo,
-            includeMeta
+            lastUpdatedTo
         ).awaitFirst()
         return EthUnionItemConverter.convert(items, blockchain)
     }
 
     override suspend fun getItemById(
-        itemId: String,
-        includeMeta: Boolean?
+        itemId: String
     ): UnionItemDto {
-        val item = itemControllerApi.getNftItemById(itemId, includeMeta).awaitFirst()
+        val item = itemControllerApi.getNftItemById(itemId).awaitFirst()
         return EthUnionItemConverter.convert(item, blockchain)
     }
 
     override suspend fun getItemsByCollection(
         collection: String,
         continuation: String?,
-        size: Int,
-        includeMeta: Boolean?
+        size: Int
     ): UnionItemsDto {
-        val items = itemControllerApi.getNftItemsByCollection(collection, continuation, size, includeMeta).awaitFirst()
+        val items = itemControllerApi.getNftItemsByCollection(collection, continuation, size).awaitFirst()
         return EthUnionItemConverter.convert(items, blockchain)
     }
 
     override suspend fun getItemsByCreator(
         creator: String,
         continuation: String?,
-        size: Int,
-        includeMeta: Boolean?
+        size: Int
     ): UnionItemsDto {
-        val items = itemControllerApi.getNftItemsByCreator(creator, continuation, size, includeMeta).awaitFirst()
+        val items = itemControllerApi.getNftItemsByCreator(creator, continuation, size).awaitFirst()
         return EthUnionItemConverter.convert(items, blockchain)
     }
 
     override suspend fun getItemsByOwner(
         owner: String,
         continuation: String?,
-        size: Int,
-        includeMeta: Boolean?
+        size: Int
     ): UnionItemsDto {
-        val items = itemControllerApi.getNftItemsByOwner(owner, continuation, size, includeMeta).awaitFirst()
+        val items = itemControllerApi.getNftItemsByOwner(owner, continuation, size).awaitFirst()
         return EthUnionItemConverter.convert(items, blockchain)
     }
 
