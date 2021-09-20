@@ -29,18 +29,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/UnionItem"
-        "404":
-          description: "Not Found"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiError"
-        "500":
-          description: "Internal Server Error"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiError"
+        '404':
+          $ref: "#/components/responses/EntityNotFound"
+        '400':
+          $ref: "#/components/responses/BadRequest"
+        '500':
+          $ref: "#/components/responses/ServerError"
 
   /v0.1/items/byOwner:
     get:
@@ -75,12 +69,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/UnionItems"
-        "500":
-          description: "Internal Server Error"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiError"
+        '400':
+          $ref: "#/components/responses/BadRequest"
+        '500':
+          $ref: "#/components/responses/ServerError"
 
   /v0.1/items/byCreator:
     get:
@@ -115,12 +107,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/UnionItems"
-        "500":
-          description: "Internal Server Error"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiError"
+        '400':
+          $ref: "#/components/responses/BadRequest"
+        '500':
+          $ref: "#/components/responses/ServerError"
 
   /v0.1/items/byCollection:
     get:
@@ -155,12 +145,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/UnionItems"
-        "500":
-          description: "Internal Server Error"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiError"
+        '400':
+          $ref: "#/components/responses/BadRequest"
+        '500':
+          $ref: "#/components/responses/ServerError"
 
   /v0.1/items/all:
     get:
@@ -214,12 +202,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/UnionItems"
-        "500":
-          description: "Internal Server Error"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiError"
+        '400':
+          $ref: "#/components/responses/BadRequest"
+        '500':
+          $ref: "#/components/responses/ServerError"
 
   #
   # NFT Ownership Controller
@@ -243,12 +229,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/UnionOwnership"
-        "500":
-          description: "Internal Server Error"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiError"
+        '404':
+          $ref: "#/components/responses/EntityNotFound"
+        '400':
+          $ref: "#/components/responses/BadRequest"
+        '500':
+          $ref: "#/components/responses/ServerError"
 
   /v0.1/ownerships/byItem:
     get:
@@ -283,12 +269,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/UnionOwnerships"
-        "500":
-          description: "Internal Server Error"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiError"
+        '400':
+          $ref: "#/components/responses/BadRequest"
+        '500':
+          $ref: "#/components/responses/ServerError"
 
   /v0.1/ownerships/all:
     get:
@@ -320,12 +304,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/UnionOwnerships"
-        "500":
-          description: "Internal Server Error"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiError"
+        '400':
+          $ref: "#/components/responses/BadRequest"
+        '500':
+          $ref: "#/components/responses/ServerError"
 
   #
   # NFT Order Controller
@@ -349,12 +331,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/UnionOrder"
-        "500":
-          description: "Internal Server Error"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiError"
+        '404':
+          $ref: "#/components/responses/EntityNotFound"
+        '400':
+          $ref: "#/components/responses/BadRequest"
+        '500':
+          $ref: "#/components/responses/ServerError"
 
   /v0.1/orders/{id}/updateMakeStock:
     get:
@@ -374,12 +356,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/UnionOrder"
-        "500":
-          description: "Internal Server Error"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiError"
+        '404':
+          $ref: "#/components/responses/EntityNotFound"
+        '400':
+          $ref: "#/components/responses/BadRequest"
+        '500':
+          $ref: "#/components/responses/ServerError"
 
   /v0.1/orders/all:
     get:
@@ -421,12 +403,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/UnionOrders"
-        "500":
-          description: "Internal Server Error"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiError"
+        '400':
+          $ref: "#/components/responses/BadRequest"
+        '500':
+          $ref: "#/components/responses/ServerError"
 
   /v0.1/orders/sell/byMaker:
     get:
@@ -467,12 +447,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/UnionOrders"
-        "500":
-          description: "Internal Server Error"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiError"
+        '400':
+          $ref: "#/components/responses/BadRequest"
+        '500':
+          $ref: "#/components/responses/ServerError"
 
   /v0.1/orders/sell/byItem:
     get:
@@ -523,12 +501,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/UnionOrders"
-        "500":
-          description: "Internal Server Error"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiError"
+        '400':
+          $ref: "#/components/responses/BadRequest"
+        '500':
+          $ref: "#/components/responses/ServerError"
 
   /v0.1/orders/sell/byCollection:
     get:
@@ -570,12 +546,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/UnionOrders"
-        "500":
-          description: "Internal Server Error"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiError"
+        '400':
+          $ref: "#/components/responses/BadRequest"
+        '500':
+          $ref: "#/components/responses/ServerError"
 
   /v0.1/orders/sell:
     get:
@@ -619,12 +593,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/UnionOrders"
-        "500":
-          description: "Internal Server Error"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiError"
+        '400':
+          $ref: "#/components/responses/BadRequest"
+        '500':
+          $ref: "#/components/responses/ServerError"
 
   /v0.1/orders/bids/byMaker:
     get:
@@ -666,12 +638,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/UnionOrders"
-        "500":
-          description: "Internal Server Error"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiError"
+        '400':
+          $ref: "#/components/responses/BadRequest"
+        '500':
+          $ref: "#/components/responses/ServerError"
 
   /v0.1/orders/bids/byItem:
     get:
@@ -721,12 +691,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/UnionOrders"
-        "500":
-          description: "Internal Server Error"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiError"
+        '400':
+          $ref: "#/components/responses/BadRequest"
+        '500':
+          $ref: "#/components/responses/ServerError"
 
   #
   # NFT Activity Controller
@@ -774,18 +742,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/UnionActivities"
-        "400":
-          description: "Bad request"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiError"
-        "500":
-          description: "Internal Server Error"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiError"
+        '400':
+          $ref: "#/components/responses/BadRequest"
+        '500':
+          $ref: "#/components/responses/ServerError"
 
   /v0.1/activities/byItem:
     get:
@@ -832,18 +792,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/UnionActivities"
-        "400":
-          description: "Bad request"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiError"
-        "500":
-          description: "Internal Server Error"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiError"
+        '400':
+          $ref: "#/components/responses/BadRequest"
+        '500':
+          $ref: "#/components/responses/ServerError"
 
   /v0.1/activities/byCollection:
     get:
@@ -885,18 +837,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/UnionActivities"
-        "400":
-          description: "Bad request"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiError"
-        "500":
-          description: "Internal Server Error"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiError"
+        '400':
+          $ref: "#/components/responses/BadRequest"
+        '500':
+          $ref: "#/components/responses/ServerError"
 
   /v0.1/activities/all:
     get:
@@ -941,18 +885,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/UnionActivities"
-        "400":
-          description: "Bad request"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiError"
-        "500":
-          description: "Internal Server Error"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiError"
+        '400':
+          $ref: "#/components/responses/BadRequest"
+        '500':
+          $ref: "#/components/responses/ServerError"
 
   #
   # NFT Collection Controller
@@ -977,12 +913,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/UnionCollection"
-        "500":
-          description: "Internal Server Error"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiError"
+        '404':
+          $ref: "#/components/responses/EntityNotFound"
+        '400':
+          $ref: "#/components/responses/BadRequest"
+        '500':
+          $ref: "#/components/responses/ServerError"
 
   /v0.1/collections/byOwner:
     get:
@@ -1013,12 +949,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/UnionCollections"
-        "500":
-          description: "Internal Server Error"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiError"
+        '400':
+          $ref: "#/components/responses/BadRequest"
+        '500':
+          $ref: "#/components/responses/ServerError"
 
   /v0.1/collections/all:
     get:
@@ -1051,9 +985,28 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/UnionCollections"
-        "500":
-          description: "Internal Server Error"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiError"
+        '400':
+          $ref: "#/components/responses/BadRequest"
+        '500':
+          $ref: "#/components/responses/ServerError"
+
+components:
+  responses:
+    BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            "$ref": "#/components/schemas/UnionApiErrorBadRequest"
+    ServerError:
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            "$ref": "#/components/schemas/UnionApiErrorServerError"
+    EntityNotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            "$ref": "#/components/schemas/UnionApiErrorEntityNotFound"

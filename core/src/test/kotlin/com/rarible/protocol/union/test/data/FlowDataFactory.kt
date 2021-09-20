@@ -109,7 +109,7 @@ fun randomFlowV1OrderDto(): FlowOrderDto {
         taker = randomFlowAddress().value,
         make = randomFlowAsset(),
         take = randomFlowAsset(),
-        fill = randomBigInt(),
+        fill = randomBigDecimal(), // TODO should be BigInt
         cancelled = randomBoolean(),
         createdAt = nowMillis(),
         amount = randomBigDecimal(),

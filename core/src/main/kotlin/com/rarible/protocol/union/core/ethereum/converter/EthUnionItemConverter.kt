@@ -40,10 +40,10 @@ object EthUnionItemConverter {
 
     fun convert(source: ItemTransferDto, blockchain: EthBlockchainDto): EthItemTransferDto {
         return EthItemTransferDto(
-            owner = EthAddressConverter.convert(source.owner!!, blockchain),
+            owner = EthAddressConverter.convert(source.owner, blockchain),
             contract = EthAddressConverter.convert(source.contract, blockchain),
             tokenId = source.tokenId,
-            value = source.value!!,
+            value = source.value,
             date = source.date,
             from = EthAddressConverter.convert(source.from, blockchain)
         )

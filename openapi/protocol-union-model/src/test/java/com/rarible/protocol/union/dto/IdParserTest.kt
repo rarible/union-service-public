@@ -18,7 +18,7 @@ class IdParserTest {
     @Test
     fun `parse id - no blockchain`() {
         val id = "abc"
-        assertThrows(IllegalArgumentException::class.java) {
+        assertThrows(BlockchainIdFormatException::class.java) {
             IdParser.parse(id)
         }
     }
@@ -45,7 +45,7 @@ class IdParserTest {
     @Test
     fun `split with blockchain - wrong size`() {
         val id = "ETHEREUM:abc:123"
-        assertThrows(IllegalArgumentException::class.java) {
+        assertThrows(BlockchainIdFormatException::class.java) {
             IdParser.split(id, 4)
         }
     }
