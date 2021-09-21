@@ -31,6 +31,10 @@ abstract class AbstractIntegrationTest {
     lateinit var testEthereumOrderApi: com.rarible.protocol.order.api.client.OrderControllerApi
 
     @Autowired
+    @Qualifier("ethereum.signature.api")
+    lateinit var testEthereumSignatureApi: com.rarible.protocol.order.api.client.OrderSignatureControllerApi
+
+    @Autowired
     @Qualifier("ethereum.activity.api.item")
     lateinit var testEthereumActivityItemApi: NftActivityControllerApi
 
@@ -54,6 +58,10 @@ abstract class AbstractIntegrationTest {
     @Autowired
     @Qualifier("polygon.order.api")
     lateinit var testPolygonOrderApi: com.rarible.protocol.order.api.client.OrderControllerApi
+
+    @Autowired
+    @Qualifier("polygon.signature.api")
+    lateinit var testPolygonSignatureApi: com.rarible.protocol.order.api.client.OrderSignatureControllerApi
 
     @Autowired
     @Qualifier("polygon.activity.api.item")

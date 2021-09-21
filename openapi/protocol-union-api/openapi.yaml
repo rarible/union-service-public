@@ -5,6 +5,33 @@ info:
 
 paths:
 
+  ######################### Sign API #########################
+
+  "/v0.1/signature/validate":
+    post:
+      tags:
+        - signature-controller
+      operationId: validate
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UnionSignatureValidationForm"
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: boolean
+        '400':
+          $ref: "#/components/responses/BadRequest"
+        '500':
+          $ref: "#/components/responses/ServerError"
+
+  ######################### Item API #########################
+
   /v0.1/items/{itemId}:
     get:
       tags:
@@ -182,9 +209,7 @@ paths:
         '500':
           $ref: "#/components/responses/ServerError"
 
-  #
-  # NFT Ownership Controller
-  #
+  ####################### Ownership API #######################
 
   /v0.1/ownerships/{ownershipId}:
     get:
@@ -284,9 +309,7 @@ paths:
         '500':
           $ref: "#/components/responses/ServerError"
 
-  #
-  # NFT Order Controller
-  #
+  ######################## Order API ########################
 
   /v0.1/orders/{id}:
     get:
@@ -671,9 +694,7 @@ paths:
         '500':
           $ref: "#/components/responses/ServerError"
 
-  #
-  # NFT Activity Controller
-  #
+  ######################## Activity API ########################
 
   /v0.1/activities/byUser:
     get:
@@ -865,9 +886,7 @@ paths:
         '500':
           $ref: "#/components/responses/ServerError"
 
-  #
-  # NFT Collection Controller
-  #
+  ####################### Collection API #######################
 
   /v0.1/collections/{collection}:
     get:
