@@ -108,19 +108,20 @@ fun randomFlowV1OrderDto(): FlowOrderDto {
         maker = randomFlowAddress().value,
         taker = randomFlowAddress().value,
         make = randomFlowAsset(),
-        take = randomFlowAsset(),
-        fill = randomBigDecimal(), // TODO should be BigInt
+        take = randomFlowFungibleAsset(),
+        fill = randomBigDecimal(),
         cancelled = randomBoolean(),
         createdAt = nowMillis(),
         amount = randomBigDecimal(),
-        amountUsd = randomBigDecimal(),
+        priceUsd = randomBigDecimal(),
         data = FlowOrderDataDto(
             payouts = listOf(PayInfoDto(randomString(), randomBigDecimal())),
             originalFees = listOf(PayInfoDto(randomString(), randomBigDecimal()))
         ),
         collection = randomFlowContract().value,
         lastUpdateAt = nowMillis(),
-        offeredNftId = randomString()
+        offeredNftId = randomString(),
+        makeStock = randomBigInt()
     )
 }
 

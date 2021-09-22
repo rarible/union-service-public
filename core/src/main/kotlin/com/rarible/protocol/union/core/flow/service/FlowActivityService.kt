@@ -63,7 +63,7 @@ class FlowActivityService(
         sort: UnionActivitySortDto?
     ): UnionActivitiesDto {
         val rawTypes = types.map { it.name }
-        val result = activityControllerApi.getNftOrderActivitiesByUser(rawTypes, users, continuation, size)
+        val result = activityControllerApi.getNftOrderActivitiesByUser(rawTypes, users, continuation, size, sort?.name)
             .awaitFirst()
         return FlowUnionActivityConverter.convert(result, blockchain)
     }

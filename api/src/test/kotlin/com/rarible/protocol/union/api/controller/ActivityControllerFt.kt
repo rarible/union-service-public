@@ -226,7 +226,8 @@ class ActivityControllerFt : AbstractIntegrationTest() {
                 types.map { it.name },
                 listOf(userFlow.value),
                 isNull(),
-                eq(size)
+                eq(size),
+                sort?.name
             )
         } returns FlowActivitiesDto(1, null, listOf(flowActivity)).toMono()
 

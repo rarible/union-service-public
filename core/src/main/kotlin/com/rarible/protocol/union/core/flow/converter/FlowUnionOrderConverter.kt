@@ -4,6 +4,7 @@ import com.rarible.protocol.dto.PayInfoDto
 import com.rarible.protocol.union.dto.*
 import com.rarible.protocol.union.dto.flow.FlowOrderIdDto
 import java.math.BigInteger
+import java.time.Instant
 
 object FlowUnionOrderConverter {
 
@@ -13,16 +14,16 @@ object FlowUnionOrderConverter {
             maker = FlowAddressConverter.convert(order.maker, blockchain),
             taker = order.taker?.let { FlowAddressConverter.convert(it, blockchain) },
             make = FlowConverter.convert(order.make, blockchain),
-            take = FlowConverter.convert(order.take!!, blockchain), //TODO: Why take is null?
-            fill = order.fill.toBigInteger(), // TODO should be BigInt
-            startedAt = null, //TODO: No needed field
-            endedAt = null, //TODO: No needed field
-            makeStock = BigInteger.ZERO, // TODO: No needed field
+            take = FlowConverter.convert(order.take, blockchain),
+            fill = order.fill.toBigInteger(),
+            startedAt = order.start,
+            endedAt = order.end,
+            makeStock = order.makeStock,
             cancelled = order.cancelled,
             createdAt = order.createdAt,
             lastUpdatedAt = order.lastUpdateAt,
-            makePriceUsd = order.amountUsd, //TODO: I think need to rename
-            takePriceUsd = order.amountUsd, //TODO: I think need to rename
+            makePriceUsd = order.priceUsd,
+            takePriceUsd = order.priceUsd,
             priceHistory = emptyList(),
             data = convert(order.data, blockchain)
         )
@@ -41,7 +42,7 @@ object FlowUnionOrderConverter {
     private fun convert(source: PayInfoDto, blockchain: FlowBlockchainDto): FlowOrderPayoutDto {
         return FlowOrderPayoutDto(
             account = FlowAddressConverter.convert(source.account, blockchain),
-            value = source.value.toBigInteger() // TODO
+            value = source.value.toBigInteger()
         )
     }
 
