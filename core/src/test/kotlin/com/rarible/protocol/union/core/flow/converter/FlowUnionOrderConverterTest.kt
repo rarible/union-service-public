@@ -1,6 +1,6 @@
 package com.rarible.protocol.union.core.flow.converter
 
-import com.rarible.protocol.union.dto.FlowBlockchainDto
+import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.FlowOrderV1Dto
 import com.rarible.protocol.union.test.data.randomFlowV1OrderDto
 import org.assertj.core.api.Assertions.assertThat
@@ -13,7 +13,7 @@ class FlowUnionOrderConverterTest {
     fun `order V1`() {
         val dto = randomFlowV1OrderDto()
 
-        val converted = FlowUnionOrderConverter.convert(dto, FlowBlockchainDto.FLOW) as FlowOrderV1Dto
+        val converted = FlowUnionOrderConverter.convert(dto, BlockchainDto.FLOW) as FlowOrderV1Dto
 
         assertThat(converted.id.value).isEqualTo(dto.id.toString())
         assertThat(converted.startedAt).isNull()

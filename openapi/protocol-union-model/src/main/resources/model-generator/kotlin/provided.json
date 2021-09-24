@@ -1,13 +1,7 @@
 {
-  "EthAddress": "com.rarible.protocol.union.dto.ethereum.EthAddress",
-  "EthActivityId": "com.rarible.protocol.union.dto.ethereum.EthActivityIdDto",
-  "EthItemId": "com.rarible.protocol.union.dto.ethereum.EthItemIdDto",
-  "EthOrderId": "com.rarible.protocol.union.dto.ethereum.EthOrderIdDto",
-  "EthOwnershipId": "com.rarible.protocol.union.dto.ethereum.EthOwnershipIdDto",
-  "FlowAddress": "com.rarible.protocol.union.dto.flow.FlowAddress",
-  "FlowContract": "com.rarible.protocol.union.dto.flow.FlowContract",
-  "FlowActivityId": "com.rarible.protocol.union.dto.flow.FlowActivityIdDto",
-  "FlowItemId": "com.rarible.protocol.union.dto.flow.FlowItemIdDto",
-  "FlowOrderId": "com.rarible.protocol.union.dto.flow.FlowOrderIdDto",
-  "FlowOwnershipId": "com.rarible.protocol.union.dto.flow.FlowOwnershipIdDto"
+  "UnionAddress": "com.rarible.protocol.union.dto.UnionAddress",
+  "UnionActivityId": "com.rarible.protocol.union.dto.UnionActivityIdDto",
+  "UnionItemId": "com.rarible.protocol.union.dto.UnionItemIdDto",
+  "UnionOrderId": "com.rarible.protocol.union.dto.UnionOrderIdDto",
+  "UnionOwnershipId": "com.rarible.protocol.union.dto.UnionOwnershipIdDto"
 }

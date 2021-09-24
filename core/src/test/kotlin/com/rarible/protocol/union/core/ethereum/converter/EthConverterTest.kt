@@ -26,7 +26,7 @@ class EthConverterTest {
     fun `asset type - eth`() {
         val assetType = EthAssetTypeDto()
 
-        val converted = EthConverter.convert(assetType, EthBlockchainDto.ETHEREUM)
+        val converted = EthConverter.convert(assetType, BlockchainDto.ETHEREUM)
 
         assertThat(converted).isInstanceOf(EthEthereumAssetTypeDto::class.java)
     }
@@ -37,7 +37,7 @@ class EthConverterTest {
             contract = randomAddress()
         )
 
-        val converted = EthConverter.convert(assetType, EthBlockchainDto.ETHEREUM) as EthErc20AssetTypeDto
+        val converted = EthConverter.convert(assetType, BlockchainDto.ETHEREUM) as EthErc20AssetTypeDto
 
         assertThat(converted.contract.value).isEqualTo(assetType.contract.prefixed())
     }
@@ -49,7 +49,7 @@ class EthConverterTest {
             tokenId = randomBigInt()
         )
 
-        val converted = EthConverter.convert(assetType, EthBlockchainDto.ETHEREUM) as EthErc721AssetTypeDto
+        val converted = EthConverter.convert(assetType, BlockchainDto.ETHEREUM) as EthErc721AssetTypeDto
 
         assertThat(converted.contract.value).isEqualTo(assetType.contract.prefixed())
         assertThat(converted.tokenId).isEqualTo(assetType.tokenId)
@@ -62,7 +62,7 @@ class EthConverterTest {
             tokenId = randomBigInt()
         )
 
-        val converted = EthConverter.convert(assetType, EthBlockchainDto.ETHEREUM) as EthErc1155AssetTypeDto
+        val converted = EthConverter.convert(assetType, BlockchainDto.ETHEREUM) as EthErc1155AssetTypeDto
 
         assertThat(converted.contract.value).isEqualTo(assetType.contract.prefixed())
         assertThat(converted.tokenId).isEqualTo(assetType.tokenId)
@@ -82,7 +82,7 @@ class EthConverterTest {
             signatures = listOf(binary)
         )
 
-        val converted = EthConverter.convert(assetType, EthBlockchainDto.ETHEREUM) as EthErc721LazyAssetTypeDto
+        val converted = EthConverter.convert(assetType, BlockchainDto.ETHEREUM) as EthErc721LazyAssetTypeDto
 
         assertThat(converted.contract.value).isEqualTo(assetType.contract.prefixed())
         assertThat(converted.tokenId).isEqualTo(assetType.tokenId)
@@ -109,7 +109,7 @@ class EthConverterTest {
             supply = randomBigInt()
         )
 
-        val converted = EthConverter.convert(assetType, EthBlockchainDto.ETHEREUM) as EthErc1155LazyAssetTypeDto
+        val converted = EthConverter.convert(assetType, BlockchainDto.ETHEREUM) as EthErc1155LazyAssetTypeDto
 
         assertThat(converted.contract.value).isEqualTo(assetType.contract.prefixed())
         assertThat(converted.tokenId).isEqualTo(assetType.tokenId)

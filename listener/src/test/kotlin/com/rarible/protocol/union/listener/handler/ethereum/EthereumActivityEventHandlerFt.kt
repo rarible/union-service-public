@@ -14,19 +14,19 @@ import org.junit.jupiter.api.Test
 @IntegrationTest
 class EthereumActivityEventHandlerFt : AbstractIntegrationTest() {
 
-    @Test
-    fun `ethereum activity event`() = runWithKafka {
-
-        val event: ActivityDto = randomEthOrderBidActivity()
-
-        ethActivityProducer.send(message(event)).ensureSuccess()
-
-        Wait.waitAssert {
-            val messages = findEthActivityUpdates(event.id, EthOrderBidActivityDto::class.java)
-            Assertions.assertThat(messages).hasSize(1)
-            Assertions.assertThat(messages[0].key).isEqualTo(event.id)
-            Assertions.assertThat(messages[0].id).isEqualTo(event.id)
-        }
-    }
+    // @Test
+    // fun `ethereum activity event`() = runWithKafka {
+    //
+    //     val event: ActivityDto = randomEthOrderBidActivity()
+    //
+    //     ethActivityProducer.send(message(event)).ensureSuccess()
+    //
+    //     Wait.waitAssert {
+    //         val messages = findEthActivityUpdates(event.id, EthOrderBidActivityDto::class.java)
+    //         Assertions.assertThat(messages).hasSize(1)
+    //         Assertions.assertThat(messages[0].key).isEqualTo(event.id)
+    //         Assertions.assertThat(messages[0].id).isEqualTo(event.id)
+    //     }
+    // }
 
 }

@@ -10,8 +10,7 @@ import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.core.ethereum.converter.EthConverter
 import com.rarible.protocol.union.dto.*
-import com.rarible.protocol.union.dto.ethereum.EthOrderIdDto
-import com.rarible.protocol.union.dto.flow.FlowOrderIdDto
+import com.rarible.protocol.union.dto.UnionOrderIdDto
 import com.rarible.protocol.union.test.data.randomEthAddress
 import com.rarible.protocol.union.test.data.randomEthLegacyOrderDto
 import com.rarible.protocol.union.test.data.randomFlowV1OrderDto
@@ -42,7 +41,7 @@ class OrderControllerFt : AbstractIntegrationTest() {
     fun `get order by id - ethereum`() = runBlocking<Unit> {
         val order = randomEthLegacyOrderDto()
         val orderId = EthConverter.convert(order.hash)
-        val orderIdFull = EthOrderIdDto(EthBlockchainDto.ETHEREUM, order.hash.prefixed()).fullId()
+        val orderIdFull = UnionOrderIdDto(BlockchainDto.ETHEREUM, order.hash.prefixed()).fullId()
 
         coEvery { testEthereumOrderApi.getOrderByHash(orderId) } returns order.toMono()
 
@@ -50,14 +49,14 @@ class OrderControllerFt : AbstractIntegrationTest() {
         val ethOrder = unionOrder as EthOrderDto
 
         assertThat(ethOrder.id.value).isEqualTo(orderId)
-        assertThat(ethOrder.id.blockchain).isEqualTo(EthBlockchainDto.ETHEREUM)
+        assertThat(ethOrder.id.blockchain).isEqualTo(BlockchainDto.ETHEREUM)
     }
 
     @Test
     fun `get order by id - polygon`() = runBlocking<Unit> {
         val order = randomEthLegacyOrderDto()
         val orderId = EthConverter.convert(order.hash)
-        val orderIdFull = EthOrderIdDto(EthBlockchainDto.POLYGON, order.hash.prefixed()).fullId()
+        val orderIdFull = UnionOrderIdDto(BlockchainDto.POLYGON, order.hash.prefixed()).fullId()
 
         coEvery { testPolygonOrderApi.getOrderByHash(orderId) } returns order.toMono()
 
@@ -65,14 +64,14 @@ class OrderControllerFt : AbstractIntegrationTest() {
         val ethOrder = unionOrder as EthOrderDto
 
         assertThat(ethOrder.id.value).isEqualTo(orderId)
-        assertThat(ethOrder.id.blockchain).isEqualTo(EthBlockchainDto.POLYGON)
+        assertThat(ethOrder.id.blockchain).isEqualTo(BlockchainDto.POLYGON)
     }
 
     @Test
     fun `get order by id - flow`() = runBlocking<Unit> {
         val order = randomFlowV1OrderDto()
         val orderId = order.id
-        val orderIdFull = FlowOrderIdDto(FlowBlockchainDto.FLOW, orderId.toString()).fullId()
+        val orderIdFull = UnionOrderIdDto(BlockchainDto.FLOW, orderId.toString()).fullId()
 
         coEvery { testFlowOrderApi.getOrderByOrderId(orderId.toString()) } returns order.toMono()
 
@@ -80,14 +79,14 @@ class OrderControllerFt : AbstractIntegrationTest() {
         val ethOrder = unionOrder as FlowOrderDto
 
         assertThat(ethOrder.id.value).isEqualTo(orderId.toString())
-        assertThat(ethOrder.id.blockchain).isEqualTo(FlowBlockchainDto.FLOW)
+        assertThat(ethOrder.id.blockchain).isEqualTo(BlockchainDto.FLOW)
     }
 
     @Test
     fun `update order make stock - ethereum`() = runBlocking<Unit> {
         val order = randomEthLegacyOrderDto()
         val orderId = EthConverter.convert(order.hash)
-        val orderIdFull = EthOrderIdDto(EthBlockchainDto.ETHEREUM, order.hash.prefixed()).fullId()
+        val orderIdFull = UnionOrderIdDto(BlockchainDto.ETHEREUM, order.hash.prefixed()).fullId()
 
         coEvery { testEthereumOrderApi.updateOrderMakeStock(orderId) } returns order.toMono()
 
@@ -95,7 +94,7 @@ class OrderControllerFt : AbstractIntegrationTest() {
         val ethOrder = unionOrder as EthOrderDto
 
         assertThat(ethOrder.id.value).isEqualTo(orderId)
-        assertThat(ethOrder.id.blockchain).isEqualTo(EthBlockchainDto.ETHEREUM)
+        assertThat(ethOrder.id.blockchain).isEqualTo(BlockchainDto.ETHEREUM)
     }
 
     @Test

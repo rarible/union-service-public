@@ -3,13 +3,13 @@ package com.rarible.protocol.union.core.flow.service
 import com.rarible.protocol.flow.nft.api.client.FlowNftCollectionControllerApi
 import com.rarible.protocol.union.core.flow.converter.FlowUnionCollectionConverter
 import com.rarible.protocol.union.core.service.CollectionService
-import com.rarible.protocol.union.dto.FlowBlockchainDto
+import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.UnionCollectionDto
 import com.rarible.protocol.union.dto.UnionCollectionsDto
 import kotlinx.coroutines.reactive.awaitFirst
 
 class FlowCollectionService(
-    blockchain: FlowBlockchainDto,
+    blockchain: BlockchainDto,
     private val collectionControllerApi: FlowNftCollectionControllerApi
 ) : AbstractFlowService(blockchain), CollectionService {
 

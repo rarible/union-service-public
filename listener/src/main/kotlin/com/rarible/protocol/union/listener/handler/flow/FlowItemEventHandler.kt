@@ -4,14 +4,14 @@ import com.rarible.core.kafka.KafkaMessage
 import com.rarible.core.kafka.RaribleKafkaProducer
 import com.rarible.protocol.dto.FlowNftItemEventDto
 import com.rarible.protocol.union.core.flow.converter.FlowUnionItemEventConverter
-import com.rarible.protocol.union.dto.FlowBlockchainDto
+import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.UnionItemEventDto
 import com.rarible.protocol.union.listener.handler.AbstractEventHandler
 import org.slf4j.LoggerFactory
 
 class FlowItemEventHandler(
     private val producer: RaribleKafkaProducer<UnionItemEventDto>,
-    private val blockchain: FlowBlockchainDto
+    private val blockchain: BlockchainDto
 ) : AbstractEventHandler<FlowNftItemEventDto>() {
 
     private val logger = LoggerFactory.getLogger(javaClass)

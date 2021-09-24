@@ -1,34 +1,39 @@
 package com.rarible.protocol.union.core.ethereum.converter
 
-import com.rarible.protocol.dto.*
-import com.rarible.protocol.union.dto.EthBlockchainDto
+import com.rarible.protocol.dto.ItemHistoryDto
+import com.rarible.protocol.dto.ItemRoyaltyDto
+import com.rarible.protocol.dto.ItemTransferDto
+import com.rarible.protocol.dto.NftOwnershipDto
+import com.rarible.protocol.dto.NftOwnershipsDto
+import com.rarible.protocol.union.core.converter.UnionAddressConverter
+import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.EthItemHistoryDto
 import com.rarible.protocol.union.dto.EthOwnershipDto
+import com.rarible.protocol.union.dto.UnionOwnershipIdDto
 import com.rarible.protocol.union.dto.UnionOwnershipsDto
-import com.rarible.protocol.union.dto.ethereum.EthOwnershipIdDto
 
 object EthUnionOwnershipConverter {
 
-    fun convert(source: NftOwnershipDto, blockchain: EthBlockchainDto): EthOwnershipDto {
+    fun convert(source: NftOwnershipDto, blockchain: BlockchainDto): EthOwnershipDto {
         return EthOwnershipDto(
-            id = EthOwnershipIdDto(
-                token = EthAddressConverter.convert(source.contract, blockchain),
+            id = UnionOwnershipIdDto(
+                token = UnionAddressConverter.convert(source.contract, blockchain),
                 tokenId = source.tokenId,
-                owner = EthAddressConverter.convert(source.owner, blockchain),
+                owner = UnionAddressConverter.convert(source.owner, blockchain),
                 blockchain = blockchain
             ),
             value = source.value,
             createdAt = source.date,
-            contract = EthAddressConverter.convert(source.contract, blockchain),
+            contract = UnionAddressConverter.convert(source.contract, blockchain),
             tokenId = source.tokenId,
-            owners = listOf(EthAddressConverter.convert(source.owner, blockchain)),
+            owners = listOf(UnionAddressConverter.convert(source.owner, blockchain)),
             creators = source.creators.map { EthConverter.convertToCreator(it, blockchain) },
             lazyValue = source.lazyValue,
             pending = source.pending.map { convert(it, blockchain) }
         )
     }
 
-    fun convert(page: NftOwnershipsDto, blockchain: EthBlockchainDto): UnionOwnershipsDto {
+    fun convert(page: NftOwnershipsDto, blockchain: BlockchainDto): UnionOwnershipsDto {
         return UnionOwnershipsDto(
             total = page.total,
             continuation = page.continuation,
@@ -36,7 +41,7 @@ object EthUnionOwnershipConverter {
         )
     }
 
-    private fun convert(source: ItemHistoryDto, blockchain: EthBlockchainDto): EthItemHistoryDto {
+    private fun convert(source: ItemHistoryDto, blockchain: BlockchainDto): EthItemHistoryDto {
         return when (source) {
             is ItemRoyaltyDto -> EthUnionItemConverter.convert(source, blockchain)
             is ItemTransferDto -> EthUnionItemConverter.convert(source, blockchain)

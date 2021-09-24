@@ -6,7 +6,7 @@ import com.rarible.protocol.union.dto.*
 
 object FlowUnionOrderEventConverter {
 
-    fun convert(source: FlowOrderEventDto, blockchain: FlowBlockchainDto): UnionOrderEventDto {
+    fun convert(source: FlowOrderEventDto, blockchain: BlockchainDto): UnionOrderEventDto {
         return when (source) {
             is FlowOrderUpdateEventDto -> {
                 val order = FlowUnionOrderConverter.convert(source.order, blockchain)

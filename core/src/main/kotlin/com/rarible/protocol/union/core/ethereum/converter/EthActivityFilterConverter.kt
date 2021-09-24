@@ -1,6 +1,24 @@
 package com.rarible.protocol.union.core.ethereum.converter
 
-import com.rarible.protocol.dto.*
+import com.rarible.protocol.dto.ActivityFilterAllDto
+import com.rarible.protocol.dto.ActivityFilterAllTypeDto
+import com.rarible.protocol.dto.ActivityFilterByCollectionDto
+import com.rarible.protocol.dto.ActivityFilterByCollectionTypeDto
+import com.rarible.protocol.dto.ActivityFilterByItemDto
+import com.rarible.protocol.dto.ActivityFilterByItemTypeDto
+import com.rarible.protocol.dto.ActivityFilterByUserDto
+import com.rarible.protocol.dto.ActivityFilterByUserTypeDto
+import com.rarible.protocol.dto.ActivityFilterDto
+import com.rarible.protocol.dto.NftActivityFilterAllDto
+import com.rarible.protocol.dto.NftActivityFilterByCollectionDto
+import com.rarible.protocol.dto.NftActivityFilterByItemDto
+import com.rarible.protocol.dto.NftActivityFilterByUserDto
+import com.rarible.protocol.dto.NftActivityFilterDto
+import com.rarible.protocol.dto.OrderActivityFilterAllDto
+import com.rarible.protocol.dto.OrderActivityFilterByCollectionDto
+import com.rarible.protocol.dto.OrderActivityFilterByItemDto
+import com.rarible.protocol.dto.OrderActivityFilterByUserDto
+import com.rarible.protocol.dto.OrderActivityFilterDto
 
 object EthActivityFilterConverter {
 
