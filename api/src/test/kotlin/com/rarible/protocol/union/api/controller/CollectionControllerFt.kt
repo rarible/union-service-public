@@ -9,7 +9,7 @@ import com.rarible.protocol.union.api.client.CollectionControllerApi
 import com.rarible.protocol.union.api.configuration.PageSize
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
-import com.rarible.protocol.union.core.ethereum.converter.EthAddressConverter
+import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.flow.converter.FlowContractConverter
 import com.rarible.protocol.union.dto.*
 import com.rarible.protocol.union.test.data.*
@@ -35,7 +35,7 @@ class CollectionControllerFt : AbstractIntegrationTest() {
     @Test
     fun `get collection by id - ethereum`() = runBlocking<Unit> {
         val collectionId = randomAddress()
-        val collectionIdFull = EthAddressConverter.convert(collectionId, EthBlockchainDto.ETHEREUM)
+        val collectionIdFull = UnionAddressConverter.convert(collectionId, BlockchainDto.ETHEREUM)
         val collection = randomEthCollectionDto(collectionId)
 
         coEvery { testEthereumCollectionApi.getNftCollectionById(collectionIdFull.value) } returns collection.toMono()
@@ -44,13 +44,13 @@ class CollectionControllerFt : AbstractIntegrationTest() {
         val ethCollection = unionCollection as EthCollectionDto
 
         assertThat(ethCollection.id.value).isEqualTo(collectionIdFull.value)
-        assertThat(ethCollection.id.blockchain).isEqualTo(EthBlockchainDto.ETHEREUM)
+        assertThat(ethCollection.id.blockchain).isEqualTo(BlockchainDto.ETHEREUM)
     }
 
     @Test
     fun `get collection by id - polygon`() = runBlocking<Unit> {
         val collectionId = randomAddress()
-        val collectionIdFull = EthAddressConverter.convert(collectionId, EthBlockchainDto.POLYGON)
+        val collectionIdFull = UnionAddressConverter.convert(collectionId, BlockchainDto.POLYGON)
         val collection = randomEthCollectionDto(collectionId)
 
         coEvery { testPolygonCollectionApi.getNftCollectionById(collectionIdFull.value) } returns collection.toMono()
@@ -59,13 +59,13 @@ class CollectionControllerFt : AbstractIntegrationTest() {
         val ethCollection = unionCollection as EthCollectionDto
 
         assertThat(ethCollection.id.value).isEqualTo(collectionIdFull.value)
-        assertThat(ethCollection.id.blockchain).isEqualTo(EthBlockchainDto.POLYGON)
+        assertThat(ethCollection.id.blockchain).isEqualTo(BlockchainDto.POLYGON)
     }
 
     @Test
     fun `get collection by id - flow`() = runBlocking<Unit> {
         val collectionId = randomString()
-        val collectionIdFull = FlowContractConverter.convert(collectionId, FlowBlockchainDto.FLOW)
+        val collectionIdFull = FlowContractConverter.convert(collectionId, BlockchainDto.FLOW)
         val collection = randomFlowCollectionDto(collectionId)
 
         coEvery { testFlowCollectionApi.getNftCollectionById(collectionId) } returns collection.toMono()
@@ -74,14 +74,14 @@ class CollectionControllerFt : AbstractIntegrationTest() {
         val flowCollection = unionCollection as FlowCollectionDto
 
         assertThat(flowCollection.id.value).isEqualTo(collectionIdFull.value)
-        assertThat(flowCollection.id.blockchain).isEqualTo(FlowBlockchainDto.FLOW)
+        assertThat(flowCollection.id.blockchain).isEqualTo(BlockchainDto.FLOW)
     }
 
     @Test
     fun `get collections by owner - ethereum`() = runBlocking<Unit> {
         val ethOwnerId = randomEthAddress()
         val collection = randomEthCollectionDto()
-        val collectionId = EthAddressConverter.convert(collection.id, EthBlockchainDto.ETHEREUM)
+        val collectionId = UnionAddressConverter.convert(collection.id, BlockchainDto.ETHEREUM)
 
         coEvery {
             testEthereumCollectionApi.searchNftCollectionsByOwner(ethOwnerId.value, continuation, size)
@@ -99,7 +99,7 @@ class CollectionControllerFt : AbstractIntegrationTest() {
     fun `get collections by owner - polygon`() = runBlocking<Unit> {
         val polyOwnerId = randomPolygonAddress()
         val collection = randomEthCollectionDto()
-        val collectionId = EthAddressConverter.convert(collection.id, EthBlockchainDto.POLYGON)
+        val collectionId = UnionAddressConverter.convert(collection.id, BlockchainDto.POLYGON)
 
         coEvery {
             testPolygonCollectionApi.searchNftCollectionsByOwner(polyOwnerId.value, continuation, size)

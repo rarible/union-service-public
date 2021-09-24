@@ -3,13 +3,13 @@ package com.rarible.protocol.union.core.ethereum.service
 import com.rarible.protocol.nft.api.client.NftItemControllerApi
 import com.rarible.protocol.union.core.ethereum.converter.EthUnionItemConverter
 import com.rarible.protocol.union.core.service.ItemService
-import com.rarible.protocol.union.dto.EthBlockchainDto
+import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.UnionItemDto
 import com.rarible.protocol.union.dto.UnionItemsDto
 import kotlinx.coroutines.reactive.awaitFirst
 
 class EthereumItemService(
-    blockchain: EthBlockchainDto,
+    blockchain: BlockchainDto,
     private val itemControllerApi: NftItemControllerApi
 ) : AbstractEthereumService(blockchain), ItemService {
 

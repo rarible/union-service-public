@@ -3,14 +3,14 @@ package com.rarible.protocol.union.core.ethereum.service
 import com.rarible.protocol.dto.EthereumSignatureValidationFormDto
 import com.rarible.protocol.order.api.client.OrderSignatureControllerApi
 import com.rarible.protocol.union.core.service.SignatureService
-import com.rarible.protocol.union.dto.EthBlockchainDto
+import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.UnionSignatureValidationFormDto
 import io.daonomic.rpc.domain.Binary
 import kotlinx.coroutines.reactive.awaitFirst
 import scalether.domain.Address
 
 class EthereumSignatureService(
-    blockchain: EthBlockchainDto,
+    blockchain: BlockchainDto,
     private val signatureControllerApi: OrderSignatureControllerApi
 ) : AbstractEthereumService(blockchain), SignatureService {
 

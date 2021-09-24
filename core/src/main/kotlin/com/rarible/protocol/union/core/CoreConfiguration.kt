@@ -1,6 +1,10 @@
 package com.rarible.protocol.union.core
 
-import com.rarible.protocol.flow.nft.api.client.*
+import com.rarible.protocol.flow.nft.api.client.FlowNftCollectionControllerApi
+import com.rarible.protocol.flow.nft.api.client.FlowNftItemControllerApi
+import com.rarible.protocol.flow.nft.api.client.FlowNftOrderActivityControllerApi
+import com.rarible.protocol.flow.nft.api.client.FlowNftOwnershipControllerApi
+import com.rarible.protocol.flow.nft.api.client.FlowOrderControllerApi
 import com.rarible.protocol.nft.api.client.NftActivityControllerApi
 import com.rarible.protocol.nft.api.client.NftCollectionControllerApi
 import com.rarible.protocol.nft.api.client.NftItemControllerApi
@@ -8,11 +12,25 @@ import com.rarible.protocol.nft.api.client.NftOwnershipControllerApi
 import com.rarible.protocol.order.api.client.OrderActivityControllerApi
 import com.rarible.protocol.order.api.client.OrderControllerApi
 import com.rarible.protocol.order.api.client.OrderSignatureControllerApi
-import com.rarible.protocol.union.core.ethereum.service.*
-import com.rarible.protocol.union.core.flow.service.*
-import com.rarible.protocol.union.core.service.*
-import com.rarible.protocol.union.dto.EthBlockchainDto
-import com.rarible.protocol.union.dto.FlowBlockchainDto
+import com.rarible.protocol.union.core.ethereum.service.EthereumActivityService
+import com.rarible.protocol.union.core.ethereum.service.EthereumCollectionService
+import com.rarible.protocol.union.core.ethereum.service.EthereumItemService
+import com.rarible.protocol.union.core.ethereum.service.EthereumOrderService
+import com.rarible.protocol.union.core.ethereum.service.EthereumOwnershipService
+import com.rarible.protocol.union.core.ethereum.service.EthereumSignatureService
+import com.rarible.protocol.union.core.flow.service.FlowActivityService
+import com.rarible.protocol.union.core.flow.service.FlowCollectionService
+import com.rarible.protocol.union.core.flow.service.FlowItemService
+import com.rarible.protocol.union.core.flow.service.FlowOrderService
+import com.rarible.protocol.union.core.flow.service.FlowOwnershipService
+import com.rarible.protocol.union.core.flow.service.FlowSignatureService
+import com.rarible.protocol.union.core.service.ActivityService
+import com.rarible.protocol.union.core.service.CollectionService
+import com.rarible.protocol.union.core.service.ItemService
+import com.rarible.protocol.union.core.service.OrderService
+import com.rarible.protocol.union.core.service.OwnershipService
+import com.rarible.protocol.union.core.service.SignatureService
+import com.rarible.protocol.union.dto.BlockchainDto
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
@@ -25,27 +43,27 @@ class CoreConfiguration {
     //--------------------- ETHEREUM --------------------//
     @Bean
     fun ethereumItemService(@Qualifier("ethereum.item.api") ethereumItemApi: NftItemControllerApi): ItemService {
-        return EthereumItemService(EthBlockchainDto.ETHEREUM, ethereumItemApi)
+        return EthereumItemService(BlockchainDto.ETHEREUM, ethereumItemApi)
     }
 
     @Bean
     fun ethereumOwnershipService(@Qualifier("ethereum.ownership.api") ethereumOwnershipApi: NftOwnershipControllerApi): OwnershipService {
-        return EthereumOwnershipService(EthBlockchainDto.ETHEREUM, ethereumOwnershipApi)
+        return EthereumOwnershipService(BlockchainDto.ETHEREUM, ethereumOwnershipApi)
     }
 
     @Bean
     fun ethereumCollectionService(@Qualifier("ethereum.collection.api") ethereumCollectionApi: NftCollectionControllerApi): CollectionService {
-        return EthereumCollectionService(EthBlockchainDto.ETHEREUM, ethereumCollectionApi)
+        return EthereumCollectionService(BlockchainDto.ETHEREUM, ethereumCollectionApi)
     }
 
     @Bean
     fun ethereumOrderService(@Qualifier("ethereum.order.api") ethereumOrderApi: OrderControllerApi): OrderService {
-        return EthereumOrderService(EthBlockchainDto.ETHEREUM, ethereumOrderApi)
+        return EthereumOrderService(BlockchainDto.ETHEREUM, ethereumOrderApi)
     }
 
     @Bean
     fun ethereumSignatureService(@Qualifier("ethereum.signature.api") ethereumSignatureApi: OrderSignatureControllerApi): SignatureService {
-        return EthereumSignatureService(EthBlockchainDto.ETHEREUM, ethereumSignatureApi)
+        return EthereumSignatureService(BlockchainDto.ETHEREUM, ethereumSignatureApi)
     }
 
     @Bean
@@ -53,33 +71,33 @@ class CoreConfiguration {
         @Qualifier("ethereum.activity.api.item") ethereumActivityItemApi: NftActivityControllerApi,
         @Qualifier("ethereum.activity.api.order") ethereumActivityOrderApi: OrderActivityControllerApi
     ): ActivityService {
-        return EthereumActivityService(EthBlockchainDto.ETHEREUM, ethereumActivityItemApi, ethereumActivityOrderApi)
+        return EthereumActivityService(BlockchainDto.ETHEREUM, ethereumActivityItemApi, ethereumActivityOrderApi)
     }
 
     //--------------------- POLYGON ---------------------//
     @Bean
     fun polygonItemService(@Qualifier("polygon.item.api") ethereumItemApi: NftItemControllerApi): ItemService {
-        return EthereumItemService(EthBlockchainDto.POLYGON, ethereumItemApi)
+        return EthereumItemService(BlockchainDto.POLYGON, ethereumItemApi)
     }
 
     @Bean
     fun polygonOwnershipService(@Qualifier("polygon.ownership.api") ethereumOwnershipApi: NftOwnershipControllerApi): OwnershipService {
-        return EthereumOwnershipService(EthBlockchainDto.POLYGON, ethereumOwnershipApi)
+        return EthereumOwnershipService(BlockchainDto.POLYGON, ethereumOwnershipApi)
     }
 
     @Bean
     fun polygonCollectionService(@Qualifier("polygon.collection.api") ethereumCollectionApi: NftCollectionControllerApi): CollectionService {
-        return EthereumCollectionService(EthBlockchainDto.POLYGON, ethereumCollectionApi)
+        return EthereumCollectionService(BlockchainDto.POLYGON, ethereumCollectionApi)
     }
 
     @Bean
     fun polygonOrderService(@Qualifier("polygon.order.api") ethereumOrderApi: OrderControllerApi): OrderService {
-        return EthereumOrderService(EthBlockchainDto.POLYGON, ethereumOrderApi)
+        return EthereumOrderService(BlockchainDto.POLYGON, ethereumOrderApi)
     }
 
     @Bean
     fun polygonSignatureService(@Qualifier("polygon.signature.api") ethereumSignatureApi: OrderSignatureControllerApi): SignatureService {
-        return EthereumSignatureService(EthBlockchainDto.POLYGON, ethereumSignatureApi)
+        return EthereumSignatureService(BlockchainDto.POLYGON, ethereumSignatureApi)
     }
 
     @Bean
@@ -87,38 +105,38 @@ class CoreConfiguration {
         @Qualifier("polygon.activity.api.item") polygonActivityItemApi: NftActivityControllerApi,
         @Qualifier("polygon.activity.api.order") polygonActivityOrderApi: OrderActivityControllerApi
     ): ActivityService {
-        return EthereumActivityService(EthBlockchainDto.POLYGON, polygonActivityItemApi, polygonActivityOrderApi)
+        return EthereumActivityService(BlockchainDto.POLYGON, polygonActivityItemApi, polygonActivityOrderApi)
     }
 
     //---------------------- FLOW -----------------------//
     @Bean
     fun flowItemService(flowItemApi: FlowNftItemControllerApi): ItemService {
-        return FlowItemService(FlowBlockchainDto.FLOW, flowItemApi)
+        return FlowItemService(BlockchainDto.FLOW, flowItemApi)
     }
 
     @Bean
     fun flowOwnershipService(flowOwnershipApi: FlowNftOwnershipControllerApi): OwnershipService {
-        return FlowOwnershipService(FlowBlockchainDto.FLOW, flowOwnershipApi)
+        return FlowOwnershipService(BlockchainDto.FLOW, flowOwnershipApi)
     }
 
     @Bean
     fun flowCollectionService(flowCollectionApi: FlowNftCollectionControllerApi): CollectionService {
-        return FlowCollectionService(FlowBlockchainDto.FLOW, flowCollectionApi)
+        return FlowCollectionService(BlockchainDto.FLOW, flowCollectionApi)
     }
 
     @Bean
     fun flowOrderService(flowOrderApi: FlowOrderControllerApi): OrderService {
-        return FlowOrderService(FlowBlockchainDto.FLOW, flowOrderApi)
+        return FlowOrderService(BlockchainDto.FLOW, flowOrderApi)
     }
 
     @Bean
     fun flowSignatureService(flowOrderApi: FlowOrderControllerApi): SignatureService {
-        return FlowSignatureService(FlowBlockchainDto.FLOW) // TODO implement it later
+        return FlowSignatureService(BlockchainDto.FLOW) // TODO implement it later
     }
 
     @Bean
     fun flowActivityService(flowActivityApi: FlowNftOrderActivityControllerApi): ActivityService {
-        return FlowActivityService(FlowBlockchainDto.FLOW, flowActivityApi)
+        return FlowActivityService(BlockchainDto.FLOW, flowActivityApi)
     }
 
 }

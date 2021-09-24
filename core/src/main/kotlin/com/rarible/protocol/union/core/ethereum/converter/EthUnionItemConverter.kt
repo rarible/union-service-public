@@ -1,16 +1,31 @@
 package com.rarible.protocol.union.core.ethereum.converter
 
 import com.rarible.core.common.nowMillis
-import com.rarible.protocol.dto.*
-import com.rarible.protocol.union.dto.*
-import com.rarible.protocol.union.dto.ethereum.EthItemIdDto
+import com.rarible.protocol.dto.ItemRoyaltyDto
+import com.rarible.protocol.dto.ItemTransferDto
+import com.rarible.protocol.dto.NftItemAttributeDto
+import com.rarible.protocol.dto.NftItemDto
+import com.rarible.protocol.dto.NftItemMetaDto
+import com.rarible.protocol.dto.NftItemsDto
+import com.rarible.protocol.dto.NftMediaDto
+import com.rarible.protocol.dto.NftMediaMetaDto
+import com.rarible.protocol.union.core.converter.UnionAddressConverter
+import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.EthItemDto
+import com.rarible.protocol.union.dto.EthItemRoyaltyDto
+import com.rarible.protocol.union.dto.EthItemTransferDto
+import com.rarible.protocol.union.dto.UnionItemIdDto
+import com.rarible.protocol.union.dto.UnionItemsDto
+import com.rarible.protocol.union.dto.UnionMetaAttributeDto
+import com.rarible.protocol.union.dto.UnionMetaContentDto
+import com.rarible.protocol.union.dto.UnionMetaDto
 
 object EthUnionItemConverter {
 
-    fun convert(item: NftItemDto, blockchain: EthBlockchainDto): EthItemDto {
+    fun convert(item: NftItemDto, blockchain: BlockchainDto): EthItemDto {
         return EthItemDto(
-            id = EthItemIdDto(
-                token = EthAddressConverter.convert(item.contract, blockchain),
+            id = UnionItemIdDto(
+                token = UnionAddressConverter.convert(item.contract, blockchain),
                 tokenId = item.tokenId,
                 blockchain = blockchain
             ),
@@ -21,16 +36,16 @@ object EthUnionItemConverter {
             meta = item.meta?.let { convert(it) },
             deleted = item.deleted ?: false,
             tokenId = item.tokenId,
-            collection = EthAddressConverter.convert(item.contract, blockchain),
+            collection = UnionAddressConverter.convert(item.contract, blockchain),
             creators = item.creators.map { EthConverter.convertToCreator(it, blockchain) },
-            owners = item.owners.map { EthAddressConverter.convert(it, blockchain) },
+            owners = item.owners.map { UnionAddressConverter.convert(it, blockchain) },
             royalties = item.royalties.map { EthConverter.convertToRoyalty(it, blockchain) },
             lazySupply = item.lazySupply,
             pending = item.pending?.map { convert(it, blockchain) } ?: listOf()
         )
     }
 
-    fun convert(page: NftItemsDto, blockchain: EthBlockchainDto): UnionItemsDto {
+    fun convert(page: NftItemsDto, blockchain: BlockchainDto): UnionItemsDto {
         return UnionItemsDto(
             total = page.total,
             continuation = page.continuation,
@@ -38,21 +53,21 @@ object EthUnionItemConverter {
         )
     }
 
-    fun convert(source: ItemTransferDto, blockchain: EthBlockchainDto): EthItemTransferDto {
+    fun convert(source: ItemTransferDto, blockchain: BlockchainDto): EthItemTransferDto {
         return EthItemTransferDto(
-            owner = EthAddressConverter.convert(source.owner, blockchain),
-            contract = EthAddressConverter.convert(source.contract, blockchain),
+            owner = UnionAddressConverter.convert(source.owner, blockchain),
+            contract = UnionAddressConverter.convert(source.contract, blockchain),
             tokenId = source.tokenId,
             value = source.value,
             date = source.date,
-            from = EthAddressConverter.convert(source.from, blockchain)
+            from = UnionAddressConverter.convert(source.from, blockchain)
         )
     }
 
-    fun convert(source: ItemRoyaltyDto, blockchain: EthBlockchainDto): EthItemRoyaltyDto {
+    fun convert(source: ItemRoyaltyDto, blockchain: BlockchainDto): EthItemRoyaltyDto {
         return EthItemRoyaltyDto(
-            owner = source.owner?.let { EthAddressConverter.convert(it, blockchain) },
-            contract = EthAddressConverter.convert(source.contract, blockchain),
+            owner = source.owner?.let { UnionAddressConverter.convert(it, blockchain) },
+            contract = UnionAddressConverter.convert(source.contract, blockchain),
             tokenId = source.tokenId,
             value = source.value!!,
             date = source.date,

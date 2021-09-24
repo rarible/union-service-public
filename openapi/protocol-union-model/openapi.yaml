@@ -91,9 +91,29 @@ components:
 
     #################### Item - Union ####################
 
+    UnionItemId:
+      type: object
+      properties:
+        value:
+          type: string
+          example: "${blockchain}:${token}:${tokenId}"
+        blockchain:
+          $ref: "#/components/schemas/UnionBlockchain"
+        token:
+          $ref: "#/components/schemas/UnionAddress"
+        tokenId:
+          $ref: "#/components/schemas/BigInteger"
+      required:
+        - value
+        - blockchain
+        - token
+        - tokenId
+
     UnionItem:
       type: object
       properties:
+        id:
+          $ref: "#/components/schemas/UnionItemId"
         mintedAt:
           type: string
           format: date-time
@@ -113,6 +133,7 @@ components:
         - $ref: "#/components/schemas/EthItem"
         - $ref: "#/components/schemas/FlowItem"
       required:
+        - id
         - mintedAt
         - lastUpdatedAt
         - supply
@@ -151,9 +172,32 @@ components:
 
     #################### Ownership - Union ####################
 
+    UnionOwnershipId:
+      type: object
+      properties:
+        value:
+          type: string
+          example: "${blockchain}:${token}:${tokenId}:${owner}"
+        blockchain:
+          $ref: "#/components/schemas/UnionBlockchain"
+        token:
+          $ref: "#/components/schemas/UnionAddress"
+        tokenId:
+          $ref: "#/components/schemas/BigInteger"
+        owner:
+          $ref: "#/components/schemas/UnionAddress"
+      required:
+        - value
+        - blockchain
+        - token
+        - tokenId
+        - owner
+
     UnionOwnership:
       type: object
       properties:
+        id:
+          $ref: "#/components/schemas/UnionOwnershipId"
         value:
           $ref: "#/components/schemas/BigInteger"
         createdAt:
@@ -163,6 +207,7 @@ components:
         - $ref: "#/components/schemas/EthOwnership"
         - $ref: "#/components/schemas/FlowOwnership"
       required:
+        - id
         - value
         - createdAt
 
@@ -199,9 +244,15 @@ components:
 
     #################### Order - Union ####################
 
+    UnionOrderId:
+      type: object
+      example: "${blockchain}:${id}"
+
     UnionOrder:
       type: object
       properties:
+        id:
+          $ref: "#/components/schemas/UnionOrderId"
         fill:
           $ref: "#/components/schemas/BigInteger"
         startedAt:
@@ -233,6 +284,7 @@ components:
         - $ref: "#/components/schemas/EthOrder"
         - $ref: "#/components/schemas/FlowOrder"
       required:
+        - id
         - fill
         - makeStock
         - cancelled
@@ -284,6 +336,10 @@ components:
 
     #################### Activity - Union ####################
 
+    UnionActivityId:
+      type: object
+      example: "${blockchain}:${id}"
+
     UnionActivitySort:
       type: string
       enum:
@@ -316,6 +372,8 @@ components:
     UnionActivity:
       type: object
       properties:
+        id:
+          $ref: "#/components/schemas/UnionActivityId"
         date:
           type: string
           format: "date-time"
@@ -323,6 +381,7 @@ components:
         - $ref: "#/components/schemas/EthActivity"
         - $ref: "#/components/schemas/FlowActivity"
       required:
+        - id
         - date
 
     UnionActivities:
@@ -438,24 +497,6 @@ components:
 
     #################### Item - Eth ####################
 
-    EthItemId:
-      type: object
-      properties:
-        value:
-          type: string
-          example: "${blockchain}:${token}:${tokenId}"
-        blockchain:
-          $ref: "#/components/schemas/EthBlockchain"
-        token:
-          $ref: "#/components/schemas/EthAddress"
-        tokenId:
-          $ref: "#/components/schemas/BigInteger"
-      required:
-        - value
-        - blockchain
-        - token
-        - tokenId
-
     EthItem:
       type: object
       properties:
@@ -463,12 +504,10 @@ components:
           type: string
           enum:
             - ETHEREUM
-        id:
-          $ref: "#/components/schemas/EthItemId"
         tokenId:
           $ref: "#/components/schemas/BigInteger"
         collection:
-          $ref: "#/components/schemas/EthAddress"
+          $ref: "#/components/schemas/UnionAddress"
         creators:
           type: array
           default: [ ]
@@ -478,7 +517,7 @@ components:
           type: array
           default: [ ]
           items:
-            $ref: "#/components/schemas/EthAddress"
+            $ref: "#/components/schemas/UnionAddress"
         royalties:
           type: array
           default: [ ]
@@ -493,7 +532,6 @@ components:
             $ref: "#/components/schemas/EthItemTransfer"
       required:
         - blockchain
-        - id
         - tokenId
         - collection
         - creators
@@ -506,9 +544,9 @@ components:
       type: object
       properties:
         owner:
-          "$ref": "#/components/schemas/EthAddress"
+          "$ref": "#/components/schemas/UnionAddress"
         contract:
-          "$ref": "#/components/schemas/EthAddress"
+          "$ref": "#/components/schemas/UnionAddress"
         tokenId:
           "$ref": "#/components/schemas/BigInteger"
         value:
@@ -549,7 +587,7 @@ components:
           enum:
             - TRANSFER
         from:
-          "$ref": "#/components/schemas/EthAddress"
+          "$ref": "#/components/schemas/UnionAddress"
       required:
         - "@type"
         - owner
@@ -563,7 +601,7 @@ components:
         - value
       properties:
         account:
-          $ref: "#/components/schemas/EthAddress"
+          $ref: "#/components/schemas/UnionAddress"
         value:
           $ref: "#/components/schemas/BigInteger"
 
@@ -571,7 +609,7 @@ components:
       type: object
       properties:
         account:
-          $ref: "#/components/schemas/EthAddress"
+          $ref: "#/components/schemas/UnionAddress"
         value:
           $ref: "#/components/schemas/BigDecimal"
       required:
@@ -581,7 +619,7 @@ components:
     EthItemEvent:
       properties:
         itemId:
-          $ref: "#/components/schemas/EthItemId"
+          $ref: "#/components/schemas/UnionItemId"
       required:
         - "@type"
         - itemId
@@ -615,27 +653,6 @@ components:
 
     #################### Ownership - Eth ####################
 
-    EthOwnershipId:
-      type: object
-      properties:
-        value:
-          type: string
-          example: "${blockchain}:${token}:${tokenId}:${owner}"
-        blockchain:
-          $ref: "#/components/schemas/EthBlockchain"
-        token:
-          $ref: "#/components/schemas/EthAddress"
-        tokenId:
-          $ref: "#/components/schemas/BigInteger"
-        owner:
-          $ref: "#/components/schemas/EthAddress"
-      required:
-        - value
-        - blockchain
-        - token
-        - tokenId
-        - owner
-
     EthOwnership:
       type: object
       properties:
@@ -643,17 +660,15 @@ components:
           type: string
           enum:
             - ETHEREUM
-        id:
-          $ref: "#/components/schemas/EthOwnershipId"
         contract:
-          $ref: "#/components/schemas/EthAddress"
+          $ref: "#/components/schemas/UnionAddress"
         tokenId:
           $ref: "#/components/schemas/BigInteger"
         owners:
           type: array
           default: [ ]
           items:
-            $ref: "#/components/schemas/EthAddress"
+            $ref: "#/components/schemas/UnionAddress"
         creators:
           type: array
           default: [ ]
@@ -668,7 +683,6 @@ components:
             $ref: "#/components/schemas/EthItemHistory"
       required:
         - "@type"
-        - id
         - contract
         - tokenId
         - owners
@@ -683,7 +697,7 @@ components:
           enum:
             - ETHEREUM
         ownershipId:
-          $ref: "#/components/schemas/EthOwnershipId"
+          $ref: "#/components/schemas/UnionOwnershipId"
       required:
         - "@type"
         - ownershipId
@@ -716,19 +730,13 @@ components:
 
     #################### Order - Eth ####################
 
-    EthOrderId:
-      type: object
-      example: "${blockchain}:${id}"
-
     EthOrder:
       type: object
       properties:
-        id:
-          $ref: "#/components/schemas/EthOrderId"
         maker:
-          $ref: "#/components/schemas/EthAddress"
+          $ref: "#/components/schemas/UnionAddress"
         taker:
-          $ref: "#/components/schemas/EthAddress"
+          $ref: "#/components/schemas/UnionAddress"
         make:
           $ref: "#/components/schemas/EthAsset"
         take:
@@ -743,7 +751,6 @@ components:
           items:
             $ref: "#/components/schemas/EthPendingOrder"
       required:
-        - id
         - type
         - maker
         - make
@@ -837,7 +844,7 @@ components:
       type: object
       properties:
         exchange:
-          $ref: "#/components/schemas/EthAddress"
+          $ref: "#/components/schemas/UnionAddress"
         makerRelayerFee:
           $ref: "#/components/schemas/BigInteger"
         takerRelayerFee:
@@ -847,7 +854,7 @@ components:
         takerProtocolFee:
           $ref: "#/components/schemas/BigInteger"
         feeRecipient:
-          $ref: "#/components/schemas/EthAddress"
+          $ref: "#/components/schemas/UnionAddress"
         feeMethod:
           type: string
           enum:
@@ -873,7 +880,7 @@ components:
         replacementPattern:
           type: string
         staticTarget:
-          $ref: "#/components/schemas/EthAddress"
+          $ref: "#/components/schemas/UnionAddress"
         staticExtraData:
           type: string
         extra:
@@ -910,7 +917,7 @@ components:
         - date
       properties:
         id:
-          $ref: "#/components/schemas/EthOrderId"
+          $ref: "#/components/schemas/UnionOrderId"
         make:
           $ref: "#/components/schemas/EthAsset"
         take:
@@ -919,7 +926,7 @@ components:
           type: string
           format: date-time
         maker:
-          $ref: "#/components/schemas/EthAddress"
+          $ref: "#/components/schemas/UnionAddress"
       oneOf:
         - $ref: "#/components/schemas/EthPendingOrderCancel"
         - $ref: "#/components/schemas/EthPendingOrderMatch"
@@ -940,7 +947,7 @@ components:
         fill:
           $ref: "#/components/schemas/BigInteger"
         taker:
-          $ref: "#/components/schemas/EthAddress"
+          $ref: "#/components/schemas/UnionAddress"
         counterHash:
           type: string
         makeUsd:
@@ -963,7 +970,7 @@ components:
           enum:
             - CANCEL
         owner:
-          $ref: "#/components/schemas/EthAddress"
+          $ref: "#/components/schemas/UnionAddress"
       required:
         - "@type"
 
@@ -981,7 +988,7 @@ components:
       type: object
       properties:
         account:
-          $ref: "#/components/schemas/EthAddress"
+          $ref: "#/components/schemas/UnionAddress"
         value:
           $ref: "#/components/schemas/BigInteger"
       required:
@@ -1029,7 +1036,7 @@ components:
           enum:
             - ERC20
         contract:
-          $ref: "#/components/schemas/EthAddress"
+          $ref: "#/components/schemas/UnionAddress"
       required:
         - "@type"
         - contract
@@ -1042,7 +1049,7 @@ components:
           enum:
             - ERC721
         contract:
-          $ref: "#/components/schemas/EthAddress"
+          $ref: "#/components/schemas/UnionAddress"
         tokenId:
           $ref: "#/components/schemas/BigInteger"
       required:
@@ -1058,7 +1065,7 @@ components:
           enum:
             - ERC721_Lazy
         contract:
-          $ref: "#/components/schemas/EthAddress"
+          $ref: "#/components/schemas/UnionAddress"
         tokenId:
           $ref: "#/components/schemas/BigInteger"
         uri:
@@ -1095,7 +1102,7 @@ components:
           enum:
             - ERC1155
         contract:
-          $ref: "#/components/schemas/EthAddress"
+          $ref: "#/components/schemas/UnionAddress"
         tokenId:
           $ref: "#/components/schemas/BigInteger"
       required:
@@ -1111,7 +1118,7 @@ components:
           enum:
             - ERC1155_Lazy
         contract:
-          $ref: "#/components/schemas/EthAddress"
+          $ref: "#/components/schemas/UnionAddress"
         tokenId:
           $ref: "#/components/schemas/BigInteger"
         uri:
@@ -1150,7 +1157,7 @@ components:
           enum:
             - "CRYPTO_PUNKS"
         contract:
-          $ref: "#/components/schemas/EthAddress"
+          $ref: "#/components/schemas/UnionAddress"
         punkId:
           type: integer
       required:
@@ -1166,22 +1173,15 @@ components:
           enum:
             - "GEN_ART"
         contract:
-          $ref: "#/components/schemas/EthAddress"
+          $ref: "#/components/schemas/UnionAddress"
       required:
         - "@type"
         - contract
 
     #################### Activity - Eth ####################
 
-    EthActivityId:
-      type: string
-      example: "${blockchain}:${id}"
-
     EthActivity:
       type: object
-      properties:
-        id:
-          $ref: "#/components/schemas/EthActivityId"
       oneOf:
         - $ref: "#/components/schemas/EthMintActivity"
         - $ref: "#/components/schemas/EthBurnActivity"
@@ -1191,8 +1191,6 @@ components:
         - $ref: "#/components/schemas/EthOrderListActivity"
         - $ref: "#/components/schemas/EthOrderCancelBidActivity"
         - $ref: "#/components/schemas/EthOrderCancelListActivity"
-      required:
-        - id
 
     EthMintActivity:
       type: object
@@ -1205,9 +1203,9 @@ components:
           type: array
           default: [ ]
           items:
-            $ref: "#/components/schemas/EthAddress"
+            $ref: "#/components/schemas/UnionAddress"
         contract:
-          $ref: "#/components/schemas/EthAddress"
+          $ref: "#/components/schemas/UnionAddress"
         tokenId:
           $ref: "#/components/schemas/BigInteger"
         value:
@@ -1233,9 +1231,9 @@ components:
           type: array
           default: [ ]
           items:
-            $ref: "#/components/schemas/EthAddress"
+            $ref: "#/components/schemas/UnionAddress"
         contract:
-          $ref: "#/components/schemas/EthAddress"
+          $ref: "#/components/schemas/UnionAddress"
         tokenId:
           $ref: "#/components/schemas/BigInteger"
         value:
@@ -1258,14 +1256,14 @@ components:
           enum:
             - ETHEREUM_TRANSFER
         from:
-          $ref: "#/components/schemas/EthAddress"
+          $ref: "#/components/schemas/UnionAddress"
         owners:
           type: array
           default: [ ]
           items:
-            $ref: "#/components/schemas/EthAddress"
+            $ref: "#/components/schemas/UnionAddress"
         contract:
-          $ref: "#/components/schemas/EthAddress"
+          $ref: "#/components/schemas/UnionAddress"
         tokenId:
           $ref: "#/components/schemas/BigInteger"
         value:
@@ -1285,7 +1283,7 @@ components:
       type: object
       properties:
         maker:
-          $ref: "#/components/schemas/EthAddress"
+          $ref: "#/components/schemas/UnionAddress"
         hash:
           type: string
         asset:
@@ -1345,7 +1343,7 @@ components:
         hash:
           type: string
         maker:
-          $ref: "#/components/schemas/EthAddress"
+          $ref: "#/components/schemas/UnionAddress"
         make:
           $ref: "#/components/schemas/EthAsset"
         take:
@@ -1375,7 +1373,7 @@ components:
         hash:
           type: string
         maker:
-          $ref: "#/components/schemas/EthAddress"
+          $ref: "#/components/schemas/UnionAddress"
         make:
           $ref: "#/components/schemas/EthAsset"
         take:
@@ -1405,7 +1403,7 @@ components:
         hash:
           type: string
         maker:
-          $ref: "#/components/schemas/EthAddress"
+          $ref: "#/components/schemas/UnionAddress"
         make:
           $ref: "#/components/schemas/EthAssetType"
         take:
@@ -1433,7 +1431,7 @@ components:
         hash:
           type: string
         maker:
-          $ref: "#/components/schemas/EthAddress"
+          $ref: "#/components/schemas/UnionAddress"
         make:
           $ref: "#/components/schemas/EthAssetType"
         take:
@@ -1459,7 +1457,7 @@ components:
           enum:
             - ETHEREUM
         id:
-          $ref: "#/components/schemas/EthAddress"
+          $ref: "#/components/schemas/UnionAddress"
         type:
           type: string
           enum:
@@ -1469,7 +1467,7 @@ components:
         supportsLazyMint:
           type: boolean
         owner:
-          $ref: "#/components/schemas/EthAddress"
+          $ref: "#/components/schemas/UnionAddress"
         features:
           type: array
           default: [ ]
@@ -1493,7 +1491,7 @@ components:
       type: object
       properties:
         orderId:
-          "$ref": "#/components/schemas/EthOrderId"
+          "$ref": "#/components/schemas/UnionOrderId"
       required:
         - orderId
       oneOf:
@@ -1514,24 +1512,6 @@ components:
 
     #################### Item - Flow ####################
 
-    FlowItemId:
-      type: object
-      properties:
-        value:
-          type: string
-          example: "${blockchain}:${contract}:${tokenId}"
-        blockchain:
-          $ref: "#/components/schemas/FlowBlockchain"
-        token:
-          $ref: "#/components/schemas/FlowContract"
-        tokenId:
-          $ref: "#/components/schemas/BigInteger"
-      required:
-        - value
-        - blockchain
-        - token
-        - tokenId
-
     FlowItem:
       type: object
       properties:
@@ -1539,12 +1519,10 @@ components:
           type: string
           enum:
             - FLOW
-        id:
-          $ref: "#/components/schemas/FlowItemId"
         tokenId:
           $ref: "#/components/schemas/BigInteger"
         collection:
-          $ref: "#/components/schemas/FlowContract"
+          $ref: "#/components/schemas/UnionAddress"
         creators:
           type: array
           default: [ ]
@@ -1554,7 +1532,7 @@ components:
           type: array
           default: [ ]
           items:
-            $ref: "#/components/schemas/FlowAddress"
+            $ref: "#/components/schemas/UnionAddress"
         royalties:
           type: array
           default: [ ]
@@ -1562,7 +1540,6 @@ components:
             $ref: "#/components/schemas/FlowRoyalty"
       required:
         - blockchain
-        - id
         - tokenId
         - collection
         - creators
@@ -1573,7 +1550,7 @@ components:
       type: object
       properties:
         account:
-          $ref: "#/components/schemas/FlowAddress"
+          $ref: "#/components/schemas/UnionAddress"
         value:
           $ref: "#/components/schemas/BigDecimal"
       required:
@@ -1584,7 +1561,7 @@ components:
       type: object
       properties:
         account:
-          $ref: "#/components/schemas/FlowAddress"
+          $ref: "#/components/schemas/UnionAddress"
         value:
           $ref: "#/components/schemas/BigDecimal"
       required:
@@ -1594,7 +1571,7 @@ components:
     FlowItemEvent:
       properties:
         itemId:
-          $ref: "#/components/schemas/FlowItemId"
+          $ref: "#/components/schemas/UnionItemId"
       required:
         - "@type"
         - itemId
@@ -1628,27 +1605,6 @@ components:
 
     #################### Ownership - Flow ####################
 
-    FlowOwnershipId:
-      type: object
-      properties:
-        value:
-          type: string
-          example: "${blockchain}:${collection}:${tokenId}:${owner}"
-        blockchain:
-          $ref: "#/components/schemas/FlowBlockchain"
-        token:
-          $ref: "#/components/schemas/FlowContract"
-        tokenId:
-          $ref: "#/components/schemas/BigInteger"
-        owner:
-          $ref: "#/components/schemas/FlowAddress"
-      required:
-        - value
-        - blockchain
-        - token
-        - tokenId
-        - owner
-
     FlowOwnership:
       type: object
       properties:
@@ -1656,20 +1612,17 @@ components:
           type: string
           enum:
             - FLOW
-        id:
-          $ref: "#/components/schemas/FlowOwnershipId"
         contract:
-          $ref: "#/components/schemas/FlowContract"
+          $ref: "#/components/schemas/UnionAddress"
         tokenId:
           $ref: "#/components/schemas/BigInteger"
         owners:
           type: array
           default: [ ]
           items:
-            $ref: "#/components/schemas/FlowAddress"
+            $ref: "#/components/schemas/UnionAddress"
       required:
         - "@type"
-        - id
         - contract
         - tokenId
         - owners
@@ -1679,7 +1632,7 @@ components:
         eventId:
           type: string
         ownershipId:
-          $ref: "#/components/schemas/FlowOwnershipId"
+          $ref: "#/components/schemas/UnionOwnershipId"
       required:
         - "@type"
         - eventId
@@ -1713,16 +1666,7 @@ components:
 
     #################### Order - Flow ####################
 
-    FlowOrderId:
-      type: object
-      example: "${blockchain}:${id}"
-
     FlowOrder:
-      properties:
-        id:
-          $ref: "#/components/schemas/FlowOrderId"
-      required:
-        - id
       oneOf:
         - $ref: "#/components/schemas/FlowOrderV1"
 
@@ -1734,9 +1678,9 @@ components:
           enum:
             - FLOW_RARIBLE_V1
         maker:
-          $ref: "#/components/schemas/FlowAddress"
+          $ref: "#/components/schemas/UnionAddress"
         taker:
-          $ref: "#/components/schemas/FlowAddress"
+          $ref: "#/components/schemas/UnionAddress"
         make:
           $ref: "#/components/schemas/FlowAsset"
         take:
@@ -1771,7 +1715,7 @@ components:
       type: object
       properties:
         account:
-          $ref: "#/components/schemas/FlowAddress"
+          $ref: "#/components/schemas/UnionAddress"
         value:
           $ref: "#/components/schemas/BigInteger"
       required:
@@ -1793,7 +1737,7 @@ components:
       type: object
       properties:
         contract:
-          $ref: "#/components/schemas/FlowAddress"
+          $ref: "#/components/schemas/UnionAddress"
       required:
         - contract
       oneOf:
@@ -1826,7 +1770,7 @@ components:
       type: object
       properties:
         orderId:
-          "$ref": "#/components/schemas/FlowOrderId"
+          "$ref": "#/components/schemas/UnionOrderId"
       required:
         - orderId
       oneOf:
@@ -1847,15 +1791,8 @@ components:
 
     #################### Activity - Flow ####################
 
-    FlowActivityId:
-      type: object
-      example: "${blockchain}:${id}"
-
     FlowActivity:
       type: object
-      properties:
-        id:
-          $ref: "#/components/schemas/FlowActivityId"
       oneOf:
         - $ref: "#/components/schemas/FlowMintActivity"
         - $ref: "#/components/schemas/FlowBurnActivity"
@@ -1863,8 +1800,6 @@ components:
         - $ref: "#/components/schemas/FlowOrderMatchActivity"
         - $ref: "#/components/schemas/FlowOrderListActivity"
         - $ref: "#/components/schemas/FlowOrderCancelListActivity"
-      required:
-        - id
 
     FlowMintActivity:
       type: object
@@ -1877,9 +1812,9 @@ components:
           type: array
           default: [ ]
           items:
-            $ref: "#/components/schemas/FlowAddress"
+            $ref: "#/components/schemas/UnionAddress"
         contract:
-          $ref: "#/components/schemas/FlowContract"
+          $ref: "#/components/schemas/UnionAddress"
         tokenId:
           $ref: "#/components/schemas/BigInteger"
         value:
@@ -1905,9 +1840,9 @@ components:
           type: array
           default: [ ]
           items:
-            $ref: "#/components/schemas/FlowAddress"
+            $ref: "#/components/schemas/UnionAddress"
         contract:
-          $ref: "#/components/schemas/FlowContract"
+          $ref: "#/components/schemas/UnionAddress"
         tokenId:
           $ref: "#/components/schemas/BigInteger"
         value:
@@ -1930,14 +1865,14 @@ components:
           enum:
             - FLOW_TRANSFER
         from:
-          $ref: "#/components/schemas/FlowAddress"
+          $ref: "#/components/schemas/UnionAddress"
         owners:
           type: array
           default: [ ]
           items:
-            $ref: "#/components/schemas/FlowAddress"
+            $ref: "#/components/schemas/UnionAddress"
         contract:
-          $ref: "#/components/schemas/FlowContract"
+          $ref: "#/components/schemas/UnionAddress"
         tokenId:
           $ref: "#/components/schemas/BigInteger"
         value:
@@ -1987,7 +1922,7 @@ components:
         hash:
           type: string
         maker:
-          $ref: "#/components/schemas/FlowAddress"
+          $ref: "#/components/schemas/UnionAddress"
         make:
           $ref: "#/components/schemas/FlowAsset"
         take:
@@ -2014,7 +1949,7 @@ components:
         hash:
           type: string
         maker:
-          $ref: "#/components/schemas/FlowAddress"
+          $ref: "#/components/schemas/UnionAddress"
         make:
           $ref: "#/components/schemas/FlowAsset"
         take:
@@ -2030,7 +1965,7 @@ components:
       type: object
       properties:
         maker:
-          $ref: "#/components/schemas/FlowAddress"
+          $ref: "#/components/schemas/UnionAddress"
         asset:
           $ref: "#/components/schemas/FlowAsset"
         type:
@@ -2051,9 +1986,9 @@ components:
           enum:
             - FLOW
         id:
-          $ref: "#/components/schemas/FlowContract"
+          $ref: "#/components/schemas/UnionAddress"
         owner:
-          $ref: "#/components/schemas/FlowAddress"
+          $ref: "#/components/schemas/UnionAddress"
       required:
         - "@type"
         - id
@@ -2068,22 +2003,12 @@ components:
       type: string
       example: 123456.789
 
-    EthAddress:
+    UnionAddress:
       type: string
       example: "0x60f80121c31a0d46b5279700f9df786054aa5ee5"
-    EthBlockchain:
+    UnionBlockchain:
       type: string
       enum:
         - ETHEREUM
         - POLYGON
-
-    FlowAddress:
-      type: string
-      example: "0x5c075acc71f2f41c"
-    FlowContract:
-      type: string
-      example: "A.${FlowAddress}.${string}"
-    FlowBlockchain:
-      type: string
-      enum:
         - FLOW

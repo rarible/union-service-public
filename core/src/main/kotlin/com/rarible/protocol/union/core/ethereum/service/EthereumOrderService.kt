@@ -8,12 +8,9 @@ import com.rarible.protocol.union.dto.*
 import kotlinx.coroutines.reactive.awaitFirst
 
 class EthereumOrderService(
-    blockchain: EthBlockchainDto,
+    override val blockchain: BlockchainDto,
     private val orderControllerApi: OrderControllerApi
 ) : AbstractEthereumService(blockchain), OrderService {
-
-    private val commonBlockchain = BlockchainDto.valueOf(blockchain.name)
-    override fun getBlockchain() = commonBlockchain
 
     override suspend fun getOrdersAll(
         platform: PlatformDto?,

@@ -1,11 +1,11 @@
 package com.rarible.protocol.union.core.flow.service
 
 import com.rarible.protocol.union.core.service.SignatureService
-import com.rarible.protocol.union.dto.FlowBlockchainDto
+import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.UnionSignatureValidationFormDto
 
 class FlowSignatureService(
-    blockchain: FlowBlockchainDto
+    blockchain: BlockchainDto
     // private val signatureControllerApi: Any
 ) : AbstractFlowService(blockchain), SignatureService {
 

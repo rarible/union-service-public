@@ -8,8 +8,8 @@ import com.rarible.protocol.union.api.client.SignatureControllerApi
 import com.rarible.protocol.union.api.configuration.PageSize
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
-import com.rarible.protocol.union.core.ethereum.converter.EthAddressConverter
-import com.rarible.protocol.union.dto.EthBlockchainDto
+import com.rarible.protocol.union.core.converter.UnionAddressConverter
+import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.UnionSignatureValidationFormDto
 import io.mockk.coEvery
 import kotlinx.coroutines.FlowPreview
@@ -35,7 +35,7 @@ class SignatureControllerFt : AbstractIntegrationTest() {
         val ethForm = EthereumSignatureValidationFormDto(randomAddress(), randomString(), randomBinary())
 
         val unionForm = UnionSignatureValidationFormDto(
-            signer = EthAddressConverter.convert(ethForm.signer, EthBlockchainDto.ETHEREUM).fullId(),
+            signer = UnionAddressConverter.convert(ethForm.signer, BlockchainDto.ETHEREUM).fullId(),
             message = ethForm.message,
             signature = ethForm.signature.prefixed()
         )
@@ -51,7 +51,7 @@ class SignatureControllerFt : AbstractIntegrationTest() {
         val ethForm = EthereumSignatureValidationFormDto(randomAddress(), randomString(), randomBinary())
 
         val unionForm = UnionSignatureValidationFormDto(
-            signer = EthAddressConverter.convert(ethForm.signer, EthBlockchainDto.POLYGON).fullId(),
+            signer = UnionAddressConverter.convert(ethForm.signer, BlockchainDto.POLYGON).fullId(),
             message = ethForm.message,
             signature = ethForm.signature.prefixed()
         )

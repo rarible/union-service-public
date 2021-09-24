@@ -2,20 +2,21 @@ package com.rarible.protocol.union.core.ethereum.converter
 
 import com.rarible.protocol.dto.NftCollectionDto
 import com.rarible.protocol.dto.NftCollectionsDto
-import com.rarible.protocol.union.dto.EthBlockchainDto
+import com.rarible.protocol.union.core.converter.UnionAddressConverter
+import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.EthCollectionDto
 import com.rarible.protocol.union.dto.UnionCollectionsDto
 
 object EthUnionCollectionConverter {
 
-    fun convert(source: NftCollectionDto, blockchain: EthBlockchainDto): EthCollectionDto {
+    fun convert(source: NftCollectionDto, blockchain: BlockchainDto): EthCollectionDto {
         return EthCollectionDto(
-            id = EthAddressConverter.convert(source.id, blockchain),
+            id = UnionAddressConverter.convert(source.id, blockchain),
             name = source.name,
             symbol = source.symbol,
             type = convert(source.type),
             supportsLazyMint = source.supportsLazyMint,
-            owner = if (source.owner == null) null else EthAddressConverter.convert(
+            owner = if (source.owner == null) null else UnionAddressConverter.convert(
                 source.owner!!,
                 blockchain
             ),
@@ -23,7 +24,7 @@ object EthUnionCollectionConverter {
         )
     }
 
-    fun convert(page: NftCollectionsDto, blockchain: EthBlockchainDto): UnionCollectionsDto {
+    fun convert(page: NftCollectionsDto, blockchain: BlockchainDto): UnionCollectionsDto {
         return UnionCollectionsDto(
             total = page.total,
             continuation = page.continuation,

@@ -1,13 +1,13 @@
 package com.rarible.protocol.union.core.ethereum.converter
 
 import com.rarible.protocol.dto.*
+import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.dto.*
-import com.rarible.protocol.union.dto.ethereum.EthActivityIdDto
 
 object EthUnionActivityConverter {
 
-    fun convert(source: ActivityDto, blockchain: EthBlockchainDto): UnionActivityDto {
-        val unionActivityId = EthActivityIdDto(blockchain, source.id)
+    fun convert(source: ActivityDto, blockchain: BlockchainDto): UnionActivityDto {
+        val unionActivityId = UnionActivityIdDto(blockchain, source.id)
         return when (source) {
             is OrderActivityMatchDto -> {
                 EthOrderMatchActivityDto(
@@ -34,7 +34,7 @@ object EthUnionActivityConverter {
                     priceUsd = source.priceUsd,
                     source = convert(source.source),
                     hash = EthConverter.convert(source.hash),
-                    maker = EthAddressConverter.convert(source.maker, blockchain),
+                    maker = UnionAddressConverter.convert(source.maker, blockchain),
                     make = EthConverter.convert(source.make, blockchain),
                     take = EthConverter.convert(source.take, blockchain)
                 )
@@ -47,7 +47,7 @@ object EthUnionActivityConverter {
                     priceUsd = source.priceUsd,
                     source = convert(source.source),
                     hash = EthConverter.convert(source.hash),
-                    maker = EthAddressConverter.convert(source.maker, blockchain),
+                    maker = UnionAddressConverter.convert(source.maker, blockchain),
                     make = EthConverter.convert(source.make, blockchain),
                     take = EthConverter.convert(source.take, blockchain)
                 )
@@ -58,7 +58,7 @@ object EthUnionActivityConverter {
                     date = source.date,
                     source = convert(source.source),
                     hash = EthConverter.convert(source.hash),
-                    maker = EthAddressConverter.convert(source.maker, blockchain),
+                    maker = UnionAddressConverter.convert(source.maker, blockchain),
                     make = EthConverter.convert(source.make, blockchain),
                     take = EthConverter.convert(source.take, blockchain),
                     blockchainInfo = ActivityBlockchainInfoDto(
@@ -75,7 +75,7 @@ object EthUnionActivityConverter {
                     date = source.date,
                     source = convert(source.source),
                     hash = EthConverter.convert(source.hash),
-                    maker = EthAddressConverter.convert(source.maker, blockchain),
+                    maker = UnionAddressConverter.convert(source.maker, blockchain),
                     make = EthConverter.convert(source.make, blockchain),
                     take = EthConverter.convert(source.take, blockchain),
                     blockchainInfo = ActivityBlockchainInfoDto(
@@ -90,8 +90,8 @@ object EthUnionActivityConverter {
                 EthMintActivityDto(
                     id = unionActivityId,
                     date = source.date,
-                    owners = listOf(EthAddressConverter.convert(source.owner, blockchain)),
-                    contract = EthAddressConverter.convert(source.contract, blockchain),
+                    owners = listOf(UnionAddressConverter.convert(source.owner, blockchain)),
+                    contract = UnionAddressConverter.convert(source.contract, blockchain),
                     tokenId = source.tokenId,
                     value = source.value,
                     blockchainInfo = ActivityBlockchainInfoDto(
@@ -106,8 +106,8 @@ object EthUnionActivityConverter {
                 EthBurnActivityDto(
                     id = unionActivityId,
                     date = source.date,
-                    owners = listOf(EthAddressConverter.convert(source.owner, blockchain)),
-                    contract = EthAddressConverter.convert(source.contract, blockchain),
+                    owners = listOf(UnionAddressConverter.convert(source.owner, blockchain)),
+                    contract = UnionAddressConverter.convert(source.contract, blockchain),
                     tokenId = source.tokenId,
                     value = source.value,
                     blockchainInfo = ActivityBlockchainInfoDto(
@@ -122,9 +122,9 @@ object EthUnionActivityConverter {
                 EthTransferActivityDto(
                     id = unionActivityId,
                     date = source.date,
-                    from = EthAddressConverter.convert(source.from, blockchain),
-                    owners = listOf(EthAddressConverter.convert(source.owner, blockchain)),
-                    contract = EthAddressConverter.convert(source.contract, blockchain),
+                    from = UnionAddressConverter.convert(source.from, blockchain),
+                    owners = listOf(UnionAddressConverter.convert(source.owner, blockchain)),
+                    contract = UnionAddressConverter.convert(source.contract, blockchain),
                     tokenId = source.tokenId,
                     value = source.value,
                     blockchainInfo = ActivityBlockchainInfoDto(
@@ -185,9 +185,9 @@ object EthUnionActivityConverter {
         }
     }
 
-    private fun convert(source: OrderActivityMatchSideDto, blockchain: EthBlockchainDto): EthOrderActivityMatchSideDto {
+    private fun convert(source: OrderActivityMatchSideDto, blockchain: BlockchainDto): EthOrderActivityMatchSideDto {
         return EthOrderActivityMatchSideDto(
-            maker = EthAddressConverter.convert(source.maker, blockchain),
+            maker = UnionAddressConverter.convert(source.maker, blockchain),
             hash = EthConverter.convert(source.hash),
             asset = EthConverter.convert(source.asset, blockchain),
             type = convert(source.type!!) // TODO must be not null

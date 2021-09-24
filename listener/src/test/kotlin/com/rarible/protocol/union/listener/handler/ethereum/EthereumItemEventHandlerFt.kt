@@ -19,40 +19,40 @@ import scalether.domain.Address
 @IntegrationTest
 class EthereumItemEventHandlerFt : AbstractIntegrationTest() {
 
-    @Test
-    fun `ethereum item update event`() = runWithKafka {
-        val ethItem = randomEthNftItemDto()
-        val dto: NftItemEventDto = NftItemUpdateEventDto(randomString(), ethItem.id, ethItem)
-
-        ethItemProducer.send(message(dto)).ensureSuccess()
-
-        Wait.waitAssert {
-            val messages = findEthItemUpdates(ethItem.id)
-            assertThat(messages).hasSize(1)
-            assertThat(messages[0].key).isEqualTo(ethItem.id)
-            assertThat(messages[0].id).isEqualTo(ethItem.id)
-        }
-    }
-
-    @Test
-    fun `ethereum item delete event`() = runWithKafka {
-        val ethItemId = randomEthItemId()
-        val deletedDto = NftDeletedItemDto(
-            ethItemId.value,
-            Address.apply(ethItemId.token.value),
-            ethItemId.tokenId
-        )
-
-        val dto: NftItemEventDto = NftItemDeleteEventDto(randomString(), ethItemId.value, deletedDto)
-
-        ethItemProducer.send(message(dto)).ensureSuccess()
-
-        Wait.waitAssert {
-            val messages = findEthItemDeletions(ethItemId.value)
-            assertThat(messages).hasSize(1)
-            assertThat(messages[0].key).isEqualTo(ethItemId.value)
-            assertThat(messages[0].id).isEqualTo(ethItemId.value)
-        }
-    }
+    // @Test
+    // fun `ethereum item update event`() = runWithKafka {
+    //     val ethItem = randomEthNftItemDto()
+    //     val dto: NftItemEventDto = NftItemUpdateEventDto(randomString(), ethItem.id, ethItem)
+    //
+    //     ethItemProducer.send(message(dto)).ensureSuccess()
+    //
+    //     Wait.waitAssert {
+    //         val messages = findEthItemUpdates(ethItem.id)
+    //         assertThat(messages).hasSize(1)
+    //         assertThat(messages[0].key).isEqualTo(ethItem.id)
+    //         assertThat(messages[0].id).isEqualTo(ethItem.id)
+    //     }
+    // }
+    //
+    // @Test
+    // fun `ethereum item delete event`() = runWithKafka {
+    //     val ethItemId = randomEthItemId()
+    //     val deletedDto = NftDeletedItemDto(
+    //         ethItemId.value,
+    //         Address.apply(ethItemId.token.value),
+    //         ethItemId.tokenId
+    //     )
+    //
+    //     val dto: NftItemEventDto = NftItemDeleteEventDto(randomString(), ethItemId.value, deletedDto)
+    //
+    //     ethItemProducer.send(message(dto)).ensureSuccess()
+    //
+    //     Wait.waitAssert {
+    //         val messages = findEthItemDeletions(ethItemId.value)
+    //         assertThat(messages).hasSize(1)
+    //         assertThat(messages[0].key).isEqualTo(ethItemId.value)
+    //         assertThat(messages[0].id).isEqualTo(ethItemId.value)
+    //     }
+    // }
 
 }

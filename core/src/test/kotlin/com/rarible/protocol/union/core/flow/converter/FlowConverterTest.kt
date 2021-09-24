@@ -1,7 +1,7 @@
 package com.rarible.protocol.union.core.flow.converter
 
 import com.rarible.protocol.union.dto.FlowAssetTypeNftDto
-import com.rarible.protocol.union.dto.FlowBlockchainDto
+import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.test.data.randomFlowFungibleAsset
 import com.rarible.protocol.union.test.data.randomFlowNftAsset
 import org.assertj.core.api.Assertions.assertThat
@@ -13,7 +13,7 @@ internal class FlowConverterTest {
     fun `asset - FT`() {
         val dto = randomFlowFungibleAsset()
 
-        val converted = FlowConverter.convert(dto, FlowBlockchainDto.FLOW)
+        val converted = FlowConverter.convert(dto, BlockchainDto.FLOW)
 
         // assertThat(converted.value.toBigDecimal()).isEqualTo(dto.value) // TODO - types incompatible
         assertThat(converted.type.contract.value).isEqualTo(dto.contract)
@@ -23,7 +23,7 @@ internal class FlowConverterTest {
     fun `asset - NFT`() {
         val dto = randomFlowNftAsset()
 
-        val converted = FlowConverter.convert(dto, FlowBlockchainDto.FLOW)
+        val converted = FlowConverter.convert(dto, BlockchainDto.FLOW)
 
         // assertThat(converted.value.toBigDecimal()).isEqualTo(dto.value) // TODO - types incompatible
         assertThat(converted.type.contract.value).isEqualTo(dto.contract)
