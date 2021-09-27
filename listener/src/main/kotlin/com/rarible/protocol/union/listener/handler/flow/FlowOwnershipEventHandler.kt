@@ -4,14 +4,14 @@ import com.rarible.core.kafka.KafkaMessage
 import com.rarible.core.kafka.RaribleKafkaProducer
 import com.rarible.protocol.dto.FlowOwnershipEventDto
 import com.rarible.protocol.union.core.flow.converter.FlowUnionOwnershipEventConverter
-import com.rarible.protocol.union.dto.FlowBlockchainDto
+import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.UnionOwnershipEventDto
 import com.rarible.protocol.union.listener.handler.AbstractEventHandler
 import org.slf4j.LoggerFactory
 
 class FlowOwnershipEventHandler(
     private val producer: RaribleKafkaProducer<UnionOwnershipEventDto>,
-    private val blockchain: FlowBlockchainDto
+    private val blockchain: BlockchainDto
 ) : AbstractEventHandler<FlowOwnershipEventDto>() {
 
     private val logger = LoggerFactory.getLogger(javaClass)

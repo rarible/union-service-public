@@ -1,18 +1,18 @@
 package com.rarible.protocol.union.core.flow.converter
 
 import com.rarible.protocol.dto.*
+import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.dto.*
 import com.rarible.protocol.union.dto.FlowCreatorDto
 import com.rarible.protocol.union.dto.FlowRoyaltyDto
-import com.rarible.protocol.union.dto.flow.FlowItemIdDto
 
 object FlowUnionItemConverter {
 
-    fun convert(item: FlowNftItemDto, blockchain: FlowBlockchainDto): FlowItemDto {
+    fun convert(item: FlowNftItemDto, blockchain: BlockchainDto): FlowItemDto {
         val collection = FlowContractConverter.convert(item.collection, blockchain)
 
         return FlowItemDto(
-            id = FlowItemIdDto(
+            id = UnionItemIdDto(
                 blockchain = blockchain,
                 token = collection,
                 tokenId = item.tokenId
@@ -26,12 +26,12 @@ object FlowUnionItemConverter {
             tokenId = item.tokenId,
             collection = collection,
             creators = item.creators.map { convert(it, blockchain) },
-            owners = item.owners.map { FlowAddressConverter.convert(it, blockchain) },
+            owners = item.owners.map { UnionAddressConverter.convert(it, blockchain) },
             royalties = item.royalties.map { convert(it, blockchain) }
         )
     }
 
-    fun convert(page: FlowNftItemsDto, blockchain: FlowBlockchainDto): UnionItemsDto {
+    fun convert(page: FlowNftItemsDto, blockchain: BlockchainDto): UnionItemsDto {
         return UnionItemsDto(
             total = page.total!!.toLong(), // TODO should be required
             continuation = page.continuation,
@@ -41,20 +41,20 @@ object FlowUnionItemConverter {
 
     private fun convert(
         source: com.rarible.protocol.dto.FlowCreatorDto,
-        blockchain: FlowBlockchainDto
+        blockchain: BlockchainDto
     ): FlowCreatorDto {
         return FlowCreatorDto(
-            account = FlowAddressConverter.convert(source.account, blockchain),
+            account = UnionAddressConverter.convert(source.account, blockchain),
             value = source.value
         )
     }
 
     private fun convert(
         source: com.rarible.protocol.dto.FlowRoyaltyDto,
-        blockchain: FlowBlockchainDto
+        blockchain: BlockchainDto
     ): FlowRoyaltyDto {
         return FlowRoyaltyDto(
-            account = FlowAddressConverter.convert(source.account, blockchain),
+            account = UnionAddressConverter.convert(source.account, blockchain),
             value = source.value
         )
     }

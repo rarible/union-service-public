@@ -10,7 +10,7 @@ class FlowUnionActivityConverterTest {
     @Test
     fun `flow order activity match`() {
         val dto = randomFlowNftOrderActivitySell()
-        val converted = FlowUnionActivityConverter.convert(dto, FlowBlockchainDto.FLOW) as FlowOrderMatchActivityDto
+        val converted = FlowUnionActivityConverter.convert(dto, BlockchainDto.FLOW) as FlowOrderMatchActivityDto
 
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.date).isEqualTo(dto.date)
@@ -27,7 +27,7 @@ class FlowUnionActivityConverterTest {
     @Test
     fun `flow order activity list`() {
         val dto = randomFlowNftOrderActivityListDto()
-        val converted = FlowUnionActivityConverter.convert(dto, FlowBlockchainDto.FLOW) as FlowOrderListActivityDto
+        val converted = FlowUnionActivityConverter.convert(dto, BlockchainDto.FLOW) as FlowOrderListActivityDto
 
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.date).isEqualTo(dto.date)
@@ -45,7 +45,7 @@ class FlowUnionActivityConverterTest {
     fun `flow order activity cancel list`() {
         val dto = randomFlowCancelListActivityDto()
         val converted =
-            FlowUnionActivityConverter.convert(dto, FlowBlockchainDto.FLOW) as FlowOrderCancelListActivityDto
+            FlowUnionActivityConverter.convert(dto, BlockchainDto.FLOW) as FlowOrderCancelListActivityDto
 
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.date).isEqualTo(dto.date)
@@ -60,7 +60,7 @@ class FlowUnionActivityConverterTest {
     @Test
     fun `flow item activity mint`() {
         val dto = randomFlowMintDto()
-        val converted = FlowUnionActivityConverter.convert(dto, FlowBlockchainDto.FLOW) as FlowMintActivityDto
+        val converted = FlowUnionActivityConverter.convert(dto, BlockchainDto.FLOW) as FlowMintActivityDto
 
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.date).isEqualTo(dto.date)
@@ -78,7 +78,7 @@ class FlowUnionActivityConverterTest {
     @Test
     fun `flow item activity transfer`() {
         val dto = randomFlowTransferDto()
-        val converted = FlowUnionActivityConverter.convert(dto, FlowBlockchainDto.FLOW) as FlowTransferActivityDto
+        val converted = FlowUnionActivityConverter.convert(dto, BlockchainDto.FLOW) as FlowTransferActivityDto
 
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.date).isEqualTo(dto.date)
@@ -96,7 +96,7 @@ class FlowUnionActivityConverterTest {
     @Test
     fun `flow item activity burn`() {
         val dto = randomFlowBurnDto()
-        val converted = FlowUnionActivityConverter.convert(dto, FlowBlockchainDto.FLOW) as FlowBurnActivityDto
+        val converted = FlowUnionActivityConverter.convert(dto, BlockchainDto.FLOW) as FlowBurnActivityDto
 
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.date).isEqualTo(dto.date)

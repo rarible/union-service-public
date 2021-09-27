@@ -4,14 +4,14 @@ import com.rarible.core.kafka.KafkaMessage
 import com.rarible.core.kafka.RaribleKafkaProducer
 import com.rarible.protocol.dto.ActivityDto
 import com.rarible.protocol.union.core.ethereum.converter.EthUnionActivityConverter
-import com.rarible.protocol.union.dto.EthBlockchainDto
+import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.UnionActivityDto
 import com.rarible.protocol.union.listener.handler.AbstractEventHandler
 import org.slf4j.LoggerFactory
 
 class EthereumActivityEventHandler(
     private val producer: RaribleKafkaProducer<UnionActivityDto>,
-    private val blockchain: EthBlockchainDto
+    private val blockchain: BlockchainDto
 ) : AbstractEventHandler<ActivityDto>() {
 
     private val logger = LoggerFactory.getLogger(javaClass)

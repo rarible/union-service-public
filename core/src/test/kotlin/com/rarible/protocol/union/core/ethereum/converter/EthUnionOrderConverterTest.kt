@@ -14,7 +14,7 @@ class EthUnionOrderConverterTest {
     fun `eth order - legacy`() {
         val dto = randomEthLegacyOrderDto()
 
-        val converted = EthUnionOrderConverter.convert(dto, EthBlockchainDto.ETHEREUM) as EthLegacyOrderDto
+        val converted = EthUnionOrderConverter.convert(dto, BlockchainDto.ETHEREUM) as EthLegacyOrderDto
 
         assertThat(converted.id.value).isEqualTo(dto.hash.prefixed())
         assertThat(converted.maker.value).isEqualTo(dto.maker.prefixed())
@@ -45,7 +45,7 @@ class EthUnionOrderConverterTest {
         val order = randomEthLegacyOrderDto().copy(pending = listOf(randomEthOrderSideMatchDto()))
         val dto = order.pending!![0] as OrderSideMatchDto
 
-        val converted = EthUnionOrderConverter.convert(order, EthBlockchainDto.ETHEREUM)
+        val converted = EthUnionOrderConverter.convert(order, BlockchainDto.ETHEREUM)
             .pending!![0] as EthPendingOrderMatchDto
 
         assertThat(converted.id.value).isEqualTo(dto.hash.prefixed())
@@ -73,7 +73,7 @@ class EthUnionOrderConverterTest {
         val order = randomEthLegacyOrderDto().copy(pending = listOf(randomEthOrderCancelDto()))
         val dto = order.pending!![0] as OrderCancelDto
 
-        val converted = EthUnionOrderConverter.convert(order, EthBlockchainDto.ETHEREUM)
+        val converted = EthUnionOrderConverter.convert(order, BlockchainDto.ETHEREUM)
             .pending!![0] as EthPendingOrderCancelDto
 
         assertThat(converted.id.value).isEqualTo(dto.hash.prefixed())
@@ -92,7 +92,7 @@ class EthUnionOrderConverterTest {
         val order = randomEthLegacyOrderDto().copy(pending = listOf(randomEthOnChainOrderDto()))
         val dto = order.pending!![0] as OnChainOrderDto
 
-        val converted = EthUnionOrderConverter.convert(order, EthBlockchainDto.ETHEREUM)
+        val converted = EthUnionOrderConverter.convert(order, BlockchainDto.ETHEREUM)
             .pending!![0] as EthOnChainOrderDto
 
         assertThat(converted.id.value).isEqualTo(dto.hash.prefixed())
@@ -108,7 +108,7 @@ class EthUnionOrderConverterTest {
     fun `eth order rarible v2`() {
         val dto = randomEthV2OrderDto()
 
-        val converted = EthUnionOrderConverter.convert(dto, EthBlockchainDto.ETHEREUM) as EthRaribleV2OrderDto
+        val converted = EthUnionOrderConverter.convert(dto, BlockchainDto.ETHEREUM) as EthRaribleV2OrderDto
 
         assertThat(converted.id.value).isEqualTo(dto.hash.prefixed())
         assertThat(converted.maker.value).isEqualTo(dto.maker.prefixed())
@@ -143,7 +143,7 @@ class EthUnionOrderConverterTest {
     fun `eth order opensea v1`() {
         val dto = randomEthOpenSeaV1OrderDto()
 
-        val converted = EthUnionOrderConverter.convert(dto, EthBlockchainDto.ETHEREUM) as EthOpenSeaV1OrderDto
+        val converted = EthUnionOrderConverter.convert(dto, BlockchainDto.ETHEREUM) as EthOpenSeaV1OrderDto
 
         assertThat(converted.id.value).isEqualTo(dto.hash.prefixed())
         assertThat(converted.maker.value).isEqualTo(dto.maker.prefixed())
@@ -173,7 +173,7 @@ class EthUnionOrderConverterTest {
         val order = randomEthOpenSeaV1OrderDto()
         val dto = order.data
 
-        val converted = (EthUnionOrderConverter.convert(order, EthBlockchainDto.ETHEREUM) as EthOpenSeaV1OrderDto).data
+        val converted = (EthUnionOrderConverter.convert(order, BlockchainDto.ETHEREUM) as EthOpenSeaV1OrderDto).data
 
         assertThat(converted.exchange.value).isEqualTo(dto.exchange.prefixed())
         assertThat(converted.makerRelayerFee).isEqualTo(dto.makerRelayerFee)
@@ -197,7 +197,7 @@ class EthUnionOrderConverterTest {
     fun `eth order crypto punks`() {
         val dto = randomEthCryptoPunksOrderDto()
 
-        val converted = EthUnionOrderConverter.convert(dto, EthBlockchainDto.ETHEREUM) as EthCryptoPunksOrderDto
+        val converted = EthUnionOrderConverter.convert(dto, BlockchainDto.ETHEREUM) as EthCryptoPunksOrderDto
 
         assertThat(converted.id.value).isEqualTo(dto.hash.prefixed())
         assertThat(converted.maker.value).isEqualTo(dto.maker.prefixed())

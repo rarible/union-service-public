@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.core.ethereum.converter
 
 import com.rarible.protocol.dto.*
+import com.rarible.protocol.union.core.ethereum.converter.EthUnionActivityConverter
 import com.rarible.protocol.union.dto.*
 import com.rarible.protocol.union.test.data.*
 import org.assertj.core.api.Assertions.assertThat
@@ -11,7 +12,7 @@ class EthUnionActivityConverterTest {
     @Test
     fun `eth order activity match side`() {
         val dto = randomEthOrderActivityMatch()
-        val converted = EthUnionActivityConverter.convert(dto, EthBlockchainDto.ETHEREUM) as EthOrderMatchActivityDto
+        val converted = EthUnionActivityConverter.convert(dto, BlockchainDto.ETHEREUM) as EthOrderMatchActivityDto
 
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.date).isEqualTo(dto.date)
@@ -29,7 +30,7 @@ class EthUnionActivityConverterTest {
     @Test
     fun `eth order activity bid`() {
         val dto = randomEthOrderBidActivity()
-        val converted = EthUnionActivityConverter.convert(dto, EthBlockchainDto.ETHEREUM) as EthOrderBidActivityDto
+        val converted = EthUnionActivityConverter.convert(dto, BlockchainDto.ETHEREUM) as EthOrderBidActivityDto
 
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.date).isEqualTo(dto.date)
@@ -44,7 +45,7 @@ class EthUnionActivityConverterTest {
     @Test
     fun `eth order activity list`() {
         val dto = randomEthOrderListActivity()
-        val converted = EthUnionActivityConverter.convert(dto, EthBlockchainDto.ETHEREUM) as EthOrderListActivityDto
+        val converted = EthUnionActivityConverter.convert(dto, BlockchainDto.ETHEREUM) as EthOrderListActivityDto
 
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.date).isEqualTo(dto.date)
@@ -60,7 +61,7 @@ class EthUnionActivityConverterTest {
     fun `eth order activity cancel bid`() {
         val dto = randomEthOrderActivityCancelBid()
         val converted =
-            EthUnionActivityConverter.convert(dto, EthBlockchainDto.ETHEREUM) as EthOrderCancelBidActivityDto
+            EthUnionActivityConverter.convert(dto, BlockchainDto.ETHEREUM) as EthOrderCancelBidActivityDto
 
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.date).isEqualTo(dto.date)
@@ -77,7 +78,7 @@ class EthUnionActivityConverterTest {
     fun `eth order activity cancel list`() {
         val dto = randomEthOrderActivityCancelList()
         val converted =
-            EthUnionActivityConverter.convert(dto, EthBlockchainDto.ETHEREUM) as EthOrderCancelListActivityDto
+            EthUnionActivityConverter.convert(dto, BlockchainDto.ETHEREUM) as EthOrderCancelListActivityDto
 
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.date).isEqualTo(dto.date)
@@ -93,7 +94,7 @@ class EthUnionActivityConverterTest {
     @Test
     fun `eth item activity mint`() {
         val dto = randomEthItemMintActivity()
-        val converted = EthUnionActivityConverter.convert(dto, EthBlockchainDto.ETHEREUM) as EthMintActivityDto
+        val converted = EthUnionActivityConverter.convert(dto, BlockchainDto.ETHEREUM) as EthMintActivityDto
 
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.date).isEqualTo(dto.date)
@@ -110,7 +111,7 @@ class EthUnionActivityConverterTest {
     @Test
     fun `eth item activity burn`() {
         val dto = randomEthItemBurnActivity()
-        val converted = EthUnionActivityConverter.convert(dto, EthBlockchainDto.ETHEREUM) as EthBurnActivityDto
+        val converted = EthUnionActivityConverter.convert(dto, BlockchainDto.ETHEREUM) as EthBurnActivityDto
 
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.date).isEqualTo(dto.date)
@@ -127,7 +128,7 @@ class EthUnionActivityConverterTest {
     @Test
     fun `eth item activity transfer`() {
         val dto = randomEthItemTransferActivity()
-        val converted = EthUnionActivityConverter.convert(dto, EthBlockchainDto.ETHEREUM) as EthTransferActivityDto
+        val converted = EthUnionActivityConverter.convert(dto, BlockchainDto.ETHEREUM) as EthTransferActivityDto
 
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.date).isEqualTo(dto.date)

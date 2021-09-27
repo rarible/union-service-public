@@ -3,16 +3,16 @@ package com.rarible.protocol.union.core.ethereum.converter
 import com.rarible.protocol.dto.NftItemDeleteEventDto
 import com.rarible.protocol.dto.NftItemEventDto
 import com.rarible.protocol.dto.NftItemUpdateEventDto
-import com.rarible.protocol.union.dto.EthBlockchainDto
+import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.EthItemDeleteEventDto
 import com.rarible.protocol.union.dto.EthItemUpdateEventDto
 import com.rarible.protocol.union.dto.UnionItemEventDto
-import com.rarible.protocol.union.dto.ethereum.parser.EthItemIdParser
+import com.rarible.protocol.union.dto.parser.UnionItemIdParser
 
 object EthUnionItemEventConverter {
 
-    fun convert(source: NftItemEventDto, blockchain: EthBlockchainDto): UnionItemEventDto {
-        val itemId = EthItemIdParser.parseShort(source.itemId, blockchain)
+    fun convert(source: NftItemEventDto, blockchain: BlockchainDto): UnionItemEventDto {
+        val itemId = UnionItemIdParser.parseShort(source.itemId, blockchain)
         return when (source) {
             is NftItemUpdateEventDto -> EthItemUpdateEventDto(
                 eventId = source.eventId,

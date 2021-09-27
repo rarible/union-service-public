@@ -12,7 +12,7 @@ abstract class BlockchainRouter<T : BlockchainService>(
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    private val blockchainServices = services.associateBy { it.getBlockchain() }
+    private val blockchainServices = services.associateBy { it.blockchain }
     private val supportedBlockchains = BlockchainDto.values().toSet()
 
     fun getService(blockchain: BlockchainDto): T {

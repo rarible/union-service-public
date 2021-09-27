@@ -8,10 +8,18 @@ import com.rarible.protocol.union.api.client.ItemControllerApi
 import com.rarible.protocol.union.api.configuration.PageSize
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
-import com.rarible.protocol.union.dto.*
-import com.rarible.protocol.union.dto.ethereum.parser.EthItemIdParser
-import com.rarible.protocol.union.dto.flow.parser.FlowItemIdParser
-import com.rarible.protocol.union.test.data.*
+import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.EthItemDto
+import com.rarible.protocol.union.dto.FlowItemDto
+import com.rarible.protocol.union.dto.parser.UnionItemIdParser
+import com.rarible.protocol.union.test.data.randomEthAddress
+import com.rarible.protocol.union.test.data.randomEthItemId
+import com.rarible.protocol.union.test.data.randomEthNftItemDto
+import com.rarible.protocol.union.test.data.randomFlowAddress
+import com.rarible.protocol.union.test.data.randomFlowItemIdFullValue
+import com.rarible.protocol.union.test.data.randomFlowNftItemDto
+import com.rarible.protocol.union.test.data.randomPolygonAddress
+import com.rarible.protocol.union.test.data.randomPolygonItemId
 import io.mockk.coEvery
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.reactive.awaitFirst
@@ -35,7 +43,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
     @Test
     fun `get item by id - ethereum`() = runBlocking<Unit> {
         val itemIdFull = randomEthItemId().fullId()
-        val itemId = EthItemIdParser.parseFull(itemIdFull)
+        val itemId = UnionItemIdParser.parseFull(itemIdFull)
         val item = randomEthNftItemDto(itemId)
 
         coEvery { testEthereumItemApi.getNftItemById(itemId.value) } returns item.toMono()
@@ -44,13 +52,13 @@ class ItemControllerFt : AbstractIntegrationTest() {
         val ethItem = unionItem as EthItemDto
 
         assertThat(ethItem.id.value).isEqualTo(itemId.value)
-        assertThat(ethItem.id.blockchain).isEqualTo(EthBlockchainDto.ETHEREUM)
+        assertThat(ethItem.id.blockchain).isEqualTo(BlockchainDto.ETHEREUM)
     }
 
     @Test
     fun `get item by id - polygon`() = runBlocking<Unit> {
         val itemIdFull = randomPolygonItemId().fullId()
-        val itemId = EthItemIdParser.parseFull(itemIdFull)
+        val itemId = UnionItemIdParser.parseFull(itemIdFull)
         val item = randomEthNftItemDto(itemId)
 
         coEvery { testPolygonItemApi.getNftItemById(itemId.value) } returns item.toMono()
@@ -59,13 +67,13 @@ class ItemControllerFt : AbstractIntegrationTest() {
         val polyItem = unionItem as EthItemDto
 
         assertThat(polyItem.id.value).isEqualTo(itemId.value)
-        assertThat(polyItem.id.blockchain).isEqualTo(EthBlockchainDto.POLYGON)
+        assertThat(polyItem.id.blockchain).isEqualTo(BlockchainDto.POLYGON)
     }
 
     @Test
     fun `get item by id - flow`() = runBlocking<Unit> {
         val itemIdFull = randomFlowItemIdFullValue()
-        val itemId = FlowItemIdParser.parseFull(itemIdFull)
+        val itemId = UnionItemIdParser.parseFull(itemIdFull)
         val item = randomFlowNftItemDto(itemId)
 
         coEvery { testFlowItemApi.getNftItemById(itemId.value) } returns item.toMono()
@@ -74,7 +82,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
         val flowItem = unionItem as FlowItemDto
 
         assertThat(flowItem.id.value).isEqualTo(itemId.value)
-        assertThat(flowItem.id.blockchain).isEqualTo(FlowBlockchainDto.FLOW)
+        assertThat(flowItem.id.blockchain).isEqualTo(BlockchainDto.FLOW)
     }
 
     @Test

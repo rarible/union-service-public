@@ -5,7 +5,7 @@ import com.rarible.protocol.dto.NftItemAttributeDto
 import com.rarible.protocol.dto.NftItemMetaDto
 import com.rarible.protocol.dto.NftMediaDto
 import com.rarible.protocol.dto.NftMediaMetaDto
-import com.rarible.protocol.union.dto.EthBlockchainDto
+import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.test.data.randomEthItemRoyaltyDto
 import com.rarible.protocol.union.test.data.randomEthItemTransferDto
 import com.rarible.protocol.union.test.data.randomEthNftItemDto
@@ -18,7 +18,7 @@ class EthUnionItemConverterTest {
     fun `eth item history - transfer`() {
         val dto = randomEthItemTransferDto()
 
-        val converted = EthUnionItemConverter.convert(dto, EthBlockchainDto.ETHEREUM)
+        val converted = EthUnionItemConverter.convert(dto, BlockchainDto.ETHEREUM)
 
         assertThat(converted.owner.value).isEqualTo(dto.owner.prefixed())
         assertThat(converted.date).isEqualTo(dto.date)
@@ -33,7 +33,7 @@ class EthUnionItemConverterTest {
     fun `eth item history - royalty`() {
         val dto = randomEthItemRoyaltyDto()
 
-        val converted = EthUnionItemConverter.convert(dto, EthBlockchainDto.ETHEREUM)
+        val converted = EthUnionItemConverter.convert(dto, BlockchainDto.ETHEREUM)
 
         assertThat(converted.owner!!.value).isEqualTo(dto.owner!!.prefixed())
         assertThat(converted.date).isEqualTo(dto.date)
@@ -49,7 +49,7 @@ class EthUnionItemConverterTest {
     fun `eth item`() {
         val dto = randomEthNftItemDto()
 
-        val converted = EthUnionItemConverter.convert(dto, EthBlockchainDto.ETHEREUM)
+        val converted = EthUnionItemConverter.convert(dto, BlockchainDto.ETHEREUM)
 
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.id.token.value).isEqualTo(dto.contract.prefixed())
@@ -105,7 +105,7 @@ class EthUnionItemConverterTest {
         )
         val dto = item.meta!!
 
-        val converted = EthUnionItemConverter.convert(item, EthBlockchainDto.ETHEREUM).meta!!
+        val converted = EthUnionItemConverter.convert(item, BlockchainDto.ETHEREUM).meta!!
 
         assertThat(converted.name).isEqualTo(dto.name)
         assertThat(converted.description).isEqualTo(dto.description)

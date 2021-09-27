@@ -35,7 +35,7 @@ class BlockchainRouterTest {
     fun `one of services failed`() = runBlocking {
         val workingService = TestService(BlockchainDto.FLOW)
         val failedService: TestService = mockk()
-        coEvery { failedService.getBlockchain() } returns BlockchainDto.ETHEREUM
+        coEvery { failedService.blockchain } returns BlockchainDto.ETHEREUM
         coEvery { failedService.test() } throws Exception("oops")
 
         val router = TestBlockchainRouter(listOf(failedService, workingService))
@@ -54,8 +54,7 @@ class BlockchainRouterTest {
     private class TestBlockchainRouter(services: List<TestService>) : BlockchainRouter<TestService>(services)
 
 
-    private class TestService(private val blockchain: BlockchainDto) : BlockchainService {
-        override fun getBlockchain() = blockchain
+    private class TestService(override val blockchain: BlockchainDto) : BlockchainService {
         fun test() = blockchain.name
     }
 

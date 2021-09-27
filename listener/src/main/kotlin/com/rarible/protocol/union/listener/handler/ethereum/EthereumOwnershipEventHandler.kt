@@ -4,14 +4,14 @@ import com.rarible.core.kafka.KafkaMessage
 import com.rarible.core.kafka.RaribleKafkaProducer
 import com.rarible.protocol.dto.NftOwnershipEventDto
 import com.rarible.protocol.union.core.ethereum.converter.EthUnionOwnershipEventConverter
-import com.rarible.protocol.union.dto.EthBlockchainDto
+import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.UnionOwnershipEventDto
 import com.rarible.protocol.union.listener.handler.AbstractEventHandler
 import org.slf4j.LoggerFactory
 
 class EthereumOwnershipEventHandler(
     private val producer: RaribleKafkaProducer<UnionOwnershipEventDto>,
-    private val blockchain: EthBlockchainDto
+    private val blockchain: BlockchainDto
 ) : AbstractEventHandler<NftOwnershipEventDto>() {
 
     private val logger = LoggerFactory.getLogger(javaClass)

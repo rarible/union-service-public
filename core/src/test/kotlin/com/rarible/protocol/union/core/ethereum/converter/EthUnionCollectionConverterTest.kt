@@ -1,7 +1,7 @@
 package com.rarible.protocol.union.core.ethereum.converter
 
 import com.rarible.protocol.dto.NftCollectionDto
-import com.rarible.protocol.union.dto.EthBlockchainDto
+import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.test.data.randomEthCollectionDto
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -14,7 +14,7 @@ class EthUnionCollectionConverterTest {
             .copy(features = NftCollectionDto.Features.values().asList())
             .copy(type = NftCollectionDto.Type.ERC721)
 
-        val converted = EthUnionCollectionConverter.convert(dto, EthBlockchainDto.ETHEREUM)
+        val converted = EthUnionCollectionConverter.convert(dto, BlockchainDto.ETHEREUM)
 
         assertThat(converted.id.value).isEqualTo(dto.id.prefixed())
         assertThat(converted.name).isEqualTo(dto.name)
@@ -30,7 +30,7 @@ class EthUnionCollectionConverterTest {
         val dto = randomEthCollectionDto()
             .copy(type = NftCollectionDto.Type.ERC1155)
 
-        val converted = EthUnionCollectionConverter.convert(dto, EthBlockchainDto.ETHEREUM)
+        val converted = EthUnionCollectionConverter.convert(dto, BlockchainDto.ETHEREUM)
 
         assertThat(converted.type.name).isEqualTo(dto.type.name)
     }
@@ -40,7 +40,7 @@ class EthUnionCollectionConverterTest {
         val dto = randomEthCollectionDto()
             .copy(type = NftCollectionDto.Type.CRYPTO_PUNKS)
 
-        val converted = EthUnionCollectionConverter.convert(dto, EthBlockchainDto.ETHEREUM)
+        val converted = EthUnionCollectionConverter.convert(dto, BlockchainDto.ETHEREUM)
 
         assertThat(converted.type.name).isEqualTo(dto.type.name)
     }
@@ -50,7 +50,7 @@ class EthUnionCollectionConverterTest {
         val dto = randomEthCollectionDto()
             .copy(owner = null)
 
-        val converted = EthUnionCollectionConverter.convert(dto, EthBlockchainDto.ETHEREUM)
+        val converted = EthUnionCollectionConverter.convert(dto, BlockchainDto.ETHEREUM)
 
         assertThat(converted.owner).isNull()
     }

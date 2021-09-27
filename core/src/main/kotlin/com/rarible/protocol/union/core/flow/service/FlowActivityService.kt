@@ -7,7 +7,7 @@ import com.rarible.protocol.union.dto.*
 import kotlinx.coroutines.reactive.awaitFirst
 
 class FlowActivityService(
-    blockchain: FlowBlockchainDto,
+    blockchain: BlockchainDto,
     private val activityControllerApi: FlowNftOrderActivityControllerApi
 ) : AbstractFlowService(blockchain), ActivityService {
 

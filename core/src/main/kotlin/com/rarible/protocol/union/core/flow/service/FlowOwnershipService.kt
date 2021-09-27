@@ -3,13 +3,13 @@ package com.rarible.protocol.union.core.flow.service
 import com.rarible.protocol.flow.nft.api.client.FlowNftOwnershipControllerApi
 import com.rarible.protocol.union.core.flow.converter.FlowUnionOwnershipConverter
 import com.rarible.protocol.union.core.service.OwnershipService
-import com.rarible.protocol.union.dto.FlowBlockchainDto
+import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.UnionOwnershipDto
 import com.rarible.protocol.union.dto.UnionOwnershipsDto
 import kotlinx.coroutines.reactive.awaitFirst
 
 class FlowOwnershipService(
-    blockchain: FlowBlockchainDto,
+    blockchain: BlockchainDto,
     private val ownershipControllerApi: FlowNftOwnershipControllerApi
 ) : AbstractFlowService(blockchain), OwnershipService {
 

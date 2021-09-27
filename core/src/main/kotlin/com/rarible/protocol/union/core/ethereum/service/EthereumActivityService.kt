@@ -17,7 +17,7 @@ import scalether.domain.Address
 import java.math.BigInteger
 
 class EthereumActivityService(
-    blockchain: EthBlockchainDto,
+    blockchain: BlockchainDto,
     private val activityItemControllerApi: NftActivityControllerApi,
     private val activityOrderControllerApi: OrderActivityControllerApi
 ) : AbstractEthereumService(blockchain), ActivityService {

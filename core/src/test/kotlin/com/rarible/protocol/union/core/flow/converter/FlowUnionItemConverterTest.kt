@@ -4,7 +4,7 @@ import com.rarible.core.test.data.randomString
 import com.rarible.protocol.dto.MetaAttributeDto
 import com.rarible.protocol.dto.MetaContentDto
 import com.rarible.protocol.dto.MetaDto
-import com.rarible.protocol.union.dto.FlowBlockchainDto
+import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.test.data.randomFlowNftItemDto
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -15,7 +15,7 @@ class FlowUnionItemConverterTest {
     fun `flow item`() {
         val dto = randomFlowNftItemDto()
 
-        val converted = FlowUnionItemConverter.convert(dto, FlowBlockchainDto.FLOW)
+        val converted = FlowUnionItemConverter.convert(dto, BlockchainDto.FLOW)
 
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.collection.value).isEqualTo(dto.collection)
@@ -69,7 +69,7 @@ class FlowUnionItemConverterTest {
         )
         val dto = item.meta!!
 
-        val converted = FlowUnionItemConverter.convert(item, FlowBlockchainDto.FLOW).meta!!
+        val converted = FlowUnionItemConverter.convert(item, BlockchainDto.FLOW).meta!!
 
         assertThat(converted.name).isEqualTo(dto.name)
         assertThat(converted.raw).isEqualTo(dto.raw)

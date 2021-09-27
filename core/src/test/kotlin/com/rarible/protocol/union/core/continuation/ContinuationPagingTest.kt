@@ -2,7 +2,7 @@ package com.rarible.protocol.union.core.continuation
 
 import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.core.ethereum.converter.EthUnionItemConverter
-import com.rarible.protocol.union.dto.EthBlockchainDto
+import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.UnionItemDto
 import com.rarible.protocol.union.dto.continuation.UnionItemContinuation
 import com.rarible.protocol.union.test.data.randomEthNftItemDto
@@ -52,7 +52,7 @@ class ContinuationPagingTest {
 
     private fun createItem(lastUpdated: Instant): UnionItemDto {
         val item = randomEthNftItemDto().copy(date = lastUpdated)
-        return EthUnionItemConverter.convert(item, EthBlockchainDto.ETHEREUM)
+        return EthUnionItemConverter.convert(item, BlockchainDto.ETHEREUM)
     }
 
 }
