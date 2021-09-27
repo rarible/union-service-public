@@ -23,7 +23,7 @@ internal class OpenapiControllerFt {
         assertTrue(yaml.contains("openapi:"))
         assertTrue(yaml.contains("paths:"))
         assertTrue(yaml.contains("/v0.1/"))
-        assertTrue(yaml.contains("EthItem:"))
+        assertTrue(yaml.contains("UnionItem:"))
         assertTrue(yaml.contains("components:"))
     }
 

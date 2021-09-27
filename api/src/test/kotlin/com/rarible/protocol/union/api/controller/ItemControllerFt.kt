@@ -9,8 +9,7 @@ import com.rarible.protocol.union.api.configuration.PageSize
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.EthItemDto
-import com.rarible.protocol.union.dto.FlowItemDto
+import com.rarible.protocol.union.dto.UnionItemDto
 import com.rarible.protocol.union.dto.parser.UnionItemIdParser
 import com.rarible.protocol.union.test.data.randomEthAddress
 import com.rarible.protocol.union.test.data.randomEthItemId
@@ -49,10 +48,9 @@ class ItemControllerFt : AbstractIntegrationTest() {
         coEvery { testEthereumItemApi.getNftItemById(itemId.value) } returns item.toMono()
 
         val unionItem = itemControllerClient.getItemById(itemIdFull).awaitFirst()
-        val ethItem = unionItem as EthItemDto
 
-        assertThat(ethItem.id.value).isEqualTo(itemId.value)
-        assertThat(ethItem.id.blockchain).isEqualTo(BlockchainDto.ETHEREUM)
+        assertThat(unionItem.id.value).isEqualTo(itemId.value)
+        assertThat(unionItem.id.blockchain).isEqualTo(BlockchainDto.ETHEREUM)
     }
 
     @Test
@@ -64,10 +62,9 @@ class ItemControllerFt : AbstractIntegrationTest() {
         coEvery { testPolygonItemApi.getNftItemById(itemId.value) } returns item.toMono()
 
         val unionItem = itemControllerClient.getItemById(itemIdFull).awaitFirst()
-        val polyItem = unionItem as EthItemDto
 
-        assertThat(polyItem.id.value).isEqualTo(itemId.value)
-        assertThat(polyItem.id.blockchain).isEqualTo(BlockchainDto.POLYGON)
+        assertThat(unionItem.id.value).isEqualTo(itemId.value)
+        assertThat(unionItem.id.blockchain).isEqualTo(BlockchainDto.POLYGON)
     }
 
     @Test
@@ -79,10 +76,9 @@ class ItemControllerFt : AbstractIntegrationTest() {
         coEvery { testFlowItemApi.getNftItemById(itemId.value) } returns item.toMono()
 
         val unionItem = itemControllerClient.getItemById(itemIdFull).awaitFirst()
-        val flowItem = unionItem as FlowItemDto
 
-        assertThat(flowItem.id.value).isEqualTo(itemId.value)
-        assertThat(flowItem.id.blockchain).isEqualTo(BlockchainDto.FLOW)
+        assertThat(unionItem.id.value).isEqualTo(itemId.value)
+        assertThat(unionItem.id.blockchain).isEqualTo(BlockchainDto.FLOW)
     }
 
     @Test
@@ -98,7 +94,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
             ethCollectionId.fullId(), continuation, size
         ).awaitFirst()
 
-        val ethItem = unionItems.items[0] as EthItemDto
+        val ethItem = unionItems.items[0]
         assertThat(ethItem.id.value).isEqualTo(item.id)
     }
 
@@ -115,7 +111,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
             polyCollectionId.fullId(), continuation, size
         ).awaitFirst()
 
-        val polyItem = unionItems.items[0] as EthItemDto
+        val polyItem = unionItems.items[0]
         assertThat(polyItem.id.value).isEqualTo(item.id)
     }
 
@@ -132,7 +128,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
             flowCollectionId.fullId(), continuation, size
         ).awaitFirst()
 
-        val flowItem = unionItems.items[0] as FlowItemDto
+        val flowItem = unionItems.items[0]
         assertThat(flowItem.id.value).isEqualTo(item.id)
     }
 
@@ -149,7 +145,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
             ethOwnerId.fullId(), continuation, size
         ).awaitFirst()
 
-        val ethItem = unionItems.items[0] as EthItemDto
+        val ethItem = unionItems.items[0]
         assertThat(ethItem.id.value).isEqualTo(item.id)
     }
 
@@ -166,7 +162,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
             polyOwnerId.fullId(), continuation, size
         ).awaitFirst()
 
-        val polyItem = unionItems.items[0] as EthItemDto
+        val polyItem = unionItems.items[0]
         assertThat(polyItem.id.value).isEqualTo(item.id)
     }
 
@@ -183,7 +179,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
             flowOwnerId.fullId(), continuation, size
         ).awaitFirst()
 
-        val flowItem = unionItems.items[0] as FlowItemDto
+        val flowItem = unionItems.items[0]
         assertThat(flowItem.id.value).isEqualTo(item.id)
     }
 
@@ -200,7 +196,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
             ethCreatorId.fullId(), continuation, size
         ).awaitFirst()
 
-        val ethItem = unionItems.items[0] as EthItemDto
+        val ethItem = unionItems.items[0]
         assertThat(ethItem.id.value).isEqualTo(item.id)
     }
 
@@ -217,7 +213,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
             polyCreatorId.fullId(), continuation, size
         ).awaitFirst()
 
-        val polyItem = unionItems.items[0] as EthItemDto
+        val polyItem = unionItems.items[0]
         assertThat(polyItem.id.value).isEqualTo(item.id)
     }
 
@@ -234,7 +230,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
             flowCreatorId.fullId(), continuation, size
         ).awaitFirst()
 
-        val flowItem = unionItems.items[0] as FlowItemDto
+        val flowItem = unionItems.items[0]
         assertThat(flowItem.id.value).isEqualTo(item.id)
     }
 

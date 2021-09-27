@@ -5,13 +5,14 @@ import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.dto.*
 import com.rarible.protocol.union.dto.UnionCreatorDto
 import com.rarible.protocol.union.dto.UnionRoyaltyDto
+import java.math.BigInteger
 
 object FlowUnionItemConverter {
 
-    fun convert(item: FlowNftItemDto, blockchain: BlockchainDto): FlowItemDto {
+    fun convert(item: FlowNftItemDto, blockchain: BlockchainDto): UnionItemDto {
         val collection = FlowContractConverter.convert(item.collection, blockchain)
 
-        return FlowItemDto(
+        return UnionItemDto(
             id = UnionItemIdDto(
                 blockchain = blockchain,
                 token = collection,
@@ -27,7 +28,8 @@ object FlowUnionItemConverter {
             collection = collection,
             creators = item.creators.map { convert(it, blockchain) },
             owners = item.owners.map { UnionAddressConverter.convert(it, blockchain) },
-            royalties = item.royalties.map { convert(it, blockchain) }
+            royalties = item.royalties.map { convert(it, blockchain) },
+            lazySupply = BigInteger.ZERO
         )
     }
 
