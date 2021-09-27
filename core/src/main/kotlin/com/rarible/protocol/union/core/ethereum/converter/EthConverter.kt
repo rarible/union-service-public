@@ -36,9 +36,18 @@ import java.math.MathContext
 
 object EthConverter {
 
+    /**
+     * Соответствует 100% в базисных пунктах
+     */
     private val FULL_100_PERCENTS_IN_BP = 10000.toBigDecimal()
 
-    fun convertFromBp(value: Int): BigDecimal {
+    /**
+     * Конвертация числа % в базисных пунктах в число доли от единицы (от целого)
+     * Например:
+     * 10000 (100%) => 1
+     * 5000 (50%) => 0.5
+     */
+    fun convertToDecimalPart(value: Int): BigDecimal {
         return value.toBigDecimal().divide(FULL_100_PERCENTS_IN_BP, MathContext.DECIMAL128)
     }
 
@@ -74,7 +83,7 @@ object EthConverter {
     fun convertToRoyalty(source: PartDto, blockchain: BlockchainDto): UnionRoyaltyDto {
         return UnionRoyaltyDto(
             account = UnionAddressConverter.convert(source.account, blockchain),
-            value = convertFromBp(source.value)
+            value = convertToDecimalPart(source.value)
         )
     }
 

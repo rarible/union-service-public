@@ -90,7 +90,7 @@ class EthConverterTest {
         assertThat(converted.uri).isEqualTo(assetType.uri)
         assertThat(converted.creators[0].value).isEqualTo(assetType.creators[0].value.toBigDecimal())
         assertThat(converted.creators[0].account.value).isEqualTo(assetType.creators[0].account.prefixed())
-        assertThat(converted.royalties[0].value).isEqualTo(EthConverter.convertFromBp(assetType.royalties[0].value))
+        assertThat(converted.royalties[0].value).isEqualTo(EthConverter.convertToDecimalPart(assetType.royalties[0].value))
         assertThat(converted.royalties[0].account.value).isEqualTo(assetType.royalties[0].account.prefixed())
         assertThat(converted.signatures[0]).isEqualTo(assetType.signatures[0].prefixed())
     }
@@ -118,15 +118,15 @@ class EthConverterTest {
         assertThat(converted.supply).isEqualTo(assetType.supply)
         assertThat(converted.creators[0].value).isEqualTo(assetType.creators[0].value.toBigDecimal())
         assertThat(converted.creators[0].account.value).isEqualTo(assetType.creators[0].account.prefixed())
-        assertThat(converted.royalties[0].value).isEqualTo(EthConverter.convertFromBp(assetType.royalties[0].value))
+        assertThat(converted.royalties[0].value).isEqualTo(EthConverter.convertToDecimalPart(assetType.royalties[0].value))
         assertThat(converted.royalties[0].account.value).isEqualTo(assetType.royalties[0].account.prefixed())
         assertThat(converted.signatures[0]).isEqualTo(assetType.signatures[0].prefixed())
     }
 
     @Test
     fun `convert from bp to bigDecimal`() {
-        assertThat(EthConverter.convertFromBp(10000)).isEqualTo(BigDecimal.ONE)
-        assertThat(EthConverter.convertFromBp(5000)).isEqualTo(0.5.toBigDecimal())
+        assertThat(EthConverter.convertToDecimalPart(10000)).isEqualTo(BigDecimal.ONE)
+        assertThat(EthConverter.convertToDecimalPart(5000)).isEqualTo(0.5.toBigDecimal())
     }
 
 }
