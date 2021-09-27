@@ -20,7 +20,7 @@ class EthUnionOwnershipConverterTest {
         assertThat(converted.value).isEqualTo(dto.value)
         assertThat(converted.createdAt).isEqualTo(dto.date)
         assertThat(converted.lazyValue).isEqualTo(dto.lazyValue)
-        assertThat(converted.owners[0].value).isEqualTo(dto.owner.prefixed())
+        assertThat(converted.owner.value).isEqualTo(dto.owner.prefixed())
         assertThat(converted.creators[0].account.value).isEqualTo(dto.creators[0].account.prefixed())
         assertThat(converted.creators[0].value).isEqualTo(dto.creators[0].value.toBigDecimal())
         assertThat(converted.pending.size).isEqualTo(dto.pending.size)

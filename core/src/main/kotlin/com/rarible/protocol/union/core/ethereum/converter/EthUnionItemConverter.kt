@@ -12,8 +12,8 @@ import com.rarible.protocol.dto.NftMediaMetaDto
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.EthItemDto
-import com.rarible.protocol.union.dto.EthItemRoyaltyDto
-import com.rarible.protocol.union.dto.EthItemTransferDto
+import com.rarible.protocol.union.dto.UnionItemRoyaltyDto
+import com.rarible.protocol.union.dto.UnionItemTransferDto
 import com.rarible.protocol.union.dto.UnionItemIdDto
 import com.rarible.protocol.union.dto.UnionItemsDto
 import com.rarible.protocol.union.dto.UnionMetaAttributeDto
@@ -53,8 +53,8 @@ object EthUnionItemConverter {
         )
     }
 
-    fun convert(source: ItemTransferDto, blockchain: BlockchainDto): EthItemTransferDto {
-        return EthItemTransferDto(
+    fun convert(source: ItemTransferDto, blockchain: BlockchainDto): UnionItemTransferDto {
+        return UnionItemTransferDto(
             owner = UnionAddressConverter.convert(source.owner, blockchain),
             contract = UnionAddressConverter.convert(source.contract, blockchain),
             tokenId = source.tokenId,
@@ -64,8 +64,8 @@ object EthUnionItemConverter {
         )
     }
 
-    fun convert(source: ItemRoyaltyDto, blockchain: BlockchainDto): EthItemRoyaltyDto {
-        return EthItemRoyaltyDto(
+    fun convert(source: ItemRoyaltyDto, blockchain: BlockchainDto): UnionItemRoyaltyDto {
+        return UnionItemRoyaltyDto(
             owner = source.owner?.let { UnionAddressConverter.convert(it, blockchain) },
             contract = UnionAddressConverter.convert(source.contract, blockchain),
             tokenId = source.tokenId,

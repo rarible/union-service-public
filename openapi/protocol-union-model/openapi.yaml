@@ -203,13 +203,110 @@ components:
         createdAt:
           type: string
           format: "date-time"
-      oneOf:
-        - $ref: "#/components/schemas/EthOwnership"
-        - $ref: "#/components/schemas/FlowOwnership"
+        contract:
+          $ref: "#/components/schemas/UnionAddress"
+        tokenId:
+          $ref: "#/components/schemas/BigInteger"
+        owner:
+          $ref: "#/components/schemas/UnionAddress"
+        creators:
+          type: array
+          default: [ ]
+          items:
+            $ref: "#/components/schemas/UnionCreator"
+        lazyValue:
+          $ref: "#/components/schemas/BigInteger"
+        pending:
+          type: array
+          default: [ ]
+          items:
+            $ref: "#/components/schemas/UnionItemHistory"
       required:
         - id
         - value
         - createdAt
+        - contract
+        - tokenId
+        - owner
+        - creators
+        - lazyValue
+        - pending
+
+    UnionItemHistory:
+      type: object
+      properties:
+        owner:
+          "$ref": "#/components/schemas/UnionAddress"
+        contract:
+          "$ref": "#/components/schemas/UnionAddress"
+        tokenId:
+          "$ref": "#/components/schemas/BigInteger"
+        value:
+          "$ref": "#/components/schemas/BigInteger"
+        date:
+          type: string
+          format: date-time
+      description: History of item
+      required:
+        - contract
+        - tokenId
+        - date
+      oneOf:
+        - "$ref": "#/components/schemas/UnionItemRoyalty"
+        - "$ref": "#/components/schemas/UnionItemTransfer"
+
+    UnionItemRoyalty:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - ROYALTY
+        royalties:
+          type: array
+          default: [ ]
+          items:
+            "$ref": "#/components/schemas/UnionRoyalty"
+      required:
+        - "@type"
+        - royalties
+
+    UnionItemTransfer:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - TRANSFER
+        from:
+          "$ref": "#/components/schemas/UnionAddress"
+      required:
+        - "@type"
+        - owner
+        - value
+        - from
+
+    UnionRoyalty:
+      type: object
+      required:
+        - account
+        - value
+      properties:
+        account:
+          $ref: "#/components/schemas/UnionAddress"
+        value:
+          $ref: "#/components/schemas/BigDecimal"
+
+    UnionCreator:
+      type: object
+      properties:
+        account:
+          $ref: "#/components/schemas/UnionAddress"
+        value:
+          $ref: "#/components/schemas/BigDecimal"
+      required:
+        - account
+        - value
 
     UnionOwnerships:
       type: object
@@ -512,7 +609,7 @@ components:
           type: array
           default: [ ]
           items:
-            $ref: "#/components/schemas/EthCreator"
+            $ref: "#/components/schemas/UnionCreator"
         owners:
           type: array
           default: [ ]
@@ -522,14 +619,14 @@ components:
           type: array
           default: [ ]
           items:
-            $ref: "#/components/schemas/EthRoyalty"
+            $ref: "#/components/schemas/UnionRoyalty"
         lazySupply:
           $ref: "#/components/schemas/BigInteger"
         pending:
           type: array
           default: [ ]
           items:
-            $ref: "#/components/schemas/EthItemTransfer"
+            $ref: "#/components/schemas/UnionItemTransfer"
       required:
         - blockchain
         - tokenId
@@ -539,82 +636,6 @@ components:
         - royalties
         - lazySupply
         - pending
-
-    EthItemHistory:
-      type: object
-      properties:
-        owner:
-          "$ref": "#/components/schemas/UnionAddress"
-        contract:
-          "$ref": "#/components/schemas/UnionAddress"
-        tokenId:
-          "$ref": "#/components/schemas/BigInteger"
-        value:
-          "$ref": "#/components/schemas/BigInteger"
-        date:
-          type: string
-          format: date-time
-      description: History of item
-      required:
-        - contract
-        - tokenId
-        - date
-      oneOf:
-        - "$ref": "#/components/schemas/EthItemRoyalty"
-        - "$ref": "#/components/schemas/EthItemTransfer"
-
-    EthItemRoyalty:
-      type: object
-      properties:
-        "@type":
-          type: string
-          enum:
-            - ROYALTY
-        royalties:
-          type: array
-          default: [ ]
-          items:
-            "$ref": "#/components/schemas/EthRoyalty"
-      required:
-        - "@type"
-        - royalties
-
-    EthItemTransfer:
-      type: object
-      properties:
-        "@type":
-          type: string
-          enum:
-            - TRANSFER
-        from:
-          "$ref": "#/components/schemas/UnionAddress"
-      required:
-        - "@type"
-        - owner
-        - value
-        - from
-
-    EthRoyalty:
-      type: object
-      required:
-        - account
-        - value
-      properties:
-        account:
-          $ref: "#/components/schemas/UnionAddress"
-        value:
-          $ref: "#/components/schemas/BigInteger"
-
-    EthCreator:
-      type: object
-      properties:
-        account:
-          $ref: "#/components/schemas/UnionAddress"
-        value:
-          $ref: "#/components/schemas/BigDecimal"
-      required:
-        - account
-        - value
 
     EthItemEvent:
       properties:
@@ -653,43 +674,6 @@ components:
 
     #################### Ownership - Eth ####################
 
-    EthOwnership:
-      type: object
-      properties:
-        "@type":
-          type: string
-          enum:
-            - ETHEREUM
-        contract:
-          $ref: "#/components/schemas/UnionAddress"
-        tokenId:
-          $ref: "#/components/schemas/BigInteger"
-        owners:
-          type: array
-          default: [ ]
-          items:
-            $ref: "#/components/schemas/UnionAddress"
-        creators:
-          type: array
-          default: [ ]
-          items:
-            $ref: "#/components/schemas/EthCreator"
-        lazyValue:
-          $ref: "#/components/schemas/BigInteger"
-        pending:
-          type: array
-          default: [ ]
-          items:
-            $ref: "#/components/schemas/EthItemHistory"
-      required:
-        - "@type"
-        - contract
-        - tokenId
-        - owners
-        - creators
-        - lazyValue
-        - pending
-
     EthOwnershipEvent:
       properties:
         "@type":
@@ -713,7 +697,7 @@ components:
           enum:
             - ETHEREUM_UPDATE
         ownership:
-          $ref: "#/components/schemas/EthOwnership"
+          $ref: "#/components/schemas/UnionOwnership"
       required:
         - "@type"
         - ownership
@@ -1074,12 +1058,12 @@ components:
           type: array
           default: [ ]
           items:
-            $ref: "#/components/schemas/EthCreator"
+            $ref: "#/components/schemas/UnionCreator"
         royalties:
           type: array
           default: [ ]
           items:
-            $ref: "#/components/schemas/EthRoyalty"
+            $ref: "#/components/schemas/UnionRoyalty"
         signatures:
           type: array
           default: [ ]
@@ -1129,12 +1113,12 @@ components:
           type: array
           default: [ ]
           items:
-            $ref: "#/components/schemas/EthCreator"
+            $ref: "#/components/schemas/UnionCreator"
         royalties:
           type: array
           default: [ ]
           items:
-            $ref: "#/components/schemas/EthRoyalty"
+            $ref: "#/components/schemas/UnionRoyalty"
         signatures:
           type: array
           default: [ ]
@@ -1527,7 +1511,7 @@ components:
           type: array
           default: [ ]
           items:
-            $ref: "#/components/schemas/FlowCreator"
+            $ref: "#/components/schemas/UnionCreator"
         owners:
           type: array
           default: [ ]
@@ -1537,7 +1521,7 @@ components:
           type: array
           default: [ ]
           items:
-            $ref: "#/components/schemas/FlowRoyalty"
+            $ref: "#/components/schemas/UnionRoyalty"
       required:
         - blockchain
         - tokenId
@@ -1545,28 +1529,6 @@ components:
         - creators
         - owners
         - royalties
-
-    FlowCreator:
-      type: object
-      properties:
-        account:
-          $ref: "#/components/schemas/UnionAddress"
-        value:
-          $ref: "#/components/schemas/BigDecimal"
-      required:
-        - account
-        - value
-
-    FlowRoyalty:
-      type: object
-      properties:
-        account:
-          $ref: "#/components/schemas/UnionAddress"
-        value:
-          $ref: "#/components/schemas/BigDecimal"
-      required:
-        - account
-        - value
 
     FlowItemEvent:
       properties:
@@ -1605,28 +1567,6 @@ components:
 
     #################### Ownership - Flow ####################
 
-    FlowOwnership:
-      type: object
-      properties:
-        "@type":
-          type: string
-          enum:
-            - FLOW
-        contract:
-          $ref: "#/components/schemas/UnionAddress"
-        tokenId:
-          $ref: "#/components/schemas/BigInteger"
-        owners:
-          type: array
-          default: [ ]
-          items:
-            $ref: "#/components/schemas/UnionAddress"
-      required:
-        - "@type"
-        - contract
-        - tokenId
-        - owners
-
     FlowOwnershipEvent:
       properties:
         eventId:
@@ -1649,7 +1589,7 @@ components:
           enum:
             - FLOW_UPDATE
         ownership:
-          $ref: "#/components/schemas/FlowOwnership"
+          $ref: "#/components/schemas/UnionOwnership"
       required:
         - "@type"
         - ownership

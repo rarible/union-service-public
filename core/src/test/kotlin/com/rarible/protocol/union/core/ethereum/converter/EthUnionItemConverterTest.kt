@@ -42,7 +42,7 @@ class EthUnionItemConverterTest {
         assertThat(converted.tokenId).isEqualTo(dto.tokenId)
 
         assertThat(converted.royalties[0].account.value).isEqualTo(dto.royalties[0].account.prefixed())
-        assertThat(converted.royalties[0].value).isEqualTo(dto.royalties[0].value.toBigInteger())
+        assertThat(converted.royalties[0].value).isEqualTo(EthConverter.convertToDecimalPart(dto.royalties[0].value))
     }
 
     @Test
@@ -64,7 +64,7 @@ class EthUnionItemConverterTest {
         assertThat(converted.owners[0].value).isEqualTo(dto.owners[0].prefixed())
 
         assertThat(converted.royalties[0].account.value).isEqualTo(dto.royalties[0].account.prefixed())
-        assertThat(converted.royalties[0].value).isEqualTo(dto.royalties[0].value.toBigInteger())
+        assertThat(converted.royalties[0].value).isEqualTo(EthConverter.convertToDecimalPart(dto.royalties[0].value))
 
         assertThat(converted.creators[0].account.value).isEqualTo(dto.creators[0].account.prefixed())
         assertThat(converted.creators[0].value).isEqualTo(dto.creators[0].value.toBigDecimal())

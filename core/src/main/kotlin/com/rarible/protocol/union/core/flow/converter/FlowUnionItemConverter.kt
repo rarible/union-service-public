@@ -3,8 +3,8 @@ package com.rarible.protocol.union.core.flow.converter
 import com.rarible.protocol.dto.*
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.dto.*
-import com.rarible.protocol.union.dto.FlowCreatorDto
-import com.rarible.protocol.union.dto.FlowRoyaltyDto
+import com.rarible.protocol.union.dto.UnionCreatorDto
+import com.rarible.protocol.union.dto.UnionRoyaltyDto
 
 object FlowUnionItemConverter {
 
@@ -40,20 +40,20 @@ object FlowUnionItemConverter {
     }
 
     private fun convert(
-        source: com.rarible.protocol.dto.FlowCreatorDto,
+        source: FlowCreatorDto,
         blockchain: BlockchainDto
-    ): FlowCreatorDto {
-        return FlowCreatorDto(
+    ): UnionCreatorDto {
+        return UnionCreatorDto(
             account = UnionAddressConverter.convert(source.account, blockchain),
             value = source.value
         )
     }
 
     private fun convert(
-        source: com.rarible.protocol.dto.FlowRoyaltyDto,
+        source: FlowRoyaltyDto,
         blockchain: BlockchainDto
-    ): FlowRoyaltyDto {
-        return FlowRoyaltyDto(
+    ): UnionRoyaltyDto {
+        return UnionRoyaltyDto(
             account = UnionAddressConverter.convert(source.account, blockchain),
             value = source.value
         )
@@ -86,5 +86,4 @@ object FlowUnionItemConverter {
             attributes = source.attributes?.map { convert(it) } ?: listOf()
         )
     }
-
 }
