@@ -18,23 +18,23 @@ class FlowUnionOrderConverterTest {
         assertThat(converted.id.value).isEqualTo(dto.id.toString())
         assertThat(converted.startedAt).isNull()
         assertThat(converted.endedAt).isNull()
-        assertThat(converted.makeStock).isEqualTo(BigInteger.ZERO) // TODO?
-        // assertThat(converted.fill).isEqualTo(dto.fill) // TODO - types incompatible
+        assertThat(converted.makeStock).isEqualTo(dto.makeStock)
+        assertThat(converted.fill).isEqualTo(dto.fill.toBigInteger())
         assertThat(converted.createdAt).isEqualTo(dto.createdAt)
         assertThat(converted.lastUpdatedAt).isEqualTo(dto.lastUpdateAt)
-        assertThat(converted.makePriceUsd).isEqualTo(dto.amountUsd)
-        assertThat(converted.takePriceUsd).isEqualTo(dto.amountUsd)
+        assertThat(converted.makePriceUsd).isEqualTo(dto.priceUsd)
+        assertThat(converted.takePriceUsd).isEqualTo(dto.priceUsd)
         assertThat(converted.maker.value).isEqualTo(dto.maker)
-        assertThat(converted.taker!!.value).isEqualTo(dto.taker)
-        // assertThat(converted.make.value).isEqualTo(dto.make.value) // TODO - types incompatible
+        assertThat(converted.taker?.value).isEqualTo(dto.taker)
+        assertThat(converted.make.value).isEqualTo(dto.make.value.toBigInteger())
         assertThat(converted.make.type.contract.value).isEqualTo(dto.make.contract)
-        // assertThat(converted.take.value).isEqualTo(dto.take!!.value) // TODO - types incompatible
-        assertThat(converted.take.type.contract.value).isEqualTo(dto.take!!.contract)
+        assertThat(converted.take.value).isEqualTo(dto.take.value.toBigInteger())
+        assertThat(converted.take.type.contract.value).isEqualTo(dto.take.contract)
 
-        // assertThat(converted.data.payouts[0].value).isEqualTo(dto.data.payouts[0].value) // TODO - types incompatible
+         assertThat(converted.data.payouts[0].value).isEqualTo(dto.data.payouts[0].value.toBigInteger())
         assertThat(converted.data.payouts[0].account.value).isEqualTo(dto.data.payouts[0].account)
 
-        // assertThat(converted.data.originFees[0].value).isEqualTo(dto.data.originalFees[0].value) // TODO - types incompatible
+        assertThat(converted.data.originFees[0].value).isEqualTo(dto.data.originalFees[0].value.toBigInteger())
         assertThat(converted.data.originFees[0].account.value).isEqualTo(dto.data.originalFees[0].account)
     }
 }
