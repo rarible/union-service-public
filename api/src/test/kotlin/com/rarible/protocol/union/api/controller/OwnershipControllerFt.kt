@@ -9,8 +9,6 @@ import com.rarible.protocol.union.api.configuration.PageSize
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.EthOwnershipDto
-import com.rarible.protocol.union.dto.FlowOwnershipDto
 import com.rarible.protocol.union.dto.parser.UnionOwnershipIdParser
 import com.rarible.protocol.union.test.data.randomEthAddress
 import com.rarible.protocol.union.test.data.randomEthNftOwnershipDto
@@ -48,10 +46,9 @@ class OwnershipControllerFt : AbstractIntegrationTest() {
         coEvery { testEthereumOwnershipApi.getNftOwnershipById(ownershipId.value) } returns ownership.toMono()
 
         val unionOwnership = ownershipControllerClient.getOwnershipById(ownershipIdFull).awaitFirst()
-        val ethOwnership = unionOwnership as EthOwnershipDto
 
-        assertThat(ethOwnership.id.value).isEqualTo(ownershipId.value)
-        assertThat(ethOwnership.id.blockchain).isEqualTo(BlockchainDto.ETHEREUM)
+        assertThat(unionOwnership.id.value).isEqualTo(ownershipId.value)
+        assertThat(unionOwnership.id.blockchain).isEqualTo(BlockchainDto.ETHEREUM)
     }
 
     @Test
@@ -63,10 +60,9 @@ class OwnershipControllerFt : AbstractIntegrationTest() {
         coEvery { testPolygonOwnershipApi.getNftOwnershipById(ownershipId.value) } returns ownership.toMono()
 
         val unionOwnership = ownershipControllerClient.getOwnershipById(ownershipIdFull).awaitFirst()
-        val polyOwnership = unionOwnership as EthOwnershipDto
 
-        assertThat(polyOwnership.id.value).isEqualTo(ownershipId.value)
-        assertThat(polyOwnership.id.blockchain).isEqualTo(BlockchainDto.POLYGON)
+        assertThat(unionOwnership.id.value).isEqualTo(ownershipId.value)
+        assertThat(unionOwnership.id.blockchain).isEqualTo(BlockchainDto.POLYGON)
     }
 
     @Test
@@ -78,10 +74,9 @@ class OwnershipControllerFt : AbstractIntegrationTest() {
         coEvery { testFlowOwnershipApi.getNftOwnershipById(ownershipId.value) } returns ownership.toMono()
 
         val unionOwnership = ownershipControllerClient.getOwnershipById(ownershipIdFull).awaitFirst()
-        val flowOwnership = unionOwnership as FlowOwnershipDto
 
-        assertThat(flowOwnership.id.value).isEqualTo(ownershipId.value)
-        assertThat(flowOwnership.id.blockchain).isEqualTo(BlockchainDto.FLOW)
+        assertThat(unionOwnership.id.value).isEqualTo(ownershipId.value)
+        assertThat(unionOwnership.id.blockchain).isEqualTo(BlockchainDto.FLOW)
     }
 
     @Test
@@ -98,7 +93,7 @@ class OwnershipControllerFt : AbstractIntegrationTest() {
             ethItemId.fullId(), tokenId, continuation, size
         ).awaitFirst()
 
-        val ethOwnership = unionOwnerships.ownerships[0] as EthOwnershipDto
+        val ethOwnership = unionOwnerships.ownerships[0]
         assertThat(ethOwnership.id.value).isEqualTo(ownership.id)
     }
 
@@ -116,7 +111,7 @@ class OwnershipControllerFt : AbstractIntegrationTest() {
             polyItemId.fullId(), tokenId, continuation, size
         ).awaitFirst()
 
-        val polyOwnership = unionOwnerships.ownerships[0] as EthOwnershipDto
+        val polyOwnership = unionOwnerships.ownerships[0]
         assertThat(polyOwnership.id.value).isEqualTo(ownership.id)
     }
 
@@ -134,7 +129,7 @@ class OwnershipControllerFt : AbstractIntegrationTest() {
             flowItemId.fullId(), tokenId, continuation, size
         ).awaitFirst()
 
-        val flowOwnership = unionOwnerships.ownerships[0] as FlowOwnershipDto
+        val flowOwnership = unionOwnerships.ownerships[0]
         assertThat(flowOwnership.id.value).isEqualTo(ownership.id)
     }
 

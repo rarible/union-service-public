@@ -15,7 +15,7 @@ import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.EthAssetDto
 import com.rarible.protocol.union.dto.EthAssetTypeDto
-import com.rarible.protocol.union.dto.EthCreatorDto
+import com.rarible.protocol.union.dto.UnionCreatorDto
 import com.rarible.protocol.union.dto.EthCryptoPunksAssetTypeDto
 import com.rarible.protocol.union.dto.EthErc1155AssetTypeDto
 import com.rarible.protocol.union.dto.EthErc1155LazyAssetTypeDto
@@ -25,14 +25,22 @@ import com.rarible.protocol.union.dto.EthErc721LazyAssetTypeDto
 import com.rarible.protocol.union.dto.EthEthereumAssetTypeDto
 import com.rarible.protocol.union.dto.EthGenerativeArtAssetTypeDto
 import com.rarible.protocol.union.dto.EthOrderPayoutDto
-import com.rarible.protocol.union.dto.EthRoyaltyDto
+import com.rarible.protocol.union.dto.UnionRoyaltyDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.UnionActivitySortDto
 import io.daonomic.rpc.domain.Binary
 import io.daonomic.rpc.domain.Word
 import scalether.domain.Address
+import java.math.BigDecimal
+import java.math.MathContext
 
 object EthConverter {
+
+    private val FULL_100_PERCENTS_IN_BP = 10000.toBigDecimal()
+
+    fun convertFromBp(value: Int): BigDecimal {
+        return value.toBigDecimal().divide(FULL_100_PERCENTS_IN_BP, MathContext.DECIMAL128)
+    }
 
     fun convert(address: Address) = address.prefixed()
     fun convert(word: Word) = word.prefixed()
@@ -63,15 +71,15 @@ object EthConverter {
         )
     }
 
-    fun convertToRoyalty(source: PartDto, blockchain: BlockchainDto): EthRoyaltyDto {
-        return EthRoyaltyDto(
+    fun convertToRoyalty(source: PartDto, blockchain: BlockchainDto): UnionRoyaltyDto {
+        return UnionRoyaltyDto(
             account = UnionAddressConverter.convert(source.account, blockchain),
-            value = source.value.toBigInteger()
+            value = convertFromBp(source.value)
         )
     }
 
-    fun convertToCreator(source: PartDto, blockchain: BlockchainDto): EthCreatorDto {
-        return EthCreatorDto(
+    fun convertToCreator(source: PartDto, blockchain: BlockchainDto): UnionCreatorDto {
+        return UnionCreatorDto(
             account = UnionAddressConverter.convert(source.account, blockchain),
             value = source.value.toBigDecimal()
         )

@@ -19,7 +19,7 @@ class FlowUnionOwnershipConverterTest {
 
         assertThat(converted.tokenId).isEqualTo(dto.tokenId)
         assertThat(converted.contract.value).isEqualTo(dto.contract)
-        assertThat(converted.owners[0].value).isEqualTo(dto.owner)
+        assertThat(converted.owner.value).isEqualTo(dto.owner)
         // assertThat(converted.creators).isEqualTo(dto.creators) // TODO
     }
 
