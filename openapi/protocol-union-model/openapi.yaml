@@ -114,6 +114,32 @@ components:
       properties:
         id:
           $ref: "#/components/schemas/UnionItemId"
+        tokenId:
+          $ref: "#/components/schemas/BigInteger"
+        collection:
+          $ref: "#/components/schemas/UnionAddress"
+        creators:
+          type: array
+          default: [ ]
+          items:
+            $ref: "#/components/schemas/UnionCreator"
+        owners:
+          type: array
+          default: [ ]
+          items:
+            $ref: "#/components/schemas/UnionAddress"
+        royalties:
+          type: array
+          default: [ ]
+          items:
+            $ref: "#/components/schemas/UnionRoyalty"
+        lazySupply:
+          $ref: "#/components/schemas/BigInteger"
+        pending:
+          type: array
+          default: [ ]
+          items:
+            $ref: "#/components/schemas/UnionItemTransfer"
         mintedAt:
           type: string
           format: date-time
@@ -129,11 +155,15 @@ components:
           $ref: "#/components/schemas/UnionMeta"
         deleted:
           type: boolean
-      oneOf:
-        - $ref: "#/components/schemas/EthItem"
-        - $ref: "#/components/schemas/FlowItem"
       required:
         - id
+        - tokenId
+        - collection
+        - creators
+        - owners
+        - royalties
+        - lazySupply
+        - pending
         - mintedAt
         - lastUpdatedAt
         - supply
@@ -594,49 +624,6 @@ components:
 
     #################### Item - Eth ####################
 
-    EthItem:
-      type: object
-      properties:
-        "@type":
-          type: string
-          enum:
-            - ETHEREUM
-        tokenId:
-          $ref: "#/components/schemas/BigInteger"
-        collection:
-          $ref: "#/components/schemas/UnionAddress"
-        creators:
-          type: array
-          default: [ ]
-          items:
-            $ref: "#/components/schemas/UnionCreator"
-        owners:
-          type: array
-          default: [ ]
-          items:
-            $ref: "#/components/schemas/UnionAddress"
-        royalties:
-          type: array
-          default: [ ]
-          items:
-            $ref: "#/components/schemas/UnionRoyalty"
-        lazySupply:
-          $ref: "#/components/schemas/BigInteger"
-        pending:
-          type: array
-          default: [ ]
-          items:
-            $ref: "#/components/schemas/UnionItemTransfer"
-      required:
-        - blockchain
-        - tokenId
-        - collection
-        - creators
-        - owners
-        - royalties
-        - lazySupply
-        - pending
-
     EthItemEvent:
       properties:
         itemId:
@@ -656,7 +643,7 @@ components:
           enum:
             - ETHEREUM_UPDATE
         item:
-          $ref: "#/components/schemas/EthItem"
+          $ref: "#/components/schemas/UnionItem"
       required:
         - "@type"
         - item
@@ -1496,40 +1483,6 @@ components:
 
     #################### Item - Flow ####################
 
-    FlowItem:
-      type: object
-      properties:
-        "@type":
-          type: string
-          enum:
-            - FLOW
-        tokenId:
-          $ref: "#/components/schemas/BigInteger"
-        collection:
-          $ref: "#/components/schemas/UnionAddress"
-        creators:
-          type: array
-          default: [ ]
-          items:
-            $ref: "#/components/schemas/UnionCreator"
-        owners:
-          type: array
-          default: [ ]
-          items:
-            $ref: "#/components/schemas/UnionAddress"
-        royalties:
-          type: array
-          default: [ ]
-          items:
-            $ref: "#/components/schemas/UnionRoyalty"
-      required:
-        - blockchain
-        - tokenId
-        - collection
-        - creators
-        - owners
-        - royalties
-
     FlowItemEvent:
       properties:
         itemId:
@@ -1549,7 +1502,7 @@ components:
           enum:
             - FLOW_UPDATE
         item:
-          $ref: "#/components/schemas/FlowItem"
+          $ref: "#/components/schemas/UnionItem"
       required:
         - "@type"
         - item

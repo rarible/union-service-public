@@ -11,7 +11,7 @@ import com.rarible.protocol.dto.NftMediaDto
 import com.rarible.protocol.dto.NftMediaMetaDto
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.EthItemDto
+import com.rarible.protocol.union.dto.UnionItemDto
 import com.rarible.protocol.union.dto.UnionItemRoyaltyDto
 import com.rarible.protocol.union.dto.UnionItemTransferDto
 import com.rarible.protocol.union.dto.UnionItemIdDto
@@ -22,8 +22,8 @@ import com.rarible.protocol.union.dto.UnionMetaDto
 
 object EthUnionItemConverter {
 
-    fun convert(item: NftItemDto, blockchain: BlockchainDto): EthItemDto {
-        return EthItemDto(
+    fun convert(item: NftItemDto, blockchain: BlockchainDto): UnionItemDto {
+        return UnionItemDto(
             id = UnionItemIdDto(
                 token = UnionAddressConverter.convert(item.contract, blockchain),
                 tokenId = item.tokenId,
