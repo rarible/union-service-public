@@ -192,13 +192,40 @@ components:
     UnionItemEvent:
       type: object
       properties:
+        itemId:
+          $ref: "#/components/schemas/UnionItemId"
         eventId:
           type: string
       required:
         - eventId
+        - itemId
       oneOf:
-        - $ref: "#/components/schemas/EthItemEvent"
-        - $ref: "#/components/schemas/FlowItemEvent"
+        - $ref: "#/components/schemas/UnionItemUpdateEvent"
+        - $ref: "#/components/schemas/UnionItemDeleteEvent"
+
+    UnionItemUpdateEvent:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - UPDATE
+        item:
+          $ref: "#/components/schemas/UnionItem"
+      required:
+        - "@type"
+        - item
+
+    UnionItemDeleteEvent:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - DELETE
+      required:
+        - "@type"
+        - itemId
 
     #################### Ownership - Union ####################
 
@@ -965,43 +992,6 @@ components:
         message:
           type: string
 
-    #################### Item - Eth ####################
-
-    EthItemEvent:
-      properties:
-        itemId:
-          $ref: "#/components/schemas/UnionItemId"
-      required:
-        - "@type"
-        - itemId
-      oneOf:
-        - $ref: "#/components/schemas/EthItemUpdateEvent"
-        - $ref: "#/components/schemas/EthItemDeleteEvent"
-
-    EthItemUpdateEvent:
-      type: object
-      properties:
-        "@type":
-          type: string
-          enum:
-            - ETHEREUM_UPDATE
-        item:
-          $ref: "#/components/schemas/UnionItem"
-      required:
-        - "@type"
-        - item
-
-    EthItemDeleteEvent:
-      type: object
-      properties:
-        "@type":
-          type: string
-          enum:
-            - ETHEREUM_DELETE
-      required:
-        - "@type"
-        - itemId
-
     #################### Ownership - Eth ####################
 
     EthOwnershipEvent:
@@ -1486,43 +1476,6 @@ components:
       required:
         - "@type"
         - order
-
-    #################### Item - Flow ####################
-
-    FlowItemEvent:
-      properties:
-        itemId:
-          $ref: "#/components/schemas/UnionItemId"
-      required:
-        - "@type"
-        - itemId
-      oneOf:
-        - $ref: "#/components/schemas/FlowItemUpdateEvent"
-        - $ref: "#/components/schemas/FlowItemDeleteEvent"
-
-    FlowItemUpdateEvent:
-      type: object
-      properties:
-        "@type":
-          type: string
-          enum:
-            - FLOW_UPDATE
-        item:
-          $ref: "#/components/schemas/UnionItem"
-      required:
-        - "@type"
-        - item
-
-    FlowItemDeleteEvent:
-      type: object
-      properties:
-        "@type":
-          type: string
-          enum:
-            - FLOW_DELETE
-      required:
-        - "@type"
-        - itemId
 
     #################### Ownership - Flow ####################
 

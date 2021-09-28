@@ -88,13 +88,13 @@ abstract class AbstractIntegrationTest {
         result
     }
 
-    fun findEthItemUpdates(itemId: String): List<KafkaMessage<EthItemUpdateEventDto>> {
-        return filterByValueType(itemEvents as Queue<KafkaMessage<Any>>, EthItemUpdateEventDto::class.java)
+    fun findEthItemUpdates(itemId: String): List<KafkaMessage<UnionItemUpdateEventDto>> {
+        return filterByValueType(itemEvents as Queue<KafkaMessage<Any>>, UnionItemUpdateEventDto::class.java)
             .filter { it.value.itemId.value == itemId }
     }
 
-    fun findEthItemDeletions(itemId: String): List<KafkaMessage<EthItemDeleteEventDto>> {
-        return filterByValueType(itemEvents as Queue<KafkaMessage<Any>>, EthItemDeleteEventDto::class.java)
+    fun findEthItemDeletions(itemId: String): List<KafkaMessage<UnionItemDeleteEventDto>> {
+        return filterByValueType(itemEvents as Queue<KafkaMessage<Any>>, UnionItemDeleteEventDto::class.java)
             .filter { it.value.itemId.value == itemId }
     }
 
@@ -113,13 +113,13 @@ abstract class AbstractIntegrationTest {
             .filter { it.value.orderId.value == orderId }
     }
 
-    fun findFlowItemUpdates(itemId: String): List<KafkaMessage<FlowItemUpdateEventDto>> {
-        return filterByValueType(itemEvents as Queue<KafkaMessage<Any>>, FlowItemUpdateEventDto::class.java)
+    fun findFlowItemUpdates(itemId: String): List<KafkaMessage<UnionItemUpdateEventDto>> {
+        return filterByValueType(itemEvents as Queue<KafkaMessage<Any>>, UnionItemUpdateEventDto::class.java)
             .filter { it.value.itemId.value == itemId }
     }
 
-    fun findFlowItemDeletions(itemId: String): List<KafkaMessage<FlowItemDeleteEventDto>> {
-        return filterByValueType(itemEvents as Queue<KafkaMessage<Any>>, FlowItemDeleteEventDto::class.java)
+    fun findFlowItemDeletions(itemId: String): List<KafkaMessage<UnionItemDeleteEventDto>> {
+        return filterByValueType(itemEvents as Queue<KafkaMessage<Any>>, UnionItemDeleteEventDto::class.java)
             .filter { it.value.itemId.value == itemId }
     }
 
