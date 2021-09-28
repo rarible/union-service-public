@@ -10,7 +10,7 @@ object EthUnionActivityConverter {
         val unionActivityId = UnionActivityIdDto(blockchain, source.id)
         return when (source) {
             is OrderActivityMatchDto -> {
-                EthOrderMatchActivityDto(
+                UnionOrderMatchActivityDto(
                     id = unionActivityId,
                     date = source.date,
                     left = convert(source.left, blockchain),
@@ -27,7 +27,7 @@ object EthUnionActivityConverter {
                 )
             }
             is OrderActivityBidDto -> {
-                EthOrderBidActivityDto(
+                UnionOrderBidActivityDto(
                     id = unionActivityId,
                     date = source.date,
                     price = source.price,
@@ -40,7 +40,7 @@ object EthUnionActivityConverter {
                 )
             }
             is OrderActivityListDto -> {
-                EthOrderListActivityDto(
+                UnionOrderListActivityDto(
                     id = unionActivityId,
                     date = source.date,
                     price = source.price,
@@ -53,7 +53,7 @@ object EthUnionActivityConverter {
                 )
             }
             is OrderActivityCancelBidDto -> {
-                EthOrderCancelBidActivityDto(
+                UnionOrderCancelBidActivityDto(
                     id = unionActivityId,
                     date = source.date,
                     source = convert(source.source),
@@ -70,7 +70,7 @@ object EthUnionActivityConverter {
                 )
             }
             is OrderActivityCancelListDto -> {
-                EthOrderCancelListActivityDto(
+                UnionOrderCancelListActivityDto(
                     id = unionActivityId,
                     date = source.date,
                     source = convert(source.source),
@@ -87,7 +87,7 @@ object EthUnionActivityConverter {
                 )
             }
             is MintDto -> {
-                EthMintActivityDto(
+                UnionMintActivityDto(
                     id = unionActivityId,
                     date = source.date,
                     owners = listOf(UnionAddressConverter.convert(source.owner, blockchain)),
@@ -103,7 +103,7 @@ object EthUnionActivityConverter {
                 )
             }
             is BurnDto -> {
-                EthBurnActivityDto(
+                UnionBurnActivityDto(
                     id = unionActivityId,
                     date = source.date,
                     owners = listOf(UnionAddressConverter.convert(source.owner, blockchain)),
@@ -119,7 +119,7 @@ object EthUnionActivityConverter {
                 )
             }
             is TransferDto -> {
-                EthTransferActivityDto(
+                UnionTransferActivityDto(
                     id = unionActivityId,
                     date = source.date,
                     from = UnionAddressConverter.convert(source.from, blockchain),
@@ -185,27 +185,19 @@ object EthUnionActivityConverter {
         }
     }
 
-    private fun convert(source: OrderActivityMatchSideDto, blockchain: BlockchainDto): EthOrderActivityMatchSideDto {
-        return EthOrderActivityMatchSideDto(
+    private fun convert(source: OrderActivityMatchSideDto, blockchain: BlockchainDto): UnionOrderActivityMatchSideDto {
+        return UnionOrderActivityMatchSideDto(
             maker = UnionAddressConverter.convert(source.maker, blockchain),
             hash = EthConverter.convert(source.hash),
-            asset = EthConverter.convert(source.asset, blockchain),
-            type = convert(source.type!!) // TODO must be not null
+            asset = EthConverter.convert(source.asset, blockchain)
         )
     }
 
-    private fun convert(source: OrderActivityMatchSideDto.Type): EthOrderActivityMatchSideDto.Type {
+    private fun convert(source: OrderActivityDto.Source): OrderActivitySourceDto {
         return when (source) {
-            OrderActivityMatchSideDto.Type.BID -> EthOrderActivityMatchSideDto.Type.BID
-            OrderActivityMatchSideDto.Type.SELL -> EthOrderActivityMatchSideDto.Type.SELL
-        }
-    }
-
-    private fun convert(source: OrderActivityDto.Source): EthOrderActivitySourceDto {
-        return when (source) {
-            OrderActivityDto.Source.OPEN_SEA -> EthOrderActivitySourceDto.OPEN_SEA
-            OrderActivityDto.Source.RARIBLE -> EthOrderActivitySourceDto.RARIBLE
-            OrderActivityDto.Source.CRYPTO_PUNKS -> EthOrderActivitySourceDto.CRYPTO_PUNKS
+            OrderActivityDto.Source.OPEN_SEA -> OrderActivitySourceDto.OPEN_SEA
+            OrderActivityDto.Source.RARIBLE -> OrderActivitySourceDto.RARIBLE
+            OrderActivityDto.Source.CRYPTO_PUNKS -> OrderActivitySourceDto.CRYPTO_PUNKS
         }
     }
 

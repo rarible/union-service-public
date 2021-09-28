@@ -8,6 +8,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.UnionAssetDto
 import com.rarible.protocol.union.dto.FlowAssetTypeFtDto
 import com.rarible.protocol.union.dto.FlowAssetTypeNftDto
+import com.rarible.protocol.union.dto.UnionAssetTypeDto
 
 object FlowConverter {
 
@@ -28,6 +29,22 @@ object FlowConverter {
                         contract = UnionAddressConverter.convert(source.contract, blockchain),
                         tokenId = source.tokenId
                     )
+                )
+            }
+        }
+    }
+
+    fun convertToType(source: FlowAssetDto, blockchain: BlockchainDto): UnionAssetTypeDto {
+        return when (source) {
+            is FlowAssetFungibleDto -> {
+                FlowAssetTypeFtDto(
+                    contract = UnionAddressConverter.convert(source.contract, blockchain)
+                )
+            }
+            is FlowAssetNFTDto -> {
+                FlowAssetTypeNftDto(
+                    contract = UnionAddressConverter.convert(source.contract, blockchain),
+                    tokenId = source.tokenId
                 )
             }
         }
