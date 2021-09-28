@@ -1282,6 +1282,7 @@ components:
           $ref: "#/components/schemas/BigInteger"
       required:
         - "@type"
+        - tokenId
 
     FlowAssetTypeFt:
       type: object
