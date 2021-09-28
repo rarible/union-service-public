@@ -9,7 +9,7 @@ import com.rarible.protocol.dto.FlowActivityDto
 import com.rarible.protocol.dto.FlowOrderEventDto
 import com.rarible.protocol.dto.FlowOwnershipEventDto
 import com.rarible.protocol.union.dto.*
-import com.rarible.protocol.union.dto.FlowOrderUpdateEventDto
+import com.rarible.protocol.union.dto.UnionOrderUpdateEventDto
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
 import org.springframework.beans.factory.annotation.Autowired
@@ -108,8 +108,8 @@ abstract class AbstractIntegrationTest {
             .filter { it.value.ownershipId.value == ownershipId }
     }
 
-    fun findEthOrderUpdates(orderId: String): List<KafkaMessage<EthOrderUpdateEventDto>> {
-        return filterByValueType(orderEvents as Queue<KafkaMessage<Any>>, EthOrderUpdateEventDto::class.java)
+    fun findEthOrderUpdates(orderId: String): List<KafkaMessage<UnionOrderUpdateEventDto>> {
+        return filterByValueType(orderEvents as Queue<KafkaMessage<Any>>, UnionOrderUpdateEventDto::class.java)
             .filter { it.value.orderId.value == orderId }
     }
 
@@ -133,8 +133,8 @@ abstract class AbstractIntegrationTest {
             .filter { it.value.ownershipId.value == ownershipId }
     }
 
-    fun findFlowOrderUpdates(orderId: String): List<KafkaMessage<FlowOrderUpdateEventDto>> {
-        return filterByValueType(orderEvents as Queue<KafkaMessage<Any>>, FlowOrderUpdateEventDto::class.java)
+    fun findFlowOrderUpdates(orderId: String): List<KafkaMessage<UnionOrderUpdateEventDto>> {
+        return filterByValueType(orderEvents as Queue<KafkaMessage<Any>>, UnionOrderUpdateEventDto::class.java)
             .filter { it.value.orderId.value == orderId }
     }
 

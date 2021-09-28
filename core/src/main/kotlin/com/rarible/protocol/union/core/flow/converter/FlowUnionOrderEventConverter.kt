@@ -10,7 +10,7 @@ object FlowUnionOrderEventConverter {
         return when (source) {
             is FlowOrderUpdateEventDto -> {
                 val order = FlowUnionOrderConverter.convert(source.order, blockchain)
-                FlowOrderUpdateEventDto(
+                UnionOrderUpdateEventDto(
                     eventId = source.eventId,
                     orderId = order.id,
                     order = order

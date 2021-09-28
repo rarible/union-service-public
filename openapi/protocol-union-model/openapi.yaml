@@ -537,13 +537,28 @@ components:
     UnionOrderEvent:
       type: object
       properties:
+        orderId:
+          "$ref": "#/components/schemas/UnionOrderId"
         eventId:
           type: string
       required:
+        - orderId
         - eventId
       oneOf:
-        - "$ref": "#/components/schemas/EthOrderEvent"
-        - "$ref": "#/components/schemas/FlowOrderEvent"
+        - "$ref": "#/components/schemas/UnionOrderUpdateEvent"
+
+    UnionOrderUpdateEvent:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - UPDATE
+        order:
+          "$ref": "#/components/schemas/UnionOrder"
+      required:
+        - "@type"
+        - order
 
     #################### Activity - Union ####################
 
@@ -1438,31 +1453,6 @@ components:
         - "@type"
         - contract
 
-    #################### Activity - Eth ####################
-
-    EthOrderEvent:
-      type: object
-      properties:
-        orderId:
-          "$ref": "#/components/schemas/UnionOrderId"
-      required:
-        - orderId
-      oneOf:
-        - "$ref": "#/components/schemas/EthOrderUpdateEvent"
-
-    EthOrderUpdateEvent:
-      type: object
-      properties:
-        "@type":
-          type: string
-          enum:
-            - ETHEREUM_UPDATE
-        order:
-          "$ref": "#/components/schemas/UnionOrder"
-      required:
-        - "@type"
-        - order
-
     #################### Order - Flow ####################
 
     FlowOrderDataV1:
@@ -1497,29 +1487,6 @@ components:
       required:
         - account
         - value
-
-    FlowOrderEvent:
-      type: object
-      properties:
-        orderId:
-          "$ref": "#/components/schemas/UnionOrderId"
-      required:
-        - orderId
-      oneOf:
-        - "$ref": "#/components/schemas/FlowOrderUpdateEvent"
-
-    FlowOrderUpdateEvent:
-      type: object
-      properties:
-        "@type":
-          type: string
-          enum:
-            - FLOW_UPDATE
-        order:
-          "$ref": "#/components/schemas/UnionOrder"
-      required:
-        - "@type"
-        - order
 
     #################### Referenced Types ####################
 
