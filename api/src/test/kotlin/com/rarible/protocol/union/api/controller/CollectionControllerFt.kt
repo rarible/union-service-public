@@ -41,10 +41,9 @@ class CollectionControllerFt : AbstractIntegrationTest() {
         coEvery { testEthereumCollectionApi.getNftCollectionById(collectionIdFull.value) } returns collection.toMono()
 
         val unionCollection = collectionControllerClient.getCollectionById(collectionIdFull.fullId()).awaitFirst()
-        val ethCollection = unionCollection as EthCollectionDto
 
-        assertThat(ethCollection.id.value).isEqualTo(collectionIdFull.value)
-        assertThat(ethCollection.id.blockchain).isEqualTo(BlockchainDto.ETHEREUM)
+        assertThat(unionCollection.id.value).isEqualTo(collectionIdFull.value)
+        assertThat(unionCollection.id.blockchain).isEqualTo(BlockchainDto.ETHEREUM)
     }
 
     @Test
@@ -56,10 +55,9 @@ class CollectionControllerFt : AbstractIntegrationTest() {
         coEvery { testPolygonCollectionApi.getNftCollectionById(collectionIdFull.value) } returns collection.toMono()
 
         val unionCollection = collectionControllerClient.getCollectionById(collectionIdFull.fullId()).awaitFirst()
-        val ethCollection = unionCollection as EthCollectionDto
 
-        assertThat(ethCollection.id.value).isEqualTo(collectionIdFull.value)
-        assertThat(ethCollection.id.blockchain).isEqualTo(BlockchainDto.POLYGON)
+        assertThat(unionCollection.id.value).isEqualTo(collectionIdFull.value)
+        assertThat(unionCollection.id.blockchain).isEqualTo(BlockchainDto.POLYGON)
     }
 
     @Test
@@ -71,7 +69,7 @@ class CollectionControllerFt : AbstractIntegrationTest() {
         coEvery { testFlowCollectionApi.getNftCollectionById(collectionId) } returns collection.toMono()
 
         val unionCollection = collectionControllerClient.getCollectionById(collectionIdFull.fullId()).awaitFirst()
-        val flowCollection = unionCollection as FlowCollectionDto
+        val flowCollection = unionCollection as UnionCollectionDto
 
         assertThat(flowCollection.id.value).isEqualTo(collectionIdFull.value)
         assertThat(flowCollection.id.blockchain).isEqualTo(BlockchainDto.FLOW)
@@ -91,7 +89,7 @@ class CollectionControllerFt : AbstractIntegrationTest() {
             ethOwnerId.fullId(), continuation, size
         ).awaitFirst()
 
-        val ethCollection = unionCollections.collections[0] as EthCollectionDto
+        val ethCollection = unionCollections.collections[0]
         assertThat(ethCollection.id.value).isEqualTo(collectionId.value)
     }
 
@@ -109,7 +107,7 @@ class CollectionControllerFt : AbstractIntegrationTest() {
             polyOwnerId.fullId(), continuation, size
         ).awaitFirst()
 
-        val polyCollection = unionCollections.collections[0] as EthCollectionDto
+        val polyCollection = unionCollections.collections[0]
         assertThat(polyCollection.id.value).isEqualTo(collectionId.value)
     }
 
@@ -126,7 +124,7 @@ class CollectionControllerFt : AbstractIntegrationTest() {
             flowOwnerId.fullId(), continuation, size
         ).awaitFirst()
 
-        val flowCollection = unionCollections.collections[0] as FlowCollectionDto
+        val flowCollection = unionCollections.collections[0]
         assertThat(flowCollection.id.value).isEqualTo(collection.id)
     }
 

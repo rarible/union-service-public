@@ -22,7 +22,6 @@ class EthUnionCollectionConverterTest {
         assertThat(converted.type.name).isEqualTo(dto.type.name)
         assertThat(converted.owner!!.value).isEqualTo(dto.owner!!.prefixed())
         assertThat(converted.features.map { it.name }).isEqualTo(dto.features.map { it.name })
-        assertThat(converted.supportsLazyMint).isEqualTo(dto.supportsLazyMint)
     }
 
     @Test

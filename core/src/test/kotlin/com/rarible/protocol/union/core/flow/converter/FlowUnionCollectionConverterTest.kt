@@ -16,7 +16,7 @@ class FlowUnionCollectionConverterTest {
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.name).isEqualTo(dto.name)
         assertThat(converted.symbol).isEqualTo(dto.symbol)
-        assertThat(converted.owner.value).isEqualTo(dto.owner)
+        assertThat(converted.owner?.value).isEqualTo(dto.owner)
     }
 
 }

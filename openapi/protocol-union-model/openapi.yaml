@@ -531,15 +531,38 @@ components:
     UnionCollection:
       type: object
       properties:
+        id:
+          $ref: "#/components/schemas/UnionAddress"
+        type:
+          type: string
+          enum:
+            - CRYPTO_PUNKS
+            - ERC721
+            - ERC1155
+            - FLOW
         name:
           type: string
         symbol:
           type: string
-      oneOf:
-        - $ref: "#/components/schemas/EthCollection"
-        - $ref: "#/components/schemas/FlowCollection"
+        owner:
+          $ref: "#/components/schemas/UnionAddress"
+        features:
+          type: array
+          default: [ ]
+          items:
+            type: string
+            enum:
+              - APPROVE_FOR_ALL
+              - SET_URI_PREFIX
+              - BURN
+              - MINT_WITH_ADDRESS
+              - SECONDARY_SALE_FEES
+              - MINT_AND_TRANSFER
       required:
+        - id
         - name
+        - type
+        - features
 
     UnionCollections:
       type: object
@@ -1434,44 +1457,6 @@ components:
         - source
         - blockchainInfo
 
-    EthCollection:
-      type: object
-      properties:
-        "@type":
-          type: string
-          enum:
-            - ETHEREUM
-        id:
-          $ref: "#/components/schemas/UnionAddress"
-        type:
-          type: string
-          enum:
-            - CRYPTO_PUNKS
-            - ERC721
-            - ERC1155
-        supportsLazyMint:
-          type: boolean
-        owner:
-          $ref: "#/components/schemas/UnionAddress"
-        features:
-          type: array
-          default: [ ]
-          items:
-            type: string
-            enum:
-              - APPROVE_FOR_ALL
-              - SET_URI_PREFIX
-              - BURN
-              - MINT_WITH_ADDRESS
-              - SECONDARY_SALE_FEES
-              - MINT_AND_TRANSFER
-      required:
-        - "@type"
-        - id
-        - type
-        - supportsLazyMint
-        - features
-
     EthOrderEvent:
       type: object
       properties:
@@ -1851,22 +1836,6 @@ components:
         - maker
         - asset
         - type
-
-    FlowCollection:
-      type: object
-      properties:
-        "@type":
-          type: string
-          enum:
-            - FLOW
-        id:
-          $ref: "#/components/schemas/UnionAddress"
-        owner:
-          $ref: "#/components/schemas/UnionAddress"
-      required:
-        - "@type"
-        - id
-        - owner
 
     #################### Referenced Types ####################
 
