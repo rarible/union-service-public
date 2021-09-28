@@ -377,9 +377,25 @@ components:
           default: [ ]
           items:
             $ref: "#/components/schemas/UnionOrderPriceHistoryRecord"
-      oneOf:
-        - $ref: "#/components/schemas/EthOrder"
-        - $ref: "#/components/schemas/FlowOrder"
+        maker:
+          $ref: "#/components/schemas/UnionAddress"
+        taker:
+          $ref: "#/components/schemas/UnionAddress"
+        make:
+          $ref: "#/components/schemas/UnionAsset"
+        take:
+          $ref: "#/components/schemas/UnionAsset"
+        salt:
+          type: string
+        signature:
+          type: string
+        pending:
+          type: array
+          default: [ ]
+          items:
+            $ref: "#/components/schemas/UnionPendingOrder"
+        data:
+          $ref: "#/components/schemas/UnionOrderData"
       required:
         - id
         - fill
@@ -388,6 +404,21 @@ components:
         - createdAt
         - lastUpdatedAt
         - priceHistory
+        - type
+        - maker
+        - make
+        - take
+        - salt
+        - data
+
+    UnionOrderData:
+      type: object
+      oneOf:
+        - "$ref": "#/components/schemas/EthOrderDataLegacy"
+        - "$ref": "#/components/schemas/EthOrderDataRaribleV2DataV1"
+        - "$ref": "#/components/schemas/EthOrderOpenSeaV1DataV1"
+        - "$ref": "#/components/schemas/EthOrderCryptoPunksData"
+        - "$ref": "#/components/schemas/FlowOrderDataV1"
 
     UnionOrderPriceHistoryRecord:
       type: object
@@ -714,102 +745,26 @@ components:
 
     #################### Order - Eth ####################
 
-    EthOrder:
-      type: object
-      properties:
-        maker:
-          $ref: "#/components/schemas/UnionAddress"
-        taker:
-          $ref: "#/components/schemas/UnionAddress"
-        make:
-          $ref: "#/components/schemas/EthAsset"
-        take:
-          $ref: "#/components/schemas/EthAsset"
-        salt:
-          type: string
-        signature:
-          type: string
-        pending:
-          type: array
-          default: [ ]
-          items:
-            $ref: "#/components/schemas/EthPendingOrder"
-      required:
-        - type
-        - maker
-        - make
-        - take
-        - salt
-        - data
-      oneOf:
-        - "$ref": "#/components/schemas/EthLegacyOrder"
-        - "$ref": "#/components/schemas/EthRaribleV2Order"
-        - "$ref": "#/components/schemas/EthOpenSeaV1Order"
-        - "$ref": "#/components/schemas/EthCryptoPunksOrder"
-
-    EthLegacyOrder:
+    EthOrderDataLegacy:
       type: object
       properties:
         "@type":
           type: string
           enum:
             - ETH_RARIBLE_V1
-        data:
-          $ref: "#/components/schemas/EthOrderDataLegacy"
+        fee:
+          $ref: "#/components/schemas/BigInteger"
       required:
+        - fee
         - "@type"
-        - data
 
-    EthRaribleV2Order:
+    EthOrderDataRaribleV2DataV1:
       type: object
       properties:
         "@type":
           type: string
           enum:
             - ETH_RARIBLE_V2
-        data:
-          $ref: "#/components/schemas/EthOrderDataRaribleV2DataV1"
-      required:
-        - "@type"
-        - data
-
-    EthOpenSeaV1Order:
-      type: object
-      properties:
-        "@type":
-          type: string
-          enum:
-            - ETH_OPEN_SEA_V1
-        data:
-          $ref: "#/components/schemas/EthOrderOpenSeaV1DataV1"
-      required:
-        - "@type"
-        - data
-
-    EthCryptoPunksOrder:
-      type: object
-      required:
-        - "@type"
-        - data
-      properties:
-        "@type":
-          type: string
-          enum:
-            - ETH_CRYPTO_PUNKS
-        data:
-          $ref: "#/components/schemas/EthOrderCryptoPunksData"
-
-    EthOrderDataLegacy:
-      type: object
-      properties:
-        fee:
-          $ref: "#/components/schemas/BigInteger"
-      required:
-        - fee
-
-    EthOrderDataRaribleV2DataV1:
-      type: object
-      properties:
         payouts:
           type: array
           default: [ ]
@@ -821,12 +776,17 @@ components:
           items:
             $ref: "#/components/schemas/EthOrderPayout"
       required:
+        - "@type"
         - payouts
         - originFees
 
     EthOrderOpenSeaV1DataV1:
       type: object
       properties:
+        "@type":
+          type: string
+          enum:
+            - ETH_OPEN_SEA_V1
         exchange:
           $ref: "#/components/schemas/UnionAddress"
         makerRelayerFee:
@@ -870,6 +830,7 @@ components:
         extra:
           $ref: "#/components/schemas/BigInteger"
       required:
+        - "@type"
         - dataType
         - exchange
         - makerRelayerFee
@@ -890,11 +851,17 @@ components:
     EthOrderCryptoPunksData:
       type: object
       properties:
+        "@type":
+          type: string
+          enum:
+            - ETH_CRYPTO_PUNKS
         stub:
           type: string
           default: "STUB"
+      required:
+        - "@type"
 
-    EthPendingOrder:
+    UnionPendingOrder:
       type: object
       required:
         - id
@@ -903,20 +870,20 @@ components:
         id:
           $ref: "#/components/schemas/UnionOrderId"
         make:
-          $ref: "#/components/schemas/EthAsset"
+          $ref: "#/components/schemas/UnionAsset"
         take:
-          $ref: "#/components/schemas/EthAsset"
+          $ref: "#/components/schemas/UnionAsset"
         date:
           type: string
           format: date-time
         maker:
           $ref: "#/components/schemas/UnionAddress"
       oneOf:
-        - $ref: "#/components/schemas/EthPendingOrderCancel"
-        - $ref: "#/components/schemas/EthPendingOrderMatch"
-        - $ref: "#/components/schemas/EthOnChainOrder"
+        - $ref: "#/components/schemas/UnionPendingOrderCancel"
+        - $ref: "#/components/schemas/UnionPendingOrderMatch"
+        - $ref: "#/components/schemas/UnionOnChainOrder"
 
-    EthPendingOrderMatch:
+    UnionPendingOrderMatch:
       type: object
       properties:
         "@type":
@@ -946,7 +913,7 @@ components:
         - "@type"
         - fill
 
-    EthPendingOrderCancel:
+    UnionPendingOrderCancel:
       type: object
       properties:
         "@type":
@@ -958,7 +925,7 @@ components:
       required:
         - "@type"
 
-    EthOnChainOrder:
+    UnionOnChainOrder:
       type: object
       properties:
         "@type":
@@ -979,20 +946,21 @@ components:
         - account
         - value
 
-    EthAsset:
+    UnionAsset:
       type: object
       properties:
         type:
-          $ref: "#/components/schemas/EthAssetType"
+          $ref: "#/components/schemas/UnionAssetType"
         value:
           $ref: "#/components/schemas/BigInteger"
       required:
         - type
         - value
 
-    EthAssetType:
+    UnionAssetType:
       type: object
       oneOf:
+        - $ref: "#/components/schemas/FlowAssetType"
         - $ref: "#/components/schemas/EthEthereumAssetType"
         - $ref: "#/components/schemas/EthErc20AssetType"
         - $ref: "#/components/schemas/EthErc721AssetType"
@@ -1001,6 +969,39 @@ components:
         - $ref: "#/components/schemas/EthErc1155LazyAssetType"
         - $ref: "#/components/schemas/EthCryptoPunksAssetType"
         - $ref: "#/components/schemas/EthGenerativeArtAssetType"
+
+    FlowAssetType:
+      type: object
+      properties:
+        contract:
+          $ref: "#/components/schemas/UnionAddress"
+      required:
+        - contract
+      oneOf:
+        - $ref: "#/components/schemas/FlowAssetTypeNft"
+        - $ref: "#/components/schemas/FlowAssetTypeFt"
+
+    FlowAssetTypeNft:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - FLOW_NFT
+        tokenId:
+          $ref: "#/components/schemas/BigInteger"
+      required:
+        - "@type"
+
+    FlowAssetTypeFt:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - FLOW_FT
+      required:
+        - "@type"
 
     EthEthereumAssetType:
       type: object
@@ -1271,7 +1272,7 @@ components:
         hash:
           type: string
         asset:
-          $ref: "#/components/schemas/EthAsset"
+          $ref: "#/components/schemas/UnionAsset"
         type:
           type: string
           enum:
@@ -1329,9 +1330,9 @@ components:
         maker:
           $ref: "#/components/schemas/UnionAddress"
         make:
-          $ref: "#/components/schemas/EthAsset"
+          $ref: "#/components/schemas/UnionAsset"
         take:
-          $ref: "#/components/schemas/EthAsset"
+          $ref: "#/components/schemas/UnionAsset"
         price:
           $ref: "#/components/schemas/BigDecimal"
         priceUsd:
@@ -1359,9 +1360,9 @@ components:
         maker:
           $ref: "#/components/schemas/UnionAddress"
         make:
-          $ref: "#/components/schemas/EthAsset"
+          $ref: "#/components/schemas/UnionAsset"
         take:
-          $ref: "#/components/schemas/EthAsset"
+          $ref: "#/components/schemas/UnionAsset"
         price:
           $ref: "#/components/schemas/BigDecimal"
         priceUsd:
@@ -1389,9 +1390,9 @@ components:
         maker:
           $ref: "#/components/schemas/UnionAddress"
         make:
-          $ref: "#/components/schemas/EthAssetType"
+          $ref: "#/components/schemas/UnionAssetType"
         take:
-          $ref: "#/components/schemas/EthAssetType"
+          $ref: "#/components/schemas/UnionAssetType"
         source:
           $ref: "#/components/schemas/EthOrderActivitySource"
         blockchainInfo:
@@ -1417,9 +1418,9 @@ components:
         maker:
           $ref: "#/components/schemas/UnionAddress"
         make:
-          $ref: "#/components/schemas/EthAssetType"
+          $ref: "#/components/schemas/UnionAssetType"
         take:
-          $ref: "#/components/schemas/EthAssetType"
+          $ref: "#/components/schemas/UnionAssetType"
         source:
           $ref: "#/components/schemas/EthOrderActivitySource"
         blockchainInfo:
@@ -1489,7 +1490,7 @@ components:
           enum:
             - ETHEREUM_UPDATE
         order:
-          "$ref": "#/components/schemas/EthOrder"
+          "$ref": "#/components/schemas/UnionOrder"
       required:
         - "@type"
         - order
@@ -1606,37 +1607,13 @@ components:
 
     #################### Order - Flow ####################
 
-    FlowOrder:
-      oneOf:
-        - $ref: "#/components/schemas/FlowOrderV1"
-
-    FlowOrderV1:
+    FlowOrderDataV1:
       type: object
       properties:
         "@type":
           type: string
           enum:
             - FLOW_RARIBLE_V1
-        maker:
-          $ref: "#/components/schemas/UnionAddress"
-        taker:
-          $ref: "#/components/schemas/UnionAddress"
-        make:
-          $ref: "#/components/schemas/FlowAsset"
-        take:
-          $ref: "#/components/schemas/FlowAsset"
-        data:
-          $ref: "#/components/schemas/FlowOrderDataV1"
-      required:
-        - "@type"
-        - maker
-        - make
-        - take
-        - data
-
-    FlowOrderDataV1:
-      type: object
-      properties:
         payouts:
           type: array
           default: [ ]
@@ -1648,6 +1625,7 @@ components:
           items:
             $ref: "#/components/schemas/FlowOrderPayout"
       required:
+        - "@type"
         - payouts
         - originFees
 
@@ -1661,50 +1639,6 @@ components:
       required:
         - account
         - value
-
-    FlowAsset:
-      type: object
-      properties:
-        type:
-          $ref: "#/components/schemas/FlowAssetType"
-        value:
-          $ref: "#/components/schemas/BigInteger"
-      required:
-        - type
-        - value
-
-    FlowAssetType:
-      type: object
-      properties:
-        contract:
-          $ref: "#/components/schemas/UnionAddress"
-      required:
-        - contract
-      oneOf:
-        - $ref: "#/components/schemas/FlowAssetTypeNft"
-        - $ref: "#/components/schemas/FlowAssetTypeFt"
-
-    FlowAssetTypeNft:
-      type: object
-      properties:
-        "@type":
-          type: string
-          enum:
-            - FLOW_NFT
-        tokenId:
-          $ref: "#/components/schemas/BigInteger"
-      required:
-        - "@type"
-
-    FlowAssetTypeFt:
-      type: object
-      properties:
-        "@type":
-          type: string
-          enum:
-            - FLOW_FT
-      required:
-        - "@type"
 
     FlowOrderEvent:
       type: object
@@ -1724,7 +1658,7 @@ components:
           enum:
             - FLOW_UPDATE
         order:
-          "$ref": "#/components/schemas/FlowOrder"
+          "$ref": "#/components/schemas/UnionOrder"
       required:
         - "@type"
         - order
@@ -1864,9 +1798,9 @@ components:
         maker:
           $ref: "#/components/schemas/UnionAddress"
         make:
-          $ref: "#/components/schemas/FlowAsset"
+          $ref: "#/components/schemas/UnionAsset"
         take:
-          $ref: "#/components/schemas/FlowAsset"
+          $ref: "#/components/schemas/UnionAsset"
         price:
           $ref: "#/components/schemas/BigDecimal"
         priceUsd:
@@ -1891,9 +1825,9 @@ components:
         maker:
           $ref: "#/components/schemas/UnionAddress"
         make:
-          $ref: "#/components/schemas/FlowAsset"
+          $ref: "#/components/schemas/UnionAsset"
         take:
-          $ref: "#/components/schemas/FlowAsset"
+          $ref: "#/components/schemas/UnionAsset"
       required:
         - "@type"
         - hash
@@ -1907,7 +1841,7 @@ components:
         maker:
           $ref: "#/components/schemas/UnionAddress"
         asset:
-          $ref: "#/components/schemas/FlowAsset"
+          $ref: "#/components/schemas/UnionAsset"
         type:
           type: string
           enum:

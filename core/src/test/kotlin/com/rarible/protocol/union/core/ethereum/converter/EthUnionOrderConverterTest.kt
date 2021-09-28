@@ -14,7 +14,7 @@ class EthUnionOrderConverterTest {
     fun `eth order - legacy`() {
         val dto = randomEthLegacyOrderDto()
 
-        val converted = EthUnionOrderConverter.convert(dto, BlockchainDto.ETHEREUM) as EthLegacyOrderDto
+        val converted = EthUnionOrderConverter.convert(dto, BlockchainDto.ETHEREUM)
 
         assertThat(converted.id.value).isEqualTo(dto.hash.prefixed())
         assertThat(converted.maker.value).isEqualTo(dto.maker.prefixed())
@@ -37,7 +37,8 @@ class EthUnionOrderConverterTest {
         assertThat(converted.priceHistory[0].date).isEqualTo(dto.priceHistory!![0].date)
         assertThat(converted.priceHistory[0].makeValue).isEqualTo(dto.priceHistory!![0].makeValue)
         assertThat(converted.priceHistory[0].takeValue).isEqualTo(dto.priceHistory!![0].takeValue)
-        assertThat(converted.data.fee).isEqualTo(dto.data.fee)
+        val data = converted.data as EthOrderDataLegacyDto
+        assertThat(data.fee).isEqualTo(dto.data.fee)
     }
 
     @Test
@@ -46,7 +47,7 @@ class EthUnionOrderConverterTest {
         val dto = order.pending!![0] as OrderSideMatchDto
 
         val converted = EthUnionOrderConverter.convert(order, BlockchainDto.ETHEREUM)
-            .pending!![0] as EthPendingOrderMatchDto
+            .pending!![0] as UnionPendingOrderMatchDto
 
         assertThat(converted.id.value).isEqualTo(dto.hash.prefixed())
         assertThat(converted.date).isEqualTo(dto.date)
@@ -74,7 +75,7 @@ class EthUnionOrderConverterTest {
         val dto = order.pending!![0] as OrderCancelDto
 
         val converted = EthUnionOrderConverter.convert(order, BlockchainDto.ETHEREUM)
-            .pending!![0] as EthPendingOrderCancelDto
+            .pending!![0] as UnionPendingOrderCancelDto
 
         assertThat(converted.id.value).isEqualTo(dto.hash.prefixed())
         assertThat(converted.date).isEqualTo(dto.date)
@@ -93,7 +94,7 @@ class EthUnionOrderConverterTest {
         val dto = order.pending!![0] as OnChainOrderDto
 
         val converted = EthUnionOrderConverter.convert(order, BlockchainDto.ETHEREUM)
-            .pending!![0] as EthOnChainOrderDto
+            .pending!![0] as UnionOnChainOrderDto
 
         assertThat(converted.id.value).isEqualTo(dto.hash.prefixed())
         assertThat(converted.date).isEqualTo(dto.date)
@@ -108,7 +109,7 @@ class EthUnionOrderConverterTest {
     fun `eth order rarible v2`() {
         val dto = randomEthV2OrderDto()
 
-        val converted = EthUnionOrderConverter.convert(dto, BlockchainDto.ETHEREUM) as EthRaribleV2OrderDto
+        val converted = EthUnionOrderConverter.convert(dto, BlockchainDto.ETHEREUM)
 
         assertThat(converted.id.value).isEqualTo(dto.hash.prefixed())
         assertThat(converted.maker.value).isEqualTo(dto.maker.prefixed())
@@ -132,18 +133,19 @@ class EthUnionOrderConverterTest {
         assertThat(converted.priceHistory[0].makeValue).isEqualTo(dto.priceHistory!![0].makeValue)
         assertThat(converted.priceHistory[0].takeValue).isEqualTo(dto.priceHistory!![0].takeValue)
 
-        assertThat(converted.data.payouts[0].account.value).isEqualTo(dto.data.payouts[0].account.prefixed())
-        assertThat(converted.data.payouts[0].value).isEqualTo(dto.data.payouts[0].value)
+        val data = converted.data as EthOrderDataRaribleV2DataV1Dto
+        assertThat(data.payouts[0].account.value).isEqualTo(dto.data.payouts[0].account.prefixed())
+        assertThat(data.payouts[0].value).isEqualTo(dto.data.payouts[0].value)
 
-        assertThat(converted.data.originFees[0].account.value).isEqualTo(dto.data.originFees[0].account.prefixed())
-        assertThat(converted.data.originFees[0].value).isEqualTo(dto.data.originFees[0].value)
+        assertThat(data.originFees[0].account.value).isEqualTo(dto.data.originFees[0].account.prefixed())
+        assertThat(data.originFees[0].value).isEqualTo(dto.data.originFees[0].value)
     }
 
     @Test
     fun `eth order opensea v1`() {
         val dto = randomEthOpenSeaV1OrderDto()
 
-        val converted = EthUnionOrderConverter.convert(dto, BlockchainDto.ETHEREUM) as EthOpenSeaV1OrderDto
+        val converted = EthUnionOrderConverter.convert(dto, BlockchainDto.ETHEREUM)
 
         assertThat(converted.id.value).isEqualTo(dto.hash.prefixed())
         assertThat(converted.maker.value).isEqualTo(dto.maker.prefixed())
@@ -173,7 +175,7 @@ class EthUnionOrderConverterTest {
         val order = randomEthOpenSeaV1OrderDto()
         val dto = order.data
 
-        val converted = (EthUnionOrderConverter.convert(order, BlockchainDto.ETHEREUM) as EthOpenSeaV1OrderDto).data
+        val converted = EthUnionOrderConverter.convert(order, BlockchainDto.ETHEREUM).data as EthOrderOpenSeaV1DataV1Dto
 
         assertThat(converted.exchange.value).isEqualTo(dto.exchange.prefixed())
         assertThat(converted.makerRelayerFee).isEqualTo(dto.makerRelayerFee)
@@ -197,7 +199,7 @@ class EthUnionOrderConverterTest {
     fun `eth order crypto punks`() {
         val dto = randomEthCryptoPunksOrderDto()
 
-        val converted = EthUnionOrderConverter.convert(dto, BlockchainDto.ETHEREUM) as EthCryptoPunksOrderDto
+        val converted = EthUnionOrderConverter.convert(dto, BlockchainDto.ETHEREUM)
 
         assertThat(converted.id.value).isEqualTo(dto.hash.prefixed())
         assertThat(converted.maker.value).isEqualTo(dto.maker.prefixed())

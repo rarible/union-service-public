@@ -36,9 +36,11 @@ class FlowUnionActivityConverterTest {
         assertThat(converted.hash).isEqualTo(dto.hash)
         assertThat(converted.maker.value).isEqualTo(dto.maker)
         // assertThat(converted.make.value).isEqualTo(dto.make.value) // TODO - types incompatible
-        assertThat(converted.make.type.contract.value).isEqualTo(dto.make.contract)
+        val makeType = converted.make.type as FlowAssetTypeDto
+        assertThat(makeType.contract.value).isEqualTo(dto.make.contract)
         // assertThat(converted.take.value).isEqualTo(dto.take.value) // TODO - types incompatible
-        assertThat(converted.take.type.contract.value).isEqualTo(dto.take.contract)
+        val takeType = converted.take.type as FlowAssetTypeDto
+        assertThat(takeType.contract.value).isEqualTo(dto.take.contract)
     }
 
     @Test
@@ -52,9 +54,11 @@ class FlowUnionActivityConverterTest {
         assertThat(converted.hash).isEqualTo(dto.hash)
         assertThat(converted.maker.value).isEqualTo(dto.maker)
         // assertThat(converted.make.value).isEqualTo(dto.make.value) // TODO - types incompatible
-        assertThat(converted.make.type.contract.value).isEqualTo(dto.make.contract)
+        val makeType = converted.make.type as FlowAssetTypeDto
+        assertThat(makeType.contract.value).isEqualTo(dto.make.contract)
         // assertThat(converted.take.value).isEqualTo(dto.take.value) // TODO - types incompatible
-        assertThat(converted.take.type.contract.value).isEqualTo(dto.take.contract)
+        val takeType = converted.take.type as FlowAssetTypeDto
+        assertThat(takeType.contract.value).isEqualTo(dto.take.contract)
     }
 
     @Test
@@ -119,5 +123,4 @@ class FlowUnionActivityConverterTest {
         assertThat(dest.maker.value).isEqualTo(expected.maker)
         assertThat(dest.type.name).isEqualTo(expected.type.name)
     }
-
 }
