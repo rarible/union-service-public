@@ -636,7 +636,7 @@ components:
         - value
         - blockchainInfo
 
-    OrderActivitySource:
+    UnionOrderActivitySource:
       type: string
       enum:
         - RARIBLE
@@ -663,7 +663,7 @@ components:
         priceUsd:
           $ref: "#/components/schemas/BigDecimal"
         source:
-          $ref: "#/components/schemas/OrderActivitySource"
+          $ref: "#/components/schemas/UnionOrderActivitySource"
         blockchainInfo:
           $ref: "#/components/schemas/ActivityBlockchainInfo"
         type:
@@ -710,7 +710,7 @@ components:
         priceUsd:
           $ref: "#/components/schemas/BigDecimal"
         source:
-          $ref: "#/components/schemas/OrderActivitySource"
+          $ref: "#/components/schemas/UnionOrderActivitySource"
         blockchainInfo:
           $ref: "#/components/schemas/ActivityBlockchainInfo"
       required:
@@ -740,7 +740,7 @@ components:
         priceUsd:
           $ref: "#/components/schemas/BigDecimal"
         source:
-          $ref: "#/components/schemas/OrderActivitySource"
+          $ref: "#/components/schemas/UnionOrderActivitySource"
       required:
         - "@type"
         - hash
@@ -769,7 +769,7 @@ components:
         priceUsd:
           $ref: "#/components/schemas/BigDecimal"
         source:
-          $ref: "#/components/schemas/OrderActivitySource"
+          $ref: "#/components/schemas/UnionOrderActivitySource"
       required:
         - "@type"
         - hash
@@ -794,7 +794,7 @@ components:
         take:
           $ref: "#/components/schemas/UnionAssetType"
         source:
-          $ref: "#/components/schemas/OrderActivitySource"
+          $ref: "#/components/schemas/UnionOrderActivitySource"
         blockchainInfo:
           $ref: "#/components/schemas/ActivityBlockchainInfo"
       required:
@@ -821,7 +821,7 @@ components:
         take:
           $ref: "#/components/schemas/UnionAssetType"
         source:
-          $ref: "#/components/schemas/OrderActivitySource"
+          $ref: "#/components/schemas/UnionOrderActivitySource"
         blockchainInfo:
           $ref: "#/components/schemas/ActivityBlockchainInfo"
       required:

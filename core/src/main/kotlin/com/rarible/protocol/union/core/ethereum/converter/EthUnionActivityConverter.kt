@@ -193,11 +193,11 @@ object EthUnionActivityConverter {
         )
     }
 
-    private fun convert(source: OrderActivityDto.Source): OrderActivitySourceDto {
+    private fun convert(source: OrderActivityDto.Source): UnionOrderActivitySourceDto {
         return when (source) {
-            OrderActivityDto.Source.OPEN_SEA -> OrderActivitySourceDto.OPEN_SEA
-            OrderActivityDto.Source.RARIBLE -> OrderActivitySourceDto.RARIBLE
-            OrderActivityDto.Source.CRYPTO_PUNKS -> OrderActivitySourceDto.CRYPTO_PUNKS
+            OrderActivityDto.Source.OPEN_SEA -> UnionOrderActivitySourceDto.OPEN_SEA
+            OrderActivityDto.Source.RARIBLE -> UnionOrderActivitySourceDto.RARIBLE
+            OrderActivityDto.Source.CRYPTO_PUNKS -> UnionOrderActivitySourceDto.CRYPTO_PUNKS
         }
     }
 
