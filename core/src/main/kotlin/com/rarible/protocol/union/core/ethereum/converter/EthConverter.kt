@@ -9,12 +9,13 @@ import com.rarible.protocol.dto.Erc1155LazyAssetTypeDto
 import com.rarible.protocol.dto.Erc20AssetTypeDto
 import com.rarible.protocol.dto.Erc721AssetTypeDto
 import com.rarible.protocol.dto.Erc721LazyAssetTypeDto
+import com.rarible.protocol.dto.EthAssetTypeDto
 import com.rarible.protocol.dto.GenerativeArtAssetTypeDto
 import com.rarible.protocol.dto.PartDto
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.EthAssetDto
-import com.rarible.protocol.union.dto.EthAssetTypeDto
+import com.rarible.protocol.union.dto.UnionAssetDto
+import com.rarible.protocol.union.dto.UnionAssetTypeDto
 import com.rarible.protocol.union.dto.UnionCreatorDto
 import com.rarible.protocol.union.dto.EthCryptoPunksAssetTypeDto
 import com.rarible.protocol.union.dto.EthErc1155AssetTypeDto
@@ -94,16 +95,16 @@ object EthConverter {
         )
     }
 
-    fun convert(source: AssetDto, blockchain: BlockchainDto): EthAssetDto {
-        return EthAssetDto(
+    fun convert(source: AssetDto, blockchain: BlockchainDto): UnionAssetDto {
+        return UnionAssetDto(
             type = convert(source.assetType, blockchain),
             value = source.value
         )
     }
 
-    fun convert(source: AssetTypeDto, blockchain: BlockchainDto): EthAssetTypeDto {
+    fun convert(source: AssetTypeDto, blockchain: BlockchainDto): UnionAssetTypeDto {
         return when (source) {
-            is com.rarible.protocol.dto.EthAssetTypeDto -> EthEthereumAssetTypeDto(
+            is EthAssetTypeDto -> EthEthereumAssetTypeDto(
             )
             is Erc20AssetTypeDto -> EthErc20AssetTypeDto(
                 contract = UnionAddressConverter.convert(source.contract, blockchain)

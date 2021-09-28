@@ -1,11 +1,11 @@
 package com.rarible.protocol.union.core.flow.converter
 
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.FlowOrderV1Dto
+import com.rarible.protocol.union.dto.FlowAssetTypeDto
+import com.rarible.protocol.union.dto.FlowOrderDataV1Dto
 import com.rarible.protocol.union.test.data.randomFlowV1OrderDto
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import java.math.BigInteger
 
 class FlowUnionOrderConverterTest {
 
@@ -13,7 +13,7 @@ class FlowUnionOrderConverterTest {
     fun `order V1`() {
         val dto = randomFlowV1OrderDto()
 
-        val converted = FlowUnionOrderConverter.convert(dto, BlockchainDto.FLOW) as FlowOrderV1Dto
+        val converted = FlowUnionOrderConverter.convert(dto, BlockchainDto.FLOW)
 
         assertThat(converted.id.value).isEqualTo(dto.id.toString())
         assertThat(converted.startedAt).isNull()
@@ -27,14 +27,17 @@ class FlowUnionOrderConverterTest {
         assertThat(converted.maker.value).isEqualTo(dto.maker)
         assertThat(converted.taker?.value).isEqualTo(dto.taker)
         assertThat(converted.make.value).isEqualTo(dto.make.value.toBigInteger())
-        assertThat(converted.make.type.contract.value).isEqualTo(dto.make.contract)
+        val makeType = converted.make.type as FlowAssetTypeDto
+        assertThat(makeType.contract.value).isEqualTo(dto.make.contract)
         assertThat(converted.take.value).isEqualTo(dto.take.value.toBigInteger())
-        assertThat(converted.take.type.contract.value).isEqualTo(dto.take.contract)
+        val takeType = converted.take.type as FlowAssetTypeDto
+        assertThat(takeType.contract.value).isEqualTo(dto.take.contract)
 
-         assertThat(converted.data.payouts[0].value).isEqualTo(dto.data.payouts[0].value.toBigInteger())
-        assertThat(converted.data.payouts[0].account.value).isEqualTo(dto.data.payouts[0].account)
+        val data = converted.data as FlowOrderDataV1Dto
+        assertThat(data.payouts[0].value).isEqualTo(dto.data.payouts[0].value.toBigInteger())
+        assertThat(data.payouts[0].account.value).isEqualTo(dto.data.payouts[0].account)
 
-        assertThat(converted.data.originFees[0].value).isEqualTo(dto.data.originalFees[0].value.toBigInteger())
-        assertThat(converted.data.originFees[0].account.value).isEqualTo(dto.data.originalFees[0].account)
+        assertThat(data.originFees[0].value).isEqualTo(dto.data.originalFees[0].value.toBigInteger())
+        assertThat(data.originFees[0].account.value).isEqualTo(dto.data.originalFees[0].account)
     }
 }

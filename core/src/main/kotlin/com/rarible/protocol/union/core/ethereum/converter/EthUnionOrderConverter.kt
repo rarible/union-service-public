@@ -7,11 +7,11 @@ import java.time.Instant
 
 object EthUnionOrderConverter {
 
-    fun convert(order: OrderDto, blockchain: BlockchainDto): EthOrderDto {
+    fun convert(order: OrderDto, blockchain: BlockchainDto): UnionOrderDto {
         val unionOrderId = UnionOrderIdDto(blockchain, EthConverter.convert(order.hash))
         return when (order) {
             is LegacyOrderDto -> {
-                EthLegacyOrderDto(
+                UnionOrderDto(
                     id = unionOrderId,
                     maker = UnionAddressConverter.convert(order.maker, blockchain),
                     taker = order.taker?.let { UnionAddressConverter.convert(it, blockchain) },
@@ -36,7 +36,7 @@ object EthUnionOrderConverter {
                 )
             }
             is RaribleV2OrderDto -> {
-                EthRaribleV2OrderDto(
+                UnionOrderDto(
                     id = unionOrderId,
                     maker = UnionAddressConverter.convert(order.maker, blockchain),
                     taker = order.taker?.let { UnionAddressConverter.convert(order.taker!!, blockchain) },
@@ -62,7 +62,7 @@ object EthUnionOrderConverter {
                 )
             }
             is OpenSeaV1OrderDto -> {
-                EthOpenSeaV1OrderDto(
+                UnionOrderDto(
                     id = unionOrderId,
                     maker = UnionAddressConverter.convert(order.maker, blockchain),
                     taker = order.taker?.let { UnionAddressConverter.convert(order.taker!!, blockchain) },
@@ -101,7 +101,7 @@ object EthUnionOrderConverter {
                 )
             }
             is CryptoPunkOrderDto -> {
-                EthCryptoPunksOrderDto(
+                UnionOrderDto(
                     id = unionOrderId,
                     maker = UnionAddressConverter.convert(order.maker, blockchain),
                     taker = order.taker?.let { UnionAddressConverter.convert(order.taker!!, blockchain) },
@@ -162,10 +162,10 @@ object EthUnionOrderConverter {
     }
 
 
-    private fun convert(source: OrderSideDto): EthPendingOrderMatchDto.Side {
+    private fun convert(source: OrderSideDto): UnionPendingOrderMatchDto.Side {
         return when (source) {
-            OrderSideDto.RIGHT -> EthPendingOrderMatchDto.Side.RIGHT
-            OrderSideDto.LEFT -> EthPendingOrderMatchDto.Side.LEFT
+            OrderSideDto.RIGHT -> UnionPendingOrderMatchDto.Side.RIGHT
+            OrderSideDto.LEFT -> UnionPendingOrderMatchDto.Side.LEFT
         }
     }
 
@@ -177,9 +177,9 @@ object EthUnionOrderConverter {
         )
     }
 
-    private fun convert(source: OrderExchangeHistoryDto, blockchain: BlockchainDto): EthPendingOrderDto {
+    private fun convert(source: OrderExchangeHistoryDto, blockchain: BlockchainDto): UnionPendingOrderDto {
         return when (source) {
-            is OrderSideMatchDto -> EthPendingOrderMatchDto(
+            is OrderSideMatchDto -> UnionPendingOrderMatchDto(
                 id = UnionOrderIdDto(blockchain, EthConverter.convert(source.hash)),
                 make = source.make?.let { EthConverter.convert(it, blockchain) },
                 take = source.take?.let { EthConverter.convert(it, blockchain) },
@@ -194,7 +194,7 @@ object EthUnionOrderConverter {
                 makePriceUsd = source.makePriceUsd,
                 takePriceUsd = source.takePriceUsd
             )
-            is OrderCancelDto -> EthPendingOrderCancelDto(
+            is OrderCancelDto -> UnionPendingOrderCancelDto(
                 id = UnionOrderIdDto(blockchain, EthConverter.convert(source.hash)),
                 make = source.make?.let { EthConverter.convert(it, blockchain) },
                 take = source.take?.let { EthConverter.convert(it, blockchain) },
@@ -202,7 +202,7 @@ object EthUnionOrderConverter {
                 maker = source.maker?.let { UnionAddressConverter.convert(it, blockchain) },
                 owner = source.owner?.let { UnionAddressConverter.convert(it, blockchain) }
             )
-            is OnChainOrderDto -> EthOnChainOrderDto(
+            is OnChainOrderDto -> UnionOnChainOrderDto(
                 id = UnionOrderIdDto(blockchain, EthConverter.convert(source.hash)),
                 make = source.make?.let { EthConverter.convert(it, blockchain) },
                 take = source.take?.let { EthConverter.convert(it, blockchain) },

@@ -2,6 +2,7 @@ package com.rarible.protocol.union.core.flow.converter
 
 import com.rarible.protocol.union.dto.FlowAssetTypeNftDto
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.FlowAssetTypeDto
 import com.rarible.protocol.union.test.data.randomFlowFungibleAsset
 import com.rarible.protocol.union.test.data.randomFlowNftAsset
 import org.assertj.core.api.Assertions.assertThat
@@ -16,7 +17,8 @@ internal class FlowConverterTest {
         val converted = FlowConverter.convert(dto, BlockchainDto.FLOW)
 
         // assertThat(converted.value.toBigDecimal()).isEqualTo(dto.value) // TODO - types incompatible
-        assertThat(converted.type.contract.value).isEqualTo(dto.contract)
+        val type = converted.type as FlowAssetTypeDto
+        assertThat(type.contract.value).isEqualTo(dto.contract)
     }
 
     @Test
@@ -26,9 +28,9 @@ internal class FlowConverterTest {
         val converted = FlowConverter.convert(dto, BlockchainDto.FLOW)
 
         // assertThat(converted.value.toBigDecimal()).isEqualTo(dto.value) // TODO - types incompatible
-        assertThat(converted.type.contract.value).isEqualTo(dto.contract)
-        assertThat(converted.type).isInstanceOf(FlowAssetTypeNftDto::class.java)
-        assertThat((converted.type as FlowAssetTypeNftDto).tokenId).isEqualTo(dto.tokenId)
+        val type = converted.type as FlowAssetTypeDto
+        assertThat(type.contract.value).isEqualTo(dto.contract)
+        assertThat(type).isInstanceOf(FlowAssetTypeNftDto::class.java)
+        assertThat((type as FlowAssetTypeNftDto).tokenId).isEqualTo(dto.tokenId)
     }
-
 }

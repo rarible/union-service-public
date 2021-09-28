@@ -46,10 +46,9 @@ class OrderControllerFt : AbstractIntegrationTest() {
         coEvery { testEthereumOrderApi.getOrderByHash(orderId) } returns order.toMono()
 
         val unionOrder = orderControllerClient.getOrderById(orderIdFull).awaitFirst()
-        val ethOrder = unionOrder as EthOrderDto
 
-        assertThat(ethOrder.id.value).isEqualTo(orderId)
-        assertThat(ethOrder.id.blockchain).isEqualTo(BlockchainDto.ETHEREUM)
+        assertThat(unionOrder.id.value).isEqualTo(orderId)
+        assertThat(unionOrder.id.blockchain).isEqualTo(BlockchainDto.ETHEREUM)
     }
 
     @Test
@@ -61,10 +60,9 @@ class OrderControllerFt : AbstractIntegrationTest() {
         coEvery { testPolygonOrderApi.getOrderByHash(orderId) } returns order.toMono()
 
         val unionOrder = orderControllerClient.getOrderById(orderIdFull).awaitFirst()
-        val ethOrder = unionOrder as EthOrderDto
 
-        assertThat(ethOrder.id.value).isEqualTo(orderId)
-        assertThat(ethOrder.id.blockchain).isEqualTo(BlockchainDto.POLYGON)
+        assertThat(unionOrder.id.value).isEqualTo(orderId)
+        assertThat(unionOrder.id.blockchain).isEqualTo(BlockchainDto.POLYGON)
     }
 
     @Test
@@ -76,10 +74,9 @@ class OrderControllerFt : AbstractIntegrationTest() {
         coEvery { testFlowOrderApi.getOrderByOrderId(orderId.toString()) } returns order.toMono()
 
         val unionOrder = orderControllerClient.getOrderById(orderIdFull).awaitFirst()
-        val ethOrder = unionOrder as FlowOrderDto
 
-        assertThat(ethOrder.id.value).isEqualTo(orderId.toString())
-        assertThat(ethOrder.id.blockchain).isEqualTo(BlockchainDto.FLOW)
+        assertThat(unionOrder.id.value).isEqualTo(orderId.toString())
+        assertThat(unionOrder.id.blockchain).isEqualTo(BlockchainDto.FLOW)
     }
 
     @Test
@@ -91,10 +88,9 @@ class OrderControllerFt : AbstractIntegrationTest() {
         coEvery { testEthereumOrderApi.updateOrderMakeStock(orderId) } returns order.toMono()
 
         val unionOrder = orderControllerClient.updateOrderMakeStock(orderIdFull).awaitFirst()
-        val ethOrder = unionOrder as EthOrderDto
 
-        assertThat(ethOrder.id.value).isEqualTo(orderId)
-        assertThat(ethOrder.id.blockchain).isEqualTo(BlockchainDto.ETHEREUM)
+        assertThat(unionOrder.id.value).isEqualTo(orderId)
+        assertThat(unionOrder.id.blockchain).isEqualTo(BlockchainDto.ETHEREUM)
     }
 
     @Test
@@ -174,7 +170,7 @@ class OrderControllerFt : AbstractIntegrationTest() {
         ).awaitFirst()
 
         assertThat(unionOrders.orders).hasSize(1)
-        assertThat(unionOrders.orders[0]).isInstanceOf(EthOrderDto::class.java)
+        assertThat(unionOrders.orders[0]).isInstanceOf(UnionOrderDto::class.java)
         assertThat(unionOrders.continuation).isNull()
     }
 
@@ -202,7 +198,7 @@ class OrderControllerFt : AbstractIntegrationTest() {
         ).awaitFirst()
 
         assertThat(unionOrders.orders).hasSize(1)
-        assertThat(unionOrders.orders[0]).isInstanceOf(EthOrderDto::class.java)
+        assertThat(unionOrders.orders[0]).isInstanceOf(UnionOrderDto::class.java)
         assertThat(unionOrders.continuation).isNull()
     }
 
@@ -281,7 +277,7 @@ class OrderControllerFt : AbstractIntegrationTest() {
         ).awaitFirst()
 
         assertThat(unionOrders.orders).hasSize(1)
-        assertThat(unionOrders.orders[0]).isInstanceOf(EthOrderDto::class.java)
+        assertThat(unionOrders.orders[0]).isInstanceOf(UnionOrderDto::class.java)
         assertThat(unionOrders.continuation).isNull()
     }
 
@@ -316,7 +312,7 @@ class OrderControllerFt : AbstractIntegrationTest() {
         ).awaitFirst()
 
         assertThat(unionOrders.orders).hasSize(1)
-        assertThat(unionOrders.orders[0]).isInstanceOf(EthOrderDto::class.java)
+        assertThat(unionOrders.orders[0]).isInstanceOf(UnionOrderDto::class.java)
         assertThat(unionOrders.continuation).isNull()
     }
 
@@ -339,7 +335,7 @@ class OrderControllerFt : AbstractIntegrationTest() {
         ).awaitFirst()
 
         assertThat(unionOrders.orders).hasSize(1)
-        assertThat(unionOrders.orders[0]).isInstanceOf(EthOrderDto::class.java)
+        assertThat(unionOrders.orders[0]).isInstanceOf(UnionOrderDto::class.java)
         assertThat(unionOrders.continuation).isNull()
     }
 

@@ -1,20 +1,20 @@
 package com.rarible.protocol.union.core.flow.converter
 
+import com.rarible.protocol.dto.FlowOrderDto
 import com.rarible.protocol.dto.PayInfoDto
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.FlowOrderDataV1Dto
-import com.rarible.protocol.union.dto.FlowOrderDto
+import com.rarible.protocol.union.dto.UnionOrderDto
 import com.rarible.protocol.union.dto.FlowOrderPayoutDto
-import com.rarible.protocol.union.dto.FlowOrderV1Dto
 import com.rarible.protocol.union.dto.UnionOrderIdDto
 import java.math.BigInteger
 import java.time.Instant
 
 object FlowUnionOrderConverter {
 
-    fun convert(order: com.rarible.protocol.dto.FlowOrderDto, blockchain: BlockchainDto): FlowOrderDto {
-        return FlowOrderV1Dto(
+    fun convert(order: FlowOrderDto, blockchain: BlockchainDto): UnionOrderDto {
+        return UnionOrderDto(
             id = UnionOrderIdDto(blockchain, order.id.toString()),
             maker = UnionAddressConverter.convert(order.maker, blockchain),
             taker = order.taker?.let { UnionAddressConverter.convert(it, blockchain) },
@@ -30,7 +30,8 @@ object FlowUnionOrderConverter {
             makePriceUsd = order.priceUsd,
             takePriceUsd = order.priceUsd,
             priceHistory = emptyList(),
-            data = convert(order.data, blockchain)
+            data = convert(order.data, blockchain),
+            salt = ""// TODO возможно будет на flow?
         )
     }
 
@@ -46,10 +47,9 @@ object FlowUnionOrderConverter {
 
     private fun convert(source: PayInfoDto, blockchain: BlockchainDto): FlowOrderPayoutDto {
         return FlowOrderPayoutDto(
-            account = FlowAddressConverter.convert(source.account, blockchain),
+            account = UnionAddressConverter.convert(source.account, blockchain),
             value = source.value.toBigInteger()
         )
     }
-
 }
 
