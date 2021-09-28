@@ -137,16 +137,15 @@ fun randomFlowV1OrderDto(): FlowOrderDto {
         cancelled = randomBoolean(),
         createdAt = nowMillis(),
         amount = randomBigDecimal(),
-        // priceUsd = randomBigDecimal(), TODO что-то с версией не так flow-protocol-api
-        amountUsd = randomBigDecimal(),
+        priceUsd = randomBigDecimal(),
         data = FlowOrderDataDto(
             payouts = listOf(PayInfoDto(randomString(), randomBigDecimal())),
             originalFees = listOf(PayInfoDto(randomString(), randomBigDecimal()))
         ),
         collection = randomFlowContract().value,
         lastUpdateAt = nowMillis(),
-        offeredNftId = randomString()
-        // makeStock = randomBigInt()
+        offeredNftId = randomString(),
+        makeStock = randomBigInt()
     )
 }
 
