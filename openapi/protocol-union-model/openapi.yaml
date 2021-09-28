@@ -388,13 +388,39 @@ components:
     UnionOwnershipEvent:
       type: object
       properties:
+        ownershipId:
+          $ref: "#/components/schemas/UnionOwnershipId"
         eventId:
           type: string
       required:
+        - ownershipId
         - eventId
       oneOf:
-        - $ref: "#/components/schemas/EthOwnershipEvent"
-        - $ref: "#/components/schemas/FlowOwnershipEvent"
+        - $ref: "#/components/schemas/UnionOwnershipUpdateEvent"
+        - $ref: "#/components/schemas/UnionOwnershipDeleteEvent"
+
+    UnionOwnershipUpdateEvent:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - UPDATE
+        ownership:
+          $ref: "#/components/schemas/UnionOwnership"
+      required:
+        - "@type"
+        - ownership
+
+    UnionOwnershipDeleteEvent:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - DELETE
+      required:
+        - "@type"
 
     #################### Order - Union ####################
 
@@ -992,46 +1018,6 @@ components:
         message:
           type: string
 
-    #################### Ownership - Eth ####################
-
-    EthOwnershipEvent:
-      properties:
-        "@type":
-          type: string
-          enum:
-            - ETHEREUM
-        ownershipId:
-          $ref: "#/components/schemas/UnionOwnershipId"
-      required:
-        - "@type"
-        - ownershipId
-      oneOf:
-        - $ref: "#/components/schemas/EthOwnershipUpdateEvent"
-        - $ref: "#/components/schemas/EthOwnershipDeleteEvent"
-
-    EthOwnershipUpdateEvent:
-      type: object
-      properties:
-        "@type":
-          type: string
-          enum:
-            - ETHEREUM_UPDATE
-        ownership:
-          $ref: "#/components/schemas/UnionOwnership"
-      required:
-        - "@type"
-        - ownership
-
-    EthOwnershipDeleteEvent:
-      type: object
-      properties:
-        "@type":
-          type: string
-          enum:
-            - ETHEREUM_DELETE
-      required:
-        - "@type"
-
     #################### Order - Eth ####################
 
     EthOrderDataLegacy:
@@ -1476,45 +1462,6 @@ components:
       required:
         - "@type"
         - order
-
-    #################### Ownership - Flow ####################
-
-    FlowOwnershipEvent:
-      properties:
-        eventId:
-          type: string
-        ownershipId:
-          $ref: "#/components/schemas/UnionOwnershipId"
-      required:
-        - "@type"
-        - eventId
-        - ownershipId
-      oneOf:
-        - $ref: "#/components/schemas/FlowOwnershipUpdateEvent"
-        - $ref: "#/components/schemas/FlowOwnershipDeleteEvent"
-
-    FlowOwnershipUpdateEvent:
-      type: object
-      properties:
-        "@type":
-          type: string
-          enum:
-            - FLOW_UPDATE
-        ownership:
-          $ref: "#/components/schemas/UnionOwnership"
-      required:
-        - "@type"
-        - ownership
-
-    FlowOwnershipDeleteEvent:
-      type: object
-      properties:
-        "@type":
-          type: string
-          enum:
-            - FLOW_DELETE
-      required:
-        - "@type"
 
     #################### Order - Flow ####################
 

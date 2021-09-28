@@ -98,13 +98,13 @@ abstract class AbstractIntegrationTest {
             .filter { it.value.itemId.value == itemId }
     }
 
-    fun findEthOwnershipUpdates(ownershipId: String): List<KafkaMessage<EthOwnershipUpdateEventDto>> {
-        return filterByValueType(ownershipEvents as Queue<KafkaMessage<Any>>, EthOwnershipUpdateEventDto::class.java)
+    fun findEthOwnershipUpdates(ownershipId: String): List<KafkaMessage<UnionOwnershipUpdateEventDto>> {
+        return filterByValueType(ownershipEvents as Queue<KafkaMessage<Any>>, UnionOwnershipUpdateEventDto::class.java)
             .filter { it.value.ownershipId.value == ownershipId }
     }
 
-    fun findEthOwnershipDeletions(ownershipId: String): List<KafkaMessage<EthOwnershipDeleteEventDto>> {
-        return filterByValueType(ownershipEvents as Queue<KafkaMessage<Any>>, EthOwnershipDeleteEventDto::class.java)
+    fun findEthOwnershipDeletions(ownershipId: String): List<KafkaMessage<UnionOwnershipDeleteEventDto>> {
+        return filterByValueType(ownershipEvents as Queue<KafkaMessage<Any>>, UnionOwnershipDeleteEventDto::class.java)
             .filter { it.value.ownershipId.value == ownershipId }
     }
 
@@ -123,13 +123,13 @@ abstract class AbstractIntegrationTest {
             .filter { it.value.itemId.value == itemId }
     }
 
-    fun findFlowOwnershipUpdates(ownershipId: String): List<KafkaMessage<FlowOwnershipUpdateEventDto>> {
-        return filterByValueType(ownershipEvents as Queue<KafkaMessage<Any>>, FlowOwnershipUpdateEventDto::class.java)
+    fun findFlowOwnershipUpdates(ownershipId: String): List<KafkaMessage<UnionOwnershipUpdateEventDto>> {
+        return filterByValueType(ownershipEvents as Queue<KafkaMessage<Any>>, UnionOwnershipUpdateEventDto::class.java)
             .filter { it.value.ownershipId.value == ownershipId }
     }
 
-    fun findFlowOwnershipDeletions(ownershipId: String): List<KafkaMessage<FlowOwnershipDeleteEventDto>> {
-        return filterByValueType(ownershipEvents as Queue<KafkaMessage<Any>>, FlowOwnershipDeleteEventDto::class.java)
+    fun findFlowOwnershipDeletions(ownershipId: String): List<KafkaMessage<UnionOwnershipDeleteEventDto>> {
+        return filterByValueType(ownershipEvents as Queue<KafkaMessage<Any>>, UnionOwnershipDeleteEventDto::class.java)
             .filter { it.value.ownershipId.value == ownershipId }
     }
 
