@@ -1,12 +1,12 @@
 package com.rarible.protocol.union.dto.continuation
 
-import com.rarible.protocol.union.dto.OwnershipDto
+import com.rarible.protocol.union.dto.UnionOwnershipDto
 
 object OwnershipContinuation {
 
-    object ByLastUpdatedAndId : ContinuationFactory<OwnershipDto, DateIdContinuation> {
-        override fun getContinuation(item: OwnershipDto): DateIdContinuation {
-            return DateIdContinuation(item.createdAt, item.id.value)
+    object ByLastUpdatedAndId : ContinuationFactory<UnionOwnershipDto, DateIdContinuation> {
+        override fun getContinuation(entity: UnionOwnershipDto): DateIdContinuation {
+            return DateIdContinuation(entity.createdAt, entity.id.value)
         }
     }
 }

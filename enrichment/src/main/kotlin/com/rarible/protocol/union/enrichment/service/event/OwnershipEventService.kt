@@ -1,9 +1,8 @@
 package com.rarible.protocol.union.enrichment.service.event
 
-import com.rarible.core.common.nowMillis
 import com.rarible.core.common.optimisticLock
 import com.rarible.protocol.union.dto.OrderDto
-import com.rarible.protocol.union.dto.OwnershipDto
+import com.rarible.protocol.union.dto.UnionOwnershipDto
 import com.rarible.protocol.union.enrichment.converter.ShortOwnershipConverter
 import com.rarible.protocol.union.enrichment.event.OwnershipEventDelete
 import com.rarible.protocol.union.enrichment.event.OwnershipEventListener
@@ -12,7 +11,6 @@ import com.rarible.protocol.union.enrichment.model.ShortOwnership
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
 import com.rarible.protocol.union.enrichment.service.BestOrderService
 import com.rarible.protocol.union.enrichment.service.OwnershipService
-import com.rarible.protocol.union.enrichment.util.spent
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
@@ -25,7 +23,7 @@ class OwnershipEventService(
 ) {
     private val logger = LoggerFactory.getLogger(OwnershipEventService::class.java)
 
-    suspend fun onOwnershipUpdated(ownership: OwnershipDto) {
+    suspend fun onOwnershipUpdated(ownership: UnionOwnershipDto) {
         val received = ShortOwnershipConverter.convert(ownership)
         val existing = ownershipService.getOrEmpty(received.id)
         notifyUpdate(existing, ownership)
@@ -64,16 +62,6 @@ class OwnershipEventService(
         }
     }
 
-    private suspend fun updateOwnership(updated: ShortOwnership): ShortOwnership {
-        val now = nowMillis()
-        val result = ownershipService.save(updated)
-        logger.info(
-            "Updating Ownership [{}] with enrichment data: bestSellOrder = [{}] ({}ms)",
-            updated.id, updated.bestSellOrder?.id, spent(now)
-        )
-        return result
-    }
-
     private suspend fun deleteOwnership(ownershipId: ShortOwnershipId): Boolean {
         val result = ownershipService.delete(ownershipId)
         return result != null && result.deletedCount > 0
@@ -86,7 +74,7 @@ class OwnershipEventService(
 
     private suspend fun notifyUpdate(
         short: ShortOwnership,
-        ownership: OwnershipDto? = null,
+        ownership: UnionOwnershipDto? = null,
         order: OrderDto? = null
     ) {
         val dto = ownershipService.enrichOwnership(short, ownership, order)

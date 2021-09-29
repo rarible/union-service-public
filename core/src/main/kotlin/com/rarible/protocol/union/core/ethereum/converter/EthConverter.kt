@@ -50,9 +50,9 @@ object EthConverter {
         return value.toBigDecimal().divide(FULL_100_PERCENTS_IN_BP, MathContext.DECIMAL128)
     }
 
-    fun convert(address: Address) = address.prefixed()
-    fun convert(word: Word) = word.prefixed()
-    fun convert(binary: Binary) = binary.prefixed()
+    fun convert(address: Address) = address.prefixed()!!
+    fun convert(word: Word) = word.prefixed()!!
+    fun convert(binary: Binary) = binary.prefixed()!!
 
     fun convert(source: ActivitySortDto?): com.rarible.protocol.dto.ActivitySortDto {
         return when (source) {

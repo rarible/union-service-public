@@ -1,9 +1,10 @@
 package com.rarible.protocol.union.core.flow.service
 
 import com.rarible.protocol.flow.nft.api.client.FlowNftOrderActivityControllerApi
+import com.rarible.protocol.union.core.continuation.Slice
 import com.rarible.protocol.union.core.flow.converter.FlowActivityConverter
 import com.rarible.protocol.union.core.service.ActivityService
-import com.rarible.protocol.union.dto.ActivitiesDto
+import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -20,7 +21,7 @@ class FlowActivityService(
         continuation: String?,
         size: Int,
         sort: ActivitySortDto?
-    ): ActivitiesDto {
+    ): Slice<ActivityDto> {
         val rawTypes = types.map { it.name }
         val result = activityControllerApi.getNftOrderAllActivities(rawTypes, continuation, size)
             .awaitFirst()
@@ -33,7 +34,7 @@ class FlowActivityService(
         continuation: String?,
         size: Int,
         sort: ActivitySortDto?
-    ): ActivitiesDto {
+    ): Slice<ActivityDto> {
         val rawTypes = types.map { it.name }
         val result = activityControllerApi.getNftOrderActivitiesByCollection(rawTypes, collection, continuation, size)
             .awaitFirst()
@@ -47,7 +48,7 @@ class FlowActivityService(
         continuation: String?,
         size: Int,
         sort: ActivitySortDto?
-    ): ActivitiesDto {
+    ): Slice<ActivityDto> {
         val rawTypes = types.map { it.name }
         val result = activityControllerApi.getNftOrderActivitiesByItem(
             rawTypes,
@@ -65,7 +66,7 @@ class FlowActivityService(
         continuation: String?,
         size: Int,
         sort: ActivitySortDto?
-    ): ActivitiesDto {
+    ): Slice<ActivityDto> {
         val rawTypes = types.map { it.name }
         val result = activityControllerApi.getNftOrderActivitiesByUser(rawTypes, users, continuation, size, sort?.name)
             .awaitFirst()

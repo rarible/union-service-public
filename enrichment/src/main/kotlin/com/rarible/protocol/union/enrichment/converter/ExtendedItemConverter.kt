@@ -1,20 +1,20 @@
 package com.rarible.protocol.union.enrichment.converter
 
-import com.rarible.protocol.union.dto.ExtendedItemDto
 import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
+import com.rarible.protocol.union.dto.UnionItemDto
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import java.math.BigInteger
 
 object ExtendedItemConverter {
 
     fun convert(
-        item: ItemDto,
+        item: UnionItemDto,
         shortItem: ShortItem? = null,
         orders: Map<OrderIdDto, OrderDto> = emptyMap()
-    ): ExtendedItemDto {
-        return ExtendedItemDto(
+    ): ItemDto {
+        return ItemDto(
             id = item.id,
             tokenId = item.tokenId,
             collection = item.collection,
@@ -31,7 +31,6 @@ object ExtendedItemConverter {
             deleted = item.deleted,
 
             // Enrichment data
-            unlockable = shortItem?.unlockable ?: false,
             bestSellOrder = shortItem?.bestSellOrder?.let { orders[it.dtoId] },
             bestBidOrder = shortItem?.bestBidOrder?.let { orders[it.dtoId] },
             totalStock = shortItem?.totalStock ?: BigInteger.ZERO,

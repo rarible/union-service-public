@@ -78,7 +78,7 @@ abstract class AbstractIntegrationTest {
     var activityEvents: Queue<KafkaMessage<ActivityDto>>? = null
     private var activityJob: Deferred<Unit>? = null
 
-    fun <T> runWithKafka(block: suspend CoroutineScope.() -> T): T = runBlocking<T> {
+    fun <T> runWithKafka(block: suspend CoroutineScope.() -> T): T = runBlocking {
         orderEvents = LinkedBlockingQueue()
         orderJob = async { orderConsumer.receive().collect { orderEvents?.add(it) } }
 

@@ -5,8 +5,8 @@ import com.rarible.protocol.union.dto.OrderDto
 object OrderContinuation {
 
     object ByLastUpdatedAndId : ContinuationFactory<OrderDto, DateIdContinuation> {
-        override fun getContinuation(order: OrderDto): DateIdContinuation {
-            return DateIdContinuation(order.lastUpdatedAt, order.id.value)
+        override fun getContinuation(entity: OrderDto): DateIdContinuation {
+            return DateIdContinuation(entity.lastUpdatedAt, entity.id.value)
         }
     }
 }

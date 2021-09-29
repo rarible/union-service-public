@@ -1,11 +1,11 @@
 package com.rarible.protocol.union.core.ethereum.service
 
 import com.rarible.protocol.nft.api.client.NftCollectionControllerApi
+import com.rarible.protocol.union.core.continuation.Page
 import com.rarible.protocol.union.core.ethereum.converter.EthCollectionConverter
 import com.rarible.protocol.union.core.service.CollectionService
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionDto
-import com.rarible.protocol.union.dto.CollectionsDto
 import kotlinx.coroutines.reactive.awaitFirst
 
 class EthereumCollectionService(
@@ -13,7 +13,7 @@ class EthereumCollectionService(
     private val collectionControllerApi: NftCollectionControllerApi
 ) : AbstractEthereumService(blockchain), CollectionService {
 
-    override suspend fun getAllCollections(continuation: String?, size: Int): CollectionsDto {
+    override suspend fun getAllCollections(continuation: String?, size: Int): Page<CollectionDto> {
         val collections = collectionControllerApi.searchNftAllCollections(continuation, size).awaitFirst()
         return EthCollectionConverter.convert(collections, blockchain)
     }
@@ -27,7 +27,7 @@ class EthereumCollectionService(
         owner: String,
         continuation: String?,
         size: Int
-    ): CollectionsDto {
+    ): Page<CollectionDto> {
         val items = collectionControllerApi.searchNftCollectionsByOwner(owner, continuation, size).awaitFirst()
         return EthCollectionConverter.convert(items, blockchain)
     }

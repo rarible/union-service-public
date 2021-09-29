@@ -1,7 +1,8 @@
 package com.rarible.protocol.union.api.controller
 
 import com.rarible.protocol.union.api.configuration.PageSize
-import com.rarible.protocol.union.core.continuation.ContinuationPaging
+import com.rarible.protocol.union.core.continuation.Page
+import com.rarible.protocol.union.core.continuation.Paging
 import com.rarible.protocol.union.core.service.CollectionServiceRouter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionDto
@@ -28,13 +29,12 @@ class CollectionController(
 
         val total = blockchainPages.map { it.total }.sum()
 
-        val combinedPage = ContinuationPaging(
+        val combinedPage = Paging(
             UnionCollectionContinuation.ById,
-            blockchainPages.flatMap { it.collections }
-        ).getPage(safeSize)
+            blockchainPages.flatMap { it.entities }
+        ).getPage(safeSize, total)
 
-        val result = CollectionsDto(total, combinedPage.printContinuation(), combinedPage.entities)
-        return ResponseEntity.ok(result)
+        return ResponseEntity.ok(toDto(combinedPage))
     }
 
     override suspend fun getCollectionById(
@@ -53,6 +53,15 @@ class CollectionController(
         val safeSize = PageSize.COLLECTION.limit(size)
         val (blockchain, shortOwner) = IdParser.parse(owner)
         val result = router.getService(blockchain).getCollectionsByOwner(shortOwner, continuation, safeSize)
-        return ResponseEntity.ok(result)
+        return ResponseEntity.ok(toDto(result))
     }
+
+    private fun toDto(page: Page<CollectionDto>): CollectionsDto {
+        return CollectionsDto(
+            total = page.total,
+            continuation = page.continuation,
+            collections = page.entities
+        )
+    }
+
 }

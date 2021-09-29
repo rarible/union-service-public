@@ -1,7 +1,7 @@
 package com.rarible.protocol.union.core.service
 
-import com.rarible.protocol.union.dto.ItemDto
-import com.rarible.protocol.union.dto.ItemsDto
+import com.rarible.protocol.union.core.continuation.Page
+import com.rarible.protocol.union.dto.UnionItemDto
 
 interface ItemService : BlockchainService {
 
@@ -11,28 +11,28 @@ interface ItemService : BlockchainService {
         showDeleted: Boolean?,
         lastUpdatedFrom: Long?,
         lastUpdatedTo: Long?
-    ): ItemsDto
+    ): Page<UnionItemDto>
 
     suspend fun getItemById(
         itemId: String
-    ): ItemDto
+    ): UnionItemDto
 
     suspend fun getItemsByCollection(
         collection: String,
         continuation: String?,
         size: Int
-    ): ItemsDto
+    ): Page<UnionItemDto>
 
     suspend fun getItemsByCreator(
         creator: String,
         continuation: String?,
         size: Int
-    ): ItemsDto
+    ): Page<UnionItemDto>
 
     suspend fun getItemsByOwner(
         owner: String,
         continuation: String?,
         size: Int
-    ): ItemsDto
+    ): Page<UnionItemDto>
 
 }

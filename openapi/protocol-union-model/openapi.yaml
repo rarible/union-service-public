@@ -156,66 +156,6 @@ components:
           $ref: "#/components/schemas/Meta"
         deleted:
           type: boolean
-      required:
-        - id
-        - tokenId
-        - collection
-        - creators
-        - owners
-        - royalties
-        - lazySupply
-        - pending
-        - mintedAt
-        - lastUpdatedAt
-        - supply
-        - deleted
-
-    ExtendedItem:
-      type: object
-      properties:
-        id:
-          $ref: "#/components/schemas/ItemId"
-        tokenId:
-          $ref: "#/components/schemas/BigInteger"
-        collection:
-          $ref: "#/components/schemas/UnionAddress"
-        creators:
-          type: array
-          default: [ ]
-          items:
-            $ref: "#/components/schemas/Creator"
-        owners:
-          type: array
-          default: [ ]
-          items:
-            $ref: "#/components/schemas/UnionAddress"
-        royalties:
-          type: array
-          default: [ ]
-          items:
-            $ref: "#/components/schemas/Royalty"
-        lazySupply:
-          $ref: "#/components/schemas/BigInteger"
-        pending:
-          type: array
-          default: [ ]
-          items:
-            $ref: "#/components/schemas/ItemTransfer"
-        mintedAt:
-          type: string
-          format: date-time
-        lastUpdatedAt:
-          type: string
-          format: date-time
-        supply:
-          $ref: "#/components/schemas/BigInteger"
-        metaUrl:
-          type: string
-          example: "ipfs://ipfs/QmPe1W8XiUYdsvdpvgWVwekQ7cDQivRMak3YPX15vxvSJs"
-        meta:
-          $ref: "#/components/schemas/Meta"
-        deleted:
-          type: boolean
         bestSellOrder:
           $ref: "#/components/schemas/Order"
         bestBidOrder:
@@ -224,8 +164,6 @@ components:
           $ref: "#/components/schemas/BigInteger"
         sellers:
           type: integer
-        unlockable:
-          type: boolean
           description: "Was item locked"
       required:
         - id
@@ -242,7 +180,6 @@ components:
         - deleted
         - tokenId
         - sellers
-        - unlockable
 
     Items:
       type: object
@@ -286,7 +223,7 @@ components:
           enum:
             - UPDATE
         item:
-          $ref: "#/components/schemas/ExtendedItem"
+          $ref: "#/components/schemas/Item"
       required:
         - "@type"
         - item
@@ -326,45 +263,6 @@ components:
         - owner
 
     Ownership:
-      type: object
-      properties:
-        id:
-          $ref: "#/components/schemas/OwnershipId"
-        value:
-          $ref: "#/components/schemas/BigInteger"
-        createdAt:
-          type: string
-          format: "date-time"
-        contract:
-          $ref: "#/components/schemas/UnionAddress"
-        tokenId:
-          $ref: "#/components/schemas/BigInteger"
-        owner:
-          $ref: "#/components/schemas/UnionAddress"
-        creators:
-          type: array
-          default: [ ]
-          items:
-            $ref: "#/components/schemas/Creator"
-        lazyValue:
-          $ref: "#/components/schemas/BigInteger"
-        pending:
-          type: array
-          default: [ ]
-          items:
-            $ref: "#/components/schemas/ItemHistory"
-      required:
-        - id
-        - value
-        - createdAt
-        - contract
-        - tokenId
-        - owner
-        - creators
-        - lazyValue
-        - pending
-
-    ExtendedOwnership:
       type: object
       properties:
         id:
@@ -523,7 +421,7 @@ components:
           enum:
             - UPDATE
         ownership:
-          $ref: "#/components/schemas/ExtendedOwnership"
+          $ref: "#/components/schemas/Ownership"
       required:
         - "@type"
         - ownership

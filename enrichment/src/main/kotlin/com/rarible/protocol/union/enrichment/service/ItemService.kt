@@ -3,8 +3,8 @@ package com.rarible.protocol.union.enrichment.service
 import com.mongodb.client.result.DeleteResult
 import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.core.service.ItemServiceRouter
-import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.OrderDto
+import com.rarible.protocol.union.dto.UnionItemDto
 import com.rarible.protocol.union.enrichment.converter.ExtendedItemConverter
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
@@ -47,7 +47,7 @@ class ItemService(
         return itemRepository.findAll(ids)
     }
 
-    suspend fun fetch(itemId: ShortItemId): ItemDto {
+    suspend fun fetch(itemId: ShortItemId): UnionItemDto {
         val now = nowMillis()
         val nftItemDto = itemServiceRouter.getService(itemId.blockchain)
             .getItemById(itemId.toDto().value)
@@ -58,7 +58,7 @@ class ItemService(
 
     // Here we could specify Order already fetched (or received via event) to avoid unnecessary getById call
     // if one of Item's short orders has same hash
-    suspend fun enrichItem(shortItem: ShortItem, item: ItemDto? = null, order: OrderDto? = null) = coroutineScope {
+    suspend fun enrichItem(shortItem: ShortItem, item: UnionItemDto? = null, order: OrderDto? = null) = coroutineScope {
         val fetchedItem = async { item ?: fetch(shortItem.id) }
         val bestSellOrder = async { orderService.fetchOrderIfDiffers(shortItem.bestSellOrder, order) }
         val bestBidOrder = async { orderService.fetchOrderIfDiffers(shortItem.bestBidOrder, order) }

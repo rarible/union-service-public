@@ -1,11 +1,11 @@
 package com.rarible.protocol.union.core.ethereum.service
 
 import com.rarible.protocol.nft.api.client.NftOwnershipControllerApi
+import com.rarible.protocol.union.core.continuation.Page
 import com.rarible.protocol.union.core.ethereum.converter.EthOwnershipConverter
 import com.rarible.protocol.union.core.service.OwnershipService
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.OwnershipDto
-import com.rarible.protocol.union.dto.OwnershipsDto
+import com.rarible.protocol.union.dto.UnionOwnershipDto
 import kotlinx.coroutines.reactive.awaitFirst
 
 class EthereumOwnershipService(
@@ -13,12 +13,12 @@ class EthereumOwnershipService(
     private val ownershipControllerApi: NftOwnershipControllerApi
 ) : AbstractEthereumService(blockchain), OwnershipService {
 
-    override suspend fun getAllOwnerships(continuation: String?, size: Int): OwnershipsDto {
+    override suspend fun getAllOwnerships(continuation: String?, size: Int): Page<UnionOwnershipDto> {
         val ownerships = ownershipControllerApi.getNftAllOwnerships(continuation, size).awaitFirst()
         return EthOwnershipConverter.convert(ownerships, blockchain)
     }
 
-    override suspend fun getOwnershipById(ownershipId: String): OwnershipDto {
+    override suspend fun getOwnershipById(ownershipId: String): UnionOwnershipDto {
         val ownership = ownershipControllerApi.getNftOwnershipById(ownershipId).awaitFirst()
         return EthOwnershipConverter.convert(ownership, blockchain)
     }
@@ -28,8 +28,9 @@ class EthereumOwnershipService(
         tokenId: String,
         continuation: String?,
         size: Int
-    ): OwnershipsDto {
-        val items = ownershipControllerApi.getNftOwnershipsByItem(contract, tokenId, continuation, size).awaitFirst()
-        return EthOwnershipConverter.convert(items, blockchain)
+    ): Page<UnionOwnershipDto> {
+        val ownerships =
+            ownershipControllerApi.getNftOwnershipsByItem(contract, tokenId, continuation, size).awaitFirst()
+        return EthOwnershipConverter.convert(ownerships, blockchain)
     }
 }

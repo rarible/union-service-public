@@ -1,6 +1,6 @@
 package com.rarible.protocol.union.enrichment.event
 
-import com.rarible.protocol.union.dto.ExtendedItemDto
+import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import java.util.*
 
@@ -11,7 +11,7 @@ sealed class ItemEvent(
 }
 
 data class ItemEventUpdate(
-    val item: ExtendedItemDto
+    val item: ItemDto
 ) : ItemEvent(ItemEventType.UPDATE)
 
 

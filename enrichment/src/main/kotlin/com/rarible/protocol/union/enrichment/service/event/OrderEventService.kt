@@ -69,7 +69,7 @@ class OrderEventService(
             is EthErc20AssetTypeDto -> null
 
             // Flow
-            is FlowAssetTypeNftDto -> toItemId(assetType.contract, assetType.tokenId!!)
+            is FlowAssetTypeNftDto -> toItemId(assetType.contract, assetType.tokenId)
             is FlowAssetTypeFtDto -> null
         }
     }

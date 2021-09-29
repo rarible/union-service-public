@@ -22,8 +22,8 @@ class FlowItemEventHandler(
 
         when (event) {
             is FlowNftItemUpdateEventDto -> {
-                val Item = FlowItemConverter.convert(event.item, blockchain)
-                itemEventService.onItemUpdated(Item)
+                val item = FlowItemConverter.convert(event.item, blockchain)
+                itemEventService.onItemUpdated(item)
             }
             is FlowNftItemDeleteEventDto -> {
                 val itemId = ShortItemId(

@@ -19,7 +19,6 @@ data class ShortItem(
     val totalStock: BigInteger,
     val bestSellOrder: ShortOrder?,
     val bestBidOrder: ShortOrder?,
-    val unlockable: Boolean,
 
     @Version
     val version: Long? = null
@@ -36,14 +35,13 @@ data class ShortItem(
                 sellers = 0,
                 totalStock = BigInteger.ZERO,
                 bestSellOrder = null,
-                bestBidOrder = null,
-                unlockable = false
+                bestBidOrder = null
             )
         }
     }
 
     fun isNotEmpty(): Boolean {
-        return unlockable || bestBidOrder != null || bestSellOrder != null
+        return bestBidOrder != null || bestSellOrder != null
     }
 
     @Transient

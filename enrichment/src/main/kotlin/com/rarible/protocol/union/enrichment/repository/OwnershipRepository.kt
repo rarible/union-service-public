@@ -86,7 +86,7 @@ class OwnershipRepository(
 
     object Indices {
 
-        val OWNERSHIP_CONTRACT_TOKENID: Index = Index()
+        private val OWNERSHIP_CONTRACT_TOKENID: Index = Index()
             .on(ShortOwnership::blockchain.name, Sort.Direction.ASC)
             .on(ShortOwnership::token.name, Sort.Direction.ASC)
             .on(ShortOwnership::tokenId.name, Sort.Direction.ASC)

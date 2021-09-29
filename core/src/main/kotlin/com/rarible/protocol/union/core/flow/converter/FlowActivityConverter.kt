@@ -9,8 +9,8 @@ import com.rarible.protocol.dto.FlowNftOrderActivityListDto
 import com.rarible.protocol.dto.FlowNftOrderActivitySellDto
 import com.rarible.protocol.dto.FlowOrderActivityMatchSideDto
 import com.rarible.protocol.dto.FlowTransferDto
+import com.rarible.protocol.union.core.continuation.Slice
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
-import com.rarible.protocol.union.dto.ActivitiesDto
 import com.rarible.protocol.union.dto.ActivityBlockchainInfoDto
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivityIdDto
@@ -118,10 +118,10 @@ object FlowActivityConverter {
         }
     }
 
-    fun convert(source: FlowActivitiesDto, blockchain: BlockchainDto): ActivitiesDto {
-        return ActivitiesDto(
+    fun convert(source: FlowActivitiesDto, blockchain: BlockchainDto): Slice<ActivityDto> {
+        return Slice(
             continuation = source.continuation,
-            activities = source.items.map { convert(it, blockchain) }
+            entities = source.items.map { convert(it, blockchain) }
         )
     }
 

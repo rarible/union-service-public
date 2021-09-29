@@ -29,7 +29,7 @@
         <!-- ============ Internal dependencies ============ -->
         <dependency>
             <groupId>com.rarible.protocol.union</groupId>
-            <artifactId>rarible-union-core</artifactId>
+            <artifactId>rarible-union-enrichment</artifactId>
         </dependency>
 
         <!-- ============ Union Protocol-API ============= -->

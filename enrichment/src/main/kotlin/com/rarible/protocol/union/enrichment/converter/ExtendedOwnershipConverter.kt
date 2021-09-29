@@ -1,19 +1,19 @@
 package com.rarible.protocol.union.enrichment.converter
 
-import com.rarible.protocol.union.dto.ExtendedOwnershipDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.OwnershipDto
+import com.rarible.protocol.union.dto.UnionOwnershipDto
 import com.rarible.protocol.union.enrichment.model.ShortOwnership
 
 object ExtendedOwnershipConverter {
 
     fun convert(
-        ownership: OwnershipDto,
+        ownership: UnionOwnershipDto,
         shortOwnership: ShortOwnership? = null,
         orders: Map<OrderIdDto, OrderDto> = emptyMap()
-    ): ExtendedOwnershipDto {
-        return ExtendedOwnershipDto(
+    ): OwnershipDto {
+        return OwnershipDto(
             id = ownership.id,
             contract = ownership.contract,
             tokenId = ownership.tokenId,

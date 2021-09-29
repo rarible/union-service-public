@@ -5,14 +5,14 @@ import com.rarible.protocol.union.dto.ActivityDto
 object ActivityContinuation {
 
     object ByLastUpdatedAndIdDesc : ContinuationFactory<ActivityDto, DateIdContinuation> {
-        override fun getContinuation(activity: ActivityDto): DateIdContinuation {
-            return DateIdContinuation(activity.date, activity.id.value, false)
+        override fun getContinuation(entity: ActivityDto): DateIdContinuation {
+            return DateIdContinuation(entity.date, entity.id.value, false)
         }
     }
 
     object ByLastUpdatedAndIdAsc : ContinuationFactory<ActivityDto, DateIdContinuation> {
-        override fun getContinuation(activity: ActivityDto): DateIdContinuation {
-            return DateIdContinuation(activity.date, activity.id.value, true)
+        override fun getContinuation(entity: ActivityDto): DateIdContinuation {
+            return DateIdContinuation(entity.date, entity.id.value, true)
         }
     }
 }

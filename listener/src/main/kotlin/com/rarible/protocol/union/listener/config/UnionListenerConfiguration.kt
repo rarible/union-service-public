@@ -21,6 +21,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.OrderEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
+import com.rarible.protocol.union.enrichment.configuration.EnrichmentConfiguration
 import com.rarible.protocol.union.enrichment.service.event.ItemEventService
 import com.rarible.protocol.union.enrichment.service.event.OrderEventService
 import com.rarible.protocol.union.enrichment.service.event.OwnershipEventService
@@ -39,8 +40,10 @@ import io.micrometer.core.instrument.MeterRegistry
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Import
 
 @Configuration
+@Import(EnrichmentConfiguration::class)
 @EnableConfigurationProperties(value = [UnionListenerProperties::class])
 class UnionListenerConfiguration(
     applicationEnvironmentInfo: ApplicationEnvironmentInfo,

@@ -1,11 +1,11 @@
 package com.rarible.protocol.union.core.flow.service
 
 import com.rarible.protocol.flow.nft.api.client.FlowNftOwnershipControllerApi
+import com.rarible.protocol.union.core.continuation.Page
 import com.rarible.protocol.union.core.flow.converter.FlowOwnershipConverter
 import com.rarible.protocol.union.core.service.OwnershipService
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.OwnershipDto
-import com.rarible.protocol.union.dto.OwnershipsDto
+import com.rarible.protocol.union.dto.UnionOwnershipDto
 import kotlinx.coroutines.reactive.awaitFirst
 
 class FlowOwnershipService(
@@ -13,12 +13,12 @@ class FlowOwnershipService(
     private val ownershipControllerApi: FlowNftOwnershipControllerApi
 ) : AbstractFlowService(blockchain), OwnershipService {
 
-    override suspend fun getAllOwnerships(continuation: String?, size: Int): OwnershipsDto {
+    override suspend fun getAllOwnerships(continuation: String?, size: Int): Page<UnionOwnershipDto> {
         val ownerships = ownershipControllerApi.getNftAllOwnerships(continuation, size).awaitFirst()
         return FlowOwnershipConverter.convert(ownerships, blockchain)
     }
 
-    override suspend fun getOwnershipById(ownershipId: String): OwnershipDto {
+    override suspend fun getOwnershipById(ownershipId: String): UnionOwnershipDto {
         val ownership = ownershipControllerApi.getNftOwnershipById(ownershipId).awaitFirst()
         return FlowOwnershipConverter.convert(ownership, blockchain)
     }
@@ -28,7 +28,7 @@ class FlowOwnershipService(
         tokenId: String,
         continuation: String?,
         size: Int
-    ): OwnershipsDto {
+    ): Page<UnionOwnershipDto> {
         val items = ownershipControllerApi.getNftOwnershipsByItem(contract, tokenId, continuation, size).awaitFirst()
         return FlowOwnershipConverter.convert(items, blockchain)
     }

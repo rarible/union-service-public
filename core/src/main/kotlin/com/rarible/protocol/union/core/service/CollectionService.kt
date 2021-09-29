@@ -1,14 +1,14 @@
 package com.rarible.protocol.union.core.service
 
+import com.rarible.protocol.union.core.continuation.Page
 import com.rarible.protocol.union.dto.CollectionDto
-import com.rarible.protocol.union.dto.CollectionsDto
 
 interface CollectionService : BlockchainService {
 
     suspend fun getAllCollections(
         continuation: String?,
         size: Int
-    ): CollectionsDto
+    ): Page<CollectionDto>
 
     suspend fun getCollectionById(
         collectionId: String
@@ -18,6 +18,6 @@ interface CollectionService : BlockchainService {
         owner: String,
         continuation: String?,
         size: Int
-    ): CollectionsDto
+    ): Page<CollectionDto>
 
 }

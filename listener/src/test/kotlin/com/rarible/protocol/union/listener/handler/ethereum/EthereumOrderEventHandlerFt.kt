@@ -10,10 +10,12 @@ import com.rarible.protocol.union.listener.test.IntegrationTest
 import com.rarible.protocol.union.test.data.randomEthLegacyOrderDto
 import kotlinx.coroutines.FlowPreview
 import org.assertj.core.api.Assertions
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 @FlowPreview
 @IntegrationTest
+@Disabled // TODO enable after enrichment implemented
 class EthereumOrderEventHandlerFt : AbstractIntegrationTest() {
 
     @Test

@@ -23,8 +23,8 @@ class EthereumItemEventHandler(
 
         when (event) {
             is NftItemUpdateEventDto -> {
-                val Item = EthItemConverter.convert(event.item, blockchain)
-                itemEventService.onItemUpdated(Item)
+                val item = EthItemConverter.convert(event.item, blockchain)
+                itemEventService.onItemUpdated(item)
             }
             is NftItemDeleteEventDto -> {
                 val itemId = ShortItemId(

@@ -1,6 +1,11 @@
 package com.rarible.protocol.union.core.flow
 
-import com.rarible.protocol.flow.nft.api.client.*
+import com.rarible.protocol.flow.nft.api.client.FlowNftCollectionControllerApi
+import com.rarible.protocol.flow.nft.api.client.FlowNftIndexerApiClientFactory
+import com.rarible.protocol.flow.nft.api.client.FlowNftItemControllerApi
+import com.rarible.protocol.flow.nft.api.client.FlowNftOrderActivityControllerApi
+import com.rarible.protocol.flow.nft.api.client.FlowNftOwnershipControllerApi
+import com.rarible.protocol.flow.nft.api.client.FlowOrderControllerApi
 import com.rarible.protocol.union.dto.BlockchainDto
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration

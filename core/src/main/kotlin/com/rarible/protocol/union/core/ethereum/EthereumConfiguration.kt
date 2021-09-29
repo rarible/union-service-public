@@ -1,6 +1,10 @@
 package com.rarible.protocol.union.core.ethereum
 
-import com.rarible.protocol.nft.api.client.*
+import com.rarible.protocol.nft.api.client.NftActivityControllerApi
+import com.rarible.protocol.nft.api.client.NftCollectionControllerApi
+import com.rarible.protocol.nft.api.client.NftIndexerApiClientFactory
+import com.rarible.protocol.nft.api.client.NftItemControllerApi
+import com.rarible.protocol.nft.api.client.NftOwnershipControllerApi
 import com.rarible.protocol.order.api.client.OrderActivityControllerApi
 import com.rarible.protocol.order.api.client.OrderControllerApi
 import com.rarible.protocol.order.api.client.OrderIndexerApiClientFactory

@@ -1,7 +1,7 @@
 package com.rarible.protocol.union.core.service
 
+import com.rarible.protocol.union.core.continuation.Slice
 import com.rarible.protocol.union.dto.OrderDto
-import com.rarible.protocol.union.dto.OrdersDto
 import com.rarible.protocol.union.dto.PlatformDto
 
 interface OrderService : BlockchainService {
@@ -11,13 +11,9 @@ interface OrderService : BlockchainService {
         origin: String?,
         continuation: String?,
         size: Int
-    ): OrdersDto
+    ): Slice<OrderDto>
 
     suspend fun getOrderById(
-        id: String
-    ): OrderDto
-
-    suspend fun updateOrderMakeStock(
         id: String
     ): OrderDto
 
@@ -29,7 +25,7 @@ interface OrderService : BlockchainService {
         origin: String?,
         continuation: String?,
         size: Int
-    ): OrdersDto
+    ): Slice<OrderDto>
 
     suspend fun getOrderBidsByMaker(
         platform: PlatformDto?,
@@ -37,14 +33,14 @@ interface OrderService : BlockchainService {
         origin: String?,
         continuation: String?,
         size: Int
-    ): OrdersDto
+    ): Slice<OrderDto>
 
     suspend fun getSellOrders(
         platform: PlatformDto?,
         origin: String?,
         continuation: String?,
         size: Int
-    ): OrdersDto
+    ): Slice<OrderDto>
 
     suspend fun getSellOrdersByCollection(
         platform: PlatformDto?,
@@ -52,7 +48,7 @@ interface OrderService : BlockchainService {
         origin: String?,
         continuation: String?,
         size: Int
-    ): OrdersDto
+    ): Slice<OrderDto>
 
     suspend fun getSellOrdersByItem(
         platform: PlatformDto?,
@@ -62,7 +58,7 @@ interface OrderService : BlockchainService {
         origin: String?,
         continuation: String?,
         size: Int
-    ): OrdersDto
+    ): Slice<OrderDto>
 
     suspend fun getSellOrdersByMaker(
         platform: PlatformDto?,
@@ -70,5 +66,5 @@ interface OrderService : BlockchainService {
         origin: String?,
         continuation: String?,
         size: Int
-    ): OrdersDto
+    ): Slice<OrderDto>
 }

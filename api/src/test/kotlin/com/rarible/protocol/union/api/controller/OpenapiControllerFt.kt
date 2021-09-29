@@ -18,7 +18,7 @@ internal class OpenapiControllerFt {
 
     @Test
     fun `get openapi yaml`() {
-        val yaml = testTemplate.getForObject("${baseUrl()}/openapi.yaml", String::class.java)
+        val yaml = testTemplate.getForObject("${baseUrl()}/openapi.yaml", String::class.java)!!
 
         assertTrue(yaml.contains("openapi:"))
         assertTrue(yaml.contains("paths:"))
@@ -29,7 +29,7 @@ internal class OpenapiControllerFt {
 
     @Test
     fun `get redocly html`() {
-        val redocly = testTemplate.getForObject("${baseUrl()}/doc", String::class.java)
+        val redocly = testTemplate.getForObject("${baseUrl()}/doc", String::class.java)!!
 
         assertTrue(redocly.contains("<html>"))
     }

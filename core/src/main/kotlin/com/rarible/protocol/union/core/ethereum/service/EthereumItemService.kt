@@ -1,11 +1,11 @@
 package com.rarible.protocol.union.core.ethereum.service
 
 import com.rarible.protocol.nft.api.client.NftItemControllerApi
+import com.rarible.protocol.union.core.continuation.Page
 import com.rarible.protocol.union.core.ethereum.converter.EthItemConverter
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.ItemDto
-import com.rarible.protocol.union.dto.ItemsDto
+import com.rarible.protocol.union.dto.UnionItemDto
 import kotlinx.coroutines.reactive.awaitFirst
 
 class EthereumItemService(
@@ -19,7 +19,7 @@ class EthereumItemService(
         showDeleted: Boolean?,
         lastUpdatedFrom: Long?,
         lastUpdatedTo: Long?
-    ): ItemsDto {
+    ): Page<UnionItemDto> {
         val items = itemControllerApi.getNftAllItems(
             continuation,
             size,
@@ -32,7 +32,7 @@ class EthereumItemService(
 
     override suspend fun getItemById(
         itemId: String
-    ): ItemDto {
+    ): UnionItemDto {
         val item = itemControllerApi.getNftItemById(itemId).awaitFirst()
         return EthItemConverter.convert(item, blockchain)
     }
@@ -41,7 +41,7 @@ class EthereumItemService(
         collection: String,
         continuation: String?,
         size: Int
-    ): ItemsDto {
+    ): Page<UnionItemDto> {
         val items = itemControllerApi.getNftItemsByCollection(collection, continuation, size).awaitFirst()
         return EthItemConverter.convert(items, blockchain)
     }
@@ -50,7 +50,7 @@ class EthereumItemService(
         creator: String,
         continuation: String?,
         size: Int
-    ): ItemsDto {
+    ): Page<UnionItemDto> {
         val items = itemControllerApi.getNftItemsByCreator(creator, continuation, size).awaitFirst()
         return EthItemConverter.convert(items, blockchain)
     }
@@ -59,7 +59,7 @@ class EthereumItemService(
         owner: String,
         continuation: String?,
         size: Int
-    ): ItemsDto {
+    ): Page<UnionItemDto> {
         val items = itemControllerApi.getNftItemsByOwner(owner, continuation, size).awaitFirst()
         return EthItemConverter.convert(items, blockchain)
     }

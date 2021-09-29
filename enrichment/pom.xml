@@ -53,11 +53,5 @@
             <artifactId>rarible-core-test-common</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>io.daonomic.scalether</groupId>
-            <artifactId>domain-test_${scala.major.version}</artifactId>
-            <version>${scalether.version}</version>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 </project>

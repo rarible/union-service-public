@@ -1,6 +1,6 @@
 package com.rarible.protocol.union.enrichment.event
 
-import com.rarible.protocol.union.dto.ExtendedOwnershipDto
+import com.rarible.protocol.union.dto.OwnershipDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import java.util.*
 
@@ -11,7 +11,7 @@ sealed class OwnershipEvent(
 }
 
 data class OwnershipEventUpdate(
-    val ownership: ExtendedOwnershipDto
+    val ownership: OwnershipDto
 ) : OwnershipEvent(OwnershipEventType.UPDATE)
 
 

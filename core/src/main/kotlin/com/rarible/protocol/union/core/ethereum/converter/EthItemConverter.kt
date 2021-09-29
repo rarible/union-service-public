@@ -7,21 +7,21 @@ import com.rarible.protocol.dto.NftItemMetaDto
 import com.rarible.protocol.dto.NftItemsDto
 import com.rarible.protocol.dto.NftMediaDto
 import com.rarible.protocol.dto.NftMediaMetaDto
+import com.rarible.protocol.union.core.continuation.Page
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.ItemRoyaltyDto
 import com.rarible.protocol.union.dto.ItemTransferDto
-import com.rarible.protocol.union.dto.ItemsDto
 import com.rarible.protocol.union.dto.MetaAttributeDto
 import com.rarible.protocol.union.dto.MetaContentDto
 import com.rarible.protocol.union.dto.MetaDto
+import com.rarible.protocol.union.dto.UnionItemDto
 
 object EthItemConverter {
 
-    fun convert(item: NftItemDto, blockchain: BlockchainDto): ItemDto {
-        return ItemDto(
+    fun convert(item: NftItemDto, blockchain: BlockchainDto): UnionItemDto {
+        return UnionItemDto(
             id = ItemIdDto(
                 token = UnionAddressConverter.convert(item.contract, blockchain),
                 tokenId = item.tokenId,
@@ -43,11 +43,11 @@ object EthItemConverter {
         )
     }
 
-    fun convert(page: NftItemsDto, blockchain: BlockchainDto): ItemsDto {
-        return ItemsDto(
+    fun convert(page: NftItemsDto, blockchain: BlockchainDto): Page<UnionItemDto> {
+        return Page(
             total = page.total,
             continuation = page.continuation,
-            items = page.items.map { convert(it, blockchain) }
+            entities = page.items.map { convert(it, blockchain) }
         )
     }
 

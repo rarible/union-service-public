@@ -75,11 +75,11 @@ class ActivityControllerFt : AbstractIntegrationTest() {
             )
         } returns FlowActivitiesDto(1, null, listOf(activity)).toMono()
 
-        val Activities = activityControllerApi.getActivitiesByCollection(
+        val activities = activityControllerApi.getActivitiesByCollection(
             types, flowCollectionId.fullId(), continuation, null, sort
         ).awaitFirst()
 
-        val flowItem = Activities.activities[0]
+        val flowItem = activities.activities[0]
         assertThat(flowItem.id.value).isEqualTo(activity.id)
     }
 
@@ -111,13 +111,13 @@ class ActivityControllerFt : AbstractIntegrationTest() {
             )
         } returns NftActivitiesDto(null, listOf(itemActivity)).toMono()
 
-        val Activities = activityControllerApi.getActivitiesByItem(
+        val activities = activityControllerApi.getActivitiesByItem(
             types, ethItemId.fullId(), tokenId, continuation, 10000000, sort
         ).awaitFirst()
 
-        assertThat(Activities.activities).hasSize(2)
-        assertThat(Activities.activities[0]).isInstanceOf(OrderBidActivityDto::class.java)
-        assertThat(Activities.activities[1]).isInstanceOf(MintActivityDto::class.java)
+        assertThat(activities.activities).hasSize(2)
+        assertThat(activities.activities[0]).isInstanceOf(OrderBidActivityDto::class.java)
+        assertThat(activities.activities[1]).isInstanceOf(MintActivityDto::class.java)
     }
 
     @Test
@@ -136,11 +136,11 @@ class ActivityControllerFt : AbstractIntegrationTest() {
             )
         } returns FlowActivitiesDto(1, null, listOf(activity)).toMono()
 
-        val Activities = activityControllerApi.getActivitiesByItem(
+        val activities = activityControllerApi.getActivitiesByItem(
             types, flowItemId.fullId(), tokenId.toString(), continuation, size, sort
         ).awaitFirst()
 
-        val flowItem = Activities.activities[0]
+        val flowItem = activities.activities[0]
         assertThat(flowItem.id.value).isEqualTo(activity.id)
     }
 

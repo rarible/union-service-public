@@ -100,7 +100,7 @@ class FlowActivityConverterTest {
 
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.date).isEqualTo(dto.date)
-        assertThat(converted.owners!![0].value).isEqualTo(dto.owner)
+        assertThat(converted.owners[0].value).isEqualTo(dto.owner)
         assertThat(converted.contract.value).isEqualTo(dto.contract)
         assertThat(converted.value).isEqualTo(dto.value)
         assertThat(converted.tokenId).isEqualTo(dto.tokenId)

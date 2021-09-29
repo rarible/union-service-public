@@ -22,8 +22,8 @@ class FlowOwnershipEventHandler(
 
         when (event) {
             is FlowNftOwnershipUpdateEventDto -> {
-                val Item = FlowOwnershipConverter.convert(event.ownership, blockchain)
-                ownershipEventService.onOwnershipUpdated(Item)
+                val item = FlowOwnershipConverter.convert(event.ownership, blockchain)
+                ownershipEventService.onOwnershipUpdated(item)
             }
             is FlowNftOwnershipDeleteEventDto -> {
                 val ownershipId = ShortOwnershipId(

@@ -1,12 +1,12 @@
 package com.rarible.protocol.union.core.ethereum.service
 
 import com.rarible.protocol.order.api.client.OrderControllerApi
+import com.rarible.protocol.union.core.continuation.Slice
 import com.rarible.protocol.union.core.ethereum.converter.EthConverter
 import com.rarible.protocol.union.core.ethereum.converter.EthOrderConverter
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderDto
-import com.rarible.protocol.union.dto.OrdersDto
 import com.rarible.protocol.union.dto.PlatformDto
 import kotlinx.coroutines.reactive.awaitFirst
 
@@ -20,7 +20,7 @@ class EthereumOrderService(
         origin: String?,
         continuation: String?,
         size: Int
-    ): OrdersDto {
+    ): Slice<OrderDto> {
         val orders = orderControllerApi.getOrdersAll(
             origin,
             EthConverter.convert(platform),
@@ -35,11 +35,6 @@ class EthereumOrderService(
         return EthOrderConverter.convert(order, blockchain)
     }
 
-    override suspend fun updateOrderMakeStock(id: String): OrderDto {
-        val order = orderControllerApi.updateOrderMakeStock(id).awaitFirst()
-        return EthOrderConverter.convert(order, blockchain)
-    }
-
     override suspend fun getOrderBidsByItem(
         platform: PlatformDto?,
         contract: String,
@@ -48,7 +43,7 @@ class EthereumOrderService(
         origin: String?,
         continuation: String?,
         size: Int
-    ): OrdersDto {
+    ): Slice<OrderDto> {
         val orders = orderControllerApi.getOrderBidsByItem(
             contract,
             tokenId,
@@ -67,7 +62,7 @@ class EthereumOrderService(
         origin: String?,
         continuation: String?,
         size: Int
-    ): OrdersDto {
+    ): Slice<OrderDto> {
         val orders = orderControllerApi.getOrderBidsByMaker(
             maker,
             origin,
@@ -83,7 +78,7 @@ class EthereumOrderService(
         origin: String?,
         continuation: String?,
         size: Int
-    ): OrdersDto {
+    ): Slice<OrderDto> {
         val orders = orderControllerApi.getSellOrders(
             origin,
             EthConverter.convert(platform),
@@ -98,7 +93,7 @@ class EthereumOrderService(
         origin: String?,
         continuation: String?,
         size: Int
-    ): OrdersDto {
+    ): Slice<OrderDto> {
         val orders = orderControllerApi.getSellOrdersByCollection(
             collection,
             origin,
@@ -117,7 +112,7 @@ class EthereumOrderService(
         origin: String?,
         continuation: String?,
         size: Int
-    ): OrdersDto {
+    ): Slice<OrderDto> {
         val orders = orderControllerApi.getSellOrdersByItem(
             contract,
             tokenId,
@@ -136,7 +131,7 @@ class EthereumOrderService(
         origin: String?,
         continuation: String?,
         size: Int
-    ): OrdersDto {
+    ): Slice<OrderDto> {
         val orders = orderControllerApi.getSellOrdersByMaker(
             maker,
             origin,

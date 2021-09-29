@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.core.service
 
-import com.rarible.protocol.union.dto.ActivitiesDto
+import com.rarible.protocol.union.core.continuation.Slice
+import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
@@ -12,7 +13,7 @@ interface ActivityService : BlockchainService {
         continuation: String?,
         size: Int,
         sort: ActivitySortDto?
-    ): ActivitiesDto
+    ): Slice<ActivityDto>
 
     suspend fun getActivitiesByCollection(
         types: List<ActivityTypeDto>,
@@ -20,7 +21,7 @@ interface ActivityService : BlockchainService {
         continuation: String?,
         size: Int,
         sort: ActivitySortDto?
-    ): ActivitiesDto
+    ): Slice<ActivityDto>
 
     suspend fun getActivitiesByItem(
         types: List<ActivityTypeDto>,
@@ -29,7 +30,7 @@ interface ActivityService : BlockchainService {
         continuation: String?,
         size: Int,
         sort: ActivitySortDto?
-    ): ActivitiesDto
+    ): Slice<ActivityDto>
 
     suspend fun getActivitiesByUser(
         types: List<UserActivityTypeDto>,
@@ -37,6 +38,6 @@ interface ActivityService : BlockchainService {
         continuation: String?,
         size: Int,
         sort: ActivitySortDto?
-    ): ActivitiesDto
+    ): Slice<ActivityDto>
 
 }

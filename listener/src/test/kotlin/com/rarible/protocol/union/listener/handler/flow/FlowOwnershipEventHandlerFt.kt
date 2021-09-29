@@ -10,11 +10,13 @@ import com.rarible.protocol.union.listener.test.IntegrationTest
 import com.rarible.protocol.union.test.data.randomFlowNftOwnershipDto
 import kotlinx.coroutines.FlowPreview
 import org.assertj.core.api.Assertions
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.Duration
 
 @FlowPreview
 @IntegrationTest
+@Disabled // TODO enable after enrichment implemented
 class FlowOwnershipEventHandlerFt : AbstractIntegrationTest() {
 
     @Test

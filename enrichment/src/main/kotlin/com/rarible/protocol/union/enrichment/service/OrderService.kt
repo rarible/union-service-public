@@ -2,10 +2,10 @@ package com.rarible.protocol.union.enrichment.service
 
 import com.rarible.core.client.WebClientResponseProxyException
 import com.rarible.core.common.nowMillis
+import com.rarible.protocol.union.core.continuation.Slice
 import com.rarible.protocol.union.core.service.OrderServiceRouter
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
-import com.rarible.protocol.union.dto.OrdersDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortOrder
@@ -108,15 +108,15 @@ class OrderService(
     }
 
     private suspend fun withPreferredRariblePlatform(
-        clientCall: suspend (platform: PlatformDto) -> OrdersDto
+        clientCall: suspend (platform: PlatformDto) -> Slice<OrderDto>
     ): OrderDto? {
-        val bestOfAll = clientCall(PlatformDto.ALL).orders.firstOrNull()
+        val bestOfAll = clientCall(PlatformDto.ALL).entities.firstOrNull()
         logger.debug("Found best order from ALL platforms: [{}]", bestOfAll)
         if (bestOfAll == null || bestOfAll.platform == PlatformDto.RARIBLE) {
             return bestOfAll
         }
         logger.debug("Order [{}] is not a preferred platform order, checking preferred platform...", bestOfAll)
-        val preferredPlatformBestOrder = clientCall(PlatformDto.RARIBLE).orders.firstOrNull()
+        val preferredPlatformBestOrder = clientCall(PlatformDto.RARIBLE).entities.firstOrNull()
         logger.debug("Checked preferred platform for best order: [{}]")
         return preferredPlatformBestOrder ?: bestOfAll
     }

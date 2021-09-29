@@ -1,11 +1,11 @@
 package com.rarible.protocol.union.core.flow.service
 
 import com.rarible.protocol.flow.nft.api.client.FlowNftItemControllerApi
+import com.rarible.protocol.union.core.continuation.Page
 import com.rarible.protocol.union.core.flow.converter.FlowItemConverter
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.ItemDto
-import com.rarible.protocol.union.dto.ItemsDto
+import com.rarible.protocol.union.dto.UnionItemDto
 import kotlinx.coroutines.reactive.awaitFirst
 
 class FlowItemService(
@@ -19,14 +19,14 @@ class FlowItemService(
         showDeleted: Boolean?,
         lastUpdatedFrom: Long?, //TODO not supported by Flow
         lastUpdatedTo: Long? //TODO not supported by Flow
-    ): ItemsDto {
+    ): Page<UnionItemDto> {
         val items = flowNftItemControllerApi.getNftAllItems(continuation, size, showDeleted).awaitFirst()
         return FlowItemConverter.convert(items, blockchain)
     }
 
     override suspend fun getItemById(
         itemId: String
-    ): ItemDto {
+    ): UnionItemDto {
         val item = flowNftItemControllerApi.getNftItemById(itemId).awaitFirst()
         return FlowItemConverter.convert(item, blockchain)
     }
@@ -35,7 +35,7 @@ class FlowItemService(
         collection: String,
         continuation: String?,
         size: Int
-    ): ItemsDto {
+    ): Page<UnionItemDto> {
         val items = flowNftItemControllerApi.getNftItemsByCollection(collection, continuation, size).awaitFirst()
         return FlowItemConverter.convert(items, blockchain)
     }
@@ -44,7 +44,7 @@ class FlowItemService(
         creator: String,
         continuation: String?,
         size: Int
-    ): ItemsDto {
+    ): Page<UnionItemDto> {
         val items = flowNftItemControllerApi.getNftItemsByCreator(creator, continuation, size).awaitFirst()
         return FlowItemConverter.convert(items, blockchain)
     }
@@ -53,7 +53,7 @@ class FlowItemService(
         owner: String,
         continuation: String?,
         size: Int
-    ): ItemsDto {
+    ): Page<UnionItemDto> {
         val items = flowNftItemControllerApi.getNftItemsByOwner(owner, continuation, size).awaitFirst()
         return FlowItemConverter.convert(items, blockchain)
     }

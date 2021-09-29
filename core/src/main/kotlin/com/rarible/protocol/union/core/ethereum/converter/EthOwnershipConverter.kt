@@ -4,17 +4,17 @@ import com.rarible.protocol.dto.ItemRoyaltyDto
 import com.rarible.protocol.dto.ItemTransferDto
 import com.rarible.protocol.dto.NftOwnershipDto
 import com.rarible.protocol.dto.NftOwnershipsDto
+import com.rarible.protocol.union.core.continuation.Page
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemHistoryDto
-import com.rarible.protocol.union.dto.OwnershipDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
-import com.rarible.protocol.union.dto.OwnershipsDto
+import com.rarible.protocol.union.dto.UnionOwnershipDto
 
 object EthOwnershipConverter {
 
-    fun convert(source: NftOwnershipDto, blockchain: BlockchainDto): OwnershipDto {
-        return OwnershipDto(
+    fun convert(source: NftOwnershipDto, blockchain: BlockchainDto): UnionOwnershipDto {
+        return UnionOwnershipDto(
             id = OwnershipIdDto(
                 token = UnionAddressConverter.convert(source.contract, blockchain),
                 tokenId = source.tokenId,
@@ -32,11 +32,11 @@ object EthOwnershipConverter {
         )
     }
 
-    fun convert(page: NftOwnershipsDto, blockchain: BlockchainDto): OwnershipsDto {
-        return OwnershipsDto(
+    fun convert(page: NftOwnershipsDto, blockchain: BlockchainDto): Page<UnionOwnershipDto> {
+        return Page(
             total = page.total,
             continuation = page.continuation,
-            ownerships = page.ownerships.map { convert(it, blockchain) }
+            entities = page.ownerships.map { convert(it, blockchain) }
         )
     }
 

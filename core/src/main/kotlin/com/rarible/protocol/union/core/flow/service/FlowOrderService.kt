@@ -1,11 +1,11 @@
 package com.rarible.protocol.union.core.flow.service
 
 import com.rarible.protocol.flow.nft.api.client.FlowOrderControllerApi
+import com.rarible.protocol.union.core.continuation.Slice
 import com.rarible.protocol.union.core.flow.converter.FlowOrderConverter
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderDto
-import com.rarible.protocol.union.dto.OrdersDto
 import com.rarible.protocol.union.dto.PlatformDto
 import kotlinx.coroutines.reactive.awaitFirst
 
@@ -19,17 +19,11 @@ class FlowOrderService(
         origin: String?,
         continuation: String?,
         size: Int
-    ): OrdersDto {
+    ): Slice<OrderDto> {
         return stub()
     }
 
     override suspend fun getOrderById(id: String): OrderDto {
-        val order = orderControllerApi.getOrderByOrderId(id).awaitFirst()
-        return FlowOrderConverter.convert(order, blockchain)
-    }
-
-    override suspend fun updateOrderMakeStock(id: String): OrderDto {
-        // TODO implement when Flow support it
         val order = orderControllerApi.getOrderByOrderId(id).awaitFirst()
         return FlowOrderConverter.convert(order, blockchain)
     }
@@ -42,7 +36,7 @@ class FlowOrderService(
         origin: String?,
         continuation: String?,
         size: Int
-    ): OrdersDto {
+    ): Slice<OrderDto> {
         return stub()
     }
 
@@ -52,7 +46,7 @@ class FlowOrderService(
         origin: String?,
         continuation: String?,
         size: Int
-    ): OrdersDto {
+    ): Slice<OrderDto> {
         return stub()
     }
 
@@ -61,7 +55,7 @@ class FlowOrderService(
         origin: String?,
         continuation: String?,
         size: Int
-    ): OrdersDto {
+    ): Slice<OrderDto> {
         return stub()
     }
 
@@ -71,7 +65,7 @@ class FlowOrderService(
         origin: String?,
         continuation: String?,
         size: Int
-    ): OrdersDto {
+    ): Slice<OrderDto> {
         return stub()
     }
 
@@ -83,7 +77,7 @@ class FlowOrderService(
         origin: String?,
         continuation: String?,
         size: Int
-    ): OrdersDto {
+    ): Slice<OrderDto> {
         return stub()
     }
 
@@ -93,15 +87,15 @@ class FlowOrderService(
         origin: String?,
         continuation: String?,
         size: Int
-    ): OrdersDto {
+    ): Slice<OrderDto> {
         return stub()
     }
 
     // TODO remove when FLow support Order API
-    private fun stub(): OrdersDto {
-        return OrdersDto(
+    private fun stub(): Slice<OrderDto> {
+        return Slice(
             continuation = null,
-            orders = listOf()
+            entities = listOf()
         )
     }
 }

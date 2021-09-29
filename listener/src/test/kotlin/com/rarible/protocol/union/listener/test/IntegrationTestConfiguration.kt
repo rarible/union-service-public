@@ -119,22 +119,22 @@ class IntegrationTestConfiguration {
     }
 
     @Bean
-    fun testEthereumOrderEventProducer(): RaribleKafkaProducer<OrderEventDto> {
+    fun testEthereumOrderEventProducer(): RaribleKafkaProducer<com.rarible.protocol.dto.OrderEventDto> {
         return RaribleKafkaProducer(
             clientId = "test.union.ethereum.order",
             valueSerializerClass = UnionKafkaJsonSerializer::class.java,
-            valueClass = OrderEventDto::class.java,
+            valueClass = com.rarible.protocol.dto.OrderEventDto::class.java,
             defaultTopic = OrderIndexerTopicProvider.getUpdateTopic(applicationEnvironmentInfo().name, "ethereum"),
             bootstrapServers = kafkaContainer.kafkaBoostrapServers()
         )
     }
 
     @Bean
-    fun testEthereumActivityEventProducer(): RaribleKafkaProducer<ActivityDto> {
+    fun testEthereumActivityEventProducer(): RaribleKafkaProducer<com.rarible.protocol.dto.ActivityDto> {
         return RaribleKafkaProducer(
             clientId = "test.union.ethereum.activity",
             valueSerializerClass = UnionKafkaJsonSerializer::class.java,
-            valueClass = ActivityDto::class.java,
+            valueClass = com.rarible.protocol.dto.ActivityDto::class.java,
             defaultTopic = ActivityTopicProvider.getTopic(applicationEnvironmentInfo().name, "ethereum"),
             bootstrapServers = kafkaContainer.kafkaBoostrapServers()
         )

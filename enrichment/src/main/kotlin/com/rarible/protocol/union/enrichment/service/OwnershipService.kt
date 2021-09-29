@@ -4,7 +4,7 @@ import com.mongodb.client.result.DeleteResult
 import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.core.service.OwnershipServiceRouter
 import com.rarible.protocol.union.dto.OrderDto
-import com.rarible.protocol.union.dto.OwnershipDto
+import com.rarible.protocol.union.dto.UnionOwnershipDto
 import com.rarible.protocol.union.enrichment.converter.ExtendedOwnershipConverter
 import com.rarible.protocol.union.enrichment.model.ItemSellStats
 import com.rarible.protocol.union.enrichment.model.ShortItemId
@@ -55,7 +55,7 @@ class OwnershipService(
         return result
     }
 
-    suspend fun fetch(ownershipId: ShortOwnershipId): OwnershipDto {
+    suspend fun fetch(ownershipId: ShortOwnershipId): UnionOwnershipDto {
         val now = nowMillis()
         val ownershipDto = ownershipServiceRouter.getService(ownershipId.blockchain)
             .getOwnershipById(ownershipId.toDto().value)
@@ -64,9 +64,9 @@ class OwnershipService(
         return ownershipDto
     }
 
-    suspend fun fetchAllByItemId(itemId: ShortItemId): List<OwnershipDto> {
+    suspend fun fetchAllByItemId(itemId: ShortItemId): List<UnionOwnershipDto> {
         var continuation: String? = null
-        val result = ArrayList<OwnershipDto>()
+        val result = ArrayList<UnionOwnershipDto>()
         do {
             val page = ownershipServiceRouter.getService(itemId.blockchain).getOwnershipsByItem(
                 itemId.token,
@@ -74,7 +74,7 @@ class OwnershipService(
                 continuation,
                 1000 // TODO
             )
-            result.addAll(page.ownerships)
+            result.addAll(page.entities)
             continuation = page.continuation
         } while (continuation != null)
         return result
@@ -82,7 +82,7 @@ class OwnershipService(
 
     suspend fun enrichOwnership(
         short: ShortOwnership,
-        ownership: OwnershipDto? = null,
+        ownership: UnionOwnershipDto? = null,
         order: OrderDto? = null
     ) = coroutineScope {
         val fetchedOwnership = async { ownership ?: fetch(short.id) }

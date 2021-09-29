@@ -7,7 +7,7 @@ import io.changock.migration.api.annotations.NonLockGuarded
 import kotlinx.coroutines.runBlocking
 
 @ChangeLog(order = "99999")
-class ChangeLog99999CreateOwnershipIndices() {
+class ChangeLog99999CreateOwnershipIndices {
 
     @ChangeSet(
         id = "ChangeLog00001CreateOwnershipIndices.createIndicesForAllCollections",

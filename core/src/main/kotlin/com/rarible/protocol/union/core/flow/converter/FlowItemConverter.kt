@@ -4,24 +4,24 @@ import com.rarible.protocol.dto.FlowCreatorDto
 import com.rarible.protocol.dto.FlowNftItemDto
 import com.rarible.protocol.dto.FlowNftItemsDto
 import com.rarible.protocol.dto.FlowRoyaltyDto
+import com.rarible.protocol.union.core.continuation.Page
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CreatorDto
-import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.ItemIdDto
-import com.rarible.protocol.union.dto.ItemsDto
 import com.rarible.protocol.union.dto.MetaAttributeDto
 import com.rarible.protocol.union.dto.MetaContentDto
 import com.rarible.protocol.union.dto.MetaDto
 import com.rarible.protocol.union.dto.RoyaltyDto
+import com.rarible.protocol.union.dto.UnionItemDto
 import java.math.BigInteger
 
 object FlowItemConverter {
 
-    fun convert(item: FlowNftItemDto, blockchain: BlockchainDto): ItemDto {
+    fun convert(item: FlowNftItemDto, blockchain: BlockchainDto): UnionItemDto {
         val collection = FlowContractConverter.convert(item.collection, blockchain)
 
-        return ItemDto(
+        return UnionItemDto(
             id = ItemIdDto(
                 blockchain = blockchain,
                 token = collection,
@@ -42,11 +42,11 @@ object FlowItemConverter {
         )
     }
 
-    fun convert(page: FlowNftItemsDto, blockchain: BlockchainDto): ItemsDto {
-        return ItemsDto(
+    fun convert(page: FlowNftItemsDto, blockchain: BlockchainDto): Page<UnionItemDto> {
+        return Page(
             total = page.total,
             continuation = page.continuation,
-            items = page.items.map { convert(it, blockchain) }
+            entities = page.items.map { convert(it, blockchain) }
         )
     }
 

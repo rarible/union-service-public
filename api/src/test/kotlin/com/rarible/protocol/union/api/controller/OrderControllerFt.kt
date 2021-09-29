@@ -47,10 +47,10 @@ class OrderControllerFt : AbstractIntegrationTest() {
 
         coEvery { testEthereumOrderApi.getOrderByHash(orderId) } returns order.toMono()
 
-        val Order = orderControllerClient.getOrderById(orderIdFull).awaitFirst()
+        val unionOrder = orderControllerClient.getOrderById(orderIdFull).awaitFirst()
 
-        assertThat(Order.id.value).isEqualTo(orderId)
-        assertThat(Order.id.blockchain).isEqualTo(BlockchainDto.ETHEREUM)
+        assertThat(unionOrder.id.value).isEqualTo(orderId)
+        assertThat(unionOrder.id.blockchain).isEqualTo(BlockchainDto.ETHEREUM)
     }
 
     @Test
@@ -61,10 +61,10 @@ class OrderControllerFt : AbstractIntegrationTest() {
 
         coEvery { testPolygonOrderApi.getOrderByHash(orderId) } returns order.toMono()
 
-        val Order = orderControllerClient.getOrderById(orderIdFull).awaitFirst()
+        val unionOrder = orderControllerClient.getOrderById(orderIdFull).awaitFirst()
 
-        assertThat(Order.id.value).isEqualTo(orderId)
-        assertThat(Order.id.blockchain).isEqualTo(BlockchainDto.POLYGON)
+        assertThat(unionOrder.id.value).isEqualTo(orderId)
+        assertThat(unionOrder.id.blockchain).isEqualTo(BlockchainDto.POLYGON)
     }
 
     @Test
@@ -75,24 +75,10 @@ class OrderControllerFt : AbstractIntegrationTest() {
 
         coEvery { testFlowOrderApi.getOrderByOrderId(orderId.toString()) } returns order.toMono()
 
-        val Order = orderControllerClient.getOrderById(orderIdFull).awaitFirst()
+        val unionOrder = orderControllerClient.getOrderById(orderIdFull).awaitFirst()
 
-        assertThat(Order.id.value).isEqualTo(orderId.toString())
-        assertThat(Order.id.blockchain).isEqualTo(BlockchainDto.FLOW)
-    }
-
-    @Test
-    fun `update order make stock - ethereum`() = runBlocking<Unit> {
-        val order = randomEthLegacyOrderDto()
-        val orderId = EthConverter.convert(order.hash)
-        val orderIdFull = OrderIdDto(BlockchainDto.ETHEREUM, order.hash.prefixed()).fullId()
-
-        coEvery { testEthereumOrderApi.updateOrderMakeStock(orderId) } returns order.toMono()
-
-        val Order = orderControllerClient.updateOrderMakeStock(orderIdFull).awaitFirst()
-
-        assertThat(Order.id.value).isEqualTo(orderId)
-        assertThat(Order.id.blockchain).isEqualTo(BlockchainDto.ETHEREUM)
+        assertThat(unionOrder.id.value).isEqualTo(orderId.toString())
+        assertThat(unionOrder.id.blockchain).isEqualTo(BlockchainDto.FLOW)
     }
 
     @Test
@@ -112,12 +98,12 @@ class OrderControllerFt : AbstractIntegrationTest() {
             testEthereumOrderApi.getOrdersAll(null, ethPlatform, continuation, size)
         } returns OrdersPaginationDto(ethOrders, this@OrderControllerFt.continuation).toMono()
 
-        val Orders = orderControllerClient.getOrdersAll(
+        val orders = orderControllerClient.getOrdersAll(
             blockchains, platform, null, continuation, size
         ).awaitFirst()
 
-        assertThat(Orders.orders).hasSize(3)
-        assertThat(Orders.continuation).isNotNull()
+        assertThat(orders.orders).hasSize(3)
+        assertThat(orders.continuation).isNotNull()
     }
 
     @Test
@@ -133,12 +119,12 @@ class OrderControllerFt : AbstractIntegrationTest() {
             testEthereumOrderApi.getOrdersAll(origin.value, ethPlatform, continuation, size)
         } returns OrdersPaginationDto(ethOrders, this@OrderControllerFt.continuation).toMono()
 
-        val Orders = orderControllerClient.getOrdersAll(
+        val orders = orderControllerClient.getOrdersAll(
             blockchains, platform, origin.fullId(), continuation, size
         ).awaitFirst()
 
-        assertThat(Orders.orders).hasSize(2)
-        assertThat(Orders.continuation).isNull()
+        assertThat(orders.orders).hasSize(2)
+        assertThat(orders.continuation).isNull()
     }
 
     @Test
@@ -161,7 +147,7 @@ class OrderControllerFt : AbstractIntegrationTest() {
             )
         } returns OrdersPaginationDto(ethOrders, continuation).toMono()
 
-        val Orders = orderControllerClient.getOrderBidsByItem(
+        val orders = orderControllerClient.getOrderBidsByItem(
             contract.fullId(),
             tokenId.toString(),
             platform,
@@ -171,9 +157,9 @@ class OrderControllerFt : AbstractIntegrationTest() {
             size
         ).awaitFirst()
 
-        assertThat(Orders.orders).hasSize(1)
-        assertThat(Orders.orders[0]).isInstanceOf(OrderDto::class.java)
-        assertThat(Orders.continuation).isNull()
+        assertThat(orders.orders).hasSize(1)
+        assertThat(orders.orders[0]).isInstanceOf(OrderDto::class.java)
+        assertThat(orders.continuation).isNull()
     }
 
     @Test
@@ -191,7 +177,7 @@ class OrderControllerFt : AbstractIntegrationTest() {
             testPolygonOrderApi.getOrderBidsByMaker(maker.value, null, ethPlatform, continuation, size)
         } returns OrdersPaginationDto(polygonOrders, continuation).toMono()
 
-        val Orders = orderControllerClient.getOrderBidsByMaker(
+        val orders = orderControllerClient.getOrderBidsByMaker(
             maker.fullId(),
             platform,
             null,
@@ -199,9 +185,9 @@ class OrderControllerFt : AbstractIntegrationTest() {
             size
         ).awaitFirst()
 
-        assertThat(Orders.orders).hasSize(1)
-        assertThat(Orders.orders[0]).isInstanceOf(OrderDto::class.java)
-        assertThat(Orders.continuation).isNull()
+        assertThat(orders.orders).hasSize(1)
+        assertThat(orders.orders[0]).isInstanceOf(OrderDto::class.java)
+        assertThat(orders.continuation).isNull()
     }
 
     @Test
@@ -226,12 +212,12 @@ class OrderControllerFt : AbstractIntegrationTest() {
             testEthereumOrderApi.getSellOrders(null, ethPlatform, continuation, size)
         } returns OrdersPaginationDto(ethOrders, this@OrderControllerFt.continuation).toMono()
 
-        val Orders = orderControllerClient.getSellOrders(
+        val orders = orderControllerClient.getSellOrders(
             blockchains, platform, null, continuation, size
         ).awaitFirst()
 
-        assertThat(Orders.orders).hasSize(3)
-        assertThat(Orders.continuation).isNotNull()
+        assertThat(orders.orders).hasSize(3)
+        assertThat(orders.continuation).isNotNull()
     }
 
     @Test
@@ -247,12 +233,12 @@ class OrderControllerFt : AbstractIntegrationTest() {
             testPolygonOrderApi.getSellOrders(origin.value, ethPlatform, continuation, size)
         } returns OrdersPaginationDto(ethOrders, this@OrderControllerFt.continuation).toMono()
 
-        val Orders = orderControllerClient.getSellOrders(
+        val orders = orderControllerClient.getSellOrders(
             blockchains, platform, origin.fullId(), continuation, size
         ).awaitFirst()
 
-        assertThat(Orders.orders).hasSize(1)
-        assertThat(Orders.continuation).isNull()
+        assertThat(orders.orders).hasSize(1)
+        assertThat(orders.continuation).isNull()
     }
 
     @Test
@@ -270,7 +256,7 @@ class OrderControllerFt : AbstractIntegrationTest() {
             )
         } returns OrdersPaginationDto(polygonOrders, continuation).toMono()
 
-        val Orders = orderControllerClient.getSellOrdersByCollection(
+        val orders = orderControllerClient.getSellOrdersByCollection(
             collection.fullId(),
             platform,
             null,
@@ -278,9 +264,9 @@ class OrderControllerFt : AbstractIntegrationTest() {
             size
         ).awaitFirst()
 
-        assertThat(Orders.orders).hasSize(1)
-        assertThat(Orders.orders[0]).isInstanceOf(OrderDto::class.java)
-        assertThat(Orders.continuation).isNull()
+        assertThat(orders.orders).hasSize(1)
+        assertThat(orders.orders[0]).isInstanceOf(OrderDto::class.java)
+        assertThat(orders.continuation).isNull()
     }
 
     @Test
@@ -303,7 +289,7 @@ class OrderControllerFt : AbstractIntegrationTest() {
             )
         } returns OrdersPaginationDto(ethOrders, continuation).toMono()
 
-        val Orders = orderControllerClient.getSellOrdersByItem(
+        val orders = orderControllerClient.getSellOrdersByItem(
             contract.fullId(),
             tokenId.toString(),
             platform,
@@ -313,9 +299,9 @@ class OrderControllerFt : AbstractIntegrationTest() {
             size
         ).awaitFirst()
 
-        assertThat(Orders.orders).hasSize(1)
-        assertThat(Orders.orders[0]).isInstanceOf(OrderDto::class.java)
-        assertThat(Orders.continuation).isNull()
+        assertThat(orders.orders).hasSize(1)
+        assertThat(orders.orders[0]).isInstanceOf(OrderDto::class.java)
+        assertThat(orders.continuation).isNull()
     }
 
     @Test
@@ -328,7 +314,7 @@ class OrderControllerFt : AbstractIntegrationTest() {
             testPolygonOrderApi.getSellOrdersByMaker(maker.value, null, ethPlatform, continuation, size)
         } returns OrdersPaginationDto(polygonOrders, continuation).toMono()
 
-        val Orders = orderControllerClient.getSellOrdersByMaker(
+        val orders = orderControllerClient.getSellOrdersByMaker(
             maker.fullId(),
             platform,
             null,
@@ -336,9 +322,9 @@ class OrderControllerFt : AbstractIntegrationTest() {
             size
         ).awaitFirst()
 
-        assertThat(Orders.orders).hasSize(1)
-        assertThat(Orders.orders[0]).isInstanceOf(OrderDto::class.java)
-        assertThat(Orders.continuation).isNull()
+        assertThat(orders.orders).hasSize(1)
+        assertThat(orders.orders[0]).isInstanceOf(OrderDto::class.java)
+        assertThat(orders.continuation).isNull()
     }
 
     @Test

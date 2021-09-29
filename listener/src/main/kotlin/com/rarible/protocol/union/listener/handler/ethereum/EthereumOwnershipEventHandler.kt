@@ -23,8 +23,8 @@ class EthereumOwnershipEventHandler(
 
         when (event) {
             is NftOwnershipUpdateEventDto -> {
-                val Item = EthOwnershipConverter.convert(event.ownership, blockchain)
-                ownershipEventService.onOwnershipUpdated(Item)
+                val item = EthOwnershipConverter.convert(event.ownership, blockchain)
+                ownershipEventService.onOwnershipUpdated(item)
             }
             is NftOwnershipDeleteEventDto -> {
                 val ownershipId = ShortOwnershipId(

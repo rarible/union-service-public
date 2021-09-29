@@ -2,10 +2,10 @@ package com.rarible.protocol.union.core.ethereum.converter
 
 import com.rarible.protocol.dto.NftCollectionDto
 import com.rarible.protocol.dto.NftCollectionsDto
+import com.rarible.protocol.union.core.continuation.Page
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionDto
-import com.rarible.protocol.union.dto.CollectionsDto
 
 object EthCollectionConverter {
 
@@ -23,11 +23,11 @@ object EthCollectionConverter {
         )
     }
 
-    fun convert(page: NftCollectionsDto, blockchain: BlockchainDto): CollectionsDto {
-        return CollectionsDto(
+    fun convert(page: NftCollectionsDto, blockchain: BlockchainDto): Page<CollectionDto> {
+        return Page(
             total = page.total,
             continuation = page.continuation,
-            collections = page.collections.map { convert(it, blockchain) }
+            entities = page.collections.map { convert(it, blockchain) }
         )
     }
 

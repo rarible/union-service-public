@@ -9,12 +9,13 @@ import com.rarible.protocol.dto.NftActivitiesDto
 import com.rarible.protocol.dto.OrderActivitiesDto
 import com.rarible.protocol.nft.api.client.NftActivityControllerApi
 import com.rarible.protocol.order.api.client.OrderActivityControllerApi
-import com.rarible.protocol.union.core.continuation.ContinuationPaging
+import com.rarible.protocol.union.core.continuation.Paging
+import com.rarible.protocol.union.core.continuation.Slice
 import com.rarible.protocol.union.core.ethereum.converter.EthActivityConverter
 import com.rarible.protocol.union.core.ethereum.converter.EthActivityFilterConverter
 import com.rarible.protocol.union.core.ethereum.converter.EthConverter
 import com.rarible.protocol.union.core.service.ActivityService
-import com.rarible.protocol.union.dto.ActivitiesDto
+import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -42,7 +43,7 @@ class EthereumActivityService(
         continuation: String?,
         size: Int,
         sort: ActivitySortDto?
-    ): ActivitiesDto {
+    ): Slice<ActivityDto> {
         val filter = ActivityFilterAllDto(
             LinkedHashSet(types).map { EthActivityConverter.asGlobalActivityType(it) }
         )
@@ -55,7 +56,7 @@ class EthereumActivityService(
         continuation: String?,
         size: Int,
         sort: ActivitySortDto?
-    ): ActivitiesDto {
+    ): Slice<ActivityDto> {
         val filter = ActivityFilterByCollectionDto(
             Address.apply(collection),
             LinkedHashSet(types).map { EthActivityConverter.asCollectionActivityType(it) }
@@ -70,7 +71,7 @@ class EthereumActivityService(
         continuation: String?,
         size: Int,
         sort: ActivitySortDto?
-    ): ActivitiesDto {
+    ): Slice<ActivityDto> {
         val filter = ActivityFilterByItemDto(
             Address.apply(contract),
             BigInteger(tokenId),
@@ -85,7 +86,7 @@ class EthereumActivityService(
         continuation: String?,
         size: Int,
         sort: ActivitySortDto?
-    ): ActivitiesDto {
+    ): Slice<ActivityDto> {
         val filter = ActivityFilterByUserDto(
             users.map { Address.apply(it) },
             LinkedHashSet(types).map { EthActivityConverter.asUserActivityType(it) }
@@ -117,13 +118,12 @@ class EthereumActivityService(
         val orderActivities = ordersPage.items.map { EthActivityConverter.convert(it, blockchain) }
         val allActivities = itemActivities + orderActivities
 
-        val combinedPage = ContinuationPaging(
+        Paging(
             continuationFactory,
             allActivities
-        ).getPage(size)
+        ).getSlice(size)
 
-        ActivitiesDto(combinedPage.printContinuation(), combinedPage.entities)
-        }
+    }
 
     private suspend fun getItemActivities(
         filter: ActivityFilterDto,

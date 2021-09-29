@@ -10,6 +10,7 @@ import com.rarible.protocol.dto.OrderSideDto
 import com.rarible.protocol.dto.OrderSideMatchDto
 import com.rarible.protocol.dto.OrdersPaginationDto
 import com.rarible.protocol.dto.RaribleV2OrderDto
+import com.rarible.protocol.union.core.continuation.Slice
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.EthOrderCryptoPunksDataDto
@@ -20,7 +21,6 @@ import com.rarible.protocol.union.dto.OnChainOrderDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.OrderPriceHistoryRecordDto
-import com.rarible.protocol.union.dto.OrdersDto
 import com.rarible.protocol.union.dto.PendingOrderCancelDto
 import com.rarible.protocol.union.dto.PendingOrderDto
 import com.rarible.protocol.union.dto.PendingOrderMatchDto
@@ -30,11 +30,11 @@ import java.time.Instant
 object EthOrderConverter {
 
     fun convert(order: com.rarible.protocol.dto.OrderDto, blockchain: BlockchainDto): OrderDto {
-        val OrderId = OrderIdDto(blockchain, EthConverter.convert(order.hash))
+        val orderId = OrderIdDto(blockchain, EthConverter.convert(order.hash))
         return when (order) {
             is LegacyOrderDto -> {
                 OrderDto(
-                    id = OrderId,
+                    id = orderId,
                     platform = PlatformDto.RARIBLE,
                     maker = UnionAddressConverter.convert(order.maker, blockchain),
                     taker = order.taker?.let { UnionAddressConverter.convert(it, blockchain) },
@@ -60,7 +60,7 @@ object EthOrderConverter {
             }
             is RaribleV2OrderDto -> {
                 OrderDto(
-                    id = OrderId,
+                    id = orderId,
                     platform = PlatformDto.RARIBLE,
                     maker = UnionAddressConverter.convert(order.maker, blockchain),
                     taker = order.taker?.let { UnionAddressConverter.convert(order.taker!!, blockchain) },
@@ -87,7 +87,7 @@ object EthOrderConverter {
             }
             is OpenSeaV1OrderDto -> {
                 OrderDto(
-                    id = OrderId,
+                    id = orderId,
                     platform = PlatformDto.OPEN_SEA,
                     maker = UnionAddressConverter.convert(order.maker, blockchain),
                     taker = order.taker?.let { UnionAddressConverter.convert(order.taker!!, blockchain) },
@@ -127,7 +127,7 @@ object EthOrderConverter {
             }
             is CryptoPunkOrderDto -> {
                 OrderDto(
-                    id = OrderId,
+                    id = orderId,
                     platform = PlatformDto.CRYPTO_PUNKS,
                     maker = UnionAddressConverter.convert(order.maker, blockchain),
                     taker = order.taker?.let { UnionAddressConverter.convert(order.taker!!, blockchain) },
@@ -152,10 +152,10 @@ object EthOrderConverter {
         }
     }
 
-    fun convert(source: OrdersPaginationDto, blockchain: BlockchainDto): OrdersDto {
-        return OrdersDto(
+    fun convert(source: OrdersPaginationDto, blockchain: BlockchainDto): Slice<OrderDto> {
+        return Slice(
             continuation = source.continuation,
-            orders = source.orders.map { convert(it, blockchain) }
+            entities = source.orders.map { convert(it, blockchain) }
         )
     }
 

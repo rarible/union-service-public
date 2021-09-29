@@ -1,11 +1,11 @@
 package com.rarible.protocol.union.core.flow.service
 
 import com.rarible.protocol.flow.nft.api.client.FlowNftCollectionControllerApi
+import com.rarible.protocol.union.core.continuation.Page
 import com.rarible.protocol.union.core.flow.converter.FlowCollectionConverter
 import com.rarible.protocol.union.core.service.CollectionService
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionDto
-import com.rarible.protocol.union.dto.CollectionsDto
 import kotlinx.coroutines.reactive.awaitFirst
 
 class FlowCollectionService(
@@ -13,7 +13,7 @@ class FlowCollectionService(
     private val collectionControllerApi: FlowNftCollectionControllerApi
 ) : AbstractFlowService(blockchain), CollectionService {
 
-    override suspend fun getAllCollections(continuation: String?, size: Int): CollectionsDto {
+    override suspend fun getAllCollections(continuation: String?, size: Int): Page<CollectionDto> {
         val collections = collectionControllerApi.searchNftAllCollections(continuation, size).awaitFirst()
         return FlowCollectionConverter.convert(collections, blockchain)
     }
@@ -27,7 +27,7 @@ class FlowCollectionService(
         owner: String,
         continuation: String?,
         size: Int
-    ): CollectionsDto {
+    ): Page<CollectionDto> {
         val items = collectionControllerApi.searchNftCollectionsByOwner(owner, continuation, size).awaitFirst()
         return FlowCollectionConverter.convert(items, blockchain)
     }

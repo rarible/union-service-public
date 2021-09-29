@@ -1,9 +1,11 @@
 package com.rarible.protocol.union.api.controller
 
 import com.rarible.protocol.union.api.configuration.PageSize
-import com.rarible.protocol.union.core.continuation.ContinuationPaging
+import com.rarible.protocol.union.core.continuation.Paging
+import com.rarible.protocol.union.core.continuation.Slice
 import com.rarible.protocol.union.core.service.ActivityServiceRouter
 import com.rarible.protocol.union.dto.ActivitiesDto
+import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -47,7 +49,7 @@ class ActivityController(
         val (blockchain, shortCollection) = IdParser.parse(collection)
         val result = router.getService(blockchain)
             .getActivitiesByCollection(type, shortCollection, continuation, safeSize, sort)
-        return ResponseEntity.ok(result)
+        return ResponseEntity.ok(toDto(result))
     }
 
     override suspend fun getActivitiesByItem(
@@ -62,7 +64,7 @@ class ActivityController(
         val (blockchain, shortContact) = IdParser.parse(contract)
         val result = router.getService(blockchain)
             .getActivitiesByItem(type, shortContact, tokenId, continuation, safeSize, sort)
-        return ResponseEntity.ok(result)
+        return ResponseEntity.ok(toDto(result))
     }
 
     override suspend fun getActivitiesByUser(
@@ -92,7 +94,7 @@ class ActivityController(
     }
 
     private fun merge(
-        blockchainPages: List<ActivitiesDto>,
+        blockchainPages: List<Slice<ActivityDto>>,
         size: Int,
         sort: ActivitySortDto?
     ): ActivitiesDto {
@@ -101,11 +103,18 @@ class ActivityController(
             ActivitySortDto.LATEST_FIRST, null -> ActivityContinuation.ByLastUpdatedAndIdDesc
         }
 
-        val combinedPage = ContinuationPaging(
+        val combinedSlice = Paging(
             continuationFactory,
-            blockchainPages.flatMap { it.activities }
-        ).getPage(size)
+            blockchainPages.flatMap { it.entities }
+        ).getSlice(size)
 
-        return ActivitiesDto(combinedPage.printContinuation(), combinedPage.entities)
+        return toDto(combinedSlice)
+    }
+
+    private fun toDto(slice: Slice<ActivityDto>): ActivitiesDto {
+        return ActivitiesDto(
+            continuation = slice.continuation,
+            activities = slice.entities
+        )
     }
 }

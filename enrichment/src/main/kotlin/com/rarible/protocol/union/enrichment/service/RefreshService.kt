@@ -1,7 +1,7 @@
 package com.rarible.protocol.union.enrichment.service
 
 import com.rarible.core.common.optimisticLock
-import com.rarible.protocol.union.dto.OwnershipDto
+import com.rarible.protocol.union.dto.UnionOwnershipDto
 import com.rarible.protocol.union.enrichment.converter.ExtendedItemConverter
 import com.rarible.protocol.union.enrichment.converter.ExtendedOwnershipConverter
 import com.rarible.protocol.union.enrichment.converter.ShortItemConverter
@@ -22,7 +22,6 @@ class RefreshService(
     private val itemService: ItemService,
     private val ownershipService: OwnershipService,
     private val orderService: OrderService,
-    private val lockService: LockService,
     private val itemEventListeners: List<ItemEventListener>,
     private val ownershipEventListeners: List<OwnershipEventListener>
 ) {
@@ -44,7 +43,6 @@ class RefreshService(
         val itemDtoDeferred = async { itemService.fetch(itemId) }
         val bestSellOrderDeferred = async { orderService.getBestSell(itemId) }
         val bestBidOrderDeferred = async { orderService.getBestBid(itemId) }
-        val unlockableDeferred = async { lockService.isUnlockable(itemId) }
         val sellStats = ownershipService.getItemSellStats(itemId)
 
         val itemDto = itemDtoDeferred.await()
@@ -54,7 +52,6 @@ class RefreshService(
         val short = ShortItemConverter.convert(itemDto).copy(
             bestBidOrder = bestBidOrderDeferred.await()?.let { ShortOrderConverter.convert(it) },
             bestSellOrder = bestSellOrderDeferred.await()?.let { ShortOrderConverter.convert(it) },
-            unlockable = unlockableDeferred.await(),
             sellers = sellStats.sellers,
             totalStock = sellStats.totalStock
         )
@@ -84,7 +81,7 @@ class RefreshService(
         dto
     }
 
-    private suspend fun refreshOwnership(ownership: OwnershipDto) {
+    private suspend fun refreshOwnership(ownership: UnionOwnershipDto) {
         val short = ShortOwnershipConverter.convert(ownership)
         val bestSellOrder = orderService.getBestSell(short.id)
         val enrichedOwnership = short.copy(

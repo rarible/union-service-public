@@ -47,4 +47,6 @@ class UnionEventsConsumerFactory(
             bootstrapServers = brokerReplicaSet
         )
     }
+
+    // TODO add activity/order consumers
 }

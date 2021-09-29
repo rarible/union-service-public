@@ -1,12 +1,14 @@
 package com.rarible.protocol.union.api.controller
 
 import com.rarible.protocol.union.api.configuration.PageSize
-import com.rarible.protocol.union.core.continuation.ContinuationPaging
+import com.rarible.protocol.union.core.continuation.Page
+import com.rarible.protocol.union.core.continuation.Paging
 import com.rarible.protocol.union.core.service.ItemServiceRouter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.IdParser
 import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.ItemsDto
+import com.rarible.protocol.union.dto.UnionItemDto
 import com.rarible.protocol.union.dto.continuation.ItemContinuation
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.RestController
@@ -31,12 +33,13 @@ class ItemController(
 
         val total = blockchainPages.map { it.total }.sum()
 
-        val combinedPage = ContinuationPaging(
+        val combinedPage = Paging(
             ItemContinuation.ByLastUpdatedAndId,
-            blockchainPages.flatMap { it.items }
-        ).getPage(safeSize)
+            blockchainPages.flatMap { it.entities }
+        ).getPage(safeSize, total)
 
-        val result = ItemsDto(total, combinedPage.printContinuation(), combinedPage.entities)
+        val result = enrich(combinedPage)
+
         return ResponseEntity.ok(result)
     }
 
@@ -45,7 +48,8 @@ class ItemController(
     ): ResponseEntity<ItemDto> {
         val (blockchain, shortItemId) = IdParser.parse(itemId)
         val result = router.getService(blockchain).getItemById(shortItemId)
-        return ResponseEntity.ok(result)
+        val enriched = enrich(result)
+        return ResponseEntity.ok(enriched)
     }
 
     override suspend fun getItemsByCollection(
@@ -57,7 +61,10 @@ class ItemController(
         val (blockchain, shortCollection) = IdParser.parse(collection)
         val result = router.getService(blockchain)
             .getItemsByCollection(shortCollection, continuation, safeSize)
-        return ResponseEntity.ok(result)
+
+        val enriched = enrich(result)
+
+        return ResponseEntity.ok(enriched)
     }
 
     override suspend fun getItemsByCreator(
@@ -68,7 +75,10 @@ class ItemController(
         val safeSize = PageSize.ITEM.limit(size)
         val (blockchain, shortCreator) = IdParser.parse(creator)
         val result = router.getService(blockchain).getItemsByCreator(shortCreator, continuation, safeSize)
-        return ResponseEntity.ok(result)
+
+        val enriched = enrich(result)
+
+        return ResponseEntity.ok(enriched)
     }
 
     override suspend fun getItemsByOwner(
@@ -79,6 +89,27 @@ class ItemController(
         val safeSize = PageSize.ITEM.limit(size)
         val (blockchain, shortOwner) = IdParser.parse(owner)
         val result = router.getService(blockchain).getItemsByOwner(shortOwner, continuation, safeSize)
-        return ResponseEntity.ok(result)
+
+        val enriched = enrich(result)
+
+        return ResponseEntity.ok(enriched)
+    }
+
+    private fun enrich(unionItemsPage: Page<UnionItemDto>): ItemsDto {
+        return ItemsDto(
+            total = unionItemsPage.total,
+            continuation = unionItemsPage.continuation,
+            items = enrich(unionItemsPage.entities)
+        )
+    }
+
+    private fun enrich(unionItem: UnionItemDto): ItemDto {
+        // TODO
+        throw NotImplementedError("IMPLEMENT ITEM ENRICHMENT!")
+    }
+
+    private fun enrich(unionItems: List<UnionItemDto>): List<ItemDto> {
+        // TODO
+        throw NotImplementedError("IMPLEMENT ITEM ENRICHMENT!")
     }
 }

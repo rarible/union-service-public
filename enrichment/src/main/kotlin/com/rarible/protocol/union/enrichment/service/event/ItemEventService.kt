@@ -1,9 +1,8 @@
 package com.rarible.protocol.union.enrichment.service.event
 
-import com.rarible.core.common.nowMillis
 import com.rarible.core.common.optimisticLock
-import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.OrderDto
+import com.rarible.protocol.union.dto.UnionItemDto
 import com.rarible.protocol.union.enrichment.converter.ShortItemConverter
 import com.rarible.protocol.union.enrichment.event.ItemEventDelete
 import com.rarible.protocol.union.enrichment.event.ItemEventListener
@@ -15,7 +14,6 @@ import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
 import com.rarible.protocol.union.enrichment.service.BestOrderService
 import com.rarible.protocol.union.enrichment.service.ItemService
 import com.rarible.protocol.union.enrichment.service.OwnershipService
-import com.rarible.protocol.union.enrichment.util.spent
 import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -66,7 +64,7 @@ class ItemEventService(
         }
     }
 
-    suspend fun onItemUpdated(item: ItemDto) {
+    suspend fun onItemUpdated(item: UnionItemDto) {
         val received = ShortItemConverter.convert(item)
         val existing = itemService.getOrEmpty(received.id)
         notifyUpdate(existing, item)
@@ -111,13 +109,6 @@ class ItemEventService(
         }
     }
 
-    private suspend fun updateItem(existing: ShortItem, updated: ShortItem): ShortItem {
-        val now = nowMillis()
-        val result = itemService.save(updated.copy(version = existing.version))
-        logger.info("Updated Item [{}]: {} ({}ms)", updated.id, updated, spent(now))
-        return result
-    }
-
     suspend fun onItemDeleted(itemId: ShortItemId) {
         val deleted = deleteItem(itemId)
         notifyDelete(itemId)
@@ -131,14 +122,6 @@ class ItemEventService(
         return result != null && result.deletedCount > 0
     }
 
-    suspend fun onLockCreated(itemId: ShortItemId) {
-        logger.info("Updating Item [{}] marked as Unlockable", itemId)
-        val shortItem = itemService.getOrEmpty(itemId)
-        val updated = shortItem.copy(unlockable = true)
-        val saved = itemService.save(updated)
-        notifyUpdate(saved)
-    }
-
     private suspend fun notifyDelete(itemId: ShortItemId) {
         val event = ItemEventDelete(itemId.toDto())
         itemEventListeners.forEach { it.onEvent(event) }
@@ -148,7 +131,7 @@ class ItemEventService(
     // full version of the order, we can use this already fetched Order if it has same ID (hash)
     private suspend fun notifyUpdate(
         short: ShortItem,
-        item: ItemDto? = null,
+        item: UnionItemDto? = null,
         order: OrderDto? = null
     ) = coroutineScope {
         val dto = itemService.enrichItem(short, item, order)

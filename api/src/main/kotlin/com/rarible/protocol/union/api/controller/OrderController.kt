@@ -1,7 +1,8 @@
 package com.rarible.protocol.union.api.controller
 
 import com.rarible.protocol.union.api.configuration.PageSize
-import com.rarible.protocol.union.core.continuation.ContinuationPaging
+import com.rarible.protocol.union.core.continuation.Paging
+import com.rarible.protocol.union.core.continuation.Slice
 import com.rarible.protocol.union.core.service.OrderServiceRouter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.IdParser
@@ -28,20 +29,19 @@ class OrderController(
         if (origin != null) {
             val (blockchain, shortOrigin) = IdParser.parse(origin)
             val result = router.getService(blockchain).getOrdersAll(platform, shortOrigin, continuation, safeSize)
-            return ResponseEntity.ok(result)
+            return ResponseEntity.ok(toDto(result))
         }
 
         val blockchainPages = router.executeForAll(blockchains) {
             it.getOrdersAll(platform, null, continuation, safeSize)
         }
 
-        val combinedPage = ContinuationPaging(
+        val combinedSlice = Paging(
             OrderContinuation.ByLastUpdatedAndId,
-            blockchainPages.flatMap { it.orders }
-        ).getPage(safeSize)
+            blockchainPages.flatMap { it.entities }
+        ).getSlice(safeSize)
 
-        val result = OrdersDto(combinedPage.printContinuation(), combinedPage.entities)
-        return ResponseEntity.ok(result)
+        return ResponseEntity.ok(toDto(combinedSlice))
     }
 
     override suspend fun getOrderBidsByItem(
@@ -61,7 +61,7 @@ class OrderController(
 
         val result = router.getService(blockchain)
             .getOrderBidsByItem(platform, shortContract, tokenId, shortMaker, shortOrigin, continuation, safeSize)
-        return ResponseEntity.ok(result)
+        return ResponseEntity.ok(toDto(result))
     }
 
     override suspend fun getOrderBidsByMaker(
@@ -78,7 +78,8 @@ class OrderController(
 
         val result = router.getService(blockchain)
             .getOrderBidsByMaker(platform, shortMaker, shortOrigin, continuation, safeSize)
-        return ResponseEntity.ok(result)
+
+        return ResponseEntity.ok(toDto(result))
     }
 
     override suspend fun getOrderById(id: String): ResponseEntity<OrderDto> {
@@ -98,20 +99,20 @@ class OrderController(
         if (origin != null) {
             val (blockchain, shortOrigin) = IdParser.parse(origin)
             val result = router.getService(blockchain).getSellOrders(platform, shortOrigin, continuation, safeSize)
-            return ResponseEntity.ok(result)
+            return ResponseEntity.ok(toDto(result))
         }
 
         val blockchainPages = router.executeForAll(blockchains) {
             it.getSellOrders(platform, null, continuation, safeSize)
         }
 
-        val combinedPage = ContinuationPaging(
+        val combinedSlice = Paging(
             OrderContinuation.ByLastUpdatedAndId,
-            blockchainPages.flatMap { it.orders }
-        ).getPage(safeSize)
+            blockchainPages.flatMap { it.entities }
+        ).getSlice(safeSize)
 
-        val result = OrdersDto(combinedPage.printContinuation(), combinedPage.entities)
-        return ResponseEntity.ok(result)
+
+        return ResponseEntity.ok(toDto(combinedSlice))
     }
 
     override suspend fun getSellOrdersByCollection(
@@ -128,7 +129,8 @@ class OrderController(
 
         val result = router.getService(blockchain)
             .getSellOrdersByCollection(platform, shortCollection, shortOrigin, continuation, safeSize)
-        return ResponseEntity.ok(result)
+
+        return ResponseEntity.ok(toDto(result))
     }
 
     override suspend fun getSellOrdersByItem(
@@ -148,7 +150,8 @@ class OrderController(
 
         val result = router.getService(blockchain)
             .getSellOrdersByItem(platform, shortContract, tokenId, shortMaker, shortOrigin, continuation, safeSize)
-        return ResponseEntity.ok(result)
+
+        return ResponseEntity.ok(toDto(result))
     }
 
     override suspend fun getSellOrdersByMaker(
@@ -165,13 +168,15 @@ class OrderController(
 
         val result = router.getService(blockchain)
             .getSellOrdersByMaker(platform, shortMaker, shortOrigin, continuation, safeSize)
-        return ResponseEntity.ok(result)
+
+        return ResponseEntity.ok(toDto(result))
     }
 
-    override suspend fun updateOrderMakeStock(id: String): ResponseEntity<OrderDto> {
-        val (blockchain, shortOrderId) = IdParser.parse(id)
-        val result = router.getService(blockchain).updateOrderMakeStock(shortOrderId)
-        return ResponseEntity.ok(result)
+    private fun toDto(slice: Slice<OrderDto>): OrdersDto {
+        return OrdersDto(
+            continuation = slice.continuation,
+            orders = slice.entities
+        )
     }
 
     private fun safePair(id: String?, defaultBlockchain: BlockchainDto): Pair<BlockchainDto, String?> {
