@@ -6,12 +6,12 @@ import com.rarible.protocol.dto.FlowNftItemUpdateEventDto
 import com.rarible.protocol.union.core.flow.converter.FlowItemConverter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.model.ShortItemId
-import com.rarible.protocol.union.enrichment.service.event.ItemEventService
+import com.rarible.protocol.union.enrichment.service.event.EnrichmentItemEventService
 import com.rarible.protocol.union.listener.handler.AbstractEventHandler
 import org.slf4j.LoggerFactory
 
 class FlowItemEventHandler(
-    private val itemEventService: ItemEventService,
+    private val itemEventService: EnrichmentItemEventService,
     private val blockchain: BlockchainDto
 ) : AbstractEventHandler<FlowNftItemEventDto>() {
 

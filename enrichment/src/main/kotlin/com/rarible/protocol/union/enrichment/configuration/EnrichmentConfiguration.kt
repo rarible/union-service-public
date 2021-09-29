@@ -4,7 +4,7 @@ import com.rarible.core.mongo.configuration.EnableRaribleMongo
 import com.rarible.protocol.union.core.CoreConfiguration
 import com.rarible.protocol.union.enrichment.event.ItemEventListener
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
-import com.rarible.protocol.union.enrichment.service.ItemService
+import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Import
 
@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Import
 @Import(CoreConfiguration::class)
 @ComponentScan(
     basePackageClasses = [
-        ItemService::class,
+        EnrichmentItemService::class,
         ItemRepository::class,
         ItemEventListener::class
     ]

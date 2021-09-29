@@ -439,8 +439,18 @@ components:
     #################### Order - Union ####################
 
     OrderId:
-      type: object
+      type: string
       example: "${blockchain}:${id}"
+
+    OrderIds:
+      type: object
+      required:
+        - ids
+      properties:
+        ids:
+          type: array
+          items:
+            type: string
 
     Order:
       type: object
@@ -580,7 +590,7 @@ components:
     #################### Activity - Union ####################
 
     ActivityId:
-      type: object
+      type: string
       example: "${blockchain}:${id}"
 
     ActivitySort:

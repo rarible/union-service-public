@@ -3,7 +3,7 @@ package com.rarible.protocol.union.api.controller.internal
 import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.parser.ItemIdParser
 import com.rarible.protocol.union.enrichment.model.ShortItemId
-import com.rarible.protocol.union.enrichment.service.RefreshService
+import com.rarible.protocol.union.enrichment.service.EnrichmentRefreshService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 class RefreshController(
-    private val refreshService: RefreshService
+    private val refreshService: EnrichmentRefreshService
 ) {
 
     @PostMapping(

@@ -12,21 +12,21 @@ import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
 import com.rarible.protocol.union.enrichment.service.BestOrderService
-import com.rarible.protocol.union.enrichment.service.ItemService
-import com.rarible.protocol.union.enrichment.service.OwnershipService
+import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
+import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
 import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
-class ItemEventService(
-    private val itemService: ItemService,
-    private val ownershipService: OwnershipService,
+class EnrichmentItemEventService(
+    private val itemService: EnrichmentItemService,
+    private val ownershipService: EnrichmentOwnershipService,
     private val itemEventListeners: List<ItemEventListener>,
     private val bestOrderService: BestOrderService
 ) {
 
-    private val logger = LoggerFactory.getLogger(ItemEventService::class.java)
+    private val logger = LoggerFactory.getLogger(EnrichmentItemEventService::class.java)
 
     // If ownership was updated, we need to recalculate totalStock/sellers for related item,
     // also, we can specify here Order which triggered this update - ItemService

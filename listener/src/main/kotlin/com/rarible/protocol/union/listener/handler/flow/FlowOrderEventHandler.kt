@@ -7,13 +7,13 @@ import com.rarible.protocol.union.core.flow.converter.FlowOrderEventConverter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderEventDto
 import com.rarible.protocol.union.dto.OrderUpdateEventDto
-import com.rarible.protocol.union.enrichment.service.event.OrderEventService
+import com.rarible.protocol.union.enrichment.service.event.EnrichmentOrderEventService
 import com.rarible.protocol.union.listener.handler.AbstractEventHandler
 import org.slf4j.LoggerFactory
 
 class FlowOrderEventHandler(
     private val producer: RaribleKafkaProducer<OrderEventDto>,
-    private val orderEventService: OrderEventService,
+    private val orderEventService: EnrichmentOrderEventService,
     private val blockchain: BlockchainDto
 ) : AbstractEventHandler<FlowOrderEventDto>() {
 

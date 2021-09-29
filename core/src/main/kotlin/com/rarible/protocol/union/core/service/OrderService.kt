@@ -3,6 +3,7 @@ package com.rarible.protocol.union.core.service
 import com.rarible.protocol.union.core.continuation.Slice
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.PlatformDto
+import kotlinx.coroutines.flow.Flow
 
 interface OrderService : BlockchainService {
 
@@ -16,6 +17,10 @@ interface OrderService : BlockchainService {
     suspend fun getOrderById(
         id: String
     ): OrderDto
+
+    fun getOrdersByIds(
+        orderIds: List<String>
+    ): Flow<OrderDto>
 
     suspend fun getOrderBidsByItem(
         platform: PlatformDto?,

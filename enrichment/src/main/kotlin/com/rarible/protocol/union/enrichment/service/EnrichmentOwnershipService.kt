@@ -18,13 +18,13 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
-class OwnershipService(
+class EnrichmentOwnershipService(
     private val ownershipServiceRouter: OwnershipServiceRouter,
     private val ownershipRepository: OwnershipRepository,
-    private val orderService: OrderService
+    private val enrichmentOrderService: EnrichmentOrderService
 ) {
 
-    private val logger = LoggerFactory.getLogger(OwnershipService::class.java)
+    private val logger = LoggerFactory.getLogger(EnrichmentOwnershipService::class.java)
 
     suspend fun get(ownershipId: ShortOwnershipId): ShortOwnership? {
         return ownershipRepository.get(ownershipId)
@@ -86,7 +86,7 @@ class OwnershipService(
         order: OrderDto? = null
     ) = coroutineScope {
         val fetchedOwnership = async { ownership ?: fetch(short.id) }
-        val bestSellOrder = orderService.fetchOrderIfDiffers(short.bestSellOrder, order)
+        val bestSellOrder = enrichmentOrderService.fetchOrderIfDiffers(short.bestSellOrder, order)
 
         val orders = listOfNotNull(bestSellOrder)
             .associateBy { it.id }

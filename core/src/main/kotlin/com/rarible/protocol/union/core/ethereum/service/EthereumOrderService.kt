@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.core.ethereum.service
 
+import com.rarible.protocol.dto.OrderIdsDto
 import com.rarible.protocol.order.api.client.OrderControllerApi
 import com.rarible.protocol.union.core.continuation.Slice
 import com.rarible.protocol.union.core.ethereum.converter.EthConverter
@@ -8,6 +9,8 @@ import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.PlatformDto
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitFirst
 
 class EthereumOrderService(
@@ -33,6 +36,14 @@ class EthereumOrderService(
     override suspend fun getOrderById(id: String): OrderDto {
         val order = orderControllerApi.getOrderByHash(id).awaitFirst()
         return EthOrderConverter.convert(order, blockchain)
+    }
+
+    override fun getOrdersByIds(orderIds: List<String>): Flow<OrderDto> {
+        val orderIdsDto = OrderIdsDto(
+            ids = orderIds.map { EthConverter.convertToWord(it) }
+        )
+        val orders = orderControllerApi.getOrdersByIds(orderIdsDto)
+        return orders.map { EthOrderConverter.convert(it, blockchain) }.asFlow()
     }
 
     override suspend fun getOrderBidsByItem(

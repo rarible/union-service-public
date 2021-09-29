@@ -6,13 +6,13 @@ import com.rarible.protocol.union.core.ethereum.converter.EthOrderEventConverter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderEventDto
 import com.rarible.protocol.union.dto.OrderUpdateEventDto
-import com.rarible.protocol.union.enrichment.service.event.OrderEventService
+import com.rarible.protocol.union.enrichment.service.event.EnrichmentOrderEventService
 import com.rarible.protocol.union.listener.handler.AbstractEventHandler
 import org.slf4j.LoggerFactory
 
 class EthereumOrderEventHandler(
     private val producer: RaribleKafkaProducer<OrderEventDto>,
-    private val orderEventService: OrderEventService,
+    private val orderEventService: EnrichmentOrderEventService,
     private val blockchain: BlockchainDto
 ) : AbstractEventHandler<com.rarible.protocol.dto.OrderEventDto>() {
 

@@ -18,15 +18,15 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
-class RefreshService(
-    private val itemService: ItemService,
-    private val ownershipService: OwnershipService,
-    private val orderService: OrderService,
+class EnrichmentRefreshService(
+    private val itemService: EnrichmentItemService,
+    private val ownershipService: EnrichmentOwnershipService,
+    private val enrichmentOrderService: EnrichmentOrderService,
     private val itemEventListeners: List<ItemEventListener>,
     private val ownershipEventListeners: List<OwnershipEventListener>
 ) {
 
-    private val logger = LoggerFactory.getLogger(RefreshService::class.java)
+    private val logger = LoggerFactory.getLogger(EnrichmentRefreshService::class.java)
 
     suspend fun refreshItemWithOwnerships(itemId: ShortItemId) = coroutineScope {
         logger.info("Starting full refresh of Item [{}] (with ownerships)", itemId)
@@ -41,8 +41,8 @@ class RefreshService(
     suspend fun refreshItem(itemId: ShortItemId) = coroutineScope {
         logger.info("Starting refresh of Item [{}]", itemId)
         val itemDtoDeferred = async { itemService.fetch(itemId) }
-        val bestSellOrderDeferred = async { orderService.getBestSell(itemId) }
-        val bestBidOrderDeferred = async { orderService.getBestBid(itemId) }
+        val bestSellOrderDeferred = async { enrichmentOrderService.getBestSell(itemId) }
+        val bestBidOrderDeferred = async { enrichmentOrderService.getBestBid(itemId) }
         val sellStats = ownershipService.getItemSellStats(itemId)
 
         val itemDto = itemDtoDeferred.await()
@@ -83,7 +83,7 @@ class RefreshService(
 
     private suspend fun refreshOwnership(ownership: UnionOwnershipDto) {
         val short = ShortOwnershipConverter.convert(ownership)
-        val bestSellOrder = orderService.getBestSell(short.id)
+        val bestSellOrder = enrichmentOrderService.getBestSell(short.id)
         val enrichedOwnership = short.copy(
             bestSellOrder = bestSellOrder?.let { ShortOrderConverter.convert(it) }
         )

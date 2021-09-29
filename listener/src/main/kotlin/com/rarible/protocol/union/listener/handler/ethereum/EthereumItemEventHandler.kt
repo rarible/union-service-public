@@ -7,12 +7,12 @@ import com.rarible.protocol.union.core.ethereum.converter.EthConverter
 import com.rarible.protocol.union.core.ethereum.converter.EthItemConverter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.model.ShortItemId
-import com.rarible.protocol.union.enrichment.service.event.ItemEventService
+import com.rarible.protocol.union.enrichment.service.event.EnrichmentItemEventService
 import com.rarible.protocol.union.listener.handler.AbstractEventHandler
 import org.slf4j.LoggerFactory
 
 class EthereumItemEventHandler(
-    private val itemEventService: ItemEventService,
+    private val itemEventService: EnrichmentItemEventService,
     private val blockchain: BlockchainDto
 ) : AbstractEventHandler<NftItemEventDto>() {
 

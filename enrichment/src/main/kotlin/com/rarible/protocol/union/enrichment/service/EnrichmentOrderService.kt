@@ -15,11 +15,11 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
-class OrderService(
+class EnrichmentOrderService(
     private val orderServiceRouter: OrderServiceRouter
 ) {
 
-    private val logger = LoggerFactory.getLogger(OrderService::class.java)
+    private val logger = LoggerFactory.getLogger(EnrichmentOrderService::class.java)
 
     suspend fun getById(id: OrderIdDto): OrderDto? {
         return try {
@@ -28,19 +28,6 @@ class OrderService(
             logger.warn("Unable to retrieve original Order [{}] from indexer: {}, response:", id, e.message, e.data)
             null
         }
-    }
-
-    suspend fun getByIds(ids: List<OrderIdDto>): List<OrderDto> {
-        /*if (ids.isEmpty()) {
-            return emptyList()
-        }
-        val result = orderControllerApi.getOrdersByIds(OrderIdsDto(ids)).collectList().awaitFirst()
-        val notFound = result.map { it.id }.subtract(ids)
-        if (notFound.isNotEmpty()) {
-            logger.warn("Orders not found in order-indexer: {}", notFound)
-        }
-        return result*/
-        return emptyList()
     }
 
     suspend fun fetchOrderIfDiffers(existing: ShortOrder?, order: OrderDto?): OrderDto? {

@@ -22,9 +22,9 @@ import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.OrderEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.enrichment.configuration.EnrichmentConfiguration
-import com.rarible.protocol.union.enrichment.service.event.ItemEventService
-import com.rarible.protocol.union.enrichment.service.event.OrderEventService
-import com.rarible.protocol.union.enrichment.service.event.OwnershipEventService
+import com.rarible.protocol.union.enrichment.service.event.EnrichmentItemEventService
+import com.rarible.protocol.union.enrichment.service.event.EnrichmentOrderEventService
+import com.rarible.protocol.union.enrichment.service.event.EnrichmentOwnershipEventService
 import com.rarible.protocol.union.listener.config.activity.EthActivityEventsConsumerFactory
 import com.rarible.protocol.union.listener.config.activity.FlowActivityEventsConsumerFactory
 import com.rarible.protocol.union.listener.handler.SingleConsumerWorker
@@ -50,9 +50,9 @@ class UnionListenerConfiguration(
     private val properties: UnionListenerProperties,
     private val meterRegistry: MeterRegistry,
 
-    private val itemEventService: ItemEventService,
-    private val ownershipEventService: OwnershipEventService,
-    private val orderEventService: OrderEventService,
+    private val enrichmentItemEventService: EnrichmentItemEventService,
+    private val enrichmentOwnershipEventService: EnrichmentOwnershipEventService,
+    private val enrichmentOrderEventService: EnrichmentOrderEventService,
 
     private val itemProducer: RaribleKafkaProducer<ItemEventDto>,
     private val ownershipProducer: RaribleKafkaProducer<OwnershipEventDto>,
@@ -93,21 +93,21 @@ class UnionListenerConfiguration(
     @Bean
     fun ethereumItemWorker(factory: NftIndexerEventsConsumerFactory): SingleConsumerWorker<NftItemEventDto> {
         val consumer = factory.createItemEventsConsumer(consumerGroup(Entity.ITEM), Blockchain.ETHEREUM)
-        val handler = EthereumItemEventHandler(itemEventService, BlockchainDto.ETHEREUM)
+        val handler = EthereumItemEventHandler(enrichmentItemEventService, BlockchainDto.ETHEREUM)
         return createConsumerWorker(consumer, handler, ETHEREUM, Entity.ITEM)
     }
 
     @Bean
     fun ethereumOwnershipWorker(factory: NftIndexerEventsConsumerFactory): SingleConsumerWorker<NftOwnershipEventDto> {
         val consumer = factory.createOwnershipEventsConsumer(consumerGroup(Entity.OWNERSHIP), Blockchain.ETHEREUM)
-        val handler = EthereumOwnershipEventHandler(ownershipEventService, BlockchainDto.ETHEREUM)
+        val handler = EthereumOwnershipEventHandler(enrichmentOwnershipEventService, BlockchainDto.ETHEREUM)
         return createConsumerWorker(consumer, handler, ETHEREUM, Entity.OWNERSHIP)
     }
 
     @Bean
     fun ethereumOrderWorker(factory: OrderIndexerEventsConsumerFactory): SingleConsumerWorker<com.rarible.protocol.dto.OrderEventDto> {
         val consumer = factory.createOrderEventsConsumer(consumerGroup(Entity.ORDER), Blockchain.ETHEREUM)
-        val handler = EthereumOrderEventHandler(orderProducer, orderEventService, BlockchainDto.ETHEREUM)
+        val handler = EthereumOrderEventHandler(orderProducer, enrichmentOrderEventService, BlockchainDto.ETHEREUM)
         return createConsumerWorker(consumer, handler, ETHEREUM, Entity.ORDER)
     }
 
@@ -122,21 +122,21 @@ class UnionListenerConfiguration(
     @Bean
     fun polygonItemWorker(factory: NftIndexerEventsConsumerFactory): SingleConsumerWorker<NftItemEventDto> {
         val consumer = factory.createItemEventsConsumer(consumerGroup(Entity.ITEM), Blockchain.POLYGON)
-        val handler = EthereumItemEventHandler(itemEventService, BlockchainDto.POLYGON)
+        val handler = EthereumItemEventHandler(enrichmentItemEventService, BlockchainDto.POLYGON)
         return createConsumerWorker(consumer, handler, POLYGON, Entity.ITEM)
     }
 
     @Bean
     fun polygonOwnershipWorker(factory: NftIndexerEventsConsumerFactory): SingleConsumerWorker<NftOwnershipEventDto> {
         val consumer = factory.createOwnershipEventsConsumer(consumerGroup(Entity.OWNERSHIP), Blockchain.POLYGON)
-        val handler = EthereumOwnershipEventHandler(ownershipEventService, BlockchainDto.POLYGON)
+        val handler = EthereumOwnershipEventHandler(enrichmentOwnershipEventService, BlockchainDto.POLYGON)
         return createConsumerWorker(consumer, handler, POLYGON, Entity.OWNERSHIP)
     }
 
     @Bean
     fun polygonOrderWorker(factory: OrderIndexerEventsConsumerFactory): SingleConsumerWorker<com.rarible.protocol.dto.OrderEventDto> {
         val consumer = factory.createOrderEventsConsumer(consumerGroup(Entity.ORDER), Blockchain.POLYGON)
-        val handler = EthereumOrderEventHandler(orderProducer, orderEventService, BlockchainDto.POLYGON)
+        val handler = EthereumOrderEventHandler(orderProducer, enrichmentOrderEventService, BlockchainDto.POLYGON)
         return createConsumerWorker(consumer, handler, POLYGON, Entity.ORDER)
     }
 
@@ -164,21 +164,21 @@ class UnionListenerConfiguration(
     @Bean
     fun flowItemWorker(factory: FlowNftIndexerEventsConsumerFactory): SingleConsumerWorker<FlowNftItemEventDto> {
         val consumer = factory.createItemEventsConsumer(consumerGroup(Entity.ITEM))
-        val handler = FlowItemEventHandler(itemEventService, BlockchainDto.FLOW)
+        val handler = FlowItemEventHandler(enrichmentItemEventService, BlockchainDto.FLOW)
         return createConsumerWorker(consumer, handler, FLOW, Entity.ITEM)
     }
 
     @Bean
     fun flowOwnershipWorker(factory: FlowNftIndexerEventsConsumerFactory): SingleConsumerWorker<FlowOwnershipEventDto> {
         val consumer = factory.createOwnershipEventsConsumer(consumerGroup(Entity.OWNERSHIP))
-        val handler = FlowOwnershipEventHandler(ownershipEventService, BlockchainDto.FLOW)
+        val handler = FlowOwnershipEventHandler(enrichmentOwnershipEventService, BlockchainDto.FLOW)
         return createConsumerWorker(consumer, handler, FLOW, Entity.OWNERSHIP)
     }
 
     @Bean
     fun flowOrderChangeWorker(factory: FlowNftIndexerEventsConsumerFactory): SingleConsumerWorker<FlowOrderEventDto> {
         val consumer = factory.createORderEventsConsumer(consumerGroup(Entity.ORDER))
-        val handler = FlowOrderEventHandler(orderProducer, orderEventService, BlockchainDto.FLOW)
+        val handler = FlowOrderEventHandler(orderProducer, enrichmentOrderEventService, BlockchainDto.FLOW)
         return createConsumerWorker(consumer, handler, FLOW, Entity.ORDER)
     }
 

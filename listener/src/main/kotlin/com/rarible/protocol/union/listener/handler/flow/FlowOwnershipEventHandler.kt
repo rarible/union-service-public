@@ -6,12 +6,12 @@ import com.rarible.protocol.dto.FlowOwnershipEventDto
 import com.rarible.protocol.union.core.flow.converter.FlowOwnershipConverter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
-import com.rarible.protocol.union.enrichment.service.event.OwnershipEventService
+import com.rarible.protocol.union.enrichment.service.event.EnrichmentOwnershipEventService
 import com.rarible.protocol.union.listener.handler.AbstractEventHandler
 import org.slf4j.LoggerFactory
 
 class FlowOwnershipEventHandler(
-    private val ownershipEventService: OwnershipEventService,
+    private val enrichmentOwnershipEventService: EnrichmentOwnershipEventService,
     private val blockchain: BlockchainDto
 ) : AbstractEventHandler<FlowOwnershipEventDto>() {
 
@@ -23,7 +23,7 @@ class FlowOwnershipEventHandler(
         when (event) {
             is FlowNftOwnershipUpdateEventDto -> {
                 val item = FlowOwnershipConverter.convert(event.ownership, blockchain)
-                ownershipEventService.onOwnershipUpdated(item)
+                enrichmentOwnershipEventService.onOwnershipUpdated(item)
             }
             is FlowNftOwnershipDeleteEventDto -> {
                 val ownershipId = ShortOwnershipId(
@@ -32,7 +32,7 @@ class FlowOwnershipEventHandler(
                     tokenId = event.ownership.tokenId.toBigInteger(),
                     owner = event.ownership.owner
                 )
-                ownershipEventService.onOwnershipDeleted(ownershipId)
+                enrichmentOwnershipEventService.onOwnershipDeleted(ownershipId)
             }
         }
     }

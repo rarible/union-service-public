@@ -23,9 +23,9 @@ import org.springframework.stereotype.Component
 import java.math.BigInteger
 
 @Component
-class OrderEventService(
-    private val itemEventService: ItemEventService,
-    private val ownershipEventService: OwnershipEventService
+class EnrichmentOrderEventService(
+    private val enrichmentItemEventService: EnrichmentItemEventService,
+    private val enrichmentOwnershipEventService: EnrichmentOwnershipEventService
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -35,10 +35,10 @@ class OrderEventService(
         val takeItemId = toItemId(order.take.type)
 
         val mFuture = makeItemId?.let {
-            async { ignoreApi404 { itemEventService.onItemBestSellOrderUpdated(makeItemId, order) } }
+            async { ignoreApi404 { enrichmentItemEventService.onItemBestSellOrderUpdated(makeItemId, order) } }
         }
         val tFuture = takeItemId?.let {
-            async { ignoreApi404 { itemEventService.onItemBestBidOrderUpdated(takeItemId, order) } }
+            async { ignoreApi404 { enrichmentItemEventService.onItemBestBidOrderUpdated(takeItemId, order) } }
         }
         val oFuture = makeItemId?.let {
             val ownershipId = ShortOwnershipId(
@@ -47,7 +47,14 @@ class OrderEventService(
                 makeItemId.tokenId,
                 order.maker.value
             )
-            async { ignoreApi404 { ownershipEventService.onOwnershipBestSellOrderUpdated(ownershipId, order) } }
+            async {
+                ignoreApi404 {
+                    enrichmentOwnershipEventService.onOwnershipBestSellOrderUpdated(
+                        ownershipId,
+                        order
+                    )
+                }
+            }
         }
 
         mFuture?.await()

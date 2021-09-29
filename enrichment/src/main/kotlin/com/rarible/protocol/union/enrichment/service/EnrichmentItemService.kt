@@ -16,13 +16,13 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
-class ItemService(
+class EnrichmentItemService(
     private val itemServiceRouter: ItemServiceRouter,
     private val itemRepository: ItemRepository,
-    private val orderService: OrderService
+    private val enrichmentOrderService: EnrichmentOrderService
 ) {
 
-    private val logger = LoggerFactory.getLogger(ItemService::class.java)
+    private val logger = LoggerFactory.getLogger(EnrichmentItemService::class.java)
 
     suspend fun get(itemId: ShortItemId): ShortItem? {
         return itemRepository.get(itemId)
@@ -60,8 +60,8 @@ class ItemService(
     // if one of Item's short orders has same hash
     suspend fun enrichItem(shortItem: ShortItem, item: UnionItemDto? = null, order: OrderDto? = null) = coroutineScope {
         val fetchedItem = async { item ?: fetch(shortItem.id) }
-        val bestSellOrder = async { orderService.fetchOrderIfDiffers(shortItem.bestSellOrder, order) }
-        val bestBidOrder = async { orderService.fetchOrderIfDiffers(shortItem.bestBidOrder, order) }
+        val bestSellOrder = async { enrichmentOrderService.fetchOrderIfDiffers(shortItem.bestSellOrder, order) }
+        val bestBidOrder = async { enrichmentOrderService.fetchOrderIfDiffers(shortItem.bestBidOrder, order) }
 
         val orders = listOf(bestSellOrder, bestBidOrder)
             .mapNotNull { it.await() }

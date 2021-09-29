@@ -10,18 +10,18 @@ import com.rarible.protocol.union.enrichment.event.OwnershipEventUpdate
 import com.rarible.protocol.union.enrichment.model.ShortOwnership
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
 import com.rarible.protocol.union.enrichment.service.BestOrderService
-import com.rarible.protocol.union.enrichment.service.OwnershipService
+import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
-class OwnershipEventService(
-    private val ownershipService: OwnershipService,
-    private val itemEventService: ItemEventService,
+class EnrichmentOwnershipEventService(
+    private val ownershipService: EnrichmentOwnershipService,
+    private val enrichmentItemEventService: EnrichmentItemEventService,
     private val ownershipEventListeners: List<OwnershipEventListener>,
     private val bestOrderService: BestOrderService
 ) {
-    private val logger = LoggerFactory.getLogger(OwnershipEventService::class.java)
+    private val logger = LoggerFactory.getLogger(EnrichmentOwnershipEventService::class.java)
 
     suspend fun onOwnershipUpdated(ownership: UnionOwnershipDto) {
         val received = ShortOwnershipConverter.convert(ownership)
@@ -40,12 +40,12 @@ class OwnershipEventService(
             if (updated.isNotEmpty()) {
                 val saved = ownershipService.save(updated)
                 notifyUpdate(saved, null, order)
-                itemEventService.onOwnershipUpdated(ownershipId, order)
+                enrichmentItemEventService.onOwnershipUpdated(ownershipId, order)
             } else if (exist) {
                 logger.info("Deleting Ownership [{}] without related bestSellOrder", ownershipId)
                 ownershipService.delete(ownershipId)
                 notifyUpdate(updated, null, order)
-                itemEventService.onOwnershipUpdated(ownershipId, order)
+                enrichmentItemEventService.onOwnershipUpdated(ownershipId, order)
             }
         } else {
             logger.info("Ownership [{}] not changed after order updated, event won't be published", ownershipId)
@@ -58,7 +58,7 @@ class OwnershipEventService(
         notifyDelete(ownershipId)
         if (deleted) {
             logger.info("Ownership [{}] deleted (removed from NFT-Indexer), refreshing sell stats", ownershipId)
-            itemEventService.onOwnershipUpdated(ownershipId, null)
+            enrichmentItemEventService.onOwnershipUpdated(ownershipId, null)
         }
     }
 

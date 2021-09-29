@@ -54,6 +54,10 @@ object EthConverter {
     fun convert(word: Word) = word.prefixed()!!
     fun convert(binary: Binary) = binary.prefixed()!!
 
+    // TODO add TRY with throwing custom exceptions
+    fun convertToWord(value: String) = Word.apply(value)!!
+    fun convertToAddress(value: String) = Address.apply(value)!!
+
     fun convert(source: ActivitySortDto?): com.rarible.protocol.dto.ActivitySortDto {
         return when (source) {
             null -> com.rarible.protocol.dto.ActivitySortDto.LATEST_FIRST

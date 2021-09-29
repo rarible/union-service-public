@@ -3,17 +3,17 @@ package com.rarible.protocol.union.enrichment.evaluator
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
-import com.rarible.protocol.union.enrichment.service.OrderService
+import com.rarible.protocol.union.enrichment.service.EnrichmentOrderService
 
 class ItemBestBidOrderProvider(
     private val itemId: ShortItemId,
-    private val orderService: OrderService
+    private val enrichmentOrderService: EnrichmentOrderService
 ) : BestOrderProvider<ShortItem> {
 
     override val entityId: String = itemId.toString()
     override val entityType: Class<ShortItem> get() = ShortItem::class.java
 
     override suspend fun fetch(): OrderDto? {
-        return orderService.getBestBid(itemId)
+        return enrichmentOrderService.getBestBid(itemId)
     }
 }

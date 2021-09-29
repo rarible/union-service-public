@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class BestOrderService(
-    private val orderService: OrderService
+    private val enrichmentOrderService: EnrichmentOrderService
 ) {
 
     // TODO we can return here Full Order if it was fetched - thats allow us to avoid one more query to indexer
@@ -22,7 +22,7 @@ class BestOrderService(
     suspend fun getBestSellOrder(ownership: ShortOwnership, order: OrderDto): ShortOrder? {
         val bestOrderEvaluator = BestOrderEvaluator(
             comparator = BestSellOrderComparator,
-            provider = OwnershipBestSellOrderProvider(ownership.id, orderService)
+            provider = OwnershipBestSellOrderProvider(ownership.id, enrichmentOrderService)
         )
         return bestOrderEvaluator.evaluateBestOrder(ownership.bestSellOrder, order)
     }
@@ -30,7 +30,7 @@ class BestOrderService(
     suspend fun getBestSellOrder(item: ShortItem, order: OrderDto): ShortOrder? {
         val bestOrderEvaluator = BestOrderEvaluator(
             comparator = BestSellOrderComparator,
-            provider = ItemBestSellOrderProvider(item.id, orderService)
+            provider = ItemBestSellOrderProvider(item.id, enrichmentOrderService)
         )
         return bestOrderEvaluator.evaluateBestOrder(item.bestSellOrder, order)
     }
@@ -38,7 +38,7 @@ class BestOrderService(
     suspend fun getBestBidOrder(item: ShortItem, order: OrderDto): ShortOrder? {
         val bestOrderEvaluator = BestOrderEvaluator(
             comparator = BestBidOrderComparator,
-            provider = ItemBestBidOrderProvider(item.id, orderService)
+            provider = ItemBestBidOrderProvider(item.id, enrichmentOrderService)
         )
         return bestOrderEvaluator.evaluateBestOrder(item.bestBidOrder, order)
     }
