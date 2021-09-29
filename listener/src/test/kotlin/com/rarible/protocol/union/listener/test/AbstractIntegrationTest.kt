@@ -138,7 +138,7 @@ abstract class AbstractIntegrationTest {
             .filter { it.value.orderId.value == orderId }
     }
 
-    fun <T : EthActivityDto> findEthActivityUpdates(
+    fun <T : UnionActivityDto> findEthActivityUpdates(
         id: String,
         type: Class<T>
     ): List<KafkaMessage<T>> {
@@ -146,7 +146,7 @@ abstract class AbstractIntegrationTest {
             .filter { it.value.id.value == id }
     }
 
-    fun <T : com.rarible.protocol.union.dto.FlowActivityDto> findFlowActivityUpdates(
+    fun <T : UnionActivityDto> findFlowActivityUpdates(
         id: String,
         type: Class<T>
     ): List<KafkaMessage<T>> {

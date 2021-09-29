@@ -49,7 +49,7 @@ class ActivityControllerFt : AbstractIntegrationTest() {
         ).awaitFirst()
 
         assertThat(unionActivities.activities).hasSize(1)
-        assertThat(unionActivities.activities[0]).isInstanceOf(EthOrderBidActivityDto::class.java)
+        assertThat(unionActivities.activities[0]).isInstanceOf(UnionOrderBidActivityDto::class.java)
     }
 
     @Test
@@ -71,7 +71,7 @@ class ActivityControllerFt : AbstractIntegrationTest() {
             types, flowCollectionId.fullId(), continuation, null, sort
         ).awaitFirst()
 
-        val flowItem = unionActivities.activities[0] as FlowActivityDto
+        val flowItem = unionActivities.activities[0]
         assertThat(flowItem.id.value).isEqualTo(activity.id)
     }
 
@@ -108,8 +108,8 @@ class ActivityControllerFt : AbstractIntegrationTest() {
         ).awaitFirst()
 
         assertThat(unionActivities.activities).hasSize(2)
-        assertThat(unionActivities.activities[0]).isInstanceOf(EthOrderBidActivityDto::class.java)
-        assertThat(unionActivities.activities[1]).isInstanceOf(EthMintActivityDto::class.java)
+        assertThat(unionActivities.activities[0]).isInstanceOf(UnionOrderBidActivityDto::class.java)
+        assertThat(unionActivities.activities[1]).isInstanceOf(UnionMintActivityDto::class.java)
     }
 
     @Test
@@ -132,7 +132,7 @@ class ActivityControllerFt : AbstractIntegrationTest() {
             types, flowItemId.fullId(), tokenId.toString(), continuation, size, sort
         ).awaitFirst()
 
-        val flowItem = unionActivities.activities[0] as FlowActivityDto
+        val flowItem = unionActivities.activities[0]
         assertThat(flowItem.id.value).isEqualTo(activity.id)
     }
 
@@ -191,9 +191,9 @@ class ActivityControllerFt : AbstractIntegrationTest() {
         assertThat(unionActivities.activities).hasSize(3)
         assertThat(unionActivities.continuation).isNotNull()
 
-        val oldestActivity = unionActivities.activities[0] as EthActivityDto
-        val secondActivity = unionActivities.activities[1] as EthActivityDto
-        val newestActivity = unionActivities.activities[2] as FlowActivityDto
+        val oldestActivity = unionActivities.activities[0]
+        val secondActivity = unionActivities.activities[1]
+        val newestActivity = unionActivities.activities[2]
 
         assertThat(oldestActivity.id.value).isEqualTo(polygonItemActivity1.id)
         assertThat(secondActivity.id.value).isEqualTo(ethOrderActivity3.id)

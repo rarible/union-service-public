@@ -31,6 +31,7 @@ import com.rarible.protocol.dto.PayInfoDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.UnionItemIdDto
+import com.rarible.protocol.union.dto.UnionOrderSellActivityDto
 import com.rarible.protocol.union.dto.UnionOwnershipIdDto
 import com.rarible.protocol.union.dto.parser.UnionItemIdParser
 import java.math.BigInteger
@@ -256,6 +257,6 @@ fun randomFlowOrderActivityMatchSideDto(): FlowOrderActivityMatchSideDto {
     return FlowOrderActivityMatchSideDto(
         maker = randomFlowAddress().value,
         asset = randomFlowAsset(),
-        type = FlowOrderActivityMatchSideDto.Type.values()[randomInt(FlowOrderActivityMatchSideDto.Type.values().size)]
+        type = FlowOrderActivityMatchSideDto.Type.values()[randomInt(UnionOrderSellActivityDto.Type.values().size)]
     )
 }

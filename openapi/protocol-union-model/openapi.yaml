@@ -536,11 +536,300 @@ components:
           type: string
           format: "date-time"
       oneOf:
-        - $ref: "#/components/schemas/EthActivity"
-        - $ref: "#/components/schemas/FlowActivity"
+        - $ref: "#/components/schemas/UnionMintActivity"
+        - $ref: "#/components/schemas/UnionBurnActivity"
+        - $ref: "#/components/schemas/UnionTransferActivity"
+        - $ref: "#/components/schemas/UnionOrderSellActivity"
+        - $ref: "#/components/schemas/UnionOrderMatchActivity"
+        - $ref: "#/components/schemas/UnionOrderBidActivity"
+        - $ref: "#/components/schemas/UnionOrderListActivity"
+        - $ref: "#/components/schemas/UnionOrderCancelBidActivity"
+        - $ref: "#/components/schemas/UnionOrderCancelListActivity"
       required:
         - id
         - date
+
+    UnionMintActivity:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - MINT
+        owners:
+          type: array
+          default: [ ]
+          items:
+            $ref: "#/components/schemas/UnionAddress"
+        contract:
+          $ref: "#/components/schemas/UnionAddress"
+        tokenId:
+          $ref: "#/components/schemas/BigInteger"
+        value:
+          $ref: "#/components/schemas/BigInteger"
+        blockchainInfo:
+          $ref: "#/components/schemas/ActivityBlockchainInfo"
+      required:
+        - "@type"
+        - owners
+        - contract
+        - tokenId
+        - value
+        - blockchainInfo
+
+    UnionBurnActivity:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - BURN
+        owners:
+          type: array
+          default: [ ]
+          items:
+            $ref: "#/components/schemas/UnionAddress"
+        contract:
+          $ref: "#/components/schemas/UnionAddress"
+        tokenId:
+          $ref: "#/components/schemas/BigInteger"
+        value:
+          $ref: "#/components/schemas/BigInteger"
+        blockchainInfo:
+          $ref: "#/components/schemas/ActivityBlockchainInfo"
+      required:
+        - "@type"
+        - owners
+        - contract
+        - tokenId
+        - value
+        - blockchainInfo
+
+    UnionTransferActivity:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - TRANSFER
+        from:
+          $ref: "#/components/schemas/UnionAddress"
+        owners:
+          type: array
+          default: [ ]
+          items:
+            $ref: "#/components/schemas/UnionAddress"
+        contract:
+          $ref: "#/components/schemas/UnionAddress"
+        tokenId:
+          $ref: "#/components/schemas/BigInteger"
+        value:
+          $ref: "#/components/schemas/BigInteger"
+        blockchainInfo:
+          $ref: "#/components/schemas/ActivityBlockchainInfo"
+      required:
+        - "@type"
+        - from
+        - owners
+        - contract
+        - tokenId
+        - value
+        - blockchainInfo
+
+    UnionOrderActivitySource:
+      type: string
+      enum:
+        - RARIBLE
+        - OPEN_SEA
+        - CRYPTO_PUNKS
+
+    UnionOrderSellActivity:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - SELL
+        seller:
+          $ref: "#/components/schemas/UnionAddress"
+        buyer:
+          $ref: "#/components/schemas/UnionAddress"
+        nft:
+          $ref: "#/components/schemas/UnionAsset"
+        payment:
+          $ref: "#/components/schemas/UnionAsset"
+        price:
+          $ref: "#/components/schemas/BigDecimal"
+        priceUsd:
+          $ref: "#/components/schemas/BigDecimal"
+        source:
+          $ref: "#/components/schemas/UnionOrderActivitySource"
+        blockchainInfo:
+          $ref: "#/components/schemas/ActivityBlockchainInfo"
+        type:
+          type: string
+          enum:
+            - SELL
+            - ACCEPT_BID
+      required:
+        - "@type"
+        - seller
+        - buyer
+        - nft
+        - payment
+        - price
+        - blockchainInfo
+        - type
+
+    UnionOrderActivityMatchSide:
+      type: object
+      properties:
+        maker:
+          $ref: "#/components/schemas/UnionAddress"
+        hash:
+          type: string
+        asset:
+          $ref: "#/components/schemas/UnionAsset"
+      required:
+        - maker
+        - asset
+
+    UnionOrderMatchActivity:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - MATCH
+        left:
+          $ref: "#/components/schemas/UnionOrderActivityMatchSide"
+        right:
+          $ref: "#/components/schemas/UnionOrderActivityMatchSide"
+        price:
+          $ref: "#/components/schemas/BigDecimal"
+        priceUsd:
+          $ref: "#/components/schemas/BigDecimal"
+        source:
+          $ref: "#/components/schemas/UnionOrderActivitySource"
+        blockchainInfo:
+          $ref: "#/components/schemas/ActivityBlockchainInfo"
+      required:
+        - "@type"
+        - left
+        - right
+        - price
+        - blockchainInfo
+
+    UnionOrderBidActivity:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - BID
+        hash:
+          type: string
+        maker:
+          $ref: "#/components/schemas/UnionAddress"
+        make:
+          $ref: "#/components/schemas/UnionAsset"
+        take:
+          $ref: "#/components/schemas/UnionAsset"
+        price:
+          $ref: "#/components/schemas/BigDecimal"
+        priceUsd:
+          $ref: "#/components/schemas/BigDecimal"
+        source:
+          $ref: "#/components/schemas/UnionOrderActivitySource"
+      required:
+        - "@type"
+        - hash
+        - maker
+        - make
+        - take
+        - price
+
+    UnionOrderListActivity:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - LIST
+        hash:
+          type: string
+        maker:
+          $ref: "#/components/schemas/UnionAddress"
+        make:
+          $ref: "#/components/schemas/UnionAsset"
+        take:
+          $ref: "#/components/schemas/UnionAsset"
+        price:
+          $ref: "#/components/schemas/BigDecimal"
+        priceUsd:
+          $ref: "#/components/schemas/BigDecimal"
+        source:
+          $ref: "#/components/schemas/UnionOrderActivitySource"
+      required:
+        - "@type"
+        - hash
+        - maker
+        - make
+        - take
+        - price
+
+    UnionOrderCancelBidActivity:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - CANCEL_BID
+        hash:
+          type: string
+        maker:
+          $ref: "#/components/schemas/UnionAddress"
+        make:
+          $ref: "#/components/schemas/UnionAssetType"
+        take:
+          $ref: "#/components/schemas/UnionAssetType"
+        source:
+          $ref: "#/components/schemas/UnionOrderActivitySource"
+        blockchainInfo:
+          $ref: "#/components/schemas/ActivityBlockchainInfo"
+      required:
+        - "@type"
+        - hash
+        - maker
+        - make
+        - take
+        - blockchainInfo
+
+    UnionOrderCancelListActivity:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - CANCEL_LIST
+        hash:
+          type: string
+        maker:
+          $ref: "#/components/schemas/UnionAddress"
+        make:
+          $ref: "#/components/schemas/UnionAssetType"
+        take:
+          $ref: "#/components/schemas/UnionAssetType"
+        source:
+          $ref: "#/components/schemas/UnionOrderActivitySource"
+        blockchainInfo:
+          $ref: "#/components/schemas/ActivityBlockchainInfo"
+      required:
+        - "@type"
+        - hash
+        - maker
+        - make
+        - take
 
     UnionActivities:
       type: object
@@ -1175,275 +1464,6 @@ components:
 
     #################### Activity - Eth ####################
 
-    EthActivity:
-      type: object
-      oneOf:
-        - $ref: "#/components/schemas/EthMintActivity"
-        - $ref: "#/components/schemas/EthBurnActivity"
-        - $ref: "#/components/schemas/EthTransferActivity"
-        - $ref: "#/components/schemas/EthOrderMatchActivity"
-        - $ref: "#/components/schemas/EthOrderBidActivity"
-        - $ref: "#/components/schemas/EthOrderListActivity"
-        - $ref: "#/components/schemas/EthOrderCancelBidActivity"
-        - $ref: "#/components/schemas/EthOrderCancelListActivity"
-
-    EthMintActivity:
-      type: object
-      properties:
-        "@type":
-          type: string
-          enum:
-            - ETHEREUM_MINT
-        owners:
-          type: array
-          default: [ ]
-          items:
-            $ref: "#/components/schemas/UnionAddress"
-        contract:
-          $ref: "#/components/schemas/UnionAddress"
-        tokenId:
-          $ref: "#/components/schemas/BigInteger"
-        value:
-          $ref: "#/components/schemas/BigInteger"
-        blockchainInfo:
-          $ref: "#/components/schemas/ActivityBlockchainInfo"
-      required:
-        - "@type"
-        - owners
-        - contract
-        - tokenId
-        - value
-        - blockchainInfo
-
-    EthBurnActivity:
-      type: object
-      properties:
-        "@type":
-          type: string
-          enum:
-            - ETHEREUM_BURN
-        owners:
-          type: array
-          default: [ ]
-          items:
-            $ref: "#/components/schemas/UnionAddress"
-        contract:
-          $ref: "#/components/schemas/UnionAddress"
-        tokenId:
-          $ref: "#/components/schemas/BigInteger"
-        value:
-          $ref: "#/components/schemas/BigInteger"
-        blockchainInfo:
-          $ref: "#/components/schemas/ActivityBlockchainInfo"
-      required:
-        - "@type"
-        - owners
-        - contract
-        - tokenId
-        - value
-        - blockchainInfo
-
-    EthTransferActivity:
-      type: object
-      properties:
-        "@type":
-          type: string
-          enum:
-            - ETHEREUM_TRANSFER
-        from:
-          $ref: "#/components/schemas/UnionAddress"
-        owners:
-          type: array
-          default: [ ]
-          items:
-            $ref: "#/components/schemas/UnionAddress"
-        contract:
-          $ref: "#/components/schemas/UnionAddress"
-        tokenId:
-          $ref: "#/components/schemas/BigInteger"
-        value:
-          $ref: "#/components/schemas/BigInteger"
-        blockchainInfo:
-          $ref: "#/components/schemas/ActivityBlockchainInfo"
-      required:
-        - "@type"
-        - from
-        - owners
-        - contract
-        - tokenId
-        - value
-        - blockchainInfo
-
-    EthOrderActivityMatchSide:
-      type: object
-      properties:
-        maker:
-          $ref: "#/components/schemas/UnionAddress"
-        hash:
-          type: string
-        asset:
-          $ref: "#/components/schemas/UnionAsset"
-        type:
-          type: string
-          enum:
-            - SELL
-            - BID
-      required:
-        - maker
-        - hash
-        - asset
-        - type
-
-    EthOrderActivitySource:
-      type: string
-      enum:
-        - RARIBLE
-        - OPEN_SEA
-        - CRYPTO_PUNKS
-
-    EthOrderMatchActivity:
-      type: object
-      properties:
-        "@type":
-          type: string
-          enum:
-            - ETHEREUM_MATCH
-        left:
-          $ref: "#/components/schemas/EthOrderActivityMatchSide"
-        right:
-          $ref: "#/components/schemas/EthOrderActivityMatchSide"
-        price:
-          $ref: "#/components/schemas/BigDecimal"
-        priceUsd:
-          $ref: "#/components/schemas/BigDecimal"
-        source:
-          $ref: "#/components/schemas/EthOrderActivitySource"
-        blockchainInfo:
-          $ref: "#/components/schemas/ActivityBlockchainInfo"
-      required:
-        - "@type"
-        - left
-        - right
-        - price
-        - source
-        - blockchainInfo
-
-    EthOrderBidActivity:
-      type: object
-      properties:
-        "@type":
-          type: string
-          enum:
-            - ETHEREUM_BID
-        hash:
-          type: string
-        maker:
-          $ref: "#/components/schemas/UnionAddress"
-        make:
-          $ref: "#/components/schemas/UnionAsset"
-        take:
-          $ref: "#/components/schemas/UnionAsset"
-        price:
-          $ref: "#/components/schemas/BigDecimal"
-        priceUsd:
-          $ref: "#/components/schemas/BigDecimal"
-        source:
-          $ref: "#/components/schemas/EthOrderActivitySource"
-      required:
-        - "@type"
-        - hash
-        - maker
-        - make
-        - take
-        - price
-        - source
-
-    EthOrderListActivity:
-      type: object
-      properties:
-        "@type":
-          type: string
-          enum:
-            - ETHEREUM_LIST
-        hash:
-          type: string
-        maker:
-          $ref: "#/components/schemas/UnionAddress"
-        make:
-          $ref: "#/components/schemas/UnionAsset"
-        take:
-          $ref: "#/components/schemas/UnionAsset"
-        price:
-          $ref: "#/components/schemas/BigDecimal"
-        priceUsd:
-          $ref: "#/components/schemas/BigDecimal"
-        source:
-          $ref: "#/components/schemas/EthOrderActivitySource"
-      required:
-        - "@type"
-        - hash
-        - maker
-        - make
-        - take
-        - price
-        - source
-
-    EthOrderCancelBidActivity:
-      type: object
-      properties:
-        "@type":
-          type: string
-          enum:
-            - ETHEREUM_CANCEL_BID
-        hash:
-          type: string
-        maker:
-          $ref: "#/components/schemas/UnionAddress"
-        make:
-          $ref: "#/components/schemas/UnionAssetType"
-        take:
-          $ref: "#/components/schemas/UnionAssetType"
-        source:
-          $ref: "#/components/schemas/EthOrderActivitySource"
-        blockchainInfo:
-          $ref: "#/components/schemas/ActivityBlockchainInfo"
-      required:
-        - "@type"
-        - hash
-        - maker
-        - make
-        - take
-        - source
-        - blockchainInfo
-
-    EthOrderCancelListActivity:
-      type: object
-      properties:
-        "@type":
-          type: string
-          enum:
-            - ETHEREUM_CANCEL_LIST
-        hash:
-          type: string
-        maker:
-          $ref: "#/components/schemas/UnionAddress"
-        make:
-          $ref: "#/components/schemas/UnionAssetType"
-        take:
-          $ref: "#/components/schemas/UnionAssetType"
-        source:
-          $ref: "#/components/schemas/EthOrderActivitySource"
-        blockchainInfo:
-          $ref: "#/components/schemas/ActivityBlockchainInfo"
-      required:
-        - "@type"
-        - hash
-        - maker
-        - make
-        - take
-        - source
-        - blockchainInfo
-
     EthOrderEvent:
       type: object
       properties:
@@ -1600,195 +1620,6 @@ components:
       required:
         - "@type"
         - order
-
-    #################### Activity - Flow ####################
-
-    FlowActivity:
-      type: object
-      oneOf:
-        - $ref: "#/components/schemas/FlowMintActivity"
-        - $ref: "#/components/schemas/FlowBurnActivity"
-        - $ref: "#/components/schemas/FlowTransferActivity"
-        - $ref: "#/components/schemas/FlowOrderMatchActivity"
-        - $ref: "#/components/schemas/FlowOrderListActivity"
-        - $ref: "#/components/schemas/FlowOrderCancelListActivity"
-
-    FlowMintActivity:
-      type: object
-      properties:
-        "@type":
-          type: string
-          enum:
-            - FLOW_MINT
-        owners:
-          type: array
-          default: [ ]
-          items:
-            $ref: "#/components/schemas/UnionAddress"
-        contract:
-          $ref: "#/components/schemas/UnionAddress"
-        tokenId:
-          $ref: "#/components/schemas/BigInteger"
-        value:
-          $ref: "#/components/schemas/BigInteger"
-        blockchainInfo:
-          $ref: "#/components/schemas/ActivityBlockchainInfo"
-      required:
-        - "@type"
-        - owners
-        - contract
-        - tokenId
-        - value
-        - blockchainInfo
-
-    FlowBurnActivity:
-      type: object
-      properties:
-        "@type":
-          type: string
-          enum:
-            - FLOW_BURN
-        owners:
-          type: array
-          default: [ ]
-          items:
-            $ref: "#/components/schemas/UnionAddress"
-        contract:
-          $ref: "#/components/schemas/UnionAddress"
-        tokenId:
-          $ref: "#/components/schemas/BigInteger"
-        value:
-          $ref: "#/components/schemas/BigInteger"
-        blockchainInfo:
-          $ref: "#/components/schemas/ActivityBlockchainInfo"
-      required:
-        - "@type"
-        - owners
-        - contract
-        - tokenId
-        - value
-        - blockchainInfo
-
-    FlowTransferActivity:
-      type: object
-      properties:
-        "@type":
-          type: string
-          enum:
-            - FLOW_TRANSFER
-        from:
-          $ref: "#/components/schemas/UnionAddress"
-        owners:
-          type: array
-          default: [ ]
-          items:
-            $ref: "#/components/schemas/UnionAddress"
-        contract:
-          $ref: "#/components/schemas/UnionAddress"
-        tokenId:
-          $ref: "#/components/schemas/BigInteger"
-        value:
-          $ref: "#/components/schemas/BigInteger"
-        blockchainInfo:
-          $ref: "#/components/schemas/ActivityBlockchainInfo"
-      required:
-        - "@type"
-        - from
-        - owner
-        - contract
-        - tokenId
-        - value
-        - blockchainInfo
-
-    FlowOrderMatchActivity:
-      type: object
-      properties:
-        "@type":
-          type: string
-          enum:
-            - FLOW_MATCH
-        left:
-          $ref: "#/components/schemas/FlowOrderActivityMatchSide"
-        right:
-          $ref: "#/components/schemas/FlowOrderActivityMatchSide"
-        price:
-          $ref: "#/components/schemas/BigDecimal"
-        priceUsd:
-          $ref: "#/components/schemas/BigDecimal"
-        blockchainInfo:
-          $ref: "#/components/schemas/ActivityBlockchainInfo"
-      required:
-        - "@type"
-        - left
-        - right
-        - price
-        - blockchainInfo
-
-    FlowOrderListActivity:
-      type: object
-      properties:
-        "@type":
-          type: string
-          enum:
-            - FLOW_LIST
-        hash:
-          type: string
-        maker:
-          $ref: "#/components/schemas/UnionAddress"
-        make:
-          $ref: "#/components/schemas/UnionAsset"
-        take:
-          $ref: "#/components/schemas/UnionAsset"
-        price:
-          $ref: "#/components/schemas/BigDecimal"
-        priceUsd:
-          $ref: "#/components/schemas/BigDecimal"
-      required:
-        - "@type"
-        - hash
-        - maker
-        - make
-        - take
-        - price
-
-    FlowOrderCancelListActivity:
-      type: object
-      properties:
-        "@type":
-          type: string
-          enum:
-            - FLOW_CANCEL_LIST
-        hash:
-          type: string
-        maker:
-          $ref: "#/components/schemas/UnionAddress"
-        make:
-          $ref: "#/components/schemas/UnionAsset"
-        take:
-          $ref: "#/components/schemas/UnionAsset"
-      required:
-        - "@type"
-        - hash
-        - maker
-        - make
-        - take
-
-    FlowOrderActivityMatchSide:
-      type: object
-      properties:
-        maker:
-          $ref: "#/components/schemas/UnionAddress"
-        asset:
-          $ref: "#/components/schemas/UnionAsset"
-        type:
-          type: string
-          enum:
-            - SELL
-            - BID
-      required:
-        - maker
-        - asset
-        - type
 
     #################### Referenced Types ####################
 
