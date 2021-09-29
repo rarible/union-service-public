@@ -30,7 +30,7 @@ components:
       type: object
       properties:
         signer:
-          type: string
+          $ref: "#/components/schemas/UnionAddress"
         message:
           type: string
         signature:
