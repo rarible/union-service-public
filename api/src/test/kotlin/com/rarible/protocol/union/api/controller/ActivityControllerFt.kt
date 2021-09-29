@@ -240,10 +240,9 @@ class ActivityControllerFt : AbstractIntegrationTest() {
         } returns FlowActivitiesDto(1, null, listOf(flowActivity)).toMono()
 
         val activities = activityControllerApi.getActivitiesByUser(
-            types, listOf(userEth.fullId(), userFlow.fullId()), null, size, sort
+            types, listOf(userEth.fullId(), userFlow.fullId()), null, null, null, size, sort
         ).awaitFirst()
 
         assertThat(activities.activities).hasSize(2)
     }
-
 }

@@ -716,6 +716,18 @@ paths:
             type: array
             items:
               type: string
+        - name: "from"
+          in: query
+          required: false
+          schema:
+            type: string
+            format: "date-time"
+        - name: "to"
+          in: query
+          required: false
+          schema:
+            type: string
+            format: "date-time"
         - name: "continuation"
           in: query
           required: false

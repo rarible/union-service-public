@@ -26,6 +26,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.reactive.awaitFirst
 import scalether.domain.Address
 import java.math.BigInteger
+import java.time.Instant
 
 class EthereumActivityService(
     blockchain: BlockchainDto,
@@ -83,10 +84,13 @@ class EthereumActivityService(
     override suspend fun getActivitiesByUser(
         types: List<UserActivityTypeDto>,
         users: List<String>,
+        from: Instant?,
+        to: Instant?,
         continuation: String?,
         size: Int,
         sort: ActivitySortDto?
     ): Slice<ActivityDto> {
+        // TODO use from/to parameters when protocol supports it
         val filter = ActivityFilterByUserDto(
             users.map { Address.apply(it) },
             LinkedHashSet(types).map { EthActivityConverter.asUserActivityType(it) }
@@ -122,7 +126,6 @@ class EthereumActivityService(
             continuationFactory,
             allActivities
         ).getSlice(size)
-
     }
 
     private suspend fun getItemActivities(
@@ -152,5 +155,4 @@ class EthereumActivityService(
             EMPTY_ORDER_ACTIVITIES
         }
     }
-
 }

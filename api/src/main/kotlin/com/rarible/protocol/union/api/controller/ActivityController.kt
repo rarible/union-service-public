@@ -16,6 +16,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.RestController
+import java.time.OffsetDateTime
 
 @RestController
 class ActivityController(
@@ -70,10 +71,14 @@ class ActivityController(
     override suspend fun getActivitiesByUser(
         type: List<UserActivityTypeDto>,
         user: List<String>,
+        from: OffsetDateTime?,
+        to: OffsetDateTime?,
         continuation: String?,
         size: Int?,
         sort: ActivitySortDto?
     ): ResponseEntity<ActivitiesDto> {
+        val fromInstant = from?.toInstant()
+        val toInstant = to?.toInstant()
         val safeSize = PageSize.ACTIVITY.limit(size)
         val groupedByBlockchain = user.map { IdParser.parse(it) }
             .groupBy({ it.first }, { it.second })
@@ -84,7 +89,9 @@ class ActivityController(
                 val blockchainUsers = it.value
                 async {
                     router.getService(blockchain)
-                        .getActivitiesByUser(type, blockchainUsers, continuation, safeSize, sort)
+                        .getActivitiesByUser(
+                            type, blockchainUsers, fromInstant, toInstant, continuation, safeSize, sort
+                        )
                 }
             }
         }.map { it.await() }

@@ -10,6 +10,7 @@ import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
 import kotlinx.coroutines.reactive.awaitFirst
+import java.time.Instant
 
 class FlowActivityService(
     blockchain: BlockchainDto,
@@ -63,11 +64,14 @@ class FlowActivityService(
     override suspend fun getActivitiesByUser(
         types: List<UserActivityTypeDto>,
         users: List<String>,
+        from: Instant?,
+        to: Instant?,
         continuation: String?,
         size: Int,
         sort: ActivitySortDto?
     ): Slice<ActivityDto> {
         val rawTypes = types.map { it.name }
+        // TODO use from/to parameters when flow supports it
         val result = activityControllerApi.getNftOrderActivitiesByUser(rawTypes, users, continuation, size, sort?.name)
             .awaitFirst()
         return FlowActivityConverter.convert(result, blockchain)
