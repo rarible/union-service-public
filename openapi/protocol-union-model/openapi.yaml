@@ -192,13 +192,40 @@ components:
     UnionItemEvent:
       type: object
       properties:
+        itemId:
+          $ref: "#/components/schemas/UnionItemId"
         eventId:
           type: string
       required:
         - eventId
+        - itemId
       oneOf:
-        - $ref: "#/components/schemas/EthItemEvent"
-        - $ref: "#/components/schemas/FlowItemEvent"
+        - $ref: "#/components/schemas/UnionItemUpdateEvent"
+        - $ref: "#/components/schemas/UnionItemDeleteEvent"
+
+    UnionItemUpdateEvent:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - UPDATE
+        item:
+          $ref: "#/components/schemas/UnionItem"
+      required:
+        - "@type"
+        - item
+
+    UnionItemDeleteEvent:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - DELETE
+      required:
+        - "@type"
+        - itemId
 
     #################### Ownership - Union ####################
 
@@ -361,13 +388,39 @@ components:
     UnionOwnershipEvent:
       type: object
       properties:
+        ownershipId:
+          $ref: "#/components/schemas/UnionOwnershipId"
         eventId:
           type: string
       required:
+        - ownershipId
         - eventId
       oneOf:
-        - $ref: "#/components/schemas/EthOwnershipEvent"
-        - $ref: "#/components/schemas/FlowOwnershipEvent"
+        - $ref: "#/components/schemas/UnionOwnershipUpdateEvent"
+        - $ref: "#/components/schemas/UnionOwnershipDeleteEvent"
+
+    UnionOwnershipUpdateEvent:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - UPDATE
+        ownership:
+          $ref: "#/components/schemas/UnionOwnership"
+      required:
+        - "@type"
+        - ownership
+
+    UnionOwnershipDeleteEvent:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - DELETE
+      required:
+        - "@type"
 
     #################### Order - Union ####################
 
@@ -484,13 +537,28 @@ components:
     UnionOrderEvent:
       type: object
       properties:
+        orderId:
+          "$ref": "#/components/schemas/UnionOrderId"
         eventId:
           type: string
       required:
+        - orderId
         - eventId
       oneOf:
-        - "$ref": "#/components/schemas/EthOrderEvent"
-        - "$ref": "#/components/schemas/FlowOrderEvent"
+        - "$ref": "#/components/schemas/UnionOrderUpdateEvent"
+
+    UnionOrderUpdateEvent:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - UPDATE
+        order:
+          "$ref": "#/components/schemas/UnionOrder"
+      required:
+        - "@type"
+        - order
 
     #################### Activity - Union ####################
 
@@ -965,83 +1033,6 @@ components:
         message:
           type: string
 
-    #################### Item - Eth ####################
-
-    EthItemEvent:
-      properties:
-        itemId:
-          $ref: "#/components/schemas/UnionItemId"
-      required:
-        - "@type"
-        - itemId
-      oneOf:
-        - $ref: "#/components/schemas/EthItemUpdateEvent"
-        - $ref: "#/components/schemas/EthItemDeleteEvent"
-
-    EthItemUpdateEvent:
-      type: object
-      properties:
-        "@type":
-          type: string
-          enum:
-            - ETHEREUM_UPDATE
-        item:
-          $ref: "#/components/schemas/UnionItem"
-      required:
-        - "@type"
-        - item
-
-    EthItemDeleteEvent:
-      type: object
-      properties:
-        "@type":
-          type: string
-          enum:
-            - ETHEREUM_DELETE
-      required:
-        - "@type"
-        - itemId
-
-    #################### Ownership - Eth ####################
-
-    EthOwnershipEvent:
-      properties:
-        "@type":
-          type: string
-          enum:
-            - ETHEREUM
-        ownershipId:
-          $ref: "#/components/schemas/UnionOwnershipId"
-      required:
-        - "@type"
-        - ownershipId
-      oneOf:
-        - $ref: "#/components/schemas/EthOwnershipUpdateEvent"
-        - $ref: "#/components/schemas/EthOwnershipDeleteEvent"
-
-    EthOwnershipUpdateEvent:
-      type: object
-      properties:
-        "@type":
-          type: string
-          enum:
-            - ETHEREUM_UPDATE
-        ownership:
-          $ref: "#/components/schemas/UnionOwnership"
-      required:
-        - "@type"
-        - ownership
-
-    EthOwnershipDeleteEvent:
-      type: object
-      properties:
-        "@type":
-          type: string
-          enum:
-            - ETHEREUM_DELETE
-      required:
-        - "@type"
-
     #################### Order - Eth ####################
 
     EthOrderDataLegacy:
@@ -1291,6 +1282,7 @@ components:
           $ref: "#/components/schemas/BigInteger"
       required:
         - "@type"
+        - tokenId
 
     FlowAssetTypeFt:
       type: object
@@ -1462,107 +1454,6 @@ components:
         - "@type"
         - contract
 
-    #################### Activity - Eth ####################
-
-    EthOrderEvent:
-      type: object
-      properties:
-        orderId:
-          "$ref": "#/components/schemas/UnionOrderId"
-      required:
-        - orderId
-      oneOf:
-        - "$ref": "#/components/schemas/EthOrderUpdateEvent"
-
-    EthOrderUpdateEvent:
-      type: object
-      properties:
-        "@type":
-          type: string
-          enum:
-            - ETHEREUM_UPDATE
-        order:
-          "$ref": "#/components/schemas/UnionOrder"
-      required:
-        - "@type"
-        - order
-
-    #################### Item - Flow ####################
-
-    FlowItemEvent:
-      properties:
-        itemId:
-          $ref: "#/components/schemas/UnionItemId"
-      required:
-        - "@type"
-        - itemId
-      oneOf:
-        - $ref: "#/components/schemas/FlowItemUpdateEvent"
-        - $ref: "#/components/schemas/FlowItemDeleteEvent"
-
-    FlowItemUpdateEvent:
-      type: object
-      properties:
-        "@type":
-          type: string
-          enum:
-            - FLOW_UPDATE
-        item:
-          $ref: "#/components/schemas/UnionItem"
-      required:
-        - "@type"
-        - item
-
-    FlowItemDeleteEvent:
-      type: object
-      properties:
-        "@type":
-          type: string
-          enum:
-            - FLOW_DELETE
-      required:
-        - "@type"
-        - itemId
-
-    #################### Ownership - Flow ####################
-
-    FlowOwnershipEvent:
-      properties:
-        eventId:
-          type: string
-        ownershipId:
-          $ref: "#/components/schemas/UnionOwnershipId"
-      required:
-        - "@type"
-        - eventId
-        - ownershipId
-      oneOf:
-        - $ref: "#/components/schemas/FlowOwnershipUpdateEvent"
-        - $ref: "#/components/schemas/FlowOwnershipDeleteEvent"
-
-    FlowOwnershipUpdateEvent:
-      type: object
-      properties:
-        "@type":
-          type: string
-          enum:
-            - FLOW_UPDATE
-        ownership:
-          $ref: "#/components/schemas/UnionOwnership"
-      required:
-        - "@type"
-        - ownership
-
-    FlowOwnershipDeleteEvent:
-      type: object
-      properties:
-        "@type":
-          type: string
-          enum:
-            - FLOW_DELETE
-      required:
-        - "@type"
-
     #################### Order - Flow ####################
 
     FlowOrderDataV1:
@@ -1597,29 +1488,6 @@ components:
       required:
         - account
         - value
-
-    FlowOrderEvent:
-      type: object
-      properties:
-        orderId:
-          "$ref": "#/components/schemas/UnionOrderId"
-      required:
-        - orderId
-      oneOf:
-        - "$ref": "#/components/schemas/FlowOrderUpdateEvent"
-
-    FlowOrderUpdateEvent:
-      type: object
-      properties:
-        "@type":
-          type: string
-          enum:
-            - FLOW_UPDATE
-        order:
-          "$ref": "#/components/schemas/UnionOrder"
-      required:
-        - "@type"
-        - order
 
     #################### Referenced Types ####################
 
