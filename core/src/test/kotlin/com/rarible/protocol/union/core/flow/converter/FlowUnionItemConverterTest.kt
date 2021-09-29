@@ -9,13 +9,13 @@ import com.rarible.protocol.union.test.data.randomFlowNftItemDto
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
-class FlowUnionItemConverterTest {
+class FlowItemConverterTest {
 
     @Test
     fun `flow item`() {
         val dto = randomFlowNftItemDto()
 
-        val converted = FlowUnionItemConverter.convert(dto, BlockchainDto.FLOW)
+        val converted = FlowItemConverter.convert(dto, BlockchainDto.FLOW)
 
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.collection.value).isEqualTo(dto.collection)
@@ -69,7 +69,7 @@ class FlowUnionItemConverterTest {
         )
         val dto = item.meta!!
 
-        val converted = FlowUnionItemConverter.convert(item, BlockchainDto.FLOW).meta!!
+        val converted = FlowItemConverter.convert(item, BlockchainDto.FLOW).meta!!
 
         assertThat(converted.name).isEqualTo(dto.name)
         assertThat(converted.raw).isEqualTo(dto.raw)

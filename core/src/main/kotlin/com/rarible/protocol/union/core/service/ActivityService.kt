@@ -1,42 +1,42 @@
 package com.rarible.protocol.union.core.service
 
-import com.rarible.protocol.union.dto.UnionActivitiesDto
-import com.rarible.protocol.union.dto.UnionActivitySortDto
-import com.rarible.protocol.union.dto.UnionActivityTypeDto
-import com.rarible.protocol.union.dto.UnionUserActivityTypeDto
+import com.rarible.protocol.union.dto.ActivitiesDto
+import com.rarible.protocol.union.dto.ActivitySortDto
+import com.rarible.protocol.union.dto.ActivityTypeDto
+import com.rarible.protocol.union.dto.UserActivityTypeDto
 
 interface ActivityService : BlockchainService {
 
     suspend fun getAllActivities(
-        types: List<UnionActivityTypeDto>,
+        types: List<ActivityTypeDto>,
         continuation: String?,
         size: Int,
-        sort: UnionActivitySortDto?
-    ): UnionActivitiesDto
+        sort: ActivitySortDto?
+    ): ActivitiesDto
 
     suspend fun getActivitiesByCollection(
-        types: List<UnionActivityTypeDto>,
+        types: List<ActivityTypeDto>,
         collection: String,
         continuation: String?,
         size: Int,
-        sort: UnionActivitySortDto?
-    ): UnionActivitiesDto
+        sort: ActivitySortDto?
+    ): ActivitiesDto
 
     suspend fun getActivitiesByItem(
-        types: List<UnionActivityTypeDto>,
+        types: List<ActivityTypeDto>,
         contract: String,
         tokenId: String,
         continuation: String?,
         size: Int,
-        sort: UnionActivitySortDto?
-    ): UnionActivitiesDto
+        sort: ActivitySortDto?
+    ): ActivitiesDto
 
     suspend fun getActivitiesByUser(
-        types: List<UnionUserActivityTypeDto>,
+        types: List<UserActivityTypeDto>,
         users: List<String>,
         continuation: String?,
         size: Int,
-        sort: UnionActivitySortDto?
-    ): UnionActivitiesDto
+        sort: ActivitySortDto?
+    ): ActivitiesDto
 
 }

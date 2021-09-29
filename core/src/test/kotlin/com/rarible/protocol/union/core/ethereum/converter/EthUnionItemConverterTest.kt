@@ -12,13 +12,13 @@ import com.rarible.protocol.union.test.data.randomEthNftItemDto
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
-class EthUnionItemConverterTest {
+class EthItemConverterTest {
 
     @Test
     fun `eth item history - transfer`() {
         val dto = randomEthItemTransferDto()
 
-        val converted = EthUnionItemConverter.convert(dto, BlockchainDto.ETHEREUM)
+        val converted = EthItemConverter.convert(dto, BlockchainDto.ETHEREUM)
 
         assertThat(converted.owner.value).isEqualTo(dto.owner.prefixed())
         assertThat(converted.date).isEqualTo(dto.date)
@@ -33,7 +33,7 @@ class EthUnionItemConverterTest {
     fun `eth item history - royalty`() {
         val dto = randomEthItemRoyaltyDto()
 
-        val converted = EthUnionItemConverter.convert(dto, BlockchainDto.ETHEREUM)
+        val converted = EthItemConverter.convert(dto, BlockchainDto.ETHEREUM)
 
         assertThat(converted.owner!!.value).isEqualTo(dto.owner!!.prefixed())
         assertThat(converted.date).isEqualTo(dto.date)
@@ -49,7 +49,7 @@ class EthUnionItemConverterTest {
     fun `eth item`() {
         val dto = randomEthNftItemDto()
 
-        val converted = EthUnionItemConverter.convert(dto, BlockchainDto.ETHEREUM)
+        val converted = EthItemConverter.convert(dto, BlockchainDto.ETHEREUM)
 
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.id.token.value).isEqualTo(dto.contract.prefixed())
@@ -105,7 +105,7 @@ class EthUnionItemConverterTest {
         )
         val dto = item.meta!!
 
-        val converted = EthUnionItemConverter.convert(item, BlockchainDto.ETHEREUM).meta!!
+        val converted = EthItemConverter.convert(item, BlockchainDto.ETHEREUM).meta!!
 
         assertThat(converted.name).isEqualTo(dto.name)
         assertThat(converted.description).isEqualTo(dto.description)

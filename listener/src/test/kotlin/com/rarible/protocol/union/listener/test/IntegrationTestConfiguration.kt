@@ -4,13 +4,26 @@ import com.rarible.core.application.ApplicationEnvironmentInfo
 import com.rarible.core.kafka.RaribleKafkaConsumer
 import com.rarible.core.kafka.RaribleKafkaProducer
 import com.rarible.core.test.ext.KafkaTestExtension.Companion.kafkaContainer
-import com.rarible.protocol.dto.*
+import com.rarible.protocol.dto.ActivityTopicProvider
 import com.rarible.protocol.dto.FlowActivityDto
+import com.rarible.protocol.dto.FlowNftItemEventDto
+import com.rarible.protocol.dto.FlowNftItemEventTopicProvider
+import com.rarible.protocol.dto.FlowNftOwnershipEventTopicProvider
 import com.rarible.protocol.dto.FlowOrderEventDto
+import com.rarible.protocol.dto.FlowOrderEventTopicProvider
 import com.rarible.protocol.dto.FlowOwnershipEventDto
+import com.rarible.protocol.dto.NftItemEventDto
+import com.rarible.protocol.dto.NftItemEventTopicProvider
+import com.rarible.protocol.dto.NftOwnershipEventDto
+import com.rarible.protocol.dto.NftOwnershipEventTopicProvider
+import com.rarible.protocol.dto.OrderIndexerTopicProvider
 import com.rarible.protocol.union.core.CoreConfiguration
-import com.rarible.protocol.union.dto.*
-import com.rarible.protocol.union.listener.config.UnionKafkaJsonSerializer
+import com.rarible.protocol.union.core.UnionKafkaJsonSerializer
+import com.rarible.protocol.union.dto.ActivityDto
+import com.rarible.protocol.union.dto.ItemEventDto
+import com.rarible.protocol.union.dto.OrderEventDto
+import com.rarible.protocol.union.dto.OwnershipEventDto
+import com.rarible.protocol.union.dto.UnionEventTopicProvider
 import com.rarible.protocol.union.listener.config.activity.FlowActivityTopicProvider
 import com.rarible.protocol.union.subscriber.UnionKafkaJsonDeserializer
 import org.apache.kafka.clients.consumer.OffsetResetStrategy
@@ -28,13 +41,13 @@ class IntegrationTestConfiguration {
     }
 
     @Bean
-    fun testItemConsumer(): RaribleKafkaConsumer<UnionItemEventDto> {
+    fun testItemConsumer(): RaribleKafkaConsumer<ItemEventDto> {
         val topic = UnionEventTopicProvider.getItemTopic(applicationEnvironmentInfo().name)
         return RaribleKafkaConsumer(
             clientId = "test-union-item-consumer",
             consumerGroup = "test-union-item-group",
             valueDeserializerClass = UnionKafkaJsonDeserializer::class.java,
-            valueClass = UnionItemEventDto::class.java,
+            valueClass = ItemEventDto::class.java,
             defaultTopic = topic,
             bootstrapServers = kafkaContainer.kafkaBoostrapServers(),
             offsetResetStrategy = OffsetResetStrategy.EARLIEST
@@ -42,13 +55,13 @@ class IntegrationTestConfiguration {
     }
 
     @Bean
-    fun testOwnershipConsumer(): RaribleKafkaConsumer<UnionOwnershipEventDto> {
+    fun testOwnershipConsumer(): RaribleKafkaConsumer<OwnershipEventDto> {
         val topic = UnionEventTopicProvider.getOwnershipTopic(applicationEnvironmentInfo().name)
         return RaribleKafkaConsumer(
             clientId = "test-union-ownership-consumer",
             consumerGroup = "test-union-ownership-group",
             valueDeserializerClass = UnionKafkaJsonDeserializer::class.java,
-            valueClass = UnionOwnershipEventDto::class.java,
+            valueClass = OwnershipEventDto::class.java,
             defaultTopic = topic,
             bootstrapServers = kafkaContainer.kafkaBoostrapServers(),
             offsetResetStrategy = OffsetResetStrategy.EARLIEST
@@ -56,13 +69,13 @@ class IntegrationTestConfiguration {
     }
 
     @Bean
-    fun testOrderConsumer(): RaribleKafkaConsumer<UnionOrderEventDto> {
+    fun testOrderConsumer(): RaribleKafkaConsumer<OrderEventDto> {
         val topic = UnionEventTopicProvider.getOrderTopic(applicationEnvironmentInfo().name)
         return RaribleKafkaConsumer(
             clientId = "test-union-order-consumer",
             consumerGroup = "test-union-order-group",
             valueDeserializerClass = UnionKafkaJsonDeserializer::class.java,
-            valueClass = UnionOrderEventDto::class.java,
+            valueClass = OrderEventDto::class.java,
             defaultTopic = topic,
             bootstrapServers = kafkaContainer.kafkaBoostrapServers(),
             offsetResetStrategy = OffsetResetStrategy.EARLIEST
@@ -70,13 +83,13 @@ class IntegrationTestConfiguration {
     }
 
     @Bean
-    fun testActivityConsumer(): RaribleKafkaConsumer<UnionActivityDto> {
+    fun testActivityConsumer(): RaribleKafkaConsumer<ActivityDto> {
         val topic = UnionEventTopicProvider.getActivityTopic(applicationEnvironmentInfo().name)
         return RaribleKafkaConsumer(
             clientId = "test-union-activity-consumer",
             consumerGroup = "test-union-activity-group",
             valueDeserializerClass = UnionKafkaJsonDeserializer::class.java,
-            valueClass = UnionActivityDto::class.java,
+            valueClass = ActivityDto::class.java,
             defaultTopic = topic,
             bootstrapServers = kafkaContainer.kafkaBoostrapServers(),
             offsetResetStrategy = OffsetResetStrategy.EARLIEST

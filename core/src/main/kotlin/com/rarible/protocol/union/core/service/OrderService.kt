@@ -1,8 +1,8 @@
 package com.rarible.protocol.union.core.service
 
+import com.rarible.protocol.union.dto.OrderDto
+import com.rarible.protocol.union.dto.OrdersDto
 import com.rarible.protocol.union.dto.PlatformDto
-import com.rarible.protocol.union.dto.UnionOrderDto
-import com.rarible.protocol.union.dto.UnionOrdersDto
 
 interface OrderService : BlockchainService {
 
@@ -11,15 +11,15 @@ interface OrderService : BlockchainService {
         origin: String?,
         continuation: String?,
         size: Int
-    ): UnionOrdersDto
+    ): OrdersDto
 
     suspend fun getOrderById(
         id: String
-    ): UnionOrderDto
+    ): OrderDto
 
     suspend fun updateOrderMakeStock(
         id: String
-    ): UnionOrderDto
+    ): OrderDto
 
     suspend fun getOrderBidsByItem(
         platform: PlatformDto?,
@@ -29,7 +29,7 @@ interface OrderService : BlockchainService {
         origin: String?,
         continuation: String?,
         size: Int
-    ): UnionOrdersDto
+    ): OrdersDto
 
     suspend fun getOrderBidsByMaker(
         platform: PlatformDto?,
@@ -37,14 +37,14 @@ interface OrderService : BlockchainService {
         origin: String?,
         continuation: String?,
         size: Int
-    ): UnionOrdersDto
+    ): OrdersDto
 
     suspend fun getSellOrders(
         platform: PlatformDto?,
         origin: String?,
         continuation: String?,
         size: Int
-    ): UnionOrdersDto
+    ): OrdersDto
 
     suspend fun getSellOrdersByCollection(
         platform: PlatformDto?,
@@ -52,7 +52,7 @@ interface OrderService : BlockchainService {
         origin: String?,
         continuation: String?,
         size: Int
-    ): UnionOrdersDto
+    ): OrdersDto
 
     suspend fun getSellOrdersByItem(
         platform: PlatformDto?,
@@ -62,7 +62,7 @@ interface OrderService : BlockchainService {
         origin: String?,
         continuation: String?,
         size: Int
-    ): UnionOrdersDto
+    ): OrdersDto
 
     suspend fun getSellOrdersByMaker(
         platform: PlatformDto?,
@@ -70,5 +70,5 @@ interface OrderService : BlockchainService {
         origin: String?,
         continuation: String?,
         size: Int
-    ): UnionOrdersDto
+    ): OrdersDto
 }

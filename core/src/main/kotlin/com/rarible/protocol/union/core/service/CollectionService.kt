@@ -1,23 +1,23 @@
 package com.rarible.protocol.union.core.service
 
-import com.rarible.protocol.union.dto.UnionCollectionDto
-import com.rarible.protocol.union.dto.UnionCollectionsDto
+import com.rarible.protocol.union.dto.CollectionDto
+import com.rarible.protocol.union.dto.CollectionsDto
 
 interface CollectionService : BlockchainService {
 
     suspend fun getAllCollections(
         continuation: String?,
         size: Int
-    ): UnionCollectionsDto
+    ): CollectionsDto
 
     suspend fun getCollectionById(
         collectionId: String
-    ): UnionCollectionDto
+    ): CollectionDto
 
     suspend fun getCollectionsByOwner(
         owner: String,
         continuation: String?,
         size: Int
-    ): UnionCollectionsDto
+    ): CollectionsDto
 
 }

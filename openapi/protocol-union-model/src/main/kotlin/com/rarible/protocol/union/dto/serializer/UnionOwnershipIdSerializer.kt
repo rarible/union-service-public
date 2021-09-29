@@ -3,21 +3,21 @@ package com.rarible.protocol.union.dto.serializer
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.databind.SerializerProvider
 import com.fasterxml.jackson.databind.ser.std.StdSerializer
-import com.rarible.protocol.union.dto.UnionOwnershipIdDto
+import com.rarible.protocol.union.dto.OwnershipIdDto
 
-object UnionOwnershipIdSerializer : StdSerializer<UnionOwnershipIdDto>(UnionOwnershipIdDto::class.java) {
+object OwnershipIdSerializer : StdSerializer<OwnershipIdDto>(OwnershipIdDto::class.java) {
 
-    override fun serialize(id: UnionOwnershipIdDto?, gen: JsonGenerator, provider: SerializerProvider) {
+    override fun serialize(id: OwnershipIdDto?, gen: JsonGenerator, provider: SerializerProvider) {
         if (id == null) {
             gen.writeNull()
             return
         }
         gen.writeStartObject()
-        gen.writeStringField(UnionOwnershipIdDto::value.name, id.fullId())
-        provider.defaultSerializeField(UnionOwnershipIdDto::blockchain.name, id.blockchain, gen)
-        provider.defaultSerializeField(UnionOwnershipIdDto::token.name, id.token, gen)
-        provider.defaultSerializeField(UnionOwnershipIdDto::tokenId.name, id.tokenId, gen)
-        provider.defaultSerializeField(UnionOwnershipIdDto::owner.name, id.owner, gen)
+        gen.writeStringField(OwnershipIdDto::value.name, id.fullId())
+        provider.defaultSerializeField(OwnershipIdDto::blockchain.name, id.blockchain, gen)
+        provider.defaultSerializeField(OwnershipIdDto::token.name, id.token, gen)
+        provider.defaultSerializeField(OwnershipIdDto::tokenId.name, id.tokenId, gen)
+        provider.defaultSerializeField(OwnershipIdDto::owner.name, id.owner, gen)
         gen.writeEndObject()
     }
 }

@@ -5,9 +5,9 @@ import com.rarible.protocol.union.core.continuation.ContinuationPaging
 import com.rarible.protocol.union.core.service.ItemServiceRouter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.IdParser
-import com.rarible.protocol.union.dto.UnionItemDto
-import com.rarible.protocol.union.dto.UnionItemsDto
-import com.rarible.protocol.union.dto.continuation.UnionItemContinuation
+import com.rarible.protocol.union.dto.ItemDto
+import com.rarible.protocol.union.dto.ItemsDto
+import com.rarible.protocol.union.dto.continuation.ItemContinuation
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.RestController
 
@@ -23,7 +23,7 @@ class ItemController(
         showDeleted: Boolean?,
         lastUpdatedFrom: Long?,
         lastUpdatedTo: Long?
-    ): ResponseEntity<UnionItemsDto> {
+    ): ResponseEntity<ItemsDto> {
         val safeSize = PageSize.ITEM.limit(size)
         val blockchainPages = router.executeForAll(blockchains) {
             it.getAllItems(continuation, safeSize, showDeleted, lastUpdatedFrom, lastUpdatedTo)
@@ -32,17 +32,17 @@ class ItemController(
         val total = blockchainPages.map { it.total }.sum()
 
         val combinedPage = ContinuationPaging(
-            UnionItemContinuation.ByLastUpdatedAndId,
+            ItemContinuation.ByLastUpdatedAndId,
             blockchainPages.flatMap { it.items }
         ).getPage(safeSize)
 
-        val result = UnionItemsDto(total, combinedPage.printContinuation(), combinedPage.entities)
+        val result = ItemsDto(total, combinedPage.printContinuation(), combinedPage.entities)
         return ResponseEntity.ok(result)
     }
 
     override suspend fun getItemById(
         itemId: String
-    ): ResponseEntity<UnionItemDto> {
+    ): ResponseEntity<ItemDto> {
         val (blockchain, shortItemId) = IdParser.parse(itemId)
         val result = router.getService(blockchain).getItemById(shortItemId)
         return ResponseEntity.ok(result)
@@ -52,7 +52,7 @@ class ItemController(
         collection: String,
         continuation: String?,
         size: Int?
-    ): ResponseEntity<UnionItemsDto> {
+    ): ResponseEntity<ItemsDto> {
         val safeSize = PageSize.ITEM.limit(size)
         val (blockchain, shortCollection) = IdParser.parse(collection)
         val result = router.getService(blockchain)
@@ -64,7 +64,7 @@ class ItemController(
         creator: String,
         continuation: String?,
         size: Int?
-    ): ResponseEntity<UnionItemsDto> {
+    ): ResponseEntity<ItemsDto> {
         val safeSize = PageSize.ITEM.limit(size)
         val (blockchain, shortCreator) = IdParser.parse(creator)
         val result = router.getService(blockchain).getItemsByCreator(shortCreator, continuation, safeSize)
@@ -75,7 +75,7 @@ class ItemController(
         owner: String,
         continuation: String?,
         size: Int?
-    ): ResponseEntity<UnionItemsDto> {
+    ): ResponseEntity<ItemsDto> {
         val safeSize = PageSize.ITEM.limit(size)
         val (blockchain, shortOwner) = IdParser.parse(owner)
         val result = router.getService(blockchain).getItemsByOwner(shortOwner, continuation, safeSize)

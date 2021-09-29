@@ -94,6 +94,11 @@
             </dependency>
             <dependency>
                 <groupId>com.rarible.protocol.union</groupId>
+                <artifactId>rarible-union-enrichment</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.rarible.protocol.union</groupId>
                 <artifactId>rarible-union-api</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -189,23 +194,6 @@
             <dependency>
                 <groupId>com.rarible.protocol</groupId>
                 <artifactId>protocol-subscriber-erc20</artifactId>
-                <version>${rarible-protocol.ethereum.version}</version>
-            </dependency>
-
-            <!-- NFT-Order -->
-            <dependency>
-                <groupId>com.rarible.protocol</groupId>
-                <artifactId>protocol-model-nft-order</artifactId>
-                <version>${rarible-protocol.ethereum.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.rarible.protocol</groupId>
-                <artifactId>protocol-client-nft-order-starter</artifactId>
-                <version>${rarible-protocol.ethereum.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.rarible.protocol</groupId>
-                <artifactId>protocol-subscriber-nft-order</artifactId>
                 <version>${rarible-protocol.ethereum.version}</version>
             </dependency>
 
@@ -310,6 +298,7 @@
     <modules>
         <module>api</module>
         <module>core</module>
+        <module>enrichment</module>
         <module>listener</module>
         <module>openapi</module>
         <module>test-coverage</module>

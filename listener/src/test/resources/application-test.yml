@@ -23,11 +23,15 @@ rarible:
     converter:
       enabled: true
 
-listener:
+common:
   producer:
     broker-replica-set: ${kafka.hosts}
+
+listener:
   consumer:
     ethereum:
+      broker-replica-set: ${kafka.hosts}
+    poygon:
       broker-replica-set: ${kafka.hosts}
     flow:
       broker-replica-set: ${kafka.hosts}

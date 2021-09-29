@@ -5,12 +5,11 @@ import com.rarible.core.test.data.randomBinary
 import com.rarible.core.test.data.randomString
 import com.rarible.protocol.dto.EthereumSignatureValidationFormDto
 import com.rarible.protocol.union.api.client.SignatureControllerApi
-import com.rarible.protocol.union.api.configuration.PageSize
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.UnionSignatureValidationFormDto
+import com.rarible.protocol.union.dto.SignatureValidationFormDto
 import io.mockk.coEvery
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.reactive.awaitFirst
@@ -24,9 +23,6 @@ import reactor.kotlin.core.publisher.toMono
 @IntegrationTest
 class SignatureControllerFt : AbstractIntegrationTest() {
 
-    private val continuation = null
-    private val size = PageSize.OWNERSHIP.default
-
     @Autowired
     lateinit var signatureControllerApi: SignatureControllerApi
 
@@ -34,7 +30,7 @@ class SignatureControllerFt : AbstractIntegrationTest() {
     fun `validate signature - ethereum`() = runBlocking<Unit> {
         val ethForm = EthereumSignatureValidationFormDto(randomAddress(), randomString(), randomBinary())
 
-        val unionForm = UnionSignatureValidationFormDto(
+        val unionForm = SignatureValidationFormDto(
             signer = UnionAddressConverter.convert(ethForm.signer, BlockchainDto.ETHEREUM).fullId(),
             message = ethForm.message,
             signature = ethForm.signature.prefixed()
@@ -50,7 +46,7 @@ class SignatureControllerFt : AbstractIntegrationTest() {
     fun `validate signature - polygon`() = runBlocking<Unit> {
         val ethForm = EthereumSignatureValidationFormDto(randomAddress(), randomString(), randomBinary())
 
-        val unionForm = UnionSignatureValidationFormDto(
+        val unionForm = SignatureValidationFormDto(
             signer = UnionAddressConverter.convert(ethForm.signer, BlockchainDto.POLYGON).fullId(),
             message = ethForm.message,
             signature = ethForm.signature.prefixed()

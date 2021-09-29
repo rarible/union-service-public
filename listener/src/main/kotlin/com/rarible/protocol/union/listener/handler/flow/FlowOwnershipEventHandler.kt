@@ -1,16 +1,17 @@
 package com.rarible.protocol.union.listener.handler.flow
 
-import com.rarible.core.kafka.KafkaMessage
-import com.rarible.core.kafka.RaribleKafkaProducer
+import com.rarible.protocol.dto.FlowNftOwnershipDeleteEventDto
+import com.rarible.protocol.dto.FlowNftOwnershipUpdateEventDto
 import com.rarible.protocol.dto.FlowOwnershipEventDto
-import com.rarible.protocol.union.core.flow.converter.FlowUnionOwnershipEventConverter
+import com.rarible.protocol.union.core.flow.converter.FlowOwnershipConverter
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.UnionOwnershipEventDto
+import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
+import com.rarible.protocol.union.enrichment.service.event.OwnershipEventService
 import com.rarible.protocol.union.listener.handler.AbstractEventHandler
 import org.slf4j.LoggerFactory
 
 class FlowOwnershipEventHandler(
-    private val producer: RaribleKafkaProducer<UnionOwnershipEventDto>,
+    private val ownershipEventService: OwnershipEventService,
     private val blockchain: BlockchainDto
 ) : AbstractEventHandler<FlowOwnershipEventDto>() {
 
@@ -19,13 +20,21 @@ class FlowOwnershipEventHandler(
     override suspend fun handleSafely(event: FlowOwnershipEventDto) {
         logger.debug("Received Flow Ownership event: type={}", event::class.java.simpleName)
 
-        val unionEventDto = FlowUnionOwnershipEventConverter.convert(event, blockchain)
-
-        val message = KafkaMessage(
-            key = event.ownershipId,
-            value = unionEventDto,
-            headers = OWNERSHIP_EVENT_HEADERS
-        )
-        producer.send(message).ensureSuccess()
+        when (event) {
+            is FlowNftOwnershipUpdateEventDto -> {
+                val Item = FlowOwnershipConverter.convert(event.ownership, blockchain)
+                ownershipEventService.onOwnershipUpdated(Item)
+            }
+            is FlowNftOwnershipDeleteEventDto -> {
+                val ownershipId = ShortOwnershipId(
+                    blockchain = blockchain,
+                    token = event.ownership.contract!!, // TODO should be not null
+                    tokenId = event.ownership.tokenId.toBigInteger(),
+                    owner = event.ownership.owner
+                )
+                ownershipEventService.onOwnershipDeleted(ownershipId)
+            }
+        }
     }
+
 }

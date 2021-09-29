@@ -1,16 +1,18 @@
 package com.rarible.protocol.union.listener.handler.ethereum
 
-import com.rarible.core.kafka.KafkaMessage
-import com.rarible.core.kafka.RaribleKafkaProducer
+import com.rarible.protocol.dto.NftItemDeleteEventDto
 import com.rarible.protocol.dto.NftItemEventDto
-import com.rarible.protocol.union.core.ethereum.converter.EthUnionItemEventConverter
+import com.rarible.protocol.dto.NftItemUpdateEventDto
+import com.rarible.protocol.union.core.ethereum.converter.EthConverter
+import com.rarible.protocol.union.core.ethereum.converter.EthItemConverter
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.UnionItemEventDto
+import com.rarible.protocol.union.enrichment.model.ShortItemId
+import com.rarible.protocol.union.enrichment.service.event.ItemEventService
 import com.rarible.protocol.union.listener.handler.AbstractEventHandler
 import org.slf4j.LoggerFactory
 
 class EthereumItemEventHandler(
-    private val producer: RaribleKafkaProducer<UnionItemEventDto>,
+    private val itemEventService: ItemEventService,
     private val blockchain: BlockchainDto
 ) : AbstractEventHandler<NftItemEventDto>() {
 
@@ -19,13 +21,19 @@ class EthereumItemEventHandler(
     override suspend fun handleSafely(event: NftItemEventDto) {
         logger.debug("Received Ethereum ({}) Item event: type={}", blockchain, event::class.java.simpleName)
 
-        val unionEventDto = EthUnionItemEventConverter.convert(event, blockchain)
-
-        val message = KafkaMessage(
-            key = event.itemId,
-            value = unionEventDto,
-            headers = ITEM_EVENT_HEADERS
-        )
-        producer.send(message).ensureSuccess()
+        when (event) {
+            is NftItemUpdateEventDto -> {
+                val Item = EthItemConverter.convert(event.item, blockchain)
+                itemEventService.onItemUpdated(Item)
+            }
+            is NftItemDeleteEventDto -> {
+                val itemId = ShortItemId(
+                    blockchain = blockchain,
+                    token = EthConverter.convert(event.item.token),
+                    tokenId = event.item.tokenId
+                )
+                itemEventService.onItemDeleted(itemId)
+            }
+        }
     }
 }

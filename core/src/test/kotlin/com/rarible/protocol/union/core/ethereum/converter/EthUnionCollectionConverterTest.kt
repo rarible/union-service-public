@@ -6,7 +6,7 @@ import com.rarible.protocol.union.test.data.randomEthCollectionDto
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
-class EthUnionCollectionConverterTest {
+class EthCollectionConverterTest {
 
     @Test
     fun `eth collection erc721`() {
@@ -14,7 +14,7 @@ class EthUnionCollectionConverterTest {
             .copy(features = NftCollectionDto.Features.values().asList())
             .copy(type = NftCollectionDto.Type.ERC721)
 
-        val converted = EthUnionCollectionConverter.convert(dto, BlockchainDto.ETHEREUM)
+        val converted = EthCollectionConverter.convert(dto, BlockchainDto.ETHEREUM)
 
         assertThat(converted.id.value).isEqualTo(dto.id.prefixed())
         assertThat(converted.name).isEqualTo(dto.name)
@@ -29,7 +29,7 @@ class EthUnionCollectionConverterTest {
         val dto = randomEthCollectionDto()
             .copy(type = NftCollectionDto.Type.ERC1155)
 
-        val converted = EthUnionCollectionConverter.convert(dto, BlockchainDto.ETHEREUM)
+        val converted = EthCollectionConverter.convert(dto, BlockchainDto.ETHEREUM)
 
         assertThat(converted.type.name).isEqualTo(dto.type.name)
     }
@@ -39,7 +39,7 @@ class EthUnionCollectionConverterTest {
         val dto = randomEthCollectionDto()
             .copy(type = NftCollectionDto.Type.CRYPTO_PUNKS)
 
-        val converted = EthUnionCollectionConverter.convert(dto, BlockchainDto.ETHEREUM)
+        val converted = EthCollectionConverter.convert(dto, BlockchainDto.ETHEREUM)
 
         assertThat(converted.type.name).isEqualTo(dto.type.name)
     }
@@ -49,7 +49,7 @@ class EthUnionCollectionConverterTest {
         val dto = randomEthCollectionDto()
             .copy(owner = null)
 
-        val converted = EthUnionCollectionConverter.convert(dto, BlockchainDto.ETHEREUM)
+        val converted = EthCollectionConverter.convert(dto, BlockchainDto.ETHEREUM)
 
         assertThat(converted.owner).isNull()
     }

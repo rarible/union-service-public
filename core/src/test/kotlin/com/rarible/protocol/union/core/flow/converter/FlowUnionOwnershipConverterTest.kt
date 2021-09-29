@@ -5,13 +5,13 @@ import com.rarible.protocol.union.test.data.randomFlowNftOwnershipDto
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
-class FlowUnionOwnershipConverterTest {
+class FlowOwnershipConverterTest {
 
     @Test
     fun `flow ownership`() {
         val dto = randomFlowNftOwnershipDto()
 
-        val converted = FlowUnionOwnershipConverter.convert(dto, BlockchainDto.FLOW)
+        val converted = FlowOwnershipConverter.convert(dto, BlockchainDto.FLOW)
 
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.createdAt).isEqualTo(dto.createdAt)

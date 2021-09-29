@@ -3,19 +3,21 @@ package com.rarible.protocol.union.core.flow.converter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.FlowAssetTypeDto
 import com.rarible.protocol.union.dto.FlowOrderDataV1Dto
+import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.test.data.randomFlowV1OrderDto
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
-class FlowUnionOrderConverterTest {
+class FlowOrderConverterTest {
 
     @Test
     fun `order V1`() {
         val dto = randomFlowV1OrderDto()
 
-        val converted = FlowUnionOrderConverter.convert(dto, BlockchainDto.FLOW)
+        val converted = FlowOrderConverter.convert(dto, BlockchainDto.FLOW)
 
         assertThat(converted.id.value).isEqualTo(dto.id.toString())
+        assertThat(converted.platform).isEqualTo(PlatformDto.RARIBLE)
         assertThat(converted.startedAt).isNull()
         assertThat(converted.endedAt).isNull()
         assertThat(converted.makeStock).isEqualTo(dto.makeStock)

@@ -1,9 +1,13 @@
 package com.rarible.protocol.union.core.flow.service
 
 import com.rarible.protocol.flow.nft.api.client.FlowNftOrderActivityControllerApi
-import com.rarible.protocol.union.core.flow.converter.FlowUnionActivityConverter
+import com.rarible.protocol.union.core.flow.converter.FlowActivityConverter
 import com.rarible.protocol.union.core.service.ActivityService
-import com.rarible.protocol.union.dto.*
+import com.rarible.protocol.union.dto.ActivitiesDto
+import com.rarible.protocol.union.dto.ActivitySortDto
+import com.rarible.protocol.union.dto.ActivityTypeDto
+import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.UserActivityTypeDto
 import kotlinx.coroutines.reactive.awaitFirst
 
 class FlowActivityService(
@@ -12,38 +16,38 @@ class FlowActivityService(
 ) : AbstractFlowService(blockchain), ActivityService {
 
     override suspend fun getAllActivities(
-        types: List<UnionActivityTypeDto>,
+        types: List<ActivityTypeDto>,
         continuation: String?,
         size: Int,
-        sort: UnionActivitySortDto?
-    ): UnionActivitiesDto {
+        sort: ActivitySortDto?
+    ): ActivitiesDto {
         val rawTypes = types.map { it.name }
         val result = activityControllerApi.getNftOrderAllActivities(rawTypes, continuation, size)
             .awaitFirst()
-        return FlowUnionActivityConverter.convert(result, blockchain)
+        return FlowActivityConverter.convert(result, blockchain)
     }
 
     override suspend fun getActivitiesByCollection(
-        types: List<UnionActivityTypeDto>,
+        types: List<ActivityTypeDto>,
         collection: String,
         continuation: String?,
         size: Int,
-        sort: UnionActivitySortDto?
-    ): UnionActivitiesDto {
+        sort: ActivitySortDto?
+    ): ActivitiesDto {
         val rawTypes = types.map { it.name }
         val result = activityControllerApi.getNftOrderActivitiesByCollection(rawTypes, collection, continuation, size)
             .awaitFirst()
-        return FlowUnionActivityConverter.convert(result, blockchain)
+        return FlowActivityConverter.convert(result, blockchain)
     }
 
     override suspend fun getActivitiesByItem(
-        types: List<UnionActivityTypeDto>,
+        types: List<ActivityTypeDto>,
         contract: String,
         tokenId: String,
         continuation: String?,
         size: Int,
-        sort: UnionActivitySortDto?
-    ): UnionActivitiesDto {
+        sort: ActivitySortDto?
+    ): ActivitiesDto {
         val rawTypes = types.map { it.name }
         val result = activityControllerApi.getNftOrderActivitiesByItem(
             rawTypes,
@@ -52,19 +56,19 @@ class FlowActivityService(
             continuation,
             size
         ).awaitFirst()
-        return FlowUnionActivityConverter.convert(result, blockchain)
+        return FlowActivityConverter.convert(result, blockchain)
     }
 
     override suspend fun getActivitiesByUser(
-        types: List<UnionUserActivityTypeDto>,
+        types: List<UserActivityTypeDto>,
         users: List<String>,
         continuation: String?,
         size: Int,
-        sort: UnionActivitySortDto?
-    ): UnionActivitiesDto {
+        sort: ActivitySortDto?
+    ): ActivitiesDto {
         val rawTypes = types.map { it.name }
         val result = activityControllerApi.getNftOrderActivitiesByUser(rawTypes, users, continuation, size, sort?.name)
             .awaitFirst()
-        return FlowUnionActivityConverter.convert(result, blockchain)
+        return FlowActivityConverter.convert(result, blockchain)
     }
 }

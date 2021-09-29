@@ -9,7 +9,7 @@ import com.rarible.protocol.union.api.configuration.PageSize
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.parser.UnionOwnershipIdParser
+import com.rarible.protocol.union.dto.parser.OwnershipIdParser
 import com.rarible.protocol.union.test.data.randomEthAddress
 import com.rarible.protocol.union.test.data.randomEthNftOwnershipDto
 import com.rarible.protocol.union.test.data.randomEthOwnershipId
@@ -40,43 +40,43 @@ class OwnershipControllerFt : AbstractIntegrationTest() {
     @Test
     fun `get ownership by id - ethereum`() = runBlocking<Unit> {
         val ownershipIdFull = randomEthOwnershipId().fullId()
-        val ownershipId = UnionOwnershipIdParser.parseFull(ownershipIdFull)
+        val ownershipId = OwnershipIdParser.parseFull(ownershipIdFull)
         val ownership = randomEthNftOwnershipDto(ownershipId)
 
         coEvery { testEthereumOwnershipApi.getNftOwnershipById(ownershipId.value) } returns ownership.toMono()
 
-        val unionOwnership = ownershipControllerClient.getOwnershipById(ownershipIdFull).awaitFirst()
+        val Ownership = ownershipControllerClient.getOwnershipById(ownershipIdFull).awaitFirst()
 
-        assertThat(unionOwnership.id.value).isEqualTo(ownershipId.value)
-        assertThat(unionOwnership.id.blockchain).isEqualTo(BlockchainDto.ETHEREUM)
+        assertThat(Ownership.id.value).isEqualTo(ownershipId.value)
+        assertThat(Ownership.id.blockchain).isEqualTo(BlockchainDto.ETHEREUM)
     }
 
     @Test
     fun `get ownership by id - polygon`() = runBlocking<Unit> {
         val ownershipIdFull = randomPolygonOwnershipId().fullId()
-        val ownershipId = UnionOwnershipIdParser.parseFull(ownershipIdFull)
+        val ownershipId = OwnershipIdParser.parseFull(ownershipIdFull)
         val ownership = randomEthNftOwnershipDto(ownershipId)
 
         coEvery { testPolygonOwnershipApi.getNftOwnershipById(ownershipId.value) } returns ownership.toMono()
 
-        val unionOwnership = ownershipControllerClient.getOwnershipById(ownershipIdFull).awaitFirst()
+        val Ownership = ownershipControllerClient.getOwnershipById(ownershipIdFull).awaitFirst()
 
-        assertThat(unionOwnership.id.value).isEqualTo(ownershipId.value)
-        assertThat(unionOwnership.id.blockchain).isEqualTo(BlockchainDto.POLYGON)
+        assertThat(Ownership.id.value).isEqualTo(ownershipId.value)
+        assertThat(Ownership.id.blockchain).isEqualTo(BlockchainDto.POLYGON)
     }
 
     @Test
     fun `get ownership by id - flow`() = runBlocking<Unit> {
         val ownershipIdFull = randomFlowOwnershipId().fullId()
-        val ownershipId = UnionOwnershipIdParser.parseFull(ownershipIdFull)
+        val ownershipId = OwnershipIdParser.parseFull(ownershipIdFull)
         val ownership = randomFlowNftOwnershipDto(ownershipId)
 
         coEvery { testFlowOwnershipApi.getNftOwnershipById(ownershipId.value) } returns ownership.toMono()
 
-        val unionOwnership = ownershipControllerClient.getOwnershipById(ownershipIdFull).awaitFirst()
+        val Ownership = ownershipControllerClient.getOwnershipById(ownershipIdFull).awaitFirst()
 
-        assertThat(unionOwnership.id.value).isEqualTo(ownershipId.value)
-        assertThat(unionOwnership.id.blockchain).isEqualTo(BlockchainDto.FLOW)
+        assertThat(Ownership.id.value).isEqualTo(ownershipId.value)
+        assertThat(Ownership.id.blockchain).isEqualTo(BlockchainDto.FLOW)
     }
 
     @Test
@@ -89,11 +89,11 @@ class OwnershipControllerFt : AbstractIntegrationTest() {
             testEthereumOwnershipApi.getNftOwnershipsByItem(ethItemId.value, tokenId, continuation, size)
         } returns NftOwnershipsDto(1, null, listOf(ownership)).toMono()
 
-        val unionOwnerships = ownershipControllerClient.getOwnershipsByItem(
+        val Ownerships = ownershipControllerClient.getOwnershipsByItem(
             ethItemId.fullId(), tokenId, continuation, size
         ).awaitFirst()
 
-        val ethOwnership = unionOwnerships.ownerships[0]
+        val ethOwnership = Ownerships.ownerships[0]
         assertThat(ethOwnership.id.value).isEqualTo(ownership.id)
     }
 
@@ -107,11 +107,11 @@ class OwnershipControllerFt : AbstractIntegrationTest() {
             testPolygonOwnershipApi.getNftOwnershipsByItem(polyItemId.value, tokenId, continuation, size)
         } returns NftOwnershipsDto(1, null, listOf(ownership)).toMono()
 
-        val unionOwnerships = ownershipControllerClient.getOwnershipsByItem(
+        val Ownerships = ownershipControllerClient.getOwnershipsByItem(
             polyItemId.fullId(), tokenId, continuation, size
         ).awaitFirst()
 
-        val polyOwnership = unionOwnerships.ownerships[0]
+        val polyOwnership = Ownerships.ownerships[0]
         assertThat(polyOwnership.id.value).isEqualTo(ownership.id)
     }
 
@@ -125,11 +125,11 @@ class OwnershipControllerFt : AbstractIntegrationTest() {
             testFlowOwnershipApi.getNftOwnershipsByItem(flowItemId.value, tokenId, continuation, size)
         } returns FlowNftOwnershipsDto(1, null, listOf(ownership)).toMono()
 
-        val unionOwnerships = ownershipControllerClient.getOwnershipsByItem(
+        val Ownerships = ownershipControllerClient.getOwnershipsByItem(
             flowItemId.fullId(), tokenId, continuation, size
         ).awaitFirst()
 
-        val flowOwnership = unionOwnerships.ownerships[0]
+        val flowOwnership = Ownerships.ownerships[0]
         assertThat(flowOwnership.id.value).isEqualTo(ownership.id)
     }
 
@@ -153,12 +153,12 @@ class OwnershipControllerFt : AbstractIntegrationTest() {
             )
         } returns NftOwnershipsDto(3, null, ethOwnerships).toMono()
 
-        val unionOwnerships = ownershipControllerClient.getAllOwnerships(
+        val Ownerships = ownershipControllerClient.getAllOwnerships(
             blockchains, continuation, size
         ).awaitFirst()
 
-        assertThat(unionOwnerships.ownerships).hasSize(3)
-        assertThat(unionOwnerships.total).isEqualTo(5)
-        assertThat(unionOwnerships.continuation).isNotNull()
+        assertThat(Ownerships.ownerships).hasSize(3)
+        assertThat(Ownerships.total).isEqualTo(5)
+        assertThat(Ownerships.continuation).isNotNull()
     }
 }

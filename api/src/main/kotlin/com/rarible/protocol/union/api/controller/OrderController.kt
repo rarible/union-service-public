@@ -3,8 +3,12 @@ package com.rarible.protocol.union.api.controller
 import com.rarible.protocol.union.api.configuration.PageSize
 import com.rarible.protocol.union.core.continuation.ContinuationPaging
 import com.rarible.protocol.union.core.service.OrderServiceRouter
-import com.rarible.protocol.union.dto.*
-import com.rarible.protocol.union.dto.continuation.UnionOrderContinuation
+import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.IdParser
+import com.rarible.protocol.union.dto.OrderDto
+import com.rarible.protocol.union.dto.OrdersDto
+import com.rarible.protocol.union.dto.PlatformDto
+import com.rarible.protocol.union.dto.continuation.OrderContinuation
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.RestController
 
@@ -19,7 +23,7 @@ class OrderController(
         origin: String?,
         continuation: String?,
         size: Int?
-    ): ResponseEntity<UnionOrdersDto> {
+    ): ResponseEntity<OrdersDto> {
         val safeSize = PageSize.ORDER.limit(size)
         if (origin != null) {
             val (blockchain, shortOrigin) = IdParser.parse(origin)
@@ -32,11 +36,11 @@ class OrderController(
         }
 
         val combinedPage = ContinuationPaging(
-            UnionOrderContinuation.ByLastUpdatedAndId,
+            OrderContinuation.ByLastUpdatedAndId,
             blockchainPages.flatMap { it.orders }
         ).getPage(safeSize)
 
-        val result = UnionOrdersDto(combinedPage.printContinuation(), combinedPage.entities)
+        val result = OrdersDto(combinedPage.printContinuation(), combinedPage.entities)
         return ResponseEntity.ok(result)
     }
 
@@ -48,7 +52,7 @@ class OrderController(
         origin: String?,
         continuation: String?,
         size: Int?
-    ): ResponseEntity<UnionOrdersDto> {
+    ): ResponseEntity<OrdersDto> {
         val safeSize = PageSize.ORDER.limit(size)
         val (blockchain, shortContract) = IdParser.parse(contract)
         val (makerBlockchain, shortMaker) = safePair(maker, blockchain)
@@ -66,7 +70,7 @@ class OrderController(
         origin: String?,
         continuation: String?,
         size: Int?
-    ): ResponseEntity<UnionOrdersDto> {
+    ): ResponseEntity<OrdersDto> {
         val safeSize = PageSize.ORDER.limit(size)
         val (blockchain, shortMaker) = IdParser.parse(maker)
         val (originBlockchain, shortOrigin) = safePair(origin, blockchain)
@@ -77,7 +81,7 @@ class OrderController(
         return ResponseEntity.ok(result)
     }
 
-    override suspend fun getOrderById(id: String): ResponseEntity<UnionOrderDto> {
+    override suspend fun getOrderById(id: String): ResponseEntity<OrderDto> {
         val (blockchain, shortOrderId) = IdParser.parse(id)
         val result = router.getService(blockchain).getOrderById(shortOrderId)
         return ResponseEntity.ok(result)
@@ -89,7 +93,7 @@ class OrderController(
         origin: String?,
         continuation: String?,
         size: Int?
-    ): ResponseEntity<UnionOrdersDto> {
+    ): ResponseEntity<OrdersDto> {
         val safeSize = PageSize.ORDER.limit(size)
         if (origin != null) {
             val (blockchain, shortOrigin) = IdParser.parse(origin)
@@ -102,11 +106,11 @@ class OrderController(
         }
 
         val combinedPage = ContinuationPaging(
-            UnionOrderContinuation.ByLastUpdatedAndId,
+            OrderContinuation.ByLastUpdatedAndId,
             blockchainPages.flatMap { it.orders }
         ).getPage(safeSize)
 
-        val result = UnionOrdersDto(combinedPage.printContinuation(), combinedPage.entities)
+        val result = OrdersDto(combinedPage.printContinuation(), combinedPage.entities)
         return ResponseEntity.ok(result)
     }
 
@@ -116,7 +120,7 @@ class OrderController(
         origin: String?,
         continuation: String?,
         size: Int?
-    ): ResponseEntity<UnionOrdersDto> {
+    ): ResponseEntity<OrdersDto> {
         val safeSize = PageSize.ORDER.limit(size)
         val (blockchain, shortCollection) = IdParser.parse(collection)
         val (originBlockchain, shortOrigin) = safePair(origin, blockchain)
@@ -135,7 +139,7 @@ class OrderController(
         origin: String?,
         continuation: String?,
         size: Int?
-    ): ResponseEntity<UnionOrdersDto> {
+    ): ResponseEntity<OrdersDto> {
         val safeSize = PageSize.ORDER.limit(size)
         val (blockchain, shortContract) = IdParser.parse(contract)
         val (originBlockchain, shortOrigin) = safePair(origin, blockchain)
@@ -153,7 +157,7 @@ class OrderController(
         origin: String?,
         continuation: String?,
         size: Int?
-    ): ResponseEntity<UnionOrdersDto> {
+    ): ResponseEntity<OrdersDto> {
         val safeSize = PageSize.ORDER.limit(size)
         val (blockchain, shortMaker) = IdParser.parse(maker)
         val (originBlockchain, shortOrigin) = safePair(origin, blockchain)
@@ -164,7 +168,7 @@ class OrderController(
         return ResponseEntity.ok(result)
     }
 
-    override suspend fun updateOrderMakeStock(id: String): ResponseEntity<UnionOrderDto> {
+    override suspend fun updateOrderMakeStock(id: String): ResponseEntity<OrderDto> {
         val (blockchain, shortOrderId) = IdParser.parse(id)
         val result = router.getService(blockchain).updateOrderMakeStock(shortOrderId)
         return ResponseEntity.ok(result)

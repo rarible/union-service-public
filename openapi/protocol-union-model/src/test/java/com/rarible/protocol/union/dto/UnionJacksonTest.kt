@@ -49,7 +49,7 @@ class UnionJacksonTest {
 
     @Test
     fun `eth itemId`() {
-        val itemId = UnionItemIdDto(
+        val itemId = ItemIdDto(
             blockchain = BlockchainDto.POLYGON,
             token = UnionAddress(BlockchainDto.POLYGON, "abc"),
             tokenId = BigInteger("123")
@@ -61,13 +61,13 @@ class UnionJacksonTest {
             serialized
         )
 
-        val deserialized = mapper.readValue(serialized, UnionItemIdDto::class.java)
+        val deserialized = mapper.readValue(serialized, ItemIdDto::class.java)
         assertEquals(itemId, deserialized)
     }
 
     @Test
     fun `flow itemId`() {
-        val itemId = UnionItemIdDto(
+        val itemId = ItemIdDto(
             blockchain = BlockchainDto.FLOW,
             token = UnionAddress(BlockchainDto.FLOW, "abc"),
             tokenId = BigInteger("123")
@@ -76,13 +76,13 @@ class UnionJacksonTest {
         val serialized = mapper.writeValueAsString(itemId)
         assertEquals("""{"value":"FLOW:abc:123","blockchain":"FLOW","token":"FLOW:abc","tokenId":123}""", serialized)
 
-        val deserialized = mapper.readValue(serialized, UnionItemIdDto::class.java)
+        val deserialized = mapper.readValue(serialized, ItemIdDto::class.java)
         assertEquals(itemId, deserialized)
     }
 
     @Test
     fun `eth ownershipId`() {
-        val itemId = UnionOwnershipIdDto(
+        val itemId = OwnershipIdDto(
             blockchain = BlockchainDto.ETHEREUM,
             token = UnionAddress(BlockchainDto.ETHEREUM, "abc"),
             tokenId = BigInteger("123"),
@@ -95,13 +95,13 @@ class UnionJacksonTest {
             serialized
         )
 
-        val deserialized = mapper.readValue(serialized, UnionOwnershipIdDto::class.java)
+        val deserialized = mapper.readValue(serialized, OwnershipIdDto::class.java)
         assertEquals(itemId, deserialized)
     }
 
     @Test
     fun `flow ownershipId`() {
-        val ownershipId = UnionOwnershipIdDto(
+        val ownershipId = OwnershipIdDto(
             blockchain = BlockchainDto.FLOW,
             token = UnionAddress(BlockchainDto.FLOW, "abc"),
             tokenId = BigInteger("123"),
@@ -114,51 +114,51 @@ class UnionJacksonTest {
             serialized
         )
 
-        val deserialized = mapper.readValue(serialized, UnionOwnershipIdDto::class.java)
+        val deserialized = mapper.readValue(serialized, OwnershipIdDto::class.java)
         assertEquals(ownershipId, deserialized)
     }
 
     @Test
     fun `eth order id`() {
-        val ethOrderId = UnionOrderIdDto(BlockchainDto.ETHEREUM, "754")
+        val ethOrderId = OrderIdDto(BlockchainDto.ETHEREUM, "754")
 
         val serialized = mapper.writeValueAsString(ethOrderId)
         assertEquals("\"ETHEREUM:754\"", serialized)
 
-        val deserialized = mapper.readValue(serialized, UnionOrderIdDto::class.java)
+        val deserialized = mapper.readValue(serialized, OrderIdDto::class.java)
         assertEquals(ethOrderId, deserialized)
     }
 
     @Test
     fun `flow order id`() {
-        val flowOrderId = UnionOrderIdDto(BlockchainDto.FLOW, "754")
+        val flowOrderId = OrderIdDto(BlockchainDto.FLOW, "754")
 
         val serialized = mapper.writeValueAsString(flowOrderId)
         assertEquals("\"FLOW:754\"", serialized)
 
-        val deserialized = mapper.readValue(serialized, UnionOrderIdDto::class.java)
+        val deserialized = mapper.readValue(serialized, OrderIdDto::class.java)
         assertEquals(flowOrderId, deserialized)
     }
 
     @Test
     fun `eth activity id`() {
-        val ethActivityId = UnionActivityIdDto(BlockchainDto.ETHEREUM, "754")
+        val ethActivityId = ActivityIdDto(BlockchainDto.ETHEREUM, "754")
 
         val serialized = mapper.writeValueAsString(ethActivityId)
         assertEquals("\"ETHEREUM:754\"", serialized)
 
-        val deserialized = mapper.readValue(serialized, UnionActivityIdDto::class.java)
+        val deserialized = mapper.readValue(serialized, ActivityIdDto::class.java)
         assertEquals(ethActivityId, deserialized)
     }
 
     @Test
     fun `flow activity id`() {
-        val flowActivityId = UnionActivityIdDto(BlockchainDto.FLOW, "754")
+        val flowActivityId = ActivityIdDto(BlockchainDto.FLOW, "754")
 
         val serialized = mapper.writeValueAsString(flowActivityId)
         assertEquals("\"FLOW:754\"", serialized)
 
-        val deserialized = mapper.readValue(serialized, UnionActivityIdDto::class.java)
+        val deserialized = mapper.readValue(serialized, ActivityIdDto::class.java)
         assertEquals(flowActivityId, deserialized)
     }
 

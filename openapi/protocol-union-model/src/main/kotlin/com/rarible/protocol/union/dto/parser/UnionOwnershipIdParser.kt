@@ -2,19 +2,19 @@ package com.rarible.protocol.union.dto.parser
 
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.IdParser
+import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.UnionAddress
-import com.rarible.protocol.union.dto.UnionOwnershipIdDto
 import java.math.BigInteger
 
-object UnionOwnershipIdParser {
+object OwnershipIdParser {
 
     /**
      * For full qualifiers like "ETHEREUM:abc:123:xyz"
      */
-    fun parseFull(value: String): UnionOwnershipIdDto {
+    fun parseFull(value: String): OwnershipIdDto {
         val parts = IdParser.split(value, 4)
         val blockchain = BlockchainDto.valueOf(parts[0])
-        return UnionOwnershipIdDto(
+        return OwnershipIdDto(
             blockchain = blockchain,
             token = UnionAddress(blockchain, parts[1]),
             tokenId = BigInteger(parts[2]),
@@ -25,9 +25,9 @@ object UnionOwnershipIdParser {
     /**
      * For short qualifiers like "abc:123:xyz", blockchain should be defined manually
      */
-    fun parseShort(value: String, blockchain: BlockchainDto): UnionOwnershipIdDto {
+    fun parseShort(value: String, blockchain: BlockchainDto): OwnershipIdDto {
         val parts = IdParser.split(value, 3)
-        return UnionOwnershipIdDto(
+        return OwnershipIdDto(
             blockchain = blockchain,
             token = UnionAddress(blockchain, parts[0]),
             tokenId = BigInteger(parts[1]),

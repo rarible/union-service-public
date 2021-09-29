@@ -1,17 +1,30 @@
 package com.rarible.protocol.union.core.flow.converter
 
 import com.rarible.protocol.dto.FlowOrderActivityMatchSideDto
-import com.rarible.protocol.union.dto.*
-import com.rarible.protocol.union.test.data.*
+import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.BurnActivityDto
+import com.rarible.protocol.union.dto.FlowAssetTypeDto
+import com.rarible.protocol.union.dto.MintActivityDto
+import com.rarible.protocol.union.dto.OrderActivityMatchSideDto
+import com.rarible.protocol.union.dto.OrderCancelListActivityDto
+import com.rarible.protocol.union.dto.OrderListActivityDto
+import com.rarible.protocol.union.dto.OrderMatchActivityDto
+import com.rarible.protocol.union.dto.TransferActivityDto
+import com.rarible.protocol.union.test.data.randomFlowBurnDto
+import com.rarible.protocol.union.test.data.randomFlowCancelListActivityDto
+import com.rarible.protocol.union.test.data.randomFlowMintDto
+import com.rarible.protocol.union.test.data.randomFlowNftOrderActivityListDto
+import com.rarible.protocol.union.test.data.randomFlowNftOrderActivitySell
+import com.rarible.protocol.union.test.data.randomFlowTransferDto
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
-class FlowUnionActivityConverterTest {
+class FlowActivityConverterTest {
 
     @Test
     fun `flow order activity match`() {
         val dto = randomFlowNftOrderActivitySell()
-        val converted = FlowUnionActivityConverter.convert(dto, BlockchainDto.FLOW) as UnionOrderMatchActivityDto
+        val converted = FlowActivityConverter.convert(dto, BlockchainDto.FLOW) as OrderMatchActivityDto
 
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.date).isEqualTo(dto.date)
@@ -28,7 +41,7 @@ class FlowUnionActivityConverterTest {
     @Test
     fun `flow order activity list`() {
         val dto = randomFlowNftOrderActivityListDto()
-        val converted = FlowUnionActivityConverter.convert(dto, BlockchainDto.FLOW) as UnionOrderListActivityDto
+        val converted = FlowActivityConverter.convert(dto, BlockchainDto.FLOW) as OrderListActivityDto
 
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.date).isEqualTo(dto.date)
@@ -48,7 +61,7 @@ class FlowUnionActivityConverterTest {
     fun `flow order activity cancel list`() {
         val dto = randomFlowCancelListActivityDto()
         val converted =
-            FlowUnionActivityConverter.convert(dto, BlockchainDto.FLOW) as UnionOrderCancelListActivityDto
+            FlowActivityConverter.convert(dto, BlockchainDto.FLOW) as OrderCancelListActivityDto
 
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.date).isEqualTo(dto.date)
@@ -65,7 +78,7 @@ class FlowUnionActivityConverterTest {
     @Test
     fun `flow item activity mint`() {
         val dto = randomFlowMintDto()
-        val converted = FlowUnionActivityConverter.convert(dto, BlockchainDto.FLOW) as UnionMintActivityDto
+        val converted = FlowActivityConverter.convert(dto, BlockchainDto.FLOW) as MintActivityDto
 
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.date).isEqualTo(dto.date)
@@ -83,7 +96,7 @@ class FlowUnionActivityConverterTest {
     @Test
     fun `flow item activity transfer`() {
         val dto = randomFlowTransferDto()
-        val converted = FlowUnionActivityConverter.convert(dto, BlockchainDto.FLOW) as UnionTransferActivityDto
+        val converted = FlowActivityConverter.convert(dto, BlockchainDto.FLOW) as TransferActivityDto
 
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.date).isEqualTo(dto.date)
@@ -101,7 +114,7 @@ class FlowUnionActivityConverterTest {
     @Test
     fun `flow item activity burn`() {
         val dto = randomFlowBurnDto()
-        val converted = FlowUnionActivityConverter.convert(dto, BlockchainDto.FLOW) as UnionBurnActivityDto
+        val converted = FlowActivityConverter.convert(dto, BlockchainDto.FLOW) as BurnActivityDto
 
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.date).isEqualTo(dto.date)
@@ -117,7 +130,7 @@ class FlowUnionActivityConverterTest {
     }
 
     private fun assertMatchSide(
-        dest: UnionOrderActivityMatchSideDto,
+        dest: OrderActivityMatchSideDto,
         expected: FlowOrderActivityMatchSideDto
     ) {
         //assertThat(dest.asset.value).isEqualTo(expected.asset.value) // TODO - types incompatible

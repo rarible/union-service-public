@@ -3,8 +3,13 @@ package com.rarible.protocol.union.api.controller
 import com.rarible.protocol.union.api.configuration.PageSize
 import com.rarible.protocol.union.core.continuation.ContinuationPaging
 import com.rarible.protocol.union.core.service.ActivityServiceRouter
-import com.rarible.protocol.union.dto.*
-import com.rarible.protocol.union.dto.continuation.UnionActivityContinuation
+import com.rarible.protocol.union.dto.ActivitiesDto
+import com.rarible.protocol.union.dto.ActivitySortDto
+import com.rarible.protocol.union.dto.ActivityTypeDto
+import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.IdParser
+import com.rarible.protocol.union.dto.UserActivityTypeDto
+import com.rarible.protocol.union.dto.continuation.ActivityContinuation
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import org.springframework.http.ResponseEntity
@@ -16,12 +21,12 @@ class ActivityController(
 ) : ActivityControllerApi {
 
     override suspend fun getAllActivities(
-        type: List<UnionActivityTypeDto>,
+        type: List<ActivityTypeDto>,
         blockchains: List<BlockchainDto>?,
         continuation: String?,
         size: Int?,
-        sort: UnionActivitySortDto?
-    ): ResponseEntity<UnionActivitiesDto> {
+        sort: ActivitySortDto?
+    ): ResponseEntity<ActivitiesDto> {
         val safeSize = PageSize.ACTIVITY.limit(size)
         val blockchainPages = router.executeForAll(blockchains) {
             it.getAllActivities(type, continuation, safeSize, sort)
@@ -32,12 +37,12 @@ class ActivityController(
     }
 
     override suspend fun getActivitiesByCollection(
-        type: List<UnionActivityTypeDto>,
+        type: List<ActivityTypeDto>,
         collection: String,
         continuation: String?,
         size: Int?,
-        sort: UnionActivitySortDto?
-    ): ResponseEntity<UnionActivitiesDto> {
+        sort: ActivitySortDto?
+    ): ResponseEntity<ActivitiesDto> {
         val safeSize = PageSize.ACTIVITY.limit(size)
         val (blockchain, shortCollection) = IdParser.parse(collection)
         val result = router.getService(blockchain)
@@ -46,13 +51,13 @@ class ActivityController(
     }
 
     override suspend fun getActivitiesByItem(
-        type: List<UnionActivityTypeDto>,
+        type: List<ActivityTypeDto>,
         contract: String,
         tokenId: String,
         continuation: String?,
         size: Int?,
-        sort: UnionActivitySortDto?
-    ): ResponseEntity<UnionActivitiesDto> {
+        sort: ActivitySortDto?
+    ): ResponseEntity<ActivitiesDto> {
         val safeSize = PageSize.ACTIVITY.limit(size)
         val (blockchain, shortContact) = IdParser.parse(contract)
         val result = router.getService(blockchain)
@@ -61,12 +66,12 @@ class ActivityController(
     }
 
     override suspend fun getActivitiesByUser(
-        type: List<UnionUserActivityTypeDto>,
+        type: List<UserActivityTypeDto>,
         user: List<String>,
         continuation: String?,
         size: Int?,
-        sort: UnionActivitySortDto?
-    ): ResponseEntity<UnionActivitiesDto> {
+        sort: ActivitySortDto?
+    ): ResponseEntity<ActivitiesDto> {
         val safeSize = PageSize.ACTIVITY.limit(size)
         val groupedByBlockchain = user.map { IdParser.parse(it) }
             .groupBy({ it.first }, { it.second })
@@ -87,13 +92,13 @@ class ActivityController(
     }
 
     private fun merge(
-        blockchainPages: List<UnionActivitiesDto>,
+        blockchainPages: List<ActivitiesDto>,
         size: Int,
-        sort: UnionActivitySortDto?
-    ): UnionActivitiesDto {
+        sort: ActivitySortDto?
+    ): ActivitiesDto {
         val continuationFactory = when (sort) {
-            UnionActivitySortDto.EARLIEST_FIRST -> UnionActivityContinuation.ByLastUpdatedAndIdAsc
-            UnionActivitySortDto.LATEST_FIRST, null -> UnionActivityContinuation.ByLastUpdatedAndIdDesc
+            ActivitySortDto.EARLIEST_FIRST -> ActivityContinuation.ByLastUpdatedAndIdAsc
+            ActivitySortDto.LATEST_FIRST, null -> ActivityContinuation.ByLastUpdatedAndIdDesc
         }
 
         val combinedPage = ContinuationPaging(
@@ -101,6 +106,6 @@ class ActivityController(
             blockchainPages.flatMap { it.activities }
         ).getPage(size)
 
-        return UnionActivitiesDto(combinedPage.printContinuation(), combinedPage.entities)
+        return ActivitiesDto(combinedPage.printContinuation(), combinedPage.entities)
     }
 }

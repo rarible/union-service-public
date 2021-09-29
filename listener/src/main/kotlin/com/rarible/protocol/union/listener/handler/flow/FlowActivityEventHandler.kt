@@ -3,14 +3,14 @@ package com.rarible.protocol.union.listener.handler.flow
 import com.rarible.core.kafka.KafkaMessage
 import com.rarible.core.kafka.RaribleKafkaProducer
 import com.rarible.protocol.dto.FlowActivityDto
-import com.rarible.protocol.union.core.flow.converter.FlowUnionActivityConverter
+import com.rarible.protocol.union.core.flow.converter.FlowActivityConverter
+import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.UnionActivityDto
 import com.rarible.protocol.union.listener.handler.AbstractEventHandler
 import org.slf4j.LoggerFactory
 
 class FlowActivityEventHandler(
-    private val producer: RaribleKafkaProducer<UnionActivityDto>,
+    private val producer: RaribleKafkaProducer<ActivityDto>,
     private val blockchain: BlockchainDto
 ) : AbstractEventHandler<FlowActivityDto>() {
 
@@ -19,10 +19,10 @@ class FlowActivityEventHandler(
     override suspend fun handleSafely(event: FlowActivityDto) {
         logger.debug("Received Flow ({}) Activity event: type={}", event::class.java.simpleName)
 
-        val unionEventDto = FlowUnionActivityConverter.convert(event, blockchain)
+        val unionEventDto = FlowActivityConverter.convert(event, blockchain)
 
         val message = KafkaMessage(
-            key = event.id,
+            key = unionEventDto.id.fullId(),
             value = unionEventDto,
             headers = ACTIVITY_EVENT_HEADERS
         )

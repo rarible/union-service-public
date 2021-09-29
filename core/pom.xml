@@ -49,6 +49,14 @@
             <artifactId>rarible-core-common</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.rarible.core</groupId>
+            <artifactId>rarible-core-mongo</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.rarible.core</groupId>
+            <artifactId>rarible-core-kafka</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.rarible.ethereum</groupId>
             <artifactId>rarible-ethereum-converters</artifactId>
         </dependency>
@@ -71,10 +79,6 @@
         <dependency>
             <groupId>com.rarible.protocol</groupId>
             <artifactId>protocol-client-erc20-starter</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.rarible.protocol</groupId>
-            <artifactId>protocol-client-nft-order-starter</artifactId>
         </dependency>
         <dependency>
             <groupId>com.rarible.protocol</groupId>

@@ -4,14 +4,28 @@ import com.rarible.core.kafka.KafkaMessage
 import com.rarible.core.kafka.RaribleKafkaConsumer
 import com.rarible.core.kafka.RaribleKafkaProducer
 import com.rarible.core.test.data.randomString
-import com.rarible.protocol.dto.*
 import com.rarible.protocol.dto.FlowActivityDto
+import com.rarible.protocol.dto.FlowNftItemEventDto
 import com.rarible.protocol.dto.FlowOrderEventDto
 import com.rarible.protocol.dto.FlowOwnershipEventDto
-import com.rarible.protocol.union.dto.*
-import com.rarible.protocol.union.dto.UnionOrderUpdateEventDto
-import kotlinx.coroutines.*
+import com.rarible.protocol.dto.NftItemEventDto
+import com.rarible.protocol.dto.NftOwnershipEventDto
+import com.rarible.protocol.union.dto.ActivityDto
+import com.rarible.protocol.union.dto.ItemDeleteEventDto
+import com.rarible.protocol.union.dto.ItemEventDto
+import com.rarible.protocol.union.dto.ItemUpdateEventDto
+import com.rarible.protocol.union.dto.OrderEventDto
+import com.rarible.protocol.union.dto.OrderUpdateEventDto
+import com.rarible.protocol.union.dto.OwnershipDeleteEventDto
+import com.rarible.protocol.union.dto.OwnershipEventDto
+import com.rarible.protocol.union.dto.OwnershipUpdateEventDto
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.async
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.runBlocking
 import org.springframework.beans.factory.annotation.Autowired
 import java.util.*
 import java.util.concurrent.LinkedBlockingQueue
@@ -27,10 +41,10 @@ abstract class AbstractIntegrationTest {
     lateinit var ethOwnershipProducer: RaribleKafkaProducer<NftOwnershipEventDto>
 
     @Autowired
-    lateinit var ethOrderProducer: RaribleKafkaProducer<OrderEventDto>
+    lateinit var ethOrderProducer: RaribleKafkaProducer<com.rarible.protocol.dto.OrderEventDto>
 
     @Autowired
-    lateinit var ethActivityProducer: RaribleKafkaProducer<ActivityDto>
+    lateinit var ethActivityProducer: RaribleKafkaProducer<com.rarible.protocol.dto.ActivityDto>
 
     @Autowired
     lateinit var flowItemProducer: RaribleKafkaProducer<FlowNftItemEventDto>
@@ -45,23 +59,23 @@ abstract class AbstractIntegrationTest {
     lateinit var flowActivityProducer: RaribleKafkaProducer<FlowActivityDto>
 
     @Autowired
-    lateinit var itemConsumer: RaribleKafkaConsumer<UnionItemEventDto>
-    var itemEvents: Queue<KafkaMessage<UnionItemEventDto>>? = null
+    lateinit var itemConsumer: RaribleKafkaConsumer<ItemEventDto>
+    var itemEvents: Queue<KafkaMessage<ItemEventDto>>? = null
     private var itemJob: Deferred<Unit>? = null
 
     @Autowired
-    lateinit var ownershipConsumer: RaribleKafkaConsumer<UnionOwnershipEventDto>
-    var ownershipEvents: Queue<KafkaMessage<UnionOwnershipEventDto>>? = null
+    lateinit var ownershipConsumer: RaribleKafkaConsumer<OwnershipEventDto>
+    var ownershipEvents: Queue<KafkaMessage<OwnershipEventDto>>? = null
     private var ownershipJob: Deferred<Unit>? = null
 
     @Autowired
-    lateinit var orderConsumer: RaribleKafkaConsumer<UnionOrderEventDto>
-    var orderEvents: Queue<KafkaMessage<UnionOrderEventDto>>? = null
+    lateinit var orderConsumer: RaribleKafkaConsumer<OrderEventDto>
+    var orderEvents: Queue<KafkaMessage<OrderEventDto>>? = null
     private var orderJob: Deferred<Unit>? = null
 
     @Autowired
-    lateinit var activityConsumer: RaribleKafkaConsumer<UnionActivityDto>
-    var activityEvents: Queue<KafkaMessage<UnionActivityDto>>? = null
+    lateinit var activityConsumer: RaribleKafkaConsumer<ActivityDto>
+    var activityEvents: Queue<KafkaMessage<ActivityDto>>? = null
     private var activityJob: Deferred<Unit>? = null
 
     fun <T> runWithKafka(block: suspend CoroutineScope.() -> T): T = runBlocking<T> {
@@ -88,57 +102,57 @@ abstract class AbstractIntegrationTest {
         result
     }
 
-    fun findEthItemUpdates(itemId: String): List<KafkaMessage<UnionItemUpdateEventDto>> {
-        return filterByValueType(itemEvents as Queue<KafkaMessage<Any>>, UnionItemUpdateEventDto::class.java)
+    fun findEthItemUpdates(itemId: String): List<KafkaMessage<ItemUpdateEventDto>> {
+        return filterByValueType(itemEvents as Queue<KafkaMessage<Any>>, ItemUpdateEventDto::class.java)
             .filter { it.value.itemId.value == itemId }
     }
 
-    fun findEthItemDeletions(itemId: String): List<KafkaMessage<UnionItemDeleteEventDto>> {
-        return filterByValueType(itemEvents as Queue<KafkaMessage<Any>>, UnionItemDeleteEventDto::class.java)
+    fun findEthItemDeletions(itemId: String): List<KafkaMessage<ItemDeleteEventDto>> {
+        return filterByValueType(itemEvents as Queue<KafkaMessage<Any>>, ItemDeleteEventDto::class.java)
             .filter { it.value.itemId.value == itemId }
     }
 
-    fun findEthOwnershipUpdates(ownershipId: String): List<KafkaMessage<UnionOwnershipUpdateEventDto>> {
-        return filterByValueType(ownershipEvents as Queue<KafkaMessage<Any>>, UnionOwnershipUpdateEventDto::class.java)
+    fun findEthOwnershipUpdates(ownershipId: String): List<KafkaMessage<OwnershipUpdateEventDto>> {
+        return filterByValueType(ownershipEvents as Queue<KafkaMessage<Any>>, OwnershipUpdateEventDto::class.java)
             .filter { it.value.ownershipId.value == ownershipId }
     }
 
-    fun findEthOwnershipDeletions(ownershipId: String): List<KafkaMessage<UnionOwnershipDeleteEventDto>> {
-        return filterByValueType(ownershipEvents as Queue<KafkaMessage<Any>>, UnionOwnershipDeleteEventDto::class.java)
+    fun findEthOwnershipDeletions(ownershipId: String): List<KafkaMessage<OwnershipDeleteEventDto>> {
+        return filterByValueType(ownershipEvents as Queue<KafkaMessage<Any>>, OwnershipDeleteEventDto::class.java)
             .filter { it.value.ownershipId.value == ownershipId }
     }
 
-    fun findEthOrderUpdates(orderId: String): List<KafkaMessage<UnionOrderUpdateEventDto>> {
-        return filterByValueType(orderEvents as Queue<KafkaMessage<Any>>, UnionOrderUpdateEventDto::class.java)
+    fun findEthOrderUpdates(orderId: String): List<KafkaMessage<OrderUpdateEventDto>> {
+        return filterByValueType(orderEvents as Queue<KafkaMessage<Any>>, OrderUpdateEventDto::class.java)
             .filter { it.value.orderId.value == orderId }
     }
 
-    fun findFlowItemUpdates(itemId: String): List<KafkaMessage<UnionItemUpdateEventDto>> {
-        return filterByValueType(itemEvents as Queue<KafkaMessage<Any>>, UnionItemUpdateEventDto::class.java)
+    fun findFlowItemUpdates(itemId: String): List<KafkaMessage<ItemUpdateEventDto>> {
+        return filterByValueType(itemEvents as Queue<KafkaMessage<Any>>, ItemUpdateEventDto::class.java)
             .filter { it.value.itemId.value == itemId }
     }
 
-    fun findFlowItemDeletions(itemId: String): List<KafkaMessage<UnionItemDeleteEventDto>> {
-        return filterByValueType(itemEvents as Queue<KafkaMessage<Any>>, UnionItemDeleteEventDto::class.java)
+    fun findFlowItemDeletions(itemId: String): List<KafkaMessage<ItemDeleteEventDto>> {
+        return filterByValueType(itemEvents as Queue<KafkaMessage<Any>>, ItemDeleteEventDto::class.java)
             .filter { it.value.itemId.value == itemId }
     }
 
-    fun findFlowOwnershipUpdates(ownershipId: String): List<KafkaMessage<UnionOwnershipUpdateEventDto>> {
-        return filterByValueType(ownershipEvents as Queue<KafkaMessage<Any>>, UnionOwnershipUpdateEventDto::class.java)
+    fun findFlowOwnershipUpdates(ownershipId: String): List<KafkaMessage<OwnershipUpdateEventDto>> {
+        return filterByValueType(ownershipEvents as Queue<KafkaMessage<Any>>, OwnershipUpdateEventDto::class.java)
             .filter { it.value.ownershipId.value == ownershipId }
     }
 
-    fun findFlowOwnershipDeletions(ownershipId: String): List<KafkaMessage<UnionOwnershipDeleteEventDto>> {
-        return filterByValueType(ownershipEvents as Queue<KafkaMessage<Any>>, UnionOwnershipDeleteEventDto::class.java)
+    fun findFlowOwnershipDeletions(ownershipId: String): List<KafkaMessage<OwnershipDeleteEventDto>> {
+        return filterByValueType(ownershipEvents as Queue<KafkaMessage<Any>>, OwnershipDeleteEventDto::class.java)
             .filter { it.value.ownershipId.value == ownershipId }
     }
 
-    fun findFlowOrderUpdates(orderId: String): List<KafkaMessage<UnionOrderUpdateEventDto>> {
-        return filterByValueType(orderEvents as Queue<KafkaMessage<Any>>, UnionOrderUpdateEventDto::class.java)
+    fun findFlowOrderUpdates(orderId: String): List<KafkaMessage<OrderUpdateEventDto>> {
+        return filterByValueType(orderEvents as Queue<KafkaMessage<Any>>, OrderUpdateEventDto::class.java)
             .filter { it.value.orderId.value == orderId }
     }
 
-    fun <T : UnionActivityDto> findEthActivityUpdates(
+    fun <T : ActivityDto> findEthActivityUpdates(
         id: String,
         type: Class<T>
     ): List<KafkaMessage<T>> {
@@ -146,7 +160,7 @@ abstract class AbstractIntegrationTest {
             .filter { it.value.id.value == id }
     }
 
-    fun <T : UnionActivityDto> findFlowActivityUpdates(
+    fun <T : ActivityDto> findFlowActivityUpdates(
         id: String,
         type: Class<T>
     ): List<KafkaMessage<T>> {

@@ -16,7 +16,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UnionSignatureValidationForm"
+              $ref: "#/components/schemas/SignatureValidationForm"
         required: true
       responses:
         '200':
@@ -50,7 +50,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UnionItem"
+                $ref: "#/components/schemas/Item"
         '404':
           $ref: "#/components/responses/EntityNotFound"
         '400':
@@ -85,7 +85,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UnionItems"
+                $ref: "#/components/schemas/Items"
         '400':
           $ref: "#/components/responses/BadRequest"
         '500':
@@ -118,7 +118,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UnionItems"
+                $ref: "#/components/schemas/Items"
         '400':
           $ref: "#/components/responses/BadRequest"
         '500':
@@ -151,7 +151,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UnionItems"
+                $ref: "#/components/schemas/Items"
         '400':
           $ref: "#/components/responses/BadRequest"
         '500':
@@ -203,7 +203,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UnionItems"
+                $ref: "#/components/schemas/Items"
         '400':
           $ref: "#/components/responses/BadRequest"
         '500':
@@ -228,7 +228,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UnionOwnership"
+                $ref: "#/components/schemas/Ownership"
         '404':
           $ref: "#/components/responses/EntityNotFound"
         '400':
@@ -268,7 +268,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UnionOwnerships"
+                $ref: "#/components/schemas/Ownerships"
         '400':
           $ref: "#/components/responses/BadRequest"
         '500':
@@ -303,7 +303,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UnionOwnerships"
+                $ref: "#/components/schemas/Ownerships"
         '400':
           $ref: "#/components/responses/BadRequest"
         '500':
@@ -328,7 +328,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UnionOrder"
+                $ref: "#/components/schemas/Order"
         '404':
           $ref: "#/components/responses/EntityNotFound"
         '400':
@@ -353,7 +353,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UnionOrder"
+                $ref: "#/components/schemas/Order"
         '404':
           $ref: "#/components/responses/EntityNotFound"
         '400':
@@ -400,7 +400,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UnionOrders"
+                $ref: "#/components/schemas/Orders"
         '400':
           $ref: "#/components/responses/BadRequest"
         '500':
@@ -444,7 +444,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UnionOrders"
+                $ref: "#/components/schemas/Orders"
         '400':
           $ref: "#/components/responses/BadRequest"
         '500':
@@ -498,7 +498,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UnionOrders"
+                $ref: "#/components/schemas/Orders"
         '400':
           $ref: "#/components/responses/BadRequest"
         '500':
@@ -543,7 +543,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UnionOrders"
+                $ref: "#/components/schemas/Orders"
         '400':
           $ref: "#/components/responses/BadRequest"
         '500':
@@ -590,7 +590,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UnionOrders"
+                $ref: "#/components/schemas/Orders"
         '400':
           $ref: "#/components/responses/BadRequest"
         '500':
@@ -635,7 +635,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UnionOrders"
+                $ref: "#/components/schemas/Orders"
         '400':
           $ref: "#/components/responses/BadRequest"
         '500':
@@ -688,7 +688,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UnionOrders"
+                $ref: "#/components/schemas/Orders"
         '400':
           $ref: "#/components/responses/BadRequest"
         '500':
@@ -708,7 +708,7 @@ paths:
           schema:
             type: "array"
             items:
-              $ref: "#/components/schemas/UnionUserActivityType"
+              $ref: "#/components/schemas/UserActivityType"
         - name: "user"
           in: query
           required: true
@@ -730,14 +730,14 @@ paths:
           in: query
           required: false
           schema:
-            "$ref": "#/components/schemas/UnionActivitySort"
+            "$ref": "#/components/schemas/ActivitySort"
       responses:
         "200":
           description: "OK"
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UnionActivities"
+                $ref: "#/components/schemas/Activities"
         '400':
           $ref: "#/components/responses/BadRequest"
         '500':
@@ -755,7 +755,7 @@ paths:
           schema:
             type: "array"
             items:
-              $ref: "#/components/schemas/UnionActivityType"
+              $ref: "#/components/schemas/ActivityType"
         - name: "contract"
           in: query
           required: true
@@ -780,14 +780,14 @@ paths:
           in: query
           required: false
           schema:
-            "$ref": "#/components/schemas/UnionActivitySort"
+            "$ref": "#/components/schemas/ActivitySort"
       responses:
         "200":
           description: "OK"
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UnionActivities"
+                $ref: "#/components/schemas/Activities"
         '400':
           $ref: "#/components/responses/BadRequest"
         '500':
@@ -805,7 +805,7 @@ paths:
           schema:
             type: "array"
             items:
-              $ref: "#/components/schemas/UnionActivityType"
+              $ref: "#/components/schemas/ActivityType"
         - name: "collection"
           in: query
           required: true
@@ -825,14 +825,14 @@ paths:
           in: query
           required: false
           schema:
-            "$ref": "#/components/schemas/UnionActivitySort"
+            "$ref": "#/components/schemas/ActivitySort"
       responses:
         "200":
           description: "OK"
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UnionActivities"
+                $ref: "#/components/schemas/Activities"
         '400':
           $ref: "#/components/responses/BadRequest"
         '500':
@@ -857,7 +857,7 @@ paths:
           schema:
             type: "array"
             items:
-              $ref: "#/components/schemas/UnionActivityType"
+              $ref: "#/components/schemas/ActivityType"
         - name: "continuation"
           in: query
           required: false
@@ -873,14 +873,14 @@ paths:
           in: query
           required: false
           schema:
-            "$ref": "#/components/schemas/UnionActivitySort"
+            "$ref": "#/components/schemas/ActivitySort"
       responses:
         "200":
           description: "OK"
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UnionActivities"
+                $ref: "#/components/schemas/Activities"
         '400':
           $ref: "#/components/responses/BadRequest"
         '500':
@@ -906,7 +906,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UnionCollection"
+                $ref: "#/components/schemas/Collection"
         '404':
           $ref: "#/components/responses/EntityNotFound"
         '400':
@@ -942,7 +942,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UnionCollections"
+                $ref: "#/components/schemas/Collections"
         '400':
           $ref: "#/components/responses/BadRequest"
         '500':
@@ -978,7 +978,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UnionCollections"
+                $ref: "#/components/schemas/Collections"
         '400':
           $ref: "#/components/responses/BadRequest"
         '500':

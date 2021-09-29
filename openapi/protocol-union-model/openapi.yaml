@@ -11,6 +11,7 @@ components:
         - ALL
         - RARIBLE
         - OPEN_SEA
+        - CRYPTO_PUNKS
 
     Blockchain:
       type: string
@@ -21,7 +22,7 @@ components:
 
     #################### Sign - Union ####################
 
-    UnionSignatureValidationForm:
+    SignatureValidationForm:
       required:
         - signer
         - message
@@ -37,7 +38,7 @@ components:
 
     #################### Meta - Union ####################
 
-    UnionMeta:
+    Meta:
       type: object
       properties:
         name:
@@ -48,12 +49,12 @@ components:
           type: array
           default: [ ]
           items:
-            $ref: "#/components/schemas/UnionMetaAttribute"
+            $ref: "#/components/schemas/MetaAttribute"
         contents:
           type: array
           default: [ ]
           items:
-            $ref: "#/components/schemas/UnionMetaContent"
+            $ref: "#/components/schemas/MetaContent"
         raw:
           type: string
       required:
@@ -61,7 +62,7 @@ components:
         - attributes
         - contents
 
-    UnionMetaContent:
+    MetaContent:
       type: object
       properties:
         typeContent:
@@ -72,13 +73,13 @@ components:
           type: array
           default: [ ]
           items:
-            $ref: "#/components/schemas/UnionMetaAttribute"
+            $ref: "#/components/schemas/MetaAttribute"
       required:
         - typeContent
         - url
         - attributes
 
-    UnionMetaAttribute:
+    MetaAttribute:
       type: object
       properties:
         key:
@@ -91,7 +92,7 @@ components:
 
     #################### Item - Union ####################
 
-    UnionItemId:
+    ItemId:
       type: object
       properties:
         value:
@@ -109,11 +110,11 @@ components:
         - token
         - tokenId
 
-    UnionItem:
+    Item:
       type: object
       properties:
         id:
-          $ref: "#/components/schemas/UnionItemId"
+          $ref: "#/components/schemas/ItemId"
         tokenId:
           $ref: "#/components/schemas/BigInteger"
         collection:
@@ -122,7 +123,7 @@ components:
           type: array
           default: [ ]
           items:
-            $ref: "#/components/schemas/UnionCreator"
+            $ref: "#/components/schemas/Creator"
         owners:
           type: array
           default: [ ]
@@ -132,14 +133,14 @@ components:
           type: array
           default: [ ]
           items:
-            $ref: "#/components/schemas/UnionRoyalty"
+            $ref: "#/components/schemas/Royalty"
         lazySupply:
           $ref: "#/components/schemas/BigInteger"
         pending:
           type: array
           default: [ ]
           items:
-            $ref: "#/components/schemas/UnionItemTransfer"
+            $ref: "#/components/schemas/ItemTransfer"
         mintedAt:
           type: string
           format: date-time
@@ -152,7 +153,7 @@ components:
           type: string
           example: "ipfs://ipfs/QmPe1W8XiUYdsvdpvgWVwekQ7cDQivRMak3YPX15vxvSJs"
         meta:
-          $ref: "#/components/schemas/UnionMeta"
+          $ref: "#/components/schemas/Meta"
         deleted:
           type: boolean
       required:
@@ -169,7 +170,81 @@ components:
         - supply
         - deleted
 
-    UnionItems:
+    ExtendedItem:
+      type: object
+      properties:
+        id:
+          $ref: "#/components/schemas/ItemId"
+        tokenId:
+          $ref: "#/components/schemas/BigInteger"
+        collection:
+          $ref: "#/components/schemas/UnionAddress"
+        creators:
+          type: array
+          default: [ ]
+          items:
+            $ref: "#/components/schemas/Creator"
+        owners:
+          type: array
+          default: [ ]
+          items:
+            $ref: "#/components/schemas/UnionAddress"
+        royalties:
+          type: array
+          default: [ ]
+          items:
+            $ref: "#/components/schemas/Royalty"
+        lazySupply:
+          $ref: "#/components/schemas/BigInteger"
+        pending:
+          type: array
+          default: [ ]
+          items:
+            $ref: "#/components/schemas/ItemTransfer"
+        mintedAt:
+          type: string
+          format: date-time
+        lastUpdatedAt:
+          type: string
+          format: date-time
+        supply:
+          $ref: "#/components/schemas/BigInteger"
+        metaUrl:
+          type: string
+          example: "ipfs://ipfs/QmPe1W8XiUYdsvdpvgWVwekQ7cDQivRMak3YPX15vxvSJs"
+        meta:
+          $ref: "#/components/schemas/Meta"
+        deleted:
+          type: boolean
+        bestSellOrder:
+          $ref: "#/components/schemas/Order"
+        bestBidOrder:
+          $ref: "#/components/schemas/Order"
+        totalStock:
+          $ref: "#/components/schemas/BigInteger"
+        sellers:
+          type: integer
+        unlockable:
+          type: boolean
+          description: "Was item locked"
+      required:
+        - id
+        - tokenId
+        - collection
+        - creators
+        - owners
+        - royalties
+        - lazySupply
+        - pending
+        - mintedAt
+        - lastUpdatedAt
+        - supply
+        - deleted
+        - tokenId
+        - sellers
+        - unlockable
+
+    Items:
       type: object
       properties:
         total:
@@ -184,26 +259,26 @@ components:
           description: "List of found items"
           default: [ ]
           items:
-            $ref: "#/components/schemas/UnionItem"
+            $ref: "#/components/schemas/Item"
       required:
         - total
         - items
 
-    UnionItemEvent:
+    ItemEvent:
       type: object
       properties:
         itemId:
-          $ref: "#/components/schemas/UnionItemId"
+          $ref: "#/components/schemas/ItemId"
         eventId:
           type: string
       required:
         - eventId
         - itemId
       oneOf:
-        - $ref: "#/components/schemas/UnionItemUpdateEvent"
-        - $ref: "#/components/schemas/UnionItemDeleteEvent"
+        - $ref: "#/components/schemas/ItemUpdateEvent"
+        - $ref: "#/components/schemas/ItemDeleteEvent"
 
-    UnionItemUpdateEvent:
+    ItemUpdateEvent:
       type: object
       properties:
         "@type":
@@ -211,12 +286,12 @@ components:
           enum:
             - UPDATE
         item:
-          $ref: "#/components/schemas/UnionItem"
+          $ref: "#/components/schemas/ExtendedItem"
       required:
         - "@type"
         - item
 
-    UnionItemDeleteEvent:
+    ItemDeleteEvent:
       type: object
       properties:
         "@type":
@@ -229,7 +304,7 @@ components:
 
     #################### Ownership - Union ####################
 
-    UnionOwnershipId:
+    OwnershipId:
       type: object
       properties:
         value:
@@ -250,11 +325,11 @@ components:
         - tokenId
         - owner
 
-    UnionOwnership:
+    Ownership:
       type: object
       properties:
         id:
-          $ref: "#/components/schemas/UnionOwnershipId"
+          $ref: "#/components/schemas/OwnershipId"
         value:
           $ref: "#/components/schemas/BigInteger"
         createdAt:
@@ -270,14 +345,14 @@ components:
           type: array
           default: [ ]
           items:
-            $ref: "#/components/schemas/UnionCreator"
+            $ref: "#/components/schemas/Creator"
         lazyValue:
           $ref: "#/components/schemas/BigInteger"
         pending:
           type: array
           default: [ ]
           items:
-            $ref: "#/components/schemas/UnionItemHistory"
+            $ref: "#/components/schemas/ItemHistory"
       required:
         - id
         - value
@@ -289,7 +364,48 @@ components:
         - lazyValue
         - pending
 
-    UnionItemHistory:
+    ExtendedOwnership:
+      type: object
+      properties:
+        id:
+          $ref: "#/components/schemas/OwnershipId"
+        value:
+          $ref: "#/components/schemas/BigInteger"
+        createdAt:
+          type: string
+          format: "date-time"
+        contract:
+          $ref: "#/components/schemas/UnionAddress"
+        tokenId:
+          $ref: "#/components/schemas/BigInteger"
+        owner:
+          $ref: "#/components/schemas/UnionAddress"
+        creators:
+          type: array
+          default: [ ]
+          items:
+            $ref: "#/components/schemas/Creator"
+        lazyValue:
+          $ref: "#/components/schemas/BigInteger"
+        pending:
+          type: array
+          default: [ ]
+          items:
+            $ref: "#/components/schemas/ItemHistory"
+        bestSellOrder:
+          $ref: "#/components/schemas/Order"
+      required:
+        - id
+        - value
+        - createdAt
+        - contract
+        - tokenId
+        - owner
+        - creators
+        - lazyValue
+        - pending
+
+    ItemHistory:
       type: object
       properties:
         owner:
@@ -309,10 +425,10 @@ components:
         - tokenId
         - date
       oneOf:
-        - "$ref": "#/components/schemas/UnionItemRoyalty"
-        - "$ref": "#/components/schemas/UnionItemTransfer"
+        - "$ref": "#/components/schemas/ItemRoyalty"
+        - "$ref": "#/components/schemas/ItemTransfer"
 
-    UnionItemRoyalty:
+    ItemRoyalty:
       type: object
       properties:
         "@type":
@@ -323,12 +439,12 @@ components:
           type: array
           default: [ ]
           items:
-            "$ref": "#/components/schemas/UnionRoyalty"
+            "$ref": "#/components/schemas/Royalty"
       required:
         - "@type"
         - royalties
 
-    UnionItemTransfer:
+    ItemTransfer:
       type: object
       properties:
         "@type":
@@ -343,7 +459,7 @@ components:
         - value
         - from
 
-    UnionRoyalty:
+    Royalty:
       type: object
       required:
         - account
@@ -354,7 +470,7 @@ components:
         value:
           $ref: "#/components/schemas/BigDecimal"
 
-    UnionCreator:
+    Creator:
       type: object
       properties:
         account:
@@ -365,7 +481,7 @@ components:
         - account
         - value
 
-    UnionOwnerships:
+    Ownerships:
       type: object
       properties:
         total:
@@ -380,26 +496,26 @@ components:
           default: [ ]
           description: "List of found ownerships"
           items:
-            $ref: "#/components/schemas/UnionOwnership"
+            $ref: "#/components/schemas/Ownership"
       required:
         - total
         - ownerships
 
-    UnionOwnershipEvent:
+    OwnershipEvent:
       type: object
       properties:
         ownershipId:
-          $ref: "#/components/schemas/UnionOwnershipId"
+          $ref: "#/components/schemas/OwnershipId"
         eventId:
           type: string
       required:
         - ownershipId
         - eventId
       oneOf:
-        - $ref: "#/components/schemas/UnionOwnershipUpdateEvent"
-        - $ref: "#/components/schemas/UnionOwnershipDeleteEvent"
+        - $ref: "#/components/schemas/OwnershipUpdateEvent"
+        - $ref: "#/components/schemas/OwnershipDeleteEvent"
 
-    UnionOwnershipUpdateEvent:
+    OwnershipUpdateEvent:
       type: object
       properties:
         "@type":
@@ -407,12 +523,12 @@ components:
           enum:
             - UPDATE
         ownership:
-          $ref: "#/components/schemas/UnionOwnership"
+          $ref: "#/components/schemas/ExtendedOwnership"
       required:
         - "@type"
         - ownership
 
-    UnionOwnershipDeleteEvent:
+    OwnershipDeleteEvent:
       type: object
       properties:
         "@type":
@@ -424,17 +540,19 @@ components:
 
     #################### Order - Union ####################
 
-    UnionOrderId:
+    OrderId:
       type: object
       example: "${blockchain}:${id}"
 
-    UnionOrder:
+    Order:
       type: object
       properties:
         id:
-          $ref: "#/components/schemas/UnionOrderId"
+          $ref: "#/components/schemas/OrderId"
         fill:
           $ref: "#/components/schemas/BigInteger"
+        platform:
+          $ref: "#/components/schemas/Platform"
         startedAt:
           type: string
           format: "date-time"
@@ -459,15 +577,15 @@ components:
           type: array
           default: [ ]
           items:
-            $ref: "#/components/schemas/UnionOrderPriceHistoryRecord"
+            $ref: "#/components/schemas/OrderPriceHistoryRecord"
         maker:
           $ref: "#/components/schemas/UnionAddress"
         taker:
           $ref: "#/components/schemas/UnionAddress"
         make:
-          $ref: "#/components/schemas/UnionAsset"
+          $ref: "#/components/schemas/Asset"
         take:
-          $ref: "#/components/schemas/UnionAsset"
+          $ref: "#/components/schemas/Asset"
         salt:
           type: string
         signature:
@@ -476,11 +594,12 @@ components:
           type: array
           default: [ ]
           items:
-            $ref: "#/components/schemas/UnionPendingOrder"
+            $ref: "#/components/schemas/PendingOrder"
         data:
-          $ref: "#/components/schemas/UnionOrderData"
+          $ref: "#/components/schemas/OrderData"
       required:
         - id
+        - platform
         - fill
         - makeStock
         - cancelled
@@ -494,7 +613,7 @@ components:
         - salt
         - data
 
-    UnionOrderData:
+    OrderData:
       type: object
       oneOf:
         - "$ref": "#/components/schemas/EthOrderDataLegacy"
@@ -503,7 +622,7 @@ components:
         - "$ref": "#/components/schemas/EthOrderCryptoPunksData"
         - "$ref": "#/components/schemas/FlowOrderDataV1"
 
-    UnionOrderPriceHistoryRecord:
+    OrderPriceHistoryRecord:
       type: object
       required:
         - date
@@ -518,7 +637,7 @@ components:
         takeValue:
           $ref: "#/components/schemas/BigDecimal"
 
-    UnionOrders:
+    Orders:
       type: object
       properties:
         continuation:
@@ -529,25 +648,25 @@ components:
           description: "List of found orders"
           default: [ ]
           items:
-            $ref: "#/components/schemas/UnionOrder"
+            $ref: "#/components/schemas/Order"
       required:
         - total
         - orders
 
-    UnionOrderEvent:
+    OrderEvent:
       type: object
       properties:
         orderId:
-          "$ref": "#/components/schemas/UnionOrderId"
+          "$ref": "#/components/schemas/OrderId"
         eventId:
           type: string
       required:
         - orderId
         - eventId
       oneOf:
-        - "$ref": "#/components/schemas/UnionOrderUpdateEvent"
+        - "$ref": "#/components/schemas/OrderUpdateEvent"
 
-    UnionOrderUpdateEvent:
+    OrderUpdateEvent:
       type: object
       properties:
         "@type":
@@ -555,24 +674,24 @@ components:
           enum:
             - UPDATE
         order:
-          "$ref": "#/components/schemas/UnionOrder"
+          "$ref": "#/components/schemas/Order"
       required:
         - "@type"
         - order
 
     #################### Activity - Union ####################
 
-    UnionActivityId:
+    ActivityId:
       type: object
       example: "${blockchain}:${id}"
 
-    UnionActivitySort:
+    ActivitySort:
       type: string
       enum:
         - LATEST_FIRST
         - EARLIEST_FIRST
 
-    UnionActivityType:
+    ActivityType:
       type: string
       enum:
         - TRANSFER
@@ -582,7 +701,7 @@ components:
         - LIST
         - SELL
 
-    UnionUserActivityType:
+    UserActivityType:
       type: string
       enum:
         - TRANSFER_FROM
@@ -595,29 +714,29 @@ components:
         - BUY
         - SELL
 
-    UnionActivity:
+    Activity:
       type: object
       properties:
         id:
-          $ref: "#/components/schemas/UnionActivityId"
+          $ref: "#/components/schemas/ActivityId"
         date:
           type: string
           format: "date-time"
       oneOf:
-        - $ref: "#/components/schemas/UnionMintActivity"
-        - $ref: "#/components/schemas/UnionBurnActivity"
-        - $ref: "#/components/schemas/UnionTransferActivity"
-        - $ref: "#/components/schemas/UnionOrderSellActivity"
-        - $ref: "#/components/schemas/UnionOrderMatchActivity"
-        - $ref: "#/components/schemas/UnionOrderBidActivity"
-        - $ref: "#/components/schemas/UnionOrderListActivity"
-        - $ref: "#/components/schemas/UnionOrderCancelBidActivity"
-        - $ref: "#/components/schemas/UnionOrderCancelListActivity"
+        - $ref: "#/components/schemas/MintActivity"
+        - $ref: "#/components/schemas/BurnActivity"
+        - $ref: "#/components/schemas/TransferActivity"
+        - $ref: "#/components/schemas/OrderSellActivity"
+        - $ref: "#/components/schemas/OrderMatchActivity"
+        - $ref: "#/components/schemas/OrderBidActivity"
+        - $ref: "#/components/schemas/OrderListActivity"
+        - $ref: "#/components/schemas/OrderCancelBidActivity"
+        - $ref: "#/components/schemas/OrderCancelListActivity"
       required:
         - id
         - date
 
-    UnionMintActivity:
+    MintActivity:
       type: object
       properties:
         "@type":
@@ -645,7 +764,7 @@ components:
         - value
         - blockchainInfo
 
-    UnionBurnActivity:
+    BurnActivity:
       type: object
       properties:
         "@type":
@@ -673,7 +792,7 @@ components:
         - value
         - blockchainInfo
 
-    UnionTransferActivity:
+    TransferActivity:
       type: object
       properties:
         "@type":
@@ -704,14 +823,14 @@ components:
         - value
         - blockchainInfo
 
-    UnionOrderActivitySource:
+    OrderActivitySource:
       type: string
       enum:
         - RARIBLE
         - OPEN_SEA
         - CRYPTO_PUNKS
 
-    UnionOrderSellActivity:
+    OrderSellActivity:
       type: object
       properties:
         "@type":
@@ -723,15 +842,15 @@ components:
         buyer:
           $ref: "#/components/schemas/UnionAddress"
         nft:
-          $ref: "#/components/schemas/UnionAsset"
+          $ref: "#/components/schemas/Asset"
         payment:
-          $ref: "#/components/schemas/UnionAsset"
+          $ref: "#/components/schemas/Asset"
         price:
           $ref: "#/components/schemas/BigDecimal"
         priceUsd:
           $ref: "#/components/schemas/BigDecimal"
         source:
-          $ref: "#/components/schemas/UnionOrderActivitySource"
+          $ref: "#/components/schemas/OrderActivitySource"
         blockchainInfo:
           $ref: "#/components/schemas/ActivityBlockchainInfo"
         type:
@@ -749,7 +868,7 @@ components:
         - blockchainInfo
         - type
 
-    UnionOrderActivityMatchSide:
+    OrderActivityMatchSide:
       type: object
       properties:
         maker:
@@ -757,12 +876,12 @@ components:
         hash:
           type: string
         asset:
-          $ref: "#/components/schemas/UnionAsset"
+          $ref: "#/components/schemas/Asset"
       required:
         - maker
         - asset
 
-    UnionOrderMatchActivity:
+    OrderMatchActivity:
       type: object
       properties:
         "@type":
@@ -770,15 +889,15 @@ components:
           enum:
             - MATCH
         left:
-          $ref: "#/components/schemas/UnionOrderActivityMatchSide"
+          $ref: "#/components/schemas/OrderActivityMatchSide"
         right:
-          $ref: "#/components/schemas/UnionOrderActivityMatchSide"
+          $ref: "#/components/schemas/OrderActivityMatchSide"
         price:
           $ref: "#/components/schemas/BigDecimal"
         priceUsd:
           $ref: "#/components/schemas/BigDecimal"
         source:
-          $ref: "#/components/schemas/UnionOrderActivitySource"
+          $ref: "#/components/schemas/OrderActivitySource"
         blockchainInfo:
           $ref: "#/components/schemas/ActivityBlockchainInfo"
       required:
@@ -788,7 +907,7 @@ components:
         - price
         - blockchainInfo
 
-    UnionOrderBidActivity:
+    OrderBidActivity:
       type: object
       properties:
         "@type":
@@ -800,15 +919,15 @@ components:
         maker:
           $ref: "#/components/schemas/UnionAddress"
         make:
-          $ref: "#/components/schemas/UnionAsset"
+          $ref: "#/components/schemas/Asset"
         take:
-          $ref: "#/components/schemas/UnionAsset"
+          $ref: "#/components/schemas/Asset"
         price:
           $ref: "#/components/schemas/BigDecimal"
         priceUsd:
           $ref: "#/components/schemas/BigDecimal"
         source:
-          $ref: "#/components/schemas/UnionOrderActivitySource"
+          $ref: "#/components/schemas/OrderActivitySource"
       required:
         - "@type"
         - hash
@@ -817,7 +936,7 @@ components:
         - take
         - price
 
-    UnionOrderListActivity:
+    OrderListActivity:
       type: object
       properties:
         "@type":
@@ -829,15 +948,15 @@ components:
         maker:
           $ref: "#/components/schemas/UnionAddress"
         make:
-          $ref: "#/components/schemas/UnionAsset"
+          $ref: "#/components/schemas/Asset"
         take:
-          $ref: "#/components/schemas/UnionAsset"
+          $ref: "#/components/schemas/Asset"
         price:
           $ref: "#/components/schemas/BigDecimal"
         priceUsd:
           $ref: "#/components/schemas/BigDecimal"
         source:
-          $ref: "#/components/schemas/UnionOrderActivitySource"
+          $ref: "#/components/schemas/OrderActivitySource"
       required:
         - "@type"
         - hash
@@ -846,7 +965,7 @@ components:
         - take
         - price
 
-    UnionOrderCancelBidActivity:
+    OrderCancelBidActivity:
       type: object
       properties:
         "@type":
@@ -858,11 +977,11 @@ components:
         maker:
           $ref: "#/components/schemas/UnionAddress"
         make:
-          $ref: "#/components/schemas/UnionAssetType"
+          $ref: "#/components/schemas/AssetType"
         take:
-          $ref: "#/components/schemas/UnionAssetType"
+          $ref: "#/components/schemas/AssetType"
         source:
-          $ref: "#/components/schemas/UnionOrderActivitySource"
+          $ref: "#/components/schemas/OrderActivitySource"
         blockchainInfo:
           $ref: "#/components/schemas/ActivityBlockchainInfo"
       required:
@@ -873,7 +992,7 @@ components:
         - take
         - blockchainInfo
 
-    UnionOrderCancelListActivity:
+    OrderCancelListActivity:
       type: object
       properties:
         "@type":
@@ -885,11 +1004,11 @@ components:
         maker:
           $ref: "#/components/schemas/UnionAddress"
         make:
-          $ref: "#/components/schemas/UnionAssetType"
+          $ref: "#/components/schemas/AssetType"
         take:
-          $ref: "#/components/schemas/UnionAssetType"
+          $ref: "#/components/schemas/AssetType"
         source:
-          $ref: "#/components/schemas/UnionOrderActivitySource"
+          $ref: "#/components/schemas/OrderActivitySource"
         blockchainInfo:
           $ref: "#/components/schemas/ActivityBlockchainInfo"
       required:
@@ -899,7 +1018,7 @@ components:
         - make
         - take
 
-    UnionActivities:
+    Activities:
       type: object
       properties:
         continuation:
@@ -910,12 +1029,12 @@ components:
           default: [ ]
           description: "List of found activities"
           items:
-            $ref: "#/components/schemas/UnionActivity"
+            $ref: "#/components/schemas/Activity"
       required:
         - total
         - activities
 
-    UnionCollection:
+    Collection:
       type: object
       properties:
         id:
@@ -951,7 +1070,7 @@ components:
         - type
         - features
 
-    UnionCollections:
+    Collections:
       type: object
       properties:
         total:
@@ -965,7 +1084,7 @@ components:
           default: [ ]
           type: array
           items:
-            $ref: "#/components/schemas/UnionCollection"
+            $ref: "#/components/schemas/Collection"
       required:
         - total
         - collections
@@ -1151,29 +1270,29 @@ components:
       required:
         - "@type"
 
-    UnionPendingOrder:
+    PendingOrder:
       type: object
       required:
         - id
         - date
       properties:
         id:
-          $ref: "#/components/schemas/UnionOrderId"
+          $ref: "#/components/schemas/OrderId"
         make:
-          $ref: "#/components/schemas/UnionAsset"
+          $ref: "#/components/schemas/Asset"
         take:
-          $ref: "#/components/schemas/UnionAsset"
+          $ref: "#/components/schemas/Asset"
         date:
           type: string
           format: date-time
         maker:
           $ref: "#/components/schemas/UnionAddress"
       oneOf:
-        - $ref: "#/components/schemas/UnionPendingOrderCancel"
-        - $ref: "#/components/schemas/UnionPendingOrderMatch"
-        - $ref: "#/components/schemas/UnionOnChainOrder"
+        - $ref: "#/components/schemas/PendingOrderCancel"
+        - $ref: "#/components/schemas/PendingOrderMatch"
+        - $ref: "#/components/schemas/OnChainOrder"
 
-    UnionPendingOrderMatch:
+    PendingOrderMatch:
       type: object
       properties:
         "@type":
@@ -1203,7 +1322,7 @@ components:
         - "@type"
         - fill
 
-    UnionPendingOrderCancel:
+    PendingOrderCancel:
       type: object
       properties:
         "@type":
@@ -1215,7 +1334,7 @@ components:
       required:
         - "@type"
 
-    UnionOnChainOrder:
+    OnChainOrder:
       type: object
       properties:
         "@type":
@@ -1236,18 +1355,18 @@ components:
         - account
         - value
 
-    UnionAsset:
+    Asset:
       type: object
       properties:
         type:
-          $ref: "#/components/schemas/UnionAssetType"
+          $ref: "#/components/schemas/AssetType"
         value:
           $ref: "#/components/schemas/BigInteger"
       required:
         - type
         - value
 
-    UnionAssetType:
+    AssetType:
       type: object
       oneOf:
         - $ref: "#/components/schemas/FlowAssetType"
@@ -1350,12 +1469,12 @@ components:
           type: array
           default: [ ]
           items:
-            $ref: "#/components/schemas/UnionCreator"
+            $ref: "#/components/schemas/Creator"
         royalties:
           type: array
           default: [ ]
           items:
-            $ref: "#/components/schemas/UnionRoyalty"
+            $ref: "#/components/schemas/Royalty"
         signatures:
           type: array
           default: [ ]
@@ -1405,12 +1524,12 @@ components:
           type: array
           default: [ ]
           items:
-            $ref: "#/components/schemas/UnionCreator"
+            $ref: "#/components/schemas/Creator"
         royalties:
           type: array
           default: [ ]
           items:
-            $ref: "#/components/schemas/UnionRoyalty"
+            $ref: "#/components/schemas/Royalty"
         signatures:
           type: array
           default: [ ]
@@ -1501,9 +1620,3 @@ components:
     UnionAddress:
       type: string
       example: "0x60f80121c31a0d46b5279700f9df786054aa5ee5"
-    UnionBlockchain:
-      type: string
-      enum:
-        - ETHEREUM
-        - POLYGON
-        - FLOW

@@ -2,27 +2,26 @@ package com.rarible.protocol.union.listener.handler.ethereum
 
 import com.rarible.core.kafka.KafkaMessage
 import com.rarible.core.kafka.RaribleKafkaProducer
-import com.rarible.protocol.dto.ActivityDto
-import com.rarible.protocol.union.core.ethereum.converter.EthUnionActivityConverter
+import com.rarible.protocol.union.core.ethereum.converter.EthActivityConverter
+import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.UnionActivityDto
 import com.rarible.protocol.union.listener.handler.AbstractEventHandler
 import org.slf4j.LoggerFactory
 
 class EthereumActivityEventHandler(
-    private val producer: RaribleKafkaProducer<UnionActivityDto>,
+    private val producer: RaribleKafkaProducer<ActivityDto>,
     private val blockchain: BlockchainDto
-) : AbstractEventHandler<ActivityDto>() {
+) : AbstractEventHandler<com.rarible.protocol.dto.ActivityDto>() {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    override suspend fun handleSafely(event: ActivityDto) {
+    override suspend fun handleSafely(event: com.rarible.protocol.dto.ActivityDto) {
         logger.debug("Received Ethereum ({}) Activity event: type={}", blockchain, event::class.java.simpleName)
 
-        val unionEventDto = EthUnionActivityConverter.convert(event, blockchain)
+        val unionEventDto = EthActivityConverter.convert(event, blockchain)
 
         val message = KafkaMessage(
-            key = event.id,
+            key = unionEventDto.id.fullId(),
             value = unionEventDto,
             headers = ACTIVITY_EVENT_HEADERS
         )

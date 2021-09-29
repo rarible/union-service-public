@@ -1,12 +1,12 @@
 package com.rarible.protocol.union.core.flow.service
 
 import com.rarible.protocol.flow.nft.api.client.FlowOrderControllerApi
-import com.rarible.protocol.union.core.flow.converter.FlowUnionOrderConverter
+import com.rarible.protocol.union.core.flow.converter.FlowOrderConverter
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.OrderDto
+import com.rarible.protocol.union.dto.OrdersDto
 import com.rarible.protocol.union.dto.PlatformDto
-import com.rarible.protocol.union.dto.UnionOrderDto
-import com.rarible.protocol.union.dto.UnionOrdersDto
 import kotlinx.coroutines.reactive.awaitFirst
 
 class FlowOrderService(
@@ -19,19 +19,19 @@ class FlowOrderService(
         origin: String?,
         continuation: String?,
         size: Int
-    ): UnionOrdersDto {
+    ): OrdersDto {
         return stub()
     }
 
-    override suspend fun getOrderById(id: String): UnionOrderDto {
+    override suspend fun getOrderById(id: String): OrderDto {
         val order = orderControllerApi.getOrderByOrderId(id).awaitFirst()
-        return FlowUnionOrderConverter.convert(order, blockchain)
+        return FlowOrderConverter.convert(order, blockchain)
     }
 
-    override suspend fun updateOrderMakeStock(id: String): UnionOrderDto {
+    override suspend fun updateOrderMakeStock(id: String): OrderDto {
         // TODO implement when Flow support it
         val order = orderControllerApi.getOrderByOrderId(id).awaitFirst()
-        return FlowUnionOrderConverter.convert(order, blockchain)
+        return FlowOrderConverter.convert(order, blockchain)
     }
 
     override suspend fun getOrderBidsByItem(
@@ -42,7 +42,7 @@ class FlowOrderService(
         origin: String?,
         continuation: String?,
         size: Int
-    ): UnionOrdersDto {
+    ): OrdersDto {
         return stub()
     }
 
@@ -52,7 +52,7 @@ class FlowOrderService(
         origin: String?,
         continuation: String?,
         size: Int
-    ): UnionOrdersDto {
+    ): OrdersDto {
         return stub()
     }
 
@@ -61,7 +61,7 @@ class FlowOrderService(
         origin: String?,
         continuation: String?,
         size: Int
-    ): UnionOrdersDto {
+    ): OrdersDto {
         return stub()
     }
 
@@ -71,7 +71,7 @@ class FlowOrderService(
         origin: String?,
         continuation: String?,
         size: Int
-    ): UnionOrdersDto {
+    ): OrdersDto {
         return stub()
     }
 
@@ -83,7 +83,7 @@ class FlowOrderService(
         origin: String?,
         continuation: String?,
         size: Int
-    ): UnionOrdersDto {
+    ): OrdersDto {
         return stub()
     }
 
@@ -93,13 +93,13 @@ class FlowOrderService(
         origin: String?,
         continuation: String?,
         size: Int
-    ): UnionOrdersDto {
+    ): OrdersDto {
         return stub()
     }
 
     // TODO remove when FLow support Order API
-    private fun stub(): UnionOrdersDto {
-        return UnionOrdersDto(
+    private fun stub(): OrdersDto {
+        return OrdersDto(
             continuation = null,
             orders = listOf()
         )

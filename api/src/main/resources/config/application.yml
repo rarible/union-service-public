@@ -21,3 +21,7 @@ rarible:
   ethereum:
     converter:
       enabled: true
+
+common:
+  producer:
+    broker-replica-set: ${kafka.hosts}

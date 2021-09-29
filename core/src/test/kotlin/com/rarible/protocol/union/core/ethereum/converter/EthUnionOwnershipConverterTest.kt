@@ -5,13 +5,13 @@ import com.rarible.protocol.union.test.data.randomEthNftOwnershipDto
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
-class EthUnionOwnershipConverterTest {
+class EthOwnershipConverterTest {
 
     @Test
     fun `eth ownership`() {
         val dto = randomEthNftOwnershipDto()
 
-        val converted = EthUnionOwnershipConverter.convert(dto, BlockchainDto.ETHEREUM)
+        val converted = EthOwnershipConverter.convert(dto, BlockchainDto.ETHEREUM)
 
         assertThat(converted.id.token.value).isEqualTo(dto.contract.prefixed())
         assertThat(converted.id.tokenId).isEqualTo(dto.tokenId)

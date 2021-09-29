@@ -1,11 +1,11 @@
 package com.rarible.protocol.union.dto.continuation
 
-import com.rarible.protocol.union.dto.UnionOrderDto
+import com.rarible.protocol.union.dto.OrderDto
 
-object UnionOrderContinuation {
+object OrderContinuation {
 
-    object ByLastUpdatedAndId : ContinuationFactory<UnionOrderDto, DateIdContinuation> {
-        override fun getContinuation(order: UnionOrderDto): DateIdContinuation {
+    object ByLastUpdatedAndId : ContinuationFactory<OrderDto, DateIdContinuation> {
+        override fun getContinuation(order: OrderDto): DateIdContinuation {
             return DateIdContinuation(order.lastUpdatedAt, order.id.value)
         }
     }

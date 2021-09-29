@@ -4,19 +4,18 @@ import com.rarible.protocol.dto.ActivityFilterAllTypeDto
 import com.rarible.protocol.dto.ActivityFilterByCollectionTypeDto
 import com.rarible.protocol.dto.ActivityFilterByItemTypeDto
 import com.rarible.protocol.dto.ActivityFilterByUserTypeDto
-import com.rarible.protocol.dto.OrderActivityMatchSideDto
+import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.UnionActivityTypeDto
-import com.rarible.protocol.union.dto.UnionBurnActivityDto
-import com.rarible.protocol.union.dto.UnionMintActivityDto
-import com.rarible.protocol.union.dto.UnionOrderActivityMatchSideDto
-import com.rarible.protocol.union.dto.UnionOrderBidActivityDto
-import com.rarible.protocol.union.dto.UnionOrderCancelBidActivityDto
-import com.rarible.protocol.union.dto.UnionOrderCancelListActivityDto
-import com.rarible.protocol.union.dto.UnionOrderListActivityDto
-import com.rarible.protocol.union.dto.UnionOrderMatchActivityDto
-import com.rarible.protocol.union.dto.UnionTransferActivityDto
-import com.rarible.protocol.union.dto.UnionUserActivityTypeDto
+import com.rarible.protocol.union.dto.BurnActivityDto
+import com.rarible.protocol.union.dto.MintActivityDto
+import com.rarible.protocol.union.dto.OrderActivityMatchSideDto
+import com.rarible.protocol.union.dto.OrderBidActivityDto
+import com.rarible.protocol.union.dto.OrderCancelBidActivityDto
+import com.rarible.protocol.union.dto.OrderCancelListActivityDto
+import com.rarible.protocol.union.dto.OrderListActivityDto
+import com.rarible.protocol.union.dto.OrderMatchActivityDto
+import com.rarible.protocol.union.dto.TransferActivityDto
+import com.rarible.protocol.union.dto.UserActivityTypeDto
 import com.rarible.protocol.union.test.data.randomEthItemBurnActivity
 import com.rarible.protocol.union.test.data.randomEthItemMintActivity
 import com.rarible.protocol.union.test.data.randomEthItemTransferActivity
@@ -28,12 +27,12 @@ import com.rarible.protocol.union.test.data.randomEthOrderListActivity
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
-class EthUnionActivityConverterTest {
+class EthActivityConverterTest {
 
     @Test
     fun `eth order activity match side`() {
         val dto = randomEthOrderActivityMatch()
-        val converted = EthUnionActivityConverter.convert(dto, BlockchainDto.ETHEREUM) as UnionOrderMatchActivityDto
+        val converted = EthActivityConverter.convert(dto, BlockchainDto.ETHEREUM) as OrderMatchActivityDto
 
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.date).isEqualTo(dto.date)
@@ -51,7 +50,7 @@ class EthUnionActivityConverterTest {
     @Test
     fun `eth order activity bid`() {
         val dto = randomEthOrderBidActivity()
-        val converted = EthUnionActivityConverter.convert(dto, BlockchainDto.ETHEREUM) as UnionOrderBidActivityDto
+        val converted = EthActivityConverter.convert(dto, BlockchainDto.ETHEREUM) as OrderBidActivityDto
 
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.date).isEqualTo(dto.date)
@@ -66,7 +65,7 @@ class EthUnionActivityConverterTest {
     @Test
     fun `eth order activity list`() {
         val dto = randomEthOrderListActivity()
-        val converted = EthUnionActivityConverter.convert(dto, BlockchainDto.ETHEREUM) as UnionOrderListActivityDto
+        val converted = EthActivityConverter.convert(dto, BlockchainDto.ETHEREUM) as OrderListActivityDto
 
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.date).isEqualTo(dto.date)
@@ -82,7 +81,7 @@ class EthUnionActivityConverterTest {
     fun `eth order activity cancel bid`() {
         val dto = randomEthOrderActivityCancelBid()
         val converted =
-            EthUnionActivityConverter.convert(dto, BlockchainDto.ETHEREUM) as UnionOrderCancelBidActivityDto
+            EthActivityConverter.convert(dto, BlockchainDto.ETHEREUM) as OrderCancelBidActivityDto
 
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.date).isEqualTo(dto.date)
@@ -99,7 +98,7 @@ class EthUnionActivityConverterTest {
     fun `eth order activity cancel list`() {
         val dto = randomEthOrderActivityCancelList()
         val converted =
-            EthUnionActivityConverter.convert(dto, BlockchainDto.ETHEREUM) as UnionOrderCancelListActivityDto
+            EthActivityConverter.convert(dto, BlockchainDto.ETHEREUM) as OrderCancelListActivityDto
 
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.date).isEqualTo(dto.date)
@@ -115,7 +114,7 @@ class EthUnionActivityConverterTest {
     @Test
     fun `eth item activity mint`() {
         val dto = randomEthItemMintActivity()
-        val converted = EthUnionActivityConverter.convert(dto, BlockchainDto.ETHEREUM) as UnionMintActivityDto
+        val converted = EthActivityConverter.convert(dto, BlockchainDto.ETHEREUM) as MintActivityDto
 
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.date).isEqualTo(dto.date)
@@ -132,7 +131,7 @@ class EthUnionActivityConverterTest {
     @Test
     fun `eth item activity burn`() {
         val dto = randomEthItemBurnActivity()
-        val converted = EthUnionActivityConverter.convert(dto, BlockchainDto.ETHEREUM) as UnionBurnActivityDto
+        val converted = EthActivityConverter.convert(dto, BlockchainDto.ETHEREUM) as BurnActivityDto
 
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.date).isEqualTo(dto.date)
@@ -149,7 +148,7 @@ class EthUnionActivityConverterTest {
     @Test
     fun `eth item activity transfer`() {
         val dto = randomEthItemTransferActivity()
-        val converted = EthUnionActivityConverter.convert(dto, BlockchainDto.ETHEREUM) as UnionTransferActivityDto
+        val converted = EthActivityConverter.convert(dto, BlockchainDto.ETHEREUM) as TransferActivityDto
 
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.date).isEqualTo(dto.date)
@@ -165,98 +164,101 @@ class EthUnionActivityConverterTest {
 
     @Test
     fun `eth activity type as user activity type`() {
-        assertThat(EthUnionActivityConverter.asUserActivityType(UnionUserActivityTypeDto.BURN))
+        assertThat(EthActivityConverter.asUserActivityType(UserActivityTypeDto.BURN))
             .isEqualTo(ActivityFilterByUserTypeDto.BURN)
 
-        assertThat(EthUnionActivityConverter.asUserActivityType(UnionUserActivityTypeDto.BUY))
+        assertThat(EthActivityConverter.asUserActivityType(UserActivityTypeDto.BUY))
             .isEqualTo(ActivityFilterByUserTypeDto.BUY)
 
-        assertThat(EthUnionActivityConverter.asUserActivityType(UnionUserActivityTypeDto.GET_BID))
+        assertThat(EthActivityConverter.asUserActivityType(UserActivityTypeDto.GET_BID))
             .isEqualTo(ActivityFilterByUserTypeDto.GET_BID)
 
-        assertThat(EthUnionActivityConverter.asUserActivityType(UnionUserActivityTypeDto.LIST))
+        assertThat(EthActivityConverter.asUserActivityType(UserActivityTypeDto.LIST))
             .isEqualTo(ActivityFilterByUserTypeDto.LIST)
 
-        assertThat(EthUnionActivityConverter.asUserActivityType(UnionUserActivityTypeDto.MAKE_BID))
+        assertThat(EthActivityConverter.asUserActivityType(UserActivityTypeDto.MAKE_BID))
             .isEqualTo(ActivityFilterByUserTypeDto.MAKE_BID)
 
-        assertThat(EthUnionActivityConverter.asUserActivityType(UnionUserActivityTypeDto.MINT))
+        assertThat(EthActivityConverter.asUserActivityType(UserActivityTypeDto.MINT))
             .isEqualTo(ActivityFilterByUserTypeDto.MINT)
 
-        assertThat(EthUnionActivityConverter.asUserActivityType(UnionUserActivityTypeDto.SELL))
+        assertThat(EthActivityConverter.asUserActivityType(UserActivityTypeDto.SELL))
             .isEqualTo(ActivityFilterByUserTypeDto.SELL)
 
-        assertThat(EthUnionActivityConverter.asUserActivityType(UnionUserActivityTypeDto.TRANSFER_FROM))
+        assertThat(EthActivityConverter.asUserActivityType(UserActivityTypeDto.TRANSFER_FROM))
             .isEqualTo(ActivityFilterByUserTypeDto.TRANSFER_FROM)
 
-        assertThat(EthUnionActivityConverter.asUserActivityType(UnionUserActivityTypeDto.TRANSFER_TO))
+        assertThat(EthActivityConverter.asUserActivityType(UserActivityTypeDto.TRANSFER_TO))
             .isEqualTo(ActivityFilterByUserTypeDto.TRANSFER_TO)
     }
 
     @Test
     fun `eth activity type as item activity type`() {
-        assertThat(EthUnionActivityConverter.asItemActivityType(UnionActivityTypeDto.BID))
+        assertThat(EthActivityConverter.asItemActivityType(ActivityTypeDto.BID))
             .isEqualTo(ActivityFilterByItemTypeDto.BID)
 
-        assertThat(EthUnionActivityConverter.asItemActivityType(UnionActivityTypeDto.BURN))
+        assertThat(EthActivityConverter.asItemActivityType(ActivityTypeDto.BURN))
             .isEqualTo(ActivityFilterByItemTypeDto.BURN)
 
-        assertThat(EthUnionActivityConverter.asItemActivityType(UnionActivityTypeDto.LIST))
+        assertThat(EthActivityConverter.asItemActivityType(ActivityTypeDto.LIST))
             .isEqualTo(ActivityFilterByItemTypeDto.LIST)
 
-        assertThat(EthUnionActivityConverter.asItemActivityType(UnionActivityTypeDto.MINT))
+        assertThat(EthActivityConverter.asItemActivityType(ActivityTypeDto.MINT))
             .isEqualTo(ActivityFilterByItemTypeDto.MINT)
 
-        assertThat(EthUnionActivityConverter.asItemActivityType(UnionActivityTypeDto.SELL))
+        assertThat(EthActivityConverter.asItemActivityType(ActivityTypeDto.SELL))
             .isEqualTo(ActivityFilterByItemTypeDto.MATCH)
 
-        assertThat(EthUnionActivityConverter.asItemActivityType(UnionActivityTypeDto.TRANSFER))
+        assertThat(EthActivityConverter.asItemActivityType(ActivityTypeDto.TRANSFER))
             .isEqualTo(ActivityFilterByItemTypeDto.TRANSFER)
     }
 
     @Test
     fun `eth activity type as collection activity type`() {
-        assertThat(EthUnionActivityConverter.asCollectionActivityType(UnionActivityTypeDto.BID))
+        assertThat(EthActivityConverter.asCollectionActivityType(ActivityTypeDto.BID))
             .isEqualTo(ActivityFilterByCollectionTypeDto.BID)
 
-        assertThat(EthUnionActivityConverter.asCollectionActivityType(UnionActivityTypeDto.BURN))
+        assertThat(EthActivityConverter.asCollectionActivityType(ActivityTypeDto.BURN))
             .isEqualTo(ActivityFilterByCollectionTypeDto.BURN)
 
-        assertThat(EthUnionActivityConverter.asCollectionActivityType(UnionActivityTypeDto.LIST))
+        assertThat(EthActivityConverter.asCollectionActivityType(ActivityTypeDto.LIST))
             .isEqualTo(ActivityFilterByCollectionTypeDto.LIST)
 
-        assertThat(EthUnionActivityConverter.asCollectionActivityType(UnionActivityTypeDto.MINT))
+        assertThat(EthActivityConverter.asCollectionActivityType(ActivityTypeDto.MINT))
             .isEqualTo(ActivityFilterByCollectionTypeDto.MINT)
 
-        assertThat(EthUnionActivityConverter.asCollectionActivityType(UnionActivityTypeDto.SELL))
+        assertThat(EthActivityConverter.asCollectionActivityType(ActivityTypeDto.SELL))
             .isEqualTo(ActivityFilterByCollectionTypeDto.MATCH)
 
-        assertThat(EthUnionActivityConverter.asCollectionActivityType(UnionActivityTypeDto.TRANSFER))
+        assertThat(EthActivityConverter.asCollectionActivityType(ActivityTypeDto.TRANSFER))
             .isEqualTo(ActivityFilterByCollectionTypeDto.TRANSFER)
     }
 
     @Test
     fun `eth activity type as global activity type`() {
-        assertThat(EthUnionActivityConverter.asGlobalActivityType(UnionActivityTypeDto.BID))
+        assertThat(EthActivityConverter.asGlobalActivityType(ActivityTypeDto.BID))
             .isEqualTo(ActivityFilterAllTypeDto.BID)
 
-        assertThat(EthUnionActivityConverter.asGlobalActivityType(UnionActivityTypeDto.BURN))
+        assertThat(EthActivityConverter.asGlobalActivityType(ActivityTypeDto.BURN))
             .isEqualTo(ActivityFilterAllTypeDto.BURN)
 
-        assertThat(EthUnionActivityConverter.asGlobalActivityType(UnionActivityTypeDto.LIST))
+        assertThat(EthActivityConverter.asGlobalActivityType(ActivityTypeDto.LIST))
             .isEqualTo(ActivityFilterAllTypeDto.LIST)
 
-        assertThat(EthUnionActivityConverter.asGlobalActivityType(UnionActivityTypeDto.MINT))
+        assertThat(EthActivityConverter.asGlobalActivityType(ActivityTypeDto.MINT))
             .isEqualTo(ActivityFilterAllTypeDto.MINT)
 
-        assertThat(EthUnionActivityConverter.asGlobalActivityType(UnionActivityTypeDto.SELL))
+        assertThat(EthActivityConverter.asGlobalActivityType(ActivityTypeDto.SELL))
             .isEqualTo(ActivityFilterAllTypeDto.SELL)
 
-        assertThat(EthUnionActivityConverter.asGlobalActivityType(UnionActivityTypeDto.TRANSFER))
+        assertThat(EthActivityConverter.asGlobalActivityType(ActivityTypeDto.TRANSFER))
             .isEqualTo(ActivityFilterAllTypeDto.TRANSFER)
     }
 
-    private fun assertMatchSide(dest: UnionOrderActivityMatchSideDto, expected: OrderActivityMatchSideDto) {
+    private fun assertMatchSide(
+        dest: OrderActivityMatchSideDto,
+        expected: com.rarible.protocol.dto.OrderActivityMatchSideDto
+    ) {
         assertThat(dest.hash).isEqualTo(expected.hash.prefixed())
         assertThat(dest.maker.value).isEqualTo(expected.maker.prefixed())
     }
