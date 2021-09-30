@@ -97,7 +97,7 @@ object EthConverter {
     fun convert(source: com.rarible.protocol.dto.AssetDto, blockchain: BlockchainDto): AssetDto {
         return AssetDto(
             type = convert(source.assetType, blockchain),
-            value = source.value
+            value = source.valueDecimal!!
         )
     }
 
