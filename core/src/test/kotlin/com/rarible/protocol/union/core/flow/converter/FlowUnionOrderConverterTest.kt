@@ -20,18 +20,19 @@ class FlowOrderConverterTest {
         assertThat(converted.platform).isEqualTo(PlatformDto.RARIBLE)
         assertThat(converted.startedAt).isNull()
         assertThat(converted.endedAt).isNull()
-        assertThat(converted.makeStock).isEqualTo(dto.makeStock)
-        assertThat(converted.fill).isEqualTo(dto.fill.toBigInteger())
+        // TODO makeStock is needed to be BigDecimal on the flow client side
+        assertThat(converted.makeStock).isEqualTo(dto.makeStock.toBigDecimal())
+        assertThat(converted.fill).isEqualTo(dto.fill)
         assertThat(converted.createdAt).isEqualTo(dto.createdAt)
         assertThat(converted.lastUpdatedAt).isEqualTo(dto.lastUpdateAt)
         assertThat(converted.makePriceUsd).isEqualTo(dto.priceUsd)
         assertThat(converted.takePriceUsd).isEqualTo(dto.priceUsd)
         assertThat(converted.maker.value).isEqualTo(dto.maker)
         assertThat(converted.taker?.value).isEqualTo(dto.taker)
-        assertThat(converted.make.value).isEqualTo(dto.make.value.toBigInteger())
+        assertThat(converted.make.value).isEqualTo(dto.make.value)
         val makeType = converted.make.type as FlowAssetTypeDto
         assertThat(makeType.contract.value).isEqualTo(dto.make.contract)
-        assertThat(converted.take.value).isEqualTo(dto.take.value.toBigInteger())
+        assertThat(converted.take.value).isEqualTo(dto.take.value)
         val takeType = converted.take.type as FlowAssetTypeDto
         assertThat(takeType.contract.value).isEqualTo(dto.take.contract)
 

@@ -174,16 +174,22 @@ fun randomEthNftOwnershipDto(itemId: ItemIdDto, creator: PartDto): NftOwnershipD
 
 fun randomEthAssetErc721() = randomEthAssetErc721(randomEthItemId())
 fun randomEthAssetErc721(itemId: ItemIdDto) = AssetDto(
-    Erc721AssetTypeDto(Address.apply(itemId.token.value), itemId.tokenId),
-    randomBigInt()
+    assetType = Erc721AssetTypeDto(Address.apply(itemId.token.value), itemId.tokenId),
+    value = randomBigInt(),
+    valueDecimal = randomBigDecimal()
 )
 
 fun randomEthAssetErc20() = randomEthAssetErc20(randomAddress())
-fun randomEthAssetErc20(address: Address) = AssetDto(Erc20AssetTypeDto(address), randomBigInt())
+fun randomEthAssetErc20(address: Address) = AssetDto(
+    assetType = Erc20AssetTypeDto(address),
+    value = randomBigInt(),
+    valueDecimal = randomBigDecimal()
+)
 
 fun randomEthAssetErc1155(itemId: ItemIdDto) = AssetDto(
-    Erc1155AssetTypeDto(Address.apply(itemId.token.value), itemId.tokenId),
-    randomBigInt()
+    assetType = Erc1155AssetTypeDto(Address.apply(itemId.token.value), itemId.tokenId),
+    value = randomBigInt(),
+    valueDecimal = randomBigDecimal()
 )
 
 fun randomEthLegacyOrderDto() = randomEthLegacyOrderDto(randomEthAssetErc721(), randomAddress(), randomEthAssetErc20())
@@ -201,7 +207,9 @@ fun randomEthLegacyOrderDto(make: AssetDto, maker: Address, take: AssetDto): Leg
         make = make,
         take = take,
         fill = randomBigInt(),
+        fillValue = randomBigDecimal(),
         makeStock = randomBigInt(),
+        makeStockValue = randomBigDecimal(),
         cancelled = false,
         salt = Word.apply(randomWord()),
         data = OrderDataLegacyDto(randomInt()),
@@ -234,7 +242,9 @@ fun randomEthV2OrderDto(make: AssetDto, maker: Address, take: AssetDto): Rarible
         make = make,
         take = take,
         fill = randomBigInt(),
+        fillValue = randomBigDecimal(),
         makeStock = randomBigInt(),
+        makeStockValue = randomBigDecimal(),
         cancelled = false,
         salt = Word.apply(randomWord()),
         data = OrderRaribleV2DataV1Dto(listOf(randomEthPartDto()), listOf(randomEthPartDto())),
@@ -269,7 +279,9 @@ fun randomEthOpenSeaV1OrderDto(make: AssetDto, maker: Address, take: AssetDto): 
         make = make,
         take = take,
         fill = randomBigInt(),
+        fillValue = randomBigDecimal(),
         makeStock = randomBigInt(),
+        makeStockValue = randomBigDecimal(),
         cancelled = false,
         salt = Word.apply(randomWord()),
         data = randomEthOrderOpenSeaV1DataV1Dto(),
@@ -304,7 +316,9 @@ fun randomEthCryptoPunksOrderDto(make: AssetDto, maker: Address, take: AssetDto)
         make = make,
         take = take,
         fill = randomBigInt(),
+        fillValue = randomBigDecimal(),
         makeStock = randomBigInt(),
+        makeStockValue = randomBigDecimal(),
         cancelled = false,
         salt = Word.apply(randomWord()),
         data = OrderCryptoPunksDataDto(),
@@ -427,8 +441,8 @@ fun randomEthOrderBidActivity(): OrderActivityBidDto {
         source = OrderActivityDto.Source.RARIBLE,
         hash = Word.apply(randomWord()),
         maker = randomAddress(),
-        make = AssetDto(Erc20AssetTypeDto(randomAddress()), randomBigInt()),
-        take = AssetDto(Erc20AssetTypeDto(randomAddress()), randomBigInt()),
+        make = AssetDto(Erc20AssetTypeDto(randomAddress()), randomBigInt(), randomBigDecimal()),
+        take = AssetDto(Erc20AssetTypeDto(randomAddress()), randomBigInt(), randomBigDecimal()),
         price = randomBigDecimal(),
         priceUsd = randomBigDecimal()
     )
@@ -441,8 +455,8 @@ fun randomEthOrderListActivity(): OrderActivityListDto {
         source = OrderActivityDto.Source.OPEN_SEA,
         hash = Word.apply(randomWord()),
         maker = randomAddress(),
-        make = AssetDto(Erc20AssetTypeDto(randomAddress()), randomBigInt()),
-        take = AssetDto(Erc20AssetTypeDto(randomAddress()), randomBigInt()),
+        make = AssetDto(Erc20AssetTypeDto(randomAddress()), randomBigInt(), randomBigDecimal()),
+        take = AssetDto(Erc20AssetTypeDto(randomAddress()), randomBigInt(), randomBigDecimal()),
         price = randomBigDecimal(),
         priceUsd = randomBigDecimal()
     )

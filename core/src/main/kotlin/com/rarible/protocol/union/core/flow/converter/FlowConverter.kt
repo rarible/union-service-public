@@ -16,7 +16,7 @@ object FlowConverter {
         return when (source) {
             is FlowAssetFungibleDto -> {
                 AssetDto(
-                    value = source.value.toBigInteger(), //TODO
+                    value = source.value,
                     type = FlowAssetTypeFtDto(
                         contract = UnionAddressConverter.convert(source.contract, blockchain)
                     )
@@ -24,7 +24,7 @@ object FlowConverter {
             }
             is FlowAssetNFTDto -> {
                 AssetDto(
-                    value = source.value.toBigInteger(), //TODO
+                    value = source.value,
                     type = FlowAssetTypeNftDto(
                         contract = UnionAddressConverter.convert(source.contract, blockchain),
                         tokenId = source.tokenId

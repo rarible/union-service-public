@@ -20,10 +20,11 @@ object FlowOrderConverter {
             taker = order.taker?.let { UnionAddressConverter.convert(it, blockchain) },
             make = FlowConverter.convert(order.make, blockchain),
             take = FlowConverter.convert(order.take, blockchain),
-            fill = order.fill.toBigInteger(),
+            fill = order.fill,
             startedAt = order.start,
             endedAt = order.end,
-            makeStock = order.makeStock,
+            // TODO makeStock is needed to be BigDecimal on the flow client side
+            makeStock = order.makeStock.toBigDecimal(),
             cancelled = order.cancelled,
             createdAt = order.createdAt,
             lastUpdatedAt = order.lastUpdateAt,
@@ -31,7 +32,7 @@ object FlowOrderConverter {
             takePriceUsd = order.priceUsd,
             priceHistory = emptyList(),
             data = convert(order.data, blockchain),
-            salt = ""// TODO возможно будет на flow?
+            salt = ""// TODO could be supported on Flow?
         )
     }
 

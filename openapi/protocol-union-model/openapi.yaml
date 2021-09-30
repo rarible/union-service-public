@@ -99,7 +99,7 @@ components:
           type: string
           example: "${blockchain}:${token}:${tokenId}"
         blockchain:
-          $ref: "#/components/schemas/UnionBlockchain"
+          $ref: "#/components/schemas/Blockchain"
         token:
           $ref: "#/components/schemas/UnionAddress"
         tokenId:
@@ -248,7 +248,7 @@ components:
           type: string
           example: "${blockchain}:${token}:${tokenId}:${owner}"
         blockchain:
-          $ref: "#/components/schemas/UnionBlockchain"
+          $ref: "#/components/schemas/Blockchain"
         token:
           $ref: "#/components/schemas/UnionAddress"
         tokenId:
@@ -458,7 +458,7 @@ components:
         id:
           $ref: "#/components/schemas/OrderId"
         fill:
-          $ref: "#/components/schemas/BigInteger"
+          $ref: "#/components/schemas/BigDecimal"
         platform:
           $ref: "#/components/schemas/Platform"
         startedAt:
@@ -468,7 +468,7 @@ components:
           type: string
           format: "date-time"
         makeStock:
-          $ref: "#/components/schemas/BigInteger"
+          $ref: "#/components/schemas/BigDecimal"
         cancelled:
           type: "boolean"
         createdAt:
@@ -1213,7 +1213,7 @@ components:
             - LEFT
             - RIGHT
         fill:
-          $ref: "#/components/schemas/BigInteger"
+          $ref: "#/components/schemas/BigDecimal"
         taker:
           $ref: "#/components/schemas/UnionAddress"
         counterHash:
@@ -1269,7 +1269,7 @@ components:
         type:
           $ref: "#/components/schemas/AssetType"
         value:
-          $ref: "#/components/schemas/BigInteger"
+          $ref: "#/components/schemas/BigDecimal"
       required:
         - type
         - value

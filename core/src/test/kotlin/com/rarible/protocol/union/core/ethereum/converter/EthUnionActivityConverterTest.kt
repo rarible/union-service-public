@@ -57,8 +57,8 @@ class EthActivityConverterTest {
         assertThat(converted.price).isEqualTo(dto.price)
         assertThat(converted.priceUsd).isEqualTo(dto.priceUsd)
         assertThat(converted.source?.name).isEqualTo(dto.source.name)
-        assertThat(converted.take.value).isEqualTo(dto.take.value)
-        assertThat(converted.make.value).isEqualTo(dto.make.value)
+        assertThat(converted.take.value).isEqualTo(dto.take.valueDecimal)
+        assertThat(converted.make.value).isEqualTo(dto.make.valueDecimal)
         assertThat(converted.maker.value).isEqualTo(dto.maker.prefixed())
     }
 
@@ -72,8 +72,8 @@ class EthActivityConverterTest {
         assertThat(converted.price).isEqualTo(dto.price)
         assertThat(converted.priceUsd).isEqualTo(dto.priceUsd)
         assertThat(converted.source?.name).isEqualTo(dto.source.name)
-        assertThat(converted.take.value).isEqualTo(dto.take.value)
-        assertThat(converted.make.value).isEqualTo(dto.make.value)
+        assertThat(converted.take.value).isEqualTo(dto.take.valueDecimal)
+        assertThat(converted.make.value).isEqualTo(dto.make.valueDecimal)
         assertThat(converted.maker.value).isEqualTo(dto.maker.prefixed())
     }
 

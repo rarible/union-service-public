@@ -3,7 +3,6 @@ package com.rarible.protocol.union.enrichment.model
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import java.math.BigDecimal
-import java.math.BigInteger
 
 data class ShortOrder(
 
@@ -11,7 +10,7 @@ data class ShortOrder(
     val id: String,
 
     val platform: String,
-    val makeStock: BigInteger,
+    val makeStock: BigDecimal,
     val makePriceUsd: BigDecimal?,
     val takePriceUsd: BigDecimal?,
 
