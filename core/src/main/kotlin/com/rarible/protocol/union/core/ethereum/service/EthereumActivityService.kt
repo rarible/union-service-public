@@ -90,10 +90,11 @@ class EthereumActivityService(
         size: Int,
         sort: ActivitySortDto?
     ): Slice<ActivityDto> {
-        // TODO use from/to parameters when protocol supports it
         val filter = ActivityFilterByUserDto(
             users.map { Address.apply(it) },
-            LinkedHashSet(types).map { EthActivityConverter.asUserActivityType(it) }
+            LinkedHashSet(types).map { EthActivityConverter.asUserActivityType(it) },
+            from?.epochSecond,
+            to?.epochSecond
         )
         return getEthereumActivities(filter, continuation, size, sort)
     }
