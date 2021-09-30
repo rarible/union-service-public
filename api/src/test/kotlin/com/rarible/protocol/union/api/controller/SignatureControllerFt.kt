@@ -31,7 +31,7 @@ class SignatureControllerFt : AbstractIntegrationTest() {
         val ethForm = EthereumSignatureValidationFormDto(randomAddress(), randomString(), randomBinary())
 
         val unionForm = SignatureValidationFormDto(
-            signer = UnionAddressConverter.convert(ethForm.signer, BlockchainDto.ETHEREUM).fullId(),
+            signer = UnionAddressConverter.convert(ethForm.signer, BlockchainDto.ETHEREUM),
             message = ethForm.message,
             signature = ethForm.signature.prefixed()
         )
@@ -47,7 +47,7 @@ class SignatureControllerFt : AbstractIntegrationTest() {
         val ethForm = EthereumSignatureValidationFormDto(randomAddress(), randomString(), randomBinary())
 
         val unionForm = SignatureValidationFormDto(
-            signer = UnionAddressConverter.convert(ethForm.signer, BlockchainDto.POLYGON).fullId(),
+            signer = UnionAddressConverter.convert(ethForm.signer, BlockchainDto.POLYGON),
             message = ethForm.message,
             signature = ethForm.signature.prefixed()
         )
@@ -62,5 +62,4 @@ class SignatureControllerFt : AbstractIntegrationTest() {
     fun `validate signature - flow`() = runBlocking<Unit> {
         // TODO implement
     }
-
 }
