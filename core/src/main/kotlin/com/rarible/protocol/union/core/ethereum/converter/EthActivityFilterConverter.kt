@@ -81,10 +81,11 @@ object EthActivityFilterConverter {
                         ActivityFilterByUserTypeDto.SELL -> null
                     }
                 }
-                if (nftTypes.isNotEmpty())
+                if (nftTypes.isNotEmpty()) {
                     NftActivityFilterByUserDto(source.users, nftTypes, source.from, source.to)
-                else
+                } else {
                     null
+                }
             }
             else -> throw IllegalArgumentException("Unexpected activity filter type: $javaClass")
         }
@@ -149,10 +150,11 @@ object EthActivityFilterConverter {
                         ActivityFilterByUserTypeDto.BURN -> null
                     }
                 }
-                if (nftTypes.isNotEmpty())
+                if (nftTypes.isNotEmpty()) {
                     OrderActivityFilterByUserDto(source.users, nftTypes, source.from, source.to)
-                else
+                } else {
                     null
+                }
             }
             else -> throw IllegalArgumentException("Unexpected activity filter type: $javaClass")
         }
