@@ -1,20 +1,22 @@
 package com.rarible.protocol.union.api.controller
 
 import com.rarible.protocol.union.api.configuration.PageSize
-import com.rarible.protocol.union.core.continuation.Page
+import com.rarible.protocol.union.api.service.OwnershipApiService
 import com.rarible.protocol.union.core.continuation.Paging
 import com.rarible.protocol.union.core.service.OwnershipServiceRouter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.IdParser
 import com.rarible.protocol.union.dto.OwnershipDto
 import com.rarible.protocol.union.dto.OwnershipsDto
-import com.rarible.protocol.union.dto.UnionOwnershipDto
 import com.rarible.protocol.union.dto.continuation.OwnershipContinuation
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.RestController
 
+@ExperimentalCoroutinesApi
 @RestController
 class OwnershipController(
+    private val ownershipApiService: OwnershipApiService,
     private val router: OwnershipServiceRouter
 ) : OwnershipControllerApi {
 
@@ -35,7 +37,7 @@ class OwnershipController(
             blockchainPages.flatMap { it.entities }
         ).getPage(safeSize, total)
 
-        val enriched = enrich(combinedPage)
+        val enriched = ownershipApiService.enrich(combinedPage)
 
         return ResponseEntity.ok(enriched)
     }
@@ -46,7 +48,7 @@ class OwnershipController(
         val (blockchain, shortOwnershipId) = IdParser.parse(ownershipId)
         val result = router.getService(blockchain).getOwnershipById(shortOwnershipId)
 
-        val enriched = enrich(result)
+        val enriched = ownershipApiService.enrich(result)
 
         return ResponseEntity.ok(enriched)
     }
@@ -61,26 +63,9 @@ class OwnershipController(
         val (blockchain, shortContract) = IdParser.parse(contract)
         val result = router.getService(blockchain).getOwnershipsByItem(shortContract, tokenId, continuation, safeSize)
 
-        val enriched = enrich(result)
+        val enriched = ownershipApiService.enrich(result)
 
         return ResponseEntity.ok(enriched)
     }
 
-    private fun enrich(unionOwnershipsPage: Page<UnionOwnershipDto>): OwnershipsDto {
-        return OwnershipsDto(
-            total = unionOwnershipsPage.total,
-            continuation = unionOwnershipsPage.continuation,
-            ownerships = enrich(unionOwnershipsPage.entities)
-        )
-    }
-
-    private fun enrich(unionItem: UnionOwnershipDto): OwnershipDto {
-        // TODO
-        throw NotImplementedError("IMPLEMENT ITEM ENRICHMENT!")
-    }
-
-    private fun enrich(unionItems: List<UnionOwnershipDto>): List<OwnershipDto> {
-        // TODO
-        throw NotImplementedError("IMPLEMENT ITEM ENRICHMENT!")
-    }
 }

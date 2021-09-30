@@ -2,8 +2,8 @@ package com.rarible.protocol.union.enrichment.service
 
 import com.rarible.core.common.optimisticLock
 import com.rarible.protocol.union.dto.UnionOwnershipDto
-import com.rarible.protocol.union.enrichment.converter.ExtendedItemConverter
-import com.rarible.protocol.union.enrichment.converter.ExtendedOwnershipConverter
+import com.rarible.protocol.union.enrichment.converter.EnrichedItemConverter
+import com.rarible.protocol.union.enrichment.converter.EnrichedOwnershipConverter
 import com.rarible.protocol.union.enrichment.converter.ShortItemConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOwnershipConverter
@@ -74,7 +74,7 @@ class EnrichmentRefreshService(
         val orders = listOfNotNull(bestSellOrder, bestBidOrder)
             .associateBy { it.id }
 
-        val dto = ExtendedItemConverter.convert(itemDto, short, orders)
+        val dto = EnrichedItemConverter.convert(itemDto, short, orders)
         val event = ItemEventUpdate(dto)
 
         itemEventListeners.forEach { it.onEvent(event) }
@@ -102,7 +102,7 @@ class EnrichmentRefreshService(
         val orders = listOfNotNull(bestSellOrder)
             .associateBy { it.id }
 
-        val dto = ExtendedOwnershipConverter.convert(ownership, short, orders)
+        val dto = EnrichedOwnershipConverter.convert(ownership, short, orders)
         val event = OwnershipEventUpdate(dto)
 
         ownershipEventListeners.forEach { it.onEvent(event) }

@@ -13,6 +13,13 @@ data class ShortOwnershipId(
     val owner: String
 ) {
 
+    constructor(dto: OwnershipIdDto) : this(
+        dto.blockchain,
+        dto.token.value,
+        dto.tokenId,
+        dto.owner.value
+    )
+
     override fun toString(): String {
         return toDto().value
     }

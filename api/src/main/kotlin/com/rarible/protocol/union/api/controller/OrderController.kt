@@ -1,25 +1,27 @@
 package com.rarible.protocol.union.api.controller
 
 import com.rarible.protocol.union.api.configuration.PageSize
+import com.rarible.protocol.union.api.service.OrderApiService
 import com.rarible.protocol.union.core.continuation.Paging
 import com.rarible.protocol.union.core.continuation.Slice
 import com.rarible.protocol.union.core.service.OrderServiceRouter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.IdParser
 import com.rarible.protocol.union.dto.OrderDto
+import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.OrderIdsDto
 import com.rarible.protocol.union.dto.OrdersDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.continuation.OrderContinuation
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.merge
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
 class OrderController(
-    private val router: OrderServiceRouter
+    private val router: OrderServiceRouter,
+    private val orderApiService: OrderApiService
 ) : OrderControllerApi {
 
     override suspend fun getOrdersAll(
@@ -95,15 +97,12 @@ class OrderController(
     // TODO add tests
     @ExperimentalCoroutinesApi
     override fun getOrdersByIds(orderIdsDto: OrderIdsDto): ResponseEntity<Flow<OrderDto>> {
-        val groupedIds = orderIdsDto
-            .ids.map { IdParser.parse(it) }
-            .groupBy({ it.first }, { it.second })
+        val orderIds = orderIdsDto.ids
+            .map { IdParser.parse(it) }
+            .map { OrderIdDto(blockchain = it.first, value = it.second) }
 
-        val combinedOrders = groupedIds
-            .map { router.getService(it.key).getOrdersByIds(it.value) }
-            .merge()
-
-        return ResponseEntity.ok(combinedOrders)
+        val orders = orderApiService.getByIds(orderIds)
+        return ResponseEntity.ok(orders)
     }
 
     override suspend fun getSellOrders(

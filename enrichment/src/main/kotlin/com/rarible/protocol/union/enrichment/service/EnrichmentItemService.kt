@@ -5,7 +5,7 @@ import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.core.service.ItemServiceRouter
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.UnionItemDto
-import com.rarible.protocol.union.enrichment.converter.ExtendedItemConverter
+import com.rarible.protocol.union.enrichment.converter.EnrichedItemConverter
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
@@ -67,6 +67,6 @@ class EnrichmentItemService(
             .mapNotNull { it.await() }
             .associateBy { it.id }
 
-        ExtendedItemConverter.convert(fetchedItem.await(), shortItem, orders)
+        EnrichedItemConverter.convert(fetchedItem.await(), shortItem, orders)
     }
 }

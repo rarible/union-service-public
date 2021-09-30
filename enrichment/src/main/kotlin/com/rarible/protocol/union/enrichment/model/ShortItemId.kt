@@ -11,6 +11,12 @@ data class ShortItemId(
     val tokenId: BigInteger
 ) {
 
+    constructor(dto: ItemIdDto) : this(
+        dto.blockchain,
+        dto.token.value,
+        dto.tokenId
+    )
+
     override fun toString(): String {
         return toDto().value
     }
@@ -22,4 +28,5 @@ data class ShortItemId(
             tokenId = tokenId
         )
     }
+
 }

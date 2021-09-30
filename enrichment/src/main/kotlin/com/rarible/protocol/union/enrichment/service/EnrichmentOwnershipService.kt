@@ -5,7 +5,7 @@ import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.core.service.OwnershipServiceRouter
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.UnionOwnershipDto
-import com.rarible.protocol.union.enrichment.converter.ExtendedOwnershipConverter
+import com.rarible.protocol.union.enrichment.converter.EnrichedOwnershipConverter
 import com.rarible.protocol.union.enrichment.model.ItemSellStats
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortOwnership
@@ -91,7 +91,7 @@ class EnrichmentOwnershipService(
         val orders = listOfNotNull(bestSellOrder)
             .associateBy { it.id }
 
-        ExtendedOwnershipConverter.convert(fetchedOwnership.await(), short, orders)
+        EnrichedOwnershipConverter.convert(fetchedOwnership.await(), short, orders)
     }
 
 }
