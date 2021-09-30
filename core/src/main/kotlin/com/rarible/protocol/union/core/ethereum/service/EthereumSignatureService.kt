@@ -16,7 +16,7 @@ class EthereumSignatureService(
 
     override suspend fun validate(form: SignatureValidationFormDto): Boolean {
         val ethereumForm = EthereumSignatureValidationFormDto(
-            signer = Address.apply(form.signer),
+            signer = Address.apply(form.signer.value),
             message = form.message,
             signature = Binary.apply(form.signature)
         )
