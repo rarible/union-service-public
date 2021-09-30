@@ -29,6 +29,8 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import reactor.kotlin.core.publisher.toMono
+import java.time.Instant
+import java.time.temporal.ChronoUnit
 
 @FlowPreview
 @IntegrationTest
@@ -239,8 +241,10 @@ class ActivityControllerFt : AbstractIntegrationTest() {
             )
         } returns FlowActivitiesDto(1, null, listOf(flowActivity)).toMono()
 
+        val now = Instant.now()
+        val oneWeekAgo = now.minus(7, ChronoUnit.DAYS)
         val activities = activityControllerApi.getActivitiesByUser(
-            types, listOf(userEth.fullId(), userFlow.fullId()), null, null, null, size, sort
+            types, listOf(userEth.fullId(), userFlow.fullId()), oneWeekAgo, now, null, size, sort
         ).awaitFirst()
 
         assertThat(activities.activities).hasSize(2)
