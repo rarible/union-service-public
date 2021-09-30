@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.subscriber
 
 import com.rarible.core.kafka.RaribleKafkaConsumer
+import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.OrderEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
@@ -48,5 +49,15 @@ class UnionEventsConsumerFactory(
         )
     }
 
-    // TODO add activity/order consumers
+    fun createActivityConsumer(consumerGroup: String): RaribleKafkaConsumer<ActivityDto> {
+        return RaribleKafkaConsumer(
+            clientId = "$clientIdPrefix.union-activity-consumer",
+            valueDeserializerClass = UnionKafkaJsonDeserializer::class.java,
+            valueClass = ActivityDto::class.java,
+            consumerGroup = consumerGroup,
+            defaultTopic = UnionEventTopicProvider.getActivityTopic(environment),
+            bootstrapServers = brokerReplicaSet
+        )
+    }
+
 }
