@@ -23,16 +23,16 @@ class EthereumOrderEventHandler(
 
         val unionEventDto = EthOrderEventConverter.convert(event, blockchain)
 
+        when (unionEventDto) {
+            is OrderUpdateEventDto -> orderEventService.updateOrder(unionEventDto.order)
+        }
+
         val message = KafkaMessage(
             key = unionEventDto.orderId.fullId(),
-            value = unionEventDto,
+            value = unionEventDto as OrderEventDto,
             headers = ORDER_EVENT_HEADERS
         )
         producer.send(message)
 
-        // TODO maybe it should be called first?
-        when (unionEventDto) {
-            is OrderUpdateEventDto -> orderEventService.updateOrder(unionEventDto.order)
-        }
     }
 }

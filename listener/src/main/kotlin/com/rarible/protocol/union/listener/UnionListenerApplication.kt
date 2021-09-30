@@ -7,12 +7,11 @@ import org.springframework.boot.runApplication
 
 @SpringBootApplication
 class UnionListenerApplication(
-    private val kafkaConsumers: List<KafkaConsumerWorker>
+    private val kafkaConsumers: List<KafkaConsumerWorker<*>>
 ) : CommandLineRunner {
 
     override fun run(vararg args: String?) {
         kafkaConsumers.forEach { it.start() }
-        Thread.sleep(500) //TODO producers triggers earlier than consumers started to listen topics
     }
 }
 
