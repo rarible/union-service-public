@@ -11,7 +11,7 @@ object ShortItemConverter {
             blockchain = item.id.blockchain,
             token = item.id.token.value,
             tokenId = item.id.tokenId,
-            // Default enrichment data, should be replaced out of this converter
+            // Default enrichment data
             sellers = 0,
             totalStock = BigInteger.ZERO,
             bestSellOrder = null,

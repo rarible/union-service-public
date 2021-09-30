@@ -7,7 +7,7 @@ import com.rarible.protocol.union.dto.UnionItemDto
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import java.math.BigInteger
 
-object ExtendedItemConverter {
+object EnrichedItemConverter {
 
     fun convert(
         item: UnionItemDto,

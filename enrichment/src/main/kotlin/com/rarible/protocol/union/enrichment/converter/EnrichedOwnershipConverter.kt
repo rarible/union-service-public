@@ -6,7 +6,7 @@ import com.rarible.protocol.union.dto.OwnershipDto
 import com.rarible.protocol.union.dto.UnionOwnershipDto
 import com.rarible.protocol.union.enrichment.model.ShortOwnership
 
-object ExtendedOwnershipConverter {
+object EnrichedOwnershipConverter {
 
     fun convert(
         ownership: UnionOwnershipDto,

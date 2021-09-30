@@ -1,20 +1,22 @@
 package com.rarible.protocol.union.api.controller
 
 import com.rarible.protocol.union.api.configuration.PageSize
-import com.rarible.protocol.union.core.continuation.Page
+import com.rarible.protocol.union.api.service.ItemApiService
 import com.rarible.protocol.union.core.continuation.Paging
 import com.rarible.protocol.union.core.service.ItemServiceRouter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.IdParser
 import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.ItemsDto
-import com.rarible.protocol.union.dto.UnionItemDto
 import com.rarible.protocol.union.dto.continuation.ItemContinuation
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.RestController
 
+@ExperimentalCoroutinesApi
 @RestController
 class ItemController(
+    private val itemApiService: ItemApiService,
     private val router: ItemServiceRouter
 ) : ItemControllerApi {
 
@@ -38,7 +40,7 @@ class ItemController(
             blockchainPages.flatMap { it.entities }
         ).getPage(safeSize, total)
 
-        val result = enrich(combinedPage)
+        val result = itemApiService.enrich(combinedPage)
 
         return ResponseEntity.ok(result)
     }
@@ -48,7 +50,7 @@ class ItemController(
     ): ResponseEntity<ItemDto> {
         val (blockchain, shortItemId) = IdParser.parse(itemId)
         val result = router.getService(blockchain).getItemById(shortItemId)
-        val enriched = enrich(result)
+        val enriched = itemApiService.enrich(result)
         return ResponseEntity.ok(enriched)
     }
 
@@ -62,7 +64,7 @@ class ItemController(
         val result = router.getService(blockchain)
             .getItemsByCollection(shortCollection, continuation, safeSize)
 
-        val enriched = enrich(result)
+        val enriched = itemApiService.enrich(result)
 
         return ResponseEntity.ok(enriched)
     }
@@ -76,7 +78,7 @@ class ItemController(
         val (blockchain, shortCreator) = IdParser.parse(creator)
         val result = router.getService(blockchain).getItemsByCreator(shortCreator, continuation, safeSize)
 
-        val enriched = enrich(result)
+        val enriched = itemApiService.enrich(result)
 
         return ResponseEntity.ok(enriched)
     }
@@ -90,26 +92,9 @@ class ItemController(
         val (blockchain, shortOwner) = IdParser.parse(owner)
         val result = router.getService(blockchain).getItemsByOwner(shortOwner, continuation, safeSize)
 
-        val enriched = enrich(result)
+        val enriched = itemApiService.enrich(result)
 
         return ResponseEntity.ok(enriched)
     }
 
-    private fun enrich(unionItemsPage: Page<UnionItemDto>): ItemsDto {
-        return ItemsDto(
-            total = unionItemsPage.total,
-            continuation = unionItemsPage.continuation,
-            items = enrich(unionItemsPage.entities)
-        )
-    }
-
-    private fun enrich(unionItem: UnionItemDto): ItemDto {
-        // TODO
-        throw NotImplementedError("IMPLEMENT ITEM ENRICHMENT!")
-    }
-
-    private fun enrich(unionItems: List<UnionItemDto>): List<ItemDto> {
-        // TODO
-        throw NotImplementedError("IMPLEMENT ITEM ENRICHMENT!")
-    }
 }
