@@ -2,15 +2,16 @@ package com.rarible.protocol.union.listener.handler
 
 import com.rarible.core.daemon.sequential.ConsumerWorker
 
-class SingleConsumerWorker<T>(
-    private val worker: ConsumerWorker<T>
+class BatchedConsumerWorker<T>(
+    private val workers: List<ConsumerWorker<T>>
 ) : KafkaConsumerWorker<T> {
 
     override fun start() {
-        worker.start()
+        workers.forEach { it.start() }
     }
 
     override fun close() {
-        worker.close()
+        workers.forEach { it.close() }
     }
+
 }

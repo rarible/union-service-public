@@ -31,8 +31,19 @@ listener:
   consumer:
     ethereum:
       broker-replica-set: ${kafka.hosts}
-    poygon:
+      itemWorkers: 1
+      ownershipWorkers: 1
+      orderWorkers: 1
+    polygon:
       broker-replica-set: ${kafka.hosts}
+      itemWorkers: 1
+      ownershipWorkers: 1
+      orderWorkers: 1
     flow:
       broker-replica-set: ${kafka.hosts}
-
+      itemWorkers: 1
+      ownershipWorkers: 1
+      orderWorkers: 1
+  reconciliation:
+    orderBatchSize: 50
+    threadCount: 2
