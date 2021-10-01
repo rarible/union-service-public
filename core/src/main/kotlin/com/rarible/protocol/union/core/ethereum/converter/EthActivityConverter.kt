@@ -39,6 +39,7 @@ object EthActivityConverter {
             is OrderActivityMatchDto -> {
                 OrderMatchActivityDto(
                     id = activityId,
+                    type = convert(source.type),
                     date = source.date,
                     left = convert(source.left, blockchain),
                     right = convert(source.right, blockchain),
@@ -162,6 +163,14 @@ object EthActivityConverter {
                     )
                 )
             }
+        }
+    }
+
+    fun convert(source: OrderActivityMatchDto.Type?): OrderMatchActivityDto.Type? {
+        return when (source) {
+            null -> null
+            OrderActivityMatchDto.Type.SELL -> OrderMatchActivityDto.Type.SELL
+            OrderActivityMatchDto.Type.ACCEPT_BID -> OrderMatchActivityDto.Type.ACCEPT_BID
         }
     }
 

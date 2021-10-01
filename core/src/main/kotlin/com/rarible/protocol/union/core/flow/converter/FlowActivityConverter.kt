@@ -31,6 +31,8 @@ object FlowActivityConverter {
             is FlowNftOrderActivitySellDto -> {
                 OrderMatchActivityDto(
                     id = activityId,
+                    // TODO ensure that's right
+                    type = OrderMatchActivityDto.Type.SELL,
                     date = source.date,
                     left = convert(source.left, blockchain),
                     right = convert(source.right, blockchain),

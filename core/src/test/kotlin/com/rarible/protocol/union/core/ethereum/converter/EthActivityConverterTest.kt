@@ -4,6 +4,7 @@ import com.rarible.protocol.dto.ActivityFilterAllTypeDto
 import com.rarible.protocol.dto.ActivityFilterByCollectionTypeDto
 import com.rarible.protocol.dto.ActivityFilterByItemTypeDto
 import com.rarible.protocol.dto.ActivityFilterByUserTypeDto
+import com.rarible.protocol.dto.OrderActivityMatchDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.BurnActivityDto
@@ -35,6 +36,7 @@ class EthActivityConverterTest {
         val converted = EthActivityConverter.convert(dto, BlockchainDto.ETHEREUM) as OrderMatchActivityDto
 
         assertThat(converted.id.value).isEqualTo(dto.id)
+        assertThat(converted.type).isNull()
         assertThat(converted.date).isEqualTo(dto.date)
         assertMatchSide(converted.left, dto.left)
         assertMatchSide(converted.right, dto.right)
@@ -45,6 +47,17 @@ class EthActivityConverterTest {
         assertThat(converted.blockchainInfo.blockHash).isEqualTo(dto.blockHash.prefixed())
         assertThat(converted.blockchainInfo.blockNumber).isEqualTo(dto.blockNumber)
         assertThat(converted.blockchainInfo.logIndex).isEqualTo(dto.logIndex)
+    }
+
+    @Test
+    fun `eth order activity match side - type`() {
+        assertThat(EthActivityConverter.convert(null)).isNull()
+
+        assertThat(EthActivityConverter.convert(OrderActivityMatchDto.Type.SELL))
+            .isEqualTo(OrderMatchActivityDto.Type.SELL)
+
+        assertThat(EthActivityConverter.convert(OrderActivityMatchDto.Type.ACCEPT_BID))
+            .isEqualTo(OrderMatchActivityDto.Type.ACCEPT_BID)
     }
 
     @Test

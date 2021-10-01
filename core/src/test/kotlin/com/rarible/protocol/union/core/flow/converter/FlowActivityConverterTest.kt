@@ -27,6 +27,7 @@ class FlowActivityConverterTest {
         val converted = FlowActivityConverter.convert(dto, BlockchainDto.FLOW) as OrderMatchActivityDto
 
         assertThat(converted.id.value).isEqualTo(dto.id)
+        assertThat(converted.type).isEqualTo(OrderMatchActivityDto.Type.SELL)
         assertThat(converted.date).isEqualTo(dto.date)
         assertMatchSide(converted.left, dto.left)
         assertMatchSide(converted.right, dto.right)
