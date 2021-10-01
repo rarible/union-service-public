@@ -1814,6 +1814,11 @@ components:
           type: string
           enum:
             - MATCH
+        type:
+          type: string
+          enum:
+            - SELL
+            - ACCEPT_BID
         left:
           $ref: "#/components/schemas/OrderActivityMatchSide"
         right:
