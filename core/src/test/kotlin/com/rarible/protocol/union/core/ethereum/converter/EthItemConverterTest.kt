@@ -6,6 +6,9 @@ import com.rarible.protocol.dto.NftItemMetaDto
 import com.rarible.protocol.dto.NftMediaDto
 import com.rarible.protocol.dto.NftMediaMetaDto
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.ImageContentDto
+import com.rarible.protocol.union.dto.MetaContentDto
+import com.rarible.protocol.union.dto.VideoContentDto
 import com.rarible.protocol.union.test.data.randomEthItemRoyaltyDto
 import com.rarible.protocol.union.test.data.randomEthItemTransferDto
 import com.rarible.protocol.union.test.data.randomEthNftItemDto
@@ -98,7 +101,7 @@ class EthItemConverterTest {
                     url = LinkedHashMap(mapOf(Pair("ORIGINAL", "url3"), Pair("PREVIEW", "url4"))),
                     meta = mapOf(
                         Pair("ORIGINAL", NftMediaMetaDto("mp4", 200, 400)),
-                        Pair("PREVIEW", NftMediaMetaDto("gif", 20, 40))
+                        Pair("PREVIEW", NftMediaMetaDto("amv", 20, 40))
                     )
                 )
             )
@@ -109,35 +112,37 @@ class EthItemConverterTest {
 
         assertThat(converted.name).isEqualTo(dto.name)
         assertThat(converted.description).isEqualTo(dto.description)
-        assertThat(converted.contents).hasSize(4)
+        assertThat(converted.content).hasSize(4)
+        assertThat(converted.attributes["key1"]).isEqualTo("value1")
+        assertThat(converted.attributes["key2"]).isEqualTo("value2")
 
-        val originalImage = converted.contents[0]
-        val bigImage = converted.contents[1]
-        val originalAnim = converted.contents[2]
-        val previewAnim = converted.contents[3]
+        val originalImage = converted.content[0] as ImageContentDto
+        val bigImage = converted.content[1] as ImageContentDto
+        val originalAnim = converted.content[2] as VideoContentDto
+        val previewAnim = converted.content[3] as VideoContentDto
 
         assertThat(originalImage.url).isEqualTo("url1")
-        assertThat(originalImage.typeContent).isEqualTo("ORIGINAL")
-        assertThat(originalImage.attributes.find { it.key == "type" }!!.value).isEqualTo("jpeg")
-        assertThat(originalImage.attributes.find { it.key == "width" }!!.value).isEqualTo("100")
-        assertThat(originalImage.attributes.find { it.key == "height" }!!.value).isEqualTo("200")
+        assertThat(originalImage.representation).isEqualTo(MetaContentDto.Representation.ORIGINAL)
+        assertThat(originalImage.mimeType).isEqualTo("jpeg")
+        assertThat(originalImage.width).isEqualTo(100)
+        assertThat(originalImage.height).isEqualTo(200)
 
         assertThat(bigImage.url).isEqualTo("url2")
-        assertThat(bigImage.typeContent).isEqualTo("BIG")
-        assertThat(bigImage.attributes.find { it.key == "type" }!!.value).isEqualTo("png")
-        assertThat(bigImage.attributes.find { it.key == "width" }!!.value).isEqualTo("10")
-        assertThat(bigImage.attributes.find { it.key == "height" }!!.value).isEqualTo("20")
+        assertThat(bigImage.representation).isEqualTo(MetaContentDto.Representation.BIG)
+        assertThat(bigImage.mimeType).isEqualTo("png")
+        assertThat(bigImage.width).isEqualTo(10)
+        assertThat(bigImage.height).isEqualTo(20)
 
         assertThat(originalAnim.url).isEqualTo("url3")
-        assertThat(originalAnim.typeContent).isEqualTo("ORIGINAL")
-        assertThat(originalAnim.attributes.find { it.key == "type" }!!.value).isEqualTo("mp4")
-        assertThat(originalAnim.attributes.find { it.key == "width" }!!.value).isEqualTo("200")
-        assertThat(originalAnim.attributes.find { it.key == "height" }!!.value).isEqualTo("400")
+        assertThat(originalAnim.representation).isEqualTo(MetaContentDto.Representation.ORIGINAL)
+        assertThat(originalAnim.mimeType).isEqualTo("mp4")
+        assertThat(originalAnim.width).isEqualTo(200)
+        assertThat(originalAnim.height).isEqualTo(400)
 
         assertThat(previewAnim.url).isEqualTo("url4")
-        assertThat(previewAnim.typeContent).isEqualTo("PREVIEW")
-        assertThat(previewAnim.attributes.find { it.key == "type" }!!.value).isEqualTo("gif")
-        assertThat(previewAnim.attributes.find { it.key == "width" }!!.value).isEqualTo("20")
-        assertThat(previewAnim.attributes.find { it.key == "height" }!!.value).isEqualTo("40")
+        assertThat(previewAnim.representation).isEqualTo(MetaContentDto.Representation.PREVIEW)
+        assertThat(previewAnim.mimeType).isEqualTo("amv")
+        assertThat(previewAnim.width).isEqualTo(20)
+        assertThat(previewAnim.height).isEqualTo(40)
     }
 }
