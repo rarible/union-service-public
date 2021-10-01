@@ -12,6 +12,7 @@ import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
@@ -37,6 +38,20 @@ class ReconciliationJobTest {
         clearMocks(orderServiceRouter, orderEventService)
         coEvery { orderServiceRouter.getService(BlockchainDto.ETHEREUM) } returns orderService
         coEvery { orderEventService.updateOrder(any()) } returns Unit
+    }
+
+    @Test
+    fun `run reconciliation task`() = runBlocking {
+        mockGetOrdersAll(null, testPageSize, mockPagination("1_1", testPageSize))
+        mockGetOrdersAll("1_1", testPageSize, mockPagination("1_2", testPageSize))
+        mockGetOrdersAll("1_2", testPageSize, mockPagination(null, 10))
+
+
+        val result = orderReconciliationService.reconcile(null, BlockchainDto.ETHEREUM).toList()
+
+        assertEquals(2, result.size)
+        assertEquals("1_1", result[0])
+        assertEquals("1_2", result[1])
     }
 
     @Test

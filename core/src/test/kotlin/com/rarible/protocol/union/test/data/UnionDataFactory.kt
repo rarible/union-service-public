@@ -30,12 +30,12 @@ fun randomUnionOwnershipDto() = EthOwnershipConverter.convert(
 
 fun randomUnionOwnershipDto(itemId: ItemIdDto) = EthOwnershipConverter.convert(
     randomEthOwnershipDto(itemId),
-    BlockchainDto.ETHEREUM
+    itemId.blockchain
 )
 
 fun randomUnionOwnershipDto(ownershipId: OwnershipIdDto) = EthOwnershipConverter.convert(
     randomEthOwnershipDto(ownershipId),
-    BlockchainDto.ETHEREUM
+    ownershipId.blockchain
 )
 
 fun randomUnionOrderDto() = EthOrderConverter.convert(
@@ -45,10 +45,10 @@ fun randomUnionOrderDto() = EthOrderConverter.convert(
 
 fun randomUnionOrderDto(itemId: ItemIdDto) = EthOrderConverter.convert(
     randomEthLegacyOrderDto(itemId),
-    BlockchainDto.ETHEREUM
+    itemId.blockchain
 )
 
 fun randomUnionOrderDto(itemId: ItemIdDto, owner: String) = EthOrderConverter.convert(
     randomEthLegacyOrderDto(itemId, EthConverter.convertToAddress(owner)),
-    BlockchainDto.ETHEREUM
+    itemId.blockchain
 )

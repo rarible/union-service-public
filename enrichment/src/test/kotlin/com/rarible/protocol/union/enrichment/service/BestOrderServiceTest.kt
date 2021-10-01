@@ -159,7 +159,7 @@ class BestOrderServiceTest {
     @Test
     fun `item best sell order - updated is dead, current without preferred type is not null`() = runBlocking<Unit> {
         val itemId = randomEthItemId()
-        val current = randomUnionOrderDto(itemId)
+        val current = randomUnionOrderDto(itemId).copy(platform = PlatformDto.OPEN_SEA)
         val item = randomShortItem(itemId).copy(
             bestSellOrder = ShortOrderConverter.convert(current)
         )
