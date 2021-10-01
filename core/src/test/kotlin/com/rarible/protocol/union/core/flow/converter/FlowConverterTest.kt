@@ -8,7 +8,7 @@ import com.rarible.protocol.union.test.data.randomFlowNftAsset
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
-internal class FlowConverterTest {
+class FlowConverterTest {
 
     @Test
     fun `asset - FT`() {
