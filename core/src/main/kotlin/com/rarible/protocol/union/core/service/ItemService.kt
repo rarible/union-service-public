@@ -17,6 +17,10 @@ interface ItemService : BlockchainService {
         itemId: String
     ): UnionItemDto
 
+    suspend fun resetItemMeta(
+        itemId: String
+    )
+
     suspend fun getItemsByCollection(
         collection: String,
         continuation: String?,

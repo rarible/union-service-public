@@ -17,8 +17,8 @@ import com.rarible.protocol.union.test.data.randomFlowAddress
 import com.rarible.protocol.union.test.data.randomFlowItemIdFullValue
 import com.rarible.protocol.union.test.data.randomFlowNftItemDto
 import com.rarible.protocol.union.test.data.randomPolygonAddress
-import com.rarible.protocol.union.test.data.randomPolygonItemId
 import io.mockk.coEvery
+import io.mockk.verify
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.runBlocking
@@ -26,6 +26,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
 
 @FlowPreview
@@ -55,20 +56,6 @@ class ItemControllerFt : AbstractIntegrationTest() {
     }
 
     @Test
-    fun `get item by id - polygon`() = runBlocking<Unit> {
-        val itemIdFull = randomPolygonItemId().fullId()
-        val itemId = ItemIdParser.parseFull(itemIdFull)
-        val item = randomEthNftItemDto(itemId)
-
-        coEvery { testPolygonItemApi.getNftItemById(itemId.value) } returns item.toMono()
-
-        val unionItem = itemControllerClient.getItemById(itemIdFull).awaitFirst()
-
-        assertThat(unionItem.id.value).isEqualTo(itemId.value)
-        assertThat(unionItem.id.blockchain).isEqualTo(BlockchainDto.POLYGON)
-    }
-
-    @Test
     fun `get item by id - flow`() = runBlocking<Unit> {
         val itemIdFull = randomFlowItemIdFullValue()
         val itemId = ItemIdParser.parseFull(itemIdFull)
@@ -81,6 +68,33 @@ class ItemControllerFt : AbstractIntegrationTest() {
         assertThat(unionItem.id.value).isEqualTo(itemId.value)
         assertThat(unionItem.id.blockchain).isEqualTo(BlockchainDto.FLOW)
     }
+
+    @Test
+    fun `reset item meta by id - ethereum`() = runBlocking<Unit> {
+        val itemIdFull = randomEthItemId().fullId()
+        val itemId = ItemIdParser.parseFull(itemIdFull)
+
+        coEvery { testEthereumItemApi.resetNftItemMetaById(itemId.value) } returns Mono.first()
+
+        itemControllerClient.getItemById(itemIdFull).awaitFirst()
+
+        verify(exactly = 1) { testEthereumItemApi.resetNftItemMetaById(itemId.value) }
+    }
+
+    /*
+    @Test
+    // TODO uncomment when Flow implement it
+    fun `reset item meta by id - flow`() = runBlocking<Unit> {
+        val itemIdFull = randomFlowItemIdFullValue()
+        val itemId = ItemIdParser.parseFull(itemIdFull)
+
+        coEvery { testFlowItemApi.resetNftItemMetaById(itemId.value) } returns item.toMono()
+
+        val unionItem = itemControllerClient.getItemById(itemIdFull).awaitFirst()
+
+        verify(exactly = 1) { testFlowItemApi.resetNftItemMetaById(itemId.value) }
+    }
+    */
 
     @Test
     fun `get items by collection - ethereum`() = runBlocking<Unit> {
