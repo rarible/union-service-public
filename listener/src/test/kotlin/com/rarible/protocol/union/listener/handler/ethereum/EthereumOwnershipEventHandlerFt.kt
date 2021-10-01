@@ -8,7 +8,7 @@ import com.rarible.protocol.dto.NftOwnershipEventDto
 import com.rarible.protocol.dto.NftOwnershipUpdateEventDto
 import com.rarible.protocol.union.listener.test.AbstractIntegrationTest
 import com.rarible.protocol.union.listener.test.IntegrationTest
-import com.rarible.protocol.union.test.data.randomEthNftOwnershipDto
+import com.rarible.protocol.union.test.data.randomEthOwnershipDto
 import com.rarible.protocol.union.test.data.randomEthOwnershipId
 import kotlinx.coroutines.FlowPreview
 import org.assertj.core.api.Assertions
@@ -23,7 +23,7 @@ class EthereumOwnershipEventHandlerFt : AbstractIntegrationTest() {
 
     @Test
     fun `ethereum ownership update event`() = runWithKafka {
-        val ethOwnership = randomEthNftOwnershipDto()
+        val ethOwnership = randomEthOwnershipDto()
         val dto: NftOwnershipEventDto = NftOwnershipUpdateEventDto(randomString(), ethOwnership.id, ethOwnership)
 
         ethOwnershipProducer.send(message(dto)).ensureSuccess()

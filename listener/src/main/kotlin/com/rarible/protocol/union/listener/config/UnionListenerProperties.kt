@@ -6,7 +6,7 @@ import org.springframework.boot.context.properties.ConstructorBinding
 
 @ConstructorBinding
 @ConfigurationProperties("listener")
-class UnionListenerProperties(
+data class UnionListenerProperties(
     val monitoringWorker: DaemonWorkerProperties = DaemonWorkerProperties(),
     val consumer: BlockchainConsumerSet,
     val reconciliation: ReconciliationProperties

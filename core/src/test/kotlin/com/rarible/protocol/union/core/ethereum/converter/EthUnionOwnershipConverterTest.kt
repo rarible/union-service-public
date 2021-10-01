@@ -1,7 +1,7 @@
 package com.rarible.protocol.union.core.ethereum.converter
 
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.test.data.randomEthNftOwnershipDto
+import com.rarible.protocol.union.test.data.randomEthOwnershipDto
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
@@ -9,7 +9,7 @@ class EthOwnershipConverterTest {
 
     @Test
     fun `eth ownership`() {
-        val dto = randomEthNftOwnershipDto()
+        val dto = randomEthOwnershipDto()
 
         val converted = EthOwnershipConverter.convert(dto, BlockchainDto.ETHEREUM)
 
