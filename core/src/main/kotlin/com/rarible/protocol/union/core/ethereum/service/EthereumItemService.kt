@@ -37,6 +37,10 @@ class EthereumItemService(
         return EthItemConverter.convert(item, blockchain)
     }
 
+    override suspend fun resetItemMeta(itemId: String) {
+        itemControllerApi.resetNftItemMetaById(itemId)
+    }
+
     override suspend fun getItemsByCollection(
         collection: String,
         continuation: String?,

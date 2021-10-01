@@ -54,6 +54,12 @@ class ItemController(
         return ResponseEntity.ok(enriched)
     }
 
+    override suspend fun resetItemMeta(itemId: String): ResponseEntity<Unit> {
+        val (blockchain, shortItemId) = IdParser.parse(itemId)
+        router.getService(blockchain).resetItemMeta(shortItemId)
+        return ResponseEntity.ok().build()
+    }
+
     override suspend fun getItemsByCollection(
         collection: String,
         continuation: String?,

@@ -31,6 +31,10 @@ class FlowItemService(
         return FlowItemConverter.convert(item, blockchain)
     }
 
+    override suspend fun resetItemMeta(itemId: String) {
+        // TODO implement
+    }
+
     override suspend fun getItemsByCollection(
         collection: String,
         continuation: String?,
