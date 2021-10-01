@@ -1,7 +1,6 @@
 package com.rarible.protocol.union.core.ethereum.converter
 
 import com.rarible.core.common.nowMillis
-import com.rarible.protocol.dto.NftItemAttributeDto
 import com.rarible.protocol.dto.NftItemDto
 import com.rarible.protocol.dto.NftItemMetaDto
 import com.rarible.protocol.dto.NftItemsDto
@@ -10,13 +9,14 @@ import com.rarible.protocol.dto.NftMediaMetaDto
 import com.rarible.protocol.union.core.continuation.Page
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.ImageContentDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.ItemRoyaltyDto
 import com.rarible.protocol.union.dto.ItemTransferDto
-import com.rarible.protocol.union.dto.MetaAttributeDto
 import com.rarible.protocol.union.dto.MetaContentDto
 import com.rarible.protocol.union.dto.MetaDto
 import com.rarible.protocol.union.dto.UnionItemDto
+import com.rarible.protocol.union.dto.VideoContentDto
 
 object EthItemConverter {
 
@@ -77,50 +77,59 @@ object EthItemConverter {
         return MetaDto(
             name = source.name,
             description = source.description,
-            attributes = source.attributes?.filter { it.value != null }?.map { convert(it) } ?: listOf(),
-            contents = listOfNotNull(source.image, source.animation).flatMap { convert(it) },
+            attributes = source.attributes
+                ?.filter { it.value != null }
+                ?.associate { it.key to it.value!! }
+                ?: emptyMap(),
+            content = convertMetaContent(source.image, this::convertImage)
+                    + convertMetaContent(source.animation, this::convertVideo),
             raw = null //TODO
         )
     }
 
-    private fun convert(source: NftMediaDto): List<MetaContentDto> {
-        return source.url.map { urlMap ->
-            val type = urlMap.key
+    private fun <T : MetaContentDto> convertMetaContent(
+        source: NftMediaDto?, converter: (
+            url: String,
+            representation: MetaContentDto.Representation,
+            meta: NftMediaMetaDto
+        ) -> T
+    ): List<T> {
+        return source?.url?.map { urlMap ->
+            // TODO handle unknown representation
+            val representation = MetaContentDto.Representation.valueOf(urlMap.key)
             val url = urlMap.value
-
-            MetaContentDto(
-                typeContent = type,
-                url = url,
-                attributes = source.meta[type]?.let { convert(it) } ?: listOf()
-            )
-        }
+            val meta = source.meta[urlMap.key]!!
+            converter(url, representation, meta)
+        } ?: emptyList()
     }
 
-    private fun convert(source: NftMediaMetaDto): List<MetaAttributeDto> {
-        return listOfNotNull(
-            MetaAttributeDto(
-                key = NftMediaMetaDto::type.name,
-                value = source.type
-            ),
-            source.height?.let {
-                MetaAttributeDto(
-                    key = NftMediaMetaDto::height.name,
-                    value = it.toString()
-                )
-            },
-            source.width?.let {
-                MetaAttributeDto(
-                    key = NftMediaMetaDto::width.name,
-                    value = it.toString()
-                )
-            }
+    private fun convertImage(
+        url: String,
+        representation: MetaContentDto.Representation,
+        meta: NftMediaMetaDto
+    ): ImageContentDto {
+        return ImageContentDto(
+            representation = representation,
+            url = url,
+            mimeType = meta.type,
+            width = meta.width,
+            height = meta.height,
+            attributes = emptyMap()
         )
     }
 
-    private fun convert(source: NftItemAttributeDto): MetaAttributeDto {
-        return MetaAttributeDto(
-            key = source.key,
-            value = source.value!!
+    private fun convertVideo(
+        url: String,
+        representation: MetaContentDto.Representation,
+        meta: NftMediaMetaDto
+    ): VideoContentDto {
+        return VideoContentDto(
+            representation = representation,
+            url = url,
+            mimeType = meta.type,
+            width = meta.width,
+            height = meta.height,
+            attributes = emptyMap()
         )
     }
 }

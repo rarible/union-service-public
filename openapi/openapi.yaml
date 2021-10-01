@@ -1040,13 +1040,11 @@ components:
         description:
           type: string
         attributes:
+          type: object
+          additionalProperties:
+            type: string
+        content:
           type: array
-          default: [ ]
-          items:
-            $ref: "#/components/schemas/MetaAttribute"
-        contents:
-          type: array
-          default: [ ]
           items:
             $ref: "#/components/schemas/MetaContent"
         raw:
@@ -1054,35 +1052,61 @@ components:
       required:
         - name
         - attributes
-        - contents
+        - content
 
     MetaContent:
       type: object
       properties:
-        typeContent:
-          type: string
         url:
           type: string
+        representation:
+          type: string
+          enum:
+            - PREVIEW
+            - BIG
+            - ORIGINAL
+        mimeType:
+          type: string
+          example: "image/png"
         attributes:
-          type: array
-          default: [ ]
-          items:
-            $ref: "#/components/schemas/MetaAttribute"
+          type: object
+          additionalProperties:
+            type: string
       required:
-        - typeContent
         - url
+        - representation
+        - mimeType
         - attributes
 
-    MetaAttribute:
+      oneOf:
+        - $ref: "#/components/schemas/ImageContent"
+        - $ref: "#/components/schemas/VideoContent"
+
+    ImageContent:
       type: object
       properties:
-        key:
+        "@type":
           type: string
-        value:
+          enum:
+            - IMAGE
+        width:
+          type: integer
+        height:
+          type: integer
+
+    VideoContent:
+      type: object
+      properties:
+        "@type":
           type: string
-      required:
-        - key
-        - value
+          enum:
+            - VIDEO
+        width:
+          type: integer
+        height:
+          type: integer
+        duration:
+          type: integer
 
     #################### Item - Union ####################
 

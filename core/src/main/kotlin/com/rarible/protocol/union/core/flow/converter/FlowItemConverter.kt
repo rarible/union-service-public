@@ -9,8 +9,6 @@ import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CreatorDto
 import com.rarible.protocol.union.dto.ItemIdDto
-import com.rarible.protocol.union.dto.MetaAttributeDto
-import com.rarible.protocol.union.dto.MetaContentDto
 import com.rarible.protocol.union.dto.MetaDto
 import com.rarible.protocol.union.dto.RoyaltyDto
 import com.rarible.protocol.union.dto.UnionItemDto
@@ -77,24 +75,12 @@ object FlowItemConverter {
         return MetaDto(
             name = source.name,
             description = source.description,
-            attributes = source.attributes?.map { convert(it) } ?: listOf(),
-            contents = source.contents?.map { convert(it) } ?: listOf(),
+            attributes = source.attributes
+                ?.associate { it.key to it.value }
+                ?: emptyMap(),
+            content = listOf(), // TODO add conversion when we can extract video/images
             raw = source.raw
         )
     }
 
-    private fun convert(source: com.rarible.protocol.dto.MetaAttributeDto): MetaAttributeDto {
-        return MetaAttributeDto(
-            key = source.key,
-            value = source.value
-        )
-    }
-
-    private fun convert(source: com.rarible.protocol.dto.MetaContentDto): MetaContentDto {
-        return MetaContentDto(
-            typeContent = source.contentType,
-            url = source.url,
-            attributes = source.attributes?.map { convert(it) } ?: listOf()
-        )
-    }
 }
