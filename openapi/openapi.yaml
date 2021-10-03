@@ -1829,34 +1829,76 @@ components:
 
     OrderMatchActivity:
       type: object
+      required: [match, source, blockchainInfo]
       properties:
         "@type":
           type: string
           enum:
             - MATCH
-        type:
-          type: string
-          enum:
-            - SELL
-            - ACCEPT_BID
-        left:
-          $ref: "#/components/schemas/OrderActivityMatchSide"
-        right:
-          $ref: "#/components/schemas/OrderActivityMatchSide"
-        price:
-          $ref: "#/components/schemas/BigDecimal"
-        priceUsd:
-          $ref: "#/components/schemas/BigDecimal"
+        match:
+          $ref: "#/components/schemas/OrderMatch"
         source:
           $ref: "#/components/schemas/OrderActivitySource"
         blockchainInfo:
           $ref: "#/components/schemas/ActivityBlockchainInfo"
-      required:
-        - "@type"
-        - left
-        - right
-        - price
-        - blockchainInfo
+
+    OrderMatch:
+      type: object
+      oneOf:
+        - $ref: "#/components/schemas/OrderMatchSwap"
+        - $ref: "#/components/schemas/OrderMatchSell"
+        - $ref: "#/components/schemas/OrderMatchAcceptBid"
+
+    OrderMatchSwap:
+      type: object
+      required: [left, right]
+      properties:
+        "@type":
+          type: string
+          enum:
+            - SWAP
+        left:
+          $ref: "#/components/schemas/OrderActivityMatchSide"
+        right:
+          $ref: "#/components/schemas/OrderActivityMatchSide"
+
+    OrderMatchAcceptBid:
+      type: object
+      required: [nft, payment, price]
+      properties:
+        "@type":
+          type: string
+          enum:
+            - ACCEPT_BID
+        nft:
+          $ref: "#/components/schemas/Asset"
+        payment:
+          $ref: "#/components/schemas/Asset"
+        price:
+          $ref: "#/components/schemas/BigDecimal"
+        priceUsd:
+          $ref: "#/components/schemas/BigDecimal"
+        amountUsd:
+          $ref: "#/components/schemas/BigDecimal"
+
+    OrderMatchSell:
+      type: object
+      required: [nft, payment, price]
+      properties:
+        "@type":
+          type: string
+          enum:
+            - SELL
+        nft:
+          $ref: "#/components/schemas/Asset"
+        payment:
+          $ref: "#/components/schemas/Asset"
+        price:
+          $ref: "#/components/schemas/BigDecimal"
+        priceUsd:
+          $ref: "#/components/schemas/BigDecimal"
+        amountUsd:
+          $ref: "#/components/schemas/BigDecimal"
 
     OrderBidActivity:
       type: object
