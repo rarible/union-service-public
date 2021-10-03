@@ -1847,7 +1847,6 @@ components:
       oneOf:
         - $ref: "#/components/schemas/OrderMatchSwap"
         - $ref: "#/components/schemas/OrderMatchSell"
-        - $ref: "#/components/schemas/OrderMatchAcceptBid"
 
     OrderMatchSwap:
       type: object
@@ -1862,28 +1861,9 @@ components:
         right:
           $ref: "#/components/schemas/OrderActivityMatchSide"
 
-    OrderMatchAcceptBid:
-      type: object
-      required: [nft, payment, price]
-      properties:
-        "@type":
-          type: string
-          enum:
-            - ACCEPT_BID
-        nft:
-          $ref: "#/components/schemas/Asset"
-        payment:
-          $ref: "#/components/schemas/Asset"
-        price:
-          $ref: "#/components/schemas/BigDecimal"
-        priceUsd:
-          $ref: "#/components/schemas/BigDecimal"
-        amountUsd:
-          $ref: "#/components/schemas/BigDecimal"
-
     OrderMatchSell:
       type: object
-      required: [nft, payment, price]
+      required: [nft, payment, price, type]
       properties:
         "@type":
           type: string
@@ -1899,6 +1879,11 @@ components:
           $ref: "#/components/schemas/BigDecimal"
         amountUsd:
           $ref: "#/components/schemas/BigDecimal"
+        type:
+          type: string
+          enum:
+            - SELL
+            - ACCEPT_BID
 
     OrderBidActivity:
       type: object

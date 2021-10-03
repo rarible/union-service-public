@@ -4,7 +4,17 @@ import com.rarible.protocol.dto.ActivityFilterAllTypeDto
 import com.rarible.protocol.dto.ActivityFilterByCollectionTypeDto
 import com.rarible.protocol.dto.ActivityFilterByItemTypeDto
 import com.rarible.protocol.dto.ActivityFilterByUserTypeDto
+import com.rarible.protocol.dto.AssetDto
+import com.rarible.protocol.dto.AssetTypeDto
 import com.rarible.protocol.dto.BurnDto
+import com.rarible.protocol.dto.CryptoPunksAssetTypeDto
+import com.rarible.protocol.dto.Erc1155AssetTypeDto
+import com.rarible.protocol.dto.Erc1155LazyAssetTypeDto
+import com.rarible.protocol.dto.Erc20AssetTypeDto
+import com.rarible.protocol.dto.Erc721AssetTypeDto
+import com.rarible.protocol.dto.Erc721LazyAssetTypeDto
+import com.rarible.protocol.dto.EthAssetTypeDto
+import com.rarible.protocol.dto.GenerativeArtAssetTypeDto
 import com.rarible.protocol.dto.MintDto
 import com.rarible.protocol.dto.OrderActivityBidDto
 import com.rarible.protocol.dto.OrderActivityCancelBidDto
@@ -28,6 +38,8 @@ import com.rarible.protocol.union.dto.OrderCancelBidActivityDto
 import com.rarible.protocol.union.dto.OrderCancelListActivityDto
 import com.rarible.protocol.union.dto.OrderListActivityDto
 import com.rarible.protocol.union.dto.OrderMatchActivityDto
+import com.rarible.protocol.union.dto.OrderMatchSellDto
+import com.rarible.protocol.union.dto.OrderMatchSwapDto
 import com.rarible.protocol.union.dto.TransferActivityDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
 
@@ -37,15 +49,27 @@ object EthActivityConverter {
         val activityId = ActivityIdDto(blockchain, source.id)
         return when (source) {
             is OrderActivityMatchDto -> {
+                val type = source.type
+                val activityMatch = if (source.left.asset.assetType.nft && source.right.asset.assetType.payment) {
+                    if (type != null) {
+                        activityToSell(source, blockchain, source.left.asset, source.right.asset, convert(type))
+                    } else {
+                        activityToSwap(source, blockchain)
+                    }
+                } else if (source.left.asset.assetType.payment && source.right.asset.assetType.nft) {
+                    if (type != null) {
+                        activityToSell(source, blockchain, source.right.asset, source.left.asset, convert(type))
+                    } else {
+                        activityToSwap(source, blockchain)
+                    }
+                } else {
+                    activityToSwap(source, blockchain)
+                }
                 OrderMatchActivityDto(
                     id = activityId,
-                    type = convert(source.type),
                     date = source.date,
-                    left = convert(source.left, blockchain),
-                    right = convert(source.right, blockchain),
-                    price = source.price,
-                    priceUsd = source.priceUsd,
                     source = convert(source.source),
+                    match = activityMatch,
                     blockchainInfo = ActivityBlockchainInfoDto(
                         transactionHash = EthConverter.convert(source.transactionHash),
                         blockHash = EthConverter.convert(source.blockHash),
@@ -166,13 +190,28 @@ object EthActivityConverter {
         }
     }
 
-    fun convert(source: OrderActivityMatchDto.Type?): OrderMatchActivityDto.Type? {
-        return when (source) {
-            null -> null
-            OrderActivityMatchDto.Type.SELL -> OrderMatchActivityDto.Type.SELL
-            OrderActivityMatchDto.Type.ACCEPT_BID -> OrderMatchActivityDto.Type.ACCEPT_BID
-        }
-    }
+    private fun activityToSell(
+        source: OrderActivityMatchDto,
+        blockchain: BlockchainDto,
+        nft: AssetDto,
+        payment: AssetDto,
+        type: OrderMatchSellDto.Type
+    ) = OrderMatchSellDto(
+        nft = EthConverter.convert(nft, blockchain),
+        payment = EthConverter.convert(payment, blockchain),
+        price = source.price,
+        priceUsd = source.priceUsd,
+        amountUsd = source.priceUsd?.multiply(nft.value.toBigDecimal()),
+        type = type
+    )
+
+    private fun activityToSwap(
+        source: OrderActivityMatchDto,
+        blockchain: BlockchainDto
+    ) = OrderMatchSwapDto(
+        left = convert(source.left, blockchain),
+        right = convert(source.right, blockchain)
+    )
 
     fun asUserActivityType(source: UserActivityTypeDto): ActivityFilterByUserTypeDto {
         return when (source) {
@@ -240,4 +279,34 @@ object EthActivityConverter {
         }
     }
 
+    private fun convert(source: OrderActivityMatchDto.Type) =
+        when(source) {
+            OrderActivityMatchDto.Type.SELL -> OrderMatchSellDto.Type.SELL
+            OrderActivityMatchDto.Type.ACCEPT_BID -> OrderMatchSellDto.Type.ACCEPT_BID
+        }
+
+    private val AssetTypeDto.nft: Boolean
+        get() = when(this) {
+            is EthAssetTypeDto -> false
+            is Erc20AssetTypeDto -> false
+            is Erc721AssetTypeDto -> true
+            is Erc1155AssetTypeDto -> true
+            is Erc721LazyAssetTypeDto -> true
+            is Erc1155LazyAssetTypeDto -> true
+            is CryptoPunksAssetTypeDto -> true
+            is GenerativeArtAssetTypeDto -> false
+        }
+
+    private val AssetTypeDto.payment: Boolean
+        get() = when(this) {
+            is EthAssetTypeDto -> true
+            is Erc20AssetTypeDto -> true
+            is Erc721AssetTypeDto -> false
+            is Erc1155AssetTypeDto -> false
+            is Erc721LazyAssetTypeDto -> false
+            is Erc1155LazyAssetTypeDto -> false
+            is CryptoPunksAssetTypeDto -> false
+            is GenerativeArtAssetTypeDto -> false
+        }
 }
+
