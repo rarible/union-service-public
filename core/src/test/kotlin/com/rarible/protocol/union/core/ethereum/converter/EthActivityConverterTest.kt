@@ -4,7 +4,6 @@ import com.rarible.protocol.dto.ActivityFilterAllTypeDto
 import com.rarible.protocol.dto.ActivityFilterByCollectionTypeDto
 import com.rarible.protocol.dto.ActivityFilterByItemTypeDto
 import com.rarible.protocol.dto.ActivityFilterByUserTypeDto
-import com.rarible.protocol.dto.OrderActivityMatchDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.BurnActivityDto
@@ -15,6 +14,7 @@ import com.rarible.protocol.union.dto.OrderCancelBidActivityDto
 import com.rarible.protocol.union.dto.OrderCancelListActivityDto
 import com.rarible.protocol.union.dto.OrderListActivityDto
 import com.rarible.protocol.union.dto.OrderMatchActivityDto
+import com.rarible.protocol.union.dto.OrderMatchSwapDto
 import com.rarible.protocol.union.dto.TransferActivityDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
 import com.rarible.protocol.union.test.data.randomEthItemBurnActivity
@@ -36,28 +36,16 @@ class EthActivityConverterTest {
         val converted = EthActivityConverter.convert(dto, BlockchainDto.ETHEREUM) as OrderMatchActivityDto
 
         assertThat(converted.id.value).isEqualTo(dto.id)
-        assertThat(converted.type).isNull()
+        assertThat(converted.match is OrderMatchSwapDto)
+        val swap = converted.match as OrderMatchSwapDto
         assertThat(converted.date).isEqualTo(dto.date)
-        assertMatchSide(converted.left, dto.left)
-        assertMatchSide(converted.right, dto.right)
-        assertThat(converted.price).isEqualTo(dto.price)
-        assertThat(converted.priceUsd).isEqualTo(dto.priceUsd)
-        assertThat(converted.source?.name).isEqualTo(dto.source.name)
+        assertMatchSide(swap.left, dto.left)
+        assertMatchSide(swap.right, dto.right)
+        assertThat(converted.source.name).isEqualTo(dto.source.name)
         assertThat(converted.blockchainInfo.transactionHash).isEqualTo(dto.transactionHash.prefixed())
         assertThat(converted.blockchainInfo.blockHash).isEqualTo(dto.blockHash.prefixed())
         assertThat(converted.blockchainInfo.blockNumber).isEqualTo(dto.blockNumber)
         assertThat(converted.blockchainInfo.logIndex).isEqualTo(dto.logIndex)
-    }
-
-    @Test
-    fun `eth order activity match side - type`() {
-        assertThat(EthActivityConverter.convert(null)).isNull()
-
-        assertThat(EthActivityConverter.convert(OrderActivityMatchDto.Type.SELL))
-            .isEqualTo(OrderMatchActivityDto.Type.SELL)
-
-        assertThat(EthActivityConverter.convert(OrderActivityMatchDto.Type.ACCEPT_BID))
-            .isEqualTo(OrderMatchActivityDto.Type.ACCEPT_BID)
     }
 
     @Test
