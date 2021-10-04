@@ -1,14 +1,13 @@
 package com.rarible.protocol.union.core.flow.converter
 
-import com.rarible.protocol.dto.FlowOrderActivityMatchSideDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.BurnActivityDto
 import com.rarible.protocol.union.dto.FlowAssetTypeDto
 import com.rarible.protocol.union.dto.MintActivityDto
-import com.rarible.protocol.union.dto.OrderActivityMatchSideDto
 import com.rarible.protocol.union.dto.OrderCancelListActivityDto
 import com.rarible.protocol.union.dto.OrderListActivityDto
 import com.rarible.protocol.union.dto.OrderMatchActivityDto
+import com.rarible.protocol.union.dto.OrderMatchSellDto
 import com.rarible.protocol.union.dto.TransferActivityDto
 import com.rarible.protocol.union.test.data.randomFlowBurnDto
 import com.rarible.protocol.union.test.data.randomFlowCancelListActivityDto
@@ -27,11 +26,9 @@ class FlowActivityConverterTest {
         val converted = FlowActivityConverter.convert(dto, BlockchainDto.FLOW) as OrderMatchActivityDto
 
         assertThat(converted.id.value).isEqualTo(dto.id)
-        assertThat(converted.type).isEqualTo(OrderMatchActivityDto.Type.SELL)
+        assertThat(converted.match is OrderMatchSellDto)
+        //todo assert match is ok after flow implementation
         assertThat(converted.date).isEqualTo(dto.date)
-        assertMatchSide(converted.left, dto.left)
-        assertMatchSide(converted.right, dto.right)
-        assertThat(converted.price).isEqualTo(dto.price)
         //assertThat(converted.priceUsd).isEqualTo(dto.priceUsd) //TODO - add usdPrice
         assertThat(converted.blockchainInfo.transactionHash).isEqualTo(dto.transactionHash)
         assertThat(converted.blockchainInfo.blockHash).isEqualTo(dto.blockHash)
@@ -128,13 +125,5 @@ class FlowActivityConverterTest {
         assertThat(converted.blockchainInfo.blockHash).isEqualTo(dto.blockHash)
         assertThat(converted.blockchainInfo.blockNumber).isEqualTo(dto.blockNumber)
         assertThat(converted.blockchainInfo.logIndex).isEqualTo(dto.logIndex)
-    }
-
-    private fun assertMatchSide(
-        dest: OrderActivityMatchSideDto,
-        expected: FlowOrderActivityMatchSideDto
-    ) {
-        //assertThat(dest.asset.value).isEqualTo(expected.asset.value) // TODO - types incompatible
-        assertThat(dest.maker.value).isEqualTo(expected.maker)
     }
 }

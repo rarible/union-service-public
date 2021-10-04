@@ -7,7 +7,6 @@ import com.rarible.protocol.dto.FlowMintDto
 import com.rarible.protocol.dto.FlowNftOrderActivityCancelListDto
 import com.rarible.protocol.dto.FlowNftOrderActivityListDto
 import com.rarible.protocol.dto.FlowNftOrderActivitySellDto
-import com.rarible.protocol.dto.FlowOrderActivityMatchSideDto
 import com.rarible.protocol.dto.FlowTransferDto
 import com.rarible.protocol.union.core.continuation.Slice
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
@@ -17,10 +16,11 @@ import com.rarible.protocol.union.dto.ActivityIdDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.BurnActivityDto
 import com.rarible.protocol.union.dto.MintActivityDto
-import com.rarible.protocol.union.dto.OrderActivityMatchSideDto
+import com.rarible.protocol.union.dto.OrderActivitySourceDto
 import com.rarible.protocol.union.dto.OrderCancelListActivityDto
 import com.rarible.protocol.union.dto.OrderListActivityDto
 import com.rarible.protocol.union.dto.OrderMatchActivityDto
+import com.rarible.protocol.union.dto.OrderMatchSellDto
 import com.rarible.protocol.union.dto.TransferActivityDto
 
 object FlowActivityConverter {
@@ -32,18 +32,22 @@ object FlowActivityConverter {
                 OrderMatchActivityDto(
                     id = activityId,
                     // TODO ensure that's right
-                    type = OrderMatchActivityDto.Type.SELL,
                     date = source.date,
-                    left = convert(source.left, blockchain),
-                    right = convert(source.right, blockchain),
-                    price = source.price,
-                    priceUsd = source.price, // TODO should be in USD
+                    match = OrderMatchSellDto(
+                        nft = FlowConverter.convert(source.left.asset, blockchain),
+                        payment = FlowConverter.convert(source.left.asset, blockchain),
+                        priceUsd = source.price, //TODO should be in USD,
+                        price = source.price,
+                        type = OrderMatchSellDto.Type.SELL,
+                        amountUsd = source.price.multiply(source.left.asset.value)
+                    ),
                     blockchainInfo = ActivityBlockchainInfoDto(
                         transactionHash = source.transactionHash,
                         blockHash = source.blockHash,
                         blockNumber = source.blockNumber,
                         logIndex = source.logIndex
-                    )
+                    ),
+                    source = OrderActivitySourceDto.RARIBLE
                 )
             }
             is FlowNftOrderActivityListDto -> {
@@ -127,14 +131,4 @@ object FlowActivityConverter {
         )
     }
 
-    private fun convert(
-        source: FlowOrderActivityMatchSideDto,
-        blockchain: BlockchainDto
-    ): OrderActivityMatchSideDto {
-        // TODO как здесь разделять?
-        return OrderActivityMatchSideDto(
-            maker = UnionAddressConverter.convert(source.maker, blockchain),
-            asset = FlowConverter.convert(source.asset, blockchain)
-        )
-    }
 }

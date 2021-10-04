@@ -195,6 +195,7 @@ fun randomEthAssetErc20(address: Address) = AssetDto(
     valueDecimal = randomBigDecimal()
 )
 
+fun randomEthAssetErc1155() = randomEthAssetErc1155(randomEthItemId())
 fun randomEthAssetErc1155(itemId: ItemIdDto) = AssetDto(
     assetType = Erc1155AssetTypeDto(Address.apply(itemId.token.value), itemId.tokenId),
     value = randomBigInt(),
@@ -439,7 +440,8 @@ fun randomEthOrderActivityMatch(): OrderActivityMatchDto {
         transactionHash = Word.apply(randomWord()),
         blockHash = Word.apply(randomWord()),
         blockNumber = randomLong(),
-        logIndex = randomInt()
+        logIndex = randomInt(),
+        type = OrderActivityMatchDto.Type.SELL
     )
 }
 
