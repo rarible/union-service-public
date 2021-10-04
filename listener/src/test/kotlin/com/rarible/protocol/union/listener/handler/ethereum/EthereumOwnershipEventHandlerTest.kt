@@ -1,14 +1,15 @@
-package com.rarible.protocol.union.listener.handler.flow
+package com.rarible.protocol.union.listener.handler.ethereum
 
 import com.rarible.core.test.data.randomString
-import com.rarible.protocol.dto.FlowNftOwnershipDeleteEventDto
-import com.rarible.protocol.dto.FlowNftOwnershipUpdateEventDto
-import com.rarible.protocol.dto.FlowOwnershipEventDto
-import com.rarible.protocol.union.core.flow.converter.FlowOwnershipConverter
+import com.rarible.protocol.dto.NftDeletedOwnershipDto
+import com.rarible.protocol.dto.NftOwnershipDeleteEventDto
+import com.rarible.protocol.dto.NftOwnershipEventDto
+import com.rarible.protocol.dto.NftOwnershipUpdateEventDto
+import com.rarible.protocol.union.core.ethereum.converter.EthOwnershipConverter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.listener.service.EnrichmentOwnershipEventService
-import com.rarible.protocol.union.test.data.randomFlowNftOwnershipDto
-import com.rarible.protocol.union.test.data.randomFlowOwnershipId
+import com.rarible.protocol.union.test.data.randomEthOwnershipDto
+import com.rarible.protocol.union.test.data.randomEthOwnershipId
 import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -17,12 +18,13 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import scalether.domain.Address
 
 @FlowPreview
-class FlowOwnershipEventHandlerFt {
+class EthereumOwnershipEventHandlerTest {
 
     private val ownershipEventService: EnrichmentOwnershipEventService = mockk()
-    private val handler = FlowOwnershipEventHandler(ownershipEventService, BlockchainDto.FLOW)
+    private val handler = EthereumOwnershipEventHandler(ownershipEventService, BlockchainDto.ETHEREUM)
 
     @BeforeEach
     fun beforeEach() {
@@ -33,13 +35,12 @@ class FlowOwnershipEventHandlerFt {
 
     @Test
     fun `ethereum ownership update event`() = runBlocking {
-        val flowOwnership = randomFlowNftOwnershipDto()
-        val dto: FlowOwnershipEventDto =
-            FlowNftOwnershipUpdateEventDto(randomString(), flowOwnership.id!!, flowOwnership)
+        val ethOwnership = randomEthOwnershipDto()
+        val dto: NftOwnershipEventDto = NftOwnershipUpdateEventDto(randomString(), ethOwnership.id, ethOwnership)
 
         handler.handle(dto)
 
-        val expected = FlowOwnershipConverter.convert(flowOwnership, BlockchainDto.FLOW)
+        val expected = EthOwnershipConverter.convert(ethOwnership, BlockchainDto.ETHEREUM)
         coVerify(exactly = 1) { ownershipEventService.onOwnershipUpdated(expected) }
         coVerify(exactly = 0) { ownershipEventService.onOwnershipDeleted(any()) }
     }
@@ -47,14 +48,16 @@ class FlowOwnershipEventHandlerFt {
     @Test
     fun `ethereum ownership delete event`() = runBlocking {
 
-        val ethOwnershipId = randomFlowOwnershipId()
-        val flowOwnership = randomFlowNftOwnershipDto(ethOwnershipId)
+        val ethOwnershipId = randomEthOwnershipId()
 
-        val dto = FlowNftOwnershipDeleteEventDto(
-            randomString(),
-            flowOwnership.id!!,
-            flowOwnership
+        val deletedDto = NftDeletedOwnershipDto(
+            ethOwnershipId.value,
+            Address.apply(ethOwnershipId.token.value),
+            ethOwnershipId.tokenId,
+            Address.apply(ethOwnershipId.owner.value)
         )
+
+        val dto: NftOwnershipEventDto = NftOwnershipDeleteEventDto(randomString(), ethOwnershipId.value, deletedDto)
 
         handler.handle(dto)
 

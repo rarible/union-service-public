@@ -11,7 +11,8 @@ object ShortOrderConverter {
             blockchain = order.id.blockchain,
             id = order.id.value,
             platform = order.platform.name,
-            makeStock = order.makeStock,
+            // We expect here orders with integer value of makeStock since there should be only NFTs
+            makeStock = order.makeStock.toBigInteger(),
             makePriceUsd = order.makePriceUsd,
             takePriceUsd = order.takePriceUsd
         )

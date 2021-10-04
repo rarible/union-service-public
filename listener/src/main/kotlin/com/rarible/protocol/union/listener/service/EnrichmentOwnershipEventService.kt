@@ -1,7 +1,8 @@
-package com.rarible.protocol.union.enrichment.service.event
+package com.rarible.protocol.union.listener.service
 
 import com.rarible.core.common.optimisticLock
 import com.rarible.protocol.union.dto.OrderDto
+import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.UnionOwnershipDto
 import com.rarible.protocol.union.enrichment.converter.ShortOwnershipConverter
 import com.rarible.protocol.union.enrichment.event.OwnershipEventDelete
@@ -52,13 +53,14 @@ class EnrichmentOwnershipEventService(
         }
     }
 
-    suspend fun onOwnershipDeleted(ownershipId: ShortOwnershipId) {
-        logger.debug("Deleting Ownership [{}] since it was removed from NFT-Indexer", ownershipId)
-        val deleted = deleteOwnership(ownershipId)
-        notifyDelete(ownershipId)
+    suspend fun onOwnershipDeleted(ownershipId: OwnershipIdDto) {
+        val shortOwnershipId = ShortOwnershipId(ownershipId)
+        logger.debug("Deleting Ownership [{}] since it was removed from NFT-Indexer", shortOwnershipId)
+        val deleted = deleteOwnership(shortOwnershipId)
+        notifyDelete(shortOwnershipId)
         if (deleted) {
-            logger.info("Ownership [{}] deleted (removed from NFT-Indexer), refreshing sell stats", ownershipId)
-            enrichmentItemEventService.onOwnershipUpdated(ownershipId, null)
+            logger.info("Ownership [{}] deleted (removed from NFT-Indexer), refreshing sell stats", shortOwnershipId)
+            enrichmentItemEventService.onOwnershipUpdated(shortOwnershipId, null)
         }
     }
 

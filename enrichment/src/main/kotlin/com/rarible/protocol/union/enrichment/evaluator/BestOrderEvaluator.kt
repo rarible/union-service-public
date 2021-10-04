@@ -5,7 +5,7 @@ import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.model.ShortOrder
 import org.slf4j.LoggerFactory
-import java.math.BigInteger
+import java.math.BigDecimal
 
 class BestOrderEvaluator(
     private val comparator: BestOrderComparator,
@@ -124,7 +124,7 @@ class BestOrderEvaluator(
     }
 
     private fun isAlive(order: OrderDto): Boolean {
-        return order.take.value != order.fill && !order.cancelled && order.makeStock != BigInteger.ZERO
+        return order.take.value != order.fill && !order.cancelled && order.makeStock != BigDecimal.ZERO
     }
 
 }

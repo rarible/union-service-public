@@ -10,6 +10,11 @@ import com.rarible.protocol.dto.FlowOrderEventDto
 import com.rarible.protocol.dto.FlowOwnershipEventDto
 import com.rarible.protocol.dto.NftItemEventDto
 import com.rarible.protocol.dto.NftOwnershipEventDto
+import com.rarible.protocol.flow.nft.api.client.FlowNftItemControllerApi
+import com.rarible.protocol.flow.nft.api.client.FlowNftOwnershipControllerApi
+import com.rarible.protocol.flow.nft.api.client.FlowOrderControllerApi
+import com.rarible.protocol.nft.api.client.NftItemControllerApi
+import com.rarible.protocol.nft.api.client.NftOwnershipControllerApi
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ItemDeleteEventDto
 import com.rarible.protocol.union.dto.ItemEventDto
@@ -27,12 +32,26 @@ import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.runBlocking
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Qualifier
 import java.util.*
 import java.util.concurrent.LinkedBlockingQueue
 
 @FlowPreview
 @Suppress("UNCHECKED_CAST")
 abstract class AbstractIntegrationTest {
+
+    //--------------------- ETHEREUM ---------------------//
+    @Autowired
+    @Qualifier("ethereum.item.api")
+    lateinit var testEthereumItemApi: NftItemControllerApi
+
+    @Autowired
+    @Qualifier("ethereum.ownership.api")
+    lateinit var testEthereumOwnershipApi: NftOwnershipControllerApi
+
+    @Autowired
+    @Qualifier("ethereum.order.api")
+    lateinit var testEthereumOrderApi: com.rarible.protocol.order.api.client.OrderControllerApi
 
     @Autowired
     lateinit var ethItemProducer: RaribleKafkaProducer<NftItemEventDto>
@@ -45,6 +64,16 @@ abstract class AbstractIntegrationTest {
 
     @Autowired
     lateinit var ethActivityProducer: RaribleKafkaProducer<com.rarible.protocol.dto.ActivityDto>
+
+    //--------------------- FLOW ---------------------//
+    @Autowired
+    lateinit var testFlowItemApi: FlowNftItemControllerApi
+
+    @Autowired
+    lateinit var testFlowOwnershipApi: FlowNftOwnershipControllerApi
+
+    @Autowired
+    lateinit var testFlowOrderApi: FlowOrderControllerApi
 
     @Autowired
     lateinit var flowItemProducer: RaribleKafkaProducer<FlowNftItemEventDto>
@@ -102,22 +131,22 @@ abstract class AbstractIntegrationTest {
         result
     }
 
-    fun findEthItemUpdates(itemId: String): List<KafkaMessage<ItemUpdateEventDto>> {
+    fun findItemUpdates(itemId: String): List<KafkaMessage<ItemUpdateEventDto>> {
         return filterByValueType(itemEvents as Queue<KafkaMessage<Any>>, ItemUpdateEventDto::class.java)
             .filter { it.value.itemId.value == itemId }
     }
 
-    fun findEthItemDeletions(itemId: String): List<KafkaMessage<ItemDeleteEventDto>> {
+    fun findItemDeletions(itemId: String): List<KafkaMessage<ItemDeleteEventDto>> {
         return filterByValueType(itemEvents as Queue<KafkaMessage<Any>>, ItemDeleteEventDto::class.java)
             .filter { it.value.itemId.value == itemId }
     }
 
-    fun findEthOwnershipUpdates(ownershipId: String): List<KafkaMessage<OwnershipUpdateEventDto>> {
+    fun findOwnershipUpdates(ownershipId: String): List<KafkaMessage<OwnershipUpdateEventDto>> {
         return filterByValueType(ownershipEvents as Queue<KafkaMessage<Any>>, OwnershipUpdateEventDto::class.java)
             .filter { it.value.ownershipId.value == ownershipId }
     }
 
-    fun findEthOwnershipDeletions(ownershipId: String): List<KafkaMessage<OwnershipDeleteEventDto>> {
+    fun findOwnershipDeletions(ownershipId: String): List<KafkaMessage<OwnershipDeleteEventDto>> {
         return filterByValueType(ownershipEvents as Queue<KafkaMessage<Any>>, OwnershipDeleteEventDto::class.java)
             .filter { it.value.ownershipId.value == ownershipId }
     }
@@ -125,21 +154,6 @@ abstract class AbstractIntegrationTest {
     fun findEthOrderUpdates(orderId: String): List<KafkaMessage<OrderUpdateEventDto>> {
         return filterByValueType(orderEvents as Queue<KafkaMessage<Any>>, OrderUpdateEventDto::class.java)
             .filter { it.value.orderId.value == orderId }
-    }
-
-    fun findFlowItemUpdates(itemId: String): List<KafkaMessage<ItemUpdateEventDto>> {
-        return filterByValueType(itemEvents as Queue<KafkaMessage<Any>>, ItemUpdateEventDto::class.java)
-            .filter { it.value.itemId.value == itemId }
-    }
-
-    fun findFlowItemDeletions(itemId: String): List<KafkaMessage<ItemDeleteEventDto>> {
-        return filterByValueType(itemEvents as Queue<KafkaMessage<Any>>, ItemDeleteEventDto::class.java)
-            .filter { it.value.itemId.value == itemId }
-    }
-
-    fun findFlowOwnershipUpdates(ownershipId: String): List<KafkaMessage<OwnershipUpdateEventDto>> {
-        return filterByValueType(ownershipEvents as Queue<KafkaMessage<Any>>, OwnershipUpdateEventDto::class.java)
-            .filter { it.value.ownershipId.value == ownershipId }
     }
 
     fun findFlowOwnershipDeletions(ownershipId: String): List<KafkaMessage<OwnershipDeleteEventDto>> {

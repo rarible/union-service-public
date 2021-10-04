@@ -95,6 +95,14 @@
             <dependency>
                 <groupId>com.rarible.protocol.union</groupId>
                 <artifactId>rarible-union-enrichment</artifactId>
+                <classifier>tests</classifier>
+                <type>test-jar</type>
+                <scope>test</scope>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.rarible.protocol.union</groupId>
+                <artifactId>rarible-union-enrichment</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
