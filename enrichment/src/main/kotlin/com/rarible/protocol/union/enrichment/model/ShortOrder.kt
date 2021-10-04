@@ -20,7 +20,7 @@ data class ShortOrder(
 
 ) {
 
-    fun toDto(): OrderIdDto {
+    fun getIdDto(): OrderIdDto {
         return OrderIdDto(blockchain, id)
     }
 

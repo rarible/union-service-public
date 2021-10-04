@@ -21,7 +21,7 @@ data class ShortOwnershipId(
     )
 
     override fun toString(): String {
-        return toDto().value
+        return toDto().fullId()
     }
 
     fun toDto(): OwnershipIdDto {

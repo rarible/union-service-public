@@ -55,7 +55,7 @@ class BestOrderEvaluator(
     private fun setBestOrder(updated: ShortOrder): ShortOrder {
         logger.info(
             "Updated {} Order [{}] is alive, current Order for {} [{}] is null - using updated Order",
-            name, updated.id, type, id
+            name, updated.getIdDto().fullId(), type, id
         )
         return updated
     }
@@ -64,7 +64,7 @@ class BestOrderEvaluator(
     private fun updateBestOrder(updated: ShortOrder): ShortOrder {
         logger.info(
             "Updated {} Order [{}] is the same as current for {} [{}] - using updated Order",
-            name, updated.id, type, id
+            name, updated.getIdDto().fullId(), type, id
         )
         return updated
     }
@@ -84,7 +84,7 @@ class BestOrderEvaluator(
 
         logger.info(
             "Evaluated {} for {} [{}] (current = [{}], updated = [{}], best = [{}])",
-            name, type, id, current.id, updated.id, bestOrder.id
+            name, type, id, current.getIdDto().fullId(), updated.getIdDto().fullId(), bestOrder.getIdDto().fullId()
         )
         return bestOrder
     }
@@ -93,7 +93,7 @@ class BestOrderEvaluator(
     private fun skipDeadOrder(updated: ShortOrder): ShortOrder? {
         logger.info(
             "Updated {} Order [{}] is cancelled/filled, current Order for {} [{}] is null - nothing to update",
-            name, updated.id, type, id
+            name, updated.getIdDto().fullId(), type, id
         )
         return null
     }
@@ -102,7 +102,7 @@ class BestOrderEvaluator(
     private suspend fun refetchDeadOrder(updated: ShortOrder): ShortOrder? {
         logger.info(
             "Updated {} Order [{}] is cancelled/filled, current Order for {} [{}] is the same - dropping it",
-            name, updated.id, type, id
+            name, updated.getIdDto().fullId(), type, id
         )
         // It means, current best Order is not alive, we have to fetch actual best Order
         val fetched = provider.fetch()
@@ -114,7 +114,7 @@ class BestOrderEvaluator(
     private fun ignoreDeadOrder(current: ShortOrder, updated: ShortOrder): ShortOrder {
         logger.info(
             "Updated {} Order [{}] is cancelled/filled, current Order for {} [{}] is [{}] - nothing to update",
-            name, updated.id, type, id, current.id
+            name, updated.getIdDto().fullId(), type, id, current.getIdDto().fullId()
         )
         return current
     }
