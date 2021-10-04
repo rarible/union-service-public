@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory
 
 abstract class AbstractEventHandler<T> : ConsumerEventHandler<T> {
 
+    // TODO put it into producers
     companion object {
         val ITEM_EVENT_HEADERS = mapOf("protocol.union.item.event.version" to UnionEventTopicProvider.VERSION)
         val OWNERSHIP_EVENT_HEADERS = mapOf("protocol.union.ownership.event.version" to UnionEventTopicProvider.VERSION)

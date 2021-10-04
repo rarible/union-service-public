@@ -4,27 +4,27 @@ import com.rarible.protocol.dto.FlowAssetDto
 import com.rarible.protocol.dto.FlowAssetFungibleDto
 import com.rarible.protocol.dto.FlowAssetNFTDto
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
+import com.rarible.protocol.union.dto.AssetDto
+import com.rarible.protocol.union.dto.AssetTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.UnionAssetDto
 import com.rarible.protocol.union.dto.FlowAssetTypeFtDto
 import com.rarible.protocol.union.dto.FlowAssetTypeNftDto
-import com.rarible.protocol.union.dto.UnionAssetTypeDto
 
 object FlowConverter {
 
-    fun convert(source: FlowAssetDto, blockchain: BlockchainDto): UnionAssetDto {
+    fun convert(source: FlowAssetDto, blockchain: BlockchainDto): AssetDto {
         return when (source) {
             is FlowAssetFungibleDto -> {
-                UnionAssetDto(
-                    value = source.value.toBigInteger(), //TODO
+                AssetDto(
+                    value = source.value,
                     type = FlowAssetTypeFtDto(
                         contract = UnionAddressConverter.convert(source.contract, blockchain)
                     )
                 )
             }
             is FlowAssetNFTDto -> {
-                UnionAssetDto(
-                    value = source.value.toBigInteger(), //TODO
+                AssetDto(
+                    value = source.value,
                     type = FlowAssetTypeNftDto(
                         contract = UnionAddressConverter.convert(source.contract, blockchain),
                         tokenId = source.tokenId
@@ -34,7 +34,7 @@ object FlowConverter {
         }
     }
 
-    fun convertToType(source: FlowAssetDto, blockchain: BlockchainDto): UnionAssetTypeDto {
+    fun convertToType(source: FlowAssetDto, blockchain: BlockchainDto): AssetTypeDto {
         return when (source) {
             is FlowAssetFungibleDto -> {
                 FlowAssetTypeFtDto(

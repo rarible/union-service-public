@@ -1,11 +1,11 @@
 package com.rarible.protocol.union.core.ethereum.service
 
 import com.rarible.protocol.nft.api.client.NftItemControllerApi
-import com.rarible.protocol.union.core.ethereum.converter.EthUnionItemConverter
+import com.rarible.protocol.union.core.continuation.Page
+import com.rarible.protocol.union.core.ethereum.converter.EthItemConverter
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.UnionItemDto
-import com.rarible.protocol.union.dto.UnionItemsDto
 import kotlinx.coroutines.reactive.awaitFirst
 
 class EthereumItemService(
@@ -19,7 +19,7 @@ class EthereumItemService(
         showDeleted: Boolean?,
         lastUpdatedFrom: Long?,
         lastUpdatedTo: Long?
-    ): UnionItemsDto {
+    ): Page<UnionItemDto> {
         val items = itemControllerApi.getNftAllItems(
             continuation,
             size,
@@ -27,41 +27,45 @@ class EthereumItemService(
             lastUpdatedFrom,
             lastUpdatedTo
         ).awaitFirst()
-        return EthUnionItemConverter.convert(items, blockchain)
+        return EthItemConverter.convert(items, blockchain)
     }
 
     override suspend fun getItemById(
         itemId: String
     ): UnionItemDto {
         val item = itemControllerApi.getNftItemById(itemId).awaitFirst()
-        return EthUnionItemConverter.convert(item, blockchain)
+        return EthItemConverter.convert(item, blockchain)
+    }
+
+    override suspend fun resetItemMeta(itemId: String) {
+        itemControllerApi.resetNftItemMetaById(itemId)
     }
 
     override suspend fun getItemsByCollection(
         collection: String,
         continuation: String?,
         size: Int
-    ): UnionItemsDto {
+    ): Page<UnionItemDto> {
         val items = itemControllerApi.getNftItemsByCollection(collection, continuation, size).awaitFirst()
-        return EthUnionItemConverter.convert(items, blockchain)
+        return EthItemConverter.convert(items, blockchain)
     }
 
     override suspend fun getItemsByCreator(
         creator: String,
         continuation: String?,
         size: Int
-    ): UnionItemsDto {
+    ): Page<UnionItemDto> {
         val items = itemControllerApi.getNftItemsByCreator(creator, continuation, size).awaitFirst()
-        return EthUnionItemConverter.convert(items, blockchain)
+        return EthItemConverter.convert(items, blockchain)
     }
 
     override suspend fun getItemsByOwner(
         owner: String,
         continuation: String?,
         size: Int
-    ): UnionItemsDto {
+    ): Page<UnionItemDto> {
         val items = itemControllerApi.getNftItemsByOwner(owner, continuation, size).awaitFirst()
-        return EthUnionItemConverter.convert(items, blockchain)
+        return EthItemConverter.convert(items, blockchain)
     }
 
 }

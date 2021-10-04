@@ -1,11 +1,11 @@
 package com.rarible.protocol.union.core.ethereum.service
 
 import com.rarible.protocol.nft.api.client.NftCollectionControllerApi
-import com.rarible.protocol.union.core.ethereum.converter.EthUnionCollectionConverter
+import com.rarible.protocol.union.core.continuation.Page
+import com.rarible.protocol.union.core.ethereum.converter.EthCollectionConverter
 import com.rarible.protocol.union.core.service.CollectionService
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.UnionCollectionDto
-import com.rarible.protocol.union.dto.UnionCollectionsDto
+import com.rarible.protocol.union.dto.CollectionDto
 import kotlinx.coroutines.reactive.awaitFirst
 
 class EthereumCollectionService(
@@ -13,22 +13,22 @@ class EthereumCollectionService(
     private val collectionControllerApi: NftCollectionControllerApi
 ) : AbstractEthereumService(blockchain), CollectionService {
 
-    override suspend fun getAllCollections(continuation: String?, size: Int): UnionCollectionsDto {
+    override suspend fun getAllCollections(continuation: String?, size: Int): Page<CollectionDto> {
         val collections = collectionControllerApi.searchNftAllCollections(continuation, size).awaitFirst()
-        return EthUnionCollectionConverter.convert(collections, blockchain)
+        return EthCollectionConverter.convert(collections, blockchain)
     }
 
-    override suspend fun getCollectionById(collectionId: String): UnionCollectionDto {
+    override suspend fun getCollectionById(collectionId: String): CollectionDto {
         val collection = collectionControllerApi.getNftCollectionById(collectionId).awaitFirst()
-        return EthUnionCollectionConverter.convert(collection, blockchain)
+        return EthCollectionConverter.convert(collection, blockchain)
     }
 
     override suspend fun getCollectionsByOwner(
         owner: String,
         continuation: String?,
         size: Int
-    ): UnionCollectionsDto {
+    ): Page<CollectionDto> {
         val items = collectionControllerApi.searchNftCollectionsByOwner(owner, continuation, size).awaitFirst()
-        return EthUnionCollectionConverter.convert(items, blockchain)
+        return EthCollectionConverter.convert(items, blockchain)
     }
 }

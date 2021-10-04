@@ -38,7 +38,7 @@
     </distributionManagement>
 
     <properties>
-        <revision>1.3-SNAPSHOT</revision>
+        <revision>1.5-SNAPSHOT</revision>
         <nexus.maven.public>http://nexus.rarible.int/repository/maven-public</nexus.maven.public>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
@@ -50,10 +50,10 @@
 
         <rarible-core.version>1.3.4</rarible-core.version>
         <rarible-ethereum.version>1.1.1</rarible-ethereum.version>
-        <rarible-protocol.ethereum.version>1.15-SNAPSHOT</rarible-protocol.ethereum.version>
+        <rarible-protocol.ethereum.version>1.16-SNAPSHOT</rarible-protocol.ethereum.version>
         <rarible-protocol.flow.version>2.0.16-SNAPSHOT</rarible-protocol.flow.version>
-        <rarible.codegen.server.version>1.0.1</rarible.codegen.server.version>
-        <rarible.codegen.client.version>1.1.4</rarible.codegen.client.version>
+        <rarible.codegen.server.version>1.1.0</rarible.codegen.server.version>
+        <rarible.codegen.client.version>1.2.0</rarible.codegen.client.version>
 
         <openapi.plugin.version>5.1.0</openapi.plugin.version>
         <model.generator.version>1.2.5</model.generator.version>
@@ -90,6 +90,19 @@
                 <classifier>tests</classifier>
                 <type>test-jar</type>
                 <scope>test</scope>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.rarible.protocol.union</groupId>
+                <artifactId>rarible-union-enrichment</artifactId>
+                <classifier>tests</classifier>
+                <type>test-jar</type>
+                <scope>test</scope>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.rarible.protocol.union</groupId>
+                <artifactId>rarible-union-enrichment</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -189,23 +202,6 @@
             <dependency>
                 <groupId>com.rarible.protocol</groupId>
                 <artifactId>protocol-subscriber-erc20</artifactId>
-                <version>${rarible-protocol.ethereum.version}</version>
-            </dependency>
-
-            <!-- NFT-Order -->
-            <dependency>
-                <groupId>com.rarible.protocol</groupId>
-                <artifactId>protocol-model-nft-order</artifactId>
-                <version>${rarible-protocol.ethereum.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.rarible.protocol</groupId>
-                <artifactId>protocol-client-nft-order-starter</artifactId>
-                <version>${rarible-protocol.ethereum.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.rarible.protocol</groupId>
-                <artifactId>protocol-subscriber-nft-order</artifactId>
                 <version>${rarible-protocol.ethereum.version}</version>
             </dependency>
 
@@ -310,6 +306,7 @@
     <modules>
         <module>api</module>
         <module>core</module>
+        <module>enrichment</module>
         <module>listener</module>
         <module>openapi</module>
         <module>test-coverage</module>

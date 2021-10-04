@@ -1,29 +1,29 @@
 package com.rarible.protocol.union.dto
 
 import com.fasterxml.jackson.databind.module.SimpleModule
-import com.rarible.protocol.union.dto.deserializer.UnionActivityIdDeserializer
-import com.rarible.protocol.union.dto.deserializer.UnionItemIdDeserializer
-import com.rarible.protocol.union.dto.deserializer.UnionOrderIdDeserializer
-import com.rarible.protocol.union.dto.deserializer.UnionOwnershipIdDeserializer
-import com.rarible.protocol.union.dto.serializer.UnionActivityIdSerializer
-import com.rarible.protocol.union.dto.serializer.UnionItemIdSerializer
-import com.rarible.protocol.union.dto.serializer.UnionOrderIdSerializer
-import com.rarible.protocol.union.dto.serializer.UnionOwnershipIdSerializer
+import com.rarible.protocol.union.dto.deserializer.ActivityIdDeserializer
+import com.rarible.protocol.union.dto.deserializer.ItemIdDeserializer
+import com.rarible.protocol.union.dto.deserializer.OrderIdDeserializer
+import com.rarible.protocol.union.dto.deserializer.OwnershipIdDeserializer
+import com.rarible.protocol.union.dto.serializer.ActivityIdSerializer
+import com.rarible.protocol.union.dto.serializer.ItemIdSerializer
+import com.rarible.protocol.union.dto.serializer.OrderIdSerializer
+import com.rarible.protocol.union.dto.serializer.OwnershipIdSerializer
 
 object UnionModelJacksonModule : SimpleModule() {
 
     init {
-        addSerializer(UnionItemIdSerializer)
-        addDeserializer(UnionItemIdDto::class.java, UnionItemIdDeserializer)
+        addSerializer(ItemIdSerializer)
+        addDeserializer(ItemIdDto::class.java, ItemIdDeserializer)
 
-        addSerializer(UnionOwnershipIdSerializer)
-        addDeserializer(UnionOwnershipIdDto::class.java, UnionOwnershipIdDeserializer)
+        addSerializer(OwnershipIdSerializer)
+        addDeserializer(OwnershipIdDto::class.java, OwnershipIdDeserializer)
 
-        addSerializer(UnionOrderIdSerializer)
-        addDeserializer(UnionOrderIdDto::class.java, UnionOrderIdDeserializer)
+        addSerializer(OrderIdSerializer)
+        addDeserializer(OrderIdDto::class.java, OrderIdDeserializer)
 
-        addSerializer(UnionActivityIdSerializer)
-        addDeserializer(UnionActivityIdDto::class.java, UnionActivityIdDeserializer)
+        addSerializer(ActivityIdSerializer)
+        addDeserializer(ActivityIdDto::class.java, ActivityIdDeserializer)
     }
 
 }

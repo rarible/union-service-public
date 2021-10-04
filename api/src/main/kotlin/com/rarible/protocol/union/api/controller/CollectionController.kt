@@ -1,13 +1,14 @@
 package com.rarible.protocol.union.api.controller
 
 import com.rarible.protocol.union.api.configuration.PageSize
-import com.rarible.protocol.union.core.continuation.ContinuationPaging
+import com.rarible.protocol.union.core.continuation.Page
+import com.rarible.protocol.union.core.continuation.Paging
 import com.rarible.protocol.union.core.service.CollectionServiceRouter
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.CollectionDto
+import com.rarible.protocol.union.dto.CollectionsDto
 import com.rarible.protocol.union.dto.IdParser
-import com.rarible.protocol.union.dto.UnionCollectionDto
-import com.rarible.protocol.union.dto.UnionCollectionsDto
-import com.rarible.protocol.union.dto.continuation.UnionCollectionContinuation
+import com.rarible.protocol.union.dto.continuation.CollectionContinuation
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.RestController
 
@@ -20,7 +21,7 @@ class CollectionController(
         blockchains: List<BlockchainDto>?,
         continuation: String?,
         size: Int?
-    ): ResponseEntity<UnionCollectionsDto> {
+    ): ResponseEntity<CollectionsDto> {
         val safeSize = PageSize.COLLECTION.limit(size)
         val blockchainPages = router.executeForAll(blockchains) {
             it.getAllCollections(continuation, safeSize)
@@ -28,18 +29,17 @@ class CollectionController(
 
         val total = blockchainPages.map { it.total }.sum()
 
-        val combinedPage = ContinuationPaging(
-            UnionCollectionContinuation.ById,
-            blockchainPages.flatMap { it.collections }
-        ).getPage(safeSize)
+        val combinedPage = Paging(
+            CollectionContinuation.ById,
+            blockchainPages.flatMap { it.entities }
+        ).getPage(safeSize, total)
 
-        val result = UnionCollectionsDto(total, combinedPage.printContinuation(), combinedPage.entities)
-        return ResponseEntity.ok(result)
+        return ResponseEntity.ok(toDto(combinedPage))
     }
 
     override suspend fun getCollectionById(
         collection: String
-    ): ResponseEntity<UnionCollectionDto> {
+    ): ResponseEntity<CollectionDto> {
         val (blockchain, shortCollectionId) = IdParser.parse(collection)
         val result = router.getService(blockchain).getCollectionById(shortCollectionId)
         return ResponseEntity.ok(result)
@@ -49,10 +49,19 @@ class CollectionController(
         owner: String,
         continuation: String?,
         size: Int?
-    ): ResponseEntity<UnionCollectionsDto> {
+    ): ResponseEntity<CollectionsDto> {
         val safeSize = PageSize.COLLECTION.limit(size)
         val (blockchain, shortOwner) = IdParser.parse(owner)
         val result = router.getService(blockchain).getCollectionsByOwner(shortOwner, continuation, safeSize)
-        return ResponseEntity.ok(result)
+        return ResponseEntity.ok(toDto(result))
     }
+
+    private fun toDto(page: Page<CollectionDto>): CollectionsDto {
+        return CollectionsDto(
+            total = page.total,
+            continuation = page.continuation,
+            collections = page.entities
+        )
+    }
+
 }

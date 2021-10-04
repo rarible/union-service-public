@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping(value = ["/v0.1"])
-class OpenapiController() {
+class OpenapiController {
 
     @GetMapping(
         value = ["/openapi.yaml"],

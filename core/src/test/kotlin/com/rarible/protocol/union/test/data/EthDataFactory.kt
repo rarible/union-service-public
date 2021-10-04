@@ -1,14 +1,57 @@
 package com.rarible.protocol.union.test.data
 
 import com.rarible.core.common.nowMillis
-import com.rarible.core.test.data.*
-import com.rarible.protocol.dto.*
+import com.rarible.core.test.data.randomAddress
+import com.rarible.core.test.data.randomBigDecimal
+import com.rarible.core.test.data.randomBigInt
+import com.rarible.core.test.data.randomBinary
+import com.rarible.core.test.data.randomInt
+import com.rarible.core.test.data.randomLong
+import com.rarible.core.test.data.randomString
+import com.rarible.core.test.data.randomWord
+import com.rarible.protocol.dto.AssetDto
+import com.rarible.protocol.dto.BurnDto
+import com.rarible.protocol.dto.CryptoPunkOrderDto
+import com.rarible.protocol.dto.Erc1155AssetTypeDto
+import com.rarible.protocol.dto.Erc20AssetTypeDto
+import com.rarible.protocol.dto.Erc721AssetTypeDto
+import com.rarible.protocol.dto.ItemRoyaltyDto
+import com.rarible.protocol.dto.ItemTransferDto
+import com.rarible.protocol.dto.LegacyOrderDto
+import com.rarible.protocol.dto.MintDto
+import com.rarible.protocol.dto.NftCollectionDto
+import com.rarible.protocol.dto.NftItemAttributeDto
+import com.rarible.protocol.dto.NftItemDto
+import com.rarible.protocol.dto.NftItemMetaDto
+import com.rarible.protocol.dto.NftMediaDto
+import com.rarible.protocol.dto.NftMediaMetaDto
+import com.rarible.protocol.dto.NftOwnershipDto
+import com.rarible.protocol.dto.OnChainOrderDto
+import com.rarible.protocol.dto.OpenSeaV1OrderDto
+import com.rarible.protocol.dto.OrderActivityBidDto
+import com.rarible.protocol.dto.OrderActivityCancelBidDto
+import com.rarible.protocol.dto.OrderActivityCancelListDto
+import com.rarible.protocol.dto.OrderActivityDto
+import com.rarible.protocol.dto.OrderActivityListDto
+import com.rarible.protocol.dto.OrderActivityMatchDto
+import com.rarible.protocol.dto.OrderActivityMatchSideDto
+import com.rarible.protocol.dto.OrderCancelDto
+import com.rarible.protocol.dto.OrderCryptoPunksDataDto
+import com.rarible.protocol.dto.OrderDataLegacyDto
+import com.rarible.protocol.dto.OrderOpenSeaV1DataV1Dto
+import com.rarible.protocol.dto.OrderPriceHistoryRecordDto
+import com.rarible.protocol.dto.OrderRaribleV2DataV1Dto
+import com.rarible.protocol.dto.OrderSideDto
+import com.rarible.protocol.dto.OrderSideMatchDto
+import com.rarible.protocol.dto.PartDto
+import com.rarible.protocol.dto.RaribleV2OrderDto
+import com.rarible.protocol.dto.TransferDto
 import com.rarible.protocol.union.core.ethereum.converter.EthConverter
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.ItemIdDto
+import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.UnionAddress
-import com.rarible.protocol.union.dto.UnionItemIdDto
-import com.rarible.protocol.union.dto.UnionOwnershipIdDto
-import com.rarible.protocol.union.dto.parser.UnionItemIdParser
+import com.rarible.protocol.union.dto.parser.ItemIdParser
 import io.daonomic.rpc.domain.Word
 import scalether.domain.Address
 
@@ -20,14 +63,14 @@ fun randomPolygonAddress() = UnionAddress(BlockchainDto.POLYGON, randomAddressSt
 fun randomEthPartDto() = randomEthPartDto(randomAddress())
 fun randomEthPartDto(account: Address) = PartDto(account, randomInt())
 
-fun randomEthItemId() = UnionItemIdDto(BlockchainDto.ETHEREUM, randomEthAddress(), randomBigInt())
+fun randomEthItemId() = ItemIdDto(BlockchainDto.ETHEREUM, randomEthAddress(), randomBigInt())
 fun randomPolygonItemId() = randomEthItemId().copy(blockchain = BlockchainDto.POLYGON)
 
 fun randomEthOwnershipId() = randomEthOwnershipId(randomEthItemId())
 fun randomPolygonOwnershipId() = randomEthOwnershipId().copy(blockchain = BlockchainDto.POLYGON)
-fun randomEthOwnershipId(itemId: UnionItemIdDto) = randomEthOwnershipId(itemId, randomAddressString())
-fun randomEthOwnershipId(itemId: UnionItemIdDto, owner: String): UnionOwnershipIdDto {
-    return UnionOwnershipIdDto(
+fun randomEthOwnershipId(itemId: ItemIdDto) = randomEthOwnershipId(itemId, randomAddressString())
+fun randomEthOwnershipId(itemId: ItemIdDto, owner: String): OwnershipIdDto {
+    return OwnershipIdDto(
         token = itemId.token,
         tokenId = itemId.tokenId,
         owner = UnionAddress(BlockchainDto.ETHEREUM, owner),
@@ -36,7 +79,7 @@ fun randomEthOwnershipId(itemId: UnionItemIdDto, owner: String): UnionOwnershipI
 }
 
 fun randomEthNftItemDto() = randomEthNftItemDto(randomEthItemId())
-fun randomEthNftItemDto(itemId: UnionItemIdDto): NftItemDto {
+fun randomEthNftItemDto(itemId: ItemIdDto): NftItemDto {
     return NftItemDto(
         id = itemId.value,
         contract = Address.apply(itemId.token.value),
@@ -93,9 +136,9 @@ fun randomEthItemMetaAttribute(): NftItemAttributeDto {
 }
 
 fun randomEthItemMedia(): NftMediaDto {
-    val type = randomString()
+    val type = "ORIGINAL"
     return NftMediaDto(
-        url = mapOf(Pair(randomString(), randomString())),
+        url = mapOf(Pair(type, randomString())),
         meta = mapOf(Pair(type, randomEthItemMediaMeta(type)))
     )
 }
@@ -108,13 +151,22 @@ fun randomEthItemMediaMeta(type: String): NftMediaMetaDto {
     )
 }
 
-fun randomEthNftOwnershipDto() = randomEthNftOwnershipDto(randomEthOwnershipId())
-fun randomEthNftOwnershipDto(ownershipId: UnionOwnershipIdDto) = randomEthNftOwnershipDto(
-    UnionItemIdParser.parseShort("${ownershipId.token.value}:${ownershipId.tokenId}", BlockchainDto.ETHEREUM),
+fun randomEthOwnershipDto() = randomEthOwnershipDto(randomEthOwnershipId())
+fun randomEthOwnershipDto(itemId: ItemIdDto) = randomEthOwnershipDto(
+    OwnershipIdDto(
+        itemId.blockchain,
+        itemId.token,
+        itemId.tokenId,
+        UnionAddress(BlockchainDto.ETHEREUM, randomAddressString())
+    )
+)
+
+fun randomEthOwnershipDto(ownershipId: OwnershipIdDto) = randomEthOwnershipDto(
+    ItemIdParser.parseShort("${ownershipId.token.value}:${ownershipId.tokenId}", BlockchainDto.ETHEREUM),
     PartDto(Address.apply(ownershipId.owner.value), randomInt())
 )
 
-fun randomEthNftOwnershipDto(itemId: UnionItemIdDto, creator: PartDto): NftOwnershipDto {
+fun randomEthOwnershipDto(itemId: ItemIdDto, creator: PartDto): NftOwnershipDto {
     val ownershipId = randomEthOwnershipId(itemId, creator.account.toString())
     return NftOwnershipDto(
         id = ownershipId.value,
@@ -130,22 +182,29 @@ fun randomEthNftOwnershipDto(itemId: UnionItemIdDto, creator: PartDto): NftOwner
 }
 
 fun randomEthAssetErc721() = randomEthAssetErc721(randomEthItemId())
-fun randomEthAssetErc721(itemId: UnionItemIdDto) = AssetDto(
-    Erc721AssetTypeDto(Address.apply(itemId.token.value), itemId.tokenId),
-    randomBigInt()
+fun randomEthAssetErc721(itemId: ItemIdDto) = AssetDto(
+    assetType = Erc721AssetTypeDto(Address.apply(itemId.token.value), itemId.tokenId),
+    value = randomBigInt(),
+    valueDecimal = randomBigDecimal()
 )
 
 fun randomEthAssetErc20() = randomEthAssetErc20(randomAddress())
-fun randomEthAssetErc20(address: Address) = AssetDto(Erc20AssetTypeDto(address), randomBigInt())
+fun randomEthAssetErc20(address: Address) = AssetDto(
+    assetType = Erc20AssetTypeDto(address),
+    value = randomBigInt(),
+    valueDecimal = randomBigDecimal()
+)
 
-fun randomEthAssetErc1155(itemId: UnionItemIdDto) = AssetDto(
-    Erc1155AssetTypeDto(Address.apply(itemId.token.value), itemId.tokenId),
-    randomBigInt()
+fun randomEthAssetErc1155() = randomEthAssetErc1155(randomEthItemId())
+fun randomEthAssetErc1155(itemId: ItemIdDto) = AssetDto(
+    assetType = Erc1155AssetTypeDto(Address.apply(itemId.token.value), itemId.tokenId),
+    value = randomBigInt(),
+    valueDecimal = randomBigDecimal()
 )
 
 fun randomEthLegacyOrderDto() = randomEthLegacyOrderDto(randomEthAssetErc721(), randomAddress(), randomEthAssetErc20())
-fun randomEthLegacyOrderDto(itemId: UnionItemIdDto) = randomEthLegacyOrderDto(itemId, randomAddress())
-fun randomEthLegacyOrderDto(itemId: UnionItemIdDto, maker: Address) = randomEthLegacyOrderDto(
+fun randomEthLegacyOrderDto(itemId: ItemIdDto) = randomEthLegacyOrderDto(itemId, randomAddress())
+fun randomEthLegacyOrderDto(itemId: ItemIdDto, maker: Address) = randomEthLegacyOrderDto(
     randomEthAssetErc721(itemId),
     maker,
     randomEthAssetErc20()
@@ -158,7 +217,9 @@ fun randomEthLegacyOrderDto(make: AssetDto, maker: Address, take: AssetDto): Leg
         make = make,
         take = take,
         fill = randomBigInt(),
+        fillValue = randomBigDecimal(),
         makeStock = randomBigInt(),
+        makeStockValue = randomBigDecimal(),
         cancelled = false,
         salt = Word.apply(randomWord()),
         data = OrderDataLegacyDto(randomInt()),
@@ -177,8 +238,8 @@ fun randomEthLegacyOrderDto(make: AssetDto, maker: Address, take: AssetDto): Leg
 }
 
 fun randomEthV2OrderDto() = randomEthV2OrderDto(randomEthAssetErc721(), randomAddress(), randomEthAssetErc20())
-fun randomEthV2OrderDto(itemId: UnionItemIdDto) = randomEthV2OrderDto(itemId, randomAddress())
-fun randomEthV2OrderDto(itemId: UnionItemIdDto, maker: Address) = randomEthV2OrderDto(
+fun randomEthV2OrderDto(itemId: ItemIdDto) = randomEthV2OrderDto(itemId, randomAddress())
+fun randomEthV2OrderDto(itemId: ItemIdDto, maker: Address) = randomEthV2OrderDto(
     randomEthAssetErc721(itemId),
     maker,
     randomEthAssetErc20()
@@ -191,7 +252,9 @@ fun randomEthV2OrderDto(make: AssetDto, maker: Address, take: AssetDto): Rarible
         make = make,
         take = take,
         fill = randomBigInt(),
+        fillValue = randomBigDecimal(),
         makeStock = randomBigInt(),
+        makeStockValue = randomBigDecimal(),
         cancelled = false,
         salt = Word.apply(randomWord()),
         data = OrderRaribleV2DataV1Dto(listOf(randomEthPartDto()), listOf(randomEthPartDto())),
@@ -212,8 +275,8 @@ fun randomEthV2OrderDto(make: AssetDto, maker: Address, take: AssetDto): Rarible
 fun randomEthOpenSeaV1OrderDto() =
     randomEthOpenSeaV1OrderDto(randomEthAssetErc721(), randomAddress(), randomEthAssetErc20())
 
-fun randomEthOpenSeaV1OrderDto(itemId: UnionItemIdDto) = randomEthOpenSeaV1OrderDto(itemId, randomAddress())
-fun randomEthOpenSeaV1OrderDto(itemId: UnionItemIdDto, maker: Address) = randomEthOpenSeaV1OrderDto(
+fun randomEthOpenSeaV1OrderDto(itemId: ItemIdDto) = randomEthOpenSeaV1OrderDto(itemId, randomAddress())
+fun randomEthOpenSeaV1OrderDto(itemId: ItemIdDto, maker: Address) = randomEthOpenSeaV1OrderDto(
     randomEthAssetErc721(itemId),
     maker,
     randomEthAssetErc20()
@@ -226,7 +289,9 @@ fun randomEthOpenSeaV1OrderDto(make: AssetDto, maker: Address, take: AssetDto): 
         make = make,
         take = take,
         fill = randomBigInt(),
+        fillValue = randomBigDecimal(),
         makeStock = randomBigInt(),
+        makeStockValue = randomBigDecimal(),
         cancelled = false,
         salt = Word.apply(randomWord()),
         data = randomEthOrderOpenSeaV1DataV1Dto(),
@@ -247,8 +312,8 @@ fun randomEthOpenSeaV1OrderDto(make: AssetDto, maker: Address, take: AssetDto): 
 fun randomEthCryptoPunksOrderDto() =
     randomEthCryptoPunksOrderDto(randomEthAssetErc721(), randomAddress(), randomEthAssetErc20())
 
-fun randomEthCryptoPunksOrderDto(itemId: UnionItemIdDto) = randomEthCryptoPunksOrderDto(itemId, randomAddress())
-fun randomEthCryptoPunksOrderDto(itemId: UnionItemIdDto, maker: Address) = randomEthCryptoPunksOrderDto(
+fun randomEthCryptoPunksOrderDto(itemId: ItemIdDto) = randomEthCryptoPunksOrderDto(itemId, randomAddress())
+fun randomEthCryptoPunksOrderDto(itemId: ItemIdDto, maker: Address) = randomEthCryptoPunksOrderDto(
     randomEthAssetErc721(itemId),
     maker,
     randomEthAssetErc20()
@@ -261,7 +326,9 @@ fun randomEthCryptoPunksOrderDto(make: AssetDto, maker: Address, take: AssetDto)
         make = make,
         take = take,
         fill = randomBigInt(),
+        fillValue = randomBigDecimal(),
         makeStock = randomBigInt(),
+        makeStockValue = randomBigDecimal(),
         cancelled = false,
         salt = Word.apply(randomWord()),
         data = OrderCryptoPunksDataDto(),
@@ -373,7 +440,8 @@ fun randomEthOrderActivityMatch(): OrderActivityMatchDto {
         transactionHash = Word.apply(randomWord()),
         blockHash = Word.apply(randomWord()),
         blockNumber = randomLong(),
-        logIndex = randomInt()
+        logIndex = randomInt(),
+        type = OrderActivityMatchDto.Type.SELL
     )
 }
 
@@ -384,8 +452,8 @@ fun randomEthOrderBidActivity(): OrderActivityBidDto {
         source = OrderActivityDto.Source.RARIBLE,
         hash = Word.apply(randomWord()),
         maker = randomAddress(),
-        make = AssetDto(Erc20AssetTypeDto(randomAddress()), randomBigInt()),
-        take = AssetDto(Erc20AssetTypeDto(randomAddress()), randomBigInt()),
+        make = AssetDto(Erc20AssetTypeDto(randomAddress()), randomBigInt(), randomBigDecimal()),
+        take = AssetDto(Erc20AssetTypeDto(randomAddress()), randomBigInt(), randomBigDecimal()),
         price = randomBigDecimal(),
         priceUsd = randomBigDecimal()
     )
@@ -398,8 +466,8 @@ fun randomEthOrderListActivity(): OrderActivityListDto {
         source = OrderActivityDto.Source.OPEN_SEA,
         hash = Word.apply(randomWord()),
         maker = randomAddress(),
-        make = AssetDto(Erc20AssetTypeDto(randomAddress()), randomBigInt()),
-        take = AssetDto(Erc20AssetTypeDto(randomAddress()), randomBigInt()),
+        make = AssetDto(Erc20AssetTypeDto(randomAddress()), randomBigInt(), randomBigDecimal()),
+        take = AssetDto(Erc20AssetTypeDto(randomAddress()), randomBigInt(), randomBigDecimal()),
         price = randomBigDecimal(),
         priceUsd = randomBigDecimal()
     )

@@ -1,8 +1,5 @@
 package com.rarible.protocol.union.core.ethereum.converter
 
-import com.rarible.protocol.dto.ActivitySortDto
-import com.rarible.protocol.dto.AssetDto
-import com.rarible.protocol.dto.AssetTypeDto
 import com.rarible.protocol.dto.CryptoPunksAssetTypeDto
 import com.rarible.protocol.dto.Erc1155AssetTypeDto
 import com.rarible.protocol.dto.Erc1155LazyAssetTypeDto
@@ -13,10 +10,11 @@ import com.rarible.protocol.dto.EthAssetTypeDto
 import com.rarible.protocol.dto.GenerativeArtAssetTypeDto
 import com.rarible.protocol.dto.PartDto
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
+import com.rarible.protocol.union.dto.ActivitySortDto
+import com.rarible.protocol.union.dto.AssetDto
+import com.rarible.protocol.union.dto.AssetTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.UnionAssetDto
-import com.rarible.protocol.union.dto.UnionAssetTypeDto
-import com.rarible.protocol.union.dto.UnionCreatorDto
+import com.rarible.protocol.union.dto.CreatorDto
 import com.rarible.protocol.union.dto.EthCryptoPunksAssetTypeDto
 import com.rarible.protocol.union.dto.EthErc1155AssetTypeDto
 import com.rarible.protocol.union.dto.EthErc1155LazyAssetTypeDto
@@ -26,9 +24,9 @@ import com.rarible.protocol.union.dto.EthErc721LazyAssetTypeDto
 import com.rarible.protocol.union.dto.EthEthereumAssetTypeDto
 import com.rarible.protocol.union.dto.EthGenerativeArtAssetTypeDto
 import com.rarible.protocol.union.dto.EthOrderPayoutDto
-import com.rarible.protocol.union.dto.UnionRoyaltyDto
 import com.rarible.protocol.union.dto.PlatformDto
-import com.rarible.protocol.union.dto.UnionActivitySortDto
+import com.rarible.protocol.union.dto.RoyaltyDto
+
 import io.daonomic.rpc.domain.Binary
 import io.daonomic.rpc.domain.Word
 import scalether.domain.Address
@@ -52,15 +50,19 @@ object EthConverter {
         return value.toBigDecimal().divide(FULL_100_PERCENTS_IN_BP, MathContext.DECIMAL128)
     }
 
-    fun convert(address: Address) = address.prefixed()
-    fun convert(word: Word) = word.prefixed()
-    fun convert(binary: Binary) = binary.prefixed()
+    fun convert(address: Address) = address.prefixed()!!
+    fun convert(word: Word) = word.prefixed()!!
+    fun convert(binary: Binary) = binary.prefixed()!!
 
-    fun convert(source: UnionActivitySortDto?): ActivitySortDto {
+    // TODO add TRY with throwing custom exceptions
+    fun convertToWord(value: String) = Word.apply(value)!!
+    fun convertToAddress(value: String) = Address.apply(value)!!
+
+    fun convert(source: ActivitySortDto?): com.rarible.protocol.dto.ActivitySortDto {
         return when (source) {
-            null -> ActivitySortDto.LATEST_FIRST
-            UnionActivitySortDto.EARLIEST_FIRST -> ActivitySortDto.EARLIEST_FIRST
-            UnionActivitySortDto.LATEST_FIRST -> ActivitySortDto.LATEST_FIRST
+            null -> com.rarible.protocol.dto.ActivitySortDto.LATEST_FIRST
+            ActivitySortDto.EARLIEST_FIRST -> com.rarible.protocol.dto.ActivitySortDto.EARLIEST_FIRST
+            ActivitySortDto.LATEST_FIRST -> com.rarible.protocol.dto.ActivitySortDto.LATEST_FIRST
         }
     }
 
@@ -71,6 +73,7 @@ object EthConverter {
             PlatformDto.ALL -> com.rarible.protocol.dto.PlatformDto.ALL
             PlatformDto.RARIBLE -> com.rarible.protocol.dto.PlatformDto.RARIBLE
             PlatformDto.OPEN_SEA -> com.rarible.protocol.dto.PlatformDto.OPEN_SEA
+            PlatformDto.CRYPTO_PUNKS -> com.rarible.protocol.dto.PlatformDto.CRYPTO_PUNKS
         }
     }
 
@@ -81,28 +84,28 @@ object EthConverter {
         )
     }
 
-    fun convertToRoyalty(source: PartDto, blockchain: BlockchainDto): UnionRoyaltyDto {
-        return UnionRoyaltyDto(
+    fun convertToRoyalty(source: PartDto, blockchain: BlockchainDto): RoyaltyDto {
+        return RoyaltyDto(
             account = UnionAddressConverter.convert(source.account, blockchain),
             value = convertToDecimalPart(source.value)
         )
     }
 
-    fun convertToCreator(source: PartDto, blockchain: BlockchainDto): UnionCreatorDto {
-        return UnionCreatorDto(
+    fun convertToCreator(source: PartDto, blockchain: BlockchainDto): CreatorDto {
+        return CreatorDto(
             account = UnionAddressConverter.convert(source.account, blockchain),
             value = source.value.toBigDecimal()
         )
     }
 
-    fun convert(source: AssetDto, blockchain: BlockchainDto): UnionAssetDto {
-        return UnionAssetDto(
+    fun convert(source: com.rarible.protocol.dto.AssetDto, blockchain: BlockchainDto): AssetDto {
+        return AssetDto(
             type = convert(source.assetType, blockchain),
-            value = source.value
+            value = source.valueDecimal!!
         )
     }
 
-    fun convert(source: AssetTypeDto, blockchain: BlockchainDto): UnionAssetTypeDto {
+    fun convert(source: com.rarible.protocol.dto.AssetTypeDto, blockchain: BlockchainDto): AssetTypeDto {
         return when (source) {
             is EthAssetTypeDto -> EthEthereumAssetTypeDto(
             )

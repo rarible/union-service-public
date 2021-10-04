@@ -1,11 +1,26 @@
 package com.rarible.protocol.union.api.controller.test
 
 import com.rarible.core.application.ApplicationEnvironmentInfo
-import com.rarible.protocol.flow.nft.api.client.*
-import com.rarible.protocol.nft.api.client.*
+import com.rarible.protocol.flow.nft.api.client.FlowNftCollectionControllerApi
+import com.rarible.protocol.flow.nft.api.client.FlowNftItemControllerApi
+import com.rarible.protocol.flow.nft.api.client.FlowNftOrderActivityControllerApi
+import com.rarible.protocol.flow.nft.api.client.FlowNftOwnershipControllerApi
+import com.rarible.protocol.flow.nft.api.client.FlowOrderControllerApi
+import com.rarible.protocol.nft.api.client.NftActivityControllerApi
+import com.rarible.protocol.nft.api.client.NftCollectionControllerApi
+import com.rarible.protocol.nft.api.client.NftIndexerApiClientFactory
+import com.rarible.protocol.nft.api.client.NftItemControllerApi
+import com.rarible.protocol.nft.api.client.NftOwnershipControllerApi
 import com.rarible.protocol.order.api.client.OrderActivityControllerApi
 import com.rarible.protocol.order.api.client.OrderIndexerApiClientFactory
-import com.rarible.protocol.union.api.client.*
+import com.rarible.protocol.union.api.client.ActivityControllerApi
+import com.rarible.protocol.union.api.client.CollectionControllerApi
+import com.rarible.protocol.union.api.client.FixedUnionApiServiceUriProvider
+import com.rarible.protocol.union.api.client.ItemControllerApi
+import com.rarible.protocol.union.api.client.OrderControllerApi
+import com.rarible.protocol.union.api.client.OwnershipControllerApi
+import com.rarible.protocol.union.api.client.SignatureControllerApi
+import com.rarible.protocol.union.api.client.UnionApiClientFactory
 import io.mockk.mockk
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.web.server.LocalServerPort
@@ -37,17 +52,17 @@ class TestApiConfiguration {
     }
 
     @Bean
-    fun testUnionItemControllerApi(unionApiClientFactory: UnionApiClientFactory): ItemControllerApi {
+    fun testItemControllerApi(unionApiClientFactory: UnionApiClientFactory): ItemControllerApi {
         return unionApiClientFactory.createItemApiClient()
     }
 
     @Bean
-    fun testUnionOwnershipControllerApi(unionApiClientFactory: UnionApiClientFactory): OwnershipControllerApi {
+    fun testOwnershipControllerApi(unionApiClientFactory: UnionApiClientFactory): OwnershipControllerApi {
         return unionApiClientFactory.createOwnershipApiClient()
     }
 
     @Bean
-    fun testUnionOrderControllerApi(unionApiClientFactory: UnionApiClientFactory): OrderControllerApi {
+    fun testOrderControllerApi(unionApiClientFactory: UnionApiClientFactory): OrderControllerApi {
         return unionApiClientFactory.createOrderApiClient()
     }
 
@@ -57,12 +72,12 @@ class TestApiConfiguration {
     }
 
     @Bean
-    fun testUnionCollectionControllerApi(unionApiClientFactory: UnionApiClientFactory): CollectionControllerApi {
+    fun testCollectionControllerApi(unionApiClientFactory: UnionApiClientFactory): CollectionControllerApi {
         return unionApiClientFactory.createCollectionApiClient()
     }
 
     @Bean
-    fun testUnionActivityControllerApi(unionApiClientFactory: UnionApiClientFactory): ActivityControllerApi {
+    fun testActivityControllerApi(unionApiClientFactory: UnionApiClientFactory): ActivityControllerApi {
         return unionApiClientFactory.createActivityApiClient()
     }
 

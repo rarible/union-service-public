@@ -41,7 +41,9 @@
                 <groupId>com.rarible.protocol</groupId>
                 <artifactId>model-generator-maven-plugin</artifactId>
                 <configuration>
-
+                    <schema>
+                        <inputFile>${project.basedir}/../openapi.yaml</inputFile>
+                    </schema>
                     <generators>
                         <generator>
                             <lang>${generator.kotlin}</lang>

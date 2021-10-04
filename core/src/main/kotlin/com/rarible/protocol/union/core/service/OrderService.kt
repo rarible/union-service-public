@@ -1,8 +1,9 @@
 package com.rarible.protocol.union.core.service
 
+import com.rarible.protocol.union.core.continuation.Slice
+import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.PlatformDto
-import com.rarible.protocol.union.dto.UnionOrderDto
-import com.rarible.protocol.union.dto.UnionOrdersDto
+import kotlinx.coroutines.flow.Flow
 
 interface OrderService : BlockchainService {
 
@@ -11,15 +12,15 @@ interface OrderService : BlockchainService {
         origin: String?,
         continuation: String?,
         size: Int
-    ): UnionOrdersDto
+    ): Slice<OrderDto>
 
     suspend fun getOrderById(
         id: String
-    ): UnionOrderDto
+    ): OrderDto
 
-    suspend fun updateOrderMakeStock(
-        id: String
-    ): UnionOrderDto
+    fun getOrdersByIds(
+        orderIds: List<String>
+    ): Flow<OrderDto>
 
     suspend fun getOrderBidsByItem(
         platform: PlatformDto?,
@@ -29,7 +30,7 @@ interface OrderService : BlockchainService {
         origin: String?,
         continuation: String?,
         size: Int
-    ): UnionOrdersDto
+    ): Slice<OrderDto>
 
     suspend fun getOrderBidsByMaker(
         platform: PlatformDto?,
@@ -37,14 +38,14 @@ interface OrderService : BlockchainService {
         origin: String?,
         continuation: String?,
         size: Int
-    ): UnionOrdersDto
+    ): Slice<OrderDto>
 
     suspend fun getSellOrders(
         platform: PlatformDto?,
         origin: String?,
         continuation: String?,
         size: Int
-    ): UnionOrdersDto
+    ): Slice<OrderDto>
 
     suspend fun getSellOrdersByCollection(
         platform: PlatformDto?,
@@ -52,7 +53,7 @@ interface OrderService : BlockchainService {
         origin: String?,
         continuation: String?,
         size: Int
-    ): UnionOrdersDto
+    ): Slice<OrderDto>
 
     suspend fun getSellOrdersByItem(
         platform: PlatformDto?,
@@ -62,7 +63,7 @@ interface OrderService : BlockchainService {
         origin: String?,
         continuation: String?,
         size: Int
-    ): UnionOrdersDto
+    ): Slice<OrderDto>
 
     suspend fun getSellOrdersByMaker(
         platform: PlatformDto?,
@@ -70,5 +71,5 @@ interface OrderService : BlockchainService {
         origin: String?,
         continuation: String?,
         size: Int
-    ): UnionOrdersDto
+    ): Slice<OrderDto>
 }

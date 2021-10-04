@@ -2,9 +2,26 @@ package com.rarible.protocol.union.core.ethereum.converter
 
 import com.rarible.core.test.data.randomAddress
 import com.rarible.core.test.data.randomBigInt
-import com.rarible.protocol.dto.*
+import com.rarible.protocol.dto.ActivityFilterAllDto
+import com.rarible.protocol.dto.ActivityFilterAllTypeDto
+import com.rarible.protocol.dto.ActivityFilterByCollectionDto
+import com.rarible.protocol.dto.ActivityFilterByCollectionTypeDto
+import com.rarible.protocol.dto.ActivityFilterByItemDto
+import com.rarible.protocol.dto.ActivityFilterByItemTypeDto
+import com.rarible.protocol.dto.ActivityFilterByUserDto
+import com.rarible.protocol.dto.ActivityFilterByUserTypeDto
+import com.rarible.protocol.dto.NftActivityFilterAllDto
+import com.rarible.protocol.dto.NftActivityFilterByCollectionDto
+import com.rarible.protocol.dto.NftActivityFilterByItemDto
+import com.rarible.protocol.dto.NftActivityFilterByUserDto
+import com.rarible.protocol.dto.OrderActivityFilterAllDto
+import com.rarible.protocol.dto.OrderActivityFilterByCollectionDto
+import com.rarible.protocol.dto.OrderActivityFilterByItemDto
+import com.rarible.protocol.dto.OrderActivityFilterByUserDto
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import java.time.Instant
+import java.time.temporal.ChronoUnit
 
 class EthActivityFilterConverterTest {
 
@@ -102,9 +119,14 @@ class EthActivityFilterConverterTest {
 
     @Test
     fun `eth activities by user`() {
+        val now = Instant.now()
+        val oneWeekAgo = now.minus(7, ChronoUnit.DAYS).epochSecond
+        val today = now.epochSecond
         val filter = ActivityFilterByUserDto(
             types = ActivityFilterByUserTypeDto.values().asList(),
-            users = listOf(randomAddress(), randomAddress())
+            users = listOf(randomAddress(), randomAddress()),
+            from = oneWeekAgo,
+            to = today
         )
 
         val itemFilter = EthActivityFilterConverter.asItemActivityFilter(filter) as NftActivityFilterByUserDto
@@ -112,9 +134,13 @@ class EthActivityFilterConverterTest {
 
         assertThat(itemFilter.users).isEqualTo(filter.users)
         assertThat(itemFilter.types).isEqualTo(NftActivityFilterByUserDto.Types.values().toList())
+        assertThat(itemFilter.from).isEqualTo(filter.from)
+        assertThat(itemFilter.to).isEqualTo(filter.to)
 
         assertThat(orderFilter.users).isEqualTo(filter.users)
         assertThat(orderFilter.types).isEqualTo(OrderActivityFilterByUserDto.Types.values().toList())
+        assertThat(orderFilter.from).isEqualTo(filter.from)
+        assertThat(orderFilter.to).isEqualTo(filter.to)
     }
 
     @Test
@@ -130,5 +156,4 @@ class EthActivityFilterConverterTest {
         assertThat(itemFilter).isNull()
         assertThat(orderFilter).isNull()
     }
-
 }

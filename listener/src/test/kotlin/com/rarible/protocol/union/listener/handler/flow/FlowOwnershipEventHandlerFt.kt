@@ -1,52 +1,65 @@
 package com.rarible.protocol.union.listener.handler.flow
 
 import com.rarible.core.test.data.randomString
-import com.rarible.core.test.wait.Wait
 import com.rarible.protocol.dto.FlowNftOwnershipDeleteEventDto
 import com.rarible.protocol.dto.FlowNftOwnershipUpdateEventDto
 import com.rarible.protocol.dto.FlowOwnershipEventDto
-import com.rarible.protocol.union.listener.test.AbstractIntegrationTest
-import com.rarible.protocol.union.listener.test.IntegrationTest
+import com.rarible.protocol.union.core.flow.converter.FlowOwnershipConverter
+import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.listener.service.EnrichmentOwnershipEventService
 import com.rarible.protocol.union.test.data.randomFlowNftOwnershipDto
+import com.rarible.protocol.union.test.data.randomFlowOwnershipId
+import io.mockk.clearMocks
+import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.mockk
 import kotlinx.coroutines.FlowPreview
-import org.assertj.core.api.Assertions
+import kotlinx.coroutines.runBlocking
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.Duration
 
 @FlowPreview
-@IntegrationTest
-class FlowOwnershipEventHandlerFt : AbstractIntegrationTest() {
+class FlowOwnershipEventHandlerFt {
+
+    private val ownershipEventService: EnrichmentOwnershipEventService = mockk()
+    private val handler = FlowOwnershipEventHandler(ownershipEventService, BlockchainDto.FLOW)
+
+    @BeforeEach
+    fun beforeEach() {
+        clearMocks(ownershipEventService)
+        coEvery { ownershipEventService.onOwnershipUpdated(any()) } returns Unit
+        coEvery { ownershipEventService.onOwnershipDeleted(any()) } returns Unit
+    }
 
     @Test
-    fun `flow ownership update event`() = runWithKafka {
+    fun `ethereum ownership update event`() = runBlocking {
         val flowOwnership = randomFlowNftOwnershipDto()
         val dto: FlowOwnershipEventDto =
             FlowNftOwnershipUpdateEventDto(randomString(), flowOwnership.id!!, flowOwnership)
 
-        flowOwnershipProducer.send(message(dto)).ensureSuccess()
+        handler.handle(dto)
 
-        Wait.waitAssert(Duration.ofMinutes(5)) {
-            val messages = findFlowOwnershipUpdates(flowOwnership.id!!)
-            Assertions.assertThat(messages).hasSize(1)
-            Assertions.assertThat(messages[0].key).isEqualTo(flowOwnership.id)
-            Assertions.assertThat(messages[0].id).isEqualTo(flowOwnership.id)
-        }
+        val expected = FlowOwnershipConverter.convert(flowOwnership, BlockchainDto.FLOW)
+        coVerify(exactly = 1) { ownershipEventService.onOwnershipUpdated(expected) }
+        coVerify(exactly = 0) { ownershipEventService.onOwnershipDeleted(any()) }
     }
 
     @Test
-    fun `flow ownership delete event`() = runWithKafka {
-        val flowOwnership = randomFlowNftOwnershipDto()
-        val dto: FlowOwnershipEventDto =
-            FlowNftOwnershipDeleteEventDto(randomString(), flowOwnership.id!!, flowOwnership)
+    fun `ethereum ownership delete event`() = runBlocking {
 
-        flowOwnershipProducer.send(message(dto)).ensureSuccess()
+        val ethOwnershipId = randomFlowOwnershipId()
+        val flowOwnership = randomFlowNftOwnershipDto(ethOwnershipId)
 
-        Wait.waitAssert(Duration.ofMinutes(5)) {
-            val messages = findFlowOwnershipDeletions(flowOwnership.id!!)
-            Assertions.assertThat(messages).hasSize(1)
-            Assertions.assertThat(messages[0].key).isEqualTo(flowOwnership.id)
-            Assertions.assertThat(messages[0].id).isEqualTo(flowOwnership.id)
-        }
+        val dto = FlowNftOwnershipDeleteEventDto(
+            randomString(),
+            flowOwnership.id!!,
+            flowOwnership
+        )
+
+        handler.handle(dto)
+
+        coVerify(exactly = 0) { ownershipEventService.onOwnershipUpdated(any()) }
+        coVerify(exactly = 1) { ownershipEventService.onOwnershipDeleted(ethOwnershipId) }
     }
 
 }

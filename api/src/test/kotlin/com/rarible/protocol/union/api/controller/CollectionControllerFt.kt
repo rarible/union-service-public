@@ -11,8 +11,13 @@ import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.flow.converter.FlowContractConverter
-import com.rarible.protocol.union.dto.*
-import com.rarible.protocol.union.test.data.*
+import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.CollectionDto
+import com.rarible.protocol.union.test.data.randomEthAddress
+import com.rarible.protocol.union.test.data.randomEthCollectionDto
+import com.rarible.protocol.union.test.data.randomFlowAddress
+import com.rarible.protocol.union.test.data.randomFlowCollectionDto
+import com.rarible.protocol.union.test.data.randomPolygonAddress
 import io.mockk.coEvery
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.reactive.awaitFirst
@@ -69,7 +74,7 @@ class CollectionControllerFt : AbstractIntegrationTest() {
         coEvery { testFlowCollectionApi.getNftCollectionById(collectionId) } returns collection.toMono()
 
         val unionCollection = collectionControllerClient.getCollectionById(collectionIdFull.fullId()).awaitFirst()
-        val flowCollection = unionCollection as UnionCollectionDto
+        val flowCollection = unionCollection as CollectionDto
 
         assertThat(flowCollection.id.value).isEqualTo(collectionIdFull.value)
         assertThat(flowCollection.id.blockchain).isEqualTo(BlockchainDto.FLOW)

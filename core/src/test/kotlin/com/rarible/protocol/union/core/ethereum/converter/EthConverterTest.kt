@@ -4,9 +4,19 @@ import com.rarible.core.test.data.randomAddress
 import com.rarible.core.test.data.randomBigInt
 import com.rarible.core.test.data.randomBinary
 import com.rarible.core.test.data.randomString
-import com.rarible.protocol.dto.*
+import com.rarible.protocol.dto.Erc1155AssetTypeDto
+import com.rarible.protocol.dto.Erc1155LazyAssetTypeDto
+import com.rarible.protocol.dto.Erc20AssetTypeDto
+import com.rarible.protocol.dto.Erc721AssetTypeDto
+import com.rarible.protocol.dto.Erc721LazyAssetTypeDto
 import com.rarible.protocol.dto.EthAssetTypeDto
-import com.rarible.protocol.union.dto.*
+import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.EthErc1155AssetTypeDto
+import com.rarible.protocol.union.dto.EthErc1155LazyAssetTypeDto
+import com.rarible.protocol.union.dto.EthErc20AssetTypeDto
+import com.rarible.protocol.union.dto.EthErc721AssetTypeDto
+import com.rarible.protocol.union.dto.EthErc721LazyAssetTypeDto
+import com.rarible.protocol.union.dto.EthEthereumAssetTypeDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.test.data.randomEthPartDto
 import org.assertj.core.api.Assertions.assertThat
@@ -21,6 +31,7 @@ class EthConverterTest {
         assertThat(EthConverter.convert(PlatformDto.ALL)).isEqualTo(com.rarible.protocol.dto.PlatformDto.ALL)
         assertThat(EthConverter.convert(PlatformDto.RARIBLE)).isEqualTo(com.rarible.protocol.dto.PlatformDto.RARIBLE)
         assertThat(EthConverter.convert(PlatformDto.OPEN_SEA)).isEqualTo(com.rarible.protocol.dto.PlatformDto.OPEN_SEA)
+        assertThat(EthConverter.convert(PlatformDto.CRYPTO_PUNKS)).isEqualTo(com.rarible.protocol.dto.PlatformDto.CRYPTO_PUNKS)
     }
 
     @Test

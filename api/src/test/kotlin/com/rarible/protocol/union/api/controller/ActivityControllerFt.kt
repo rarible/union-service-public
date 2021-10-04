@@ -11,8 +11,16 @@ import com.rarible.protocol.union.api.client.ActivityControllerApi
 import com.rarible.protocol.union.api.configuration.PageSize
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
-import com.rarible.protocol.union.dto.*
-import com.rarible.protocol.union.test.data.*
+import com.rarible.protocol.union.dto.ActivityTypeDto
+import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.MintActivityDto
+import com.rarible.protocol.union.dto.OrderBidActivityDto
+import com.rarible.protocol.union.dto.UserActivityTypeDto
+import com.rarible.protocol.union.test.data.randomEthAddress
+import com.rarible.protocol.union.test.data.randomEthItemMintActivity
+import com.rarible.protocol.union.test.data.randomEthOrderBidActivity
+import com.rarible.protocol.union.test.data.randomFlowAddress
+import com.rarible.protocol.union.test.data.randomFlowCancelListActivityDto
 import io.mockk.coEvery
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.reactive.awaitFirst
@@ -21,6 +29,8 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import reactor.kotlin.core.publisher.toMono
+import java.time.Instant
+import java.time.temporal.ChronoUnit
 
 @FlowPreview
 @IntegrationTest
@@ -28,7 +38,7 @@ class ActivityControllerFt : AbstractIntegrationTest() {
 
     private val continuation: String? = null
     private val size = PageSize.ACTIVITY.default
-    private val sort: UnionActivitySortDto? = null
+    private val sort: com.rarible.protocol.union.dto.ActivitySortDto? = null
 
     @Autowired
     lateinit var activityControllerApi: ActivityControllerApi
@@ -36,7 +46,7 @@ class ActivityControllerFt : AbstractIntegrationTest() {
     @Test
     fun `get activities by collection - ethereum`() = runBlocking<Unit> {
         // Here we expect only one query - to Order activities, since there is only order-related activity type
-        val types = listOf(UnionActivityTypeDto.SELL)
+        val types = listOf(ActivityTypeDto.SELL)
         val ethCollectionId = randomEthAddress()
         val orderActivity = randomEthOrderBidActivity()
 
@@ -44,17 +54,17 @@ class ActivityControllerFt : AbstractIntegrationTest() {
             testEthereumActivityOrderApi.getOrderActivities(any(), isNull(), eq(size), ActivitySortDto.LATEST_FIRST)
         } returns OrderActivitiesDto(null, listOf(orderActivity)).toMono()
 
-        val unionActivities = activityControllerApi.getActivitiesByCollection(
+        val activities = activityControllerApi.getActivitiesByCollection(
             types, ethCollectionId.fullId(), continuation, size, sort
         ).awaitFirst()
 
-        assertThat(unionActivities.activities).hasSize(1)
-        assertThat(unionActivities.activities[0]).isInstanceOf(UnionOrderBidActivityDto::class.java)
+        assertThat(activities.activities).hasSize(1)
+        assertThat(activities.activities[0]).isInstanceOf(OrderBidActivityDto::class.java)
     }
 
     @Test
     fun `get activities by collection - flow`() = runBlocking<Unit> {
-        val types = UnionActivityTypeDto.values().toList()
+        val types = ActivityTypeDto.values().toList()
         val flowCollectionId = randomFlowAddress()
         val activity = randomFlowCancelListActivityDto()
 
@@ -67,18 +77,18 @@ class ActivityControllerFt : AbstractIntegrationTest() {
             )
         } returns FlowActivitiesDto(1, null, listOf(activity)).toMono()
 
-        val unionActivities = activityControllerApi.getActivitiesByCollection(
+        val activities = activityControllerApi.getActivitiesByCollection(
             types, flowCollectionId.fullId(), continuation, null, sort
         ).awaitFirst()
 
-        val flowItem = unionActivities.activities[0]
+        val flowItem = activities.activities[0]
         assertThat(flowItem.id.value).isEqualTo(activity.id)
     }
 
     @Test
     fun `get activities by item - ethereum`() = runBlocking<Unit> {
         // All activity types specified here, so both Order and Nft indexer should be requested for activities
-        val types = UnionActivityTypeDto.values().toList()
+        val types = ActivityTypeDto.values().toList()
         val ethItemId = randomEthAddress()
         val now = nowMillis()
         val tokenId = randomBigInt().toString()
@@ -103,18 +113,18 @@ class ActivityControllerFt : AbstractIntegrationTest() {
             )
         } returns NftActivitiesDto(null, listOf(itemActivity)).toMono()
 
-        val unionActivities = activityControllerApi.getActivitiesByItem(
+        val activities = activityControllerApi.getActivitiesByItem(
             types, ethItemId.fullId(), tokenId, continuation, 10000000, sort
         ).awaitFirst()
 
-        assertThat(unionActivities.activities).hasSize(2)
-        assertThat(unionActivities.activities[0]).isInstanceOf(UnionOrderBidActivityDto::class.java)
-        assertThat(unionActivities.activities[1]).isInstanceOf(UnionMintActivityDto::class.java)
+        assertThat(activities.activities).hasSize(2)
+        assertThat(activities.activities[0]).isInstanceOf(OrderBidActivityDto::class.java)
+        assertThat(activities.activities[1]).isInstanceOf(MintActivityDto::class.java)
     }
 
     @Test
     fun `get activities by item - flow`() = runBlocking<Unit> {
-        val types = UnionActivityTypeDto.values().toList()
+        val types = ActivityTypeDto.values().toList()
         val flowItemId = randomFlowAddress()
         val tokenId = randomLong()
         val activity = randomFlowCancelListActivityDto()
@@ -128,17 +138,17 @@ class ActivityControllerFt : AbstractIntegrationTest() {
             )
         } returns FlowActivitiesDto(1, null, listOf(activity)).toMono()
 
-        val unionActivities = activityControllerApi.getActivitiesByItem(
+        val activities = activityControllerApi.getActivitiesByItem(
             types, flowItemId.fullId(), tokenId.toString(), continuation, size, sort
         ).awaitFirst()
 
-        val flowItem = unionActivities.activities[0]
+        val flowItem = activities.activities[0]
         assertThat(flowItem.id.value).isEqualTo(activity.id)
     }
 
     @Test
     fun `get all activities - asc`() = runBlocking<Unit> {
-        val types = UnionActivityTypeDto.values().toList()
+        val types = ActivityTypeDto.values().toList()
         val blockchains = listOf<BlockchainDto>()
         val size = 3
         val now = nowMillis()
@@ -184,16 +194,16 @@ class ActivityControllerFt : AbstractIntegrationTest() {
             testFlowActivityApi.getNftOrderAllActivities(any(), isNull(), eq(size))
         } returns FlowActivitiesDto(1, null, flowActivities).toMono()
 
-        val unionActivities = activityControllerApi.getAllActivities(
-            types, blockchains, null, size, UnionActivitySortDto.EARLIEST_FIRST
+        val activities = activityControllerApi.getAllActivities(
+            types, blockchains, null, size, com.rarible.protocol.union.dto.ActivitySortDto.EARLIEST_FIRST
         ).awaitFirst()
 
-        assertThat(unionActivities.activities).hasSize(3)
-        assertThat(unionActivities.continuation).isNotNull()
+        assertThat(activities.activities).hasSize(3)
+        assertThat(activities.continuation).isNotNull()
 
-        val oldestActivity = unionActivities.activities[0]
-        val secondActivity = unionActivities.activities[1]
-        val newestActivity = unionActivities.activities[2]
+        val oldestActivity = activities.activities[0]
+        val secondActivity = activities.activities[1]
+        val newestActivity = activities.activities[2]
 
         assertThat(oldestActivity.id.value).isEqualTo(polygonItemActivity1.id)
         assertThat(secondActivity.id.value).isEqualTo(ethOrderActivity3.id)
@@ -204,10 +214,10 @@ class ActivityControllerFt : AbstractIntegrationTest() {
     fun `get activities by user`() = runBlocking<Unit> {
         // Only Item-specific activity types specified here, so only NFT-Indexer of Ethereum should be requested
         val types = listOf(
-            UnionUserActivityTypeDto.TRANSFER_FROM,
-            UnionUserActivityTypeDto.TRANSFER_TO,
-            UnionUserActivityTypeDto.MINT,
-            UnionUserActivityTypeDto.BURN
+            UserActivityTypeDto.TRANSFER_FROM,
+            UserActivityTypeDto.TRANSFER_TO,
+            UserActivityTypeDto.MINT,
+            UserActivityTypeDto.BURN
         )
         // Flow and Ethereum user specified - request should be routed only for them, Polygon omitted
         val userEth = randomEthAddress()
@@ -231,11 +241,12 @@ class ActivityControllerFt : AbstractIntegrationTest() {
             )
         } returns FlowActivitiesDto(1, null, listOf(flowActivity)).toMono()
 
-        val unionActivities = activityControllerApi.getActivitiesByUser(
-            types, listOf(userEth.fullId(), userFlow.fullId()), null, size, sort
+        val now = Instant.now()
+        val oneWeekAgo = now.minus(7, ChronoUnit.DAYS)
+        val activities = activityControllerApi.getActivitiesByUser(
+            types, listOf(userEth.fullId(), userFlow.fullId()), oneWeekAgo, now, null, size, sort
         ).awaitFirst()
 
-        assertThat(unionActivities.activities).hasSize(2)
+        assertThat(activities.activities).hasSize(2)
     }
-
 }

@@ -1,7 +1,7 @@
 {
   "UnionAddress": "com.rarible.protocol.union.dto.UnionAddress",
-  "UnionActivityId": "com.rarible.protocol.union.dto.UnionActivityIdDto",
-  "UnionItemId": "com.rarible.protocol.union.dto.UnionItemIdDto",
-  "UnionOrderId": "com.rarible.protocol.union.dto.UnionOrderIdDto",
-  "UnionOwnershipId": "com.rarible.protocol.union.dto.UnionOwnershipIdDto"
+  "ActivityId": "com.rarible.protocol.union.dto.ActivityIdDto",
+  "ItemId": "com.rarible.protocol.union.dto.ItemIdDto",
+  "OrderId": "com.rarible.protocol.union.dto.OrderIdDto",
+  "OwnershipId": "com.rarible.protocol.union.dto.OwnershipIdDto"
 }

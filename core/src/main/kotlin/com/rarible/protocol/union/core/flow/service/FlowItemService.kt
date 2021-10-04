@@ -1,11 +1,11 @@
 package com.rarible.protocol.union.core.flow.service
 
 import com.rarible.protocol.flow.nft.api.client.FlowNftItemControllerApi
-import com.rarible.protocol.union.core.flow.converter.FlowUnionItemConverter
+import com.rarible.protocol.union.core.continuation.Page
+import com.rarible.protocol.union.core.flow.converter.FlowItemConverter
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.UnionItemDto
-import com.rarible.protocol.union.dto.UnionItemsDto
 import kotlinx.coroutines.reactive.awaitFirst
 
 class FlowItemService(
@@ -19,43 +19,47 @@ class FlowItemService(
         showDeleted: Boolean?,
         lastUpdatedFrom: Long?, //TODO not supported by Flow
         lastUpdatedTo: Long? //TODO not supported by Flow
-    ): UnionItemsDto {
+    ): Page<UnionItemDto> {
         val items = flowNftItemControllerApi.getNftAllItems(continuation, size, showDeleted).awaitFirst()
-        return FlowUnionItemConverter.convert(items, blockchain)
+        return FlowItemConverter.convert(items, blockchain)
     }
 
     override suspend fun getItemById(
         itemId: String
     ): UnionItemDto {
         val item = flowNftItemControllerApi.getNftItemById(itemId).awaitFirst()
-        return FlowUnionItemConverter.convert(item, blockchain)
+        return FlowItemConverter.convert(item, blockchain)
+    }
+
+    override suspend fun resetItemMeta(itemId: String) {
+        // TODO implement
     }
 
     override suspend fun getItemsByCollection(
         collection: String,
         continuation: String?,
         size: Int
-    ): UnionItemsDto {
+    ): Page<UnionItemDto> {
         val items = flowNftItemControllerApi.getNftItemsByCollection(collection, continuation, size).awaitFirst()
-        return FlowUnionItemConverter.convert(items, blockchain)
+        return FlowItemConverter.convert(items, blockchain)
     }
 
     override suspend fun getItemsByCreator(
         creator: String,
         continuation: String?,
         size: Int
-    ): UnionItemsDto {
+    ): Page<UnionItemDto> {
         val items = flowNftItemControllerApi.getNftItemsByCreator(creator, continuation, size).awaitFirst()
-        return FlowUnionItemConverter.convert(items, blockchain)
+        return FlowItemConverter.convert(items, blockchain)
     }
 
     override suspend fun getItemsByOwner(
         owner: String,
         continuation: String?,
         size: Int
-    ): UnionItemsDto {
+    ): Page<UnionItemDto> {
         val items = flowNftItemControllerApi.getNftItemsByOwner(owner, continuation, size).awaitFirst()
-        return FlowUnionItemConverter.convert(items, blockchain)
+        return FlowItemConverter.convert(items, blockchain)
     }
 
 }

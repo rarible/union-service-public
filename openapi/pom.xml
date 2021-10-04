@@ -16,7 +16,6 @@
         <generator.kotlin>kotlin</generator.kotlin>
         <generator.package>com.rarible.protocol.union.dto</generator.package>
 
-        <dir.resources>${basedir}/src/main/resources</dir.resources>
         <dir.src.kotlin>${project.basedir}/src/main/kotlin</dir.src.kotlin>
         <dir.src.java>${project.basedir}/src/main/java</dir.src.java>
 

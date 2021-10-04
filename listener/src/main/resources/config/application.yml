@@ -24,14 +24,29 @@ rarible:
     converter:
       enabled: true
 
-listener:
+common:
   producer:
     broker-replica-set: ${kafka.hosts}
+
+listener:
   consumer:
     ethereum:
       broker-replica-set: ${kafka.hosts}
-    poygon:
+      itemWorkers: 1
+      ownershipWorkers: 2
+      orderWorkers: 5
+    polygon:
       broker-replica-set: ${kafka.hosts}
+      itemWorkers: 1
+      ownershipWorkers: 1
+      orderWorkers: 2
     flow:
       broker-replica-set: ${kafka.hosts}
+      itemWorkers: 1,
+      ownershipWorkers: 1
+      orderWorkers: 1
+  reconciliation:
+    orderBatchSize: 50
+    threadCount: 2
+
 

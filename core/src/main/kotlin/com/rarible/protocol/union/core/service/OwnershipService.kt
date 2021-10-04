@@ -1,14 +1,14 @@
 package com.rarible.protocol.union.core.service
 
+import com.rarible.protocol.union.core.continuation.Page
 import com.rarible.protocol.union.dto.UnionOwnershipDto
-import com.rarible.protocol.union.dto.UnionOwnershipsDto
 
 interface OwnershipService : BlockchainService {
 
     suspend fun getAllOwnerships(
         continuation: String?,
         size: Int
-    ): UnionOwnershipsDto
+    ): Page<UnionOwnershipDto>
 
     suspend fun getOwnershipById(
         ownershipId: String
@@ -19,6 +19,6 @@ interface OwnershipService : BlockchainService {
         tokenId: String,
         continuation: String?,
         size: Int
-    ): UnionOwnershipsDto
+    ): Page<UnionOwnershipDto>
 
 }

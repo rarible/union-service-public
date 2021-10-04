@@ -1,6 +1,6 @@
 package com.rarible.protocol.union.listener.handler
 
-interface KafkaConsumerWorker : AutoCloseable {
+interface KafkaConsumerWorker<T> : AutoCloseable {
 
     fun start()
 

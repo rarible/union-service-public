@@ -4,7 +4,7 @@ import com.rarible.protocol.dto.EthereumSignatureValidationFormDto
 import com.rarible.protocol.order.api.client.OrderSignatureControllerApi
 import com.rarible.protocol.union.core.service.SignatureService
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.UnionSignatureValidationFormDto
+import com.rarible.protocol.union.dto.SignatureValidationFormDto
 import io.daonomic.rpc.domain.Binary
 import kotlinx.coroutines.reactive.awaitFirst
 import scalether.domain.Address
@@ -14,9 +14,9 @@ class EthereumSignatureService(
     private val signatureControllerApi: OrderSignatureControllerApi
 ) : AbstractEthereumService(blockchain), SignatureService {
 
-    override suspend fun validate(form: UnionSignatureValidationFormDto): Boolean {
+    override suspend fun validate(form: SignatureValidationFormDto): Boolean {
         val ethereumForm = EthereumSignatureValidationFormDto(
-            signer = Address.apply(form.signer),
+            signer = Address.apply(form.signer.value),
             message = form.message,
             signature = Binary.apply(form.signature)
         )

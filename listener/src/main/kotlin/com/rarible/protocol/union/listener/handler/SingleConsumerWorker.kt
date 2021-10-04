@@ -4,7 +4,7 @@ import com.rarible.core.daemon.sequential.ConsumerWorker
 
 class SingleConsumerWorker<T>(
     private val worker: ConsumerWorker<T>
-) : KafkaConsumerWorker {
+) : KafkaConsumerWorker<T> {
 
     override fun start() {
         worker.start()
