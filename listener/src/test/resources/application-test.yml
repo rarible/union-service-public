@@ -18,6 +18,10 @@ logging:
 application:
   environment: test
 
+mongock:
+  change-logs-scan-package:
+    - com.rarible.protocol.union.enrichment.migration
+
 rarible:
   ethereum:
     converter:
