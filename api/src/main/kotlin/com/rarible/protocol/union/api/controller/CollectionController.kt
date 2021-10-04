@@ -8,7 +8,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.dto.CollectionsDto
 import com.rarible.protocol.union.dto.IdParser
-import com.rarible.protocol.union.dto.continuation.UnionCollectionContinuation
+import com.rarible.protocol.union.dto.continuation.CollectionContinuation
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.RestController
 
@@ -30,7 +30,7 @@ class CollectionController(
         val total = blockchainPages.map { it.total }.sum()
 
         val combinedPage = Paging(
-            UnionCollectionContinuation.ById,
+            CollectionContinuation.ById,
             blockchainPages.flatMap { it.entities }
         ).getPage(safeSize, total)
 
