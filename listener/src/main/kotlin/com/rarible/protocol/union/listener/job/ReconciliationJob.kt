@@ -41,7 +41,7 @@ class ReconciliationJob(
     }
 
     suspend fun reconcileOrders(lastUpdateContinuation: String?, blockchain: BlockchainDto): String? {
-        logger.info("Fetching Orders from [{}]", lastUpdateContinuation)
+        logger.info("Fetching Orders from {}: [{}]", blockchain.name, lastUpdateContinuation)
         val page = orderServiceRouter.getService(blockchain).getOrdersAll(
             PlatformDto.ALL,
             null,
@@ -52,7 +52,10 @@ class ReconciliationJob(
         val orders = page.entities
 
         if (orders.isEmpty()) {
-            logger.info("There is no more Orders for continuation $lastUpdateContinuation, aborting reconciliation")
+            logger.info(
+                "RECONCILIATION STATE FOR {}: There is no more Orders for continuation {}, aborting reconciliation",
+                blockchain.name, lastUpdateContinuation
+            )
             return null
         }
 
@@ -63,7 +66,10 @@ class ReconciliationJob(
                 .collect()
         }
 
-        logger.info("${page.entities.size} Orders updated, next continuation is [{}]", page.continuation)
+        logger.info(
+            "RECONCILIATION STATE FOR {}: {} Orders updated, next continuation is [{}]",
+            blockchain.name, page.entities.size, page.continuation
+        )
         return page.continuation
     }
 
