@@ -42,7 +42,7 @@ listener:
       orderWorkers: 2
     flow:
       broker-replica-set: ${kafka.hosts}
-      itemWorkers: 1,
+      itemWorkers: 1
       ownershipWorkers: 1
       orderWorkers: 1
   reconciliation:
