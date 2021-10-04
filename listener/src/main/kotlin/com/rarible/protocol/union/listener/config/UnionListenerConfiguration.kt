@@ -5,6 +5,7 @@ import com.rarible.core.daemon.sequential.ConsumerEventHandler
 import com.rarible.core.daemon.sequential.ConsumerWorker
 import com.rarible.core.kafka.RaribleKafkaConsumer
 import com.rarible.core.kafka.RaribleKafkaProducer
+import com.rarible.core.task.EnableRaribleTask
 import com.rarible.ethereum.domain.Blockchain
 import com.rarible.protocol.dto.FlowActivityDto
 import com.rarible.protocol.dto.FlowNftItemEventDto
@@ -47,6 +48,7 @@ import org.springframework.context.annotation.Import
 
 @Configuration
 @Import(EnrichmentConfiguration::class)
+@EnableRaribleTask
 @EnableConfigurationProperties(value = [UnionListenerProperties::class])
 class UnionListenerConfiguration(
     applicationEnvironmentInfo: ApplicationEnvironmentInfo,
