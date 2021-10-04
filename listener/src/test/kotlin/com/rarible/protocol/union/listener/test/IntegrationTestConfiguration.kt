@@ -17,6 +17,11 @@ import com.rarible.protocol.dto.NftItemEventTopicProvider
 import com.rarible.protocol.dto.NftOwnershipEventDto
 import com.rarible.protocol.dto.NftOwnershipEventTopicProvider
 import com.rarible.protocol.dto.OrderIndexerTopicProvider
+import com.rarible.protocol.flow.nft.api.client.FlowNftItemControllerApi
+import com.rarible.protocol.flow.nft.api.client.FlowNftOwnershipControllerApi
+import com.rarible.protocol.flow.nft.api.client.FlowOrderControllerApi
+import com.rarible.protocol.nft.api.client.NftItemControllerApi
+import com.rarible.protocol.nft.api.client.NftOwnershipControllerApi
 import com.rarible.protocol.union.core.CoreConfiguration
 import com.rarible.protocol.union.core.UnionKafkaJsonSerializer
 import com.rarible.protocol.union.dto.ActivityDto
@@ -26,10 +31,13 @@ import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.dto.UnionEventTopicProvider
 import com.rarible.protocol.union.listener.config.activity.FlowActivityTopicProvider
 import com.rarible.protocol.union.subscriber.UnionKafkaJsonDeserializer
+import io.mockk.mockk
 import org.apache.kafka.clients.consumer.OffsetResetStrategy
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
+import org.springframework.context.annotation.Primary
 
 @TestConfiguration
 @Import(CoreConfiguration::class)
@@ -183,5 +191,35 @@ class IntegrationTestConfiguration {
             bootstrapServers = kafkaContainer.kafkaBoostrapServers()
         )
     }
+
+    //--------------------- ETHEREUM ---------------------//
+    @Bean
+    @Primary
+    @Qualifier("ethereum.item.api")
+    fun testEthereumItemApi(): NftItemControllerApi = mockk()
+
+    @Bean
+    @Primary
+    @Qualifier("ethereum.ownership.api")
+    fun testEthereumOwnershipApi(): NftOwnershipControllerApi = mockk()
+
+    @Bean
+    @Primary
+    @Qualifier("ethereum.order.api")
+    fun testEthereumOrderApi(): com.rarible.protocol.order.api.client.OrderControllerApi = mockk()
+
+
+    //--------------------- FLOW ---------------------//
+    @Bean
+    @Primary
+    fun testFlowItemApi(): FlowNftItemControllerApi = mockk()
+
+    @Bean
+    @Primary
+    fun testFlowOwnershipApi(): FlowNftOwnershipControllerApi = mockk()
+
+    @Bean
+    @Primary
+    fun testFlowOrderApi(): FlowOrderControllerApi = mockk()
 
 }

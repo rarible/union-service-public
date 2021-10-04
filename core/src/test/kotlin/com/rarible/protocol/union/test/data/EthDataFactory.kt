@@ -151,13 +151,22 @@ fun randomEthItemMediaMeta(type: String): NftMediaMetaDto {
     )
 }
 
-fun randomEthNftOwnershipDto() = randomEthNftOwnershipDto(randomEthOwnershipId())
-fun randomEthNftOwnershipDto(ownershipId: OwnershipIdDto) = randomEthNftOwnershipDto(
+fun randomEthOwnershipDto() = randomEthOwnershipDto(randomEthOwnershipId())
+fun randomEthOwnershipDto(itemId: ItemIdDto) = randomEthOwnershipDto(
+    OwnershipIdDto(
+        itemId.blockchain,
+        itemId.token,
+        itemId.tokenId,
+        UnionAddress(BlockchainDto.ETHEREUM, randomAddressString())
+    )
+)
+
+fun randomEthOwnershipDto(ownershipId: OwnershipIdDto) = randomEthOwnershipDto(
     ItemIdParser.parseShort("${ownershipId.token.value}:${ownershipId.tokenId}", BlockchainDto.ETHEREUM),
     PartDto(Address.apply(ownershipId.owner.value), randomInt())
 )
 
-fun randomEthNftOwnershipDto(itemId: ItemIdDto, creator: PartDto): NftOwnershipDto {
+fun randomEthOwnershipDto(itemId: ItemIdDto, creator: PartDto): NftOwnershipDto {
     val ownershipId = randomEthOwnershipId(itemId, creator.account.toString())
     return NftOwnershipDto(
         id = ownershipId.value,

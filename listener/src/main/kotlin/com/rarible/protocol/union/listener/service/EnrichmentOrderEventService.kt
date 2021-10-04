@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.enrichment.service.event
+package com.rarible.protocol.union.listener.service
 
 import com.rarible.core.client.WebClientResponseProxyException
 import com.rarible.protocol.union.dto.AssetTypeDto

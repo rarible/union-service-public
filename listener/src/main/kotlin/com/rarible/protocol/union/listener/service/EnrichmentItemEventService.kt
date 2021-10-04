@@ -1,6 +1,7 @@
-package com.rarible.protocol.union.enrichment.service.event
+package com.rarible.protocol.union.listener.service
 
 import com.rarible.core.common.optimisticLock
+import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.UnionItemDto
 import com.rarible.protocol.union.enrichment.converter.ShortItemConverter
@@ -109,11 +110,12 @@ class EnrichmentItemEventService(
         }
     }
 
-    suspend fun onItemDeleted(itemId: ShortItemId) {
-        val deleted = deleteItem(itemId)
-        notifyDelete(itemId)
+    suspend fun onItemDeleted(itemId: ItemIdDto) {
+        val shortItemId = ShortItemId(itemId)
+        val deleted = deleteItem(shortItemId)
+        notifyDelete(shortItemId)
         if (deleted) {
-            logger.info("Item [{}] deleted (removed from NFT-Indexer)", itemId)
+            logger.info("Item [{}] deleted (removed from NFT-Indexer)", shortItemId)
         }
     }
 

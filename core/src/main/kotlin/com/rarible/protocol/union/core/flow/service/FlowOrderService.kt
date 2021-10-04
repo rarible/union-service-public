@@ -30,7 +30,7 @@ class FlowOrderService(
         return FlowOrderConverter.convert(order, blockchain)
     }
 
-    override fun getOrdersByIds(orerIds: List<String>): Flow<OrderDto> {
+    override fun getOrdersByIds(orderIds: List<String>): Flow<OrderDto> {
         // TODO implement when Flow support it
         return emptyFlow()
         /*

@@ -4,8 +4,8 @@ import com.rarible.protocol.union.core.service.OrderServiceRouter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.PlatformDto
-import com.rarible.protocol.union.enrichment.service.event.EnrichmentOrderEventService
 import com.rarible.protocol.union.listener.config.UnionListenerProperties
+import com.rarible.protocol.union.listener.service.EnrichmentOrderEventService
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow

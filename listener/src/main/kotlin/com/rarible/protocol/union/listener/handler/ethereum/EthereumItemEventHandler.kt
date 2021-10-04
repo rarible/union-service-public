@@ -6,9 +6,10 @@ import com.rarible.protocol.dto.NftItemUpdateEventDto
 import com.rarible.protocol.union.core.ethereum.converter.EthConverter
 import com.rarible.protocol.union.core.ethereum.converter.EthItemConverter
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.enrichment.model.ShortItemId
-import com.rarible.protocol.union.enrichment.service.event.EnrichmentItemEventService
+import com.rarible.protocol.union.dto.ItemIdDto
+import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.listener.handler.AbstractEventHandler
+import com.rarible.protocol.union.listener.service.EnrichmentItemEventService
 import org.slf4j.LoggerFactory
 
 class EthereumItemEventHandler(
@@ -27,9 +28,9 @@ class EthereumItemEventHandler(
                 itemEventService.onItemUpdated(item)
             }
             is NftItemDeleteEventDto -> {
-                val itemId = ShortItemId(
+                val itemId = ItemIdDto(
                     blockchain = blockchain,
-                    token = EthConverter.convert(event.item.token),
+                    token = UnionAddress(blockchain, EthConverter.convert(event.item.token)),
                     tokenId = event.item.tokenId
                 )
                 itemEventService.onItemDeleted(itemId)

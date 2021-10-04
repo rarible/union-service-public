@@ -5,9 +5,10 @@ import com.rarible.protocol.dto.FlowNftItemEventDto
 import com.rarible.protocol.dto.FlowNftItemUpdateEventDto
 import com.rarible.protocol.union.core.flow.converter.FlowItemConverter
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.enrichment.model.ShortItemId
-import com.rarible.protocol.union.enrichment.service.event.EnrichmentItemEventService
+import com.rarible.protocol.union.dto.ItemIdDto
+import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.listener.handler.AbstractEventHandler
+import com.rarible.protocol.union.listener.service.EnrichmentItemEventService
 import org.slf4j.LoggerFactory
 
 class FlowItemEventHandler(
@@ -26,9 +27,9 @@ class FlowItemEventHandler(
                 itemEventService.onItemUpdated(item)
             }
             is FlowNftItemDeleteEventDto -> {
-                val itemId = ShortItemId(
+                val itemId = ItemIdDto(
                     blockchain = blockchain,
-                    token = event.item.token,
+                    token = UnionAddress(blockchain, event.item.token),
                     tokenId = event.item.tokenId.toBigInteger()
                 )
                 itemEventService.onItemDeleted(itemId)

@@ -7,8 +7,8 @@ import com.rarible.protocol.union.core.flow.converter.FlowOrderEventConverter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderEventDto
 import com.rarible.protocol.union.dto.OrderUpdateEventDto
-import com.rarible.protocol.union.enrichment.service.event.EnrichmentOrderEventService
 import com.rarible.protocol.union.listener.handler.AbstractEventHandler
+import com.rarible.protocol.union.listener.service.EnrichmentOrderEventService
 import org.slf4j.LoggerFactory
 
 class FlowOrderEventHandler(
