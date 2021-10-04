@@ -5,7 +5,6 @@ import com.rarible.protocol.dto.ActivityFilterByCollectionTypeDto
 import com.rarible.protocol.dto.ActivityFilterByItemTypeDto
 import com.rarible.protocol.dto.ActivityFilterByUserTypeDto
 import com.rarible.protocol.dto.AssetDto
-import com.rarible.protocol.dto.AssetTypeDto
 import com.rarible.protocol.dto.BurnDto
 import com.rarible.protocol.dto.CryptoPunksAssetTypeDto
 import com.rarible.protocol.dto.Erc1155AssetTypeDto
@@ -50,18 +49,13 @@ object EthActivityConverter {
         return when (source) {
             is OrderActivityMatchDto -> {
                 val type = source.type
-                val activityMatch = if (source.left.asset.assetType.nft && source.right.asset.assetType.payment) {
-                    if (type != null) {
-                        activityToSell(source, blockchain, source.left.asset, source.right.asset, convert(type))
-                    } else {
-                        activityToSwap(source, blockchain)
-                    }
-                } else if (source.left.asset.assetType.payment && source.right.asset.assetType.nft) {
-                    if (type != null) {
-                        activityToSell(source, blockchain, source.right.asset, source.left.asset, convert(type))
-                    } else {
-                        activityToSwap(source, blockchain)
-                    }
+                val leftAsset = source.left.asset
+                val rightAsset = source.right.asset
+
+                val activityMatch = if (type != null && leftAsset.nft && rightAsset.payment) {
+                    activityToSell(source, blockchain, leftAsset, rightAsset, convert(type))
+                } else if (type != null && leftAsset.payment && rightAsset.nft) {
+                    activityToSell(source, blockchain, rightAsset, leftAsset, convert(type))
                 } else {
                     activityToSwap(source, blockchain)
                 }
@@ -201,7 +195,7 @@ object EthActivityConverter {
         payment = EthConverter.convert(payment, blockchain),
         price = source.price,
         priceUsd = source.priceUsd,
-        amountUsd = source.priceUsd?.multiply(nft.value.toBigDecimal()),
+        amountUsd = source.priceUsd?.multiply(nft.valueDecimal),
         type = type
     )
 
@@ -280,13 +274,13 @@ object EthActivityConverter {
     }
 
     private fun convert(source: OrderActivityMatchDto.Type) =
-        when(source) {
+        when (source) {
             OrderActivityMatchDto.Type.SELL -> OrderMatchSellDto.Type.SELL
             OrderActivityMatchDto.Type.ACCEPT_BID -> OrderMatchSellDto.Type.ACCEPT_BID
         }
 
-    private val AssetTypeDto.nft: Boolean
-        get() = when(this) {
+    private val AssetDto.nft: Boolean
+        get() = when (this.assetType) {
             is EthAssetTypeDto -> false
             is Erc20AssetTypeDto -> false
             is Erc721AssetTypeDto -> true
@@ -297,8 +291,8 @@ object EthActivityConverter {
             is GenerativeArtAssetTypeDto -> false
         }
 
-    private val AssetTypeDto.payment: Boolean
-        get() = when(this) {
+    private val AssetDto.payment: Boolean
+        get() = when (this.assetType) {
             is EthAssetTypeDto -> true
             is Erc20AssetTypeDto -> true
             is Erc721AssetTypeDto -> false

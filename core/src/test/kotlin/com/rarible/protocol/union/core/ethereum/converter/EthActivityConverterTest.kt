@@ -14,9 +14,11 @@ import com.rarible.protocol.union.dto.OrderCancelBidActivityDto
 import com.rarible.protocol.union.dto.OrderCancelListActivityDto
 import com.rarible.protocol.union.dto.OrderListActivityDto
 import com.rarible.protocol.union.dto.OrderMatchActivityDto
+import com.rarible.protocol.union.dto.OrderMatchSellDto
 import com.rarible.protocol.union.dto.OrderMatchSwapDto
 import com.rarible.protocol.union.dto.TransferActivityDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
+import com.rarible.protocol.union.test.data.randomEthAssetErc1155
 import com.rarible.protocol.union.test.data.randomEthItemBurnActivity
 import com.rarible.protocol.union.test.data.randomEthItemMintActivity
 import com.rarible.protocol.union.test.data.randomEthItemTransferActivity
@@ -31,21 +33,63 @@ import org.junit.jupiter.api.Test
 class EthActivityConverterTest {
 
     @Test
-    fun `eth order activity match side`() {
+    fun `eth order activity match side - swap`() {
         val dto = randomEthOrderActivityMatch()
         val converted = EthActivityConverter.convert(dto, BlockchainDto.ETHEREUM) as OrderMatchActivityDto
 
         assertThat(converted.id.value).isEqualTo(dto.id)
+        assertThat(converted.date).isEqualTo(dto.date)
+
         assertThat(converted.match is OrderMatchSwapDto)
         val swap = converted.match as OrderMatchSwapDto
-        assertThat(converted.date).isEqualTo(dto.date)
         assertMatchSide(swap.left, dto.left)
         assertMatchSide(swap.right, dto.right)
+
         assertThat(converted.source.name).isEqualTo(dto.source.name)
         assertThat(converted.blockchainInfo.transactionHash).isEqualTo(dto.transactionHash.prefixed())
         assertThat(converted.blockchainInfo.blockHash).isEqualTo(dto.blockHash.prefixed())
         assertThat(converted.blockchainInfo.blockNumber).isEqualTo(dto.blockNumber)
         assertThat(converted.blockchainInfo.logIndex).isEqualTo(dto.logIndex)
+    }
+
+    @Test
+    fun `eth order activity match side - nft to payment`() {
+        val swapDto = randomEthOrderActivityMatch()
+        val left = swapDto.left.copy(asset = randomEthAssetErc1155())
+        val dto = swapDto.copy(
+            left = left
+        )
+
+        val converted = EthActivityConverter.convert(dto, BlockchainDto.ETHEREUM) as OrderMatchActivityDto
+
+        assertThat(converted.match is OrderMatchSellDto)
+        val sell = converted.match as OrderMatchSellDto
+
+        assertThat(sell.nft).isEqualTo(EthConverter.convert(left.asset, BlockchainDto.ETHEREUM))
+        assertThat(sell.payment).isEqualTo(EthConverter.convert(swapDto.right.asset, BlockchainDto.ETHEREUM))
+        assertThat(sell.price).isEqualTo(swapDto.price)
+        assertThat(sell.priceUsd).isEqualTo(swapDto.priceUsd)
+        assertThat(sell.amountUsd).isEqualTo(swapDto.priceUsd!!.multiply(left.asset.valueDecimal))
+    }
+
+    @Test
+    fun `eth order activity match side - payment to nft`() {
+        val swapDto = randomEthOrderActivityMatch()
+        val right = swapDto.right.copy(asset = randomEthAssetErc1155())
+        val dto = swapDto.copy(
+            right = right
+        )
+
+        val converted = EthActivityConverter.convert(dto, BlockchainDto.ETHEREUM) as OrderMatchActivityDto
+
+        assertThat(converted.match is OrderMatchSellDto)
+        val sell = converted.match as OrderMatchSellDto
+
+        assertThat(sell.nft).isEqualTo(EthConverter.convert(right.asset, BlockchainDto.ETHEREUM))
+        assertThat(sell.payment).isEqualTo(EthConverter.convert(swapDto.left.asset, BlockchainDto.ETHEREUM))
+        assertThat(sell.price).isEqualTo(swapDto.price)
+        assertThat(sell.priceUsd).isEqualTo(swapDto.priceUsd)
+        assertThat(sell.amountUsd).isEqualTo(swapDto.priceUsd!!.multiply(right.asset.valueDecimal))
     }
 
     @Test
