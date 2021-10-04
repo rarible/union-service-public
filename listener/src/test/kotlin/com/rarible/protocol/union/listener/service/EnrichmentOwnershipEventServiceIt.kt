@@ -3,7 +3,6 @@ package com.rarible.protocol.union.listener.service
 import com.rarible.core.test.wait.Wait
 import com.rarible.protocol.union.core.ethereum.converter.EthOrderConverter
 import com.rarible.protocol.union.core.ethereum.converter.EthOwnershipConverter
-import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.converter.EnrichedOwnershipConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOwnershipConverter
@@ -65,17 +64,14 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
         val itemId = randomEthItemId()
         val ownershipId = randomEthOwnershipId(itemId)
         val ethOwnership = randomEthOwnershipDto(ownershipId)
+
         val bestSellOrder = randomEthLegacyOrderDto(itemId)
+        val unionBestSell = EthOrderConverter.convert(bestSellOrder, itemId.blockchain)
 
-        val unionBestSell = EthOrderConverter.convert(bestSellOrder, BlockchainDto.ETHEREUM)
-        val unionOwnership = EthOwnershipConverter.convert(ethOwnership, BlockchainDto.ETHEREUM)
-
+        val unionOwnership = EthOwnershipConverter.convert(ethOwnership, itemId.blockchain)
         val shortOwnership = ShortOwnershipConverter.convert(unionOwnership).copy(
             bestSellOrder = ShortOrderConverter.convert(unionBestSell)
         )
-
-        val expected = EnrichedOwnershipConverter.convert(unionOwnership)
-            .copy(bestSellOrder = unionBestSell)
 
         ownershipService.save(shortOwnership)
 
@@ -84,15 +80,52 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
 
         ownershipEventHandler.onOwnershipUpdated(unionOwnership)
 
-        val stored = ownershipService.get(shortOwnership.id)!!
+        val saved = ownershipService.get(shortOwnership.id)!!
+        assertThat(saved.bestSellOrder).isEqualTo(shortOwnership.bestSellOrder)
 
-        assertThat(stored.bestSellOrder).isEqualTo(shortOwnership.bestSellOrder)
+        val expected = EnrichedOwnershipConverter.convert(unionOwnership)
+            .copy(bestSellOrder = unionBestSell)
+
+        // We don't have related item in enrichment DB, so expect only Ownership update
         Wait.waitAssert {
             assertThat(ownershipEvents).hasSize(1)
             val messages = findOwnershipUpdates(ownershipId.value)
             assertThat(messages).hasSize(1)
             assertThat(messages[0].key).isEqualTo(itemId.fullId())
             assertThat(messages[0].id).isEqualTo(itemId.fullId())
+            assertThat(messages[0].value.ownershipId).isEqualTo(ownershipId)
+            assertThat(messages[0].value.ownership).isEqualTo(expected)
+        }
+    }
+
+    @Test
+    fun `on order updated - ownership exists`() = runWithKafka {
+        val itemId = randomEthItemId()
+        val ownershipId = randomEthOwnershipId(itemId)
+        val ethOwnership = randomEthOwnershipDto(ownershipId)
+
+        val unionOwnership = EthOwnershipConverter.convert(ethOwnership, itemId.blockchain)
+        val shortOwnership = ShortOwnershipConverter.convert(unionOwnership)
+        ownershipService.save(shortOwnership)
+
+        val bestSellOrder = randomEthLegacyOrderDto(itemId)
+        val unionBestSell = EthOrderConverter.convert(bestSellOrder, itemId.blockchain)
+
+        coEvery { testEthereumOwnershipApi.getNftOwnershipById(ownershipId.value) } returns ethOwnership.toMono()
+
+        ownershipEventHandler.onOwnershipBestSellOrderUpdated(shortOwnership.id, unionBestSell)
+
+        val saved = ownershipService.get(shortOwnership.id)!!
+        assertThat(saved.bestSellOrder).isEqualTo(ShortOrderConverter.convert(unionBestSell))
+
+        val expected = EnrichedOwnershipConverter.convert(unionOwnership)
+            .copy(bestSellOrder = unionBestSell)
+
+        // Since Item doesn't exist in Enrichment DB, we expect only Ownership event
+        Wait.waitAssert {
+            assertThat(ownershipEvents).hasSize(1)
+            val messages = findOwnershipUpdates(ownershipId.value)
+            assertThat(messages).hasSize(1)
             assertThat(messages[0].value.ownershipId).isEqualTo(ownershipId)
             assertThat(messages[0].value.ownership).isEqualTo(expected)
         }

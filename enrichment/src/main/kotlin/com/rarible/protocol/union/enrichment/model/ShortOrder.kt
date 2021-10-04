@@ -18,4 +18,10 @@ data class ShortOrder(
     @Transient
     val dtoId: OrderIdDto = OrderIdDto(blockchain, id)
 
-)
+) {
+
+    fun toDto(): OrderIdDto {
+        return OrderIdDto(blockchain, id)
+    }
+
+}
