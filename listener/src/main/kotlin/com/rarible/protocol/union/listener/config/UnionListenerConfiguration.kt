@@ -22,9 +22,6 @@ import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.OrderEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.enrichment.configuration.EnrichmentConfiguration
-import com.rarible.protocol.union.enrichment.service.event.EnrichmentItemEventService
-import com.rarible.protocol.union.enrichment.service.event.EnrichmentOrderEventService
-import com.rarible.protocol.union.enrichment.service.event.EnrichmentOwnershipEventService
 import com.rarible.protocol.union.listener.config.activity.EthActivityEventsConsumerFactory
 import com.rarible.protocol.union.listener.config.activity.FlowActivityEventsConsumerFactory
 import com.rarible.protocol.union.listener.handler.BatchedConsumerWorker
@@ -38,6 +35,9 @@ import com.rarible.protocol.union.listener.handler.flow.FlowActivityEventHandler
 import com.rarible.protocol.union.listener.handler.flow.FlowItemEventHandler
 import com.rarible.protocol.union.listener.handler.flow.FlowOrderEventHandler
 import com.rarible.protocol.union.listener.handler.flow.FlowOwnershipEventHandler
+import com.rarible.protocol.union.listener.service.EnrichmentItemEventService
+import com.rarible.protocol.union.listener.service.EnrichmentOrderEventService
+import com.rarible.protocol.union.listener.service.EnrichmentOwnershipEventService
 import io.micrometer.core.instrument.MeterRegistry
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.context.properties.EnableConfigurationProperties

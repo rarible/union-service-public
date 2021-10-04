@@ -6,7 +6,7 @@ import com.rarible.protocol.union.core.service.OrderServiceRouter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.PlatformDto
-import com.rarible.protocol.union.enrichment.service.event.EnrichmentOrderEventService
+import com.rarible.protocol.union.listener.service.EnrichmentOrderEventService
 import com.rarible.protocol.union.listener.test.data.defaultUnionListenerProperties
 import io.mockk.clearMocks
 import io.mockk.coEvery

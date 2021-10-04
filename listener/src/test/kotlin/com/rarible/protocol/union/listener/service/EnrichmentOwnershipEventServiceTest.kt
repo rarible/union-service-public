@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.enrichment.service.event
+package com.rarible.protocol.union.listener.service
 
 import com.mongodb.client.result.DeleteResult
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
@@ -144,7 +144,7 @@ class EnrichmentOwnershipEventServiceTest {
 
         coEvery { ownershipService.delete(ownershipId) } returns DeleteResult.acknowledged(1)
 
-        ownershipEventService.onOwnershipDeleted(ownershipId)
+        ownershipEventService.onOwnershipDeleted(ownershipId.toDto())
 
         // Ownership deleted, listeners notified, item recalculated
         coVerify(exactly = 1) { eventListener.onEvent(any()) }
@@ -158,7 +158,7 @@ class EnrichmentOwnershipEventServiceTest {
 
         coEvery { ownershipService.delete(ownershipId) } returns DeleteResult.acknowledged(0)
 
-        ownershipEventService.onOwnershipDeleted(ownershipId)
+        ownershipEventService.onOwnershipDeleted(ownershipId.toDto())
 
         // Even we don't have Ownership in DB, we need to notify listeners, but we should not recalculate Item sell stat
         coVerify(exactly = 1) { eventListener.onEvent(any()) }

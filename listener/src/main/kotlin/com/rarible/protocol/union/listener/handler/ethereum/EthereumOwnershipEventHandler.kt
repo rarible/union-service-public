@@ -6,9 +6,10 @@ import com.rarible.protocol.dto.NftOwnershipUpdateEventDto
 import com.rarible.protocol.union.core.ethereum.converter.EthConverter
 import com.rarible.protocol.union.core.ethereum.converter.EthOwnershipConverter
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
-import com.rarible.protocol.union.enrichment.service.event.EnrichmentOwnershipEventService
+import com.rarible.protocol.union.dto.OwnershipIdDto
+import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.listener.handler.AbstractEventHandler
+import com.rarible.protocol.union.listener.service.EnrichmentOwnershipEventService
 import org.slf4j.LoggerFactory
 
 class EthereumOwnershipEventHandler(
@@ -27,11 +28,11 @@ class EthereumOwnershipEventHandler(
                 enrichmentOwnershipEventService.onOwnershipUpdated(item)
             }
             is NftOwnershipDeleteEventDto -> {
-                val ownershipId = ShortOwnershipId(
+                val ownershipId = OwnershipIdDto(
                     blockchain = blockchain,
-                    token = EthConverter.convert(event.ownership.token),
+                    token = UnionAddress(blockchain, EthConverter.convert(event.ownership.token)),
                     tokenId = event.ownership.tokenId,
-                    owner = EthConverter.convert(event.ownership.owner)
+                    owner = UnionAddress(blockchain, EthConverter.convert(event.ownership.owner))
                 )
                 enrichmentOwnershipEventService.onOwnershipDeleted(ownershipId)
             }
