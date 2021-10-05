@@ -98,6 +98,7 @@ fun randomFlowMetaContentDto(): MetaContentDto {
 }
 
 fun randomFlowNftOwnershipDto() = randomFlowNftOwnershipDto(randomFlowOwnershipId())
+fun randomFlowNftOwnershipDto(itemId: ItemIdDto) = randomFlowNftOwnershipDto(randomFlowOwnershipId(itemId))
 fun randomFlowNftOwnershipDto(ownershipId: OwnershipIdDto) = randomFlowNftOwnershipDto(
     ItemIdParser.parseShort("${ownershipId.token.value}:${ownershipId.tokenId}", BlockchainDto.FLOW),
     ownershipId.owner.value
@@ -125,10 +126,11 @@ fun randomFlowCollectionDto(id: String): FlowNftCollectionDto {
     )
 }
 
-fun randomFlowV1OrderDto(): FlowOrderDto {
+fun randomFlowV1OrderDto() = randomFlowV1OrderDto(randomFlowItemId())
+fun randomFlowV1OrderDto(itemId: ItemIdDto): FlowOrderDto {
     return FlowOrderDto(
         id = randomLong(),
-        itemId = randomFlowItemIdShortValue(),
+        itemId = itemId.value,
         maker = randomFlowAddress().value,
         taker = randomFlowAddress().value,
         make = randomFlowAsset(),

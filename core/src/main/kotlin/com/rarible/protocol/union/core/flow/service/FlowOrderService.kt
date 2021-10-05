@@ -8,7 +8,8 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.PlatformDto
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.reactive.awaitFirst
 
 class FlowOrderService(
@@ -31,12 +32,8 @@ class FlowOrderService(
     }
 
     override fun getOrdersByIds(orderIds: List<String>): Flow<OrderDto> {
-        // TODO implement when Flow support it
-        return emptyFlow()
-        /*
-        val orders = orderControllerApi.getOrdersByIds(orerIds)
-        return orders.map { EthOrderConverter.convert(it, blockchain) }.asFlow()
-         */
+        // TODO implement in right way when Flow support it
+        return orderIds.asFlow().map { getOrderById(it) }
     }
 
     override suspend fun getOrderBidsByItem(

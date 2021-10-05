@@ -211,6 +211,7 @@ fun randomEthLegacyOrderDto(itemId: ItemIdDto, maker: Address) = randomEthLegacy
 )
 
 fun randomEthLegacyOrderDto(make: AssetDto, maker: Address, take: AssetDto): LegacyOrderDto {
+    val makeStockValue = randomBigDecimal()
     return LegacyOrderDto(
         maker = maker,
         taker = randomAddress(),
@@ -218,8 +219,8 @@ fun randomEthLegacyOrderDto(make: AssetDto, maker: Address, take: AssetDto): Leg
         take = take,
         fill = randomBigInt(),
         fillValue = randomBigDecimal(),
-        makeStock = randomBigInt(),
-        makeStockValue = randomBigDecimal(),
+        makeStock = makeStockValue.toBigInteger(),
+        makeStockValue = makeStockValue,
         cancelled = false,
         salt = Word.apply(randomWord()),
         data = OrderDataLegacyDto(randomInt()),
@@ -246,6 +247,7 @@ fun randomEthV2OrderDto(itemId: ItemIdDto, maker: Address) = randomEthV2OrderDto
 )
 
 fun randomEthV2OrderDto(make: AssetDto, maker: Address, take: AssetDto): RaribleV2OrderDto {
+    val makeStockValue = randomBigDecimal()
     return RaribleV2OrderDto(
         maker = maker,
         taker = randomAddress(),
@@ -253,8 +255,8 @@ fun randomEthV2OrderDto(make: AssetDto, maker: Address, take: AssetDto): Rarible
         take = take,
         fill = randomBigInt(),
         fillValue = randomBigDecimal(),
-        makeStock = randomBigInt(),
-        makeStockValue = randomBigDecimal(),
+        makeStock = makeStockValue.toBigInteger(),
+        makeStockValue = makeStockValue,
         cancelled = false,
         salt = Word.apply(randomWord()),
         data = OrderRaribleV2DataV1Dto(listOf(randomEthPartDto()), listOf(randomEthPartDto())),
@@ -283,6 +285,7 @@ fun randomEthOpenSeaV1OrderDto(itemId: ItemIdDto, maker: Address) = randomEthOpe
 )
 
 fun randomEthOpenSeaV1OrderDto(make: AssetDto, maker: Address, take: AssetDto): OpenSeaV1OrderDto {
+    val makeStockValue = randomBigDecimal()
     return OpenSeaV1OrderDto(
         maker = maker,
         taker = randomAddress(),
@@ -290,8 +293,8 @@ fun randomEthOpenSeaV1OrderDto(make: AssetDto, maker: Address, take: AssetDto): 
         take = take,
         fill = randomBigInt(),
         fillValue = randomBigDecimal(),
-        makeStock = randomBigInt(),
-        makeStockValue = randomBigDecimal(),
+        makeStock = makeStockValue.toBigInteger(),
+        makeStockValue = makeStockValue,
         cancelled = false,
         salt = Word.apply(randomWord()),
         data = randomEthOrderOpenSeaV1DataV1Dto(),
@@ -320,6 +323,7 @@ fun randomEthCryptoPunksOrderDto(itemId: ItemIdDto, maker: Address) = randomEthC
 )
 
 fun randomEthCryptoPunksOrderDto(make: AssetDto, maker: Address, take: AssetDto): CryptoPunkOrderDto {
+    val makeStockValue = randomBigDecimal()
     return CryptoPunkOrderDto(
         maker = maker,
         taker = randomAddress(),
@@ -327,8 +331,8 @@ fun randomEthCryptoPunksOrderDto(make: AssetDto, maker: Address, take: AssetDto)
         take = take,
         fill = randomBigInt(),
         fillValue = randomBigDecimal(),
-        makeStock = randomBigInt(),
-        makeStockValue = randomBigDecimal(),
+        makeStock = makeStockValue.toBigInteger(),
+        makeStockValue = makeStockValue,
         cancelled = false,
         salt = Word.apply(randomWord()),
         data = OrderCryptoPunksDataDto(),

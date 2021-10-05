@@ -22,7 +22,7 @@ class Paging<T, C : Continuation<C>, F : ContinuationFactory<T, C>>(
         val pageSize = min(size, pageableList.size)
         val page = pageableList.subList(0, pageSize)
 
-        val continuation = if (pageableList.size > pageSize) page.last().continuation else null
+        val continuation = if (page.size >= size) page.last().continuation else null
 
         return ContinuationSlice(page.map { it.entity }, continuation)
     }
