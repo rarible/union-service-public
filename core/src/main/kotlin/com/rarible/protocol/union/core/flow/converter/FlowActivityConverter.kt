@@ -19,7 +19,6 @@ import com.rarible.protocol.union.dto.MintActivityDto
 import com.rarible.protocol.union.dto.OrderActivitySourceDto
 import com.rarible.protocol.union.dto.OrderCancelListActivityDto
 import com.rarible.protocol.union.dto.OrderListActivityDto
-import com.rarible.protocol.union.dto.OrderMatchActivityDto
 import com.rarible.protocol.union.dto.OrderMatchSellDto
 import com.rarible.protocol.union.dto.TransferActivityDto
 
@@ -29,18 +28,16 @@ object FlowActivityConverter {
         val activityId = ActivityIdDto(blockchain, source.id)
         return when (source) {
             is FlowNftOrderActivitySellDto -> {
-                OrderMatchActivityDto(
+                OrderMatchSellDto(
                     id = activityId,
                     // TODO ensure that's right
                     date = source.date,
-                    match = OrderMatchSellDto(
-                        nft = FlowConverter.convert(source.left.asset, blockchain),
-                        payment = FlowConverter.convert(source.left.asset, blockchain),
-                        priceUsd = source.price, //TODO should be in USD,
-                        price = source.price,
-                        type = OrderMatchSellDto.Type.SELL,
-                        amountUsd = source.price.multiply(source.left.asset.value)
-                    ),
+                    nft = FlowConverter.convert(source.left.asset, blockchain),
+                    payment = FlowConverter.convert(source.left.asset, blockchain),
+                    priceUsd = source.price, //TODO should be in USD,
+                    price = source.price,
+                    type = OrderMatchSellDto.Type.SELL,
+                    amountUsd = source.price.multiply(source.left.asset.value),
                     blockchainInfo = ActivityBlockchainInfoDto(
                         transactionHash = source.transactionHash,
                         blockHash = source.blockHash,
@@ -130,5 +127,4 @@ object FlowActivityConverter {
             entities = source.items.map { convert(it, blockchain) }
         )
     }
-
 }
