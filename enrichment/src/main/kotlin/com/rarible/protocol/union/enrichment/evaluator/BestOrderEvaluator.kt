@@ -13,7 +13,7 @@ class BestOrderEvaluator(
 ) {
 
     private val id = provider.entityId
-    private val type = provider.entityType
+    private val type = provider.entityType.simpleName
     private val name = comparator.name
 
     companion object {
