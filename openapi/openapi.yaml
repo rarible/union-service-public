@@ -1790,21 +1790,16 @@ components:
 
     OrderMatchActivity:
       type: object
-      required: [match, source, blockchainInfo]
+      required: [source, blockchainInfo]
       properties:
         "@type":
           type: string
           enum:
             - MATCH
-        match:
-          $ref: "#/components/schemas/OrderMatch"
         source:
           $ref: "#/components/schemas/OrderActivitySource"
         blockchainInfo:
           $ref: "#/components/schemas/ActivityBlockchainInfo"
-
-    OrderMatch:
-      type: object
       oneOf:
         - $ref: "#/components/schemas/OrderMatchSwap"
         - $ref: "#/components/schemas/OrderMatchSell"

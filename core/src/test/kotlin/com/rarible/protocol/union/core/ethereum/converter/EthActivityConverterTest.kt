@@ -40,10 +40,10 @@ class EthActivityConverterTest {
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.date).isEqualTo(dto.date)
 
-        assertThat(converted.match is OrderMatchSwapDto)
-        val swap = converted.match as OrderMatchSwapDto
-        assertMatchSide(swap.left, dto.left)
-        assertMatchSide(swap.right, dto.right)
+        assertThat(converted is OrderMatchSwapDto)
+        converted as OrderMatchSwapDto
+        assertMatchSide(converted.left, dto.left)
+        assertMatchSide(converted.right, dto.right)
 
         assertThat(converted.source.name).isEqualTo(dto.source.name)
         assertThat(converted.blockchainInfo.transactionHash).isEqualTo(dto.transactionHash.prefixed())
@@ -62,14 +62,14 @@ class EthActivityConverterTest {
 
         val converted = EthActivityConverter.convert(dto, BlockchainDto.ETHEREUM) as OrderMatchActivityDto
 
-        assertThat(converted.match is OrderMatchSellDto)
-        val sell = converted.match as OrderMatchSellDto
+        assertThat(converted is OrderMatchSellDto)
+        converted as OrderMatchSellDto
 
-        assertThat(sell.nft).isEqualTo(EthConverter.convert(left.asset, BlockchainDto.ETHEREUM))
-        assertThat(sell.payment).isEqualTo(EthConverter.convert(swapDto.right.asset, BlockchainDto.ETHEREUM))
-        assertThat(sell.price).isEqualTo(swapDto.price)
-        assertThat(sell.priceUsd).isEqualTo(swapDto.priceUsd)
-        assertThat(sell.amountUsd).isEqualTo(swapDto.priceUsd!!.multiply(left.asset.valueDecimal))
+        assertThat(converted.nft).isEqualTo(EthConverter.convert(left.asset, BlockchainDto.ETHEREUM))
+        assertThat(converted.payment).isEqualTo(EthConverter.convert(swapDto.right.asset, BlockchainDto.ETHEREUM))
+        assertThat(converted.price).isEqualTo(swapDto.price)
+        assertThat(converted.priceUsd).isEqualTo(swapDto.priceUsd)
+        assertThat(converted.amountUsd).isEqualTo(swapDto.priceUsd!!.multiply(left.asset.valueDecimal))
     }
 
     @Test
@@ -82,14 +82,14 @@ class EthActivityConverterTest {
 
         val converted = EthActivityConverter.convert(dto, BlockchainDto.ETHEREUM) as OrderMatchActivityDto
 
-        assertThat(converted.match is OrderMatchSellDto)
-        val sell = converted.match as OrderMatchSellDto
+        assertThat(converted is OrderMatchSellDto)
+        converted as OrderMatchSellDto
 
-        assertThat(sell.nft).isEqualTo(EthConverter.convert(right.asset, BlockchainDto.ETHEREUM))
-        assertThat(sell.payment).isEqualTo(EthConverter.convert(swapDto.left.asset, BlockchainDto.ETHEREUM))
-        assertThat(sell.price).isEqualTo(swapDto.price)
-        assertThat(sell.priceUsd).isEqualTo(swapDto.priceUsd)
-        assertThat(sell.amountUsd).isEqualTo(swapDto.priceUsd!!.multiply(right.asset.valueDecimal))
+        assertThat(converted.nft).isEqualTo(EthConverter.convert(right.asset, BlockchainDto.ETHEREUM))
+        assertThat(converted.payment).isEqualTo(EthConverter.convert(swapDto.left.asset, BlockchainDto.ETHEREUM))
+        assertThat(converted.price).isEqualTo(swapDto.price)
+        assertThat(converted.priceUsd).isEqualTo(swapDto.priceUsd)
+        assertThat(converted.amountUsd).isEqualTo(swapDto.priceUsd!!.multiply(right.asset.valueDecimal))
     }
 
     @Test
