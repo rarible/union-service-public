@@ -1625,6 +1625,17 @@ components:
         - "@type"
         - order
 
+    OrderPayout:
+      type: object
+      properties:
+        account:
+          $ref: "#/components/schemas/UnionAddress"
+        value:
+          $ref: "#/components/schemas/BigInteger"
+      required:
+        - account
+        - value
+
     #################### Activity - Union ####################
 
     ActivityId:
@@ -2107,12 +2118,12 @@ components:
           type: array
           default: [ ]
           items:
-            $ref: "#/components/schemas/EthOrderPayout"
+            $ref: "#/components/schemas/OrderPayout"
         originFees:
           type: array
           default: [ ]
           items:
-            $ref: "#/components/schemas/EthOrderPayout"
+            $ref: "#/components/schemas/OrderPayout"
       required:
         - "@type"
         - payouts
@@ -2272,17 +2283,6 @@ components:
             - ON_CHAIN_ORDER
       required:
         - "@type"
-
-    EthOrderPayout:
-      type: object
-      properties:
-        account:
-          $ref: "#/components/schemas/UnionAddress"
-        value:
-          $ref: "#/components/schemas/BigInteger"
-      required:
-        - account
-        - value
 
     Asset:
       type: object
@@ -2515,27 +2515,16 @@ components:
           type: array
           default: [ ]
           items:
-            $ref: "#/components/schemas/FlowOrderPayout"
+            $ref: "#/components/schemas/OrderPayout"
         originFees:
           type: array
           default: [ ]
           items:
-            $ref: "#/components/schemas/FlowOrderPayout"
+            $ref: "#/components/schemas/OrderPayout"
       required:
         - "@type"
         - payouts
         - originFees
-
-    FlowOrderPayout:
-      type: object
-      properties:
-        account:
-          $ref: "#/components/schemas/UnionAddress"
-        value:
-          $ref: "#/components/schemas/BigInteger"
-      required:
-        - account
-        - value
 
     #################### Referenced Types ####################
 

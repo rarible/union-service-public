@@ -5,7 +5,7 @@ import com.rarible.protocol.dto.PayInfoDto
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.FlowOrderDataV1Dto
-import com.rarible.protocol.union.dto.FlowOrderPayoutDto
+import com.rarible.protocol.union.dto.OrderPayoutDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.PlatformDto
@@ -46,8 +46,8 @@ object FlowOrderConverter {
         )
     }
 
-    private fun convert(source: PayInfoDto, blockchain: BlockchainDto): FlowOrderPayoutDto {
-        return FlowOrderPayoutDto(
+    private fun convert(source: PayInfoDto, blockchain: BlockchainDto): OrderPayoutDto {
+        return OrderPayoutDto(
             account = UnionAddressConverter.convert(source.account, blockchain),
             value = source.value.toBigInteger()
         )
