@@ -14,7 +14,11 @@ class ReconciliationTaskHandler(
     override val type = "ENRICHMENT_RECONCILIATION_JOB"
 
     override fun getAutorunParams(): List<RunTask> {
-        return BlockchainDto.values().map { RunTask(it.name) }
+        return listOf(
+            RunTask(BlockchainDto.FLOW.name),
+            //RunTask(BlockchainDto.POLYGON.name), // TODO Temporary disabled
+            RunTask(BlockchainDto.ETHEREUM.name)
+        )
     }
 
     override fun runLongTask(from: String?, param: String): Flow<String> {
