@@ -1,6 +1,8 @@
 package com.rarible.protocol.union.api.controller.test
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.rarible.core.application.ApplicationEnvironmentInfo
+import com.rarible.core.kafka.RaribleKafkaProducer
 import com.rarible.protocol.flow.nft.api.client.FlowNftCollectionControllerApi
 import com.rarible.protocol.flow.nft.api.client.FlowNftItemControllerApi
 import com.rarible.protocol.flow.nft.api.client.FlowNftOrderActivityControllerApi
@@ -21,6 +23,8 @@ import com.rarible.protocol.union.api.client.OrderControllerApi
 import com.rarible.protocol.union.api.client.OwnershipControllerApi
 import com.rarible.protocol.union.api.client.SignatureControllerApi
 import com.rarible.protocol.union.api.client.UnionApiClientFactory
+import com.rarible.protocol.union.dto.ItemEventDto
+import com.rarible.protocol.union.dto.OwnershipEventDto
 import io.mockk.mockk
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.web.server.LocalServerPort
@@ -28,6 +32,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Lazy
 import org.springframework.context.annotation.Primary
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
 import org.springframework.web.client.RestTemplate
 import java.net.URI
 
@@ -36,19 +41,37 @@ import java.net.URI
 class TestApiConfiguration {
 
     @Bean
+    @Qualifier("testLocalhostUri")
+    fun testLocalhostUri(@LocalServerPort port: Int): URI {
+        return URI("http://localhost:${port}")
+    }
+
+    @Bean
     fun applicationEnvironmentInfo(): ApplicationEnvironmentInfo {
         return ApplicationEnvironmentInfo("test", "test.com")
     }
 
     @Bean
-    fun testRestTemplate(): RestTemplate {
-        return RestTemplate()
+    fun testRestTemplate(mapper: ObjectMapper): RestTemplate {
+        val converter = MappingJackson2HttpMessageConverter()
+        converter.setObjectMapper(mapper)
+        val template = RestTemplate()
+        template.messageConverters.add(0, converter)
+        return template
     }
 
     @Bean
     @Primary
-    fun testUnionApiClientFactory(@LocalServerPort port: Int): UnionApiClientFactory {
-        return UnionApiClientFactory(FixedUnionApiServiceUriProvider(URI("http://localhost:${port}")))
+    fun testItemEventProducer(): RaribleKafkaProducer<ItemEventDto> = mockk()
+
+    @Bean
+    @Primary
+    fun testOwnershipEventProducer(): RaribleKafkaProducer<OwnershipEventDto> = mockk()
+
+    @Bean
+    @Primary
+    fun testUnionApiClientFactory(@Qualifier("testLocalhostUri") uri: URI): UnionApiClientFactory {
+        return UnionApiClientFactory(FixedUnionApiServiceUriProvider(uri))
     }
 
     @Bean

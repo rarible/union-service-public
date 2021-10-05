@@ -2,71 +2,83 @@ package com.rarible.protocol.union.api.controller
 
 import com.rarible.core.common.nowMillis
 import com.rarible.core.test.data.randomString
-import com.rarible.protocol.dto.FlowNftItemsDto
-import com.rarible.protocol.dto.NftItemsDto
 import com.rarible.protocol.union.api.client.ItemControllerApi
 import com.rarible.protocol.union.api.configuration.PageSize
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
+import com.rarible.protocol.union.core.ethereum.converter.EthItemConverter
+import com.rarible.protocol.union.core.ethereum.converter.EthOrderConverter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.parser.ItemIdParser
+import com.rarible.protocol.union.enrichment.converter.ShortItemConverter
+import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
+import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.test.data.randomEthAddress
 import com.rarible.protocol.union.test.data.randomEthItemId
 import com.rarible.protocol.union.test.data.randomEthNftItemDto
+import com.rarible.protocol.union.test.data.randomEthV2OrderDto
 import com.rarible.protocol.union.test.data.randomFlowAddress
 import com.rarible.protocol.union.test.data.randomFlowItemIdFullValue
 import com.rarible.protocol.union.test.data.randomFlowNftItemDto
-import com.rarible.protocol.union.test.data.randomPolygonAddress
 import io.mockk.coEvery
 import io.mockk.verify
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.reactive.awaitFirst
+import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import reactor.core.publisher.Mono
-import reactor.kotlin.core.publisher.toMono
+import java.math.BigInteger
 
 @FlowPreview
 @IntegrationTest
-@Disabled // TODO enable after enrichment implemented
 class ItemControllerFt : AbstractIntegrationTest() {
 
     private val continuation: String? = null
     private val size = PageSize.ITEM.default
 
-
     @Autowired
     lateinit var itemControllerClient: ItemControllerApi
 
+    @Autowired
+    lateinit var enrichmentItemService: EnrichmentItemService
+
     @Test
-    fun `get item by id - ethereum`() = runBlocking<Unit> {
-        val itemIdFull = randomEthItemId().fullId()
-        val itemId = ItemIdParser.parseFull(itemIdFull)
-        val item = randomEthNftItemDto(itemId)
+    fun `get item by id - ethereum, enriched`() = runBlocking<Unit> {
+        // Enriched item
+        val ethItemId = randomEthItemId()
+        val ethItem = randomEthNftItemDto(ethItemId)
+        val ethUnionItem = EthItemConverter.convert(ethItem, ethItemId.blockchain)
+        val ethOrder = randomEthV2OrderDto(ethItemId)
+        val ethUnionOrder = EthOrderConverter.convert(ethOrder, ethItemId.blockchain)
+        val ethShortItem = ShortItemConverter.convert(ethUnionItem)
+            .copy(bestSellOrder = ShortOrderConverter.convert(ethUnionOrder))
+        enrichmentItemService.save(ethShortItem)
 
-        coEvery { testEthereumItemApi.getNftItemById(itemId.value) } returns item.toMono()
+        ethereumOrderControllerApiMock.mockGetById(ethOrder)
+        ethereumItemControllerApiMock.mockGetNftItemById(ethItemId, ethItem)
 
-        val unionItem = itemControllerClient.getItemById(itemIdFull).awaitFirst()
+        val result = itemControllerClient.getItemById(ethItemId.fullId()).awaitFirst()
 
-        assertThat(unionItem.id.value).isEqualTo(itemId.value)
-        assertThat(unionItem.id.blockchain).isEqualTo(BlockchainDto.ETHEREUM)
+        assertThat(result.id).isEqualTo(ethItemId)
+        assertThat(result.id.blockchain).isEqualTo(BlockchainDto.ETHEREUM)
+        assertThat(result.bestSellOrder).isEqualTo(ethUnionOrder)
     }
 
     @Test
-    fun `get item by id - flow`() = runBlocking<Unit> {
+    fun `get item by id - flow, not enriched`() = runBlocking<Unit> {
         val itemIdFull = randomFlowItemIdFullValue()
         val itemId = ItemIdParser.parseFull(itemIdFull)
         val item = randomFlowNftItemDto(itemId)
 
-        coEvery { testFlowItemApi.getNftItemById(itemId.value) } returns item.toMono()
+        flowItemControllerApiMock.mockGetNftItemById(itemId, item)
 
-        val unionItem = itemControllerClient.getItemById(itemIdFull).awaitFirst()
+        val result = itemControllerClient.getItemById(itemIdFull).awaitFirst()
 
-        assertThat(unionItem.id.value).isEqualTo(itemId.value)
-        assertThat(unionItem.id.blockchain).isEqualTo(BlockchainDto.FLOW)
+        assertThat(result.id.value).isEqualTo(itemId.value)
+        assertThat(result.id.blockchain).isEqualTo(BlockchainDto.FLOW)
     }
 
     @Test
@@ -76,7 +88,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
 
         coEvery { testEthereumItemApi.resetNftItemMetaById(itemId.value) } returns Mono.first()
 
-        itemControllerClient.getItemById(itemIdFull).awaitFirst()
+        itemControllerClient.resetItemMeta(itemIdFull).awaitFirstOrNull()
 
         verify(exactly = 1) { testEthereumItemApi.resetNftItemMetaById(itemId.value) }
     }
@@ -97,161 +109,136 @@ class ItemControllerFt : AbstractIntegrationTest() {
     */
 
     @Test
-    fun `get items by collection - ethereum`() = runBlocking<Unit> {
-        val ethCollectionId = randomEthAddress()
-        val item = randomEthNftItemDto()
+    fun `get items by collection - ethereum, all enriched`() = runBlocking<Unit> {
+        // Enriched item
+        val ethItemId = randomEthItemId()
+        val ethItem = randomEthNftItemDto(ethItemId)
+        val ethUnionItem = EthItemConverter.convert(ethItem, ethItemId.blockchain)
+        val ethOrder = randomEthV2OrderDto(ethItemId)
+        val ethUnionOrder = EthOrderConverter.convert(ethOrder, ethItemId.blockchain)
+        val ethShortItem = ShortItemConverter.convert(ethUnionItem)
+            .copy(bestBidOrder = ShortOrderConverter.convert(ethUnionOrder))
+        enrichmentItemService.save(ethShortItem)
 
-        coEvery {
-            testEthereumItemApi.getNftItemsByCollection(ethCollectionId.value, continuation, size)
-        } returns NftItemsDto(1, null, listOf(item)).toMono()
+        val ethCollectionId = randomEthAddress()
+
+        ethereumOrderControllerApiMock.mockGetByIds(ethOrder)
+        ethereumItemControllerApiMock.mockGetNftOrderItemsByCollection(
+            ethCollectionId.value, continuation, size, ethItem
+        )
 
         val items = itemControllerClient.getItemsByCollection(
             ethCollectionId.fullId(), continuation, size
         ).awaitFirst()
 
-        val ethItem = items.items[0]
-        assertThat(ethItem.id.value).isEqualTo(item.id)
+        assertThat(items.items).hasSize(1)
+        val result = items.items[0]
+
+        assertThat(result.id).isEqualTo(ethItemId)
+        assertThat(result.id.blockchain).isEqualTo(BlockchainDto.ETHEREUM)
+        assertThat(result.bestBidOrder).isEqualTo(ethUnionOrder)
     }
 
     @Test
-    fun `get items by collection - polygon`() = runBlocking<Unit> {
-        val polyCollectionId = randomPolygonAddress()
-        val item = randomEthNftItemDto()
-
-        coEvery {
-            testPolygonItemApi.getNftItemsByCollection(polyCollectionId.value, continuation, size)
-        } returns NftItemsDto(1, null, listOf(item)).toMono()
-
-        val items = itemControllerClient.getItemsByCollection(
-            polyCollectionId.fullId(), continuation, size
-        ).awaitFirst()
-
-        val polyItem = items.items[0]
-        assertThat(polyItem.id.value).isEqualTo(item.id)
-    }
-
-    @Test
-    fun `get items by collection - flow`() = runBlocking<Unit> {
+    fun `get items by collection - flow, nothing enriched`() = runBlocking<Unit> {
         val flowCollectionId = randomFlowAddress()
         val item = randomFlowNftItemDto()
 
-        coEvery {
-            testFlowItemApi.getNftItemsByCollection(flowCollectionId.value, continuation, size)
-        } returns FlowNftItemsDto(1, null, listOf(item)).toMono()
+        flowItemControllerApiMock.mockGetNftOrderItemsByCollection(flowCollectionId.value, continuation, size, item)
 
         val items = itemControllerClient.getItemsByCollection(
             flowCollectionId.fullId(), continuation, size
         ).awaitFirst()
 
-        val flowItem = items.items[0]
-        assertThat(flowItem.id.value).isEqualTo(item.id)
+        val result = items.items[0]
+        assertThat(result.id.value).isEqualTo(item.id)
     }
 
     @Test
-    fun `get items by owner - ethereum`() = runBlocking<Unit> {
-        val ethOwnerId = randomEthAddress()
-        val item = randomEthNftItemDto()
+    fun `get items by owner - ethereum, enriched partially`() = runBlocking<Unit> {
+        // Enriched item
+        val ethItemId = randomEthItemId()
+        val ethItem = randomEthNftItemDto(ethItemId).copy(date = nowMillis())
+        val ethUnionItem = EthItemConverter.convert(ethItem, ethItemId.blockchain)
+        val ethShortItem = ShortItemConverter.convert(ethUnionItem)
+            .copy(totalStock = 10.toBigInteger(), sellers = 2)
+        enrichmentItemService.save(ethShortItem)
 
-        coEvery {
-            testEthereumItemApi.getNftItemsByOwner(ethOwnerId.value, continuation, size)
-        } returns NftItemsDto(1, null, listOf(item)).toMono()
+        val ethOwnerId = randomEthAddress()
+        val emptyEthItem = randomEthNftItemDto().copy(date = ethItem.date!!.minusSeconds(1))
+
+        ethereumItemControllerApiMock.mockGetNftOrderItemsByOwner(
+            ethOwnerId.value, continuation, size, ethItem, emptyEthItem
+        )
 
         val items = itemControllerClient.getItemsByOwner(
             ethOwnerId.fullId(), continuation, size
         ).awaitFirst()
 
-        val ethItem = items.items[0]
-        assertThat(ethItem.id.value).isEqualTo(item.id)
+        assertThat(items.items).hasSize(2)
+        val enrichedResult = items.items[0]
+        val emptyResult = items.items[1]
+
+        assertThat(enrichedResult.id).isEqualTo(ethItemId)
+        assertThat(enrichedResult.sellers).isEqualTo(ethShortItem.sellers)
+        assertThat(enrichedResult.totalStock).isEqualTo(ethShortItem.totalStock)
+
+        assertThat(emptyResult.id.value).isEqualTo(emptyEthItem.id)
+        assertThat(emptyResult.sellers).isEqualTo(0)
+        assertThat(emptyResult.totalStock).isEqualTo(BigInteger.ZERO)
     }
 
     @Test
-    fun `get items by owner - polygon`() = runBlocking<Unit> {
-        val polyOwnerId = randomPolygonAddress()
-        val item = randomEthNftItemDto()
-
-        coEvery {
-            testPolygonItemApi.getNftItemsByOwner(polyOwnerId.value, continuation, size)
-        } returns NftItemsDto(1, null, listOf(item)).toMono()
-
-        val items = itemControllerClient.getItemsByOwner(
-            polyOwnerId.fullId(), continuation, size
-        ).awaitFirst()
-
-        val polyItem = items.items[0]
-        assertThat(polyItem.id.value).isEqualTo(item.id)
-    }
-
-    @Test
-    fun `get items by owner - flow`() = runBlocking<Unit> {
+    fun `get items by owner - flow, nothing enriched`() = runBlocking<Unit> {
         val flowOwnerId = randomFlowAddress()
-        val item = randomFlowNftItemDto()
+        val flowItem = randomFlowNftItemDto()
 
-        coEvery {
-            testFlowItemApi.getNftItemsByOwner(flowOwnerId.value, continuation, size)
-        } returns FlowNftItemsDto(1, null, listOf(item)).toMono()
+        flowItemControllerApiMock.mockGetNftOrderItemsByOwner(
+            flowOwnerId.value, continuation, size, flowItem
+        )
 
         val items = itemControllerClient.getItemsByOwner(
             flowOwnerId.fullId(), continuation, size
         ).awaitFirst()
 
-        val flowItem = items.items[0]
-        assertThat(flowItem.id.value).isEqualTo(item.id)
+        val result = items.items[0]
+        assertThat(result.id.value).isEqualTo(flowItem.id)
     }
 
     @Test
-    fun `get items by creator - ethereum`() = runBlocking<Unit> {
+    fun `get items by creator - ethereum, nothing found`() = runBlocking<Unit> {
         val ethCreatorId = randomEthAddress()
-        val item = randomEthNftItemDto()
 
-        coEvery {
-            testEthereumItemApi.getNftItemsByCreator(ethCreatorId.value, continuation, size)
-        } returns NftItemsDto(1, null, listOf(item)).toMono()
+        ethereumItemControllerApiMock.mockGetNftOrderItemsByCreator(
+            ethCreatorId.value, continuation, size
+        )
 
         val items = itemControllerClient.getItemsByCreator(
             ethCreatorId.fullId(), continuation, size
         ).awaitFirst()
 
-        val ethItem = items.items[0]
-        assertThat(ethItem.id.value).isEqualTo(item.id)
+        assertThat(items.items).hasSize(0)
     }
 
     @Test
-    fun `get items by creator - polygon`() = runBlocking<Unit> {
-        val polyCreatorId = randomPolygonAddress()
-        val item = randomEthNftItemDto()
-
-        coEvery {
-            testPolygonItemApi.getNftItemsByCreator(polyCreatorId.value, continuation, size)
-        } returns NftItemsDto(1, null, listOf(item)).toMono()
-
-        val items = itemControllerClient.getItemsByCreator(
-            polyCreatorId.fullId(), continuation, size
-        ).awaitFirst()
-
-        val polyItem = items.items[0]
-        assertThat(polyItem.id.value).isEqualTo(item.id)
-    }
-
-    @Test
-    fun `get items by creator - flow`() = runBlocking<Unit> {
+    fun `get items by creator - flow, nothing enriched`() = runBlocking<Unit> {
         val flowCreatorId = randomFlowAddress()
-        val item = randomFlowNftItemDto()
+        val flowItem = randomFlowNftItemDto()
 
-        coEvery {
-            testFlowItemApi.getNftItemsByCreator(flowCreatorId.value, continuation, size)
-        } returns FlowNftItemsDto(1, null, listOf(item)).toMono()
+        flowItemControllerApiMock.mockGetNftOrderItemsByCreator(
+            flowCreatorId.value, continuation, size, flowItem
+        )
 
         val items = itemControllerClient.getItemsByCreator(
             flowCreatorId.fullId(), continuation, size
         ).awaitFirst()
 
-        val flowItem = items.items[0]
-        assertThat(flowItem.id.value).isEqualTo(item.id)
+        val result = items.items[0]
+        assertThat(result.id.value).isEqualTo(flowItem.id)
     }
 
     @Test
-    fun `get all items`() = runBlocking<Unit> {
-
+    fun `get all items - trimmed to size`() = runBlocking<Unit> {
         val blockchains = listOf(BlockchainDto.ETHEREUM, BlockchainDto.FLOW)
         val continuation = "${nowMillis()}_${randomString()}"
         val showDeleted = true
@@ -259,22 +246,15 @@ class ItemControllerFt : AbstractIntegrationTest() {
         val lastUpdatedFrom = nowMillis().minusSeconds(120).toEpochMilli()
         val lastUpdatedTo = nowMillis().plusSeconds(120).toEpochMilli()
 
-        val flowItems = listOf(randomFlowNftItemDto(), randomFlowNftItemDto())
-        val ethItems = listOf(randomEthNftItemDto(), randomEthNftItemDto())
+        flowItemControllerApiMock.mockGetNftAllItems(
+            continuation, size, showDeleted, lastUpdatedFrom, lastUpdatedTo,
+            randomFlowNftItemDto(), randomFlowNftItemDto()
+        )
 
-        coEvery {
-            testFlowItemApi.getNftAllItems(continuation, size, showDeleted)
-        } returns FlowNftItemsDto(2, null, flowItems).toMono()
-
-        coEvery {
-            testEthereumItemApi.getNftAllItems(
-                continuation,
-                size,
-                showDeleted,
-                lastUpdatedFrom,
-                lastUpdatedTo
-            )
-        } returns NftItemsDto(2, null, ethItems).toMono()
+        ethereumItemControllerApiMock.mockGetNftAllItems(
+            continuation, size, showDeleted, lastUpdatedFrom, lastUpdatedTo,
+            randomEthNftItemDto(), randomEthNftItemDto()
+        )
 
         val items = itemControllerClient.getAllItems(
             blockchains, continuation, size, showDeleted, lastUpdatedFrom, lastUpdatedTo

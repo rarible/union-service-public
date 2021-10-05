@@ -2,35 +2,35 @@ package com.rarible.protocol.union.api.controller
 
 import com.rarible.core.common.nowMillis
 import com.rarible.core.test.data.randomString
-import com.rarible.protocol.dto.FlowNftOwnershipsDto
-import com.rarible.protocol.dto.NftOwnershipsDto
 import com.rarible.protocol.union.api.client.OwnershipControllerApi
 import com.rarible.protocol.union.api.configuration.PageSize
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
+import com.rarible.protocol.union.core.ethereum.converter.EthOrderConverter
+import com.rarible.protocol.union.core.ethereum.converter.EthOwnershipConverter
+import com.rarible.protocol.union.core.flow.converter.FlowOrderConverter
+import com.rarible.protocol.union.core.flow.converter.FlowOwnershipConverter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.parser.OwnershipIdParser
-import com.rarible.protocol.union.test.data.randomEthAddress
+import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
+import com.rarible.protocol.union.enrichment.converter.ShortOwnershipConverter
+import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
+import com.rarible.protocol.union.test.data.randomEthItemId
 import com.rarible.protocol.union.test.data.randomEthOwnershipDto
 import com.rarible.protocol.union.test.data.randomEthOwnershipId
-import com.rarible.protocol.union.test.data.randomFlowAddress
+import com.rarible.protocol.union.test.data.randomEthV2OrderDto
+import com.rarible.protocol.union.test.data.randomFlowItemId
 import com.rarible.protocol.union.test.data.randomFlowNftOwnershipDto
-import com.rarible.protocol.union.test.data.randomFlowOwnershipId
-import com.rarible.protocol.union.test.data.randomPolygonAddress
-import com.rarible.protocol.union.test.data.randomPolygonOwnershipId
-import io.mockk.coEvery
+import com.rarible.protocol.union.test.data.randomFlowV1OrderDto
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import reactor.kotlin.core.publisher.toMono
 
 @FlowPreview
 @IntegrationTest
-@Disabled // TODO enable after enrichment implemented
 class OwnershipControllerFt : AbstractIntegrationTest() {
 
     private val continuation = null
@@ -39,13 +39,16 @@ class OwnershipControllerFt : AbstractIntegrationTest() {
     @Autowired
     lateinit var ownershipControllerClient: OwnershipControllerApi
 
+    @Autowired
+    lateinit var enrichmentOwnershipService: EnrichmentOwnershipService
+
     @Test
-    fun `get ownership by id - ethereum`() = runBlocking<Unit> {
+    fun `get ownership by id - ethereum, not enriched`() = runBlocking<Unit> {
         val ownershipIdFull = randomEthOwnershipId().fullId()
         val ownershipId = OwnershipIdParser.parseFull(ownershipIdFull)
         val ownership = randomEthOwnershipDto(ownershipId)
 
-        coEvery { testEthereumOwnershipApi.getNftOwnershipById(ownershipId.value) } returns ownership.toMono()
+        ethereumOwnershipControllerApiMock.mockGetNftOwnershipById(ownershipId, ownership)
 
         val unionOwnership = ownershipControllerClient.getOwnershipById(ownershipIdFull).awaitFirst()
 
@@ -54,106 +57,87 @@ class OwnershipControllerFt : AbstractIntegrationTest() {
     }
 
     @Test
-    fun `get ownership by id - polygon`() = runBlocking<Unit> {
-        val ownershipIdFull = randomPolygonOwnershipId().fullId()
-        val ownershipId = OwnershipIdParser.parseFull(ownershipIdFull)
-        val ownership = randomEthOwnershipDto(ownershipId)
+    fun `get ownership by id - flow, enriched`() = runBlocking<Unit> {
+        // Enriched ownership
+        val flowItemId = randomFlowItemId()
+        val flowOwnership = randomFlowNftOwnershipDto(flowItemId)
+        val flowUnionOwnership = FlowOwnershipConverter.convert(flowOwnership, flowItemId.blockchain)
+        val flowOrder = randomFlowV1OrderDto(flowItemId)
+        val flowUnionOrder = FlowOrderConverter.convert(flowOrder, flowItemId.blockchain)
+        val flowShortOwnership = ShortOwnershipConverter.convert(flowUnionOwnership)
+            .copy(bestSellOrder = ShortOrderConverter.convert(flowUnionOrder))
+        enrichmentOwnershipService.save(flowShortOwnership)
 
-        coEvery { testPolygonOwnershipApi.getNftOwnershipById(ownershipId.value) } returns ownership.toMono()
+        flowOwnershipControllerApiMock.mockGetNftOwnershipById(flowUnionOwnership.id, flowOwnership)
+        flowOrderControllerApiMock.mockGetById(flowOrder)
 
-        val unionOwnership = ownershipControllerClient.getOwnershipById(ownershipIdFull).awaitFirst()
+        val result = ownershipControllerClient.getOwnershipById(flowUnionOwnership.id.fullId()).awaitFirst()
 
-        assertThat(unionOwnership.id.value).isEqualTo(ownershipId.value)
-        assertThat(unionOwnership.id.blockchain).isEqualTo(BlockchainDto.POLYGON)
+        assertThat(result.id).isEqualTo(flowUnionOwnership.id)
+        assertThat(result.bestSellOrder).isEqualTo(flowUnionOrder)
+        assertThat(result.id.blockchain).isEqualTo(BlockchainDto.FLOW)
     }
 
     @Test
-    fun `get ownership by id - flow`() = runBlocking<Unit> {
-        val ownershipIdFull = randomFlowOwnershipId().fullId()
-        val ownershipId = OwnershipIdParser.parseFull(ownershipIdFull)
-        val ownership = randomFlowNftOwnershipDto(ownershipId)
+    fun `get ownerships by item - ethereum, partially enriched`() = runBlocking<Unit> {
+        // Enriched ownership
+        val ethItemId = randomEthItemId()
+        val ethOwnership = randomEthOwnershipDto(ethItemId).copy(date = nowMillis())
+        val ethUnionOwnership = EthOwnershipConverter.convert(ethOwnership, ethItemId.blockchain)
+        val ethOrder = randomEthV2OrderDto(ethItemId)
+        val ethUnionOrder = EthOrderConverter.convert(ethOrder, ethItemId.blockchain)
+        val ethShortOwnership = ShortOwnershipConverter.convert(ethUnionOwnership)
+            .copy(bestSellOrder = ShortOrderConverter.convert(ethUnionOrder))
+        enrichmentOwnershipService.save(ethShortOwnership)
 
-        coEvery { testFlowOwnershipApi.getNftOwnershipById(ownershipId.value) } returns ownership.toMono()
+        val emptyEthOwnership = randomEthOwnershipDto(ethItemId)
 
-        val unionOwnership = ownershipControllerClient.getOwnershipById(ownershipIdFull).awaitFirst()
-
-        assertThat(unionOwnership.id.value).isEqualTo(ownershipId.value)
-        assertThat(unionOwnership.id.blockchain).isEqualTo(BlockchainDto.FLOW)
-    }
-
-    @Test
-    fun `get ownerships by item - ethereum`() = runBlocking<Unit> {
-        val ethItemId = randomEthAddress()
-        val ownership = randomEthOwnershipDto()
-        val tokenId = ownership.tokenId.toString()
-
-        coEvery {
-            testEthereumOwnershipApi.getNftOwnershipsByItem(ethItemId.value, tokenId, continuation, size)
-        } returns NftOwnershipsDto(1, null, listOf(ownership)).toMono()
+        ethereumOrderControllerApiMock.mockGetByIds(ethOrder)
+        ethereumOwnershipControllerApiMock.mockGetNftOwnershipsByItem(
+            ethItemId, continuation, size, emptyEthOwnership, ethOwnership
+        )
 
         val ownerships = ownershipControllerClient.getOwnershipsByItem(
-            ethItemId.fullId(), tokenId, continuation, size
+            ethItemId.token.fullId(), ethItemId.tokenId.toString(), continuation, size
         ).awaitFirst()
 
-        val ethOwnership = ownerships.ownerships[0]
-        assertThat(ethOwnership.id.value).isEqualTo(ownership.id)
+        val resultEmptyOwnership = ownerships.ownerships[0]
+        val resultEnrichedOwnership = ownerships.ownerships[1]
+
+        assertThat(resultEmptyOwnership.id.value).isEqualTo(emptyEthOwnership.id)
+        assertThat(resultEmptyOwnership.bestSellOrder).isEqualTo(null)
+
+        assertThat(resultEnrichedOwnership.id).isEqualTo(ethUnionOwnership.id)
+        assertThat(resultEnrichedOwnership.bestSellOrder).isEqualTo(ethUnionOrder)
     }
 
     @Test
-    fun `get ownerships by item - polygon`() = runBlocking<Unit> {
-        val polyItemId = randomPolygonAddress()
-        val ownership = randomEthOwnershipDto()
-        val tokenId = ownership.tokenId.toString()
+    fun `get ownerships by item - flow, nothing found`() = runBlocking<Unit> {
+        val flowItemId = randomFlowItemId()
 
-        coEvery {
-            testPolygonOwnershipApi.getNftOwnershipsByItem(polyItemId.value, tokenId, continuation, size)
-        } returns NftOwnershipsDto(1, null, listOf(ownership)).toMono()
+        flowOwnershipControllerApiMock.mockGetNftOwnershipsByItem(
+            flowItemId, continuation, size
+        )
 
         val ownerships = ownershipControllerClient.getOwnershipsByItem(
-            polyItemId.fullId(), tokenId, continuation, size
+            flowItemId.token.fullId(), flowItemId.tokenId.toString(), continuation, size
         ).awaitFirst()
 
-        val polyOwnership = ownerships.ownerships[0]
-        assertThat(polyOwnership.id.value).isEqualTo(ownership.id)
+        assertThat(ownerships.ownerships).hasSize(0)
     }
 
     @Test
-    fun `get ownerships by item - flow`() = runBlocking<Unit> {
-        val flowItemId = randomFlowAddress()
-        val ownership = randomFlowNftOwnershipDto()
-        val tokenId = ownership.tokenId.toString()
-
-        coEvery {
-            testFlowOwnershipApi.getNftOwnershipsByItem(flowItemId.value, tokenId, continuation, size)
-        } returns FlowNftOwnershipsDto(1, null, listOf(ownership)).toMono()
-
-        val ownerships = ownershipControllerClient.getOwnershipsByItem(
-            flowItemId.fullId(), tokenId, continuation, size
-        ).awaitFirst()
-
-        val flowOwnership = ownerships.ownerships[0]
-        assertThat(flowOwnership.id.value).isEqualTo(ownership.id)
-    }
-
-    @Test
-    fun `get all ownerships`() = runBlocking<Unit> {
+    fun `get all ownerships - trimmed to size`() = runBlocking<Unit> {
         val blockchains = listOf(BlockchainDto.ETHEREUM, BlockchainDto.FLOW)
         val continuation = "${nowMillis()}_${randomString()}"
         val size = 3
 
-        val flowOwnerships = listOf(randomFlowNftOwnershipDto(), randomFlowNftOwnershipDto())
-        val ethOwnerships = listOf(randomEthOwnershipDto(), randomEthOwnershipDto(), randomEthOwnershipDto())
-
-        coEvery {
-            testFlowOwnershipApi.getNftAllOwnerships(continuation, size)
-        } returns FlowNftOwnershipsDto(2, null, flowOwnerships).toMono()
-
-        coEvery {
-            testEthereumOwnershipApi.getNftAllOwnerships(
-                continuation,
-                size
-            )
-        } returns NftOwnershipsDto(3, null, ethOwnerships).toMono()
+        flowOwnershipControllerApiMock.mockGetNftAllOwnerships(
+            continuation, size, randomFlowNftOwnershipDto(), randomFlowNftOwnershipDto()
+        )
+        ethereumOwnershipControllerApiMock.mockGetNftAllOwnerships(
+            continuation, size, randomEthOwnershipDto(), randomEthOwnershipDto(), randomEthOwnershipDto()
+        )
 
         val ownerships = ownershipControllerClient.getAllOwnerships(
             blockchains, continuation, size
@@ -162,5 +146,44 @@ class OwnershipControllerFt : AbstractIntegrationTest() {
         assertThat(ownerships.ownerships).hasSize(3)
         assertThat(ownerships.total).isEqualTo(5)
         assertThat(ownerships.continuation).isNotNull()
+    }
+
+    @Test
+    fun `get all ownerships - enriched`() = runBlocking<Unit> {
+        val blockchains = listOf(BlockchainDto.ETHEREUM, BlockchainDto.FLOW)
+        val size = 3
+
+        // Eth ownership
+        val ethItemId = randomEthItemId()
+        val ethOwnership = randomEthOwnershipDto(ethItemId).copy(date = nowMillis())
+        val ethUnionOwnership = EthOwnershipConverter.convert(ethOwnership, ethItemId.blockchain)
+        val ethOrder = randomEthV2OrderDto(ethItemId)
+        val ethUnionOrder = EthOrderConverter.convert(ethOrder, ethItemId.blockchain)
+        val ethShortOwnership = ShortOwnershipConverter.convert(ethUnionOwnership)
+            .copy(bestSellOrder = ShortOrderConverter.convert(ethUnionOrder))
+        enrichmentOwnershipService.save(ethShortOwnership)
+
+        // Flow ownership
+        val flowItemId = randomFlowItemId()
+        val flowOwnership = randomFlowNftOwnershipDto(flowItemId).copy(createdAt = ethOwnership.date.minusSeconds(1))
+        val flowUnionOwnership = FlowOwnershipConverter.convert(flowOwnership, flowItemId.blockchain)
+        val flowOrder = randomFlowV1OrderDto(flowItemId)
+        val flowUnionOrder = FlowOrderConverter.convert(flowOrder, flowItemId.blockchain)
+        val flowShortOwnership = ShortOwnershipConverter.convert(flowUnionOwnership)
+            .copy(bestSellOrder = ShortOrderConverter.convert(flowUnionOrder))
+        enrichmentOwnershipService.save(flowShortOwnership)
+
+        ethereumOwnershipControllerApiMock.mockGetNftAllOwnerships(continuation, size, ethOwnership)
+        flowOwnershipControllerApiMock.mockGetNftAllOwnerships(continuation, size, flowOwnership)
+        ethereumOrderControllerApiMock.mockGetByIds(ethOrder)
+        flowOrderControllerApiMock.mockGetById(flowOrder)
+
+        val ownerships = ownershipControllerClient.getAllOwnerships(
+            blockchains, continuation, size
+        ).awaitFirst()
+
+        assertThat(ownerships.ownerships).hasSize(2)
+        assertThat(ownerships.ownerships[0].bestSellOrder).isEqualTo(ethUnionOrder)
+        assertThat(ownerships.ownerships[1].bestSellOrder).isEqualTo(flowUnionOrder)
     }
 }
