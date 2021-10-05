@@ -1819,7 +1819,7 @@ components:
 
     OrderMatchSell:
       type: object
-      required: [nft, payment, price, type]
+      required: [nft, payment, price, type, buyer, seller]
       properties:
         "@type":
           type: string
@@ -1829,6 +1829,10 @@ components:
           $ref: "#/components/schemas/Asset"
         payment:
           $ref: "#/components/schemas/Asset"
+        buyer:
+          $ref: "#/components/schemas/UnionAddress"
+        seller:
+          $ref: "#/components/schemas/UnionAddress"
         price:
           $ref: "#/components/schemas/BigDecimal"
         priceUsd:

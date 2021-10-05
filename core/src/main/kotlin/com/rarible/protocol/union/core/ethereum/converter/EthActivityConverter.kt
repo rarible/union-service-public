@@ -48,24 +48,24 @@ object EthActivityConverter {
         return when (source) {
             is OrderActivityMatchDto -> {
                 val type = source.type
-                val leftAsset = source.left.asset
-                val rightAsset = source.right.asset
-                if (type != null && leftAsset.nft && rightAsset.payment) {
+                val leftSide = source.left
+                val rightSide = source.right
+                if (type != null && leftSide.asset.nft && rightSide.asset.payment) {
                     activityToSell(
                         activityId = activityId,
                         source = source,
                         blockchain = blockchain,
-                        nft = leftAsset,
-                        payment = rightAsset,
+                        nft = leftSide,
+                        payment = rightSide,
                         type = convert(type)
                     )
-                } else if (type != null && leftAsset.payment && rightAsset.nft) {
+                } else if (type != null && leftSide.asset.payment && rightSide.asset.nft) {
                     activityToSell(
                         activityId = activityId,
                         source = source,
                         blockchain = blockchain,
-                        nft = rightAsset,
-                        payment = leftAsset,
+                        nft = rightSide,
+                        payment = leftSide,
                         type = convert(type)
                     )
                 } else {
@@ -191,8 +191,8 @@ object EthActivityConverter {
     private fun activityToSell(
         source: OrderActivityMatchDto,
         blockchain: BlockchainDto,
-        nft: AssetDto,
-        payment: AssetDto,
+        nft: com.rarible.protocol.dto.OrderActivityMatchSideDto,
+        payment: com.rarible.protocol.dto.OrderActivityMatchSideDto,
         type: OrderMatchSellDto.Type,
         activityId: ActivityIdDto
     ) = OrderMatchSellDto(
@@ -200,11 +200,13 @@ object EthActivityConverter {
         date = source.date,
         source = convert(source.source),
         blockchainInfo = asActivityBlockchainInfo(source),
-        nft = EthConverter.convert(nft, blockchain),
-        payment = EthConverter.convert(payment, blockchain),
+        nft = EthConverter.convert(nft.asset, blockchain),
+        payment = EthConverter.convert(payment.asset, blockchain),
+        seller = UnionAddressConverter.convert(nft.maker, blockchain),
+        buyer = UnionAddressConverter.convert(payment.maker, blockchain),
         price = source.price,
         priceUsd = source.priceUsd,
-        amountUsd = source.priceUsd?.multiply(nft.valueDecimal),
+        amountUsd = source.priceUsd?.multiply(nft.asset.valueDecimal),
         type = type
     )
 

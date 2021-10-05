@@ -4,6 +4,7 @@ import com.rarible.protocol.dto.ActivityFilterAllTypeDto
 import com.rarible.protocol.dto.ActivityFilterByCollectionTypeDto
 import com.rarible.protocol.dto.ActivityFilterByItemTypeDto
 import com.rarible.protocol.dto.ActivityFilterByUserTypeDto
+import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.BurnActivityDto
@@ -67,6 +68,8 @@ class EthActivityConverterTest {
 
         assertThat(converted.nft).isEqualTo(EthConverter.convert(left.asset, BlockchainDto.ETHEREUM))
         assertThat(converted.payment).isEqualTo(EthConverter.convert(swapDto.right.asset, BlockchainDto.ETHEREUM))
+        assertThat(converted.seller).isEqualTo(UnionAddressConverter.convert(left.maker, BlockchainDto.ETHEREUM))
+        assertThat(converted.buyer).isEqualTo(UnionAddressConverter.convert(swapDto.right.maker, BlockchainDto.ETHEREUM))
         assertThat(converted.price).isEqualTo(swapDto.price)
         assertThat(converted.priceUsd).isEqualTo(swapDto.priceUsd)
         assertThat(converted.amountUsd).isEqualTo(swapDto.priceUsd!!.multiply(left.asset.valueDecimal))
@@ -87,6 +90,8 @@ class EthActivityConverterTest {
 
         assertThat(converted.nft).isEqualTo(EthConverter.convert(right.asset, BlockchainDto.ETHEREUM))
         assertThat(converted.payment).isEqualTo(EthConverter.convert(swapDto.left.asset, BlockchainDto.ETHEREUM))
+        assertThat(converted.seller).isEqualTo(UnionAddressConverter.convert(right.maker, BlockchainDto.ETHEREUM))
+        assertThat(converted.buyer).isEqualTo(UnionAddressConverter.convert(swapDto.left.maker, BlockchainDto.ETHEREUM))
         assertThat(converted.price).isEqualTo(swapDto.price)
         assertThat(converted.priceUsd).isEqualTo(swapDto.priceUsd)
         assertThat(converted.amountUsd).isEqualTo(swapDto.priceUsd!!.multiply(right.asset.valueDecimal))
