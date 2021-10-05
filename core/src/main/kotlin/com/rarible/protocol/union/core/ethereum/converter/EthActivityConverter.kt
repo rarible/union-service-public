@@ -140,7 +140,7 @@ object EthActivityConverter {
                 MintActivityDto(
                     id = activityId,
                     date = source.date,
-                    owners = listOf(UnionAddressConverter.convert(source.owner, blockchain)),
+                    owner = UnionAddressConverter.convert(source.owner, blockchain),
                     contract = UnionAddressConverter.convert(source.contract, blockchain),
                     tokenId = source.tokenId,
                     value = source.value,
@@ -156,7 +156,7 @@ object EthActivityConverter {
                 BurnActivityDto(
                     id = activityId,
                     date = source.date,
-                    owners = listOf(UnionAddressConverter.convert(source.owner, blockchain)),
+                    owner = UnionAddressConverter.convert(source.owner, blockchain),
                     contract = UnionAddressConverter.convert(source.contract, blockchain),
                     tokenId = source.tokenId,
                     value = source.value,
@@ -173,7 +173,7 @@ object EthActivityConverter {
                     id = activityId,
                     date = source.date,
                     from = UnionAddressConverter.convert(source.from, blockchain),
-                    owners = listOf(UnionAddressConverter.convert(source.owner, blockchain)),
+                    owner = UnionAddressConverter.convert(source.owner, blockchain),
                     contract = UnionAddressConverter.convert(source.contract, blockchain),
                     tokenId = source.tokenId,
                     value = source.value,
