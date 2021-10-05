@@ -12,11 +12,6 @@ object ItemIdSerializer : StdSerializer<ItemIdDto>(ItemIdDto::class.java) {
             gen.writeNull()
             return
         }
-        gen.writeStartObject()
-        gen.writeStringField(ItemIdDto::value.name, id.fullId())
-        provider.defaultSerializeField(ItemIdDto::blockchain.name, id.blockchain, gen)
-        provider.defaultSerializeField(ItemIdDto::token.name, id.token, gen)
-        provider.defaultSerializeField(ItemIdDto::tokenId.name, id.tokenId, gen)
-        gen.writeEndObject()
+        gen.writeString(id.fullId())
     }
 }
