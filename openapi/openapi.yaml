@@ -1131,22 +1131,8 @@ components:
     #################### Item - Union ####################
 
     ItemId:
-      type: object
-      properties:
-        value:
-          type: string
-          example: "${blockchain}:${token}:${tokenId}"
-        blockchain:
-          $ref: "#/components/schemas/Blockchain"
-        token:
-          $ref: "#/components/schemas/UnionAddress"
-        tokenId:
-          $ref: "#/components/schemas/BigInteger"
-      required:
-        - value
-        - blockchain
-        - token
-        - tokenId
+      type: string
+      example: "${blockchain}:${token}:${tokenId}"
 
     Item:
       type: object
@@ -1281,24 +1267,7 @@ components:
 
     OwnershipId:
       type: object
-      properties:
-        value:
-          type: string
-          example: "${blockchain}:${token}:${tokenId}:${owner}"
-        blockchain:
-          $ref: "#/components/schemas/Blockchain"
-        token:
-          $ref: "#/components/schemas/UnionAddress"
-        tokenId:
-          $ref: "#/components/schemas/BigInteger"
-        owner:
-          $ref: "#/components/schemas/UnionAddress"
-      required:
-        - value
-        - blockchain
-        - token
-        - tokenId
-        - owner
+      example: "${blockchain}:${token}:${tokenId}:${owner}"
 
     Ownership:
       type: object

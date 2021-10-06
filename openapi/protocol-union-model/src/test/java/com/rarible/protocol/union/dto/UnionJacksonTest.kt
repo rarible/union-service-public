@@ -57,7 +57,7 @@ class UnionJacksonTest {
 
         val serialized = mapper.writeValueAsString(itemId)
         assertEquals(
-            """{"value":"POLYGON:abc:123","blockchain":"POLYGON","token":"POLYGON:abc","tokenId":123}""",
+            "\"POLYGON:abc:123\"",
             serialized
         )
 
@@ -74,7 +74,7 @@ class UnionJacksonTest {
         )
 
         val serialized = mapper.writeValueAsString(itemId)
-        assertEquals("""{"value":"FLOW:abc:123","blockchain":"FLOW","token":"FLOW:abc","tokenId":123}""", serialized)
+        assertEquals("\"FLOW:abc:123\"", serialized)
 
         val deserialized = mapper.readValue(serialized, ItemIdDto::class.java)
         assertEquals(itemId, deserialized)
@@ -91,7 +91,7 @@ class UnionJacksonTest {
 
         val serialized = mapper.writeValueAsString(itemId)
         assertEquals(
-            """{"value":"ETHEREUM:abc:123:xyz","blockchain":"ETHEREUM","token":"ETHEREUM:abc","tokenId":123,"owner":"ETHEREUM:xyz"}""",
+            "\"ETHEREUM:abc:123:xyz\"",
             serialized
         )
 
@@ -110,7 +110,7 @@ class UnionJacksonTest {
 
         val serialized = mapper.writeValueAsString(ownershipId)
         assertEquals(
-            """{"value":"FLOW:abc:123:xyz","blockchain":"FLOW","token":"FLOW:abc","tokenId":123,"owner":"FLOW:xyz"}""",
+            "\"FLOW:abc:123:xyz\"",
             serialized
         )
 
