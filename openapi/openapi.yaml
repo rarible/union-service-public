@@ -30,6 +30,42 @@ paths:
         '500':
           $ref: "#/components/responses/ServerError"
 
+  ######################### Currency API #########################
+
+  "/v0.1/currency/rate/usd":
+    get:
+      tags:
+        - currency-controller
+      operationId: getCurrencyUsdRate
+      parameters:
+        - name: blockchain
+          in: query
+          required: true
+          schema:
+            "$ref": "#/components/schemas/Blockchain"
+        - name: address
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: at
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CurrencyUsdRate"
+        '400':
+          $ref: "#/components/responses/BadRequest"
+        '500':
+          $ref: "#/components/responses/ServerError"
+
   ######################### Item API #########################
 
   /v0.1/items/{itemId}:
@@ -1049,6 +1085,23 @@ components:
           type: string
         signature:
           type: string
+
+    ################## Currency - Union ##################
+
+    CurrencyUsdRate:
+      type: object
+      required:
+        - currencyId
+        - rate
+        - date
+      properties:
+        currencyId:
+          type: string
+        rate:
+          $ref: '#/components/schemas/BigDecimal'
+        date:
+          type: string
+          format: date-time
 
     #################### Meta - Union ####################
 

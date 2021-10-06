@@ -3,7 +3,8 @@ package com.rarible.protocol.union.api.controller
 import com.rarible.protocol.union.api.configuration.PageSize
 import com.rarible.protocol.union.core.continuation.Paging
 import com.rarible.protocol.union.core.continuation.Slice
-import com.rarible.protocol.union.core.service.ActivityServiceRouter
+import com.rarible.protocol.union.core.service.ActivityService
+import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.ActivitiesDto
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivitySortDto
@@ -20,7 +21,7 @@ import java.time.Instant
 
 @RestController
 class ActivityController(
-    private val router: ActivityServiceRouter
+    private val router: BlockchainRouter<ActivityService>
 ) : ActivityControllerApi {
 
     override suspend fun getAllActivities(

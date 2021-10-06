@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.api.client
 
-import com.rarible.protocol.client.NoopWebClientCustomizer
 import com.rarible.protocol.union.api.ApiClient
 import com.rarible.protocol.union.dto.UnionModelJacksonModule
 import com.rarible.protocol.union.dto.UnionPrimitivesJacksonModule
@@ -33,6 +32,10 @@ open class UnionApiClientFactory(
 
     fun createActivityApiClient(): ActivityControllerApi {
         return ActivityControllerApi(createApiClient())
+    }
+
+    fun createCurrencyApiClient(): CurrencyControllerApi {
+        return CurrencyControllerApi(createApiClient())
     }
 
     private fun createApiClient(): ApiClient {

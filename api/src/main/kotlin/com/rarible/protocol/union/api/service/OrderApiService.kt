@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.api.service
 
-import com.rarible.protocol.union.core.service.OrderServiceRouter
+import com.rarible.protocol.union.core.service.OrderService
+import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -10,7 +11,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class OrderApiService(
-    private val router: OrderServiceRouter
+    private val router: BlockchainRouter<OrderService>
 ) {
 
     @ExperimentalCoroutinesApi

@@ -1,5 +1,7 @@
 package com.rarible.protocol.union.core.service
 
+import com.rarible.protocol.union.core.service.router.BlockchainRouter
+import com.rarible.protocol.union.core.service.router.BlockchainService
 import com.rarible.protocol.union.dto.BlockchainDto
 import io.mockk.coEvery
 import io.mockk.mockk
@@ -13,7 +15,7 @@ class BlockchainRouterTest {
 
     @Test
     fun `empty router`() = runBlocking {
-        val router = TestBlockchainRouter(listOf())
+        val router = BlockchainRouter<TestService>(listOf())
         val result = router.executeForAll(listOf()) { it.test() }
 
         assertEquals(0, result.size)
@@ -22,7 +24,7 @@ class BlockchainRouterTest {
     @Test
     fun `default blockchains`() = runBlocking {
         val expectedResult = listOf(BlockchainDto.FLOW.name, BlockchainDto.ETHEREUM.name)
-        val router = TestBlockchainRouter(listOf(TestService(BlockchainDto.FLOW), TestService(BlockchainDto.ETHEREUM)))
+        val router = BlockchainRouter(listOf(TestService(BlockchainDto.FLOW), TestService(BlockchainDto.ETHEREUM)))
 
         val resultForEmptyList = router.executeForAll(listOf()) { it.test() }
         assertIterableEquals(expectedResult, resultForEmptyList)
@@ -38,7 +40,7 @@ class BlockchainRouterTest {
         coEvery { failedService.blockchain } returns BlockchainDto.ETHEREUM
         coEvery { failedService.test() } throws Exception("oops")
 
-        val router = TestBlockchainRouter(listOf(failedService, workingService))
+        val router = BlockchainRouter(listOf(failedService, workingService))
         val result = router.executeForAll(listOf(BlockchainDto.ETHEREUM, BlockchainDto.FLOW)) { it.test() }
 
         assertEquals(1, result.size)
@@ -47,12 +49,9 @@ class BlockchainRouterTest {
 
     @Test
     fun `unsupported blockchain`() = runBlocking<Unit> {
-        val router = TestBlockchainRouter(listOf(TestService(BlockchainDto.FLOW), TestService(BlockchainDto.ETHEREUM)))
+        val router = BlockchainRouter(listOf(TestService(BlockchainDto.FLOW), TestService(BlockchainDto.ETHEREUM)))
         assertThrows<IllegalArgumentException> { router.getService(BlockchainDto.POLYGON) }
     }
-
-    private class TestBlockchainRouter(services: List<TestService>) : BlockchainRouter<TestService>(services)
-
 
     private class TestService(override val blockchain: BlockchainDto) : BlockchainService {
         fun test() = blockchain.name

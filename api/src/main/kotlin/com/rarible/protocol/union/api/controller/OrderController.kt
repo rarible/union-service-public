@@ -4,7 +4,8 @@ import com.rarible.protocol.union.api.configuration.PageSize
 import com.rarible.protocol.union.api.service.OrderApiService
 import com.rarible.protocol.union.core.continuation.Paging
 import com.rarible.protocol.union.core.continuation.Slice
-import com.rarible.protocol.union.core.service.OrderServiceRouter
+import com.rarible.protocol.union.core.service.OrderService
+import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.IdParser
 import com.rarible.protocol.union.dto.OrderDto
@@ -20,8 +21,8 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 class OrderController(
-    private val router: OrderServiceRouter,
-    private val orderApiService: OrderApiService
+    private val orderApiService: OrderApiService,
+    private val router: BlockchainRouter<OrderService>
 ) : OrderControllerApi {
 
     override suspend fun getOrdersAll(

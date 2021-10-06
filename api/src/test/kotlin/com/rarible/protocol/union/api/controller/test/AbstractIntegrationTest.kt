@@ -3,6 +3,7 @@ package com.rarible.protocol.union.api.controller.test
 import com.rarible.core.kafka.KafkaMessage
 import com.rarible.core.kafka.KafkaSendResult
 import com.rarible.core.kafka.RaribleKafkaProducer
+import com.rarible.protocol.currency.api.client.CurrencyControllerApi
 import com.rarible.protocol.flow.nft.api.client.FlowNftCollectionControllerApi
 import com.rarible.protocol.flow.nft.api.client.FlowNftItemControllerApi
 import com.rarible.protocol.flow.nft.api.client.FlowNftOrderActivityControllerApi
@@ -45,6 +46,11 @@ abstract class AbstractIntegrationTest {
 
     @Autowired
     protected lateinit var testOwnershipEventProducer: RaribleKafkaProducer<OwnershipEventDto>
+
+    //--------------------- CURRENCY ---------------------//
+
+    @Autowired
+    lateinit var testCurrencyApi: CurrencyControllerApi
 
     //--------------------- ETHEREUM ---------------------//
     @Autowired
@@ -132,6 +138,8 @@ abstract class AbstractIntegrationTest {
     @BeforeEach
     fun beforeEach() {
         clearMocks(
+            testCurrencyApi,
+
             testEthereumItemApi,
             testEthereumOwnershipApi,
             testEthereumOrderApi,

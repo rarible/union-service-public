@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.core.service
 
+import com.rarible.protocol.union.core.service.router.BlockchainService
 import com.rarible.protocol.union.dto.SignatureValidationFormDto
 
 interface SignatureService : BlockchainService {

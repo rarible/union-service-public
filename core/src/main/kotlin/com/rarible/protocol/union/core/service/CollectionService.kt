@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.core.service
 
 import com.rarible.protocol.union.core.continuation.Page
+import com.rarible.protocol.union.core.service.router.BlockchainService
 import com.rarible.protocol.union.dto.CollectionDto
 
 interface CollectionService : BlockchainService {
