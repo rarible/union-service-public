@@ -168,7 +168,7 @@ class EthActivityConverterTest {
 
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.date).isEqualTo(dto.date)
-        assertThat(converted.owners[0].value).isEqualTo(dto.owner.prefixed())
+        assertThat(converted.owner.value).isEqualTo(dto.owner.prefixed())
         assertThat(converted.contract.value).isEqualTo(dto.contract.prefixed())
         assertThat(converted.tokenId).isEqualTo(dto.tokenId)
         assertThat(converted.value).isEqualTo(dto.value)
@@ -185,7 +185,7 @@ class EthActivityConverterTest {
 
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.date).isEqualTo(dto.date)
-        assertThat(converted.owners[0].value).isEqualTo(dto.owner.prefixed())
+        assertThat(converted.owner.value).isEqualTo(dto.owner.prefixed())
         assertThat(converted.contract.value).isEqualTo(dto.contract.prefixed())
         assertThat(converted.tokenId).isEqualTo(dto.tokenId)
         assertThat(converted.value).isEqualTo(dto.value)
@@ -202,7 +202,7 @@ class EthActivityConverterTest {
 
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.date).isEqualTo(dto.date)
-        assertThat(converted.owners[0].value).isEqualTo(dto.owner.prefixed())
+        assertThat(converted.owner.value).isEqualTo(dto.owner.prefixed())
         assertThat(converted.contract.value).isEqualTo(dto.contract.prefixed())
         assertThat(converted.tokenId).isEqualTo(dto.tokenId)
         assertThat(converted.value).isEqualTo(dto.value)

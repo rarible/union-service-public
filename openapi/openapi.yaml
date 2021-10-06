@@ -1688,11 +1688,8 @@ components:
           type: string
           enum:
             - MINT
-        owners:
-          type: array
-          default: [ ]
-          items:
-            $ref: "#/components/schemas/UnionAddress"
+        owner:
+          $ref: "#/components/schemas/UnionAddress"
         contract:
           $ref: "#/components/schemas/UnionAddress"
         tokenId:
@@ -1703,7 +1700,7 @@ components:
           $ref: "#/components/schemas/ActivityBlockchainInfo"
       required:
         - "@type"
-        - owners
+        - owner
         - contract
         - tokenId
         - value
@@ -1716,11 +1713,8 @@ components:
           type: string
           enum:
             - BURN
-        owners:
-          type: array
-          default: [ ]
-          items:
-            $ref: "#/components/schemas/UnionAddress"
+        owner:
+          $ref: "#/components/schemas/UnionAddress"
         contract:
           $ref: "#/components/schemas/UnionAddress"
         tokenId:
@@ -1731,7 +1725,7 @@ components:
           $ref: "#/components/schemas/ActivityBlockchainInfo"
       required:
         - "@type"
-        - owners
+        - owner
         - contract
         - tokenId
         - value
@@ -1746,11 +1740,8 @@ components:
             - TRANSFER
         from:
           $ref: "#/components/schemas/UnionAddress"
-        owners:
-          type: array
-          default: [ ]
-          items:
-            $ref: "#/components/schemas/UnionAddress"
+        owner:
+          $ref: "#/components/schemas/UnionAddress"
         contract:
           $ref: "#/components/schemas/UnionAddress"
         tokenId:
@@ -1762,7 +1753,7 @@ components:
       required:
         - "@type"
         - from
-        - owners
+        - owner
         - contract
         - tokenId
         - value
