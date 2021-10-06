@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.core.service
+package com.rarible.protocol.union.core.service.router
 
 import com.rarible.core.client.WebClientResponseProxyException
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -6,14 +6,13 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
 
-abstract class BlockchainRouter<T : BlockchainService>(
+class BlockchainRouter<T : BlockchainService>(
     private val services: List<T>
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
     private val blockchainServices = services.associateBy { it.blockchain }
-    private val supportedBlockchains = BlockchainDto.values().toSet()
 
     fun getService(blockchain: BlockchainDto): T {
         return blockchainServices[blockchain] ?: throw IllegalArgumentException(

@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.api.controller.advice
 
 import com.rarible.core.client.WebClientResponseProxyException
+import com.rarible.protocol.union.core.exception.UnionBadRequestException
 import com.rarible.protocol.union.dto.BlockchainIdFormatException
 import com.rarible.protocol.union.dto.UnionApiErrorBadRequestDto
 import com.rarible.protocol.union.dto.UnionApiErrorServerErrorDto
@@ -25,15 +26,20 @@ class ErrorsController {
         ResponseEntity.status(ex.statusCode).body(convertedData)
     }
 
-    @ExceptionHandler(value = [ServerWebInputException::class, BlockchainIdFormatException::class])
-    fun handleServerWebInputException(ex: ServerWebInputException) = mono {
-        // For ServerWebInputException status is always 400
+    @ExceptionHandler(
+        value = [
+            ServerWebInputException::class,
+            BlockchainIdFormatException::class,
+            UnionBadRequestException::class
+        ]
+    )
+    fun handleServerWebInputException(ex: Exception) = mono {
         val error = UnionApiErrorBadRequestDto(
             code = UnionApiErrorBadRequestDto.Code.BAD_REQUEST,
             message = ex.cause?.cause?.message ?: ex.cause?.message ?: ex.message ?: ""
         )
         logger.warn("Web input error: {}", error.message)
-        ResponseEntity.status(ex.status).body(error)
+        ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error)
     }
 
     @ExceptionHandler(Throwable::class)

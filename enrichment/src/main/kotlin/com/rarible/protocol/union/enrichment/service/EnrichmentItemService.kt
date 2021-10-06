@@ -2,7 +2,8 @@ package com.rarible.protocol.union.enrichment.service
 
 import com.mongodb.client.result.DeleteResult
 import com.rarible.core.common.nowMillis
-import com.rarible.protocol.union.core.service.ItemServiceRouter
+import com.rarible.protocol.union.core.service.ItemService
+import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.UnionItemDto
 import com.rarible.protocol.union.enrichment.converter.EnrichedItemConverter
@@ -17,7 +18,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class EnrichmentItemService(
-    private val itemServiceRouter: ItemServiceRouter,
+    private val itemServiceRouter: BlockchainRouter<ItemService>,
     private val itemRepository: ItemRepository,
     private val enrichmentOrderService: EnrichmentOrderService
 ) {

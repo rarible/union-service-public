@@ -3,7 +3,8 @@ package com.rarible.protocol.union.api.controller
 import com.rarible.protocol.union.api.configuration.PageSize
 import com.rarible.protocol.union.core.continuation.Page
 import com.rarible.protocol.union.core.continuation.Paging
-import com.rarible.protocol.union.core.service.CollectionServiceRouter
+import com.rarible.protocol.union.core.service.CollectionService
+import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.dto.CollectionsDto
@@ -14,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 class CollectionController(
-    private val router: CollectionServiceRouter
+    private val router: BlockchainRouter<CollectionService>
 ) : CollectionControllerApi {
 
     override suspend fun getAllCollections(

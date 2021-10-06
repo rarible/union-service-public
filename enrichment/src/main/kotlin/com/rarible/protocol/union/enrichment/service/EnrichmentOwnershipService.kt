@@ -2,7 +2,8 @@ package com.rarible.protocol.union.enrichment.service
 
 import com.mongodb.client.result.DeleteResult
 import com.rarible.core.common.nowMillis
-import com.rarible.protocol.union.core.service.OwnershipServiceRouter
+import com.rarible.protocol.union.core.service.OwnershipService
+import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.UnionOwnershipDto
 import com.rarible.protocol.union.enrichment.converter.EnrichedOwnershipConverter
@@ -19,7 +20,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class EnrichmentOwnershipService(
-    private val ownershipServiceRouter: OwnershipServiceRouter,
+    private val ownershipServiceRouter: BlockchainRouter<OwnershipService>,
     private val ownershipRepository: OwnershipRepository,
     private val enrichmentOrderService: EnrichmentOrderService
 ) {

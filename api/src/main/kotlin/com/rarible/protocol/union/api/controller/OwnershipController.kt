@@ -3,7 +3,8 @@ package com.rarible.protocol.union.api.controller
 import com.rarible.protocol.union.api.configuration.PageSize
 import com.rarible.protocol.union.api.service.OwnershipApiService
 import com.rarible.protocol.union.core.continuation.Paging
-import com.rarible.protocol.union.core.service.OwnershipServiceRouter
+import com.rarible.protocol.union.core.service.OwnershipService
+import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.IdParser
 import com.rarible.protocol.union.dto.OwnershipDto
@@ -17,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 class OwnershipController(
     private val ownershipApiService: OwnershipApiService,
-    private val router: OwnershipServiceRouter
+    private val router: BlockchainRouter<OwnershipService>
 ) : OwnershipControllerApi {
 
     override suspend fun getAllOwnerships(

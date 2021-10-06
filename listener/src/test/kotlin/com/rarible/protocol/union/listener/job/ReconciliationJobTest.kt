@@ -2,7 +2,7 @@ package com.rarible.protocol.union.listener.job
 
 import com.rarible.protocol.union.core.continuation.Slice
 import com.rarible.protocol.union.core.service.OrderService
-import com.rarible.protocol.union.core.service.OrderServiceRouter
+import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.PlatformDto
@@ -24,7 +24,7 @@ class ReconciliationJobTest {
     private val testPageSize = 50
 
     private val orderService: OrderService = mockk()
-    private val orderServiceRouter: OrderServiceRouter = mockk()
+    private val orderServiceRouter: BlockchainRouter<OrderService> = mockk()
     private val orderEventService: EnrichmentOrderEventService = mockk()
 
     private val orderReconciliationService = ReconciliationJob(

@@ -3,6 +3,7 @@ package com.rarible.protocol.union.api.controller.test
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.rarible.core.application.ApplicationEnvironmentInfo
 import com.rarible.core.kafka.RaribleKafkaProducer
+import com.rarible.protocol.currency.api.client.CurrencyControllerApi
 import com.rarible.protocol.flow.nft.api.client.FlowNftCollectionControllerApi
 import com.rarible.protocol.flow.nft.api.client.FlowNftItemControllerApi
 import com.rarible.protocol.flow.nft.api.client.FlowNftOrderActivityControllerApi
@@ -15,13 +16,7 @@ import com.rarible.protocol.nft.api.client.NftItemControllerApi
 import com.rarible.protocol.nft.api.client.NftOwnershipControllerApi
 import com.rarible.protocol.order.api.client.OrderActivityControllerApi
 import com.rarible.protocol.order.api.client.OrderIndexerApiClientFactory
-import com.rarible.protocol.union.api.client.ActivityControllerApi
-import com.rarible.protocol.union.api.client.CollectionControllerApi
 import com.rarible.protocol.union.api.client.FixedUnionApiServiceUriProvider
-import com.rarible.protocol.union.api.client.ItemControllerApi
-import com.rarible.protocol.union.api.client.OrderControllerApi
-import com.rarible.protocol.union.api.client.OwnershipControllerApi
-import com.rarible.protocol.union.api.client.SignatureControllerApi
 import com.rarible.protocol.union.api.client.UnionApiClientFactory
 import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
@@ -74,35 +69,34 @@ class TestApiConfiguration {
         return UnionApiClientFactory(FixedUnionApiServiceUriProvider(uri))
     }
 
-    @Bean
-    fun testItemControllerApi(unionApiClientFactory: UnionApiClientFactory): ItemControllerApi {
-        return unionApiClientFactory.createItemApiClient()
-    }
+    //--------------------- UNION CLIENTS ---------------------//
 
     @Bean
-    fun testOwnershipControllerApi(unionApiClientFactory: UnionApiClientFactory): OwnershipControllerApi {
-        return unionApiClientFactory.createOwnershipApiClient()
-    }
+    fun testItemControllerApi(factory: UnionApiClientFactory) = factory.createItemApiClient()
 
     @Bean
-    fun testOrderControllerApi(unionApiClientFactory: UnionApiClientFactory): OrderControllerApi {
-        return unionApiClientFactory.createOrderApiClient()
-    }
+    fun testOwnershipControllerApi(factory: UnionApiClientFactory) = factory.createOwnershipApiClient()
 
     @Bean
-    fun testUnionSignatureControllerApi(unionApiClientFactory: UnionApiClientFactory): SignatureControllerApi {
-        return unionApiClientFactory.createSignatureApiClient()
-    }
+    fun testOrderControllerApi(factory: UnionApiClientFactory) = factory.createOrderApiClient()
 
     @Bean
-    fun testCollectionControllerApi(unionApiClientFactory: UnionApiClientFactory): CollectionControllerApi {
-        return unionApiClientFactory.createCollectionApiClient()
-    }
+    fun testSignatureControllerApi(factory: UnionApiClientFactory) = factory.createSignatureApiClient()
 
     @Bean
-    fun testActivityControllerApi(unionApiClientFactory: UnionApiClientFactory): ActivityControllerApi {
-        return unionApiClientFactory.createActivityApiClient()
-    }
+    fun testCollectionControllerApi(factory: UnionApiClientFactory) = factory.createCollectionApiClient()
+
+    @Bean
+    fun testActivityControllerApi(factory: UnionApiClientFactory) = factory.createActivityApiClient()
+
+    @Bean
+    fun testCurrencyControllerApi(factory: UnionApiClientFactory) = factory.createCurrencyApiClient()
+
+    //--------------------- CURRENCY ---------------------//
+
+    @Bean
+    @Primary
+    fun testCurrencyApi(): CurrencyControllerApi = mockk()
 
     //--------------------- ETHEREUM ---------------------//
     @Bean

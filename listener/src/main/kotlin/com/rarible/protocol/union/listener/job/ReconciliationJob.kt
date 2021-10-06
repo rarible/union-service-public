@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.listener.job
 
-import com.rarible.protocol.union.core.service.OrderServiceRouter
+import com.rarible.protocol.union.core.service.OrderService
+import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.PlatformDto
@@ -19,7 +20,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class ReconciliationJob(
-    private val orderServiceRouter: OrderServiceRouter,
+    private val orderServiceRouter: BlockchainRouter<OrderService>,
     private val orderEventService: EnrichmentOrderEventService,
     properties: UnionListenerProperties
 ) {

@@ -1,9 +1,9 @@
 package com.rarible.protocol.union.api.client.autoconfigure
 
 import com.rarible.core.application.ApplicationEnvironmentInfo
-import com.rarible.protocol.client.CompositeWebClientCustomizer
-import com.rarible.protocol.client.DefaultProtocolWebClientCustomizer
-import com.rarible.protocol.client.NoopWebClientCustomizer
+import com.rarible.protocol.union.api.client.CompositeWebClientCustomizer
+import com.rarible.protocol.union.api.client.DefaultUnionWebClientCustomizer
+import com.rarible.protocol.union.api.client.NoopWebClientCustomizer
 import com.rarible.protocol.union.api.client.SwarmUnionApiServiceUriProvider
 import com.rarible.protocol.union.api.client.UnionApiClientFactory
 import com.rarible.protocol.union.api.client.UnionApiServiceUriProvider
@@ -32,7 +32,7 @@ class UnionApiClientAutoConfiguration(
     @Bean
     @ConditionalOnMissingBean(UnionApiClientFactory::class)
     fun unionApiClientFactory(unionApiServiceUriProvider: UnionApiServiceUriProvider): UnionApiClientFactory {
-        val customizer = CompositeWebClientCustomizer(listOf(DefaultProtocolWebClientCustomizer(), webClientCustomizer))
+        val customizer = CompositeWebClientCustomizer(listOf(DefaultUnionWebClientCustomizer(), webClientCustomizer))
         return UnionApiClientFactory(unionApiServiceUriProvider, customizer)
     }
 }

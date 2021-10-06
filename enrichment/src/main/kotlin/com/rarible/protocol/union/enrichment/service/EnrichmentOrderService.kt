@@ -3,7 +3,8 @@ package com.rarible.protocol.union.enrichment.service
 import com.rarible.core.client.WebClientResponseProxyException
 import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.core.continuation.Slice
-import com.rarible.protocol.union.core.service.OrderServiceRouter
+import com.rarible.protocol.union.core.service.OrderService
+import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.PlatformDto
@@ -16,7 +17,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class EnrichmentOrderService(
-    private val orderServiceRouter: OrderServiceRouter
+    private val orderServiceRouter: BlockchainRouter<OrderService>
 ) {
 
     private val logger = LoggerFactory.getLogger(EnrichmentOrderService::class.java)
