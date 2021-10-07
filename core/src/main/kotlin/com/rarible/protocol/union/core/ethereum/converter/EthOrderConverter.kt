@@ -12,7 +12,20 @@ import com.rarible.protocol.dto.OrdersPaginationDto
 import com.rarible.protocol.dto.RaribleV2OrderDto
 import com.rarible.protocol.union.core.continuation.Slice
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
-import com.rarible.protocol.union.dto.*
+import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.EthOrderCryptoPunksDataDto
+import com.rarible.protocol.union.dto.EthOrderDataLegacyDto
+import com.rarible.protocol.union.dto.EthOrderDataRaribleV2DataV1Dto
+import com.rarible.protocol.union.dto.EthOrderOpenSeaV1DataV1Dto
+import com.rarible.protocol.union.dto.OnChainOrderDto
+import com.rarible.protocol.union.dto.OrderDto
+import com.rarible.protocol.union.dto.OrderIdDto
+import com.rarible.protocol.union.dto.OrderPriceHistoryRecordDto
+import com.rarible.protocol.union.dto.OrderStatusDto
+import com.rarible.protocol.union.dto.PendingOrderCancelDto
+import com.rarible.protocol.union.dto.PendingOrderDto
+import com.rarible.protocol.union.dto.PendingOrderMatchDto
+import com.rarible.protocol.union.dto.PlatformDto
 import java.time.Instant
 
 object EthOrderConverter {

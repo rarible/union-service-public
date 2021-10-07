@@ -2,7 +2,17 @@ package com.rarible.protocol.union.core.ethereum.converter
 
 import com.rarible.protocol.dto.OrderCancelDto
 import com.rarible.protocol.dto.OrderSideMatchDto
-import com.rarible.protocol.union.dto.*
+import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.EthErc20AssetTypeDto
+import com.rarible.protocol.union.dto.EthErc721AssetTypeDto
+import com.rarible.protocol.union.dto.EthOrderDataLegacyDto
+import com.rarible.protocol.union.dto.EthOrderDataRaribleV2DataV1Dto
+import com.rarible.protocol.union.dto.EthOrderOpenSeaV1DataV1Dto
+import com.rarible.protocol.union.dto.OnChainOrderDto
+import com.rarible.protocol.union.dto.OrderStatusDto
+import com.rarible.protocol.union.dto.PendingOrderCancelDto
+import com.rarible.protocol.union.dto.PendingOrderMatchDto
+import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.test.data.randomEthCryptoPunksOrderDto
 import com.rarible.protocol.union.test.data.randomEthLegacyOrderDto
 import com.rarible.protocol.union.test.data.randomEthOnChainOrderDto
