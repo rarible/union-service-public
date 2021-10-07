@@ -153,6 +153,9 @@ class OrderControllerFt : AbstractIntegrationTest() {
             platform,
             maker.fullId(),
             null,
+            null,
+            null,
+            null,
             continuation,
             size
         ).awaitFirst()
@@ -180,6 +183,9 @@ class OrderControllerFt : AbstractIntegrationTest() {
         val orders = orderControllerClient.getOrderBidsByMaker(
             maker.fullId(),
             platform,
+            null,
+            null,
+            null,
             null,
             continuation,
             size

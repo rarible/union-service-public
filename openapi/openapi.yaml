@@ -673,6 +673,25 @@ paths:
           required: false
           schema:
             type: string
+        - name: "status"
+          in: query
+          required: false
+          schema:
+            type: "array"
+            items:
+              $ref: "#/components/schemas/OrderStatus"
+        - name: "start"
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+        - name: "end"
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
         - name: "continuation"
           in: query
           required: false
@@ -728,6 +747,25 @@ paths:
           required: false
           schema:
             type: string
+        - name: "status"
+          in: query
+          required: false
+          schema:
+            type: "array"
+            items:
+              $ref: "#/components/schemas/OrderStatus"
+        - name: "start"
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+        - name: "end"
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
         - name: "continuation"
           in: query
           required: false
@@ -1657,6 +1695,15 @@ components:
       required:
         - account
         - value
+
+    OrderStatus:
+      type: string
+      enum:
+        - ACTIVE
+        - FILLED
+        - HISTORICAL
+        - INACTIVE
+        - CANCELLED
 
     #################### Activity - Union ####################
 

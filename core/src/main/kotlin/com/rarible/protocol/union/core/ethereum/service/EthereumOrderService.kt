@@ -3,11 +3,13 @@ package com.rarible.protocol.union.core.ethereum.service
 import com.rarible.protocol.dto.OrderIdsDto
 import com.rarible.protocol.order.api.client.OrderControllerApi
 import com.rarible.protocol.union.core.continuation.Slice
+import com.rarible.protocol.union.core.converter.OrderStatusConverter
 import com.rarible.protocol.union.core.ethereum.converter.EthConverter
 import com.rarible.protocol.union.core.ethereum.converter.EthOrderConverter
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderDto
+import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PlatformDto
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.reactive.asFlow
@@ -52,17 +54,23 @@ class EthereumOrderService(
         tokenId: String,
         maker: String?,
         origin: String?,
+        status: List<OrderStatusDto>?,
+        start: Long?,
+        end: Long?,
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
-        val orders = orderControllerApi.getOrderBidsByItem(
+        val orders = orderControllerApi.getOrderBidsByItemAndByStatus(
             contract,
             tokenId,
+            OrderStatusConverter.convert(status),
             maker,
             origin,
             EthConverter.convert(platform),
             continuation,
-            size
+            size,
+            start,
+            end
         ).awaitFirst()
         return EthOrderConverter.convert(orders, blockchain)
     }
@@ -71,15 +79,21 @@ class EthereumOrderService(
         platform: PlatformDto?,
         maker: String,
         origin: String?,
+        status: List<OrderStatusDto>?,
+        start: Long?,
+        end: Long?,
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
-        val orders = orderControllerApi.getOrderBidsByMaker(
+        val orders = orderControllerApi.getOrderBidsByMakerAndByStatus(
             maker,
+            OrderStatusConverter.convert(status),
             origin,
             EthConverter.convert(platform),
             continuation,
-            size
+            size,
+            start,
+            end
         ).awaitFirst()
         return EthOrderConverter.convert(orders, blockchain)
     }
