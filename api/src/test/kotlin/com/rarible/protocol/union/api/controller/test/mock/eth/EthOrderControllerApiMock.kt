@@ -60,9 +60,12 @@ class EthOrderControllerApiMock(
 
     fun mockGetBidOrdersByItem(itemId: ItemIdDto, vararg returnOrders: OrderDto) {
         every {
-            orderControllerApi.getOrderBidsByItem(
+            orderControllerApi.getOrderBidsByItemAndByStatus(
                 itemId.token.value,
                 itemId.tokenId.toString(),
+                any(),
+                any(),
+                any(),
                 any(),
                 any(),
                 any(),

@@ -12,19 +12,7 @@ import com.rarible.protocol.dto.OrdersPaginationDto
 import com.rarible.protocol.dto.RaribleV2OrderDto
 import com.rarible.protocol.union.core.continuation.Slice
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
-import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.EthOrderCryptoPunksDataDto
-import com.rarible.protocol.union.dto.EthOrderDataLegacyDto
-import com.rarible.protocol.union.dto.EthOrderDataRaribleV2DataV1Dto
-import com.rarible.protocol.union.dto.EthOrderOpenSeaV1DataV1Dto
-import com.rarible.protocol.union.dto.OnChainOrderDto
-import com.rarible.protocol.union.dto.OrderDto
-import com.rarible.protocol.union.dto.OrderIdDto
-import com.rarible.protocol.union.dto.OrderPriceHistoryRecordDto
-import com.rarible.protocol.union.dto.PendingOrderCancelDto
-import com.rarible.protocol.union.dto.PendingOrderDto
-import com.rarible.protocol.union.dto.PendingOrderMatchDto
-import com.rarible.protocol.union.dto.PlatformDto
+import com.rarible.protocol.union.dto.*
 import java.time.Instant
 
 object EthOrderConverter {
@@ -157,6 +145,20 @@ object EthOrderConverter {
             continuation = source.continuation,
             entities = source.orders.map { convert(it, blockchain) }
         )
+    }
+
+    fun convert(source: OrderStatusDto): com.rarible.protocol.dto.OrderStatusDto {
+        return when (source) {
+            OrderStatusDto.ACTIVE -> com.rarible.protocol.dto.OrderStatusDto.ACTIVE
+            OrderStatusDto.FILLED -> com.rarible.protocol.dto.OrderStatusDto.FILLED
+            OrderStatusDto.HISTORICAL -> com.rarible.protocol.dto.OrderStatusDto.HISTORICAL
+            OrderStatusDto.INACTIVE -> com.rarible.protocol.dto.OrderStatusDto.INACTIVE
+            OrderStatusDto.CANCELLED -> com.rarible.protocol.dto.OrderStatusDto.CANCELLED
+        }
+    }
+
+    fun convert(source: List<OrderStatusDto>?): List<com.rarible.protocol.dto.OrderStatusDto>? {
+        return source?.map { convert(it) }
     }
 
     private fun convert(source: OrderOpenSeaV1DataV1Dto.FeeMethod): EthOrderOpenSeaV1DataV1Dto.FeeMethod {

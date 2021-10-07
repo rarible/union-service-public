@@ -3,7 +3,6 @@ package com.rarible.protocol.union.core.ethereum.service
 import com.rarible.protocol.dto.OrderIdsDto
 import com.rarible.protocol.order.api.client.OrderControllerApi
 import com.rarible.protocol.union.core.continuation.Slice
-import com.rarible.protocol.union.core.converter.OrderStatusConverter
 import com.rarible.protocol.union.core.ethereum.converter.EthConverter
 import com.rarible.protocol.union.core.ethereum.converter.EthOrderConverter
 import com.rarible.protocol.union.core.service.OrderService
@@ -63,7 +62,7 @@ class EthereumOrderService(
         val orders = orderControllerApi.getOrderBidsByItemAndByStatus(
             contract,
             tokenId,
-            OrderStatusConverter.convert(status),
+            EthOrderConverter.convert(status),
             maker,
             origin,
             EthConverter.convert(platform),
@@ -87,7 +86,7 @@ class EthereumOrderService(
     ): Slice<OrderDto> {
         val orders = orderControllerApi.getOrderBidsByMakerAndByStatus(
             maker,
-            OrderStatusConverter.convert(status),
+            EthOrderConverter.convert(status),
             origin,
             EthConverter.convert(platform),
             continuation,

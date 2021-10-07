@@ -2,16 +2,7 @@ package com.rarible.protocol.union.core.ethereum.converter
 
 import com.rarible.protocol.dto.OrderCancelDto
 import com.rarible.protocol.dto.OrderSideMatchDto
-import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.EthErc20AssetTypeDto
-import com.rarible.protocol.union.dto.EthErc721AssetTypeDto
-import com.rarible.protocol.union.dto.EthOrderDataLegacyDto
-import com.rarible.protocol.union.dto.EthOrderDataRaribleV2DataV1Dto
-import com.rarible.protocol.union.dto.EthOrderOpenSeaV1DataV1Dto
-import com.rarible.protocol.union.dto.OnChainOrderDto
-import com.rarible.protocol.union.dto.PendingOrderCancelDto
-import com.rarible.protocol.union.dto.PendingOrderMatchDto
-import com.rarible.protocol.union.dto.PlatformDto
+import com.rarible.protocol.union.dto.*
 import com.rarible.protocol.union.test.data.randomEthCryptoPunksOrderDto
 import com.rarible.protocol.union.test.data.randomEthLegacyOrderDto
 import com.rarible.protocol.union.test.data.randomEthOnChainOrderDto
@@ -20,6 +11,7 @@ import com.rarible.protocol.union.test.data.randomEthOrderCancelDto
 import com.rarible.protocol.union.test.data.randomEthOrderSideMatchDto
 import com.rarible.protocol.union.test.data.randomEthV2OrderDto
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 class EthOrderConverterTest {
@@ -242,4 +234,22 @@ class EthOrderConverterTest {
         assertThat(converted.priceHistory[0].takeValue).isEqualTo(dto.priceHistory!![0].takeValue)
     }
 
+    @Test
+    fun `eth order status`() {
+        val unionStatuses = listOf(
+            OrderStatusDto.ACTIVE,
+            OrderStatusDto.FILLED,
+            OrderStatusDto.INACTIVE,
+            OrderStatusDto.HISTORICAL,
+            OrderStatusDto.CANCELLED
+        )
+        val ethStatuses = listOf(
+            com.rarible.protocol.dto.OrderStatusDto.ACTIVE,
+            com.rarible.protocol.dto.OrderStatusDto.FILLED,
+            com.rarible.protocol.dto.OrderStatusDto.INACTIVE,
+            com.rarible.protocol.dto.OrderStatusDto.HISTORICAL,
+            com.rarible.protocol.dto.OrderStatusDto.CANCELLED
+        )
+        assertEquals(ethStatuses, EthOrderConverter.convert(unionStatuses))
+    }
 }
