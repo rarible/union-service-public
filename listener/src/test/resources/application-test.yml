@@ -1,3 +1,6 @@
+application:
+  environment: test
+
 spring:
   application.name: nft-order-listener
   cloud:
@@ -15,21 +18,10 @@ logging:
   logstash.tcp-socket.enabled: false
   level.org.springframework.data.mongodb.core.ReactiveMongoTemplate: DEBUG
 
-application:
-  environment: test
-
-mongock:
-  change-logs-scan-package:
-    - com.rarible.protocol.union.enrichment.migration
-
-rarible:
-  ethereum:
-    converter:
-      enabled: true
-
 common:
-  producer:
-    broker-replica-set: ${kafka.hosts}
+  currency:
+    refresh:
+      cron: "-"
 
 listener:
   consumer:
