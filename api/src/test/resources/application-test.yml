@@ -9,3 +9,8 @@ spring:
 
 logging:
   logstash.tcp-socket.enabled: false
+
+common:
+  currency:
+    refresh:
+      cron: "-"

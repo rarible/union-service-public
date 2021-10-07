@@ -30,6 +30,9 @@ rarible:
 common:
   producer:
     broker-replica-set: ${kafka.hosts}
+  currency:
+    refresh:
+      cron: "0 0/30 * * * *"
 
 listener:
   consumer:
