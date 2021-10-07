@@ -21,7 +21,8 @@ import java.math.BigDecimal
 class BestOrderServiceTest {
 
     private val enrichmentOrderService: EnrichmentOrderService = mockk()
-    private val bestOrderService = BestOrderService(enrichmentOrderService)
+    private val bestUsdOrderReducer: BestUsdOrderReducer = mockk()
+    private val bestOrderService = BestOrderService(enrichmentOrderService, bestUsdOrderReducer)
 
     @BeforeEach
     fun beforeEach() {
@@ -194,7 +195,7 @@ class BestOrderServiceTest {
         val ownership = randomShortOwnership(itemId).copy(bestSellOrder = ShortOrderConverter.convert(current))
         val ownershipId = ownership.id
 
-        coEvery { enrichmentOrderService.getBestSell(ownershipId) } returns fetched
+        coEvery { enrichmentOrderService.getBestSell(ownershipId, any()) } returns fetched
 
         val bestSellOrder = bestOrderService.getBestSellOrder(ownership, updated)
 

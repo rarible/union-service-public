@@ -14,6 +14,8 @@ object ShortItemConverter {
             // Default enrichment data
             sellers = 0,
             totalStock = BigInteger.ZERO,
+            bestSellOrders = emptyMap(),
+            bestBidOrders = emptyMap(),
             bestSellOrder = null,
             bestBidOrder = null
         )

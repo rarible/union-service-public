@@ -8,6 +8,7 @@ import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.PlatformDto
+import com.rarible.protocol.union.enrichment.model.CurrencyId
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortOrder
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
@@ -44,7 +45,7 @@ class EnrichmentOrderService(
         return getById(existing.dtoId)
     }
 
-    suspend fun getBestSell(id: ShortItemId): OrderDto? {
+    suspend fun getBestSell(id: ShortItemId, currencyId: CurrencyId): OrderDto? {
         val now = nowMillis()
         val result = withPreferredRariblePlatform { platform ->
             orderServiceRouter.getService(id.blockchain).getSellOrdersByItem(
@@ -61,7 +62,11 @@ class EnrichmentOrderService(
         return result
     }
 
-    suspend fun getBestSell(id: ShortOwnershipId): OrderDto? {
+    suspend fun getBestSells(id: ShortItemId): Map<CurrencyId, OrderDto> {
+        TODO()
+    }
+
+    suspend fun getBestSell(id: ShortOwnershipId, currencyId: CurrencyId): OrderDto? {
         val now = nowMillis()
         val result = withPreferredRariblePlatform { platform ->
             orderServiceRouter.getService(id.blockchain).getSellOrdersByItem(
@@ -78,7 +83,11 @@ class EnrichmentOrderService(
         return result
     }
 
-    suspend fun getBestBid(id: ShortItemId): OrderDto? {
+    suspend fun getBestSells(id: ShortOwnershipId): Map<CurrencyId, OrderDto> {
+        TODO()
+    }
+
+    suspend fun getBestBid(id: ShortItemId, currencyId: CurrencyId): OrderDto? {
         val now = nowMillis()
         val result = withPreferredRariblePlatform { platform ->
             orderServiceRouter.getService(id.blockchain).getOrderBidsByItem(
@@ -93,6 +102,10 @@ class EnrichmentOrderService(
         }
         logger.info("Fetching best bid Order for Item [{}]: [{}] ({}ms)", id, result?.id, spent(now))
         return result
+    }
+
+    suspend fun getBestBids(id: ShortItemId): Map<CurrencyId, OrderDto> {
+        TODO()
     }
 
     private suspend fun withPreferredRariblePlatform(

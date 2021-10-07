@@ -17,6 +17,10 @@ data class ShortItem(
 
     val sellers: Int = 0,
     val totalStock: BigInteger,
+
+    val bestSellOrders: Map<CurrencyId, ShortOrder>,
+    val bestBidOrders: Map<CurrencyId, ShortOrder>,
+
     val bestSellOrder: ShortOrder?,
     val bestBidOrder: ShortOrder?,
 
@@ -34,6 +38,10 @@ data class ShortItem(
 
                 sellers = 0,
                 totalStock = BigInteger.ZERO,
+
+                bestSellOrders = emptyMap(),
+                bestBidOrders = emptyMap(),
+
                 bestSellOrder = null,
                 bestBidOrder = null
             )
