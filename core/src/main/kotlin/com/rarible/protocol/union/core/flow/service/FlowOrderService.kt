@@ -6,6 +6,7 @@ import com.rarible.protocol.union.core.flow.converter.FlowOrderConverter
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderDto
+import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PlatformDto
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
@@ -42,6 +43,9 @@ class FlowOrderService(
         tokenId: String,
         maker: String?,
         origin: String?,
+        status: List<OrderStatusDto>?,
+        start: Long?,
+        end: Long?,
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
@@ -52,6 +56,9 @@ class FlowOrderService(
         platform: PlatformDto?,
         maker: String,
         origin: String?,
+        status: List<OrderStatusDto>?,
+        start: Long?,
+        end: Long?,
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
