@@ -20,6 +20,7 @@ import com.rarible.protocol.union.api.client.FixedUnionApiServiceUriProvider
 import com.rarible.protocol.union.api.client.UnionApiClientFactory
 import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
+import com.rarible.protocol.union.test.mock.CurrencyMock
 import io.mockk.mockk
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.web.server.LocalServerPort
@@ -96,7 +97,7 @@ class TestApiConfiguration {
 
     @Bean
     @Primary
-    fun testCurrencyApi(): CurrencyControllerApi = mockk()
+    fun testCurrencyApi(): CurrencyControllerApi = CurrencyMock.currencyControllerApiMock
 
     //--------------------- ETHEREUM ---------------------//
     @Bean

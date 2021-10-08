@@ -33,6 +33,9 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
     @Autowired
     private lateinit var ownershipService: EnrichmentOwnershipService
 
+    @Autowired
+    lateinit var ethOrderConverter: EthOrderConverter
+
     @Test
     fun `update event - ownership doesn't exist`() = runWithKafka {
         val itemId = randomEthItemId()
@@ -66,7 +69,7 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
         val ethOwnership = randomEthOwnershipDto(ownershipId)
 
         val bestSellOrder = randomEthLegacyOrderDto(itemId)
-        val unionBestSell = EthOrderConverter.convert(bestSellOrder, itemId.blockchain)
+        val unionBestSell = ethOrderConverter.convert(bestSellOrder, itemId.blockchain)
 
         val unionOwnership = EthOwnershipConverter.convert(ethOwnership, itemId.blockchain)
         val shortOwnership = ShortOwnershipConverter.convert(unionOwnership).copy(
@@ -109,7 +112,7 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
         ownershipService.save(shortOwnership)
 
         val bestSellOrder = randomEthLegacyOrderDto(itemId)
-        val unionBestSell = EthOrderConverter.convert(bestSellOrder, itemId.blockchain)
+        val unionBestSell = ethOrderConverter.convert(bestSellOrder, itemId.blockchain)
 
         coEvery { testEthereumOwnershipApi.getNftOwnershipById(ownershipId.value) } returns ethOwnership.toMono()
 

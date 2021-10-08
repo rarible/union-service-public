@@ -10,7 +10,6 @@ import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.toList
 import org.springframework.stereotype.Component
 
 @ExperimentalCoroutinesApi
@@ -50,7 +49,7 @@ class ItemApiService(
             .map { listOfNotNull(it.bestBidOrder?.dtoId, it.bestSellOrder?.dtoId) }
             .flatten()
 
-        val orders = orderApiService.getByIds(shortOrderIds).toList()
+        val orders = orderApiService.getByIds(shortOrderIds)
             .associateBy { it.id }
 
         val result = unionItems.map {

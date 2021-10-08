@@ -5,7 +5,6 @@ import com.rarible.protocol.union.core.service.router.BlockchainService
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PlatformDto
-import kotlinx.coroutines.flow.Flow
 
 interface OrderService : BlockchainService {
 
@@ -20,9 +19,9 @@ interface OrderService : BlockchainService {
         id: String
     ): OrderDto
 
-    fun getOrdersByIds(
+    suspend fun getOrdersByIds(
         orderIds: List<String>
-    ): Flow<OrderDto>
+    ): List<OrderDto>
 
     suspend fun getOrderBidsByItem(
         platform: PlatformDto?,

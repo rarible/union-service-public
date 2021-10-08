@@ -3,7 +3,9 @@ package com.rarible.protocol.union.core.converter
 import com.rarible.protocol.currency.dto.CurrencyRateDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CurrencyUsdRateDto
+import org.springframework.stereotype.Component
 
+@Component
 object CurrencyConverter {
 
     fun convert(source: CurrencyRateDto): CurrencyUsdRateDto {

@@ -15,9 +15,13 @@ import io.mockk.coVerify
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
 
 @IntegrationTest
 class RefreshControllerFt : AbstractIntegrationTest() {
+
+    @Autowired
+    lateinit var ethOrderConverter: EthOrderConverter
 
     @Test
     fun `refresh item only`() = runBlocking<Unit> {
@@ -34,8 +38,8 @@ class RefreshControllerFt : AbstractIntegrationTest() {
 
         val result = testRestTemplate.postForEntity(uri, null, ItemDto::class.java).body!!
 
-        assertThat(result.bestSellOrder).isEqualTo(EthOrderConverter.convert(bestSell, itemId.blockchain))
-        assertThat(result.bestBidOrder).isEqualTo(EthOrderConverter.convert(bestBid, itemId.blockchain))
+        assertThat(result.bestSellOrder).isEqualTo(ethOrderConverter.convert(bestSell, itemId.blockchain))
+        assertThat(result.bestBidOrder).isEqualTo(ethOrderConverter.convert(bestBid, itemId.blockchain))
 
         coVerify {
             testItemEventProducer.send(match { message: KafkaMessage<ItemEventDto> ->
@@ -64,7 +68,7 @@ class RefreshControllerFt : AbstractIntegrationTest() {
 
         val result = testRestTemplate.postForEntity(uri, null, ItemDto::class.java).body!!
 
-        assertThat(result.bestBidOrder).isEqualTo(EthOrderConverter.convert(bestBid, itemId.blockchain))
+        assertThat(result.bestBidOrder).isEqualTo(ethOrderConverter.convert(bestBid, itemId.blockchain))
         assertThat(result.bestSellOrder).isNull()
         assertThat(result.sellers).isEqualTo(1)
         assertThat(result.totalStock).isEqualTo(bestSell.makeStock)

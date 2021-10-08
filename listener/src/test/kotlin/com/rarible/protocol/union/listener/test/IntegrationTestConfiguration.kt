@@ -4,6 +4,7 @@ import com.rarible.core.application.ApplicationEnvironmentInfo
 import com.rarible.core.kafka.RaribleKafkaConsumer
 import com.rarible.core.kafka.RaribleKafkaProducer
 import com.rarible.core.test.ext.KafkaTestExtension.Companion.kafkaContainer
+import com.rarible.protocol.currency.api.client.CurrencyControllerApi
 import com.rarible.protocol.dto.ActivityTopicProvider
 import com.rarible.protocol.dto.FlowActivityDto
 import com.rarible.protocol.dto.FlowNftItemEventDto
@@ -31,6 +32,7 @@ import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.dto.UnionEventTopicProvider
 import com.rarible.protocol.union.listener.config.activity.FlowActivityTopicProvider
 import com.rarible.protocol.union.subscriber.UnionKafkaJsonDeserializer
+import com.rarible.protocol.union.test.mock.CurrencyMock
 import io.mockk.mockk
 import org.apache.kafka.clients.consumer.OffsetResetStrategy
 import org.springframework.beans.factory.annotation.Qualifier
@@ -191,6 +193,12 @@ class IntegrationTestConfiguration {
             bootstrapServers = kafkaContainer.kafkaBoostrapServers()
         )
     }
+
+    //--------------------- CURRENCY ---------------------//
+
+    @Bean
+    @Primary
+    fun testCurrencyApi(): CurrencyControllerApi = CurrencyMock.currencyControllerApiMock
 
     //--------------------- ETHEREUM ---------------------//
     @Bean

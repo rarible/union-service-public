@@ -9,6 +9,8 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.UnionItemDto
+import com.rarible.protocol.union.test.mock.CurrencyMock
+import kotlinx.coroutines.runBlocking
 
 fun randomUnionItem(id: ItemIdDto): UnionItemDto {
     return when (id.blockchain) {
@@ -38,17 +40,26 @@ fun randomUnionOwnershipDto(ownershipId: OwnershipIdDto) = EthOwnershipConverter
     ownershipId.blockchain
 )
 
-fun randomUnionOrderDto() = EthOrderConverter.convert(
-    randomEthLegacyOrderDto(),
-    BlockchainDto.ETHEREUM
-)
+fun randomUnionOrderDto() = runBlocking {
+    mockedEthOrderConverter.convert(
+        randomEthLegacyOrderDto(),
+        BlockchainDto.ETHEREUM
+    )
+}
 
-fun randomUnionOrderDto(itemId: ItemIdDto) = EthOrderConverter.convert(
-    randomEthLegacyOrderDto(itemId),
-    itemId.blockchain
-)
+fun randomUnionOrderDto(itemId: ItemIdDto) = runBlocking {
+    mockedEthOrderConverter.convert(
+        randomEthLegacyOrderDto(itemId),
+        itemId.blockchain
+    )
+}
 
-fun randomUnionOrderDto(itemId: ItemIdDto, owner: String) = EthOrderConverter.convert(
-    randomEthLegacyOrderDto(itemId, EthConverter.convertToAddress(owner)),
-    itemId.blockchain
-)
+fun randomUnionOrderDto(itemId: ItemIdDto, owner: String) = runBlocking {
+    mockedEthOrderConverter.convert(
+        randomEthLegacyOrderDto(itemId, EthConverter.convertToAddress(owner)),
+        itemId.blockchain
+    )
+}
+
+
+private val mockedEthOrderConverter = EthOrderConverter(CurrencyMock.currencyServiceMock)

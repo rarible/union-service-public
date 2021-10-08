@@ -40,6 +40,9 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
     @Autowired
     private lateinit var ownershipService: EnrichmentOwnershipService
 
+    @Autowired
+    lateinit var ethOrderConverter: EthOrderConverter
+
     @Test
     fun `update event - item doesn't exist`() = runWithKafka {
         val itemId = randomEthItemId()
@@ -70,8 +73,8 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         val ethItem = randomEthNftItemDto(itemId)
         val bestSellOrder = randomEthLegacyOrderDto(itemId)
         val bestBidOrder = randomEthLegacyOrderDto(itemId)
-        val unionBestSell = EthOrderConverter.convert(bestSellOrder, itemId.blockchain)
-        val unionBestBid = EthOrderConverter.convert(bestBidOrder, itemId.blockchain)
+        val unionBestSell = ethOrderConverter.convert(bestSellOrder, itemId.blockchain)
+        val unionBestBid = ethOrderConverter.convert(bestBidOrder, itemId.blockchain)
 
         val unionItem = EthItemConverter.convert(ethItem, itemId.blockchain)
         val shortItem = ShortItemConverter.convert(unionItem).copy(
@@ -167,7 +170,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         itemService.save(shortItem)
 
         val bestSellOrder = randomEthLegacyOrderDto(itemId)
-        val unionBestSell = EthOrderConverter.convert(bestSellOrder, itemId.blockchain)
+        val unionBestSell = ethOrderConverter.convert(bestSellOrder, itemId.blockchain)
 
         coEvery { testEthereumItemApi.getNftItemById(itemId.value) } returns ethItem.toMono()
 
@@ -193,7 +196,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         val itemId = randomEthItemId()
 
         val bestBidOrder = randomEthLegacyOrderDto(itemId).copy(cancelled = true)
-        val unionBestBid = EthOrderConverter.convert(bestBidOrder, itemId.blockchain)
+        val unionBestBid = ethOrderConverter.convert(bestBidOrder, itemId.blockchain)
 
         val shortItem = randomShortItem(itemId).copy(bestBidOrder = ShortOrderConverter.convert(unionBestBid))
         val ethItem = randomEthNftItemDto(itemId)
@@ -231,7 +234,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         // In this case we don't have saved ShortItem in Enrichment DB
 
         val bestBidOrder = randomEthLegacyOrderDto(itemId).copy(cancelled = true)
-        val unionBestBid = EthOrderConverter.convert(bestBidOrder, itemId.blockchain)
+        val unionBestBid = ethOrderConverter.convert(bestBidOrder, itemId.blockchain)
 
         coEvery { testEthereumItemApi.getNftItemById(itemId.value) } returns ethItem.toMono()
 

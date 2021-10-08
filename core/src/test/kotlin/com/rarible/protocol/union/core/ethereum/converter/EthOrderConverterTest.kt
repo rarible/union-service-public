@@ -20,17 +20,21 @@ import com.rarible.protocol.union.test.data.randomEthOpenSeaV1OrderDto
 import com.rarible.protocol.union.test.data.randomEthOrderCancelDto
 import com.rarible.protocol.union.test.data.randomEthOrderSideMatchDto
 import com.rarible.protocol.union.test.data.randomEthV2OrderDto
+import com.rarible.protocol.union.test.mock.CurrencyMock
+import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 class EthOrderConverterTest {
 
+    private val ethOrderConverter = EthOrderConverter(CurrencyMock.currencyServiceMock)
+
     @Test
-    fun `eth order - legacy`() {
+    fun `eth order - legacy`() = runBlocking<Unit> {
         val dto = randomEthLegacyOrderDto()
 
-        val converted = EthOrderConverter.convert(dto, BlockchainDto.ETHEREUM)
+        val converted = ethOrderConverter.convert(dto, BlockchainDto.ETHEREUM)
 
         assertThat(converted.id.value).isEqualTo(dto.hash.prefixed())
         assertThat(converted.platform).isEqualTo(PlatformDto.RARIBLE)
@@ -49,8 +53,11 @@ class EthOrderConverterTest {
         assertThat(converted.cancelled).isEqualTo(dto.cancelled)
         assertThat(converted.createdAt).isEqualTo(dto.createdAt)
         assertThat(converted.lastUpdatedAt).isEqualTo(dto.lastUpdateAt)
-        assertThat(converted.makePriceUsd).isEqualTo(dto.makePriceUsd)
-        assertThat(converted.takePriceUsd).isEqualTo(dto.takePriceUsd)
+        assertThat(converted.makePrice).isEqualTo(dto.makePrice)
+        assertThat(converted.takePrice).isEqualTo(dto.takePrice)
+        // In mock we are converting price 1 to 1
+        assertThat(converted.makePriceUsd).isEqualTo(dto.makePrice)
+        assertThat(converted.takePriceUsd).isEqualTo(dto.takePrice)
         assertThat(converted.priceHistory[0].date).isEqualTo(dto.priceHistory!![0].date)
         assertThat(converted.priceHistory[0].makeValue).isEqualTo(dto.priceHistory!![0].makeValue)
         assertThat(converted.priceHistory[0].takeValue).isEqualTo(dto.priceHistory!![0].takeValue)
@@ -59,11 +66,11 @@ class EthOrderConverterTest {
     }
 
     @Test
-    fun `eth order pending - side match`() {
+    fun `eth order pending - side match`() = runBlocking<Unit> {
         val order = randomEthLegacyOrderDto().copy(pending = listOf(randomEthOrderSideMatchDto()))
         val dto = order.pending!![0] as OrderSideMatchDto
 
-        val converted = EthOrderConverter.convert(order, BlockchainDto.ETHEREUM)
+        val converted = ethOrderConverter.convert(order, BlockchainDto.ETHEREUM)
             .pending!![0] as PendingOrderMatchDto
 
         assertThat(converted.id.value).isEqualTo(dto.hash.prefixed())
@@ -87,11 +94,11 @@ class EthOrderConverterTest {
     }
 
     @Test
-    fun `eth order pending - cancel`() {
+    fun `eth order pending - cancel`() = runBlocking<Unit> {
         val order = randomEthLegacyOrderDto().copy(pending = listOf(randomEthOrderCancelDto()))
         val dto = order.pending!![0] as OrderCancelDto
 
-        val converted = EthOrderConverter.convert(order, BlockchainDto.ETHEREUM)
+        val converted = ethOrderConverter.convert(order, BlockchainDto.ETHEREUM)
             .pending!![0] as PendingOrderCancelDto
 
         assertThat(converted.id.value).isEqualTo(dto.hash.prefixed())
@@ -106,11 +113,11 @@ class EthOrderConverterTest {
     }
 
     @Test
-    fun `eth order pending - on chain`() {
+    fun `eth order pending - on chain`() = runBlocking<Unit> {
         val order = randomEthLegacyOrderDto().copy(pending = listOf(randomEthOnChainOrderDto()))
         val dto = order.pending!![0] as com.rarible.protocol.dto.OnChainOrderDto
 
-        val converted = EthOrderConverter.convert(order, BlockchainDto.ETHEREUM)
+        val converted = ethOrderConverter.convert(order, BlockchainDto.ETHEREUM)
             .pending!![0] as OnChainOrderDto
 
         assertThat(converted.id.value).isEqualTo(dto.hash.prefixed())
@@ -123,10 +130,10 @@ class EthOrderConverterTest {
     }
 
     @Test
-    fun `eth order rarible v2`() {
+    fun `eth order rarible v2`() = runBlocking<Unit> {
         val dto = randomEthV2OrderDto()
 
-        val converted = EthOrderConverter.convert(dto, BlockchainDto.ETHEREUM)
+        val converted = ethOrderConverter.convert(dto, BlockchainDto.ETHEREUM)
 
         assertThat(converted.id.value).isEqualTo(dto.hash.prefixed())
         assertThat(converted.platform).isEqualTo(PlatformDto.RARIBLE)
@@ -145,8 +152,10 @@ class EthOrderConverterTest {
         assertThat(converted.cancelled).isEqualTo(dto.cancelled)
         assertThat(converted.createdAt).isEqualTo(dto.createdAt)
         assertThat(converted.lastUpdatedAt).isEqualTo(dto.lastUpdateAt)
-        assertThat(converted.makePriceUsd).isEqualTo(dto.makePriceUsd)
-        assertThat(converted.takePriceUsd).isEqualTo(dto.takePriceUsd)
+        assertThat(converted.makePrice).isEqualTo(dto.makePrice)
+        assertThat(converted.takePrice).isEqualTo(dto.takePrice)
+        assertThat(converted.makePriceUsd).isEqualTo(dto.makePrice)
+        assertThat(converted.takePriceUsd).isEqualTo(dto.takePrice)
         assertThat(converted.priceHistory[0].date).isEqualTo(dto.priceHistory!![0].date)
         assertThat(converted.priceHistory[0].makeValue).isEqualTo(dto.priceHistory!![0].makeValue)
         assertThat(converted.priceHistory[0].takeValue).isEqualTo(dto.priceHistory!![0].takeValue)
@@ -160,10 +169,10 @@ class EthOrderConverterTest {
     }
 
     @Test
-    fun `eth order opensea v1`() {
+    fun `eth order opensea v1`() = runBlocking<Unit> {
         val dto = randomEthOpenSeaV1OrderDto()
 
-        val converted = EthOrderConverter.convert(dto, BlockchainDto.ETHEREUM)
+        val converted = ethOrderConverter.convert(dto, BlockchainDto.ETHEREUM)
 
         assertThat(converted.id.value).isEqualTo(dto.hash.prefixed())
         assertThat(converted.platform).isEqualTo(PlatformDto.OPEN_SEA)
@@ -182,19 +191,21 @@ class EthOrderConverterTest {
         assertThat(converted.cancelled).isEqualTo(dto.cancelled)
         assertThat(converted.createdAt).isEqualTo(dto.createdAt)
         assertThat(converted.lastUpdatedAt).isEqualTo(dto.lastUpdateAt)
-        assertThat(converted.makePriceUsd).isEqualTo(dto.makePriceUsd)
-        assertThat(converted.takePriceUsd).isEqualTo(dto.takePriceUsd)
+        assertThat(converted.makePrice).isEqualTo(dto.makePrice)
+        assertThat(converted.takePrice).isEqualTo(dto.takePrice)
+        assertThat(converted.makePriceUsd).isEqualTo(dto.makePrice)
+        assertThat(converted.takePriceUsd).isEqualTo(dto.takePrice)
         assertThat(converted.priceHistory[0].date).isEqualTo(dto.priceHistory!![0].date)
         assertThat(converted.priceHistory[0].makeValue).isEqualTo(dto.priceHistory!![0].makeValue)
         assertThat(converted.priceHistory[0].takeValue).isEqualTo(dto.priceHistory!![0].takeValue)
     }
 
     @Test
-    fun `eth order opensea v1 - data`() {
+    fun `eth order opensea v1 - data`() = runBlocking<Unit> {
         val order = randomEthOpenSeaV1OrderDto()
         val dto = order.data
 
-        val converted = EthOrderConverter.convert(order, BlockchainDto.ETHEREUM).data as EthOrderOpenSeaV1DataV1Dto
+        val converted = ethOrderConverter.convert(order, BlockchainDto.ETHEREUM).data as EthOrderOpenSeaV1DataV1Dto
 
         assertThat(converted.exchange.value).isEqualTo(dto.exchange.prefixed())
         assertThat(converted.makerRelayerFee).isEqualTo(dto.makerRelayerFee)
@@ -215,10 +226,10 @@ class EthOrderConverterTest {
     }
 
     @Test
-    fun `eth order crypto punks`() {
+    fun `eth order crypto punks`() = runBlocking<Unit> {
         val dto = randomEthCryptoPunksOrderDto()
 
-        val converted = EthOrderConverter.convert(dto, BlockchainDto.ETHEREUM)
+        val converted = ethOrderConverter.convert(dto, BlockchainDto.ETHEREUM)
 
         assertThat(converted.id.value).isEqualTo(dto.hash.prefixed())
         assertThat(converted.platform).isEqualTo(PlatformDto.CRYPTO_PUNKS)
@@ -237,8 +248,10 @@ class EthOrderConverterTest {
         assertThat(converted.cancelled).isEqualTo(dto.cancelled)
         assertThat(converted.createdAt).isEqualTo(dto.createdAt)
         assertThat(converted.lastUpdatedAt).isEqualTo(dto.lastUpdateAt)
-        assertThat(converted.makePriceUsd).isEqualTo(dto.makePriceUsd)
-        assertThat(converted.takePriceUsd).isEqualTo(dto.takePriceUsd)
+        assertThat(converted.makePrice).isEqualTo(dto.makePrice)
+        assertThat(converted.takePrice).isEqualTo(dto.takePrice)
+        assertThat(converted.makePriceUsd).isEqualTo(dto.makePrice)
+        assertThat(converted.takePriceUsd).isEqualTo(dto.takePrice)
         assertThat(converted.priceHistory[0].date).isEqualTo(dto.priceHistory!![0].date)
         assertThat(converted.priceHistory[0].makeValue).isEqualTo(dto.priceHistory!![0].makeValue)
         assertThat(converted.priceHistory[0].takeValue).isEqualTo(dto.priceHistory!![0].takeValue)
@@ -260,6 +273,6 @@ class EthOrderConverterTest {
             com.rarible.protocol.dto.OrderStatusDto.HISTORICAL,
             com.rarible.protocol.dto.OrderStatusDto.CANCELLED
         )
-        assertEquals(ethStatuses, EthOrderConverter.convert(unionStatuses))
+        assertEquals(ethStatuses, ethOrderConverter.convert(unionStatuses))
     }
 }
