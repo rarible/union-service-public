@@ -1541,6 +1541,10 @@ components:
           $ref: "#/components/schemas/BigDecimal"
         takePriceUsd:
           $ref: "#/components/schemas/BigDecimal"
+        makePrice:
+          $ref: "#/components/schemas/BigDecimal"
+        takePrice:
+          $ref: "#/components/schemas/BigDecimal"
         priceHistory:
           type: array
           default: [ ]

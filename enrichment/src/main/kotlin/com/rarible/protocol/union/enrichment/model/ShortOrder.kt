@@ -28,4 +28,8 @@ data class ShortOrder(
     fun getIdDto(): OrderIdDto {
         return OrderIdDto(blockchain, id)
     }
+
+    fun clearState(): ShortOrder {
+        return copy(makePriceUsd = null, takePriceUsd = null)
+    }
 }

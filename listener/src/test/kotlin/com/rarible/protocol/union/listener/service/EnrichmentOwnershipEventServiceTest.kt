@@ -56,7 +56,7 @@ class EnrichmentOwnershipEventServiceTest {
         val expectedShortOwnership = shortOwnership.copy(bestSellOrder = shortOrder)
 
         coEvery { ownershipService.get(shortOwnership.id) } returns shortOwnership
-        coEvery { bestOrderService.getBestSellOrder(shortOwnership, order) } returns shortOwnership
+        coEvery { bestOrderService.getBestSellOrder(shortOwnership, order) } returns expectedShortOwnership
         coEvery { ownershipService.save(expectedShortOwnership) } returns expectedShortOwnership
         coEvery { ownershipService.enrichOwnership(expectedShortOwnership, null, order) } returns mockk()
 
@@ -104,7 +104,7 @@ class EnrichmentOwnershipEventServiceTest {
         // Ownership exists, best Order is cancelled - Ownership should be deleted
         coEvery { ownershipService.get(shortOwnership.id) } returns shortOwnership
         // Means order is cancelled
-        coEvery { bestOrderService.getBestSellOrder(shortOwnership, order) } returns shortOwnership
+        coEvery { bestOrderService.getBestSellOrder(shortOwnership, order) } returns expectedShortOwnership
         coEvery { ownershipService.delete(shortOwnership.id) } returns DeleteResult.acknowledged(1)
         coEvery { ownershipService.enrichOwnership(expectedShortOwnership, null, order) } returns mockk()
 

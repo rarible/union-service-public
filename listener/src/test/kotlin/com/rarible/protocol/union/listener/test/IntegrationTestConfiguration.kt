@@ -4,6 +4,7 @@ import com.rarible.core.application.ApplicationEnvironmentInfo
 import com.rarible.core.kafka.RaribleKafkaConsumer
 import com.rarible.core.kafka.RaribleKafkaProducer
 import com.rarible.core.test.ext.KafkaTestExtension.Companion.kafkaContainer
+import com.rarible.protocol.currency.api.client.CurrencyControllerApi
 import com.rarible.protocol.dto.ActivityTopicProvider
 import com.rarible.protocol.dto.FlowActivityDto
 import com.rarible.protocol.dto.FlowNftItemEventDto
@@ -222,4 +223,7 @@ class IntegrationTestConfiguration {
     @Primary
     fun testFlowOrderApi(): FlowOrderControllerApi = mockk()
 
+    @Bean
+    @Primary
+    fun testCurrencyApi(): CurrencyControllerApi = mockk()
 }

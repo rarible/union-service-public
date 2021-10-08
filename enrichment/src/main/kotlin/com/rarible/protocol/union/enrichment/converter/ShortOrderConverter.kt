@@ -15,8 +15,8 @@ object ShortOrderConverter {
             // We expect here orders with integer value of makeStock since there should be only NFTs
             makeStock =  order.makeStock.toBigInteger(),
 
-            makePrice = if (isNft(order.make.type)) calculatePrice(order.make.value, order.take.value) else null,
-            takePrice = if (isNft(order.take.type)) calculatePrice(order.take.value, order.make.value) else null,
+            makePrice = order.makePrice,
+            takePrice = order.takePrice,
 
             makePriceUsd = order.makePriceUsd,
             takePriceUsd = order.takePriceUsd

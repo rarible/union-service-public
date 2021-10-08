@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.listener.service
 
 import com.rarible.core.test.wait.Wait
+import com.rarible.protocol.currency.api.client.CurrencyControllerApi
 import com.rarible.protocol.dto.OrdersPaginationDto
 import com.rarible.protocol.union.core.ethereum.converter.EthItemConverter
 import com.rarible.protocol.union.core.ethereum.converter.EthOrderConverter
@@ -12,17 +13,21 @@ import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
 import com.rarible.protocol.union.enrichment.test.data.randomShortItem
 import com.rarible.protocol.union.enrichment.test.data.randomShortOwnership
+import com.rarible.protocol.union.enrichment.util.sellCurrencyId
 import com.rarible.protocol.union.listener.test.AbstractIntegrationTest
 import com.rarible.protocol.union.listener.test.IntegrationTest
+import com.rarible.protocol.union.listener.test.data.createCurrencyDto
 import com.rarible.protocol.union.test.data.randomEthItemId
 import com.rarible.protocol.union.test.data.randomEthLegacyOrderDto
 import com.rarible.protocol.union.test.data.randomEthNftItemDto
 import com.rarible.protocol.union.test.data.randomUnionItem
 import com.rarible.protocol.union.test.data.randomUnionOrderDto
+import io.mockk.clearMocks
 import io.mockk.coEvery
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.delay
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import reactor.kotlin.core.publisher.toMono
@@ -35,10 +40,18 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
     private lateinit var itemEventService: EnrichmentItemEventService
 
     @Autowired
+    private lateinit var currencyControllerApi: CurrencyControllerApi
+
+    @Autowired
     private lateinit var itemService: EnrichmentItemService
 
     @Autowired
     private lateinit var ownershipService: EnrichmentOwnershipService
+
+    @BeforeEach
+    fun beforeEach() {
+        clearMocks(currencyControllerApi)
+    }
 
     @Test
     fun `update event - item doesn't exist`() = runWithKafka {
@@ -169,16 +182,16 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         val bestSellOrder = randomEthLegacyOrderDto(itemId)
         val unionBestSell = EthOrderConverter.convert(bestSellOrder, itemId.blockchain)
 
+        coEvery { currencyControllerApi.getCurrencyRate(any(), any(), any()) } returns createCurrencyDto().toMono()
         coEvery { testEthereumItemApi.getNftItemById(itemId.value) } returns ethItem.toMono()
 
         itemEventService.onItemBestSellOrderUpdated(shortItem.id, unionBestSell)
 
         // In result event for Item we expect updated bestSellOrder
-        val expected = EnrichedItemConverter.convert(unionItem)
-            .copy(bestSellOrder = unionBestSell)
+        val expected = EnrichedItemConverter.convert(unionItem).copy(bestSellOrder = unionBestSell)
 
         val saved = itemService.get(shortItem.id)!!
-        assertThat(saved.bestSellOrder).isEqualTo(ShortOrderConverter.convert(unionBestSell))
+        assertThat(saved.bestSellOrder?.clearState()).isEqualTo(ShortOrderConverter.convert(unionBestSell).clearState())
 
         Wait.waitAssert {
             val messages = findItemUpdates(itemId.value)

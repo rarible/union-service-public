@@ -2,6 +2,7 @@ package com.rarible.protocol.union.enrichment.configuration
 
 import com.rarible.core.mongo.configuration.EnableRaribleMongo
 import com.rarible.protocol.union.core.CoreConfiguration
+import com.rarible.protocol.union.enrichment.converter.CurrencyIdMongoConverter
 import com.rarible.protocol.union.enrichment.event.ItemEventListener
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
@@ -14,7 +15,8 @@ import org.springframework.context.annotation.Import
     basePackageClasses = [
         EnrichmentItemService::class,
         ItemRepository::class,
-        ItemEventListener::class
+        ItemEventListener::class,
+        CurrencyIdMongoConverter::class
     ]
 )
 class EnrichmentConfiguration
