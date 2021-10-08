@@ -27,7 +27,7 @@ class BestOrderServiceTest {
     private val enrichmentOrderService: EnrichmentOrderService = mockk()
 
     private val currencyService: CurrencyService = mockk {
-        coEvery { getCurrencyRate(any(), any(), any()) } returns CurrencyUsdRateDto(
+        coEvery { getRate(any(), any(), any()) } returns CurrencyUsdRateDto(
             currencyId = "test",
             rate = BigDecimal.ONE,
             date = nowMillis()

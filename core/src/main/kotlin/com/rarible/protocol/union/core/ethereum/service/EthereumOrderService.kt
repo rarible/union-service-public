@@ -8,6 +8,7 @@ import com.rarible.protocol.union.core.ethereum.converter.EthOrderConverter
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderDto
+import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PlatformDto
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.reactive.asFlow
@@ -52,17 +53,23 @@ class EthereumOrderService(
         tokenId: String,
         maker: String?,
         origin: String?,
+        status: List<OrderStatusDto>?,
+        start: Long?,
+        end: Long?,
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
-        val orders = orderControllerApi.getOrderBidsByItem(
+        val orders = orderControllerApi.getOrderBidsByItemAndByStatus(
             contract,
             tokenId,
+            EthOrderConverter.convert(status),
             maker,
             origin,
             EthConverter.convert(platform),
             continuation,
-            size
+            size,
+            start,
+            end
         ).awaitFirst()
         return EthOrderConverter.convert(orders, blockchain)
     }
@@ -71,15 +78,21 @@ class EthereumOrderService(
         platform: PlatformDto?,
         maker: String,
         origin: String?,
+        status: List<OrderStatusDto>?,
+        start: Long?,
+        end: Long?,
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
-        val orders = orderControllerApi.getOrderBidsByMaker(
+        val orders = orderControllerApi.getOrderBidsByMakerAndByStatus(
             maker,
+            EthOrderConverter.convert(status),
             origin,
             EthConverter.convert(platform),
             continuation,
-            size
+            size,
+            start,
+            end
         ).awaitFirst()
         return EthOrderConverter.convert(orders, blockchain)
     }

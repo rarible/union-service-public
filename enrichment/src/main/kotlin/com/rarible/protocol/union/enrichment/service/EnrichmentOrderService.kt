@@ -123,6 +123,9 @@ class EnrichmentOrderService(
                 null,
                 null,
                 null,
+                null,
+                null,
+                null,
                 1
             )
         }
@@ -137,6 +140,9 @@ class EnrichmentOrderService(
                     platform,
                     id.token,
                     id.tokenId.toString(),
+                    null,
+                    null,
+                    null,
                     null,
                     null,
                     continuation,

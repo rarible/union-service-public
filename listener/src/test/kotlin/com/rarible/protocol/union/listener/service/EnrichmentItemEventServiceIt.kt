@@ -215,7 +215,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
 
         coEvery { testEthereumItemApi.getNftItemById(itemId.value) } returns ethItem.toMono()
         coEvery {
-            testEthereumOrderApi.getOrderBidsByItem(any(), any(), any(), any(), any(), any(), any())
+            testEthereumOrderApi.getOrderBidsByItemAndByStatus(any(), any(), any(), any(), any(), any(), any(), any(), any(), any())
         } returns OrdersPaginationDto(emptyList(), null).toMono()
 
         itemEventService.onItemBestBidOrderUpdated(shortItem.id, unionBestBid)

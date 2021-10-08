@@ -1,7 +1,7 @@
 package com.rarible.protocol.union.api.controller.advice
 
 import com.rarible.core.client.WebClientResponseProxyException
-import com.rarible.protocol.union.core.exception.UnionBadRequestException
+import com.rarible.protocol.union.core.exception.UnionException
 import com.rarible.protocol.union.dto.BlockchainIdFormatException
 import com.rarible.protocol.union.dto.UnionApiErrorBadRequestDto
 import com.rarible.protocol.union.dto.UnionApiErrorServerErrorDto
@@ -30,7 +30,7 @@ class ErrorsController {
         value = [
             ServerWebInputException::class,
             BlockchainIdFormatException::class,
-            UnionBadRequestException::class
+            UnionException::class
         ]
     )
     fun handleServerWebInputException(ex: Exception) = mono {

@@ -17,7 +17,7 @@ class CurrencyController(
         address: String,
         at: Instant
     ): ResponseEntity<CurrencyUsdRateDto> {
-        val result = currencyService.getCurrencyRate(blockchain, address, at)
+        val result = currencyService.getRate(blockchain, address, at)
         return ResponseEntity.ok(result)
     }
 }

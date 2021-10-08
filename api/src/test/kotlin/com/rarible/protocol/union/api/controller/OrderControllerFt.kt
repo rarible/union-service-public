@@ -136,14 +136,17 @@ class OrderControllerFt : AbstractIntegrationTest() {
         val ethOrders = listOf(randomEthLegacyOrderDto())
 
         coEvery {
-            testEthereumOrderApi.getOrderBidsByItem(
+            testEthereumOrderApi.getOrderBidsByItemAndByStatus(
                 contract.value,
                 tokenId.toString(),
+                null,
                 maker.value,
                 null,
                 ethPlatform,
                 continuation,
-                size
+                size,
+                null,
+                null
             )
         } returns OrdersPaginationDto(ethOrders, continuation).toMono()
 
@@ -152,6 +155,9 @@ class OrderControllerFt : AbstractIntegrationTest() {
             tokenId.toString(),
             platform,
             maker.fullId(),
+            null,
+            null,
+            null,
             null,
             continuation,
             size
@@ -165,29 +171,6 @@ class OrderControllerFt : AbstractIntegrationTest() {
     @Test
     fun `get order bids by item - flow`() = runBlocking<Unit> {
         // TODO - implement when Flow support this method
-    }
-
-    @Test
-    fun `get order bids by maker - polygon`() = runBlocking<Unit> {
-        val maker = randomPolygonAddress()
-
-        val polygonOrders = listOf(randomEthLegacyOrderDto())
-
-        coEvery {
-            testPolygonOrderApi.getOrderBidsByMaker(maker.value, null, ethPlatform, continuation, size)
-        } returns OrdersPaginationDto(polygonOrders, continuation).toMono()
-
-        val orders = orderControllerClient.getOrderBidsByMaker(
-            maker.fullId(),
-            platform,
-            null,
-            continuation,
-            size
-        ).awaitFirst()
-
-        assertThat(orders.orders).hasSize(1)
-        assertThat(orders.orders[0]).isInstanceOf(OrderDto::class.java)
-        assertThat(orders.continuation).isNull()
     }
 
     @Test

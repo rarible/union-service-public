@@ -11,6 +11,7 @@ import com.rarible.protocol.union.dto.IdParser
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.OrderIdsDto
+import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.OrdersDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.continuation.OrderContinuation
@@ -57,6 +58,9 @@ class OrderController(
         platform: PlatformDto?,
         maker: String?,
         origin: String?,
+        status: List<OrderStatusDto>?,
+        start: Long?,
+        end: Long?,
         continuation: String?,
         size: Int?
     ): ResponseEntity<OrdersDto> {
@@ -67,7 +71,7 @@ class OrderController(
         ensureSameBlockchain(blockchain, makerBlockchain, originBlockchain)
 
         val result = router.getService(blockchain)
-            .getOrderBidsByItem(platform, shortContract, tokenId, shortMaker, shortOrigin, continuation, safeSize)
+            .getOrderBidsByItem(platform, shortContract, tokenId, shortMaker, shortOrigin, status, start, end, continuation, safeSize)
         return ResponseEntity.ok(toDto(result))
     }
 
@@ -75,6 +79,9 @@ class OrderController(
         maker: String,
         platform: PlatformDto?,
         origin: String?,
+        status: List<OrderStatusDto>?,
+        start: Long?,
+        end: Long?,
         continuation: String?,
         size: Int?
     ): ResponseEntity<OrdersDto> {
@@ -84,7 +91,7 @@ class OrderController(
         ensureSameBlockchain(blockchain, originBlockchain)
 
         val result = router.getService(blockchain)
-            .getOrderBidsByMaker(platform, shortMaker, shortOrigin, continuation, safeSize)
+            .getOrderBidsByMaker(platform, shortMaker, shortOrigin, status, start, end, continuation, safeSize)
 
         return ResponseEntity.ok(toDto(result))
     }

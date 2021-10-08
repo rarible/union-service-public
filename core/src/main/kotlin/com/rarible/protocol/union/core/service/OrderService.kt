@@ -3,6 +3,7 @@ package com.rarible.protocol.union.core.service
 import com.rarible.protocol.union.core.continuation.Slice
 import com.rarible.protocol.union.core.service.router.BlockchainService
 import com.rarible.protocol.union.dto.OrderDto
+import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PlatformDto
 import kotlinx.coroutines.flow.Flow
 
@@ -29,6 +30,9 @@ interface OrderService : BlockchainService {
         tokenId: String,
         maker: String?,
         origin: String?,
+        status: List<OrderStatusDto>?,
+        start: Long?,
+        end: Long?,
         continuation: String?,
         size: Int
     ): Slice<OrderDto>
@@ -37,6 +41,9 @@ interface OrderService : BlockchainService {
         platform: PlatformDto?,
         maker: String,
         origin: String?,
+        status: List<OrderStatusDto>?,
+        start: Long?,
+        end: Long?,
         continuation: String?,
         size: Int
     ): Slice<OrderDto>
