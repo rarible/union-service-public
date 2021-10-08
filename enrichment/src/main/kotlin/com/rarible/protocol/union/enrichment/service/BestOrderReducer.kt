@@ -32,7 +32,7 @@ class BestOrderReducer(
         val usdEnrichedOrders = orders.map { entity ->
             val order = entity.value
             val currencyId = entity.key
-            val rate = currencyService.getRate(order.blockchain, currencyId.address, at).rate
+            val rate = currencyService.getRate(order.blockchain, currencyId, at).rate
 
             order.copy(
                 makePriceUsd = order.makePrice?.let { makePrice -> makePrice * rate },
