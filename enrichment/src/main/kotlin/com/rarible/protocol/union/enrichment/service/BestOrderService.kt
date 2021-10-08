@@ -1,7 +1,6 @@
 package com.rarible.protocol.union.enrichment.service
 
 import com.rarible.protocol.union.dto.OrderDto
-import com.rarible.protocol.union.enrichment.converter.CurrencyIdConverter
 import com.rarible.protocol.union.enrichment.evaluator.*
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortOwnership
@@ -17,7 +16,7 @@ class BestOrderService(
     // TODO we can return here Full Order if it was fetched - thats allow us to avoid one more query to indexer
     // for update events in ownership/item
     suspend fun getBestSellOrder(ownership: ShortOwnership, order: OrderDto): ShortOwnership {
-        val currencyId = CurrencyIdConverter.convert(order.id.blockchain, order.take.type)
+        val currencyId = order.sellCurrencyId
         val bestSellOrders = HashMap(ownership.bestSellOrders)
 
         val bestOrderEvaluator = BestOrderEvaluator(
