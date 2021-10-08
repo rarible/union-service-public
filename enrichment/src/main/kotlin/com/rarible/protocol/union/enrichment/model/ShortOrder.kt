@@ -12,16 +12,24 @@ data class ShortOrder(
 
     val platform: String,
     val makeStock: BigInteger,
+
+    val makePrice: BigDecimal?,
+    val takePrice: BigDecimal?,
+
+    @Transient
     val makePriceUsd: BigDecimal?,
+    @Transient
     val takePriceUsd: BigDecimal?,
 
     @Transient
     val dtoId: OrderIdDto = OrderIdDto(blockchain, id)
 
 ) {
-
     fun getIdDto(): OrderIdDto {
         return OrderIdDto(blockchain, id)
     }
 
+    fun clearState(): ShortOrder {
+        return copy(makePriceUsd = null, takePriceUsd = null)
+    }
 }

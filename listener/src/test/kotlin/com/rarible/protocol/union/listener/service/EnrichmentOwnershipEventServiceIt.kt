@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.listener.service
 
 import com.rarible.core.test.wait.Wait
+import com.rarible.protocol.currency.api.client.CurrencyControllerApi
 import com.rarible.protocol.union.core.ethereum.converter.EthOrderConverter
 import com.rarible.protocol.union.core.ethereum.converter.EthOwnershipConverter
 import com.rarible.protocol.union.enrichment.converter.EnrichedOwnershipConverter
@@ -11,20 +12,25 @@ import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
 import com.rarible.protocol.union.enrichment.test.data.randomShortOwnership
 import com.rarible.protocol.union.listener.test.AbstractIntegrationTest
 import com.rarible.protocol.union.listener.test.IntegrationTest
+import com.rarible.protocol.union.listener.test.data.createCurrencyDto
 import com.rarible.protocol.union.test.data.randomEthItemId
 import com.rarible.protocol.union.test.data.randomEthLegacyOrderDto
 import com.rarible.protocol.union.test.data.randomEthOwnershipDto
 import com.rarible.protocol.union.test.data.randomEthOwnershipId
 import com.rarible.protocol.union.test.data.randomUnionOwnershipDto
+import io.mockk.clearMocks
 import io.mockk.coEvery
 import kotlinx.coroutines.FlowPreview
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
 
 @FlowPreview
 @IntegrationTest
+@Suppress("ReactiveStreamsUnusedPublisher")
 class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
 
     @Autowired
@@ -34,7 +40,16 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
     private lateinit var ownershipService: EnrichmentOwnershipService
 
     @Autowired
+    private lateinit var currencyControllerApi: CurrencyControllerApi
+
+    @Autowired
     lateinit var ethOrderConverter: EthOrderConverter
+
+    @BeforeEach
+    fun beforeEach() {
+        clearMocks(currencyControllerApi)
+        coEvery { currencyControllerApi.getCurrencyRate(any(), any(), any()) } returns Mono.just(createCurrencyDto())
+    }
 
     @Test
     fun `update event - ownership doesn't exist`() = runWithKafka {
@@ -115,11 +130,12 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
         val unionBestSell = ethOrderConverter.convert(bestSellOrder, itemId.blockchain)
 
         coEvery { testEthereumOwnershipApi.getNftOwnershipById(ownershipId.value) } returns ethOwnership.toMono()
+        coEvery { testEthereumOwnershipApi.getNftOwnershipById(ownershipId.value) } returns ethOwnership.toMono()
 
         ownershipEventHandler.onOwnershipBestSellOrderUpdated(shortOwnership.id, unionBestSell)
 
         val saved = ownershipService.get(shortOwnership.id)!!
-        assertThat(saved.bestSellOrder).isEqualTo(ShortOrderConverter.convert(unionBestSell))
+        assertThat(saved.bestSellOrder?.clearState()).isEqualTo(ShortOrderConverter.convert(unionBestSell).clearState())
 
         val expected = EnrichedOwnershipConverter.convert(unionOwnership)
             .copy(bestSellOrder = unionBestSell)

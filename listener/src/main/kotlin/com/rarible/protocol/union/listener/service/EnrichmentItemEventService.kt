@@ -72,15 +72,11 @@ class EnrichmentItemEventService(
     }
 
     suspend fun onItemBestSellOrderUpdated(itemId: ShortItemId, order: OrderDto) {
-        updateOrder(itemId, order) { item ->
-            item.copy(bestSellOrder = bestOrderService.getBestSellOrder(item, order))
-        }
+        updateOrder(itemId, order) { item -> bestOrderService.getBestSellOrder(item, order) }
     }
 
     suspend fun onItemBestBidOrderUpdated(itemId: ShortItemId, order: OrderDto) {
-        updateOrder(itemId, order) { item ->
-            item.copy(bestBidOrder = bestOrderService.getBestBidOrder(item, order))
-        }
+        updateOrder(itemId, order) { item -> bestOrderService.getBestBidOrder(item, order) }
     }
 
     private suspend fun updateOrder(

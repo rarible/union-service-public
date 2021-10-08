@@ -35,7 +35,7 @@ class EnrichmentOwnershipEventService(
         val exist = current != null
         val short = current ?: ShortOwnership.empty(ownershipId)
 
-        val updated = short.copy(bestSellOrder = bestOrderService.getBestSellOrder(short, order))
+        val updated = bestOrderService.getBestSellOrder(short, order)
 
         if (short != updated) {
             if (updated.isNotEmpty()) {

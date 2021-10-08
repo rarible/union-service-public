@@ -15,6 +15,8 @@ data class ShortOwnership(
     val tokenId: BigInteger,
     val owner: String,
 
+    val bestSellOrders: Map<CurrencyId, ShortOrder>,
+
     val bestSellOrder: ShortOrder?
 ) {
 
@@ -26,6 +28,7 @@ data class ShortOwnership(
                 tokenId = ownershipId.tokenId,
                 owner = ownershipId.owner,
 
+                bestSellOrders = emptyMap(),
                 bestSellOrder = null
             )
         }

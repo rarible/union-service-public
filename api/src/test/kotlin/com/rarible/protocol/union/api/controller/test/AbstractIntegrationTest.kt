@@ -1,9 +1,11 @@
 package com.rarible.protocol.union.api.controller.test
 
+import com.rarible.core.common.nowMillis
 import com.rarible.core.kafka.KafkaMessage
 import com.rarible.core.kafka.KafkaSendResult
 import com.rarible.core.kafka.RaribleKafkaProducer
 import com.rarible.protocol.currency.api.client.CurrencyControllerApi
+import com.rarible.protocol.currency.dto.CurrencyRateDto
 import com.rarible.protocol.flow.nft.api.client.FlowNftCollectionControllerApi
 import com.rarible.protocol.flow.nft.api.client.FlowNftItemControllerApi
 import com.rarible.protocol.flow.nft.api.client.FlowNftOrderActivityControllerApi
@@ -29,7 +31,10 @@ import org.junit.jupiter.api.BeforeEach
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.web.client.RestTemplate
+import reactor.kotlin.core.publisher.toMono
+import java.math.BigDecimal
 import java.net.URI
+import java.util.*
 
 @FlowPreview
 abstract class AbstractIntegrationTest {
@@ -85,7 +90,7 @@ abstract class AbstractIntegrationTest {
     lateinit var ethereumOwnershipControllerApiMock: EthOwnershipControllerApiMock
     lateinit var ethereumOrderControllerApiMock: EthOrderControllerApiMock
 
-    //--------------------- POLYGON ---------------------//    
+    //--------------------- POLYGON ---------------------//
     @Autowired
     @Qualifier("polygon.item.api")
     lateinit var testPolygonItemApi: NftItemControllerApi
@@ -114,7 +119,7 @@ abstract class AbstractIntegrationTest {
     @Qualifier("polygon.activity.api.order")
     lateinit var testPolygonActivityOrderApi: OrderActivityControllerApi
 
-    //--------------------- FLOW ---------------------//    
+    //--------------------- FLOW ---------------------//
     @Autowired
     lateinit var testFlowItemApi: FlowNftItemControllerApi
 
@@ -164,6 +169,14 @@ abstract class AbstractIntegrationTest {
         coEvery {
             testOwnershipEventProducer.send(any() as KafkaMessage<OwnershipEventDto>)
         } returns KafkaSendResult.Success("")
-    }
 
+        coEvery {
+            testCurrencyApi.getCurrencyRate(any(), any(), any())
+        } returns CurrencyRateDto(
+            date = nowMillis(),
+            fromCurrencyId = UUID.randomUUID().toString(),
+            rate = BigDecimal.ONE,
+            toCurrencyId = UUID.randomUUID().toString()
+        ).toMono()
+    }
 }

@@ -12,6 +12,7 @@ object ShortOwnershipConverter {
             tokenId = dto.id.tokenId,
             owner = dto.id.owner.value,
             // Default enrichment data
+            bestSellOrders = emptyMap(),
             bestSellOrder = null
         )
     }

@@ -6,7 +6,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 
-class BestBidOrderComparatorTest {
+class BestUsdBidOrderComparatorTest {
 
     @Test
     fun `updated is better - both prices specified`() {
@@ -14,7 +14,7 @@ class BestBidOrderComparatorTest {
         val updated = randomUnionOrderDto().copy(takePriceUsd = BigDecimal.valueOf(2))
         val shortCurrent = ShortOrderConverter.convert(current)
         val shortUpdated = ShortOrderConverter.convert(updated)
-        val result = BestBidOrderComparator.compare(shortCurrent, shortUpdated)
+        val result = BestUsdBidOrderComparator.compare(shortCurrent, shortUpdated)
         assertThat(result).isEqualTo(shortUpdated)
     }
 
@@ -24,7 +24,7 @@ class BestBidOrderComparatorTest {
         val updated = randomUnionOrderDto().copy(takePriceUsd = BigDecimal.valueOf(1))
         val shortCurrent = ShortOrderConverter.convert(current)
         val shortUpdated = ShortOrderConverter.convert(updated)
-        val result = BestBidOrderComparator.compare(shortCurrent, shortUpdated)
+        val result = BestUsdBidOrderComparator.compare(shortCurrent, shortUpdated)
         assertThat(result).isEqualTo(shortCurrent)
     }
 
@@ -34,7 +34,7 @@ class BestBidOrderComparatorTest {
         val updated = randomUnionOrderDto().copy(takePriceUsd = BigDecimal.valueOf(1))
         val shortCurrent = ShortOrderConverter.convert(current)
         val shortUpdated = ShortOrderConverter.convert(updated)
-        val result = BestBidOrderComparator.compare(shortCurrent, shortUpdated)
+        val result = BestUsdBidOrderComparator.compare(shortCurrent, shortUpdated)
         assertThat(result).isEqualTo(shortUpdated)
     }
 
@@ -44,7 +44,7 @@ class BestBidOrderComparatorTest {
         val updated = randomUnionOrderDto().copy(takePriceUsd = null)
         val shortCurrent = ShortOrderConverter.convert(current)
         val shortUpdated = ShortOrderConverter.convert(updated)
-        val result = BestBidOrderComparator.compare(shortCurrent, shortUpdated)
+        val result = BestUsdBidOrderComparator.compare(shortCurrent, shortUpdated)
         assertThat(result).isEqualTo(shortUpdated)
     }
 
