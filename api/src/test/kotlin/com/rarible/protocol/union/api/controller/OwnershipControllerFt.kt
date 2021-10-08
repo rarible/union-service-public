@@ -42,6 +42,12 @@ class OwnershipControllerFt : AbstractIntegrationTest() {
     @Autowired
     lateinit var enrichmentOwnershipService: EnrichmentOwnershipService
 
+    @Autowired
+    lateinit var ethOrderConverter: EthOrderConverter
+
+    @Autowired
+    lateinit var flowOrderConverter: FlowOrderConverter
+
     @Test
     fun `get ownership by id - ethereum, not enriched`() = runBlocking<Unit> {
         val ownershipIdFull = randomEthOwnershipId().fullId()
@@ -63,7 +69,7 @@ class OwnershipControllerFt : AbstractIntegrationTest() {
         val flowOwnership = randomFlowNftOwnershipDto(flowItemId)
         val flowUnionOwnership = FlowOwnershipConverter.convert(flowOwnership, flowItemId.blockchain)
         val flowOrder = randomFlowV1OrderDto(flowItemId)
-        val flowUnionOrder = FlowOrderConverter.convert(flowOrder, flowItemId.blockchain)
+        val flowUnionOrder = flowOrderConverter.convert(flowOrder, flowItemId.blockchain)
         val flowShortOwnership = ShortOwnershipConverter.convert(flowUnionOwnership)
             .copy(bestSellOrder = ShortOrderConverter.convert(flowUnionOrder))
         enrichmentOwnershipService.save(flowShortOwnership)
@@ -85,7 +91,7 @@ class OwnershipControllerFt : AbstractIntegrationTest() {
         val ethOwnership = randomEthOwnershipDto(ethItemId).copy(date = nowMillis())
         val ethUnionOwnership = EthOwnershipConverter.convert(ethOwnership, ethItemId.blockchain)
         val ethOrder = randomEthV2OrderDto(ethItemId)
-        val ethUnionOrder = EthOrderConverter.convert(ethOrder, ethItemId.blockchain)
+        val ethUnionOrder = ethOrderConverter.convert(ethOrder, ethItemId.blockchain)
         val ethShortOwnership = ShortOwnershipConverter.convert(ethUnionOwnership)
             .copy(bestSellOrder = ShortOrderConverter.convert(ethUnionOrder))
         enrichmentOwnershipService.save(ethShortOwnership)
@@ -158,7 +164,7 @@ class OwnershipControllerFt : AbstractIntegrationTest() {
         val ethOwnership = randomEthOwnershipDto(ethItemId).copy(date = nowMillis())
         val ethUnionOwnership = EthOwnershipConverter.convert(ethOwnership, ethItemId.blockchain)
         val ethOrder = randomEthV2OrderDto(ethItemId)
-        val ethUnionOrder = EthOrderConverter.convert(ethOrder, ethItemId.blockchain)
+        val ethUnionOrder = ethOrderConverter.convert(ethOrder, ethItemId.blockchain)
         val ethShortOwnership = ShortOwnershipConverter.convert(ethUnionOwnership)
             .copy(bestSellOrder = ShortOrderConverter.convert(ethUnionOrder))
         enrichmentOwnershipService.save(ethShortOwnership)
@@ -168,7 +174,7 @@ class OwnershipControllerFt : AbstractIntegrationTest() {
         val flowOwnership = randomFlowNftOwnershipDto(flowItemId).copy(createdAt = ethOwnership.date.minusSeconds(1))
         val flowUnionOwnership = FlowOwnershipConverter.convert(flowOwnership, flowItemId.blockchain)
         val flowOrder = randomFlowV1OrderDto(flowItemId)
-        val flowUnionOrder = FlowOrderConverter.convert(flowOrder, flowItemId.blockchain)
+        val flowUnionOrder = flowOrderConverter.convert(flowOrder, flowItemId.blockchain)
         val flowShortOwnership = ShortOwnershipConverter.convert(flowUnionOwnership)
             .copy(bestSellOrder = ShortOrderConverter.convert(flowUnionOrder))
         enrichmentOwnershipService.save(flowShortOwnership)

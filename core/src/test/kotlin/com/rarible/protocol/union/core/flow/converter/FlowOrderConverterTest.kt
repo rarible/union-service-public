@@ -5,16 +5,20 @@ import com.rarible.protocol.union.dto.FlowAssetTypeDto
 import com.rarible.protocol.union.dto.FlowOrderDataV1Dto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.test.data.randomFlowV1OrderDto
+import com.rarible.protocol.union.test.mock.CurrencyMock
+import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 class FlowOrderConverterTest {
 
+    private val flowOrderConverter = FlowOrderConverter(CurrencyMock.currencyServiceMock)
+
     @Test
-    fun `order V1`() {
+    fun `order V1`() = runBlocking<Unit> {
         val dto = randomFlowV1OrderDto()
 
-        val converted = FlowOrderConverter.convert(dto, BlockchainDto.FLOW)
+        val converted = flowOrderConverter.convert(dto, BlockchainDto.FLOW)
 
         assertThat(converted.id.value).isEqualTo(dto.id.toString())
         assertThat(converted.platform).isEqualTo(PlatformDto.RARIBLE)
@@ -25,8 +29,10 @@ class FlowOrderConverterTest {
         assertThat(converted.fill).isEqualTo(dto.fill)
         assertThat(converted.createdAt).isEqualTo(dto.createdAt)
         assertThat(converted.lastUpdatedAt).isEqualTo(dto.lastUpdateAt)
-        assertThat(converted.makePriceUsd).isEqualTo(dto.priceUsd)
-        assertThat(converted.takePriceUsd).isEqualTo(dto.priceUsd)
+        assertThat(converted.makePrice).isNull()
+        assertThat(converted.takePrice).isEqualTo(dto.take.value / dto.make.value)
+        assertThat(converted.makePriceUsd).isNull()
+        assertThat(converted.takePriceUsd).isEqualTo(dto.take.value / dto.make.value)
         assertThat(converted.maker.value).isEqualTo(dto.maker)
         assertThat(converted.taker?.value).isEqualTo(dto.taker)
         assertThat(converted.make.value).isEqualTo(dto.make.value)

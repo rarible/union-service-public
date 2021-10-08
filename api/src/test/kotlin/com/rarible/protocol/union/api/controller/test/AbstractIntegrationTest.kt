@@ -138,8 +138,6 @@ abstract class AbstractIntegrationTest {
     @BeforeEach
     fun beforeEach() {
         clearMocks(
-            testCurrencyApi,
-
             testEthereumItemApi,
             testEthereumOwnershipApi,
             testEthereumOrderApi,

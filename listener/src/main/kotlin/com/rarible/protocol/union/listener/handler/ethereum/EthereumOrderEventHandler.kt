@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory
 class EthereumOrderEventHandler(
     private val producer: RaribleKafkaProducer<OrderEventDto>,
     private val orderEventService: EnrichmentOrderEventService,
+    private val ethOrderEventConverter: EthOrderEventConverter,
     private val blockchain: BlockchainDto
 ) : AbstractEventHandler<com.rarible.protocol.dto.OrderEventDto>() {
 
@@ -21,7 +22,7 @@ class EthereumOrderEventHandler(
     override suspend fun handleSafely(event: com.rarible.protocol.dto.OrderEventDto) {
         logger.debug("Received Ethereum ({}) Order event: type={}", blockchain, event::class.java.simpleName)
 
-        val unionEventDto = EthOrderEventConverter.convert(event, blockchain)
+        val unionEventDto = ethOrderEventConverter.convert(event, blockchain)
 
         when (unionEventDto) {
             is OrderUpdateEventDto -> orderEventService.updateOrder(unionEventDto.order)

@@ -10,13 +10,12 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PlatformDto
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitFirst
 
 class EthereumOrderService(
     override val blockchain: BlockchainDto,
-    private val orderControllerApi: OrderControllerApi
+    private val orderControllerApi: OrderControllerApi,
+    private val ethOrderConverter: EthOrderConverter
 ) : AbstractEthereumService(blockchain), OrderService {
 
     override suspend fun getOrdersAll(
@@ -31,20 +30,20 @@ class EthereumOrderService(
             continuation,
             size
         ).awaitFirst()
-        return EthOrderConverter.convert(orders, blockchain)
+        return ethOrderConverter.convert(orders, blockchain)
     }
 
     override suspend fun getOrderById(id: String): OrderDto {
         val order = orderControllerApi.getOrderByHash(id).awaitFirst()
-        return EthOrderConverter.convert(order, blockchain)
+        return ethOrderConverter.convert(order, blockchain)
     }
 
-    override fun getOrdersByIds(orderIds: List<String>): Flow<OrderDto> {
+    override suspend fun getOrdersByIds(orderIds: List<String>): List<OrderDto> {
         val orderIdsDto = OrderIdsDto(
             ids = orderIds.map { EthConverter.convertToWord(it) }
         )
-        val orders = orderControllerApi.getOrdersByIds(orderIdsDto)
-        return orders.map { EthOrderConverter.convert(it, blockchain) }.asFlow()
+        val orders = orderControllerApi.getOrdersByIds(orderIdsDto).collectList().awaitFirst()
+        return orders.map { ethOrderConverter.convert(it, blockchain) }
     }
 
     override suspend fun getOrderBidsByItem(
@@ -62,7 +61,7 @@ class EthereumOrderService(
         val orders = orderControllerApi.getOrderBidsByItemAndByStatus(
             contract,
             tokenId,
-            EthOrderConverter.convert(status),
+            ethOrderConverter.convert(status),
             maker,
             origin,
             EthConverter.convert(platform),
@@ -71,7 +70,7 @@ class EthereumOrderService(
             start,
             end
         ).awaitFirst()
-        return EthOrderConverter.convert(orders, blockchain)
+        return ethOrderConverter.convert(orders, blockchain)
     }
 
     override suspend fun getOrderBidsByMaker(
@@ -86,7 +85,7 @@ class EthereumOrderService(
     ): Slice<OrderDto> {
         val orders = orderControllerApi.getOrderBidsByMakerAndByStatus(
             maker,
-            EthOrderConverter.convert(status),
+            ethOrderConverter.convert(status),
             origin,
             EthConverter.convert(platform),
             continuation,
@@ -94,7 +93,7 @@ class EthereumOrderService(
             start,
             end
         ).awaitFirst()
-        return EthOrderConverter.convert(orders, blockchain)
+        return ethOrderConverter.convert(orders, blockchain)
     }
 
     override suspend fun getSellOrders(
@@ -108,7 +107,7 @@ class EthereumOrderService(
             EthConverter.convert(platform),
             continuation, size
         ).awaitFirst()
-        return EthOrderConverter.convert(orders, blockchain)
+        return ethOrderConverter.convert(orders, blockchain)
     }
 
     override suspend fun getSellOrdersByCollection(
@@ -125,7 +124,7 @@ class EthereumOrderService(
             continuation,
             size
         ).awaitFirst()
-        return EthOrderConverter.convert(orders, blockchain)
+        return ethOrderConverter.convert(orders, blockchain)
     }
 
     override suspend fun getSellOrdersByItem(
@@ -146,7 +145,7 @@ class EthereumOrderService(
             continuation,
             size
         ).awaitFirst()
-        return EthOrderConverter.convert(orders, blockchain)
+        return ethOrderConverter.convert(orders, blockchain)
     }
 
     override suspend fun getSellOrdersByMaker(
@@ -163,6 +162,6 @@ class EthereumOrderService(
             continuation,
             size
         ).awaitFirst()
-        return EthOrderConverter.convert(orders, blockchain)
+        return ethOrderConverter.convert(orders, blockchain)
     }
 }

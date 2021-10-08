@@ -45,6 +45,9 @@ class ItemControllerFt : AbstractIntegrationTest() {
     @Autowired
     lateinit var enrichmentItemService: EnrichmentItemService
 
+    @Autowired
+    lateinit var ethOrderConverter: EthOrderConverter
+
     @Test
     fun `get item by id - ethereum, enriched`() = runBlocking<Unit> {
         // Enriched item
@@ -52,7 +55,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
         val ethItem = randomEthNftItemDto(ethItemId)
         val ethUnionItem = EthItemConverter.convert(ethItem, ethItemId.blockchain)
         val ethOrder = randomEthV2OrderDto(ethItemId)
-        val ethUnionOrder = EthOrderConverter.convert(ethOrder, ethItemId.blockchain)
+        val ethUnionOrder = ethOrderConverter.convert(ethOrder, ethItemId.blockchain)
         val ethShortItem = ShortItemConverter.convert(ethUnionItem)
             .copy(bestSellOrder = ShortOrderConverter.convert(ethUnionOrder))
         enrichmentItemService.save(ethShortItem)
@@ -115,7 +118,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
         val ethItem = randomEthNftItemDto(ethItemId)
         val ethUnionItem = EthItemConverter.convert(ethItem, ethItemId.blockchain)
         val ethOrder = randomEthV2OrderDto(ethItemId)
-        val ethUnionOrder = EthOrderConverter.convert(ethOrder, ethItemId.blockchain)
+        val ethUnionOrder = ethOrderConverter.convert(ethOrder, ethItemId.blockchain)
         val ethShortItem = ShortItemConverter.convert(ethUnionItem)
             .copy(bestBidOrder = ShortOrderConverter.convert(ethUnionOrder))
         enrichmentItemService.save(ethShortItem)

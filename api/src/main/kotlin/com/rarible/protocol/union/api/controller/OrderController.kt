@@ -16,7 +16,6 @@ import com.rarible.protocol.union.dto.OrdersDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.continuation.OrderContinuation
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.RestController
 
@@ -104,13 +103,14 @@ class OrderController(
 
     // TODO add tests
     @ExperimentalCoroutinesApi
-    override fun getOrdersByIds(orderIdsDto: OrderIdsDto): ResponseEntity<Flow<OrderDto>> {
+    override suspend fun getOrdersByIds(orderIdsDto: OrderIdsDto): ResponseEntity<OrdersDto> {
         val orderIds = orderIdsDto.ids
             .map { IdParser.parse(it) }
             .map { OrderIdDto(blockchain = it.first, value = it.second) }
 
         val orders = orderApiService.getByIds(orderIds)
-        return ResponseEntity.ok(orders)
+        val result = OrdersDto(orders = orders)
+        return ResponseEntity.ok(result)
     }
 
     override suspend fun getSellOrders(
