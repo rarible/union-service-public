@@ -10,7 +10,6 @@ import com.rarible.protocol.union.enrichment.model.ShortOwnership
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.toList
 import org.springframework.stereotype.Component
 
 @ExperimentalCoroutinesApi
@@ -49,7 +48,7 @@ class OwnershipApiService(
         val shortOrderIds = existingEnrichedOwnerships.values
             .mapNotNull { it.bestSellOrder?.dtoId }
 
-        val orders = orderApiService.getByIds(shortOrderIds).toList()
+        val orders = orderApiService.getByIds(shortOrderIds)
             .associateBy { it.id }
 
         val result = unionOwnerships.map {

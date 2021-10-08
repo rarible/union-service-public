@@ -14,12 +14,14 @@ import com.rarible.protocol.nft.api.client.NftOwnershipControllerApi
 import com.rarible.protocol.order.api.client.OrderActivityControllerApi
 import com.rarible.protocol.order.api.client.OrderControllerApi
 import com.rarible.protocol.order.api.client.OrderSignatureControllerApi
+import com.rarible.protocol.union.core.ethereum.converter.EthOrderConverter
 import com.rarible.protocol.union.core.ethereum.service.EthereumActivityService
 import com.rarible.protocol.union.core.ethereum.service.EthereumCollectionService
 import com.rarible.protocol.union.core.ethereum.service.EthereumItemService
 import com.rarible.protocol.union.core.ethereum.service.EthereumOrderService
 import com.rarible.protocol.union.core.ethereum.service.EthereumOwnershipService
 import com.rarible.protocol.union.core.ethereum.service.EthereumSignatureService
+import com.rarible.protocol.union.core.flow.converter.FlowOrderConverter
 import com.rarible.protocol.union.core.flow.service.FlowActivityService
 import com.rarible.protocol.union.core.flow.service.FlowCollectionService
 import com.rarible.protocol.union.core.flow.service.FlowItemService
@@ -99,8 +101,11 @@ class CoreConfiguration {
     }
 
     @Bean
-    fun ethereumOrderService(@Qualifier("ethereum.order.api") ethereumOrderApi: OrderControllerApi): OrderService {
-        return EthereumOrderService(BlockchainDto.ETHEREUM, ethereumOrderApi)
+    fun ethereumOrderService(
+        @Qualifier("ethereum.order.api") ethereumOrderApi: OrderControllerApi,
+        ethOrderConverter: EthOrderConverter
+    ): OrderService {
+        return EthereumOrderService(BlockchainDto.ETHEREUM, ethereumOrderApi, ethOrderConverter)
     }
 
     @Bean
@@ -133,8 +138,11 @@ class CoreConfiguration {
     }
 
     @Bean
-    fun polygonOrderService(@Qualifier("polygon.order.api") ethereumOrderApi: OrderControllerApi): OrderService {
-        return EthereumOrderService(BlockchainDto.POLYGON, ethereumOrderApi)
+    fun polygonOrderService(
+        @Qualifier("polygon.order.api") ethereumOrderApi: OrderControllerApi,
+        ethOrderConverter: EthOrderConverter
+    ): OrderService {
+        return EthereumOrderService(BlockchainDto.POLYGON, ethereumOrderApi, ethOrderConverter)
     }
 
     @Bean
@@ -167,8 +175,8 @@ class CoreConfiguration {
     }
 
     @Bean
-    fun flowOrderService(flowOrderApi: FlowOrderControllerApi): OrderService {
-        return FlowOrderService(BlockchainDto.FLOW, flowOrderApi)
+    fun flowOrderService(flowOrderApi: FlowOrderControllerApi, flowOrderConverter: FlowOrderConverter): OrderService {
+        return FlowOrderService(BlockchainDto.FLOW, flowOrderApi, flowOrderConverter)
     }
 
     @Bean

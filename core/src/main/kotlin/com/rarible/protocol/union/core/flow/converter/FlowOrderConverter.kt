@@ -3,36 +3,52 @@ package com.rarible.protocol.union.core.flow.converter
 import com.rarible.protocol.dto.FlowOrderDto
 import com.rarible.protocol.dto.PayInfoDto
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
+import com.rarible.protocol.union.core.service.CurrencyService
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.FlowOrderDataV1Dto
-import com.rarible.protocol.union.dto.OrderPayoutDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
+import com.rarible.protocol.union.dto.OrderPayoutDto
 import com.rarible.protocol.union.dto.PlatformDto
+import org.springframework.stereotype.Component
 
-object FlowOrderConverter {
+@Component
+class FlowOrderConverter(
+    private val currencyService: CurrencyService
+) {
 
-    fun convert(order: FlowOrderDto, blockchain: BlockchainDto): OrderDto {
+    suspend fun convert(order: FlowOrderDto, blockchain: BlockchainDto): OrderDto {
+
+        val make = FlowConverter.convert(order.make, blockchain)
+        val take = FlowConverter.convert(order.take, blockchain)
+
+        val maker = UnionAddressConverter.convert(order.maker, blockchain)
+        val taker = order.taker?.let { UnionAddressConverter.convert(it, blockchain) }
+
+        val takePrice = order.take.value / order.make.value
+        val takePriceUsd = currencyService.toUsd(take.type, takePrice)
+
         return OrderDto(
             id = OrderIdDto(blockchain, order.id.toString()),
             platform = PlatformDto.RARIBLE,
-            maker = UnionAddressConverter.convert(order.maker, blockchain),
-            taker = order.taker?.let { UnionAddressConverter.convert(it, blockchain) },
-            make = FlowConverter.convert(order.make, blockchain),
-            take = FlowConverter.convert(order.take, blockchain),
+            maker = maker,
+            taker = taker,
+            make = make,
+            take = take,
             fill = order.fill,
             startedAt = order.start,
             endedAt = order.end,
-            // TODO makeStock is needed to be BigDecimal on the flow client side
             makeStock = order.makeStock.toBigDecimal(),
             cancelled = order.cancelled,
             createdAt = order.createdAt,
             lastUpdatedAt = order.lastUpdateAt,
-            makePriceUsd = order.priceUsd,
-            takePriceUsd = order.priceUsd,
+            makePrice = null,
+            takePrice = takePrice,
+            makePriceUsd = null,
+            takePriceUsd = takePriceUsd,
             priceHistory = emptyList(),
             data = convert(order.data, blockchain),
-            salt = ""// TODO could be supported on Flow?
+            salt = ""// Not supported on Flow
         )
     }
 

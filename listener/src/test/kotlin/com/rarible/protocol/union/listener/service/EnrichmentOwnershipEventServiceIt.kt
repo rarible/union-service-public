@@ -42,6 +42,9 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
     @Autowired
     private lateinit var currencyControllerApi: CurrencyControllerApi
 
+    @Autowired
+    lateinit var ethOrderConverter: EthOrderConverter
+
     @BeforeEach
     fun beforeEach() {
         clearMocks(currencyControllerApi)
@@ -81,7 +84,7 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
         val ethOwnership = randomEthOwnershipDto(ownershipId)
 
         val bestSellOrder = randomEthLegacyOrderDto(itemId)
-        val unionBestSell = EthOrderConverter.convert(bestSellOrder, itemId.blockchain)
+        val unionBestSell = ethOrderConverter.convert(bestSellOrder, itemId.blockchain)
 
         val unionOwnership = EthOwnershipConverter.convert(ethOwnership, itemId.blockchain)
         val shortOwnership = ShortOwnershipConverter.convert(unionOwnership).copy(
@@ -124,7 +127,7 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
         ownershipService.save(shortOwnership)
 
         val bestSellOrder = randomEthLegacyOrderDto(itemId)
-        val unionBestSell = EthOrderConverter.convert(bestSellOrder, itemId.blockchain)
+        val unionBestSell = ethOrderConverter.convert(bestSellOrder, itemId.blockchain)
 
         coEvery { testEthereumOwnershipApi.getNftOwnershipById(ownershipId.value) } returns ethOwnership.toMono()
         coEvery { testEthereumOwnershipApi.getNftOwnershipById(ownershipId.value) } returns ethOwnership.toMono()

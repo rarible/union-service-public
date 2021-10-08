@@ -17,6 +17,8 @@ import com.rarible.protocol.flow.nft.api.subscriber.FlowNftIndexerEventsConsumer
 import com.rarible.protocol.nft.api.subscriber.NftIndexerEventsConsumerFactory
 import com.rarible.protocol.order.api.subscriber.OrderIndexerEventsConsumerFactory
 import com.rarible.protocol.union.core.Entity
+import com.rarible.protocol.union.core.ethereum.converter.EthOrderEventConverter
+import com.rarible.protocol.union.core.flow.converter.FlowOrderEventConverter
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemEventDto
@@ -123,9 +125,17 @@ class UnionListenerConfiguration(
     }
 
     @Bean
-    fun ethereumOrderWorker(@Qualifier("ethereum.order.consumer.factory") factory: OrderIndexerEventsConsumerFactory): KafkaConsumerWorker<com.rarible.protocol.dto.OrderEventDto> {
+    fun ethereumOrderWorker(
+        @Qualifier("ethereum.order.consumer.factory") factory: OrderIndexerEventsConsumerFactory,
+        ethOrderEventConverter: EthOrderEventConverter
+    ): KafkaConsumerWorker<com.rarible.protocol.dto.OrderEventDto> {
         val consumer = factory.createOrderEventsConsumer(consumerGroup(Entity.ORDER), Blockchain.ETHEREUM)
-        val handler = EthereumOrderEventHandler(orderProducer, enrichmentOrderEventService, BlockchainDto.ETHEREUM)
+        val handler = EthereumOrderEventHandler(
+            orderProducer,
+            enrichmentOrderEventService,
+            ethOrderEventConverter,
+            BlockchainDto.ETHEREUM
+        )
         return createBatchedConsumerWorker(consumer, handler, ETHEREUM, Entity.ORDER, ethereumProperties.orderWorkers)
     }
 
@@ -179,9 +189,17 @@ class UnionListenerConfiguration(
     }
 
     @Bean
-    fun polygonOrderWorker(@Qualifier("polygon.order.consumer.factory") factory: OrderIndexerEventsConsumerFactory): KafkaConsumerWorker<com.rarible.protocol.dto.OrderEventDto> {
+    fun polygonOrderWorker(
+        @Qualifier("polygon.order.consumer.factory") factory: OrderIndexerEventsConsumerFactory,
+        ethOrderEventConverter: EthOrderEventConverter
+    ): KafkaConsumerWorker<com.rarible.protocol.dto.OrderEventDto> {
         val consumer = factory.createOrderEventsConsumer(consumerGroup(Entity.ORDER), Blockchain.POLYGON)
-        val handler = EthereumOrderEventHandler(orderProducer, enrichmentOrderEventService, BlockchainDto.POLYGON)
+        val handler = EthereumOrderEventHandler(
+            orderProducer,
+            enrichmentOrderEventService,
+            ethOrderEventConverter,
+            BlockchainDto.POLYGON
+        )
         return createBatchedConsumerWorker(consumer, handler, POLYGON, Entity.ORDER, polygonProperties.orderWorkers)
     }
 
@@ -221,9 +239,17 @@ class UnionListenerConfiguration(
     }
 
     @Bean
-    fun flowOrderChangeWorker(factory: FlowNftIndexerEventsConsumerFactory): KafkaConsumerWorker<FlowOrderEventDto> {
+    fun flowOrderChangeWorker(
+        factory: FlowNftIndexerEventsConsumerFactory,
+        flowOrderEventConverter: FlowOrderEventConverter
+    ): KafkaConsumerWorker<FlowOrderEventDto> {
         val consumer = factory.createORderEventsConsumer(consumerGroup(Entity.ORDER))
-        val handler = FlowOrderEventHandler(orderProducer, enrichmentOrderEventService, BlockchainDto.FLOW)
+        val handler = FlowOrderEventHandler(
+            orderProducer,
+            enrichmentOrderEventService,
+            flowOrderEventConverter,
+            BlockchainDto.FLOW
+        )
         return createBatchedConsumerWorker(consumer, handler, FLOW, Entity.ORDER, flowProperties.orderWorkers)
     }
 

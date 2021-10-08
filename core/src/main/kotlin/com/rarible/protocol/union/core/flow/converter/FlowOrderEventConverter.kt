@@ -5,13 +5,17 @@ import com.rarible.protocol.dto.FlowOrderUpdateEventDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderEventDto
 import com.rarible.protocol.union.dto.OrderUpdateEventDto
+import org.springframework.stereotype.Component
 
-object FlowOrderEventConverter {
+@Component
+class FlowOrderEventConverter(
+    private val flowOrderConverter: FlowOrderConverter
+) {
 
-    fun convert(source: FlowOrderEventDto, blockchain: BlockchainDto): OrderEventDto {
+    suspend fun convert(source: FlowOrderEventDto, blockchain: BlockchainDto): OrderEventDto {
         return when (source) {
             is FlowOrderUpdateEventDto -> {
-                val order = FlowOrderConverter.convert(source.order, blockchain)
+                val order = flowOrderConverter.convert(source.order, blockchain)
                 OrderUpdateEventDto(
                     eventId = source.eventId,
                     orderId = order.id,

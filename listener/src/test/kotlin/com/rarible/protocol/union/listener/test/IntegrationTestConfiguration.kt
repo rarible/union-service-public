@@ -32,6 +32,7 @@ import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.dto.UnionEventTopicProvider
 import com.rarible.protocol.union.listener.config.activity.FlowActivityTopicProvider
 import com.rarible.protocol.union.subscriber.UnionKafkaJsonDeserializer
+import com.rarible.protocol.union.test.mock.CurrencyMock
 import io.mockk.mockk
 import org.apache.kafka.clients.consumer.OffsetResetStrategy
 import org.springframework.beans.factory.annotation.Qualifier
@@ -192,6 +193,12 @@ class IntegrationTestConfiguration {
             bootstrapServers = kafkaContainer.kafkaBoostrapServers()
         )
     }
+
+    //--------------------- CURRENCY ---------------------//
+
+    @Bean
+    @Primary
+    fun testCurrencyApi(): CurrencyControllerApi = CurrencyMock.currencyControllerApiMock
 
     //--------------------- ETHEREUM ---------------------//
     @Bean

@@ -108,6 +108,7 @@ object EthConverter {
     fun convert(source: com.rarible.protocol.dto.AssetTypeDto, blockchain: BlockchainDto): AssetTypeDto {
         return when (source) {
             is EthAssetTypeDto -> EthEthereumAssetTypeDto(
+                contract = UnionAddressConverter.convert(Address.ZERO(), blockchain)
             )
             is Erc20AssetTypeDto -> EthErc20AssetTypeDto(
                 contract = UnionAddressConverter.convert(source.contract, blockchain)
