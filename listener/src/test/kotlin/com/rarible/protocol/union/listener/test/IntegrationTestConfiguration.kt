@@ -229,8 +229,4 @@ class IntegrationTestConfiguration {
     @Bean
     @Primary
     fun testFlowOrderApi(): FlowOrderControllerApi = mockk()
-
-    @Bean
-    @Primary
-    fun testCurrencyApi(): CurrencyControllerApi = mockk()
 }
