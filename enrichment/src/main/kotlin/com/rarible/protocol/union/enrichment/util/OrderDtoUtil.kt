@@ -5,7 +5,7 @@ import com.rarible.protocol.union.enrichment.converter.CurrencyIdConverter
 import com.rarible.protocol.union.enrichment.model.CurrencyId
 
 val OrderDto.sellCurrencyId: CurrencyId
-    get() = CurrencyIdConverter.convert(take.type)
+    get() = take.type.contract.value
 
 val OrderDto.bidCurrencyId: CurrencyId
-    get() = CurrencyIdConverter.convert(make.type)
+    get() = make.type.contract.value

@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.api.client
 
-import com.rarible.protocol.union.api.ApiClient
 import com.rarible.protocol.union.dto.UnionModelJacksonModule
 import com.rarible.protocol.union.dto.UnionPrimitivesJacksonModule
 import org.springframework.boot.web.reactive.function.client.WebClientCustomizer
