@@ -34,6 +34,7 @@ data class ShortItem(
     @Version
     val version: Long? = null
 ) {
+
     fun withBestSellOrders(
         bestSellOrder: ShortOrder?,
         bestSellOrders: Map<CurrencyId, ShortOrder>
@@ -85,6 +86,34 @@ data class ShortItem(
 
     fun isNotEmpty(): Boolean {
         return bestBidOrder != null || bestSellOrder != null
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as ShortItem
+
+        if (blockchain != other.blockchain) return false
+        if (token != other.token) return false
+        if (tokenId != other.tokenId) return false
+        if (sellers != other.sellers) return false
+        if (totalStock != other.totalStock) return false
+        if (bestSellOrder?.clearState() != other.bestSellOrder?.clearState()) return false
+        if (bestBidOrder?.clearState() != other.bestBidOrder?.clearState()) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = blockchain.hashCode()
+        result = 31 * result + token.hashCode()
+        result = 31 * result + tokenId.hashCode()
+        result = 31 * result + sellers
+        result = 31 * result + totalStock.hashCode()
+        result = 31 * result + (bestSellOrder?.hashCode() ?: 0)
+        result = 31 * result + (bestBidOrder?.hashCode() ?: 0)
+        return result
     }
 
     @Transient

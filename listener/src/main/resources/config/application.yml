@@ -54,5 +54,8 @@ listener:
   reconciliation:
     orderBatchSize: 50
     threadCount: 2
+  price-update:
+    rate: PT5M
+    delay: PT1M
 
 
