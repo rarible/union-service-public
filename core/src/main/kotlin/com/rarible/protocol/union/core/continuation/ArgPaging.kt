@@ -38,9 +38,8 @@ class ArgPaging<T, C : Continuation<C>, F : ContinuationFactory<T, C>>(
             // per arg that we have in result slice
             val reversed = it.slice.entities.reversed()
 
-            // Ok, we found one of entities for this arg in result slice - we need to build arg continuation for it
             for (entity in reversed) {
-                // If there is already continuation for this arg, skipping it, since we're moving in reversed order
+                // Ok, we found one of entities for this arg in result slice - we need to build arg continuation for it
                 if (resultSet.contains(entity)) {
                     if (it.hasNext() || entity != it.slice.entities.last()) {
                         // If this slice has next page OR this entity is not last from this arg slice,
