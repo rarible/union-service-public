@@ -33,9 +33,9 @@ object FlowActivityConverter {
                     // TODO ensure that's right
                     date = source.date,
                     nft = FlowConverter.convert(source.left.asset, blockchain),
-                    payment = FlowConverter.convert(source.left.asset, blockchain),
+                    payment = FlowConverter.convert(source.right.asset, blockchain),
                     seller = UnionAddressConverter.convert(source.left.maker, blockchain),
-                    buyer = UnionAddressConverter.convert(source.left.maker, blockchain),
+                    buyer = UnionAddressConverter.convert(source.right.maker, blockchain),
                     priceUsd = source.price, //TODO should be in USD,
                     price = source.price,
                     type = OrderMatchSellDto.Type.SELL,
