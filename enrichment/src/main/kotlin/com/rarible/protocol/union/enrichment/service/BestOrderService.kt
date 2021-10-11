@@ -15,55 +15,58 @@ class BestOrderService(
 ) {
     // TODO we can return here Full Order if it was fetched - thats allow us to avoid one more query to indexer
     // for update events in ownership/item
-    suspend fun getBestSellOrder(ownership: ShortOwnership, order: OrderDto): ShortOwnership {
-        val currencyId = order.sellCurrencyId
+    suspend fun getBestSellOrder(ownership: ShortOwnership, order: OrderDto? = null): ShortOwnership {
         val bestSellOrders = HashMap(ownership.bestSellOrders)
 
-        val bestOrderEvaluator = BestOrderEvaluator(
-            comparator = BestSellOrderComparator,
-            provider = OwnershipBestSellOrderProvider(ownership.id, currencyId, enrichmentOrderService)
-        )
-        val bestCurrent = bestSellOrders[currencyId]
-        val bestUpdated = bestOrderEvaluator.evaluateBestOrder(bestCurrent, order)
-        if (bestUpdated != null) bestSellOrders[currencyId] = bestUpdated else bestSellOrders.remove(currencyId)
+        if (order != null) {
+            val currencyId = order.sellCurrencyId
 
+            val bestOrderEvaluator = BestOrderEvaluator(
+                comparator = BestSellOrderComparator,
+                provider = OwnershipBestSellOrderProvider(ownership.id, currencyId, enrichmentOrderService)
+            )
+            val bestCurrent = bestSellOrders[currencyId]
+            val bestUpdated = bestOrderEvaluator.evaluateBestOrder(bestCurrent, order)
+            if (bestUpdated != null) bestSellOrders[currencyId] = bestUpdated else bestSellOrders.remove(currencyId)
+        }
         val bestSellOrder = bestUsdOrderReducer.reduceSellsByUsd(bestSellOrders)
-
-        return ownership.copy(bestSellOrder = bestSellOrder, bestSellOrders = bestSellOrders)
+        return ownership.withBestSellOrders(bestSellOrder, bestSellOrders)
     }
 
-    suspend fun getBestSellOrder(item: ShortItem, order: OrderDto): ShortItem {
-        val currencyId = order.sellCurrencyId
+    suspend fun getBestSellOrder(item: ShortItem, order: OrderDto? = null): ShortItem {
         val bestSellOrders = HashMap(item.bestSellOrders)
 
-        val bestOrderEvaluator = BestOrderEvaluator(
-            comparator = BestSellOrderComparator,
-            provider = ItemBestSellOrderProvider(item.id, currencyId, enrichmentOrderService)
-        )
+        if (order != null) {
+            val currencyId = order.sellCurrencyId
 
-        val bestCurrent = bestSellOrders[currencyId]
-        val bestUpdated = bestOrderEvaluator.evaluateBestOrder(bestCurrent, order)
-        if (bestUpdated != null) bestSellOrders[currencyId] = bestUpdated else bestSellOrders.remove(currencyId)
-
-        val bestSellOrder = bestUsdOrderReducer.reduceBidsByUsd(bestSellOrders)
-        return item.copy(bestSellOrder = bestSellOrder, bestSellOrders = bestSellOrders)
+            val bestOrderEvaluator = BestOrderEvaluator(
+                comparator = BestSellOrderComparator,
+                provider = ItemBestSellOrderProvider(item.id, currencyId, enrichmentOrderService)
+            )
+            val bestCurrent = bestSellOrders[currencyId]
+            val bestUpdated = bestOrderEvaluator.evaluateBestOrder(bestCurrent, order)
+            if (bestUpdated != null) bestSellOrders[currencyId] = bestUpdated else bestSellOrders.remove(currencyId)
+        }
+        val bestSellOrder = bestUsdOrderReducer.reduceSellsByUsd(bestSellOrders)
+        return item.withBestSellOrders(bestSellOrder, bestSellOrders)
     }
 
-    suspend fun getBestBidOrder(item: ShortItem, order: OrderDto): ShortItem {
-        val currencyId = order.bidCurrencyId
+    suspend fun getBestBidOrder(item: ShortItem, order: OrderDto? = null): ShortItem {
         val bestBidOrders = HashMap(item.bestBidOrders)
 
-        val bestOrderEvaluator = BestOrderEvaluator(
-            comparator = BestBidOrderComparator,
-            provider = ItemBestBidOrderProvider(item.id, currencyId, enrichmentOrderService)
-        )
+        if (order != null) {
+            val currencyId = order.bidCurrencyId
 
-        val bestCurrent = bestBidOrders[currencyId]
-        val bestUpdated = bestOrderEvaluator.evaluateBestOrder(bestCurrent, order)
-        if (bestUpdated != null) bestBidOrders[currencyId] = bestUpdated else bestBidOrders.remove(currencyId)
-
+            val bestOrderEvaluator = BestOrderEvaluator(
+                comparator = BestBidOrderComparator,
+                provider = ItemBestBidOrderProvider(item.id, currencyId, enrichmentOrderService)
+            )
+            val bestCurrent = bestBidOrders[currencyId]
+            val bestUpdated = bestOrderEvaluator.evaluateBestOrder(bestCurrent, order)
+            if (bestUpdated != null) bestBidOrders[currencyId] = bestUpdated else bestBidOrders.remove(currencyId)
+        }
         val bestBidOrder = bestUsdOrderReducer.reduceBidsByUsd(bestBidOrders)
-        return item.copy(bestBidOrder = bestBidOrder, bestBidOrders = bestBidOrders)
+        return item.withBestBidOrders(bestBidOrder, bestBidOrders)
     }
 }
 

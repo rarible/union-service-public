@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.enrichment.converter
 
+import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.dto.UnionItemDto
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import java.math.BigInteger
@@ -16,8 +17,11 @@ object ShortItemConverter {
             totalStock = BigInteger.ZERO,
             bestSellOrders = emptyMap(),
             bestBidOrders = emptyMap(),
+            bestSellOrderCount = 0,
+            bestBidOrderCount = 0,
             bestSellOrder = null,
-            bestBidOrder = null
+            bestBidOrder = null,
+            lastUpdatedAt = nowMillis()
         )
     }
 }
