@@ -30,7 +30,7 @@ class EnrichmentOwnershipEventService(
         notifyUpdate(existing, ownership)
     }
 
-    suspend fun onOwnershipBestSellOrderUpdated(ownershipId: ShortOwnershipId, order: OrderDto) = optimisticLock {
+    suspend fun onOwnershipBestSellOrderUpdated(ownershipId: ShortOwnershipId, order: OrderDto? = null) = optimisticLock {
         val current = ownershipService.get(ownershipId)
         val exist = current != null
         val short = current ?: ShortOwnership.empty(ownershipId)

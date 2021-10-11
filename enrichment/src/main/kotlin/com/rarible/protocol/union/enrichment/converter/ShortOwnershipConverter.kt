@@ -2,6 +2,7 @@ package com.rarible.protocol.union.enrichment.converter
 
 import com.rarible.protocol.union.dto.UnionOwnershipDto
 import com.rarible.protocol.union.enrichment.model.ShortOwnership
+import java.time.Instant
 
 object ShortOwnershipConverter {
 
@@ -12,8 +13,10 @@ object ShortOwnershipConverter {
             tokenId = dto.id.tokenId,
             owner = dto.id.owner.value,
             // Default enrichment data
+            bestSellOrderCount = 0,
             bestSellOrders = emptyMap(),
-            bestSellOrder = null
+            bestSellOrder = null,
+            lastUpdatedAt = Instant.EPOCH
         )
     }
 }
