@@ -1,11 +1,10 @@
 package com.rarible.protocol.union.enrichment.repository
 
 import com.mongodb.client.result.DeleteResult
-import com.rarible.protocol.union.enrichment.model.ItemSellStats
-import com.rarible.protocol.union.enrichment.model.ShortItemId
-import com.rarible.protocol.union.enrichment.model.ShortOrder
-import com.rarible.protocol.union.enrichment.model.ShortOwnership
-import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
+import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.enrichment.model.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrElse
 import kotlinx.coroutines.reactive.awaitFirstOrNull
@@ -16,13 +15,10 @@ import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.findById
 import org.springframework.data.mongodb.core.index.Index
-import org.springframework.data.mongodb.core.query.Criteria
-import org.springframework.data.mongodb.core.query.Query
-import org.springframework.data.mongodb.core.query.exists
-import org.springframework.data.mongodb.core.query.inValues
-import org.springframework.data.mongodb.core.query.isEqualTo
+import org.springframework.data.mongodb.core.query.*
 import org.springframework.stereotype.Component
 import java.math.BigInteger
+import java.time.Instant
 
 @Component
 class OwnershipRepository(
@@ -46,6 +42,36 @@ class OwnershipRepository(
             Query(ShortOwnership::id inValues ids),
             ShortOwnership::class.java
         ).collectList().awaitFirst()
+    }
+
+    fun findWithMultiCurrency(lastUpdateAt: Instant): Flow<ShortOwnershipId> {
+        val criteria = Criteria().orOperator(
+            ShortOwnership::bestSellOrderCount gte 2
+        ).and(ShortOwnership::lastUpdatedAt).lte(lastUpdateAt)
+
+        val blockchainField = ShortOwnership::blockchain.name
+        val tokenField = ShortOwnership::token.name
+        val tokenIdField = ShortOwnership::tokenId.name
+        val ownerField = ShortOwnership::owner.name
+
+        val query = Query(criteria).withHint(Indices.MULTI_CURRENCY_OWNERSHIP.indexKeys)
+
+        query.fields()
+            .include(blockchainField)
+            .include(tokenField)
+            .include(tokenIdField)
+            .include(ownerField)
+
+        return template.find(query, Document::class.java, collection)
+            .map { document ->
+                ShortOwnershipId(
+                    blockchain = BlockchainDto.valueOf(document.getString(blockchainField)),
+                    token = document.getString(tokenField),
+                    tokenId = BigInteger(document.getString(tokenIdField)),
+                    owner = document.getString(ownerField)
+                )
+            }
+            .asFlow()
     }
 
     suspend fun delete(ownershipId: ShortOwnershipId): DeleteResult? {
@@ -92,8 +118,18 @@ class OwnershipRepository(
             .on(ShortOwnership::tokenId.name, Sort.Direction.ASC)
             .background()
 
+        val MULTI_CURRENCY_OWNERSHIP: Index = Index()
+            .on(ShortOwnership::bestSellOrderCount.name, Sort.Direction.DESC)
+            .on(ShortOwnership::blockchain.name, Sort.Direction.DESC)
+            .on(ShortOwnership::token.name, Sort.Direction.DESC)
+            .on(ShortOwnership::tokenId.name, Sort.Direction.DESC)
+            .on(ShortOwnership::owner.name, Sort.Direction.DESC)
+            .on(ShortOwnership::lastUpdatedAt.name, Sort.Direction.DESC)
+            .background()
+
         val ALL = listOf(
-            OWNERSHIP_CONTRACT_TOKENID
+            OWNERSHIP_CONTRACT_TOKENID,
+            MULTI_CURRENCY_OWNERSHIP
         )
     }
 }

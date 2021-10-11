@@ -32,7 +32,7 @@ class EnrichmentItemEventService(
     // If ownership was updated, we need to recalculate totalStock/sellers for related item,
     // also, we can specify here Order which triggered this update - ItemService
     // can use this full Order to avoid unnecessary getOrderById calls
-    suspend fun onOwnershipUpdated(ownershipId: ShortOwnershipId, order: OrderDto?) {
+    suspend fun onOwnershipUpdated(ownershipId: ShortOwnershipId, order: OrderDto? = null) {
         val itemId = ShortItemId(ownershipId.blockchain, ownershipId.token, ownershipId.tokenId)
         optimisticLock {
             val item = itemService.get(itemId)
@@ -71,6 +71,10 @@ class EnrichmentItemEventService(
         notifyUpdate(existing, item)
     }
 
+    suspend fun onItemBestSellOrdersPriceUpdate(itemId: ShortItemId) {
+        updateOrder(itemId) { item -> bestOrderService.getBestSellOrder(item) }
+    }
+
     suspend fun onItemBestSellOrderUpdated(itemId: ShortItemId, order: OrderDto) {
         updateOrder(itemId, order) { item -> bestOrderService.getBestSellOrder(item, order) }
     }
@@ -79,9 +83,13 @@ class EnrichmentItemEventService(
         updateOrder(itemId, order) { item -> bestOrderService.getBestBidOrder(item, order) }
     }
 
+    suspend fun onItemBestBidOrdersPriceUpdated(itemId: ShortItemId) {
+        updateOrder(itemId) { item -> bestOrderService.getBestBidOrder(item) }
+    }
+
     private suspend fun updateOrder(
         itemId: ShortItemId,
-        order: OrderDto,
+        order: OrderDto? = null,
         orderUpdateAction: suspend (item: ShortItem) -> ShortItem
     ) = coroutineScope {
         optimisticLock {
