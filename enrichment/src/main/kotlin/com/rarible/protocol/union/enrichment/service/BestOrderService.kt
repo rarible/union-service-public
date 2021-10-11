@@ -30,7 +30,7 @@ class BestOrderService(
             if (bestUpdated != null) bestSellOrders[currencyId] = bestUpdated else bestSellOrders.remove(currencyId)
         }
         val bestSellOrder = bestUsdOrderReducer.reduceSellsByUsd(bestSellOrders)
-        return ownership.copy(bestSellOrder = bestSellOrder, bestSellOrders = bestSellOrders)
+        return ownership.withBestSellOrders(bestSellOrder, bestSellOrders)
     }
 
     suspend fun getBestSellOrder(item: ShortItem, order: OrderDto? = null): ShortItem {
@@ -47,8 +47,8 @@ class BestOrderService(
             val bestUpdated = bestOrderEvaluator.evaluateBestOrder(bestCurrent, order)
             if (bestUpdated != null) bestSellOrders[currencyId] = bestUpdated else bestSellOrders.remove(currencyId)
         }
-        val bestSellOrder = bestUsdOrderReducer.reduceBidsByUsd(bestSellOrders)
-        return item.copy(bestSellOrder = bestSellOrder, bestSellOrders = bestSellOrders)
+        val bestSellOrder = bestUsdOrderReducer.reduceSellsByUsd(bestSellOrders)
+        return item.withBestSellOrders(bestSellOrder, bestSellOrders)
     }
 
     suspend fun getBestBidOrder(item: ShortItem, order: OrderDto? = null): ShortItem {
@@ -66,7 +66,7 @@ class BestOrderService(
             if (bestUpdated != null) bestBidOrders[currencyId] = bestUpdated else bestBidOrders.remove(currencyId)
         }
         val bestBidOrder = bestUsdOrderReducer.reduceBidsByUsd(bestBidOrders)
-        return item.copy(bestBidOrder = bestBidOrder, bestBidOrders = bestBidOrders)
+        return item.withBestBidOrders(bestBidOrder, bestBidOrders)
     }
 }
 

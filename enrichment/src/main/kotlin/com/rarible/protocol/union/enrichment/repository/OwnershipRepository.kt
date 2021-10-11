@@ -46,7 +46,7 @@ class OwnershipRepository(
 
     fun findWithMultiCurrency(lastUpdateAt: Instant): Flow<ShortOwnershipId> {
         val criteria = Criteria().orOperator(
-            ShortOwnership::bestSellOrderCount gte 2
+            ShortOwnership::bestSellOrderCount gt 1
         ).and(ShortOwnership::lastUpdatedAt).lte(lastUpdateAt)
 
         val blockchainField = ShortOwnership::blockchain.name

@@ -32,7 +32,7 @@ class EnrichmentItemEventService(
     // If ownership was updated, we need to recalculate totalStock/sellers for related item,
     // also, we can specify here Order which triggered this update - ItemService
     // can use this full Order to avoid unnecessary getOrderById calls
-    suspend fun onOwnershipUpdated(ownershipId: ShortOwnershipId, order: OrderDto? = null) {
+    suspend fun onOwnershipUpdated(ownershipId: ShortOwnershipId, order: OrderDto?) {
         val itemId = ShortItemId(ownershipId.blockchain, ownershipId.token, ownershipId.tokenId)
         optimisticLock {
             val item = itemService.get(itemId)

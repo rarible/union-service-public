@@ -25,6 +25,17 @@ data class ShortOwnership(
 
     val lastUpdatedAt: Instant
 ) {
+    fun withBestSellOrders(
+        bestSellOrder: ShortOrder?,
+        bestSellOrders: Map<CurrencyId, ShortOrder>
+    ): ShortOwnership {
+        return copy(
+            bestSellOrder = bestSellOrder,
+            bestSellOrders = bestSellOrders,
+            bestSellOrderCount = bestSellOrders.size,
+            lastUpdatedAt = nowMillis()
+        )
+    }
 
     companion object {
         fun empty(ownershipId: ShortOwnershipId): ShortOwnership {

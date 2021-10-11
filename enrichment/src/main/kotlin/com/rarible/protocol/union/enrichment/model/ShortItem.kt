@@ -34,6 +34,29 @@ data class ShortItem(
     @Version
     val version: Long? = null
 ) {
+    fun withBestSellOrders(
+        bestSellOrder: ShortOrder?,
+        bestSellOrders: Map<CurrencyId, ShortOrder>
+    ): ShortItem {
+        return copy(
+            bestSellOrder = bestSellOrder,
+            bestSellOrders = bestSellOrders,
+            bestSellOrderCount = bestSellOrders.size,
+            lastUpdatedAt = nowMillis()
+        )
+    }
+
+    fun withBestBidOrders(
+        bestBidOrder: ShortOrder?,
+        bestBidOrders: Map<CurrencyId, ShortOrder>
+    ): ShortItem {
+        return copy(
+            bestBidOrder = bestBidOrder,
+            bestBidOrders = bestBidOrders,
+            bestBidOrderCount = bestBidOrders.size,
+            lastUpdatedAt = nowMillis()
+        )
+    }
 
     companion object {
         fun empty(itemId: ShortItemId): ShortItem {
