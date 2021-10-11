@@ -68,5 +68,7 @@ class BestOrderService(
         val bestBidOrder = bestUsdOrderReducer.reduceBidsByUsd(bestBidOrders)
         return item.withBestBidOrders(bestBidOrder, bestBidOrders)
     }
+
+
 }
 

@@ -20,8 +20,8 @@ data class ShortItem(
     val sellers: Int = 0,
     val totalStock: BigInteger,
 
-    val bestSellOrders: Map<CurrencyId, ShortOrder>,
-    val bestBidOrders: Map<CurrencyId, ShortOrder>,
+    val bestSellOrders: Map<String, ShortOrder>,
+    val bestBidOrders: Map<String, ShortOrder>,
 
     val bestSellOrderCount: Int = 0,
     val bestBidOrderCount: Int = 0,
@@ -37,7 +37,7 @@ data class ShortItem(
 
     fun withBestSellOrders(
         bestSellOrder: ShortOrder?,
-        bestSellOrders: Map<CurrencyId, ShortOrder>
+        bestSellOrders: Map<String, ShortOrder>
     ): ShortItem {
         return copy(
             bestSellOrder = bestSellOrder,
@@ -49,7 +49,7 @@ data class ShortItem(
 
     fun withBestBidOrders(
         bestBidOrder: ShortOrder?,
-        bestBidOrders: Map<CurrencyId, ShortOrder>
+        bestBidOrders: Map<String, ShortOrder>
     ): ShortItem {
         return copy(
             bestBidOrder = bestBidOrder,
