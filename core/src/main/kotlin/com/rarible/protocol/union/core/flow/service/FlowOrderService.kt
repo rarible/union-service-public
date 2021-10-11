@@ -44,6 +44,7 @@ class FlowOrderService(
         status: List<OrderStatusDto>?,
         start: Long?,
         end: Long?,
+        currencyAddress: String,
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
@@ -88,6 +89,7 @@ class FlowOrderService(
         tokenId: String,
         maker: String?,
         origin: String?,
+        currencyAddress: String,
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {

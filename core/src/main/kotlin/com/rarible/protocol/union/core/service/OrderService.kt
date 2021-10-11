@@ -32,6 +32,7 @@ interface OrderService : BlockchainService {
         status: List<OrderStatusDto>?,
         start: Long?,
         end: Long?,
+        currencyAddress: String,
         continuation: String?,
         size: Int
     ): Slice<OrderDto>
@@ -68,6 +69,7 @@ interface OrderService : BlockchainService {
         tokenId: String,
         maker: String?,
         origin: String?,
+        currencyAddress: String,
         continuation: String?,
         size: Int
     ): Slice<OrderDto>

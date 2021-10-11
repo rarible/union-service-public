@@ -14,10 +14,13 @@ import com.rarible.protocol.union.test.data.randomEthOwnershipId
 import io.mockk.coVerify
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
 @IntegrationTest
+@Disabled
+// TODO enable after multi-currency supported
 class RefreshControllerFt : AbstractIntegrationTest() {
 
     @Autowired

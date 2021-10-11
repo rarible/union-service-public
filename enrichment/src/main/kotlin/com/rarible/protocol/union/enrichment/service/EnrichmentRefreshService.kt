@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.enrichment.service
 
 import com.rarible.core.common.optimisticLock
+import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.UnionOwnershipDto
 import com.rarible.protocol.union.enrichment.converter.EnrichedItemConverter
 import com.rarible.protocol.union.enrichment.converter.EnrichedOwnershipConverter
@@ -44,8 +45,12 @@ class EnrichmentRefreshService(
     suspend fun refreshItem(itemId: ShortItemId) = coroutineScope {
         logger.info("Starting refresh of Item [{}]", itemId)
         val itemDtoDeferred = async { itemService.fetch(itemId) }
-        val bestSellOrdersDeferred = async { enrichmentOrderService.getBestSells(itemId) }
-        val bestBidOrdersDeferred = async { enrichmentOrderService.getBestBids(itemId) }
+
+        //TODO implement in RPN-1183
+        //val bestSellOrdersDeferred = async { enrichmentOrderService.getBestSells(itemId) }
+        //val bestBidOrdersDeferred = async { enrichmentOrderService.getBestBids(itemId) }
+        val bestSellOrdersDeferred = async { emptyList<OrderDto>() }
+        val bestBidOrdersDeferred = async { emptyList<OrderDto>() }
 
         val bestSellOrdersDto = bestSellOrdersDeferred.await()
         val bestBidOrdersDto = bestBidOrdersDeferred.await()
@@ -105,12 +110,16 @@ class EnrichmentRefreshService(
     private suspend fun refreshOwnership(ownership: UnionOwnershipDto) {
         val short = ShortOwnershipConverter.convert(ownership)
 
-        val bestSellOrdersDto = enrichmentOrderService.getBestSells(short.id)
+        //val bestSellOrdersDto = enrichmentOrderService.getBestSells(short.id)
+        // TODO implement in RPN-1183
+        val bestSellOrdersDto = emptyList<OrderDto>()
 
         val bestSellOrders = bestSellOrdersDto
             .groupBy { order -> order.sellCurrencyId }
-            .mapValues { (_, orders) -> orders.map { order -> ShortOrderConverter.convert(order) }  }
-            .mapNotNull { (currencyId, orders) -> bestOrderReducer.reduceSells(orders)?.let { best -> currencyId to best }  }
+            .mapValues { (_, orders) -> orders.map { order -> ShortOrderConverter.convert(order) } }
+            .mapNotNull { (currencyId, orders) ->
+                bestOrderReducer.reduceSells(orders)?.let { best -> currencyId to best }
+            }
             .toMap()
 
         val bestSellOrder = bestOrderReducer.reduceSellsByUsd(bestSellOrders)

@@ -55,9 +55,11 @@ class EthereumOrderService(
         status: List<OrderStatusDto>?,
         start: Long?,
         end: Long?,
+        currencyAddress: String,
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
+        // TODO add currency filter
         val orders = orderControllerApi.getOrderBidsByItemAndByStatus(
             contract,
             tokenId,
@@ -133,9 +135,11 @@ class EthereumOrderService(
         tokenId: String,
         maker: String?,
         origin: String?,
+        currencyAddress: String,
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
+        // TODO add currency filter
         val orders = orderControllerApi.getSellOrdersByItem(
             contract,
             tokenId,

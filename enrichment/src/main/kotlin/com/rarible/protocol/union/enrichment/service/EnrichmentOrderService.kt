@@ -54,29 +54,13 @@ class EnrichmentOrderService(
                 id.tokenId.toString(),
                 null,
                 null,
+                currencyId,
                 null,
                 1
             )
         }
         logger.info("Fetched best sell Order for Item [{}]: [{}] ({}ms)", id, result?.id, spent(now))
         return result
-    }
-
-    suspend fun getBestSells(id: ShortItemId): List<OrderDto> {
-        return withPreferredRariblePlatformOrderList { platform ->
-            val collectedOrders = collect { continuation ->
-                orderServiceRouter.getService(id.blockchain).getSellOrdersByItem(
-                    platform,
-                    id.token,
-                    id.tokenId.toString(),
-                    null,
-                    null,
-                    continuation,
-                    1000
-                )
-            }
-            Slice(continuation = null, entities = collectedOrders)
-        }
     }
 
     suspend fun getBestSell(id: ShortOwnershipId, currencyId: CurrencyId): OrderDto? {
@@ -88,29 +72,13 @@ class EnrichmentOrderService(
                 id.tokenId.toString(),
                 id.owner,
                 null,
+                currencyId,
                 null,
                 1
             )
         }
         logger.info("Fetched best sell Order for Ownership [{}]: [{}] ({}ms)", id, result?.id, spent(now))
         return result
-    }
-
-    suspend fun getBestSells(id: ShortOwnershipId): List<OrderDto> {
-        return withPreferredRariblePlatformOrderList { platform ->
-            val collectedOrders = collect { continuation ->
-                orderServiceRouter.getService(id.blockchain).getSellOrdersByItem(
-                    platform,
-                    id.token,
-                    id.tokenId.toString(),
-                    id.owner,
-                    null,
-                    continuation,
-                    1000
-                )
-            }
-            Slice(continuation = null, entities = collectedOrders)
-        }
     }
 
     suspend fun getBestBid(id: ShortItemId, currencyId: CurrencyId): OrderDto? {
@@ -125,32 +93,13 @@ class EnrichmentOrderService(
                 null,
                 null,
                 null,
+                currencyId,
                 null,
                 1
             )
         }
         logger.info("Fetching best bid Order for Item [{}]: [{}] ({}ms)", id, result?.id, spent(now))
         return result
-    }
-
-    suspend fun getBestBids(id: ShortItemId): List<OrderDto> {
-        return withPreferredRariblePlatformOrderList { platform ->
-            val collectedOrders = collect { continuation ->
-                orderServiceRouter.getService(id.blockchain).getOrderBidsByItem(
-                    platform,
-                    id.token,
-                    id.tokenId.toString(),
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    continuation,
-                    1000
-                )
-            }
-            Slice(continuation = null, entities = collectedOrders)
-        }
     }
 
     private suspend fun withPreferredRariblePlatform(
@@ -166,37 +115,4 @@ class EnrichmentOrderService(
         logger.debug("Checked preferred platform for best order: [{}]")
         return preferredPlatformBestOrder ?: bestOfAll
     }
-
-    private suspend fun withPreferredRariblePlatformOrderList(
-        clientCall: suspend (platform: PlatformDto) -> Slice<OrderDto>
-    ): List<OrderDto> {
-        val orders = clientCall(PlatformDto.ALL).entities
-
-        logger.debug("Found orders from ALL platforms: [{}]", orders.idsString)
-        if (orders.isEmpty() || orders.none { order -> order.platform == PlatformDto.RARIBLE }) {
-            return orders
-        }
-        logger.debug("Order [{}] is not a preferred platform order, checking preferred platform...", orders.idsString)
-        val preferredPlatformBestOrder = clientCall(PlatformDto.RARIBLE).entities
-        logger.debug("Checked preferred platform for best order: [{}]", preferredPlatformBestOrder.idsString)
-        return preferredPlatformBestOrder.ifEmpty { orders }
-    }
-
-    private suspend fun collect(
-        clientCall: suspend (continuation: String?) -> Slice<OrderDto>
-    ): List<OrderDto> {
-        var continuation: String? = null
-        val orders = mutableListOf<OrderDto>()
-
-        do {
-            val slice = clientCall(continuation)
-            continuation = slice.continuation
-            orders.addAll(slice.entities)
-        } while (slice.entities.isNotEmpty() && continuation != null)
-
-        return orders
-    }
-
-    private val List<OrderDto>.idsString: String
-        get() = joinToString { order -> order.id.toString() }
 }
