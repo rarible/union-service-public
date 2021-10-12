@@ -53,6 +53,7 @@ class EnrichmentOrderService(
                 id.tokenId.toString(),
                 null,
                 null,
+                null,
                 currencyId,
                 null,
                 1
@@ -70,6 +71,7 @@ class EnrichmentOrderService(
                 id.token,
                 id.tokenId.toString(),
                 id.owner,
+                null,
                 null,
                 currencyId,
                 null,

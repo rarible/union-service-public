@@ -69,6 +69,7 @@ class EthereumOrderService(
             EthConverter.convert(platform),
             continuation,
             size,
+            currencyAddress,
             start,
             end
         ).awaitFirst()
@@ -135,19 +136,22 @@ class EthereumOrderService(
         tokenId: String,
         maker: String?,
         origin: String?,
+        status: List<OrderStatusDto>?,
         currencyAddress: String,
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
         // TODO add currency filter
-        val orders = orderControllerApi.getSellOrdersByItem(
+        val orders = orderControllerApi.getSellOrdersByItemAndByStatus(
             contract,
             tokenId,
             maker,
             origin,
             EthConverter.convert(platform),
             continuation,
-            size
+            size,
+            ethOrderConverter.convert(status),
+            currencyAddress
         ).awaitFirst()
         return ethOrderConverter.convert(orders, blockchain)
     }

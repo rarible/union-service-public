@@ -182,6 +182,7 @@ class OrderController(
         platform: PlatformDto?,
         maker: String?,
         origin: String?,
+        status: List<OrderStatusDto>?,
         continuation: String?,
         size: Int?
     ): ResponseEntity<OrdersDto> {
@@ -194,7 +195,7 @@ class OrderController(
         }
 
         val result = orderApiService.getSellOrdersByItem(
-            blockchain, platform, shortContract, tokenId, shortMaker, shortOrigin, continuation, safeSize
+            blockchain, platform, shortContract, tokenId, shortMaker, shortOrigin, status, continuation, safeSize
         )
 
         return ResponseEntity.ok(toDto(result))
