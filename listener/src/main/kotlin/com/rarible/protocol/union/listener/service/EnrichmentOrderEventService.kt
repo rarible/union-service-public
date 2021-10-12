@@ -1,29 +1,14 @@
 package com.rarible.protocol.union.listener.service
 
 import com.rarible.core.client.WebClientResponseProxyException
-import com.rarible.protocol.union.dto.AssetTypeDto
-import com.rarible.protocol.union.dto.EthCryptoPunksAssetTypeDto
-import com.rarible.protocol.union.dto.EthErc1155AssetTypeDto
-import com.rarible.protocol.union.dto.EthErc1155LazyAssetTypeDto
-import com.rarible.protocol.union.dto.EthErc20AssetTypeDto
-import com.rarible.protocol.union.dto.EthErc721AssetTypeDto
-import com.rarible.protocol.union.dto.EthErc721LazyAssetTypeDto
-import com.rarible.protocol.union.dto.EthEthereumAssetTypeDto
-import com.rarible.protocol.union.dto.EthGenerativeArtAssetTypeDto
-import com.rarible.protocol.union.dto.FlowAssetTypeFtDto
-import com.rarible.protocol.union.dto.FlowAssetTypeNftDto
+import com.rarible.protocol.union.core.model.ext
 import com.rarible.protocol.union.dto.OrderDto
-import com.rarible.protocol.union.dto.TezosFA12AssetTypeDto
-import com.rarible.protocol.union.dto.TezosFA2AssetTypeDto
-import com.rarible.protocol.union.dto.TezosXTZAssetTypeDto
-import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
-import java.math.BigInteger
 
 @Component
 class EnrichmentOrderEventService(
@@ -34,8 +19,11 @@ class EnrichmentOrderEventService(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     suspend fun updateOrder(order: OrderDto) = coroutineScope {
-        val makeItemId = toItemId(order.make.type)
-        val takeItemId = toItemId(order.take.type)
+        val makeItemIdDto = order.make.type.ext.itemId
+        val takeItemIdDto = order.take.type.ext.itemId
+
+        val makeItemId = makeItemIdDto?.let { ShortItemId(it) }
+        val takeItemId = takeItemIdDto?.let { ShortItemId(it) }
 
         val mFuture = makeItemId?.let {
             async { ignoreApi404 { enrichmentItemEventService.onItemBestSellOrderUpdated(makeItemId, order) } }
@@ -63,38 +51,6 @@ class EnrichmentOrderEventService(
         mFuture?.await()
         tFuture?.await()
         oFuture?.await()
-    }
-
-    private fun toItemId(assetType: AssetTypeDto): ShortItemId? {
-
-        return when (assetType) {
-            // Ethereum
-            is EthErc721AssetTypeDto -> toItemId(assetType.contract, assetType.tokenId)
-            is EthErc1155AssetTypeDto -> toItemId(assetType.contract, assetType.tokenId)
-            is EthErc721LazyAssetTypeDto -> toItemId(assetType.contract, assetType.tokenId)
-            is EthErc1155LazyAssetTypeDto -> toItemId(assetType.contract, assetType.tokenId)
-            is EthCryptoPunksAssetTypeDto -> toItemId(assetType.contract, assetType.punkId.toBigInteger())
-            is EthGenerativeArtAssetTypeDto -> null
-            is EthEthereumAssetTypeDto -> null
-            is EthErc20AssetTypeDto -> null
-
-            // Flow
-            is FlowAssetTypeNftDto -> toItemId(assetType.contract, assetType.tokenId)
-            is FlowAssetTypeFtDto -> null
-
-            // Tezos
-            is TezosFA12AssetTypeDto -> TODO()
-            is TezosFA2AssetTypeDto -> TODO()
-            is TezosXTZAssetTypeDto -> TODO()
-        }
-    }
-
-    private fun toItemId(contract: UnionAddress, tokenId: BigInteger): ShortItemId {
-        return ShortItemId(
-            contract.blockchain,
-            contract.value,
-            tokenId
-        )
     }
 
     private suspend fun ignoreApi404(call: suspend () -> Unit) {

@@ -12,6 +12,7 @@ import com.rarible.protocol.dto.OrdersPaginationDto
 import com.rarible.protocol.dto.RaribleV2OrderDto
 import com.rarible.protocol.union.core.continuation.Slice
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
+import com.rarible.protocol.union.core.model.ext
 import com.rarible.protocol.union.core.service.CurrencyService
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.EthOrderCryptoPunksDataDto
@@ -44,8 +45,8 @@ class EthOrderConverter(
         val salt = EthConverter.convert(order.salt)
         val startedAt = order.start?.let { Instant.ofEpochSecond(it) }
         val endedAt = order.end?.let { Instant.ofEpochSecond(it) }
-        val makePriceUsd = currencyService.toUsd(make.type, order.makePrice)
-        val takePriceUsd = currencyService.toUsd(take.type, order.takePrice)
+        val makePriceUsd = currencyService.toUsd(blockchain, make.type.ext.contract, order.makePrice)
+        val takePriceUsd = currencyService.toUsd(blockchain, take.type.ext.contract, order.takePrice)
         val signature = order.signature?.let { EthConverter.convert(it) }
         val pending = order.pending?.map { convert(it, blockchain) }
         val priceHistory = order.priceHistory?.map { convert(it) } ?: listOf()

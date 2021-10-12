@@ -4,16 +4,7 @@ import com.rarible.protocol.dto.ActivityFilterAllTypeDto
 import com.rarible.protocol.dto.ActivityFilterByCollectionTypeDto
 import com.rarible.protocol.dto.ActivityFilterByItemTypeDto
 import com.rarible.protocol.dto.ActivityFilterByUserTypeDto
-import com.rarible.protocol.dto.AssetDto
 import com.rarible.protocol.dto.BurnDto
-import com.rarible.protocol.dto.CryptoPunksAssetTypeDto
-import com.rarible.protocol.dto.Erc1155AssetTypeDto
-import com.rarible.protocol.dto.Erc1155LazyAssetTypeDto
-import com.rarible.protocol.dto.Erc20AssetTypeDto
-import com.rarible.protocol.dto.Erc721AssetTypeDto
-import com.rarible.protocol.dto.Erc721LazyAssetTypeDto
-import com.rarible.protocol.dto.EthAssetTypeDto
-import com.rarible.protocol.dto.GenerativeArtAssetTypeDto
 import com.rarible.protocol.dto.MintDto
 import com.rarible.protocol.dto.OrderActivityBidDto
 import com.rarible.protocol.dto.OrderActivityCancelBidDto
@@ -23,6 +14,7 @@ import com.rarible.protocol.dto.OrderActivityListDto
 import com.rarible.protocol.dto.OrderActivityMatchDto
 import com.rarible.protocol.dto.TransferDto
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
+import com.rarible.protocol.union.core.model.ext
 import com.rarible.protocol.union.dto.ActivityBlockchainInfoDto
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivityIdDto
@@ -50,7 +42,9 @@ object EthActivityConverter {
                 val type = source.type
                 val leftSide = source.left
                 val rightSide = source.right
-                if (type != null && leftSide.asset.nft && rightSide.asset.payment) {
+                val leftTypeExt = EthConverter.convert(leftSide.asset.assetType, blockchain).ext
+                val rightTypeExt = EthConverter.convert(rightSide.asset.assetType, blockchain).ext
+                if (type != null && leftTypeExt.isNft && rightTypeExt.isCurrency) {
                     activityToSell(
                         activityId = activityId,
                         source = source,
@@ -59,7 +53,7 @@ object EthActivityConverter {
                         payment = rightSide,
                         type = convert(type)
                     )
-                } else if (type != null && leftSide.asset.payment && rightSide.asset.nft) {
+                } else if (type != null && leftTypeExt.isCurrency && rightTypeExt.isNft) {
                     activityToSell(
                         activityId = activityId,
                         source = source,
@@ -300,30 +294,6 @@ object EthActivityConverter {
         when (source) {
             OrderActivityMatchDto.Type.SELL -> OrderMatchSellDto.Type.SELL
             OrderActivityMatchDto.Type.ACCEPT_BID -> OrderMatchSellDto.Type.ACCEPT_BID
-        }
-
-    private val AssetDto.nft: Boolean
-        get() = when (this.assetType) {
-            is EthAssetTypeDto -> false
-            is Erc20AssetTypeDto -> false
-            is Erc721AssetTypeDto -> true
-            is Erc1155AssetTypeDto -> true
-            is Erc721LazyAssetTypeDto -> true
-            is Erc1155LazyAssetTypeDto -> true
-            is CryptoPunksAssetTypeDto -> true
-            is GenerativeArtAssetTypeDto -> false
-        }
-
-    private val AssetDto.payment: Boolean
-        get() = when (this.assetType) {
-            is EthAssetTypeDto -> true
-            is Erc20AssetTypeDto -> true
-            is Erc721AssetTypeDto -> false
-            is Erc1155AssetTypeDto -> false
-            is Erc721LazyAssetTypeDto -> false
-            is Erc1155LazyAssetTypeDto -> false
-            is CryptoPunksAssetTypeDto -> false
-            is GenerativeArtAssetTypeDto -> false
         }
 }
 
