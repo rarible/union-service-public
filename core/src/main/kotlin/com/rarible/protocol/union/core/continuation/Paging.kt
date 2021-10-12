@@ -10,21 +10,25 @@ class Paging<T, C : Continuation<C>, F : ContinuationFactory<T, C>>(
 ) {
 
     fun getPage(size: Int, total: Long): Page<T> {
-        return createSlice(size).asPage(total)
+        val slice = getSlice(size)
+        return Page(
+            total = total,
+            continuation = slice.continuation,
+            entities = slice.entities
+        )
     }
 
     fun getSlice(size: Int): Slice<T> {
-        return createSlice(size).asSlice()
-    }
-
-    private fun createSlice(size: Int): ContinuationSlice<T, C> {
         val pageableList = entities.map { PageableEntity(it, factory) }.sorted()
         val pageSize = min(size, pageableList.size)
         val page = pageableList.subList(0, pageSize)
 
         val continuation = if (page.size >= size) page.last().continuation else null
 
-        return ContinuationSlice(page.map { it.entity }, continuation)
+        return Slice(
+            continuation = continuation?.toString(),
+            entities = page.map { it.entity }
+        )
     }
 
     private data class PageableEntity<T, C : Continuation<C>, F : ContinuationFactory<T, C>>(
@@ -38,26 +42,4 @@ class Paging<T, C : Continuation<C>, F : ContinuationFactory<T, C>>(
             return this.continuation.compareTo(other.continuation)
         }
     }
-
-    private data class ContinuationSlice<T, C>(
-        val entities: List<T>,
-        val continuation: C?
-    ) {
-
-        fun asSlice(): Slice<T> {
-            return Slice(
-                continuation = continuation?.toString(),
-                entities = entities
-            )
-        }
-
-        fun asPage(total: Long): Page<T> {
-            return Page(
-                continuation = continuation?.toString(),
-                entities = entities,
-                total = total
-            )
-        }
-    }
-
 }

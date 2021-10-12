@@ -9,14 +9,22 @@ import com.rarible.protocol.union.api.configuration.PageSize
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.core.ethereum.converter.EthConverter
+import com.rarible.protocol.union.core.ethereum.converter.EthOrderConverter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.PlatformDto
+import com.rarible.protocol.union.enrichment.converter.ShortItemConverter
+import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
+import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
+import com.rarible.protocol.union.enrichment.util.bidCurrencyId
+import com.rarible.protocol.union.enrichment.util.sellCurrencyId
 import com.rarible.protocol.union.test.data.randomEthAddress
+import com.rarible.protocol.union.test.data.randomEthItemId
 import com.rarible.protocol.union.test.data.randomEthLegacyOrderDto
 import com.rarible.protocol.union.test.data.randomFlowV1OrderDto
 import com.rarible.protocol.union.test.data.randomPolygonAddress
+import com.rarible.protocol.union.test.data.randomUnionItem
 import io.mockk.coEvery
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.reactive.awaitFirst
@@ -38,6 +46,12 @@ class OrderControllerFt : AbstractIntegrationTest() {
 
     @Autowired
     lateinit var orderControllerClient: OrderControllerApi
+
+    @Autowired
+    lateinit var enrichmentItemService: EnrichmentItemService
+
+    @Autowired
+    lateinit var ethOrderConverter: EthOrderConverter
 
     @Test
     fun `get order by id - ethereum`() = runBlocking<Unit> {
@@ -129,11 +143,23 @@ class OrderControllerFt : AbstractIntegrationTest() {
 
     @Test
     fun `get order bids by item - ethereum`() = runBlocking<Unit> {
-        val contract = randomEthAddress()
-        val tokenId = randomBigInt()
+        val ethItemId = randomEthItemId()
+        val ethItem = randomUnionItem(ethItemId)
+
+        val contract = ethItemId.token
+        val tokenId = ethItemId.tokenId
         val maker = randomEthAddress()
 
-        val ethOrders = listOf(randomEthLegacyOrderDto())
+        val order = randomEthLegacyOrderDto(ethItemId)
+        val unionOrder = ethOrderConverter.convert(order, ethItemId.blockchain)
+        val shortOrder = ShortOrderConverter.convert(unionOrder)
+        val shortItem = ShortItemConverter.convert(ethItem).copy(
+            bestBidOrder = shortOrder,
+            bestBidOrders = mapOf(unionOrder.bidCurrencyId to shortOrder)
+        )
+        enrichmentItemService.save(shortItem)
+
+        val ethOrders = listOf(order)
 
         coEvery {
             testEthereumOrderApi.getOrderBidsByItemAndByStatus(
@@ -254,11 +280,23 @@ class OrderControllerFt : AbstractIntegrationTest() {
 
     @Test
     fun `get sell orders by item - ethereum`() = runBlocking<Unit> {
-        val contract = randomEthAddress()
-        val tokenId = randomBigInt()
+        val ethItemId = randomEthItemId()
+        val ethItem = randomUnionItem(ethItemId)
+
+        val contract = ethItemId.token
+        val tokenId = ethItemId.tokenId
         val maker = randomEthAddress()
 
-        val ethOrders = listOf(randomEthLegacyOrderDto())
+        val order = randomEthLegacyOrderDto(ethItemId)
+        val unionOrder = ethOrderConverter.convert(order, ethItemId.blockchain)
+        val shortOrder = ShortOrderConverter.convert(unionOrder)
+        val shortItem = ShortItemConverter.convert(ethItem).copy(
+            bestSellOrder = shortOrder,
+            bestSellOrders = mapOf(unionOrder.sellCurrencyId to shortOrder)
+        )
+        enrichmentItemService.save(shortItem)
+
+        val ethOrders = listOf(order)
 
         coEvery {
             testEthereumOrderApi.getSellOrdersByItem(

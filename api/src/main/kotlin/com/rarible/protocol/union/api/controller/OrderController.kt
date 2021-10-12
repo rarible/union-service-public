@@ -15,7 +15,6 @@ import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.OrdersDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.continuation.OrderContinuation
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.RestController
 
@@ -24,6 +23,8 @@ class OrderController(
     private val orderApiService: OrderApiService,
     private val router: BlockchainRouter<OrderService>
 ) : OrderControllerApi {
+
+    private val empty = OrdersDto(null, emptyList())
 
     override suspend fun getOrdersAll(
         blockchains: List<BlockchainDto>?,
@@ -67,10 +68,24 @@ class OrderController(
         val (blockchain, shortContract) = IdParser.parse(contract)
         val (makerBlockchain, shortMaker) = safePair(maker, blockchain)
         val (originBlockchain, shortOrigin) = safePair(origin, blockchain)
-        ensureSameBlockchain(blockchain, makerBlockchain, originBlockchain)
+        if (!ensureSameBlockchain(blockchain, makerBlockchain, originBlockchain)) {
+            return ResponseEntity.ok(empty)
+        }
 
-        val result = router.getService(blockchain)
-            .getOrderBidsByItem(platform, shortContract, tokenId, shortMaker, shortOrigin, status, start, end, continuation, safeSize)
+        val result = orderApiService.getOrderBidsByItem(
+            blockchain,
+            platform,
+            shortContract,
+            tokenId,
+            shortMaker,
+            shortOrigin,
+            status,
+            start,
+            end,
+            continuation,
+            safeSize
+        )
+
         return ResponseEntity.ok(toDto(result))
     }
 
@@ -87,7 +102,9 @@ class OrderController(
         val safeSize = PageSize.ORDER.limit(size)
         val (blockchain, shortMaker) = IdParser.parse(maker)
         val (originBlockchain, shortOrigin) = safePair(origin, blockchain)
-        ensureSameBlockchain(blockchain, originBlockchain)
+        if (!ensureSameBlockchain(blockchain, originBlockchain)) {
+            return ResponseEntity.ok(empty)
+        }
 
         val result = router.getService(blockchain)
             .getOrderBidsByMaker(platform, shortMaker, shortOrigin, status, start, end, continuation, safeSize)
@@ -102,7 +119,6 @@ class OrderController(
     }
 
     // TODO add tests
-    @ExperimentalCoroutinesApi
     override suspend fun getOrdersByIds(orderIdsDto: OrderIdsDto): ResponseEntity<OrdersDto> {
         val orderIds = orderIdsDto.ids
             .map { IdParser.parse(it) }
@@ -150,7 +166,9 @@ class OrderController(
         val safeSize = PageSize.ORDER.limit(size)
         val (blockchain, shortCollection) = IdParser.parse(collection)
         val (originBlockchain, shortOrigin) = safePair(origin, blockchain)
-        ensureSameBlockchain(blockchain, originBlockchain)
+        if (!ensureSameBlockchain(blockchain, originBlockchain)) {
+            return ResponseEntity.ok(empty)
+        }
 
         val result = router.getService(blockchain)
             .getSellOrdersByCollection(platform, shortCollection, shortOrigin, continuation, safeSize)
@@ -171,10 +189,13 @@ class OrderController(
         val (blockchain, shortContract) = IdParser.parse(contract)
         val (originBlockchain, shortOrigin) = safePair(origin, blockchain)
         val (makerBlockchain, shortMaker) = safePair(maker, blockchain)
-        ensureSameBlockchain(blockchain, originBlockchain, makerBlockchain)
+        if (!ensureSameBlockchain(blockchain, originBlockchain, makerBlockchain)) {
+            return ResponseEntity.ok(empty)
+        }
 
-        val result = router.getService(blockchain)
-            .getSellOrdersByItem(platform, shortContract, tokenId, shortMaker, shortOrigin, continuation, safeSize)
+        val result = orderApiService.getSellOrdersByItem(
+            blockchain, platform, shortContract, tokenId, shortMaker, shortOrigin, continuation, safeSize
+        )
 
         return ResponseEntity.ok(toDto(result))
     }
@@ -189,7 +210,9 @@ class OrderController(
         val safeSize = PageSize.ORDER.limit(size)
         val (blockchain, shortMaker) = IdParser.parse(maker)
         val (originBlockchain, shortOrigin) = safePair(origin, blockchain)
-        ensureSameBlockchain(blockchain, originBlockchain)
+        if (!ensureSameBlockchain(blockchain, originBlockchain)) {
+            return ResponseEntity.ok(empty)
+        }
 
         val result = router.getService(blockchain)
             .getSellOrdersByMaker(platform, shortMaker, shortOrigin, continuation, safeSize)
@@ -208,10 +231,8 @@ class OrderController(
         return if (id == null) Pair(defaultBlockchain, null) else IdParser.parse(id)
     }
 
-    private fun ensureSameBlockchain(vararg blockchains: BlockchainDto) {
+    private fun ensureSameBlockchain(vararg blockchains: BlockchainDto): Boolean {
         val set = blockchains.toSet()
-        if (set.size != 1) {
-            throw IllegalArgumentException("All of arguments should belong to same blockchain, but received: $set")
-        }
+        return set.size == 1
     }
 }
