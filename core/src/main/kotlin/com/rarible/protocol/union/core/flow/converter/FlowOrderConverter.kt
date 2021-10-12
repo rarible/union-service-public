@@ -3,6 +3,7 @@ package com.rarible.protocol.union.core.flow.converter
 import com.rarible.protocol.dto.FlowOrderDto
 import com.rarible.protocol.dto.PayInfoDto
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
+import com.rarible.protocol.union.core.model.ext
 import com.rarible.protocol.union.core.service.CurrencyService
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.FlowOrderDataV1Dto
@@ -26,7 +27,7 @@ class FlowOrderConverter(
         val taker = order.taker?.let { UnionAddressConverter.convert(it, blockchain) }
 
         val takePrice = order.take.value / order.make.value
-        val takePriceUsd = currencyService.toUsd(take.type, takePrice)
+        val takePriceUsd = currencyService.toUsd(blockchain, take.type.ext.contract, takePrice)
 
         return OrderDto(
             id = OrderIdDto(blockchain, order.id.toString()),

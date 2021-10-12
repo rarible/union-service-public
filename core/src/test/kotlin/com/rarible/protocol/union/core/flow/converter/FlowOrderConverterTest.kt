@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.core.flow.converter
 
-import com.rarible.protocol.union.core.service.contract
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.FlowAssetTypeFtDto
 import com.rarible.protocol.union.dto.FlowAssetTypeNftDto

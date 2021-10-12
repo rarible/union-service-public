@@ -4,10 +4,8 @@ import com.rarible.core.common.nowMillis
 import com.rarible.protocol.currency.api.client.CurrencyControllerApi
 import com.rarible.protocol.union.core.converter.CurrencyConverter
 import com.rarible.protocol.union.core.exception.UnionCurrencyException
-import com.rarible.protocol.union.dto.AssetTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CurrencyUsdRateDto
-import com.rarible.protocol.union.dto.UnionAddress
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.reactive.awaitFirstOrNull
@@ -39,11 +37,6 @@ class CurrencyService(
     }
 
     // Return current rate (cached)
-    suspend fun getCurrentRate(address: UnionAddress): CurrencyUsdRateDto {
-        return getCurrentRate(address.blockchain, address.value)
-    }
-
-    // Return current rate (cached)
     suspend fun getCurrentRate(blockchain: BlockchainDto, address: String): CurrencyUsdRateDto {
         val blockchainCache = caches[blockchain]!!
         var cached = blockchainCache[address]
@@ -61,14 +54,14 @@ class CurrencyService(
         return cached
     }
 
-    suspend fun toUsd(assetType: AssetTypeDto, value: BigDecimal?): BigDecimal? {
+    suspend fun toUsd(blockchain: BlockchainDto, address: String, value: BigDecimal?): BigDecimal? {
         if (value == null) {
             return null
         }
         if (value == BigDecimal.ZERO) {
             return BigDecimal.ZERO
         }
-        val rate = getCurrentRate(assetType.contract)
+        val rate = getCurrentRate(blockchain, address)
         return value.multiply(rate.rate)
     }
 
