@@ -8,7 +8,6 @@ import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.PlatformDto
-import com.rarible.protocol.union.enrichment.model.CurrencyId
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortOrder
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
@@ -45,7 +44,7 @@ class EnrichmentOrderService(
         return getById(existing.dtoId)
     }
 
-    suspend fun getBestSell(id: ShortItemId, currencyId: CurrencyId): OrderDto? {
+    suspend fun getBestSell(id: ShortItemId, currencyId: String): OrderDto? {
         val now = nowMillis()
         val result = withPreferredRariblePlatform { platform ->
             orderServiceRouter.getService(id.blockchain).getSellOrdersByItem(
@@ -63,7 +62,7 @@ class EnrichmentOrderService(
         return result
     }
 
-    suspend fun getBestSell(id: ShortOwnershipId, currencyId: CurrencyId): OrderDto? {
+    suspend fun getBestSell(id: ShortOwnershipId, currencyId: String): OrderDto? {
         val now = nowMillis()
         val result = withPreferredRariblePlatform { platform ->
             orderServiceRouter.getService(id.blockchain).getSellOrdersByItem(
@@ -81,7 +80,7 @@ class EnrichmentOrderService(
         return result
     }
 
-    suspend fun getBestBid(id: ShortItemId, currencyId: CurrencyId): OrderDto? {
+    suspend fun getBestBid(id: ShortItemId, currencyId: String): OrderDto? {
         val now = nowMillis()
         val result = withPreferredRariblePlatform { platform ->
             orderServiceRouter.getService(id.blockchain).getOrderBidsByItem(

@@ -17,7 +17,7 @@ data class ShortOwnership(
     val tokenId: BigInteger,
     val owner: String,
 
-    val bestSellOrders: Map<CurrencyId, ShortOrder>,
+    val bestSellOrders: Map<String, ShortOrder>,
 
     val bestSellOrderCount: Int = 0,
 
@@ -27,7 +27,7 @@ data class ShortOwnership(
 ) {
     fun withBestSellOrders(
         bestSellOrder: ShortOrder?,
-        bestSellOrders: Map<CurrencyId, ShortOrder>
+        bestSellOrders: Map<String, ShortOrder>
     ): ShortOwnership {
         return copy(
             bestSellOrder = bestSellOrder,

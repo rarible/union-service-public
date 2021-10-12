@@ -1,10 +1,9 @@
 package com.rarible.protocol.union.enrichment.util
 
 import com.rarible.protocol.union.dto.OrderDto
-import com.rarible.protocol.union.enrichment.model.CurrencyId
 
-val OrderDto.sellCurrencyId: CurrencyId
+val OrderDto.sellCurrencyId: String
     get() = take.type.contract.value
 
-val OrderDto.bidCurrencyId: CurrencyId
+val OrderDto.bidCurrencyId: String
     get() = make.type.contract.value

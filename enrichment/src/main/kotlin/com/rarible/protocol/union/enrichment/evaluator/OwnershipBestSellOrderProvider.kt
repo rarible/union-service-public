@@ -1,14 +1,13 @@
 package com.rarible.protocol.union.enrichment.evaluator
 
 import com.rarible.protocol.union.dto.OrderDto
-import com.rarible.protocol.union.enrichment.model.CurrencyId
 import com.rarible.protocol.union.enrichment.model.ShortOwnership
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
 import com.rarible.protocol.union.enrichment.service.EnrichmentOrderService
 
 class OwnershipBestSellOrderProvider(
     private val ownershipId: ShortOwnershipId,
-    private val currencyId: CurrencyId,
+    private val currencyId: String,
     private val enrichmentOrderService: EnrichmentOrderService
 ) : BestOrderProvider<ShortOwnership> {
 
