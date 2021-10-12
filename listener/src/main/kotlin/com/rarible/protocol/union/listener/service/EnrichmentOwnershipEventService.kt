@@ -30,12 +30,28 @@ class EnrichmentOwnershipEventService(
         notifyUpdate(existing, ownership)
     }
 
-    suspend fun onOwnershipBestSellOrderUpdated(ownershipId: ShortOwnershipId, order: OrderDto? = null) = optimisticLock {
+    suspend fun recalculateBestOrder(ownership: ShortOwnership): Boolean {
+        val updated = bestOrderService.updateBestSellOrder(ownership)
+        if (ownership.bestSellOrder != updated.bestSellOrder) {
+            logger.info(
+                "Ownership BestSellOrder updated ([{}] -> [{}]) due to currency rate changed",
+                ownership.bestSellOrder?.dtoId, updated.bestSellOrder?.dtoId
+            )
+
+            val saved = ownershipService.save(updated)
+            notifyUpdate(saved, null, null)
+            enrichmentItemEventService.onOwnershipUpdated(ownership.id, null)
+            return true
+        }
+        return false
+    }
+
+    suspend fun onOwnershipBestSellOrderUpdated(ownershipId: ShortOwnershipId, order: OrderDto) = optimisticLock {
         val current = ownershipService.get(ownershipId)
         val exist = current != null
         val short = current ?: ShortOwnership.empty(ownershipId)
 
-        val updated = bestOrderService.getBestSellOrder(short, order)
+        val updated = bestOrderService.updateBestSellOrder(short, order)
 
         if (short != updated) {
             if (updated.isNotEmpty()) {

@@ -71,20 +71,28 @@ class EnrichmentItemEventService(
         notifyUpdate(existing, item)
     }
 
-    suspend fun onItemBestSellOrdersPriceUpdate(itemId: ShortItemId) {
-        updateOrder(itemId) { item -> bestOrderService.getBestSellOrder(item) }
+    suspend fun recalculateBestOrders(item: ShortItem): Boolean {
+        val updatedBid = bestOrderService.updateBestBidOrder(item)
+        val updated = bestOrderService.updateBestSellOrder(updatedBid)
+        if (updated != item) {
+            logger.info(
+                "Item BestSellOrder updated ([{}] -> [{}]), BestBidOrder updated ([{}] -> [{}]) due to currency rate changed",
+                item.bestSellOrder?.dtoId, updated.bestSellOrder?.dtoId,
+                item.bestBidOrder?.dtoId, updated.bestBidOrder?.dtoId
+            )
+            val saved = itemService.save(updated)
+            notifyUpdate(saved, null, null)
+            return true
+        }
+        return false
     }
 
     suspend fun onItemBestSellOrderUpdated(itemId: ShortItemId, order: OrderDto) {
-        updateOrder(itemId, order) { item -> bestOrderService.getBestSellOrder(item, order) }
+        updateOrder(itemId, order) { item -> bestOrderService.updateBestSellOrder(item, order) }
     }
 
     suspend fun onItemBestBidOrderUpdated(itemId: ShortItemId, order: OrderDto) {
-        updateOrder(itemId, order) { item -> bestOrderService.getBestBidOrder(item, order) }
-    }
-
-    suspend fun onItemBestBidOrdersPriceUpdated(itemId: ShortItemId) {
-        updateOrder(itemId) { item -> bestOrderService.getBestBidOrder(item) }
+        updateOrder(itemId, order) { item -> bestOrderService.updateBestBidOrder(item, order) }
     }
 
     private suspend fun updateOrder(

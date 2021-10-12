@@ -37,7 +37,7 @@ class EnrichmentOrderService(
             return null
         }
         // Full order we already fetched is the same as short Order we want to download - using obtained order here
-        if (existing.getIdDto() == order?.id) {
+        if (existing.dtoId == order?.id) {
             return order
         }
         // Downloading full order in common case

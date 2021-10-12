@@ -135,7 +135,7 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
         ownershipEventHandler.onOwnershipBestSellOrderUpdated(shortOwnership.id, unionBestSell)
 
         val saved = ownershipService.get(shortOwnership.id)!!
-        assertThat(saved.bestSellOrder?.clearState()).isEqualTo(ShortOrderConverter.convert(unionBestSell).clearState())
+        assertThat(saved.bestSellOrder).isEqualTo(ShortOrderConverter.convert(unionBestSell))
 
         val expected = EnrichedOwnershipConverter.convert(unionOwnership)
             .copy(bestSellOrder = unionBestSell)

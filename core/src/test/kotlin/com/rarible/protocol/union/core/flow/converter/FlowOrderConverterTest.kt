@@ -1,7 +1,8 @@
 package com.rarible.protocol.union.core.flow.converter
 
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.FlowAssetTypeDto
+import com.rarible.protocol.union.dto.FlowAssetTypeFtDto
+import com.rarible.protocol.union.dto.FlowAssetTypeNftDto
 import com.rarible.protocol.union.dto.FlowOrderDataV1Dto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.test.data.randomFlowV1OrderDto
@@ -36,10 +37,10 @@ class FlowOrderConverterTest {
         assertThat(converted.maker.value).isEqualTo(dto.maker)
         assertThat(converted.taker?.value).isEqualTo(dto.taker)
         assertThat(converted.make.value).isEqualTo(dto.make.value)
-        val makeType = converted.make.type as FlowAssetTypeDto
+        val makeType = converted.make.type as FlowAssetTypeNftDto
         assertThat(makeType.contract.value).isEqualTo(dto.make.contract)
         assertThat(converted.take.value).isEqualTo(dto.take.value)
-        val takeType = converted.take.type as FlowAssetTypeDto
+        val takeType = converted.take.type as FlowAssetTypeFtDto
         assertThat(takeType.contract.value).isEqualTo(dto.take.contract)
 
         val data = converted.data as FlowOrderDataV1Dto

@@ -6,45 +6,45 @@ import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 
-class BestUsdSellOrderComparatorTest {
+class BestSellOrderComparatorTest {
 
     @Test
     fun `updated is better - both prices specified`() {
-        val current = randomUnionOrderDto().copy(makePriceUsd = BigDecimal.valueOf(2))
-        val updated = randomUnionOrderDto().copy(makePriceUsd = BigDecimal.valueOf(1))
+        val current = randomUnionOrderDto().copy(makePrice = BigDecimal.valueOf(2))
+        val updated = randomUnionOrderDto().copy(makePrice = BigDecimal.valueOf(1))
         val shortCurrent = ShortOrderConverter.convert(current)
         val shortUpdated = ShortOrderConverter.convert(updated)
-        val result = BestUsdSellOrderComparator.compare(shortCurrent, shortUpdated)
+        val result = BestSellOrderComparator.compare(shortCurrent, shortUpdated)
         Assertions.assertThat(result).isEqualTo(shortUpdated)
     }
 
     @Test
     fun `current is better - both prices specified`() {
-        val current = randomUnionOrderDto().copy(makePriceUsd = BigDecimal.valueOf(1))
-        val updated = randomUnionOrderDto().copy(makePriceUsd = BigDecimal.valueOf(2))
+        val current = randomUnionOrderDto().copy(makePrice = BigDecimal.valueOf(1))
+        val updated = randomUnionOrderDto().copy(makePrice = BigDecimal.valueOf(2))
         val shortCurrent = ShortOrderConverter.convert(current)
         val shortUpdated = ShortOrderConverter.convert(updated)
-        val result = BestUsdSellOrderComparator.compare(shortCurrent, shortUpdated)
+        val result = BestSellOrderComparator.compare(shortCurrent, shortUpdated)
         Assertions.assertThat(result).isEqualTo(shortCurrent)
     }
 
     @Test
     fun `updated is better - current price not specified`() {
-        val current = randomUnionOrderDto().copy(makePriceUsd = null)
-        val updated = randomUnionOrderDto().copy(makePriceUsd = BigDecimal.valueOf(1))
+        val current = randomUnionOrderDto().copy(makePrice = null)
+        val updated = randomUnionOrderDto().copy(makePrice = BigDecimal.valueOf(1))
         val shortCurrent = ShortOrderConverter.convert(current)
         val shortUpdated = ShortOrderConverter.convert(updated)
-        val result = BestUsdSellOrderComparator.compare(shortCurrent, shortUpdated)
+        val result = BestSellOrderComparator.compare(shortCurrent, shortUpdated)
         Assertions.assertThat(result).isEqualTo(shortUpdated)
     }
 
     @Test
     fun `updated is better - no prices specified`() {
-        val current = randomUnionOrderDto().copy(makePriceUsd = null)
-        val updated = randomUnionOrderDto().copy(makePriceUsd = null)
+        val current = randomUnionOrderDto().copy(makePrice = null)
+        val updated = randomUnionOrderDto().copy(makePrice = null)
         val shortCurrent = ShortOrderConverter.convert(current)
         val shortUpdated = ShortOrderConverter.convert(updated)
-        val result = BestUsdSellOrderComparator.compare(shortCurrent, shortUpdated)
+        val result = BestSellOrderComparator.compare(shortCurrent, shortUpdated)
         Assertions.assertThat(result).isEqualTo(shortUpdated)
     }
 }

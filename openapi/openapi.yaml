@@ -1581,10 +1581,6 @@ components:
           $ref: "#/components/schemas/BigDecimal"
         takePriceUsd:
           $ref: "#/components/schemas/BigDecimal"
-        makePrice:
-          $ref: "#/components/schemas/BigDecimal"
-        takePrice:
-          $ref: "#/components/schemas/BigDecimal"
         priceHistory:
           type: array
           default: [ ]
@@ -2378,7 +2374,8 @@ components:
       required:
         - contract
       oneOf:
-        - $ref: "#/components/schemas/FlowAssetType"
+        - $ref: "#/components/schemas/FlowAssetTypeNft"
+        - $ref: "#/components/schemas/FlowAssetTypeFt"
         - $ref: "#/components/schemas/EthEthereumAssetType"
         - $ref: "#/components/schemas/EthErc20AssetType"
         - $ref: "#/components/schemas/EthErc721AssetType"
@@ -2387,12 +2384,6 @@ components:
         - $ref: "#/components/schemas/EthErc1155LazyAssetType"
         - $ref: "#/components/schemas/EthCryptoPunksAssetType"
         - $ref: "#/components/schemas/EthGenerativeArtAssetType"
-
-    FlowAssetType:
-      type: object
-      oneOf:
-        - $ref: "#/components/schemas/FlowAssetTypeNft"
-        - $ref: "#/components/schemas/FlowAssetTypeFt"
 
     FlowAssetTypeNft:
       type: object

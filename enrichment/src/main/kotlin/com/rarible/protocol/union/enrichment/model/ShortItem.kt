@@ -23,8 +23,7 @@ data class ShortItem(
     val bestSellOrders: Map<String, ShortOrder>,
     val bestBidOrders: Map<String, ShortOrder>,
 
-    val bestSellOrderCount: Int = 0,
-    val bestBidOrderCount: Int = 0,
+    val multiCurrency: Boolean = bestSellOrders.size > 1 || bestBidOrders.size > 1,
 
     val bestSellOrder: ShortOrder?,
     val bestBidOrder: ShortOrder?,
@@ -35,26 +34,9 @@ data class ShortItem(
     val version: Long? = null
 ) {
 
-    fun withBestSellOrders(
-        bestSellOrder: ShortOrder?,
-        bestSellOrders: Map<String, ShortOrder>
-    ): ShortItem {
-        return copy(
-            bestSellOrder = bestSellOrder,
-            bestSellOrders = bestSellOrders,
-            bestSellOrderCount = bestSellOrders.size,
-            lastUpdatedAt = nowMillis()
-        )
-    }
-
-    fun withBestBidOrders(
-        bestBidOrder: ShortOrder?,
-        bestBidOrders: Map<String, ShortOrder>
-    ): ShortItem {
-        return copy(
-            bestBidOrder = bestBidOrder,
-            bestBidOrders = bestBidOrders,
-            bestBidOrderCount = bestBidOrders.size,
+    fun withCalculatedFields(): ShortItem {
+        return this.copy(
+            multiCurrency = bestSellOrders.size > 1 || bestBidOrders.size > 1,
             lastUpdatedAt = nowMillis()
         )
     }
@@ -73,9 +55,6 @@ data class ShortItem(
                 bestSellOrders = emptyMap(),
                 bestBidOrders = emptyMap(),
 
-                bestSellOrderCount = 0,
-                bestBidOrderCount = 0,
-
                 bestSellOrder = null,
                 bestBidOrder = null,
 
@@ -86,34 +65,6 @@ data class ShortItem(
 
     fun isNotEmpty(): Boolean {
         return bestBidOrder != null || bestSellOrder != null
-    }
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as ShortItem
-
-        if (blockchain != other.blockchain) return false
-        if (token != other.token) return false
-        if (tokenId != other.tokenId) return false
-        if (sellers != other.sellers) return false
-        if (totalStock != other.totalStock) return false
-        if (bestSellOrder?.clearState() != other.bestSellOrder?.clearState()) return false
-        if (bestBidOrder?.clearState() != other.bestBidOrder?.clearState()) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = blockchain.hashCode()
-        result = 31 * result + token.hashCode()
-        result = 31 * result + tokenId.hashCode()
-        result = 31 * result + sellers
-        result = 31 * result + totalStock.hashCode()
-        result = 31 * result + (bestSellOrder?.hashCode() ?: 0)
-        result = 31 * result + (bestBidOrder?.hashCode() ?: 0)
-        return result
     }
 
     @Transient

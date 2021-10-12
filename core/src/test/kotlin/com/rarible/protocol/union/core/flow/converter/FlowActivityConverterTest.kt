@@ -2,7 +2,7 @@ package com.rarible.protocol.union.core.flow.converter
 
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.BurnActivityDto
-import com.rarible.protocol.union.dto.FlowAssetTypeDto
+import com.rarible.protocol.union.dto.FlowAssetTypeFtDto
 import com.rarible.protocol.union.dto.MintActivityDto
 import com.rarible.protocol.union.dto.OrderCancelListActivityDto
 import com.rarible.protocol.union.dto.OrderListActivityDto
@@ -48,10 +48,10 @@ class FlowActivityConverterTest {
         assertThat(converted.hash).isEqualTo(dto.hash)
         assertThat(converted.maker.value).isEqualTo(dto.maker)
         // assertThat(converted.make.value).isEqualTo(dto.make.value) // TODO - types incompatible
-        val makeType = converted.make.type as FlowAssetTypeDto
+        val makeType = converted.make.type as FlowAssetTypeFtDto
         assertThat(makeType.contract.value).isEqualTo(dto.make.contract)
         // assertThat(converted.take.value).isEqualTo(dto.take.value) // TODO - types incompatible
-        val takeType = converted.take.type as FlowAssetTypeDto
+        val takeType = converted.take.type as FlowAssetTypeFtDto
         assertThat(takeType.contract.value).isEqualTo(dto.take.contract)
     }
 
@@ -66,10 +66,10 @@ class FlowActivityConverterTest {
         assertThat(converted.hash).isEqualTo(dto.hash)
         assertThat(converted.maker.value).isEqualTo(dto.maker)
         // assertThat(converted.make.value).isEqualTo(dto.make.value) // TODO - types incompatible
-        val makeType = converted.make as FlowAssetTypeDto
+        val makeType = converted.make as FlowAssetTypeFtDto
         assertThat(makeType.contract.value).isEqualTo(dto.make.contract)
         // assertThat(converted.take.value).isEqualTo(dto.take.value) // TODO - types incompatible
-        val takeType = converted.take as FlowAssetTypeDto
+        val takeType = converted.take as FlowAssetTypeFtDto
         assertThat(takeType.contract.value).isEqualTo(dto.take.contract)
     }
 

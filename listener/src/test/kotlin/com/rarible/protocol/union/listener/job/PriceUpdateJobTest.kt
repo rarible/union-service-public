@@ -15,7 +15,12 @@ import com.rarible.protocol.union.listener.service.EnrichmentItemEventService
 import com.rarible.protocol.union.listener.test.AbstractIntegrationTest
 import com.rarible.protocol.union.listener.test.IntegrationTest
 import com.rarible.protocol.union.listener.test.data.createCurrencyDto
-import com.rarible.protocol.union.test.data.*
+import com.rarible.protocol.union.test.data.randomEthItemId
+import com.rarible.protocol.union.test.data.randomEthLegacyOrderDto
+import com.rarible.protocol.union.test.data.randomEthNftItemDto
+import com.rarible.protocol.union.test.data.randomEthOwnershipDto
+import com.rarible.protocol.union.test.data.randomEthOwnershipId
+import com.rarible.protocol.union.test.data.randomUnionOrderDto
 import io.mockk.clearMocks
 import io.mockk.coEvery
 import kotlinx.coroutines.FlowPreview
@@ -32,6 +37,7 @@ import java.time.Instant
 @FlowPreview
 @IntegrationTest
 internal class PriceUpdateJobTest : AbstractIntegrationTest() {
+
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @Autowired
@@ -53,7 +59,7 @@ internal class PriceUpdateJobTest : AbstractIntegrationTest() {
     private lateinit var ownershipRepository: OwnershipRepository
 
     @Autowired
-    private lateinit var priceUpdateJob: PriceUpdateJob
+    private lateinit var priceUpdateJob: BestOrderCheckJob
 
     @Autowired
     lateinit var ethOrderConverter: EthOrderConverter
@@ -85,11 +91,13 @@ internal class PriceUpdateJobTest : AbstractIntegrationTest() {
 
         val shortItem = randomShortItem(itemId).copy(
             bestSellOrder = sellOrder2,
-            bestSellOrders = mapOf(unionSellOrder1.sellCurrencyId to sellOrder1, unionSellOrder2.sellCurrencyId to sellOrder2),
-            bestSellOrderCount = 2,
+            bestSellOrders = mapOf(
+                unionSellOrder1.sellCurrencyId to sellOrder1,
+                unionSellOrder2.sellCurrencyId to sellOrder2
+            ),
             bestBidOrder = bidOrder2,
             bestBidOrders = mapOf(unionBidOrder1.bidCurrencyId to bidOrder1, unionBidOrder2.bidCurrencyId to bidOrder2),
-            bestBidOrderCount = 2,
+            multiCurrency = true,
             lastUpdatedAt = Instant.EPOCH
         )
 
@@ -97,7 +105,7 @@ internal class PriceUpdateJobTest : AbstractIntegrationTest() {
         coEvery { testEthereumItemApi.getNftItemById(itemId.value) } returns randomEthNftItemDto().toMono()
         coEvery { testEthereumOrderApi.getOrderByHash(any()) } returns randomEthLegacyOrderDto().toMono()
 
-        itemService.save(shortItem)
+        itemRepository.save(shortItem)
         priceUpdateJob.updateBestOrderPrice()
 
         val updatedItem = itemService.get(shortItem.id)
@@ -118,8 +126,11 @@ internal class PriceUpdateJobTest : AbstractIntegrationTest() {
 
         val shortOwnership = randomShortOwnership(ownershipId).copy(
             bestSellOrder = sellOrder2,
-            bestSellOrders = mapOf(unionSellOrder1.sellCurrencyId to sellOrder1, unionSellOrder2.sellCurrencyId to sellOrder2),
-            bestSellOrderCount = 2,
+            bestSellOrders = mapOf(
+                unionSellOrder1.sellCurrencyId to sellOrder1,
+                unionSellOrder2.sellCurrencyId to sellOrder2
+            ),
+            multiCurrency = true,
             lastUpdatedAt = Instant.EPOCH
         )
 
@@ -127,7 +138,7 @@ internal class PriceUpdateJobTest : AbstractIntegrationTest() {
         coEvery { testEthereumOwnershipApi.getNftOwnershipById(ownershipId.value) } returns randomEthOwnershipDto().toMono()
         coEvery { testEthereumOrderApi.getOrderByHash(any()) } returns randomEthLegacyOrderDto().toMono()
 
-        ownershipService.save(shortOwnership)
+        ownershipRepository.save(shortOwnership)
         priceUpdateJob.updateBestOrderPrice()
 
         val updatedItem = ownershipService.get(shortOwnership.id)

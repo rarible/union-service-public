@@ -3,6 +3,7 @@ package com.rarible.protocol.union.listener.service
 import com.mongodb.client.result.DeleteResult
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.event.OwnershipEventListener
+import com.rarible.protocol.union.enrichment.model.ShortOwnership
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
 import com.rarible.protocol.union.enrichment.service.BestOrderService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
@@ -56,7 +57,7 @@ class EnrichmentOwnershipEventServiceTest {
         val expectedShortOwnership = shortOwnership.copy(bestSellOrder = shortOrder)
 
         coEvery { ownershipService.get(shortOwnership.id) } returns shortOwnership
-        coEvery { bestOrderService.getBestSellOrder(shortOwnership, order) } returns expectedShortOwnership
+        coEvery { bestOrderService.updateBestSellOrder(shortOwnership, order) } returns expectedShortOwnership
         coEvery { ownershipService.save(expectedShortOwnership) } returns expectedShortOwnership
         coEvery { ownershipService.enrichOwnership(expectedShortOwnership, null, order) } returns mockk()
 
@@ -75,19 +76,16 @@ class EnrichmentOwnershipEventServiceTest {
         val ownershipId = randomEthOwnershipId(itemId)
         val shortOwnership = randomShortOwnership(ownershipId)
         val order = randomUnionOrderDto(itemId, shortOwnership.id.owner)
-        val shortOrder = ShortOrderConverter.convert(order)
-
-        val expectedOwnership = shortOwnership.copy(bestSellOrder = shortOrder)
 
         // There is no existing short ownership, and order is cancelled
         coEvery { ownershipService.get(shortOwnership.id) } returns null
-        coEvery { bestOrderService.getBestSellOrder(shortOwnership, order) } returns shortOwnership
+        coEvery { bestOrderService.updateBestSellOrder(any<ShortOwnership>(), eq(order)) } returns shortOwnership
 
         ownershipEventService.onOwnershipBestSellOrderUpdated(shortOwnership.id, order)
 
         // Since Ownership wasn't in DB and received Order is cancelled, we should just skip such update
         coVerify(exactly = 0) { eventListener.onEvent(any()) }
-        coVerify(exactly = 0) { ownershipService.save(expectedOwnership) }
+        coVerify(exactly = 0) { ownershipService.save(any()) }
         coVerify(exactly = 0) { itemEventService.onOwnershipUpdated(shortOwnership.id, order) }
         coVerify(exactly = 0) { ownershipService.delete(shortOwnership.id) }
     }
@@ -104,7 +102,7 @@ class EnrichmentOwnershipEventServiceTest {
         // Ownership exists, best Order is cancelled - Ownership should be deleted
         coEvery { ownershipService.get(shortOwnership.id) } returns shortOwnership
         // Means order is cancelled
-        coEvery { bestOrderService.getBestSellOrder(shortOwnership, order) } returns expectedShortOwnership
+        coEvery { bestOrderService.updateBestSellOrder(shortOwnership, order) } returns expectedShortOwnership
         coEvery { ownershipService.delete(shortOwnership.id) } returns DeleteResult.acknowledged(1)
         coEvery { ownershipService.enrichOwnership(expectedShortOwnership, null, order) } returns mockk()
 
@@ -127,7 +125,7 @@ class EnrichmentOwnershipEventServiceTest {
 
         // Ownership exists, best Order is the same - nothing should happen here
         coEvery { ownershipService.get(ownership.id) } returns ownership
-        coEvery { bestOrderService.getBestSellOrder(ownership, order) } returns ownership
+        coEvery { bestOrderService.updateBestSellOrder(ownership, order) } returns ownership
 
         ownershipEventService.onOwnershipBestSellOrderUpdated(ownership.id, order)
 

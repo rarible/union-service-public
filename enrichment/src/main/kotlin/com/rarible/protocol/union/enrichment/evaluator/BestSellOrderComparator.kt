@@ -1,16 +1,17 @@
 package com.rarible.protocol.union.enrichment.evaluator
 
 import com.rarible.protocol.union.enrichment.model.ShortOrder
-import java.math.BigDecimal
 
-abstract class BaseBestSellOrderComparator : BestOrderComparator {
-    protected fun compare(
+object BestSellOrderComparator : BestOrderComparator {
+
+    override val name: String = "BestSellOrder"
+
+    override fun compare(
         current: ShortOrder,
-        updated: ShortOrder,
-        priceExtractor: (ShortOrder) -> BigDecimal?
+        updated: ShortOrder
     ): ShortOrder {
-        val currentMakePrice = priceExtractor(current)
-        val updatedMakePrice = priceExtractor(updated)
+        val currentMakePrice = current.makePrice
+        val updatedMakePrice = updated.makePrice
 
         val isCurrentMakePriceGreater = when {
             currentMakePrice == null -> true
@@ -20,21 +21,5 @@ abstract class BaseBestSellOrderComparator : BestOrderComparator {
 
         // We have new price, which is lower, then current - updated order is better, using it
         return if (isCurrentMakePriceGreater) updated else current
-    }
-}
-
-object BestSellOrderComparator : BaseBestSellOrderComparator() {
-    override val name: String = "BestSellOrder"
-
-    override fun compare(current: ShortOrder, updated: ShortOrder): ShortOrder {
-        return compare(current, updated) { shortOrder -> shortOrder.makePrice }
-    }
-}
-
-object BestUsdSellOrderComparator : BaseBestSellOrderComparator() {
-    override val name: String = "BestUsdSellOrder"
-
-    override fun compare(current: ShortOrder, updated: ShortOrder): ShortOrder {
-        return compare(current, updated) { shortOrder -> shortOrder.makePriceUsd }
     }
 }
