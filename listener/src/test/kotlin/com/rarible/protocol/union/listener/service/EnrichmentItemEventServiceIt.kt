@@ -13,7 +13,6 @@ import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
 import com.rarible.protocol.union.enrichment.test.data.randomShortItem
 import com.rarible.protocol.union.enrichment.test.data.randomShortOwnership
-import com.rarible.protocol.union.enrichment.util.sellCurrencyId
 import com.rarible.protocol.union.listener.test.AbstractIntegrationTest
 import com.rarible.protocol.union.listener.test.IntegrationTest
 import com.rarible.protocol.union.listener.test.data.createCurrencyDto
@@ -194,7 +193,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         val expected = EnrichedItemConverter.convert(unionItem).copy(bestSellOrder = unionBestSell)
 
         val saved = itemService.get(shortItem.id)!!
-        assertThat(saved.bestSellOrder?.clearState()).isEqualTo(ShortOrderConverter.convert(unionBestSell).clearState())
+        assertThat(saved.bestSellOrder).isEqualTo(ShortOrderConverter.convert(unionBestSell))
 
         Wait.waitAssert {
             val messages = findItemUpdates(itemId.value)

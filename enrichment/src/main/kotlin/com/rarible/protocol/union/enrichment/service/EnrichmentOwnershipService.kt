@@ -36,7 +36,7 @@ class EnrichmentOwnershipService(
     }
 
     suspend fun save(ownership: ShortOwnership): ShortOwnership {
-        return ownershipRepository.save(ownership)
+        return ownershipRepository.save(ownership.withCalculateFields())
     }
 
     suspend fun delete(ownershipId: ShortOwnershipId): DeleteResult? {

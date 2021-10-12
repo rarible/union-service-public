@@ -19,20 +19,15 @@ data class ShortOwnership(
 
     val bestSellOrders: Map<String, ShortOrder>,
 
-    val bestSellOrderCount: Int = 0,
+    val multiCurrency: Boolean = bestSellOrders.size > 1,
 
     val bestSellOrder: ShortOrder?,
 
     val lastUpdatedAt: Instant
 ) {
-    fun withBestSellOrders(
-        bestSellOrder: ShortOrder?,
-        bestSellOrders: Map<String, ShortOrder>
-    ): ShortOwnership {
+    fun withCalculateFields(): ShortOwnership {
         return copy(
-            bestSellOrder = bestSellOrder,
-            bestSellOrders = bestSellOrders,
-            bestSellOrderCount = bestSellOrders.size,
+            multiCurrency = bestSellOrders.size > 1,
             lastUpdatedAt = nowMillis()
         )
     }
@@ -47,38 +42,13 @@ data class ShortOwnership(
 
                 bestSellOrders = emptyMap(),
                 bestSellOrder = null,
-                bestSellOrderCount = 0,
-                lastUpdatedAt = Instant.EPOCH
+                lastUpdatedAt = nowMillis()
             )
         }
     }
 
     fun isNotEmpty(): Boolean {
         return bestSellOrder != null
-    }
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as ShortOwnership
-
-        if (blockchain != other.blockchain) return false
-        if (token != other.token) return false
-        if (tokenId != other.tokenId) return false
-        if (owner != other.owner) return false
-        if (bestSellOrder?.clearState() != other.bestSellOrder?.clearState()) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = blockchain.hashCode()
-        result = 31 * result + token.hashCode()
-        result = 31 * result + tokenId.hashCode()
-        result = 31 * result + owner.hashCode()
-        result = 31 * result + (bestSellOrder?.hashCode() ?: 0)
-        return result
     }
 
     @Transient

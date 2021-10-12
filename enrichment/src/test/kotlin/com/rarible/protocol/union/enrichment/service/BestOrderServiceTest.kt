@@ -34,8 +34,7 @@ class BestOrderServiceTest {
         )
     }
 
-    private val bestUsdOrderReducer = BestOrderReducer(currencyService)
-    private val bestOrderService = BestOrderService(enrichmentOrderService, bestUsdOrderReducer)
+    private val bestOrderService = BestOrderService(enrichmentOrderService, currencyService)
 
     @BeforeEach
     fun beforeEach() {
@@ -48,10 +47,10 @@ class BestOrderServiceTest {
         val item = randomShortItem(itemId).copy(bestSellOrder = null, bestSellOrders = emptyMap())
         val updated = randomUnionOrderDto(itemId)
 
-        val updatedShortItem = bestOrderService.getBestSellOrder(item, updated)
+        val updatedShortItem = bestOrderService.updateBestSellOrder(item, updated)
 
         // If current best Order is missing, updated should be set as best Order
-        assertThat(updatedShortItem.bestSellOrder?.clearState()).isEqualTo(ShortOrderConverter.convert(updated).clearState())
+        assertThat(updatedShortItem.bestSellOrder).isEqualTo(ShortOrderConverter.convert(updated))
     }
 
     @Test
@@ -61,10 +60,10 @@ class BestOrderServiceTest {
         val current = updated.copy(makePriceUsd = randomBigDecimal())
         val item = randomShortItem(itemId).copy(bestSellOrder = ShortOrderConverter.convert(current))
 
-        val updatedShortItem = bestOrderService.getBestSellOrder(item, updated)
+        val updatedShortItem = bestOrderService.updateBestSellOrder(item, updated)
 
         // If current Order is the same as updated, updated should be set as best Order
-        assertThat(updatedShortItem.bestSellOrder?.clearState()).isEqualTo(ShortOrderConverter.convert(updated).clearState())
+        assertThat(updatedShortItem.bestSellOrder).isEqualTo(ShortOrderConverter.convert(updated))
     }
 
     @Test
@@ -75,10 +74,10 @@ class BestOrderServiceTest {
         val item = randomShortItem(itemId)
             .copy(bestSellOrder = ShortOrderConverter.convert(current))
 
-        val updatedShortItem = bestOrderService.getBestSellOrder(item, updated)
+        val updatedShortItem = bestOrderService.updateBestSellOrder(item, updated)
 
         // We have better sell Order, replacing current best Order
-        assertThat(updatedShortItem.bestSellOrder?.clearState()).isEqualTo(ShortOrderConverter.convert(updated).clearState())
+        assertThat(updatedShortItem.bestSellOrder).isEqualTo(ShortOrderConverter.convert(updated))
     }
 
     @Test
@@ -95,10 +94,10 @@ class BestOrderServiceTest {
             bestSellOrder = ShortOrderConverter.convert(current)
         )
 
-        val updatedShortItem = bestOrderService.getBestSellOrder(item, updated)
+        val updatedShortItem = bestOrderService.updateBestSellOrder(item, updated)
 
         // Current best Order is still better than updated
-        assertThat(updatedShortItem.bestSellOrder?.clearState()).isEqualTo(ShortOrderConverter.convert(current).clearState())
+        assertThat(updatedShortItem.bestSellOrder).isEqualTo(ShortOrderConverter.convert(current))
     }
 
     @Test
@@ -112,10 +111,10 @@ class BestOrderServiceTest {
         )
         val item = randomShortItem(itemId).copy(bestSellOrder = ShortOrderConverter.convert(current))
 
-        val updatedShortItem = bestOrderService.getBestSellOrder(item, updated)
+        val updatedShortItem = bestOrderService.updateBestSellOrder(item, updated)
 
         // Current best Order is still better than updated
-        assertThat(updatedShortItem.bestSellOrder?.clearState()).isEqualTo(ShortOrderConverter.convert(updated).clearState())
+        assertThat(updatedShortItem.bestSellOrder).isEqualTo(ShortOrderConverter.convert(updated))
     }
 
     @Test
@@ -132,10 +131,10 @@ class BestOrderServiceTest {
         val item = randomShortItem(itemId)
             .copy(bestSellOrder = ShortOrderConverter.convert(current))
 
-        val updatedShortItem = bestOrderService.getBestSellOrder(item, updated)
+        val updatedShortItem = bestOrderService.updateBestSellOrder(item, updated)
 
         // Updated Order has better price, should be set as best Order
-        assertThat(updatedShortItem.bestSellOrder?.clearState()).isEqualTo(ShortOrderConverter.convert(updated).clearState())
+        assertThat(updatedShortItem.bestSellOrder).isEqualTo(ShortOrderConverter.convert(updated))
     }
 
     @Test
@@ -147,9 +146,9 @@ class BestOrderServiceTest {
             bestSellOrders = mapOf(updated.sellCurrencyId to ShortOrderConverter.convert(current)),
             bestSellOrder = ShortOrderConverter.convert(current)
         )
-        val updatedShortItem = bestOrderService.getBestSellOrder(item, updated)
+        val updatedShortItem = bestOrderService.updateBestSellOrder(item, updated)
         // Current best Order is still better than updated
-        assertThat(updatedShortItem.bestSellOrder?.clearState()).isEqualTo(ShortOrderConverter.convert(current).clearState())
+        assertThat(updatedShortItem.bestSellOrder).isEqualTo(ShortOrderConverter.convert(current))
     }
 
     @Test
@@ -158,7 +157,7 @@ class BestOrderServiceTest {
         val item = randomShortItem(itemId).copy(bestSellOrder = null)
         val updated = randomUnionOrderDto(itemId).copy(cancelled = true)
 
-        val updatedShortItem = bestOrderService.getBestSellOrder(item, updated)
+        val updatedShortItem = bestOrderService.updateBestSellOrder(item, updated)
 
         assertThat(updatedShortItem.bestSellOrder).isNull()
     }
@@ -169,9 +168,9 @@ class BestOrderServiceTest {
         val item = randomShortItem(itemId)
         val updated = randomUnionOrderDto(itemId).copy(cancelled = true)
 
-        val updatedShortItem = bestOrderService.getBestSellOrder(item, updated)
+        val updatedShortItem = bestOrderService.updateBestSellOrder(item, updated)
 
-        assertThat(updatedShortItem.bestSellOrder?.clearState()).isEqualTo(item.bestSellOrder?.clearState())
+        assertThat(updatedShortItem.bestSellOrder).isEqualTo(item.bestSellOrder)
     }
 
     @Test
@@ -184,9 +183,9 @@ class BestOrderServiceTest {
             bestSellOrder = ShortOrderConverter.convert(current)
         )
 
-        val updatedShortItem = bestOrderService.getBestSellOrder(item, updated)
+        val updatedShortItem = bestOrderService.updateBestSellOrder(item, updated)
 
-        assertThat(updatedShortItem.bestSellOrder?.clearState()).isEqualTo(item.bestSellOrder?.clearState())
+        assertThat(updatedShortItem.bestSellOrder).isEqualTo(item.bestSellOrder)
     }
 
     @Test
@@ -197,10 +196,10 @@ class BestOrderServiceTest {
         val item = ShortItemConverter.convert(randomUnionItem(itemId))
             .copy(bestBidOrder = ShortOrderConverter.convert(current))
 
-        val updatedShortItem = bestOrderService.getBestBidOrder(item, updated)
+        val updatedShortItem = bestOrderService.updateBestBidOrder(item, updated)
 
         // We have better bid Order, replacing current best Order
-        assertThat(updatedShortItem.bestBidOrder?.clearState()).isEqualTo(ShortOrderConverter.convert(updated).clearState())
+        assertThat(updatedShortItem.bestBidOrder).isEqualTo(ShortOrderConverter.convert(updated))
     }
 
     @Test
@@ -219,9 +218,9 @@ class BestOrderServiceTest {
 
         coEvery { enrichmentOrderService.getBestSell(ownershipId, any()) } returns fetched
 
-        val updatedShortItem = bestOrderService.getBestSellOrder(ownership, updated)
+        val updatedShortItem = bestOrderService.updateBestSellOrder(ownership, updated)
 
         // Dead best Order should be replaced by fetched Order
-        assertThat(updatedShortItem.bestSellOrder?.clearState()).isEqualTo(ShortOrderConverter.convert(fetched).clearState())
+        assertThat(updatedShortItem.bestSellOrder).isEqualTo(ShortOrderConverter.convert(fetched))
     }
 }

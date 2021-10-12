@@ -23,7 +23,7 @@ import org.springframework.stereotype.Component
 @Component
 class EnrichmentRefreshService(
     private val itemService: EnrichmentItemService,
-    private val bestOrderReducer: BestOrderReducer,
+    private val bestOrderService: BestOrderService,
     private val ownershipService: EnrichmentOwnershipService,
     private val enrichmentOrderService: EnrichmentOrderService,
     private val itemEventListeners: List<ItemEventListener>,
@@ -33,6 +33,7 @@ class EnrichmentRefreshService(
     private val logger = LoggerFactory.getLogger(EnrichmentRefreshService::class.java)
 
     suspend fun refreshItemWithOwnerships(itemId: ShortItemId) = coroutineScope {
+        TODO()
         logger.info("Starting full refresh of Item [{}] (with ownerships)", itemId)
         val ownerships = ownershipService.fetchAllByItemId(itemId)
         logger.info("Fetched {} Ownerships for Item [{}]", ownerships.size, itemId)
@@ -43,6 +44,7 @@ class EnrichmentRefreshService(
     }
 
     suspend fun refreshItem(itemId: ShortItemId) = coroutineScope {
+        TODO()
         logger.info("Starting refresh of Item [{}]", itemId)
         val itemDtoDeferred = async { itemService.fetch(itemId) }
 
@@ -61,18 +63,22 @@ class EnrichmentRefreshService(
 
         val bestSellOrders = bestSellOrdersDto
             .groupBy { order -> order.sellCurrencyId }
-            .mapValues { (_, orders) -> orders.map { order -> ShortOrderConverter.convert(order) }  }
-            .mapNotNull { (currencyId, orders) -> bestOrderReducer.reduceSells(orders)?.let { best -> currencyId to best }  }
+            .mapValues { (_, orders) -> orders.map { order -> ShortOrderConverter.convert(order) } }
+            .mapNotNull { (currencyId, orders) ->
+                bestOrderService.getBestSellOrder(orders)?.let { best -> currencyId to best }
+            }
             .toMap()
 
         val bestBidOrders = bestBidOrdersDto
             .groupBy { order -> order.bidCurrencyId }
-            .mapValues { (_, orders) -> orders.map { order -> ShortOrderConverter.convert(order) }  }
-            .mapNotNull { (currencyId, orders) -> bestOrderReducer.reduceBids(orders)?.let { best -> currencyId to best }  }
+            .mapValues { (_, orders) -> orders.map { order -> ShortOrderConverter.convert(order) } }
+            .mapNotNull { (currencyId, orders) ->
+                bestOrderService.getBestBidOrder(orders)?.let { best -> currencyId to best }
+            }
             .toMap()
 
-        val bestSellOrder = bestOrderReducer.reduceSellsByUsd(bestSellOrders)
-        val bestBidOrder = bestOrderReducer.reduceBidsByUsd(bestBidOrders)
+        val bestSellOrder = bestOrderService.getBestSellOrderInUsd(bestSellOrders)
+        val bestBidOrder = bestOrderService.getBestBidOrderInUsd(bestBidOrders)
 
         val short = ShortItemConverter.convert(itemDto).copy(
             bestSellOrders = bestSellOrders,
@@ -118,11 +124,11 @@ class EnrichmentRefreshService(
             .groupBy { order -> order.sellCurrencyId }
             .mapValues { (_, orders) -> orders.map { order -> ShortOrderConverter.convert(order) } }
             .mapNotNull { (currencyId, orders) ->
-                bestOrderReducer.reduceSells(orders)?.let { best -> currencyId to best }
+                bestOrderService.getBestSellOrder(orders)?.let { best -> currencyId to best }
             }
             .toMap()
 
-        val bestSellOrder = bestOrderReducer.reduceSellsByUsd(bestSellOrders)
+        val bestSellOrder = bestOrderService.getBestSellOrderInUsd(bestSellOrders)
 
         val enrichedOwnership = short.copy(
             bestSellOrders = bestSellOrders,

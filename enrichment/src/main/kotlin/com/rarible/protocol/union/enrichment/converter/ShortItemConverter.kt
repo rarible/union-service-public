@@ -17,8 +17,6 @@ object ShortItemConverter {
             totalStock = BigInteger.ZERO,
             bestSellOrders = emptyMap(),
             bestBidOrders = emptyMap(),
-            bestSellOrderCount = 0,
-            bestBidOrderCount = 0,
             bestSellOrder = null,
             bestBidOrder = null,
             lastUpdatedAt = nowMillis()

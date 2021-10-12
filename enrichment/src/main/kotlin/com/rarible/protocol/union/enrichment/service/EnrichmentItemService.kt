@@ -34,7 +34,7 @@ class EnrichmentItemService(
     }
 
     suspend fun save(item: ShortItem): ShortItem {
-        return itemRepository.save(item)
+        return itemRepository.save(item.withCalculatedFields())
     }
 
     suspend fun delete(itemId: ShortItemId): DeleteResult? {
