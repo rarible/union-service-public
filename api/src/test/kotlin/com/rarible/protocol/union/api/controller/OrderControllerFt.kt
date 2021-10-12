@@ -171,6 +171,7 @@ class OrderControllerFt : AbstractIntegrationTest() {
                 ethPlatform,
                 continuation,
                 size,
+                unionOrder.bidCurrencyId,
                 null,
                 null
             )
@@ -299,14 +300,16 @@ class OrderControllerFt : AbstractIntegrationTest() {
         val ethOrders = listOf(order)
 
         coEvery {
-            testEthereumOrderApi.getSellOrdersByItem(
+            testEthereumOrderApi.getSellOrdersByItemAndByStatus(
                 contract.value,
                 tokenId.toString(),
                 maker.value,
                 null,
                 ethPlatform,
                 continuation,
-                size
+                size,
+                null,
+                unionOrder.sellCurrencyId
             )
         } returns OrdersPaginationDto(ethOrders, continuation).toMono()
 
@@ -315,6 +318,7 @@ class OrderControllerFt : AbstractIntegrationTest() {
             tokenId.toString(),
             platform,
             maker.fullId(),
+            null,
             null,
             continuation,
             size
@@ -362,6 +366,7 @@ class OrderControllerFt : AbstractIntegrationTest() {
                     tokenId.toString(),
                     platform,
                     maker.fullId(),
+                    null,
                     null,
                     continuation,
                     size

@@ -89,6 +89,7 @@ class FlowOrderService(
         tokenId: String,
         maker: String?,
         origin: String?,
+        status: List<OrderStatusDto>?,
         currencyAddress: String,
         continuation: String?,
         size: Int

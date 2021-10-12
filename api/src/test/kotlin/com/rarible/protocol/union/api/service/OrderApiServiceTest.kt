@@ -107,6 +107,7 @@ class OrderApiServiceTest {
             tokenId = itemId.tokenId.toString(),
             maker = null,
             origin = null,
+            status = null,
             continuation = continuation,
             size = size
         )
