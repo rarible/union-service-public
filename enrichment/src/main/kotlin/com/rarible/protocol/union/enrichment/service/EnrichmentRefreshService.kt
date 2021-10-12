@@ -16,6 +16,7 @@ import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.util.bidCurrencyId
 import com.rarible.protocol.union.enrichment.util.sellCurrencyId
 import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -39,7 +40,7 @@ class EnrichmentRefreshService(
         logger.info("Fetched {} Ownerships for Item [{}]", ownerships.size, itemId)
         ownerships
             .map { async { refreshOwnership(it) } }
-            .map { it.await() }
+            .awaitAll()
         refreshItem(itemId)
     }
 

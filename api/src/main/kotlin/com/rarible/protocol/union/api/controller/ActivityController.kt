@@ -14,6 +14,7 @@ import com.rarible.protocol.union.dto.IdParser
 import com.rarible.protocol.union.dto.UserActivityTypeDto
 import com.rarible.protocol.union.dto.continuation.ActivityContinuation
 import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.RestController
@@ -91,7 +92,7 @@ class ActivityController(
                         .getActivitiesByUser(type, blockchainUsers, from, to, continuation, safeSize, sort)
                 }
             }
-        }.map { it.await() }
+        }.awaitAll()
 
         val result = merge(blockchainPages, safeSize, sort)
         return ResponseEntity.ok(result)

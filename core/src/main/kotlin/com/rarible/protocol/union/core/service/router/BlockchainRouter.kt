@@ -3,6 +3,7 @@ package com.rarible.protocol.union.core.service.router
 import com.rarible.core.client.WebClientResponseProxyException
 import com.rarible.protocol.union.dto.BlockchainDto
 import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
 
@@ -23,7 +24,7 @@ class BlockchainRouter<T : BlockchainService>(
     suspend fun <R : Any> executeForAll(
         blockchains: Collection<BlockchainDto>?,
         clientCall: suspend (service: T) -> R
-    ) = coroutineScope {
+    ): List<R> = coroutineScope {
         val selectedServices = if (blockchains == null || blockchains.isEmpty()) {
             services
         } else {
@@ -34,7 +35,7 @@ class BlockchainRouter<T : BlockchainService>(
             async {
                 safeApiCall { clientCall(it) }
             }
-        }.mapNotNull { it.await() }
+        }.awaitAll().filterNotNull()
     }
 
     private suspend fun <T> safeApiCall(

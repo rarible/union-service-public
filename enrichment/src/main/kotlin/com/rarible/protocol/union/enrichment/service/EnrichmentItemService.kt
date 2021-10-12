@@ -12,6 +12,7 @@ import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
 import com.rarible.protocol.union.enrichment.util.spent
 import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -65,7 +66,7 @@ class EnrichmentItemService(
         val bestBidOrder = async { enrichmentOrderService.fetchOrderIfDiffers(shortItem.bestBidOrder, order) }
 
         val orders = listOf(bestSellOrder, bestBidOrder)
-            .mapNotNull { it.await() }
+            .awaitAll().filterNotNull()
             .associateBy { it.id }
 
         EnrichedItemConverter.convert(fetchedItem.await(), shortItem, orders)
