@@ -13,6 +13,9 @@ import com.rarible.protocol.union.dto.EthGenerativeArtAssetTypeDto
 import com.rarible.protocol.union.dto.FlowAssetTypeFtDto
 import com.rarible.protocol.union.dto.FlowAssetTypeNftDto
 import com.rarible.protocol.union.dto.OrderDto
+import com.rarible.protocol.union.dto.TezosFA12AssetTypeDto
+import com.rarible.protocol.union.dto.TezosFA2AssetTypeDto
+import com.rarible.protocol.union.dto.TezosXTZAssetTypeDto
 import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
@@ -78,6 +81,11 @@ class EnrichmentOrderEventService(
             // Flow
             is FlowAssetTypeNftDto -> toItemId(assetType.contract, assetType.tokenId)
             is FlowAssetTypeFtDto -> null
+
+            // Tezos
+            is TezosFA12AssetTypeDto -> TODO()
+            is TezosFA2AssetTypeDto -> TODO()
+            is TezosXTZAssetTypeDto -> TODO()
         }
     }
 

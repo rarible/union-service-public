@@ -22,6 +22,7 @@ fun randomUnionItem(id: ItemIdDto): UnionItemDto {
             randomFlowNftItemDto(id),
             id.blockchain
         )
+        BlockchainDto.TEZOS -> TODO()
     }
 }
 

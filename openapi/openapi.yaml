@@ -1105,6 +1105,7 @@ components:
         - ETHEREUM
         - POLYGON
         - FLOW
+        - TEZOS
 
     #################### Sign - Union ####################
 
@@ -2057,6 +2058,7 @@ components:
             - ERC721
             - ERC1155
             - FLOW
+            - TEZOS
         name:
           type: string
         symbol:
@@ -2368,14 +2370,12 @@ components:
 
     AssetType:
       type: object
-      properties:
-        contract:
-          $ref: "#/components/schemas/UnionAddress"
-      required:
-        - contract
       oneOf:
         - $ref: "#/components/schemas/FlowAssetTypeNft"
         - $ref: "#/components/schemas/FlowAssetTypeFt"
+        - $ref: "#/components/schemas/TezosXTZAssetType"
+        - $ref: "#/components/schemas/TezosFA12AssetType"
+        - $ref: "#/components/schemas/TezosFA2AssetType"
         - $ref: "#/components/schemas/EthEthereumAssetType"
         - $ref: "#/components/schemas/EthErc20AssetType"
         - $ref: "#/components/schemas/EthErc721AssetType"
@@ -2385,6 +2385,45 @@ components:
         - $ref: "#/components/schemas/EthCryptoPunksAssetType"
         - $ref: "#/components/schemas/EthGenerativeArtAssetType"
 
+    TezosXTZAssetType:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - XTZ
+      required:
+        - "@type"
+
+    TezosFA12AssetType:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - FA_1_2
+        contract:
+          $ref: "#/components/schemas/UnionAddress"
+      required:
+        - "@type"
+        - contract
+
+    TezosFA2AssetType:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - FA_2
+        contract:
+          $ref: "#/components/schemas/UnionAddress"
+        tokenId:
+          $ref: "#/components/schemas/BigInteger"
+      required:
+        - "@type"
+        - contract
+        - tokenId
+
     FlowAssetTypeNft:
       type: object
       properties:
@@ -2392,11 +2431,14 @@ components:
           type: string
           enum:
             - FLOW_NFT
+        contract:
+          $ref: "#/components/schemas/UnionAddress"
         tokenId:
           $ref: "#/components/schemas/BigInteger"
       required:
         - "@type"
         - tokenId
+        - contract
 
     FlowAssetTypeFt:
       type: object
@@ -2405,8 +2447,11 @@ components:
           type: string
           enum:
             - FLOW_FT
+        contract:
+          $ref: "#/components/schemas/UnionAddress"
       required:
         - "@type"
+        - contract
 
     EthEthereumAssetType:
       type: object
@@ -2425,8 +2470,11 @@ components:
           type: string
           enum:
             - ERC20
+        contract:
+          $ref: "#/components/schemas/UnionAddress"
       required:
         - "@type"
+        - contract
 
     EthErc721AssetType:
       type: object
@@ -2435,10 +2483,13 @@ components:
           type: string
           enum:
             - ERC721
+        contract:
+          $ref: "#/components/schemas/UnionAddress"
         tokenId:
           $ref: "#/components/schemas/BigInteger"
       required:
         - "@type"
+        - contract
         - tokenId
 
     EthErc721LazyAssetType:
@@ -2448,6 +2499,8 @@ components:
           type: string
           enum:
             - ERC721_Lazy
+        contract:
+          $ref: "#/components/schemas/UnionAddress"
         tokenId:
           $ref: "#/components/schemas/BigInteger"
         uri:
@@ -2469,6 +2522,7 @@ components:
             type: string
       required:
         - "@type"
+        - contract
         - tokenId
         - uri
         - creators
@@ -2482,10 +2536,13 @@ components:
           type: string
           enum:
             - ERC1155
+        contract:
+          $ref: "#/components/schemas/UnionAddress"
         tokenId:
           $ref: "#/components/schemas/BigInteger"
       required:
         - "@type"
+        - contract
         - tokenId
 
     EthErc1155LazyAssetType:
@@ -2495,6 +2552,8 @@ components:
           type: string
           enum:
             - ERC1155_Lazy
+        contract:
+          $ref: "#/components/schemas/UnionAddress"
         tokenId:
           $ref: "#/components/schemas/BigInteger"
         uri:
@@ -2518,9 +2577,11 @@ components:
             type: string
       required:
         - "@type"
+        - contract
         - tokenId
         - uri
         - creators
+        - supply
         - royalties
         - signatures
 
@@ -2531,10 +2592,13 @@ components:
           type: string
           enum:
             - "CRYPTO_PUNKS"
+        contract:
+          $ref: "#/components/schemas/UnionAddress"
         punkId:
           type: integer
       required:
         - "@type"
+        - contract
         - punkId
 
     EthGenerativeArtAssetType:
@@ -2544,8 +2608,11 @@ components:
           type: string
           enum:
             - "GEN_ART"
+        contract:
+          $ref: "#/components/schemas/UnionAddress"
       required:
         - "@type"
+        - contract
 
     #################### Order - Flow ####################
 

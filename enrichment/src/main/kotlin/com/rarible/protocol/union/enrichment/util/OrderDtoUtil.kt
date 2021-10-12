@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.enrichment.util
 
+import com.rarible.protocol.union.core.service.contract
 import com.rarible.protocol.union.dto.OrderDto
 
 val OrderDto.sellCurrencyId: String
