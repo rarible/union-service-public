@@ -103,11 +103,12 @@ class BestOrderService(
         val usdEnrichedOrders = orders.map { entity ->
             val currencyId = entity.key
             val order = entity.value
-            val rate = currencyService.getCurrentRate(order.blockchain, currencyId).rate
+            val rate = currencyService.getCurrentRate(order.blockchain, currencyId)?.rate
             order.copy(
-                // TODO???
-                makePrice = order.makePrice?.let { makePrice -> makePrice * rate },
-                takePrice = order.takePrice?.let { takePrice -> takePrice * rate }
+                // If we have orders which are made in not supports USD conversion,
+                // they will have NULL prices and if current order exists, it won't be replaced
+                makePrice = order.makePrice?.let { makePrice -> rate?.let { makePrice * rate } },
+                takePrice = order.takePrice?.let { takePrice -> rate?.let { takePrice * rate } }
             )
         }
         val best = getBestOrder(usdEnrichedOrders, comparator)

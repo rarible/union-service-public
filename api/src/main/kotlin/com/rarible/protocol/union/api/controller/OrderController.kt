@@ -2,8 +2,9 @@ package com.rarible.protocol.union.api.controller
 
 import com.rarible.protocol.union.api.configuration.PageSize
 import com.rarible.protocol.union.api.service.OrderApiService
-import com.rarible.protocol.union.core.continuation.Paging
-import com.rarible.protocol.union.core.continuation.Slice
+import com.rarible.protocol.union.core.continuation.OrderContinuation
+import com.rarible.protocol.union.core.continuation.page.Paging
+import com.rarible.protocol.union.core.continuation.page.Slice
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -14,7 +15,6 @@ import com.rarible.protocol.union.dto.OrderIdsDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.OrdersDto
 import com.rarible.protocol.union.dto.PlatformDto
-import com.rarible.protocol.union.dto.continuation.OrderContinuation
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.RestController
 

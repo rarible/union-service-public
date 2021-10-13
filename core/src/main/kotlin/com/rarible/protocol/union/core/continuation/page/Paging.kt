@@ -1,7 +1,7 @@
-package com.rarible.protocol.union.core.continuation
+package com.rarible.protocol.union.core.continuation.page
 
-import com.rarible.protocol.union.dto.continuation.Continuation
-import com.rarible.protocol.union.dto.continuation.ContinuationFactory
+import com.rarible.protocol.union.core.continuation.Continuation
+import com.rarible.protocol.union.core.continuation.ContinuationFactory
 import kotlin.math.min
 
 class Paging<T, C : Continuation<C>, F : ContinuationFactory<T, C>>(

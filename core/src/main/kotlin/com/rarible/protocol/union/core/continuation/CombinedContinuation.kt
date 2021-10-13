@@ -1,7 +1,5 @@
 package com.rarible.protocol.union.core.continuation
 
-import com.rarible.protocol.union.dto.continuation.Continuation
-
 data class CombinedContinuation(
     val continuations: Map<String, String>
 ) {

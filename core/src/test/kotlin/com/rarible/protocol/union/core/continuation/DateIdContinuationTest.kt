@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.dto.continuation
+package com.rarible.protocol.union.core.continuation
 
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -36,10 +36,10 @@ class DateIdContinuationTest {
     fun `compare records`() {
         val now = Instant.now()
         val d1 = DateIdContinuation(now.plusMillis(1), "a")
-        val d2 = DateIdContinuation(now, "z")
-        val d3 = DateIdContinuation(now, "y")
-        val d4 = DateIdContinuation(now.minusMillis(1), "y")
-        val d5 = DateIdContinuation(now.minusMillis(1), "x")
+        val d2 = DateIdContinuation(now, "y")
+        val d3 = DateIdContinuation(now, "z")
+        val d4 = DateIdContinuation(now.minusMillis(1), "x")
+        val d5 = DateIdContinuation(now.minusMillis(1), "y")
 
         val list = listOf(d1, d2, d3, d4, d5).shuffled().sorted()
 

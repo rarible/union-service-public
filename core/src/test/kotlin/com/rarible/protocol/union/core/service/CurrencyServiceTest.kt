@@ -6,7 +6,6 @@ import com.rarible.core.test.data.randomString
 import com.rarible.protocol.currency.api.client.CurrencyControllerApi
 import com.rarible.protocol.currency.dto.CurrencyRateDto
 import com.rarible.protocol.union.core.converter.CurrencyConverter
-import com.rarible.protocol.union.core.exception.UnionCurrencyException
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.test.data.randomAddressString
 import io.mockk.clearMocks
@@ -17,7 +16,6 @@ import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
 import java.math.BigDecimal
@@ -57,8 +55,8 @@ class CurrencyServiceTest {
         val address = randomAddressString()
         mockCurrency(blockchain, address, rate)
 
-        val usdRate1 = currencyService.getCurrentRate(blockchain, address)
-        val usdRate2 = currencyService.getCurrentRate(blockchain, address)
+        val usdRate1 = currencyService.getCurrentRate(blockchain, address)!!
+        val usdRate2 = currencyService.getCurrentRate(blockchain, address)!!
 
         assertThat(usdRate1.rate).isEqualTo(rate)
         assertThat(usdRate2.rate).isEqualTo(rate)
@@ -69,15 +67,12 @@ class CurrencyServiceTest {
 
     @Test
     fun `get current rate - failed`() = runBlocking<Unit> {
-        val mock = coEvery {
+        coEvery {
             currencyControllerApi.getCurrencyRate(any(), any(), any())
         } throws RuntimeException()
 
-        assertThrows<UnionCurrencyException> {
-            runBlocking {
-                currencyService.getCurrentRate(BlockchainDto.POLYGON, randomAddressString())
-            }
-        }
+        val currency = currencyService.getCurrentRate(BlockchainDto.POLYGON, randomAddressString())
+        assertThat(currency).isNull()
     }
 
     @Test
@@ -95,8 +90,8 @@ class CurrencyServiceTest {
         mockCurrency(flowBlockchain, flowAddress, flowRate1, null)
 
         // Filling cache with initial values
-        val currentEthRate = currencyService.getCurrentRate(ethBlockchain, ethAddress)
-        val currentFlowRate = currencyService.getCurrentRate(flowBlockchain, flowAddress)
+        val currentEthRate = currencyService.getCurrentRate(ethBlockchain, ethAddress)!!
+        val currentFlowRate = currencyService.getCurrentRate(flowBlockchain, flowAddress)!!
 
         assertThat(currentEthRate.rate).isEqualTo(ethRate1)
         assertThat(currentFlowRate.rate).isEqualTo(flowRate1)
@@ -104,8 +99,8 @@ class CurrencyServiceTest {
         // Refreshing cache - there should be new values
         currencyService.refreshCache()
 
-        val refreshedEthRate = currencyService.getCurrentRate(ethBlockchain, ethAddress)
-        val refreshedFlowRate = currencyService.getCurrentRate(flowBlockchain, flowAddress)
+        val refreshedEthRate = currencyService.getCurrentRate(ethBlockchain, ethAddress)!!
+        val refreshedFlowRate = currencyService.getCurrentRate(flowBlockchain, flowAddress)!!
 
         // Eth rate should be updated, flow rate should stay the same since refresh failed for it
         assertThat(refreshedEthRate.rate).isEqualTo(ethRate2)

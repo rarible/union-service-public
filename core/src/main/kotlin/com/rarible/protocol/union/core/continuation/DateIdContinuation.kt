@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.dto.continuation
+package com.rarible.protocol.union.core.continuation
 
 import java.time.Instant
 
@@ -19,7 +19,7 @@ data class DateIdContinuation(
         if (dateDiff != 0) {
             return sign * dateDiff
         }
-        return sign * this.id.compareTo(other.id)
+        return this.id.compareTo(other.id)
     }
 
     companion object {

@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.core.continuation
+package com.rarible.protocol.union.core.continuation.page
 
 data class Page<T>(
     val total: Long,

@@ -2,7 +2,7 @@ package com.rarible.protocol.union.enrichment.service
 
 import com.rarible.core.client.WebClientResponseProxyException
 import com.rarible.core.common.nowMillis
-import com.rarible.protocol.union.core.continuation.Slice
+import com.rarible.protocol.union.core.continuation.page.Slice
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.OrderDto
