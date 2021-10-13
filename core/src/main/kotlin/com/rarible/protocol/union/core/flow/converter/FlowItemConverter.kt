@@ -28,7 +28,6 @@ object FlowItemConverter {
             mintedAt = item.mintedAt,
             lastUpdatedAt = item.lastUpdatedAt,
             supply = item.supply,
-            metaUrl = item.metaUrl,
             meta = convert(item.meta),
             deleted = item.deleted,
             tokenId = item.tokenId,

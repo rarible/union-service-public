@@ -27,7 +27,6 @@ object EnrichedItemConverter {
             lastUpdatedAt = item.lastUpdatedAt,
             supply = item.supply,
             meta = item.meta,
-            metaUrl = item.metaUrl,
             deleted = item.deleted,
 
             // Enrichment data

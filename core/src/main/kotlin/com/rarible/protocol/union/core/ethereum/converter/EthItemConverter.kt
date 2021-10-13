@@ -30,7 +30,6 @@ object EthItemConverter {
             mintedAt = item.date ?: nowMillis(), // TODO RPN-848
             lastUpdatedAt = item.date ?: nowMillis(),
             supply = item.supply,
-            metaUrl = null, //TODO
             meta = item.meta?.let { convert(it) },
             deleted = item.deleted ?: false,
             tokenId = item.tokenId,

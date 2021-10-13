@@ -24,7 +24,6 @@ class FlowItemConverterTest {
         assertThat(converted.tokenId).isEqualTo(dto.tokenId)
         assertThat(converted.mintedAt).isEqualTo(dto.mintedAt)
         assertThat(converted.lastUpdatedAt).isEqualTo(dto.lastUpdatedAt)
-        assertThat(converted.metaUrl).isEqualTo(dto.metaUrl)
         assertThat(converted.supply).isEqualTo(dto.supply)
         assertThat(converted.deleted).isEqualTo(dto.deleted)
 

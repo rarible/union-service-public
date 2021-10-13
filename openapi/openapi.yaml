@@ -1269,9 +1269,6 @@ components:
           format: date-time
         supply:
           $ref: "#/components/schemas/BigInteger"
-        metaUrl:
-          type: string
-          example: "ipfs://ipfs/QmPe1W8XiUYdsvdpvgWVwekQ7cDQivRMak3YPX15vxvSJs"
         meta:
           $ref: "#/components/schemas/Meta"
         deleted:
