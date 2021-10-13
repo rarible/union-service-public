@@ -1199,14 +1199,9 @@ components:
         mimeType:
           type: string
           example: "image/png"
-        attributes:
-          type: object
-          additionalProperties:
-            type: string
       required:
         - url
         - representation
-        - attributes
 
       oneOf:
         - $ref: "#/components/schemas/ImageContent"

@@ -108,8 +108,7 @@ object EthItemConverter {
             url = url,
             mimeType = meta?.type,
             width = meta?.width,
-            height = meta?.height,
-            attributes = emptyMap()
+            height = meta?.height
         )
     }
 
@@ -123,8 +122,7 @@ object EthItemConverter {
             url = url,
             mimeType = meta?.type,
             width = meta?.width,
-            height = meta?.height,
-            attributes = emptyMap()
+            height = meta?.height
         )
     }
 }
