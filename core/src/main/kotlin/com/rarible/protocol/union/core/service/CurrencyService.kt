@@ -32,7 +32,7 @@ class CurrencyService(
     suspend fun getRate(blockchain: BlockchainDto, address: String, at: Instant): CurrencyUsdRateDto {
         val result = fetchRateSafe(blockchain, address, at)
         return result ?: throw UnionCurrencyException(
-            "Currency for ${blockchain.name} with id [$address] is not supported"
+            "Currency for ${blockchain.name} with id [$address] doesn't support USD conversion"
         )
     }
 
