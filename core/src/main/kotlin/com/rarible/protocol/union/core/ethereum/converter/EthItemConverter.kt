@@ -91,14 +91,14 @@ object EthItemConverter {
         source: NftMediaDto?, converter: (
             url: String,
             representation: MetaContentDto.Representation,
-            meta: NftMediaMetaDto
+            meta: NftMediaMetaDto?
         ) -> T
     ): List<T> {
         return source?.url?.map { urlMap ->
             // TODO handle unknown representation
             val representation = MetaContentDto.Representation.valueOf(urlMap.key)
             val url = urlMap.value
-            val meta = source.meta[urlMap.key]!!
+            val meta = source.meta[urlMap.key]
             converter(url, representation, meta)
         } ?: emptyList()
     }
@@ -106,14 +106,14 @@ object EthItemConverter {
     private fun convertImage(
         url: String,
         representation: MetaContentDto.Representation,
-        meta: NftMediaMetaDto
+        meta: NftMediaMetaDto?
     ): ImageContentDto {
         return ImageContentDto(
             representation = representation,
             url = url,
-            mimeType = meta.type,
-            width = meta.width,
-            height = meta.height,
+            mimeType = meta?.type,
+            width = meta?.width,
+            height = meta?.height,
             attributes = emptyMap()
         )
     }
@@ -121,14 +121,14 @@ object EthItemConverter {
     private fun convertVideo(
         url: String,
         representation: MetaContentDto.Representation,
-        meta: NftMediaMetaDto
+        meta: NftMediaMetaDto?
     ): VideoContentDto {
         return VideoContentDto(
             representation = representation,
             url = url,
-            mimeType = meta.type,
-            width = meta.width,
-            height = meta.height,
+            mimeType = meta?.type,
+            width = meta?.width,
+            height = meta?.height,
             attributes = emptyMap()
         )
     }

@@ -11,6 +11,7 @@ import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.OrderPayoutDto
 import com.rarible.protocol.union.dto.PlatformDto
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
@@ -18,7 +19,18 @@ class FlowOrderConverter(
     private val currencyService: CurrencyService
 ) {
 
+    private val logger = LoggerFactory.getLogger(javaClass)
+
     suspend fun convert(order: FlowOrderDto, blockchain: BlockchainDto): OrderDto {
+        try {
+            return convertInternal(order, blockchain)
+        } catch (e: Exception) {
+            logger.error("Failed to convert Flow Order, cause {}: \n{}", e.message, order)
+            throw e
+        }
+    }
+
+    private suspend fun convertInternal(order: FlowOrderDto, blockchain: BlockchainDto): OrderDto {
 
         val make = FlowConverter.convert(order.make, blockchain)
         val take = FlowConverter.convert(order.take, blockchain)

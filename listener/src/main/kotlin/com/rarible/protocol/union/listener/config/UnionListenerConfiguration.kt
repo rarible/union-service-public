@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.listener.config
 
+import com.github.cloudyrock.spring.v5.EnableMongock
 import com.rarible.core.application.ApplicationEnvironmentInfo
 import com.rarible.core.daemon.sequential.ConsumerEventHandler
 import com.rarible.core.daemon.sequential.ConsumerWorker
@@ -51,6 +52,7 @@ import org.springframework.context.annotation.Import
 @Configuration
 @Import(EnrichmentConfiguration::class)
 @EnableRaribleTask
+@EnableMongock
 @EnableConfigurationProperties(value = [UnionListenerProperties::class])
 class UnionListenerConfiguration(
     applicationEnvironmentInfo: ApplicationEnvironmentInfo,

@@ -66,8 +66,6 @@ internal class PriceUpdateJobTest : AbstractIntegrationTest() {
 
     @BeforeEach
     fun beforeEach() = runBlocking<Unit> {
-        itemRepository.createIndexes()
-        ownershipRepository.createIndices()
         clearMocks(
             currencyControllerApi,
             testEthereumOrderApi,

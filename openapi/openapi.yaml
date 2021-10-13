@@ -1192,7 +1192,6 @@ components:
       required:
         - url
         - representation
-        - mimeType
         - attributes
 
       oneOf:
