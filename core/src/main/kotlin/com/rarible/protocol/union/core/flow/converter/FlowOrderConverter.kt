@@ -3,7 +3,6 @@ package com.rarible.protocol.union.core.flow.converter
 import com.rarible.protocol.dto.FlowOrderDto
 import com.rarible.protocol.dto.PayInfoDto
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
-import com.rarible.protocol.union.core.model.ext
 import com.rarible.protocol.union.core.service.CurrencyService
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.FlowOrderDataV1Dto
@@ -25,7 +24,7 @@ class FlowOrderConverter(
         try {
             return convertInternal(order, blockchain)
         } catch (e: Exception) {
-            logger.error("Failed to convert Flow Order, cause {}: \n{}", e.message, order)
+            logger.error("Failed to convert Flow Order, cause: {} \n{}", e.message, order)
             throw e
         }
     }
