@@ -1,7 +1,7 @@
-package com.rarible.protocol.union.core.continuation
+package com.rarible.protocol.union.core.continuation.page
 
-import com.rarible.protocol.union.dto.continuation.Continuation
-import com.rarible.protocol.union.dto.continuation.ContinuationFactory
+import com.rarible.protocol.union.core.continuation.Continuation
+import com.rarible.protocol.union.core.continuation.ContinuationFactory
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
@@ -20,7 +20,7 @@ class ArgPagingTest {
         )
 
         val result = ArgPaging(
-            ByOriginalAndIdAsc, BySellFinalAndIdAsc, listOf(firstArgSlice, secondArgSlice)
+            TestContinuationFactory, listOf(firstArgSlice, secondArgSlice)
         ).getSlice(2)
 
         assertThat(result.entities).hasSize(2)
@@ -46,7 +46,7 @@ class ArgPagingTest {
         )
 
         val result = ArgPaging(
-            ByOriginalAndIdAsc, BySellFinalAndIdAsc, listOf(firstArgSlice, secondArgSlice)
+            TestContinuationFactory, listOf(firstArgSlice, secondArgSlice)
         ).getSlice(2)
 
         assertThat(result.entities).hasSize(2)
@@ -73,7 +73,7 @@ class ArgPagingTest {
         )
 
         val result = ArgPaging(
-            ByOriginalAndIdAsc, BySellFinalAndIdAsc, listOf(firstArgSlice, secondArgSlice)
+            TestContinuationFactory, listOf(firstArgSlice, secondArgSlice)
         ).getSlice(2)
 
         assertThat(result.entities).hasSize(2)
@@ -101,7 +101,7 @@ class ArgPagingTest {
         )
 
         val result = ArgPaging(
-            ByOriginalAndIdAsc, BySellFinalAndIdAsc, listOf(firstArgSlice, secondArgSlice)
+            TestContinuationFactory, listOf(firstArgSlice, secondArgSlice)
         ).getSlice(2)
 
         assertThat(result.entities).hasSize(2)
@@ -129,7 +129,7 @@ class ArgPagingTest {
         )
 
         val result = ArgPaging(
-            ByOriginalAndIdAsc, BySellFinalAndIdAsc, listOf(firstArgSlice, secondArgSlice)
+            TestContinuationFactory, listOf(firstArgSlice, secondArgSlice)
         ).getSlice(2)
 
         assertThat(result.entities).hasSize(2)
@@ -155,7 +155,7 @@ class ArgPagingTest {
         )
 
         val result = ArgPaging(
-            ByOriginalAndIdAsc, BySellFinalAndIdAsc, listOf(firstArgSlice, secondArgSlice)
+            TestContinuationFactory, listOf(firstArgSlice, secondArgSlice)
         ).getSlice(2)
 
         assertThat(result.entities).hasSize(1)
@@ -171,28 +171,26 @@ class ArgPagingTest {
     )
 
     private class TestContinuation(
-        val id: String,
-        val value: Int
+        val e: TestEntity
     ) : Continuation<TestContinuation> {
         override fun compareTo(other: TestContinuation): Int {
-            val result = this.value.compareTo(other.value)
-            return if (result != 0) result else id.compareTo(other.id)
+            var result = this.e.finalValue.compareTo(other.e.finalValue)
+            if (result != 0) return result
+
+            result = this.e.originalValue.compareTo(other.e.originalValue)
+            if (result != 0) return result
+
+            return if (result != 0) result else e.id.compareTo(other.e.id)
         }
 
         override fun toString(): String {
-            return "${value}_${id}"
+            return "${e.originalValue}_${e.id}"
         }
     }
 
-    private object BySellFinalAndIdAsc : ContinuationFactory<TestEntity, TestContinuation> {
+    private object TestContinuationFactory : ContinuationFactory<TestEntity, TestContinuation> {
         override fun getContinuation(entity: TestEntity): TestContinuation {
-            return TestContinuation(entity.id, entity.finalValue)
-        }
-    }
-
-    private object ByOriginalAndIdAsc : ContinuationFactory<TestEntity, TestContinuation> {
-        override fun getContinuation(entity: TestEntity): TestContinuation {
-            return TestContinuation(entity.id, entity.originalValue)
+            return TestContinuation(entity)
         }
     }
 }

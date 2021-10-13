@@ -2,14 +2,14 @@ package com.rarible.protocol.union.api.controller
 
 import com.rarible.protocol.union.api.configuration.PageSize
 import com.rarible.protocol.union.api.service.ItemApiService
-import com.rarible.protocol.union.core.continuation.Paging
+import com.rarible.protocol.union.core.continuation.ItemContinuation
+import com.rarible.protocol.union.core.continuation.page.Paging
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.IdParser
 import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.ItemsDto
-import com.rarible.protocol.union.dto.continuation.ItemContinuation
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.RestController

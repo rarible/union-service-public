@@ -8,7 +8,7 @@ import com.rarible.protocol.dto.FlowNftOrderActivityCancelListDto
 import com.rarible.protocol.dto.FlowNftOrderActivityListDto
 import com.rarible.protocol.dto.FlowNftOrderActivitySellDto
 import com.rarible.protocol.dto.FlowTransferDto
-import com.rarible.protocol.union.core.continuation.Slice
+import com.rarible.protocol.union.core.continuation.page.Slice
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.dto.ActivityBlockchainInfoDto
 import com.rarible.protocol.union.dto.ActivityDto

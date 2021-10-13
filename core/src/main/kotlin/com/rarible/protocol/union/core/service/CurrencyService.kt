@@ -25,33 +25,31 @@ class CurrencyService(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     private val caches = BlockchainDto.values().associate {
-        it to ConcurrentHashMap<String, CurrencyUsdRateDto>()
+        it to ConcurrentHashMap<String, CurrencyUsdRateDto?>()
     }
 
     // Read currency rate directly from Currency-Service (for API calls)
     suspend fun getRate(blockchain: BlockchainDto, address: String, at: Instant): CurrencyUsdRateDto {
         val result = fetchRateSafe(blockchain, address, at)
         return result ?: throw UnionCurrencyException(
-            "Currency for ${blockchain.name} with id [$address] is not supported"
+            "Currency for ${blockchain.name} with id [$address] doesn't support USD conversion"
         )
     }
 
     // Return current rate (cached)
-    suspend fun getCurrentRate(blockchain: BlockchainDto, address: String): CurrencyUsdRateDto {
+    suspend fun getCurrentRate(blockchain: BlockchainDto, address: String): CurrencyUsdRateDto? {
         val blockchainCache = caches[blockchain]!!
         var cached = blockchainCache[address]
         if (cached == null) {
             cached = fetchRateSafe(blockchain, address, nowMillis())
-            if (cached != null) {
-                blockchainCache[address] = cached
-            } else {
-                throw UnionCurrencyException(
-                    "Currency rate for ${blockchain.name} with address [$address] is not supported," +
-                            " fix in in currency service"
-                )
+            if (cached == null) {
+                logger.info("Currency {}:[{}] updated, but doesn't support USD conversion", blockchain.name, address)
+                cached = CurrencyUsdRateDto(address, BigDecimal(-1), nowMillis())
             }
+            blockchainCache[address] = cached
         }
-        return cached
+        val supported = cached.rate >= BigDecimal.ZERO
+        return if (supported) cached else null
     }
 
     suspend fun toUsd(blockchain: BlockchainDto, address: String, value: BigDecimal?): BigDecimal? {
@@ -62,7 +60,7 @@ class CurrencyService(
             return BigDecimal.ZERO
         }
         val rate = getCurrentRate(blockchain, address)
-        return value.multiply(rate.rate)
+        return rate?.let { value.multiply(it.rate) }
     }
 
     fun invalidateCache() {

@@ -2,7 +2,7 @@ package com.rarible.protocol.union.core.ethereum.converter
 
 import com.rarible.protocol.dto.NftCollectionDto
 import com.rarible.protocol.dto.NftCollectionsDto
-import com.rarible.protocol.union.core.continuation.Page
+import com.rarible.protocol.union.core.continuation.page.Page
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionDto

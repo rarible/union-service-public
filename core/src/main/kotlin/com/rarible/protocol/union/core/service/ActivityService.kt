@@ -1,6 +1,6 @@
 package com.rarible.protocol.union.core.service
 
-import com.rarible.protocol.union.core.continuation.Slice
+import com.rarible.protocol.union.core.continuation.page.Slice
 import com.rarible.protocol.union.core.service.router.BlockchainService
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivitySortDto

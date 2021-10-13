@@ -9,8 +9,9 @@ import com.rarible.protocol.dto.NftActivitiesDto
 import com.rarible.protocol.dto.OrderActivitiesDto
 import com.rarible.protocol.nft.api.client.NftActivityControllerApi
 import com.rarible.protocol.order.api.client.OrderActivityControllerApi
-import com.rarible.protocol.union.core.continuation.Paging
-import com.rarible.protocol.union.core.continuation.Slice
+import com.rarible.protocol.union.core.continuation.ActivityContinuation
+import com.rarible.protocol.union.core.continuation.page.Paging
+import com.rarible.protocol.union.core.continuation.page.Slice
 import com.rarible.protocol.union.core.ethereum.converter.EthActivityConverter
 import com.rarible.protocol.union.core.ethereum.converter.EthActivityFilterConverter
 import com.rarible.protocol.union.core.ethereum.converter.EthConverter
@@ -20,7 +21,6 @@ import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
-import com.rarible.protocol.union.dto.continuation.ActivityContinuation
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.reactive.awaitFirst

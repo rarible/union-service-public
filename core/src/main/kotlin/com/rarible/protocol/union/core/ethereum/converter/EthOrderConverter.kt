@@ -10,7 +10,7 @@ import com.rarible.protocol.dto.OrderSideDto
 import com.rarible.protocol.dto.OrderSideMatchDto
 import com.rarible.protocol.dto.OrdersPaginationDto
 import com.rarible.protocol.dto.RaribleV2OrderDto
-import com.rarible.protocol.union.core.continuation.Slice
+import com.rarible.protocol.union.core.continuation.page.Slice
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.model.ext
 import com.rarible.protocol.union.core.service.CurrencyService
@@ -43,7 +43,7 @@ class EthOrderConverter(
         try {
             return convertInternal(order, blockchain)
         } catch (e: Exception) {
-            logger.error("Failed to convert Ethereum Order, cause {}: \n{}", e.message, order)
+            logger.error("Failed to convert Ethereum Order, cause: {} \n{}", e.message, order)
             throw e
         }
     }

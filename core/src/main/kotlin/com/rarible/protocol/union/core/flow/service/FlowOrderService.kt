@@ -1,7 +1,7 @@
 package com.rarible.protocol.union.core.flow.service
 
 import com.rarible.protocol.flow.nft.api.client.FlowOrderControllerApi
-import com.rarible.protocol.union.core.continuation.Slice
+import com.rarible.protocol.union.core.continuation.page.Slice
 import com.rarible.protocol.union.core.flow.converter.FlowOrderConverter
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.dto.BlockchainDto

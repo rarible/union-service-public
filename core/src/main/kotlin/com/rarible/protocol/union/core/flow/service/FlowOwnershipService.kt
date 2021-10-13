@@ -1,7 +1,7 @@
 package com.rarible.protocol.union.core.flow.service
 
 import com.rarible.protocol.flow.nft.api.client.FlowNftOwnershipControllerApi
-import com.rarible.protocol.union.core.continuation.Page
+import com.rarible.protocol.union.core.continuation.page.Page
 import com.rarible.protocol.union.core.flow.converter.FlowOwnershipConverter
 import com.rarible.protocol.union.core.service.OwnershipService
 import com.rarible.protocol.union.dto.BlockchainDto

@@ -1,7 +1,7 @@
 package com.rarible.protocol.union.core.ethereum.service
 
 import com.rarible.protocol.nft.api.client.NftCollectionControllerApi
-import com.rarible.protocol.union.core.continuation.Page
+import com.rarible.protocol.union.core.continuation.page.Page
 import com.rarible.protocol.union.core.ethereum.converter.EthCollectionConverter
 import com.rarible.protocol.union.core.service.CollectionService
 import com.rarible.protocol.union.dto.BlockchainDto

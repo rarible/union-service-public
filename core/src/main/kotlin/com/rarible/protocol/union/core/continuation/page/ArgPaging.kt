@@ -1,18 +1,15 @@
-package com.rarible.protocol.union.core.continuation
+package com.rarible.protocol.union.core.continuation.page
 
-import com.rarible.protocol.union.dto.continuation.Continuation
-import com.rarible.protocol.union.dto.continuation.ContinuationFactory
+import com.rarible.protocol.union.core.continuation.CombinedContinuation
+import com.rarible.protocol.union.core.continuation.Continuation
+import com.rarible.protocol.union.core.continuation.ContinuationFactory
 
 /**
  * Paging implementation for per-arg based requests. Used for building ordered list
  * of Orders which should be requested by several currencies, but ordered by USD.
  */
 class ArgPaging<T, C : Continuation<C>, F : ContinuationFactory<T, C>>(
-    // Intermediate factory for continuations (to build per-arg continuations)
-    private val intermediateFactory: F,
-    // Final factory to build final slice (originally, we don't need it to build continuation,
-    // it needed just for sort - good example of bad architecture)
-    private val finalFactory: F,
+    private val factory: F,
     private val slices: List<ArgSlice<T>>
 ) {
 
@@ -26,7 +23,7 @@ class ArgPaging<T, C : Continuation<C>, F : ContinuationFactory<T, C>>(
         // Then we're building final slice based on non-empty slices
         val inProgressArgs = slices.filter { !it.isFinished() }
         val allEntities = inProgressArgs.flatMap { it.slice.entities }
-        val paging = Paging(finalFactory, allEntities)
+        val paging = Paging(factory, allEntities)
         val result = paging.getSlice(size)
 
         // Now we need to understand, which args fully handled and which are still have continuation -
@@ -44,7 +41,7 @@ class ArgPaging<T, C : Continuation<C>, F : ContinuationFactory<T, C>>(
                     if (it.hasNext() || entity != it.slice.entities.last()) {
                         // If this slice has next page OR this entity is not last from this arg slice,
                         // build continuation for it
-                        continuation[it.arg] = intermediateFactory.getContinuation(entity).toString()
+                        continuation[it.arg] = factory.getContinuation(entity).toString()
                     } else {
                         // Otherwise, we handled all entities for this arg and we don't want to request it anymore
                         continuation[it.arg] = ArgSlice.COMPLETED
