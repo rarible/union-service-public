@@ -3,6 +3,7 @@ package com.rarible.protocol.union.core.flow.converter
 import com.rarible.protocol.dto.FlowOrderDto
 import com.rarible.protocol.dto.PayInfoDto
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
+import com.rarible.protocol.union.core.model.ext
 import com.rarible.protocol.union.core.service.CurrencyService
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.FlowOrderDataV1Dto
