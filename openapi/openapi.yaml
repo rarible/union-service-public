@@ -1157,9 +1157,9 @@ components:
         description:
           type: string
         attributes:
-          type: object
-          additionalProperties:
-            type: string
+          type: array
+          items:
+            "$ref": "#/components/schemas/MetaAttribute"
         content:
           type: array
           items:
@@ -1170,6 +1170,20 @@ components:
         - name
         - attributes
         - content
+
+    MetaAttribute:
+      required:
+        - key
+      type: object
+      properties:
+        key:
+          type: string
+        value:
+          type: string
+        type:
+          type: string
+        format:
+          type: string
 
     MetaContent:
       type: object

@@ -78,8 +78,8 @@ class FlowItemConverterTest {
         assertThat(converted.raw).isEqualTo(dto.raw)
         assertThat(converted.description).isEqualTo(dto.description)
         assertThat(converted.content).hasSize(2)
-        assertThat(converted.attributes["key1"]).isEqualTo("value1")
-        assertThat(converted.attributes["key2"]).isEqualTo("value2")
+        assertThat(converted.attributes.find { it.key == "key1" }?.value).isEqualTo("value1")
+        assertThat(converted.attributes.find { it.key == "key2" }?.value).isEqualTo("value2")
 
         val originalImage = converted.content[0] as ImageContentDto
         val bigImage = converted.content[1] as ImageContentDto

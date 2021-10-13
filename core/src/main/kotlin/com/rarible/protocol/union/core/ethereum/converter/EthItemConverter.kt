@@ -8,15 +8,7 @@ import com.rarible.protocol.dto.NftMediaDto
 import com.rarible.protocol.dto.NftMediaMetaDto
 import com.rarible.protocol.union.core.continuation.page.Page
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
-import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.ImageContentDto
-import com.rarible.protocol.union.dto.ItemIdDto
-import com.rarible.protocol.union.dto.ItemRoyaltyDto
-import com.rarible.protocol.union.dto.ItemTransferDto
-import com.rarible.protocol.union.dto.MetaContentDto
-import com.rarible.protocol.union.dto.MetaDto
-import com.rarible.protocol.union.dto.UnionItemDto
-import com.rarible.protocol.union.dto.VideoContentDto
+import com.rarible.protocol.union.dto.*
 
 object EthItemConverter {
 
@@ -76,10 +68,14 @@ object EthItemConverter {
         return MetaDto(
             name = source.name,
             description = source.description,
-            attributes = source.attributes
-                ?.filter { it.value != null }
-                ?.associate { it.key to it.value!! }
-                ?: emptyMap(),
+            attributes = source.attributes.orEmpty().map {
+                MetaAttributeDto(
+                    key = it.key,
+                    value = it.value,
+                    type = it.type,
+                    format = it.format
+                )
+            },
             content = convertMetaContent(source.image, this::convertImage)
                     + convertMetaContent(source.animation, this::convertVideo),
             raw = null //TODO

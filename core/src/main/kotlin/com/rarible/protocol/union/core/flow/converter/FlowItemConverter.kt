@@ -6,12 +6,7 @@ import com.rarible.protocol.dto.FlowNftItemsDto
 import com.rarible.protocol.dto.FlowRoyaltyDto
 import com.rarible.protocol.union.core.continuation.page.Page
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
-import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.CreatorDto
-import com.rarible.protocol.union.dto.ItemIdDto
-import com.rarible.protocol.union.dto.MetaDto
-import com.rarible.protocol.union.dto.RoyaltyDto
-import com.rarible.protocol.union.dto.UnionItemDto
+import com.rarible.protocol.union.dto.*
 import java.math.BigInteger
 
 object FlowItemConverter {
@@ -74,9 +69,15 @@ object FlowItemConverter {
         return MetaDto(
             name = source.name,
             description = source.description,
-            attributes = source.attributes
-                ?.associate { it.key to it.value }
-                ?: emptyMap(),
+            attributes = source.attributes.orEmpty()
+                .map {
+                    MetaAttributeDto(
+                        key = it.key,
+                        value = it.value,
+                        type = null,
+                        format = null
+                    )
+                },
             content = listOf(), // TODO add conversion when we can extract video/images
             raw = source.raw
         )
