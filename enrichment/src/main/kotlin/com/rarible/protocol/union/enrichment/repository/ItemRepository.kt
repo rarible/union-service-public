@@ -30,7 +30,7 @@ class ItemRepository(
 
     val collection: String = template.getCollectionName(ShortItem::class.java)
 
-    suspend fun createIndexes() {
+    suspend fun createIndices() {
         ALL_INDEXES.forEach { index ->
             logger.info("Ensure index '{}' for collection '{}'", index, collection)
             template.indexOps(collection).ensureIndex(index).awaitFirst()

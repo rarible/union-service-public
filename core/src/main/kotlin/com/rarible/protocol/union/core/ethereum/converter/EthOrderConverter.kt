@@ -28,6 +28,7 @@ import com.rarible.protocol.union.dto.PendingOrderCancelDto
 import com.rarible.protocol.union.dto.PendingOrderDto
 import com.rarible.protocol.union.dto.PendingOrderMatchDto
 import com.rarible.protocol.union.dto.PlatformDto
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.time.Instant
 
@@ -36,7 +37,18 @@ class EthOrderConverter(
     private val currencyService: CurrencyService
 ) {
 
+    private val logger = LoggerFactory.getLogger(javaClass)
+
     suspend fun convert(order: com.rarible.protocol.dto.OrderDto, blockchain: BlockchainDto): OrderDto {
+        try {
+            return convertInternal(order, blockchain)
+        } catch (e: Exception) {
+            logger.error("Failed to convert Ethereum Order, cause {}: \n{}", e.message, order)
+            throw e
+        }
+    }
+
+    private suspend fun convertInternal(order: com.rarible.protocol.dto.OrderDto, blockchain: BlockchainDto): OrderDto {
         val orderId = OrderIdDto(blockchain, EthConverter.convert(order.hash))
         val maker = UnionAddressConverter.convert(order.maker, blockchain)
         val taker = order.taker?.let { UnionAddressConverter.convert(it, blockchain) }
