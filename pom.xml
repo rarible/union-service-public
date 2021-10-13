@@ -55,6 +55,7 @@
         <rarible-protocol.flow.version>2.0.16-SNAPSHOT</rarible-protocol.flow.version>
         <rarible.codegen.server.version>1.1.0</rarible.codegen.server.version>
         <rarible.codegen.client.version>1.2.0</rarible.codegen.client.version>
+        <rarible-tezos.version>1.0-SNAPSHOT</rarible-tezos.version>
 
         <openapi.plugin.version>5.1.0</openapi.plugin.version>
         <model.generator.version>1.2.5</model.generator.version>
@@ -258,6 +259,15 @@
                 <groupId>com.rarible.protocol</groupId>
                 <artifactId>flow-protocol-model-order</artifactId>
                 <version>${rarible-protocol.flow.version}</version>
+            </dependency>
+
+            <!-- Tezos-client -->
+            <dependency>
+                <groupId>com.rarible.protocol.tezos</groupId>
+                <artifactId>rarible-tezos-openapi</artifactId>
+                <version>${rarible-tezos.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
 
             <!-- ================== Other =================== -->

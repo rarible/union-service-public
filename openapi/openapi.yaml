@@ -1641,6 +1641,7 @@ components:
         - "$ref": "#/components/schemas/EthOrderDataRaribleV2DataV1"
         - "$ref": "#/components/schemas/EthOrderOpenSeaV1DataV1"
         - "$ref": "#/components/schemas/EthOrderCryptoPunksData"
+        - "$ref": "#/components/schemas/TezosOrderDataRaribleV2DataV1"
         - "$ref": "#/components/schemas/FlowOrderDataV1"
 
     OrderPriceHistoryRecord:
@@ -2191,6 +2192,28 @@ components:
       required:
         - fee
         - "@type"
+
+    TezosOrderDataRaribleV2DataV1:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - TEZOS_RARIBLE_V2
+        payouts:
+          type: array
+          default: [ ]
+          items:
+            $ref: "#/components/schemas/OrderPayout"
+        originFees:
+          type: array
+          default: [ ]
+          items:
+            $ref: "#/components/schemas/OrderPayout"
+      required:
+        - "@type"
+        - payouts
+        - originFees
 
     EthOrderDataRaribleV2DataV1:
       type: object
