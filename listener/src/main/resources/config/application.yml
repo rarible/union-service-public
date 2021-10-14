@@ -62,4 +62,8 @@ listener:
     rate: PT5M
     delay: PT1M
 
+meta:
+  ipfsGateway: "https://ipfs.rarible.com/"
+  mediaFetchTimeout: 10000
+  openSeaProxyUrl: ${consul.meta.openSeaProxyUrl}
 

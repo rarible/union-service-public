@@ -64,7 +64,7 @@ object EthItemConverter {
         )
     }
 
-    private fun convert(source: NftItemMetaDto): MetaDto {
+    fun convert(source: NftItemMetaDto): MetaDto {
         return MetaDto(
             name = source.name,
             description = source.description,
@@ -108,7 +108,8 @@ object EthItemConverter {
             url = url,
             mimeType = meta?.type,
             width = meta?.width,
-            height = meta?.height
+            height = meta?.height,
+            size = null // Not available.
         )
     }
 
@@ -122,7 +123,8 @@ object EthItemConverter {
             url = url,
             mimeType = meta?.type,
             width = meta?.width,
-            height = meta?.height
+            height = meta?.height,
+            size = null // Not available.
         )
     }
 }

@@ -23,7 +23,7 @@ object FlowItemConverter {
             mintedAt = item.mintedAt,
             lastUpdatedAt = item.lastUpdatedAt,
             supply = item.supply,
-            meta = convert(item.meta),
+            meta = item.meta?.let { convert(it) },
             deleted = item.deleted,
             tokenId = item.tokenId,
             collection = collection,
@@ -62,11 +62,8 @@ object FlowItemConverter {
         )
     }
 
-    private fun convert(source: com.rarible.protocol.dto.MetaDto?): MetaDto? {
-        if (source == null) {
-            return null
-        }
-        return MetaDto(
+    fun convert(source: com.rarible.protocol.dto.MetaDto): MetaDto =
+        MetaDto(
             name = source.name,
             description = source.description,
             attributes = source.attributes.orEmpty()
@@ -81,6 +78,4 @@ object FlowItemConverter {
             content = listOf(), // TODO add conversion when we can extract video/images
             raw = source.raw
         )
-    }
-
 }

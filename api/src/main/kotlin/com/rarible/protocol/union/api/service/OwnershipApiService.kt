@@ -53,7 +53,11 @@ class OwnershipApiService(
 
         val result = unionOwnerships.map {
             val existingEnrichedOwnership = existingEnrichedOwnerships[it.id]
-            EnrichedOwnershipConverter.convert(it, existingEnrichedOwnership, orders)
+            if (existingEnrichedOwnership == null) {
+                EnrichedOwnershipConverter.convert(it, existingEnrichedOwnership, orders)
+            } else {
+                enrichmentOwnershipService.enrichOwnership(existingEnrichedOwnership, it, orders)
+            }
         }
 
         return result

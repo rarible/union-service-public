@@ -1199,6 +1199,9 @@ components:
         mimeType:
           type: string
           example: "image/png"
+        size:
+          type: integer
+          format: int64
       required:
         - url
         - representation

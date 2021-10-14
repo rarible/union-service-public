@@ -31,14 +31,15 @@ class EnrichmentOrderService(
         }
     }
 
-    suspend fun fetchOrderIfDiffers(existing: ShortOrder?, order: OrderDto?): OrderDto? {
+    suspend fun fetchOrderIfDiffers(existing: ShortOrder?, orders: Map<OrderIdDto, OrderDto>): OrderDto? {
         // Nothing to download - there is no existing short order
         if (existing == null) {
             return null
         }
         // Full order we already fetched is the same as short Order we want to download - using obtained order here
-        if (existing.dtoId == order?.id) {
-            return order
+        val theSameOrder = orders[existing.dtoId]
+        if (theSameOrder != null) {
+            return theSameOrder
         }
         // Downloading full order in common case
         return getById(existing.dtoId)

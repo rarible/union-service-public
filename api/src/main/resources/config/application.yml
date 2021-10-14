@@ -32,3 +32,8 @@ common:
     tezos:
       # TODO replace in consul
       url: "https://rarible-api.functori.com"
+
+meta:
+  ipfsGateway: "https://ipfs.rarible.com/"
+  mediaFetchTimeout: 10000
+  openSeaProxyUrl: ${consul.meta.openSeaProxyUrl}

@@ -16,11 +16,7 @@ import com.rarible.protocol.union.enrichment.test.data.randomShortOwnership
 import com.rarible.protocol.union.listener.test.AbstractIntegrationTest
 import com.rarible.protocol.union.listener.test.IntegrationTest
 import com.rarible.protocol.union.listener.test.data.createCurrencyDto
-import com.rarible.protocol.union.test.data.randomEthItemId
-import com.rarible.protocol.union.test.data.randomEthLegacyOrderDto
-import com.rarible.protocol.union.test.data.randomEthNftItemDto
-import com.rarible.protocol.union.test.data.randomUnionItem
-import com.rarible.protocol.union.test.data.randomUnionOrderDto
+import com.rarible.protocol.union.test.data.*
 import io.mockk.clearMocks
 import io.mockk.coEvery
 import kotlinx.coroutines.FlowPreview
@@ -136,6 +132,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         ownershipService.save(ownership2)
 
         coEvery { testEthereumItemApi.getNftItemById(itemId.value) } returns ethItem.toMono()
+        coEvery { testEthereumItemApi.getNftItemMetaById(itemId.value) } returns ethItem.meta!!.toMono()
 
         itemEventService.onOwnershipUpdated(ownership1.id, bestSellOrder1)
 
@@ -186,6 +183,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
 
         coEvery { currencyControllerApi.getCurrencyRate(any(), any(), any()) } returns createCurrencyDto().toMono()
         coEvery { testEthereumItemApi.getNftItemById(itemId.value) } returns ethItem.toMono()
+        coEvery { testEthereumItemApi.getNftItemMetaById(itemId.value) } returns ethItem.meta!!.toMono()
 
         itemEventService.onItemBestSellOrderUpdated(shortItem.id, unionBestSell)
 
@@ -216,6 +214,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         itemService.save(shortItem)
 
         coEvery { testEthereumItemApi.getNftItemById(itemId.value) } returns ethItem.toMono()
+        coEvery { testEthereumItemApi.getNftItemMetaById(itemId.value) } returns ethItem.meta!!.toMono()
         coEvery {
             testEthereumOrderApi.getOrderBidsByItemAndByStatus(
                 any(),
