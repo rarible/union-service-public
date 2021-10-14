@@ -1280,6 +1280,8 @@ components:
           $ref: "#/components/schemas/BigInteger"
         meta:
           $ref: "#/components/schemas/Meta"
+        metaUrl:
+          type: string
         deleted:
           type: boolean
         bestSellOrder:
