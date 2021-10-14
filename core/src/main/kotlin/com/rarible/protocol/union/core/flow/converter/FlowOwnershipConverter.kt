@@ -23,7 +23,7 @@ object FlowOwnershipConverter {
                 tokenId = tokenId,
                 owner = owner
             ),
-            value = BigInteger.ONE,//TODO: Is it right?
+            value = BigInteger.ONE,
             createdAt = ownership.createdAt,
             contract = contract,
             tokenId = tokenId,

@@ -183,6 +183,7 @@ class OwnershipControllerFt : AbstractIntegrationTest() {
         flowOwnershipControllerApiMock.mockGetNftAllOwnerships(continuation, size, flowOwnership)
         ethereumOrderControllerApiMock.mockGetByIds(ethOrder)
         flowOrderControllerApiMock.mockGetById(flowOrder)
+        flowOrderControllerApiMock.mockGetByIds(flowOrder)
 
         val ownerships = ownershipControllerClient.getAllOwnerships(
             blockchains, continuation, size

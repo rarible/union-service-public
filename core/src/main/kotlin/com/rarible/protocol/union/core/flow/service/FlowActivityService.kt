@@ -14,7 +14,8 @@ import java.time.Instant
 
 class FlowActivityService(
     blockchain: BlockchainDto,
-    private val activityControllerApi: FlowNftOrderActivityControllerApi
+    private val activityControllerApi: FlowNftOrderActivityControllerApi,
+    private val flowActivityConverter: FlowActivityConverter
 ) : AbstractFlowService(blockchain), ActivityService {
 
     override suspend fun getAllActivities(
@@ -26,7 +27,7 @@ class FlowActivityService(
         val rawTypes = types.map { it.name }
         val result = activityControllerApi.getNftOrderAllActivities(rawTypes, continuation, size)
             .awaitFirst()
-        return FlowActivityConverter.convert(result, blockchain)
+        return flowActivityConverter.convert(result, blockchain)
     }
 
     override suspend fun getActivitiesByCollection(
@@ -39,7 +40,7 @@ class FlowActivityService(
         val rawTypes = types.map { it.name }
         val result = activityControllerApi.getNftOrderActivitiesByCollection(rawTypes, collection, continuation, size)
             .awaitFirst()
-        return FlowActivityConverter.convert(result, blockchain)
+        return flowActivityConverter.convert(result, blockchain)
     }
 
     override suspend fun getActivitiesByItem(
@@ -58,7 +59,7 @@ class FlowActivityService(
             continuation,
             size
         ).awaitFirst()
-        return FlowActivityConverter.convert(result, blockchain)
+        return flowActivityConverter.convert(result, blockchain)
     }
 
     override suspend fun getActivitiesByUser(
@@ -77,6 +78,6 @@ class FlowActivityService(
                 rawTypes, users, from?.toEpochMilli(), to?.toEpochMilli(), continuation, size, sort?.name
             )
             .awaitFirst()
-        return FlowActivityConverter.convert(result, blockchain)
+        return flowActivityConverter.convert(result, blockchain)
     }
 }

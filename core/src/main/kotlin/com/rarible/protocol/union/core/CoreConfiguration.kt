@@ -17,6 +17,7 @@ import com.rarible.protocol.union.core.ethereum.service.EthereumItemService
 import com.rarible.protocol.union.core.ethereum.service.EthereumOrderService
 import com.rarible.protocol.union.core.ethereum.service.EthereumOwnershipService
 import com.rarible.protocol.union.core.ethereum.service.EthereumSignatureService
+import com.rarible.protocol.union.core.flow.converter.FlowActivityConverter
 import com.rarible.protocol.union.core.flow.converter.FlowOrderConverter
 import com.rarible.protocol.union.core.flow.service.FlowActivityService
 import com.rarible.protocol.union.core.flow.service.FlowCollectionService
@@ -181,8 +182,11 @@ class CoreConfiguration {
     }
 
     @Bean
-    fun flowActivityService(flowActivityApi: FlowNftOrderActivityControllerApi): ActivityService {
-        return FlowActivityService(BlockchainDto.FLOW, flowActivityApi)
+    fun flowActivityService(
+        flowActivityApi: FlowNftOrderActivityControllerApi,
+        flowActivityConverter: FlowActivityConverter
+    ): ActivityService {
+        return FlowActivityService(BlockchainDto.FLOW, flowActivityApi, flowActivityConverter)
     }
 
 }
