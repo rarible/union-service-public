@@ -16,5 +16,6 @@ data class UnionItemDto(
     val lastUpdatedAt: Instant,
     val supply: BigInteger,
     val meta: MetaDto? = null,
+    val metaUrl: String? = null,
     val deleted: Boolean
 )

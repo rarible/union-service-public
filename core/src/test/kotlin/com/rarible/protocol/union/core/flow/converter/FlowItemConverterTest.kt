@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.core.flow.converter
 
-import com.rarible.core.test.data.randomString
 import com.rarible.protocol.dto.MetaAttributeDto
 import com.rarible.protocol.dto.MetaDto
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -39,11 +38,12 @@ class FlowItemConverterTest {
     @Disabled
     // TODO enable when Flow update Meta model
     fun `flow item meta`() {
-        val item = randomFlowNftItemDto().copy(
+        val flowDto = randomFlowNftItemDto().copy(
+            metaUrl = "some_meta_url",
             meta = MetaDto(
                 name = "some_nft_meta",
-                description = randomString(),
-                raw = randomString(),
+                description = "some_description",
+                raw = "some_raw",
                 attributes = listOf(
                     MetaAttributeDto("key1", "value1"),
                     MetaAttributeDto("key2", "value2")
@@ -70,13 +70,13 @@ class FlowItemConverterTest {
                 )
             )
         )
-        val dto = item.meta!!
 
-        val converted = FlowItemConverter.convert(item, BlockchainDto.FLOW).meta!!
+        val convertedItem = FlowItemConverter.convert(flowDto, BlockchainDto.FLOW)
+        val converted = convertedItem.meta!!
 
-        assertThat(converted.name).isEqualTo(dto.name)
-        assertThat(converted.raw).isEqualTo(dto.raw)
-        assertThat(converted.description).isEqualTo(dto.description)
+        assertThat(converted.name).isEqualTo("some_nft_meta")
+        assertThat(converted.raw).isEqualTo("some_raw")
+        assertThat(converted.description).isEqualTo("some_description")
         assertThat(converted.content).hasSize(2)
         assertThat(converted.attributes.find { it.key == "key1" }?.value).isEqualTo("value1")
         assertThat(converted.attributes.find { it.key == "key2" }?.value).isEqualTo("value2")
