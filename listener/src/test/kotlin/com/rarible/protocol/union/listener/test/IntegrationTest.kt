@@ -16,6 +16,6 @@ import org.springframework.test.context.ActiveProfiles
     webEnvironment = SpringBootTest.WebEnvironment.MOCK,
     properties = ["spring.cloud.bootstrap.enabled=false"]
 )
-@Import(value = [IntegrationTestConfiguration::class])
+@Import(value = [TestListenerConfiguration::class])
 @ActiveProfiles("test")
 annotation class IntegrationTest

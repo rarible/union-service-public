@@ -1,7 +1,9 @@
 package com.rarible.protocol.union.core.tezos.converter
 
 import com.rarible.protocol.tezos.dto.NftItemDto
+import com.rarible.protocol.tezos.dto.NftItemsDto
 import com.rarible.protocol.tezos.dto.PartDto
+import com.rarible.protocol.union.core.continuation.page.Page
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CreatorDto
@@ -11,6 +13,7 @@ import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.UnionItemDto
 
 object TezosItemConverter {
+
     fun convert(item: NftItemDto, blockchain: BlockchainDto): UnionItemDto {
         return UnionItemDto(
             id = ItemIdDto(
@@ -21,7 +24,7 @@ object TezosItemConverter {
             tokenId = item.tokenId,
             collection = UnionAddress(blockchain, item.contract),
             creators = item.creators.map { toCreator(it, blockchain) },
-            deleted = item.deleted == true, //todo raise to tezos
+            deleted = item.deleted ?: false, //todo raise to tezos
             lastUpdatedAt = item.date,
             lazySupply = item.lazySupply,
             meta = null, //todo we can set probably here
@@ -30,6 +33,14 @@ object TezosItemConverter {
             pending = emptyList(), //todo tezos better delete this if they don't populate it,
             royalties = item.royalties.map { toRoyalty(it, blockchain) },
             supply = item.supply
+        )
+    }
+
+    fun convert(page: NftItemsDto, blockchain: BlockchainDto): Page<UnionItemDto> {
+        return Page(
+            total = page.total.toLong(),
+            continuation = page.continuation,
+            entities = page.items.map { convert(it, blockchain) }
         )
     }
 

@@ -9,6 +9,19 @@ import com.rarible.protocol.order.api.client.OrderActivityControllerApi
 import com.rarible.protocol.order.api.client.OrderControllerApi
 import com.rarible.protocol.order.api.client.OrderIndexerApiClientFactory
 import com.rarible.protocol.order.api.client.OrderSignatureControllerApi
+import com.rarible.protocol.union.core.ethereum.converter.EthOrderConverter
+import com.rarible.protocol.union.core.ethereum.service.EthereumActivityService
+import com.rarible.protocol.union.core.ethereum.service.EthereumCollectionService
+import com.rarible.protocol.union.core.ethereum.service.EthereumItemService
+import com.rarible.protocol.union.core.ethereum.service.EthereumOrderService
+import com.rarible.protocol.union.core.ethereum.service.EthereumOwnershipService
+import com.rarible.protocol.union.core.ethereum.service.EthereumSignatureService
+import com.rarible.protocol.union.core.service.ActivityService
+import com.rarible.protocol.union.core.service.CollectionService
+import com.rarible.protocol.union.core.service.ItemService
+import com.rarible.protocol.union.core.service.OrderService
+import com.rarible.protocol.union.core.service.OwnershipService
+import com.rarible.protocol.union.core.service.SignatureService
 import com.rarible.protocol.union.dto.BlockchainDto
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Bean
@@ -20,7 +33,7 @@ class EthereumConfiguration {
     private val ethereum = BlockchainDto.ETHEREUM.name.toLowerCase()
     private val polygon = BlockchainDto.POLYGON.name.toLowerCase()
 
-    //--------------------- ETHEREUM ---------------------//
+    //--------------------- ETHEREUM API ---------------------//
     @Bean
     @Qualifier("ethereum.item.api")
     fun ethereumItemApi(factory: NftIndexerApiClientFactory): NftItemControllerApi =
@@ -56,7 +69,7 @@ class EthereumConfiguration {
     fun ethereumActivityOrderApi(factory: OrderIndexerApiClientFactory): OrderActivityControllerApi =
         factory.createOrderActivityApiClient(ethereum)
 
-    //--------------------- POLYGON ---------------------//
+    //--------------------- POLYGON API ---------------------//
     @Bean
     @Qualifier("polygon.item.api")
     fun polygonItemApi(factory: NftIndexerApiClientFactory): NftItemControllerApi =
@@ -92,4 +105,77 @@ class EthereumConfiguration {
     fun polygonActivityOrderApi(factory: OrderIndexerApiClientFactory): OrderActivityControllerApi =
         factory.createOrderActivityApiClient(polygon)
 
+    //--------------------- ETHEREUM SERVICES --------------------//
+    @Bean
+    fun ethereumItemService(@Qualifier("ethereum.item.api") ethereumItemApi: NftItemControllerApi): ItemService {
+        return EthereumItemService(BlockchainDto.ETHEREUM, ethereumItemApi)
+    }
+
+    @Bean
+    fun ethereumOwnershipService(@Qualifier("ethereum.ownership.api") ethereumOwnershipApi: NftOwnershipControllerApi): OwnershipService {
+        return EthereumOwnershipService(BlockchainDto.ETHEREUM, ethereumOwnershipApi)
+    }
+
+    @Bean
+    fun ethereumCollectionService(@Qualifier("ethereum.collection.api") ethereumCollectionApi: NftCollectionControllerApi): CollectionService {
+        return EthereumCollectionService(BlockchainDto.ETHEREUM, ethereumCollectionApi)
+    }
+
+    @Bean
+    fun ethereumOrderService(
+        @Qualifier("ethereum.order.api") ethereumOrderApi: OrderControllerApi,
+        ethOrderConverter: EthOrderConverter
+    ): OrderService {
+        return EthereumOrderService(BlockchainDto.ETHEREUM, ethereumOrderApi, ethOrderConverter)
+    }
+
+    @Bean
+    fun ethereumSignatureService(@Qualifier("ethereum.signature.api") ethereumSignatureApi: OrderSignatureControllerApi): SignatureService {
+        return EthereumSignatureService(BlockchainDto.ETHEREUM, ethereumSignatureApi)
+    }
+
+    @Bean
+    fun ethereumActivityService(
+        @Qualifier("ethereum.activity.api.item") ethereumActivityItemApi: NftActivityControllerApi,
+        @Qualifier("ethereum.activity.api.order") ethereumActivityOrderApi: OrderActivityControllerApi
+    ): ActivityService {
+        return EthereumActivityService(BlockchainDto.ETHEREUM, ethereumActivityItemApi, ethereumActivityOrderApi)
+    }
+
+    //--------------------- POLYGON SERVICES ---------------------//
+    @Bean
+    fun polygonItemService(@Qualifier("polygon.item.api") ethereumItemApi: NftItemControllerApi): ItemService {
+        return EthereumItemService(BlockchainDto.POLYGON, ethereumItemApi)
+    }
+
+    @Bean
+    fun polygonOwnershipService(@Qualifier("polygon.ownership.api") ethereumOwnershipApi: NftOwnershipControllerApi): OwnershipService {
+        return EthereumOwnershipService(BlockchainDto.POLYGON, ethereumOwnershipApi)
+    }
+
+    @Bean
+    fun polygonCollectionService(@Qualifier("polygon.collection.api") ethereumCollectionApi: NftCollectionControllerApi): CollectionService {
+        return EthereumCollectionService(BlockchainDto.POLYGON, ethereumCollectionApi)
+    }
+
+    @Bean
+    fun polygonOrderService(
+        @Qualifier("polygon.order.api") ethereumOrderApi: OrderControllerApi,
+        ethOrderConverter: EthOrderConverter
+    ): OrderService {
+        return EthereumOrderService(BlockchainDto.POLYGON, ethereumOrderApi, ethOrderConverter)
+    }
+
+    @Bean
+    fun polygonSignatureService(@Qualifier("polygon.signature.api") ethereumSignatureApi: OrderSignatureControllerApi): SignatureService {
+        return EthereumSignatureService(BlockchainDto.POLYGON, ethereumSignatureApi)
+    }
+
+    @Bean
+    fun polygonActivityService(
+        @Qualifier("polygon.activity.api.item") polygonActivityItemApi: NftActivityControllerApi,
+        @Qualifier("polygon.activity.api.order") polygonActivityOrderApi: OrderActivityControllerApi
+    ): ActivityService {
+        return EthereumActivityService(BlockchainDto.POLYGON, polygonActivityItemApi, polygonActivityOrderApi)
+    }
 }

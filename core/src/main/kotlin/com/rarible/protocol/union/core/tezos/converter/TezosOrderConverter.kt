@@ -1,7 +1,9 @@
 package com.rarible.protocol.union.core.tezos.converter
 
+import com.rarible.protocol.tezos.dto.OrderPaginationDto
 import com.rarible.protocol.tezos.dto.OrderRaribleV2DataV1Dto
 import com.rarible.protocol.tezos.dto.PartDto
+import com.rarible.protocol.union.core.continuation.page.Slice
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.model.ext
 import com.rarible.protocol.union.core.service.CurrencyService
@@ -13,6 +15,7 @@ import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.TezosOrderDataRaribleV2DataV1Dto
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
+import java.time.Instant
 
 @Component
 class TezosOrderConverter(
@@ -50,8 +53,8 @@ class TezosOrderConverter(
             make = make,
             take = take,
             fill = order.fill.toBigDecimal(),
-            startedAt = null, // todo ask tezos about format here order.start,
-            endedAt = null, //todo ast tezos about format,
+            startedAt = order.start?.let { Instant.ofEpochSecond(it.toLong()) },
+            endedAt = order.end?.let { Instant.ofEpochSecond(it.toLong()) },
             makeStock = order.makeStock.toBigDecimal(),
             cancelled = order.cancelled,
             createdAt = order.createdAt,
@@ -63,6 +66,13 @@ class TezosOrderConverter(
             priceHistory = emptyList(),
             data = convert(order.data, blockchain),
             salt = order.salt
+        )
+    }
+
+    suspend fun convert(source: OrderPaginationDto, blockchain: BlockchainDto): Slice<OrderDto> {
+        return Slice(
+            continuation = source.contination,
+            entities = source.orders.map { convert(it, blockchain) }
         )
     }
 
