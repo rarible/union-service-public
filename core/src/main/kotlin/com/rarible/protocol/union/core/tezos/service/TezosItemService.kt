@@ -63,7 +63,7 @@ class TezosItemService(
         val items = itemControllerApi.getNftItemsByCollection(
             collection,
             WITH_META,
-            size.toBigDecimal(),
+            size,
             continuation
         ).awaitFirst()
         return TezosItemConverter.convert(items, blockchain)
@@ -77,7 +77,7 @@ class TezosItemService(
         val items = itemControllerApi.getNftItemsByCreator(
             creator,
             WITH_META,
-            size.toBigDecimal(),
+            size,
             continuation
         ).awaitFirst()
         return TezosItemConverter.convert(items, blockchain)
@@ -91,7 +91,7 @@ class TezosItemService(
         val items = itemControllerApi.getNftItemsByOwner(
             owner,
             WITH_META,
-            size.toBigDecimal(),
+            size,
             continuation
         ).awaitFirst()
         return TezosItemConverter.convert(items, blockchain)

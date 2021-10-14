@@ -16,7 +16,7 @@ class TezosCollectionService(
 
     override suspend fun getAllCollections(continuation: String?, size: Int): Page<CollectionDto> {
         val collections = collectionControllerApi.searchNftAllCollections(
-            size.toBigDecimal(),
+            size,
             continuation
         ).awaitFirst()
         return TezosCollectionConverter.convert(collections, blockchain)
@@ -34,7 +34,7 @@ class TezosCollectionService(
     ): Page<CollectionDto> {
         val items = collectionControllerApi.searchNftCollectionsByOwner(
             owner,
-            size.toBigDecimal(),
+            size,
             continuation
         ).awaitFirst()
         return TezosCollectionConverter.convert(items, blockchain)
