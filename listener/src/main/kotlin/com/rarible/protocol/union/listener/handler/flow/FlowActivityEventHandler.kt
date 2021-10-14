@@ -11,7 +11,8 @@ import org.slf4j.LoggerFactory
 
 class FlowActivityEventHandler(
     private val producer: RaribleKafkaProducer<ActivityDto>,
-    private val blockchain: BlockchainDto
+    private val blockchain: BlockchainDto,
+    private val flowActivityConverter: FlowActivityConverter
 ) : AbstractEventHandler<FlowActivityDto>() {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -19,7 +20,7 @@ class FlowActivityEventHandler(
     override suspend fun handleSafely(event: FlowActivityDto) {
         logger.debug("Received Flow ({}) Activity event: type={}", event::class.java.simpleName)
 
-        val unionEventDto = FlowActivityConverter.convert(event, blockchain)
+        val unionEventDto = flowActivityConverter.convert(event, blockchain)
 
         val message = KafkaMessage(
             key = unionEventDto.id.fullId(),

@@ -19,6 +19,7 @@ import com.rarible.protocol.nft.api.subscriber.NftIndexerEventsConsumerFactory
 import com.rarible.protocol.order.api.subscriber.OrderIndexerEventsConsumerFactory
 import com.rarible.protocol.union.core.Entity
 import com.rarible.protocol.union.core.ethereum.converter.EthOrderEventConverter
+import com.rarible.protocol.union.core.flow.converter.FlowActivityConverter
 import com.rarible.protocol.union.core.flow.converter.FlowOrderEventConverter
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -256,9 +257,9 @@ class UnionListenerConfiguration(
     }
 
     @Bean
-    fun flowActivityWorker(factory: FlowActivityEventsConsumerFactory): KafkaConsumerWorker<FlowActivityDto> {
+    fun flowActivityWorker(factory: FlowActivityEventsConsumerFactory, flowActivityConverter: FlowActivityConverter): KafkaConsumerWorker<FlowActivityDto> {
         val consumer = factory.createActivityConsumer(consumerGroup(Entity.ACTIVITY))
-        val handler = FlowActivityEventHandler(activityProducer, BlockchainDto.FLOW)
+        val handler = FlowActivityEventHandler(activityProducer, BlockchainDto.FLOW, flowActivityConverter)
         return createSingleConsumerWorker(consumer, handler, FLOW, Entity.ACTIVITY)
     }
 
