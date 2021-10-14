@@ -23,7 +23,6 @@ object EthItemConverter {
             lastUpdatedAt = item.date ?: nowMillis(),
             supply = item.supply,
             meta = item.meta?.let { convert(it) },
-            metaUrl = null,
             deleted = item.deleted ?: false,
             tokenId = item.tokenId,
             collection = UnionAddressConverter.convert(item.contract, blockchain),
