@@ -4,6 +4,7 @@ import com.rarible.protocol.flow.nft.api.client.FlowNftItemControllerApi
 import com.rarible.protocol.union.core.continuation.page.Page
 import com.rarible.protocol.union.core.flow.converter.FlowItemConverter
 import com.rarible.protocol.union.core.service.ItemService
+import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.UnionItemDto
 import kotlinx.coroutines.reactive.awaitFirst
@@ -11,7 +12,7 @@ import kotlinx.coroutines.reactive.awaitFirst
 class FlowItemService(
     blockchain: BlockchainDto,
     private val flowNftItemControllerApi: FlowNftItemControllerApi
-) : AbstractFlowService(blockchain), ItemService {
+) : AbstractBlockchainService(blockchain), ItemService {
 
     override suspend fun getAllItems(
         continuation: String?,

@@ -16,6 +16,7 @@ import com.rarible.protocol.union.core.ethereum.converter.EthActivityConverter
 import com.rarible.protocol.union.core.ethereum.converter.EthActivityFilterConverter
 import com.rarible.protocol.union.core.ethereum.converter.EthConverter
 import com.rarible.protocol.union.core.service.ActivityService
+import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
@@ -32,7 +33,7 @@ class EthereumActivityService(
     blockchain: BlockchainDto,
     private val activityItemControllerApi: NftActivityControllerApi,
     private val activityOrderControllerApi: OrderActivityControllerApi
-) : AbstractEthereumService(blockchain), ActivityService {
+) : AbstractBlockchainService(blockchain), ActivityService {
 
     companion object {
         private val EMPTY_ORDER_ACTIVITIES = OrderActivitiesDto(null, listOf())

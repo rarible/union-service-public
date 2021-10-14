@@ -47,7 +47,7 @@ class ProducerConfiguration(
 
     private fun <T> createUnionProducer(clientSuffix: String, topic: String, type: Class<T>): RaribleKafkaProducer<T> {
         return RaribleKafkaProducer(
-            clientId = "${env}.protocol-union-listener.${clientSuffix}",
+            clientId = "${env}.protocol-union-service.${clientSuffix}",
             valueSerializerClass = UnionKafkaJsonSerializer::class.java,
             valueClass = type,
             defaultTopic = topic,

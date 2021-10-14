@@ -4,6 +4,7 @@ import com.rarible.protocol.nft.api.client.NftItemControllerApi
 import com.rarible.protocol.union.core.continuation.page.Page
 import com.rarible.protocol.union.core.ethereum.converter.EthItemConverter
 import com.rarible.protocol.union.core.service.ItemService
+import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.UnionItemDto
 import kotlinx.coroutines.reactive.awaitFirst
@@ -11,7 +12,7 @@ import kotlinx.coroutines.reactive.awaitFirst
 class EthereumItemService(
     blockchain: BlockchainDto,
     private val itemControllerApi: NftItemControllerApi
-) : AbstractEthereumService(blockchain), ItemService {
+) : AbstractBlockchainService(blockchain), ItemService {
 
     override suspend fun getAllItems(
         continuation: String?,

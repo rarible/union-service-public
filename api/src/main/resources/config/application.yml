@@ -28,3 +28,7 @@ common:
   currency:
     refresh:
       cron: "0 0/30 * * * *"
+  client:
+    tezos:
+      # TODO replace in consul
+      url: "https://rarible-api.functori.com"

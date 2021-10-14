@@ -11,11 +11,10 @@ import com.rarible.protocol.flow.nft.api.client.FlowNftOwnershipControllerApi
 import com.rarible.protocol.flow.nft.api.client.FlowOrderControllerApi
 import com.rarible.protocol.nft.api.client.NftActivityControllerApi
 import com.rarible.protocol.nft.api.client.NftCollectionControllerApi
-import com.rarible.protocol.nft.api.client.NftIndexerApiClientFactory
 import com.rarible.protocol.nft.api.client.NftItemControllerApi
 import com.rarible.protocol.nft.api.client.NftOwnershipControllerApi
 import com.rarible.protocol.order.api.client.OrderActivityControllerApi
-import com.rarible.protocol.order.api.client.OrderIndexerApiClientFactory
+import com.rarible.protocol.order.api.client.OrderControllerApi
 import com.rarible.protocol.union.api.client.FixedUnionApiServiceUriProvider
 import com.rarible.protocol.union.api.client.UnionApiClientFactory
 import com.rarible.protocol.union.dto.ItemEventDto
@@ -118,7 +117,7 @@ class TestApiConfiguration {
     @Bean
     @Primary
     @Qualifier("ethereum.order.api")
-    fun testEthereumOrderApi(): com.rarible.protocol.order.api.client.OrderControllerApi = mockk()
+    fun testEthereumOrderApi(): OrderControllerApi = mockk()
 
     @Bean
     @Primary
@@ -128,12 +127,12 @@ class TestApiConfiguration {
     @Bean
     @Primary
     @Qualifier("ethereum.activity.api.item")
-    fun testEthereumActivityItemApi(factory: NftIndexerApiClientFactory): NftActivityControllerApi = mockk()
+    fun testEthereumActivityItemApi(): NftActivityControllerApi = mockk()
 
     @Bean
     @Primary
     @Qualifier("ethereum.activity.api.order")
-    fun testEthereumActivityOrderApi(factory: OrderIndexerApiClientFactory): OrderActivityControllerApi = mockk()
+    fun testEthereumActivityOrderApi(): OrderActivityControllerApi = mockk()
 
     //--------------------- POLYGON ---------------------//
     @Bean
@@ -164,12 +163,12 @@ class TestApiConfiguration {
     @Bean
     @Primary
     @Qualifier("polygon.activity.api.item")
-    fun testPolygonActivityItemApi(factory: NftIndexerApiClientFactory): NftActivityControllerApi = mockk()
+    fun testPolygonActivityItemApi(): NftActivityControllerApi = mockk()
 
     @Bean
     @Primary
     @Qualifier("polygon.activity.api.order")
-    fun testPolygonActivityOrderApi(factory: OrderIndexerApiClientFactory): OrderActivityControllerApi = mockk()
+    fun testPolygonActivityOrderApi(): OrderActivityControllerApi = mockk()
 
     //--------------------- FLOW ---------------------//
     @Bean
@@ -191,5 +190,30 @@ class TestApiConfiguration {
     @Bean
     @Primary
     fun testFlowActivityApi(): FlowNftOrderActivityControllerApi = mockk()
+
+    //--------------------- TEZOS ---------------------//
+    @Bean
+    @Primary
+    fun testTezosItemApi(): com.rarible.protocol.tezos.api.client.NftItemControllerApi = mockk()
+
+    @Bean
+    @Primary
+    fun testTezosOwnershipApi(): com.rarible.protocol.tezos.api.client.NftOwnershipControllerApi = mockk()
+
+    @Bean
+    @Primary
+    fun testTezosCollectionApi(): com.rarible.protocol.tezos.api.client.NftCollectionControllerApi = mockk()
+
+    @Bean
+    @Primary
+    fun testTezosOrderApi(): com.rarible.protocol.tezos.api.client.OrderControllerApi = mockk()
+
+    @Bean
+    @Primary
+    fun testTezosActivityItemApi(): com.rarible.protocol.tezos.api.client.NftActivityControllerApi = mockk()
+
+    @Bean
+    @Primary
+    fun testTezosActivityOrderApi(): com.rarible.protocol.tezos.api.client.OrderActivityControllerApi = mockk()
 
 }

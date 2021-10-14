@@ -1,8 +1,8 @@
-package com.rarible.protocol.union.core.flow.service
+package com.rarible.protocol.union.core.tezos.service
 
-import com.rarible.protocol.flow.nft.api.client.FlowNftOrderActivityControllerApi
+import com.rarible.protocol.tezos.api.client.NftActivityControllerApi
+import com.rarible.protocol.tezos.api.client.OrderActivityControllerApi
 import com.rarible.protocol.union.core.continuation.page.Slice
-import com.rarible.protocol.union.core.flow.converter.FlowActivityConverter
 import com.rarible.protocol.union.core.service.ActivityService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.ActivityDto
@@ -10,12 +10,13 @@ import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
-import kotlinx.coroutines.reactive.awaitFirst
 import java.time.Instant
 
-class FlowActivityService(
+// TODO implement
+class TezosActivityService(
     blockchain: BlockchainDto,
-    private val activityControllerApi: FlowNftOrderActivityControllerApi
+    private val activityItemControllerApi: NftActivityControllerApi,
+    private val activityOrderControllerApi: OrderActivityControllerApi
 ) : AbstractBlockchainService(blockchain), ActivityService {
 
     override suspend fun getAllActivities(
@@ -24,10 +25,7 @@ class FlowActivityService(
         size: Int,
         sort: ActivitySortDto?
     ): Slice<ActivityDto> {
-        val rawTypes = types.map { it.name }
-        val result = activityControllerApi.getNftOrderAllActivities(rawTypes, continuation, size)
-            .awaitFirst()
-        return FlowActivityConverter.convert(result, blockchain)
+        return stub()
     }
 
     override suspend fun getActivitiesByCollection(
@@ -37,10 +35,7 @@ class FlowActivityService(
         size: Int,
         sort: ActivitySortDto?
     ): Slice<ActivityDto> {
-        val rawTypes = types.map { it.name }
-        val result = activityControllerApi.getNftOrderActivitiesByCollection(rawTypes, collection, continuation, size)
-            .awaitFirst()
-        return FlowActivityConverter.convert(result, blockchain)
+        return stub()
     }
 
     override suspend fun getActivitiesByItem(
@@ -51,15 +46,7 @@ class FlowActivityService(
         size: Int,
         sort: ActivitySortDto?
     ): Slice<ActivityDto> {
-        val rawTypes = types.map { it.name }
-        val result = activityControllerApi.getNftOrderActivitiesByItem(
-            rawTypes,
-            contract,
-            tokenId.toLong(),
-            continuation,
-            size
-        ).awaitFirst()
-        return FlowActivityConverter.convert(result, blockchain)
+        return stub()
     }
 
     override suspend fun getActivitiesByUser(
@@ -71,10 +58,10 @@ class FlowActivityService(
         size: Int,
         sort: ActivitySortDto?
     ): Slice<ActivityDto> {
-        val rawTypes = types.map { it.name }
-        // TODO use from/to parameters when flow supports it
-        val result = activityControllerApi.getNftOrderActivitiesByUser(rawTypes, users, continuation, size, sort?.name)
-            .awaitFirst()
-        return FlowActivityConverter.convert(result, blockchain)
+        return stub()
+    }
+
+    private fun stub(): Slice<ActivityDto> {
+        return Slice(null, emptyList())
     }
 }
