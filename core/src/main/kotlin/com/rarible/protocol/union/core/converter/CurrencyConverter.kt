@@ -19,7 +19,7 @@ object CurrencyConverter {
             BlockchainDto.ETHEREUM -> com.rarible.protocol.currency.dto.BlockchainDto.ETHEREUM
             BlockchainDto.FLOW -> com.rarible.protocol.currency.dto.BlockchainDto.FLOW
             BlockchainDto.POLYGON -> com.rarible.protocol.currency.dto.BlockchainDto.POLYGON
-            BlockchainDto.TEZOS -> TODO("add to currency service")
+            BlockchainDto.TEZOS -> com.rarible.protocol.currency.dto.BlockchainDto.TEZOS
         }
     }
 
