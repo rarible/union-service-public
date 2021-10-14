@@ -235,6 +235,8 @@ class ActivityControllerFt : AbstractIntegrationTest() {
             testFlowActivityApi.getNftOrderActivitiesByUser(
                 types.map { it.name },
                 listOf(userFlow.value),
+                any(),
+                any(),
                 isNull(),
                 eq(size),
                 sort?.name

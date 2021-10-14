@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.core.flow
 
 import com.rarible.protocol.flow.nft.api.client.FlowNftCollectionControllerApi
+import com.rarible.protocol.flow.nft.api.client.FlowNftCryptoControllerApi
 import com.rarible.protocol.flow.nft.api.client.FlowNftIndexerApiClientFactory
 import com.rarible.protocol.flow.nft.api.client.FlowNftItemControllerApi
 import com.rarible.protocol.flow.nft.api.client.FlowNftOrderActivityControllerApi
@@ -35,5 +36,9 @@ class FlowConfiguration {
     @Bean
     fun flowActivityApi(factory: FlowNftIndexerApiClientFactory): FlowNftOrderActivityControllerApi =
         factory.createNftOrderActivityApiClient(flow)
+
+    @Bean
+    fun flowCryptoApi(factory: FlowNftIndexerApiClientFactory): FlowNftCryptoControllerApi =
+        factory.createCryptoApiClient(flow)
 
 }

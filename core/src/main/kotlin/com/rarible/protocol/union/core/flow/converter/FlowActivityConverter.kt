@@ -1,6 +1,14 @@
 package com.rarible.protocol.union.core.flow.converter
 
-import com.rarible.protocol.dto.*
+import com.rarible.protocol.dto.FlowActivitiesDto
+import com.rarible.protocol.dto.FlowActivityDto
+import com.rarible.protocol.dto.FlowAssetDto
+import com.rarible.protocol.dto.FlowBurnDto
+import com.rarible.protocol.dto.FlowMintDto
+import com.rarible.protocol.dto.FlowNftOrderActivityCancelListDto
+import com.rarible.protocol.dto.FlowNftOrderActivityListDto
+import com.rarible.protocol.dto.FlowNftOrderActivitySellDto
+import com.rarible.protocol.dto.FlowTransferDto
 import com.rarible.protocol.union.core.continuation.page.Slice
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.dto.ActivityBlockchainInfoDto
