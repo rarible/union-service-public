@@ -60,10 +60,11 @@ class EnrichmentItemService(
 
     // Here we could specify Order already fetched (or received via event) to avoid unnecessary getById call
     // if one of Item's short orders has same hash
-    suspend fun enrichItem(shortItem: ShortItem, item: UnionItemDto? = null, order: OrderDto? = null) = coroutineScope {
-        val fetchedItem = async { item ?: fetch(shortItem.id) }
-        val bestSellOrder = async { enrichmentOrderService.fetchOrderIfDiffers(shortItem.bestSellOrder, order) }
-        val bestBidOrder = async { enrichmentOrderService.fetchOrderIfDiffers(shortItem.bestBidOrder, order) }
+    suspend fun enrichItem(shortItem: ShortItem?, item: UnionItemDto? = null, order: OrderDto? = null) = coroutineScope {
+        require(shortItem != null || item != null)
+        val fetchedItem = async { item ?: fetch(shortItem!!.id) }
+        val bestSellOrder = async { enrichmentOrderService.fetchOrderIfDiffers(shortItem?.bestSellOrder, order) }
+        val bestBidOrder = async { enrichmentOrderService.fetchOrderIfDiffers(shortItem?.bestBidOrder, order) }
 
         val orders = listOf(bestSellOrder, bestBidOrder)
             .awaitAll().filterNotNull()
