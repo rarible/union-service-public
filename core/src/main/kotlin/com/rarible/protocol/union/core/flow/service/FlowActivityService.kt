@@ -4,6 +4,7 @@ import com.rarible.protocol.flow.nft.api.client.FlowNftOrderActivityControllerAp
 import com.rarible.protocol.union.core.continuation.page.Slice
 import com.rarible.protocol.union.core.flow.converter.FlowActivityConverter
 import com.rarible.protocol.union.core.service.ActivityService
+import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
@@ -16,7 +17,7 @@ class FlowActivityService(
     blockchain: BlockchainDto,
     private val activityControllerApi: FlowNftOrderActivityControllerApi,
     private val flowActivityConverter: FlowActivityConverter
-) : AbstractFlowService(blockchain), ActivityService {
+) : AbstractBlockchainService(blockchain), ActivityService {
 
     override suspend fun getAllActivities(
         types: List<ActivityTypeDto>,

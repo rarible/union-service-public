@@ -5,6 +5,7 @@ import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.OrderDto
+import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.UnionItemDto
 import com.rarible.protocol.union.enrichment.converter.EnrichedItemConverter
 import com.rarible.protocol.union.enrichment.model.ShortItem
@@ -21,7 +22,8 @@ import org.springframework.stereotype.Component
 class EnrichmentItemService(
     private val itemServiceRouter: BlockchainRouter<ItemService>,
     private val itemRepository: ItemRepository,
-    private val enrichmentOrderService: EnrichmentOrderService
+    private val enrichmentOrderService: EnrichmentOrderService,
+    private val enrichmentMetaService: EnrichmentMetaService
 ) {
 
     private val logger = LoggerFactory.getLogger(EnrichmentItemService::class.java)
@@ -58,17 +60,25 @@ class EnrichmentItemService(
         return nftItemDto
     }
 
-    // Here we could specify Order already fetched (or received via event) to avoid unnecessary getById call
-    // if one of Item's short orders has same hash
-    suspend fun enrichItem(shortItem: ShortItem, item: UnionItemDto? = null, order: OrderDto? = null) = coroutineScope {
-        val fetchedItem = async { item ?: fetch(shortItem.id) }
-        val bestSellOrder = async { enrichmentOrderService.fetchOrderIfDiffers(shortItem.bestSellOrder, order) }
-        val bestBidOrder = async { enrichmentOrderService.fetchOrderIfDiffers(shortItem.bestBidOrder, order) }
+    // [orders] is a set of already fetched orders that can be used as cache to avoid unnecessary 'getById' calls
+    suspend fun enrichItem(
+        shortItem: ShortItem?,
+        item: UnionItemDto? = null,
+        orders: Map<OrderIdDto, OrderDto> = emptyMap()
+    ) = coroutineScope {
+        require(shortItem != null || item != null)
+        val fetchedItem = async { item ?: fetch(shortItem!!.id) }
+        val bestSellOrder = async { enrichmentOrderService.fetchOrderIfDiffers(shortItem?.bestSellOrder, orders) }
+        val bestBidOrder = async { enrichmentOrderService.fetchOrderIfDiffers(shortItem?.bestBidOrder, orders) }
+        val meta = async {
+            val itemId = shortItem?.id ?: ShortItemId(item!!.id)
+            enrichmentMetaService.enrichMeta(item?.meta, itemId)
+        }
 
-        val orders = listOf(bestSellOrder, bestBidOrder)
+        val bestOrders = listOf(bestSellOrder, bestBidOrder)
             .awaitAll().filterNotNull()
             .associateBy { it.id }
 
-        EnrichedItemConverter.convert(fetchedItem.await(), shortItem, orders)
+        EnrichedItemConverter.convert(fetchedItem.await().copy(meta = meta.await()), shortItem, bestOrders)
     }
 }

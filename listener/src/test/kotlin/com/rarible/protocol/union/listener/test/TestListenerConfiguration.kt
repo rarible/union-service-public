@@ -43,7 +43,7 @@ import org.springframework.context.annotation.Primary
 
 @TestConfiguration
 @Import(CoreConfiguration::class)
-class IntegrationTestConfiguration {
+class TestListenerConfiguration {
 
     @Bean
     fun applicationEnvironmentInfo(): ApplicationEnvironmentInfo {
@@ -229,4 +229,17 @@ class IntegrationTestConfiguration {
     @Bean
     @Primary
     fun testFlowOrderApi(): FlowOrderControllerApi = mockk()
+
+    //--------------------- TEZOS ---------------------//
+    @Bean
+    @Primary
+    fun testTezosItemApi(): com.rarible.protocol.tezos.api.client.NftItemControllerApi = mockk()
+
+    @Bean
+    @Primary
+    fun testTezosOwnershipApi(): com.rarible.protocol.tezos.api.client.NftOwnershipControllerApi = mockk()
+
+    @Bean
+    @Primary
+    fun testTezosOrderApi(): com.rarible.protocol.tezos.api.client.OrderControllerApi = mockk()
 }

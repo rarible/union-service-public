@@ -4,14 +4,16 @@ import com.rarible.protocol.flow.nft.api.client.FlowNftItemControllerApi
 import com.rarible.protocol.union.core.continuation.page.Page
 import com.rarible.protocol.union.core.flow.converter.FlowItemConverter
 import com.rarible.protocol.union.core.service.ItemService
+import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.MetaDto
 import com.rarible.protocol.union.dto.UnionItemDto
 import kotlinx.coroutines.reactive.awaitFirst
 
 class FlowItemService(
     blockchain: BlockchainDto,
     private val flowNftItemControllerApi: FlowNftItemControllerApi
-) : AbstractFlowService(blockchain), ItemService {
+) : AbstractBlockchainService(blockchain), ItemService {
 
     override suspend fun getAllItems(
         continuation: String?,
@@ -31,6 +33,17 @@ class FlowItemService(
     ): UnionItemDto {
         val item = flowNftItemControllerApi.getNftItemById(itemId).awaitFirst()
         return FlowItemConverter.convert(item, blockchain)
+    }
+
+    override suspend fun getItemMetaById(itemId: String): MetaDto {
+        // TODO: Flow will return a richer object (MetaDto) soon, and we should put 'attributes' and 'content' here.
+        val meta = flowNftItemControllerApi.getNftItemMetaById(itemId).awaitFirst()
+        return MetaDto(
+            name = meta.title ?: "Flow #$itemId",
+            description = meta.description,
+            attributes = emptyList(),
+            content = emptyList()
+        )
     }
 
     override suspend fun resetItemMeta(itemId: String) {

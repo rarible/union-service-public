@@ -95,6 +95,13 @@
             <artifactId>flow-protocol-client-nft-starter</artifactId>
         </dependency>
 
+        <!-- =============== Tezos Protocol API =========== -->
+
+        <dependency>
+            <groupId>com.rarible.protocol.tezos</groupId>
+            <artifactId>protocol-tezos-client-starter</artifactId>
+        </dependency>
+
         <!-- ================== Spring =================== -->
         <dependency>
             <groupId>org.springframework</groupId>

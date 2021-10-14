@@ -6,6 +6,7 @@ import com.rarible.protocol.union.core.continuation.page.Slice
 import com.rarible.protocol.union.core.ethereum.converter.EthConverter
 import com.rarible.protocol.union.core.ethereum.converter.EthOrderConverter
 import com.rarible.protocol.union.core.service.OrderService
+import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderStatusDto
@@ -16,7 +17,7 @@ class EthereumOrderService(
     override val blockchain: BlockchainDto,
     private val orderControllerApi: OrderControllerApi,
     private val ethOrderConverter: EthOrderConverter
-) : AbstractEthereumService(blockchain), OrderService {
+) : AbstractBlockchainService(blockchain), OrderService {
 
     override suspend fun getOrdersAll(
         platform: PlatformDto?,
@@ -59,7 +60,6 @@ class EthereumOrderService(
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
-        // TODO add currency filter
         val orders = orderControllerApi.getOrderBidsByItemAndByStatus(
             contract,
             tokenId,
@@ -141,7 +141,6 @@ class EthereumOrderService(
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
-        // TODO add currency filter
         val orders = orderControllerApi.getSellOrdersByItemAndByStatus(
             contract,
             tokenId,

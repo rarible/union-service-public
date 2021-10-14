@@ -2,6 +2,7 @@ package com.rarible.protocol.union.core.service
 
 import com.rarible.protocol.union.core.continuation.page.Page
 import com.rarible.protocol.union.core.service.router.BlockchainService
+import com.rarible.protocol.union.dto.MetaDto
 import com.rarible.protocol.union.dto.UnionItemDto
 
 interface ItemService : BlockchainService {
@@ -17,6 +18,10 @@ interface ItemService : BlockchainService {
     suspend fun getItemById(
         itemId: String
     ): UnionItemDto
+
+    suspend fun getItemMetaById(
+        itemId: String
+    ): MetaDto
 
     suspend fun resetItemMeta(
         itemId: String

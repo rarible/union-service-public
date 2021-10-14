@@ -6,6 +6,7 @@ import com.rarible.protocol.flow.nft.api.client.FlowOrderControllerApi
 import com.rarible.protocol.union.core.continuation.page.Slice
 import com.rarible.protocol.union.core.flow.converter.FlowOrderConverter
 import com.rarible.protocol.union.core.service.OrderService
+import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderStatusDto
@@ -17,7 +18,7 @@ class FlowOrderService(
     blockchain: BlockchainDto,
     private val orderControllerApi: FlowOrderControllerApi,
     private val flowOrderConverter: FlowOrderConverter
-) : AbstractFlowService(blockchain), OrderService {
+) : AbstractBlockchainService(blockchain), OrderService {
 
     override suspend fun getOrdersAll(
         platform: PlatformDto?,

@@ -99,8 +99,10 @@ internal class PriceUpdateJobTest : AbstractIntegrationTest() {
             lastUpdatedAt = Instant.EPOCH
         )
 
+        val nftItemDto = randomEthNftItemDto()
         coEvery { currencyControllerApi.getCurrencyRate(any(), any(), any()) } returns createCurrencyDto().copy(rate = BigDecimal.ONE).toMono()
-        coEvery { testEthereumItemApi.getNftItemById(itemId.value) } returns randomEthNftItemDto().toMono()
+        coEvery { testEthereumItemApi.getNftItemById(itemId.value) } returns nftItemDto.toMono()
+        coEvery { testEthereumItemApi.getNftItemMetaById(itemId.value) } returns nftItemDto.meta!!.toMono()
         coEvery { testEthereumOrderApi.getOrderByHash(any()) } returns randomEthLegacyOrderDto().toMono()
 
         itemRepository.save(shortItem)

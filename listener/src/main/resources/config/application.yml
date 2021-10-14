@@ -26,6 +26,8 @@ rarible:
   ethereum:
     converter:
       enabled: true
+  cache:
+    use-locks: true
 
 common:
   producer:
@@ -33,6 +35,10 @@ common:
   currency:
     refresh:
       cron: "0 0/30 * * * *"
+  client:
+    tezos:
+      # TODO replace in consul
+      url: "https://rarible-api.functori.com"
 
 listener:
   consumer:
@@ -58,4 +64,8 @@ listener:
     rate: PT5M
     delay: PT1M
 
+meta:
+  ipfsGateway: "https://ipfs.rarible.com/"
+  mediaFetchTimeout: 10000
+  openSeaProxyUrl: ${consul.meta.openSeaProxyUrl}
 

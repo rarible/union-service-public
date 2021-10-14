@@ -30,9 +30,6 @@ class ItemApiService(
     suspend fun enrich(unionItem: UnionItemDto): ItemDto {
         val shortId = ShortItemId(unionItem.id)
         val shortItem = enrichmentItemService.get(shortId)
-        if (shortItem == null) {
-            return EnrichedItemConverter.convert(unionItem)
-        }
         return enrichmentItemService.enrichItem(shortItem, unionItem)
     }
 
@@ -54,7 +51,7 @@ class ItemApiService(
 
         val result = unionItems.map {
             val existingEnrichedItem = existingEnrichedItems[it.id]
-            EnrichedItemConverter.convert(it, existingEnrichedItem, orders)
+            enrichmentItemService.enrichItem(existingEnrichedItem, it, orders)
         }
 
         return result

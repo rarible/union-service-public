@@ -4,6 +4,7 @@ import com.rarible.protocol.flow.nft.api.client.FlowNftOwnershipControllerApi
 import com.rarible.protocol.union.core.continuation.page.Page
 import com.rarible.protocol.union.core.flow.converter.FlowOwnershipConverter
 import com.rarible.protocol.union.core.service.OwnershipService
+import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.UnionOwnershipDto
 import kotlinx.coroutines.reactive.awaitFirst
@@ -11,7 +12,7 @@ import kotlinx.coroutines.reactive.awaitFirst
 class FlowOwnershipService(
     blockchain: BlockchainDto,
     private val ownershipControllerApi: FlowNftOwnershipControllerApi
-) : AbstractFlowService(blockchain), OwnershipService {
+) : AbstractBlockchainService(blockchain), OwnershipService {
 
     override suspend fun getAllOwnerships(continuation: String?, size: Int): Page<UnionOwnershipDto> {
         val ownerships = ownershipControllerApi.getNftAllOwnerships(continuation, size).awaitFirst()
