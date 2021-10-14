@@ -21,6 +21,8 @@ rarible:
   ethereum:
     converter:
       enabled: true
+  cache:
+    use-locks: true
 
 common:
   producer:
