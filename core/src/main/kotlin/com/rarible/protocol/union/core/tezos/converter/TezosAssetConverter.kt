@@ -1,8 +1,8 @@
 package com.rarible.protocol.union.core.tezos.converter
 
-import com.rarible.protocol.tezos.dto.ATFA_1_2Dto
-import com.rarible.protocol.tezos.dto.ATFA_2Dto
-import com.rarible.protocol.tezos.dto.ATXTZDto
+import com.rarible.protocol.tezos.dto.FA_1_2AssetTypeDto
+import com.rarible.protocol.tezos.dto.FA_2AssetTypeDto
+import com.rarible.protocol.tezos.dto.XTZAssetTypeDto
 import com.rarible.protocol.union.dto.AssetDto
 import com.rarible.protocol.union.dto.AssetTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -22,13 +22,13 @@ object TezosAssetConverter {
 
     private fun convertAssetType(source: com.rarible.protocol.tezos.dto.AssetTypeDto, blockchain: BlockchainDto): AssetTypeDto {
         return when (source) {
-            is ATXTZDto ->
+            is XTZAssetTypeDto ->
                 TezosXTZAssetTypeDto()
-            is ATFA_1_2Dto ->
+            is FA_1_2AssetTypeDto ->
                 TezosFA12AssetTypeDto(
                     contract = UnionAddress(blockchain, source.contract)
                 )
-            is ATFA_2Dto ->
+            is FA_2AssetTypeDto ->
                 TezosFA2AssetTypeDto(
                     contract = UnionAddress(blockchain, source.contract),
                     tokenId = source.tokenId
