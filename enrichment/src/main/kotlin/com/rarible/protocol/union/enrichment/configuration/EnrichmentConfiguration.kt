@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.enrichment.configuration
 
+import com.rarible.core.cache.EnableRaribleCache
 import com.rarible.core.mongo.configuration.EnableRaribleMongo
 import com.rarible.protocol.union.core.CoreConfiguration
 import com.rarible.protocol.union.enrichment.event.ItemEventListener
@@ -11,6 +12,7 @@ import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Import
 
 @EnableRaribleMongo
+@EnableRaribleCache
 @EnableConfigurationProperties(MetaProperties::class)
 @Import(CoreConfiguration::class)
 @ComponentScan(
