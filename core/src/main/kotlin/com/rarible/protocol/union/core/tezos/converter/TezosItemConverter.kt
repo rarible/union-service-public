@@ -24,7 +24,7 @@ object TezosItemConverter {
             lastUpdatedAt = item.date,
             lazySupply = item.lazySupply,
             meta = item.meta?.let { convert(it) },
-            mintedAt = item.date, //todo ask tezos to include
+            mintedAt = item.mintedAt,
             owners = item.owners.map { UnionAddress(blockchain, it) },
             pending = emptyList(), //todo tezos better delete this if they don't populate it,
             royalties = item.royalties.map { toRoyalty(it, blockchain) },
