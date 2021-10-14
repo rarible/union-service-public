@@ -75,7 +75,22 @@ object FlowItemConverter {
                         format = null
                     )
                 },
-            content = listOf(), // TODO add conversion when we can extract video/images
+            // TODO improve conversion when Flow fixes the model of meta
+            content = source.contents.orEmpty().map { dto ->
+                if ("video" in dto.contentType) {
+                    VideoContentDto(
+                        url = dto.url,
+                        representation = MetaContentDto.Representation.ORIGINAL,
+                        mimeType = dto.contentType
+                    )
+                } else {
+                    ImageContentDto(
+                        url = dto.url,
+                        representation = MetaContentDto.Representation.ORIGINAL,
+                        mimeType = dto.contentType
+                    )
+                }
+            },
             raw = source.raw
         )
 }
