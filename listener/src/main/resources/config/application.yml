@@ -37,8 +37,7 @@ common:
       cron: "0 0/30 * * * *"
   client:
     tezos:
-      # TODO replace in consul
-      url: "https://rarible-api.functori.com"
+      url: "${consul.tezos.api.baseUrl}"
 
 listener:
   consumer:
@@ -57,6 +56,13 @@ listener:
       itemWorkers: 1
       ownershipWorkers: 1
       orderWorkers: 1
+    tezos:
+      broker-replica-set: ${consul.tezos.kafka.hosts}
+      itemWorkers: 1
+      ownershipWorkers: 1
+      orderWorkers: 1
+      username: ${consul.tezos.kafka.username}
+      password: ${consul.tezos.kafka.password}
   reconciliation:
     orderBatchSize: 50
     threadCount: 2

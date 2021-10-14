@@ -22,7 +22,7 @@ class FlowActivityEventHandler(
         val unionEventDto = FlowActivityConverter.convert(event, blockchain)
 
         val message = KafkaMessage(
-            key = unionEventDto.id.fullId(),
+            key = unionEventDto.id.fullId(), // TODO we need to use right key here
             value = unionEventDto,
             headers = ACTIVITY_EVENT_HEADERS
         )
