@@ -1,3 +1,3 @@
 @Library('shared-library') _
 
-servicePipeline('protocol-union', 'protocol-union', 'nexus-ci')
+servicePipeline('protocol-union', 'protocol-union', 'nexus-ci', '#protocol-duty')
