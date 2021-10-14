@@ -71,8 +71,11 @@ class FlowActivityService(
         sort: ActivitySortDto?
     ): Slice<ActivityDto> {
         val rawTypes = types.map { it.name }
-        // TODO use from/to parameters when flow supports it
-        val result = activityControllerApi.getNftOrderActivitiesByUser(rawTypes, users, continuation, size, sort?.name)
+
+        val result = activityControllerApi
+            .getNftOrderActivitiesByUser(
+                rawTypes, users, from?.toEpochMilli(), to?.toEpochMilli(), continuation, size, sort?.name
+            )
             .awaitFirst()
         return FlowActivityConverter.convert(result, blockchain)
     }

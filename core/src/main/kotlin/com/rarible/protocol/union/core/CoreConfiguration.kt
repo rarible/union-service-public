@@ -2,11 +2,7 @@ package com.rarible.protocol.union.core
 
 import com.rarible.protocol.currency.api.client.CurrencyApiClientFactory
 import com.rarible.protocol.currency.api.client.CurrencyControllerApi
-import com.rarible.protocol.flow.nft.api.client.FlowNftCollectionControllerApi
-import com.rarible.protocol.flow.nft.api.client.FlowNftItemControllerApi
-import com.rarible.protocol.flow.nft.api.client.FlowNftOrderActivityControllerApi
-import com.rarible.protocol.flow.nft.api.client.FlowNftOwnershipControllerApi
-import com.rarible.protocol.flow.nft.api.client.FlowOrderControllerApi
+import com.rarible.protocol.flow.nft.api.client.*
 import com.rarible.protocol.nft.api.client.NftActivityControllerApi
 import com.rarible.protocol.nft.api.client.NftCollectionControllerApi
 import com.rarible.protocol.nft.api.client.NftItemControllerApi
@@ -180,8 +176,8 @@ class CoreConfiguration {
     }
 
     @Bean
-    fun flowSignatureService(flowOrderApi: FlowOrderControllerApi): SignatureService {
-        return FlowSignatureService(BlockchainDto.FLOW) // TODO implement it later
+    fun flowSignatureService(flowSignatureApi: FlowNftCryptoControllerApi): SignatureService {
+        return FlowSignatureService(BlockchainDto.FLOW, flowSignatureApi)
     }
 
     @Bean

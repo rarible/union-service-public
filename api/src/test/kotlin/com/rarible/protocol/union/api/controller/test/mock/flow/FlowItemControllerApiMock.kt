@@ -36,7 +36,9 @@ class FlowItemControllerApiMock(
             nftItemControllerApi.getNftAllItems(
                 continuation,
                 size,
-                showDeleted
+                showDeleted,
+                lastUpdatedFrom,
+                lastUpdatedTo
             )
         } returns Mono.just(FlowNftItemsDto(returnItems.size.toLong(), null, returnItems.asList()))
     }

@@ -1,13 +1,6 @@
 package com.rarible.protocol.union.core.flow.converter
 
-import com.rarible.protocol.dto.FlowActivitiesDto
-import com.rarible.protocol.dto.FlowActivityDto
-import com.rarible.protocol.dto.FlowBurnDto
-import com.rarible.protocol.dto.FlowMintDto
-import com.rarible.protocol.dto.FlowNftOrderActivityCancelListDto
-import com.rarible.protocol.dto.FlowNftOrderActivityListDto
-import com.rarible.protocol.dto.FlowNftOrderActivitySellDto
-import com.rarible.protocol.dto.FlowTransferDto
+import com.rarible.protocol.dto.*
 import com.rarible.protocol.union.core.continuation.page.Slice
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.dto.ActivityBlockchainInfoDto
@@ -21,6 +14,7 @@ import com.rarible.protocol.union.dto.OrderCancelListActivityDto
 import com.rarible.protocol.union.dto.OrderListActivityDto
 import com.rarible.protocol.union.dto.OrderMatchSellDto
 import com.rarible.protocol.union.dto.TransferActivityDto
+import java.math.BigDecimal
 
 object FlowActivityConverter {
 
@@ -39,7 +33,7 @@ object FlowActivityConverter {
                     priceUsd = source.price, //TODO should be in USD,
                     price = source.price,
                     type = OrderMatchSellDto.Type.SELL,
-                    amountUsd = source.price.multiply(source.left.asset.value),
+                    amountUsd = amountUsd(source.price, source.left.asset),
                     blockchainInfo = ActivityBlockchainInfoDto(
                         transactionHash = source.transactionHash,
                         blockHash = source.blockHash,
@@ -122,6 +116,8 @@ object FlowActivityConverter {
             }
         }
     }
+
+    private fun amountUsd(price: BigDecimal, asset: FlowAssetDto) = price.multiply(asset.value)
 
     fun convert(source: FlowActivitiesDto, blockchain: BlockchainDto): Slice<ActivityDto> {
         return Slice(
