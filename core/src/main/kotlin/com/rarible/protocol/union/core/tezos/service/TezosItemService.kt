@@ -6,6 +6,7 @@ import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.core.tezos.converter.TezosItemConverter
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.MetaDto
 import com.rarible.protocol.union.dto.UnionItemDto
 import kotlinx.coroutines.reactive.awaitFirst
 
@@ -42,6 +43,11 @@ class TezosItemService(
             itemId, WITH_META
         ).awaitFirst()
         return TezosItemConverter.convert(item, blockchain)
+    }
+
+    override suspend fun getItemMetaById(itemId: String): MetaDto {
+        val meta = itemControllerApi.getNftItemMetaById(itemId).awaitFirst()
+        return TezosItemConverter.convert(meta)
     }
 
     override suspend fun resetItemMeta(itemId: String) {

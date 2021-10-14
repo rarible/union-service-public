@@ -148,7 +148,7 @@ class EnrichmentItemEventService(
         item: UnionItemDto? = null,
         order: OrderDto? = null
     ) = coroutineScope {
-        val dto = itemService.enrichItem(short, item, order)
+        val dto = itemService.enrichItem(short, item, listOfNotNull(order).associateBy { it.id })
         val event = ItemEventUpdate(dto)
         itemEventListeners.forEach { it.onEvent(event) }
     }

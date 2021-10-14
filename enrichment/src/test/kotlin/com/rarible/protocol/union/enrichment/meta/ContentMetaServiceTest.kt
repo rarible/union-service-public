@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test
 
 @Tag("manual")
 @Disabled
-class ContentMetaServiceIt {
+class ContentMetaServiceTest {
 
     private val metaProperties = MetaProperties(
         "https://ipfs.rarible.com/",
@@ -19,13 +19,15 @@ class ContentMetaServiceIt {
 
     private val service: ContentMetaService = ContentMetaService(
         MediaMetaService(metaProperties),
-        IpfsService(metaProperties),
+        IpfsUrlResolver(metaProperties),
         null
     )
 
     @Test
     fun testVideoWithPreview() = runBlocking {
-        val meta = service.getContentMeta("ipfs://ipfs/QmSNhGhcBynr1s9QgPnon8HaiPzE5dKgmqSDNsNXCfDHGs/image.gif")
-        assertEquals(600, meta?.width)
+        val meta = service.getContentMeta("ipfs://ipfs/QmSNhGhcBynr1s9QgPnon8HaiPzE5dKgmqSDNsNXCfDHGs/image.gif")!!
+        assertEquals(600, meta.width)
+        assertEquals(404, meta.height)
+        assertEquals(2559234, meta.size)
     }
 }

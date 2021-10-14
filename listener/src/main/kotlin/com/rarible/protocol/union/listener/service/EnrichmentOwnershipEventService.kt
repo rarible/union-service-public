@@ -95,7 +95,7 @@ class EnrichmentOwnershipEventService(
         ownership: UnionOwnershipDto? = null,
         order: OrderDto? = null
     ) {
-        val dto = ownershipService.enrichOwnership(short, ownership, order)
+        val dto = ownershipService.enrichOwnership(short, ownership, listOfNotNull(order).associateBy { it.id })
         val event = OwnershipEventUpdate(dto)
         ownershipEventListeners.forEach { it.onEvent(event) }
     }

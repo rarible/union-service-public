@@ -51,7 +51,7 @@ class ItemApiService(
 
         val result = unionItems.map {
             val existingEnrichedItem = existingEnrichedItems[it.id]
-            EnrichedItemConverter.convert(it, existingEnrichedItem, orders)
+            enrichmentItemService.enrichItem(existingEnrichedItem, it, orders)
         }
 
         return result

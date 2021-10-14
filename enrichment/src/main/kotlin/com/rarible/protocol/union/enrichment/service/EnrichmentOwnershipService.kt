@@ -5,6 +5,7 @@ import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.core.service.OwnershipService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.OrderDto
+import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.UnionOwnershipDto
 import com.rarible.protocol.union.enrichment.converter.EnrichedOwnershipConverter
 import com.rarible.protocol.union.enrichment.model.ItemSellStats
@@ -84,15 +85,15 @@ class EnrichmentOwnershipService(
     suspend fun enrichOwnership(
         short: ShortOwnership,
         ownership: UnionOwnershipDto? = null,
-        order: OrderDto? = null
+        orders: Map<OrderIdDto, OrderDto> = emptyMap()
     ) = coroutineScope {
         val fetchedOwnership = async { ownership ?: fetch(short.id) }
-        val bestSellOrder = enrichmentOrderService.fetchOrderIfDiffers(short.bestSellOrder, order)
+        val bestSellOrder = enrichmentOrderService.fetchOrderIfDiffers(short.bestSellOrder, orders)
 
-        val orders = listOfNotNull(bestSellOrder)
+        val bestOrders = listOfNotNull(bestSellOrder)
             .associateBy { it.id }
 
-        EnrichedOwnershipConverter.convert(fetchedOwnership.await(), short, orders)
+        EnrichedOwnershipConverter.convert(fetchedOwnership.await(), short, bestOrders)
     }
 
 }

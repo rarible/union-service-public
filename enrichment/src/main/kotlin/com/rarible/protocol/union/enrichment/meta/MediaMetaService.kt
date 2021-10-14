@@ -16,8 +16,8 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Mono
+import reactor.kotlin.core.publisher.switchIfEmpty
 import reactor.kotlin.core.publisher.toMono
-import java.io.IOException
 import java.io.InputStream
 import java.net.*
 import java.util.concurrent.Callable
@@ -27,10 +27,16 @@ import javax.imageio.metadata.IIOMetadata
 @Component
 class MediaMetaService(
     private val metaProperties: MetaProperties
-): CacheDescriptor<ContentMeta> {
+) : CacheDescriptor<ContentMeta> {
 
     private val client = WebClient.builder()
-        .clientConnector(WebClientHelper.createConnector(metaProperties.mediaFetchTimeout, metaProperties.mediaFetchTimeout, true))
+        .clientConnector(
+            WebClientHelper.createConnector(
+                metaProperties.mediaFetchTimeout,
+                metaProperties.mediaFetchTimeout,
+                true
+            )
+        )
         .build()
 
     override val collection: String = "cache_meta"
@@ -58,17 +64,36 @@ class MediaMetaService(
                     ContentMeta("image/svg+xml", 192, 192).toMono()
                 else -> {
                     getMetadata(url)
-                        .flatMap { (width, height, metadata) ->
+                        .flatMap { (width, height, metadata, contentLength) ->
                             when (metadata) {
-                                is GIFImageMetadata -> ContentMeta("image/gif", metadata.imageWidth, metadata.imageHeight).toMono()
-                                is JPEGMetadata -> ContentMeta("image/jpeg", width, height).toMono()
-                                is BMPMetadata -> ContentMeta("image/bmp", width, height).toMono()
-                                is PNGMetadata -> ContentMeta("image/png", width, height).toMono()
-                                else -> Mono.error<ContentMeta>(IOException("Unknown metadata: " + metadata.javaClass.name))
+                                is GIFImageMetadata -> ContentMeta(
+                                    type = "image/gif",
+                                    width = metadata.imageWidth,
+                                    height = metadata.imageHeight,
+                                    size = contentLength
+                                ).toMono()
+                                is JPEGMetadata -> ContentMeta(
+                                    type = "image/jpeg",
+                                    width = width,
+                                    height = height,
+                                    size = contentLength
+                                ).toMono()
+                                is BMPMetadata -> ContentMeta(
+                                    type = "image/bmp",
+                                    width = width,
+                                    height = height,
+                                    size = contentLength
+                                ).toMono()
+                                is PNGMetadata -> ContentMeta(
+                                    type = "image/png",
+                                    width = width,
+                                    height = height,
+                                    size = contentLength
+                                ).toMono()
+                                else -> Mono.empty()
                             }
                         }
-                        .onErrorResume { ex ->
-                            logger.warn(marker, "unable to get meta using image metadata", ex)
+                        .switchIfEmpty {
                             when {
                                 url.endsWith(".gif") ->
                                     ContentMeta("image/gif").toMono()
@@ -82,8 +107,8 @@ class MediaMetaService(
                                     .map { ContentMeta(it) }
                             }
                         }
-                        .onErrorResume { ex ->
-                            logger.warn(marker, "unable to get meta using HEAD request", ex)
+                        .switchIfEmpty {
+                            logger.warn(marker, "Unable to get metadata for $url")
                             Mono.empty()
                         }
                 }
@@ -103,38 +128,56 @@ class MediaMetaService(
                     Mono.empty()
                 }
             }
+            .onErrorResume { Mono.empty() }
     }
 
-    private fun getMetadata(url: String): Mono<Triple<Int, Int, IIOMetadata>> {
+    private data class RawMetadata(
+        val width: Int,
+        val height: Int,
+        val metadata: IIOMetadata,
+        val contentLength: Long?
+    )
+
+    private fun getMetadata(url: String): Mono<RawMetadata> {
         return Callable {
             val conn = connection(url) as HttpURLConnection
             conn.readTimeout = metaProperties.mediaFetchTimeout
             conn.connectTimeout = metaProperties.mediaFetchTimeout
             conn.setRequestProperty("user-agent", "curl/7.73.0")
-            conn.inputStream.use { get(it) }
+            conn.inputStream.use { getMetadata(conn, it) }
         }.blockingToMono()
+            .flatMap { it?.toMono() ?: Mono.empty() }
+            .onErrorResume { Mono.empty() }
     }
 
-    private fun get(ins: InputStream): Triple<Int, Int, IIOMetadata> {
+    private fun getMetadata(connection: HttpURLConnection, ins: InputStream): RawMetadata? {
         return ImageIO.createImageInputStream(ins).use { iis ->
             val readers = ImageIO.getImageReaders(iis)
             if (readers.hasNext()) {
                 val r = readers.next()
                 r.setInput(iis, true)
                 try {
-                    Triple(r.getWidth(0), r.getHeight(0), r.getImageMetadata(0))
+                    val contentLength = connection.contentLength.toLong().takeIf { it > 0 }
+                        ?: connection.contentLengthLong.takeIf { it > 0 }
+                        ?: iis.length().takeIf { it > 0 }
+                    RawMetadata(
+                        width = r.getWidth(0),
+                        height = r.getHeight(0),
+                        metadata = r.getImageMetadata(0),
+                        contentLength = contentLength
+                    )
                 } finally {
                     r.dispose()
                 }
             } else {
-                throw IOException("reader not found")
+                return null
             }
         }
     }
 
     private fun connection(url: String): URLConnection {
         return when {
-            isOpenSea(url) -> {
+            isOpenSea(url) && metaProperties.openSeaProxyUrl.isNotEmpty() -> {
                 val address = URL(metaProperties.openSeaProxyUrl)
                 val proxy = Proxy(Proxy.Type.HTTP, InetSocketAddress(address.host, address.port))
                 URL(url).openConnection(proxy)

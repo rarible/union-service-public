@@ -59,7 +59,7 @@ class EnrichmentOwnershipEventServiceTest {
         coEvery { ownershipService.get(shortOwnership.id) } returns shortOwnership
         coEvery { bestOrderService.updateBestSellOrder(shortOwnership, order) } returns expectedShortOwnership
         coEvery { ownershipService.save(expectedShortOwnership) } returns expectedShortOwnership
-        coEvery { ownershipService.enrichOwnership(expectedShortOwnership, null, order) } returns mockk()
+        coEvery { ownershipService.enrichOwnership(expectedShortOwnership, null, listOf(order).associateBy { it.id }) } returns mockk()
 
         ownershipEventService.onOwnershipBestSellOrderUpdated(shortOwnership.id, order)
 
@@ -104,7 +104,7 @@ class EnrichmentOwnershipEventServiceTest {
         // Means order is cancelled
         coEvery { bestOrderService.updateBestSellOrder(shortOwnership, order) } returns expectedShortOwnership
         coEvery { ownershipService.delete(shortOwnership.id) } returns DeleteResult.acknowledged(1)
-        coEvery { ownershipService.enrichOwnership(expectedShortOwnership, null, order) } returns mockk()
+        coEvery { ownershipService.enrichOwnership(expectedShortOwnership, null, listOf(order).associateBy { it.id }) } returns mockk()
 
         ownershipEventService.onOwnershipBestSellOrderUpdated(shortOwnership.id, order)
 

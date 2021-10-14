@@ -1,16 +1,12 @@
 package com.rarible.protocol.union.core.tezos.converter
 
 import com.rarible.protocol.tezos.dto.NftItemDto
+import com.rarible.protocol.tezos.dto.NftItemMetaDto
 import com.rarible.protocol.tezos.dto.NftItemsDto
 import com.rarible.protocol.tezos.dto.PartDto
 import com.rarible.protocol.union.core.continuation.page.Page
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
-import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.CreatorDto
-import com.rarible.protocol.union.dto.ItemIdDto
-import com.rarible.protocol.union.dto.RoyaltyDto
-import com.rarible.protocol.union.dto.UnionAddress
-import com.rarible.protocol.union.dto.UnionItemDto
+import com.rarible.protocol.union.dto.*
 
 object TezosItemConverter {
 
@@ -27,7 +23,7 @@ object TezosItemConverter {
             deleted = item.deleted ?: false, //todo raise to tezos
             lastUpdatedAt = item.date,
             lazySupply = item.lazySupply,
-            meta = null, //todo we can set probably here
+            meta = item.meta?.let { convert(it) },
             mintedAt = item.date, //todo ask tezos to include
             owners = item.owners.map { UnionAddress(blockchain, it) },
             pending = emptyList(), //todo tezos better delete this if they don't populate it,
@@ -35,6 +31,38 @@ object TezosItemConverter {
             supply = item.supply
         )
     }
+
+    fun convert(meta: NftItemMetaDto): MetaDto =
+        MetaDto(
+            name = meta.name,
+            description = meta.description,
+            attributes = meta.attributes.orEmpty().map {
+                MetaAttributeDto(
+                    key = it.key,
+                    value = it.value,
+                    type = it.type,
+                    format = it.format
+                )
+            },
+            content = listOfNotNull(
+                meta.image?.let { convertImage(it) },
+                meta.animation?.let { convertVideo(it) }
+            )
+        )
+
+    private fun convertImage(imageUrl: String): ImageContentDto =
+        ImageContentDto(
+            url = imageUrl,
+            representation = MetaContentDto.Representation.ORIGINAL
+            // Other fields will be fetched by the enrichment level.
+        )
+
+    private fun convertVideo(imageUrl: String): ImageContentDto =
+        ImageContentDto(
+            url = imageUrl,
+            representation = MetaContentDto.Representation.ORIGINAL
+            // Other fields will be fetched by the enrichment level.
+        )
 
     fun convert(page: NftItemsDto, blockchain: BlockchainDto): Page<UnionItemDto> {
         return Page(

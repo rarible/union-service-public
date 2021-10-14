@@ -15,6 +15,6 @@ data class UnionItemDto(
     val mintedAt: Instant,
     val lastUpdatedAt: Instant,
     val supply: BigInteger,
-    val meta: MetaDto? = null,
+    val meta: MetaDto? = null, // It's better to introduce an intermediate model class for meta and not use final DTO.
     val deleted: Boolean
 )
