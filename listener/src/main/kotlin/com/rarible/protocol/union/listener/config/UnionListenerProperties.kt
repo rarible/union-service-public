@@ -26,6 +26,7 @@ data class ConsumerProperties(
     val ownershipWorkers: Int = 1,
     val orderWorkers: Int = 1,
     val itemWorkers: Int = 1,
+    val collectionWorkers: Int = 1,
     val username: String? = null,
     val password: String? = null
 )
