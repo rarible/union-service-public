@@ -1,7 +1,6 @@
 package com.rarible.protocol.union.core.tezos.converter
 
 import com.rarible.protocol.tezos.dto.OrderPaginationDto
-import com.rarible.protocol.tezos.dto.OrderRaribleV2DataV1Dto
 import com.rarible.protocol.tezos.dto.PartDto
 import com.rarible.protocol.union.core.continuation.page.Slice
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
@@ -63,7 +62,7 @@ class TezosOrderConverter(
             makePriceUsd = null,
             takePriceUsd = takePriceUsd,
             priceHistory = emptyList(),
-            data = convert(order.data, blockchain),
+            data = convertData(order, blockchain),
             salt = order.salt
         )
     }
@@ -75,13 +74,15 @@ class TezosOrderConverter(
         )
     }
 
-    private fun convert(
-        source: OrderRaribleV2DataV1Dto,
+    private fun convertData(
+        source: com.rarible.protocol.tezos.dto.OrderDto,
         blockchain: BlockchainDto
     ): TezosOrderDataRaribleV2DataV1Dto {
         return TezosOrderDataRaribleV2DataV1Dto(
-            payouts = source.payouts.map { convert(it, blockchain) },
-            originFees = source.originFees.map { convert(it, blockchain) }
+            payouts = source.data.payouts.map { convert(it, blockchain) },
+            originFees = source.data.originFees.map { convert(it, blockchain) },
+            makerEdpk = source.makerEdpk,
+            takerEdpk = source.takerEdpk
         )
     }
 

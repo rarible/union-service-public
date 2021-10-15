@@ -2213,6 +2213,10 @@ components:
           default: [ ]
           items:
             $ref: "#/components/schemas/OrderPayout"
+        makerEdpk:
+          type: string
+        takerEdpk:
+          type: string
       required:
         - "@type"
         - payouts
