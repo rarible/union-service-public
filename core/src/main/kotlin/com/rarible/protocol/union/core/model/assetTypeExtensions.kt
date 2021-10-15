@@ -92,7 +92,7 @@ val AssetTypeDto.ext: AssetTypeExtension
         is TezosXTZAssetTypeDto -> AssetTypeExtension(
             isNft = false,
             isCurrency = true,
-            contract = "", // TODO add fake contract
+            contract = "XTZ",
             itemId = null
         )
         is TezosFA12AssetTypeDto -> AssetTypeExtension(
