@@ -20,7 +20,7 @@ class TezosOrderEventHandler(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     override suspend fun handleSafely(event: com.rarible.protocol.tezos.dto.OrderEventDto) {
-        logger.debug("Received Tezos Order event: type={}", event::class.java.simpleName)
+        logger.info("Received Tezos Order event: type={}", event::class.java.simpleName)
 
         when (event.type) {
             com.rarible.protocol.tezos.dto.OrderEventDto.Type.UPDATE -> {

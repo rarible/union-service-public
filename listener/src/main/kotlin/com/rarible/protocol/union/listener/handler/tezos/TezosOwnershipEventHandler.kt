@@ -17,7 +17,7 @@ class TezosOwnershipEventHandler(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     override suspend fun handleSafely(event: OwnershipEventDto) {
-        logger.debug("Received Tezos Ownership event: type={}", event::class.java.simpleName)
+        logger.info("Received Tezos Ownership event: type={}", event::class.java.simpleName)
 
         when (event.type) {
             OwnershipEventDto.Type.UPDATE -> {

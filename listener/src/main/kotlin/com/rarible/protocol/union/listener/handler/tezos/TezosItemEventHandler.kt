@@ -17,7 +17,7 @@ class TezosItemEventHandler(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     override suspend fun handleSafely(event: ItemEventDto) {
-        logger.debug("Received Tezos Item event: type={}", event::class.java.simpleName)
+        logger.info("Received Tezos Item event: type={}", event::class.java.simpleName)
 
         when (event.type) {
             ItemEventDto.Type.UPDATE -> {
