@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.fold
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
+import org.springframework.dao.OptimisticLockingFailureException
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 
@@ -35,7 +36,9 @@ class BestOrderCheckJob(
         logger.info("Checking Items with multi-currency orders updated after {}", notUpdatedSince)
 
         val itemsUpdated = itemRepository.findWithMultiCurrency(notUpdatedSince).map { shortItem ->
-            val updated = enrichmentItemEventService.recalculateBestOrders(shortItem)
+            val updated = withIgnoredOptimisticLock {
+                enrichmentItemEventService.recalculateBestOrders(shortItem)
+            }
             if (updated) 1 else 0
         }.fold(0) { a, b -> a + b }
 
@@ -43,10 +46,22 @@ class BestOrderCheckJob(
 
         logger.info("Checking Ownerships with multi-currency orders updated after {}", notUpdatedSince)
         val ownershipsUpdated = ownershipRepository.findWithMultiCurrency(notUpdatedSince).map { shortOwnership ->
-            val updated = enrichmentOwnershipEventService.recalculateBestOrder(shortOwnership)
+            val updated = withIgnoredOptimisticLock {
+                enrichmentOwnershipEventService.recalculateBestOrder(shortOwnership)
+            }
             if (updated) 1 else 0
         }.fold(0) { a, b -> a + b }
 
         logger.info("Recalculated best Order for {} Ownerships", ownershipsUpdated)
+    }
+
+    private suspend fun withIgnoredOptimisticLock(call: suspend () -> Boolean): Boolean {
+        return try {
+            call()
+        } catch (ex: OptimisticLockingFailureException) {
+            // ignoring this exception - if entity was updated by somebody during job,
+            // it means item/ownership already actualized, and we don't need to recalculate it
+            false
+        }
     }
 }

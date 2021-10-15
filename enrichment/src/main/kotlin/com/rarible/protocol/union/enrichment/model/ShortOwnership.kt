@@ -5,6 +5,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import org.springframework.data.annotation.AccessType
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.Transient
+import org.springframework.data.annotation.Version
 import org.springframework.data.mongodb.core.mapping.Document
 import java.math.BigInteger
 import java.time.Instant
@@ -23,9 +24,12 @@ data class ShortOwnership(
 
     val bestSellOrder: ShortOrder?,
 
-    val lastUpdatedAt: Instant
+    val lastUpdatedAt: Instant,
+
+    @Version
+    val version: Long? = null
 ) {
-    fun withCalculateFields(): ShortOwnership {
+    fun withCalculatedFields(): ShortOwnership {
         return copy(
             multiCurrency = bestSellOrders.size > 1,
             lastUpdatedAt = nowMillis()
@@ -42,7 +46,9 @@ data class ShortOwnership(
 
                 bestSellOrders = emptyMap(),
                 bestSellOrder = null,
-                lastUpdatedAt = nowMillis()
+                lastUpdatedAt = nowMillis(),
+
+                version = null
             )
         }
     }
