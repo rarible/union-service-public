@@ -1,7 +1,7 @@
 package com.rarible.protocol.union.core.tezos.converter
 
-import com.rarible.protocol.tezos.dto.NftOwnerShipsDto
 import com.rarible.protocol.tezos.dto.NftOwnershipDto
+import com.rarible.protocol.tezos.dto.NftOwnershipsDto
 import com.rarible.protocol.union.core.continuation.page.Page
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -33,8 +33,7 @@ object TezosOwnershipConverter {
         )
     }
 
-    //todo tell tezos about NftOwnerShips
-    fun convert(page: NftOwnerShipsDto, blockchain: BlockchainDto): Page<UnionOwnershipDto> {
+    fun convert(page: NftOwnershipsDto, blockchain: BlockchainDto): Page<UnionOwnershipDto> {
         return Page(
             total = page.total.toLong(),
             continuation = page.continuation,

@@ -25,7 +25,7 @@ class TezosOrderService(
     ): Slice<OrderDto> {
         val orders = orderControllerApi.getOrdersAll(
             origin,
-            size.toBigDecimal(),
+            size,
             continuation
         ).awaitFirst()
         return tezosOrderConverter.convert(orders, blockchain)
@@ -68,7 +68,7 @@ class TezosOrderService(
             tokenId,
             maker,
             origin,
-            size.toBigDecimal(),
+            size,
             continuation
         ).awaitFirst()
         return tezosOrderConverter.convert(orders, blockchain)
@@ -87,7 +87,7 @@ class TezosOrderService(
         val orders = orderControllerApi.getOrderBidsByMaker(
             maker,
             origin,
-            size.toBigDecimal(),
+            size,
             continuation
         ).awaitFirst()
         return tezosOrderConverter.convert(orders, blockchain)
@@ -101,7 +101,7 @@ class TezosOrderService(
     ): Slice<OrderDto> {
         val orders = orderControllerApi.getSellOrders(
             origin,
-            size.toBigDecimal(),
+            size,
             continuation
         ).awaitFirst()
         return tezosOrderConverter.convert(orders, blockchain)
@@ -117,7 +117,7 @@ class TezosOrderService(
         val orders = orderControllerApi.getSellOrdersByCollection(
             collection,
             origin,
-            size.toBigDecimal(),
+            size,
             continuation
         ).awaitFirst()
         return tezosOrderConverter.convert(orders, blockchain)
@@ -139,7 +139,7 @@ class TezosOrderService(
             tokenId,
             maker,
             origin,
-            size.toBigDecimal(),
+            size,
             continuation
         ).awaitFirst()
         return tezosOrderConverter.convert(orders, blockchain)
@@ -155,7 +155,7 @@ class TezosOrderService(
         val orders = orderControllerApi.getSellOrdersByMaker(
             maker,
             origin,
-            size.toBigDecimal(),
+            size,
             continuation
         ).awaitFirst()
         return tezosOrderConverter.convert(orders, blockchain)

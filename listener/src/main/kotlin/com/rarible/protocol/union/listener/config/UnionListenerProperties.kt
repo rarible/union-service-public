@@ -17,14 +17,17 @@ data class UnionListenerProperties(
 data class BlockchainConsumerSet(
     val ethereum: ConsumerProperties,
     val polygon: ConsumerProperties,
-    val flow: ConsumerProperties
+    val flow: ConsumerProperties,
+    val tezos: ConsumerProperties
 )
 
 data class ConsumerProperties(
     val brokerReplicaSet: String,
     val ownershipWorkers: Int = 1,
     val orderWorkers: Int = 1,
-    val itemWorkers: Int = 1
+    val itemWorkers: Int = 1,
+    val username: String? = null,
+    val password: String? = null
 )
 
 class ReconciliationProperties(

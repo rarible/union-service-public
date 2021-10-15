@@ -41,8 +41,7 @@ class TezosOrderConverter(
         val maker = UnionAddressConverter.convert(order.maker, blockchain)
         val taker = order.taker?.let { UnionAddressConverter.convert(it, blockchain) }
 
-        //todo toBigDecimal???
-        val takePrice = order.take.value.toBigDecimal() / order.make.value.toBigDecimal()
+        val takePrice = order.take.value / order.make.value
         val takePriceUsd = currencyService.toUsd(blockchain, take.type.ext.contract, takePrice)
 
         return OrderDto(
@@ -89,7 +88,7 @@ class TezosOrderConverter(
     private fun convert(source: PartDto, blockchain: BlockchainDto): OrderPayoutDto {
         return OrderPayoutDto(
             account = UnionAddressConverter.convert(source.account, blockchain),
-            value = source.value //todo why is biginteger here? it's part as in Creator and Royalty
+            value = source.value.toBigInteger() //todo why BigInteger here?
         )
     }
 }

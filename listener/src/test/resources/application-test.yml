@@ -22,6 +22,9 @@ common:
   currency:
     refresh:
       cron: "-"
+  client:
+    tezos:
+      url: "http://localhost:8080"
 
 listener:
   consumer:
@@ -36,6 +39,11 @@ listener:
       ownershipWorkers: 1
       orderWorkers: 1
     flow:
+      broker-replica-set: ${kafka.hosts}
+      itemWorkers: 1
+      ownershipWorkers: 1
+      orderWorkers: 1
+    tezos:
       broker-replica-set: ${kafka.hosts}
       itemWorkers: 1
       ownershipWorkers: 1

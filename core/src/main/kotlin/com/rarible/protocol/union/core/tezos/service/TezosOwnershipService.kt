@@ -16,7 +16,7 @@ class TezosOwnershipService(
 
     override suspend fun getAllOwnerships(continuation: String?, size: Int): Page<UnionOwnershipDto> {
         val ownerships = ownershipControllerApi.getNftAllOwnerships(
-            size.toBigDecimal(),
+            size,
             continuation
         ).awaitFirst()
         return TezosOwnershipConverter.convert(ownerships, blockchain)
@@ -37,7 +37,7 @@ class TezosOwnershipService(
             ownershipControllerApi.getNftOwnershipByItem(
                 contract,
                 tokenId,
-                size.toBigDecimal(),
+                size,
                 continuation
             ).awaitFirst()
         return TezosOwnershipConverter.convert(ownerships, blockchain)
