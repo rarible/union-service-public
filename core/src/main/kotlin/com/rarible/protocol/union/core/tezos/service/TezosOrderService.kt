@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.core.tezos.service
 
 import com.rarible.protocol.tezos.api.client.OrderControllerApi
+import com.rarible.protocol.union.core.Platform
 import com.rarible.protocol.union.core.continuation.page.Slice
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
@@ -18,11 +19,13 @@ class TezosOrderService(
 ) : AbstractBlockchainService(blockchain), OrderService {
 
     override suspend fun getOrdersAll(
-        platform: PlatformDto?, // TODO TEZOS doesn't support it
+        platform: PlatformDto?,
         origin: String?,
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
+        if (!Platform.isRarible(platform)) return Slice.empty()
+
         val orders = orderControllerApi.getOrdersAll(
             origin,
             size,
@@ -62,6 +65,8 @@ class TezosOrderService(
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
+        if (!Platform.isRarible(platform)) return Slice.empty()
+
         // TODO add currency filter
         val orders = orderControllerApi.getOrderBidsByItem(
             contract,
@@ -84,6 +89,8 @@ class TezosOrderService(
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
+        if (!Platform.isRarible(platform)) return Slice.empty()
+
         val orders = orderControllerApi.getOrderBidsByMaker(
             maker,
             origin,
@@ -99,6 +106,8 @@ class TezosOrderService(
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
+        if (!Platform.isRarible(platform)) return Slice.empty()
+
         val orders = orderControllerApi.getSellOrders(
             origin,
             size,
@@ -114,6 +123,8 @@ class TezosOrderService(
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
+        if (!Platform.isRarible(platform)) return Slice.empty()
+
         val orders = orderControllerApi.getSellOrdersByCollection(
             collection,
             origin,
@@ -134,6 +145,8 @@ class TezosOrderService(
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
+        if (!Platform.isRarible(platform)) return Slice.empty()
+
         val orders = orderControllerApi.getSellOrderByItem(
             contract,
             tokenId,
@@ -152,6 +165,8 @@ class TezosOrderService(
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
+        if (!Platform.isRarible(platform)) return Slice.empty()
+
         val orders = orderControllerApi.getSellOrdersByMaker(
             maker,
             origin,

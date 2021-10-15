@@ -15,6 +15,7 @@ import com.rarible.protocol.dto.OrderActivityMatchDto
 import com.rarible.protocol.dto.TransferDto
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.model.ext
+import com.rarible.protocol.union.core.service.CurrencyService
 import com.rarible.protocol.union.dto.ActivityBlockchainInfoDto
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivityIdDto
@@ -32,10 +33,14 @@ import com.rarible.protocol.union.dto.OrderMatchSellDto
 import com.rarible.protocol.union.dto.OrderMatchSwapDto
 import com.rarible.protocol.union.dto.TransferActivityDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
+import org.springframework.stereotype.Component
 
-object EthActivityConverter {
+@Component
+class EthActivityConverter(
+    private val currencyService: CurrencyService
+) {
 
-    fun convert(source: com.rarible.protocol.dto.ActivityDto, blockchain: BlockchainDto): ActivityDto {
+    suspend fun convert(source: com.rarible.protocol.dto.ActivityDto, blockchain: BlockchainDto): ActivityDto {
         val activityId = ActivityIdDto(blockchain, source.id)
         return when (source) {
             is OrderActivityMatchDto -> {
@@ -71,29 +76,33 @@ object EthActivityConverter {
                 }
             }
             is OrderActivityBidDto -> {
+                val payment = EthConverter.convert(source.make, blockchain)
+                val nft = EthConverter.convert(source.take, blockchain)
                 OrderBidActivityDto(
                     id = activityId,
                     date = source.date,
                     price = source.price,
-                    priceUsd = source.priceUsd,
+                    priceUsd = currencyService.toUsd(blockchain, payment.type.ext.contract, source.price),
                     source = convert(source.source),
                     hash = EthConverter.convert(source.hash),
                     maker = UnionAddressConverter.convert(source.maker, blockchain),
-                    make = EthConverter.convert(source.make, blockchain),
-                    take = EthConverter.convert(source.take, blockchain)
+                    make = payment,
+                    take = nft
                 )
             }
             is OrderActivityListDto -> {
+                val payment = EthConverter.convert(source.take, blockchain)
+                val nft = EthConverter.convert(source.make, blockchain)
                 OrderListActivityDto(
                     id = activityId,
                     date = source.date,
                     price = source.price,
-                    priceUsd = source.priceUsd,
+                    priceUsd = currencyService.toUsd(blockchain, payment.type.ext.contract, source.price),
                     source = convert(source.source),
                     hash = EthConverter.convert(source.hash),
                     maker = UnionAddressConverter.convert(source.maker, blockchain),
-                    make = EthConverter.convert(source.make, blockchain),
-                    take = EthConverter.convert(source.take, blockchain)
+                    make = nft,
+                    take = payment
                 )
             }
             is OrderActivityCancelBidDto -> {
@@ -182,27 +191,31 @@ object EthActivityConverter {
         }
     }
 
-    private fun activityToSell(
+    private suspend fun activityToSell(
         source: OrderActivityMatchDto,
         blockchain: BlockchainDto,
         nft: com.rarible.protocol.dto.OrderActivityMatchSideDto,
         payment: com.rarible.protocol.dto.OrderActivityMatchSideDto,
         type: OrderMatchSellDto.Type,
         activityId: ActivityIdDto
-    ) = OrderMatchSellDto(
-        id = activityId,
-        date = source.date,
-        source = convert(source.source),
-        blockchainInfo = asActivityBlockchainInfo(source),
-        nft = EthConverter.convert(nft.asset, blockchain),
-        payment = EthConverter.convert(payment.asset, blockchain),
-        seller = UnionAddressConverter.convert(nft.maker, blockchain),
-        buyer = UnionAddressConverter.convert(payment.maker, blockchain),
-        price = source.price,
-        priceUsd = source.priceUsd,
-        amountUsd = source.priceUsd?.multiply(nft.asset.valueDecimal),
-        type = type
-    )
+    ): OrderMatchSellDto {
+        val unionPayment = EthConverter.convert(payment.asset, blockchain)
+        val priceUsd = currencyService.toUsd(blockchain, unionPayment.type.ext.contract, source.price)
+        return OrderMatchSellDto(
+            id = activityId,
+            date = source.date,
+            source = convert(source.source),
+            blockchainInfo = asActivityBlockchainInfo(source),
+            nft = EthConverter.convert(nft.asset, blockchain),
+            payment = unionPayment,
+            seller = UnionAddressConverter.convert(nft.maker, blockchain),
+            buyer = UnionAddressConverter.convert(payment.maker, blockchain),
+            price = source.price,
+            priceUsd = priceUsd,
+            amountUsd = priceUsd?.multiply(nft.asset.valueDecimal),
+            type = type
+        )
+    }
 
     private fun activityToSwap(
         source: OrderActivityMatchDto,

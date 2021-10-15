@@ -32,7 +32,8 @@ import java.time.Instant
 class EthereumActivityService(
     blockchain: BlockchainDto,
     private val activityItemControllerApi: NftActivityControllerApi,
-    private val activityOrderControllerApi: OrderActivityControllerApi
+    private val activityOrderControllerApi: OrderActivityControllerApi,
+    private val ethActivityConverter: EthActivityConverter
 ) : AbstractBlockchainService(blockchain), ActivityService {
 
     companion object {
@@ -47,7 +48,7 @@ class EthereumActivityService(
         sort: ActivitySortDto?
     ): Slice<ActivityDto> {
         val filter = ActivityFilterAllDto(
-            LinkedHashSet(types).map { EthActivityConverter.asGlobalActivityType(it) }
+            LinkedHashSet(types).map { ethActivityConverter.asGlobalActivityType(it) }
         )
         return getEthereumActivities(filter, continuation, size, sort)
     }
@@ -61,7 +62,7 @@ class EthereumActivityService(
     ): Slice<ActivityDto> {
         val filter = ActivityFilterByCollectionDto(
             Address.apply(collection),
-            LinkedHashSet(types).map { EthActivityConverter.asCollectionActivityType(it) }
+            LinkedHashSet(types).map { ethActivityConverter.asCollectionActivityType(it) }
         )
         return getEthereumActivities(filter, continuation, size, sort)
     }
@@ -77,7 +78,7 @@ class EthereumActivityService(
         val filter = ActivityFilterByItemDto(
             Address.apply(contract),
             BigInteger(tokenId),
-            LinkedHashSet(types).map { EthActivityConverter.asItemActivityType(it) }
+            LinkedHashSet(types).map { ethActivityConverter.asItemActivityType(it) }
         )
         return getEthereumActivities(filter, continuation, size, sort)
     }
@@ -93,7 +94,7 @@ class EthereumActivityService(
     ): Slice<ActivityDto> {
         val filter = ActivityFilterByUserDto(
             users.map { Address.apply(it) },
-            LinkedHashSet(types).map { EthActivityConverter.asUserActivityType(it) },
+            LinkedHashSet(types).map { ethActivityConverter.asUserActivityType(it) },
             from?.epochSecond,
             to?.epochSecond
         )
@@ -120,8 +121,8 @@ class EthereumActivityService(
         val itemsPage = itemRequest.await()
         val ordersPage = orderRequest.await()
 
-        val itemActivities = itemsPage.items.map { EthActivityConverter.convert(it, blockchain) }
-        val orderActivities = ordersPage.items.map { EthActivityConverter.convert(it, blockchain) }
+        val itemActivities = itemsPage.items.map { ethActivityConverter.convert(it, blockchain) }
+        val orderActivities = ordersPage.items.map { ethActivityConverter.convert(it, blockchain) }
         val allActivities = itemActivities + orderActivities
 
         Paging(

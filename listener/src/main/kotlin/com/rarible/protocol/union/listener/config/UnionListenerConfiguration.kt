@@ -19,6 +19,7 @@ import com.rarible.protocol.nft.api.subscriber.NftIndexerEventsConsumerFactory
 import com.rarible.protocol.order.api.subscriber.OrderIndexerEventsConsumerFactory
 import com.rarible.protocol.tezos.subscriber.TezosEventsConsumerFactory
 import com.rarible.protocol.union.core.Entity
+import com.rarible.protocol.union.core.ethereum.converter.EthActivityConverter
 import com.rarible.protocol.union.core.ethereum.converter.EthOrderEventConverter
 import com.rarible.protocol.union.core.flow.converter.FlowActivityConverter
 import com.rarible.protocol.union.core.flow.converter.FlowOrderEventConverter
@@ -76,6 +77,7 @@ class UnionListenerConfiguration(
 ) {
 
     companion object {
+
         private val FLOW = BlockchainDto.FLOW.name.toLowerCase()
         private val ETHEREUM = BlockchainDto.ETHEREUM.name.toLowerCase()
         private val POLYGON = BlockchainDto.POLYGON.name.toLowerCase()
@@ -150,9 +152,12 @@ class UnionListenerConfiguration(
     }
 
     @Bean
-    fun ethereumActivityWorker(@Qualifier("ethereum.activity.consumer.factory") factory: EthActivityEventsConsumerFactory): KafkaConsumerWorker<com.rarible.protocol.dto.ActivityDto> {
+    fun ethereumActivityWorker(
+        @Qualifier("ethereum.activity.consumer.factory") factory: EthActivityEventsConsumerFactory,
+        ethActivityConverter: EthActivityConverter
+    ): KafkaConsumerWorker<com.rarible.protocol.dto.ActivityDto> {
         val consumer = factory.createActivityConsumer(consumerGroup(Entity.ACTIVITY), Blockchain.ETHEREUM)
-        val handler = EthereumActivityEventHandler(activityProducer, BlockchainDto.ETHEREUM)
+        val handler = EthereumActivityEventHandler(activityProducer, BlockchainDto.ETHEREUM, ethActivityConverter)
         return createSingleConsumerWorker(consumer, handler, ETHEREUM, Entity.ACTIVITY)
     }
 
@@ -214,9 +219,12 @@ class UnionListenerConfiguration(
     }
 
     @Bean
-    fun polygonActivityWorker(@Qualifier("polygon.activity.consumer.factory") factory: EthActivityEventsConsumerFactory): KafkaConsumerWorker<com.rarible.protocol.dto.ActivityDto> {
+    fun polygonActivityWorker(
+        @Qualifier("polygon.activity.consumer.factory") factory: EthActivityEventsConsumerFactory,
+        ethActivityConverter: EthActivityConverter
+    ): KafkaConsumerWorker<com.rarible.protocol.dto.ActivityDto> {
         val consumer = factory.createActivityConsumer(consumerGroup(Entity.ACTIVITY), Blockchain.POLYGON)
-        val handler = EthereumActivityEventHandler(activityProducer, BlockchainDto.POLYGON)
+        val handler = EthereumActivityEventHandler(activityProducer, BlockchainDto.POLYGON, ethActivityConverter)
         return createSingleConsumerWorker(consumer, handler, POLYGON, Entity.ACTIVITY)
     }
 
