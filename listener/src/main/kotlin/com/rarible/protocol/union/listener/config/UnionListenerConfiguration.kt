@@ -17,10 +17,12 @@ import com.rarible.protocol.dto.NftOwnershipEventDto
 import com.rarible.protocol.flow.nft.api.subscriber.FlowNftIndexerEventsConsumerFactory
 import com.rarible.protocol.nft.api.subscriber.NftIndexerEventsConsumerFactory
 import com.rarible.protocol.order.api.subscriber.OrderIndexerEventsConsumerFactory
+import com.rarible.protocol.tezos.subscriber.TezosEventsConsumerFactory
 import com.rarible.protocol.union.core.Entity
 import com.rarible.protocol.union.core.ethereum.converter.EthOrderEventConverter
 import com.rarible.protocol.union.core.flow.converter.FlowActivityConverter
 import com.rarible.protocol.union.core.flow.converter.FlowOrderEventConverter
+import com.rarible.protocol.union.core.tezos.converter.TezosOrderConverter
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemEventDto
@@ -40,6 +42,9 @@ import com.rarible.protocol.union.listener.handler.flow.FlowActivityEventHandler
 import com.rarible.protocol.union.listener.handler.flow.FlowItemEventHandler
 import com.rarible.protocol.union.listener.handler.flow.FlowOrderEventHandler
 import com.rarible.protocol.union.listener.handler.flow.FlowOwnershipEventHandler
+import com.rarible.protocol.union.listener.handler.tezos.TezosItemEventHandler
+import com.rarible.protocol.union.listener.handler.tezos.TezosOrderEventHandler
+import com.rarible.protocol.union.listener.handler.tezos.TezosOwnershipEventHandler
 import com.rarible.protocol.union.listener.service.EnrichmentItemEventService
 import com.rarible.protocol.union.listener.service.EnrichmentOrderEventService
 import com.rarible.protocol.union.listener.service.EnrichmentOwnershipEventService
@@ -74,6 +79,7 @@ class UnionListenerConfiguration(
         private val FLOW = BlockchainDto.FLOW.name.toLowerCase()
         private val ETHEREUM = BlockchainDto.ETHEREUM.name.toLowerCase()
         private val POLYGON = BlockchainDto.POLYGON.name.toLowerCase()
+        private val TEZOS = BlockchainDto.TEZOS.name.toLowerCase()
     }
 
     private val env = applicationEnvironmentInfo.name
@@ -82,6 +88,7 @@ class UnionListenerConfiguration(
     private val ethereumProperties = properties.consumer.ethereum
     private val polygonProperties = properties.consumer.polygon
     private val flowProperties = properties.consumer.flow
+    private val tezosProperties = properties.consumer.tezos
 
     //------------------------ Eth Consumers ------------------------//
 
@@ -217,13 +224,13 @@ class UnionListenerConfiguration(
 
     @Bean
     fun flowActivityConsumerFactory(): FlowActivityEventsConsumerFactory {
-        val replicaSet = properties.consumer.ethereum.brokerReplicaSet
+        val replicaSet = flowProperties.brokerReplicaSet
         return FlowActivityEventsConsumerFactory(replicaSet, host, env)
     }
 
     @Bean
     fun flowNftIndexerConsumerFactory(): FlowNftIndexerEventsConsumerFactory {
-        val replicaSet = properties.consumer.ethereum.brokerReplicaSet
+        val replicaSet = flowProperties.brokerReplicaSet
         return FlowNftIndexerEventsConsumerFactory(replicaSet, host, env)
     }
 
@@ -242,7 +249,7 @@ class UnionListenerConfiguration(
     }
 
     @Bean
-    fun flowOrderChangeWorker(
+    fun flowOrderWorker(
         factory: FlowNftIndexerEventsConsumerFactory,
         flowOrderEventConverter: FlowOrderEventConverter
     ): KafkaConsumerWorker<FlowOrderEventDto> {
@@ -262,6 +269,51 @@ class UnionListenerConfiguration(
         val handler = FlowActivityEventHandler(activityProducer, BlockchainDto.FLOW, flowActivityConverter)
         return createSingleConsumerWorker(consumer, handler, FLOW, Entity.ACTIVITY)
     }
+
+    //------------------------ Tezos Consumers ------------------------//
+    @Bean
+    fun tezosActivityConsumerFactory(): TezosEventsConsumerFactory {
+        val replicaSet = tezosProperties.brokerReplicaSet
+        return TezosEventsConsumerFactory(replicaSet, host, env, tezosProperties.username, tezosProperties.password)
+    }
+
+    @Bean
+    fun tezosItemWorker(factory: TezosEventsConsumerFactory): KafkaConsumerWorker<com.rarible.protocol.tezos.dto.ItemEventDto> {
+        val consumer = factory.createItemConsumer(consumerGroup(Entity.ITEM))
+        val handler = TezosItemEventHandler(enrichmentItemEventService, BlockchainDto.TEZOS)
+        return createBatchedConsumerWorker(consumer, handler, TEZOS, Entity.ITEM, tezosProperties.itemWorkers)
+    }
+
+    @Bean
+    fun tezosOwnershipWorker(factory: TezosEventsConsumerFactory): KafkaConsumerWorker<com.rarible.protocol.tezos.dto.OwnershipEventDto> {
+        val consumer = factory.createOwnershipConsumer(consumerGroup(Entity.OWNERSHIP))
+        val handler = TezosOwnershipEventHandler(enrichmentOwnershipEventService, BlockchainDto.TEZOS)
+        return createBatchedConsumerWorker(consumer, handler, TEZOS, Entity.OWNERSHIP, tezosProperties.ownershipWorkers)
+    }
+
+    @Bean
+    fun tezosOrderWorker(
+        factory: TezosEventsConsumerFactory,
+        tezosOrderConverter: TezosOrderConverter
+    ): KafkaConsumerWorker<com.rarible.protocol.tezos.dto.OrderEventDto> {
+        val consumer = factory.createOrderConsumer(consumerGroup(Entity.ORDER))
+        val handler = TezosOrderEventHandler(
+            orderProducer,
+            enrichmentOrderEventService,
+            tezosOrderConverter,
+            BlockchainDto.TEZOS
+        )
+        return createBatchedConsumerWorker(consumer, handler, TEZOS, Entity.ORDER, tezosProperties.orderWorkers)
+    }
+
+    /*
+    @Bean
+    fun tezosActivityWorker(factory: TezosEventsConsumerFactory): KafkaConsumerWorker<TezosActivityDto> {
+        val consumer = factory.createActivityConsumer(consumerGroup(Entity.ACTIVITY))
+        val handler = TezosActivityEventHandler(activityProducer, BlockchainDto.TEZOS)
+        return createSingleConsumerWorker(consumer, handler, TEZOS, Entity.ACTIVITY)
+    }
+    */
 
     private fun <T> createSingleConsumerWorker(
         consumer: RaribleKafkaConsumer<T>,

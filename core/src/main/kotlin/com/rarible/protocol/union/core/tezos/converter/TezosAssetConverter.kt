@@ -16,7 +16,7 @@ object TezosAssetConverter {
     fun convert(source: com.rarible.protocol.tezos.dto.AssetDto, blockchain: BlockchainDto): AssetDto {
         return AssetDto(
             type = convertAssetType(source = source.assetType, blockchain = blockchain),
-            value = source.value.toBigDecimal() //todo what is actual value here?
+            value = source.value
         )
     }
 

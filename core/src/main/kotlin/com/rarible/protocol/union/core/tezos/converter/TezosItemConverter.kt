@@ -6,7 +6,16 @@ import com.rarible.protocol.tezos.dto.NftItemsDto
 import com.rarible.protocol.tezos.dto.PartDto
 import com.rarible.protocol.union.core.continuation.page.Page
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
-import com.rarible.protocol.union.dto.*
+import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.CreatorDto
+import com.rarible.protocol.union.dto.ImageContentDto
+import com.rarible.protocol.union.dto.ItemIdDto
+import com.rarible.protocol.union.dto.MetaAttributeDto
+import com.rarible.protocol.union.dto.MetaContentDto
+import com.rarible.protocol.union.dto.MetaDto
+import com.rarible.protocol.union.dto.RoyaltyDto
+import com.rarible.protocol.union.dto.UnionAddress
+import com.rarible.protocol.union.dto.UnionItemDto
 
 object TezosItemConverter {
 
@@ -14,21 +23,21 @@ object TezosItemConverter {
         return UnionItemDto(
             id = ItemIdDto(
                 blockchain = blockchain,
-                token = UnionAddress(blockchain, item.contract),
-                tokenId = item.tokenId
+                    token = UnionAddress(blockchain, item.contract),
+                    tokenId = item.tokenId
             ),
-            tokenId = item.tokenId,
-            collection = UnionAddress(blockchain, item.contract),
-            creators = item.creators.map { toCreator(it, blockchain) },
-            deleted = item.deleted ?: false, //todo raise to tezos
-            lastUpdatedAt = item.date,
-            lazySupply = item.lazySupply,
-            meta = item.meta?.let { convert(it) },
-            mintedAt = item.date, //todo ask tezos to include
-            owners = item.owners.map { UnionAddress(blockchain, it) },
-            pending = emptyList(), //todo tezos better delete this if they don't populate it,
-            royalties = item.royalties.map { toRoyalty(it, blockchain) },
-            supply = item.supply
+                tokenId = item.tokenId,
+                collection = UnionAddress(blockchain, item.contract),
+                creators = item.creators.map { toCreator(it, blockchain) },
+                deleted = item.deleted ?: false, //todo raise to tezos
+                lastUpdatedAt = item.date,
+                lazySupply = item.lazySupply,
+                meta = item.meta?.let { convert(it) },
+                mintedAt = item.date, // TODO update later
+                owners = item.owners.map { UnionAddress(blockchain, it) },
+                pending = emptyList(), //todo tezos better delete this if they don't populate it,
+                royalties = item.royalties.map { toRoyalty(it, blockchain) },
+                supply = item.supply
         )
     }
 

@@ -12,7 +12,7 @@ import com.rarible.protocol.union.listener.service.EnrichmentOwnershipEventServi
 import org.slf4j.LoggerFactory
 
 class FlowOwnershipEventHandler(
-    private val enrichmentOwnershipEventService: EnrichmentOwnershipEventService,
+    private val ownershipEventService: EnrichmentOwnershipEventService,
     private val blockchain: BlockchainDto
 ) : AbstractEventHandler<FlowOwnershipEventDto>() {
 
@@ -24,7 +24,7 @@ class FlowOwnershipEventHandler(
         when (event) {
             is FlowNftOwnershipUpdateEventDto -> {
                 val item = FlowOwnershipConverter.convert(event.ownership, blockchain)
-                enrichmentOwnershipEventService.onOwnershipUpdated(item)
+                ownershipEventService.onOwnershipUpdated(item)
             }
             is FlowNftOwnershipDeleteEventDto -> {
                 val ownershipId = OwnershipIdDto(
@@ -33,7 +33,7 @@ class FlowOwnershipEventHandler(
                     tokenId = event.ownership.tokenId.toBigInteger(),
                     owner = UnionAddress(blockchain, event.ownership.owner)
                 )
-                enrichmentOwnershipEventService.onOwnershipDeleted(ownershipId)
+                ownershipEventService.onOwnershipDeleted(ownershipId)
             }
         }
     }
