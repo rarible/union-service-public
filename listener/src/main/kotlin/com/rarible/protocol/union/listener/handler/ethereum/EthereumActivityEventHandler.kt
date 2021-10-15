@@ -10,7 +10,8 @@ import org.slf4j.LoggerFactory
 
 class EthereumActivityEventHandler(
     private val producer: RaribleKafkaProducer<ActivityDto>,
-    private val blockchain: BlockchainDto
+    private val blockchain: BlockchainDto,
+    private val ethActivityConverter: EthActivityConverter
 ) : AbstractEventHandler<com.rarible.protocol.dto.ActivityDto>() {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -18,7 +19,7 @@ class EthereumActivityEventHandler(
     override suspend fun handleSafely(event: com.rarible.protocol.dto.ActivityDto) {
         logger.debug("Received Ethereum ({}) Activity event: type={}", blockchain, event::class.java.simpleName)
 
-        val unionEventDto = EthActivityConverter.convert(event, blockchain)
+        val unionEventDto = ethActivityConverter.convert(event, blockchain)
 
         val message = KafkaMessage(
             key = unionEventDto.id.fullId(), // TODO we need to use right key here

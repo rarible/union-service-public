@@ -9,6 +9,7 @@ import com.rarible.protocol.order.api.client.OrderActivityControllerApi
 import com.rarible.protocol.order.api.client.OrderControllerApi
 import com.rarible.protocol.order.api.client.OrderIndexerApiClientFactory
 import com.rarible.protocol.order.api.client.OrderSignatureControllerApi
+import com.rarible.protocol.union.core.ethereum.converter.EthActivityConverter
 import com.rarible.protocol.union.core.ethereum.converter.EthOrderConverter
 import com.rarible.protocol.union.core.ethereum.service.EthereumActivityService
 import com.rarible.protocol.union.core.ethereum.service.EthereumCollectionService
@@ -137,9 +138,10 @@ class EthereumConfiguration {
     @Bean
     fun ethereumActivityService(
         @Qualifier("ethereum.activity.api.item") ethereumActivityItemApi: NftActivityControllerApi,
-        @Qualifier("ethereum.activity.api.order") ethereumActivityOrderApi: OrderActivityControllerApi
+        @Qualifier("ethereum.activity.api.order") ethereumActivityOrderApi: OrderActivityControllerApi,
+        ethActivityConverter: EthActivityConverter
     ): ActivityService {
-        return EthereumActivityService(BlockchainDto.ETHEREUM, ethereumActivityItemApi, ethereumActivityOrderApi)
+        return EthereumActivityService(BlockchainDto.ETHEREUM, ethereumActivityItemApi, ethereumActivityOrderApi, ethActivityConverter)
     }
 
     //--------------------- POLYGON SERVICES ---------------------//
@@ -174,8 +176,9 @@ class EthereumConfiguration {
     @Bean
     fun polygonActivityService(
         @Qualifier("polygon.activity.api.item") polygonActivityItemApi: NftActivityControllerApi,
-        @Qualifier("polygon.activity.api.order") polygonActivityOrderApi: OrderActivityControllerApi
+        @Qualifier("polygon.activity.api.order") polygonActivityOrderApi: OrderActivityControllerApi,
+        ethActivityConverter: EthActivityConverter
     ): ActivityService {
-        return EthereumActivityService(BlockchainDto.POLYGON, polygonActivityItemApi, polygonActivityOrderApi)
+        return EthereumActivityService(BlockchainDto.POLYGON, polygonActivityItemApi, polygonActivityOrderApi, ethActivityConverter)
     }
 }
