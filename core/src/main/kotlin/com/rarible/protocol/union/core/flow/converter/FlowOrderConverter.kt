@@ -1,7 +1,9 @@
 package com.rarible.protocol.union.core.flow.converter
 
 import com.rarible.protocol.dto.FlowOrderDto
+import com.rarible.protocol.dto.FlowOrdersPaginationDto
 import com.rarible.protocol.dto.PayInfoDto
+import com.rarible.protocol.union.core.continuation.page.Slice
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.model.ext
 import com.rarible.protocol.union.core.service.CurrencyService
@@ -62,6 +64,13 @@ class FlowOrderConverter(
             priceHistory = emptyList(),
             data = convert(order.data, blockchain),
             salt = ""// Not supported on Flow
+        )
+    }
+
+    suspend fun convert(order: FlowOrdersPaginationDto, blockchain: BlockchainDto): Slice<OrderDto> {
+        return Slice(
+            entities = order.items.map { this.convert(it, blockchain) },
+            continuation = order.continuation
         )
     }
 

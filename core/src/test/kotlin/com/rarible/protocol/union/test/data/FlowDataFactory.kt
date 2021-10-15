@@ -36,7 +36,7 @@ import com.rarible.protocol.union.dto.parser.ItemIdParser
 import java.math.BigInteger
 
 fun randomFlowContract() = UnionAddress(BlockchainDto.FLOW, randomString(12))
-fun randomFlowAddress() = UnionAddress(BlockchainDto.FLOW, randomString(16))
+fun randomFlowAddress() = UnionAddress(BlockchainDto.FLOW, java.lang.Long.toHexString(randomLong()))
 
 fun randomFlowItemId() = ItemIdDto(BlockchainDto.FLOW, randomFlowContract(), randomLong().toBigInteger())
 fun randomFlowItemIdShortValue() = randomFlowItemId().value

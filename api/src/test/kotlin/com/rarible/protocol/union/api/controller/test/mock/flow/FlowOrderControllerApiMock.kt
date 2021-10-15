@@ -1,8 +1,10 @@
 package com.rarible.protocol.union.api.controller.test.mock.flow
 
 import com.rarible.protocol.dto.FlowOrderDto
+import com.rarible.protocol.dto.FlowOrderIdsDto
 import com.rarible.protocol.flow.nft.api.client.FlowOrderControllerApi
 import io.mockk.every
+import reactor.kotlin.core.publisher.toFlux
 import reactor.kotlin.core.publisher.toMono
 
 class FlowOrderControllerApiMock(
@@ -17,6 +19,12 @@ class FlowOrderControllerApiMock(
         }
     }
 
-    // TODO extend mock when Flow support other methods
+    fun mockGetByIds(vararg orders: FlowOrderDto) {
+        every {
+            orderControllerApi.getOrdersByIds(
+                FlowOrderIdsDto(orders.map { it.id })
+            )
+        } returns orders.toFlux()
+    }
 
 }

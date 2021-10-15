@@ -19,10 +19,12 @@ class FlowItemService(
         continuation: String?,
         size: Int,
         showDeleted: Boolean?,
-        lastUpdatedFrom: Long?, //TODO not supported by Flow
-        lastUpdatedTo: Long? //TODO not supported by Flow
+        lastUpdatedFrom: Long?,
+        lastUpdatedTo: Long?
     ): Page<UnionItemDto> {
-        val items = flowNftItemControllerApi.getNftAllItems(continuation, size, showDeleted).awaitFirst()
+        val items = flowNftItemControllerApi
+            .getNftAllItems(continuation, size, showDeleted, lastUpdatedFrom, lastUpdatedTo)
+            .awaitFirst()
         return FlowItemConverter.convert(items, blockchain)
     }
 

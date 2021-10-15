@@ -1,11 +1,13 @@
 package com.rarible.protocol.union.core.flow
 
 import com.rarible.protocol.flow.nft.api.client.FlowNftCollectionControllerApi
+import com.rarible.protocol.flow.nft.api.client.FlowNftCryptoControllerApi
 import com.rarible.protocol.flow.nft.api.client.FlowNftIndexerApiClientFactory
 import com.rarible.protocol.flow.nft.api.client.FlowNftItemControllerApi
 import com.rarible.protocol.flow.nft.api.client.FlowNftOrderActivityControllerApi
 import com.rarible.protocol.flow.nft.api.client.FlowNftOwnershipControllerApi
 import com.rarible.protocol.flow.nft.api.client.FlowOrderControllerApi
+import com.rarible.protocol.union.core.flow.converter.FlowActivityConverter
 import com.rarible.protocol.union.core.flow.converter.FlowOrderConverter
 import com.rarible.protocol.union.core.flow.service.FlowActivityService
 import com.rarible.protocol.union.core.flow.service.FlowCollectionService
@@ -49,6 +51,10 @@ class FlowConfiguration {
     fun flowActivityApi(factory: FlowNftIndexerApiClientFactory): FlowNftOrderActivityControllerApi =
         factory.createNftOrderActivityApiClient(flow)
 
+    @Bean
+    fun flowCryptoApi(factory: FlowNftIndexerApiClientFactory): FlowNftCryptoControllerApi =
+        factory.createCryptoApiClient(flow)
+
     //---------------------- FLOW SERVICES -----------------------//
     @Bean
     fun flowItemService(flowItemApi: FlowNftItemControllerApi): ItemService {
@@ -71,13 +77,13 @@ class FlowConfiguration {
     }
 
     @Bean
-    fun flowSignatureService(flowOrderApi: FlowOrderControllerApi): SignatureService {
-        return FlowSignatureService(BlockchainDto.FLOW) // TODO implement it later
+    fun flowSignatureService(signatureControllerApi: FlowNftCryptoControllerApi): SignatureService {
+        return FlowSignatureService(BlockchainDto.FLOW, signatureControllerApi) // TODO implement it later
     }
 
     @Bean
-    fun flowActivityService(flowActivityApi: FlowNftOrderActivityControllerApi): ActivityService {
-        return FlowActivityService(BlockchainDto.FLOW, flowActivityApi)
+    fun flowActivityService(flowActivityApi: FlowNftOrderActivityControllerApi, flowActivityConverter: FlowActivityConverter): ActivityService {
+        return FlowActivityService(BlockchainDto.FLOW, flowActivityApi, flowActivityConverter)
     }
 
 }

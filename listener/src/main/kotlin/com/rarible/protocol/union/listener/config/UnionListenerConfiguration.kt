@@ -20,6 +20,7 @@ import com.rarible.protocol.order.api.subscriber.OrderIndexerEventsConsumerFacto
 import com.rarible.protocol.tezos.subscriber.TezosEventsConsumerFactory
 import com.rarible.protocol.union.core.Entity
 import com.rarible.protocol.union.core.ethereum.converter.EthOrderEventConverter
+import com.rarible.protocol.union.core.flow.converter.FlowActivityConverter
 import com.rarible.protocol.union.core.flow.converter.FlowOrderEventConverter
 import com.rarible.protocol.union.core.tezos.converter.TezosOrderConverter
 import com.rarible.protocol.union.dto.ActivityDto
@@ -263,9 +264,9 @@ class UnionListenerConfiguration(
     }
 
     @Bean
-    fun flowActivityWorker(factory: FlowActivityEventsConsumerFactory): KafkaConsumerWorker<FlowActivityDto> {
+    fun flowActivityWorker(factory: FlowActivityEventsConsumerFactory, flowActivityConverter: FlowActivityConverter): KafkaConsumerWorker<FlowActivityDto> {
         val consumer = factory.createActivityConsumer(consumerGroup(Entity.ACTIVITY))
-        val handler = FlowActivityEventHandler(activityProducer, BlockchainDto.FLOW)
+        val handler = FlowActivityEventHandler(activityProducer, BlockchainDto.FLOW, flowActivityConverter)
         return createSingleConsumerWorker(consumer, handler, FLOW, Entity.ACTIVITY)
     }
 
