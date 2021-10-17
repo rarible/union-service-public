@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.listener.handler.ethereum
 
-import com.rarible.protocol.dto.*
+import com.rarible.protocol.dto.NftCollectionEventDto
+import com.rarible.protocol.dto.NftCollectionUpdateEventDto
 import com.rarible.protocol.union.core.ethereum.converter.EthCollectionConverter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.listener.handler.AbstractEventHandler

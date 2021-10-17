@@ -3,7 +3,7 @@ package com.rarible.protocol.union.listener.service
 import com.rarible.core.test.wait.Wait
 import com.rarible.protocol.union.listener.test.AbstractIntegrationTest
 import com.rarible.protocol.union.listener.test.IntegrationTest
-import com.rarible.protocol.union.test.data.*
+import com.rarible.protocol.union.test.data.randomUnionCollection
 import kotlinx.coroutines.FlowPreview
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test

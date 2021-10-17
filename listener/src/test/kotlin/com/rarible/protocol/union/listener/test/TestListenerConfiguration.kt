@@ -25,7 +25,12 @@ import com.rarible.protocol.nft.api.client.NftItemControllerApi
 import com.rarible.protocol.nft.api.client.NftOwnershipControllerApi
 import com.rarible.protocol.union.core.CoreConfiguration
 import com.rarible.protocol.union.core.UnionKafkaJsonSerializer
-import com.rarible.protocol.union.dto.*
+import com.rarible.protocol.union.dto.ActivityDto
+import com.rarible.protocol.union.dto.CollectionEventDto
+import com.rarible.protocol.union.dto.ItemEventDto
+import com.rarible.protocol.union.dto.OrderEventDto
+import com.rarible.protocol.union.dto.OwnershipEventDto
+import com.rarible.protocol.union.dto.UnionEventTopicProvider
 import com.rarible.protocol.union.listener.config.activity.FlowActivityTopicProvider
 import com.rarible.protocol.union.subscriber.UnionKafkaJsonDeserializer
 import com.rarible.protocol.union.test.mock.CurrencyMock
