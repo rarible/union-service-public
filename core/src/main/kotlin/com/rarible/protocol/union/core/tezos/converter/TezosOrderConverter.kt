@@ -10,6 +10,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.OrderPayoutDto
+import com.rarible.protocol.union.dto.OrderPriceHistoryRecordDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.TezosOrderDataRaribleV2DataV1Dto
 import org.slf4j.LoggerFactory
@@ -34,8 +35,8 @@ class TezosOrderConverter(
 
     private suspend fun convertInternal(order: com.rarible.protocol.tezos.dto.OrderDto, blockchain: BlockchainDto): OrderDto {
 
-        val make = TezosAssetConverter.convert(order.make, blockchain)
-        val take = TezosAssetConverter.convert(order.take, blockchain)
+        val make = TezosConverter.convert(order.make, blockchain)
+        val take = TezosConverter.convert(order.take, blockchain)
 
         val maker = UnionAddressConverter.convert(order.maker, blockchain)
         val taker = order.taker?.let { UnionAddressConverter.convert(it, blockchain) }
@@ -61,9 +62,11 @@ class TezosOrderConverter(
             takePrice = takePrice,
             makePriceUsd = null,
             takePriceUsd = takePriceUsd,
-            priceHistory = emptyList(),
+            signature = order.signature,
+            priceHistory = order.priceHistory?.map { convert(it) } ?: listOf(),
             data = convertData(order, blockchain),
-            salt = order.salt
+            salt = order.salt,
+            pending = emptyList() // TODO won't be published
         )
     }
 
@@ -73,6 +76,15 @@ class TezosOrderConverter(
             entities = source.orders.map { convert(it, blockchain) }
         )
     }
+
+    private fun convert(source: com.rarible.protocol.tezos.dto.OrderPriceHistoryRecordDto): OrderPriceHistoryRecordDto {
+        return OrderPriceHistoryRecordDto(
+            date = source.date,
+            makeValue = source.makeValue,
+            takeValue = source.takeValue
+        )
+    }
+
 
     private fun convertData(
         source: com.rarible.protocol.tezos.dto.OrderDto,
