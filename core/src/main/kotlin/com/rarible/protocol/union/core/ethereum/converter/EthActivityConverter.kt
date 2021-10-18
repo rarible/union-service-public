@@ -40,6 +40,10 @@ class EthActivityConverter(
     private val currencyService: CurrencyService
 ) {
 
+    // For activities, we decided to do NOT convert price to USD in realtime,
+    // since we want to see here USD price for the moment when event happened
+    // For example, if user bought NFT for 1 ETH 2 days ago, we want to see here USD price
+    // for THAT date instead of price calculated for current rate
     suspend fun convert(source: com.rarible.protocol.dto.ActivityDto, blockchain: BlockchainDto): ActivityDto {
         val activityId = ActivityIdDto(blockchain, source.id)
         return when (source) {
@@ -82,7 +86,8 @@ class EthActivityConverter(
                     id = activityId,
                     date = source.date,
                     price = source.price,
-                    priceUsd = currencyService.toUsd(blockchain, payment.type.ext.contract, source.price),
+                    priceUsd = source.priceUsd,
+                    //priceUsd = currencyService.toUsd(blockchain, payment.type.ext.contract, source.price),
                     source = convert(source.source),
                     hash = EthConverter.convert(source.hash),
                     maker = UnionAddressConverter.convert(source.maker, blockchain),
@@ -97,7 +102,8 @@ class EthActivityConverter(
                     id = activityId,
                     date = source.date,
                     price = source.price,
-                    priceUsd = currencyService.toUsd(blockchain, payment.type.ext.contract, source.price),
+                    priceUsd = source.priceUsd,
+                    //priceUsd = currencyService.toUsd(blockchain, payment.type.ext.contract, source.price),
                     source = convert(source.source),
                     hash = EthConverter.convert(source.hash),
                     maker = UnionAddressConverter.convert(source.maker, blockchain),
@@ -200,7 +206,8 @@ class EthActivityConverter(
         activityId: ActivityIdDto
     ): OrderMatchSellDto {
         val unionPayment = EthConverter.convert(payment.asset, blockchain)
-        val priceUsd = currencyService.toUsd(blockchain, unionPayment.type.ext.contract, source.price)
+        val priceUsd = source.priceUsd
+        //val priceUsd = currencyService.toUsd(blockchain, unionPayment.type.ext.contract, source.price)
         return OrderMatchSellDto(
             id = activityId,
             date = source.date,
