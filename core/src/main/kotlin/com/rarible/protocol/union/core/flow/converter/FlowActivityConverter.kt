@@ -35,6 +35,7 @@ class FlowActivityConverter(
         val activityId = ActivityIdDto(blockchain, source.id)
         return when (source) {
             is FlowNftOrderActivitySellDto -> {
+                // TODO here should be price from FLOW, we don't want to calculate it here
                 val priceUsd = currencyService
                     .toUsd(blockchain, source.right.asset.contract, source.price) ?: BigDecimal.ZERO
 
@@ -59,6 +60,7 @@ class FlowActivityConverter(
                 )
             }
             is FlowNftOrderActivityListDto -> {
+                // TODO here should be price from FLOW, we don't want to calculate it here
                 val priceUsd = currencyService
                     .toUsd(blockchain, source.take.contract, source.price) ?: BigDecimal.ZERO
 

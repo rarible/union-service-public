@@ -73,11 +73,15 @@ class EthActivityConverterTest {
         assertThat(converted.nft).isEqualTo(EthConverter.convert(left.asset, BlockchainDto.ETHEREUM))
         assertThat(converted.payment).isEqualTo(EthConverter.convert(swapDto.right.asset, BlockchainDto.ETHEREUM))
         assertThat(converted.seller).isEqualTo(UnionAddressConverter.convert(left.maker, BlockchainDto.ETHEREUM))
-        assertThat(converted.buyer).isEqualTo(UnionAddressConverter.convert(swapDto.right.maker, BlockchainDto.ETHEREUM))
+        assertThat(converted.buyer).isEqualTo(
+            UnionAddressConverter.convert(
+                swapDto.right.maker,
+                BlockchainDto.ETHEREUM
+            )
+        )
         assertThat(converted.price).isEqualTo(swapDto.price)
-        // In tests we're converting currency 1:1
-        assertThat(converted.priceUsd).isEqualTo(swapDto.price)
-        assertThat(converted.amountUsd).isEqualTo(swapDto.price.multiply(left.asset.valueDecimal))
+        assertThat(converted.priceUsd).isEqualTo(swapDto.priceUsd)
+        assertThat(converted.amountUsd).isEqualTo(swapDto.priceUsd!!.multiply(left.asset.valueDecimal))
     }
 
     @Test
@@ -98,9 +102,8 @@ class EthActivityConverterTest {
         assertThat(converted.seller).isEqualTo(UnionAddressConverter.convert(right.maker, BlockchainDto.ETHEREUM))
         assertThat(converted.buyer).isEqualTo(UnionAddressConverter.convert(swapDto.left.maker, BlockchainDto.ETHEREUM))
         assertThat(converted.price).isEqualTo(swapDto.price)
-        // In tests we're converting currency 1:1
-        assertThat(converted.priceUsd).isEqualTo(swapDto.price)
-        assertThat(converted.amountUsd).isEqualTo(swapDto.price.multiply(right.asset.valueDecimal))
+        assertThat(converted.priceUsd).isEqualTo(swapDto.priceUsd)
+        assertThat(converted.amountUsd).isEqualTo(swapDto.priceUsd!!.multiply(right.asset.valueDecimal))
     }
 
     @Test
@@ -111,8 +114,7 @@ class EthActivityConverterTest {
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.date).isEqualTo(dto.date)
         assertThat(converted.price).isEqualTo(dto.price)
-        // In tests we're converting currency 1:1
-        assertThat(converted.priceUsd).isEqualTo(dto.price)
+        assertThat(converted.priceUsd).isEqualTo(dto.priceUsd)
         assertThat(converted.source?.name).isEqualTo(dto.source.name)
         assertThat(converted.take.value).isEqualTo(dto.take.valueDecimal)
         assertThat(converted.make.value).isEqualTo(dto.make.valueDecimal)
@@ -126,9 +128,8 @@ class EthActivityConverterTest {
 
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.date).isEqualTo(dto.date)
-        // In tests we're converting currency 1:1
         assertThat(converted.price).isEqualTo(dto.price)
-        assertThat(converted.priceUsd).isEqualTo(dto.price)
+        assertThat(converted.priceUsd).isEqualTo(dto.priceUsd)
         assertThat(converted.source?.name).isEqualTo(dto.source.name)
         assertThat(converted.take.value).isEqualTo(dto.take.valueDecimal)
         assertThat(converted.make.value).isEqualTo(dto.make.valueDecimal)
