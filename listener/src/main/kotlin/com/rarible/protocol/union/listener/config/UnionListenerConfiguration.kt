@@ -12,6 +12,7 @@ import com.rarible.protocol.dto.FlowActivityDto
 import com.rarible.protocol.dto.FlowNftItemEventDto
 import com.rarible.protocol.dto.FlowOrderEventDto
 import com.rarible.protocol.dto.FlowOwnershipEventDto
+import com.rarible.protocol.dto.NftCollectionEventDto
 import com.rarible.protocol.dto.NftItemEventDto
 import com.rarible.protocol.dto.NftOwnershipEventDto
 import com.rarible.protocol.flow.nft.api.subscriber.FlowNftIndexerEventsConsumerFactory
@@ -36,6 +37,7 @@ import com.rarible.protocol.union.listener.handler.BatchedConsumerWorker
 import com.rarible.protocol.union.listener.handler.KafkaConsumerWorker
 import com.rarible.protocol.union.listener.handler.SingleConsumerWorker
 import com.rarible.protocol.union.listener.handler.ethereum.EthereumActivityEventHandler
+import com.rarible.protocol.union.listener.handler.ethereum.EthereumCollectionEventHandler
 import com.rarible.protocol.union.listener.handler.ethereum.EthereumItemEventHandler
 import com.rarible.protocol.union.listener.handler.ethereum.EthereumOrderEventHandler
 import com.rarible.protocol.union.listener.handler.ethereum.EthereumOwnershipEventHandler
@@ -46,6 +48,7 @@ import com.rarible.protocol.union.listener.handler.flow.FlowOwnershipEventHandle
 import com.rarible.protocol.union.listener.handler.tezos.TezosItemEventHandler
 import com.rarible.protocol.union.listener.handler.tezos.TezosOrderEventHandler
 import com.rarible.protocol.union.listener.handler.tezos.TezosOwnershipEventHandler
+import com.rarible.protocol.union.listener.service.EnrichmentCollectionEventService
 import com.rarible.protocol.union.listener.service.EnrichmentItemEventService
 import com.rarible.protocol.union.listener.service.EnrichmentOrderEventService
 import com.rarible.protocol.union.listener.service.EnrichmentOwnershipEventService
@@ -67,6 +70,7 @@ class UnionListenerConfiguration(
     private val meterRegistry: MeterRegistry,
 
     private val enrichmentItemEventService: EnrichmentItemEventService,
+    private val enrichmentCollectionEventService: EnrichmentCollectionEventService,
     private val enrichmentOwnershipEventService: EnrichmentOwnershipEventService,
     private val enrichmentOrderEventService: EnrichmentOrderEventService,
 
@@ -77,7 +81,6 @@ class UnionListenerConfiguration(
 ) {
 
     companion object {
-
         private val FLOW = BlockchainDto.FLOW.name.toLowerCase()
         private val ETHEREUM = BlockchainDto.ETHEREUM.name.toLowerCase()
         private val POLYGON = BlockchainDto.POLYGON.name.toLowerCase()
@@ -121,6 +124,19 @@ class UnionListenerConfiguration(
         val consumer = factory.createItemEventsConsumer(consumerGroup(Entity.ITEM), Blockchain.ETHEREUM)
         val handler = EthereumItemEventHandler(enrichmentItemEventService, BlockchainDto.ETHEREUM)
         return createBatchedConsumerWorker(consumer, handler, ETHEREUM, Entity.ITEM, ethereumProperties.itemWorkers)
+    }
+
+    @Bean
+    fun ethereumCollectionWorker(@Qualifier("ethereum.nft.consumer.factory") factory: NftIndexerEventsConsumerFactory): KafkaConsumerWorker<NftCollectionEventDto> {
+        val consumer = factory.createCollectionEventsConsumer(consumerGroup(Entity.COLLECTION), Blockchain.ETHEREUM)
+        val handler = EthereumCollectionEventHandler(enrichmentCollectionEventService, BlockchainDto.ETHEREUM)
+        return createBatchedConsumerWorker(
+            consumer,
+            handler,
+            ETHEREUM,
+            Entity.COLLECTION,
+            ethereumProperties.collectionWorkers
+        )
     }
 
     @Bean
@@ -191,6 +207,19 @@ class UnionListenerConfiguration(
     }
 
     @Bean
+    fun polygonCollectionWorker(@Qualifier("polygon.nft.consumer.factory") factory: NftIndexerEventsConsumerFactory): KafkaConsumerWorker<NftCollectionEventDto> {
+        val consumer = factory.createCollectionEventsConsumer(consumerGroup(Entity.COLLECTION), Blockchain.POLYGON)
+        val handler = EthereumCollectionEventHandler(enrichmentCollectionEventService, BlockchainDto.POLYGON)
+        return createBatchedConsumerWorker(
+            consumer,
+            handler,
+            POLYGON,
+            Entity.COLLECTION,
+            polygonProperties.collectionWorkers
+        )
+    }
+
+    @Bean
     fun polygonOwnershipWorker(@Qualifier("polygon.nft.consumer.factory") factory: NftIndexerEventsConsumerFactory): KafkaConsumerWorker<NftOwnershipEventDto> {
         val consumer = factory.createOwnershipEventsConsumer(consumerGroup(Entity.OWNERSHIP), Blockchain.POLYGON)
         val handler = EthereumOwnershipEventHandler(enrichmentOwnershipEventService, BlockchainDto.POLYGON)
@@ -249,6 +278,8 @@ class UnionListenerConfiguration(
         return createBatchedConsumerWorker(consumer, handler, FLOW, Entity.ITEM, flowProperties.itemWorkers)
     }
 
+    // TODO: Flow will support events on collections => create a worker here.
+
     @Bean
     fun flowOwnershipWorker(factory: FlowNftIndexerEventsConsumerFactory): KafkaConsumerWorker<FlowOwnershipEventDto> {
         val consumer = factory.createOwnershipEventsConsumer(consumerGroup(Entity.OWNERSHIP))
@@ -284,6 +315,8 @@ class UnionListenerConfiguration(
         val replicaSet = tezosProperties.brokerReplicaSet
         return TezosEventsConsumerFactory(replicaSet, host, env, tezosProperties.username, tezosProperties.password)
     }
+
+    // TODO: Tezos will support events on collections => create a worker here.
 
     @Bean
     fun tezosItemWorker(factory: TezosEventsConsumerFactory): KafkaConsumerWorker<com.rarible.protocol.tezos.dto.ItemEventDto> {

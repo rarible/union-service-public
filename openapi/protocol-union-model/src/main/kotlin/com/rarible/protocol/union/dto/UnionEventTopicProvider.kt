@@ -5,6 +5,10 @@ class UnionEventTopicProvider {
     companion object {
         const val VERSION = "v1"
 
+        fun getCollectionTopic(environment: String): String {
+            return "protocol.$environment.union.collection"
+        }
+
         fun getItemTopic(environment: String): String {
             return "protocol.$environment.union.item"
         }

@@ -16,6 +16,8 @@ import com.rarible.protocol.flow.nft.api.client.FlowOrderControllerApi
 import com.rarible.protocol.nft.api.client.NftItemControllerApi
 import com.rarible.protocol.nft.api.client.NftOwnershipControllerApi
 import com.rarible.protocol.union.dto.ActivityDto
+import com.rarible.protocol.union.dto.CollectionEventDto
+import com.rarible.protocol.union.dto.CollectionUpdateEventDto
 import com.rarible.protocol.union.dto.ItemDeleteEventDto
 import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.ItemUpdateEventDto
@@ -88,6 +90,11 @@ abstract class AbstractIntegrationTest {
     lateinit var flowActivityProducer: RaribleKafkaProducer<FlowActivityDto>
 
     @Autowired
+    lateinit var collectionConsumer: RaribleKafkaConsumer<CollectionEventDto>
+    var collectionEvents: Queue<KafkaMessage<CollectionEventDto>>? = null
+    private var collectionJob: Deferred<Unit>? = null
+
+    @Autowired
     lateinit var itemConsumer: RaribleKafkaConsumer<ItemEventDto>
     var itemEvents: Queue<KafkaMessage<ItemEventDto>>? = null
     private var itemJob: Deferred<Unit>? = null
@@ -117,6 +124,9 @@ abstract class AbstractIntegrationTest {
         itemEvents = LinkedBlockingQueue()
         itemJob = async { itemConsumer.receive().collect { itemEvents?.add(it) } }
 
+        collectionEvents = LinkedBlockingQueue()
+        collectionJob = async { collectionConsumer.receive().collect { collectionEvents?.add(it) } }
+
         activityEvents = LinkedBlockingQueue()
         activityJob = async { activityConsumer.receive().collect { activityEvents?.add(it) } }
 
@@ -127,6 +137,7 @@ abstract class AbstractIntegrationTest {
             ownershipJob?.cancelAndJoin()
             orderJob?.cancelAndJoin()
             activityJob?.cancelAndJoin()
+            collectionJob?.cancelAndJoin()
         }
         result
     }
@@ -134,6 +145,11 @@ abstract class AbstractIntegrationTest {
     fun findItemUpdates(itemId: String): List<KafkaMessage<ItemUpdateEventDto>> {
         return filterByValueType(itemEvents as Queue<KafkaMessage<Any>>, ItemUpdateEventDto::class.java)
             .filter { it.value.itemId.value == itemId }
+    }
+
+    fun findCollectionUpdates(collectionId: String): List<KafkaMessage<CollectionUpdateEventDto>> {
+        return filterByValueType(collectionEvents as Queue<KafkaMessage<Any>>, CollectionUpdateEventDto::class.java)
+            .filter { it.value.collectionId.value == collectionId }
     }
 
     fun findItemDeletions(itemId: String): List<KafkaMessage<ItemDeleteEventDto>> {

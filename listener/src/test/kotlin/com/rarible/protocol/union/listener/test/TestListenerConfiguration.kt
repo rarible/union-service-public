@@ -26,6 +26,7 @@ import com.rarible.protocol.nft.api.client.NftOwnershipControllerApi
 import com.rarible.protocol.union.core.CoreConfiguration
 import com.rarible.protocol.union.core.UnionKafkaJsonSerializer
 import com.rarible.protocol.union.dto.ActivityDto
+import com.rarible.protocol.union.dto.CollectionEventDto
 import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.OrderEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
@@ -48,6 +49,20 @@ class TestListenerConfiguration {
     @Bean
     fun applicationEnvironmentInfo(): ApplicationEnvironmentInfo {
         return ApplicationEnvironmentInfo("test", "test.com")
+    }
+
+    @Bean
+    fun testCollectionConsumer(): RaribleKafkaConsumer<CollectionEventDto> {
+        val topic = UnionEventTopicProvider.getCollectionTopic(applicationEnvironmentInfo().name)
+        return RaribleKafkaConsumer(
+            clientId = "test-union-collection-consumer",
+            consumerGroup = "test-union-collection-group",
+            valueDeserializerClass = UnionKafkaJsonDeserializer::class.java,
+            valueClass = CollectionEventDto::class.java,
+            defaultTopic = topic,
+            bootstrapServers = kafkaContainer.kafkaBoostrapServers(),
+            offsetResetStrategy = OffsetResetStrategy.EARLIEST
+        )
     }
 
     @Bean

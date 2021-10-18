@@ -3,6 +3,7 @@ package com.rarible.protocol.union.core
 import com.rarible.core.application.ApplicationEnvironmentInfo
 import com.rarible.core.kafka.RaribleKafkaProducer
 import com.rarible.protocol.union.dto.ActivityDto
+import com.rarible.protocol.union.dto.CollectionEventDto
 import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.OrderEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
@@ -20,6 +21,12 @@ class ProducerConfiguration(
 
     private val env = applicationEnvironmentInfo.name
     private val producerBrokerReplicaSet = properties.brokerReplicaSet
+
+    @Bean
+    fun collectionEventProducer(): RaribleKafkaProducer<CollectionEventDto> {
+        val collectionTopic = UnionEventTopicProvider.getCollectionTopic(env)
+        return createUnionProducer(Entity.COLLECTION, collectionTopic, CollectionEventDto::class.java)
+    }
 
     @Bean
     fun itemEventProducer(): RaribleKafkaProducer<ItemEventDto> {

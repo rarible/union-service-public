@@ -17,6 +17,7 @@ import com.rarible.protocol.order.api.client.OrderActivityControllerApi
 import com.rarible.protocol.order.api.client.OrderControllerApi
 import com.rarible.protocol.union.api.client.FixedUnionApiServiceUriProvider
 import com.rarible.protocol.union.api.client.UnionApiClientFactory
+import com.rarible.protocol.union.dto.CollectionEventDto
 import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.test.mock.CurrencyMock
@@ -58,6 +59,10 @@ class TestApiConfiguration {
     @Bean
     @Primary
     fun testItemEventProducer(): RaribleKafkaProducer<ItemEventDto> = mockk()
+
+    @Bean
+    @Primary
+    fun testCollectionEventProducer(): RaribleKafkaProducer<CollectionEventDto> = mockk()
 
     @Bean
     @Primary

@@ -1330,6 +1330,32 @@ components:
         - total
         - items
 
+    CollectionEvent:
+      type: object
+      properties:
+        collectionId:
+          $ref: "#/components/schemas/UnionAddress"
+        eventId:
+          type: string
+      required:
+        - eventId
+        - collectionId
+      oneOf:
+        - $ref: "#/components/schemas/CollectionUpdateEvent"
+
+    CollectionUpdateEvent:
+      type: object
+      properties:
+        "@type":
+          type: string
+          enum:
+            - UPDATE
+        collection:
+          $ref: "#/components/schemas/Collection"
+      required:
+        - "@type"
+        - collection
+
     ItemEvent:
       type: object
       properties:
@@ -2213,6 +2239,10 @@ components:
           default: [ ]
           items:
             $ref: "#/components/schemas/OrderPayout"
+        makerEdpk:
+          type: string
+        takerEdpk:
+          type: string
       required:
         - "@type"
         - payouts
