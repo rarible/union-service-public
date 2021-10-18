@@ -15,10 +15,7 @@ object EthCollectionConverter {
             name = source.name,
             symbol = source.symbol,
             type = convert(source.type),
-            owner = if (source.owner == null) null else UnionAddressConverter.convert(
-                source.owner!!,
-                blockchain
-            ),
+            owner = source.owner?.let { UnionAddressConverter.convert(it, blockchain) },
             features = source.features.map { convert(it) }
         )
     }

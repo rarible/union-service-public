@@ -8,7 +8,6 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.UnionOwnershipDto
-import java.math.BigInteger
 
 object TezosOwnershipConverter {
 
@@ -25,11 +24,14 @@ object TezosOwnershipConverter {
                 owner = owner
             ),
             value = ownership.value,
-            createdAt = ownership.date, //todo ask tezos to add this
+            createdAt = ownership.date, //TODO ask TEZOS to add this
             contract = contract,
             tokenId = tokenId,
             owner = owner,
-            lazyValue = BigInteger.ZERO
+            creators = ownership.creators.map { TezosConverter.convertToCreator(it, blockchain) },
+            //lazyValue = BigInteger.ZERO,
+            lazyValue = ownership.lazyValue,
+            pending = emptyList() // TODO won't populate for now
         )
     }
 
