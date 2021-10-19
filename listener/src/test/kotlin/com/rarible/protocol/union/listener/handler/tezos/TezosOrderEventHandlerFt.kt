@@ -27,7 +27,6 @@ class TezosOrderEventHandlerFt : AbstractIntegrationTest() {
         val expectedOrderId = OrderIdDto(BlockchainDto.TEZOS, tezosOrderId)
         val dto = OrderEventDto(OrderEventDto.Type.UPDATE, randomString(), tezosOrderId, tezosOrder)
 
-        Thread.sleep(3000)
         tezosOrderProducer.send(message(dto)).ensureSuccess()
 
         Wait.waitAssert {
