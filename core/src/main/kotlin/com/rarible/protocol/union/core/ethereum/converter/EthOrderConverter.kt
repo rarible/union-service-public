@@ -209,7 +209,7 @@ class EthOrderConverter(
     }
 
     fun convert(source: List<OrderStatusDto>?): List<com.rarible.protocol.dto.OrderStatusDto>? {
-        return source?.map { convert(it) }
+        return source?.map { convert(it) } ?: emptyList()
     }
 
     private fun convert(source: OrderOpenSeaV1DataV1Dto.FeeMethod): EthOrderOpenSeaV1DataV1Dto.FeeMethod {

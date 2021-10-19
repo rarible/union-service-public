@@ -47,7 +47,6 @@ class FlowOrderService(
             }
     }
 
-
     override suspend fun getOrderBidsByItem(
         platform: PlatformDto?,
         contract: String,
@@ -61,6 +60,7 @@ class FlowOrderService(
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
+        // TODO add currency support
         return convert(
             orderControllerApi.getOrderBidsByItem(
                 contract, tokenId, maker, origin, continuation, size
@@ -78,6 +78,7 @@ class FlowOrderService(
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
+        // TODO status not supported
         return convert(
             orderControllerApi.getOrderBidsByMaker(
                 maker, origin, continuation, size
@@ -123,6 +124,7 @@ class FlowOrderService(
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
+        // TODO add currency support
         return convert(
             orderControllerApi.getSellOrdersByItem(
                 contract, tokenId, maker, origin, continuation, size

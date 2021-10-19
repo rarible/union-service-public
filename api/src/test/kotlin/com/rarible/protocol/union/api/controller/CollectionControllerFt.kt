@@ -17,7 +17,8 @@ import com.rarible.protocol.union.test.data.randomEthAddress
 import com.rarible.protocol.union.test.data.randomEthCollectionDto
 import com.rarible.protocol.union.test.data.randomFlowAddress
 import com.rarible.protocol.union.test.data.randomFlowCollectionDto
-import com.rarible.protocol.union.test.data.randomPolygonAddress
+import com.rarible.protocol.union.test.data.randomTezosCollectionDto
+import com.rarible.protocol.union.test.data.randomTezosOwnershipId
 import io.mockk.coEvery
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.reactive.awaitFirst
@@ -52,17 +53,17 @@ class CollectionControllerFt : AbstractIntegrationTest() {
     }
 
     @Test
-    fun `get collection by id - polygon`() = runBlocking<Unit> {
-        val collectionId = randomAddress()
-        val collectionIdFull = UnionAddressConverter.convert(collectionId, BlockchainDto.POLYGON)
-        val collection = randomEthCollectionDto(collectionId)
+    fun `get collection by id - tezos`() = runBlocking<Unit> {
+        val collectionId = randomString()
+        val collectionIdFull = UnionAddressConverter.convert(collectionId, BlockchainDto.TEZOS)
+        val collection = randomTezosCollectionDto(collectionId)
 
-        coEvery { testPolygonCollectionApi.getNftCollectionById(collectionIdFull.value) } returns collection.toMono()
+        coEvery { testTezosCollectionApi.getNftCollectionById(collectionIdFull.value) } returns collection.toMono()
 
         val unionCollection = collectionControllerClient.getCollectionById(collectionIdFull.fullId()).awaitFirst()
 
         assertThat(unionCollection.id.value).isEqualTo(collectionIdFull.value)
-        assertThat(unionCollection.id.blockchain).isEqualTo(BlockchainDto.POLYGON)
+        assertThat(unionCollection.id.blockchain).isEqualTo(BlockchainDto.TEZOS)
     }
 
     @Test
@@ -99,21 +100,21 @@ class CollectionControllerFt : AbstractIntegrationTest() {
     }
 
     @Test
-    fun `get collections by owner - polygon`() = runBlocking<Unit> {
-        val polyOwnerId = randomPolygonAddress()
-        val collection = randomEthCollectionDto()
-        val collectionId = UnionAddressConverter.convert(collection.id, BlockchainDto.POLYGON)
+    fun `get collections by owner - tezos`() = runBlocking<Unit> {
+        val tezosOwnerId = randomTezosOwnershipId()
+        val collection = randomTezosCollectionDto()
+        val collectionId = UnionAddressConverter.convert(collection.id, BlockchainDto.TEZOS)
 
         coEvery {
-            testPolygonCollectionApi.searchNftCollectionsByOwner(polyOwnerId.value, continuation, size)
-        } returns NftCollectionsDto(1, null, listOf(collection)).toMono()
+            testTezosCollectionApi.searchNftCollectionsByOwner(tezosOwnerId.value, size, continuation)
+        } returns com.rarible.protocol.tezos.dto.NftCollectionsDto(1, null, listOf(collection)).toMono()
 
         val unionCollections = collectionControllerClient.getCollectionsByOwner(
-            polyOwnerId.fullId(), continuation, size
+            tezosOwnerId.fullId(), continuation, size
         ).awaitFirst()
 
-        val polyCollection = unionCollections.collections[0]
-        assertThat(polyCollection.id.value).isEqualTo(collectionId.value)
+        val tezosCollection = unionCollections.collections[0]
+        assertThat(tezosCollection.id.value).isEqualTo(collectionId.value)
     }
 
     @Test
@@ -135,12 +136,13 @@ class CollectionControllerFt : AbstractIntegrationTest() {
 
     @Test
     fun `get all collections`() = runBlocking<Unit> {
-        val blockchains = listOf(BlockchainDto.ETHEREUM, BlockchainDto.FLOW)
+        val blockchains = listOf(BlockchainDto.ETHEREUM, BlockchainDto.FLOW, BlockchainDto.TEZOS)
         val continuation = "${nowMillis()}_${randomString()}"
         val size = 10
 
         val flowCollections = listOf(randomFlowCollectionDto(), randomFlowCollectionDto())
         val ethCollections = listOf(randomEthCollectionDto(), randomEthCollectionDto(), randomEthCollectionDto())
+        val tezosCollections = listOf(randomTezosCollectionDto())
 
         coEvery {
             testFlowCollectionApi.searchNftAllCollections(continuation, size)
@@ -150,12 +152,16 @@ class CollectionControllerFt : AbstractIntegrationTest() {
             testEthereumCollectionApi.searchNftAllCollections(continuation, size)
         } returns NftCollectionsDto(3, null, ethCollections).toMono()
 
+        coEvery {
+            testTezosCollectionApi.searchNftAllCollections(size, continuation)
+        } returns com.rarible.protocol.tezos.dto.NftCollectionsDto(1, null, tezosCollections).toMono()
+
         val unionCollections = collectionControllerClient.getAllCollections(
             blockchains, continuation, size
         ).awaitFirst()
 
-        assertThat(unionCollections.collections).hasSize(5)
-        assertThat(unionCollections.total).isEqualTo(5)
+        assertThat(unionCollections.collections).hasSize(6)
+        assertThat(unionCollections.total).isEqualTo(6)
         assertThat(unionCollections.continuation).isNull()
     }
 }

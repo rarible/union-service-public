@@ -43,16 +43,20 @@ class SignatureControllerFt : AbstractIntegrationTest() {
     }
 
     @Test
-    fun `validate signature - polygon`() = runBlocking<Unit> {
-        val ethForm = EthereumSignatureValidationFormDto(randomAddress(), randomString(), randomBinary())
-
-        val unionForm = SignatureValidationFormDto(
-            signer = UnionAddressConverter.convert(ethForm.signer, BlockchainDto.POLYGON),
-            message = ethForm.message,
-            signature = ethForm.signature.prefixed()
+    fun `validate signature - tezos`() = runBlocking<Unit> {
+        val tezosForm = com.rarible.protocol.tezos.dto.SignatureValidationFormDto(
+            randomString(),
+            randomString(),
+            randomString()
         )
 
-        coEvery { testPolygonSignatureApi.validate(ethForm) } returns false.toMono()
+        val unionForm = SignatureValidationFormDto(
+            signer = UnionAddressConverter.convert(tezosForm.signer, BlockchainDto.TEZOS),
+            message = tezosForm.message,
+            signature = tezosForm.signature
+        )
+
+        coEvery { testTezosSignatureApi.validate(tezosForm) } returns false.toMono()
         val result = signatureControllerApi.validate(unionForm).awaitFirst()
 
         assertThat(result).isEqualTo(false)
@@ -60,6 +64,17 @@ class SignatureControllerFt : AbstractIntegrationTest() {
 
     @Test
     fun `validate signature - flow`() = runBlocking<Unit> {
-        // TODO implement
+        val unionForm = SignatureValidationFormDto(
+            signer = UnionAddressConverter.convert(randomString(), BlockchainDto.FLOW),
+            message = randomString(),
+            signature = randomString()
+        )
+
+        coEvery {
+            testFlowSignatureApi.verifySignature(unionForm.signer.value, unionForm.signature, unionForm.message)
+        } returns true.toMono()
+        val result = signatureControllerApi.validate(unionForm).awaitFirst()
+
+        assertThat(result).isEqualTo(true)
     }
 }

@@ -3,7 +3,9 @@ package com.rarible.protocol.union.api.controller
 import com.rarible.core.common.nowMillis
 import com.rarible.core.test.data.randomBigInt
 import com.rarible.core.test.data.randomString
+import com.rarible.protocol.dto.FlowOrdersPaginationDto
 import com.rarible.protocol.dto.OrdersPaginationDto
+import com.rarible.protocol.tezos.dto.OrderPaginationDto
 import com.rarible.protocol.union.api.client.OrderControllerApi
 import com.rarible.protocol.union.api.configuration.PageSize
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
@@ -24,13 +26,13 @@ import com.rarible.protocol.union.test.data.randomEthItemId
 import com.rarible.protocol.union.test.data.randomEthLegacyOrderDto
 import com.rarible.protocol.union.test.data.randomFlowV1OrderDto
 import com.rarible.protocol.union.test.data.randomPolygonAddress
+import com.rarible.protocol.union.test.data.randomTezosOrderDto
 import com.rarible.protocol.union.test.data.randomUnionItem
 import io.mockk.coEvery
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.catchThrowable
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import reactor.kotlin.core.publisher.toMono
@@ -59,7 +61,7 @@ class OrderControllerFt : AbstractIntegrationTest() {
         val orderId = EthConverter.convert(order.hash)
         val orderIdFull = OrderIdDto(BlockchainDto.ETHEREUM, order.hash.prefixed()).fullId()
 
-        coEvery { testEthereumOrderApi.getOrderByHash(orderId) } returns order.toMono()
+        ethereumOrderControllerApiMock.mockGetById(order)
 
         val unionOrder = orderControllerClient.getOrderById(orderIdFull).awaitFirst()
 
@@ -68,17 +70,16 @@ class OrderControllerFt : AbstractIntegrationTest() {
     }
 
     @Test
-    fun `get order by id - polygon`() = runBlocking<Unit> {
-        val order = randomEthLegacyOrderDto()
-        val orderId = EthConverter.convert(order.hash)
-        val orderIdFull = OrderIdDto(BlockchainDto.POLYGON, order.hash.prefixed()).fullId()
+    fun `get order by id - tezos`() = runBlocking<Unit> {
+        val order = randomTezosOrderDto()
+        val orderIdFull = OrderIdDto(BlockchainDto.TEZOS, order.hash).fullId()
 
-        coEvery { testPolygonOrderApi.getOrderByHash(orderId) } returns order.toMono()
+        tezosOrderControllerApiMock.mockGetById(order)
 
         val unionOrder = orderControllerClient.getOrderById(orderIdFull).awaitFirst()
 
-        assertThat(unionOrder.id.value).isEqualTo(orderId)
-        assertThat(unionOrder.id.blockchain).isEqualTo(BlockchainDto.POLYGON)
+        assertThat(unionOrder.id.value).isEqualTo(order.hash)
+        assertThat(unionOrder.id.blockchain).isEqualTo(BlockchainDto.TEZOS)
     }
 
     @Test
@@ -87,7 +88,7 @@ class OrderControllerFt : AbstractIntegrationTest() {
         val orderId = order.id
         val orderIdFull = OrderIdDto(BlockchainDto.FLOW, orderId.toString()).fullId()
 
-        coEvery { testFlowOrderApi.getOrderByOrderId(orderId.toString()) } returns order.toMono()
+        flowOrderControllerApiMock.mockGetById(order)
 
         val unionOrder = orderControllerClient.getOrderById(orderIdFull).awaitFirst()
 
@@ -97,32 +98,37 @@ class OrderControllerFt : AbstractIntegrationTest() {
 
     @Test
     fun `get all orders - no origin`() = runBlocking<Unit> {
-        val blockchains = listOf(BlockchainDto.ETHEREUM, BlockchainDto.POLYGON)
+        val blockchains = listOf(BlockchainDto.ETHEREUM, BlockchainDto.FLOW, BlockchainDto.TEZOS)
         val continuation = "${nowMillis()}_${randomString()}"
-        val size = 3
+        val size = 8
 
-        val polygonOwnerships = listOf(randomEthLegacyOrderDto(), randomEthLegacyOrderDto())
+        val flowOrders = listOf(randomFlowV1OrderDto(), randomFlowV1OrderDto())
+        val tezosOrders = listOf(randomTezosOrderDto())
         val ethOrders = listOf(randomEthLegacyOrderDto(), randomEthLegacyOrderDto())
 
         coEvery {
-            testPolygonOrderApi.getOrdersAll(null, ethPlatform, continuation, size)
-        } returns OrdersPaginationDto(polygonOwnerships, this@OrderControllerFt.continuation).toMono()
+            testFlowOrderApi.getOrdersAll(null, continuation, size)
+        } returns FlowOrdersPaginationDto(flowOrders, null).toMono()
+
+        coEvery {
+            testTezosOrderApi.getOrdersAll(null, size, continuation)
+        } returns OrderPaginationDto(tezosOrders, null).toMono()
 
         coEvery {
             testEthereumOrderApi.getOrdersAll(null, ethPlatform, continuation, size)
-        } returns OrdersPaginationDto(ethOrders, this@OrderControllerFt.continuation).toMono()
+        } returns OrdersPaginationDto(ethOrders, null).toMono()
 
         val orders = orderControllerClient.getOrdersAll(
             blockchains, platform, null, continuation, size
         ).awaitFirst()
 
-        assertThat(orders.orders).hasSize(3)
-        assertThat(orders.continuation).isNotNull()
+        assertThat(orders.orders).hasSize(5)
+        assertThat(orders.continuation).isNull()
     }
 
     @Test
     fun `get all orders - with origin`() = runBlocking<Unit> {
-        val blockchains = listOf(BlockchainDto.ETHEREUM, BlockchainDto.POLYGON)
+        val blockchains = listOf(BlockchainDto.ETHEREUM, BlockchainDto.FLOW)
         val continuation = "${nowMillis()}_${randomString()}"
         val origin = randomEthAddress()
         val size = 3
@@ -207,26 +213,31 @@ class OrderControllerFt : AbstractIntegrationTest() {
 
     @Test
     fun `get sell orders - no origin`() = runBlocking<Unit> {
-        val blockchains = listOf(BlockchainDto.ETHEREUM, BlockchainDto.POLYGON)
-        val continuation = "${nowMillis()}_${randomString()}"
-        val size = 3
+        val blockchains = listOf(BlockchainDto.ETHEREUM, BlockchainDto.FLOW, BlockchainDto.TEZOS)
+        val continuation = "${nowMillis().toEpochMilli()}_${randomString()}"
+        val size = 4
 
-        val polygonOwnerships = listOf(randomEthLegacyOrderDto(), randomEthLegacyOrderDto())
+        val flowOrders = listOf(randomFlowV1OrderDto(), randomFlowV1OrderDto())
+        val tezosOrders = listOf(randomTezosOrderDto())
         val ethOrders = listOf(randomEthLegacyOrderDto(), randomEthLegacyOrderDto())
 
         coEvery {
-            testPolygonOrderApi.getSellOrders(null, ethPlatform, continuation, size)
-        } returns OrdersPaginationDto(polygonOwnerships, this@OrderControllerFt.continuation).toMono()
+            testFlowOrderApi.getSellOrders(null, continuation, size)
+        } returns FlowOrdersPaginationDto(flowOrders, null).toMono()
+
+        coEvery {
+            testTezosOrderApi.getSellOrders(null, size, continuation)
+        } returns OrderPaginationDto(tezosOrders, null).toMono()
 
         coEvery {
             testEthereumOrderApi.getSellOrders(null, ethPlatform, continuation, size)
-        } returns OrdersPaginationDto(ethOrders, this@OrderControllerFt.continuation).toMono()
+        } returns OrdersPaginationDto(ethOrders, null).toMono()
 
         val orders = orderControllerClient.getSellOrders(
             blockchains, platform, null, continuation, size
         ).awaitFirst()
 
-        assertThat(orders.orders).hasSize(3)
+        assertThat(orders.orders).hasSize(4)
         assertThat(orders.continuation).isNotNull()
     }
 
@@ -241,7 +252,7 @@ class OrderControllerFt : AbstractIntegrationTest() {
 
         coEvery {
             testPolygonOrderApi.getSellOrders(origin.value, ethPlatform, continuation, size)
-        } returns OrdersPaginationDto(ethOrders, this@OrderControllerFt.continuation).toMono()
+        } returns OrdersPaginationDto(ethOrders, null).toMono()
 
         val orders = orderControllerClient.getSellOrders(
             blockchains, platform, origin.fullId(), continuation, size
@@ -358,20 +369,18 @@ class OrderControllerFt : AbstractIntegrationTest() {
         val tokenId = randomBigInt()
         val maker = randomPolygonAddress()
 
-        // TODO add specific responce check after Advise beign implemented
-        catchThrowable {
-            runBlocking {
-                orderControllerClient.getSellOrdersByItem(
-                    contract.fullId(),
-                    tokenId.toString(),
-                    platform,
-                    maker.fullId(),
-                    null,
-                    null,
-                    continuation,
-                    size
-                ).awaitFirst()
-            }
-        }
+        val result = orderControllerClient.getSellOrdersByItem(
+            contract.fullId(),
+            tokenId.toString(),
+            platform,
+            maker.fullId(),
+            null,
+            null,
+            continuation,
+            size
+        ).awaitFirst()
+
+        // Should be 0 without sub-requests
+        assertThat(result.orders).hasSize(0)
     }
 }

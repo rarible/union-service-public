@@ -22,6 +22,9 @@ import com.rarible.protocol.union.test.data.randomEthV2OrderDto
 import com.rarible.protocol.union.test.data.randomFlowItemId
 import com.rarible.protocol.union.test.data.randomFlowNftOwnershipDto
 import com.rarible.protocol.union.test.data.randomFlowV1OrderDto
+import com.rarible.protocol.union.test.data.randomTezosItemId
+import com.rarible.protocol.union.test.data.randomTezosOwnershipDto
+import com.rarible.protocol.union.test.data.randomTezosOwnershipId
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.runBlocking
@@ -60,6 +63,20 @@ class OwnershipControllerFt : AbstractIntegrationTest() {
 
         assertThat(unionOwnership.id.value).isEqualTo(ownershipId.value)
         assertThat(unionOwnership.id.blockchain).isEqualTo(BlockchainDto.ETHEREUM)
+    }
+
+    @Test
+    fun `get ownership by id - tezos, not enriched`() = runBlocking<Unit> {
+        val ownershipIdFull = randomTezosOwnershipId().fullId()
+        val ownershipId = OwnershipIdParser.parseFull(ownershipIdFull)
+        val ownership = randomTezosOwnershipDto(ownershipId)
+
+        tezosOwnershipControllerApiMock.mockGetNftOwnershipById(ownershipId, ownership)
+
+        val unionOwnership = ownershipControllerClient.getOwnershipById(ownershipIdFull).awaitFirst()
+
+        assertThat(unionOwnership.id.value).isEqualTo(ownershipId.value)
+        assertThat(unionOwnership.id.blockchain).isEqualTo(BlockchainDto.TEZOS)
     }
 
     @Test
@@ -133,8 +150,24 @@ class OwnershipControllerFt : AbstractIntegrationTest() {
     }
 
     @Test
+    fun `get ownerships by item - tezos, nothing enriched`() = runBlocking<Unit> {
+        val itemId = randomTezosItemId()
+        val ownership = randomTezosOwnershipDto(itemId)
+
+        tezosOwnershipControllerApiMock.mockGetNftOwnershipsByItem(
+            itemId, continuation, size, ownership
+        )
+
+        val ownerships = ownershipControllerClient.getOwnershipsByItem(
+            itemId.token.fullId(), itemId.tokenId.toString(), continuation, size
+        ).awaitFirst()
+
+        assertThat(ownerships.ownerships).hasSize(1)
+    }
+
+    @Test
     fun `get all ownerships - trimmed to size`() = runBlocking<Unit> {
-        val blockchains = listOf(BlockchainDto.ETHEREUM, BlockchainDto.FLOW)
+        val blockchains = listOf(BlockchainDto.ETHEREUM, BlockchainDto.FLOW, BlockchainDto.TEZOS)
         val continuation = "${nowMillis()}_${randomString()}"
         val size = 3
 
@@ -143,6 +176,9 @@ class OwnershipControllerFt : AbstractIntegrationTest() {
         )
         ethereumOwnershipControllerApiMock.mockGetNftAllOwnerships(
             continuation, size, randomEthOwnershipDto(), randomEthOwnershipDto(), randomEthOwnershipDto()
+        )
+        tezosOwnershipControllerApiMock.mockGetNftAllOwnerships(
+            continuation, size
         )
 
         val ownerships = ownershipControllerClient.getAllOwnerships(

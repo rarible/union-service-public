@@ -5,14 +5,8 @@ import com.rarible.core.kafka.RaribleKafkaConsumer
 import com.rarible.core.kafka.RaribleKafkaProducer
 import com.rarible.core.test.data.randomString
 import com.rarible.protocol.dto.FlowActivityDto
-import com.rarible.protocol.dto.FlowNftItemEventDto
 import com.rarible.protocol.dto.FlowOrderEventDto
 import com.rarible.protocol.dto.FlowOwnershipEventDto
-import com.rarible.protocol.dto.NftItemEventDto
-import com.rarible.protocol.dto.NftOwnershipEventDto
-import com.rarible.protocol.flow.nft.api.client.FlowNftItemControllerApi
-import com.rarible.protocol.flow.nft.api.client.FlowNftOwnershipControllerApi
-import com.rarible.protocol.flow.nft.api.client.FlowOrderControllerApi
 import com.rarible.protocol.nft.api.client.NftItemControllerApi
 import com.rarible.protocol.nft.api.client.NftOwnershipControllerApi
 import com.rarible.protocol.union.dto.ActivityDto
@@ -56,30 +50,12 @@ abstract class AbstractIntegrationTest {
     lateinit var testEthereumOrderApi: com.rarible.protocol.order.api.client.OrderControllerApi
 
     @Autowired
-    lateinit var ethItemProducer: RaribleKafkaProducer<NftItemEventDto>
-
-    @Autowired
-    lateinit var ethOwnershipProducer: RaribleKafkaProducer<NftOwnershipEventDto>
-
-    @Autowired
     lateinit var ethOrderProducer: RaribleKafkaProducer<com.rarible.protocol.dto.OrderEventDto>
 
     @Autowired
     lateinit var ethActivityProducer: RaribleKafkaProducer<com.rarible.protocol.dto.ActivityDto>
 
     //--------------------- FLOW ---------------------//
-    @Autowired
-    lateinit var testFlowItemApi: FlowNftItemControllerApi
-
-    @Autowired
-    lateinit var testFlowOwnershipApi: FlowNftOwnershipControllerApi
-
-    @Autowired
-    lateinit var testFlowOrderApi: FlowOrderControllerApi
-
-    @Autowired
-    lateinit var flowItemProducer: RaribleKafkaProducer<FlowNftItemEventDto>
-
     @Autowired
     lateinit var flowOwnershipProducer: RaribleKafkaProducer<FlowOwnershipEventDto>
 
@@ -88,6 +64,10 @@ abstract class AbstractIntegrationTest {
 
     @Autowired
     lateinit var flowActivityProducer: RaribleKafkaProducer<FlowActivityDto>
+
+    //--------------------- TEZOS ---------------------//
+    @Autowired
+    lateinit var tezosOrderProducer: RaribleKafkaProducer<com.rarible.protocol.tezos.dto.OrderEventDto>
 
     @Autowired
     lateinit var collectionConsumer: RaribleKafkaConsumer<CollectionEventDto>
@@ -167,17 +147,7 @@ abstract class AbstractIntegrationTest {
             .filter { it.value.ownershipId.value == ownershipId }
     }
 
-    fun findEthOrderUpdates(orderId: String): List<KafkaMessage<OrderUpdateEventDto>> {
-        return filterByValueType(orderEvents as Queue<KafkaMessage<Any>>, OrderUpdateEventDto::class.java)
-            .filter { it.value.orderId.value == orderId }
-    }
-
-    fun findFlowOwnershipDeletions(ownershipId: String): List<KafkaMessage<OwnershipDeleteEventDto>> {
-        return filterByValueType(ownershipEvents as Queue<KafkaMessage<Any>>, OwnershipDeleteEventDto::class.java)
-            .filter { it.value.ownershipId.value == ownershipId }
-    }
-
-    fun findFlowOrderUpdates(orderId: String): List<KafkaMessage<OrderUpdateEventDto>> {
+    fun findOrderUpdates(orderId: String): List<KafkaMessage<OrderUpdateEventDto>> {
         return filterByValueType(orderEvents as Queue<KafkaMessage<Any>>, OrderUpdateEventDto::class.java)
             .filter { it.value.orderId.value == orderId }
     }
