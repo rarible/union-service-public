@@ -7,6 +7,7 @@ import com.rarible.protocol.union.core.continuation.page.Slice
 import com.rarible.protocol.union.core.flow.converter.FlowOrderConverter
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
+import com.rarible.protocol.union.dto.AssetTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderStatusDto
@@ -47,6 +48,10 @@ class FlowOrderService(
             }
     }
 
+    override suspend fun getBidCurrencies(contract: String, tokenId: String): List<AssetTypeDto> {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun getOrderBidsByItem(
         platform: PlatformDto?,
         contract: String,
@@ -84,6 +89,10 @@ class FlowOrderService(
                 maker, origin, continuation, size
             )
         )
+    }
+
+    override suspend fun getSellCurrencies(contract: String, tokenId: String): List<AssetTypeDto> {
+        TODO("Not yet implemented")
     }
 
     override suspend fun getSellOrders(

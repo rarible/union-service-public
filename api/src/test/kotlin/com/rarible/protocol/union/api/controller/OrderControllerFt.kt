@@ -171,7 +171,7 @@ class OrderControllerFt : AbstractIntegrationTest() {
             testEthereumOrderApi.getOrderBidsByItemAndByStatus(
                 contract.value,
                 tokenId.toString(),
-                null,
+                emptyList(),
                 maker.value,
                 null,
                 ethPlatform,
@@ -319,7 +319,7 @@ class OrderControllerFt : AbstractIntegrationTest() {
                 ethPlatform,
                 continuation,
                 size,
-                null,
+                emptyList(),
                 unionOrder.sellCurrencyId
             )
         } returns OrdersPaginationDto(ethOrders, continuation).toMono()

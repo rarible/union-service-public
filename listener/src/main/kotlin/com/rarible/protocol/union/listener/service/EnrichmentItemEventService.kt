@@ -15,7 +15,6 @@ import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
 import com.rarible.protocol.union.enrichment.service.BestOrderService
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
-import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
@@ -72,8 +71,7 @@ class EnrichmentItemEventService(
     }
 
     suspend fun recalculateBestOrders(item: ShortItem): Boolean {
-        val updatedBid = bestOrderService.updateBestBidOrder(item)
-        val updated = bestOrderService.updateBestSellOrder(updatedBid)
+        val updated = bestOrderService.updateBestOrders(item)
         if (updated != item) {
             logger.info(
                 "Item BestSellOrder updated ([{}] -> [{}]), BestBidOrder updated ([{}] -> [{}]) due to currency rate changed",
@@ -99,26 +97,24 @@ class EnrichmentItemEventService(
         itemId: ShortItemId,
         order: OrderDto? = null,
         orderUpdateAction: suspend (item: ShortItem) -> ShortItem
-    ) = coroutineScope {
-        optimisticLock {
-            val current = itemService.get(itemId)
-            val exist = current != null
-            val short = current ?: ShortItem.empty(itemId)
+    ) = optimisticLock {
+        val current = itemService.get(itemId)
+        val exist = current != null
+        val short = current ?: ShortItem.empty(itemId)
 
-            val updated = orderUpdateAction(short)
+        val updated = orderUpdateAction(short)
 
-            if (short != updated) {
-                if (updated.isNotEmpty()) {
-                    val saved = itemService.save(updated)
-                    notifyUpdate(saved, null, order)
-                } else if (exist) {
-                    itemService.delete(itemId)
-                    logger.info("Deleted Item [{}] without enrichment data", itemId)
-                    notifyUpdate(updated, null, order)
-                }
-            } else {
-                logger.info("Item [{}] not changed after order updated, event won't be published", itemId)
+        if (short != updated) {
+            if (updated.isNotEmpty()) {
+                val saved = itemService.save(updated)
+                notifyUpdate(saved, null, order)
+            } else if (exist) {
+                itemService.delete(itemId)
+                logger.info("Deleted Item [{}] without enrichment data", itemId)
+                notifyUpdate(updated, null, order)
             }
+        } else {
+            logger.info("Item [{}] not changed after order updated, event won't be published", itemId)
         }
     }
 
@@ -147,7 +143,7 @@ class EnrichmentItemEventService(
         short: ShortItem,
         item: UnionItemDto? = null,
         order: OrderDto? = null
-    ) = coroutineScope {
+    ) {
         val dto = itemService.enrichItem(short, item, listOfNotNull(order).associateBy { it.id })
         val event = ItemEventUpdate(dto)
         itemEventListeners.forEach { it.onEvent(event) }

@@ -7,6 +7,7 @@ import com.rarible.protocol.union.core.ethereum.converter.EthConverter
 import com.rarible.protocol.union.core.ethereum.converter.EthOrderConverter
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
+import com.rarible.protocol.union.dto.AssetTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderStatusDto
@@ -45,6 +46,15 @@ class EthereumOrderService(
         )
         val orders = orderControllerApi.getOrdersByIds(orderIdsDto).collectList().awaitFirst()
         return orders.map { ethOrderConverter.convert(it, blockchain) }
+    }
+
+    override suspend fun getBidCurrencies(
+        contract: String,
+        tokenId: String
+    ): List<AssetTypeDto> {
+        val assetTypes = orderControllerApi.getCurrenciesByBidOrdersOfItem(contract, tokenId)
+            .awaitFirst()
+        return assetTypes.currencies.map { EthConverter.convert(it, blockchain) }
     }
 
     override suspend fun getOrderBidsByItem(
@@ -97,6 +107,15 @@ class EthereumOrderService(
             end
         ).awaitFirst()
         return ethOrderConverter.convert(orders, blockchain)
+    }
+
+    override suspend fun getSellCurrencies(
+        contract: String,
+        tokenId: String
+    ): List<AssetTypeDto> {
+        val assetTypes = orderControllerApi.getCurrenciesBySellOrdersOfItem(contract, tokenId)
+            .awaitFirst()
+        return assetTypes.currencies.map { EthConverter.convert(it, blockchain) }
     }
 
     override suspend fun getSellOrders(

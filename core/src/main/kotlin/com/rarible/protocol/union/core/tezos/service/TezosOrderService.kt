@@ -6,6 +6,7 @@ import com.rarible.protocol.union.core.continuation.page.Slice
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.core.tezos.converter.TezosOrderConverter
+import com.rarible.protocol.union.dto.AssetTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderStatusDto
@@ -50,6 +51,10 @@ class TezosOrderService(
         )
         val orders = orderControllerApi.getOrdersByIds(orderIdsDto).collectList().awaitFirst()
         return orders.map { tezosOrderConverter.convert(it, blockchain) }*/
+    }
+
+    override suspend fun getBidCurrencies(contract: String, tokenId: String): List<AssetTypeDto> {
+        TODO("Not yet implemented")
     }
 
     override suspend fun getOrderBidsByItem(
@@ -98,6 +103,10 @@ class TezosOrderService(
             continuation
         ).awaitFirst()
         return tezosOrderConverter.convert(orders, blockchain)
+    }
+
+    override suspend fun getSellCurrencies(contract: String, tokenId: String): List<AssetTypeDto> {
+        TODO("Not yet implemented")
     }
 
     override suspend fun getSellOrders(

@@ -55,6 +55,10 @@ class BestOrderService(
         return updateBestSellOrder(updatedItem)
     }
 
+    suspend fun updateBestOrders(item: ShortItem): ShortItem {
+        return updateBestBidOrder(updateBestSellOrder(item))
+    }
+
     suspend fun updateBestSellOrder(item: ShortItem): ShortItem {
         val bestSellOrder = getBestSellOrderInUsd(item.bestSellOrders)
         return item.copy(bestSellOrder = bestSellOrder)
