@@ -2,6 +2,7 @@ package com.rarible.protocol.union.core.service
 
 import com.rarible.protocol.union.core.continuation.page.Slice
 import com.rarible.protocol.union.core.service.router.BlockchainService
+import com.rarible.protocol.union.dto.AssetTypeDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PlatformDto
@@ -22,6 +23,11 @@ interface OrderService : BlockchainService {
     suspend fun getOrdersByIds(
         orderIds: List<String>
     ): List<OrderDto>
+
+    suspend fun getBidCurrencies(
+        contract: String,
+        tokenId: String
+    ): List<AssetTypeDto>
 
     suspend fun getOrderBidsByItem(
         platform: PlatformDto?,
@@ -47,6 +53,11 @@ interface OrderService : BlockchainService {
         continuation: String?,
         size: Int
     ): Slice<OrderDto>
+
+    suspend fun getSellCurrencies(
+        contract: String,
+        tokenId: String
+    ): List<AssetTypeDto>
 
     suspend fun getSellOrders(
         platform: PlatformDto?,

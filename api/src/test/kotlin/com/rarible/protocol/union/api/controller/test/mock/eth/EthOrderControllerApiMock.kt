@@ -1,5 +1,7 @@
 package com.rarible.protocol.nftorder.api.test.mock
 
+import com.rarible.protocol.dto.AssetTypeDto
+import com.rarible.protocol.dto.OrderCurrenciesDto
 import com.rarible.protocol.dto.OrderDto
 import com.rarible.protocol.dto.OrderIdsDto
 import com.rarible.protocol.dto.OrdersPaginationDto
@@ -30,50 +32,76 @@ class EthOrderControllerApiMock(
         } returns orders.toFlux()
     }
 
-    fun mockGetSellOrdersByItem(itemId: ItemIdDto, vararg returnOrders: OrderDto) {
+    fun mockGetSellOrdersByItemAndByStatus(itemId: ItemIdDto, currencyId: String, vararg returnOrders: OrderDto) {
         every {
-            orderControllerApi.getSellOrdersByItem(
-                itemId.token.value,
-                itemId.tokenId.toString(),
+            orderControllerApi.getSellOrdersByItemAndByStatus(
+                eq(itemId.token.value),
+                eq(itemId.tokenId.toString()),
                 any(),
                 any(),
                 any(),
                 any(),
-                any()
+                any(),
+                any(),
+                eq(currencyId)
             )
         } returns Mono.just(OrdersPaginationDto(returnOrders.asList(), null))
     }
 
-    fun mockGetSellOrdersByOwnership(ownershipId: OwnershipIdDto, vararg returnOrders: OrderDto) {
+    fun mockGetSellOrdersByItemAndByStatus(
+        ownershipId: OwnershipIdDto,
+        currencyId: String,
+        vararg returnOrders: OrderDto
+    ) {
         every {
-            orderControllerApi.getSellOrdersByItem(
-                ownershipId.token.value,
-                ownershipId.tokenId.toString(),
-                ownershipId.owner.value,
+            orderControllerApi.getSellOrdersByItemAndByStatus(
+                eq(ownershipId.token.value),
+                eq(ownershipId.tokenId.toString()),
+                eq(ownershipId.owner.value),
                 any(),
                 any(),
                 any(),
-                any()
+                any(),
+                any(),
+                eq(currencyId)
             )
         } returns Mono.just(OrdersPaginationDto(returnOrders.asList(), null))
     }
 
-    fun mockGetBidOrdersByItem(itemId: ItemIdDto, vararg returnOrders: OrderDto) {
+    fun mockGetOrderBidsByItemAndByStatus(itemId: ItemIdDto, currencyId: String, vararg returnOrders: OrderDto) {
         every {
             orderControllerApi.getOrderBidsByItemAndByStatus(
-                itemId.token.value,
-                itemId.tokenId.toString(),
+                eq(itemId.token.value),
+                eq(itemId.tokenId.toString()),
                 any(),
                 any(),
                 any(),
                 any(),
                 any(),
                 any(),
-                any(),
+                eq(currencyId),
                 any(),
                 any()
             )
         } returns Mono.just(OrdersPaginationDto(returnOrders.asList(), null))
+    }
+
+    fun mockGetCurrenciesByBidOrdersOfItem(itemId: ItemIdDto, vararg returnTypes: AssetTypeDto) {
+        every {
+            orderControllerApi.getCurrenciesByBidOrdersOfItem(
+                itemId.token.value,
+                itemId.tokenId.toString()
+            )
+        } returns Mono.just(OrderCurrenciesDto(OrderCurrenciesDto.OrderType.BID, returnTypes.asList()))
+    }
+
+    fun mockGetCurrenciesBySellOrdersOfItem(itemId: ItemIdDto, vararg returnTypes: AssetTypeDto) {
+        every {
+            orderControllerApi.getCurrenciesBySellOrdersOfItem(
+                itemId.token.value,
+                itemId.tokenId.toString()
+            )
+        } returns Mono.just(OrderCurrenciesDto(OrderCurrenciesDto.OrderType.SELL, returnTypes.asList()))
     }
 
 }
