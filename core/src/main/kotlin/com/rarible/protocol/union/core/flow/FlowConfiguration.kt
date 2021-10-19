@@ -78,7 +78,7 @@ class FlowConfiguration {
 
     @Bean
     fun flowSignatureService(signatureControllerApi: FlowNftCryptoControllerApi): SignatureService {
-        return FlowSignatureService(BlockchainDto.FLOW, signatureControllerApi) // TODO implement it later
+        return FlowSignatureService(BlockchainDto.FLOW, signatureControllerApi)
     }
 
     @Bean

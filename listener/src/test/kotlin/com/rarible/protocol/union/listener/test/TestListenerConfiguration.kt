@@ -23,6 +23,7 @@ import com.rarible.protocol.flow.nft.api.client.FlowNftOwnershipControllerApi
 import com.rarible.protocol.flow.nft.api.client.FlowOrderControllerApi
 import com.rarible.protocol.nft.api.client.NftItemControllerApi
 import com.rarible.protocol.nft.api.client.NftOwnershipControllerApi
+import com.rarible.protocol.tezos.dto.TezosEventTopicProvider
 import com.rarible.protocol.union.core.CoreConfiguration
 import com.rarible.protocol.union.core.UnionKafkaJsonSerializer
 import com.rarible.protocol.union.dto.ActivityDto
@@ -205,6 +206,19 @@ class TestListenerConfiguration {
             valueSerializerClass = UnionKafkaJsonSerializer::class.java,
             valueClass = FlowActivityDto::class.java,
             defaultTopic = FlowActivityTopicProvider.getTopic(applicationEnvironmentInfo().name),
+            bootstrapServers = kafkaContainer.kafkaBoostrapServers()
+        )
+    }
+
+    //---------------------- TEZOS -----------------------//
+
+    @Bean
+    fun testTezosOrderEventProducer(): RaribleKafkaProducer<com.rarible.protocol.tezos.dto.OrderEventDto> {
+        return RaribleKafkaProducer(
+            clientId = "test.union.tezos.order",
+            valueSerializerClass = UnionKafkaJsonSerializer::class.java,
+            valueClass = com.rarible.protocol.tezos.dto.OrderEventDto::class.java,
+            defaultTopic = TezosEventTopicProvider.ORDER,
             bootstrapServers = kafkaContainer.kafkaBoostrapServers()
         )
     }

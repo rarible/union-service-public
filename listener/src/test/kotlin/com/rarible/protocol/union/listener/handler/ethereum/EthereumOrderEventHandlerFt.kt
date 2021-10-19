@@ -32,7 +32,7 @@ class EthereumOrderEventHandlerFt : AbstractIntegrationTest() {
         ethOrderProducer.send(message(dto)).ensureSuccess()
 
         Wait.waitAssert {
-            val messages = findEthOrderUpdates(ethOrderId)
+            val messages = findOrderUpdates(ethOrderId)
             assertThat(messages).hasSize(1)
             assertThat(messages[0].key).isEqualTo(expectedOrderId.fullId())
             assertThat(messages[0].id).isEqualTo(expectedOrderId.fullId())

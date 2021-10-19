@@ -20,6 +20,9 @@ import com.rarible.protocol.union.test.data.randomEthV2OrderDto
 import com.rarible.protocol.union.test.data.randomFlowAddress
 import com.rarible.protocol.union.test.data.randomFlowItemIdFullValue
 import com.rarible.protocol.union.test.data.randomFlowNftItemDto
+import com.rarible.protocol.union.test.data.randomTezosAddress
+import com.rarible.protocol.union.test.data.randomTezosItemIdFullValue
+import com.rarible.protocol.union.test.data.randomTezosNftItemDto
 import io.mockk.coEvery
 import io.mockk.verify
 import kotlinx.coroutines.FlowPreview
@@ -85,6 +88,20 @@ class ItemControllerFt : AbstractIntegrationTest() {
     }
 
     @Test
+    fun `get item by id - tezos, not enriched`() = runBlocking<Unit> {
+        val itemIdFull = randomTezosItemIdFullValue()
+        val itemId = ItemIdParser.parseFull(itemIdFull)
+        val item = randomTezosNftItemDto(itemId)
+
+        tezosItemControllerApiMock.mockGetNftItemById(itemId, item)
+
+        val result = itemControllerClient.getItemById(itemIdFull).awaitFirst()
+
+        assertThat(result.id.value).isEqualTo(itemId.value)
+        assertThat(result.id.blockchain).isEqualTo(BlockchainDto.TEZOS)
+    }
+
+    @Test
     fun `reset item meta by id - ethereum`() = runBlocking<Unit> {
         val itemIdFull = randomEthItemId().fullId()
         val itemId = ItemIdParser.parseFull(itemIdFull)
@@ -108,6 +125,21 @@ class ItemControllerFt : AbstractIntegrationTest() {
         val unionItem = itemControllerClient.getItemById(itemIdFull).awaitFirst()
 
         verify(exactly = 1) { testFlowItemApi.resetNftItemMetaById(itemId.value) }
+    }
+    */
+
+    // TODO uncomment when TEZOS implement it
+    /*
+    @Test
+    fun `reset item meta by id - tezos`() = runBlocking<Unit> {
+        val itemIdFull = randomEthItemId().fullId()
+        val itemId = ItemIdParser.parseFull(itemIdFull)
+
+        coEvery { testTezosItemApi.resetNftItemMetaById(itemId.value) } returns Mono.first()
+
+        itemControllerClient.resetItemMeta(itemIdFull).awaitFirstOrNull()
+
+        verify(exactly = 1) { testTezosItemApi.resetNftItemMetaById(itemId.value) }
     }
     */
 
@@ -151,6 +183,21 @@ class ItemControllerFt : AbstractIntegrationTest() {
 
         val items = itemControllerClient.getItemsByCollection(
             flowCollectionId.fullId(), continuation, size
+        ).awaitFirst()
+
+        val result = items.items[0]
+        assertThat(result.id.value).isEqualTo(item.id)
+    }
+
+    @Test
+    fun `get items by collection - tezos, nothing enriched`() = runBlocking<Unit> {
+        val tezosCollectionId = randomTezosAddress()
+        val item = randomTezosNftItemDto()
+
+        tezosItemControllerApiMock.mockGetNftOrderItemsByCollection(tezosCollectionId.value, continuation, size, item)
+
+        val items = itemControllerClient.getItemsByCollection(
+            tezosCollectionId.fullId(), continuation, size
         ).awaitFirst()
 
         val result = items.items[0]
@@ -209,6 +256,23 @@ class ItemControllerFt : AbstractIntegrationTest() {
     }
 
     @Test
+    fun `get items by owner - tezos, nothing enriched`() = runBlocking<Unit> {
+        val tezosOwnerId = randomTezosAddress()
+        val tezosItem = randomTezosNftItemDto()
+
+        tezosItemControllerApiMock.mockGetNftOrderItemsByOwner(
+            tezosOwnerId.value, continuation, size, tezosItem
+        )
+
+        val items = itemControllerClient.getItemsByOwner(
+            tezosOwnerId.fullId(), continuation, size
+        ).awaitFirst()
+
+        val result = items.items[0]
+        assertThat(result.id.value).isEqualTo(tezosItem.id)
+    }
+
+    @Test
     fun `get items by creator - ethereum, nothing found`() = runBlocking<Unit> {
         val ethCreatorId = randomEthAddress()
 
@@ -238,6 +302,23 @@ class ItemControllerFt : AbstractIntegrationTest() {
 
         val result = items.items[0]
         assertThat(result.id.value).isEqualTo(flowItem.id)
+    }
+
+    @Test
+    fun `get items by creator - tezos, nothing enriched`() = runBlocking<Unit> {
+        val tezosCreatorId = randomTezosAddress()
+        val tezosItem = randomTezosNftItemDto()
+
+        tezosItemControllerApiMock.mockGetNftOrderItemsByCreator(
+            tezosCreatorId.value, continuation, size, tezosItem
+        )
+
+        val items = itemControllerClient.getItemsByCreator(
+            tezosCreatorId.fullId(), continuation, size
+        ).awaitFirst()
+
+        val result = items.items[0]
+        assertThat(result.id.value).isEqualTo(tezosItem.id)
     }
 
     @Test

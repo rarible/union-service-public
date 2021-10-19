@@ -33,7 +33,7 @@ class FlowItemEventHandlerTest {
     }
 
     @Test
-    fun `ethereum item update event`() = runBlocking {
+    fun `flow item update event`() = runBlocking {
         val flowItem = randomFlowNftItemDto()
         val dto: FlowNftItemEventDto = FlowNftItemUpdateEventDto(randomString(), flowItem.id, flowItem)
 
@@ -45,13 +45,9 @@ class FlowItemEventHandlerTest {
     }
 
     @Test
-    fun `ethereum item delete event`() = runBlocking {
+    fun `flow item delete event`() = runBlocking {
         val flowItemId = randomFlowItemId()
-        val deletedDto = FlowNftDeletedItemDto(
-            flowItemId.value,
-            flowItemId.token.value,
-            flowItemId.tokenId.toLong()
-        )
+        val deletedDto = FlowNftDeletedItemDto(flowItemId.value, flowItemId.token.value, flowItemId.tokenId.toLong())
 
         val dto: FlowNftItemEventDto = FlowNftItemDeleteEventDto(randomString(), flowItemId.value, deletedDto)
 

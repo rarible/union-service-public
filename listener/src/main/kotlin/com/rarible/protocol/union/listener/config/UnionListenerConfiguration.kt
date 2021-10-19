@@ -53,6 +53,7 @@ import com.rarible.protocol.union.listener.service.EnrichmentItemEventService
 import com.rarible.protocol.union.listener.service.EnrichmentOrderEventService
 import com.rarible.protocol.union.listener.service.EnrichmentOwnershipEventService
 import io.micrometer.core.instrument.MeterRegistry
+import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
@@ -313,7 +314,13 @@ class UnionListenerConfiguration(
     @Bean
     fun tezosActivityConsumerFactory(): TezosEventsConsumerFactory {
         val replicaSet = tezosProperties.brokerReplicaSet
-        return TezosEventsConsumerFactory(replicaSet, host, env, tezosProperties.username, tezosProperties.password)
+        return TezosEventsConsumerFactory(
+            replicaSet,
+            host,
+            env,
+            StringUtils.trimToNull(tezosProperties.username),
+            StringUtils.trimToNull(tezosProperties.password)
+        )
     }
 
     // TODO: Tezos will support events on collections => create a worker here.

@@ -32,7 +32,7 @@ class FlowOwnershipEventHandlerFt {
     }
 
     @Test
-    fun `ethereum ownership update event`() = runBlocking {
+    fun `flow ownership update event`() = runBlocking {
         val flowOwnership = randomFlowNftOwnershipDto()
         val dto: FlowOwnershipEventDto =
             FlowNftOwnershipUpdateEventDto(randomString(), flowOwnership.id!!, flowOwnership)
@@ -45,21 +45,17 @@ class FlowOwnershipEventHandlerFt {
     }
 
     @Test
-    fun `ethereum ownership delete event`() = runBlocking {
+    fun `flow ownership delete event`() = runBlocking {
 
-        val ethOwnershipId = randomFlowOwnershipId()
-        val flowOwnership = randomFlowNftOwnershipDto(ethOwnershipId)
+        val flowOwnershipId = randomFlowOwnershipId()
+        val flowOwnership = randomFlowNftOwnershipDto(flowOwnershipId)
 
-        val dto = FlowNftOwnershipDeleteEventDto(
-            randomString(),
-            flowOwnership.id!!,
-            flowOwnership
-        )
+        val dto = FlowNftOwnershipDeleteEventDto(randomString(), flowOwnership.id!!, flowOwnership)
 
         handler.handle(dto)
 
         coVerify(exactly = 0) { ownershipEventService.onOwnershipUpdated(any()) }
-        coVerify(exactly = 1) { ownershipEventService.onOwnershipDeleted(ethOwnershipId) }
+        coVerify(exactly = 1) { ownershipEventService.onOwnershipDeleted(flowOwnershipId) }
     }
 
 }

@@ -5,6 +5,7 @@ import com.rarible.core.application.ApplicationEnvironmentInfo
 import com.rarible.core.kafka.RaribleKafkaProducer
 import com.rarible.protocol.currency.api.client.CurrencyControllerApi
 import com.rarible.protocol.flow.nft.api.client.FlowNftCollectionControllerApi
+import com.rarible.protocol.flow.nft.api.client.FlowNftCryptoControllerApi
 import com.rarible.protocol.flow.nft.api.client.FlowNftItemControllerApi
 import com.rarible.protocol.flow.nft.api.client.FlowNftOrderActivityControllerApi
 import com.rarible.protocol.flow.nft.api.client.FlowNftOwnershipControllerApi
@@ -194,6 +195,10 @@ class TestApiConfiguration {
 
     @Bean
     @Primary
+    fun testFlowSignatureApi(): FlowNftCryptoControllerApi = mockk()
+
+    @Bean
+    @Primary
     fun testFlowActivityApi(): FlowNftOrderActivityControllerApi = mockk()
 
     //--------------------- TEZOS ---------------------//
@@ -208,6 +213,10 @@ class TestApiConfiguration {
     @Bean
     @Primary
     fun testTezosCollectionApi(): com.rarible.protocol.tezos.api.client.NftCollectionControllerApi = mockk()
+
+    @Bean
+    @Primary
+    fun testTezosSignatureApi(): com.rarible.protocol.tezos.api.client.OrderSignatureControllerApi = mockk()
 
     @Bean
     @Primary

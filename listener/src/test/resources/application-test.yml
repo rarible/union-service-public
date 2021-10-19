@@ -48,6 +48,8 @@ listener:
       itemWorkers: 1
       ownershipWorkers: 1
       orderWorkers: 1
+      username:
+      password:
   reconciliation:
     orderBatchSize: 50
     threadCount: 2
