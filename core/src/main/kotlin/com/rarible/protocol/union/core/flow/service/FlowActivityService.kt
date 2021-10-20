@@ -25,9 +25,11 @@ class FlowActivityService(
         size: Int,
         sort: ActivitySortDto?
     ): Slice<ActivityDto> {
-        val rawTypes = types.map { it.name }
-        val result = activityControllerApi.getNftOrderAllActivities(rawTypes, continuation, size)
-            .awaitFirst()
+        val result = activityControllerApi.getNftOrderAllActivities(
+            types.map { it.name },
+            continuation,
+            size
+        ).awaitFirst()
         return flowActivityConverter.convert(result, blockchain)
     }
 
@@ -38,9 +40,12 @@ class FlowActivityService(
         size: Int,
         sort: ActivitySortDto?
     ): Slice<ActivityDto> {
-        val rawTypes = types.map { it.name }
-        val result = activityControllerApi.getNftOrderActivitiesByCollection(rawTypes, collection, continuation, size)
-            .awaitFirst()
+        val result = activityControllerApi.getNftOrderActivitiesByCollection(
+            types.map { it.name },
+            collection,
+            continuation,
+            size
+        ).awaitFirst()
         return flowActivityConverter.convert(result, blockchain)
     }
 
@@ -52,9 +57,8 @@ class FlowActivityService(
         size: Int,
         sort: ActivitySortDto?
     ): Slice<ActivityDto> {
-        val rawTypes = types.map { it.name }
         val result = activityControllerApi.getNftOrderActivitiesByItem(
-            rawTypes,
+            types.map { it.name },
             contract,
             tokenId.toLong(),
             continuation,
@@ -72,13 +76,15 @@ class FlowActivityService(
         size: Int,
         sort: ActivitySortDto?
     ): Slice<ActivityDto> {
-        val rawTypes = types.map { it.name }
-
-        val result = activityControllerApi
-            .getNftOrderActivitiesByUser(
-                rawTypes, users, from?.toEpochMilli(), to?.toEpochMilli(), continuation, size, sort?.name
-            )
-            .awaitFirst()
+        val result = activityControllerApi.getNftOrderActivitiesByUser(
+            types.map { it.name },
+            users,
+            from?.toEpochMilli(),
+            to?.toEpochMilli(),
+            continuation,
+            size,
+            sort?.name
+        ).awaitFirst()
         return flowActivityConverter.convert(result, blockchain)
     }
 }

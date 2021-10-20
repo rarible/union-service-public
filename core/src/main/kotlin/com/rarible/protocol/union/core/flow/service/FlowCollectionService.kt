@@ -14,8 +14,14 @@ class FlowCollectionService(
     private val collectionControllerApi: FlowNftCollectionControllerApi
 ) : AbstractBlockchainService(blockchain), CollectionService {
 
-    override suspend fun getAllCollections(continuation: String?, size: Int): Page<CollectionDto> {
-        val collections = collectionControllerApi.searchNftAllCollections(continuation, size).awaitFirst()
+    override suspend fun getAllCollections(
+        continuation: String?,
+        size: Int
+    ): Page<CollectionDto> {
+        val collections = collectionControllerApi.searchNftAllCollections(
+            continuation,
+            size
+        ).awaitFirst()
         return FlowCollectionConverter.convert(collections, blockchain)
     }
 
@@ -29,7 +35,11 @@ class FlowCollectionService(
         continuation: String?,
         size: Int
     ): Page<CollectionDto> {
-        val items = collectionControllerApi.searchNftCollectionsByOwner(owner, continuation, size).awaitFirst()
+        val items = collectionControllerApi.searchNftCollectionsByOwner(
+            owner,
+            continuation,
+            size
+        ).awaitFirst()
         return FlowCollectionConverter.convert(items, blockchain)
     }
 }

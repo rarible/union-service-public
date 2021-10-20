@@ -21,7 +21,9 @@ import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.OwnershipService
 import com.rarible.protocol.union.core.service.SignatureService
+import com.rarible.protocol.union.core.service.router.OrderProxyService
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.PlatformDto
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
@@ -73,7 +75,10 @@ class FlowConfiguration {
 
     @Bean
     fun flowOrderService(flowOrderApi: FlowOrderControllerApi, flowOrderConverter: FlowOrderConverter): OrderService {
-        return FlowOrderService(BlockchainDto.FLOW, flowOrderApi, flowOrderConverter)
+        return OrderProxyService(
+            FlowOrderService(BlockchainDto.FLOW, flowOrderApi, flowOrderConverter),
+            setOf(PlatformDto.RARIBLE)
+        )
     }
 
     @Bean

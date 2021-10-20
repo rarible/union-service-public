@@ -14,8 +14,14 @@ class EthereumCollectionService(
     private val collectionControllerApi: NftCollectionControllerApi
 ) : AbstractBlockchainService(blockchain), CollectionService {
 
-    override suspend fun getAllCollections(continuation: String?, size: Int): Page<CollectionDto> {
-        val collections = collectionControllerApi.searchNftAllCollections(continuation, size).awaitFirst()
+    override suspend fun getAllCollections(
+        continuation: String?,
+        size: Int
+    ): Page<CollectionDto> {
+        val collections = collectionControllerApi.searchNftAllCollections(
+            continuation,
+            size
+        ).awaitFirst()
         return EthCollectionConverter.convert(collections, blockchain)
     }
 
@@ -29,7 +35,11 @@ class EthereumCollectionService(
         continuation: String?,
         size: Int
     ): Page<CollectionDto> {
-        val items = collectionControllerApi.searchNftCollectionsByOwner(owner, continuation, size).awaitFirst()
+        val items = collectionControllerApi.searchNftCollectionsByOwner(
+            owner,
+            continuation,
+            size
+        ).awaitFirst()
         return EthCollectionConverter.convert(items, blockchain)
     }
 }

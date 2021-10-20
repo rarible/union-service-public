@@ -2,6 +2,7 @@ package com.rarible.protocol.union.subscriber
 
 import com.rarible.core.kafka.RaribleKafkaConsumer
 import com.rarible.protocol.union.dto.ActivityDto
+import com.rarible.protocol.union.dto.CollectionEventDto
 import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.OrderEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
@@ -45,6 +46,17 @@ class UnionEventsConsumerFactory(
             valueClass = OrderEventDto::class.java,
             consumerGroup = consumerGroup,
             defaultTopic = UnionEventTopicProvider.getOrderTopic(environment),
+            bootstrapServers = brokerReplicaSet
+        )
+    }
+
+    fun createCollectionConsumer(consumerGroup: String): RaribleKafkaConsumer<CollectionEventDto> {
+        return RaribleKafkaConsumer(
+            clientId = "$clientIdPrefix.union-collection-consumer",
+            valueDeserializerClass = UnionKafkaJsonDeserializer::class.java,
+            valueClass = CollectionEventDto::class.java,
+            consumerGroup = consumerGroup,
+            defaultTopic = UnionEventTopicProvider.getCollectionTopic(environment),
             bootstrapServers = brokerReplicaSet
         )
     }

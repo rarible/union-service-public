@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.core
+package com.rarible.protocol.union.subscriber
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.rarible.core.kafka.json.JsonSerializer

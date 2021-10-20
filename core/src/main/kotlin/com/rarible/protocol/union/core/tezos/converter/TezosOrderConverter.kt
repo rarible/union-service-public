@@ -66,7 +66,7 @@ class TezosOrderConverter(
             priceHistory = order.priceHistory?.map { convert(it) } ?: listOf(),
             data = convertData(order, blockchain),
             salt = order.salt,
-            pending = emptyList() // TODO won't be published
+            pending = emptyList() // TODO TEZOS in union we won't use this field
         )
     }
 
@@ -101,7 +101,7 @@ class TezosOrderConverter(
     private fun convert(source: PartDto, blockchain: BlockchainDto): OrderPayoutDto {
         return OrderPayoutDto(
             account = UnionAddressConverter.convert(source.account, blockchain),
-            value = source.value.toBigInteger() //todo why BigInteger here?
+            value = source.value.toBigInteger() //TODO UNION why BigInteger?
         )
     }
 }

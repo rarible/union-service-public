@@ -12,7 +12,6 @@ import com.rarible.protocol.union.test.data.randomEthOrderBidActivity
 import kotlinx.coroutines.FlowPreview
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import java.time.Duration
 
 @FlowPreview
 @IntegrationTest
@@ -30,8 +29,8 @@ class EthereumActivityEventHandlerFt : AbstractIntegrationTest() {
             value = (event as OrderActivityBidDto).id
         ).fullId()
 
-        Wait.waitAssert(Duration.ofMillis(5000)) {
-            val messages = findEthActivityUpdates(event.id, OrderBidActivityDto::class.java)
+        Wait.waitAssert {
+            val messages = findActivityUpdates(event.id, OrderBidActivityDto::class.java)
             assertThat(messages).hasSize(1)
             assertThat(messages[0].key).isEqualTo(expectedKey)
             assertThat(messages[0].id).isEqualTo(expectedKey)

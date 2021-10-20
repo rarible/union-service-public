@@ -23,8 +23,6 @@ class BestOrderService(
     private val currencyService: CurrencyService
 ) {
 
-    // TODO we can return here Full Order if it was fetched - thats allow us to avoid one more query to indexer
-    // for update events in ownership/item
     suspend fun updateBestSellOrder(ownership: ShortOwnership, order: OrderDto): ShortOwnership {
         val currencyId = order.sellCurrencyId
         val evaluator = BestOrderEvaluator(

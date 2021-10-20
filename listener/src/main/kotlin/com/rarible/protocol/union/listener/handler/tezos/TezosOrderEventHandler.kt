@@ -1,11 +1,11 @@
 package com.rarible.protocol.union.listener.handler.tezos
 
-import com.rarible.core.kafka.KafkaMessage
 import com.rarible.core.kafka.RaribleKafkaProducer
 import com.rarible.protocol.union.core.tezos.converter.TezosOrderConverter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderEventDto
 import com.rarible.protocol.union.dto.OrderUpdateEventDto
+import com.rarible.protocol.union.enrichment.event.KafkaEventFactory
 import com.rarible.protocol.union.listener.handler.AbstractEventHandler
 import com.rarible.protocol.union.listener.service.EnrichmentOrderEventService
 import org.slf4j.LoggerFactory
@@ -33,12 +33,7 @@ class TezosOrderEventHandler(
                     order = unionOrder
                 )
 
-                val message = KafkaMessage(
-                    key = unionOrder.id.fullId(),
-                    value = unionEventDto as OrderEventDto,
-                    headers = ORDER_EVENT_HEADERS
-                )
-                producer.send(message)
+                producer.send(KafkaEventFactory.orderEvent(unionEventDto))
             }
             com.rarible.protocol.tezos.dto.OrderEventDto.Type.SERIALIZATION_FAILED -> {
                 // skip it, will be logged inside of parser

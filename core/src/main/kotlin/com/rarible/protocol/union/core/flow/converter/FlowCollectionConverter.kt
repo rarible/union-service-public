@@ -11,7 +11,7 @@ object FlowCollectionConverter {
 
     fun convert(source: FlowNftCollectionDto, blockchain: BlockchainDto): CollectionDto {
         return CollectionDto(
-            id = FlowContractConverter.convert(source.id, blockchain),
+            id = UnionAddressConverter.convert(source.id, blockchain),
             name = source.name,
             symbol = source.symbol,
             owner = UnionAddressConverter.convert(source.owner, blockchain),

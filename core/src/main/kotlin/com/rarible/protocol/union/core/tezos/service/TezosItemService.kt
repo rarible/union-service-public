@@ -24,7 +24,7 @@ class TezosItemService(
         lastUpdatedFrom: Long?,
         lastUpdatedTo: Long?
     ): Page<UnionItemDto> {
-        // TODO TEZOS Not implemented
+        // TODO TEZOS implement
         /* val items = itemControllerApi.getNftAllItems(
              continuation,
              size,
@@ -51,7 +51,7 @@ class TezosItemService(
     }
 
     override suspend fun resetItemMeta(itemId: String) {
-        // TODO TEZOS Not implemented
+        // TODO TEZOS implement
         //itemControllerApi.resetNftItemMetaById(itemId)
     }
 

@@ -1,7 +1,7 @@
 package com.rarible.protocol.union.api.controller
 
-import com.rarible.protocol.union.api.configuration.PageSize
 import com.rarible.protocol.union.core.continuation.ActivityContinuation
+import com.rarible.protocol.union.core.continuation.page.PageSize
 import com.rarible.protocol.union.core.continuation.page.Paging
 import com.rarible.protocol.union.core.continuation.page.Slice
 import com.rarible.protocol.union.core.service.ActivityService

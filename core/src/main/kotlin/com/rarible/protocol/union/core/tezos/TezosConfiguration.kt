@@ -16,6 +16,7 @@ import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.OwnershipService
 import com.rarible.protocol.union.core.service.SignatureService
+import com.rarible.protocol.union.core.service.router.OrderProxyService
 import com.rarible.protocol.union.core.tezos.converter.TezosOrderConverter
 import com.rarible.protocol.union.core.tezos.service.TezosActivityService
 import com.rarible.protocol.union.core.tezos.service.TezosCollectionService
@@ -24,6 +25,7 @@ import com.rarible.protocol.union.core.tezos.service.TezosOrderService
 import com.rarible.protocol.union.core.tezos.service.TezosOwnershipService
 import com.rarible.protocol.union.core.tezos.service.TezosSignatureService
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.PlatformDto
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -87,7 +89,10 @@ class TezosConfiguration {
 
     @Bean
     fun tezosOrderService(tezosOrderApi: OrderControllerApi, tezosOrderConverter: TezosOrderConverter): OrderService {
-        return TezosOrderService(BlockchainDto.TEZOS, tezosOrderApi, tezosOrderConverter)
+        return OrderProxyService(
+            TezosOrderService(BlockchainDto.TEZOS, tezosOrderApi, tezosOrderConverter),
+            setOf(PlatformDto.RARIBLE)
+        )
     }
 
     @Bean

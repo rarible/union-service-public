@@ -28,15 +28,13 @@ class FlowItemService(
         return FlowItemConverter.convert(items, blockchain)
     }
 
-    override suspend fun getItemById(
-        itemId: String
-    ): UnionItemDto {
+    override suspend fun getItemById(itemId: String): UnionItemDto {
         val item = flowNftItemControllerApi.getNftItemById(itemId).awaitFirst()
         return FlowItemConverter.convert(item, blockchain)
     }
 
     override suspend fun getItemMetaById(itemId: String): MetaDto {
-        // TODO: Flow will return a richer object (MetaDto) soon, and we should put 'attributes' and 'content' here.
+        // TODO FLOW will return a richer object (MetaDto) soon, and we should put 'attributes' and 'content' here.
         val meta = flowNftItemControllerApi.getNftItemMetaById(itemId).awaitFirst()
         return MetaDto(
             name = meta.title ?: "Flow #$itemId",
@@ -47,7 +45,7 @@ class FlowItemService(
     }
 
     override suspend fun resetItemMeta(itemId: String) {
-        // TODO implement
+        // TODO FLOW implement
     }
 
     override suspend fun getItemsByCollection(
@@ -55,7 +53,11 @@ class FlowItemService(
         continuation: String?,
         size: Int
     ): Page<UnionItemDto> {
-        val items = flowNftItemControllerApi.getNftItemsByCollection(collection, continuation, size).awaitFirst()
+        val items = flowNftItemControllerApi.getNftItemsByCollection(
+            collection,
+            continuation,
+            size
+        ).awaitFirst()
         return FlowItemConverter.convert(items, blockchain)
     }
 
@@ -64,7 +66,11 @@ class FlowItemService(
         continuation: String?,
         size: Int
     ): Page<UnionItemDto> {
-        val items = flowNftItemControllerApi.getNftItemsByCreator(creator, continuation, size).awaitFirst()
+        val items = flowNftItemControllerApi.getNftItemsByCreator(
+            creator,
+            continuation,
+            size
+        ).awaitFirst()
         return FlowItemConverter.convert(items, blockchain)
     }
 
@@ -73,7 +79,11 @@ class FlowItemService(
         continuation: String?,
         size: Int
     ): Page<UnionItemDto> {
-        val items = flowNftItemControllerApi.getNftItemsByOwner(owner, continuation, size).awaitFirst()
+        val items = flowNftItemControllerApi.getNftItemsByOwner(
+            owner,
+            continuation,
+            size
+        ).awaitFirst()
         return FlowItemConverter.convert(items, blockchain)
     }
 

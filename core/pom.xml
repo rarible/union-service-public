@@ -64,7 +64,7 @@
         <!-- ============ Union Protocol-API ============= -->
         <dependency>
             <groupId>com.rarible.protocol.union</groupId>
-            <artifactId>protocol-union-model</artifactId>
+            <artifactId>protocol-union-subscriber</artifactId>
         </dependency>
 
         <!-- ============= Eth Protocol-API ============== -->

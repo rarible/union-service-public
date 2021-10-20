@@ -14,8 +14,14 @@ class FlowOwnershipService(
     private val ownershipControllerApi: FlowNftOwnershipControllerApi
 ) : AbstractBlockchainService(blockchain), OwnershipService {
 
-    override suspend fun getAllOwnerships(continuation: String?, size: Int): Page<UnionOwnershipDto> {
-        val ownerships = ownershipControllerApi.getNftAllOwnerships(continuation, size).awaitFirst()
+    override suspend fun getAllOwnerships(
+        continuation: String?,
+        size: Int
+    ): Page<UnionOwnershipDto> {
+        val ownerships = ownershipControllerApi.getNftAllOwnerships(
+            continuation,
+            size
+        ).awaitFirst()
         return FlowOwnershipConverter.convert(ownerships, blockchain)
     }
 
@@ -30,7 +36,12 @@ class FlowOwnershipService(
         continuation: String?,
         size: Int
     ): Page<UnionOwnershipDto> {
-        val items = ownershipControllerApi.getNftOwnershipsByItem(contract, tokenId, continuation, size).awaitFirst()
+        val items = ownershipControllerApi.getNftOwnershipsByItem(
+            contract,
+            tokenId,
+            continuation,
+            size
+        ).awaitFirst()
         return FlowOwnershipConverter.convert(items, blockchain)
     }
 }

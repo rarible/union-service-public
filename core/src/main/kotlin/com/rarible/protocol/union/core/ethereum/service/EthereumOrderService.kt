@@ -41,9 +41,7 @@ class EthereumOrderService(
     }
 
     override suspend fun getOrdersByIds(orderIds: List<String>): List<OrderDto> {
-        val orderIdsDto = OrderIdsDto(
-            ids = orderIds.map { EthConverter.convertToWord(it) }
-        )
+        val orderIdsDto = OrderIdsDto(orderIds.map { EthConverter.convertToWord(it) })
         val orders = orderControllerApi.getOrdersByIds(orderIdsDto).collectList().awaitFirst()
         return orders.map { ethOrderConverter.convert(it, blockchain) }
     }
@@ -52,8 +50,10 @@ class EthereumOrderService(
         contract: String,
         tokenId: String
     ): List<AssetTypeDto> {
-        val assetTypes = orderControllerApi.getCurrenciesByBidOrdersOfItem(contract, tokenId)
-            .awaitFirst()
+        val assetTypes = orderControllerApi.getCurrenciesByBidOrdersOfItem(
+            contract,
+            tokenId
+        ).awaitFirst()
         return assetTypes.currencies.map { EthConverter.convert(it, blockchain) }
     }
 
@@ -113,8 +113,10 @@ class EthereumOrderService(
         contract: String,
         tokenId: String
     ): List<AssetTypeDto> {
-        val assetTypes = orderControllerApi.getCurrenciesBySellOrdersOfItem(contract, tokenId)
-            .awaitFirst()
+        val assetTypes = orderControllerApi.getCurrenciesBySellOrdersOfItem(
+            contract,
+            tokenId
+        ).awaitFirst()
         return assetTypes.currencies.map { EthConverter.convert(it, blockchain) }
     }
 
@@ -156,7 +158,7 @@ class EthereumOrderService(
         maker: String?,
         origin: String?,
         status: List<OrderStatusDto>?,
-        currencyAddress: String,
+        currencyId: String,
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
@@ -169,7 +171,7 @@ class EthereumOrderService(
             continuation,
             size,
             ethOrderConverter.convert(status),
-            currencyAddress
+            currencyId
         ).awaitFirst()
         return ethOrderConverter.convert(orders, blockchain)
     }

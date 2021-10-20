@@ -23,7 +23,9 @@ import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.OwnershipService
 import com.rarible.protocol.union.core.service.SignatureService
+import com.rarible.protocol.union.core.service.router.OrderProxyService
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.PlatformDto
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -127,7 +129,10 @@ class EthereumConfiguration {
         @Qualifier("ethereum.order.api") ethereumOrderApi: OrderControllerApi,
         ethOrderConverter: EthOrderConverter
     ): OrderService {
-        return EthereumOrderService(BlockchainDto.ETHEREUM, ethereumOrderApi, ethOrderConverter)
+        return OrderProxyService(
+            EthereumOrderService(BlockchainDto.ETHEREUM, ethereumOrderApi, ethOrderConverter),
+            PlatformDto.values().toHashSet()
+        )
     }
 
     @Bean
@@ -165,7 +170,10 @@ class EthereumConfiguration {
         @Qualifier("polygon.order.api") ethereumOrderApi: OrderControllerApi,
         ethOrderConverter: EthOrderConverter
     ): OrderService {
-        return EthereumOrderService(BlockchainDto.POLYGON, ethereumOrderApi, ethOrderConverter)
+        return OrderProxyService(
+            EthereumOrderService(BlockchainDto.POLYGON, ethereumOrderApi, ethOrderConverter),
+            PlatformDto.values().toHashSet()
+        )
     }
 
     @Bean

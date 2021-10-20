@@ -12,7 +12,8 @@ class SignatureController(
 ) : SignatureControllerApi {
 
     override suspend fun validate(form: SignatureValidationFormDto): ResponseEntity<Boolean> {
-        val result = router.getService(form.signer.blockchain).validate(form)
+        val result = router.getService(form.signer.blockchain)
+            .validate(form.signer.value, form.signature, form.message)
         return ResponseEntity.ok(result)
     }
 }

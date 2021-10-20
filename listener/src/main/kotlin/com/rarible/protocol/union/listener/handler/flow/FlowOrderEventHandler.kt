@@ -1,12 +1,13 @@
 package com.rarible.protocol.union.listener.handler.flow
 
-import com.rarible.core.kafka.KafkaMessage
 import com.rarible.core.kafka.RaribleKafkaProducer
 import com.rarible.protocol.dto.FlowOrderEventDto
-import com.rarible.protocol.union.core.flow.converter.FlowOrderEventConverter
+import com.rarible.protocol.dto.FlowOrderUpdateEventDto
+import com.rarible.protocol.union.core.flow.converter.FlowOrderConverter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderEventDto
 import com.rarible.protocol.union.dto.OrderUpdateEventDto
+import com.rarible.protocol.union.enrichment.event.KafkaEventFactory
 import com.rarible.protocol.union.listener.handler.AbstractEventHandler
 import com.rarible.protocol.union.listener.service.EnrichmentOrderEventService
 import org.slf4j.LoggerFactory
@@ -14,7 +15,7 @@ import org.slf4j.LoggerFactory
 class FlowOrderEventHandler(
     private val producer: RaribleKafkaProducer<OrderEventDto>,
     private val orderEventService: EnrichmentOrderEventService,
-    private val flowOrderEventConverter: FlowOrderEventConverter,
+    private val flowOrderConverter: FlowOrderConverter,
     private val blockchain: BlockchainDto
 ) : AbstractEventHandler<FlowOrderEventDto>() {
 
@@ -23,18 +24,19 @@ class FlowOrderEventHandler(
     override suspend fun handleSafely(event: FlowOrderEventDto) {
         logger.debug("Received Flow Order event: type={}", event::class.java.simpleName)
 
-        val unionEventDto = flowOrderEventConverter.convert(event, blockchain)
+        when (event) {
+            is FlowOrderUpdateEventDto -> {
+                val order = flowOrderConverter.convert(event.order, blockchain)
+                val unionEventDto = OrderUpdateEventDto(
+                    eventId = event.eventId,
+                    orderId = order.id,
+                    order = order
+                )
 
-        when (unionEventDto) {
-            is OrderUpdateEventDto -> orderEventService.updateOrder(unionEventDto.order)
+                orderEventService.updateOrder(unionEventDto.order)
+
+                producer.send(KafkaEventFactory.orderEvent(unionEventDto))
+            }
         }
-
-        val message = KafkaMessage(
-            key = unionEventDto.orderId.fullId(),
-            value = unionEventDto as OrderEventDto,
-            headers = ORDER_EVENT_HEADERS
-        )
-        producer.send(message)
-
     }
 }

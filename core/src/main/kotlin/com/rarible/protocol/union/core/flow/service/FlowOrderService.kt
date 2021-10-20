@@ -1,7 +1,6 @@
 package com.rarible.protocol.union.core.flow.service
 
 import com.rarible.protocol.dto.FlowOrderIdsDto
-import com.rarible.protocol.dto.FlowOrdersPaginationDto
 import com.rarible.protocol.flow.nft.api.client.FlowOrderControllerApi
 import com.rarible.protocol.union.core.continuation.page.Slice
 import com.rarible.protocol.union.core.flow.converter.FlowOrderConverter
@@ -13,7 +12,9 @@ import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PlatformDto
 import kotlinx.coroutines.reactive.awaitFirst
-import reactor.core.publisher.Mono
+import java.time.Instant
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
 
 class FlowOrderService(
     blockchain: BlockchainDto,
@@ -27,9 +28,12 @@ class FlowOrderService(
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
-        return convert(
-            orderControllerApi.getOrdersAll(origin, continuation, size)
-        )
+        val result = orderControllerApi.getOrdersAll(
+            origin,
+            continuation,
+            size
+        ).awaitFirst()
+        return flowOrderConverter.convert(result, blockchain)
     }
 
     override suspend fun getOrderById(id: String): OrderDto {
@@ -39,16 +43,12 @@ class FlowOrderService(
 
     override suspend fun getOrdersByIds(orderIds: List<String>): List<OrderDto> {
         val ids = orderIds.map { it.toLong() }
-        return orderControllerApi
-            .getOrdersByIds(FlowOrderIdsDto(ids))
-            .collectList()
-            .awaitFirst()
-            .map {
-                flowOrderConverter.convert(it, blockchain)
-            }
+        val orders = orderControllerApi.getOrdersByIds(FlowOrderIdsDto(ids)).collectList().awaitFirst()
+        return orders.map { flowOrderConverter.convert(it, blockchain) }
     }
 
     override suspend fun getBidCurrencies(contract: String, tokenId: String): List<AssetTypeDto> {
+        // TODO FLOW implement
         TODO("Not yet implemented")
     }
 
@@ -65,12 +65,19 @@ class FlowOrderService(
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
-        // TODO add currency support
-        return convert(
-            orderControllerApi.getOrderBidsByItem(
-                contract, tokenId, maker, origin, continuation, size
-            )
-        )
+        // TODO FLOW support currency filtering
+        val result = orderControllerApi.getBidsByItem(
+            contract,
+            tokenId,
+            flowOrderConverter.convert(status),
+            maker,
+            origin,
+            start?.let { OffsetDateTime.ofInstant(Instant.ofEpochMilli(it), ZoneOffset.UTC) },
+            end?.let { OffsetDateTime.ofInstant(Instant.ofEpochMilli(it), ZoneOffset.UTC) },
+            continuation,
+            size
+        ).awaitFirst()
+        return flowOrderConverter.convert(result, blockchain)
     }
 
     override suspend fun getOrderBidsByMaker(
@@ -83,15 +90,18 @@ class FlowOrderService(
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
-        // TODO status not supported
-        return convert(
-            orderControllerApi.getOrderBidsByMaker(
-                maker, origin, continuation, size
-            )
-        )
+        // TODO FLOW support status/start/end filtering
+        val result = orderControllerApi.getOrderBidsByMaker(
+            maker,
+            origin,
+            continuation,
+            size
+        ).awaitFirst()
+        return flowOrderConverter.convert(result, blockchain)
     }
 
     override suspend fun getSellCurrencies(contract: String, tokenId: String): List<AssetTypeDto> {
+        // TODO FLOW implement
         TODO("Not yet implemented")
     }
 
@@ -101,11 +111,12 @@ class FlowOrderService(
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
-        return convert(
-            orderControllerApi.getSellOrders(
-                origin, continuation, size
-            )
-        )
+        val result = orderControllerApi.getSellOrders(
+            origin,
+            continuation,
+            size
+        ).awaitFirst()
+        return flowOrderConverter.convert(result, blockchain)
     }
 
     override suspend fun getSellOrdersByCollection(
@@ -115,11 +126,13 @@ class FlowOrderService(
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
-        return convert(
-            orderControllerApi.getSellOrdersByCollection(
-                collection, origin, continuation, size
-            )
-        )
+        val result = orderControllerApi.getSellOrdersByCollection(
+            collection,
+            origin,
+            continuation,
+            size
+        ).awaitFirst()
+        return flowOrderConverter.convert(result, blockchain)
     }
 
     override suspend fun getSellOrdersByItem(
@@ -129,16 +142,21 @@ class FlowOrderService(
         maker: String?,
         origin: String?,
         status: List<OrderStatusDto>?,
-        currencyAddress: String,
+        currencyId: String,
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
-        // TODO add currency support
-        return convert(
-            orderControllerApi.getSellOrdersByItem(
-                contract, tokenId, maker, origin, continuation, size
-            )
-        )
+        val result = orderControllerApi.getSellOrdersByItemAndByStatus(
+            contract,
+            tokenId,
+            maker,
+            origin,
+            continuation,
+            size,
+            flowOrderConverter.convert(status),
+            currencyId
+        ).awaitFirst()
+        return flowOrderConverter.convert(result, blockchain)
     }
 
     override suspend fun getSellOrdersByMaker(
@@ -148,17 +166,12 @@ class FlowOrderService(
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
-        return convert(
-            orderControllerApi.getSellOrdersByMaker(
-                maker, origin, continuation, size
-            )
-        )
-    }
-
-    private suspend fun convert(orders: Mono<FlowOrdersPaginationDto>): Slice<OrderDto> {
-        return flowOrderConverter.convert(
-            orders.awaitFirst(),
-            blockchain
-        )
+        val result = orderControllerApi.getSellOrdersByMaker(
+            maker,
+            origin,
+            continuation,
+            size
+        ).awaitFirst()
+        return flowOrderConverter.convert(result, blockchain)
     }
 }

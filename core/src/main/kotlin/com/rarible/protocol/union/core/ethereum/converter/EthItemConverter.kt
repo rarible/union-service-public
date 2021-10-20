@@ -8,7 +8,16 @@ import com.rarible.protocol.dto.NftMediaDto
 import com.rarible.protocol.dto.NftMediaMetaDto
 import com.rarible.protocol.union.core.continuation.page.Page
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
-import com.rarible.protocol.union.dto.*
+import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.ImageContentDto
+import com.rarible.protocol.union.dto.ItemIdDto
+import com.rarible.protocol.union.dto.ItemRoyaltyDto
+import com.rarible.protocol.union.dto.ItemTransferDto
+import com.rarible.protocol.union.dto.MetaAttributeDto
+import com.rarible.protocol.union.dto.MetaContentDto
+import com.rarible.protocol.union.dto.MetaDto
+import com.rarible.protocol.union.dto.UnionItemDto
+import com.rarible.protocol.union.dto.VideoContentDto
 
 object EthItemConverter {
 
@@ -19,7 +28,7 @@ object EthItemConverter {
                 tokenId = item.tokenId,
                 blockchain = blockchain
             ),
-            mintedAt = item.date ?: nowMillis(), // TODO RPN-848
+            mintedAt = item.date ?: nowMillis(), // TODO ETHEREUM RPN-848
             lastUpdatedAt = item.date ?: nowMillis(),
             supply = item.supply,
             meta = item.meta?.let { convert(it) },
@@ -78,7 +87,7 @@ object EthItemConverter {
             },
             content = convertMetaContent(source.image, this::convertImage)
                     + convertMetaContent(source.animation, this::convertVideo),
-            raw = null //TODO
+            raw = null //TODO UNION Remove?
         )
     }
 
@@ -90,7 +99,7 @@ object EthItemConverter {
         ) -> T
     ): List<T> {
         return source?.url?.map { urlMap ->
-            // TODO handle unknown representation
+            // TODO UNION handle unknown representation
             val representation = MetaContentDto.Representation.valueOf(urlMap.key)
             val url = urlMap.value
             val meta = source.meta[urlMap.key]

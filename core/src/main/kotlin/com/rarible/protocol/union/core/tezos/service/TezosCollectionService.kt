@@ -14,7 +14,10 @@ class TezosCollectionService(
     private val collectionControllerApi: NftCollectionControllerApi
 ) : AbstractBlockchainService(blockchain), CollectionService {
 
-    override suspend fun getAllCollections(continuation: String?, size: Int): Page<CollectionDto> {
+    override suspend fun getAllCollections(
+        continuation: String?,
+        size: Int
+    ): Page<CollectionDto> {
         val collections = collectionControllerApi.searchNftAllCollections(
             size,
             continuation

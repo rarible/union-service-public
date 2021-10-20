@@ -12,7 +12,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
 import java.time.Instant
 
-// TODO implement
+// TODO UNION implement
 class TezosActivityService(
     blockchain: BlockchainDto,
     private val activityItemControllerApi: NftActivityControllerApi,
@@ -25,7 +25,7 @@ class TezosActivityService(
         size: Int,
         sort: ActivitySortDto?
     ): Slice<ActivityDto> {
-        return stub()
+        return Slice.empty()
     }
 
     override suspend fun getActivitiesByCollection(
@@ -35,7 +35,7 @@ class TezosActivityService(
         size: Int,
         sort: ActivitySortDto?
     ): Slice<ActivityDto> {
-        return stub()
+        return Slice.empty()
     }
 
     override suspend fun getActivitiesByItem(
@@ -46,7 +46,7 @@ class TezosActivityService(
         size: Int,
         sort: ActivitySortDto?
     ): Slice<ActivityDto> {
-        return stub()
+        return Slice.empty()
     }
 
     override suspend fun getActivitiesByUser(
@@ -58,10 +58,6 @@ class TezosActivityService(
         size: Int,
         sort: ActivitySortDto?
     ): Slice<ActivityDto> {
-        return stub()
-    }
-
-    private fun stub(): Slice<ActivityDto> {
-        return Slice(null, emptyList())
+        return Slice.empty()
     }
 }

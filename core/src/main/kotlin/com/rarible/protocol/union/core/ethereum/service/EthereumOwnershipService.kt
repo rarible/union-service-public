@@ -14,8 +14,14 @@ class EthereumOwnershipService(
     private val ownershipControllerApi: NftOwnershipControllerApi
 ) : AbstractBlockchainService(blockchain), OwnershipService {
 
-    override suspend fun getAllOwnerships(continuation: String?, size: Int): Page<UnionOwnershipDto> {
-        val ownerships = ownershipControllerApi.getNftAllOwnerships(continuation, size).awaitFirst()
+    override suspend fun getAllOwnerships(
+        continuation: String?,
+        size: Int
+    ): Page<UnionOwnershipDto> {
+        val ownerships = ownershipControllerApi.getNftAllOwnerships(
+            continuation,
+            size
+        ).awaitFirst()
         return EthOwnershipConverter.convert(ownerships, blockchain)
     }
 
@@ -30,8 +36,12 @@ class EthereumOwnershipService(
         continuation: String?,
         size: Int
     ): Page<UnionOwnershipDto> {
-        val ownerships =
-            ownershipControllerApi.getNftOwnershipsByItem(contract, tokenId, continuation, size).awaitFirst()
+        val ownerships = ownershipControllerApi.getNftOwnershipsByItem(
+            contract,
+            tokenId,
+            continuation,
+            size
+        ).awaitFirst()
         return EthOwnershipConverter.convert(ownerships, blockchain)
     }
 }

@@ -81,7 +81,7 @@ interface OrderService : BlockchainService {
         maker: String?,
         origin: String?,
         status: List<OrderStatusDto>?,
-        currencyAddress: String,
+        currencyId: String,
         continuation: String?,
         size: Int
     ): Slice<OrderDto>

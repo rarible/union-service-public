@@ -1,8 +1,8 @@
 package com.rarible.protocol.union.api.controller
 
-import com.rarible.protocol.union.api.configuration.PageSize
 import com.rarible.protocol.union.api.service.ItemApiService
 import com.rarible.protocol.union.core.continuation.ItemContinuation
+import com.rarible.protocol.union.core.continuation.page.PageSize
 import com.rarible.protocol.union.core.continuation.page.Paging
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter

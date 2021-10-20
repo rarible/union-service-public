@@ -6,11 +6,10 @@ import com.rarible.core.test.data.randomString
 import com.rarible.protocol.dto.FlowNftCollectionsDto
 import com.rarible.protocol.dto.NftCollectionsDto
 import com.rarible.protocol.union.api.client.CollectionControllerApi
-import com.rarible.protocol.union.api.configuration.PageSize
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
+import com.rarible.protocol.union.core.continuation.page.PageSize
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
-import com.rarible.protocol.union.core.flow.converter.FlowContractConverter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.test.data.randomEthAddress
@@ -69,7 +68,7 @@ class CollectionControllerFt : AbstractIntegrationTest() {
     @Test
     fun `get collection by id - flow`() = runBlocking<Unit> {
         val collectionId = randomString()
-        val collectionIdFull = FlowContractConverter.convert(collectionId, BlockchainDto.FLOW)
+        val collectionIdFull = UnionAddressConverter.convert(collectionId, BlockchainDto.FLOW)
         val collection = randomFlowCollectionDto(collectionId)
 
         coEvery { testFlowCollectionApi.getNftCollectionById(collectionId) } returns collection.toMono()

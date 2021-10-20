@@ -50,6 +50,9 @@ abstract class AbstractIntegrationTest {
     lateinit var testEthereumOrderApi: com.rarible.protocol.order.api.client.OrderControllerApi
 
     @Autowired
+    lateinit var ethCollectionProducer: RaribleKafkaProducer<com.rarible.protocol.dto.NftCollectionEventDto>
+
+    @Autowired
     lateinit var ethOrderProducer: RaribleKafkaProducer<com.rarible.protocol.dto.OrderEventDto>
 
     @Autowired
@@ -152,22 +155,13 @@ abstract class AbstractIntegrationTest {
             .filter { it.value.orderId.value == orderId }
     }
 
-    fun <T : ActivityDto> findEthActivityUpdates(
+    fun <T : ActivityDto> findActivityUpdates(
         id: String,
         type: Class<T>
     ): List<KafkaMessage<T>> {
         return filterByValueType(activityEvents as Queue<KafkaMessage<Any>>, type)
             .filter { it.value.id.value == id }
     }
-
-    fun <T : ActivityDto> findFlowActivityUpdates(
-        id: String,
-        type: Class<T>
-    ): List<KafkaMessage<T>> {
-        return filterByValueType(activityEvents as Queue<KafkaMessage<Any>>, type)
-            .filter { it.value.id.value == id }
-    }
-
 
     private fun <T> filterByValueType(messages: Queue<KafkaMessage<Any>>, type: Class<T>): Collection<KafkaMessage<T>> {
         return messages.filter {

@@ -29,15 +29,15 @@ object TezosItemConverter {
             tokenId = item.tokenId,
             collection = UnionAddress(blockchain, item.contract),
             creators = item.creators.map { TezosConverter.convertToCreator(it, blockchain) },
-            deleted = item.deleted ?: false, //todo raise to tezos
+            deleted = item.deleted ?: false, //TODO TEZOS raise to tezos, should be required
             lastUpdatedAt = item.date,
             lazySupply = item.lazySupply,
             meta = item.meta?.let { convert(it) },
-            mintedAt = item.date, // TODO update later
+            mintedAt = item.date, // TODO TEZOS add mintedAt
             owners = item.owners.map { UnionAddress(blockchain, it) },
-            pending = emptyList(), //todo tezos better delete this if they don't populate it,
             royalties = item.royalties.map { toRoyalty(it, blockchain) },
-            supply = item.supply
+            supply = item.supply,
+            pending = emptyList() // TODO TEZOS in union we won't use this field
         )
     }
 
@@ -87,7 +87,7 @@ object TezosItemConverter {
     ): RoyaltyDto {
         return RoyaltyDto(
             account = UnionAddressConverter.convert(source.account, blockchain),
-            value = source.value.toBigDecimal() // TODO do we need some multiplier here?
+            value = source.value.toBigDecimal() // TODO TEZOS do we need some multiplier here?
         )
     }
 }

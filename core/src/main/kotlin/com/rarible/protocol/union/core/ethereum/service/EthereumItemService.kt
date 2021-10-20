@@ -32,9 +32,7 @@ class EthereumItemService(
         return EthItemConverter.convert(items, blockchain)
     }
 
-    override suspend fun getItemById(
-        itemId: String
-    ): UnionItemDto {
+    override suspend fun getItemById(itemId: String): UnionItemDto {
         val item = itemControllerApi.getNftItemById(itemId).awaitFirst()
         return EthItemConverter.convert(item, blockchain)
     }
@@ -53,7 +51,11 @@ class EthereumItemService(
         continuation: String?,
         size: Int
     ): Page<UnionItemDto> {
-        val items = itemControllerApi.getNftItemsByCollection(collection, continuation, size).awaitFirst()
+        val items = itemControllerApi.getNftItemsByCollection(
+            collection,
+            continuation,
+            size
+        ).awaitFirst()
         return EthItemConverter.convert(items, blockchain)
     }
 
@@ -62,7 +64,11 @@ class EthereumItemService(
         continuation: String?,
         size: Int
     ): Page<UnionItemDto> {
-        val items = itemControllerApi.getNftItemsByCreator(creator, continuation, size).awaitFirst()
+        val items = itemControllerApi.getNftItemsByCreator(
+            creator,
+            continuation,
+            size
+        ).awaitFirst()
         return EthItemConverter.convert(items, blockchain)
     }
 
@@ -71,7 +77,11 @@ class EthereumItemService(
         continuation: String?,
         size: Int
     ): Page<UnionItemDto> {
-        val items = itemControllerApi.getNftItemsByOwner(owner, continuation, size).awaitFirst()
+        val items = itemControllerApi.getNftItemsByOwner(
+            owner,
+            continuation,
+            size
+        ).awaitFirst()
         return EthItemConverter.convert(items, blockchain)
     }
 

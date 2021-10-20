@@ -35,7 +35,6 @@ class FlowActivityConverter(
         val activityId = ActivityIdDto(blockchain, source.id)
         return when (source) {
             is FlowNftOrderActivitySellDto -> {
-                // TODO here should be price from FLOW, we don't want to calculate it here
                 val priceUsd = currencyService
                     .toUsd(blockchain, source.right.asset.contract, source.price) ?: BigDecimal.ZERO
 
@@ -49,6 +48,7 @@ class FlowActivityConverter(
                     priceUsd = priceUsd,
                     price = source.price,
                     type = OrderMatchSellDto.Type.SELL,
+                    // TODO FLOW here should be price from FLOW, we don't want to calculate it here
                     amountUsd = amountUsd(priceUsd, source.left.asset),
                     blockchainInfo = ActivityBlockchainInfoDto(
                         transactionHash = source.transactionHash,
@@ -60,7 +60,6 @@ class FlowActivityConverter(
                 )
             }
             is FlowNftOrderActivityListDto -> {
-                // TODO here should be price from FLOW, we don't want to calculate it here
                 val priceUsd = currencyService
                     .toUsd(blockchain, source.take.contract, source.price) ?: BigDecimal.ZERO
 
@@ -68,6 +67,7 @@ class FlowActivityConverter(
                     id = activityId,
                     date = source.date,
                     price = source.price,
+                    // TODO FLOW here should be price from FLOW, we don't want to calculate it here
                     priceUsd = priceUsd,
                     hash = source.hash,
                     maker = UnionAddressConverter.convert(source.maker, blockchain),
@@ -90,7 +90,7 @@ class FlowActivityConverter(
                     id = activityId,
                     date = source.date,
                     owner = UnionAddressConverter.convert(source.owner, blockchain),
-                    contract = FlowContractConverter.convert(source.contract, blockchain),
+                    contract = UnionAddressConverter.convert(source.contract, blockchain),
                     tokenId = source.tokenId,
                     value = source.value,
                     blockchainInfo = ActivityBlockchainInfoDto(
@@ -106,7 +106,7 @@ class FlowActivityConverter(
                     id = activityId,
                     date = source.date,
                     owner = UnionAddressConverter.convert(source.owner, blockchain),
-                    contract = FlowContractConverter.convert(source.contract, blockchain),
+                    contract = UnionAddressConverter.convert(source.contract, blockchain),
                     tokenId = source.tokenId,
                     value = source.value,
                     blockchainInfo = ActivityBlockchainInfoDto(
@@ -123,7 +123,7 @@ class FlowActivityConverter(
                     date = source.date,
                     from = UnionAddressConverter.convert(source.from, blockchain),
                     owner = UnionAddressConverter.convert(source.owner, blockchain),
-                    contract = FlowContractConverter.convert(source.contract, blockchain),
+                    contract = UnionAddressConverter.convert(source.contract, blockchain),
                     tokenId = source.tokenId,
                     value = source.value,
                     blockchainInfo = ActivityBlockchainInfoDto(

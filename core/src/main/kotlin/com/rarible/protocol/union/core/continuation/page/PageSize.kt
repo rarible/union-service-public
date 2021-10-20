@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.api.configuration
+package com.rarible.protocol.union.core.continuation.page
 
 data class PageSize(
     val default: Int,

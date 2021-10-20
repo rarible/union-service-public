@@ -24,14 +24,13 @@ object TezosOwnershipConverter {
                 owner = owner
             ),
             value = ownership.value,
-            createdAt = ownership.date, //TODO ask TEZOS to add this
+            createdAt = ownership.date, //TODO TEZOS add createdAt
             contract = contract,
             tokenId = tokenId,
             owner = owner,
             creators = ownership.creators.map { TezosConverter.convertToCreator(it, blockchain) },
-            //lazyValue = BigInteger.ZERO,
             lazyValue = ownership.lazyValue,
-            pending = emptyList() // TODO won't populate for now
+            pending = emptyList() // TODO TEZOS in union we won't use this field
         )
     }
 

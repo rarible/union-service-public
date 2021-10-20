@@ -30,7 +30,7 @@ class FlowActivityEventHandlerFt : AbstractIntegrationTest() {
         ).fullId()
 
         Wait.waitAssert {
-            val messages = findFlowActivityUpdates(event.id, OrderCancelListActivityDto::class.java)
+            val messages = findActivityUpdates(event.id, OrderCancelListActivityDto::class.java)
             Assertions.assertThat(messages).hasSize(1)
             Assertions.assertThat(messages[0].key).isEqualTo(expectedKey)
             Assertions.assertThat(messages[0].id).isEqualTo(expectedKey)

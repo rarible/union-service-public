@@ -1,8 +1,8 @@
 package com.rarible.protocol.union.core.flow.converter
 
 import com.rarible.protocol.dto.FlowOrderDto
+import com.rarible.protocol.dto.FlowOrderStatusDto
 import com.rarible.protocol.dto.FlowOrdersPaginationDto
-import com.rarible.protocol.dto.PayInfoDto
 import com.rarible.protocol.union.core.continuation.page.Slice
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.model.ext
@@ -11,7 +11,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.FlowOrderDataV1Dto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
-import com.rarible.protocol.union.dto.OrderPayoutDto
+import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PlatformDto
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -74,20 +74,27 @@ class FlowOrderConverter(
         )
     }
 
+    fun convert(source: List<OrderStatusDto>?): List<FlowOrderStatusDto>? {
+        return source?.map { convert(it) } ?: emptyList()
+    }
+
+    fun convert(source: OrderStatusDto): FlowOrderStatusDto {
+        return when (source) {
+            OrderStatusDto.ACTIVE -> FlowOrderStatusDto.ACTIVE
+            OrderStatusDto.FILLED -> FlowOrderStatusDto.FILLED
+            OrderStatusDto.HISTORICAL -> FlowOrderStatusDto.HISTORICAL
+            OrderStatusDto.INACTIVE -> FlowOrderStatusDto.INACTIVE
+            OrderStatusDto.CANCELLED -> FlowOrderStatusDto.CANCELLED
+        }
+    }
+
     private fun convert(
         source: com.rarible.protocol.dto.FlowOrderDataDto,
         blockchain: BlockchainDto
     ): FlowOrderDataV1Dto {
         return FlowOrderDataV1Dto(
-            payouts = source.payouts.map { convert(it, blockchain) },
-            originFees = source.originalFees.map { convert(it, blockchain) }
-        )
-    }
-
-    private fun convert(source: PayInfoDto, blockchain: BlockchainDto): OrderPayoutDto {
-        return OrderPayoutDto(
-            account = UnionAddressConverter.convert(source.account, blockchain),
-            value = source.value.toBigInteger()
+            payouts = source.payouts.map { FlowConverter.convertToPayout(it, blockchain) },
+            originFees = source.originalFees.map { FlowConverter.convertToPayout(it, blockchain) }
         )
     }
 }

@@ -2,6 +2,7 @@ package com.rarible.protocol.union.enrichment.service
 
 import com.mongodb.client.result.DeleteResult
 import com.rarible.core.common.nowMillis
+import com.rarible.protocol.union.core.continuation.page.PageSize
 import com.rarible.protocol.union.core.service.OwnershipService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.OrderDto
@@ -74,7 +75,7 @@ class EnrichmentOwnershipService(
                 itemId.token,
                 itemId.tokenId.toString(),
                 continuation,
-                1000 // TODO
+                PageSize.OWNERSHIP.max
             )
             result.addAll(page.entities)
             continuation = page.continuation

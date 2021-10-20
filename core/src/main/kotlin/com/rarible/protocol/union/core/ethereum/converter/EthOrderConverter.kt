@@ -264,7 +264,7 @@ class EthOrderConverter(
                 take = source.take?.let { EthConverter.convert(it, blockchain) },
                 date = source.date,
                 side = source.side?.let { convert(it) },
-                /** TODO [OrderSideMatchDto.fill] must be BigDecimal, or fillValue */
+                /** TODO ETHEREUM [OrderSideMatchDto.fill] must be BigDecimal, or fillValue */
                 fill = source.fill.toBigDecimal(),
                 maker = source.maker?.let { UnionAddressConverter.convert(it, blockchain) },
                 taker = source.taker?.let { UnionAddressConverter.convert(it, blockchain) },

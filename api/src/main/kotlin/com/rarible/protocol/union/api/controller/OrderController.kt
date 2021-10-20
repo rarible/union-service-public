@@ -1,8 +1,8 @@
 package com.rarible.protocol.union.api.controller
 
-import com.rarible.protocol.union.api.configuration.PageSize
 import com.rarible.protocol.union.api.service.OrderApiService
 import com.rarible.protocol.union.core.continuation.OrderContinuation
+import com.rarible.protocol.union.core.continuation.page.PageSize
 import com.rarible.protocol.union.core.continuation.page.Paging
 import com.rarible.protocol.union.core.continuation.page.Slice
 import com.rarible.protocol.union.core.service.OrderService
@@ -118,7 +118,7 @@ class OrderController(
         return ResponseEntity.ok(result)
     }
 
-    // TODO add tests
+    // TODO UNION add tests
     override suspend fun getOrdersByIds(orderIdsDto: OrderIdsDto): ResponseEntity<OrdersDto> {
         val orderIds = orderIdsDto.ids
             .map { IdParser.parse(it) }

@@ -4,7 +4,6 @@ import com.rarible.protocol.flow.nft.api.client.FlowNftCryptoControllerApi
 import com.rarible.protocol.union.core.service.SignatureService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.SignatureValidationFormDto
 import kotlinx.coroutines.reactive.awaitFirst
 
 class FlowSignatureService(
@@ -12,11 +11,15 @@ class FlowSignatureService(
     private val signatureControllerApi: FlowNftCryptoControllerApi
 ) : AbstractBlockchainService(blockchain), SignatureService {
 
-    override suspend fun validate(form: SignatureValidationFormDto): Boolean {
+    override suspend fun validate(
+        signer: String,
+        signature: String,
+        message: String
+    ): Boolean {
         return signatureControllerApi.verifySignature(
-            form.signer.value,
-            form.signature,
-            form.message
+            signer,
+            signature,
+            message
         ).awaitFirst()
     }
 }

@@ -6,13 +6,22 @@ import com.rarible.protocol.dto.FlowNftItemsDto
 import com.rarible.protocol.dto.FlowRoyaltyDto
 import com.rarible.protocol.union.core.continuation.page.Page
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
-import com.rarible.protocol.union.dto.*
+import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.CreatorDto
+import com.rarible.protocol.union.dto.ImageContentDto
+import com.rarible.protocol.union.dto.ItemIdDto
+import com.rarible.protocol.union.dto.MetaAttributeDto
+import com.rarible.protocol.union.dto.MetaContentDto
+import com.rarible.protocol.union.dto.MetaDto
+import com.rarible.protocol.union.dto.RoyaltyDto
+import com.rarible.protocol.union.dto.UnionItemDto
+import com.rarible.protocol.union.dto.VideoContentDto
 import java.math.BigInteger
 
 object FlowItemConverter {
 
     fun convert(item: FlowNftItemDto, blockchain: BlockchainDto): UnionItemDto {
-        val collection = FlowContractConverter.convert(item.collection, blockchain)
+        val collection = UnionAddressConverter.convert(item.collection, blockchain)
 
         return UnionItemDto(
             id = ItemIdDto(
@@ -62,8 +71,8 @@ object FlowItemConverter {
         )
     }
 
-    fun convert(source: com.rarible.protocol.dto.MetaDto): MetaDto =
-        MetaDto(
+    fun convert(source: com.rarible.protocol.dto.MetaDto): MetaDto {
+        return MetaDto(
             name = source.name,
             description = source.description,
             attributes = source.attributes.orEmpty()
@@ -75,7 +84,7 @@ object FlowItemConverter {
                         format = null
                     )
                 },
-            // TODO improve conversion when Flow fixes the model of meta
+            // TODO FLOW improve MetaData model in order to identify video/image
             content = source.contents.orEmpty().map { dto ->
                 if ("video" in dto.contentType) {
                     VideoContentDto(
@@ -93,4 +102,5 @@ object FlowItemConverter {
             },
             raw = source.raw
         )
+    }
 }

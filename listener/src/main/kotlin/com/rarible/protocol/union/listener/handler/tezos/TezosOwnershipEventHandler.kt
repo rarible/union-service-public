@@ -37,7 +37,5 @@ class TezosOwnershipEventHandler(
                 // skip it, will be logged inside of parser
             }
         }
-
     }
-
 }

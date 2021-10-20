@@ -7,9 +7,9 @@ import com.rarible.protocol.dto.FlowOrdersPaginationDto
 import com.rarible.protocol.dto.OrdersPaginationDto
 import com.rarible.protocol.tezos.dto.OrderPaginationDto
 import com.rarible.protocol.union.api.client.OrderControllerApi
-import com.rarible.protocol.union.api.configuration.PageSize
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
+import com.rarible.protocol.union.core.continuation.page.PageSize
 import com.rarible.protocol.union.core.ethereum.converter.EthConverter
 import com.rarible.protocol.union.core.ethereum.converter.EthOrderConverter
 import com.rarible.protocol.union.dto.BlockchainDto

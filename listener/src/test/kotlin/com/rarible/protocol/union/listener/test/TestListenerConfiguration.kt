@@ -13,6 +13,7 @@ import com.rarible.protocol.dto.FlowNftOwnershipEventTopicProvider
 import com.rarible.protocol.dto.FlowOrderEventDto
 import com.rarible.protocol.dto.FlowOrderEventTopicProvider
 import com.rarible.protocol.dto.FlowOwnershipEventDto
+import com.rarible.protocol.dto.NftCollectionEventTopicProvider
 import com.rarible.protocol.dto.NftItemEventDto
 import com.rarible.protocol.dto.NftItemEventTopicProvider
 import com.rarible.protocol.dto.NftOwnershipEventDto
@@ -25,7 +26,6 @@ import com.rarible.protocol.nft.api.client.NftItemControllerApi
 import com.rarible.protocol.nft.api.client.NftOwnershipControllerApi
 import com.rarible.protocol.tezos.dto.TezosEventTopicProvider
 import com.rarible.protocol.union.core.CoreConfiguration
-import com.rarible.protocol.union.core.UnionKafkaJsonSerializer
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.CollectionEventDto
 import com.rarible.protocol.union.dto.ItemEventDto
@@ -34,6 +34,7 @@ import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.dto.UnionEventTopicProvider
 import com.rarible.protocol.union.listener.config.activity.FlowActivityTopicProvider
 import com.rarible.protocol.union.subscriber.UnionKafkaJsonDeserializer
+import com.rarible.protocol.union.subscriber.UnionKafkaJsonSerializer
 import com.rarible.protocol.union.test.mock.CurrencyMock
 import io.mockk.mockk
 import org.apache.kafka.clients.consumer.OffsetResetStrategy
@@ -151,6 +152,17 @@ class TestListenerConfiguration {
             valueSerializerClass = UnionKafkaJsonSerializer::class.java,
             valueClass = com.rarible.protocol.dto.OrderEventDto::class.java,
             defaultTopic = OrderIndexerTopicProvider.getUpdateTopic(applicationEnvironmentInfo().name, "ethereum"),
+            bootstrapServers = kafkaContainer.kafkaBoostrapServers()
+        )
+    }
+
+    @Bean
+    fun testEthereumCollectionEventProducer(): RaribleKafkaProducer<com.rarible.protocol.dto.NftCollectionEventDto> {
+        return RaribleKafkaProducer(
+            clientId = "test.union.ethereum.activity",
+            valueSerializerClass = UnionKafkaJsonSerializer::class.java,
+            valueClass = com.rarible.protocol.dto.NftCollectionEventDto::class.java,
+            defaultTopic = NftCollectionEventTopicProvider.getTopic(applicationEnvironmentInfo().name, "ethereum"),
             bootstrapServers = kafkaContainer.kafkaBoostrapServers()
         )
     }
