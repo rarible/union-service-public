@@ -8,8 +8,11 @@ import com.rarible.core.test.data.randomInt
 import com.rarible.core.test.data.randomLong
 import com.rarible.core.test.data.randomString
 import com.rarible.protocol.tezos.dto.AssetDto
+import com.rarible.protocol.tezos.dto.BurnDto
 import com.rarible.protocol.tezos.dto.FA_1_2AssetTypeDto
 import com.rarible.protocol.tezos.dto.FA_2AssetTypeDto
+import com.rarible.protocol.tezos.dto.MintDto
+import com.rarible.protocol.tezos.dto.NftActivityEltDto
 import com.rarible.protocol.tezos.dto.NftCollectionDto
 import com.rarible.protocol.tezos.dto.NftCollectionFeatureDto
 import com.rarible.protocol.tezos.dto.NftCollectionTypeDto
@@ -17,11 +20,19 @@ import com.rarible.protocol.tezos.dto.NftItemAttributeDto
 import com.rarible.protocol.tezos.dto.NftItemDto
 import com.rarible.protocol.tezos.dto.NftItemMetaDto
 import com.rarible.protocol.tezos.dto.NftOwnershipDto
+import com.rarible.protocol.tezos.dto.OrderActivityBidDto
+import com.rarible.protocol.tezos.dto.OrderActivityCancelBidDto
+import com.rarible.protocol.tezos.dto.OrderActivityCancelListDto
+import com.rarible.protocol.tezos.dto.OrderActivityListDto
+import com.rarible.protocol.tezos.dto.OrderActivityMatchDto
+import com.rarible.protocol.tezos.dto.OrderActivitySideMatchDto
+import com.rarible.protocol.tezos.dto.OrderActivitySideTypeDto
 import com.rarible.protocol.tezos.dto.OrderDto
 import com.rarible.protocol.tezos.dto.OrderPriceHistoryRecordDto
 import com.rarible.protocol.tezos.dto.OrderRaribleV2DataV1Dto
 import com.rarible.protocol.tezos.dto.OrderStatusDto
 import com.rarible.protocol.tezos.dto.PartDto
+import com.rarible.protocol.tezos.dto.TransferDto
 import com.rarible.protocol.tezos.dto.XTZAssetTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
@@ -36,7 +47,6 @@ fun randomTezosContract() = UnionAddress(BlockchainDto.TEZOS, randomString(12))
 fun randomTezosAddress() = UnionAddress(BlockchainDto.TEZOS, Long.toHexString(randomLong()))
 
 fun randomTezosItemId() = ItemIdDto(BlockchainDto.TEZOS, randomTezosContract(), randomLong().toBigInteger())
-fun randomTezosItemIdShortValue() = randomTezosItemId().value
 fun randomTezosItemIdFullValue() = randomTezosItemId().fullId()
 
 fun randomTezosPartDto() = randomTezosPartDto(randomString())
@@ -79,7 +89,7 @@ fun randomTezosOwnershipDto(itemId: ItemIdDto) = randomTezosOwnershipDto(
         itemId.blockchain,
         itemId.token,
         itemId.tokenId,
-        UnionAddress(BlockchainDto.TEZOS, randomAddressString())
+        UnionAddress(BlockchainDto.TEZOS, randomString())
     )
 )
 
@@ -192,5 +202,139 @@ fun randomTezosOrderPriceHistoryRecordDto(): OrderPriceHistoryRecordDto {
         date = nowMillis(),
         makeValue = randomBigDecimal(),
         takeValue = randomBigDecimal()
+    )
+}
+
+fun randomTezosOrderActivityMatch(): OrderActivityMatchDto {
+    return OrderActivityMatchDto(
+        id = randomString(),
+        date = nowMillis(),
+        source = "RARIBLE",
+        left = randomTezosOrderActivityMatchSide(),
+        right = randomTezosOrderActivityMatchSide(),
+        price = randomBigDecimal(),
+        transactionHash = randomString(),
+        blockHash = randomString(),
+        blockNumber = randomBigInt(8),
+        logIndex = randomInt()
+        //type = 
+    )
+}
+
+fun randomTezosOrderBidActivity(): OrderActivityBidDto {
+    return OrderActivityBidDto(
+        id = randomString(),
+        date = nowMillis(),
+        source = "RARIBLE",
+        hash = randomString(16),
+        maker = randomString(),
+        make = randomTezosAssetFa2(),
+        take = randomTezosAssetFa12(),
+        price = randomBigDecimal()
+    )
+}
+
+fun randomTezosOrderListActivity(): OrderActivityListDto {
+    return OrderActivityListDto(
+        id = randomString(),
+        date = nowMillis(),
+        source = "RARIBLE",
+        hash = randomString(16),
+        maker = randomString(),
+        make = randomTezosAssetFa2(),
+        take = randomTezosAssetFa12(),
+        price = randomBigDecimal()
+    )
+}
+
+fun randomTezosOrderActivityCancelBid(): OrderActivityCancelBidDto {
+    return OrderActivityCancelBidDto(
+        id = randomString(),
+        date = nowMillis(),
+        source = "RARIBLE",
+        transactionHash = randomString(),
+        blockHash = randomString(),
+        blockNumber = randomBigInt(8),
+        logIndex = randomInt(),
+        maker = randomString(),
+        hash = randomString(16),
+        make = randomTezosAssetXtz().assetType,
+        take = randomTezosAssetFa2().assetType
+    )
+}
+
+fun randomTezosOrderActivityCancelList(): OrderActivityCancelListDto {
+    return OrderActivityCancelListDto(
+        id = randomString(),
+        date = nowMillis(),
+        source = "RARIBLE",
+        transactionHash = randomString(),
+        blockHash = randomString(),
+        blockNumber = randomBigInt(8),
+        logIndex = randomInt(),
+        maker = randomString(),
+        hash = randomString(16),
+        make = randomTezosAssetXtz().assetType,
+        take = randomTezosAssetFa2().assetType
+    )
+}
+
+fun randomTezosItemMintActivity(): MintDto {
+    return MintDto(
+        id = randomString(),
+        date = nowMillis(),
+        source = "RARIBLE",
+        owner = randomString(),
+        contract = randomString(),
+        tokenId = randomBigInt(),
+        value = randomBigInt(),
+        transactionHash = randomString(),
+        blockHash = randomString(),
+        blockNumber = randomBigInt(8),
+        logIndex = randomInt()
+    )
+}
+
+fun randomTezosItemBurnActivity(): BurnDto {
+    return BurnDto(
+        id = randomString(),
+        date = nowMillis(),
+        source = "RARIBLE",
+        owner = randomString(),
+        contract = randomString(),
+        tokenId = randomBigInt(),
+        value = randomBigInt(),
+        transactionHash = randomString(),
+        blockHash = randomString(),
+        blockNumber = randomBigInt(8),
+        logIndex = randomInt()
+    )
+}
+
+fun randomTezosItemTransferActivity(): TransferDto {
+    return TransferDto(
+        id = randomString(),
+        date = nowMillis(),
+        source = "RARIBLE",
+        from = randomString(),
+        elt = NftActivityEltDto(
+            owner = randomString(),
+            contract = randomString(),
+            tokenId = randomBigInt(),
+            value = randomBigInt(),
+            transactionHash = randomString(),
+            blockHash = randomString(),
+            blockNumber = randomBigInt(8),
+            logIndex = randomInt()
+        )
+    )
+}
+
+fun randomTezosOrderActivityMatchSide(): OrderActivitySideMatchDto {
+    return OrderActivitySideMatchDto(
+        maker = randomString(),
+        hash = randomString(16),
+        asset = randomTezosAssetXtz(),
+        type = OrderActivitySideTypeDto.values()[randomInt(OrderActivitySideTypeDto.values().size)]
     )
 }

@@ -52,14 +52,24 @@ class CurrencyService(
         return if (supported) cached else null
     }
 
-    suspend fun toUsd(blockchain: BlockchainDto, address: String, value: BigDecimal?): BigDecimal? {
+    suspend fun toUsd(
+        blockchain: BlockchainDto,
+        address: String,
+        value: BigDecimal?,
+        at: Instant? = null
+    ): BigDecimal? {
         if (value == null) {
             return null
         }
         if (value == BigDecimal.ZERO) {
             return BigDecimal.ZERO
         }
-        val rate = getCurrentRate(blockchain, address)
+
+        val rate = if (canUseCurrentRate(at)) {
+            getCurrentRate(blockchain, address)
+        } else {
+            fetchRateSafe(blockchain, address, at!!)
+        }
         return rate?.let { value.multiply(it.rate) }
     }
 
@@ -116,6 +126,11 @@ class CurrencyService(
         ).awaitFirstOrNull()
 
         return result?.let { CurrencyConverter.convert(result) }
+    }
+
+    private fun canUseCurrentRate(at: Instant?): Boolean {
+        // We're using current rate for historical rates if date is not greater than 30 minutes ago
+        return at == null || System.currentTimeMillis() - at.toEpochMilli() < 30 * 60 * 1000
     }
 
 }
