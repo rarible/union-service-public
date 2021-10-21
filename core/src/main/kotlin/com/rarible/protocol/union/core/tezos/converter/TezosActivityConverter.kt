@@ -3,9 +3,13 @@ package com.rarible.protocol.union.core.tezos.converter
 import com.rarible.protocol.tezos.dto.ActivityTypeDto
 import com.rarible.protocol.tezos.dto.BurnDto
 import com.rarible.protocol.tezos.dto.MintDto
+import com.rarible.protocol.tezos.dto.NftActivityFilterAllTypeDto
+import com.rarible.protocol.tezos.dto.NftActivityFilterUserTypeDto
 import com.rarible.protocol.tezos.dto.OrderActivityBidDto
 import com.rarible.protocol.tezos.dto.OrderActivityCancelBidDto
 import com.rarible.protocol.tezos.dto.OrderActivityCancelListDto
+import com.rarible.protocol.tezos.dto.OrderActivityFilterAllTypeDto
+import com.rarible.protocol.tezos.dto.OrderActivityFilterUserTypeDto
 import com.rarible.protocol.tezos.dto.OrderActivityListDto
 import com.rarible.protocol.tezos.dto.OrderActivityMatchDto
 import com.rarible.protocol.tezos.dto.OrderActivitySideMatchDto
@@ -28,6 +32,7 @@ import com.rarible.protocol.union.dto.OrderListActivityDto
 import com.rarible.protocol.union.dto.OrderMatchSellDto
 import com.rarible.protocol.union.dto.OrderMatchSwapDto
 import com.rarible.protocol.union.dto.TransferActivityDto
+import com.rarible.protocol.union.dto.UserActivityTypeDto
 import org.springframework.stereotype.Component
 
 @Component
@@ -187,6 +192,65 @@ class TezosActivityConverter(
                 )
             }
         }
+    }
+
+    fun asUserOrderActivityType(source: UserActivityTypeDto): OrderActivityFilterUserTypeDto? {
+        return when (source) {
+            UserActivityTypeDto.MAKE_BID -> OrderActivityFilterUserTypeDto.MAKE_BID
+            UserActivityTypeDto.GET_BID -> OrderActivityFilterUserTypeDto.GET_BID
+            UserActivityTypeDto.BUY -> OrderActivityFilterUserTypeDto.BUY
+            UserActivityTypeDto.LIST -> OrderActivityFilterUserTypeDto.LIST
+            UserActivityTypeDto.SELL -> OrderActivityFilterUserTypeDto.SELL
+            else -> null
+        }
+    }
+
+    fun asUserNftActivityType(source: UserActivityTypeDto): NftActivityFilterUserTypeDto? {
+        return when (source) {
+            UserActivityTypeDto.TRANSFER_FROM -> NftActivityFilterUserTypeDto.TRANSFER_FROM
+            UserActivityTypeDto.TRANSFER_TO -> NftActivityFilterUserTypeDto.TRANSFER_TO
+            UserActivityTypeDto.MINT -> NftActivityFilterUserTypeDto.MINT
+            UserActivityTypeDto.BURN -> NftActivityFilterUserTypeDto.BURN
+            else -> null
+        }
+    }
+
+    fun asOrderActivityType(source: com.rarible.protocol.union.dto.ActivityTypeDto): OrderActivityFilterAllTypeDto? {
+        return when (source) {
+            com.rarible.protocol.union.dto.ActivityTypeDto.BID -> OrderActivityFilterAllTypeDto.BID
+            com.rarible.protocol.union.dto.ActivityTypeDto.LIST -> OrderActivityFilterAllTypeDto.LIST
+            com.rarible.protocol.union.dto.ActivityTypeDto.SELL -> OrderActivityFilterAllTypeDto.MATCH
+            else -> null
+        }
+    }
+
+    fun asNftActivityType(source: com.rarible.protocol.union.dto.ActivityTypeDto): NftActivityFilterAllTypeDto? {
+        return when (source) {
+            com.rarible.protocol.union.dto.ActivityTypeDto.BURN -> NftActivityFilterAllTypeDto.BURN
+            com.rarible.protocol.union.dto.ActivityTypeDto.MINT -> NftActivityFilterAllTypeDto.MINT
+            com.rarible.protocol.union.dto.ActivityTypeDto.TRANSFER -> NftActivityFilterAllTypeDto.TRANSFER
+            else -> null
+        }
+    }
+
+    fun convertToNftTypes(types: List<com.rarible.protocol.union.dto.ActivityTypeDto>): List<NftActivityFilterAllTypeDto>? {
+        val result = types.mapNotNull { asNftActivityType(it) }.distinct()
+        return result.ifEmpty { null }
+    }
+
+    fun convertToOrderTypes(types: List<com.rarible.protocol.union.dto.ActivityTypeDto>): List<OrderActivityFilterAllTypeDto>? {
+        val result = types.mapNotNull { asOrderActivityType(it) }.distinct()
+        return result.ifEmpty { null }
+    }
+
+    fun convertToNftUserTypes(types: List<UserActivityTypeDto>): List<NftActivityFilterUserTypeDto>? {
+        val result = types.mapNotNull { asUserNftActivityType(it) }.distinct()
+        return result.ifEmpty { null }
+    }
+
+    fun convertToOrderUserTypes(types: List<UserActivityTypeDto>): List<OrderActivityFilterUserTypeDto>? {
+        val result = types.mapNotNull { asUserOrderActivityType(it) }.distinct()
+        return result.ifEmpty { null }
     }
 
     private suspend fun activityToSell(

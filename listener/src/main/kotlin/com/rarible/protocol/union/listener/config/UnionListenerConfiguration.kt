@@ -24,6 +24,7 @@ import com.rarible.protocol.union.core.ethereum.converter.EthActivityConverter
 import com.rarible.protocol.union.core.ethereum.converter.EthOrderConverter
 import com.rarible.protocol.union.core.flow.converter.FlowActivityConverter
 import com.rarible.protocol.union.core.flow.converter.FlowOrderConverter
+import com.rarible.protocol.union.core.tezos.converter.TezosActivityConverter
 import com.rarible.protocol.union.core.tezos.converter.TezosOrderConverter
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -46,6 +47,7 @@ import com.rarible.protocol.union.listener.handler.flow.FlowActivityEventHandler
 import com.rarible.protocol.union.listener.handler.flow.FlowItemEventHandler
 import com.rarible.protocol.union.listener.handler.flow.FlowOrderEventHandler
 import com.rarible.protocol.union.listener.handler.flow.FlowOwnershipEventHandler
+import com.rarible.protocol.union.listener.handler.tezos.TezosActivityEventHandler
 import com.rarible.protocol.union.listener.handler.tezos.TezosItemEventHandler
 import com.rarible.protocol.union.listener.handler.tezos.TezosOrderEventHandler
 import com.rarible.protocol.union.listener.handler.tezos.TezosOwnershipEventHandler
@@ -354,14 +356,15 @@ class UnionListenerConfiguration(
         return createBatchedConsumerWorker(consumer, handler, TEZOS, Entity.ORDER, tezosProperties.orderWorkers)
     }
 
-    /*
     @Bean
-    fun tezosActivityWorker(factory: TezosEventsConsumerFactory): KafkaConsumerWorker<TezosActivityDto> {
+    fun tezosActivityWorker(
+        factory: TezosEventsConsumerFactory,
+        tezosActivityConverter: TezosActivityConverter
+    ): KafkaConsumerWorker<com.rarible.protocol.tezos.dto.ActivityDto> {
         val consumer = factory.createActivityConsumer(consumerGroup(Entity.ACTIVITY))
-        val handler = TezosActivityEventHandler(activityProducer, BlockchainDto.TEZOS)
+        val handler = TezosActivityEventHandler(activityProducer, BlockchainDto.TEZOS, tezosActivityConverter)
         return createSingleConsumerWorker(consumer, handler, TEZOS, Entity.ACTIVITY)
     }
-    */
 
     private fun <T> createSingleConsumerWorker(
         consumer: RaribleKafkaConsumer<T>,

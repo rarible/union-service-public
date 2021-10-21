@@ -49,6 +49,46 @@ class CurrencyServiceTest {
     }
 
     @Test
+    fun `to usd - actual`() = runBlocking<Unit> {
+        val rate = randomBigDecimal()
+        val blockchain = BlockchainDto.ETHEREUM
+        val address = randomAddressString()
+        mockCurrency(blockchain, address, rate, BigDecimal.ONE)
+
+        val at = nowMillis().minusSeconds(60 * 29)
+
+        val usdRate1 = currencyService.toUsd(blockchain, address, BigDecimal.ONE, at)
+        val usdRate2 = currencyService.toUsd(blockchain, address, BigDecimal.ONE, at)
+
+        // Both times should be rate * BigDecimal.ONE
+        assertThat(usdRate1).isEqualTo(rate)
+        assertThat(usdRate2).isEqualTo(rate)
+
+        // Both times we requested rate in "actual" time rage - so only 1 call should be here
+        verifyCurrency(blockchain, address, 1)
+    }
+
+    @Test
+    fun `to usd - historical`() = runBlocking<Unit> {
+        val rate = randomBigDecimal()
+        val blockchain = BlockchainDto.ETHEREUM
+        val address = randomAddressString()
+        mockCurrency(blockchain, address, rate, BigDecimal.ONE)
+
+        val at = nowMillis().minusSeconds(60 * 29)
+
+        val usdRate1 = currencyService.toUsd(blockchain, address, BigDecimal.ONE, at)
+        val usdRate2 = currencyService.toUsd(blockchain, address, BigDecimal.ONE, at.minusSeconds(2 * 60))
+
+        // Second request should return rate == 1
+        assertThat(usdRate1).isEqualTo(rate)
+        assertThat(usdRate2).isEqualTo(BigDecimal.ONE)
+
+        // Both times we requested rate in "actual" time rage - so only 1 call should be here
+        verifyCurrency(blockchain, address, 2)
+    }
+
+    @Test
     fun `get current rate`() = runBlocking<Unit> {
         val rate = randomBigDecimal()
         val blockchain = BlockchainDto.FLOW

@@ -95,7 +95,7 @@ class EnrichmentItemEventService(
 
     private suspend fun updateOrder(
         itemId: ShortItemId,
-        order: OrderDto? = null,
+        order: OrderDto,
         orderUpdateAction: suspend (item: ShortItem) -> ShortItem
     ) = optimisticLock {
         val current = itemService.get(itemId)
