@@ -1,7 +1,12 @@
 package com.rarible.protocol.union.core.tezos.converter
 
+import com.rarible.protocol.tezos.dto.NftActivityFilterAllTypeDto
+import com.rarible.protocol.tezos.dto.NftActivityFilterUserTypeDto
+import com.rarible.protocol.tezos.dto.OrderActivityFilterAllTypeDto
+import com.rarible.protocol.tezos.dto.OrderActivityFilterUserTypeDto
 import com.rarible.protocol.tezos.dto.OrderActivitySideMatchDto
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
+import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.BurnActivityDto
 import com.rarible.protocol.union.dto.MintActivityDto
@@ -14,6 +19,7 @@ import com.rarible.protocol.union.dto.OrderMatchActivityDto
 import com.rarible.protocol.union.dto.OrderMatchSellDto
 import com.rarible.protocol.union.dto.OrderMatchSwapDto
 import com.rarible.protocol.union.dto.TransferActivityDto
+import com.rarible.protocol.union.dto.UserActivityTypeDto
 import com.rarible.protocol.union.test.data.randomTezosAssetFa2
 import com.rarible.protocol.union.test.data.randomTezosItemBurnActivity
 import com.rarible.protocol.union.test.data.randomTezosItemMintActivity
@@ -221,6 +227,69 @@ class TezosActivityConverterTest {
         assertThat(converted.blockchainInfo.blockHash).isEqualTo(dto.elt.blockHash)
         assertThat(converted.blockchainInfo.blockNumber).isEqualTo(dto.elt.blockNumber.toLong())
         assertThat(converted.blockchainInfo.logIndex).isEqualTo(dto.elt.logIndex)
+    }
+
+    @Test
+    fun `tezos nft activity types`() {
+        val result = tezosActivityConverter.convertToNftTypes(
+            // To check deduplication
+            ActivityTypeDto.values().toList() + ActivityTypeDto.values().toList()
+        )
+
+        assertThat(result).hasSize(3)
+        assertThat(result).contains(
+            NftActivityFilterAllTypeDto.MINT,
+            NftActivityFilterAllTypeDto.BURN,
+            NftActivityFilterAllTypeDto.TRANSFER
+        )
+    }
+
+    @Test
+    fun `tezos order activity types`() {
+        val result = tezosActivityConverter.convertToOrderTypes(
+            // To check deduplication
+            ActivityTypeDto.values().toList() + ActivityTypeDto.values().toList()
+        )
+
+        assertThat(result).hasSize(3)
+        assertThat(result).contains(
+            OrderActivityFilterAllTypeDto.BID,
+            OrderActivityFilterAllTypeDto.MATCH,
+            OrderActivityFilterAllTypeDto.LIST
+        )
+    }
+
+    @Test
+    fun `tezos nft user activity types`() {
+        val result = tezosActivityConverter.convertToOrderUserTypes(
+            // To check deduplication
+            UserActivityTypeDto.values().toList() + UserActivityTypeDto.values().toList()
+        )
+
+        assertThat(result).hasSize(5)
+        assertThat(result).contains(
+            OrderActivityFilterUserTypeDto.SELL,
+            OrderActivityFilterUserTypeDto.LIST,
+            OrderActivityFilterUserTypeDto.GET_BID,
+            OrderActivityFilterUserTypeDto.BUY,
+            OrderActivityFilterUserTypeDto.MAKE_BID
+        )
+    }
+
+    @Test
+    fun `tezos order user activity types`() {
+        val result = tezosActivityConverter.convertToNftUserTypes(
+            // To check deduplication
+            UserActivityTypeDto.values().toList() + UserActivityTypeDto.values().toList()
+        )
+
+        assertThat(result).hasSize(4)
+        assertThat(result).contains(
+            NftActivityFilterUserTypeDto.MINT,
+            NftActivityFilterUserTypeDto.BURN,
+            NftActivityFilterUserTypeDto.TRANSFER_TO,
+            NftActivityFilterUserTypeDto.TRANSFER_FROM
+        )
     }
 
     private fun assertMatchSide(

@@ -53,6 +53,9 @@ class TestListenerConfiguration {
         return ApplicationEnvironmentInfo("test", "test.com")
     }
 
+    //----------------- UNION CONSUMERS ------------------//
+    // Test consumers with EARLIEST offset
+
     @Bean
     fun testCollectionConsumer(): RaribleKafkaConsumer<CollectionEventDto> {
         val topic = UnionEventTopicProvider.getCollectionTopic(applicationEnvironmentInfo().name)
@@ -123,6 +126,8 @@ class TestListenerConfiguration {
         )
     }
 
+    //---------------- ETHEREUM producers ----------------//
+
     @Bean
     fun testEthereumItemEventProducer(): RaribleKafkaProducer<NftItemEventDto> {
         return RaribleKafkaProducer(
@@ -178,6 +183,8 @@ class TestListenerConfiguration {
         )
     }
 
+    //------------------ FLOW producers ------------------//
+
     @Bean
     fun testFlowItemEventProducer(): RaribleKafkaProducer<FlowNftItemEventDto> {
         return RaribleKafkaProducer(
@@ -222,7 +229,7 @@ class TestListenerConfiguration {
         )
     }
 
-    //---------------------- TEZOS -----------------------//
+    //----------------- TEZOS producers ------------------//
 
     @Bean
     fun testTezosOrderEventProducer(): RaribleKafkaProducer<com.rarible.protocol.tezos.dto.OrderEventDto> {
@@ -231,6 +238,17 @@ class TestListenerConfiguration {
             valueSerializerClass = UnionKafkaJsonSerializer::class.java,
             valueClass = com.rarible.protocol.tezos.dto.OrderEventDto::class.java,
             defaultTopic = TezosEventTopicProvider.ORDER,
+            bootstrapServers = kafkaContainer.kafkaBoostrapServers()
+        )
+    }
+
+    @Bean
+    fun testTezosActivityEventProducer(): RaribleKafkaProducer<com.rarible.protocol.tezos.dto.ActivityDto> {
+        return RaribleKafkaProducer(
+            clientId = "test.union.tezos.order",
+            valueSerializerClass = UnionKafkaJsonSerializer::class.java,
+            valueClass = com.rarible.protocol.tezos.dto.ActivityDto::class.java,
+            defaultTopic = TezosEventTopicProvider.ACTIVITY,
             bootstrapServers = kafkaContainer.kafkaBoostrapServers()
         )
     }

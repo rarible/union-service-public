@@ -6,7 +6,6 @@ import com.rarible.core.kafka.RaribleKafkaProducer
 import com.rarible.core.test.data.randomString
 import com.rarible.protocol.dto.FlowActivityDto
 import com.rarible.protocol.dto.FlowOrderEventDto
-import com.rarible.protocol.dto.FlowOwnershipEventDto
 import com.rarible.protocol.nft.api.client.NftItemControllerApi
 import com.rarible.protocol.nft.api.client.NftOwnershipControllerApi
 import com.rarible.protocol.union.dto.ActivityDto
@@ -60,9 +59,6 @@ abstract class AbstractIntegrationTest {
 
     //--------------------- FLOW ---------------------//
     @Autowired
-    lateinit var flowOwnershipProducer: RaribleKafkaProducer<FlowOwnershipEventDto>
-
-    @Autowired
     lateinit var flowOrderProducer: RaribleKafkaProducer<FlowOrderEventDto>
 
     @Autowired
@@ -71,6 +67,9 @@ abstract class AbstractIntegrationTest {
     //--------------------- TEZOS ---------------------//
     @Autowired
     lateinit var tezosOrderProducer: RaribleKafkaProducer<com.rarible.protocol.tezos.dto.OrderEventDto>
+
+    @Autowired
+    lateinit var tezosActivityProducer: RaribleKafkaProducer<com.rarible.protocol.tezos.dto.ActivityDto>
 
     @Autowired
     lateinit var collectionConsumer: RaribleKafkaConsumer<CollectionEventDto>
