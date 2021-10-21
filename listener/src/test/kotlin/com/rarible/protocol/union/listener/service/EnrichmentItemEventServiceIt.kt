@@ -2,6 +2,7 @@ package com.rarible.protocol.union.listener.service
 
 import com.rarible.core.test.wait.Wait
 import com.rarible.protocol.currency.api.client.CurrencyControllerApi
+import com.rarible.protocol.dto.OrderStatusDto
 import com.rarible.protocol.dto.OrdersPaginationDto
 import com.rarible.protocol.union.core.ethereum.converter.EthItemConverter
 import com.rarible.protocol.union.core.ethereum.converter.EthOrderConverter
@@ -13,10 +14,15 @@ import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
 import com.rarible.protocol.union.enrichment.test.data.randomShortItem
 import com.rarible.protocol.union.enrichment.test.data.randomShortOwnership
+import com.rarible.protocol.union.enrichment.util.bidCurrencyId
 import com.rarible.protocol.union.listener.test.AbstractIntegrationTest
 import com.rarible.protocol.union.listener.test.IntegrationTest
 import com.rarible.protocol.union.listener.test.data.createCurrencyDto
-import com.rarible.protocol.union.test.data.*
+import com.rarible.protocol.union.test.data.randomEthItemId
+import com.rarible.protocol.union.test.data.randomEthLegacyOrderDto
+import com.rarible.protocol.union.test.data.randomEthNftItemDto
+import com.rarible.protocol.union.test.data.randomUnionItem
+import com.rarible.protocol.union.test.data.randomUnionOrderDto
 import io.mockk.clearMocks
 import io.mockk.coEvery
 import kotlinx.coroutines.FlowPreview
@@ -217,15 +223,15 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         coEvery { testEthereumItemApi.getNftItemMetaById(itemId.value) } returns ethItem.meta!!.toMono()
         coEvery {
             testEthereumOrderApi.getOrderBidsByItemAndByStatus(
+                eq(itemId.token.value),
+                eq(itemId.tokenId.toString()),
+                eq(listOf(OrderStatusDto.ACTIVE)),
                 any(),
                 any(),
                 any(),
                 any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
+                eq(1),
+                eq(unionBestBid.bidCurrencyId),
                 any(),
                 any()
             )
