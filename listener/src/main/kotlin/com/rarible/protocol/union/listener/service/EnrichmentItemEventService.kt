@@ -1,9 +1,9 @@
 package com.rarible.protocol.union.listener.service
 
 import com.rarible.core.common.optimisticLock
+import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OrderDto
-import com.rarible.protocol.union.dto.UnionItemDto
 import com.rarible.protocol.union.enrichment.converter.ShortItemConverter
 import com.rarible.protocol.union.enrichment.event.ItemEventDelete
 import com.rarible.protocol.union.enrichment.event.ItemEventListener
@@ -64,7 +64,7 @@ class EnrichmentItemEventService(
         }
     }
 
-    suspend fun onItemUpdated(item: UnionItemDto) {
+    suspend fun onItemUpdated(item: UnionItem) {
         val received = ShortItemConverter.convert(item)
         val existing = itemService.getOrEmpty(received.id)
         notifyUpdate(existing, item)
@@ -95,7 +95,7 @@ class EnrichmentItemEventService(
 
     private suspend fun updateOrder(
         itemId: ShortItemId,
-        order: OrderDto? = null,
+        order: OrderDto,
         orderUpdateAction: suspend (item: ShortItem) -> ShortItem
     ) = optimisticLock {
         val current = itemService.get(itemId)
@@ -141,7 +141,7 @@ class EnrichmentItemEventService(
     // full version of the order, we can use this already fetched Order if it has same ID (hash)
     private suspend fun notifyUpdate(
         short: ShortItem,
-        item: UnionItemDto? = null,
+        item: UnionItem? = null,
         order: OrderDto? = null
     ) {
         val dto = itemService.enrichItem(short, item, listOfNotNull(order).associateBy { it.id })

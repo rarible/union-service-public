@@ -1,11 +1,10 @@
 package com.rarible.protocol.union.api.service
 
 import com.rarible.protocol.union.core.continuation.page.Page
+import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.ItemsDto
-import com.rarible.protocol.union.dto.UnionItemDto
-import com.rarible.protocol.union.enrichment.converter.EnrichedItemConverter
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
@@ -19,7 +18,7 @@ class ItemApiService(
     private val enrichmentItemService: EnrichmentItemService
 ) {
 
-    suspend fun enrich(unionItemsPage: Page<UnionItemDto>): ItemsDto {
+    suspend fun enrich(unionItemsPage: Page<UnionItem>): ItemsDto {
         return ItemsDto(
             total = unionItemsPage.total,
             continuation = unionItemsPage.continuation,
@@ -27,13 +26,13 @@ class ItemApiService(
         )
     }
 
-    suspend fun enrich(unionItem: UnionItemDto): ItemDto {
+    suspend fun enrich(unionItem: UnionItem): ItemDto {
         val shortId = ShortItemId(unionItem.id)
         val shortItem = enrichmentItemService.get(shortId)
         return enrichmentItemService.enrichItem(shortItem, unionItem)
     }
 
-    private suspend fun enrich(unionItems: List<UnionItemDto>): List<ItemDto> {
+    private suspend fun enrich(unionItems: List<UnionItem>): List<ItemDto> {
         if (unionItems.isEmpty()) {
             return emptyList()
         }

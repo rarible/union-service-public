@@ -17,7 +17,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 @FlowPreview
-class TezosOwnershipEventHandlerFt {
+class TezosOwnershipEventHandlerTest {
 
     private val ownershipEventService: EnrichmentOwnershipEventService = mockk()
     private val handler = TezosOwnershipEventHandler(ownershipEventService, BlockchainDto.TEZOS)

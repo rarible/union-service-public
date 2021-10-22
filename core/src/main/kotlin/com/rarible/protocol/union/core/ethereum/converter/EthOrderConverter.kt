@@ -62,11 +62,13 @@ class EthOrderConverter(
         val signature = order.signature?.let { EthConverter.convert(it) }
         val pending = order.pending?.map { convert(it, blockchain) }
         val priceHistory = order.priceHistory?.map { convert(it) } ?: listOf()
+        val status = convert(order.status!!) // TODO ETH should be required
         return when (order) {
             is LegacyOrderDto -> {
                 OrderDto(
                     id = orderId,
                     platform = PlatformDto.RARIBLE,
+                    status = status,
                     maker = maker,
                     taker = taker,
                     make = make,
@@ -95,6 +97,7 @@ class EthOrderConverter(
                 OrderDto(
                     id = orderId,
                     platform = PlatformDto.RARIBLE,
+                    status = status,
                     maker = maker,
                     taker = taker,
                     make = make,
@@ -124,6 +127,7 @@ class EthOrderConverter(
                 OrderDto(
                     id = orderId,
                     platform = PlatformDto.OPEN_SEA,
+                    status = status,
                     maker = maker,
                     taker = taker,
                     make = make,
@@ -166,6 +170,7 @@ class EthOrderConverter(
                 OrderDto(
                     id = orderId,
                     platform = PlatformDto.CRYPTO_PUNKS,
+                    status = status,
                     maker = maker,
                     taker = taker,
                     make = make,
@@ -205,6 +210,16 @@ class EthOrderConverter(
             OrderStatusDto.HISTORICAL -> com.rarible.protocol.dto.OrderStatusDto.HISTORICAL
             OrderStatusDto.INACTIVE -> com.rarible.protocol.dto.OrderStatusDto.INACTIVE
             OrderStatusDto.CANCELLED -> com.rarible.protocol.dto.OrderStatusDto.CANCELLED
+        }
+    }
+
+    fun convert(source: com.rarible.protocol.dto.OrderStatusDto): OrderStatusDto {
+        return when (source) {
+            com.rarible.protocol.dto.OrderStatusDto.ACTIVE -> OrderStatusDto.ACTIVE
+            com.rarible.protocol.dto.OrderStatusDto.FILLED -> OrderStatusDto.FILLED
+            com.rarible.protocol.dto.OrderStatusDto.HISTORICAL -> OrderStatusDto.HISTORICAL
+            com.rarible.protocol.dto.OrderStatusDto.INACTIVE -> OrderStatusDto.INACTIVE
+            com.rarible.protocol.dto.OrderStatusDto.CANCELLED -> OrderStatusDto.CANCELLED
         }
     }
 

@@ -12,6 +12,7 @@ class ContentMetaService(
     private val ipfsUrlResolver: IpfsUrlResolver,
     @Autowired(required = false) private val cacheService: CacheService?
 ) {
+
     suspend fun getContentMeta(url: String): ContentMeta? {
         val realUrl = ipfsUrlResolver.resolveRealUrl(url)
         return runCatching {

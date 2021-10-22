@@ -2,11 +2,11 @@ package com.rarible.protocol.union.enrichment.service
 
 import com.mongodb.client.result.DeleteResult
 import com.rarible.core.common.nowMillis
+import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
-import com.rarible.protocol.union.dto.UnionItemDto
 import com.rarible.protocol.union.enrichment.converter.EnrichedItemConverter
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
@@ -51,7 +51,7 @@ class EnrichmentItemService(
         return itemRepository.findAll(ids)
     }
 
-    suspend fun fetch(itemId: ShortItemId): UnionItemDto {
+    suspend fun fetch(itemId: ShortItemId): UnionItem {
         val now = nowMillis()
         val nftItemDto = itemServiceRouter.getService(itemId.blockchain)
             .getItemById(itemId.toDto().value)
@@ -63,7 +63,7 @@ class EnrichmentItemService(
     // [orders] is a set of already fetched orders that can be used as cache to avoid unnecessary 'getById' calls
     suspend fun enrichItem(
         shortItem: ShortItem?,
-        item: UnionItemDto? = null,
+        item: UnionItem? = null,
         orders: Map<OrderIdDto, OrderDto> = emptyMap()
     ) = coroutineScope {
         require(shortItem != null || item != null)
@@ -72,13 +72,13 @@ class EnrichmentItemService(
         val bestBidOrder = async { enrichmentOrderService.fetchOrderIfDiffers(shortItem?.bestBidOrder, orders) }
         val meta = async {
             val itemId = shortItem?.id ?: ShortItemId(item!!.id)
-            enrichmentMetaService.enrichMeta(item?.meta, itemId)
+            enrichmentMetaService.enrichMeta(item?.meta ?: fetchedItem.await().meta, itemId)
         }
 
         val bestOrders = listOf(bestSellOrder, bestBidOrder)
             .awaitAll().filterNotNull()
             .associateBy { it.id }
 
-        EnrichedItemConverter.convert(fetchedItem.await().copy(meta = meta.await()), shortItem, bestOrders)
+        EnrichedItemConverter.convert(fetchedItem.await(), shortItem, meta.await(), bestOrders)
     }
 }

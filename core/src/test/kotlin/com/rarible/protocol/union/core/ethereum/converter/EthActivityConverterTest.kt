@@ -45,7 +45,7 @@ class EthActivityConverterTest {
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.date).isEqualTo(dto.date)
 
-        assertThat(converted is OrderMatchSwapDto)
+        assertThat(converted).isInstanceOf(OrderMatchSwapDto::class.java)
         converted as OrderMatchSwapDto
         assertMatchSide(converted.left, dto.left)
         assertMatchSide(converted.right, dto.right)
@@ -67,7 +67,7 @@ class EthActivityConverterTest {
 
         val converted = ethActivityConverter.convert(dto, BlockchainDto.ETHEREUM) as OrderMatchActivityDto
 
-        assertThat(converted is OrderMatchSellDto)
+        assertThat(converted).isInstanceOf(OrderMatchSellDto::class.java)
         converted as OrderMatchSellDto
 
         assertThat(converted.nft).isEqualTo(EthConverter.convert(left.asset, BlockchainDto.ETHEREUM))
@@ -94,7 +94,7 @@ class EthActivityConverterTest {
 
         val converted = ethActivityConverter.convert(dto, BlockchainDto.ETHEREUM) as OrderMatchActivityDto
 
-        assertThat(converted is OrderMatchSellDto)
+        assertThat(converted).isInstanceOf(OrderMatchSellDto::class.java)
         converted as OrderMatchSellDto
 
         assertThat(converted.nft).isEqualTo(EthConverter.convert(right.asset, BlockchainDto.ETHEREUM))

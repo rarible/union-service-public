@@ -17,6 +17,7 @@ import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.OwnershipService
 import com.rarible.protocol.union.core.service.SignatureService
 import com.rarible.protocol.union.core.service.router.OrderProxyService
+import com.rarible.protocol.union.core.tezos.converter.TezosActivityConverter
 import com.rarible.protocol.union.core.tezos.converter.TezosOrderConverter
 import com.rarible.protocol.union.core.tezos.service.TezosActivityService
 import com.rarible.protocol.union.core.tezos.service.TezosCollectionService
@@ -98,9 +99,15 @@ class TezosConfiguration {
     @Bean
     fun tezosActivityService(
         tezosActivityItemApi: NftActivityControllerApi,
-        tezosActivityOrderApi: OrderActivityControllerApi
+        tezosActivityOrderApi: OrderActivityControllerApi,
+        tezosActivityConverter: TezosActivityConverter
     ): ActivityService {
-        return TezosActivityService(BlockchainDto.TEZOS, tezosActivityItemApi, tezosActivityOrderApi)
+        return TezosActivityService(
+            BlockchainDto.TEZOS,
+            tezosActivityItemApi,
+            tezosActivityOrderApi,
+            tezosActivityConverter
+        )
     }
 
     @Bean

@@ -1,13 +1,13 @@
 package com.rarible.protocol.union.enrichment.converter
 
 import com.rarible.core.common.nowMillis
-import com.rarible.protocol.union.dto.UnionItemDto
+import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import java.math.BigInteger
 
 object ShortItemConverter {
 
-    fun convert(item: UnionItemDto): ShortItem {
+    fun convert(item: UnionItem): ShortItem {
         return ShortItem(
             blockchain = item.id.blockchain,
             token = item.id.token.value,

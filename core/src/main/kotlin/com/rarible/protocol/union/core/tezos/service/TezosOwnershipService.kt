@@ -2,11 +2,11 @@ package com.rarible.protocol.union.core.tezos.service
 
 import com.rarible.protocol.tezos.api.client.NftOwnershipControllerApi
 import com.rarible.protocol.union.core.continuation.page.Page
+import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.core.service.OwnershipService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.core.tezos.converter.TezosOwnershipConverter
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.UnionOwnershipDto
 import kotlinx.coroutines.reactive.awaitFirst
 
 class TezosOwnershipService(
@@ -17,7 +17,7 @@ class TezosOwnershipService(
     override suspend fun getAllOwnerships(
         continuation: String?,
         size: Int
-    ): Page<UnionOwnershipDto> {
+    ): Page<UnionOwnership> {
         val ownerships = ownershipControllerApi.getNftAllOwnerships(
             size,
             continuation
@@ -25,7 +25,7 @@ class TezosOwnershipService(
         return TezosOwnershipConverter.convert(ownerships, blockchain)
     }
 
-    override suspend fun getOwnershipById(ownershipId: String): UnionOwnershipDto {
+    override suspend fun getOwnershipById(ownershipId: String): UnionOwnership {
         val ownership = ownershipControllerApi.getNftOwnershipById(ownershipId).awaitFirst()
         return TezosOwnershipConverter.convert(ownership, blockchain)
     }
@@ -35,7 +35,7 @@ class TezosOwnershipService(
         tokenId: String,
         continuation: String?,
         size: Int
-    ): Page<UnionOwnershipDto> {
+    ): Page<UnionOwnership> {
         val ownerships =
             ownershipControllerApi.getNftOwnershipByItem(
                 contract,

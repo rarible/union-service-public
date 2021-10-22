@@ -25,7 +25,6 @@ import com.rarible.protocol.dto.FlowOrderDto
 import com.rarible.protocol.dto.FlowRoyaltyDto
 import com.rarible.protocol.dto.FlowTransferDto
 import com.rarible.protocol.dto.MetaAttributeDto
-import com.rarible.protocol.dto.MetaContentDto
 import com.rarible.protocol.dto.MetaDto
 import com.rarible.protocol.dto.PayInfoDto
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -77,7 +76,7 @@ fun randomFlowMetaDto(): MetaDto {
         name = randomString(),
         raw = randomString(),
         attributes = listOf(randomFlowMetaAttributeDto()),
-        contents = listOf(randomFlowMetaContentDto())
+        contents = listOf(randomString())
     )
 }
 
@@ -85,14 +84,6 @@ fun randomFlowMetaAttributeDto(): MetaAttributeDto {
     return MetaAttributeDto(
         key = randomString(),
         value = randomString()
-    )
-}
-
-fun randomFlowMetaContentDto(): MetaContentDto {
-    return MetaContentDto(
-        contentType = randomString(),
-        url = randomString(),
-        attributes = listOf(randomFlowMetaAttributeDto())
     )
 }
 
@@ -108,7 +99,7 @@ fun randomFlowNftOwnershipDto(itemId: ItemIdDto, creator: String): FlowNftOwners
     return FlowNftOwnershipDto(
         id = ownershipId.value,
         contract = ownershipId.token.value,
-        tokenId = ownershipId.tokenId.toLong(),
+        tokenId = ownershipId.tokenId,
         owner = ownershipId.owner.value,
         creators = listOf(PayInfoDto(creator, randomBigDecimal())),
         createdAt = nowMillis()

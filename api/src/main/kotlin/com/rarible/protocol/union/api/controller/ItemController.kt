@@ -10,6 +10,8 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.IdParser
 import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.ItemsDto
+import com.rarible.protocol.union.dto.parser.ItemIdParser
+import com.rarible.protocol.union.enrichment.service.EnrichmentMetaService
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.RestController
@@ -18,7 +20,8 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 class ItemController(
     private val itemApiService: ItemApiService,
-    private val router: BlockchainRouter<ItemService>
+    private val router: BlockchainRouter<ItemService>,
+    private val enrichmentMetaService: EnrichmentMetaService
 ) : ItemControllerApi {
 
     override suspend fun getAllItems(
@@ -56,8 +59,9 @@ class ItemController(
     }
 
     override suspend fun resetItemMeta(itemId: String): ResponseEntity<Unit> {
-        val (blockchain, shortItemId) = IdParser.parse(itemId)
-        router.getService(blockchain).resetItemMeta(shortItemId)
+        val itemId = ItemIdParser.parseFull(itemId)
+        enrichmentMetaService.resetMeta(itemId)
+        router.getService(itemId.blockchain).resetItemMeta(itemId.value)
         return ResponseEntity.ok().build()
     }
 

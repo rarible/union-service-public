@@ -14,6 +14,7 @@ class ContentMetaServiceTest {
     private val metaProperties = MetaProperties(
         "https://ipfs.rarible.com/",
         10000,
+        256 * 1024,
         ""
     )
 

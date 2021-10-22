@@ -29,8 +29,8 @@ class FlowOwnershipEventHandler(
             is FlowNftOwnershipDeleteEventDto -> {
                 val ownershipId = OwnershipIdDto(
                     blockchain = blockchain,
-                    token = UnionAddress(blockchain, event.ownership.contract!!), // TODO should be not null
-                    tokenId = event.ownership.tokenId.toBigInteger(),
+                    token = UnionAddress(blockchain, event.ownership.contract),
+                    tokenId = event.ownership.tokenId,
                     owner = UnionAddress(blockchain, event.ownership.owner)
                 )
                 ownershipEventService.onOwnershipDeleted(ownershipId)
