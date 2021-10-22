@@ -20,7 +20,6 @@ class ContentMetaService(
         }.getOrNull()
     }
 
-    // TODO UNION We should use this method
     suspend fun resetContentMeta(url: String) {
         val realUrl = ipfsUrlResolver.resolveRealUrl(url)
         runCatching {

@@ -15,6 +15,7 @@ import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.test.data.randomEthAddress
 import com.rarible.protocol.union.test.data.randomEthItemId
+import com.rarible.protocol.union.test.data.randomEthItemMeta
 import com.rarible.protocol.union.test.data.randomEthNftItemDto
 import com.rarible.protocol.union.test.data.randomEthV2OrderDto
 import com.rarible.protocol.union.test.data.randomFlowAddress
@@ -107,6 +108,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
         val itemId = ItemIdParser.parseFull(itemIdFull)
 
         coEvery { testEthereumItemApi.resetNftItemMetaById(itemId.value) } returns Mono.first()
+        coEvery { testEthereumItemApi.getNftItemMetaById(itemId.value) } returns Mono.just(randomEthItemMeta())
 
         itemControllerClient.resetItemMeta(itemIdFull).awaitFirstOrNull()
 

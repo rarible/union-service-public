@@ -9,6 +9,7 @@ import com.rarible.protocol.union.core.model.UnionVideoProperties
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.ImageContentDto
+import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.MetaContentDto
 import com.rarible.protocol.union.dto.MetaDto
 import com.rarible.protocol.union.dto.VideoContentDto
@@ -30,18 +31,8 @@ class EnrichmentMetaService(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     suspend fun enrichMeta(meta: UnionMeta?, itemId: ShortItemId): MetaDto? {
-        val metaToEnrich = meta
-            ?: try {
-                router.getService(itemId.blockchain).getItemMetaById(itemId.toDto().value)
-            } catch (e: WebClientResponseProxyException) {
-                if (e.statusCode == HttpStatus.NOT_FOUND) {
-                    logger.warn("Raw meta for Item [{}] not found", itemId)
-                    return null
-                } else {
-                    throw e
-                }
-            }
-        return enrichMeta(metaToEnrich)
+        val metaToEnrich = meta ?: getMetaSafe(itemId.toDto())
+        return metaToEnrich?.let { enrichMeta(it) }
     }
 
     suspend fun enrichMeta(meta: UnionMeta): MetaDto {
@@ -55,6 +46,26 @@ class EnrichmentMetaService(
             attributes = meta.attributes,
             content = enrichedContent
         )
+    }
+
+    suspend fun resetMeta(itemId: ItemIdDto) {
+        val meta = getMetaSafe(itemId)
+        meta?.let {
+            meta.content.forEach { contentMetaService.resetContentMeta(it.url) }
+        }
+    }
+
+    private suspend fun getMetaSafe(itemId: ItemIdDto): UnionMeta? {
+        try {
+            return router.getService(itemId.blockchain).getItemMetaById(itemId.value)
+        } catch (e: WebClientResponseProxyException) {
+            if (e.statusCode == HttpStatus.NOT_FOUND) {
+                logger.warn("Raw meta for Item [{}] not found", itemId)
+                return null
+            } else {
+                throw e
+            }
+        }
     }
 
     private suspend fun enrichContent(content: UnionMetaContent): MetaContentDto {
