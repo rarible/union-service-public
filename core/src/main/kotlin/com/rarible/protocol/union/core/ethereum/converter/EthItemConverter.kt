@@ -8,21 +8,23 @@ import com.rarible.protocol.dto.NftMediaDto
 import com.rarible.protocol.dto.NftMediaMetaDto
 import com.rarible.protocol.union.core.continuation.page.Page
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
+import com.rarible.protocol.union.core.model.UnionImageProperties
+import com.rarible.protocol.union.core.model.UnionItem
+import com.rarible.protocol.union.core.model.UnionMeta
+import com.rarible.protocol.union.core.model.UnionMetaContent
+import com.rarible.protocol.union.core.model.UnionMetaContentProperties
+import com.rarible.protocol.union.core.model.UnionVideoProperties
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.ImageContentDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.ItemRoyaltyDto
 import com.rarible.protocol.union.dto.ItemTransferDto
 import com.rarible.protocol.union.dto.MetaAttributeDto
 import com.rarible.protocol.union.dto.MetaContentDto
-import com.rarible.protocol.union.dto.MetaDto
-import com.rarible.protocol.union.dto.UnionItemDto
-import com.rarible.protocol.union.dto.VideoContentDto
 
 object EthItemConverter {
 
-    fun convert(item: NftItemDto, blockchain: BlockchainDto): UnionItemDto {
-        return UnionItemDto(
+    fun convert(item: NftItemDto, blockchain: BlockchainDto): UnionItem {
+        return UnionItem(
             id = ItemIdDto(
                 token = UnionAddressConverter.convert(item.contract, blockchain),
                 tokenId = item.tokenId,
@@ -43,7 +45,7 @@ object EthItemConverter {
         )
     }
 
-    fun convert(page: NftItemsDto, blockchain: BlockchainDto): Page<UnionItemDto> {
+    fun convert(page: NftItemsDto, blockchain: BlockchainDto): Page<UnionItem> {
         return Page(
             total = page.total,
             continuation = page.continuation,
@@ -73,8 +75,8 @@ object EthItemConverter {
         )
     }
 
-    fun convert(source: NftItemMetaDto): MetaDto {
-        return MetaDto(
+    fun convert(source: NftItemMetaDto): UnionMeta {
+        return UnionMeta(
             name = source.name,
             description = source.description,
             attributes = source.attributes.orEmpty().map {
@@ -85,55 +87,44 @@ object EthItemConverter {
                     format = it.format
                 )
             },
-            content = convertMetaContent(source.image, this::convertImage)
-                    + convertMetaContent(source.animation, this::convertVideo),
-            raw = null //TODO UNION Remove?
+            content = convertMetaContent(source.image, this::getImageHint)
+                    + convertMetaContent(source.animation, this::getVideoHint)
         )
     }
 
-    private fun <T : MetaContentDto> convertMetaContent(
-        source: NftMediaDto?, converter: (
-            url: String,
-            representation: MetaContentDto.Representation,
+    private fun convertMetaContent(
+        source: NftMediaDto?, hintConverter: (
             meta: NftMediaMetaDto?
-        ) -> T
-    ): List<T> {
+        ) -> UnionMetaContentProperties
+    ): List<UnionMetaContent> {
         return source?.url?.map { urlMap ->
-            // TODO UNION handle unknown representation
-            val representation = MetaContentDto.Representation.valueOf(urlMap.key)
-            val url = urlMap.value
             val meta = source.meta[urlMap.key]
-            converter(url, representation, meta)
+            UnionMetaContent(
+                url = urlMap.value,
+                // TODO UNION handle unknown representation
+                representation = MetaContentDto.Representation.valueOf(urlMap.key),
+                properties = hintConverter(meta)
+            )
         } ?: emptyList()
     }
 
-    private fun convertImage(
-        url: String,
-        representation: MetaContentDto.Representation,
+    private fun getImageHint(
         meta: NftMediaMetaDto?
-    ): ImageContentDto {
-        return ImageContentDto(
-            representation = representation,
-            url = url,
+    ): UnionImageProperties {
+        return UnionImageProperties(
             mimeType = meta?.type,
             width = meta?.width,
-            height = meta?.height,
-            size = null // Not available.
+            height = meta?.height
         )
     }
 
-    private fun convertVideo(
-        url: String,
-        representation: MetaContentDto.Representation,
+    private fun getVideoHint(
         meta: NftMediaMetaDto?
-    ): VideoContentDto {
-        return VideoContentDto(
-            representation = representation,
-            url = url,
+    ): UnionVideoProperties {
+        return UnionVideoProperties(
             mimeType = meta?.type,
             width = meta?.width,
-            height = meta?.height,
-            size = null // Not available.
+            height = meta?.height
         )
     }
 }

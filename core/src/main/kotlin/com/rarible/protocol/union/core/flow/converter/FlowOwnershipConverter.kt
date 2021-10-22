@@ -4,19 +4,19 @@ import com.rarible.protocol.dto.FlowNftOwnershipDto
 import com.rarible.protocol.dto.FlowNftOwnershipsDto
 import com.rarible.protocol.union.core.continuation.page.Page
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
+import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
-import com.rarible.protocol.union.dto.UnionOwnershipDto
 import java.math.BigInteger
 
 object FlowOwnershipConverter {
 
-    fun convert(ownership: FlowNftOwnershipDto, blockchain: BlockchainDto): UnionOwnershipDto {
+    fun convert(ownership: FlowNftOwnershipDto, blockchain: BlockchainDto): UnionOwnership {
         val contract = UnionAddressConverter.convert(ownership.contract!!, blockchain) // TODO FLOW should be not null?
         val tokenId = ownership.tokenId.toBigInteger() // TODO FLOW should be BigInt
         val owner = UnionAddressConverter.convert(ownership.owner, blockchain)
 
-        return UnionOwnershipDto(
+        return UnionOwnership(
             id = OwnershipIdDto(
                 blockchain = blockchain,
                 token = contract,
@@ -33,7 +33,7 @@ object FlowOwnershipConverter {
         )
     }
 
-    fun convert(page: FlowNftOwnershipsDto, blockchain: BlockchainDto): Page<UnionOwnershipDto> {
+    fun convert(page: FlowNftOwnershipsDto, blockchain: BlockchainDto): Page<UnionOwnership> {
         return Page(
             total = page.total,
             continuation = page.continuation,

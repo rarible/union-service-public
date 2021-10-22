@@ -1,17 +1,19 @@
 package com.rarible.protocol.union.enrichment.converter
 
+import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.dto.ItemDto
+import com.rarible.protocol.union.dto.MetaDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
-import com.rarible.protocol.union.dto.UnionItemDto
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import java.math.BigInteger
 
 object EnrichedItemConverter {
 
     fun convert(
-        item: UnionItemDto,
+        item: UnionItem,
         shortItem: ShortItem? = null,
+        meta: MetaDto? = null,
         orders: Map<OrderIdDto, OrderDto> = emptyMap()
     ): ItemDto {
         return ItemDto(
@@ -26,7 +28,7 @@ object EnrichedItemConverter {
             mintedAt = item.mintedAt,
             lastUpdatedAt = item.lastUpdatedAt,
             supply = item.supply,
-            meta = item.meta,
+            meta = meta,
             deleted = item.deleted,
 
             // Enrichment data

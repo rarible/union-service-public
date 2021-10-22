@@ -3,8 +3,8 @@ package com.rarible.protocol.union.core.continuation.page
 import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.core.continuation.ItemContinuation
 import com.rarible.protocol.union.core.ethereum.converter.EthItemConverter
+import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.UnionItemDto
 import com.rarible.protocol.union.test.data.randomEthNftItemDto
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -50,7 +50,7 @@ class PagingTest {
         assertThat(page.continuation).isNull()
     }
 
-    private fun createItem(lastUpdated: Instant): UnionItemDto {
+    private fun createItem(lastUpdated: Instant): UnionItem {
         val item = randomEthNftItemDto().copy(date = lastUpdated)
         return EthItemConverter.convert(item, BlockchainDto.ETHEREUM)
     }

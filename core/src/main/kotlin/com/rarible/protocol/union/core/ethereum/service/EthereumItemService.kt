@@ -3,11 +3,11 @@ package com.rarible.protocol.union.core.ethereum.service
 import com.rarible.protocol.nft.api.client.NftItemControllerApi
 import com.rarible.protocol.union.core.continuation.page.Page
 import com.rarible.protocol.union.core.ethereum.converter.EthItemConverter
+import com.rarible.protocol.union.core.model.UnionItem
+import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.MetaDto
-import com.rarible.protocol.union.dto.UnionItemDto
 import kotlinx.coroutines.reactive.awaitFirst
 
 class EthereumItemService(
@@ -21,7 +21,7 @@ class EthereumItemService(
         showDeleted: Boolean?,
         lastUpdatedFrom: Long?,
         lastUpdatedTo: Long?
-    ): Page<UnionItemDto> {
+    ): Page<UnionItem> {
         val items = itemControllerApi.getNftAllItems(
             continuation,
             size,
@@ -32,12 +32,12 @@ class EthereumItemService(
         return EthItemConverter.convert(items, blockchain)
     }
 
-    override suspend fun getItemById(itemId: String): UnionItemDto {
+    override suspend fun getItemById(itemId: String): UnionItem {
         val item = itemControllerApi.getNftItemById(itemId).awaitFirst()
         return EthItemConverter.convert(item, blockchain)
     }
 
-    override suspend fun getItemMetaById(itemId: String): MetaDto {
+    override suspend fun getItemMetaById(itemId: String): UnionMeta {
         val meta = itemControllerApi.getNftItemMetaById(itemId).awaitFirst()
         return EthItemConverter.convert(meta)
     }
@@ -50,7 +50,7 @@ class EthereumItemService(
         collection: String,
         continuation: String?,
         size: Int
-    ): Page<UnionItemDto> {
+    ): Page<UnionItem> {
         val items = itemControllerApi.getNftItemsByCollection(
             collection,
             continuation,
@@ -63,7 +63,7 @@ class EthereumItemService(
         creator: String,
         continuation: String?,
         size: Int
-    ): Page<UnionItemDto> {
+    ): Page<UnionItem> {
         val items = itemControllerApi.getNftItemsByCreator(
             creator,
             continuation,
@@ -76,7 +76,7 @@ class EthereumItemService(
         owner: String,
         continuation: String?,
         size: Int
-    ): Page<UnionItemDto> {
+    ): Page<UnionItem> {
         val items = itemControllerApi.getNftItemsByOwner(
             owner,
             continuation,

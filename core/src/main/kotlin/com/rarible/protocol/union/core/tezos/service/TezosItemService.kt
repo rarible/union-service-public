@@ -2,12 +2,12 @@ package com.rarible.protocol.union.core.tezos.service
 
 import com.rarible.protocol.tezos.api.client.NftItemControllerApi
 import com.rarible.protocol.union.core.continuation.page.Page
+import com.rarible.protocol.union.core.model.UnionItem
+import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.core.tezos.converter.TezosItemConverter
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.MetaDto
-import com.rarible.protocol.union.dto.UnionItemDto
 import kotlinx.coroutines.reactive.awaitFirst
 
 class TezosItemService(
@@ -23,7 +23,7 @@ class TezosItemService(
         showDeleted: Boolean?,
         lastUpdatedFrom: Long?,
         lastUpdatedTo: Long?
-    ): Page<UnionItemDto> {
+    ): Page<UnionItem> {
         // TODO TEZOS implement
         /* val items = itemControllerApi.getNftAllItems(
              continuation,
@@ -38,14 +38,14 @@ class TezosItemService(
 
     override suspend fun getItemById(
         itemId: String
-    ): UnionItemDto {
+    ): UnionItem {
         val item = itemControllerApi.getNftItemById(
             itemId, WITH_META
         ).awaitFirst()
         return TezosItemConverter.convert(item, blockchain)
     }
 
-    override suspend fun getItemMetaById(itemId: String): MetaDto {
+    override suspend fun getItemMetaById(itemId: String): UnionMeta {
         val meta = itemControllerApi.getNftItemMetaById(itemId).awaitFirst()
         return TezosItemConverter.convert(meta)
     }
@@ -59,7 +59,7 @@ class TezosItemService(
         collection: String,
         continuation: String?,
         size: Int
-    ): Page<UnionItemDto> {
+    ): Page<UnionItem> {
         val items = itemControllerApi.getNftItemsByCollection(
             collection,
             WITH_META,
@@ -73,7 +73,7 @@ class TezosItemService(
         creator: String,
         continuation: String?,
         size: Int
-    ): Page<UnionItemDto> {
+    ): Page<UnionItem> {
         val items = itemControllerApi.getNftItemsByCreator(
             creator,
             WITH_META,
@@ -87,7 +87,7 @@ class TezosItemService(
         owner: String,
         continuation: String?,
         size: Int
-    ): Page<UnionItemDto> {
+    ): Page<UnionItem> {
         val items = itemControllerApi.getNftItemsByOwner(
             owner,
             WITH_META,

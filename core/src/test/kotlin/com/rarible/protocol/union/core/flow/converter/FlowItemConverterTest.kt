@@ -75,7 +75,6 @@ class FlowItemConverterTest {
         val converted = FlowItemConverter.convert(item, BlockchainDto.FLOW).meta!!
 
         assertThat(converted.name).isEqualTo(dto.name)
-        assertThat(converted.raw).isEqualTo(dto.raw)
         assertThat(converted.description).isEqualTo(dto.description)
         assertThat(converted.content).hasSize(2)
         assertThat(converted.attributes.find { it.key == "key1" }?.value).isEqualTo("value1")

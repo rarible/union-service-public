@@ -62,6 +62,7 @@ class EthOrderConverter(
         val signature = order.signature?.let { EthConverter.convert(it) }
         val pending = order.pending?.map { convert(it, blockchain) }
         val priceHistory = order.priceHistory?.map { convert(it) } ?: listOf()
+        val status = order.status
         return when (order) {
             is LegacyOrderDto -> {
                 OrderDto(

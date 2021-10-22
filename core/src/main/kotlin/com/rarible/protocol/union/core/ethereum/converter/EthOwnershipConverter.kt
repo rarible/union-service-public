@@ -6,15 +6,15 @@ import com.rarible.protocol.dto.NftOwnershipDto
 import com.rarible.protocol.dto.NftOwnershipsDto
 import com.rarible.protocol.union.core.continuation.page.Page
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
+import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemHistoryDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
-import com.rarible.protocol.union.dto.UnionOwnershipDto
 
 object EthOwnershipConverter {
 
-    fun convert(source: NftOwnershipDto, blockchain: BlockchainDto): UnionOwnershipDto {
-        return UnionOwnershipDto(
+    fun convert(source: NftOwnershipDto, blockchain: BlockchainDto): UnionOwnership {
+        return UnionOwnership(
             id = OwnershipIdDto(
                 token = UnionAddressConverter.convert(source.contract, blockchain),
                 tokenId = source.tokenId,
@@ -32,7 +32,7 @@ object EthOwnershipConverter {
         )
     }
 
-    fun convert(page: NftOwnershipsDto, blockchain: BlockchainDto): Page<UnionOwnershipDto> {
+    fun convert(page: NftOwnershipsDto, blockchain: BlockchainDto): Page<UnionOwnership> {
         return Page(
             total = page.total,
             continuation = page.continuation,

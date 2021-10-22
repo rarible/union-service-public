@@ -1,9 +1,14 @@
-package com.rarible.protocol.union.dto
+package com.rarible.protocol.union.core.model
 
+import com.rarible.protocol.union.dto.CreatorDto
+import com.rarible.protocol.union.dto.ItemIdDto
+import com.rarible.protocol.union.dto.ItemTransferDto
+import com.rarible.protocol.union.dto.RoyaltyDto
+import com.rarible.protocol.union.dto.UnionAddress
 import java.math.BigInteger
 import java.time.Instant
 
-data class UnionItemDto(
+data class UnionItem(
     val id: ItemIdDto,
     val tokenId: BigInteger,
     val collection: UnionAddress,
@@ -15,6 +20,6 @@ data class UnionItemDto(
     val mintedAt: Instant,
     val lastUpdatedAt: Instant,
     val supply: BigInteger,
-    val meta: MetaDto? = null, // It's better to introduce an intermediate model class for meta and not use final DTO.
+    val meta: UnionMeta? = null,
     val deleted: Boolean
 )

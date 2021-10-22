@@ -6,11 +6,11 @@ import com.rarible.protocol.union.core.ethereum.converter.EthItemConverter
 import com.rarible.protocol.union.core.ethereum.converter.EthOrderConverter
 import com.rarible.protocol.union.core.ethereum.converter.EthOwnershipConverter
 import com.rarible.protocol.union.core.flow.converter.FlowItemConverter
+import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
-import com.rarible.protocol.union.dto.UnionItemDto
 import com.rarible.protocol.union.test.mock.CurrencyMock
 import kotlinx.coroutines.runBlocking
 
@@ -20,7 +20,7 @@ fun randomUnionCollection(): CollectionDto =
         BlockchainDto.ETHEREUM
     )
 
-fun randomUnionItem(id: ItemIdDto): UnionItemDto {
+fun randomUnionItem(id: ItemIdDto): UnionItem {
     return when (id.blockchain) {
         BlockchainDto.ETHEREUM, BlockchainDto.POLYGON -> EthItemConverter.convert(
             randomEthNftItemDto(id),

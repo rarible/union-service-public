@@ -3,10 +3,10 @@ package com.rarible.protocol.union.core.ethereum.service
 import com.rarible.protocol.nft.api.client.NftOwnershipControllerApi
 import com.rarible.protocol.union.core.continuation.page.Page
 import com.rarible.protocol.union.core.ethereum.converter.EthOwnershipConverter
+import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.core.service.OwnershipService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.UnionOwnershipDto
 import kotlinx.coroutines.reactive.awaitFirst
 
 class EthereumOwnershipService(
@@ -17,7 +17,7 @@ class EthereumOwnershipService(
     override suspend fun getAllOwnerships(
         continuation: String?,
         size: Int
-    ): Page<UnionOwnershipDto> {
+    ): Page<UnionOwnership> {
         val ownerships = ownershipControllerApi.getNftAllOwnerships(
             continuation,
             size
@@ -25,7 +25,7 @@ class EthereumOwnershipService(
         return EthOwnershipConverter.convert(ownerships, blockchain)
     }
 
-    override suspend fun getOwnershipById(ownershipId: String): UnionOwnershipDto {
+    override suspend fun getOwnershipById(ownershipId: String): UnionOwnership {
         val ownership = ownershipControllerApi.getNftOwnershipById(ownershipId).awaitFirst()
         return EthOwnershipConverter.convert(ownership, blockchain)
     }
@@ -35,7 +35,7 @@ class EthereumOwnershipService(
         tokenId: String,
         continuation: String?,
         size: Int
-    ): Page<UnionOwnershipDto> {
+    ): Page<UnionOwnership> {
         val ownerships = ownershipControllerApi.getNftOwnershipsByItem(
             contract,
             tokenId,

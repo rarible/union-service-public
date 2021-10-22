@@ -19,7 +19,12 @@ import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.switchIfEmpty
 import reactor.kotlin.core.publisher.toMono
 import java.io.InputStream
-import java.net.*
+import java.net.HttpURLConnection
+import java.net.InetSocketAddress
+import java.net.Proxy
+import java.net.URI
+import java.net.URL
+import java.net.URLConnection
 import java.util.concurrent.Callable
 import javax.imageio.ImageIO
 import javax.imageio.metadata.IIOMetadata
@@ -52,16 +57,11 @@ class MediaMetaService(
         return LoggingUtils.withMarker { marker ->
             logger.info(marker, "getMediaMeta $url")
             when {
-                url.endsWith(".mp4") ->
-                    ContentMeta("video/mp4").toMono()
-                url.endsWith(".webm") ->
-                    ContentMeta("video/webm").toMono()
-                url.endsWith(".mp3") ->
-                    ContentMeta("audio/mp3").toMono()
-                url.endsWith(".mpga") ->
-                    ContentMeta("audio/mpeg").toMono()
-                url.endsWith(".svg") ->
-                    ContentMeta("image/svg+xml", 192, 192).toMono()
+                url.endsWith(".mp4") -> ContentMeta("video/mp4").toMono()
+                url.endsWith(".webm") -> ContentMeta("video/webm").toMono()
+                url.endsWith(".mp3") -> ContentMeta("audio/mp3").toMono()
+                url.endsWith(".mpga") -> ContentMeta("audio/mpeg").toMono()
+                url.endsWith(".svg") -> ContentMeta("image/svg+xml", 192, 192).toMono()
                 else -> {
                     getMetadata(url)
                         .flatMap { (width, height, metadata, contentLength) ->
@@ -95,14 +95,10 @@ class MediaMetaService(
                         }
                         .switchIfEmpty {
                             when {
-                                url.endsWith(".gif") ->
-                                    ContentMeta("image/gif").toMono()
-                                url.endsWith(".jpg") ->
-                                    ContentMeta("image/jpeg").toMono()
-                                url.endsWith(".jpeg") ->
-                                    ContentMeta("image/jpeg").toMono()
-                                url.endsWith(".png") ->
-                                    ContentMeta("image/png").toMono()
+                                url.endsWith(".gif") -> ContentMeta("image/gif").toMono()
+                                url.endsWith(".jpg") -> ContentMeta("image/jpeg").toMono()
+                                url.endsWith(".jpeg") -> ContentMeta("image/jpeg").toMono()
+                                url.endsWith(".png") -> ContentMeta("image/png").toMono()
                                 else -> getMimeType(url)
                                     .map { ContentMeta(it) }
                             }

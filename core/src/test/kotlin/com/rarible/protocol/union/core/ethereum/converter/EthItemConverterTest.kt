@@ -5,10 +5,10 @@ import com.rarible.protocol.dto.NftItemAttributeDto
 import com.rarible.protocol.dto.NftItemMetaDto
 import com.rarible.protocol.dto.NftMediaDto
 import com.rarible.protocol.dto.NftMediaMetaDto
+import com.rarible.protocol.union.core.model.UnionImageProperties
+import com.rarible.protocol.union.core.model.UnionVideoProperties
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.ImageContentDto
 import com.rarible.protocol.union.dto.MetaContentDto
-import com.rarible.protocol.union.dto.VideoContentDto
 import com.rarible.protocol.union.test.data.randomEthItemRoyaltyDto
 import com.rarible.protocol.union.test.data.randomEthItemTransferDto
 import com.rarible.protocol.union.test.data.randomEthNftItemDto
@@ -116,33 +116,38 @@ class EthItemConverterTest {
         assertThat(converted.attributes.find { it.key == "key1" }?.value).isEqualTo("value1")
         assertThat(converted.attributes.find { it.key == "key2" }?.value).isEqualTo("value2")
 
-        val originalImage = converted.content[0] as ImageContentDto
-        val bigImage = converted.content[1] as ImageContentDto
-        val originalAnim = converted.content[2] as VideoContentDto
-        val previewAnim = converted.content[3] as VideoContentDto
+        val originalImage = converted.content[0]
+        val bigImage = converted.content[1]
+        val originalAnim = converted.content[2]
+        val previewAnim = converted.content[3]
+
+        val originalImageProperties = originalImage.properties as UnionImageProperties
+        val bigImageProperties = bigImage.properties as UnionImageProperties
+        val originalAnimProperties = originalAnim.properties as UnionVideoProperties
+        val previewAnimProperties = previewAnim.properties as UnionVideoProperties
 
         assertThat(originalImage.url).isEqualTo("url1")
         assertThat(originalImage.representation).isEqualTo(MetaContentDto.Representation.ORIGINAL)
-        assertThat(originalImage.mimeType).isEqualTo("jpeg")
-        assertThat(originalImage.width).isEqualTo(100)
-        assertThat(originalImage.height).isEqualTo(200)
+        assertThat(originalImageProperties.mimeType).isEqualTo("jpeg")
+        assertThat(originalImageProperties.width).isEqualTo(100)
+        assertThat(originalImageProperties.height).isEqualTo(200)
 
         assertThat(bigImage.url).isEqualTo("url2")
         assertThat(bigImage.representation).isEqualTo(MetaContentDto.Representation.BIG)
-        assertThat(bigImage.mimeType).isEqualTo("png")
-        assertThat(bigImage.width).isEqualTo(10)
-        assertThat(bigImage.height).isEqualTo(20)
+        assertThat(bigImageProperties.mimeType).isEqualTo("png")
+        assertThat(bigImageProperties.width).isEqualTo(10)
+        assertThat(bigImageProperties.height).isEqualTo(20)
 
         assertThat(originalAnim.url).isEqualTo("url3")
         assertThat(originalAnim.representation).isEqualTo(MetaContentDto.Representation.ORIGINAL)
-        assertThat(originalAnim.mimeType).isEqualTo("mp4")
-        assertThat(originalAnim.width).isEqualTo(200)
-        assertThat(originalAnim.height).isEqualTo(400)
+        assertThat(originalAnimProperties.mimeType).isEqualTo("mp4")
+        assertThat(originalAnimProperties.width).isEqualTo(200)
+        assertThat(originalAnimProperties.height).isEqualTo(400)
 
         assertThat(previewAnim.url).isEqualTo("url4")
         assertThat(previewAnim.representation).isEqualTo(MetaContentDto.Representation.PREVIEW)
-        assertThat(previewAnim.mimeType).isEqualTo("amv")
-        assertThat(previewAnim.width).isEqualTo(20)
-        assertThat(previewAnim.height).isEqualTo(40)
+        assertThat(previewAnimProperties.mimeType).isEqualTo("amv")
+        assertThat(previewAnimProperties.width).isEqualTo(20)
+        assertThat(previewAnimProperties.height).isEqualTo(40)
     }
 }
