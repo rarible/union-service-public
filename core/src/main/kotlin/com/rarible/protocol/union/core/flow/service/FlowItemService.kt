@@ -36,12 +36,7 @@ class FlowItemService(
     override suspend fun getItemMetaById(itemId: String): UnionMeta {
         // TODO FLOW will return a richer object (MetaDto) soon, and we should put 'attributes' and 'content' here.
         val meta = flowNftItemControllerApi.getNftItemMetaById(itemId).awaitFirst()
-        return UnionMeta(
-            name = meta.title ?: "Flow #$itemId",
-            description = meta.description,
-            attributes = emptyList(),
-            content = emptyList()
-        )
+        return FlowItemConverter.convert(meta)
     }
 
     override suspend fun resetItemMeta(itemId: String) {

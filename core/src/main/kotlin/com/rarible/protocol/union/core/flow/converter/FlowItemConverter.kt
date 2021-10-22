@@ -78,13 +78,13 @@ object FlowItemConverter {
                 MetaAttributeDto(
                     key = it.key,
                     value = it.value,
-                    type = null,
-                    format = null
+                    type = it.type,
+                    format = it.format
                 )
             },
-            content = source.contents.orEmpty().map { dto ->
+            content = source.contents.orEmpty().map { url ->
                 UnionMetaContent(
-                    url = dto.url,
+                    url = url,
                     representation = MetaContentDto.Representation.ORIGINAL
                 )
             }

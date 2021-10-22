@@ -12,8 +12,8 @@ import java.math.BigInteger
 object FlowOwnershipConverter {
 
     fun convert(ownership: FlowNftOwnershipDto, blockchain: BlockchainDto): UnionOwnership {
-        val contract = UnionAddressConverter.convert(ownership.contract!!, blockchain) // TODO FLOW should be not null?
-        val tokenId = ownership.tokenId.toBigInteger() // TODO FLOW should be BigInt
+        val contract = UnionAddressConverter.convert(ownership.contract, blockchain)
+        val tokenId = ownership.tokenId
         val owner = UnionAddressConverter.convert(ownership.owner, blockchain)
 
         return UnionOwnership(
