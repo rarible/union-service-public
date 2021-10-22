@@ -7,6 +7,7 @@ import com.rarible.protocol.union.core.continuation.page.Slice
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.model.ext
 import com.rarible.protocol.union.core.service.CurrencyService
+import com.rarible.protocol.union.dto.AssetDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.FlowOrderDataV1Dto
 import com.rarible.protocol.union.dto.OrderDto
@@ -15,6 +16,8 @@ import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PlatformDto
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
+import java.math.BigDecimal
+import java.math.BigInteger
 
 @Component
 class FlowOrderConverter(
@@ -43,9 +46,13 @@ class FlowOrderConverter(
         val takePrice = order.take.value / order.make.value
         val takePriceUsd = currencyService.toUsd(blockchain, take.type.ext.contract, takePrice)
 
+        //TODO FLOW That's not correct! Just a stub until Flow starts to return status
+        val status = calculateStatus(order.fill, take, order.makeStock, order.cancelled)
+
         return OrderDto(
             id = OrderIdDto(blockchain, order.id.toString()),
             platform = PlatformDto.RARIBLE,
+            status = status,
             maker = maker,
             taker = taker,
             make = make,
@@ -88,6 +95,16 @@ class FlowOrderConverter(
         }
     }
 
+    fun convert(source: FlowOrderStatusDto): OrderStatusDto {
+        return when (source) {
+            FlowOrderStatusDto.ACTIVE -> OrderStatusDto.ACTIVE
+            FlowOrderStatusDto.FILLED -> OrderStatusDto.FILLED
+            FlowOrderStatusDto.HISTORICAL -> OrderStatusDto.HISTORICAL
+            FlowOrderStatusDto.INACTIVE -> OrderStatusDto.INACTIVE
+            FlowOrderStatusDto.CANCELLED -> OrderStatusDto.CANCELLED
+        }
+    }
+
     private fun convert(
         source: com.rarible.protocol.dto.FlowOrderDataDto,
         blockchain: BlockchainDto
@@ -96,6 +113,21 @@ class FlowOrderConverter(
             payouts = source.payouts.map { FlowConverter.convertToPayout(it, blockchain) },
             originFees = source.originalFees.map { FlowConverter.convertToPayout(it, blockchain) }
         )
+    }
+
+    // TODO FLOW remove later
+    private fun calculateStatus(
+        fill: BigDecimal,
+        take: AssetDto,
+        makeStock: BigInteger,
+        cancelled: Boolean
+    ): OrderStatusDto {
+        return when {
+            fill == take.value -> OrderStatusDto.FILLED
+            makeStock > BigInteger.ZERO -> OrderStatusDto.ACTIVE
+            cancelled -> OrderStatusDto.CANCELLED
+            else -> OrderStatusDto.INACTIVE
+        }
     }
 }
 

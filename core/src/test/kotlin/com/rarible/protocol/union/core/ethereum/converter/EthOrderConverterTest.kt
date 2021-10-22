@@ -36,6 +36,7 @@ class EthOrderConverterTest {
 
         val converted = ethOrderConverter.convert(dto, BlockchainDto.ETHEREUM)
 
+        assertThat(converted.status.name).isEqualTo(dto.status!!.name)
         assertThat(converted.id.value).isEqualTo(dto.hash.prefixed())
         assertThat(converted.platform).isEqualTo(PlatformDto.RARIBLE)
         assertThat(converted.maker.value).isEqualTo(dto.maker.prefixed())
@@ -135,6 +136,7 @@ class EthOrderConverterTest {
 
         val converted = ethOrderConverter.convert(dto, BlockchainDto.ETHEREUM)
 
+        assertThat(converted.status.name).isEqualTo(dto.status!!.name)
         assertThat(converted.id.value).isEqualTo(dto.hash.prefixed())
         assertThat(converted.platform).isEqualTo(PlatformDto.RARIBLE)
         assertThat(converted.maker.value).isEqualTo(dto.maker.prefixed())
@@ -174,6 +176,7 @@ class EthOrderConverterTest {
 
         val converted = ethOrderConverter.convert(dto, BlockchainDto.ETHEREUM)
 
+        assertThat(converted.status.name).isEqualTo(dto.status!!.name)
         assertThat(converted.id.value).isEqualTo(dto.hash.prefixed())
         assertThat(converted.platform).isEqualTo(PlatformDto.OPEN_SEA)
         assertThat(converted.maker.value).isEqualTo(dto.maker.prefixed())
@@ -231,6 +234,7 @@ class EthOrderConverterTest {
 
         val converted = ethOrderConverter.convert(dto, BlockchainDto.ETHEREUM)
 
+        assertThat(converted.status.name).isEqualTo(dto.status!!.name)
         assertThat(converted.id.value).isEqualTo(dto.hash.prefixed())
         assertThat(converted.platform).isEqualTo(PlatformDto.CRYPTO_PUNKS)
         assertThat(converted.maker.value).isEqualTo(dto.maker.prefixed())
@@ -274,5 +278,24 @@ class EthOrderConverterTest {
             com.rarible.protocol.dto.OrderStatusDto.CANCELLED
         )
         assertEquals(ethStatuses, ethOrderConverter.convert(unionStatuses))
+    }
+
+    @Test
+    fun `union order status`() {
+        val ethStatuses = listOf(
+            com.rarible.protocol.dto.OrderStatusDto.ACTIVE,
+            com.rarible.protocol.dto.OrderStatusDto.FILLED,
+            com.rarible.protocol.dto.OrderStatusDto.INACTIVE,
+            com.rarible.protocol.dto.OrderStatusDto.HISTORICAL,
+            com.rarible.protocol.dto.OrderStatusDto.CANCELLED
+        )
+        val unionStatuses = listOf(
+            OrderStatusDto.ACTIVE,
+            OrderStatusDto.FILLED,
+            OrderStatusDto.INACTIVE,
+            OrderStatusDto.HISTORICAL,
+            OrderStatusDto.CANCELLED
+        )
+        assertEquals(ethStatuses, unionStatuses.map { ethOrderConverter.convert(it) })
     }
 }

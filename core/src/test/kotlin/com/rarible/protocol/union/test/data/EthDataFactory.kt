@@ -43,6 +43,7 @@ import com.rarible.protocol.dto.OrderPriceHistoryRecordDto
 import com.rarible.protocol.dto.OrderRaribleV2DataV1Dto
 import com.rarible.protocol.dto.OrderSideDto
 import com.rarible.protocol.dto.OrderSideMatchDto
+import com.rarible.protocol.dto.OrderStatusDto
 import com.rarible.protocol.dto.PartDto
 import com.rarible.protocol.dto.RaribleV2OrderDto
 import com.rarible.protocol.dto.TransferDto
@@ -213,6 +214,7 @@ fun randomEthLegacyOrderDto(itemId: ItemIdDto, maker: Address) = randomEthLegacy
 fun randomEthLegacyOrderDto(make: AssetDto, maker: Address, take: AssetDto): LegacyOrderDto {
     val makeStockValue = randomBigDecimal()
     return LegacyOrderDto(
+        status = OrderStatusDto.ACTIVE,
         maker = maker,
         taker = randomAddress(),
         make = make,
@@ -249,6 +251,7 @@ fun randomEthV2OrderDto(itemId: ItemIdDto, maker: Address) = randomEthV2OrderDto
 fun randomEthV2OrderDto(make: AssetDto, maker: Address, take: AssetDto): RaribleV2OrderDto {
     val makeStockValue = randomBigDecimal()
     return RaribleV2OrderDto(
+        status = OrderStatusDto.ACTIVE,
         maker = maker,
         taker = randomAddress(),
         make = make,
@@ -287,6 +290,7 @@ fun randomEthOpenSeaV1OrderDto(itemId: ItemIdDto, maker: Address) = randomEthOpe
 fun randomEthOpenSeaV1OrderDto(make: AssetDto, maker: Address, take: AssetDto): OpenSeaV1OrderDto {
     val makeStockValue = randomBigDecimal()
     return OpenSeaV1OrderDto(
+        status = OrderStatusDto.ACTIVE,
         maker = maker,
         taker = randomAddress(),
         make = make,
@@ -325,6 +329,7 @@ fun randomEthCryptoPunksOrderDto(itemId: ItemIdDto, maker: Address) = randomEthC
 fun randomEthCryptoPunksOrderDto(make: AssetDto, maker: Address, take: AssetDto): CryptoPunkOrderDto {
     val makeStockValue = randomBigDecimal()
     return CryptoPunkOrderDto(
+        status = OrderStatusDto.ACTIVE,
         maker = maker,
         taker = randomAddress(),
         make = make,
