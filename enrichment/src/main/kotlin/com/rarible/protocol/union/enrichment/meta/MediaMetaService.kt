@@ -1,5 +1,7 @@
 package com.rarible.protocol.union.enrichment.meta
 
+import com.google.common.io.ByteStreams
+import com.google.common.io.CountingInputStream
 import com.google.common.net.InternetDomainName
 import com.rarible.core.cache.CacheDescriptor
 import com.rarible.core.client.WebClientHelper
@@ -18,6 +20,7 @@ import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.switchIfEmpty
 import reactor.kotlin.core.publisher.toMono
+import java.io.FilterInputStream
 import java.io.InputStream
 import java.net.HttpURLConnection
 import java.net.InetSocketAddress
@@ -30,6 +33,7 @@ import javax.imageio.ImageIO
 import javax.imageio.metadata.IIOMetadata
 
 @Component
+@Suppress("UnstableApiUsage")
 class MediaMetaService(
     private val metaProperties: MetaProperties
 ) : CacheDescriptor<ContentMeta> {
@@ -140,10 +144,24 @@ class MediaMetaService(
             conn.readTimeout = metaProperties.mediaFetchTimeout
             conn.connectTimeout = metaProperties.mediaFetchTimeout
             conn.setRequestProperty("user-agent", "curl/7.73.0")
-            conn.inputStream.use { getMetadata(conn, it) }
+            conn.inputStream.limited(url).use { getMetadata(conn, it) }
         }.blockingToMono()
             .flatMap { it?.toMono() ?: Mono.empty() }
             .onErrorResume { Mono.empty() }
+    }
+
+
+    private fun InputStream.limited(url: String): InputStream {
+        val limitedStream = ByteStreams.limit(this, metaProperties.mediaFetchMaxSize)
+        val countingStream = CountingInputStream(limitedStream)
+        return object : FilterInputStream(countingStream) {
+            override fun close() {
+                if (countingStream.count > metaProperties.mediaFetchMaxSize / 2) {
+                    logger.warn("Suspiciously many bytes ${countingStream.count} are read from the content input stream for $url")
+                }
+                super.close()
+            }
+        }
     }
 
     private fun getMetadata(connection: HttpURLConnection, ins: InputStream): RawMetadata? {
