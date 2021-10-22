@@ -6,24 +6,23 @@ import com.rarible.protocol.dto.FlowNftItemsDto
 import com.rarible.protocol.dto.FlowRoyaltyDto
 import com.rarible.protocol.union.core.continuation.page.Page
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
+import com.rarible.protocol.union.core.model.UnionItem
+import com.rarible.protocol.union.core.model.UnionMeta
+import com.rarible.protocol.union.core.model.UnionMetaContent
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CreatorDto
-import com.rarible.protocol.union.dto.ImageContentDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.MetaAttributeDto
 import com.rarible.protocol.union.dto.MetaContentDto
-import com.rarible.protocol.union.dto.MetaDto
 import com.rarible.protocol.union.dto.RoyaltyDto
-import com.rarible.protocol.union.dto.UnionItemDto
-import com.rarible.protocol.union.dto.VideoContentDto
 import java.math.BigInteger
 
 object FlowItemConverter {
 
-    fun convert(item: FlowNftItemDto, blockchain: BlockchainDto): UnionItemDto {
+    fun convert(item: FlowNftItemDto, blockchain: BlockchainDto): UnionItem {
         val collection = UnionAddressConverter.convert(item.collection, blockchain)
 
-        return UnionItemDto(
+        return UnionItem(
             id = ItemIdDto(
                 blockchain = blockchain,
                 token = collection,
@@ -43,7 +42,7 @@ object FlowItemConverter {
         )
     }
 
-    fun convert(page: FlowNftItemsDto, blockchain: BlockchainDto): Page<UnionItemDto> {
+    fun convert(page: FlowNftItemsDto, blockchain: BlockchainDto): Page<UnionItem> {
         return Page(
             total = page.total,
             continuation = page.continuation,
@@ -71,36 +70,24 @@ object FlowItemConverter {
         )
     }
 
-    fun convert(source: com.rarible.protocol.dto.MetaDto): MetaDto {
-        return MetaDto(
+    fun convert(source: com.rarible.protocol.dto.MetaDto): UnionMeta {
+        return UnionMeta(
             name = source.name,
             description = source.description,
-            attributes = source.attributes.orEmpty()
-                .map {
-                    MetaAttributeDto(
-                        key = it.key,
-                        value = it.value,
-                        type = null,
-                        format = null
-                    )
-                },
-            // TODO FLOW improve MetaData model in order to identify video/image
-            content = source.contents.orEmpty().map { dto ->
-                if ("video" in dto.contentType) {
-                    VideoContentDto(
-                        url = dto.url,
-                        representation = MetaContentDto.Representation.ORIGINAL,
-                        mimeType = dto.contentType
-                    )
-                } else {
-                    ImageContentDto(
-                        url = dto.url,
-                        representation = MetaContentDto.Representation.ORIGINAL,
-                        mimeType = dto.contentType
-                    )
-                }
+            attributes = source.attributes.orEmpty().map {
+                MetaAttributeDto(
+                    key = it.key,
+                    value = it.value,
+                    type = it.type,
+                    format = it.format
+                )
             },
-            raw = source.raw
+            content = source.contents.orEmpty().map { url ->
+                UnionMetaContent(
+                    url = url,
+                    representation = MetaContentDto.Representation.ORIGINAL
+                )
+            }
         )
     }
 }

@@ -12,6 +12,7 @@ class ContentMetaService(
     private val ipfsUrlResolver: IpfsUrlResolver,
     @Autowired(required = false) private val cacheService: CacheService?
 ) {
+
     suspend fun getContentMeta(url: String): ContentMeta? {
         val realUrl = ipfsUrlResolver.resolveRealUrl(url)
         return runCatching {
@@ -19,6 +20,7 @@ class ContentMetaService(
         }.getOrNull()
     }
 
+    // TODO UNION We should use this method
     suspend fun resetContentMeta(url: String) {
         val realUrl = ipfsUrlResolver.resolveRealUrl(url)
         runCatching {

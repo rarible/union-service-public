@@ -3,11 +3,11 @@ package com.rarible.protocol.union.core.flow.service
 import com.rarible.protocol.flow.nft.api.client.FlowNftItemControllerApi
 import com.rarible.protocol.union.core.continuation.page.Page
 import com.rarible.protocol.union.core.flow.converter.FlowItemConverter
+import com.rarible.protocol.union.core.model.UnionItem
+import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.MetaDto
-import com.rarible.protocol.union.dto.UnionItemDto
 import kotlinx.coroutines.reactive.awaitFirst
 
 class FlowItemService(
@@ -21,27 +21,22 @@ class FlowItemService(
         showDeleted: Boolean?,
         lastUpdatedFrom: Long?,
         lastUpdatedTo: Long?
-    ): Page<UnionItemDto> {
+    ): Page<UnionItem> {
         val items = flowNftItemControllerApi
             .getNftAllItems(continuation, size, showDeleted, lastUpdatedFrom, lastUpdatedTo)
             .awaitFirst()
         return FlowItemConverter.convert(items, blockchain)
     }
 
-    override suspend fun getItemById(itemId: String): UnionItemDto {
+    override suspend fun getItemById(itemId: String): UnionItem {
         val item = flowNftItemControllerApi.getNftItemById(itemId).awaitFirst()
         return FlowItemConverter.convert(item, blockchain)
     }
 
-    override suspend fun getItemMetaById(itemId: String): MetaDto {
+    override suspend fun getItemMetaById(itemId: String): UnionMeta {
         // TODO FLOW will return a richer object (MetaDto) soon, and we should put 'attributes' and 'content' here.
         val meta = flowNftItemControllerApi.getNftItemMetaById(itemId).awaitFirst()
-        return MetaDto(
-            name = meta.title ?: "Flow #$itemId",
-            description = meta.description,
-            attributes = emptyList(),
-            content = emptyList()
-        )
+        return FlowItemConverter.convert(meta)
     }
 
     override suspend fun resetItemMeta(itemId: String) {
@@ -52,7 +47,7 @@ class FlowItemService(
         collection: String,
         continuation: String?,
         size: Int
-    ): Page<UnionItemDto> {
+    ): Page<UnionItem> {
         val items = flowNftItemControllerApi.getNftItemsByCollection(
             collection,
             continuation,
@@ -65,7 +60,7 @@ class FlowItemService(
         creator: String,
         continuation: String?,
         size: Int
-    ): Page<UnionItemDto> {
+    ): Page<UnionItem> {
         val items = flowNftItemControllerApi.getNftItemsByCreator(
             creator,
             continuation,
@@ -78,7 +73,7 @@ class FlowItemService(
         owner: String,
         continuation: String?,
         size: Int
-    ): Page<UnionItemDto> {
+    ): Page<UnionItem> {
         val items = flowNftItemControllerApi.getNftItemsByOwner(
             owner,
             continuation,

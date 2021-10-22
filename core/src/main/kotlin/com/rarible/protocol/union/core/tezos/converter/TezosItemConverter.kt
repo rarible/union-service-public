@@ -6,21 +6,20 @@ import com.rarible.protocol.tezos.dto.NftItemsDto
 import com.rarible.protocol.tezos.dto.PartDto
 import com.rarible.protocol.union.core.continuation.page.Page
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
+import com.rarible.protocol.union.core.model.UnionItem
+import com.rarible.protocol.union.core.model.UnionMeta
+import com.rarible.protocol.union.core.model.UnionMetaContent
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.ImageContentDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.MetaAttributeDto
 import com.rarible.protocol.union.dto.MetaContentDto
-import com.rarible.protocol.union.dto.MetaDto
 import com.rarible.protocol.union.dto.RoyaltyDto
 import com.rarible.protocol.union.dto.UnionAddress
-import com.rarible.protocol.union.dto.UnionItemDto
-import com.rarible.protocol.union.dto.VideoContentDto
 
 object TezosItemConverter {
 
-    fun convert(item: NftItemDto, blockchain: BlockchainDto): UnionItemDto {
-        return UnionItemDto(
+    fun convert(item: NftItemDto, blockchain: BlockchainDto): UnionItem {
+        return UnionItem(
             id = ItemIdDto(
                 blockchain = blockchain,
                 token = UnionAddress(blockchain, item.contract),
@@ -41,7 +40,7 @@ object TezosItemConverter {
         )
     }
 
-    fun convert(page: NftItemsDto, blockchain: BlockchainDto): Page<UnionItemDto> {
+    fun convert(page: NftItemsDto, blockchain: BlockchainDto): Page<UnionItem> {
         return Page(
             total = page.total.toLong(),
             continuation = page.continuation,
@@ -49,8 +48,8 @@ object TezosItemConverter {
         )
     }
 
-    fun convert(meta: NftItemMetaDto): MetaDto =
-        MetaDto(
+    fun convert(meta: NftItemMetaDto): UnionMeta =
+        UnionMeta(
             name = meta.name,
             description = meta.description,
             attributes = meta.attributes.orEmpty().map {
@@ -62,23 +61,9 @@ object TezosItemConverter {
                 )
             },
             content = listOfNotNull(
-                meta.image?.let { convertImage(it) },
-                meta.animation?.let { convertVideo(it) }
+                meta.image?.let { UnionMetaContent(it, MetaContentDto.Representation.ORIGINAL) },
+                meta.animation?.let { UnionMetaContent(it, MetaContentDto.Representation.ORIGINAL) }
             )
-        )
-
-    private fun convertImage(imageUrl: String): ImageContentDto =
-        ImageContentDto(
-            url = imageUrl,
-            representation = MetaContentDto.Representation.ORIGINAL
-            // Other fields will be fetched by the enrichment level.
-        )
-
-    private fun convertVideo(imageUrl: String): VideoContentDto =
-        VideoContentDto(
-            url = imageUrl,
-            representation = MetaContentDto.Representation.ORIGINAL
-            // Other fields will be fetched by the enrichment level.
         )
 
     private fun toRoyalty(

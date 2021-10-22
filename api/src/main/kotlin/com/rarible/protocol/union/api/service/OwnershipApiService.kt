@@ -1,10 +1,10 @@
 package com.rarible.protocol.union.api.service
 
 import com.rarible.protocol.union.core.continuation.page.Page
+import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.dto.OwnershipDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.OwnershipsDto
-import com.rarible.protocol.union.dto.UnionOwnershipDto
 import com.rarible.protocol.union.enrichment.converter.EnrichedOwnershipConverter
 import com.rarible.protocol.union.enrichment.model.ShortOwnership
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
@@ -19,7 +19,7 @@ class OwnershipApiService(
     private val enrichmentOwnershipService: EnrichmentOwnershipService
 ) {
 
-    suspend fun enrich(unionOwnershipsPage: Page<UnionOwnershipDto>): OwnershipsDto {
+    suspend fun enrich(unionOwnershipsPage: Page<UnionOwnership>): OwnershipsDto {
         return OwnershipsDto(
             total = unionOwnershipsPage.total,
             continuation = unionOwnershipsPage.continuation,
@@ -27,7 +27,7 @@ class OwnershipApiService(
         )
     }
 
-    suspend fun enrich(unionOwnership: UnionOwnershipDto): OwnershipDto {
+    suspend fun enrich(unionOwnership: UnionOwnership): OwnershipDto {
         val shortId = ShortOwnershipId(unionOwnership.id)
         val shortOwnership = enrichmentOwnershipService.get(shortId)
         if (shortOwnership == null) {
@@ -36,7 +36,7 @@ class OwnershipApiService(
         return enrichmentOwnershipService.enrichOwnership(shortOwnership, unionOwnership)
     }
 
-    private suspend fun enrich(unionOwnerships: List<UnionOwnershipDto>): List<OwnershipDto> {
+    private suspend fun enrich(unionOwnerships: List<UnionOwnership>): List<OwnershipDto> {
         if (unionOwnerships.isEmpty()) {
             return emptyList()
         }

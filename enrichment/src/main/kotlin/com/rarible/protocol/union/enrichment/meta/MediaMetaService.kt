@@ -1,5 +1,7 @@
 package com.rarible.protocol.union.enrichment.meta
 
+import com.google.common.io.ByteStreams
+import com.google.common.io.CountingInputStream
 import com.google.common.net.InternetDomainName
 import com.rarible.core.cache.CacheDescriptor
 import com.rarible.core.client.WebClientHelper
@@ -18,13 +20,20 @@ import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.switchIfEmpty
 import reactor.kotlin.core.publisher.toMono
+import java.io.FilterInputStream
 import java.io.InputStream
-import java.net.*
+import java.net.HttpURLConnection
+import java.net.InetSocketAddress
+import java.net.Proxy
+import java.net.URI
+import java.net.URL
+import java.net.URLConnection
 import java.util.concurrent.Callable
 import javax.imageio.ImageIO
 import javax.imageio.metadata.IIOMetadata
 
 @Component
+@Suppress("UnstableApiUsage")
 class MediaMetaService(
     private val metaProperties: MetaProperties
 ) : CacheDescriptor<ContentMeta> {
@@ -52,16 +61,11 @@ class MediaMetaService(
         return LoggingUtils.withMarker { marker ->
             logger.info(marker, "getMediaMeta $url")
             when {
-                url.endsWith(".mp4") ->
-                    ContentMeta("video/mp4").toMono()
-                url.endsWith(".webm") ->
-                    ContentMeta("video/webm").toMono()
-                url.endsWith(".mp3") ->
-                    ContentMeta("audio/mp3").toMono()
-                url.endsWith(".mpga") ->
-                    ContentMeta("audio/mpeg").toMono()
-                url.endsWith(".svg") ->
-                    ContentMeta("image/svg+xml", 192, 192).toMono()
+                url.endsWith(".mp4") -> ContentMeta("video/mp4").toMono()
+                url.endsWith(".webm") -> ContentMeta("video/webm").toMono()
+                url.endsWith(".mp3") -> ContentMeta("audio/mp3").toMono()
+                url.endsWith(".mpga") -> ContentMeta("audio/mpeg").toMono()
+                url.endsWith(".svg") -> ContentMeta("image/svg+xml", 192, 192).toMono()
                 else -> {
                     getMetadata(url)
                         .flatMap { (width, height, metadata, contentLength) ->
@@ -95,14 +99,10 @@ class MediaMetaService(
                         }
                         .switchIfEmpty {
                             when {
-                                url.endsWith(".gif") ->
-                                    ContentMeta("image/gif").toMono()
-                                url.endsWith(".jpg") ->
-                                    ContentMeta("image/jpeg").toMono()
-                                url.endsWith(".jpeg") ->
-                                    ContentMeta("image/jpeg").toMono()
-                                url.endsWith(".png") ->
-                                    ContentMeta("image/png").toMono()
+                                url.endsWith(".gif") -> ContentMeta("image/gif").toMono()
+                                url.endsWith(".jpg") -> ContentMeta("image/jpeg").toMono()
+                                url.endsWith(".jpeg") -> ContentMeta("image/jpeg").toMono()
+                                url.endsWith(".png") -> ContentMeta("image/png").toMono()
                                 else -> getMimeType(url)
                                     .map { ContentMeta(it) }
                             }
@@ -144,10 +144,24 @@ class MediaMetaService(
             conn.readTimeout = metaProperties.mediaFetchTimeout
             conn.connectTimeout = metaProperties.mediaFetchTimeout
             conn.setRequestProperty("user-agent", "curl/7.73.0")
-            conn.inputStream.use { getMetadata(conn, it) }
+            conn.inputStream.limited(url).use { getMetadata(conn, it) }
         }.blockingToMono()
             .flatMap { it?.toMono() ?: Mono.empty() }
             .onErrorResume { Mono.empty() }
+    }
+
+
+    private fun InputStream.limited(url: String): InputStream {
+        val limitedStream = ByteStreams.limit(this, metaProperties.mediaFetchMaxSize)
+        val countingStream = CountingInputStream(limitedStream)
+        return object : FilterInputStream(countingStream) {
+            override fun close() {
+                if (countingStream.count > metaProperties.mediaFetchMaxSize / 2) {
+                    logger.warn("Suspiciously many bytes ${countingStream.count} are read from the content input stream for $url")
+                }
+                super.close()
+            }
+        }
     }
 
     private fun getMetadata(connection: HttpURLConnection, ins: InputStream): RawMetadata? {

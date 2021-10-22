@@ -1,6 +1,8 @@
 package com.rarible.protocol.union.enrichment.service
 
 import com.rarible.core.common.optimisticLock
+import com.rarible.protocol.union.core.model.UnionItem
+import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.core.model.ext
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
@@ -8,8 +10,6 @@ import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OwnershipDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
-import com.rarible.protocol.union.dto.UnionItemDto
-import com.rarible.protocol.union.dto.UnionOwnershipDto
 import com.rarible.protocol.union.enrichment.converter.EnrichedItemConverter
 import com.rarible.protocol.union.enrichment.converter.EnrichedOwnershipConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
@@ -35,6 +35,7 @@ class EnrichmentRefreshService(
     private val itemService: EnrichmentItemService,
     private val ownershipService: EnrichmentOwnershipService,
     private val bestOrderService: BestOrderService,
+    private val enrichmentMetaService: EnrichmentMetaService,
     private val enrichmentOrderService: EnrichmentOrderService,
     private val enrichmentItemService: EnrichmentItemService,
     private val enrichmentOwnershipService: EnrichmentOwnershipService,
@@ -108,6 +109,10 @@ class EnrichmentRefreshService(
         logger.info("Starting refresh of Item [{}]", shortItemId)
         val itemDtoDeferred = async { itemService.fetch(shortItemId) }
         val sellStatsDeferred = async { ownershipService.getItemSellStats(shortItemId) }
+        val metaDeferred = async {
+            val meta = itemDtoDeferred.await().meta
+            meta?.let { enrichmentMetaService.enrichMeta(meta) }
+        }
 
         // Looking for best sell orders
         val bestSellOrdersDto = sellCurrencies.map { currencyId ->
@@ -151,14 +156,14 @@ class EnrichmentRefreshService(
 
         val ordersHint = (bestSellOrdersDto + bestBidOrdersDto).associateBy { it.id }
 
-        val dto = EnrichedItemConverter.convert(itemDto, updatedItem, ordersHint)
+        val dto = EnrichedItemConverter.convert(itemDto, updatedItem, metaDeferred.await(), ordersHint)
         val event = ItemEventUpdate(dto)
         itemEventListeners.forEach { it.onEvent(event) }
 
         dto
     }
 
-    private suspend fun reconcileOwnership(ownership: UnionOwnershipDto, currencies: List<String>) = coroutineScope {
+    private suspend fun reconcileOwnership(ownership: UnionOwnership, currencies: List<String>) = coroutineScope {
         val shortOwnershipId = ShortOwnershipId(ownership.id)
 
         val bestSellOrdersDto = currencies.map { currencyId ->
@@ -194,7 +199,7 @@ class EnrichmentRefreshService(
 
     private suspend fun notifyUpdate(
         short: ShortItem,
-        item: UnionItemDto
+        item: UnionItem
     ): ItemDto {
         val dto = itemService.enrichItem(short, item, emptyMap())
         val event = ItemEventUpdate(dto)
@@ -204,7 +209,7 @@ class EnrichmentRefreshService(
 
     private suspend fun notifyUpdate(
         short: ShortOwnership,
-        ownership: UnionOwnershipDto
+        ownership: UnionOwnership
     ): OwnershipDto {
         val dto = ownershipService.enrichOwnership(short, ownership, emptyMap())
         val event = OwnershipEventUpdate(dto)

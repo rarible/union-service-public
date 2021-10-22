@@ -37,4 +37,5 @@ common:
 meta:
   ipfsGateway: "https://ipfs.rarible.com/"
   mediaFetchTimeout: 10000
+  mediaFetchMaxSize: 262144
   openSeaProxyUrl: ${consul.meta.openSeaProxyUrl}

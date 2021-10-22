@@ -8,5 +8,6 @@ import org.springframework.boot.context.properties.ConstructorBinding
 data class MetaProperties(
     val ipfsGateway: String,
     val mediaFetchTimeout: Int,
+    val mediaFetchMaxSize: Long,
     val openSeaProxyUrl: String
 )

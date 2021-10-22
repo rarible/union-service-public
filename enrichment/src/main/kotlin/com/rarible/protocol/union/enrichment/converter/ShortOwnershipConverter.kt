@@ -1,12 +1,12 @@
 package com.rarible.protocol.union.enrichment.converter
 
-import com.rarible.protocol.union.dto.UnionOwnershipDto
+import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.enrichment.model.ShortOwnership
 import java.time.Instant
 
 object ShortOwnershipConverter {
 
-    fun convert(dto: UnionOwnershipDto): ShortOwnership {
+    fun convert(dto: UnionOwnership): ShortOwnership {
         return ShortOwnership(
             blockchain = dto.id.blockchain,
             token = dto.id.token.value,

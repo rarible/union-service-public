@@ -11,6 +11,7 @@ import com.rarible.protocol.union.enrichment.converter.ShortItemConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
+import com.rarible.protocol.union.enrichment.service.EnrichmentMetaService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
 import com.rarible.protocol.union.enrichment.test.data.randomShortItem
 import com.rarible.protocol.union.enrichment.test.data.randomShortOwnership
@@ -52,6 +53,10 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
     @Autowired
     lateinit var ethOrderConverter: EthOrderConverter
 
+    @Autowired
+    lateinit var enrichmentMetaService: EnrichmentMetaService
+
+
     @BeforeEach
     fun beforeEach() {
         clearMocks(currencyControllerApi)
@@ -60,11 +65,14 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
     @Test
     fun `update event - item doesn't exist`() = runWithKafka {
         val itemId = randomEthItemId()
-        val itemDto = randomUnionItem(itemId)
+        val unionItem = randomUnionItem(itemId)
 
-        val expected = EnrichedItemConverter.convert(itemDto)
+        val expected = EnrichedItemConverter.convert(unionItem).copy(
+            // Eth meta fully qualified, no request should be executed
+            meta = enrichmentMetaService.enrichMeta(unionItem.meta!!)
+        )
 
-        itemEventService.onItemUpdated(itemDto)
+        itemEventService.onItemUpdated(unionItem)
 
         val created = itemService.get(ShortItemId(itemId))
 
@@ -105,7 +113,12 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         itemEventService.onItemUpdated(unionItem)
 
         val expected = EnrichedItemConverter.convert(unionItem)
-            .copy(bestSellOrder = unionBestSell, bestBidOrder = unionBestBid)
+            .copy(
+                bestSellOrder = unionBestSell,
+                bestBidOrder = unionBestBid,
+                // Eth meta fully qualified, no request should be executed
+                meta = enrichmentMetaService.enrichMeta(unionItem.meta!!)
+            )
 
         val saved = itemService.get(shortItem.id)!!
         assertThat(saved.bestSellOrder).isEqualTo(shortItem.bestSellOrder)
@@ -147,8 +160,12 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         assertThat(saved.totalStock).isEqualTo(30.toBigInteger())
 
         // In result event for item we expect updated totalStock/sellers
-        val expected = EnrichedItemConverter.convert(unionItem)
-            .copy(sellers = 2, totalStock = 30.toBigInteger())
+        val expected = EnrichedItemConverter.convert(unionItem).copy(
+            sellers = 2,
+            totalStock = 30.toBigInteger(),
+            // Eth meta fully qualified, no request should be executed
+            meta = enrichmentMetaService.enrichMeta(unionItem.meta!!)
+        )
 
         Wait.waitAssert {
             val messages = findItemUpdates(itemId.value)
@@ -194,7 +211,11 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         itemEventService.onItemBestSellOrderUpdated(shortItem.id, unionBestSell)
 
         // In result event for Item we expect updated bestSellOrder
-        val expected = EnrichedItemConverter.convert(unionItem).copy(bestSellOrder = unionBestSell)
+        val expected = EnrichedItemConverter.convert(unionItem).copy(
+            bestSellOrder = unionBestSell,
+            // Eth meta fully qualified, no request should be executed
+            meta = enrichmentMetaService.enrichMeta(unionItem.meta!!)
+        )
 
         val saved = itemService.get(shortItem.id)!!
         assertThat(saved.bestSellOrder).isEqualTo(ShortOrderConverter.convert(unionBestSell))
@@ -240,8 +261,11 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         itemEventService.onItemBestBidOrderUpdated(shortItem.id, unionBestBid)
 
         // In result event for Item we expect no bestBidOrder since it was cancelled
-        val expected = EnrichedItemConverter.convert(unionItem)
-            .copy(bestBidOrder = null)
+        val expected = EnrichedItemConverter.convert(unionItem).copy(
+            bestBidOrder = null,
+            // Eth meta fully qualified, no request should be executed
+            meta = enrichmentMetaService.enrichMeta(unionItem.meta!!)
+        )
 
         // Item should be removed since it has no enrich data
         val saved = itemService.get(shortItem.id)

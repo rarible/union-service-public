@@ -1,9 +1,9 @@
 package com.rarible.protocol.union.core.service
 
 import com.rarible.protocol.union.core.continuation.page.Page
+import com.rarible.protocol.union.core.model.UnionItem
+import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.service.router.BlockchainService
-import com.rarible.protocol.union.dto.MetaDto
-import com.rarible.protocol.union.dto.UnionItemDto
 
 interface ItemService : BlockchainService {
 
@@ -13,15 +13,15 @@ interface ItemService : BlockchainService {
         showDeleted: Boolean?,
         lastUpdatedFrom: Long?,
         lastUpdatedTo: Long?
-    ): Page<UnionItemDto>
+    ): Page<UnionItem>
 
     suspend fun getItemById(
         itemId: String
-    ): UnionItemDto
+    ): UnionItem
 
     suspend fun getItemMetaById(
         itemId: String
-    ): MetaDto
+    ): UnionMeta
 
     suspend fun resetItemMeta(
         itemId: String
@@ -31,18 +31,18 @@ interface ItemService : BlockchainService {
         collection: String,
         continuation: String?,
         size: Int
-    ): Page<UnionItemDto>
+    ): Page<UnionItem>
 
     suspend fun getItemsByCreator(
         creator: String,
         continuation: String?,
         size: Int
-    ): Page<UnionItemDto>
+    ): Page<UnionItem>
 
     suspend fun getItemsByOwner(
         owner: String,
         continuation: String?,
         size: Int
-    ): Page<UnionItemDto>
+    ): Page<UnionItem>
 
 }

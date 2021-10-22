@@ -1,9 +1,9 @@
 package com.rarible.protocol.union.listener.service
 
 import com.rarible.core.common.optimisticLock
+import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
-import com.rarible.protocol.union.dto.UnionOwnershipDto
 import com.rarible.protocol.union.enrichment.converter.ShortOwnershipConverter
 import com.rarible.protocol.union.enrichment.event.OwnershipEventDelete
 import com.rarible.protocol.union.enrichment.event.OwnershipEventListener
@@ -24,7 +24,7 @@ class EnrichmentOwnershipEventService(
 ) {
     private val logger = LoggerFactory.getLogger(EnrichmentOwnershipEventService::class.java)
 
-    suspend fun onOwnershipUpdated(ownership: UnionOwnershipDto) {
+    suspend fun onOwnershipUpdated(ownership: UnionOwnership) {
         val received = ShortOwnershipConverter.convert(ownership)
         val existing = ownershipService.getOrEmpty(received.id)
         notifyUpdate(existing, ownership)
@@ -92,7 +92,7 @@ class EnrichmentOwnershipEventService(
 
     private suspend fun notifyUpdate(
         short: ShortOwnership,
-        ownership: UnionOwnershipDto? = null,
+        ownership: UnionOwnership? = null,
         order: OrderDto? = null
     ) {
         val dto = ownershipService.enrichOwnership(short, ownership, listOfNotNull(order).associateBy { it.id })

@@ -4,9 +4,7 @@ import com.rarible.core.test.data.randomString
 import com.rarible.protocol.tezos.dto.NftItemAttributeDto
 import com.rarible.protocol.tezos.dto.NftItemMetaDto
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.ImageContentDto
 import com.rarible.protocol.union.dto.MetaContentDto
-import com.rarible.protocol.union.dto.VideoContentDto
 import com.rarible.protocol.union.test.data.randomTezosNftItemDto
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -64,19 +62,15 @@ class TezosItemConverterTest {
         assertThat(converted.attributes.find { it.key == "key1" }?.value).isEqualTo("value1")
         assertThat(converted.attributes.find { it.key == "key2" }?.value).isEqualTo("value2")
 
-        val originalImage = converted.content[0] as ImageContentDto
-        val originalAnim = converted.content[1] as VideoContentDto
+        val originalImage = converted.content[0]
+        val originalAnim = converted.content[1]
 
         assertThat(originalImage.url).isEqualTo("url1")
         assertThat(originalImage.representation).isEqualTo(MetaContentDto.Representation.ORIGINAL)
-        assertThat(originalImage.mimeType).isEqualTo(null)
-        assertThat(originalImage.width).isEqualTo(null)
-        assertThat(originalImage.height).isEqualTo(null)
+        assertThat(originalImage.properties).isEqualTo(null)
 
         assertThat(originalAnim.url).isEqualTo("url2")
         assertThat(originalAnim.representation).isEqualTo(MetaContentDto.Representation.ORIGINAL)
-        assertThat(originalAnim.mimeType).isEqualTo(null)
-        assertThat(originalAnim.width).isEqualTo(null)
-        assertThat(originalAnim.height).isEqualTo(null)
+        assertThat(originalAnim.properties).isEqualTo(null)
     }
 }
