@@ -1597,6 +1597,8 @@ components:
           $ref: "#/components/schemas/BigDecimal"
         platform:
           $ref: "#/components/schemas/Platform"
+        status:
+          $ref: "#/components/schemas/OrderStatus"
         startedAt:
           type: string
           format: "date-time"
@@ -1648,6 +1650,7 @@ components:
       required:
         - id
         - platform
+        - status
         - fill
         - makeStock
         - cancelled
