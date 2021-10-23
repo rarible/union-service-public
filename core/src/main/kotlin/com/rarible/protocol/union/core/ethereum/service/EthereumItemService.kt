@@ -43,7 +43,7 @@ class EthereumItemService(
     }
 
     override suspend fun resetItemMeta(itemId: String) {
-        itemControllerApi.resetNftItemMetaById(itemId)
+        itemControllerApi.resetNftItemMetaById(itemId).awaitFirst()
     }
 
     override suspend fun getItemsByCollection(
