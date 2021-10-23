@@ -10,6 +10,7 @@ import com.rarible.protocol.tezos.api.client.OrderControllerApi
 import com.rarible.protocol.tezos.api.client.OrderSignatureControllerApi
 import com.rarible.protocol.tezos.api.client.TezosApiClientFactory
 import com.rarible.protocol.tezos.api.client.TezosApiServiceUriProvider
+import com.rarible.protocol.union.core.IntegrationProperties
 import com.rarible.protocol.union.core.service.ActivityService
 import com.rarible.protocol.union.core.service.CollectionService
 import com.rarible.protocol.union.core.service.ItemService
@@ -27,20 +28,18 @@ import com.rarible.protocol.union.core.tezos.service.TezosOwnershipService
 import com.rarible.protocol.union.core.tezos.service.TezosSignatureService
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.PlatformDto
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import java.net.URI
 
 @Configuration
-class TezosConfiguration {
-
-    @Value("\${common.client.tezos.url}")
-    lateinit var tezosBaseUrl: String
+class TezosConfiguration(
+    private val integrations: IntegrationProperties
+) {
 
     @Bean
     fun tezosApiServiceUriProvider(): TezosApiServiceUriProvider {
-        return FixedTezosApiServiceUriProvider(URI(tezosBaseUrl))
+        return FixedTezosApiServiceUriProvider(URI(integrations.get(BlockchainDto.TEZOS).client!!.url!!))
     }
 
     //--------------------- TEZOS API ---------------------//

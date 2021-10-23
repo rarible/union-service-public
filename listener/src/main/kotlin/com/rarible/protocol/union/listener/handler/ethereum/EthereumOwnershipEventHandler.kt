@@ -8,14 +8,14 @@ import com.rarible.protocol.union.core.ethereum.converter.EthOwnershipConverter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.UnionAddress
-import com.rarible.protocol.union.listener.handler.AbstractEventHandler
+import com.rarible.protocol.union.listener.handler.BlockchainEventHandler
 import com.rarible.protocol.union.listener.service.EnrichmentOwnershipEventService
 import org.slf4j.LoggerFactory
 
 class EthereumOwnershipEventHandler(
-    private val ownershipEventService: EnrichmentOwnershipEventService,
-    private val blockchain: BlockchainDto
-) : AbstractEventHandler<NftOwnershipEventDto>() {
+    override val blockchain: BlockchainDto,
+    private val ownershipEventService: EnrichmentOwnershipEventService
+) : BlockchainEventHandler<NftOwnershipEventDto>() {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 

@@ -7,14 +7,14 @@ import com.rarible.protocol.union.core.flow.converter.FlowOwnershipConverter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.UnionAddress
-import com.rarible.protocol.union.listener.handler.AbstractEventHandler
+import com.rarible.protocol.union.listener.handler.BlockchainEventHandler
 import com.rarible.protocol.union.listener.service.EnrichmentOwnershipEventService
 import org.slf4j.LoggerFactory
 
 class FlowOwnershipEventHandler(
-    private val ownershipEventService: EnrichmentOwnershipEventService,
-    private val blockchain: BlockchainDto
-) : AbstractEventHandler<FlowOwnershipEventDto>() {
+    override val blockchain: BlockchainDto,
+    private val ownershipEventService: EnrichmentOwnershipEventService
+) : BlockchainEventHandler<FlowOwnershipEventDto>() {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 

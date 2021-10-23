@@ -6,14 +6,14 @@ import com.rarible.protocol.union.core.flow.converter.FlowActivityConverter
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.event.KafkaEventFactory
-import com.rarible.protocol.union.listener.handler.AbstractEventHandler
+import com.rarible.protocol.union.listener.handler.BlockchainEventHandler
 import org.slf4j.LoggerFactory
 
 class FlowActivityEventHandler(
+    override val blockchain: BlockchainDto,
     private val producer: RaribleKafkaProducer<ActivityDto>,
-    private val blockchain: BlockchainDto,
     private val flowActivityConverter: FlowActivityConverter
-) : AbstractEventHandler<FlowActivityDto>() {
+) : BlockchainEventHandler<FlowActivityDto>() {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 

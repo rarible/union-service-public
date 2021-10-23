@@ -5,14 +5,14 @@ import com.rarible.protocol.union.core.tezos.converter.TezosOwnershipConverter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.UnionAddress
-import com.rarible.protocol.union.listener.handler.AbstractEventHandler
+import com.rarible.protocol.union.listener.handler.BlockchainEventHandler
 import com.rarible.protocol.union.listener.service.EnrichmentOwnershipEventService
 import org.slf4j.LoggerFactory
 
 class TezosOwnershipEventHandler(
-    private val enrichmentOwnershipEventService: EnrichmentOwnershipEventService,
-    private val blockchain: BlockchainDto
-) : AbstractEventHandler<OwnershipEventDto>() {
+    override val blockchain: BlockchainDto,
+    private val enrichmentOwnershipEventService: EnrichmentOwnershipEventService
+) : BlockchainEventHandler<OwnershipEventDto>() {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 

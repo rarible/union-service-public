@@ -8,13 +8,13 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionEventDto
 import com.rarible.protocol.union.dto.CollectionUpdateEventDto
 import com.rarible.protocol.union.enrichment.event.KafkaEventFactory
-import com.rarible.protocol.union.listener.handler.AbstractEventHandler
+import com.rarible.protocol.union.listener.handler.BlockchainEventHandler
 import org.slf4j.LoggerFactory
 
 class EthereumCollectionEventHandler(
-    private val producer: RaribleKafkaProducer<CollectionEventDto>,
-    private val blockchain: BlockchainDto
-) : AbstractEventHandler<NftCollectionEventDto>() {
+    override val blockchain: BlockchainDto,
+    private val producer: RaribleKafkaProducer<CollectionEventDto>
+) : BlockchainEventHandler<NftCollectionEventDto>() {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 

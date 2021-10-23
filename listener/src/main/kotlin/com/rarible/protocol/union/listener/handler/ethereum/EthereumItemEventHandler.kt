@@ -8,14 +8,14 @@ import com.rarible.protocol.union.core.ethereum.converter.EthItemConverter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.UnionAddress
-import com.rarible.protocol.union.listener.handler.AbstractEventHandler
+import com.rarible.protocol.union.listener.handler.BlockchainEventHandler
 import com.rarible.protocol.union.listener.service.EnrichmentItemEventService
 import org.slf4j.LoggerFactory
 
 class EthereumItemEventHandler(
-    private val itemEventService: EnrichmentItemEventService,
-    private val blockchain: BlockchainDto
-) : AbstractEventHandler<NftItemEventDto>() {
+    override val blockchain: BlockchainDto,
+    private val itemEventService: EnrichmentItemEventService
+) : BlockchainEventHandler<NftItemEventDto>() {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 

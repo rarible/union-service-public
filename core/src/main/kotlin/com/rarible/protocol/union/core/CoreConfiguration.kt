@@ -9,6 +9,8 @@ import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.OwnershipService
 import com.rarible.protocol.union.core.service.SignatureService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
+import com.rarible.protocol.union.core.service.router.BlockchainService
+import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Configuration
@@ -17,37 +19,46 @@ import org.springframework.scheduling.annotation.EnableScheduling
 @Configuration
 @EnableScheduling
 @ComponentScan(basePackageClasses = [CoreConfiguration::class])
-class CoreConfiguration {
+@EnableConfigurationProperties(value = [IntegrationProperties::class])
+class CoreConfiguration(
+    integrationProperties: IntegrationProperties
+) {
+
+    val enabledBlockchains = integrationProperties.integrations.keys
 
     //-------------------- Routers ---------------------//
     @Bean
     fun itemServiceRouter(services: List<ItemService>): BlockchainRouter<ItemService> {
-        return BlockchainRouter(services)
+        return BlockchainRouter(filter(services))
     }
 
     @Bean
     fun ownershipServiceRouter(services: List<OwnershipService>): BlockchainRouter<OwnershipService> {
-        return BlockchainRouter(services)
+        return BlockchainRouter(filter(services))
     }
 
     @Bean
     fun collectionServiceRouter(services: List<CollectionService>): BlockchainRouter<CollectionService> {
-        return BlockchainRouter(services)
+        return BlockchainRouter(filter(services))
     }
 
     @Bean
     fun orderServiceRouter(services: List<OrderService>): BlockchainRouter<OrderService> {
-        return BlockchainRouter(services)
+        return BlockchainRouter(filter(services))
     }
 
     @Bean
     fun activityServiceRouter(services: List<ActivityService>): BlockchainRouter<ActivityService> {
-        return BlockchainRouter(services)
+        return BlockchainRouter(filter(services))
     }
 
     @Bean
     fun signatureServiceRouter(services: List<SignatureService>): BlockchainRouter<SignatureService> {
-        return BlockchainRouter(services)
+        return BlockchainRouter(filter(services))
+    }
+
+    private fun <T : BlockchainService> filter(services: List<T>): List<T> {
+        return services.filter { enabledBlockchains.contains(it.blockchain) }
     }
 
     //-------------------- CURRENCY ---------------------//

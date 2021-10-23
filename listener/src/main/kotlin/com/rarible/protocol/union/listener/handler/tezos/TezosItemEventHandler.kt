@@ -5,14 +5,14 @@ import com.rarible.protocol.union.core.tezos.converter.TezosItemConverter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.UnionAddress
-import com.rarible.protocol.union.listener.handler.AbstractEventHandler
+import com.rarible.protocol.union.listener.handler.BlockchainEventHandler
 import com.rarible.protocol.union.listener.service.EnrichmentItemEventService
 import org.slf4j.LoggerFactory
 
 class TezosItemEventHandler(
-    private val itemEventService: EnrichmentItemEventService,
-    private val blockchain: BlockchainDto
-) : AbstractEventHandler<ItemEventDto>() {
+    override val blockchain: BlockchainDto,
+    private val itemEventService: EnrichmentItemEventService
+) : BlockchainEventHandler<ItemEventDto>() {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 

@@ -7,14 +7,14 @@ import com.rarible.protocol.union.core.flow.converter.FlowItemConverter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.UnionAddress
-import com.rarible.protocol.union.listener.handler.AbstractEventHandler
+import com.rarible.protocol.union.listener.handler.BlockchainEventHandler
 import com.rarible.protocol.union.listener.service.EnrichmentItemEventService
 import org.slf4j.LoggerFactory
 
 class FlowItemEventHandler(
-    private val itemEventService: EnrichmentItemEventService,
-    private val blockchain: BlockchainDto
-) : AbstractEventHandler<FlowNftItemEventDto>() {
+    override val blockchain: BlockchainDto,
+    private val itemEventService: EnrichmentItemEventService
+) : BlockchainEventHandler<FlowNftItemEventDto>() {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 

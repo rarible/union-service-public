@@ -5,14 +5,14 @@ import com.rarible.protocol.union.core.tezos.converter.TezosActivityConverter
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.event.KafkaEventFactory
-import com.rarible.protocol.union.listener.handler.AbstractEventHandler
+import com.rarible.protocol.union.listener.handler.BlockchainEventHandler
 import org.slf4j.LoggerFactory
 
 class TezosActivityEventHandler(
+    override val blockchain: BlockchainDto,
     private val producer: RaribleKafkaProducer<ActivityDto>,
-    private val blockchain: BlockchainDto,
     private val tezosActivityConverter: TezosActivityConverter
-) : AbstractEventHandler<com.rarible.protocol.tezos.dto.ActivityDto>() {
+) : BlockchainEventHandler<com.rarible.protocol.tezos.dto.ActivityDto>() {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
