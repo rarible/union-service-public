@@ -97,14 +97,14 @@
             <dependency>
                 <groupId>com.rarible.protocol.union</groupId>
                 <artifactId>rarible-union-enrichment</artifactId>
-                <classifier>tests</classifier>
-                <type>test-jar</type>
-                <scope>test</scope>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.rarible.protocol.union</groupId>
                 <artifactId>rarible-union-enrichment</artifactId>
+                <classifier>tests</classifier>
+                <type>test-jar</type>
+                <scope>test</scope>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -115,6 +115,46 @@
             <dependency>
                 <groupId>com.rarible.protocol.union</groupId>
                 <artifactId>rarible-union-listener</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.rarible.protocol.union</groupId>
+                <artifactId>rarible-union-integration-ethereum</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.rarible.protocol.union</groupId>
+                <artifactId>rarible-union-integration-ethereum</artifactId>
+                <classifier>tests</classifier>
+                <type>test-jar</type>
+                <scope>test</scope>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.rarible.protocol.union</groupId>
+                <artifactId>rarible-union-integration-flow</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.rarible.protocol.union</groupId>
+                <artifactId>rarible-union-integration-flow</artifactId>
+                <classifier>tests</classifier>
+                <type>test-jar</type>
+                <scope>test</scope>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.rarible.protocol.union</groupId>
+                <artifactId>rarible-union-integration-tezos</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.rarible.protocol.union</groupId>
+                <artifactId>rarible-union-integration-tezos</artifactId>
+                <classifier>tests</classifier>
+                <type>test-jar</type>
+                <scope>test</scope>
                 <version>${project.version}</version>
             </dependency>
 
@@ -330,6 +370,7 @@
         <module>api</module>
         <module>core</module>
         <module>enrichment</module>
+        <module>integration</module>
         <module>listener</module>
         <module>openapi</module>
         <module>test-coverage</module>

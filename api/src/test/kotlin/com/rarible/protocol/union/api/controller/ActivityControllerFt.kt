@@ -16,9 +16,9 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.MintActivityDto
 import com.rarible.protocol.union.dto.OrderBidActivityDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
-import com.rarible.protocol.union.test.data.randomEthAddress
-import com.rarible.protocol.union.test.data.randomEthItemMintActivity
-import com.rarible.protocol.union.test.data.randomEthOrderBidActivity
+import com.rarible.protocol.union.integration.ethereum.data.randomEthAddress
+import com.rarible.protocol.union.integration.ethereum.data.randomEthItemMintActivity
+import com.rarible.protocol.union.integration.ethereum.data.randomEthOrderBidActivity
 import com.rarible.protocol.union.test.data.randomFlowAddress
 import com.rarible.protocol.union.test.data.randomFlowCancelListActivityDto
 import io.mockk.coEvery

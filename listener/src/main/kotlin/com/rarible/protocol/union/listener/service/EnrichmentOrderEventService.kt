@@ -1,19 +1,23 @@
 package com.rarible.protocol.union.listener.service
 
 import com.rarible.core.client.WebClientResponseProxyException
+import com.rarible.protocol.union.core.event.OutgoingOrderEventListener
 import com.rarible.protocol.union.core.model.ext
 import com.rarible.protocol.union.dto.OrderDto
+import com.rarible.protocol.union.dto.OrderUpdateEventDto
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
+import java.util.*
 
 @Component
 class EnrichmentOrderEventService(
     private val enrichmentItemEventService: EnrichmentItemEventService,
-    private val enrichmentOwnershipEventService: EnrichmentOwnershipEventService
+    private val enrichmentOwnershipEventService: EnrichmentOwnershipEventService,
+    private val orderEventListeners: List<OutgoingOrderEventListener>
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -51,6 +55,12 @@ class EnrichmentOrderEventService(
         mFuture?.await()
         tFuture?.await()
         oFuture?.await()
+        val event = OrderUpdateEventDto(
+            eventId = UUID.randomUUID().toString(),
+            orderId = order.id,
+            order = order
+        )
+        orderEventListeners.forEach { it.onEvent(event) }
     }
 
     private suspend fun ignoreApi404(call: suspend () -> Unit) {

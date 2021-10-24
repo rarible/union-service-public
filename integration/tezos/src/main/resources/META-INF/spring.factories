@@ -1,0 +1,3 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+com.rarible.protocol.union.integration.tezos.TezosApiConfiguration,\
+com.rarible.protocol.union.integration.tezos.TezosConsumerConfiguration

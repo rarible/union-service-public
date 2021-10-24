@@ -1,0 +1,5 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+com.rarible.protocol.union.integration.ethereum.EthereumApiConfiguration,\
+com.rarible.protocol.union.integration.ethereum.PolygonApiConfiguration,\
+com.rarible.protocol.union.integration.ethereum.EthereumConsumerConfiguration,\
+com.rarible.protocol.union.integration.ethereum.PolygonConsumerConfiguration

@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.core.model
 
-import com.rarible.protocol.union.core.ethereum.converter.EthConverter
 import com.rarible.protocol.union.dto.AssetTypeDto
 import com.rarible.protocol.union.dto.EthCryptoPunksAssetTypeDto
 import com.rarible.protocol.union.dto.EthErc1155AssetTypeDto
@@ -17,7 +16,6 @@ import com.rarible.protocol.union.dto.TezosFA12AssetTypeDto
 import com.rarible.protocol.union.dto.TezosFA2AssetTypeDto
 import com.rarible.protocol.union.dto.TezosXTZAssetTypeDto
 import com.rarible.protocol.union.dto.UnionAddress
-import scalether.domain.Address
 import java.math.BigInteger
 
 val AssetTypeDto.ext: AssetTypeExtension
@@ -26,7 +24,7 @@ val AssetTypeDto.ext: AssetTypeExtension
         is EthEthereumAssetTypeDto -> AssetTypeExtension(
             isNft = false,
             isCurrency = true,
-            contract = EthConverter.convert(Address.ZERO()),
+            contract = "0x000000", // TODO !!! check
             itemId = null
         )
         is EthErc20AssetTypeDto -> AssetTypeExtension(

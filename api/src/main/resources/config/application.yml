@@ -25,17 +25,16 @@ rarible:
     use-locks: true
 
 integration:
-  blockchains:
-    - blockchain: ETHEREUM
-      enabled: ${consul.ethereum.enabled:true}
-    - blockchain: POLYGON
-      enabled: ${consul.polygon.enabled:true}
-    - blockchain: FLOW
-      enabled: ${consul.flow.enabled:true}
-    - blockchain: TEZOS
-      enabled: ${consul.tezos.enabled:true}
-      client:
-        baseUrl: ${consul.tezos.api.baseUrl}
+  ethereum:
+    enabled: ${consul.ethereum.enabled:true}
+  polygon:
+    enabled: ${consul.polygon.enabled:true}
+  flow:
+    enabled: ${consul.flow.enabled:true}
+  tezos:
+    enabled: ${consul.tezos.enabled:true}
+    client:
+      baseUrl: ${consul.tezos.api.baseUrl}
 
 common:
   producer:
