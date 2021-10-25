@@ -1,11 +1,12 @@
 package com.rarible.protocol.union.core.continuation.page
 
 import com.rarible.core.common.nowMillis
+import com.rarible.core.test.data.randomString
 import com.rarible.protocol.union.core.continuation.ItemContinuation
-import com.rarible.protocol.union.core.ethereum.converter.EthItemConverter
 import com.rarible.protocol.union.core.model.UnionItem
-import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.test.data.randomEthNftItemDto
+import com.rarible.protocol.union.dto.parser.ItemIdParser
+import io.mockk.coEvery
+import io.mockk.mockk
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.Instant
@@ -51,8 +52,13 @@ class PagingTest {
     }
 
     private fun createItem(lastUpdated: Instant): UnionItem {
-        val item = randomEthNftItemDto().copy(date = lastUpdated)
-        return EthItemConverter.convert(item, BlockchainDto.ETHEREUM)
+
+        val item: UnionItem = mockk()
+        val id = ItemIdParser.parseFull("ETHEREUM:${randomString()}:123")
+        coEvery { item.lastUpdatedAt } returns lastUpdated
+        coEvery { item.id } returns id
+
+        return item
     }
 
 }

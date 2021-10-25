@@ -57,49 +57,24 @@
             <artifactId>rarible-core-kafka</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.rarible.core</groupId>
+            <artifactId>rarible-core-daemon</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.rarible.ethereum</groupId>
             <artifactId>rarible-ethereum-converters</artifactId>
+        </dependency>
+
+        <!-- =============== Currency-API ================ -->
+        <dependency>
+            <groupId>com.rarible.protocol</groupId>
+            <artifactId>protocol-client-currency-starter</artifactId>
         </dependency>
 
         <!-- ============ Union Protocol-API ============= -->
         <dependency>
             <groupId>com.rarible.protocol.union</groupId>
             <artifactId>protocol-union-subscriber</artifactId>
-        </dependency>
-
-        <!-- ============= Eth Protocol-API ============== -->
-        <dependency>
-            <groupId>com.rarible.protocol</groupId>
-            <artifactId>protocol-client-nft-starter</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.rarible.protocol</groupId>
-            <artifactId>protocol-client-order-starter</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.rarible.protocol</groupId>
-            <artifactId>protocol-client-erc20-starter</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.rarible.protocol</groupId>
-            <artifactId>protocol-client-unlockable-starter</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.rarible.protocol</groupId>
-            <artifactId>protocol-client-currency-starter</artifactId>
-        </dependency>
-        <!-- =============== Flow Protocol API =========== -->
-
-        <dependency>
-            <groupId>com.rarible.protocol</groupId>
-            <artifactId>flow-protocol-client-nft-starter</artifactId>
-        </dependency>
-
-        <!-- =============== Tezos Protocol API =========== -->
-
-        <dependency>
-            <groupId>com.rarible.protocol.tezos</groupId>
-            <artifactId>protocol-tezos-client-starter</artifactId>
         </dependency>
 
         <!-- ================== Spring =================== -->

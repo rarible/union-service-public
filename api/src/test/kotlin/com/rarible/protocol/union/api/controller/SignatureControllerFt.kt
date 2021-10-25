@@ -10,6 +10,7 @@ import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.SignatureValidationFormDto
+import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
 import io.mockk.coEvery
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.reactive.awaitFirst
@@ -31,7 +32,7 @@ class SignatureControllerFt : AbstractIntegrationTest() {
         val ethForm = EthereumSignatureValidationFormDto(randomAddress(), randomString(), randomBinary())
 
         val unionForm = SignatureValidationFormDto(
-            signer = UnionAddressConverter.convert(ethForm.signer, BlockchainDto.ETHEREUM),
+            signer = EthConverter.convert(ethForm.signer, BlockchainDto.ETHEREUM),
             message = ethForm.message,
             signature = ethForm.signature.prefixed()
         )

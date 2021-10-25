@@ -8,7 +8,16 @@ import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.OwnershipService
 import com.rarible.protocol.union.core.service.SignatureService
+import com.rarible.protocol.union.core.service.dummy.DummyActivityService
+import com.rarible.protocol.union.core.service.dummy.DummyCollectionService
+import com.rarible.protocol.union.core.service.dummy.DummyItemService
+import com.rarible.protocol.union.core.service.dummy.DummyOrderService
+import com.rarible.protocol.union.core.service.dummy.DummyOwnershipService
+import com.rarible.protocol.union.core.service.dummy.DummySignatureService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
+import com.rarible.protocol.union.core.service.router.BlockchainService
+import com.rarible.protocol.union.dto.BlockchainDto
+import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Configuration
@@ -19,41 +28,94 @@ import org.springframework.scheduling.annotation.EnableScheduling
 @ComponentScan(basePackageClasses = [CoreConfiguration::class])
 class CoreConfiguration {
 
-    //-------------------- Routers ---------------------//
+    private val logger = LoggerFactory.getLogger(javaClass)
+
+    private val blockchains = BlockchainDto.values().toSet()
+
     @Bean
     fun itemServiceRouter(services: List<ItemService>): BlockchainRouter<ItemService> {
-        return BlockchainRouter(services)
+        val result = ArrayList(services)
+        val disabled = getDisabledBlockchains(services)
+        disabled.forEach {
+            result.add(DummyItemService(it))
+            logger.info("ItemService for blockchain {} disabled or not implemented, replaced by dummy", it.name)
+        }
+        return BlockchainRouter(result)
     }
 
     @Bean
     fun ownershipServiceRouter(services: List<OwnershipService>): BlockchainRouter<OwnershipService> {
-        return BlockchainRouter(services)
+        val result = ArrayList(services)
+        val disabled = getDisabledBlockchains(services)
+        disabled.forEach {
+            result.add(DummyOwnershipService(it))
+            logger.info("OwnershipService for blockchain {} disabled or not implemented, replaced by dummy", it.name)
+        }
+        return BlockchainRouter(result)
     }
 
     @Bean
     fun collectionServiceRouter(services: List<CollectionService>): BlockchainRouter<CollectionService> {
+        val result = ArrayList(services)
+        val disabled = getDisabledBlockchains(services)
+        disabled.forEach {
+            result.add(DummyCollectionService(it))
+            logger.info("CollectionService for blockchain {} disabled or not implemented, replaced by dummy", it.name)
+        }
         return BlockchainRouter(services)
     }
 
     @Bean
     fun orderServiceRouter(services: List<OrderService>): BlockchainRouter<OrderService> {
+        val result = ArrayList(services)
+        val disabled = getDisabledBlockchains(services)
+        disabled.forEach {
+            result.add(DummyOrderService(it))
+            logger.info("OrderService for blockchain {} disabled or not implemented, replaced by dummy", it.name)
+        }
         return BlockchainRouter(services)
     }
 
     @Bean
     fun activityServiceRouter(services: List<ActivityService>): BlockchainRouter<ActivityService> {
+        val result = ArrayList(services)
+        val disabled = getDisabledBlockchains(services)
+        disabled.forEach {
+            result.add(DummyActivityService(it))
+            logger.info("ActivityService for blockchain {} disabled or not implemented, replaced by dummy", it.name)
+        }
         return BlockchainRouter(services)
     }
 
     @Bean
     fun signatureServiceRouter(services: List<SignatureService>): BlockchainRouter<SignatureService> {
+        val result = ArrayList(services)
+        val disabled = getDisabledBlockchains(services)
+        disabled.forEach {
+            result.add(DummySignatureService(it))
+            logger.info("SignatureService for blockchain {} disabled or not implemented, replaced by dummy", it.name)
+        }
         return BlockchainRouter(services)
     }
 
-    //-------------------- CURRENCY ---------------------//
     @Bean
     fun currencyApi(factory: CurrencyApiClientFactory): CurrencyControllerApi {
         return factory.createCurrencyApiClient()
     }
 
+    private fun <T : BlockchainService> getDisabledBlockchains(services: List<T>): List<BlockchainDto> {
+        services.groupBy { it.blockchain }.forEach { e ->
+            if (e.value.size > 1) {
+                throw IllegalArgumentException(
+                    "There are several implementations of service " +
+                            "for blockchain ${e.key}: ${e.value.map { it.javaClass.name }}, should be only one" +
+                            "implementation"
+                )
+            }
+        }
+
+        val disabledBlockchains = this.blockchains.toMutableSet()
+        services.forEach { disabledBlockchains.remove(it.blockchain) }
+        return disabledBlockchains.toList()
+    }
 }

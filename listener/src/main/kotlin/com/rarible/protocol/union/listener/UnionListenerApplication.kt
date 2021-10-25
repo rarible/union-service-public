@@ -1,6 +1,6 @@
 package com.rarible.protocol.union.listener
 
-import com.rarible.protocol.union.listener.handler.KafkaConsumerWorker
+import com.rarible.protocol.union.core.handler.KafkaConsumerWorker
 import org.springframework.boot.CommandLineRunner
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication

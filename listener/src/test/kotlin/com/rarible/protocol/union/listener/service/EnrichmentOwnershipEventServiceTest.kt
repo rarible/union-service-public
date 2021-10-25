@@ -1,16 +1,16 @@
 package com.rarible.protocol.union.listener.service
 
 import com.mongodb.client.result.DeleteResult
+import com.rarible.protocol.union.core.event.OutgoingOwnershipEventListener
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
-import com.rarible.protocol.union.enrichment.event.OwnershipEventListener
 import com.rarible.protocol.union.enrichment.model.ShortOwnership
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
 import com.rarible.protocol.union.enrichment.service.BestOrderService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
 import com.rarible.protocol.union.enrichment.test.data.randomShortOwnership
-import com.rarible.protocol.union.test.data.randomEthItemId
-import com.rarible.protocol.union.test.data.randomEthOwnershipId
-import com.rarible.protocol.union.test.data.randomUnionOrderDto
+import com.rarible.protocol.union.enrichment.test.data.randomUnionOrderDto
+import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
+import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipId
 import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -23,7 +23,7 @@ class EnrichmentOwnershipEventServiceTest {
 
     private val ownershipService: EnrichmentOwnershipService = mockk()
     private val itemEventService: EnrichmentItemEventService = mockk()
-    private val eventListener: OwnershipEventListener = mockk()
+    private val eventListener: OutgoingOwnershipEventListener = mockk()
     private val ownershipEventListeners = listOf(eventListener)
     private val bestOrderService: BestOrderService = mockk()
 

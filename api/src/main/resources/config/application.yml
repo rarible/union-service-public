@@ -24,15 +24,24 @@ rarible:
   cache:
     use-locks: true
 
+integration:
+  ethereum:
+    enabled: ${consul.ethereum.enabled:true}
+  polygon:
+    enabled: ${consul.polygon.enabled:true}
+  flow:
+    enabled: ${consul.flow.enabled:true}
+  tezos:
+    enabled: ${consul.tezos.enabled:true}
+    client:
+      url: ${consul.tezos.api.baseUrl}
+
 common:
   producer:
     broker-replica-set: ${kafka.hosts}
   currency:
     refresh:
       cron: "0 0/30 * * * *"
-  client:
-    tezos:
-      url: "${consul.tezos.api.baseUrl}"
 
 meta:
   ipfsGateway: "https://ipfs.rarible.com/"

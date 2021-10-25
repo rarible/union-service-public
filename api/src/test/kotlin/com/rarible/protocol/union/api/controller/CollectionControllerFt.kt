@@ -12,8 +12,9 @@ import com.rarible.protocol.union.core.continuation.page.PageSize
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionDto
-import com.rarible.protocol.union.test.data.randomEthAddress
-import com.rarible.protocol.union.test.data.randomEthCollectionDto
+import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
+import com.rarible.protocol.union.integration.ethereum.data.randomEthAddress
+import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionDto
 import com.rarible.protocol.union.test.data.randomFlowAddress
 import com.rarible.protocol.union.test.data.randomFlowCollectionDto
 import com.rarible.protocol.union.test.data.randomTezosCollectionDto
@@ -40,7 +41,7 @@ class CollectionControllerFt : AbstractIntegrationTest() {
     @Test
     fun `get collection by id - ethereum`() = runBlocking<Unit> {
         val collectionId = randomAddress()
-        val collectionIdFull = UnionAddressConverter.convert(collectionId, BlockchainDto.ETHEREUM)
+        val collectionIdFull = EthConverter.convert(collectionId, BlockchainDto.ETHEREUM)
         val collection = randomEthCollectionDto(collectionId)
 
         coEvery { testEthereumCollectionApi.getNftCollectionById(collectionIdFull.value) } returns collection.toMono()
@@ -84,7 +85,7 @@ class CollectionControllerFt : AbstractIntegrationTest() {
     fun `get collections by owner - ethereum`() = runBlocking<Unit> {
         val ethOwnerId = randomEthAddress()
         val collection = randomEthCollectionDto()
-        val collectionId = UnionAddressConverter.convert(collection.id, BlockchainDto.ETHEREUM)
+        val collectionId = EthConverter.convert(collection.id, BlockchainDto.ETHEREUM)
 
         coEvery {
             testEthereumCollectionApi.searchNftCollectionsByOwner(ethOwnerId.value, continuation, size)

@@ -1,0 +1,19 @@
+package com.rarible.protocol.union.core.event
+
+import com.rarible.core.kafka.RaribleKafkaProducer
+import com.rarible.protocol.union.dto.ActivityDto
+import org.slf4j.LoggerFactory
+import org.springframework.stereotype.Component
+
+@Component
+class OutgoingActivityEventListener(
+    private val eventsProducer: RaribleKafkaProducer<ActivityDto>
+) : OutgoingEventListener<ActivityDto> {
+
+    private val logger = LoggerFactory.getLogger(javaClass)
+
+    override suspend fun onEvent(event: ActivityDto) {
+        eventsProducer.send(KafkaEventFactory.activityEvent(event)).ensureSuccess()
+        logger.debug("Activity Event sent: {}", event)
+    }
+}

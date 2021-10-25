@@ -7,7 +7,6 @@ import com.rarible.protocol.currency.api.client.CurrencyControllerApi
 import com.rarible.protocol.currency.dto.CurrencyRateDto
 import com.rarible.protocol.union.core.converter.CurrencyConverter
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.test.data.randomAddressString
 import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -35,7 +34,7 @@ class CurrencyServiceTest {
     fun `get rate`() = runBlocking<Unit> {
         val rate = randomBigDecimal()
         val blockchain = BlockchainDto.ETHEREUM
-        val address = randomAddressString()
+        val address = randomString()
         mockCurrency(blockchain, address, rate)
 
         val usdRate1 = currencyService.getRate(blockchain, address, nowMillis())
@@ -52,7 +51,7 @@ class CurrencyServiceTest {
     fun `to usd - actual`() = runBlocking<Unit> {
         val rate = randomBigDecimal()
         val blockchain = BlockchainDto.ETHEREUM
-        val address = randomAddressString()
+        val address = randomString()
         mockCurrency(blockchain, address, rate, BigDecimal.ONE)
 
         val at = nowMillis().minusSeconds(60 * 29)
@@ -72,7 +71,7 @@ class CurrencyServiceTest {
     fun `to usd - historical`() = runBlocking<Unit> {
         val rate = randomBigDecimal()
         val blockchain = BlockchainDto.ETHEREUM
-        val address = randomAddressString()
+        val address = randomString()
         mockCurrency(blockchain, address, rate, BigDecimal.ONE)
 
         val at = nowMillis().minusSeconds(60 * 29)
@@ -92,7 +91,7 @@ class CurrencyServiceTest {
     fun `get current rate`() = runBlocking<Unit> {
         val rate = randomBigDecimal()
         val blockchain = BlockchainDto.FLOW
-        val address = randomAddressString()
+        val address = randomString()
         mockCurrency(blockchain, address, rate)
 
         val usdRate1 = currencyService.getCurrentRate(blockchain, address)!!
@@ -111,7 +110,7 @@ class CurrencyServiceTest {
             currencyControllerApi.getCurrencyRate(any(), any(), any())
         } throws RuntimeException()
 
-        val currency = currencyService.getCurrentRate(BlockchainDto.POLYGON, randomAddressString())
+        val currency = currencyService.getCurrentRate(BlockchainDto.POLYGON, randomString())
         assertThat(currency).isNull()
     }
 

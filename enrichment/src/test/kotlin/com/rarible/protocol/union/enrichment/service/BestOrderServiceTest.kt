@@ -9,10 +9,10 @@ import com.rarible.protocol.union.enrichment.converter.ShortItemConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.test.data.randomShortItem
 import com.rarible.protocol.union.enrichment.test.data.randomShortOwnership
+import com.rarible.protocol.union.enrichment.test.data.randomUnionItem
+import com.rarible.protocol.union.enrichment.test.data.randomUnionOrderDto
 import com.rarible.protocol.union.enrichment.util.sellCurrencyId
-import com.rarible.protocol.union.test.data.randomEthItemId
-import com.rarible.protocol.union.test.data.randomUnionItem
-import com.rarible.protocol.union.test.data.randomUnionOrderDto
+import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.mockk

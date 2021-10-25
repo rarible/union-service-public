@@ -1,25 +1,26 @@
 package com.rarible.protocol.union.listener.service
 
 import com.rarible.core.common.optimisticLock
+import com.rarible.protocol.union.core.event.OutgoingOwnershipEventListener
 import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.dto.OrderDto
+import com.rarible.protocol.union.dto.OwnershipDeleteEventDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
+import com.rarible.protocol.union.dto.OwnershipUpdateEventDto
 import com.rarible.protocol.union.enrichment.converter.ShortOwnershipConverter
-import com.rarible.protocol.union.enrichment.event.OwnershipEventDelete
-import com.rarible.protocol.union.enrichment.event.OwnershipEventListener
-import com.rarible.protocol.union.enrichment.event.OwnershipEventUpdate
 import com.rarible.protocol.union.enrichment.model.ShortOwnership
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
 import com.rarible.protocol.union.enrichment.service.BestOrderService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
+import java.util.*
 
 @Component
 class EnrichmentOwnershipEventService(
     private val ownershipService: EnrichmentOwnershipService,
     private val enrichmentItemEventService: EnrichmentItemEventService,
-    private val ownershipEventListeners: List<OwnershipEventListener>,
+    private val ownershipEventListeners: List<OutgoingOwnershipEventListener>,
     private val bestOrderService: BestOrderService
 ) {
     private val logger = LoggerFactory.getLogger(EnrichmentOwnershipEventService::class.java)
@@ -86,7 +87,10 @@ class EnrichmentOwnershipEventService(
     }
 
     private suspend fun notifyDelete(ownershipId: ShortOwnershipId) {
-        val event = OwnershipEventDelete(ownershipId.toDto())
+        val event = OwnershipDeleteEventDto(
+            eventId = UUID.randomUUID().toString(),
+            ownershipId = ownershipId.toDto()
+        )
         ownershipEventListeners.forEach { it.onEvent(event) }
     }
 
@@ -96,7 +100,11 @@ class EnrichmentOwnershipEventService(
         order: OrderDto? = null
     ) {
         val dto = ownershipService.enrichOwnership(short, ownership, listOfNotNull(order).associateBy { it.id })
-        val event = OwnershipEventUpdate(dto)
+        val event = OwnershipUpdateEventDto(
+            eventId = UUID.randomUUID().toString(),
+            ownershipId = short.id.toDto(),
+            ownership = dto
+        )
         ownershipEventListeners.forEach { it.onEvent(event) }
     }
 }

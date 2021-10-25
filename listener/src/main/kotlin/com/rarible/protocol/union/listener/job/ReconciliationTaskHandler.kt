@@ -8,15 +8,16 @@ import org.springframework.stereotype.Component
 
 @Component
 class ReconciliationTaskHandler(
-    private val job: ReconciliationJob
+    private val job: ReconciliationJob,
+    private val blockchains: List<BlockchainDto>
 ) : TaskHandler<String> {
 
     override val type = "ENRICHMENT_RECONCILIATION_JOB"
 
     override fun getAutorunParams(): List<RunTask> {
+        // TODO Enable before release
+        //blockchains.map { RunTask(it.name) }
         return listOf(
-            RunTask(BlockchainDto.FLOW.name),
-            //RunTask(BlockchainDto.POLYGON.name), // TODO Temporary disabled
             RunTask(BlockchainDto.ETHEREUM.name)
         )
     }
