@@ -67,12 +67,18 @@ class SignatureControllerFt : AbstractIntegrationTest() {
     fun `validate signature - flow`() = runBlocking<Unit> {
         val unionForm = SignatureValidationFormDto(
             signer = UnionAddressConverter.convert(randomString(), BlockchainDto.FLOW),
+            publicKey = randomString(),
             message = randomString(),
             signature = randomString()
         )
 
         coEvery {
-            testFlowSignatureApi.verifySignature(unionForm.signer.value, unionForm.signature, unionForm.message)
+            testFlowSignatureApi.verifySignature(
+                unionForm.publicKey,
+                unionForm.signer.value,
+                unionForm.signature,
+                unionForm.message
+            )
         } returns true.toMono()
         val result = signatureControllerApi.validate(unionForm).awaitFirst()
 

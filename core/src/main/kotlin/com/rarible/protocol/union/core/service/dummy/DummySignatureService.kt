@@ -10,6 +10,7 @@ class DummySignatureService(
 
     override suspend fun validate(
         signer: String,
+        publicKey: String?,
         signature: String,
         message: String
     ): Boolean {

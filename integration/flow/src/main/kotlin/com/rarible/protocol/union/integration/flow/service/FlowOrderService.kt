@@ -10,6 +10,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PlatformDto
+import com.rarible.protocol.union.integration.flow.converter.FlowConverter
 import com.rarible.protocol.union.integration.flow.converter.FlowOrderConverter
 import kotlinx.coroutines.reactive.awaitFirst
 import java.time.Instant
@@ -47,8 +48,9 @@ class FlowOrderService(
     }
 
     override suspend fun getBidCurrencies(contract: String, tokenId: String): List<AssetTypeDto> {
-        // TODO FLOW implement
-        TODO("Not yet implemented")
+        val assets = orderControllerApi.getBidCurrencies("$contract:$tokenId")
+            .collectList().awaitFirst()
+        return assets.map { FlowConverter.convert(it, blockchain).type }
     }
 
     override suspend fun getOrderBidsByItem(
@@ -89,10 +91,12 @@ class FlowOrderService(
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
-        // TODO FLOW support status/start/end filtering
         val result = orderControllerApi.getOrderBidsByMaker(
             maker,
+            flowOrderConverter.convert(status),
             origin,
+            start?.let { OffsetDateTime.ofInstant(Instant.ofEpochMilli(it), ZoneOffset.UTC) },
+            end?.let { OffsetDateTime.ofInstant(Instant.ofEpochMilli(it), ZoneOffset.UTC) },
             continuation,
             size
         ).awaitFirst()
@@ -100,8 +104,9 @@ class FlowOrderService(
     }
 
     override suspend fun getSellCurrencies(contract: String, tokenId: String): List<AssetTypeDto> {
-        // TODO FLOW implement
-        TODO("Not yet implemented")
+        val assets = orderControllerApi.getSellCurrencies("$contract:$tokenId")
+            .collectList().awaitFirst()
+        return assets.map { FlowConverter.convert(it, blockchain).type }
     }
 
     override suspend fun getSellOrders(

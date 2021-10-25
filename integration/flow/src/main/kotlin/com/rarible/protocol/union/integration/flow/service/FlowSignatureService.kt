@@ -12,10 +12,12 @@ class FlowSignatureService(
 
     override suspend fun validate(
         signer: String,
+        publicKey: String?,
         signature: String,
         message: String
     ): Boolean {
         return signatureControllerApi.verifySignature(
+            publicKey,
             signer,
             signature,
             message

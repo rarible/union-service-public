@@ -6,6 +6,7 @@ interface SignatureService : BlockchainService {
 
     suspend fun validate(
         signer: String,
+        publicKey: String?,
         signature: String,
         message: String
     ): Boolean

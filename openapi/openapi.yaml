@@ -1125,6 +1125,8 @@ components:
       properties:
         signer:
           $ref: "#/components/schemas/UnionAddress"
+        publicKey:
+          type: string
         message:
           type: string
         signature:
