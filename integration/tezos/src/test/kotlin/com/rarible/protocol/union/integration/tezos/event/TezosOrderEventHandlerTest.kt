@@ -7,8 +7,8 @@ import com.rarible.protocol.union.core.model.UnionOrderEvent
 import com.rarible.protocol.union.core.model.UnionOrderUpdateEvent
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.tezos.converter.TezosOrderConverter
-import com.rarible.protocol.union.test.data.randomTezosAssetFa2
-import com.rarible.protocol.union.test.data.randomTezosOrderDto
+import com.rarible.protocol.union.integration.tezos.data.randomTezosAssetFa2
+import com.rarible.protocol.union.integration.tezos.data.randomTezosOrderDto
 import com.rarible.protocol.union.test.mock.CurrencyMock
 import io.mockk.clearMocks
 import io.mockk.coEvery

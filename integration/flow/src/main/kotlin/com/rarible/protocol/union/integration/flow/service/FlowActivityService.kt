@@ -2,6 +2,7 @@ package com.rarible.protocol.union.integration.flow.service
 
 import com.rarible.protocol.flow.nft.api.client.FlowNftOrderActivityControllerApi
 import com.rarible.protocol.union.core.continuation.page.Slice
+import com.rarible.protocol.union.core.converter.UnionConverter
 import com.rarible.protocol.union.core.service.ActivityService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.ActivityDto
@@ -59,7 +60,7 @@ class FlowActivityService(
         val result = activityControllerApi.getNftOrderActivitiesByItem(
             types.map { it.name },
             contract,
-            tokenId.toLong(),
+            UnionConverter.convertToLong(tokenId),
             continuation,
             size
         ).awaitFirst()

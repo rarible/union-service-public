@@ -9,7 +9,7 @@ import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.dto.CollectionsDto
-import com.rarible.protocol.union.dto.IdParser
+import com.rarible.protocol.union.dto.parser.IdParser
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.RestController
 
@@ -41,8 +41,8 @@ class CollectionController(
     override suspend fun getCollectionById(
         collection: String
     ): ResponseEntity<CollectionDto> {
-        val (blockchain, shortCollectionId) = IdParser.parse(collection)
-        val result = router.getService(blockchain).getCollectionById(shortCollectionId)
+        val collectionAddress = IdParser.parseAddress(collection)
+        val result = router.getService(collectionAddress.blockchain).getCollectionById(collectionAddress.value)
         return ResponseEntity.ok(result)
     }
 
@@ -52,8 +52,9 @@ class CollectionController(
         size: Int?
     ): ResponseEntity<CollectionsDto> {
         val safeSize = PageSize.COLLECTION.limit(size)
-        val (blockchain, shortOwner) = IdParser.parse(owner)
-        val result = router.getService(blockchain).getCollectionsByOwner(shortOwner, continuation, safeSize)
+        val ownerAddress = IdParser.parseAddress(owner)
+        val result = router.getService(ownerAddress.blockchain)
+            .getCollectionsByOwner(ownerAddress.value, continuation, safeSize)
         return ResponseEntity.ok(toDto(result))
     }
 

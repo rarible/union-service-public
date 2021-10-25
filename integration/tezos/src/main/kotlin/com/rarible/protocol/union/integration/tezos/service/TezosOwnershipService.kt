@@ -2,6 +2,7 @@ package com.rarible.protocol.union.integration.tezos.service
 
 import com.rarible.protocol.tezos.api.client.NftOwnershipControllerApi
 import com.rarible.protocol.union.core.continuation.page.Page
+import com.rarible.protocol.union.core.converter.UnionConverter
 import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.core.service.OwnershipService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
@@ -38,7 +39,7 @@ class TezosOwnershipService(
         val ownerships =
             ownershipControllerApi.getNftOwnershipByItem(
                 contract,
-                tokenId,
+                UnionConverter.convertToBigInteger(tokenId).toString(),
                 size,
                 continuation
             ).awaitFirst()

@@ -38,10 +38,10 @@ class UnionJacksonTest {
 
     @Test
     fun `flow contract`() {
-        val flowContract = UnionAddress(BlockchainDto.FLOW, "123:abc")
+        val flowContract = UnionAddress(BlockchainDto.FLOW, "123abc")
 
         val serialized = mapper.writeValueAsString(flowContract)
-        assertEquals("\"FLOW:123:abc\"", serialized)
+        assertEquals("\"FLOW:123abc\"", serialized)
 
         val deserialized = mapper.readValue(serialized, UnionAddress::class.java)
         assertEquals(flowContract, deserialized)

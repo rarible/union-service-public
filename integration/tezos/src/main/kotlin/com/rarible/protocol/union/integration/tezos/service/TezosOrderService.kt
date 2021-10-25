@@ -2,6 +2,7 @@ package com.rarible.protocol.union.integration.tezos.service
 
 import com.rarible.protocol.tezos.api.client.OrderControllerApi
 import com.rarible.protocol.union.core.continuation.page.Slice
+import com.rarible.protocol.union.core.converter.UnionConverter
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.AssetTypeDto
@@ -64,7 +65,7 @@ class TezosOrderService(
         // TODO TEZOS add currency/status/start/end filtering
         val orders = orderControllerApi.getOrderBidsByItem(
             contract,
-            tokenId,
+            UnionConverter.convertToBigInteger(tokenId).toString(),
             maker,
             origin,
             size,
@@ -142,7 +143,7 @@ class TezosOrderService(
         // TODO TEZOS add status/currency filtering
         val orders = orderControllerApi.getSellOrderByItem(
             contract,
-            tokenId,
+            UnionConverter.convertToBigInteger(tokenId).toString(),
             maker,
             origin,
             size,

@@ -5,7 +5,7 @@ import com.rarible.protocol.tezos.dto.NftItemAttributeDto
 import com.rarible.protocol.tezos.dto.NftItemMetaDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.MetaContentDto
-import com.rarible.protocol.union.test.data.randomTezosNftItemDto
+import com.rarible.protocol.union.integration.tezos.data.randomTezosNftItemDto
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 

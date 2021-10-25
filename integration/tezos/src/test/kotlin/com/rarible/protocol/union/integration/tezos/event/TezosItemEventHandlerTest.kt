@@ -8,7 +8,7 @@ import com.rarible.protocol.union.core.model.UnionItemEvent
 import com.rarible.protocol.union.core.model.UnionItemUpdateEvent
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.tezos.converter.TezosItemConverter
-import com.rarible.protocol.union.test.data.randomTezosNftItemDto
+import com.rarible.protocol.union.integration.tezos.data.randomTezosNftItemDto
 import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.coVerify

@@ -5,9 +5,8 @@ import com.rarible.protocol.order.api.client.OrderSignatureControllerApi
 import com.rarible.protocol.union.core.service.SignatureService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.BlockchainDto
-import io.daonomic.rpc.domain.Binary
+import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
 import kotlinx.coroutines.reactive.awaitFirst
-import scalether.domain.Address
 
 class EthSignatureService(
     blockchain: BlockchainDto,
@@ -21,8 +20,8 @@ class EthSignatureService(
         message: String
     ): Boolean {
         val ethereumForm = EthereumSignatureValidationFormDto(
-            signer = Address.apply(signer),
-            signature = Binary.apply(signature),
+            signer = EthConverter.convertToAddress(signer),
+            signature = EthConverter.convertToBinary(signature),
             message = message
         )
         return signatureControllerApi.validate(ethereumForm).awaitFirst()

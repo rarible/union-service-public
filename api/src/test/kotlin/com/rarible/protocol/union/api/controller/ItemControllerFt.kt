@@ -18,12 +18,12 @@ import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemMeta
 import com.rarible.protocol.union.integration.ethereum.data.randomEthNftItemDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthV2OrderDto
+import com.rarible.protocol.union.integration.tezos.data.randomTezosAddress
+import com.rarible.protocol.union.integration.tezos.data.randomTezosItemIdFullValue
+import com.rarible.protocol.union.integration.tezos.data.randomTezosNftItemDto
 import com.rarible.protocol.union.test.data.randomFlowAddress
 import com.rarible.protocol.union.test.data.randomFlowItemIdFullValue
 import com.rarible.protocol.union.test.data.randomFlowNftItemDto
-import com.rarible.protocol.union.test.data.randomTezosAddress
-import com.rarible.protocol.union.test.data.randomTezosItemIdFullValue
-import com.rarible.protocol.union.test.data.randomTezosNftItemDto
 import io.mockk.coEvery
 import io.mockk.verify
 import kotlinx.coroutines.FlowPreview

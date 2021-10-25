@@ -17,6 +17,7 @@ import com.rarible.protocol.tezos.dto.OrderActivityFilterDto
 import com.rarible.protocol.union.core.continuation.ActivityContinuation
 import com.rarible.protocol.union.core.continuation.page.Paging
 import com.rarible.protocol.union.core.continuation.page.Slice
+import com.rarible.protocol.union.core.converter.UnionConverter
 import com.rarible.protocol.union.core.service.ActivityService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.ActivityDto
@@ -82,7 +83,7 @@ class TezosActivityService(
         size: Int,
         sort: ActivitySortDto?
     ): Slice<ActivityDto> {
-        val tokenIdInt = tokenId.toBigInteger()
+        val tokenIdInt = UnionConverter.convertToBigInteger(tokenId)
         val nftFilter = tezosActivityConverter.convertToNftTypes(types)?.let {
             NftActivityFilterByItemDto(it, contract, tokenIdInt)
         }

@@ -8,8 +8,8 @@ import com.rarible.protocol.union.core.model.UnionOwnershipEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipUpdateEvent
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.tezos.converter.TezosOwnershipConverter
-import com.rarible.protocol.union.test.data.randomTezosOwnershipDto
-import com.rarible.protocol.union.test.data.randomTezosOwnershipId
+import com.rarible.protocol.union.integration.tezos.data.randomTezosOwnershipDto
+import com.rarible.protocol.union.integration.tezos.data.randomTezosOwnershipId
 import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.coVerify

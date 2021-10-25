@@ -6,7 +6,7 @@ import com.rarible.protocol.tezos.dto.ActivityDto
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.tezos.converter.TezosActivityConverter
-import com.rarible.protocol.union.test.data.randomTezosOrderListActivity
+import com.rarible.protocol.union.integration.tezos.data.randomTezosOrderListActivity
 import com.rarible.protocol.union.test.mock.CurrencyMock
 import io.mockk.clearMocks
 import io.mockk.coEvery
