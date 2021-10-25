@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.dto
 
+import com.rarible.protocol.union.dto.parser.IdParser
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
@@ -7,29 +8,62 @@ import org.junit.jupiter.api.Test
 class IdParserTest {
 
     @Test
-    fun `parse id - ok`() {
+    fun `parse activity id`() {
         val id = "ETHEREUM:abc"
-        val pair = IdParser.parse(id)
+        val activityId = IdParser.parseActivityId(id)
 
-        assertEquals(BlockchainDto.ETHEREUM, pair.first)
-        assertEquals("abc", pair.second)
+        assertEquals(BlockchainDto.ETHEREUM, activityId.blockchain)
+        assertEquals("abc", activityId.value)
     }
 
     @Test
-    fun `parse id - no blockchain`() {
+    fun `parse order id`() {
+        val id = "TEZOS:231"
+        val orderId = IdParser.parseOrderId(id)
+
+        assertEquals(BlockchainDto.TEZOS, orderId.blockchain)
+        assertEquals("231", orderId.value)
+    }
+
+    @Test
+    fun `parse address`() {
+        val id = "FLOW:gtt"
+        val address = IdParser.parseAddress(id)
+
+        assertEquals(BlockchainDto.FLOW, address.blockchain)
+        assertEquals("gtt", address.value)
+    }
+
+    @Test
+    fun `parse address - no blockchain`() {
         val id = "abc"
         assertThrows(BlockchainIdFormatException::class.java) {
-            IdParser.parse(id)
+            IdParser.parseAddress(id)
         }
     }
 
     @Test
-    fun `parse composite id - ok`() {
+    fun `parse address - too many parts`() {
         val id = "ETHEREUM:abc:123"
-        val pair = IdParser.parse(id)
+        assertThrows(BlockchainIdFormatException::class.java) {
+            IdParser.parseAddress(id)
+        }
+    }
 
-        assertEquals(BlockchainDto.ETHEREUM, pair.first)
-        assertEquals("abc:123", pair.second)
+    @Test
+    fun `parse orderId - too many parts`() {
+        val id = "ETHEREUM:abc:123"
+        assertThrows(BlockchainIdFormatException::class.java) {
+            IdParser.parseOrderId(id)
+        }
+    }
+
+    @Test
+    fun `parse activityId - too many parts`() {
+        val id = "ETHEREUM:abc:123"
+        assertThrows(BlockchainIdFormatException::class.java) {
+            IdParser.parseActivityId(id)
+        }
     }
 
     @Test

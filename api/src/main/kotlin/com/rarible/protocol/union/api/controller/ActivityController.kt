@@ -11,8 +11,8 @@ import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.IdParser
 import com.rarible.protocol.union.dto.UserActivityTypeDto
+import com.rarible.protocol.union.dto.parser.IdParser
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -49,9 +49,9 @@ class ActivityController(
         sort: ActivitySortDto?
     ): ResponseEntity<ActivitiesDto> {
         val safeSize = PageSize.ACTIVITY.limit(size)
-        val (blockchain, shortCollection) = IdParser.parse(collection)
-        val result = router.getService(blockchain)
-            .getActivitiesByCollection(type, shortCollection, continuation, safeSize, sort)
+        val collectionAddress = IdParser.parseAddress(collection)
+        val result = router.getService(collectionAddress.blockchain)
+            .getActivitiesByCollection(type, collectionAddress.value, continuation, safeSize, sort)
         return ResponseEntity.ok(toDto(result))
     }
 
@@ -64,9 +64,9 @@ class ActivityController(
         sort: ActivitySortDto?
     ): ResponseEntity<ActivitiesDto> {
         val safeSize = PageSize.ACTIVITY.limit(size)
-        val (blockchain, shortContact) = IdParser.parse(contract)
-        val result = router.getService(blockchain)
-            .getActivitiesByItem(type, shortContact, tokenId, continuation, safeSize, sort)
+        val contractAddress = IdParser.parseAddress(contract)
+        val result = router.getService(contractAddress.blockchain)
+            .getActivitiesByItem(type, contractAddress.value, tokenId, continuation, safeSize, sort)
         return ResponseEntity.ok(toDto(result))
     }
 
@@ -80,8 +80,8 @@ class ActivityController(
         sort: ActivitySortDto?
     ): ResponseEntity<ActivitiesDto> {
         val safeSize = PageSize.ACTIVITY.limit(size)
-        val groupedByBlockchain = user.map { IdParser.parse(it) }
-            .groupBy({ it.first }, { it.second })
+        val groupedByBlockchain = user.map { IdParser.parseAddress(it) }
+            .groupBy({ it.blockchain }, { it.value })
 
         val blockchainPages = coroutineScope {
             groupedByBlockchain.map {

@@ -9,6 +9,7 @@ import com.rarible.protocol.dto.Erc721LazyAssetTypeDto
 import com.rarible.protocol.dto.EthAssetTypeDto
 import com.rarible.protocol.dto.GenerativeArtAssetTypeDto
 import com.rarible.protocol.dto.PartDto
+import com.rarible.protocol.union.core.exception.UnionValidationException
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.AssetDto
 import com.rarible.protocol.union.dto.AssetTypeDto
@@ -53,9 +54,30 @@ object EthConverter {
     fun convert(word: Word) = word.prefixed()!!
     fun convert(binary: Binary) = binary.prefixed()!!
 
-    // TODO add TRY with throwing custom exceptions
-    fun convertToWord(value: String) = Word.apply(value)!!
-    fun convertToAddress(value: String) = Address.apply(value)!!
+    fun convertToWord(value: String): Word {
+        try {
+            return Word.apply(value)!!
+        } catch (e: Throwable) {
+            throw UnionValidationException("Incorrect Ethereum word format: $value")
+        }
+    }
+
+    fun convertToAddress(value: String): Address {
+        try {
+            return Address.apply(value)!!
+        } catch (e: Throwable) {
+            throw UnionValidationException("Incorrect Ethereum address format: $value")
+        }
+    }
+
+    fun convertToBinary(value: String): Binary {
+        try {
+            return Binary.apply(value)!!
+        } catch (e: Throwable) {
+            throw UnionValidationException("Incorrect Ethereum binary format: $value")
+        }
+    }
+
 
     fun convert(source: Address, blockchain: BlockchainDto): UnionAddress {
         return UnionAddress(blockchain, convert(source))

@@ -7,9 +7,9 @@ import com.rarible.protocol.union.core.continuation.page.Paging
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.IdParser
 import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.ItemsDto
+import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.dto.parser.ItemIdParser
 import com.rarible.protocol.union.enrichment.service.EnrichmentMetaService
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -52,16 +52,16 @@ class ItemController(
     override suspend fun getItemById(
         itemId: String
     ): ResponseEntity<ItemDto> {
-        val (blockchain, shortItemId) = IdParser.parse(itemId)
-        val result = router.getService(blockchain).getItemById(shortItemId)
+        val fullItemId = ItemIdParser.parseFull(itemId)
+        val result = router.getService(fullItemId.blockchain).getItemById(fullItemId.value)
         val enriched = itemApiService.enrich(result)
         return ResponseEntity.ok(enriched)
     }
 
     override suspend fun resetItemMeta(itemId: String): ResponseEntity<Unit> {
-        val itemId = ItemIdParser.parseFull(itemId)
-        enrichmentMetaService.resetMeta(itemId)
-        router.getService(itemId.blockchain).resetItemMeta(itemId.value)
+        val fullItemId = ItemIdParser.parseFull(itemId)
+        enrichmentMetaService.resetMeta(fullItemId)
+        router.getService(fullItemId.blockchain).resetItemMeta(fullItemId.value)
         return ResponseEntity.ok().build()
     }
 
@@ -71,9 +71,9 @@ class ItemController(
         size: Int?
     ): ResponseEntity<ItemsDto> {
         val safeSize = PageSize.ITEM.limit(size)
-        val (blockchain, shortCollection) = IdParser.parse(collection)
-        val result = router.getService(blockchain)
-            .getItemsByCollection(shortCollection, continuation, safeSize)
+        val collectionAddress = IdParser.parseAddress(collection)
+        val result = router.getService(collectionAddress.blockchain)
+            .getItemsByCollection(collectionAddress.value, continuation, safeSize)
 
         val enriched = itemApiService.enrich(result)
 
@@ -86,8 +86,9 @@ class ItemController(
         size: Int?
     ): ResponseEntity<ItemsDto> {
         val safeSize = PageSize.ITEM.limit(size)
-        val (blockchain, shortCreator) = IdParser.parse(creator)
-        val result = router.getService(blockchain).getItemsByCreator(shortCreator, continuation, safeSize)
+        val creatorAddress = IdParser.parseAddress(creator)
+        val result = router.getService(creatorAddress.blockchain)
+            .getItemsByCreator(creatorAddress.value, continuation, safeSize)
 
         val enriched = itemApiService.enrich(result)
 
@@ -100,8 +101,9 @@ class ItemController(
         size: Int?
     ): ResponseEntity<ItemsDto> {
         val safeSize = PageSize.ITEM.limit(size)
-        val (blockchain, shortOwner) = IdParser.parse(owner)
-        val result = router.getService(blockchain).getItemsByOwner(shortOwner, continuation, safeSize)
+        val ownerAddress = IdParser.parseAddress(owner)
+        val result = router.getService(ownerAddress.blockchain)
+            .getItemsByOwner(ownerAddress.value, continuation, safeSize)
 
         val enriched = itemApiService.enrich(result)
 

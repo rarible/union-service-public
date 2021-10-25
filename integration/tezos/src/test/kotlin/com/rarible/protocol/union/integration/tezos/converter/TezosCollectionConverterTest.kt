@@ -3,7 +3,7 @@ package com.rarible.protocol.union.integration.tezos.converter
 import com.rarible.protocol.tezos.dto.NftCollectionFeatureDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionDto
-import com.rarible.protocol.union.test.data.randomTezosCollectionDto
+import com.rarible.protocol.union.integration.tezos.data.randomTezosCollectionDto
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 

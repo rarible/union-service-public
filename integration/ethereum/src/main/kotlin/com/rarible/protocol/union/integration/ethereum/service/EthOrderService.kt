@@ -3,6 +3,7 @@ package com.rarible.protocol.union.integration.ethereum.service
 import com.rarible.protocol.dto.OrderIdsDto
 import com.rarible.protocol.order.api.client.OrderControllerApi
 import com.rarible.protocol.union.core.continuation.page.Slice
+import com.rarible.protocol.union.core.converter.UnionConverter
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.AssetTypeDto
@@ -52,7 +53,7 @@ class EthOrderService(
     ): List<AssetTypeDto> {
         val assetTypes = orderControllerApi.getCurrenciesByBidOrdersOfItem(
             contract,
-            tokenId
+            UnionConverter.convertToBigInteger(tokenId).toString()
         ).awaitFirst()
         return assetTypes.currencies.map { EthConverter.convert(it, blockchain) }
     }
@@ -72,7 +73,7 @@ class EthOrderService(
     ): Slice<OrderDto> {
         val orders = orderControllerApi.getOrderBidsByItemAndByStatus(
             contract,
-            tokenId,
+            UnionConverter.convertToBigInteger(tokenId).toString(),
             ethOrderConverter.convert(status),
             maker,
             origin,
@@ -115,7 +116,7 @@ class EthOrderService(
     ): List<AssetTypeDto> {
         val assetTypes = orderControllerApi.getCurrenciesBySellOrdersOfItem(
             contract,
-            tokenId
+            UnionConverter.convertToBigInteger(tokenId).toString()
         ).awaitFirst()
         return assetTypes.currencies.map { EthConverter.convert(it, blockchain) }
     }
@@ -164,7 +165,7 @@ class EthOrderService(
     ): Slice<OrderDto> {
         val orders = orderControllerApi.getSellOrdersByItemAndByStatus(
             contract,
-            tokenId,
+            UnionConverter.convertToBigInteger(tokenId).toString(),
             maker,
             origin,
             EthConverter.convert(platform),
