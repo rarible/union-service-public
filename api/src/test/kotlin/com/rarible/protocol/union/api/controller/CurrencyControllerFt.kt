@@ -7,7 +7,7 @@ import com.rarible.protocol.currency.dto.CurrencyRateDto
 import com.rarible.protocol.union.api.client.CurrencyControllerApi
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
-import com.rarible.protocol.union.test.data.randomAddressString
+import com.rarible.protocol.union.integration.ethereum.data.randomAddressString
 import io.mockk.coEvery
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.reactive.awaitFirst

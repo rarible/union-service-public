@@ -202,6 +202,8 @@ class TestApiConfiguration {
     fun testFlowActivityApi(): FlowNftOrderActivityControllerApi = mockk()
 
     //--------------------- TEZOS ---------------------//
+
+
     @Bean
     @Primary
     fun testTezosItemApi(): com.rarible.protocol.tezos.api.client.NftItemControllerApi = mockk()

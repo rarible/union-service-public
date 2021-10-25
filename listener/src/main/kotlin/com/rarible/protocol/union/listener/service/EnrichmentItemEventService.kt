@@ -1,13 +1,13 @@
 package com.rarible.protocol.union.listener.service
 
 import com.rarible.core.common.optimisticLock
+import com.rarible.protocol.union.core.event.OutgoingItemEventListener
 import com.rarible.protocol.union.core.model.UnionItem
+import com.rarible.protocol.union.dto.ItemDeleteEventDto
 import com.rarible.protocol.union.dto.ItemIdDto
+import com.rarible.protocol.union.dto.ItemUpdateEventDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.enrichment.converter.ShortItemConverter
-import com.rarible.protocol.union.enrichment.event.ItemEventDelete
-import com.rarible.protocol.union.enrichment.event.ItemEventListener
-import com.rarible.protocol.union.enrichment.event.ItemEventUpdate
 import com.rarible.protocol.union.enrichment.model.ItemSellStats
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
@@ -17,12 +17,13 @@ import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
+import java.util.*
 
 @Component
 class EnrichmentItemEventService(
     private val itemService: EnrichmentItemService,
     private val ownershipService: EnrichmentOwnershipService,
-    private val itemEventListeners: List<ItemEventListener>,
+    private val itemEventListeners: List<OutgoingItemEventListener>,
     private val bestOrderService: BestOrderService
 ) {
 
@@ -133,7 +134,10 @@ class EnrichmentItemEventService(
     }
 
     private suspend fun notifyDelete(itemId: ShortItemId) {
-        val event = ItemEventDelete(itemId.toDto())
+        val event = ItemDeleteEventDto(
+            itemId = itemId.toDto(),
+            eventId = UUID.randomUUID().toString()
+        )
         itemEventListeners.forEach { it.onEvent(event) }
     }
 
@@ -145,7 +149,11 @@ class EnrichmentItemEventService(
         order: OrderDto? = null
     ) {
         val dto = itemService.enrichItem(short, item, listOfNotNull(order).associateBy { it.id })
-        val event = ItemEventUpdate(dto)
+        val event = ItemUpdateEventDto(
+            itemId = dto.id,
+            item = dto,
+            eventId = UUID.randomUUID().toString()
+        )
         itemEventListeners.forEach { it.onEvent(event) }
     }
 }

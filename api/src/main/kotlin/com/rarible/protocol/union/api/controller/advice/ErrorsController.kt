@@ -2,6 +2,7 @@ package com.rarible.protocol.union.api.controller.advice
 
 import com.rarible.core.client.WebClientResponseProxyException
 import com.rarible.protocol.union.core.exception.UnionException
+import com.rarible.protocol.union.core.exception.UnionNotFoundException
 import com.rarible.protocol.union.dto.BlockchainIdFormatException
 import com.rarible.protocol.union.dto.UnionApiErrorBadRequestDto
 import com.rarible.protocol.union.dto.UnionApiErrorServerErrorDto
@@ -24,6 +25,13 @@ class ErrorsController {
         val convertedData = ErrorsConverter.convert(ex.data)
             ?: ErrorsConverter.getDefault(ex.statusCode, ex.message ?: "")
         ResponseEntity.status(ex.statusCode).body(convertedData)
+    }
+
+    @ExceptionHandler(UnionNotFoundException::class)
+    fun handleUnionNotFoundException(ex: Exception) = mono {
+        val error = UnionNotFoundException(ex.message)
+        logger.warn(error.message)
+        ResponseEntity.status(HttpStatus.NOT_FOUND).body(error)
     }
 
     @ExceptionHandler(

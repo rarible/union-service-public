@@ -1,7 +1,7 @@
 package com.rarible.protocol.union.enrichment.evaluator
 
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
-import com.rarible.protocol.union.test.data.randomUnionOrderDto
+import com.rarible.protocol.union.enrichment.test.data.randomUnionOrderDto
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal

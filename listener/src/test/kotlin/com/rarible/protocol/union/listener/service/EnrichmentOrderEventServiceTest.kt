@@ -1,14 +1,14 @@
 package com.rarible.protocol.union.listener.service
 
-import com.rarible.protocol.union.core.ethereum.converter.EthConverter
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
-import com.rarible.protocol.union.test.data.randomEthAssetErc1155
-import com.rarible.protocol.union.test.data.randomEthAssetErc20
-import com.rarible.protocol.union.test.data.randomEthAssetErc721
-import com.rarible.protocol.union.test.data.randomEthItemId
-import com.rarible.protocol.union.test.data.randomEthOwnershipId
-import com.rarible.protocol.union.test.data.randomUnionOrderDto
+import com.rarible.protocol.union.enrichment.test.data.randomUnionOrderDto
+import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
+import com.rarible.protocol.union.integration.ethereum.data.randomEthAssetErc1155
+import com.rarible.protocol.union.integration.ethereum.data.randomEthAssetErc20
+import com.rarible.protocol.union.integration.ethereum.data.randomEthAssetErc721
+import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
+import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipId
 import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -24,7 +24,8 @@ class EnrichmentOrderEventServiceTest {
 
     private val orderEventService = EnrichmentOrderEventService(
         enrichmentItemEventService,
-        enrichmentOwnershipEventService
+        enrichmentOwnershipEventService,
+        emptyList()
     )
 
     @BeforeEach

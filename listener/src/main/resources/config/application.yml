@@ -35,34 +35,47 @@ common:
   currency:
     refresh:
       cron: "0 0/30 * * * *"
-  client:
-    tezos:
-      url: "${consul.tezos.api.baseUrl}"
 
-listener:
-  consumer:
-    ethereum:
+
+integration:
+  ethereum:
+    enabled: ${consul.ethereum.enabled:true}
+    consumer:
       broker-replica-set: ${kafka.hosts}
-      itemWorkers: 1
-      ownershipWorkers: 2
-      orderWorkers: 5
-    polygon:
+      workers:
+        item: 1
+        ownership: 2
+        order: 5
+  polygon:
+    enabled: ${consul.polygon.enabled:true}
+    consumer:
       broker-replica-set: ${kafka.hosts}
-      itemWorkers: 1
-      ownershipWorkers: 1
-      orderWorkers: 2
-    flow:
+      workers:
+        item: 1
+        ownership: 1
+        order: 2
+  flow:
+    enabled: ${consul.flow.enabled:true}
+    consumer:
       broker-replica-set: ${kafka.hosts}
-      itemWorkers: 1
-      ownershipWorkers: 1
-      orderWorkers: 1
-    tezos:
+      workers:
+        item: 1
+        ownership: 1
+        order: 2
+  tezos:
+    enabled: ${consul.tezos.enabled:true}
+    client:
+      url: ${consul.tezos.api.baseUrl}
+    consumer:
       broker-replica-set: ${consul.tezos.kafka.hosts}
-      itemWorkers: 1
-      ownershipWorkers: 1
-      orderWorkers: 1
       username: ${consul.tezos.kafka.username}
       password: ${consul.tezos.kafka.password}
+      workers:
+        item: 1
+        ownership: 1
+        order: 2
+
+listener:
   reconciliation:
     orderBatchSize: 50
     threadCount: 2

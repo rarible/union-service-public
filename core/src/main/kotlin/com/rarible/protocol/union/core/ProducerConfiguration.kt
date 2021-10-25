@@ -26,31 +26,31 @@ class ProducerConfiguration(
     @Bean
     fun collectionEventProducer(): RaribleKafkaProducer<CollectionEventDto> {
         val collectionTopic = UnionEventTopicProvider.getCollectionTopic(env)
-        return createUnionProducer(Entity.COLLECTION, collectionTopic, CollectionEventDto::class.java)
+        return createUnionProducer("collection", collectionTopic, CollectionEventDto::class.java)
     }
 
     @Bean
     fun itemEventProducer(): RaribleKafkaProducer<ItemEventDto> {
         val itemTopic = UnionEventTopicProvider.getItemTopic(env)
-        return createUnionProducer(Entity.ITEM, itemTopic, ItemEventDto::class.java)
+        return createUnionProducer("item", itemTopic, ItemEventDto::class.java)
     }
 
     @Bean
     fun ownershipEventProducer(): RaribleKafkaProducer<OwnershipEventDto> {
         val ownershipTopic = UnionEventTopicProvider.getOwnershipTopic(env)
-        return createUnionProducer(Entity.OWNERSHIP, ownershipTopic, OwnershipEventDto::class.java)
+        return createUnionProducer("ownership", ownershipTopic, OwnershipEventDto::class.java)
     }
 
     @Bean
     fun orderEventProducer(): RaribleKafkaProducer<OrderEventDto> {
         val orderTopic = UnionEventTopicProvider.getOrderTopic(env)
-        return createUnionProducer(Entity.ORDER, orderTopic, OrderEventDto::class.java)
+        return createUnionProducer("order", orderTopic, OrderEventDto::class.java)
     }
 
     @Bean
     fun activityEventProducer(): RaribleKafkaProducer<ActivityDto> {
         val activityTopic = UnionEventTopicProvider.getActivityTopic(env)
-        return createUnionProducer(Entity.ACTIVITY, activityTopic, ActivityDto::class.java)
+        return createUnionProducer("activity", activityTopic, ActivityDto::class.java)
     }
 
     private fun <T> createUnionProducer(clientSuffix: String, topic: String, type: Class<T>): RaribleKafkaProducer<T> {

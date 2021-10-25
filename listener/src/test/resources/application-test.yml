@@ -26,30 +26,43 @@ common:
     tezos:
       url: "http://localhost:8080"
 
+integration:
+  ethereum:
+    enabled: true
+    consumer:
+      broker-replica-set: ${kafka.hosts}
+      workers:
+        item: 1
+        ownership: 1
+        order: 1
+  polygon:
+    enabled: true
+    consumer:
+      broker-replica-set: ${kafka.hosts}
+      workers:
+        item: 1
+        ownership: 1
+        order: 1
+  flow:
+    enabled: true
+    consumer:
+      broker-replica-set: ${kafka.hosts}
+      workers:
+        item: 1
+        ownership: 1
+        order: 1
+  tezos:
+    enabled: true
+    client:
+      url: "http://localhost:8080"
+    consumer:
+      broker-replica-set: ${kafka.hosts}
+      workers:
+        item: 1
+        ownership: 1
+        order: 1
+
 listener:
-  consumer:
-    ethereum:
-      broker-replica-set: ${kafka.hosts}
-      itemWorkers: 1
-      ownershipWorkers: 1
-      orderWorkers: 1
-    polygon:
-      broker-replica-set: ${kafka.hosts}
-      itemWorkers: 1
-      ownershipWorkers: 1
-      orderWorkers: 1
-    flow:
-      broker-replica-set: ${kafka.hosts}
-      itemWorkers: 1
-      ownershipWorkers: 1
-      orderWorkers: 1
-    tezos:
-      broker-replica-set: ${kafka.hosts}
-      itemWorkers: 1
-      ownershipWorkers: 1
-      orderWorkers: 1
-      username:
-      password:
   reconciliation:
     orderBatchSize: 50
     threadCount: 2

@@ -1,22 +1,22 @@
 package com.rarible.protocol.union.enrichment.service
 
 import com.rarible.core.common.optimisticLock
+import com.rarible.protocol.union.core.event.OutgoingItemEventListener
+import com.rarible.protocol.union.core.event.OutgoingOwnershipEventListener
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.UnionOwnership
-import com.rarible.protocol.union.core.model.ext
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.ItemIdDto
+import com.rarible.protocol.union.dto.ItemUpdateEventDto
 import com.rarible.protocol.union.dto.OwnershipDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
+import com.rarible.protocol.union.dto.OwnershipUpdateEventDto
+import com.rarible.protocol.union.dto.ext
 import com.rarible.protocol.union.enrichment.converter.EnrichedItemConverter
 import com.rarible.protocol.union.enrichment.converter.EnrichedOwnershipConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
-import com.rarible.protocol.union.enrichment.event.ItemEventListener
-import com.rarible.protocol.union.enrichment.event.ItemEventUpdate
-import com.rarible.protocol.union.enrichment.event.OwnershipEventListener
-import com.rarible.protocol.union.enrichment.event.OwnershipEventUpdate
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortOwnership
@@ -28,6 +28,7 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
+import java.util.*
 
 @Component
 class EnrichmentRefreshService(
@@ -39,8 +40,8 @@ class EnrichmentRefreshService(
     private val enrichmentOrderService: EnrichmentOrderService,
     private val enrichmentItemService: EnrichmentItemService,
     private val enrichmentOwnershipService: EnrichmentOwnershipService,
-    private val itemEventListeners: List<ItemEventListener>,
-    private val ownershipEventListeners: List<OwnershipEventListener>
+    private val itemEventListeners: List<OutgoingItemEventListener>,
+    private val ownershipEventListeners: List<OutgoingOwnershipEventListener>
 ) {
 
     private val logger = LoggerFactory.getLogger(EnrichmentRefreshService::class.java)
@@ -157,7 +158,11 @@ class EnrichmentRefreshService(
         val ordersHint = (bestSellOrdersDto + bestBidOrdersDto).associateBy { it.id }
 
         val dto = EnrichedItemConverter.convert(itemDto, updatedItem, metaDeferred.await(), ordersHint)
-        val event = ItemEventUpdate(dto)
+        val event = ItemUpdateEventDto(
+            itemId = dto.id,
+            item = dto,
+            eventId = UUID.randomUUID().toString()
+        )
         itemEventListeners.forEach { it.onEvent(event) }
 
         dto
@@ -191,7 +196,11 @@ class EnrichmentRefreshService(
 
         val ordersHint = bestSellOrdersDto.associateBy { it.id }
         val dto = EnrichedOwnershipConverter.convert(ownership, updatedOwnership, ordersHint)
-        val event = OwnershipEventUpdate(dto)
+        val event = OwnershipUpdateEventDto(
+            ownershipId = dto.id,
+            ownership = dto,
+            eventId = UUID.randomUUID().toString()
+        )
 
         ownershipEventListeners.forEach { it.onEvent(event) }
         dto
@@ -202,7 +211,11 @@ class EnrichmentRefreshService(
         item: UnionItem
     ): ItemDto {
         val dto = itemService.enrichItem(short, item, emptyMap())
-        val event = ItemEventUpdate(dto)
+        val event = ItemUpdateEventDto(
+            itemId = dto.id,
+            item = dto,
+            eventId = UUID.randomUUID().toString()
+        )
         itemEventListeners.forEach { it.onEvent(event) }
         return dto
     }
@@ -212,7 +225,11 @@ class EnrichmentRefreshService(
         ownership: UnionOwnership
     ): OwnershipDto {
         val dto = ownershipService.enrichOwnership(short, ownership, emptyMap())
-        val event = OwnershipEventUpdate(dto)
+        val event = OwnershipUpdateEventDto(
+            ownershipId = dto.id,
+            ownership = dto,
+            eventId = UUID.randomUUID().toString()
+        )
         ownershipEventListeners.forEach { it.onEvent(event) }
         return dto
     }

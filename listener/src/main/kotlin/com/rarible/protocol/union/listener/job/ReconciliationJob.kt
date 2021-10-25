@@ -25,7 +25,7 @@ class ReconciliationJob(
     properties: UnionListenerProperties
 ) {
 
-    private val logger = LoggerFactory.getLogger(ReconciliationTaskHandler::class.java)
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     private val config = properties.reconciliation
 
