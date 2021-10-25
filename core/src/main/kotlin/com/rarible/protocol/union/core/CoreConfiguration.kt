@@ -114,8 +114,8 @@ class CoreConfiguration {
             }
         }
 
-        val blockchains = this.blockchains.toMutableSet()
-        services.forEach { blockchains.remove(it.blockchain) }
-        return blockchains.toList()
+        val disabledBlockchains = this.blockchains.toMutableSet()
+        services.forEach { disabledBlockchains.remove(it.blockchain) }
+        return disabledBlockchains.toList()
     }
 }

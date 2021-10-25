@@ -109,7 +109,7 @@ class EthereumConsumerConfiguration(
         @Qualifier("ethereum.nft.consumer.factory") factory: NftIndexerEventsConsumerFactory,
         @Qualifier("ethereum.item.handler") handler: EthItemEventHandler
     ): KafkaConsumerWorker<NftItemEventDto> {
-        val consumer = factory.createItemEventsConsumer(consumerFactory.itemGroup, Blockchain.POLYGON)
+        val consumer = factory.createItemEventsConsumer(consumerFactory.itemGroup, Blockchain.ETHEREUM)
         return consumerFactory.createItemConsumer(consumer, handler, daemon, workers)
     }
 
@@ -118,7 +118,7 @@ class EthereumConsumerConfiguration(
         @Qualifier("ethereum.nft.consumer.factory") factory: NftIndexerEventsConsumerFactory,
         @Qualifier("ethereum.ownership.handler") handler: EthOwnershipEventHandler
     ): KafkaConsumerWorker<NftOwnershipEventDto> {
-        val consumer = factory.createOwnershipEventsConsumer(consumerFactory.ownershipGroup, Blockchain.POLYGON)
+        val consumer = factory.createOwnershipEventsConsumer(consumerFactory.ownershipGroup, Blockchain.ETHEREUM)
         return consumerFactory.createOwnershipConsumer(consumer, handler, daemon, workers)
     }
 
@@ -128,7 +128,7 @@ class EthereumConsumerConfiguration(
         @Qualifier("ethereum.nft.consumer.factory") factory: NftIndexerEventsConsumerFactory,
         @Qualifier("ethereum.collection.handler") handler: EthCollectionEventHandler
     ): KafkaConsumerWorker<NftCollectionEventDto> {
-        val consumer = factory.createCollectionEventsConsumer(consumerFactory.collectionGroup, Blockchain.POLYGON)
+        val consumer = factory.createCollectionEventsConsumer(consumerFactory.collectionGroup, Blockchain.ETHEREUM)
         return consumerFactory.createCollectionConsumer(consumer, handler, daemon, workers)
     }
 
@@ -137,7 +137,7 @@ class EthereumConsumerConfiguration(
         @Qualifier("ethereum.order.consumer.factory") factory: OrderIndexerEventsConsumerFactory,
         @Qualifier("ethereum.order.handler") handler: EthOrderEventHandler
     ): KafkaConsumerWorker<com.rarible.protocol.dto.OrderEventDto> {
-        val consumer = factory.createOrderEventsConsumer(consumerFactory.orderGroup, Blockchain.POLYGON)
+        val consumer = factory.createOrderEventsConsumer(consumerFactory.orderGroup, Blockchain.ETHEREUM)
         return consumerFactory.createOrderConsumer(consumer, handler, daemon, workers)
     }
 
@@ -146,7 +146,7 @@ class EthereumConsumerConfiguration(
         @Qualifier("ethereum.activity.consumer.factory") factory: EthActivityEventsConsumerFactory,
         @Qualifier("ethereum.activity.handler") handler: EthActivityEventHandler
     ): KafkaConsumerWorker<com.rarible.protocol.dto.ActivityDto> {
-        val consumer = factory.createActivityConsumer(consumerFactory.activityGroup, Blockchain.POLYGON)
+        val consumer = factory.createActivityConsumer(consumerFactory.activityGroup, Blockchain.ETHEREUM)
         return consumerFactory.createActivityConsumer(consumer, handler, daemon, workers)
     }
 }
