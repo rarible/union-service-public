@@ -36,7 +36,7 @@ object FlowItemConverter {
             tokenId = item.tokenId,
             collection = collection,
             creators = item.creators.map { convert(it, blockchain) },
-            owners = item.owners.map { UnionAddressConverter.convert(it, blockchain) },
+            owners = item.owner?.let { listOf(UnionAddressConverter.convert(it, blockchain)) } ?: emptyList(),
             royalties = item.royalties.map { convert(it, blockchain) },
             lazySupply = BigInteger.ZERO
         )
