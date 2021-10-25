@@ -8,27 +8,27 @@ import com.rarible.protocol.dto.NftOwnershipEventDto
 import com.rarible.protocol.nft.api.subscriber.NftIndexerEventsConsumerFactory
 import com.rarible.protocol.order.api.subscriber.OrderIndexerEventsConsumerFactory
 import com.rarible.protocol.union.core.ConsumerFactory
-import com.rarible.protocol.union.core.CoreConfiguration
+import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.handler.KafkaConsumerWorker
-import com.rarible.protocol.union.integration.ethereum.event.PolygonActivityEventHandler
-import com.rarible.protocol.union.integration.ethereum.event.PolygonCollectionEventHandler
-import com.rarible.protocol.union.integration.ethereum.event.PolygonItemEventHandler
-import com.rarible.protocol.union.integration.ethereum.event.PolygonOrderEventHandler
-import com.rarible.protocol.union.integration.ethereum.event.PolygonOwnershipEventHandler
+import com.rarible.protocol.union.core.model.UnionItemEvent
+import com.rarible.protocol.union.core.model.UnionOrderEvent
+import com.rarible.protocol.union.core.model.UnionOwnershipEvent
+import com.rarible.protocol.union.dto.ActivityDto
+import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.CollectionEventDto
+import com.rarible.protocol.union.integration.ethereum.converter.EthActivityConverter
+import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
+import com.rarible.protocol.union.integration.ethereum.event.EthActivityEventHandler
+import com.rarible.protocol.union.integration.ethereum.event.EthCollectionEventHandler
+import com.rarible.protocol.union.integration.ethereum.event.EthItemEventHandler
+import com.rarible.protocol.union.integration.ethereum.event.EthOrderEventHandler
+import com.rarible.protocol.union.integration.ethereum.event.EthOwnershipEventHandler
 import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
-import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.ComponentScan
-import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
 
-@Configuration
-@PolygonComponent
-@Import(CoreConfiguration::class)
-@ComponentScan(basePackageClasses = [PolygonConsumerConfiguration::class])
-@EnableConfigurationProperties(value = [PolygonIntegrationProperties::class])
-@ConditionalOnProperty(name = ["integration.polygon.consumer.brokerReplicaSet"])
+@PolygonConfiguration
+@Import(PolygonApiConfiguration::class)
 class PolygonConsumerConfiguration(
     applicationEnvironmentInfo: ApplicationEnvironmentInfo,
     properties: PolygonIntegrationProperties,
@@ -43,7 +43,46 @@ class PolygonConsumerConfiguration(
 
     private val daemon = properties.daemon
 
-    // ------ POLYGON
+    //-------------------- Handlers -------------------//
+
+    @Bean
+    @Qualifier("polygon.item.handler")
+    fun polygonItemEventHandler(handler: IncomingEventHandler<UnionItemEvent>): EthItemEventHandler {
+        return EthItemEventHandler(BlockchainDto.POLYGON, handler)
+    }
+
+    @Bean
+    @Qualifier("polygon.ownership.handler")
+    fun polygonOwnershipEventHandler(handler: IncomingEventHandler<UnionOwnershipEvent>): EthOwnershipEventHandler {
+        return EthOwnershipEventHandler(BlockchainDto.POLYGON, handler)
+    }
+
+    @Bean
+    @Qualifier("polygon.collection.handler")
+    fun polygonCollectionEventHandler(handler: IncomingEventHandler<CollectionEventDto>): EthCollectionEventHandler {
+        return EthCollectionEventHandler(BlockchainDto.POLYGON, handler)
+    }
+
+    @Bean
+    @Qualifier("polygon.order.handler")
+    fun polygonOrderEventHandler(
+        handler: IncomingEventHandler<UnionOrderEvent>,
+        converter: EthOrderConverter
+    ): EthOrderEventHandler {
+        return EthOrderEventHandler(BlockchainDto.POLYGON, handler, converter)
+    }
+
+    @Bean
+    @Qualifier("polygon.activity.handler")
+    fun polygonActivityEventHandler(
+        handler: IncomingEventHandler<ActivityDto>,
+        converter: EthActivityConverter
+    ): EthActivityEventHandler {
+        return EthActivityEventHandler(BlockchainDto.POLYGON, handler, converter)
+    }
+
+    //-------------------- Workers --------------------//
+
     @Bean
     @Qualifier("polygon.nft.consumer.factory")
     fun polygonNftIndexerConsumerFactory(): NftIndexerEventsConsumerFactory {
@@ -68,34 +107,35 @@ class PolygonConsumerConfiguration(
     @Bean
     fun polygonItemWorker(
         @Qualifier("polygon.nft.consumer.factory") factory: NftIndexerEventsConsumerFactory,
-        handler: PolygonItemEventHandler
+        @Qualifier("polygon.item.handler") handler: EthItemEventHandler
     ): KafkaConsumerWorker<NftItemEventDto> {
         val consumer = factory.createItemEventsConsumer(consumerFactory.itemGroup, Blockchain.POLYGON)
         return consumerFactory.createItemConsumer(consumer, handler, daemon, workers)
     }
 
     @Bean
+    fun polygonOwnershipWorker(
+        @Qualifier("polygon.nft.consumer.factory") factory: NftIndexerEventsConsumerFactory,
+        @Qualifier("polygon.ownership.handler") handler: EthOwnershipEventHandler
+    ): KafkaConsumerWorker<NftOwnershipEventDto> {
+        val consumer = factory.createOwnershipEventsConsumer(consumerFactory.ownershipGroup, Blockchain.POLYGON)
+        return consumerFactory.createOwnershipConsumer(consumer, handler, daemon, workers)
+    }
+
+
+    @Bean
     fun polygonCollectionWorker(
         @Qualifier("polygon.nft.consumer.factory") factory: NftIndexerEventsConsumerFactory,
-        handler: PolygonCollectionEventHandler
+        @Qualifier("polygon.collection.handler") handler: EthCollectionEventHandler
     ): KafkaConsumerWorker<NftCollectionEventDto> {
         val consumer = factory.createCollectionEventsConsumer(consumerFactory.collectionGroup, Blockchain.POLYGON)
         return consumerFactory.createCollectionConsumer(consumer, handler, daemon, workers)
     }
 
     @Bean
-    fun polygonOwnershipWorker(
-        @Qualifier("polygon.nft.consumer.factory") factory: NftIndexerEventsConsumerFactory,
-        handler: PolygonOwnershipEventHandler
-    ): KafkaConsumerWorker<NftOwnershipEventDto> {
-        val consumer = factory.createOwnershipEventsConsumer(consumerFactory.ownershipGroup, Blockchain.POLYGON)
-        return consumerFactory.createOwnershipConsumer(consumer, handler, daemon, workers)
-    }
-
-    @Bean
     fun polygonOrderWorker(
         @Qualifier("polygon.order.consumer.factory") factory: OrderIndexerEventsConsumerFactory,
-        handler: PolygonOrderEventHandler
+        @Qualifier("polygon.order.handler") handler: EthOrderEventHandler
     ): KafkaConsumerWorker<com.rarible.protocol.dto.OrderEventDto> {
         val consumer = factory.createOrderEventsConsumer(consumerFactory.orderGroup, Blockchain.POLYGON)
         return consumerFactory.createOrderConsumer(consumer, handler, daemon, workers)
@@ -104,7 +144,7 @@ class PolygonConsumerConfiguration(
     @Bean
     fun polygonActivityWorker(
         @Qualifier("polygon.activity.consumer.factory") factory: EthActivityEventsConsumerFactory,
-        handler: PolygonActivityEventHandler
+        @Qualifier("polygon.activity.handler") handler: EthActivityEventHandler
     ): KafkaConsumerWorker<com.rarible.protocol.dto.ActivityDto> {
         val consumer = factory.createActivityConsumer(consumerFactory.activityGroup, Blockchain.POLYGON)
         return consumerFactory.createActivityConsumer(consumer, handler, daemon, workers)

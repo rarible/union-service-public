@@ -102,7 +102,7 @@ class EnrichmentOwnershipEventService(
         val dto = ownershipService.enrichOwnership(short, ownership, listOfNotNull(order).associateBy { it.id })
         val event = OwnershipUpdateEventDto(
             eventId = UUID.randomUUID().toString(),
-            ownershipId = dto.id,
+            ownershipId = short.id.toDto(),
             ownership = dto
         )
         ownershipEventListeners.forEach { it.onEvent(event) }

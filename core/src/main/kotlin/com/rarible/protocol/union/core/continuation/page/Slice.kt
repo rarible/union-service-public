@@ -6,7 +6,6 @@ data class Slice<T>(
 ) {
 
     companion object {
-
         fun <T> empty() = Slice<T>(null, emptyList<T>())
     }
 }

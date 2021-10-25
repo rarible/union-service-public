@@ -11,14 +11,11 @@ import com.rarible.protocol.union.core.model.UnionOwnershipUpdateEvent
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.UnionAddress
-import com.rarible.protocol.union.integration.ethereum.EthereumComponent
-import com.rarible.protocol.union.integration.ethereum.PolygonComponent
 import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOwnershipConverter
 import org.slf4j.LoggerFactory
-import org.springframework.stereotype.Component
 
-sealed class EthOwnershipEventHandler(
+class EthOwnershipEventHandler(
     blockchain: BlockchainDto,
     override val handler: IncomingEventHandler<UnionOwnershipEvent>
 ) : BlockchainEventHandler<NftOwnershipEventDto, UnionOwnershipEvent>(blockchain) {
@@ -45,21 +42,3 @@ sealed class EthOwnershipEventHandler(
         }
     }
 }
-
-@Component
-@EthereumComponent
-class EthereumOwnershipEventHandler(
-    handler: IncomingEventHandler<UnionOwnershipEvent>
-) : EthOwnershipEventHandler(
-    BlockchainDto.ETHEREUM,
-    handler
-)
-
-@Component
-@PolygonComponent
-class PolygonOwnershipEventHandler(
-    handler: IncomingEventHandler<UnionOwnershipEvent>
-) : EthOwnershipEventHandler(
-    BlockchainDto.POLYGON,
-    handler
-)

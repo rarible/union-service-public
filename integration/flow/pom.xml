@@ -35,6 +35,17 @@
             <artifactId>rarible-union-core</artifactId>
         </dependency>
 
+        <!-- =============== Flow Protocol API =========== -->
+
+        <dependency>
+            <groupId>com.rarible.protocol</groupId>
+            <artifactId>flow-protocol-client-nft-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.rarible.protocol</groupId>
+            <artifactId>flow-protocol-subscriber-nft</artifactId>
+        </dependency>
+
         <!-- ================== Test ===================== -->
         <dependency>
             <groupId>com.rarible.protocol.union</groupId>

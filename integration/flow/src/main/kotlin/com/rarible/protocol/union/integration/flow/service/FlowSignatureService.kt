@@ -4,12 +4,8 @@ import com.rarible.protocol.flow.nft.api.client.FlowNftCryptoControllerApi
 import com.rarible.protocol.union.core.service.SignatureService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.integration.flow.FlowComponent
 import kotlinx.coroutines.reactive.awaitFirst
-import org.springframework.stereotype.Component
 
-@Component
-@FlowComponent
 class FlowSignatureService(
     private val signatureControllerApi: FlowNftCryptoControllerApi
 ) : AbstractBlockchainService(BlockchainDto.FLOW), SignatureService {

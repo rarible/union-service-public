@@ -6,13 +6,9 @@ import com.rarible.protocol.union.core.service.CollectionService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionDto
-import com.rarible.protocol.union.integration.flow.FlowComponent
 import com.rarible.protocol.union.integration.flow.converter.FlowCollectionConverter
 import kotlinx.coroutines.reactive.awaitFirst
-import org.springframework.stereotype.Component
 
-@Component
-@FlowComponent
 class FlowCollectionService(
     private val collectionControllerApi: FlowNftCollectionControllerApi
 ) : AbstractBlockchainService(BlockchainDto.FLOW), CollectionService {

@@ -11,20 +11,34 @@ import com.rarible.protocol.order.api.client.OrderIndexerApiClientFactory
 import com.rarible.protocol.order.api.client.OrderSignatureControllerApi
 import com.rarible.protocol.union.core.CoreConfiguration
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.integration.ethereum.converter.EthActivityConverter
+import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
+import com.rarible.protocol.union.integration.ethereum.service.EthActivityService
+import com.rarible.protocol.union.integration.ethereum.service.EthCollectionService
+import com.rarible.protocol.union.integration.ethereum.service.EthItemService
+import com.rarible.protocol.union.integration.ethereum.service.EthOrderService
+import com.rarible.protocol.union.integration.ethereum.service.EthOwnershipService
+import com.rarible.protocol.union.integration.ethereum.service.EthSignatureService
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
-import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
 
-@Configuration
+@EthereumConfiguration
 @Import(CoreConfiguration::class)
-@ComponentScan(basePackageClasses = [EthereumApiConfiguration::class])
+@ComponentScan(basePackageClasses = [EthOrderConverter::class])
 @EnableConfigurationProperties(value = [EthereumIntegrationProperties::class])
 class EthereumApiConfiguration {
 
     private val ethereum = BlockchainDto.ETHEREUM.name.toLowerCase()
+
+    @Bean
+    fun ethereumBlockchain(): BlockchainDto {
+        return BlockchainDto.ETHEREUM
+    }
+
+    //-------------------- API --------------------//
 
     @Bean
     @Qualifier("ethereum.item.api")
@@ -60,4 +74,51 @@ class EthereumApiConfiguration {
     @Qualifier("ethereum.activity.api.order")
     fun ethereumActivityOrderApi(factory: OrderIndexerApiClientFactory): OrderActivityControllerApi =
         factory.createOrderActivityApiClient(ethereum)
+
+    //-------------------- Services --------------------//
+
+    @Bean
+    fun ethereumItemService(
+        @Qualifier("ethereum.item.api") controllerApi: NftItemControllerApi
+    ): EthItemService {
+        return EthItemService(BlockchainDto.ETHEREUM, controllerApi)
+    }
+
+    @Bean
+    fun ethereumOwnershipService(
+        @Qualifier("ethereum.ownership.api") controllerApi: NftOwnershipControllerApi
+    ): EthOwnershipService {
+        return EthOwnershipService(BlockchainDto.ETHEREUM, controllerApi)
+    }
+
+    @Bean
+    fun ethereumCollectionService(
+        @Qualifier("ethereum.collection.api") controllerApi: NftCollectionControllerApi
+    ): EthCollectionService {
+        return EthCollectionService(BlockchainDto.ETHEREUM, controllerApi)
+    }
+
+    @Bean
+    fun ethereumOrderService(
+        @Qualifier("ethereum.order.api") controllerApi: OrderControllerApi,
+        converter: EthOrderConverter
+    ): EthOrderService {
+        return EthOrderService(BlockchainDto.ETHEREUM, controllerApi, converter)
+    }
+
+    @Bean
+    fun ethereumSignatureService(
+        @Qualifier("ethereum.signature.api") controllerApi: OrderSignatureControllerApi
+    ): EthSignatureService {
+        return EthSignatureService(BlockchainDto.ETHEREUM, controllerApi)
+    }
+
+    @Bean
+    fun ethereumActivityService(
+        @Qualifier("ethereum.activity.api.item") itemActivityApi: NftActivityControllerApi,
+        @Qualifier("ethereum.activity.api.order") orderActivityApi: OrderActivityControllerApi,
+        converter: EthActivityConverter
+    ): EthActivityService {
+        return EthActivityService(BlockchainDto.ETHEREUM, itemActivityApi, orderActivityApi, converter)
+    }
 }

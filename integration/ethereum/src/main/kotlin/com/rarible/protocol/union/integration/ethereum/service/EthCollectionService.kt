@@ -6,14 +6,10 @@ import com.rarible.protocol.union.core.service.CollectionService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionDto
-import com.rarible.protocol.union.integration.ethereum.EthereumComponent
-import com.rarible.protocol.union.integration.ethereum.PolygonComponent
 import com.rarible.protocol.union.integration.ethereum.converter.EthCollectionConverter
 import kotlinx.coroutines.reactive.awaitFirst
-import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.stereotype.Component
 
-sealed class EthCollectionService(
+class EthCollectionService(
     blockchain: BlockchainDto,
     private val collectionControllerApi: NftCollectionControllerApi
 ) : AbstractBlockchainService(blockchain), CollectionService {
@@ -47,21 +43,3 @@ sealed class EthCollectionService(
         return EthCollectionConverter.convert(items, blockchain)
     }
 }
-
-@Component
-@EthereumComponent
-class EthereumCollectionService(
-    @Qualifier("ethereum.collection.api") collectionControllerApi: NftCollectionControllerApi
-) : EthCollectionService(
-    BlockchainDto.ETHEREUM,
-    collectionControllerApi
-)
-
-@Component
-@PolygonComponent
-class PolygonCollectionService(
-    @Qualifier("polygon.collection.api") collectionControllerApi: NftCollectionControllerApi
-) : EthCollectionService(
-    BlockchainDto.POLYGON,
-    collectionControllerApi
-)

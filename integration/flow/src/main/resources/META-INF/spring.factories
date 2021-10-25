@@ -1,3 +1,0 @@
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-com.rarible.protocol.union.integration.flow.FlowApiConfiguration,\
-com.rarible.protocol.union.integration.flow.FlowConsumerConfiguration

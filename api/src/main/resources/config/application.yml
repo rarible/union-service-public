@@ -34,7 +34,7 @@ integration:
   tezos:
     enabled: ${consul.tezos.enabled:true}
     client:
-      baseUrl: ${consul.tezos.api.baseUrl}
+      url: ${consul.tezos.api.baseUrl}
 
 common:
   producer:

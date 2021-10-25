@@ -94,7 +94,7 @@ fun randomTezosOwnershipDto(itemId: ItemIdDto) = randomTezosOwnershipDto(
 )
 
 fun randomTezosOwnershipDto(ownershipId: OwnershipIdDto) = randomTezosOwnershipDto(
-    ItemIdParser.parseShort("${ownershipId.token.value}:${ownershipId.tokenId}", BlockchainDto.ETHEREUM),
+    ItemIdParser.parseShort("${ownershipId.token.value}:${ownershipId.tokenId}", BlockchainDto.TEZOS),
     PartDto(ownershipId.owner.value, randomInt())
 )
 

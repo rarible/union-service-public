@@ -7,13 +7,9 @@ import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.model.UnionOrderEvent
 import com.rarible.protocol.union.core.model.UnionOrderUpdateEvent
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.integration.flow.FlowComponent
 import com.rarible.protocol.union.integration.flow.converter.FlowOrderConverter
 import org.slf4j.LoggerFactory
-import org.springframework.stereotype.Component
 
-@Component
-@FlowComponent
 class FlowOrderEventHandler(
     override val handler: IncomingEventHandler<UnionOrderEvent>,
     private val flowOrderConverter: FlowOrderConverter

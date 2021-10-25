@@ -2,9 +2,9 @@ package com.rarible.protocol.union.listener.service
 
 import com.rarible.core.client.WebClientResponseProxyException
 import com.rarible.protocol.union.core.event.OutgoingOrderEventListener
-import com.rarible.protocol.union.core.model.ext
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderUpdateEventDto
+import com.rarible.protocol.union.dto.ext
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
 import kotlinx.coroutines.async

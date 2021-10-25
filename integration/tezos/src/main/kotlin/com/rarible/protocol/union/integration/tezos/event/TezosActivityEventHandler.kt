@@ -4,13 +4,9 @@ import com.rarible.protocol.union.core.handler.BlockchainEventHandler
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.integration.tezos.TezosComponent
 import com.rarible.protocol.union.integration.tezos.converter.TezosActivityConverter
 import org.slf4j.LoggerFactory
-import org.springframework.stereotype.Component
 
-@Component
-@TezosComponent
 class TezosActivityEventHandler(
     override val handler: IncomingEventHandler<ActivityDto>,
     private val tezosActivityConverter: TezosActivityConverter

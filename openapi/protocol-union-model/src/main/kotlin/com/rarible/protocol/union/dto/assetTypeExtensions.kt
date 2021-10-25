@@ -1,21 +1,5 @@
-package com.rarible.protocol.union.core.model
+package com.rarible.protocol.union.dto
 
-import com.rarible.protocol.union.dto.AssetTypeDto
-import com.rarible.protocol.union.dto.EthCryptoPunksAssetTypeDto
-import com.rarible.protocol.union.dto.EthErc1155AssetTypeDto
-import com.rarible.protocol.union.dto.EthErc1155LazyAssetTypeDto
-import com.rarible.protocol.union.dto.EthErc20AssetTypeDto
-import com.rarible.protocol.union.dto.EthErc721AssetTypeDto
-import com.rarible.protocol.union.dto.EthErc721LazyAssetTypeDto
-import com.rarible.protocol.union.dto.EthEthereumAssetTypeDto
-import com.rarible.protocol.union.dto.EthGenerativeArtAssetTypeDto
-import com.rarible.protocol.union.dto.FlowAssetTypeFtDto
-import com.rarible.protocol.union.dto.FlowAssetTypeNftDto
-import com.rarible.protocol.union.dto.ItemIdDto
-import com.rarible.protocol.union.dto.TezosFA12AssetTypeDto
-import com.rarible.protocol.union.dto.TezosFA2AssetTypeDto
-import com.rarible.protocol.union.dto.TezosXTZAssetTypeDto
-import com.rarible.protocol.union.dto.UnionAddress
 import java.math.BigInteger
 
 val AssetTypeDto.ext: AssetTypeExtension
@@ -24,7 +8,7 @@ val AssetTypeDto.ext: AssetTypeExtension
         is EthEthereumAssetTypeDto -> AssetTypeExtension(
             isNft = false,
             isCurrency = true,
-            contract = "0x000000", // TODO !!! check
+            contract = "0x0000000000000000000000000000000000000000",
             itemId = null
         )
         is EthErc20AssetTypeDto -> AssetTypeExtension(

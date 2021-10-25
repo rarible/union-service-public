@@ -5,12 +5,8 @@ import com.rarible.protocol.tezos.dto.SignatureValidationFormDto
 import com.rarible.protocol.union.core.service.SignatureService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.integration.tezos.TezosComponent
 import kotlinx.coroutines.reactive.awaitFirst
-import org.springframework.stereotype.Component
 
-@Component
-@TezosComponent
 class TezosSignatureService(
     private val signatureControllerApi: OrderSignatureControllerApi
 ) : AbstractBlockchainService(BlockchainDto.TEZOS), SignatureService {

@@ -16,17 +16,15 @@ import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import scalether.domain.Address
 
-@FlowPreview
 class EthereumOwnershipEventHandlerTest {
 
     private val incomingEventHandler: IncomingEventHandler<UnionOwnershipEvent> = mockk()
-    private val handler = EthereumOwnershipEventHandler(incomingEventHandler)
+    private val handler = EthOwnershipEventHandler(BlockchainDto.ETHEREUM, incomingEventHandler)
 
     @BeforeEach
     fun beforeEach() {

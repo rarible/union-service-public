@@ -53,6 +53,8 @@ integration:
         order: 1
   tezos:
     enabled: true
+    client:
+      url: "http://localhost:8080"
     consumer:
       broker-replica-set: ${kafka.hosts}
       workers:

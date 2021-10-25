@@ -10,16 +10,12 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PlatformDto
-import com.rarible.protocol.union.integration.flow.FlowComponent
 import com.rarible.protocol.union.integration.flow.converter.FlowOrderConverter
 import kotlinx.coroutines.reactive.awaitFirst
-import org.springframework.stereotype.Component
 import java.time.Instant
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 
-@Component
-@FlowComponent
 class FlowOrderService(
     private val orderControllerApi: FlowOrderControllerApi,
     private val flowOrderConverter: FlowOrderConverter

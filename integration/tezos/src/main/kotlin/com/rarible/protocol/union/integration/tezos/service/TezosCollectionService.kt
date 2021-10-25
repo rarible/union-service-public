@@ -6,13 +6,9 @@ import com.rarible.protocol.union.core.service.CollectionService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionDto
-import com.rarible.protocol.union.integration.tezos.TezosComponent
 import com.rarible.protocol.union.integration.tezos.converter.TezosCollectionConverter
 import kotlinx.coroutines.reactive.awaitFirst
-import org.springframework.stereotype.Component
 
-@Component
-@TezosComponent
 class TezosCollectionService(
     private val collectionControllerApi: NftCollectionControllerApi
 ) : AbstractBlockchainService(BlockchainDto.TEZOS), CollectionService {

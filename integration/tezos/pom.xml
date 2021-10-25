@@ -35,6 +35,17 @@
             <artifactId>rarible-union-core</artifactId>
         </dependency>
 
+        <!-- =============== Tezos Protocol API =========== -->
+
+        <dependency>
+            <groupId>com.rarible.protocol.tezos</groupId>
+            <artifactId>protocol-tezos-client-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.rarible.protocol.tezos</groupId>
+            <artifactId>protocol-tezos-subscriber</artifactId>
+        </dependency>
+
         <!-- ================== Test ===================== -->
         <dependency>
             <groupId>com.rarible.protocol.union</groupId>

@@ -7,26 +7,23 @@ import com.rarible.protocol.tezos.dto.OrderEventDto
 import com.rarible.protocol.tezos.dto.OwnershipEventDto
 import com.rarible.protocol.tezos.subscriber.TezosEventsConsumerFactory
 import com.rarible.protocol.union.core.ConsumerFactory
-import com.rarible.protocol.union.core.CoreConfiguration
+import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.handler.KafkaConsumerWorker
+import com.rarible.protocol.union.core.model.UnionItemEvent
+import com.rarible.protocol.union.core.model.UnionOrderEvent
+import com.rarible.protocol.union.core.model.UnionOwnershipEvent
+import com.rarible.protocol.union.integration.tezos.converter.TezosActivityConverter
+import com.rarible.protocol.union.integration.tezos.converter.TezosOrderConverter
 import com.rarible.protocol.union.integration.tezos.event.TezosActivityEventHandler
 import com.rarible.protocol.union.integration.tezos.event.TezosItemEventHandler
 import com.rarible.protocol.union.integration.tezos.event.TezosOrderEventHandler
 import com.rarible.protocol.union.integration.tezos.event.TezosOwnershipEventHandler
 import org.apache.commons.lang3.StringUtils
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
-import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.ComponentScan
-import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
 
-@Configuration
-@TezosComponent
-@Import(CoreConfiguration::class)
-@ComponentScan(basePackageClasses = [TezosConsumerConfiguration::class])
-@EnableConfigurationProperties(value = [TezosIntegrationProperties::class])
-@ConditionalOnProperty(name = ["integration.tezos.consumer.brokerReplicaSet"])
+@TezosConfiguration
+@Import(TezosApiConfiguration::class)
 class TezosConsumerConfiguration(
     applicationEnvironmentInfo: ApplicationEnvironmentInfo,
     properties: TezosIntegrationProperties,
@@ -51,6 +48,44 @@ class TezosConsumerConfiguration(
             StringUtils.trimToNull(consumer.password)
         )
     }
+
+    //-------------------- Handlers -------------------//
+
+    @Bean
+    fun tezosItemEventHandler(handler: IncomingEventHandler<UnionItemEvent>): TezosItemEventHandler {
+        return TezosItemEventHandler(handler)
+    }
+
+    @Bean
+    fun tezosOwnershipEventHandler(handler: IncomingEventHandler<UnionOwnershipEvent>): TezosOwnershipEventHandler {
+        return TezosOwnershipEventHandler(handler)
+    }
+
+    // TODO TEZOS not supported yet
+    /*
+    @Bean
+    fun tezosCollectionEventHandler(handler: IncomingEventHandler<CollectionEventDto>): TezosCollectionEventHandler {
+        return TezosCollectionEventHandler(handler)
+    }
+     */
+
+    @Bean
+    fun tezosOrderEventHandler(
+        handler: IncomingEventHandler<UnionOrderEvent>,
+        converter: TezosOrderConverter
+    ): TezosOrderEventHandler {
+        return TezosOrderEventHandler(handler, converter)
+    }
+
+    @Bean
+    fun tezosActivityEventHandler(
+        handler: IncomingEventHandler<com.rarible.protocol.union.dto.ActivityDto>,
+        converter: TezosActivityConverter
+    ): TezosActivityEventHandler {
+        return TezosActivityEventHandler(handler, converter)
+    }
+
+    //-------------------- Workers --------------------//
 
     @Bean
     fun tezosItemWorker(

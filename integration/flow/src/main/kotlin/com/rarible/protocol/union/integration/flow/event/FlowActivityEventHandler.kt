@@ -5,13 +5,9 @@ import com.rarible.protocol.union.core.handler.BlockchainEventHandler
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.integration.flow.FlowComponent
 import com.rarible.protocol.union.integration.flow.converter.FlowActivityConverter
 import org.slf4j.LoggerFactory
-import org.springframework.stereotype.Component
 
-@Component
-@FlowComponent
 class FlowActivityEventHandler(
     override val handler: IncomingEventHandler<ActivityDto>,
     private val flowActivityConverter: FlowActivityConverter

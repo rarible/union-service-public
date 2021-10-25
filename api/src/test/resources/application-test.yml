@@ -10,10 +10,12 @@ spring:
 logging:
   logstash.tcp-socket.enabled: false
 
+integration:
+  tezos:
+    client:
+      url: "http://localhost:8080"
+
 common:
   currency:
     refresh:
       cron: "-"
-  client:
-    tezos:
-      url: "http://localhost:8080"

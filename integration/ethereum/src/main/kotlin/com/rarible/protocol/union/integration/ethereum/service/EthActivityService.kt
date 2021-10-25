@@ -19,21 +19,17 @@ import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
-import com.rarible.protocol.union.integration.ethereum.EthereumComponent
-import com.rarible.protocol.union.integration.ethereum.PolygonComponent
 import com.rarible.protocol.union.integration.ethereum.converter.EthActivityConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthActivityFilterConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.reactive.awaitFirst
-import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.stereotype.Component
 import scalether.domain.Address
 import java.math.BigInteger
 import java.time.Instant
 
-sealed class EthActivityService(
+class EthActivityService(
     blockchain: BlockchainDto,
     private val activityItemControllerApi: NftActivityControllerApi,
     private val activityOrderControllerApi: OrderActivityControllerApi,
@@ -164,29 +160,3 @@ sealed class EthActivityService(
         }
     }
 }
-
-@Component
-@EthereumComponent
-class EthereumActivityService(
-    @Qualifier("ethereum.activity.api.item") activityItemControllerApi: NftActivityControllerApi,
-    @Qualifier("ethereum.activity.api.order") activityOrderControllerApi: OrderActivityControllerApi,
-    ethActivityConverter: EthActivityConverter
-) : EthActivityService(
-    BlockchainDto.ETHEREUM,
-    activityItemControllerApi,
-    activityOrderControllerApi,
-    ethActivityConverter
-)
-
-@Component
-@PolygonComponent
-class PolygonActivityService(
-    @Qualifier("polygon.activity.api.item") activityItemControllerApi: NftActivityControllerApi,
-    @Qualifier("polygon.activity.api.order") activityOrderControllerApi: OrderActivityControllerApi,
-    ethActivityConverter: EthActivityConverter
-) : EthActivityService(
-    BlockchainDto.POLYGON,
-    activityItemControllerApi,
-    activityOrderControllerApi,
-    ethActivityConverter
-)

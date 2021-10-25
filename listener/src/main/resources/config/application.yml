@@ -35,9 +35,6 @@ common:
   currency:
     refresh:
       cron: "0 0/30 * * * *"
-  client:
-    tezos:
-      url: "${consul.tezos.api.baseUrl}"
 
 
 integration:
@@ -68,7 +65,7 @@ integration:
   tezos:
     enabled: ${consul.tezos.enabled:true}
     client:
-      baseUrl: ${consul.tezos.api.baseUrl}
+      url: ${consul.tezos.api.baseUrl}
     consumer:
       broker-replica-set: ${consul.tezos.kafka.hosts}
       username: ${consul.tezos.kafka.username}

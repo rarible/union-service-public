@@ -11,13 +11,9 @@ import com.rarible.protocol.union.core.model.UnionOwnershipUpdateEvent
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.UnionAddress
-import com.rarible.protocol.union.integration.flow.FlowComponent
 import com.rarible.protocol.union.integration.flow.converter.FlowOwnershipConverter
 import org.slf4j.LoggerFactory
-import org.springframework.stereotype.Component
 
-@Component
-@FlowComponent
 class FlowOwnershipEventHandler(
     override val handler: IncomingEventHandler<UnionOwnershipEvent>
 ) : BlockchainEventHandler<FlowOwnershipEventDto, UnionOwnershipEvent>(BlockchainDto.FLOW) {

@@ -13,17 +13,15 @@ import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-@FlowPreview
 class EthereumOrderEventHandlerTest {
 
     private val incomingEventHandler: IncomingEventHandler<UnionOrderEvent> = mockk()
     private val converter = EthOrderConverter(CurrencyMock.currencyServiceMock)
-    private val handler = EthereumOrderEventHandler(incomingEventHandler, converter)
+    private val handler = EthOrderEventHandler(BlockchainDto.ETHEREUM, incomingEventHandler, converter)
 
     @BeforeEach
     fun beforeEach() {

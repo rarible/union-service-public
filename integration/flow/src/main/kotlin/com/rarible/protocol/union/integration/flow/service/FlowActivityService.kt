@@ -9,14 +9,10 @@ import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
-import com.rarible.protocol.union.integration.flow.FlowComponent
 import com.rarible.protocol.union.integration.flow.converter.FlowActivityConverter
 import kotlinx.coroutines.reactive.awaitFirst
-import org.springframework.stereotype.Component
 import java.time.Instant
 
-@Component
-@FlowComponent
 class FlowActivityService(
     private val activityControllerApi: FlowNftOrderActivityControllerApi,
     private val flowActivityConverter: FlowActivityConverter

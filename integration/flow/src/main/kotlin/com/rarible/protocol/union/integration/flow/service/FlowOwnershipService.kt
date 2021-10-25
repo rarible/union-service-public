@@ -6,13 +6,9 @@ import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.core.service.OwnershipService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.integration.flow.FlowComponent
 import com.rarible.protocol.union.integration.flow.converter.FlowOwnershipConverter
 import kotlinx.coroutines.reactive.awaitFirst
-import org.springframework.stereotype.Component
 
-@Component
-@FlowComponent
 class FlowOwnershipService(
     private val ownershipControllerApi: FlowNftOwnershipControllerApi
 ) : AbstractBlockchainService(BlockchainDto.FLOW), OwnershipService {

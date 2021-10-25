@@ -7,13 +7,9 @@ import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.integration.tezos.TezosComponent
 import com.rarible.protocol.union.integration.tezos.converter.TezosItemConverter
 import kotlinx.coroutines.reactive.awaitFirst
-import org.springframework.stereotype.Component
 
-@Component
-@TezosComponent
 class TezosItemService(
     private val itemControllerApi: NftItemControllerApi
 ) : AbstractBlockchainService(BlockchainDto.TEZOS), ItemService {

@@ -7,13 +7,9 @@ import com.rarible.protocol.union.core.model.UnionOwnershipDeleteEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipUpdateEvent
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.integration.tezos.TezosComponent
 import com.rarible.protocol.union.integration.tezos.converter.TezosOwnershipConverter
 import org.slf4j.LoggerFactory
-import org.springframework.stereotype.Component
 
-@Component
-@TezosComponent
 class TezosOwnershipEventHandler(
     override val handler: IncomingEventHandler<UnionOwnershipEvent>
 ) : BlockchainEventHandler<OwnershipEventDto, UnionOwnershipEvent>(BlockchainDto.TEZOS) {

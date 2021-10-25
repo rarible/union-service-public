@@ -9,13 +9,9 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PlatformDto
-import com.rarible.protocol.union.integration.tezos.TezosComponent
 import com.rarible.protocol.union.integration.tezos.converter.TezosOrderConverter
 import kotlinx.coroutines.reactive.awaitFirst
-import org.springframework.stereotype.Component
 
-@Component
-@TezosComponent
 class TezosOrderService(
     private val orderControllerApi: OrderControllerApi,
     private val tezosOrderConverter: TezosOrderConverter

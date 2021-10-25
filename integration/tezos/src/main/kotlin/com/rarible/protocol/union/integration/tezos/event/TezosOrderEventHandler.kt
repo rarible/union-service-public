@@ -7,9 +7,7 @@ import com.rarible.protocol.union.core.model.UnionOrderUpdateEvent
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.tezos.converter.TezosOrderConverter
 import org.slf4j.LoggerFactory
-import org.springframework.stereotype.Component
 
-@Component
 class TezosOrderEventHandler(
     override val handler: IncomingEventHandler<UnionOrderEvent>,
     private val tezosOrderConverter: TezosOrderConverter

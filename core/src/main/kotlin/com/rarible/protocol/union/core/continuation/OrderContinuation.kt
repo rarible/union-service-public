@@ -1,7 +1,7 @@
 package com.rarible.protocol.union.core.continuation
 
-import com.rarible.protocol.union.core.model.ext
 import com.rarible.protocol.union.dto.OrderDto
+import com.rarible.protocol.union.dto.ext
 
 object OrderContinuation {
 

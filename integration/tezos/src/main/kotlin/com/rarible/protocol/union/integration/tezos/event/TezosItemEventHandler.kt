@@ -9,13 +9,9 @@ import com.rarible.protocol.union.core.model.UnionItemUpdateEvent
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.UnionAddress
-import com.rarible.protocol.union.integration.tezos.TezosComponent
 import com.rarible.protocol.union.integration.tezos.converter.TezosItemConverter
 import org.slf4j.LoggerFactory
-import org.springframework.stereotype.Component
 
-@Component
-@TezosComponent
 class TezosItemEventHandler(
     override val handler: IncomingEventHandler<UnionItemEvent>
 ) : BlockchainEventHandler<ItemEventDto, UnionItemEvent>(BlockchainDto.TEZOS) {

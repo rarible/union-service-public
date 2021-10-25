@@ -6,13 +6,9 @@ import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.core.service.OwnershipService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.integration.tezos.TezosComponent
 import com.rarible.protocol.union.integration.tezos.converter.TezosOwnershipConverter
 import kotlinx.coroutines.reactive.awaitFirst
-import org.springframework.stereotype.Component
 
-@Component
-@TezosComponent
 class TezosOwnershipService(
     private val ownershipControllerApi: NftOwnershipControllerApi
 ) : AbstractBlockchainService(BlockchainDto.TEZOS), OwnershipService {

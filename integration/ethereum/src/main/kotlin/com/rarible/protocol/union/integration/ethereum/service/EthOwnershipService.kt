@@ -6,14 +6,10 @@ import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.core.service.OwnershipService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.integration.ethereum.EthereumComponent
-import com.rarible.protocol.union.integration.ethereum.PolygonComponent
 import com.rarible.protocol.union.integration.ethereum.converter.EthOwnershipConverter
 import kotlinx.coroutines.reactive.awaitFirst
-import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.stereotype.Component
 
-sealed class EthOwnershipService(
+class EthOwnershipService(
     blockchain: BlockchainDto,
     private val ownershipControllerApi: NftOwnershipControllerApi
 ) : AbstractBlockchainService(blockchain), OwnershipService {
@@ -49,21 +45,3 @@ sealed class EthOwnershipService(
         return EthOwnershipConverter.convert(ownerships, blockchain)
     }
 }
-
-@Component
-@EthereumComponent
-class EthereumOwnershipService(
-    @Qualifier("ethereum.ownership.api") ownershipControllerApi: NftOwnershipControllerApi
-) : EthOwnershipService(
-    BlockchainDto.ETHEREUM,
-    ownershipControllerApi
-)
-
-@Component
-@PolygonComponent
-class PolygonOwnershipService(
-    @Qualifier("polygon.ownership.api") ownershipControllerApi: NftOwnershipControllerApi
-) : EthOwnershipService(
-    BlockchainDto.POLYGON,
-    ownershipControllerApi
-)

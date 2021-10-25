@@ -10,15 +10,11 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PlatformDto
-import com.rarible.protocol.union.integration.ethereum.EthereumComponent
-import com.rarible.protocol.union.integration.ethereum.PolygonComponent
 import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
 import kotlinx.coroutines.reactive.awaitFirst
-import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.stereotype.Component
 
-sealed class EthOrderService(
+class EthOrderService(
     override val blockchain: BlockchainDto,
     private val orderControllerApi: OrderControllerApi,
     private val ethOrderConverter: EthOrderConverter
@@ -197,25 +193,3 @@ sealed class EthOrderService(
         return ethOrderConverter.convert(orders, blockchain)
     }
 }
-
-@Component
-@EthereumComponent
-class EthereumOrderService(
-    @Qualifier("ethereum.order.api") OrderControllerApi: OrderControllerApi,
-    ethOrderConverter: EthOrderConverter
-) : EthOrderService(
-    BlockchainDto.ETHEREUM,
-    OrderControllerApi,
-    ethOrderConverter
-)
-
-@Component
-@PolygonComponent
-class PolygonOrderService(
-    @Qualifier("polygon.order.api") OrderControllerApi: OrderControllerApi,
-    ethOrderConverter: EthOrderConverter
-) : EthOrderService(
-    BlockchainDto.POLYGON,
-    OrderControllerApi,
-    ethOrderConverter
-)

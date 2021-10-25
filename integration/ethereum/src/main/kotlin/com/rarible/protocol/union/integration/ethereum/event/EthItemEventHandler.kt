@@ -11,14 +11,11 @@ import com.rarible.protocol.union.core.model.UnionItemUpdateEvent
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.UnionAddress
-import com.rarible.protocol.union.integration.ethereum.EthereumComponent
-import com.rarible.protocol.union.integration.ethereum.PolygonComponent
 import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthItemConverter
 import org.slf4j.LoggerFactory
-import org.springframework.stereotype.Component
 
-sealed class EthItemEventHandler(
+class EthItemEventHandler(
     blockchain: BlockchainDto,
     override val handler: IncomingEventHandler<UnionItemEvent>
 ) : BlockchainEventHandler<NftItemEventDto, UnionItemEvent>(blockchain) {
@@ -44,21 +41,3 @@ sealed class EthItemEventHandler(
         }
     }
 }
-
-@Component
-@EthereumComponent
-class EthereumItemEventHandler(
-    handler: IncomingEventHandler<UnionItemEvent>
-) : EthItemEventHandler(
-    BlockchainDto.ETHEREUM,
-    handler
-)
-
-@Component
-@PolygonComponent
-class PolygonItemEventHandler(
-    handler: IncomingEventHandler<UnionItemEvent>
-) : EthItemEventHandler(
-    BlockchainDto.POLYGON,
-    handler
-)
