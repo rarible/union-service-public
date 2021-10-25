@@ -63,7 +63,7 @@ fun randomFlowNftItemDto(itemId: ItemIdDto, creator: String): FlowNftItemDto {
         lastUpdatedAt = nowMillis(),
         meta = randomFlowMetaDto(),
         creators = listOf(FlowCreatorDto(creator, randomBigDecimal())),
-        owners = listOf(randomString()),
+        owner = randomString(),
         royalties = listOf(FlowRoyaltyDto(randomString(), randomBigDecimal())),
         supply = randomBigInt(),
         deleted = randomBoolean()
