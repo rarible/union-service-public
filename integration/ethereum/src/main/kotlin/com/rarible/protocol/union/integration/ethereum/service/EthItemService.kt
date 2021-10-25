@@ -9,6 +9,7 @@ import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.ethereum.converter.EthItemConverter
 import kotlinx.coroutines.reactive.awaitFirst
+import kotlinx.coroutines.reactive.awaitFirstOrNull
 
 class EthItemService(
     blockchain: BlockchainDto,
@@ -43,7 +44,7 @@ class EthItemService(
     }
 
     override suspend fun resetItemMeta(itemId: String) {
-        itemControllerApi.resetNftItemMetaById(itemId)
+        itemControllerApi.resetNftItemMetaById(itemId).awaitFirstOrNull()
     }
 
     override suspend fun getItemsByCollection(
