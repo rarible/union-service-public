@@ -5,6 +5,7 @@ import com.rarible.protocol.union.core.continuation.OrderContinuation
 import com.rarible.protocol.union.core.continuation.page.ArgPaging
 import com.rarible.protocol.union.core.continuation.page.ArgSlice
 import com.rarible.protocol.union.core.continuation.page.Slice
+import com.rarible.protocol.union.core.converter.UnionConverter
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -19,7 +20,6 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import org.springframework.stereotype.Component
-import java.math.BigInteger
 
 @Component
 class OrderApiService(
@@ -46,7 +46,7 @@ class OrderApiService(
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
-        val shortItemId = ShortItemId(blockchain, contract, BigInteger(tokenId))
+        val shortItemId = ShortItemId(blockchain, contract, UnionConverter.convertToBigInteger(tokenId))
         val shortItem = enrichmentItemService.get(shortItemId) ?: return Slice(null, emptyList())
         val currencyAssetTypes = shortItem.bestSellOrders.keys.map { UnionAddress(shortItem.blockchain, it) }
 
@@ -78,7 +78,7 @@ class OrderApiService(
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
-        val shortItemId = ShortItemId(blockchain, contract, BigInteger(tokenId))
+        val shortItemId = ShortItemId(blockchain, contract, UnionConverter.convertToBigInteger(tokenId))
         val shortItem = enrichmentItemService.get(shortItemId) ?: return Slice(null, emptyList())
         val currencyAssetTypes = shortItem.bestBidOrders.keys.map { UnionAddress(shortItem.blockchain, it) }
 
