@@ -9,6 +9,7 @@ import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.flow.converter.FlowItemConverter
 import kotlinx.coroutines.reactive.awaitFirst
+import kotlinx.coroutines.reactive.awaitFirstOrNull
 
 class FlowItemService(
     private val flowNftItemControllerApi: FlowNftItemControllerApi
@@ -33,13 +34,12 @@ class FlowItemService(
     }
 
     override suspend fun getItemMetaById(itemId: String): UnionMeta {
-        // TODO FLOW will return a richer object (MetaDto) soon, and we should put 'attributes' and 'content' here.
         val meta = flowNftItemControllerApi.getNftItemMetaById(itemId).awaitFirst()
         return FlowItemConverter.convert(meta)
     }
 
     override suspend fun resetItemMeta(itemId: String) {
-        // TODO FLOW implement
+        flowNftItemControllerApi.resetItemMeta(itemId).awaitFirstOrNull()
     }
 
     override suspend fun getItemsByCollection(

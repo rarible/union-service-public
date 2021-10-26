@@ -12,6 +12,7 @@ import com.rarible.protocol.order.api.client.OrderActivityControllerApi
 import com.rarible.protocol.union.core.continuation.ActivityContinuation
 import com.rarible.protocol.union.core.continuation.page.Paging
 import com.rarible.protocol.union.core.continuation.page.Slice
+import com.rarible.protocol.union.core.converter.UnionConverter
 import com.rarible.protocol.union.core.service.ActivityService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.ActivityDto
@@ -25,8 +26,6 @@ import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.reactive.awaitFirst
-import scalether.domain.Address
-import java.math.BigInteger
 import java.time.Instant
 
 class EthActivityService(
@@ -62,7 +61,7 @@ class EthActivityService(
         sort: ActivitySortDto?
     ): Slice<ActivityDto> {
         val filter = ActivityFilterByCollectionDto(
-            Address.apply(collection),
+            EthConverter.convertToAddress(collection),
             LinkedHashSet(types).map { ethActivityConverter.asCollectionActivityType(it) }
         )
         return getEthereumActivities(filter, continuation, size, sort)
@@ -77,8 +76,8 @@ class EthActivityService(
         sort: ActivitySortDto?
     ): Slice<ActivityDto> {
         val filter = ActivityFilterByItemDto(
-            Address.apply(contract),
-            BigInteger(tokenId),
+            EthConverter.convertToAddress(contract),
+            UnionConverter.convertToBigInteger(tokenId),
             LinkedHashSet(types).map { ethActivityConverter.asItemActivityType(it) }
         )
         return getEthereumActivities(filter, continuation, size, sort)
@@ -94,7 +93,7 @@ class EthActivityService(
         sort: ActivitySortDto?
     ): Slice<ActivityDto> {
         val filter = ActivityFilterByUserDto(
-            users.map { Address.apply(it) },
+            users.map { EthConverter.convertToAddress(it) },
             LinkedHashSet(types).map { ethActivityConverter.asUserActivityType(it) },
             from?.epochSecond,
             to?.epochSecond

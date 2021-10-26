@@ -1,7 +1,7 @@
 package com.rarible.protocol.union.integration.tezos.converter
 
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.test.data.randomTezosOwnershipDto
+import com.rarible.protocol.union.integration.tezos.data.randomTezosOwnershipDto
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 

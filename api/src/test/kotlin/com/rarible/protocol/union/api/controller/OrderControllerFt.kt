@@ -26,8 +26,8 @@ import com.rarible.protocol.union.integration.ethereum.data.randomEthAddress
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthLegacyOrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomPolygonAddress
+import com.rarible.protocol.union.integration.tezos.data.randomTezosOrderDto
 import com.rarible.protocol.union.test.data.randomFlowV1OrderDto
-import com.rarible.protocol.union.test.data.randomTezosOrderDto
 import io.mockk.coEvery
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.reactive.awaitFirst

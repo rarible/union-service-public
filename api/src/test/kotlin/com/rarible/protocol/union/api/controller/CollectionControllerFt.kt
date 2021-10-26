@@ -15,10 +15,10 @@ import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAddress
 import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionDto
+import com.rarible.protocol.union.integration.tezos.data.randomTezosAddress
+import com.rarible.protocol.union.integration.tezos.data.randomTezosCollectionDto
 import com.rarible.protocol.union.test.data.randomFlowAddress
 import com.rarible.protocol.union.test.data.randomFlowCollectionDto
-import com.rarible.protocol.union.test.data.randomTezosCollectionDto
-import com.rarible.protocol.union.test.data.randomTezosOwnershipId
 import io.mockk.coEvery
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.reactive.awaitFirst
@@ -101,7 +101,7 @@ class CollectionControllerFt : AbstractIntegrationTest() {
 
     @Test
     fun `get collections by owner - tezos`() = runBlocking<Unit> {
-        val tezosOwnerId = randomTezosOwnershipId()
+        val tezosOwnerId = randomTezosAddress()
         val collection = randomTezosCollectionDto()
         val collectionId = UnionAddressConverter.convert(collection.id, BlockchainDto.TEZOS)
 

@@ -7,9 +7,10 @@ import com.rarible.protocol.union.core.continuation.page.Paging
 import com.rarible.protocol.union.core.service.OwnershipService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.IdParser
 import com.rarible.protocol.union.dto.OwnershipDto
 import com.rarible.protocol.union.dto.OwnershipsDto
+import com.rarible.protocol.union.dto.parser.IdParser
+import com.rarible.protocol.union.dto.parser.OwnershipIdParser
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.RestController
@@ -46,8 +47,8 @@ class OwnershipController(
     override suspend fun getOwnershipById(
         ownershipId: String
     ): ResponseEntity<OwnershipDto> {
-        val (blockchain, shortOwnershipId) = IdParser.parse(ownershipId)
-        val result = router.getService(blockchain).getOwnershipById(shortOwnershipId)
+        val fullOwnershipId = OwnershipIdParser.parseFull(ownershipId)
+        val result = router.getService(fullOwnershipId.blockchain).getOwnershipById(fullOwnershipId.value)
 
         val enriched = ownershipApiService.enrich(result)
 
@@ -61,8 +62,9 @@ class OwnershipController(
         size: Int?
     ): ResponseEntity<OwnershipsDto> {
         val safeSize = PageSize.OWNERSHIP.limit(size)
-        val (blockchain, shortContract) = IdParser.parse(contract)
-        val result = router.getService(blockchain).getOwnershipsByItem(shortContract, tokenId, continuation, safeSize)
+        val contractAddress = IdParser.parseAddress(contract)
+        val result = router.getService(contractAddress.blockchain)
+            .getOwnershipsByItem(contractAddress.value, tokenId, continuation, safeSize)
 
         val enriched = ownershipApiService.enrich(result)
 

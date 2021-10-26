@@ -2,6 +2,7 @@ package com.rarible.protocol.union.integration.flow.service
 
 import com.rarible.protocol.flow.nft.api.client.FlowNftOwnershipControllerApi
 import com.rarible.protocol.union.core.continuation.page.Page
+import com.rarible.protocol.union.core.converter.UnionConverter
 import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.core.service.OwnershipService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
@@ -37,7 +38,7 @@ class FlowOwnershipService(
     ): Page<UnionOwnership> {
         val items = ownershipControllerApi.getNftOwnershipsByItem(
             contract,
-            tokenId,
+            UnionConverter.convertToLong(tokenId).toString(),
             continuation,
             size
         ).awaitFirst()
