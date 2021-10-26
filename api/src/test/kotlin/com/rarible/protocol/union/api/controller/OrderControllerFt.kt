@@ -3,7 +3,9 @@ package com.rarible.protocol.union.api.controller
 import com.rarible.core.common.nowMillis
 import com.rarible.core.test.data.randomBigInt
 import com.rarible.core.test.data.randomString
+import com.rarible.protocol.dto.Erc20AssetTypeDto
 import com.rarible.protocol.dto.FlowOrdersPaginationDto
+import com.rarible.protocol.dto.OrderCurrenciesDto
 import com.rarible.protocol.dto.OrdersPaginationDto
 import com.rarible.protocol.tezos.dto.OrderPaginationDto
 import com.rarible.protocol.union.api.client.OrderControllerApi
@@ -14,10 +16,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.PlatformDto
-import com.rarible.protocol.union.enrichment.converter.ShortItemConverter
-import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
-import com.rarible.protocol.union.enrichment.test.data.randomUnionItem
 import com.rarible.protocol.union.enrichment.util.bidCurrencyId
 import com.rarible.protocol.union.enrichment.util.sellCurrencyId
 import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
@@ -36,6 +35,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import reactor.kotlin.core.publisher.toMono
+import scalether.domain.Address
 
 @FlowPreview
 @IntegrationTest
@@ -150,7 +150,6 @@ class OrderControllerFt : AbstractIntegrationTest() {
     @Test
     fun `get order bids by item - ethereum`() = runBlocking<Unit> {
         val ethItemId = randomEthItemId()
-        val ethItem = randomUnionItem(ethItemId)
 
         val contract = ethItemId.token
         val tokenId = ethItemId.tokenId
@@ -158,12 +157,6 @@ class OrderControllerFt : AbstractIntegrationTest() {
 
         val order = randomEthLegacyOrderDto(ethItemId)
         val unionOrder = ethOrderConverter.convert(order, ethItemId.blockchain)
-        val shortOrder = ShortOrderConverter.convert(unionOrder)
-        val shortItem = ShortItemConverter.convert(ethItem).copy(
-            bestBidOrder = shortOrder,
-            bestBidOrders = mapOf(unionOrder.bidCurrencyId to shortOrder)
-        )
-        enrichmentItemService.save(shortItem)
 
         val ethOrders = listOf(order)
 
@@ -182,6 +175,13 @@ class OrderControllerFt : AbstractIntegrationTest() {
                 null
             )
         } returns OrdersPaginationDto(ethOrders, continuation).toMono()
+
+        coEvery {
+            testEthereumOrderApi.getCurrenciesByBidOrdersOfItem(contract.value, tokenId.toString())
+        } returns OrderCurrenciesDto(
+            OrderCurrenciesDto.OrderType.BID,
+            listOf(Erc20AssetTypeDto(Address.apply(unionOrder.bidCurrencyId)))
+        ).toMono()
 
         val orders = orderControllerClient.getOrderBidsByItem(
             contract.fullId(),
@@ -293,7 +293,6 @@ class OrderControllerFt : AbstractIntegrationTest() {
     @Test
     fun `get sell orders by item - ethereum`() = runBlocking<Unit> {
         val ethItemId = randomEthItemId()
-        val ethItem = randomUnionItem(ethItemId)
 
         val contract = ethItemId.token
         val tokenId = ethItemId.tokenId
@@ -301,12 +300,6 @@ class OrderControllerFt : AbstractIntegrationTest() {
 
         val order = randomEthLegacyOrderDto(ethItemId)
         val unionOrder = ethOrderConverter.convert(order, ethItemId.blockchain)
-        val shortOrder = ShortOrderConverter.convert(unionOrder)
-        val shortItem = ShortItemConverter.convert(ethItem).copy(
-            bestSellOrder = shortOrder,
-            bestSellOrders = mapOf(unionOrder.sellCurrencyId to shortOrder)
-        )
-        enrichmentItemService.save(shortItem)
 
         val ethOrders = listOf(order)
 
@@ -323,6 +316,13 @@ class OrderControllerFt : AbstractIntegrationTest() {
                 unionOrder.sellCurrencyId
             )
         } returns OrdersPaginationDto(ethOrders, continuation).toMono()
+
+        coEvery {
+            testEthereumOrderApi.getCurrenciesBySellOrdersOfItem(contract.value, tokenId.toString())
+        } returns OrderCurrenciesDto(
+            OrderCurrenciesDto.OrderType.SELL,
+            listOf(Erc20AssetTypeDto(Address.apply(unionOrder.sellCurrencyId)))
+        ).toMono()
 
         val orders = orderControllerClient.getSellOrdersByItem(
             contract.fullId(),

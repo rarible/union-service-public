@@ -5,7 +5,6 @@ import com.rarible.protocol.union.core.continuation.OrderContinuation
 import com.rarible.protocol.union.core.continuation.page.ArgPaging
 import com.rarible.protocol.union.core.continuation.page.ArgSlice
 import com.rarible.protocol.union.core.continuation.page.Slice
-import com.rarible.protocol.union.core.converter.UnionConverter
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -14,8 +13,7 @@ import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.UnionAddress
-import com.rarible.protocol.union.enrichment.model.ShortItemId
-import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
+import com.rarible.protocol.union.dto.ext
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -23,8 +21,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class OrderApiService(
-    private val router: BlockchainRouter<OrderService>,
-    private val enrichmentItemService: EnrichmentItemService
+    private val router: BlockchainRouter<OrderService>
 ) {
 
     suspend fun getByIds(ids: List<OrderIdDto>): List<OrderDto> {
@@ -46,9 +43,13 @@ class OrderApiService(
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
-        val shortItemId = ShortItemId(blockchain, contract, UnionConverter.convertToBigInteger(tokenId))
-        val shortItem = enrichmentItemService.get(shortItemId) ?: return Slice(null, emptyList())
-        val currencyAssetTypes = shortItem.bestSellOrders.keys.map { UnionAddress(shortItem.blockchain, it) }
+        val currencyAssetTypes = router.getService(blockchain)
+            .getSellCurrencies(contract, tokenId)
+            .map { UnionAddress(blockchain, it.ext.contract) }
+
+        if (currencyAssetTypes.isEmpty()) {
+            return Slice.empty()
+        }
 
         val currencySlices = getMultiCurrencyOrdersForItem(
             continuation, currencyAssetTypes
@@ -78,9 +79,13 @@ class OrderApiService(
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
-        val shortItemId = ShortItemId(blockchain, contract, UnionConverter.convertToBigInteger(tokenId))
-        val shortItem = enrichmentItemService.get(shortItemId) ?: return Slice(null, emptyList())
-        val currencyAssetTypes = shortItem.bestBidOrders.keys.map { UnionAddress(shortItem.blockchain, it) }
+        val currencyAssetTypes = router.getService(blockchain)
+            .getBidCurrencies(contract, tokenId)
+            .map { UnionAddress(blockchain, it.ext.contract) }
+
+        if (currencyAssetTypes.isEmpty()) {
+            return Slice.empty()
+        }
 
         val currencySlices = getMultiCurrencyOrdersForItem(
             continuation, currencyAssetTypes
