@@ -10,16 +10,16 @@ object BestSellOrderComparator : BestOrderComparator {
         current: ShortOrder,
         updated: ShortOrder
     ): ShortOrder {
-        val currentMakePrice = current.makePrice
-        val updatedMakePrice = updated.makePrice
+        val currentTakePrice = current.takePrice
+        val updatedTakePrice = updated.takePrice
 
-        val isCurrentMakePriceGreater = when {
-            currentMakePrice == null -> true
-            updatedMakePrice != null -> currentMakePrice >= updatedMakePrice
+        val isCurrentTakePriceGreater = when {
+            currentTakePrice == null -> true
+            updatedTakePrice != null -> currentTakePrice >= updatedTakePrice
             else -> false
         }
 
         // We have new price, which is lower, then current - updated order is better, using it
-        return if (isCurrentMakePriceGreater) updated else current
+        return if (isCurrentTakePriceGreater) updated else current
     }
 }

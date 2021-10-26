@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.integration.flow.converter
 
 import com.rarible.protocol.union.core.service.CurrencyService
+import com.rarible.protocol.union.dto.AssetTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.BurnActivityDto
 import com.rarible.protocol.union.dto.FlowAssetTypeFtDto
@@ -26,7 +27,7 @@ class FlowActivityConverterTest {
 
     val currencyService = mockk<CurrencyService>("currencyService") {
         coEvery {
-            toUsd(any(), any(), any())
+            toUsd(any(), any<AssetTypeDto>(), any())
         } returns 2.toBigDecimal()
     }
 

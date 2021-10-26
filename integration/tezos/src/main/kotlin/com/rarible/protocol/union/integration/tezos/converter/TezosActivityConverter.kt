@@ -84,7 +84,7 @@ class TezosActivityConverter(
                     id = activityId,
                     date = source.date,
                     price = source.price,
-                    priceUsd = currencyService.toUsd(blockchain, payment.type.ext.contract, source.price, source.date),
+                    priceUsd = currencyService.toUsd(blockchain, payment.type, source.price, source.date),
                     source = convertSource(source.source),
                     hash = source.hash,
                     maker = UnionAddressConverter.convert(source.maker, blockchain),
@@ -99,7 +99,7 @@ class TezosActivityConverter(
                     id = activityId,
                     date = source.date,
                     price = source.price,
-                    priceUsd = currencyService.toUsd(blockchain, payment.type.ext.contract, source.price, source.date),
+                    priceUsd = currencyService.toUsd(blockchain, payment.type, source.price, source.date),
                     source = convertSource(source.source),
                     hash = source.hash,
                     maker = UnionAddressConverter.convert(source.maker, blockchain),
@@ -262,7 +262,7 @@ class TezosActivityConverter(
         activityId: ActivityIdDto
     ): OrderMatchSellDto {
         val unionPayment = TezosConverter.convert(payment.asset, blockchain)
-        val priceUsd = currencyService.toUsd(blockchain, unionPayment.type.ext.contract, source.price, source.date)
+        val priceUsd = currencyService.toUsd(blockchain, unionPayment.type, source.price, source.date)
         return OrderMatchSellDto(
             id = activityId,
             date = source.date,

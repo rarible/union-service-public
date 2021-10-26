@@ -79,13 +79,13 @@ internal class PriceUpdateJobTest : AbstractIntegrationTest() {
 
         val unionSellOrder1 = randomUnionOrderDto(randomEthItemId())
         val unionSellOrder2 = randomUnionOrderDto(randomEthItemId())
-        val sellOrder1 = ShortOrderConverter.convert(unionSellOrder1).copy(makePrice = BigDecimal.valueOf(1))
-        val sellOrder2 = ShortOrderConverter.convert(unionSellOrder2).copy(makePrice = BigDecimal.valueOf(2))
+        val sellOrder1 = ShortOrderConverter.convert(unionSellOrder1).copy(takePrice = BigDecimal.valueOf(1))
+        val sellOrder2 = ShortOrderConverter.convert(unionSellOrder2).copy(takePrice = BigDecimal.valueOf(2))
 
         val unionBidOrder1 = randomUnionOrderDto(randomEthItemId())
         val unionBidOrder2 = randomUnionOrderDto(randomEthItemId())
-        val bidOrder1 = ShortOrderConverter.convert(unionBidOrder1).copy(takePrice = BigDecimal.valueOf(2))
-        val bidOrder2 = ShortOrderConverter.convert(unionBidOrder2).copy(takePrice = BigDecimal.valueOf(1))
+        val bidOrder1 = ShortOrderConverter.convert(unionBidOrder1).copy(makePrice = BigDecimal.valueOf(2))
+        val bidOrder2 = ShortOrderConverter.convert(unionBidOrder2).copy(makePrice = BigDecimal.valueOf(1))
 
         val shortItem = randomShortItem(itemId).copy(
             bestSellOrder = sellOrder2,
@@ -121,8 +121,8 @@ internal class PriceUpdateJobTest : AbstractIntegrationTest() {
 
         val unionSellOrder1 = randomUnionOrderDto(randomEthItemId())
         val unionSellOrder2 = randomUnionOrderDto(randomEthItemId())
-        val sellOrder1 = ShortOrderConverter.convert(unionSellOrder1).copy(makePrice = BigDecimal.valueOf(1))
-        val sellOrder2 = ShortOrderConverter.convert(unionSellOrder2).copy(makePrice = BigDecimal.valueOf(2))
+        val sellOrder1 = ShortOrderConverter.convert(unionSellOrder1).copy(takePrice = BigDecimal.valueOf(1))
+        val sellOrder2 = ShortOrderConverter.convert(unionSellOrder2).copy(takePrice = BigDecimal.valueOf(2))
 
         val shortOwnership = randomShortOwnership(ownershipId).copy(
             bestSellOrder = sellOrder2,

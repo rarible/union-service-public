@@ -26,7 +26,6 @@ import com.rarible.protocol.union.dto.PendingOrderCancelDto
 import com.rarible.protocol.union.dto.PendingOrderDto
 import com.rarible.protocol.union.dto.PendingOrderMatchDto
 import com.rarible.protocol.union.dto.PlatformDto
-import com.rarible.protocol.union.dto.ext
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.time.Instant
@@ -56,8 +55,8 @@ class EthOrderConverter(
         val salt = EthConverter.convert(order.salt)
         val startedAt = order.start?.let { Instant.ofEpochSecond(it) }
         val endedAt = order.end?.let { Instant.ofEpochSecond(it) }
-        val makePriceUsd = currencyService.toUsd(blockchain, make.type.ext.contract, order.makePrice)
-        val takePriceUsd = currencyService.toUsd(blockchain, take.type.ext.contract, order.takePrice)
+        val makePriceUsd = currencyService.toUsd(blockchain, make.type, order.makePrice)
+        val takePriceUsd = currencyService.toUsd(blockchain, take.type, order.takePrice)
         val signature = order.signature?.let { EthConverter.convert(it) }
         val pending = order.pending?.map { convert(it, blockchain) }
         val priceHistory = order.priceHistory?.map { convert(it) } ?: listOf()
