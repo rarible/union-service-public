@@ -14,7 +14,7 @@ import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
 import com.rarible.protocol.union.enrichment.test.data.randomShortItem
 import com.rarible.protocol.union.enrichment.test.data.randomShortOwnership
 import com.rarible.protocol.union.enrichment.test.data.randomUnionItem
-import com.rarible.protocol.union.enrichment.test.data.randomUnionOrderDto
+import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrderDto
 import com.rarible.protocol.union.enrichment.util.bidCurrencyId
 import com.rarible.protocol.union.integration.ethereum.converter.EthItemConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
@@ -142,11 +142,11 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         val unionItem = EthItemConverter.convert(ethItem, itemId.blockchain)
         itemService.save(shortItem)
 
-        val bestSellOrder1 = randomUnionOrderDto(itemId).copy(makeStock = 20.toBigDecimal())
+        val bestSellOrder1 = randomUnionSellOrderDto(itemId).copy(makeStock = 20.toBigDecimal())
         val ownership1 = randomShortOwnership(itemId).copy(bestSellOrder = ShortOrderConverter.convert(bestSellOrder1))
         ownershipService.save(ownership1)
 
-        val bestSellOrder2 = randomUnionOrderDto(itemId).copy(makeStock = 10.toBigDecimal())
+        val bestSellOrder2 = randomUnionSellOrderDto(itemId).copy(makeStock = 10.toBigDecimal())
         val ownership2 = randomShortOwnership(itemId).copy(bestSellOrder = ShortOrderConverter.convert(bestSellOrder2))
         ownershipService.save(ownership2)
 
@@ -182,7 +182,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         // Item should not be changed - we'll check version
         val expectedItem = itemService.save(shortItem)
 
-        val bestSellOrder = randomUnionOrderDto(itemId).copy(makeStock = 20.toBigDecimal())
+        val bestSellOrder = randomUnionSellOrderDto(itemId).copy(makeStock = 20.toBigDecimal())
         val ownership = randomShortOwnership(itemId).copy(bestSellOrder = ShortOrderConverter.convert(bestSellOrder))
         ownershipService.save(ownership)
 

@@ -10,6 +10,8 @@ import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthItemConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOwnershipConverter
+import com.rarible.protocol.union.integration.ethereum.data.randomEthAssetErc20
+import com.rarible.protocol.union.integration.ethereum.data.randomEthAssetErc721
 import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthLegacyOrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthNftItemDto
@@ -55,26 +57,55 @@ fun randomUnionOwnershipDto(ownershipId: OwnershipIdDto) = EthOwnershipConverter
     ownershipId.blockchain
 )
 
-fun randomUnionOrderDto() = runBlocking {
+fun randomUnionSellOrderDto() = runBlocking {
     mockedEthOrderConverter.convert(
-        randomEthLegacyOrderDto(),
+        randomEthLegacyOrderDto()
+            .copy(takePrice = null, takePriceUsd = null),
         BlockchainDto.ETHEREUM
     )
 }
 
-fun randomUnionOrderDto(itemId: ItemIdDto) = runBlocking {
+fun randomUnionSellOrderDto(itemId: ItemIdDto) = runBlocking {
     mockedEthOrderConverter.convert(
-        randomEthLegacyOrderDto(itemId),
+        randomEthLegacyOrderDto(itemId)
+            .copy(takePrice = null, takePriceUsd = null),
         itemId.blockchain
     )
 }
 
-fun randomUnionOrderDto(itemId: ItemIdDto, owner: String) = runBlocking {
+fun randomUnionSellOrderDto(itemId: ItemIdDto, owner: String) = runBlocking {
     mockedEthOrderConverter.convert(
-        randomEthLegacyOrderDto(itemId, EthConverter.convertToAddress(owner)),
+        randomEthLegacyOrderDto(itemId, EthConverter.convertToAddress(owner))
+            .copy(takePrice = null, takePriceUsd = null),
         itemId.blockchain
     )
 }
 
+fun randomUnionBidOrderDto() = runBlocking {
+    mockedEthOrderConverter.convert(
+        randomEthLegacyOrderDto()
+            .copy(make = randomEthAssetErc721(), take = randomEthAssetErc20())
+            .copy(makePrice = null, makePriceUsd = null),
+        BlockchainDto.ETHEREUM
+    )
+}
+
+fun randomUnionBidOrderDto(itemId: ItemIdDto) = runBlocking {
+    mockedEthOrderConverter.convert(
+        randomEthLegacyOrderDto(itemId)
+            .copy(make = randomEthAssetErc721(), take = randomEthAssetErc20())
+            .copy(makePrice = null, makePriceUsd = null),
+        itemId.blockchain
+    )
+}
+
+fun randomUnionBidOrderDto(itemId: ItemIdDto, owner: String) = runBlocking {
+    mockedEthOrderConverter.convert(
+        randomEthLegacyOrderDto(itemId, EthConverter.convertToAddress(owner))
+            .copy(make = randomEthAssetErc721(), take = randomEthAssetErc20())
+            .copy(makePrice = null, makePriceUsd = null),
+        itemId.blockchain
+    )
+}
 
 private val mockedEthOrderConverter = EthOrderConverter(CurrencyMock.currencyServiceMock)

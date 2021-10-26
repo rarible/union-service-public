@@ -2,7 +2,7 @@ package com.rarible.protocol.union.listener.service
 
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
-import com.rarible.protocol.union.enrichment.test.data.randomUnionOrderDto
+import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrderDto
 import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAssetErc1155
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAssetErc20
@@ -44,7 +44,7 @@ class EnrichmentOrderEventServiceTest {
         val shortItemId = ShortItemId(itemId)
         val shortOwnershipId = ShortOwnershipId(ownershipId)
 
-        val order = randomUnionOrderDto(itemId, ownershipId.owner.value)
+        val order = randomUnionSellOrderDto(itemId, ownershipId.owner.value)
             .copy(
                 make = EthConverter.convert(randomEthAssetErc1155(itemId), itemId.blockchain),
                 take = EthConverter.convert(randomEthAssetErc20(), itemId.blockchain)
@@ -66,7 +66,7 @@ class EnrichmentOrderEventServiceTest {
 
         val shortItemId = ShortItemId(itemId)
 
-        val order = randomUnionOrderDto(itemId, ownershipId.owner.value)
+        val order = randomUnionSellOrderDto(itemId, ownershipId.owner.value)
             .copy(
                 make = EthConverter.convert(randomEthAssetErc20(), itemId.blockchain),
                 take = EthConverter.convert(randomEthAssetErc721(itemId), itemId.blockchain)

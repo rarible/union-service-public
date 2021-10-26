@@ -8,7 +8,7 @@ import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
 import com.rarible.protocol.union.enrichment.test.data.randomShortItem
 import com.rarible.protocol.union.enrichment.test.data.randomShortOwnership
-import com.rarible.protocol.union.enrichment.test.data.randomUnionOrderDto
+import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrderDto
 import com.rarible.protocol.union.enrichment.util.bidCurrencyId
 import com.rarible.protocol.union.enrichment.util.sellCurrencyId
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
@@ -77,15 +77,15 @@ internal class PriceUpdateJobTest : AbstractIntegrationTest() {
     fun `should update best order for multi orders items`() = runBlocking<Unit> {
         val itemId = randomEthItemId()
 
-        val unionSellOrder1 = randomUnionOrderDto(randomEthItemId())
-        val unionSellOrder2 = randomUnionOrderDto(randomEthItemId())
-        val sellOrder1 = ShortOrderConverter.convert(unionSellOrder1).copy(takePrice = BigDecimal.valueOf(1))
-        val sellOrder2 = ShortOrderConverter.convert(unionSellOrder2).copy(takePrice = BigDecimal.valueOf(2))
+        val unionSellOrder1 = randomUnionSellOrderDto(randomEthItemId())
+        val unionSellOrder2 = randomUnionSellOrderDto(randomEthItemId())
+        val sellOrder1 = ShortOrderConverter.convert(unionSellOrder1).copy(makePrice = BigDecimal.valueOf(1))
+        val sellOrder2 = ShortOrderConverter.convert(unionSellOrder2).copy(makePrice = BigDecimal.valueOf(2))
 
-        val unionBidOrder1 = randomUnionOrderDto(randomEthItemId())
-        val unionBidOrder2 = randomUnionOrderDto(randomEthItemId())
-        val bidOrder1 = ShortOrderConverter.convert(unionBidOrder1).copy(makePrice = BigDecimal.valueOf(2))
-        val bidOrder2 = ShortOrderConverter.convert(unionBidOrder2).copy(makePrice = BigDecimal.valueOf(1))
+        val unionBidOrder1 = randomUnionSellOrderDto(randomEthItemId())
+        val unionBidOrder2 = randomUnionSellOrderDto(randomEthItemId())
+        val bidOrder1 = ShortOrderConverter.convert(unionBidOrder1).copy(takePrice = BigDecimal.valueOf(2))
+        val bidOrder2 = ShortOrderConverter.convert(unionBidOrder2).copy(takePrice = BigDecimal.valueOf(1))
 
         val shortItem = randomShortItem(itemId).copy(
             bestSellOrder = sellOrder2,
@@ -119,10 +119,10 @@ internal class PriceUpdateJobTest : AbstractIntegrationTest() {
     fun `should update best order for multi orders ownership`() = runBlocking<Unit> {
         val ownershipId = randomEthOwnershipId()
 
-        val unionSellOrder1 = randomUnionOrderDto(randomEthItemId())
-        val unionSellOrder2 = randomUnionOrderDto(randomEthItemId())
-        val sellOrder1 = ShortOrderConverter.convert(unionSellOrder1).copy(takePrice = BigDecimal.valueOf(1))
-        val sellOrder2 = ShortOrderConverter.convert(unionSellOrder2).copy(takePrice = BigDecimal.valueOf(2))
+        val unionSellOrder1 = randomUnionSellOrderDto(randomEthItemId())
+        val unionSellOrder2 = randomUnionSellOrderDto(randomEthItemId())
+        val sellOrder1 = ShortOrderConverter.convert(unionSellOrder1).copy(makePrice = BigDecimal.valueOf(1))
+        val sellOrder2 = ShortOrderConverter.convert(unionSellOrder2).copy(makePrice = BigDecimal.valueOf(2))
 
         val shortOwnership = randomShortOwnership(ownershipId).copy(
             bestSellOrder = sellOrder2,

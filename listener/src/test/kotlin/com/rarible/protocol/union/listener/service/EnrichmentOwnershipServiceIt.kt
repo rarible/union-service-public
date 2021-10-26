@@ -6,7 +6,7 @@ import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
 import com.rarible.protocol.union.enrichment.test.data.randomShortOwnership
-import com.rarible.protocol.union.enrichment.test.data.randomUnionOrderDto
+import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomAddressString
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.listener.test.IntegrationTest
@@ -25,9 +25,9 @@ class EnrichmentOwnershipServiceIt {
     fun getTotalStock() = runBlocking<Unit> {
         val itemId = randomEthItemId()
 
-        val orderDto1 = ShortOrderConverter.convert(randomUnionOrderDto(itemId).copy(makeStock = 54.toBigDecimal()))
-        val orderDto2 = ShortOrderConverter.convert(randomUnionOrderDto(itemId).copy(makeStock = 33.toBigDecimal()))
-        val orderDto3 = ShortOrderConverter.convert(randomUnionOrderDto(itemId).copy(makeStock = 13.toBigDecimal()))
+        val orderDto1 = ShortOrderConverter.convert(randomUnionSellOrderDto(itemId).copy(makeStock = 54.toBigDecimal()))
+        val orderDto2 = ShortOrderConverter.convert(randomUnionSellOrderDto(itemId).copy(makeStock = 33.toBigDecimal()))
+        val orderDto3 = ShortOrderConverter.convert(randomUnionSellOrderDto(itemId).copy(makeStock = 13.toBigDecimal()))
 
         val ownership1 = randomShortOwnership(itemId).copy(bestSellOrder = orderDto1)
         val ownership2 = randomShortOwnership(itemId).copy(bestSellOrder = orderDto2)
