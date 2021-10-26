@@ -228,8 +228,8 @@ fun randomTezosOrderBidActivity(): OrderActivityBidDto {
         source = "RARIBLE",
         hash = randomString(16),
         maker = randomString(),
-        make = randomTezosAssetFa2(),
-        take = randomTezosAssetFa12(),
+        make = randomTezosAssetFa12(),
+        take = randomTezosAssetFa2(),
         price = randomBigDecimal()
     )
 }

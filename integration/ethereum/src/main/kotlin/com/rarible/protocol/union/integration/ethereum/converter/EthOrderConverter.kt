@@ -53,11 +53,16 @@ class EthOrderConverter(
         val taker = order.taker?.let { EthConverter.convert(it, blockchain) }
         val make = EthConverter.convert(order.make, blockchain)
         val take = EthConverter.convert(order.take, blockchain)
+        // For BID (make = currency, take - NFT) we're calculating prices for taker
+        val takePrice = if (take.type.ext.isNft) make.value / take.value else null
+        // For SELL (make = NFT, take - currency) we're calculating prices for maker
+        val makePrice = if (make.type.ext.isNft) take.value / make.value else null
+        // So for USD conversion we are using take.type for MAKE price and vice versa
+        val makePriceUsd = currencyService.toUsd(blockchain, take.type, makePrice)
+        val takePriceUsd = currencyService.toUsd(blockchain, make.type, takePrice)
         val salt = EthConverter.convert(order.salt)
         val startedAt = order.start?.let { Instant.ofEpochSecond(it) }
         val endedAt = order.end?.let { Instant.ofEpochSecond(it) }
-        val makePriceUsd = currencyService.toUsd(blockchain, make.type.ext.contract, order.makePrice)
-        val takePriceUsd = currencyService.toUsd(blockchain, take.type.ext.contract, order.takePrice)
         val signature = order.signature?.let { EthConverter.convert(it) }
         val pending = order.pending?.map { convert(it, blockchain) }
         val priceHistory = order.priceHistory?.map { convert(it) } ?: listOf()
@@ -82,8 +87,8 @@ class EthOrderConverter(
                     cancelled = order.cancelled,
                     createdAt = order.createdAt,
                     lastUpdatedAt = order.lastUpdateAt,
-                    makePrice = order.makePrice,
-                    takePrice = order.takePrice,
+                    makePrice = makePrice,
+                    takePrice = takePrice,
                     makePriceUsd = makePriceUsd,
                     takePriceUsd = takePriceUsd,
                     priceHistory = priceHistory,
@@ -111,8 +116,8 @@ class EthOrderConverter(
                     cancelled = order.cancelled,
                     createdAt = order.createdAt,
                     lastUpdatedAt = order.lastUpdateAt,
-                    makePrice = order.makePrice,
-                    takePrice = order.takePrice,
+                    makePrice = makePrice,
+                    takePrice = takePrice,
                     makePriceUsd = makePriceUsd,
                     takePriceUsd = takePriceUsd,
                     priceHistory = priceHistory,
@@ -141,8 +146,8 @@ class EthOrderConverter(
                     cancelled = order.cancelled,
                     createdAt = order.createdAt,
                     lastUpdatedAt = order.lastUpdateAt,
-                    makePrice = order.makePrice,
-                    takePrice = order.takePrice,
+                    makePrice = makePrice,
+                    takePrice = takePrice,
                     makePriceUsd = makePriceUsd,
                     takePriceUsd = takePriceUsd,
                     priceHistory = priceHistory,
@@ -184,8 +189,8 @@ class EthOrderConverter(
                     cancelled = order.cancelled,
                     createdAt = order.createdAt,
                     lastUpdatedAt = order.lastUpdateAt,
-                    makePrice = order.makePrice,
-                    takePrice = order.takePrice,
+                    makePrice = makePrice,
+                    takePrice = takePrice,
                     makePriceUsd = makePriceUsd,
                     takePriceUsd = takePriceUsd,
                     priceHistory = priceHistory,

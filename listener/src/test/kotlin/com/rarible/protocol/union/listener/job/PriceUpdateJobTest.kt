@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.listener.job
 
-import com.rarible.protocol.currency.api.client.CurrencyControllerApi
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
 import com.rarible.protocol.union.enrichment.repository.OwnershipRepository
@@ -8,7 +7,7 @@ import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
 import com.rarible.protocol.union.enrichment.test.data.randomShortItem
 import com.rarible.protocol.union.enrichment.test.data.randomShortOwnership
-import com.rarible.protocol.union.enrichment.test.data.randomUnionOrderDto
+import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrderDto
 import com.rarible.protocol.union.enrichment.util.bidCurrencyId
 import com.rarible.protocol.union.enrichment.util.sellCurrencyId
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
@@ -20,7 +19,6 @@ import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipId
 import com.rarible.protocol.union.listener.service.EnrichmentItemEventService
 import com.rarible.protocol.union.listener.test.AbstractIntegrationTest
 import com.rarible.protocol.union.listener.test.IntegrationTest
-import com.rarible.protocol.union.listener.test.data.createCurrencyDto
 import io.mockk.clearMocks
 import io.mockk.coEvery
 import kotlinx.coroutines.FlowPreview
@@ -44,9 +42,6 @@ internal class PriceUpdateJobTest : AbstractIntegrationTest() {
     private lateinit var itemEventService: EnrichmentItemEventService
 
     @Autowired
-    private lateinit var currencyControllerApi: CurrencyControllerApi
-
-    @Autowired
     private lateinit var itemService: EnrichmentItemService
 
     @Autowired
@@ -67,7 +62,6 @@ internal class PriceUpdateJobTest : AbstractIntegrationTest() {
     @BeforeEach
     fun beforeEach() = runBlocking<Unit> {
         clearMocks(
-            currencyControllerApi,
             testEthereumOrderApi,
             testEthereumOwnershipApi
         )
@@ -77,13 +71,13 @@ internal class PriceUpdateJobTest : AbstractIntegrationTest() {
     fun `should update best order for multi orders items`() = runBlocking<Unit> {
         val itemId = randomEthItemId()
 
-        val unionSellOrder1 = randomUnionOrderDto(randomEthItemId())
-        val unionSellOrder2 = randomUnionOrderDto(randomEthItemId())
+        val unionSellOrder1 = randomUnionSellOrderDto(randomEthItemId())
+        val unionSellOrder2 = randomUnionSellOrderDto(randomEthItemId())
         val sellOrder1 = ShortOrderConverter.convert(unionSellOrder1).copy(makePrice = BigDecimal.valueOf(1))
         val sellOrder2 = ShortOrderConverter.convert(unionSellOrder2).copy(makePrice = BigDecimal.valueOf(2))
 
-        val unionBidOrder1 = randomUnionOrderDto(randomEthItemId())
-        val unionBidOrder2 = randomUnionOrderDto(randomEthItemId())
+        val unionBidOrder1 = randomUnionSellOrderDto(randomEthItemId())
+        val unionBidOrder2 = randomUnionSellOrderDto(randomEthItemId())
         val bidOrder1 = ShortOrderConverter.convert(unionBidOrder1).copy(takePrice = BigDecimal.valueOf(2))
         val bidOrder2 = ShortOrderConverter.convert(unionBidOrder2).copy(takePrice = BigDecimal.valueOf(1))
 
@@ -100,7 +94,6 @@ internal class PriceUpdateJobTest : AbstractIntegrationTest() {
         )
 
         val nftItemDto = randomEthNftItemDto()
-        coEvery { currencyControllerApi.getCurrencyRate(any(), any(), any()) } returns createCurrencyDto().copy(rate = BigDecimal.ONE).toMono()
         coEvery { testEthereumItemApi.getNftItemById(itemId.value) } returns nftItemDto.toMono()
         coEvery { testEthereumItemApi.getNftItemMetaById(itemId.value) } returns nftItemDto.meta!!.toMono()
         coEvery { testEthereumOrderApi.getOrderByHash(any()) } returns randomEthLegacyOrderDto().toMono()
@@ -119,8 +112,8 @@ internal class PriceUpdateJobTest : AbstractIntegrationTest() {
     fun `should update best order for multi orders ownership`() = runBlocking<Unit> {
         val ownershipId = randomEthOwnershipId()
 
-        val unionSellOrder1 = randomUnionOrderDto(randomEthItemId())
-        val unionSellOrder2 = randomUnionOrderDto(randomEthItemId())
+        val unionSellOrder1 = randomUnionSellOrderDto(randomEthItemId())
+        val unionSellOrder2 = randomUnionSellOrderDto(randomEthItemId())
         val sellOrder1 = ShortOrderConverter.convert(unionSellOrder1).copy(makePrice = BigDecimal.valueOf(1))
         val sellOrder2 = ShortOrderConverter.convert(unionSellOrder2).copy(makePrice = BigDecimal.valueOf(2))
 
@@ -134,7 +127,6 @@ internal class PriceUpdateJobTest : AbstractIntegrationTest() {
             lastUpdatedAt = Instant.EPOCH
         )
 
-        coEvery { currencyControllerApi.getCurrencyRate(any(), any(), any()) } returns createCurrencyDto().copy(rate = BigDecimal.ONE).toMono()
         coEvery { testEthereumOwnershipApi.getNftOwnershipById(ownershipId.value) } returns randomEthOwnershipDto().toMono()
         coEvery { testEthereumOrderApi.getOrderByHash(any()) } returns randomEthLegacyOrderDto().toMono()
 

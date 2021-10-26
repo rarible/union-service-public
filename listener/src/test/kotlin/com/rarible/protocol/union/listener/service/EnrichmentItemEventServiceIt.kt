@@ -1,7 +1,6 @@
 package com.rarible.protocol.union.listener.service
 
 import com.rarible.core.test.wait.Wait
-import com.rarible.protocol.currency.api.client.CurrencyControllerApi
 import com.rarible.protocol.dto.OrderStatusDto
 import com.rarible.protocol.dto.OrdersPaginationDto
 import com.rarible.protocol.union.enrichment.converter.EnrichedItemConverter
@@ -14,7 +13,7 @@ import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
 import com.rarible.protocol.union.enrichment.test.data.randomShortItem
 import com.rarible.protocol.union.enrichment.test.data.randomShortOwnership
 import com.rarible.protocol.union.enrichment.test.data.randomUnionItem
-import com.rarible.protocol.union.enrichment.test.data.randomUnionOrderDto
+import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrderDto
 import com.rarible.protocol.union.enrichment.util.bidCurrencyId
 import com.rarible.protocol.union.integration.ethereum.converter.EthItemConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
@@ -23,13 +22,10 @@ import com.rarible.protocol.union.integration.ethereum.data.randomEthLegacyOrder
 import com.rarible.protocol.union.integration.ethereum.data.randomEthNftItemDto
 import com.rarible.protocol.union.listener.test.AbstractIntegrationTest
 import com.rarible.protocol.union.listener.test.IntegrationTest
-import com.rarible.protocol.union.listener.test.data.createCurrencyDto
-import io.mockk.clearMocks
 import io.mockk.coEvery
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.delay
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import reactor.kotlin.core.publisher.toMono
@@ -40,9 +36,6 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
 
     @Autowired
     private lateinit var itemEventService: EnrichmentItemEventService
-
-    @Autowired
-    private lateinit var currencyControllerApi: CurrencyControllerApi
 
     @Autowired
     private lateinit var itemService: EnrichmentItemService
@@ -56,11 +49,6 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
     @Autowired
     lateinit var enrichmentMetaService: EnrichmentMetaService
 
-
-    @BeforeEach
-    fun beforeEach() {
-        clearMocks(currencyControllerApi)
-    }
 
     @Test
     fun `update event - item doesn't exist`() = runWithKafka {
@@ -142,11 +130,11 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         val unionItem = EthItemConverter.convert(ethItem, itemId.blockchain)
         itemService.save(shortItem)
 
-        val bestSellOrder1 = randomUnionOrderDto(itemId).copy(makeStock = 20.toBigDecimal())
+        val bestSellOrder1 = randomUnionSellOrderDto(itemId).copy(makeStock = 20.toBigDecimal())
         val ownership1 = randomShortOwnership(itemId).copy(bestSellOrder = ShortOrderConverter.convert(bestSellOrder1))
         ownershipService.save(ownership1)
 
-        val bestSellOrder2 = randomUnionOrderDto(itemId).copy(makeStock = 10.toBigDecimal())
+        val bestSellOrder2 = randomUnionSellOrderDto(itemId).copy(makeStock = 10.toBigDecimal())
         val ownership2 = randomShortOwnership(itemId).copy(bestSellOrder = ShortOrderConverter.convert(bestSellOrder2))
         ownershipService.save(ownership2)
 
@@ -182,7 +170,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         // Item should not be changed - we'll check version
         val expectedItem = itemService.save(shortItem)
 
-        val bestSellOrder = randomUnionOrderDto(itemId).copy(makeStock = 20.toBigDecimal())
+        val bestSellOrder = randomUnionSellOrderDto(itemId).copy(makeStock = 20.toBigDecimal())
         val ownership = randomShortOwnership(itemId).copy(bestSellOrder = ShortOrderConverter.convert(bestSellOrder))
         ownershipService.save(ownership)
 
@@ -204,7 +192,6 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         val bestSellOrder = randomEthLegacyOrderDto(itemId)
         val unionBestSell = ethOrderConverter.convert(bestSellOrder, itemId.blockchain)
 
-        coEvery { currencyControllerApi.getCurrencyRate(any(), any(), any()) } returns createCurrencyDto().toMono()
         coEvery { testEthereumItemApi.getNftItemById(itemId.value) } returns ethItem.toMono()
         coEvery { testEthereumItemApi.getNftItemMetaById(itemId.value) } returns ethItem.meta!!.toMono()
 
