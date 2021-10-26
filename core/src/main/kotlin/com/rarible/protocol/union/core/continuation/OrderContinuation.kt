@@ -16,8 +16,8 @@ object OrderContinuation {
         override fun getContinuation(entity: OrderDto): UsdPriceIdContinuation {
             return UsdPriceIdContinuation(
                 entity.take.type.ext.contract,
-                entity.takePrice,
-                entity.takePriceUsd,
+                entity.makePrice,
+                entity.makePriceUsd,
                 entity.id.value,
                 true
             )
@@ -28,8 +28,8 @@ object OrderContinuation {
         override fun getContinuation(entity: OrderDto): UsdPriceIdContinuation {
             return UsdPriceIdContinuation(
                 entity.make.type.ext.contract,
-                entity.makePrice,
-                entity.makePriceUsd,
+                entity.takePrice,
+                entity.takePriceUsd,
                 entity.id.value,
                 false
             )
