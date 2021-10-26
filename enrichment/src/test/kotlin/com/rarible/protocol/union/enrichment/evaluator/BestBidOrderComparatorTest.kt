@@ -10,8 +10,8 @@ class BestBidOrderComparatorTest {
 
     @Test
     fun `updated is better - both prices specified`() {
-        val current = randomUnionOrderDto().copy(takePrice = BigDecimal.valueOf(1))
-        val updated = randomUnionOrderDto().copy(takePrice = BigDecimal.valueOf(2))
+        val current = randomUnionOrderDto().copy(makePrice = BigDecimal.valueOf(1))
+        val updated = randomUnionOrderDto().copy(makePrice = BigDecimal.valueOf(2))
         val shortCurrent = ShortOrderConverter.convert(current)
         val shortUpdated = ShortOrderConverter.convert(updated)
         val result = BestBidOrderComparator.compare(shortCurrent, shortUpdated)
@@ -20,8 +20,8 @@ class BestBidOrderComparatorTest {
 
     @Test
     fun `current is better - both prices specified`() {
-        val current = randomUnionOrderDto().copy(takePrice = BigDecimal.valueOf(2))
-        val updated = randomUnionOrderDto().copy(takePrice = BigDecimal.valueOf(1))
+        val current = randomUnionOrderDto().copy(makePrice = BigDecimal.valueOf(2))
+        val updated = randomUnionOrderDto().copy(makePrice = BigDecimal.valueOf(1))
         val shortCurrent = ShortOrderConverter.convert(current)
         val shortUpdated = ShortOrderConverter.convert(updated)
         val result = BestBidOrderComparator.compare(shortCurrent, shortUpdated)
@@ -30,8 +30,8 @@ class BestBidOrderComparatorTest {
 
     @Test
     fun `updated is better - current price not specified`() {
-        val current = randomUnionOrderDto().copy(takePrice = null)
-        val updated = randomUnionOrderDto().copy(takePrice = BigDecimal.valueOf(1))
+        val current = randomUnionOrderDto().copy(makePrice = null)
+        val updated = randomUnionOrderDto().copy(makePrice = BigDecimal.valueOf(1))
         val shortCurrent = ShortOrderConverter.convert(current)
         val shortUpdated = ShortOrderConverter.convert(updated)
         val result = BestBidOrderComparator.compare(shortCurrent, shortUpdated)
@@ -40,8 +40,8 @@ class BestBidOrderComparatorTest {
 
     @Test
     fun `updated is better - no prices specified`() {
-        val current = randomUnionOrderDto().copy(takePrice = null)
-        val updated = randomUnionOrderDto().copy(takePrice = null)
+        val current = randomUnionOrderDto().copy(makePrice = null)
+        val updated = randomUnionOrderDto().copy(makePrice = null)
         val shortCurrent = ShortOrderConverter.convert(current)
         val shortUpdated = ShortOrderConverter.convert(updated)
         val result = BestBidOrderComparator.compare(shortCurrent, shortUpdated)

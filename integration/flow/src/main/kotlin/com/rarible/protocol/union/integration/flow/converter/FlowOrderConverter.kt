@@ -13,7 +13,6 @@ import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PlatformDto
-import com.rarible.protocol.union.dto.ext
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.math.BigDecimal
@@ -44,7 +43,7 @@ class FlowOrderConverter(
         val taker = order.taker?.let { UnionAddressConverter.convert(it, blockchain) }
 
         val takePrice = order.take.value / order.make.value
-        val takePriceUsd = currencyService.toUsd(blockchain, take.type.ext.contract, takePrice)
+        val takePriceUsd = currencyService.toUsd(blockchain, take.type, takePrice)
 
         //TODO FLOW That's not correct! Just a stub until Flow starts to return status
         val status = calculateStatus(order.fill, take, order.makeStock, order.cancelled)

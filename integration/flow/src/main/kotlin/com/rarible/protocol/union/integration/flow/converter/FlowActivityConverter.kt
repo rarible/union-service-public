@@ -35,14 +35,16 @@ class FlowActivityConverter(
         val activityId = ActivityIdDto(blockchain, source.id)
         return when (source) {
             is FlowNftOrderActivitySellDto -> {
+                val nft = FlowConverter.convert(source.left.asset, blockchain)
+                val payment = FlowConverter.convert(source.right.asset, blockchain)
                 val priceUsd = currencyService
-                    .toUsd(blockchain, source.right.asset.contract, source.price) ?: BigDecimal.ZERO
+                    .toUsd(blockchain, payment.type, source.price) ?: BigDecimal.ZERO
 
                 OrderMatchSellDto(
                     id = activityId,
                     date = source.date,
-                    nft = FlowConverter.convert(source.left.asset, blockchain),
-                    payment = FlowConverter.convert(source.right.asset, blockchain),
+                    nft = nft,
+                    payment = payment,
                     seller = UnionAddressConverter.convert(source.left.maker, blockchain),
                     buyer = UnionAddressConverter.convert(source.right.maker, blockchain),
                     priceUsd = priceUsd,
@@ -60,8 +62,9 @@ class FlowActivityConverter(
                 )
             }
             is FlowNftOrderActivityListDto -> {
+                val payment = FlowConverter.convert(source.take, blockchain)
                 val priceUsd = currencyService
-                    .toUsd(blockchain, source.take.contract, source.price) ?: BigDecimal.ZERO
+                    .toUsd(blockchain, payment.type, source.price) ?: BigDecimal.ZERO
 
                 OrderListActivityDto(
                     id = activityId,

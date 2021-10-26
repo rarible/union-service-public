@@ -4,8 +4,10 @@ import com.rarible.core.common.nowMillis
 import com.rarible.protocol.currency.api.client.CurrencyControllerApi
 import com.rarible.protocol.union.core.converter.CurrencyConverter
 import com.rarible.protocol.union.core.exception.UnionCurrencyException
+import com.rarible.protocol.union.dto.AssetTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CurrencyUsdRateDto
+import com.rarible.protocol.union.dto.ext
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.reactive.awaitFirstOrNull
@@ -50,6 +52,19 @@ class CurrencyService(
         }
         val supported = cached.rate >= BigDecimal.ZERO
         return if (supported) cached else null
+    }
+
+    suspend fun toUsd(
+        blockchain: BlockchainDto,
+        assetType: AssetTypeDto,
+        value: BigDecimal?,
+        at: Instant? = null
+    ): BigDecimal? {
+        val assetExt = assetType.ext
+        if (assetExt.isNft) {
+            return null
+        }
+        return toUsd(blockchain, assetExt.contract, value, at)
     }
 
     suspend fun toUsd(
