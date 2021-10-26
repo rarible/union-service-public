@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.listener.job
 
-import com.rarible.protocol.currency.api.client.CurrencyControllerApi
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
 import com.rarible.protocol.union.enrichment.repository.OwnershipRepository
@@ -20,7 +19,6 @@ import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipId
 import com.rarible.protocol.union.listener.service.EnrichmentItemEventService
 import com.rarible.protocol.union.listener.test.AbstractIntegrationTest
 import com.rarible.protocol.union.listener.test.IntegrationTest
-import com.rarible.protocol.union.listener.test.data.createCurrencyDto
 import io.mockk.clearMocks
 import io.mockk.coEvery
 import kotlinx.coroutines.FlowPreview
@@ -44,9 +42,6 @@ internal class PriceUpdateJobTest : AbstractIntegrationTest() {
     private lateinit var itemEventService: EnrichmentItemEventService
 
     @Autowired
-    private lateinit var currencyControllerApi: CurrencyControllerApi
-
-    @Autowired
     private lateinit var itemService: EnrichmentItemService
 
     @Autowired
@@ -67,7 +62,6 @@ internal class PriceUpdateJobTest : AbstractIntegrationTest() {
     @BeforeEach
     fun beforeEach() = runBlocking<Unit> {
         clearMocks(
-            currencyControllerApi,
             testEthereumOrderApi,
             testEthereumOwnershipApi
         )
@@ -100,7 +94,6 @@ internal class PriceUpdateJobTest : AbstractIntegrationTest() {
         )
 
         val nftItemDto = randomEthNftItemDto()
-        coEvery { currencyControllerApi.getCurrencyRate(any(), any(), any()) } returns createCurrencyDto().copy(rate = BigDecimal.ONE).toMono()
         coEvery { testEthereumItemApi.getNftItemById(itemId.value) } returns nftItemDto.toMono()
         coEvery { testEthereumItemApi.getNftItemMetaById(itemId.value) } returns nftItemDto.meta!!.toMono()
         coEvery { testEthereumOrderApi.getOrderByHash(any()) } returns randomEthLegacyOrderDto().toMono()
@@ -134,7 +127,6 @@ internal class PriceUpdateJobTest : AbstractIntegrationTest() {
             lastUpdatedAt = Instant.EPOCH
         )
 
-        coEvery { currencyControllerApi.getCurrencyRate(any(), any(), any()) } returns createCurrencyDto().copy(rate = BigDecimal.ONE).toMono()
         coEvery { testEthereumOwnershipApi.getNftOwnershipById(ownershipId.value) } returns randomEthOwnershipDto().toMono()
         coEvery { testEthereumOrderApi.getOrderByHash(any()) } returns randomEthLegacyOrderDto().toMono()
 
