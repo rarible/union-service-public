@@ -1,7 +1,7 @@
 @Library('shared-library@new-cicd')
 
 def pipelineConfig = [
-    "stackName": "rarible",
+    "stackName": "protocol-union",
     "slackChannel": "#protocol-duty"
 ]
 
