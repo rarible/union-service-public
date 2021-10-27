@@ -11,6 +11,7 @@ paths:
     post:
       tags:
         - signature-controller
+      description: "Validation of the order signature"
       operationId: validate
       requestBody:
         content:
@@ -36,21 +37,25 @@ paths:
     get:
       tags:
         - currency-controller
+      description: "Get currency USD rate"
       operationId: getCurrencyUsdRate
       parameters:
         - name: blockchain
           in: query
           required: true
+          description: "Type of the blockchain network"
           schema:
             "$ref": "#/components/schemas/Blockchain"
         - name: address
           in: query
           required: true
+          description: "Address of the NFT"
           schema:
             type: string
         - name: at
           in: query
           required: true
+          description: "Date and time for getting currency USD rate"
           schema:
             type: string
             format: date-time
@@ -72,12 +77,13 @@ paths:
     get:
       tags:
         - item-controller
-      description: "returns Item by identifier"
+      description: "Returns Item by identifier"
       operationId: getItemById
       parameters:
         - name: "itemId"
           in: path
           required: true
+          description: "Item identifier, has format `blockchain:token:tokenId`"
           schema:
             type: string
       responses:
@@ -104,6 +110,7 @@ paths:
         - name: itemId
           in: path
           required: true
+          description: "Item identifier, has format `blockchain:token:tokenId`"
           schema:
             type: string
       responses:
@@ -118,21 +125,25 @@ paths:
     get:
       tags:
         - item-controller
+      description: "Returns Item by owner"
       operationId: getItemsByOwner
       parameters:
         - name: "owner"
           in: query
           required: true
+          description: "Address of the item owner"
           schema:
             type: string
         - name: "continuation"
           in: query
           required: false
+          description: "Continuation token from the previous response"
           schema:
             type: string
         - name: "size"
           in: query
           required: false
+          description: "The number of items to return"
           schema:
             type: integer
       responses:
@@ -151,21 +162,25 @@ paths:
     get:
       tags:
         - item-controller
+      description: "Returns Item by creator"
       operationId: getItemsByCreator
       parameters:
         - name: "creator"
           in: query
           required: true
+          description: "Address of the item creator"
           schema:
             type: string
         - name: "continuation"
           in: query
           required: false
+          description: "Continuation token from the previous response"
           schema:
             type: string
         - name: "size"
           in: query
           required: false
+          description: "The number of items to return"
           schema:
             type: integer
       responses:
@@ -184,21 +199,25 @@ paths:
     get:
       tags:
         - item-controller
+      description: "Returns items by collection"
       operationId: getItemsByCollection
       parameters:
         - name: "collection"
           in: query
           required: true
+          description: "Address of the collection"
           schema:
             type: string
         - name: "continuation"
           in: query
           required: false
+          description: "Continuation token from the previous response"
           schema:
             type: string
         - name: "size"
           in: query
           required: false
+          description: "The number of items to return"
           schema:
             type: integer
       responses:
@@ -217,11 +236,13 @@ paths:
     get:
       tags:
         - item-controller
+      description: "Returns all items"
       operationId: getAllItems
       parameters:
         - name: "blockchains"
           in: query
           required: false
+          escription: "Type of the blockchain network"
           schema:
             type: array
             items:
@@ -229,27 +250,32 @@ paths:
         - name: "continuation"
           in: query
           required: false
+          description: "Continuation token from the previous response"
           schema:
             type: string
         - name: "size"
           in: query
           required: false
+          description: "The number of items to return"
           schema:
             type: integer
         - name: "showDeleted"
           in: query
           required: false
+          description: "Include deleted items"
           schema:
             type: boolean
         - name: "lastUpdatedFrom"
           in: query
           required: false
+          description: "Filter condition to return only items that were updated after this date (unix format)"
           schema:
             type: integer
             format: int64
         - name: "lastUpdatedTo"
           in: query
           required: false
+          description: "Filter condition to return only items that were updated before this date (unix format)"
           schema:
             type: integer
             format: "int64"
@@ -271,11 +297,13 @@ paths:
     get:
       tags:
         - ownership-controller
+      description: "Returns ownership by identifier"
       operationId: getOwnershipById
       parameters:
         - name: "ownershipId"
           in: path
           required: true
+          description: "Ownership identifier in format: '${blockchain}:${token}:${tokenId}:${owner}'"
           schema:
             type: string
       responses:
@@ -311,11 +339,13 @@ paths:
         - name: "continuation"
           in: query
           required: false
+          description: "Continuation token from the previous response"
           schema:
             type: string
         - name: "size"
           in: query
           required: false
+          description: "The number of items to return"
           schema:
             type: integer
       responses:
@@ -339,6 +369,7 @@ paths:
         - name: "blockchains"
           in: query
           required: false
+          escription: "Type of the blockchain network"
           schema:
             type: array
             items:
@@ -346,11 +377,13 @@ paths:
         - name: "continuation"
           in: query
           required: false
+          description: "Continuation token from the previous response"
           schema:
             type: string
         - name: "size"
           in: query
           required: false
+          description: "The number of items to return"
           schema:
             type: integer
       responses:
@@ -441,11 +474,13 @@ paths:
         - name: "continuation"
           in: query
           required: false
+          description: "Continuation token from the previous response"
           schema:
             type: string
         - name: "size"
           in: query
           required: false
+          description: "The number of items to return"
           schema:
             type: integer
       responses:
@@ -484,11 +519,13 @@ paths:
         - name: "continuation"
           in: query
           required: false
+          description: "Continuation token from the previous response"
           schema:
             type: string
         - name: "size"
           in: query
           required: false
+          description: "The number of items to return"
           schema:
             minimum: 1
             type: integer
@@ -545,11 +582,13 @@ paths:
         - name: "continuation"
           in: query
           required: false
+          description: "Continuation token from the previous response"
           schema:
             type: string
         - name: "size"
           in: query
           required: false
+          description: "The number of items to return"
           schema:
             minimum: 1
             type: integer
@@ -589,11 +628,13 @@ paths:
         - name: "continuation"
           in: query
           required: false
+          description: "Continuation token from the previous response"
           schema:
             type: string
         - name: "size"
           in: query
           required: false
+          description: "The number of items to return"
           schema:
             minimum: 1
             type: integer
@@ -619,6 +660,7 @@ paths:
         - name: "blockchains"
           in: query
           required: false
+          escription: "Type of the blockchain network"
           schema:
             type: array
             items:
@@ -636,11 +678,13 @@ paths:
         - name: "continuation"
           in: query
           required: false
+          description: "Continuation token from the previous response"
           schema:
             type: string
         - name: "size"
           in: query
           required: false
+          description: "The number of items to return"
           schema:
             minimum: 1
             type: integer
@@ -700,11 +744,13 @@ paths:
         - name: "continuation"
           in: query
           required: false
+          description: "Continuation token from the previous response"
           schema:
             type: string
         - name: "size"
           in: query
           required: false
+          description: "The number of items to return"
           schema:
             minimum: 1
             type: integer
@@ -774,11 +820,13 @@ paths:
         - name: "continuation"
           in: query
           required: false
+          description: "Continuation token from the previous response"
           schema:
             type: string
         - name: "size"
           in: query
           required: false
+          description: "The number of items to return"
           schema:
             type: integer
       responses:
@@ -830,11 +878,13 @@ paths:
         - name: "continuation"
           in: query
           required: false
+          description: "Continuation token from the previous response"
           schema:
             type: string
         - name: "size"
           in: query
           required: false
+          description: "The number of items to return"
           schema:
             type: integer
         - name: sort
@@ -880,11 +930,13 @@ paths:
         - name: "continuation"
           in: query
           required: false
+          description: "Continuation token from the previous response"
           schema:
             type: string
         - name: "size"
           in: query
           required: false
+          description: "The number of items to return"
           schema:
             type: integer
         - name: sort
@@ -925,11 +977,13 @@ paths:
         - name: "continuation"
           in: query
           required: false
+          description: "Continuation token from the previous response"
           schema:
             type: string
         - name: "size"
           in: query
           required: false
+          description: "The number of items to return"
           schema:
             type: integer
         - name: sort
@@ -958,6 +1012,7 @@ paths:
         - name: "blockchains"
           in: query
           required: false
+          escription: "Type of the blockchain network"
           schema:
             type: array
             items:
@@ -972,11 +1027,13 @@ paths:
         - name: "continuation"
           in: query
           required: false
+          description: "Continuation token from the previous response"
           schema:
             type: string
         - name: "size"
           in: query
           required: false
+          description: "The number of items to return"
           schema:
             type: integer
             format: int32
@@ -1040,11 +1097,13 @@ paths:
         - name: "continuation"
           in: query
           required: false
+          description: "Continuation token from the previous response"
           schema:
             type: string
         - name: "size"
           in: query
           required: false
+          description: "The number of items to return"
           schema:
             type: integer
       responses:
@@ -1068,6 +1127,7 @@ paths:
         - name: "blockchains"
           in: query
           required: false
+          escription: "Type of the blockchain network"
           schema:
             type: array
             items:
@@ -1075,11 +1135,13 @@ paths:
         - name: "continuation"
           in: query
           required: false
+          description: "Continuation token from the previous response"
           schema:
             type: string
         - name: "size"
           in: query
           required: false
+          description: "The number of items to return"
           schema:
             type: integer
             format: int32
@@ -1127,10 +1189,13 @@ components:
           $ref: "#/components/schemas/UnionAddress"
         publicKey:
           type: string
+          description: "The creator's public key"
         message:
           type: string
+          description: ""
         signature:
           type: string
+          description: "Digital signature of the signer"
 
     ################## Currency - Union ##################
 
@@ -1143,11 +1208,13 @@ components:
       properties:
         currencyId:
           type: string
+          description: "Currency identifier"
         rate:
           $ref: '#/components/schemas/BigDecimal'
         date:
           type: string
           format: date-time
+          description: "Date and time of currency USD rate"
 
     #################### Meta - Union ####################
 
@@ -1240,6 +1307,7 @@ components:
 
     ItemId:
       type: string
+      description: "Item identifier, has format `${blockchain}:${token}:${tokenId}`"
       example: "${blockchain}:${token}:${tokenId}"
 
     Item:
@@ -2180,6 +2248,7 @@ components:
           default: NOT_FOUND
         message:
           type: string
+          description: "Error message"
 
     UnionApiErrorBadRequest:
       required:
@@ -2195,6 +2264,7 @@ components:
           default: BAD_REQUEST
         message:
           type: string
+          description: "Error message"
 
     UnionApiErrorServerError:
       required:
@@ -2209,6 +2279,7 @@ components:
           default: UNKNOWN
         message:
           type: string
+          description: "Error message"
 
     #################### Order - Eth ####################
 
