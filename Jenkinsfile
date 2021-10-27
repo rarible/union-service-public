@@ -1,3 +1,8 @@
-@Library('shared-library') _
+@Library('shared-library@new-cicd')
 
-servicePipeline('protocol-union', 'protocol-union', 'nexus-ci', '#protocol-duty')
+def pipelineConfig = [
+    "stackName": "protocol-union",
+    "slackChannel": "#protocol-duty"
+]
+
+serviceCI(pipelineConfig)

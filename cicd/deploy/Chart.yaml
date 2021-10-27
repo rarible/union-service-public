@@ -1,0 +1,12 @@
+apiVersion: v2
+name: protocol-union
+version: 0.1.0
+dependencies:
+- name: rarible-helm-chart
+  alias: protocol-union-api
+  repository: file://../resources/helm/rarible
+  version: 0.1.0
+- name: rarible-helm-chart
+  alias: protocol-union-listener
+  repository: file://../resources/helm/rarible
+  version: 0.1.0

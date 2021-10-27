@@ -1,0 +1,40 @@
+protocol-union-api:
+  image:
+    repository: protocol-union-api
+  replicas: 2
+  environments:
+    APPLICATION_ENVIRONMENT: '{{ include "service.appEnv" $ }}'
+    CONSUL_ROOT_PATH: '{{ include "service.appEnv" $ }}/protocol/union'
+    SPRING_PROFILES_ACTIVE: 'consul,{{ include "service.appEnv" $ }}'
+    SERVICE_PREFIX: '{{ include "service.appEnv" $ }}-union'
+    JAVA_OPTIONS: '-XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp'
+  nodeSelector:
+    node.labels.rarible.service: true
+  resources:
+    jvm:
+      xmx_megabytes: 512
+      max_direct_memory_megabytes: 128
+  updateConfig:
+    order: start-first
+  networks:
+    common:
+    - '{{ include "service.appEnv" $ }}-backend'
+    - proxy
+
+protocol-union-listener:
+  image:
+    repository: protocol-union-listener
+  environments:
+    APPLICATION_ENVIRONMENT: '{{ include "service.appEnv" $ }}'
+    CONSUL_ROOT_PATH: '{{ include "service.appEnv" $ }}/protocol/union'
+    SPRING_PROFILES_ACTIVE: 'consul,{{ include "service.appEnv" $ }}'
+    SERVICE_PREFIX: '{{ include "service.appEnv" $ }}-union'
+  nodeSelector:
+    node.labels.rarible.service: true
+  resources:
+    jvm:
+      xmx_megabytes: 512
+      max_direct_memory_megabytes: 128
+  networks:
+    common: 
+    - '{{ include "service.appEnv" $ }}-backend'
