@@ -49,7 +49,7 @@ class UnionApiClientAutoConfigurationIt {
     @Test
     fun `test default client uri`() {
         val uri = unionApiServiceUriProvider.getUri()
-        assertThat(uri.toString()).isEqualTo("http://test-union-api:8080")
+        assertThat(uri.toString()).isEqualTo("http://test-protocol-union-api:8080")
     }
 
     @TestConfiguration
