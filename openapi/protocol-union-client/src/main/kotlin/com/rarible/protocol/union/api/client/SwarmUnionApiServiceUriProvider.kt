@@ -7,6 +7,6 @@ class SwarmUnionApiServiceUriProvider(
 ) : UnionApiServiceUriProvider {
 
     override fun getUri(): URI {
-        return URI.create(String.format("http://%s-union-api:8080", environment))
+        return URI.create(String.format("http://%s-protocol-union-api:8080", environment))
     }
 }
