@@ -1,0 +1,12 @@
+protocol-union-api:
+  replicas: 4
+  resources:
+    jvm:
+      xmx_megabytes: 1024
+      max_direct_memory_megabytes: 256
+
+protocol-union-listener:
+  resources:
+    jvm:
+      xmx_megabytes: 2048
+      max_direct_memory_megabytes: 256
