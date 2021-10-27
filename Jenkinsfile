@@ -1,4 +1,4 @@
-@Library('shared-library@new-cicd')
+@Library('shared-library')
 
 def pipelineConfig = [
     "stackName": "protocol-union",
