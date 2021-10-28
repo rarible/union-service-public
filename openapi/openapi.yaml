@@ -1287,14 +1287,18 @@ components:
       properties:
         name:
           type: string
+          description: "Name of the NFT item"
         description:
           type: string
+          description: "Description of the NFT item"
         attributes:
           type: array
+          description: "Attributes of the NFT item"
           items:
             "$ref": "#/components/schemas/MetaAttribute"
         content:
           type: array
+          description: "NFT content information"
           items:
             $ref: "#/components/schemas/MetaContent"
         raw:
@@ -1385,16 +1389,19 @@ components:
           $ref: "#/components/schemas/UnionAddress"
         creators:
           type: array
+          description: "Creators of the target item"
           default: [ ]
           items:
             $ref: "#/components/schemas/Creator"
         owners:
           type: array
+          description: "Owners of the target item"
           default: [ ]
           items:
             $ref: "#/components/schemas/UnionAddress"
         royalties:
           type: array
+          description: "List of royalties"
           default: [ ]
           items:
             $ref: "#/components/schemas/Royalty"
@@ -1402,21 +1409,25 @@ components:
           $ref: "#/components/schemas/BigInteger"
         pending:
           type: array
+          description: "Pending information about the item"
           default: [ ]
           items:
             $ref: "#/components/schemas/ItemTransfer"
         mintedAt:
           type: string
           format: date-time
+          description: "Date and time of the item minting"
         lastUpdatedAt:
           type: string
           format: date-time
+          description: "Filter condition to return only items that were updated at this date"
         supply:
           $ref: "#/components/schemas/BigInteger"
         meta:
           $ref: "#/components/schemas/Meta"
         deleted:
           type: boolean
+          description: "Item was deleted or not"
         bestSellOrder:
           $ref: "#/components/schemas/Order"
         bestBidOrder:
@@ -1550,6 +1561,7 @@ components:
           $ref: "#/components/schemas/UnionAddress"
         creators:
           type: array
+          description: "Creators of the target item"
           default: [ ]
           items:
             $ref: "#/components/schemas/Creator"
@@ -1557,6 +1569,7 @@ components:
           $ref: "#/components/schemas/BigInteger"
         pending:
           type: array
+          description: "Pending information about the item"
           default: [ ]
           items:
             $ref: "#/components/schemas/ItemHistory"
@@ -1776,6 +1789,7 @@ components:
           type: string
         pending:
           type: array
+          description: "Pending information about the order"
           default: [ ]
           items:
             $ref: "#/components/schemas/PendingOrder"
@@ -2713,6 +2727,7 @@ components:
           type: string
         creators:
           type: array
+          description: "Creators of the target item"
           default: [ ]
           items:
             $ref: "#/components/schemas/Creator"
@@ -2768,6 +2783,7 @@ components:
           $ref: "#/components/schemas/BigInteger"
         creators:
           type: array
+          description: "Creators of the target item"
           default: [ ]
           items:
             $ref: "#/components/schemas/Creator"
