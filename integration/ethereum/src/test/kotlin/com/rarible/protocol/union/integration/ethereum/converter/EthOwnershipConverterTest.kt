@@ -22,7 +22,7 @@ class EthOwnershipConverterTest {
         assertThat(converted.lazyValue).isEqualTo(dto.lazyValue)
         assertThat(converted.owner.value).isEqualTo(dto.owner.prefixed())
         assertThat(converted.creators[0].account.value).isEqualTo(dto.creators[0].account.prefixed())
-        assertThat(converted.creators[0].value).isEqualTo(dto.creators[0].value.toBigDecimal())
+        assertThat(converted.creators[0].value).isEqualTo(dto.creators[0].value)
         assertThat(converted.pending.size).isEqualTo(dto.pending.size)
     }
 

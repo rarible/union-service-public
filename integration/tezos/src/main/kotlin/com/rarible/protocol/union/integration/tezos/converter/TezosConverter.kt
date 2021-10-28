@@ -45,7 +45,7 @@ object TezosConverter {
     ): CreatorDto {
         return CreatorDto(
             account = UnionAddressConverter.convert(source.account, blockchain),
-            value = source.value.toBigDecimal()
+            value = source.value
         )
     }
 

@@ -45,7 +45,7 @@ class EthItemConverterTest {
         assertThat(converted.tokenId).isEqualTo(dto.tokenId)
 
         assertThat(converted.royalties[0].account.value).isEqualTo(dto.royalties[0].account.prefixed())
-        assertThat(converted.royalties[0].value).isEqualTo(EthConverter.convertToDecimalPart(dto.royalties[0].value))
+        assertThat(converted.royalties[0].value).isEqualTo(dto.royalties[0].value)
     }
 
     @Test
@@ -67,10 +67,10 @@ class EthItemConverterTest {
         assertThat(converted.owners[0].value).isEqualTo(dto.owners[0].prefixed())
 
         assertThat(converted.royalties[0].account.value).isEqualTo(dto.royalties[0].account.prefixed())
-        assertThat(converted.royalties[0].value).isEqualTo(EthConverter.convertToDecimalPart(dto.royalties[0].value))
+        assertThat(converted.royalties[0].value).isEqualTo(dto.royalties[0].value)
 
         assertThat(converted.creators[0].account.value).isEqualTo(dto.creators[0].account.prefixed())
-        assertThat(converted.creators[0].value).isEqualTo(dto.creators[0].value.toBigDecimal())
+        assertThat(converted.creators[0].value).isEqualTo(dto.creators[0].value)
 
         assertThat(converted.pending[0].from.value).isEqualTo(dto.pending!![0].from.prefixed())
         assertThat(converted.pending[0].owner.value).isEqualTo(dto.pending!![0].owner.prefixed())

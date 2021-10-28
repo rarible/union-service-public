@@ -52,7 +52,7 @@
         <rarible-ethereum.version>1.1.1</rarible-ethereum.version>
         <rarible-protocol.currency.version>1.4.5</rarible-protocol.currency.version>
         <rarible-protocol.ethereum.version>1.16.208</rarible-protocol.ethereum.version>
-        <rarible-protocol.flow.version>2.0.20-SNAPSHOT</rarible-protocol.flow.version>
+        <rarible-protocol.flow.version>2.0.23-SNAPSHOT</rarible-protocol.flow.version>
         <rarible-protocol.tezos.version>1.0.2-SNAPSHOT</rarible-protocol.tezos.version>
         <rarible.codegen.server.version>1.1.0</rarible.codegen.server.version>
         <rarible.codegen.client.version>1.2.0</rarible.codegen.client.version>
