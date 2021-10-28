@@ -56,7 +56,8 @@ object FlowItemConverter {
     ): CreatorDto {
         return CreatorDto(
             account = UnionAddressConverter.convert(source.account, blockchain),
-            value = source.value
+            value = 0
+            //value = source.value.toInt()
         )
     }
 
@@ -66,7 +67,8 @@ object FlowItemConverter {
     ): RoyaltyDto {
         return RoyaltyDto(
             account = UnionAddressConverter.convert(source.account, blockchain),
-            value = source.value
+            value = 0
+            //value = source.value.toInt()
         )
     }
 

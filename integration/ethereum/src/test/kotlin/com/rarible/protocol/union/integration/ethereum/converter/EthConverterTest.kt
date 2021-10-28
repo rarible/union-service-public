@@ -21,7 +21,6 @@ import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthPartDto
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import java.math.BigDecimal
 
 class EthConverterTest {
 
@@ -99,9 +98,9 @@ class EthConverterTest {
         assertThat(converted.contract.value).isEqualTo(assetType.contract.prefixed())
         assertThat(converted.tokenId).isEqualTo(assetType.tokenId)
         assertThat(converted.uri).isEqualTo(assetType.uri)
-        assertThat(converted.creators[0].value).isEqualTo(assetType.creators[0].value.toBigDecimal())
+        assertThat(converted.creators[0].value).isEqualTo(assetType.creators[0].value)
         assertThat(converted.creators[0].account.value).isEqualTo(assetType.creators[0].account.prefixed())
-        assertThat(converted.royalties[0].value).isEqualTo(EthConverter.convertToDecimalPart(assetType.royalties[0].value))
+        assertThat(converted.royalties[0].value).isEqualTo(assetType.royalties[0].value)
         assertThat(converted.royalties[0].account.value).isEqualTo(assetType.royalties[0].account.prefixed())
         assertThat(converted.signatures[0]).isEqualTo(assetType.signatures[0].prefixed())
     }
@@ -127,17 +126,10 @@ class EthConverterTest {
         assertThat(converted.tokenId).isEqualTo(assetType.tokenId)
         assertThat(converted.uri).isEqualTo(assetType.uri)
         assertThat(converted.supply).isEqualTo(assetType.supply)
-        assertThat(converted.creators[0].value).isEqualTo(assetType.creators[0].value.toBigDecimal())
+        assertThat(converted.creators[0].value).isEqualTo(assetType.creators[0].value)
         assertThat(converted.creators[0].account.value).isEqualTo(assetType.creators[0].account.prefixed())
-        assertThat(converted.royalties[0].value).isEqualTo(EthConverter.convertToDecimalPart(assetType.royalties[0].value))
+        assertThat(converted.royalties[0].value).isEqualTo(assetType.royalties[0].value)
         assertThat(converted.royalties[0].account.value).isEqualTo(assetType.royalties[0].account.prefixed())
         assertThat(converted.signatures[0]).isEqualTo(assetType.signatures[0].prefixed())
     }
-
-    @Test
-    fun `convert from bp to bigDecimal`() {
-        assertThat(EthConverter.convertToDecimalPart(10000)).isEqualTo(BigDecimal.ONE)
-        assertThat(EthConverter.convertToDecimalPart(5000)).isEqualTo(0.5.toBigDecimal())
-    }
-
 }

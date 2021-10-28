@@ -30,25 +30,8 @@ import com.rarible.protocol.union.dto.UnionAddress
 import io.daonomic.rpc.domain.Binary
 import io.daonomic.rpc.domain.Word
 import scalether.domain.Address
-import java.math.BigDecimal
-import java.math.MathContext
 
 object EthConverter {
-
-    /**
-     * Соответствует 100% в базисных пунктах
-     */
-    private val FULL_100_PERCENTS_IN_BP = 10000.toBigDecimal()
-
-    /**
-     * Конвертация числа % в базисных пунктах в число доли от единицы (от целого)
-     * Например:
-     * 10000 (100%) => 1
-     * 5000 (50%) => 0.5
-     */
-    fun convertToDecimalPart(value: Int): BigDecimal {
-        return value.toBigDecimal().divide(FULL_100_PERCENTS_IN_BP, MathContext.DECIMAL128)
-    }
 
     fun convert(address: Address) = address.prefixed()!!
     fun convert(word: Word) = word.prefixed()!!
@@ -103,22 +86,22 @@ object EthConverter {
 
     fun convertToPayout(source: PartDto, blockchain: BlockchainDto): OrderPayoutDto {
         return OrderPayoutDto(
-            account = EthConverter.convert(source.account, blockchain),
-            value = source.value.toBigInteger()
+            account = convert(source.account, blockchain),
+            value = source.value
         )
     }
 
     fun convertToRoyalty(source: PartDto, blockchain: BlockchainDto): RoyaltyDto {
         return RoyaltyDto(
-            account = EthConverter.convert(source.account, blockchain),
-            value = convertToDecimalPart(source.value)
+            account = convert(source.account, blockchain),
+            value = source.value
         )
     }
 
     fun convertToCreator(source: PartDto, blockchain: BlockchainDto): CreatorDto {
         return CreatorDto(
-            account = EthConverter.convert(source.account, blockchain),
-            value = source.value.toBigDecimal()
+            account = convert(source.account, blockchain),
+            value = source.value
         )
     }
 
@@ -133,18 +116,18 @@ object EthConverter {
         return when (source) {
             is EthAssetTypeDto -> EthEthereumAssetTypeDto()
             is Erc20AssetTypeDto -> EthErc20AssetTypeDto(
-                contract = EthConverter.convert(source.contract, blockchain)
+                contract = convert(source.contract, blockchain)
             )
             is Erc721AssetTypeDto -> EthErc721AssetTypeDto(
-                contract = EthConverter.convert(source.contract, blockchain),
+                contract = convert(source.contract, blockchain),
                 tokenId = source.tokenId
             )
             is Erc1155AssetTypeDto -> EthErc1155AssetTypeDto(
-                contract = EthConverter.convert(source.contract, blockchain),
+                contract = convert(source.contract, blockchain),
                 tokenId = source.tokenId
             )
             is Erc721LazyAssetTypeDto -> EthErc721LazyAssetTypeDto(
-                contract = EthConverter.convert(source.contract, blockchain),
+                contract = convert(source.contract, blockchain),
                 tokenId = source.tokenId,
                 uri = source.uri,
                 creators = source.creators.map { convertToCreator(it, blockchain) },
@@ -152,7 +135,7 @@ object EthConverter {
                 signatures = source.signatures.map { convert(it) }
             )
             is Erc1155LazyAssetTypeDto -> EthErc1155LazyAssetTypeDto(
-                contract = EthConverter.convert(source.contract, blockchain),
+                contract = convert(source.contract, blockchain),
                 tokenId = source.tokenId,
                 uri = source.uri,
                 supply = source.supply,
@@ -161,11 +144,11 @@ object EthConverter {
                 signatures = source.signatures.map { convert(it) }
             )
             is CryptoPunksAssetTypeDto -> EthCryptoPunksAssetTypeDto(
-                contract = EthConverter.convert(source.contract, blockchain),
+                contract = convert(source.contract, blockchain),
                 punkId = source.punkId
             )
             is GenerativeArtAssetTypeDto -> EthGenerativeArtAssetTypeDto(
-                contract = EthConverter.convert(source.contract, blockchain)
+                contract = convert(source.contract, blockchain)
             )
         }
     }

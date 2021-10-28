@@ -107,7 +107,7 @@ class TezosOrderConverter(
     private fun convert(source: PartDto, blockchain: BlockchainDto): OrderPayoutDto {
         return OrderPayoutDto(
             account = UnionAddressConverter.convert(source.account, blockchain),
-            value = source.value.toBigInteger() //TODO UNION why BigInteger?
+            value = source.value
         )
     }
 

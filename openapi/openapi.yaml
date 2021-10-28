@@ -1504,7 +1504,7 @@ components:
         account:
           $ref: "#/components/schemas/UnionAddress"
         value:
-          $ref: "#/components/schemas/BigDecimal"
+          type: integer
 
     Creator:
       type: object
@@ -1512,7 +1512,7 @@ components:
         account:
           $ref: "#/components/schemas/UnionAddress"
         value:
-          $ref: "#/components/schemas/BigDecimal"
+          type: integer
       required:
         - account
         - value
@@ -1739,7 +1739,7 @@ components:
         account:
           $ref: "#/components/schemas/UnionAddress"
         value:
-          $ref: "#/components/schemas/BigInteger"
+          type: integer
       required:
         - account
         - value
