@@ -45,6 +45,10 @@
         </dependency>
         <dependency>
             <groupId>com.rarible.core</groupId>
+            <artifactId>rarible-core-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.rarible.core</groupId>
             <artifactId>rarible-core-logging-filter</artifactId>
         </dependency>
 
