@@ -68,7 +68,6 @@ class FlowOrderService(
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
-        // TODO FLOW support currency filtering
         val result = orderControllerApi.getBidsByItem(
             contract,
             UnionConverter.convertToLong(tokenId).toString(),
@@ -77,6 +76,7 @@ class FlowOrderService(
             origin,
             start?.let { OffsetDateTime.ofInstant(Instant.ofEpochMilli(it), ZoneOffset.UTC) },
             end?.let { OffsetDateTime.ofInstant(Instant.ofEpochMilli(it), ZoneOffset.UTC) },
+            currencyAddress,
             continuation,
             size
         ).awaitFirst()

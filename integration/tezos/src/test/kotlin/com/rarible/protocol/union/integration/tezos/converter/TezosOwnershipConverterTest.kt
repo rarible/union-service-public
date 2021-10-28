@@ -22,7 +22,7 @@ class TezosOwnershipConverterTest {
         assertThat(converted.lazyValue).isEqualTo(dto.lazyValue)
         assertThat(converted.owner.value).isEqualTo(dto.owner)
         assertThat(converted.creators[0].account.value).isEqualTo(dto.creators[0].account)
-        assertThat(converted.creators[0].value).isEqualTo(dto.creators[0].value.toBigDecimal())
+        assertThat(converted.creators[0].value).isEqualTo(dto.creators[0].value)
     }
 
 }

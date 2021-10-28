@@ -22,6 +22,7 @@ import com.rarible.protocol.dto.FlowNftOwnershipDto
 import com.rarible.protocol.dto.FlowOrderActivityMatchSideDto
 import com.rarible.protocol.dto.FlowOrderDataDto
 import com.rarible.protocol.dto.FlowOrderDto
+import com.rarible.protocol.dto.FlowOrderStatusDto
 import com.rarible.protocol.dto.FlowRoyaltyDto
 import com.rarible.protocol.dto.FlowTransferDto
 import com.rarible.protocol.dto.MetaAttributeDto
@@ -126,6 +127,7 @@ fun randomFlowV1OrderDto(itemId: ItemIdDto): FlowOrderDto {
         make = randomFlowAsset(),
         take = randomFlowFungibleAsset(),
         fill = randomBigDecimal(),
+        status = FlowOrderStatusDto.ACTIVE,
         cancelled = randomBoolean(),
         createdAt = nowMillis(),
         amount = randomBigDecimal(),

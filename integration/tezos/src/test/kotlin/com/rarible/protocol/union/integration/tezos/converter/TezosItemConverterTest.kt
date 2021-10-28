@@ -32,10 +32,10 @@ class TezosItemConverterTest {
         assertThat(converted.owners[0].value).isEqualTo(dto.owners[0])
 
         assertThat(converted.royalties[0].account.value).isEqualTo(dto.royalties[0].account)
-        assertThat(converted.royalties[0].value).isEqualTo(dto.royalties[0].value.toBigDecimal())
+        assertThat(converted.royalties[0].value).isEqualTo(dto.royalties[0].value)
 
         assertThat(converted.creators[0].account.value).isEqualTo(dto.creators[0].account)
-        assertThat(converted.creators[0].value).isEqualTo(dto.creators[0].value.toBigDecimal())
+        assertThat(converted.creators[0].value).isEqualTo(dto.creators[0].value)
     }
 
     @Test

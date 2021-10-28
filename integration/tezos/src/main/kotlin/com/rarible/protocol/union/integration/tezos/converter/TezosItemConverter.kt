@@ -72,7 +72,7 @@ object TezosItemConverter {
     ): RoyaltyDto {
         return RoyaltyDto(
             account = UnionAddressConverter.convert(source.account, blockchain),
-            value = source.value.toBigDecimal() // TODO TEZOS do we need some multiplier here?
+            value = source.value
         )
     }
 }

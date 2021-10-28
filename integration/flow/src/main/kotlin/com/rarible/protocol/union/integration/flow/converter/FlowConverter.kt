@@ -18,14 +18,16 @@ object FlowConverter {
     fun convertToPayout(source: PayInfoDto, blockchain: BlockchainDto): OrderPayoutDto {
         return OrderPayoutDto(
             account = UnionAddressConverter.convert(source.account, blockchain),
-            value = source.value.toBigInteger()
+            value = 0
+            //value = source.value.toInt() //TODO FLOW check
         )
     }
 
     fun convertToCreator(source: PayInfoDto, blockchain: BlockchainDto): CreatorDto {
         return CreatorDto(
             account = UnionAddressConverter.convert(source.account, blockchain),
-            value = source.value
+            value = 0
+            //value = source.value.toInt() //TODO FLOW check
         )
     }
 
