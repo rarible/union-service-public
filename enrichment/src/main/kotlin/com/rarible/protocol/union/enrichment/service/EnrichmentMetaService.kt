@@ -32,12 +32,12 @@ class EnrichmentMetaService(
 
     suspend fun enrichMeta(meta: UnionMeta?, itemId: ShortItemId): MetaDto? {
         val metaToEnrich = meta ?: getMetaSafe(itemId.toDto())
-        return metaToEnrich?.let { enrichMeta(it) }
+        return metaToEnrich?.let { enrichMeta(it, itemId.toDto().fullId()) }
     }
 
-    suspend fun enrichMeta(meta: UnionMeta): MetaDto {
+    suspend fun enrichMeta(meta: UnionMeta, itemId: String): MetaDto {
         val enrichedContent = coroutineScope {
-            meta.content.map { async { enrichContent(it) } }
+            meta.content.map { async { enrichContent(it, itemId) } }
         }.awaitAll()
 
         return MetaDto(
@@ -68,17 +68,17 @@ class EnrichmentMetaService(
         }
     }
 
-    private suspend fun enrichContent(content: UnionMetaContent): MetaContentDto {
+    private suspend fun enrichContent(content: UnionMetaContent, itemId: String): MetaContentDto {
         val receivedProperties = content.properties
 
         val properties = if (receivedProperties == null) {
             // We know nothing about content - only URL
-            val fetchedProperties = fetchMetaContentProperties(content.url)
+            val fetchedProperties = fetchMetaContentProperties(content.url, itemId)
             // If no metadata fetched - let it be an Image by default
             fetchedProperties ?: UnionImageProperties()
         } else if (receivedProperties.isEmpty()) {
             // Ok, we have some info about metadata, but it is not full - fetching it
-            val fetchedProperties = fetchMetaContentProperties(content.url)
+            val fetchedProperties = fetchMetaContentProperties(content.url, itemId)
             // If fetched - good, otherwise using properties we have
             fetchedProperties ?: receivedProperties
         } else {
@@ -110,8 +110,8 @@ class EnrichmentMetaService(
         }
     }
 
-    private suspend fun fetchMetaContentProperties(url: String): UnionMetaContentProperties? {
-        val contentMeta = contentMetaService.getContentMeta(url)
+    private suspend fun fetchMetaContentProperties(url: String, itemId: String): UnionMetaContentProperties? {
+        val contentMeta = contentMetaService.getContentMeta(url, itemId)
         val emptyMeta = createEmptyMetaProperties(contentMeta?.type)
         return when (emptyMeta) {
             is UnionImageProperties -> emptyMeta.copy(

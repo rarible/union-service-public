@@ -112,7 +112,7 @@ class EnrichmentRefreshService(
         val sellStatsDeferred = async { ownershipService.getItemSellStats(shortItemId) }
         val metaDeferred = async {
             val meta = itemDtoDeferred.await().meta
-            meta?.let { enrichmentMetaService.enrichMeta(meta) }
+            meta?.let { enrichmentMetaService.enrichMeta(meta, shortItemId) }
         }
 
         // Looking for best sell orders

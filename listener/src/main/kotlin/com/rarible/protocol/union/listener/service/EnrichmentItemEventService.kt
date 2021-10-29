@@ -32,7 +32,11 @@ class EnrichmentItemEventService(
     // If ownership was updated, we need to recalculate totalStock/sellers for related item,
     // also, we can specify here Order which triggered this update - ItemService
     // can use this full Order to avoid unnecessary getOrderById calls
-    suspend fun onOwnershipUpdated(ownershipId: ShortOwnershipId, order: OrderDto?) {
+    suspend fun onOwnershipUpdated(
+        ownershipId: ShortOwnershipId,
+        order: OrderDto?,
+        notificationEnabled: Boolean = true
+    ) {
         val itemId = ShortItemId(ownershipId.blockchain, ownershipId.token, ownershipId.tokenId)
         optimisticLock {
             val item = itemService.get(itemId)
@@ -54,7 +58,9 @@ class EnrichmentItemEventService(
                         itemId, currentSellStats, refreshedSellStats
                     )
                     val saved = itemService.save(updatedItem)
-                    notifyUpdate(saved, null, order)
+                    if (notificationEnabled) {
+                        notifyUpdate(saved, null, order)
+                    }
                 } else {
                     logger.debug(
                         "Sell stats of Item [{}] are the same as before Ownership event [{}], skipping update",
@@ -86,17 +92,18 @@ class EnrichmentItemEventService(
         return false
     }
 
-    suspend fun onItemBestSellOrderUpdated(itemId: ShortItemId, order: OrderDto) {
-        updateOrder(itemId, order) { item -> bestOrderService.updateBestSellOrder(item, order) }
+    suspend fun onItemBestSellOrderUpdated(itemId: ShortItemId, order: OrderDto, notificationEnabled: Boolean = true) {
+        updateOrder(itemId, order, notificationEnabled) { item -> bestOrderService.updateBestSellOrder(item, order) }
     }
 
-    suspend fun onItemBestBidOrderUpdated(itemId: ShortItemId, order: OrderDto) {
-        updateOrder(itemId, order) { item -> bestOrderService.updateBestBidOrder(item, order) }
+    suspend fun onItemBestBidOrderUpdated(itemId: ShortItemId, order: OrderDto, notificationEnabled: Boolean = true) {
+        updateOrder(itemId, order, notificationEnabled) { item -> bestOrderService.updateBestBidOrder(item, order) }
     }
 
     private suspend fun updateOrder(
         itemId: ShortItemId,
         order: OrderDto,
+        notificationEnabled: Boolean,
         orderUpdateAction: suspend (item: ShortItem) -> ShortItem
     ) = optimisticLock {
         val current = itemService.get(itemId)
@@ -108,11 +115,15 @@ class EnrichmentItemEventService(
         if (short != updated) {
             if (updated.isNotEmpty()) {
                 val saved = itemService.save(updated)
-                notifyUpdate(saved, null, order)
+                if (notificationEnabled) {
+                    notifyUpdate(saved, null, order)
+                }
             } else if (exist) {
                 itemService.delete(itemId)
                 logger.info("Deleted Item [{}] without enrichment data", itemId)
-                notifyUpdate(updated, null, order)
+                if (notificationEnabled) {
+                    notifyUpdate(updated, null, order)
+                }
             }
         } else {
             logger.info("Item [{}] not changed after order updated, event won't be published", itemId)
