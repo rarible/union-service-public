@@ -79,6 +79,7 @@ listener:
   reconciliation:
     orderBatchSize: 50
     threadCount: 2
+    notificationEnabled: false
   price-update:
     rate: PT5M
     delay: PT1M

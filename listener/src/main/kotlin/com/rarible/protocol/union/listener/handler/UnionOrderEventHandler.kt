@@ -14,7 +14,7 @@ class UnionOrderEventHandler(
     override suspend fun onEvent(event: UnionOrderEvent) {
         when (event) {
             is UnionOrderUpdateEvent -> {
-                orderEventService.updateOrder(event.order)
+                orderEventService.updateOrder(event.order, true)
             }
         }
     }

@@ -15,7 +15,8 @@ data class UnionListenerProperties(
 
 class ReconciliationProperties(
     val orderBatchSize: Int = 50,
-    val threadCount: Int = 4
+    val threadCount: Int = 4,
+    val notificationEnabled: Boolean = true
 )
 
 class PriceUpdateProperties(

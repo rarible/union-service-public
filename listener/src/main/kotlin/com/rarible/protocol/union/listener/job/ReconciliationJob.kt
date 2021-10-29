@@ -76,7 +76,7 @@ class ReconciliationJob(
 
     private suspend fun safeUpdate(order: OrderDto) {
         try {
-            orderEventService.updateOrder(order)
+            orderEventService.updateOrder(order, config.notificationEnabled)
         } catch (e: Exception) {
             logger.error("Unable to reconcile order {} : {}", e.message, e)
         }

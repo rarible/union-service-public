@@ -47,7 +47,11 @@ class EnrichmentOwnershipEventService(
         return false
     }
 
-    suspend fun onOwnershipBestSellOrderUpdated(ownershipId: ShortOwnershipId, order: OrderDto) = optimisticLock {
+    suspend fun onOwnershipBestSellOrderUpdated(
+        ownershipId: ShortOwnershipId,
+        order: OrderDto,
+        notificationEnabled: Boolean = true
+    ) = optimisticLock {
         val current = ownershipService.get(ownershipId)
         val exist = current != null
         val short = current ?: ShortOwnership.empty(ownershipId)
@@ -57,13 +61,17 @@ class EnrichmentOwnershipEventService(
         if (short != updated) {
             if (updated.isNotEmpty()) {
                 val saved = ownershipService.save(updated)
-                notifyUpdate(saved, null, order)
-                enrichmentItemEventService.onOwnershipUpdated(ownershipId, order)
+                if (notificationEnabled) {
+                    notifyUpdate(saved, null, order)
+                }
+                enrichmentItemEventService.onOwnershipUpdated(ownershipId, order, notificationEnabled)
             } else if (exist) {
                 logger.info("Deleting Ownership [{}] without related bestSellOrder", ownershipId)
                 ownershipService.delete(ownershipId)
-                notifyUpdate(updated, null, order)
-                enrichmentItemEventService.onOwnershipUpdated(ownershipId, order)
+                if (notificationEnabled) {
+                    notifyUpdate(updated, null, order)
+                }
+                enrichmentItemEventService.onOwnershipUpdated(ownershipId, order, notificationEnabled)
             }
         } else {
             logger.info("Ownership [{}] not changed after order updated, event won't be published", ownershipId)
