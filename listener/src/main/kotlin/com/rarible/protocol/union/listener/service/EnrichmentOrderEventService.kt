@@ -22,7 +22,7 @@ class EnrichmentOrderEventService(
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    suspend fun updateOrder(order: OrderDto) = coroutineScope {
+    suspend fun updateOrder(order: OrderDto, notificationEnabled: Boolean = true) = coroutineScope {
         val makeItemIdDto = order.make.type.ext.itemId
         val takeItemIdDto = order.take.type.ext.itemId
 
@@ -30,10 +30,18 @@ class EnrichmentOrderEventService(
         val takeItemId = takeItemIdDto?.let { ShortItemId(it) }
 
         val mFuture = makeItemId?.let {
-            async { ignoreApi404 { enrichmentItemEventService.onItemBestSellOrderUpdated(makeItemId, order) } }
+            async {
+                ignoreApi404 {
+                    enrichmentItemEventService.onItemBestSellOrderUpdated(makeItemId, order, notificationEnabled)
+                }
+            }
         }
         val tFuture = takeItemId?.let {
-            async { ignoreApi404 { enrichmentItemEventService.onItemBestBidOrderUpdated(takeItemId, order) } }
+            async {
+                ignoreApi404 {
+                    enrichmentItemEventService.onItemBestBidOrderUpdated(takeItemId, order, notificationEnabled)
+                }
+            }
         }
         val oFuture = makeItemId?.let {
             val ownershipId = ShortOwnershipId(
@@ -46,7 +54,8 @@ class EnrichmentOrderEventService(
                 ignoreApi404 {
                     enrichmentOwnershipEventService.onOwnershipBestSellOrderUpdated(
                         ownershipId,
-                        order
+                        order,
+                        notificationEnabled
                     )
                 }
             }

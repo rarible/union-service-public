@@ -57,7 +57,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
 
         val expected = EnrichedItemConverter.convert(unionItem).copy(
             // Eth meta fully qualified, no request should be executed
-            meta = enrichmentMetaService.enrichMeta(unionItem.meta!!)
+            meta = enrichmentMetaService.enrichMeta(unionItem.meta!!, ShortItemId(itemId))
         )
 
         itemEventService.onItemUpdated(unionItem)
@@ -105,7 +105,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
                 bestSellOrder = unionBestSell,
                 bestBidOrder = unionBestBid,
                 // Eth meta fully qualified, no request should be executed
-                meta = enrichmentMetaService.enrichMeta(unionItem.meta!!)
+                meta = enrichmentMetaService.enrichMeta(unionItem.meta!!, ShortItemId(itemId))
             )
 
         val saved = itemService.get(shortItem.id)!!
@@ -152,7 +152,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
             sellers = 2,
             totalStock = 30.toBigInteger(),
             // Eth meta fully qualified, no request should be executed
-            meta = enrichmentMetaService.enrichMeta(unionItem.meta!!)
+            meta = enrichmentMetaService.enrichMeta(unionItem.meta!!, ShortItemId(itemId))
         )
 
         Wait.waitAssert {
@@ -201,7 +201,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         val expected = EnrichedItemConverter.convert(unionItem).copy(
             bestSellOrder = unionBestSell,
             // Eth meta fully qualified, no request should be executed
-            meta = enrichmentMetaService.enrichMeta(unionItem.meta!!)
+            meta = enrichmentMetaService.enrichMeta(unionItem.meta!!, ShortItemId(itemId))
         )
 
         val saved = itemService.get(shortItem.id)!!
@@ -251,7 +251,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         val expected = EnrichedItemConverter.convert(unionItem).copy(
             bestBidOrder = null,
             // Eth meta fully qualified, no request should be executed
-            meta = enrichmentMetaService.enrichMeta(unionItem.meta!!)
+            meta = enrichmentMetaService.enrichMeta(unionItem.meta!!, ShortItemId(itemId))
         )
 
         // Item should be removed since it has no enrich data

@@ -6,8 +6,10 @@ import com.google.common.net.InternetDomainName
 import com.rarible.core.cache.CacheDescriptor
 import com.rarible.core.client.WebClientHelper
 import com.rarible.core.common.blockingToMono
+import com.rarible.core.common.nowMillis
 import com.rarible.core.logging.LoggingUtils
 import com.rarible.protocol.union.enrichment.configuration.MetaProperties
+import com.rarible.protocol.union.enrichment.util.spent
 import com.sun.imageio.plugins.bmp.BMPMetadata
 import com.sun.imageio.plugins.gif.GIFImageMetadata
 import com.sun.imageio.plugins.jpeg.JPEGMetadata
@@ -58,8 +60,9 @@ class MediaMetaService(
         }
 
     override fun get(url: String): Mono<ContentMeta> {
-        return LoggingUtils.withMarker { marker ->
-            logger.info(marker, "getMediaMeta $url")
+        val now = nowMillis()
+        val result = LoggingUtils.withMarker { marker ->
+            logger.info(marker, "Fetching meta by URL: {}", url)
             when {
                 url.endsWith(".mp4") -> ContentMeta("video/mp4").toMono()
                 url.endsWith(".webm") -> ContentMeta("video/webm").toMono()
@@ -114,6 +117,8 @@ class MediaMetaService(
                 }
             }
         }
+        logger.info("Fetched meta by URL {} ({}ms) : {}", url, result, spent(now))
+        return result
     }
 
     private fun getMimeType(url: String): Mono<String> {
@@ -157,7 +162,7 @@ class MediaMetaService(
         return object : FilterInputStream(countingStream) {
             override fun close() {
                 if (countingStream.count > metaProperties.mediaFetchMaxSize / 2) {
-                    logger.warn("Suspiciously many bytes ${countingStream.count} are read from the content input stream for $url")
+                    logger.warn("Suspiciously many bytes (${countingStream.count}) are read from the content input stream for $url")
                 }
                 super.close()
             }
