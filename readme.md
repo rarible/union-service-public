@@ -10,8 +10,10 @@ Use these base URLs to access our API on different networks:
 
 | Base URL | Network |
 | :--- | :--- |
+| https://api.rarible.org/v0.1/doc | Mainnet |
 | https://api-staging.rarible.org/v0.1/doc | Rinkeby |
 | https://api-dev.rarible.org/v0.1/doc | Ropsten |
+| https://api-e2e.rarible.org/v0.1/doc | - |
 
 ## Rarible Protocol SDK
 
@@ -23,4 +25,6 @@ You are welcome to suggest features and report bugs found! You can do it here: [
 
 ## License
 
-Rarible Protocol SDK is available under the [MIT license]().
+Rarible Protocol is available under [GPL v3](LICENSE.md).
+
+SDK and openapi (with generated clients) are available under [MIT](MIT-LICENSE.md).

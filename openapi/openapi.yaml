@@ -77,13 +77,13 @@ paths:
     get:
       tags:
         - item-controller
-      description: "Returns Item by identifier"
+      description: "Returns Item by Id"
       operationId: getItemById
       parameters:
         - name: "itemId"
           in: path
           required: true
-          description: "Item identifier, has format `blockchain:token:tokenId`"
+          description: "Item Id, has format `${blockchain}:${token}:${tokenId}`"
           schema:
             type: string
       responses:
@@ -104,13 +104,13 @@ paths:
     delete:
       tags:
         - item-controller
-      description: Deletes the NFT item meta by identifier
+      description: "Deletes the NFT item meta by Id"
       operationId: resetItemMeta
       parameters:
         - name: itemId
           in: path
           required: true
-          description: "Item identifier, has format `blockchain:token:tokenId`"
+          description: "Item Id, has format `${blockchain}:${token}:${tokenId}`"
           schema:
             type: string
       responses:
@@ -242,7 +242,7 @@ paths:
         - name: "blockchains"
           in: query
           required: false
-          description: "Type of the blockchain network"
+          description: "Names of the blockchain networks. If no one specified, data from all blockchains will be returned"
           schema:
             type: array
             items:
@@ -268,14 +268,14 @@ paths:
         - name: "lastUpdatedFrom"
           in: query
           required: false
-          description: "Filter condition to return only items that were updated after this date (unix format)"
+          description: "Filter condition to return only items that have been updated after this date (timestamp)"
           schema:
             type: integer
             format: int64
         - name: "lastUpdatedTo"
           in: query
           required: false
-          description: "Filter condition to return only items that were updated before this date (unix format)"
+          description: "Filter condition to return only items that have been updated before this date (timestamp)"
           schema:
             type: integer
             format: "int64"
@@ -297,13 +297,13 @@ paths:
     get:
       tags:
         - ownership-controller
-      description: "Returns ownership by identifier"
+      description: "Returns ownership by Id"
       operationId: getOwnershipById
       parameters:
         - name: "ownershipId"
           in: path
           required: true
-          description: "Ownership identifier in format: '${blockchain}:${token}:${tokenId}:${owner}'"
+          description: "Ownership Id in format: '${blockchain}:${token}:${tokenId}:${owner}'"
           schema:
             type: string
       responses:
@@ -336,7 +336,7 @@ paths:
         - name: "tokenId"
           in: query
           required: true
-          description: "Token identifier"
+          description: "Token Id"
           schema:
             $ref: "#/components/schemas/BigInteger"
         - name: "continuation"
@@ -373,7 +373,7 @@ paths:
         - name: "blockchains"
           in: query
           required: false
-          description: "Type of the blockchain network"
+          description: "Names of the blockchain networks. If no one specified, data from all blockchains will be returned"
           schema:
             type: array
             items:
@@ -408,13 +408,13 @@ paths:
     get:
       tags:
         - order-controller
-      description: "Returns order by identifier"
+      description: "Returns order by Id"
       operationId: getOrderById
       parameters:
         - name: "id"
           in: "path"
           required: true
-          description: "Order identifier, has format '${blockchain}:${id}'"
+          description: "Order Id, has format '${blockchain}:${id}'"
           schema:
             type: string
       responses:
@@ -435,6 +435,7 @@ paths:
     post:
       tags:
         - order-controller
+      description: "Returns the orders that have been put on sale"
       operationId: getOrdersByIds
       requestBody:
         content:
@@ -577,13 +578,13 @@ paths:
         - name: "tokenId"
           in: query
           required: true
-          description: "Token identifier"
+          description: "Token Id"
           schema:
             $ref: "#/components/schemas/BigInteger"
         - name: "maker"
           in: query
           required: false
-          description: "The maker of the order"
+          description: "The maker of the bid"
           schema:
             type: string
         - name: "origin"
@@ -686,7 +687,7 @@ paths:
         - name: "blockchains"
           in: query
           required: false
-          description: "Type of the blockchain network"
+          description: "Names of the blockchain networks. If no one specified, data from all blockchains will be returned"
           schema:
             type: array
             items:
@@ -765,14 +766,14 @@ paths:
         - name: "start"
           in: query
           required: false
-          description: "Lower time border of data (unix format)"
+          description: "Lower time border of data (timestamp)"
           schema:
             type: integer
             format: int64
         - name: "end"
           in: query
           required: false
-          description: "Upper time border of data (unix format)"
+          description: "Upper time border of data (timestamp)"
           schema:
             type: integer
             format: int64
@@ -824,13 +825,13 @@ paths:
         - name: "tokenId"
           in: query
           required: true
-          description: "Token identifier"
+          description: "Token Id"
           schema:
             $ref: "#/components/schemas/BigInteger"
         - name: "maker"
           in: query
           required: false
-          description: "The maker of the order"
+          description: "The maker of the bid"
           schema:
             type: string
         - name: "origin"
@@ -850,14 +851,14 @@ paths:
         - name: "start"
           in: query
           required: false
-          description: "Lower time border of data (unix format)"
+          description: "Lower time border of data (timestamp)"
           schema:
             type: integer
             format: int64
         - name: "end"
           in: query
           required: false
-          description: "Upper time border of data (unix format)"
+          description: "Upper time border of data (timestamp)"
           schema:
             type: integer
             format: int64
@@ -978,7 +979,7 @@ paths:
         - name: "tokenId"
           in: query
           required: true
-          description: "Token identifier"
+          description: "Token Id"
           schema:
             $ref: "#/components/schemas/BigInteger"
         - name: "continuation"
@@ -1072,7 +1073,7 @@ paths:
         - name: "blockchains"
           in: query
           required: false
-          description: "Type of the blockchain network"
+          description: "Names of the blockchain networks. If no one specified, data from all blockchains will be returned"
           schema:
             type: array
             items:
@@ -1192,7 +1193,7 @@ paths:
         - name: "blockchains"
           in: query
           required: false
-          description: "Type of the blockchain network"
+          description: "Names of the blockchain networks. If no one specified, data from all blockchains will be returned"
           schema:
             type: array
             items:
@@ -1272,7 +1273,7 @@ components:
       properties:
         currencyId:
           type: string
-          description: "Currency identifier"
+          description: "Currency Id"
         rate:
           $ref: '#/components/schemas/BigDecimal'
         date:
@@ -1375,7 +1376,7 @@ components:
 
     ItemId:
       type: string
-      description: "Item identifier, has format `${blockchain}:${token}:${tokenId}`"
+      description: "Item Id, has format `${blockchain}:${token}:${tokenId}`"
       example: "${blockchain}:${token}:${tokenId}"
 
     Item:
@@ -1420,7 +1421,7 @@ components:
         lastUpdatedAt:
           type: string
           format: date-time
-          description: "Filter condition to return only items that were updated at this date"
+          description: "Filter condition to return only items that have been updated at this date"
         supply:
           $ref: "#/components/schemas/BigInteger"
         meta:
@@ -1732,6 +1733,7 @@ components:
       properties:
         ids:
           type: array
+          description: "Array of the orders Ids in format '${blockchain}:${id}'"
           items:
             type: string
 
