@@ -18,9 +18,11 @@ import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.core.service.router.BlockchainService
 import com.rarible.protocol.union.dto.BlockchainDto
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Configuration
+import org.springframework.data.mongodb.core.convert.MappingMongoConverter
 import org.springframework.scheduling.annotation.EnableScheduling
 
 @Configuration
@@ -31,6 +33,11 @@ class CoreConfiguration {
     private val logger = LoggerFactory.getLogger(javaClass)
 
     private val blockchains = BlockchainDto.values().toSet()
+
+    @Autowired
+    fun setMapKeyDotReplacement(mappingMongoConverter: MappingMongoConverter) {
+        mappingMongoConverter.setMapKeyDotReplacement("__DOT__");
+    }
 
     @Bean
     fun itemServiceRouter(services: List<ItemService>): BlockchainRouter<ItemService> {

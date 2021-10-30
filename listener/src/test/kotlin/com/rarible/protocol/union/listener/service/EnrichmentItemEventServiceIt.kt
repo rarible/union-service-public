@@ -7,11 +7,13 @@ import com.rarible.protocol.union.enrichment.converter.EnrichedItemConverter
 import com.rarible.protocol.union.enrichment.converter.ShortItemConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.model.ShortItemId
+import com.rarible.protocol.union.enrichment.repository.ItemRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.service.EnrichmentMetaService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
 import com.rarible.protocol.union.enrichment.test.data.randomShortItem
 import com.rarible.protocol.union.enrichment.test.data.randomShortOwnership
+import com.rarible.protocol.union.enrichment.test.data.randomUnionBidOrderDto
 import com.rarible.protocol.union.enrichment.test.data.randomUnionItem
 import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrderDto
 import com.rarible.protocol.union.enrichment.util.bidCurrencyId
@@ -25,6 +27,7 @@ import com.rarible.protocol.union.listener.test.IntegrationTest
 import io.mockk.coEvery
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -39,6 +42,9 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
 
     @Autowired
     private lateinit var itemService: EnrichmentItemService
+
+    @Autowired
+    private lateinit var itemRepository: ItemRepository
 
     @Autowired
     private lateinit var ownershipService: EnrichmentOwnershipService
@@ -323,5 +329,20 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
             assertThat(messages[0].id).isEqualTo(itemId.fullId())
             assertThat(messages[0].value.itemId).isEqualTo(itemId)
         }
+    }
+
+    @Test
+    fun `damn dot`() = runBlocking<Unit> {
+        val item = ShortItemConverter.convert(randomUnionItem(randomEthItemId()))
+
+        val itemWithDotMapKey = item.copy(
+            bestSellOrders = mapOf("A.something.Flow" to ShortOrderConverter.convert(randomUnionBidOrderDto()))
+        )
+
+        val saved = itemService.save(itemWithDotMapKey)
+        val fromMongo = itemService.get(item.id)!!
+
+        assertThat(itemWithDotMapKey).isEqualTo(saved.copy(version = null, lastUpdatedAt = item.lastUpdatedAt))
+        assertThat(itemWithDotMapKey).isEqualTo(fromMongo.copy(version = null, lastUpdatedAt = item.lastUpdatedAt))
     }
 }
