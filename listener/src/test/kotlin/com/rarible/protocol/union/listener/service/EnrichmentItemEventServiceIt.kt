@@ -225,7 +225,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
     fun `on best bid order updated - item exists with same order, order cancelled`() = runWithKafka {
         val itemId = randomEthItemId()
 
-        val bestBidOrder = randomEthLegacyOrderDto(itemId).copy(cancelled = true)
+        val bestBidOrder = randomEthLegacyOrderDto(itemId).copy(status = OrderStatusDto.CANCELLED)
         val unionBestBid = ethOrderConverter.convert(bestBidOrder, itemId.blockchain)
 
         val shortItem = randomShortItem(itemId).copy(bestBidOrder = ShortOrderConverter.convert(unionBestBid))
@@ -279,7 +279,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         val ethItem = randomEthNftItemDto(itemId)
         // In this case we don't have saved ShortItem in Enrichment DB
 
-        val bestBidOrder = randomEthLegacyOrderDto(itemId).copy(cancelled = true)
+        val bestBidOrder = randomEthLegacyOrderDto(itemId).copy(status = OrderStatusDto.INACTIVE)
         val unionBestBid = ethOrderConverter.convert(bestBidOrder, itemId.blockchain)
 
         coEvery { testEthereumItemApi.getNftItemById(itemId.value) } returns ethItem.toMono()
