@@ -186,21 +186,21 @@ fun randomEthAssetErc721() = randomEthAssetErc721(randomEthItemId())
 fun randomEthAssetErc721(itemId: ItemIdDto) = AssetDto(
     assetType = Erc721AssetTypeDto(Address.apply(itemId.token.value), itemId.tokenId),
     value = randomBigInt(),
-    valueDecimal = randomBigDecimal()
+    valueDecimal = randomBigDecimal().stripTrailingZeros()
 )
 
 fun randomEthAssetErc20() = randomEthAssetErc20(randomAddress())
 fun randomEthAssetErc20(address: Address) = AssetDto(
     assetType = Erc20AssetTypeDto(address),
     value = randomBigInt(),
-    valueDecimal = randomBigDecimal()
+    valueDecimal = randomBigDecimal().stripTrailingZeros()
 )
 
 fun randomEthAssetErc1155() = randomEthAssetErc1155(randomEthItemId())
 fun randomEthAssetErc1155(itemId: ItemIdDto) = AssetDto(
     assetType = Erc1155AssetTypeDto(Address.apply(itemId.token.value), itemId.tokenId),
     value = randomBigInt(),
-    valueDecimal = randomBigDecimal()
+    valueDecimal = randomBigDecimal().stripTrailingZeros()
 )
 
 fun randomEthLegacyOrderDto() = randomEthLegacyOrderDto(randomEthAssetErc721(), randomAddress(), randomEthAssetErc20())
@@ -212,7 +212,7 @@ fun randomEthLegacyOrderDto(itemId: ItemIdDto, maker: Address) = randomEthLegacy
 )
 
 fun randomEthLegacyOrderDto(make: AssetDto, maker: Address, take: AssetDto): LegacyOrderDto {
-    val makeStockValue = randomBigDecimal()
+    val makeStockValue = randomBigDecimal().stripTrailingZeros()
     return LegacyOrderDto(
         status = OrderStatusDto.ACTIVE,
         maker = maker,
@@ -220,7 +220,7 @@ fun randomEthLegacyOrderDto(make: AssetDto, maker: Address, take: AssetDto): Leg
         make = make,
         take = take,
         fill = randomBigInt(),
-        fillValue = randomBigDecimal(),
+        fillValue = randomBigDecimal().stripTrailingZeros(),
         makeStock = makeStockValue.toBigInteger(),
         makeStockValue = makeStockValue,
         cancelled = false,
@@ -249,7 +249,7 @@ fun randomEthV2OrderDto(itemId: ItemIdDto, maker: Address) = randomEthV2OrderDto
 )
 
 fun randomEthV2OrderDto(make: AssetDto, maker: Address, take: AssetDto): RaribleV2OrderDto {
-    val makeStockValue = randomBigDecimal()
+    val makeStockValue = randomBigDecimal().stripTrailingZeros()
     return RaribleV2OrderDto(
         status = OrderStatusDto.ACTIVE,
         maker = maker,
@@ -257,7 +257,7 @@ fun randomEthV2OrderDto(make: AssetDto, maker: Address, take: AssetDto): Rarible
         make = make,
         take = take,
         fill = randomBigInt(),
-        fillValue = randomBigDecimal(),
+        fillValue = randomBigDecimal().stripTrailingZeros(),
         makeStock = makeStockValue.toBigInteger(),
         makeStockValue = makeStockValue,
         cancelled = false,
@@ -288,7 +288,7 @@ fun randomEthOpenSeaV1OrderDto(itemId: ItemIdDto, maker: Address) = randomEthOpe
 )
 
 fun randomEthOpenSeaV1OrderDto(make: AssetDto, maker: Address, take: AssetDto): OpenSeaV1OrderDto {
-    val makeStockValue = randomBigDecimal()
+    val makeStockValue = randomBigDecimal().stripTrailingZeros()
     return OpenSeaV1OrderDto(
         status = OrderStatusDto.ACTIVE,
         maker = maker,
@@ -296,7 +296,7 @@ fun randomEthOpenSeaV1OrderDto(make: AssetDto, maker: Address, take: AssetDto): 
         make = make,
         take = take,
         fill = randomBigInt(),
-        fillValue = randomBigDecimal(),
+        fillValue = randomBigDecimal().stripTrailingZeros(),
         makeStock = makeStockValue.toBigInteger(),
         makeStockValue = makeStockValue,
         cancelled = false,
@@ -327,7 +327,7 @@ fun randomEthCryptoPunksOrderDto(itemId: ItemIdDto, maker: Address) = randomEthC
 )
 
 fun randomEthCryptoPunksOrderDto(make: AssetDto, maker: Address, take: AssetDto): CryptoPunkOrderDto {
-    val makeStockValue = randomBigDecimal()
+    val makeStockValue = randomBigDecimal().stripTrailingZeros()
     return CryptoPunkOrderDto(
         status = OrderStatusDto.ACTIVE,
         maker = maker,
@@ -335,7 +335,7 @@ fun randomEthCryptoPunksOrderDto(make: AssetDto, maker: Address, take: AssetDto)
         make = make,
         take = take,
         fill = randomBigInt(),
-        fillValue = randomBigDecimal(),
+        fillValue = randomBigDecimal().stripTrailingZeros(),
         makeStock = makeStockValue.toBigInteger(),
         makeStockValue = makeStockValue,
         cancelled = false,
@@ -387,10 +387,10 @@ fun randomEthOrderSideMatchDto(): OrderSideMatchDto {
         fill = randomBigInt(),
         taker = randomAddress(),
         counterHash = Word.apply(randomWord()),
-        makeUsd = randomBigDecimal(),
-        takeUsd = randomBigDecimal(),
-        makePriceUsd = randomBigDecimal(),
-        takePriceUsd = randomBigDecimal()
+        makeUsd = randomBigDecimal().stripTrailingZeros(),
+        takeUsd = randomBigDecimal().stripTrailingZeros(),
+        makePriceUsd = randomBigDecimal().stripTrailingZeros(),
+        takePriceUsd = randomBigDecimal().stripTrailingZeros()
     )
 }
 
@@ -419,8 +419,8 @@ fun randomEthOnChainOrderDto(): OnChainOrderDto {
 fun randomEthOrderPriceHistoryRecordDto(): OrderPriceHistoryRecordDto {
     return OrderPriceHistoryRecordDto(
         date = nowMillis(),
-        makeValue = randomBigDecimal(),
-        takeValue = randomBigDecimal()
+        makeValue = randomBigDecimal().stripTrailingZeros(),
+        takeValue = randomBigDecimal().stripTrailingZeros()
     )
 }
 
@@ -444,8 +444,8 @@ fun randomEthOrderActivityMatch(): OrderActivityMatchDto {
         source = OrderActivityDto.Source.RARIBLE,
         left = randomEthOrderActivityMatchSide(),
         right = randomEthOrderActivityMatchSide(),
-        price = randomBigDecimal(),
-        priceUsd = randomBigDecimal(),
+        price = randomBigDecimal().stripTrailingZeros(),
+        priceUsd = randomBigDecimal().stripTrailingZeros(),
         transactionHash = Word.apply(randomWord()),
         blockHash = Word.apply(randomWord()),
         blockNumber = randomLong(),
@@ -461,10 +461,10 @@ fun randomEthOrderBidActivity(): OrderActivityBidDto {
         source = OrderActivityDto.Source.RARIBLE,
         hash = Word.apply(randomWord()),
         maker = randomAddress(),
-        make = AssetDto(Erc20AssetTypeDto(randomAddress()), randomBigInt(), randomBigDecimal()),
-        take = AssetDto(Erc20AssetTypeDto(randomAddress()), randomBigInt(), randomBigDecimal()),
-        price = randomBigDecimal(),
-        priceUsd = randomBigDecimal()
+        make = AssetDto(Erc20AssetTypeDto(randomAddress()), randomBigInt(), randomBigDecimal().stripTrailingZeros()),
+        take = AssetDto(Erc20AssetTypeDto(randomAddress()), randomBigInt(), randomBigDecimal().stripTrailingZeros()),
+        price = randomBigDecimal().stripTrailingZeros(),
+        priceUsd = randomBigDecimal().stripTrailingZeros()
     )
 }
 
@@ -475,10 +475,10 @@ fun randomEthOrderListActivity(): OrderActivityListDto {
         source = OrderActivityDto.Source.OPEN_SEA,
         hash = Word.apply(randomWord()),
         maker = randomAddress(),
-        make = AssetDto(Erc20AssetTypeDto(randomAddress()), randomBigInt(), randomBigDecimal()),
-        take = AssetDto(Erc20AssetTypeDto(randomAddress()), randomBigInt(), randomBigDecimal()),
-        price = randomBigDecimal(),
-        priceUsd = randomBigDecimal()
+        make = AssetDto(Erc20AssetTypeDto(randomAddress()), randomBigInt(), randomBigDecimal().stripTrailingZeros()),
+        take = AssetDto(Erc20AssetTypeDto(randomAddress()), randomBigInt(), randomBigDecimal().stripTrailingZeros()),
+        price = randomBigDecimal().stripTrailingZeros(),
+        priceUsd = randomBigDecimal().stripTrailingZeros()
     )
 }
 

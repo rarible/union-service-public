@@ -31,7 +31,7 @@ class CurrencyControllerFt : AbstractIntegrationTest() {
         val address = randomAddressString()
         val now = nowMillis()
 
-        val currencyDto = CurrencyRateDto(address, "usd", randomBigDecimal(), now)
+        val currencyDto = CurrencyRateDto(address, "usd", randomBigDecimal().stripTrailingZeros(), now)
 
         coEvery {
             testCurrencyApi.getCurrencyRate(BlockchainDto.ETHEREUM, address, now.toEpochMilli())

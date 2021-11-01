@@ -20,6 +20,6 @@ fun createCurrencyDto(): CurrencyRateDto {
         date = nowMillis(),
         fromCurrencyId = UUID.randomUUID().toString(),
         toCurrencyId = "usd",
-        rate = randomBigDecimal()
+        rate = randomBigDecimal().stripTrailingZeros()
     )
 }
