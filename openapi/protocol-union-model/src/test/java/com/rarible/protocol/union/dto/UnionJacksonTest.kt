@@ -1,9 +1,11 @@
 package com.rarible.protocol.union.dto
 
+import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import java.math.BigDecimal
 import java.math.BigInteger
 
 class UnionJacksonTest {
@@ -12,7 +14,37 @@ class UnionJacksonTest {
         .registerModule(UnionPrimitivesJacksonModule)
         .registerModule(UnionModelJacksonModule)
         .registerModule(KotlinModule())
+        .enable(JsonGenerator.Feature.WRITE_BIGDECIMAL_AS_PLAIN)
 
+    private val legacyMapper = ObjectMapper()
+        .registerModule(KotlinModule())
+
+    @Test
+    fun `serialize big decimal`() {
+        val value = BigDecimal("1.3E-10")
+
+        val serialized = mapper.writeValueAsString(value)
+        assertEquals("\"0.00000000013\"", serialized)
+
+        val deserialized = mapper.readValue(serialized, BigDecimal::class.java)
+        assertEquals(deserialized, value)
+
+        val deserializedLegacy = legacyMapper.readValue(serialized, BigDecimal::class.java)
+        assertEquals(deserializedLegacy, value)
+    }
+
+    @Test
+    fun `serialize big int`() {
+        val value = BigInteger("10000000000000000000000000000000000000000000000000000000000")
+        val serialized = mapper.writeValueAsString(value)
+        assertEquals("\"10000000000000000000000000000000000000000000000000000000000\"", serialized)
+
+        val deserialized = mapper.readValue(serialized, BigInteger::class.java)
+        assertEquals(deserialized, value)
+
+        val deserializedLegacy = legacyMapper.readValue(serialized, BigInteger::class.java)
+        assertEquals(deserializedLegacy, value)
+    }
 
     @Test
     fun `eth address`() {
