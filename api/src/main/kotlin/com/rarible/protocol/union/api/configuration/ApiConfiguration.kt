@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.api.configuration
 
-import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.rarible.core.autoconfigure.filter.cors.EnableRaribleCorsWebFilter
@@ -32,7 +31,6 @@ class ApiConfiguration {
                 KotlinModule(),
                 JavaTimeModule()
             )
-            builder.featuresToEnable(JsonGenerator.Feature.WRITE_BIGDECIMAL_AS_PLAIN)
         }
     }
 

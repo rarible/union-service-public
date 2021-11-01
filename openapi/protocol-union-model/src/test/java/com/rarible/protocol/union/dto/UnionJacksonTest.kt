@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.dto
 
-import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -14,7 +13,6 @@ class UnionJacksonTest {
         .registerModule(UnionPrimitivesJacksonModule)
         .registerModule(UnionModelJacksonModule)
         .registerModule(KotlinModule())
-        .enable(JsonGenerator.Feature.WRITE_BIGDECIMAL_AS_PLAIN)
 
     private val legacyMapper = ObjectMapper()
         .registerModule(KotlinModule())
