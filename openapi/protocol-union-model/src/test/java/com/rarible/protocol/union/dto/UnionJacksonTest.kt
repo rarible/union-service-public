@@ -20,6 +20,36 @@ class UnionJacksonTest {
         .registerModule(KotlinModule())
 
     @Test
+    fun `serialize big decimal with trailing zeros`() {
+        val expected = BigDecimal("0.00000000013")
+        val value = BigDecimal("0.000000000130000000")
+
+        val serialized = mapper.writeValueAsString(value)
+        assertEquals("\"0.00000000013\"", serialized)
+
+        val deserialized = mapper.readValue(serialized, BigDecimal::class.java)
+        assertEquals(deserialized, expected)
+
+        val deserializedLegacy = legacyMapper.readValue(serialized, BigDecimal::class.java)
+        assertEquals(deserializedLegacy, expected)
+    }
+
+    @Test
+    fun `serialize zero big decimal with trailing zeros`() {
+        val expected = BigDecimal.ZERO
+        val value = BigDecimal("0.000000000")
+
+        val serialized = mapper.writeValueAsString(value)
+        assertEquals("\"0\"", serialized)
+
+        val deserialized = mapper.readValue(serialized, BigDecimal::class.java)
+        assertEquals(deserialized, expected)
+
+        val deserializedLegacy = legacyMapper.readValue(serialized, BigDecimal::class.java)
+        assertEquals(deserializedLegacy, expected)
+    }
+
+    @Test
     fun `serialize big decimal`() {
         val value = BigDecimal("1.3E-10")
 
