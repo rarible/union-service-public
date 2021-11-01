@@ -97,7 +97,7 @@ class OwnershipControllerFt : AbstractIntegrationTest() {
         val result = ownershipControllerClient.getOwnershipById(flowUnionOwnership.id.fullId()).awaitFirst()
 
         assertThat(result.id).isEqualTo(flowUnionOwnership.id)
-        assertThat(result.bestSellOrder).isEqualTo(flowUnionOrder)
+        assertThat(result.bestSellOrder!!.id).isEqualTo(flowUnionOrder.id)
         assertThat(result.id.blockchain).isEqualTo(BlockchainDto.FLOW)
     }
 
@@ -131,7 +131,7 @@ class OwnershipControllerFt : AbstractIntegrationTest() {
         assertThat(resultEmptyOwnership.bestSellOrder).isEqualTo(null)
 
         assertThat(resultEnrichedOwnership.id).isEqualTo(ethUnionOwnership.id)
-        assertThat(resultEnrichedOwnership.bestSellOrder).isEqualTo(ethUnionOrder)
+        assertThat(resultEnrichedOwnership.bestSellOrder!!.id).isEqualTo(ethUnionOrder.id)
     }
 
     @Test
@@ -226,7 +226,7 @@ class OwnershipControllerFt : AbstractIntegrationTest() {
         ).awaitFirst()
 
         assertThat(ownerships.ownerships).hasSize(2)
-        assertThat(ownerships.ownerships[0].bestSellOrder).isEqualTo(ethUnionOrder)
-        assertThat(ownerships.ownerships[1].bestSellOrder).isEqualTo(flowUnionOrder)
+        assertThat(ownerships.ownerships[0].bestSellOrder!!.id).isEqualTo(ethUnionOrder.id)
+        assertThat(ownerships.ownerships[1].bestSellOrder!!.id).isEqualTo(flowUnionOrder.id)
     }
 }

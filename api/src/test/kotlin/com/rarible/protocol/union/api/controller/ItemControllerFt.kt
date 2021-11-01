@@ -71,7 +71,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
 
         assertThat(result.id).isEqualTo(ethItemId)
         assertThat(result.id.blockchain).isEqualTo(BlockchainDto.ETHEREUM)
-        assertThat(result.bestSellOrder).isEqualTo(ethUnionOrder)
+        assertThat(result.bestSellOrder!!.id).isEqualTo(ethUnionOrder.id)
     }
 
     @Test
@@ -173,7 +173,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
 
         assertThat(result.id).isEqualTo(ethItemId)
         assertThat(result.id.blockchain).isEqualTo(BlockchainDto.ETHEREUM)
-        assertThat(result.bestBidOrder).isEqualTo(ethUnionOrder)
+        assertThat(result.bestBidOrder!!.id).isEqualTo(ethUnionOrder.id)
     }
 
     @Test

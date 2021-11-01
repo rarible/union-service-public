@@ -1307,7 +1307,6 @@ components:
         - lastUpdatedAt
         - supply
         - deleted
-        - tokenId
         - sellers
 
     Items:

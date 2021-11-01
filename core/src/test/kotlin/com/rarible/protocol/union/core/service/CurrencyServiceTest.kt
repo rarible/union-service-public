@@ -32,7 +32,7 @@ class CurrencyServiceTest {
 
     @Test
     fun `get rate`() = runBlocking<Unit> {
-        val rate = randomBigDecimal().stripTrailingZeros()
+        val rate = randomBigDecimal()
         val blockchain = BlockchainDto.ETHEREUM
         val address = randomString()
         mockCurrency(blockchain, address, rate)
@@ -49,7 +49,7 @@ class CurrencyServiceTest {
 
     @Test
     fun `to usd - actual`() = runBlocking<Unit> {
-        val rate = randomBigDecimal().stripTrailingZeros()
+        val rate = randomBigDecimal()
         val blockchain = BlockchainDto.ETHEREUM
         val address = randomString()
         mockCurrency(blockchain, address, rate, BigDecimal.ONE)
@@ -69,7 +69,7 @@ class CurrencyServiceTest {
 
     @Test
     fun `to usd - historical`() = runBlocking<Unit> {
-        val rate = randomBigDecimal().stripTrailingZeros()
+        val rate = randomBigDecimal()
         val blockchain = BlockchainDto.ETHEREUM
         val address = randomString()
         mockCurrency(blockchain, address, rate, BigDecimal.ONE)
@@ -89,7 +89,7 @@ class CurrencyServiceTest {
 
     @Test
     fun `get current rate`() = runBlocking<Unit> {
-        val rate = randomBigDecimal().stripTrailingZeros()
+        val rate = randomBigDecimal()
         val blockchain = BlockchainDto.FLOW
         val address = randomString()
         mockCurrency(blockchain, address, rate)
@@ -116,12 +116,12 @@ class CurrencyServiceTest {
 
     @Test
     fun `refresh cache`() = runBlocking<Unit> {
-        val ethRate1 = randomBigDecimal().stripTrailingZeros()
-        val ethRate2 = randomBigDecimal().stripTrailingZeros()
+        val ethRate1 = randomBigDecimal()
+        val ethRate2 = randomBigDecimal()
         val ethBlockchain = BlockchainDto.ETHEREUM
         val ethAddress = randomString()
 
-        val flowRate1 = randomBigDecimal().stripTrailingZeros()
+        val flowRate1 = randomBigDecimal()
         val flowBlockchain = BlockchainDto.FLOW
         val flowAddress = randomString()
 

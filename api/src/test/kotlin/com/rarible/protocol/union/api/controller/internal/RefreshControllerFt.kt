@@ -91,8 +91,8 @@ class RefreshControllerFt : AbstractIntegrationTest() {
         assertThat(savedShortItem.bestSellOrder).isEqualTo(shortBestSell)
         assertThat(savedShortItem.bestBidOrder).isEqualTo(shortBestBid)
 
-        assertThat(result.bestSellOrder).isEqualTo(unionBestSell)
-        assertThat(result.bestBidOrder).isEqualTo(unionBestBid)
+        assertThat(result.bestSellOrder!!.id).isEqualTo(unionBestSell.id)
+        assertThat(result.bestBidOrder!!.id).isEqualTo(unionBestBid.id)
 
         coVerify {
             testItemEventProducer.send(match { message: KafkaMessage<ItemEventDto> ->
@@ -143,7 +143,7 @@ class RefreshControllerFt : AbstractIntegrationTest() {
 
         assertThat(savedShortOwnership.bestSellOrder).isEqualTo(shortBestSell)
 
-        assertThat(result.bestSellOrder).isEqualTo(unionBestSell)
+        assertThat(result.bestSellOrder!!.id).isEqualTo(unionBestSell.id)
 
         coVerify {
             testOwnershipEventProducer.send(match { message: KafkaMessage<OwnershipEventDto> ->
@@ -187,13 +187,13 @@ class RefreshControllerFt : AbstractIntegrationTest() {
         val result = testRestTemplate.postForEntity(uri, null, ItemDto::class.java).body!!
         val savedShortItem = enrichmentItemService.get(shortItem.id)!!
 
-        assertThat(savedShortItem.bestSellOrder).isEqualTo(shortBestSell)
-        assertThat(savedShortItem.bestBidOrder).isEqualTo(shortBestBid)
-        assertThat(savedShortItem.bestSellOrders[unionBestSell.sellCurrencyId]).isEqualTo(shortBestSell)
-        assertThat(savedShortItem.bestBidOrders[unionBestSell.bidCurrencyId]).isEqualTo(shortBestBid)
+        assertThat(savedShortItem.bestSellOrder!!.id).isEqualTo(shortBestSell.id)
+        assertThat(savedShortItem.bestBidOrder!!.id).isEqualTo(shortBestBid.id)
+        assertThat(savedShortItem.bestSellOrders[unionBestSell.sellCurrencyId]!!.id).isEqualTo(shortBestSell.id)
+        assertThat(savedShortItem.bestBidOrders[unionBestSell.bidCurrencyId]!!.id).isEqualTo(shortBestBid.id)
 
-        assertThat(result.bestSellOrder).isEqualTo(unionBestSell)
-        assertThat(result.bestBidOrder).isEqualTo(unionBestBid)
+        assertThat(result.bestSellOrder!!.id).isEqualTo(unionBestSell.id)
+        assertThat(result.bestBidOrder!!.id).isEqualTo(unionBestBid.id)
 
         coVerify {
             testItemEventProducer.send(match { message: KafkaMessage<ItemEventDto> ->
@@ -227,10 +227,10 @@ class RefreshControllerFt : AbstractIntegrationTest() {
         val result = testRestTemplate.postForEntity(uri, null, OwnershipDto::class.java).body!!
         val savedShortOwnership = enrichmentOwnershipService.get(shortOwnership.id)!!
 
-        assertThat(savedShortOwnership.bestSellOrder).isEqualTo(shortBestSell)
-        assertThat(savedShortOwnership.bestSellOrders[unionBestSell.sellCurrencyId]).isEqualTo(shortBestSell)
+        assertThat(savedShortOwnership.bestSellOrder!!.id).isEqualTo(shortBestSell.id)
+        assertThat(savedShortOwnership.bestSellOrders[unionBestSell.sellCurrencyId]!!.id).isEqualTo(shortBestSell.id)
 
-        assertThat(result.bestSellOrder).isEqualTo(unionBestSell)
+        assertThat(result.bestSellOrder!!.id).isEqualTo(unionBestSell.id)
 
         coVerify {
             testOwnershipEventProducer.send(match { message: KafkaMessage<OwnershipEventDto> ->

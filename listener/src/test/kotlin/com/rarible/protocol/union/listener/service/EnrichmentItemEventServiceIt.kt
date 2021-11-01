@@ -124,7 +124,9 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
             assertThat(messages[0].key).isEqualTo(itemId.fullId())
             assertThat(messages[0].id).isEqualTo(itemId.fullId())
             assertThat(messages[0].value.itemId).isEqualTo(itemId)
-            assertThat(messages[0].value.item).isEqualTo(expected)
+            assertThat(messages[0].value.item.id).isEqualTo(expected.id)
+            assertThat(messages[0].value.item.bestSellOrder!!.id).isEqualTo(expected.bestSellOrder!!.id)
+            assertThat(messages[0].value.item.bestBidOrder!!.id).isEqualTo(expected.bestBidOrder!!.id)
         }
     }
 
@@ -217,7 +219,9 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
             val messages = findItemUpdates(itemId.value)
             assertThat(messages).hasSize(1)
             assertThat(messages[0].value.itemId).isEqualTo(itemId)
-            assertThat(messages[0].value.item).isEqualTo(expected)
+            assertThat(messages[0].value.item.id).isEqualTo(expected.id)
+            assertThat(messages[0].value.item.bestSellOrder!!.id).isEqualTo(expected.bestSellOrder!!.id)
+            assertThat(messages[0].value.item.bestBidOrder).isNull()
         }
     }
 
@@ -268,7 +272,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
             val messages = findItemUpdates(itemId.value)
             assertThat(messages).hasSize(1)
             assertThat(messages[0].value.itemId).isEqualTo(itemId)
-            assertThat(messages[0].value.item).isEqualTo(expected)
+            assertThat(messages[0].value.item.bestBidOrder).isNull()
         }
     }
 

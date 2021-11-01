@@ -98,7 +98,7 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
             assertThat(messages[0].key).isEqualTo(itemId.fullId())
             assertThat(messages[0].id).isEqualTo(itemId.fullId())
             assertThat(messages[0].value.ownershipId).isEqualTo(ownershipId)
-            assertThat(messages[0].value.ownership).isEqualTo(expected)
+            assertThat(messages[0].value.ownership.bestSellOrder!!.id).isEqualTo(expected.bestSellOrder!!.id)
         }
     }
 
@@ -132,7 +132,7 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
             val messages = findOwnershipUpdates(ownershipId.value)
             assertThat(messages).hasSize(1)
             assertThat(messages[0].value.ownershipId).isEqualTo(ownershipId)
-            assertThat(messages[0].value.ownership).isEqualTo(expected)
+            assertThat(messages[0].value.ownership.bestSellOrder!!.id).isEqualTo(expected.bestSellOrder!!.id)
         }
     }
 

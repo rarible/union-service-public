@@ -60,7 +60,7 @@ class BestOrderServiceTest {
     fun `item best sell order - updated is alive, current the same`() = runBlocking<Unit> {
         val itemId = randomEthItemId()
         val updated = randomUnionSellOrderDto(itemId)
-        val current = updated.copy(makePrice = randomBigDecimal().stripTrailingZeros())
+        val current = updated.copy(makePrice = randomBigDecimal())
         val item = randomShortItem(itemId).copy(bestSellOrder = ShortOrderConverter.convert(current))
 
         val updatedShortItem = bestOrderService.updateBestSellOrder(item, updated)
@@ -235,7 +235,7 @@ class BestOrderServiceTest {
         val updated = randomUnionSellOrderDto(itemId).copy(status = OrderStatusDto.FILLED)
         val currencyId = updated.sellCurrencyId
         val current =
-            updated.copy(makePriceUsd = randomBigDecimal().stripTrailingZeros(), status = OrderStatusDto.ACTIVE)
+            updated.copy(makePriceUsd = randomBigDecimal(), status = OrderStatusDto.ACTIVE)
         val fetched = randomUnionSellOrderDto(itemId)
 
         val ownership = randomShortOwnership(itemId).copy(

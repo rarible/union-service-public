@@ -63,9 +63,9 @@ fun randomFlowNftItemDto(itemId: ItemIdDto, creator: String): FlowNftItemDto {
         mintedAt = nowMillis(),
         lastUpdatedAt = nowMillis(),
         meta = randomFlowMetaDto(),
-        creators = listOf(FlowCreatorDto(creator, randomBigDecimal().stripTrailingZeros())),
+        creators = listOf(FlowCreatorDto(creator, randomBigDecimal())),
         owner = randomString(),
-        royalties = listOf(FlowRoyaltyDto(randomString(), randomBigDecimal().stripTrailingZeros())),
+        royalties = listOf(FlowRoyaltyDto(randomString(), randomBigDecimal())),
         supply = randomBigInt(),
         deleted = randomBoolean()
     )
@@ -102,7 +102,7 @@ fun randomFlowNftOwnershipDto(itemId: ItemIdDto, creator: String): FlowNftOwners
         contract = ownershipId.token.value,
         tokenId = ownershipId.tokenId,
         owner = ownershipId.owner.value,
-        creators = listOf(PayInfoDto(creator, randomBigDecimal().stripTrailingZeros())),
+        creators = listOf(PayInfoDto(creator, randomBigDecimal())),
         createdAt = nowMillis()
     )
 }
@@ -126,15 +126,15 @@ fun randomFlowV1OrderDto(itemId: ItemIdDto): FlowOrderDto {
         taker = randomFlowAddress().value,
         make = randomFlowAsset(),
         take = randomFlowFungibleAsset(),
-        fill = randomBigDecimal().stripTrailingZeros(),
+        fill = randomBigDecimal(),
         status = FlowOrderStatusDto.ACTIVE,
         cancelled = randomBoolean(),
         createdAt = nowMillis(),
-        amount = randomBigDecimal().stripTrailingZeros(),
-        priceUsd = randomBigDecimal().stripTrailingZeros(),
+        amount = randomBigDecimal(),
+        priceUsd = randomBigDecimal(),
         data = FlowOrderDataDto(
-            payouts = listOf(PayInfoDto(randomString(), randomBigDecimal().stripTrailingZeros())),
-            originalFees = listOf(PayInfoDto(randomString(), randomBigDecimal().stripTrailingZeros()))
+            payouts = listOf(PayInfoDto(randomString(), randomBigDecimal())),
+            originalFees = listOf(PayInfoDto(randomString(), randomBigDecimal()))
         ),
         collection = randomFlowContract().value,
         lastUpdateAt = nowMillis(),
@@ -150,7 +150,7 @@ fun randomFlowAsset(): FlowAssetDto {
 
 fun randomFlowFungibleAsset() = randomFlowFungibleAsset(randomFlowAddress())
 fun randomFlowFungibleAsset(contract: UnionAddress) = FlowAssetFungibleDto(
-    value = randomBigDecimal().stripTrailingZeros(),
+    value = randomBigDecimal(),
     contract = contract.value
 )
 
@@ -158,14 +158,14 @@ fun randomFlowNftAsset() = randomFlowNftAsset(randomFlowAddress(), randomBigInt(
 fun randomFlowNftAsset(contract: UnionAddress, tokenId: BigInteger) = FlowAssetNFTDto(
     contract = contract.value,
     tokenId = tokenId,
-    value = randomBigDecimal().stripTrailingZeros()
+    value = randomBigDecimal()
 )
 
 fun randomFlowNftOrderActivitySell(): FlowNftOrderActivitySellDto {
     return FlowNftOrderActivitySellDto(
         id = randomString(),
         date = nowMillis(),
-        price = randomBigDecimal().stripTrailingZeros(),
+        price = randomBigDecimal(),
         left = randomFlowOrderActivityMatchSideDto().copy(type = FlowOrderActivityMatchSideDto.Type.BID),
         right = randomFlowOrderActivityMatchSideDto().copy(type = FlowOrderActivityMatchSideDto.Type.SELL),
         transactionHash = randomString(),
@@ -181,9 +181,9 @@ fun randomFlowNftOrderActivityListDto(): FlowNftOrderActivityListDto {
         date = nowMillis(),
         hash = randomString(),
         maker = randomString(),
-        make = FlowAssetFungibleDto(randomString(), randomBigDecimal().stripTrailingZeros()),
-        take = FlowAssetFungibleDto(randomString(), randomBigDecimal().stripTrailingZeros()),
-        price = randomBigDecimal().stripTrailingZeros()
+        make = FlowAssetFungibleDto(randomString(), randomBigDecimal()),
+        take = FlowAssetFungibleDto(randomString(), randomBigDecimal()),
+        price = randomBigDecimal()
     )
 }
 
@@ -194,9 +194,9 @@ fun randomFlowCancelListActivityDto(): FlowNftOrderActivityCancelListDto {
         date = nowMillis(),
         hash = randomString(),
         maker = randomString(),
-        make = FlowAssetFungibleDto(randomString(), randomBigDecimal().stripTrailingZeros()),
-        take = FlowAssetFungibleDto(randomString(), randomBigDecimal().stripTrailingZeros()),
-        price = randomBigDecimal().stripTrailingZeros()
+        make = FlowAssetFungibleDto(randomString(), randomBigDecimal()),
+        take = FlowAssetFungibleDto(randomString(), randomBigDecimal()),
+        price = randomBigDecimal()
     )
 }
 

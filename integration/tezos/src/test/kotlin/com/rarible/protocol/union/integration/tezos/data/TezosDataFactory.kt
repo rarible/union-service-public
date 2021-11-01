@@ -184,24 +184,24 @@ fun randomTezosItemMetaAttribute(): NftItemAttributeDto {
 fun randomTezosAssetFa2() = randomTezosAssetFa2(randomTezosItemId())
 fun randomTezosAssetFa2(itemId: ItemIdDto) = AssetDto(
     assetType = FA_2AssetTypeDto(itemId.token.value, itemId.tokenId),
-    value = randomBigDecimal().stripTrailingZeros()
+    value = randomBigDecimal()
 )
 
 fun randomTezosAssetXtz() = AssetDto(
     assetType = XTZAssetTypeDto(),
-    value = randomBigDecimal().stripTrailingZeros()
+    value = randomBigDecimal()
 )
 
 fun randomTezosAssetFa12() = AssetDto(
     assetType = FA_1_2AssetTypeDto(randomString()),
-    value = randomBigDecimal().stripTrailingZeros()
+    value = randomBigDecimal()
 )
 
 fun randomTezosOrderPriceHistoryRecordDto(): OrderPriceHistoryRecordDto {
     return OrderPriceHistoryRecordDto(
         date = nowMillis(),
-        makeValue = randomBigDecimal().stripTrailingZeros(),
-        takeValue = randomBigDecimal().stripTrailingZeros()
+        makeValue = randomBigDecimal(),
+        takeValue = randomBigDecimal()
     )
 }
 
@@ -212,7 +212,7 @@ fun randomTezosOrderActivityMatch(): OrderActivityMatchDto {
         source = "RARIBLE",
         left = randomTezosOrderActivityMatchSide(),
         right = randomTezosOrderActivityMatchSide(),
-        price = randomBigDecimal().stripTrailingZeros(),
+        price = randomBigDecimal(),
         transactionHash = randomString(),
         blockHash = randomString(),
         blockNumber = randomBigInt(8),
@@ -230,7 +230,7 @@ fun randomTezosOrderBidActivity(): OrderActivityBidDto {
         maker = randomString(),
         make = randomTezosAssetFa12(),
         take = randomTezosAssetFa2(),
-        price = randomBigDecimal().stripTrailingZeros()
+        price = randomBigDecimal()
     )
 }
 
@@ -243,7 +243,7 @@ fun randomTezosOrderListActivity(): OrderActivityListDto {
         maker = randomString(),
         make = randomTezosAssetFa2(),
         take = randomTezosAssetFa12(),
-        price = randomBigDecimal().stripTrailingZeros()
+        price = randomBigDecimal()
     )
 }
 

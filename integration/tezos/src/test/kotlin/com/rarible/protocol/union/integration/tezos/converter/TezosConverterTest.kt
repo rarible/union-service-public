@@ -18,7 +18,7 @@ class TezosConverterTest {
 
     @Test
     fun `asset`() {
-        val asset = AssetDto(XTZAssetTypeDto(), randomBigDecimal().stripTrailingZeros())
+        val asset = AssetDto(XTZAssetTypeDto(), randomBigDecimal())
 
         val converted = TezosConverter.convert(asset, BlockchainDto.TEZOS)
 
