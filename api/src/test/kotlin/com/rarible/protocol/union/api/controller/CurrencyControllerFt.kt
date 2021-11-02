@@ -45,7 +45,7 @@ class CurrencyControllerFt : AbstractIntegrationTest() {
 
         assertThat(result.currencyId).isEqualTo(address)
         assertThat(result.date).isEqualTo(now)
-        assertThat(result.rate.stripTrailingZeros()).isEqualTo(currencyDto.rate)
+        assertThat(result.rate).isEqualTo(currencyDto.rate.stripTrailingZeros())
     }
 
     @Test

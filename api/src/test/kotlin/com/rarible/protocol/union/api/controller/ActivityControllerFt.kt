@@ -73,7 +73,8 @@ class ActivityControllerFt : AbstractIntegrationTest() {
                 types.map { it.name },
                 flowCollectionId.value,
                 continuation,
-                size
+                size,
+                any()
             )
         } returns FlowActivitiesDto(1, null, listOf(activity)).toMono()
 
@@ -134,7 +135,7 @@ class ActivityControllerFt : AbstractIntegrationTest() {
                 types.map { it.name },
                 flowItemId.value,
                 tokenId,
-                continuation, size
+                continuation, size, any()
             )
         } returns FlowActivitiesDto(1, null, listOf(activity)).toMono()
 
@@ -149,7 +150,7 @@ class ActivityControllerFt : AbstractIntegrationTest() {
     @Test
     fun `get all activities - asc`() = runBlocking<Unit> {
         val types = ActivityTypeDto.values().toList()
-        val blockchains = listOf<BlockchainDto>()
+        val blockchains = listOf(BlockchainDto.ETHEREUM, BlockchainDto.POLYGON, BlockchainDto.FLOW)
         val size = 3
         val now = nowMillis()
 
@@ -191,7 +192,7 @@ class ActivityControllerFt : AbstractIntegrationTest() {
         } returns NftActivitiesDto(null, polygonItemActivities).toMono()
 
         coEvery {
-            testFlowActivityApi.getNftOrderAllActivities(any(), isNull(), eq(size))
+            testFlowActivityApi.getNftOrderAllActivities(any(), isNull(), eq(size), any())
         } returns FlowActivitiesDto(1, null, flowActivities).toMono()
 
         val activities = activityControllerApi.getAllActivities(
