@@ -44,7 +44,7 @@ integration:
       broker-replica-set: ${kafka.hosts}
       workers:
         item: 1
-        ownership: 2
+        ownership: 4
         order: 5
   polygon:
     enabled: ${consul.polygon.enabled:true}
