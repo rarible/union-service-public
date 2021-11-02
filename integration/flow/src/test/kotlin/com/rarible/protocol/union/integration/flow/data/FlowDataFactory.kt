@@ -113,7 +113,8 @@ fun randomFlowCollectionDto(id: String): FlowNftCollectionDto {
         id = id,
         name = randomString(),
         symbol = randomString(2),
-        owner = randomString()
+        owner = randomString(),
+        features = listOf(FlowNftCollectionDto.Features.BURN)
     )
 }
 
