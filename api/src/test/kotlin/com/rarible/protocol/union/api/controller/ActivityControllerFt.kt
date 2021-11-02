@@ -150,7 +150,7 @@ class ActivityControllerFt : AbstractIntegrationTest() {
     @Test
     fun `get all activities - asc`() = runBlocking<Unit> {
         val types = ActivityTypeDto.values().toList()
-        val blockchains = listOf<BlockchainDto>()
+        val blockchains = listOf(BlockchainDto.ETHEREUM, BlockchainDto.POLYGON, BlockchainDto.FLOW)
         val size = 3
         val now = nowMillis()
 
