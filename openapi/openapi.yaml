@@ -11,6 +11,7 @@ paths:
     post:
       tags:
         - signature-controller
+      description: "Validation of the order signature"
       operationId: validate
       requestBody:
         content:
@@ -36,21 +37,25 @@ paths:
     get:
       tags:
         - currency-controller
+      description: "Get currency USD rate"
       operationId: getCurrencyUsdRate
       parameters:
         - name: blockchain
           in: query
           required: true
+          description: "Type of the blockchain network"
           schema:
             "$ref": "#/components/schemas/Blockchain"
         - name: address
           in: query
           required: true
+          description: "Address of the NFT"
           schema:
             type: string
         - name: at
           in: query
           required: true
+          description: "Date and time for getting currency USD rate"
           schema:
             type: string
             format: date-time
@@ -72,12 +77,13 @@ paths:
     get:
       tags:
         - item-controller
-      description: "returns Item by identifier"
+      description: "Returns Item by Id"
       operationId: getItemById
       parameters:
         - name: "itemId"
           in: path
           required: true
+          description: "Item Id, has format `${blockchain}:${token}:${tokenId}`"
           schema:
             type: string
       responses:
@@ -98,12 +104,13 @@ paths:
     delete:
       tags:
         - item-controller
-      description: Deletes the NFT item meta by identifier
+      description: "Deletes the NFT item meta by Id"
       operationId: resetItemMeta
       parameters:
         - name: itemId
           in: path
           required: true
+          description: "Item Id, has format `${blockchain}:${token}:${tokenId}`"
           schema:
             type: string
       responses:
@@ -118,21 +125,25 @@ paths:
     get:
       tags:
         - item-controller
+      description: "Returns Item by owner"
       operationId: getItemsByOwner
       parameters:
         - name: "owner"
           in: query
           required: true
+          description: "Address of the item owner"
           schema:
             type: string
         - name: "continuation"
           in: query
           required: false
+          description: "Continuation token from the previous response"
           schema:
             type: string
         - name: "size"
           in: query
           required: false
+          description: "The number of items to return"
           schema:
             type: integer
       responses:
@@ -151,21 +162,25 @@ paths:
     get:
       tags:
         - item-controller
+      description: "Returns Item by creator"
       operationId: getItemsByCreator
       parameters:
         - name: "creator"
           in: query
           required: true
+          description: "Address of the item creator"
           schema:
             type: string
         - name: "continuation"
           in: query
           required: false
+          description: "Continuation token from the previous response"
           schema:
             type: string
         - name: "size"
           in: query
           required: false
+          description: "The number of items to return"
           schema:
             type: integer
       responses:
@@ -184,21 +199,25 @@ paths:
     get:
       tags:
         - item-controller
+      description: "Returns items by collection"
       operationId: getItemsByCollection
       parameters:
         - name: "collection"
           in: query
           required: true
+          description: "Address of the collection"
           schema:
             type: string
         - name: "continuation"
           in: query
           required: false
+          description: "Continuation token from the previous response"
           schema:
             type: string
         - name: "size"
           in: query
           required: false
+          description: "The number of items to return"
           schema:
             type: integer
       responses:
@@ -217,11 +236,13 @@ paths:
     get:
       tags:
         - item-controller
+      description: "Returns all items"
       operationId: getAllItems
       parameters:
         - name: "blockchains"
           in: query
           required: false
+          description: "Names of the blockchain networks. If no one specified, data from all blockchains will be returned"
           schema:
             type: array
             items:
@@ -229,27 +250,32 @@ paths:
         - name: "continuation"
           in: query
           required: false
+          description: "Continuation token from the previous response"
           schema:
             type: string
         - name: "size"
           in: query
           required: false
+          description: "The number of items to return"
           schema:
             type: integer
         - name: "showDeleted"
           in: query
           required: false
+          description: "Include deleted items"
           schema:
             type: boolean
         - name: "lastUpdatedFrom"
           in: query
           required: false
+          description: "Filter condition to return only items that have been updated after this date (timestamp)"
           schema:
             type: integer
             format: int64
         - name: "lastUpdatedTo"
           in: query
           required: false
+          description: "Filter condition to return only items that have been updated before this date (timestamp)"
           schema:
             type: integer
             format: "int64"
@@ -271,11 +297,13 @@ paths:
     get:
       tags:
         - ownership-controller
+      description: "Returns ownership by Id"
       operationId: getOwnershipById
       parameters:
         - name: "ownershipId"
           in: path
           required: true
+          description: "Ownership Id in format: '${blockchain}:${token}:${tokenId}:${owner}'"
           schema:
             type: string
       responses:
@@ -296,26 +324,31 @@ paths:
     get:
       tags:
         - ownership-controller
+      description: "Returns ownerships by item"
       operationId: getOwnershipsByItem
       parameters:
         - name: "contract"
           in: query
           required: true
+          description: "Address of the contract"
           schema:
             type: string
         - name: "tokenId"
           in: query
           required: true
+          description: "Token Id"
           schema:
             $ref: "#/components/schemas/BigInteger"
         - name: "continuation"
           in: query
           required: false
+          description: "Continuation token from the previous response"
           schema:
             type: string
         - name: "size"
           in: query
           required: false
+          description: "The number of items to return"
           schema:
             type: integer
       responses:
@@ -334,11 +367,13 @@ paths:
     get:
       tags:
         - ownership-controller
+      description: "Returns all ownerships"
       operationId: getAllOwnerships
       parameters:
         - name: "blockchains"
           in: query
           required: false
+          description: "Names of the blockchain networks. If no one specified, data from all blockchains will be returned"
           schema:
             type: array
             items:
@@ -346,11 +381,13 @@ paths:
         - name: "continuation"
           in: query
           required: false
+          description: "Continuation token from the previous response"
           schema:
             type: string
         - name: "size"
           in: query
           required: false
+          description: "The number of items to return"
           schema:
             type: integer
       responses:
@@ -371,11 +408,13 @@ paths:
     get:
       tags:
         - order-controller
+      description: "Returns order by Id"
       operationId: getOrderById
       parameters:
         - name: "id"
           in: "path"
           required: true
+          description: "Order Id, has format '${blockchain}:${id}'"
           schema:
             type: string
       responses:
@@ -396,6 +435,7 @@ paths:
     post:
       tags:
         - order-controller
+      description: "Returns the orders that have been put on sale"
       operationId: getOrdersByIds
       requestBody:
         content:
@@ -419,11 +459,13 @@ paths:
     get:
       tags:
         - order-controller
+      description: "Returns all orders"
       operationId: getOrdersAll
       parameters:
         - name: blockchains
           in: query
           required: false
+          description: "Type of the blockchain network"
           schema:
             type: array
             items:
@@ -431,21 +473,25 @@ paths:
         - name: platform
           in: query
           required: false
+          description: "The platform where the order was created"
           schema:
             "$ref": "#/components/schemas/Platform"
         - name: "origin"
           in: query
           required: false
+          description: "Address of the consumer to receive the commission for the order"
           schema:
             type: string
         - name: "continuation"
           in: query
           required: false
+          description: "Continuation token from the previous response"
           schema:
             type: string
         - name: "size"
           in: query
           required: false
+          description: "The number of items to return"
           schema:
             type: integer
       responses:
@@ -464,31 +510,37 @@ paths:
     get:
       tags:
         - order-controller
+      description: "Returns sell orders by maker"
       operationId: getSellOrdersByMaker
       parameters:
         - name: platform
           in: query
           required: false
+          description: "The platform where the order was created"
           schema:
             "$ref": "#/components/schemas/Platform"
         - name: "maker"
           in: query
           required: true
+          description: "The maker of the order"
           schema:
             type: string
         - name: "origin"
           in: query
           required: false
+          description: "Address of the consumer to receive the commission for the order"
           schema:
             type: string
         - name: "continuation"
           in: query
           required: false
+          description: "Continuation token from the previous response"
           schema:
             type: string
         - name: "size"
           in: query
           required: false
+          description: "The number of items to return"
           schema:
             minimum: 1
             type: integer
@@ -508,36 +560,43 @@ paths:
     get:
       tags:
         - order-controller
+      description: "Returns sell orders by item"
       operationId: getSellOrdersByItem
       parameters:
         - name: platform
           in: query
           required: false
+          description: "The platform where the order was created"
           schema:
             "$ref": "#/components/schemas/Platform"
         - name: "contract"
           in: query
           required: true
+          description: "Address of the contract"
           schema:
             type: string
         - name: "tokenId"
           in: query
           required: true
+          description: "Token Id"
           schema:
             $ref: "#/components/schemas/BigInteger"
         - name: "maker"
           in: query
           required: false
+          description: "The maker of the bid"
           schema:
             type: string
         - name: "origin"
           in: query
           required: false
+          description: "Address of the consumer to receive the commission for the order"
           schema:
             type: string
         - name: "status"
           in: query
           required: false
+          description: "Order status"
           schema:
             type: "array"
             items:
@@ -545,11 +604,13 @@ paths:
         - name: "continuation"
           in: query
           required: false
+          description: "Continuation token from the previous response"
           schema:
             type: string
         - name: "size"
           in: query
           required: false
+          description: "The number of items to return"
           schema:
             minimum: 1
             type: integer
@@ -569,31 +630,37 @@ paths:
     get:
       tags:
         - order-controller
+      description: "Returns sell orders by collection"
       operationId: getSellOrdersByCollection
       parameters:
         - name: platform
           in: query
           required: false
+          description: "The platform where the order was created"
           schema:
             "$ref": "#/components/schemas/Platform"
         - name: "collection"
           in: query
           required: true
+          description: "Address of the collection"
           schema:
             type: string
         - name: "origin"
           in: query
           required: false
+          description: "Address of the consumer to receive the commission for the order"
           schema:
             type: string
         - name: "continuation"
           in: query
           required: false
+          description: "Continuation token from the previous response"
           schema:
             type: string
         - name: "size"
           in: query
           required: false
+          description: "The number of items to return"
           schema:
             minimum: 1
             type: integer
@@ -614,11 +681,13 @@ paths:
     get:
       tags:
         - order-controller
+      description: "Returns all sell orders"
       operationId: getSellOrders
       parameters:
         - name: "blockchains"
           in: query
           required: false
+          description: "Names of the blockchain networks. If no one specified, data from all blockchains will be returned"
           schema:
             type: array
             items:
@@ -626,21 +695,25 @@ paths:
         - name: platform
           in: query
           required: false
+          description: "The platform where the order was created"
           schema:
             "$ref": "#/components/schemas/Platform"
         - name: "origin"
           in: query
           required: false
+          description: "Address of the consumer to receive the commission for the order"
           schema:
             type: string
         - name: "continuation"
           in: query
           required: false
+          description: "Continuation token from the previous response"
           schema:
             type: string
         - name: "size"
           in: query
           required: false
+          description: "The number of items to return"
           schema:
             minimum: 1
             type: integer
@@ -661,26 +734,31 @@ paths:
     get:
       tags:
         - order-controller
+      description: "Returns order bids by maker"
       operationId: getOrderBidsByMaker
       parameters:
         - name: platform
           in: query
           required: false
+          description: "The platform where the order was created"
           schema:
             "$ref": "#/components/schemas/Platform"
         - name: "maker"
           in: query
           required: true
+          description: "The maker of the order"
           schema:
             type: string
         - name: "origin"
           in: query
           required: false
+          description: "Address of the consumer to receive the commission for the order"
           schema:
             type: string
         - name: "status"
           in: query
           required: false
+          description: "Order status"
           schema:
             type: "array"
             items:
@@ -688,23 +766,27 @@ paths:
         - name: "start"
           in: query
           required: false
+          description: "Lower time border of data (timestamp)"
           schema:
             type: integer
             format: int64
         - name: "end"
           in: query
           required: false
+          description: "Upper time border of data (timestamp)"
           schema:
             type: integer
             format: int64
         - name: "continuation"
           in: query
           required: false
+          description: "Continuation token from the previous response"
           schema:
             type: string
         - name: "size"
           in: query
           required: false
+          description: "The number of items to return"
           schema:
             minimum: 1
             type: integer
@@ -725,36 +807,43 @@ paths:
     get:
       tags:
         - order-controller
+      description: "Returns order bids by item"
       operationId: getOrderBidsByItem
       parameters:
         - name: platform
           in: query
           required: false
+          description: "The platform where the order was created"
           schema:
             "$ref": "#/components/schemas/Platform"
         - name: "contract"
           in: query
           required: true
+          description: "Address of the contract"
           schema:
             type: string
         - name: "tokenId"
           in: query
           required: true
+          description: "Token Id"
           schema:
             $ref: "#/components/schemas/BigInteger"
         - name: "maker"
           in: query
           required: false
+          description: "The maker of the bid"
           schema:
             type: string
         - name: "origin"
           in: query
           required: false
+          description: "Address of the consumer to receive the commission for the order"
           schema:
             type: string
         - name: "status"
           in: query
           required: false
+          description: "Order status"
           schema:
             type: "array"
             items:
@@ -762,23 +851,27 @@ paths:
         - name: "start"
           in: query
           required: false
+          description: "Lower time border of data (timestamp)"
           schema:
             type: integer
             format: int64
         - name: "end"
           in: query
           required: false
+          description: "Upper time border of data (timestamp)"
           schema:
             type: integer
             format: int64
         - name: "continuation"
           in: query
           required: false
+          description: "Continuation token from the previous response"
           schema:
             type: string
         - name: "size"
           in: query
           required: false
+          description: "The number of items to return"
           schema:
             type: integer
       responses:
@@ -799,11 +892,13 @@ paths:
     get:
       tags:
         - activity-controller
+      description: "Returns activities by user"
       operationId: getActivitiesByUser
       parameters:
         - name: "type"
           in: query
           required: true
+          description: "Activity type"
           schema:
             type: "array"
             items:
@@ -811,6 +906,7 @@ paths:
         - name: "user"
           in: query
           required: true
+          description: "Address of the user"
           schema:
             type: array
             items:
@@ -818,28 +914,33 @@ paths:
         - name: "from"
           in: query
           required: false
+          description: "Lower time border of data"
           schema:
             type: string
             format: "date-time"
         - name: "to"
           in: query
           required: false
+          description: "Upper time border of data"
           schema:
             type: string
             format: "date-time"
         - name: "continuation"
           in: query
           required: false
+          description: "Continuation token from the previous response"
           schema:
             type: string
         - name: "size"
           in: query
           required: false
+          description: "The number of items to return"
           schema:
             type: integer
         - name: sort
           in: query
           required: false
+          description: "Sorting by data update time"
           schema:
             "$ref": "#/components/schemas/ActivitySort"
       responses:
@@ -858,11 +959,13 @@ paths:
     get:
       tags:
         - activity-controller
+      description: "Returns activities by item"
       operationId: getActivitiesByItem
       parameters:
         - name: "type"
           in: query
           required: true
+          description: "Activity type"
           schema:
             type: "array"
             items:
@@ -870,26 +973,31 @@ paths:
         - name: "contract"
           in: query
           required: true
+          description: "Address of the contract"
           schema:
             type: string
         - name: "tokenId"
           in: query
           required: true
+          description: "Token Id"
           schema:
             $ref: "#/components/schemas/BigInteger"
         - name: "continuation"
           in: query
           required: false
+          description: "Continuation token from the previous response"
           schema:
             type: string
         - name: "size"
           in: query
           required: false
+          description: "The number of items to return"
           schema:
             type: integer
         - name: sort
           in: query
           required: false
+          description: "Sorting by data update time"
           schema:
             "$ref": "#/components/schemas/ActivitySort"
       responses:
@@ -908,11 +1016,13 @@ paths:
     get:
       tags:
         - activity-controller
+      description: "Returns activities by collection"
       operationId: getActivitiesByCollection
       parameters:
         - name: "type"
           in: query
           required: true
+          description: "Activity type"
           schema:
             type: "array"
             items:
@@ -920,21 +1030,25 @@ paths:
         - name: "collection"
           in: query
           required: true
+          description: "Address of the collection"
           schema:
             type: string
         - name: "continuation"
           in: query
           required: false
+          description: "Continuation token from the previous response"
           schema:
             type: string
         - name: "size"
           in: query
           required: false
+          description: "The number of items to return"
           schema:
             type: integer
         - name: sort
           in: query
           required: false
+          description: "Sorting by data update time"
           schema:
             "$ref": "#/components/schemas/ActivitySort"
       responses:
@@ -953,11 +1067,13 @@ paths:
     get:
       tags:
         - activity-controller
+      description: "Returns all activities"
       operationId: getAllActivities
       parameters:
         - name: "blockchains"
           in: query
           required: false
+          description: "Names of the blockchain networks. If no one specified, data from all blockchains will be returned"
           schema:
             type: array
             items:
@@ -965,6 +1081,7 @@ paths:
         - name: "type"
           in: query
           required: true
+          description: "Activity type"
           schema:
             type: "array"
             items:
@@ -972,17 +1089,20 @@ paths:
         - name: "continuation"
           in: query
           required: false
+          description: "Continuation token from the previous response"
           schema:
             type: string
         - name: "size"
           in: query
           required: false
+          description: "The number of items to return"
           schema:
             type: integer
             format: int32
         - name: sort
           in: query
           required: false
+          description: "Sorting by data update time"
           schema:
             "$ref": "#/components/schemas/ActivitySort"
       responses:
@@ -1003,12 +1123,13 @@ paths:
     get:
       tags:
         - collection-controller
-      description: "Returns Collection by address"
+      description: "Returns collection by address"
       operationId: getCollectionById
       parameters:
         - name: "collection"
           in: path
           required: true
+          description: "Address of the collection"
           schema:
             type: string
       responses:
@@ -1029,22 +1150,25 @@ paths:
     get:
       tags:
         - collection-controller
+      description: "Returns collection by owner"
       operationId: getCollectionsByOwner
       parameters:
         - name: "owner"
           in: query
-          description: "owner of searching collections"
+          description: "Owner of searching collections"
           required: true
           schema:
             type: string
         - name: "continuation"
           in: query
           required: false
+          description: "Continuation token from the previous response"
           schema:
             type: string
         - name: "size"
           in: query
           required: false
+          description: "The number of items to return"
           schema:
             type: integer
       responses:
@@ -1063,11 +1187,13 @@ paths:
     get:
       tags:
         - collection-controller
+      description: "Returns all collections"
       operationId: getAllCollections
       parameters:
         - name: "blockchains"
           in: query
           required: false
+          description: "Names of the blockchain networks. If no one specified, data from all blockchains will be returned"
           schema:
             type: array
             items:
@@ -1075,11 +1201,13 @@ paths:
         - name: "continuation"
           in: query
           required: false
+          description: "Continuation token from the previous response"
           schema:
             type: string
         - name: "size"
           in: query
           required: false
+          description: "The number of items to return"
           schema:
             type: integer
             format: int32
@@ -1127,10 +1255,12 @@ components:
           $ref: "#/components/schemas/UnionAddress"
         publicKey:
           type: string
+          description: "The creator's public key"
         message:
           type: string
         signature:
           type: string
+          description: "Digital signature of the signer"
 
     ################## Currency - Union ##################
 
@@ -1143,11 +1273,13 @@ components:
       properties:
         currencyId:
           type: string
+          description: "Currency Id"
         rate:
           $ref: '#/components/schemas/BigDecimal'
         date:
           type: string
           format: date-time
+          description: "Date and time of currency USD rate"
 
     #################### Meta - Union ####################
 
@@ -1156,14 +1288,18 @@ components:
       properties:
         name:
           type: string
+          description: "Name of the NFT item"
         description:
           type: string
+          description: "Description of the NFT item"
         attributes:
           type: array
+          description: "Attributes of the NFT item"
           items:
             "$ref": "#/components/schemas/MetaAttribute"
         content:
           type: array
+          description: "NFT content information"
           items:
             $ref: "#/components/schemas/MetaContent"
         raw:
@@ -1240,6 +1376,7 @@ components:
 
     ItemId:
       type: string
+      description: "Item Id, has format `${blockchain}:${token}:${tokenId}`"
       example: "${blockchain}:${token}:${tokenId}"
 
     Item:
@@ -1253,16 +1390,19 @@ components:
           $ref: "#/components/schemas/UnionAddress"
         creators:
           type: array
+          description: "Creators of the target item"
           default: [ ]
           items:
             $ref: "#/components/schemas/Creator"
         owners:
           type: array
+          description: "Owners of the target item"
           default: [ ]
           items:
             $ref: "#/components/schemas/UnionAddress"
         royalties:
           type: array
+          description: "List of royalties"
           default: [ ]
           items:
             $ref: "#/components/schemas/Royalty"
@@ -1270,21 +1410,25 @@ components:
           $ref: "#/components/schemas/BigInteger"
         pending:
           type: array
+          description: "Pending information about the item"
           default: [ ]
           items:
             $ref: "#/components/schemas/ItemTransfer"
         mintedAt:
           type: string
           format: date-time
+          description: "Date and time of the item minting"
         lastUpdatedAt:
           type: string
           format: date-time
+          description: "Filter condition to return only items that have been updated at this date"
         supply:
           $ref: "#/components/schemas/BigInteger"
         meta:
           $ref: "#/components/schemas/Meta"
         deleted:
           type: boolean
+          description: "Item was deleted or not"
         bestSellOrder:
           $ref: "#/components/schemas/Order"
         bestBidOrder:
@@ -1417,6 +1561,7 @@ components:
           $ref: "#/components/schemas/UnionAddress"
         creators:
           type: array
+          description: "Creators of the target item"
           default: [ ]
           items:
             $ref: "#/components/schemas/Creator"
@@ -1424,6 +1569,7 @@ components:
           $ref: "#/components/schemas/BigInteger"
         pending:
           type: array
+          description: "Pending information about the item"
           default: [ ]
           items:
             $ref: "#/components/schemas/ItemHistory"
@@ -1586,6 +1732,7 @@ components:
       properties:
         ids:
           type: array
+          description: "Array of the orders Ids in format '${blockchain}:${id}'"
           items:
             type: string
 
@@ -1643,6 +1790,7 @@ components:
           type: string
         pending:
           type: array
+          description: "Pending information about the order"
           default: [ ]
           items:
             $ref: "#/components/schemas/PendingOrder"
@@ -2179,6 +2327,7 @@ components:
           default: NOT_FOUND
         message:
           type: string
+          description: "Error message"
 
     UnionApiErrorBadRequest:
       required:
@@ -2194,6 +2343,7 @@ components:
           default: BAD_REQUEST
         message:
           type: string
+          description: "Error message"
 
     UnionApiErrorServerError:
       required:
@@ -2208,6 +2358,7 @@ components:
           default: UNKNOWN
         message:
           type: string
+          description: "Error message"
 
     #################### Order - Eth ####################
 
@@ -2577,6 +2728,7 @@ components:
           type: string
         creators:
           type: array
+          description: "Creators of the target item"
           default: [ ]
           items:
             $ref: "#/components/schemas/Creator"
@@ -2632,6 +2784,7 @@ components:
           $ref: "#/components/schemas/BigInteger"
         creators:
           type: array
+          description: "Creators of the target item"
           default: [ ]
           items:
             $ref: "#/components/schemas/Creator"
