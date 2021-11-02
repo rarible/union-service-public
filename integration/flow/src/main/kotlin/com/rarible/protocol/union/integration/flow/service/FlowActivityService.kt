@@ -28,7 +28,8 @@ class FlowActivityService(
         val result = activityControllerApi.getNftOrderAllActivities(
             types.map { it.name },
             continuation,
-            size
+            size,
+            sort?.name
         ).awaitFirst()
         return flowActivityConverter.convert(result, blockchain)
     }
@@ -44,7 +45,8 @@ class FlowActivityService(
             types.map { it.name },
             collection,
             continuation,
-            size
+            size,
+            sort?.name
         ).awaitFirst()
         return flowActivityConverter.convert(result, blockchain)
     }
@@ -62,7 +64,8 @@ class FlowActivityService(
             contract,
             UnionConverter.convertToLong(tokenId),
             continuation,
-            size
+            size,
+            sort?.name
         ).awaitFirst()
         return flowActivityConverter.convert(result, blockchain)
     }

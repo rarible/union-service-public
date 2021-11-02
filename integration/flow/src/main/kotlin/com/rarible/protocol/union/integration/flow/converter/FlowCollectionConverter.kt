@@ -15,7 +15,8 @@ object FlowCollectionConverter {
             name = source.name,
             symbol = source.symbol,
             owner = UnionAddressConverter.convert(source.owner, blockchain),
-            type = CollectionDto.Type.FLOW
+            type = CollectionDto.Type.FLOW,
+            features = convert(source.features)
         )
     }
 
@@ -27,6 +28,16 @@ object FlowCollectionConverter {
         )
     }
 
+    fun convert(feature: FlowNftCollectionDto.Features): CollectionDto.Features {
+        return when(feature) {
+            FlowNftCollectionDto.Features.BURN -> CollectionDto.Features.BURN
+            FlowNftCollectionDto.Features.SECONDARY_SALE_FEES -> CollectionDto.Features.SECONDARY_SALE_FEES
+        }
+    }
+
+    fun convert(features: List<FlowNftCollectionDto.Features>): List<CollectionDto.Features> {
+        return features.map(this::convert)
+    }
 
 }
 
