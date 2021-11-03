@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.integration.ethereum.converter
 
+import com.rarible.protocol.dto.CollectionAssetTypeDto
 import com.rarible.protocol.dto.CryptoPunksAssetTypeDto
 import com.rarible.protocol.dto.Erc1155AssetTypeDto
 import com.rarible.protocol.dto.Erc1155LazyAssetTypeDto
@@ -15,6 +16,7 @@ import com.rarible.protocol.union.dto.AssetDto
 import com.rarible.protocol.union.dto.AssetTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CreatorDto
+import com.rarible.protocol.union.dto.EthCollectionAssetTypeDto
 import com.rarible.protocol.union.dto.EthCryptoPunksAssetTypeDto
 import com.rarible.protocol.union.dto.EthErc1155AssetTypeDto
 import com.rarible.protocol.union.dto.EthErc1155LazyAssetTypeDto
@@ -148,6 +150,9 @@ object EthConverter {
                 punkId = source.punkId
             )
             is GenerativeArtAssetTypeDto -> EthGenerativeArtAssetTypeDto(
+                contract = convert(source.contract, blockchain)
+            )
+            is CollectionAssetTypeDto -> EthCollectionAssetTypeDto(
                 contract = convert(source.contract, blockchain)
             )
         }

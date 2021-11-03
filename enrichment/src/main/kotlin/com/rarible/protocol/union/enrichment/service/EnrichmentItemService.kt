@@ -7,6 +7,7 @@ import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
+import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.enrichment.converter.EnrichedItemConverter
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
@@ -49,6 +50,10 @@ class EnrichmentItemService(
 
     suspend fun findAll(ids: List<ShortItemId>): List<ShortItem> {
         return itemRepository.findAll(ids)
+    }
+
+    suspend fun findByAddress(address: UnionAddress): List<ShortItem> {
+        return itemRepository.findByAddress(address)
     }
 
     suspend fun fetch(itemId: ShortItemId): UnionItem {

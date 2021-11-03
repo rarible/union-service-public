@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.enrichment.repository
 
 import com.mongodb.client.result.DeleteResult
+import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import kotlinx.coroutines.flow.Flow
@@ -48,6 +49,16 @@ class ItemRepository(
     suspend fun findAll(ids: List<ShortItemId>): List<ShortItem> {
         val criteria = Criteria("_id").inValues(ids)
         return template.find<ShortItem>(Query(criteria)).collectList().awaitFirst()
+    }
+
+    suspend fun findByAddress(address: UnionAddress): List<ShortItem> {
+        val query = Query(
+            Criteria().andOperator(
+                ShortItem::blockchain isEqualTo address.blockchain,
+                ShortItem::token isEqualTo address.value
+            )
+        )
+        return template.find(query, ShortItem::class.java).collectList().awaitFirst() //TODO asFlow?
     }
 
     fun findWithMultiCurrency(lastUpdateAt: Instant): Flow<ShortItem> {

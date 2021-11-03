@@ -2,6 +2,7 @@ package com.rarible.protocol.union.listener.service
 
 import com.rarible.core.client.WebClientResponseProxyException
 import com.rarible.protocol.union.core.event.OutgoingOrderEventListener
+import com.rarible.protocol.union.dto.EthCollectionAssetTypeDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderUpdateEventDto
 import com.rarible.protocol.union.dto.ext
@@ -17,6 +18,7 @@ import java.util.*
 class EnrichmentOrderEventService(
     private val enrichmentItemEventService: EnrichmentItemEventService,
     private val enrichmentOwnershipEventService: EnrichmentOwnershipEventService,
+    private val enrichmentCollectionEventService: EnrichmentCollectionEventService,
     private val orderEventListeners: List<OutgoingOrderEventListener>
 ) {
 
@@ -60,10 +62,24 @@ class EnrichmentOrderEventService(
                 }
             }
         }
+        val mcFuture = if (order.make.type is EthCollectionAssetTypeDto) {
+            async {
+                val contract = (order.make.type as EthCollectionAssetTypeDto).contract
+                enrichmentCollectionEventService.onCollectionBestSellOrderUpdate(contract, order, notificationEnabled)
+            }
+        } else null
+        val tcFuture = if (order.take.type is EthCollectionAssetTypeDto) {
+            async {
+                val contract = (order.take.type as EthCollectionAssetTypeDto).contract
+                enrichmentCollectionEventService.onCollectionBestBidOrderUpdate(contract, order, notificationEnabled)
+            }
+        } else null
 
         mFuture?.await()
         tFuture?.await()
         oFuture?.await()
+        mcFuture?.await()
+        tcFuture?.await()
         val event = OrderUpdateEventDto(
             eventId = UUID.randomUUID().toString(),
             orderId = order.id,

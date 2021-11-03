@@ -11,6 +11,7 @@ import com.rarible.core.test.data.randomString
 import com.rarible.core.test.data.randomWord
 import com.rarible.protocol.dto.AssetDto
 import com.rarible.protocol.dto.BurnDto
+import com.rarible.protocol.dto.CollectionAssetTypeDto
 import com.rarible.protocol.dto.CryptoPunkOrderDto
 import com.rarible.protocol.dto.Erc1155AssetTypeDto
 import com.rarible.protocol.dto.Erc20AssetTypeDto
@@ -192,6 +193,13 @@ fun randomEthAssetErc721(itemId: ItemIdDto) = AssetDto(
 fun randomEthAssetErc20() = randomEthAssetErc20(randomAddress())
 fun randomEthAssetErc20(address: Address) = AssetDto(
     assetType = Erc20AssetTypeDto(address),
+    value = randomBigInt(),
+    valueDecimal = randomBigDecimal()
+)
+
+fun randomEthCollectionAsset() = randomEthCollectionAsset(randomAddress())
+fun randomEthCollectionAsset(address: Address) = AssetDto(
+    assetType = CollectionAssetTypeDto(address),
     value = randomBigInt(),
     valueDecimal = randomBigDecimal()
 )
