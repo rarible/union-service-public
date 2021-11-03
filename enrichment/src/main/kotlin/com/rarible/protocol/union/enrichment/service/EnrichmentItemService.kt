@@ -16,6 +16,7 @@ import com.rarible.protocol.union.enrichment.util.spent
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.Flow
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
@@ -52,7 +53,7 @@ class EnrichmentItemService(
         return itemRepository.findAll(ids)
     }
 
-    suspend fun findByAddress(address: UnionAddress): List<ShortItem> {
+    fun findByAddress(address: UnionAddress): Flow<ShortItem> {
         return itemRepository.findByAddress(address)
     }
 

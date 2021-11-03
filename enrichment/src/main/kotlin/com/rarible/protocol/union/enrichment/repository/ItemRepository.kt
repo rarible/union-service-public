@@ -51,16 +51,6 @@ class ItemRepository(
         return template.find<ShortItem>(Query(criteria)).collectList().awaitFirst()
     }
 
-    suspend fun findByAddress(address: UnionAddress): List<ShortItem> {
-        val query = Query(
-            Criteria().andOperator(
-                ShortItem::blockchain isEqualTo address.blockchain,
-                ShortItem::token isEqualTo address.value
-            )
-        )
-        return template.find(query, ShortItem::class.java).collectList().awaitFirst() //TODO asFlow?
-    }
-
     fun findWithMultiCurrency(lastUpdateAt: Instant): Flow<ShortItem> {
         val query = Query(
             Criteria().andOperator(
@@ -69,6 +59,16 @@ class ItemRepository(
             )
         ).withHint(MULTI_CURRENCY_DEFINITION.indexKeys)
 
+        return template.find(query, ShortItem::class.java).asFlow()
+    }
+
+    fun findByAddress(address: UnionAddress): Flow<ShortItem> {
+        val query = Query(
+            Criteria().andOperator(
+                ShortItem::blockchain isEqualTo address.blockchain,
+                ShortItem::token isEqualTo address.value
+            )
+        )
         return template.find(query, ShortItem::class.java).asFlow()
     }
 
@@ -83,8 +83,14 @@ class ItemRepository(
             .on(ShortItem::lastUpdatedAt.name, Sort.Direction.DESC)
             .background()
 
+        private val BLOCKCHAIN_TOKEN_DEFINITION = Index()
+            .on(ShortItem::blockchain.name, Sort.Direction.ASC)
+            .on(ShortItem::token.name, Sort.Direction.ASC)
+            .background()
+
         private val ALL_INDEXES = listOf(
-            MULTI_CURRENCY_DEFINITION
+            MULTI_CURRENCY_DEFINITION,
+            BLOCKCHAIN_TOKEN_DEFINITION
         )
     }
 }

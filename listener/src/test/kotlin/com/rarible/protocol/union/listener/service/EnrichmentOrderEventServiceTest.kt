@@ -40,8 +40,8 @@ class EnrichmentOrderEventServiceTest {
         coEvery { enrichmentItemEventService.onItemBestSellOrderUpdated(any(), any()) } returns Unit
         coEvery { enrichmentItemEventService.onItemBestBidOrderUpdated(any(), any()) } returns Unit
         coEvery { enrichmentOwnershipEventService.onOwnershipBestSellOrderUpdated(any(), any()) } returns Unit
-        coEvery { enrichmentCollectionEventService.onCollectionBestSellOrderUpdate(any(), any()) } returns Unit
-        coEvery { enrichmentCollectionEventService.onCollectionBestBidOrderUpdate(any(), any()) } returns Unit
+        coEvery { enrichmentCollectionEventService.onCollectionBestSellOrderUpdate(any(), any(), any()) } returns Unit
+        coEvery { enrichmentCollectionEventService.onCollectionBestBidOrderUpdate(any(), any(), any()) } returns Unit
     }
 
     @Test
@@ -86,7 +86,7 @@ class EnrichmentOrderEventServiceTest {
         coVerify(exactly = 0) { enrichmentItemEventService.onItemBestSellOrderUpdated(shortItemId, order) }
         coVerify(exactly = 0) { enrichmentItemEventService.onItemBestBidOrderUpdated(any(), any()) }
         coVerify(exactly = 1) {
-            enrichmentCollectionEventService.onCollectionBestSellOrderUpdate(address, order)
+            enrichmentCollectionEventService.onCollectionBestSellOrderUpdate(address, order, true)
         }
     }
 
@@ -109,7 +109,7 @@ class EnrichmentOrderEventServiceTest {
         coVerify(exactly = 0) { enrichmentItemEventService.onItemBestSellOrderUpdated(shortItemId, order) }
         coVerify(exactly = 0) { enrichmentItemEventService.onItemBestBidOrderUpdated(any(), any()) }
         coVerify(exactly = 1) {
-            enrichmentCollectionEventService.onCollectionBestBidOrderUpdate(address, order)
+            enrichmentCollectionEventService.onCollectionBestBidOrderUpdate(address, order, true)
         }
     }
 
