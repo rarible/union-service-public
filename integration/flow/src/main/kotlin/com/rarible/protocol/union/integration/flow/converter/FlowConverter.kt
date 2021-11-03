@@ -12,22 +12,27 @@ import com.rarible.protocol.union.dto.CreatorDto
 import com.rarible.protocol.union.dto.FlowAssetTypeFtDto
 import com.rarible.protocol.union.dto.FlowAssetTypeNftDto
 import com.rarible.protocol.union.dto.OrderPayoutDto
+import java.math.BigDecimal
 
 object FlowConverter {
+
+    private val BP_MULTIPLIER = BigDecimal(10000)
+
+    fun toBasePoints(v: BigDecimal): Int {
+        return v.multiply(BP_MULTIPLIER).toInt()
+    }
 
     fun convertToPayout(source: PayInfoDto, blockchain: BlockchainDto): OrderPayoutDto {
         return OrderPayoutDto(
             account = UnionAddressConverter.convert(source.account, blockchain),
-            value = 0
-            //value = source.value.toInt() //TODO FLOW check
+            value = toBasePoints(source.value)
         )
     }
 
     fun convertToCreator(source: PayInfoDto, blockchain: BlockchainDto): CreatorDto {
         return CreatorDto(
             account = UnionAddressConverter.convert(source.account, blockchain),
-            value = 0
-            //value = source.value.toInt() //TODO FLOW check
+            value = toBasePoints(source.value)
         )
     }
 
