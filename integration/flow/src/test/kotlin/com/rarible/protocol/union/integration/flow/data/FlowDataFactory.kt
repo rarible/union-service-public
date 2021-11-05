@@ -63,9 +63,9 @@ fun randomFlowNftItemDto(itemId: ItemIdDto, creator: String): FlowNftItemDto {
         mintedAt = nowMillis(),
         lastUpdatedAt = nowMillis(),
         meta = randomFlowMetaDto(),
-        creators = listOf(FlowCreatorDto(creator, randomBigDecimal())),
+        creators = listOf(FlowCreatorDto(creator, randomBigDecimal(0, 2))),
         owner = randomString(),
-        royalties = listOf(FlowRoyaltyDto(randomString(), randomBigDecimal())),
+        royalties = listOf(FlowRoyaltyDto(randomString(), randomBigDecimal(0, 2))),
         supply = randomBigInt(),
         deleted = randomBoolean()
     )
@@ -102,7 +102,7 @@ fun randomFlowNftOwnershipDto(itemId: ItemIdDto, creator: String): FlowNftOwners
         contract = ownershipId.token.value,
         tokenId = ownershipId.tokenId,
         owner = ownershipId.owner.value,
-        creators = listOf(PayInfoDto(creator, randomBigDecimal())),
+        creators = listOf(PayInfoDto(creator, randomBigDecimal(0, 2))),
         createdAt = nowMillis()
     )
 }
@@ -134,8 +134,8 @@ fun randomFlowV1OrderDto(itemId: ItemIdDto): FlowOrderDto {
         amount = randomBigDecimal(),
         priceUsd = randomBigDecimal(),
         data = FlowOrderDataDto(
-            payouts = listOf(PayInfoDto(randomString(), randomBigDecimal())),
-            originalFees = listOf(PayInfoDto(randomString(), randomBigDecimal()))
+            payouts = listOf(PayInfoDto(randomString(), randomBigDecimal(0, 2))),
+            originalFees = listOf(PayInfoDto(randomString(), randomBigDecimal(0, 2)))
         ),
         collection = randomFlowContract().value,
         lastUpdateAt = nowMillis(),

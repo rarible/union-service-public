@@ -45,12 +45,10 @@ class FlowOrderConverterTest {
         assertThat(takeType.contract.value).isEqualTo(dto.take.contract)
 
         val data = converted.data as FlowOrderDataV1Dto
-        assertThat(data.payouts[0].value).isEqualTo(0) // TODO FLOW fix later
-        //assertThat(data.payouts[0].value).isEqualTo(dto.data.payouts[0].value)
+        assertThat(data.payouts[0].value).isEqualTo(FlowConverter.toBasePoints(dto.data.payouts[0].value))
         assertThat(data.payouts[0].account.value).isEqualTo(dto.data.payouts[0].account)
 
-        assertThat(data.originFees[0].value).isEqualTo(0) // TODO FLOW fix it later
-        //assertThat(data.originFees[0].value).isEqualTo(dto.data.originalFees[0].value)
+        assertThat(data.originFees[0].value).isEqualTo(FlowConverter.toBasePoints(dto.data.originalFees[0].value))
         assertThat(data.originFees[0].account.value).isEqualTo(dto.data.originalFees[0].account)
     }
 }
