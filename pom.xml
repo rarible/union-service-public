@@ -18,7 +18,7 @@
         <repository>
             <id>nexus-maven-public</id>
             <name>nexus-maven-public</name>
-            <url>http://nexus.rarible.int/repository/maven-public/</url>
+            <url>http://nexus-ext.rarible.int/repository/maven-public/</url>
         </repository>
         <repository>
             <id>jitpack.io</id>
@@ -26,19 +26,10 @@
         </repository>
     </repositories>
 
-    <distributionManagement>
-        <snapshotRepository>
-            <id>nexus-snapshots</id>
-            <url>http://nexus.rarible.int/repository/maven-snapshots/</url>
-        </snapshotRepository>
-        <repository>
-            <id>nexus-releases</id>
-            <url>http://nexus.rarible.int/repository/maven-releases/</url>
-        </repository>
-    </distributionManagement>
-
     <properties>
         <revision>1.17-SNAPSHOT</revision>
+        <maven.deploy.skip>true</maven.deploy.skip>
+
         <nexus.maven.public>http://nexus.rarible.int/repository/maven-public</nexus.maven.public>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
@@ -54,12 +45,6 @@
         <rarible-protocol.ethereum.version>1.17-SNAPSHOT</rarible-protocol.ethereum.version>
         <rarible-protocol.flow.version>2.0.27-SNAPSHOT</rarible-protocol.flow.version>
         <rarible-protocol.tezos.version>1.0.2-SNAPSHOT</rarible-protocol.tezos.version>
-        <rarible.codegen.server.version>1.1.0</rarible.codegen.server.version>
-        <rarible.codegen.client.version>1.2.0</rarible.codegen.client.version>
-
-        <openapi.plugin.version>5.1.0</openapi.plugin.version>
-        <model.generator.version>1.2.5</model.generator.version>
-
         <dev-jna.version>5.7.0</dev-jna.version>
     </properties>
 
@@ -343,10 +328,6 @@
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
             </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>flatten-maven-plugin</artifactId>
-            </plugin>
         </plugins>
     </build>
     <profiles>
@@ -372,7 +353,5 @@
         <module>enrichment</module>
         <module>integration</module>
         <module>listener</module>
-        <module>openapi</module>
-        <module>test-coverage</module>
     </modules>
 </project>
