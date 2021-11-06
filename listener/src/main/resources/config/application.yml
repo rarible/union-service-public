@@ -85,7 +85,7 @@ listener:
     delay: PT1M
 
 meta:
-  ipfsGateway: "https://ipfs.rarible.com/"
+  ipfsGateway: "https://rarible.mypinata.cloud/"
   mediaFetchTimeout: 10000
   mediaFetchMaxSize: 10485760
   openSeaProxyUrl: ${consul.meta.openSeaProxyUrl}

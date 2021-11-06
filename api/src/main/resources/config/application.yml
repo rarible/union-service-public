@@ -44,7 +44,7 @@ common:
       cron: "0 0/30 * * * *"
 
 meta:
-  ipfsGateway: "https://ipfs.rarible.com/"
+  ipfsGateway: "https://rarible.mypinata.cloud/"
   mediaFetchTimeout: 10000
   mediaFetchMaxSize: 10485760
   openSeaProxyUrl: ${consul.meta.openSeaProxyUrl}
