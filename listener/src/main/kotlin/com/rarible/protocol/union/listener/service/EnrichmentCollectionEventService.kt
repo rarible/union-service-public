@@ -5,15 +5,17 @@ import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
-
 import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
+import java.util.concurrent.Executors
 
 @Component
 class EnrichmentCollectionEventService(
@@ -22,38 +24,49 @@ class EnrichmentCollectionEventService(
     private val enrichmentOwnershipEventService: EnrichmentOwnershipEventService
 ) {
 
-    suspend fun onCollectionBestSellOrderUpdate(address: UnionAddress, order: OrderDto, notificationEnabled: Boolean) = coroutineScope {
-        itemService.findByAddress(address).buffer(BUFFER_SIZE).map { item ->
-            val bFuture = async {
-                ignoreApi404 {
-                    enrichmentItemEventService.onItemBestSellOrderUpdated(item.id, order, notificationEnabled)
+    private val logger = LoggerFactory.getLogger(EnrichmentCollectionEventService::class.java)
+    private val threadPoolSize = 4
+    private val threadPool = Executors.newFixedThreadPool(threadPoolSize)
+    private val dispatcher = threadPool.asCoroutineDispatcher()
+    private val scope = CoroutineScope(dispatcher)
+
+    suspend fun onCollectionBestSellOrderUpdate(address: UnionAddress, order: OrderDto, notificationEnabled: Boolean) {
+        itemService.findByCollection(address, order.maker)
+            .map { item ->
+                scope.async {
+                    val bFuture = async {
+                        ignoreApi404 {
+                            enrichmentItemEventService.onItemBestSellOrderUpdated(item, order, notificationEnabled)
+                        }
+                    }
+                    val oFuture = async {
+                        val ownershipId = ShortOwnershipId(
+                            item.blockchain,
+                            item.token,
+                            item.tokenId,
+                            order.maker.value
+                        )
+                        ignoreApi404 {
+                            enrichmentOwnershipEventService.onOwnershipBestSellOrderUpdated(
+                                ownershipId,
+                                order,
+                                notificationEnabled
+                            )
+                        }
+                    }
+                    listOf(bFuture, oFuture).awaitAll()
                 }
-            }
-            val oFuture = async {
-                val ownershipId = ShortOwnershipId(
-                    item.blockchain,
-                    item.token,
-                    item.tokenId,
-                    order.maker.value
-                )
-                ignoreApi404 {
-                    enrichmentOwnershipEventService.onOwnershipBestSellOrderUpdated(
-                        ownershipId,
-                        order,
-                        notificationEnabled
-                    )
-                }
-            }
-            listOf(bFuture, oFuture).awaitAll()
-        }.collect()
+            }.buffer(threadPoolSize).map { it.await() }.flowOn(dispatcher).collect()
     }
 
     suspend fun onCollectionBestBidOrderUpdate(address: UnionAddress, order: OrderDto, notificationEnabled: Boolean) {
-        itemService.findByAddress(address).buffer(BUFFER_SIZE).map { item ->
-            ignoreApi404 {
-                enrichmentItemEventService.onItemBestBidOrderUpdated(item.id, order, notificationEnabled)
+        itemService.findByCollection(address).map { item ->
+            scope.async {
+                ignoreApi404 {
+                    enrichmentItemEventService.onItemBestBidOrderUpdated(item, order, notificationEnabled)
+                }
             }
-        }.collect()
+        }.buffer(threadPoolSize).map { it.await() }.flowOn(dispatcher).collect()
     }
 
     private suspend fun ignoreApi404(call: suspend () -> Unit) {
@@ -62,10 +75,5 @@ class EnrichmentCollectionEventService(
         } catch (ex: WebClientResponseProxyException) {
             logger.warn("Received NOT_FOUND code from client, details: {}, message: {}", ex.data, ex.message)
         }
-    }
-
-    companion object {
-        private const val BUFFER_SIZE = 4
-        private val logger = LoggerFactory.getLogger(EnrichmentCollectionEventService::class.java)
     }
 }

@@ -1,7 +1,6 @@
 package com.rarible.protocol.union.enrichment.repository
 
 import com.mongodb.client.result.DeleteResult
-import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import kotlinx.coroutines.flow.Flow
@@ -62,16 +61,6 @@ class ItemRepository(
         return template.find(query, ShortItem::class.java).asFlow()
     }
 
-    fun findByAddress(address: UnionAddress): Flow<ShortItem> {
-        val query = Query(
-            Criteria().andOperator(
-                ShortItem::blockchain isEqualTo address.blockchain,
-                ShortItem::token isEqualTo address.value
-            )
-        )
-        return template.find(query, ShortItem::class.java).asFlow()
-    }
-
     suspend fun delete(itemId: ShortItemId): DeleteResult? {
         val criteria = Criteria("_id").isEqualTo(itemId)
         return template.remove(Query(criteria), collection).awaitFirstOrNull()
@@ -83,14 +72,8 @@ class ItemRepository(
             .on(ShortItem::lastUpdatedAt.name, Sort.Direction.DESC)
             .background()
 
-        private val BLOCKCHAIN_TOKEN_DEFINITION = Index()
-            .on(ShortItem::blockchain.name, Sort.Direction.ASC)
-            .on(ShortItem::token.name, Sort.Direction.ASC)
-            .background()
-
         private val ALL_INDEXES = listOf(
-            MULTI_CURRENCY_DEFINITION,
-            BLOCKCHAIN_TOKEN_DEFINITION
+            MULTI_CURRENCY_DEFINITION
         )
     }
 }

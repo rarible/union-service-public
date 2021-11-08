@@ -1,8 +1,10 @@
 package com.rarible.protocol.union.listener.service
 
 import com.rarible.core.test.wait.Wait
+import com.rarible.protocol.dto.NftItemsDto
 import com.rarible.protocol.dto.OrderStatusDto
 import com.rarible.protocol.dto.OrdersPaginationDto
+import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.enrichment.converter.EnrichedItemConverter
 import com.rarible.protocol.union.enrichment.converter.ShortItemConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
@@ -27,10 +29,13 @@ import com.rarible.protocol.union.listener.test.IntegrationTest
 import io.mockk.coEvery
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
 
 @FlowPreview
@@ -54,7 +59,6 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
 
     @Autowired
     lateinit var enrichmentMetaService: EnrichmentMetaService
-
 
     @Test
     fun `update event - item doesn't exist`() = runWithKafka {
@@ -348,5 +352,20 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
 
         assertThat(itemWithDotMapKey).isEqualTo(saved.copy(version = null, lastUpdatedAt = item.lastUpdatedAt))
         assertThat(itemWithDotMapKey).isEqualTo(fromMongo.copy(version = null, lastUpdatedAt = item.lastUpdatedAt))
+    }
+
+    @Test
+    fun `should return pages after continuation`() = runBlocking {
+        val itemId = randomEthItemId()
+        val collection = UnionAddress(itemId.blockchain, itemId.token.value)
+
+        val nft = randomEthNftItemDto(itemId)
+        coEvery { testEthereumItemApi.getNftItemsByCollection(eq(collection.value), isNull(), any())
+        } returns Mono.just(NftItemsDto(1, "next", listOf(nft)))
+        coEvery { testEthereumItemApi.getNftItemsByCollection(eq(collection.value), eq("next"), any())
+        } returns Mono.just(NftItemsDto(2, null, listOf(nft, nft)))
+
+        val list = itemService.findByCollection(collection).toList()
+        assertEquals(3, list.size)
     }
 }

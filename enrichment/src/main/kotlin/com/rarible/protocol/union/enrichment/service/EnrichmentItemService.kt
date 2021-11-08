@@ -17,6 +17,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
@@ -29,6 +30,7 @@ class EnrichmentItemService(
 ) {
 
     private val logger = LoggerFactory.getLogger(EnrichmentItemService::class.java)
+    private val FETCH_SIZE = 1_000
 
     suspend fun get(itemId: ShortItemId): ShortItem? {
         return itemRepository.get(itemId)
@@ -53,8 +55,16 @@ class EnrichmentItemService(
         return itemRepository.findAll(ids)
     }
 
-    fun findByAddress(address: UnionAddress): Flow<ShortItem> {
-        return itemRepository.findByAddress(address)
+    suspend fun findByCollection(address: UnionAddress, owner: UnionAddress? = null): Flow<ShortItemId> = flow {
+        var continuation: String? = null
+        do {
+            val page = itemServiceRouter.getService(address.blockchain)
+                .getItemsByCollection(address.value, continuation, FETCH_SIZE)
+            page.entities
+                .filter { item -> owner?.let { item.owners.contains(it) } ?: true }
+                .map { ShortItemId(it.id) }.forEach { emit(it) }
+            continuation = page.continuation
+        } while (continuation != null)
     }
 
     suspend fun fetch(itemId: ShortItemId): UnionItem {
