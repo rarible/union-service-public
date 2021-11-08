@@ -117,7 +117,7 @@ class MediaMetaService(
                 }
             }
         }
-        logger.info("Fetched meta by URL {} ({}ms) : {}", url, result, spent(now))
+        logger.info("Fetched meta by URL {} ({}ms)", url, spent(now))
         return result
     }
 
