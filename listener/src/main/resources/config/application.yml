@@ -59,7 +59,7 @@ integration:
     consumer:
       broker-replica-set: ${kafka.hosts}
       workers:
-        item: 1
+        item: 9
         ownership: 1
         order: 2
   tezos:

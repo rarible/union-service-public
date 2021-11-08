@@ -5,6 +5,7 @@ import com.rarible.protocol.union.core.exception.UnionException
 import com.rarible.protocol.union.core.exception.UnionNotFoundException
 import com.rarible.protocol.union.dto.BlockchainIdFormatException
 import com.rarible.protocol.union.dto.UnionApiErrorBadRequestDto
+import com.rarible.protocol.union.dto.UnionApiErrorEntityNotFoundDto
 import com.rarible.protocol.union.dto.UnionApiErrorServerErrorDto
 import kotlinx.coroutines.reactor.mono
 import org.slf4j.LoggerFactory
@@ -29,7 +30,7 @@ class ErrorsController {
 
     @ExceptionHandler(UnionNotFoundException::class)
     fun handleUnionNotFoundException(ex: Exception) = mono {
-        val error = UnionNotFoundException(ex.message)
+        val error = UnionApiErrorEntityNotFoundDto(message = ex.message ?: "Entity not found")
         logger.warn(error.message)
         ResponseEntity.status(HttpStatus.NOT_FOUND).body(error)
     }
