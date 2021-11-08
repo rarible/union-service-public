@@ -12,10 +12,6 @@
 
     <artifactId>rarible-union-core</artifactId>
 
-    <properties>
-        <maven.deploy.skip>true</maven.deploy.skip>
-    </properties>
-
     <build>
         <resources>
             <resource>
