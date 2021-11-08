@@ -2,9 +2,9 @@ package com.rarible.protocol.union.listener.service
 
 import com.rarible.core.client.WebClientResponseProxyException
 import com.rarible.protocol.union.core.event.OutgoingOrderEventListener
-import com.rarible.protocol.union.dto.EthCollectionAssetTypeDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderUpdateEventDto
+import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.ext
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
@@ -62,16 +62,16 @@ class EnrichmentOrderEventService(
                 }
             }
         }
-        val mcFuture = if (order.make.type is EthCollectionAssetTypeDto) {
+        val mcFuture = if (order.make.type.ext.isCollection) {
             async {
-                val contract = (order.make.type as EthCollectionAssetTypeDto).contract
-                enrichmentCollectionEventService.onCollectionBestSellOrderUpdate(contract, order, notificationEnabled)
+                val address = UnionAddress(order.id.blockchain, order.make.type.ext.contract)
+                enrichmentCollectionEventService.onCollectionBestSellOrderUpdate(address, order, notificationEnabled)
             }
         } else null
-        val tcFuture = if (order.take.type is EthCollectionAssetTypeDto) {
+        val tcFuture = if (order.take.type.ext.isCollection) {
             async {
-                val contract = (order.take.type as EthCollectionAssetTypeDto).contract
-                enrichmentCollectionEventService.onCollectionBestBidOrderUpdate(contract, order, notificationEnabled)
+                val address = UnionAddress(order.id.blockchain, order.take.type.ext.contract)
+                enrichmentCollectionEventService.onCollectionBestBidOrderUpdate(address, order, notificationEnabled)
             }
         } else null
 
