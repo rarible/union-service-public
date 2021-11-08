@@ -5,6 +5,11 @@ import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
+
+import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.map
 import org.slf4j.LoggerFactory
@@ -17,31 +22,34 @@ class EnrichmentCollectionEventService(
     private val enrichmentOwnershipEventService: EnrichmentOwnershipEventService
 ) {
 
-    private val logger = LoggerFactory.getLogger(EnrichmentCollectionEventService::class.java)
-
-    suspend fun onCollectionBestSellOrderUpdate(address: UnionAddress, order: OrderDto, notificationEnabled: Boolean) {
-        itemService.findByAddress(address).map { item ->
-            ignoreApi404 {
-                enrichmentItemEventService.onItemBestSellOrderUpdated(item.id, order, notificationEnabled)
+    suspend fun onCollectionBestSellOrderUpdate(address: UnionAddress, order: OrderDto, notificationEnabled: Boolean) = coroutineScope {
+        itemService.findByAddress(address).buffer(BUFFER_SIZE).map { item ->
+            val bFuture = async {
+                ignoreApi404 {
+                    enrichmentItemEventService.onItemBestSellOrderUpdated(item.id, order, notificationEnabled)
+                }
             }
-            val ownershipId = ShortOwnershipId(
-                item.blockchain,
-                item.token,
-                item.tokenId,
-                order.maker.value
-            )
-            ignoreApi404 {
-                enrichmentOwnershipEventService.onOwnershipBestSellOrderUpdated(
-                    ownershipId,
-                    order,
-                    notificationEnabled
+            val oFuture = async {
+                val ownershipId = ShortOwnershipId(
+                    item.blockchain,
+                    item.token,
+                    item.tokenId,
+                    order.maker.value
                 )
+                ignoreApi404 {
+                    enrichmentOwnershipEventService.onOwnershipBestSellOrderUpdated(
+                        ownershipId,
+                        order,
+                        notificationEnabled
+                    )
+                }
             }
+            listOf(bFuture, oFuture).awaitAll()
         }.collect()
     }
 
     suspend fun onCollectionBestBidOrderUpdate(address: UnionAddress, order: OrderDto, notificationEnabled: Boolean) {
-        itemService.findByAddress(address).map { item ->
+        itemService.findByAddress(address).buffer(BUFFER_SIZE).map { item ->
             ignoreApi404 {
                 enrichmentItemEventService.onItemBestBidOrderUpdated(item.id, order, notificationEnabled)
             }
@@ -54,5 +62,10 @@ class EnrichmentCollectionEventService(
         } catch (ex: WebClientResponseProxyException) {
             logger.warn("Received NOT_FOUND code from client, details: {}, message: {}", ex.data, ex.message)
         }
+    }
+
+    companion object {
+        private const val BUFFER_SIZE = 4
+        private val logger = LoggerFactory.getLogger(EnrichmentCollectionEventService::class.java)
     }
 }

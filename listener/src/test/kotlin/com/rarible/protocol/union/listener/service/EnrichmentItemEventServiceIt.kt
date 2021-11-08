@@ -202,7 +202,6 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
 
         coEvery { testEthereumItemApi.getNftItemById(itemId.value) } returns ethItem.toMono()
         coEvery { testEthereumItemApi.getNftItemMetaById(itemId.value) } returns ethItem.meta!!.toMono()
-        coEvery { testEthereumItemApi.getNftItemMetaById(itemId.value) } returns ethItem.meta!!.toMono()
 
         itemEventService.onItemBestSellOrderUpdated(shortItem.id, unionBestSell)
 
