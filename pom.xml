@@ -50,6 +50,7 @@
         <rarible-protocol.ethereum.version>1.17-SNAPSHOT</rarible-protocol.ethereum.version>
         <rarible-protocol.flow.version>2.0.27-SNAPSHOT</rarible-protocol.flow.version>
         <rarible-protocol.tezos.version>1.0.2-SNAPSHOT</rarible-protocol.tezos.version>
+        <rarible-protocol.union.version>1.7.1-SNAPSHOT</rarible-protocol.union.version>
         <dev-jna.version>5.7.0</dev-jna.version>
     </properties>
 
@@ -152,32 +153,32 @@
             <dependency>
                 <groupId>com.rarible.protocol.union</groupId>
                 <artifactId>protocol-union-model</artifactId>
-                <version>${project.version}</version>
+                <version>${rarible-protocol.union.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.rarible.protocol.union</groupId>
                 <artifactId>protocol-union-api</artifactId>
-                <version>${project.version}</version>
+                <version>${rarible-protocol.union.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.rarible.protocol.union</groupId>
                 <artifactId>protocol-union-client</artifactId>
-                <version>${project.version}</version>
+                <version>${rarible-protocol.union.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.rarible.protocol.union</groupId>
                 <artifactId>protocol-union-client-starter</artifactId>
-                <version>${project.version}</version>
+                <version>${rarible-protocol.union.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.rarible.protocol.union</groupId>
                 <artifactId>protocol-union-subscriber</artifactId>
-                <version>${project.version}</version>
+                <version>${rarible-protocol.union.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.rarible.protocol.union</groupId>
                 <artifactId>protocol-union-subscriber-starter</artifactId>
-                <version>${project.version}</version>
+                <version>${rarible-protocol.union.version}</version>
             </dependency>
 
             <!-- ========== Currency Protocol-API ========= -->
