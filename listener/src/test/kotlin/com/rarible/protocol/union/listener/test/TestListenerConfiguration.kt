@@ -7,6 +7,7 @@ import com.rarible.core.test.ext.KafkaTestExtension.Companion.kafkaContainer
 import com.rarible.protocol.currency.api.client.CurrencyControllerApi
 import com.rarible.protocol.dto.ActivityTopicProvider
 import com.rarible.protocol.dto.FlowActivityDto
+import com.rarible.protocol.dto.FlowActivityEventTopicProvider
 import com.rarible.protocol.dto.FlowNftItemEventDto
 import com.rarible.protocol.dto.FlowNftItemEventTopicProvider
 import com.rarible.protocol.dto.FlowNftOwnershipEventTopicProvider
@@ -32,7 +33,7 @@ import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.OrderEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.dto.UnionEventTopicProvider
-import com.rarible.protocol.union.integration.flow.FlowActivityTopicProvider
+
 import com.rarible.protocol.union.subscriber.UnionKafkaJsonDeserializer
 import com.rarible.protocol.union.subscriber.UnionKafkaJsonSerializer
 import com.rarible.protocol.union.test.mock.CurrencyMock
@@ -224,7 +225,7 @@ class TestListenerConfiguration {
             clientId = "test.union.flow.activity",
             valueSerializerClass = UnionKafkaJsonSerializer::class.java,
             valueClass = FlowActivityDto::class.java,
-            defaultTopic = FlowActivityTopicProvider.getTopic(applicationEnvironmentInfo().name),
+            defaultTopic = FlowActivityEventTopicProvider.getTopic(applicationEnvironmentInfo().name),
             bootstrapServers = kafkaContainer.kafkaBoostrapServers()
         )
     }
