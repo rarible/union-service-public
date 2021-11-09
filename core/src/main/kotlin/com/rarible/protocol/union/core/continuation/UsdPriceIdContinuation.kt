@@ -27,7 +27,7 @@ data class UsdPriceIdContinuation(
         if (result != 0) return result
 
         // Otherwise - using sorting by OrderId
-        return this.id.compareTo(other.id)
+        return this.id.compareTo(other.id) * sign
     }
 
     private fun compareNullable(thisPrice: BigDecimal?, otherPrice: BigDecimal?): Int {

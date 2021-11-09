@@ -77,12 +77,6 @@ class FlowConsumerConfiguration(
     //-------------------- Workers --------------------//
 
     @Bean
-    fun flowActivityConsumerFactory(): FlowActivityEventsConsumerFactory {
-        val replicaSet = consumer.brokerReplicaSet
-        return FlowActivityEventsConsumerFactory(replicaSet, host, env)
-    }
-
-    @Bean
     fun flowNftIndexerConsumerFactory(): FlowNftIndexerEventsConsumerFactory {
         val replicaSet = consumer.brokerReplicaSet
         return FlowNftIndexerEventsConsumerFactory(replicaSet, host, env)
@@ -113,16 +107,16 @@ class FlowConsumerConfiguration(
         factory: FlowNftIndexerEventsConsumerFactory,
         handler: FlowOrderEventHandler
     ): KafkaConsumerWorker<FlowOrderEventDto> {
-        val consumer = factory.createORderEventsConsumer(consumerFactory.orderGroup)
+        val consumer = factory.createOrderEventsConsumer(consumerFactory.orderGroup)
         return consumerFactory.createOrderConsumer(consumer, handler, daemon, workers)
     }
 
     @Bean
     fun flowActivityWorker(
-        factory: FlowActivityEventsConsumerFactory,
+        factory: FlowNftIndexerEventsConsumerFactory,
         handler: FlowActivityEventHandler
     ): KafkaConsumerWorker<FlowActivityDto> {
-        val consumer = factory.createActivityConsumer(consumerFactory.activityGroup)
+        val consumer = factory.createAcitivityEventsConsumer(consumerFactory.activityGroup)
         return consumerFactory.createActivityConsumer(consumer, handler, daemon, workers)
     }
 }

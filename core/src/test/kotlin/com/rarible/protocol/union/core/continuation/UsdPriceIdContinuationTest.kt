@@ -30,23 +30,23 @@ class UsdPriceIdContinuationTest {
         val sorted = listOf(
             // Greatest USD price - first
             UsdPriceIdContinuation(c, dec(1), dec(4), "a0"),
-            // Same price in USD/Currency, y should be before z
-            UsdPriceIdContinuation(c, dec(2), dec(3), "y0"),
+            // Same price in USD/Currency, z should be before y
             UsdPriceIdContinuation(c, dec(2), dec(3), "z0"),
+            UsdPriceIdContinuation(c, dec(2), dec(3), "y0"),
 
             // Greatest price for c1
             UsdPriceIdContinuation(c1, dec(2), null, "y1"),
             // Same prices for c1, ordered by ID
-            UsdPriceIdContinuation(c1, dec(1), null, "y1"),
             UsdPriceIdContinuation(c1, dec(1), null, "z1"),
+            UsdPriceIdContinuation(c1, dec(1), null, "y1"),
             // Null should be last in any case, but in c1 sublist
             UsdPriceIdContinuation(c1, null, null, "a1"),
 
             // Greatest price for c2
             UsdPriceIdContinuation(c2, dec(25), null, "y2"),
             // Same prices for c2, ordered by ID
-            UsdPriceIdContinuation(c2, dec(10), null, "y2"),
             UsdPriceIdContinuation(c2, dec(10), null, "z2"),
+            UsdPriceIdContinuation(c2, dec(10), null, "y2"),
             // Null should be last in any case, but in c2 sublist
             UsdPriceIdContinuation(c2, null, null, "a2")
         )

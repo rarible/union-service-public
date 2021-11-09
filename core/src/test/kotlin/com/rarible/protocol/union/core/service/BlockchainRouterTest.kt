@@ -48,6 +48,21 @@ class BlockchainRouterTest {
     }
 
     @Test
+    fun `single service failed`() = runBlocking<Unit> {
+        val failedService: TestService = mockk()
+        coEvery { failedService.blockchain } returns BlockchainDto.ETHEREUM
+        coEvery { failedService.test() } throws IllegalArgumentException("oops")
+
+        val router = BlockchainRouter(listOf(failedService))
+
+        assertThrows<IllegalArgumentException> {
+            runBlocking {
+                router.executeForAll(listOf(BlockchainDto.ETHEREUM)) { it.test() }
+            }
+        }
+    }
+
+    @Test
     fun `unsupported blockchain`() = runBlocking<Unit> {
         val router = BlockchainRouter(listOf(TestService(BlockchainDto.FLOW), TestService(BlockchainDto.ETHEREUM)))
         assertThrows<IllegalArgumentException> { router.getService(BlockchainDto.POLYGON) }
