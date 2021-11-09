@@ -4,6 +4,7 @@ import com.rarible.core.client.WebClientResponseProxyException
 import com.rarible.protocol.union.core.event.OutgoingOrderEventListener
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderUpdateEventDto
+import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.ext
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
@@ -17,6 +18,7 @@ import java.util.*
 class EnrichmentOrderEventService(
     private val enrichmentItemEventService: EnrichmentItemEventService,
     private val enrichmentOwnershipEventService: EnrichmentOwnershipEventService,
+    private val enrichmentCollectionEventService: EnrichmentCollectionEventService,
     private val orderEventListeners: List<OutgoingOrderEventListener>
 ) {
 
@@ -60,10 +62,24 @@ class EnrichmentOrderEventService(
                 }
             }
         }
+        val mcFuture = if (order.make.type.ext.isCollection) {
+            async {
+                val address = UnionAddress(order.id.blockchain, order.make.type.ext.contract)
+                enrichmentCollectionEventService.onCollectionBestSellOrderUpdate(address, order, notificationEnabled)
+            }
+        } else null
+        val tcFuture = if (order.take.type.ext.isCollection) {
+            async {
+                val address = UnionAddress(order.id.blockchain, order.take.type.ext.contract)
+                enrichmentCollectionEventService.onCollectionBestBidOrderUpdate(address, order, notificationEnabled)
+            }
+        } else null
 
         mFuture?.await()
         tFuture?.await()
         oFuture?.await()
+        mcFuture?.await()
+        tcFuture?.await()
         val event = OrderUpdateEventDto(
             eventId = UUID.randomUUID().toString(),
             orderId = order.id,

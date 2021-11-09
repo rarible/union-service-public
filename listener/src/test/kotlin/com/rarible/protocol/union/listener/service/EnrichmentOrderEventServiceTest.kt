@@ -1,5 +1,9 @@
 package com.rarible.protocol.union.listener.service
 
+import com.rarible.core.test.data.randomBigDecimal
+import com.rarible.protocol.union.dto.AssetDto
+import com.rarible.protocol.union.dto.EthCollectionAssetTypeDto
+import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
 import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrderDto
@@ -21,10 +25,12 @@ class EnrichmentOrderEventServiceTest {
 
     private val enrichmentItemEventService: EnrichmentItemEventService = mockk()
     private val enrichmentOwnershipEventService: EnrichmentOwnershipEventService = mockk()
+    private val enrichmentCollectionEventService: EnrichmentCollectionEventService = mockk()
 
     private val orderEventService = EnrichmentOrderEventService(
         enrichmentItemEventService,
         enrichmentOwnershipEventService,
+        enrichmentCollectionEventService,
         emptyList()
     )
 
@@ -34,6 +40,8 @@ class EnrichmentOrderEventServiceTest {
         coEvery { enrichmentItemEventService.onItemBestSellOrderUpdated(any(), any()) } returns Unit
         coEvery { enrichmentItemEventService.onItemBestBidOrderUpdated(any(), any()) } returns Unit
         coEvery { enrichmentOwnershipEventService.onOwnershipBestSellOrderUpdated(any(), any()) } returns Unit
+        coEvery { enrichmentCollectionEventService.onCollectionBestSellOrderUpdate(any(), any(), any()) } returns Unit
+        coEvery { enrichmentCollectionEventService.onCollectionBestBidOrderUpdate(any(), any(), any()) } returns Unit
     }
 
     @Test
@@ -56,6 +64,52 @@ class EnrichmentOrderEventServiceTest {
         coVerify(exactly = 0) { enrichmentItemEventService.onItemBestBidOrderUpdated(any(), any()) }
         coVerify(exactly = 1) {
             enrichmentOwnershipEventService.onOwnershipBestSellOrderUpdated(shortOwnershipId, order)
+        }
+    }
+
+    @Test
+    fun `best sell collection order update`() = runBlocking {
+        val itemId = randomEthItemId()
+        val ownershipId = randomEthOwnershipId(itemId)
+
+        val shortItemId = ShortItemId(itemId)
+        val address = UnionAddress(itemId.blockchain, itemId.token.value)
+
+        val order = randomUnionSellOrderDto(itemId, ownershipId.owner.value)
+            .copy(
+                make = AssetDto(EthCollectionAssetTypeDto(address), randomBigDecimal()),
+                take = EthConverter.convert(randomEthAssetErc20(), itemId.blockchain)
+            )
+
+        orderEventService.updateOrder(order)
+
+        coVerify(exactly = 0) { enrichmentItemEventService.onItemBestSellOrderUpdated(shortItemId, order) }
+        coVerify(exactly = 0) { enrichmentItemEventService.onItemBestBidOrderUpdated(any(), any()) }
+        coVerify(exactly = 1) {
+            enrichmentCollectionEventService.onCollectionBestSellOrderUpdate(address, order, true)
+        }
+    }
+
+    @Test
+    fun `best bid collection order update`() = runBlocking {
+        val itemId = randomEthItemId()
+        val ownershipId = randomEthOwnershipId(itemId)
+
+        val shortItemId = ShortItemId(itemId)
+        val address = UnionAddress(itemId.blockchain, itemId.token.value)
+
+        val order = randomUnionSellOrderDto(itemId, ownershipId.owner.value)
+            .copy(
+                make = EthConverter.convert(randomEthAssetErc20(), itemId.blockchain),
+                take = AssetDto(EthCollectionAssetTypeDto(address), randomBigDecimal())
+            )
+
+        orderEventService.updateOrder(order)
+
+        coVerify(exactly = 0) { enrichmentItemEventService.onItemBestSellOrderUpdated(shortItemId, order) }
+        coVerify(exactly = 0) { enrichmentItemEventService.onItemBestBidOrderUpdated(any(), any()) }
+        coVerify(exactly = 1) {
+            enrichmentCollectionEventService.onCollectionBestBidOrderUpdate(address, order, true)
         }
     }
 

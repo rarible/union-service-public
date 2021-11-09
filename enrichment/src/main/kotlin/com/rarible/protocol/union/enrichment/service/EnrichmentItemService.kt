@@ -7,6 +7,7 @@ import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
+import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.enrichment.converter.EnrichedItemConverter
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
@@ -15,6 +16,8 @@ import com.rarible.protocol.union.enrichment.util.spent
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
@@ -27,6 +30,7 @@ class EnrichmentItemService(
 ) {
 
     private val logger = LoggerFactory.getLogger(EnrichmentItemService::class.java)
+    private val FETCH_SIZE = 1_000
 
     suspend fun get(itemId: ShortItemId): ShortItem? {
         return itemRepository.get(itemId)
@@ -49,6 +53,22 @@ class EnrichmentItemService(
 
     suspend fun findAll(ids: List<ShortItemId>): List<ShortItem> {
         return itemRepository.findAll(ids)
+    }
+
+    suspend fun findByCollection(address: UnionAddress, owner: UnionAddress? = null): Flow<ShortItemId> = flow {
+        var continuation: String? = null
+        logger.info("Fetching all items for collection {} and owner {}", address, owner)
+        var count = 0
+        do {
+            val page = itemServiceRouter.getService(address.blockchain)
+                .getItemsByCollection(address.value, continuation, FETCH_SIZE)
+            page.entities
+                .filter { item -> owner?.let { item.owners.contains(it) } ?: true }
+                .map { ShortItemId(it.id) }.forEach { emit(it) }
+            count += page.entities.count()
+            continuation = page.continuation
+        } while (continuation != null)
+        logger.info("Fetched {} items for collection {} and owner {}", count, address, owner)
     }
 
     suspend fun fetch(itemId: ShortItemId): UnionItem {
