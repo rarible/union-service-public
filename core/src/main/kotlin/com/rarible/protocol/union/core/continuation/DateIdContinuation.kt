@@ -19,7 +19,7 @@ data class DateIdContinuation(
         if (dateDiff != 0) {
             return sign * dateDiff
         }
-        return this.id.compareTo(other.id)
+        return this.id.compareTo(other.id) * sign
     }
 
     companion object {
