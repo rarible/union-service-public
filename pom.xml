@@ -21,9 +21,9 @@
             <url>http://nexus.rarible.int/repository/maven-public/</url>
         </repository>
         <repository>
-            <id>nexus-maven-public</id>
-            <name>nexus-maven-public</name>
-            <url>http://nexus-ext.rarible.int/repository/maven-public/</url>
+            <id>nexus-ext-maven-public</id>
+            <name>nexus-ext-maven-public</name>
+            <url>http://repo.rarible.org/repository/maven-public/</url>
         </repository>
         <repository>
             <id>jitpack.io</id>
@@ -32,10 +32,9 @@
     </repositories>
 
     <properties>
-        <revision>1.17-SNAPSHOT</revision>
+        <revision>1.17.0</revision>
         <maven.deploy.skip>true</maven.deploy.skip>
 
-        <nexus.maven.public>http://nexus.rarible.int/repository/maven-public</nexus.maven.public>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <kotlin.compiler.jvmTarget>1.8</kotlin.compiler.jvmTarget>
@@ -44,13 +43,13 @@
         <mockserver-netty.version>5.11.2</mockserver-netty.version>
         <mockserver.version>1.15.3</mockserver.version>
 
-        <rarible-core.version>1.4.0</rarible-core.version>
-        <rarible-ethereum.version>1.3.0</rarible-ethereum.version>
-        <rarible-protocol.currency.version>1.4.5</rarible-protocol.currency.version>
+        <rarible.core.version>1.4.3</rarible.core.version>
+        <rarible.ethereum.version>1.3.1</rarible.ethereum.version>
+        <rarible-protocol.currency.version>1.5.3</rarible-protocol.currency.version>
         <rarible-protocol.ethereum.version>1.17-SNAPSHOT</rarible-protocol.ethereum.version>
         <rarible-protocol.flow.version>2.0.28-SNAPSHOT</rarible-protocol.flow.version>
-        <rarible-protocol.tezos.version>0.1.0</rarible-protocol.tezos.version>
-        <rarible-protocol.union.version>1.17.1</rarible-protocol.union.version>
+        <rarible-protocol.tezos.version>0.1.1</rarible-protocol.tezos.version>
+        <rarible-protocol.union.version>1.17.2</rarible-protocol.union.version>
         <dev-jna.version>5.7.0</dev-jna.version>
     </properties>
 
@@ -59,14 +58,14 @@
             <dependency>
                 <groupId>com.rarible.core</groupId>
                 <artifactId>rarible-core-parent</artifactId>
-                <version>${rarible-core.version}</version>
+                <version>${rarible.core.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>com.rarible.ethereum</groupId>
                 <artifactId>rarible-ethereum-parent</artifactId>
-                <version>${rarible-ethereum.version}</version>
+                <version>${rarible.ethereum.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
