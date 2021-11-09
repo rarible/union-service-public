@@ -57,14 +57,18 @@ class EnrichmentItemService(
 
     suspend fun findByCollection(address: UnionAddress, owner: UnionAddress? = null): Flow<ShortItemId> = flow {
         var continuation: String? = null
+        logger.info("Fetching all items for collection {} and owner {}", address, owner)
+        var count = 0
         do {
             val page = itemServiceRouter.getService(address.blockchain)
                 .getItemsByCollection(address.value, continuation, FETCH_SIZE)
             page.entities
                 .filter { item -> owner?.let { item.owners.contains(it) } ?: true }
                 .map { ShortItemId(it.id) }.forEach { emit(it) }
+            count += page.entities.count()
             continuation = page.continuation
         } while (continuation != null)
+        logger.info("Fetched {} items for collection {} and owner {}", count, address, owner)
     }
 
     suspend fun fetch(itemId: ShortItemId): UnionItem {

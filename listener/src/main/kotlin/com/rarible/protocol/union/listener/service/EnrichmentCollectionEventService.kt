@@ -8,7 +8,6 @@ import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flowOn
@@ -34,27 +33,22 @@ class EnrichmentCollectionEventService(
         itemService.findByCollection(address, order.maker)
             .map { item ->
                 scope.async {
-                    val bFuture = async {
-                        ignoreApi404 {
-                            enrichmentItemEventService.onItemBestSellOrderUpdated(item, order, notificationEnabled)
-                        }
+                    ignoreApi404 {
+                        enrichmentItemEventService.onItemBestSellOrderUpdated(item, order, notificationEnabled)
                     }
-                    val oFuture = async {
-                        val ownershipId = ShortOwnershipId(
-                            item.blockchain,
-                            item.token,
-                            item.tokenId,
-                            order.maker.value
+                    val ownershipId = ShortOwnershipId(
+                        item.blockchain,
+                        item.token,
+                        item.tokenId,
+                        order.maker.value
+                    )
+                    ignoreApi404 {
+                        enrichmentOwnershipEventService.onOwnershipBestSellOrderUpdated(
+                            ownershipId,
+                            order,
+                            notificationEnabled
                         )
-                        ignoreApi404 {
-                            enrichmentOwnershipEventService.onOwnershipBestSellOrderUpdated(
-                                ownershipId,
-                                order,
-                                notificationEnabled
-                            )
-                        }
                     }
-                    listOf(bFuture, oFuture).awaitAll()
                 }
             }.buffer(threadPoolSize).map { it.await() }.flowOn(dispatcher).collect()
     }
