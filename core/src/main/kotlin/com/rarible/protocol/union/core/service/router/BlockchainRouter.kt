@@ -31,11 +31,16 @@ class BlockchainRouter<T : BlockchainService>(
             blockchains.map { getService(it) }
         }
 
-        selectedServices.map {
-            async {
-                safeApiCall { clientCall(it) }
-            }
-        }.awaitAll().filterNotNull()
+        if (selectedServices.size == 1) {
+            // For single blockchain we are not using safe call in order to throw exception
+            listOf(clientCall(selectedServices[0]))
+        } else {
+            selectedServices.map {
+                async {
+                    safeApiCall { clientCall(it) }
+                }
+            }.awaitAll().filterNotNull()
+        }
     }
 
     private suspend fun <T> safeApiCall(
