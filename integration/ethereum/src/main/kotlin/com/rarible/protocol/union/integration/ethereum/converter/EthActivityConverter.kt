@@ -193,6 +193,7 @@ class EthActivityConverter(
                     )
                 )
             }
+            else -> TODO() //TODO Implement Auction activities
         }
     }
 

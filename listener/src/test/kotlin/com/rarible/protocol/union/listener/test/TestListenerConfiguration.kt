@@ -157,7 +157,7 @@ class TestListenerConfiguration {
             clientId = "test.union.ethereum.order",
             valueSerializerClass = UnionKafkaJsonSerializer::class.java,
             valueClass = com.rarible.protocol.dto.OrderEventDto::class.java,
-            defaultTopic = OrderIndexerTopicProvider.getUpdateTopic(applicationEnvironmentInfo().name, "ethereum"),
+            defaultTopic = OrderIndexerTopicProvider.getOrderUpdateTopic(applicationEnvironmentInfo().name, "ethereum"),
             bootstrapServers = kafkaContainer.kafkaBoostrapServers()
         )
     }
