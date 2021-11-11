@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.api.service
 
+import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.core.continuation.page.Page
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.dto.ItemDto
@@ -8,7 +9,9 @@ import com.rarible.protocol.union.dto.ItemsDto
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
+import com.rarible.protocol.union.enrichment.util.spent
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @ExperimentalCoroutinesApi
@@ -17,6 +20,8 @@ class ItemApiService(
     private val orderApiService: OrderApiService,
     private val enrichmentItemService: EnrichmentItemService
 ) {
+
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     suspend fun enrich(unionItemsPage: Page<UnionItem>): ItemsDto {
         return ItemsDto(
@@ -36,6 +41,7 @@ class ItemApiService(
         if (unionItems.isEmpty()) {
             return emptyList()
         }
+        val now = nowMillis()
         val existingEnrichedItems: Map<ItemIdDto, ShortItem> = enrichmentItemService
             .findAll(unionItems.map { ShortItemId(it.id) })
             .associateBy { it.id.toDto() }
@@ -52,6 +58,11 @@ class ItemApiService(
             val existingEnrichedItem = existingEnrichedItems[it.id]
             enrichmentItemService.enrichItem(existingEnrichedItem, it, orders)
         }
+
+        logger.info(
+            "Enriched {} of {} Items, {} Orders fetched ({}ms)",
+            existingEnrichedItems.size, result.size, orders.size, spent(now)
+        )
 
         return result
     }

@@ -13,6 +13,7 @@ import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.dto.parser.ItemIdParser
 import com.rarible.protocol.union.enrichment.service.EnrichmentMetaService
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.RestController
 
@@ -23,6 +24,8 @@ class ItemController(
     private val router: BlockchainRouter<ItemService>,
     private val enrichmentMetaService: EnrichmentMetaService
 ) : ItemControllerApi {
+
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     override suspend fun getAllItems(
         blockchains: List<BlockchainDto>?,
@@ -44,8 +47,13 @@ class ItemController(
             blockchainPages.flatMap { it.entities }
         ).getPage(safeSize, total)
 
-        val result = itemApiService.enrich(combinedPage)
+        logger.info("Response for getAllItems(blockchains={}, continuation={}, size={}):" +
+                " Page(size={}, total={}, continuation={}) from blockchain pages {} ",
+            blockchains, continuation, size, combinedPage.entities.size, combinedPage.total,
+            combinedPage.continuation, blockchainPages.map { it.entities.size }
+        )
 
+        val result = itemApiService.enrich(combinedPage)
         return ResponseEntity.ok(result)
     }
 
@@ -62,6 +70,8 @@ class ItemController(
         val fullItemId = ItemIdParser.parseFull(itemId)
         enrichmentMetaService.resetMeta(fullItemId)
         router.getService(fullItemId.blockchain).resetItemMeta(fullItemId.value)
+
+        logger.info("Item meta has been reset: {}", itemId)
         return ResponseEntity.ok().build()
     }
 
@@ -75,8 +85,13 @@ class ItemController(
         val result = router.getService(collectionAddress.blockchain)
             .getItemsByCollection(collectionAddress.value, continuation, safeSize)
 
-        val enriched = itemApiService.enrich(result)
+        logger.info(
+            "Response for getItemsByCollection(collection={}, continuation={}, size={}):" +
+                    " Page(size={}, total={}, continuation={}) from blockchain pages {} ",
+            collection, continuation, size, result.entities.size, result.total, result.continuation
+        )
 
+        val enriched = itemApiService.enrich(result)
         return ResponseEntity.ok(enriched)
     }
 
@@ -90,8 +105,13 @@ class ItemController(
         val result = router.getService(creatorAddress.blockchain)
             .getItemsByCreator(creatorAddress.value, continuation, safeSize)
 
-        val enriched = itemApiService.enrich(result)
+        logger.info(
+            "Response for getItemsByCreator(creator={}, continuation={}, size={}):" +
+                    " Page(size={}, total={}, continuation={}) from blockchain pages {} ",
+            creator, continuation, size, result.entities.size, result.total, result.continuation
+        )
 
+        val enriched = itemApiService.enrich(result)
         return ResponseEntity.ok(enriched)
     }
 
@@ -105,8 +125,13 @@ class ItemController(
         val result = router.getService(ownerAddress.blockchain)
             .getItemsByOwner(ownerAddress.value, continuation, safeSize)
 
-        val enriched = itemApiService.enrich(result)
+        logger.info(
+            "Response for getItemsByCreator(owner={}, continuation={}, size={}):" +
+                    " Page(size={}, total={}, continuation={}) from blockchain pages {} ",
+            owner, continuation, size, result.entities.size, result.total, result.continuation
+        )
 
+        val enriched = itemApiService.enrich(result)
         return ResponseEntity.ok(enriched)
     }
 

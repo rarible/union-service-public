@@ -15,6 +15,7 @@ import com.rarible.protocol.union.dto.OrdersDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.parser.IdParser
+import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.RestController
 
@@ -23,6 +24,8 @@ class OrderController(
     private val orderApiService: OrderApiService,
     private val router: BlockchainRouter<OrderService>
 ) : OrderControllerApi {
+
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     private val empty = OrdersDto(null, emptyList())
 
@@ -49,6 +52,12 @@ class OrderController(
             OrderContinuation.ByLastUpdatedAndId,
             blockchainPages.flatMap { it.entities }
         ).getSlice(safeSize)
+
+        logger.info("Response for getOrdersAll(blockchains={}, continuation={}, size={}):" +
+                " Slice(size={}, continuation={}) from blockchain slices {} ",
+            blockchains, continuation, size,
+            combinedSlice.entities.size, combinedSlice.continuation, blockchainPages.map { it.entities.size }
+        )
 
         return ResponseEntity.ok(toDto(combinedSlice))
     }
@@ -87,6 +96,14 @@ class OrderController(
             safeSize
         )
 
+        logger.info(
+            "Response for getOrderBidsByItem" +
+                    "(contract={}, tokenId={}, platform={}, maker={}, origin={}, status={}, start={}, end={}, continuation={}, size={}): " +
+                    "Slice(size={}, continuation={})",
+            contract, tokenId, platform, maker, origin, status, start, end, continuation, size,
+            result.entities.size, result.continuation
+        )
+
         return ResponseEntity.ok(toDto(result))
     }
 
@@ -118,6 +135,15 @@ class OrderController(
                 continuation,
                 safeSize
             )
+
+        logger.info(
+            "Response for getOrderBidsByMaker" +
+                    "(maker={}, platform={}, origin={}, status={}, start={}, end={}, continuation={}, size={}): " +
+                    "Slice(size={}, continuation={})",
+            maker, platform, origin, status, start, end, continuation, size,
+            result.entities.size, result.continuation
+        )
+
         return ResponseEntity.ok(toDto(result))
     }
 
@@ -161,6 +187,11 @@ class OrderController(
             blockchainPages.flatMap { it.entities }
         ).getSlice(safeSize)
 
+        logger.info("Response for getSellOrders(blockchains={}, platform={}, origin={}, continuation={}, size={}):" +
+                " Slice(size={}, continuation={}) from blockchain slices {} ",
+            blockchains, platform, origin, continuation, size,
+            combinedSlice.entities.size, combinedSlice.continuation, blockchainPages.map { it.entities.size }
+        )
 
         return ResponseEntity.ok(toDto(combinedSlice))
     }
@@ -181,6 +212,13 @@ class OrderController(
 
         val result = router.getService(collectionAddress.blockchain)
             .getSellOrdersByCollection(platform, collectionAddress.value, originAddress?.value, continuation, safeSize)
+
+        logger.info(
+            "Response for getSellOrdersByCollection" +
+                    "(collection={}, platform={}, origin={}, continuation={}, size={}): " +
+                    "Slice(size={}, continuation={})",
+            collection, platform, origin, continuation, size, result.entities.size, result.continuation
+        )
 
         return ResponseEntity.ok(toDto(result))
     }
@@ -215,6 +253,14 @@ class OrderController(
             safeSize
         )
 
+        logger.info(
+            "Response for getSellOrdersByItem" +
+                    "(contract={}, tokenId={}, platform={}, maker={}, origin={}, status={}, continuation={}, size={}): " +
+                    "Slice(size={}, continuation={})",
+            contract, tokenId, platform, maker, origin, status, continuation, size,
+            result.entities.size, result.continuation
+        )
+
         return ResponseEntity.ok(toDto(result))
     }
 
@@ -234,6 +280,13 @@ class OrderController(
 
         val result = router.getService(makerAddress.blockchain)
             .getSellOrdersByMaker(platform, makerAddress.value, originAddress?.value, continuation, safeSize)
+
+        logger.info(
+            "Response for getSellOrdersByMaker" +
+                    "(maker={}, platform={}, maker={}, origin={}, continuation={}, size={}): " +
+                    "Slice(size={}, continuation={})",
+            maker, platform, maker, origin, continuation, size, result.entities.size, result.continuation
+        )
 
         return ResponseEntity.ok(toDto(result))
     }
