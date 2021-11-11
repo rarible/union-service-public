@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.api.service
 
+import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.core.continuation.page.Page
 import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.dto.OwnershipDto
@@ -9,7 +10,9 @@ import com.rarible.protocol.union.enrichment.converter.EnrichedOwnershipConverte
 import com.rarible.protocol.union.enrichment.model.ShortOwnership
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
+import com.rarible.protocol.union.enrichment.util.spent
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @ExperimentalCoroutinesApi
@@ -19,12 +22,17 @@ class OwnershipApiService(
     private val enrichmentOwnershipService: EnrichmentOwnershipService
 ) {
 
+    private val logger = LoggerFactory.getLogger(javaClass)
+
     suspend fun enrich(unionOwnershipsPage: Page<UnionOwnership>): OwnershipsDto {
-        return OwnershipsDto(
+        val now = nowMillis()
+        val result = OwnershipsDto(
             total = unionOwnershipsPage.total,
             continuation = unionOwnershipsPage.continuation,
             ownerships = enrich(unionOwnershipsPage.entities)
         )
+        logger.info("Enriched {} ownerships ({}ms)", unionOwnershipsPage.entities.size, spent(now))
+        return result
     }
 
     suspend fun enrich(unionOwnership: UnionOwnership): OwnershipDto {
@@ -40,6 +48,9 @@ class OwnershipApiService(
         if (unionOwnerships.isEmpty()) {
             return emptyList()
         }
+
+        val now = nowMillis()
+
         val existingEnrichedOwnerships: Map<OwnershipIdDto, ShortOwnership> = enrichmentOwnershipService
             .findAll(unionOwnerships.map { ShortOwnershipId(it.id) })
             .associateBy { it.id.toDto() }
@@ -59,6 +70,11 @@ class OwnershipApiService(
                 enrichmentOwnershipService.enrichOwnership(existingEnrichedOwnership, it, orders)
             }
         }
+
+        logger.info(
+            "Enriched {} of {} Ownerships, {} Orders fetched ({}ms)",
+            existingEnrichedOwnerships.size, result.size, orders.size, spent(now)
+        )
 
         return result
     }

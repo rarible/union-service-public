@@ -12,6 +12,7 @@ import com.rarible.protocol.union.dto.OwnershipsDto
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.dto.parser.OwnershipIdParser
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.RestController
 
@@ -21,6 +22,8 @@ class OwnershipController(
     private val ownershipApiService: OwnershipApiService,
     private val router: BlockchainRouter<OwnershipService>
 ) : OwnershipControllerApi {
+
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     override suspend fun getAllOwnerships(
         blockchains: List<BlockchainDto>?,
@@ -39,8 +42,13 @@ class OwnershipController(
             blockchainPages.flatMap { it.entities }
         ).getPage(safeSize, total)
 
-        val enriched = ownershipApiService.enrich(combinedPage)
+        logger.info("Response for getAllOwnerships(blockchains={}, continuation={}, size={}):" +
+                " Page(size={}, total={}, continuation={}) from blockchain pages {} ",
+            blockchains, continuation, size, combinedPage.entities.size, combinedPage.total,
+            combinedPage.continuation, blockchainPages.map { it.entities.size }
+        )
 
+        val enriched = ownershipApiService.enrich(combinedPage)
         return ResponseEntity.ok(enriched)
     }
 
@@ -66,8 +74,13 @@ class OwnershipController(
         val result = router.getService(contractAddress.blockchain)
             .getOwnershipsByItem(contractAddress.value, tokenId, continuation, safeSize)
 
-        val enriched = ownershipApiService.enrich(result)
+        logger.info(
+            "Response for getOwnershipsByItem(contract={}, tokenId={}, continuation={}, size={}):" +
+                    " Page(size={}, total={}, continuation={}) from blockchain pages {} ",
+            contract, tokenId, continuation, size, result.entities.size, result.total, result.continuation
+        )
 
+        val enriched = ownershipApiService.enrich(result)
         return ResponseEntity.ok(enriched)
     }
 

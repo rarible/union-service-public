@@ -10,6 +10,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.dto.CollectionsDto
 import com.rarible.protocol.union.dto.parser.IdParser
+import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.RestController
 
@@ -17,6 +18,8 @@ import org.springframework.web.bind.annotation.RestController
 class CollectionController(
     private val router: BlockchainRouter<CollectionService>
 ) : CollectionControllerApi {
+
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     override suspend fun getAllCollections(
         blockchains: List<BlockchainDto>?,
@@ -35,6 +38,11 @@ class CollectionController(
             blockchainPages.flatMap { it.entities }
         ).getPage(safeSize, total)
 
+        logger.info("Response for getAllCollections(blockchains={}, continuation={}, size={}):" +
+                " Page(size={}, total={}, continuation={}) from blockchain pages {} ",
+            blockchains, continuation, size, combinedPage.entities.size, combinedPage.total,
+            combinedPage.continuation, blockchainPages.map { it.entities.size }
+        )
         return ResponseEntity.ok(toDto(combinedPage))
     }
 
@@ -55,6 +63,12 @@ class CollectionController(
         val ownerAddress = IdParser.parseAddress(owner)
         val result = router.getService(ownerAddress.blockchain)
             .getCollectionsByOwner(ownerAddress.value, continuation, safeSize)
+
+        logger.info(
+            "Response for getCollectionsByOwner(owner={}, continuation={}, size={}):" +
+                    " Page(size={}, total={}, continuation={})",
+            owner, continuation, size, result.entities.size, result.total, result.continuation
+        )
         return ResponseEntity.ok(toDto(result))
     }
 

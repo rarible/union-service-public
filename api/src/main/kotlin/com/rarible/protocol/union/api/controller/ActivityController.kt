@@ -16,6 +16,7 @@ import com.rarible.protocol.union.dto.parser.IdParser
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.RestController
 import java.time.Instant
@@ -24,6 +25,8 @@ import java.time.Instant
 class ActivityController(
     private val router: BlockchainRouter<ActivityService>
 ) : ActivityControllerApi {
+
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     override suspend fun getAllActivities(
         type: List<ActivityTypeDto>,
@@ -38,6 +41,12 @@ class ActivityController(
         }
 
         val result = merge(blockchainPages, safeSize, sort)
+
+        logger.info("Response for getAllActivities(type={}, blockchains={}, continuation={}, size={}, sort={}):" +
+                " Slice(size={}, continuation={}) from blockchain slices {} ",
+            type, blockchains, continuation, size, sort,
+            result.activities.size, result.continuation, blockchainPages.map { it.entities.size }
+        )
         return ResponseEntity.ok(result)
     }
 
@@ -52,6 +61,12 @@ class ActivityController(
         val collectionAddress = IdParser.parseAddress(collection)
         val result = router.getService(collectionAddress.blockchain)
             .getActivitiesByCollection(type, collectionAddress.value, continuation, safeSize, sort)
+
+        logger.info(
+            "Response for getActivitiesByCollection(type={}, collection={}, continuation={}, size={}, sort={}): " +
+                    "Slice(size={}, continuation={}) ",
+            type, collection, continuation, size, sort, result.entities.size, result.continuation
+        )
         return ResponseEntity.ok(toDto(result))
     }
 
@@ -67,6 +82,12 @@ class ActivityController(
         val contractAddress = IdParser.parseAddress(contract)
         val result = router.getService(contractAddress.blockchain)
             .getActivitiesByItem(type, contractAddress.value, tokenId, continuation, safeSize, sort)
+
+        logger.info(
+            "Response for getActivitiesByItem(type={}, contract={}, tokenId={} continuation={}, size={}, sort={}): " +
+                    "Slice(size={}, continuation={}) ",
+            type, contract, tokenId, continuation, size, sort, result.entities.size, result.continuation
+        )
         return ResponseEntity.ok(toDto(result))
     }
 
@@ -95,6 +116,13 @@ class ActivityController(
         }.awaitAll()
 
         val result = merge(blockchainPages, safeSize, sort)
+
+        logger.info("Response for getActivitiesByUser(type={}, users={}, continuation={}, size={}, sort={}):" +
+                " Slice(size={}, continuation={}) from user slices {} ",
+            type, user, continuation, size, sort,
+            result.activities.size, result.continuation, blockchainPages.map { it.entities.size }
+        )
+
         return ResponseEntity.ok(result)
     }
 
