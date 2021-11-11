@@ -21,7 +21,9 @@ import com.rarible.protocol.union.api.client.UnionApiClientFactory
 import com.rarible.protocol.union.dto.CollectionEventDto
 import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
+import com.rarible.protocol.union.enrichment.meta.ContentMetaService
 import com.rarible.protocol.union.test.mock.CurrencyMock
+import io.mockk.coEvery
 import io.mockk.mockk
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.web.server.LocalServerPort
@@ -55,6 +57,15 @@ class TestApiConfiguration {
         val template = RestTemplate()
         template.messageConverters.add(0, converter)
         return template
+    }
+
+    @Bean
+    @Primary
+    fun testMetaContentService(): ContentMetaService {
+        val mock = mockk<ContentMetaService>()
+        coEvery { mock.getContentMeta(any(), any()) } returns null
+        coEvery { mock.resetContentMeta(any()) } returns Unit
+        return mock
     }
 
     @Bean

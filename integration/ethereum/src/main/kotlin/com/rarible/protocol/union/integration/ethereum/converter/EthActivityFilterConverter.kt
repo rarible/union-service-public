@@ -33,6 +33,7 @@ object EthActivityFilterConverter {
                         ActivityFilterAllTypeDto.BID,
                         ActivityFilterAllTypeDto.LIST,
                         ActivityFilterAllTypeDto.SELL -> null
+                        else -> TODO() // TODO Add handling for new types
                     }
                 }
                 if (nftTypes.isNotEmpty()) NftActivityFilterAllDto(nftTypes) else null
@@ -46,6 +47,7 @@ object EthActivityFilterConverter {
                         ActivityFilterByCollectionTypeDto.BID,
                         ActivityFilterByCollectionTypeDto.LIST,
                         ActivityFilterByCollectionTypeDto.MATCH -> null
+                        else -> TODO() // TODO Add handling for new types
                     }
                 }
                 if (nftTypes.isNotEmpty()) NftActivityFilterByCollectionDto(source.contract, nftTypes) else null
@@ -59,6 +61,7 @@ object EthActivityFilterConverter {
                         ActivityFilterByItemTypeDto.BID,
                         ActivityFilterByItemTypeDto.LIST,
                         ActivityFilterByItemTypeDto.MATCH -> null
+                        else -> TODO() // TODO Add handling for new types
                     }
                 }
                 if (nftTypes.isNotEmpty()) NftActivityFilterByItemDto(
@@ -79,6 +82,7 @@ object EthActivityFilterConverter {
                         ActivityFilterByUserTypeDto.BUY,
                         ActivityFilterByUserTypeDto.LIST,
                         ActivityFilterByUserTypeDto.SELL -> null
+                        else -> TODO() // TODO Add handling for new types
                     }
                 }
                 if (nftTypes.isNotEmpty()) {
@@ -102,6 +106,7 @@ object EthActivityFilterConverter {
                         ActivityFilterAllTypeDto.TRANSFER,
                         ActivityFilterAllTypeDto.MINT,
                         ActivityFilterAllTypeDto.BURN -> null
+                        else -> TODO() // TODO Add handling for new types
                     }
                 }
                 if (orderTypes.isNotEmpty()) OrderActivityFilterAllDto(orderTypes) else null
@@ -115,6 +120,7 @@ object EthActivityFilterConverter {
                         ActivityFilterByCollectionTypeDto.TRANSFER,
                         ActivityFilterByCollectionTypeDto.MINT,
                         ActivityFilterByCollectionTypeDto.BURN -> null
+                        else -> TODO() // TODO Add handling for new types
                     }
                 }
                 if (orderTypes.isNotEmpty()) OrderActivityFilterByCollectionDto(source.contract, orderTypes) else null
@@ -128,6 +134,7 @@ object EthActivityFilterConverter {
                         ActivityFilterByItemTypeDto.TRANSFER,
                         ActivityFilterByItemTypeDto.MINT,
                         ActivityFilterByItemTypeDto.BURN -> null
+                        else -> TODO() // TODO Add handling for new types
                     }
                 }
                 if (orderTypes.isNotEmpty()) OrderActivityFilterByItemDto(
@@ -148,6 +155,7 @@ object EthActivityFilterConverter {
                         ActivityFilterByUserTypeDto.TRANSFER_TO,
                         ActivityFilterByUserTypeDto.MINT,
                         ActivityFilterByUserTypeDto.BURN -> null
+                        else -> TODO() // TODO Add handling for new types
                     }
                 }
                 if (nftTypes.isNotEmpty()) {
