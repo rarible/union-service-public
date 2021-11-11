@@ -26,6 +26,12 @@ common:
     tezos:
       url: "http://localhost:8080"
 
+rarible:
+  core:
+    apm:
+      agent:
+        enabled: false
+
 integration:
   ethereum:
     enabled: true

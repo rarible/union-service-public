@@ -10,6 +10,12 @@ spring:
 logging:
   logstash.tcp-socket.enabled: false
 
+rarible:
+  core:
+    apm:
+      agent:
+        enabled: false
+
 integration:
   tezos:
     client:

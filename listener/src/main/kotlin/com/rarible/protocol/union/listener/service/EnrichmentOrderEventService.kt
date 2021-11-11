@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.listener.service
 
+import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.client.WebClientResponseProxyException
 import com.rarible.protocol.union.core.event.OutgoingOrderEventListener
 import com.rarible.protocol.union.dto.OrderDto
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Component
 import java.util.*
 
 @Component
+@CaptureSpan(type = "event", subtype = "order")
 class EnrichmentOrderEventService(
     private val enrichmentItemEventService: EnrichmentItemEventService,
     private val enrichmentOwnershipEventService: EnrichmentOwnershipEventService,

@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.integration.flow.service
 
+import com.rarible.core.apm.CaptureSpan
 import com.rarible.protocol.flow.nft.api.client.FlowNftItemControllerApi
 import com.rarible.protocol.union.core.continuation.page.Page
 import com.rarible.protocol.union.core.model.UnionItem
@@ -11,6 +12,7 @@ import com.rarible.protocol.union.integration.flow.converter.FlowItemConverter
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 
+@CaptureSpan(type = "network", subtype = "flow")
 class FlowItemService(
     private val flowNftItemControllerApi: FlowNftItemControllerApi
 ) : AbstractBlockchainService(BlockchainDto.FLOW), ItemService {

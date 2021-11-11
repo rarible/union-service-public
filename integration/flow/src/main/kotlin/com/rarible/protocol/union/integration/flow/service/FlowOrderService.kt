@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.integration.flow.service
 
+import com.rarible.core.apm.CaptureSpan
 import com.rarible.protocol.dto.FlowOrderIdsDto
 import com.rarible.protocol.flow.nft.api.client.FlowOrderControllerApi
 import com.rarible.protocol.union.core.continuation.page.Slice
@@ -18,6 +19,7 @@ import java.time.Instant
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 
+@CaptureSpan(type = "network", subtype = "flow")
 class FlowOrderService(
     private val orderControllerApi: FlowOrderControllerApi,
     private val flowOrderConverter: FlowOrderConverter

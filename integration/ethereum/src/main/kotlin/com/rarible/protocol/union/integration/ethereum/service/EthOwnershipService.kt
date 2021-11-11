@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.integration.ethereum.service
 
+import com.rarible.core.apm.CaptureSpan
 import com.rarible.protocol.nft.api.client.NftOwnershipControllerApi
 import com.rarible.protocol.union.core.continuation.page.Page
 import com.rarible.protocol.union.core.converter.UnionConverter
@@ -10,7 +11,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.ethereum.converter.EthOwnershipConverter
 import kotlinx.coroutines.reactive.awaitFirst
 
-class EthOwnershipService(
+sealed class EthOwnershipService(
     blockchain: BlockchainDto,
     private val ownershipControllerApi: NftOwnershipControllerApi
 ) : AbstractBlockchainService(blockchain), OwnershipService {
@@ -46,3 +47,19 @@ class EthOwnershipService(
         return EthOwnershipConverter.convert(ownerships, blockchain)
     }
 }
+
+@CaptureSpan(type = "network", subtype = "ethereum")
+class EthereumOwnershipService(
+    ownershipControllerApi: NftOwnershipControllerApi
+) : EthOwnershipService(
+    BlockchainDto.ETHEREUM,
+    ownershipControllerApi
+)
+
+@CaptureSpan(type = "network", subtype = "polygon")
+class PolygonOwnershipService(
+    ownershipControllerApi: NftOwnershipControllerApi
+) : EthOwnershipService(
+    BlockchainDto.POLYGON,
+    ownershipControllerApi
+)

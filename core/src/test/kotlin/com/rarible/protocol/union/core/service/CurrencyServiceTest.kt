@@ -5,8 +5,11 @@ import com.rarible.core.test.data.randomBigDecimal
 import com.rarible.core.test.data.randomString
 import com.rarible.protocol.currency.api.client.CurrencyControllerApi
 import com.rarible.protocol.currency.dto.CurrencyRateDto
+import com.rarible.protocol.union.core.client.CurrencyClient
 import com.rarible.protocol.union.core.converter.CurrencyConverter
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.EthErc20AssetTypeDto
+import com.rarible.protocol.union.dto.UnionAddress
 import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -22,7 +25,7 @@ import java.math.BigDecimal
 class CurrencyServiceTest {
 
     private val currencyControllerApi: CurrencyControllerApi = mockk()
-    private val currencyService = CurrencyService(currencyControllerApi)
+    private val currencyService = CurrencyService(CurrencyClient(currencyControllerApi))
 
     @BeforeEach
     fun beforeEach() {
@@ -56,8 +59,9 @@ class CurrencyServiceTest {
 
         val at = nowMillis().minusSeconds(60 * 29)
 
-        val usdRate1 = currencyService.toUsd(blockchain, address, BigDecimal.ONE, at)
-        val usdRate2 = currencyService.toUsd(blockchain, address, BigDecimal.ONE, at)
+        val assetType = EthErc20AssetTypeDto(UnionAddress(blockchain, address))
+        val usdRate1 = currencyService.toUsd(blockchain, assetType, BigDecimal.ONE, at)
+        val usdRate2 = currencyService.toUsd(blockchain, assetType, BigDecimal.ONE, at)
 
         // Both times should be rate * BigDecimal.ONE
         assertThat(usdRate1).isEqualTo(rate)
@@ -76,8 +80,9 @@ class CurrencyServiceTest {
 
         val at = nowMillis().minusSeconds(60 * 29)
 
-        val usdRate1 = currencyService.toUsd(blockchain, address, BigDecimal.ONE, at)
-        val usdRate2 = currencyService.toUsd(blockchain, address, BigDecimal.ONE, at.minusSeconds(2 * 60))
+        val assetType = EthErc20AssetTypeDto(UnionAddress(blockchain, address))
+        val usdRate1 = currencyService.toUsd(blockchain, assetType, BigDecimal.ONE, at)
+        val usdRate2 = currencyService.toUsd(blockchain, assetType, BigDecimal.ONE, at.minusSeconds(2 * 60))
 
         // Second request should return rate == 1
         assertThat(usdRate1).isEqualTo(rate)

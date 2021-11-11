@@ -19,7 +19,7 @@ import reactor.kotlin.core.publisher.toMono
 class EthCollectionServiceTest {
 
     private val collectionControllerApi: NftCollectionControllerApi = mockk()
-    private val service = EthCollectionService(BlockchainDto.ETHEREUM, collectionControllerApi)
+    private val service = EthereumCollectionService(collectionControllerApi)
 
     @Test
     fun `ethereum get all collections`() = runBlocking<Unit> {

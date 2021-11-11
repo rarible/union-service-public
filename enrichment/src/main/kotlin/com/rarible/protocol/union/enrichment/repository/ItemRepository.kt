@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.enrichment.repository
 
 import com.mongodb.client.result.DeleteResult
+import com.rarible.core.apm.CaptureSpan
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import kotlinx.coroutines.flow.Flow
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Component
 import java.time.Instant
 
 @Component
+@CaptureSpan(type = "db", subtype = "item")
 class ItemRepository(
     private val template: ReactiveMongoTemplate
 ) {

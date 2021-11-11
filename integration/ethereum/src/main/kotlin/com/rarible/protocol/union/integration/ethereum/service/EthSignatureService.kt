@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.integration.ethereum.service
 
+import com.rarible.core.apm.CaptureSpan
 import com.rarible.protocol.dto.EthereumSignatureValidationFormDto
 import com.rarible.protocol.order.api.client.OrderSignatureControllerApi
 import com.rarible.protocol.union.core.service.SignatureService
@@ -8,7 +9,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
 import kotlinx.coroutines.reactive.awaitFirst
 
-class EthSignatureService(
+sealed class EthSignatureService(
     blockchain: BlockchainDto,
     private val signatureControllerApi: OrderSignatureControllerApi
 ) : AbstractBlockchainService(blockchain), SignatureService {
@@ -27,3 +28,19 @@ class EthSignatureService(
         return signatureControllerApi.validate(ethereumForm).awaitFirst()
     }
 }
+
+@CaptureSpan(type = "network", subtype = "ethereum")
+class EthereumSignatureService(
+    signatureControllerApi: OrderSignatureControllerApi
+) : EthSignatureService(
+    BlockchainDto.ETHEREUM,
+    signatureControllerApi
+)
+
+@CaptureSpan(type = "network", subtype = "polygon")
+class PolygonSignatureService(
+    signatureControllerApi: OrderSignatureControllerApi
+) : EthSignatureService(
+    BlockchainDto.POLYGON,
+    signatureControllerApi
+)

@@ -19,7 +19,7 @@ import reactor.kotlin.core.publisher.toMono
 class EthOwnershipServiceTest {
 
     private val ownershipControllerApi: NftOwnershipControllerApi = mockk()
-    private val service = EthOwnershipService(BlockchainDto.ETHEREUM, ownershipControllerApi)
+    private val service = EthereumOwnershipService(ownershipControllerApi)
 
     @Test
     fun `ethereum get all ownerships`() = runBlocking<Unit> {

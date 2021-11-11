@@ -57,6 +57,10 @@
             <artifactId>rarible-core-daemon</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.rarible.core</groupId>
+            <artifactId>rarible-core-apm</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.rarible.ethereum</groupId>
             <artifactId>rarible-ethereum-converters</artifactId>
         </dependency>

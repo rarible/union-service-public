@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.integration.ethereum.service
 
+import com.rarible.core.apm.CaptureSpan
 import com.rarible.protocol.dto.ActivityFilterAllDto
 import com.rarible.protocol.dto.ActivityFilterByCollectionDto
 import com.rarible.protocol.dto.ActivityFilterByItemDto
@@ -28,7 +29,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.reactive.awaitFirst
 import java.time.Instant
 
-class EthActivityService(
+sealed class EthActivityService(
     blockchain: BlockchainDto,
     private val activityItemControllerApi: NftActivityControllerApi,
     private val activityOrderControllerApi: OrderActivityControllerApi,
@@ -159,3 +160,27 @@ class EthActivityService(
         }
     }
 }
+
+@CaptureSpan(type = "network", subtype = "ethereum")
+class EthereumActivityService(
+    activityItemControllerApi: NftActivityControllerApi,
+    activityOrderControllerApi: OrderActivityControllerApi,
+    ethActivityConverter: EthActivityConverter
+) : EthActivityService(
+    BlockchainDto.ETHEREUM,
+    activityItemControllerApi,
+    activityOrderControllerApi,
+    ethActivityConverter
+)
+
+@CaptureSpan(type = "network", subtype = "polygon")
+class PolygonActivityService(
+    activityItemControllerApi: NftActivityControllerApi,
+    activityOrderControllerApi: OrderActivityControllerApi,
+    ethActivityConverter: EthActivityConverter
+) : EthActivityService(
+    BlockchainDto.POLYGON,
+    activityItemControllerApi,
+    activityOrderControllerApi,
+    ethActivityConverter
+)
