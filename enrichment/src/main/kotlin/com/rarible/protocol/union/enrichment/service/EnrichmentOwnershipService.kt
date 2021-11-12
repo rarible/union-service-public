@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
-@CaptureSpan(type = "enrichment", subtype = "ownership")
+@CaptureSpan(type = "service", subtype = "enrichment")
 class EnrichmentOwnershipService(
     private val ownershipServiceRouter: BlockchainRouter<OwnershipService>,
     private val ownershipRepository: OwnershipRepository,

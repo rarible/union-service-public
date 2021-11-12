@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.listener.service
 
-import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.client.WebClientResponseProxyException
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.UnionAddress
@@ -18,7 +17,6 @@ import org.springframework.stereotype.Component
 import java.util.concurrent.Executors
 
 @Component
-@CaptureSpan(type = "event", subtype = "collection")
 class EnrichmentCollectionEventService(
     private val itemService: EnrichmentItemService,
     private val enrichmentItemEventService: EnrichmentItemEventService,

@@ -24,7 +24,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
 
 @Component
-@CaptureSpan(type = "enrichment", subtype = "meta")
+@CaptureSpan(type = "service", subtype = "enrichment")
 class EnrichmentMetaService(
     private val router: BlockchainRouter<ItemService>,
     private val contentMetaService: ContentMetaService

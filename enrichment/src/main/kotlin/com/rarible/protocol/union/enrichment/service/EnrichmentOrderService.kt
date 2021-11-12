@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
-@CaptureSpan(type = "enrichment", subtype = "order")
+@CaptureSpan(type = "service", subtype = "enrichment")
 class EnrichmentOrderService(
     private val orderServiceRouter: BlockchainRouter<OrderService>
 ) {
