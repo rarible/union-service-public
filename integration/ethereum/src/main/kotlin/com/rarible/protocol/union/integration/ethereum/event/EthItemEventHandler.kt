@@ -1,9 +1,10 @@
 package com.rarible.protocol.union.integration.ethereum.event
 
+import com.rarible.core.apm.CaptureTransaction
 import com.rarible.protocol.dto.NftItemDeleteEventDto
 import com.rarible.protocol.dto.NftItemEventDto
 import com.rarible.protocol.dto.NftItemUpdateEventDto
-import com.rarible.protocol.union.core.handler.BlockchainEventHandler
+import com.rarible.protocol.union.core.handler.AbstractBlockchainEventHandler
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.model.UnionItemDeleteEvent
 import com.rarible.protocol.union.core.model.UnionItemEvent
@@ -15,14 +16,14 @@ import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthItemConverter
 import org.slf4j.LoggerFactory
 
-class EthItemEventHandler(
+abstract class EthItemEventHandler(
     blockchain: BlockchainDto,
     override val handler: IncomingEventHandler<UnionItemEvent>
-) : BlockchainEventHandler<NftItemEventDto, UnionItemEvent>(blockchain) {
+) : AbstractBlockchainEventHandler<NftItemEventDto, UnionItemEvent>(blockchain) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    override suspend fun handleSafely(event: NftItemEventDto) {
+    suspend fun handleInternal(event: NftItemEventDto) {
         logger.debug("Received Ethereum ({}) Item event: type={}", blockchain, event::class.java.simpleName)
 
         when (event) {
@@ -40,4 +41,18 @@ class EthItemEventHandler(
             }
         }
     }
+}
+
+class EthereumItemEventHandler(
+    handler: IncomingEventHandler<UnionItemEvent>
+) : EthItemEventHandler(BlockchainDto.ETHEREUM, handler) {
+    @CaptureTransaction("ItemEvent#ETHEREUM")
+    override suspend fun handleSafely(event: NftItemEventDto) = handleInternal(event)
+}
+
+class PolygonItemEventHandler(
+    handler: IncomingEventHandler<UnionItemEvent>
+) : EthItemEventHandler(BlockchainDto.POLYGON, handler) {
+    @CaptureTransaction("ItemEvent#POLYGON")
+    override suspend fun handleSafely(event: NftItemEventDto) = handleInternal(event)
 }

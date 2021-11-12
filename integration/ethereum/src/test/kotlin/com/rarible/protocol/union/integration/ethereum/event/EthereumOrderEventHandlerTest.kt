@@ -21,7 +21,7 @@ class EthereumOrderEventHandlerTest {
 
     private val incomingEventHandler: IncomingEventHandler<UnionOrderEvent> = mockk()
     private val converter = EthOrderConverter(CurrencyMock.currencyServiceMock)
-    private val handler = EthOrderEventHandler(BlockchainDto.ETHEREUM, incomingEventHandler, converter)
+    private val handler = EthereumOrderEventHandler(incomingEventHandler, converter)
 
     @BeforeEach
     fun beforeEach() {

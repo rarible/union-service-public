@@ -1,7 +1,8 @@
 package com.rarible.protocol.union.integration.tezos.event
 
+import com.rarible.core.apm.CaptureTransaction
 import com.rarible.protocol.tezos.dto.ItemEventDto
-import com.rarible.protocol.union.core.handler.BlockchainEventHandler
+import com.rarible.protocol.union.core.handler.AbstractBlockchainEventHandler
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.model.UnionItemDeleteEvent
 import com.rarible.protocol.union.core.model.UnionItemEvent
@@ -14,10 +15,11 @@ import org.slf4j.LoggerFactory
 
 class TezosItemEventHandler(
     override val handler: IncomingEventHandler<UnionItemEvent>
-) : BlockchainEventHandler<ItemEventDto, UnionItemEvent>(BlockchainDto.TEZOS) {
+) : AbstractBlockchainEventHandler<ItemEventDto, UnionItemEvent>(BlockchainDto.TEZOS) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
+    @CaptureTransaction("ItemEvent#TEZOS")
     override suspend fun handleSafely(event: ItemEventDto) {
         logger.info("Received Tezos Item event: type={}", event::class.java.simpleName)
 

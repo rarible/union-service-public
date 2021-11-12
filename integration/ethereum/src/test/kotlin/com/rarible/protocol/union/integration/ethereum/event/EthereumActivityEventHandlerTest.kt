@@ -18,7 +18,7 @@ class EthereumActivityEventHandlerTest {
 
     private val incomingEventHandler: IncomingEventHandler<com.rarible.protocol.union.dto.ActivityDto> = mockk()
     private val converter = EthActivityConverter(CurrencyMock.currencyServiceMock)
-    private val handler = EthActivityEventHandler(BlockchainDto.ETHEREUM, incomingEventHandler, converter)
+    private val handler = EthereumActivityEventHandler(incomingEventHandler, converter)
 
     @BeforeEach
     fun beforeEach() {

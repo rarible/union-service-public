@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.listener.handler
 
-import com.rarible.core.apm.CaptureSpan
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.model.UnionItemDeleteEvent
 import com.rarible.protocol.union.core.model.UnionItemEvent
@@ -9,7 +8,6 @@ import com.rarible.protocol.union.listener.service.EnrichmentItemEventService
 import org.springframework.stereotype.Component
 
 @Component
-@CaptureSpan(type = "event", subtype = "item")
 class UnionItemEventHandler(
     private val itemEventService: EnrichmentItemEventService
 ) : IncomingEventHandler<UnionItemEvent> {
