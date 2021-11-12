@@ -30,7 +30,7 @@ import java.math.BigInteger
 import java.time.Instant
 
 @Component
-@CaptureSpan(type = "db", subtype = "ownership")
+@CaptureSpan(type = "db")
 class OwnershipRepository(
     private val template: ReactiveMongoTemplate
 ) {

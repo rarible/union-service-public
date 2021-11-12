@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component
 import java.time.Instant
 
 @Component
-@CaptureSpan(type = "network", subtype = "currency")
+@CaptureSpan(type = "ext", subtype = "currency")
 class CurrencyClient(
     private val currencyControllerApi: CurrencyControllerApi
 ) {

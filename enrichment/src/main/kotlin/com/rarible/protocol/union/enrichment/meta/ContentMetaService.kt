@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 @Component
-@CaptureSpan(type = "service", subtype = "meta")
+@CaptureSpan(type = "cache", subtype = "meta")
 class ContentMetaService(
     private val mediaMetaService: MediaMetaService,
     private val ipfsUrlResolver: IpfsUrlResolver,

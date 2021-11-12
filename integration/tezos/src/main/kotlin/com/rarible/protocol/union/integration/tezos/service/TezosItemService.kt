@@ -11,7 +11,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.tezos.converter.TezosItemConverter
 import kotlinx.coroutines.reactive.awaitFirst
 
-@CaptureSpan(type = "network", subtype = "tezos")
+@CaptureSpan(type = "ext", subtype = "tezos")
 open class TezosItemService(
     private val itemControllerApi: NftItemControllerApi
 ) : AbstractBlockchainService(BlockchainDto.TEZOS), ItemService {

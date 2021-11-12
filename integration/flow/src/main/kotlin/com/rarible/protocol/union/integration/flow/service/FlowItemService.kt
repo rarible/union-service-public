@@ -12,7 +12,7 @@ import com.rarible.protocol.union.integration.flow.converter.FlowItemConverter
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 
-@CaptureSpan(type = "network", subtype = "flow")
+@CaptureSpan(type = "ext", subtype = "flow")
 open class FlowItemService(
     private val flowNftItemControllerApi: FlowNftItemControllerApi
 ) : AbstractBlockchainService(BlockchainDto.FLOW), ItemService {

@@ -45,7 +45,7 @@ open class EthCollectionService(
     }
 }
 
-@CaptureSpan(type = "network", subtype = "ethereum")
+@CaptureSpan(type = "ext", subtype = "ethereum")
 open class EthereumCollectionService(
     collectionControllerApi: NftCollectionControllerApi
 ) : EthCollectionService(
@@ -53,7 +53,7 @@ open class EthereumCollectionService(
     collectionControllerApi
 )
 
-@CaptureSpan(type = "network", subtype = "polygon")
+@CaptureSpan(type = "ext", subtype = "polygon")
 open class PolygonCollectionService(
     collectionControllerApi: NftCollectionControllerApi
 ) : EthCollectionService(

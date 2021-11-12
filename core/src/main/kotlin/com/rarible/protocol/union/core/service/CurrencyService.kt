@@ -19,7 +19,7 @@ import java.time.Instant
 import java.util.concurrent.ConcurrentHashMap
 
 @Component
-@CaptureSpan(type = "service", subtype = "currency")
+@CaptureSpan(type = "app", subtype = "currency")
 class CurrencyService(
     private val currencyClient: CurrencyClient
 ) {

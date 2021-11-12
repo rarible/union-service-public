@@ -23,7 +23,7 @@ import org.springframework.stereotype.Component
 import java.time.Instant
 
 @Component
-@CaptureSpan(type = "db", subtype = "item")
+@CaptureSpan(type = "db")
 class ItemRepository(
     private val template: ReactiveMongoTemplate
 ) {

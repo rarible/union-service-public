@@ -3,6 +3,7 @@ package com.rarible.protocol.union.enrichment.meta
 import com.google.common.io.ByteStreams
 import com.google.common.io.CountingInputStream
 import com.google.common.net.InternetDomainName
+import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.cache.CacheDescriptor
 import com.rarible.core.client.WebClientHelper
 import com.rarible.core.common.blockingToMono
@@ -59,6 +60,7 @@ class MediaMetaService(
             Long.MAX_VALUE
         }
 
+    @CaptureSpan(type = "ext", subtype = "meta")
     override fun get(url: String): Mono<ContentMeta> {
         val now = nowMillis()
         val result = LoggingUtils.withMarker { marker ->

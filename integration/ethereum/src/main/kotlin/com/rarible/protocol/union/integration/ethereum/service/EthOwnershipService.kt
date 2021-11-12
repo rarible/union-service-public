@@ -48,7 +48,7 @@ open class EthOwnershipService(
     }
 }
 
-@CaptureSpan(type = "network", subtype = "ethereum")
+@CaptureSpan(type = "ext", subtype = "ethereum")
 open class EthereumOwnershipService(
     ownershipControllerApi: NftOwnershipControllerApi
 ) : EthOwnershipService(
@@ -56,7 +56,7 @@ open class EthereumOwnershipService(
     ownershipControllerApi
 )
 
-@CaptureSpan(type = "network", subtype = "polygon")
+@CaptureSpan(type = "ext", subtype = "polygon")
 open class PolygonOwnershipService(
     ownershipControllerApi: NftOwnershipControllerApi
 ) : EthOwnershipService(
