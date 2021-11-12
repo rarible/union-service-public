@@ -38,11 +38,11 @@
         <!-- =============== Flow Protocol API =========== -->
 
         <dependency>
-            <groupId>com.rarible.protocol</groupId>
+            <groupId>com.rarible.protocol.flow</groupId>
             <artifactId>flow-protocol-client-nft-starter</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.rarible.protocol</groupId>
+            <groupId>com.rarible.protocol.flow</groupId>
             <artifactId>flow-protocol-subscriber-nft</artifactId>
         </dependency>
 
