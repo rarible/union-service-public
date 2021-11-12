@@ -10,7 +10,7 @@ import kotlinx.coroutines.reactive.awaitFirst
 import org.apache.commons.lang3.StringUtils
 
 @CaptureSpan(type = "network", subtype = "flow")
-class FlowSignatureService(
+open class FlowSignatureService(
     private val signatureControllerApi: FlowNftCryptoControllerApi
 ) : AbstractBlockchainService(BlockchainDto.FLOW), SignatureService {
 

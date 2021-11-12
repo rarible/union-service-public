@@ -12,7 +12,7 @@ import com.rarible.protocol.union.integration.ethereum.converter.EthItemConverte
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 
-sealed class EthItemService(
+open class EthItemService(
     blockchain: BlockchainDto,
     private val itemControllerApi: NftItemControllerApi
 ) : AbstractBlockchainService(blockchain), ItemService {
@@ -89,7 +89,7 @@ sealed class EthItemService(
 }
 
 @CaptureSpan(type = "network", subtype = "ethereum")
-class EthereumItemService(
+open class EthereumItemService(
     itemControllerApi: NftItemControllerApi
 ) : EthItemService(
     BlockchainDto.ETHEREUM,
@@ -97,7 +97,7 @@ class EthereumItemService(
 )
 
 @CaptureSpan(type = "network", subtype = "polygon")
-class PolygonItemService(
+open class PolygonItemService(
     itemControllerApi: NftItemControllerApi
 ) : EthItemService(
     BlockchainDto.POLYGON,

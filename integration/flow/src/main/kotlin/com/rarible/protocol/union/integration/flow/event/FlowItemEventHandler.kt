@@ -15,7 +15,7 @@ import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.integration.flow.converter.FlowItemConverter
 import org.slf4j.LoggerFactory
 
-class FlowItemEventHandler(
+open class FlowItemEventHandler(
     override val handler: IncomingEventHandler<UnionItemEvent>
 ) : AbstractBlockchainEventHandler<FlowNftItemEventDto, UnionItemEvent>(BlockchainDto.FLOW) {
 

@@ -9,7 +9,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.flow.converter.FlowActivityConverter
 import org.slf4j.LoggerFactory
 
-class FlowActivityEventHandler(
+open class FlowActivityEventHandler(
     override val handler: IncomingEventHandler<ActivityDto>,
     private val flowActivityConverter: FlowActivityConverter
 ) : AbstractBlockchainEventHandler<FlowActivityDto, ActivityDto>(BlockchainDto.FLOW) {

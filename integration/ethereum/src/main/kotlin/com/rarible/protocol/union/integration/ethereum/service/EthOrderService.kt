@@ -16,7 +16,7 @@ import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
 import kotlinx.coroutines.reactive.awaitFirst
 
-sealed class EthOrderService(
+open class EthOrderService(
     override val blockchain: BlockchainDto,
     private val orderControllerApi: OrderControllerApi,
     private val ethOrderConverter: EthOrderConverter
@@ -197,7 +197,7 @@ sealed class EthOrderService(
 }
 
 @CaptureSpan(type = "network", subtype = "ethereum")
-class EthereumOrderService(
+open class EthereumOrderService(
     orderControllerApi: OrderControllerApi,
     ethOrderConverter: EthOrderConverter
 ) : EthOrderService(
@@ -207,7 +207,7 @@ class EthereumOrderService(
 )
 
 @CaptureSpan(type = "network", subtype = "polygon")
-class PolygonOrderService(
+open class PolygonOrderService(
     orderControllerApi: OrderControllerApi,
     ethOrderConverter: EthOrderConverter
 ) : EthOrderService(

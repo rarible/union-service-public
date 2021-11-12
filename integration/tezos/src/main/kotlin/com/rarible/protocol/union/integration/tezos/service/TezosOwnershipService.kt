@@ -12,7 +12,7 @@ import com.rarible.protocol.union.integration.tezos.converter.TezosOwnershipConv
 import kotlinx.coroutines.reactive.awaitFirst
 
 @CaptureSpan(type = "network", subtype = "tezos")
-class TezosOwnershipService(
+open class TezosOwnershipService(
     private val ownershipControllerApi: NftOwnershipControllerApi
 ) : AbstractBlockchainService(BlockchainDto.TEZOS), OwnershipService {
 

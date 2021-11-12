@@ -12,7 +12,7 @@ import com.rarible.protocol.union.integration.flow.converter.FlowOwnershipConver
 import kotlinx.coroutines.reactive.awaitFirst
 
 @CaptureSpan(type = "network", subtype = "flow")
-class FlowOwnershipService(
+open class FlowOwnershipService(
     private val ownershipControllerApi: FlowNftOwnershipControllerApi
 ) : AbstractBlockchainService(BlockchainDto.FLOW), OwnershipService {
 

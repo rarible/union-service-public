@@ -9,7 +9,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import kotlinx.coroutines.reactive.awaitFirst
 
 @CaptureSpan(type = "network", subtype = "tezos")
-class TezosSignatureService(
+open class TezosSignatureService(
     private val signatureControllerApi: OrderSignatureControllerApi
 ) : AbstractBlockchainService(BlockchainDto.TEZOS), SignatureService {
 

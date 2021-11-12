@@ -10,7 +10,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.tezos.converter.TezosOrderConverter
 import org.slf4j.LoggerFactory
 
-class TezosOrderEventHandler(
+open class TezosOrderEventHandler(
     override val handler: IncomingEventHandler<UnionOrderEvent>,
     private val tezosOrderConverter: TezosOrderConverter
 ) : AbstractBlockchainEventHandler<OrderEventDto, UnionOrderEvent>(BlockchainDto.TEZOS) {

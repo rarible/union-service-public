@@ -44,14 +44,14 @@ abstract class EthOwnershipEventHandler(
     }
 }
 
-class EthereumOwnershipEventHandler(
+open class EthereumOwnershipEventHandler(
     handler: IncomingEventHandler<UnionOwnershipEvent>
 ) : EthOwnershipEventHandler(BlockchainDto.ETHEREUM, handler) {
     @CaptureTransaction("OwnershipEvent#ETHEREUM")
     override suspend fun handleSafely(event: NftOwnershipEventDto) = handleInternal(event)
 }
 
-class PolygonOwnershipEventHandler(
+open class PolygonOwnershipEventHandler(
     handler: IncomingEventHandler<UnionOwnershipEvent>
 ) : EthOwnershipEventHandler(BlockchainDto.POLYGON, handler) {
     @CaptureTransaction("OwnershipEvent#POLYGON")

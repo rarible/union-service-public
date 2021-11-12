@@ -31,14 +31,14 @@ abstract class EthOrderEventHandler(
     }
 }
 
-class EthereumOrderEventHandler(
+open class EthereumOrderEventHandler(
     handler: IncomingEventHandler<UnionOrderEvent>, ethOrderConverter: EthOrderConverter
 ) : EthOrderEventHandler(BlockchainDto.ETHEREUM, handler, ethOrderConverter) {
     @CaptureTransaction("OrderEvent#ETHEREUM")
     override suspend fun handleSafely(event: OrderEventDto) = handleInternal(event)
 }
 
-class PolygonOrderEventHandler(
+open class PolygonOrderEventHandler(
     handler: IncomingEventHandler<UnionOrderEvent>, ethOrderConverter: EthOrderConverter
 ) : EthOrderEventHandler(BlockchainDto.POLYGON, handler, ethOrderConverter) {
     @CaptureTransaction("OrderEvent#POLYGON")

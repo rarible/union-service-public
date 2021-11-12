@@ -13,7 +13,7 @@ import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.integration.tezos.converter.TezosItemConverter
 import org.slf4j.LoggerFactory
 
-class TezosItemEventHandler(
+open class TezosItemEventHandler(
     override val handler: IncomingEventHandler<UnionItemEvent>
 ) : AbstractBlockchainEventHandler<ItemEventDto, UnionItemEvent>(BlockchainDto.TEZOS) {
 

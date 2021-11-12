@@ -34,7 +34,7 @@ import java.time.Instant
 
 // TODO UNION add tests when tezos add sorting
 @CaptureSpan(type = "network", subtype = "tezos")
-class TezosActivityService(
+open class TezosActivityService(
     private val activityItemControllerApi: NftActivityControllerApi,
     private val activityOrderControllerApi: OrderActivityControllerApi,
     private val tezosActivityConverter: TezosActivityConverter

@@ -11,7 +11,7 @@ import com.rarible.protocol.union.integration.flow.converter.FlowCollectionConve
 import kotlinx.coroutines.reactive.awaitFirst
 
 @CaptureSpan(type = "network", subtype = "flow")
-class FlowCollectionService(
+open class FlowCollectionService(
     private val collectionControllerApi: FlowNftCollectionControllerApi
 ) : AbstractBlockchainService(BlockchainDto.FLOW), CollectionService {
 

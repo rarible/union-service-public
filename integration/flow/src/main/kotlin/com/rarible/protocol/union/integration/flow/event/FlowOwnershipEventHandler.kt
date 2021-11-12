@@ -15,7 +15,7 @@ import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.integration.flow.converter.FlowOwnershipConverter
 import org.slf4j.LoggerFactory
 
-class FlowOwnershipEventHandler(
+open class FlowOwnershipEventHandler(
     override val handler: IncomingEventHandler<UnionOwnershipEvent>
 ) : AbstractBlockchainEventHandler<FlowOwnershipEventDto, UnionOwnershipEvent>(BlockchainDto.FLOW) {
 

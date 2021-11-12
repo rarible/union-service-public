@@ -11,7 +11,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.flow.converter.FlowOrderConverter
 import org.slf4j.LoggerFactory
 
-class FlowOrderEventHandler(
+open class FlowOrderEventHandler(
     override val handler: IncomingEventHandler<UnionOrderEvent>,
     private val flowOrderConverter: FlowOrderConverter
 ) : AbstractBlockchainEventHandler<FlowOrderEventDto, UnionOrderEvent>(BlockchainDto.FLOW) {

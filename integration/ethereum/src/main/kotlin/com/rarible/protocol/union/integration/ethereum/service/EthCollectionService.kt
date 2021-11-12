@@ -10,7 +10,7 @@ import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.integration.ethereum.converter.EthCollectionConverter
 import kotlinx.coroutines.reactive.awaitFirst
 
-sealed class EthCollectionService(
+open class EthCollectionService(
     blockchain: BlockchainDto,
     private val collectionControllerApi: NftCollectionControllerApi
 ) : AbstractBlockchainService(blockchain), CollectionService {
@@ -46,7 +46,7 @@ sealed class EthCollectionService(
 }
 
 @CaptureSpan(type = "network", subtype = "ethereum")
-class EthereumCollectionService(
+open class EthereumCollectionService(
     collectionControllerApi: NftCollectionControllerApi
 ) : EthCollectionService(
     BlockchainDto.ETHEREUM,
@@ -54,7 +54,7 @@ class EthereumCollectionService(
 )
 
 @CaptureSpan(type = "network", subtype = "polygon")
-class PolygonCollectionService(
+open class PolygonCollectionService(
     collectionControllerApi: NftCollectionControllerApi
 ) : EthCollectionService(
     BlockchainDto.POLYGON,

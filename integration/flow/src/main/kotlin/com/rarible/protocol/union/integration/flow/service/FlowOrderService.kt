@@ -20,7 +20,7 @@ import java.time.OffsetDateTime
 import java.time.ZoneOffset
 
 @CaptureSpan(type = "network", subtype = "flow")
-class FlowOrderService(
+open class FlowOrderService(
     private val orderControllerApi: FlowOrderControllerApi,
     private val flowOrderConverter: FlowOrderConverter
 ) : AbstractBlockchainService(BlockchainDto.FLOW), OrderService {

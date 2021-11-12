@@ -11,7 +11,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.tezos.converter.TezosOwnershipConverter
 import org.slf4j.LoggerFactory
 
-class TezosOwnershipEventHandler(
+open class TezosOwnershipEventHandler(
     override val handler: IncomingEventHandler<UnionOwnershipEvent>
 ) : AbstractBlockchainEventHandler<OwnershipEventDto, UnionOwnershipEvent>(BlockchainDto.TEZOS) {
 

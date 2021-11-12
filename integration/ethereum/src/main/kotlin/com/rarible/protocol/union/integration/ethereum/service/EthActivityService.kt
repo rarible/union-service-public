@@ -29,7 +29,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.reactive.awaitFirst
 import java.time.Instant
 
-sealed class EthActivityService(
+open class EthActivityService(
     blockchain: BlockchainDto,
     private val activityItemControllerApi: NftActivityControllerApi,
     private val activityOrderControllerApi: OrderActivityControllerApi,
@@ -162,7 +162,7 @@ sealed class EthActivityService(
 }
 
 @CaptureSpan(type = "network", subtype = "ethereum")
-class EthereumActivityService(
+open class EthereumActivityService(
     activityItemControllerApi: NftActivityControllerApi,
     activityOrderControllerApi: OrderActivityControllerApi,
     ethActivityConverter: EthActivityConverter
@@ -174,7 +174,7 @@ class EthereumActivityService(
 )
 
 @CaptureSpan(type = "network", subtype = "polygon")
-class PolygonActivityService(
+open class PolygonActivityService(
     activityItemControllerApi: NftActivityControllerApi,
     activityOrderControllerApi: OrderActivityControllerApi,
     ethActivityConverter: EthActivityConverter

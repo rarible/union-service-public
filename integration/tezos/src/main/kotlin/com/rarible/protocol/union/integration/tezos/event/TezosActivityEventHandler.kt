@@ -8,7 +8,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.tezos.converter.TezosActivityConverter
 import org.slf4j.LoggerFactory
 
-class TezosActivityEventHandler(
+open class TezosActivityEventHandler(
     override val handler: IncomingEventHandler<ActivityDto>,
     private val tezosActivityConverter: TezosActivityConverter
 ) : AbstractBlockchainEventHandler<com.rarible.protocol.tezos.dto.ActivityDto, ActivityDto>(BlockchainDto.TEZOS) {

@@ -13,7 +13,7 @@ import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 
 @CaptureSpan(type = "network", subtype = "flow")
-class FlowItemService(
+open class FlowItemService(
     private val flowNftItemControllerApi: FlowNftItemControllerApi
 ) : AbstractBlockchainService(BlockchainDto.FLOW), ItemService {
 

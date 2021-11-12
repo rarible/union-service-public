@@ -15,7 +15,7 @@ import com.rarible.protocol.union.integration.tezos.converter.TezosOrderConverte
 import kotlinx.coroutines.reactive.awaitFirst
 
 @CaptureSpan(type = "network", subtype = "tezos")
-class TezosOrderService(
+open class TezosOrderService(
     private val orderControllerApi: OrderControllerApi,
     private val tezosOrderConverter: TezosOrderConverter
 ) : AbstractBlockchainService(BlockchainDto.TEZOS), OrderService {

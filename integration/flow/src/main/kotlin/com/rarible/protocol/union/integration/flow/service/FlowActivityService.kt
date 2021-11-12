@@ -16,7 +16,7 @@ import kotlinx.coroutines.reactive.awaitFirst
 import java.time.Instant
 
 @CaptureSpan(type = "network", subtype = "flow")
-class FlowActivityService(
+open class FlowActivityService(
     private val activityControllerApi: FlowNftOrderActivityControllerApi,
     private val flowActivityConverter: FlowActivityConverter
 ) : AbstractBlockchainService(BlockchainDto.FLOW), ActivityService {
