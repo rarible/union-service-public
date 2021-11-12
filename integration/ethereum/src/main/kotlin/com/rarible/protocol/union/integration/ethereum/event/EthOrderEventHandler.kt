@@ -35,12 +35,12 @@ open class EthereumOrderEventHandler(
     handler: IncomingEventHandler<UnionOrderEvent>, ethOrderConverter: EthOrderConverter
 ) : EthOrderEventHandler(BlockchainDto.ETHEREUM, handler, ethOrderConverter) {
     @CaptureTransaction("OrderEvent#ETHEREUM")
-    override suspend fun handleSafely(event: OrderEventDto) = handleInternal(event)
+    override suspend fun handle(event: OrderEventDto) = handleInternal(event)
 }
 
 open class PolygonOrderEventHandler(
     handler: IncomingEventHandler<UnionOrderEvent>, ethOrderConverter: EthOrderConverter
 ) : EthOrderEventHandler(BlockchainDto.POLYGON, handler, ethOrderConverter) {
     @CaptureTransaction("OrderEvent#POLYGON")
-    override suspend fun handleSafely(event: OrderEventDto) = handleInternal(event)
+    override suspend fun handle(event: OrderEventDto) = handleInternal(event)
 }

@@ -17,7 +17,7 @@ open class FlowActivityEventHandler(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @CaptureTransaction("ActivityEvent#FLOW")
-    override suspend fun handleSafely(event: FlowActivityDto) {
+    override suspend fun handle(event: FlowActivityDto) {
         logger.debug("Received Flow ({}) Activity event: type={}", event::class.java.simpleName)
 
         val unionEventDto = flowActivityConverter.convert(event, blockchain)

@@ -39,12 +39,12 @@ open class EthereumCollectionEventHandler(
     handler: IncomingEventHandler<CollectionEventDto>
 ) : EthCollectionEventHandler(BlockchainDto.ETHEREUM, handler) {
     @CaptureTransaction("CollectionEvent#ETHEREUM")
-    override suspend fun handleSafely(event: NftCollectionEventDto) = handleInternal(event)
+    override suspend fun handle(event: NftCollectionEventDto) = handleInternal(event)
 }
 
 open class PolygonCollectionEventHandler(
     handler: IncomingEventHandler<CollectionEventDto>
 ) : EthCollectionEventHandler(BlockchainDto.POLYGON, handler) {
     @CaptureTransaction("CollectionEvent#POLYGON")
-    override suspend fun handleSafely(event: NftCollectionEventDto) = handleInternal(event)
+    override suspend fun handle(event: NftCollectionEventDto) = handleInternal(event)
 }

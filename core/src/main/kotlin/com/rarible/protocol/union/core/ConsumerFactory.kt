@@ -6,6 +6,7 @@ import com.rarible.core.daemon.sequential.ConsumerWorker
 import com.rarible.core.kafka.RaribleKafkaConsumer
 import com.rarible.protocol.union.core.handler.BatchedConsumerWorker
 import com.rarible.protocol.union.core.handler.BlockchainEventHandler
+import com.rarible.protocol.union.core.handler.BlockchainEventHandlerWrapper
 import io.micrometer.core.instrument.MeterRegistry
 import org.springframework.stereotype.Component
 
@@ -90,7 +91,7 @@ class ConsumerFactory(
             ConsumerWorker(
                 consumer = consumer,
                 properties = daemonWorkerProperties,
-                eventHandler = handler,
+                eventHandler = BlockchainEventHandlerWrapper(handler),
                 meterRegistry = meterRegistry,
                 workerName = "${blockchain.name.toLowerCase()}-${entityType}-$it"
             )

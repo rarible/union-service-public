@@ -47,12 +47,12 @@ open class EthereumItemEventHandler(
     handler: IncomingEventHandler<UnionItemEvent>
 ) : EthItemEventHandler(BlockchainDto.ETHEREUM, handler) {
     @CaptureTransaction("ItemEvent#ETHEREUM")
-    override suspend fun handleSafely(event: NftItemEventDto) = handleInternal(event)
+    override suspend fun handle(event: NftItemEventDto) = handleInternal(event)
 }
 
 open class PolygonItemEventHandler(
     handler: IncomingEventHandler<UnionItemEvent>
 ) : EthItemEventHandler(BlockchainDto.POLYGON, handler) {
     @CaptureTransaction("ItemEvent#POLYGON")
-    override suspend fun handleSafely(event: NftItemEventDto) = handleInternal(event)
+    override suspend fun handle(event: NftItemEventDto) = handleInternal(event)
 }

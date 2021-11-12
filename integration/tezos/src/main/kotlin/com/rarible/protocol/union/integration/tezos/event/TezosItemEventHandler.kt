@@ -20,7 +20,7 @@ open class TezosItemEventHandler(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @CaptureTransaction("ItemEvent#TEZOS")
-    override suspend fun handleSafely(event: ItemEventDto) {
+    override suspend fun handle(event: ItemEventDto) {
         logger.info("Received Tezos Item event: type={}", event::class.java.simpleName)
 
         when (event.type) {

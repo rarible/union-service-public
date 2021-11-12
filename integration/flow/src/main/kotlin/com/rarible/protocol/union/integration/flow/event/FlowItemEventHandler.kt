@@ -22,7 +22,7 @@ open class FlowItemEventHandler(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @CaptureTransaction("ItemEvent#FLOW")
-    override suspend fun handleSafely(event: FlowNftItemEventDto) {
+    override suspend fun handle(event: FlowNftItemEventDto) {
         logger.debug("Received Flow item event: type={}", event::class.java.simpleName)
 
         when (event) {

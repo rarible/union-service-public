@@ -28,7 +28,7 @@ rarible:
       agent:
         enabled: true
         server: http://elk_apm-server:8200
-        packages: com.rarible.protocol.union
+        packages: com.rarible.protocol.union.listener
       web:
         filter:
           enabled: false

@@ -27,12 +27,12 @@ open class EthereumActivityEventHandler(
     handler: IncomingEventHandler<ActivityDto>, ethActivityConverter: EthActivityConverter
 ) : EthActivityEventHandler(BlockchainDto.ETHEREUM, handler, ethActivityConverter) {
     @CaptureTransaction("ActivityEvent#ETHEREUM")
-    override suspend fun handleSafely(event: com.rarible.protocol.dto.ActivityDto) = handleInternal(event)
+    override suspend fun handle(event: com.rarible.protocol.dto.ActivityDto) = handleInternal(event)
 }
 
 open class PolygonActivityEventHandler(
     handler: IncomingEventHandler<ActivityDto>, ethActivityConverter: EthActivityConverter
 ) : EthActivityEventHandler(BlockchainDto.POLYGON, handler, ethActivityConverter) {
     @CaptureTransaction("ActivityEvent#POLYGON")
-    override suspend fun handleSafely(event: com.rarible.protocol.dto.ActivityDto) = handleInternal(event)
+    override suspend fun handle(event: com.rarible.protocol.dto.ActivityDto) = handleInternal(event)
 }

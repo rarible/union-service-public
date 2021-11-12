@@ -22,7 +22,7 @@ open class FlowOwnershipEventHandler(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @CaptureTransaction("OwnershipEvent#FLOW")
-    override suspend fun handleSafely(event: FlowOwnershipEventDto) {
+    override suspend fun handle(event: FlowOwnershipEventDto) {
         logger.debug("Received Flow Ownership event: type={}", event::class.java.simpleName)
 
         when (event) {

@@ -16,7 +16,7 @@ open class TezosActivityEventHandler(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @CaptureTransaction("ActivityEvent#TEZOS")
-    override suspend fun handleSafely(event: com.rarible.protocol.tezos.dto.ActivityDto) {
+    override suspend fun handle(event: com.rarible.protocol.tezos.dto.ActivityDto) {
         logger.debug("Received Tezos ({}) Activity event: type={}", blockchain, event::class.java.simpleName)
         // if type == null, it means event unparseable - will be logged inside of parser
         if (event.type != null) {

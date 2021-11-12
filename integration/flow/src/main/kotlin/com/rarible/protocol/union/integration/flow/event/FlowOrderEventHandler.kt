@@ -19,7 +19,7 @@ open class FlowOrderEventHandler(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @CaptureTransaction("OrderEvent#FLOW")
-    override suspend fun handleSafely(event: FlowOrderEventDto) {
+    override suspend fun handle(event: FlowOrderEventDto) {
         logger.debug("Received Flow Order event: type={}", event::class.java.simpleName)
 
         when (event) {

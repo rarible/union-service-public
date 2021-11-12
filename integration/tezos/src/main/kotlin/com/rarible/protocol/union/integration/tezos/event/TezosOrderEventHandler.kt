@@ -18,7 +18,7 @@ open class TezosOrderEventHandler(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @CaptureTransaction("OrderEvent#TEZOS")
-    override suspend fun handleSafely(event: com.rarible.protocol.tezos.dto.OrderEventDto) {
+    override suspend fun handle(event: com.rarible.protocol.tezos.dto.OrderEventDto) {
         logger.info("Received Tezos Order event: type={}", event::class.java.simpleName)
 
         when (event.type) {
