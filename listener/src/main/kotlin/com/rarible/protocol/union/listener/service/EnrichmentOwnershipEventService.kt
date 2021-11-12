@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.listener.service
 
+import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.common.optimisticLock
 import com.rarible.protocol.union.core.event.OutgoingOwnershipEventListener
 import com.rarible.protocol.union.core.model.UnionOwnership
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Component
 import java.util.*
 
 @Component
+@CaptureSpan(type = "event", subtype = "ownership")
 class EnrichmentOwnershipEventService(
     private val ownershipService: EnrichmentOwnershipService,
     private val enrichmentItemEventService: EnrichmentItemEventService,

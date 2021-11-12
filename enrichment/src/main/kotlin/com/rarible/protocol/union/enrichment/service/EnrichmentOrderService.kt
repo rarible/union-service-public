@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.enrichment.service
 
+import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.client.WebClientResponseProxyException
 import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.core.continuation.page.Slice
@@ -17,6 +18,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
+@CaptureSpan(type = "enrichment", subtype = "order")
 class EnrichmentOrderService(
     private val orderServiceRouter: BlockchainRouter<OrderService>
 ) {

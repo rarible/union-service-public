@@ -14,8 +14,6 @@ import com.rarible.protocol.union.integration.ethereum.data.randomEthNftItemDto
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
-import io.mockk.spyk
-import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -25,7 +23,7 @@ import reactor.kotlin.core.publisher.toMono
 class EthItemServiceTest {
 
     private val itemControllerApi: NftItemControllerApi = mockk()
-    private val service = EthItemService(BlockchainDto.ETHEREUM, itemControllerApi)
+    private val service = EthereumItemService(itemControllerApi)
 
     @Test
     fun `ethereum get all items`() = runBlocking<Unit> {

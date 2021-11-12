@@ -24,7 +24,7 @@ import scalether.domain.Address
 class EthereumOwnershipEventHandlerTest {
 
     private val incomingEventHandler: IncomingEventHandler<UnionOwnershipEvent> = mockk()
-    private val handler = EthOwnershipEventHandler(BlockchainDto.ETHEREUM, incomingEventHandler)
+    private val handler = EthereumOwnershipEventHandler(incomingEventHandler)
 
     @BeforeEach
     fun beforeEach() {

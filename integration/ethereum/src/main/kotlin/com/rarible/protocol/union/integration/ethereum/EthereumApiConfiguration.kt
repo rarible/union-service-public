@@ -19,6 +19,12 @@ import com.rarible.protocol.union.integration.ethereum.service.EthItemService
 import com.rarible.protocol.union.integration.ethereum.service.EthOrderService
 import com.rarible.protocol.union.integration.ethereum.service.EthOwnershipService
 import com.rarible.protocol.union.integration.ethereum.service.EthSignatureService
+import com.rarible.protocol.union.integration.ethereum.service.EthereumActivityService
+import com.rarible.protocol.union.integration.ethereum.service.EthereumCollectionService
+import com.rarible.protocol.union.integration.ethereum.service.EthereumItemService
+import com.rarible.protocol.union.integration.ethereum.service.EthereumOrderService
+import com.rarible.protocol.union.integration.ethereum.service.EthereumOwnershipService
+import com.rarible.protocol.union.integration.ethereum.service.EthereumSignatureService
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
@@ -81,21 +87,21 @@ class EthereumApiConfiguration {
     fun ethereumItemService(
         @Qualifier("ethereum.item.api") controllerApi: NftItemControllerApi
     ): EthItemService {
-        return EthItemService(BlockchainDto.ETHEREUM, controllerApi)
+        return EthereumItemService(controllerApi)
     }
 
     @Bean
     fun ethereumOwnershipService(
         @Qualifier("ethereum.ownership.api") controllerApi: NftOwnershipControllerApi
     ): EthOwnershipService {
-        return EthOwnershipService(BlockchainDto.ETHEREUM, controllerApi)
+        return EthereumOwnershipService(controllerApi)
     }
 
     @Bean
     fun ethereumCollectionService(
         @Qualifier("ethereum.collection.api") controllerApi: NftCollectionControllerApi
     ): EthCollectionService {
-        return EthCollectionService(BlockchainDto.ETHEREUM, controllerApi)
+        return EthereumCollectionService(controllerApi)
     }
 
     @Bean
@@ -103,14 +109,14 @@ class EthereumApiConfiguration {
         @Qualifier("ethereum.order.api") controllerApi: OrderControllerApi,
         converter: EthOrderConverter
     ): EthOrderService {
-        return EthOrderService(BlockchainDto.ETHEREUM, controllerApi, converter)
+        return EthereumOrderService(controllerApi, converter)
     }
 
     @Bean
     fun ethereumSignatureService(
         @Qualifier("ethereum.signature.api") controllerApi: OrderSignatureControllerApi
     ): EthSignatureService {
-        return EthSignatureService(BlockchainDto.ETHEREUM, controllerApi)
+        return EthereumSignatureService(controllerApi)
     }
 
     @Bean
@@ -119,6 +125,6 @@ class EthereumApiConfiguration {
         @Qualifier("ethereum.activity.api.order") orderActivityApi: OrderActivityControllerApi,
         converter: EthActivityConverter
     ): EthActivityService {
-        return EthActivityService(BlockchainDto.ETHEREUM, itemActivityApi, orderActivityApi, converter)
+        return EthereumActivityService(itemActivityApi, orderActivityApi, converter)
     }
 }

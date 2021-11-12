@@ -1,8 +1,8 @@
 package com.rarible.protocol.union.core.service
 
+import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.common.nowMillis
-import com.rarible.protocol.currency.api.client.CurrencyControllerApi
-import com.rarible.protocol.union.core.converter.CurrencyConverter
+import com.rarible.protocol.union.core.client.CurrencyClient
 import com.rarible.protocol.union.core.exception.UnionCurrencyException
 import com.rarible.protocol.union.dto.AssetTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -10,7 +10,6 @@ import com.rarible.protocol.union.dto.CurrencyUsdRateDto
 import com.rarible.protocol.union.dto.ext
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
@@ -20,8 +19,9 @@ import java.time.Instant
 import java.util.concurrent.ConcurrentHashMap
 
 @Component
+@CaptureSpan(type = "service", subtype = "currency")
 class CurrencyService(
-    private val currencyControllerApi: CurrencyControllerApi
+    private val currencyClient: CurrencyClient
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -61,24 +61,13 @@ class CurrencyService(
         at: Instant? = null
     ): BigDecimal? {
         val assetExt = assetType.ext
-        if (assetExt.isNft) {
-            return null
-        }
-        return toUsd(blockchain, assetExt.contract, value, at)
-    }
-
-    suspend fun toUsd(
-        blockchain: BlockchainDto,
-        address: String,
-        value: BigDecimal?,
-        at: Instant? = null
-    ): BigDecimal? {
-        if (value == null) {
+        if (assetExt.isNft || value == null) {
             return null
         }
         if (value == BigDecimal.ZERO) {
             return BigDecimal.ZERO
         }
+        val address = assetExt.contract
 
         val rate = if (canUseCurrentRate(at)) {
             getCurrentRate(blockchain, address)
@@ -126,21 +115,11 @@ class CurrencyService(
 
     private suspend fun fetchRateSafe(blockchain: BlockchainDto, address: String, at: Instant): CurrencyUsdRateDto? {
         return try {
-            fetchRate(blockchain, address, at)
+            currencyClient.fetchRate(blockchain, address, at)
         } catch (e: Exception) {
             logger.error("Unable to get currency rate for $blockchain with address [$address]: ${e.message}", e)
             null
         }
-    }
-
-    private suspend fun fetchRate(blockchain: BlockchainDto, address: String, at: Instant?): CurrencyUsdRateDto? {
-        val result = currencyControllerApi.getCurrencyRate(
-            CurrencyConverter.convert(blockchain),
-            address,
-            (at ?: nowMillis()).toEpochMilli()
-        ).awaitFirstOrNull()
-
-        return result?.let { CurrencyConverter.convert(result) }
     }
 
     private fun canUseCurrentRate(at: Instant?): Boolean {

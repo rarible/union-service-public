@@ -3,6 +3,7 @@ package com.rarible.protocol.union.test.mock
 import com.rarible.core.common.nowMillis
 import com.rarible.protocol.currency.api.client.CurrencyControllerApi
 import com.rarible.protocol.currency.dto.CurrencyRateDto
+import com.rarible.protocol.union.core.client.CurrencyClient
 import com.rarible.protocol.union.core.service.CurrencyService
 import io.mockk.coEvery
 import io.mockk.mockk
@@ -12,7 +13,8 @@ import java.math.BigDecimal
 object CurrencyMock {
 
     val currencyControllerApiMock: CurrencyControllerApi = mockk()
-    val currencyServiceMock = CurrencyService(currencyControllerApiMock)
+    val currencyClientMock = CurrencyClient(currencyControllerApiMock)
+    val currencyServiceMock = CurrencyService(currencyClientMock)
 
     init {
         coEvery {

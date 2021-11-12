@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.integration.tezos.service
 
+import com.rarible.core.apm.CaptureSpan
 import com.rarible.protocol.tezos.api.client.NftActivityControllerApi
 import com.rarible.protocol.tezos.api.client.OrderActivityControllerApi
 import com.rarible.protocol.tezos.dto.NftActivitiesDto
@@ -32,6 +33,7 @@ import kotlinx.coroutines.reactive.awaitFirst
 import java.time.Instant
 
 // TODO UNION add tests when tezos add sorting
+@CaptureSpan(type = "network", subtype = "tezos")
 class TezosActivityService(
     private val activityItemControllerApi: NftActivityControllerApi,
     private val activityOrderControllerApi: OrderActivityControllerApi,

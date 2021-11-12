@@ -5,16 +5,17 @@ import com.rarible.ethereum.domain.Blockchain
 import com.rarible.protocol.dto.NftCollectionEventDto
 import com.rarible.protocol.dto.NftItemEventDto
 import com.rarible.protocol.dto.NftOwnershipEventDto
+import com.rarible.protocol.dto.OrderEventDto
 import com.rarible.protocol.nft.api.subscriber.NftIndexerEventsConsumerFactory
 import com.rarible.protocol.order.api.subscriber.OrderIndexerEventsConsumerFactory
 import com.rarible.protocol.union.core.ConsumerFactory
+import com.rarible.protocol.union.core.handler.BlockchainEventHandler
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.handler.KafkaConsumerWorker
 import com.rarible.protocol.union.core.model.UnionItemEvent
 import com.rarible.protocol.union.core.model.UnionOrderEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipEvent
 import com.rarible.protocol.union.dto.ActivityDto
-import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionEventDto
 import com.rarible.protocol.union.integration.ethereum.converter.EthActivityConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
@@ -23,6 +24,11 @@ import com.rarible.protocol.union.integration.ethereum.event.EthCollectionEventH
 import com.rarible.protocol.union.integration.ethereum.event.EthItemEventHandler
 import com.rarible.protocol.union.integration.ethereum.event.EthOrderEventHandler
 import com.rarible.protocol.union.integration.ethereum.event.EthOwnershipEventHandler
+import com.rarible.protocol.union.integration.ethereum.event.EthereumActivityEventHandler
+import com.rarible.protocol.union.integration.ethereum.event.EthereumCollectionEventHandler
+import com.rarible.protocol.union.integration.ethereum.event.EthereumItemEventHandler
+import com.rarible.protocol.union.integration.ethereum.event.EthereumOrderEventHandler
+import com.rarible.protocol.union.integration.ethereum.event.EthereumOwnershipEventHandler
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
@@ -48,19 +54,19 @@ class EthereumConsumerConfiguration(
     @Bean
     @Qualifier("ethereum.item.handler")
     fun ethereumItemEventHandler(handler: IncomingEventHandler<UnionItemEvent>): EthItemEventHandler {
-        return EthItemEventHandler(BlockchainDto.ETHEREUM, handler)
+        return EthereumItemEventHandler(handler)
     }
 
     @Bean
     @Qualifier("ethereum.ownership.handler")
     fun ethereumOwnershipEventHandler(handler: IncomingEventHandler<UnionOwnershipEvent>): EthOwnershipEventHandler {
-        return EthOwnershipEventHandler(BlockchainDto.ETHEREUM, handler)
+        return EthereumOwnershipEventHandler(handler)
     }
 
     @Bean
     @Qualifier("ethereum.collection.handler")
     fun ethereumCollectionEventHandler(handler: IncomingEventHandler<CollectionEventDto>): EthCollectionEventHandler {
-        return EthCollectionEventHandler(BlockchainDto.ETHEREUM, handler)
+        return EthereumCollectionEventHandler(handler)
     }
 
     @Bean
@@ -69,7 +75,7 @@ class EthereumConsumerConfiguration(
         handler: IncomingEventHandler<UnionOrderEvent>,
         converter: EthOrderConverter
     ): EthOrderEventHandler {
-        return EthOrderEventHandler(BlockchainDto.ETHEREUM, handler, converter)
+        return EthereumOrderEventHandler(handler, converter)
     }
 
     @Bean
@@ -78,7 +84,7 @@ class EthereumConsumerConfiguration(
         handler: IncomingEventHandler<ActivityDto>,
         converter: EthActivityConverter
     ): EthActivityEventHandler {
-        return EthActivityEventHandler(BlockchainDto.ETHEREUM, handler, converter)
+        return EthereumActivityEventHandler(handler, converter)
     }
 
     //-------------------- Workers --------------------//
@@ -107,7 +113,7 @@ class EthereumConsumerConfiguration(
     @Bean
     fun ethereumItemWorker(
         @Qualifier("ethereum.nft.consumer.factory") factory: NftIndexerEventsConsumerFactory,
-        @Qualifier("ethereum.item.handler") handler: EthItemEventHandler
+        @Qualifier("ethereum.item.handler") handler: BlockchainEventHandler<NftItemEventDto, UnionItemEvent>
     ): KafkaConsumerWorker<NftItemEventDto> {
         val consumer = factory.createItemEventsConsumer(consumerFactory.itemGroup, Blockchain.ETHEREUM)
         return consumerFactory.createItemConsumer(consumer, handler, daemon, workers)
@@ -116,17 +122,16 @@ class EthereumConsumerConfiguration(
     @Bean
     fun ethereumOwnershipWorker(
         @Qualifier("ethereum.nft.consumer.factory") factory: NftIndexerEventsConsumerFactory,
-        @Qualifier("ethereum.ownership.handler") handler: EthOwnershipEventHandler
+        @Qualifier("ethereum.ownership.handler") handler: BlockchainEventHandler<NftOwnershipEventDto, UnionOwnershipEvent>
     ): KafkaConsumerWorker<NftOwnershipEventDto> {
         val consumer = factory.createOwnershipEventsConsumer(consumerFactory.ownershipGroup, Blockchain.ETHEREUM)
         return consumerFactory.createOwnershipConsumer(consumer, handler, daemon, workers)
     }
 
-
     @Bean
     fun ethereumCollectionWorker(
         @Qualifier("ethereum.nft.consumer.factory") factory: NftIndexerEventsConsumerFactory,
-        @Qualifier("ethereum.collection.handler") handler: EthCollectionEventHandler
+        @Qualifier("ethereum.collection.handler") handler: BlockchainEventHandler<NftCollectionEventDto, CollectionEventDto>
     ): KafkaConsumerWorker<NftCollectionEventDto> {
         val consumer = factory.createCollectionEventsConsumer(consumerFactory.collectionGroup, Blockchain.ETHEREUM)
         return consumerFactory.createCollectionConsumer(consumer, handler, daemon, workers)
@@ -135,8 +140,8 @@ class EthereumConsumerConfiguration(
     @Bean
     fun ethereumOrderWorker(
         @Qualifier("ethereum.order.consumer.factory") factory: OrderIndexerEventsConsumerFactory,
-        @Qualifier("ethereum.order.handler") handler: EthOrderEventHandler
-    ): KafkaConsumerWorker<com.rarible.protocol.dto.OrderEventDto> {
+        @Qualifier("ethereum.order.handler") handler: BlockchainEventHandler<OrderEventDto, UnionOrderEvent>
+    ): KafkaConsumerWorker<OrderEventDto> {
         val consumer = factory.createOrderEventsConsumer(consumerFactory.orderGroup, Blockchain.ETHEREUM)
         return consumerFactory.createOrderConsumer(consumer, handler, daemon, workers)
     }
@@ -144,7 +149,7 @@ class EthereumConsumerConfiguration(
     @Bean
     fun ethereumActivityWorker(
         @Qualifier("ethereum.activity.consumer.factory") factory: EthActivityEventsConsumerFactory,
-        @Qualifier("ethereum.activity.handler") handler: EthActivityEventHandler
+        @Qualifier("ethereum.activity.handler") handler: BlockchainEventHandler<com.rarible.protocol.dto.ActivityDto, ActivityDto>
     ): KafkaConsumerWorker<com.rarible.protocol.dto.ActivityDto> {
         val consumer = factory.createActivityConsumer(consumerFactory.activityGroup, Blockchain.ETHEREUM)
         return consumerFactory.createActivityConsumer(consumer, handler, daemon, workers)

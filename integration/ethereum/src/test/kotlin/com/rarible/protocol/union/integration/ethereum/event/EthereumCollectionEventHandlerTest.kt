@@ -19,7 +19,7 @@ import org.junit.jupiter.api.Test
 class EthereumCollectionEventHandlerTest {
 
     private val incomingEventHandler: IncomingEventHandler<CollectionEventDto> = mockk()
-    private val handler = EthCollectionEventHandler(BlockchainDto.ETHEREUM, incomingEventHandler)
+    private val handler = EthereumCollectionEventHandler(incomingEventHandler)
 
     @BeforeEach
     fun beforeEach() {

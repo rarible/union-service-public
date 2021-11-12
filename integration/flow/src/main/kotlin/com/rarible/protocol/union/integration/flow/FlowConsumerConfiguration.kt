@@ -7,6 +7,7 @@ import com.rarible.protocol.dto.FlowOrderEventDto
 import com.rarible.protocol.dto.FlowOwnershipEventDto
 import com.rarible.protocol.flow.nft.api.subscriber.FlowNftIndexerEventsConsumerFactory
 import com.rarible.protocol.union.core.ConsumerFactory
+import com.rarible.protocol.union.core.handler.BlockchainEventHandler
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.handler.KafkaConsumerWorker
 import com.rarible.protocol.union.core.model.UnionItemEvent
@@ -85,7 +86,7 @@ class FlowConsumerConfiguration(
     @Bean
     fun flowItemWorker(
         factory: FlowNftIndexerEventsConsumerFactory,
-        handler: FlowItemEventHandler
+        handler: BlockchainEventHandler<FlowNftItemEventDto, UnionItemEvent>
     ): KafkaConsumerWorker<FlowNftItemEventDto> {
         val consumer = factory.createItemEventsConsumer(consumerFactory.itemGroup)
         return consumerFactory.createItemConsumer(consumer, handler, daemon, workers)
@@ -96,7 +97,7 @@ class FlowConsumerConfiguration(
     @Bean
     fun flowOwnershipWorker(
         factory: FlowNftIndexerEventsConsumerFactory,
-        handler: FlowOwnershipEventHandler
+        handler: BlockchainEventHandler<FlowOwnershipEventDto, UnionOwnershipEvent>
     ): KafkaConsumerWorker<FlowOwnershipEventDto> {
         val consumer = factory.createOwnershipEventsConsumer(consumerFactory.ownershipGroup)
         return consumerFactory.createOwnershipConsumer(consumer, handler, daemon, workers)
@@ -105,7 +106,7 @@ class FlowConsumerConfiguration(
     @Bean
     fun flowOrderWorker(
         factory: FlowNftIndexerEventsConsumerFactory,
-        handler: FlowOrderEventHandler
+        handler: BlockchainEventHandler<FlowOrderEventDto, UnionOrderEvent>
     ): KafkaConsumerWorker<FlowOrderEventDto> {
         val consumer = factory.createOrderEventsConsumer(consumerFactory.orderGroup)
         return consumerFactory.createOrderConsumer(consumer, handler, daemon, workers)
@@ -114,7 +115,7 @@ class FlowConsumerConfiguration(
     @Bean
     fun flowActivityWorker(
         factory: FlowNftIndexerEventsConsumerFactory,
-        handler: FlowActivityEventHandler
+        handler: BlockchainEventHandler<FlowActivityDto, ActivityDto>
     ): KafkaConsumerWorker<FlowActivityDto> {
         val consumer = factory.createAcitivityEventsConsumer(consumerFactory.activityGroup)
         return consumerFactory.createActivityConsumer(consumer, handler, daemon, workers)

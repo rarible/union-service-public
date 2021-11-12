@@ -19,6 +19,12 @@ import com.rarible.protocol.union.integration.ethereum.service.EthItemService
 import com.rarible.protocol.union.integration.ethereum.service.EthOrderService
 import com.rarible.protocol.union.integration.ethereum.service.EthOwnershipService
 import com.rarible.protocol.union.integration.ethereum.service.EthSignatureService
+import com.rarible.protocol.union.integration.ethereum.service.PolygonActivityService
+import com.rarible.protocol.union.integration.ethereum.service.PolygonCollectionService
+import com.rarible.protocol.union.integration.ethereum.service.PolygonItemService
+import com.rarible.protocol.union.integration.ethereum.service.PolygonOrderService
+import com.rarible.protocol.union.integration.ethereum.service.PolygonOwnershipService
+import com.rarible.protocol.union.integration.ethereum.service.PolygonSignatureService
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
@@ -81,21 +87,21 @@ class PolygonApiConfiguration {
     fun polygonItemService(
         @Qualifier("polygon.item.api") controllerApi: NftItemControllerApi
     ): EthItemService {
-        return EthItemService(BlockchainDto.POLYGON, controllerApi)
+        return PolygonItemService(controllerApi)
     }
 
     @Bean
     fun polygonOwnershipService(
         @Qualifier("polygon.ownership.api") controllerApi: NftOwnershipControllerApi
     ): EthOwnershipService {
-        return EthOwnershipService(BlockchainDto.POLYGON, controllerApi)
+        return PolygonOwnershipService(controllerApi)
     }
 
     @Bean
     fun polygonCollectionService(
         @Qualifier("polygon.collection.api") controllerApi: NftCollectionControllerApi
     ): EthCollectionService {
-        return EthCollectionService(BlockchainDto.POLYGON, controllerApi)
+        return PolygonCollectionService(controllerApi)
     }
 
     @Bean
@@ -103,14 +109,14 @@ class PolygonApiConfiguration {
         @Qualifier("polygon.order.api") controllerApi: OrderControllerApi,
         converter: EthOrderConverter
     ): EthOrderService {
-        return EthOrderService(BlockchainDto.POLYGON, controllerApi, converter)
+        return PolygonOrderService(controllerApi, converter)
     }
 
     @Bean
     fun polygonSignatureService(
         @Qualifier("polygon.signature.api") controllerApi: OrderSignatureControllerApi
     ): EthSignatureService {
-        return EthSignatureService(BlockchainDto.POLYGON, controllerApi)
+        return PolygonSignatureService(controllerApi)
     }
 
     @Bean
@@ -119,6 +125,6 @@ class PolygonApiConfiguration {
         @Qualifier("polygon.activity.api.order") orderActivityApi: OrderActivityControllerApi,
         converter: EthActivityConverter
     ): EthActivityService {
-        return EthActivityService(BlockchainDto.POLYGON, itemActivityApi, orderActivityApi, converter)
+        return PolygonActivityService(itemActivityApi, orderActivityApi, converter)
     }
 }

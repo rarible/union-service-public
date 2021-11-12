@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.enrichment.service
 
 import com.mongodb.client.result.DeleteResult
+import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.service.ItemService
@@ -22,6 +23,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
+@CaptureSpan(type = "enrichment", subtype = "item")
 class EnrichmentItemService(
     private val itemServiceRouter: BlockchainRouter<ItemService>,
     private val itemRepository: ItemRepository,

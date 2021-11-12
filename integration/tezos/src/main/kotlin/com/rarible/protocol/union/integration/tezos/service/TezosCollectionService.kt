@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.integration.tezos.service
 
+import com.rarible.core.apm.CaptureSpan
 import com.rarible.protocol.tezos.api.client.NftCollectionControllerApi
 import com.rarible.protocol.union.core.continuation.page.Page
 import com.rarible.protocol.union.core.service.CollectionService
@@ -9,6 +10,7 @@ import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.integration.tezos.converter.TezosCollectionConverter
 import kotlinx.coroutines.reactive.awaitFirst
 
+@CaptureSpan(type = "network", subtype = "tezos")
 class TezosCollectionService(
     private val collectionControllerApi: NftCollectionControllerApi
 ) : AbstractBlockchainService(BlockchainDto.TEZOS), CollectionService {
