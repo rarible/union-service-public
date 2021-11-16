@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.api.controller
 
+import com.rarible.core.logging.withMdc
 import com.rarible.protocol.union.api.service.OrderApiService
 import com.rarible.protocol.union.api.service.extractItemId
 import com.rarible.protocol.union.core.continuation.OrderContinuation
@@ -21,6 +22,8 @@ import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.dto.subchains
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
@@ -118,7 +121,26 @@ class OrderController(
         return ResponseEntity.ok(toDto(result))
     }
 
-    override suspend fun getOrderBidsByMaker(
+    //--------- TODO UNION - this method should be implemented with currencies, like getBidsByItem ---------//
+    // For now it is hidden from openapi since nobody using it
+    @GetMapping(
+        value = ["/v0.1/orders/bids/byMaker"],
+        produces = ["application/json"]
+    )
+    suspend fun getOrderBidsByMaker0(
+        @RequestParam(value = "maker", required = true) maker: kotlin.String,
+        @RequestParam(value = "platform", required = false) platform: PlatformDto?,
+        @RequestParam(value = "origin", required = false) origin: kotlin.String?,
+        @RequestParam(value = "status", required = false) status: kotlin.collections.List<OrderStatusDto>?,
+        @RequestParam(value = "start", required = false) start: kotlin.Long?,
+        @RequestParam(value = "end", required = false) end: kotlin.Long?,
+        @RequestParam(value = "continuation", required = false) continuation: kotlin.String?,
+        @RequestParam(value = "size", required = false) size: kotlin.Int?
+    ): ResponseEntity<OrdersDto> {
+        return withMdc { getOrderBidsByMaker(maker, platform, origin, status, start, end, continuation, size) }
+    }
+
+    suspend fun getOrderBidsByMaker(
         maker: String,
         platform: PlatformDto?,
         origin: String?,
@@ -167,6 +189,7 @@ class OrderController(
 
         return ResponseEntity.ok(toDto(combinedSlice))
     }
+//-----------------------------------------------------------------------//
 
     override suspend fun getOrderById(id: String): ResponseEntity<OrderDto> {
         val orderId = IdParser.parseOrderId(id)
