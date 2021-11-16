@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.enrichment.model
 
 import com.rarible.core.common.nowMillis
+import com.rarible.protocol.union.dto.AuctionIdDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import org.springframework.data.annotation.AccessType
 import org.springframework.data.annotation.Id
@@ -22,6 +23,8 @@ data class ShortItem(
 
     val bestSellOrders: Map<String, ShortOrder>,
     val bestBidOrders: Map<String, ShortOrder>,
+
+    val auctions: List<String>,
 
     val multiCurrency: Boolean = bestSellOrders.size > 1 || bestBidOrders.size > 1,
 
@@ -54,6 +57,8 @@ data class ShortItem(
 
                 bestSellOrders = emptyMap(),
                 bestBidOrders = emptyMap(),
+
+                auctions = emptyList(),
 
                 bestSellOrder = null,
                 bestBidOrder = null,
