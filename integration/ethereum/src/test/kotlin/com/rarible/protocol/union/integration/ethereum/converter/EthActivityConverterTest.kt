@@ -234,8 +234,14 @@ class EthActivityConverterTest {
         assertThat(ethActivityConverter.asUserActivityType(UserActivityTypeDto.LIST))
             .isEqualTo(ActivityFilterByUserTypeDto.LIST)
 
+        assertThat(ethActivityConverter.asUserActivityType(UserActivityTypeDto.CANCEL_LIST))
+            .isEqualTo(ActivityFilterByUserTypeDto.CANCEL_LIST)
+
         assertThat(ethActivityConverter.asUserActivityType(UserActivityTypeDto.MAKE_BID))
             .isEqualTo(ActivityFilterByUserTypeDto.MAKE_BID)
+
+        assertThat(ethActivityConverter.asUserActivityType(UserActivityTypeDto.CANCEL_BID))
+            .isEqualTo(ActivityFilterByUserTypeDto.CANCEL_BID)
 
         assertThat(ethActivityConverter.asUserActivityType(UserActivityTypeDto.MINT))
             .isEqualTo(ActivityFilterByUserTypeDto.MINT)
@@ -255,11 +261,17 @@ class EthActivityConverterTest {
         assertThat(ethActivityConverter.asItemActivityType(ActivityTypeDto.BID))
             .isEqualTo(ActivityFilterByItemTypeDto.BID)
 
+        assertThat(ethActivityConverter.asItemActivityType(ActivityTypeDto.CANCEL_BID))
+            .isEqualTo(ActivityFilterByItemTypeDto.CANCEL_BID)
+
         assertThat(ethActivityConverter.asItemActivityType(ActivityTypeDto.BURN))
             .isEqualTo(ActivityFilterByItemTypeDto.BURN)
 
         assertThat(ethActivityConverter.asItemActivityType(ActivityTypeDto.LIST))
             .isEqualTo(ActivityFilterByItemTypeDto.LIST)
+
+        assertThat(ethActivityConverter.asItemActivityType(ActivityTypeDto.CANCEL_LIST))
+            .isEqualTo(ActivityFilterByItemTypeDto.CANCEL_LIST)
 
         assertThat(ethActivityConverter.asItemActivityType(ActivityTypeDto.MINT))
             .isEqualTo(ActivityFilterByItemTypeDto.MINT)
@@ -276,11 +288,17 @@ class EthActivityConverterTest {
         assertThat(ethActivityConverter.asCollectionActivityType(ActivityTypeDto.BID))
             .isEqualTo(ActivityFilterByCollectionTypeDto.BID)
 
+        assertThat(ethActivityConverter.asCollectionActivityType(ActivityTypeDto.CANCEL_BID))
+            .isEqualTo(ActivityFilterByCollectionTypeDto.CANCEL_BID)
+
         assertThat(ethActivityConverter.asCollectionActivityType(ActivityTypeDto.BURN))
             .isEqualTo(ActivityFilterByCollectionTypeDto.BURN)
 
         assertThat(ethActivityConverter.asCollectionActivityType(ActivityTypeDto.LIST))
             .isEqualTo(ActivityFilterByCollectionTypeDto.LIST)
+
+        assertThat(ethActivityConverter.asCollectionActivityType(ActivityTypeDto.CANCEL_LIST))
+            .isEqualTo(ActivityFilterByCollectionTypeDto.CANCEL_LIST)
 
         assertThat(ethActivityConverter.asCollectionActivityType(ActivityTypeDto.MINT))
             .isEqualTo(ActivityFilterByCollectionTypeDto.MINT)
@@ -297,11 +315,17 @@ class EthActivityConverterTest {
         assertThat(ethActivityConverter.asGlobalActivityType(ActivityTypeDto.BID))
             .isEqualTo(ActivityFilterAllTypeDto.BID)
 
+        assertThat(ethActivityConverter.asGlobalActivityType(ActivityTypeDto.CANCEL_BID))
+            .isEqualTo(ActivityFilterAllTypeDto.CANCEL_BID)
+
         assertThat(ethActivityConverter.asGlobalActivityType(ActivityTypeDto.BURN))
             .isEqualTo(ActivityFilterAllTypeDto.BURN)
 
         assertThat(ethActivityConverter.asGlobalActivityType(ActivityTypeDto.LIST))
             .isEqualTo(ActivityFilterAllTypeDto.LIST)
+
+        assertThat(ethActivityConverter.asGlobalActivityType(ActivityTypeDto.CANCEL_LIST))
+            .isEqualTo(ActivityFilterAllTypeDto.CANCEL_LIST)
 
         assertThat(ethActivityConverter.asGlobalActivityType(ActivityTypeDto.MINT))
             .isEqualTo(ActivityFilterAllTypeDto.MINT)
