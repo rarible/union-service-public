@@ -4,6 +4,10 @@ import com.rarible.protocol.dto.ActivityFilterAllTypeDto
 import com.rarible.protocol.dto.ActivityFilterByCollectionTypeDto
 import com.rarible.protocol.dto.ActivityFilterByItemTypeDto
 import com.rarible.protocol.dto.ActivityFilterByUserTypeDto
+import com.rarible.protocol.dto.AuctionActivityBidDto
+import com.rarible.protocol.dto.AuctionActivityCancelDto
+import com.rarible.protocol.dto.AuctionActivityFinishDto
+import com.rarible.protocol.dto.AuctionActivityOpenDto
 import com.rarible.protocol.dto.BurnDto
 import com.rarible.protocol.dto.MintDto
 import com.rarible.protocol.dto.OrderActivityBidDto
@@ -19,6 +23,10 @@ import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivityIdDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.ActivityTypeDto.*
+import com.rarible.protocol.union.dto.AuctionBidActivityDto
+import com.rarible.protocol.union.dto.AuctionCancelActivityDto
+import com.rarible.protocol.union.dto.AuctionFinishActivityDto
+import com.rarible.protocol.union.dto.AuctionOpenActivityDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.BurnActivityDto
 import com.rarible.protocol.union.dto.ContractAddress
@@ -195,7 +203,67 @@ class EthActivityConverter(
                     )
                 )
             }
-            else -> TODO() //TODO Implement Auction activities
+            is AuctionActivityOpenDto -> {
+                AuctionOpenActivityDto(
+                    id = activityId,
+                    date = source.date,
+                    seller = EthConverter.convert(source.seller, blockchain),
+                    sell = EthConverter.convert(source.sell, blockchain),
+                    buy = EthConverter.convert(source.buy, blockchain),
+                    startTime = source.startTime,
+                    endTime = source.endTime,
+                    duration = source.duration,
+                    minimalStep = source.minimalStep,
+                    minimalPrice = source.minimalPrice,
+                    hash = EthConverter.convert(source.hash),
+                    blockchainInfo = ActivityBlockchainInfoDto(
+                        transactionHash = EthConverter.convert(source.transactionHash),
+                        blockHash = EthConverter.convert(source.blockHash),
+                        blockNumber = source.blockNumber,
+                        logIndex = source.logIndex
+                    )
+                )
+            }
+            is AuctionActivityBidDto -> {
+                AuctionBidActivityDto(
+                    id = activityId,
+                    date = source.date,
+                    bid = EthConverter.convert(source.bid, blockchain),
+                    hash = EthConverter.convert(source.hash),
+                    blockchainInfo = ActivityBlockchainInfoDto(
+                        transactionHash = EthConverter.convert(source.transactionHash),
+                        blockHash = EthConverter.convert(source.blockHash),
+                        blockNumber = source.blockNumber,
+                        logIndex = source.logIndex
+                    )
+                )
+            }
+            is AuctionActivityFinishDto -> {
+                AuctionFinishActivityDto(
+                    id = activityId,
+                    date = source.date,
+                    hash = EthConverter.convert(source.hash),
+                    blockchainInfo = ActivityBlockchainInfoDto(
+                        transactionHash = EthConverter.convert(source.transactionHash),
+                        blockHash = EthConverter.convert(source.blockHash),
+                        blockNumber = source.blockNumber,
+                        logIndex = source.logIndex
+                    )
+                )
+            }
+            is AuctionActivityCancelDto -> {
+                AuctionCancelActivityDto(
+                    id = activityId,
+                    date = source.date,
+                    hash = EthConverter.convert(source.hash),
+                    blockchainInfo = ActivityBlockchainInfoDto(
+                        transactionHash = EthConverter.convert(source.transactionHash),
+                        blockHash = EthConverter.convert(source.blockHash),
+                        blockNumber = source.blockNumber,
+                        logIndex = source.logIndex
+                    )
+                )
+            }
         }
     }
 

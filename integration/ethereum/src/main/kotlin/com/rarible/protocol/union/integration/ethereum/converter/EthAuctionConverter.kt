@@ -7,7 +7,6 @@ import com.rarible.protocol.union.dto.AuctionHistoryDto
 import com.rarible.protocol.union.dto.AuctionIdDto
 import com.rarible.protocol.union.dto.AuctionStatusDto
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.PartDto
 import com.rarible.protocol.union.dto.RaribleAuctionV1BidDataV1Dto
 import com.rarible.protocol.union.dto.RaribleAuctionV1BidV1Dto
 import com.rarible.protocol.union.dto.RaribleAuctionV1DataV1Dto
@@ -78,8 +77,8 @@ class EthAuctionConverter(
 
     suspend fun convert(source: com.rarible.protocol.dto.RaribleAuctionV1DataV1Dto, blockchain: BlockchainDto): RaribleAuctionV1DataV1Dto {
         return RaribleAuctionV1DataV1Dto(
-            originFees = source.originFees.map { PartDto(EthConverter.convert(it.account, blockchain), it.value) },
-            payouts = source.payouts.map { PartDto(EthConverter.convert(it.account, blockchain), it.value) },
+            originFees = source.originFees.map { EthConverter.convertToPayout(it, blockchain) },
+            payouts = source.payouts.map { EthConverter.convertToPayout(it, blockchain) },
             startTime = source.startTime,
             duration = source.duration,
             buyOutPrice = source.buyOutPrice
@@ -91,8 +90,8 @@ class EthAuctionConverter(
             RaribleAuctionV1BidV1Dto(
                 amount = bid.amount,
                 data = RaribleAuctionV1BidDataV1Dto(
-                    originFees = bid.data.originFees.map { PartDto(EthConverter.convert(it.account, blockchain), it.value) },
-                    payouts = bid.data.payouts.map { PartDto(EthConverter.convert(it.account, blockchain), it.value) }
+                    originFees = bid.data.originFees.map { EthConverter.convertToPayout(it, blockchain) },
+                    payouts = bid.data.payouts.map { EthConverter.convertToPayout(it, blockchain) }
                 )
             )
         }
