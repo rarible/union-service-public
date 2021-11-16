@@ -18,6 +18,7 @@ import com.rarible.protocol.union.dto.ActivityBlockchainInfoDto
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivityIdDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
+import com.rarible.protocol.union.dto.ActivityTypeDto.*
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.BurnActivityDto
 import com.rarible.protocol.union.dto.MintActivityDto
@@ -248,39 +249,47 @@ class EthActivityConverter(
             UserActivityTypeDto.SELL -> ActivityFilterByUserTypeDto.SELL
             UserActivityTypeDto.TRANSFER_FROM -> ActivityFilterByUserTypeDto.TRANSFER_FROM
             UserActivityTypeDto.TRANSFER_TO -> ActivityFilterByUserTypeDto.TRANSFER_TO
+            UserActivityTypeDto.CANCEL_LIST -> ActivityFilterByUserTypeDto.CANCEL_LIST
+            UserActivityTypeDto.CANCEL_BID -> ActivityFilterByUserTypeDto.CANCEL_BID
         }
     }
 
     fun asItemActivityType(source: ActivityTypeDto): ActivityFilterByItemTypeDto {
         return when (source) {
-            ActivityTypeDto.BID -> ActivityFilterByItemTypeDto.BID
-            ActivityTypeDto.BURN -> ActivityFilterByItemTypeDto.BURN
-            ActivityTypeDto.LIST -> ActivityFilterByItemTypeDto.LIST
-            ActivityTypeDto.MINT -> ActivityFilterByItemTypeDto.MINT
-            ActivityTypeDto.SELL -> ActivityFilterByItemTypeDto.MATCH
-            ActivityTypeDto.TRANSFER -> ActivityFilterByItemTypeDto.TRANSFER
+            BID -> ActivityFilterByItemTypeDto.BID
+            BURN -> ActivityFilterByItemTypeDto.BURN
+            LIST -> ActivityFilterByItemTypeDto.LIST
+            MINT -> ActivityFilterByItemTypeDto.MINT
+            SELL -> ActivityFilterByItemTypeDto.MATCH
+            TRANSFER -> ActivityFilterByItemTypeDto.TRANSFER
+            CANCEL_LIST -> ActivityFilterByItemTypeDto.CANCEL_LIST
+            CANCEL_BID -> ActivityFilterByItemTypeDto.CANCEL_BID
         }
     }
 
     fun asCollectionActivityType(source: ActivityTypeDto): ActivityFilterByCollectionTypeDto {
         return when (source) {
-            ActivityTypeDto.BID -> ActivityFilterByCollectionTypeDto.BID
-            ActivityTypeDto.BURN -> ActivityFilterByCollectionTypeDto.BURN
-            ActivityTypeDto.LIST -> ActivityFilterByCollectionTypeDto.LIST
-            ActivityTypeDto.MINT -> ActivityFilterByCollectionTypeDto.MINT
-            ActivityTypeDto.SELL -> ActivityFilterByCollectionTypeDto.MATCH
-            ActivityTypeDto.TRANSFER -> ActivityFilterByCollectionTypeDto.TRANSFER
+            BID -> ActivityFilterByCollectionTypeDto.BID
+            BURN -> ActivityFilterByCollectionTypeDto.BURN
+            LIST -> ActivityFilterByCollectionTypeDto.LIST
+            MINT -> ActivityFilterByCollectionTypeDto.MINT
+            SELL -> ActivityFilterByCollectionTypeDto.MATCH
+            TRANSFER -> ActivityFilterByCollectionTypeDto.TRANSFER
+            CANCEL_LIST -> ActivityFilterByCollectionTypeDto.CANCEL_LIST
+            CANCEL_BID -> ActivityFilterByCollectionTypeDto.CANCEL_BID
         }
     }
 
     fun asGlobalActivityType(source: ActivityTypeDto): ActivityFilterAllTypeDto {
         return when (source) {
-            ActivityTypeDto.BID -> ActivityFilterAllTypeDto.BID
-            ActivityTypeDto.BURN -> ActivityFilterAllTypeDto.BURN
-            ActivityTypeDto.LIST -> ActivityFilterAllTypeDto.LIST
-            ActivityTypeDto.MINT -> ActivityFilterAllTypeDto.MINT
-            ActivityTypeDto.SELL -> ActivityFilterAllTypeDto.SELL
-            ActivityTypeDto.TRANSFER -> ActivityFilterAllTypeDto.TRANSFER
+            BID -> ActivityFilterAllTypeDto.BID
+            BURN -> ActivityFilterAllTypeDto.BURN
+            LIST -> ActivityFilterAllTypeDto.LIST
+            MINT -> ActivityFilterAllTypeDto.MINT
+            SELL -> ActivityFilterAllTypeDto.SELL
+            TRANSFER -> ActivityFilterAllTypeDto.TRANSFER
+            CANCEL_LIST -> ActivityFilterAllTypeDto.CANCEL_LIST
+            CANCEL_BID -> ActivityFilterAllTypeDto.CANCEL_BID
         }
     }
 

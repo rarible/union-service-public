@@ -32,8 +32,9 @@ object EthActivityFilterConverter {
                         ActivityFilterAllTypeDto.BURN -> NftActivityFilterAllDto.Types.BURN
                         ActivityFilterAllTypeDto.BID,
                         ActivityFilterAllTypeDto.LIST,
-                        ActivityFilterAllTypeDto.SELL -> null
-                        else -> TODO() // TODO Add handling for new types
+                        ActivityFilterAllTypeDto.SELL,
+                        ActivityFilterAllTypeDto.CANCEL_BID,
+                        ActivityFilterAllTypeDto.CANCEL_LIST -> null
                     }
                 }
                 if (nftTypes.isNotEmpty()) NftActivityFilterAllDto(nftTypes) else null
@@ -46,8 +47,9 @@ object EthActivityFilterConverter {
                         ActivityFilterByCollectionTypeDto.BURN -> NftActivityFilterByCollectionDto.Types.BURN
                         ActivityFilterByCollectionTypeDto.BID,
                         ActivityFilterByCollectionTypeDto.LIST,
-                        ActivityFilterByCollectionTypeDto.MATCH -> null
-                        else -> TODO() // TODO Add handling for new types
+                        ActivityFilterByCollectionTypeDto.MATCH,
+                        ActivityFilterByCollectionTypeDto.CANCEL_BID,
+                        ActivityFilterByCollectionTypeDto.CANCEL_LIST -> null
                     }
                 }
                 if (nftTypes.isNotEmpty()) NftActivityFilterByCollectionDto(source.contract, nftTypes) else null
@@ -58,10 +60,11 @@ object EthActivityFilterConverter {
                         ActivityFilterByItemTypeDto.TRANSFER -> NftActivityFilterByItemDto.Types.TRANSFER
                         ActivityFilterByItemTypeDto.MINT -> NftActivityFilterByItemDto.Types.MINT
                         ActivityFilterByItemTypeDto.BURN -> NftActivityFilterByItemDto.Types.BURN
+                        ActivityFilterByItemTypeDto.CANCEL_BID,
+                        ActivityFilterByItemTypeDto.CANCEL_LIST,
                         ActivityFilterByItemTypeDto.BID,
                         ActivityFilterByItemTypeDto.LIST,
                         ActivityFilterByItemTypeDto.MATCH -> null
-                        else -> TODO() // TODO Add handling for new types
                     }
                 }
                 if (nftTypes.isNotEmpty()) NftActivityFilterByItemDto(
@@ -81,8 +84,9 @@ object EthActivityFilterConverter {
                         ActivityFilterByUserTypeDto.GET_BID,
                         ActivityFilterByUserTypeDto.BUY,
                         ActivityFilterByUserTypeDto.LIST,
-                        ActivityFilterByUserTypeDto.SELL -> null
-                        else -> TODO() // TODO Add handling for new types
+                        ActivityFilterByUserTypeDto.SELL,
+                        ActivityFilterByUserTypeDto.CANCEL_BID,
+                        ActivityFilterByUserTypeDto.CANCEL_LIST -> null
                     }
                 }
                 if (nftTypes.isNotEmpty()) {
@@ -103,10 +107,11 @@ object EthActivityFilterConverter {
                         ActivityFilterAllTypeDto.BID -> OrderActivityFilterAllDto.Types.BID
                         ActivityFilterAllTypeDto.LIST -> OrderActivityFilterAllDto.Types.LIST
                         ActivityFilterAllTypeDto.SELL -> OrderActivityFilterAllDto.Types.MATCH
+                        ActivityFilterAllTypeDto.CANCEL_BID -> OrderActivityFilterAllDto.Types.CANCEL_BID
+                        ActivityFilterAllTypeDto.CANCEL_LIST -> OrderActivityFilterAllDto.Types.CANCEL_LIST
                         ActivityFilterAllTypeDto.TRANSFER,
                         ActivityFilterAllTypeDto.MINT,
                         ActivityFilterAllTypeDto.BURN -> null
-                        else -> TODO() // TODO Add handling for new types
                     }
                 }
                 if (orderTypes.isNotEmpty()) OrderActivityFilterAllDto(orderTypes) else null
@@ -117,10 +122,11 @@ object EthActivityFilterConverter {
                         ActivityFilterByCollectionTypeDto.BID -> OrderActivityFilterByCollectionDto.Types.BID
                         ActivityFilterByCollectionTypeDto.LIST -> OrderActivityFilterByCollectionDto.Types.LIST
                         ActivityFilterByCollectionTypeDto.MATCH -> OrderActivityFilterByCollectionDto.Types.MATCH
+                        ActivityFilterByCollectionTypeDto.CANCEL_BID -> OrderActivityFilterByCollectionDto.Types.CANCEL_BID
+                        ActivityFilterByCollectionTypeDto.CANCEL_LIST -> OrderActivityFilterByCollectionDto.Types.CANCEL_LIST
                         ActivityFilterByCollectionTypeDto.TRANSFER,
                         ActivityFilterByCollectionTypeDto.MINT,
                         ActivityFilterByCollectionTypeDto.BURN -> null
-                        else -> TODO() // TODO Add handling for new types
                     }
                 }
                 if (orderTypes.isNotEmpty()) OrderActivityFilterByCollectionDto(source.contract, orderTypes) else null
@@ -131,10 +137,11 @@ object EthActivityFilterConverter {
                         ActivityFilterByItemTypeDto.BID -> OrderActivityFilterByItemDto.Types.BID
                         ActivityFilterByItemTypeDto.LIST -> OrderActivityFilterByItemDto.Types.LIST
                         ActivityFilterByItemTypeDto.MATCH -> OrderActivityFilterByItemDto.Types.MATCH
+                        ActivityFilterByItemTypeDto.CANCEL_BID -> OrderActivityFilterByItemDto.Types.CANCEL_BID
+                        ActivityFilterByItemTypeDto.CANCEL_LIST -> OrderActivityFilterByItemDto.Types.CANCEL_LIST
                         ActivityFilterByItemTypeDto.TRANSFER,
                         ActivityFilterByItemTypeDto.MINT,
                         ActivityFilterByItemTypeDto.BURN -> null
-                        else -> TODO() // TODO Add handling for new types
                     }
                 }
                 if (orderTypes.isNotEmpty()) OrderActivityFilterByItemDto(
@@ -151,11 +158,12 @@ object EthActivityFilterConverter {
                         ActivityFilterByUserTypeDto.BUY -> OrderActivityFilterByUserDto.Types.BUY
                         ActivityFilterByUserTypeDto.LIST -> OrderActivityFilterByUserDto.Types.LIST
                         ActivityFilterByUserTypeDto.SELL -> OrderActivityFilterByUserDto.Types.SELL
+                        ActivityFilterByUserTypeDto.CANCEL_BID -> OrderActivityFilterByUserDto.Types.CANCEL_BID
+                        ActivityFilterByUserTypeDto.CANCEL_LIST -> OrderActivityFilterByUserDto.Types.CANCEL_LIST
                         ActivityFilterByUserTypeDto.TRANSFER_FROM,
                         ActivityFilterByUserTypeDto.TRANSFER_TO,
                         ActivityFilterByUserTypeDto.MINT,
                         ActivityFilterByUserTypeDto.BURN -> null
-                        else -> TODO() // TODO Add handling for new types
                     }
                 }
                 if (nftTypes.isNotEmpty()) {
