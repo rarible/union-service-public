@@ -68,7 +68,7 @@ object KafkaEventFactory {
     fun ownershipEvent(dto: OwnershipEventDto): KafkaMessage<OwnershipEventDto> {
         val itemId = ItemIdDto(
             dto.ownershipId.blockchain,
-            dto.ownershipId.token,
+            dto.ownershipId.contract,
             dto.ownershipId.tokenId
         )
         return KafkaMessage(

@@ -10,7 +10,7 @@ object ShortItemConverter {
     fun convert(item: UnionItem): ShortItem {
         return ShortItem(
             blockchain = item.id.blockchain,
-            token = item.id.token.value,
+            token = item.id.contract,
             tokenId = item.id.tokenId,
             // Default enrichment data
             sellers = 0,

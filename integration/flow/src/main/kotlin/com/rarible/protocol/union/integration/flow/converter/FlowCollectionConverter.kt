@@ -6,15 +6,17 @@ import com.rarible.protocol.union.core.continuation.page.Page
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionDto
+import com.rarible.protocol.union.dto.ContractAddress
 
 object FlowCollectionConverter {
 
     fun convert(source: FlowNftCollectionDto, blockchain: BlockchainDto): CollectionDto {
         return CollectionDto(
-            id = UnionAddressConverter.convert(source.id, blockchain),
+            id = ContractAddress(blockchain, source.id),
+            blockchain = blockchain,
             name = source.name,
             symbol = source.symbol,
-            owner = UnionAddressConverter.convert(source.owner, blockchain),
+            owner = UnionAddressConverter.convert(blockchain, source.owner),
             type = CollectionDto.Type.FLOW,
             features = convert(source.features)
         )

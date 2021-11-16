@@ -17,6 +17,7 @@ import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivityIdDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.BurnActivityDto
+import com.rarible.protocol.union.dto.ContractAddress
 import com.rarible.protocol.union.dto.MintActivityDto
 import com.rarible.protocol.union.dto.OrderActivitySourceDto
 import com.rarible.protocol.union.dto.OrderCancelListActivityDto
@@ -45,8 +46,8 @@ class FlowActivityConverter(
                     date = source.date,
                     nft = nft,
                     payment = payment,
-                    seller = UnionAddressConverter.convert(source.left.maker, blockchain),
-                    buyer = UnionAddressConverter.convert(source.right.maker, blockchain),
+                    seller = UnionAddressConverter.convert(blockchain, source.left.maker),
+                    buyer = UnionAddressConverter.convert(blockchain, source.right.maker),
                     priceUsd = priceUsd,
                     price = source.price,
                     type = OrderMatchSellDto.Type.SELL,
@@ -73,7 +74,7 @@ class FlowActivityConverter(
                     // TODO FLOW here should be price from FLOW, we don't want to calculate it here
                     priceUsd = priceUsd,
                     hash = source.hash,
-                    maker = UnionAddressConverter.convert(source.maker, blockchain),
+                    maker = UnionAddressConverter.convert(blockchain, source.maker),
                     make = FlowConverter.convert(source.make, blockchain),
                     take = FlowConverter.convert(source.take, blockchain)
                 )
@@ -83,7 +84,7 @@ class FlowActivityConverter(
                     id = activityId,
                     date = source.date,
                     hash = source.hash,
-                    maker = UnionAddressConverter.convert(source.maker, blockchain),
+                    maker = UnionAddressConverter.convert(blockchain, source.maker),
                     make = FlowConverter.convertToType(source.make, blockchain),
                     take = FlowConverter.convertToType(source.take, blockchain)
                 )
@@ -92,8 +93,8 @@ class FlowActivityConverter(
                 MintActivityDto(
                     id = activityId,
                     date = source.date,
-                    owner = UnionAddressConverter.convert(source.owner, blockchain),
-                    contract = UnionAddressConverter.convert(source.contract, blockchain),
+                    owner = UnionAddressConverter.convert(blockchain, source.owner),
+                    contract = ContractAddress(blockchain, source.contract),
                     tokenId = source.tokenId,
                     value = source.value,
                     blockchainInfo = ActivityBlockchainInfoDto(
@@ -108,8 +109,8 @@ class FlowActivityConverter(
                 BurnActivityDto(
                     id = activityId,
                     date = source.date,
-                    owner = UnionAddressConverter.convert(source.owner, blockchain),
-                    contract = UnionAddressConverter.convert(source.contract, blockchain),
+                    owner = UnionAddressConverter.convert(blockchain, source.owner),
+                    contract = ContractAddress(blockchain, source.contract),
                     tokenId = source.tokenId,
                     value = source.value,
                     blockchainInfo = ActivityBlockchainInfoDto(
@@ -124,9 +125,9 @@ class FlowActivityConverter(
                 TransferActivityDto(
                     id = activityId,
                     date = source.date,
-                    from = UnionAddressConverter.convert(source.from, blockchain),
-                    owner = UnionAddressConverter.convert(source.owner, blockchain),
-                    contract = UnionAddressConverter.convert(source.contract, blockchain),
+                    from = UnionAddressConverter.convert(blockchain, source.from),
+                    owner = UnionAddressConverter.convert(blockchain, source.owner),
+                    contract = ContractAddress(blockchain, source.contract),
                     tokenId = source.tokenId,
                     value = source.value,
                     blockchainInfo = ActivityBlockchainInfoDto(

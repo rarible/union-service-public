@@ -12,22 +12,18 @@ import java.math.BigInteger
 object FlowOwnershipConverter {
 
     fun convert(ownership: FlowNftOwnershipDto, blockchain: BlockchainDto): UnionOwnership {
-        val contract = UnionAddressConverter.convert(ownership.contract, blockchain)
         val tokenId = ownership.tokenId
-        val owner = UnionAddressConverter.convert(ownership.owner, blockchain)
+        val owner = UnionAddressConverter.convert(blockchain, ownership.owner)
 
         return UnionOwnership(
             id = OwnershipIdDto(
                 blockchain = blockchain,
-                token = contract,
+                contract = ownership.contract,
                 tokenId = tokenId,
                 owner = owner
             ),
             value = BigInteger.ONE, // TODO FLOW always one?
             createdAt = ownership.createdAt,
-            contract = contract,
-            tokenId = tokenId,
-            owner = owner,
             lazyValue = BigInteger.ZERO,
             creators = ownership.creators.map { FlowConverter.convertToCreator(it, blockchain) }
         )

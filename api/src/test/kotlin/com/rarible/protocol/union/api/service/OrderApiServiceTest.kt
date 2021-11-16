@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.api.service
 
 import com.rarible.protocol.union.core.continuation.page.Slice
+import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -8,7 +9,6 @@ import com.rarible.protocol.union.dto.EthErc20AssetTypeDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.PlatformDto
-import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.enrichment.util.bidCurrencyId
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
@@ -41,7 +41,7 @@ class OrderApiServiceTest {
     @Test
     fun `get best bids - no currencies found`() = runBlocking<Unit> {
         val itemId = randomEthItemId()
-        coEvery { orderService.getBidCurrencies(itemId.token.value, itemId.tokenId.toString()) } returns emptyList()
+        coEvery { orderService.getBidCurrencies(itemId.contract, itemId.tokenId.toString()) } returns emptyList()
         val result = getOrderBidsByItem(itemId, null, 10)
 
         assertThat(result.continuation).isNull()
@@ -51,7 +51,7 @@ class OrderApiServiceTest {
     @Test
     fun `get best sells - no currencies found`() = runBlocking<Unit> {
         val itemId = randomEthItemId()
-        coEvery { orderService.getSellCurrencies(itemId.token.value, itemId.tokenId.toString()) } returns emptyList()
+        coEvery { orderService.getSellCurrencies(itemId.contract, itemId.tokenId.toString()) } returns emptyList()
         val result = getSellOrdersByItem(itemId, null, 10)
 
         assertThat(result.continuation).isNull()
@@ -65,8 +65,15 @@ class OrderApiServiceTest {
         val unionOrder = ethOrderConverter.convert(ethOrder, ethItemId.blockchain)
 
         coEvery {
-            orderService.getBidCurrencies(ethItemId.token.value, ethItemId.tokenId.toString())
-        } returns listOf(EthErc20AssetTypeDto(UnionAddress(ethItemId.blockchain, unionOrder.bidCurrencyId)))
+            orderService.getBidCurrencies(ethItemId.contract, ethItemId.tokenId.toString())
+        } returns listOf(
+            EthErc20AssetTypeDto(
+                UnionAddressConverter.convert(
+                    ethItemId.blockchain,
+                    unionOrder.bidCurrencyId
+                )
+            )
+        )
 
         val result = getOrderBidsByItem(ethItemId, "${unionOrder.bidCurrencyId}:COMPLETED", 10)
 
@@ -78,7 +85,7 @@ class OrderApiServiceTest {
         return orderApiService.getOrderBidsByItem(
             blockchain = BlockchainDto.ETHEREUM,
             platform = PlatformDto.RARIBLE,
-            contract = itemId.token.value,
+            contract = itemId.contract,
             tokenId = itemId.tokenId.toString(),
             maker = null,
             origin = null,
@@ -94,7 +101,7 @@ class OrderApiServiceTest {
         return orderApiService.getSellOrdersByItem(
             blockchain = BlockchainDto.ETHEREUM,
             platform = PlatformDto.RARIBLE,
-            contract = itemId.token.value,
+            contract = itemId.contract,
             tokenId = itemId.tokenId.toString(),
             maker = null,
             origin = null,

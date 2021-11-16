@@ -14,7 +14,6 @@ import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.MetaAttributeDto
 import com.rarible.protocol.union.dto.MetaContentDto
 import com.rarible.protocol.union.dto.RoyaltyDto
-import com.rarible.protocol.union.dto.UnionAddress
 
 object TezosItemConverter {
 
@@ -22,18 +21,16 @@ object TezosItemConverter {
         return UnionItem(
             id = ItemIdDto(
                 blockchain = blockchain,
-                token = UnionAddress(blockchain, item.contract),
+                contract = item.contract,
                 tokenId = item.tokenId
             ),
-            tokenId = item.tokenId,
-            collection = UnionAddress(blockchain, item.contract),
             creators = item.creators.map { TezosConverter.convertToCreator(it, blockchain) },
             deleted = item.deleted ?: false, //TODO TEZOS raise to tezos, should be required
             lastUpdatedAt = item.date,
             lazySupply = item.lazySupply,
             meta = item.meta?.let { convert(it) },
             mintedAt = item.date, // TODO TEZOS add mintedAt
-            owners = item.owners.map { UnionAddress(blockchain, it) },
+            owners = item.owners.map { UnionAddressConverter.convert(blockchain, it) },
             royalties = item.royalties.map { toRoyalty(it, blockchain) },
             supply = item.supply,
             pending = emptyList() // TODO TEZOS in union we won't use this field
@@ -71,7 +68,7 @@ object TezosItemConverter {
         blockchain: BlockchainDto
     ): RoyaltyDto {
         return RoyaltyDto(
-            account = UnionAddressConverter.convert(source.account, blockchain),
+            account = UnionAddressConverter.convert(blockchain, source.account),
             value = source.value
         )
     }

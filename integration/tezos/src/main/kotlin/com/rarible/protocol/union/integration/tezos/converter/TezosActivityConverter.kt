@@ -21,6 +21,7 @@ import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivityIdDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.BurnActivityDto
+import com.rarible.protocol.union.dto.ContractAddress
 import com.rarible.protocol.union.dto.MintActivityDto
 import com.rarible.protocol.union.dto.OrderActivityMatchSideDto
 import com.rarible.protocol.union.dto.OrderActivitySourceDto
@@ -87,7 +88,7 @@ class TezosActivityConverter(
                     priceUsd = currencyService.toUsd(blockchain, payment.type, source.price, source.date),
                     source = convertSource(source.source),
                     hash = source.hash,
-                    maker = UnionAddressConverter.convert(source.maker, blockchain),
+                    maker = UnionAddressConverter.convert(blockchain, source.maker),
                     make = payment,
                     take = nft
                 )
@@ -102,7 +103,7 @@ class TezosActivityConverter(
                     priceUsd = currencyService.toUsd(blockchain, payment.type, source.price, source.date),
                     source = convertSource(source.source),
                     hash = source.hash,
-                    maker = UnionAddressConverter.convert(source.maker, blockchain),
+                    maker = UnionAddressConverter.convert(blockchain, source.maker),
                     make = nft,
                     take = payment
                 )
@@ -113,7 +114,7 @@ class TezosActivityConverter(
                     date = source.date,
                     source = convertSource(source.source),
                     hash = source.hash,
-                    maker = UnionAddressConverter.convert(source.maker, blockchain),
+                    maker = UnionAddressConverter.convert(blockchain, source.maker),
                     make = TezosConverter.convert(source.make, blockchain),
                     take = TezosConverter.convert(source.take, blockchain),
                     blockchainInfo = ActivityBlockchainInfoDto(
@@ -130,7 +131,7 @@ class TezosActivityConverter(
                     date = source.date,
                     source = convertSource(source.source),
                     hash = source.hash,
-                    maker = UnionAddressConverter.convert(source.maker, blockchain),
+                    maker = UnionAddressConverter.convert(blockchain, source.maker),
                     make = TezosConverter.convert(source.make, blockchain),
                     take = TezosConverter.convert(source.take, blockchain),
                     blockchainInfo = ActivityBlockchainInfoDto(
@@ -146,8 +147,8 @@ class TezosActivityConverter(
                 MintActivityDto(
                     id = activityId,
                     date = source.date,
-                    owner = UnionAddressConverter.convert(source.owner, blockchain),
-                    contract = UnionAddressConverter.convert(source.contract, blockchain),
+                    owner = UnionAddressConverter.convert(blockchain, source.owner),
+                    contract = ContractAddress(blockchain, source.contract),
                     tokenId = source.tokenId,
                     value = source.value,
                     blockchainInfo = ActivityBlockchainInfoDto(
@@ -162,8 +163,8 @@ class TezosActivityConverter(
                 BurnActivityDto(
                     id = activityId,
                     date = source.date,
-                    owner = UnionAddressConverter.convert(source.owner, blockchain),
-                    contract = UnionAddressConverter.convert(source.contract, blockchain),
+                    owner = UnionAddressConverter.convert(blockchain, source.owner),
+                    contract = ContractAddress(blockchain, source.contract),
                     tokenId = source.tokenId,
                     value = source.value,
                     blockchainInfo = ActivityBlockchainInfoDto(
@@ -178,9 +179,9 @@ class TezosActivityConverter(
                 TransferActivityDto(
                     id = activityId,
                     date = source.date,
-                    from = UnionAddressConverter.convert(source.from, blockchain),
-                    owner = UnionAddressConverter.convert(source.elt.owner, blockchain),
-                    contract = UnionAddressConverter.convert(source.elt.contract, blockchain),
+                    from = UnionAddressConverter.convert(blockchain, source.from),
+                    owner = UnionAddressConverter.convert(blockchain, source.elt.owner),
+                    contract = ContractAddress(blockchain, source.elt.contract),
                     tokenId = source.elt.tokenId,
                     value = source.elt.value,
                     blockchainInfo = ActivityBlockchainInfoDto(
@@ -270,8 +271,8 @@ class TezosActivityConverter(
             blockchainInfo = asActivityBlockchainInfo(source),
             nft = TezosConverter.convert(nft.asset, blockchain),
             payment = unionPayment,
-            seller = UnionAddressConverter.convert(nft.maker, blockchain),
-            buyer = UnionAddressConverter.convert(payment.maker, blockchain),
+            seller = UnionAddressConverter.convert(blockchain, nft.maker),
+            buyer = UnionAddressConverter.convert(blockchain, payment.maker),
             price = source.price,
             priceUsd = priceUsd,
             amountUsd = priceUsd?.multiply(nft.asset.value),
@@ -304,7 +305,7 @@ class TezosActivityConverter(
         blockchain: BlockchainDto
     ): OrderActivityMatchSideDto {
         return OrderActivityMatchSideDto(
-            maker = UnionAddressConverter.convert(source.maker, blockchain),
+            maker = UnionAddressConverter.convert(blockchain, source.maker),
             hash = source.hash,
             asset = TezosConverter.convert(source.asset, blockchain)
         )

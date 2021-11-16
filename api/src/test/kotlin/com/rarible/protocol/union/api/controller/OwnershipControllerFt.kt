@@ -121,7 +121,7 @@ class OwnershipControllerFt : AbstractIntegrationTest() {
         )
 
         val ownerships = ownershipControllerClient.getOwnershipsByItem(
-            ethItemId.token.fullId(), ethItemId.tokenId.toString(), continuation, size
+            ethItemId.fullId(), null, null, continuation, size
         ).awaitFirst()
 
         val resultEmptyOwnership = ownerships.ownerships[0]
@@ -143,7 +143,7 @@ class OwnershipControllerFt : AbstractIntegrationTest() {
         )
 
         val ownerships = ownershipControllerClient.getOwnershipsByItem(
-            flowItemId.token.fullId(), flowItemId.tokenId.toString(), continuation, size
+            flowItemId.fullId(), null, null, continuation, size
         ).awaitFirst()
 
         assertThat(ownerships.ownerships).hasSize(0)
@@ -159,7 +159,7 @@ class OwnershipControllerFt : AbstractIntegrationTest() {
         )
 
         val ownerships = ownershipControllerClient.getOwnershipsByItem(
-            itemId.token.fullId(), itemId.tokenId.toString(), continuation, size
+            itemId.fullId(), null, null, continuation, size
         ).awaitFirst()
 
         assertThat(ownerships.ownerships).hasSize(1)

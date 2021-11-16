@@ -2,7 +2,6 @@ package com.rarible.protocol.union.enrichment.model
 
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
-import com.rarible.protocol.union.dto.UnionAddress
 import java.math.BigInteger
 
 data class ShortItemId(
@@ -13,7 +12,7 @@ data class ShortItemId(
 
     constructor(dto: ItemIdDto) : this(
         dto.blockchain,
-        dto.token.value,
+        dto.contract,
         dto.tokenId
     )
 
@@ -24,7 +23,7 @@ data class ShortItemId(
     fun toDto(): ItemIdDto {
         return ItemIdDto(
             blockchain = blockchain,
-            token = UnionAddress(blockchain, token),
+            contract = token,
             tokenId = tokenId
         )
     }

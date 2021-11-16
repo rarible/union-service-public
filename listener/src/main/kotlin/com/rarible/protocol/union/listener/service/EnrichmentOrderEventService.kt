@@ -2,9 +2,9 @@ package com.rarible.protocol.union.listener.service
 
 import com.rarible.core.client.WebClientResponseProxyException
 import com.rarible.protocol.union.core.event.OutgoingOrderEventListener
+import com.rarible.protocol.union.dto.ContractAddress
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderUpdateEventDto
-import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.ext
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
@@ -25,8 +25,12 @@ class EnrichmentOrderEventService(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     suspend fun updateOrder(order: OrderDto, notificationEnabled: Boolean = true) = coroutineScope {
-        val makeItemIdDto = order.make.type.ext.itemId
-        val takeItemIdDto = order.take.type.ext.itemId
+        val blockchain = order.id.blockchain
+        val makeAssetExt = order.make.type.ext
+        val takeAssetExt = order.take.type.ext
+
+        val makeItemIdDto = makeAssetExt.itemId(blockchain)
+        val takeItemIdDto = takeAssetExt.itemId(blockchain)
 
         val makeItemId = makeItemIdDto?.let { ShortItemId(it) }
         val takeItemId = takeItemIdDto?.let { ShortItemId(it) }
@@ -64,13 +68,17 @@ class EnrichmentOrderEventService(
         }
         val mcFuture = if (order.make.type.ext.isCollection) {
             async {
-                val address = UnionAddress(order.id.blockchain, order.make.type.ext.contract)
-                enrichmentCollectionEventService.onCollectionBestSellOrderUpdate(address, order, notificationEnabled)
+                val collectionId = ContractAddress(blockchain, makeAssetExt.contract)
+                enrichmentCollectionEventService.onCollectionBestSellOrderUpdate(
+                    collectionId,
+                    order,
+                    notificationEnabled
+                )
             }
         } else null
         val tcFuture = if (order.take.type.ext.isCollection) {
             async {
-                val address = UnionAddress(order.id.blockchain, order.take.type.ext.contract)
+                val address = ContractAddress(blockchain, takeAssetExt.contract)
                 enrichmentCollectionEventService.onCollectionBestBidOrderUpdate(address, order, notificationEnabled)
             }
         } else null

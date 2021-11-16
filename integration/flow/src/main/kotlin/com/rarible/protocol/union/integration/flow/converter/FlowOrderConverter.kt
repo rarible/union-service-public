@@ -36,8 +36,8 @@ class FlowOrderConverter(
         val make = FlowConverter.convert(order.make, blockchain)
         val take = FlowConverter.convert(order.take, blockchain)
 
-        val maker = UnionAddressConverter.convert(order.maker, blockchain)
-        val taker = order.taker?.let { UnionAddressConverter.convert(it, blockchain) }
+        val maker = UnionAddressConverter.convert(blockchain, order.maker)
+        val taker = order.taker?.let { UnionAddressConverter.convert(blockchain, it) }
 
         val makePrice = order.take.value / order.make.value
         val makePriceUsd = currencyService.toUsd(blockchain, take.type, makePrice)

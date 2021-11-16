@@ -48,10 +48,10 @@ import com.rarible.protocol.dto.OrderStatusDto
 import com.rarible.protocol.dto.PartDto
 import com.rarible.protocol.dto.RaribleV2OrderDto
 import com.rarible.protocol.dto.TransferDto
+import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
-import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.parser.ItemIdParser
 import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
 import io.daonomic.rpc.domain.Word
@@ -59,8 +59,8 @@ import scalether.domain.Address
 
 fun randomAddressString() = EthConverter.convert(randomAddress())
 
-fun randomEthAddress() = UnionAddress(BlockchainDto.ETHEREUM, randomAddressString())
-fun randomPolygonAddress() = UnionAddress(BlockchainDto.POLYGON, randomAddressString())
+fun randomEthAddress() = randomAddressString()
+fun randomPolygonAddress() = UnionAddressConverter.convert(BlockchainDto.POLYGON, randomAddressString())
 
 fun randomEthPartDto() = randomEthPartDto(randomAddress())
 fun randomEthPartDto(account: Address) = PartDto(account, randomInt())
@@ -73,9 +73,9 @@ fun randomPolygonOwnershipId() = randomEthOwnershipId().copy(blockchain = Blockc
 fun randomEthOwnershipId(itemId: ItemIdDto) = randomEthOwnershipId(itemId, randomAddressString())
 fun randomEthOwnershipId(itemId: ItemIdDto, owner: String): OwnershipIdDto {
     return OwnershipIdDto(
-        token = itemId.token,
+        contract = itemId.contract,
         tokenId = itemId.tokenId,
-        owner = UnionAddress(BlockchainDto.ETHEREUM, owner),
+        owner = UnionAddressConverter.convert(BlockchainDto.ETHEREUM, owner),
         blockchain = BlockchainDto.ETHEREUM
     )
 }
@@ -84,9 +84,9 @@ fun randomEthNftItemDto() = randomEthNftItemDto(randomEthItemId())
 fun randomEthNftItemDto(itemId: ItemIdDto): NftItemDto {
     return NftItemDto(
         id = itemId.value,
-        contract = Address.apply(itemId.token.value),
+        contract = Address.apply(itemId.contract),
         tokenId = itemId.tokenId,
-        creators = listOf(randomEthPartDto(Address.apply(itemId.token.value))),
+        creators = listOf(randomEthPartDto(Address.apply(itemId.contract))),
         supply = randomBigInt(),
         lazySupply = randomBigInt(),
         royalties = listOf(randomEthPartDto()),
@@ -157,14 +157,14 @@ fun randomEthOwnershipDto() = randomEthOwnershipDto(randomEthOwnershipId())
 fun randomEthOwnershipDto(itemId: ItemIdDto) = randomEthOwnershipDto(
     OwnershipIdDto(
         itemId.blockchain,
-        itemId.token,
+        itemId.contract,
         itemId.tokenId,
-        UnionAddress(BlockchainDto.ETHEREUM, randomAddressString())
+        UnionAddressConverter.convert(BlockchainDto.ETHEREUM, randomAddressString())
     )
 )
 
 fun randomEthOwnershipDto(ownershipId: OwnershipIdDto) = randomEthOwnershipDto(
-    ItemIdParser.parseShort("${ownershipId.token.value}:${ownershipId.tokenId}", BlockchainDto.ETHEREUM),
+    ItemIdParser.parseShort("${ownershipId.contract}:${ownershipId.tokenId}", BlockchainDto.ETHEREUM),
     PartDto(Address.apply(ownershipId.owner.value), randomInt())
 )
 
@@ -172,7 +172,7 @@ fun randomEthOwnershipDto(itemId: ItemIdDto, creator: PartDto): NftOwnershipDto 
     val ownershipId = randomEthOwnershipId(itemId, creator.account.toString())
     return NftOwnershipDto(
         id = ownershipId.value,
-        contract = Address.apply(ownershipId.token.value),
+        contract = Address.apply(ownershipId.contract),
         tokenId = ownershipId.tokenId,
         owner = Address.apply(ownershipId.owner.value),
         creators = listOf(creator),
@@ -185,7 +185,7 @@ fun randomEthOwnershipDto(itemId: ItemIdDto, creator: PartDto): NftOwnershipDto 
 
 fun randomEthAssetErc721() = randomEthAssetErc721(randomEthItemId())
 fun randomEthAssetErc721(itemId: ItemIdDto) = AssetDto(
-    assetType = Erc721AssetTypeDto(Address.apply(itemId.token.value), itemId.tokenId),
+    assetType = Erc721AssetTypeDto(Address.apply(itemId.contract), itemId.tokenId),
     value = randomBigInt(),
     valueDecimal = randomBigDecimal()
 )
@@ -206,7 +206,7 @@ fun randomEthCollectionAsset(address: Address) = AssetDto(
 
 fun randomEthAssetErc1155() = randomEthAssetErc1155(randomEthItemId())
 fun randomEthAssetErc1155(itemId: ItemIdDto) = AssetDto(
-    assetType = Erc1155AssetTypeDto(Address.apply(itemId.token.value), itemId.tokenId),
+    assetType = Erc1155AssetTypeDto(Address.apply(itemId.contract), itemId.tokenId),
     value = randomBigInt(),
     valueDecimal = randomBigDecimal()
 )

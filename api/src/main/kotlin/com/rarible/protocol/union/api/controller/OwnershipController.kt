@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.api.controller
 
 import com.rarible.protocol.union.api.service.OwnershipApiService
+import com.rarible.protocol.union.api.service.extractItemId
 import com.rarible.protocol.union.core.continuation.OwnershipContinuation
 import com.rarible.protocol.union.core.continuation.page.PageSize
 import com.rarible.protocol.union.core.continuation.page.Paging
@@ -9,7 +10,6 @@ import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OwnershipDto
 import com.rarible.protocol.union.dto.OwnershipsDto
-import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.dto.parser.OwnershipIdParser
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.slf4j.LoggerFactory
@@ -64,20 +64,21 @@ class OwnershipController(
     }
 
     override suspend fun getOwnershipsByItem(
-        contract: String,
-        tokenId: String,
+        itemId: String?,
+        contract: String?,
+        tokenId: String?,
         continuation: String?,
         size: Int?
     ): ResponseEntity<OwnershipsDto> {
         val safeSize = PageSize.OWNERSHIP.limit(size)
-        val contractAddress = IdParser.parseAddress(contract)
-        val result = router.getService(contractAddress.blockchain)
-            .getOwnershipsByItem(contractAddress.value, tokenId, continuation, safeSize)
+        val fullItemId = extractItemId(contract, tokenId, itemId)
+        val result = router.getService(fullItemId.blockchain)
+            .getOwnershipsByItem(fullItemId.contract, fullItemId.tokenId.toString(), continuation, safeSize)
 
         logger.info(
-            "Response for getOwnershipsByItem(contract={}, tokenId={}, continuation={}, size={}):" +
+            "Response for getOwnershipsByItem(itemId={}, continuation={}, size={}):" +
                     " Page(size={}, total={}, continuation={}) from blockchain pages {} ",
-            contract, tokenId, continuation, size, result.entities.size, result.total, result.continuation
+            fullItemId.fullId(), continuation, size, result.entities.size, result.total, result.continuation
         )
 
         val enriched = ownershipApiService.enrich(result)

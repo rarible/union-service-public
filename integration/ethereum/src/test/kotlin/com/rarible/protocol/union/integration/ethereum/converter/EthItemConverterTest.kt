@@ -55,7 +55,7 @@ class EthItemConverterTest {
         val converted = EthItemConverter.convert(dto, BlockchainDto.ETHEREUM)
 
         assertThat(converted.id.value).isEqualTo(dto.id)
-        assertThat(converted.id.token.value).isEqualTo(dto.contract.prefixed())
+        assertThat(converted.id.contract).isEqualTo(dto.contract.prefixed())
         assertThat(converted.id.tokenId).isEqualTo(dto.tokenId)
         assertThat(converted.supply).isEqualTo(dto.supply)
         assertThat(converted.lastUpdatedAt).isEqualTo(dto.date)

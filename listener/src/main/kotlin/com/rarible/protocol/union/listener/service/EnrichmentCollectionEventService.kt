@@ -1,8 +1,8 @@
 package com.rarible.protocol.union.listener.service
 
 import com.rarible.core.client.WebClientResponseProxyException
+import com.rarible.protocol.union.dto.ContractAddress
 import com.rarible.protocol.union.dto.OrderDto
-import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import kotlinx.coroutines.CoroutineScope
@@ -29,8 +29,12 @@ class EnrichmentCollectionEventService(
     private val dispatcher = threadPool.asCoroutineDispatcher()
     private val scope = CoroutineScope(dispatcher)
 
-    suspend fun onCollectionBestSellOrderUpdate(address: UnionAddress, order: OrderDto, notificationEnabled: Boolean) {
-        itemService.findByCollection(address, order.maker)
+    suspend fun onCollectionBestSellOrderUpdate(
+        collectionId: ContractAddress,
+        order: OrderDto,
+        notificationEnabled: Boolean
+    ) {
+        itemService.findByCollection(collectionId, order.maker)
             .map { item ->
                 scope.async {
                     ignoreApi404 {
@@ -53,8 +57,12 @@ class EnrichmentCollectionEventService(
             }.buffer(threadPoolSize).map { it.await() }.flowOn(dispatcher).collect()
     }
 
-    suspend fun onCollectionBestBidOrderUpdate(address: UnionAddress, order: OrderDto, notificationEnabled: Boolean) {
-        itemService.findByCollection(address).map { item ->
+    suspend fun onCollectionBestBidOrderUpdate(
+        collectionId: ContractAddress,
+        order: OrderDto,
+        notificationEnabled: Boolean
+    ) {
+        itemService.findByCollection(collectionId).map { item ->
             scope.async {
                 ignoreApi404 {
                     enrichmentItemEventService.onItemBestBidOrderUpdated(item, order, notificationEnabled)
