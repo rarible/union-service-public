@@ -15,6 +15,8 @@ import com.rarible.protocol.union.core.exception.UnionValidationException
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.AssetDto
 import com.rarible.protocol.union.dto.AssetTypeDto
+import com.rarible.protocol.union.dto.AuctionBidDto
+import com.rarible.protocol.union.dto.AuctionDataDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CreatorDto
 import com.rarible.protocol.union.dto.EthCollectionAssetTypeDto
@@ -26,8 +28,11 @@ import com.rarible.protocol.union.dto.EthErc721AssetTypeDto
 import com.rarible.protocol.union.dto.EthErc721LazyAssetTypeDto
 import com.rarible.protocol.union.dto.EthEthereumAssetTypeDto
 import com.rarible.protocol.union.dto.EthGenerativeArtAssetTypeDto
-import com.rarible.protocol.union.dto.OrderPayoutDto
+import com.rarible.protocol.union.dto.PayoutDto
 import com.rarible.protocol.union.dto.PlatformDto
+import com.rarible.protocol.union.dto.RaribleAuctionV1BidDataV1Dto
+import com.rarible.protocol.union.dto.RaribleAuctionV1BidV1Dto
+import com.rarible.protocol.union.dto.RaribleAuctionV1DataV1Dto
 import com.rarible.protocol.union.dto.RoyaltyDto
 import com.rarible.protocol.union.dto.UnionAddress
 import io.daonomic.rpc.domain.Binary
@@ -86,8 +91,8 @@ object EthConverter {
         }
     }
 
-    fun convertToPayout(source: PartDto, blockchain: BlockchainDto): OrderPayoutDto {
-        return OrderPayoutDto(
+    fun convertToPayout(source: PartDto, blockchain: BlockchainDto): PayoutDto {
+        return PayoutDto(
             account = convert(source.account, blockchain),
             value = source.value
         )
@@ -154,6 +159,30 @@ object EthConverter {
             )
             is CollectionAssetTypeDto -> EthCollectionAssetTypeDto(
                 contract = convert(source.contract, blockchain)
+            )
+        }
+    }
+
+    fun convert(source: com.rarible.protocol.dto.AuctionBidDto, blockchain: BlockchainDto): AuctionBidDto {
+        return when (source) {
+            is com.rarible.protocol.dto.RaribleAuctionV1BidV1Dto -> RaribleAuctionV1BidV1Dto(
+                amount = source.amount,
+                data = RaribleAuctionV1BidDataV1Dto(
+                    originFees = source.data.originFees.map { convertToPayout(it, blockchain) },
+                    payouts = source.data.payouts.map { convertToPayout(it, blockchain) }
+                )
+            )
+        }
+    }
+
+    fun convert(source: com.rarible.protocol.dto.AuctionDataDto, blockchain: BlockchainDto): AuctionDataDto {
+        return when (source) {
+            is com.rarible.protocol.dto.RaribleAuctionV1DataV1Dto -> RaribleAuctionV1DataV1Dto(
+                originFees = source.originFees.map { convertToPayout(it, blockchain) },
+                payouts = source.payouts.map { convertToPayout(it, blockchain) },
+                startTime = source.startTime,
+                duration = source.duration,
+                buyOutPrice = source.buyOutPrice
             )
         }
     }

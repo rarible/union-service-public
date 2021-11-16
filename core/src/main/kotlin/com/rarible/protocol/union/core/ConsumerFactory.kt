@@ -19,6 +19,7 @@ class ConsumerFactory(
     companion object {
 
         const val ORDER = "order"
+        const val AUCTION = "auction"
         const val ACTIVITY = "activity"
         const val ITEM = "item"
         const val COLLECTION = "collection"
@@ -31,6 +32,7 @@ class ConsumerFactory(
     val ownershipGroup = consumerGroup(OWNERSHIP)
     val collectionGroup = consumerGroup(COLLECTION)
     val orderGroup = consumerGroup(ORDER)
+    val auctionGroup = consumerGroup(AUCTION)
     val activityGroup = consumerGroup(ACTIVITY)
 
     fun <T> createItemConsumer(
@@ -58,6 +60,15 @@ class ConsumerFactory(
         workers: Map<String, Int>
     ): BatchedConsumerWorker<T> {
         return createBatchedConsumerWorker(consumer, handler, daemon, workers, ORDER)
+    }
+
+    fun <T> createAuctionConsumer(
+        consumer: RaribleKafkaConsumer<T>,
+        handler: BlockchainEventHandler<T, *>,
+        daemon: DaemonWorkerProperties,
+        workers: Map<String, Int>
+    ): BatchedConsumerWorker<T> {
+        return createBatchedConsumerWorker(consumer, handler, daemon, workers, AUCTION)
     }
 
     fun <T> createActivityConsumer(
