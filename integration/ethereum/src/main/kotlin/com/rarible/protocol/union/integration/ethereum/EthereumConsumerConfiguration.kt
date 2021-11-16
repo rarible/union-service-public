@@ -2,6 +2,7 @@ package com.rarible.protocol.union.integration.ethereum
 
 import com.rarible.core.application.ApplicationEnvironmentInfo
 import com.rarible.ethereum.domain.Blockchain
+import com.rarible.protocol.dto.AuctionEventDto
 import com.rarible.protocol.dto.NftCollectionEventDto
 import com.rarible.protocol.dto.NftItemEventDto
 import com.rarible.protocol.dto.NftOwnershipEventDto
@@ -12,19 +13,23 @@ import com.rarible.protocol.union.core.ConsumerFactory
 import com.rarible.protocol.union.core.handler.BlockchainEventHandler
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.handler.KafkaConsumerWorker
+import com.rarible.protocol.union.core.model.UnionAuctionEvent
 import com.rarible.protocol.union.core.model.UnionItemEvent
 import com.rarible.protocol.union.core.model.UnionOrderEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipEvent
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.CollectionEventDto
 import com.rarible.protocol.union.integration.ethereum.converter.EthActivityConverter
+import com.rarible.protocol.union.integration.ethereum.converter.EthAuctionConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
 import com.rarible.protocol.union.integration.ethereum.event.EthActivityEventHandler
+import com.rarible.protocol.union.integration.ethereum.event.EthAuctionEventHandler
 import com.rarible.protocol.union.integration.ethereum.event.EthCollectionEventHandler
 import com.rarible.protocol.union.integration.ethereum.event.EthItemEventHandler
 import com.rarible.protocol.union.integration.ethereum.event.EthOrderEventHandler
 import com.rarible.protocol.union.integration.ethereum.event.EthOwnershipEventHandler
 import com.rarible.protocol.union.integration.ethereum.event.EthereumActivityEventHandler
+import com.rarible.protocol.union.integration.ethereum.event.EthereumAuctionEventHandler
 import com.rarible.protocol.union.integration.ethereum.event.EthereumCollectionEventHandler
 import com.rarible.protocol.union.integration.ethereum.event.EthereumItemEventHandler
 import com.rarible.protocol.union.integration.ethereum.event.EthereumOrderEventHandler
@@ -76,6 +81,15 @@ class EthereumConsumerConfiguration(
         converter: EthOrderConverter
     ): EthOrderEventHandler {
         return EthereumOrderEventHandler(handler, converter)
+    }
+
+    @Bean
+    @Qualifier("ethereum.auction.handler")
+    fun ethereumAuctionEventHandler(
+        handler: IncomingEventHandler<UnionAuctionEvent>,
+        converter: EthAuctionConverter
+    ): EthAuctionEventHandler {
+        return EthereumAuctionEventHandler(handler, converter)
     }
 
     @Bean
@@ -144,6 +158,15 @@ class EthereumConsumerConfiguration(
     ): KafkaConsumerWorker<OrderEventDto> {
         val consumer = factory.createOrderEventsConsumer(consumerFactory.orderGroup, Blockchain.ETHEREUM)
         return consumerFactory.createOrderConsumer(consumer, handler, daemon, workers)
+    }
+
+    @Bean
+    fun ethereumAuctionWorker(
+        @Qualifier("ethereum.order.consumer.factory") factory: OrderIndexerEventsConsumerFactory,
+        @Qualifier("ethereum.auction.handler") handler: BlockchainEventHandler<AuctionEventDto, UnionAuctionEvent>
+    ): KafkaConsumerWorker<AuctionEventDto> {
+        val consumer = factory.createAuctionEventsConsumer(consumerFactory.auctionGroup, Blockchain.ETHEREUM)
+        return consumerFactory.createAuctionConsumer(consumer, handler, daemon, workers)
     }
 
     @Bean

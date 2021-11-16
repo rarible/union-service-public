@@ -10,6 +10,8 @@ import com.rarible.core.test.data.randomLong
 import com.rarible.core.test.data.randomString
 import com.rarible.core.test.data.randomWord
 import com.rarible.protocol.dto.AssetDto
+import com.rarible.protocol.dto.AuctionHistoryDto
+import com.rarible.protocol.dto.AuctionStatusDto
 import com.rarible.protocol.dto.BurnDto
 import com.rarible.protocol.dto.CollectionAssetTypeDto
 import com.rarible.protocol.dto.CryptoPunkOrderDto
@@ -46,6 +48,10 @@ import com.rarible.protocol.dto.OrderSideDto
 import com.rarible.protocol.dto.OrderSideMatchDto
 import com.rarible.protocol.dto.OrderStatusDto
 import com.rarible.protocol.dto.PartDto
+import com.rarible.protocol.dto.RaribleAuctionV1BidDataV1Dto
+import com.rarible.protocol.dto.RaribleAuctionV1BidV1Dto
+import com.rarible.protocol.dto.RaribleAuctionV1DataV1Dto
+import com.rarible.protocol.dto.RaribleAuctionV1Dto
 import com.rarible.protocol.dto.RaribleV2OrderDto
 import com.rarible.protocol.dto.TransferDto
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
@@ -56,6 +62,9 @@ import com.rarible.protocol.union.dto.parser.ItemIdParser
 import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
 import io.daonomic.rpc.domain.Word
 import scalether.domain.Address
+import java.math.BigDecimal
+import java.math.BigInteger
+import java.time.Instant
 
 fun randomAddressString() = EthConverter.convert(randomAddress())
 
@@ -442,6 +451,40 @@ fun randomEthCollectionDto(id: Address): NftCollectionDto {
         owner = randomAddress(),
         features = listOf(NftCollectionDto.Features.values()[randomInt(NftCollectionDto.Features.values().size)]),
         supportsLazyMint = true
+    )
+}
+
+fun randomEthAuctionDto(): RaribleAuctionV1Dto {
+    return RaribleAuctionV1Dto(
+        seller = randomAddress(),
+        buyer = randomAddress(),
+        sell = randomEthAssetErc721(),
+        buy = Erc20AssetTypeDto(randomAddress()),
+        endTime = Instant.MAX,
+        minimalStep = BigDecimal.ONE,
+        minimalPrice = BigDecimal.ONE,
+        createdAt = Instant.now(),
+        lastUpdateAt = Instant.now(),
+        buyPrice = BigDecimal.TEN,
+        pending = listOf(AuctionHistoryDto(Word(ByteArray(32)))),
+        status = AuctionStatusDto.ACTIVE,
+        buyPriceUsd = BigDecimal.TEN,
+        hash = Word(ByteArray(32)),
+        auctionId = BigInteger.ONE,
+        lastBid = RaribleAuctionV1BidV1Dto(
+            amount = BigDecimal.ONE,
+            data = RaribleAuctionV1BidDataV1Dto(
+                originFees = listOf(PartDto(randomAddress(), 100)),
+                payouts = listOf(PartDto(randomAddress(), 100))
+            )
+        ),
+        data = RaribleAuctionV1DataV1Dto(
+            originFees = listOf(PartDto(randomAddress(), 100)),
+            payouts = listOf(PartDto(randomAddress(), 100)),
+            startTime = Instant.now(),
+            duration = BigInteger.TEN,
+            buyOutPrice = BigDecimal.TEN
+        )
     )
 }
 
