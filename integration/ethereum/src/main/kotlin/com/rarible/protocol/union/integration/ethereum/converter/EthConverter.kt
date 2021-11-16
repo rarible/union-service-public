@@ -28,7 +28,7 @@ import com.rarible.protocol.union.dto.EthErc721AssetTypeDto
 import com.rarible.protocol.union.dto.EthErc721LazyAssetTypeDto
 import com.rarible.protocol.union.dto.EthEthereumAssetTypeDto
 import com.rarible.protocol.union.dto.EthGenerativeArtAssetTypeDto
-import com.rarible.protocol.union.dto.OrderPayoutDto
+import com.rarible.protocol.union.dto.PayoutDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.RaribleAuctionV1BidDataV1Dto
 import com.rarible.protocol.union.dto.RaribleAuctionV1BidV1Dto
@@ -91,8 +91,8 @@ object EthConverter {
         }
     }
 
-    fun convertToPayout(source: PartDto, blockchain: BlockchainDto): OrderPayoutDto {
-        return OrderPayoutDto(
+    fun convertToPayout(source: PartDto, blockchain: BlockchainDto): PayoutDto {
+        return PayoutDto(
             account = convert(source.account, blockchain),
             value = source.value
         )

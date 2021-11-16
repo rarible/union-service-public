@@ -9,7 +9,7 @@ import com.rarible.protocol.union.dto.AssetDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
-import com.rarible.protocol.union.dto.OrderPayoutDto
+import com.rarible.protocol.union.dto.PayoutDto
 import com.rarible.protocol.union.dto.OrderPriceHistoryRecordDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.TezosOrderDataRaribleV2DataV1Dto
@@ -104,8 +104,8 @@ class TezosOrderConverter(
         )
     }
 
-    private fun convert(source: PartDto, blockchain: BlockchainDto): OrderPayoutDto {
-        return OrderPayoutDto(
+    private fun convert(source: PartDto, blockchain: BlockchainDto): PayoutDto {
+        return PayoutDto(
             account = UnionAddressConverter.convert(blockchain, source.account),
             value = source.value
         )
