@@ -12,6 +12,7 @@ import com.rarible.protocol.union.api.client.OrderControllerApi
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.core.continuation.page.PageSize
+import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
@@ -26,6 +27,7 @@ import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthLegacyOrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomPolygonAddress
 import com.rarible.protocol.union.integration.tezos.data.randomTezosOrderDto
+import com.rarible.protocol.union.test.data.randomFlowAddress
 import com.rarible.protocol.union.test.data.randomFlowV1OrderDto
 import io.mockk.coEvery
 import kotlinx.coroutines.FlowPreview
@@ -130,20 +132,25 @@ class OrderControllerFt : AbstractIntegrationTest() {
     fun `get all orders - with origin`() = runBlocking<Unit> {
         val blockchains = listOf(BlockchainDto.ETHEREUM, BlockchainDto.FLOW)
         val continuation = "${nowMillis()}_${randomString()}"
-        val origin = randomEthAddress()
-        val size = 3
+        val origin = UnionAddressConverter.convert(BlockchainDto.ETHEREUM, randomEthAddress())
+        val size = 4
 
-        val ethOrders = listOf(randomEthLegacyOrderDto(), randomEthLegacyOrderDto())
+        val ethOrders = listOf(randomEthLegacyOrderDto())
+        val polyOrders = listOf(randomEthLegacyOrderDto(), randomEthLegacyOrderDto())
 
         coEvery {
             testEthereumOrderApi.getOrdersAll(origin.value, ethPlatform, continuation, size)
-        } returns OrdersPaginationDto(ethOrders, this@OrderControllerFt.continuation).toMono()
+        } returns OrdersPaginationDto(ethOrders, null).toMono()
+
+        coEvery {
+            testPolygonOrderApi.getOrdersAll(origin.value, ethPlatform, continuation, size)
+        } returns OrdersPaginationDto(polyOrders, null).toMono()
 
         val orders = orderControllerClient.getOrdersAll(
             blockchains, platform, origin.fullId(), continuation, size
         ).awaitFirst()
 
-        assertThat(orders.orders).hasSize(2)
+        assertThat(orders.orders).hasSize(3)
         assertThat(orders.continuation).isNull()
     }
 
@@ -151,9 +158,9 @@ class OrderControllerFt : AbstractIntegrationTest() {
     fun `get order bids by item - ethereum`() = runBlocking<Unit> {
         val ethItemId = randomEthItemId()
 
-        val contract = ethItemId.token
+        val contract = ethItemId.contract
         val tokenId = ethItemId.tokenId
-        val maker = randomEthAddress()
+        val maker = UnionAddressConverter.convert(BlockchainDto.ETHEREUM, randomEthAddress())
 
         val order = randomEthLegacyOrderDto(ethItemId)
         val unionOrder = ethOrderConverter.convert(order, ethItemId.blockchain)
@@ -162,7 +169,7 @@ class OrderControllerFt : AbstractIntegrationTest() {
 
         coEvery {
             testEthereumOrderApi.getOrderBidsByItemAndByStatus(
-                contract.value,
+                contract,
                 tokenId.toString(),
                 emptyList(),
                 maker.value,
@@ -177,16 +184,17 @@ class OrderControllerFt : AbstractIntegrationTest() {
         } returns OrdersPaginationDto(ethOrders, continuation).toMono()
 
         coEvery {
-            testEthereumOrderApi.getCurrenciesByBidOrdersOfItem(contract.value, tokenId.toString())
+            testEthereumOrderApi.getCurrenciesByBidOrdersOfItem(contract, tokenId.toString())
         } returns OrderCurrenciesDto(
             OrderCurrenciesDto.OrderType.BID,
             listOf(Erc20AssetTypeDto(Address.apply(unionOrder.bidCurrencyId)))
         ).toMono()
 
         val orders = orderControllerClient.getOrderBidsByItem(
-            contract.fullId(),
-            tokenId.toString(),
             platform,
+            ethItemId.fullId(),
+            null,
+            null,
             maker.fullId(),
             null,
             null,
@@ -243,16 +251,16 @@ class OrderControllerFt : AbstractIntegrationTest() {
 
     @Test
     fun `get sell orders - with origin`() = runBlocking<Unit> {
-        val blockchains = listOf(BlockchainDto.ETHEREUM, BlockchainDto.POLYGON)
+        val blockchains = listOf(BlockchainDto.ETHEREUM, BlockchainDto.FLOW)
         val continuation = "${nowMillis()}_${randomString()}"
-        val origin = randomPolygonAddress()
-        val size = 1
+        val origin = randomFlowAddress()
+        val size = 2
 
-        val ethOrders = listOf(randomEthLegacyOrderDto())
+        val flowOrders = listOf(randomFlowV1OrderDto())
 
         coEvery {
-            testPolygonOrderApi.getSellOrders(origin.value, ethPlatform, continuation, size)
-        } returns OrdersPaginationDto(ethOrders, null).toMono()
+            testFlowOrderApi.getSellOrders(origin.value, continuation, size)
+        } returns FlowOrdersPaginationDto(flowOrders, null).toMono()
 
         val orders = orderControllerClient.getSellOrders(
             blockchains, platform, origin.fullId(), continuation, size
@@ -263,40 +271,12 @@ class OrderControllerFt : AbstractIntegrationTest() {
     }
 
     @Test
-    fun `get sell orders by collection - polygon`() = runBlocking<Unit> {
-        val collection = randomPolygonAddress()
-        val polygonOrders = listOf(randomEthLegacyOrderDto())
-
-        coEvery {
-            testPolygonOrderApi.getSellOrdersByCollection(
-                collection.value,
-                null,
-                ethPlatform,
-                continuation,
-                size
-            )
-        } returns OrdersPaginationDto(polygonOrders, continuation).toMono()
-
-        val orders = orderControllerClient.getSellOrdersByCollection(
-            collection.fullId(),
-            platform,
-            null,
-            continuation,
-            size
-        ).awaitFirst()
-
-        assertThat(orders.orders).hasSize(1)
-        assertThat(orders.orders[0]).isInstanceOf(OrderDto::class.java)
-        assertThat(orders.continuation).isNull()
-    }
-
-    @Test
     fun `get sell orders by item - ethereum`() = runBlocking<Unit> {
         val ethItemId = randomEthItemId()
 
-        val contract = ethItemId.token
+        val contract = ethItemId.contract
         val tokenId = ethItemId.tokenId
-        val maker = randomEthAddress()
+        val maker = UnionAddressConverter.convert(BlockchainDto.ETHEREUM, randomEthAddress())
 
         val order = randomEthLegacyOrderDto(ethItemId)
         val unionOrder = ethOrderConverter.convert(order, ethItemId.blockchain)
@@ -305,7 +285,7 @@ class OrderControllerFt : AbstractIntegrationTest() {
 
         coEvery {
             testEthereumOrderApi.getSellOrdersByItemAndByStatus(
-                contract.value,
+                contract,
                 tokenId.toString(),
                 maker.value,
                 null,
@@ -318,16 +298,17 @@ class OrderControllerFt : AbstractIntegrationTest() {
         } returns OrdersPaginationDto(ethOrders, continuation).toMono()
 
         coEvery {
-            testEthereumOrderApi.getCurrenciesBySellOrdersOfItem(contract.value, tokenId.toString())
+            testEthereumOrderApi.getCurrenciesBySellOrdersOfItem(contract, tokenId.toString())
         } returns OrderCurrenciesDto(
             OrderCurrenciesDto.OrderType.SELL,
             listOf(Erc20AssetTypeDto(Address.apply(unionOrder.sellCurrencyId)))
         ).toMono()
 
         val orders = orderControllerClient.getSellOrdersByItem(
-            contract.fullId(),
-            tokenId.toString(),
             platform,
+            ethItemId.fullId(),
+            null,
+            null,
             maker.fullId(),
             null,
             null,
@@ -365,14 +346,16 @@ class OrderControllerFt : AbstractIntegrationTest() {
 
     @Test
     fun `get sell orders by item - multiple blockchain specified`() = runBlocking<Unit> {
+        val ethItemId = randomEthItemId()
         val contract = randomEthAddress()
         val tokenId = randomBigInt()
-        val maker = randomPolygonAddress()
+        val maker = randomFlowAddress()
 
         val result = orderControllerClient.getSellOrdersByItem(
-            contract.fullId(),
-            tokenId.toString(),
             platform,
+            ethItemId.fullId(),
+            null,
+            null,
             maker.fullId(),
             null,
             null,

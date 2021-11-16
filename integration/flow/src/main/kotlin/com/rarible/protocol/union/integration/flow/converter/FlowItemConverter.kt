@@ -20,23 +20,22 @@ import java.math.BigInteger
 object FlowItemConverter {
 
     fun convert(item: FlowNftItemDto, blockchain: BlockchainDto): UnionItem {
-        val collection = UnionAddressConverter.convert(item.collection, blockchain)
+        val collection = UnionAddressConverter.convert(blockchain, item.collection)
 
         return UnionItem(
             id = ItemIdDto(
                 blockchain = blockchain,
-                token = collection,
+                contract = collection.value,
                 tokenId = item.tokenId
             ),
+
             mintedAt = item.mintedAt,
             lastUpdatedAt = item.lastUpdatedAt,
             supply = item.supply,
             meta = item.meta?.let { convert(it) },
             deleted = item.deleted,
-            tokenId = item.tokenId,
-            collection = collection,
             creators = item.creators.map { convert(it, blockchain) },
-            owners = item.owner?.let { listOf(UnionAddressConverter.convert(it, blockchain)) } ?: emptyList(),
+            owners = item.owner?.let { listOf(UnionAddressConverter.convert(blockchain, it)) } ?: emptyList(),
             royalties = item.royalties.map { convert(it, blockchain) },
             lazySupply = BigInteger.ZERO
         )
@@ -55,7 +54,7 @@ object FlowItemConverter {
         blockchain: BlockchainDto
     ): CreatorDto {
         return CreatorDto(
-            account = UnionAddressConverter.convert(source.account, blockchain),
+            account = UnionAddressConverter.convert(blockchain, source.account),
             value = FlowConverter.toBasePoints(source.value)
         )
     }
@@ -65,7 +64,7 @@ object FlowItemConverter {
         blockchain: BlockchainDto
     ): RoyaltyDto {
         return RoyaltyDto(
-            account = UnionAddressConverter.convert(source.account, blockchain),
+            account = UnionAddressConverter.convert(blockchain, source.account),
             value = FlowConverter.toBasePoints(source.value)
         )
     }

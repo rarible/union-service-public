@@ -14,6 +14,7 @@ import com.rarible.protocol.union.core.model.UnionMetaContent
 import com.rarible.protocol.union.core.model.UnionMetaContentProperties
 import com.rarible.protocol.union.core.model.UnionVideoProperties
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.ContractAddress
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.ItemRoyaltyDto
 import com.rarible.protocol.union.dto.ItemTransferDto
@@ -25,7 +26,7 @@ object EthItemConverter {
     fun convert(item: NftItemDto, blockchain: BlockchainDto): UnionItem {
         return UnionItem(
             id = ItemIdDto(
-                token = EthConverter.convert(item.contract, blockchain),
+                contract = EthConverter.convert(item.contract),
                 tokenId = item.tokenId,
                 blockchain = blockchain
             ),
@@ -34,8 +35,6 @@ object EthItemConverter {
             supply = item.supply,
             meta = item.meta?.let { convert(it) },
             deleted = item.deleted ?: false,
-            tokenId = item.tokenId,
-            collection = EthConverter.convert(item.contract, blockchain),
             creators = item.creators.map { EthConverter.convertToCreator(it, blockchain) },
             owners = item.owners.map { EthConverter.convert(it, blockchain) },
             royalties = item.royalties.map { EthConverter.convertToRoyalty(it, blockchain) },
@@ -55,7 +54,7 @@ object EthItemConverter {
     fun convert(source: com.rarible.protocol.dto.ItemTransferDto, blockchain: BlockchainDto): ItemTransferDto {
         return ItemTransferDto(
             owner = EthConverter.convert(source.owner, blockchain),
-            contract = EthConverter.convert(source.contract, blockchain),
+            contract = ContractAddress(blockchain, EthConverter.convert(source.contract)),
             tokenId = source.tokenId,
             value = source.value,
             date = source.date,
@@ -66,7 +65,7 @@ object EthItemConverter {
     fun convert(source: com.rarible.protocol.dto.ItemRoyaltyDto, blockchain: BlockchainDto): ItemRoyaltyDto {
         return ItemRoyaltyDto(
             owner = source.owner?.let { EthConverter.convert(it, blockchain) },
-            contract = EthConverter.convert(source.contract, blockchain),
+            contract = ContractAddress(blockchain, EthConverter.convert(source.contract)),
             tokenId = source.tokenId,
             value = source.value!!,
             date = source.date,

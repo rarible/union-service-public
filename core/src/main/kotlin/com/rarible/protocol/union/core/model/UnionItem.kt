@@ -10,8 +10,6 @@ import java.time.Instant
 
 data class UnionItem(
     val id: ItemIdDto,
-    val tokenId: BigInteger,
-    val collection: UnionAddress,
     val creators: List<CreatorDto> = listOf(),
     val owners: List<UnionAddress> = listOf(),
     val royalties: List<RoyaltyDto> = listOf(),

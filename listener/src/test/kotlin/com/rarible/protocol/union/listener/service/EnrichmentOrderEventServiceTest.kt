@@ -1,9 +1,10 @@
 package com.rarible.protocol.union.listener.service
 
 import com.rarible.core.test.data.randomBigDecimal
+import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.dto.AssetDto
+import com.rarible.protocol.union.dto.ContractAddress
 import com.rarible.protocol.union.dto.EthCollectionAssetTypeDto
-import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
 import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrderDto
@@ -73,11 +74,12 @@ class EnrichmentOrderEventServiceTest {
         val ownershipId = randomEthOwnershipId(itemId)
 
         val shortItemId = ShortItemId(itemId)
-        val address = UnionAddress(itemId.blockchain, itemId.token.value)
+        val collectionId = ContractAddress(itemId.blockchain, itemId.contract)
+        val assetAddress = UnionAddressConverter.convert(itemId.blockchain, itemId.contract)
 
         val order = randomUnionSellOrderDto(itemId, ownershipId.owner.value)
             .copy(
-                make = AssetDto(EthCollectionAssetTypeDto(address), randomBigDecimal()),
+                make = AssetDto(EthCollectionAssetTypeDto(assetAddress), randomBigDecimal()),
                 take = EthConverter.convert(randomEthAssetErc20(), itemId.blockchain)
             )
 
@@ -86,7 +88,7 @@ class EnrichmentOrderEventServiceTest {
         coVerify(exactly = 0) { enrichmentItemEventService.onItemBestSellOrderUpdated(shortItemId, order) }
         coVerify(exactly = 0) { enrichmentItemEventService.onItemBestBidOrderUpdated(any(), any()) }
         coVerify(exactly = 1) {
-            enrichmentCollectionEventService.onCollectionBestSellOrderUpdate(address, order, true)
+            enrichmentCollectionEventService.onCollectionBestSellOrderUpdate(collectionId, order, true)
         }
     }
 
@@ -96,12 +98,13 @@ class EnrichmentOrderEventServiceTest {
         val ownershipId = randomEthOwnershipId(itemId)
 
         val shortItemId = ShortItemId(itemId)
-        val address = UnionAddress(itemId.blockchain, itemId.token.value)
+        val collectionId = ContractAddress(itemId.blockchain, itemId.contract)
+        val assetAddress = UnionAddressConverter.convert(itemId.blockchain, itemId.contract)
 
         val order = randomUnionSellOrderDto(itemId, ownershipId.owner.value)
             .copy(
                 make = EthConverter.convert(randomEthAssetErc20(), itemId.blockchain),
-                take = AssetDto(EthCollectionAssetTypeDto(address), randomBigDecimal())
+                take = AssetDto(EthCollectionAssetTypeDto(assetAddress), randomBigDecimal())
             )
 
         orderEventService.updateOrder(order)
@@ -109,7 +112,7 @@ class EnrichmentOrderEventServiceTest {
         coVerify(exactly = 0) { enrichmentItemEventService.onItemBestSellOrderUpdated(shortItemId, order) }
         coVerify(exactly = 0) { enrichmentItemEventService.onItemBestBidOrderUpdated(any(), any()) }
         coVerify(exactly = 1) {
-            enrichmentCollectionEventService.onCollectionBestBidOrderUpdate(address, order, true)
+            enrichmentCollectionEventService.onCollectionBestBidOrderUpdate(collectionId, order, true)
         }
     }
 

@@ -55,7 +55,7 @@ class CollectionControllerFt : AbstractIntegrationTest() {
     @Test
     fun `get collection by id - tezos`() = runBlocking<Unit> {
         val collectionId = randomString()
-        val collectionIdFull = UnionAddressConverter.convert(collectionId, BlockchainDto.TEZOS)
+        val collectionIdFull = UnionAddressConverter.convert(BlockchainDto.TEZOS, collectionId)
         val collection = randomTezosCollectionDto(collectionId)
 
         coEvery { testTezosCollectionApi.getNftCollectionById(collectionIdFull.value) } returns collection.toMono()
@@ -69,7 +69,7 @@ class CollectionControllerFt : AbstractIntegrationTest() {
     @Test
     fun `get collection by id - flow`() = runBlocking<Unit> {
         val collectionId = randomString()
-        val collectionIdFull = UnionAddressConverter.convert(collectionId, BlockchainDto.FLOW)
+        val collectionIdFull = UnionAddressConverter.convert(BlockchainDto.FLOW, collectionId)
         val collection = randomFlowCollectionDto(collectionId)
 
         coEvery { testFlowCollectionApi.getNftCollectionById(collectionId) } returns collection.toMono()
@@ -83,7 +83,7 @@ class CollectionControllerFt : AbstractIntegrationTest() {
 
     @Test
     fun `get collections by owner - ethereum`() = runBlocking<Unit> {
-        val ethOwnerId = randomEthAddress()
+        val ethOwnerId = UnionAddressConverter.convert(BlockchainDto.ETHEREUM, randomEthAddress())
         val collection = randomEthCollectionDto()
         val collectionId = EthConverter.convert(collection.id, BlockchainDto.ETHEREUM)
 
@@ -103,7 +103,7 @@ class CollectionControllerFt : AbstractIntegrationTest() {
     fun `get collections by owner - tezos`() = runBlocking<Unit> {
         val tezosOwnerId = randomTezosAddress()
         val collection = randomTezosCollectionDto()
-        val collectionId = UnionAddressConverter.convert(collection.id, BlockchainDto.TEZOS)
+        val collectionId = UnionAddressConverter.convert(BlockchainDto.TEZOS, collection.id)
 
         coEvery {
             testTezosCollectionApi.searchNftCollectionsByOwner(tezosOwnerId.value, size, continuation)

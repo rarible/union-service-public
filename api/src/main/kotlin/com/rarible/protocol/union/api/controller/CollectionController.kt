@@ -10,6 +10,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.dto.CollectionsDto
 import com.rarible.protocol.union.dto.parser.IdParser
+import com.rarible.protocol.union.dto.subchains
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.RestController
@@ -49,8 +50,8 @@ class CollectionController(
     override suspend fun getCollectionById(
         collection: String
     ): ResponseEntity<CollectionDto> {
-        val collectionAddress = IdParser.parseAddress(collection)
-        val result = router.getService(collectionAddress.blockchain).getCollectionById(collectionAddress.value)
+        val collectionId = IdParser.parseContract(collection)
+        val result = router.getService(collectionId.blockchain).getCollectionById(collectionId.value)
         return ResponseEntity.ok(result)
     }
 
@@ -61,15 +62,23 @@ class CollectionController(
     ): ResponseEntity<CollectionsDto> {
         val safeSize = PageSize.COLLECTION.limit(size)
         val ownerAddress = IdParser.parseAddress(owner)
-        val result = router.getService(ownerAddress.blockchain)
-            .getCollectionsByOwner(ownerAddress.value, continuation, safeSize)
+        val blockchainPages = router.executeForAll(ownerAddress.blockchainGroup.subchains()) {
+            it.getCollectionsByOwner(ownerAddress.value, continuation, safeSize)
+        }
+
+        val total = blockchainPages.map { it.total }.sum()
+
+        val combinedPage = Paging(
+            CollectionContinuation.ById,
+            blockchainPages.flatMap { it.entities }
+        ).getPage(safeSize, total)
 
         logger.info(
             "Response for getCollectionsByOwner(owner={}, continuation={}, size={}):" +
                     " Page(size={}, total={}, continuation={})",
-            owner, continuation, size, result.entities.size, result.total, result.continuation
+            owner, continuation, size, combinedPage.entities.size, combinedPage.total, combinedPage.continuation
         )
-        return ResponseEntity.ok(toDto(result))
+        return ResponseEntity.ok(toDto(combinedPage))
     }
 
     private fun toDto(page: Page<CollectionDto>): CollectionsDto {

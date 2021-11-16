@@ -13,14 +13,13 @@ class TezosOwnershipConverterTest {
 
         val converted = TezosOwnershipConverter.convert(dto, BlockchainDto.TEZOS)
 
-        assertThat(converted.id.token.value).isEqualTo(dto.contract)
+        assertThat(converted.id.contract).isEqualTo(dto.contract)
         assertThat(converted.id.tokenId).isEqualTo(dto.tokenId)
         assertThat(converted.id.owner.value).isEqualTo(dto.owner)
 
         assertThat(converted.value).isEqualTo(dto.value)
         assertThat(converted.createdAt).isEqualTo(dto.date)
         assertThat(converted.lazyValue).isEqualTo(dto.lazyValue)
-        assertThat(converted.owner.value).isEqualTo(dto.owner)
         assertThat(converted.creators[0].account.value).isEqualTo(dto.creators[0].account)
         assertThat(converted.creators[0].value).isEqualTo(dto.creators[0].value)
     }

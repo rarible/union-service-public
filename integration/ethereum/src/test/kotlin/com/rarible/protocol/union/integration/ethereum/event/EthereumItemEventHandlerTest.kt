@@ -49,7 +49,7 @@ class EthereumItemEventHandlerTest {
         val itemId = randomEthItemId()
         val deletedDto = NftDeletedItemDto(
             itemId.value,
-            Address.apply(itemId.token.value),
+            Address.apply(itemId.contract),
             itemId.tokenId
         )
 

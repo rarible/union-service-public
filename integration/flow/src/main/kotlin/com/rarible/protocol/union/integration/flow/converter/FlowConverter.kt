@@ -24,14 +24,14 @@ object FlowConverter {
 
     fun convertToPayout(source: PayInfoDto, blockchain: BlockchainDto): OrderPayoutDto {
         return OrderPayoutDto(
-            account = UnionAddressConverter.convert(source.account, blockchain),
+            account = UnionAddressConverter.convert(blockchain, source.account),
             value = toBasePoints(source.value)
         )
     }
 
     fun convertToCreator(source: PayInfoDto, blockchain: BlockchainDto): CreatorDto {
         return CreatorDto(
-            account = UnionAddressConverter.convert(source.account, blockchain),
+            account = UnionAddressConverter.convert(blockchain, source.account),
             value = toBasePoints(source.value)
         )
     }
@@ -42,7 +42,7 @@ object FlowConverter {
                 AssetDto(
                     value = source.value,
                     type = FlowAssetTypeFtDto(
-                        contract = UnionAddressConverter.convert(source.contract, blockchain)
+                        contract = UnionAddressConverter.convert(blockchain, source.contract)
                     )
                 )
             }
@@ -50,7 +50,7 @@ object FlowConverter {
                 AssetDto(
                     value = source.value,
                     type = FlowAssetTypeNftDto(
-                        contract = UnionAddressConverter.convert(source.contract, blockchain),
+                        contract = UnionAddressConverter.convert(blockchain, source.contract),
                         tokenId = source.tokenId
                     )
                 )
@@ -62,12 +62,12 @@ object FlowConverter {
         return when (source) {
             is FlowAssetFungibleDto -> {
                 FlowAssetTypeFtDto(
-                    contract = UnionAddressConverter.convert(source.contract, blockchain)
+                    contract = UnionAddressConverter.convert(blockchain, source.contract)
                 )
             }
             is FlowAssetNFTDto -> {
                 FlowAssetTypeNftDto(
-                    contract = UnionAddressConverter.convert(source.contract, blockchain),
+                    contract = UnionAddressConverter.convert(blockchain, source.contract),
                     tokenId = source.tokenId
                 )
             }

@@ -9,7 +9,7 @@ object ShortOwnershipConverter {
     fun convert(dto: UnionOwnership): ShortOwnership {
         return ShortOwnership(
             blockchain = dto.id.blockchain,
-            token = dto.id.token.value,
+            token = dto.id.contract,
             tokenId = dto.id.tokenId,
             owner = dto.id.owner.value,
             // Default enrichment data

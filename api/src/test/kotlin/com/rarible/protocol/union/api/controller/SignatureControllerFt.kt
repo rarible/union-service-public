@@ -52,7 +52,7 @@ class SignatureControllerFt : AbstractIntegrationTest() {
         )
 
         val unionForm = SignatureValidationFormDto(
-            signer = UnionAddressConverter.convert(tezosForm.signer, BlockchainDto.TEZOS),
+            signer = UnionAddressConverter.convert(BlockchainDto.TEZOS, tezosForm.signer),
             message = tezosForm.message,
             signature = tezosForm.signature
         )
@@ -66,7 +66,7 @@ class SignatureControllerFt : AbstractIntegrationTest() {
     @Test
     fun `validate signature - flow`() = runBlocking<Unit> {
         val unionForm = SignatureValidationFormDto(
-            signer = UnionAddressConverter.convert(randomString(), BlockchainDto.FLOW),
+            signer = UnionAddressConverter.convert(BlockchainDto.FLOW, randomString()),
             publicKey = randomString(),
             message = randomString(),
             signature = randomString()

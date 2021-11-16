@@ -4,18 +4,20 @@ import com.rarible.protocol.tezos.dto.NftCollectionDto
 import com.rarible.protocol.tezos.dto.NftCollectionFeatureDto
 import com.rarible.protocol.tezos.dto.NftCollectionsDto
 import com.rarible.protocol.union.core.continuation.page.Page
+import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionDto
-import com.rarible.protocol.union.dto.UnionAddress
+import com.rarible.protocol.union.dto.ContractAddress
 
 object TezosCollectionConverter {
 
     fun convert(source: NftCollectionDto, blockchain: BlockchainDto): CollectionDto {
         return CollectionDto(
-            id = UnionAddress(blockchain, source.id),
+            id = ContractAddress(blockchain, source.id),
+            blockchain = blockchain,
             name = source.name,
             symbol = source.symbol,
-            owner = source.owner?.let { UnionAddress(blockchain, it) },
+            owner = source.owner?.let { UnionAddressConverter.convert(blockchain, it) },
             type = CollectionDto.Type.TEZOS,
             features = source.features.map { convert(it) }
         )

@@ -34,17 +34,14 @@ import com.rarible.protocol.tezos.dto.OrderStatusDto
 import com.rarible.protocol.tezos.dto.PartDto
 import com.rarible.protocol.tezos.dto.TransferDto
 import com.rarible.protocol.tezos.dto.XTZAssetTypeDto
+import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
-import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.parser.ItemIdParser
-import java.lang.Long
-import kotlin.String
-import kotlin.toBigInteger
 
-fun randomTezosContract() = UnionAddress(BlockchainDto.TEZOS, randomString(12))
-fun randomTezosAddress() = UnionAddress(BlockchainDto.TEZOS, Long.toHexString(randomLong()))
+fun randomTezosContract() = randomString(12)
+fun randomTezosAddress() = UnionAddressConverter.convert(BlockchainDto.TEZOS, randomString())
 
 fun randomTezosItemId() = ItemIdDto(BlockchainDto.TEZOS, randomTezosContract(), randomLong().toBigInteger())
 fun randomTezosItemIdFullValue() = randomTezosItemId().fullId()
@@ -56,9 +53,9 @@ fun randomTezosOwnershipId() = randomTezosOwnershipId(randomTezosItemId())
 fun randomTezosOwnershipId(itemId: ItemIdDto) = randomTezosOwnershipId(itemId, randomTezosAddress().value)
 fun randomTezosOwnershipId(itemId: ItemIdDto, owner: String): OwnershipIdDto {
     return OwnershipIdDto(
-        token = UnionAddress(BlockchainDto.TEZOS, itemId.token.value),
+        contract = itemId.contract,
         tokenId = itemId.tokenId,
-        owner = UnionAddress(BlockchainDto.TEZOS, owner),
+        owner = UnionAddressConverter.convert(BlockchainDto.TEZOS, owner),
         blockchain = BlockchainDto.TEZOS
     )
 }
@@ -68,7 +65,7 @@ fun randomTezosNftItemDto(itemId: ItemIdDto) = randomTezosNftItemDto(itemId, ran
 fun randomTezosNftItemDto(itemId: ItemIdDto, creator: String): NftItemDto {
     return NftItemDto(
         id = itemId.value,
-        contract = itemId.token.value,
+        contract = itemId.contract,
         tokenId = itemId.tokenId,
         mintedAt = nowMillis(),
         date = nowMillis(),
@@ -87,14 +84,14 @@ fun randomTezosOwnershipDto() = randomTezosOwnershipDto(randomTezosOwnershipId()
 fun randomTezosOwnershipDto(itemId: ItemIdDto) = randomTezosOwnershipDto(
     OwnershipIdDto(
         itemId.blockchain,
-        itemId.token,
+        itemId.contract,
         itemId.tokenId,
-        UnionAddress(BlockchainDto.TEZOS, randomString())
+        UnionAddressConverter.convert(BlockchainDto.TEZOS, randomString())
     )
 )
 
 fun randomTezosOwnershipDto(ownershipId: OwnershipIdDto) = randomTezosOwnershipDto(
-    ItemIdParser.parseShort("${ownershipId.token.value}:${ownershipId.tokenId}", BlockchainDto.TEZOS),
+    ItemIdParser.parseShort("${ownershipId.contract}:${ownershipId.tokenId}", BlockchainDto.TEZOS),
     PartDto(ownershipId.owner.value, randomInt())
 )
 
@@ -102,7 +99,7 @@ fun randomTezosOwnershipDto(itemId: ItemIdDto, creator: PartDto): NftOwnershipDt
     val ownershipId = randomTezosOwnershipId(itemId, creator.account.toString())
     return NftOwnershipDto(
         id = ownershipId.value,
-        contract = ownershipId.token.value,
+        contract = ownershipId.contract,
         tokenId = ownershipId.tokenId,
         owner = ownershipId.owner.value,
         creators = listOf(creator),
@@ -183,7 +180,7 @@ fun randomTezosItemMetaAttribute(): NftItemAttributeDto {
 
 fun randomTezosAssetFa2() = randomTezosAssetFa2(randomTezosItemId())
 fun randomTezosAssetFa2(itemId: ItemIdDto) = AssetDto(
-    assetType = FA_2AssetTypeDto(itemId.token.value, itemId.tokenId),
+    assetType = FA_2AssetTypeDto(itemId.contract, itemId.tokenId),
     value = randomBigDecimal()
 )
 

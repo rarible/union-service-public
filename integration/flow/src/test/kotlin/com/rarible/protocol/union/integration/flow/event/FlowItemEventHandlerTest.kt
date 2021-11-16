@@ -47,7 +47,7 @@ class FlowItemEventHandlerTest {
         val itemId = randomFlowItemId()
         val deletedDto = FlowNftDeletedItemDto(
             itemId.value,
-            itemId.token.value,
+            itemId.contract,
             itemId.tokenId.toLong()
         )
 

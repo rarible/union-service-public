@@ -27,7 +27,7 @@ class TezosOwnershipControllerApiMock(
     ) {
         every {
             nftOwnershipControllerApi.getNftOwnershipByItem(
-                itemId.token.value,
+                itemId.contract,
                 itemId.tokenId.toString(),
                 size,
                 continuation

@@ -12,7 +12,6 @@ import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PlatformDto
-import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.ext
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -45,7 +44,7 @@ class OrderApiService(
     ): Slice<OrderDto> {
         val currencyAssetTypes = router.getService(blockchain)
             .getSellCurrencies(contract, tokenId)
-            .map { UnionAddress(blockchain, it.ext.contract) }
+            .map { it.ext.contract }
 
         if (currencyAssetTypes.isEmpty()) {
             return Slice.empty()
@@ -79,16 +78,16 @@ class OrderApiService(
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
-        val currencyAssetTypes = router.getService(blockchain)
+        val currencyContracts = router.getService(blockchain)
             .getBidCurrencies(contract, tokenId)
-            .map { UnionAddress(blockchain, it.ext.contract) }
+            .map { it.ext.contract }
 
-        if (currencyAssetTypes.isEmpty()) {
+        if (currencyContracts.isEmpty()) {
             return Slice.empty()
         }
 
         val currencySlices = getMultiCurrencyOrdersForItem(
-            continuation, currencyAssetTypes
+            continuation, currencyContracts
         ) { currency, currencyContinuation ->
             router.getService(blockchain).getOrderBidsByItem(
                 platform, contract, tokenId, maker, origin, status, start, end, currency, currencyContinuation, size
@@ -104,16 +103,15 @@ class OrderApiService(
 
     private suspend fun getMultiCurrencyOrdersForItem(
         continuation: String?,
-        currencyAssetTypes: List<UnionAddress>,
+        currencyAssetTypes: List<String>,
         clientCall: suspend (currency: String, continuation: String?) -> Slice<OrderDto>
     ): List<ArgSlice<OrderDto>> {
 
         val currentContinuation = CombinedContinuation.parse(continuation)
 
         return coroutineScope {
-            currencyAssetTypes.map {
+            currencyAssetTypes.map { currency ->
                 async {
-                    val currency = it.value
                     val currencyContinuation = currentContinuation.continuations[currency]
                     // For completed currencies we do not request orders
                     if (currencyContinuation == ArgSlice.COMPLETED) {

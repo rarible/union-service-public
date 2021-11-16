@@ -69,7 +69,7 @@ class EthOwnershipServiceTest {
 
         coEvery {
             ownershipControllerApi.getNftOwnershipsByItem(
-                ownershipId.token.value,
+                ownershipId.contract,
                 ownershipId.tokenId.toString(),
                 continuation,
                 size

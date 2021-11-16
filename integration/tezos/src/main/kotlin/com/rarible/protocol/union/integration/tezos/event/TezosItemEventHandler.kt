@@ -9,7 +9,6 @@ import com.rarible.protocol.union.core.model.UnionItemEvent
 import com.rarible.protocol.union.core.model.UnionItemUpdateEvent
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
-import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.integration.tezos.converter.TezosItemConverter
 import org.slf4j.LoggerFactory
 
@@ -31,7 +30,7 @@ open class TezosItemEventHandler(
             ItemEventDto.Type.DELETE -> {
                 val itemId = ItemIdDto(
                     blockchain = blockchain,
-                    token = UnionAddress(blockchain, event.item!!.contract),
+                    contract = event.item!!.contract,
                     tokenId = event.item!!.tokenId
                 )
                 handler.onEvent(UnionItemDeleteEvent(itemId))

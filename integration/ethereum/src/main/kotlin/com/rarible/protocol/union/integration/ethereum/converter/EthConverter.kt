@@ -10,6 +10,7 @@ import com.rarible.protocol.dto.Erc721LazyAssetTypeDto
 import com.rarible.protocol.dto.EthAssetTypeDto
 import com.rarible.protocol.dto.GenerativeArtAssetTypeDto
 import com.rarible.protocol.dto.PartDto
+import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.exception.UnionValidationException
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.AssetDto
@@ -63,9 +64,8 @@ object EthConverter {
         }
     }
 
-
     fun convert(source: Address, blockchain: BlockchainDto): UnionAddress {
-        return UnionAddress(blockchain, convert(source))
+        return UnionAddressConverter.convert(blockchain, convert(source))
     }
 
     fun convert(source: ActivitySortDto?): com.rarible.protocol.dto.ActivitySortDto {

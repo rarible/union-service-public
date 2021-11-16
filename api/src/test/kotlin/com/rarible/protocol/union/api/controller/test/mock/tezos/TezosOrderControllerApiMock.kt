@@ -33,7 +33,7 @@ class TezosOrderControllerApiMock(
     fun mockGetSellOrdersByItem(itemId: ItemIdDto, vararg returnOrders: OrderDto) {
         every {
             orderControllerApi.getSellOrderByItem(
-                itemId.token.value,
+                itemId.contract,
                 itemId.tokenId.toString(),
                 any(),
                 any(),
@@ -46,7 +46,7 @@ class TezosOrderControllerApiMock(
     fun mockGetSellOrdersByOwnership(ownershipId: OwnershipIdDto, vararg returnOrders: OrderDto) {
         every {
             orderControllerApi.getSellOrderByItem(
-                ownershipId.token.value,
+                ownershipId.contract,
                 ownershipId.tokenId.toString(),
                 ownershipId.owner.value,
                 any(),
@@ -59,7 +59,7 @@ class TezosOrderControllerApiMock(
     fun mockGetBidOrdersByItem(itemId: ItemIdDto, vararg returnOrders: OrderDto) {
         every {
             orderControllerApi.getOrderBidsByItem(
-                itemId.token.value,
+                itemId.contract,
                 itemId.tokenId.toString(),
                 any(),
                 any(),

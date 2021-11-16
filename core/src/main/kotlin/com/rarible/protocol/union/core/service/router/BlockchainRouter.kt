@@ -8,11 +8,16 @@ import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
 
 class BlockchainRouter<T : BlockchainService>(
-    private val services: List<T>
+    services: List<T>,
+    blockchains: List<BlockchainDto>
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
+    // Enabled blockchains, executeForAll should consider this set
+    private val enabledBlockchains = blockchains.toSet()
+
+    // All services, include dummy for disabled blockchains - for getService method
     private val blockchainServices = services.associateBy { it.blockchain }
 
     fun getService(blockchain: BlockchainDto): T {
@@ -25,11 +30,12 @@ class BlockchainRouter<T : BlockchainService>(
         blockchains: Collection<BlockchainDto>?,
         clientCall: suspend (service: T) -> R
     ): List<R> = coroutineScope {
-        val selectedServices = if (blockchains == null || blockchains.isEmpty()) {
-            services
+        val enabledBlockchains = if (blockchains == null || blockchains.isEmpty()) {
+            enabledBlockchains
         } else {
-            blockchains.map { getService(it) }
+            blockchains.filter { enabledBlockchains.contains(it) }
         }
+        val selectedServices = enabledBlockchains.map { getService(it) }
 
         if (selectedServices.size == 1) {
             // For single blockchain we are not using safe call in order to throw exception

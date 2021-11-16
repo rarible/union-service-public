@@ -26,7 +26,7 @@ class FlowOwnershipControllerApiMock(
     ) {
         every {
             nftOwnershipControllerApi.getNftOwnershipsByItem(
-                itemId.token.value,
+                itemId.contract,
                 itemId.tokenId.toString(),
                 continuation,
                 size
