@@ -39,7 +39,7 @@ class EnrichmentOwnershipServiceIt {
         val ownership5 = randomShortOwnership(itemId.copy(tokenId = randomBigInt()))
             .copy(bestSellOrder = orderDto1)
         // Token is different
-        val ownership6 = randomShortOwnership(itemId.copy(token = itemId.token.copy(value = randomAddressString())))
+        val ownership6 = randomShortOwnership(itemId.copy(contract = randomAddressString()))
             .copy(bestSellOrder = orderDto2)
         // Blockchain is different
         val ownership7 = randomShortOwnership(itemId.copy(blockchain = BlockchainDto.POLYGON))

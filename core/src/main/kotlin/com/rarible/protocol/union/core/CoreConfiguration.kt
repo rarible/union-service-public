@@ -28,11 +28,13 @@ import org.springframework.scheduling.annotation.EnableScheduling
 @Configuration
 @EnableScheduling
 @ComponentScan(basePackageClasses = [CoreConfiguration::class])
-class CoreConfiguration {
+class CoreConfiguration(
+    val enabledBlockchains: List<BlockchainDto>
+) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    private val blockchains = BlockchainDto.values().toSet()
+    private val allBlockchains = BlockchainDto.values().toSet()
 
     @Autowired
     fun setMapKeyDotReplacement(mappingMongoConverter: MappingMongoConverter) {
@@ -47,7 +49,7 @@ class CoreConfiguration {
             result.add(DummyItemService(it))
             logger.info("ItemService for blockchain {} disabled or not implemented, replaced by dummy", it.name)
         }
-        return BlockchainRouter(result)
+        return BlockchainRouter(result, enabledBlockchains)
     }
 
     @Bean
@@ -58,7 +60,7 @@ class CoreConfiguration {
             result.add(DummyOwnershipService(it))
             logger.info("OwnershipService for blockchain {} disabled or not implemented, replaced by dummy", it.name)
         }
-        return BlockchainRouter(result)
+        return BlockchainRouter(result, enabledBlockchains)
     }
 
     @Bean
@@ -69,7 +71,7 @@ class CoreConfiguration {
             result.add(DummyCollectionService(it))
             logger.info("CollectionService for blockchain {} disabled or not implemented, replaced by dummy", it.name)
         }
-        return BlockchainRouter(services)
+        return BlockchainRouter(services, enabledBlockchains)
     }
 
     @Bean
@@ -80,7 +82,7 @@ class CoreConfiguration {
             result.add(DummyOrderService(it))
             logger.info("OrderService for blockchain {} disabled or not implemented, replaced by dummy", it.name)
         }
-        return BlockchainRouter(services)
+        return BlockchainRouter(services, enabledBlockchains)
     }
 
     @Bean
@@ -91,7 +93,7 @@ class CoreConfiguration {
             result.add(DummyActivityService(it))
             logger.info("ActivityService for blockchain {} disabled or not implemented, replaced by dummy", it.name)
         }
-        return BlockchainRouter(services)
+        return BlockchainRouter(services, enabledBlockchains)
     }
 
     @Bean
@@ -102,7 +104,7 @@ class CoreConfiguration {
             result.add(DummySignatureService(it))
             logger.info("SignatureService for blockchain {} disabled or not implemented, replaced by dummy", it.name)
         }
-        return BlockchainRouter(services)
+        return BlockchainRouter(services, enabledBlockchains)
     }
 
     @Bean
@@ -121,7 +123,7 @@ class CoreConfiguration {
             }
         }
 
-        val disabledBlockchains = this.blockchains.toMutableSet()
+        val disabledBlockchains = this.allBlockchains.toMutableSet()
         services.forEach { disabledBlockchains.remove(it.blockchain) }
         return disabledBlockchains.toList()
     }

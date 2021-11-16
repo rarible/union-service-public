@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.api.controller
 
+import com.rarible.protocol.union.api.service.extractItemId
 import com.rarible.protocol.union.core.continuation.ActivityContinuation
 import com.rarible.protocol.union.core.continuation.page.PageSize
 import com.rarible.protocol.union.core.continuation.page.Paging
@@ -13,6 +14,7 @@ import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
 import com.rarible.protocol.union.dto.parser.IdParser
+import com.rarible.protocol.union.dto.subchains
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -58,7 +60,7 @@ class ActivityController(
         sort: ActivitySortDto?
     ): ResponseEntity<ActivitiesDto> {
         val safeSize = PageSize.ACTIVITY.limit(size)
-        val collectionAddress = IdParser.parseAddress(collection)
+        val collectionAddress = IdParser.parseContract(collection)
         val result = router.getService(collectionAddress.blockchain)
             .getActivitiesByCollection(type, collectionAddress.value, continuation, safeSize, sort)
 
@@ -72,21 +74,24 @@ class ActivityController(
 
     override suspend fun getActivitiesByItem(
         type: List<ActivityTypeDto>,
-        contract: String,
-        tokenId: String,
+        itemId: String?,
+        contract: String?,
+        tokenId: String?,
         continuation: String?,
         size: Int?,
         sort: ActivitySortDto?
     ): ResponseEntity<ActivitiesDto> {
         val safeSize = PageSize.ACTIVITY.limit(size)
-        val contractAddress = IdParser.parseAddress(contract)
-        val result = router.getService(contractAddress.blockchain)
-            .getActivitiesByItem(type, contractAddress.value, tokenId, continuation, safeSize, sort)
+
+        val fullItemId = extractItemId(contract, tokenId, itemId)
+
+        val result = router.getService(fullItemId.blockchain)
+            .getActivitiesByItem(type, fullItemId.contract, fullItemId.tokenId.toString(), continuation, safeSize, sort)
 
         logger.info(
-            "Response for getActivitiesByItem(type={}, contract={}, tokenId={} continuation={}, size={}, sort={}): " +
+            "Response for getActivitiesByItem(type={}, itemId={} continuation={}, size={}, sort={}): " +
                     "Slice(size={}, continuation={}) ",
-            type, contract, tokenId, continuation, size, sort, result.entities.size, result.continuation
+            type, fullItemId.fullId(), continuation, size, sort, result.entities.size, result.continuation
         )
         return ResponseEntity.ok(toDto(result))
     }
@@ -102,7 +107,9 @@ class ActivityController(
     ): ResponseEntity<ActivitiesDto> {
         val safeSize = PageSize.ACTIVITY.limit(size)
         val groupedByBlockchain = user.map { IdParser.parseAddress(it) }
-            .groupBy({ it.blockchain }, { it.value })
+            // Since user specified here with blockchain group, we need to route request to all subchains
+            .flatMap { address -> address.blockchainGroup.subchains().map { it to address.value } }
+            .groupBy({ it.first }, { it.second })
 
         val blockchainPages = coroutineScope {
             groupedByBlockchain.map {

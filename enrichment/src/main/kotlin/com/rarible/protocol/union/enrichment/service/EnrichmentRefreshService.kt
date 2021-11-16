@@ -92,7 +92,7 @@ class EnrichmentRefreshService(
 
     suspend fun reconcileOwnership(ownershipId: OwnershipIdDto) = coroutineScope {
         // We don't have specific query for ownership, so will use currencies for item
-        val itemIdDto = ItemIdDto(ownershipId.blockchain, ownershipId.token, ownershipId.tokenId)
+        val itemIdDto = ItemIdDto(ownershipId.blockchain, ownershipId.contract, ownershipId.tokenId)
 
         val sellCurrencies = async { getSellCurrencies(itemIdDto) }
         val unionOwnership = async { ownershipService.fetch(ShortOwnershipId(ownershipId)) }
@@ -236,7 +236,7 @@ class EnrichmentRefreshService(
 
     private suspend fun getBidCurrencies(itemId: ItemIdDto): List<String> {
         val result = orderServiceRouter.getService(itemId.blockchain)
-            .getBidCurrencies(itemId.token.value, itemId.tokenId.toString())
+            .getBidCurrencies(itemId.contract, itemId.tokenId.toString())
 
         logger.info("Found Bid currencies for Item [{}] : {}", itemId.fullId(), result)
         return result.map { it.ext.contract }
@@ -244,7 +244,7 @@ class EnrichmentRefreshService(
 
     private suspend fun getSellCurrencies(itemId: ItemIdDto): List<String> {
         val result = orderServiceRouter.getService(itemId.blockchain)
-            .getSellCurrencies(itemId.token.value, itemId.tokenId.toString())
+            .getSellCurrencies(itemId.contract, itemId.tokenId.toString())
 
         logger.info("Found Sell currencies for Item [{}] : {}", itemId.fullId(), result)
         return result.map { it.ext.contract }

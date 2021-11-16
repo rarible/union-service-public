@@ -1,10 +1,9 @@
 package com.rarible.protocol.union.enrichment.model
 
+import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
-import com.rarible.protocol.union.dto.UnionAddress
 import java.math.BigInteger
-
 
 data class ShortOwnershipId(
     val blockchain: BlockchainDto,
@@ -15,7 +14,7 @@ data class ShortOwnershipId(
 
     constructor(dto: OwnershipIdDto) : this(
         dto.blockchain,
-        dto.token.value,
+        dto.contract,
         dto.tokenId,
         dto.owner.value
     )
@@ -27,9 +26,9 @@ data class ShortOwnershipId(
     fun toDto(): OwnershipIdDto {
         return OwnershipIdDto(
             blockchain = blockchain,
-            token = UnionAddress(blockchain, token),
+            contract = token,
             tokenId = tokenId,
-            owner = UnionAddress(blockchain, owner)
+            owner = UnionAddressConverter.convert(blockchain, owner)
         )
     }
 }

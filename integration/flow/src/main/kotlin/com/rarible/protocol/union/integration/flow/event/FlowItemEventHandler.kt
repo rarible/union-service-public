@@ -11,7 +11,6 @@ import com.rarible.protocol.union.core.model.UnionItemEvent
 import com.rarible.protocol.union.core.model.UnionItemUpdateEvent
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
-import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.integration.flow.converter.FlowItemConverter
 import org.slf4j.LoggerFactory
 
@@ -33,7 +32,7 @@ open class FlowItemEventHandler(
             is FlowNftItemDeleteEventDto -> {
                 val itemId = ItemIdDto(
                     blockchain = blockchain,
-                    token = UnionAddress(blockchain, event.item.token),
+                    contract = event.item.token,
                     tokenId = event.item.tokenId.toBigInteger()
                 )
                 handler.onEvent(UnionItemDeleteEvent(itemId))

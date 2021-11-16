@@ -13,18 +13,16 @@ import com.rarible.protocol.union.dto.OwnershipIdDto
 object EthOwnershipConverter {
 
     fun convert(source: NftOwnershipDto, blockchain: BlockchainDto): UnionOwnership {
+        val contract = EthConverter.convert(source.contract)
         return UnionOwnership(
             id = OwnershipIdDto(
-                token = EthConverter.convert(source.contract, blockchain),
+                contract = contract,
                 tokenId = source.tokenId,
                 owner = EthConverter.convert(source.owner, blockchain),
                 blockchain = blockchain
             ),
             value = source.value,
             createdAt = source.date,
-            contract = EthConverter.convert(source.contract, blockchain),
-            tokenId = source.tokenId,
-            owner = EthConverter.convert(source.owner, blockchain),
             creators = source.creators.map { EthConverter.convertToCreator(it, blockchain) },
             lazyValue = source.lazyValue,
             pending = source.pending.map { convert(it, blockchain) }

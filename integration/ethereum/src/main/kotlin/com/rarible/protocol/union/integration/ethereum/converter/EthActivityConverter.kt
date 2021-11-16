@@ -20,6 +20,7 @@ import com.rarible.protocol.union.dto.ActivityIdDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.BurnActivityDto
+import com.rarible.protocol.union.dto.ContractAddress
 import com.rarible.protocol.union.dto.MintActivityDto
 import com.rarible.protocol.union.dto.OrderActivityMatchSideDto
 import com.rarible.protocol.union.dto.OrderActivitySourceDto
@@ -149,7 +150,7 @@ class EthActivityConverter(
                     id = activityId,
                     date = source.date,
                     owner = EthConverter.convert(source.owner, blockchain),
-                    contract = EthConverter.convert(source.contract, blockchain),
+                    contract = ContractAddress(blockchain, EthConverter.convert(source.contract)),
                     tokenId = source.tokenId,
                     value = source.value,
                     blockchainInfo = ActivityBlockchainInfoDto(
@@ -165,7 +166,7 @@ class EthActivityConverter(
                     id = activityId,
                     date = source.date,
                     owner = EthConverter.convert(source.owner, blockchain),
-                    contract = EthConverter.convert(source.contract, blockchain),
+                    contract = ContractAddress(blockchain, EthConverter.convert(source.contract)),
                     tokenId = source.tokenId,
                     value = source.value,
                     blockchainInfo = ActivityBlockchainInfoDto(
@@ -182,7 +183,7 @@ class EthActivityConverter(
                     date = source.date,
                     from = EthConverter.convert(source.from, blockchain),
                     owner = EthConverter.convert(source.owner, blockchain),
-                    contract = EthConverter.convert(source.contract, blockchain),
+                    contract = ContractAddress(blockchain, EthConverter.convert(source.contract)),
                     tokenId = source.tokenId,
                     value = source.value,
                     blockchainInfo = ActivityBlockchainInfoDto(

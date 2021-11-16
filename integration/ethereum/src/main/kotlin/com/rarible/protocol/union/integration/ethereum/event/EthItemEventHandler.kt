@@ -11,7 +11,6 @@ import com.rarible.protocol.union.core.model.UnionItemEvent
 import com.rarible.protocol.union.core.model.UnionItemUpdateEvent
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
-import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthItemConverter
 import org.slf4j.LoggerFactory
@@ -34,7 +33,7 @@ abstract class EthItemEventHandler(
             is NftItemDeleteEventDto -> {
                 val itemId = ItemIdDto(
                     blockchain = blockchain,
-                    token = UnionAddress(blockchain, EthConverter.convert(event.item.token)),
+                    contract = EthConverter.convert(event.item.token),
                     tokenId = event.item.tokenId
                 )
                 handler.onEvent(UnionItemDeleteEvent(itemId))

@@ -11,6 +11,7 @@ import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.ItemsDto
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.dto.parser.ItemIdParser
+import com.rarible.protocol.union.dto.subchains
 import com.rarible.protocol.union.enrichment.service.EnrichmentMetaService
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.slf4j.LoggerFactory
@@ -81,7 +82,7 @@ class ItemController(
         size: Int?
     ): ResponseEntity<ItemsDto> {
         val safeSize = PageSize.ITEM.limit(size)
-        val collectionAddress = IdParser.parseAddress(collection)
+        val collectionAddress = IdParser.parseContract(collection)
         val result = router.getService(collectionAddress.blockchain)
             .getItemsByCollection(collectionAddress.value, continuation, safeSize)
 
@@ -102,16 +103,25 @@ class ItemController(
     ): ResponseEntity<ItemsDto> {
         val safeSize = PageSize.ITEM.limit(size)
         val creatorAddress = IdParser.parseAddress(creator)
-        val result = router.getService(creatorAddress.blockchain)
-            .getItemsByCreator(creatorAddress.value, continuation, safeSize)
+
+        val blockchainPages = router.executeForAll(creatorAddress.blockchainGroup.subchains()) {
+            it.getItemsByCreator(creatorAddress.value, continuation, safeSize)
+        }
+
+        val total = blockchainPages.map { it.total }.sum()
+
+        val combinedPage = Paging(
+            ItemContinuation.ByLastUpdatedAndId,
+            blockchainPages.flatMap { it.entities }
+        ).getPage(safeSize, total)
 
         logger.info(
             "Response for getItemsByCreator(creator={}, continuation={}, size={}):" +
                     " Page(size={}, total={}, continuation={}) from blockchain pages {} ",
-            creator, continuation, size, result.entities.size, result.total, result.continuation
+            creator, continuation, size, combinedPage.entities.size, combinedPage.total, combinedPage.continuation
         )
 
-        val enriched = itemApiService.enrich(result)
+        val enriched = itemApiService.enrich(combinedPage)
         return ResponseEntity.ok(enriched)
     }
 
@@ -122,16 +132,24 @@ class ItemController(
     ): ResponseEntity<ItemsDto> {
         val safeSize = PageSize.ITEM.limit(size)
         val ownerAddress = IdParser.parseAddress(owner)
-        val result = router.getService(ownerAddress.blockchain)
-            .getItemsByOwner(ownerAddress.value, continuation, safeSize)
+        val blockchainPages = router.executeForAll(ownerAddress.blockchainGroup.subchains()) {
+            it.getItemsByOwner(ownerAddress.value, continuation, safeSize)
+        }
+
+        val total = blockchainPages.map { it.total }.sum()
+
+        val combinedPage = Paging(
+            ItemContinuation.ByLastUpdatedAndId,
+            blockchainPages.flatMap { it.entities }
+        ).getPage(safeSize, total)
 
         logger.info(
             "Response for getItemsByCreator(owner={}, continuation={}, size={}):" +
                     " Page(size={}, total={}, continuation={}) from blockchain pages {} ",
-            owner, continuation, size, result.entities.size, result.total, result.continuation
+            owner, continuation, size, combinedPage.entities.size, combinedPage.total, combinedPage.continuation
         )
 
-        val enriched = itemApiService.enrich(result)
+        val enriched = itemApiService.enrich(combinedPage)
         return ResponseEntity.ok(enriched)
     }
 

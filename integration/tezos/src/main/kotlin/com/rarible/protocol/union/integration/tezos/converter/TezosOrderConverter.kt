@@ -40,8 +40,8 @@ class TezosOrderConverter(
         val make = TezosConverter.convert(order.make, blockchain)
         val take = TezosConverter.convert(order.take, blockchain)
 
-        val maker = UnionAddressConverter.convert(order.maker, blockchain)
-        val taker = order.taker?.let { UnionAddressConverter.convert(it, blockchain) }
+        val maker = UnionAddressConverter.convert(blockchain, order.maker)
+        val taker = order.taker?.let { UnionAddressConverter.convert(blockchain, it) }
 
         val takePrice = order.take.value / order.make.value
         val takePriceUsd = currencyService.toUsd(blockchain, take.type, takePrice)
@@ -106,7 +106,7 @@ class TezosOrderConverter(
 
     private fun convert(source: PartDto, blockchain: BlockchainDto): OrderPayoutDto {
         return OrderPayoutDto(
-            account = UnionAddressConverter.convert(source.account, blockchain),
+            account = UnionAddressConverter.convert(blockchain, source.account),
             value = source.value
         )
     }

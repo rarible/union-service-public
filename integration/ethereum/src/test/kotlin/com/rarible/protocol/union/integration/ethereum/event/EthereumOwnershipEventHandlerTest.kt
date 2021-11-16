@@ -50,7 +50,7 @@ class EthereumOwnershipEventHandlerTest {
 
         val deletedDto = NftDeletedOwnershipDto(
             ownershipId.value,
-            Address.apply(ownershipId.token.value),
+            Address.apply(ownershipId.contract),
             ownershipId.tokenId,
             Address.apply(ownershipId.owner.value)
         )

@@ -12,7 +12,6 @@ import com.rarible.protocol.union.dto.CreatorDto
 import com.rarible.protocol.union.dto.TezosFA12AssetTypeDto
 import com.rarible.protocol.union.dto.TezosFA2AssetTypeDto
 import com.rarible.protocol.union.dto.TezosXTZAssetTypeDto
-import com.rarible.protocol.union.dto.UnionAddress
 
 object TezosConverter {
 
@@ -29,11 +28,11 @@ object TezosConverter {
                 TezosXTZAssetTypeDto()
             is FA_1_2AssetTypeDto ->
                 TezosFA12AssetTypeDto(
-                    contract = UnionAddress(blockchain, source.contract)
+                    contract = UnionAddressConverter.convert(blockchain, source.contract)
                 )
             is FA_2AssetTypeDto ->
                 TezosFA2AssetTypeDto(
-                    contract = UnionAddress(blockchain, source.contract),
+                    contract = UnionAddressConverter.convert(blockchain, source.contract),
                     tokenId = source.tokenId
                 )
         }
@@ -44,7 +43,7 @@ object TezosConverter {
         blockchain: BlockchainDto
     ): CreatorDto {
         return CreatorDto(
-            account = UnionAddressConverter.convert(source.account, blockchain),
+            account = UnionAddressConverter.convert(blockchain, source.account),
             value = source.value
         )
     }

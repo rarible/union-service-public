@@ -6,7 +6,9 @@ import com.rarible.protocol.union.api.client.ItemControllerApi
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.core.continuation.page.PageSize
+import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.ContractAddress
 import com.rarible.protocol.union.dto.parser.ItemIdParser
 import com.rarible.protocol.union.enrichment.converter.ShortItemConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
@@ -157,7 +159,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
             .copy(bestBidOrder = ShortOrderConverter.convert(ethUnionOrder))
         enrichmentItemService.save(ethShortItem)
 
-        val ethCollectionId = randomEthAddress()
+        val ethCollectionId = ContractAddress(BlockchainDto.ETHEREUM, randomEthAddress())
 
         ethereumOrderControllerApiMock.mockGetByIds(ethOrder)
         ethereumItemControllerApiMock.mockGetNftOrderItemsByCollection(
@@ -216,7 +218,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
             .copy(totalStock = 10.toBigInteger(), sellers = 2)
         enrichmentItemService.save(ethShortItem)
 
-        val ethOwnerId = randomEthAddress()
+        val ethOwnerId = UnionAddressConverter.convert(BlockchainDto.ETHEREUM, randomEthAddress())
         val emptyEthItem = randomEthNftItemDto().copy(date = ethItem.date!!.minusSeconds(1))
 
         ethereumItemControllerApiMock.mockGetNftOrderItemsByOwner(
@@ -276,7 +278,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
 
     @Test
     fun `get items by creator - ethereum, nothing found`() = runBlocking<Unit> {
-        val ethCreatorId = randomEthAddress()
+        val ethCreatorId = UnionAddressConverter.convert(BlockchainDto.ETHEREUM, randomEthAddress())
 
         ethereumItemControllerApiMock.mockGetNftOrderItemsByCreator(
             ethCreatorId.value, continuation, size

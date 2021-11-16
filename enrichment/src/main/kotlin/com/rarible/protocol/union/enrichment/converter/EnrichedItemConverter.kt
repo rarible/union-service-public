@@ -1,6 +1,8 @@
 package com.rarible.protocol.union.enrichment.converter
 
+import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.model.UnionItem
+import com.rarible.protocol.union.dto.ContractAddress
 import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.MetaDto
 import com.rarible.protocol.union.dto.OrderDto
@@ -18,8 +20,10 @@ object EnrichedItemConverter {
     ): ItemDto {
         return ItemDto(
             id = item.id,
-            tokenId = item.tokenId,
-            collection = item.collection,
+            blockchain = item.id.blockchain,
+            contract = ContractAddress(item.id.blockchain, item.id.contract),
+            collection = UnionAddressConverter.convert(item.id.blockchain, item.id.contract),
+            tokenId = item.id.tokenId,
             creators = item.creators,
             owners = item.owners,
             royalties = item.royalties,

@@ -35,7 +35,7 @@ class EthOrderControllerApiMock(
     fun mockGetSellOrdersByItemAndByStatus(itemId: ItemIdDto, currencyId: String, vararg returnOrders: OrderDto) {
         every {
             orderControllerApi.getSellOrdersByItemAndByStatus(
-                eq(itemId.token.value),
+                eq(itemId.contract),
                 eq(itemId.tokenId.toString()),
                 any(),
                 any(),
@@ -55,7 +55,7 @@ class EthOrderControllerApiMock(
     ) {
         every {
             orderControllerApi.getSellOrdersByItemAndByStatus(
-                eq(ownershipId.token.value),
+                eq(ownershipId.contract),
                 eq(ownershipId.tokenId.toString()),
                 eq(ownershipId.owner.value),
                 any(),
@@ -71,7 +71,7 @@ class EthOrderControllerApiMock(
     fun mockGetOrderBidsByItemAndByStatus(itemId: ItemIdDto, currencyId: String, vararg returnOrders: OrderDto) {
         every {
             orderControllerApi.getOrderBidsByItemAndByStatus(
-                eq(itemId.token.value),
+                eq(itemId.contract),
                 eq(itemId.tokenId.toString()),
                 any(),
                 any(),
@@ -89,7 +89,7 @@ class EthOrderControllerApiMock(
     fun mockGetCurrenciesByBidOrdersOfItem(itemId: ItemIdDto, vararg returnTypes: AssetTypeDto) {
         every {
             orderControllerApi.getCurrenciesByBidOrdersOfItem(
-                itemId.token.value,
+                itemId.contract,
                 itemId.tokenId.toString()
             )
         } returns Mono.just(OrderCurrenciesDto(OrderCurrenciesDto.OrderType.BID, returnTypes.asList()))
@@ -98,7 +98,7 @@ class EthOrderControllerApiMock(
     fun mockGetCurrenciesBySellOrdersOfItem(itemId: ItemIdDto, vararg returnTypes: AssetTypeDto) {
         every {
             orderControllerApi.getCurrenciesBySellOrdersOfItem(
-                itemId.token.value,
+                itemId.contract,
                 itemId.tokenId.toString()
             )
         } returns Mono.just(OrderCurrenciesDto(OrderCurrenciesDto.OrderType.SELL, returnTypes.asList()))

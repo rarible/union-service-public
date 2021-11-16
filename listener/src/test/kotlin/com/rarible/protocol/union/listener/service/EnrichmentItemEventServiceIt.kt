@@ -4,7 +4,7 @@ import com.rarible.core.test.wait.Wait
 import com.rarible.protocol.dto.NftItemsDto
 import com.rarible.protocol.dto.OrderStatusDto
 import com.rarible.protocol.dto.OrdersPaginationDto
-import com.rarible.protocol.union.dto.UnionAddress
+import com.rarible.protocol.union.dto.ContractAddress
 import com.rarible.protocol.union.enrichment.converter.EnrichedItemConverter
 import com.rarible.protocol.union.enrichment.converter.ShortItemConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
@@ -245,7 +245,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         coEvery { testEthereumItemApi.getNftItemMetaById(itemId.value) } returns ethItem.meta!!.toMono()
         coEvery {
             testEthereumOrderApi.getOrderBidsByItemAndByStatus(
-                eq(itemId.token.value),
+                eq(itemId.contract),
                 eq(itemId.tokenId.toString()),
                 eq(listOf(OrderStatusDto.ACTIVE)),
                 any(),
@@ -260,13 +260,6 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         } returns OrdersPaginationDto(emptyList(), null).toMono()
 
         itemEventService.onItemBestBidOrderUpdated(shortItem.id, unionBestBid)
-
-        // In result event for Item we expect no bestBidOrder since it was cancelled
-        val expected = EnrichedItemConverter.convert(unionItem).copy(
-            bestBidOrder = null,
-            // Eth meta fully qualified, no request should be executed
-            meta = enrichmentMetaService.enrichMeta(unionItem.meta!!, ShortItemId(itemId))
-        )
 
         // Item should be removed since it has no enrich data
         val saved = itemService.get(shortItem.id)
@@ -357,15 +350,17 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
     @Test
     fun `should return pages after continuation`() = runBlocking {
         val itemId = randomEthItemId()
-        val collection = UnionAddress(itemId.blockchain, itemId.token.value)
+        val collectionId = ContractAddress(itemId.blockchain, itemId.contract)
 
         val nft = randomEthNftItemDto(itemId)
-        coEvery { testEthereumItemApi.getNftItemsByCollection(eq(collection.value), isNull(), any())
+        coEvery {
+            testEthereumItemApi.getNftItemsByCollection(eq(collectionId.value), isNull(), any())
         } returns Mono.just(NftItemsDto(1, "next", listOf(nft)))
-        coEvery { testEthereumItemApi.getNftItemsByCollection(eq(collection.value), eq("next"), any())
+        coEvery {
+            testEthereumItemApi.getNftItemsByCollection(eq(collectionId.value), eq("next"), any())
         } returns Mono.just(NftItemsDto(2, null, listOf(nft, nft)))
 
-        val list = itemService.findByCollection(collection).toList()
+        val list = itemService.findByCollection(collectionId).toList()
         assertEquals(3, list.size)
     }
 }
