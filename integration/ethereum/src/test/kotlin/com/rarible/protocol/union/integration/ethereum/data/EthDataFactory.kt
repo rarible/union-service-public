@@ -10,6 +10,8 @@ import com.rarible.core.test.data.randomLong
 import com.rarible.core.test.data.randomString
 import com.rarible.core.test.data.randomWord
 import com.rarible.protocol.dto.AssetDto
+import com.rarible.protocol.dto.AuctionActivityDto
+import com.rarible.protocol.dto.AuctionActivityOpenDto
 import com.rarible.protocol.dto.AuctionHistoryDto
 import com.rarible.protocol.dto.AuctionStatusDto
 import com.rarible.protocol.dto.BurnDto
@@ -466,10 +468,10 @@ fun randomEthAuctionDto(): RaribleAuctionV1Dto {
         createdAt = Instant.now(),
         lastUpdateAt = Instant.now(),
         buyPrice = BigDecimal.TEN,
-        pending = listOf(AuctionHistoryDto(Word(ByteArray(32)))),
+        pending = listOf(AuctionHistoryDto(Word.apply(randomWord()))),
         status = AuctionStatusDto.ACTIVE,
         buyPriceUsd = BigDecimal.TEN,
-        hash = Word(ByteArray(32)),
+        hash = Word.apply(randomWord()),
         auctionId = BigInteger.ONE,
         lastBid = RaribleAuctionV1BidV1Dto(
             amount = BigDecimal.ONE,
@@ -516,6 +518,26 @@ fun randomEthOrderBidActivity(): OrderActivityBidDto {
         take = AssetDto(Erc20AssetTypeDto(randomAddress()), randomBigInt(), randomBigDecimal()),
         price = randomBigDecimal(),
         priceUsd = randomBigDecimal()
+    )
+}
+
+fun randomEthAuctionOpenActivity(): AuctionActivityOpenDto {
+    return AuctionActivityOpenDto(
+        id = randomString(),
+        date = nowMillis(),
+        source = AuctionActivityDto.Source.RARIBLE,
+        hash = Word.apply(randomWord()),
+        seller = randomAddress(),
+        sell = randomEthAssetErc721(),
+        buy = Erc20AssetTypeDto(randomAddress()),
+        startTime = Instant.now(),
+        endTime = Instant.MAX,
+        minimalStep = BigDecimal.ONE,
+        minimalPrice = BigDecimal.ONE,
+        transactionHash = Word.apply(randomWord()),
+        blockHash = Word.apply(randomWord()),
+        blockNumber = randomLong(),
+        logIndex = randomInt()
     )
 }
 

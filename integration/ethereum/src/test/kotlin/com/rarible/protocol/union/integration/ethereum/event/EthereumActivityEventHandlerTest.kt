@@ -4,6 +4,7 @@ import com.rarible.protocol.dto.ActivityDto
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.ethereum.converter.EthActivityConverter
+import com.rarible.protocol.union.integration.ethereum.data.randomEthAuctionOpenActivity
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOrderBidActivity
 import com.rarible.protocol.union.test.mock.CurrencyMock
 import io.mockk.clearMocks
@@ -27,7 +28,7 @@ class EthereumActivityEventHandlerTest {
     }
 
     @Test
-    fun `ethereum activity event`() = runBlocking {
+    fun `ethereum activity order event`() = runBlocking {
         val event: ActivityDto = randomEthOrderBidActivity()
 
         handler.handle(event)
@@ -36,4 +37,13 @@ class EthereumActivityEventHandlerTest {
         coVerify(exactly = 1) { incomingEventHandler.onEvent(expected) }
     }
 
+    @Test
+    fun `ethereum activity auction event`() = runBlocking {
+        val event: ActivityDto = randomEthAuctionOpenActivity()
+
+        handler.handle(event)
+
+        val expected = converter.convert(event, BlockchainDto.ETHEREUM)
+        coVerify(exactly = 1) { incomingEventHandler.onEvent(expected) }
+    }
 }

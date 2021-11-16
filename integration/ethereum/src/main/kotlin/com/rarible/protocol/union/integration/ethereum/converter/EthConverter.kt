@@ -16,6 +16,7 @@ import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.AssetDto
 import com.rarible.protocol.union.dto.AssetTypeDto
 import com.rarible.protocol.union.dto.AuctionBidDto
+import com.rarible.protocol.union.dto.AuctionDataDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CreatorDto
 import com.rarible.protocol.union.dto.EthCollectionAssetTypeDto
@@ -31,6 +32,7 @@ import com.rarible.protocol.union.dto.OrderPayoutDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.RaribleAuctionV1BidDataV1Dto
 import com.rarible.protocol.union.dto.RaribleAuctionV1BidV1Dto
+import com.rarible.protocol.union.dto.RaribleAuctionV1DataV1Dto
 import com.rarible.protocol.union.dto.RoyaltyDto
 import com.rarible.protocol.union.dto.UnionAddress
 import io.daonomic.rpc.domain.Binary
@@ -169,6 +171,18 @@ object EthConverter {
                     originFees = source.data.originFees.map { convertToPayout(it, blockchain) },
                     payouts = source.data.payouts.map { convertToPayout(it, blockchain) }
                 )
+            )
+        }
+    }
+
+    fun convert(source: com.rarible.protocol.dto.AuctionDataDto, blockchain: BlockchainDto): AuctionDataDto {
+        return when (source) {
+            is com.rarible.protocol.dto.RaribleAuctionV1DataV1Dto -> RaribleAuctionV1DataV1Dto(
+                originFees = source.originFees.map { convertToPayout(it, blockchain) },
+                payouts = source.payouts.map { convertToPayout(it, blockchain) },
+                startTime = source.startTime,
+                duration = source.duration,
+                buyOutPrice = source.buyOutPrice
             )
         }
     }
