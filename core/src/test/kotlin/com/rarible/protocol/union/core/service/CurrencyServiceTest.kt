@@ -7,8 +7,8 @@ import com.rarible.protocol.currency.api.client.CurrencyControllerApi
 import com.rarible.protocol.currency.dto.CurrencyRateDto
 import com.rarible.protocol.union.core.client.CurrencyClient
 import com.rarible.protocol.union.core.converter.CurrencyConverter
-import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.ContractAddress
 import com.rarible.protocol.union.dto.EthErc20AssetTypeDto
 import io.mockk.clearMocks
 import io.mockk.coEvery
@@ -59,7 +59,7 @@ class CurrencyServiceTest {
 
         val at = nowMillis().minusSeconds(60 * 29)
 
-        val assetType = EthErc20AssetTypeDto(UnionAddressConverter.convert(blockchain, address))
+        val assetType = EthErc20AssetTypeDto(ContractAddress(blockchain, address))
         val usdRate1 = currencyService.toUsd(blockchain, assetType, BigDecimal.ONE, at)
         val usdRate2 = currencyService.toUsd(blockchain, assetType, BigDecimal.ONE, at)
 
@@ -80,7 +80,7 @@ class CurrencyServiceTest {
 
         val at = nowMillis().minusSeconds(60 * 29)
 
-        val assetType = EthErc20AssetTypeDto(UnionAddressConverter.convert(blockchain, address))
+        val assetType = EthErc20AssetTypeDto(ContractAddress(blockchain, address))
         val usdRate1 = currencyService.toUsd(blockchain, assetType, BigDecimal.ONE, at)
         val usdRate2 = currencyService.toUsd(blockchain, assetType, BigDecimal.ONE, at.minusSeconds(2 * 60))
 

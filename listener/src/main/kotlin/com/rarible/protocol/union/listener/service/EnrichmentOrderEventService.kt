@@ -29,8 +29,8 @@ class EnrichmentOrderEventService(
         val makeAssetExt = order.make.type.ext
         val takeAssetExt = order.take.type.ext
 
-        val makeItemIdDto = makeAssetExt.itemId(blockchain)
-        val takeItemIdDto = takeAssetExt.itemId(blockchain)
+        val makeItemIdDto = makeAssetExt.itemId
+        val takeItemIdDto = takeAssetExt.itemId
 
         val makeItemId = makeItemIdDto?.let { ShortItemId(it) }
         val takeItemId = takeItemIdDto?.let { ShortItemId(it) }

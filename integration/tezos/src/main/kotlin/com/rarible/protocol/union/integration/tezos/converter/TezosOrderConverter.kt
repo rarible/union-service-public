@@ -5,18 +5,16 @@ import com.rarible.protocol.tezos.dto.PartDto
 import com.rarible.protocol.union.core.continuation.page.Slice
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.service.CurrencyService
-import com.rarible.protocol.union.dto.AssetDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
-import com.rarible.protocol.union.dto.PayoutDto
 import com.rarible.protocol.union.dto.OrderPriceHistoryRecordDto
+import com.rarible.protocol.union.dto.OrderStatusDto
+import com.rarible.protocol.union.dto.PayoutDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.TezosOrderDataRaribleV2DataV1Dto
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
-import java.math.BigDecimal
-import java.math.BigInteger
 import java.time.Instant
 
 @Component
@@ -46,8 +44,7 @@ class TezosOrderConverter(
         val takePrice = order.take.value / order.make.value
         val takePriceUsd = currencyService.toUsd(blockchain, take.type, takePrice)
 
-        //TODO FLOW That's not correct! Just a stub until Flow starts to return status
-        val status = calculateStatus(order.fill.toBigDecimal(), take, order.makeStock, order.cancelled)
+        val status = convert(order.status)
 
         return OrderDto(
             id = OrderIdDto(blockchain, order.hash),
@@ -72,15 +69,39 @@ class TezosOrderConverter(
             priceHistory = order.priceHistory?.map { convert(it) } ?: listOf(),
             data = convertData(order, blockchain),
             salt = order.salt,
-            pending = emptyList() // TODO TEZOS in union we won't use this field
+            pending = emptyList() // In Union we won't use this field for Tezos
         )
     }
 
     suspend fun convert(source: OrderPaginationDto, blockchain: BlockchainDto): Slice<OrderDto> {
         return Slice(
-            continuation = source.contination,
+            continuation = source.continuation,
             entities = source.orders.map { convert(it, blockchain) }
         )
+    }
+
+    fun convert(source: List<OrderStatusDto>?): List<com.rarible.protocol.tezos.dto.OrderStatusDto>? {
+        return source?.map { convert(it) } ?: emptyList()
+    }
+
+    fun convert(source: OrderStatusDto): com.rarible.protocol.tezos.dto.OrderStatusDto {
+        return when (source) {
+            OrderStatusDto.ACTIVE -> com.rarible.protocol.tezos.dto.OrderStatusDto.ACTIVE
+            OrderStatusDto.FILLED -> com.rarible.protocol.tezos.dto.OrderStatusDto.FILLED
+            OrderStatusDto.HISTORICAL -> com.rarible.protocol.tezos.dto.OrderStatusDto.HISTORICAL
+            OrderStatusDto.INACTIVE -> com.rarible.protocol.tezos.dto.OrderStatusDto.INACTIVE
+            OrderStatusDto.CANCELLED -> com.rarible.protocol.tezos.dto.OrderStatusDto.CANCELLED
+        }
+    }
+
+    fun convert(source: com.rarible.protocol.tezos.dto.OrderStatusDto): OrderStatusDto {
+        return when (source) {
+            com.rarible.protocol.tezos.dto.OrderStatusDto.ACTIVE -> OrderStatusDto.ACTIVE
+            com.rarible.protocol.tezos.dto.OrderStatusDto.FILLED -> OrderStatusDto.FILLED
+            com.rarible.protocol.tezos.dto.OrderStatusDto.HISTORICAL -> OrderStatusDto.HISTORICAL
+            com.rarible.protocol.tezos.dto.OrderStatusDto.INACTIVE -> OrderStatusDto.INACTIVE
+            com.rarible.protocol.tezos.dto.OrderStatusDto.CANCELLED -> OrderStatusDto.CANCELLED
+        }
     }
 
     private fun convert(source: com.rarible.protocol.tezos.dto.OrderPriceHistoryRecordDto): OrderPriceHistoryRecordDto {
@@ -109,21 +130,6 @@ class TezosOrderConverter(
             account = UnionAddressConverter.convert(blockchain, source.account),
             value = source.value
         )
-    }
-
-    // TODO TEZOS remove later
-    private fun calculateStatus(
-        fill: BigDecimal,
-        take: AssetDto,
-        makeStock: BigInteger,
-        cancelled: Boolean
-    ): com.rarible.protocol.union.dto.OrderStatusDto {
-        return when {
-            fill == take.value -> com.rarible.protocol.union.dto.OrderStatusDto.FILLED
-            makeStock > BigInteger.ZERO -> com.rarible.protocol.union.dto.OrderStatusDto.ACTIVE
-            cancelled -> com.rarible.protocol.union.dto.OrderStatusDto.CANCELLED
-            else -> com.rarible.protocol.union.dto.OrderStatusDto.INACTIVE
-        }
     }
 }
 

@@ -25,7 +25,9 @@ import com.rarible.protocol.flow.nft.api.client.FlowNftOwnershipControllerApi
 import com.rarible.protocol.flow.nft.api.client.FlowOrderControllerApi
 import com.rarible.protocol.nft.api.client.NftItemControllerApi
 import com.rarible.protocol.nft.api.client.NftOwnershipControllerApi
+import com.rarible.protocol.tezos.dto.TezosActivitySafeDto
 import com.rarible.protocol.tezos.dto.TezosEventTopicProvider
+import com.rarible.protocol.tezos.dto.TezosOrderSafeEventDto
 import com.rarible.protocol.union.core.CoreConfiguration
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.CollectionEventDto
@@ -233,22 +235,22 @@ class TestListenerConfiguration {
     //----------------- TEZOS producers ------------------//
 
     @Bean
-    fun testTezosOrderEventProducer(): RaribleKafkaProducer<com.rarible.protocol.tezos.dto.OrderEventDto> {
+    fun testTezosOrderEventProducer(): RaribleKafkaProducer<TezosOrderSafeEventDto> {
         return RaribleKafkaProducer(
             clientId = "test.union.tezos.order",
             valueSerializerClass = UnionKafkaJsonSerializer::class.java,
-            valueClass = com.rarible.protocol.tezos.dto.OrderEventDto::class.java,
+            valueClass = TezosOrderSafeEventDto::class.java,
             defaultTopic = TezosEventTopicProvider.ORDER,
             bootstrapServers = kafkaContainer.kafkaBoostrapServers()
         )
     }
 
     @Bean
-    fun testTezosActivityEventProducer(): RaribleKafkaProducer<com.rarible.protocol.tezos.dto.ActivityDto> {
+    fun testTezosActivityEventProducer(): RaribleKafkaProducer<TezosActivitySafeDto> {
         return RaribleKafkaProducer(
             clientId = "test.union.tezos.order",
             valueSerializerClass = UnionKafkaJsonSerializer::class.java,
-            valueClass = com.rarible.protocol.tezos.dto.ActivityDto::class.java,
+            valueClass = TezosActivitySafeDto::class.java,
             defaultTopic = TezosEventTopicProvider.ACTIVITY,
             bootstrapServers = kafkaContainer.kafkaBoostrapServers()
         )

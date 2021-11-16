@@ -8,6 +8,8 @@ import com.rarible.protocol.dto.FlowActivityDto
 import com.rarible.protocol.dto.FlowOrderEventDto
 import com.rarible.protocol.nft.api.client.NftItemControllerApi
 import com.rarible.protocol.nft.api.client.NftOwnershipControllerApi
+import com.rarible.protocol.tezos.dto.TezosActivitySafeDto
+import com.rarible.protocol.tezos.dto.TezosOrderSafeEventDto
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.CollectionEventDto
 import com.rarible.protocol.union.dto.CollectionUpdateEventDto
@@ -66,10 +68,10 @@ abstract class AbstractIntegrationTest {
 
     //--------------------- TEZOS ---------------------//
     @Autowired
-    lateinit var tezosOrderProducer: RaribleKafkaProducer<com.rarible.protocol.tezos.dto.OrderEventDto>
+    lateinit var tezosOrderProducer: RaribleKafkaProducer<TezosOrderSafeEventDto>
 
     @Autowired
-    lateinit var tezosActivityProducer: RaribleKafkaProducer<com.rarible.protocol.tezos.dto.ActivityDto>
+    lateinit var tezosActivityProducer: RaribleKafkaProducer<TezosActivitySafeDto>
 
     @Autowired
     lateinit var collectionConsumer: RaribleKafkaConsumer<CollectionEventDto>
