@@ -147,7 +147,7 @@ object EthConverter {
             )
             is CryptoPunksAssetTypeDto -> EthCryptoPunksAssetTypeDto(
                 contract = convert(source.contract, blockchain),
-                punkId = source.punkId
+                tokenId = source.tokenId
             )
             is GenerativeArtAssetTypeDto -> EthGenerativeArtAssetTypeDto(
                 contract = convert(source.contract, blockchain)
