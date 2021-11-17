@@ -88,7 +88,7 @@ class CoreConfiguration(
     }
 
     @Bean
-    fun orderAuctionRouter(services: List<AuctionService>): BlockchainRouter<AuctionService> {
+    fun auctionServiceRouter(services: List<AuctionService>): BlockchainRouter<AuctionService> {
         val result = ArrayList(services)
         val disabled = getDisabledBlockchains(services)
         disabled.forEach {

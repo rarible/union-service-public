@@ -61,7 +61,7 @@ class EnrichmentItemEventService(
                     )
                     val saved = itemService.save(updatedItem)
                     if (notificationEnabled) {
-                        notifyOrderUpdate(saved, null, order)
+                        notifyUpdate(saved, null, order)
                     }
                 } else {
                     logger.debug(
@@ -76,7 +76,7 @@ class EnrichmentItemEventService(
     suspend fun onItemUpdated(item: UnionItem) {
         val received = ShortItemConverter.convert(item)
         val existing = itemService.getOrEmpty(received.id)
-        notifyOrderUpdate(existing, item)
+        notifyUpdate(existing, item)
     }
 
     suspend fun recalculateBestOrders(item: ShortItem): Boolean {
@@ -88,7 +88,7 @@ class EnrichmentItemEventService(
                 item.bestBidOrder?.dtoId, updated.bestBidOrder?.dtoId
             )
             val saved = itemService.save(updated)
-            notifyOrderUpdate(saved, null, null)
+            notifyUpdate(saved, null, null)
             return true
         }
         return false
@@ -135,13 +135,13 @@ class EnrichmentItemEventService(
             if (updated.isNotEmpty()) {
                 val saved = itemService.save(updated)
                 if (notificationEnabled) {
-                    notifyOrderUpdate(saved, null, order)
+                    notifyUpdate(saved, null, order)
                 }
             } else if (exist) {
                 itemService.delete(itemId)
                 logger.info("Deleted Item [{}] without enrichment data", itemId)
                 if (notificationEnabled) {
-                    notifyOrderUpdate(updated, null, order)
+                    notifyUpdate(updated, null, order)
                 }
             }
         } else {
@@ -165,13 +165,13 @@ class EnrichmentItemEventService(
             if (updated.isNotEmpty()) {
                 val saved = itemService.save(updated)
                 if (notificationEnabled) {
-                    notifyOrderUpdate(saved, null, null, auction)
+                    notifyUpdate(saved, null, null, auction)
                 }
             } else if (exist) {
                 itemService.delete(itemId)
                 logger.info("Deleted Item [{}] without enrichment data", itemId)
                 if (notificationEnabled) {
-                    notifyOrderUpdate(updated, null, null, auction)
+                    notifyUpdate(updated, null, null, auction)
                 }
             }
         } else {
@@ -203,7 +203,7 @@ class EnrichmentItemEventService(
 
     // Potentially we could have updated Order here (no matter - bid/sell) and when we need to fetch
     // full version of the order, we can use this already fetched Order if it has same ID (hash)
-    private suspend fun notifyOrderUpdate(
+    private suspend fun notifyUpdate(
         short: ShortItem,
         item: UnionItem? = null,
         order: OrderDto? = null,

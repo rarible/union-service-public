@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.integration.ethereum.service
 
 import com.rarible.core.apm.CaptureSpan
+import com.rarible.protocol.dto.AuctionIdsDto
 import com.rarible.protocol.dto.OrderIdsDto
 import com.rarible.protocol.order.api.client.AuctionControllerApi
 import com.rarible.protocol.order.api.client.OrderControllerApi
@@ -18,7 +19,9 @@ import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.integration.ethereum.converter.EthAuctionConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
+import io.daonomic.rpc.domain.Word
 import kotlinx.coroutines.reactive.awaitFirst
+import kotlinx.coroutines.reactive.awaitFirstOrNull
 
 open class EthAuctionService(
     override val blockchain: BlockchainDto,
@@ -27,9 +30,11 @@ open class EthAuctionService(
 ) : AbstractBlockchainService(blockchain), AuctionService {
 
     override suspend fun getAuctionsByIds(orderIds: List<String>): List<AuctionDto> {
-        TODO("Not yet implemented")
+        val orders = auctionControllerApi
+            .getAuctionsByIds(AuctionIdsDto(orderIds.map { Word.apply(it) }))
+            .collectList().awaitFirst()
+        return orders.map { ethAuctionConverter.convert(it, blockchain) }
     }
-
 }
 
 @CaptureSpan(type = "ext", subtype = "ethereum")

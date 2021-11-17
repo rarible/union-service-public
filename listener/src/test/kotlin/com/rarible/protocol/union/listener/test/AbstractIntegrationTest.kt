@@ -51,6 +51,10 @@ abstract class AbstractIntegrationTest {
     lateinit var testEthereumOrderApi: com.rarible.protocol.order.api.client.OrderControllerApi
 
     @Autowired
+    @Qualifier("ethereum.auction.api")
+    lateinit var testEthereumAuctionApi: com.rarible.protocol.order.api.client.AuctionControllerApi
+
+    @Autowired
     lateinit var ethCollectionProducer: RaribleKafkaProducer<com.rarible.protocol.dto.NftCollectionEventDto>
 
     @Autowired

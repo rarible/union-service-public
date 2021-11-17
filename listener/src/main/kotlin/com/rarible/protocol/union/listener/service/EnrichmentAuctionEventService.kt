@@ -26,7 +26,7 @@ class EnrichmentAuctionEventService(
     suspend fun updateAuction(auction: AuctionDto, notificationEnabled: Boolean = true) = coroutineScope {
         val blockchain = auction.id.blockchain
         val makeAssetExt = auction.sell.type.ext
-        val makeItemIdDto = makeAssetExt.itemId(blockchain)
+        val makeItemIdDto = makeAssetExt.itemId
         val makeItemId = makeItemIdDto?.let { ShortItemId(it) }
 
         if (makeItemId != null) {

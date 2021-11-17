@@ -107,9 +107,13 @@ class EnrichmentItemService(
             .awaitAll().filterNotNull()
             .associateBy { it.id }
 
-        // auction
-//        enrichmentAuctionService.
+        val auctionIds = when {
+            shortItem != null -> shortItem.auctions
+            auctions.isNotEmpty() -> auctions.keys
+            else -> emptySet()
+        }
+        val auctionsData = async { enrichmentAuctionService.fetchAuctionsIfAbsent(auctionIds, auctions) }
 
-        EnrichedItemConverter.convert(fetchedItem.await(), shortItem, meta.await(), bestOrders)
+        EnrichedItemConverter.convert(fetchedItem.await(), shortItem, meta.await(), bestOrders, auctionsData.await())
     }
 }
