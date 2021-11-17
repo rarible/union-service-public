@@ -9,9 +9,9 @@ import com.rarible.core.test.data.randomLong
 import com.rarible.core.test.data.randomString
 import com.rarible.protocol.tezos.dto.AssetDto
 import com.rarible.protocol.tezos.dto.BurnDto
-import com.rarible.protocol.tezos.dto.FA_1_2AssetTypeDto
-import com.rarible.protocol.tezos.dto.FA_2AssetTypeDto
+import com.rarible.protocol.tezos.dto.FTAssetTypeDto
 import com.rarible.protocol.tezos.dto.MintDto
+import com.rarible.protocol.tezos.dto.NFTAssetTypeDto
 import com.rarible.protocol.tezos.dto.NftActivityEltDto
 import com.rarible.protocol.tezos.dto.NftCollectionDto
 import com.rarible.protocol.tezos.dto.NftCollectionFeatureDto
@@ -75,8 +75,7 @@ fun randomTezosNftItemDto(itemId: ItemIdDto, creator: String): NftItemDto {
         royalties = listOf(randomTezosPartDto(randomString())),
         supply = randomBigInt(),
         deleted = randomBoolean(),
-        lazySupply = randomBigInt(),
-        pending = emptyList() // TODO not supported yet
+        lazySupply = randomBigInt()
     )
 }
 
@@ -96,7 +95,7 @@ fun randomTezosOwnershipDto(ownershipId: OwnershipIdDto) = randomTezosOwnershipD
 )
 
 fun randomTezosOwnershipDto(itemId: ItemIdDto, creator: PartDto): NftOwnershipDto {
-    val ownershipId = randomTezosOwnershipId(itemId, creator.account.toString())
+    val ownershipId = randomTezosOwnershipId(itemId, creator.account)
     return NftOwnershipDto(
         id = ownershipId.value,
         contract = ownershipId.contract,
@@ -106,7 +105,7 @@ fun randomTezosOwnershipDto(itemId: ItemIdDto, creator: PartDto): NftOwnershipDt
         value = randomBigInt(),
         lazyValue = randomBigInt(),
         date = nowMillis(),
-        pending = listOf()
+        createdAt = nowMillis()
     )
 }
 
@@ -116,17 +115,17 @@ fun randomTezosCollectionDto(id: String): NftCollectionDto {
         id = id,
         name = randomString(),
         symbol = randomString(2),
-        type = NftCollectionTypeDto.FA_2,
+        type = NftCollectionTypeDto.NFT,
         owner = randomString(),
         features = listOf(NftCollectionFeatureDto.values()[randomInt(NftCollectionFeatureDto.values().size)]),
         supports_lazy_mint = true
     )
 }
 
-fun randomTezosOrderDto() = randomTezosOrderDto(randomTezosAssetFa2(), randomString(), randomTezosAssetXtz())
+fun randomTezosOrderDto() = randomTezosOrderDto(randomTezosAssetNFT(), randomString(), randomTezosAssetXtz())
 fun randomTezosOrderDto(itemId: ItemIdDto) = randomTezosOrderDto(itemId, randomString())
 fun randomTezosOrderDto(itemId: ItemIdDto, maker: String) = randomTezosOrderDto(
-    randomTezosAssetFa2(itemId),
+    randomTezosAssetNFT(itemId),
     maker,
     randomTezosAssetXtz()
 )
@@ -145,7 +144,6 @@ fun randomTezosOrderDto(make: AssetDto, maker: String, take: AssetDto): OrderDto
         signature = randomString(16),
         createdAt = nowMillis(),
         lastUpdateAt = nowMillis(),
-        pending = listOf(), // TODO add later maybe
         hash = randomString(32),
         makeBalance = randomBigInt(),
         start = randomInt(),
@@ -153,7 +151,7 @@ fun randomTezosOrderDto(make: AssetDto, maker: String, take: AssetDto): OrderDto
         priceHistory = listOf(randomTezosOrderPriceHistoryRecordDto()),
         makerEdpk = randomString(),
         takerEdpk = randomString(),
-        status = OrderStatusDto.OACTIVE,
+        status = OrderStatusDto.ACTIVE,
         type = OrderDto.Type.RARIBLE_V2
     )
 }
@@ -178,9 +176,9 @@ fun randomTezosItemMetaAttribute(): NftItemAttributeDto {
 }
 
 
-fun randomTezosAssetFa2() = randomTezosAssetFa2(randomTezosItemId())
-fun randomTezosAssetFa2(itemId: ItemIdDto) = AssetDto(
-    assetType = FA_2AssetTypeDto(itemId.contract, itemId.tokenId),
+fun randomTezosAssetNFT() = randomTezosAssetNFT(randomTezosItemId())
+fun randomTezosAssetNFT(itemId: ItemIdDto) = AssetDto(
+    assetType = NFTAssetTypeDto(itemId.contract, itemId.tokenId),
     value = randomBigDecimal()
 )
 
@@ -189,8 +187,8 @@ fun randomTezosAssetXtz() = AssetDto(
     value = randomBigDecimal()
 )
 
-fun randomTezosAssetFa12() = AssetDto(
-    assetType = FA_1_2AssetTypeDto(randomString()),
+fun randomTezosAssetFT() = AssetDto(
+    assetType = FTAssetTypeDto(randomString()),
     value = randomBigDecimal()
 )
 
@@ -225,8 +223,8 @@ fun randomTezosOrderBidActivity(): OrderActivityBidDto {
         source = "RARIBLE",
         hash = randomString(16),
         maker = randomString(),
-        make = randomTezosAssetFa12(),
-        take = randomTezosAssetFa2(),
+        make = randomTezosAssetFT(),
+        take = randomTezosAssetNFT(),
         price = randomBigDecimal()
     )
 }
@@ -238,8 +236,8 @@ fun randomTezosOrderListActivity(): OrderActivityListDto {
         source = "RARIBLE",
         hash = randomString(16),
         maker = randomString(),
-        make = randomTezosAssetFa2(),
-        take = randomTezosAssetFa12(),
+        make = randomTezosAssetNFT(),
+        take = randomTezosAssetFT(),
         price = randomBigDecimal()
     )
 }
@@ -256,7 +254,7 @@ fun randomTezosOrderActivityCancelBid(): OrderActivityCancelBidDto {
         maker = randomString(),
         hash = randomString(16),
         make = randomTezosAssetXtz().assetType,
-        take = randomTezosAssetFa2().assetType
+        take = randomTezosAssetNFT().assetType
     )
 }
 
@@ -272,7 +270,7 @@ fun randomTezosOrderActivityCancelList(): OrderActivityCancelListDto {
         maker = randomString(),
         hash = randomString(16),
         make = randomTezosAssetXtz().assetType,
-        take = randomTezosAssetFa2().assetType
+        take = randomTezosAssetNFT().assetType
     )
 }
 
@@ -287,8 +285,7 @@ fun randomTezosItemMintActivity(): MintDto {
         value = randomBigInt(),
         transactionHash = randomString(),
         blockHash = randomString(),
-        blockNumber = randomBigInt(8),
-        logIndex = randomInt()
+        blockNumber = randomBigInt(8)
     )
 }
 
@@ -303,8 +300,7 @@ fun randomTezosItemBurnActivity(): BurnDto {
         value = randomBigInt(),
         transactionHash = randomString(),
         blockHash = randomString(),
-        blockNumber = randomBigInt(8),
-        logIndex = randomInt()
+        blockNumber = randomBigInt(8)
     )
 }
 
@@ -321,8 +317,7 @@ fun randomTezosItemTransferActivity(): TransferDto {
             value = randomBigInt(),
             transactionHash = randomString(),
             blockHash = randomString(),
-            blockNumber = randomBigInt(8),
-            logIndex = randomInt()
+            blockNumber = randomBigInt(8)
         )
     )
 }

@@ -22,10 +22,10 @@ object TezosOwnershipConverter {
                 owner = owner
             ),
             value = ownership.value,
-            createdAt = ownership.date, //TODO TEZOS add createdAt
+            createdAt = ownership.createdAt,
             creators = ownership.creators.map { TezosConverter.convertToCreator(it, blockchain) },
             lazyValue = ownership.lazyValue,
-            pending = emptyList() // TODO TEZOS in union we won't use this field
+            pending = emptyList() // In Union we won't use this field for Tezos
         )
     }
 

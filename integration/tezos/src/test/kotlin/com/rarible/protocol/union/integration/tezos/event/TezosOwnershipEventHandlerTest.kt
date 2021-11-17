@@ -1,7 +1,7 @@
 package com.rarible.protocol.union.integration.tezos.event
 
 import com.rarible.core.test.data.randomString
-import com.rarible.protocol.tezos.dto.OwnershipEventDto
+import com.rarible.protocol.tezos.dto.TezosOwnershipSafeEventDto
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.model.UnionOwnershipDeleteEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipEvent
@@ -32,7 +32,8 @@ class TezosOwnershipEventHandlerTest {
     @Test
     fun `tezos ownership update event`() = runBlocking {
         val ownership = randomTezosOwnershipDto()
-        val dto = OwnershipEventDto(OwnershipEventDto.Type.UPDATE, randomString(), ownership.id, ownership)
+        val dto =
+            TezosOwnershipSafeEventDto(TezosOwnershipSafeEventDto.Type.UPDATE, randomString(), ownership.id, ownership)
 
         handler.handle(dto)
 
@@ -46,15 +47,17 @@ class TezosOwnershipEventHandlerTest {
         val ownershipId = randomTezosOwnershipId()
         val ownership = randomTezosOwnershipDto(ownershipId)
 
-        val dto = OwnershipEventDto(OwnershipEventDto.Type.DELETE, randomString(), ownership.id, ownership)
+        val dto =
+            TezosOwnershipSafeEventDto(TezosOwnershipSafeEventDto.Type.DELETE, randomString(), ownership.id, ownership)
 
         handler.handle(dto)
 
         coVerify(exactly = 1) { incomingEventHandler.onEvent(UnionOwnershipDeleteEvent(ownershipId)) }
     }
+
     @Test
     fun `tezos ownership unparseable event`() = runBlocking {
-        val dto = OwnershipEventDto(OwnershipEventDto.Type.SERIALIZATION_FAILED, null, null, null)
+        val dto = TezosOwnershipSafeEventDto(TezosOwnershipSafeEventDto.Type.SERIALIZATION_FAILED, null, null, null)
 
         handler.handle(dto)
 

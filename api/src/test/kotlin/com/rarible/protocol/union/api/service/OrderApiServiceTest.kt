@@ -1,10 +1,10 @@
 package com.rarible.protocol.union.api.service
 
 import com.rarible.protocol.union.core.continuation.page.Slice
-import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.ContractAddress
 import com.rarible.protocol.union.dto.EthErc20AssetTypeDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OrderDto
@@ -68,7 +68,7 @@ class OrderApiServiceTest {
             orderService.getBidCurrencies(ethItemId.contract, ethItemId.tokenId.toString())
         } returns listOf(
             EthErc20AssetTypeDto(
-                UnionAddressConverter.convert(
+                ContractAddress(
                     ethItemId.blockchain,
                     unionOrder.bidCurrencyId
                 )

@@ -1,7 +1,7 @@
 package com.rarible.protocol.union.integration.tezos.event
 
 import com.rarible.core.test.data.randomString
-import com.rarible.protocol.tezos.dto.ItemEventDto
+import com.rarible.protocol.tezos.dto.TezosItemSafeEventDto
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.model.UnionItemDeleteEvent
 import com.rarible.protocol.union.core.model.UnionItemEvent
@@ -31,7 +31,7 @@ class TezosItemEventHandlerTest {
     @Test
     fun `tezos item update event`() = runBlocking {
         val item = randomTezosNftItemDto()
-        val event = ItemEventDto(ItemEventDto.Type.UPDATE, randomString(), item.id, item)
+        val event = TezosItemSafeEventDto(TezosItemSafeEventDto.Type.UPDATE, randomString(), item.id, item)
 
         handler.handle(event)
 
@@ -42,7 +42,7 @@ class TezosItemEventHandlerTest {
     @Test
     fun `tezos item delete event`() = runBlocking {
         val item = randomTezosNftItemDto()
-        val event = ItemEventDto(ItemEventDto.Type.DELETE, randomString(), item.id, item)
+        val event = TezosItemSafeEventDto(TezosItemSafeEventDto.Type.DELETE, randomString(), item.id, item)
 
         handler.handle(event)
 
@@ -52,7 +52,7 @@ class TezosItemEventHandlerTest {
 
     @Test
     fun `tezos item unparseable event`() = runBlocking {
-        val dto = ItemEventDto(ItemEventDto.Type.SERIALIZATION_FAILED, null, null, null)
+        val dto = TezosItemSafeEventDto(TezosItemSafeEventDto.Type.SERIALIZATION_FAILED, null, null, null)
 
         handler.handle(dto)
 

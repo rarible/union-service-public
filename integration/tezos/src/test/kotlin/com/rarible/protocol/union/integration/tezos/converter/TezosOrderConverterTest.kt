@@ -2,7 +2,7 @@ package com.rarible.protocol.union.integration.tezos.converter
 
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.PlatformDto
-import com.rarible.protocol.union.dto.TezosFA2AssetTypeDto
+import com.rarible.protocol.union.dto.TezosNFTAssetTypeDto
 import com.rarible.protocol.union.dto.TezosOrderDataRaribleV2DataV1Dto
 import com.rarible.protocol.union.dto.TezosXTZAssetTypeDto
 import com.rarible.protocol.union.integration.tezos.data.randomTezosOrderDto
@@ -25,7 +25,7 @@ class TezosOrderConverterTest {
         assertThat(converted.platform).isEqualTo(PlatformDto.RARIBLE)
         assertThat(converted.maker.value).isEqualTo(dto.maker)
         assertThat(converted.taker!!.value).isEqualTo(dto.taker!!)
-        assertThat(converted.make.type).isInstanceOf(TezosFA2AssetTypeDto::class.java)
+        assertThat(converted.make.type).isInstanceOf(TezosNFTAssetTypeDto::class.java)
         assertThat(converted.make.value).isEqualTo(dto.make.value)
         assertThat(converted.take.type).isInstanceOf(TezosXTZAssetTypeDto::class.java)
         assertThat(converted.take.value).isEqualTo(dto.take.value)

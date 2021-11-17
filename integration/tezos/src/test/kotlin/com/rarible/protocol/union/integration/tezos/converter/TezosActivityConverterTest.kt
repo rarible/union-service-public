@@ -20,7 +20,7 @@ import com.rarible.protocol.union.dto.OrderMatchSellDto
 import com.rarible.protocol.union.dto.OrderMatchSwapDto
 import com.rarible.protocol.union.dto.TransferActivityDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
-import com.rarible.protocol.union.integration.tezos.data.randomTezosAssetFa2
+import com.rarible.protocol.union.integration.tezos.data.randomTezosAssetNFT
 import com.rarible.protocol.union.integration.tezos.data.randomTezosItemBurnActivity
 import com.rarible.protocol.union.integration.tezos.data.randomTezosItemMintActivity
 import com.rarible.protocol.union.integration.tezos.data.randomTezosItemTransferActivity
@@ -63,7 +63,7 @@ class TezosActivityConverterTest {
     @Disabled // TODO TEZOS enable when type field appears in activity
     fun `tezos order activity match side - nft to payment`() = runBlocking<Unit> {
         val swapDto = randomTezosOrderActivityMatch()
-        val left = swapDto.left.copy(asset = randomTezosAssetFa2())
+        val left = swapDto.left.copy(asset = randomTezosAssetNFT())
         val dto = swapDto.copy(
             left = left
         )
@@ -92,7 +92,7 @@ class TezosActivityConverterTest {
     @Disabled // TODO TEZOS enable when type field appears in activity
     fun `tezos order activity match side - payment to nft`() = runBlocking<Unit> {
         val swapDto = randomTezosOrderActivityMatch()
-        val right = swapDto.right.copy(asset = randomTezosAssetFa2())
+        val right = swapDto.right.copy(asset = randomTezosAssetNFT())
         val dto = swapDto.copy(
             right = right
         )
@@ -192,7 +192,6 @@ class TezosActivityConverterTest {
         assertThat(converted.blockchainInfo.transactionHash).isEqualTo(dto.transactionHash)
         assertThat(converted.blockchainInfo.blockHash).isEqualTo(dto.blockHash)
         assertThat(converted.blockchainInfo.blockNumber).isEqualTo(dto.blockNumber.toLong())
-        assertThat(converted.blockchainInfo.logIndex).isEqualTo(dto.logIndex)
     }
 
     @Test
@@ -209,7 +208,6 @@ class TezosActivityConverterTest {
         assertThat(converted.blockchainInfo.transactionHash).isEqualTo(dto.transactionHash)
         assertThat(converted.blockchainInfo.blockHash).isEqualTo(dto.blockHash)
         assertThat(converted.blockchainInfo.blockNumber).isEqualTo(dto.blockNumber.toLong())
-        assertThat(converted.blockchainInfo.logIndex).isEqualTo(dto.logIndex)
     }
 
     @Test
@@ -226,7 +224,6 @@ class TezosActivityConverterTest {
         assertThat(converted.blockchainInfo.transactionHash).isEqualTo(dto.elt.transactionHash)
         assertThat(converted.blockchainInfo.blockHash).isEqualTo(dto.elt.blockHash)
         assertThat(converted.blockchainInfo.blockNumber).isEqualTo(dto.elt.blockNumber.toLong())
-        assertThat(converted.blockchainInfo.logIndex).isEqualTo(dto.elt.logIndex)
     }
 
     @Test

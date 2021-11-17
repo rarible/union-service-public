@@ -25,15 +25,15 @@ object TezosItemConverter {
                 tokenId = item.tokenId
             ),
             creators = item.creators.map { TezosConverter.convertToCreator(it, blockchain) },
-            deleted = item.deleted ?: false, //TODO TEZOS raise to tezos, should be required
+            deleted = item.deleted,
             lastUpdatedAt = item.date,
             lazySupply = item.lazySupply,
             meta = item.meta?.let { convert(it) },
-            mintedAt = item.date, // TODO TEZOS add mintedAt
+            mintedAt = item.mintedAt,
             owners = item.owners.map { UnionAddressConverter.convert(blockchain, it) },
             royalties = item.royalties.map { toRoyalty(it, blockchain) },
             supply = item.supply,
-            pending = emptyList() // TODO TEZOS in union we won't use this field
+            pending = emptyList() // In Union we won't use this field for Tezos
         )
     }
 

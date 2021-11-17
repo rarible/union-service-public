@@ -27,6 +27,7 @@ import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
 import com.rarible.protocol.union.integration.tezos.converter.TezosActivityConverter
+import com.rarible.protocol.union.integration.tezos.converter.TezosConverter
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.reactive.awaitFirst
@@ -126,10 +127,10 @@ open class TezosActivityService(
             ActivitySortDto.LATEST_FIRST, null -> ActivityContinuation.ByLastUpdatedAndIdDesc
         }
 
-        //val tezosSort = TezosConverter.convert(sort)
+        val tezosSort = TezosConverter.convert(sort ?: ActivitySortDto.LATEST_FIRST)
 
-        val itemRequest = async { getItemActivities(nftFilter, continuation, size/*, tezosSort*/) }
-        val orderRequest = async { getOrderActivities(orderFilter, continuation, size/*, tezosSort*/) }
+        val itemRequest = async { getItemActivities(nftFilter, continuation, size, tezosSort) }
+        val orderRequest = async { getOrderActivities(orderFilter, continuation, size, tezosSort) }
 
         val itemActivities = itemRequest.await().items.map { tezosActivityConverter.convert(it, blockchain) }
         val orderActivities = orderRequest.await().items.map { tezosActivityConverter.convert(it, blockchain) }
@@ -144,12 +145,11 @@ open class TezosActivityService(
     private suspend fun getItemActivities(
         filter: NftActivityFilterDto?,
         continuation: String?,
-        size: Int
-        //sort: com.rarible.protocol.tezos.dto.ActivitySortDto
+        size: Int,
+        sort: com.rarible.protocol.tezos.dto.ActivitySortDto
     ): NftActivitiesDto {
-        // TODO TEZOS sorting is not supported
         return if (filter != null) {
-            activityItemControllerApi.getNftActivities(size, continuation, filter).awaitFirst()
+            activityItemControllerApi.getNftActivities(sort, size, continuation, filter).awaitFirst()
         } else {
             EMPTY_ITEM_ACTIVITIES
         }
@@ -158,12 +158,11 @@ open class TezosActivityService(
     private suspend fun getOrderActivities(
         filter: OrderActivityFilterDto?,
         continuation: String?,
-        size: Int
-        //sort: com.rarible.protocol.tezos.dto.ActivitySortDto
+        size: Int,
+        sort: com.rarible.protocol.tezos.dto.ActivitySortDto
     ): OrderActivitiesDto {
-        // TODO TEZOS sorting is not supported
         return if (filter != null) {
-            activityOrderControllerApi.getOrderActivities(size, continuation, filter).awaitFirst()
+            activityOrderControllerApi.getOrderActivities(sort, size, continuation, filter).awaitFirst()
         } else {
             EMPTY_ORDER_ACTIVITIES
         }

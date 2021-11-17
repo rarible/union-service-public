@@ -22,7 +22,7 @@ class TezosItemConverterTest {
         assertThat(converted.id.tokenId).isEqualTo(dto.tokenId)
         assertThat(converted.supply).isEqualTo(dto.supply)
         assertThat(converted.lastUpdatedAt).isEqualTo(dto.date)
-        assertThat(converted.mintedAt).isEqualTo(dto.date) // TODO not correct
+        assertThat(converted.mintedAt).isEqualTo(dto.mintedAt)
         assertThat(converted.lazySupply).isEqualTo(dto.lazySupply)
         assertThat(converted.deleted).isEqualTo(dto.deleted)
         assertThat(converted.lazySupply).isEqualTo(dto.lazySupply)

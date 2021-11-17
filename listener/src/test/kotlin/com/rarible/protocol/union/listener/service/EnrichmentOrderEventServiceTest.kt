@@ -1,7 +1,6 @@
 package com.rarible.protocol.union.listener.service
 
 import com.rarible.core.test.data.randomBigDecimal
-import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.dto.AssetDto
 import com.rarible.protocol.union.dto.ContractAddress
 import com.rarible.protocol.union.dto.EthCollectionAssetTypeDto
@@ -75,7 +74,7 @@ class EnrichmentOrderEventServiceTest {
 
         val shortItemId = ShortItemId(itemId)
         val collectionId = ContractAddress(itemId.blockchain, itemId.contract)
-        val assetAddress = UnionAddressConverter.convert(itemId.blockchain, itemId.contract)
+        val assetAddress = ContractAddress(itemId.blockchain, itemId.contract)
 
         val order = randomUnionSellOrderDto(itemId, ownershipId.owner.value)
             .copy(
@@ -99,7 +98,7 @@ class EnrichmentOrderEventServiceTest {
 
         val shortItemId = ShortItemId(itemId)
         val collectionId = ContractAddress(itemId.blockchain, itemId.contract)
-        val assetAddress = UnionAddressConverter.convert(itemId.blockchain, itemId.contract)
+        val assetAddress = ContractAddress(itemId.blockchain, itemId.contract)
 
         val order = randomUnionSellOrderDto(itemId, ownershipId.owner.value)
             .copy(

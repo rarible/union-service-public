@@ -1,13 +1,13 @@
 package com.rarible.protocol.union.integration.tezos.event
 
 import com.rarible.core.test.data.randomString
-import com.rarible.protocol.tezos.dto.OrderEventDto
+import com.rarible.protocol.tezos.dto.TezosOrderSafeEventDto
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.model.UnionOrderEvent
 import com.rarible.protocol.union.core.model.UnionOrderUpdateEvent
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.tezos.converter.TezosOrderConverter
-import com.rarible.protocol.union.integration.tezos.data.randomTezosAssetFa2
+import com.rarible.protocol.union.integration.tezos.data.randomTezosAssetNFT
 import com.rarible.protocol.union.integration.tezos.data.randomTezosOrderDto
 import com.rarible.protocol.union.test.mock.CurrencyMock
 import io.mockk.clearMocks
@@ -32,8 +32,8 @@ class TezosOrderEventHandlerTest {
 
     @Test
     fun `tezos order event`() = runBlocking {
-        val order = randomTezosOrderDto().copy(take = randomTezosAssetFa2())
-        val event = OrderEventDto(OrderEventDto.Type.UPDATE, randomString(), order.hash, order)
+        val order = randomTezosOrderDto().copy(take = randomTezosAssetNFT())
+        val event = TezosOrderSafeEventDto(TezosOrderSafeEventDto.Type.UPDATE, randomString(), order.hash, order)
 
         handler.handle(event)
 

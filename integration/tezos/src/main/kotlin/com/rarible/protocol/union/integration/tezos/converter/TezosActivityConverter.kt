@@ -155,7 +155,7 @@ class TezosActivityConverter(
                         transactionHash = source.transactionHash,
                         blockHash = source.blockHash,
                         blockNumber = source.blockNumber.toLong(),
-                        logIndex = source.logIndex
+                        logIndex = /*source.elt.logIndex*/ 0 // TODO UNION we're planning to remove it
                     )
                 )
             }
@@ -171,7 +171,7 @@ class TezosActivityConverter(
                         transactionHash = source.transactionHash,
                         blockHash = source.blockHash,
                         blockNumber = source.blockNumber.toLong(),
-                        logIndex = source.logIndex
+                        logIndex = /*source.elt.logIndex*/ 0 // TODO UNION we're planning to remove it
                     )
                 )
             }
@@ -188,7 +188,7 @@ class TezosActivityConverter(
                         transactionHash = source.elt.transactionHash,
                         blockHash = source.elt.blockHash,
                         blockNumber = source.elt.blockNumber.toLong(),
-                        logIndex = source.elt.logIndex
+                        logIndex = /*source.elt.logIndex*/ 0 // TODO UNION we're planning to remove it
                     )
                 )
             }

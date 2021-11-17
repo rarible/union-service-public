@@ -2,7 +2,7 @@ package com.rarible.protocol.union.integration.tezos.event
 
 import com.rarible.core.common.nowMillis
 import com.rarible.core.test.data.randomString
-import com.rarible.protocol.tezos.dto.ActivityDto
+import com.rarible.protocol.tezos.dto.TezosActivitySafeDto
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.tezos.converter.TezosActivityConverter
@@ -31,7 +31,7 @@ class TezosActivityEventHandlerTest {
     @Test
     fun `tezos activity event`() = runBlocking {
         val dto = randomTezosOrderListActivity()
-        val event = ActivityDto(randomString(), nowMillis(), "RARIBLE", dto)
+        val event = TezosActivitySafeDto(randomString(), nowMillis(), "RARIBLE", dto)
 
 
         handler.handle(event)
