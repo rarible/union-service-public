@@ -12,8 +12,8 @@ protocol-union-api:
     node.labels.rarible.service: true
   resources:
     jvm:
-      xmx_megabytes: 512
-      max_direct_memory_megabytes: 128
+      xmx_megabytes: 384
+      max_direct_memory_megabytes: 32
   updateConfig:
     order: start-first
   networks:
