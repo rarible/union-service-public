@@ -433,4 +433,28 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
             }
         }
     }
+
+    @Test
+    fun `on auction delete`() = runWithKafka {
+        val itemId = randomEthItemId()
+        val ethItem = randomEthNftItemDto(itemId)
+
+        val unionItem = EthItemConverter.convert(ethItem, itemId.blockchain)
+        val ethAuction = randomEthAuctionDto(itemId)
+        val auction = ethAuctionConverter.convert(ethAuction, BlockchainDto.ETHEREUM)
+        val shortItem = ShortItemConverter.convert(unionItem).copy(auctions = setOf(auction.id))
+        itemService.save(shortItem)
+
+        coEvery { testEthereumItemApi.getNftItemById(itemId.value) } returns ethItem.toMono()
+        coEvery { testEthereumItemApi.getNftItemMetaById(itemId.value) } returns ethItem.meta!!.toMono()
+
+        itemEventService.onAuctionDeleted(auction.id)
+
+        Wait.waitAssert {
+            val messages = findItemUpdates(itemId.value)
+            assertThat(messages).hasSize(1)
+            assertThat(messages[0].value.itemId).isEqualTo(itemId)
+            assertThat(messages[0].value.item.auctions).isNullOrEmpty()
+        }
+    }
 }

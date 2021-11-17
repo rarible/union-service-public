@@ -17,6 +17,8 @@ import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
 import com.rarible.protocol.union.enrichment.service.BestOrderService
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.map
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.util.*
@@ -107,16 +109,7 @@ class EnrichmentItemEventService(
     }
 
     suspend fun onAuctionDeleted(auctionId: AuctionIdDto, notificationEnabled: Boolean = true) {
-//        deleteAuction(auctionId, notificationEnabled) { it.copy(auctions = it.auctions - auctionId) }
-    }
-
-    private fun deleteAuction(
-        itemId: ShortItemId,
-        auctionId: AuctionIdDto,
-        notificationEnabled: Boolean,
-        suspendFunction1: suspend (item: ShortItem) -> ShortItem
-    ) {
-        TODO("Not yet implemented")
+        deleteAuction(auctionId, notificationEnabled) { it.copy(auctions = it.auctions - auctionId) }
     }
 
     private suspend fun updateOrder(
@@ -153,13 +146,13 @@ class EnrichmentItemEventService(
         itemId: ShortItemId,
         auction: AuctionDto,
         notificationEnabled: Boolean,
-        orderUpdateAction: suspend (item: ShortItem) -> ShortItem
+        updateAction: suspend (item: ShortItem) -> ShortItem
     ) = optimisticLock {
         val current = itemService.get(itemId)
         val exist = current != null
         val short = current ?: ShortItem.empty(itemId)
 
-        val updated = orderUpdateAction(short)
+        val updated = updateAction(short)
 
         if (short != updated) {
             if (updated.isNotEmpty()) {
@@ -177,6 +170,24 @@ class EnrichmentItemEventService(
         } else {
             logger.info("Item [{}] not changed after auction updated, event won't be published", itemId)
         }
+    }
+
+    private suspend fun deleteAuction(
+        auctionId: AuctionIdDto,
+        notificationEnabled: Boolean,
+        updateAction: suspend (item: ShortItem) -> ShortItem
+    ) {
+        itemService.findByAuctionId(auctionId).map { item ->
+            val updated = updateAction(item)
+            if (item != updated) {
+                val saved = itemService.save(updated)
+                if (notificationEnabled) {
+                    notifyUpdate(saved)
+                }
+            } else {
+                logger.info("Item [{}] not changed after auction deleted, event won't be published", item.id)
+            }
+        }.collect()
     }
 
     suspend fun onItemDeleted(itemId: ItemIdDto) {

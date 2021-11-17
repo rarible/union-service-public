@@ -78,6 +78,10 @@ class EnrichmentItemService(
         logger.info("Fetched {} items for collection {} and owner {}", count, address, owner)
     }
 
+    fun findByAuctionId(auctionIdDto: AuctionIdDto): Flow<ShortItem> {
+        return itemRepository.findWithAuction(auctionIdDto.value)
+    }
+
     suspend fun fetch(itemId: ShortItemId): UnionItem {
         val now = nowMillis()
         val nftItemDto = itemServiceRouter.getService(itemId.blockchain)

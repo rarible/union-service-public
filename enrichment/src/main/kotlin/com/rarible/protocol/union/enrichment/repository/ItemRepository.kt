@@ -16,6 +16,7 @@ import org.springframework.data.mongodb.core.findById
 import org.springframework.data.mongodb.core.index.Index
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
+import org.springframework.data.mongodb.core.query.elemMatch
 import org.springframework.data.mongodb.core.query.inValues
 import org.springframework.data.mongodb.core.query.isEqualTo
 import org.springframework.data.mongodb.core.query.lte
@@ -60,6 +61,15 @@ class ItemRepository(
             )
         ).withHint(MULTI_CURRENCY_DEFINITION.indexKeys)
 
+        return template.find(query, ShortItem::class.java).asFlow()
+    }
+
+    fun findWithAuction(id: String): Flow<ShortItem> {
+        val query = Query(
+            Criteria().andOperator(
+                ShortItem::auctions elemMatch Criteria("value").isEqualTo(id)
+            )
+        )
         return template.find(query, ShortItem::class.java).asFlow()
     }
 
