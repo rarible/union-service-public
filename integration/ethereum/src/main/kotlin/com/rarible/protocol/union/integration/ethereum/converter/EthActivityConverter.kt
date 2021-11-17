@@ -129,6 +129,8 @@ class EthActivityConverter(
                     maker = EthConverter.convert(source.maker, blockchain),
                     make = EthConverter.convert(source.make, blockchain),
                     take = EthConverter.convert(source.take, blockchain),
+                    transactionHash = EthConverter.convert(source.transactionHash),
+                    // TODO UNION remove in 1.19
                     blockchainInfo = ActivityBlockchainInfoDto(
                         transactionHash = EthConverter.convert(source.transactionHash),
                         blockHash = EthConverter.convert(source.blockHash),
@@ -146,6 +148,8 @@ class EthActivityConverter(
                     maker = EthConverter.convert(source.maker, blockchain),
                     make = EthConverter.convert(source.make, blockchain),
                     take = EthConverter.convert(source.take, blockchain),
+                    transactionHash = EthConverter.convert(source.transactionHash),
+                    // TODO UNION remove in 1.19
                     blockchainInfo = ActivityBlockchainInfoDto(
                         transactionHash = EthConverter.convert(source.transactionHash),
                         blockHash = EthConverter.convert(source.blockHash),
@@ -162,6 +166,8 @@ class EthActivityConverter(
                     contract = ContractAddress(blockchain, EthConverter.convert(source.contract)),
                     tokenId = source.tokenId,
                     value = source.value,
+                    transactionHash = EthConverter.convert(source.transactionHash),
+                    // TODO UNION remove in 1.19
                     blockchainInfo = ActivityBlockchainInfoDto(
                         transactionHash = EthConverter.convert(source.transactionHash),
                         blockHash = EthConverter.convert(source.blockHash),
@@ -178,6 +184,8 @@ class EthActivityConverter(
                     contract = ContractAddress(blockchain, EthConverter.convert(source.contract)),
                     tokenId = source.tokenId,
                     value = source.value,
+                    transactionHash = EthConverter.convert(source.transactionHash),
+                    // TODO UNION remove in 1.19
                     blockchainInfo = ActivityBlockchainInfoDto(
                         transactionHash = EthConverter.convert(source.transactionHash),
                         blockHash = EthConverter.convert(source.blockHash),
@@ -195,6 +203,8 @@ class EthActivityConverter(
                     contract = ContractAddress(blockchain, EthConverter.convert(source.contract)),
                     tokenId = source.tokenId,
                     value = source.value,
+                    transactionHash = EthConverter.convert(source.transactionHash),
+                    // TODO UNION remove in 1.19
                     blockchainInfo = ActivityBlockchainInfoDto(
                         transactionHash = EthConverter.convert(source.transactionHash),
                         blockHash = EthConverter.convert(source.blockHash),
@@ -216,6 +226,8 @@ class EthActivityConverter(
                     minimalStep = source.minimalStep,
                     minimalPrice = source.minimalPrice,
                     hash = EthConverter.convert(source.hash),
+                    transactionHash = EthConverter.convert(source.transactionHash),
+                    // TODO UNION remove in 1.19
                     blockchainInfo = ActivityBlockchainInfoDto(
                         transactionHash = EthConverter.convert(source.transactionHash),
                         blockHash = EthConverter.convert(source.blockHash),
@@ -230,6 +242,8 @@ class EthActivityConverter(
                     date = source.date,
                     bid = EthConverter.convert(source.bid, blockchain),
                     hash = EthConverter.convert(source.hash),
+                    transactionHash = EthConverter.convert(source.transactionHash),
+                    // TODO UNION remove in 1.19
                     blockchainInfo = ActivityBlockchainInfoDto(
                         transactionHash = EthConverter.convert(source.transactionHash),
                         blockHash = EthConverter.convert(source.blockHash),
@@ -243,6 +257,8 @@ class EthActivityConverter(
                     id = activityId,
                     date = source.date,
                     hash = EthConverter.convert(source.hash),
+                    transactionHash = EthConverter.convert(source.transactionHash),
+                    // TODO UNION remove in 1.19
                     blockchainInfo = ActivityBlockchainInfoDto(
                         transactionHash = EthConverter.convert(source.transactionHash),
                         blockHash = EthConverter.convert(source.blockHash),
@@ -256,6 +272,8 @@ class EthActivityConverter(
                     id = activityId,
                     date = source.date,
                     hash = EthConverter.convert(source.hash),
+                    transactionHash = EthConverter.convert(source.transactionHash),
+                    // TODO UNION remove in 1.19
                     blockchainInfo = ActivityBlockchainInfoDto(
                         transactionHash = EthConverter.convert(source.transactionHash),
                         blockHash = EthConverter.convert(source.blockHash),
@@ -282,6 +300,8 @@ class EthActivityConverter(
             id = activityId,
             date = source.date,
             source = convert(source.source),
+            transactionHash = EthConverter.convert(source.transactionHash),
+            // TODO UNION remove in 1.19
             blockchainInfo = asActivityBlockchainInfo(source),
             nft = EthConverter.convert(nft.asset, blockchain),
             payment = unionPayment,
@@ -302,9 +322,12 @@ class EthActivityConverter(
         id = activityId,
         date = source.date,
         source = convert(source.source),
+        transactionHash = EthConverter.convert(source.transactionHash),
+        // TODO UNION remove in 1.19
         blockchainInfo = asActivityBlockchainInfo(source),
         left = convert(source.left, blockchain),
         right = convert(source.right, blockchain)
+
     )
 
     fun asUserActivityType(source: UserActivityTypeDto): ActivityFilterByUserTypeDto {

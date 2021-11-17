@@ -19,7 +19,6 @@ import com.rarible.protocol.dto.OrderActivityFilterByCollectionDto
 import com.rarible.protocol.dto.OrderActivityFilterByItemDto
 import com.rarible.protocol.dto.OrderActivityFilterByUserDto
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.Instant
 import java.time.temporal.ChronoUnit
@@ -27,7 +26,6 @@ import java.time.temporal.ChronoUnit
 class EthActivityFilterConverterTest {
 
     @Test
-    @Disabled // TODO Enable when new Activity types supported
     fun `eth activities all`() {
         val filter = ActivityFilterAllDto(
             types = ActivityFilterAllTypeDto.values().asList()
@@ -54,7 +52,6 @@ class EthActivityFilterConverterTest {
     }
 
     @Test
-    @Disabled // TODO Enable when new Activity types supported
     fun `eth activities by collection`() {
         val filter = ActivityFilterByCollectionDto(
             types = ActivityFilterByCollectionTypeDto.values().asList(),
@@ -86,7 +83,6 @@ class EthActivityFilterConverterTest {
     }
 
     @Test
-    @Disabled // TODO Enable when new Activity types supported
     fun `eth activities by item`() {
         val filter = ActivityFilterByItemDto(
             types = ActivityFilterByItemTypeDto.values().asList(),
@@ -122,7 +118,6 @@ class EthActivityFilterConverterTest {
     }
 
     @Test
-    @Disabled // TODO Enable when new Activity types supported
     fun `eth activities by user`() {
         val now = Instant.now()
         val oneWeekAgo = now.minus(7, ChronoUnit.DAYS).epochSecond

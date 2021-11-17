@@ -53,10 +53,12 @@ class TezosActivityConverterTest {
         assertMatchSide(converted.right, dto.right)
 
         assertThat(converted.source.name).isEqualTo(dto.source)
-        assertThat(converted.blockchainInfo.transactionHash).isEqualTo(dto.transactionHash)
-        assertThat(converted.blockchainInfo.blockHash).isEqualTo(dto.blockHash)
-        assertThat(converted.blockchainInfo.blockNumber).isEqualTo(dto.blockNumber.toLong())
-        assertThat(converted.blockchainInfo.logIndex).isEqualTo(dto.logIndex)
+        assertThat(converted.transactionHash).isEqualTo(dto.transactionHash)
+        // TODO UNION remove in 1.19
+        assertThat(converted.blockchainInfo!!.transactionHash).isEqualTo(dto.transactionHash)
+        assertThat(converted.blockchainInfo!!.blockHash).isEqualTo(dto.blockHash)
+        assertThat(converted.blockchainInfo!!.blockNumber).isEqualTo(dto.blockNumber.toLong())
+        assertThat(converted.blockchainInfo!!.logIndex).isEqualTo(dto.logIndex)
     }
 
     @Test
@@ -155,10 +157,12 @@ class TezosActivityConverterTest {
         assertThat(converted.source?.name).isEqualTo(dto.source)
         assertThat(converted.hash).isEqualTo(dto.hash)
         assertThat(converted.maker.value).isEqualTo(dto.maker)
-        assertThat(converted.blockchainInfo.transactionHash).isEqualTo(dto.transactionHash)
-        assertThat(converted.blockchainInfo.blockHash).isEqualTo(dto.blockHash)
-        assertThat(converted.blockchainInfo.blockNumber).isEqualTo(dto.blockNumber.toLong())
-        assertThat(converted.blockchainInfo.logIndex).isEqualTo(dto.logIndex)
+        assertThat(converted.transactionHash).isEqualTo(dto.transactionHash)
+        // TODO UNION remove in 1.19
+        assertThat(converted.blockchainInfo!!.transactionHash).isEqualTo(dto.transactionHash)
+        assertThat(converted.blockchainInfo!!.blockHash).isEqualTo(dto.blockHash)
+        assertThat(converted.blockchainInfo!!.blockNumber).isEqualTo(dto.blockNumber.toLong())
+        assertThat(converted.blockchainInfo!!.logIndex).isEqualTo(dto.logIndex)
     }
 
     @Test
@@ -189,9 +193,11 @@ class TezosActivityConverterTest {
         assertThat(converted.contract.value).isEqualTo(dto.contract)
         assertThat(converted.tokenId).isEqualTo(dto.tokenId)
         assertThat(converted.value).isEqualTo(dto.value)
-        assertThat(converted.blockchainInfo.transactionHash).isEqualTo(dto.transactionHash)
-        assertThat(converted.blockchainInfo.blockHash).isEqualTo(dto.blockHash)
-        assertThat(converted.blockchainInfo.blockNumber).isEqualTo(dto.blockNumber.toLong())
+        assertThat(converted.transactionHash).isEqualTo(dto.transactionHash)
+        // TODO UNION remove in 1.19
+        assertThat(converted.blockchainInfo!!.transactionHash).isEqualTo(dto.transactionHash)
+        assertThat(converted.blockchainInfo!!.blockHash).isEqualTo(dto.blockHash)
+        assertThat(converted.blockchainInfo!!.blockNumber).isEqualTo(dto.blockNumber.toLong())
     }
 
     @Test
@@ -205,9 +211,11 @@ class TezosActivityConverterTest {
         assertThat(converted.contract.value).isEqualTo(dto.contract)
         assertThat(converted.tokenId).isEqualTo(dto.tokenId)
         assertThat(converted.value).isEqualTo(dto.value)
-        assertThat(converted.blockchainInfo.transactionHash).isEqualTo(dto.transactionHash)
-        assertThat(converted.blockchainInfo.blockHash).isEqualTo(dto.blockHash)
-        assertThat(converted.blockchainInfo.blockNumber).isEqualTo(dto.blockNumber.toLong())
+        assertThat(converted.transactionHash).isEqualTo(dto.transactionHash)
+        // TODO UNION remove in 1.19
+        assertThat(converted.blockchainInfo!!.transactionHash).isEqualTo(dto.transactionHash)
+        assertThat(converted.blockchainInfo!!.blockHash).isEqualTo(dto.blockHash)
+        assertThat(converted.blockchainInfo!!.blockNumber).isEqualTo(dto.blockNumber.toLong())
     }
 
     @Test
@@ -221,9 +229,11 @@ class TezosActivityConverterTest {
         assertThat(converted.contract.value).isEqualTo(dto.elt.contract)
         assertThat(converted.tokenId).isEqualTo(dto.elt.tokenId)
         assertThat(converted.value).isEqualTo(dto.elt.value)
-        assertThat(converted.blockchainInfo.transactionHash).isEqualTo(dto.elt.transactionHash)
-        assertThat(converted.blockchainInfo.blockHash).isEqualTo(dto.elt.blockHash)
-        assertThat(converted.blockchainInfo.blockNumber).isEqualTo(dto.elt.blockNumber.toLong())
+        assertThat(converted.transactionHash).isEqualTo(dto.elt.transactionHash)
+        // TODO UNION remove in 1.19
+        assertThat(converted.blockchainInfo!!.transactionHash).isEqualTo(dto.elt.transactionHash)
+        assertThat(converted.blockchainInfo!!.blockHash).isEqualTo(dto.elt.blockHash)
+        assertThat(converted.blockchainInfo!!.blockNumber).isEqualTo(dto.elt.blockNumber.toLong())
     }
 
     @Test

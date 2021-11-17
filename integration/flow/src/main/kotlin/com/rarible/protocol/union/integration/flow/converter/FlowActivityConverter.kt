@@ -53,6 +53,8 @@ class FlowActivityConverter(
                     type = OrderMatchSellDto.Type.SELL,
                     // TODO FLOW here should be price from FLOW, we don't want to calculate it here
                     amountUsd = amountUsd(priceUsd, source.left.asset),
+                    transactionHash = source.transactionHash,
+                    // TODO UNION remove in 1.19
                     blockchainInfo = ActivityBlockchainInfoDto(
                         transactionHash = source.transactionHash,
                         blockHash = source.blockHash,
@@ -86,7 +88,9 @@ class FlowActivityConverter(
                     hash = source.hash,
                     maker = UnionAddressConverter.convert(blockchain, source.maker),
                     make = FlowConverter.convertToType(source.make, blockchain),
-                    take = FlowConverter.convertToType(source.take, blockchain)
+                    take = FlowConverter.convertToType(source.take, blockchain),
+                    // TODO FLOW add this field to the activity
+                    transactionHash = ""
                 )
             }
             is FlowMintDto -> {
@@ -97,6 +101,8 @@ class FlowActivityConverter(
                     contract = ContractAddress(blockchain, source.contract),
                     tokenId = source.tokenId,
                     value = source.value,
+                    transactionHash = source.transactionHash,
+                    // TODO UNION remove in 1.19
                     blockchainInfo = ActivityBlockchainInfoDto(
                         transactionHash = source.transactionHash,
                         blockHash = source.blockHash,
@@ -113,6 +119,8 @@ class FlowActivityConverter(
                     contract = ContractAddress(blockchain, source.contract),
                     tokenId = source.tokenId,
                     value = source.value,
+                    transactionHash = source.transactionHash,
+                    // TODO UNION remove in 1.19
                     blockchainInfo = ActivityBlockchainInfoDto(
                         transactionHash = source.transactionHash,
                         blockHash = source.blockHash,
@@ -130,6 +138,8 @@ class FlowActivityConverter(
                     contract = ContractAddress(blockchain, source.contract),
                     tokenId = source.tokenId,
                     value = source.value,
+                    transactionHash = source.transactionHash,
+                    // TODO UNION remove in 1.19
                     blockchainInfo = ActivityBlockchainInfoDto(
                         transactionHash = source.transactionHash,
                         blockHash = source.blockHash,

@@ -42,10 +42,12 @@ class FlowActivityConverterTest {
         assertThat(converted is OrderMatchSellDto)
         //todo assert match is ok after flow implementation
         assertThat(converted.date).isEqualTo(dto.date)
-        assertThat(converted.blockchainInfo.transactionHash).isEqualTo(dto.transactionHash)
-        assertThat(converted.blockchainInfo.blockHash).isEqualTo(dto.blockHash)
-        assertThat(converted.blockchainInfo.blockNumber).isEqualTo(dto.blockNumber)
-        assertThat(converted.blockchainInfo.logIndex).isEqualTo(dto.logIndex)
+        assertThat(converted.transactionHash).isEqualTo(dto.transactionHash)
+        // TODO UNION remove in 1.19
+        assertThat(converted.blockchainInfo!!.transactionHash).isEqualTo(dto.transactionHash)
+        assertThat(converted.blockchainInfo!!.blockHash).isEqualTo(dto.blockHash)
+        assertThat(converted.blockchainInfo!!.blockNumber).isEqualTo(dto.blockNumber)
+        assertThat(converted.blockchainInfo!!.logIndex).isEqualTo(dto.logIndex)
     }
 
     @Test
@@ -81,6 +83,8 @@ class FlowActivityConverterTest {
         assertThat(makeType.contract.value).isEqualTo(dto.make.contract)
         val takeType = converted.take as FlowAssetTypeFtDto
         assertThat(takeType.contract.value).isEqualTo(dto.take.contract)
+        // TODO FLOW uncomment when Flow implement it
+        //assertThat(converted.transactionHash).isEqualTo(dto.transactionHash)
     }
 
     @Test
@@ -94,11 +98,12 @@ class FlowActivityConverterTest {
         assertThat(converted.contract.value).isEqualTo(dto.contract)
         assertThat(converted.value).isEqualTo(dto.value)
         assertThat(converted.tokenId).isEqualTo(dto.tokenId)
-
-        assertThat(converted.blockchainInfo.transactionHash).isEqualTo(dto.transactionHash)
-        assertThat(converted.blockchainInfo.blockHash).isEqualTo(dto.blockHash)
-        assertThat(converted.blockchainInfo.blockNumber).isEqualTo(dto.blockNumber)
-        assertThat(converted.blockchainInfo.logIndex).isEqualTo(dto.logIndex)
+        assertThat(converted.transactionHash).isEqualTo(dto.transactionHash)
+        // TODO UNION remove in 1.19
+        assertThat(converted.blockchainInfo!!.transactionHash).isEqualTo(dto.transactionHash)
+        assertThat(converted.blockchainInfo!!.blockHash).isEqualTo(dto.blockHash)
+        assertThat(converted.blockchainInfo!!.blockNumber).isEqualTo(dto.blockNumber)
+        assertThat(converted.blockchainInfo!!.logIndex).isEqualTo(dto.logIndex)
     }
 
     @Test
@@ -112,11 +117,12 @@ class FlowActivityConverterTest {
         assertThat(converted.contract.value).isEqualTo(dto.contract)
         assertThat(converted.value).isEqualTo(dto.value)
         assertThat(converted.tokenId).isEqualTo(dto.tokenId)
-
-        assertThat(converted.blockchainInfo.transactionHash).isEqualTo(dto.transactionHash)
-        assertThat(converted.blockchainInfo.blockHash).isEqualTo(dto.blockHash)
-        assertThat(converted.blockchainInfo.blockNumber).isEqualTo(dto.blockNumber)
-        assertThat(converted.blockchainInfo.logIndex).isEqualTo(dto.logIndex)
+        assertThat(converted.transactionHash).isEqualTo(dto.transactionHash)
+        // TODO UNION remove in 1.19
+        assertThat(converted.blockchainInfo!!.transactionHash).isEqualTo(dto.transactionHash)
+        assertThat(converted.blockchainInfo!!.blockHash).isEqualTo(dto.blockHash)
+        assertThat(converted.blockchainInfo!!.blockNumber).isEqualTo(dto.blockNumber)
+        assertThat(converted.blockchainInfo!!.logIndex).isEqualTo(dto.logIndex)
     }
 
     @Test
@@ -130,10 +136,11 @@ class FlowActivityConverterTest {
         assertThat(converted.contract.value).isEqualTo(dto.contract)
         assertThat(converted.value).isEqualTo(dto.value)
         assertThat(converted.tokenId).isEqualTo(dto.tokenId)
-
-        assertThat(converted.blockchainInfo.transactionHash).isEqualTo(dto.transactionHash)
-        assertThat(converted.blockchainInfo.blockHash).isEqualTo(dto.blockHash)
-        assertThat(converted.blockchainInfo.blockNumber).isEqualTo(dto.blockNumber)
-        assertThat(converted.blockchainInfo.logIndex).isEqualTo(dto.logIndex)
+        assertThat(converted.transactionHash).isEqualTo(dto.transactionHash)
+        // TODO UNION remove in 1.19
+        assertThat(converted.blockchainInfo!!.transactionHash).isEqualTo(dto.transactionHash)
+        assertThat(converted.blockchainInfo!!.blockHash).isEqualTo(dto.blockHash)
+        assertThat(converted.blockchainInfo!!.blockNumber).isEqualTo(dto.blockNumber)
+        assertThat(converted.blockchainInfo!!.logIndex).isEqualTo(dto.logIndex)
     }
 }

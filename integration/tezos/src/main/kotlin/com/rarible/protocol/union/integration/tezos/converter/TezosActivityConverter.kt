@@ -117,6 +117,8 @@ class TezosActivityConverter(
                     maker = UnionAddressConverter.convert(blockchain, source.maker),
                     make = TezosConverter.convert(source.make, blockchain),
                     take = TezosConverter.convert(source.take, blockchain),
+                    transactionHash = source.transactionHash,
+                    // TODO UNION remove in 1.19
                     blockchainInfo = ActivityBlockchainInfoDto(
                         transactionHash = source.transactionHash,
                         blockHash = source.blockHash,
@@ -134,6 +136,8 @@ class TezosActivityConverter(
                     maker = UnionAddressConverter.convert(blockchain, source.maker),
                     make = TezosConverter.convert(source.make, blockchain),
                     take = TezosConverter.convert(source.take, blockchain),
+                    transactionHash = source.transactionHash,
+                    // TODO UNION remove in 1.19
                     blockchainInfo = ActivityBlockchainInfoDto(
                         transactionHash = source.transactionHash,
                         blockHash = source.blockHash,
@@ -151,6 +155,8 @@ class TezosActivityConverter(
                     contract = ContractAddress(blockchain, source.contract),
                     tokenId = source.tokenId,
                     value = source.value,
+                    transactionHash = source.transactionHash,
+                    // TODO UNION remove in 1.19
                     blockchainInfo = ActivityBlockchainInfoDto(
                         transactionHash = source.transactionHash,
                         blockHash = source.blockHash,
@@ -167,6 +173,8 @@ class TezosActivityConverter(
                     contract = ContractAddress(blockchain, source.contract),
                     tokenId = source.tokenId,
                     value = source.value,
+                    transactionHash = source.transactionHash,
+                    // TODO UNION remove in 1.19
                     blockchainInfo = ActivityBlockchainInfoDto(
                         transactionHash = source.transactionHash,
                         blockHash = source.blockHash,
@@ -184,6 +192,8 @@ class TezosActivityConverter(
                     contract = ContractAddress(blockchain, source.elt.contract),
                     tokenId = source.elt.tokenId,
                     value = source.elt.value,
+                    transactionHash = source.elt.transactionHash,
+                    // TODO UNION remove in 1.19
                     blockchainInfo = ActivityBlockchainInfoDto(
                         transactionHash = source.elt.transactionHash,
                         blockHash = source.elt.blockHash,
@@ -268,6 +278,8 @@ class TezosActivityConverter(
             id = activityId,
             date = source.date,
             source = convertSource(source.source),
+            transactionHash = source.transactionHash,
+            // TODO UNION remove in 1.19
             blockchainInfo = asActivityBlockchainInfo(source),
             nft = TezosConverter.convert(nft.asset, blockchain),
             payment = unionPayment,
@@ -288,6 +300,8 @@ class TezosActivityConverter(
         id = activityId,
         date = source.date,
         source = convertSource(source.source),
+        transactionHash = source.transactionHash,
+        // TODO UNION remove in 1.19
         blockchainInfo = asActivityBlockchainInfo(source),
         left = convert(source.left, blockchain),
         right = convert(source.right, blockchain)
