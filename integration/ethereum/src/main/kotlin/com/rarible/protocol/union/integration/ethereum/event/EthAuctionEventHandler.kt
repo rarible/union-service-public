@@ -4,8 +4,10 @@ import com.rarible.core.apm.CaptureTransaction
 import com.rarible.protocol.dto.AuctionEventDto
 import com.rarible.protocol.union.core.handler.AbstractBlockchainEventHandler
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
+import com.rarible.protocol.union.core.model.UnionAuctionDeleteEvent
 import com.rarible.protocol.union.core.model.UnionAuctionEvent
 import com.rarible.protocol.union.core.model.UnionAuctionUpdateEvent
+import com.rarible.protocol.union.dto.AuctionIdDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.ethereum.converter.EthAuctionConverter
 import org.slf4j.LoggerFactory
@@ -25,6 +27,10 @@ abstract class EthAuctionEventHandler(
             is com.rarible.protocol.dto.AuctionUpdateEventDto -> {
                 val auction = ethActionConverter.convert(event.auction, blockchain)
                 val unionEventDto = UnionAuctionUpdateEvent(auction)
+                handler.onEvent(unionEventDto)
+            }
+            is com.rarible.protocol.dto.AuctionDeleteEventDto -> {
+                val unionEventDto = UnionAuctionDeleteEvent(AuctionIdDto(blockchain, event.auctionId))
                 handler.onEvent(unionEventDto)
             }
         }

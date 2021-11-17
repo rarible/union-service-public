@@ -12,6 +12,7 @@ import com.rarible.core.test.data.randomWord
 import com.rarible.protocol.dto.AssetDto
 import com.rarible.protocol.dto.AuctionActivityDto
 import com.rarible.protocol.dto.AuctionActivityOpenDto
+import com.rarible.protocol.dto.AuctionDto
 import com.rarible.protocol.dto.AuctionHistoryDto
 import com.rarible.protocol.dto.AuctionStatusDto
 import com.rarible.protocol.dto.BurnDto
@@ -446,12 +447,12 @@ fun randomEthCollectionDto(id: Address): NftCollectionDto {
         supportsLazyMint = true
     )
 }
-
-fun randomEthAuctionDto(): RaribleAuctionV1Dto {
+fun randomEthAuctionDto() = randomEthAuctionDto(randomEthItemId())
+fun randomEthAuctionDto(itemId: ItemIdDto): AuctionDto {
     return RaribleAuctionV1Dto(
         seller = randomAddress(),
         buyer = randomAddress(),
-        sell = randomEthAssetErc721(),
+        sell = randomEthAssetErc721(itemId),
         buy = Erc20AssetTypeDto(randomAddress()),
         endTime = Instant.MAX,
         minimalStep = BigDecimal.ONE,

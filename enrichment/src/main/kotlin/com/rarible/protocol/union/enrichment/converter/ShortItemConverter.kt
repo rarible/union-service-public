@@ -19,6 +19,7 @@ object ShortItemConverter {
             bestBidOrders = emptyMap(),
             bestSellOrder = null,
             bestBidOrder = null,
+            auctions = emptySet(),
             lastUpdatedAt = nowMillis()
         )
     }

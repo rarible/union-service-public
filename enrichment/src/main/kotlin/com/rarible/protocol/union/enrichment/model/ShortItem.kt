@@ -24,7 +24,7 @@ data class ShortItem(
     val bestSellOrders: Map<String, ShortOrder>,
     val bestBidOrders: Map<String, ShortOrder>,
 
-    val auctions: List<String>,
+    val auctions: Set<AuctionIdDto>,
 
     val multiCurrency: Boolean = bestSellOrders.size > 1 || bestBidOrders.size > 1,
 
@@ -58,7 +58,7 @@ data class ShortItem(
                 bestSellOrders = emptyMap(),
                 bestBidOrders = emptyMap(),
 
-                auctions = emptyList(),
+                auctions = emptySet(),
 
                 bestSellOrder = null,
                 bestBidOrder = null,
@@ -69,7 +69,7 @@ data class ShortItem(
     }
 
     fun isNotEmpty(): Boolean {
-        return bestBidOrder != null || bestSellOrder != null
+        return bestBidOrder != null || bestSellOrder != null || auctions.isNotEmpty()
     }
 
     @Transient

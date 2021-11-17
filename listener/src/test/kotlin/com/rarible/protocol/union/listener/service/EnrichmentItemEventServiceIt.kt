@@ -4,6 +4,8 @@ import com.rarible.core.test.wait.Wait
 import com.rarible.protocol.dto.NftItemsDto
 import com.rarible.protocol.dto.OrderStatusDto
 import com.rarible.protocol.dto.OrdersPaginationDto
+import com.rarible.protocol.union.dto.AssetDto
+import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ContractAddress
 import com.rarible.protocol.union.enrichment.converter.EnrichedItemConverter
 import com.rarible.protocol.union.enrichment.converter.ShortItemConverter
@@ -19,8 +21,10 @@ import com.rarible.protocol.union.enrichment.test.data.randomUnionBidOrderDto
 import com.rarible.protocol.union.enrichment.test.data.randomUnionItem
 import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrderDto
 import com.rarible.protocol.union.enrichment.util.bidCurrencyId
+import com.rarible.protocol.union.integration.ethereum.converter.EthAuctionConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthItemConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
+import com.rarible.protocol.union.integration.ethereum.data.randomEthAuctionDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthLegacyOrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthNftItemDto
@@ -56,6 +60,9 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
 
     @Autowired
     lateinit var ethOrderConverter: EthOrderConverter
+
+    @Autowired
+    lateinit var ethAuctionConverter: EthAuctionConverter
 
     @Autowired
     lateinit var enrichmentMetaService: EnrichmentMetaService
@@ -362,5 +369,22 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
 
         val list = itemService.findByCollection(collectionId).toList()
         assertEquals(3, list.size)
+    }
+
+    @Test
+    fun `on auction update`() = runBlocking<Unit> {
+        val itemId = randomEthItemId()
+        val ethItem = randomEthNftItemDto(itemId)
+
+        val unionItem = EthItemConverter.convert(ethItem, itemId.blockchain)
+        val shortItem = ShortItemConverter.convert(unionItem)
+        val auction = ethAuctionConverter.convert(randomEthAuctionDto(itemId), BlockchainDto.ETHEREUM)
+//        auction.sell = AssetDto()
+        itemService.save(shortItem)
+
+        itemEventService.onAuctionUpdated(shortItem.id, auction, false)
+
+        val saved = itemService.get(shortItem.id)!!
+        assertThat(saved.auctions).isEqualTo(setOf(auction.id))
     }
 }

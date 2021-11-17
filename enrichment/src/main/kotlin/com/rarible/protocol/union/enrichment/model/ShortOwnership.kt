@@ -20,7 +20,7 @@ data class ShortOwnership(
 
     val bestSellOrders: Map<String, ShortOrder>,
 
-    val auctions: List<String>,
+    val auctions: Set<String>,
 
     val multiCurrency: Boolean = bestSellOrders.size > 1,
 
@@ -48,7 +48,7 @@ data class ShortOwnership(
 
                 bestSellOrders = emptyMap(),
                 bestSellOrder = null,
-                auctions = emptyList(),
+                auctions = emptySet(),
                 lastUpdatedAt = nowMillis(),
 
                 version = null

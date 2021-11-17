@@ -3,6 +3,8 @@ package com.rarible.protocol.union.listener.service
 import com.rarible.core.common.optimisticLock
 import com.rarible.protocol.union.core.event.OutgoingItemEventListener
 import com.rarible.protocol.union.core.model.UnionItem
+import com.rarible.protocol.union.dto.AuctionDto
+import com.rarible.protocol.union.dto.AuctionIdDto
 import com.rarible.protocol.union.dto.ItemDeleteEventDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.ItemUpdateEventDto
@@ -59,7 +61,7 @@ class EnrichmentItemEventService(
                     )
                     val saved = itemService.save(updatedItem)
                     if (notificationEnabled) {
-                        notifyUpdate(saved, null, order)
+                        notifyOrderUpdate(saved, null, order)
                     }
                 } else {
                     logger.debug(
@@ -74,7 +76,7 @@ class EnrichmentItemEventService(
     suspend fun onItemUpdated(item: UnionItem) {
         val received = ShortItemConverter.convert(item)
         val existing = itemService.getOrEmpty(received.id)
-        notifyUpdate(existing, item)
+        notifyOrderUpdate(existing, item)
     }
 
     suspend fun recalculateBestOrders(item: ShortItem): Boolean {
@@ -86,7 +88,7 @@ class EnrichmentItemEventService(
                 item.bestBidOrder?.dtoId, updated.bestBidOrder?.dtoId
             )
             val saved = itemService.save(updated)
-            notifyUpdate(saved, null, null)
+            notifyOrderUpdate(saved, null, null)
             return true
         }
         return false
@@ -98,6 +100,23 @@ class EnrichmentItemEventService(
 
     suspend fun onItemBestBidOrderUpdated(itemId: ShortItemId, order: OrderDto, notificationEnabled: Boolean = true) {
         updateOrder(itemId, order, notificationEnabled) { item -> bestOrderService.updateBestBidOrder(item, order) }
+    }
+
+    suspend fun onAuctionUpdated(itemId: ShortItemId, auction: AuctionDto, notificationEnabled: Boolean = true) {
+        updateAuction(itemId, auction, notificationEnabled) { it.copy(auctions = it.auctions + auction.id) }
+    }
+
+    suspend fun onAuctionDeleted(auctionId: AuctionIdDto, notificationEnabled: Boolean = true) {
+//        deleteAuction(auctionId, notificationEnabled) { it.copy(auctions = it.auctions - auctionId) }
+    }
+
+    private fun deleteAuction(
+        itemId: ShortItemId,
+        auctionId: AuctionIdDto,
+        notificationEnabled: Boolean,
+        suspendFunction1: suspend (item: ShortItem) -> ShortItem
+    ) {
+        TODO("Not yet implemented")
     }
 
     private suspend fun updateOrder(
@@ -116,17 +135,47 @@ class EnrichmentItemEventService(
             if (updated.isNotEmpty()) {
                 val saved = itemService.save(updated)
                 if (notificationEnabled) {
-                    notifyUpdate(saved, null, order)
+                    notifyOrderUpdate(saved, null, order)
                 }
             } else if (exist) {
                 itemService.delete(itemId)
                 logger.info("Deleted Item [{}] without enrichment data", itemId)
                 if (notificationEnabled) {
-                    notifyUpdate(updated, null, order)
+                    notifyOrderUpdate(updated, null, order)
                 }
             }
         } else {
             logger.info("Item [{}] not changed after order updated, event won't be published", itemId)
+        }
+    }
+
+    private suspend fun updateAuction(
+        itemId: ShortItemId,
+        auction: AuctionDto,
+        notificationEnabled: Boolean,
+        orderUpdateAction: suspend (item: ShortItem) -> ShortItem
+    ) = optimisticLock {
+        val current = itemService.get(itemId)
+        val exist = current != null
+        val short = current ?: ShortItem.empty(itemId)
+
+        val updated = orderUpdateAction(short)
+
+        if (short != updated) {
+            if (updated.isNotEmpty()) {
+                val saved = itemService.save(updated)
+                if (notificationEnabled) {
+                    notifyOrderUpdate(saved, null, null, auction)
+                }
+            } else if (exist) {
+                itemService.delete(itemId)
+                logger.info("Deleted Item [{}] without enrichment data", itemId)
+                if (notificationEnabled) {
+                    notifyOrderUpdate(updated, null, null, auction)
+                }
+            }
+        } else {
+            logger.info("Item [{}] not changed after auction updated, event won't be published", itemId)
         }
     }
 
@@ -154,12 +203,13 @@ class EnrichmentItemEventService(
 
     // Potentially we could have updated Order here (no matter - bid/sell) and when we need to fetch
     // full version of the order, we can use this already fetched Order if it has same ID (hash)
-    private suspend fun notifyUpdate(
+    private suspend fun notifyOrderUpdate(
         short: ShortItem,
         item: UnionItem? = null,
-        order: OrderDto? = null
+        order: OrderDto? = null,
+        auction: AuctionDto? = null
     ) {
-        val dto = itemService.enrichItem(short, item, listOfNotNull(order).associateBy { it.id })
+        val dto = itemService.enrichItem(short, item, listOfNotNull(order).associateBy { it.id }, listOfNotNull(auction).associateBy { it.id })
         val event = ItemUpdateEventDto(
             itemId = dto.id,
             item = dto,

@@ -6,6 +6,8 @@ import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
+import com.rarible.protocol.union.dto.AuctionDto
+import com.rarible.protocol.union.dto.AuctionIdDto
 import com.rarible.protocol.union.dto.ContractAddress
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
@@ -29,6 +31,7 @@ class EnrichmentItemService(
     private val itemServiceRouter: BlockchainRouter<ItemService>,
     private val itemRepository: ItemRepository,
     private val enrichmentOrderService: EnrichmentOrderService,
+    private val enrichmentAuctionService: EnrichmentAuctionService,
     private val enrichmentMetaService: EnrichmentMetaService
 ) {
 
@@ -88,7 +91,8 @@ class EnrichmentItemService(
     suspend fun enrichItem(
         shortItem: ShortItem?,
         item: UnionItem? = null,
-        orders: Map<OrderIdDto, OrderDto> = emptyMap()
+        orders: Map<OrderIdDto, OrderDto> = emptyMap(),
+        auctions: Map<AuctionIdDto, AuctionDto> = emptyMap()
     ) = coroutineScope {
         require(shortItem != null || item != null)
         val fetchedItem = async { item ?: fetch(shortItem!!.id) }
@@ -102,6 +106,9 @@ class EnrichmentItemService(
         val bestOrders = listOf(bestSellOrder, bestBidOrder)
             .awaitAll().filterNotNull()
             .associateBy { it.id }
+
+        // auction
+//        enrichmentAuctionService.
 
         EnrichedItemConverter.convert(fetchedItem.await(), shortItem, meta.await(), bestOrders)
     }
