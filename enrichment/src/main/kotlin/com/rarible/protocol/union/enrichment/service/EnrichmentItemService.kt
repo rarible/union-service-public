@@ -78,9 +78,7 @@ class EnrichmentItemService(
         logger.info("Fetched {} items for collection {} and owner {}", count, address, owner)
     }
 
-    fun findByAuctionId(auctionIdDto: AuctionIdDto): Flow<ShortItem> {
-        return itemRepository.findWithAuction(auctionIdDto.value)
-    }
+    fun findByAuctionId(auctionIdDto: AuctionIdDto) = itemRepository.findWithAuction(auctionIdDto)
 
     suspend fun fetch(itemId: ShortItemId): UnionItem {
         val now = nowMillis()

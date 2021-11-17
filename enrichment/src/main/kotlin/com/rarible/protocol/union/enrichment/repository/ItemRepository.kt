@@ -2,6 +2,7 @@ package com.rarible.protocol.union.enrichment.repository
 
 import com.mongodb.client.result.DeleteResult
 import com.rarible.core.apm.CaptureSpan
+import com.rarible.protocol.union.dto.AuctionIdDto
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import kotlinx.coroutines.flow.Flow
@@ -16,7 +17,6 @@ import org.springframework.data.mongodb.core.findById
 import org.springframework.data.mongodb.core.index.Index
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
-import org.springframework.data.mongodb.core.query.elemMatch
 import org.springframework.data.mongodb.core.query.inValues
 import org.springframework.data.mongodb.core.query.isEqualTo
 import org.springframework.data.mongodb.core.query.lte
@@ -64,12 +64,8 @@ class ItemRepository(
         return template.find(query, ShortItem::class.java).asFlow()
     }
 
-    fun findWithAuction(id: String): Flow<ShortItem> {
-        val query = Query(
-            Criteria().andOperator(
-                ShortItem::auctions elemMatch Criteria("value").isEqualTo(id)
-            )
-        )
+    fun findWithAuction(auctionId: AuctionIdDto): Flow<ShortItem> {
+        val query = Query(ShortItem::auctions isEqualTo auctionId)
         return template.find(query, ShortItem::class.java).asFlow()
     }
 
@@ -84,8 +80,13 @@ class ItemRepository(
             .on(ShortItem::lastUpdatedAt.name, Sort.Direction.DESC)
             .background()
 
+        private val AUCTION_DEFINITION = Index()
+            .on(ShortItem::auctions.name, Sort.Direction.DESC)
+            .background()
+
         private val ALL_INDEXES = listOf(
-            MULTI_CURRENCY_DEFINITION
+            MULTI_CURRENCY_DEFINITION,
+            AUCTION_DEFINITION
         )
     }
 }
