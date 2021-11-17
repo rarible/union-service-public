@@ -28,7 +28,6 @@ import com.rarible.protocol.tezos.dto.OrderActivityMatchDto
 import com.rarible.protocol.tezos.dto.OrderActivitySideMatchDto
 import com.rarible.protocol.tezos.dto.OrderActivitySideTypeDto
 import com.rarible.protocol.tezos.dto.OrderDto
-import com.rarible.protocol.tezos.dto.OrderPriceHistoryRecordDto
 import com.rarible.protocol.tezos.dto.OrderRaribleV2DataV1Dto
 import com.rarible.protocol.tezos.dto.OrderStatusDto
 import com.rarible.protocol.tezos.dto.PartDto
@@ -71,7 +70,7 @@ fun randomTezosNftItemDto(itemId: ItemIdDto, creator: String): NftItemDto {
         date = nowMillis(),
         meta = randomTezosMetaDto(),
         creators = listOf(randomTezosPartDto(creator)),
-        owners = listOf(randomString()),
+        owners = emptyList(),
         royalties = listOf(randomTezosPartDto(randomString())),
         supply = randomBigInt(),
         deleted = randomBoolean(),
@@ -148,7 +147,7 @@ fun randomTezosOrderDto(make: AssetDto, maker: String, take: AssetDto): OrderDto
         makeBalance = randomBigInt(),
         start = randomInt(),
         end = randomInt(),
-        priceHistory = listOf(randomTezosOrderPriceHistoryRecordDto()),
+        priceHistory = listOf(),
         makerEdpk = randomString(),
         takerEdpk = randomString(),
         status = OrderStatusDto.ACTIVE,
@@ -191,14 +190,6 @@ fun randomTezosAssetFT() = AssetDto(
     assetType = FTAssetTypeDto(randomString()),
     value = randomBigDecimal()
 )
-
-fun randomTezosOrderPriceHistoryRecordDto(): OrderPriceHistoryRecordDto {
-    return OrderPriceHistoryRecordDto(
-        date = nowMillis(),
-        makeValue = randomBigDecimal(),
-        takeValue = randomBigDecimal()
-    )
-}
 
 fun randomTezosOrderActivityMatch(): OrderActivityMatchDto {
     return OrderActivityMatchDto(

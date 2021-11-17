@@ -35,7 +35,7 @@ object FlowItemConverter {
             meta = item.meta?.let { convert(it) },
             deleted = item.deleted,
             creators = item.creators.map { convert(it, blockchain) },
-            owners = item.owner?.let { listOf(UnionAddressConverter.convert(blockchain, it)) } ?: emptyList(),
+            owners = emptyList(),
             royalties = item.royalties.map { convert(it, blockchain) },
             lazySupply = BigInteger.ZERO
         )

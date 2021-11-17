@@ -25,7 +25,6 @@ class FlowItemConverterTest {
         assertThat(converted.supply).isEqualTo(dto.supply)
         assertThat(converted.deleted).isEqualTo(dto.deleted)
 
-        assertThat(converted.owners.map { it.value }).isEqualTo(listOf(dto.owner))
         assertThat(converted.royalties[0].value).isEqualTo(FlowConverter.toBasePoints(dto.royalties[0].value))
         assertThat(converted.royalties[0].account.value).isEqualTo(dto.royalties[0].account)
 

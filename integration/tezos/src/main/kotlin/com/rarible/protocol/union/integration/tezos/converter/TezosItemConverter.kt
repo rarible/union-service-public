@@ -30,7 +30,7 @@ object TezosItemConverter {
             lazySupply = item.lazySupply,
             meta = item.meta?.let { convert(it) },
             mintedAt = item.mintedAt,
-            owners = item.owners.map { UnionAddressConverter.convert(blockchain, it) },
+            owners = emptyList(),
             royalties = item.royalties.map { toRoyalty(it, blockchain) },
             supply = item.supply,
             pending = emptyList() // In Union we won't use this field for Tezos

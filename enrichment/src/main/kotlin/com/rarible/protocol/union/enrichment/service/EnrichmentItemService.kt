@@ -58,7 +58,8 @@ class EnrichmentItemService(
         return itemRepository.findAll(ids)
     }
 
-    suspend fun findByCollection(address: ContractAddress, owner: UnionAddress? = null): Flow<ShortItemId> = flow {
+    // TODO UNION - we need to get rid of usage of 'owners' field
+    fun findByCollection(address: ContractAddress, owner: UnionAddress? = null): Flow<ShortItemId> = flow {
         var continuation: String? = null
         logger.info("Fetching all items for collection {} and owner {}", address, owner)
         var count = 0

@@ -66,7 +66,7 @@ class TezosOrderConverter(
             makePriceUsd = null,
             takePriceUsd = takePriceUsd,
             signature = order.signature,
-            priceHistory = order.priceHistory?.map { convert(it) } ?: listOf(),
+            priceHistory = emptyList(),
             data = convertData(order, blockchain),
             salt = order.salt,
             pending = emptyList() // In Union we won't use this field for Tezos
