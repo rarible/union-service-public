@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.enrichment.converter
 
 import com.rarible.protocol.union.core.model.UnionOwnership
+import com.rarible.protocol.union.dto.AuctionDto
 import com.rarible.protocol.union.dto.ContractAddress
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
@@ -12,7 +13,8 @@ object EnrichedOwnershipConverter {
     fun convert(
         ownership: UnionOwnership,
         shortOwnership: ShortOwnership? = null,
-        orders: Map<OrderIdDto, OrderDto> = emptyMap()
+        orders: Map<OrderIdDto, OrderDto> = emptyMap(),
+        auctions: List<AuctionDto> = emptyList()
     ): OwnershipDto {
         return OwnershipDto(
             id = ownership.id,
@@ -26,7 +28,8 @@ object EnrichedOwnershipConverter {
             createdAt = ownership.createdAt,
             pending = ownership.pending,
             // Enrichment data
-            bestSellOrder = shortOwnership?.bestSellOrder?.let { orders[it.dtoId] }
+            bestSellOrder = shortOwnership?.bestSellOrder?.let { orders[it.dtoId] },
+            auctions = auctions
         )
     }
 }

@@ -7,6 +7,8 @@ import com.rarible.protocol.union.core.continuation.page.PageSize
 import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.core.service.OwnershipService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
+import com.rarible.protocol.union.dto.AuctionDto
+import com.rarible.protocol.union.dto.AuctionIdDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.enrichment.converter.EnrichedOwnershipConverter
@@ -26,7 +28,8 @@ import org.springframework.stereotype.Component
 class EnrichmentOwnershipService(
     private val ownershipServiceRouter: BlockchainRouter<OwnershipService>,
     private val ownershipRepository: OwnershipRepository,
-    private val enrichmentOrderService: EnrichmentOrderService
+    private val enrichmentOrderService: EnrichmentOrderService,
+    private val enrichmentAuctionService: EnrichmentAuctionService
 ) {
 
     private val logger = LoggerFactory.getLogger(EnrichmentOwnershipService::class.java)
@@ -88,7 +91,8 @@ class EnrichmentOwnershipService(
     suspend fun enrichOwnership(
         short: ShortOwnership,
         ownership: UnionOwnership? = null,
-        orders: Map<OrderIdDto, OrderDto> = emptyMap()
+        orders: Map<OrderIdDto, OrderDto> = emptyMap(),
+        auctions: Map<AuctionIdDto, AuctionDto> = emptyMap()
     ) = coroutineScope {
         val fetchedOwnership = async { ownership ?: fetch(short.id) }
         val bestSellOrder = enrichmentOrderService.fetchOrderIfDiffers(short.bestSellOrder, orders)
@@ -96,7 +100,11 @@ class EnrichmentOwnershipService(
         val bestOrders = listOfNotNull(bestSellOrder)
             .associateBy { it.id }
 
-        EnrichedOwnershipConverter.convert(fetchedOwnership.await(), short, bestOrders)
+        val auctionsData = async { enrichmentAuctionService.fetchAuctionsIfAbsent(short.auctions, auctions) }
+
+        EnrichedOwnershipConverter.convert(fetchedOwnership.await(), short, bestOrders, auctionsData.await())
     }
+
+    fun findByAuctionId(auctionIdDto: AuctionIdDto) = ownershipRepository.findWithAuction(auctionIdDto)
 
 }

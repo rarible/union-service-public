@@ -2,7 +2,9 @@ package com.rarible.protocol.union.enrichment.repository
 
 import com.mongodb.client.result.DeleteResult
 import com.rarible.core.apm.CaptureSpan
+import com.rarible.protocol.union.dto.AuctionIdDto
 import com.rarible.protocol.union.enrichment.model.ItemSellStats
+import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortOrder
 import com.rarible.protocol.union.enrichment.model.ShortOwnership
@@ -65,6 +67,11 @@ class OwnershipRepository(
         return template.find(query, ShortOwnership::class.java).asFlow()
     }
 
+    fun findWithAuction(auctionId: AuctionIdDto): Flow<ShortOwnership> {
+        val query = Query(ShortItem::auctions isEqualTo auctionId)
+        return template.find(query, ShortOwnership::class.java).asFlow()
+    }
+
     suspend fun delete(ownershipId: ShortOwnershipId): DeleteResult? {
         val criteria = Criteria("_id").isEqualTo(ownershipId)
         return template.remove(Query(criteria), collection).awaitFirstOrNull()
@@ -114,9 +121,14 @@ class OwnershipRepository(
             .on(ShortOwnership::lastUpdatedAt.name, Sort.Direction.DESC)
             .background()
 
+        private val AUCTION_DEFINITION = Index()
+            .on(ShortItem::auctions.name, Sort.Direction.DESC)
+            .background()
+
         val ALL = listOf(
             OWNERSHIP_CONTRACT_TOKENID,
-            MULTI_CURRENCY_OWNERSHIP
+            MULTI_CURRENCY_OWNERSHIP,
+            AUCTION_DEFINITION
         )
     }
 }

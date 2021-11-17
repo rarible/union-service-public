@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.enrichment.model
 
 import com.rarible.core.common.nowMillis
+import com.rarible.protocol.union.dto.AuctionIdDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import org.springframework.data.annotation.AccessType
 import org.springframework.data.annotation.Id
@@ -20,7 +21,7 @@ data class ShortOwnership(
 
     val bestSellOrders: Map<String, ShortOrder>,
 
-    val auctions: Set<String>,
+    val auctions: Set<AuctionIdDto>,
 
     val multiCurrency: Boolean = bestSellOrders.size > 1,
 
@@ -57,7 +58,7 @@ data class ShortOwnership(
     }
 
     fun isNotEmpty(): Boolean {
-        return bestSellOrder != null
+        return bestSellOrder != null || auctions.isNotEmpty()
     }
 
     @Transient

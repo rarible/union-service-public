@@ -1,6 +1,8 @@
 package com.rarible.protocol.union.listener.service
 
 import com.rarible.core.test.wait.Wait
+import com.rarible.protocol.dto.AuctionIdsDto
+import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.converter.EnrichedOwnershipConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOwnershipConverter
@@ -8,19 +10,23 @@ import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
 import com.rarible.protocol.union.enrichment.test.data.randomShortOwnership
 import com.rarible.protocol.union.enrichment.test.data.randomUnionOwnershipDto
+import com.rarible.protocol.union.integration.ethereum.converter.EthAuctionConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOwnershipConverter
+import com.rarible.protocol.union.integration.ethereum.data.randomEthAuctionDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthLegacyOrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipId
 import com.rarible.protocol.union.listener.test.AbstractIntegrationTest
 import com.rarible.protocol.union.listener.test.IntegrationTest
+import io.daonomic.rpc.domain.Word
 import io.mockk.coEvery
 import kotlinx.coroutines.FlowPreview
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import reactor.core.publisher.Flux
 import reactor.kotlin.core.publisher.toMono
 
 @FlowPreview
@@ -36,6 +42,9 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
 
     @Autowired
     lateinit var ethOrderConverter: EthOrderConverter
+
+    @Autowired
+    lateinit var ethAuctionConverter: EthAuctionConverter
 
     @Test
     fun `update event - ownership doesn't exist`() = runWithKafka {
@@ -172,6 +181,73 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
             assertThat(messages[0].key).isEqualTo(itemId.fullId())
             assertThat(messages[0].id).isEqualTo(itemId.fullId())
             assertThat(messages[0].value.ownershipId).isEqualTo(ownershipId)
+        }
+    }
+
+    @Test
+    fun `update auction event`() = runWithKafka {
+        val itemId = randomEthItemId()
+        val ownershipId = randomEthOwnershipId(itemId)
+        val ethOwnership = randomEthOwnershipDto(ownershipId)
+
+        val ethAuction = randomEthAuctionDto(itemId)
+        val auction = ethAuctionConverter.convert(ethAuction, BlockchainDto.ETHEREUM)
+            .copy(seller = ownershipId.owner)
+
+        val unionOwnership = EthOwnershipConverter.convert(ethOwnership, itemId.blockchain)
+        val shortOwnership = ShortOwnershipConverter.convert(unionOwnership)
+
+        ownershipService.save(shortOwnership)
+
+        coEvery { testEthereumOwnershipApi.getNftOwnershipById(ownershipId.value) } returns ethOwnership.toMono()
+        coEvery { testEthereumAuctionApi.getAuctionsByIds(AuctionIdsDto(listOf(Word.apply(auction.id.value)))) } returns Flux.just(ethAuction)
+
+        ownershipEventHandler.onAuctionUpdated(shortOwnership.id, auction)
+
+        val saved = ownershipService.get(shortOwnership.id)!!
+        assertThat(saved.auctions.size).isEqualTo(1)
+
+        Wait.waitAssert {
+            assertThat(ownershipEvents).hasSize(1)
+            val messages = findOwnershipUpdates(ownershipId.value)
+            assertThat(messages).hasSize(1)
+            assertThat(messages[0].key).isEqualTo(itemId.fullId())
+            assertThat(messages[0].id).isEqualTo(itemId.fullId())
+            assertThat(messages[0].value.ownership.auctions?.size).isEqualTo(1)
+        }
+    }
+
+
+    @Test
+    fun `delete auction event`() = runWithKafka {
+        val itemId = randomEthItemId()
+        val ownershipId = randomEthOwnershipId(itemId)
+        val ethOwnership = randomEthOwnershipDto(ownershipId)
+
+        val ethAuction = randomEthAuctionDto(itemId)
+        val auction = ethAuctionConverter.convert(ethAuction, BlockchainDto.ETHEREUM)
+            .copy(seller = ownershipId.owner)
+
+        val unionOwnership = EthOwnershipConverter.convert(ethOwnership, itemId.blockchain)
+        val shortOwnership = ShortOwnershipConverter.convert(unionOwnership).copy(auctions = setOf(auction.id))
+
+        ownershipService.save(shortOwnership)
+
+        coEvery { testEthereumOwnershipApi.getNftOwnershipById(ownershipId.value) } returns ethOwnership.toMono()
+        coEvery { testEthereumAuctionApi.getAuctionsByIds(AuctionIdsDto(listOf(Word.apply(auction.id.value)))) } returns Flux.just(ethAuction)
+
+        ownershipEventHandler.onAuctionDeleted(auction.id)
+
+        val saved = ownershipService.get(shortOwnership.id)!!
+        assertThat(saved.auctions).isNullOrEmpty()
+
+        Wait.waitAssert {
+            assertThat(ownershipEvents).hasSize(1)
+            val messages = findOwnershipUpdates(ownershipId.value)
+            assertThat(messages).hasSize(1)
+            assertThat(messages[0].key).isEqualTo(itemId.fullId())
+            assertThat(messages[0].id).isEqualTo(itemId.fullId())
+            assertThat(messages[0].value.ownership.auctions).isNullOrEmpty()
         }
     }
 }

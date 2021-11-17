@@ -450,6 +450,9 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
 
         itemEventService.onAuctionDeleted(auction.id)
 
+        val saved = itemService.get(shortItem.id)!!
+        assertThat(saved.auctions).isNullOrEmpty()
+
         Wait.waitAssert {
             val messages = findItemUpdates(itemId.value)
             assertThat(messages).hasSize(1)

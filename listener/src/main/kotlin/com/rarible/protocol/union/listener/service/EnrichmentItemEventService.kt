@@ -176,7 +176,7 @@ class EnrichmentItemEventService(
         auctionId: AuctionIdDto,
         notificationEnabled: Boolean,
         updateAction: suspend (item: ShortItem) -> ShortItem
-    ) {
+    ) = optimisticLock {
         itemService.findByAuctionId(auctionId).map { item ->
             val updated = updateAction(item)
             if (item != updated) {
