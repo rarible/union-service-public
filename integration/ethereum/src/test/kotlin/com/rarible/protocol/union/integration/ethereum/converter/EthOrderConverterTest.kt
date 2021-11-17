@@ -59,9 +59,6 @@ class EthOrderConverterTest {
         // In mock we are converting price 1 to 1
         assertThat(converted.makePriceUsd).isEqualTo(dto.take.valueDecimal!! / dto.make.valueDecimal!!)
         assertThat(converted.takePriceUsd).isNull()
-        assertThat(converted.priceHistory[0].date).isEqualTo(dto.priceHistory!![0].date)
-        assertThat(converted.priceHistory[0].makeValue).isEqualTo(dto.priceHistory!![0].makeValue)
-        assertThat(converted.priceHistory[0].takeValue).isEqualTo(dto.priceHistory!![0].takeValue)
         val data = converted.data as EthOrderDataLegacyDto
         assertThat(data.fee).isEqualTo(dto.data.fee)
     }
@@ -159,9 +156,6 @@ class EthOrderConverterTest {
         // In mock we are converting price 1 to 1
         assertThat(converted.makePriceUsd).isEqualTo(dto.take.valueDecimal!! / dto.make.valueDecimal!!)
         assertThat(converted.takePriceUsd).isNull()
-        assertThat(converted.priceHistory[0].date).isEqualTo(dto.priceHistory!![0].date)
-        assertThat(converted.priceHistory[0].makeValue).isEqualTo(dto.priceHistory!![0].makeValue)
-        assertThat(converted.priceHistory[0].takeValue).isEqualTo(dto.priceHistory!![0].takeValue)
 
         val data = converted.data as EthOrderDataRaribleV2DataV1Dto
         assertThat(data.payouts[0].account.value).isEqualTo(dto.data.payouts[0].account.prefixed())
@@ -200,9 +194,6 @@ class EthOrderConverterTest {
         // In mock we are converting price 1 to 1
         assertThat(converted.makePriceUsd).isEqualTo(dto.take.valueDecimal!! / dto.make.valueDecimal!!)
         assertThat(converted.takePriceUsd).isNull()
-        assertThat(converted.priceHistory[0].date).isEqualTo(dto.priceHistory!![0].date)
-        assertThat(converted.priceHistory[0].makeValue).isEqualTo(dto.priceHistory!![0].makeValue)
-        assertThat(converted.priceHistory[0].takeValue).isEqualTo(dto.priceHistory!![0].takeValue)
     }
 
     @Test
@@ -259,9 +250,6 @@ class EthOrderConverterTest {
         // In mock we are converting price 1 to 1
         assertThat(converted.makePriceUsd).isEqualTo(dto.take.valueDecimal!! / dto.make.valueDecimal!!)
         assertThat(converted.takePriceUsd).isNull()
-        assertThat(converted.priceHistory[0].date).isEqualTo(dto.priceHistory!![0].date)
-        assertThat(converted.priceHistory[0].makeValue).isEqualTo(dto.priceHistory!![0].makeValue)
-        assertThat(converted.priceHistory[0].takeValue).isEqualTo(dto.priceHistory!![0].takeValue)
     }
 
     @Test

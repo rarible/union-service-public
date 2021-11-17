@@ -65,7 +65,7 @@ class EthOrderConverter(
         val endedAt = order.end?.let { Instant.ofEpochSecond(it) }
         val signature = order.signature?.let { EthConverter.convert(it) }
         val pending = order.pending?.map { convert(it, blockchain) }
-        val priceHistory = order.priceHistory?.map { convert(it) } ?: listOf()
+        val priceHistory = emptyList<OrderPriceHistoryRecordDto>()
         val status = convert(order.status!!) // TODO ETH should be required
         return when (order) {
             is LegacyOrderDto -> {

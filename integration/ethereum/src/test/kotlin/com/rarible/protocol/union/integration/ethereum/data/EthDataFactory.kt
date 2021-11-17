@@ -44,7 +44,6 @@ import com.rarible.protocol.dto.OrderCancelDto
 import com.rarible.protocol.dto.OrderCryptoPunksDataDto
 import com.rarible.protocol.dto.OrderDataLegacyDto
 import com.rarible.protocol.dto.OrderOpenSeaV1DataV1Dto
-import com.rarible.protocol.dto.OrderPriceHistoryRecordDto
 import com.rarible.protocol.dto.OrderRaribleV2DataV1Dto
 import com.rarible.protocol.dto.OrderSideDto
 import com.rarible.protocol.dto.OrderSideMatchDto
@@ -102,7 +101,7 @@ fun randomEthNftItemDto(itemId: ItemIdDto): NftItemDto {
         lazySupply = randomBigInt(),
         royalties = listOf(randomEthPartDto()),
         date = nowMillis(),
-        owners = listOf(randomAddress()),
+        owners = listOf(),
         pending = listOf(randomEthItemTransferDto()),
         deleted = false,
         meta = randomEthItemMeta()
@@ -255,7 +254,7 @@ fun randomEthLegacyOrderDto(make: AssetDto, maker: Address, take: AssetDto): Leg
         takePriceUsd = randomBigInt().toBigDecimal(),
         start = randomInt().toLong(),
         end = randomInt().toLong(),
-        priceHistory = listOf(randomEthOrderPriceHistoryRecordDto())
+        priceHistory = listOf()
     )
 }
 
@@ -292,7 +291,7 @@ fun randomEthV2OrderDto(make: AssetDto, maker: Address, take: AssetDto): Rarible
         takePriceUsd = randomBigInt().toBigDecimal(),
         start = randomInt().toLong(),
         end = randomInt().toLong(),
-        priceHistory = listOf(randomEthOrderPriceHistoryRecordDto())
+        priceHistory = listOf()
     )
 }
 
@@ -331,7 +330,7 @@ fun randomEthOpenSeaV1OrderDto(make: AssetDto, maker: Address, take: AssetDto): 
         takePriceUsd = randomBigInt().toBigDecimal(),
         start = randomInt().toLong(),
         end = randomInt().toLong(),
-        priceHistory = listOf(randomEthOrderPriceHistoryRecordDto())
+        priceHistory = listOf()
     )
 }
 
@@ -370,7 +369,7 @@ fun randomEthCryptoPunksOrderDto(make: AssetDto, maker: Address, take: AssetDto)
         takePriceUsd = randomBigInt().toBigDecimal(),
         start = randomInt().toLong(),
         end = randomInt().toLong(),
-        priceHistory = listOf(randomEthOrderPriceHistoryRecordDto())
+        priceHistory = listOf()
     )
 }
 
@@ -432,14 +431,6 @@ fun randomEthOnChainOrderDto(): OnChainOrderDto {
         make = randomEthAssetErc721(),
         take = randomEthAssetErc20(),
         maker = randomAddress()
-    )
-}
-
-fun randomEthOrderPriceHistoryRecordDto(): OrderPriceHistoryRecordDto {
-    return OrderPriceHistoryRecordDto(
-        date = nowMillis(),
-        makeValue = randomBigDecimal(),
-        takeValue = randomBigDecimal()
     )
 }
 
