@@ -76,7 +76,7 @@ open class EthAuctionService(
     }
 }
 
-@CaptureSpan(type = "ext", subtype = "ethereum")
+@CaptureSpan(type = "blockchain")
 open class EthereumAuctionService(
     auctionControllerApi: AuctionControllerApi,
     ethAuctionConverter: EthAuctionConverter
@@ -86,7 +86,7 @@ open class EthereumAuctionService(
     ethAuctionConverter
 )
 
-@CaptureSpan(type = "ext", subtype = "polygon")
+@CaptureSpan(type = "blockchain")
 open class PolygonAuctionService(
     auctionControllerApi: AuctionControllerApi,
     ethAuctionConverter: EthAuctionConverter

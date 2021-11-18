@@ -161,7 +161,7 @@ open class EthActivityService(
     }
 }
 
-@CaptureSpan(type = "ext", subtype = "blockchain")
+@CaptureSpan(type = "blockchain")
 open class EthereumActivityService(
     activityItemControllerApi: NftActivityControllerApi,
     activityOrderControllerApi: OrderActivityControllerApi,
@@ -173,7 +173,7 @@ open class EthereumActivityService(
     ethActivityConverter
 )
 
-@CaptureSpan(type = "ext", subtype = "blockchain")
+@CaptureSpan(type = "blockchain")
 open class PolygonActivityService(
     activityItemControllerApi: NftActivityControllerApi,
     activityOrderControllerApi: OrderActivityControllerApi,

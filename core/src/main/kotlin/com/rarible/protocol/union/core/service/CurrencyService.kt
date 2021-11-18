@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.core.service
 
-import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.core.client.CurrencyClient
 import com.rarible.protocol.union.core.exception.UnionCurrencyException
@@ -19,7 +18,6 @@ import java.time.Instant
 import java.util.concurrent.ConcurrentHashMap
 
 @Component
-@CaptureSpan(type = "app", subtype = "currency")
 class CurrencyService(
     private val currencyClient: CurrencyClient
 ) {

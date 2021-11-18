@@ -60,7 +60,7 @@ class MediaMetaService(
             Long.MAX_VALUE
         }
 
-    @CaptureSpan(type = "ext", subtype = "meta")
+    @CaptureSpan(type = "meta")
     override fun get(url: String): Mono<ContentMeta> {
         val now = nowMillis()
         val result = LoggingUtils.withMarker { marker ->

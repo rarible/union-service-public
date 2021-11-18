@@ -34,7 +34,7 @@ import kotlinx.coroutines.reactive.awaitFirst
 import java.time.Instant
 
 // TODO UNION add tests when tezos add sorting
-@CaptureSpan(type = "ext", subtype = "blockchain")
+@CaptureSpan(type = "blockchain")
 open class TezosActivityService(
     private val activityItemControllerApi: NftActivityControllerApi,
     private val activityOrderControllerApi: OrderActivityControllerApi,

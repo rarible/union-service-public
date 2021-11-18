@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
-@CaptureSpan(type = "ext", subtype = "kafka")
+@CaptureSpan(type = "kafka")
 class OutgoingOwnershipEventListener(
     private val eventsProducer: RaribleKafkaProducer<OwnershipEventDto>
 ) : OutgoingEventListener<OwnershipEventDto> {

@@ -2,6 +2,7 @@ package com.rarible.protocol.union.enrichment.service
 
 import com.mongodb.client.result.DeleteResult
 import com.rarible.core.apm.CaptureSpan
+import com.rarible.core.apm.SpanType
 import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.core.continuation.page.PageSize
 import com.rarible.protocol.union.core.model.UnionOwnership
@@ -22,7 +23,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
-@CaptureSpan(type = "app", subtype = "enrichment")
+@CaptureSpan(type = SpanType.APP)
 class EnrichmentOwnershipService(
     private val ownershipServiceRouter: BlockchainRouter<OwnershipService>,
     private val ownershipRepository: OwnershipRepository,

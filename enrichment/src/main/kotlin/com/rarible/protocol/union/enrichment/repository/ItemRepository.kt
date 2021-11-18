@@ -2,6 +2,7 @@ package com.rarible.protocol.union.enrichment.repository
 
 import com.mongodb.client.result.DeleteResult
 import com.rarible.core.apm.CaptureSpan
+import com.rarible.core.apm.SpanType
 import com.rarible.protocol.union.dto.AuctionIdDto
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
@@ -24,7 +25,7 @@ import org.springframework.stereotype.Component
 import java.time.Instant
 
 @Component
-@CaptureSpan(type = "db")
+@CaptureSpan(type = SpanType.DB)
 class ItemRepository(
     private val template: ReactiveMongoTemplate
 ) {

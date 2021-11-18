@@ -15,7 +15,7 @@ import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.http.HttpStatus
 import org.springframework.web.reactive.function.client.WebClientResponseException
 
-@CaptureSpan(type = "ext", subtype = "blockchain")
+@CaptureSpan(type = "blockchain")
 open class FlowItemService(
     private val flowNftItemControllerApi: FlowNftItemControllerApi
 ) : AbstractBlockchainService(BlockchainDto.FLOW), ItemService {

@@ -196,7 +196,7 @@ open class EthOrderService(
     }
 }
 
-@CaptureSpan(type = "ext", subtype = "blockchain")
+@CaptureSpan(type = "blockchain")
 open class EthereumOrderService(
     orderControllerApi: OrderControllerApi,
     ethOrderConverter: EthOrderConverter
@@ -206,7 +206,7 @@ open class EthereumOrderService(
     ethOrderConverter
 )
 
-@CaptureSpan(type = "ext", subtype = "blockchain")
+@CaptureSpan(type = "blockchain")
 open class PolygonOrderService(
     orderControllerApi: OrderControllerApi,
     ethOrderConverter: EthOrderConverter

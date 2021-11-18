@@ -29,7 +29,7 @@ open class EthSignatureService(
     }
 }
 
-@CaptureSpan(type = "ext", subtype = "blockchain")
+@CaptureSpan(type = "blockchain")
 open class EthereumSignatureService(
     signatureControllerApi: OrderSignatureControllerApi
 ) : EthSignatureService(
@@ -37,7 +37,7 @@ open class EthereumSignatureService(
     signatureControllerApi
 )
 
-@CaptureSpan(type = "ext", subtype = "blockchain")
+@CaptureSpan(type = "blockchain")
 open class PolygonSignatureService(
     signatureControllerApi: OrderSignatureControllerApi
 ) : EthSignatureService(

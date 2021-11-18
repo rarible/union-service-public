@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.enrichment.service
 
 import com.rarible.core.apm.CaptureSpan
+import com.rarible.core.apm.SpanType
 import com.rarible.core.client.WebClientResponseProxyException
 import com.rarible.protocol.union.core.model.UnionImageProperties
 import com.rarible.protocol.union.core.model.UnionMeta
@@ -24,7 +25,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
 
 @Component
-@CaptureSpan(type = "app", subtype = "enrichment")
+@CaptureSpan(type = SpanType.APP)
 class EnrichmentMetaService(
     private val router: BlockchainRouter<ItemService>,
     private val contentMetaService: ContentMetaService

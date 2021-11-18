@@ -96,7 +96,7 @@ open class EthItemService(
     }
 }
 
-@CaptureSpan(type = "ext", subtype = "blockchain")
+@CaptureSpan(type = "blockchain")
 open class EthereumItemService(
     itemControllerApi: NftItemControllerApi
 ) : EthItemService(
@@ -104,7 +104,7 @@ open class EthereumItemService(
     itemControllerApi
 )
 
-@CaptureSpan(type = "ext", subtype = "blockchain")
+@CaptureSpan(type = "blockchain")
 open class PolygonItemService(
     itemControllerApi: NftItemControllerApi
 ) : EthItemService(

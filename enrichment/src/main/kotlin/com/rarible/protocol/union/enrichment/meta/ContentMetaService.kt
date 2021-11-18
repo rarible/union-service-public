@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.enrichment.meta
 
 import com.rarible.core.apm.CaptureSpan
+import com.rarible.core.apm.SpanType
 import com.rarible.core.cache.CacheService
 import com.rarible.core.cache.get
 import com.rarible.core.common.nowMillis
@@ -11,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 @Component
-@CaptureSpan(type = "app")
+@CaptureSpan(type = SpanType.APP)
 class ContentMetaService(
     private val mediaMetaService: MediaMetaService,
     private val ipfsUrlResolver: IpfsUrlResolver,

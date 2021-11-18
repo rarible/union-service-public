@@ -11,7 +11,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.tezos.converter.TezosOwnershipConverter
 import kotlinx.coroutines.reactive.awaitFirst
 
-@CaptureSpan(type = "ext", subtype = "blockchain")
+@CaptureSpan(type = "blockchain")
 open class TezosOwnershipService(
     private val ownershipControllerApi: NftOwnershipControllerApi
 ) : AbstractBlockchainService(BlockchainDto.TEZOS), OwnershipService {

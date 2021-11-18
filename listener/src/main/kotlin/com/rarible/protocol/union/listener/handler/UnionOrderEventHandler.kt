@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.listener.handler
 
 import com.rarible.core.apm.CaptureSpan
+import com.rarible.core.apm.SpanType
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.model.UnionOrderEvent
 import com.rarible.protocol.union.core.model.UnionOrderUpdateEvent
@@ -8,7 +9,7 @@ import com.rarible.protocol.union.listener.service.EnrichmentOrderEventService
 import org.springframework.stereotype.Component
 
 @Component
-@CaptureSpan(type = "app", subtype = "event")
+@CaptureSpan(type = SpanType.APP)
 class UnionOrderEventHandler(
     private val orderEventService: EnrichmentOrderEventService
 ) : IncomingEventHandler<UnionOrderEvent> {

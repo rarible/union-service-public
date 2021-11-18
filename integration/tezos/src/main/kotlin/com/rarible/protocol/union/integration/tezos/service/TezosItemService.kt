@@ -14,7 +14,7 @@ import kotlinx.coroutines.reactive.awaitFirst
 import org.springframework.http.HttpStatus
 import org.springframework.web.reactive.function.client.WebClientResponseException
 
-@CaptureSpan(type = "ext", subtype = "blockchain")
+@CaptureSpan(type = "blockchain")
 open class TezosItemService(
     private val itemControllerApi: NftItemControllerApi
 ) : AbstractBlockchainService(BlockchainDto.TEZOS), ItemService {

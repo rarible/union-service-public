@@ -15,7 +15,7 @@ import com.rarible.protocol.union.integration.flow.converter.FlowActivityConvert
 import kotlinx.coroutines.reactive.awaitFirst
 import java.time.Instant
 
-@CaptureSpan(type = "ext", subtype = "blockchain")
+@CaptureSpan(type = "blockchain")
 open class FlowActivityService(
     private val activityControllerApi: FlowNftOrderActivityControllerApi,
     private val flowActivityConverter: FlowActivityConverter
