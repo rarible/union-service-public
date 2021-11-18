@@ -26,6 +26,7 @@ object EnrichedItemConverter {
             tokenId = item.id.tokenId,
             creators = item.creators,
             owners = item.owners,
+            // TODO UNION Remove in 1.19
             royalties = item.royalties,
             lazySupply = item.lazySupply,
             pending = item.pending,

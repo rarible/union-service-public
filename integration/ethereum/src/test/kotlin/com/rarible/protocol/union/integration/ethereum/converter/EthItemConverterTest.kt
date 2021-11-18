@@ -64,9 +64,6 @@ class EthItemConverterTest {
         assertThat(converted.deleted).isEqualTo(dto.deleted)
         assertThat(converted.lazySupply).isEqualTo(dto.lazySupply)
 
-        assertThat(converted.royalties[0].account.value).isEqualTo(dto.royalties[0].account.prefixed())
-        assertThat(converted.royalties[0].value).isEqualTo(dto.royalties[0].value)
-
         assertThat(converted.creators[0].account.value).isEqualTo(dto.creators[0].account.prefixed())
         assertThat(converted.creators[0].value).isEqualTo(dto.creators[0].value)
 

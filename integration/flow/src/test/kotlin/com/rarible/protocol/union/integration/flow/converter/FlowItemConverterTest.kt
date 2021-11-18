@@ -25,6 +25,7 @@ class FlowItemConverterTest {
         assertThat(converted.supply).isEqualTo(dto.supply)
         assertThat(converted.deleted).isEqualTo(dto.deleted)
 
+        // TODO TEZOS Remove when Flow implement getItemRoyalties
         assertThat(converted.royalties[0].value).isEqualTo(FlowConverter.toBasePoints(dto.royalties[0].value))
         assertThat(converted.royalties[0].account.value).isEqualTo(dto.royalties[0].account)
 
