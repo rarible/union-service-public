@@ -8,6 +8,8 @@ import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.RoyaltyDto
+import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthItemConverter
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
@@ -37,6 +39,12 @@ open class EthItemService(
     override suspend fun getItemById(itemId: String): UnionItem {
         val item = itemControllerApi.getNftItemById(itemId).awaitFirst()
         return EthItemConverter.convert(item, blockchain)
+    }
+
+    override suspend fun getItemRoyaltiesById(itemId: String): List<RoyaltyDto> {
+        val royaltyList = itemControllerApi.getNftItemRoyaltyById(itemId).awaitFirst()
+        val royalties = royaltyList.royalty.orEmpty()
+        return royalties.map { EthConverter.convert(it, blockchain) }
     }
 
     override suspend fun getItemMetaById(itemId: String): UnionMeta {

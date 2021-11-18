@@ -7,6 +7,7 @@ import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.RoyaltyDto
 
 class DummyItemService(
     blockchain: BlockchainDto
@@ -24,6 +25,10 @@ class DummyItemService(
 
     override suspend fun getItemById(itemId: String): UnionItem {
         throw UnionNotFoundException("Item [$itemId] not found, ${blockchain.name} is not available")
+    }
+
+    override suspend fun getItemRoyaltiesById(itemId: String): List<RoyaltyDto> {
+        throw UnionNotFoundException("Royalties for Item [$itemId] not found, ${blockchain.name} is not available")
     }
 
     override suspend fun getItemMetaById(itemId: String): UnionMeta {

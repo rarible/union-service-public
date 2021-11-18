@@ -4,6 +4,7 @@ import com.rarible.protocol.union.core.continuation.page.Page
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.service.router.BlockchainService
+import com.rarible.protocol.union.dto.RoyaltyDto
 
 interface ItemService : BlockchainService {
 
@@ -18,6 +19,10 @@ interface ItemService : BlockchainService {
     suspend fun getItemById(
         itemId: String
     ): UnionItem
+
+    suspend fun getItemRoyaltiesById(
+        itemId: String
+    ): List<RoyaltyDto>
 
     suspend fun getItemMetaById(
         itemId: String
