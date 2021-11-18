@@ -50,10 +50,12 @@ class EthActivityConverterTest {
         assertMatchSide(converted.right, dto.right)
 
         assertThat(converted.source.name).isEqualTo(dto.source.name)
-        assertThat(converted.blockchainInfo.transactionHash).isEqualTo(dto.transactionHash.prefixed())
-        assertThat(converted.blockchainInfo.blockHash).isEqualTo(dto.blockHash.prefixed())
-        assertThat(converted.blockchainInfo.blockNumber).isEqualTo(dto.blockNumber)
-        assertThat(converted.blockchainInfo.logIndex).isEqualTo(dto.logIndex)
+        assertThat(converted.transactionHash).isEqualTo(dto.transactionHash.prefixed())
+        // TODO UNION remove in 1.19
+        assertThat(converted.blockchainInfo!!.transactionHash).isEqualTo(dto.transactionHash.prefixed())
+        assertThat(converted.blockchainInfo!!.blockHash).isEqualTo(dto.blockHash.prefixed())
+        assertThat(converted.blockchainInfo!!.blockNumber).isEqualTo(dto.blockNumber)
+        assertThat(converted.blockchainInfo!!.logIndex).isEqualTo(dto.logIndex)
     }
 
     @Test
@@ -146,10 +148,12 @@ class EthActivityConverterTest {
         assertThat(converted.source?.name).isEqualTo(dto.source.name)
         assertThat(converted.hash).isEqualTo(dto.hash.prefixed())
         assertThat(converted.maker.value).isEqualTo(dto.maker.prefixed())
-        assertThat(converted.blockchainInfo.transactionHash).isEqualTo(dto.transactionHash.prefixed())
-        assertThat(converted.blockchainInfo.blockHash).isEqualTo(dto.blockHash.prefixed())
-        assertThat(converted.blockchainInfo.blockNumber).isEqualTo(dto.blockNumber)
-        assertThat(converted.blockchainInfo.logIndex).isEqualTo(dto.logIndex)
+        assertThat(converted.transactionHash).isEqualTo(dto.transactionHash.prefixed())
+        // TODO UNION remove in 1.19
+        assertThat(converted.blockchainInfo!!.transactionHash).isEqualTo(dto.transactionHash.prefixed())
+        assertThat(converted.blockchainInfo!!.blockHash).isEqualTo(dto.blockHash.prefixed())
+        assertThat(converted.blockchainInfo!!.blockNumber).isEqualTo(dto.blockNumber)
+        assertThat(converted.blockchainInfo!!.logIndex).isEqualTo(dto.logIndex)
     }
 
     @Test
@@ -163,6 +167,8 @@ class EthActivityConverterTest {
         assertThat(converted.source?.name).isEqualTo(dto.source.name)
         assertThat(converted.hash).isEqualTo(dto.hash.prefixed())
         assertThat(converted.maker.value).isEqualTo(dto.maker.prefixed())
+        assertThat(converted.transactionHash).isEqualTo(dto.transactionHash.prefixed())
+        // TODO UNION remove in 1.19
         assertThat(converted.blockchainInfo?.transactionHash).isEqualTo(dto.transactionHash.prefixed())
         assertThat(converted.blockchainInfo?.blockHash).isEqualTo(dto.blockHash.prefixed())
         assertThat(converted.blockchainInfo?.blockNumber).isEqualTo(dto.blockNumber)
@@ -180,10 +186,12 @@ class EthActivityConverterTest {
         assertThat(converted.contract.value).isEqualTo(dto.contract.prefixed())
         assertThat(converted.tokenId).isEqualTo(dto.tokenId)
         assertThat(converted.value).isEqualTo(dto.value)
-        assertThat(converted.blockchainInfo.transactionHash).isEqualTo(dto.transactionHash.prefixed())
-        assertThat(converted.blockchainInfo.blockHash).isEqualTo(dto.blockHash.prefixed())
-        assertThat(converted.blockchainInfo.blockNumber).isEqualTo(dto.blockNumber)
-        assertThat(converted.blockchainInfo.logIndex).isEqualTo(dto.logIndex)
+        assertThat(converted.transactionHash).isEqualTo(dto.transactionHash.prefixed())
+        // TODO UNION remove in 1.19
+        assertThat(converted.blockchainInfo!!.transactionHash).isEqualTo(dto.transactionHash.prefixed())
+        assertThat(converted.blockchainInfo!!.blockHash).isEqualTo(dto.blockHash.prefixed())
+        assertThat(converted.blockchainInfo!!.blockNumber).isEqualTo(dto.blockNumber)
+        assertThat(converted.blockchainInfo!!.logIndex).isEqualTo(dto.logIndex)
     }
 
     @Test
@@ -197,10 +205,12 @@ class EthActivityConverterTest {
         assertThat(converted.contract.value).isEqualTo(dto.contract.prefixed())
         assertThat(converted.tokenId).isEqualTo(dto.tokenId)
         assertThat(converted.value).isEqualTo(dto.value)
-        assertThat(converted.blockchainInfo.transactionHash).isEqualTo(dto.transactionHash.prefixed())
-        assertThat(converted.blockchainInfo.blockHash).isEqualTo(dto.blockHash.prefixed())
-        assertThat(converted.blockchainInfo.blockNumber).isEqualTo(dto.blockNumber)
-        assertThat(converted.blockchainInfo.logIndex).isEqualTo(dto.logIndex)
+        assertThat(converted.transactionHash).isEqualTo(dto.transactionHash.prefixed())
+        // TODO UNION remove in 1.19
+        assertThat(converted.blockchainInfo!!.transactionHash).isEqualTo(dto.transactionHash.prefixed())
+        assertThat(converted.blockchainInfo!!.blockHash).isEqualTo(dto.blockHash.prefixed())
+        assertThat(converted.blockchainInfo!!.blockNumber).isEqualTo(dto.blockNumber)
+        assertThat(converted.blockchainInfo!!.logIndex).isEqualTo(dto.logIndex)
     }
 
     @Test
@@ -214,10 +224,12 @@ class EthActivityConverterTest {
         assertThat(converted.contract.value).isEqualTo(dto.contract.prefixed())
         assertThat(converted.tokenId).isEqualTo(dto.tokenId)
         assertThat(converted.value).isEqualTo(dto.value)
-        assertThat(converted.blockchainInfo.transactionHash).isEqualTo(dto.transactionHash.prefixed())
-        assertThat(converted.blockchainInfo.blockHash).isEqualTo(dto.blockHash.prefixed())
-        assertThat(converted.blockchainInfo.blockNumber).isEqualTo(dto.blockNumber)
-        assertThat(converted.blockchainInfo.logIndex).isEqualTo(dto.logIndex)
+        assertThat(converted.transactionHash).isEqualTo(dto.transactionHash.prefixed())
+        // TODO UNION remove in 1.19
+        assertThat(converted.blockchainInfo!!.transactionHash).isEqualTo(dto.transactionHash.prefixed())
+        assertThat(converted.blockchainInfo!!.blockHash).isEqualTo(dto.blockHash.prefixed())
+        assertThat(converted.blockchainInfo!!.blockNumber).isEqualTo(dto.blockNumber)
+        assertThat(converted.blockchainInfo!!.logIndex).isEqualTo(dto.logIndex)
     }
 
     @Test
