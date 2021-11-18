@@ -3,12 +3,14 @@ package com.rarible.protocol.union.core
 import com.rarible.protocol.currency.api.client.CurrencyApiClientFactory
 import com.rarible.protocol.currency.api.client.CurrencyControllerApi
 import com.rarible.protocol.union.core.service.ActivityService
+import com.rarible.protocol.union.core.service.AuctionService
 import com.rarible.protocol.union.core.service.CollectionService
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.OwnershipService
 import com.rarible.protocol.union.core.service.SignatureService
 import com.rarible.protocol.union.core.service.dummy.DummyActivityService
+import com.rarible.protocol.union.core.service.dummy.DummyAuctionService
 import com.rarible.protocol.union.core.service.dummy.DummyCollectionService
 import com.rarible.protocol.union.core.service.dummy.DummyItemService
 import com.rarible.protocol.union.core.service.dummy.DummyOrderService
@@ -81,6 +83,17 @@ class CoreConfiguration(
         disabled.forEach {
             result.add(DummyOrderService(it))
             logger.info("OrderService for blockchain {} disabled or not implemented, replaced by dummy", it.name)
+        }
+        return BlockchainRouter(services, enabledBlockchains)
+    }
+
+    @Bean
+    fun auctionServiceRouter(services: List<AuctionService>): BlockchainRouter<AuctionService> {
+        val result = ArrayList(services)
+        val disabled = getDisabledBlockchains(services)
+        disabled.forEach {
+            result.add(DummyAuctionService(it))
+            logger.info("AuctionService for blockchain {} disabled or not implemented, replaced by dummy", it.name)
         }
         return BlockchainRouter(services, enabledBlockchains)
     }

@@ -100,7 +100,7 @@ class EnrichmentOrderEventService(
         try {
             call()
         } catch (ex: WebClientResponseProxyException) {
-            logger.warn("Received NOT_FOUND code from client, details: {}, message: {}", ex.data, ex.message)
+            logger.warn("Received NOT_FOUND code from client during order updating, details: {}, message: {}", ex.data, ex.message)
         }
     }
 

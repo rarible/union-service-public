@@ -278,6 +278,11 @@ class TestListenerConfiguration {
     @Qualifier("ethereum.order.api")
     fun testEthereumOrderApi(): com.rarible.protocol.order.api.client.OrderControllerApi = mockk()
 
+    @Bean
+    @Primary
+    @Qualifier("ethereum.auction.api")
+    fun testEthereumAuctionApi(): com.rarible.protocol.order.api.client.AuctionControllerApi = mockk()
+
 
     //--------------------- FLOW ---------------------//
     @Bean

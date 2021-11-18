@@ -5,6 +5,7 @@ import com.rarible.protocol.nft.api.client.NftCollectionControllerApi
 import com.rarible.protocol.nft.api.client.NftIndexerApiClientFactory
 import com.rarible.protocol.nft.api.client.NftItemControllerApi
 import com.rarible.protocol.nft.api.client.NftOwnershipControllerApi
+import com.rarible.protocol.order.api.client.AuctionControllerApi
 import com.rarible.protocol.order.api.client.OrderActivityControllerApi
 import com.rarible.protocol.order.api.client.OrderControllerApi
 import com.rarible.protocol.order.api.client.OrderIndexerApiClientFactory
@@ -12,14 +13,17 @@ import com.rarible.protocol.order.api.client.OrderSignatureControllerApi
 import com.rarible.protocol.union.core.CoreConfiguration
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.ethereum.converter.EthActivityConverter
+import com.rarible.protocol.union.integration.ethereum.converter.EthAuctionConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
 import com.rarible.protocol.union.integration.ethereum.service.EthActivityService
+import com.rarible.protocol.union.integration.ethereum.service.EthAuctionService
 import com.rarible.protocol.union.integration.ethereum.service.EthCollectionService
 import com.rarible.protocol.union.integration.ethereum.service.EthItemService
 import com.rarible.protocol.union.integration.ethereum.service.EthOrderService
 import com.rarible.protocol.union.integration.ethereum.service.EthOwnershipService
 import com.rarible.protocol.union.integration.ethereum.service.EthSignatureService
 import com.rarible.protocol.union.integration.ethereum.service.EthereumActivityService
+import com.rarible.protocol.union.integration.ethereum.service.EthereumAuctionService
 import com.rarible.protocol.union.integration.ethereum.service.EthereumCollectionService
 import com.rarible.protocol.union.integration.ethereum.service.EthereumItemService
 import com.rarible.protocol.union.integration.ethereum.service.EthereumOrderService
@@ -67,6 +71,11 @@ class EthereumApiConfiguration {
         factory.createOrderApiClient(ethereum)
 
     @Bean
+    @Qualifier("ethereum.auction.api")
+    fun ethereumAuctionApi(factory: OrderIndexerApiClientFactory): AuctionControllerApi =
+        factory.createAuctionApiClient(ethereum)
+
+    @Bean
     @Qualifier("ethereum.signature.api")
     fun ethereumSignatureApi(factory: OrderIndexerApiClientFactory): OrderSignatureControllerApi =
         factory.createOrderSignatureApiClient(ethereum)
@@ -110,6 +119,14 @@ class EthereumApiConfiguration {
         converter: EthOrderConverter
     ): EthOrderService {
         return EthereumOrderService(controllerApi, converter)
+    }
+
+    @Bean
+    fun ethereumAuctionService(
+        @Qualifier("ethereum.auction.api") auctionApi: AuctionControllerApi,
+        converter: EthAuctionConverter
+    ): EthAuctionService {
+        return EthereumAuctionService(auctionApi, converter)
     }
 
     @Bean

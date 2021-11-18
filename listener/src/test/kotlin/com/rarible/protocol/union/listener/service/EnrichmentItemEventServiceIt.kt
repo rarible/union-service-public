@@ -1,9 +1,12 @@
 package com.rarible.protocol.union.listener.service
 
 import com.rarible.core.test.wait.Wait
+import com.rarible.protocol.dto.AuctionIdsDto
 import com.rarible.protocol.dto.NftItemsDto
 import com.rarible.protocol.dto.OrderStatusDto
 import com.rarible.protocol.dto.OrdersPaginationDto
+import com.rarible.protocol.union.dto.AssetDto
+import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ContractAddress
 import com.rarible.protocol.union.enrichment.converter.EnrichedItemConverter
 import com.rarible.protocol.union.enrichment.converter.ShortItemConverter
@@ -19,13 +22,16 @@ import com.rarible.protocol.union.enrichment.test.data.randomUnionBidOrderDto
 import com.rarible.protocol.union.enrichment.test.data.randomUnionItem
 import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrderDto
 import com.rarible.protocol.union.enrichment.util.bidCurrencyId
+import com.rarible.protocol.union.integration.ethereum.converter.EthAuctionConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthItemConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
+import com.rarible.protocol.union.integration.ethereum.data.randomEthAuctionDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthLegacyOrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthNftItemDto
 import com.rarible.protocol.union.listener.test.AbstractIntegrationTest
 import com.rarible.protocol.union.listener.test.IntegrationTest
+import io.daonomic.rpc.domain.Word
 import io.mockk.coEvery
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.delay
@@ -35,6 +41,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
 
@@ -56,6 +63,9 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
 
     @Autowired
     lateinit var ethOrderConverter: EthOrderConverter
+
+    @Autowired
+    lateinit var ethAuctionConverter: EthAuctionConverter
 
     @Autowired
     lateinit var enrichmentMetaService: EnrichmentMetaService
@@ -362,5 +372,92 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
 
         val list = itemService.findByCollection(collectionId).toList()
         assertEquals(3, list.size)
+    }
+
+    @Test
+    fun `on auction update`() = runWithKafka {
+        val itemId = randomEthItemId()
+        val ethItem = randomEthNftItemDto(itemId)
+
+        val unionItem = EthItemConverter.convert(ethItem, itemId.blockchain)
+        val shortItem = ShortItemConverter.convert(unionItem)
+        val auction = ethAuctionConverter.convert(randomEthAuctionDto(itemId), BlockchainDto.ETHEREUM)
+        itemService.save(shortItem)
+
+        coEvery { testEthereumItemApi.getNftItemById(itemId.value) } returns ethItem.toMono()
+        coEvery { testEthereumItemApi.getNftItemMetaById(itemId.value) } returns ethItem.meta!!.toMono()
+
+        itemEventService.onAuctionUpdated(shortItem.id, auction)
+
+        val saved = itemService.get(shortItem.id)!!
+        assertThat(saved.auctions).isEqualTo(setOf(auction.id))
+
+        Wait.waitAssert {
+            val messages = findItemUpdates(itemId.value)
+            assertThat(messages).hasSize(1)
+            assertThat(messages[0].value.itemId).isEqualTo(itemId)
+            assertThat(messages[0].value.item.auctions.size).isEqualTo(1)
+        }
+    }
+
+    @Test
+    fun `on auction update with auction fetching`() = runWithKafka {
+        val itemId = randomEthItemId()
+        val ethItem = randomEthNftItemDto(itemId)
+
+        val unionItem = EthItemConverter.convert(ethItem, itemId.blockchain)
+        val shortItem = ShortItemConverter.convert(unionItem)
+        val ethAuction = randomEthAuctionDto(itemId)
+        val auction = ethAuctionConverter.convert(ethAuction, BlockchainDto.ETHEREUM)
+        itemService.save(shortItem)
+
+        coEvery { testEthereumItemApi.getNftItemById(itemId.value) } returns ethItem.toMono()
+        coEvery { testEthereumItemApi.getNftItemMetaById(itemId.value) } returns ethItem.meta!!.toMono()
+        coEvery { testEthereumAuctionApi.getAuctionsByIds(AuctionIdsDto(listOf(Word.apply(auction.id.value)))) } returns Flux.just(ethAuction)
+
+        itemEventService.onAuctionUpdated(shortItem.id, auction)
+
+        val newAuction = ethAuctionConverter.convert(randomEthAuctionDto(itemId), BlockchainDto.ETHEREUM)
+        itemEventService.onAuctionUpdated(shortItem.id, newAuction)
+
+        val saved = itemService.get(shortItem.id)!!
+        assertThat(saved.auctions.size).isEqualTo(2)
+
+        Wait.waitAssert {
+            val messages = findItemUpdates(itemId.value)
+            assertThat(messages).hasSize(2)
+
+            messages.filter { it.value.item.auctions?.size == 2 }.map { it.value }.forEach {
+                assertThat(messages[0].value.itemId).isEqualTo(itemId)
+                assertThat(it.item.auctions.size).isEqualTo(2)
+            }
+        }
+    }
+
+    @Test
+    fun `on auction delete`() = runWithKafka {
+        val itemId = randomEthItemId()
+        val ethItem = randomEthNftItemDto(itemId)
+
+        val unionItem = EthItemConverter.convert(ethItem, itemId.blockchain)
+        val ethAuction = randomEthAuctionDto(itemId)
+        val auction = ethAuctionConverter.convert(ethAuction, BlockchainDto.ETHEREUM)
+        val shortItem = ShortItemConverter.convert(unionItem).copy(auctions = setOf(auction.id))
+        itemService.save(shortItem)
+
+        coEvery { testEthereumItemApi.getNftItemById(itemId.value) } returns ethItem.toMono()
+        coEvery { testEthereumItemApi.getNftItemMetaById(itemId.value) } returns ethItem.meta!!.toMono()
+
+        itemEventService.onAuctionDeleted(auction.id)
+
+        val saved = itemService.get(shortItem.id)!!
+        assertThat(saved.auctions).isNullOrEmpty()
+
+        Wait.waitAssert {
+            val messages = findItemUpdates(itemId.value)
+            assertThat(messages).hasSize(1)
+            assertThat(messages[0].value.itemId).isEqualTo(itemId)
+            assertThat(messages[0].value.item.auctions).isEmpty()
+        }
     }
 }

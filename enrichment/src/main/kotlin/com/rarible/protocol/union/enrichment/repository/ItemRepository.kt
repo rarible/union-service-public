@@ -2,6 +2,7 @@ package com.rarible.protocol.union.enrichment.repository
 
 import com.mongodb.client.result.DeleteResult
 import com.rarible.core.apm.CaptureSpan
+import com.rarible.protocol.union.dto.AuctionIdDto
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import kotlinx.coroutines.flow.Flow
@@ -63,6 +64,11 @@ class ItemRepository(
         return template.find(query, ShortItem::class.java).asFlow()
     }
 
+    fun findWithAuction(auctionId: AuctionIdDto): Flow<ShortItem> {
+        val query = Query(ShortItem::auctions isEqualTo auctionId)
+        return template.find(query, ShortItem::class.java).asFlow()
+    }
+
     suspend fun delete(itemId: ShortItemId): DeleteResult? {
         val criteria = Criteria("_id").isEqualTo(itemId)
         return template.remove(Query(criteria), collection).awaitFirstOrNull()
@@ -74,8 +80,13 @@ class ItemRepository(
             .on(ShortItem::lastUpdatedAt.name, Sort.Direction.DESC)
             .background()
 
+        private val AUCTION_DEFINITION = Index()
+            .on(ShortItem::auctions.name, Sort.Direction.DESC)
+            .background()
+
         private val ALL_INDEXES = listOf(
-            MULTI_CURRENCY_DEFINITION
+            MULTI_CURRENCY_DEFINITION,
+            AUCTION_DEFINITION
         )
     }
 }

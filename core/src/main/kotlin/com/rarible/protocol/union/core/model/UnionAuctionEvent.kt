@@ -2,6 +2,7 @@ package com.rarible.protocol.union.core.model
 
 import com.rarible.protocol.union.dto.AuctionDto
 import com.rarible.protocol.union.dto.AuctionIdDto
+import com.rarible.protocol.union.dto.BlockchainDto
 
 sealed class UnionAuctionEvent {
 
@@ -16,3 +17,7 @@ data class UnionAuctionUpdateEvent(
     constructor(auction: AuctionDto) : this(auction.id, auction)
 
 }
+
+data class UnionAuctionDeleteEvent(
+    override val auctionId: AuctionIdDto
+) : UnionAuctionEvent()

@@ -18,6 +18,8 @@ import com.rarible.protocol.union.dto.AssetDto
 import com.rarible.protocol.union.dto.AssetTypeDto
 import com.rarible.protocol.union.dto.AuctionBidDto
 import com.rarible.protocol.union.dto.AuctionDataDto
+import com.rarible.protocol.union.dto.AuctionSortDto
+import com.rarible.protocol.union.dto.AuctionStatusDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ContractAddress
 import com.rarible.protocol.union.dto.CreatorDto
@@ -80,6 +82,15 @@ object EthConverter {
             null -> com.rarible.protocol.dto.ActivitySortDto.LATEST_FIRST
             ActivitySortDto.EARLIEST_FIRST -> com.rarible.protocol.dto.ActivitySortDto.EARLIEST_FIRST
             ActivitySortDto.LATEST_FIRST -> com.rarible.protocol.dto.ActivitySortDto.LATEST_FIRST
+        }
+    }
+
+    fun convert(source: AuctionSortDto?): com.rarible.protocol.dto.AuctionSortDto {
+        return when (source) {
+            null -> com.rarible.protocol.dto.AuctionSortDto.LAST_UPDATE_DESC
+            AuctionSortDto.LAST_UPDATE_DESC -> com.rarible.protocol.dto.AuctionSortDto.LAST_UPDATE_DESC
+            AuctionSortDto.LAST_UPDATE_ASC -> com.rarible.protocol.dto.AuctionSortDto.LAST_UPDATE_ASC
+            AuctionSortDto.BUY_PRICE_ASC -> com.rarible.protocol.dto.AuctionSortDto.BUY_PRICE_ASC
         }
     }
 
@@ -193,6 +204,18 @@ object EthConverter {
                 duration = source.duration,
                 buyOutPrice = source.buyOutPrice
             )
+        }
+    }
+
+    fun convert(source: List<AuctionStatusDto>?): List<com.rarible.protocol.dto.AuctionStatusDto>? {
+        return source?.map { convert(it) }
+    }
+
+    private fun convert(source: AuctionStatusDto): com.rarible.protocol.dto.AuctionStatusDto {
+        return when (source) {
+            AuctionStatusDto.ACTIVE -> com.rarible.protocol.dto.AuctionStatusDto.ACTIVE
+            AuctionStatusDto.CANCELLED -> com.rarible.protocol.dto.AuctionStatusDto.CANCELLED
+            AuctionStatusDto.FINISHED -> com.rarible.protocol.dto.AuctionStatusDto.FINISHED
         }
     }
 }

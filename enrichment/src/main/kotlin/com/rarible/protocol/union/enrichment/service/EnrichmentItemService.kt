@@ -6,6 +6,8 @@ import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
+import com.rarible.protocol.union.dto.AuctionDto
+import com.rarible.protocol.union.dto.AuctionIdDto
 import com.rarible.protocol.union.dto.ContractAddress
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
@@ -29,6 +31,7 @@ class EnrichmentItemService(
     private val itemServiceRouter: BlockchainRouter<ItemService>,
     private val itemRepository: ItemRepository,
     private val enrichmentOrderService: EnrichmentOrderService,
+    private val enrichmentAuctionService: EnrichmentAuctionService,
     private val enrichmentMetaService: EnrichmentMetaService
 ) {
 
@@ -75,6 +78,8 @@ class EnrichmentItemService(
         logger.info("Fetched {} items for collection {} and owner {}", count, address, owner)
     }
 
+    fun findByAuctionId(auctionIdDto: AuctionIdDto) = itemRepository.findWithAuction(auctionIdDto)
+
     suspend fun fetch(itemId: ShortItemId): UnionItem {
         val now = nowMillis()
         val nftItemDto = itemServiceRouter.getService(itemId.blockchain)
@@ -88,7 +93,8 @@ class EnrichmentItemService(
     suspend fun enrichItem(
         shortItem: ShortItem?,
         item: UnionItem? = null,
-        orders: Map<OrderIdDto, OrderDto> = emptyMap()
+        orders: Map<OrderIdDto, OrderDto> = emptyMap(),
+        auctions: Map<AuctionIdDto, AuctionDto> = emptyMap()
     ) = coroutineScope {
         require(shortItem != null || item != null)
         val fetchedItem = async { item ?: fetch(shortItem!!.id) }
@@ -103,6 +109,13 @@ class EnrichmentItemService(
             .awaitAll().filterNotNull()
             .associateBy { it.id }
 
-        EnrichedItemConverter.convert(fetchedItem.await(), shortItem, meta.await(), bestOrders)
+        val auctionIds = when {
+            shortItem != null -> shortItem.auctions
+            auctions.isNotEmpty() -> auctions.keys
+            else -> emptySet()
+        }
+        val auctionsData = async { enrichmentAuctionService.fetchAuctionsIfAbsent(auctionIds, auctions) }
+
+        EnrichedItemConverter.convert(fetchedItem.await(), shortItem, meta.await(), bestOrders, auctionsData.await())
     }
 }
