@@ -1,7 +1,5 @@
-package com.rarible.protocol.union.core.service
+package com.rarible.protocol.union.core.service.router
 
-import com.rarible.protocol.union.core.service.router.BlockchainRouter
-import com.rarible.protocol.union.core.service.router.BlockchainService
 import com.rarible.protocol.union.dto.BlockchainDto
 import io.mockk.coEvery
 import io.mockk.mockk
@@ -36,7 +34,7 @@ class BlockchainRouterTest {
 
     @Test
     fun `one of services failed`() = runBlocking {
-        val enabledBlockchains = listOf(BlockchainDto.FLOW)
+        val enabledBlockchains = listOf(BlockchainDto.FLOW, BlockchainDto.ETHEREUM)
 
         val workingService = TestService(BlockchainDto.FLOW)
         val failedService: TestService = mockk()
@@ -45,6 +43,18 @@ class BlockchainRouterTest {
 
         val router = BlockchainRouter(listOf(failedService, workingService), enabledBlockchains)
         val result = router.executeForAll(listOf(BlockchainDto.ETHEREUM, BlockchainDto.FLOW)) { it.test() }
+
+        assertEquals(1, result.size)
+        assertEquals(BlockchainDto.FLOW.name, result[0])
+    }
+
+
+    @Test
+    fun `single service`() = runBlocking<Unit> {
+        val service = TestService(BlockchainDto.FLOW)
+
+        val router = BlockchainRouter(listOf(service), listOf(BlockchainDto.FLOW))
+        val result = router.executeForAll(emptyList()) { it.test() }
 
         assertEquals(1, result.size)
         assertEquals(BlockchainDto.FLOW.name, result[0])

@@ -2,14 +2,17 @@ package com.rarible.protocol.union.core.service
 
 import com.rarible.core.common.nowMillis
 import com.rarible.core.test.data.randomBigDecimal
+import com.rarible.core.test.data.randomBigInt
 import com.rarible.core.test.data.randomString
 import com.rarible.protocol.currency.api.client.CurrencyControllerApi
 import com.rarible.protocol.currency.dto.CurrencyRateDto
 import com.rarible.protocol.union.core.client.CurrencyClient
 import com.rarible.protocol.union.core.converter.CurrencyConverter
+import com.rarible.protocol.union.core.exception.UnionCurrencyException
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ContractAddress
 import com.rarible.protocol.union.dto.EthErc20AssetTypeDto
+import com.rarible.protocol.union.dto.EthErc721AssetTypeDto
 import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -18,6 +21,7 @@ import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
 import java.math.BigDecimal
@@ -48,6 +52,17 @@ class CurrencyServiceTest {
 
         // This request is not cached, so should be executed twice
         verifyCurrency(blockchain, address, 2)
+    }
+
+    @Test
+    fun `get rate - unsupported`() = runBlocking<Unit> {
+        val blockchain = BlockchainDto.ETHEREUM
+        val address = randomString()
+        mockCurrency(blockchain, address, null)
+
+        assertThrows<UnionCurrencyException> {
+            runBlocking { currencyService.getRate(blockchain, address, nowMillis()) }
+        }
     }
 
     @Test
@@ -93,6 +108,36 @@ class CurrencyServiceTest {
     }
 
     @Test
+    fun `to usd - incorrect input`() = runBlocking<Unit> {
+        val blockchain = BlockchainDto.ETHEREUM
+        val address = ContractAddress(blockchain, randomString())
+        val assetType = EthErc20AssetTypeDto(address)
+        val nftAssetType = EthErc721AssetTypeDto(address, randomBigInt())
+
+        val nullValue = currencyService.toUsd(blockchain, assetType, null)
+        assertThat(nullValue).isNull()
+
+        val nftAddress = currencyService.toUsd(blockchain, nftAssetType, BigDecimal.ONE)
+        assertThat(nftAddress).isNull()
+
+        val zeroValue = currencyService.toUsd(blockchain, assetType, BigDecimal.ZERO)
+        assertThat(zeroValue).isEqualTo(BigDecimal.ZERO)
+    }
+
+    @Test
+    fun `to usd - unsupported currency`() = runBlocking<Unit> {
+        val blockchain = BlockchainDto.ETHEREUM
+        val address = randomString()
+        mockCurrency(blockchain, address, null)
+
+        val assetType = EthErc20AssetTypeDto(ContractAddress(blockchain, address))
+
+        val rate = currencyService.toUsd(blockchain, assetType, BigDecimal.ONE, nowMillis())
+
+        assertThat(rate).isNull()
+    }
+
+    @Test
     fun `get current rate`() = runBlocking<Unit> {
         val rate = randomBigDecimal()
         val blockchain = BlockchainDto.FLOW
@@ -108,6 +153,7 @@ class CurrencyServiceTest {
         // This request is cached, so should be executed only once
         verifyCurrency(blockchain, address, 1)
     }
+
 
     @Test
     fun `get current rate - failed`() = runBlocking<Unit> {
