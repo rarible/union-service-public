@@ -1,11 +1,13 @@
 package com.rarible.protocol.union.core.event
 
+import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.kafka.RaribleKafkaProducer
 import com.rarible.protocol.union.dto.ItemEventDto
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
+@CaptureSpan(type = "ext", subtype = "kafka")
 class OutgoingItemEventListener(
     private val eventsProducer: RaribleKafkaProducer<ItemEventDto>
 ) : OutgoingEventListener<ItemEventDto> {

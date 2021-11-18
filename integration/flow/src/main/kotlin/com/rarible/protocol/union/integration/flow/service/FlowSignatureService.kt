@@ -9,7 +9,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import kotlinx.coroutines.reactive.awaitFirst
 import org.apache.commons.lang3.StringUtils
 
-@CaptureSpan(type = "ext", subtype = "flow")
+@CaptureSpan(type = "ext", subtype = "blockchain")
 open class FlowSignatureService(
     private val signatureControllerApi: FlowNftCryptoControllerApi
 ) : AbstractBlockchainService(BlockchainDto.FLOW), SignatureService {
