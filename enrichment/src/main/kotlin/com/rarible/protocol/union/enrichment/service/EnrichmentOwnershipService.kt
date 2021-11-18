@@ -102,6 +102,4 @@ class EnrichmentOwnershipService(
         EnrichedOwnershipConverter.convert(fetchedOwnership.await(), short, bestOrders)
     }
 
-    fun findByAuctionId(auctionIdDto: AuctionIdDto) = ownershipRepository.findWithAuction(auctionIdDto)
-
 }

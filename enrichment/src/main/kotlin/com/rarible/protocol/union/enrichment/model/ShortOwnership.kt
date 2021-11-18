@@ -21,8 +21,6 @@ data class ShortOwnership(
 
     val bestSellOrders: Map<String, ShortOrder>,
 
-    val auctions: Set<AuctionIdDto>,
-
     val multiCurrency: Boolean = bestSellOrders.size > 1,
 
     val bestSellOrder: ShortOrder?,
@@ -49,7 +47,6 @@ data class ShortOwnership(
 
                 bestSellOrders = emptyMap(),
                 bestSellOrder = null,
-                auctions = emptySet(),
                 lastUpdatedAt = nowMillis(),
 
                 version = null
@@ -58,7 +55,7 @@ data class ShortOwnership(
     }
 
     fun isNotEmpty(): Boolean {
-        return bestSellOrder != null || auctions.isNotEmpty()
+        return bestSellOrder != null
     }
 
     @Transient
