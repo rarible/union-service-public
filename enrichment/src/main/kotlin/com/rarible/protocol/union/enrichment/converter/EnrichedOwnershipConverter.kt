@@ -13,8 +13,7 @@ object EnrichedOwnershipConverter {
     fun convert(
         ownership: UnionOwnership,
         shortOwnership: ShortOwnership? = null,
-        orders: Map<OrderIdDto, OrderDto> = emptyMap(),
-        auctions: List<AuctionDto> = emptyList()
+        orders: Map<OrderIdDto, OrderDto> = emptyMap()
     ): OwnershipDto {
         return OwnershipDto(
             id = ownership.id,
@@ -28,8 +27,7 @@ object EnrichedOwnershipConverter {
             createdAt = ownership.createdAt,
             pending = ownership.pending,
             // Enrichment data
-            bestSellOrder = shortOwnership?.bestSellOrder?.let { orders[it.dtoId] },
-            auctions = auctions
+            bestSellOrder = shortOwnership?.bestSellOrder?.let { orders[it.dtoId] }
         )
     }
 }

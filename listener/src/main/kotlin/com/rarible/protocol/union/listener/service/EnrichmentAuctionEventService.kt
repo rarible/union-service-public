@@ -24,34 +24,11 @@ class EnrichmentAuctionEventService(
         val makeItemIdDto = makeAssetExt.itemId
         val makeItemId = makeItemIdDto?.let { ShortItemId(it) }
 
-        val iFuture = makeItemId?.let {
-            async {
+        makeItemId?.let {
                 ignoreApi404 {
                     enrichmentItemEventService.onAuctionUpdated(it, auction, notificationEnabled)
                 }
-            }
         }
-
-        val oFuture = makeItemId?.let {
-            val ownershipId = ShortOwnershipId(
-                makeItemId.blockchain,
-                makeItemId.token,
-                makeItemId.tokenId,
-                auction.seller.value
-            )
-            async {
-                ignoreApi404 {
-                    enrichmentOwnershipEventService.onAuctionUpdated(
-                        ownershipId,
-                        auction,
-                        notificationEnabled
-                    )
-                }
-            }
-        }
-
-        iFuture?.await()
-        oFuture?.await()
     }
 
     suspend fun deleteAuction(auctionId: AuctionIdDto, notificationEnabled: Boolean = true) = coroutineScope {

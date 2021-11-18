@@ -94,52 +94,6 @@ class EnrichmentOwnershipEventService(
         }
     }
 
-    suspend fun onAuctionUpdated(
-        ownershipId: ShortOwnershipId,
-        auction: AuctionDto,
-        notificationEnabled: Boolean = true
-    ) = optimisticLock {
-        val current = ownershipService.get(ownershipId)
-        val exist = current != null
-        val short = current ?: ShortOwnership.empty(ownershipId)
-
-        val updated = short.copy(auctions = short.auctions + auction.id)
-
-        if (short != updated) {
-            if (updated.isNotEmpty()) {
-                val saved = ownershipService.save(updated)
-                if (notificationEnabled) {
-                    notifyUpdate(saved, null, null, auction)
-                }
-            } else if (exist) {
-                logger.info("Deleting Ownership [{}] without related auction", ownershipId)
-                ownershipService.delete(ownershipId)
-                if (notificationEnabled) {
-                    notifyUpdate(updated, null, null, auction)
-                }
-            }
-        } else {
-            logger.info("Ownership [{}] not changed after auction updated, event won't be published", ownershipId)
-        }
-    }
-
-    suspend fun onAuctionDeleted(
-        auctionId: AuctionIdDto,
-        notificationEnabled: Boolean = true
-    ) = optimisticLock {
-        ownershipService.findByAuctionId(auctionId).map { ownership ->
-            val updated = ownership.copy(auctions = ownership.auctions - auctionId)
-            if (ownership != updated) {
-                val saved = ownershipService.save(updated)
-                if (notificationEnabled) {
-                    notifyUpdate(saved)
-                }
-            } else {
-                logger.info("Ownership [{}] not changed after auction deleted, event won't be published", ownership.id)
-            }
-        }.collect()
-    }
-
     private suspend fun deleteOwnership(ownershipId: ShortOwnershipId): Boolean {
         val result = ownershipService.delete(ownershipId)
         return result != null && result.deletedCount > 0
@@ -156,10 +110,9 @@ class EnrichmentOwnershipEventService(
     private suspend fun notifyUpdate(
         short: ShortOwnership,
         ownership: UnionOwnership? = null,
-        order: OrderDto? = null,
-        auction: AuctionDto? = null
+        order: OrderDto? = null
     ) {
-        val dto = ownershipService.enrichOwnership(short, ownership, listOfNotNull(order).associateBy { it.id }, listOfNotNull(auction).associateBy { it.id })
+        val dto = ownershipService.enrichOwnership(short, ownership, listOfNotNull(order).associateBy { it.id })
         val event = OwnershipUpdateEventDto(
             eventId = UUID.randomUUID().toString(),
             ownershipId = short.id.toDto(),

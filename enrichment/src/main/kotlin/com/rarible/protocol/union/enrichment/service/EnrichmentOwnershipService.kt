@@ -28,8 +28,7 @@ import org.springframework.stereotype.Component
 class EnrichmentOwnershipService(
     private val ownershipServiceRouter: BlockchainRouter<OwnershipService>,
     private val ownershipRepository: OwnershipRepository,
-    private val enrichmentOrderService: EnrichmentOrderService,
-    private val enrichmentAuctionService: EnrichmentAuctionService
+    private val enrichmentOrderService: EnrichmentOrderService
 ) {
 
     private val logger = LoggerFactory.getLogger(EnrichmentOwnershipService::class.java)
@@ -100,9 +99,7 @@ class EnrichmentOwnershipService(
         val bestOrders = listOfNotNull(bestSellOrder)
             .associateBy { it.id }
 
-        val auctionsData = async { enrichmentAuctionService.fetchAuctionsIfAbsent(short.auctions, auctions) }
-
-        EnrichedOwnershipConverter.convert(fetchedOwnership.await(), short, bestOrders, auctionsData.await())
+        EnrichedOwnershipConverter.convert(fetchedOwnership.await(), short, bestOrders)
     }
 
     fun findByAuctionId(auctionIdDto: AuctionIdDto) = ownershipRepository.findWithAuction(auctionIdDto)

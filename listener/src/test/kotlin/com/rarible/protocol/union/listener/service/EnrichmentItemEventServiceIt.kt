@@ -396,7 +396,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
             val messages = findItemUpdates(itemId.value)
             assertThat(messages).hasSize(1)
             assertThat(messages[0].value.itemId).isEqualTo(itemId)
-            assertThat(messages[0].value.item.auctions?.size).isEqualTo(1)
+            assertThat(messages[0].value.item.auctions.size).isEqualTo(1)
         }
     }
 
@@ -429,7 +429,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
 
             messages.filter { it.value.item.auctions?.size == 2 }.map { it.value }.forEach {
                 assertThat(messages[0].value.itemId).isEqualTo(itemId)
-                assertThat(it.item.auctions?.size).isEqualTo(2)
+                assertThat(it.item.auctions.size).isEqualTo(2)
             }
         }
     }
@@ -457,7 +457,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
             val messages = findItemUpdates(itemId.value)
             assertThat(messages).hasSize(1)
             assertThat(messages[0].value.itemId).isEqualTo(itemId)
-            assertThat(messages[0].value.item.auctions).isNullOrEmpty()
+            assertThat(messages[0].value.item.auctions).isEmpty()
         }
     }
 }
