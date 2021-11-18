@@ -9,7 +9,7 @@ import com.rarible.protocol.union.listener.service.EnrichmentOrderEventService
 import org.springframework.stereotype.Component
 
 @Component
-@CaptureSpan(type = SpanType.APP)
+@CaptureSpan(type = SpanType.EVENT)
 class UnionOrderEventHandler(
     private val orderEventService: EnrichmentOrderEventService
 ) : IncomingEventHandler<UnionOrderEvent> {

@@ -10,7 +10,7 @@ import com.rarible.protocol.union.listener.service.EnrichmentItemEventService
 import org.springframework.stereotype.Component
 
 @Component
-@CaptureSpan(type = SpanType.APP)
+@CaptureSpan(type = SpanType.EVENT)
 class UnionItemEventHandler(
     private val itemEventService: EnrichmentItemEventService
 ) : IncomingEventHandler<UnionItemEvent> {

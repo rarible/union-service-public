@@ -10,7 +10,7 @@ import com.rarible.protocol.union.listener.service.EnrichmentOwnershipEventServi
 import org.springframework.stereotype.Component
 
 @Component
-@CaptureSpan(type = SpanType.APP)
+@CaptureSpan(type = SpanType.EVENT)
 class UnionOwnershipEventHandler(
     private val ownershipEventService: EnrichmentOwnershipEventService
 ) : IncomingEventHandler<UnionOwnershipEvent> {

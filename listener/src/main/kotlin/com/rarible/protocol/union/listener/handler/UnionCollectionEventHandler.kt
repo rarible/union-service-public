@@ -8,7 +8,7 @@ import com.rarible.protocol.union.dto.CollectionEventDto
 import org.springframework.stereotype.Component
 
 @Component
-@CaptureSpan(type = SpanType.APP)
+@CaptureSpan(type = SpanType.EVENT)
 class UnionCollectionEventHandler(
     private val collectionEventListeners: List<OutgoingCollectionEventListener>
 ) : IncomingEventHandler<CollectionEventDto> {
