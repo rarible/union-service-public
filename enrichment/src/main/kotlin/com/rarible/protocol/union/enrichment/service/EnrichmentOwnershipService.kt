@@ -7,8 +7,6 @@ import com.rarible.protocol.union.core.continuation.page.PageSize
 import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.core.service.OwnershipService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
-import com.rarible.protocol.union.dto.AuctionDto
-import com.rarible.protocol.union.dto.AuctionIdDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.enrichment.converter.EnrichedOwnershipConverter
@@ -90,8 +88,7 @@ class EnrichmentOwnershipService(
     suspend fun enrichOwnership(
         short: ShortOwnership,
         ownership: UnionOwnership? = null,
-        orders: Map<OrderIdDto, OrderDto> = emptyMap(),
-        auctions: Map<AuctionIdDto, AuctionDto> = emptyMap()
+        orders: Map<OrderIdDto, OrderDto> = emptyMap()
     ) = coroutineScope {
         val fetchedOwnership = async { ownership ?: fetch(short.id) }
         val bestSellOrder = enrichmentOrderService.fetchOrderIfDiffers(short.bestSellOrder, orders)

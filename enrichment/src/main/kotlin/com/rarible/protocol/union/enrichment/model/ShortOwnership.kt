@@ -1,7 +1,6 @@
 package com.rarible.protocol.union.enrichment.model
 
 import com.rarible.core.common.nowMillis
-import com.rarible.protocol.union.dto.AuctionIdDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import org.springframework.data.annotation.AccessType
 import org.springframework.data.annotation.Id
