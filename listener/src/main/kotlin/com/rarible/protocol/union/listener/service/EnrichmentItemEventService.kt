@@ -118,12 +118,7 @@ class EnrichmentItemEventService(
         notificationEnabled: Boolean,
         orderUpdateAction: suspend (item: ShortItem) -> ShortItem
     ) = optimisticLock {
-        val current = itemService.get(itemId)
-        val exist = current != null
-        val short = current ?: ShortItem.empty(itemId)
-
-        val updated = orderUpdateAction(short)
-
+        val (short, updated, exist) = update(itemId, orderUpdateAction)
         if (short != updated) {
             if (updated.isNotEmpty()) {
                 val saved = itemService.save(updated)
@@ -148,12 +143,7 @@ class EnrichmentItemEventService(
         notificationEnabled: Boolean,
         updateAction: suspend (item: ShortItem) -> ShortItem
     ) = optimisticLock {
-        val current = itemService.get(itemId)
-        val exist = current != null
-        val short = current ?: ShortItem.empty(itemId)
-
-        val updated = updateAction(short)
-
+        val (short, updated, exist) = update(itemId, updateAction)
         if (short != updated) {
             if (updated.isNotEmpty()) {
                 val saved = itemService.save(updated)
@@ -212,6 +202,16 @@ class EnrichmentItemEventService(
         itemEventListeners.forEach { it.onEvent(event) }
     }
 
+    private suspend fun update(
+        itemId: ShortItemId,
+        action: suspend (item: ShortItem) -> ShortItem
+    ): Triple<ShortItem?, ShortItem, Boolean> {
+        val current = itemService.get(itemId)
+        val exist = current != null
+        val short = current ?: ShortItem.empty(itemId)
+        return Triple(current, action(short), exist)
+    }
+
     // Potentially we could have updated Order here (no matter - bid/sell) and when we need to fetch
     // full version of the order, we can use this already fetched Order if it has same ID (hash)
     private suspend fun notifyUpdate(
@@ -220,7 +220,11 @@ class EnrichmentItemEventService(
         order: OrderDto? = null,
         auction: AuctionDto? = null
     ) {
-        val dto = itemService.enrichItem(short, item, listOfNotNull(order).associateBy { it.id }, listOfNotNull(auction).associateBy { it.id })
+        val dto = itemService.enrichItem(
+            short,
+            item,
+            listOfNotNull(order).associateBy { it.id },
+            listOfNotNull(auction).associateBy { it.id })
         val event = ItemUpdateEventDto(
             itemId = dto.id,
             item = dto,

@@ -89,6 +89,7 @@ integration:
 listener:
   reconciliation:
     orderBatchSize: 50
+    auctionBatchSize: 50
     threadCount: 2
     notificationEnabled: false
   price-update:

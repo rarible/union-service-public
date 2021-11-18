@@ -25,9 +25,9 @@ class EnrichmentAuctionEventService(
         val makeItemId = makeItemIdDto?.let { ShortItemId(it) }
 
         makeItemId?.let {
-                ignoreApi404 {
-                    enrichmentItemEventService.onAuctionUpdated(it, auction, notificationEnabled)
-                }
+            ignoreApi404 {
+                enrichmentItemEventService.onAuctionUpdated(it, auction, notificationEnabled)
+            }
         }
     }
 
@@ -41,7 +41,7 @@ class EnrichmentAuctionEventService(
         try {
             call()
         } catch (ex: WebClientResponseProxyException) {
-            logger.warn("Received NOT_FOUND code from client, details: {}, message: {}", ex.data, ex.message)
+            logger.warn("Received NOT_FOUND code from client during auction updating, details: {}, message: {}", ex.data, ex.message)
         }
     }
 }
