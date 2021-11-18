@@ -27,6 +27,7 @@ class TezosItemConverterTest {
         assertThat(converted.deleted).isEqualTo(dto.deleted)
         assertThat(converted.lazySupply).isEqualTo(dto.lazySupply)
 
+        // TODO TEZOS Remove when Tezos implement getItemRoyalties
         assertThat(converted.royalties[0].account.value).isEqualTo(dto.royalties[0].account)
         assertThat(converted.royalties[0].value).isEqualTo(dto.royalties[0].value)
 

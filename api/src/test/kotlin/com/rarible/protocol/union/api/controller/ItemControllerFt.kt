@@ -1,7 +1,11 @@
 package com.rarible.protocol.union.api.controller
 
 import com.rarible.core.common.nowMillis
+import com.rarible.core.test.data.randomAddress
+import com.rarible.core.test.data.randomInt
 import com.rarible.core.test.data.randomString
+import com.rarible.protocol.dto.NftItemRoyaltyDto
+import com.rarible.protocol.dto.NftItemRoyaltyListDto
 import com.rarible.protocol.union.api.client.ItemControllerApi
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
@@ -36,6 +40,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import reactor.core.publisher.Mono
+import reactor.kotlin.core.publisher.toMono
 import java.math.BigInteger
 
 @FlowPreview
@@ -146,6 +151,23 @@ class ItemControllerFt : AbstractIntegrationTest() {
         verify(exactly = 1) { testTezosItemApi.resetNftItemMetaById(itemId.value) }
     }
     */
+
+    @Test
+    fun `get item royalties`() = runBlocking<Unit> {
+        val ethItemId = randomEthItemId()
+
+        val royalty = NftItemRoyaltyDto(randomAddress(), randomInt())
+
+        coEvery {
+            testEthereumItemApi.getNftItemRoyaltyById(ethItemId.value)
+        } returns NftItemRoyaltyListDto(listOf(royalty)).toMono()
+
+        val result = itemControllerClient.getItemRoyaltiesById(ethItemId.fullId()).awaitFirst()
+
+        assertThat(result.royalties).hasSize(1)
+        assertThat(result.royalties[0].value).isEqualTo(royalty.value)
+        assertThat(result.royalties[0].account.value).isEqualTo(royalty.account.prefixed())
+    }
 
     @Test
     fun `get items by collection - ethereum, all enriched`() = runBlocking<Unit> {

@@ -9,6 +9,7 @@ import com.rarible.protocol.dto.Erc721AssetTypeDto
 import com.rarible.protocol.dto.Erc721LazyAssetTypeDto
 import com.rarible.protocol.dto.EthAssetTypeDto
 import com.rarible.protocol.dto.GenerativeArtAssetTypeDto
+import com.rarible.protocol.dto.NftItemRoyaltyDto
 import com.rarible.protocol.dto.PartDto
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.exception.UnionValidationException
@@ -117,6 +118,13 @@ object EthConverter {
         return AssetDto(
             type = convert(source.assetType, blockchain),
             value = source.valueDecimal!!
+        )
+    }
+
+    fun convert(source: NftItemRoyaltyDto, blockchain: BlockchainDto): RoyaltyDto {
+        return RoyaltyDto(
+            account = UnionAddressConverter.convert(blockchain, convert(source.account)),
+            value = source.value
         )
     }
 

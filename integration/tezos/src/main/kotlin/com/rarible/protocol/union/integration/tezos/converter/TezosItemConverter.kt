@@ -31,6 +31,7 @@ object TezosItemConverter {
             meta = item.meta?.let { convert(it) },
             mintedAt = item.mintedAt,
             owners = emptyList(),
+            // TODO TEZOS Remove when Tezos implement getItemRoyalties
             royalties = item.royalties.map { toRoyalty(it, blockchain) },
             supply = item.supply,
             pending = emptyList() // In Union we won't use this field for Tezos

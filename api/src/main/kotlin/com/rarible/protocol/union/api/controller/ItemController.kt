@@ -9,6 +9,7 @@ import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.ItemsDto
+import com.rarible.protocol.union.dto.RoyaltiesDto
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.dto.parser.ItemIdParser
 import com.rarible.protocol.union.dto.subchains
@@ -65,6 +66,14 @@ class ItemController(
         val result = router.getService(fullItemId.blockchain).getItemById(fullItemId.value)
         val enriched = itemApiService.enrich(result)
         return ResponseEntity.ok(enriched)
+    }
+
+    override suspend fun getItemRoyaltiesById(
+        itemId: String
+    ): ResponseEntity<RoyaltiesDto> {
+        val fullItemId = ItemIdParser.parseFull(itemId)
+        val royalties = router.getService(fullItemId.blockchain).getItemRoyaltiesById(fullItemId.value)
+        return ResponseEntity.ok(RoyaltiesDto(royalties))
     }
 
     override suspend fun resetItemMeta(itemId: String): ResponseEntity<Unit> {
