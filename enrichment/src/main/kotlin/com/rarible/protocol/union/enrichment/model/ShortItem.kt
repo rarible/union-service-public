@@ -24,7 +24,7 @@ data class ShortItem(
     val bestSellOrders: Map<String, ShortOrder>,
     val bestBidOrders: Map<String, ShortOrder>,
 
-    val auctions: Set<AuctionIdDto>,
+    val auctions: Set<AuctionIdDto> = emptySet(),
 
     val multiCurrency: Boolean = bestSellOrders.size > 1 || bestBidOrders.size > 1,
 
