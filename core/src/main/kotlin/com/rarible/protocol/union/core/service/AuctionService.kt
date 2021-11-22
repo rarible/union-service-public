@@ -9,14 +9,26 @@ import com.rarible.protocol.union.dto.PlatformDto
 
 interface AuctionService : BlockchainService {
 
+    suspend fun getAuctionById(auctionId: String): AuctionDto
+
     suspend fun getAuctionsByIds(
-        orderIds: List<String>
+        auctionIds: List<String>
     ): List<AuctionDto>
 
     suspend fun getAuctionsAll(
         sort: AuctionSortDto? = null,
         status: List<AuctionStatusDto>? = null,
         origin: String? = null,
+        platform: PlatformDto? = null,
+        continuation: String? = null,
+        size: Int? = null
+    ): Slice<AuctionDto>
+
+    suspend fun getAuctionsByCollection(
+        contract: String,
+        seller: String? = null,
+        origin: String? = null,
+        status: List<AuctionStatusDto>? = null,
         platform: PlatformDto? = null,
         continuation: String? = null,
         size: Int? = null
@@ -30,6 +42,15 @@ interface AuctionService : BlockchainService {
         origin: String? = null,
         status: List<AuctionStatusDto>? = null,
         currencyId: String? = null,
+        platform: PlatformDto? = null,
+        continuation: String? = null,
+        size: Int? = null
+    ): Slice<AuctionDto>
+
+    suspend fun getAuctionsBySeller(
+        seller: String,
+        status: List<AuctionStatusDto>? = null,
+        origin: String? = null,
         platform: PlatformDto? = null,
         continuation: String? = null,
         size: Int? = null

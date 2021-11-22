@@ -98,6 +98,9 @@ class TestApiConfiguration {
     fun testOrderControllerApi(factory: UnionApiClientFactory) = factory.createOrderApiClient()
 
     @Bean
+    fun testAuctionControllerApi(factory: UnionApiClientFactory) = factory.createAuctionApiClient()
+
+    @Bean
     fun testSignatureControllerApi(factory: UnionApiClientFactory) = factory.createSignatureApiClient()
 
     @Bean
@@ -135,6 +138,11 @@ class TestApiConfiguration {
     @Primary
     @Qualifier("ethereum.order.api")
     fun testEthereumOrderApi(): OrderControllerApi = mockk()
+
+    @Bean
+    @Primary
+    @Qualifier("ethereum.auction.api")
+    fun testEthereumAuctionApi(): com.rarible.protocol.order.api.client.AuctionControllerApi = mockk()
 
     @Bean
     @Primary

@@ -19,7 +19,7 @@ import java.time.Instant
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 
-@CaptureSpan(type = "blockchain")
+@CaptureSpan(type = "ext", subtype = "blockchain")
 open class FlowOrderService(
     private val orderControllerApi: FlowOrderControllerApi,
     private val flowOrderConverter: FlowOrderConverter

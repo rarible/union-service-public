@@ -11,6 +11,7 @@ data class PageSize(
         val OWNERSHIP = PageSize(1000, 1000)
         val COLLECTION = PageSize(1000, 1000)
         val ORDER = PageSize(50, 1000)
+        val AUCTION = PageSize(50, 1000)
         val ACTIVITY = PageSize(1000, 1000)
     }
 

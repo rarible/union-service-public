@@ -3,6 +3,7 @@ package com.rarible.protocol.union.api.controller.internal
 import com.rarible.core.kafka.KafkaMessage
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
+import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.OwnershipDto
@@ -14,10 +15,12 @@ import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
 import com.rarible.protocol.union.enrichment.util.bidCurrencyId
 import com.rarible.protocol.union.enrichment.util.sellCurrencyId
+import com.rarible.protocol.union.integration.ethereum.converter.EthAuctionConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthItemConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOwnershipConverter
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAssetErc20
+import com.rarible.protocol.union.integration.ethereum.data.randomEthAuctionDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthLegacyOrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthNftItemDto
@@ -35,6 +38,9 @@ class RefreshControllerFt : AbstractIntegrationTest() {
 
     @Autowired
     lateinit var ethOrderConverter: EthOrderConverter
+
+    @Autowired
+    lateinit var ethAuctionConverter: EthAuctionConverter
 
     @Autowired
     lateinit var enrichmentItemService: EnrichmentItemService
@@ -67,6 +73,7 @@ class RefreshControllerFt : AbstractIntegrationTest() {
         val ethBestBid = randomEthLegacyOrderDto(ethItemId)
         val unionBestBid = ethOrderConverter.convert(ethBestBid, ethItemId.blockchain)
         val shortBestBid = ShortOrderConverter.convert(unionBestBid)
+        val auctionDto = randomEthAuctionDto(ethItemId)
 
         enrichmentItemService.save(
             shortItem.copy(
@@ -84,6 +91,8 @@ class RefreshControllerFt : AbstractIntegrationTest() {
 
         ethereumItemControllerApiMock.mockGetNftItemById(ethItemId, ethItem)
         ethereumOrderControllerApiMock.mockGetById(ethBestSell, ethBestBid)
+        ethereumAuctionControllerApiMock.mockGetAuctionsByItem(ethItemId, listOf(auctionDto))
+        ethereumAuctionControllerApiMock.mockGetAuctionsByIds(listOf(auctionDto.hash), listOf(auctionDto))
 
         val result = testRestTemplate.postForEntity(uri, null, ItemDto::class.java).body!!
         val savedShortItem = enrichmentItemService.get(shortItem.id)!!
@@ -93,6 +102,8 @@ class RefreshControllerFt : AbstractIntegrationTest() {
 
         assertThat(result.bestSellOrder!!.id).isEqualTo(unionBestSell.id)
         assertThat(result.bestBidOrder!!.id).isEqualTo(unionBestBid.id)
+        assertThat(result.auctions.size).isEqualTo(1)
+        assertThat(result.auctions.first().id).isEqualTo(ethAuctionConverter.convert(auctionDto, BlockchainDto.ETHEREUM).id)
 
         coVerify {
             testItemEventProducer.send(match { message: KafkaMessage<ItemEventDto> ->

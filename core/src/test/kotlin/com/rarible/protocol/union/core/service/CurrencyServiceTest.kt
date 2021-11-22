@@ -154,7 +154,6 @@ class CurrencyServiceTest {
         verifyCurrency(blockchain, address, 1)
     }
 
-
     @Test
     fun `get current rate - failed`() = runBlocking<Unit> {
         coEvery {

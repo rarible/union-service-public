@@ -8,6 +8,7 @@ import com.rarible.protocol.flow.nft.api.client.FlowNftOrderActivityControllerAp
 import com.rarible.protocol.flow.nft.api.client.FlowNftOwnershipControllerApi
 import com.rarible.protocol.flow.nft.api.client.FlowOrderControllerApi
 import com.rarible.protocol.union.core.CoreConfiguration
+import com.rarible.protocol.union.core.service.AuctionService
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.OrderProxyService
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -15,6 +16,7 @@ import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.integration.flow.converter.FlowActivityConverter
 import com.rarible.protocol.union.integration.flow.converter.FlowOrderConverter
 import com.rarible.protocol.union.integration.flow.service.FlowActivityService
+import com.rarible.protocol.union.integration.flow.service.FlowAuctionService
 import com.rarible.protocol.union.integration.flow.service.FlowCollectionService
 import com.rarible.protocol.union.integration.flow.service.FlowItemService
 import com.rarible.protocol.union.integration.flow.service.FlowOrderService
@@ -92,6 +94,11 @@ class FlowApiConfiguration(
             FlowOrderService(controllerApi, converter),
             setOf(PlatformDto.RARIBLE)
         )
+    }
+
+    @Bean
+    fun flowAuctionService(): AuctionService {
+        return FlowAuctionService(BlockchainDto.FLOW)
     }
 
     @Bean

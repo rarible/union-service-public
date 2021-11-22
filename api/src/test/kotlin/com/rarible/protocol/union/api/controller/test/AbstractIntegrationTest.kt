@@ -16,6 +16,7 @@ import com.rarible.protocol.nft.api.client.NftActivityControllerApi
 import com.rarible.protocol.nft.api.client.NftCollectionControllerApi
 import com.rarible.protocol.nft.api.client.NftItemControllerApi
 import com.rarible.protocol.nft.api.client.NftOwnershipControllerApi
+import com.rarible.protocol.nftorder.api.test.mock.EthAuctionControllerApiMock
 import com.rarible.protocol.nftorder.api.test.mock.EthItemControllerApiMock
 import com.rarible.protocol.nftorder.api.test.mock.EthOrderControllerApiMock
 import com.rarible.protocol.order.api.client.OrderActivityControllerApi
@@ -79,6 +80,10 @@ abstract class AbstractIntegrationTest {
     lateinit var testEthereumOrderApi: com.rarible.protocol.order.api.client.OrderControllerApi
 
     @Autowired
+    @Qualifier("ethereum.auction.api")
+    lateinit var testEthereumAuctionApi: com.rarible.protocol.order.api.client.AuctionControllerApi
+
+    @Autowired
     @Qualifier("ethereum.signature.api")
     lateinit var testEthereumSignatureApi: com.rarible.protocol.order.api.client.OrderSignatureControllerApi
 
@@ -93,6 +98,7 @@ abstract class AbstractIntegrationTest {
     lateinit var ethereumItemControllerApiMock: EthItemControllerApiMock
     lateinit var ethereumOwnershipControllerApiMock: EthOwnershipControllerApiMock
     lateinit var ethereumOrderControllerApiMock: EthOrderControllerApiMock
+    lateinit var ethereumAuctionControllerApiMock: EthAuctionControllerApiMock
 
     //--------------------- POLYGON ---------------------//
     @Autowired
@@ -110,6 +116,10 @@ abstract class AbstractIntegrationTest {
     @Autowired
     @Qualifier("polygon.order.api")
     lateinit var testPolygonOrderApi: com.rarible.protocol.order.api.client.OrderControllerApi
+
+    @Autowired
+    @Qualifier("polygon.auction.api")
+    lateinit var testPolygonAuctionApi: com.rarible.protocol.order.api.client.AuctionControllerApi
 
     @Autowired
     @Qualifier("polygon.signature.api")
@@ -183,6 +193,7 @@ abstract class AbstractIntegrationTest {
         ethereumItemControllerApiMock = EthItemControllerApiMock(testEthereumItemApi)
         ethereumOwnershipControllerApiMock = EthOwnershipControllerApiMock(testEthereumOwnershipApi)
         ethereumOrderControllerApiMock = EthOrderControllerApiMock(testEthereumOrderApi)
+        ethereumAuctionControllerApiMock = EthAuctionControllerApiMock(testEthereumAuctionApi)
 
         flowItemControllerApiMock = FlowItemControllerApiMock(testFlowItemApi)
         flowOwnershipControllerApiMock = FlowOwnershipControllerApiMock(testFlowOwnershipApi)
