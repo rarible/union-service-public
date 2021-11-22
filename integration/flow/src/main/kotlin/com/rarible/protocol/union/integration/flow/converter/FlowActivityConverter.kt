@@ -47,6 +47,9 @@ class FlowActivityConverter(
                     payment = payment,
                     seller = UnionAddressConverter.convert(source.left.maker, blockchain),
                     buyer = UnionAddressConverter.convert(source.right.maker, blockchain),
+                    // TODO FLOW there is no order info in flow for sides
+                    sellerOrderHash = null,
+                    buyerOrderHash = null,
                     priceUsd = priceUsd,
                     price = source.price,
                     type = OrderMatchSellDto.Type.SELL,
