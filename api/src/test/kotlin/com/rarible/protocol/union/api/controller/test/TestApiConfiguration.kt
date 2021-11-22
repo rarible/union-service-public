@@ -98,6 +98,9 @@ class TestApiConfiguration {
     fun testOrderControllerApi(factory: UnionApiClientFactory) = factory.createOrderApiClient()
 
     @Bean
+    fun testAuctionControllerApi(factory: UnionApiClientFactory) = factory.createAuctionApiClient()
+
+    @Bean
     fun testSignatureControllerApi(factory: UnionApiClientFactory) = factory.createSignatureApiClient()
 
     @Bean

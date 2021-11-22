@@ -91,7 +91,7 @@ class RefreshControllerFt : AbstractIntegrationTest() {
 
         ethereumItemControllerApiMock.mockGetNftItemById(ethItemId, ethItem)
         ethereumOrderControllerApiMock.mockGetById(ethBestSell, ethBestBid)
-        ethereumAuctionControllerApiMock.mockGetAuctionByItem(ethItemId, listOf(auctionDto))
+        ethereumAuctionControllerApiMock.mockGetAuctionsByItem(ethItemId, listOf(auctionDto))
         ethereumAuctionControllerApiMock.mockGetAuctionsByIds(listOf(auctionDto.hash), listOf(auctionDto))
 
         val result = testRestTemplate.postForEntity(uri, null, ItemDto::class.java).body!!

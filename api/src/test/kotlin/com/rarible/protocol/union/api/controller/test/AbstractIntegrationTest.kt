@@ -118,6 +118,10 @@ abstract class AbstractIntegrationTest {
     lateinit var testPolygonOrderApi: com.rarible.protocol.order.api.client.OrderControllerApi
 
     @Autowired
+    @Qualifier("polygon.auction.api")
+    lateinit var testPolygonAuctionApi: com.rarible.protocol.order.api.client.AuctionControllerApi
+
+    @Autowired
     @Qualifier("polygon.signature.api")
     lateinit var testPolygonSignatureApi: com.rarible.protocol.order.api.client.OrderSignatureControllerApi
 

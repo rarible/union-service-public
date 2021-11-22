@@ -120,7 +120,7 @@ class AuctionController(
         }
 
         val slice = router.getService(fullItemId.blockchain).getAuctionsByItem(
-            fullItemId.value,
+            fullItemId.contract,
             fullItemId.tokenId.toString(),
             sellerAddress?.value,
             sort,
