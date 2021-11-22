@@ -138,7 +138,7 @@ fun randomTezosOrderDto(make: AssetDto, maker: String, take: AssetDto): OrderDto
         fill = randomBigInt(),
         makeStock = randomBigInt(),
         cancelled = false,
-        salt = randomString(32),
+        salt = randomBigInt(32),
         data = OrderRaribleV2DataV1Dto(randomString(), listOf(randomTezosPartDto()), listOf(randomTezosPartDto())),
         signature = randomString(16),
         createdAt = nowMillis(),
@@ -273,7 +273,7 @@ fun randomTezosItemMintActivity(): MintDto {
         owner = randomString(),
         contract = randomString(),
         tokenId = randomBigInt(),
-        value = randomBigInt(),
+        value = randomBigInt().toBigDecimal(),
         transactionHash = randomString(),
         blockHash = randomString(),
         blockNumber = randomBigInt(8)
@@ -288,7 +288,7 @@ fun randomTezosItemBurnActivity(): BurnDto {
         owner = randomString(),
         contract = randomString(),
         tokenId = randomBigInt(),
-        value = randomBigInt(),
+        value = randomBigInt().toBigDecimal(),
         transactionHash = randomString(),
         blockHash = randomString(),
         blockNumber = randomBigInt(8)
@@ -305,7 +305,7 @@ fun randomTezosItemTransferActivity(): TransferDto {
             owner = randomString(),
             contract = randomString(),
             tokenId = randomBigInt(),
-            value = randomBigInt(),
+            value = randomBigInt().toBigDecimal(),
             transactionHash = randomString(),
             blockHash = randomString(),
             blockNumber = randomBigInt(8)
