@@ -3,11 +3,11 @@ package com.rarible.protocol.union.core.continuation
 import java.math.BigDecimal
 
 data class UsdPriceIdContinuation(
-    private val currencyId: String,
-    private val price: BigDecimal?,
-    private val priceUsd: BigDecimal?,
-    private val id: String,
-    private val asc: Boolean = false
+    val currencyId: String,
+    val price: BigDecimal?,
+    val priceUsd: BigDecimal?,
+    val id: String,
+    val asc: Boolean = false
 ) : Continuation<UsdPriceIdContinuation> {
 
     private val sign = if (asc) 1 else -1

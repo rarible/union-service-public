@@ -22,11 +22,16 @@ open class EthAuctionService(
     private val ethAuctionConverter: EthAuctionConverter
 ) : AbstractBlockchainService(blockchain), AuctionService {
 
-    override suspend fun getAuctionsByIds(orderIds: List<String>): List<AuctionDto> {
-        val orders = auctionControllerApi
-            .getAuctionsByIds(AuctionIdsDto(orderIds.map { Word.apply(it) }))
+    override suspend fun getAuctionById(auctionId: String): AuctionDto {
+        val auction = auctionControllerApi.getAuctionByHash(auctionId).awaitFirst()
+        return ethAuctionConverter.convert(auction, blockchain)
+    }
+
+    override suspend fun getAuctionsByIds(auctionIds: List<String>): List<AuctionDto> {
+        val auctions = auctionControllerApi
+            .getAuctionsByIds(AuctionIdsDto(auctionIds.map { Word.apply(it) }))
             .collectList().awaitFirst()
-        return orders.map { ethAuctionConverter.convert(it, blockchain) }
+        return auctions.map { ethAuctionConverter.convert(it, blockchain) }
     }
 
     override suspend fun getAuctionsAll(
@@ -41,6 +46,27 @@ open class EthAuctionService(
             EthConverter.convert(sort),
             EthConverter.convert(status),
             origin,
+            EthConverter.convert(platform),
+            continuation,
+            size
+        ).awaitFirst()
+        return ethAuctionConverter.convert(auctions, blockchain)
+    }
+
+    override suspend fun getAuctionsByCollection(
+        contract: String,
+        seller: String?,
+        origin: String?,
+        status: List<AuctionStatusDto>?,
+        platform: PlatformDto?,
+        continuation: String?,
+        size: Int?
+    ): Slice<AuctionDto> {
+        val auctions = auctionControllerApi.getAuctionsByCollection(
+            contract,
+            seller,
+            origin,
+            EthConverter.convert(status),
             EthConverter.convert(platform),
             continuation,
             size
@@ -68,6 +94,25 @@ open class EthAuctionService(
             origin,
             EthConverter.convert(status),
             currencyId,
+            EthConverter.convert(platform),
+            continuation,
+            size
+        ).awaitFirst()
+        return ethAuctionConverter.convert(auctions, blockchain)
+    }
+
+    override suspend fun getAuctionsBySeller(
+        seller: String,
+        status: List<AuctionStatusDto>?,
+        origin: String?,
+        platform: PlatformDto?,
+        continuation: String?,
+        size: Int?
+    ): Slice<AuctionDto> {
+        val auctions = auctionControllerApi.getAuctionsBySeller(
+            seller,
+            EthConverter.convert(status),
+            origin,
             EthConverter.convert(platform),
             continuation,
             size

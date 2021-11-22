@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.core.service.dummy
+package com.rarible.protocol.union.integration.flow.service
 
 import com.rarible.protocol.union.core.continuation.page.Slice
 import com.rarible.protocol.union.core.exception.UnionNotFoundException
@@ -10,7 +10,7 @@ import com.rarible.protocol.union.dto.AuctionStatusDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.PlatformDto
 
-class DummyAuctionService(
+class FlowAuctionService(
     blockchain: BlockchainDto
 ) : AbstractBlockchainService(blockchain), AuctionService {
 

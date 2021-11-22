@@ -5,6 +5,7 @@ import com.rarible.protocol.nft.api.client.NftCollectionControllerApi
 import com.rarible.protocol.nft.api.client.NftIndexerApiClientFactory
 import com.rarible.protocol.nft.api.client.NftItemControllerApi
 import com.rarible.protocol.nft.api.client.NftOwnershipControllerApi
+import com.rarible.protocol.order.api.client.AuctionControllerApi
 import com.rarible.protocol.order.api.client.OrderActivityControllerApi
 import com.rarible.protocol.order.api.client.OrderControllerApi
 import com.rarible.protocol.order.api.client.OrderIndexerApiClientFactory
@@ -12,14 +13,18 @@ import com.rarible.protocol.order.api.client.OrderSignatureControllerApi
 import com.rarible.protocol.union.core.CoreConfiguration
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.ethereum.converter.EthActivityConverter
+import com.rarible.protocol.union.integration.ethereum.converter.EthAuctionConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
 import com.rarible.protocol.union.integration.ethereum.service.EthActivityService
+import com.rarible.protocol.union.integration.ethereum.service.EthAuctionService
 import com.rarible.protocol.union.integration.ethereum.service.EthCollectionService
 import com.rarible.protocol.union.integration.ethereum.service.EthItemService
 import com.rarible.protocol.union.integration.ethereum.service.EthOrderService
 import com.rarible.protocol.union.integration.ethereum.service.EthOwnershipService
 import com.rarible.protocol.union.integration.ethereum.service.EthSignatureService
+import com.rarible.protocol.union.integration.ethereum.service.EthereumAuctionService
 import com.rarible.protocol.union.integration.ethereum.service.PolygonActivityService
+import com.rarible.protocol.union.integration.ethereum.service.PolygonAuctionService
 import com.rarible.protocol.union.integration.ethereum.service.PolygonCollectionService
 import com.rarible.protocol.union.integration.ethereum.service.PolygonItemService
 import com.rarible.protocol.union.integration.ethereum.service.PolygonOrderService
@@ -67,6 +72,11 @@ class PolygonApiConfiguration {
         factory.createOrderApiClient(polygon)
 
     @Bean
+    @Qualifier("polygon.auction.api")
+    fun polygonAuctionApi(factory: OrderIndexerApiClientFactory): AuctionControllerApi =
+        factory.createAuctionApiClient(polygon)
+
+    @Bean
     @Qualifier("polygon.signature.api")
     fun polygonSignatureApi(factory: OrderIndexerApiClientFactory): OrderSignatureControllerApi =
         factory.createOrderSignatureApiClient(polygon)
@@ -110,6 +120,14 @@ class PolygonApiConfiguration {
         converter: EthOrderConverter
     ): EthOrderService {
         return PolygonOrderService(controllerApi, converter)
+    }
+
+    @Bean
+    fun polygonAuctionService(
+        @Qualifier("polygon.auction.api") auctionApi: AuctionControllerApi,
+        converter: EthAuctionConverter
+    ): EthAuctionService {
+        return PolygonAuctionService(auctionApi, converter)
     }
 
     @Bean

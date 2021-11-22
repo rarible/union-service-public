@@ -19,7 +19,7 @@ class EthSignatureServiceTest {
     private val service = EthereumSignatureService(signatureControllerApi)
 
     @Test
-    fun `ethereum validate`() = runBlocking<Unit> {
+    fun `ethereum validate`() = runBlocking {
         val expected = EthereumSignatureValidationFormDto(
             signer = randomAddress(),
             signature = randomBinary(),

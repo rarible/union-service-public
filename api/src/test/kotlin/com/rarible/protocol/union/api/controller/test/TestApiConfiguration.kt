@@ -138,6 +138,11 @@ class TestApiConfiguration {
 
     @Bean
     @Primary
+    @Qualifier("ethereum.auction.api")
+    fun testEthereumAuctionApi(): com.rarible.protocol.order.api.client.AuctionControllerApi = mockk()
+
+    @Bean
+    @Primary
     @Qualifier("ethereum.signature.api")
     fun testEthereumSignatureApi(): com.rarible.protocol.order.api.client.OrderSignatureControllerApi = mockk()
 

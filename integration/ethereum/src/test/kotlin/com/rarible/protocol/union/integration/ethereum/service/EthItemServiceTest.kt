@@ -1,15 +1,11 @@
 package com.rarible.protocol.union.integration.ethereum.service
 
-import com.rarible.core.test.data.randomAddress
 import com.rarible.core.test.data.randomInt
 import com.rarible.core.test.data.randomLong
 import com.rarible.core.test.data.randomString
-import com.rarible.protocol.dto.NftItemRoyaltyDto
-import com.rarible.protocol.dto.NftItemRoyaltyListDto
 import com.rarible.protocol.dto.NftItemsDto
 import com.rarible.protocol.nft.api.client.NftItemControllerApi
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthItemConverter
 import com.rarible.protocol.union.integration.ethereum.data.randomAddressString
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
@@ -65,22 +61,6 @@ class EthItemServiceTest {
         val result = service.getItemById(itemId.value)
 
         assertThat(result).isEqualTo(expected)
-    }
-
-    @Test
-    fun `ethereum get item royalties by id`() = runBlocking<Unit> {
-        val itemId = randomEthItemId()
-        val royalty = NftItemRoyaltyDto(randomAddress(), randomInt())
-        val royaltyList = NftItemRoyaltyListDto(listOf(royalty))
-
-        val expected = EthConverter.convert(royalty, itemId.blockchain)
-
-        coEvery { itemControllerApi.getNftItemRoyaltyById(itemId.value) } returns royaltyList.toMono()
-
-        val result = service.getItemRoyaltiesById(itemId.value)
-
-        assertThat(result).hasSize(1)
-        assertThat(result[0]).isEqualTo(expected)
     }
 
     @Test
