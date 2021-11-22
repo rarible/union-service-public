@@ -29,7 +29,7 @@ class TezosOrderConverterTest {
         assertThat(converted.make.value).isEqualTo(dto.make.value)
         assertThat(converted.take.type).isInstanceOf(TezosXTZAssetTypeDto::class.java)
         assertThat(converted.take.value).isEqualTo(dto.take.value)
-        assertThat(converted.salt).isEqualTo(dto.salt)
+        assertThat(converted.salt).isEqualTo(dto.salt.toString())
         assertThat(converted.signature).isEqualTo(dto.signature)
         assertThat(converted.fill).isEqualTo(dto.fill.toBigDecimal())
         assertThat(converted.startedAt!!.epochSecond).isEqualTo(dto.start!!.toLong())
