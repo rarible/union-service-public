@@ -76,11 +76,22 @@
             <groupId>com.rarible.protocol.union</groupId>
             <artifactId>protocol-union-subscriber</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.rarible.protocol.union</groupId>
+            <artifactId>protocol-union-client</artifactId>
+        </dependency>
 
         <!-- ================== Spring =================== -->
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-webflux</artifactId>
+        </dependency>
+
+        <!-- ================== Other ==================== -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-text</artifactId>
+            <version>1.9</version>
         </dependency>
 
         <!-- ================== Test ===================== -->

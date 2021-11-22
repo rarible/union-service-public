@@ -47,7 +47,8 @@ class EnrichmentMetaService(
             name = meta.name,
             description = meta.description,
             attributes = meta.attributes,
-            content = enrichedContent
+            content = enrichedContent,
+            restrictions = meta.restrictions.map { it.type }.distinct()
         )
     }
 

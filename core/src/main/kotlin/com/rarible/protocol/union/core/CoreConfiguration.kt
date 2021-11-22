@@ -2,6 +2,8 @@ package com.rarible.protocol.union.core
 
 import com.rarible.protocol.currency.api.client.CurrencyApiClientFactory
 import com.rarible.protocol.currency.api.client.CurrencyControllerApi
+import com.rarible.protocol.union.api.ApiClient
+import com.rarible.protocol.union.api.client.DefaultUnionWebClientCustomizer
 import com.rarible.protocol.union.core.service.ActivityService
 import com.rarible.protocol.union.core.service.AuctionService
 import com.rarible.protocol.union.core.service.CollectionService
@@ -25,7 +27,13 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Configuration
 import org.springframework.data.mongodb.core.convert.MappingMongoConverter
+import org.springframework.http.MediaType
+import org.springframework.http.codec.ClientCodecConfigurer
+import org.springframework.http.codec.json.Jackson2JsonDecoder
+import org.springframework.http.codec.json.Jackson2JsonEncoder
 import org.springframework.scheduling.annotation.EnableScheduling
+import org.springframework.web.reactive.function.client.ExchangeStrategies
+import org.springframework.web.reactive.function.client.WebClient
 
 @Configuration
 @EnableScheduling
@@ -41,6 +49,22 @@ class CoreConfiguration(
     @Autowired
     fun setMapKeyDotReplacement(mappingMongoConverter: MappingMongoConverter) {
         mappingMongoConverter.setMapKeyDotReplacement("__DOT__");
+    }
+
+    @Bean
+    fun webClient(): WebClient {
+        val mapper = ApiClient.createDefaultObjectMapper()
+        val strategies = ExchangeStrategies
+            .builder()
+            .codecs { configurer: ClientCodecConfigurer ->
+                configurer.defaultCodecs().jackson2JsonEncoder(Jackson2JsonEncoder(mapper, MediaType.APPLICATION_JSON))
+                configurer.defaultCodecs().jackson2JsonDecoder(Jackson2JsonDecoder(mapper, MediaType.APPLICATION_JSON))
+            }.build()
+        val webClient = WebClient.builder().exchangeStrategies(strategies)
+
+        DefaultUnionWebClientCustomizer().customize(webClient)
+
+        return webClient.build()
     }
 
     @Bean
