@@ -84,6 +84,8 @@ class TezosActivityConverterTest {
                 swapDto.right.maker
             )
         )
+        assertThat(converted.sellerOrderHash).isEqualTo(swapDto.left.hash)
+        assertThat(converted.buyerOrderHash).isEqualTo(swapDto.right.hash)
         assertThat(converted.price).isEqualTo(swapDto.price)
         // in tests all currencies == 1 usd
         assertThat(converted.priceUsd).isEqualTo(swapDto.price)
@@ -108,6 +110,8 @@ class TezosActivityConverterTest {
         assertThat(converted.payment).isEqualTo(TezosConverter.convert(swapDto.left.asset, BlockchainDto.TEZOS))
         assertThat(converted.seller).isEqualTo(UnionAddressConverter.convert(BlockchainDto.TEZOS, right.maker))
         assertThat(converted.buyer).isEqualTo(UnionAddressConverter.convert(BlockchainDto.TEZOS, swapDto.left.maker))
+        assertThat(converted.sellerOrderHash).isEqualTo(swapDto.right.hash)
+        assertThat(converted.buyerOrderHash).isEqualTo(swapDto.left.hash)
         assertThat(converted.price).isEqualTo(swapDto.price)
         // in tests all currencies == 1 usd
         assertThat(converted.priceUsd).isEqualTo(swapDto.price)

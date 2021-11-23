@@ -322,6 +322,8 @@ class EthActivityConverter(
             payment = unionPayment,
             seller = EthConverter.convert(nft.maker, blockchain),
             buyer = EthConverter.convert(payment.maker, blockchain),
+            sellerOrderHash = EthConverter.convert(nft.hash),
+            buyerOrderHash = EthConverter.convert(payment.hash),
             price = source.price,
             priceUsd = priceUsd,
             amountUsd = priceUsd?.multiply(nft.asset.valueDecimal),

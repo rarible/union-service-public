@@ -300,6 +300,8 @@ class TezosActivityConverter(
             payment = unionPayment,
             seller = UnionAddressConverter.convert(blockchain, nft.maker),
             buyer = UnionAddressConverter.convert(blockchain, payment.maker),
+            sellerOrderHash = nft.hash,
+            buyerOrderHash = payment.hash,
             price = source.price,
             priceUsd = priceUsd,
             amountUsd = priceUsd?.multiply(nft.asset.value),

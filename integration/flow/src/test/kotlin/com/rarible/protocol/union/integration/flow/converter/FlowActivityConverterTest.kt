@@ -38,11 +38,16 @@ class FlowActivityConverterTest {
         val dto = randomFlowNftOrderActivitySell()
         val converted = converter.convert(dto, BlockchainDto.FLOW) as OrderMatchActivityDto
 
+        assertThat(converted).isInstanceOf(OrderMatchSellDto::class.java)
+        converted as OrderMatchSellDto
+
         assertThat(converted.id.value).isEqualTo(dto.id)
-        assertThat(converted is OrderMatchSellDto)
-        //todo assert match is ok after flow implementation
         assertThat(converted.date).isEqualTo(dto.date)
         assertThat(converted.transactionHash).isEqualTo(dto.transactionHash)
+
+        // TODO FLOW replace when Flow Implement it
+        assertThat(converted.sellerOrderHash).isNull()
+        assertThat(converted.buyerOrderHash).isNull()
         // TODO UNION remove in 1.19
         assertThat(converted.blockchainInfo!!.transactionHash).isEqualTo(dto.transactionHash)
         assertThat(converted.blockchainInfo!!.blockHash).isEqualTo(dto.blockHash)

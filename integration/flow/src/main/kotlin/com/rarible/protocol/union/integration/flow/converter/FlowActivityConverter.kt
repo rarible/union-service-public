@@ -65,6 +65,9 @@ class FlowActivityConverter(
                     type = OrderMatchSellDto.Type.SELL,
                     // TODO FLOW here should be price from FLOW, we don't want to calculate it here
                     amountUsd = amountUsd(priceUsd, source.left.asset),
+                    // TODO FLOW there is no order info in flow for sides
+                    sellerOrderHash = null,
+                    buyerOrderHash = null,
                     transactionHash = source.transactionHash,
                     // TODO UNION remove in 1.19
                     blockchainInfo = ActivityBlockchainInfoDto(

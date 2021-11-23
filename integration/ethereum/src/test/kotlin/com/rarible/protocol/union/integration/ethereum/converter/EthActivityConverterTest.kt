@@ -80,6 +80,8 @@ class EthActivityConverterTest {
                 BlockchainDto.ETHEREUM
             )
         )
+        assertThat(converted.sellerOrderHash).isEqualTo(EthConverter.convert(swapDto.left.hash))
+        assertThat(converted.buyerOrderHash).isEqualTo(EthConverter.convert(swapDto.right.hash))
         assertThat(converted.price).isEqualTo(swapDto.price)
         assertThat(converted.priceUsd).isEqualTo(swapDto.priceUsd)
         assertThat(converted.amountUsd).isEqualTo(swapDto.priceUsd!!.multiply(left.asset.valueDecimal))
@@ -102,6 +104,8 @@ class EthActivityConverterTest {
         assertThat(converted.payment).isEqualTo(EthConverter.convert(swapDto.left.asset, BlockchainDto.ETHEREUM))
         assertThat(converted.seller).isEqualTo(EthConverter.convert(right.maker, BlockchainDto.ETHEREUM))
         assertThat(converted.buyer).isEqualTo(EthConverter.convert(swapDto.left.maker, BlockchainDto.ETHEREUM))
+        assertThat(converted.sellerOrderHash).isEqualTo(EthConverter.convert(swapDto.right.hash))
+        assertThat(converted.buyerOrderHash).isEqualTo(EthConverter.convert(swapDto.left.hash))
         assertThat(converted.price).isEqualTo(swapDto.price)
         assertThat(converted.priceUsd).isEqualTo(swapDto.priceUsd)
         assertThat(converted.amountUsd).isEqualTo(swapDto.priceUsd!!.multiply(right.asset.valueDecimal))
