@@ -73,7 +73,7 @@ class EnrichmentCollectionEventServiceIt : AbstractIntegrationTest() {
         coEvery { testEthereumOwnershipApi.getNftOwnershipById(ownershipId.value) } returns ethOwnership.toMono()
 
         val nft = randomEthNftItemDto(itemId)
-        coEvery { testEthereumItemApi.getNftItemsByCollection(eq(collection.value), any(), any())
+        coEvery { testEthereumItemApi.getNftItemsByCollection(eq(collection.value), any(), any(), any())
         } returns Mono.just(NftItemsDto(1, null, listOf(nft)))
 
         collectionEventService.onCollectionBestSellOrderUpdate(collectionId, unionBestSell, true)
@@ -119,7 +119,7 @@ class EnrichmentCollectionEventServiceIt : AbstractIntegrationTest() {
         coEvery { testEthereumItemApi.getNftItemMetaById(itemId.value) } returns ethItem.meta!!.toMono()
 
         val nft = randomEthNftItemDto(itemId)
-        coEvery { testEthereumItemApi.getNftItemsByCollection(eq(collection.value), any(), any())
+        coEvery { testEthereumItemApi.getNftItemsByCollection(eq(collection.value), any(), any(), any())
         } returns Mono.just(NftItemsDto(1, null, listOf(nft)))
 
         collectionEventService.onCollectionBestBidOrderUpdate(collectionId, unionBestBid, true)

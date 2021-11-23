@@ -61,7 +61,7 @@ class EthItemControllerApiMock(
         vararg returnItems: NftItemDto
     ) {
         every {
-            nftItemControllerApi.getNftItemsByCollection(collection, continuation, size)
+            nftItemControllerApi.getNftItemsByCollection(collection, any(), continuation, size)
         } returns Mono.just(NftItemsDto(returnItems.size.toLong(), null, returnItems.asList()))
     }
 

@@ -120,10 +120,10 @@ class EthItemServiceTest {
         val expected = EthItemConverter.convert(item, BlockchainDto.ETHEREUM)
 
         coEvery {
-            itemControllerApi.getNftItemsByCollection(collection, continuation, size)
+            itemControllerApi.getNftItemsByCollection(collection, any(), continuation, size)
         } returns NftItemsDto(43, "abc", listOf(item)).toMono()
 
-        val result = service.getItemsByCollection(collection, continuation, size)
+        val result = service.getItemsByCollection(collection, null, continuation, size)
 
         assertThat(result.total).isEqualTo(43)
         assertThat(result.continuation).isEqualTo("abc")
