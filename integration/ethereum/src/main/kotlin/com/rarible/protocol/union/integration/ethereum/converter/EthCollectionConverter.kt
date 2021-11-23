@@ -3,16 +3,28 @@ package com.rarible.protocol.union.integration.ethereum.converter
 import com.rarible.protocol.dto.NftCollectionDto
 import com.rarible.protocol.dto.NftCollectionsDto
 import com.rarible.protocol.union.core.continuation.page.Page
+import com.rarible.protocol.union.core.converter.ContractAddressConverter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionDto
-import com.rarible.protocol.union.dto.ContractAddress
+import org.slf4j.LoggerFactory
 
 object EthCollectionConverter {
 
+    private val logger = LoggerFactory.getLogger(javaClass)
+
     fun convert(source: NftCollectionDto, blockchain: BlockchainDto): CollectionDto {
+        try {
+            return convertInternal(source, blockchain)
+        } catch (e: Exception) {
+            logger.error("Failed to convert {} Collection: {} \n{}", blockchain, e.message, source)
+            throw e
+        }
+    }
+
+    private fun convertInternal(source: NftCollectionDto, blockchain: BlockchainDto): CollectionDto {
         val contract = EthConverter.convert(source.id)
         return CollectionDto(
-            id = ContractAddress(blockchain, contract),
+            id = ContractAddressConverter.convert(blockchain, contract),
             blockchain = blockchain,
             name = source.name,
             symbol = source.symbol,

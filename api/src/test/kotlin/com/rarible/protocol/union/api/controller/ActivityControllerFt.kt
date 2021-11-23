@@ -10,10 +10,10 @@ import com.rarible.protocol.union.api.client.ActivityControllerApi
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.core.continuation.page.PageSize
+import com.rarible.protocol.union.core.converter.ContractAddressConverter
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.ContractAddress
 import com.rarible.protocol.union.dto.MintActivityDto
 import com.rarible.protocol.union.dto.OrderBidActivityDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
@@ -50,7 +50,7 @@ class ActivityControllerFt : AbstractIntegrationTest() {
     fun `get activities by collection - ethereum`() = runBlocking<Unit> {
         // Here we expect only one query - to Order activities, since there is only order-related activity type
         val types = listOf(ActivityTypeDto.SELL)
-        val ethCollectionId = ContractAddress(BlockchainDto.ETHEREUM, randomEthAddress())
+        val ethCollectionId = ContractAddressConverter.convert(BlockchainDto.ETHEREUM, randomEthAddress())
         val orderActivity = randomEthOrderBidActivity()
 
         coEvery {

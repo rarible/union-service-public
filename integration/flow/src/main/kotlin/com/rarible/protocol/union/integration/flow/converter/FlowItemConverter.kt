@@ -15,11 +15,23 @@ import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.MetaAttributeDto
 import com.rarible.protocol.union.dto.MetaContentDto
 import com.rarible.protocol.union.dto.RoyaltyDto
+import org.slf4j.LoggerFactory
 import java.math.BigInteger
 
 object FlowItemConverter {
 
+    private val logger = LoggerFactory.getLogger(javaClass)
+
     fun convert(item: FlowNftItemDto, blockchain: BlockchainDto): UnionItem {
+        try {
+            return convertInternal(item, blockchain)
+        } catch (e: Exception) {
+            logger.error("Failed to convert {} Item: {} \n{}", blockchain, e.message, item)
+            throw e
+        }
+    }
+
+    private fun convertInternal(item: FlowNftItemDto, blockchain: BlockchainDto): UnionItem {
         val collection = UnionAddressConverter.convert(blockchain, item.collection)
 
         return UnionItem(

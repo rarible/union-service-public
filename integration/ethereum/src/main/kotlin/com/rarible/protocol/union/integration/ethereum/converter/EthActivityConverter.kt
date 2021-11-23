@@ -17,6 +17,7 @@ import com.rarible.protocol.dto.OrderActivityDto
 import com.rarible.protocol.dto.OrderActivityListDto
 import com.rarible.protocol.dto.OrderActivityMatchDto
 import com.rarible.protocol.dto.TransferDto
+import com.rarible.protocol.union.core.converter.ContractAddressConverter
 import com.rarible.protocol.union.core.service.CurrencyService
 import com.rarible.protocol.union.dto.ActivityBlockchainInfoDto
 import com.rarible.protocol.union.dto.ActivityDto
@@ -29,7 +30,6 @@ import com.rarible.protocol.union.dto.AuctionFinishActivityDto
 import com.rarible.protocol.union.dto.AuctionOpenActivityDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.BurnActivityDto
-import com.rarible.protocol.union.dto.ContractAddress
 import com.rarible.protocol.union.dto.MintActivityDto
 import com.rarible.protocol.union.dto.OrderActivityMatchSideDto
 import com.rarible.protocol.union.dto.OrderActivitySourceDto
@@ -42,6 +42,7 @@ import com.rarible.protocol.union.dto.OrderMatchSwapDto
 import com.rarible.protocol.union.dto.TransferActivityDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
 import com.rarible.protocol.union.dto.ext
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
@@ -49,11 +50,25 @@ class EthActivityConverter(
     private val currencyService: CurrencyService
 ) {
 
+    private val logger = LoggerFactory.getLogger(javaClass)
+
+    suspend fun convert(source: com.rarible.protocol.dto.ActivityDto, blockchain: BlockchainDto): ActivityDto {
+        try {
+            return convertInternal(source, blockchain)
+        } catch (e: Exception) {
+            logger.error("Failed to convert {} Activity: {} \n{}", blockchain, e.message, source)
+            throw e
+        }
+    }
+
     // For activities, we decided to do NOT convert price to USD in realtime,
     // since we want to see here USD price for the moment when event happened
     // For example, if user bought NFT for 1 ETH 2 days ago, we want to see here USD price
     // for THAT date instead of price calculated for current rate
-    suspend fun convert(source: com.rarible.protocol.dto.ActivityDto, blockchain: BlockchainDto): ActivityDto {
+    private suspend fun convertInternal(
+        source: com.rarible.protocol.dto.ActivityDto,
+        blockchain: BlockchainDto
+    ): ActivityDto {
         val activityId = ActivityIdDto(blockchain, source.id)
         return when (source) {
             is OrderActivityMatchDto -> {
@@ -163,7 +178,7 @@ class EthActivityConverter(
                     id = activityId,
                     date = source.date,
                     owner = EthConverter.convert(source.owner, blockchain),
-                    contract = ContractAddress(blockchain, EthConverter.convert(source.contract)),
+                    contract = ContractAddressConverter.convert(blockchain, EthConverter.convert(source.contract)),
                     tokenId = source.tokenId,
                     value = source.value,
                     transactionHash = EthConverter.convert(source.transactionHash),
@@ -181,7 +196,7 @@ class EthActivityConverter(
                     id = activityId,
                     date = source.date,
                     owner = EthConverter.convert(source.owner, blockchain),
-                    contract = ContractAddress(blockchain, EthConverter.convert(source.contract)),
+                    contract = ContractAddressConverter.convert(blockchain, EthConverter.convert(source.contract)),
                     tokenId = source.tokenId,
                     value = source.value,
                     transactionHash = EthConverter.convert(source.transactionHash),
@@ -200,7 +215,7 @@ class EthActivityConverter(
                     date = source.date,
                     from = EthConverter.convert(source.from, blockchain),
                     owner = EthConverter.convert(source.owner, blockchain),
-                    contract = ContractAddress(blockchain, EthConverter.convert(source.contract)),
+                    contract = ContractAddressConverter.convert(blockchain, EthConverter.convert(source.contract)),
                     tokenId = source.tokenId,
                     value = source.value,
                     transactionHash = EthConverter.convert(source.transactionHash),

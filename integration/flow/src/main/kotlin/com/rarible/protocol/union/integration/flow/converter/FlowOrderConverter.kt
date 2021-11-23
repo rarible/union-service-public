@@ -26,7 +26,7 @@ class FlowOrderConverter(
         try {
             return convertInternal(order, blockchain)
         } catch (e: Exception) {
-            logger.error("Failed to convert Flow Order, cause: {} \n{}", e.message, order)
+            logger.error("Failed to convert {} Order: {} \n{}", blockchain, e.message, order)
             throw e
         }
     }

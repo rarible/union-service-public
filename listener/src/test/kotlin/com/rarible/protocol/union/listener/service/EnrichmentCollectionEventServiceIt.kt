@@ -3,8 +3,8 @@ package com.rarible.protocol.union.listener.service
 import com.rarible.core.test.data.randomAddress
 import com.rarible.core.test.wait.Wait
 import com.rarible.protocol.dto.NftItemsDto
+import com.rarible.protocol.union.core.converter.ContractAddressConverter
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
-import com.rarible.protocol.union.dto.ContractAddress
 import com.rarible.protocol.union.enrichment.converter.EnrichedItemConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.model.ShortItemId
@@ -60,7 +60,7 @@ class EnrichmentCollectionEventServiceIt : AbstractIntegrationTest() {
         val ownershipId = randomEthOwnershipId(itemId)
         val ethOwnership = randomEthOwnershipDto(ownershipId)
 
-        val collectionId = ContractAddress(itemId.blockchain, itemId.contract)
+        val collectionId = ContractAddressConverter.convert(itemId.blockchain, itemId.contract)
         val bestSellOrder = randomEthLegacyOrderDto(
             randomEthCollectionAsset(Address.apply(collectionId.value)),
             ethOwnership.owner,
@@ -107,7 +107,7 @@ class EnrichmentCollectionEventServiceIt : AbstractIntegrationTest() {
         val ethItem = randomEthNftItemDto(itemId)
         val unionItem = EthItemConverter.convert(ethItem, itemId.blockchain)
 
-        val collectionId = ContractAddress(itemId.blockchain, itemId.contract)
+        val collectionId = ContractAddressConverter.convert(itemId.blockchain, itemId.contract)
         val bestBidOrder = randomEthLegacyOrderDto(
             randomEthAssetErc721(),
             randomAddress(),

@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.api.controller.advice
 
 import com.rarible.core.client.WebClientResponseProxyException
+import com.rarible.protocol.union.core.exception.UnionDataFormatException
 import com.rarible.protocol.union.core.exception.UnionException
 import com.rarible.protocol.union.core.exception.UnionNotFoundException
 import com.rarible.protocol.union.dto.BlockchainIdFormatException
@@ -51,13 +52,25 @@ class ErrorsController {
         ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error)
     }
 
-    @ExceptionHandler(Throwable::class)
+    @ExceptionHandler(UnionDataFormatException::class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    fun handlerException(ex: Throwable) = mono {
-        logger.error("System error while handling request", ex)
+    fun dataException(ex: Throwable) = mono {
+        logger.error("Unexpected error during request: {}", ex.message)
         UnionApiErrorServerErrorDto(
             code = UnionApiErrorServerErrorDto.Code.UNKNOWN,
-            message = ex.message ?: "Something went wrong"
+            // In order to do not expose conversion error details, we using here dedicated message,
+            // details could be found in logs
+            message = "Unexpected data error"
+        )
+    }
+
+    @ExceptionHandler(Throwable::class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    fun handleException(ex: Throwable) = mono {
+        logger.error("Unexpected server error: {}", ex)
+        UnionApiErrorServerErrorDto(
+            code = UnionApiErrorServerErrorDto.Code.UNKNOWN,
+            message = ex.message ?: "Unexpected server error"
         )
     }
 }

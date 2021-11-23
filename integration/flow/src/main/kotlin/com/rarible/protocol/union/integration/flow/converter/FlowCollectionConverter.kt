@@ -3,16 +3,28 @@ package com.rarible.protocol.union.integration.flow.converter
 import com.rarible.protocol.dto.FlowNftCollectionDto
 import com.rarible.protocol.dto.FlowNftCollectionsDto
 import com.rarible.protocol.union.core.continuation.page.Page
+import com.rarible.protocol.union.core.converter.ContractAddressConverter
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionDto
-import com.rarible.protocol.union.dto.ContractAddress
+import org.slf4j.LoggerFactory
 
 object FlowCollectionConverter {
 
+    private val logger = LoggerFactory.getLogger(javaClass)
+
     fun convert(source: FlowNftCollectionDto, blockchain: BlockchainDto): CollectionDto {
+        try {
+            return convertInternal(source, blockchain)
+        } catch (e: Exception) {
+            logger.error("Failed to convert {} Collection: {} \n{}", blockchain, e.message, source)
+            throw e
+        }
+    }
+
+    private fun convertInternal(source: FlowNftCollectionDto, blockchain: BlockchainDto): CollectionDto {
         return CollectionDto(
-            id = ContractAddress(blockchain, source.id),
+            id = ContractAddressConverter.convert(blockchain, source.id),
             blockchain = blockchain,
             name = source.name,
             symbol = source.symbol,
