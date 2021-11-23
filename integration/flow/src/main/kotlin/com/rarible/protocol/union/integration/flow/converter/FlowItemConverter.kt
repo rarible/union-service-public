@@ -87,7 +87,9 @@ object FlowItemConverter {
                     url = url,
                     representation = MetaContentDto.Representation.ORIGINAL
                 )
-            }
+            },
+            // TODO FLOW - implement it
+            restrictions = emptyList()
         )
     }
 }

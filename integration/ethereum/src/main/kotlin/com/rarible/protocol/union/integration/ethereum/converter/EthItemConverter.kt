@@ -88,7 +88,9 @@ object EthItemConverter {
                 )
             },
             content = convertMetaContent(source.image, this::getImageHint)
-                    + convertMetaContent(source.animation, this::getVideoHint)
+                    + convertMetaContent(source.animation, this::getVideoHint),
+            // TODO ETHEREUM - implement it
+            restrictions = emptyList()
         )
     }
 

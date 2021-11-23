@@ -133,6 +133,11 @@ abstract class AbstractIntegrationTest {
     @Qualifier("polygon.activity.api.order")
     lateinit var testPolygonActivityOrderApi: OrderActivityControllerApi
 
+    lateinit var polygonItemControllerApiMock: EthItemControllerApiMock
+    lateinit var polygonOwnershipControllerApiMock: EthOwnershipControllerApiMock
+    lateinit var polygonOrderControllerApiMock: EthOrderControllerApiMock
+    lateinit var polygonAuctionControllerApiMock: EthAuctionControllerApiMock
+
     //--------------------- FLOW ---------------------//
     @Autowired
     lateinit var testFlowItemApi: FlowNftItemControllerApi
@@ -183,6 +188,10 @@ abstract class AbstractIntegrationTest {
             testEthereumOwnershipApi,
             testEthereumOrderApi,
 
+            testPolygonItemApi,
+            testPolygonOwnershipApi,
+            testPolygonOrderApi,
+
             testFlowItemApi,
             testFlowOwnershipApi,
             testFlowOrderApi,
@@ -194,6 +203,11 @@ abstract class AbstractIntegrationTest {
         ethereumOwnershipControllerApiMock = EthOwnershipControllerApiMock(testEthereumOwnershipApi)
         ethereumOrderControllerApiMock = EthOrderControllerApiMock(testEthereumOrderApi)
         ethereumAuctionControllerApiMock = EthAuctionControllerApiMock(testEthereumAuctionApi)
+
+        polygonItemControllerApiMock = EthItemControllerApiMock(testPolygonItemApi)
+        polygonOwnershipControllerApiMock = EthOwnershipControllerApiMock(testPolygonOwnershipApi)
+        polygonOrderControllerApiMock = EthOrderControllerApiMock(testPolygonOrderApi)
+        polygonAuctionControllerApiMock = EthAuctionControllerApiMock(testPolygonAuctionApi)
 
         flowItemControllerApiMock = FlowItemControllerApiMock(testFlowItemApi)
         flowOwnershipControllerApiMock = FlowOwnershipControllerApiMock(testFlowOwnershipApi)

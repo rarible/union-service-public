@@ -5,10 +5,13 @@ import com.rarible.protocol.union.core.continuation.ItemContinuation
 import com.rarible.protocol.union.core.continuation.page.PageSize
 import com.rarible.protocol.union.core.continuation.page.Paging
 import com.rarible.protocol.union.core.service.ItemService
+import com.rarible.protocol.union.core.service.RestrictionService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.ItemsDto
+import com.rarible.protocol.union.dto.RestrictionCheckFormDto
+import com.rarible.protocol.union.dto.RestrictionCheckResultDto
 import com.rarible.protocol.union.dto.RoyaltiesDto
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.dto.parser.ItemIdParser
@@ -24,7 +27,8 @@ import org.springframework.web.bind.annotation.RestController
 class ItemController(
     private val itemApiService: ItemApiService,
     private val router: BlockchainRouter<ItemService>,
-    private val enrichmentMetaService: EnrichmentMetaService
+    private val enrichmentMetaService: EnrichmentMetaService,
+    private val restrictionService: RestrictionService
 ) : ItemControllerApi {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -74,6 +78,19 @@ class ItemController(
         val fullItemId = ItemIdParser.parseFull(itemId)
         val royalties = router.getService(fullItemId.blockchain).getItemRoyaltiesById(fullItemId.value)
         return ResponseEntity.ok(RoyaltiesDto(royalties))
+    }
+
+    override suspend fun checkItemRestriction(
+        itemId: String,
+        restrictionCheckFormDto: RestrictionCheckFormDto
+    ): ResponseEntity<RestrictionCheckResultDto> {
+        val fullItemId = ItemIdParser.parseFull(itemId)
+        val checkResult = restrictionService.checkRestriction(fullItemId, restrictionCheckFormDto)
+        val dto = RestrictionCheckResultDto(
+            success = checkResult.success,
+            message = checkResult.message
+        )
+        return ResponseEntity.ok(dto)
     }
 
     override suspend fun resetItemMeta(itemId: String): ResponseEntity<Unit> {

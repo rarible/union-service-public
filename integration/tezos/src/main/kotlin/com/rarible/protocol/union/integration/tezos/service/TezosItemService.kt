@@ -11,6 +11,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.RoyaltyDto
 import com.rarible.protocol.union.integration.tezos.converter.TezosItemConverter
 import kotlinx.coroutines.reactive.awaitFirst
+import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.http.HttpStatus
 import org.springframework.web.reactive.function.client.WebClientResponseException
 
@@ -66,7 +67,7 @@ open class TezosItemService(
     }
 
     override suspend fun resetItemMeta(itemId: String) {
-        itemControllerApi.resetNftItemMetaById(itemId).awaitFirst()
+        itemControllerApi.resetNftItemMetaById(itemId).awaitFirstOrNull()
     }
 
     override suspend fun getItemsByCollection(
