@@ -1,6 +1,9 @@
 package com.rarible.protocol.union.integration.ethereum.converter
 
 import com.rarible.protocol.dto.OrderCancelDto
+import com.rarible.protocol.dto.OrderRaribleV2DataDto
+import com.rarible.protocol.dto.OrderRaribleV2DataV1Dto
+import com.rarible.protocol.dto.OrderRaribleV2DataV2Dto
 import com.rarible.protocol.dto.OrderSideMatchDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.EthErc20AssetTypeDto
@@ -158,11 +161,11 @@ class EthOrderConverterTest {
         assertThat(converted.takePriceUsd).isNull()
 
         val data = converted.data as EthOrderDataRaribleV2DataV1Dto
-        assertThat(data.payouts[0].account.value).isEqualTo(dto.data.payouts[0].account.prefixed())
-        assertThat(data.payouts[0].value).isEqualTo(dto.data.payouts[0].value)
+        assertThat(data.payouts[0].account.value).isEqualTo((dto.data as OrderRaribleV2DataV1Dto).payouts[0].account.prefixed())
+        assertThat(data.payouts[0].value).isEqualTo((dto.data as OrderRaribleV2DataV1Dto).payouts[0].value)
 
-        assertThat(data.originFees[0].account.value).isEqualTo(dto.data.originFees[0].account.prefixed())
-        assertThat(data.originFees[0].value).isEqualTo(dto.data.originFees[0].value)
+        assertThat(data.originFees[0].account.value).isEqualTo((dto.data as OrderRaribleV2DataV1Dto).originFees[0].account.prefixed())
+        assertThat(data.originFees[0].value).isEqualTo((dto.data as OrderRaribleV2DataV1Dto).originFees[0].value)
     }
 
     @Test

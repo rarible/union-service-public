@@ -39,7 +39,6 @@ class EthAuctionConverter(
     private suspend fun convertInternal(auction: com.rarible.protocol.dto.AuctionDto, blockchain: BlockchainDto): AuctionDto {
         val auctionId = AuctionIdDto(blockchain, EthConverter.convert(auction.hash))
         val seller = EthConverter.convert(auction.seller, blockchain)
-        val buyer = auction.buyer?.let { EthConverter.convert(it, blockchain) }
         val sell = EthConverter.convert(auction.sell, blockchain)
         val buy = EthConverter.convert(auction.buy, blockchain)
         val buyPriceUsd = currencyService.toUsd(blockchain, buy, auction.buyPrice)
@@ -49,7 +48,6 @@ class EthAuctionConverter(
                     id = auctionId,
                     type = AuctionDto.Type.RARIBLE_AUCTION_V1,
                     seller = seller,
-                    buyer = buyer,
                     sell = sell,
                     buy = buy,
                     endTime = auction.endTime,

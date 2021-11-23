@@ -451,7 +451,6 @@ fun randomEthAuctionDto() = randomEthAuctionDto(randomEthItemId())
 fun randomEthAuctionDto(itemId: ItemIdDto): AuctionDto {
     return RaribleAuctionV1Dto(
         seller = randomAddress(),
-        buyer = randomAddress(),
         sell = randomEthAssetErc721(itemId),
         buy = Erc20AssetTypeDto(randomAddress()),
         endTime = Instant.MAX,
@@ -466,6 +465,7 @@ fun randomEthAuctionDto(itemId: ItemIdDto): AuctionDto {
         hash = Word.apply(randomWord()),
         auctionId = BigInteger.ONE,
         lastBid = RaribleAuctionV1BidV1Dto(
+            buyer = randomAddress(),
             amount = BigDecimal.ONE,
             data = RaribleAuctionV1BidDataV1Dto(
                 originFees = listOf(PartDto(randomAddress(), 100)),

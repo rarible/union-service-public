@@ -110,7 +110,7 @@ class ItemController(
         val safeSize = PageSize.ITEM.limit(size)
         val collectionAddress = IdParser.parseContract(collection)
         val result = router.getService(collectionAddress.blockchain)
-            .getItemsByCollection(collectionAddress.value, continuation, safeSize)
+            .getItemsByCollection(collectionAddress.value, null, continuation, safeSize)
 
         logger.info(
             "Response for getItemsByCollection(collection={}, continuation={}, size={}):" +

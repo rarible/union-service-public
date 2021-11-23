@@ -62,17 +62,14 @@ class EnrichmentItemService(
         return itemRepository.findAll(ids)
     }
 
-    // TODO UNION - we need to get rid of usage of 'owners' field
     fun findByCollection(address: ContractAddress, owner: UnionAddress? = null): Flow<ShortItemId> = flow {
         var continuation: String? = null
         logger.info("Fetching all items for collection {} and owner {}", address, owner)
         var count = 0
         do {
             val page = itemServiceRouter.getService(address.blockchain)
-                .getItemsByCollection(address.value, continuation, FETCH_SIZE)
-            page.entities
-                .filter { item -> owner?.let { item.owners.contains(it) } ?: true }
-                .map { ShortItemId(it.id) }.forEach { emit(it) }
+                .getItemsByCollection(address.value, owner?.value, continuation, FETCH_SIZE)
+            page.entities.map { ShortItemId(it.id) }.forEach { emit(it) }
             count += page.entities.count()
             continuation = page.continuation
         } while (continuation != null)

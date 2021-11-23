@@ -34,6 +34,7 @@ interface ItemService : BlockchainService {
 
     suspend fun getItemsByCollection(
         collection: String,
+        owner: String?,
         continuation: String?,
         size: Int
     ): Page<UnionItem>
