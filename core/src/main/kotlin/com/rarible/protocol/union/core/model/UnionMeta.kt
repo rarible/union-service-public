@@ -1,7 +1,6 @@
 package com.rarible.protocol.union.core.model
 
 import com.rarible.protocol.union.dto.MetaAttributeDto
-import com.rarible.protocol.union.dto.Restriction
 
 data class UnionMeta(
     val name: String,

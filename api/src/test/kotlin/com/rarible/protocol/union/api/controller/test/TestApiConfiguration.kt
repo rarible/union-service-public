@@ -182,6 +182,11 @@ class TestApiConfiguration {
 
     @Bean
     @Primary
+    @Qualifier("polygon.auction.api")
+    fun testPolygonAuctionApi(): com.rarible.protocol.order.api.client.AuctionControllerApi = mockk()
+
+    @Bean
+    @Primary
     @Qualifier("polygon.signature.api")
     fun testPolygonSignatureApi(): com.rarible.protocol.order.api.client.OrderSignatureControllerApi = mockk()
 

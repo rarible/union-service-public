@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.core.restriction
+package com.rarible.protocol.union.core.model
 
 data class RestrictionCheckResult(
     val success: Boolean,

@@ -52,11 +52,14 @@ class AuctionControllerFt : AbstractIntegrationTest() {
 
     @Test
     fun `get all auction - ethereum`() = runBlocking<Unit> {
-        val auction = randomEthAuctionDto()
+        val ethereumAuction = randomEthAuctionDto()
+        val polygonAuction = randomEthAuctionDto()
         val origin = UnionAddressConverter.convert(BlockchainDto.ETHEREUM, randomEthAddress())
-        val unionAuction = ethAuctionConverter.convert(auction, BlockchainDto.ETHEREUM)
+        val unionEthereumAuction = ethAuctionConverter.convert(ethereumAuction, BlockchainDto.ETHEREUM)
+        val unionPolygonAuction = ethAuctionConverter.convert(polygonAuction, BlockchainDto.POLYGON)
 
-        ethereumAuctionControllerApiMock.mockGetAllAuctions(listOf(auction))
+        ethereumAuctionControllerApiMock.mockGetAllAuctions(listOf(ethereumAuction))
+        polygonAuctionControllerApiMock.mockGetAllAuctions(listOf(polygonAuction))
 
         val unionAuctions = auctionControllerClient.getAuctionsAll(
             listOf(BlockchainDto.ETHEREUM),
@@ -66,8 +69,10 @@ class AuctionControllerFt : AbstractIntegrationTest() {
             platform, continuation, size
         ).awaitFirst()
 
-        assertThat(unionAuctions.auctions.size).isEqualTo(1)
-        assertThat(unionAuctions.auctions.first().id).isEqualTo(unionAuction.id)
+        val auctionIds = unionAuctions.auctions.map { it.auctionId }
+
+        assertThat(unionAuctions.auctions).hasSize(2)
+        assertThat(auctionIds).contains(unionEthereumAuction.auctionId, unionPolygonAuction.auctionId)
     }
 
     @Test
@@ -123,6 +128,7 @@ class AuctionControllerFt : AbstractIntegrationTest() {
         val unionAuction = ethAuctionConverter.convert(auction, BlockchainDto.ETHEREUM)
 
         ethereumAuctionControllerApiMock.mockGetAuctionsBySeller(seller.value, listOf(auction))
+        polygonAuctionControllerApiMock.mockGetAuctionsBySeller(seller.value, listOf())
 
         val unionAuctions = auctionControllerClient.getAuctionsBySeller(
             seller.fullId(),
