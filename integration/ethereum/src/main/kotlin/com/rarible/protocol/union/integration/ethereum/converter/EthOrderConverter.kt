@@ -6,6 +6,8 @@ import com.rarible.protocol.dto.OpenSeaV1OrderDto
 import com.rarible.protocol.dto.OrderCancelDto
 import com.rarible.protocol.dto.OrderExchangeHistoryDto
 import com.rarible.protocol.dto.OrderOpenSeaV1DataV1Dto
+import com.rarible.protocol.dto.OrderRaribleV2DataV1Dto
+import com.rarible.protocol.dto.OrderRaribleV2DataV2Dto
 import com.rarible.protocol.dto.OrderSideDto
 import com.rarible.protocol.dto.OrderSideMatchDto
 import com.rarible.protocol.dto.OrdersPaginationDto
@@ -122,10 +124,7 @@ class EthOrderConverter(
                     makePriceUsd = makePriceUsd,
                     takePriceUsd = takePriceUsd,
                     priceHistory = priceHistory,
-                    data = EthOrderDataRaribleV2DataV1Dto(
-                        payouts = order.data.payouts.map { EthConverter.convertToPayout(it, blockchain) },
-                        originFees = order.data.originFees.map { EthConverter.convertToPayout(it, blockchain) }
-                    )
+                    data = convert(order.data, blockchain)
                 )
             }
             is OpenSeaV1OrderDto -> {
@@ -196,6 +195,23 @@ class EthOrderConverter(
                     takePriceUsd = takePriceUsd,
                     priceHistory = priceHistory,
                     data = EthOrderCryptoPunksDataDto()
+                )
+            }
+        }
+    }
+
+    fun convert(source: com.rarible.protocol.dto.OrderRaribleV2DataDto, blockchain: BlockchainDto): EthOrderDataRaribleV2DataV1Dto {
+        return when(source) {
+            is OrderRaribleV2DataV2Dto -> {
+                EthOrderDataRaribleV2DataV1Dto(
+                    payouts = source.payouts.map { EthConverter.convertToPayout(it, blockchain) },
+                    originFees = source.originFees.map { EthConverter.convertToPayout(it, blockchain) }
+                )
+            }
+            is OrderRaribleV2DataV1Dto -> {
+                EthOrderDataRaribleV2DataV1Dto(
+                    payouts = source.payouts.map { EthConverter.convertToPayout(it, blockchain) },
+                    originFees = source.originFees.map { EthConverter.convertToPayout(it, blockchain) }
                 )
             }
         }

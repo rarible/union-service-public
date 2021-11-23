@@ -58,11 +58,13 @@ open class EthItemService(
 
     override suspend fun getItemsByCollection(
         collection: String,
+        owner: String?,
         continuation: String?,
         size: Int
     ): Page<UnionItem> {
         val items = itemControllerApi.getNftItemsByCollection(
             collection,
+            owner,
             continuation,
             size
         ).awaitFirst()
