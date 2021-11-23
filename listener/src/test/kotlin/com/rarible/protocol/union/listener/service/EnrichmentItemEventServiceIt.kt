@@ -367,7 +367,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
             testEthereumItemApi.getNftItemsByCollection(eq(collectionId.value), isNull(), any(), any())
         } returns Mono.just(NftItemsDto(1, "next", listOf(nft)))
         coEvery {
-            testEthereumItemApi.getNftItemsByCollection(eq(collectionId.value), eq("next"), any(), any())
+            testEthereumItemApi.getNftItemsByCollection(eq(collectionId.value), any(), eq("next"), any())
         } returns Mono.just(NftItemsDto(2, null, listOf(nft, nft)))
 
         val list = itemService.findByCollection(collectionId).toList()
