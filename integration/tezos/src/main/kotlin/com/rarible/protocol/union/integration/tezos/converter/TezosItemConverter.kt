@@ -61,7 +61,9 @@ object TezosItemConverter {
             content = listOfNotNull(
                 meta.image?.let { UnionMetaContent(it, MetaContentDto.Representation.ORIGINAL) },
                 meta.animation?.let { UnionMetaContent(it, MetaContentDto.Representation.ORIGINAL) }
-            )
+            ),
+            // TODO TEZOS - implement it
+            restrictions = listOf()
         )
 
     private fun toRoyalty(

@@ -25,10 +25,14 @@ import com.rarible.protocol.union.integration.ethereum.data.randomEthItemMeta
 import com.rarible.protocol.union.integration.ethereum.data.randomEthNftItemDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthV2OrderDto
 import com.rarible.protocol.union.integration.tezos.data.randomTezosAddress
+import com.rarible.protocol.union.integration.tezos.data.randomTezosItemId
 import com.rarible.protocol.union.integration.tezos.data.randomTezosItemIdFullValue
+import com.rarible.protocol.union.integration.tezos.data.randomTezosMetaDto
 import com.rarible.protocol.union.integration.tezos.data.randomTezosNftItemDto
 import com.rarible.protocol.union.test.data.randomFlowAddress
+import com.rarible.protocol.union.test.data.randomFlowItemId
 import com.rarible.protocol.union.test.data.randomFlowItemIdFullValue
+import com.rarible.protocol.union.test.data.randomFlowMetaDto
 import com.rarible.protocol.union.test.data.randomFlowNftItemDto
 import io.mockk.coEvery
 import io.mockk.verify
@@ -111,46 +115,39 @@ class ItemControllerFt : AbstractIntegrationTest() {
 
     @Test
     fun `reset item meta by id - ethereum`() = runBlocking<Unit> {
-        val itemIdFull = randomEthItemId().fullId()
-        val itemId = ItemIdParser.parseFull(itemIdFull)
+        val itemId = randomEthItemId()
 
         coEvery { testEthereumItemApi.resetNftItemMetaById(itemId.value) } returns Mono.first()
         coEvery { testEthereumItemApi.getNftItemMetaById(itemId.value) } returns Mono.just(randomEthItemMeta())
 
-        itemControllerClient.resetItemMeta(itemIdFull).awaitFirstOrNull()
+        itemControllerClient.resetItemMeta(itemId.fullId()).awaitFirstOrNull()
 
         verify(exactly = 1) { testEthereumItemApi.resetNftItemMetaById(itemId.value) }
     }
 
-    /*
     @Test
-    // TODO uncomment when Flow implement it
     fun `reset item meta by id - flow`() = runBlocking<Unit> {
-        val itemIdFull = randomFlowItemIdFullValue()
-        val itemId = ItemIdParser.parseFull(itemIdFull)
+        val itemId = randomFlowItemId()
 
-        coEvery { testFlowItemApi.resetNftItemMetaById(itemId.value) } returns item.toMono()
+        coEvery { testFlowItemApi.resetItemMeta(itemId.value) } returns Mono.first()
+        coEvery { testFlowItemApi.getNftItemMetaById(itemId.value) } returns Mono.just(randomFlowMetaDto())
 
-        val unionItem = itemControllerClient.getItemById(itemIdFull).awaitFirst()
+        itemControllerClient.resetItemMeta(itemId.fullId()).awaitFirstOrNull()
 
-        verify(exactly = 1) { testFlowItemApi.resetNftItemMetaById(itemId.value) }
+        verify(exactly = 1) { testFlowItemApi.resetItemMeta(itemId.value) }
     }
-    */
 
-    // TODO uncomment when TEZOS implement it
-    /*
     @Test
     fun `reset item meta by id - tezos`() = runBlocking<Unit> {
-        val itemIdFull = randomEthItemId().fullId()
-        val itemId = ItemIdParser.parseFull(itemIdFull)
+        val itemId = randomTezosItemId()
 
         coEvery { testTezosItemApi.resetNftItemMetaById(itemId.value) } returns Mono.first()
+        coEvery { testTezosItemApi.getNftItemMetaById(itemId.value) } returns Mono.just(randomTezosMetaDto())
 
-        itemControllerClient.resetItemMeta(itemIdFull).awaitFirstOrNull()
+        itemControllerClient.resetItemMeta(itemId.fullId()).awaitFirstOrNull()
 
         verify(exactly = 1) { testTezosItemApi.resetNftItemMetaById(itemId.value) }
     }
-    */
 
     @Test
     fun `get item royalties`() = runBlocking<Unit> {

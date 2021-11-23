@@ -76,11 +76,22 @@
             <groupId>com.rarible.protocol.union</groupId>
             <artifactId>protocol-union-subscriber</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.rarible.protocol.union</groupId>
+            <artifactId>protocol-union-client</artifactId>
+        </dependency>
 
         <!-- ================== Spring =================== -->
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-webflux</artifactId>
+        </dependency>
+
+        <!-- ================== Other ==================== -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-text</artifactId>
+            <version>1.9</version>
         </dependency>
 
         <!-- ================== Test ===================== -->
@@ -97,6 +108,16 @@
         <dependency>
             <groupId>net.java.dev.jna</groupId>
             <artifactId>jna</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>mockwebserver</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
