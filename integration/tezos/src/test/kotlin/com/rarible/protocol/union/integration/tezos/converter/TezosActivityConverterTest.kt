@@ -192,7 +192,7 @@ class TezosActivityConverterTest {
         assertThat(converted.owner.value).isEqualTo(dto.owner)
         assertThat(converted.contract.value).isEqualTo(dto.contract)
         assertThat(converted.tokenId).isEqualTo(dto.tokenId)
-        assertThat(converted.value).isEqualTo(dto.value)
+        assertThat(converted.value).isEqualTo(dto.value.toBigInteger())
         assertThat(converted.transactionHash).isEqualTo(dto.transactionHash)
         // TODO UNION remove in 1.19
         assertThat(converted.blockchainInfo!!.transactionHash).isEqualTo(dto.transactionHash)
@@ -210,7 +210,7 @@ class TezosActivityConverterTest {
         assertThat(converted.owner.value).isEqualTo(dto.owner)
         assertThat(converted.contract.value).isEqualTo(dto.contract)
         assertThat(converted.tokenId).isEqualTo(dto.tokenId)
-        assertThat(converted.value).isEqualTo(dto.value)
+        assertThat(converted.value).isEqualTo(dto.value.toBigInteger())
         assertThat(converted.transactionHash).isEqualTo(dto.transactionHash)
         // TODO UNION remove in 1.19
         assertThat(converted.blockchainInfo!!.transactionHash).isEqualTo(dto.transactionHash)
@@ -228,7 +228,7 @@ class TezosActivityConverterTest {
         assertThat(converted.owner.value).isEqualTo(dto.elt.owner)
         assertThat(converted.contract.value).isEqualTo(dto.elt.contract)
         assertThat(converted.tokenId).isEqualTo(dto.elt.tokenId)
-        assertThat(converted.value).isEqualTo(dto.elt.value)
+        assertThat(converted.value).isEqualTo(dto.elt.value.toBigInteger())
         assertThat(converted.transactionHash).isEqualTo(dto.elt.transactionHash)
         // TODO UNION remove in 1.19
         assertThat(converted.blockchainInfo!!.transactionHash).isEqualTo(dto.elt.transactionHash)

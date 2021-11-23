@@ -154,7 +154,8 @@ class TezosActivityConverter(
                     owner = UnionAddressConverter.convert(blockchain, source.owner),
                     contract = ContractAddress(blockchain, source.contract),
                     tokenId = source.tokenId,
-                    value = source.value,
+                    // Tezos send it as BigDecimal, but in fact, that's BigInteger
+                    value = source.value.toBigInteger(),
                     transactionHash = source.transactionHash,
                     // TODO UNION remove in 1.19
                     blockchainInfo = ActivityBlockchainInfoDto(
@@ -172,7 +173,8 @@ class TezosActivityConverter(
                     owner = UnionAddressConverter.convert(blockchain, source.owner),
                     contract = ContractAddress(blockchain, source.contract),
                     tokenId = source.tokenId,
-                    value = source.value,
+                    // Tezos send it as BigDecimal, but in fact, that's BigInteger
+                    value = source.value.toBigInteger(),
                     transactionHash = source.transactionHash,
                     // TODO UNION remove in 1.19
                     blockchainInfo = ActivityBlockchainInfoDto(
@@ -191,7 +193,8 @@ class TezosActivityConverter(
                     owner = UnionAddressConverter.convert(blockchain, source.elt.owner),
                     contract = ContractAddress(blockchain, source.elt.contract),
                     tokenId = source.elt.tokenId,
-                    value = source.elt.value,
+                    // Tezos send it as BigDecimal, but in fact, that's BigInteger
+                    value = source.elt.value.toBigInteger(),
                     transactionHash = source.elt.transactionHash,
                     // TODO UNION remove in 1.19
                     blockchainInfo = ActivityBlockchainInfoDto(

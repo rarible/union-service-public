@@ -28,16 +28,15 @@ open class TezosItemService(
         lastUpdatedFrom: Long?,
         lastUpdatedTo: Long?
     ): Page<UnionItem> {
-        // TODO TEZOS implement
-        /* val items = itemControllerApi.getNftAllItems(
-             continuation,
-             size,
-             showDeleted,
-             lastUpdatedFrom,
-             lastUpdatedTo
-         ).awaitFirst()
-         return TezosItemConverter.convert(items, blockchain)*/
-        return Page(0, null, emptyList())
+        val items = itemControllerApi.getNftAllItems(
+            lastUpdatedFrom?.toString(),
+            lastUpdatedTo?.toString(),
+            showDeleted,
+            WITH_META,
+            size,
+            continuation
+        ).awaitFirst()
+        return TezosItemConverter.convert(items, blockchain)
     }
 
     override suspend fun getItemById(
@@ -67,8 +66,7 @@ open class TezosItemService(
     }
 
     override suspend fun resetItemMeta(itemId: String) {
-        // TODO TEZOS implement
-        //itemControllerApi.resetNftItemMetaById(itemId)
+        itemControllerApi.resetNftItemMetaById(itemId).awaitFirst()
     }
 
     override suspend fun getItemsByCollection(
