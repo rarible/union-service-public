@@ -1,7 +1,6 @@
 package com.rarible.protocol.union.integration.ethereum.converter
 
 import com.rarible.protocol.dto.AuctionsPaginationDto
-import com.rarible.protocol.dto.OrdersPaginationDto
 import com.rarible.protocol.dto.RaribleAuctionV1Dto
 import com.rarible.protocol.union.core.continuation.page.Slice
 import com.rarible.protocol.union.core.service.CurrencyService
@@ -11,7 +10,6 @@ import com.rarible.protocol.union.dto.AuctionIdDto
 import com.rarible.protocol.union.dto.AuctionSortDto
 import com.rarible.protocol.union.dto.AuctionStatusDto
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.OrderDto
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
@@ -41,7 +39,6 @@ class EthAuctionConverter(
     private suspend fun convertInternal(auction: com.rarible.protocol.dto.AuctionDto, blockchain: BlockchainDto): AuctionDto {
         val auctionId = AuctionIdDto(blockchain, EthConverter.convert(auction.hash))
         val seller = EthConverter.convert(auction.seller, blockchain)
-//        val buyer = auction.buyer?.let { EthConverter.convert(it, blockchain) }
         val sell = EthConverter.convert(auction.sell, blockchain)
         val buy = EthConverter.convert(auction.buy, blockchain)
         val buyPriceUsd = currencyService.toUsd(blockchain, buy, auction.buyPrice)
@@ -51,7 +48,6 @@ class EthAuctionConverter(
                     id = auctionId,
                     type = AuctionDto.Type.RARIBLE_AUCTION_V1,
                     seller = seller,
-//                    buyer = buyer,
                     sell = sell,
                     buy = buy,
                     endTime = auction.endTime,
