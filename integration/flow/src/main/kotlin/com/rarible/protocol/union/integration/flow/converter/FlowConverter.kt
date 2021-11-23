@@ -4,11 +4,11 @@ import com.rarible.protocol.dto.FlowAssetDto
 import com.rarible.protocol.dto.FlowAssetFungibleDto
 import com.rarible.protocol.dto.FlowAssetNFTDto
 import com.rarible.protocol.dto.PayInfoDto
+import com.rarible.protocol.union.core.converter.ContractAddressConverter
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.dto.AssetDto
 import com.rarible.protocol.union.dto.AssetTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.ContractAddress
 import com.rarible.protocol.union.dto.CreatorDto
 import com.rarible.protocol.union.dto.FlowAssetTypeFtDto
 import com.rarible.protocol.union.dto.FlowAssetTypeNftDto
@@ -43,7 +43,7 @@ object FlowConverter {
                 AssetDto(
                     value = source.value,
                     type = FlowAssetTypeFtDto(
-                        contract = ContractAddress(blockchain, source.contract)
+                        contract = ContractAddressConverter.convert(blockchain, source.contract)
                     )
                 )
             }
@@ -51,7 +51,7 @@ object FlowConverter {
                 AssetDto(
                     value = source.value,
                     type = FlowAssetTypeNftDto(
-                        contract = ContractAddress(blockchain, source.contract),
+                        contract = ContractAddressConverter.convert(blockchain, source.contract),
                         tokenId = source.tokenId
                     )
                 )
@@ -63,12 +63,12 @@ object FlowConverter {
         return when (source) {
             is FlowAssetFungibleDto -> {
                 FlowAssetTypeFtDto(
-                    contract = ContractAddress(blockchain, source.contract)
+                    contract = ContractAddressConverter.convert(blockchain, source.contract)
                 )
             }
             is FlowAssetNFTDto -> {
                 FlowAssetTypeNftDto(
-                    contract = ContractAddress(blockchain, source.contract),
+                    contract = ContractAddressConverter.convert(blockchain, source.contract),
                     tokenId = source.tokenId
                 )
             }

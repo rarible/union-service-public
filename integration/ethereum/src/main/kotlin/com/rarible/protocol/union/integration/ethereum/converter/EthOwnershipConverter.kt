@@ -9,10 +9,22 @@ import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemHistoryDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
+import org.slf4j.LoggerFactory
 
 object EthOwnershipConverter {
 
+    private val logger = LoggerFactory.getLogger(javaClass)
+
     fun convert(source: NftOwnershipDto, blockchain: BlockchainDto): UnionOwnership {
+        try {
+            return convertInternal(source, blockchain)
+        } catch (e: Exception) {
+            logger.error("Failed to convert {} Ownership: {} \n{}", blockchain, e.message, source)
+            throw e
+        }
+    }
+
+    private fun convertInternal(source: NftOwnershipDto, blockchain: BlockchainDto): UnionOwnership {
         val contract = EthConverter.convert(source.contract)
         return UnionOwnership(
             id = OwnershipIdDto(

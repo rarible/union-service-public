@@ -5,9 +5,8 @@ import com.rarible.protocol.dto.AuctionIdsDto
 import com.rarible.protocol.dto.NftItemsDto
 import com.rarible.protocol.dto.OrderStatusDto
 import com.rarible.protocol.dto.OrdersPaginationDto
-import com.rarible.protocol.union.dto.AssetDto
+import com.rarible.protocol.union.core.converter.ContractAddressConverter
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.ContractAddress
 import com.rarible.protocol.union.enrichment.converter.EnrichedItemConverter
 import com.rarible.protocol.union.enrichment.converter.ShortItemConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
@@ -360,7 +359,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
     @Test
     fun `should return pages after continuation`() = runBlocking {
         val itemId = randomEthItemId()
-        val collectionId = ContractAddress(itemId.blockchain, itemId.contract)
+        val collectionId = ContractAddressConverter.convert(itemId.blockchain, itemId.contract)
 
         val nft = randomEthNftItemDto(itemId)
         coEvery {

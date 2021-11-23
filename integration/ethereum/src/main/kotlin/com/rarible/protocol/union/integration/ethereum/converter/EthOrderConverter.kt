@@ -42,7 +42,7 @@ class EthOrderConverter(
         try {
             return convertInternal(order, blockchain)
         } catch (e: Exception) {
-            logger.error("Failed to convert Ethereum Order, cause: {} \n{}", e.message, order)
+            logger.error("Failed to convert {} Order: {} \n{}", blockchain, e.message, order)
             throw e
         }
     }

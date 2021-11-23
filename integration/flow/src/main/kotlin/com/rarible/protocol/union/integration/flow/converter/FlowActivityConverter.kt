@@ -10,6 +10,7 @@ import com.rarible.protocol.dto.FlowNftOrderActivityListDto
 import com.rarible.protocol.dto.FlowNftOrderActivitySellDto
 import com.rarible.protocol.dto.FlowTransferDto
 import com.rarible.protocol.union.core.continuation.page.Slice
+import com.rarible.protocol.union.core.converter.ContractAddressConverter
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.service.CurrencyService
 import com.rarible.protocol.union.dto.ActivityBlockchainInfoDto
@@ -17,13 +18,13 @@ import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivityIdDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.BurnActivityDto
-import com.rarible.protocol.union.dto.ContractAddress
 import com.rarible.protocol.union.dto.MintActivityDto
 import com.rarible.protocol.union.dto.OrderActivitySourceDto
 import com.rarible.protocol.union.dto.OrderCancelListActivityDto
 import com.rarible.protocol.union.dto.OrderListActivityDto
 import com.rarible.protocol.union.dto.OrderMatchSellDto
 import com.rarible.protocol.union.dto.TransferActivityDto
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.math.BigDecimal
 
@@ -32,7 +33,18 @@ class FlowActivityConverter(
     private val currencyService: CurrencyService
 ) {
 
+    private val logger = LoggerFactory.getLogger(javaClass)
+
     suspend fun convert(source: FlowActivityDto, blockchain: BlockchainDto): ActivityDto {
+        try {
+            return convertInternal(source, blockchain)
+        } catch (e: Exception) {
+            logger.error("Failed to convert {} Activity: {} \n{}", blockchain, e.message, source)
+            throw e
+        }
+    }
+
+    private suspend fun convertInternal(source: FlowActivityDto, blockchain: BlockchainDto): ActivityDto {
         val activityId = ActivityIdDto(blockchain, source.id)
         return when (source) {
             is FlowNftOrderActivitySellDto -> {
@@ -98,7 +110,7 @@ class FlowActivityConverter(
                     id = activityId,
                     date = source.date,
                     owner = UnionAddressConverter.convert(blockchain, source.owner),
-                    contract = ContractAddress(blockchain, source.contract),
+                    contract = ContractAddressConverter.convert(blockchain, source.contract),
                     tokenId = source.tokenId,
                     value = source.value,
                     transactionHash = source.transactionHash,
@@ -116,7 +128,7 @@ class FlowActivityConverter(
                     id = activityId,
                     date = source.date,
                     owner = UnionAddressConverter.convert(blockchain, source.owner),
-                    contract = ContractAddress(blockchain, source.contract),
+                    contract = ContractAddressConverter.convert(blockchain, source.contract),
                     tokenId = source.tokenId,
                     value = source.value,
                     transactionHash = source.transactionHash,
@@ -135,7 +147,7 @@ class FlowActivityConverter(
                     date = source.date,
                     from = UnionAddressConverter.convert(blockchain, source.from),
                     owner = UnionAddressConverter.convert(blockchain, source.owner),
-                    contract = ContractAddress(blockchain, source.contract),
+                    contract = ContractAddressConverter.convert(blockchain, source.contract),
                     tokenId = source.tokenId,
                     value = source.value,
                     transactionHash = source.transactionHash,

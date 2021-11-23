@@ -7,11 +7,23 @@ import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
+import org.slf4j.LoggerFactory
 import java.math.BigInteger
 
 object FlowOwnershipConverter {
 
+    private val logger = LoggerFactory.getLogger(javaClass)
+
     fun convert(ownership: FlowNftOwnershipDto, blockchain: BlockchainDto): UnionOwnership {
+        try {
+            return convertInternal(ownership, blockchain)
+        } catch (e: Exception) {
+            logger.error("Failed to convert {} Ownership: {} \n{}", blockchain, e.message, ownership)
+            throw e
+        }
+    }
+
+    private fun convertInternal(ownership: FlowNftOwnershipDto, blockchain: BlockchainDto): UnionOwnership {
         val tokenId = ownership.tokenId
         val owner = UnionAddressConverter.convert(blockchain, ownership.owner)
 

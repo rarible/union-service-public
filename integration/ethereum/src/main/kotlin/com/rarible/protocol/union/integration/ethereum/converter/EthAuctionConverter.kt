@@ -1,7 +1,6 @@
 package com.rarible.protocol.union.integration.ethereum.converter
 
 import com.rarible.protocol.dto.AuctionsPaginationDto
-import com.rarible.protocol.dto.OrdersPaginationDto
 import com.rarible.protocol.dto.RaribleAuctionV1Dto
 import com.rarible.protocol.union.core.continuation.page.Slice
 import com.rarible.protocol.union.core.service.CurrencyService
@@ -11,7 +10,6 @@ import com.rarible.protocol.union.dto.AuctionIdDto
 import com.rarible.protocol.union.dto.AuctionSortDto
 import com.rarible.protocol.union.dto.AuctionStatusDto
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.OrderDto
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
@@ -26,7 +24,7 @@ class EthAuctionConverter(
         try {
             return convertInternal(auction, blockchain)
         } catch (e: Exception) {
-            logger.error("Failed to convert Ethereum Auction, cause: {} \n{}", e.message, auction)
+            logger.error("Failed to convert {} Auction: {} \n{}", blockchain, e.message, auction)
             throw e
         }
     }

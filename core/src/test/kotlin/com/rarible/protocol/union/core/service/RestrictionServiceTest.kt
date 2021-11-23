@@ -2,6 +2,7 @@ package com.rarible.protocol.union.core.service
 
 import com.rarible.core.test.data.randomBigInt
 import com.rarible.core.test.data.randomString
+import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.model.Restriction
 import com.rarible.protocol.union.core.model.RestrictionApiRule
 import com.rarible.protocol.union.core.model.RestrictionCheckResult
@@ -10,11 +11,9 @@ import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.restriction.RestrictionApiRuleChecker
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.BlockchainGroupDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OwnershipRestrictionCheckFormDto
 import com.rarible.protocol.union.dto.RestrictionTypeDto
-import com.rarible.protocol.union.dto.UnionAddress
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
@@ -39,7 +38,9 @@ class RestrictionServiceTest {
     fun `check ownership restriction`() = runBlocking<Unit> {
         val itemId = ItemIdDto(BlockchainDto.ETHEREUM, randomString(), randomBigInt())
         val user = randomString()
-        val form = OwnershipRestrictionCheckFormDto(UnionAddress(BlockchainGroupDto.ETHEREUM, user))
+        val form = OwnershipRestrictionCheckFormDto(
+            UnionAddressConverter.convert(BlockchainDto.ETHEREUM, user)
+        )
         val rule = RestrictionApiRule(
             method = RestrictionApiRule.Method.GET,
             uriTemplate = randomString()
@@ -59,7 +60,9 @@ class RestrictionServiceTest {
     fun `check item without restrictions`() = runBlocking<Unit> {
         val itemId = ItemIdDto(BlockchainDto.ETHEREUM, randomString(), randomBigInt())
         val user = randomString()
-        val form = OwnershipRestrictionCheckFormDto(UnionAddress(BlockchainGroupDto.ETHEREUM, user))
+        val form = OwnershipRestrictionCheckFormDto(
+            UnionAddressConverter.convert(BlockchainDto.ETHEREUM, user)
+        )
         val meta = UnionMeta(
             name = randomString(),
             attributes = emptyList(),

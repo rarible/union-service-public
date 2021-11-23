@@ -1,8 +1,8 @@
 package com.rarible.protocol.union.listener.service
 
 import com.rarible.core.client.WebClientResponseProxyException
+import com.rarible.protocol.union.core.converter.ContractAddressConverter
 import com.rarible.protocol.union.core.event.OutgoingOrderEventListener
-import com.rarible.protocol.union.dto.ContractAddress
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderUpdateEventDto
 import com.rarible.protocol.union.dto.ext
@@ -68,7 +68,7 @@ class EnrichmentOrderEventService(
         }
         val mcFuture = if (order.make.type.ext.isCollection) {
             async {
-                val collectionId = ContractAddress(blockchain, makeAssetExt.contract)
+                val collectionId = ContractAddressConverter.convert(blockchain, makeAssetExt.contract)
                 enrichmentCollectionEventService.onCollectionBestSellOrderUpdate(
                     collectionId,
                     order,
@@ -78,7 +78,7 @@ class EnrichmentOrderEventService(
         } else null
         val tcFuture = if (order.take.type.ext.isCollection) {
             async {
-                val address = ContractAddress(blockchain, takeAssetExt.contract)
+                val address = ContractAddressConverter.convert(blockchain, takeAssetExt.contract)
                 enrichmentCollectionEventService.onCollectionBestBidOrderUpdate(address, order, notificationEnabled)
             }
         } else null
