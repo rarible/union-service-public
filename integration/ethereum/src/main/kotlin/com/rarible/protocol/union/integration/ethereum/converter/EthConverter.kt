@@ -11,6 +11,7 @@ import com.rarible.protocol.dto.EthAssetTypeDto
 import com.rarible.protocol.dto.GenerativeArtAssetTypeDto
 import com.rarible.protocol.dto.NftItemRoyaltyDto
 import com.rarible.protocol.dto.PartDto
+import com.rarible.protocol.union.core.converter.ContractAddressConverter
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.exception.UnionValidationException
 import com.rarible.protocol.union.dto.ActivitySortDto
@@ -21,7 +22,6 @@ import com.rarible.protocol.union.dto.AuctionDataDto
 import com.rarible.protocol.union.dto.AuctionSortDto
 import com.rarible.protocol.union.dto.AuctionStatusDto
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.ContractAddress
 import com.rarible.protocol.union.dto.CreatorDto
 import com.rarible.protocol.union.dto.EthCollectionAssetTypeDto
 import com.rarible.protocol.union.dto.EthCryptoPunksAssetTypeDto
@@ -143,18 +143,18 @@ object EthConverter {
         return when (source) {
             is EthAssetTypeDto -> EthEthereumAssetTypeDto()
             is Erc20AssetTypeDto -> EthErc20AssetTypeDto(
-                contract = ContractAddress(blockchain, convert(source.contract))
+                contract = ContractAddressConverter.convert(blockchain, convert(source.contract))
             )
             is Erc721AssetTypeDto -> EthErc721AssetTypeDto(
-                contract = ContractAddress(blockchain, convert(source.contract)),
+                contract = ContractAddressConverter.convert(blockchain, convert(source.contract)),
                 tokenId = source.tokenId
             )
             is Erc1155AssetTypeDto -> EthErc1155AssetTypeDto(
-                contract = ContractAddress(blockchain, convert(source.contract)),
+                contract = ContractAddressConverter.convert(blockchain, convert(source.contract)),
                 tokenId = source.tokenId
             )
             is Erc721LazyAssetTypeDto -> EthErc721LazyAssetTypeDto(
-                contract = ContractAddress(blockchain, convert(source.contract)),
+                contract = ContractAddressConverter.convert(blockchain, convert(source.contract)),
                 tokenId = source.tokenId,
                 uri = source.uri,
                 creators = source.creators.map { convertToCreator(it, blockchain) },
@@ -162,7 +162,7 @@ object EthConverter {
                 signatures = source.signatures.map { convert(it) }
             )
             is Erc1155LazyAssetTypeDto -> EthErc1155LazyAssetTypeDto(
-                contract = ContractAddress(blockchain, convert(source.contract)),
+                contract = ContractAddressConverter.convert(blockchain, convert(source.contract)),
                 tokenId = source.tokenId,
                 uri = source.uri,
                 supply = source.supply,
@@ -171,14 +171,14 @@ object EthConverter {
                 signatures = source.signatures.map { convert(it) }
             )
             is CryptoPunksAssetTypeDto -> EthCryptoPunksAssetTypeDto(
-                contract = ContractAddress(blockchain, convert(source.contract)),
+                contract = ContractAddressConverter.convert(blockchain, convert(source.contract)),
                 tokenId = source.tokenId
             )
             is GenerativeArtAssetTypeDto -> EthGenerativeArtAssetTypeDto(
-                contract = ContractAddress(blockchain, convert(source.contract))
+                contract = ContractAddressConverter.convert(blockchain, convert(source.contract))
             )
             is CollectionAssetTypeDto -> EthCollectionAssetTypeDto(
-                contract = ContractAddress(blockchain, convert(source.contract))
+                contract = ContractAddressConverter.convert(blockchain, convert(source.contract))
             )
         }
     }

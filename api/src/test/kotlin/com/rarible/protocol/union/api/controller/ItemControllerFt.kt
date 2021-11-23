@@ -10,9 +10,9 @@ import com.rarible.protocol.union.api.client.ItemControllerApi
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.core.continuation.page.PageSize
+import com.rarible.protocol.union.core.converter.ContractAddressConverter
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.ContractAddress
 import com.rarible.protocol.union.dto.parser.ItemIdParser
 import com.rarible.protocol.union.enrichment.converter.ShortItemConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
@@ -178,7 +178,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
             .copy(bestBidOrder = ShortOrderConverter.convert(ethUnionOrder))
         enrichmentItemService.save(ethShortItem)
 
-        val ethCollectionId = ContractAddress(BlockchainDto.ETHEREUM, randomEthAddress())
+        val ethCollectionId = ContractAddressConverter.convert(BlockchainDto.ETHEREUM, randomEthAddress())
 
         ethereumOrderControllerApiMock.mockGetByIds(ethOrder)
         ethereumItemControllerApiMock.mockGetNftOrderItemsByCollection(

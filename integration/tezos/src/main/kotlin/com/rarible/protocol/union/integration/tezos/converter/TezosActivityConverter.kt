@@ -14,6 +14,7 @@ import com.rarible.protocol.tezos.dto.OrderActivityListDto
 import com.rarible.protocol.tezos.dto.OrderActivityMatchDto
 import com.rarible.protocol.tezos.dto.OrderActivitySideMatchDto
 import com.rarible.protocol.tezos.dto.TransferDto
+import com.rarible.protocol.union.core.converter.ContractAddressConverter
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.service.CurrencyService
 import com.rarible.protocol.union.dto.ActivityBlockchainInfoDto
@@ -21,7 +22,6 @@ import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivityIdDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.BurnActivityDto
-import com.rarible.protocol.union.dto.ContractAddress
 import com.rarible.protocol.union.dto.MintActivityDto
 import com.rarible.protocol.union.dto.OrderActivityMatchSideDto
 import com.rarible.protocol.union.dto.OrderActivitySourceDto
@@ -34,6 +34,7 @@ import com.rarible.protocol.union.dto.OrderMatchSwapDto
 import com.rarible.protocol.union.dto.TransferActivityDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
 import com.rarible.protocol.union.dto.ext
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
@@ -41,7 +42,18 @@ class TezosActivityConverter(
     private val currencyService: CurrencyService
 ) {
 
+    private val logger = LoggerFactory.getLogger(javaClass)
+
     suspend fun convert(source: ActivityTypeDto, blockchain: BlockchainDto): ActivityDto {
+        try {
+            return convertInternal(source, blockchain)
+        } catch (e: Exception) {
+            logger.error("Failed to convert {} Activity: {} \n{}", blockchain, e.message, source)
+            throw e
+        }
+    }
+
+    private suspend fun convertInternal(source: ActivityTypeDto, blockchain: BlockchainDto): ActivityDto {
         val activityId = ActivityIdDto(blockchain, source.id)
         return when (source) {
             is OrderActivityMatchDto -> {
@@ -152,7 +164,7 @@ class TezosActivityConverter(
                     id = activityId,
                     date = source.date,
                     owner = UnionAddressConverter.convert(blockchain, source.owner),
-                    contract = ContractAddress(blockchain, source.contract),
+                    contract = ContractAddressConverter.convert(blockchain, source.contract),
                     tokenId = source.tokenId,
                     // Tezos send it as BigDecimal, but in fact, that's BigInteger
                     value = source.value.toBigInteger(),
@@ -171,7 +183,7 @@ class TezosActivityConverter(
                     id = activityId,
                     date = source.date,
                     owner = UnionAddressConverter.convert(blockchain, source.owner),
-                    contract = ContractAddress(blockchain, source.contract),
+                    contract = ContractAddressConverter.convert(blockchain, source.contract),
                     tokenId = source.tokenId,
                     // Tezos send it as BigDecimal, but in fact, that's BigInteger
                     value = source.value.toBigInteger(),
@@ -191,7 +203,7 @@ class TezosActivityConverter(
                     date = source.date,
                     from = UnionAddressConverter.convert(blockchain, source.from),
                     owner = UnionAddressConverter.convert(blockchain, source.elt.owner),
-                    contract = ContractAddress(blockchain, source.elt.contract),
+                    contract = ContractAddressConverter.convert(blockchain, source.elt.contract),
                     tokenId = source.elt.tokenId,
                     // Tezos send it as BigDecimal, but in fact, that's BigInteger
                     value = source.elt.value.toBigInteger(),
@@ -288,6 +300,8 @@ class TezosActivityConverter(
             payment = unionPayment,
             seller = UnionAddressConverter.convert(blockchain, nft.maker),
             buyer = UnionAddressConverter.convert(blockchain, payment.maker),
+            sellerOrderHash = nft.hash,
+            buyerOrderHash = payment.hash,
             price = source.price,
             priceUsd = priceUsd,
             amountUsd = priceUsd?.multiply(nft.asset.value),

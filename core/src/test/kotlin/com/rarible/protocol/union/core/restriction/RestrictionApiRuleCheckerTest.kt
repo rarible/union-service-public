@@ -3,6 +3,7 @@ package com.rarible.protocol.union.core.restriction
 import com.rarible.core.test.data.randomBigInt
 import com.rarible.core.test.data.randomString
 import com.rarible.protocol.union.api.ApiClient
+import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.model.RestrictionApiRule
 import com.rarible.protocol.union.core.model.RestrictionCheckResult
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -51,7 +52,9 @@ class RestrictionApiRuleCheckerTest {
         mockBackEnd.enqueue(mockOkResponse(mockedResult))
 
         val itemId = ItemIdDto(BlockchainDto.ETHEREUM, randomString(), randomBigInt())
-        val form = OwnershipRestrictionCheckFormDto(UnionAddress(BlockchainGroupDto.ETHEREUM, "abc"))
+        val form = OwnershipRestrictionCheckFormDto(
+            UnionAddressConverter.convert(BlockchainDto.ETHEREUM, "abc")
+        )
         val rule = RestrictionApiRule(
             method = RestrictionApiRule.Method.GET,
             uriTemplate = "${mockHost}/\${itemId}?address=\${user}"
@@ -72,7 +75,9 @@ class RestrictionApiRuleCheckerTest {
         mockBackEnd.enqueue(mockOkResponse(mockedResult))
 
         val itemId = ItemIdDto(BlockchainDto.ETHEREUM, randomString(), randomBigInt())
-        val form = OwnershipRestrictionCheckFormDto(UnionAddress(BlockchainGroupDto.ETHEREUM, "abc"))
+        val form = OwnershipRestrictionCheckFormDto(
+            UnionAddressConverter.convert(BlockchainDto.ETHEREUM, "abc")
+        )
         val rule = RestrictionApiRule(
             method = RestrictionApiRule.Method.POST,
             uriTemplate = "${mockHost}/check",

@@ -7,10 +7,10 @@ import com.rarible.core.test.data.randomString
 import com.rarible.protocol.currency.api.client.CurrencyControllerApi
 import com.rarible.protocol.currency.dto.CurrencyRateDto
 import com.rarible.protocol.union.core.client.CurrencyClient
+import com.rarible.protocol.union.core.converter.ContractAddressConverter
 import com.rarible.protocol.union.core.converter.CurrencyConverter
 import com.rarible.protocol.union.core.exception.UnionCurrencyException
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.ContractAddress
 import com.rarible.protocol.union.dto.EthErc20AssetTypeDto
 import com.rarible.protocol.union.dto.EthErc721AssetTypeDto
 import io.mockk.clearMocks
@@ -74,7 +74,7 @@ class CurrencyServiceTest {
 
         val at = nowMillis().minusSeconds(60 * 29)
 
-        val assetType = EthErc20AssetTypeDto(ContractAddress(blockchain, address))
+        val assetType = EthErc20AssetTypeDto(ContractAddressConverter.convert(blockchain, address))
         val usdRate1 = currencyService.toUsd(blockchain, assetType, BigDecimal.ONE, at)
         val usdRate2 = currencyService.toUsd(blockchain, assetType, BigDecimal.ONE, at)
 
@@ -95,7 +95,7 @@ class CurrencyServiceTest {
 
         val at = nowMillis().minusSeconds(60 * 29)
 
-        val assetType = EthErc20AssetTypeDto(ContractAddress(blockchain, address))
+        val assetType = EthErc20AssetTypeDto(ContractAddressConverter.convert(blockchain, address))
         val usdRate1 = currencyService.toUsd(blockchain, assetType, BigDecimal.ONE, at)
         val usdRate2 = currencyService.toUsd(blockchain, assetType, BigDecimal.ONE, at.minusSeconds(2 * 60))
 
@@ -110,7 +110,7 @@ class CurrencyServiceTest {
     @Test
     fun `to usd - incorrect input`() = runBlocking<Unit> {
         val blockchain = BlockchainDto.ETHEREUM
-        val address = ContractAddress(blockchain, randomString())
+        val address = ContractAddressConverter.convert(blockchain, randomString())
         val assetType = EthErc20AssetTypeDto(address)
         val nftAssetType = EthErc721AssetTypeDto(address, randomBigInt())
 
@@ -130,7 +130,7 @@ class CurrencyServiceTest {
         val address = randomString()
         mockCurrency(blockchain, address, null)
 
-        val assetType = EthErc20AssetTypeDto(ContractAddress(blockchain, address))
+        val assetType = EthErc20AssetTypeDto(ContractAddressConverter.convert(blockchain, address))
 
         val rate = currencyService.toUsd(blockchain, assetType, BigDecimal.ONE, nowMillis())
 
