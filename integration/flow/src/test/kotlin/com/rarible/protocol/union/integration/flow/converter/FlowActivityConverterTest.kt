@@ -90,9 +90,6 @@ class FlowActivityConverterTest {
         assertThat(takeType.contract.value).isEqualTo(dto.take.contract)
         assertThat(converted.transactionHash).isEqualTo(dto.transactionHash)
         assertThat(converted.blockchainInfo!!.transactionHash).isEqualTo(dto.transactionHash)
-        assertThat(converted.blockchainInfo!!.blockHash).isEqualTo(dto.blockHash)
-        assertThat(converted.blockchainInfo!!.blockNumber).isEqualTo(dto.blockNumber)
-        assertThat(converted.blockchainInfo!!.logIndex).isEqualTo(dto.logIndex)
     }
 
     @Test
