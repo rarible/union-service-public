@@ -198,7 +198,11 @@ fun randomFlowCancelListActivityDto(): FlowNftOrderActivityCancelListDto {
         maker = randomString(),
         make = FlowAssetFungibleDto(randomString(), randomBigDecimal()),
         take = FlowAssetFungibleDto(randomString(), randomBigDecimal()),
-        price = randomBigDecimal()
+        price = randomBigDecimal(),
+        transactionHash = randomString(),
+        blockHash = randomString(),
+        blockNumber = randomLong(),
+        logIndex = randomInt()
     )
 }
 
