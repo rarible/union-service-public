@@ -104,8 +104,14 @@ class FlowActivityConverter(
                     maker = UnionAddressConverter.convert(blockchain, source.maker),
                     make = FlowConverter.convertToType(source.make, blockchain),
                     take = FlowConverter.convertToType(source.take, blockchain),
-                    // TODO FLOW add this field to the activity
-                    transactionHash = ""
+                    transactionHash = source.transactionHash ?: "",
+                    // TODO UNION remove in 1.19
+                    blockchainInfo = ActivityBlockchainInfoDto(
+                        transactionHash = source.transactionHash ?: "",
+                        blockHash = source.blockHash ?: "",
+                        blockNumber = source.blockNumber ?: 0,
+                        logIndex = source.logIndex ?: 0
+                    )
                 )
             }
             is FlowMintDto -> {

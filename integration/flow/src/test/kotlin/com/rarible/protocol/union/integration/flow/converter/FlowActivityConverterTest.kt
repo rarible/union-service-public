@@ -88,8 +88,11 @@ class FlowActivityConverterTest {
         assertThat(makeType.contract.value).isEqualTo(dto.make.contract)
         val takeType = converted.take as FlowAssetTypeFtDto
         assertThat(takeType.contract.value).isEqualTo(dto.take.contract)
-        // TODO FLOW uncomment when Flow implement it
-        //assertThat(converted.transactionHash).isEqualTo(dto.transactionHash)
+        assertThat(converted.transactionHash).isEqualTo(dto.transactionHash)
+        assertThat(converted.blockchainInfo!!.transactionHash).isEqualTo(dto.transactionHash)
+        assertThat(converted.blockchainInfo!!.blockHash).isEqualTo(dto.blockHash)
+        assertThat(converted.blockchainInfo!!.blockNumber).isEqualTo(dto.blockNumber)
+        assertThat(converted.blockchainInfo!!.logIndex).isEqualTo(dto.logIndex)
     }
 
     @Test
