@@ -4,6 +4,7 @@ import com.rarible.protocol.tezos.dto.NftActivityFilterAllTypeDto
 import com.rarible.protocol.tezos.dto.NftActivityFilterUserTypeDto
 import com.rarible.protocol.tezos.dto.OrderActivityFilterAllTypeDto
 import com.rarible.protocol.tezos.dto.OrderActivityFilterUserTypeDto
+import com.rarible.protocol.tezos.dto.OrderActivityMatchTypeDto
 import com.rarible.protocol.tezos.dto.OrderActivitySideMatchDto
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.dto.ActivityTypeDto
@@ -32,7 +33,6 @@ import com.rarible.protocol.union.integration.tezos.data.randomTezosOrderListAct
 import com.rarible.protocol.union.test.mock.CurrencyMock
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 class TezosActivityConverterTest {
@@ -62,12 +62,12 @@ class TezosActivityConverterTest {
     }
 
     @Test
-    @Disabled // TODO TEZOS enable when type field appears in activity
     fun `tezos order activity match side - nft to payment`() = runBlocking<Unit> {
         val swapDto = randomTezosOrderActivityMatch()
         val left = swapDto.left.copy(asset = randomTezosAssetNFT())
         val dto = swapDto.copy(
-            left = left
+            left = left,
+            type = OrderActivityMatchTypeDto.ACCEPT_BID
         )
 
         val converted = tezosActivityConverter.convert(dto, BlockchainDto.TEZOS) as OrderMatchActivityDto
@@ -75,6 +75,7 @@ class TezosActivityConverterTest {
         assertThat(converted).isInstanceOf(OrderMatchSellDto::class.java)
         converted as OrderMatchSellDto
 
+        assertThat(converted.type).isEqualTo(OrderMatchSellDto.Type.ACCEPT_BID)
         assertThat(converted.nft).isEqualTo(TezosConverter.convert(left.asset, BlockchainDto.TEZOS))
         assertThat(converted.payment).isEqualTo(TezosConverter.convert(swapDto.right.asset, BlockchainDto.TEZOS))
         assertThat(converted.seller).isEqualTo(UnionAddressConverter.convert(BlockchainDto.TEZOS, left.maker))
@@ -93,7 +94,6 @@ class TezosActivityConverterTest {
     }
 
     @Test
-    @Disabled // TODO TEZOS enable when type field appears in activity
     fun `tezos order activity match side - payment to nft`() = runBlocking<Unit> {
         val swapDto = randomTezosOrderActivityMatch()
         val right = swapDto.right.copy(asset = randomTezosAssetNFT())
@@ -106,6 +106,7 @@ class TezosActivityConverterTest {
         assertThat(converted).isInstanceOf(OrderMatchSellDto::class.java)
         converted as OrderMatchSellDto
 
+        assertThat(converted.type).isEqualTo(OrderMatchSellDto.Type.SELL)
         assertThat(converted.nft).isEqualTo(TezosConverter.convert(right.asset, BlockchainDto.TEZOS))
         assertThat(converted.payment).isEqualTo(TezosConverter.convert(swapDto.left.asset, BlockchainDto.TEZOS))
         assertThat(converted.seller).isEqualTo(UnionAddressConverter.convert(BlockchainDto.TEZOS, right.maker))

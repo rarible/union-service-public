@@ -8,7 +8,7 @@ import com.rarible.protocol.order.api.client.OrderControllerApi
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
-import com.rarible.protocol.union.integration.ethereum.data.randomEthLegacyOrderDto
+import com.rarible.protocol.union.integration.ethereum.data.randomEthLegacySellOrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOpenSeaV1OrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthV2OrderDto
 import com.rarible.protocol.union.test.mock.CurrencyMock
@@ -27,7 +27,7 @@ class EthOrderServiceTest {
 
     @Test
     fun `ethereum get all`() = runBlocking<Unit> {
-        val order1 = randomEthLegacyOrderDto()
+        val order1 = randomEthLegacySellOrderDto()
         val order2 = randomEthV2OrderDto()
 
         val origin = randomString()

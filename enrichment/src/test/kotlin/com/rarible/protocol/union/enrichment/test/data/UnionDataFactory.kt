@@ -13,7 +13,7 @@ import com.rarible.protocol.union.integration.ethereum.converter.EthOwnershipCon
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAssetErc20
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAssetErc721
 import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionDto
-import com.rarible.protocol.union.integration.ethereum.data.randomEthLegacyOrderDto
+import com.rarible.protocol.union.integration.ethereum.data.randomEthLegacySellOrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthNftItemDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipId
@@ -59,7 +59,7 @@ fun randomUnionOwnershipDto(ownershipId: OwnershipIdDto) = EthOwnershipConverter
 
 fun randomUnionSellOrderDto() = runBlocking {
     mockedEthOrderConverter.convert(
-        randomEthLegacyOrderDto()
+        randomEthLegacySellOrderDto()
             .copy(takePrice = null, takePriceUsd = null),
         BlockchainDto.ETHEREUM
     )
@@ -67,7 +67,7 @@ fun randomUnionSellOrderDto() = runBlocking {
 
 fun randomUnionSellOrderDto(itemId: ItemIdDto) = runBlocking {
     mockedEthOrderConverter.convert(
-        randomEthLegacyOrderDto(itemId)
+        randomEthLegacySellOrderDto(itemId)
             .copy(takePrice = null, takePriceUsd = null),
         itemId.blockchain
     )
@@ -75,7 +75,7 @@ fun randomUnionSellOrderDto(itemId: ItemIdDto) = runBlocking {
 
 fun randomUnionSellOrderDto(itemId: ItemIdDto, owner: String) = runBlocking {
     mockedEthOrderConverter.convert(
-        randomEthLegacyOrderDto(itemId, EthConverter.convertToAddress(owner))
+        randomEthLegacySellOrderDto(itemId, EthConverter.convertToAddress(owner))
             .copy(takePrice = null, takePriceUsd = null),
         itemId.blockchain
     )
@@ -83,8 +83,8 @@ fun randomUnionSellOrderDto(itemId: ItemIdDto, owner: String) = runBlocking {
 
 fun randomUnionBidOrderDto() = runBlocking {
     mockedEthOrderConverter.convert(
-        randomEthLegacyOrderDto()
-            .copy(make = randomEthAssetErc721(), take = randomEthAssetErc20())
+        randomEthLegacySellOrderDto()
+            .copy(make = randomEthAssetErc20(), take = randomEthAssetErc721())
             .copy(makePrice = null, makePriceUsd = null),
         BlockchainDto.ETHEREUM
     )
@@ -92,17 +92,8 @@ fun randomUnionBidOrderDto() = runBlocking {
 
 fun randomUnionBidOrderDto(itemId: ItemIdDto) = runBlocking {
     mockedEthOrderConverter.convert(
-        randomEthLegacyOrderDto(itemId)
-            .copy(make = randomEthAssetErc721(), take = randomEthAssetErc20())
-            .copy(makePrice = null, makePriceUsd = null),
-        itemId.blockchain
-    )
-}
-
-fun randomUnionBidOrderDto(itemId: ItemIdDto, owner: String) = runBlocking {
-    mockedEthOrderConverter.convert(
-        randomEthLegacyOrderDto(itemId, EthConverter.convertToAddress(owner))
-            .copy(make = randomEthAssetErc721(), take = randomEthAssetErc20())
+        randomEthLegacySellOrderDto(itemId)
+            .copy(make = randomEthAssetErc20(), take = randomEthAssetErc721())
             .copy(makePrice = null, makePriceUsd = null),
         itemId.blockchain
     )

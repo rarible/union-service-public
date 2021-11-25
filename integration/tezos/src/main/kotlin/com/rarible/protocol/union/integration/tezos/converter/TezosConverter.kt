@@ -39,7 +39,8 @@ object TezosConverter {
                 TezosXTZAssetTypeDto()
             is FTAssetTypeDto ->
                 TezosFTAssetTypeDto(
-                    contract = ContractAddressConverter.convert(blockchain, source.contract)
+                    contract = ContractAddressConverter.convert(blockchain, source.contract),
+                    tokenId = source.tokenId
                 )
             is NFTAssetTypeDto ->
                 TezosNFTAssetTypeDto(

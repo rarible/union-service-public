@@ -7,12 +7,13 @@ import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
 import com.rarible.protocol.union.enrichment.test.data.randomShortItem
 import com.rarible.protocol.union.enrichment.test.data.randomShortOwnership
+import com.rarible.protocol.union.enrichment.test.data.randomUnionBidOrderDto
 import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrderDto
 import com.rarible.protocol.union.enrichment.util.bidCurrencyId
 import com.rarible.protocol.union.enrichment.util.sellCurrencyId
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
-import com.rarible.protocol.union.integration.ethereum.data.randomEthLegacyOrderDto
+import com.rarible.protocol.union.integration.ethereum.data.randomEthLegacySellOrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthNftItemDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipId
@@ -76,8 +77,8 @@ internal class PriceUpdateJobTest : AbstractIntegrationTest() {
         val sellOrder1 = ShortOrderConverter.convert(unionSellOrder1).copy(makePrice = BigDecimal.valueOf(1))
         val sellOrder2 = ShortOrderConverter.convert(unionSellOrder2).copy(makePrice = BigDecimal.valueOf(2))
 
-        val unionBidOrder1 = randomUnionSellOrderDto(randomEthItemId())
-        val unionBidOrder2 = randomUnionSellOrderDto(randomEthItemId())
+        val unionBidOrder1 = randomUnionBidOrderDto(randomEthItemId())
+        val unionBidOrder2 = randomUnionBidOrderDto(randomEthItemId())
         val bidOrder1 = ShortOrderConverter.convert(unionBidOrder1).copy(takePrice = BigDecimal.valueOf(2))
         val bidOrder2 = ShortOrderConverter.convert(unionBidOrder2).copy(takePrice = BigDecimal.valueOf(1))
 
@@ -96,7 +97,7 @@ internal class PriceUpdateJobTest : AbstractIntegrationTest() {
         val nftItemDto = randomEthNftItemDto()
         coEvery { testEthereumItemApi.getNftItemById(itemId.value) } returns nftItemDto.toMono()
         coEvery { testEthereumItemApi.getNftItemMetaById(itemId.value) } returns nftItemDto.meta!!.toMono()
-        coEvery { testEthereumOrderApi.getOrderByHash(any()) } returns randomEthLegacyOrderDto().toMono()
+        coEvery { testEthereumOrderApi.getOrderByHash(any()) } returns randomEthLegacySellOrderDto().toMono()
 
         itemRepository.save(shortItem)
         priceUpdateJob.updateBestOrderPrice()
@@ -128,7 +129,7 @@ internal class PriceUpdateJobTest : AbstractIntegrationTest() {
         )
 
         coEvery { testEthereumOwnershipApi.getNftOwnershipById(ownershipId.value) } returns randomEthOwnershipDto().toMono()
-        coEvery { testEthereumOrderApi.getOrderByHash(any()) } returns randomEthLegacyOrderDto().toMono()
+        coEvery { testEthereumOrderApi.getOrderByHash(any()) } returns randomEthLegacySellOrderDto().toMono()
 
         ownershipRepository.save(shortOwnership)
         priceUpdateJob.updateBestOrderPrice()

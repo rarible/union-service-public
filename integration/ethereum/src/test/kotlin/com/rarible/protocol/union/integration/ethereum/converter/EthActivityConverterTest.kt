@@ -71,6 +71,7 @@ class EthActivityConverterTest {
         assertThat(converted).isInstanceOf(OrderMatchSellDto::class.java)
         converted as OrderMatchSellDto
 
+        assertThat(converted.type).isEqualTo(OrderMatchSellDto.Type.SELL)
         assertThat(converted.nft).isEqualTo(EthConverter.convert(left.asset, BlockchainDto.ETHEREUM))
         assertThat(converted.payment).isEqualTo(EthConverter.convert(swapDto.right.asset, BlockchainDto.ETHEREUM))
         assertThat(converted.seller).isEqualTo(EthConverter.convert(left.maker, BlockchainDto.ETHEREUM))
@@ -100,6 +101,7 @@ class EthActivityConverterTest {
         assertThat(converted).isInstanceOf(OrderMatchSellDto::class.java)
         converted as OrderMatchSellDto
 
+        assertThat(converted.type).isEqualTo(OrderMatchSellDto.Type.SELL)
         assertThat(converted.nft).isEqualTo(EthConverter.convert(right.asset, BlockchainDto.ETHEREUM))
         assertThat(converted.payment).isEqualTo(EthConverter.convert(swapDto.left.asset, BlockchainDto.ETHEREUM))
         assertThat(converted.seller).isEqualTo(EthConverter.convert(right.maker, BlockchainDto.ETHEREUM))

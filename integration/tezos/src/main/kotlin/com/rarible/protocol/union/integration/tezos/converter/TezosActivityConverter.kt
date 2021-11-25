@@ -12,6 +12,7 @@ import com.rarible.protocol.tezos.dto.OrderActivityFilterAllTypeDto
 import com.rarible.protocol.tezos.dto.OrderActivityFilterUserTypeDto
 import com.rarible.protocol.tezos.dto.OrderActivityListDto
 import com.rarible.protocol.tezos.dto.OrderActivityMatchDto
+import com.rarible.protocol.tezos.dto.OrderActivityMatchTypeDto
 import com.rarible.protocol.tezos.dto.OrderActivitySideMatchDto
 import com.rarible.protocol.tezos.dto.TransferDto
 import com.rarible.protocol.union.core.converter.ContractAddressConverter
@@ -57,14 +58,12 @@ class TezosActivityConverter(
         val activityId = ActivityIdDto(blockchain, source.id)
         return when (source) {
             is OrderActivityMatchDto -> {
-                // TODO TEZOS add type sell/accept_bid
-                //val type = source.type
-                val type: String? = null
+                val type = source.type
                 val leftSide = source.left
                 val rightSide = source.right
                 val leftTypeExt = TezosConverter.convert(leftSide.asset.assetType, blockchain).ext
                 val rightTypeExt = TezosConverter.convert(rightSide.asset.assetType, blockchain).ext
-                if (type != null && leftTypeExt.isNft && rightTypeExt.isCurrency) {
+                if (leftTypeExt.isNft && rightTypeExt.isCurrency) {
                     activityToSell(
                         activityId = activityId,
                         source = source,
@@ -73,7 +72,7 @@ class TezosActivityConverter(
                         payment = rightSide,
                         type = convertType(type)
                     )
-                } else if (type != null && leftTypeExt.isCurrency && rightTypeExt.isNft) {
+                } else if (leftTypeExt.isCurrency && rightTypeExt.isNft) {
                     activityToSell(
                         activityId = activityId,
                         source = source,
@@ -350,7 +349,9 @@ class TezosActivityConverter(
         throw IllegalArgumentException("Unsupported source of Tezos activity: $source")
     }
 
-    private fun convertType(source: String) =
-        //TODO add correct converter
-        OrderMatchSellDto.Type.valueOf(source)
+    private fun convertType(source: OrderActivityMatchTypeDto) =
+        when (source) {
+            OrderActivityMatchTypeDto.SELL -> OrderMatchSellDto.Type.SELL
+            OrderActivityMatchTypeDto.ACCEPT_BID -> OrderMatchSellDto.Type.ACCEPT_BID
+        }
 }

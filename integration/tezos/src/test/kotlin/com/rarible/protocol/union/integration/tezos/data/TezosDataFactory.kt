@@ -25,6 +25,7 @@ import com.rarible.protocol.tezos.dto.OrderActivityCancelBidDto
 import com.rarible.protocol.tezos.dto.OrderActivityCancelListDto
 import com.rarible.protocol.tezos.dto.OrderActivityListDto
 import com.rarible.protocol.tezos.dto.OrderActivityMatchDto
+import com.rarible.protocol.tezos.dto.OrderActivityMatchTypeDto
 import com.rarible.protocol.tezos.dto.OrderActivitySideMatchDto
 import com.rarible.protocol.tezos.dto.OrderActivitySideTypeDto
 import com.rarible.protocol.tezos.dto.OrderDto
@@ -202,8 +203,8 @@ fun randomTezosOrderActivityMatch(): OrderActivityMatchDto {
         transactionHash = randomString(),
         blockHash = randomString(),
         blockNumber = randomBigInt(8),
-        logIndex = randomInt()
-        //type = 
+        logIndex = randomInt(),
+        type = OrderActivityMatchTypeDto.SELL
     )
 }
 
@@ -317,7 +318,7 @@ fun randomTezosOrderActivityMatchSide(): OrderActivitySideMatchDto {
     return OrderActivitySideMatchDto(
         maker = randomString(),
         hash = randomString(16),
-        asset = randomTezosAssetXtz(),
+        asset = randomTezosAssetFT(),
         type = OrderActivitySideTypeDto.values()[randomInt(OrderActivitySideTypeDto.values().size)]
     )
 }

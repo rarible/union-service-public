@@ -44,7 +44,7 @@ class OrderApiService(
     ): Slice<OrderDto> {
         val currencyAssetTypes = router.getService(blockchain)
             .getSellCurrencies(contract, tokenId)
-            .map { it.ext.contract }
+            .map { it.ext.currencyAddress() }
 
         if (currencyAssetTypes.isEmpty()) {
             return Slice.empty()
@@ -80,7 +80,7 @@ class OrderApiService(
     ): Slice<OrderDto> {
         val currencyContracts = router.getService(blockchain)
             .getBidCurrencies(contract, tokenId)
-            .map { it.ext.contract }
+            .map { it.ext.currencyAddress() }
 
         if (currencyContracts.isEmpty()) {
             return Slice.empty()

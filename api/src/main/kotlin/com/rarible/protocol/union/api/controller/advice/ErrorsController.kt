@@ -67,7 +67,7 @@ class ErrorsController {
     @ExceptionHandler(Throwable::class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     fun handleException(ex: Throwable) = mono {
-        logger.error("Unexpected server error: {}", ex)
+        logger.error("Unexpected server error: {}", ex.message, ex)
         UnionApiErrorServerErrorDto(
             code = UnionApiErrorServerErrorDto.Code.UNKNOWN,
             message = ex.message ?: "Unexpected server error"

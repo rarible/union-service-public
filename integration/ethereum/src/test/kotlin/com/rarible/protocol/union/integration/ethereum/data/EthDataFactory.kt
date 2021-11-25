@@ -222,12 +222,24 @@ fun randomEthAssetErc1155(itemId: ItemIdDto) = AssetDto(
     valueDecimal = randomBigDecimal()
 )
 
-fun randomEthLegacyOrderDto() = randomEthLegacyOrderDto(randomEthAssetErc721(), randomAddress(), randomEthAssetErc20())
-fun randomEthLegacyOrderDto(itemId: ItemIdDto) = randomEthLegacyOrderDto(itemId, randomAddress())
-fun randomEthLegacyOrderDto(itemId: ItemIdDto, maker: Address) = randomEthLegacyOrderDto(
+fun randomEthLegacySellOrderDto() =
+    randomEthLegacyOrderDto(randomEthAssetErc721(), randomAddress(), randomEthAssetErc20())
+
+fun randomEthLegacySellOrderDto(itemId: ItemIdDto) = randomEthLegacySellOrderDto(itemId, randomAddress())
+fun randomEthLegacySellOrderDto(itemId: ItemIdDto, maker: Address) = randomEthLegacyOrderDto(
     randomEthAssetErc721(itemId),
     maker,
     randomEthAssetErc20()
+)
+
+fun randomEthLegacyBidOrderDto() =
+    randomEthLegacyOrderDto(randomEthAssetErc20(), randomAddress(), randomEthAssetErc721())
+
+fun randomEthLegacyBidOrderDto(itemId: ItemIdDto) = randomEthLegacyBidOrderDto(itemId, randomAddress())
+fun randomEthLegacyBidOrderDto(itemId: ItemIdDto, maker: Address) = randomEthLegacyOrderDto(
+    randomEthAssetErc20(),
+    maker,
+    randomEthAssetErc721(itemId)
 )
 
 fun randomEthLegacyOrderDto(make: AssetDto, maker: Address, take: AssetDto): LegacyOrderDto {

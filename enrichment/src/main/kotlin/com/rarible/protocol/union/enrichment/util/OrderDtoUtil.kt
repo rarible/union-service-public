@@ -4,7 +4,7 @@ import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.ext
 
 val OrderDto.sellCurrencyId: String
-    get() = take.type.ext.contract
+    get() = take.type.ext.currencyAddress()
 
 val OrderDto.bidCurrencyId: String
-    get() = make.type.ext.contract
+    get() = make.type.ext.currencyAddress()

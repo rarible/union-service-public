@@ -22,7 +22,8 @@ import com.rarible.protocol.union.integration.ethereum.converter.EthOwnershipCon
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAssetErc20
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAuctionDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
-import com.rarible.protocol.union.integration.ethereum.data.randomEthLegacyOrderDto
+import com.rarible.protocol.union.integration.ethereum.data.randomEthLegacyBidOrderDto
+import com.rarible.protocol.union.integration.ethereum.data.randomEthLegacySellOrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthNftItemDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipId
@@ -57,20 +58,20 @@ class RefreshControllerFt : AbstractIntegrationTest() {
 
         // This order is not best sell anymore
         val makeAssetOutdated = randomEthAssetErc20()
-        val ethBestSellOutdated = randomEthLegacyOrderDto(ethItemId)
+        val ethBestSellOutdated = randomEthLegacySellOrderDto(ethItemId)
             .copy(make = makeAssetOutdated)
         val unionBestSellOutdated = ethOrderConverter.convert(ethBestSellOutdated, ethItemId.blockchain)
         val shortBestSellOutdated = ShortOrderConverter.convert(unionBestSellOutdated)
 
         // In the tests we're converting USD to currencies 1 to 1, so here we can just decrease make value
         val makeAsset = randomEthAssetErc20()
-        val ethBestSell = randomEthLegacyOrderDto(ethItemId)
+        val ethBestSell = randomEthLegacySellOrderDto(ethItemId)
             .copy(make = makeAsset.copy(valueDecimal = makeAssetOutdated.valueDecimal!!.minus(BigDecimal.ONE)))
         val unionBestSell = ethOrderConverter.convert(ethBestSell, ethItemId.blockchain)
         val shortBestSell = ShortOrderConverter.convert(unionBestSell)
 
         // Bid orders won't be changed
-        val ethBestBid = randomEthLegacyOrderDto(ethItemId)
+        val ethBestBid = randomEthLegacyBidOrderDto(ethItemId)
         val unionBestBid = ethOrderConverter.convert(ethBestBid, ethItemId.blockchain)
         val shortBestBid = ShortOrderConverter.convert(unionBestBid)
         val auctionDto = randomEthAuctionDto(ethItemId)
@@ -122,14 +123,14 @@ class RefreshControllerFt : AbstractIntegrationTest() {
 
         // This order is not best sell anymore
         val makeAssetOutdated = randomEthAssetErc20()
-        val ethBestSellOutdated = randomEthLegacyOrderDto(ethItemId)
+        val ethBestSellOutdated = randomEthLegacySellOrderDto(ethItemId)
             .copy(make = makeAssetOutdated)
         val unionBestSellOutdated = ethOrderConverter.convert(ethBestSellOutdated, ethOwnershipId.blockchain)
         val shortBestSellOutdated = ShortOrderConverter.convert(unionBestSellOutdated)
 
         // In the tests we're converting USD to currencies 1 to 1, so here we can just decrease make value
         val makeAsset = randomEthAssetErc20()
-        val ethBestSell = randomEthLegacyOrderDto(ethItemId)
+        val ethBestSell = randomEthLegacySellOrderDto(ethItemId)
             .copy(make = makeAsset.copy(valueDecimal = makeAssetOutdated.valueDecimal!!.minus(BigDecimal.ONE)))
         val unionBestSell = ethOrderConverter.convert(ethBestSell, ethOwnershipId.blockchain)
         val shortBestSell = ShortOrderConverter.convert(unionBestSell)
@@ -170,11 +171,11 @@ class RefreshControllerFt : AbstractIntegrationTest() {
         val unionItem = EthItemConverter.convert(ethItem, ethItemId.blockchain)
         val shortItem = ShortItemConverter.convert(unionItem)
 
-        val ethBestSell = randomEthLegacyOrderDto(ethItemId)
+        val ethBestSell = randomEthLegacySellOrderDto(ethItemId)
         val unionBestSell = ethOrderConverter.convert(ethBestSell, ethItemId.blockchain)
         val shortBestSell = ShortOrderConverter.convert(unionBestSell)
 
-        val ethBestBid = randomEthLegacyOrderDto(ethItemId)
+        val ethBestBid = randomEthLegacyBidOrderDto(ethItemId)
         val unionBestBid = ethOrderConverter.convert(ethBestBid, ethItemId.blockchain)
         val shortBestBid = ShortOrderConverter.convert(unionBestBid)
 
@@ -201,7 +202,7 @@ class RefreshControllerFt : AbstractIntegrationTest() {
         assertThat(savedShortItem.bestSellOrder!!.id).isEqualTo(shortBestSell.id)
         assertThat(savedShortItem.bestBidOrder!!.id).isEqualTo(shortBestBid.id)
         assertThat(savedShortItem.bestSellOrders[unionBestSell.sellCurrencyId]!!.id).isEqualTo(shortBestSell.id)
-        assertThat(savedShortItem.bestBidOrders[unionBestSell.bidCurrencyId]!!.id).isEqualTo(shortBestBid.id)
+        assertThat(savedShortItem.bestBidOrders[unionBestBid.bidCurrencyId]!!.id).isEqualTo(shortBestBid.id)
 
         assertThat(result.bestSellOrder!!.id).isEqualTo(unionBestSell.id)
         assertThat(result.bestBidOrder!!.id).isEqualTo(unionBestBid.id)
@@ -221,7 +222,7 @@ class RefreshControllerFt : AbstractIntegrationTest() {
         val unionOwnership = EthOwnershipConverter.convert(ethOwnership, ethOwnershipId.blockchain)
         val shortOwnership = ShortOwnershipConverter.convert(unionOwnership)
 
-        val ethBestSell = randomEthLegacyOrderDto(ethItemId)
+        val ethBestSell = randomEthLegacySellOrderDto(ethItemId)
         val unionBestSell = ethOrderConverter.convert(ethBestSell, ethOwnershipId.blockchain)
         val shortBestSell = ShortOrderConverter.convert(unionBestSell)
 
