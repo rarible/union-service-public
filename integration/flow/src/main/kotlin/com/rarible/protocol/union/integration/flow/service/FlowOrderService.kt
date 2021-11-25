@@ -16,8 +16,6 @@ import com.rarible.protocol.union.integration.flow.converter.FlowConverter
 import com.rarible.protocol.union.integration.flow.converter.FlowOrderConverter
 import kotlinx.coroutines.reactive.awaitFirst
 import java.time.Instant
-import java.time.OffsetDateTime
-import java.time.ZoneOffset
 
 @CaptureSpan(type = "blockchain")
 open class FlowOrderService(
@@ -76,8 +74,8 @@ open class FlowOrderService(
             flowOrderConverter.convert(status),
             maker,
             origin,
-            start?.let { OffsetDateTime.ofInstant(Instant.ofEpochMilli(it), ZoneOffset.UTC) },
-            end?.let { OffsetDateTime.ofInstant(Instant.ofEpochMilli(it), ZoneOffset.UTC) },
+            start?.let { Instant.ofEpochMilli(it) },
+            end?.let { Instant.ofEpochMilli(it) },
             currencyAddress,
             continuation,
             size
@@ -99,8 +97,8 @@ open class FlowOrderService(
             maker,
             flowOrderConverter.convert(status),
             origin,
-            start?.let { OffsetDateTime.ofInstant(Instant.ofEpochMilli(it), ZoneOffset.UTC) },
-            end?.let { OffsetDateTime.ofInstant(Instant.ofEpochMilli(it), ZoneOffset.UTC) },
+            start?.let { Instant.ofEpochMilli(it) },
+            end?.let { Instant.ofEpochMilli(it) },
             continuation,
             size
         ).awaitFirst()

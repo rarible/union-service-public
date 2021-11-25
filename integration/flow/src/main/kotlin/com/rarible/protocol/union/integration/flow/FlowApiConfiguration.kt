@@ -46,27 +46,27 @@ class FlowApiConfiguration(
 
     @Bean
     fun flowItemApi(factory: FlowNftIndexerApiClientFactory): FlowNftItemControllerApi =
-        factory.createNftItemApiClient(flow)
+        factory.createNftItemApiClient()
 
     @Bean
     fun flowOwnershipApi(factory: FlowNftIndexerApiClientFactory): FlowNftOwnershipControllerApi =
-        factory.createNftOwnershipApiClient(flow)
+        factory.createNftOwnershipApiClient()
 
     @Bean
     fun flowCollectionApi(factory: FlowNftIndexerApiClientFactory): FlowNftCollectionControllerApi =
-        factory.createNftCollectionApiClient(flow)
+        factory.createNftCollectionApiClient()
 
     @Bean
     fun flowOrderApi(factory: FlowNftIndexerApiClientFactory): FlowOrderControllerApi =
-        factory.createNftOrderApiClient(flow)
+        factory.createNftOrderApiClient()
 
     @Bean
     fun flowActivityApi(factory: FlowNftIndexerApiClientFactory): FlowNftOrderActivityControllerApi =
-        factory.createNftOrderActivityApiClient(flow)
+        factory.createNftOrderActivityApiClient()
 
     @Bean
     fun flowCryptoApi(factory: FlowNftIndexerApiClientFactory): FlowNftCryptoControllerApi =
-        factory.createCryptoApiClient(flow)
+        factory.createCryptoApiClient()
 
     //-------------------- Services --------------------//
 
