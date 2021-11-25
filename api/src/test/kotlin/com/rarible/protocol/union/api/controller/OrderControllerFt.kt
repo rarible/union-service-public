@@ -24,7 +24,8 @@ import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAddress
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
-import com.rarible.protocol.union.integration.ethereum.data.randomEthLegacyOrderDto
+import com.rarible.protocol.union.integration.ethereum.data.randomEthLegacyBidOrderDto
+import com.rarible.protocol.union.integration.ethereum.data.randomEthLegacySellOrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomPolygonAddress
 import com.rarible.protocol.union.integration.tezos.data.randomTezosOrderDto
 import com.rarible.protocol.union.test.data.randomFlowAddress
@@ -59,7 +60,7 @@ class OrderControllerFt : AbstractIntegrationTest() {
 
     @Test
     fun `get order by id - ethereum`() = runBlocking<Unit> {
-        val order = randomEthLegacyOrderDto()
+        val order = randomEthLegacySellOrderDto()
         val orderId = EthConverter.convert(order.hash)
         val orderIdFull = OrderIdDto(BlockchainDto.ETHEREUM, order.hash.prefixed()).fullId()
 
@@ -106,7 +107,7 @@ class OrderControllerFt : AbstractIntegrationTest() {
 
         val flowOrders = listOf(randomFlowV1OrderDto(), randomFlowV1OrderDto())
         val tezosOrders = listOf(randomTezosOrderDto())
-        val ethOrders = listOf(randomEthLegacyOrderDto(), randomEthLegacyOrderDto())
+        val ethOrders = listOf(randomEthLegacySellOrderDto(), randomEthLegacySellOrderDto())
 
         coEvery {
             testFlowOrderApi.getOrdersAll(null, continuation, size)
@@ -135,8 +136,8 @@ class OrderControllerFt : AbstractIntegrationTest() {
         val origin = UnionAddressConverter.convert(BlockchainDto.ETHEREUM, randomEthAddress())
         val size = 4
 
-        val ethOrders = listOf(randomEthLegacyOrderDto())
-        val polyOrders = listOf(randomEthLegacyOrderDto(), randomEthLegacyOrderDto())
+        val ethOrders = listOf(randomEthLegacySellOrderDto())
+        val polyOrders = listOf(randomEthLegacySellOrderDto(), randomEthLegacySellOrderDto())
 
         coEvery {
             testEthereumOrderApi.getOrdersAll(origin.value, ethPlatform, continuation, size)
@@ -162,7 +163,7 @@ class OrderControllerFt : AbstractIntegrationTest() {
         val tokenId = ethItemId.tokenId
         val maker = UnionAddressConverter.convert(BlockchainDto.ETHEREUM, randomEthAddress())
 
-        val order = randomEthLegacyOrderDto(ethItemId)
+        val order = randomEthLegacyBidOrderDto(ethItemId)
         val unionOrder = ethOrderConverter.convert(order, ethItemId.blockchain)
 
         val ethOrders = listOf(order)
@@ -227,7 +228,7 @@ class OrderControllerFt : AbstractIntegrationTest() {
 
         val flowOrders = listOf(randomFlowV1OrderDto(), randomFlowV1OrderDto())
         val tezosOrders = listOf(randomTezosOrderDto())
-        val ethOrders = listOf(randomEthLegacyOrderDto(), randomEthLegacyOrderDto())
+        val ethOrders = listOf(randomEthLegacySellOrderDto(), randomEthLegacySellOrderDto())
 
         coEvery {
             testFlowOrderApi.getSellOrders(null, continuation, size)
@@ -278,7 +279,7 @@ class OrderControllerFt : AbstractIntegrationTest() {
         val tokenId = ethItemId.tokenId
         val maker = UnionAddressConverter.convert(BlockchainDto.ETHEREUM, randomEthAddress())
 
-        val order = randomEthLegacyOrderDto(ethItemId)
+        val order = randomEthLegacySellOrderDto(ethItemId)
         val unionOrder = ethOrderConverter.convert(order, ethItemId.blockchain)
 
         val ethOrders = listOf(order)
@@ -325,7 +326,7 @@ class OrderControllerFt : AbstractIntegrationTest() {
     fun `get sell orders order by maker - polygon`() = runBlocking<Unit> {
         val maker = randomPolygonAddress()
 
-        val polygonOrders = listOf(randomEthLegacyOrderDto())
+        val polygonOrders = listOf(randomEthLegacySellOrderDto())
 
         coEvery {
             testPolygonOrderApi.getSellOrdersByMaker(maker.value, null, ethPlatform, continuation, size)

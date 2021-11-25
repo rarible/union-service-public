@@ -59,13 +59,13 @@ class CurrencyService(
         at: Instant? = null
     ): BigDecimal? {
         val assetExt = assetType.ext
-        if (assetExt.isNft || value == null) {
+        if (!assetExt.isCurrency || value == null) {
             return null
         }
         if (value == BigDecimal.ZERO) {
             return BigDecimal.ZERO
         }
-        val address = assetExt.contract
+        val address = assetExt.currencyAddress()
 
         val rate = if (canUseCurrentRate(at)) {
             getCurrentRate(blockchain, address)

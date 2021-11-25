@@ -12,7 +12,7 @@ import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.enrichment.util.bidCurrencyId
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
-import com.rarible.protocol.union.integration.ethereum.data.randomEthLegacyOrderDto
+import com.rarible.protocol.union.integration.ethereum.data.randomEthLegacyBidOrderDto
 import com.rarible.protocol.union.test.mock.CurrencyMock
 import io.mockk.clearMocks
 import io.mockk.coEvery
@@ -61,7 +61,7 @@ class OrderApiServiceTest {
     @Test
     fun `get best bids - completed not requested`() = runBlocking<Unit> {
         val ethItemId = randomEthItemId()
-        val ethOrder = randomEthLegacyOrderDto(ethItemId)
+        val ethOrder = randomEthLegacyBidOrderDto(ethItemId)
         val unionOrder = ethOrderConverter.convert(ethOrder, ethItemId.blockchain)
 
         coEvery {

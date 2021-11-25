@@ -13,6 +13,7 @@ import com.rarible.protocol.union.enrichment.service.EnrichmentMetaService
 import com.rarible.protocol.union.enrichment.test.data.randomShortItem
 import com.rarible.protocol.union.integration.ethereum.converter.EthItemConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
+import com.rarible.protocol.union.integration.ethereum.data.randomEthAssetErc20
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAssetErc721
 import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionAsset
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
@@ -109,7 +110,7 @@ class EnrichmentCollectionEventServiceIt : AbstractIntegrationTest() {
 
         val collectionId = ContractAddressConverter.convert(itemId.blockchain, itemId.contract)
         val bestBidOrder = randomEthLegacyOrderDto(
-            randomEthAssetErc721(),
+            randomEthAssetErc20(),
             randomAddress(),
             randomEthCollectionAsset(Address.apply(collectionId.value))
         )

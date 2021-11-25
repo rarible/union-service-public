@@ -20,7 +20,7 @@ object AuctionContinuation {
     object ByBuyPriceUsdAsc : ContinuationFactory<AuctionDto, UsdPriceIdContinuation> {
         override fun getContinuation(entity: AuctionDto): UsdPriceIdContinuation {
             return UsdPriceIdContinuation(
-                entity.sell.type.ext.contract,
+                entity.sell.type.ext.currencyAddress(),
                 entity.buyPrice,
                 entity.buyPriceUsd,
                 entity.id.value,

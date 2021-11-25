@@ -244,7 +244,7 @@ class EnrichmentRefreshService(
             .getBidCurrencies(itemId.contract, itemId.tokenId.toString())
 
         logger.info("Found Bid currencies for Item [{}] : {}", itemId.fullId(), result)
-        return result.map { it.ext.contract }
+        return result.map { it.ext.currencyAddress() }
     }
 
     private suspend fun getSellCurrencies(itemId: ItemIdDto): List<String> {
@@ -252,7 +252,7 @@ class EnrichmentRefreshService(
             .getSellCurrencies(itemId.contract, itemId.tokenId.toString())
 
         logger.info("Found Sell currencies for Item [{}] : {}", itemId.fullId(), result)
-        return result.map { it.ext.contract }
+        return result.map { it.ext.currencyAddress() }
 
     }
 }

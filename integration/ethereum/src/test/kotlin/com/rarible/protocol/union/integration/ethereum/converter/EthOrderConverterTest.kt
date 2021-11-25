@@ -14,7 +14,7 @@ import com.rarible.protocol.union.dto.PendingOrderCancelDto
 import com.rarible.protocol.union.dto.PendingOrderMatchDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthCryptoPunksOrderDto
-import com.rarible.protocol.union.integration.ethereum.data.randomEthLegacyOrderDto
+import com.rarible.protocol.union.integration.ethereum.data.randomEthLegacySellOrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOnChainOrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOpenSeaV1OrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOrderCancelDto
@@ -32,7 +32,7 @@ class EthOrderConverterTest {
 
     @Test
     fun `eth order - legacy`() = runBlocking<Unit> {
-        val dto = randomEthLegacyOrderDto()
+        val dto = randomEthLegacySellOrderDto()
 
         val converted = ethOrderConverter.convert(dto, BlockchainDto.ETHEREUM)
 
@@ -65,7 +65,7 @@ class EthOrderConverterTest {
 
     @Test
     fun `eth order pending - side match`() = runBlocking<Unit> {
-        val order = randomEthLegacyOrderDto().copy(pending = listOf(randomEthOrderSideMatchDto()))
+        val order = randomEthLegacySellOrderDto().copy(pending = listOf(randomEthOrderSideMatchDto()))
         val dto = order.pending!![0] as OrderSideMatchDto
 
         val converted = ethOrderConverter.convert(order, BlockchainDto.ETHEREUM)
@@ -93,7 +93,7 @@ class EthOrderConverterTest {
 
     @Test
     fun `eth order pending - cancel`() = runBlocking<Unit> {
-        val order = randomEthLegacyOrderDto().copy(pending = listOf(randomEthOrderCancelDto()))
+        val order = randomEthLegacySellOrderDto().copy(pending = listOf(randomEthOrderCancelDto()))
         val dto = order.pending!![0] as OrderCancelDto
 
         val converted = ethOrderConverter.convert(order, BlockchainDto.ETHEREUM)
@@ -112,7 +112,7 @@ class EthOrderConverterTest {
 
     @Test
     fun `eth order pending - on chain`() = runBlocking<Unit> {
-        val order = randomEthLegacyOrderDto().copy(pending = listOf(randomEthOnChainOrderDto()))
+        val order = randomEthLegacySellOrderDto().copy(pending = listOf(randomEthOnChainOrderDto()))
         val dto = order.pending!![0] as com.rarible.protocol.dto.OnChainOrderDto
 
         val converted = ethOrderConverter.convert(order, BlockchainDto.ETHEREUM)
