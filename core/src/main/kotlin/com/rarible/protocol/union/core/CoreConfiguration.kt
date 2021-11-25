@@ -97,7 +97,7 @@ class CoreConfiguration(
             result.add(DummyCollectionService(it))
             logger.info("CollectionService for blockchain {} disabled or not implemented, replaced by dummy", it.name)
         }
-        return BlockchainRouter(services, enabledBlockchains)
+        return BlockchainRouter(result, enabledBlockchains)
     }
 
     @Bean
@@ -108,7 +108,7 @@ class CoreConfiguration(
             result.add(DummyOrderService(it))
             logger.info("OrderService for blockchain {} disabled or not implemented, replaced by dummy", it.name)
         }
-        return BlockchainRouter(services, enabledBlockchains)
+        return BlockchainRouter(result, enabledBlockchains)
     }
 
     @Bean
@@ -119,7 +119,7 @@ class CoreConfiguration(
             result.add(DummyAuctionService(it))
             logger.info("AuctionService for blockchain {} disabled or not implemented, replaced by dummy", it.name)
         }
-        return BlockchainRouter(services, enabledBlockchains)
+        return BlockchainRouter(result, enabledBlockchains)
     }
 
     @Bean
@@ -130,7 +130,7 @@ class CoreConfiguration(
             result.add(DummyActivityService(it))
             logger.info("ActivityService for blockchain {} disabled or not implemented, replaced by dummy", it.name)
         }
-        return BlockchainRouter(services, enabledBlockchains)
+        return BlockchainRouter(result, enabledBlockchains)
     }
 
     @Bean
@@ -141,7 +141,7 @@ class CoreConfiguration(
             result.add(DummySignatureService(it))
             logger.info("SignatureService for blockchain {} disabled or not implemented, replaced by dummy", it.name)
         }
-        return BlockchainRouter(services, enabledBlockchains)
+        return BlockchainRouter(result, enabledBlockchains)
     }
 
     @Bean
