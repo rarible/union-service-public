@@ -48,13 +48,15 @@ class SignatureControllerFt : AbstractIntegrationTest() {
         val tezosForm = com.rarible.protocol.tezos.dto.SignatureValidationFormDto(
             randomString(),
             randomString(),
+            randomString(),
             randomString()
         )
 
         val unionForm = SignatureValidationFormDto(
-            signer = UnionAddressConverter.convert(BlockchainDto.TEZOS, tezosForm.signer),
+            signer = UnionAddressConverter.convert(BlockchainDto.TEZOS, tezosForm.address),
             message = tezosForm.message,
-            signature = tezosForm.signature
+            signature = tezosForm.signature,
+            publicKey = tezosForm.edpk
         )
 
         coEvery { testTezosSignatureApi.validate(tezosForm) } returns false.toMono()
