@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.core.service
 
 import com.rarible.protocol.union.core.continuation.page.Page
+import com.rarible.protocol.union.core.model.UnionMedia
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.service.router.BlockchainService
@@ -27,6 +28,14 @@ interface ItemService : BlockchainService {
     suspend fun getItemMetaById(
         itemId: String
     ): UnionMeta
+
+    suspend fun getItemImageById(
+        itemId: String
+    ): UnionMedia
+
+    suspend fun getItemAnimationById(
+        itemId: String
+    ): UnionMedia
 
     suspend fun resetItemMeta(
         itemId: String

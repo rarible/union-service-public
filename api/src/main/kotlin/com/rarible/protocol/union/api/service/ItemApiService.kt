@@ -2,10 +2,14 @@ package com.rarible.protocol.union.api.service
 
 import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.core.continuation.page.Page
+import com.rarible.protocol.union.core.model.UnionMedia
 import com.rarible.protocol.union.core.model.UnionItem
+import com.rarible.protocol.union.core.service.ItemService
+import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.ItemsDto
+import com.rarible.protocol.union.enrichment.meta.IpfsUrlResolver
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
@@ -18,7 +22,9 @@ import org.springframework.stereotype.Component
 @Component
 class ItemApiService(
     private val orderApiService: OrderApiService,
-    private val enrichmentItemService: EnrichmentItemService
+    private val enrichmentItemService: EnrichmentItemService,
+    private val router: BlockchainRouter<ItemService>,
+    private val ipfsUrlResolver: IpfsUrlResolver
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -35,6 +41,23 @@ class ItemApiService(
         val shortId = ShortItemId(unionItem.id)
         val shortItem = enrichmentItemService.get(shortId)
         return enrichmentItemService.enrichItem(shortItem, unionItem)
+    }
+
+    suspend fun image(itemId: ItemIdDto): UnionMedia {
+        return media { router.getService(itemId.blockchain).getItemImageById(itemId.value) }
+    }
+
+    suspend fun animation(itemId: ItemIdDto): UnionMedia {
+        return media { router.getService(itemId.blockchain).getItemAnimationById(itemId.value) }
+    }
+
+    private suspend fun media(action: suspend () -> UnionMedia): UnionMedia {
+        val result = action()
+        return when {
+            result.url?.isNotEmpty() == true -> result.copy(url = ipfsUrlResolver.resolveRealUrl(result.url!!))
+            // TODO: set image/animation content when it would be implemented in eth
+            else -> result
+        }
     }
 
     private suspend fun enrich(unionItems: List<UnionItem>): List<ItemDto> {

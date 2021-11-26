@@ -4,11 +4,14 @@ import com.rarible.protocol.union.api.service.ItemApiService
 import com.rarible.protocol.union.core.continuation.ItemContinuation
 import com.rarible.protocol.union.core.continuation.page.PageSize
 import com.rarible.protocol.union.core.continuation.page.Paging
+import com.rarible.protocol.union.core.exception.UnionNotFoundException
+import com.rarible.protocol.union.core.model.UnionMedia
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.RestrictionService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemDto
+import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.ItemsDto
 import com.rarible.protocol.union.dto.RestrictionCheckFormDto
 import com.rarible.protocol.union.dto.RestrictionCheckResultDto
@@ -19,8 +22,14 @@ import com.rarible.protocol.union.dto.subchains
 import com.rarible.protocol.union.enrichment.service.EnrichmentMetaService
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.slf4j.LoggerFactory
+import org.springframework.core.io.ByteArrayResource
+import org.springframework.core.io.Resource
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.RestController
+import java.net.URI
 
 @ExperimentalCoroutinesApi
 @RestController
@@ -61,6 +70,14 @@ class ItemController(
 
         val result = itemApiService.enrich(combinedPage)
         return ResponseEntity.ok(result)
+    }
+
+    override suspend fun getItemAnimationById(itemId: String): ResponseEntity<Resource> {
+        return getMedia(itemId) { fullId -> itemApiService.animation(fullId) }
+    }
+
+    override suspend fun getItemImageById(itemId: String): ResponseEntity<Resource> {
+        return getMedia(itemId) { fullId -> itemApiService.image(fullId) }
     }
 
     override suspend fun getItemById(
@@ -177,6 +194,26 @@ class ItemController(
 
         val enriched = itemApiService.enrich(combinedPage)
         return ResponseEntity.ok(enriched)
+    }
+
+    suspend fun getMedia(itemId: String, action: suspend (fullId: ItemIdDto) -> UnionMedia): ResponseEntity<Resource> {
+        val fullItemId = ItemIdParser.parseFull(itemId)
+        val result = action(fullItemId)
+        return when {
+            result.url?.isNotEmpty() == true -> {
+                val httpHeaders = HttpHeaders()
+                httpHeaders.location = URI(result.url)
+                ResponseEntity(httpHeaders, HttpStatus.TEMPORARY_REDIRECT)
+            }
+            result.content?.isNotEmpty() == true -> {
+                val resource = ByteArrayResource(result.content)
+                ResponseEntity.ok()
+                    .contentLength(resource.contentLength())
+                    .contentType(MediaType.parseMediaType(result.mime))
+                    .body(resource)
+            }
+            else -> throw UnionNotFoundException("Media was not found for ${fullItemId.value}")
+        }
     }
 
 }
