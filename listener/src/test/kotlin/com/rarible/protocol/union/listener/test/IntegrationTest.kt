@@ -16,7 +16,13 @@ import org.springframework.test.context.ActiveProfiles
 @EnableAutoConfiguration
 @SpringBootTest(
     webEnvironment = SpringBootTest.WebEnvironment.MOCK,
-    properties = ["spring.cloud.bootstrap.enabled=false"]
+    properties = [
+        "application.environment = test",
+        "spring.cloud.consul.config.enabled = false",
+        "spring.cloud.service-registry.auto-registration.enabled = false",
+        "spring.cloud.discovery.enabled = false",
+        "logging.logstash.tcp-socket.enabled = false"
+    ]
 )
 @Import(value = [TestListenerConfiguration::class])
 @ActiveProfiles("test")
