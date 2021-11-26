@@ -18,11 +18,15 @@ open class TezosActivityEventHandler(
 
     @CaptureTransaction("ActivityEvent#TEZOS")
     override suspend fun handle(event: TezosActivitySafeDto) {
-        logger.debug("Received Tezos ({}) Activity event: type={}", blockchain, event::class.java.simpleName)
-        // if type == null, it means event unparseable - will be logged inside of parser
-        if (event.type != null) {
-            val unionEventDto = tezosActivityConverter.convert(event.type!!, blockchain)
+        if (event.nftType != null) {
+            logger.debug("Received Tezos ({}) Order Activity event: {}", blockchain, event)
+            val unionEventDto = tezosActivityConverter.convert(event.nftType!!, blockchain)
+            handler.onEvent(unionEventDto)
+        } else if (event.orderType != null) {
+            logger.debug("Received Tezos ({}) Order Activity event: {}", blockchain, event)
+            val unionEventDto = tezosActivityConverter.convert(event.orderType!!, blockchain)
             handler.onEvent(unionEventDto)
         }
+        // if both types == null, it means event unparseable - will be logged inside of parser
     }
 }

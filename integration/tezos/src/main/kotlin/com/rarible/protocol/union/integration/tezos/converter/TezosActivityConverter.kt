@@ -1,10 +1,11 @@
 package com.rarible.protocol.union.integration.tezos.converter
 
-import com.rarible.protocol.tezos.dto.ActivityTypeDto
 import com.rarible.protocol.tezos.dto.BurnDto
 import com.rarible.protocol.tezos.dto.MintDto
+import com.rarible.protocol.tezos.dto.NftActTypeDto
 import com.rarible.protocol.tezos.dto.NftActivityFilterAllTypeDto
 import com.rarible.protocol.tezos.dto.NftActivityFilterUserTypeDto
+import com.rarible.protocol.tezos.dto.OrderActTypeDto
 import com.rarible.protocol.tezos.dto.OrderActivityBidDto
 import com.rarible.protocol.tezos.dto.OrderActivityCancelBidDto
 import com.rarible.protocol.tezos.dto.OrderActivityCancelListDto
@@ -37,6 +38,7 @@ import com.rarible.protocol.union.dto.UserActivityTypeDto
 import com.rarible.protocol.union.dto.ext
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
+import java.time.Instant
 
 @Component
 class TezosActivityConverter(
@@ -45,76 +47,94 @@ class TezosActivityConverter(
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    suspend fun convert(source: ActivityTypeDto, blockchain: BlockchainDto): ActivityDto {
+    suspend fun convert(source: OrderActTypeDto, blockchain: BlockchainDto): ActivityDto {
         try {
             return convertInternal(source, blockchain)
         } catch (e: Exception) {
-            logger.error("Failed to convert {} Activity: {} \n{}", blockchain, e.message, source)
+            logger.error("Failed to convert {} Order Activity: {} \n{}", blockchain, e.message, source)
             throw e
         }
     }
 
-    private suspend fun convertInternal(source: ActivityTypeDto, blockchain: BlockchainDto): ActivityDto {
-        val activityId = ActivityIdDto(blockchain, source.id)
-        return when (source) {
+    suspend fun convert(source: NftActTypeDto, blockchain: BlockchainDto): ActivityDto {
+        try {
+            return convertInternal(source, blockchain)
+        } catch (e: Exception) {
+            logger.error("Failed to convert {} NFT Activity: {} \n{}", blockchain, e.message, source)
+            throw e
+        }
+    }
+
+    private suspend fun convertInternal(actType: OrderActTypeDto, blockchain: BlockchainDto): ActivityDto {
+        val activityId = ActivityIdDto(blockchain, actType.id)
+        val date = actType.date
+        val source = convertSource(actType.source)
+
+        return when (val activity = actType.type) {
             is OrderActivityMatchDto -> {
-                val type = source.type
-                val leftSide = source.left
-                val rightSide = source.right
+                val type = convertType(activity.type)
+                val leftSide = activity.left
+                val rightSide = activity.right
                 val leftTypeExt = TezosConverter.convert(leftSide.asset.assetType, blockchain).ext
                 val rightTypeExt = TezosConverter.convert(rightSide.asset.assetType, blockchain).ext
                 if (leftTypeExt.isNft && rightTypeExt.isCurrency) {
                     activityToSell(
                         activityId = activityId,
-                        source = source,
+                        activity = activity,
                         blockchain = blockchain,
                         nft = leftSide,
                         payment = rightSide,
-                        type = convertType(type)
+                        type = type,
+                        date = date,
+                        source = source
                     )
                 } else if (leftTypeExt.isCurrency && rightTypeExt.isNft) {
                     activityToSell(
                         activityId = activityId,
-                        source = source,
+                        activity = activity,
                         blockchain = blockchain,
                         nft = rightSide,
                         payment = leftSide,
-                        type = convertType(type)
+                        type = type,
+                        date = date,
+                        source = source
                     )
                 } else {
                     activityToSwap(
                         activityId = activityId,
-                        source = source,
-                        blockchain = blockchain
+                        activity = activity,
+                        blockchain = blockchain,
+                        date = date,
+                        source = source
                     )
                 }
             }
             is OrderActivityBidDto -> {
-                val payment = TezosConverter.convert(source.make, blockchain)
-                val nft = TezosConverter.convert(source.take, blockchain)
+                val payment = TezosConverter.convert(activity.make, blockchain)
+                val nft = TezosConverter.convert(activity.take, blockchain)
                 OrderBidActivityDto(
                     id = activityId,
-                    date = source.date,
-                    price = source.price,
-                    priceUsd = currencyService.toUsd(blockchain, payment.type, source.price, source.date),
-                    source = convertSource(source.source),
-                    hash = source.hash,
-                    maker = UnionAddressConverter.convert(blockchain, source.maker),
+                    date = date,
+                    price = activity.price,
+                    priceUsd = currencyService.toUsd(blockchain, payment.type, activity.price, date),
+                    source = convertSource(actType.source),
+                    hash = activity.hash,
+                    maker = UnionAddressConverter.convert(blockchain, activity.maker),
                     make = payment,
                     take = nft
                 )
             }
             is OrderActivityListDto -> {
-                val payment = TezosConverter.convert(source.take, blockchain)
-                val nft = TezosConverter.convert(source.make, blockchain)
+                val payment = TezosConverter.convert(activity.take, blockchain)
+                val nft = TezosConverter.convert(activity.make, blockchain)
                 OrderListActivityDto(
                     id = activityId,
-                    date = source.date,
-                    price = source.price,
-                    priceUsd = currencyService.toUsd(blockchain, payment.type, source.price, source.date),
-                    source = convertSource(source.source),
-                    hash = source.hash,
-                    maker = UnionAddressConverter.convert(blockchain, source.maker),
+                    date = date,
+                    price = activity.price,
+                    priceUsd = currencyService.toUsd(blockchain, payment.type, activity.price, date),
+                    source = convertSource(actType.source),
+                    hash = activity.hash,
+                    maker = UnionAddressConverter.convert(blockchain, activity.maker),
                     make = nft,
                     take = payment
                 )
@@ -122,57 +142,64 @@ class TezosActivityConverter(
             is OrderActivityCancelBidDto -> {
                 OrderCancelBidActivityDto(
                     id = activityId,
-                    date = source.date,
-                    source = convertSource(source.source),
-                    hash = source.hash,
-                    maker = UnionAddressConverter.convert(blockchain, source.maker),
-                    make = TezosConverter.convert(source.make, blockchain),
-                    take = TezosConverter.convert(source.take, blockchain),
-                    transactionHash = source.transactionHash,
+                    date = date,
+                    source = source,
+                    hash = activity.hash,
+                    maker = UnionAddressConverter.convert(blockchain, activity.maker),
+                    make = TezosConverter.convert(activity.make, blockchain),
+                    take = TezosConverter.convert(activity.take, blockchain),
+                    transactionHash = activity.transactionHash,
                     // TODO UNION remove in 1.19
                     blockchainInfo = ActivityBlockchainInfoDto(
-                        transactionHash = source.transactionHash,
-                        blockHash = source.blockHash,
-                        blockNumber = source.blockNumber.toLong(),
-                        logIndex = source.logIndex
+                        transactionHash = activity.transactionHash,
+                        blockHash = activity.blockHash,
+                        blockNumber = activity.blockNumber.toLong(),
+                        logIndex = activity.logIndex
                     )
                 )
             }
             is OrderActivityCancelListDto -> {
                 OrderCancelListActivityDto(
                     id = activityId,
-                    date = source.date,
-                    source = convertSource(source.source),
-                    hash = source.hash,
-                    maker = UnionAddressConverter.convert(blockchain, source.maker),
-                    make = TezosConverter.convert(source.make, blockchain),
-                    take = TezosConverter.convert(source.take, blockchain),
-                    transactionHash = source.transactionHash,
+                    date = date,
+                    source = source,
+                    hash = activity.hash,
+                    maker = UnionAddressConverter.convert(blockchain, activity.maker),
+                    make = TezosConverter.convert(activity.make, blockchain),
+                    take = TezosConverter.convert(activity.take, blockchain),
+                    transactionHash = activity.transactionHash,
                     // TODO UNION remove in 1.19
                     blockchainInfo = ActivityBlockchainInfoDto(
-                        transactionHash = source.transactionHash,
-                        blockHash = source.blockHash,
-                        blockNumber = source.blockNumber.toLong(),
-                        logIndex = source.logIndex
+                        transactionHash = activity.transactionHash,
+                        blockHash = activity.blockHash,
+                        blockNumber = activity.blockNumber.toLong(),
+                        logIndex = activity.logIndex
                     )
                 )
             }
 
+        }
+    }
+
+    private suspend fun convertInternal(actType: NftActTypeDto, blockchain: BlockchainDto): ActivityDto {
+        val activityId = ActivityIdDto(blockchain, actType.id)
+        val date = actType.date
+        return when (val activity = actType.type) {
             is MintDto -> {
                 MintActivityDto(
                     id = activityId,
-                    date = source.date,
-                    owner = UnionAddressConverter.convert(blockchain, source.owner),
-                    contract = ContractAddressConverter.convert(blockchain, source.contract),
-                    tokenId = source.tokenId,
+                    date = date,
+                    owner = UnionAddressConverter.convert(blockchain, activity.owner),
+                    contract = ContractAddressConverter.convert(blockchain, activity.contract),
+                    tokenId = activity.tokenId,
                     // Tezos send it as BigDecimal, but in fact, that's BigInteger
-                    value = source.value.toBigInteger(),
-                    transactionHash = source.transactionHash,
+                    value = activity.value.toBigInteger(),
+                    transactionHash = activity.transactionHash,
                     // TODO UNION remove in 1.19
                     blockchainInfo = ActivityBlockchainInfoDto(
-                        transactionHash = source.transactionHash,
-                        blockHash = source.blockHash,
-                        blockNumber = source.blockNumber.toLong(),
+                        transactionHash = activity.transactionHash,
+                        blockHash = activity.blockHash,
+                        blockNumber = activity.blockNumber.toLong(),
                         logIndex = /*source.elt.logIndex*/ 0 // TODO UNION we're planning to remove it
                     )
                 )
@@ -180,18 +207,18 @@ class TezosActivityConverter(
             is BurnDto -> {
                 BurnActivityDto(
                     id = activityId,
-                    date = source.date,
-                    owner = UnionAddressConverter.convert(blockchain, source.owner),
-                    contract = ContractAddressConverter.convert(blockchain, source.contract),
-                    tokenId = source.tokenId,
+                    date = date,
+                    owner = UnionAddressConverter.convert(blockchain, activity.owner),
+                    contract = ContractAddressConverter.convert(blockchain, activity.contract),
+                    tokenId = activity.tokenId,
                     // Tezos send it as BigDecimal, but in fact, that's BigInteger
-                    value = source.value.toBigInteger(),
-                    transactionHash = source.transactionHash,
+                    value = activity.value.toBigInteger(),
+                    transactionHash = activity.transactionHash,
                     // TODO UNION remove in 1.19
                     blockchainInfo = ActivityBlockchainInfoDto(
-                        transactionHash = source.transactionHash,
-                        blockHash = source.blockHash,
-                        blockNumber = source.blockNumber.toLong(),
+                        transactionHash = activity.transactionHash,
+                        blockHash = activity.blockHash,
+                        blockNumber = activity.blockNumber.toLong(),
                         logIndex = /*source.elt.logIndex*/ 0 // TODO UNION we're planning to remove it
                     )
                 )
@@ -199,19 +226,19 @@ class TezosActivityConverter(
             is TransferDto -> {
                 TransferActivityDto(
                     id = activityId,
-                    date = source.date,
-                    from = UnionAddressConverter.convert(blockchain, source.from),
-                    owner = UnionAddressConverter.convert(blockchain, source.elt.owner),
-                    contract = ContractAddressConverter.convert(blockchain, source.elt.contract),
-                    tokenId = source.elt.tokenId,
+                    date = date,
+                    from = UnionAddressConverter.convert(blockchain, activity.from),
+                    owner = UnionAddressConverter.convert(blockchain, activity.elt.owner),
+                    contract = ContractAddressConverter.convert(blockchain, activity.elt.contract),
+                    tokenId = activity.elt.tokenId,
                     // Tezos send it as BigDecimal, but in fact, that's BigInteger
-                    value = source.elt.value.toBigInteger(),
-                    transactionHash = source.elt.transactionHash,
+                    value = activity.elt.value.toBigInteger(),
+                    transactionHash = activity.elt.transactionHash,
                     // TODO UNION remove in 1.19
                     blockchainInfo = ActivityBlockchainInfoDto(
-                        transactionHash = source.elt.transactionHash,
-                        blockHash = source.elt.blockHash,
-                        blockNumber = source.elt.blockNumber.toLong(),
+                        transactionHash = activity.elt.transactionHash,
+                        blockHash = activity.elt.blockHash,
+                        blockNumber = activity.elt.blockNumber.toLong(),
                         logIndex = /*source.elt.logIndex*/ 0 // TODO UNION we're planning to remove it
                     )
                 )
@@ -279,29 +306,31 @@ class TezosActivityConverter(
     }
 
     private suspend fun activityToSell(
-        source: OrderActivityMatchDto,
+        activity: OrderActivityMatchDto,
         blockchain: BlockchainDto,
         nft: OrderActivitySideMatchDto,
         payment: OrderActivitySideMatchDto,
         type: OrderMatchSellDto.Type,
-        activityId: ActivityIdDto
+        activityId: ActivityIdDto,
+        date: Instant,
+        source: OrderActivitySourceDto
     ): OrderMatchSellDto {
         val unionPayment = TezosConverter.convert(payment.asset, blockchain)
-        val priceUsd = currencyService.toUsd(blockchain, unionPayment.type, source.price, source.date)
+        val priceUsd = currencyService.toUsd(blockchain, unionPayment.type, activity.price, date)
         return OrderMatchSellDto(
             id = activityId,
-            date = source.date,
-            source = convertSource(source.source),
-            transactionHash = source.transactionHash,
+            date = date,
+            source = source,
+            transactionHash = activity.transactionHash,
             // TODO UNION remove in 1.19
-            blockchainInfo = asActivityBlockchainInfo(source),
+            blockchainInfo = asActivityBlockchainInfo(activity),
             nft = TezosConverter.convert(nft.asset, blockchain),
             payment = unionPayment,
             seller = UnionAddressConverter.convert(blockchain, nft.maker),
             buyer = UnionAddressConverter.convert(blockchain, payment.maker),
             sellerOrderHash = nft.hash,
             buyerOrderHash = payment.hash,
-            price = source.price,
+            price = activity.price,
             priceUsd = priceUsd,
             amountUsd = priceUsd?.multiply(nft.asset.value),
             type = type
@@ -309,18 +338,20 @@ class TezosActivityConverter(
     }
 
     private fun activityToSwap(
-        source: OrderActivityMatchDto,
+        activity: OrderActivityMatchDto,
         blockchain: BlockchainDto,
-        activityId: ActivityIdDto
+        activityId: ActivityIdDto,
+        date: Instant,
+        source: OrderActivitySourceDto
     ) = OrderMatchSwapDto(
         id = activityId,
-        date = source.date,
-        source = convertSource(source.source),
-        transactionHash = source.transactionHash,
+        date = date,
+        source = source,
+        transactionHash = activity.transactionHash,
         // TODO UNION remove in 1.19
-        blockchainInfo = asActivityBlockchainInfo(source),
-        left = convert(source.left, blockchain),
-        right = convert(source.right, blockchain)
+        blockchainInfo = asActivityBlockchainInfo(activity),
+        left = convert(activity.left, blockchain),
+        right = convert(activity.right, blockchain)
     )
 
     private fun asActivityBlockchainInfo(source: OrderActivityMatchDto) = ActivityBlockchainInfoDto(

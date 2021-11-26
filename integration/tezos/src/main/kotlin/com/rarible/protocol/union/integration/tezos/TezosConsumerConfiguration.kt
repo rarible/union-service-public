@@ -2,6 +2,7 @@ package com.rarible.protocol.union.integration.tezos
 
 import com.rarible.core.application.ApplicationEnvironmentInfo
 import com.rarible.protocol.tezos.dto.TezosActivitySafeDto
+import com.rarible.protocol.tezos.dto.TezosCollectionSafeEventDto
 import com.rarible.protocol.tezos.dto.TezosItemSafeEventDto
 import com.rarible.protocol.tezos.dto.TezosOrderSafeEventDto
 import com.rarible.protocol.tezos.dto.TezosOwnershipSafeEventDto
@@ -13,9 +14,11 @@ import com.rarible.protocol.union.core.handler.KafkaConsumerWorker
 import com.rarible.protocol.union.core.model.UnionItemEvent
 import com.rarible.protocol.union.core.model.UnionOrderEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipEvent
+import com.rarible.protocol.union.dto.CollectionEventDto
 import com.rarible.protocol.union.integration.tezos.converter.TezosActivityConverter
 import com.rarible.protocol.union.integration.tezos.converter.TezosOrderConverter
 import com.rarible.protocol.union.integration.tezos.event.TezosActivityEventHandler
+import com.rarible.protocol.union.integration.tezos.event.TezosCollectionEventHandler
 import com.rarible.protocol.union.integration.tezos.event.TezosItemEventHandler
 import com.rarible.protocol.union.integration.tezos.event.TezosOrderEventHandler
 import com.rarible.protocol.union.integration.tezos.event.TezosOwnershipEventHandler
@@ -62,13 +65,10 @@ class TezosConsumerConfiguration(
         return TezosOwnershipEventHandler(handler)
     }
 
-    // TODO TEZOS add collection consumer when Tezos support it
-    /*
     @Bean
     fun tezosCollectionEventHandler(handler: IncomingEventHandler<CollectionEventDto>): TezosCollectionEventHandler {
         return TezosCollectionEventHandler(handler)
     }
-     */
 
     @Bean
     fun tezosOrderEventHandler(
@@ -97,7 +97,14 @@ class TezosConsumerConfiguration(
         return consumerFactory.createItemConsumer(consumer, handler, daemon, workers)
     }
 
-    // TODO TEZOS add collection worker when Tezos support it
+    @Bean
+    fun tezosCollectionWorker(
+        factory: TezosEventsConsumerFactory,
+        handler: BlockchainEventHandler<TezosCollectionSafeEventDto, CollectionEventDto>
+    ): KafkaConsumerWorker<TezosCollectionSafeEventDto> {
+        val consumer = factory.createCollectionConsumer(consumerFactory.itemGroup)
+        return consumerFactory.createCollectionConsumer(consumer, handler, daemon, workers)
+    }
 
     @Bean
     fun tezosOwnershipWorker(

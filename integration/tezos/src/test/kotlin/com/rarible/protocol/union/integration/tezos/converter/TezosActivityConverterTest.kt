@@ -1,11 +1,19 @@
 package com.rarible.protocol.union.integration.tezos.converter
 
+import com.rarible.protocol.tezos.dto.BurnDto
+import com.rarible.protocol.tezos.dto.MintDto
 import com.rarible.protocol.tezos.dto.NftActivityFilterAllTypeDto
 import com.rarible.protocol.tezos.dto.NftActivityFilterUserTypeDto
+import com.rarible.protocol.tezos.dto.OrderActivityBidDto
+import com.rarible.protocol.tezos.dto.OrderActivityCancelBidDto
+import com.rarible.protocol.tezos.dto.OrderActivityCancelListDto
 import com.rarible.protocol.tezos.dto.OrderActivityFilterAllTypeDto
 import com.rarible.protocol.tezos.dto.OrderActivityFilterUserTypeDto
+import com.rarible.protocol.tezos.dto.OrderActivityListDto
+import com.rarible.protocol.tezos.dto.OrderActivityMatchDto
 import com.rarible.protocol.tezos.dto.OrderActivityMatchTypeDto
 import com.rarible.protocol.tezos.dto.OrderActivitySideMatchDto
+import com.rarible.protocol.tezos.dto.TransferDto
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -41,18 +49,19 @@ class TezosActivityConverterTest {
 
     @Test
     fun `tezos order activity match side - swap`() = runBlocking<Unit> {
-        val dto = randomTezosOrderActivityMatch()
-        val converted = tezosActivityConverter.convert(dto, BlockchainDto.TEZOS) as OrderMatchActivityDto
+        val actType = randomTezosOrderActivityMatch()
+        val dto = actType.type as OrderActivityMatchDto
+        val converted = tezosActivityConverter.convert(actType, BlockchainDto.TEZOS) as OrderMatchActivityDto
 
-        assertThat(converted.id.value).isEqualTo(dto.id)
-        assertThat(converted.date).isEqualTo(dto.date)
+        assertThat(converted.id.value).isEqualTo(actType.id)
+        assertThat(converted.date).isEqualTo(actType.date)
+        assertThat(converted.source.name).isEqualTo(actType.source)
 
         assertThat(converted).isInstanceOf(OrderMatchSwapDto::class.java)
         converted as OrderMatchSwapDto
         assertMatchSide(converted.left, dto.left)
         assertMatchSide(converted.right, dto.right)
 
-        assertThat(converted.source.name).isEqualTo(dto.source)
         assertThat(converted.transactionHash).isEqualTo(dto.transactionHash)
         // TODO UNION remove in 1.19
         assertThat(converted.blockchainInfo!!.transactionHash).isEqualTo(dto.transactionHash)
@@ -63,12 +72,14 @@ class TezosActivityConverterTest {
 
     @Test
     fun `tezos order activity match side - nft to payment`() = runBlocking<Unit> {
-        val swapDto = randomTezosOrderActivityMatch()
-        val left = swapDto.left.copy(asset = randomTezosAssetNFT())
-        val dto = swapDto.copy(
+        val actDto = randomTezosOrderActivityMatch()
+        val actType = (actDto.type as OrderActivityMatchDto)
+        val left = actType.left.copy(asset = randomTezosAssetNFT())
+        val actTypeNft = actType.copy(
             left = left,
             type = OrderActivityMatchTypeDto.ACCEPT_BID
         )
+        val dto = actDto.copy(type = actTypeNft)
 
         val converted = tezosActivityConverter.convert(dto, BlockchainDto.TEZOS) as OrderMatchActivityDto
 
@@ -77,29 +88,31 @@ class TezosActivityConverterTest {
 
         assertThat(converted.type).isEqualTo(OrderMatchSellDto.Type.ACCEPT_BID)
         assertThat(converted.nft).isEqualTo(TezosConverter.convert(left.asset, BlockchainDto.TEZOS))
-        assertThat(converted.payment).isEqualTo(TezosConverter.convert(swapDto.right.asset, BlockchainDto.TEZOS))
+        assertThat(converted.payment).isEqualTo(TezosConverter.convert(actTypeNft.right.asset, BlockchainDto.TEZOS))
         assertThat(converted.seller).isEqualTo(UnionAddressConverter.convert(BlockchainDto.TEZOS, left.maker))
         assertThat(converted.buyer).isEqualTo(
             UnionAddressConverter.convert(
                 BlockchainDto.TEZOS,
-                swapDto.right.maker
+                actTypeNft.right.maker
             )
         )
-        assertThat(converted.sellerOrderHash).isEqualTo(swapDto.left.hash)
-        assertThat(converted.buyerOrderHash).isEqualTo(swapDto.right.hash)
-        assertThat(converted.price).isEqualTo(swapDto.price)
+        assertThat(converted.sellerOrderHash).isEqualTo(actTypeNft.left.hash)
+        assertThat(converted.buyerOrderHash).isEqualTo(actTypeNft.right.hash)
+        assertThat(converted.price).isEqualTo(actTypeNft.price)
         // in tests all currencies == 1 usd
-        assertThat(converted.priceUsd).isEqualTo(swapDto.price)
-        assertThat(converted.amountUsd).isEqualTo(swapDto.price.multiply(left.asset.value))
+        assertThat(converted.priceUsd).isEqualTo(actTypeNft.price)
+        assertThat(converted.amountUsd).isEqualTo(actTypeNft.price.multiply(left.asset.value))
     }
 
     @Test
     fun `tezos order activity match side - payment to nft`() = runBlocking<Unit> {
-        val swapDto = randomTezosOrderActivityMatch()
-        val right = swapDto.right.copy(asset = randomTezosAssetNFT())
-        val dto = swapDto.copy(
+        val actDto = randomTezosOrderActivityMatch()
+        val actType = (actDto.type as OrderActivityMatchDto)
+        val right = actType.right.copy(asset = randomTezosAssetNFT())
+        val actTypeNft = actType.copy(
             right = right
         )
+        val dto = actDto.copy(type = actTypeNft)
 
         val converted = tezosActivityConverter.convert(dto, BlockchainDto.TEZOS) as OrderMatchActivityDto
 
@@ -108,137 +121,154 @@ class TezosActivityConverterTest {
 
         assertThat(converted.type).isEqualTo(OrderMatchSellDto.Type.SELL)
         assertThat(converted.nft).isEqualTo(TezosConverter.convert(right.asset, BlockchainDto.TEZOS))
-        assertThat(converted.payment).isEqualTo(TezosConverter.convert(swapDto.left.asset, BlockchainDto.TEZOS))
+        assertThat(converted.payment).isEqualTo(TezosConverter.convert(actTypeNft.left.asset, BlockchainDto.TEZOS))
         assertThat(converted.seller).isEqualTo(UnionAddressConverter.convert(BlockchainDto.TEZOS, right.maker))
-        assertThat(converted.buyer).isEqualTo(UnionAddressConverter.convert(BlockchainDto.TEZOS, swapDto.left.maker))
-        assertThat(converted.sellerOrderHash).isEqualTo(swapDto.right.hash)
-        assertThat(converted.buyerOrderHash).isEqualTo(swapDto.left.hash)
-        assertThat(converted.price).isEqualTo(swapDto.price)
+        assertThat(converted.buyer).isEqualTo(UnionAddressConverter.convert(BlockchainDto.TEZOS, actTypeNft.left.maker))
+        assertThat(converted.sellerOrderHash).isEqualTo(actTypeNft.right.hash)
+        assertThat(converted.buyerOrderHash).isEqualTo(actTypeNft.left.hash)
+        assertThat(converted.price).isEqualTo(actTypeNft.price)
         // in tests all currencies == 1 usd
-        assertThat(converted.priceUsd).isEqualTo(swapDto.price)
-        assertThat(converted.amountUsd).isEqualTo(swapDto.price.multiply(right.asset.value))
+        assertThat(converted.priceUsd).isEqualTo(actTypeNft.price)
+        assertThat(converted.amountUsd).isEqualTo(actTypeNft.price.multiply(right.asset.value))
     }
 
     @Test
     fun `tezos order activity bid`() = runBlocking<Unit> {
         val dto = randomTezosOrderBidActivity()
+        val actType = dto.type as OrderActivityBidDto
         val converted = tezosActivityConverter.convert(dto, BlockchainDto.TEZOS) as OrderBidActivityDto
 
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.date).isEqualTo(dto.date)
-        assertThat(converted.price).isEqualTo(dto.price)
-        // in tests all currencies == 1 usd
-        assertThat(converted.priceUsd).isEqualTo(dto.price)
         assertThat(converted.source?.name).isEqualTo(dto.source)
-        assertThat(converted.take.value).isEqualTo(dto.take.value)
-        assertThat(converted.make.value).isEqualTo(dto.make.value)
-        assertThat(converted.maker.value).isEqualTo(dto.maker)
+
+        assertThat(converted.price).isEqualTo(actType.price)
+        // in tests all currencies == 1 usd
+        assertThat(converted.priceUsd).isEqualTo(actType.price)
+        assertThat(converted.take.value).isEqualTo(actType.take.value)
+        assertThat(converted.make.value).isEqualTo(actType.make.value)
+        assertThat(converted.maker.value).isEqualTo(actType.maker)
     }
 
     @Test
     fun `tezos order activity list`() = runBlocking<Unit> {
         val dto = randomTezosOrderListActivity()
+        val actType = dto.type as OrderActivityListDto
         val converted = tezosActivityConverter.convert(dto, BlockchainDto.TEZOS) as OrderListActivityDto
 
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.date).isEqualTo(dto.date)
-        assertThat(converted.price).isEqualTo(dto.price)
-        // in tests all currencies == 1 usd
-        assertThat(converted.priceUsd).isEqualTo(dto.price)
         assertThat(converted.source?.name).isEqualTo(dto.source)
-        assertThat(converted.take.value).isEqualTo(dto.take.value)
-        assertThat(converted.make.value).isEqualTo(dto.make.value)
-        assertThat(converted.maker.value).isEqualTo(dto.maker)
+
+        assertThat(converted.price).isEqualTo(actType.price)
+        // in tests all currencies == 1 usd
+        assertThat(converted.priceUsd).isEqualTo(actType.price)
+        assertThat(converted.take.value).isEqualTo(actType.take.value)
+        assertThat(converted.make.value).isEqualTo(actType.make.value)
+        assertThat(converted.maker.value).isEqualTo(actType.maker)
     }
 
     @Test
     fun `tezos order activity cancel bid`() = runBlocking<Unit> {
         val dto = randomTezosOrderActivityCancelBid()
+        val actType = dto.type as OrderActivityCancelBidDto
         val converted =
             tezosActivityConverter.convert(dto, BlockchainDto.TEZOS) as OrderCancelBidActivityDto
 
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.date).isEqualTo(dto.date)
         assertThat(converted.source?.name).isEqualTo(dto.source)
-        assertThat(converted.hash).isEqualTo(dto.hash)
-        assertThat(converted.maker.value).isEqualTo(dto.maker)
-        assertThat(converted.transactionHash).isEqualTo(dto.transactionHash)
+
+        assertThat(converted.hash).isEqualTo(actType.hash)
+        assertThat(converted.maker.value).isEqualTo(actType.maker)
+        assertThat(converted.transactionHash).isEqualTo(actType.transactionHash)
         // TODO UNION remove in 1.19
-        assertThat(converted.blockchainInfo!!.transactionHash).isEqualTo(dto.transactionHash)
-        assertThat(converted.blockchainInfo!!.blockHash).isEqualTo(dto.blockHash)
-        assertThat(converted.blockchainInfo!!.blockNumber).isEqualTo(dto.blockNumber.toLong())
-        assertThat(converted.blockchainInfo!!.logIndex).isEqualTo(dto.logIndex)
+        assertThat(converted.blockchainInfo!!.transactionHash).isEqualTo(actType.transactionHash)
+        assertThat(converted.blockchainInfo!!.blockHash).isEqualTo(actType.blockHash)
+        assertThat(converted.blockchainInfo!!.blockNumber).isEqualTo(actType.blockNumber.toLong())
+        assertThat(converted.blockchainInfo!!.logIndex).isEqualTo(actType.logIndex)
     }
 
     @Test
     fun `tezos order activity cancel list`() = runBlocking<Unit> {
         val dto = randomTezosOrderActivityCancelList()
+
+        val actType = dto.type as OrderActivityCancelListDto
+
         val converted =
             tezosActivityConverter.convert(dto, BlockchainDto.TEZOS) as OrderCancelListActivityDto
 
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.date).isEqualTo(dto.date)
         assertThat(converted.source?.name).isEqualTo(dto.source)
-        assertThat(converted.hash).isEqualTo(dto.hash)
-        assertThat(converted.maker.value).isEqualTo(dto.maker)
-        assertThat(converted.blockchainInfo?.transactionHash).isEqualTo(dto.transactionHash)
-        assertThat(converted.blockchainInfo?.blockHash).isEqualTo(dto.blockHash)
-        assertThat(converted.blockchainInfo?.blockNumber).isEqualTo(dto.blockNumber.toLong())
-        assertThat(converted.blockchainInfo?.logIndex).isEqualTo(dto.logIndex)
+
+        assertThat(converted.hash).isEqualTo(actType.hash)
+        assertThat(converted.maker.value).isEqualTo(actType.maker)
+        // TODO UNION remove in 1.19
+        assertThat(converted.blockchainInfo?.transactionHash).isEqualTo(actType.transactionHash)
+        assertThat(converted.blockchainInfo?.blockHash).isEqualTo(actType.blockHash)
+        assertThat(converted.blockchainInfo?.blockNumber).isEqualTo(actType.blockNumber.toLong())
+        assertThat(converted.blockchainInfo?.logIndex).isEqualTo(actType.logIndex)
     }
 
     @Test
     fun `tezos item activity mint`() = runBlocking<Unit> {
         val dto = randomTezosItemMintActivity()
+        val actType = dto.type as MintDto
         val converted = tezosActivityConverter.convert(dto, BlockchainDto.TEZOS) as MintActivityDto
 
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.date).isEqualTo(dto.date)
-        assertThat(converted.owner.value).isEqualTo(dto.owner)
-        assertThat(converted.contract.value).isEqualTo(dto.contract)
-        assertThat(converted.tokenId).isEqualTo(dto.tokenId)
-        assertThat(converted.value).isEqualTo(dto.value.toBigInteger())
-        assertThat(converted.transactionHash).isEqualTo(dto.transactionHash)
+
+        assertThat(converted.owner.value).isEqualTo(actType.owner)
+        assertThat(converted.contract.value).isEqualTo(actType.contract)
+        assertThat(converted.tokenId).isEqualTo(actType.tokenId)
+        assertThat(converted.value).isEqualTo(actType.value.toBigInteger())
+        assertThat(converted.transactionHash).isEqualTo(actType.transactionHash)
         // TODO UNION remove in 1.19
-        assertThat(converted.blockchainInfo!!.transactionHash).isEqualTo(dto.transactionHash)
-        assertThat(converted.blockchainInfo!!.blockHash).isEqualTo(dto.blockHash)
-        assertThat(converted.blockchainInfo!!.blockNumber).isEqualTo(dto.blockNumber.toLong())
+        assertThat(converted.blockchainInfo!!.transactionHash).isEqualTo(actType.transactionHash)
+        assertThat(converted.blockchainInfo!!.blockHash).isEqualTo(actType.blockHash)
+        assertThat(converted.blockchainInfo!!.blockNumber).isEqualTo(actType.blockNumber.toLong())
     }
 
     @Test
     fun `tezos item activity burn`() = runBlocking<Unit> {
         val dto = randomTezosItemBurnActivity()
+        val actType = dto.type as BurnDto
         val converted = tezosActivityConverter.convert(dto, BlockchainDto.TEZOS) as BurnActivityDto
 
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.date).isEqualTo(dto.date)
-        assertThat(converted.owner.value).isEqualTo(dto.owner)
-        assertThat(converted.contract.value).isEqualTo(dto.contract)
-        assertThat(converted.tokenId).isEqualTo(dto.tokenId)
-        assertThat(converted.value).isEqualTo(dto.value.toBigInteger())
-        assertThat(converted.transactionHash).isEqualTo(dto.transactionHash)
+
+        assertThat(converted.owner.value).isEqualTo(actType.owner)
+        assertThat(converted.contract.value).isEqualTo(actType.contract)
+        assertThat(converted.tokenId).isEqualTo(actType.tokenId)
+        assertThat(converted.value).isEqualTo(actType.value.toBigInteger())
+        assertThat(converted.transactionHash).isEqualTo(actType.transactionHash)
         // TODO UNION remove in 1.19
-        assertThat(converted.blockchainInfo!!.transactionHash).isEqualTo(dto.transactionHash)
-        assertThat(converted.blockchainInfo!!.blockHash).isEqualTo(dto.blockHash)
-        assertThat(converted.blockchainInfo!!.blockNumber).isEqualTo(dto.blockNumber.toLong())
+        assertThat(converted.blockchainInfo!!.transactionHash).isEqualTo(actType.transactionHash)
+        assertThat(converted.blockchainInfo!!.blockHash).isEqualTo(actType.blockHash)
+        assertThat(converted.blockchainInfo!!.blockNumber).isEqualTo(actType.blockNumber.toLong())
     }
 
     @Test
     fun `tezos item activity transfer`() = runBlocking<Unit> {
         val dto = randomTezosItemTransferActivity()
+        val actType = dto.type as TransferDto
         val converted = tezosActivityConverter.convert(dto, BlockchainDto.TEZOS) as TransferActivityDto
 
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.date).isEqualTo(dto.date)
-        assertThat(converted.owner.value).isEqualTo(dto.elt.owner)
-        assertThat(converted.contract.value).isEqualTo(dto.elt.contract)
-        assertThat(converted.tokenId).isEqualTo(dto.elt.tokenId)
-        assertThat(converted.value).isEqualTo(dto.elt.value.toBigInteger())
-        assertThat(converted.transactionHash).isEqualTo(dto.elt.transactionHash)
+
+        assertThat(converted.owner.value).isEqualTo(actType.elt.owner)
+        assertThat(converted.contract.value).isEqualTo(actType.elt.contract)
+        assertThat(converted.tokenId).isEqualTo(actType.elt.tokenId)
+        assertThat(converted.value).isEqualTo(actType.elt.value.toBigInteger())
+        assertThat(converted.transactionHash).isEqualTo(actType.elt.transactionHash)
         // TODO UNION remove in 1.19
-        assertThat(converted.blockchainInfo!!.transactionHash).isEqualTo(dto.elt.transactionHash)
-        assertThat(converted.blockchainInfo!!.blockHash).isEqualTo(dto.elt.blockHash)
-        assertThat(converted.blockchainInfo!!.blockNumber).isEqualTo(dto.elt.blockNumber.toLong())
+        assertThat(converted.blockchainInfo!!.transactionHash).isEqualTo(actType.elt.transactionHash)
+        assertThat(converted.blockchainInfo!!.blockHash).isEqualTo(actType.elt.blockHash)
+        assertThat(converted.blockchainInfo!!.blockNumber).isEqualTo(actType.elt.blockNumber.toLong())
     }
 
     @Test
