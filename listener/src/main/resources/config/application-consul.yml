@@ -1,9 +1,13 @@
-spring.config.import: consul
-
 spring:
   data:
     mongodb:
       uri: mongodb://${mongodb.hosts}
       database: ${mongodb.database}
+  config:
+    use-legacy-processing: true
+    import: "consul:"
+  cloud:
+    bootstrap:
+      enabled: true
 
 redisUri: ${consul.redis.uri}
