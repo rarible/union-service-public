@@ -21,7 +21,7 @@ class PagingTest {
         val paging = Paging(ItemContinuation.ByLastUpdatedAndId, items.shuffled())
 
         val page = paging.getSlice(5)
-        val oldestTs = page.entities.map { it.lastUpdatedAt.toEpochMilli() }.min()
+        val oldestTs = page.entities.map { it.lastUpdatedAt.toEpochMilli() }.minOrNull()
         val last = page.entities.last()
 
         assertThat(page.entities).hasSize(5)

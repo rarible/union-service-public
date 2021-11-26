@@ -107,7 +107,7 @@ class RefreshControllerFt : AbstractIntegrationTest() {
         assertThat(result.auctions.first().id).isEqualTo(ethAuctionConverter.convert(auctionDto, BlockchainDto.ETHEREUM).id)
 
         coVerify {
-            testItemEventProducer.send(match { message: KafkaMessage<ItemEventDto> ->
+            testItemEventProducer.send(match<KafkaMessage<ItemEventDto>> { message ->
                 message.value.itemId == ethItemId
             })
         }
@@ -158,7 +158,7 @@ class RefreshControllerFt : AbstractIntegrationTest() {
         assertThat(result.bestSellOrder!!.id).isEqualTo(unionBestSell.id)
 
         coVerify {
-            testOwnershipEventProducer.send(match { message: KafkaMessage<OwnershipEventDto> ->
+            testOwnershipEventProducer.send(match<KafkaMessage<OwnershipEventDto>> { message ->
                 message.value.ownershipId == ethOwnershipId
             })
         }
@@ -208,7 +208,7 @@ class RefreshControllerFt : AbstractIntegrationTest() {
         assertThat(result.bestBidOrder!!.id).isEqualTo(unionBestBid.id)
 
         coVerify {
-            testItemEventProducer.send(match { message: KafkaMessage<ItemEventDto> ->
+            testItemEventProducer.send(match<KafkaMessage<ItemEventDto>> { message ->
                 message.value.itemId == ethItemId
             })
         }
@@ -245,7 +245,7 @@ class RefreshControllerFt : AbstractIntegrationTest() {
         assertThat(result.bestSellOrder!!.id).isEqualTo(unionBestSell.id)
 
         coVerify {
-            testOwnershipEventProducer.send(match { message: KafkaMessage<OwnershipEventDto> ->
+            testOwnershipEventProducer.send(match<KafkaMessage<OwnershipEventDto>> { message ->
                 message.value.ownershipId == ethOwnershipId
             })
         }
