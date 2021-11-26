@@ -12,7 +12,13 @@ import org.springframework.test.context.ActiveProfiles
 @RedisTest
 @SpringBootTest(
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-    properties = ["spring.cloud.bootstrap.enabled=false"]
+    properties = [
+        "application.environment = test",
+        "spring.cloud.consul.config.enabled = false",
+        "spring.cloud.service-registry.auto-registration.enabled = false",
+        "spring.cloud.discovery.enabled = false",
+        "logging.logstash.tcp-socket.enabled = false"
+    ]
 )
 @ActiveProfiles("test")
 @Import(value = [TestApiConfiguration::class])
