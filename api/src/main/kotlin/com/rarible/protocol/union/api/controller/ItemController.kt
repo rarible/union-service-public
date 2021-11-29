@@ -28,6 +28,9 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.DeleteMapping
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RestController
 import java.net.URI
 
@@ -72,11 +75,13 @@ class ItemController(
         return ResponseEntity.ok(result)
     }
 
-    override suspend fun getItemAnimationById(itemId: String): ResponseEntity<Resource> {
+    @GetMapping(value = ["/v0.1/items/{itemId}/animation"])
+    suspend fun getItemAnimationById(@PathVariable("itemId") itemId: String): ResponseEntity<Resource> {
         return getMedia(itemId) { fullId -> itemApiService.animation(fullId) }
     }
 
-    override suspend fun getItemImageById(itemId: String): ResponseEntity<Resource> {
+    @GetMapping(value = ["/v0.1/items/{itemId}/image"])
+    suspend fun getItemImageById(@PathVariable("itemId") itemId: String): ResponseEntity<Resource> {
         return getMedia(itemId) { fullId -> itemApiService.image(fullId) }
     }
 
