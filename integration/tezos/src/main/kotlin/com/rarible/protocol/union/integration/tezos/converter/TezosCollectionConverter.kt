@@ -2,6 +2,7 @@ package com.rarible.protocol.union.integration.tezos.converter
 
 import com.rarible.protocol.tezos.dto.NftCollectionDto
 import com.rarible.protocol.tezos.dto.NftCollectionFeatureDto
+import com.rarible.protocol.tezos.dto.NftCollectionTypeDto
 import com.rarible.protocol.tezos.dto.NftCollectionsDto
 import com.rarible.protocol.union.core.continuation.page.Page
 import com.rarible.protocol.union.core.converter.ContractAddressConverter
@@ -30,7 +31,7 @@ object TezosCollectionConverter {
             name = source.name,
             symbol = source.symbol,
             owner = source.owner?.let { UnionAddressConverter.convert(blockchain, it) },
-            type = CollectionDto.Type.TEZOS,
+            type = convert(source.type),
             features = source.features.map { convert(it) }
         )
     }
@@ -51,6 +52,13 @@ object TezosCollectionConverter {
             NftCollectionFeatureDto.MINT_WITH_ADDRESS -> CollectionDto.Features.MINT_WITH_ADDRESS
             NftCollectionFeatureDto.SECONDARY_SALE_FEES -> CollectionDto.Features.SECONDARY_SALE_FEES
             NftCollectionFeatureDto.SET_URI_PREFIX -> CollectionDto.Features.SET_URI_PREFIX
+        }
+    }
+
+    private fun convert(type: NftCollectionTypeDto): CollectionDto.Type {
+        return when (type) {
+            NftCollectionTypeDto.NFT -> CollectionDto.Type.TEZOS_NFT
+            NftCollectionTypeDto.MT -> CollectionDto.Type.TEZOS_MT
         }
     }
 
