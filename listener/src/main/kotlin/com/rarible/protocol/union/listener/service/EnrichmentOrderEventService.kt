@@ -35,59 +35,53 @@ class EnrichmentOrderEventService(
         val makeItemId = makeItemIdDto?.let { ShortItemId(it) }
         val takeItemId = takeItemIdDto?.let { ShortItemId(it) }
 
-        val mFuture = makeItemId?.let {
+        val sellUpdateFuture = makeItemId?.let {
             async {
+                // Ownership should be updated first in order to emit events in correct order
+                // Otherwise there could be situation when Order for item changed, but ownership triggers item
+                // event caused by stock re-evaluation later than order for item updated
+                ignoreApi404 {
+                    val ownershipId = ShortOwnershipId(
+                        makeItemId.blockchain, makeItemId.token, makeItemId.tokenId, order.maker.value
+                    )
+                    enrichmentOwnershipEventService.onOwnershipBestSellOrderUpdated(
+                        ownershipId, order, notificationEnabled
+                    )
+                }
                 ignoreApi404 {
                     enrichmentItemEventService.onItemBestSellOrderUpdated(makeItemId, order, notificationEnabled)
                 }
             }
         }
-        val tFuture = takeItemId?.let {
+        val bidUpdateFuture = takeItemId?.let {
             async {
                 ignoreApi404 {
                     enrichmentItemEventService.onItemBestBidOrderUpdated(takeItemId, order, notificationEnabled)
                 }
             }
         }
-        val oFuture = makeItemId?.let {
-            val ownershipId = ShortOwnershipId(
-                makeItemId.blockchain,
-                makeItemId.token,
-                makeItemId.tokenId,
-                order.maker.value
-            )
-            async {
-                ignoreApi404 {
-                    enrichmentOwnershipEventService.onOwnershipBestSellOrderUpdated(
-                        ownershipId,
-                        order,
-                        notificationEnabled
-                    )
-                }
-            }
-        }
-        val mcFuture = if (order.make.type.ext.isCollection) {
+
+        val sellCollectionUpdateFuture = if (order.make.type.ext.isCollection) {
             async {
                 val collectionId = ContractAddressConverter.convert(blockchain, makeAssetExt.contract)
                 enrichmentCollectionEventService.onCollectionBestSellOrderUpdate(
-                    collectionId,
-                    order,
-                    notificationEnabled
+                    collectionId, order, notificationEnabled
                 )
             }
         } else null
-        val tcFuture = if (order.take.type.ext.isCollection) {
+
+        val bidCollectionUpdateFuture = if (order.take.type.ext.isCollection) {
             async {
                 val address = ContractAddressConverter.convert(blockchain, takeAssetExt.contract)
                 enrichmentCollectionEventService.onCollectionBestBidOrderUpdate(address, order, notificationEnabled)
             }
         } else null
 
-        mFuture?.await()
-        tFuture?.await()
-        oFuture?.await()
-        mcFuture?.await()
-        tcFuture?.await()
+        sellUpdateFuture?.await()
+        bidUpdateFuture?.await()
+        sellCollectionUpdateFuture?.await()
+        bidCollectionUpdateFuture?.await()
+
         val event = OrderUpdateEventDto(
             eventId = UUID.randomUUID().toString(),
             orderId = order.id,
@@ -100,7 +94,9 @@ class EnrichmentOrderEventService(
         try {
             call()
         } catch (ex: WebClientResponseProxyException) {
-            logger.warn("Received NOT_FOUND code from client during order updating, details: {}, message: {}", ex.data, ex.message)
+            logger.warn(
+                "Received NOT_FOUND code from client during order update: {}, message: {}", ex.data, ex.message
+            )
         }
     }
 
