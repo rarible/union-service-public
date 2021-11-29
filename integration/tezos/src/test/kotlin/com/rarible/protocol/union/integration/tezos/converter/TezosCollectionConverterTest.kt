@@ -19,7 +19,7 @@ class TezosCollectionConverterTest {
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.name).isEqualTo(dto.name)
         assertThat(converted.symbol).isEqualTo(dto.symbol)
-        assertThat(converted.type).isEqualTo(CollectionDto.Type.TEZOS)
+        assertThat(converted.type).isEqualTo(CollectionDto.Type.TEZOS_NFT)
         assertThat(converted.owner!!.value).isEqualTo(dto.owner!!)
         assertThat(converted.features.map { it.name }).isEqualTo(dto.features.map { it.name })
     }
