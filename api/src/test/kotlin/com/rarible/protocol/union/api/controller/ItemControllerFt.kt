@@ -45,14 +45,11 @@ import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.http.HttpStatus
 import org.springframework.web.client.RestTemplate
-import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
 import java.math.BigInteger
-import java.net.URI
 
 @FlowPreview
 @IntegrationTest

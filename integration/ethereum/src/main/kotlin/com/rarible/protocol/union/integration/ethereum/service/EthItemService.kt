@@ -3,7 +3,6 @@ package com.rarible.protocol.union.integration.ethereum.service
 import com.rarible.core.apm.CaptureSpan
 import com.rarible.protocol.nft.api.client.NftItemControllerApi
 import com.rarible.protocol.union.core.continuation.page.Page
-import com.rarible.protocol.union.core.model.UnionMedia
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.service.ItemService
@@ -51,16 +50,6 @@ open class EthItemService(
     override suspend fun getItemMetaById(itemId: String): UnionMeta {
         val meta = itemControllerApi.getNftItemMetaById(itemId).awaitFirst()
         return EthItemConverter.convert(meta)
-    }
-
-    override suspend fun getItemImageById(itemId: String): UnionMedia {
-        val meta = itemControllerApi.getNftItemMetaById(itemId).awaitFirst()
-        return UnionMedia(url = meta.image?.url?.get("ORIGINAL"))
-    }
-
-    override suspend fun getItemAnimationById(itemId: String): UnionMedia {
-        val meta = itemControllerApi.getNftItemMetaById(itemId).awaitFirst()
-        return UnionMedia(url = meta.animation?.url?.get("ORIGINAL"))
     }
 
     override suspend fun resetItemMeta(itemId: String) {

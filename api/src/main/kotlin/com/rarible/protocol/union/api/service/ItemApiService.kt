@@ -2,13 +2,17 @@ package com.rarible.protocol.union.api.service
 
 import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.core.continuation.page.Page
-import com.rarible.protocol.union.core.model.UnionMedia
+import com.rarible.protocol.union.core.model.UnionImageProperties
 import com.rarible.protocol.union.core.model.UnionItem
+import com.rarible.protocol.union.core.model.UnionMedia
+import com.rarible.protocol.union.core.model.UnionMetaContent
+import com.rarible.protocol.union.core.model.UnionVideoProperties
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.ItemsDto
+import com.rarible.protocol.union.dto.MetaContentDto
 import com.rarible.protocol.union.enrichment.meta.IpfsUrlResolver
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
@@ -44,20 +48,18 @@ class ItemApiService(
     }
 
     suspend fun image(itemId: ItemIdDto): UnionMedia {
-        return media { router.getService(itemId.blockchain).getItemImageById(itemId.value) }
+        val content = getOriginContent(itemId).find { it.properties is UnionImageProperties }
+        return UnionMedia(content?.url.let { ipfsUrlResolver.resolveRealUrl(it!!) }, null, null)
     }
 
     suspend fun animation(itemId: ItemIdDto): UnionMedia {
-        return media { router.getService(itemId.blockchain).getItemAnimationById(itemId.value) }
+        val content = getOriginContent(itemId).find { it.properties is UnionVideoProperties }
+        return UnionMedia(content?.url.let { ipfsUrlResolver.resolveRealUrl(it!!) }, null, null)
     }
 
-    private suspend fun media(action: suspend () -> UnionMedia): UnionMedia {
-        val result = action()
-        return when {
-            result.url?.isNotEmpty() == true -> result.copy(url = ipfsUrlResolver.resolveRealUrl(result.url!!))
-            // TODO: set image/animation content when it would be implemented in eth
-            else -> result
-        }
+    private suspend fun getOriginContent(itemId: ItemIdDto): List<UnionMetaContent> {
+        val meta = router.getService(itemId.blockchain).getItemMetaById(itemId.value)
+        return meta.content.filter { it.representation == MetaContentDto.Representation.ORIGINAL }
     }
 
     private suspend fun enrich(unionItems: List<UnionItem>): List<ItemDto> {

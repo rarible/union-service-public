@@ -2,7 +2,6 @@ package com.rarible.protocol.union.core.service.dummy
 
 import com.rarible.protocol.union.core.continuation.page.Page
 import com.rarible.protocol.union.core.exception.UnionNotFoundException
-import com.rarible.protocol.union.core.model.UnionMedia
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.service.ItemService
@@ -34,14 +33,6 @@ class DummyItemService(
 
     override suspend fun getItemMetaById(itemId: String): UnionMeta {
         throw UnionNotFoundException("Meta for Item [$itemId] not found, ${blockchain.name} is not available")
-    }
-
-    override suspend fun getItemImageById(itemId: String): UnionMedia {
-        throw UnionNotFoundException("Item Image [$itemId] not found, ${blockchain.name} is not available")
-    }
-
-    override suspend fun getItemAnimationById(itemId: String): UnionMedia {
-        throw UnionNotFoundException("Item Animation [$itemId] not found, ${blockchain.name} is not available")
     }
 
     override suspend fun resetItemMeta(itemId: String) {

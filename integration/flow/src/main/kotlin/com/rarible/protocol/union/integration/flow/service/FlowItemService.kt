@@ -3,7 +3,6 @@ package com.rarible.protocol.union.integration.flow.service
 import com.rarible.core.apm.CaptureSpan
 import com.rarible.protocol.flow.nft.api.client.FlowNftItemControllerApi
 import com.rarible.protocol.union.core.continuation.page.Page
-import com.rarible.protocol.union.core.model.UnionMedia
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.service.ItemService
@@ -54,14 +53,6 @@ open class FlowItemService(
     override suspend fun getItemMetaById(itemId: String): UnionMeta {
         val meta = flowNftItemControllerApi.getNftItemMetaById(itemId).awaitFirst()
         return FlowItemConverter.convert(meta)
-    }
-
-    override suspend fun getItemImageById(itemId: String): UnionMedia {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun getItemAnimationById(itemId: String): UnionMedia {
-        TODO("Not yet implemented")
     }
 
     override suspend fun resetItemMeta(itemId: String) {
