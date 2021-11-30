@@ -66,14 +66,14 @@ open class TezosOrderService(
         size: Int
     ): Slice<OrderDto> {
         val orders = orderControllerApi.getOrderBidsByItem(
-            start,
-            end,
             contract,
             UnionConverter.convertToBigInteger(tokenId).toString(),
             maker,
             origin,
             currencyAddress,
             tezosOrderConverter.convert(status),
+            start,
+            end,
             size,
             continuation
         ).awaitFirst()
@@ -147,14 +147,14 @@ open class TezosOrderService(
         size: Int
     ): Slice<OrderDto> {
         val orders = orderControllerApi.getSellOrderByItem(
-            null,
-            null,
             contract,
             UnionConverter.convertToBigInteger(tokenId).toString(),
             maker,
             origin,
             currencyId,
             tezosOrderConverter.convert(status),
+            null,
+            null,
             size,
             continuation
         ).awaitFirst()
