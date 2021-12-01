@@ -4,6 +4,10 @@ protocol-union-api:
     jvm:
       xmx_megabytes: 1024
       max_direct_memory_megabytes: 256
+  networks:
+    common:
+    - '{{ include "service.appEnv" $ }}-backend'
+    - proxy
 
 protocol-union-listener:
   resources:
