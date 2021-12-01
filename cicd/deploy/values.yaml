@@ -1,6 +1,6 @@
 protocol-union-api:
   image:
-    repository: protocol-union-api
+    repository: union-service-api
   replicas: 2
   environments:
     APPLICATION_ENVIRONMENT: '{{ include "service.appEnv" $ }}'
@@ -19,11 +19,11 @@ protocol-union-api:
   networks:
     common:
     - '{{ include "service.appEnv" $ }}-backend'
-    - proxy
+    - proxy-staging
 
 protocol-union-listener:
   image:
-    repository: protocol-union-listener
+    repository: union-service-listener
   environments:
     APPLICATION_ENVIRONMENT: '{{ include "service.appEnv" $ }}'
     CONSUL_ROOT_PATH: '{{ include "service.appEnv" $ }}/protocol/union'
