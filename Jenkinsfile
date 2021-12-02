@@ -1,4 +1,4 @@
-@Library('shared-library@v21.11.30-1')
+@Library('shared-library@v21.12.2-1') _
 
 def pipelineConfig = [
     "stackName": "protocol-union",
