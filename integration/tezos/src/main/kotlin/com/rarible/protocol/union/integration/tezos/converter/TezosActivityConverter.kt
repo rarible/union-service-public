@@ -272,6 +272,8 @@ class TezosActivityConverter(
             com.rarible.protocol.union.dto.ActivityTypeDto.BID -> OrderActivityFilterAllTypeDto.BID
             com.rarible.protocol.union.dto.ActivityTypeDto.LIST -> OrderActivityFilterAllTypeDto.LIST
             com.rarible.protocol.union.dto.ActivityTypeDto.SELL -> OrderActivityFilterAllTypeDto.MATCH
+            com.rarible.protocol.union.dto.ActivityTypeDto.CANCEL_BID -> OrderActivityFilterAllTypeDto.CANCEL_BID
+            com.rarible.protocol.union.dto.ActivityTypeDto.CANCEL_LIST -> OrderActivityFilterAllTypeDto.CANCEL_LIST
             else -> null
         }
     }
