@@ -76,7 +76,7 @@ object TezosItemConverter {
     fun convert(attr: NftItemAttributeDto) = when {
         attr.type == "date" && attr.value?.toLongOrNull() != null -> MetaAttributeDto(
             key = attr.key,
-            value = Instant.ofEpochSecond(attr.value?.toLong()!!).toString(),
+            value = Instant.ofEpochMilli(attr.value?.safeMs()!!).toString(),
             type = "string",
             format = "date-time"
         )
@@ -97,5 +97,13 @@ object TezosItemConverter {
             account = UnionAddressConverter.convert(blockchain, source.account),
             value = source.value
         )
+    }
+
+    private fun String.safeMs(): Long {
+        val ms = this.toLong()
+        return when {
+            ms <= Int.MAX_VALUE -> ms * 1000
+            else -> ms
+        }
     }
 }

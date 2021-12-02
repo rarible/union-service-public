@@ -97,4 +97,31 @@ class TezosItemConverterTest {
         assertThat(converted.attributes.find { it.key == "louis_was_here" }?.type).isEqualTo("string")
         assertThat(converted.attributes.find { it.key == "louis_was_here" }?.format).isEqualTo("date-time")
     }
+
+    @Test
+    fun `tezos item meta for date type with ms precision`() {
+        val item = randomTezosNftItemDto().copy(
+            meta = NftItemMetaDto(
+                name = "some_nft_meta",
+                description = randomString(),
+                attributes = listOf(
+                    NftItemAttributeDto("key1", "value1"),
+                    NftItemAttributeDto("louis_was_here", "1635935214000", "date")
+                ),
+                image = "url1",
+                animation = "url2"
+            )
+        )
+        val dto = item.meta!!
+
+        val converted = TezosItemConverter.convert(item, BlockchainDto.TEZOS).meta!!
+
+        assertThat(converted.name).isEqualTo(dto.name)
+        assertThat(converted.description).isEqualTo(dto.description)
+        assertThat(converted.content).hasSize(2)
+        assertThat(converted.attributes.find { it.key == "key1" }?.value).isEqualTo("value1")
+        assertThat(converted.attributes.find { it.key == "louis_was_here" }?.value).isEqualTo("2021-11-03T10:26:54Z")
+        assertThat(converted.attributes.find { it.key == "louis_was_here" }?.type).isEqualTo("string")
+        assertThat(converted.attributes.find { it.key == "louis_was_here" }?.format).isEqualTo("date-time")
+    }
 }
