@@ -40,7 +40,7 @@
         <rarible.protocol.currency.version>1.18.2</rarible.protocol.currency.version>
         <rarible.protocol.ethereum.version>1.19.2</rarible.protocol.ethereum.version>
         <rarible.protocol.flow.version>2.1.0</rarible.protocol.flow.version>
-        <rarible.protocol.tezos.version>0.1.13</rarible.protocol.tezos.version>
+        <rarible.protocol.tezos.version>0.1.14</rarible.protocol.tezos.version>
         <rarible.protocol.union.version>1.20.1</rarible.protocol.union.version>
         <dev-jna.version>5.7.0</dev-jna.version>
     </properties>

@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.integration.tezos.converter
 
+import com.rarible.protocol.tezos.dto.NftItemAttributeDto
 import com.rarible.protocol.tezos.dto.NftItemDto
 import com.rarible.protocol.tezos.dto.NftItemMetaDto
 import com.rarible.protocol.tezos.dto.NftItemsDto
@@ -15,6 +16,7 @@ import com.rarible.protocol.union.dto.MetaAttributeDto
 import com.rarible.protocol.union.dto.MetaContentDto
 import com.rarible.protocol.union.dto.RoyaltyDto
 import org.slf4j.LoggerFactory
+import java.time.Instant
 
 object TezosItemConverter {
 
@@ -62,14 +64,7 @@ object TezosItemConverter {
         UnionMeta(
             name = meta.name,
             description = meta.description,
-            attributes = meta.attributes.orEmpty().map {
-                MetaAttributeDto(
-                    key = it.key,
-                    value = it.value,
-                    type = it.type,
-                    format = it.format
-                )
-            },
+            attributes = meta.attributes.orEmpty().map(::convert),
             content = listOfNotNull(
                 meta.image?.let { UnionMetaContent(it, MetaContentDto.Representation.ORIGINAL) },
                 meta.animation?.let { UnionMetaContent(it, MetaContentDto.Representation.ORIGINAL) }
@@ -77,6 +72,22 @@ object TezosItemConverter {
             // TODO TEZOS - implement it
             restrictions = listOf()
         )
+
+    fun convert(attr: NftItemAttributeDto) = when {
+        attr.type == "date" && attr.value?.toLongOrNull() != null -> MetaAttributeDto(
+            key = attr.key,
+            value = Instant.ofEpochMilli(attr.value?.safeMs()!!).toString(),
+            type = "string",
+            format = "date-time"
+        )
+        else -> MetaAttributeDto(
+            key = attr.key,
+            value = attr.value,
+            type = attr.type,
+            format = attr.format
+        )
+    }
+
 
     private fun toRoyalty(
         source: PartDto,
@@ -86,5 +97,13 @@ object TezosItemConverter {
             account = UnionAddressConverter.convert(blockchain, source.account),
             value = source.value
         )
+    }
+
+    private fun String.safeMs(): Long {
+        val ms = this.toLong()
+        return when {
+            ms <= Int.MAX_VALUE -> ms * 1000
+            else -> ms
+        }
     }
 }
