@@ -9,6 +9,7 @@ object CurrencyConverter {
     fun convert(source: CurrencyRateDto): CurrencyUsdRateDto {
         return CurrencyUsdRateDto(
             currencyId = source.fromCurrencyId,
+            symbol = source.toCurrencyId,
             rate = source.rate,
             date = source.date
         )

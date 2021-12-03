@@ -32,6 +32,7 @@ class BestOrderServiceTest {
     private val currencyService: CurrencyService = mockk {
         coEvery { getCurrentRate(any(), any()) } returns CurrencyUsdRateDto(
             currencyId = "test",
+            symbol = "test",
             rate = BigDecimal.ONE,
             date = nowMillis()
         )

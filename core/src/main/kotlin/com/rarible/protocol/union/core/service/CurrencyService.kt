@@ -44,7 +44,7 @@ class CurrencyService(
             cached = fetchRateSafe(blockchain, address, nowMillis())
             if (cached == null) {
                 logger.info("Currency {}:[{}] updated, but doesn't support USD conversion", blockchain.name, address)
-                cached = CurrencyUsdRateDto(address, BigDecimal(-1), nowMillis())
+                cached = CurrencyUsdRateDto(address, address, BigDecimal(-1), nowMillis())
             }
             blockchainCache[address] = cached
         }
