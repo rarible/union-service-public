@@ -8,6 +8,7 @@ import com.rarible.protocol.union.core.service.SignatureService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.BlockchainDto
 import kotlinx.coroutines.reactive.awaitFirst
+import org.apache.commons.lang3.StringUtils
 
 @CaptureSpan(type = "blockchain")
 open class TezosSignatureService(
@@ -23,11 +24,16 @@ open class TezosSignatureService(
         if (publicKey.isNullOrBlank()) {
             throw UnionValidationException("Public key is not specified")
         }
+
+        val edpk = publicKey.substringBefore('_')
+        val prefix = StringUtils.trimToNull(publicKey.substringAfter('_', ""))
+
         val tezosForm = SignatureValidationFormDto(
             address = signer,
-            edpk = publicKey,
+            edpk = edpk,
             signature = signature,
-            message = message
+            message = message,
+            prefix = prefix
         )
         return signatureControllerApi.validate(tezosForm).awaitFirst()
     }
