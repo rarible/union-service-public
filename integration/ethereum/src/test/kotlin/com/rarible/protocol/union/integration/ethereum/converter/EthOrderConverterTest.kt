@@ -1,9 +1,7 @@
 package com.rarible.protocol.union.integration.ethereum.converter
 
 import com.rarible.protocol.dto.OrderCancelDto
-import com.rarible.protocol.dto.OrderRaribleV2DataDto
 import com.rarible.protocol.dto.OrderRaribleV2DataV1Dto
-import com.rarible.protocol.dto.OrderRaribleV2DataV2Dto
 import com.rarible.protocol.dto.OrderSideMatchDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.EthErc20AssetTypeDto
@@ -57,10 +55,14 @@ class EthOrderConverterTest {
         assertThat(converted.cancelled).isEqualTo(dto.cancelled)
         assertThat(converted.createdAt).isEqualTo(dto.createdAt)
         assertThat(converted.lastUpdatedAt).isEqualTo(dto.lastUpdateAt)
-        assertThat(converted.makePrice).isEqualTo(dto.take.valueDecimal!! / dto.make.valueDecimal!!)
+        assertThat(converted.makePrice).isEqualTo(
+            dto.take.valueDecimal!!.setScale(18) / dto.make.valueDecimal!!.setScale(18)
+        )
         assertThat(converted.takePrice).isNull()
         // In mock we are converting price 1 to 1
-        assertThat(converted.makePriceUsd).isEqualTo(dto.take.valueDecimal!! / dto.make.valueDecimal!!)
+        assertThat(converted.makePriceUsd).isEqualTo(
+            dto.take.valueDecimal!!.setScale(18) / dto.make.valueDecimal!!.setScale(18)
+        )
         assertThat(converted.takePriceUsd).isNull()
         val data = converted.data as EthOrderDataLegacyDto
         assertThat(data.fee).isEqualTo(dto.data.fee)
@@ -154,10 +156,14 @@ class EthOrderConverterTest {
         assertThat(converted.cancelled).isEqualTo(dto.cancelled)
         assertThat(converted.createdAt).isEqualTo(dto.createdAt)
         assertThat(converted.lastUpdatedAt).isEqualTo(dto.lastUpdateAt)
-        assertThat(converted.makePrice).isEqualTo(dto.take.valueDecimal!! / dto.make.valueDecimal!!)
+        assertThat(converted.makePrice).isEqualTo(
+            dto.take.valueDecimal!!.setScale(18) / dto.make.valueDecimal!!.setScale(18)
+        )
         assertThat(converted.takePrice).isNull()
         // In mock we are converting price 1 to 1
-        assertThat(converted.makePriceUsd).isEqualTo(dto.take.valueDecimal!! / dto.make.valueDecimal!!)
+        assertThat(converted.makePriceUsd).isEqualTo(
+            dto.take.valueDecimal!!.setScale(18) / dto.make.valueDecimal!!.setScale(18)
+        )
         assertThat(converted.takePriceUsd).isNull()
 
         val data = converted.data as EthOrderDataRaribleV2DataV1Dto
@@ -192,10 +198,14 @@ class EthOrderConverterTest {
         assertThat(converted.cancelled).isEqualTo(dto.cancelled)
         assertThat(converted.createdAt).isEqualTo(dto.createdAt)
         assertThat(converted.lastUpdatedAt).isEqualTo(dto.lastUpdateAt)
-        assertThat(converted.makePrice).isEqualTo(dto.take.valueDecimal!! / dto.make.valueDecimal!!)
+        assertThat(converted.makePrice).isEqualTo(
+            dto.take.valueDecimal!!.setScale(18) / dto.make.valueDecimal!!.setScale(18)
+        )
         assertThat(converted.takePrice).isNull()
         // In mock we are converting price 1 to 1
-        assertThat(converted.makePriceUsd).isEqualTo(dto.take.valueDecimal!! / dto.make.valueDecimal!!)
+        assertThat(converted.makePriceUsd).isEqualTo(
+            dto.take.valueDecimal!!.setScale(18) / dto.make.valueDecimal!!.setScale(18)
+        )
         assertThat(converted.takePriceUsd).isNull()
     }
 
@@ -248,10 +258,14 @@ class EthOrderConverterTest {
         assertThat(converted.cancelled).isEqualTo(dto.cancelled)
         assertThat(converted.createdAt).isEqualTo(dto.createdAt)
         assertThat(converted.lastUpdatedAt).isEqualTo(dto.lastUpdateAt)
-        assertThat(converted.makePrice).isEqualTo(dto.take.valueDecimal!! / dto.make.valueDecimal!!)
+        assertThat(converted.makePrice).isEqualTo(
+            dto.take.valueDecimal!!.setScale(18) / dto.make.valueDecimal!!.setScale(18)
+        )
         assertThat(converted.takePrice).isNull()
         // In mock we are converting price 1 to 1
-        assertThat(converted.makePriceUsd).isEqualTo(dto.take.valueDecimal!! / dto.make.valueDecimal!!)
+        assertThat(converted.makePriceUsd).isEqualTo(
+            dto.take.valueDecimal!!.setScale(18) / dto.make.valueDecimal!!.setScale(18)
+        )
         assertThat(converted.takePriceUsd).isNull()
     }
 

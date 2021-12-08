@@ -14,6 +14,8 @@ import com.rarible.protocol.dto.OrdersPaginationDto
 import com.rarible.protocol.dto.RaribleV2OrderDto
 import com.rarible.protocol.union.core.continuation.page.Slice
 import com.rarible.protocol.union.core.service.CurrencyService
+import com.rarible.protocol.union.core.util.evalMakePrice
+import com.rarible.protocol.union.core.util.evalTakePrice
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.EthOrderCryptoPunksDataDto
 import com.rarible.protocol.union.dto.EthOrderDataLegacyDto
@@ -28,7 +30,6 @@ import com.rarible.protocol.union.dto.PendingOrderCancelDto
 import com.rarible.protocol.union.dto.PendingOrderDto
 import com.rarible.protocol.union.dto.PendingOrderMatchDto
 import com.rarible.protocol.union.dto.PlatformDto
-import com.rarible.protocol.union.dto.ext
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.time.Instant
@@ -56,9 +57,9 @@ class EthOrderConverter(
         val make = EthConverter.convert(order.make, blockchain)
         val take = EthConverter.convert(order.take, blockchain)
         // For BID (make = currency, take - NFT) we're calculating prices for taker
-        val takePrice = if (take.type.ext.isNft) make.value / take.value else null
+        val takePrice = evalTakePrice(make, take)
         // For SELL (make = NFT, take - currency) we're calculating prices for maker
-        val makePrice = if (make.type.ext.isNft) take.value / make.value else null
+        val makePrice = evalMakePrice(make, take)
         // So for USD conversion we are using take.type for MAKE price and vice versa
         val makePriceUsd = currencyService.toUsd(blockchain, take.type, makePrice)
         val takePriceUsd = currencyService.toUsd(blockchain, make.type, takePrice)

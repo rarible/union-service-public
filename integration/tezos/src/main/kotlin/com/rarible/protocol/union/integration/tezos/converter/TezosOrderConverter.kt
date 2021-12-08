@@ -5,6 +5,8 @@ import com.rarible.protocol.tezos.dto.PartDto
 import com.rarible.protocol.union.core.continuation.page.Slice
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.service.CurrencyService
+import com.rarible.protocol.union.core.util.evalMakePrice
+import com.rarible.protocol.union.core.util.evalTakePrice
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
@@ -13,7 +15,6 @@ import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PayoutDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.TezosOrderDataRaribleV2DataV1Dto
-import com.rarible.protocol.union.dto.ext
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.time.Instant
@@ -43,9 +44,10 @@ class TezosOrderConverter(
         val taker = order.taker?.let { UnionAddressConverter.convert(blockchain, it) }
 
         // For BID (make = currency, take - NFT) we're calculating prices for taker
-        val takePrice = if (take.type.ext.isNft) make.value / take.value else null
+        val takePrice = evalTakePrice(make, take)
         // For SELL (make = NFT, take - currency) we're calculating prices for maker
-        val makePrice = if (make.type.ext.isNft) take.value / make.value else null
+        val makePrice = evalMakePrice(make, take)
+
         // So for USD conversion we are using take.type for MAKE price and vice versa
         val makePriceUsd = currencyService.toUsd(blockchain, take.type, makePrice)
         val takePriceUsd = currencyService.toUsd(blockchain, make.type, takePrice)

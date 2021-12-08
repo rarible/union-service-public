@@ -6,6 +6,7 @@ import com.rarible.protocol.dto.FlowOrdersPaginationDto
 import com.rarible.protocol.union.core.continuation.page.Slice
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.service.CurrencyService
+import com.rarible.protocol.union.core.util.evalMakePrice
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.FlowOrderDataV1Dto
 import com.rarible.protocol.union.dto.OrderDto
@@ -39,7 +40,7 @@ class FlowOrderConverter(
         val maker = UnionAddressConverter.convert(blockchain, order.maker)
         val taker = order.taker?.let { UnionAddressConverter.convert(blockchain, it) }
 
-        val makePrice = order.take.value / order.make.value
+        val makePrice = evalMakePrice(make, take)
         val makePriceUsd = currencyService.toUsd(blockchain, take.type, makePrice)
 
         val status = convert(order.status!!)
