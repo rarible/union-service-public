@@ -57,10 +57,8 @@ class EthOrderConverter(
         val take = EthConverter.convert(order.take, blockchain)
         // For BID (make = currency, take - NFT) we're calculating prices for taker
         val takePrice = if (take.type.ext.isNft) make.value / take.value else null
-        logger.info("Order ${orderId}: make=${make.value}/take=${take.value} -> takePrice=${takePrice}")
         // For SELL (make = NFT, take - currency) we're calculating prices for maker
         val makePrice = if (make.type.ext.isNft) take.value / make.value else null
-        logger.info("Order ${orderId}: take=${make.value}/make=${take.value} -> makePrice=${makePrice}")
         // So for USD conversion we are using take.type for MAKE price and vice versa
         val makePriceUsd = currencyService.toUsd(blockchain, take.type, makePrice)
         val takePriceUsd = currencyService.toUsd(blockchain, make.type, takePrice)
