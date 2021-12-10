@@ -7,12 +7,14 @@ import com.rarible.protocol.union.core.continuation.page.Slice
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.service.CurrencyService
 import com.rarible.protocol.union.core.util.evalMakePrice
+import com.rarible.protocol.union.core.util.evalTakePrice
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.FlowOrderDataV1Dto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PlatformDto
+import com.rarible.protocol.union.dto.ext
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
@@ -41,7 +43,9 @@ class FlowOrderConverter(
         val taker = order.taker?.let { UnionAddressConverter.convert(blockchain, it) }
 
         val makePrice = evalMakePrice(make, take)
+        val takePrice = evalTakePrice(make, take)
         val makePriceUsd = currencyService.toUsd(blockchain, take.type, makePrice)
+        val takePriceUsd = currencyService.toUsd(blockchain, make.type, takePrice)
 
         val status = convert(order.status!!)
 
@@ -61,9 +65,9 @@ class FlowOrderConverter(
             createdAt = order.createdAt,
             lastUpdatedAt = order.lastUpdateAt,
             makePrice = makePrice,
-            takePrice = null,
+            takePrice = takePrice,
             makePriceUsd = makePriceUsd,
-            takePriceUsd = null,
+            takePriceUsd = takePriceUsd,
             priceHistory = emptyList(),
             data = convert(order.data, blockchain),
             salt = ""// Not supported on Flow
