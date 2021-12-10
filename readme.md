@@ -21,7 +21,7 @@ Protocol SDK is available on GitHub: [https://github.com/rarible/sdk](https://gi
 
 ## Suggestions
 
-You are welcome to suggest features and report bugs found! You can do it here: [https://github.com/rarible/protocol/issues](https://github.com/rarible/protocol/issues)
+You are welcome to [suggest features](https://github.com/rarible/protocol/discussions) and [report bugs found](https://github.com/rarible/protocol/issues)!
 
 ## License
 
