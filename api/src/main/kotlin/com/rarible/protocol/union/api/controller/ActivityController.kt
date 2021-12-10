@@ -1,7 +1,11 @@
 package com.rarible.protocol.union.api.controller
 
+import com.rarible.protocol.union.api.service.ActivityApiService
 import com.rarible.protocol.union.api.service.extractItemId
 import com.rarible.protocol.union.core.continuation.ActivityContinuation
+import com.rarible.protocol.union.core.continuation.CombinedContinuation
+import com.rarible.protocol.union.core.continuation.page.ArgPaging
+import com.rarible.protocol.union.core.continuation.page.ArgSlice
 import com.rarible.protocol.union.core.continuation.page.PageSize
 import com.rarible.protocol.union.core.continuation.page.Paging
 import com.rarible.protocol.union.core.continuation.page.Slice
@@ -25,7 +29,8 @@ import java.time.Instant
 
 @RestController
 class ActivityController(
-    private val router: BlockchainRouter<ActivityService>
+    private val router: BlockchainRouter<ActivityService>,
+    private val activityApiService: ActivityApiService
 ) : ActivityControllerApi {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -34,20 +39,25 @@ class ActivityController(
         type: List<ActivityTypeDto>,
         blockchains: List<BlockchainDto>?,
         continuation: String?,
+        cursor: String?,
         size: Int?,
         sort: ActivitySortDto?
     ): ResponseEntity<ActivitiesDto> {
         val safeSize = PageSize.ACTIVITY.limit(size)
-        val blockchainPages = router.executeForAll(blockchains) {
-            it.getAllActivities(type, continuation, safeSize, sort)
+        val (result, slicesCounter) = if (null == cursor) {
+            val blockchainPages = router.executeForAll(blockchains) {
+                it.getAllActivities(type, continuation, safeSize, sort)
+            }
+            val dto = merge(blockchainPages, safeSize, sort)
+            Pair(dto, blockchainPages.map { it.entities.size })
+        } else {
+            val slices = activityApiService.getAllActivities(type, blockchains, cursor, safeSize, sort)
+            val dto = toDtoWithCursor(ArgPaging(continuationFactory(sort), slices).getSlice(safeSize))
+            Pair(dto, slices.map { it.slice.entities.size })
         }
-
-        val result = merge(blockchainPages, safeSize, sort)
-
         logger.info("Response for getAllActivities(type={}, blockchains={}, continuation={}, size={}, sort={}):" +
-                " Slice(size={}, continuation={}) from blockchain slices {} ",
-            type, blockchains, continuation, size, sort,
-            result.activities.size, result.continuation, blockchainPages.map { it.entities.size }
+                " Slice(size={}, continuation={}, cursor={}) from blockchain slices {} ",
+            type, blockchains, continuation, size, sort, result.activities.size, result.continuation, result.cursor, slicesCounter
         )
         return ResponseEntity.ok(result)
     }
@@ -56,20 +66,27 @@ class ActivityController(
         type: List<ActivityTypeDto>,
         collection: String,
         continuation: String?,
+        cursor: String?,
         size: Int?,
         sort: ActivitySortDto?
     ): ResponseEntity<ActivitiesDto> {
         val safeSize = PageSize.ACTIVITY.limit(size)
         val collectionAddress = IdParser.parseContract(collection)
-        val result = router.getService(collectionAddress.blockchain)
-            .getActivitiesByCollection(type, collectionAddress.value, continuation, safeSize, sort)
 
-        logger.info(
-            "Response for getActivitiesByCollection(type={}, collection={}, continuation={}, size={}, sort={}): " +
-                    "Slice(size={}, continuation={}) ",
-            type, collection, continuation, size, sort, result.entities.size, result.continuation
-        )
-        return ResponseEntity.ok(toDto(result))
+        if (null == cursor) {
+            val result = router.getService(collectionAddress.blockchain)
+                .getActivitiesByCollection(type, collectionAddress.value, continuation, safeSize, sort)
+
+            logger.info(
+                "Response for getActivitiesByCollection(type={}, collection={}, continuation={}, size={}, sort={}): " +
+                        "Slice(size={}, continuation={}) ",
+                type, collection, continuation, size, sort, result.entities.size, result.continuation
+            )
+            return ResponseEntity.ok(toDto(result))
+        } else {
+            //TODO
+            return ResponseEntity.ok(null)
+        }
     }
 
     override suspend fun getActivitiesByItem(
@@ -78,6 +95,7 @@ class ActivityController(
         contract: String?,
         tokenId: String?,
         continuation: String?,
+        cursor: String?,
         size: Int?,
         sort: ActivitySortDto?
     ): ResponseEntity<ActivitiesDto> {
@@ -85,15 +103,28 @@ class ActivityController(
 
         val fullItemId = extractItemId(contract, tokenId, itemId)
 
-        val result = router.getService(fullItemId.blockchain)
-            .getActivitiesByItem(type, fullItemId.contract, fullItemId.tokenId.toString(), continuation, safeSize, sort)
 
-        logger.info(
-            "Response for getActivitiesByItem(type={}, itemId={} continuation={}, size={}, sort={}): " +
-                    "Slice(size={}, continuation={}) ",
-            type, fullItemId.fullId(), continuation, size, sort, result.entities.size, result.continuation
-        )
-        return ResponseEntity.ok(toDto(result))
+        if (null == cursor) {
+            val result = router.getService(fullItemId.blockchain)
+                .getActivitiesByItem(
+                    type,
+                    fullItemId.contract,
+                    fullItemId.tokenId.toString(),
+                    continuation,
+                    safeSize,
+                    sort
+                )
+
+            logger.info(
+                "Response for getActivitiesByItem(type={}, itemId={} continuation={}, size={}, sort={}): " +
+                        "Slice(size={}, continuation={}) ",
+                type, fullItemId.fullId(), continuation, size, sort, result.entities.size, result.continuation
+            )
+            return ResponseEntity.ok(toDto(result))
+        } else {
+            //TODO
+            return ResponseEntity.ok(null)
+        }
     }
 
     override suspend fun getActivitiesByUser(
@@ -102,35 +133,41 @@ class ActivityController(
         from: Instant?,
         to: Instant?,
         continuation: String?,
+        cursor: String?,
         size: Int?,
         sort: ActivitySortDto?
     ): ResponseEntity<ActivitiesDto> {
         val safeSize = PageSize.ACTIVITY.limit(size)
-        val groupedByBlockchain = user.map { IdParser.parseAddress(it) }
-            // Since user specified here with blockchain group, we need to route request to all subchains
-            .flatMap { address -> address.blockchainGroup.subchains().map { it to address.value } }
-            .groupBy({ it.first }, { it.second })
+        if (null == cursor) {
+            val groupedByBlockchain = user.map { IdParser.parseAddress(it) }
+                // Since user specified here with blockchain group, we need to route request to all subchains
+                .flatMap { address -> address.blockchainGroup.subchains().map { it to address.value } }
+                .groupBy({ it.first }, { it.second })
 
-        val blockchainPages = coroutineScope {
-            groupedByBlockchain.map {
-                val blockchain = it.key
-                val blockchainUsers = it.value
-                async {
-                    router.getService(blockchain)
-                        .getActivitiesByUser(type, blockchainUsers, from, to, continuation, safeSize, sort)
+            val blockchainPages = coroutineScope {
+                groupedByBlockchain.map {
+                    val blockchain = it.key
+                    val blockchainUsers = it.value
+                    async {
+                        router.getService(blockchain)
+                            .getActivitiesByUser(type, blockchainUsers, from, to, continuation, safeSize, sort)
+                    }
                 }
-            }
-        }.awaitAll()
+            }.awaitAll()
 
-        val result = merge(blockchainPages, safeSize, sort)
+            val result = merge(blockchainPages, safeSize, sort)
 
-        logger.info("Response for getActivitiesByUser(type={}, users={}, continuation={}, size={}, sort={}):" +
-                " Slice(size={}, continuation={}) from user slices {} ",
-            type, user, continuation, size, sort,
-            result.activities.size, result.continuation, blockchainPages.map { it.entities.size }
-        )
+            logger.info("Response for getActivitiesByUser(type={}, users={}, continuation={}, size={}, sort={}):" +
+                    " Slice(size={}, continuation={}) from user slices {} ",
+                type, user, continuation, size, sort,
+                result.activities.size, result.continuation, blockchainPages.map { it.entities.size }
+            )
 
-        return ResponseEntity.ok(result)
+            return ResponseEntity.ok(result)
+        } else {
+            //TODO
+            return ResponseEntity.ok(null)
+        }
     }
 
     private fun merge(
@@ -148,13 +185,33 @@ class ActivityController(
             blockchainPages.flatMap { it.entities }
         ).getSlice(size)
 
-        return toDto(combinedSlice)
+        return toDto(combinedSlice, cursor(blockchainPages))
     }
 
-    private fun toDto(slice: Slice<ActivityDto>): ActivitiesDto {
+
+    fun cursor(blockchainPages: List<Slice<ActivityDto>>): String {
+        val m = blockchainPages.associateBy({ it.entities.first().id.blockchain.name }, { it.continuation ?: ArgSlice.COMPLETED })
+        return CombinedContinuation(m).toString()
+    }
+
+    private fun toDto(slice: Slice<ActivityDto>, cursor: String? = null): ActivitiesDto {
         return ActivitiesDto(
             continuation = slice.continuation,
+            cursor = cursor,
             activities = slice.entities
         )
+    }
+
+    private fun toDtoWithCursor(slice: Slice<ActivityDto>): ActivitiesDto {
+        return ActivitiesDto(
+            continuation = null,
+            cursor = slice.continuation,
+            activities = slice.entities
+        )
+    }
+
+    private fun continuationFactory(sort: ActivitySortDto?) = when (sort) {
+        ActivitySortDto.EARLIEST_FIRST -> ActivityContinuation.ByLastUpdatedAndIdAsc
+        ActivitySortDto.LATEST_FIRST, null -> ActivityContinuation.ByLastUpdatedAndIdDesc
     }
 }

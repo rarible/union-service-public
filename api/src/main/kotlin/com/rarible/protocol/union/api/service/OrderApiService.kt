@@ -65,6 +65,25 @@ class OrderApiService(
         ).getSlice(size)
     }
 
+    suspend fun getOrdersAll(
+        blockchains: List<BlockchainDto>?,
+        platform: PlatformDto?,
+        origin: String?,
+        continuation: String?,
+        size: Int
+    ): Slice<OrderDto> {
+        val evaluatedBlockchains = if (blockchains == null || blockchains.isEmpty()) {
+            router.enabledBlockchains
+        } else {
+            blockchains.filter(router.enabledBlockchains::contains)
+        }.map(BlockchainDto::name)
+        val slices = getOrdersByBlockchains(continuation, evaluatedBlockchains) { blockchain, continuation ->
+            val blockDto = BlockchainDto.valueOf(blockchain)
+            router.getService(blockDto).getOrdersAll(platform, origin, continuation, size)
+        }
+        return ArgPaging(OrderContinuation.ByLastUpdatedAndId, slices).getSlice(size)
+    }
+
     suspend fun getOrderBidsByItem(
         blockchain: BlockchainDto,
         platform: PlatformDto?,
@@ -118,6 +137,27 @@ class OrderApiService(
                         ArgSlice(currency, currencyContinuation, Slice(null, emptyList()))
                     } else {
                         ArgSlice(currency, currencyContinuation, clientCall(currency, currencyContinuation))
+                    }
+                }
+            }
+        }.awaitAll()
+    }
+
+    private suspend fun getOrdersByBlockchains(
+        continuation: String?,
+        blockchains: Collection<String>,
+        clientCall: suspend (blockchain: String, continuation: String?) -> Slice<OrderDto>
+    ): List<ArgSlice<OrderDto>> {
+        val currentContinuation = CombinedContinuation.parse(continuation)
+        return coroutineScope {
+            blockchains.map { blockchain ->
+                async {
+                    val blockchainContinuation = currentContinuation.continuations[blockchain]
+                    // For completed blockchain we do not request orders
+                    if (blockchainContinuation == ArgSlice.COMPLETED) {
+                        ArgSlice(blockchain, blockchainContinuation, Slice(null, emptyList()))
+                    } else {
+                        ArgSlice(blockchain, blockchainContinuation, clientCall(blockchain, blockchainContinuation))
                     }
                 }
             }

@@ -15,7 +15,7 @@ class BlockchainRouter<T : BlockchainService>(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     // Enabled blockchains, executeForAll should consider this set
-    private val enabledBlockchains = blockchains.toSet()
+    val enabledBlockchains = blockchains.toSet()
 
     // All services, include dummy for disabled blockchains - for getService method
     private val blockchainServices = services.associateBy { it.blockchain }
