@@ -39,10 +39,10 @@ class TezosOrderConverterTest {
         assertThat(converted.createdAt).isEqualTo(dto.createdAt)
         assertThat(converted.lastUpdatedAt).isEqualTo(dto.lastUpdateAt)
         assertThat(converted.takePrice).isNull()
-        assertThat(converted.makePrice).isEqualTo(converted.take.value / converted.make.value)
+        assertThat(converted.makePrice).isEqualTo(converted.take.value.setScale(18) / converted.make.value.setScale(18))
         assertThat(converted.takePriceUsd).isNull()
         // In mock we are converting price 1 to 1
-        assertThat(converted.makePriceUsd).isEqualTo(dto.take.value / dto.make.value)
+        assertThat(converted.makePriceUsd).isEqualTo(dto.take.value.setScale(18) / dto.make.value.setScale(18))
 
         val data = converted.data as TezosOrderDataRaribleV2DataV1Dto
         assertThat(data.makerEdpk).isEqualTo(dto.makerEdpk)

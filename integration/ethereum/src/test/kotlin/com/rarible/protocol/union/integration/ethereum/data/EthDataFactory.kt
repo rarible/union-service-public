@@ -459,6 +459,7 @@ fun randomEthCollectionDto(id: Address): NftCollectionDto {
         supportsLazyMint = true
     )
 }
+
 fun randomEthAuctionDto() = randomEthAuctionDto(randomEthItemId())
 fun randomEthAuctionDto(itemId: ItemIdDto): AuctionDto {
     return RaribleAuctionV1Dto(
