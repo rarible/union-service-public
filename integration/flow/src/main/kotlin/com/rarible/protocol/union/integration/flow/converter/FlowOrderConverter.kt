@@ -12,6 +12,7 @@ import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PlatformDto
+import com.rarible.protocol.union.dto.ext
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
@@ -38,9 +39,13 @@ class FlowOrderConverter(
 
         val maker = UnionAddressConverter.convert(blockchain, order.maker)
         val taker = order.taker?.let { UnionAddressConverter.convert(blockchain, it) }
-
-        val makePrice = order.take.value / order.make.value
+        // For BID (make = currency, take - NFT) we're calculating prices for taker
+        val takePrice = if (take.type.ext.isNft) make.value / take.value else null
+        // For SELL (make = NFT, take - currency) we're calculating prices for maker
+        val makePrice = if (make.type.ext.isNft) take.value / make.value else null
+        // So for USD conversion we are using take.type for MAKE price and vice versa
         val makePriceUsd = currencyService.toUsd(blockchain, take.type, makePrice)
+        val takePriceUsd = currencyService.toUsd(blockchain, make.type, takePrice)
 
         val status = convert(order.status!!)
 
@@ -60,9 +65,9 @@ class FlowOrderConverter(
             createdAt = order.createdAt,
             lastUpdatedAt = order.lastUpdateAt,
             makePrice = makePrice,
-            takePrice = null,
+            takePrice = takePrice,
             makePriceUsd = makePriceUsd,
-            takePriceUsd = null,
+            takePriceUsd = takePriceUsd,
             priceHistory = emptyList(),
             data = convert(order.data, blockchain),
             salt = ""// Not supported on Flow
