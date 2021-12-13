@@ -104,7 +104,7 @@ class ConsumerFactory(
                 properties = daemonWorkerProperties,
                 eventHandler = BlockchainEventHandlerWrapper(handler),
                 meterRegistry = meterRegistry,
-                workerName = "${blockchain.name.toLowerCase()}-${entityType}-$it"
+                workerName = "${blockchain.name.lowercase()}-${entityType}-$it"
             )
         }
         return BatchedConsumerWorker(workerSet)

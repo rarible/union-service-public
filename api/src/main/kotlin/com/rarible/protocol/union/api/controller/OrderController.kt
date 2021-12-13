@@ -20,6 +20,7 @@ import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.group
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.dto.subchains
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
@@ -123,6 +124,7 @@ class OrderController(
 
     //--------- TODO UNION - this method should be implemented with currencies, like getBidsByItem ---------//
     // For now it is hidden from openapi since nobody using it
+    @ExperimentalCoroutinesApi
     @GetMapping(
         value = ["/v0.1/orders/bids/byMaker"],
         produces = ["application/json"]

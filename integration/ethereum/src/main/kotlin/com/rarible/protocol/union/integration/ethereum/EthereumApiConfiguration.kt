@@ -41,7 +41,7 @@ import org.springframework.context.annotation.Import
 @EnableConfigurationProperties(value = [EthereumIntegrationProperties::class])
 class EthereumApiConfiguration {
 
-    private val ethereum = BlockchainDto.ETHEREUM.name.toLowerCase()
+    private val ethereum = BlockchainDto.ETHEREUM.name.lowercase()
 
     @Bean
     fun ethereumBlockchain(): BlockchainDto {

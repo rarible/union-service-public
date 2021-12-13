@@ -72,7 +72,7 @@ class CurrencyServiceTest {
         val address = randomString()
         mockCurrency(blockchain, address, rate, BigDecimal.ONE)
 
-        val at = nowMillis().minusSeconds(60 * 29)
+        val at = nowMillis().minusSeconds(60 * 29L)
 
         val assetType = EthErc20AssetTypeDto(ContractAddressConverter.convert(blockchain, address))
         val usdRate1 = currencyService.toUsd(blockchain, assetType, BigDecimal.ONE, at)
@@ -93,11 +93,11 @@ class CurrencyServiceTest {
         val address = randomString()
         mockCurrency(blockchain, address, rate, BigDecimal.ONE)
 
-        val at = nowMillis().minusSeconds(60 * 29)
+        val at = nowMillis().minusSeconds(60 * 29L)
 
         val assetType = EthErc20AssetTypeDto(ContractAddressConverter.convert(blockchain, address))
         val usdRate1 = currencyService.toUsd(blockchain, assetType, BigDecimal.ONE, at)
-        val usdRate2 = currencyService.toUsd(blockchain, assetType, BigDecimal.ONE, at.minusSeconds(2 * 60))
+        val usdRate2 = currencyService.toUsd(blockchain, assetType, BigDecimal.ONE, at.minusSeconds(2 * 60L))
 
         // Second request should return rate == 1
         assertThat(usdRate1).isEqualTo(rate)

@@ -22,7 +22,6 @@ import com.rarible.protocol.union.integration.ethereum.service.EthItemService
 import com.rarible.protocol.union.integration.ethereum.service.EthOrderService
 import com.rarible.protocol.union.integration.ethereum.service.EthOwnershipService
 import com.rarible.protocol.union.integration.ethereum.service.EthSignatureService
-import com.rarible.protocol.union.integration.ethereum.service.EthereumAuctionService
 import com.rarible.protocol.union.integration.ethereum.service.PolygonActivityService
 import com.rarible.protocol.union.integration.ethereum.service.PolygonAuctionService
 import com.rarible.protocol.union.integration.ethereum.service.PolygonCollectionService
@@ -42,7 +41,7 @@ import org.springframework.context.annotation.Import
 @EnableConfigurationProperties(value = [PolygonIntegrationProperties::class])
 class PolygonApiConfiguration {
 
-    private val polygon = BlockchainDto.POLYGON.name.toLowerCase()
+    private val polygon = BlockchainDto.POLYGON.name.lowercase()
 
     @Bean
     fun polygonBlockchain(): BlockchainDto {

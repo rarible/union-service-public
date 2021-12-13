@@ -35,7 +35,7 @@ object EthOwnershipConverter {
             ),
             value = source.value,
             createdAt = source.date,
-            creators = source.creators.map { EthConverter.convertToCreator(it, blockchain) },
+            creators = (source.creators ?: emptyList()).map { EthConverter.convertToCreator(it, blockchain) },
             lazyValue = source.lazyValue,
             pending = source.pending.map { convert(it, blockchain) }
         )

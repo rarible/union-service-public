@@ -35,7 +35,7 @@ class FlowApiConfiguration(
     private val properties: FlowIntegrationProperties
 ) {
 
-    private val flow = BlockchainDto.FLOW.name.toLowerCase()
+    private val flow = BlockchainDto.FLOW.name.lowercase()
 
     @Bean
     fun flowBlockchain(): BlockchainDto {

@@ -186,7 +186,7 @@ object EthConverter {
     fun convert(source: com.rarible.protocol.dto.AuctionBidDto, blockchain: BlockchainDto): AuctionBidDto {
         return when (source) {
             is com.rarible.protocol.dto.RaribleAuctionV1BidV1Dto -> RaribleAuctionV1BidV1Dto(
-                buyer = source.buyer?.let { convert(it, blockchain) },
+                buyer = convert(source.buyer, blockchain),
                 amount = source.amount,
                 data = RaribleAuctionV1BidDataV1Dto(
                     originFees = source.data.originFees.map { convertToPayout(it, blockchain) },

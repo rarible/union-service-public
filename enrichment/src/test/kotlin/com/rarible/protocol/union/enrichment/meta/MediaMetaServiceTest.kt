@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test
 @Tag("manual")
 @Disabled
 class MediaMetaServiceTest {
-    private val service = MediaMetaService(MetaProperties("", 5000, 256 * 1024, "http://69.197.181.202:3128"))
+    private val service = MediaMetaService(MetaProperties("", 5000, 256 * 1024L, "http://69.197.181.202:3128"))
 
     @Test
     fun gif() {
