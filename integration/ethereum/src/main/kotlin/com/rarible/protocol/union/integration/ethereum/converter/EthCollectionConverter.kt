@@ -30,7 +30,8 @@ object EthCollectionConverter {
             symbol = source.symbol,
             type = convert(source.type),
             owner = source.owner?.let { EthConverter.convert(it, blockchain) },
-            features = source.features.map { convert(it) }
+            features = source.features.map { convert(it) },
+            minters = source.minters?.let { minters -> minters.map { EthConverter.convert(it, blockchain) } }
         )
     }
 
@@ -62,4 +63,3 @@ object EthCollectionConverter {
     }
 
 }
-

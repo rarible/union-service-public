@@ -30,7 +30,8 @@ object FlowCollectionConverter {
             symbol = source.symbol,
             owner = UnionAddressConverter.convert(blockchain, source.owner),
             type = CollectionDto.Type.FLOW,
-            features = convert(source.features)
+            features = convert(source.features),
+            minters = null // Not supported in Flow yet.
         )
     }
 
@@ -54,4 +55,3 @@ object FlowCollectionConverter {
     }
 
 }
-

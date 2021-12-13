@@ -32,7 +32,8 @@ object TezosCollectionConverter {
             symbol = source.symbol,
             owner = source.owner?.let { UnionAddressConverter.convert(blockchain, it) },
             type = convert(source.type),
-            features = source.features.map { convert(it) }
+            features = source.features.map { convert(it) },
+            minters = source.minters?.let { minters -> minters.map { UnionAddressConverter.convert(blockchain, it) } }
         )
     }
 
@@ -63,4 +64,3 @@ object TezosCollectionConverter {
     }
 
 }
-
