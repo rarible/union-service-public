@@ -9,10 +9,12 @@ import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.UserActivityTypeDto
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import org.springframework.stereotype.Service
+import java.time.Instant
 
 @Service
 class ActivityApiService(
@@ -30,6 +32,24 @@ class ActivityApiService(
         val slices = getActivitiesByBlockchains(cursor, evaluatedBlockchains) { blockchain, continuation ->
             val blockDto = BlockchainDto.valueOf(blockchain)
             router.getService(blockDto).getAllActivities(type, continuation, size, sort)
+        }
+        return slices
+    }
+
+    suspend fun getActivitiesByUser(
+        type: List<UserActivityTypeDto>,
+        groupedByBlockchain: Map<BlockchainDto, List<String>>,
+        from: Instant?,
+        to: Instant?,
+        cursor: String?,
+        safeSize: Int,
+        sort: ActivitySortDto?
+    ): List<ArgSlice<ActivityDto>> {
+        val evaluatedBlockchains = groupedByBlockchain.keys.map { it.name }
+        val slices = getActivitiesByBlockchains(cursor, evaluatedBlockchains) { blockchain, continuation ->
+            val blockDto = BlockchainDto.valueOf(blockchain)
+            val users = groupedByBlockchain[blockDto] ?: listOf()
+            router.getService(blockDto).getActivitiesByUser(type, users, from, to, continuation, safeSize, sort)
         }
         return slices
     }

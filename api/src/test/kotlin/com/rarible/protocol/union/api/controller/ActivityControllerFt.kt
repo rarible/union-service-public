@@ -62,7 +62,7 @@ class ActivityControllerFt : AbstractIntegrationTest() {
         } returns OrderActivitiesDto(null, listOf(orderActivity)).toMono()
 
         val activities = activityControllerApi.getActivitiesByCollection(
-            types, ethCollectionId.fullId(), continuation, null, size, sort
+            types, ethCollectionId.fullId(), continuation, size, sort
         ).awaitFirst()
 
         assertThat(activities.activities).hasSize(1)
@@ -86,7 +86,7 @@ class ActivityControllerFt : AbstractIntegrationTest() {
         } returns FlowActivitiesDto(1, null, listOf(activity)).toMono()
 
         val activities = activityControllerApi.getActivitiesByCollection(
-            types, flowCollectionId.fullId(), continuation, null, null, sort
+            types, flowCollectionId.fullId(), continuation, null, sort
         ).awaitFirst()
 
         val flowItem = activities.activities[0]
@@ -122,7 +122,7 @@ class ActivityControllerFt : AbstractIntegrationTest() {
         } returns NftActivitiesDto(null, listOf(itemActivity)).toMono()
 
         val activities = activityControllerApi.getActivitiesByItem(
-            types, ethItemId.fullId(), null, null, continuation, null, 10000000, sort
+            types, ethItemId.fullId(), null, null, continuation, 10000000, sort
         ).awaitFirst()
 
         assertThat(activities.activities).hasSize(2)
@@ -146,7 +146,7 @@ class ActivityControllerFt : AbstractIntegrationTest() {
         } returns FlowActivitiesDto(1, null, listOf(activity)).toMono()
 
         val activities = activityControllerApi.getActivitiesByItem(
-            types, flowItemId.fullId(), null, null, continuation, null, size, sort
+            types, flowItemId.fullId(), null, null, continuation, size, sort
         ).awaitFirst()
 
         val flowItem = activities.activities[0]
@@ -348,5 +348,65 @@ class ActivityControllerFt : AbstractIntegrationTest() {
         ).awaitFirst()
 
         assertThat(activities.activities).hasSize(3)
+        assertThat(activities.cursor).isNotNull()
+    }
+
+    @Test
+    fun `get activities by user with cursor`() = runBlocking<Unit> {
+        // Only Item-specific activity types specified here, so only NFT-Indexer of Ethereum should be requested
+        val types = listOf(
+            UserActivityTypeDto.TRANSFER_FROM,
+            UserActivityTypeDto.TRANSFER_TO,
+            UserActivityTypeDto.MINT,
+            UserActivityTypeDto.BURN
+        )
+        // Flow and Ethereum user specified - request should be routed only for them, Polygon omitted
+        val userEth = UnionAddressConverter.convert(BlockchainDto.ETHEREUM, randomEthAddress())
+        val userFlow = randomFlowAddress()
+        val size = 4
+
+        val flowActivity = randomFlowCancelListActivityDto()
+        val ethItemActivity = randomEthItemMintActivity()
+        val polygonItemActivity = randomEthItemMintActivity()
+
+        val now = nowMillis()
+        val ethContinuation = "${now.toEpochMilli()}_${randomString()}"
+        val polyContinuation = "${now.toEpochMilli()}_${randomString()}"
+        val flowContinuation = "${now.toEpochMilli()}_${randomInt()}"
+        val cursorArg = CombinedContinuation(
+            mapOf(
+                BlockchainDto.ETHEREUM.toString() to ethContinuation,
+                BlockchainDto.POLYGON.toString() to polyContinuation,
+                BlockchainDto.FLOW.toString() to flowContinuation
+            )
+        )
+
+        coEvery {
+            testEthereumActivityItemApi.getNftActivities(any(), eq(ethContinuation), eq(size), ActivitySortDto.LATEST_FIRST)
+        } returns NftActivitiesDto(null, listOf(ethItemActivity)).toMono()
+
+        coEvery {
+            testPolygonActivityItemApi.getNftActivities(any(), eq(polyContinuation), eq(size), ActivitySortDto.LATEST_FIRST)
+        } returns NftActivitiesDto(null, listOf(polygonItemActivity)).toMono()
+
+        coEvery {
+            testFlowActivityApi.getNftOrderActivitiesByUser(
+                types.map { it.name },
+                listOf(userFlow.value),
+                any(),
+                any(),
+                eq(flowContinuation),
+                eq(size),
+                sort?.name
+            )
+        } returns FlowActivitiesDto(1, null, listOf(flowActivity)).toMono()
+
+        val oneWeekAgo = now.minus(7, ChronoUnit.DAYS)
+        val activities = activityControllerApi.getActivitiesByUser(
+            types, listOf(userEth.fullId(), userFlow.fullId()), oneWeekAgo, now, null, cursorArg.toString(), size, sort
+        ).awaitFirst()
+
+        assertThat(activities.activities).hasSize(3)
+        assertThat(activities.continuation).isNull()
     }
 }
