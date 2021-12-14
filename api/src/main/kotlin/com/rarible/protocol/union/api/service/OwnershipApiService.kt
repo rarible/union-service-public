@@ -40,7 +40,7 @@ class OwnershipApiService(
         cursor: String?,
         safeSize: Int,
     ): List<ArgPage<UnionOwnership>> {
-        val evaluatedBlockchains = router.getEnabledBlockChains(blockchains).map(BlockchainDto::name)
+        val evaluatedBlockchains = router.getEnabledBlockchains(blockchains).map(BlockchainDto::name)
         val slices = getOwnersByBlockchains(cursor, evaluatedBlockchains) { blockchain, continuation ->
             val blockDto = BlockchainDto.valueOf(blockchain)
             router.getService(blockDto).getAllOwnerships(continuation, safeSize)

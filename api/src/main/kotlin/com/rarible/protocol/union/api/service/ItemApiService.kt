@@ -49,7 +49,7 @@ class ItemApiService(
         lastUpdatedFrom: Long?,
         lastUpdatedTo: Long?
     ): List<ArgPage<UnionItem>> {
-        val evaluatedBlockchains = router.getEnabledBlockChains(blockchains).map(BlockchainDto::name)
+        val evaluatedBlockchains = router.getEnabledBlockchains(blockchains).map(BlockchainDto::name)
         val slices = getItemsByBlockchains(cursor, evaluatedBlockchains) { blockchain, continuation ->
             val blockDto = BlockchainDto.valueOf(blockchain)
             router.getService(blockDto).getAllItems(continuation, safeSize, showDeleted, lastUpdatedFrom, lastUpdatedTo)

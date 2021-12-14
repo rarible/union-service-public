@@ -26,7 +26,7 @@ class BlockchainRouter<T : BlockchainService>(
         )
     }
 
-    fun getEnabledBlockChains(blockchains: List<BlockchainDto>?) =
+    fun getEnabledBlockchains(blockchains: List<BlockchainDto>?) =
         if (blockchains == null || blockchains.isEmpty()) {
             enabledBlockchains
         } else {

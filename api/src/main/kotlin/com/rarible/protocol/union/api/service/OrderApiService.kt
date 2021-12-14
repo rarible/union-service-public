@@ -72,7 +72,7 @@ class OrderApiService(
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
-        val evaluatedBlockchains = router.getEnabledBlockChains(blockchains).map(BlockchainDto::name)
+        val evaluatedBlockchains = router.getEnabledBlockchains(blockchains).map(BlockchainDto::name)
         val slices = getOrdersByBlockchains(continuation, evaluatedBlockchains) { blockchain, continuation ->
             val blockDto = BlockchainDto.valueOf(blockchain)
             router.getService(blockDto).getOrdersAll(platform, origin, continuation, size)

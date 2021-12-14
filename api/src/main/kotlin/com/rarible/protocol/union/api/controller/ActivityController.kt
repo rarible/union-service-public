@@ -182,10 +182,14 @@ class ActivityController(
     }
 
 
-    fun cursor(blockchainPages: List<Slice<ActivityDto>>): String {
-        val m = blockchainPages.associateBy({ it.entities.first().id.blockchain.name },
-            { it.continuation ?: ArgSlice.COMPLETED })
-        return CombinedContinuation(m).toString()
+    fun cursor(blockchainPages: List<Slice<ActivityDto>>): String? {
+        if (blockchainPages.isEmpty()) {
+            return null
+        } else {
+            val m = blockchainPages.associateBy({ it.entities.first().id.blockchain.name },
+                { it.continuation ?: ArgSlice.COMPLETED })
+            return CombinedContinuation(m).toString()
+        }
     }
 
     private fun toDto(slice: Slice<ActivityDto>, cursor: String? = null): ActivitiesDto {
