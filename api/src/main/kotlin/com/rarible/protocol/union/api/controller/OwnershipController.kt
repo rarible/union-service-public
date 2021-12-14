@@ -3,8 +3,8 @@ package com.rarible.protocol.union.api.controller
 import com.rarible.protocol.union.api.service.OwnershipApiService
 import com.rarible.protocol.union.api.service.extractItemId
 import com.rarible.protocol.union.core.continuation.OwnershipContinuation
+import com.rarible.protocol.union.core.continuation.page.ArgPaging
 import com.rarible.protocol.union.core.continuation.page.PageSize
-import com.rarible.protocol.union.core.continuation.page.Paging
 import com.rarible.protocol.union.core.service.OwnershipService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -31,25 +31,18 @@ class OwnershipController(
         size: Int?
     ): ResponseEntity<OwnershipsDto> {
         val safeSize = PageSize.OWNERSHIP.limit(size)
-        val blockchainPages = router.executeForAll(blockchains) {
-            it.getAllOwnerships(continuation, safeSize)
-        }
-
-        val total = blockchainPages.map { it.total }.sum()
-
-        val combinedPage = Paging(
-            OwnershipContinuation.ByLastUpdatedAndId,
-            blockchainPages.flatMap { it.entities }
-        ).getPage(safeSize, total)
+        val slices = ownershipApiService.getAllOwnerships(blockchains, continuation, safeSize)
+        val total = slices.map { it.page.total }.sum()
+        val arg = ArgPaging(OwnershipContinuation.ByLastUpdatedAndId, slices.map { it.toSlice() }).getSlice(safeSize)
 
         logger.info("Response for getAllOwnerships(blockchains={}, continuation={}, size={}):" +
                 " Page(size={}, total={}, continuation={}) from blockchain pages {} ",
-            blockchains, continuation, size, combinedPage.entities.size, combinedPage.total,
-            combinedPage.continuation, blockchainPages.map { it.entities.size }
+            blockchains, continuation, slices.size, size, total,
+            arg.continuation, slices.map { it.page.entities.size }
         )
 
-        val enriched = ownershipApiService.enrich(combinedPage)
-        return ResponseEntity.ok(enriched)
+        val result = ownershipApiService.enrich(arg, total)
+        return ResponseEntity.ok(result)
     }
 
     override suspend fun getOwnershipById(

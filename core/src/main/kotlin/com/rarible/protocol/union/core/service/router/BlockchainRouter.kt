@@ -15,7 +15,7 @@ class BlockchainRouter<T : BlockchainService>(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     // Enabled blockchains, executeForAll should consider this set
-    val enabledBlockchains = blockchains.toSet()
+    private val enabledBlockchains = blockchains.toSet()
 
     // All services, include dummy for disabled blockchains - for getService method
     private val blockchainServices = services.associateBy { it.blockchain }
@@ -25,6 +25,13 @@ class BlockchainRouter<T : BlockchainService>(
             "Operation is not supported for '$blockchain', next blockchains available for it: ${blockchainServices.keys}"
         )
     }
+
+    fun getEnabledBlockChains(blockchains: List<BlockchainDto>?) =
+        if (blockchains == null || blockchains.isEmpty()) {
+            enabledBlockchains
+        } else {
+            blockchains.filter(enabledBlockchains::contains)
+        }
 
     suspend fun <R : Any> executeForAll(
         blockchains: Collection<BlockchainDto>?,

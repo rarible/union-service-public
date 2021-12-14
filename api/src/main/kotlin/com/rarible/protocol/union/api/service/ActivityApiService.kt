@@ -28,7 +28,7 @@ class ActivityApiService(
         size: Int,
         sort: ActivitySortDto?
     ): List<ArgSlice<ActivityDto>> {
-        val evaluatedBlockchains = evaluatedBlockchains(blockchains).map(BlockchainDto::name)
+        val evaluatedBlockchains = router.getEnabledBlockChains(blockchains).map(BlockchainDto::name)
         val slices = getActivitiesByBlockchains(cursor, evaluatedBlockchains) { blockchain, continuation ->
             val blockDto = BlockchainDto.valueOf(blockchain)
             router.getService(blockDto).getAllActivities(type, continuation, size, sort)
@@ -73,11 +73,5 @@ class ActivityApiService(
                 }
             }
         }.awaitAll()
-    }
-
-    private fun evaluatedBlockchains(blockchains: List<BlockchainDto>?) = if (blockchains == null || blockchains.isEmpty()) {
-        router.enabledBlockchains
-    } else {
-        blockchains.filter(router.enabledBlockchains::contains)
     }
 }

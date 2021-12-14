@@ -72,11 +72,7 @@ class OrderApiService(
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
-        val evaluatedBlockchains = if (blockchains == null || blockchains.isEmpty()) {
-            router.enabledBlockchains
-        } else {
-            blockchains.filter(router.enabledBlockchains::contains)
-        }.map(BlockchainDto::name)
+        val evaluatedBlockchains = router.getEnabledBlockChains(blockchains).map(BlockchainDto::name)
         val slices = getOrdersByBlockchains(continuation, evaluatedBlockchains) { blockchain, continuation ->
             val blockDto = BlockchainDto.valueOf(blockchain)
             router.getService(blockDto).getOrdersAll(platform, origin, continuation, size)
