@@ -63,12 +63,12 @@ class ActivityApiService(
         return coroutineScope {
             blockchains.map { blockchain ->
                 async {
-                    val bockchainContinuation = currentContinuation.continuations[blockchain]
+                    val blockchainContinuation = currentContinuation.continuations[blockchain]
                     // For completed blockchain we do not request orders
-                    if (bockchainContinuation == ArgSlice.COMPLETED) {
-                        ArgSlice(blockchain, bockchainContinuation, Slice(null, emptyList()))
+                    if (blockchainContinuation == ArgSlice.COMPLETED) {
+                        ArgSlice(blockchain, blockchainContinuation, Slice(null, emptyList()))
                     } else {
-                        ArgSlice(blockchain, bockchainContinuation, clientCall(blockchain, bockchainContinuation))
+                        ArgSlice(blockchain, blockchainContinuation, clientCall(blockchain, blockchainContinuation))
                     }
                 }
             }

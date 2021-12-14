@@ -2,9 +2,13 @@ package com.rarible.protocol.union.api.controller
 
 import com.rarible.protocol.union.api.service.ItemApiService
 import com.rarible.protocol.union.core.continuation.ItemContinuation
+import com.rarible.protocol.union.core.continuation.page.ArgPaging
+import com.rarible.protocol.union.core.continuation.page.Page
 import com.rarible.protocol.union.core.continuation.page.PageSize
 import com.rarible.protocol.union.core.continuation.page.Paging
+import com.rarible.protocol.union.core.continuation.page.Slice
 import com.rarible.protocol.union.core.exception.UnionNotFoundException
+import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.UnionMedia
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.RestrictionService
@@ -53,24 +57,17 @@ class ItemController(
         lastUpdatedTo: Long?
     ): ResponseEntity<ItemsDto> {
         val safeSize = PageSize.ITEM.limit(size)
-        val blockchainPages = router.executeForAll(blockchains) {
-            it.getAllItems(continuation, safeSize, showDeleted, lastUpdatedFrom, lastUpdatedTo)
-        }
-
-        val total = blockchainPages.map { it.total }.sum()
-
-        val combinedPage = Paging(
-            ItemContinuation.ByLastUpdatedAndId,
-            blockchainPages.flatMap { it.entities }
-        ).getPage(safeSize, total)
+        val slices = itemApiService.getAllItems(blockchains, continuation, safeSize, showDeleted, lastUpdatedFrom, lastUpdatedTo)
+        val total = slices.map { it.page.total }.sum()
+        val arg = ArgPaging(ItemContinuation.ByLastUpdatedAndId, slices.map { it.toSlice() }).getSlice(safeSize)
 
         logger.info("Response for getAllItems(blockchains={}, continuation={}, size={}):" +
                 " Page(size={}, total={}, continuation={}) from blockchain pages {} ",
-            blockchains, continuation, size, combinedPage.entities.size, combinedPage.total,
-            combinedPage.continuation, blockchainPages.map { it.entities.size }
+            blockchains, continuation, size, arg.entities.size, total,
+            arg.continuation, slices.map { it.page.entities.size }
         )
 
-        val result = itemApiService.enrich(combinedPage)
+        val result = itemApiService.enrich(arg, total)
         return ResponseEntity.ok(result)
     }
 
@@ -220,4 +217,7 @@ class ItemController(
         }
     }
 
+    fun Page<UnionItem>.toSlice(): Slice<UnionItem> {
+        return Slice(this.continuation, this.entities)
+    }
 }

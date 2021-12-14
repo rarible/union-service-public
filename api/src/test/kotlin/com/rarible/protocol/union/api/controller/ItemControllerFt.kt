@@ -10,6 +10,7 @@ import com.rarible.protocol.dto.NftMediaDto
 import com.rarible.protocol.union.api.client.ItemControllerApi
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
+import com.rarible.protocol.union.core.continuation.CombinedContinuation
 import com.rarible.protocol.union.core.continuation.page.PageSize
 import com.rarible.protocol.union.core.converter.ContractAddressConverter
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
@@ -390,24 +391,41 @@ class ItemControllerFt : AbstractIntegrationTest() {
     @Test
     fun `get all items - trimmed to size`() = runBlocking<Unit> {
         val blockchains = listOf(BlockchainDto.ETHEREUM, BlockchainDto.FLOW)
-        val continuation = "${nowMillis()}_${randomString()}"
+        val now = nowMillis()
+
+        val ethList = listOf(
+            randomEthNftItemDto().copy(date = now),
+            randomEthNftItemDto().copy(date = now.minusSeconds(10))
+        )
+
+        val flowList = listOf(
+            randomFlowNftItemDto().copy(lastUpdatedAt = now),
+            randomFlowNftItemDto().copy(lastUpdatedAt = now.minusSeconds(10))
+        )
+
+        val ethContinuation = "${now.toEpochMilli()}_${ethList.first().id}"
+        val flowContinuation = "${now.toEpochMilli()}_${flowList.first().id}"
+        val cursorArg = CombinedContinuation(
+            mapOf(
+                BlockchainDto.ETHEREUM.toString() to ethContinuation,
+                BlockchainDto.FLOW.toString() to flowContinuation
+            )
+        )
         val showDeleted = true
         val size = 3
         val lastUpdatedFrom = nowMillis().minusSeconds(120).toEpochMilli()
         val lastUpdatedTo = nowMillis().plusSeconds(120).toEpochMilli()
 
         flowItemControllerApiMock.mockGetNftAllItems(
-            continuation, size, showDeleted, lastUpdatedFrom, lastUpdatedTo,
-            randomFlowNftItemDto(), randomFlowNftItemDto()
+            flowContinuation, size, showDeleted, lastUpdatedFrom, lastUpdatedTo, *flowList.toTypedArray()
         )
 
         ethereumItemControllerApiMock.mockGetNftAllItems(
-            continuation, size, showDeleted, lastUpdatedFrom, lastUpdatedTo,
-            randomEthNftItemDto(), randomEthNftItemDto()
+            ethContinuation, size, showDeleted, lastUpdatedFrom, lastUpdatedTo, *ethList.toTypedArray()
         )
 
         val items = itemControllerClient.getAllItems(
-            blockchains, continuation, size, showDeleted, lastUpdatedFrom, lastUpdatedTo
+            blockchains, cursorArg.toString(), size, showDeleted, lastUpdatedFrom, lastUpdatedTo
         ).awaitFirst()
 
         assertThat(items.items).hasSize(3)

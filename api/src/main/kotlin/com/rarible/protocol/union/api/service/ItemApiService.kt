@@ -1,7 +1,11 @@
 package com.rarible.protocol.union.api.service
 
 import com.rarible.core.common.nowMillis
+import com.rarible.protocol.union.core.continuation.CombinedContinuation
+import com.rarible.protocol.union.core.continuation.page.ArgPage
+import com.rarible.protocol.union.core.continuation.page.ArgSlice
 import com.rarible.protocol.union.core.continuation.page.Page
+import com.rarible.protocol.union.core.continuation.page.Slice
 import com.rarible.protocol.union.core.model.UnionImageProperties
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.UnionMedia
@@ -9,6 +13,7 @@ import com.rarible.protocol.union.core.model.UnionMetaContent
 import com.rarible.protocol.union.core.model.UnionVideoProperties
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
+import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.ItemsDto
@@ -19,6 +24,9 @@ import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.util.spent
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
@@ -33,11 +41,35 @@ class ItemApiService(
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
+    suspend fun getAllItems(
+        blockchains: List<BlockchainDto>?,
+        cursor: String?,
+        safeSize: Int,
+        showDeleted: Boolean?,
+        lastUpdatedFrom: Long?,
+        lastUpdatedTo: Long?
+    ): List<ArgPage<UnionItem>> {
+        val evaluatedBlockchains = evaluatedBlockchains(blockchains).map(BlockchainDto::name)
+        val slices = getItemsByBlockchains(cursor, evaluatedBlockchains) { blockchain, continuation ->
+            val blockDto = BlockchainDto.valueOf(blockchain)
+            router.getService(blockDto).getAllItems(continuation, safeSize, showDeleted, lastUpdatedFrom, lastUpdatedTo)
+        }
+        return slices
+    }
+
     suspend fun enrich(unionItemsPage: Page<UnionItem>): ItemsDto {
         return ItemsDto(
             total = unionItemsPage.total,
             continuation = unionItemsPage.continuation,
             items = enrich(unionItemsPage.entities)
+        )
+    }
+
+    suspend fun enrich(unionItemsSlice: Slice<UnionItem>, total: Long): ItemsDto {
+        return ItemsDto(
+            total = total,
+            continuation = unionItemsSlice.continuation,
+            items = enrich(unionItemsSlice.entities)
         )
     }
 
@@ -91,4 +123,36 @@ class ItemApiService(
 
         return result
     }
+
+    private suspend fun getItemsByBlockchains(
+        continuation: String?,
+        blockchains: Collection<String>,
+        clientCall: suspend (blockchain: String, continuation: String?) -> Page<UnionItem>
+    ): List<ArgPage<UnionItem>> {
+        val currentContinuation = CombinedContinuation.parse(continuation)
+        return coroutineScope {
+            blockchains.map { blockchain ->
+                async {
+                    val blockchainContinuation = currentContinuation.continuations[blockchain]
+                    // For completed blockchain we do not request orders
+                    if (blockchainContinuation == ArgSlice.COMPLETED) {
+                        ArgPage(blockchain, blockchainContinuation, Page(0, null, emptyList()))
+                    } else {
+                        ArgPage(
+                            blockchain,
+                            blockchainContinuation,
+                            clientCall.invoke(blockchain, blockchainContinuation)
+                        )
+                    }
+                }
+            }
+        }.awaitAll()
+    }
+
+    private fun evaluatedBlockchains(blockchains: List<BlockchainDto>?) =
+        if (blockchains == null || blockchains.isEmpty()) {
+            router.enabledBlockchains
+        } else {
+            blockchains.filter(router.enabledBlockchains::contains)
+        }
 }
