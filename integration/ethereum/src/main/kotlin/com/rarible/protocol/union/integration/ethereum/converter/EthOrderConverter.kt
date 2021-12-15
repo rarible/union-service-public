@@ -25,6 +25,7 @@ import com.rarible.protocol.union.dto.OnChainOrderDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.OrderPriceHistoryRecordDto
+import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PendingOrderCancelDto
 import com.rarible.protocol.union.dto.PendingOrderDto
@@ -242,6 +243,14 @@ class EthOrderConverter(
             com.rarible.protocol.dto.OrderStatusDto.HISTORICAL -> OrderStatusDto.HISTORICAL
             com.rarible.protocol.dto.OrderStatusDto.INACTIVE -> OrderStatusDto.INACTIVE
             com.rarible.protocol.dto.OrderStatusDto.CANCELLED -> OrderStatusDto.CANCELLED
+        }
+    }
+
+    fun convert(source: OrderSortDto?): com.rarible.protocol.dto.OrderSortDto? {
+        return when (source) {
+            OrderSortDto.LAST_UPDATE_ASC -> com.rarible.protocol.dto.OrderSortDto.LAST_UPDATE_ASC
+            OrderSortDto.LAST_UPDATE_DESC -> com.rarible.protocol.dto.OrderSortDto.LAST_UPDATE_DESC
+            else -> null
         }
     }
 

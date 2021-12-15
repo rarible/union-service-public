@@ -5,7 +5,8 @@ import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderDto
-import com.rarible.protocol.union.dto.PlatformDto
+import com.rarible.protocol.union.dto.OrderSortDto
+import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.listener.service.EnrichmentOrderEventService
 import com.rarible.protocol.union.listener.test.data.defaultUnionListenerProperties
 import io.mockk.clearMocks
@@ -101,8 +102,12 @@ class ReconciliationJobTest {
 
     private fun mockGetOrdersAll(continuation: String?, size: Int, result: Slice<OrderDto>): Unit {
         coEvery {
-            orderService.getOrdersAll(PlatformDto.ALL, null, continuation, size)
-        } returns result
+            orderService.getOrdersAll(
+                continuation,
+                size,
+                eq(OrderSortDto.LAST_UPDATE_DESC),
+                eq(listOf(OrderStatusDto.ACTIVE))
+            ) } returns result
     }
 
     private fun mockPagination(continuation: String?, count: Int): Slice<OrderDto> {
