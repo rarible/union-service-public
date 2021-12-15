@@ -101,7 +101,7 @@ class ReconciliationJobTest {
 
     private fun mockGetOrdersAll(continuation: String?, size: Int, result: Slice<OrderDto>): Unit {
         coEvery {
-            orderService.getOrdersAll(PlatformDto.ALL, null, continuation, size)
+            orderService.getOrdersAll(continuation, size, null, null)
         } returns result
     }
 

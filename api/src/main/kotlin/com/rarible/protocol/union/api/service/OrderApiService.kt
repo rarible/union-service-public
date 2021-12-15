@@ -10,6 +10,7 @@ import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
+import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.ext
@@ -67,15 +68,15 @@ class OrderApiService(
 
     suspend fun getOrdersAll(
         blockchains: List<BlockchainDto>?,
-        platform: PlatformDto?,
-        origin: String?,
         continuation: String?,
-        size: Int
+        size: Int,
+        sort: OrderSortDto?,
+        status: List<OrderStatusDto>?
     ): Slice<OrderDto> {
         val evaluatedBlockchains = router.getEnabledBlockchains(blockchains).map(BlockchainDto::name)
         val slices = getOrdersByBlockchains(continuation, evaluatedBlockchains) { blockchain, continuation ->
             val blockDto = BlockchainDto.valueOf(blockchain)
-            router.getService(blockDto).getOrdersAll(platform, origin, continuation, size)
+            router.getService(blockDto).getOrdersAll(continuation, size, sort, status)
         }
         return ArgPaging(OrderContinuation.ByLastUpdatedAndId, slices).getSlice(size)
     }

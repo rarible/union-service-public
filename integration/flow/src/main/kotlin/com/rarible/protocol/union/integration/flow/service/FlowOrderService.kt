@@ -10,6 +10,7 @@ import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.AssetTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderDto
+import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.integration.flow.converter.FlowConverter
@@ -24,15 +25,16 @@ open class FlowOrderService(
 ) : AbstractBlockchainService(BlockchainDto.FLOW), OrderService {
 
     override suspend fun getOrdersAll(
-        platform: PlatformDto?,
-        origin: String?,
         continuation: String?,
-        size: Int
+        size: Int,
+        sort: OrderSortDto?,
+        status: List<OrderStatusDto>?
     ): Slice<OrderDto> {
-        val result = orderControllerApi.getOrdersAll(
-            origin,
+        val result = orderControllerApi.getOrdersAllByStatus(
+            flowOrderConverter.convert(sort),
             continuation,
-            size
+            size,
+            flowOrderConverter.convert(status)
         ).awaitFirst()
         return flowOrderConverter.convert(result, blockchain)
     }

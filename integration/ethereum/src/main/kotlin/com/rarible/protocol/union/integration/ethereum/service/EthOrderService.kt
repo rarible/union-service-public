@@ -10,6 +10,7 @@ import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.AssetTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderDto
+import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
@@ -23,16 +24,16 @@ open class EthOrderService(
 ) : AbstractBlockchainService(blockchain), OrderService {
 
     override suspend fun getOrdersAll(
-        platform: PlatformDto?,
-        origin: String?,
         continuation: String?,
-        size: Int
+        size: Int,
+        sort: OrderSortDto?,
+        status: List<OrderStatusDto>?
     ): Slice<OrderDto> {
-        val orders = orderControllerApi.getOrdersAll(
-            origin,
-            EthConverter.convert(platform),
+        val orders = orderControllerApi.getOrdersAllByStatus(
+            ethOrderConverter.convert(sort),
             continuation,
-            size
+            size,
+            ethOrderConverter.convert(status)
         ).awaitFirst()
         return ethOrderConverter.convert(orders, blockchain)
     }

@@ -38,6 +38,7 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import reactor.kotlin.core.publisher.toMono
@@ -112,7 +113,7 @@ class OrderControllerFt : AbstractIntegrationTest() {
         val ethOrders = listOf(randomEthLegacySellOrderDto(), randomEthLegacySellOrderDto())
 
         coEvery {
-            testFlowOrderApi.getOrdersAll(any(), any(), size)
+            testFlowOrderApi.getOrdersAllByStatus(any(), any(), size, any())
         } returns FlowOrdersPaginationDto(flowOrders, null).toMono()
 
         coEvery {
@@ -120,17 +121,19 @@ class OrderControllerFt : AbstractIntegrationTest() {
         } returns OrderPaginationDto(tezosOrders, null).toMono()
 
         coEvery {
-            testEthereumOrderApi.getOrdersAll(any(), ethPlatform, any(), size)
+            testEthereumOrderApi.getOrdersAllByStatus(any(), any(), size, any())
         } returns OrdersPaginationDto(ethOrders, null).toMono()
 
         val orders = orderControllerClient.getOrdersAll(
-            blockchains, null, null, null, size
+            blockchains, null, size, null, null
         ).awaitFirst()
 
         assertThat(orders.orders).hasSize(5)
         assertThat(orders.continuation).isNull()
     }
 
+    // we removed origin param from api
+    @Disabled
     @Test
     fun `get all orders - with origin`() = runBlocking<Unit> {
         val blockchains = listOf(BlockchainDto.ETHEREUM, BlockchainDto.FLOW)
@@ -149,7 +152,7 @@ class OrderControllerFt : AbstractIntegrationTest() {
         } returns OrdersPaginationDto(polyOrders, null).toMono()
 
         val orders = orderControllerClient.getOrdersAll(
-            blockchains, platform, origin.fullId(), null, size
+            blockchains, null, size, null, null
         ).awaitFirst()
 
         assertThat(orders.orders).hasSize(3)
@@ -178,15 +181,15 @@ class OrderControllerFt : AbstractIntegrationTest() {
             randomFlowV1OrderDto().copy(lastUpdateAt = now.plusSeconds(10)))
 
         coEvery {
-            testEthereumOrderApi.getOrdersAll(any(), any(), ethContinuation, size)
+            testEthereumOrderApi.getOrdersAllByStatus(any(), ethContinuation, size, any())
         } returns OrdersPaginationDto(ethOrders, null).toMono()
 
         coEvery {
-            testFlowOrderApi.getOrdersAll(any(), flowContinuation, size)
+            testFlowOrderApi.getOrdersAllByStatus(any(), flowContinuation, size, any())
         } returns FlowOrdersPaginationDto(flowOrders, null).toMono()
 
         val orders = orderControllerClient.getOrdersAll(
-            blockchains, platform, null, continuation.toString(), size
+            blockchains, continuation.toString(), size, null, null
         ).awaitFirst()
 
         assertThat(orders.orders).hasSize(size)

@@ -13,6 +13,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.BlockchainGroupDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdsDto
+import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.OrdersDto
 import com.rarible.protocol.union.dto.PlatformDto
@@ -38,21 +39,18 @@ class OrderController(
 
     override suspend fun getOrdersAll(
         blockchains: List<BlockchainDto>?,
-        platform: PlatformDto?,
-        origin: String?,
         continuation: String?,
-        size: Int?
+        size: Int?,
+        sort: OrderSortDto?,
+        status: List<OrderStatusDto>?
     ): ResponseEntity<OrdersDto> {
         val safeSize = PageSize.ORDER.limit(size)
-        val originAddress = safeAddress(origin)
-        val evaluatedBlockchains = originAddress?.blockchainGroup?.subchains() ?: blockchains
-        val result = orderApiService.getOrdersAll(evaluatedBlockchains, platform, originAddress?.value, continuation, safeSize)
+        val result = orderApiService.getOrdersAll(blockchains, continuation, safeSize, sort, status)
         logger.info(
             "Response for getOrdersAll" +
-                    "(blockchains={}, platform={}, origin={}, continuation={}, size={}): " +
+                    "(blockchains={}, continuation={}, size={}): " +
                     "Slice(size={}, continuation={})",
-            blockchains, platform, origin, continuation, size,
-            result.entities.size, result.continuation
+            blockchains, continuation, size, result.entities.size, result.continuation
         )
         return ResponseEntity.ok(toDto(result))
     }

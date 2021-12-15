@@ -44,10 +44,9 @@ class ReconciliationJob(
     suspend fun reconcileOrders(lastUpdateContinuation: String?, blockchain: BlockchainDto): String? {
         logger.info("Fetching Orders from {}: [{}]", blockchain.name, lastUpdateContinuation)
         val page = orderServiceRouter.getService(blockchain).getOrdersAll(
-            PlatformDto.ALL,
-            null,
             lastUpdateContinuation,
-            config.orderBatchSize
+            config.orderBatchSize,
+            null, null
         )
 
         val orders = page.entities
