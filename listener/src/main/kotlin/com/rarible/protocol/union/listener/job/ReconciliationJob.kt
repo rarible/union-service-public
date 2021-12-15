@@ -4,7 +4,8 @@ import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderDto
-import com.rarible.protocol.union.dto.PlatformDto
+import com.rarible.protocol.union.dto.OrderSortDto
+import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.listener.config.UnionListenerProperties
 import com.rarible.protocol.union.listener.service.EnrichmentOrderEventService
 import kotlinx.coroutines.async
@@ -46,7 +47,8 @@ class ReconciliationJob(
         val page = orderServiceRouter.getService(blockchain).getOrdersAll(
             lastUpdateContinuation,
             config.orderBatchSize,
-            null, null
+            OrderSortDto.LAST_UPDATE_DESC,
+            listOf(OrderStatusDto.ACTIVE)
         )
 
         val orders = page.entities
