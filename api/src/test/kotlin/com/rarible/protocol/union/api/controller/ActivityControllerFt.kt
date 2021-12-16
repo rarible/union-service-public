@@ -315,15 +315,16 @@ class ActivityControllerFt : AbstractIntegrationTest() {
         // Flow and Ethereum user specified - request should be routed only for them, Polygon omitted
         val userEth = UnionAddressConverter.convert(BlockchainDto.ETHEREUM, randomEthAddress())
         val userFlow = randomFlowAddress()
-        val size = 4
+        val size = 3
 
         val flowActivity = randomFlowCancelListActivityDto()
         val ethItemActivity = randomEthItemMintActivity()
+        val ethItemActivity2 = randomEthItemMintActivity()
         val polygonItemActivity = randomEthItemMintActivity()
 
         coEvery {
             testEthereumActivityItemApi.getNftActivities(any(), isNull(), eq(size), ActivitySortDto.LATEST_FIRST)
-        } returns NftActivitiesDto(null, listOf(ethItemActivity)).toMono()
+        } returns NftActivitiesDto(null, listOf(ethItemActivity, ethItemActivity2)).toMono()
 
         coEvery {
             testPolygonActivityItemApi.getNftActivities(any(), isNull(), eq(size), ActivitySortDto.LATEST_FIRST)
@@ -349,6 +350,7 @@ class ActivityControllerFt : AbstractIntegrationTest() {
 
         assertThat(activities.activities).hasSize(3)
         assertThat(activities.cursor).isNotNull()
+        assertThat(activities.continuation).isNotNull()
     }
 
     @Test
@@ -409,4 +411,53 @@ class ActivityControllerFt : AbstractIntegrationTest() {
         assertThat(activities.activities).hasSize(3)
         assertThat(activities.continuation).isNull()
     }
+
+    @Test
+    fun `get activities by user with an empty slice`() = runBlocking<Unit> {
+        // Only Item-specific activity types specified here, so only NFT-Indexer of Ethereum should be requested
+        val types = listOf(
+            UserActivityTypeDto.TRANSFER_FROM,
+            UserActivityTypeDto.TRANSFER_TO,
+            UserActivityTypeDto.MINT,
+            UserActivityTypeDto.BURN
+        )
+        // Flow and Ethereum user specified - request should be routed only for them, Polygon omitted
+        val userEth = UnionAddressConverter.convert(BlockchainDto.ETHEREUM, randomEthAddress())
+        val userFlow = randomFlowAddress()
+        val size = 1
+
+        val ethItemActivity = randomEthItemMintActivity()
+        val polygonItemActivity = randomEthItemMintActivity()
+
+        coEvery {
+            testEthereumActivityItemApi.getNftActivities(any(), isNull(), eq(size), ActivitySortDto.LATEST_FIRST)
+        } returns NftActivitiesDto(null, listOf(ethItemActivity)).toMono()
+
+        coEvery {
+            testPolygonActivityItemApi.getNftActivities(any(), isNull(), eq(size), ActivitySortDto.LATEST_FIRST)
+        } returns NftActivitiesDto(null, listOf(polygonItemActivity)).toMono()
+
+        coEvery {
+            testFlowActivityApi.getNftOrderActivitiesByUser(
+                types.map { it.name },
+                listOf(userFlow.value),
+                any(),
+                any(),
+                isNull(),
+                eq(size),
+                sort?.name
+            )
+        } returns FlowActivitiesDto(0, null, listOf()).toMono()
+
+        val now = Instant.now()
+        val oneWeekAgo = now.minus(7, ChronoUnit.DAYS)
+        val activities = activityControllerApi.getActivitiesByUser(
+            types, listOf(userEth.fullId(), userFlow.fullId()), oneWeekAgo, now, null, null, size, sort
+        ).awaitFirst()
+
+        assertThat(activities.activities).hasSize(size)
+        assertThat(activities.cursor).isNotNull()
+        assertThat(activities.continuation).isNotNull()
+    }
+
 }
