@@ -175,7 +175,7 @@ class ActivityController(
         val factory = continuationFactory(sort)
         val slices = blockchainPages.map { ArgSlice(it.key.name, it.value.continuation, it.value) }
         val finalSlice = ArgPaging(factory, slices).getSlice(size)
-        val dto = toDtoWithCursor(ArgPaging(factory, slices).getSlice(size))
+        val dto = toDtoWithCursor(finalSlice)
         val continuation = if (finalSlice.entities.size >= size) finalSlice.entities.last()
             .let { factory.getContinuation(it).toString() } else null
         return dto.copy(continuation = continuation)
