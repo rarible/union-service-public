@@ -3,11 +3,9 @@ package com.rarible.protocol.union.api.controller
 import com.rarible.protocol.union.api.service.ActivityApiService
 import com.rarible.protocol.union.api.service.extractItemId
 import com.rarible.protocol.union.core.continuation.ActivityContinuation
-import com.rarible.protocol.union.core.continuation.CombinedContinuation
 import com.rarible.protocol.union.core.continuation.page.ArgPaging
 import com.rarible.protocol.union.core.continuation.page.ArgSlice
 import com.rarible.protocol.union.core.continuation.page.PageSize
-import com.rarible.protocol.union.core.continuation.page.Paging
 import com.rarible.protocol.union.core.continuation.page.Slice
 import com.rarible.protocol.union.core.service.ActivityService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
@@ -174,26 +172,13 @@ class ActivityController(
         size: Int,
         sort: ActivitySortDto?
     ): ActivitiesDto {
-        val continuationFactory = when (sort) {
-            ActivitySortDto.EARLIEST_FIRST -> ActivityContinuation.ByLastUpdatedAndIdAsc
-            ActivitySortDto.LATEST_FIRST, null -> ActivityContinuation.ByLastUpdatedAndIdDesc
-        }
-
-        val combinedSlice = Paging(
-            continuationFactory,
-            blockchainPages.values.flatMap { it.entities }
-        ).getSlice(size)
-
-        return toDto(combinedSlice, cursor(blockchainPages))
-    }
-
-    fun cursor(blockchainMap: Map<BlockchainDto, Slice<ActivityDto>>): String? {
-        return if (blockchainMap.isEmpty()) {
-            null
-        } else {
-            val m = blockchainMap.entries.associateBy({ it.key.name }, { it.value.continuation ?: ArgSlice.COMPLETED })
-            CombinedContinuation(m).toString()
-        }
+        val factory = continuationFactory(sort)
+        val slices = blockchainPages.map { ArgSlice(it.key.name, it.value.continuation, it.value) }
+        val finalSlice = ArgPaging(factory, slices).getSlice(size)
+        val dto = toDtoWithCursor(ArgPaging(factory, slices).getSlice(size))
+        val continuation = if (finalSlice.entities.size >= size) finalSlice.entities.last()
+            .let { factory.getContinuation(it).toString() } else null
+        return dto.copy(continuation = continuation)
     }
 
     private fun toDto(slice: Slice<ActivityDto>, cursor: String? = null): ActivitiesDto {

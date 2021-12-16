@@ -315,15 +315,16 @@ class ActivityControllerFt : AbstractIntegrationTest() {
         // Flow and Ethereum user specified - request should be routed only for them, Polygon omitted
         val userEth = UnionAddressConverter.convert(BlockchainDto.ETHEREUM, randomEthAddress())
         val userFlow = randomFlowAddress()
-        val size = 4
+        val size = 3
 
         val flowActivity = randomFlowCancelListActivityDto()
         val ethItemActivity = randomEthItemMintActivity()
+        val ethItemActivity2 = randomEthItemMintActivity()
         val polygonItemActivity = randomEthItemMintActivity()
 
         coEvery {
             testEthereumActivityItemApi.getNftActivities(any(), isNull(), eq(size), ActivitySortDto.LATEST_FIRST)
-        } returns NftActivitiesDto(null, listOf(ethItemActivity)).toMono()
+        } returns NftActivitiesDto(null, listOf(ethItemActivity, ethItemActivity2)).toMono()
 
         coEvery {
             testPolygonActivityItemApi.getNftActivities(any(), isNull(), eq(size), ActivitySortDto.LATEST_FIRST)
@@ -349,6 +350,7 @@ class ActivityControllerFt : AbstractIntegrationTest() {
 
         assertThat(activities.activities).hasSize(3)
         assertThat(activities.cursor).isNotNull()
+        assertThat(activities.continuation).isNotNull()
     }
 
     @Test
@@ -422,7 +424,7 @@ class ActivityControllerFt : AbstractIntegrationTest() {
         // Flow and Ethereum user specified - request should be routed only for them, Polygon omitted
         val userEth = UnionAddressConverter.convert(BlockchainDto.ETHEREUM, randomEthAddress())
         val userFlow = randomFlowAddress()
-        val size = 4
+        val size = 1
 
         val ethItemActivity = randomEthItemMintActivity()
         val polygonItemActivity = randomEthItemMintActivity()
@@ -453,8 +455,9 @@ class ActivityControllerFt : AbstractIntegrationTest() {
             types, listOf(userEth.fullId(), userFlow.fullId()), oneWeekAgo, now, null, null, size, sort
         ).awaitFirst()
 
-        assertThat(activities.activities).hasSize(2)
+        assertThat(activities.activities).hasSize(size)
         assertThat(activities.cursor).isNotNull()
+        assertThat(activities.continuation).isNotNull()
     }
 
 }
