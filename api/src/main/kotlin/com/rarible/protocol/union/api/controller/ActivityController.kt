@@ -6,6 +6,7 @@ import com.rarible.protocol.union.core.continuation.ActivityContinuation
 import com.rarible.protocol.union.core.continuation.page.ArgPaging
 import com.rarible.protocol.union.core.continuation.page.ArgSlice
 import com.rarible.protocol.union.core.continuation.page.PageSize
+import com.rarible.protocol.union.core.continuation.page.Paging
 import com.rarible.protocol.union.core.continuation.page.Slice
 import com.rarible.protocol.union.core.service.ActivityService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
@@ -174,24 +175,25 @@ class ActivityController(
     ): ActivitiesDto {
         val factory = continuationFactory(sort)
         val slices = blockchainPages.map { ArgSlice(it.key.name, it.value.continuation, it.value) }
-        val finalSlice = ArgPaging(factory, slices).getSlice(size)
-        val dto = toDtoWithCursor(ArgPaging(factory, slices).getSlice(size))
-        val continuation = if (finalSlice.entities.size >= size) finalSlice.entities.last()
-            .let { factory.getContinuation(it).toString() } else null
-        return dto.copy(continuation = continuation)
+
+        val legacySlice = Paging(factory, blockchainPages.values.flatMap { it.entities }).getSlice(size)
+        val cursorSlice = ArgPaging(factory, slices).getSlice(size)
+
+        return toDto(legacySlice, cursorSlice.continuation)
     }
 
-    private fun toDto(slice: Slice<ActivityDto>, cursor: String? = null): ActivitiesDto {
+    private fun toDto(legacySlice: Slice<ActivityDto>, cursor: String? = null): ActivitiesDto {
         return ActivitiesDto(
-            continuation = slice.continuation,
+            continuation = legacySlice.continuation,
             cursor = cursor,
-            activities = slice.entities
+            activities = legacySlice.entities
         )
     }
 
     private fun toDtoWithCursor(slice: Slice<ActivityDto>): ActivitiesDto {
         return ActivitiesDto(
             continuation = null,
+            // TODO remove when we get back to continuation
             cursor = slice.continuation,
             activities = slice.entities
         )
