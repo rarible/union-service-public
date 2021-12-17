@@ -2,11 +2,11 @@ package com.rarible.protocol.union.integration.tezos.converter
 
 import com.rarible.protocol.tezos.dto.NftOwnershipDto
 import com.rarible.protocol.tezos.dto.NftOwnershipsDto
-import com.rarible.protocol.union.core.continuation.page.Page
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
+import com.rarible.protocol.union.dto.continuation.page.Page
 import org.slf4j.LoggerFactory
 
 object TezosOwnershipConverter {

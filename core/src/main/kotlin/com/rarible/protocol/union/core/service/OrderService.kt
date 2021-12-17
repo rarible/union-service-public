@@ -1,12 +1,12 @@
 package com.rarible.protocol.union.core.service
 
-import com.rarible.protocol.union.core.continuation.page.Slice
 import com.rarible.protocol.union.core.service.router.BlockchainService
 import com.rarible.protocol.union.dto.AssetTypeDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PlatformDto
+import com.rarible.protocol.union.dto.continuation.page.Slice
 
 interface OrderService : BlockchainService {
 

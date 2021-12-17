@@ -1,8 +1,5 @@
 package com.rarible.protocol.union.api.service
 
-import com.rarible.protocol.union.core.continuation.CombinedContinuation
-import com.rarible.protocol.union.core.continuation.page.ArgSlice
-import com.rarible.protocol.union.core.continuation.page.Slice
 import com.rarible.protocol.union.core.service.ActivityService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.ActivityDto
@@ -10,6 +7,9 @@ import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
+import com.rarible.protocol.union.dto.continuation.CombinedContinuation
+import com.rarible.protocol.union.dto.continuation.page.ArgSlice
+import com.rarible.protocol.union.dto.continuation.page.Slice
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope

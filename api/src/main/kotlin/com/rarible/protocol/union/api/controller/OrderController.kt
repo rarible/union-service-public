@@ -3,10 +3,6 @@ package com.rarible.protocol.union.api.controller
 import com.rarible.core.logging.withMdc
 import com.rarible.protocol.union.api.service.OrderApiService
 import com.rarible.protocol.union.api.service.extractItemId
-import com.rarible.protocol.union.core.continuation.OrderContinuation
-import com.rarible.protocol.union.core.continuation.page.PageSize
-import com.rarible.protocol.union.core.continuation.page.Paging
-import com.rarible.protocol.union.core.continuation.page.Slice
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -18,6 +14,10 @@ import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.OrdersDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.UnionAddress
+import com.rarible.protocol.union.dto.continuation.OrderContinuation
+import com.rarible.protocol.union.dto.continuation.page.PageSize
+import com.rarible.protocol.union.dto.continuation.page.Paging
+import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.dto.group
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.dto.subchains

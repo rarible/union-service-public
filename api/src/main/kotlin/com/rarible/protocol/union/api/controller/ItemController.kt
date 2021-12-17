@@ -1,12 +1,7 @@
 package com.rarible.protocol.union.api.controller
 
 import com.rarible.protocol.union.api.service.ItemApiService
-import com.rarible.protocol.union.core.continuation.ItemContinuation
-import com.rarible.protocol.union.core.continuation.page.ArgPaging
-import com.rarible.protocol.union.core.continuation.page.Page
-import com.rarible.protocol.union.core.continuation.page.PageSize
-import com.rarible.protocol.union.core.continuation.page.Paging
-import com.rarible.protocol.union.core.continuation.page.Slice
+import com.rarible.protocol.union.core.continuation.UnionItemContinuation
 import com.rarible.protocol.union.core.exception.UnionNotFoundException
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.UnionMedia
@@ -20,6 +15,11 @@ import com.rarible.protocol.union.dto.ItemsDto
 import com.rarible.protocol.union.dto.RestrictionCheckFormDto
 import com.rarible.protocol.union.dto.RestrictionCheckResultDto
 import com.rarible.protocol.union.dto.RoyaltiesDto
+import com.rarible.protocol.union.dto.continuation.page.ArgPaging
+import com.rarible.protocol.union.dto.continuation.page.Page
+import com.rarible.protocol.union.dto.continuation.page.PageSize
+import com.rarible.protocol.union.dto.continuation.page.Paging
+import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.dto.parser.ItemIdParser
 import com.rarible.protocol.union.dto.subchains
@@ -59,7 +59,7 @@ class ItemController(
         val safeSize = PageSize.ITEM.limit(size)
         val slices = itemApiService.getAllItems(blockchains, continuation, safeSize, showDeleted, lastUpdatedFrom, lastUpdatedTo)
         val total = slices.map { it.page.total }.sum()
-        val arg = ArgPaging(ItemContinuation.ByLastUpdatedAndId, slices.map { it.toSlice() }).getSlice(safeSize)
+        val arg = ArgPaging(UnionItemContinuation.ByLastUpdatedAndId, slices.map { it.toSlice() }).getSlice(safeSize)
 
         logger.info("Response for getAllItems(blockchains={}, continuation={}, size={}):" +
                 " Page(size={}, total={}, continuation={}) from blockchain pages {} ",
@@ -155,7 +155,7 @@ class ItemController(
         val total = blockchainPages.map { it.total }.sum()
 
         val combinedPage = Paging(
-            ItemContinuation.ByLastUpdatedAndId,
+            UnionItemContinuation.ByLastUpdatedAndId,
             blockchainPages.flatMap { it.entities }
         ).getPage(safeSize, total)
 
@@ -183,7 +183,7 @@ class ItemController(
         val total = blockchainPages.map { it.total }.sum()
 
         val combinedPage = Paging(
-            ItemContinuation.ByLastUpdatedAndId,
+            UnionItemContinuation.ByLastUpdatedAndId,
             blockchainPages.flatMap { it.entities }
         ).getPage(safeSize, total)
 

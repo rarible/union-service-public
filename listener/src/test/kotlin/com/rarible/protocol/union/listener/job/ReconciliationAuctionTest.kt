@@ -1,11 +1,11 @@
 package com.rarible.protocol.union.listener.job
 
-import com.rarible.protocol.union.core.continuation.page.Slice
 import com.rarible.protocol.union.core.service.AuctionService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
-import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.AuctionDto
+import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.PlatformDto
+import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.listener.service.EnrichmentAuctionEventService
 import com.rarible.protocol.union.listener.test.data.defaultUnionListenerProperties
 import io.mockk.clearMocks

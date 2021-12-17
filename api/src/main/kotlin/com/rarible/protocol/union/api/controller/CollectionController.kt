@@ -1,14 +1,14 @@
 package com.rarible.protocol.union.api.controller
 
-import com.rarible.protocol.union.core.continuation.CollectionContinuation
-import com.rarible.protocol.union.core.continuation.page.Page
-import com.rarible.protocol.union.core.continuation.page.PageSize
-import com.rarible.protocol.union.core.continuation.page.Paging
 import com.rarible.protocol.union.core.service.CollectionService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.dto.CollectionsDto
+import com.rarible.protocol.union.dto.continuation.CollectionContinuation
+import com.rarible.protocol.union.dto.continuation.page.Page
+import com.rarible.protocol.union.dto.continuation.page.PageSize
+import com.rarible.protocol.union.dto.continuation.page.Paging
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.dto.subchains
 import org.slf4j.LoggerFactory

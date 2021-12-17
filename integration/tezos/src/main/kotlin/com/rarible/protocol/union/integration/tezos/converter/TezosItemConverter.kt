@@ -5,7 +5,6 @@ import com.rarible.protocol.tezos.dto.NftItemDto
 import com.rarible.protocol.tezos.dto.NftItemMetaDto
 import com.rarible.protocol.tezos.dto.NftItemsDto
 import com.rarible.protocol.tezos.dto.PartDto
-import com.rarible.protocol.union.core.continuation.page.Page
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.UnionMeta
@@ -15,6 +14,7 @@ import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.MetaAttributeDto
 import com.rarible.protocol.union.dto.MetaContentDto
 import com.rarible.protocol.union.dto.RoyaltyDto
+import com.rarible.protocol.union.dto.continuation.page.Page
 import org.slf4j.LoggerFactory
 import java.time.Instant
 

@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.core.service.dummy
 
-import com.rarible.protocol.union.core.continuation.page.Slice
 import com.rarible.protocol.union.core.exception.UnionNotFoundException
 import com.rarible.protocol.union.core.service.AuctionService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
@@ -9,6 +8,7 @@ import com.rarible.protocol.union.dto.AuctionSortDto
 import com.rarible.protocol.union.dto.AuctionStatusDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.PlatformDto
+import com.rarible.protocol.union.dto.continuation.page.Slice
 
 class DummyAuctionService(
     blockchain: BlockchainDto

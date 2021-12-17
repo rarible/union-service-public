@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.core.service.dummy
 
-import com.rarible.protocol.union.core.continuation.page.Page
 import com.rarible.protocol.union.core.exception.UnionNotFoundException
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.UnionMeta
@@ -8,6 +7,7 @@ import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.RoyaltyDto
+import com.rarible.protocol.union.dto.continuation.page.Page
 
 class DummyItemService(
     blockchain: BlockchainDto

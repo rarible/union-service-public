@@ -12,14 +12,14 @@ import com.rarible.protocol.tezos.dto.OrderPaginationDto
 import com.rarible.protocol.union.api.client.OrderControllerApi
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
-import com.rarible.protocol.union.core.continuation.CombinedContinuation
-import com.rarible.protocol.union.core.continuation.page.ArgSlice
-import com.rarible.protocol.union.core.continuation.page.PageSize
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.PlatformDto
+import com.rarible.protocol.union.dto.continuation.CombinedContinuation
+import com.rarible.protocol.union.dto.continuation.page.ArgSlice
+import com.rarible.protocol.union.dto.continuation.page.PageSize
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.util.bidCurrencyId
 import com.rarible.protocol.union.enrichment.util.sellCurrencyId

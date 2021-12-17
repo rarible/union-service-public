@@ -1,11 +1,11 @@
 package com.rarible.protocol.union.core.service.dummy
 
-import com.rarible.protocol.union.core.continuation.page.Page
 import com.rarible.protocol.union.core.exception.UnionNotFoundException
 import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.core.service.OwnershipService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.continuation.page.Page
 
 class DummyOwnershipService(
     blockchain: BlockchainDto
