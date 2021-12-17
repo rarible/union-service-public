@@ -2,12 +2,6 @@ package com.rarible.protocol.union.api.controller
 
 import com.rarible.protocol.union.api.service.ActivityApiService
 import com.rarible.protocol.union.api.service.extractItemId
-import com.rarible.protocol.union.core.continuation.ActivityContinuation
-import com.rarible.protocol.union.core.continuation.page.ArgPaging
-import com.rarible.protocol.union.core.continuation.page.ArgSlice
-import com.rarible.protocol.union.core.continuation.page.PageSize
-import com.rarible.protocol.union.core.continuation.page.Paging
-import com.rarible.protocol.union.core.continuation.page.Slice
 import com.rarible.protocol.union.core.service.ActivityService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.ActivitiesDto
@@ -16,6 +10,12 @@ import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
+import com.rarible.protocol.union.dto.continuation.ActivityContinuation
+import com.rarible.protocol.union.dto.continuation.page.ArgPaging
+import com.rarible.protocol.union.dto.continuation.page.ArgSlice
+import com.rarible.protocol.union.dto.continuation.page.PageSize
+import com.rarible.protocol.union.dto.continuation.page.Paging
+import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.dto.subchains
 import kotlinx.coroutines.async

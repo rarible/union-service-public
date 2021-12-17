@@ -3,7 +3,6 @@ package com.rarible.protocol.union.integration.tezos.service
 import com.rarible.core.apm.CaptureSpan
 import com.rarible.protocol.tezos.api.client.OrderControllerApi
 import com.rarible.protocol.tezos.dto.OrderIdsDto
-import com.rarible.protocol.union.core.continuation.page.Slice
 import com.rarible.protocol.union.core.converter.UnionConverter
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
@@ -13,6 +12,7 @@ import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PlatformDto
+import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.integration.tezos.converter.TezosConverter
 import com.rarible.protocol.union.integration.tezos.converter.TezosOrderConverter
 import kotlinx.coroutines.reactive.awaitFirst

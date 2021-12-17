@@ -15,9 +15,6 @@ import com.rarible.protocol.tezos.dto.OrderActivityFilterByCollectionDto
 import com.rarible.protocol.tezos.dto.OrderActivityFilterByItemDto
 import com.rarible.protocol.tezos.dto.OrderActivityFilterByUserDto
 import com.rarible.protocol.tezos.dto.OrderActivityFilterDto
-import com.rarible.protocol.union.core.continuation.ActivityContinuation
-import com.rarible.protocol.union.core.continuation.page.Paging
-import com.rarible.protocol.union.core.continuation.page.Slice
 import com.rarible.protocol.union.core.converter.UnionConverter
 import com.rarible.protocol.union.core.service.ActivityService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
@@ -26,6 +23,9 @@ import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
+import com.rarible.protocol.union.dto.continuation.ActivityContinuation
+import com.rarible.protocol.union.dto.continuation.page.Paging
+import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.integration.tezos.converter.TezosActivityConverter
 import com.rarible.protocol.union.integration.tezos.converter.TezosConverter
 import kotlinx.coroutines.async

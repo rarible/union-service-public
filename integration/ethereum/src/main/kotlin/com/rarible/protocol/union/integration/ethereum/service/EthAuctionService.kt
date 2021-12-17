@@ -3,7 +3,6 @@ package com.rarible.protocol.union.integration.ethereum.service
 import com.rarible.core.apm.CaptureSpan
 import com.rarible.protocol.dto.AuctionIdsDto
 import com.rarible.protocol.order.api.client.AuctionControllerApi
-import com.rarible.protocol.union.core.continuation.page.Slice
 import com.rarible.protocol.union.core.service.AuctionService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.AuctionDto
@@ -11,6 +10,7 @@ import com.rarible.protocol.union.dto.AuctionSortDto
 import com.rarible.protocol.union.dto.AuctionStatusDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.PlatformDto
+import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.integration.ethereum.converter.EthAuctionConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
 import io.daonomic.rpc.domain.Word

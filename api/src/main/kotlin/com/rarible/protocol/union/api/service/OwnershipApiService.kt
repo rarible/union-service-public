@@ -1,11 +1,6 @@
 package com.rarible.protocol.union.api.service
 
 import com.rarible.core.common.nowMillis
-import com.rarible.protocol.union.core.continuation.CombinedContinuation
-import com.rarible.protocol.union.core.continuation.page.ArgPage
-import com.rarible.protocol.union.core.continuation.page.ArgSlice
-import com.rarible.protocol.union.core.continuation.page.Page
-import com.rarible.protocol.union.core.continuation.page.Slice
 import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.core.service.OwnershipService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
@@ -13,6 +8,11 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OwnershipDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.OwnershipsDto
+import com.rarible.protocol.union.dto.continuation.CombinedContinuation
+import com.rarible.protocol.union.dto.continuation.page.ArgPage
+import com.rarible.protocol.union.dto.continuation.page.ArgSlice
+import com.rarible.protocol.union.dto.continuation.page.Page
+import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.enrichment.converter.EnrichedOwnershipConverter
 import com.rarible.protocol.union.enrichment.model.ShortOwnership
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId

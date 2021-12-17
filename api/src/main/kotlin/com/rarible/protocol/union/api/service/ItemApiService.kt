@@ -1,11 +1,6 @@
 package com.rarible.protocol.union.api.service
 
 import com.rarible.core.common.nowMillis
-import com.rarible.protocol.union.core.continuation.CombinedContinuation
-import com.rarible.protocol.union.core.continuation.page.ArgPage
-import com.rarible.protocol.union.core.continuation.page.ArgSlice
-import com.rarible.protocol.union.core.continuation.page.Page
-import com.rarible.protocol.union.core.continuation.page.Slice
 import com.rarible.protocol.union.core.model.UnionImageProperties
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.UnionMedia
@@ -18,6 +13,11 @@ import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.ItemsDto
 import com.rarible.protocol.union.dto.MetaContentDto
+import com.rarible.protocol.union.dto.continuation.CombinedContinuation
+import com.rarible.protocol.union.dto.continuation.page.ArgPage
+import com.rarible.protocol.union.dto.continuation.page.ArgSlice
+import com.rarible.protocol.union.dto.continuation.page.Page
+import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.enrichment.meta.IpfsUrlResolver
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
