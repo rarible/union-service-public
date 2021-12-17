@@ -2,6 +2,7 @@ package com.rarible.protocol.union.api.controller
 
 import com.rarible.core.common.nowMillis
 import com.rarible.core.test.data.randomBigInt
+import com.rarible.core.test.data.randomInt
 import com.rarible.core.test.data.randomString
 import com.rarible.protocol.dto.Erc20AssetTypeDto
 import com.rarible.protocol.dto.FlowOrdersPaginationDto
@@ -11,6 +12,8 @@ import com.rarible.protocol.tezos.dto.OrderPaginationDto
 import com.rarible.protocol.union.api.client.OrderControllerApi
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
+import com.rarible.protocol.union.core.continuation.CombinedContinuation
+import com.rarible.protocol.union.core.continuation.page.ArgSlice
 import com.rarible.protocol.union.core.continuation.page.PageSize
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -35,6 +38,7 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import reactor.kotlin.core.publisher.toMono
@@ -102,7 +106,6 @@ class OrderControllerFt : AbstractIntegrationTest() {
     @Test
     fun `get all orders - no origin`() = runBlocking<Unit> {
         val blockchains = listOf(BlockchainDto.ETHEREUM, BlockchainDto.FLOW, BlockchainDto.TEZOS)
-        val continuation = "${nowMillis()}_${randomString()}"
         val size = 8
 
         val flowOrders = listOf(randomFlowV1OrderDto(), randomFlowV1OrderDto())
@@ -110,29 +113,30 @@ class OrderControllerFt : AbstractIntegrationTest() {
         val ethOrders = listOf(randomEthLegacySellOrderDto(), randomEthLegacySellOrderDto())
 
         coEvery {
-            testFlowOrderApi.getOrdersAll(null, continuation, size)
+            testFlowOrderApi.getOrdersAllByStatus(any(), any(), size, any())
         } returns FlowOrdersPaginationDto(flowOrders, null).toMono()
 
         coEvery {
-            testTezosOrderApi.getOrdersAll(null, size, continuation)
+            testTezosOrderApi.getOrdersAll(any(), size, any())
         } returns OrderPaginationDto(tezosOrders, null).toMono()
 
         coEvery {
-            testEthereumOrderApi.getOrdersAll(null, ethPlatform, continuation, size)
+            testEthereumOrderApi.getOrdersAllByStatus(any(), any(), size, any())
         } returns OrdersPaginationDto(ethOrders, null).toMono()
 
         val orders = orderControllerClient.getOrdersAll(
-            blockchains, platform, null, continuation, size
+            blockchains, null, size, null, null
         ).awaitFirst()
 
         assertThat(orders.orders).hasSize(5)
         assertThat(orders.continuation).isNull()
     }
 
+    // we removed origin param from api
+    @Disabled
     @Test
     fun `get all orders - with origin`() = runBlocking<Unit> {
         val blockchains = listOf(BlockchainDto.ETHEREUM, BlockchainDto.FLOW)
-        val continuation = "${nowMillis()}_${randomString()}"
         val origin = UnionAddressConverter.convert(BlockchainDto.ETHEREUM, randomEthAddress())
         val size = 4
 
@@ -140,19 +144,63 @@ class OrderControllerFt : AbstractIntegrationTest() {
         val polyOrders = listOf(randomEthLegacySellOrderDto(), randomEthLegacySellOrderDto())
 
         coEvery {
-            testEthereumOrderApi.getOrdersAll(origin.value, ethPlatform, continuation, size)
+            testEthereumOrderApi.getOrdersAll(origin.value, ethPlatform, any(), size)
         } returns OrdersPaginationDto(ethOrders, null).toMono()
 
         coEvery {
-            testPolygonOrderApi.getOrdersAll(origin.value, ethPlatform, continuation, size)
+            testPolygonOrderApi.getOrdersAll(origin.value, ethPlatform, any(), size)
         } returns OrdersPaginationDto(polyOrders, null).toMono()
 
         val orders = orderControllerClient.getOrdersAll(
-            blockchains, platform, origin.fullId(), continuation, size
+            blockchains, null, size, null, null
         ).awaitFirst()
 
         assertThat(orders.orders).hasSize(3)
         assertThat(orders.continuation).isNull()
+    }
+
+    @Test
+    fun `get all orders - with combined continuation`() = runBlocking<Unit> {
+        val blockchains = listOf(BlockchainDto.ETHEREUM, BlockchainDto.FLOW)
+        val now = nowMillis()
+        val ethContinuation = "${now.toEpochMilli()}_${randomString()}"
+        val flowContinuation = "${now.toEpochMilli()}_${randomInt()}"
+        var continuation = CombinedContinuation(
+            mapOf(
+                BlockchainDto.ETHEREUM.toString() to ethContinuation,
+                BlockchainDto.FLOW.toString() to flowContinuation
+            )
+        )
+        val size = 3
+
+        val ethOrders = listOf(
+            randomEthLegacySellOrderDto().copy(lastUpdateAt = now.minusSeconds(2)),
+            randomEthLegacySellOrderDto().copy(lastUpdateAt = now.minusSeconds(10)))
+        val flowOrders = listOf(
+            randomFlowV1OrderDto().copy(lastUpdateAt = now.minusSeconds(5)),
+            randomFlowV1OrderDto().copy(lastUpdateAt = now.plusSeconds(10)))
+
+        coEvery {
+            testEthereumOrderApi.getOrdersAllByStatus(any(), ethContinuation, size, any())
+        } returns OrdersPaginationDto(ethOrders, null).toMono()
+
+        coEvery {
+            testFlowOrderApi.getOrdersAllByStatus(any(), flowContinuation, size, any())
+        } returns FlowOrdersPaginationDto(flowOrders, null).toMono()
+
+        val orders = orderControllerClient.getOrdersAll(
+            blockchains, continuation.toString(), size, null, null
+        ).awaitFirst()
+
+        assertThat(orders.orders).hasSize(size)
+        assertThat(orders.orders.map { it.id }).contains(OrderIdDto(BlockchainDto.ETHEREUM, ethOrders.first().hash.prefixed()))
+        assertThat(orders.orders.map { it.id }).contains(OrderIdDto(BlockchainDto.FLOW, flowOrders.first().id.toString()))
+        assertThat(orders.orders.map { it.id }).contains(OrderIdDto(BlockchainDto.FLOW, flowOrders.last().id.toString()))
+
+        assertThat(orders.continuation).isNotNull()
+        continuation = CombinedContinuation.parse(orders.continuation)
+        assertThat(continuation.continuations[BlockchainDto.ETHEREUM.name]).isNotEqualTo(ArgSlice.COMPLETED)
+        assertThat(continuation.continuations[BlockchainDto.FLOW.name]).isEqualTo(ArgSlice.COMPLETED)
     }
 
     @Test

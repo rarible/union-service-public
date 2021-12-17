@@ -13,6 +13,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.BlockchainGroupDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdsDto
+import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.OrdersDto
 import com.rarible.protocol.union.dto.PlatformDto
@@ -27,6 +28,7 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
+@ExperimentalCoroutinesApi
 @RestController
 class OrderController(
     private val orderApiService: OrderApiService,
@@ -39,31 +41,20 @@ class OrderController(
 
     override suspend fun getOrdersAll(
         blockchains: List<BlockchainDto>?,
-        platform: PlatformDto?,
-        origin: String?,
         continuation: String?,
-        size: Int?
+        size: Int?,
+        sort: OrderSortDto?,
+        status: List<OrderStatusDto>?
     ): ResponseEntity<OrdersDto> {
         val safeSize = PageSize.ORDER.limit(size)
-        val originAddress = safeAddress(origin)
-        val evaluatedBlockchains = originAddress?.blockchainGroup?.subchains() ?: blockchains
-
-        val blockchainSlices = router.executeForAll(evaluatedBlockchains) {
-            it.getOrdersAll(platform, originAddress?.value, continuation, safeSize)
-        }
-
-        val combinedSlice = Paging(
-            OrderContinuation.ByLastUpdatedAndId,
-            blockchainSlices.flatMap { it.entities }
-        ).getSlice(safeSize)
-
-        logger.info("Response for getOrdersAll(blockchains={}, continuation={}, size={}):" +
-                " Slice(size={}, continuation={}) from blockchain slices {} ",
-            evaluatedBlockchains, continuation, size,
-            combinedSlice.entities.size, combinedSlice.continuation, blockchainSlices.map { it.entities.size }
+        val result = orderApiService.getOrdersAll(blockchains, continuation, safeSize, sort, status)
+        logger.info(
+            "Response for getOrdersAll" +
+                    "(blockchains={}, continuation={}, size={}): " +
+                    "Slice(size={}, continuation={})",
+            blockchains, continuation, size, result.entities.size, result.continuation
         )
-
-        return ResponseEntity.ok(toDto(combinedSlice))
+        return ResponseEntity.ok(toDto(result))
     }
 
     override suspend fun getOrderBidsByItem(

@@ -1,7 +1,10 @@
 package com.rarible.protocol.union.api.controller
 
+import com.rarible.protocol.union.api.service.ActivityApiService
 import com.rarible.protocol.union.api.service.extractItemId
 import com.rarible.protocol.union.core.continuation.ActivityContinuation
+import com.rarible.protocol.union.core.continuation.page.ArgPaging
+import com.rarible.protocol.union.core.continuation.page.ArgSlice
 import com.rarible.protocol.union.core.continuation.page.PageSize
 import com.rarible.protocol.union.core.continuation.page.Paging
 import com.rarible.protocol.union.core.continuation.page.Slice
@@ -16,7 +19,6 @@ import com.rarible.protocol.union.dto.UserActivityTypeDto
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.dto.subchains
 import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
@@ -25,7 +27,8 @@ import java.time.Instant
 
 @RestController
 class ActivityController(
-    private val router: BlockchainRouter<ActivityService>
+    private val router: BlockchainRouter<ActivityService>,
+    private val activityApiService: ActivityApiService
 ) : ActivityControllerApi {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -34,20 +37,39 @@ class ActivityController(
         type: List<ActivityTypeDto>,
         blockchains: List<BlockchainDto>?,
         continuation: String?,
+        cursor: String?,
         size: Int?,
         sort: ActivitySortDto?
     ): ResponseEntity<ActivitiesDto> {
         val safeSize = PageSize.ACTIVITY.limit(size)
-        val blockchainPages = router.executeForAll(blockchains) {
-            it.getAllActivities(type, continuation, safeSize, sort)
+        val (result, slicesCounter) = if (null == cursor) {
+            val evaluatedBlockchains = router.getEnabledBlockchains(blockchains)
+            val blockchainMap = coroutineScope {
+                evaluatedBlockchains.map {
+                    it to async {
+                        router.getService(it).getAllActivities(type, continuation, safeSize, sort)
+                    }
+                }.toMap().mapValues { it.value.await() }
+            }
+            val dto = merge(blockchainMap, safeSize, sort)
+            Pair(dto, blockchainMap.map { it.value.entities.size })
+        } else {
+            val slices = activityApiService.getAllActivities(type, blockchains, cursor, safeSize, sort)
+            val dto = toDtoWithCursor(ArgPaging(continuationFactory(sort), slices).getSlice(safeSize))
+            Pair(dto, slices.map { it.slice.entities.size })
         }
-
-        val result = merge(blockchainPages, safeSize, sort)
-
-        logger.info("Response for getAllActivities(type={}, blockchains={}, continuation={}, size={}, sort={}):" +
-                " Slice(size={}, continuation={}) from blockchain slices {} ",
-            type, blockchains, continuation, size, sort,
-            result.activities.size, result.continuation, blockchainPages.map { it.entities.size }
+        logger.info(
+            "Response for getAllActivities(type={}, blockchains={}, continuation={}, size={}, sort={}):" +
+                    " Slice(size={}, continuation={}, cursor={}) from blockchain slices {} ",
+            type,
+            blockchains,
+            continuation,
+            size,
+            sort,
+            result.activities.size,
+            result.continuation,
+            result.cursor,
+            slicesCounter
         )
         return ResponseEntity.ok(result)
     }
@@ -82,17 +104,23 @@ class ActivityController(
         sort: ActivitySortDto?
     ): ResponseEntity<ActivitiesDto> {
         val safeSize = PageSize.ACTIVITY.limit(size)
-
         val fullItemId = extractItemId(contract, tokenId, itemId)
-
         val result = router.getService(fullItemId.blockchain)
-            .getActivitiesByItem(type, fullItemId.contract, fullItemId.tokenId.toString(), continuation, safeSize, sort)
+            .getActivitiesByItem(
+                type,
+                fullItemId.contract,
+                fullItemId.tokenId.toString(),
+                continuation,
+                safeSize,
+                sort
+            )
 
         logger.info(
             "Response for getActivitiesByItem(type={}, itemId={} continuation={}, size={}, sort={}): " +
                     "Slice(size={}, continuation={}) ",
             type, fullItemId.fullId(), continuation, size, sort, result.entities.size, result.continuation
         )
+
         return ResponseEntity.ok(toDto(result))
     }
 
@@ -102,6 +130,7 @@ class ActivityController(
         from: Instant?,
         to: Instant?,
         continuation: String?,
+        cursor: String?,
         size: Int?,
         sort: ActivitySortDto?
     ): ResponseEntity<ActivitiesDto> {
@@ -111,50 +140,67 @@ class ActivityController(
             .flatMap { address -> address.blockchainGroup.subchains().map { it to address.value } }
             .groupBy({ it.first }, { it.second })
 
-        val blockchainPages = coroutineScope {
-            groupedByBlockchain.map {
-                val blockchain = it.key
-                val blockchainUsers = it.value
-                async {
-                    router.getService(blockchain)
-                        .getActivitiesByUser(type, blockchainUsers, from, to, continuation, safeSize, sort)
-                }
+        val (result, slicesCounter) = if (null == cursor) {
+            val blockchainMap = coroutineScope {
+                groupedByBlockchain.mapValues {
+                    val blockchain = it.key
+                    val blockchainUsers = it.value
+                    async {
+                        router.getService(blockchain)
+                            .getActivitiesByUser(type, blockchainUsers, from, to, continuation, safeSize, sort)
+                    }
+                }.mapValues { it.value.await() }
             }
-        }.awaitAll()
-
-        val result = merge(blockchainPages, safeSize, sort)
-
-        logger.info("Response for getActivitiesByUser(type={}, users={}, continuation={}, size={}, sort={}):" +
-                " Slice(size={}, continuation={}) from user slices {} ",
+            val result = merge(blockchainMap, safeSize, sort)
+            Pair(result, blockchainMap.map { it.value.entities.size })
+        } else {
+            val slices =
+                activityApiService.getActivitiesByUser(type, groupedByBlockchain, from, to, cursor, safeSize, sort)
+            val dto = toDtoWithCursor(ArgPaging(continuationFactory(sort), slices).getSlice(safeSize))
+            Pair(dto, slices.map { it.slice.entities.size })
+        }
+        logger.info(
+            "Response for getActivitiesByUser(type={}, users={}, continuation={}, size={}, sort={}):" +
+                    " Slice(size={}, continuation={}, cursor={}) from user slices {} ",
             type, user, continuation, size, sort,
-            result.activities.size, result.continuation, blockchainPages.map { it.entities.size }
+            result.activities.size, result.continuation, result.cursor, slicesCounter
         )
-
         return ResponseEntity.ok(result)
     }
 
     private fun merge(
-        blockchainPages: List<Slice<ActivityDto>>,
+        blockchainPages: Map<BlockchainDto, Slice<ActivityDto>>,
         size: Int,
         sort: ActivitySortDto?
     ): ActivitiesDto {
-        val continuationFactory = when (sort) {
-            ActivitySortDto.EARLIEST_FIRST -> ActivityContinuation.ByLastUpdatedAndIdAsc
-            ActivitySortDto.LATEST_FIRST, null -> ActivityContinuation.ByLastUpdatedAndIdDesc
-        }
+        val factory = continuationFactory(sort)
+        val slices = blockchainPages.map { ArgSlice(it.key.name, it.value.continuation, it.value) }
 
-        val combinedSlice = Paging(
-            continuationFactory,
-            blockchainPages.flatMap { it.entities }
-        ).getSlice(size)
+        val legacySlice = Paging(factory, blockchainPages.values.flatMap { it.entities }).getSlice(size)
+        val cursorSlice = ArgPaging(factory, slices).getSlice(size)
 
-        return toDto(combinedSlice)
+        return toDto(legacySlice, cursorSlice.continuation)
     }
 
-    private fun toDto(slice: Slice<ActivityDto>): ActivitiesDto {
+    private fun toDto(legacySlice: Slice<ActivityDto>, cursor: String? = null): ActivitiesDto {
         return ActivitiesDto(
-            continuation = slice.continuation,
+            continuation = legacySlice.continuation,
+            cursor = cursor,
+            activities = legacySlice.entities
+        )
+    }
+
+    private fun toDtoWithCursor(slice: Slice<ActivityDto>): ActivitiesDto {
+        return ActivitiesDto(
+            continuation = null,
+            // TODO remove when we get back to continuation
+            cursor = slice.continuation,
             activities = slice.entities
         )
+    }
+
+    private fun continuationFactory(sort: ActivitySortDto?) = when (sort) {
+        ActivitySortDto.EARLIEST_FIRST -> ActivityContinuation.ByLastUpdatedAndIdAsc
+        ActivitySortDto.LATEST_FIRST, null -> ActivityContinuation.ByLastUpdatedAndIdDesc
     }
 }

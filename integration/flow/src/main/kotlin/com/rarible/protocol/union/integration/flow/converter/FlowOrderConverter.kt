@@ -12,6 +12,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.FlowOrderDataV1Dto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
+import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PlatformDto
 import org.slf4j.LoggerFactory
@@ -115,6 +116,18 @@ class FlowOrderConverter(
             payouts = source.payouts.map { FlowConverter.convertToPayout(it, blockchain) },
             originFees = source.originalFees.map { FlowConverter.convertToPayout(it, blockchain) }
         )
+    }
+
+    fun convert(source: OrderSortDto?): String? {
+        return when (source) {
+            OrderSortDto.LAST_UPDATE_ASC -> Sort.EARLIEST_FIRST.name
+            OrderSortDto.LAST_UPDATE_DESC -> Sort.LATEST_FIRST.name
+            else -> null
+        }
+    }
+
+    enum class Sort {
+        EARLIEST_FIRST, LATEST_FIRST
     }
 }
 

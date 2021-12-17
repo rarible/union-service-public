@@ -4,6 +4,7 @@ import com.rarible.protocol.union.core.continuation.page.Slice
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.dto.AssetTypeDto
 import com.rarible.protocol.union.dto.OrderDto
+import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PlatformDto
 
@@ -15,17 +16,16 @@ class OrderProxyService(
     override val blockchain = orderService.blockchain
 
     override suspend fun getOrdersAll(
-        platform: PlatformDto?,
-        origin: String?,
         continuation: String?,
-        size: Int
+        size: Int,
+        sort: OrderSortDto?,
+        status: List<OrderStatusDto>?
     ): Slice<OrderDto> {
-        if (!isPlatformSupported(platform)) return Slice.empty()
         return orderService.getOrdersAll(
-            platform,
-            origin,
             continuation,
-            size
+            size,
+            sort,
+            status
         )
     }
 

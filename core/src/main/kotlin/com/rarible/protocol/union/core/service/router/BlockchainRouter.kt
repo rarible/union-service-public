@@ -26,6 +26,13 @@ class BlockchainRouter<T : BlockchainService>(
         )
     }
 
+    fun getEnabledBlockchains(blockchains: List<BlockchainDto>?) =
+        if (blockchains == null || blockchains.isEmpty()) {
+            enabledBlockchains
+        } else {
+            blockchains.filter(enabledBlockchains::contains)
+        }
+
     suspend fun <R : Any> executeForAll(
         blockchains: Collection<BlockchainDto>?,
         clientCall: suspend (service: T) -> R

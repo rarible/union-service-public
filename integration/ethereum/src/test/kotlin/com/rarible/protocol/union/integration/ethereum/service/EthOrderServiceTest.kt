@@ -38,14 +38,14 @@ class EthOrderServiceTest {
         val expected2 = converter.convert(order2, BlockchainDto.ETHEREUM)
 
         coEvery {
-            orderControllerApi.getOrdersAll(origin, PlatformDto.RARIBLE, continuation, size)
+            orderControllerApi.getOrdersAllByStatus(any(), continuation, size, any())
         } returns OrdersPaginationDto(listOf(order1, order2)).toMono()
 
         val result = service.getOrdersAll(
-            com.rarible.protocol.union.dto.PlatformDto.RARIBLE,
-            origin,
             continuation,
-            size
+            size,
+            null,
+            null
         )
 
         assertThat(result.entities).hasSize(2)

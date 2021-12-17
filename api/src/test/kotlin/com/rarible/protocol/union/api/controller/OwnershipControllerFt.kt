@@ -1,10 +1,11 @@
 package com.rarible.protocol.union.api.controller
 
 import com.rarible.core.common.nowMillis
-import com.rarible.core.test.data.randomString
 import com.rarible.protocol.union.api.client.OwnershipControllerApi
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
+import com.rarible.protocol.union.core.continuation.CombinedContinuation
+import com.rarible.protocol.union.core.continuation.page.ArgSlice
 import com.rarible.protocol.union.core.continuation.page.PageSize
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.parser.OwnershipIdParser
@@ -168,21 +169,39 @@ class OwnershipControllerFt : AbstractIntegrationTest() {
     @Test
     fun `get all ownerships - trimmed to size`() = runBlocking<Unit> {
         val blockchains = listOf(BlockchainDto.ETHEREUM, BlockchainDto.FLOW, BlockchainDto.TEZOS)
-        val continuation = "${nowMillis()}_${randomString()}"
+        val now = nowMillis()
+
+        val ethList = listOf(
+            randomEthOwnershipDto().copy(date = now),
+            randomEthOwnershipDto().copy(date = now.minusSeconds(10)),
+            randomEthOwnershipDto().copy(date = now.minusSeconds(15))
+        )
+
+        val flowList = listOf(
+            randomFlowNftOwnershipDto().copy(createdAt = now),
+            randomFlowNftOwnershipDto().copy(createdAt = now.minusSeconds(10))
+        )
+
+        val ethContinuation = "${now.toEpochMilli()}_${ethList.first().id}"
+        val flowContinuation = "${now.toEpochMilli()}_${flowList.first().id}"
+        val cursorArg = CombinedContinuation(
+            mapOf(
+                BlockchainDto.ETHEREUM.toString() to ethContinuation,
+                BlockchainDto.FLOW.toString() to flowContinuation,
+                BlockchainDto.TEZOS.toString() to ArgSlice.COMPLETED,
+            )
+        )
         val size = 3
 
         flowOwnershipControllerApiMock.mockGetNftAllOwnerships(
-            continuation, size, randomFlowNftOwnershipDto(), randomFlowNftOwnershipDto()
+            flowContinuation, size, *flowList.toTypedArray()
         )
         ethereumOwnershipControllerApiMock.mockGetNftAllOwnerships(
-            continuation, size, randomEthOwnershipDto(), randomEthOwnershipDto(), randomEthOwnershipDto()
-        )
-        tezosOwnershipControllerApiMock.mockGetNftAllOwnerships(
-            continuation, size
+            ethContinuation, size, *ethList.toTypedArray()
         )
 
         val ownerships = ownershipControllerClient.getAllOwnerships(
-            blockchains, continuation, size
+            blockchains, cursorArg.toString(), size
         ).awaitFirst()
 
         assertThat(ownerships.ownerships).hasSize(3)

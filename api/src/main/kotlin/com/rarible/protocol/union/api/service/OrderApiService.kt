@@ -10,6 +10,7 @@ import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
+import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.ext
@@ -65,6 +66,21 @@ class OrderApiService(
         ).getSlice(size)
     }
 
+    suspend fun getOrdersAll(
+        blockchains: List<BlockchainDto>?,
+        continuation: String?,
+        size: Int,
+        sort: OrderSortDto?,
+        status: List<OrderStatusDto>?
+    ): Slice<OrderDto> {
+        val evaluatedBlockchains = router.getEnabledBlockchains(blockchains).map(BlockchainDto::name)
+        val slices = getOrdersByBlockchains(continuation, evaluatedBlockchains) { blockchain, continuation ->
+            val blockDto = BlockchainDto.valueOf(blockchain)
+            router.getService(blockDto).getOrdersAll(continuation, size, sort, status)
+        }
+        return ArgPaging(OrderContinuation.ByLastUpdatedAndId, slices).getSlice(size)
+    }
+
     suspend fun getOrderBidsByItem(
         blockchain: BlockchainDto,
         platform: PlatformDto?,
@@ -118,6 +134,27 @@ class OrderApiService(
                         ArgSlice(currency, currencyContinuation, Slice(null, emptyList()))
                     } else {
                         ArgSlice(currency, currencyContinuation, clientCall(currency, currencyContinuation))
+                    }
+                }
+            }
+        }.awaitAll()
+    }
+
+    private suspend fun getOrdersByBlockchains(
+        continuation: String?,
+        blockchains: Collection<String>,
+        clientCall: suspend (blockchain: String, continuation: String?) -> Slice<OrderDto>
+    ): List<ArgSlice<OrderDto>> {
+        val currentContinuation = CombinedContinuation.parse(continuation)
+        return coroutineScope {
+            blockchains.map { blockchain ->
+                async {
+                    val blockchainContinuation = currentContinuation.continuations[blockchain]
+                    // For completed blockchain we do not request orders
+                    if (blockchainContinuation == ArgSlice.COMPLETED) {
+                        ArgSlice(blockchain, blockchainContinuation, Slice(null, emptyList()))
+                    } else {
+                        ArgSlice(blockchain, blockchainContinuation, clientCall(blockchain, blockchainContinuation))
                     }
                 }
             }
