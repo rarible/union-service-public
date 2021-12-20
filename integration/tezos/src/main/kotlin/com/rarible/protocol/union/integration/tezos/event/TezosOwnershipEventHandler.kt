@@ -19,7 +19,7 @@ open class TezosOwnershipEventHandler(
 
     @CaptureTransaction("OwnershipEvent#TEZOS")
     override suspend fun handle(event: TezosOwnershipSafeEventDto) {
-        logger.info("Received Tezos Ownership event: type={}", event::class.java.simpleName)
+        logger.info("Received Tezos Ownership event: {}", event)
 
         when (event.type) {
             TezosOwnershipSafeEventDto.Type.UPDATE -> {
