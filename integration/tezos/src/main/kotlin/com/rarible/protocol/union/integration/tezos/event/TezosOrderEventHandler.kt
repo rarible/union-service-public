@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.integration.tezos.event
 
 import com.rarible.core.apm.CaptureTransaction
+import com.rarible.protocol.tezos.api.ApiClient
 import com.rarible.protocol.tezos.dto.TezosOrderSafeEventDto
 import com.rarible.protocol.union.core.handler.AbstractBlockchainEventHandler
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
@@ -17,9 +18,11 @@ open class TezosOrderEventHandler(
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
+    private val mapper = ApiClient.createDefaultObjectMapper()
+
     @CaptureTransaction("OrderEvent#TEZOS")
     override suspend fun handle(event: TezosOrderSafeEventDto) {
-        logger.info("Received Tezos Order event: type={}", event::class.java.simpleName)
+        logger.info("Received Tezos Order event: {}", mapper.writeValueAsString(event))
 
         when (event.type) {
             TezosOrderSafeEventDto.Type.UPDATE -> {
