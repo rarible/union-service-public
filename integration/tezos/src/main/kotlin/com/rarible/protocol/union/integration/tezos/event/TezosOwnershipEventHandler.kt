@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.integration.tezos.event
 
 import com.rarible.core.apm.CaptureTransaction
+import com.rarible.protocol.tezos.api.ApiClient.createDefaultObjectMapper
 import com.rarible.protocol.tezos.dto.TezosOwnershipSafeEventDto
 import com.rarible.protocol.union.core.handler.AbstractBlockchainEventHandler
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
@@ -17,9 +18,11 @@ open class TezosOwnershipEventHandler(
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
+    private val mapper = createDefaultObjectMapper()
+
     @CaptureTransaction("OwnershipEvent#TEZOS")
     override suspend fun handle(event: TezosOwnershipSafeEventDto) {
-        logger.info("Received Tezos Ownership event: {}", event)
+        logger.info("Received Tezos Ownership event: {}", mapper.writeValueAsString(event))
 
         when (event.type) {
             TezosOwnershipSafeEventDto.Type.UPDATE -> {
