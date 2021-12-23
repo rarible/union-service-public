@@ -24,7 +24,7 @@ class EnrichmentOrderEventService(
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    suspend fun updateOrder(order: OrderDto, notificationEnabled: Boolean = true, ownershipEnabled: Boolean = true) = coroutineScope {
+    suspend fun updateOrder(order: OrderDto, notificationEnabled: Boolean = true) = coroutineScope {
         val blockchain = order.id.blockchain
         val makeAssetExt = order.make.type.ext
         val takeAssetExt = order.take.type.ext
@@ -37,22 +37,16 @@ class EnrichmentOrderEventService(
 
         val sellUpdateFuture = makeItemId?.let {
             async {
-                // MP-2267
-                // We send duplicate ownership event:
-                // 1. The first time we send ownership event here (for example we could send with wrong value)
-                // 2. Then we proxy ownership event from blockchains to marketplace after we get ownership event
-                if (ownershipEnabled) {
-                    // Ownership should be updated first in order to emit events in correct order
-                    // Otherwise there could be situation when Order for item changed, but ownership triggers item
-                    // event caused by stock re-evaluation later than order for item updated
-                    ignoreApi404 {
-                        val ownershipId = ShortOwnershipId(
-                            makeItemId.blockchain, makeItemId.token, makeItemId.tokenId, order.maker.value
-                        )
-                        enrichmentOwnershipEventService.onOwnershipBestSellOrderUpdated(
-                            ownershipId, order, notificationEnabled
-                        )
-                    }
+                // Ownership should be updated first in order to emit events in correct order
+                // Otherwise there could be situation when Order for item changed, but ownership triggers item
+                // event caused by stock re-evaluation later than order for item updated
+                ignoreApi404 {
+                    val ownershipId = ShortOwnershipId(
+                        makeItemId.blockchain, makeItemId.token, makeItemId.tokenId, order.maker.value
+                    )
+                    enrichmentOwnershipEventService.onOwnershipBestSellOrderUpdated(
+                        ownershipId, order, notificationEnabled
+                    )
                 }
                 ignoreApi404 {
                     enrichmentItemEventService.onItemBestSellOrderUpdated(makeItemId, order, notificationEnabled)
