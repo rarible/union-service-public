@@ -7,6 +7,7 @@ import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
+import com.rarible.protocol.union.dto.ItemDeleteEventDto
 import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.ItemUpdateEventDto
@@ -115,10 +116,6 @@ class EnrichmentRefreshService(
         logger.info("Starting refresh of Item [{}]", shortItemId)
         val itemDtoDeferred = async { itemService.fetch(shortItemId) }
         val sellStatsDeferred = async { ownershipService.getItemSellStats(shortItemId) }
-        val metaDeferred = async {
-            val meta = itemDtoDeferred.await().meta
-            meta?.let { enrichmentMetaService.enrichMeta(meta, shortItemId) }
-        }
 
         // Looking for best sell orders
         val bestSellOrdersDto = sellCurrencies.map { currencyId ->
@@ -160,14 +157,25 @@ class EnrichmentRefreshService(
             shortItem
         }
 
-        val ordersHint = (bestSellOrdersDto + bestBidOrdersDto).associateBy { it.id }
-
-        val dto = EnrichedItemConverter.convert(itemDto, updatedItem, metaDeferred.await(), ordersHint)
-        val event = ItemUpdateEventDto(
-            itemId = dto.id,
-            item = dto,
-            eventId = UUID.randomUUID().toString()
-        )
+        val (dto, event) = if (itemDto.deleted) {
+            val enriched = EnrichedItemConverter.convert(itemDto, updatedItem, null, emptyMap(), emptyList())
+            Pair(enriched, ItemDeleteEventDto(
+                itemId = enriched.id,
+                eventId = UUID.randomUUID().toString()
+            ))
+        } else {
+            val metaDeferred = async {
+                val meta = itemDtoDeferred.await().meta
+                meta?.let { enrichmentMetaService.enrichMeta(meta, shortItemId) }
+            }
+            val ordersHint = (bestSellOrdersDto + bestBidOrdersDto).associateBy { it.id }
+            val enriched = EnrichedItemConverter.convert(itemDto, updatedItem, metaDeferred.await(), ordersHint)
+            Pair(enriched, ItemUpdateEventDto(
+                itemId = enriched.id,
+                item = enriched,
+                eventId = UUID.randomUUID().toString()
+            ))
+        }
         itemEventListeners.forEach { it.onEvent(event) }
 
         dto
@@ -215,13 +223,22 @@ class EnrichmentRefreshService(
         short: ShortItem,
         item: UnionItem
     ): ItemDto {
-        val dto = itemService.enrichItem(short, item, emptyMap(), emptyMap())
-        val event = ItemUpdateEventDto(
-            itemId = dto.id,
-            item = dto,
-            eventId = UUID.randomUUID().toString()
-        )
+        val (dto, event) = if (item.deleted) {
+            val enriched = EnrichedItemConverter.convert(item, short, null, emptyMap(), emptyList())
+            Pair(enriched, ItemDeleteEventDto(
+                itemId = enriched.id,
+                eventId = UUID.randomUUID().toString()
+            ))
+        } else {
+            val enriched = itemService.enrichItem(short, item, emptyMap(), emptyMap())
+            Pair(enriched, ItemUpdateEventDto(
+                itemId = enriched.id,
+                item = enriched,
+                eventId = UUID.randomUUID().toString()
+            ))
+        }
         itemEventListeners.forEach { it.onEvent(event) }
+
         return dto
     }
 

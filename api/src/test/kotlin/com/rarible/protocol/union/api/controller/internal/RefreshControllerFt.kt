@@ -4,6 +4,7 @@ import com.rarible.core.kafka.KafkaMessage
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.ItemDeleteEventDto
 import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.OwnershipDto
@@ -109,6 +110,37 @@ class RefreshControllerFt : AbstractIntegrationTest() {
         coVerify {
             testItemEventProducer.send(match<KafkaMessage<ItemEventDto>> { message ->
                 message.value.itemId == ethItemId
+            })
+        }
+    }
+
+    @Test
+    fun `refresh deleted item`() = runBlocking<Unit> {
+        val ethItemId = randomEthItemId()
+        val ethItem = randomEthNftItemDto(ethItemId).copy(deleted = true)
+        val unionItem = EthItemConverter.convert(ethItem, ethItemId.blockchain)
+        val shortItem = ShortItemConverter.convert(unionItem)
+
+        enrichmentItemService.save(
+            shortItem.copy(
+                bestSellOrder = null,
+                bestBidOrder = null,
+                bestSellOrders = emptyMap(),
+                bestBidOrders = emptyMap()
+            )
+        )
+
+        val uri = "$baseUri/v0.1/refresh/item/${ethItemId.fullId()}/refresh"
+
+        ethereumItemControllerApiMock.mockGetNftItemById(ethItemId, ethItem)
+        ethereumAuctionControllerApiMock.mockGetAuctionsByItem(ethItemId, emptyList())
+
+        val result = testRestTemplate.postForEntity(uri, null, ItemDto::class.java).body!!
+
+        assertThat(result.deleted).isTrue
+        coVerify {
+            testItemEventProducer.send(match<KafkaMessage<ItemEventDto>> { message ->
+                message.value is ItemDeleteEventDto && message.value.itemId == ethItemId
             })
         }
     }
@@ -247,6 +279,44 @@ class RefreshControllerFt : AbstractIntegrationTest() {
         coVerify {
             testOwnershipEventProducer.send(match<KafkaMessage<OwnershipEventDto>> { message ->
                 message.value.ownershipId == ethOwnershipId
+            })
+        }
+    }
+
+    @Test
+    fun `reconcile deleted item`() = runBlocking<Unit> {
+        val ethItemId = randomEthItemId()
+        val ethItem = randomEthNftItemDto(ethItemId).copy(deleted = true)
+
+        val ethBestSell = randomEthLegacySellOrderDto(ethItemId)
+        val unionBestSell = ethOrderConverter.convert(ethBestSell, ethItemId.blockchain)
+
+        val ethBestBid = randomEthLegacyBidOrderDto(ethItemId)
+        val unionBestBid = ethOrderConverter.convert(ethBestBid, ethItemId.blockchain)
+
+        val uri = "$baseUri/v0.1/refresh/item/${ethItemId.fullId()}/reconcile"
+
+        ethereumItemControllerApiMock.mockGetNftItemById(ethItemId, ethItem)
+        ethereumOrderControllerApiMock.mockGetCurrenciesBySellOrdersOfItem(ethItemId, ethBestSell.take.assetType)
+        ethereumOrderControllerApiMock.mockGetSellOrdersByItemAndByStatus(
+            ethItemId,
+            unionBestSell.sellCurrencyId,
+            ethBestSell
+        )
+
+        ethereumOrderControllerApiMock.mockGetCurrenciesByBidOrdersOfItem(ethItemId, ethBestBid.make.assetType)
+        ethereumOrderControllerApiMock.mockGetOrderBidsByItemAndByStatus(
+            ethItemId,
+            unionBestBid.bidCurrencyId,
+            ethBestBid
+        )
+
+        val result = testRestTemplate.postForEntity(uri, null, ItemDto::class.java).body!!
+        assertThat(result.deleted).isTrue
+
+        coVerify {
+            testItemEventProducer.send(match<KafkaMessage<ItemEventDto>> { message ->
+                message.value is ItemDeleteEventDto && message.value.itemId == ethItemId
             })
         }
     }
