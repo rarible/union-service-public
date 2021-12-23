@@ -7,8 +7,10 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemDeleteEventDto
 import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.ItemEventDto
+import com.rarible.protocol.union.dto.ItemUpdateEventDto
 import com.rarible.protocol.union.dto.OwnershipDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
+import com.rarible.protocol.union.dto.OwnershipUpdateEventDto
 import com.rarible.protocol.union.enrichment.converter.ShortItemConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOwnershipConverter
@@ -109,7 +111,7 @@ class RefreshControllerFt : AbstractIntegrationTest() {
 
         coVerify {
             testItemEventProducer.send(match<KafkaMessage<ItemEventDto>> { message ->
-                message.value.itemId == ethItemId
+                message.value is ItemUpdateEventDto && message.value.itemId == ethItemId
             })
         }
     }
@@ -241,7 +243,7 @@ class RefreshControllerFt : AbstractIntegrationTest() {
 
         coVerify {
             testItemEventProducer.send(match<KafkaMessage<ItemEventDto>> { message ->
-                message.value.itemId == ethItemId
+                message.value is ItemUpdateEventDto && message.value.itemId == ethItemId
             })
         }
     }
@@ -278,7 +280,7 @@ class RefreshControllerFt : AbstractIntegrationTest() {
 
         coVerify {
             testOwnershipEventProducer.send(match<KafkaMessage<OwnershipEventDto>> { message ->
-                message.value.ownershipId == ethOwnershipId
+                message.value is OwnershipUpdateEventDto && message.value.ownershipId == ethOwnershipId
             })
         }
     }
