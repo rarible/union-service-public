@@ -9,5 +9,6 @@ data class MetaProperties(
     val ipfsGateway: String,
     val mediaFetchTimeout: Int,
     val mediaFetchMaxSize: Long,
-    val openSeaProxyUrl: String
+    val openSeaProxyUrl: String,
+    val returnOnlyCachedContentMeta: Boolean = false
 )
