@@ -31,8 +31,10 @@ import com.rarible.protocol.union.dto.PendingOrderCancelDto
 import com.rarible.protocol.union.dto.PendingOrderDto
 import com.rarible.protocol.union.dto.PendingOrderMatchDto
 import com.rarible.protocol.union.dto.PlatformDto
+import com.rarible.protocol.union.dto.UnionAddress
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
+import scalether.domain.Address
 import java.time.Instant
 
 @Component
@@ -54,7 +56,8 @@ class EthOrderConverter(
     private suspend fun convertInternal(order: com.rarible.protocol.dto.OrderDto, blockchain: BlockchainDto): OrderDto {
         val orderId = OrderIdDto(blockchain, EthConverter.convert(order.hash))
         val maker = EthConverter.convert(order.maker, blockchain)
-        val taker = order.taker?.let { EthConverter.convert(it, blockchain) }
+        val ethTaker = if (order.taker != null && order.taker != Address.ZERO()) order.taker else null
+        val taker = ethTaker?.let { EthConverter.convert(it, blockchain) }
         val make = EthConverter.convert(order.make, blockchain)
         val take = EthConverter.convert(order.take, blockchain)
         // For BID (make = currency, take - NFT) we're calculating prices for taker
