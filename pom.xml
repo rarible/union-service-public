@@ -25,6 +25,13 @@
             <url>https://jitpack.io</url>
         </repository>
     </repositories>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>nexus-ext-maven-public</id>
+            <name>nexus-ext-maven-public</name>
+            <url>https://repo.rarible.org/repository/maven-public/</url>
+        </pluginRepository>
+    </pluginRepositories>
 
     <properties>
         <revision>1.20.0</revision>
