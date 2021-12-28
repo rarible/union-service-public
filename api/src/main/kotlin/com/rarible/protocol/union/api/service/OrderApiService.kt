@@ -17,6 +17,7 @@ import com.rarible.protocol.union.dto.ext
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
@@ -24,7 +25,10 @@ class OrderApiService(
     private val router: BlockchainRouter<OrderService>
 ) {
 
+    private val logger = LoggerFactory.getLogger(javaClass)
+
     suspend fun getByIds(ids: List<OrderIdDto>): List<OrderDto> {
+        logger.info("Getting orders by IDs: [{}]", ids.map { "${it.blockchain}:${it.value}" })
         val groupedIds = ids.groupBy({ it.blockchain }, { it.value })
 
         return groupedIds.flatMap {
