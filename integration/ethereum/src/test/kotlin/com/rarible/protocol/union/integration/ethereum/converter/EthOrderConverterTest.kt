@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.integration.ethereum.converter
 
+import com.rarible.core.test.data.randomAddress
 import com.rarible.protocol.dto.OrderCancelDto
 import com.rarible.protocol.dto.OrderRaribleV2DataV1Dto
 import com.rarible.protocol.dto.OrderSideMatchDto
@@ -33,7 +34,7 @@ class EthOrderConverterTest {
 
     @Test
     fun `eth order - legacy`() = runBlocking<Unit> {
-        val dto = randomEthLegacySellOrderDto()
+        val dto = randomEthLegacySellOrderDto().copy(taker = randomAddress())
 
         val converted = ethOrderConverter.convert(dto, BlockchainDto.ETHEREUM)
 
@@ -134,7 +135,7 @@ class EthOrderConverterTest {
 
     @Test
     fun `eth order rarible v2`() = runBlocking<Unit> {
-        val dto = randomEthV2OrderDto()
+        val dto = randomEthV2OrderDto().copy(taker = randomAddress())
 
         val converted = ethOrderConverter.convert(dto, BlockchainDto.ETHEREUM)
 
@@ -176,7 +177,7 @@ class EthOrderConverterTest {
 
     @Test
     fun `eth order opensea v1`() = runBlocking<Unit> {
-        val dto = randomEthOpenSeaV1OrderDto()
+        val dto = randomEthOpenSeaV1OrderDto().copy(taker = randomAddress())
 
         val converted = ethOrderConverter.convert(dto, BlockchainDto.ETHEREUM)
 
@@ -236,7 +237,7 @@ class EthOrderConverterTest {
 
     @Test
     fun `eth order crypto punks`() = runBlocking<Unit> {
-        val dto = randomEthCryptoPunksOrderDto()
+        val dto = randomEthCryptoPunksOrderDto().copy(taker = randomAddress())
 
         val converted = ethOrderConverter.convert(dto, BlockchainDto.ETHEREUM)
 

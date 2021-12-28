@@ -362,7 +362,7 @@ fun randomEthCryptoPunksOrderDto(make: AssetDto, maker: Address, take: AssetDto)
     return CryptoPunkOrderDto(
         status = OrderStatusDto.ACTIVE,
         maker = maker,
-        taker = null,
+        taker = randomAddress(),
         make = make,
         take = take,
         fill = randomBigInt(),
