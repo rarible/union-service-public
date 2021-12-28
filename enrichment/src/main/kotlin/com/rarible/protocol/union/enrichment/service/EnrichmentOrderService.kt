@@ -128,6 +128,7 @@ class EnrichmentOrderService(
         var order: OrderDto?
         var continuation: String? = null
         var attempts = 0
+        // TODO: for optimization we should request bunch orders instead of one by one
         do {
             val slice = clientCall(platform, continuation)
             order = slice.entities.firstOrNull()?.takeIf { it.taker == null }
