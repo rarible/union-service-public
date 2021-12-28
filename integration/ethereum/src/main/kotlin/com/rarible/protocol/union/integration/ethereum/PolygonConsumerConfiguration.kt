@@ -93,21 +93,21 @@ class PolygonConsumerConfiguration(
     @Qualifier("polygon.nft.consumer.factory")
     fun polygonNftIndexerConsumerFactory(): NftIndexerEventsConsumerFactory {
         val replicaSet = consumer.brokerReplicaSet
-        return NftIndexerEventsConsumerFactory(replicaSet, host, env)
+        return NftIndexerEventsConsumerFactory(replicaSet!!, host, env)
     }
 
     @Bean
     @Qualifier("polygon.order.consumer.factory")
     fun polygonOrderIndexerConsumerFactory(): OrderIndexerEventsConsumerFactory {
         val replicaSet = consumer.brokerReplicaSet
-        return OrderIndexerEventsConsumerFactory(replicaSet, host, env)
+        return OrderIndexerEventsConsumerFactory(replicaSet!!, host, env)
     }
 
     @Bean
     @Qualifier("polygon.activity.consumer.factory")
     fun polygonActivityConsumerFactory(): EthActivityEventsConsumerFactory {
         val replicaSet = consumer.brokerReplicaSet
-        return EthActivityEventsConsumerFactory(replicaSet, host, env)
+        return EthActivityEventsConsumerFactory(replicaSet!!, host, env)
     }
 
     @Bean

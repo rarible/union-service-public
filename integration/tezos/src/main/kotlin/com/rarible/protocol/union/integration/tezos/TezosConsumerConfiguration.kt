@@ -45,7 +45,7 @@ class TezosConsumerConfiguration(
     @Bean
     fun tezosConsumerFactory(): TezosEventsConsumerFactory {
         return TezosEventsConsumerFactory(
-            consumer.brokerReplicaSet,
+            consumer.brokerReplicaSet!!,
             host,
             env,
             StringUtils.trimToNull(consumer.username),
