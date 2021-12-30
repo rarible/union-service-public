@@ -148,4 +148,41 @@ class FlowActivityConverterTest {
         assertThat(converted.blockchainInfo!!.blockNumber).isEqualTo(dto.blockNumber)
         assertThat(converted.blockchainInfo!!.logIndex).isEqualTo(dto.logIndex)
     }
+
+    @Test
+    fun `flow order activity bid`() = runBlocking<Unit> {
+        val dto = randomFlowNftOrderActivityListDto()
+        val converted = converter.convert(dto, BlockchainDto.FLOW) as OrderListActivityDto
+
+        assertThat(converted.id.value).isEqualTo(dto.id)
+        assertThat(converted.date).isEqualTo(dto.date)
+        assertThat(converted.price).isEqualTo(dto.price)
+        assertThat(converted.priceUsd).isEqualTo(2.toBigDecimal())
+        assertThat(converted.hash).isEqualTo(dto.hash)
+        assertThat(converted.maker.value).isEqualTo(dto.maker)
+        assertThat(converted.make.value).isEqualTo(dto.make.value)
+        val makeType = converted.make.type as FlowAssetTypeFtDto
+        assertThat(makeType.contract.value).isEqualTo(dto.make.contract)
+        assertThat(converted.take.value).isEqualTo(dto.take.value)
+        val takeType = converted.take.type as FlowAssetTypeFtDto
+        assertThat(takeType.contract.value).isEqualTo(dto.take.contract)
+    }
+
+    @Test
+    fun `flow order activity cancel bid`() = runBlocking<Unit> {
+        val dto = randomFlowCancelListActivityDto()
+        val converted =
+            converter.convert(dto, BlockchainDto.FLOW) as OrderCancelListActivityDto
+
+        assertThat(converted.id.value).isEqualTo(dto.id)
+        assertThat(converted.date).isEqualTo(dto.date)
+        assertThat(converted.hash).isEqualTo(dto.hash)
+        assertThat(converted.maker.value).isEqualTo(dto.maker)
+        val makeType = converted.make as FlowAssetTypeFtDto
+        assertThat(makeType.contract.value).isEqualTo(dto.make.contract)
+        val takeType = converted.take as FlowAssetTypeFtDto
+        assertThat(takeType.contract.value).isEqualTo(dto.take.contract)
+        assertThat(converted.transactionHash).isEqualTo(dto.transactionHash)
+        assertThat(converted.blockchainInfo!!.transactionHash).isEqualTo(dto.transactionHash)
+    }
 }

@@ -15,6 +15,8 @@ import com.rarible.protocol.dto.FlowCreatorDto
 import com.rarible.protocol.dto.FlowMintDto
 import com.rarible.protocol.dto.FlowNftCollectionDto
 import com.rarible.protocol.dto.FlowNftItemDto
+import com.rarible.protocol.dto.FlowNftOrderActivityBidDto
+import com.rarible.protocol.dto.FlowNftOrderActivityCancelBidDto
 import com.rarible.protocol.dto.FlowNftOrderActivityCancelListDto
 import com.rarible.protocol.dto.FlowNftOrderActivityListDto
 import com.rarible.protocol.dto.FlowNftOrderActivitySellDto
@@ -140,7 +142,6 @@ fun randomFlowV1OrderDto(itemId: ItemIdDto): FlowOrderDto {
         ),
         collection = randomFlowContract(),
         lastUpdateAt = nowMillis(),
-        offeredNftId = randomString(),
         makeStock = randomBigInt()
     )
 }
@@ -189,9 +190,37 @@ fun randomFlowNftOrderActivityListDto(): FlowNftOrderActivityListDto {
     )
 }
 
+fun randomFlowNftOrderActivityBidDto(): FlowNftOrderActivityBidDto {
+    return FlowNftOrderActivityBidDto(
+        id = randomString(),
+        date = nowMillis(),
+        hash = randomString(),
+        maker = randomString(),
+        make = FlowAssetFungibleDto(randomString(), randomBigDecimal()),
+        take = FlowAssetFungibleDto(randomString(), randomBigDecimal()),
+        price = randomBigDecimal()
+    )
+}
+
 
 fun randomFlowCancelListActivityDto(): FlowNftOrderActivityCancelListDto {
     return FlowNftOrderActivityCancelListDto(
+        id = randomString(),
+        date = nowMillis(),
+        hash = randomString(),
+        maker = randomString(),
+        make = FlowAssetFungibleDto(randomString(), randomBigDecimal()),
+        take = FlowAssetFungibleDto(randomString(), randomBigDecimal()),
+        price = randomBigDecimal(),
+        transactionHash = randomString(),
+        blockHash = randomString(),
+        blockNumber = randomLong(),
+        logIndex = randomInt()
+    )
+}
+
+fun randomFlowCancelBidActivityDto(): FlowNftOrderActivityCancelBidDto {
+    return FlowNftOrderActivityCancelBidDto(
         id = randomString(),
         date = nowMillis(),
         hash = randomString(),
