@@ -7,27 +7,7 @@ import com.rarible.core.test.data.randomBoolean
 import com.rarible.core.test.data.randomInt
 import com.rarible.core.test.data.randomLong
 import com.rarible.core.test.data.randomString
-import com.rarible.protocol.dto.FlowAssetDto
-import com.rarible.protocol.dto.FlowAssetFungibleDto
-import com.rarible.protocol.dto.FlowAssetNFTDto
-import com.rarible.protocol.dto.FlowBurnDto
-import com.rarible.protocol.dto.FlowCreatorDto
-import com.rarible.protocol.dto.FlowMintDto
-import com.rarible.protocol.dto.FlowNftCollectionDto
-import com.rarible.protocol.dto.FlowNftItemDto
-import com.rarible.protocol.dto.FlowNftOrderActivityCancelListDto
-import com.rarible.protocol.dto.FlowNftOrderActivityListDto
-import com.rarible.protocol.dto.FlowNftOrderActivitySellDto
-import com.rarible.protocol.dto.FlowNftOwnershipDto
-import com.rarible.protocol.dto.FlowOrderActivityMatchSideDto
-import com.rarible.protocol.dto.FlowOrderDataDto
-import com.rarible.protocol.dto.FlowOrderDto
-import com.rarible.protocol.dto.FlowOrderStatusDto
-import com.rarible.protocol.dto.FlowRoyaltyDto
-import com.rarible.protocol.dto.FlowTransferDto
-import com.rarible.protocol.dto.MetaAttributeDto
-import com.rarible.protocol.dto.MetaDto
-import com.rarible.protocol.dto.PayInfoDto
+import com.rarible.protocol.dto.*
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
@@ -140,7 +120,6 @@ fun randomFlowV1OrderDto(itemId: ItemIdDto): FlowOrderDto {
         ),
         collection = randomFlowContract(),
         lastUpdateAt = nowMillis(),
-        offeredNftId = randomString(),
         makeStock = randomBigInt()
     )
 }
@@ -189,9 +168,37 @@ fun randomFlowNftOrderActivityListDto(): FlowNftOrderActivityListDto {
     )
 }
 
+fun randomFlowNftOrderActivityBidDto(): FlowNftOrderActivityBidDto {
+    return FlowNftOrderActivityBidDto(
+        id = randomString(),
+        date = nowMillis(),
+        hash = randomString(),
+        maker = randomString(),
+        make = FlowAssetFungibleDto(randomString(), randomBigDecimal()),
+        take = FlowAssetFungibleDto(randomString(), randomBigDecimal()),
+        price = randomBigDecimal()
+    )
+}
+
 
 fun randomFlowCancelListActivityDto(): FlowNftOrderActivityCancelListDto {
     return FlowNftOrderActivityCancelListDto(
+        id = randomString(),
+        date = nowMillis(),
+        hash = randomString(),
+        maker = randomString(),
+        make = FlowAssetFungibleDto(randomString(), randomBigDecimal()),
+        take = FlowAssetFungibleDto(randomString(), randomBigDecimal()),
+        price = randomBigDecimal(),
+        transactionHash = randomString(),
+        blockHash = randomString(),
+        blockNumber = randomLong(),
+        logIndex = randomInt()
+    )
+}
+
+fun randomFlowCancelBidActivityDto(): FlowNftOrderActivityCancelBidDto {
+    return FlowNftOrderActivityCancelBidDto(
         id = randomString(),
         date = nowMillis(),
         hash = randomString(),
