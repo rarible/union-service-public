@@ -31,7 +31,6 @@ import java.time.Instant
 class ItemRepository(
     private val template: ReactiveMongoTemplate
 ) {
-
     private val logger = LoggerFactory.getLogger(ItemRepository::class.java)
 
     val collection: String = template.getCollectionName(ShortItem::class.java)
@@ -108,6 +107,7 @@ class ItemRepository(
 
         private val ALL_INDEXES = listOf(
             MULTI_CURRENCY_DEFINITION,
+            BY_BEST_SELL_PLATFORM_DEFINITION,
             AUCTION_DEFINITION
         )
     }
