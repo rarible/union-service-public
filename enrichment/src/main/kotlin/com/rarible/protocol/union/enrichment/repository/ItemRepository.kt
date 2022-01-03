@@ -3,9 +3,11 @@ package com.rarible.protocol.union.enrichment.repository
 import com.mongodb.client.result.DeleteResult
 import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.apm.SpanType
+import com.rarible.core.mongo.util.div
 import com.rarible.protocol.union.dto.AuctionIdDto
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
+import com.rarible.protocol.union.enrichment.model.ShortOrder
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitFirst
@@ -70,6 +72,20 @@ class ItemRepository(
         return template.find(query, ShortItem::class.java).asFlow()
     }
 
+    fun findWithSellAndPlatform(platform: String, fromShortItemId: ShortItemId?): Flow<ShortItem> {
+        val criteria = Criteria().andOperator(
+            listOfNotNull(
+                ShortItem::bestSellOrder / ShortOrder::platform isEqualTo platform,
+                if (fromShortItemId != null) Criteria.where("_id").gt(fromShortItemId) else null
+            )
+        )
+        val query = Query(criteria)
+            .with(Sort.by("${ShortItem::bestSellOrder.name}.${ShortOrder::platform.name}", "_id"))
+            .withHint(BY_BEST_SELL_PLATFORM_DEFINITION.indexKeys)
+
+        return template.find(query, ShortItem::class.java).asFlow()
+    }
+
     suspend fun delete(itemId: ShortItemId): DeleteResult? {
         val criteria = Criteria("_id").isEqualTo(itemId)
         return template.remove(Query(criteria), collection).awaitFirstOrNull()
@@ -79,6 +95,11 @@ class ItemRepository(
         private val MULTI_CURRENCY_DEFINITION = Index()
             .on(ShortItem::multiCurrency.name, Sort.Direction.DESC)
             .on(ShortItem::lastUpdatedAt.name, Sort.Direction.DESC)
+            .background()
+
+        private val BY_BEST_SELL_PLATFORM_DEFINITION = Index()
+            .on("${ShortItem::bestSellOrder.name}.${ShortOrder::platform.name}", Sort.Direction.ASC)
+            .on("_id", Sort.Direction.ASC)
             .background()
 
         private val AUCTION_DEFINITION = Index()
