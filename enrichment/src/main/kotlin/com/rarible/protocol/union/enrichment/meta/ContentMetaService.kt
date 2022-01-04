@@ -30,6 +30,7 @@ class ContentMetaService(
         val now = nowMillis()
         return try {
             if (metaProperties.returnOnlyCachedContentMeta) {
+                logger.info("Returning only cached meta for $url")
                 val onlyCachedDescriptor = object : CacheDescriptor<ContentMeta> {
                     override val collection: String
                         get() = mediaMetaService.collection
