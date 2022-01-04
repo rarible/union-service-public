@@ -57,3 +57,6 @@ listener:
     auctionBatchSize: 50
     threadCount: 2
     notificationEnabled: false
+
+meta:
+  returnOnlyCachedContentMeta: false
