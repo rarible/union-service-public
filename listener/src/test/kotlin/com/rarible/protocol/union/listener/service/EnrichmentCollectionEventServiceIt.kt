@@ -7,7 +7,6 @@ import com.rarible.protocol.union.core.converter.ContractAddressConverter
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.enrichment.converter.EnrichedItemConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
-import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.service.EnrichmentMetaService
 import com.rarible.protocol.union.enrichment.test.data.randomShortItem
@@ -81,7 +80,7 @@ class EnrichmentCollectionEventServiceIt : AbstractIntegrationTest() {
 
         val expected = EnrichedItemConverter.convert(unionItem).copy(
             bestSellOrder = unionBestSell,
-            meta = enrichmentMetaService.enrichMeta(unionItem.meta!!, ShortItemId(itemId))
+            meta = enrichmentMetaService.enrichMeta(itemId, unionItem.meta!!)
         )
 
         val saved = itemService.get(shortItem.id)!!
@@ -127,7 +126,7 @@ class EnrichmentCollectionEventServiceIt : AbstractIntegrationTest() {
 
         val expected = EnrichedItemConverter.convert(unionItem).copy(
             bestBidOrder = unionBestBid,
-            meta = enrichmentMetaService.enrichMeta(unionItem.meta!!, ShortItemId(itemId))
+            meta = enrichmentMetaService.enrichMeta(itemId, unionItem.meta!!)
         )
 
         val saved = itemService.get(shortItem.id)!!

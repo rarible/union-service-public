@@ -16,7 +16,6 @@ import com.rarible.protocol.union.dto.MetaContentDto
 import com.rarible.protocol.union.dto.MetaDto
 import com.rarible.protocol.union.dto.VideoContentDto
 import com.rarible.protocol.union.enrichment.meta.ContentMetaService
-import com.rarible.protocol.union.enrichment.model.ShortItemId
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -33,10 +32,10 @@ class EnrichmentMetaService(
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    suspend fun enrichMeta(originalMeta: UnionMeta?, itemId: ShortItemId): MetaDto? {
-        val meta = originalMeta ?: getMetaSafe(itemId.toDto()) ?: return null
+    suspend fun enrichMeta(itemId: ItemIdDto, originalMetaHint: UnionMeta?): MetaDto? {
+        val meta = originalMetaHint ?: getMetaSafeIfNotFound(itemId) ?: return null
         val enrichedContent = coroutineScope {
-            meta.content.map { async { enrichContent(it, itemId.toDto().fullId()) } }
+            meta.content.map { async { enrichContent(it, itemId.fullId()) } }
         }.awaitAll()
         return MetaDto(
             name = meta.name,
@@ -49,19 +48,19 @@ class EnrichmentMetaService(
 
     suspend fun resetMeta(itemId: ItemIdDto) {
         // TODO[meta-3.0]: re-implement to not request meta here. Record to database with [itemId] and delete by this key.
-        val meta = getMetaSafe(itemId)
+        val meta = getMetaSafeIfNotFound(itemId)
         meta?.let {
             meta.content.forEach { contentMetaService.resetContentMeta(it.url) }
         }
     }
 
-    private suspend fun getMetaSafe(itemId: ItemIdDto): UnionMeta? {
-        try {
-            return router.getService(itemId.blockchain).getItemMetaById(itemId.value)
+    private suspend fun getMetaSafeIfNotFound(itemId: ItemIdDto): UnionMeta? {
+        return try {
+            router.getService(itemId.blockchain).getItemMetaById(itemId.value)
         } catch (e: WebClientResponseProxyException) {
             if (e.statusCode == HttpStatus.NOT_FOUND) {
                 logger.warn("Raw meta for Item [{}] not found", itemId)
-                return null
+                null
             } else {
                 throw e
             }
