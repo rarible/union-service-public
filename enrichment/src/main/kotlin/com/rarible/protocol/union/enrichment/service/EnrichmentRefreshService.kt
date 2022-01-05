@@ -127,7 +127,7 @@ class EnrichmentRefreshService(
         val shortItemId = ShortItemId(itemId)
 
         logger.info("Starting to reconcile Item [{}]", shortItemId)
-        val itemDtoDeferred = async { itemService.fetch(shortItemId) }
+        val itemDtoDeferred = async { itemService.fetch(itemId) }
         val sellStatsDeferred = async { ownershipService.getItemSellStats(shortItemId) }
 
         // Looking for best sell orders

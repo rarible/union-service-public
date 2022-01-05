@@ -10,13 +10,14 @@ import com.rarible.protocol.union.core.util.CompositeItemIdParser
 import com.rarible.protocol.union.dto.AuctionStatusDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.converter.EnrichedItemConverter
+import com.rarible.protocol.union.enrichment.converter.EnrichedMetaConverter
 import com.rarible.protocol.union.enrichment.converter.ShortItemConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.model.ReconciliationMarkType
+import com.rarible.protocol.union.enrichment.service.EnrichmentMetaService
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.repository.ReconciliationMarkRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
-import com.rarible.protocol.union.enrichment.service.EnrichmentMetaService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
 import com.rarible.protocol.union.enrichment.test.data.randomShortItem
 import com.rarible.protocol.union.enrichment.test.data.randomShortOwnership
@@ -67,9 +68,6 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
     lateinit var ethAuctionConverter: EthAuctionConverter
 
     @Autowired
-    lateinit var enrichmentMetaService: EnrichmentMetaService
-
-    @Autowired
     private lateinit var itemReconciliationMarkRepository: ReconciliationMarkRepository
 
     @Test
@@ -77,10 +75,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         val itemId = randomEthItemId()
         val unionItem = randomUnionItem(itemId)
 
-        val expected = EnrichedItemConverter.convert(unionItem).copy(
-            // Eth meta fully qualified, no request should be executed
-            meta = enrichmentMetaService.enrichMeta(unionItem.meta!!, ShortItemId(itemId))
-        )
+        val expected = EnrichedItemConverter.convert(unionItem)
 
         itemEventService.onItemUpdated(unionItem)
 
@@ -125,9 +120,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         val expected = EnrichedItemConverter.convert(unionItem)
             .copy(
                 bestSellOrder = unionBestSell,
-                bestBidOrder = unionBestBid,
-                // Eth meta fully qualified, no request should be executed
-                meta = enrichmentMetaService.enrichMeta(unionItem.meta!!, ShortItemId(itemId))
+                bestBidOrder = unionBestBid
             )
 
         val saved = itemService.get(shortItem.id)!!
@@ -207,9 +200,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         // In result event for item we expect updated totalStock/sellers
         val expected = EnrichedItemConverter.convert(unionItem).copy(
             sellers = 2,
-            totalStock = 30.toBigInteger(),
-            // Eth meta fully qualified, no request should be executed
-            meta = enrichmentMetaService.enrichMeta(unionItem.meta!!, ShortItemId(itemId))
+            totalStock = 30.toBigInteger()
         )
 
         Wait.waitAssert {
@@ -255,11 +246,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         itemEventService.onItemBestSellOrderUpdated(shortItem.id, unionBestSell)
 
         // In result event for Item we expect updated bestSellOrder
-        val expected = EnrichedItemConverter.convert(unionItem).copy(
-            bestSellOrder = unionBestSell,
-            // Eth meta fully qualified, no request should be executed
-            meta = enrichmentMetaService.enrichMeta(unionItem.meta!!, ShortItemId(itemId))
-        )
+        val expected = EnrichedItemConverter.convert(unionItem).copy(bestSellOrder = unionBestSell)
 
         val saved = itemService.get(shortItem.id)!!
         assertThat(saved.bestSellOrder).isEqualTo(ShortOrderConverter.convert(unionBestSell))

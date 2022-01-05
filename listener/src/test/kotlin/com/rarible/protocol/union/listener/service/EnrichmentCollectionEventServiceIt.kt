@@ -4,10 +4,10 @@ import com.rarible.core.test.data.randomAddress
 import com.rarible.core.test.wait.Wait
 import com.rarible.protocol.dto.NftItemsDto
 import com.rarible.protocol.union.enrichment.converter.EnrichedItemConverter
+import com.rarible.protocol.union.enrichment.converter.EnrichedMetaConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
-import com.rarible.protocol.union.enrichment.model.ShortItemId
-import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.service.EnrichmentMetaService
+import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.test.data.randomShortItem
 import com.rarible.protocol.union.integration.ethereum.converter.EthItemConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
@@ -80,7 +80,7 @@ class EnrichmentCollectionEventServiceIt : AbstractIntegrationTest() {
 
         val expected = EnrichedItemConverter.convert(unionItem).copy(
             bestSellOrder = unionBestSell,
-            meta = enrichmentMetaService.enrichMeta(unionItem.meta!!, ShortItemId(itemId))
+            meta = EnrichedMetaConverter.convert(unionItem.meta!!)
         )
 
         val saved = itemService.get(shortItem.id)!!
@@ -126,7 +126,7 @@ class EnrichmentCollectionEventServiceIt : AbstractIntegrationTest() {
 
         val expected = EnrichedItemConverter.convert(unionItem).copy(
             bestBidOrder = unionBestBid,
-            meta = enrichmentMetaService.enrichMeta(unionItem.meta!!, ShortItemId(itemId))
+            meta = EnrichedMetaConverter.convert(unionItem.meta!!)
         )
 
         val saved = itemService.get(shortItem.id)!!

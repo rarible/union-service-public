@@ -21,4 +21,7 @@ interface CollectionService : BlockchainService {
         size: Int
     ): Page<CollectionDto>
 
+    suspend fun refreshCollectionMeta(
+        collectionId: String
+    )
 }

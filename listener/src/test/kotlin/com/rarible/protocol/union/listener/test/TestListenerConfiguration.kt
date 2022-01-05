@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.listener.test
 
 import com.rarible.core.application.ApplicationEnvironmentInfo
+import com.rarible.core.content.meta.loader.ContentMetaLoader
 import com.rarible.core.kafka.RaribleKafkaConsumer
 import com.rarible.core.kafka.RaribleKafkaProducer
 import com.rarible.core.test.ext.KafkaTestExtension.Companion.kafkaContainer
@@ -35,10 +36,12 @@ import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.OrderEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.dto.UnionEventTopicProvider
+import com.rarible.protocol.union.enrichment.meta.UnionMetaLoader
 
 import com.rarible.protocol.union.subscriber.UnionKafkaJsonDeserializer
 import com.rarible.protocol.union.subscriber.UnionKafkaJsonSerializer
 import com.rarible.protocol.union.test.mock.CurrencyMock
+import io.mockk.coEvery
 import io.mockk.mockk
 import org.apache.kafka.clients.consumer.OffsetResetStrategy
 import org.springframework.beans.factory.annotation.Qualifier
@@ -55,6 +58,11 @@ class TestListenerConfiguration {
     fun applicationEnvironmentInfo(): ApplicationEnvironmentInfo {
         return ApplicationEnvironmentInfo("test", "test.com")
     }
+
+    @Bean
+    @Primary
+    @Qualifier("test.union.meta.loader")
+    fun testUnionMetaLoader(): UnionMetaLoader = mockk()
 
     //----------------- UNION CONSUMERS ------------------//
     // Test consumers with EARLIEST offset

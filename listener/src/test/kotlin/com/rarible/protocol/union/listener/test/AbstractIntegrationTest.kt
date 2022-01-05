@@ -17,6 +17,8 @@ import com.rarible.protocol.union.dto.OrderUpdateEventDto
 import com.rarible.protocol.union.dto.OwnershipDeleteEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.dto.OwnershipUpdateEventDto
+import com.rarible.protocol.union.enrichment.meta.UnionMetaLoader
+import io.mockk.clearMocks
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.FlowPreview
@@ -24,14 +26,18 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.runBlocking
+import org.junit.jupiter.api.BeforeEach
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import java.util.*
 import java.util.concurrent.LinkedBlockingQueue
 
-@FlowPreview
 @Suppress("UNCHECKED_CAST")
 abstract class AbstractIntegrationTest {
+
+    @Autowired
+    @Qualifier("test.union.meta.loader")
+    lateinit var testUnionMetaLoader: UnionMetaLoader
 
     //--------------------- ETHEREUM ---------------------//
     @Autowired
@@ -83,6 +89,11 @@ abstract class AbstractIntegrationTest {
     lateinit var activityConsumer: RaribleKafkaConsumer<ActivityDto>
     var activityEvents: Queue<KafkaMessage<ActivityDto>>? = null
     private var activityJob: Deferred<Unit>? = null
+
+    @BeforeEach
+    fun cleanupMetaMocks() {
+        clearMocks(testUnionMetaLoader)
+    }
 
     fun <T> runWithKafka(block: suspend CoroutineScope.() -> T): T = runBlocking {
         orderEvents = LinkedBlockingQueue()

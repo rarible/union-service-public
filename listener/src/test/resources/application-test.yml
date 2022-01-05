@@ -16,6 +16,13 @@ rarible:
         enabled: false
   task:
     initialDelay: 600000
+  loader:
+    workers: 1
+    retry:
+      backoffDelaysMillis: []
+      job:
+        runner:
+        period: 1000000000000000000 # Disable in the tests. Run RetryTasksService manually.
 
 integration:
   ethereum:
@@ -67,6 +74,3 @@ listener:
   reconcile-marks:
     rate: PT1M
     delay: PT60M
-
-meta:
-  returnOnlyCachedContentMeta: false

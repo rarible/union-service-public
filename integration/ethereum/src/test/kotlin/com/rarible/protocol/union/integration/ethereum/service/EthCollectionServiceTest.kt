@@ -10,10 +10,12 @@ import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
 import com.rarible.protocol.union.integration.ethereum.data.randomAddressString
 import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionDto
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
 
 class EthCollectionServiceTest {
@@ -56,6 +58,16 @@ class EthCollectionServiceTest {
         val result = service.getCollectionById(collectionId)
 
         assertThat(result).isEqualTo(expected)
+    }
+
+    @Test
+    fun `ethereum refresh collection meta`() = runBlocking<Unit> {
+        val collectionId = randomAddressString()
+        coEvery {
+            collectionControllerApi.resetNftCollectionMetaById(collectionId)
+        } returns Mono.empty()
+        service.refreshCollectionMeta(collectionId)
+        coVerify(exactly = 1) { collectionControllerApi.resetNftCollectionMetaById(collectionId) }
     }
 
     @Test

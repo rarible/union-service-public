@@ -4,15 +4,18 @@ import com.rarible.protocol.union.api.service.ItemApiService
 import com.rarible.protocol.union.api.util.BlockchainFilter
 import com.rarible.protocol.union.core.continuation.UnionItemContinuation
 import com.rarible.protocol.union.core.exception.UnionNotFoundException
+import com.rarible.protocol.union.core.model.UnionImageProperties
 import com.rarible.protocol.union.core.model.UnionItem
-import com.rarible.protocol.union.core.model.UnionMedia
+import com.rarible.protocol.union.core.model.UnionMeta
+import com.rarible.protocol.union.core.model.UnionMetaContent
+import com.rarible.protocol.union.core.model.UnionVideoProperties
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.RestrictionService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemDto
-import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.ItemsDto
+import com.rarible.protocol.union.dto.MetaContentDto
 import com.rarible.protocol.union.dto.RestrictionCheckFormDto
 import com.rarible.protocol.union.dto.RestrictionCheckResultDto
 import com.rarible.protocol.union.dto.RoyaltiesDto
@@ -22,15 +25,14 @@ import com.rarible.protocol.union.dto.continuation.page.PageSize
 import com.rarible.protocol.union.dto.continuation.page.Paging
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.dto.parser.IdParser
-import com.rarible.protocol.union.dto.subchains
+import com.rarible.protocol.union.enrichment.model.ShortItemId
+import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.service.EnrichmentMetaService
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.slf4j.LoggerFactory
-import org.springframework.core.io.ByteArrayResource
 import org.springframework.core.io.Resource
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
-import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -42,6 +44,7 @@ import java.net.URI
 class ItemController(
     private val itemApiService: ItemApiService,
     private val router: BlockchainRouter<ItemService>,
+    private val enrichmentItemService: EnrichmentItemService,
     private val enrichmentMetaService: EnrichmentMetaService,
     private val restrictionService: RestrictionService
 ) : ItemControllerApi {
@@ -73,21 +76,36 @@ class ItemController(
 
     @GetMapping(value = ["/v0.1/items/{itemId}/animation"])
     suspend fun getItemAnimationById(@PathVariable("itemId") itemId: String): ResponseEntity<Resource> {
-        return getMedia(itemId) { fullId -> itemApiService.animation(fullId) }
+        val meta = getOrAwaitMeta(itemId)
+        val unionMetaContent = meta.content
+            .find { it.properties is UnionVideoProperties && it.representation == MetaContentDto.Representation.ORIGINAL }
+            ?: throw UnionNotFoundException("No animation found for item $itemId")
+        return createRedirectResponse(unionMetaContent)
     }
 
     @GetMapping(value = ["/v0.1/items/{itemId}/image"])
     suspend fun getItemImageById(@PathVariable("itemId") itemId: String): ResponseEntity<Resource> {
-        return getMedia(itemId) { fullId -> itemApiService.image(fullId) }
+        val meta = getOrAwaitMeta(itemId)
+        val unionMetaContent = meta.content
+            .find { it.properties is UnionImageProperties && it.representation == MetaContentDto.Representation.ORIGINAL }
+            ?: throw UnionNotFoundException("No image found for item $itemId")
+        return createRedirectResponse(unionMetaContent)
+    }
+
+    private suspend fun getOrAwaitMeta(itemId: String): UnionMeta {
+        val fullItemId = IdParser.parseItemId(itemId)
+        return itemApiService.getAvailableMetaOrScheduleAndWait(fullItemId)
+            ?: throw UnionNotFoundException("No item found for $itemId")
     }
 
     override suspend fun getItemById(
         itemId: String
     ): ResponseEntity<ItemDto> {
         val fullItemId = IdParser.parseItemId(itemId)
-        val result = router.getService(fullItemId.blockchain).getItemById(fullItemId.value)
-        val enriched = itemApiService.enrich(result)
-        return ResponseEntity.ok(enriched)
+        val unionItem = enrichmentItemService.fetch(fullItemId)
+        val shortItem = enrichmentItemService.get(ShortItemId(fullItemId))
+        val enrichedUnionItem = enrichmentItemService.enrichItem(shortItem, unionItem)
+        return ResponseEntity.ok(enrichedUnionItem)
     }
 
     override suspend fun getItemRoyaltiesById(
@@ -113,10 +131,9 @@ class ItemController(
 
     override suspend fun resetItemMeta(itemId: String): ResponseEntity<Unit> {
         val fullItemId = IdParser.parseItemId(itemId)
-        enrichmentMetaService.resetMeta(fullItemId)
+        // TODO[meta]: when all Blockchains stop caching the meta, we can remove this endpoint call.
         router.getService(fullItemId.blockchain).resetItemMeta(fullItemId.value)
-
-        logger.info("Item meta has been reset: {}", itemId)
+        enrichmentMetaService.scheduleLoading(fullItemId)
         return ResponseEntity.ok().build()
     }
 
@@ -201,26 +218,10 @@ class ItemController(
         return ResponseEntity.ok(enriched)
     }
 
-    private suspend fun getMedia(
-        itemId: String, action: suspend (fullId: ItemIdDto) -> UnionMedia
-    ): ResponseEntity<Resource> {
-        val fullItemId = IdParser.parseItemId(itemId)
-        val result = action(fullItemId)
-        return when {
-            result.url?.isNotEmpty() == true -> {
-                val httpHeaders = HttpHeaders()
-                httpHeaders.location = URI(result.url!!)
-                ResponseEntity(httpHeaders, HttpStatus.TEMPORARY_REDIRECT)
-            }
-            result.content?.isNotEmpty() == true -> {
-                val resource = ByteArrayResource(result.content!!)
-                ResponseEntity.ok()
-                    .contentLength(resource.contentLength())
-                    .contentType(MediaType.parseMediaType(result.mime))
-                    .body(resource)
-            }
-            else -> throw UnionNotFoundException("Media was not found for ${fullItemId.value}")
-        }
+    private fun createRedirectResponse(unionMetaContent: UnionMetaContent): ResponseEntity<Resource> {
+        val httpHeaders = HttpHeaders()
+        httpHeaders.location = URI(unionMetaContent.url)
+        return ResponseEntity(httpHeaders, HttpStatus.TEMPORARY_REDIRECT)
     }
 
     fun Page<UnionItem>.toSlice(): Slice<UnionItem> {

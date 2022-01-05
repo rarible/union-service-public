@@ -17,6 +17,7 @@ import com.rarible.protocol.union.dto.continuation.page.PageSize
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.converter.ShortItemConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
+import com.rarible.protocol.union.enrichment.meta.UnionMetaLoader
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.integration.ethereum.converter.EthItemConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
@@ -45,6 +46,7 @@ import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpStatus
 import org.springframework.web.client.RestTemplate
 import reactor.core.publisher.Mono
@@ -69,6 +71,10 @@ class ItemControllerFt : AbstractIntegrationTest() {
 
     @Autowired
     lateinit var restTemplate: RestTemplate
+
+    @Autowired
+    @Qualifier("test.union.meta.loader")
+    lateinit var testUnionMetaLoader: UnionMetaLoader
 
     @Test
     fun `get item by id - ethereum, enriched`() = runBlocking<Unit> {
@@ -95,37 +101,37 @@ class ItemControllerFt : AbstractIntegrationTest() {
     @Test
     fun `get item image by id`() = runBlocking<Unit> {
         val itemId = randomEthItemId()
-        val ipfsUrl = "ipfs/QfgdfgajhkjkP97RAnx443626262VNFDotF9U4Jkac567457/image.png"
+        val imageUrl = "https://rarible.mypinata.cloud/ipfs/QfgdfgajhkjkP97RAnx443626262VNFDotF9U4Jkac567457/image.png"
         val meta = randomEthItemMeta().copy(
             image = NftMediaDto(
-                url = mapOf(Pair("ORIGINAL", "ipfs://$ipfsUrl")),
+                url = mapOf(Pair("ORIGINAL", imageUrl)),
                 meta = mapOf(Pair("ORIGINAL", randomEthItemMediaMeta("ORIGINAL")))
             )
         )
 
-        coEvery { testEthereumItemApi.getNftItemMetaById(itemId.value) } returns Mono.just(meta)
+        coEvery { testUnionMetaLoader.load(itemId) } returns EthItemConverter.convert(meta)
 
         val response = restTemplate.getForEntity("${baseUri}/v0.1/items/${itemId.fullId()}/image", String::class.java)
         assertThat(response.statusCode).isEqualTo(HttpStatus.TEMPORARY_REDIRECT)
-        assertThat(response.headers["Location"]).contains("https://rarible.mypinata.cloud/$ipfsUrl")
+        assertThat(response.headers["Location"]).contains(imageUrl)
     }
 
     @Test
     fun `get item animation by id`() = runBlocking<Unit> {
         val itemId = randomEthItemId()
-        val ipfsUrl = "ipfs/Qmd72hpaFPnP97RAnxHKTCYb41ddVNFDotF9U4JkacsaLi/image.gif"
+        val animationUrl = "https://rarible.mypinata.cloud/ipfs/Qmd72hpaFPnP97RAnxHKTCYb41ddVNFDotF9U4JkacsaLi/image.gif"
         val meta = randomEthItemMeta().copy(
             animation = NftMediaDto(
-                url = mapOf(Pair("ORIGINAL", "ipfs://$ipfsUrl")),
+                url = mapOf(Pair("ORIGINAL", animationUrl)),
                 meta = mapOf(Pair("ORIGINAL", randomEthItemMediaMeta("ORIGINAL")))
             )
         )
 
-        coEvery { testEthereumItemApi.getNftItemMetaById(itemId.value) } returns Mono.just(meta)
+        coEvery { testUnionMetaLoader.load(itemId) } returns EthItemConverter.convert(meta)
 
         val response = restTemplate.getForEntity("${baseUri}/v0.1/items/${itemId.fullId()}/animation", String::class.java)
         assertThat(response.statusCode).isEqualTo(HttpStatus.TEMPORARY_REDIRECT)
-        assertThat(response.headers["Location"]).contains("https://rarible.mypinata.cloud/$ipfsUrl")
+        assertThat(response.headers["Location"]).contains(animationUrl)
     }
 
     @Test

@@ -213,10 +213,11 @@ class EnrichmentItemEventService(
         auction: AuctionDto? = null
     ) {
         val dto = itemService.enrichItem(
-            short,
-            item,
-            listOfNotNull(order).associateBy { it.id },
-            listOfNotNull(auction).associateBy { it.id })
+            shortItem = short,
+            item = item,
+            orders = listOfNotNull(order).associateBy { it.id },
+            auctions = listOfNotNull(auction).associateBy { it.id }
+        )
         val event = ItemUpdateEventDto(
             itemId = dto.id,
             item = dto,

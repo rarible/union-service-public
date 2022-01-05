@@ -31,6 +31,10 @@ open class TezosCollectionService(
         return TezosCollectionConverter.convert(collection, blockchain)
     }
 
+    override suspend fun refreshCollectionMeta(collectionId: String) {
+        // TODO[TEZOS]: implement.
+    }
+
     override suspend fun getCollectionsByOwner(
         owner: String,
         continuation: String?,

@@ -54,6 +54,14 @@ class CollectionController(
         return ResponseEntity.ok(result)
     }
 
+    override suspend fun refreshCollectionMeta(collection: String): ResponseEntity<Unit> {
+        // TODO[meta]: fetch all items by collection and schedule meta update for all of them.
+        val collectionId = IdParser.parseCollectionId(collection)
+        logger.info("Refreshing collection meta for '{}'", collection)
+        router.getService(collectionId.blockchain).refreshCollectionMeta(collectionId.value)
+        return ResponseEntity.ok().build()
+    }
+
     override suspend fun getCollectionsByOwner(
         owner: String,
         blockchains: List<BlockchainDto>?,
@@ -80,11 +88,6 @@ class CollectionController(
             owner, continuation, size, combinedPage.entities.size, combinedPage.total, combinedPage.continuation
         )
         return ResponseEntity.ok(toDto(combinedPage))
-    }
-
-    override suspend fun refreshCollectionMeta(collection: String): ResponseEntity<Unit> {
-        // TODO will be implemented later
-        return ResponseEntity.ok().build()
     }
 
     private fun toDto(page: Page<CollectionDto>): CollectionsDto {

@@ -3,6 +3,14 @@ rarible:
     apm:
       agent:
         enabled: false
+  loader:
+    enableWorkers: true
+    workers: 1
+    retry:
+      backoffDelaysMillis: [ ]
+      job:
+        runner:
+        period: 1000000000000000000 # Disable in the tests.
 
 integration:
   tezos:

@@ -10,6 +10,7 @@ import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.AuctionDto
 import com.rarible.protocol.union.dto.AuctionIdDto
 import com.rarible.protocol.union.dto.CollectionIdDto
+import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.UnionAddress
@@ -78,13 +79,11 @@ class EnrichmentItemService(
 
     fun findByAuctionId(auctionIdDto: AuctionIdDto) = itemRepository.findByAuction(auctionIdDto)
 
-    suspend fun fetch(itemId: ShortItemId): UnionItem {
+    suspend fun fetch(itemId: ItemIdDto): UnionItem {
         val now = nowMillis()
-        val nftItemDto = itemServiceRouter.getService(itemId.blockchain)
-            .getItemById(itemId.toDto().value)
-
-        logger.info("Fetched Item by Id [{}] ({}ms)", itemId, spent(now))
-        return nftItemDto
+        val itemDto = itemServiceRouter.getService(itemId.blockchain).getItemById(itemId.value)
+        logger.info("Fetched Item by Id [{}] ({} ms)", itemId, spent(now))
+        return itemDto
     }
 
     // [orders] is a set of already fetched orders that can be used as cache to avoid unnecessary 'getById' calls
@@ -96,12 +95,14 @@ class EnrichmentItemService(
     ) = coroutineScope {
         logger.info("Enriching item shortItem={}, item={}", shortItem, item)
         require(shortItem != null || item != null)
-        val fetchedItem = async { item ?: fetch(shortItem!!.id) }
+        val itemId = shortItem?.id?.toDto() ?: item!!.id
+        val fetchedItem = async { item ?: fetch(itemId) }
         val bestSellOrder = async { enrichmentOrderService.fetchOrderIfDiffers(shortItem?.bestSellOrder, orders) }
         val bestBidOrder = async { enrichmentOrderService.fetchOrderIfDiffers(shortItem?.bestBidOrder, orders) }
         val meta = async {
-            val itemId = shortItem?.id ?: ShortItemId(item!!.id)
-            enrichmentMetaService.enrichMeta(item?.meta ?: fetchedItem.await().meta, itemId)
+            item?.meta
+                ?: fetchedItem.await().meta
+                ?: enrichmentMetaService.getAvailableMetaOrScheduleLoading(itemId)
         }
 
         val bestOrders = listOf(bestSellOrder, bestBidOrder)
@@ -112,6 +113,12 @@ class EnrichmentItemService(
 
         val auctionsData = async { enrichmentAuctionService.fetchAuctionsIfAbsent(auctionIds, auctions) }
 
-        EnrichedItemConverter.convert(fetchedItem.await(), shortItem, meta.await(), bestOrders, auctionsData.await())
+        EnrichedItemConverter.convert(
+            item = fetchedItem.await(),
+            shortItem = shortItem,
+            meta = meta.await(),
+            orders = bestOrders,
+            auctions = auctionsData.await()
+        )
     }
 }
