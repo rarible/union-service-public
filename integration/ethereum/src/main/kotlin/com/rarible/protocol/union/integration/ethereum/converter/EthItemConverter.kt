@@ -99,47 +99,40 @@ object EthItemConverter {
                     format = it.format
                 )
             },
-            content = convertMetaContent(source.image, this::getImageHint)
-                    + convertMetaContent(source.animation, this::getVideoHint),
+            content = convertMetaContent(source.image) { imageMetaDto ->
+                UnionImageProperties(
+                    mimeType = imageMetaDto?.type,
+                    width = imageMetaDto?.width,
+                    height = imageMetaDto?.height,
+                    size = null // TODO ETHEREUM - get from ETH OpenAPI.
+                )
+            } + convertMetaContent(source.animation) { videoMetaDto ->
+                UnionVideoProperties(
+                    mimeType = videoMetaDto?.type,
+                    width = videoMetaDto?.width,
+                    height = videoMetaDto?.height,
+                    size = null // TODO ETHEREUM - get from ETH OpenAPI.
+                )
+            },
             // TODO ETHEREUM - implement it
             restrictions = emptyList()
         )
     }
 
     private fun convertMetaContent(
-        source: NftMediaDto?, hintConverter: (
-            meta: NftMediaMetaDto?
-        ) -> UnionMetaContentProperties
+        source: NftMediaDto?,
+        converter: (meta: NftMediaMetaDto?) -> UnionMetaContentProperties
     ): List<UnionMetaContent> {
-        return source?.url?.map { urlMap ->
-            val meta = source.meta[urlMap.key]
+        source ?: return emptyList()
+        return source.url.map { (representationType, url) ->
+            val meta = source.meta[representationType]
             UnionMetaContent(
-                url = urlMap.value,
+                url = url,
                 // TODO UNION handle unknown representation
-                representation = MetaContentDto.Representation.valueOf(urlMap.key),
-                properties = hintConverter(meta)
+                representation = MetaContentDto.Representation.valueOf(representationType),
+                properties = converter(meta)
             )
-        } ?: emptyList()
+        }
     }
 
-    private fun getImageHint(
-        meta: NftMediaMetaDto?
-    ): UnionImageProperties {
-        return UnionImageProperties(
-            mimeType = meta?.type,
-            width = meta?.width,
-            height = meta?.height
-        )
-    }
-
-    private fun getVideoHint(
-        meta: NftMediaMetaDto?
-    ): UnionVideoProperties {
-        return UnionVideoProperties(
-            mimeType = meta?.type,
-            width = meta?.width,
-            height = meta?.height
-        )
-    }
 }
-

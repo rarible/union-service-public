@@ -58,53 +58,36 @@ class EnrichmentMetaService(
     }
 
     private suspend fun enrichContent(content: UnionMetaContent, itemId: ItemIdDto): UnionMetaContent {
-        val receivedProperties = content.properties
-
-        val properties = if (receivedProperties == null) {
-            // We know nothing about content - only URL
+        val properties = content.properties
+        val enrichedProperties = if (properties == null || properties.isEmpty()) {
             val fetchedProperties = fetchMetaContentProperties(content.url, itemId)
-            // If no metadata fetched - let it be an Image by default
-            fetchedProperties ?: UnionImageProperties()
-        } else if (receivedProperties.isEmpty()) {
-            // Ok, we have some info about metadata, but it is not full - fetching it
-            val fetchedProperties = fetchMetaContentProperties(content.url, itemId)
-            // If fetched - good, otherwise using properties we have
-            fetchedProperties ?: receivedProperties
+            fetchedProperties ?: properties ?: UnionImageProperties()
         } else {
-            // We have fully qualified meta - using it, request not required
-            receivedProperties
+            properties
         }
-        return content.copy(properties = properties)
+        return content.copy(properties = enrichedProperties)
     }
 
     private suspend fun fetchMetaContentProperties(url: String, itemId: ItemIdDto): UnionMetaContentProperties? {
-        val contentMeta = contentMetaService.getContentMeta(url, itemId)
-        return when (val emptyMeta = createEmptyMetaProperties(contentMeta?.type)) {
-            is UnionImageProperties -> emptyMeta.copy(
-                width = contentMeta?.width,
-                height = contentMeta?.height,
-                size = contentMeta?.size
+        val contentMeta = contentMetaService.getContentMeta(url, itemId) ?: return null
+        val isImage = contentMeta.type.contains("image")
+        val isVideo = contentMeta.type.contains("video")
+        val isAudio = contentMeta.type.contains("audio") // TODO: add dedicated properties for audio.
+        return when {
+            isImage -> UnionImageProperties(
+                mimeType = contentMeta.type,
+                width = contentMeta.width,
+                height = contentMeta.height,
+                size = contentMeta.size
             )
-            is UnionVideoProperties -> emptyMeta.copy(
-                width = contentMeta?.width,
-                height = contentMeta?.height,
-                size = contentMeta?.size
+            isVideo || isAudio -> UnionVideoProperties(
+                mimeType = contentMeta.type,
+                width = contentMeta.width,
+                height = contentMeta.height,
+                size = contentMeta.size
             )
-            null -> null
+            else -> return null
         }
-    }
-
-    private fun createEmptyMetaProperties(mimeType: String?): UnionMetaContentProperties? {
-        if (mimeType == null) {
-            return null
-        }
-        if (mimeType.contains("image")) {
-            return UnionImageProperties(mimeType)
-        }
-        if (mimeType.contains("video") || mimeType.contains("audio")) {
-            return UnionVideoProperties(mimeType)
-        }
-        return null
     }
 
 }
