@@ -10,11 +10,7 @@ import com.rarible.protocol.union.core.model.UnionMetaContentProperties
 import com.rarible.protocol.union.core.model.UnionVideoProperties
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
-import com.rarible.protocol.union.dto.ImageContentDto
 import com.rarible.protocol.union.dto.ItemIdDto
-import com.rarible.protocol.union.dto.MetaContentDto
-import com.rarible.protocol.union.dto.MetaDto
-import com.rarible.protocol.union.dto.VideoContentDto
 import com.rarible.protocol.union.enrichment.meta.ContentMetaService
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -32,18 +28,12 @@ class EnrichmentMetaService(
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    suspend fun enrichMeta(itemId: ItemIdDto, originalMetaHint: UnionMeta?): MetaDto? {
+    suspend fun enrichMeta(itemId: ItemIdDto, originalMetaHint: UnionMeta?): UnionMeta? {
         val meta = originalMetaHint ?: getMetaSafeIfNotFound(itemId) ?: return null
         val enrichedContent = coroutineScope {
-            meta.content.map { async { enrichContent(it, itemId.fullId()) } }
+            meta.content.map { async { enrichContent(it, itemId) } }
         }.awaitAll()
-        return MetaDto(
-            name = meta.name,
-            description = meta.description,
-            attributes = meta.attributes,
-            content = enrichedContent,
-            restrictions = meta.restrictions.map { it.type }.distinct()
-        )
+        return meta.copy(content = enrichedContent)
     }
 
     suspend fun resetMeta(itemId: ItemIdDto) {
@@ -67,7 +57,7 @@ class EnrichmentMetaService(
         }
     }
 
-    private suspend fun enrichContent(content: UnionMetaContent, itemId: String): MetaContentDto {
+    private suspend fun enrichContent(content: UnionMetaContent, itemId: ItemIdDto): UnionMetaContent {
         val receivedProperties = content.properties
 
         val properties = if (receivedProperties == null) {
@@ -84,35 +74,12 @@ class EnrichmentMetaService(
             // We have fully qualified meta - using it, request not required
             receivedProperties
         }
-
-        return when (properties) {
-            is UnionImageProperties -> {
-                ImageContentDto(
-                    url = content.url,
-                    representation = content.representation,
-                    mimeType = properties.mimeType,
-                    height = properties.height,
-                    size = properties.size,
-                    width = properties.width
-                )
-            }
-            is UnionVideoProperties -> {
-                VideoContentDto(
-                    url = content.url,
-                    representation = content.representation,
-                    mimeType = properties.mimeType,
-                    height = properties.height,
-                    size = properties.size,
-                    width = properties.width
-                )
-            }
-        }
+        return content.copy(properties = properties)
     }
 
-    private suspend fun fetchMetaContentProperties(url: String, itemId: String): UnionMetaContentProperties? {
+    private suspend fun fetchMetaContentProperties(url: String, itemId: ItemIdDto): UnionMetaContentProperties? {
         val contentMeta = contentMetaService.getContentMeta(url, itemId)
-        val emptyMeta = createEmptyMetaProperties(contentMeta?.type)
-        return when (emptyMeta) {
+        return when (val emptyMeta = createEmptyMetaProperties(contentMeta?.type)) {
             is UnionImageProperties -> emptyMeta.copy(
                 width = contentMeta?.width,
                 height = contentMeta?.height,

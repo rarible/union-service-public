@@ -2,9 +2,9 @@ package com.rarible.protocol.union.enrichment.converter
 
 import com.rarible.protocol.union.core.converter.ContractAddressConverter
 import com.rarible.protocol.union.core.model.UnionItem
+import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.dto.AuctionDto
 import com.rarible.protocol.union.dto.ItemDto
-import com.rarible.protocol.union.dto.MetaDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.enrichment.model.ShortItem
@@ -15,7 +15,7 @@ object EnrichedItemConverter {
     fun convert(
         item: UnionItem,
         shortItem: ShortItem? = null,
-        meta: MetaDto? = null,
+        meta: UnionMeta? = null,
         orders: Map<OrderIdDto, OrderDto> = emptyMap(),
         auctions: List<AuctionDto> = emptyList()
     ): ItemDto {
@@ -33,7 +33,7 @@ object EnrichedItemConverter {
             mintedAt = item.mintedAt,
             lastUpdatedAt = item.lastUpdatedAt,
             supply = item.supply,
-            meta = meta,
+            meta = meta?.let { EnrichedMetaConverter.convert(it) },
             deleted = item.deleted,
 
             // Enrichment data

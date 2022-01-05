@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.enrichment.meta
 
 import com.rarible.protocol.union.enrichment.configuration.MetaProperties
+import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Disabled
@@ -27,7 +28,7 @@ class ContentMetaServiceTest {
 
     @Test
     fun testVideoWithPreview() = runBlocking {
-        val meta = service.getContentMeta("ipfs://ipfs/QmSNhGhcBynr1s9QgPnon8HaiPzE5dKgmqSDNsNXCfDHGs/image.gif")!!
+        val meta = service.getContentMeta("ipfs://ipfs/QmSNhGhcBynr1s9QgPnon8HaiPzE5dKgmqSDNsNXCfDHGs/image.gif", randomEthItemId())!!
         assertEquals(600, meta.width)
         assertEquals(404, meta.height)
         assertEquals(2559234, meta.size)

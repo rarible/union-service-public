@@ -6,6 +6,7 @@ import com.rarible.core.cache.CacheDescriptor
 import com.rarible.core.cache.CacheService
 import com.rarible.core.cache.get
 import com.rarible.core.common.nowMillis
+import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.enrichment.configuration.MetaProperties
 import com.rarible.protocol.union.enrichment.util.spent
 import kotlinx.coroutines.reactive.awaitFirstOrNull
@@ -25,7 +26,7 @@ class ContentMetaService(
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    suspend fun getContentMeta(url: String, itemId: String? = null): ContentMeta? {
+    suspend fun getContentMeta(url: String, itemId: ItemIdDto? = null): ContentMeta? {
         val realUrl = ipfsUrlResolver.resolveRealUrl(url)
         val now = nowMillis()
         return try {

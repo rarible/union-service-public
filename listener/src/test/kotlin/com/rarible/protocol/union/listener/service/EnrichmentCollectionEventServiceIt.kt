@@ -6,6 +6,7 @@ import com.rarible.protocol.dto.NftItemsDto
 import com.rarible.protocol.union.core.converter.ContractAddressConverter
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.enrichment.converter.EnrichedItemConverter
+import com.rarible.protocol.union.enrichment.converter.EnrichedMetaConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.service.EnrichmentMetaService
@@ -80,7 +81,7 @@ class EnrichmentCollectionEventServiceIt : AbstractIntegrationTest() {
 
         val expected = EnrichedItemConverter.convert(unionItem).copy(
             bestSellOrder = unionBestSell,
-            meta = enrichmentMetaService.enrichMeta(itemId, unionItem.meta!!)
+            meta = enrichmentMetaService.enrichMeta(itemId, unionItem.meta!!)?.let { EnrichedMetaConverter.convert(it) }
         )
 
         val saved = itemService.get(shortItem.id)!!
@@ -126,7 +127,7 @@ class EnrichmentCollectionEventServiceIt : AbstractIntegrationTest() {
 
         val expected = EnrichedItemConverter.convert(unionItem).copy(
             bestBidOrder = unionBestBid,
-            meta = enrichmentMetaService.enrichMeta(itemId, unionItem.meta!!)
+            meta = enrichmentMetaService.enrichMeta(itemId, unionItem.meta!!)?.let { EnrichedMetaConverter.convert(it) }
         )
 
         val saved = itemService.get(shortItem.id)!!
