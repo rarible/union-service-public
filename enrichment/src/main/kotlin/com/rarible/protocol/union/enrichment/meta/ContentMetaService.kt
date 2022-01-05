@@ -49,6 +49,7 @@ class ContentMetaService(
         }
     }
 
+    // TODO[meta-3.0]: accept [itemId] in addition to the raw URL and clear by it.
     suspend fun resetContentMeta(url: String) {
         val realUrl = ipfsUrlResolver.resolveRealUrl(url)
         runCatching {

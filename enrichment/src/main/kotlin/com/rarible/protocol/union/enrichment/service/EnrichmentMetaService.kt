@@ -33,16 +33,11 @@ class EnrichmentMetaService(
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    suspend fun enrichMeta(meta: UnionMeta?, itemId: ShortItemId): MetaDto? {
-        val metaToEnrich = meta ?: getMetaSafe(itemId.toDto())
-        return metaToEnrich?.let { enrichMeta(it, itemId.toDto().fullId()) }
-    }
-
-    suspend fun enrichMeta(meta: UnionMeta, itemId: String): MetaDto {
+    suspend fun enrichMeta(originalMeta: UnionMeta?, itemId: ShortItemId): MetaDto? {
+        val meta = originalMeta ?: getMetaSafe(itemId.toDto()) ?: return null
         val enrichedContent = coroutineScope {
-            meta.content.map { async { enrichContent(it, itemId) } }
+            meta.content.map { async { enrichContent(it, itemId.toDto().fullId()) } }
         }.awaitAll()
-
         return MetaDto(
             name = meta.name,
             description = meta.description,
@@ -53,6 +48,7 @@ class EnrichmentMetaService(
     }
 
     suspend fun resetMeta(itemId: ItemIdDto) {
+        // TODO[meta-3.0]: re-implement to not request meta here. Record to database with [itemId] and delete by this key.
         val meta = getMetaSafe(itemId)
         meta?.let {
             meta.content.forEach { contentMetaService.resetContentMeta(it.url) }
