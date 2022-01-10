@@ -48,7 +48,7 @@ class EnrichmentOrderService(
 
     suspend fun getBestSell(id: ShortItemId, currencyId: String): OrderDto? {
         val now = nowMillis()
-        val result = withPreferredRariblePlatform { platform ->
+        val result = withPreferredRariblePlatform(id) { platform, continuation ->
             orderServiceRouter.getService(id.blockchain).getSellOrdersByItem(
                 platform,
                 id.token,
@@ -57,7 +57,7 @@ class EnrichmentOrderService(
                 null,
                 listOf(OrderStatusDto.ACTIVE),
                 currencyId,
-                null,
+                continuation,
                 1
             )
         }
@@ -67,7 +67,7 @@ class EnrichmentOrderService(
 
     suspend fun getBestSell(id: ShortOwnershipId, currencyId: String): OrderDto? {
         val now = nowMillis()
-        val result = withPreferredRariblePlatform { platform ->
+        val result = withPreferredRariblePlatform(id) { platform, continuation ->
             orderServiceRouter.getService(id.blockchain).getSellOrdersByItem(
                 platform,
                 id.token,
@@ -76,7 +76,7 @@ class EnrichmentOrderService(
                 null,
                 listOf(OrderStatusDto.ACTIVE),
                 currencyId,
-                null,
+                continuation,
                 1
             )
         }
@@ -86,7 +86,7 @@ class EnrichmentOrderService(
 
     suspend fun getBestBid(id: ShortItemId, currencyId: String): OrderDto? {
         val now = nowMillis()
-        val result = withPreferredRariblePlatform { platform ->
+        val result = withPreferredRariblePlatform(id) { platform, continuation ->
             orderServiceRouter.getService(id.blockchain).getOrderBidsByItem(
                 platform,
                 id.token,
@@ -97,7 +97,7 @@ class EnrichmentOrderService(
                 null,
                 null,
                 currencyId,
-                null,
+                continuation,
                 1
             )
         }
@@ -106,16 +106,42 @@ class EnrichmentOrderService(
     }
 
     private suspend fun withPreferredRariblePlatform(
-        clientCall: suspend (platform: PlatformDto) -> Slice<OrderDto>
+        id: Any,
+        clientCall: suspend (platform: PlatformDto, continuation: String?) -> Slice<OrderDto>
     ): OrderDto? {
-        val bestOfAll = clientCall(PlatformDto.ALL).entities.firstOrNull()
+        val bestOfAll = ignoreFilledTaker(id, clientCall, PlatformDto.ALL)
         logger.debug("Found best order from ALL platforms: [{}]", bestOfAll)
         if (bestOfAll == null || bestOfAll.platform == PlatformDto.RARIBLE) {
             return bestOfAll
         }
         logger.debug("Order [{}] is not a preferred platform order, checking preferred platform...", bestOfAll)
-        val preferredPlatformBestOrder = clientCall(PlatformDto.RARIBLE).entities.firstOrNull()
+        val preferredPlatformBestOrder = ignoreFilledTaker(id, clientCall, PlatformDto.RARIBLE)
         logger.debug("Checked preferred platform for best order: [{}]")
         return preferredPlatformBestOrder ?: bestOfAll
+    }
+
+    suspend fun ignoreFilledTaker(
+        id: Any,
+        clientCall: suspend (platform: PlatformDto, continuation: String?) -> Slice<OrderDto>,
+        platform: PlatformDto
+    ): OrderDto? {
+        var order: OrderDto?
+        var continuation: String? = null
+        var attempts = 0
+        // TODO: for optimization we should request bunch orders instead of one by one
+        do {
+            val slice = clientCall(platform, continuation)
+            order = slice.entities.firstOrNull()?.takeIf { it.taker == null }
+            continuation = slice.continuation
+            attempts++
+        } while (continuation != null && order == null && attempts < MAX_ATTEMPTS)
+        if (attempts == MAX_ATTEMPTS) {
+            logger.warn("Reached max attempts ({}) for getting orders for [{}]", MAX_ATTEMPTS, id)
+        }
+        return order
+    }
+
+    companion object {
+        private const val MAX_ATTEMPTS = 100
     }
 }

@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.rarible</groupId>
         <artifactId>rarible-parent-pom</artifactId>
-        <version>2.0.0</version>
+        <version>2.0.3</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -25,6 +25,13 @@
             <url>https://jitpack.io</url>
         </repository>
     </repositories>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>nexus-ext-maven-public</id>
+            <name>nexus-ext-maven-public</name>
+            <url>https://repo.rarible.org/repository/maven-public/</url>
+        </pluginRepository>
+    </pluginRepositories>
 
     <properties>
         <revision>1.21.0</revision>
@@ -40,7 +47,7 @@
 
         <rarible.protocol.currency.version>1.19.0</rarible.protocol.currency.version>
         <rarible.protocol.ethereum.version>1.21.5</rarible.protocol.ethereum.version>
-        <rarible.protocol.flow.version>2.1.0</rarible.protocol.flow.version>
+        <rarible.protocol.flow.version>2.1.5</rarible.protocol.flow.version>
         <rarible.protocol.tezos.version>0.1.15</rarible.protocol.tezos.version>
         <rarible.protocol.union.version>1.21.3</rarible.protocol.union.version>
         <dev-jna.version>5.7.0</dev-jna.version>

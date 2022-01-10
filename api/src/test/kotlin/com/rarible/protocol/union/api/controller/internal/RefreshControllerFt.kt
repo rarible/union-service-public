@@ -1,13 +1,17 @@
 package com.rarible.protocol.union.api.controller.internal
 
 import com.rarible.core.kafka.KafkaMessage
+import com.rarible.protocol.dto.OrdersPaginationDto
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.ItemDeleteEventDto
 import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.ItemEventDto
+import com.rarible.protocol.union.dto.ItemUpdateEventDto
 import com.rarible.protocol.union.dto.OwnershipDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
+import com.rarible.protocol.union.dto.OwnershipUpdateEventDto
 import com.rarible.protocol.union.enrichment.converter.ShortItemConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOwnershipConverter
@@ -28,10 +32,13 @@ import com.rarible.protocol.union.integration.ethereum.data.randomEthNftItemDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipId
 import io.mockk.coVerify
+import io.mockk.every
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import reactor.core.publisher.Mono
+import scalether.domain.Address
 import java.math.BigDecimal
 
 @IntegrationTest
@@ -108,7 +115,38 @@ class RefreshControllerFt : AbstractIntegrationTest() {
 
         coVerify {
             testItemEventProducer.send(match<KafkaMessage<ItemEventDto>> { message ->
-                message.value.itemId == ethItemId
+                message.value is ItemUpdateEventDto && message.value.itemId == ethItemId
+            })
+        }
+    }
+
+    @Test
+    fun `refresh deleted item`() = runBlocking<Unit> {
+        val ethItemId = randomEthItemId()
+        val ethItem = randomEthNftItemDto(ethItemId).copy(deleted = true)
+        val unionItem = EthItemConverter.convert(ethItem, ethItemId.blockchain)
+        val shortItem = ShortItemConverter.convert(unionItem)
+
+        enrichmentItemService.save(
+            shortItem.copy(
+                bestSellOrder = null,
+                bestBidOrder = null,
+                bestSellOrders = emptyMap(),
+                bestBidOrders = emptyMap()
+            )
+        )
+
+        val uri = "$baseUri/v0.1/refresh/item/${ethItemId.fullId()}/refresh"
+
+        ethereumItemControllerApiMock.mockGetNftItemById(ethItemId, ethItem)
+        ethereumAuctionControllerApiMock.mockGetAuctionsByItem(ethItemId, emptyList())
+
+        val result = testRestTemplate.postForEntity(uri, null, ItemDto::class.java).body!!
+
+        assertThat(result.deleted).isTrue
+        coVerify {
+            testItemEventProducer.send(match<KafkaMessage<ItemEventDto>> { message ->
+                message.value is ItemDeleteEventDto && message.value.itemId == ethItemId
             })
         }
     }
@@ -209,7 +247,7 @@ class RefreshControllerFt : AbstractIntegrationTest() {
 
         coVerify {
             testItemEventProducer.send(match<KafkaMessage<ItemEventDto>> { message ->
-                message.value.itemId == ethItemId
+                message.value is ItemUpdateEventDto && message.value.itemId == ethItemId
             })
         }
     }
@@ -246,7 +284,159 @@ class RefreshControllerFt : AbstractIntegrationTest() {
 
         coVerify {
             testOwnershipEventProducer.send(match<KafkaMessage<OwnershipEventDto>> { message ->
-                message.value.ownershipId == ethOwnershipId
+                message.value is OwnershipUpdateEventDto && message.value.ownershipId == ethOwnershipId
+            })
+        }
+    }
+
+    @Test
+    fun `reconcile deleted item`() = runBlocking<Unit> {
+        val ethItemId = randomEthItemId()
+        val ethItem = randomEthNftItemDto(ethItemId).copy(deleted = true)
+
+        val ethBestSell = randomEthLegacySellOrderDto(ethItemId)
+        val unionBestSell = ethOrderConverter.convert(ethBestSell, ethItemId.blockchain)
+
+        val ethBestBid = randomEthLegacyBidOrderDto(ethItemId)
+        val unionBestBid = ethOrderConverter.convert(ethBestBid, ethItemId.blockchain)
+
+        val uri = "$baseUri/v0.1/refresh/item/${ethItemId.fullId()}/reconcile"
+
+        ethereumItemControllerApiMock.mockGetNftItemById(ethItemId, ethItem)
+        ethereumOrderControllerApiMock.mockGetCurrenciesBySellOrdersOfItem(ethItemId, ethBestSell.take.assetType)
+        ethereumOrderControllerApiMock.mockGetSellOrdersByItemAndByStatus(
+            ethItemId,
+            unionBestSell.sellCurrencyId,
+            ethBestSell
+        )
+
+        ethereumOrderControllerApiMock.mockGetCurrenciesByBidOrdersOfItem(ethItemId, ethBestBid.make.assetType)
+        ethereumOrderControllerApiMock.mockGetOrderBidsByItemAndByStatus(
+            ethItemId,
+            unionBestBid.bidCurrencyId,
+            ethBestBid
+        )
+
+        val result = testRestTemplate.postForEntity(uri, null, ItemDto::class.java).body!!
+        assertThat(result.deleted).isTrue
+
+        coVerify {
+            testItemEventProducer.send(match<KafkaMessage<ItemEventDto>> { message ->
+                message.value is ItemDeleteEventDto && message.value.itemId == ethItemId
+            })
+        }
+    }
+
+    @Test
+    fun `should ignore best sell order with filled taker`() = runBlocking<Unit> {
+        val ethItemId = randomEthItemId()
+        val ethItem = randomEthNftItemDto(ethItemId)
+        val unionItem = EthItemConverter.convert(ethItem, ethItemId.blockchain)
+        val shortItem = ShortItemConverter.convert(unionItem)
+
+        val ethBestSell = randomEthLegacySellOrderDto(ethItemId).copy(taker = Address.ONE())
+        val unionBestSell = ethOrderConverter.convert(ethBestSell, ethItemId.blockchain)
+
+        val ethBestBid = randomEthLegacyBidOrderDto(ethItemId)
+        val unionBestBid = ethOrderConverter.convert(ethBestBid, ethItemId.blockchain)
+
+        val uri = "$baseUri/v0.1/refresh/item/${ethItemId.fullId()}/reconcile"
+
+        ethereumItemControllerApiMock.mockGetNftItemById(ethItemId, ethItem)
+        ethereumOrderControllerApiMock.mockGetCurrenciesBySellOrdersOfItem(ethItemId, ethBestSell.take.assetType)
+        ethereumOrderControllerApiMock.mockGetSellOrdersByItemAndByStatus(
+            ethItemId,
+            unionBestSell.sellCurrencyId,
+            ethBestSell
+        )
+
+        ethereumOrderControllerApiMock.mockGetCurrenciesByBidOrdersOfItem(ethItemId, ethBestBid.make.assetType)
+        ethereumOrderControllerApiMock.mockGetOrderBidsByItemAndByStatus(
+            ethItemId,
+            unionBestBid.bidCurrencyId,
+            ethBestBid
+        )
+
+        val result = testRestTemplate.postForEntity(uri, null, ItemDto::class.java).body!!
+        assertThat(result.bestSellOrder).isNull()
+        assertThat(result.bestBidOrder).isNotNull()
+
+        val savedShortItem = enrichmentItemService.get(shortItem.id)!!
+        assertThat(savedShortItem.bestSellOrder).isNull()
+        assertThat(savedShortItem.bestSellOrders).isEmpty()
+
+        coVerify {
+            testItemEventProducer.send(match<KafkaMessage<ItemEventDto>> { message ->
+                message.value is ItemUpdateEventDto && message.value.itemId == ethItemId
+            })
+        }
+    }
+
+    @Test
+    fun `should ignore best sell order with filled taker for the first time`() = runBlocking<Unit> {
+        val ethItemId = randomEthItemId()
+        val ethItem = randomEthNftItemDto(ethItemId)
+        val unionItem = EthItemConverter.convert(ethItem, ethItemId.blockchain)
+        val shortItem = ShortItemConverter.convert(unionItem)
+
+        val ethBestSell = randomEthLegacySellOrderDto(ethItemId)
+        val ethBestSellWithTaker = randomEthLegacySellOrderDto(ethItemId).copy(taker = Address.ONE())
+        val unionBestSell = ethOrderConverter.convert(ethBestSell, ethItemId.blockchain)
+        val shortBestSell = ShortOrderConverter.convert(unionBestSell)
+
+        val ethBestBid = randomEthLegacyBidOrderDto(ethItemId)
+        val unionBestBid = ethOrderConverter.convert(ethBestBid, ethItemId.blockchain)
+
+        val uri = "$baseUri/v0.1/refresh/item/${ethItemId.fullId()}/reconcile"
+
+        ethereumItemControllerApiMock.mockGetNftItemById(ethItemId, ethItem)
+        ethereumOrderControllerApiMock.mockGetCurrenciesBySellOrdersOfItem(ethItemId, ethBestSellWithTaker.take.assetType)
+        val continuation = "continuation"
+        every {
+            testEthereumOrderApi.getSellOrdersByItemAndByStatus(
+                eq(ethItemId.contract),
+                eq(ethItemId.tokenId.toString()),
+                any(),
+                any(),
+                any(),
+                isNull(),
+                any(),
+                any(),
+                any()
+            )
+        } returns Mono.just(OrdersPaginationDto(listOf(ethBestSellWithTaker), continuation))
+        every {
+            testEthereumOrderApi.getSellOrdersByItemAndByStatus(
+                eq(ethItemId.contract),
+                eq(ethItemId.tokenId.toString()),
+                any(),
+                any(),
+                any(),
+                eq(continuation),
+                any(),
+                any(),
+                any()
+            )
+        } returns Mono.just(OrdersPaginationDto(listOf(ethBestSell), continuation))
+
+        ethereumOrderControllerApiMock.mockGetCurrenciesByBidOrdersOfItem(ethItemId, ethBestBid.make.assetType)
+        ethereumOrderControllerApiMock.mockGetOrderBidsByItemAndByStatus(
+            ethItemId,
+            unionBestBid.bidCurrencyId,
+            ethBestBid
+        )
+
+        val result = testRestTemplate.postForEntity(uri, null, ItemDto::class.java).body!!
+        assertThat(result.bestSellOrder!!.id).isEqualTo(unionBestSell.id)
+
+        val savedShortItem = enrichmentItemService.get(shortItem.id)!!
+        assertThat(savedShortItem.bestSellOrder!!.id).isEqualTo(shortBestSell.id)
+        assertThat(savedShortItem.bestSellOrders[unionBestSell.sellCurrencyId]!!.id).isEqualTo(shortBestSell.id)
+
+
+        coVerify {
+            testItemEventProducer.send(match<KafkaMessage<ItemEventDto>> { message ->
+                message.value is ItemUpdateEventDto && message.value.itemId == ethItemId
             })
         }
     }

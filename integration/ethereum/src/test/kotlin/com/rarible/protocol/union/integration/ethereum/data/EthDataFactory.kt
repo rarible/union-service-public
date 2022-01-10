@@ -247,7 +247,7 @@ fun randomEthLegacyOrderDto(make: AssetDto, maker: Address, take: AssetDto): Leg
     return LegacyOrderDto(
         status = OrderStatusDto.ACTIVE,
         maker = maker,
-        taker = randomAddress(),
+        taker = null,
         make = make,
         take = take,
         fill = randomBigInt(),
@@ -284,7 +284,7 @@ fun randomEthV2OrderDto(make: AssetDto, maker: Address, take: AssetDto): Rarible
     return RaribleV2OrderDto(
         status = OrderStatusDto.ACTIVE,
         maker = maker,
-        taker = randomAddress(),
+        taker = null,
         make = make,
         take = take,
         fill = randomBigInt(),
@@ -323,7 +323,7 @@ fun randomEthOpenSeaV1OrderDto(make: AssetDto, maker: Address, take: AssetDto): 
     return OpenSeaV1OrderDto(
         status = OrderStatusDto.ACTIVE,
         maker = maker,
-        taker = randomAddress(),
+        taker = null,
         make = make,
         take = take,
         fill = randomBigInt(),

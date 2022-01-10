@@ -94,6 +94,7 @@ class EnrichmentItemService(
         orders: Map<OrderIdDto, OrderDto> = emptyMap(),
         auctions: Map<AuctionIdDto, AuctionDto> = emptyMap()
     ) = coroutineScope {
+        logger.info("Enriching item shortItem={}, item={}", shortItem, item)
         require(shortItem != null || item != null)
         val fetchedItem = async { item ?: fetch(shortItem!!.id) }
         val bestSellOrder = async { enrichmentOrderService.fetchOrderIfDiffers(shortItem?.bestSellOrder, orders) }

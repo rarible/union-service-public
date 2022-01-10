@@ -5,6 +5,8 @@ import com.rarible.protocol.dto.FlowActivityDto
 import com.rarible.protocol.dto.FlowAssetDto
 import com.rarible.protocol.dto.FlowBurnDto
 import com.rarible.protocol.dto.FlowMintDto
+import com.rarible.protocol.dto.FlowNftOrderActivityBidDto
+import com.rarible.protocol.dto.FlowNftOrderActivityCancelBidDto
 import com.rarible.protocol.dto.FlowNftOrderActivityCancelListDto
 import com.rarible.protocol.dto.FlowNftOrderActivityListDto
 import com.rarible.protocol.dto.FlowNftOrderActivitySellDto
@@ -19,6 +21,8 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.BurnActivityDto
 import com.rarible.protocol.union.dto.MintActivityDto
 import com.rarible.protocol.union.dto.OrderActivitySourceDto
+import com.rarible.protocol.union.dto.OrderBidActivityDto
+import com.rarible.protocol.union.dto.OrderCancelBidActivityDto
 import com.rarible.protocol.union.dto.OrderCancelListActivityDto
 import com.rarible.protocol.union.dto.OrderListActivityDto
 import com.rarible.protocol.union.dto.OrderMatchSellDto
@@ -93,7 +97,7 @@ class FlowActivityConverter(
                     hash = source.hash,
                     maker = UnionAddressConverter.convert(blockchain, source.maker),
                     make = FlowConverter.convert(source.make, blockchain),
-                    take = FlowConverter.convert(source.take, blockchain)
+                    take = payment
                 )
             }
             is FlowNftOrderActivityCancelListDto -> {
@@ -167,6 +171,35 @@ class FlowActivityConverter(
                         blockNumber = source.blockNumber,
                         logIndex = source.logIndex
                     )
+                )
+            }
+            is FlowNftOrderActivityBidDto -> {
+                val payment = FlowConverter.convert(source.make, blockchain)
+                val priceUsd = currencyService
+                    .toUsd(blockchain, payment.type, source.price) ?: BigDecimal.ZERO
+
+                OrderBidActivityDto(
+                    id = activityId,
+                    date = source.date,
+                    price = source.price,
+                    // TODO FLOW here should be price from FLOW, we don't want to calculate it here
+                    priceUsd = priceUsd,
+                    hash = source.hash,
+                    maker = UnionAddressConverter.convert(blockchain, source.maker),
+                    make = payment,
+                    take = FlowConverter.convert(source.take, blockchain)
+
+                )
+            }
+            is FlowNftOrderActivityCancelBidDto -> {
+                OrderCancelBidActivityDto(
+                    id = activityId,
+                    date = source.date,
+                    hash = source.hash,
+                    maker = UnionAddressConverter.convert(blockchain, source.maker),
+                    make = FlowConverter.convertToType(source.make, blockchain),
+                    take = FlowConverter.convertToType(source.take, blockchain),
+                    transactionHash = source.transactionHash ?: "",
                 )
             }
         }

@@ -107,21 +107,21 @@ class EthereumConsumerConfiguration(
     @Qualifier("ethereum.nft.consumer.factory")
     fun ethereumNftIndexerConsumerFactory(): NftIndexerEventsConsumerFactory {
         val replicaSet = consumer.brokerReplicaSet
-        return NftIndexerEventsConsumerFactory(replicaSet, host, env)
+        return NftIndexerEventsConsumerFactory(replicaSet!!, host, env)
     }
 
     @Bean
     @Qualifier("ethereum.order.consumer.factory")
     fun ethereumOrderIndexerConsumerFactory(): OrderIndexerEventsConsumerFactory {
         val replicaSet = consumer.brokerReplicaSet
-        return OrderIndexerEventsConsumerFactory(replicaSet, host, env)
+        return OrderIndexerEventsConsumerFactory(replicaSet!!, host, env)
     }
 
     @Bean
     @Qualifier("ethereum.activity.consumer.factory")
     fun ethereumActivityConsumerFactory(): EthActivityEventsConsumerFactory {
         val replicaSet = consumer.brokerReplicaSet
-        return EthActivityEventsConsumerFactory(replicaSet, host, env)
+        return EthActivityEventsConsumerFactory(replicaSet!!, host, env)
     }
 
     @Bean

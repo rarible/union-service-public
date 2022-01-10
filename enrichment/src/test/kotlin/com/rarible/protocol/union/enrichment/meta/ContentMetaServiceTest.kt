@@ -21,6 +21,7 @@ class ContentMetaServiceTest {
     private val service: ContentMetaService = ContentMetaService(
         MediaMetaService(metaProperties),
         IpfsUrlResolver(metaProperties),
+        MetaProperties("", 1000, 1000, "", false),
         null
     )
 

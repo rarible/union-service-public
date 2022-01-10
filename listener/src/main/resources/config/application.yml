@@ -101,4 +101,4 @@ meta:
   mediaFetchTimeout: 10000
   mediaFetchMaxSize: 10485760
   openSeaProxyUrl: ${consul.meta.openSeaProxyUrl}
-
+  returnOnlyCachedContentMeta: ${consul.meta.returnOnlyCachedContentMeta}

@@ -80,7 +80,7 @@ class FlowConsumerConfiguration(
     @Bean
     fun flowNftIndexerConsumerFactory(): FlowNftIndexerEventsConsumerFactory {
         val replicaSet = consumer.brokerReplicaSet
-        return FlowNftIndexerEventsConsumerFactory(replicaSet, host, env)
+        return FlowNftIndexerEventsConsumerFactory(replicaSet!!, host, env)
     }
 
     @Bean
