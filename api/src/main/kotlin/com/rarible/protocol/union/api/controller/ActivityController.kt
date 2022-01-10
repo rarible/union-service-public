@@ -14,7 +14,6 @@ import com.rarible.protocol.union.dto.continuation.ActivityContinuation
 import com.rarible.protocol.union.dto.continuation.page.ArgPaging
 import com.rarible.protocol.union.dto.continuation.page.ArgSlice
 import com.rarible.protocol.union.dto.continuation.page.PageSize
-import com.rarible.protocol.union.dto.continuation.page.Paging
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.dto.subchains
@@ -175,25 +174,24 @@ class ActivityController(
     ): ActivitiesDto {
         val factory = continuationFactory(sort)
         val slices = blockchainPages.map { ArgSlice(it.key.name, it.value.continuation, it.value) }
-
-        val legacySlice = Paging(factory, blockchainPages.values.flatMap { it.entities }).getSlice(size)
-        val cursorSlice = ArgPaging(factory, slices).getSlice(size)
-
-        return toDto(legacySlice, cursorSlice.continuation)
+        val finalSlice = ArgPaging(factory, slices).getSlice(size)
+        val dto = toDtoWithCursor(finalSlice)
+        val continuation = if (finalSlice.entities.size >= size) finalSlice.entities.last()
+            .let { factory.getContinuation(it).toString() } else null
+        return dto.copy(continuation = continuation)
     }
 
-    private fun toDto(legacySlice: Slice<ActivityDto>, cursor: String? = null): ActivitiesDto {
+    private fun toDto(slice: Slice<ActivityDto>, cursor: String? = null): ActivitiesDto {
         return ActivitiesDto(
-            continuation = legacySlice.continuation,
+            continuation = slice.continuation,
             cursor = cursor,
-            activities = legacySlice.entities
+            activities = slice.entities
         )
     }
 
     private fun toDtoWithCursor(slice: Slice<ActivityDto>): ActivitiesDto {
         return ActivitiesDto(
             continuation = null,
-            // TODO remove when we get back to continuation
             cursor = slice.continuation,
             activities = slice.entities
         )
