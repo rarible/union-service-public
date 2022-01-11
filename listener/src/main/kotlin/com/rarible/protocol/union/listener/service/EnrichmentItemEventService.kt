@@ -122,6 +122,7 @@ class EnrichmentItemEventService(
         if (short != updated) {
             if (updated.isNotEmpty()) {
                 val saved = itemService.save(updated)
+                logger.info("Saved Item [{}] with updated order [{}]", itemId, order.id)
                 if (notificationEnabled) {
                     notifyUpdate(saved, null, order)
                 }
