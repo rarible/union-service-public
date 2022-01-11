@@ -76,7 +76,7 @@ class EnrichmentItemService(
         logger.info("Fetched {} items for collection {} and owner {}", count, address, owner)
     }
 
-    fun findByAuctionId(auctionIdDto: AuctionIdDto) = itemRepository.findWithAuction(auctionIdDto)
+    fun findByAuctionId(auctionIdDto: AuctionIdDto) = itemRepository.findByAuction(auctionIdDto)
 
     suspend fun fetch(itemId: ShortItemId): UnionItem {
         val now = nowMillis()

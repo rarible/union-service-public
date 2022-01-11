@@ -1,26 +1,22 @@
-package com.rarible.protocol.union.listener.job
+package com.rarible.protocol.union.listener.job.task
 
 import com.rarible.core.task.RunTask
 import com.rarible.core.task.TaskHandler
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.parser.IdParser
+import com.rarible.protocol.union.listener.job.ReconciliationJob
 import kotlinx.coroutines.flow.Flow
 import org.springframework.stereotype.Component
 
 @Component
-class ReconciliationAuctionTaskHandler(
-    private val job: ReconciliationAuctionsJob,
+class ReconciliationTaskHandler(
+    private val job: ReconciliationJob,
     private val activeBlockchains: List<BlockchainDto>
 ) : TaskHandler<String> {
 
-    override val type = "ENRICHMENT_RECONCILIATION_AUCTIONS_JOB"
+    override val type = "ENRICHMENT_RECONCILIATION_JOB"
 
     override fun getAutorunParams(): List<RunTask> {
-        // TODO Enable when all blockchains will support auctions
-        //blockchains.map { RunTask(it.name) }
-        return listOf(
-            RunTask(BlockchainDto.ETHEREUM.name)
-        )
         return activeBlockchains.map { RunTask(it.name) }
     }
 

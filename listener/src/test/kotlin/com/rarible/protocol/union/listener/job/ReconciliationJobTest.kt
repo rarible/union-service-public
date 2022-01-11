@@ -47,7 +47,6 @@ class ReconciliationJobTest {
         mockGetOrdersAll("1_1", testPageSize, mockPagination("1_2", testPageSize))
         mockGetOrdersAll("1_2", testPageSize, mockPagination(null, 10))
 
-
         val result = orderReconciliationService.reconcile(null, BlockchainDto.ETHEREUM).toList()
 
         assertEquals(2, result.size)
