@@ -71,8 +71,8 @@ class ItemRepository(
     fun findByBlockchain(fromShortItemId: ShortItemId?, blockchainDto: BlockchainDto?, limit: Int): Flow<ShortItem> {
         val criteria = Criteria().andOperator(
             listOfNotNull(
-                if (blockchainDto != null) ShortItem::blockchain isEqualTo blockchainDto else null,
-                if (fromShortItemId != null) Criteria.where("_id").gt(fromShortItemId) else null
+                blockchainDto?.let { ShortItem::blockchain isEqualTo it },
+                fromShortItemId?.let { Criteria.where("_id").gt(it) }
             )
         )
 
@@ -91,7 +91,7 @@ class ItemRepository(
         val criteria = Criteria().andOperator(
             listOfNotNull(
                 ShortItem::bestSellOrder / ShortOrder::platform isEqualTo platform.name,
-                if (fromShortItemId != null) Criteria.where("_id").gt(fromShortItemId) else null
+                fromShortItemId?.let { Criteria.where("_id").gt(it) }
             )
         )
         val query = Query(criteria)
