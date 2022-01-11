@@ -58,8 +58,8 @@ class EthItemConverterTest {
         assertThat(converted.id.contract).isEqualTo(dto.contract.prefixed())
         assertThat(converted.id.tokenId).isEqualTo(dto.tokenId)
         assertThat(converted.supply).isEqualTo(dto.supply)
-        assertThat(converted.lastUpdatedAt).isEqualTo(dto.date)
-        assertThat(converted.mintedAt).isEqualTo(dto.date) // TODO not correct
+        assertThat(converted.lastUpdatedAt).isEqualTo(dto.lastUpdatedAt)
+        assertThat(converted.mintedAt).isEqualTo(dto.mintedAt)
         assertThat(converted.lazySupply).isEqualTo(dto.lazySupply)
         assertThat(converted.deleted).isEqualTo(dto.deleted)
         assertThat(converted.lazySupply).isEqualTo(dto.lazySupply)

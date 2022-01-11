@@ -22,7 +22,8 @@ open class EthOwnershipService(
     ): Page<UnionOwnership> {
         val ownerships = ownershipControllerApi.getNftAllOwnerships(
             continuation,
-            size
+            size,
+            false
         ).awaitFirst()
         return EthOwnershipConverter.convert(ownerships, blockchain)
     }

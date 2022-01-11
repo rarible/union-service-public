@@ -42,8 +42,8 @@ object EthItemConverter {
                 tokenId = item.tokenId,
                 blockchain = blockchain
             ),
-            mintedAt = item.date ?: nowMillis(), // TODO ETHEREUM RPN-848
-            lastUpdatedAt = item.date ?: nowMillis(),
+            mintedAt = item.mintedAt ?: nowMillis(),
+            lastUpdatedAt = item.lastUpdatedAt ?: nowMillis(),
             supply = item.supply,
             meta = item.meta?.let { convert(it) },
             deleted = item.deleted ?: false,

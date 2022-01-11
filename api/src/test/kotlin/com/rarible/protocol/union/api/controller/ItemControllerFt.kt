@@ -274,14 +274,14 @@ class ItemControllerFt : AbstractIntegrationTest() {
     fun `get items by owner - ethereum, enriched partially`() = runBlocking<Unit> {
         // Enriched item
         val ethItemId = randomEthItemId()
-        val ethItem = randomEthNftItemDto(ethItemId).copy(date = nowMillis())
+        val ethItem = randomEthNftItemDto(ethItemId).copy(lastUpdatedAt = nowMillis())
         val ethUnionItem = EthItemConverter.convert(ethItem, ethItemId.blockchain)
         val ethShortItem = ShortItemConverter.convert(ethUnionItem)
             .copy(totalStock = 10.toBigInteger(), sellers = 2)
         enrichmentItemService.save(ethShortItem)
 
         val ethOwnerId = UnionAddressConverter.convert(BlockchainDto.ETHEREUM, randomEthAddress())
-        val emptyEthItem = randomEthNftItemDto().copy(date = ethItem.date!!.minusSeconds(1))
+        val emptyEthItem = randomEthNftItemDto().copy(lastUpdatedAt = ethItem.lastUpdatedAt!!.minusSeconds(1))
 
         ethereumItemControllerApiMock.mockGetNftOrderItemsByOwner(
             ethOwnerId.value, continuation, size, ethItem, emptyEthItem
@@ -393,8 +393,8 @@ class ItemControllerFt : AbstractIntegrationTest() {
         val now = nowMillis()
 
         val ethList = listOf(
-            randomEthNftItemDto().copy(date = now),
-            randomEthNftItemDto().copy(date = now.minusSeconds(10))
+            randomEthNftItemDto().copy(lastUpdatedAt = now),
+            randomEthNftItemDto().copy(lastUpdatedAt = now.minusSeconds(10))
         )
 
         val flowList = listOf(
