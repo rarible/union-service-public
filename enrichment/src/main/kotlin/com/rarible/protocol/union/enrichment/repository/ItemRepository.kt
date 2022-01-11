@@ -5,6 +5,8 @@ import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.apm.SpanType
 import com.rarible.core.mongo.util.div
 import com.rarible.protocol.union.dto.AuctionIdDto
+import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortOrder
@@ -66,15 +68,29 @@ class ItemRepository(
         return template.find(query, ShortItem::class.java).asFlow()
     }
 
-    fun findWithAuction(auctionId: AuctionIdDto): Flow<ShortItem> {
+    fun findByBlockchain(fromShortItemId: ShortItemId?, blockchainDto: BlockchainDto?, limit: Int): Flow<ShortItem> {
+        val criteria = Criteria().andOperator(
+            listOfNotNull(
+                if (blockchainDto != null) ShortItem::blockchain isEqualTo blockchainDto else null,
+                if (fromShortItemId != null) Criteria.where("_id").gt(fromShortItemId) else null
+            )
+        )
+
+        val query = Query(criteria)
+            .with(Sort.by("_id"))
+            .limit(limit)
+        return template.find(query, ShortItem::class.java).asFlow()
+    }
+
+    fun findByAuction(auctionId: AuctionIdDto): Flow<ShortItem> {
         val query = Query(ShortItem::auctions isEqualTo auctionId)
         return template.find(query, ShortItem::class.java).asFlow()
     }
 
-    fun findWithSellAndPlatform(platform: String, fromShortItemId: ShortItemId?): Flow<ShortItem> {
+    fun findByPlatformWithSell(platform: PlatformDto, fromShortItemId: ShortItemId?): Flow<ShortItem> {
         val criteria = Criteria().andOperator(
             listOfNotNull(
-                ShortItem::bestSellOrder / ShortOrder::platform isEqualTo platform,
+                ShortItem::bestSellOrder / ShortOrder::platform isEqualTo platform.name,
                 if (fromShortItemId != null) Criteria.where("_id").gt(fromShortItemId) else null
             )
         )
@@ -91,6 +107,11 @@ class ItemRepository(
     }
 
     companion object {
+        private val BLOCKCHAIN_DEFINITION = Index()
+            .on(ShortItem::blockchain.name, Sort.Direction.ASC)
+            .on("_id", Sort.Direction.ASC)
+            .background()
+
         private val MULTI_CURRENCY_DEFINITION = Index()
             .on(ShortItem::multiCurrency.name, Sort.Direction.DESC)
             .on(ShortItem::lastUpdatedAt.name, Sort.Direction.DESC)
@@ -106,6 +127,7 @@ class ItemRepository(
             .background()
 
         private val ALL_INDEXES = listOf(
+            BLOCKCHAIN_DEFINITION,
             MULTI_CURRENCY_DEFINITION,
             BY_BEST_SELL_PLATFORM_DEFINITION,
             AUCTION_DEFINITION
