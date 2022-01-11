@@ -17,6 +17,6 @@ class OutgoingOrderEventListener(
 
     override suspend fun onEvent(event: OrderEventDto) {
         eventsProducer.send(KafkaEventFactory.orderEvent(event)).ensureSuccess()
-        logger.debug("Order Event sent: {}", event)
+        logger.info("Order Event sent: {}", event)
     }
 }
