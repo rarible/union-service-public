@@ -94,10 +94,9 @@ object EthConverter {
         }
     }
 
-    fun convert(source: PlatformDto?): com.rarible.protocol.dto.PlatformDto {
+    fun convert(source: PlatformDto?): com.rarible.protocol.dto.PlatformDto? {
         return when (source) {
-            null -> com.rarible.protocol.dto.PlatformDto.ALL
-            PlatformDto.ALL -> com.rarible.protocol.dto.PlatformDto.ALL
+            null -> null
             PlatformDto.RARIBLE -> com.rarible.protocol.dto.PlatformDto.RARIBLE
             PlatformDto.OPEN_SEA -> com.rarible.protocol.dto.PlatformDto.OPEN_SEA
             PlatformDto.CRYPTO_PUNKS -> com.rarible.protocol.dto.PlatformDto.CRYPTO_PUNKS

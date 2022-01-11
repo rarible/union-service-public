@@ -50,8 +50,8 @@ class OrderControllerFt : AbstractIntegrationTest() {
 
     private val continuation: String? = null
     private val size = PageSize.ORDER.default
-    private val platform = PlatformDto.ALL
-    private val ethPlatform = com.rarible.protocol.dto.PlatformDto.ALL
+    private val platform: PlatformDto? = null
+    private val ethPlatform: com.rarible.protocol.dto.PlatformDto? = null
 
     @Autowired
     lateinit var orderControllerClient: OrderControllerApi

@@ -107,9 +107,9 @@ class EnrichmentOrderService(
 
     private suspend fun withPreferredRariblePlatform(
         id: Any,
-        clientCall: suspend (platform: PlatformDto, continuation: String?) -> Slice<OrderDto>
+        clientCall: suspend (platform: PlatformDto?, continuation: String?) -> Slice<OrderDto>
     ): OrderDto? {
-        val bestOfAll = ignoreFilledTaker(id, clientCall, PlatformDto.ALL)
+        val bestOfAll = ignoreFilledTaker(id, clientCall, null)
         logger.debug("Found best order from ALL platforms: [{}]", bestOfAll)
         if (bestOfAll == null || bestOfAll.platform == PlatformDto.RARIBLE) {
             return bestOfAll
@@ -122,8 +122,8 @@ class EnrichmentOrderService(
 
     suspend fun ignoreFilledTaker(
         id: Any,
-        clientCall: suspend (platform: PlatformDto, continuation: String?) -> Slice<OrderDto>,
-        platform: PlatformDto
+        clientCall: suspend (platform: PlatformDto?, continuation: String?) -> Slice<OrderDto>,
+        platform: PlatformDto?
     ): OrderDto? {
         var order: OrderDto?
         var continuation: String? = null

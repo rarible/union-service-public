@@ -28,7 +28,7 @@ class AuctionControllerFt : AbstractIntegrationTest() {
 
     private val continuation: String? = null
     private val size = PageSize.AUCTION.default
-    private val platform = PlatformDto.ALL
+    private val platform: PlatformDto? = null
 
     @Autowired
     lateinit var auctionControllerClient: AuctionControllerApi
