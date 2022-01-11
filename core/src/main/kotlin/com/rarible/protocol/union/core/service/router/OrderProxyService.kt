@@ -172,7 +172,7 @@ class OrderProxyService(
     }
 
     private fun isPlatformSupported(platform: PlatformDto?): Boolean {
-        if (platform == null || platform == PlatformDto.ALL) {
+        if (platform == null) {
             return true
         }
         return supportedPlatforms.contains(platform)

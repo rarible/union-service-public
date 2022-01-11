@@ -44,7 +44,7 @@ class ReconciliationAuctionsJob(
     suspend fun reconcileAuctions(lastUpdateContinuation: String?, blockchain: BlockchainDto): String? {
         logger.info("Fetching auctions from {}: [{}]", blockchain.name, lastUpdateContinuation)
         val page = auctionServiceRouter.getService(blockchain).getAuctionsAll(
-            platform = PlatformDto.ALL,
+            platform = null,
             continuation = lastUpdateContinuation,
             size = config.auctionBatchSize
         )

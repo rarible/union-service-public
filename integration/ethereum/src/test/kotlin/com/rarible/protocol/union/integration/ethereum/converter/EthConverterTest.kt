@@ -26,8 +26,7 @@ class EthConverterTest {
 
     @Test
     fun platform() {
-        assertThat(EthConverter.convert(null as PlatformDto?)).isEqualTo(com.rarible.protocol.dto.PlatformDto.ALL)
-        assertThat(EthConverter.convert(PlatformDto.ALL)).isEqualTo(com.rarible.protocol.dto.PlatformDto.ALL)
+        assertThat(EthConverter.convert(null as PlatformDto?)).isEqualTo(null)
         assertThat(EthConverter.convert(PlatformDto.RARIBLE)).isEqualTo(com.rarible.protocol.dto.PlatformDto.RARIBLE)
         assertThat(EthConverter.convert(PlatformDto.OPEN_SEA)).isEqualTo(com.rarible.protocol.dto.PlatformDto.OPEN_SEA)
         assertThat(EthConverter.convert(PlatformDto.CRYPTO_PUNKS)).isEqualTo(com.rarible.protocol.dto.PlatformDto.CRYPTO_PUNKS)

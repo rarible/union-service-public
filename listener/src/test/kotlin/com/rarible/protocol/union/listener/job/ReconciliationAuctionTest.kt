@@ -101,7 +101,7 @@ class ReconciliationAuctionTest {
 
     private fun mockGetAuctionsAll(continuation: String?, size: Int, result: Slice<AuctionDto>): Unit {
         coEvery {
-            auctionService.getAuctionsAll(null, null, null, PlatformDto.ALL, continuation, size)
+            auctionService.getAuctionsAll(null, null, null, null, continuation, size)
         } returns result
     }
 
