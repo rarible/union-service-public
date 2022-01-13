@@ -1,7 +1,6 @@
 package com.rarible.protocol.union.api.controller
 
 import com.rarible.core.common.nowMillis
-import com.rarible.core.test.data.randomBigInt
 import com.rarible.core.test.data.randomInt
 import com.rarible.core.test.data.randomString
 import com.rarible.protocol.dto.ActivitySortDto
@@ -173,7 +172,7 @@ class ActivityControllerFt : AbstractIntegrationTest() {
             testEthereumActivityOrderApi.getOrderActivities(
                 any(),
                 eq(ethContinuation),
-                eq(PageSize.ACTIVITY.max),
+                eq(1),
                 ActivitySortDto.LATEST_FIRST
             )
         } returns OrderActivitiesDto(null, listOf(orderActivity)).toMono()
@@ -182,18 +181,18 @@ class ActivityControllerFt : AbstractIntegrationTest() {
             testEthereumActivityItemApi.getNftActivities(
                 any(),
                 eq(ethContinuation),
-                eq(PageSize.ACTIVITY.max),
+                eq(1),
                 ActivitySortDto.LATEST_FIRST
             )
         } returns NftActivitiesDto(null, listOf(itemActivity)).toMono()
 
         val activities = activityControllerApi.getActivitiesByItem(
-            types, ethItemId.fullId(), null, null, null, cursor.toString(), 10000000, sort
+            types, ethItemId.fullId(), null, null, null, cursor.toString(), 1, sort
         ).awaitFirst()
 
-        assertThat(activities.activities).hasSize(2)
-        assertThat(activities.activities[0]).isInstanceOf(OrderBidActivityDto::class.java)
-        assertThat(activities.activities[1]).isInstanceOf(MintActivityDto::class.java)
+        assertThat(activities.activities).hasSize(1)
+        assertThat(activities.continuation).isNotNull
+        assertThat(activities.cursor).isEqualTo("${BlockchainDto.ETHEREUM}:${activities.continuation}")
     }
 
     @Test

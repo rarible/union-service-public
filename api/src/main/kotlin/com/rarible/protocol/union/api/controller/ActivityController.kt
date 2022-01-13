@@ -200,6 +200,7 @@ class ActivityController(
         sort: ActivitySortDto?,
         clientCall: suspend (continuation: String?, safeSize: Int) -> Slice<ActivityDto>
     ): ActivitiesDto {
+        val factory = continuationFactory(sort)
         val safeSize = PageSize.ACTIVITY.limit(size)
         val blockchainContinuation = if (cursor == null) {
             continuation
@@ -212,8 +213,15 @@ class ActivityController(
         } else {
             clientCall(blockchainContinuation, safeSize)
         }
+        val continuation = if (slice.entities.size >= safeSize) slice.entities.last()
+            .let { factory.getContinuation(it).toString() } else null
         val argv = ArgSlice(blockchain.name, blockchainContinuation, slice)
-        return toDtoWithCursor(ArgPaging(continuationFactory(sort), listOf(argv)).getSlice(safeSize))
+        val finalSlice = ArgPaging(factory, listOf(argv)).getSlice(safeSize)
+        return ActivitiesDto(
+            continuation = continuation,
+            cursor = finalSlice.continuation,
+            activities = finalSlice.entities
+        )
     }
 
     private fun continuationFactory(sort: ActivitySortDto?) = when (sort) {
