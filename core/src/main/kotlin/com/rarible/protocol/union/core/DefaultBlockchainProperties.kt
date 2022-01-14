@@ -8,5 +8,6 @@ open class DefaultBlockchainProperties(
     val enabled: Boolean,
     val consumer: DefaultConsumerProperties?,
     val client: DefaultClientProperties?,
-    val daemon: DaemonWorkerProperties = DaemonWorkerProperties()
+    val daemon: DaemonWorkerProperties = DaemonWorkerProperties(),
+    val auctionContracts: List<String> = listOf()
 )

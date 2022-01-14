@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.listener.job
 
+import com.rarible.protocol.dto.AuctionsPaginationDto
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
 import com.rarible.protocol.union.enrichment.repository.OwnershipRepository
@@ -130,6 +131,9 @@ internal class PriceUpdateJobTest : AbstractIntegrationTest() {
 
         coEvery { testEthereumOwnershipApi.getNftOwnershipById(ownershipId.value) } returns randomEthOwnershipDto().toMono()
         coEvery { testEthereumOrderApi.getOrderByHash(any()) } returns randomEthLegacySellOrderDto().toMono()
+        coEvery {
+            testEthereumAuctionApi.getAuctionsByItem(any(), any(), any(), any(), any(), any(), any(), any(), any(), 1)
+        } returns AuctionsPaginationDto(emptyList(), null).toMono()
 
         ownershipRepository.save(shortOwnership)
         priceUpdateJob.updateBestOrderPrice()

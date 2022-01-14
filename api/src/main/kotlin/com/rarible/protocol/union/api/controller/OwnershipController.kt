@@ -25,6 +25,7 @@ class OwnershipController(
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
+    @Deprecated("Should be removed")
     override suspend fun getAllOwnerships(
         blockchains: List<BlockchainDto>?,
         continuation: String?,
@@ -50,11 +51,10 @@ class OwnershipController(
         ownershipId: String
     ): ResponseEntity<OwnershipDto> {
         val fullOwnershipId = OwnershipIdParser.parseFull(ownershipId)
-        val result = router.getService(fullOwnershipId.blockchain).getOwnershipById(fullOwnershipId.value)
 
-        val enriched = ownershipApiService.enrich(result)
+        val ownership = ownershipApiService.getOwnershipById(fullOwnershipId)
 
-        return ResponseEntity.ok(enriched)
+        return ResponseEntity.ok(ownership)
     }
 
     override suspend fun getOwnershipsByItem(
@@ -71,7 +71,7 @@ class OwnershipController(
 
         logger.info(
             "Response for getOwnershipsByItem(itemId={}, continuation={}, size={}):" +
-                    " Page(size={}, total={}, continuation={}) from blockchain pages {} ",
+                    " Page(size={}, total={}, continuation={}) ",
             fullItemId.fullId(), continuation, size, result.entities.size, result.total, result.continuation
         )
 

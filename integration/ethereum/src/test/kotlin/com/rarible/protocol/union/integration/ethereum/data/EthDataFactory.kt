@@ -464,6 +464,7 @@ fun randomEthCollectionDto(id: Address): NftCollectionDto {
 fun randomEthAuctionDto() = randomEthAuctionDto(randomEthItemId())
 fun randomEthAuctionDto(itemId: ItemIdDto): AuctionDto {
     return RaribleAuctionV1Dto(
+        contract = randomAddress(),
         seller = randomAddress(),
         sell = randomEthAssetErc721(itemId),
         buy = Erc20AssetTypeDto(randomAddress()),

@@ -7,8 +7,11 @@ import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.core.service.OwnershipService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
+import com.rarible.protocol.union.dto.AuctionDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
+import com.rarible.protocol.union.dto.OwnershipDto
+import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.continuation.page.PageSize
 import com.rarible.protocol.union.enrichment.converter.EnrichedOwnershipConverter
 import com.rarible.protocol.union.enrichment.model.ItemSellStats
@@ -20,7 +23,9 @@ import com.rarible.protocol.union.enrichment.util.spent
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
+import org.springframework.web.reactive.function.client.WebClientResponseException
 
 @Component
 @CaptureSpan(type = SpanType.APP)
@@ -62,12 +67,20 @@ class EnrichmentOwnershipService(
     }
 
     suspend fun fetch(ownershipId: ShortOwnershipId): UnionOwnership {
-        val now = nowMillis()
-        val ownershipDto = ownershipServiceRouter.getService(ownershipId.blockchain)
+        return ownershipServiceRouter.getService(ownershipId.blockchain)
             .getOwnershipById(ownershipId.toDto().value)
+    }
 
-        logger.info("Fetched Ownership by Id [{}] ({}ms)", ownershipId, spent(now))
-        return ownershipDto
+    suspend fun fetchOrNull(ownershipId: ShortOwnershipId): UnionOwnership? {
+        return try {
+            fetch(ownershipId)
+        } catch (e: WebClientResponseException) {
+            if (e.statusCode == HttpStatus.NOT_FOUND) {
+                null
+            } else {
+                throw e
+            }
+        }
     }
 
     suspend fun fetchAllByItemId(itemId: ShortItemId): List<UnionOwnership> {
@@ -100,4 +113,28 @@ class EnrichmentOwnershipService(
         EnrichedOwnershipConverter.convert(fetchedOwnership.await(), short, bestOrders)
     }
 
+    fun mergeWithAuction(ownership: OwnershipDto, auction: AuctionDto?): OwnershipDto {
+        return if (auction != null) {
+            // Some part of user's items are participated in auction, combining total value (ER1155 case)
+            ownership.copy(
+                value = ownership.value + auction.sell.value.toBigInteger(),
+                auction = auction
+            )
+        } else {
+            // There is no auction created by user for this item, return ownership "as is"
+            ownership
+        }
+    }
+
+    fun disguiseAuctionOwnership(auctionOwnership: OwnershipDto, auction: AuctionDto): OwnershipDto {
+        val id = auctionOwnership.id
+        return auctionOwnership.copy(
+            id = OwnershipIdDto(id.blockchain, id.contract, id.tokenId, auction.seller),
+            owner = auction.seller,
+            auction = auction,
+            // Auction ownership may have summarized value from several auctions, so here we need to use value
+            // from 'sell' field from auction entity
+            value = auction.sell.value.toBigInteger()
+        )
+    }
 }

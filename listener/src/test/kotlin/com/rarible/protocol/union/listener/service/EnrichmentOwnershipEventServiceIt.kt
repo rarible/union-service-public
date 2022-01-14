@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.listener.service
 
 import com.rarible.core.test.wait.Wait
+import com.rarible.protocol.dto.AuctionsPaginationDto
 import com.rarible.protocol.union.enrichment.converter.EnrichedOwnershipConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOwnershipConverter
@@ -49,6 +50,10 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
 
         val expected = EnrichedOwnershipConverter.convert(ownershipDto)
 
+        coEvery {
+            testEthereumAuctionApi.getAuctionsByItem(any(), any(), any(), any(), any(), any(), any(), any(), any(), 1)
+        } returns AuctionsPaginationDto(emptyList(), null).toMono()
+
         ownershipEventHandler.onOwnershipUpdated(ownershipDto)
 
         val created = ownershipService.get(ShortOwnershipId(ownershipId))
@@ -85,6 +90,9 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
 
         coEvery { testEthereumOrderApi.getOrderByHash(unionBestSell.id.value) } returns bestSellOrder.toMono()
         coEvery { testEthereumOwnershipApi.getNftOwnershipById(itemId.value) } returns ethOwnership.toMono()
+        coEvery {
+            testEthereumAuctionApi.getAuctionsByItem(any(), any(), any(), any(), any(), any(), any(), any(), any(), 1)
+        } returns AuctionsPaginationDto(emptyList(), null).toMono()
 
         ownershipEventHandler.onOwnershipUpdated(unionOwnership)
 
@@ -121,6 +129,9 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
 
         coEvery { testEthereumOwnershipApi.getNftOwnershipById(ownershipId.value) } returns ethOwnership.toMono()
         coEvery { testEthereumOwnershipApi.getNftOwnershipById(ownershipId.value) } returns ethOwnership.toMono()
+        coEvery {
+            testEthereumAuctionApi.getAuctionsByItem(any(), any(), any(), any(), any(), any(), any(), any(), any(), 1)
+        } returns AuctionsPaginationDto(emptyList(), null).toMono()
 
         ownershipEventHandler.onOwnershipBestSellOrderUpdated(shortOwnership.id, unionBestSell)
 

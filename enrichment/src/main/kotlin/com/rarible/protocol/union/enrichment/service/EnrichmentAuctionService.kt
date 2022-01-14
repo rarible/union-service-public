@@ -7,7 +7,9 @@ import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.AuctionDto
 import com.rarible.protocol.union.dto.AuctionIdDto
 import com.rarible.protocol.union.dto.AuctionStatusDto
+import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.enrichment.model.ShortItem
+import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import org.slf4j.LoggerFactory
@@ -21,6 +23,28 @@ class EnrichmentAuctionService(
 
     private val logger = LoggerFactory.getLogger(EnrichmentAuctionService::class.java)
     private val FETCH_SIZE = 1_000
+
+    suspend fun fetchItemAuction(itemId: ItemIdDto): AuctionDto? {
+        val auctionPage = auctionServiceRouter.getService(itemId.blockchain)
+            .getAuctionsByItem(
+                contract = itemId.contract,
+                tokenId = itemId.tokenId.toString(),
+                size = 1
+            )
+        return auctionPage.entities.firstOrNull()
+    }
+
+    suspend fun fetchOwnershipAuction(shortOwnershipId: ShortOwnershipId): AuctionDto? {
+        // TODO here we need to determine some kind of "live" auction (with locked items)
+        val auctionPage = auctionServiceRouter.getService(shortOwnershipId.blockchain)
+            .getAuctionsByItem(
+                contract = shortOwnershipId.token,
+                tokenId = shortOwnershipId.tokenId.toString(),
+                seller = shortOwnershipId.owner,
+                size = 1
+            )
+        return auctionPage.entities.firstOrNull()
+    }
 
     suspend fun fetchAuctionsIfAbsent(
         ids: Set<AuctionIdDto>,

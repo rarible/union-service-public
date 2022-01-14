@@ -6,6 +6,7 @@ import com.rarible.protocol.nft.api.client.NftOwnershipControllerApi
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import io.mockk.every
+import org.springframework.web.reactive.function.client.WebClientResponseException
 import reactor.core.publisher.Mono
 
 class EthOwnershipControllerApiMock(
@@ -16,6 +17,12 @@ class EthOwnershipControllerApiMock(
         every {
             nftOwnershipControllerApi.getNftOwnershipById(ownershipId.value)
         } returns (if (returnOwnership == null) Mono.empty() else Mono.just(returnOwnership))
+    }
+
+    fun mockGetNftOwnershipByIdNotFound(ownershipId: OwnershipIdDto) {
+        every {
+            nftOwnershipControllerApi.getNftOwnershipById(ownershipId.value)
+        } throws WebClientResponseException(404, "", null, null, null, null)
     }
 
     fun mockGetNftOwnershipsByItem(
