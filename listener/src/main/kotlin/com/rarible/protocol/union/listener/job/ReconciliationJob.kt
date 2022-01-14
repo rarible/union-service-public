@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import org.slf4j.LoggerFactory
@@ -62,7 +63,13 @@ class ReconciliationJob(
         }
 
         coroutineScope {
-            orders.asFlow().map { async { safeUpdate(it) } }
+            orders.asFlow()
+                .filter {
+                    val isPublic = it.taker == null
+                    if (!isPublic) logger.info("Ignore private order [{}]", it.id)
+                    isPublic
+                }
+                .map { async { safeUpdate(it) } }
                 .buffer(config.threadCount)
                 .map { it.await() }
                 .collect()
