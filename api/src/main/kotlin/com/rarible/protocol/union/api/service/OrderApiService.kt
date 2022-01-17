@@ -82,7 +82,7 @@ class OrderApiService(
             val blockDto = BlockchainDto.valueOf(blockchain)
             router.getService(blockDto).getOrdersAll(continuation, size, sort, status)
         }
-        return ArgPaging(OrderContinuation.ByLastUpdatedAndId, slices).getSlice(size)
+        return ArgPaging(continuationFactory(sort), slices).getSlice(size)
     }
 
     suspend fun getOrderBidsByItem(
@@ -163,6 +163,11 @@ class OrderApiService(
                 }
             }
         }.awaitAll()
+    }
+
+    private fun continuationFactory(sort: OrderSortDto?) = when (sort) {
+        OrderSortDto.LAST_UPDATE_ASC -> OrderContinuation.ByLastUpdatedAndIdAsc
+        OrderSortDto.LAST_UPDATE_DESC, null -> OrderContinuation.ByLastUpdatedAndIdDesc
     }
 
 }

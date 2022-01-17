@@ -74,9 +74,9 @@ object TezosItemConverter {
         )
 
     fun convert(attr: NftItemAttributeDto) = when {
-        attr.type == "date" && attr.value?.toLongOrNull() != null -> MetaAttributeDto(
+        attr.type == "date" && attr.value.toLongOrNull() != null -> MetaAttributeDto(
             key = attr.key,
-            value = Instant.ofEpochMilli(attr.value?.safeMs()!!).toString(),
+            value = Instant.ofEpochMilli(attr.value.safeMs()).toString(),
             type = "string",
             format = "date-time"
         )
@@ -88,8 +88,7 @@ object TezosItemConverter {
         )
     }
 
-
-    private fun toRoyalty(
+    fun toRoyalty(
         source: PartDto,
         blockchain: BlockchainDto
     ): RoyaltyDto {
