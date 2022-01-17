@@ -16,18 +16,6 @@ open class EthOwnershipService(
     private val ownershipControllerApi: NftOwnershipControllerApi
 ) : AbstractBlockchainService(blockchain), OwnershipService {
 
-    override suspend fun getAllOwnerships(
-        continuation: String?,
-        size: Int
-    ): Page<UnionOwnership> {
-        val ownerships = ownershipControllerApi.getNftAllOwnerships(
-            continuation,
-            size,
-            false
-        ).awaitFirst()
-        return EthOwnershipConverter.convert(ownerships, blockchain)
-    }
-
     override suspend fun getOwnershipById(ownershipId: String): UnionOwnership {
         val ownership = ownershipControllerApi.getNftOwnershipById(ownershipId).awaitFirst()
         return EthOwnershipConverter.convert(ownership, blockchain)

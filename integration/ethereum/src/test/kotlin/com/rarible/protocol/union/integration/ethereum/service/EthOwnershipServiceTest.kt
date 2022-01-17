@@ -22,28 +22,6 @@ class EthOwnershipServiceTest {
     private val service = EthereumOwnershipService(ownershipControllerApi)
 
     @Test
-    fun `ethereum get all ownerships`() = runBlocking<Unit> {
-        val ownershipId = randomEthOwnershipId()
-        val ownership = randomEthOwnershipDto(ownershipId)
-
-        val continuation = randomString()
-        val size = randomInt()
-
-        val expected = EthOwnershipConverter.convert(ownership, BlockchainDto.ETHEREUM)
-
-        coEvery {
-            ownershipControllerApi.getNftAllOwnerships(continuation, size, false)
-        } returns NftOwnershipsDto(500, "abc", listOf(ownership)).toMono()
-
-        val result = service.getAllOwnerships(continuation, size)
-
-        assertThat(result.total).isEqualTo(500)
-        assertThat(result.continuation).isEqualTo("abc")
-        assertThat(result.entities).hasSize(1)
-        assertThat(result.entities[0]).isEqualTo(expected)
-    }
-
-    @Test
     fun `ethereum get ownership by id`() = runBlocking<Unit> {
         val ownershipId = randomEthOwnershipId()
         val ownership = randomEthOwnershipDto(ownershipId)
