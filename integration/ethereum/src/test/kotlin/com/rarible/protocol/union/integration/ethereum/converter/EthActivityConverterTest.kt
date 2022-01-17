@@ -4,7 +4,14 @@ import com.rarible.protocol.dto.ActivityFilterAllTypeDto
 import com.rarible.protocol.dto.ActivityFilterByCollectionTypeDto
 import com.rarible.protocol.dto.ActivityFilterByItemTypeDto
 import com.rarible.protocol.dto.ActivityFilterByUserTypeDto
+import com.rarible.protocol.union.dto.ActivityIdDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
+import com.rarible.protocol.union.dto.AuctionBidActivityDto
+import com.rarible.protocol.union.dto.AuctionCancelActivityDto
+import com.rarible.protocol.union.dto.AuctionEndActivityDto
+import com.rarible.protocol.union.dto.AuctionFinishActivityDto
+import com.rarible.protocol.union.dto.AuctionOpenActivityDto
+import com.rarible.protocol.union.dto.AuctionStartActivityDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.BurnActivityDto
 import com.rarible.protocol.union.dto.MintActivityDto
@@ -19,6 +26,12 @@ import com.rarible.protocol.union.dto.OrderMatchSwapDto
 import com.rarible.protocol.union.dto.TransferActivityDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAssetErc1155
+import com.rarible.protocol.union.integration.ethereum.data.randomEthAuctionBidActivity
+import com.rarible.protocol.union.integration.ethereum.data.randomEthAuctionCancelActivity
+import com.rarible.protocol.union.integration.ethereum.data.randomEthAuctionEndActivity
+import com.rarible.protocol.union.integration.ethereum.data.randomEthAuctionFinishActivity
+import com.rarible.protocol.union.integration.ethereum.data.randomEthAuctionOpenActivity
+import com.rarible.protocol.union.integration.ethereum.data.randomEthAuctionStartActivity
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemBurnActivity
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemMintActivity
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemTransferActivity
@@ -34,7 +47,8 @@ import org.junit.jupiter.api.Test
 
 class EthActivityConverterTest {
 
-    private val ethActivityConverter = EthActivityConverter(CurrencyMock.currencyServiceMock)
+    private val ethAuctionConverter = EthAuctionConverter(CurrencyMock.currencyServiceMock)
+    private val ethActivityConverter = EthActivityConverter(CurrencyMock.currencyServiceMock, ethAuctionConverter)
 
     @Test
     fun `eth order activity match side - swap`() = runBlocking<Unit> {
@@ -236,6 +250,78 @@ class EthActivityConverterTest {
         assertThat(converted.blockchainInfo!!.blockHash).isEqualTo(dto.blockHash.prefixed())
         assertThat(converted.blockchainInfo!!.blockNumber).isEqualTo(dto.blockNumber)
         assertThat(converted.blockchainInfo!!.logIndex).isEqualTo(dto.logIndex)
+    }
+
+    @Test
+    fun `eth auction open`() = runBlocking<Unit> {
+        val dto = randomEthAuctionOpenActivity()
+
+        val converted = ethActivityConverter.convert(dto, BlockchainDto.ETHEREUM) as AuctionOpenActivityDto
+
+        assertThat(converted.id).isEqualTo(ActivityIdDto(BlockchainDto.ETHEREUM, dto.id))
+        assertThat(converted.date).isEqualTo(dto.date)
+        assertThat(converted.transactionHash).isEqualTo(dto.transactionHash.prefixed())
+        assertThat(converted.auction).isEqualTo(ethAuctionConverter.convert(dto.auction, BlockchainDto.ETHEREUM))
+    }
+
+    @Test
+    fun `eth auction cancelled`() = runBlocking<Unit> {
+        val dto = randomEthAuctionCancelActivity()
+
+        val converted = ethActivityConverter.convert(dto, BlockchainDto.ETHEREUM) as AuctionCancelActivityDto
+
+        assertThat(converted.id).isEqualTo(ActivityIdDto(BlockchainDto.ETHEREUM, dto.id))
+        assertThat(converted.date).isEqualTo(dto.date)
+        assertThat(converted.transactionHash).isEqualTo(dto.transactionHash.prefixed())
+        assertThat(converted.auction).isEqualTo(ethAuctionConverter.convert(dto.auction, BlockchainDto.ETHEREUM))
+    }
+
+    @Test
+    fun `eth auction finished`() = runBlocking<Unit> {
+        val dto = randomEthAuctionFinishActivity()
+
+        val converted = ethActivityConverter.convert(dto, BlockchainDto.ETHEREUM) as AuctionFinishActivityDto
+
+        assertThat(converted.id).isEqualTo(ActivityIdDto(BlockchainDto.ETHEREUM, dto.id))
+        assertThat(converted.date).isEqualTo(dto.date)
+        assertThat(converted.transactionHash).isEqualTo(dto.transactionHash.prefixed())
+        assertThat(converted.auction).isEqualTo(ethAuctionConverter.convert(dto.auction, BlockchainDto.ETHEREUM))
+    }
+
+    @Test
+    fun `eth auction started`() = runBlocking<Unit> {
+        val dto = randomEthAuctionStartActivity()
+
+        val converted = ethActivityConverter.convert(dto, BlockchainDto.ETHEREUM) as AuctionStartActivityDto
+
+        assertThat(converted.id).isEqualTo(ActivityIdDto(BlockchainDto.ETHEREUM, dto.id))
+        assertThat(converted.date).isEqualTo(dto.date)
+        assertThat(converted.auction).isEqualTo(ethAuctionConverter.convert(dto.auction, BlockchainDto.ETHEREUM))
+    }
+
+    @Test
+    fun `eth auction ended`() = runBlocking<Unit> {
+        val dto = randomEthAuctionEndActivity()
+
+        val converted = ethActivityConverter.convert(dto, BlockchainDto.ETHEREUM) as AuctionEndActivityDto
+
+        assertThat(converted.id).isEqualTo(ActivityIdDto(BlockchainDto.ETHEREUM, dto.id))
+        assertThat(converted.date).isEqualTo(dto.date)
+        assertThat(converted.auction).isEqualTo(ethAuctionConverter.convert(dto.auction, BlockchainDto.ETHEREUM))
+    }
+
+    @Test
+    fun `eth auction bid`() = runBlocking<Unit> {
+        val dto = randomEthAuctionBidActivity()
+
+        val converted = ethActivityConverter.convert(dto, BlockchainDto.ETHEREUM) as AuctionBidActivityDto
+
+        assertThat(converted.id).isEqualTo(ActivityIdDto(BlockchainDto.ETHEREUM, dto.id))
+        assertThat(converted.date).isEqualTo(dto.date)
+        assertThat(converted.transactionHash).isEqualTo(dto.transactionHash.prefixed())
+        assertThat(converted.bid.amount).isEqualTo(dto.bid.amount)
+        assertThat(converted.bid.buyer.value).isEqualTo(dto.bid.buyer.prefixed())
+        assertThat(converted.auction).isEqualTo(ethAuctionConverter.convert(dto.auction, BlockchainDto.ETHEREUM))
     }
 
     @Test

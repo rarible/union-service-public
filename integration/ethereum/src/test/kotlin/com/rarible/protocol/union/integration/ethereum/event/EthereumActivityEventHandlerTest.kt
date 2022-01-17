@@ -4,6 +4,7 @@ import com.rarible.protocol.dto.ActivityDto
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.ethereum.converter.EthActivityConverter
+import com.rarible.protocol.union.integration.ethereum.converter.EthAuctionConverter
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAuctionOpenActivity
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOrderBidActivity
 import com.rarible.protocol.union.test.mock.CurrencyMock
@@ -18,8 +19,9 @@ import org.junit.jupiter.api.Test
 class EthereumActivityEventHandlerTest {
 
     private val incomingEventHandler: IncomingEventHandler<com.rarible.protocol.union.dto.ActivityDto> = mockk()
-    private val converter = EthActivityConverter(CurrencyMock.currencyServiceMock)
-    private val handler = EthereumActivityEventHandler(incomingEventHandler, converter)
+    private val ethAuctionConverter = EthAuctionConverter(CurrencyMock.currencyServiceMock)
+    private val ethActivityConverter = EthActivityConverter(CurrencyMock.currencyServiceMock, ethAuctionConverter)
+    private val handler = EthereumActivityEventHandler(incomingEventHandler, ethActivityConverter)
 
     @BeforeEach
     fun beforeEach() {
@@ -33,7 +35,7 @@ class EthereumActivityEventHandlerTest {
 
         handler.handle(event)
 
-        val expected = converter.convert(event, BlockchainDto.ETHEREUM)
+        val expected = ethActivityConverter.convert(event, BlockchainDto.ETHEREUM)
         coVerify(exactly = 1) { incomingEventHandler.onEvent(expected) }
     }
 
@@ -43,7 +45,7 @@ class EthereumActivityEventHandlerTest {
 
         handler.handle(event)
 
-        val expected = converter.convert(event, BlockchainDto.ETHEREUM)
+        val expected = ethActivityConverter.convert(event, BlockchainDto.ETHEREUM)
         coVerify(exactly = 1) { incomingEventHandler.onEvent(expected) }
     }
 }
