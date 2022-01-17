@@ -2,6 +2,7 @@ package com.rarible.protocol.union.integration.ethereum.converter
 
 import com.rarible.protocol.dto.AuctionsPaginationDto
 import com.rarible.protocol.dto.RaribleAuctionV1Dto
+import com.rarible.protocol.union.core.converter.ContractAddressConverter
 import com.rarible.protocol.union.core.service.CurrencyService
 import com.rarible.protocol.union.dto.AuctionDto
 import com.rarible.protocol.union.dto.AuctionHistoryDto
@@ -46,6 +47,7 @@ class EthAuctionConverter(
             is RaribleAuctionV1Dto -> {
                 AuctionDto(
                     id = auctionId,
+                    contract = ContractAddressConverter.convert(blockchain, EthConverter.convert(auction.contract)),
                     type = AuctionDto.Type.RARIBLE_AUCTION_V1,
                     seller = seller,
                     sell = sell,
