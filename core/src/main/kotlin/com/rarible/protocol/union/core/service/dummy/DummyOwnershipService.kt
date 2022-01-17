@@ -11,13 +11,6 @@ class DummyOwnershipService(
     blockchain: BlockchainDto
 ) : AbstractBlockchainService(blockchain), OwnershipService {
 
-    override suspend fun getAllOwnerships(
-        continuation: String?,
-        size: Int
-    ): Page<UnionOwnership> {
-        return Page.empty()
-    }
-
     override suspend fun getOwnershipById(ownershipId: String): UnionOwnership {
         throw UnionNotFoundException("Ownership [$ownershipId] not found, ${blockchain.name} is not available")
     }

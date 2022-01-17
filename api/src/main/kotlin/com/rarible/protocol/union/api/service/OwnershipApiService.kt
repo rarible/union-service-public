@@ -2,15 +2,9 @@ package com.rarible.protocol.union.api.service
 
 import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.core.model.UnionOwnership
-import com.rarible.protocol.union.core.service.OwnershipService
-import com.rarible.protocol.union.core.service.router.BlockchainRouter
-import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OwnershipDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.OwnershipsDto
-import com.rarible.protocol.union.dto.continuation.CombinedContinuation
-import com.rarible.protocol.union.dto.continuation.page.ArgPage
-import com.rarible.protocol.union.dto.continuation.page.ArgSlice
 import com.rarible.protocol.union.dto.continuation.page.Page
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.enrichment.converter.EnrichedOwnershipConverter
@@ -19,9 +13,6 @@ import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
 import com.rarible.protocol.union.enrichment.util.spent
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
@@ -29,24 +20,10 @@ import org.springframework.stereotype.Component
 @Component
 class OwnershipApiService(
     private val orderApiService: OrderApiService,
-    private val router: BlockchainRouter<OwnershipService>,
     private val enrichmentOwnershipService: EnrichmentOwnershipService
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
-
-    suspend fun getAllOwnerships(
-        blockchains: List<BlockchainDto>?,
-        cursor: String?,
-        safeSize: Int,
-    ): List<ArgPage<UnionOwnership>> {
-        val evaluatedBlockchains = router.getEnabledBlockchains(blockchains).map(BlockchainDto::name)
-        val slices = getOwnersByBlockchains(cursor, evaluatedBlockchains) { blockchain, continuation ->
-            val blockDto = BlockchainDto.valueOf(blockchain)
-            router.getService(blockDto).getAllOwnerships(continuation, safeSize)
-        }
-        return slices
-    }
 
     suspend fun enrich(slice: Slice<UnionOwnership>, total: Long): OwnershipsDto? {
         val now = nowMillis()
@@ -112,30 +89,5 @@ class OwnershipApiService(
         )
 
         return result
-    }
-
-    private suspend fun getOwnersByBlockchains(
-        continuation: String?,
-        blockchains: Collection<String>,
-        clientCall: suspend (blockchain: String, continuation: String?) -> Page<UnionOwnership>
-    ): List<ArgPage<UnionOwnership>> {
-        val currentContinuation = CombinedContinuation.parse(continuation)
-        return coroutineScope {
-            blockchains.map { blockchain ->
-                async {
-                    val blockchainContinuation = currentContinuation.continuations[blockchain]
-                    // For completed blockchain we do not request orders
-                    if (blockchainContinuation == ArgSlice.COMPLETED) {
-                        ArgPage(blockchain, blockchainContinuation, Page(0, null, emptyList()))
-                    } else {
-                        ArgPage(
-                            blockchain,
-                            blockchainContinuation,
-                            clientCall.invoke(blockchain, blockchainContinuation)
-                        )
-                    }
-                }
-            }
-        }.awaitAll()
     }
 }

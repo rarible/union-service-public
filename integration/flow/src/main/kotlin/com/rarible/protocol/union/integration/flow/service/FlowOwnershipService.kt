@@ -16,17 +16,6 @@ open class FlowOwnershipService(
     private val ownershipControllerApi: FlowNftOwnershipControllerApi
 ) : AbstractBlockchainService(BlockchainDto.FLOW), OwnershipService {
 
-    override suspend fun getAllOwnerships(
-        continuation: String?,
-        size: Int
-    ): Page<UnionOwnership> {
-        val ownerships = ownershipControllerApi.getNftAllOwnerships(
-            continuation,
-            size
-        ).awaitFirst()
-        return FlowOwnershipConverter.convert(ownerships, blockchain)
-    }
-
     override suspend fun getOwnershipById(ownershipId: String): UnionOwnership {
         val ownership = ownershipControllerApi.getNftOwnershipById(ownershipId).awaitFirst()
         return FlowOwnershipConverter.convert(ownership, blockchain)
