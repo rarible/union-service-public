@@ -10,8 +10,13 @@ import com.rarible.core.test.data.randomLong
 import com.rarible.core.test.data.randomString
 import com.rarible.core.test.data.randomWord
 import com.rarible.protocol.dto.AssetDto
+import com.rarible.protocol.dto.AuctionActivityBidDto
+import com.rarible.protocol.dto.AuctionActivityCancelDto
 import com.rarible.protocol.dto.AuctionActivityDto
+import com.rarible.protocol.dto.AuctionActivityEndDto
+import com.rarible.protocol.dto.AuctionActivityFinishDto
 import com.rarible.protocol.dto.AuctionActivityOpenDto
+import com.rarible.protocol.dto.AuctionActivityStartDto
 import com.rarible.protocol.dto.AuctionDto
 import com.rarible.protocol.dto.AuctionHistoryDto
 import com.rarible.protocol.dto.AuctionStatusDto
@@ -533,18 +538,73 @@ fun randomEthAuctionOpenActivity(): AuctionActivityOpenDto {
         id = randomString(),
         date = nowMillis(),
         source = AuctionActivityDto.Source.RARIBLE,
-        hash = Word.apply(randomWord()),
-        seller = randomAddress(),
-        sell = randomEthAssetErc721(),
-        buy = Erc20AssetTypeDto(randomAddress()),
-        startTime = Instant.now(),
-        endTime = Instant.MAX,
-        minimalStep = BigDecimal.ONE,
-        minimalPrice = BigDecimal.ONE,
+        auction = randomEthAuctionDto(),
         transactionHash = Word.apply(randomWord()),
         blockHash = Word.apply(randomWord()),
         blockNumber = randomLong(),
         logIndex = randomInt()
+    )
+}
+
+fun randomEthAuctionCancelActivity(): AuctionActivityCancelDto {
+    return AuctionActivityCancelDto(
+        id = randomString(),
+        date = nowMillis(),
+        source = AuctionActivityDto.Source.RARIBLE,
+        auction = randomEthAuctionDto(),
+        transactionHash = Word.apply(randomWord()),
+        blockHash = Word.apply(randomWord()),
+        blockNumber = randomLong(),
+        logIndex = randomInt()
+    )
+}
+
+fun randomEthAuctionFinishActivity(): AuctionActivityFinishDto {
+    return AuctionActivityFinishDto(
+        id = randomString(),
+        date = nowMillis(),
+        source = AuctionActivityDto.Source.RARIBLE,
+        auction = randomEthAuctionDto(),
+        transactionHash = Word.apply(randomWord()),
+        blockHash = Word.apply(randomWord()),
+        blockNumber = randomLong(),
+        logIndex = randomInt()
+    )
+}
+
+fun randomEthAuctionBidActivity(): AuctionActivityBidDto {
+    return AuctionActivityBidDto(
+        id = randomString(),
+        date = nowMillis(),
+        source = AuctionActivityDto.Source.RARIBLE,
+        auction = randomEthAuctionDto(),
+        transactionHash = Word.apply(randomWord()),
+        blockHash = Word.apply(randomWord()),
+        blockNumber = randomLong(),
+        logIndex = randomInt(),
+        bid = RaribleAuctionV1BidV1Dto(
+            buyer = randomAddress(),
+            amount = randomBigDecimal(),
+            data = RaribleAuctionV1BidDataV1Dto(listOf(randomEthPartDto()), listOf(randomEthPartDto()))
+        )
+    )
+}
+
+fun randomEthAuctionStartActivity(): AuctionActivityStartDto {
+    return AuctionActivityStartDto(
+        id = randomString(),
+        date = nowMillis(),
+        source = AuctionActivityDto.Source.RARIBLE,
+        auction = randomEthAuctionDto()
+    )
+}
+
+fun randomEthAuctionEndActivity(): AuctionActivityEndDto {
+    return AuctionActivityEndDto(
+        id = randomString(),
+        date = nowMillis(),
+        source = AuctionActivityDto.Source.RARIBLE,
+        auction = randomEthAuctionDto()
     )
 }
 

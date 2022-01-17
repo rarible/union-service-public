@@ -6,8 +6,10 @@ import com.rarible.protocol.dto.ActivityFilterByItemTypeDto
 import com.rarible.protocol.dto.ActivityFilterByUserTypeDto
 import com.rarible.protocol.dto.AuctionActivityBidDto
 import com.rarible.protocol.dto.AuctionActivityCancelDto
+import com.rarible.protocol.dto.AuctionActivityEndDto
 import com.rarible.protocol.dto.AuctionActivityFinishDto
 import com.rarible.protocol.dto.AuctionActivityOpenDto
+import com.rarible.protocol.dto.AuctionActivityStartDto
 import com.rarible.protocol.dto.BurnDto
 import com.rarible.protocol.dto.MintDto
 import com.rarible.protocol.dto.OrderActivityBidDto
@@ -26,8 +28,10 @@ import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.ActivityTypeDto.*
 import com.rarible.protocol.union.dto.AuctionBidActivityDto
 import com.rarible.protocol.union.dto.AuctionCancelActivityDto
+import com.rarible.protocol.union.dto.AuctionEndActivityDto
 import com.rarible.protocol.union.dto.AuctionFinishActivityDto
 import com.rarible.protocol.union.dto.AuctionOpenActivityDto
+import com.rarible.protocol.union.dto.AuctionStartActivityDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.BurnActivityDto
 import com.rarible.protocol.union.dto.MintActivityDto
@@ -47,7 +51,8 @@ import org.springframework.stereotype.Component
 
 @Component
 class EthActivityConverter(
-    private val currencyService: CurrencyService
+    private val currencyService: CurrencyService,
+    private val auctionConverter: EthAuctionConverter
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -232,23 +237,8 @@ class EthActivityConverter(
                 AuctionOpenActivityDto(
                     id = activityId,
                     date = source.date,
-                    seller = EthConverter.convert(source.seller, blockchain),
-                    sell = EthConverter.convert(source.sell, blockchain),
-                    buy = EthConverter.convert(source.buy, blockchain),
-                    startTime = source.startTime,
-                    endTime = source.endTime,
-                    duration = source.duration,
-                    minimalStep = source.minimalStep,
-                    minimalPrice = source.minimalPrice,
-                    hash = EthConverter.convert(source.hash),
+                    auction = auctionConverter.convert(source.auction, blockchain),
                     transactionHash = EthConverter.convert(source.transactionHash),
-                    // TODO UNION remove in 1.19
-                    blockchainInfo = ActivityBlockchainInfoDto(
-                        transactionHash = EthConverter.convert(source.transactionHash),
-                        blockHash = EthConverter.convert(source.blockHash),
-                        blockNumber = source.blockNumber,
-                        logIndex = source.logIndex
-                    )
                 )
             }
             is AuctionActivityBidDto -> {
@@ -256,45 +246,38 @@ class EthActivityConverter(
                     id = activityId,
                     date = source.date,
                     bid = EthConverter.convert(source.bid, blockchain),
-                    hash = EthConverter.convert(source.hash),
+                    auction = auctionConverter.convert(source.auction, blockchain),
                     transactionHash = EthConverter.convert(source.transactionHash),
-                    // TODO UNION remove in 1.19
-                    blockchainInfo = ActivityBlockchainInfoDto(
-                        transactionHash = EthConverter.convert(source.transactionHash),
-                        blockHash = EthConverter.convert(source.blockHash),
-                        blockNumber = source.blockNumber,
-                        logIndex = source.logIndex
-                    )
                 )
             }
             is AuctionActivityFinishDto -> {
                 AuctionFinishActivityDto(
                     id = activityId,
                     date = source.date,
-                    hash = EthConverter.convert(source.hash),
-                    transactionHash = EthConverter.convert(source.transactionHash),
-                    // TODO UNION remove in 1.19
-                    blockchainInfo = ActivityBlockchainInfoDto(
-                        transactionHash = EthConverter.convert(source.transactionHash),
-                        blockHash = EthConverter.convert(source.blockHash),
-                        blockNumber = source.blockNumber,
-                        logIndex = source.logIndex
-                    )
+                    auction = auctionConverter.convert(source.auction, blockchain),
+                    transactionHash = EthConverter.convert(source.transactionHash)
                 )
             }
             is AuctionActivityCancelDto -> {
                 AuctionCancelActivityDto(
                     id = activityId,
                     date = source.date,
-                    hash = EthConverter.convert(source.hash),
+                    auction = auctionConverter.convert(source.auction, blockchain),
                     transactionHash = EthConverter.convert(source.transactionHash),
-                    // TODO UNION remove in 1.19
-                    blockchainInfo = ActivityBlockchainInfoDto(
-                        transactionHash = EthConverter.convert(source.transactionHash),
-                        blockHash = EthConverter.convert(source.blockHash),
-                        blockNumber = source.blockNumber,
-                        logIndex = source.logIndex
-                    )
+                )
+            }
+            is AuctionActivityStartDto -> {
+                AuctionStartActivityDto(
+                    id = activityId,
+                    date = source.date,
+                    auction = auctionConverter.convert(source.auction, blockchain)
+                )
+            }
+            is AuctionActivityEndDto -> {
+                AuctionEndActivityDto(
+                    id = activityId,
+                    date = source.date,
+                    auction = auctionConverter.convert(source.auction, blockchain)
                 )
             }
         }
