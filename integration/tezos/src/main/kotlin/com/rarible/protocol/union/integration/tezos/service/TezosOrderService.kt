@@ -31,6 +31,8 @@ open class TezosOrderService(
     ): Slice<OrderDto> {
         val orders = orderControllerApi.getOrdersAll(
             null,
+            tezosOrderConverter.convert(sort),
+            tezosOrderConverter.convert(status),
             size,
             continuation
         ).awaitFirst()
