@@ -50,9 +50,9 @@ open class TezosItemService(
     }
 
     override suspend fun getItemRoyaltiesById(itemId: String): List<RoyaltyDto> {
-        // TODO TEZOS implement
         try {
-            return getItemById(itemId).royalties
+            val royalties = itemControllerApi.getNftItemRoyalties(itemId).awaitFirst()
+            return royalties.royalties.map { TezosItemConverter.toRoyalty(it, blockchain) }
         } catch (e: WebClientResponseException) {
             if (e.statusCode == HttpStatus.NOT_FOUND) {
                 return emptyList()

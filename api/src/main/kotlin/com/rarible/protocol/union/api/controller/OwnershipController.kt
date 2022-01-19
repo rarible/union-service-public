@@ -2,13 +2,10 @@ package com.rarible.protocol.union.api.controller
 
 import com.rarible.protocol.union.api.service.OwnershipApiService
 import com.rarible.protocol.union.api.service.extractItemId
-import com.rarible.protocol.union.core.continuation.UnionOwnershipContinuation
 import com.rarible.protocol.union.core.service.OwnershipService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
-import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OwnershipDto
 import com.rarible.protocol.union.dto.OwnershipsDto
-import com.rarible.protocol.union.dto.continuation.page.ArgPaging
 import com.rarible.protocol.union.dto.continuation.page.PageSize
 import com.rarible.protocol.union.dto.parser.OwnershipIdParser
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -24,28 +21,6 @@ class OwnershipController(
 ) : OwnershipControllerApi {
 
     private val logger = LoggerFactory.getLogger(javaClass)
-
-    @Deprecated("Should be removed")
-    override suspend fun getAllOwnerships(
-        blockchains: List<BlockchainDto>?,
-        continuation: String?,
-        size: Int?
-    ): ResponseEntity<OwnershipsDto> {
-        val safeSize = PageSize.OWNERSHIP.limit(size)
-        val slices = ownershipApiService.getAllOwnerships(blockchains, continuation, safeSize)
-        val total = slices.map { it.page.total }.sum()
-        val arg =
-            ArgPaging(UnionOwnershipContinuation.ByLastUpdatedAndId, slices.map { it.toSlice() }).getSlice(safeSize)
-
-        logger.info("Response for getAllOwnerships(blockchains={}, continuation={}, size={}):" +
-                " Page(size={}, total={}, continuation={}) from blockchain pages {} ",
-            blockchains, continuation, slices.size, size, total,
-            arg.continuation, slices.map { it.page.entities.size }
-        )
-
-        val result = ownershipApiService.enrich(arg, total)
-        return ResponseEntity.ok(result)
-    }
 
     override suspend fun getOwnershipById(
         ownershipId: String

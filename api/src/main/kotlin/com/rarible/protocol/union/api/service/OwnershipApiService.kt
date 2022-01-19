@@ -10,9 +10,6 @@ import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OwnershipDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.OwnershipsDto
-import com.rarible.protocol.union.dto.continuation.CombinedContinuation
-import com.rarible.protocol.union.dto.continuation.page.ArgPage
-import com.rarible.protocol.union.dto.continuation.page.ArgSlice
 import com.rarible.protocol.union.dto.continuation.page.Page
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.enrichment.converter.EnrichedOwnershipConverter
@@ -21,9 +18,6 @@ import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
 import com.rarible.protocol.union.enrichment.service.EnrichmentAuctionService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
@@ -38,20 +32,6 @@ class OwnershipApiService(
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
-
-    @Deprecated("Unused")
-    suspend fun getAllOwnerships(
-        blockchains: List<BlockchainDto>?,
-        cursor: String?,
-        safeSize: Int,
-    ): List<ArgPage<UnionOwnership>> {
-        val evaluatedBlockchains = ownershipRouter.getEnabledBlockchains(blockchains).map(BlockchainDto::name)
-        val slices = getOwnersByBlockchains(cursor, evaluatedBlockchains) { blockchain, continuation ->
-            val blockDto = BlockchainDto.valueOf(blockchain)
-            ownershipRouter.getService(blockDto).getAllOwnerships(continuation, safeSize)
-        }
-        return slices
-    }
 
     suspend fun getOwnershipById(fullOwnershipId: OwnershipIdDto): OwnershipDto {
         val shortOwnershipId = ShortOwnershipId(fullOwnershipId)
@@ -162,31 +142,5 @@ class OwnershipApiService(
             // Replacing auction address by user who initiated the auction
             auction?.let { enrichmentOwnershipService.disguiseAuctionOwnership(ownership, auction) } ?: ownership
         }
-    }
-
-    @Deprecated("Unused")
-    private suspend fun getOwnersByBlockchains(
-        continuation: String?,
-        blockchains: Collection<String>,
-        clientCall: suspend (blockchain: String, continuation: String?) -> Page<UnionOwnership>
-    ): List<ArgPage<UnionOwnership>> {
-        val currentContinuation = CombinedContinuation.parse(continuation)
-        return coroutineScope {
-            blockchains.map { blockchain ->
-                async {
-                    val blockchainContinuation = currentContinuation.continuations[blockchain]
-                    // For completed blockchain we do not request orders
-                    if (blockchainContinuation == ArgSlice.COMPLETED) {
-                        ArgPage(blockchain, blockchainContinuation, Page(0, null, emptyList()))
-                    } else {
-                        ArgPage(
-                            blockchain,
-                            blockchainContinuation,
-                            clientCall.invoke(blockchain, blockchainContinuation)
-                        )
-                    }
-                }
-            }
-        }.awaitAll()
     }
 }
