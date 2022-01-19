@@ -471,7 +471,6 @@ fun randomEthAuctionDto(itemId: ItemIdDto): AuctionDto {
     return RaribleAuctionV1Dto(
         contract = randomAddress(),
         seller = randomAddress(),
-        contract = randomAddress(),
         sell = randomEthAssetErc721(itemId),
         buy = Erc20AssetTypeDto(randomAddress()),
         endTime = Instant.MAX,
