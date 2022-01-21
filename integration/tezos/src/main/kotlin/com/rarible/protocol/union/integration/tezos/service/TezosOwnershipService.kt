@@ -2,7 +2,6 @@ package com.rarible.protocol.union.integration.tezos.service
 
 import com.rarible.core.apm.CaptureSpan
 import com.rarible.protocol.tezos.api.client.NftOwnershipControllerApi
-import com.rarible.protocol.union.core.converter.UnionConverter
 import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.core.service.OwnershipService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
@@ -10,6 +9,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.continuation.page.Page
 import com.rarible.protocol.union.integration.tezos.converter.TezosOwnershipConverter
 import kotlinx.coroutines.reactive.awaitFirst
+import java.math.BigInteger
 
 @CaptureSpan(type = "blockchain")
 open class TezosOwnershipService(
@@ -23,14 +23,14 @@ open class TezosOwnershipService(
 
     override suspend fun getOwnershipsByItem(
         contract: String,
-        tokenId: String,
+        tokenId: BigInteger,
         continuation: String?,
         size: Int
     ): Page<UnionOwnership> {
         val ownerships =
             ownershipControllerApi.getNftOwnershipByItem(
                 contract,
-                UnionConverter.convertToBigInteger(tokenId).toString(),
+                tokenId.toString(),
                 size,
                 continuation
             ).awaitFirst()

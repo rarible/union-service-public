@@ -5,6 +5,7 @@ import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.apm.SpanType
 import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.core.model.UnionOwnership
+import com.rarible.protocol.union.core.model.getSellerOwnershipId
 import com.rarible.protocol.union.core.service.OwnershipService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.AuctionDto
@@ -89,7 +90,7 @@ class EnrichmentOwnershipService(
         do {
             val page = ownershipServiceRouter.getService(itemId.blockchain).getOwnershipsByItem(
                 itemId.token,
-                itemId.tokenId.toString(),
+                itemId.tokenId,
                 continuation,
                 PageSize.OWNERSHIP.max
             )
@@ -126,7 +127,28 @@ class EnrichmentOwnershipService(
         }
     }
 
-    fun disguiseAuctionOwnership(auctionOwnership: OwnershipDto, auction: AuctionDto): OwnershipDto {
+    suspend fun disguiseAuction(auction: AuctionDto): OwnershipDto? {
+        // If there is an auction for this item, we need to retrieve its ownership and disguise it
+        val sellerOwnershipId = ShortOwnershipId(auction.getSellerOwnershipId())
+        val auctionOwnershipId = sellerOwnershipId.copy(owner = auction.contract.value)
+        val auctionUnionOwnership = fetchOrNull(auctionOwnershipId)
+
+        return if (auctionUnionOwnership != null) {
+            // we need to enrich ownership BEFORE disguising it
+            // such ownership is "fake" and doesn't exist in blockchain DB
+            val enriched = EnrichedOwnershipConverter.convert(auctionUnionOwnership)
+
+            // All user's items are published in auction, making disguised Ownership here
+            disguiseAuctionOwnership(enriched, auction)
+        } else {
+            // Originally, it should not happen, but for page responses it is better to skip
+            // entity instead of completely fail the entire request
+            logger.warn("Auction ownership [{}] not found", auctionOwnershipId)
+            null
+        }
+    }
+
+    private fun disguiseAuctionOwnership(auctionOwnership: OwnershipDto, auction: AuctionDto): OwnershipDto {
         val id = auctionOwnership.id
         return auctionOwnership.copy(
             id = OwnershipIdDto(id.blockchain, id.contract, id.tokenId, auction.seller),
@@ -134,7 +156,8 @@ class EnrichmentOwnershipService(
             auction = auction,
             // Auction ownership may have summarized value from several auctions, so here we need to use value
             // from 'sell' field from auction entity
-            value = auction.sell.value.toBigInteger()
+            value = auction.sell.value.toBigInteger(),
+            createdAt = auction.createdAt
         )
     }
 }

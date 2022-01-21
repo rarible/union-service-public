@@ -1,18 +1,22 @@
 package com.rarible.protocol.union.api.service
 
+import com.rarible.protocol.union.core.continuation.UnionAuctionOwnershipWrapperContinuation
 import com.rarible.protocol.union.core.exception.UnionNotFoundException
+import com.rarible.protocol.union.core.model.UnionAuctionOwnershipWrapper
 import com.rarible.protocol.union.core.model.UnionOwnership
+import com.rarible.protocol.union.core.model.getSellerOwnershipId
 import com.rarible.protocol.union.core.service.AuctionContractService
 import com.rarible.protocol.union.core.service.OwnershipService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
-import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OwnershipDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.OwnershipsDto
-import com.rarible.protocol.union.dto.continuation.page.Page
-import com.rarible.protocol.union.dto.continuation.page.Slice
+import com.rarible.protocol.union.dto.continuation.DateIdContinuation
+import com.rarible.protocol.union.dto.continuation.page.PageSize
+import com.rarible.protocol.union.dto.continuation.page.Paging
 import com.rarible.protocol.union.enrichment.converter.EnrichedOwnershipConverter
+import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortOwnership
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
 import com.rarible.protocol.union.enrichment.service.EnrichmentAuctionService
@@ -41,63 +45,81 @@ class OwnershipApiService(
 
         return coroutineScope {
             val auctionDeferred = async { enrichmentAuctionService.fetchOwnershipAuction(shortOwnershipId) }
-            val freeOwnership = enrichmentOwnershipService.fetchOrNull(shortOwnershipId)?.let { enrich(it) }
+            val freeOwnership = enrichmentOwnershipService.fetchOrNull(shortOwnershipId)
             val auction = auctionDeferred.await()
 
             if (freeOwnership != null) {
                 // Some or zero of user's items are participated in auction
-                enrichmentOwnershipService.mergeWithAuction(freeOwnership, auction)
+                enrichmentOwnershipService.mergeWithAuction(enrich(freeOwnership), auction)
             } else if (auction != null) {
-                // If there is an auction for this item, we need to retrieve its ownership and disguise it
-                val auctionOwnershipId = shortOwnershipId.copy(owner = auction.contract.value)
-                val auctionUnionOwnership = enrichmentOwnershipService.fetchOrNull(auctionOwnershipId)
-                    ?: throw UnionNotFoundException("Auction ownership $auctionOwnershipId not found")
+                val resultOwnership = enrichmentOwnershipService.disguiseAuction(auction)
+                    ?: throw UnionNotFoundException("Ownership ${fullOwnershipId.fullId()} not found")
 
-                // we need to enrich ownership BEFORE disguising it
-                // such ownership is "fake" and doesn't exist in blockchain DB
-                val enriched = enrich(auctionUnionOwnership)
-
-                // All user's items are published in auction, making disguised Ownership here
-                enrichmentOwnershipService.disguiseAuctionOwnership(enriched, auction)
+                resultOwnership
             } else {
                 throw UnionNotFoundException("Ownership ${fullOwnershipId.fullId()} not found")
             }
         }
     }
 
-    @Deprecated("Should be removed")
-    suspend fun enrich(slice: Slice<UnionOwnership>, total: Long): OwnershipsDto? {
-        return OwnershipsDto(
-            total = total,
-            continuation = slice.continuation,
-            ownerships = enrich(slice.entities)
-        )
-    }
+    suspend fun getOwnershipsByItem(itemId: ItemIdDto, continuation: String?, size: Int): OwnershipsDto {
+        val shortItemId = ShortItemId(itemId)
+        val lastPageEnd = DateIdContinuation.parse(continuation)
 
-    suspend fun enrich(unionOwnershipsPage: Page<UnionOwnership>): OwnershipsDto {
-        return OwnershipsDto(
-            total = unionOwnershipsPage.total,
-            continuation = unionOwnershipsPage.continuation,
-            ownerships = enrich(unionOwnershipsPage.entities)
-        )
-    }
-
-    private suspend fun enrich(unionOwnership: UnionOwnership): OwnershipDto {
-        val shortId = ShortOwnershipId(unionOwnership.id)
-        val shortOwnership = enrichmentOwnershipService.get(shortId)
-        if (shortOwnership == null) {
-            return EnrichedOwnershipConverter.convert(unionOwnership)
+        val itemAuctions = coroutineScope {
+            enrichmentAuctionService.findByItem(shortItemId).map {
+                val ownershipId = it.getSellerOwnershipId()
+                // Looking for seller's ownerships in order to determine auction is partial
+                val ownership = enrichmentOwnershipService.fetchOrNull(ShortOwnershipId(ownershipId))
+                UnionAuctionOwnershipWrapper(ownership, it)
+            }
         }
-        return enrichmentOwnershipService.enrichOwnership(shortOwnership, unionOwnership)
+
+        // Looking for full auctions not shown on previous pages
+        val fullAuctions = itemAuctions.filter {
+            // Works only for DESC ATM
+            val fullAuctionContinuation = DateIdContinuation(it.date, it.ownershipId.value)
+            val isInPage = lastPageEnd == null || lastPageEnd.compareTo(fullAuctionContinuation) == 1
+            it.ownership == null && isInPage
+        }.associateBy { it.ownershipId }
+        // We don't need to filter partial auctions - related ownerships should be returned in API response,
+        // so for them, we can just match these partial auctions
+        val partialAuctions = itemAuctions.filter { it.ownership != null }.associateBy { it.ownershipId }
+
+        // We need to query more items than we originally need, because some ownerships can be filtered,
+        // if they are belonged to Auction.
+        // TODO result could be shorter for case with MAX page size in original request
+        val totalSize = PageSize.OWNERSHIP.limit(fullAuctions.size + size)
+
+        val ownershipPage = ownershipRouter.getService(itemId.blockchain)
+            .getOwnershipsByItem(itemId.contract, itemId.tokenId, continuation, totalSize)
+
+        val ownerships = ownershipPage.entities.filter {
+            // Removing all auction ownerships
+            !auctionContractService.isAuctionContract(it.id.blockchain, it.id.owner.value)
+        }
+
+        // Combining partially auctioned and fully auctioned
+        val partiallyAuctioned = ownerships.map { UnionAuctionOwnershipWrapper(it, partialAuctions[it.id]?.auction) }
+        val fullyAuctioned = fullAuctions.values.map { UnionAuctionOwnershipWrapper(null, it.auction) }
+        val combined = partiallyAuctioned + fullyAuctioned
+
+        // Now we can trim combined list to requested size
+        val page = Paging(UnionAuctionOwnershipWrapperContinuation.ByLastUpdatedAndId, combined)
+            .getSlice(size)
+
+        val result = enrich(page.entities)
+
+        return OwnershipsDto(ownershipPage.total, page.continuation, result)
     }
 
-    private suspend fun enrich(unionOwnerships: List<UnionOwnership>): List<OwnershipDto> {
+    private suspend fun enrich(unionOwnerships: List<UnionAuctionOwnershipWrapper>): List<OwnershipDto> {
         if (unionOwnerships.isEmpty()) {
             return emptyList()
         }
 
         val existingEnrichedOwnerships: Map<OwnershipIdDto, ShortOwnership> = enrichmentOwnershipService
-            .findAll(unionOwnerships.map { ShortOwnershipId(it.id) })
+            .findAll(unionOwnerships.mapNotNull { it.ownership?.let { ShortOwnershipId(it.id) } })
             .associateBy { it.id.toDto() }
 
         // Looking for full orders for existing ownerships in order-indexer
@@ -107,43 +129,37 @@ class OwnershipApiService(
         val orders = orderApiService.getByIds(shortOrderIds)
             .associateBy { it.id }
 
-        val result = unionOwnerships.map {
-            val existingEnrichedOwnership = existingEnrichedOwnerships[it.id]
-            if (existingEnrichedOwnership == null) {
-                EnrichedOwnershipConverter.convert(it, existingEnrichedOwnership, orders)
-            } else {
-                enrichmentOwnershipService.enrichOwnership(existingEnrichedOwnership, it, orders)
-            }
-        }
-        return disguiseAuctionOwnerships(result)
-    }
-
-    private suspend fun disguiseAuctionOwnerships(ownerships: List<OwnershipDto>): List<OwnershipDto> {
-        // TODO won't work in right way with ERC1155
-        val auctionOwnerships = coroutineScope {
-            ownerships.filter {
-                auctionContractService.isAuctionContract(it.blockchain, it.owner.value)
-            }.map {
+        val result = coroutineScope {
+            unionOwnerships.map {
                 async {
-                    // ATM we expect there could be only ONE auction for item (for ERC721)
-                    val ownershipId = it.id
-                    val itemId = ItemIdDto(ownershipId.blockchain, ownershipId.contract, ownershipId.tokenId)
-                    val auction = enrichmentAuctionService.fetchItemAuction(itemId)
-
-                    if (auction == null) {
-                        logger.warn("Auction not found for auction Ownership [{}]", ownershipId)
-                        null
+                    if (it.ownership != null) {
+                        // If there is an ownership, we use it as primary entity
+                        val existingEnrichedOwnership = existingEnrichedOwnerships[it.ownershipId]
+                        // Enriching it if possible
+                        val ownership = if (existingEnrichedOwnership == null) {
+                            EnrichedOwnershipConverter.convert(it.ownership!!)
+                        } else {
+                            enrichmentOwnershipService.enrichOwnership(existingEnrichedOwnership, it.ownership, orders)
+                        }
+                        // Merge with related auction if possible
+                        enrichmentOwnershipService.mergeWithAuction(ownership, it.auction)
                     } else {
-                        ownershipId to auction
+                        // If we have fully auctioned ownership, it should be disguised as Ownership
+                        enrichmentOwnershipService.disguiseAuction(it.auction!!)
                     }
                 }
-            }.awaitAll().filterNotNull().associateBy({ it.first }, { it.second })
+            }.awaitAll().filterNotNull()
         }
-
-        return ownerships.map { ownership ->
-            val auction = auctionOwnerships[ownership.id]
-            // Replacing auction address by user who initiated the auction
-            auction?.let { enrichmentOwnershipService.disguiseAuctionOwnership(ownership, auction) } ?: ownership
-        }
+        return result
     }
+
+
+    private suspend fun enrich(unionOwnership: UnionOwnership): OwnershipDto {
+        val shortId = ShortOwnershipId(unionOwnership.id)
+        val shortOwnership = enrichmentOwnershipService.get(shortId)
+            ?: return EnrichedOwnershipConverter.convert(unionOwnership)
+
+        return enrichmentOwnershipService.enrichOwnership(shortOwnership, unionOwnership)
+    }
+
 }

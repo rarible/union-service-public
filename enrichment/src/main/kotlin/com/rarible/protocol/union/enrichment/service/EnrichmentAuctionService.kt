@@ -7,11 +7,8 @@ import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.AuctionDto
 import com.rarible.protocol.union.dto.AuctionIdDto
 import com.rarible.protocol.union.dto.AuctionStatusDto
-import com.rarible.protocol.union.dto.ItemIdDto
-import com.rarible.protocol.union.enrichment.model.ShortItem
+import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
@@ -24,23 +21,13 @@ class EnrichmentAuctionService(
     private val logger = LoggerFactory.getLogger(EnrichmentAuctionService::class.java)
     private val FETCH_SIZE = 1_000
 
-    suspend fun fetchItemAuction(itemId: ItemIdDto): AuctionDto? {
-        val auctionPage = auctionServiceRouter.getService(itemId.blockchain)
-            .getAuctionsByItem(
-                contract = itemId.contract,
-                tokenId = itemId.tokenId.toString(),
-                size = 1
-            )
-        return auctionPage.entities.firstOrNull()
-    }
-
     suspend fun fetchOwnershipAuction(shortOwnershipId: ShortOwnershipId): AuctionDto? {
-        // TODO here we need to determine some kind of "live" auction (with locked items)
         val auctionPage = auctionServiceRouter.getService(shortOwnershipId.blockchain)
             .getAuctionsByItem(
                 contract = shortOwnershipId.token,
                 tokenId = shortOwnershipId.tokenId.toString(),
                 seller = shortOwnershipId.owner,
+                status = listOf(AuctionStatusDto.ACTIVE),
                 size = 1
             )
         return auctionPage.entities.firstOrNull()
@@ -64,14 +51,16 @@ class EnrichmentAuctionService(
         return auctions.values.toList() + fetched
     }
 
-    fun findByItem(item: ShortItem): Flow<AuctionDto> = flow {
+    suspend fun findByItem(itemId: ShortItemId): List<AuctionDto> {
+        logger.info("Fetching all auction for item {}", itemId)
+
         var continuation: String? = null
-        logger.info("Fetching all auction for item {}", item.id)
-        var count = 0
+        val result = ArrayList<AuctionDto>()
+
         do {
-            val page = auctionServiceRouter.getService(item.blockchain).getAuctionsByItem(
-                item.id.token,
-                item.id.tokenId.toString(),
+            val page = auctionServiceRouter.getService(itemId.blockchain).getAuctionsByItem(
+                itemId.token,
+                itemId.tokenId.toString(),
                 null,
                 null,
                 null,
@@ -81,11 +70,12 @@ class EnrichmentAuctionService(
                 continuation,
                 FETCH_SIZE
             )
-            page.entities.forEach { emit(it) }
-            count += page.entities.count()
+            result.addAll(page.entities)
             continuation = page.continuation
         } while (continuation != null)
-        logger.info("Fetched {} auctions for item {}", count, item.id)
+
+        logger.info("Fetched {} auctions for item [{}]", result.size, itemId)
+        return result
     }
 
 }

@@ -27,8 +27,6 @@ import com.rarible.protocol.union.enrichment.util.sellCurrencyId
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.toSet
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.util.*
@@ -56,7 +54,7 @@ class EnrichmentRefreshService(
 
         return optimisticLock {
             val shortItem = itemService.getOrEmpty(shortItemId)
-            val auctions = enrichmentAuctionService.findByItem(shortItem).map { it.id }.toSet()
+            val auctions = enrichmentAuctionService.findByItem(shortItemId).map { it.id }.toSet()
             val updatedItem = bestOrderService.updateBestOrders(shortItem)
                 .copy(auctions = auctions)
             if (updatedItem != shortItem) {

@@ -204,7 +204,7 @@ fun randomEthAssetErc721() = randomEthAssetErc721(randomEthItemId())
 fun randomEthAssetErc721(itemId: ItemIdDto) = AssetDto(
     assetType = Erc721AssetTypeDto(Address.apply(itemId.contract), itemId.tokenId),
     value = randomBigInt(),
-    valueDecimal = randomBigDecimal()
+    valueDecimal = randomBigInt().toBigDecimal()
 )
 
 fun randomEthAssetErc20() = randomEthAssetErc20(randomAddress())
@@ -225,7 +225,7 @@ fun randomEthAssetErc1155() = randomEthAssetErc1155(randomEthItemId())
 fun randomEthAssetErc1155(itemId: ItemIdDto) = AssetDto(
     assetType = Erc1155AssetTypeDto(Address.apply(itemId.contract), itemId.tokenId),
     value = randomBigInt(),
-    valueDecimal = randomBigDecimal()
+    valueDecimal = randomBigInt().toBigDecimal()
 )
 
 fun randomEthLegacySellOrderDto() =
