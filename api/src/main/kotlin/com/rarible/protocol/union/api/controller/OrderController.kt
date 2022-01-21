@@ -62,7 +62,7 @@ class OrderController(
         itemId: String?,
         contract: String?,
         tokenId: String?,
-        maker: String?,
+        maker: List<String>?,
         origin: String?,
         status: List<OrderStatusDto>?,
         start: Long?,
@@ -73,12 +73,15 @@ class OrderController(
         val safeSize = PageSize.ORDER.limit(size)
         val fullItemId = extractItemId(contract, tokenId, itemId)
 
-        val makerAddress = safeAddress(maker)
+        val makerAddresses = if (maker.isNullOrEmpty()) null else maker.map { IdParser.parseAddress(it) }
+        val makerBlockchainGroups = makerAddresses?.let { list -> list.map { it.blockchainGroup } } ?: emptyList()
         val originAddress = safeAddress(origin)
         if (!ensureSameBlockchain(
-                fullItemId.blockchain.group(),
-                makerAddress?.blockchainGroup,
-                originAddress?.blockchainGroup
+                makerBlockchainGroups +
+                        listOf(
+                            fullItemId.blockchain.group(),
+                            originAddress?.blockchainGroup
+                        ),
             )
         ) {
             logger.warn(
@@ -93,7 +96,7 @@ class OrderController(
             platform,
             fullItemId.contract,
             fullItemId.tokenId.toString(),
-            makerAddress?.value,
+            makerAddresses?.map { it.value },
             originAddress?.value,
             status,
             start,
@@ -330,6 +333,10 @@ class OrderController(
     }
 
     private fun ensureSameBlockchain(vararg blockchains: BlockchainGroupDto?): Boolean {
+        return ensureSameBlockchain(blockchains.asList())
+    }
+
+    private fun ensureSameBlockchain(blockchains: Collection<BlockchainGroupDto?>): Boolean {
         val set = blockchains.filterNotNull().toSet()
         return set.size == 1
     }

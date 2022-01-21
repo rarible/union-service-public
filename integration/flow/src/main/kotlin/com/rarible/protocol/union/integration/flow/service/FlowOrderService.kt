@@ -61,7 +61,7 @@ open class FlowOrderService(
         platform: PlatformDto?,
         contract: String,
         tokenId: String,
-        maker: String?,
+        makers: List<String>?,
         origin: String?,
         status: List<OrderStatusDto>?,
         start: Long?,
@@ -74,7 +74,7 @@ open class FlowOrderService(
             contract,
             UnionConverter.convertToLong(tokenId).toString(),
             flowOrderConverter.convert(status),
-            maker,
+            makers?.firstOrNull(), // TODO FLOW support
             origin,
             start?.let { Instant.ofEpochMilli(it) },
             end?.let { Instant.ofEpochMilli(it) },

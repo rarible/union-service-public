@@ -64,7 +64,7 @@ open class EthOrderService(
         platform: PlatformDto?,
         contract: String,
         tokenId: String,
-        maker: String?,
+        makers: List<String>?,
         origin: String?,
         status: List<OrderStatusDto>?,
         start: Long?,
@@ -73,11 +73,12 @@ open class EthOrderService(
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
+        val makerAddresses = makers?.map { EthConverter.convertToAddress(it) }
         val orders = orderControllerApi.getOrderBidsByItemAndByStatus(
             contract,
             UnionConverter.convertToBigInteger(tokenId).toString(),
             ethOrderConverter.convert(status),
-            maker,
+            makerAddresses,
             origin,
             EthConverter.convert(platform),
             continuation,

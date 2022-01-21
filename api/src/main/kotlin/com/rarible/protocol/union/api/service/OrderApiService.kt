@@ -90,7 +90,7 @@ class OrderApiService(
         platform: PlatformDto?,
         contract: String,
         tokenId: String,
-        maker: String?,
+        makers: List<String>?,
         origin: String?,
         status: List<OrderStatusDto>?,
         start: Long?,
@@ -110,7 +110,7 @@ class OrderApiService(
             continuation, currencyContracts
         ) { currency, currencyContinuation ->
             router.getService(blockchain).getOrderBidsByItem(
-                platform, contract, tokenId, maker, origin, status, start, end, currency, currencyContinuation, size
+                platform, contract, tokenId, makers, origin, status, start, end, currency, currencyContinuation, size
             )
         }
 
