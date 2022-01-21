@@ -87,7 +87,7 @@ class OrderApiServiceTest {
             platform = PlatformDto.RARIBLE,
             contract = itemId.contract,
             tokenId = itemId.tokenId.toString(),
-            maker = null,
+            makers = null,
             origin = null,
             status = emptyList(),
             start = null,

@@ -40,7 +40,7 @@ class DummyOrderService(
         platform: PlatformDto?,
         contract: String,
         tokenId: String,
-        maker: String?,
+        makers: List<String>?,
         origin: String?,
         status: List<OrderStatusDto>?,
         start: Long?,

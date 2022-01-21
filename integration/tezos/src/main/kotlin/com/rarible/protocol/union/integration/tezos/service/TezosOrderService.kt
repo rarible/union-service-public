@@ -59,7 +59,7 @@ open class TezosOrderService(
         platform: PlatformDto?,
         contract: String,
         tokenId: String,
-        maker: String?,
+        makers: List<String>?,
         origin: String?,
         status: List<OrderStatusDto>?,
         start: Long?,
@@ -71,7 +71,7 @@ open class TezosOrderService(
         val orders = orderControllerApi.getOrderBidsByItem(
             contract,
             UnionConverter.convertToBigInteger(tokenId).toString(),
-            maker,
+            makers?.firstOrNull(), // TODO TEZOS support
             origin,
             currencyAddress,
             tezosOrderConverter.convert(status),

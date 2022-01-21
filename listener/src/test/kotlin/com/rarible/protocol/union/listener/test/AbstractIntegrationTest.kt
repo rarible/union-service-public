@@ -104,19 +104,19 @@ abstract class AbstractIntegrationTest {
 
     fun <T> runWithKafka(block: suspend CoroutineScope.() -> T): T = runBlocking {
         orderEvents = LinkedBlockingQueue()
-        orderJob = async { orderConsumer.receive().collect { orderEvents?.add(it) } }
+        orderJob = async { orderConsumer.receiveAutoAck().collect { orderEvents?.add(it) } }
 
         ownershipEvents = LinkedBlockingQueue()
-        ownershipJob = async { ownershipConsumer.receive().collect { ownershipEvents?.add(it) } }
+        ownershipJob = async { ownershipConsumer.receiveAutoAck().collect { ownershipEvents?.add(it) } }
 
         itemEvents = LinkedBlockingQueue()
-        itemJob = async { itemConsumer.receive().collect { itemEvents?.add(it) } }
+        itemJob = async { itemConsumer.receiveAutoAck().collect { itemEvents?.add(it) } }
 
         collectionEvents = LinkedBlockingQueue()
-        collectionJob = async { collectionConsumer.receive().collect { collectionEvents?.add(it) } }
+        collectionJob = async { collectionConsumer.receiveAutoAck().collect { collectionEvents?.add(it) } }
 
         activityEvents = LinkedBlockingQueue()
-        activityJob = async { activityConsumer.receive().collect { activityEvents?.add(it) } }
+        activityJob = async { activityConsumer.receiveAutoAck().collect { activityEvents?.add(it) } }
 
         val result = try {
             block()
