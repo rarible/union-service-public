@@ -2,10 +2,12 @@ package com.rarible.protocol.union.listener.service
 
 import com.mongodb.client.result.DeleteResult
 import com.rarible.protocol.union.core.event.OutgoingOwnershipEventListener
+import com.rarible.protocol.union.core.service.AuctionContractService
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.model.ShortOwnership
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
 import com.rarible.protocol.union.enrichment.service.BestOrderService
+import com.rarible.protocol.union.enrichment.service.EnrichmentAuctionService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
 import com.rarible.protocol.union.enrichment.test.data.randomShortOwnership
 import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrderDto
@@ -24,14 +26,18 @@ class EnrichmentOwnershipEventServiceTest {
     private val ownershipService: EnrichmentOwnershipService = mockk()
     private val itemEventService: EnrichmentItemEventService = mockk()
     private val eventListener: OutgoingOwnershipEventListener = mockk()
+    private val auctionContractService: AuctionContractService = mockk()
+    private val enrichmentAuctionService: EnrichmentAuctionService = mockk()
     private val ownershipEventListeners = listOf(eventListener)
     private val bestOrderService: BestOrderService = mockk()
 
     private val ownershipEventService = EnrichmentOwnershipEventService(
         ownershipService,
         itemEventService,
+        enrichmentAuctionService,
         ownershipEventListeners,
-        bestOrderService
+        bestOrderService,
+        auctionContractService
     )
 
     @BeforeEach
@@ -44,6 +50,9 @@ class EnrichmentOwnershipEventServiceTest {
         )
         coEvery { eventListener.onEvent(any()) } returns Unit
         coEvery { itemEventService.onOwnershipUpdated(any(), any()) } returns Unit
+        coEvery { auctionContractService.isAuctionContract(any(), any()) } returns false
+        coEvery { enrichmentAuctionService.fetchOwnershipAuction(any()) } returns null
+        coEvery { ownershipService.mergeWithAuction(any(), null) } returnsArgument 0
     }
 
     @Test

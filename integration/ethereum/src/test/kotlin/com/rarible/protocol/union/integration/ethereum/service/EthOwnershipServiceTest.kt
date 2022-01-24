@@ -56,7 +56,7 @@ class EthOwnershipServiceTest {
 
         val result = service.getOwnershipsByItem(
             EthConverter.convert(ownership.contract),
-            ownership.tokenId.toString(),
+            ownership.tokenId,
             continuation,
             size
         )

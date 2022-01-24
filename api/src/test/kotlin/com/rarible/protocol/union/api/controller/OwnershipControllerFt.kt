@@ -5,13 +5,17 @@ import com.rarible.protocol.union.api.client.OwnershipControllerApi
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.continuation.page.PageSize
+import com.rarible.protocol.union.dto.group
 import com.rarible.protocol.union.dto.parser.OwnershipIdParser
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOwnershipConverter
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
+import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOwnershipConverter
+import com.rarible.protocol.union.integration.ethereum.data.randomEthAuctionDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipId
@@ -52,16 +56,59 @@ class OwnershipControllerFt : AbstractIntegrationTest() {
 
     @Test
     fun `get ownership by id - ethereum, not enriched`() = runBlocking<Unit> {
-        val ownershipIdFull = randomEthOwnershipId().fullId()
-        val ownershipId = OwnershipIdParser.parseFull(ownershipIdFull)
+        val itemId = randomEthItemId()
+        val ownershipId = randomEthOwnershipId(itemId)
         val ownership = randomEthOwnershipDto(ownershipId)
 
+        ethereumAuctionControllerApiMock.mockGetAuctionsByItem(itemId, emptyList())
         ethereumOwnershipControllerApiMock.mockGetNftOwnershipById(ownershipId, ownership)
 
-        val unionOwnership = ownershipControllerClient.getOwnershipById(ownershipIdFull).awaitFirst()
+        val unionOwnership = ownershipControllerClient.getOwnershipById(ownershipId.fullId()).awaitFirst()
 
         assertThat(unionOwnership.id.value).isEqualTo(ownershipId.value)
         assertThat(unionOwnership.id.blockchain).isEqualTo(BlockchainDto.ETHEREUM)
+    }
+
+    @Test
+    fun `get ownership by id - ethereum, auction ownership`() = runBlocking<Unit> {
+        val itemId = randomEthItemId()
+
+        val auction = randomEthAuctionDto(itemId)
+        val auctionContract = UnionAddress(itemId.blockchain.group(), EthConverter.convert(auction.contract))
+        val auctionOwnershipId = randomEthOwnershipId(itemId).copy(owner = auctionContract)
+        val auctionOwnership = randomEthOwnershipDto(auctionOwnershipId)
+
+        val sellerContract = UnionAddress(itemId.blockchain.group(), EthConverter.convert(auction.seller))
+        val ownershipId = randomEthOwnershipId(itemId).copy(owner = sellerContract)
+
+        ethereumAuctionControllerApiMock.mockGetAuctionsByItem(itemId, listOf(auction))
+        ethereumOwnershipControllerApiMock.mockGetNftOwnershipByIdNotFound(ownershipId)
+        ethereumOwnershipControllerApiMock.mockGetNftOwnershipById(auctionOwnershipId, auctionOwnership)
+
+        val unionOwnership = ownershipControllerClient.getOwnershipById(ownershipId.fullId()).awaitFirst()
+
+        assertThat(unionOwnership.id).isEqualTo(ownershipId)
+        assertThat(unionOwnership.id.blockchain).isEqualTo(BlockchainDto.ETHEREUM)
+        assertThat(unionOwnership.auction!!.id.value).isEqualTo(EthConverter.convert(auction.hash))
+    }
+
+    @Test
+    fun `get ownership by id - ethereum, partially auctioned ownership`() = runBlocking<Unit> {
+        val itemId = randomEthItemId()
+        val ownershipId = randomEthOwnershipId(itemId)
+        val ownership = randomEthOwnershipDto(ownershipId)
+
+        val auction = randomEthAuctionDto(itemId)
+
+        ethereumAuctionControllerApiMock.mockGetAuctionsByItem(itemId, listOf(auction))
+        ethereumOwnershipControllerApiMock.mockGetNftOwnershipById(ownershipId, ownership)
+
+        val unionOwnership = ownershipControllerClient.getOwnershipById(ownershipId.fullId()).awaitFirst()
+
+        assertThat(unionOwnership.id).isEqualTo(ownershipId)
+        assertThat(unionOwnership.id.blockchain).isEqualTo(BlockchainDto.ETHEREUM)
+        assertThat(unionOwnership.value).isEqualTo(ownership.value + auction.sell.valueDecimal!!.toBigInteger())
+        assertThat(unionOwnership.auction!!.id.value).isEqualTo(EthConverter.convert(auction.hash))
     }
 
     @Test
@@ -114,6 +161,7 @@ class OwnershipControllerFt : AbstractIntegrationTest() {
 
         val emptyEthOwnership = randomEthOwnershipDto(ethItemId)
 
+        ethereumAuctionControllerApiMock.mockGetAuctionsByItem(ethItemId, listOf())
         ethereumOrderControllerApiMock.mockGetByIds(ethOrder)
         ethereumOwnershipControllerApiMock.mockGetNftOwnershipsByItem(
             ethItemId, continuation, size, emptyEthOwnership, ethOwnership
@@ -131,6 +179,59 @@ class OwnershipControllerFt : AbstractIntegrationTest() {
 
         assertThat(resultEnrichedOwnership.id).isEqualTo(ethUnionOwnership.id)
         assertThat(resultEnrichedOwnership.bestSellOrder!!.id).isEqualTo(ethUnionOrder.id)
+    }
+
+    @Test
+    fun `get ownerships by item - ethereum, with auctions`() = runBlocking<Unit> {
+        val ethItemId = randomEthItemId()
+
+        // Partial auction - some of user's tokens set for sale
+        val auction = randomEthAuctionDto(ethItemId)
+
+        // Full auction - all tokens set for sale
+        val fullAuction = randomEthAuctionDto(ethItemId)
+        val fullAuctionContract = UnionAddress(ethItemId.blockchain.group(), EthConverter.convert(fullAuction.contract))
+        val fullAuctionOwnershipId = randomEthOwnershipId(ethItemId).copy(owner = fullAuctionContract)
+        val fullAuctionOwnership = randomEthOwnershipDto(fullAuctionOwnershipId)
+
+        // Free ownership of some user - no auction for it
+        val ethOwnershipId = randomEthOwnershipId(ethItemId)
+        val ethOwnership = randomEthOwnershipDto(ethOwnershipId)
+
+        // Part of ownership is not participating in auction
+        val ethAuctionedOwnershipId = randomEthOwnershipId(ethItemId, EthConverter.convert(auction.seller))
+        val ethAuctionedOwnership = randomEthOwnershipDto(ethAuctionedOwnershipId)
+
+        // Non-existing user ownership - all items set for sale
+        val ethFullyAuctionedOwnershipId = randomEthOwnershipId(ethItemId, EthConverter.convert(fullAuction.seller))
+
+        ethereumAuctionControllerApiMock.mockGetAuctionsByItem(ethItemId, listOf(auction, fullAuction))
+        ethereumOwnershipControllerApiMock.mockGetNftOwnershipById(fullAuctionOwnershipId, fullAuctionOwnership)
+        ethereumOwnershipControllerApiMock.mockGetNftOwnershipById(ethAuctionedOwnershipId, ethAuctionedOwnership)
+        ethereumOwnershipControllerApiMock.mockGetNftOwnershipByIdNotFound(ethFullyAuctionedOwnershipId)
+        ethereumOwnershipControllerApiMock.mockGetNftOwnershipsByItem(
+            ethItemId, continuation, 50 + 1, ethAuctionedOwnership, ethOwnership
+        )
+
+        val ownerships = ownershipControllerClient.getOwnershipsByItem(
+            ethItemId.fullId(), null, null, continuation, 50
+        ).awaitFirst().ownerships
+
+        // AS a result we expect 3 ownerships: free, partial and disguised by full auction
+        assertThat(ownerships).hasSize(3)
+
+        val freeOwnership = ownerships.find { it.id == ethOwnershipId }!!
+        val auctionedOwnership = ownerships.find { it.id == ethAuctionedOwnershipId }!!
+        val fullyAuctionedOwnership = ownerships.find { it.id == ethFullyAuctionedOwnershipId }!!
+
+        assertThat(freeOwnership.auction).isNull()
+        assertThat(auctionedOwnership.auction!!.id.value).isEqualTo(EthConverter.convert(auction.hash))
+        assertThat(fullyAuctionedOwnership.auction!!.id.value).isEqualTo(EthConverter.convert(fullAuction.hash))
+
+        assertThat(auctionedOwnership.value)
+            .isEqualTo(ethAuctionedOwnership.value + auction.sell.valueDecimal!!.toBigInteger())
+        assertThat(fullyAuctionedOwnership.value)
+            .isEqualTo(fullAuction.sell.valueDecimal!!.toBigInteger())
     }
 
     @Test

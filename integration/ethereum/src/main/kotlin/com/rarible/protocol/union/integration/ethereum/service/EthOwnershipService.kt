@@ -2,7 +2,6 @@ package com.rarible.protocol.union.integration.ethereum.service
 
 import com.rarible.core.apm.CaptureSpan
 import com.rarible.protocol.nft.api.client.NftOwnershipControllerApi
-import com.rarible.protocol.union.core.converter.UnionConverter
 import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.core.service.OwnershipService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
@@ -10,6 +9,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.continuation.page.Page
 import com.rarible.protocol.union.integration.ethereum.converter.EthOwnershipConverter
 import kotlinx.coroutines.reactive.awaitFirst
+import java.math.BigInteger
 
 open class EthOwnershipService(
     blockchain: BlockchainDto,
@@ -23,13 +23,13 @@ open class EthOwnershipService(
 
     override suspend fun getOwnershipsByItem(
         contract: String,
-        tokenId: String,
+        tokenId: BigInteger,
         continuation: String?,
         size: Int
     ): Page<UnionOwnership> {
         val ownerships = ownershipControllerApi.getNftOwnershipsByItem(
             contract,
-            UnionConverter.convertToBigInteger(tokenId).toString(),
+            tokenId.toString(),
             continuation,
             size
         ).awaitFirst()

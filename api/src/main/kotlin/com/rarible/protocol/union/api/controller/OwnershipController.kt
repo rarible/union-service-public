@@ -2,8 +2,6 @@ package com.rarible.protocol.union.api.controller
 
 import com.rarible.protocol.union.api.service.OwnershipApiService
 import com.rarible.protocol.union.api.service.extractItemId
-import com.rarible.protocol.union.core.service.OwnershipService
-import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.OwnershipDto
 import com.rarible.protocol.union.dto.OwnershipsDto
 import com.rarible.protocol.union.dto.continuation.page.PageSize
@@ -16,8 +14,7 @@ import org.springframework.web.bind.annotation.RestController
 @ExperimentalCoroutinesApi
 @RestController
 class OwnershipController(
-    private val ownershipApiService: OwnershipApiService,
-    private val router: BlockchainRouter<OwnershipService>
+    private val ownershipApiService: OwnershipApiService
 ) : OwnershipControllerApi {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -26,11 +23,10 @@ class OwnershipController(
         ownershipId: String
     ): ResponseEntity<OwnershipDto> {
         val fullOwnershipId = OwnershipIdParser.parseFull(ownershipId)
-        val result = router.getService(fullOwnershipId.blockchain).getOwnershipById(fullOwnershipId.value)
 
-        val enriched = ownershipApiService.enrich(result)
+        val ownership = ownershipApiService.getOwnershipById(fullOwnershipId)
 
-        return ResponseEntity.ok(enriched)
+        return ResponseEntity.ok(ownership)
     }
 
     override suspend fun getOwnershipsByItem(
@@ -42,17 +38,15 @@ class OwnershipController(
     ): ResponseEntity<OwnershipsDto> {
         val safeSize = PageSize.OWNERSHIP.limit(size)
         val fullItemId = extractItemId(contract, tokenId, itemId)
-        val result = router.getService(fullItemId.blockchain)
-            .getOwnershipsByItem(fullItemId.contract, fullItemId.tokenId.toString(), continuation, safeSize)
+        val result = ownershipApiService.getOwnershipsByItem(fullItemId, continuation, safeSize)
 
         logger.info(
             "Response for getOwnershipsByItem(itemId={}, continuation={}, size={}):" +
-                    " Page(size={}, total={}, continuation={}) from blockchain pages {} ",
-            fullItemId.fullId(), continuation, size, result.entities.size, result.total, result.continuation
+                    " Slice(size={}, continuation={}) ",
+            fullItemId.fullId(), continuation, size, result.ownerships.size, result.continuation
         )
 
-        val enriched = ownershipApiService.enrich(result)
-        return ResponseEntity.ok(enriched)
+        return ResponseEntity.ok(result)
     }
 
 }
