@@ -55,8 +55,8 @@ integration:
       broker-replica-set: ${kafka.hosts}
       workers:
         item: 1
-        ownership: 4
-        order: 5
+        ownership: 1
+        order: 1
   polygon:
     enabled: ${consul.polygon.enabled:true}
     consumer:
@@ -64,15 +64,15 @@ integration:
       workers:
         item: 1
         ownership: 1
-        order: 2
+        order: 1
   flow:
     enabled: ${consul.flow.enabled:true}
     consumer:
       broker-replica-set: ${kafka.hosts}
       workers:
-        item: 9
+        item: 1
         ownership: 1
-        order: 2
+        order: 1
   tezos:
     enabled: ${consul.tezos.enabled:true}
     client:
@@ -84,7 +84,7 @@ integration:
       workers:
         item: 1
         ownership: 1
-        order: 2
+        order: 1
 
 listener:
   consumer:
