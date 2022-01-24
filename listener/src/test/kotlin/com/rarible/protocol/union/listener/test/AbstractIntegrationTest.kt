@@ -4,12 +4,8 @@ import com.rarible.core.kafka.KafkaMessage
 import com.rarible.core.kafka.RaribleKafkaConsumer
 import com.rarible.core.kafka.RaribleKafkaProducer
 import com.rarible.core.test.data.randomString
-import com.rarible.protocol.dto.FlowActivityDto
-import com.rarible.protocol.dto.FlowOrderEventDto
 import com.rarible.protocol.nft.api.client.NftItemControllerApi
 import com.rarible.protocol.nft.api.client.NftOwnershipControllerApi
-import com.rarible.protocol.tezos.dto.TezosActivitySafeDto
-import com.rarible.protocol.tezos.dto.TezosOrderSafeEventDto
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.CollectionEventDto
 import com.rarible.protocol.union.dto.CollectionUpdateEventDto
@@ -55,27 +51,13 @@ abstract class AbstractIntegrationTest {
     lateinit var testEthereumAuctionApi: com.rarible.protocol.order.api.client.AuctionControllerApi
 
     @Autowired
-    lateinit var ethCollectionProducer: RaribleKafkaProducer<com.rarible.protocol.dto.NftCollectionEventDto>
+    lateinit var ethItemProducer: RaribleKafkaProducer<com.rarible.protocol.dto.NftItemEventDto>
+
+    @Autowired
+    lateinit var ethOwnershipProducer: RaribleKafkaProducer<com.rarible.protocol.dto.NftOwnershipEventDto>
 
     @Autowired
     lateinit var ethOrderProducer: RaribleKafkaProducer<com.rarible.protocol.dto.OrderEventDto>
-
-    @Autowired
-    lateinit var ethActivityProducer: RaribleKafkaProducer<com.rarible.protocol.dto.ActivityDto>
-
-    //--------------------- FLOW ---------------------//
-    @Autowired
-    lateinit var flowOrderProducer: RaribleKafkaProducer<FlowOrderEventDto>
-
-    @Autowired
-    lateinit var flowActivityProducer: RaribleKafkaProducer<FlowActivityDto>
-
-    //--------------------- TEZOS ---------------------//
-    @Autowired
-    lateinit var tezosOrderProducer: RaribleKafkaProducer<TezosOrderSafeEventDto>
-
-    @Autowired
-    lateinit var tezosActivityProducer: RaribleKafkaProducer<TezosActivitySafeDto>
 
     @Autowired
     lateinit var collectionConsumer: RaribleKafkaConsumer<CollectionEventDto>

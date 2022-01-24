@@ -19,7 +19,7 @@ abstract class EthOrderEventHandler(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     suspend fun handleInternal(event: OrderEventDto) {
-        logger.debug("Received Ethereum ({}) Order event: type={}", blockchain, event::class.java.simpleName)
+        logger.debug("Received Ethereum ({}) Order event: {}", blockchain, event)
 
         when (event) {
             is com.rarible.protocol.dto.OrderUpdateEventDto -> {

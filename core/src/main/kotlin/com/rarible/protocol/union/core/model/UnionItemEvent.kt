@@ -1,7 +1,14 @@
 package com.rarible.protocol.union.core.model
 
+import com.fasterxml.jackson.annotation.JsonSubTypes
+import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.rarible.protocol.union.dto.ItemIdDto
 
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY)
+@JsonSubTypes(
+    JsonSubTypes.Type(name = "UPDATE", value = UnionItemUpdateEvent::class),
+    JsonSubTypes.Type(name = "DELETE", value = UnionItemDeleteEvent::class)
+)
 sealed class UnionItemEvent {
 
     abstract val itemId: ItemIdDto

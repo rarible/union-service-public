@@ -7,6 +7,8 @@ import com.rarible.core.kafka.RaribleKafkaConsumer
 import com.rarible.protocol.union.core.handler.BatchedConsumerWorker
 import com.rarible.protocol.union.core.handler.BlockchainEventHandler
 import com.rarible.protocol.union.core.handler.BlockchainEventHandlerWrapper
+import com.rarible.protocol.union.core.handler.InternalEventHandler
+import com.rarible.protocol.union.core.handler.InternalEventHandlerWrapper
 import io.micrometer.core.instrument.MeterRegistry
 import org.springframework.stereotype.Component
 
@@ -24,9 +26,13 @@ class ConsumerFactory(
         const val ITEM = "item"
         const val COLLECTION = "collection"
         const val OWNERSHIP = "ownership"
+
+        const val WRAPPED = "wrapped"
     }
 
     private val env = applicationEnvironmentInfo.name
+
+    //---------------- Blockchain handlers (external) ---------------//
 
     val itemGroup = consumerGroup(ITEM)
     val ownershipGroup = consumerGroup(OWNERSHIP)
@@ -41,7 +47,7 @@ class ConsumerFactory(
         daemon: DaemonWorkerProperties,
         workers: Map<String, Int>
     ): BatchedConsumerWorker<T> {
-        return createBatchedConsumerWorker(consumer, handler, daemon, workers, ITEM)
+        return createBlockchainBatchedConsumerWorker(consumer, handler, daemon, workers, ITEM)
     }
 
     fun <T> createOwnershipConsumer(
@@ -50,7 +56,7 @@ class ConsumerFactory(
         daemon: DaemonWorkerProperties,
         workers: Map<String, Int>
     ): BatchedConsumerWorker<T> {
-        return createBatchedConsumerWorker(consumer, handler, daemon, workers, OWNERSHIP)
+        return createBlockchainBatchedConsumerWorker(consumer, handler, daemon, workers, OWNERSHIP)
     }
 
     fun <T> createOrderConsumer(
@@ -59,7 +65,7 @@ class ConsumerFactory(
         daemon: DaemonWorkerProperties,
         workers: Map<String, Int>
     ): BatchedConsumerWorker<T> {
-        return createBatchedConsumerWorker(consumer, handler, daemon, workers, ORDER)
+        return createBlockchainBatchedConsumerWorker(consumer, handler, daemon, workers, ORDER)
     }
 
     fun <T> createAuctionConsumer(
@@ -68,7 +74,7 @@ class ConsumerFactory(
         daemon: DaemonWorkerProperties,
         workers: Map<String, Int>
     ): BatchedConsumerWorker<T> {
-        return createBatchedConsumerWorker(consumer, handler, daemon, workers, AUCTION)
+        return createBlockchainBatchedConsumerWorker(consumer, handler, daemon, workers, AUCTION)
     }
 
     fun <T> createActivityConsumer(
@@ -77,7 +83,7 @@ class ConsumerFactory(
         daemon: DaemonWorkerProperties,
         workers: Map<String, Int>
     ): BatchedConsumerWorker<T> {
-        return createBatchedConsumerWorker(consumer, handler, daemon, workers, ACTIVITY)
+        return createBlockchainBatchedConsumerWorker(consumer, handler, daemon, workers, ACTIVITY)
     }
 
     fun <T> createCollectionConsumer(
@@ -86,10 +92,10 @@ class ConsumerFactory(
         daemon: DaemonWorkerProperties,
         workers: Map<String, Int>
     ): BatchedConsumerWorker<T> {
-        return createBatchedConsumerWorker(consumer, handler, daemon, workers, COLLECTION)
+        return createBlockchainBatchedConsumerWorker(consumer, handler, daemon, workers, COLLECTION)
     }
 
-    fun <T> createBatchedConsumerWorker(
+    fun <T> createBlockchainBatchedConsumerWorker(
         consumer: RaribleKafkaConsumer<T>,
         handler: BlockchainEventHandler<T, *>,
         daemonWorkerProperties: DaemonWorkerProperties,
@@ -105,6 +111,37 @@ class ConsumerFactory(
                 eventHandler = BlockchainEventHandlerWrapper(handler),
                 meterRegistry = meterRegistry,
                 workerName = "${blockchain.name.lowercase()}-${entityType}-$it"
+            )
+        }
+        return BatchedConsumerWorker(workerSet)
+    }
+
+    //---------------- Union private handlers (internal) ---------------//
+
+    fun <T> createWrappedEventConsumer(
+        consumer: RaribleKafkaConsumer<T>,
+        handler: InternalEventHandler<T>,
+        daemon: DaemonWorkerProperties,
+        workers: Map<String, Int>
+    ): BatchedConsumerWorker<T> {
+        return createInternalBatchedConsumerWorker(consumer, handler, daemon, workers, WRAPPED)
+    }
+
+    fun <T> createInternalBatchedConsumerWorker(
+        consumer: RaribleKafkaConsumer<T>,
+        handler: InternalEventHandler<T>,
+        daemonWorkerProperties: DaemonWorkerProperties,
+        workers: Map<String, Int>,
+        entityType: String
+    ): BatchedConsumerWorker<T> {
+        val workerCount = workers.getOrDefault(entityType, 1)
+        val workerSet = (1..workerCount).map {
+            ConsumerWorker(
+                consumer = consumer,
+                properties = daemonWorkerProperties,
+                eventHandler = InternalEventHandlerWrapper(handler),
+                meterRegistry = meterRegistry,
+                workerName = "internal-${entityType}-$it"
             )
         }
         return BatchedConsumerWorker(workerSet)
