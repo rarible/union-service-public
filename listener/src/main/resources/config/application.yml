@@ -87,6 +87,10 @@ integration:
         order: 2
 
 listener:
+  consumer:
+    broker-replica-set: ${kafka.hosts}
+    workers:
+      wrapped: 10
   reconciliation:
     orderBatchSize: 50
     auctionBatchSize: 50
