@@ -5,6 +5,7 @@ import com.rarible.protocol.nft.api.client.NftCollectionControllerApi
 import com.rarible.protocol.nft.api.client.NftIndexerApiClientFactory
 import com.rarible.protocol.nft.api.client.NftItemControllerApi
 import com.rarible.protocol.nft.api.client.NftOwnershipControllerApi
+import com.rarible.protocol.order.api.client.AuctionActivityControllerApi
 import com.rarible.protocol.order.api.client.AuctionControllerApi
 import com.rarible.protocol.order.api.client.OrderActivityControllerApi
 import com.rarible.protocol.order.api.client.OrderControllerApi
@@ -90,6 +91,11 @@ class PolygonApiConfiguration {
     fun polygonActivityOrderApi(factory: OrderIndexerApiClientFactory): OrderActivityControllerApi =
         factory.createOrderActivityApiClient(polygon)
 
+    @Bean
+    @Qualifier("polygon.activity.api.auction")
+    fun polygonActivityAuctionApi(factory: OrderIndexerApiClientFactory): AuctionActivityControllerApi =
+        factory.createAuctionActivityApiClient(polygon)
+
     //-------------------- Services --------------------//
 
     @Bean
@@ -140,8 +146,9 @@ class PolygonApiConfiguration {
     fun polygonActivityService(
         @Qualifier("polygon.activity.api.item") itemActivityApi: NftActivityControllerApi,
         @Qualifier("polygon.activity.api.order") orderActivityApi: OrderActivityControllerApi,
+        @Qualifier("polygon.activity.api.auction") auctionActivityApi: AuctionActivityControllerApi,
         converter: EthActivityConverter
     ): EthActivityService {
-        return PolygonActivityService(itemActivityApi, orderActivityApi, converter)
+        return PolygonActivityService(itemActivityApi, orderActivityApi, auctionActivityApi, converter)
     }
 }

@@ -19,6 +19,7 @@ import com.rarible.protocol.nft.api.client.NftOwnershipControllerApi
 import com.rarible.protocol.nftorder.api.test.mock.EthAuctionControllerApiMock
 import com.rarible.protocol.nftorder.api.test.mock.EthItemControllerApiMock
 import com.rarible.protocol.nftorder.api.test.mock.EthOrderControllerApiMock
+import com.rarible.protocol.order.api.client.AuctionActivityControllerApi
 import com.rarible.protocol.order.api.client.OrderActivityControllerApi
 import com.rarible.protocol.union.api.controller.test.mock.eth.EthOwnershipControllerApiMock
 import com.rarible.protocol.union.api.controller.test.mock.flow.FlowItemControllerApiMock
@@ -95,6 +96,10 @@ abstract class AbstractIntegrationTest {
     @Qualifier("ethereum.activity.api.order")
     lateinit var testEthereumActivityOrderApi: OrderActivityControllerApi
 
+    @Autowired
+    @Qualifier("ethereum.activity.api.auction")
+    lateinit var testEthereumActivityAuctionApi: AuctionActivityControllerApi
+
     lateinit var ethereumItemControllerApiMock: EthItemControllerApiMock
     lateinit var ethereumOwnershipControllerApiMock: EthOwnershipControllerApiMock
     lateinit var ethereumOrderControllerApiMock: EthOrderControllerApiMock
@@ -132,6 +137,10 @@ abstract class AbstractIntegrationTest {
     @Autowired
     @Qualifier("polygon.activity.api.order")
     lateinit var testPolygonActivityOrderApi: OrderActivityControllerApi
+
+    @Autowired
+    @Qualifier("polygon.activity.api.auction")
+    lateinit var testPolygonActivityAuctionApi: AuctionActivityControllerApi
 
     lateinit var polygonItemControllerApiMock: EthItemControllerApiMock
     lateinit var polygonOwnershipControllerApiMock: EthOwnershipControllerApiMock

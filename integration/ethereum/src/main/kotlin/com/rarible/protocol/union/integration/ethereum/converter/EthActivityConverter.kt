@@ -7,6 +7,10 @@ import com.rarible.protocol.dto.ActivityFilterByUserTypeDto
 import com.rarible.protocol.dto.AuctionActivityBidDto
 import com.rarible.protocol.dto.AuctionActivityCancelDto
 import com.rarible.protocol.dto.AuctionActivityEndDto
+import com.rarible.protocol.dto.AuctionActivityFilterAllDto
+import com.rarible.protocol.dto.AuctionActivityFilterByCollectionDto
+import com.rarible.protocol.dto.AuctionActivityFilterByItemDto
+import com.rarible.protocol.dto.AuctionActivityFilterByUserDto
 import com.rarible.protocol.dto.AuctionActivityFinishDto
 import com.rarible.protocol.dto.AuctionActivityOpenDto
 import com.rarible.protocol.dto.AuctionActivityStartDto
@@ -338,61 +342,6 @@ class EthActivityConverter(
 
     )
 
-    fun asUserActivityType(source: UserActivityTypeDto): ActivityFilterByUserTypeDto {
-        return when (source) {
-            UserActivityTypeDto.BURN -> ActivityFilterByUserTypeDto.BURN
-            UserActivityTypeDto.BUY -> ActivityFilterByUserTypeDto.BUY
-            UserActivityTypeDto.GET_BID -> ActivityFilterByUserTypeDto.GET_BID
-            UserActivityTypeDto.LIST -> ActivityFilterByUserTypeDto.LIST
-            UserActivityTypeDto.MAKE_BID -> ActivityFilterByUserTypeDto.MAKE_BID
-            UserActivityTypeDto.MINT -> ActivityFilterByUserTypeDto.MINT
-            UserActivityTypeDto.SELL -> ActivityFilterByUserTypeDto.SELL
-            UserActivityTypeDto.TRANSFER_FROM -> ActivityFilterByUserTypeDto.TRANSFER_FROM
-            UserActivityTypeDto.TRANSFER_TO -> ActivityFilterByUserTypeDto.TRANSFER_TO
-            UserActivityTypeDto.CANCEL_LIST -> ActivityFilterByUserTypeDto.CANCEL_LIST
-            UserActivityTypeDto.CANCEL_BID -> ActivityFilterByUserTypeDto.CANCEL_BID
-        }
-    }
-
-    fun asItemActivityType(source: ActivityTypeDto): ActivityFilterByItemTypeDto {
-        return when (source) {
-            BID -> ActivityFilterByItemTypeDto.BID
-            BURN -> ActivityFilterByItemTypeDto.BURN
-            LIST -> ActivityFilterByItemTypeDto.LIST
-            MINT -> ActivityFilterByItemTypeDto.MINT
-            SELL -> ActivityFilterByItemTypeDto.MATCH
-            TRANSFER -> ActivityFilterByItemTypeDto.TRANSFER
-            CANCEL_LIST -> ActivityFilterByItemTypeDto.CANCEL_LIST
-            CANCEL_BID -> ActivityFilterByItemTypeDto.CANCEL_BID
-        }
-    }
-
-    fun asCollectionActivityType(source: ActivityTypeDto): ActivityFilterByCollectionTypeDto {
-        return when (source) {
-            BID -> ActivityFilterByCollectionTypeDto.BID
-            BURN -> ActivityFilterByCollectionTypeDto.BURN
-            LIST -> ActivityFilterByCollectionTypeDto.LIST
-            MINT -> ActivityFilterByCollectionTypeDto.MINT
-            SELL -> ActivityFilterByCollectionTypeDto.MATCH
-            TRANSFER -> ActivityFilterByCollectionTypeDto.TRANSFER
-            CANCEL_LIST -> ActivityFilterByCollectionTypeDto.CANCEL_LIST
-            CANCEL_BID -> ActivityFilterByCollectionTypeDto.CANCEL_BID
-        }
-    }
-
-    fun asGlobalActivityType(source: ActivityTypeDto): ActivityFilterAllTypeDto {
-        return when (source) {
-            BID -> ActivityFilterAllTypeDto.BID
-            BURN -> ActivityFilterAllTypeDto.BURN
-            LIST -> ActivityFilterAllTypeDto.LIST
-            MINT -> ActivityFilterAllTypeDto.MINT
-            SELL -> ActivityFilterAllTypeDto.SELL
-            TRANSFER -> ActivityFilterAllTypeDto.TRANSFER
-            CANCEL_LIST -> ActivityFilterAllTypeDto.CANCEL_LIST
-            CANCEL_BID -> ActivityFilterAllTypeDto.CANCEL_BID
-        }
-    }
-
     fun convertToNftAllTypes(types: List<ActivityTypeDto>): List<NftActivityFilterAllDto.Types>? {
         val result = types.mapNotNull { asNftActivityAllType(it) }.distinct()
         return result.ifEmpty { null }
@@ -512,6 +461,71 @@ class EthActivityConverter(
             UserActivityTypeDto.SELL -> OrderActivityFilterByUserDto.Types.SELL
             UserActivityTypeDto.CANCEL_BID -> OrderActivityFilterByUserDto.Types.CANCEL_BID
             UserActivityTypeDto.CANCEL_LIST -> OrderActivityFilterByUserDto.Types.CANCEL_LIST
+            else -> null
+        }
+    }
+
+    fun convertToAuctionAllTypes(types: List<ActivityTypeDto>): List<AuctionActivityFilterAllDto.Types>? {
+        val result = types.mapNotNull { asAuctionActivityAllType(it) }.distinct()
+        return result.ifEmpty { null }
+    }
+
+    fun convertToAuctionCollectionTypes(types: List<ActivityTypeDto>): List<AuctionActivityFilterByCollectionDto.Types>? {
+        val result = types.mapNotNull { asAuctionActivityCollectionType(it) }.distinct()
+        return result.ifEmpty { null }
+    }
+
+    fun convertToAuctionItemTypes(types: List<ActivityTypeDto>): List<AuctionActivityFilterByItemDto.Types>? {
+        val result = types.mapNotNull { asAuctionActivityItemType(it) }.distinct()
+        return result.ifEmpty { null }
+    }
+
+    fun convertToAuctionUserTypes(types: List<UserActivityTypeDto>): List<AuctionActivityFilterByUserDto.Types>? {
+        val result = types.mapNotNull { asAuctionActivityUserType(it) }.distinct()
+        return result.ifEmpty { null }
+    }
+
+    fun asAuctionActivityAllType(source: ActivityTypeDto): AuctionActivityFilterAllDto.Types? {
+        return when (source) {
+            BID -> AuctionActivityFilterAllDto.Types.BID
+            CREATED_AUCTION -> AuctionActivityFilterAllDto.Types.CREATED
+            CANCEL_AUCTION -> AuctionActivityFilterAllDto.Types.CANCEL
+            FINISHED_AUCTION -> AuctionActivityFilterAllDto.Types.FINISHED
+            STARTED_AUCTION -> AuctionActivityFilterAllDto.Types.STARTED
+            ENDED_AUCTION -> AuctionActivityFilterAllDto.Types.ENDED
+            else -> null
+        }
+    }
+
+    fun asAuctionActivityCollectionType(source: ActivityTypeDto): AuctionActivityFilterByCollectionDto.Types? {
+        return when (source) {
+            BID -> AuctionActivityFilterByCollectionDto.Types.BID
+            CREATED_AUCTION -> AuctionActivityFilterByCollectionDto.Types.CREATED
+            CANCEL_AUCTION -> AuctionActivityFilterByCollectionDto.Types.CANCEL
+            FINISHED_AUCTION -> AuctionActivityFilterByCollectionDto.Types.FINISHED
+            STARTED_AUCTION -> AuctionActivityFilterByCollectionDto.Types.STARTED
+            ENDED_AUCTION -> AuctionActivityFilterByCollectionDto.Types.ENDED
+            else -> null
+        }
+    }
+
+    fun asAuctionActivityItemType(source: ActivityTypeDto): AuctionActivityFilterByItemDto.Types? {
+        return when (source) {
+            BID -> AuctionActivityFilterByItemDto.Types.BID
+            CREATED_AUCTION -> AuctionActivityFilterByItemDto.Types.CREATED
+            CANCEL_AUCTION -> AuctionActivityFilterByItemDto.Types.CANCEL
+            FINISHED_AUCTION -> AuctionActivityFilterByItemDto.Types.FINISHED
+            STARTED_AUCTION -> AuctionActivityFilterByItemDto.Types.STARTED
+            ENDED_AUCTION -> AuctionActivityFilterByItemDto.Types.ENDED
+            else -> null
+        }
+    }
+
+    fun asAuctionActivityUserType(source: UserActivityTypeDto): AuctionActivityFilterByUserDto.Types? {
+        return when (source) {
+            UserActivityTypeDto.MAKE_BID -> AuctionActivityFilterByUserDto.Types.BID
+            UserActivityTypeDto.CREATED_AUCTION -> AuctionActivityFilterByUserDto.Types.CREATED
+            UserActivityTypeDto.CANCEL_AUCTION -> AuctionActivityFilterByUserDto.Types.CANCEL
             else -> null
         }
     }
