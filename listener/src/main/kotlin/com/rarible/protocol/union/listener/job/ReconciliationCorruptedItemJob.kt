@@ -71,7 +71,13 @@ class ReconciliationCorruptedItemJob(
         }
 
         corruptedItems.forEach {
-            refreshService.reconcileItem(it.toDto(), true)
+            try {
+                refreshService.reconcileItem(it.toDto(), true)
+            } catch (e: Exception) {
+                // In some cases reconciliation might fail (if item doesn't exist anymore in blockchain)
+                // We should skip it in order to do not block job from reconciling other items
+                logger.warn("Failed to reconcile item {}", it.toDto(), e)
+            }
         }
         logger.info("Item batch refreshed, {}/{} were corrupted", corruptedItems.size, page.size)
         return page.lastOrNull()?.id

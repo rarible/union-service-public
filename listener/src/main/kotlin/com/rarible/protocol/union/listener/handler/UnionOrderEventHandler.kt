@@ -2,31 +2,21 @@ package com.rarible.protocol.union.listener.handler
 
 import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.apm.SpanType
+import com.rarible.core.kafka.RaribleKafkaProducer
+import com.rarible.protocol.union.core.event.KafkaEventFactory
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.model.UnionOrderEvent
-import com.rarible.protocol.union.core.model.UnionOrderUpdateEvent
-import com.rarible.protocol.union.dto.UnionAddress
-import com.rarible.protocol.union.listener.service.EnrichmentOrderEventService
-import org.slf4j.LoggerFactory
+import com.rarible.protocol.union.core.model.UnionWrappedEvent
 import org.springframework.stereotype.Component
 
 @Component
 @CaptureSpan(type = SpanType.EVENT)
 class UnionOrderEventHandler(
-    private val orderEventService: EnrichmentOrderEventService
+    private val eventsProducer: RaribleKafkaProducer<UnionWrappedEvent>
 ) : IncomingEventHandler<UnionOrderEvent> {
 
-    private val logger = LoggerFactory.getLogger(javaClass)
-
+    // Order events should be sent to internal topic to avoid concurrent updates in Enrichment
     override suspend fun onEvent(event: UnionOrderEvent) {
-        when (event) {
-            is UnionOrderUpdateEvent -> {
-                if (event.order.taker == null) {
-                    orderEventService.updateOrder(event.order, true)
-                } else {
-                    logger.info("Ignored ${event.order.id} with filled taker")
-                }
-            }
-        }
+        eventsProducer.send(KafkaEventFactory.wrappedOrderEvent(event))
     }
 }

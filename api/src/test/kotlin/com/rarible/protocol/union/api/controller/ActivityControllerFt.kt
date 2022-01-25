@@ -1,7 +1,6 @@
 package com.rarible.protocol.union.api.controller
 
 import com.rarible.core.common.nowMillis
-import com.rarible.core.test.data.randomBigInt
 import com.rarible.core.test.data.randomInt
 import com.rarible.core.test.data.randomString
 import com.rarible.protocol.dto.ActivitySortDto
@@ -62,7 +61,32 @@ class ActivityControllerFt : AbstractIntegrationTest() {
         } returns OrderActivitiesDto(null, listOf(orderActivity)).toMono()
 
         val activities = activityControllerApi.getActivitiesByCollection(
-            types, ethCollectionId.fullId(), continuation, size, sort
+            types, ethCollectionId.fullId(), continuation, null, size, sort
+        ).awaitFirst()
+
+        assertThat(activities.activities).hasSize(1)
+        assertThat(activities.activities[0]).isInstanceOf(OrderBidActivityDto::class.java)
+    }
+
+    @Test
+    fun `get activities by collection with cursor - ethereum`() = runBlocking<Unit> {
+        // Here we expect only one query - to Order activities, since there is only order-related activity type
+        val types = listOf(ActivityTypeDto.SELL)
+        val ethCollectionId = ContractAddressConverter.convert(BlockchainDto.ETHEREUM, randomEthAddress())
+        val orderActivity = randomEthOrderBidActivity()
+        val ethContinuation = randomEthAddress()
+        val cursor = CombinedContinuation(
+            mapOf(
+                BlockchainDto.ETHEREUM.toString() to ethContinuation
+            )
+        )
+
+        coEvery {
+            testEthereumActivityOrderApi.getOrderActivities(any(), eq(ethContinuation), eq(size), ActivitySortDto.LATEST_FIRST)
+        } returns OrderActivitiesDto(null, listOf(orderActivity)).toMono()
+
+        val activities = activityControllerApi.getActivitiesByCollection(
+            types, ethCollectionId.fullId(), null, cursor.toString(), size, sort
         ).awaitFirst()
 
         assertThat(activities.activities).hasSize(1)
@@ -86,7 +110,7 @@ class ActivityControllerFt : AbstractIntegrationTest() {
         } returns FlowActivitiesDto(1, null, listOf(activity)).toMono()
 
         val activities = activityControllerApi.getActivitiesByCollection(
-            types, flowCollectionId.fullId(), continuation, null, sort
+            types, flowCollectionId.fullId(), continuation, null, 100000, sort
         ).awaitFirst()
 
         val flowItem = activities.activities[0]
@@ -99,7 +123,6 @@ class ActivityControllerFt : AbstractIntegrationTest() {
         val types = ActivityTypeDto.values().toList()
         val ethItemId = randomEthItemId()
         val now = nowMillis()
-        val tokenId = randomBigInt().toString()
         val orderActivity = randomEthOrderBidActivity().copy(date = now)
         val itemActivity = randomEthItemMintActivity().copy(date = now.minusSeconds(5))
 
@@ -122,12 +145,54 @@ class ActivityControllerFt : AbstractIntegrationTest() {
         } returns NftActivitiesDto(null, listOf(itemActivity)).toMono()
 
         val activities = activityControllerApi.getActivitiesByItem(
-            types, ethItemId.fullId(), null, null, continuation, 10000000, sort
+            types, ethItemId.fullId(), null, null, continuation, null, 10000000, sort
         ).awaitFirst()
 
         assertThat(activities.activities).hasSize(2)
         assertThat(activities.activities[0]).isInstanceOf(OrderBidActivityDto::class.java)
         assertThat(activities.activities[1]).isInstanceOf(MintActivityDto::class.java)
+    }
+
+    @Test
+    fun `get activities by item with cursor - ethereum`() = runBlocking<Unit> {
+        // All activity types specified here, so both Order and Nft indexer should be requested for activities
+        val types = ActivityTypeDto.values().toList()
+        val ethItemId = randomEthItemId()
+        val now = nowMillis()
+        val orderActivity = randomEthOrderBidActivity().copy(date = now)
+        val itemActivity = randomEthItemMintActivity().copy(date = now.minusSeconds(5))
+        val ethContinuation = randomEthAddress()
+        val cursor = CombinedContinuation(
+            mapOf(
+                BlockchainDto.ETHEREUM.toString() to ethContinuation
+            )
+        )
+
+        coEvery {
+            testEthereumActivityOrderApi.getOrderActivities(
+                any(),
+                eq(ethContinuation),
+                eq(1),
+                ActivitySortDto.LATEST_FIRST
+            )
+        } returns OrderActivitiesDto(null, listOf(orderActivity)).toMono()
+
+        coEvery {
+            testEthereumActivityItemApi.getNftActivities(
+                any(),
+                eq(ethContinuation),
+                eq(1),
+                ActivitySortDto.LATEST_FIRST
+            )
+        } returns NftActivitiesDto(null, listOf(itemActivity)).toMono()
+
+        val activities = activityControllerApi.getActivitiesByItem(
+            types, ethItemId.fullId(), null, null, null, cursor.toString(), 1, sort
+        ).awaitFirst()
+
+        assertThat(activities.activities).hasSize(1)
+        assertThat(activities.continuation).isNotNull
+        assertThat(activities.cursor).isEqualTo("${BlockchainDto.ETHEREUM}:${activities.continuation}")
     }
 
     @Test
@@ -146,7 +211,7 @@ class ActivityControllerFt : AbstractIntegrationTest() {
         } returns FlowActivitiesDto(1, null, listOf(activity)).toMono()
 
         val activities = activityControllerApi.getActivitiesByItem(
-            types, flowItemId.fullId(), null, null, continuation, size, sort
+            types, flowItemId.fullId(), null, null, continuation, null, size, sort
         ).awaitFirst()
 
         val flowItem = activities.activities[0]

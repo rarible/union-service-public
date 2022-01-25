@@ -46,6 +46,8 @@ integration:
       url: "http://localhost:8080"
     consumer:
       broker-replica-set: ${kafka.hosts}
+      username:
+      password:
       workers:
         item: 1
         ownership: 1

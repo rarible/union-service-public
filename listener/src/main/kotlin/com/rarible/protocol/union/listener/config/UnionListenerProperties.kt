@@ -8,9 +8,15 @@ import java.time.Duration
 @ConstructorBinding
 @ConfigurationProperties("listener")
 data class UnionListenerProperties(
+    val consumer: InternalConsumerProperties,
     val monitoringWorker: DaemonWorkerProperties = DaemonWorkerProperties(),
     val reconciliation: ReconciliationProperties,
     val priceUpdate: PriceUpdateProperties
+)
+
+class InternalConsumerProperties(
+    val brokerReplicaSet: String,
+    val workers: Map<String, Int>
 )
 
 class ReconciliationProperties(

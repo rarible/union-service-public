@@ -11,7 +11,6 @@ import com.rarible.protocol.union.enrichment.converter.EnrichedItemConverter
 import com.rarible.protocol.union.enrichment.converter.ShortItemConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.model.ShortItemId
-import com.rarible.protocol.union.enrichment.repository.ItemRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.service.EnrichmentMetaService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
@@ -54,9 +53,6 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
 
     @Autowired
     private lateinit var itemService: EnrichmentItemService
-
-    @Autowired
-    private lateinit var itemRepository: ItemRepository
 
     @Autowired
     private lateinit var ownershipService: EnrichmentOwnershipService

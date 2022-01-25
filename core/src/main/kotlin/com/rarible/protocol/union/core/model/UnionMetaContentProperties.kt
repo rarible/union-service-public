@@ -1,5 +1,13 @@
 package com.rarible.protocol.union.core.model
 
+import com.fasterxml.jackson.annotation.JsonSubTypes
+import com.fasterxml.jackson.annotation.JsonTypeInfo
+
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY)
+@JsonSubTypes(
+    JsonSubTypes.Type(name = "IMAGE", value = UnionImageProperties::class),
+    JsonSubTypes.Type(name = "VIDEO", value = UnionVideoProperties::class)
+)
 sealed class UnionMetaContentProperties {
     abstract val mimeType: String?
     abstract val size: Long?

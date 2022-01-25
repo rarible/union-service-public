@@ -24,7 +24,7 @@ abstract class EthOwnershipEventHandler(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     suspend fun handleInternal(event: NftOwnershipEventDto) {
-        logger.debug("Received Ethereum ({}) Ownership event: type={}", blockchain, event::class.java.simpleName)
+        logger.debug("Received Ethereum ({}) Ownership event: {}", blockchain, event)
 
         when (event) {
             is NftOwnershipUpdateEventDto -> {
