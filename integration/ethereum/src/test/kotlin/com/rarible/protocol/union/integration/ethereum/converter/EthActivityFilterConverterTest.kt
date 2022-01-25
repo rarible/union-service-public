@@ -1,15 +1,5 @@
 package com.rarible.protocol.union.integration.ethereum.converter
 
-import com.rarible.core.test.data.randomAddress
-import com.rarible.core.test.data.randomBigInt
-import com.rarible.protocol.dto.ActivityFilterAllDto
-import com.rarible.protocol.dto.ActivityFilterAllTypeDto
-import com.rarible.protocol.dto.ActivityFilterByCollectionDto
-import com.rarible.protocol.dto.ActivityFilterByCollectionTypeDto
-import com.rarible.protocol.dto.ActivityFilterByItemDto
-import com.rarible.protocol.dto.ActivityFilterByItemTypeDto
-import com.rarible.protocol.dto.ActivityFilterByUserDto
-import com.rarible.protocol.dto.ActivityFilterByUserTypeDto
 import com.rarible.protocol.dto.NftActivityFilterAllDto
 import com.rarible.protocol.dto.NftActivityFilterByCollectionDto
 import com.rarible.protocol.dto.NftActivityFilterByItemDto
@@ -18,142 +8,151 @@ import com.rarible.protocol.dto.OrderActivityFilterAllDto
 import com.rarible.protocol.dto.OrderActivityFilterByCollectionDto
 import com.rarible.protocol.dto.OrderActivityFilterByItemDto
 import com.rarible.protocol.dto.OrderActivityFilterByUserDto
+import com.rarible.protocol.union.dto.ActivityTypeDto
+import com.rarible.protocol.union.dto.UserActivityTypeDto
+import io.mockk.mockk
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import java.time.Instant
-import java.time.temporal.ChronoUnit
 
 class EthActivityFilterConverterTest {
 
+    private val ethActivityConverter = EthActivityConverter(mockk(), mockk())
+
     @Test
-    fun `eth activities all`() {
-        val filter = ActivityFilterAllDto(
-            types = ActivityFilterAllTypeDto.values().asList()
+    fun `eth nft activities item by all type`() {
+        val result = ethActivityConverter.convertToNftAllTypes(
+            // To check deduplication
+            ActivityTypeDto.values().toList() + ActivityTypeDto.values().toList()
         )
 
-        val itemFilter = EthActivityFilterConverter.asItemActivityFilter(filter) as NftActivityFilterAllDto
-        val orderFilter = EthActivityFilterConverter.asOrderActivityFilter(filter) as OrderActivityFilterAllDto
-
-        assertThat(itemFilter.types).isEqualTo(NftActivityFilterAllDto.Types.values().toList())
-        assertThat(orderFilter.types).isEqualTo(OrderActivityFilterAllDto.Types.values().toList())
+        assertThat(result).hasSize(3)
+        assertThat(result).contains(
+            NftActivityFilterAllDto.Types.TRANSFER,
+            NftActivityFilterAllDto.Types.MINT,
+            NftActivityFilterAllDto.Types.BURN
+        )
     }
 
     @Test
-    fun `eth activities all - empty`() {
-        val filter = ActivityFilterAllDto(
-            types = listOf()
-        )
-
-        val itemFilter = EthActivityFilterConverter.asItemActivityFilter(filter)
-        val orderFilter = EthActivityFilterConverter.asOrderActivityFilter(filter)
-
-        assertThat(itemFilter).isNull()
-        assertThat(orderFilter).isNull()
+    fun `eth nft activities item alls type - empty`() {
+        val result = ethActivityConverter.convertToNftAllTypes(emptyList())
+        assertThat(result).isNull()
     }
 
     @Test
-    fun `eth activities by collection`() {
-        val filter = ActivityFilterByCollectionDto(
-            types = ActivityFilterByCollectionTypeDto.values().asList(),
-            contract = randomAddress()
+    fun `eth activities items by collection type`() {
+        val result = ethActivityConverter.convertToNftCollectionTypes(
+            // To check deduplication
+            ActivityTypeDto.values().toList() + ActivityTypeDto.values().toList()
         )
 
-        val itemFilter = EthActivityFilterConverter.asItemActivityFilter(filter) as NftActivityFilterByCollectionDto
-        val orderFilter = EthActivityFilterConverter.asOrderActivityFilter(filter) as OrderActivityFilterByCollectionDto
-
-        assertThat(itemFilter.contract).isEqualTo(filter.contract)
-        assertThat(itemFilter.types).isEqualTo(NftActivityFilterByCollectionDto.Types.values().toList())
-
-        assertThat(orderFilter.contract).isEqualTo(filter.contract)
-        assertThat(orderFilter.types).isEqualTo(OrderActivityFilterByCollectionDto.Types.values().toList())
+        assertThat(result).hasSize(3)
+        assertThat(result).contains(
+            NftActivityFilterByCollectionDto.Types.TRANSFER,
+            NftActivityFilterByCollectionDto.Types.MINT,
+            NftActivityFilterByCollectionDto.Types.BURN
+        )
     }
 
     @Test
-    fun `eth activities by collection - empty`() {
-        val filter = ActivityFilterByCollectionDto(
-            types = listOf(),
-            contract = randomAddress()
+    fun `eth nft activities item by item type`() {
+        val result = ethActivityConverter.convertToNftItemTypes(
+            // To check deduplication
+            ActivityTypeDto.values().toList() + ActivityTypeDto.values().toList()
         )
 
-        val itemFilter = EthActivityFilterConverter.asItemActivityFilter(filter)
-        val orderFilter = EthActivityFilterConverter.asOrderActivityFilter(filter)
-
-        assertThat(itemFilter).isNull()
-        assertThat(orderFilter).isNull()
+        assertThat(result).hasSize(3)
+        assertThat(result).contains(
+            NftActivityFilterByItemDto.Types.TRANSFER,
+            NftActivityFilterByItemDto.Types.MINT,
+            NftActivityFilterByItemDto.Types.BURN
+        )
     }
 
     @Test
-    fun `eth activities by item`() {
-        val filter = ActivityFilterByItemDto(
-            types = ActivityFilterByItemTypeDto.values().asList(),
-            contract = randomAddress(),
-            tokenId = randomBigInt()
+    fun `eth nft activities item by user type`() {
+        val result = ethActivityConverter.convertToNftUserTypes(
+            // To check deduplication
+            UserActivityTypeDto.values().toList() + UserActivityTypeDto.values().toList()
         )
 
-        val itemFilter = EthActivityFilterConverter.asItemActivityFilter(filter) as NftActivityFilterByItemDto
-        val orderFilter = EthActivityFilterConverter.asOrderActivityFilter(filter) as OrderActivityFilterByItemDto
-
-        assertThat(itemFilter.contract).isEqualTo(filter.contract)
-        assertThat(itemFilter.tokenId).isEqualTo(filter.tokenId)
-        assertThat(itemFilter.types).isEqualTo(NftActivityFilterByItemDto.Types.values().toList())
-
-        assertThat(orderFilter.contract).isEqualTo(filter.contract)
-        assertThat(orderFilter.tokenId).isEqualTo(filter.tokenId)
-        assertThat(orderFilter.types).isEqualTo(OrderActivityFilterByItemDto.Types.values().toList())
+        assertThat(result).hasSize(4)
+        assertThat(result).contains(
+            NftActivityFilterByUserDto.Types.TRANSFER_FROM,
+            NftActivityFilterByUserDto.Types.TRANSFER_TO,
+            NftActivityFilterByUserDto.Types.MINT,
+            NftActivityFilterByUserDto.Types.BURN
+        )
     }
 
     @Test
-    fun `eth activities by item - empty`() {
-        val filter = ActivityFilterByItemDto(
-            types = listOf(),
-            contract = randomAddress(),
-            tokenId = randomBigInt()
+    fun `eth order activities item by all type`() {
+        val result = ethActivityConverter.convertToOrderAllTypes(
+            // To check deduplication
+            ActivityTypeDto.values().toList() + ActivityTypeDto.values().toList()
         )
 
-        val itemFilter = EthActivityFilterConverter.asItemActivityFilter(filter)
-        val orderFilter = EthActivityFilterConverter.asOrderActivityFilter(filter)
-
-        assertThat(itemFilter).isNull()
-        assertThat(orderFilter).isNull()
+        assertThat(result).hasSize(5)
+        assertThat(result).contains(
+            OrderActivityFilterAllDto.Types.BID,
+            OrderActivityFilterAllDto.Types.LIST,
+            OrderActivityFilterAllDto.Types.MATCH,
+            OrderActivityFilterAllDto.Types.CANCEL_LIST,
+            OrderActivityFilterAllDto.Types.CANCEL_BID
+        )
     }
 
     @Test
-    fun `eth activities by user`() {
-        val now = Instant.now()
-        val oneWeekAgo = now.minus(7, ChronoUnit.DAYS).epochSecond
-        val today = now.epochSecond
-        val filter = ActivityFilterByUserDto(
-            types = ActivityFilterByUserTypeDto.values().asList(),
-            users = listOf(randomAddress(), randomAddress()),
-            from = oneWeekAgo,
-            to = today
+    fun `eth order activities item by collection type`() {
+        val result = ethActivityConverter.convertToOrderCollectionTypes(
+            // To check deduplication
+            ActivityTypeDto.values().toList() + ActivityTypeDto.values().toList()
         )
 
-        val itemFilter = EthActivityFilterConverter.asItemActivityFilter(filter) as NftActivityFilterByUserDto
-        val orderFilter = EthActivityFilterConverter.asOrderActivityFilter(filter) as OrderActivityFilterByUserDto
-
-        assertThat(itemFilter.users).isEqualTo(filter.users)
-        assertThat(itemFilter.types).isEqualTo(NftActivityFilterByUserDto.Types.values().toList())
-        assertThat(itemFilter.from).isEqualTo(filter.from)
-        assertThat(itemFilter.to).isEqualTo(filter.to)
-
-        assertThat(orderFilter.users).isEqualTo(filter.users)
-        assertThat(orderFilter.types).isEqualTo(OrderActivityFilterByUserDto.Types.values().toList())
-        assertThat(orderFilter.from).isEqualTo(filter.from)
-        assertThat(orderFilter.to).isEqualTo(filter.to)
+        assertThat(result).hasSize(5)
+        assertThat(result).contains(
+            OrderActivityFilterByCollectionDto.Types.BID,
+            OrderActivityFilterByCollectionDto.Types.LIST,
+            OrderActivityFilterByCollectionDto.Types.MATCH,
+            OrderActivityFilterByCollectionDto.Types.CANCEL_LIST,
+            OrderActivityFilterByCollectionDto.Types.CANCEL_BID
+        )
     }
 
     @Test
-    fun `eth activities by user - empty`() {
-        val filter = ActivityFilterByUserDto(
-            types = listOf(),
-            users = listOf(randomAddress(), randomAddress())
+    fun `eth order activities item by item type`() {
+        val result = ethActivityConverter.convertToOrderItemTypes(
+            // To check deduplication
+            ActivityTypeDto.values().toList() + ActivityTypeDto.values().toList()
         )
 
-        val itemFilter = EthActivityFilterConverter.asItemActivityFilter(filter)
-        val orderFilter = EthActivityFilterConverter.asOrderActivityFilter(filter)
-
-        assertThat(itemFilter).isNull()
-        assertThat(orderFilter).isNull()
+        assertThat(result).hasSize(5)
+        assertThat(result).contains(
+            OrderActivityFilterByItemDto.Types.BID,
+            OrderActivityFilterByItemDto.Types.LIST,
+            OrderActivityFilterByItemDto.Types.MATCH,
+            OrderActivityFilterByItemDto.Types.CANCEL_LIST,
+            OrderActivityFilterByItemDto.Types.CANCEL_BID
+        )
     }
+
+    @Test
+    fun `eth order activities item by user type`() {
+        val result = ethActivityConverter.convertToOrderUserTypes(
+            // To check deduplication
+            UserActivityTypeDto.values().toList() + UserActivityTypeDto.values().toList()
+        )
+
+        assertThat(result).hasSize(7)
+        assertThat(result).contains(
+            OrderActivityFilterByUserDto.Types.MAKE_BID,
+            OrderActivityFilterByUserDto.Types.GET_BID,
+            OrderActivityFilterByUserDto.Types.BUY,
+            OrderActivityFilterByUserDto.Types.LIST,
+            OrderActivityFilterByUserDto.Types.SELL,
+            OrderActivityFilterByUserDto.Types.CANCEL_BID,
+            OrderActivityFilterByUserDto.Types.CANCEL_LIST
+        )
+    }
+
 }
