@@ -13,6 +13,7 @@ import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortOrder
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
 import com.rarible.protocol.union.enrichment.util.spent
+import com.rarible.protocol.union.enrichment.validator.BestOrderValidator
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
@@ -48,7 +49,7 @@ class EnrichmentOrderService(
 
     suspend fun getBestSell(id: ShortItemId, currencyId: String): OrderDto? {
         val now = nowMillis()
-        val result = withPreferredRariblePlatform(id) { platform, continuation ->
+        val result = withPreferredRariblePlatform(id) { platform, continuation, size ->
             orderServiceRouter.getService(id.blockchain).getSellOrdersByItem(
                 platform,
                 id.token,
@@ -58,7 +59,7 @@ class EnrichmentOrderService(
                 listOf(OrderStatusDto.ACTIVE),
                 currencyId,
                 continuation,
-                1
+                size
             )
         }
         logger.info(
@@ -70,7 +71,7 @@ class EnrichmentOrderService(
 
     suspend fun getBestSell(id: ShortOwnershipId, currencyId: String): OrderDto? {
         val now = nowMillis()
-        val result = withPreferredRariblePlatform(id) { platform, continuation ->
+        val result = withPreferredRariblePlatform(id) { platform, continuation, size ->
             orderServiceRouter.getService(id.blockchain).getSellOrdersByItem(
                 platform,
                 id.token,
@@ -80,7 +81,7 @@ class EnrichmentOrderService(
                 listOf(OrderStatusDto.ACTIVE),
                 currencyId,
                 continuation,
-                1
+                size
             )
         }
         logger.info(
@@ -92,7 +93,7 @@ class EnrichmentOrderService(
 
     suspend fun getBestBid(id: ShortItemId, currencyId: String): OrderDto? {
         val now = nowMillis()
-        val result = withPreferredRariblePlatform(id) { platform, continuation ->
+        val result = withPreferredRariblePlatform(id) { platform, continuation, size ->
             orderServiceRouter.getService(id.blockchain).getOrderBidsByItem(
                 platform,
                 id.token,
@@ -104,7 +105,7 @@ class EnrichmentOrderService(
                 null,
                 currencyId,
                 continuation,
-                1
+                size
             )
         }
         logger.info(
@@ -116,7 +117,7 @@ class EnrichmentOrderService(
 
     private suspend fun withPreferredRariblePlatform(
         id: Any,
-        clientCall: suspend (platform: PlatformDto?, continuation: String?) -> Slice<OrderDto>
+        clientCall: suspend (platform: PlatformDto?, continuation: String?, size: Int) -> Slice<OrderDto>
     ): OrderDto? {
         val bestOfAll = ignoreFilledTaker(id, clientCall, null)
         logger.debug("Found best order from ALL platforms: [{}]", bestOfAll)
@@ -131,26 +132,45 @@ class EnrichmentOrderService(
 
     suspend fun ignoreFilledTaker(
         id: Any,
-        clientCall: suspend (platform: PlatformDto?, continuation: String?) -> Slice<OrderDto>,
+        clientCall: suspend (platform: PlatformDto?, continuation: String?, size: Int) -> Slice<OrderDto>,
         platform: PlatformDto?
     ): OrderDto? {
         var order: OrderDto?
         var continuation: String? = null
         var attempts = 0
-        // TODO: for optimization we should request bunch orders instead of one by one
+
+        // Initial size is 1 - hope we're lucky and will get valid order from first try
+        var size = 1
+
         do {
-            val slice = clientCall(platform, continuation)
-            order = slice.entities.firstOrNull()?.takeIf { it.taker == null }
+            val slice = clientCall(platform, continuation, size)
+            order = slice.entities.firstOrNull()?.takeIf {
+                // TODO important! may affect performance
+                BestOrderValidator.isValid(it)
+            }
             continuation = slice.continuation
             attempts++
+            // There are rare cases when item/ownership has A LOT of private orders,
+            // if first few attempt were failed, we start to search in batches
+            if (attempts == SWITCH_TO_BATCH_ATTEMPTS) {
+                size = ORDER_BATCH
+            }
+            if (attempts == WARN_ATTEMPTS) {
+                logger.warn("More than 5 attempt to get best order for [{}]", id)
+            }
         } while (continuation != null && order == null && attempts < MAX_ATTEMPTS)
         if (attempts == MAX_ATTEMPTS) {
             logger.warn("Reached max attempts ({}) for getting orders for [{}]", MAX_ATTEMPTS, id)
+            return null
         }
         return order
     }
 
     companion object {
-        private const val MAX_ATTEMPTS = 100
+        private const val MAX_ATTEMPTS = 50
+        private const val WARN_ATTEMPTS = 5
+
+        private const val SWITCH_TO_BATCH_ATTEMPTS = 2
+        private const val ORDER_BATCH = 10
     }
 }

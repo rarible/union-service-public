@@ -1,10 +1,13 @@
 package com.rarible.protocol.union.enrichment.test.data
 
+import com.rarible.core.test.data.randomString
+import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
+import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.integration.ethereum.converter.EthCollectionConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthItemConverter
@@ -21,6 +24,12 @@ import com.rarible.protocol.union.integration.flow.converter.FlowItemConverter
 import com.rarible.protocol.union.test.data.randomFlowNftItemDto
 import com.rarible.protocol.union.test.mock.CurrencyMock
 import kotlinx.coroutines.runBlocking
+
+fun randomUnionAddress(): UnionAddress =
+    UnionAddressConverter.convert(
+        BlockchainDto.ETHEREUM,
+        randomString()
+    )
 
 fun randomUnionCollection(): CollectionDto =
     EthCollectionConverter.convert(

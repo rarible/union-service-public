@@ -6,6 +6,6 @@ import com.rarible.protocol.union.dto.OrderStatusDto
 object BestOrderValidator {
 
     fun isValid(order: OrderDto): Boolean {
-        return order.status == OrderStatusDto.ACTIVE
+        return order.status == OrderStatusDto.ACTIVE && order.taker == null
     }
 }

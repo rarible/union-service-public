@@ -21,6 +21,10 @@ class OwnershipReconciliationMarkRepository(
         return template.find(query, OwnershipReconciliationMark::class.java).collectList().awaitFirst()
     }
 
+    suspend fun save(mark: OwnershipReconciliationMark) {
+        template.save(mark).awaitFirstOrNull()
+    }
+
     suspend fun delete(mark: OwnershipReconciliationMark): DeleteResult? {
         return template.remove(mark).awaitFirstOrNull()
     }

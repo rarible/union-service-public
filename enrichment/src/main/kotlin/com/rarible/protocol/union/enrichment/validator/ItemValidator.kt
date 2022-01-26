@@ -16,7 +16,7 @@ object ItemValidator {
             val result = BestOrderValidator.isValid(it)
             if (!result) {
                 logger.warn(
-                    "Found Item [{}] with not Active best bid order: [{}], status = {}, taker = {}",
+                    "Found Item [{}] with corrupted best bid Order: [{}], status = {}, taker = {}",
                     item.id.fullId(), it.id.fullId(), it.status, it.taker
                 )
             }
@@ -27,7 +27,7 @@ object ItemValidator {
             val result = BestOrderValidator.isValid(it)
             if (!result) {
                 logger.warn(
-                    "Found Item [{}] with not Active best sell order: [{}], status = {}, taker = {}",
+                    "Found Item [{}] with corrupted best sell Order: [{}], status = {}, taker = {}",
                     item.id.fullId(), it.id.fullId(), it.status, it.taker
                 )
             }

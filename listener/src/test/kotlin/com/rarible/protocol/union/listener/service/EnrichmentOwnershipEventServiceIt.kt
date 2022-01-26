@@ -1,10 +1,12 @@
 package com.rarible.protocol.union.listener.service
 
 import com.rarible.core.test.wait.Wait
+import com.rarible.protocol.dto.OrderStatusDto
 import com.rarible.protocol.union.enrichment.converter.EnrichedOwnershipConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOwnershipConverter
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
+import com.rarible.protocol.union.enrichment.repository.OwnershipReconciliationMarkRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
 import com.rarible.protocol.union.enrichment.test.data.randomShortOwnership
 import com.rarible.protocol.union.enrichment.test.data.randomUnionOwnershipDto
@@ -40,6 +42,9 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
 
     @Autowired
     lateinit var ethAuctionConverter: EthAuctionConverter
+
+    @Autowired
+    private lateinit var ownershipReconciliationMarkRepository: OwnershipReconciliationMarkRepository
 
     @Test
     fun `update event - ownership doesn't exist`() = runWithKafka {
@@ -103,6 +108,42 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
             assertThat(messages[0].id).isEqualTo(itemId.fullId())
             assertThat(messages[0].value.ownershipId).isEqualTo(ownershipId)
             assertThat(messages[0].value.ownership.bestSellOrder!!.id).isEqualTo(expected.bestSellOrder!!.id)
+        }
+    }
+
+    @Test
+    fun `update event - existing ownership updated, order corrupted`() = runWithKafka {
+        val itemId = randomEthItemId()
+        val ownershipId = randomEthOwnershipId(itemId)
+        val ethOwnership = randomEthOwnershipDto(ownershipId)
+
+        // Corrupted order with incorrect status
+        val bestSellOrder = randomEthLegacySellOrderDto(itemId).copy(status = OrderStatusDto.INACTIVE)
+        val unionBestSell = ethOrderConverter.convert(bestSellOrder, itemId.blockchain)
+
+        val unionOwnership = EthOwnershipConverter.convert(ethOwnership, itemId.blockchain)
+        val shortOwnership = ShortOwnershipConverter.convert(unionOwnership).copy(
+            bestSellOrder = ShortOrderConverter.convert(unionBestSell)
+        )
+
+        ownershipService.save(shortOwnership)
+
+        coEvery { testEthereumOrderApi.getOrderByHash(unionBestSell.id.value) } returns bestSellOrder.toMono()
+        coEvery { testEthereumOwnershipApi.getNftOwnershipById(itemId.value) } returns ethOwnership.toMono()
+
+        ownershipEventHandler.onOwnershipUpdated(unionOwnership)
+
+
+        Wait.waitAssert {
+            assertThat(ownershipEvents).hasSize(1)
+            val messages = findOwnershipUpdates(ownershipId.value)
+            assertThat(messages).hasSize(1)
+            assertThat(messages[0].id).isEqualTo(itemId.fullId())
+
+            // Reconciliation mark should be created for such ownership
+            val reconcileMarks = ownershipReconciliationMarkRepository.findAll(100)
+            val expectedMark = reconcileMarks.find { it.id.toDto() == ownershipId }
+            assertThat(expectedMark).isNotNull()
         }
     }
 

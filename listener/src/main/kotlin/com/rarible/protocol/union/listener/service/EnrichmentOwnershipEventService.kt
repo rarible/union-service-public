@@ -3,8 +3,8 @@ package com.rarible.protocol.union.listener.service
 import com.rarible.core.common.optimisticLock
 import com.rarible.protocol.union.core.event.OutgoingOwnershipEventListener
 import com.rarible.protocol.union.core.model.UnionOwnership
+import com.rarible.protocol.union.core.service.ReconciliationEventService
 import com.rarible.protocol.union.dto.OrderDto
-import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.OwnershipDeleteEventDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.OwnershipUpdateEventDto
@@ -13,6 +13,7 @@ import com.rarible.protocol.union.enrichment.model.ShortOwnership
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
 import com.rarible.protocol.union.enrichment.service.BestOrderService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
+import com.rarible.protocol.union.enrichment.validator.OwnershipValidator
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.util.*
@@ -22,7 +23,8 @@ class EnrichmentOwnershipEventService(
     private val ownershipService: EnrichmentOwnershipService,
     private val enrichmentItemEventService: EnrichmentItemEventService,
     private val ownershipEventListeners: List<OutgoingOwnershipEventListener>,
-    private val bestOrderService: BestOrderService
+    private val bestOrderService: BestOrderService,
+    private val reconciliationEventService: ReconciliationEventService
 ) {
     private val logger = LoggerFactory.getLogger(EnrichmentOwnershipEventService::class.java)
 
@@ -114,13 +116,9 @@ class EnrichmentOwnershipEventService(
             ownershipId = short.id.toDto(),
             ownership = dto
         )
-        dto.bestSellOrder?.let {
-            if (it.status != OrderStatusDto.ACTIVE) {
-                logger.warn(
-                    "Sent event for Ownership [{}] with not Active best sell order: [{}], status = {}",
-                    dto.id.fullId(), dto.bestSellOrder?.id?.fullId(), dto.bestSellOrder?.status
-                )
-            }
+
+        if (!OwnershipValidator.isValid(dto)) {
+            reconciliationEventService.onCorruptedOwnership(dto.id)
         }
         ownershipEventListeners.forEach { it.onEvent(event) }
     }

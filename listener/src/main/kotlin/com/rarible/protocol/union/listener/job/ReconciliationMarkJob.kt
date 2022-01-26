@@ -39,7 +39,7 @@ class ReconciliationMarkJob(
         } while (reconciled > 0)
 
         logger.info(
-            "Finished to reconcile marked records, {} Items and {} has been reconciled",
+            "Finished to reconcile marked records, {} Items and {} Ownerships has been reconciled",
             reconciledItems,
             reconciledOwnerships
         )
@@ -51,12 +51,20 @@ class ReconciliationMarkJob(
             return 0
         }
         logger.info("Found {} Item reconciliation marks", items.size)
+        var withFails = false
+
         items.forEach {
-            refreshService.reconcileItem(it.id.toDto(), false)
-            itemReconciliationMarkRepository.delete(it)
+            try {
+                refreshService.reconcileItem(it.id.toDto(), false)
+                itemReconciliationMarkRepository.delete(it)
+            } catch (e: Exception) {
+                withFails = true
+                logger.warn("Unable to reconcile Item [{}]:", it.id, e)
+            }
         }
-        // means "hasMore"
-        return items.size
+        // means "hasMore", but if there were fails during updates, it's better to stop current
+        // job iteration in order to prevent endless spam of errors
+        return if (withFails) 0 else items.size
     }
 
     private suspend fun reconcileOwnerships(): Int {
@@ -65,12 +73,18 @@ class ReconciliationMarkJob(
             return 0
         }
         logger.info("Found {} Ownership reconciliation marks", ownerships.size)
+
+        var withFails = false
         ownerships.forEach {
-            refreshService.refreshOwnership(it.id.toDto())
-            ownershipReconciliationMarkRepository.delete(it)
+            try {
+                refreshService.reconcileOwnership(it.id.toDto())
+                ownershipReconciliationMarkRepository.delete(it)
+            } catch (e: Exception) {
+                withFails = true
+                logger.warn("Unable to reconcile Ownership [{}]:", it.id, e)
+            }
         }
-        // means "hasMore"
-        return ownerships.size
+        return if (withFails) 0 else ownerships.size
     }
 
 }

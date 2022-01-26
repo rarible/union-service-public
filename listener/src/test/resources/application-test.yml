@@ -14,6 +14,8 @@ rarible:
     apm:
       agent:
         enabled: false
+  task:
+    initialDelay: 600000
 
 integration:
   ethereum:
@@ -59,6 +61,12 @@ listener:
     auctionBatchSize: 50
     threadCount: 2
     notificationEnabled: false
+  price-update:
+    rate: PT5M
+    delay: PT60M
+  reconcile-marks:
+    rate: PT1M
+    delay: PT60M
 
 meta:
   returnOnlyCachedContentMeta: false

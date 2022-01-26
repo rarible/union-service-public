@@ -2,6 +2,7 @@ package com.rarible.protocol.union.listener.service
 
 import com.mongodb.client.result.DeleteResult
 import com.rarible.protocol.union.core.event.OutgoingOwnershipEventListener
+import com.rarible.protocol.union.core.service.ReconciliationEventService
 import com.rarible.protocol.union.enrichment.converter.EnrichedOwnershipConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.model.ShortOwnership
@@ -28,12 +29,14 @@ class EnrichmentOwnershipEventServiceTest {
     private val eventListener: OutgoingOwnershipEventListener = mockk()
     private val ownershipEventListeners = listOf(eventListener)
     private val bestOrderService: BestOrderService = mockk()
+    private val reconciliationEventService: ReconciliationEventService = mockk()
 
     private val ownershipEventService = EnrichmentOwnershipEventService(
         ownershipService,
         itemEventService,
         ownershipEventListeners,
-        bestOrderService
+        bestOrderService,
+        reconciliationEventService
     )
 
     @BeforeEach
@@ -46,6 +49,7 @@ class EnrichmentOwnershipEventServiceTest {
         )
         coEvery { eventListener.onEvent(any()) } returns Unit
         coEvery { itemEventService.onOwnershipUpdated(any(), any()) } returns Unit
+        coEvery { reconciliationEventService.onCorruptedOwnership(any()) } returns Unit
     }
 
     @Test
@@ -75,6 +79,7 @@ class EnrichmentOwnershipEventServiceTest {
         coVerify(exactly = 1) { ownershipService.save(expectedShortOwnership) }
         coVerify(exactly = 1) { itemEventService.onOwnershipUpdated(shortOwnership.id, order) }
         coVerify(exactly = 0) { ownershipService.delete(shortOwnership.id) }
+        coVerify(exactly = 0) { reconciliationEventService.onCorruptedOwnership(any()) }
     }
 
     @Test
@@ -95,6 +100,7 @@ class EnrichmentOwnershipEventServiceTest {
         coVerify(exactly = 0) { ownershipService.save(any()) }
         coVerify(exactly = 0) { itemEventService.onOwnershipUpdated(shortOwnership.id, order) }
         coVerify(exactly = 0) { ownershipService.delete(shortOwnership.id) }
+        coVerify(exactly = 0) { reconciliationEventService.onCorruptedOwnership(any()) }
     }
 
     @Test
@@ -125,6 +131,7 @@ class EnrichmentOwnershipEventServiceTest {
         coVerify(exactly = 0) { ownershipService.save(shortOwnership) }
         coVerify(exactly = 1) { itemEventService.onOwnershipUpdated(shortOwnership.id, order) }
         coVerify(exactly = 1) { ownershipService.delete(shortOwnership.id) }
+        coVerify(exactly = 0) { reconciliationEventService.onCorruptedOwnership(any()) }
     }
 
     @Test
@@ -146,6 +153,7 @@ class EnrichmentOwnershipEventServiceTest {
         coVerify(exactly = 0) { ownershipService.save(any()) }
         coVerify(exactly = 0) { itemEventService.onOwnershipUpdated(ownership.id, order) }
         coVerify(exactly = 0) { ownershipService.delete(ownership.id) }
+        coVerify(exactly = 0) { reconciliationEventService.onCorruptedOwnership(any()) }
     }
 
     @Test

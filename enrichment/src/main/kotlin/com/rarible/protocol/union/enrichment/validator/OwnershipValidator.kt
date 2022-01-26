@@ -16,7 +16,7 @@ object OwnershipValidator {
             val result = BestOrderValidator.isValid(it)
             if (!result) {
                 logger.warn(
-                    "Found Ownership [{}] with not Active best sell order: [{}], status = {}, taker = {}",
+                    "Found Ownership [{}] with corrupted best sell Order: [{}], status = {}, taker = {}",
                     ownership.id.fullId(), it.id.fullId(), it.status, it.taker
                 )
             }

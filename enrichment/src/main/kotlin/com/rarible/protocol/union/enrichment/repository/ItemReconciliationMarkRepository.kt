@@ -24,6 +24,10 @@ class ItemReconciliationMarkRepository(
         return template.find(query, ItemReconciliationMark::class.java).collectList().awaitFirst()
     }
 
+    suspend fun save(mark: ItemReconciliationMark) {
+        template.save(mark).awaitFirstOrNull()
+    }
+
     suspend fun delete(mark: ItemReconciliationMark): DeleteResult? {
         return template.remove(mark).awaitFirstOrNull()
     }
