@@ -169,8 +169,10 @@ fun randomFlowNftOrderActivitySell(): FlowNftOrderActivitySellDto {
         id = randomString(),
         date = nowMillis(),
         price = randomBigDecimal(),
-        left = randomFlowOrderActivityMatchSideDto().copy(type = FlowOrderActivityMatchSideDto.Type.BID),
-        right = randomFlowOrderActivityMatchSideDto().copy(type = FlowOrderActivityMatchSideDto.Type.SELL),
+        left = randomFlowOrderActivityMatchSideDto()
+            .copy(type = FlowOrderActivityMatchSideDto.Type.BID),
+        right = randomFlowOrderActivityMatchSideDto(randomFlowFungibleAsset())
+            .copy(type = FlowOrderActivityMatchSideDto.Type.SELL),
         transactionHash = randomString(),
         blockHash = randomString(),
         blockNumber = randomLong(),
@@ -281,10 +283,11 @@ fun randomFlowBurnDto(): FlowBurnDto {
     )
 }
 
-fun randomFlowOrderActivityMatchSideDto(): FlowOrderActivityMatchSideDto {
+fun randomFlowOrderActivityMatchSideDto() = randomFlowOrderActivityMatchSideDto(randomFlowAsset())
+fun randomFlowOrderActivityMatchSideDto(asset: FlowAssetDto): FlowOrderActivityMatchSideDto {
     return FlowOrderActivityMatchSideDto(
         maker = randomFlowAddress().value,
-        asset = randomFlowAsset(),
+        asset = asset,
         type = FlowOrderActivityMatchSideDto.Type.values()[randomInt(FlowOrderActivityMatchSideDto.Type.values().size)]
     )
 }

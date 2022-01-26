@@ -2,7 +2,6 @@ package com.rarible.protocol.union.integration.flow.converter
 
 import com.rarible.protocol.dto.FlowActivitiesDto
 import com.rarible.protocol.dto.FlowActivityDto
-import com.rarible.protocol.dto.FlowAssetDto
 import com.rarible.protocol.dto.FlowBurnDto
 import com.rarible.protocol.dto.FlowMintDto
 import com.rarible.protocol.dto.FlowNftOrderActivityBidDto
@@ -10,6 +9,7 @@ import com.rarible.protocol.dto.FlowNftOrderActivityCancelBidDto
 import com.rarible.protocol.dto.FlowNftOrderActivityCancelListDto
 import com.rarible.protocol.dto.FlowNftOrderActivityListDto
 import com.rarible.protocol.dto.FlowNftOrderActivitySellDto
+import com.rarible.protocol.dto.FlowOrderActivityMatchSideDto
 import com.rarible.protocol.dto.FlowTransferDto
 import com.rarible.protocol.union.core.converter.ContractAddressConverter
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
@@ -17,17 +17,21 @@ import com.rarible.protocol.union.core.service.CurrencyService
 import com.rarible.protocol.union.dto.ActivityBlockchainInfoDto
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivityIdDto
+import com.rarible.protocol.union.dto.AssetDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.BurnActivityDto
 import com.rarible.protocol.union.dto.MintActivityDto
+import com.rarible.protocol.union.dto.OrderActivityMatchSideDto
 import com.rarible.protocol.union.dto.OrderActivitySourceDto
 import com.rarible.protocol.union.dto.OrderBidActivityDto
 import com.rarible.protocol.union.dto.OrderCancelBidActivityDto
 import com.rarible.protocol.union.dto.OrderCancelListActivityDto
 import com.rarible.protocol.union.dto.OrderListActivityDto
 import com.rarible.protocol.union.dto.OrderMatchSellDto
+import com.rarible.protocol.union.dto.OrderMatchSwapDto
 import com.rarible.protocol.union.dto.TransferActivityDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
+import com.rarible.protocol.union.dto.ext
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.math.BigDecimal
@@ -52,36 +56,35 @@ class FlowActivityConverter(
         val activityId = ActivityIdDto(blockchain, source.id)
         return when (source) {
             is FlowNftOrderActivitySellDto -> {
-                val nft = FlowConverter.convert(source.left.asset, blockchain)
-                val payment = FlowConverter.convert(source.right.asset, blockchain)
-                val priceUsd = currencyService
-                    .toUsd(blockchain, payment.type, source.price) ?: BigDecimal.ZERO
-
-                OrderMatchSellDto(
-                    id = activityId,
-                    date = source.date,
-                    nft = nft,
-                    payment = payment,
-                    seller = UnionAddressConverter.convert(blockchain, source.left.maker),
-                    buyer = UnionAddressConverter.convert(blockchain, source.right.maker),
-                    priceUsd = priceUsd,
-                    price = source.price,
-                    type = OrderMatchSellDto.Type.SELL,
-                    // TODO FLOW here should be price from FLOW, we don't want to calculate it here
-                    amountUsd = amountUsd(priceUsd, source.left.asset),
-                    // TODO FLOW there is no order info in flow for sides
-                    sellerOrderHash = null,
-                    buyerOrderHash = null,
-                    transactionHash = source.transactionHash,
-                    // TODO UNION remove in 1.19
-                    blockchainInfo = ActivityBlockchainInfoDto(
-                        transactionHash = source.transactionHash,
-                        blockHash = source.blockHash,
-                        blockNumber = source.blockNumber,
-                        logIndex = source.logIndex
-                    ),
-                    source = OrderActivitySourceDto.RARIBLE
-                )
+                val leftSide = source.left
+                val rightSide = source.right
+                val leftTypeExt = FlowConverter.convert(leftSide.asset, blockchain).type.ext
+                val rightTypeExt = FlowConverter.convert(rightSide.asset, blockchain).type.ext
+                if (leftTypeExt.isNft && rightTypeExt.isCurrency) {
+                    activityToSell(
+                        activityId = activityId,
+                        source = source,
+                        blockchain = blockchain,
+                        nft = leftSide,
+                        payment = rightSide,
+                        type = OrderMatchSellDto.Type.SELL
+                    )
+                } else if (leftTypeExt.isCurrency && rightTypeExt.isNft) {
+                    activityToSell(
+                        activityId = activityId,
+                        source = source,
+                        blockchain = blockchain,
+                        nft = rightSide,
+                        payment = leftSide,
+                        type = OrderMatchSellDto.Type.ACCEPT_BID
+                    )
+                } else {
+                    activityToSwap(
+                        activityId = activityId,
+                        source = source,
+                        blockchain = blockchain
+                    )
+                }
             }
             is FlowNftOrderActivityListDto -> {
                 val payment = FlowConverter.convert(source.take, blockchain)
@@ -205,7 +208,78 @@ class FlowActivityConverter(
         }
     }
 
-    private fun amountUsd(price: BigDecimal, asset: FlowAssetDto) = price.multiply(asset.value)
+    private suspend fun activityToSell(
+        source: FlowNftOrderActivitySellDto,
+        blockchain: BlockchainDto,
+        nft: FlowOrderActivityMatchSideDto,
+        payment: FlowOrderActivityMatchSideDto,
+        type: OrderMatchSellDto.Type,
+        activityId: ActivityIdDto
+    ): OrderMatchSellDto {
+        val unionPayment = FlowConverter.convert(payment.asset, blockchain)
+        val unionNft = FlowConverter.convert(nft.asset, blockchain)
+
+        val priceUsd = currencyService
+            .toUsd(blockchain, unionPayment.type, source.price) ?: BigDecimal.ZERO
+
+        return OrderMatchSellDto(
+            id = activityId,
+            date = source.date,
+            source = OrderActivitySourceDto.RARIBLE,
+            nft = unionNft,
+            payment = unionPayment,
+            seller = UnionAddressConverter.convert(blockchain, nft.maker),
+            buyer = UnionAddressConverter.convert(blockchain, payment.maker),
+            price = source.price,
+            priceUsd = priceUsd,
+            amountUsd = amountUsd(priceUsd, unionNft),
+            type = type,
+            // TODO FLOW there is no order info in flow for sides
+            sellerOrderHash = null,
+            buyerOrderHash = null,
+            transactionHash = source.transactionHash,
+            // TODO UNION remove in 1.19
+            blockchainInfo = ActivityBlockchainInfoDto(
+                transactionHash = source.transactionHash,
+                blockHash = source.blockHash,
+                blockNumber = source.blockNumber,
+                logIndex = source.logIndex
+            ),
+        )
+    }
+
+    private fun activityToSwap(
+        source: FlowNftOrderActivitySellDto,
+        blockchain: BlockchainDto,
+        activityId: ActivityIdDto
+    ) = OrderMatchSwapDto(
+        id = activityId,
+        date = source.date,
+        source = OrderActivitySourceDto.RARIBLE,
+        transactionHash = source.transactionHash,
+        // TODO UNION remove in 1.19
+        blockchainInfo = ActivityBlockchainInfoDto(
+            transactionHash = source.transactionHash,
+            blockHash = source.blockHash,
+            blockNumber = source.blockNumber,
+            logIndex = source.logIndex
+        ),
+        left = convert(source.left, blockchain),
+        right = convert(source.right, blockchain)
+    )
+
+    private fun convert(
+        source: FlowOrderActivityMatchSideDto,
+        blockchain: BlockchainDto
+    ): OrderActivityMatchSideDto {
+        return OrderActivityMatchSideDto(
+            maker = UnionAddressConverter.convert(blockchain, source.maker),
+            hash = null,
+            asset = FlowConverter.convert(source.asset, blockchain)
+        )
+    }
+
+    private fun amountUsd(price: BigDecimal, asset: AssetDto) = price.multiply(asset.value)
 
     suspend fun convert(source: FlowActivitiesDto, blockchain: BlockchainDto): Slice<ActivityDto> {
         return Slice(
