@@ -16,9 +16,9 @@ open class TezosCollectionEventHandler(
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    @CaptureTransaction("ItemEvent#TEZOS")
+    @CaptureTransaction("CollectionEvent#TEZOS")
     override suspend fun handle(event: TezosCollectionSafeEventDto) {
-        logger.info("Received Tezos Item event: type={}", event::class.java.simpleName)
+        logger.info("Received {} Collection event: {}", blockchain, event)
 
         when (event.type) {
             TezosCollectionSafeEventDto.Type.UPDATE -> {

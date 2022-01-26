@@ -20,7 +20,7 @@ open class FlowOrderEventHandler(
 
     @CaptureTransaction("OrderEvent#FLOW")
     override suspend fun handle(event: FlowOrderEventDto) {
-        logger.debug("Received Flow Order event: type={}", event::class.java.simpleName)
+        logger.info("Received {} Order event: {}", blockchain, event)
 
         when (event) {
             is FlowOrderUpdateEventDto -> {

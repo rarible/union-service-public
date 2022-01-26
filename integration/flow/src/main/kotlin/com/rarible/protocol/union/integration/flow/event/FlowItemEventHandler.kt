@@ -22,7 +22,7 @@ open class FlowItemEventHandler(
 
     @CaptureTransaction("ItemEvent#FLOW")
     override suspend fun handle(event: FlowNftItemEventDto) {
-        logger.debug("Received Flow item event: type={}", event::class.java.simpleName)
+        logger.info("Received {} Item event: {}", blockchain, event)
 
         when (event) {
             is FlowNftItemUpdateEventDto -> {

@@ -61,7 +61,10 @@ class EnrichmentOrderService(
                 1
             )
         }
-        logger.info("Fetched best sell Order for Item [{}]: [{}] ({}ms)", id, result?.id, spent(now))
+        logger.info(
+            "Fetched best sell Order for Item [{}]: [{}], status = {} ({}ms)",
+            id, result?.id, result?.status, spent(now)
+        )
         return result
     }
 
@@ -80,7 +83,10 @@ class EnrichmentOrderService(
                 1
             )
         }
-        logger.info("Fetched best sell Order for Ownership [{}]: [{}] ({}ms)", id, result?.id, spent(now))
+        logger.info(
+            "Fetched best sell Order for Ownership [{}]: [{}], status = {} ({}ms)",
+            id, result?.id, result?.status, spent(now)
+        )
         return result
     }
 
@@ -101,7 +107,10 @@ class EnrichmentOrderService(
                 1
             )
         }
-        logger.info("Fetching best bid Order for Item [{}]: [{}] ({}ms)", id, result?.id, spent(now))
+        logger.info(
+            "Fetching best bid Order for Item [{}]: [{}], status = {} ({}ms)",
+            id, result?.id, result?.status, spent(now)
+        )
         return result
     }
 
