@@ -5,16 +5,13 @@ import com.rarible.protocol.union.dto.ContractAddress
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
-import java.util.concurrent.Executors
 
 @Component
 class EnrichmentCollectionEventService(
@@ -24,19 +21,16 @@ class EnrichmentCollectionEventService(
 ) {
 
     private val logger = LoggerFactory.getLogger(EnrichmentCollectionEventService::class.java)
-    private val threadPoolSize = 4
-    private val threadPool = Executors.newFixedThreadPool(threadPoolSize)
-    private val dispatcher = threadPool.asCoroutineDispatcher()
-    private val scope = CoroutineScope(dispatcher)
+    private val concurrency = 4
 
     suspend fun onCollectionBestSellOrderUpdate(
         collectionId: ContractAddress,
         order: OrderDto,
         notificationEnabled: Boolean
-    ) {
+    ) = coroutineScope {
         itemService.findByCollection(collectionId, order.maker)
             .map { item ->
-                scope.async {
+                async {
                     ignoreApi404 {
                         enrichmentItemEventService.onItemBestSellOrderUpdated(item, order, notificationEnabled)
                     }
@@ -54,21 +48,21 @@ class EnrichmentCollectionEventService(
                         )
                     }
                 }
-            }.buffer(threadPoolSize).map { it.await() }.flowOn(dispatcher).collect()
+            }.buffer(concurrency).map { it.await() }.collect()
     }
 
     suspend fun onCollectionBestBidOrderUpdate(
         collectionId: ContractAddress,
         order: OrderDto,
         notificationEnabled: Boolean
-    ) {
+    ) = coroutineScope {
         itemService.findByCollection(collectionId).map { item ->
-            scope.async {
+            async {
                 ignoreApi404 {
                     enrichmentItemEventService.onItemBestBidOrderUpdated(item, order, notificationEnabled)
                 }
             }
-        }.buffer(threadPoolSize).map { it.await() }.flowOn(dispatcher).collect()
+        }.buffer(concurrency).map { it.await() }.collect()
     }
 
     private suspend fun ignoreApi404(call: suspend () -> Unit) {
