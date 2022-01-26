@@ -58,8 +58,11 @@ class ReconciliationCorruptedItemJob(
         val corruptedItems = HashSet<ShortItemId>()
         bestOrders.forEach {
             val itemId = orderToItem.remove(it.id)!!
-            if (it.status != OrderStatusDto.ACTIVE) {
-                logger.info("Found best Order with incorrect state: {}, Item: {}", it.id, itemId)
+            if (it.status != OrderStatusDto.ACTIVE || it.taker != null) {
+                logger.info(
+                    "Found best Order with incorrect state: {}, Item: {}, taker = {}, status = {}",
+                    it.id, itemId, it.taker, it.status
+                )
                 corruptedItems.add(itemId)
             }
         }
