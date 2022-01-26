@@ -9,7 +9,6 @@ import com.rarible.protocol.union.dto.ItemDeleteEventDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.ItemUpdateEventDto
 import com.rarible.protocol.union.dto.OrderDto
-import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.enrichment.converter.ShortItemConverter
 import com.rarible.protocol.union.enrichment.model.ItemSellStats
 import com.rarible.protocol.union.enrichment.model.ShortItem
@@ -18,6 +17,7 @@ import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
 import com.rarible.protocol.union.enrichment.service.BestOrderService
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
+import com.rarible.protocol.union.enrichment.validator.ItemValidator
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.map
 import org.slf4j.LoggerFactory
@@ -232,21 +232,8 @@ class EnrichmentItemEventService(
             item = dto,
             eventId = UUID.randomUUID().toString()
         )
-        dto.bestBidOrder?.let {
-            if (it.status != OrderStatusDto.ACTIVE) {
-                logger.warn(
-                    "Sent event for Item [{}] with not Active best bid order: [{}], status = {}",
-                    dto.id.fullId(), dto.bestBidOrder?.id?.fullId(), dto.bestBidOrder?.status
-                )
-            }
-        }
-        dto.bestSellOrder?.let {
-            if (it.status != OrderStatusDto.ACTIVE) {
-                logger.warn(
-                    "Sent event for Item [{}] with not Active best sell order: [{}], status = {}",
-                    dto.id.fullId(), dto.bestSellOrder?.id?.fullId(), dto.bestSellOrder?.status
-                )
-            }
+        if (!ItemValidator.isValid(dto)) {
+            // TODO call async reconcile
         }
         itemEventListeners.forEach { it.onEvent(event) }
     }
