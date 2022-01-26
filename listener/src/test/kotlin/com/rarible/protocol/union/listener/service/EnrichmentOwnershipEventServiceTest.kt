@@ -2,12 +2,14 @@ package com.rarible.protocol.union.listener.service
 
 import com.mongodb.client.result.DeleteResult
 import com.rarible.protocol.union.core.event.OutgoingOwnershipEventListener
+import com.rarible.protocol.union.enrichment.converter.EnrichedOwnershipConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.model.ShortOwnership
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
 import com.rarible.protocol.union.enrichment.service.BestOrderService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
 import com.rarible.protocol.union.enrichment.test.data.randomShortOwnership
+import com.rarible.protocol.union.enrichment.test.data.randomUnionOwnershipDto
 import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipId
@@ -59,7 +61,12 @@ class EnrichmentOwnershipEventServiceTest {
         coEvery { ownershipService.get(shortOwnership.id) } returns shortOwnership
         coEvery { bestOrderService.updateBestSellOrder(shortOwnership, order) } returns expectedShortOwnership
         coEvery { ownershipService.save(expectedShortOwnership) } returns expectedShortOwnership
-        coEvery { ownershipService.enrichOwnership(expectedShortOwnership, null, listOf(order).associateBy { it.id }) } returns mockk()
+        coEvery {
+            ownershipService.enrichOwnership(
+                expectedShortOwnership,
+                null,
+                listOf(order).associateBy { it.id })
+        } returns EnrichedOwnershipConverter.convert(randomUnionOwnershipDto(), shortOwnership)
 
         ownershipEventService.onOwnershipBestSellOrderUpdated(shortOwnership.id, order)
 
@@ -104,7 +111,12 @@ class EnrichmentOwnershipEventServiceTest {
         // Means order is cancelled
         coEvery { bestOrderService.updateBestSellOrder(shortOwnership, order) } returns expectedShortOwnership
         coEvery { ownershipService.delete(shortOwnership.id) } returns DeleteResult.acknowledged(1)
-        coEvery { ownershipService.enrichOwnership(expectedShortOwnership, null, listOf(order).associateBy { it.id }) } returns mockk()
+        coEvery {
+            ownershipService.enrichOwnership(
+                expectedShortOwnership,
+                null,
+                listOf(order).associateBy { it.id })
+        } returns EnrichedOwnershipConverter.convert(randomUnionOwnershipDto(), shortOwnership)
 
         ownershipEventService.onOwnershipBestSellOrderUpdated(shortOwnership.id, order)
 
