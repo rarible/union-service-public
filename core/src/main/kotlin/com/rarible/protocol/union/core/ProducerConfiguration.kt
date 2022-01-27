@@ -2,7 +2,7 @@ package com.rarible.protocol.union.core
 
 import com.rarible.core.application.ApplicationEnvironmentInfo
 import com.rarible.core.kafka.RaribleKafkaProducer
-import com.rarible.protocol.union.core.event.UnionWrappedTopicProvider
+import com.rarible.protocol.union.core.event.UnionInternalTopicProvider
 import com.rarible.protocol.union.core.model.UnionWrappedEvent
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.CollectionEventDto
@@ -10,6 +10,7 @@ import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.OrderEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.dto.UnionEventTopicProvider
+import com.rarible.protocol.union.enrichment.model.ReconciliationMarkEvent
 import com.rarible.protocol.union.subscriber.UnionKafkaJsonSerializer
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
@@ -57,8 +58,14 @@ class ProducerConfiguration(
 
     @Bean
     fun wrappedEventProducer(): RaribleKafkaProducer<UnionWrappedEvent> {
-        val topic = UnionWrappedTopicProvider.getWrappedTopic(env)
+        val topic = UnionInternalTopicProvider.getWrappedTopic(env)
         return createUnionProducer("wrapped", topic, UnionWrappedEvent::class.java)
+    }
+
+    @Bean
+    fun reconciliationMarkEventProducer(): RaribleKafkaProducer<ReconciliationMarkEvent> {
+        val topic = UnionInternalTopicProvider.getReconciliationMarkTopic(env)
+        return createUnionProducer("reconciliation", topic, ReconciliationMarkEvent::class.java)
     }
 
     private fun <T> createUnionProducer(clientSuffix: String, topic: String, type: Class<T>): RaribleKafkaProducer<T> {

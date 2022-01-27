@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.listener.handler.wrapped
+package com.rarible.protocol.union.listener.handler.internal
 
 import com.rarible.protocol.union.core.handler.InternalEventHandler
 import com.rarible.protocol.union.core.model.UnionWrappedEvent

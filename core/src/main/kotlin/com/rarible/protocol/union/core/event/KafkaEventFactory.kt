@@ -15,8 +15,12 @@ import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OrderEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
+import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.UnionEventTopicProvider
 import com.rarible.protocol.union.dto.ext
+import com.rarible.protocol.union.enrichment.model.ReconciliationItemMarkEvent
+import com.rarible.protocol.union.enrichment.model.ReconciliationMarkEvent
+import com.rarible.protocol.union.enrichment.model.ReconciliationOwnershipMarkEvent
 import java.util.*
 
 object KafkaEventFactory {
@@ -132,6 +136,22 @@ object KafkaEventFactory {
             key = key,
             value = UnionWrappedOrderEvent(event),
             headers = ORDER_EVENT_HEADERS
+        )
+    }
+
+    fun reconciliationItemMarkEvent(itemId: ItemIdDto): KafkaMessage<ReconciliationMarkEvent> {
+        return KafkaMessage(
+            id = UUID.randomUUID().toString(),
+            key = itemId.fullId(),
+            value = ReconciliationItemMarkEvent(itemId),
+        )
+    }
+
+    fun reconciliationOwnershipMarkEvent(ownershipId: OwnershipIdDto): KafkaMessage<ReconciliationMarkEvent> {
+        return KafkaMessage(
+            id = UUID.randomUUID().toString(),
+            key = ownershipId.fullId(),
+            value = ReconciliationOwnershipMarkEvent(ownershipId),
         )
     }
 

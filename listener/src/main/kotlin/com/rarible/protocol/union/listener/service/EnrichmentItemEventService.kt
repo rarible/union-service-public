@@ -3,13 +3,13 @@ package com.rarible.protocol.union.listener.service
 import com.rarible.core.common.optimisticLock
 import com.rarible.protocol.union.core.event.OutgoingItemEventListener
 import com.rarible.protocol.union.core.model.UnionItem
+import com.rarible.protocol.union.core.service.ReconciliationEventService
 import com.rarible.protocol.union.dto.AuctionDto
 import com.rarible.protocol.union.dto.AuctionIdDto
 import com.rarible.protocol.union.dto.ItemDeleteEventDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.ItemUpdateEventDto
 import com.rarible.protocol.union.dto.OrderDto
-import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.enrichment.converter.ShortItemConverter
 import com.rarible.protocol.union.enrichment.model.ItemSellStats
 import com.rarible.protocol.union.enrichment.model.ShortItem
@@ -18,6 +18,7 @@ import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
 import com.rarible.protocol.union.enrichment.service.BestOrderService
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
+import com.rarible.protocol.union.enrichment.validator.ItemValidator
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.map
 import org.slf4j.LoggerFactory
@@ -29,7 +30,8 @@ class EnrichmentItemEventService(
     private val itemService: EnrichmentItemService,
     private val ownershipService: EnrichmentOwnershipService,
     private val itemEventListeners: List<OutgoingItemEventListener>,
-    private val bestOrderService: BestOrderService
+    private val bestOrderService: BestOrderService,
+    private val reconciliationEventService: ReconciliationEventService
 ) {
 
     private val logger = LoggerFactory.getLogger(EnrichmentItemEventService::class.java)
@@ -232,22 +234,11 @@ class EnrichmentItemEventService(
             item = dto,
             eventId = UUID.randomUUID().toString()
         )
-        dto.bestBidOrder?.let {
-            if (it.status != OrderStatusDto.ACTIVE) {
-                logger.warn(
-                    "Sent event for Item [{}] with not Active best bid order: [{}], status = {}",
-                    dto.id.fullId(), dto.bestBidOrder?.id?.fullId(), dto.bestBidOrder?.status
-                )
-            }
-        }
-        dto.bestSellOrder?.let {
-            if (it.status != OrderStatusDto.ACTIVE) {
-                logger.warn(
-                    "Sent event for Item [{}] with not Active best sell order: [{}], status = {}",
-                    dto.id.fullId(), dto.bestSellOrder?.id?.fullId(), dto.bestSellOrder?.status
-                )
-            }
-        }
+
         itemEventListeners.forEach { it.onEvent(event) }
+
+        if (!ItemValidator.isValid(dto)) {
+            reconciliationEventService.onCorruptedItem(dto.id)
+        }
     }
 }

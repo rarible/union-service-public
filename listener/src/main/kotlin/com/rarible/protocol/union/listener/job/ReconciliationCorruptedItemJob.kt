@@ -5,10 +5,10 @@ import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
-import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentRefreshService
+import com.rarible.protocol.union.enrichment.validator.BestOrderValidator
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.toList
@@ -58,11 +58,8 @@ class ReconciliationCorruptedItemJob(
         val corruptedItems = HashSet<ShortItemId>()
         bestOrders.forEach {
             val itemId = orderToItem.remove(it.id)!!
-            if (it.status != OrderStatusDto.ACTIVE || it.taker != null) {
-                logger.info(
-                    "Found best Order with incorrect state: {}, Item: {}, taker = {}, status = {}",
-                    it.id, itemId, it.taker, it.status
-                )
+            if (!BestOrderValidator.isValid(it)) {
+                logger.info("Found best Order with incorrect state: {}, Item: {}", it.id, itemId)
                 corruptedItems.add(itemId)
             }
         }
