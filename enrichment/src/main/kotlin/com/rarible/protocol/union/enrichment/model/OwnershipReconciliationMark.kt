@@ -15,7 +15,8 @@ data class OwnershipReconciliationMark(
     val tokenId: BigInteger,
     val owner: String,
 
-    val lastUpdatedAt: Instant
+    val lastUpdatedAt: Instant,
+    val retries: Int = 0
 ) {
 
     @Transient

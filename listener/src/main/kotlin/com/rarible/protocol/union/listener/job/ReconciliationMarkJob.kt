@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.listener.job
 
+import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.enrichment.repository.ItemReconciliationMarkRepository
 import com.rarible.protocol.union.enrichment.repository.OwnershipReconciliationMarkRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentRefreshService
@@ -23,7 +24,7 @@ class ReconciliationMarkJob(
         fixedRateString = "\${listener.reconcile-marks.rate}",
         initialDelayString = "\${listener.reconcile-marks.delay}"
     )
-    fun reconcileMarkedRecords() = runBlocking<Unit> {
+    fun reconcileMarkedRecords() = runBlocking {
         var reconciledItems = 0
         logger.info("Starting to reconcile marked Items")
         do {
@@ -40,8 +41,7 @@ class ReconciliationMarkJob(
 
         logger.info(
             "Finished to reconcile marked records, {} Items and {} Ownerships has been reconciled",
-            reconciledItems,
-            reconciledOwnerships
+            reconciledItems, reconciledOwnerships
         )
     }
 
@@ -51,20 +51,23 @@ class ReconciliationMarkJob(
             return 0
         }
         logger.info("Found {} Item reconciliation marks", items.size)
-        var withFails = false
+        var withFails = 0
 
         items.forEach {
             try {
                 refreshService.reconcileItem(it.id.toDto(), false)
                 itemReconciliationMarkRepository.delete(it)
             } catch (e: Exception) {
-                withFails = true
+                withFails++
+                itemReconciliationMarkRepository.save(
+                    it.copy(retries = it.retries + 1, lastUpdatedAt = nowMillis())
+                )
                 logger.warn("Unable to reconcile Item [{}]:", it.id, e)
             }
         }
-        // means "hasMore", but if there were fails during updates, it's better to stop current
+        // means "hasMore", but if there were a lot of fails during updates, it's better to stop current
         // job iteration in order to prevent endless spam of errors
-        return if (withFails) 0 else items.size
+        return if (withFails > items.size / 2) 0 else items.size
     }
 
     private suspend fun reconcileOwnerships(): Int {
@@ -74,17 +77,20 @@ class ReconciliationMarkJob(
         }
         logger.info("Found {} Ownership reconciliation marks", ownerships.size)
 
-        var withFails = false
+        var withFails = 0
         ownerships.forEach {
             try {
                 refreshService.reconcileOwnership(it.id.toDto())
                 ownershipReconciliationMarkRepository.delete(it)
             } catch (e: Exception) {
-                withFails = true
+                withFails++
+                ownershipReconciliationMarkRepository.save(
+                    it.copy(retries = it.retries + 1, lastUpdatedAt = nowMillis())
+                )
                 logger.warn("Unable to reconcile Ownership [{}]:", it.id, e)
             }
         }
-        return if (withFails) 0 else ownerships.size
+        return if (withFails > ownerships.size / 2) 0 else ownerships.size
     }
 
 }

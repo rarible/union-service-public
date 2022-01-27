@@ -14,7 +14,8 @@ data class ItemReconciliationMark(
     val token: String,
     val tokenId: BigInteger,
 
-    val lastUpdatedAt: Instant
+    val lastUpdatedAt: Instant,
+    val retries: Int = 0
 ) {
 
     @Transient

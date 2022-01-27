@@ -33,10 +33,19 @@ class ReconciliationMarkEventHandlerIt : AbstractIntegrationTest() {
         assertThat(itemReconciliationMarkRepository.findAll(100)).hasSize(0)
 
         reconciliationMarkEventHandler.handle(ReconciliationItemMarkEvent(itemId))
-        assertThat(itemReconciliationMarkRepository.findAll(100)).hasSize(1)
+        val allMarks = itemReconciliationMarkRepository.findAll(100)
+        assertThat(allMarks).hasSize(1)
+        assertThat(allMarks[0].retries).isEqualTo(0)
+
+        // replacing retries
+        itemReconciliationMarkRepository.save(allMarks[0].copy(retries = 5))
 
         reconciliationMarkEventHandler.handle(ReconciliationItemMarkEvent(itemId))
-        assertThat(itemReconciliationMarkRepository.findAll(100)).hasSize(1)
+        val allMarksAfterUpdate = itemReconciliationMarkRepository.findAll(100)
+
+        // Ensure retries is still 5
+        assertThat(allMarksAfterUpdate).hasSize(1)
+        assertThat(allMarksAfterUpdate[0].retries).isEqualTo(5)
     }
 
     @Test
@@ -45,10 +54,19 @@ class ReconciliationMarkEventHandlerIt : AbstractIntegrationTest() {
         assertThat(ownershipReconciliationMarkRepository.findAll(100)).hasSize(0)
 
         reconciliationMarkEventHandler.handle(ReconciliationOwnershipMarkEvent(ownershipId))
-        assertThat(ownershipReconciliationMarkRepository.findAll(100)).hasSize(1)
+        val allMarks = ownershipReconciliationMarkRepository.findAll(100)
+        assertThat(allMarks).hasSize(1)
+        assertThat(allMarks[0].retries).isEqualTo(0)
+
+        // replacing retries
+        ownershipReconciliationMarkRepository.save(allMarks[0].copy(retries = 5))
 
         reconciliationMarkEventHandler.handle(ReconciliationOwnershipMarkEvent(ownershipId))
-        assertThat(ownershipReconciliationMarkRepository.findAll(100)).hasSize(1)
+        val allMarksAfterUpdate = ownershipReconciliationMarkRepository.findAll(100)
+
+        // Ensure retries is still 5
+        assertThat(allMarksAfterUpdate).hasSize(1)
+        assertThat(allMarksAfterUpdate[0].retries).isEqualTo(5)
     }
 
 }

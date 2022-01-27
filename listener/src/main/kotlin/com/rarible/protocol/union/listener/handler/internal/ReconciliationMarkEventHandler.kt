@@ -20,25 +20,27 @@ class ReconciliationMarkEventHandler(
     override suspend fun handle(event: ReconciliationMarkEvent) {
         when (event) {
             is ReconciliationItemMarkEvent -> {
-                itemReconciliationMarkRepository.save(
-                    ItemReconciliationMark(
-                        blockchain = event.itemId.blockchain,
-                        token = event.itemId.contract,
-                        tokenId = event.itemId.tokenId,
-                        lastUpdatedAt = nowMillis()
-                    )
+                val mark = ItemReconciliationMark(
+                    blockchain = event.itemId.blockchain,
+                    token = event.itemId.contract,
+                    tokenId = event.itemId.tokenId,
+                    lastUpdatedAt = nowMillis()
                 )
+                if (itemReconciliationMarkRepository.get(mark.id) == null) {
+                    itemReconciliationMarkRepository.save(mark)
+                }
             }
             is ReconciliationOwnershipMarkEvent -> {
-                ownershipReconciliationMarkRepository.save(
-                    OwnershipReconciliationMark(
-                        blockchain = event.ownershipId.blockchain,
-                        token = event.ownershipId.contract,
-                        tokenId = event.ownershipId.tokenId,
-                        owner = event.ownershipId.owner.value,
-                        lastUpdatedAt = nowMillis()
-                    )
+                val mark = OwnershipReconciliationMark(
+                    blockchain = event.ownershipId.blockchain,
+                    token = event.ownershipId.contract,
+                    tokenId = event.ownershipId.tokenId,
+                    owner = event.ownershipId.owner.value,
+                    lastUpdatedAt = nowMillis()
                 )
+                if (ownershipReconciliationMarkRepository.get(mark.id) == null) {
+                    ownershipReconciliationMarkRepository.save(mark)
+                }
             }
         }
     }

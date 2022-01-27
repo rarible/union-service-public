@@ -79,23 +79,26 @@ class ReconciliationMarkJobIt : AbstractIntegrationTest() {
 
     @Test
     fun `reconcile items - with fail`() = runBlocking<Unit> {
-        val itemMarks = (1..20).map { randomItemMark() }
+        val itemMarks = (1..10).map { randomItemMark() }
 
         itemMarks.forEach { itemReconciliationMarkRepository.save(it) }
 
         coEvery { refreshService.reconcileItem(any(), any()) } returns item
-        coEvery { refreshService.reconcileItem(itemMarks[10].id.toDto(), false) } throws RuntimeException()
+        coEvery { refreshService.reconcileItem(itemMarks[5].id.toDto(), false) } throws RuntimeException()
 
         job.reconcileMarkedRecords()
 
-        coVerify(exactly = itemMarks.size) { refreshService.reconcileItem(any(), false) }
-        // One failed item mark should remains in DB
-        assertThat(itemReconciliationMarkRepository.findAll(100)).hasSize(1)
+        // 1 additional call for single retry for one corrupted item
+        coVerify(exactly = itemMarks.size + 1) { refreshService.reconcileItem(any(), false) }
+        // One failed item mark should remain in DB
+        val failedMarks = itemReconciliationMarkRepository.findAll(100)
+        assertThat(failedMarks).hasSize(1)
+        assertThat(failedMarks[0].retries).isEqualTo(2)
     }
 
     @Test
     fun `reconcile ownerships - with fail`() = runBlocking<Unit> {
-        val itemMarks = (1..20).map { randomOwnershipMark() }
+        val itemMarks = (1..30).map { randomOwnershipMark() }
 
         itemMarks.forEach { ownershipReconciliationMarkRepository.save(it) }
 
@@ -105,9 +108,13 @@ class ReconciliationMarkJobIt : AbstractIntegrationTest() {
 
         job.reconcileMarkedRecords()
 
-        coVerify(exactly = itemMarks.size) { refreshService.reconcileOwnership(any()) }
+        // 4 additional calls (2 retries for each of 2 failed)
+        coVerify(exactly = itemMarks.size + 4) { refreshService.reconcileOwnership(any()) }
         // Two failed ownership marks should remain in DB
-        assertThat(ownershipReconciliationMarkRepository.findAll(100)).hasSize(2)
+        val failedMarks = ownershipReconciliationMarkRepository.findAll(100)
+        assertThat(failedMarks).hasSize(2)
+        assertThat(failedMarks[0].retries).isEqualTo(3)
+        assertThat(failedMarks[1].retries).isEqualTo(3)
     }
 
 }
