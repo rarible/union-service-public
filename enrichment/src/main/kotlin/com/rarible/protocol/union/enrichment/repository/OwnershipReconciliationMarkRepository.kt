@@ -3,7 +3,6 @@ package com.rarible.protocol.union.enrichment.repository
 import com.mongodb.client.result.DeleteResult
 import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.apm.SpanType
-import com.rarible.protocol.union.enrichment.model.ItemReconciliationMark
 import com.rarible.protocol.union.enrichment.model.OwnershipReconciliationMark
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
 import kotlinx.coroutines.reactive.awaitFirst
@@ -24,7 +23,7 @@ class OwnershipReconciliationMarkRepository(
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    val collection: String = template.getCollectionName(ItemReconciliationMark::class.java)
+    val collection: String = template.getCollectionName(OwnershipReconciliationMark::class.java)
 
     suspend fun createIndices() {
         ALL_INDEXES.forEach { index ->
