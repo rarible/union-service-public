@@ -156,7 +156,7 @@ class EnrichmentOrderService(
                 size = ORDER_BATCH
             }
             if (attempts == WARN_ATTEMPTS) {
-                logger.warn("More than 5 attempt to get best order for [{}]", id)
+                logger.warn("More than $WARN_ATTEMPTS attempt to get best order for [{}]", id)
             }
         } while (continuation != null && order == null && attempts < MAX_ATTEMPTS)
         if (attempts == MAX_ATTEMPTS) {
