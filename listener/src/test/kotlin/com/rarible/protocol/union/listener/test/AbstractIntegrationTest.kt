@@ -29,7 +29,6 @@ import org.springframework.beans.factory.annotation.Qualifier
 import java.util.*
 import java.util.concurrent.LinkedBlockingQueue
 
-@FlowPreview
 @Suppress("UNCHECKED_CAST")
 abstract class AbstractIntegrationTest {
 

@@ -34,6 +34,15 @@ rarible:
       enabled: true
   cache:
     use-locks: true
+  loader:
+    broker-replica-set: ${kafka.hosts}
+    workers: 4
+    retry:
+      # Retry after 5m and 24h
+      backoffDelaysMillis: [ 300000, 86400000 ]
+      job:
+        runner:
+          period: 60000 # Run retry tasks scheduling once per minute.
 
 integration:
   ethereum:

@@ -21,15 +21,17 @@ class EnrichmentMetaService(
     private val contentMetaService: ContentMetaService
 ) {
 
-    suspend fun enrichMeta(itemId: ItemIdDto, meta: UnionMeta): UnionMeta {
+    suspend fun enrichMetaWithContentMeta(meta: UnionMeta): UnionMeta {
         val enrichedContent = coroutineScope {
-            meta.content.map { async { contentMetaService.enrichContent(it) } }
-        }.awaitAll()
+            meta.content.map { async { contentMetaService.enrichWithContentMeta(it) } }.awaitAll()
+        }
         return meta.copy(content = enrichedContent)
     }
 
-    suspend fun resetMeta(itemId: ItemIdDto) {
-        // TODO[meta]: re-implement.
+    suspend fun refreshContentMeta(meta: UnionMeta) {
+        coroutineScope {
+            meta.content.map { async { contentMetaService.refreshContentMeta(it) } }.awaitAll()
+        }
     }
 
     suspend fun getItemMeta(itemId: ItemIdDto): UnionMeta? {

@@ -164,7 +164,7 @@ class EnrichmentRefreshService(
         } else {
             val metaDeferred = async {
                 val meta = itemDtoDeferred.await().meta ?: enrichmentMetaService.getItemMeta(itemId)
-                meta?.let { enrichmentMetaService.enrichMeta(itemId, meta) }
+                meta?.let { enrichmentMetaService.enrichMetaWithContentMeta(meta) }
             }
             val ordersHint = (bestSellOrdersDto + bestBidOrdersDto).associateBy { it.id }
             val enriched = EnrichedItemConverter.convert(itemDto, updatedItem, metaDeferred.await(), ordersHint)

@@ -64,7 +64,7 @@ class TestApiConfiguration {
     @Primary
     fun testMetaContentService(): ContentMetaService {
         val mock = mockk<ContentMetaService>()
-        coEvery { mock.enrichContent(any()) } coAnswers { firstArg() }
+        coEvery { mock.enrichWithContentMeta(any()) } coAnswers { firstArg() }
         return mock
     }
 

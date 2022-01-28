@@ -13,3 +13,11 @@ common:
   currency:
     refresh:
       cron: "-"
+
+loader:
+  workers: 1
+  retry:
+    backoffDelaysMillis: [ ]
+    job:
+      runner:
+      period: 1000000000000000000 # Disable in the tests.

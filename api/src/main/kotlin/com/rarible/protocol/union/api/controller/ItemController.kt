@@ -113,10 +113,15 @@ class ItemController(
 
     override suspend fun resetItemMeta(itemId: String): ResponseEntity<Unit> {
         val fullItemId = ItemIdParser.parseFull(itemId)
-        enrichmentMetaService.resetMeta(fullItemId)
+        val itemMeta = enrichmentMetaService.getItemMeta(fullItemId)
+        if (itemMeta != null) {
+            logger.info("Refreshing content meta for {}", fullItemId)
+            enrichmentMetaService.refreshContentMeta(itemMeta)
+        } else {
+            logger.info("No content meta for refresh found for {}", fullItemId)
+        }
         router.getService(fullItemId.blockchain).resetItemMeta(fullItemId.value)
-
-        logger.info("Item meta has been reset: {}", itemId)
+        logger.info("Item meta has been refreshed for {}", itemId)
         return ResponseEntity.ok().build()
     }
 
