@@ -216,7 +216,7 @@ class OrderController(
         }
 
         val combinedSlice = Paging(
-            OrderContinuation.ByLastUpdatedAndId,
+            OrderContinuation.ByLastUpdatedAndIdDesc,
             blockchainPages.flatMap { it.entities }
         ).getSlice(safeSize)
 
@@ -304,7 +304,7 @@ class OrderController(
         }
 
         val combinedSlice = Paging(
-            OrderContinuation.ByLastUpdatedAndId,
+            OrderContinuation.ByLastUpdatedAndIdDesc,
             blockchainSlices.flatMap { it.entities }
         ).getSlice(safeSize)
 
