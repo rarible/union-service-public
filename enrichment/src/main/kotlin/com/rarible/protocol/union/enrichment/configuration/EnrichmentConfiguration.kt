@@ -4,7 +4,7 @@ import com.rarible.core.lockredis.EnableRaribleRedisLock
 import com.rarible.core.mongo.configuration.EnableRaribleMongo
 import com.rarible.protocol.union.core.CoreConfiguration
 import com.rarible.protocol.union.core.event.OutgoingItemEventListener
-import com.rarible.protocol.union.enrichment.meta.MediaMetaService
+import com.rarible.protocol.union.enrichment.meta.ContentMetaService
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import org.springframework.boot.context.properties.EnableConfigurationProperties
@@ -20,7 +20,7 @@ import org.springframework.context.annotation.Import
         EnrichmentItemService::class,
         ItemRepository::class,
         OutgoingItemEventListener::class,
-        MediaMetaService::class
+        ContentMetaService::class
     ]
 )
 class EnrichmentConfiguration

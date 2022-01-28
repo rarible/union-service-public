@@ -2,22 +2,29 @@ package com.rarible.protocol.union.enrichment.meta
 
 import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.apm.SpanType
+import com.rarible.core.content.meta.loader.ContentMeta
+import com.rarible.core.content.meta.loader.ContentMetaLoader
 import com.rarible.protocol.union.core.model.UnionImageProperties
 import com.rarible.protocol.union.core.model.UnionMetaContent
 import com.rarible.protocol.union.core.model.UnionMetaContentProperties
 import com.rarible.protocol.union.core.model.UnionVideoProperties
-import com.rarible.protocol.union.dto.ItemIdDto
-import kotlinx.coroutines.reactive.awaitFirstOrNull
+import com.rarible.protocol.union.enrichment.configuration.MetaProperties
 import org.springframework.stereotype.Component
 
 @Component
 @CaptureSpan(type = SpanType.APP)
 class ContentMetaService(
-    private val mediaMetaService: MediaMetaService,
+    metaProperties: MetaProperties,
     private val ipfsUrlResolver: IpfsUrlResolver
 ) {
 
-    suspend fun enrichContent(content: UnionMetaContent, itemId: ItemIdDto): UnionMetaContent {
+    private val contentMetaLoader = ContentMetaLoader(
+        mediaFetchTimeout = metaProperties.mediaFetchTimeout,
+        mediaFetchMaxSize = metaProperties.mediaFetchMaxSize,
+        openSeaProxyUrl = metaProperties.openSeaProxyUrl
+    )
+
+    suspend fun enrichContent(content: UnionMetaContent): UnionMetaContent {
         val properties = content.properties
         val enrichedProperties = if (properties == null || properties.isEmpty()) {
             val fetchedProperties = fetchMetaContentProperties(content.url)
@@ -28,9 +35,9 @@ class ContentMetaService(
         return content.copy(properties = enrichedProperties)
     }
 
-    suspend fun getContentMeta(url: String): ContentMeta? {
+    private suspend fun getContentMeta(url: String): ContentMeta? {
         val realUrl = ipfsUrlResolver.resolveRealUrl(url)
-        return mediaMetaService.get(realUrl).awaitFirstOrNull()
+        return contentMetaLoader.fetchContentMeta(realUrl)
     }
 
     private suspend fun fetchMetaContentProperties(url: String): UnionMetaContentProperties? {

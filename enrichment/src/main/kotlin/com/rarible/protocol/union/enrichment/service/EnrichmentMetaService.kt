@@ -23,7 +23,7 @@ class EnrichmentMetaService(
 
     suspend fun enrichMeta(itemId: ItemIdDto, meta: UnionMeta): UnionMeta {
         val enrichedContent = coroutineScope {
-            meta.content.map { async { contentMetaService.enrichContent(it, itemId) } }
+            meta.content.map { async { contentMetaService.enrichContent(it) } }
         }.awaitAll()
         return meta.copy(content = enrichedContent)
     }

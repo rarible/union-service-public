@@ -34,7 +34,7 @@
     </pluginRepositories>
 
     <properties>
-        <revision>1.22.0</revision>
+        <revision>1.22.1</revision>
         <maven.deploy.skip>true</maven.deploy.skip>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -353,5 +353,6 @@
         <module>enrichment</module>
         <module>integration</module>
         <module>listener</module>
+        <module>content-meta-loader</module>
     </modules>
 </project>
