@@ -41,7 +41,7 @@ class EnrichmentOwnershipEventServiceTest {
         enrichmentAuctionService,
         ownershipEventListeners,
         bestOrderService,
-        auctionContractService
+        auctionContractService,
         reconciliationEventService
     )
 

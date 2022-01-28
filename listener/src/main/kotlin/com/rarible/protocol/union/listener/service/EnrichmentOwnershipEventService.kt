@@ -10,7 +10,6 @@ import com.rarible.protocol.union.dto.OwnershipDeleteEventDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.OwnershipUpdateEventDto
 import com.rarible.protocol.union.enrichment.converter.ShortOwnershipConverter
-import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortOwnership
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
 import com.rarible.protocol.union.enrichment.service.BestOrderService
@@ -30,7 +29,7 @@ class EnrichmentOwnershipEventService(
     private val enrichmentAuctionService: EnrichmentAuctionService,
     private val ownershipEventListeners: List<OutgoingOwnershipEventListener>,
     private val bestOrderService: BestOrderService,
-    private val auctionContractService: AuctionContractService
+    private val auctionContractService: AuctionContractService,
     private val reconciliationEventService: ReconciliationEventService
 ) {
     private val logger = LoggerFactory.getLogger(EnrichmentOwnershipEventService::class.java)
