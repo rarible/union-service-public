@@ -101,7 +101,8 @@ class EnrichmentItemService(
         val bestBidOrder = async { enrichmentOrderService.fetchOrderIfDiffers(shortItem?.bestBidOrder, orders) }
         val meta = async {
             val itemId = shortItem?.id?.toDto() ?: item!!.id
-            enrichmentMetaService.enrichMeta(itemId, item?.meta ?: fetchedItem.await().meta)
+            val meta = item?.meta ?: fetchedItem.await().meta ?: enrichmentMetaService.getItemMeta(itemId)
+            if (meta != null) enrichmentMetaService.enrichMeta(itemId, meta) else null
         }
 
         val bestOrders = listOf(bestSellOrder, bestBidOrder)
