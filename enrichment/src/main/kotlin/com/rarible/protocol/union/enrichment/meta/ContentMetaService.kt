@@ -22,32 +22,12 @@ class ContentMetaService(
     private val ipfsUrlResolver: IpfsUrlResolver
 ) {
 
-    suspend fun enrichWithContentMeta(content: UnionMetaContent): UnionMetaContent {
-        val properties = content.properties
-        val enrichedProperties = if (properties == null || properties.isEmpty()) {
-            val fetchedProperties = fetchMetaContentProperties(content.url)
-            fetchedProperties ?: properties ?: UnionImageProperties()
-        } else {
-            properties
-        }
-        return content.copy(properties = enrichedProperties)
-    }
-
-    suspend fun refreshContentMeta(content: UnionMetaContent) {
-        val realUrl = ipfsUrlResolver.resolveRealUrl(content.url)
-        contentMetaCacheLoaderService.update(realUrl)
-    }
-
-    private suspend fun getContentMeta(url: String): ContentMeta? {
+    suspend fun fetchContentMeta(url: String): UnionMetaContentProperties? {
         val realUrl = ipfsUrlResolver.resolveRealUrl(url)
-        return contentMetaCacheLoaderService.getAvailableOrScheduleAndWait(
+        val contentMeta = contentMetaCacheLoaderService.getAvailableOrScheduleAndWait(
             key = realUrl,
             timeout = Duration.ofMillis(metaProperties.timeoutLoadingContentMeta)
-        )
-    }
-
-    private suspend fun fetchMetaContentProperties(url: String): UnionMetaContentProperties? {
-        val contentMeta = getContentMeta(url) ?: return null
+        ) ?: return null
         val isImage = contentMeta.type.contains("image")
         val isVideo = contentMeta.type.contains("video")
         val isAudio = contentMeta.type.contains("audio") // TODO: add dedicated properties for audio.
@@ -58,6 +38,10 @@ class ContentMetaService(
         }
     }
 
+    suspend fun refreshContentMeta(url: String) {
+        val realUrl = ipfsUrlResolver.resolveRealUrl(url)
+        contentMetaCacheLoaderService.update(realUrl)
+    }
 }
 
 fun ContentMeta.toVideoProperties() = UnionVideoProperties(

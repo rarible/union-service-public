@@ -3,7 +3,9 @@ package com.rarible.protocol.union.enrichment.service
 import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.apm.SpanType
 import com.rarible.core.client.WebClientResponseProxyException
+import com.rarible.protocol.union.core.model.UnionImageProperties
 import com.rarible.protocol.union.core.model.UnionMeta
+import com.rarible.protocol.union.core.model.UnionMetaContent
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.ItemIdDto
@@ -23,14 +25,26 @@ class EnrichmentMetaService(
 
     suspend fun enrichMetaWithContentMeta(meta: UnionMeta): UnionMeta {
         val enrichedContent = coroutineScope {
-            meta.content.map { async { contentMetaService.enrichWithContentMeta(it) } }.awaitAll()
+            meta.content.map { async { enrichWithContentMeta(it) } }.awaitAll()
         }
         return meta.copy(content = enrichedContent)
     }
 
+    private suspend fun enrichWithContentMeta(content: UnionMetaContent): UnionMetaContent {
+        val properties = content.properties
+        if (properties != null && !properties.isEmpty()) {
+            return content
+        }
+        val fetchedProperties = contentMetaService.fetchContentMeta(content.url)
+        val enrichedProperties = fetchedProperties
+            ?: properties // Use at least some fields of known properties.
+            ?: UnionImageProperties()
+        return content.copy(properties = enrichedProperties)
+    }
+
     suspend fun refreshContentMeta(meta: UnionMeta) {
         coroutineScope {
-            meta.content.map { async { contentMetaService.refreshContentMeta(it) } }.awaitAll()
+            meta.content.map { async { contentMetaService.refreshContentMeta(it.url) } }.awaitAll()
         }
     }
 

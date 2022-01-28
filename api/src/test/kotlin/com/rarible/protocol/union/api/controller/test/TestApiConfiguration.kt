@@ -2,6 +2,7 @@ package com.rarible.protocol.union.api.controller.test
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.rarible.core.application.ApplicationEnvironmentInfo
+import com.rarible.core.content.meta.loader.ContentMetaLoader
 import com.rarible.core.kafka.RaribleKafkaProducer
 import com.rarible.protocol.currency.api.client.CurrencyControllerApi
 import com.rarible.protocol.flow.nft.api.client.FlowNftCollectionControllerApi
@@ -62,10 +63,9 @@ class TestApiConfiguration {
 
     @Bean
     @Primary
-    fun testMetaContentService(): ContentMetaService {
-        val mock = mockk<ContentMetaService>()
-        coEvery { mock.enrichWithContentMeta(any()) } coAnswers { firstArg() }
-        return mock
+    @Qualifier("test.content.meta.loader")
+    fun testContentMetaLoader(): ContentMetaLoader = mockk {
+        coEvery { fetchContentMeta(any()) } returns null
     }
 
     @Bean

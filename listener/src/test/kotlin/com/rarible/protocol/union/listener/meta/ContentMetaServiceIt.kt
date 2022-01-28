@@ -2,8 +2,6 @@ package com.rarible.protocol.union.listener.meta
 
 import com.rarible.core.content.meta.loader.ContentMeta
 import com.rarible.core.content.meta.loader.ContentMetaLoader
-import com.rarible.protocol.union.core.model.UnionMetaContent
-import com.rarible.protocol.union.dto.MetaContentDto
 import com.rarible.protocol.union.enrichment.meta.ContentMetaService
 import com.rarible.protocol.union.enrichment.meta.toImageProperties
 import com.rarible.protocol.union.listener.test.AbstractIntegrationTest
@@ -35,15 +33,7 @@ class ContentMetaServiceIt : AbstractIntegrationTest() {
             size = 30
         )
         coEvery { testContentMetaLoader.fetchContentMeta(url) } returns contentMeta
-        val enriched = contentMetaService.enrichWithContentMeta(
-            UnionMetaContent(
-                url = url,
-                representation = MetaContentDto.Representation.ORIGINAL,
-                properties = null
-            )
-        )
-        assertThat(enriched).isEqualTo(
-            enriched.copy(properties = contentMeta.toImageProperties())
-        )
+        val enriched = contentMetaService.fetchContentMeta(url)
+        assertThat(enriched).isEqualTo(contentMeta.toImageProperties())
     }
 }
