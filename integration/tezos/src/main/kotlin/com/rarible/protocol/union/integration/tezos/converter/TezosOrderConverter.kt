@@ -118,7 +118,7 @@ class TezosOrderConverter(
     // TODO TEZOS there should be separate enum for Order sorting
     fun convert(source: OrderSortDto?): ActivitySortDto? {
         return when (source) {
-            OrderSortDto.LAST_UPDATE_ASC -> ActivitySortDto.LATEST_FIRST
+            OrderSortDto.LAST_UPDATE_ASC -> ActivitySortDto.EARLIEST_FIRST
             OrderSortDto.LAST_UPDATE_DESC -> ActivitySortDto.LATEST_FIRST
             else -> null
         }
