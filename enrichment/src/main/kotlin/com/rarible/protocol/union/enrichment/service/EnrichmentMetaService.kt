@@ -9,17 +9,20 @@ import com.rarible.protocol.union.core.model.UnionMetaContent
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.ItemIdDto
+import com.rarible.protocol.union.enrichment.configuration.MetaProperties
 import com.rarible.protocol.union.enrichment.meta.ContentMetaService
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
+import java.time.Duration
 
 @Component
 @CaptureSpan(type = SpanType.APP)
 class EnrichmentMetaService(
     private val router: BlockchainRouter<ItemService>,
+    private val metaProperties: MetaProperties,
     private val contentMetaService: ContentMetaService
 ) {
 
@@ -35,7 +38,10 @@ class EnrichmentMetaService(
         if (properties != null && !properties.isEmpty()) {
             return content
         }
-        val fetchedProperties = contentMetaService.fetchContentMeta(content.url)
+        val fetchedProperties = contentMetaService.fetchContentMeta(
+            url = content.url,
+            timeout = Duration.ofMillis(metaProperties.timeoutLoadingContentMeta)
+        )
         val enrichedProperties = fetchedProperties
             ?: properties // Use at least some fields of known properties.
             ?: UnionImageProperties() // Questionable, but let's consider that was an image.

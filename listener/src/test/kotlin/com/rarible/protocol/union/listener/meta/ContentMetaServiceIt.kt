@@ -12,6 +12,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
+import java.time.Duration
 
 @IntegrationTest
 class ContentMetaServiceIt : AbstractIntegrationTest() {
@@ -33,7 +34,7 @@ class ContentMetaServiceIt : AbstractIntegrationTest() {
             size = 30
         )
         coEvery { testContentMetaLoader.fetchContentMeta(url) } returns contentMeta
-        val enriched = contentMetaService.fetchContentMeta(url)
+        val enriched = contentMetaService.fetchContentMeta(url, Duration.ofSeconds(1))
         assertThat(enriched).isEqualTo(contentMeta.toImageProperties())
     }
 }

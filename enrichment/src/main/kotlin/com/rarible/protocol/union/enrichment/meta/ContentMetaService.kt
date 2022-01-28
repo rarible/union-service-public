@@ -16,17 +16,19 @@ import java.time.Duration
 @Component
 @CaptureSpan(type = SpanType.APP)
 class ContentMetaService(
-    private val metaProperties: MetaProperties,
     @Qualifier("content.meta.cache.loader.service")
     private val contentMetaCacheLoaderService: CacheLoaderService<ContentMeta>,
     private val ipfsUrlResolver: IpfsUrlResolver
 ) {
 
-    suspend fun fetchContentMeta(url: String): UnionMetaContentProperties? {
+    suspend fun fetchContentMeta(
+        url: String,
+        timeout: Duration
+    ): UnionMetaContentProperties? {
         val realUrl = ipfsUrlResolver.resolveRealUrl(url)
         val contentMeta = contentMetaCacheLoaderService.getAvailableOrScheduleAndWait(
             key = realUrl,
-            timeout = Duration.ofMillis(metaProperties.timeoutLoadingContentMeta)
+            timeout = timeout
         ) ?: return null
         val isImage = contentMeta.type.contains("image")
         val isVideo = contentMeta.type.contains("video")
