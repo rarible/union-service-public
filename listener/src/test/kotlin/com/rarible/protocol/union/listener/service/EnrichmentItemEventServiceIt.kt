@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.listener.service
 
+import com.rarible.core.test.data.randomAddress
 import com.rarible.core.test.wait.Wait
 import com.rarible.protocol.dto.AuctionIdsDto
 import com.rarible.protocol.dto.NftItemsDto
@@ -11,6 +12,7 @@ import com.rarible.protocol.union.enrichment.converter.EnrichedItemConverter
 import com.rarible.protocol.union.enrichment.converter.ShortItemConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.model.ShortItemId
+import com.rarible.protocol.union.enrichment.repository.ItemReconciliationMarkRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.service.EnrichmentMetaService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
@@ -65,6 +67,9 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
 
     @Autowired
     lateinit var enrichmentMetaService: EnrichmentMetaService
+
+    @Autowired
+    private lateinit var itemReconciliationMarkRepository: ItemReconciliationMarkRepository
 
     @Test
     fun `update event - item doesn't exist`() = runWithKafka {
@@ -137,6 +142,39 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
             assertThat(messages[0].value.item.id).isEqualTo(expected.id)
             assertThat(messages[0].value.item.bestSellOrder!!.id).isEqualTo(expected.bestSellOrder!!.id)
             assertThat(messages[0].value.item.bestBidOrder!!.id).isEqualTo(expected.bestBidOrder!!.id)
+        }
+    }
+
+    @Test
+    fun `update event - existing item updated, order corrupted`() = runWithKafka {
+        val itemId = randomEthItemId()
+        val ethItem = randomEthNftItemDto(itemId)
+
+        // Corrupted order with taker
+        val bestBidOrder = randomEthLegacySellOrderDto(itemId).copy(taker = randomAddress())
+        val unionBestBid = ethOrderConverter.convert(bestBidOrder, itemId.blockchain)
+
+        val unionItem = EthItemConverter.convert(ethItem, itemId.blockchain)
+        val shortItem = ShortItemConverter.convert(unionItem).copy(
+            bestBidOrder = ShortOrderConverter.convert(unionBestBid)
+        )
+
+        itemService.save(shortItem)
+
+        coEvery { testEthereumOrderApi.getOrderByHash(unionBestBid.id.value) } returns bestBidOrder.toMono()
+        coEvery { testEthereumItemApi.getNftItemById(itemId.value) } returns ethItem.toMono()
+
+        itemEventService.onItemUpdated(unionItem)
+
+        Wait.waitAssert {
+            val messages = findItemUpdates(itemId.value)
+            assertThat(messages).hasSize(1)
+            assertThat(messages[0].id).isEqualTo(itemId.fullId())
+
+            // Reconciliation mark should be created for such item
+            val reconcileMarks = itemReconciliationMarkRepository.findAll(100)
+            val expectedMark = reconcileMarks.find { it.id.toDto() == itemId }
+            assertThat(expectedMark).isNotNull()
         }
     }
 

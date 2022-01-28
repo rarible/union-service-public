@@ -19,7 +19,7 @@ abstract class EthCollectionEventHandler(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     suspend fun handleInternal(event: NftCollectionEventDto) {
-        logger.debug("Received Ethereum ({}) collection event: type={}", blockchain, event)
+        logger.info("Received {} collection event: {}", blockchain, event)
 
         when (event) {
             is NftCollectionUpdateEventDto -> {

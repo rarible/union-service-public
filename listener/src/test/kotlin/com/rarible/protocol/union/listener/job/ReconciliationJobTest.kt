@@ -7,6 +7,7 @@ import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
+import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrderDto
 import com.rarible.protocol.union.listener.service.EnrichmentOrderEventService
 import com.rarible.protocol.union.listener.test.data.defaultUnionListenerProperties
 import io.mockk.clearMocks
@@ -112,7 +113,7 @@ class ReconciliationJobTest {
     private fun mockPagination(continuation: String?, count: Int): Slice<OrderDto> {
         val orders = ArrayList<OrderDto>()
         for (i in 1..count) {
-            orders.add(mockk())
+            orders.add(randomUnionSellOrderDto())
         }
         return Slice(continuation, orders)
     }

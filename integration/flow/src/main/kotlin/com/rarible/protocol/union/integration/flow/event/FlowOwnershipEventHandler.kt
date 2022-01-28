@@ -23,7 +23,7 @@ open class FlowOwnershipEventHandler(
 
     @CaptureTransaction("OwnershipEvent#FLOW")
     override suspend fun handle(event: FlowOwnershipEventDto) {
-        logger.debug("Received Flow Ownership event: type={}", event::class.java.simpleName)
+        logger.info("Received {} Ownership event: {}", blockchain, event)
 
         when (event) {
             is FlowNftOwnershipUpdateEventDto -> {

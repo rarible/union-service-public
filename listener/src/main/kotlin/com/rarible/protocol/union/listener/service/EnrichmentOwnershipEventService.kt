@@ -4,16 +4,19 @@ import com.rarible.core.common.optimisticLock
 import com.rarible.protocol.union.core.event.OutgoingOwnershipEventListener
 import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.core.service.AuctionContractService
+import com.rarible.protocol.union.core.service.ReconciliationEventService
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OwnershipDeleteEventDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.OwnershipUpdateEventDto
 import com.rarible.protocol.union.enrichment.converter.ShortOwnershipConverter
+import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortOwnership
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
 import com.rarible.protocol.union.enrichment.service.BestOrderService
 import com.rarible.protocol.union.enrichment.service.EnrichmentAuctionService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
+import com.rarible.protocol.union.enrichment.validator.OwnershipValidator
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
@@ -28,6 +31,7 @@ class EnrichmentOwnershipEventService(
     private val ownershipEventListeners: List<OutgoingOwnershipEventListener>,
     private val bestOrderService: BestOrderService,
     private val auctionContractService: AuctionContractService
+    private val reconciliationEventService: ReconciliationEventService
 ) {
     private val logger = LoggerFactory.getLogger(EnrichmentOwnershipEventService::class.java)
 
@@ -131,6 +135,10 @@ class EnrichmentOwnershipEventService(
             ownershipId = short.id.toDto(),
             ownership = dto
         )
+
+        if (!OwnershipValidator.isValid(dto)) {
+            reconciliationEventService.onCorruptedOwnership(dto.id)
+        }
         ownershipEventListeners.forEach { it.onEvent(event) }
     }
 }

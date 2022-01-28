@@ -99,6 +99,9 @@ listener:
   price-update:
     rate: PT5M
     delay: PT1M
+  reconcile-marks:
+    rate: PT1M
+    delay: PT1M
 
 meta:
   ipfsGateway: "https://rarible.mypinata.cloud/"

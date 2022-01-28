@@ -20,7 +20,7 @@ open class TezosItemEventHandler(
 
     @CaptureTransaction("ItemEvent#TEZOS")
     override suspend fun handle(event: TezosItemSafeEventDto) {
-        logger.info("Received Tezos Item event: type={}", event::class.java.simpleName)
+        logger.info("Received {} Item event: {}", blockchain, event)
 
         when (event.type) {
             TezosItemSafeEventDto.Type.UPDATE -> {

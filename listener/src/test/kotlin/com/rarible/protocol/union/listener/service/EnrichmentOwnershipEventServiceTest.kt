@@ -3,6 +3,8 @@ package com.rarible.protocol.union.listener.service
 import com.mongodb.client.result.DeleteResult
 import com.rarible.protocol.union.core.event.OutgoingOwnershipEventListener
 import com.rarible.protocol.union.core.service.AuctionContractService
+import com.rarible.protocol.union.core.service.ReconciliationEventService
+import com.rarible.protocol.union.enrichment.converter.EnrichedOwnershipConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.model.ShortOwnership
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
@@ -10,6 +12,7 @@ import com.rarible.protocol.union.enrichment.service.BestOrderService
 import com.rarible.protocol.union.enrichment.service.EnrichmentAuctionService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
 import com.rarible.protocol.union.enrichment.test.data.randomShortOwnership
+import com.rarible.protocol.union.enrichment.test.data.randomUnionOwnershipDto
 import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipId
@@ -30,6 +33,7 @@ class EnrichmentOwnershipEventServiceTest {
     private val enrichmentAuctionService: EnrichmentAuctionService = mockk()
     private val ownershipEventListeners = listOf(eventListener)
     private val bestOrderService: BestOrderService = mockk()
+    private val reconciliationEventService: ReconciliationEventService = mockk()
 
     private val ownershipEventService = EnrichmentOwnershipEventService(
         ownershipService,
@@ -38,6 +42,7 @@ class EnrichmentOwnershipEventServiceTest {
         ownershipEventListeners,
         bestOrderService,
         auctionContractService
+        reconciliationEventService
     )
 
     @BeforeEach
@@ -53,6 +58,7 @@ class EnrichmentOwnershipEventServiceTest {
         coEvery { auctionContractService.isAuctionContract(any(), any()) } returns false
         coEvery { enrichmentAuctionService.fetchOwnershipAuction(any()) } returns null
         coEvery { ownershipService.mergeWithAuction(any(), null) } returnsArgument 0
+        coEvery { reconciliationEventService.onCorruptedOwnership(any()) } returns Unit
     }
 
     @Test
@@ -68,7 +74,12 @@ class EnrichmentOwnershipEventServiceTest {
         coEvery { ownershipService.get(shortOwnership.id) } returns shortOwnership
         coEvery { bestOrderService.updateBestSellOrder(shortOwnership, order) } returns expectedShortOwnership
         coEvery { ownershipService.save(expectedShortOwnership) } returns expectedShortOwnership
-        coEvery { ownershipService.enrichOwnership(expectedShortOwnership, null, listOf(order).associateBy { it.id }) } returns mockk()
+        coEvery {
+            ownershipService.enrichOwnership(
+                expectedShortOwnership,
+                null,
+                listOf(order).associateBy { it.id })
+        } returns EnrichedOwnershipConverter.convert(randomUnionOwnershipDto(), shortOwnership)
 
         ownershipEventService.onOwnershipBestSellOrderUpdated(shortOwnership.id, order)
 
@@ -77,6 +88,7 @@ class EnrichmentOwnershipEventServiceTest {
         coVerify(exactly = 1) { ownershipService.save(expectedShortOwnership) }
         coVerify(exactly = 1) { itemEventService.onOwnershipUpdated(shortOwnership.id, order) }
         coVerify(exactly = 0) { ownershipService.delete(shortOwnership.id) }
+        coVerify(exactly = 0) { reconciliationEventService.onCorruptedOwnership(any()) }
     }
 
     @Test
@@ -97,6 +109,7 @@ class EnrichmentOwnershipEventServiceTest {
         coVerify(exactly = 0) { ownershipService.save(any()) }
         coVerify(exactly = 0) { itemEventService.onOwnershipUpdated(shortOwnership.id, order) }
         coVerify(exactly = 0) { ownershipService.delete(shortOwnership.id) }
+        coVerify(exactly = 0) { reconciliationEventService.onCorruptedOwnership(any()) }
     }
 
     @Test
@@ -113,7 +126,12 @@ class EnrichmentOwnershipEventServiceTest {
         // Means order is cancelled
         coEvery { bestOrderService.updateBestSellOrder(shortOwnership, order) } returns expectedShortOwnership
         coEvery { ownershipService.delete(shortOwnership.id) } returns DeleteResult.acknowledged(1)
-        coEvery { ownershipService.enrichOwnership(expectedShortOwnership, null, listOf(order).associateBy { it.id }) } returns mockk()
+        coEvery {
+            ownershipService.enrichOwnership(
+                expectedShortOwnership,
+                null,
+                listOf(order).associateBy { it.id })
+        } returns EnrichedOwnershipConverter.convert(randomUnionOwnershipDto(), shortOwnership)
 
         ownershipEventService.onOwnershipBestSellOrderUpdated(shortOwnership.id, order)
 
@@ -122,6 +140,7 @@ class EnrichmentOwnershipEventServiceTest {
         coVerify(exactly = 0) { ownershipService.save(shortOwnership) }
         coVerify(exactly = 1) { itemEventService.onOwnershipUpdated(shortOwnership.id, order) }
         coVerify(exactly = 1) { ownershipService.delete(shortOwnership.id) }
+        coVerify(exactly = 0) { reconciliationEventService.onCorruptedOwnership(any()) }
     }
 
     @Test
@@ -143,6 +162,7 @@ class EnrichmentOwnershipEventServiceTest {
         coVerify(exactly = 0) { ownershipService.save(any()) }
         coVerify(exactly = 0) { itemEventService.onOwnershipUpdated(ownership.id, order) }
         coVerify(exactly = 0) { ownershipService.delete(ownership.id) }
+        coVerify(exactly = 0) { reconciliationEventService.onCorruptedOwnership(any()) }
     }
 
     @Test

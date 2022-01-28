@@ -21,7 +21,7 @@ abstract class EthAuctionEventHandler(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     suspend fun handleInternal(event: AuctionEventDto) {
-        logger.debug("Received Ethereum ({}) Auction event: type={}", blockchain, event::class.java.simpleName)
+        logger.info("Received {} Auction event: {}", blockchain, event)
 
         when (event) {
             is com.rarible.protocol.dto.AuctionUpdateEventDto -> {

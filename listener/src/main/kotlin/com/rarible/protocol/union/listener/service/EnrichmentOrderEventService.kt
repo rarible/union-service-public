@@ -37,9 +37,10 @@ class EnrichmentOrderEventService(
 
         val sellUpdateFuture = makeItemId?.let {
             async {
-                // Ownership should be updated first in order to emit events in correct order
-                // Otherwise there could be situation when Order for item changed, but ownership triggers item
-                // event caused by stock re-evaluation later than order for item updated
+                // Item should be checked first, otherwise ownership could trigger event for outdated item
+                ignoreApi404 {
+                    enrichmentItemEventService.onItemBestSellOrderUpdated(makeItemId, order, notificationEnabled)
+                }
                 ignoreApi404 {
                     val ownershipId = ShortOwnershipId(
                         makeItemId.blockchain, makeItemId.token, makeItemId.tokenId, order.maker.value
@@ -47,9 +48,6 @@ class EnrichmentOrderEventService(
                     enrichmentOwnershipEventService.onOwnershipBestSellOrderUpdated(
                         ownershipId, order, notificationEnabled
                     )
-                }
-                ignoreApi404 {
-                    enrichmentItemEventService.onItemBestSellOrderUpdated(makeItemId, order, notificationEnabled)
                 }
             }
         }
