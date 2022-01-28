@@ -64,8 +64,7 @@ class TestApiConfiguration {
     @Primary
     fun testMetaContentService(): ContentMetaService {
         val mock = mockk<ContentMetaService>()
-        coEvery { mock.getContentMeta(any(), any()) } returns null
-        coEvery { mock.resetContentMeta(any()) } returns Unit
+        coEvery { mock.getContentMeta(any()) } returns null
         return mock
     }
 

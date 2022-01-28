@@ -3,9 +3,6 @@ package com.rarible.protocol.union.enrichment.meta
 import com.google.common.io.ByteStreams
 import com.google.common.io.CountingInputStream
 import com.google.common.net.InternetDomainName
-import com.rarible.core.apm.CaptureSpan
-import com.rarible.core.apm.SpanType
-import com.rarible.core.cache.CacheDescriptor
 import com.rarible.core.client.WebClientHelper
 import com.rarible.core.common.blockingToMono
 import com.rarible.core.common.nowMillis
@@ -16,7 +13,6 @@ import com.sun.imageio.plugins.bmp.BMPMetadata
 import com.sun.imageio.plugins.gif.GIFImageMetadata
 import com.sun.imageio.plugins.jpeg.JPEGMetadata
 import com.sun.imageio.plugins.png.PNGMetadata
-import org.apache.commons.lang3.time.DateUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -40,7 +36,7 @@ import javax.imageio.metadata.IIOMetadata
 @Suppress("UnstableApiUsage")
 class MediaMetaService(
     private val metaProperties: MetaProperties
-) : CacheDescriptor<ContentMeta> {
+) {
 
     private val client = WebClient.builder()
         .clientConnector(
@@ -52,17 +48,7 @@ class MediaMetaService(
         )
         .build()
 
-    override val collection: String = "cache_meta"
-
-    override fun getMaxAge(value: ContentMeta?): Long =
-        if (value == null) {
-            DateUtils.MILLIS_PER_HOUR
-        } else {
-            Long.MAX_VALUE
-        }
-
-    @CaptureSpan(type = SpanType.EXT)
-    override fun get(url: String): Mono<ContentMeta> {
+    fun get(url: String): Mono<ContentMeta> {
         val now = nowMillis()
         val result = LoggingUtils.withMarker { marker ->
             logger.info(marker, "Fetching meta by URL: {}", url)

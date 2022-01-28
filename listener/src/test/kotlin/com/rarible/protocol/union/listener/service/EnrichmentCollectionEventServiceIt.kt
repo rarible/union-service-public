@@ -81,7 +81,7 @@ class EnrichmentCollectionEventServiceIt : AbstractIntegrationTest() {
 
         val expected = EnrichedItemConverter.convert(unionItem).copy(
             bestSellOrder = unionBestSell,
-            meta = enrichmentMetaService.enrichMeta(itemId, unionItem.meta!!)?.let { EnrichedMetaConverter.convert(it) }
+            meta = enrichmentMetaService.enrichMeta(itemId, unionItem.meta!!).let { EnrichedMetaConverter.convert(it) }
         )
 
         val saved = itemService.get(shortItem.id)!!
@@ -127,7 +127,7 @@ class EnrichmentCollectionEventServiceIt : AbstractIntegrationTest() {
 
         val expected = EnrichedItemConverter.convert(unionItem).copy(
             bestBidOrder = unionBestBid,
-            meta = enrichmentMetaService.enrichMeta(itemId, unionItem.meta!!)?.let { EnrichedMetaConverter.convert(it) }
+            meta = enrichmentMetaService.enrichMeta(itemId, unionItem.meta!!).let { EnrichedMetaConverter.convert(it) }
         )
 
         val saved = itemService.get(shortItem.id)!!

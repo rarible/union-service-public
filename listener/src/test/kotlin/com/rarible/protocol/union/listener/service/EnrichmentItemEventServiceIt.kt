@@ -79,7 +79,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
 
         val expected = EnrichedItemConverter.convert(unionItem).copy(
             // Eth meta fully qualified, no request should be executed
-            meta = enrichmentMetaService.enrichMeta(itemId, unionItem.meta!!)?.let { EnrichedMetaConverter.convert(it) }
+            meta = enrichmentMetaService.enrichMeta(itemId, unionItem.meta!!).let { EnrichedMetaConverter.convert(it) }
         )
 
         itemEventService.onItemUpdated(unionItem)
@@ -127,7 +127,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
                 bestSellOrder = unionBestSell,
                 bestBidOrder = unionBestBid,
                 // Eth meta fully qualified, no request should be executed
-                meta = enrichmentMetaService.enrichMeta(itemId, unionItem.meta!!)?.let { EnrichedMetaConverter.convert(it) }
+                meta = enrichmentMetaService.enrichMeta(itemId, unionItem.meta!!).let { EnrichedMetaConverter.convert(it) }
             )
 
         val saved = itemService.get(shortItem.id)!!
@@ -209,7 +209,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
             sellers = 2,
             totalStock = 30.toBigInteger(),
             // Eth meta fully qualified, no request should be executed
-            meta = enrichmentMetaService.enrichMeta(itemId, unionItem.meta!!)?.let { EnrichedMetaConverter.convert(it) }
+            meta = enrichmentMetaService.enrichMeta(itemId, unionItem.meta!!).let { EnrichedMetaConverter.convert(it) }
         )
 
         Wait.waitAssert {
@@ -258,7 +258,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         val expected = EnrichedItemConverter.convert(unionItem).copy(
             bestSellOrder = unionBestSell,
             // Eth meta fully qualified, no request should be executed
-            meta = enrichmentMetaService.enrichMeta(itemId, unionItem.meta!!)?.let { EnrichedMetaConverter.convert(it) }
+            meta = enrichmentMetaService.enrichMeta(itemId, unionItem.meta!!).let { EnrichedMetaConverter.convert(it) }
         )
 
         val saved = itemService.get(shortItem.id)!!
