@@ -38,7 +38,7 @@ class EnrichmentMetaService(
         val fetchedProperties = contentMetaService.fetchContentMeta(content.url)
         val enrichedProperties = fetchedProperties
             ?: properties // Use at least some fields of known properties.
-            ?: UnionImageProperties()
+            ?: UnionImageProperties() // Questionable, but let's consider that was an image.
         return content.copy(properties = enrichedProperties)
     }
 
