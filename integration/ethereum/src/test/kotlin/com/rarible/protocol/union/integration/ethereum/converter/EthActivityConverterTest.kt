@@ -1,11 +1,6 @@
 package com.rarible.protocol.union.integration.ethereum.converter
 
-import com.rarible.protocol.dto.ActivityFilterAllTypeDto
-import com.rarible.protocol.dto.ActivityFilterByCollectionTypeDto
-import com.rarible.protocol.dto.ActivityFilterByItemTypeDto
-import com.rarible.protocol.dto.ActivityFilterByUserTypeDto
 import com.rarible.protocol.union.dto.ActivityIdDto
-import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.AuctionBidActivityDto
 import com.rarible.protocol.union.dto.AuctionCancelActivityDto
 import com.rarible.protocol.union.dto.AuctionEndActivityDto
@@ -24,7 +19,6 @@ import com.rarible.protocol.union.dto.OrderMatchActivityDto
 import com.rarible.protocol.union.dto.OrderMatchSellDto
 import com.rarible.protocol.union.dto.OrderMatchSwapDto
 import com.rarible.protocol.union.dto.TransferActivityDto
-import com.rarible.protocol.union.dto.UserActivityTypeDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAssetErc1155
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAuctionBidActivity
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAuctionCancelActivity
@@ -322,123 +316,6 @@ class EthActivityConverterTest {
         assertThat(converted.bid.amount).isEqualTo(dto.bid.amount)
         assertThat(converted.bid.buyer.value).isEqualTo(dto.bid.buyer.prefixed())
         assertThat(converted.auction).isEqualTo(ethAuctionConverter.convert(dto.auction, BlockchainDto.ETHEREUM))
-    }
-
-    @Test
-    fun `eth activity type as user activity type`() {
-        assertThat(ethActivityConverter.asUserActivityType(UserActivityTypeDto.BURN))
-            .isEqualTo(ActivityFilterByUserTypeDto.BURN)
-
-        assertThat(ethActivityConverter.asUserActivityType(UserActivityTypeDto.BUY))
-            .isEqualTo(ActivityFilterByUserTypeDto.BUY)
-
-        assertThat(ethActivityConverter.asUserActivityType(UserActivityTypeDto.GET_BID))
-            .isEqualTo(ActivityFilterByUserTypeDto.GET_BID)
-
-        assertThat(ethActivityConverter.asUserActivityType(UserActivityTypeDto.LIST))
-            .isEqualTo(ActivityFilterByUserTypeDto.LIST)
-
-        assertThat(ethActivityConverter.asUserActivityType(UserActivityTypeDto.CANCEL_LIST))
-            .isEqualTo(ActivityFilterByUserTypeDto.CANCEL_LIST)
-
-        assertThat(ethActivityConverter.asUserActivityType(UserActivityTypeDto.MAKE_BID))
-            .isEqualTo(ActivityFilterByUserTypeDto.MAKE_BID)
-
-        assertThat(ethActivityConverter.asUserActivityType(UserActivityTypeDto.CANCEL_BID))
-            .isEqualTo(ActivityFilterByUserTypeDto.CANCEL_BID)
-
-        assertThat(ethActivityConverter.asUserActivityType(UserActivityTypeDto.MINT))
-            .isEqualTo(ActivityFilterByUserTypeDto.MINT)
-
-        assertThat(ethActivityConverter.asUserActivityType(UserActivityTypeDto.SELL))
-            .isEqualTo(ActivityFilterByUserTypeDto.SELL)
-
-        assertThat(ethActivityConverter.asUserActivityType(UserActivityTypeDto.TRANSFER_FROM))
-            .isEqualTo(ActivityFilterByUserTypeDto.TRANSFER_FROM)
-
-        assertThat(ethActivityConverter.asUserActivityType(UserActivityTypeDto.TRANSFER_TO))
-            .isEqualTo(ActivityFilterByUserTypeDto.TRANSFER_TO)
-    }
-
-    @Test
-    fun `eth activity type as item activity type`() {
-        assertThat(ethActivityConverter.asItemActivityType(ActivityTypeDto.BID))
-            .isEqualTo(ActivityFilterByItemTypeDto.BID)
-
-        assertThat(ethActivityConverter.asItemActivityType(ActivityTypeDto.CANCEL_BID))
-            .isEqualTo(ActivityFilterByItemTypeDto.CANCEL_BID)
-
-        assertThat(ethActivityConverter.asItemActivityType(ActivityTypeDto.BURN))
-            .isEqualTo(ActivityFilterByItemTypeDto.BURN)
-
-        assertThat(ethActivityConverter.asItemActivityType(ActivityTypeDto.LIST))
-            .isEqualTo(ActivityFilterByItemTypeDto.LIST)
-
-        assertThat(ethActivityConverter.asItemActivityType(ActivityTypeDto.CANCEL_LIST))
-            .isEqualTo(ActivityFilterByItemTypeDto.CANCEL_LIST)
-
-        assertThat(ethActivityConverter.asItemActivityType(ActivityTypeDto.MINT))
-            .isEqualTo(ActivityFilterByItemTypeDto.MINT)
-
-        assertThat(ethActivityConverter.asItemActivityType(ActivityTypeDto.SELL))
-            .isEqualTo(ActivityFilterByItemTypeDto.MATCH)
-
-        assertThat(ethActivityConverter.asItemActivityType(ActivityTypeDto.TRANSFER))
-            .isEqualTo(ActivityFilterByItemTypeDto.TRANSFER)
-    }
-
-    @Test
-    fun `eth activity type as collection activity type`() {
-        assertThat(ethActivityConverter.asCollectionActivityType(ActivityTypeDto.BID))
-            .isEqualTo(ActivityFilterByCollectionTypeDto.BID)
-
-        assertThat(ethActivityConverter.asCollectionActivityType(ActivityTypeDto.CANCEL_BID))
-            .isEqualTo(ActivityFilterByCollectionTypeDto.CANCEL_BID)
-
-        assertThat(ethActivityConverter.asCollectionActivityType(ActivityTypeDto.BURN))
-            .isEqualTo(ActivityFilterByCollectionTypeDto.BURN)
-
-        assertThat(ethActivityConverter.asCollectionActivityType(ActivityTypeDto.LIST))
-            .isEqualTo(ActivityFilterByCollectionTypeDto.LIST)
-
-        assertThat(ethActivityConverter.asCollectionActivityType(ActivityTypeDto.CANCEL_LIST))
-            .isEqualTo(ActivityFilterByCollectionTypeDto.CANCEL_LIST)
-
-        assertThat(ethActivityConverter.asCollectionActivityType(ActivityTypeDto.MINT))
-            .isEqualTo(ActivityFilterByCollectionTypeDto.MINT)
-
-        assertThat(ethActivityConverter.asCollectionActivityType(ActivityTypeDto.SELL))
-            .isEqualTo(ActivityFilterByCollectionTypeDto.MATCH)
-
-        assertThat(ethActivityConverter.asCollectionActivityType(ActivityTypeDto.TRANSFER))
-            .isEqualTo(ActivityFilterByCollectionTypeDto.TRANSFER)
-    }
-
-    @Test
-    fun `eth activity type as global activity type`() {
-        assertThat(ethActivityConverter.asGlobalActivityType(ActivityTypeDto.BID))
-            .isEqualTo(ActivityFilterAllTypeDto.BID)
-
-        assertThat(ethActivityConverter.asGlobalActivityType(ActivityTypeDto.CANCEL_BID))
-            .isEqualTo(ActivityFilterAllTypeDto.CANCEL_BID)
-
-        assertThat(ethActivityConverter.asGlobalActivityType(ActivityTypeDto.BURN))
-            .isEqualTo(ActivityFilterAllTypeDto.BURN)
-
-        assertThat(ethActivityConverter.asGlobalActivityType(ActivityTypeDto.LIST))
-            .isEqualTo(ActivityFilterAllTypeDto.LIST)
-
-        assertThat(ethActivityConverter.asGlobalActivityType(ActivityTypeDto.CANCEL_LIST))
-            .isEqualTo(ActivityFilterAllTypeDto.CANCEL_LIST)
-
-        assertThat(ethActivityConverter.asGlobalActivityType(ActivityTypeDto.MINT))
-            .isEqualTo(ActivityFilterAllTypeDto.MINT)
-
-        assertThat(ethActivityConverter.asGlobalActivityType(ActivityTypeDto.SELL))
-            .isEqualTo(ActivityFilterAllTypeDto.SELL)
-
-        assertThat(ethActivityConverter.asGlobalActivityType(ActivityTypeDto.TRANSFER))
-            .isEqualTo(ActivityFilterAllTypeDto.TRANSFER)
     }
 
     private fun assertMatchSide(

@@ -4,6 +4,7 @@ import com.rarible.core.common.nowMillis
 import com.rarible.core.test.data.randomInt
 import com.rarible.core.test.data.randomString
 import com.rarible.protocol.dto.ActivitySortDto
+import com.rarible.protocol.dto.AuctionActivitiesDto
 import com.rarible.protocol.dto.FlowActivitiesDto
 import com.rarible.protocol.dto.NftActivitiesDto
 import com.rarible.protocol.dto.OrderActivitiesDto
@@ -13,6 +14,7 @@ import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.core.converter.ContractAddressConverter
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.dto.ActivityTypeDto
+import com.rarible.protocol.union.dto.AuctionStartActivityDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.MintActivityDto
 import com.rarible.protocol.union.dto.OrderBidActivityDto
@@ -21,6 +23,7 @@ import com.rarible.protocol.union.dto.continuation.CombinedContinuation
 import com.rarible.protocol.union.dto.continuation.page.ArgSlice
 import com.rarible.protocol.union.dto.continuation.page.PageSize
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAddress
+import com.rarible.protocol.union.integration.ethereum.data.randomEthAuctionStartActivity
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemMintActivity
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOrderBidActivity
@@ -125,6 +128,7 @@ class ActivityControllerFt : AbstractIntegrationTest() {
         val now = nowMillis()
         val orderActivity = randomEthOrderBidActivity().copy(date = now)
         val itemActivity = randomEthItemMintActivity().copy(date = now.minusSeconds(5))
+        val auctionActivity = randomEthAuctionStartActivity().copy(date = now.minusSeconds(15))
 
         coEvery {
             testEthereumActivityOrderApi.getOrderActivities(
@@ -134,6 +138,15 @@ class ActivityControllerFt : AbstractIntegrationTest() {
                 ActivitySortDto.LATEST_FIRST
             )
         } returns OrderActivitiesDto(null, listOf(orderActivity)).toMono()
+
+        coEvery {
+            testEthereumActivityAuctionApi.getAuctionActivities(
+                any(),
+                isNull(),
+                eq(PageSize.ACTIVITY.max),
+                ActivitySortDto.LATEST_FIRST
+            )
+        } returns AuctionActivitiesDto(null, listOf(auctionActivity)).toMono()
 
         coEvery {
             testEthereumActivityItemApi.getNftActivities(
@@ -148,9 +161,10 @@ class ActivityControllerFt : AbstractIntegrationTest() {
             types, ethItemId.fullId(), null, null, continuation, null, 10000000, sort
         ).awaitFirst()
 
-        assertThat(activities.activities).hasSize(2)
+        assertThat(activities.activities).hasSize(3)
         assertThat(activities.activities[0]).isInstanceOf(OrderBidActivityDto::class.java)
         assertThat(activities.activities[1]).isInstanceOf(MintActivityDto::class.java)
+        assertThat(activities.activities[2]).isInstanceOf(AuctionStartActivityDto::class.java)
     }
 
     @Test
@@ -176,6 +190,15 @@ class ActivityControllerFt : AbstractIntegrationTest() {
                 ActivitySortDto.LATEST_FIRST
             )
         } returns OrderActivitiesDto(null, listOf(orderActivity)).toMono()
+
+        coEvery {
+            testEthereumActivityAuctionApi.getAuctionActivities(
+                any(),
+                eq(ethContinuation),
+                eq(1),
+                ActivitySortDto.LATEST_FIRST
+            )
+        } returns AuctionActivitiesDto(null, emptyList()).toMono()
 
         coEvery {
             testEthereumActivityItemApi.getNftActivities(
@@ -251,12 +274,20 @@ class ActivityControllerFt : AbstractIntegrationTest() {
         } returns OrderActivitiesDto(null, ethOrderActivities).toMono()
 
         coEvery {
+            testEthereumActivityAuctionApi.getAuctionActivities(any(), isNull(), eq(size), ActivitySortDto.EARLIEST_FIRST)
+        } returns AuctionActivitiesDto(null, emptyList()).toMono()
+
+        coEvery {
             testEthereumActivityItemApi.getNftActivities(any(), isNull(), eq(size), ActivitySortDto.EARLIEST_FIRST)
         } returns NftActivitiesDto(null, ethItemActivities).toMono()
 
         coEvery {
             testPolygonActivityOrderApi.getOrderActivities(any(), isNull(), eq(size), ActivitySortDto.EARLIEST_FIRST)
         } returns OrderActivitiesDto(null, polygonOrderActivities).toMono()
+
+        coEvery {
+            testPolygonActivityAuctionApi.getAuctionActivities(any(), isNull(), eq(size), ActivitySortDto.EARLIEST_FIRST)
+        } returns AuctionActivitiesDto(null, emptyList()).toMono()
 
         coEvery {
             testPolygonActivityItemApi.getNftActivities(any(), isNull(), eq(size), ActivitySortDto.EARLIEST_FIRST)
@@ -331,12 +362,20 @@ class ActivityControllerFt : AbstractIntegrationTest() {
         } returns OrderActivitiesDto(null, ethOrderActivities).toMono()
 
         coEvery {
+            testEthereumActivityAuctionApi.getAuctionActivities(any(), eq(ethContinuation), eq(size), ActivitySortDto.EARLIEST_FIRST)
+        } returns AuctionActivitiesDto(null, emptyList()).toMono()
+
+        coEvery {
             testEthereumActivityItemApi.getNftActivities(any(), eq(ethContinuation), eq(size), ActivitySortDto.EARLIEST_FIRST)
         } returns NftActivitiesDto(null, ethItemActivities).toMono()
 
         coEvery {
             testPolygonActivityOrderApi.getOrderActivities(any(), eq(polyContinuation), eq(size), ActivitySortDto.EARLIEST_FIRST)
         } returns OrderActivitiesDto(null, polygonOrderActivities).toMono()
+
+        coEvery {
+            testPolygonActivityAuctionApi.getAuctionActivities(any(), eq(polyContinuation), eq(size), ActivitySortDto.EARLIEST_FIRST)
+        } returns AuctionActivitiesDto(null, emptyList()).toMono()
 
         coEvery {
             testPolygonActivityItemApi.getNftActivities(any(), eq(polyContinuation), eq(size), ActivitySortDto.EARLIEST_FIRST)

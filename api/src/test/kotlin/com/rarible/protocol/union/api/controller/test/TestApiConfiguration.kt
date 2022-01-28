@@ -14,6 +14,7 @@ import com.rarible.protocol.nft.api.client.NftActivityControllerApi
 import com.rarible.protocol.nft.api.client.NftCollectionControllerApi
 import com.rarible.protocol.nft.api.client.NftItemControllerApi
 import com.rarible.protocol.nft.api.client.NftOwnershipControllerApi
+import com.rarible.protocol.order.api.client.AuctionActivityControllerApi
 import com.rarible.protocol.order.api.client.OrderActivityControllerApi
 import com.rarible.protocol.order.api.client.OrderControllerApi
 import com.rarible.protocol.union.api.client.FixedUnionApiServiceUriProvider
@@ -159,6 +160,11 @@ class TestApiConfiguration {
     @Qualifier("ethereum.activity.api.order")
     fun testEthereumActivityOrderApi(): OrderActivityControllerApi = mockk()
 
+    @Bean
+    @Primary
+    @Qualifier("ethereum.activity.api.auction")
+    fun testEthereumActivityAuctionApi(): AuctionActivityControllerApi = mockk()
+
     //--------------------- POLYGON ---------------------//
     @Bean
     @Primary
@@ -199,6 +205,11 @@ class TestApiConfiguration {
     @Primary
     @Qualifier("polygon.activity.api.order")
     fun testPolygonActivityOrderApi(): OrderActivityControllerApi = mockk()
+
+    @Bean
+    @Primary
+    @Qualifier("polygon.activity.api.auction")
+    fun testPolygonActivityAuctionApi(): AuctionActivityControllerApi = mockk()
 
     //--------------------- FLOW ---------------------//
     @Bean

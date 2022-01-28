@@ -5,6 +5,7 @@ import com.rarible.protocol.nft.api.client.NftCollectionControllerApi
 import com.rarible.protocol.nft.api.client.NftIndexerApiClientFactory
 import com.rarible.protocol.nft.api.client.NftItemControllerApi
 import com.rarible.protocol.nft.api.client.NftOwnershipControllerApi
+import com.rarible.protocol.order.api.client.AuctionActivityControllerApi
 import com.rarible.protocol.order.api.client.AuctionControllerApi
 import com.rarible.protocol.order.api.client.OrderActivityControllerApi
 import com.rarible.protocol.order.api.client.OrderControllerApi
@@ -90,6 +91,11 @@ class EthereumApiConfiguration {
     fun ethereumActivityOrderApi(factory: OrderIndexerApiClientFactory): OrderActivityControllerApi =
         factory.createOrderActivityApiClient(ethereum)
 
+    @Bean
+    @Qualifier("ethereum.activity.api.auction")
+    fun ethereumActivityAuctionApi(factory: OrderIndexerApiClientFactory): AuctionActivityControllerApi =
+        factory.createAuctionActivityApiClient(ethereum)
+
     //-------------------- Services --------------------//
 
     @Bean
@@ -140,8 +146,9 @@ class EthereumApiConfiguration {
     fun ethereumActivityService(
         @Qualifier("ethereum.activity.api.item") itemActivityApi: NftActivityControllerApi,
         @Qualifier("ethereum.activity.api.order") orderActivityApi: OrderActivityControllerApi,
+        @Qualifier("ethereum.activity.api.auction") auctionActivityApi: AuctionActivityControllerApi,
         converter: EthActivityConverter
     ): EthActivityService {
-        return EthereumActivityService(itemActivityApi, orderActivityApi, converter)
+        return EthereumActivityService(itemActivityApi, orderActivityApi, auctionActivityApi, converter)
     }
 }
