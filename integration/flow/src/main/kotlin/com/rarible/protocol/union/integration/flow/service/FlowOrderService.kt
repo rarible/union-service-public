@@ -2,6 +2,7 @@ package com.rarible.protocol.union.integration.flow.service
 
 import com.rarible.core.apm.CaptureSpan
 import com.rarible.protocol.dto.FlowOrderIdsDto
+import com.rarible.protocol.flow.nft.api.client.FlowBidOrderControllerApi
 import com.rarible.protocol.flow.nft.api.client.FlowOrderControllerApi
 import com.rarible.protocol.union.core.converter.UnionConverter
 import com.rarible.protocol.union.core.service.OrderService
@@ -21,6 +22,7 @@ import java.time.Instant
 @CaptureSpan(type = "blockchain")
 open class FlowOrderService(
     private val orderControllerApi: FlowOrderControllerApi,
+    private val bidControllerApi: FlowBidOrderControllerApi,
     private val flowOrderConverter: FlowOrderConverter
 ) : AbstractBlockchainService(BlockchainDto.FLOW), OrderService {
 
@@ -52,7 +54,7 @@ open class FlowOrderService(
 
     override suspend fun getBidCurrencies(contract: String, tokenId: String): List<AssetTypeDto> {
         UnionConverter.convertToLong(tokenId) // Validation
-        val assets = orderControllerApi.getBidCurrencies("$contract:$tokenId")
+        val assets = bidControllerApi.getBidCurrencies("$contract:$tokenId")
             .collectList().awaitFirst()
         return assets.map { FlowConverter.convert(it, blockchain).type }
     }
@@ -70,11 +72,11 @@ open class FlowOrderService(
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
-        val result = orderControllerApi.getBidsByItem(
+        val result = bidControllerApi.getBidsByItem(
             contract,
             UnionConverter.convertToLong(tokenId).toString(),
             flowOrderConverter.convert(status),
-            makers?.firstOrNull(), // TODO FLOW support
+            makers,
             origin,
             start?.let { Instant.ofEpochMilli(it) },
             end?.let { Instant.ofEpochMilli(it) },
@@ -95,7 +97,7 @@ open class FlowOrderService(
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
-        val result = orderControllerApi.getOrderBidsByMaker(
+        val result = bidControllerApi.getOrderBidsByMaker(
             maker,
             flowOrderConverter.convert(status),
             origin,
