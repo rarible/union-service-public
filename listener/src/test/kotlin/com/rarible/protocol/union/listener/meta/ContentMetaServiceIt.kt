@@ -7,6 +7,7 @@ import com.rarible.protocol.union.enrichment.meta.toImageProperties
 import com.rarible.protocol.union.listener.test.AbstractIntegrationTest
 import com.rarible.protocol.union.listener.test.IntegrationTest
 import io.mockk.coEvery
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -34,7 +35,18 @@ class ContentMetaServiceIt : AbstractIntegrationTest() {
             size = 30
         )
         coEvery { testContentMetaLoader.fetchContentMeta(url) } returns contentMeta
-        val enriched = contentMetaService.fetchContentMeta(url, Duration.ofSeconds(1))
+        val enriched = contentMetaService.fetchContentMetaWithTimeout(url, Duration.ofSeconds(1))
         assertThat(enriched).isEqualTo(contentMeta.toImageProperties())
     }
+
+    @Test
+    fun `enrich with content meta - null on timeout`() = runBlocking<Unit> {
+        val url = "https://image.com/some.jpg"
+        coEvery { testContentMetaLoader.fetchContentMeta(url) } coAnswers {
+            delay(10000)
+            error("will not happen")
+        }
+        assertThat(contentMetaService.fetchContentMetaWithTimeout(url, Duration.ofSeconds(1))).isNull()
+    }
+
 }

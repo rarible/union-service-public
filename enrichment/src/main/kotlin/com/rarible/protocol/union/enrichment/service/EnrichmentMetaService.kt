@@ -38,7 +38,7 @@ class EnrichmentMetaService(
         if (properties != null && !properties.isEmpty()) {
             return content
         }
-        val fetchedProperties = contentMetaService.fetchContentMeta(
+        val fetchedProperties = contentMetaService.fetchContentMetaWithTimeout(
             url = content.url,
             timeout = Duration.ofMillis(metaProperties.timeoutLoadingContentMeta)
         )
