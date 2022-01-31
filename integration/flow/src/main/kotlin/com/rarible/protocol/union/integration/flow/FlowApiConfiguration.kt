@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.integration.flow
 
+import com.rarible.protocol.flow.nft.api.client.FlowBidOrderControllerApi
 import com.rarible.protocol.flow.nft.api.client.FlowNftCollectionControllerApi
 import com.rarible.protocol.flow.nft.api.client.FlowNftCryptoControllerApi
 import com.rarible.protocol.flow.nft.api.client.FlowNftIndexerApiClientFactory
@@ -61,6 +62,10 @@ class FlowApiConfiguration(
         factory.createNftOrderApiClient()
 
     @Bean
+    fun flowBidApi(factory: FlowNftIndexerApiClientFactory): FlowBidOrderControllerApi =
+        factory.createBidApiClient()
+
+    @Bean
     fun flowActivityApi(factory: FlowNftIndexerApiClientFactory): FlowNftOrderActivityControllerApi =
         factory.createNftOrderActivityApiClient()
 
@@ -87,11 +92,12 @@ class FlowApiConfiguration(
 
     @Bean
     fun flowOrderService(
-        controllerApi: FlowOrderControllerApi,
+        orderApi: FlowOrderControllerApi,
+        bidApi: FlowBidOrderControllerApi,
         converter: FlowOrderConverter
     ): OrderService {
         return OrderProxyService(
-            FlowOrderService(controllerApi, converter),
+            FlowOrderService(orderApi, bidApi, converter),
             setOf(PlatformDto.RARIBLE)
         )
     }
