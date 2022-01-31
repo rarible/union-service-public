@@ -26,6 +26,7 @@
         <dependency>
             <groupId>com.rarible.protocol.union</groupId>
             <artifactId>rarible-union-enrichment</artifactId>
+            <!-- TODO[meta]: allow this 'api' module to not define Kafka consumers/workers for the cache-loader infrastructure and only use the cache facade. -->
         </dependency>
 
         <!-- ============ Union Protocol-API ============= -->
