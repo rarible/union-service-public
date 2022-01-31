@@ -9,6 +9,7 @@ import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.dto.continuation.page.Page
 import com.rarible.protocol.union.integration.ethereum.converter.EthCollectionConverter
 import kotlinx.coroutines.reactive.awaitFirst
+import kotlinx.coroutines.reactive.awaitFirstOrNull
 
 open class EthCollectionService(
     blockchain: BlockchainDto,
@@ -29,6 +30,10 @@ open class EthCollectionService(
     override suspend fun getCollectionById(collectionId: String): CollectionDto {
         val collection = collectionControllerApi.getNftCollectionById(collectionId).awaitFirst()
         return EthCollectionConverter.convert(collection, blockchain)
+    }
+
+    override suspend fun refreshCollectionMeta(collectionId: String) {
+        collectionControllerApi.resetNftCollectionMetaById(collectionId).awaitFirstOrNull()
     }
 
     override suspend fun getCollectionsByOwner(

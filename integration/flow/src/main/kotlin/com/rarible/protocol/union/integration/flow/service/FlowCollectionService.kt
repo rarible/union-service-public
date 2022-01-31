@@ -31,6 +31,10 @@ open class FlowCollectionService(
         return FlowCollectionConverter.convert(collection, blockchain)
     }
 
+    override suspend fun refreshCollectionMeta(collectionId: String) {
+        // TODO[FLOW]: implement.
+    }
+
     override suspend fun getCollectionsByOwner(
         owner: String,
         continuation: String?,

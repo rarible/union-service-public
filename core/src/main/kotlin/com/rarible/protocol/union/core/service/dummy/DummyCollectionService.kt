@@ -14,13 +14,14 @@ class DummyCollectionService(
     override suspend fun getAllCollections(
         continuation: String?,
         size: Int
-    )
-            : Page<CollectionDto> {
-        return Page.empty()
-    }
+    ) : Page<CollectionDto> = Page.empty()
 
     override suspend fun getCollectionById(collectionId: String): CollectionDto {
         throw UnionNotFoundException("Collection [$collectionId] not found, ${blockchain.name} is not available")
+    }
+
+    override suspend fun refreshCollectionMeta(collectionId: String) {
+        // Do nothing?
     }
 
     override suspend fun getCollectionsByOwner(

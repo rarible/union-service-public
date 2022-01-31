@@ -55,6 +55,13 @@ class CollectionController(
         return ResponseEntity.ok(result)
     }
 
+    override suspend fun refreshCollectionMeta(collection: String): ResponseEntity<Unit> {
+        val collectionId = IdParser.parseContract(collection)
+        logger.info("Refreshing collection meta for '{}'", collection)
+        router.getService(collectionId.blockchain).refreshCollectionMeta(collectionId.value)
+        return ResponseEntity.ok().build()
+    }
+
     override suspend fun getCollectionsByOwner(
         owner: String,
         continuation: String?,
