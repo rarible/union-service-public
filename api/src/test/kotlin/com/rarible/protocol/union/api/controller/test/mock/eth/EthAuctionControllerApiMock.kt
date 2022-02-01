@@ -9,14 +9,42 @@ import io.daonomic.rpc.domain.Word
 import io.mockk.every
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
-import scalether.domain.Address
 
 class EthAuctionControllerApiMock(
     private val auctionControllerApi: AuctionControllerApi
 ) {
+
+    fun mockGetAuctionsByItem(itemId: ItemIdDto, seller: String, returnItems: List<AuctionDto>?) {
+        every {
+            auctionControllerApi.getAuctionsByItem(
+                itemId.contract,
+                itemId.tokenId.toString(),
+                seller,
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any()
+            )
+        } returns (if (returnItems == null) Mono.empty() else Mono.just(AuctionsPaginationDto(returnItems, null)))
+    }
+
     fun mockGetAuctionsByItem(itemId: ItemIdDto, returnItems: List<AuctionDto>?) {
         every {
-            auctionControllerApi.getAuctionsByItem(itemId.contract, itemId.tokenId.toString(), any(), any(), any(), any(), any(), any(), any(), any())
+            auctionControllerApi.getAuctionsByItem(
+                itemId.contract,
+                itemId.tokenId.toString(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any()
+            )
         } returns (if (returnItems == null) Mono.empty() else Mono.just(AuctionsPaginationDto(returnItems, null)))
     }
 

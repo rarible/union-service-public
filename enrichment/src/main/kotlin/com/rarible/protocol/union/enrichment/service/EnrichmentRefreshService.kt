@@ -3,22 +3,26 @@ package com.rarible.protocol.union.enrichment.service
 import com.rarible.core.common.optimisticLock
 import com.rarible.protocol.union.core.event.OutgoingItemEventListener
 import com.rarible.protocol.union.core.event.OutgoingOwnershipEventListener
-import com.rarible.protocol.union.core.model.UnionItem
+import com.rarible.protocol.union.core.exception.UnionException
 import com.rarible.protocol.union.core.model.UnionOwnership
+import com.rarible.protocol.union.core.model.getSellerOwnershipId
+import com.rarible.protocol.union.core.service.AuctionContractService
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
+import com.rarible.protocol.union.dto.AuctionDto
 import com.rarible.protocol.union.dto.ItemDeleteEventDto
 import com.rarible.protocol.union.dto.ItemDto
+import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.ItemUpdateEventDto
+import com.rarible.protocol.union.dto.OrderDto
+import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.OwnershipDto
+import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.OwnershipUpdateEventDto
 import com.rarible.protocol.union.dto.ext
-import com.rarible.protocol.union.enrichment.converter.EnrichedItemConverter
-import com.rarible.protocol.union.enrichment.converter.EnrichedOwnershipConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
-import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortOwnership
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
@@ -37,81 +41,92 @@ class EnrichmentRefreshService(
     private val itemService: EnrichmentItemService,
     private val ownershipService: EnrichmentOwnershipService,
     private val bestOrderService: BestOrderService,
-    private val enrichmentMetaService: EnrichmentMetaService,
     private val enrichmentOrderService: EnrichmentOrderService,
     private val enrichmentAuctionService: EnrichmentAuctionService,
     private val enrichmentItemService: EnrichmentItemService,
     private val enrichmentOwnershipService: EnrichmentOwnershipService,
     private val itemEventListeners: List<OutgoingItemEventListener>,
-    private val ownershipEventListeners: List<OutgoingOwnershipEventListener>
+    private val ownershipEventListeners: List<OutgoingOwnershipEventListener>,
+    private val auctionContractService: AuctionContractService
 ) {
 
     private val logger = LoggerFactory.getLogger(EnrichmentRefreshService::class.java)
 
-    suspend fun refreshItem(itemId: ItemIdDto): ItemDto {
+    suspend fun reconcileItem(itemId: ItemIdDto, full: Boolean) = coroutineScope {
         val shortItemId = ShortItemId(itemId)
-        val unionItem = enrichmentItemService.fetch(shortItemId)
+        val sellCurrenciesDeferred = async { getSellCurrencies(itemId) }
+        val bidCurrenciesDeferred = async { getBidCurrencies(itemId) }
 
-        return optimisticLock {
-            val shortItem = itemService.getOrEmpty(shortItemId)
-            val auctions = enrichmentAuctionService.findByItem(shortItemId).map { it.id }.toSet()
-            val updatedItem = bestOrderService.updateBestOrders(shortItem)
-                .copy(auctions = auctions)
-            if (updatedItem != shortItem) {
-                enrichmentItemService.save(updatedItem)
-            }
-            notifyUpdate(updatedItem, unionItem)
-        }
-    }
-
-    suspend fun refreshOwnership(ownershipId: OwnershipIdDto): OwnershipDto {
-        val shortOwnershipId = ShortOwnershipId(ownershipId)
-        val unionOwnership = enrichmentOwnershipService.fetch(shortOwnershipId)
-
-        return optimisticLock {
-            val shortOwnership = ownershipService.getOrEmpty(shortOwnershipId)
-            val updatedOwnership = bestOrderService.updateBestSellOrder(shortOwnership)
-            if (updatedOwnership != shortOwnership) {
-                enrichmentOwnershipService.save(updatedOwnership)
-            }
-            notifyUpdate(updatedOwnership, unionOwnership)
-        }
-    }
-
-    suspend fun reconcileItem(itemId: ItemIdDto, full: Boolean): ItemDto {
-        val sellCurrencies = getSellCurrencies(itemId)
-        val bidCurrencies = getBidCurrencies(itemId)
+        val auctions = enrichmentAuctionService.findByItem(shortItemId)
+        val sellCurrencies = sellCurrenciesDeferred.await()
+        val bidCurrencies = bidCurrenciesDeferred.await()
 
         if (full) {
-            logger.info("Starting reconciliation of Item [{}] (with ownerships)", itemId)
-            val ownerships = ownershipService.fetchAllByItemId(ShortItemId(itemId))
-
-            logger.info("Fetched {} Ownerships for Item [{}]", ownerships.size, itemId)
-            coroutineScope {
-                ownerships.map { async { reconcileOwnership(it, sellCurrencies) } }
-            }.awaitAll()
+            reconcileItemOwnerships(itemId, sellCurrencies, auctions)
         }
-        return reconcileItem(itemId, sellCurrencies, bidCurrencies)
+
+        reconcileItem(itemId, sellCurrencies, bidCurrencies, auctions)
+    }
+
+    private suspend fun reconcileItemOwnerships(
+        itemId: ItemIdDto,
+        sellCurrencies: List<String>,
+        itemAuctions: Collection<AuctionDto>
+    ) {
+        // Skipping ownerships of Auctions
+        val ownerships = ownershipService.fetchAllByItemId(ShortItemId(itemId))
+            .filter { !auctionContractService.isAuctionContract(it.id.blockchain, it.id.contract) }
+
+        val auctions = itemAuctions.associateBy { it.getSellerOwnershipId() }
+
+        // Checking free or partially auctioned ownerships
+        logger.info("Reconciling {} Ownerships for Item [{}]", ownerships.size, itemId)
+        coroutineScope {
+            ownerships.map { async { reconcileOwnership(it, sellCurrencies, auctions) } }
+        }.awaitAll()
+
+        // Checking full auctions and send notifications with disguised ownerships
+        val freeOwnershipIds = ownerships.map { it.id }.toHashSet()
+        val fullAuctions = auctions.filter { !freeOwnershipIds.contains(it.key) }.values
+        fullAuctions.forEach { notifyUpdate(it) }
     }
 
     suspend fun reconcileOwnership(ownershipId: OwnershipIdDto) = coroutineScope {
+        if (auctionContractService.isAuctionContract(ownershipId.blockchain, ownershipId.contract)) {
+            throw UnionException("Reconciliation for Auction Ownerships is forbidden: $ownershipId")
+        }
         // We don't have specific query for ownership, so will use currencies for item
         val itemIdDto = ItemIdDto(ownershipId.blockchain, ownershipId.contract, ownershipId.tokenId)
+        val shortOwnershipId = ShortOwnershipId(ownershipId)
 
         val sellCurrencies = async { getSellCurrencies(itemIdDto) }
-        val unionOwnership = async { ownershipService.fetch(ShortOwnershipId(ownershipId)) }
+        val unionOwnershipDeferred = async { ownershipService.fetchOrNull(shortOwnershipId) }
+        val auction = enrichmentAuctionService.fetchOwnershipAuction(shortOwnershipId)
 
-        reconcileOwnership(unionOwnership.await(), sellCurrencies.await())
+        val unionOwnership = unionOwnershipDeferred.await()
+
+        if (unionOwnership != null) {
+            // Free or partially auctioned ownership
+            val auctions = auction?.let { mapOf(ownershipId to it) } ?: emptyMap()
+            reconcileOwnership(unionOwnership, sellCurrencies.await(), auctions)
+        } else if (auction != null) {
+            // Fully auctioned ownerships - just send disguised ownership event, no enrichment data available here
+            notifyUpdate(auction)
+        } else {
+            // Nothing to reconcile
+            null
+        }
     }
 
     private suspend fun reconcileItem(
         itemId: ItemIdDto,
         sellCurrencies: List<String>,
-        bidCurrencies: List<String>
+        bidCurrencies: List<String>,
+        auctions: Collection<AuctionDto>
     ) = coroutineScope {
         val shortItemId = ShortItemId(itemId)
 
-        logger.info("Starting refresh of Item [{}]", shortItemId)
+        logger.info("Starting to reconcile Item [{}]", shortItemId)
         val itemDtoDeferred = async { itemService.fetch(shortItemId) }
         val sellStatsDeferred = async { ownershipService.getItemSellStats(shortItemId) }
 
@@ -142,7 +157,8 @@ class EnrichmentRefreshService(
                 bestBidOrders = bestBidOrders,
                 bestBidOrder = bestOrderService.getBestBidOrderInUsd(bestBidOrders),
                 sellers = sellStats.sellers,
-                totalStock = sellStats.totalStock
+                totalStock = sellStats.totalStock,
+                auctions = auctions.map { it.id }.toSet()
             )
 
             if (shortItem.isNotEmpty()) {
@@ -155,31 +171,22 @@ class EnrichmentRefreshService(
             shortItem
         }
 
-        val (dto, event) = if (itemDto.deleted) {
-            val enriched = EnrichedItemConverter.convert(itemDto, updatedItem, null, emptyMap(), emptyList())
-            Pair(enriched, ItemDeleteEventDto(
-                itemId = enriched.id,
-                eventId = UUID.randomUUID().toString()
-            ))
+        val event = if (itemDto.deleted) {
+            notifyDelete(itemDto.id)
         } else {
-            val metaDeferred = async {
-                val meta = itemDtoDeferred.await().meta
-                meta?.let { enrichmentMetaService.enrichMeta(meta, shortItemId) }
-            }
             val ordersHint = (bestSellOrdersDto + bestBidOrdersDto).associateBy { it.id }
-            val enriched = EnrichedItemConverter.convert(itemDto, updatedItem, metaDeferred.await(), ordersHint)
-            Pair(enriched, ItemUpdateEventDto(
-                itemId = enriched.id,
-                item = enriched,
-                eventId = UUID.randomUUID().toString()
-            ))
+            val auctionsHint = auctions.associateBy { it.id }
+            val enriched = enrichmentItemService.enrichItem(updatedItem, itemDto, ordersHint, auctionsHint)
+            notifyUpdate(enriched)
         }
-        itemEventListeners.forEach { it.onEvent(event) }
-
-        dto
+        event
     }
 
-    private suspend fun reconcileOwnership(ownership: UnionOwnership, currencies: List<String>) = coroutineScope {
+    private suspend fun reconcileOwnership(
+        ownership: UnionOwnership,
+        currencies: List<String>,
+        auctions: Map<OwnershipIdDto, AuctionDto>
+    ) = coroutineScope {
         val shortOwnershipId = ShortOwnershipId(ownership.id)
 
         val bestSellOrdersDto = currencies.map { currencyId ->
@@ -206,52 +213,55 @@ class EnrichmentRefreshService(
         }
 
         val ordersHint = bestSellOrdersDto.associateBy { it.id }
-        val dto = EnrichedOwnershipConverter.convert(ownership, updatedOwnership, ordersHint)
-        val event = OwnershipUpdateEventDto(
-            ownershipId = dto.id,
-            ownership = dto,
-            eventId = UUID.randomUUID().toString()
-        )
 
-        ownershipEventListeners.forEach { it.onEvent(event) }
-        dto
-    }
-
-    private suspend fun notifyUpdate(
-        short: ShortItem,
-        item: UnionItem
-    ): ItemDto {
-        val (dto, event) = if (item.deleted) {
-            val enriched = EnrichedItemConverter.convert(item, short, null, emptyMap(), emptyList())
-            Pair(enriched, ItemDeleteEventDto(
-                itemId = enriched.id,
-                eventId = UUID.randomUUID().toString()
-            ))
-        } else {
-            val enriched = itemService.enrichItem(short, item, emptyMap(), emptyMap())
-            Pair(enriched, ItemUpdateEventDto(
-                itemId = enriched.id,
-                item = enriched,
-                eventId = UUID.randomUUID().toString()
-            ))
-        }
-        itemEventListeners.forEach { it.onEvent(event) }
-
-        return dto
+        notifyUpdate(updatedOwnership, ownership, ordersHint, auctions)
     }
 
     private suspend fun notifyUpdate(
         short: ShortOwnership,
-        ownership: UnionOwnership
-    ): OwnershipDto {
-        val dto = ownershipService.enrichOwnership(short, ownership, emptyMap())
+        ownership: UnionOwnership,
+        orders: Map<OrderIdDto, OrderDto> = emptyMap(),
+        auctions: Map<OwnershipIdDto, AuctionDto> = emptyMap()
+    ): OwnershipEventDto {
+        val enriched = ownershipService.enrichOwnership(short, ownership, orders)
+        val dto = ownershipService.mergeWithAuction(enriched, auctions[enriched.id])
+        return notifyUpdate(dto)
+    }
+
+    private suspend fun notifyUpdate(
+        auction: AuctionDto
+    ): OwnershipEventDto? {
+        val dto = enrichmentOwnershipService.disguiseAuction(auction)
+        return dto?.let { notifyUpdate(dto) }
+    }
+
+    private suspend fun notifyUpdate(dto: OwnershipDto): OwnershipEventDto {
         val event = OwnershipUpdateEventDto(
             ownershipId = dto.id,
             ownership = dto,
             eventId = UUID.randomUUID().toString()
         )
         ownershipEventListeners.forEach { it.onEvent(event) }
-        return dto
+        return event
+    }
+
+    private suspend fun notifyDelete(itemId: ItemIdDto): ItemEventDto {
+        val event = ItemDeleteEventDto(
+            itemId = itemId,
+            eventId = UUID.randomUUID().toString()
+        )
+        itemEventListeners.forEach { it.onEvent(event) }
+        return event
+    }
+
+    private suspend fun notifyUpdate(itemDto: ItemDto): ItemEventDto {
+        val event = ItemUpdateEventDto(
+            itemId = itemDto.id,
+            item = itemDto,
+            eventId = UUID.randomUUID().toString()
+        )
+        itemEventListeners.forEach { it.onEvent(event) }
+        return event
     }
 
     private suspend fun getBidCurrencies(itemId: ItemIdDto): List<String> {

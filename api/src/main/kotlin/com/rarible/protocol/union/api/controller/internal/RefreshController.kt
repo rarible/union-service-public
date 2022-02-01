@@ -1,7 +1,8 @@
 package com.rarible.protocol.union.api.controller.internal
 
-import com.rarible.protocol.union.dto.ItemDto
-import com.rarible.protocol.union.dto.OwnershipDto
+import com.rarible.protocol.union.core.exception.UnionNotFoundException
+import com.rarible.protocol.union.dto.ItemEventDto
+import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.dto.parser.ItemIdParser
 import com.rarible.protocol.union.dto.parser.OwnershipIdParser
 import com.rarible.protocol.union.enrichment.service.EnrichmentRefreshService
@@ -17,39 +18,15 @@ class RefreshController(
 ) {
 
     @PostMapping(
-        value = ["/v0.1/refresh/item/{itemId}/refresh"],
-        produces = ["application/json"]
-    )
-    suspend fun reconcileItem(
-        @PathVariable("itemId") itemId: String
-    ): ResponseEntity<ItemDto> {
-        val unionItemId = ItemIdParser.parseFull(itemId)
-        val result = refreshService.refreshItem(unionItemId)
-        return ResponseEntity.ok(result)
-    }
-
-    @PostMapping(
         value = ["/v0.1/refresh/item/{itemId}/reconcile"],
         produces = ["application/json"]
     )
     suspend fun reconcileItem(
         @PathVariable("itemId") itemId: String,
         @RequestParam(value = "full", required = false, defaultValue = "false") full: Boolean
-    ): ResponseEntity<ItemDto> {
+    ): ResponseEntity<ItemEventDto> {
         val unionItemId = ItemIdParser.parseFull(itemId)
         val result = refreshService.reconcileItem(unionItemId, full)
-        return ResponseEntity.ok(result)
-    }
-
-    @PostMapping(
-        value = ["/v0.1/refresh/ownership/{ownershipId}/refresh"],
-        produces = ["application/json"]
-    )
-    suspend fun recalculateOwnership(
-        @PathVariable("ownershipId") ownershipId: String
-    ): ResponseEntity<OwnershipDto> {
-        val unionOwnershipId = OwnershipIdParser.parseFull(ownershipId)
-        val result = refreshService.refreshOwnership(unionOwnershipId)
         return ResponseEntity.ok(result)
     }
 
@@ -59,9 +36,10 @@ class RefreshController(
     )
     suspend fun reconcileOwnership(
         @PathVariable("ownershipId") ownershipId: String
-    ): ResponseEntity<OwnershipDto> {
+    ): ResponseEntity<OwnershipEventDto> {
         val unionOwnershipId = OwnershipIdParser.parseFull(ownershipId)
         val result = refreshService.reconcileOwnership(unionOwnershipId)
+            ?: throw UnionNotFoundException("Ownership $ownershipId not found")
         return ResponseEntity.ok(result)
     }
 
