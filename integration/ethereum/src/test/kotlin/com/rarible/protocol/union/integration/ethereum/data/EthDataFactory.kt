@@ -481,6 +481,7 @@ fun randomEthAuctionDto(itemId: ItemIdDto): AuctionDto {
         buyPrice = BigDecimal.TEN,
         pending = listOf(AuctionHistoryDto(Word.apply(randomWord()))),
         status = AuctionStatusDto.ACTIVE,
+        ongoing = true,
         buyPriceUsd = BigDecimal.TEN,
         hash = Word.apply(randomWord()),
         auctionId = BigInteger.ONE,
