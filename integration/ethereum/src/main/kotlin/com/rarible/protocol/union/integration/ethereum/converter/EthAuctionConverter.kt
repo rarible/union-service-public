@@ -1,9 +1,11 @@
 package com.rarible.protocol.union.integration.ethereum.converter
 
+import com.rarible.protocol.dto.AuctionBidsPaginationDto
 import com.rarible.protocol.dto.AuctionsPaginationDto
 import com.rarible.protocol.dto.RaribleAuctionV1Dto
 import com.rarible.protocol.union.core.converter.ContractAddressConverter
 import com.rarible.protocol.union.core.service.CurrencyService
+import com.rarible.protocol.union.dto.AuctionBidDto
 import com.rarible.protocol.union.dto.AuctionDto
 import com.rarible.protocol.union.dto.AuctionHistoryDto
 import com.rarible.protocol.union.dto.AuctionIdDto
@@ -34,6 +36,13 @@ class EthAuctionConverter(
         return Slice(
             continuation = source.continuation,
             entities = source.auctions.map { convert(it, blockchain) }
+        )
+    }
+
+    fun convert(source: AuctionBidsPaginationDto, blockchain: BlockchainDto): Slice<AuctionBidDto> {
+        return Slice(
+            continuation = source.continuation,
+            entities = source.bids.map { EthConverter.convert(it, blockchain) }
         )
     }
 
