@@ -1,7 +1,7 @@
 package com.rarible.protocol.union.listener.job
 
-import com.rarible.protocol.union.dto.ItemDto
-import com.rarible.protocol.union.dto.OwnershipDto
+import com.rarible.protocol.union.dto.ItemEventDto
+import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.enrichment.repository.ItemReconciliationMarkRepository
 import com.rarible.protocol.union.enrichment.repository.OwnershipReconciliationMarkRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentRefreshService
@@ -34,8 +34,8 @@ class ReconciliationMarkJobIt : AbstractIntegrationTest() {
 
     lateinit var job: ReconciliationMarkJob
 
-    private val item: ItemDto = mockk()
-    private val ownership: OwnershipDto = mockk()
+    private val itemEvent: ItemEventDto = mockk()
+    private val ownershipEvent: OwnershipEventDto = mockk()
 
     @BeforeEach
     fun beforeEach() {
@@ -54,7 +54,7 @@ class ReconciliationMarkJobIt : AbstractIntegrationTest() {
         itemMarks.forEach { itemReconciliationMarkRepository.save(it) }
         assertThat(itemReconciliationMarkRepository.findAll(100)).hasSize(itemMarks.size)
 
-        coEvery { refreshService.reconcileItem(any(), any()) } returns item
+        coEvery { refreshService.reconcileItem(any(), any()) } returns itemEvent
 
         job.reconcileMarkedRecords()
 
@@ -69,7 +69,7 @@ class ReconciliationMarkJobIt : AbstractIntegrationTest() {
         ownershipMarks.forEach { ownershipReconciliationMarkRepository.save(it) }
         assertThat(ownershipReconciliationMarkRepository.findAll(100)).hasSize(ownershipMarks.size)
 
-        coEvery { refreshService.reconcileOwnership(any()) } returns ownership
+        coEvery { refreshService.reconcileOwnership(any()) } returns ownershipEvent
 
         job.reconcileMarkedRecords()
 
@@ -83,7 +83,7 @@ class ReconciliationMarkJobIt : AbstractIntegrationTest() {
 
         itemMarks.forEach { itemReconciliationMarkRepository.save(it) }
 
-        coEvery { refreshService.reconcileItem(any(), any()) } returns item
+        coEvery { refreshService.reconcileItem(any(), any()) } returns itemEvent
         coEvery { refreshService.reconcileItem(itemMarks[5].id.toDto(), false) } throws RuntimeException()
 
         job.reconcileMarkedRecords()
@@ -102,7 +102,7 @@ class ReconciliationMarkJobIt : AbstractIntegrationTest() {
 
         itemMarks.forEach { ownershipReconciliationMarkRepository.save(it) }
 
-        coEvery { refreshService.reconcileOwnership(any()) } returns ownership
+        coEvery { refreshService.reconcileOwnership(any()) } returns ownershipEvent
         coEvery { refreshService.reconcileOwnership(itemMarks[10].id.toDto()) } throws RuntimeException()
         coEvery { refreshService.reconcileOwnership(itemMarks[11].id.toDto()) } throws RuntimeException()
 
