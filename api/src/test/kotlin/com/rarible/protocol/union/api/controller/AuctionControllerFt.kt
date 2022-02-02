@@ -13,7 +13,6 @@ import com.rarible.protocol.union.dto.continuation.page.PageSize
 import com.rarible.protocol.union.integration.ethereum.converter.EthAuctionConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAddress
-import com.rarible.protocol.union.integration.ethereum.data.randomEthAuctionBidsDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAuctionDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import kotlinx.coroutines.FlowPreview
@@ -41,30 +40,14 @@ class AuctionControllerFt : AbstractIntegrationTest() {
     fun `get auction by hash - ethereum`() = runBlocking<Unit> {
         val auction = randomEthAuctionDto()
         val auctionId = EthConverter.convert(auction.hash)
-        val auctionIdFull = AuctionIdDto(BlockchainDto.ETHEREUM, auction.hash.prefixed()).fullId()
+        val orderIdFull = AuctionIdDto(BlockchainDto.ETHEREUM, auction.hash.prefixed()).fullId()
 
         ethereumAuctionControllerApiMock.mockGetAuctionByHash(auction.hash.prefixed(), auction)
 
-        val unionAuction = auctionControllerClient.getAuctionById(auctionIdFull).awaitFirst()
+        val unionAuction = auctionControllerClient.getAuctionById(orderIdFull).awaitFirst()
 
         assertThat(unionAuction.id.value).isEqualTo(auctionId)
         assertThat(unionAuction.id.blockchain).isEqualTo(BlockchainDto.ETHEREUM)
-    }
-
-    @Test
-    fun `get auction bids by hash - ethereum`() = runBlocking<Unit> {
-        val auction = randomEthAuctionDto()
-        val ethBids = randomEthAuctionBidsDto()
-        val auctionIdFull = AuctionIdDto(BlockchainDto.ETHEREUM, auction.hash.prefixed()).fullId()
-
-        ethereumAuctionControllerApiMock.mockGetAuctionBidsByHash(auction.hash.prefixed(), ethBids)
-
-        val unionBids = auctionControllerClient.getAuctionBidsById(auctionIdFull, null, null).awaitFirst()
-
-        assertThat(unionBids.bids).hasSize(1)
-        assertThat(unionBids.bids[0].amount).isEqualTo(ethBids.bids[0].amount)
-        assertThat(unionBids.bids[0].buyer).isEqualTo(
-            UnionAddressConverter.convert(BlockchainDto.ETHEREUM, ethBids.bids[0].buyer.prefixed()))
     }
 
     @Test

@@ -17,7 +17,6 @@ import com.rarible.protocol.dto.AuctionActivityEndDto
 import com.rarible.protocol.dto.AuctionActivityFinishDto
 import com.rarible.protocol.dto.AuctionActivityOpenDto
 import com.rarible.protocol.dto.AuctionActivityStartDto
-import com.rarible.protocol.dto.AuctionBidsPaginationDto
 import com.rarible.protocol.dto.AuctionDto
 import com.rarible.protocol.dto.AuctionHistoryDto
 import com.rarible.protocol.dto.AuctionStatusDto
@@ -501,22 +500,6 @@ fun randomEthAuctionDto(itemId: ItemIdDto): AuctionDto {
             duration = BigInteger.TEN,
             buyOutPrice = BigDecimal.TEN
         )
-    )
-}
-
-fun randomEthAuctionBidsDto(): AuctionBidsPaginationDto {
-    return AuctionBidsPaginationDto(
-        bids = listOf(
-            RaribleAuctionV1BidV1Dto(
-                buyer = randomAddress(),
-                amount = BigDecimal.ONE,
-                data = RaribleAuctionV1BidDataV1Dto(
-                    originFees = listOf(PartDto(randomAddress(), 100)),
-                    payouts = listOf(PartDto(randomAddress(), 100))
-                )
-            )
-        ),
-        continuation = null
     )
 }
 

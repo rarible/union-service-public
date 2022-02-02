@@ -1,6 +1,5 @@
 package com.rarible.protocol.nftorder.api.test.mock
 
-import com.rarible.protocol.dto.AuctionBidsPaginationDto
 import com.rarible.protocol.dto.AuctionDto
 import com.rarible.protocol.dto.AuctionIdsDto
 import com.rarible.protocol.dto.AuctionsPaginationDto
@@ -53,12 +52,6 @@ class EthAuctionControllerApiMock(
         every {
             auctionControllerApi.getAuctionByHash(hash)
         } returns Mono.just(returnItem)
-    }
-
-    fun mockGetAuctionBidsByHash(hash: String, returnBids: AuctionBidsPaginationDto) {
-        every {
-            auctionControllerApi.getAuctionBidsByHash(hash, any(), any())
-        } returns Mono.just(returnBids)
     }
 
     fun mockGetAuctionsByIds(ids: List<Word>, returnItems: List<AuctionDto>) {
