@@ -1,11 +1,13 @@
 package com.rarible.protocol.union.listener.job
 
+import com.rarible.core.client.WebClientResponseProxyException
 import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.enrichment.repository.ItemReconciliationMarkRepository
 import com.rarible.protocol.union.enrichment.repository.OwnershipReconciliationMarkRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentRefreshService
 import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
+import org.springframework.http.HttpStatus
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 
@@ -80,7 +82,15 @@ class ReconciliationMarkJob(
         var withFails = 0
         ownerships.forEach {
             try {
-                refreshService.reconcileOwnership(it.id.toDto())
+                try {
+                    refreshService.reconcileOwnership(it.id.toDto())
+                } catch (e: WebClientResponseProxyException) {
+                    if (e.statusCode == HttpStatus.NOT_FOUND) {
+                        logger.info("Unable to reconcile Ownership [{}], NOT_FOUND received: {}", it.id, e.data)
+                    } else {
+                        throw e
+                    }
+                }
                 ownershipReconciliationMarkRepository.delete(it)
             } catch (e: Exception) {
                 withFails++
