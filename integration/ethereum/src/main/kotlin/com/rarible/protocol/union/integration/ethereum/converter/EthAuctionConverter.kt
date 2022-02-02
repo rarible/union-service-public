@@ -61,6 +61,7 @@ class EthAuctionConverter(
                     buyPriceUsd = buyPriceUsd,
                     pending = convert(auction.pending),
                     status = convert(auction.status),
+                    ongoing = auction.ongoing,
                     hash = auction.hash.toString(),
                     auctionId = auction.auctionId,
                     lastBid = auction.lastBid?.let { EthConverter.convert(it, blockchain) },
