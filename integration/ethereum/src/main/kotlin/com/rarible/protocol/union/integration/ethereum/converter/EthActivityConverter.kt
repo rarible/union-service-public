@@ -487,36 +487,36 @@ class EthActivityConverter(
 
     fun asAuctionActivityAllType(source: ActivityTypeDto): AuctionActivityFilterAllDto.Types? {
         return when (source) {
-            BID -> AuctionActivityFilterAllDto.Types.BID
-            CREATED_AUCTION -> AuctionActivityFilterAllDto.Types.CREATED
-            CANCEL_AUCTION -> AuctionActivityFilterAllDto.Types.CANCEL
-            FINISHED_AUCTION -> AuctionActivityFilterAllDto.Types.FINISHED
-            STARTED_AUCTION -> AuctionActivityFilterAllDto.Types.STARTED
-            ENDED_AUCTION -> AuctionActivityFilterAllDto.Types.ENDED
+            AUCTION_BID -> AuctionActivityFilterAllDto.Types.BID
+            AUCTION_CREATED -> AuctionActivityFilterAllDto.Types.CREATED
+            AUCTION_CANCEL -> AuctionActivityFilterAllDto.Types.CANCEL
+            AUCTION_FINISHED -> AuctionActivityFilterAllDto.Types.FINISHED
+            AUCTION_STARTED -> AuctionActivityFilterAllDto.Types.STARTED
+            AUCTION_ENDED -> AuctionActivityFilterAllDto.Types.ENDED
             else -> null
         }
     }
 
     fun asAuctionActivityCollectionType(source: ActivityTypeDto): AuctionActivityFilterByCollectionDto.Types? {
         return when (source) {
-            BID -> AuctionActivityFilterByCollectionDto.Types.BID
-            CREATED_AUCTION -> AuctionActivityFilterByCollectionDto.Types.CREATED
-            CANCEL_AUCTION -> AuctionActivityFilterByCollectionDto.Types.CANCEL
-            FINISHED_AUCTION -> AuctionActivityFilterByCollectionDto.Types.FINISHED
-            STARTED_AUCTION -> AuctionActivityFilterByCollectionDto.Types.STARTED
-            ENDED_AUCTION -> AuctionActivityFilterByCollectionDto.Types.ENDED
+            AUCTION_BID -> AuctionActivityFilterByCollectionDto.Types.BID
+            AUCTION_CREATED -> AuctionActivityFilterByCollectionDto.Types.CREATED
+            AUCTION_CANCEL -> AuctionActivityFilterByCollectionDto.Types.CANCEL
+            AUCTION_FINISHED -> AuctionActivityFilterByCollectionDto.Types.FINISHED
+            AUCTION_STARTED -> AuctionActivityFilterByCollectionDto.Types.STARTED
+            AUCTION_ENDED -> AuctionActivityFilterByCollectionDto.Types.ENDED
             else -> null
         }
     }
 
     fun asAuctionActivityItemType(source: ActivityTypeDto): AuctionActivityFilterByItemDto.Types? {
         return when (source) {
-            BID -> AuctionActivityFilterByItemDto.Types.BID
-            CREATED_AUCTION -> AuctionActivityFilterByItemDto.Types.CREATED
-            CANCEL_AUCTION -> AuctionActivityFilterByItemDto.Types.CANCEL
-            FINISHED_AUCTION -> AuctionActivityFilterByItemDto.Types.FINISHED
-            STARTED_AUCTION -> AuctionActivityFilterByItemDto.Types.STARTED
-            ENDED_AUCTION -> AuctionActivityFilterByItemDto.Types.ENDED
+            AUCTION_BID -> AuctionActivityFilterByItemDto.Types.BID
+            AUCTION_CREATED -> AuctionActivityFilterByItemDto.Types.CREATED
+            AUCTION_CANCEL -> AuctionActivityFilterByItemDto.Types.CANCEL
+            AUCTION_FINISHED -> AuctionActivityFilterByItemDto.Types.FINISHED
+            AUCTION_STARTED -> AuctionActivityFilterByItemDto.Types.STARTED
+            AUCTION_ENDED -> AuctionActivityFilterByItemDto.Types.ENDED
             else -> null
         }
     }
@@ -524,8 +524,11 @@ class EthActivityConverter(
     fun asAuctionActivityUserType(source: UserActivityTypeDto): AuctionActivityFilterByUserDto.Types? {
         return when (source) {
             UserActivityTypeDto.MAKE_BID -> AuctionActivityFilterByUserDto.Types.BID
-            UserActivityTypeDto.CREATED_AUCTION -> AuctionActivityFilterByUserDto.Types.CREATED
-            UserActivityTypeDto.CANCEL_AUCTION -> AuctionActivityFilterByUserDto.Types.CANCEL
+            UserActivityTypeDto.AUCTION_CREATED -> AuctionActivityFilterByUserDto.Types.CREATED
+            UserActivityTypeDto.AUCTION_CANCEL -> AuctionActivityFilterByUserDto.Types.CANCEL
+            UserActivityTypeDto.AUCTION_FINISHED -> AuctionActivityFilterByUserDto.Types.FINISHED
+            UserActivityTypeDto.AUCTION_STARTED -> AuctionActivityFilterByUserDto.Types.STARTED
+            UserActivityTypeDto.AUCTION_ENDED -> AuctionActivityFilterByUserDto.Types.ENDED
             else -> null
         }
     }
