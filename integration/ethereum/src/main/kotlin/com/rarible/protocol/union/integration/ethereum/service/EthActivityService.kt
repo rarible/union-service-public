@@ -121,15 +121,15 @@ open class EthActivityService(
         size: Int,
         sort: ActivitySortDto?
     ): Slice<ActivityDto> {
-        val users = users.map { EthConverter.convertToAddress(it) }
+        val userAddresses = users.map { EthConverter.convertToAddress(it) }
         val nftFilter = ethActivityConverter.convertToNftUserTypes(types)?.let {
-            NftActivityFilterByUserDto(users, it, from?.epochSecond, to?.epochSecond)
+            NftActivityFilterByUserDto(userAddresses, it, from?.epochSecond, to?.epochSecond)
         }
         val orderFilter = ethActivityConverter.convertToOrderUserTypes(types)?.let {
-            OrderActivityFilterByUserDto(users, it, from?.epochSecond, to?.epochSecond)
+            OrderActivityFilterByUserDto(userAddresses, it, from?.epochSecond, to?.epochSecond)
         }
         val auctionFilter = ethActivityConverter.convertToAuctionUserTypes(types)?.let {
-            AuctionActivityFilterByUserDto(users, it)
+            AuctionActivityFilterByUserDto(userAddresses, it)
         }
         return getEthereumActivities(nftFilter, orderFilter, auctionFilter, continuation, size, sort)
     }

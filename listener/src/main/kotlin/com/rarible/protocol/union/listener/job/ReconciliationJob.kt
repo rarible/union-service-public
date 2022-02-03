@@ -37,7 +37,7 @@ class ReconciliationJob(
             do {
                 next = reconcileOrders(next, blockchain)
                 if (next != null) {
-                    emit(next!!)
+                    emit(next)
                 }
             } while (next != null)
         }

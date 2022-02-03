@@ -3,7 +3,6 @@ package com.rarible.protocol.union.integration.ethereum.service
 import com.rarible.core.test.data.randomInt
 import com.rarible.core.test.data.randomString
 import com.rarible.protocol.dto.OrdersPaginationDto
-import com.rarible.protocol.dto.PlatformDto
 import com.rarible.protocol.order.api.client.OrderControllerApi
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
@@ -30,7 +29,6 @@ class EthOrderServiceTest {
         val order1 = randomEthLegacySellOrderDto()
         val order2 = randomEthV2OrderDto()
 
-        val origin = randomString()
         val continuation = randomString()
         val size = randomInt()
 

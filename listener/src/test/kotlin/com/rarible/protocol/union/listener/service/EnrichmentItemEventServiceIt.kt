@@ -7,6 +7,7 @@ import com.rarible.protocol.dto.NftItemsDto
 import com.rarible.protocol.dto.OrderStatusDto
 import com.rarible.protocol.dto.OrdersPaginationDto
 import com.rarible.protocol.union.core.converter.ContractAddressConverter
+import com.rarible.protocol.union.dto.AuctionStatusDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.converter.EnrichedItemConverter
 import com.rarible.protocol.union.enrichment.converter.ShortItemConverter
@@ -18,7 +19,6 @@ import com.rarible.protocol.union.enrichment.service.EnrichmentMetaService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
 import com.rarible.protocol.union.enrichment.test.data.randomShortItem
 import com.rarible.protocol.union.enrichment.test.data.randomShortOwnership
-import com.rarible.protocol.union.enrichment.test.data.randomUnionBidOrderDto
 import com.rarible.protocol.union.enrichment.test.data.randomUnionItem
 import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrderDto
 import com.rarible.protocol.union.enrichment.util.bidCurrencyId
@@ -32,7 +32,6 @@ import com.rarible.protocol.union.integration.ethereum.data.randomEthLegacySellO
 import com.rarible.protocol.union.integration.ethereum.data.randomEthNftItemDto
 import com.rarible.protocol.union.listener.test.AbstractIntegrationTest
 import com.rarible.protocol.union.listener.test.IntegrationTest
-import io.daonomic.rpc.domain.Word
 import io.mockk.coEvery
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.delay
@@ -282,7 +281,6 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
 
         val shortItem = randomShortItem(itemId).copy(bestBidOrder = ShortOrderConverter.convert(unionBestBid))
         val ethItem = randomEthNftItemDto(itemId)
-        val unionItem = EthItemConverter.convert(ethItem, itemId.blockchain)
         itemService.save(shortItem)
 
         coEvery { testEthereumItemApi.getNftItemById(itemId.value) } returns ethItem.toMono()
@@ -381,7 +379,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         val item = ShortItemConverter.convert(randomUnionItem(randomEthItemId()))
 
         val itemWithDotMapKey = item.copy(
-            bestSellOrders = mapOf("A.something.Flow" to ShortOrderConverter.convert(randomUnionBidOrderDto()))
+            bestSellOrders = mapOf("A.something.Flow" to ShortOrderConverter.convert(randomUnionSellOrderDto()))
         )
 
         val saved = itemService.save(itemWithDotMapKey)
@@ -421,7 +419,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         coEvery { testEthereumItemApi.getNftItemById(itemId.value) } returns ethItem.toMono()
         coEvery { testEthereumItemApi.getNftItemMetaById(itemId.value) } returns ethItem.meta!!.toMono()
 
-        itemEventService.onAuctionUpdated(shortItem.id, auction)
+        itemEventService.onAuctionUpdated(auction)
 
         val saved = itemService.get(shortItem.id)!!
         assertThat(saved.auctions).isEqualTo(setOf(auction.id))
@@ -435,7 +433,38 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
     }
 
     @Test
-    fun `on auction update with auction fetching`() = runWithKafka {
+    fun `on auction update - inactive removed`() = runWithKafka {
+        val itemId = randomEthItemId()
+        val ethItem = randomEthNftItemDto(itemId)
+
+        val auction = ethAuctionConverter.convert(randomEthAuctionDto(itemId), BlockchainDto.ETHEREUM)
+            .copy(status = AuctionStatusDto.CANCELLED)
+
+        val unionItem = EthItemConverter.convert(ethItem, itemId.blockchain)
+        val shortItem = ShortItemConverter.convert(unionItem)
+            .copy(auctions = setOf(auction.id))
+
+        itemService.save(shortItem)
+
+        coEvery { testEthereumItemApi.getNftItemById(itemId.value) } returns ethItem.toMono()
+        coEvery { testEthereumItemApi.getNftItemMetaById(itemId.value) } returns ethItem.meta!!.toMono()
+
+        itemEventService.onAuctionUpdated(auction)
+
+        val saved = itemService.get(shortItem.id)
+        // No enrich data, should be removed
+        assertThat(saved).isNull()
+
+        Wait.waitAssert {
+            val messages = findItemUpdates(itemId.value)
+            assertThat(messages).hasSize(1)
+            assertThat(messages[0].value.itemId).isEqualTo(itemId)
+            assertThat(messages[0].value.item.auctions.size).isEqualTo(0)
+        }
+    }
+
+    @Test
+    fun `on auction update - another auction fetched`() = runWithKafka {
         val itemId = randomEthItemId()
         val ethItem = randomEthNftItemDto(itemId)
 
@@ -447,12 +476,14 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
 
         coEvery { testEthereumItemApi.getNftItemById(itemId.value) } returns ethItem.toMono()
         coEvery { testEthereumItemApi.getNftItemMetaById(itemId.value) } returns ethItem.meta!!.toMono()
-        coEvery { testEthereumAuctionApi.getAuctionsByIds(AuctionIdsDto(listOf(Word.apply(auction.id.value)))) } returns Flux.just(ethAuction)
+        coEvery { testEthereumAuctionApi.getAuctionsByIds(AuctionIdsDto(listOf(ethAuction.hash))) } returns Flux.just(
+            ethAuction
+        )
 
-        itemEventService.onAuctionUpdated(shortItem.id, auction)
+        itemEventService.onAuctionUpdated(auction)
 
         val newAuction = ethAuctionConverter.convert(randomEthAuctionDto(itemId), BlockchainDto.ETHEREUM)
-        itemEventService.onAuctionUpdated(shortItem.id, newAuction)
+        itemEventService.onAuctionUpdated(newAuction)
 
         val saved = itemService.get(shortItem.id)!!
         assertThat(saved.auctions.size).isEqualTo(2)
@@ -461,7 +492,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
             val messages = findItemUpdates(itemId.value)
             assertThat(messages).hasSize(2)
 
-            messages.filter { it.value.item.auctions?.size == 2 }.map { it.value }.forEach {
+            messages.filter { it.value.item.auctions.size == 2 }.map { it.value }.forEach {
                 assertThat(messages[0].value.itemId).isEqualTo(itemId)
                 assertThat(it.item.auctions.size).isEqualTo(2)
             }
@@ -473,18 +504,27 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         val itemId = randomEthItemId()
         val ethItem = randomEthNftItemDto(itemId)
 
-        val unionItem = EthItemConverter.convert(ethItem, itemId.blockchain)
+        val bestSell = randomEthLegacySellOrderDto()
+        val unionBestSell = ethOrderConverter.convert(bestSell, BlockchainDto.ETHEREUM)
+
         val ethAuction = randomEthAuctionDto(itemId)
         val auction = ethAuctionConverter.convert(ethAuction, BlockchainDto.ETHEREUM)
-        val shortItem = ShortItemConverter.convert(unionItem).copy(auctions = setOf(auction.id))
+
+        val unionItem = EthItemConverter.convert(ethItem, itemId.blockchain)
+        val shortItem = ShortItemConverter.convert(unionItem).copy(
+            auctions = setOf(auction.id),
+            bestSellOrder = ShortOrderConverter.convert(unionBestSell)
+        )
         itemService.save(shortItem)
 
         coEvery { testEthereumItemApi.getNftItemById(itemId.value) } returns ethItem.toMono()
         coEvery { testEthereumItemApi.getNftItemMetaById(itemId.value) } returns ethItem.meta!!.toMono()
+        coEvery { testEthereumOrderApi.getOrderByHash(bestSell.hash.prefixed()) } returns bestSell.toMono()
 
-        itemEventService.onAuctionDeleted(auction.id)
+        itemEventService.onAuctionDeleted(auction)
 
         val saved = itemService.get(shortItem.id)!!
+        // Should be not deleted since there is some enrich data
         assertThat(saved.auctions).isNullOrEmpty()
 
         Wait.waitAssert {
@@ -492,6 +532,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
             assertThat(messages).hasSize(1)
             assertThat(messages[0].value.itemId).isEqualTo(itemId)
             assertThat(messages[0].value.item.auctions).isEmpty()
+            assertThat(messages[0].value.item.bestSellOrder!!.id).isEqualTo(unionBestSell.id)
         }
     }
 }

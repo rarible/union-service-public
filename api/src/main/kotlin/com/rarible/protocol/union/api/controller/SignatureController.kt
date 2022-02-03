@@ -12,9 +12,14 @@ class SignatureController(
     private val router: BlockchainRouter<SignatureService>
 ) : SignatureControllerApi {
 
-    override suspend fun validate(form: SignatureValidationFormDto): ResponseEntity<Boolean> {
-        val result = router.getService(form.signer.blockchainGroup.subchains()[0])
-            .validate(form.signer.value, form.publicKey, form.signature, form.message)
+    override suspend fun validate(signatureValidationFormDto: SignatureValidationFormDto): ResponseEntity<Boolean> {
+        val result = router.getService(signatureValidationFormDto.signer.blockchainGroup.subchains()[0])
+            .validate(
+                signatureValidationFormDto.signer.value,
+                signatureValidationFormDto.publicKey,
+                signatureValidationFormDto.signature,
+                signatureValidationFormDto.message
+            )
         return ResponseEntity.ok(result)
     }
 }

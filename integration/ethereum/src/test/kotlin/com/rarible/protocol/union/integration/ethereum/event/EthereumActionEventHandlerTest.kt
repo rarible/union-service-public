@@ -7,7 +7,6 @@ import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.model.UnionAuctionDeleteEvent
 import com.rarible.protocol.union.core.model.UnionAuctionEvent
 import com.rarible.protocol.union.core.model.UnionAuctionUpdateEvent
-import com.rarible.protocol.union.dto.AuctionIdDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.ethereum.converter.EthAuctionConverter
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAuctionDto
@@ -45,11 +44,11 @@ class EthereumActionEventHandlerTest {
 
     @Test
     fun `ethereum auction delete event`() = runBlocking {
-        val auctionId = AuctionIdDto(BlockchainDto.ETHEREUM, randomString())
+        val auction = randomEthAuctionDto()
 
-        handler.handle(AuctionDeleteEventDto(randomString(), auctionId.value))
+        handler.handle(AuctionDeleteEventDto(randomString(), auction.hash.prefixed(), auction))
 
-        val expected = UnionAuctionDeleteEvent(auctionId)
+        val expected = UnionAuctionDeleteEvent(converter.convert(auction, BlockchainDto.ETHEREUM))
 
         coVerify(exactly = 1) { incomingEventHandler.onEvent(expected) }
     }

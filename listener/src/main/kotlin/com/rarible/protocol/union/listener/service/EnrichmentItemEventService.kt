@@ -3,9 +3,10 @@ package com.rarible.protocol.union.listener.service
 import com.rarible.core.common.optimisticLock
 import com.rarible.protocol.union.core.event.OutgoingItemEventListener
 import com.rarible.protocol.union.core.model.UnionItem
+import com.rarible.protocol.union.core.model.getItemId
 import com.rarible.protocol.union.core.service.ReconciliationEventService
 import com.rarible.protocol.union.dto.AuctionDto
-import com.rarible.protocol.union.dto.AuctionIdDto
+import com.rarible.protocol.union.dto.AuctionStatusDto
 import com.rarible.protocol.union.dto.ItemDeleteEventDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.ItemUpdateEventDto
@@ -19,8 +20,6 @@ import com.rarible.protocol.union.enrichment.service.BestOrderService
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
 import com.rarible.protocol.union.enrichment.validator.ItemValidator
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.map
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.util.*
@@ -107,12 +106,18 @@ class EnrichmentItemEventService(
         updateOrder(itemId, order, notificationEnabled) { item -> bestOrderService.updateBestBidOrder(item, order) }
     }
 
-    suspend fun onAuctionUpdated(itemId: ShortItemId, auction: AuctionDto, notificationEnabled: Boolean = true) {
-        updateAuction(itemId, auction, notificationEnabled) { it.copy(auctions = it.auctions + auction.id) }
+    suspend fun onAuctionUpdated(auction: AuctionDto, notificationEnabled: Boolean = true) {
+        updateAuction(auction, notificationEnabled) {
+            if (auction.status == AuctionStatusDto.ACTIVE) {
+                it.copy(auctions = it.auctions + auction.id)
+            } else {
+                it.copy(auctions = it.auctions - auction.id)
+            }
+        }
     }
 
-    suspend fun onAuctionDeleted(auctionId: AuctionIdDto, notificationEnabled: Boolean = true) {
-        deleteAuction(auctionId, notificationEnabled) { it.copy(auctions = it.auctions - auctionId) }
+    suspend fun onAuctionDeleted(auction: AuctionDto, notificationEnabled: Boolean = true) {
+        updateAuction(auction, notificationEnabled) { it.copy(auctions = it.auctions - auction.id) }
     }
 
     private suspend fun updateOrder(
@@ -121,11 +126,11 @@ class EnrichmentItemEventService(
         notificationEnabled: Boolean,
         orderUpdateAction: suspend (item: ShortItem) -> ShortItem
     ) = optimisticLock {
-        val (short, updated, exist) = update(itemId, orderUpdateAction)
+        val (short, updated, exist) = updateItem(itemId, orderUpdateAction)
         if (short != updated) {
             if (updated.isNotEmpty()) {
                 val saved = itemService.save(updated)
-                logger.info("Saved Item [{}] with updated order [{}]", itemId, order.id)
+                logger.info("Saved Item [{}] after Order event [{}]", saved, order.id)
                 if (notificationEnabled) {
                     notifyUpdate(saved, null, order)
                 }
@@ -137,20 +142,21 @@ class EnrichmentItemEventService(
                 }
             }
         } else {
-            logger.info("Item [{}] not changed after order updated, event won't be published", itemId)
+            logger.info("Item [{}] not changed after Order event [{}], event won't be published", itemId, order.id)
         }
     }
 
     private suspend fun updateAuction(
-        itemId: ShortItemId,
         auction: AuctionDto,
         notificationEnabled: Boolean,
         updateAction: suspend (item: ShortItem) -> ShortItem
     ) = optimisticLock {
-        val (short, updated, exist) = update(itemId, updateAction)
+        val itemId = ShortItemId(auction.getItemId())
+        val (short, updated, exist) = updateItem(itemId, updateAction)
         if (short != updated) {
             if (updated.isNotEmpty()) {
                 val saved = itemService.save(updated)
+                logger.info("Saved Item [{}] after Auction event [{}]", saved, auction.id)
                 if (notificationEnabled) {
                     notifyUpdate(saved, null, null, auction)
                 }
@@ -162,26 +168,8 @@ class EnrichmentItemEventService(
                 }
             }
         } else {
-            logger.info("Item [{}] not changed after auction updated, event won't be published", itemId)
+            logger.info("Item [{}] not changed after Auction event [{}], event won't be published", itemId, auction.id)
         }
-    }
-
-    private suspend fun deleteAuction(
-        auctionId: AuctionIdDto,
-        notificationEnabled: Boolean,
-        updateAction: suspend (item: ShortItem) -> ShortItem
-    ) = optimisticLock {
-        itemService.findByAuctionId(auctionId).map { item ->
-            val updated = updateAction(item)
-            if (item != updated) {
-                val saved = itemService.save(updated)
-                if (notificationEnabled) {
-                    notifyUpdate(saved)
-                }
-            } else {
-                logger.info("Item [{}] not changed after auction deleted, event won't be published", item.id)
-            }
-        }.collect()
     }
 
     suspend fun onItemDeleted(itemId: ItemIdDto) {
@@ -198,15 +186,7 @@ class EnrichmentItemEventService(
         return result != null && result.deletedCount > 0
     }
 
-    private suspend fun notifyDelete(itemId: ShortItemId) {
-        val event = ItemDeleteEventDto(
-            itemId = itemId.toDto(),
-            eventId = UUID.randomUUID().toString()
-        )
-        itemEventListeners.forEach { it.onEvent(event) }
-    }
-
-    private suspend fun update(
+    private suspend fun updateItem(
         itemId: ShortItemId,
         action: suspend (item: ShortItem) -> ShortItem
     ): Triple<ShortItem?, ShortItem, Boolean> {
@@ -214,6 +194,14 @@ class EnrichmentItemEventService(
         val exist = current != null
         val short = current ?: ShortItem.empty(itemId)
         return Triple(current, action(short), exist)
+    }
+
+    private suspend fun notifyDelete(itemId: ShortItemId) {
+        val event = ItemDeleteEventDto(
+            itemId = itemId.toDto(),
+            eventId = UUID.randomUUID().toString()
+        )
+        itemEventListeners.forEach { it.onEvent(event) }
     }
 
     // Potentially we could have updated Order here (no matter - bid/sell) and when we need to fetch

@@ -36,19 +36,18 @@ class EnrichmentAuctionService(
     suspend fun fetchAuctionsIfAbsent(
         ids: Set<AuctionIdDto>,
         auctions: Map<AuctionIdDto, AuctionDto>
-    ): List<AuctionDto> {
+    ): Map<AuctionIdDto, AuctionDto> {
         val requestedIds = ids - auctions.keys
 
         val fetched = requestedIds.isNotEmpty().let {
             requestedIds.groupBy { it.blockchain }.flatMap { (k, v) ->
-                logger.info("Fetching {} auctions with ids: {}", k, v)
                 val data = auctionServiceRouter.getService(k).getAuctionsByIds(v.map { it.value })
-                logger.info("Fetched {} auctions", data.size)
+                logger.info("Fetched {} auctions by ids", data.size, requestedIds)
                 data
             }
         }
 
-        return auctions.values.toList() + fetched
+        return auctions + fetched.associateBy { it.id }
     }
 
     suspend fun findByItem(itemId: ShortItemId): List<AuctionDto> {

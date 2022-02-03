@@ -11,6 +11,7 @@ import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
 import java.util.*
 
@@ -92,9 +93,15 @@ class EnrichmentOrderEventService(
         try {
             call()
         } catch (ex: WebClientResponseProxyException) {
-            logger.warn(
-                "Received NOT_FOUND code from client during order update: {}, message: {}", ex.data, ex.message
-            )
+            if (ex.statusCode == HttpStatus.NOT_FOUND) {
+                logger.warn(
+                    "Received NOT_FOUND code from client during Order update, details: {}, message: {}",
+                    ex.data,
+                    ex.message
+                )
+            } else {
+                throw ex
+            }
         }
     }
 

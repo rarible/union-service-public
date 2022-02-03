@@ -84,9 +84,9 @@ class ActivityController(
     ): ResponseEntity<ActivitiesDto> {
         val collectionAddress = IdParser.parseContract(collection)
         val blockchain = collectionAddress.blockchain
-        val dto = withCursor(continuation, cursor, blockchain, size, sort) { continuation, safeSize ->
+        val dto = withCursor(continuation, cursor, blockchain, size, sort) { cont, safeSize ->
             router.getService(collectionAddress.blockchain)
-                .getActivitiesByCollection(type, collectionAddress.value, continuation, safeSize, sort)
+                .getActivitiesByCollection(type, collectionAddress.value, cont, safeSize, sort)
         }
         logger.info(
             "Response for getActivitiesByCollection(type={}, collection={}, continuation={}, size={}, sort={}): " +
@@ -107,13 +107,13 @@ class ActivityController(
         sort: ActivitySortDto?
     ): ResponseEntity<ActivitiesDto> {
         val fullItemId = extractItemId(contract, tokenId, itemId)
-        val dto = withCursor(continuation, cursor, fullItemId.blockchain, size, sort) { continuation, safeSize ->
+        val dto = withCursor(continuation, cursor, fullItemId.blockchain, size, sort) { cont, safeSize ->
             router.getService(fullItemId.blockchain)
                 .getActivitiesByItem(
                     type,
                     fullItemId.contract,
                     fullItemId.tokenId.toString(),
-                    continuation,
+                    cont,
                     safeSize,
                     sort
                 )
@@ -213,12 +213,12 @@ class ActivityController(
         } else {
             clientCall(blockchainContinuation, safeSize)
         }
-        val continuation = if (slice.entities.size >= safeSize) slice.entities.last()
+        val cont = if (slice.entities.size >= safeSize) slice.entities.last()
             .let { factory.getContinuation(it).toString() } else null
         val argv = ArgSlice(blockchain.name, blockchainContinuation, slice)
         val finalSlice = ArgPaging(factory, listOf(argv)).getSlice(safeSize)
         return ActivitiesDto(
-            continuation = continuation,
+            continuation = cont,
             cursor = finalSlice.continuation,
             activities = finalSlice.entities
         )

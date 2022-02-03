@@ -22,3 +22,7 @@ data class UnionWrappedOwnershipEvent(
 data class UnionWrappedOrderEvent(
     val event: UnionOrderEvent
 ) : UnionWrappedEvent()
+
+data class UnionWrappedAuctionEvent(
+    val event: UnionAuctionEvent
+) : UnionWrappedEvent()
