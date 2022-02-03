@@ -38,18 +38,18 @@ rarible:
 integration:
   ethereum:
     enabled: ${consul.ethereum.enabled:true}
-    auctionContracts: ${consul.ethereum.auctionContracts:[]}
+    auctionContracts: ${consul.ethereum.auctionContracts:}
   polygon:
     enabled: ${consul.polygon.enabled:true}
-    auctionContracts: ${consul.polygon.auctionContracts:[]}
+    auctionContracts: ${consul.polygon.auctionContracts:}
   flow:
     enabled: ${consul.flow.enabled:true}
-    auctionContracts: ${consul.flow.auctionContracts:[]}
+    auctionContracts: ${consul.flow.auctionContracts:}
   tezos:
     enabled: ${consul.tezos.enabled:true}
     client:
       url: ${consul.tezos.api.baseUrl}
-    auctionContracts: ${consul.tezos.auctionContracts:[]}
+    auctionContracts: ${consul.tezos.auctionContracts:}
 
 common:
   producer:

@@ -9,5 +9,6 @@ open class DefaultBlockchainProperties(
     val consumer: DefaultConsumerProperties?,
     val client: DefaultClientProperties?,
     val daemon: DaemonWorkerProperties = DaemonWorkerProperties(),
-    val auctionContracts: List<String> = listOf()
+    // Consul doesn't allow to specify an array, so it will be comma-separated string
+    val auctionContracts: String? = null
 )
