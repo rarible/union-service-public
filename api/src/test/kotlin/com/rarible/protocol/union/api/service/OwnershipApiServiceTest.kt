@@ -47,7 +47,7 @@ class OwnershipApiServiceTest {
         enabled = true,
         consumer = null,
         client = null,
-        auctionContracts = listOf(auctionContract.prefixed())
+        auctionContracts = auctionContract.prefixed()
     )
 
     private val orderApiService: OrderApiService = mockk()

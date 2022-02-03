@@ -57,7 +57,7 @@ integration:
         item: 1
         ownership: 1
         order: 1
-    auctionContracts: ${consul.ethereum.auctionContracts:[]}
+    auctionContracts: ${consul.ethereum.auctionContracts:}
   polygon:
     enabled: ${consul.polygon.enabled:true}
     consumer:
@@ -66,7 +66,7 @@ integration:
         item: 1
         ownership: 1
         order: 1
-    auctionContracts: ${consul.polygon.auctionContracts:[]}
+    auctionContracts: ${consul.polygon.auctionContracts:}
   flow:
     enabled: ${consul.flow.enabled:true}
     consumer:
@@ -75,7 +75,7 @@ integration:
         item: 1
         ownership: 1
         order: 1
-    auctionContracts: ${consul.flow.auctionContracts:[]}
+    auctionContracts: ${consul.flow.auctionContracts:}
   tezos:
     enabled: ${consul.tezos.enabled:true}
     client:
@@ -88,7 +88,7 @@ integration:
         item: 1
         ownership: 1
         order: 1
-    auctionContracts: ${consul.tezos.auctionContracts:[]}
+    auctionContracts: ${consul.tezos.auctionContracts:}
 
 listener:
   consumer:
