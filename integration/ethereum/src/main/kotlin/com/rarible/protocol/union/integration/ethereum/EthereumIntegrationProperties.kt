@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.integration.ethereum
 
+import com.rarible.core.daemon.DaemonWorkerProperties
 import com.rarible.protocol.union.core.DefaultBlockchainProperties
 import com.rarible.protocol.union.core.DefaultClientProperties
 import com.rarible.protocol.union.core.DefaultConsumerProperties
@@ -12,10 +13,14 @@ import org.springframework.boot.context.properties.ConstructorBinding
 class EthereumIntegrationProperties(
     enabled: Boolean,
     consumer: DefaultConsumerProperties?,
-    client: DefaultClientProperties?
+    client: DefaultClientProperties?,
+    daemon: DaemonWorkerProperties = DaemonWorkerProperties(),
+    auctionContracts: String? = null
 ) : DefaultBlockchainProperties(
     BlockchainDto.ETHEREUM,
     enabled,
     consumer,
-    client
+    client,
+    daemon,
+    auctionContracts
 )
