@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.core.service
 
 import com.rarible.protocol.union.core.service.router.BlockchainService
+import com.rarible.protocol.union.dto.AuctionBidDto
 import com.rarible.protocol.union.dto.AuctionDto
 import com.rarible.protocol.union.dto.AuctionSortDto
 import com.rarible.protocol.union.dto.AuctionStatusDto
@@ -8,6 +9,12 @@ import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
 
 interface AuctionService : BlockchainService {
+
+    suspend fun getAuctionsBidsById(
+        auctionId: String,
+        continuation: String?,
+        size: Int?
+    ): Slice<AuctionBidDto>
 
     suspend fun getAuctionById(auctionId: String): AuctionDto
 
