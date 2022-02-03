@@ -5,6 +5,7 @@ import com.rarible.protocol.dto.AuctionIdsDto
 import com.rarible.protocol.order.api.client.AuctionControllerApi
 import com.rarible.protocol.union.core.service.AuctionService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
+import com.rarible.protocol.union.dto.AuctionBidDto
 import com.rarible.protocol.union.dto.AuctionDto
 import com.rarible.protocol.union.dto.AuctionSortDto
 import com.rarible.protocol.union.dto.AuctionStatusDto
@@ -21,6 +22,13 @@ open class EthAuctionService(
     private val auctionControllerApi: AuctionControllerApi,
     private val ethAuctionConverter: EthAuctionConverter
 ) : AbstractBlockchainService(blockchain), AuctionService {
+
+    override suspend fun getAuctionsBidsById(auctionId: String,
+                                             continuation: String?,
+                                             size: Int?): Slice<AuctionBidDto> {
+        val bids = auctionControllerApi.getAuctionBidsByHash(auctionId, continuation, size).awaitFirst()
+        return ethAuctionConverter.convert(bids, blockchain)
+    }
 
     override suspend fun getAuctionById(auctionId: String): AuctionDto {
         val auction = auctionControllerApi.getAuctionByHash(auctionId).awaitFirst()
