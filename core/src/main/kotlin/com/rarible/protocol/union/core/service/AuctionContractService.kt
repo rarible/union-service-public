@@ -14,7 +14,7 @@ class AuctionContractService(
     private val logger = LoggerFactory.getLogger(AuctionContractService::class.java)
 
     private val auctionContracts = blockchainProperties.associateBy({ it.blockchain }, {
-        val parsedContracts = it.auctionContracts?.split(",")?.filter { str -> str.isNotBlank() }
+        val parsedContracts = it.auctionContracts?.split(",")?.filter { str -> str.isNotBlank() } ?: emptyList()
         HashSet(parsedContracts)
     })
 
