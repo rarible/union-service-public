@@ -81,6 +81,11 @@ class CollectionController(
         return ResponseEntity.ok(toDto(combinedPage))
     }
 
+    override suspend fun refreshCollectionMeta(collection: String): ResponseEntity<Unit> {
+        // TODO will be implemented later
+        return ResponseEntity.ok().build()
+    }
+
     private fun toDto(page: Page<CollectionDto>): CollectionsDto {
         return CollectionsDto(
             total = page.total,
