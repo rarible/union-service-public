@@ -4,7 +4,6 @@ import com.rarible.protocol.union.core.service.AuctionService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.AuctionDto
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.listener.service.EnrichmentAuctionEventService
 import com.rarible.protocol.union.listener.test.data.defaultUnionListenerProperties
@@ -37,7 +36,7 @@ class ReconciliationAuctionTest {
     fun beforeEach() {
         clearMocks(auctionServiceRouter, auctionEventService)
         coEvery { auctionServiceRouter.getService(BlockchainDto.ETHEREUM) } returns auctionService
-        coEvery { auctionEventService.updateAuction(any()) } returns Unit
+        coEvery { auctionEventService.onAuctionUpdated(any()) } returns Unit
     }
 
     @Test
@@ -62,7 +61,7 @@ class ReconciliationAuctionTest {
         val result = auctionReconciliationService.reconcileAuctions(null, BlockchainDto.ETHEREUM)
 
         assertEquals(nextContinuation, result)
-        coVerify(exactly = testPageSize) { auctionEventService.updateAuction(any()) }
+        coVerify(exactly = testPageSize) { auctionEventService.onAuctionUpdated(any()) }
     }
 
     @Test
@@ -74,7 +73,7 @@ class ReconciliationAuctionTest {
         val result = auctionReconciliationService.reconcileAuctions(lastContinuation, BlockchainDto.ETHEREUM)
 
         assertEquals(nextContinuation, result)
-        coVerify(exactly = testPageSize) { auctionEventService.updateAuction(any()) }
+        coVerify(exactly = testPageSize) { auctionEventService.onAuctionUpdated(any()) }
     }
 
     @Test
@@ -86,7 +85,7 @@ class ReconciliationAuctionTest {
         val result = auctionReconciliationService.reconcileAuctions(lastContinuation, BlockchainDto.ETHEREUM)
 
         assertNull(result)
-        coVerify(exactly = 50) { auctionEventService.updateAuction(any()) }
+        coVerify(exactly = 50) { auctionEventService.onAuctionUpdated(any()) }
     }
 
     @Test
@@ -96,7 +95,7 @@ class ReconciliationAuctionTest {
         val result = auctionReconciliationService.reconcileAuctions(null, BlockchainDto.ETHEREUM)
 
         assertNull(result)
-        coVerify(exactly = 0) { auctionEventService.updateAuction(any()) }
+        coVerify(exactly = 0) { auctionEventService.onAuctionUpdated(any()) }
     }
 
     private fun mockGetAuctionsAll(continuation: String?, size: Int, result: Slice<AuctionDto>): Unit {

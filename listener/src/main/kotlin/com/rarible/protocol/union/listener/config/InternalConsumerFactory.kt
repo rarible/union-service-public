@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.listener.config
 
-import com.rarible.core.application.ApplicationEnvironmentInfo
 import com.rarible.core.daemon.DaemonWorkerProperties
 import com.rarible.core.daemon.sequential.ConsumerWorker
 import com.rarible.core.kafka.RaribleKafkaConsumer
@@ -12,7 +11,6 @@ import org.springframework.stereotype.Component
 
 @Component
 class InternalConsumerFactory(
-    applicationEnvironmentInfo: ApplicationEnvironmentInfo,
     private val meterRegistry: MeterRegistry
 ) {
 

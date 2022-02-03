@@ -1,23 +1,22 @@
 package com.rarible.protocol.union.core.model
 
+import com.fasterxml.jackson.annotation.JsonSubTypes
+import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.rarible.protocol.union.dto.AuctionDto
-import com.rarible.protocol.union.dto.AuctionIdDto
-import com.rarible.protocol.union.dto.BlockchainDto
 
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY)
+@JsonSubTypes(
+    JsonSubTypes.Type(name = "UPDATE", value = UnionAuctionUpdateEvent::class),
+    JsonSubTypes.Type(name = "DELETE", value = UnionAuctionDeleteEvent::class)
+)
 sealed class UnionAuctionEvent {
-
-    abstract val auctionId: AuctionIdDto
+    abstract val auction: AuctionDto
 }
 
 data class UnionAuctionUpdateEvent(
-    override val auctionId: AuctionIdDto,
-    val auction: AuctionDto
-) : UnionAuctionEvent() {
-
-    constructor(auction: AuctionDto) : this(auction.id, auction)
-
-}
+    override val auction: AuctionDto
+) : UnionAuctionEvent()
 
 data class UnionAuctionDeleteEvent(
-    override val auctionId: AuctionIdDto
+    override val auction: AuctionDto
 ) : UnionAuctionEvent()

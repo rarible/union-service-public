@@ -78,9 +78,9 @@ class OrderApiService(
         status: List<OrderStatusDto>?
     ): Slice<OrderDto> {
         val evaluatedBlockchains = router.getEnabledBlockchains(blockchains).map(BlockchainDto::name)
-        val slices = getOrdersByBlockchains(continuation, evaluatedBlockchains) { blockchain, continuation ->
+        val slices = getOrdersByBlockchains(continuation, evaluatedBlockchains) { blockchain, cont ->
             val blockDto = BlockchainDto.valueOf(blockchain)
-            router.getService(blockDto).getOrdersAll(continuation, size, sort, status)
+            router.getService(blockDto).getOrdersAll(cont, size, sort, status)
         }
         return ArgPaging(continuationFactory(sort), slices).getSlice(size)
     }

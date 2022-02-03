@@ -160,7 +160,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
     fun `reset item meta by id - ethereum`() = runBlocking<Unit> {
         val itemId = randomEthItemId()
 
-        coEvery { testEthereumItemApi.resetNftItemMetaById(itemId.value) } returns Mono.first()
+        coEvery { testEthereumItemApi.resetNftItemMetaById(itemId.value) } returns Mono.empty()
         coEvery { testEthereumItemApi.getNftItemMetaById(itemId.value) } returns Mono.just(randomEthItemMeta())
 
         itemControllerClient.resetItemMeta(itemId.fullId()).awaitFirstOrNull()
@@ -172,7 +172,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
     fun `reset item meta by id - flow`() = runBlocking<Unit> {
         val itemId = randomFlowItemId()
 
-        coEvery { testFlowItemApi.resetItemMeta(itemId.value) } returns Mono.first()
+        coEvery { testFlowItemApi.resetItemMeta(itemId.value) } returns Mono.empty()
         coEvery { testFlowItemApi.getNftItemMetaById(itemId.value) } returns Mono.just(randomFlowMetaDto())
 
         itemControllerClient.resetItemMeta(itemId.fullId()).awaitFirstOrNull()
@@ -184,7 +184,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
     fun `reset item meta by id - tezos`() = runBlocking<Unit> {
         val itemId = randomTezosItemId()
 
-        coEvery { testTezosItemApi.resetNftItemMetaById(itemId.value) } returns Mono.first()
+        coEvery { testTezosItemApi.resetNftItemMetaById(itemId.value) } returns Mono.empty()
         coEvery { testTezosItemApi.getNftItemMetaById(itemId.value) } returns Mono.just(randomTezosMetaDto())
 
         itemControllerClient.resetItemMeta(itemId.fullId()).awaitFirstOrNull()

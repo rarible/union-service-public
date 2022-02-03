@@ -37,7 +37,7 @@ class ReconciliationCorruptedItemJob(
             do {
                 next = reconcileBatch(next, blockchainDto)
                 if (next != null) {
-                    emit(next!!)
+                    emit(next)
                 }
             } while (next != null)
         }
