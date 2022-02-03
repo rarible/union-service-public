@@ -8,6 +8,7 @@ import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.UnionAddress
+import com.rarible.protocol.union.integration.ethereum.converter.EthAuctionConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthCollectionConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthItemConverter
@@ -15,6 +16,7 @@ import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConvert
 import com.rarible.protocol.union.integration.ethereum.converter.EthOwnershipConverter
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAssetErc20
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAssetErc721
+import com.rarible.protocol.union.integration.ethereum.data.randomEthAuctionDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthLegacySellOrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthNftItemDto
@@ -108,4 +110,21 @@ fun randomUnionBidOrderDto(itemId: ItemIdDto) = runBlocking {
     )
 }
 
+fun randomUnionAuctionDto(itemId: ItemIdDto) = randomUnionAuctionDto(
+    OwnershipIdDto(
+        itemId.blockchain,
+        itemId.contract,
+        itemId.tokenId,
+        randomUnionAddress()
+    )
+)
+
+fun randomUnionAuctionDto(ownershipId: OwnershipIdDto) = runBlocking {
+    mockedEthAuctionConverter.convert(
+        randomEthAuctionDto(ItemIdDto(ownershipId.blockchain, ownershipId.contract, ownershipId.tokenId)),
+        ownershipId.blockchain
+    ).copy(seller = ownershipId.owner)
+}
+
 private val mockedEthOrderConverter = EthOrderConverter(CurrencyMock.currencyServiceMock)
+private val mockedEthAuctionConverter = EthAuctionConverter(CurrencyMock.currencyServiceMock)

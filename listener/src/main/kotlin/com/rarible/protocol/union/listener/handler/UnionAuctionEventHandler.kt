@@ -2,27 +2,21 @@ package com.rarible.protocol.union.listener.handler
 
 import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.apm.SpanType
+import com.rarible.core.kafka.RaribleKafkaProducer
+import com.rarible.protocol.union.core.event.KafkaEventFactory
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
-import com.rarible.protocol.union.core.model.UnionAuctionDeleteEvent
 import com.rarible.protocol.union.core.model.UnionAuctionEvent
-import com.rarible.protocol.union.core.model.UnionAuctionUpdateEvent
-import com.rarible.protocol.union.listener.service.EnrichmentAuctionEventService
+import com.rarible.protocol.union.core.model.UnionWrappedEvent
 import org.springframework.stereotype.Component
 
 @Component
 @CaptureSpan(type = SpanType.EVENT)
 class UnionAuctionEventHandler(
-    private val auctionEventService: EnrichmentAuctionEventService
+    private val eventsProducer: RaribleKafkaProducer<UnionWrappedEvent>
 ) : IncomingEventHandler<UnionAuctionEvent> {
 
+    // Auction events should be sent to internal topic to avoid concurrent updates in Enrichment
     override suspend fun onEvent(event: UnionAuctionEvent) {
-        when (event) {
-            is UnionAuctionUpdateEvent -> {
-                auctionEventService.updateAuction(event.auction, true)
-            }
-            is UnionAuctionDeleteEvent -> {
-                auctionEventService.deleteAuction(event.auctionId, true)
-            }
-        }
+        eventsProducer.send(KafkaEventFactory.wrappedAuctionEvent(event))
     }
 }

@@ -4,7 +4,6 @@ import com.rarible.protocol.union.core.service.AuctionService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.AuctionDto
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.listener.config.UnionListenerProperties
 import com.rarible.protocol.union.listener.service.EnrichmentAuctionEventService
 import kotlinx.coroutines.async
@@ -35,7 +34,7 @@ class ReconciliationAuctionsJob(
             do {
                 next = reconcileAuctions(next, blockchain)
                 if (next != null) {
-                    emit(next!!)
+                    emit(next)
                 }
             } while (next != null)
         }
@@ -75,7 +74,7 @@ class ReconciliationAuctionsJob(
 
     private suspend fun safeUpdate(auction: AuctionDto) {
         try {
-            auctionEventService.updateAuction(auction, config.notificationEnabled)
+            auctionEventService.onAuctionUpdated(auction)
         } catch (e: Exception) {
             logger.error("Unable to reconcile auction {} : {}", e.message, e)
         }

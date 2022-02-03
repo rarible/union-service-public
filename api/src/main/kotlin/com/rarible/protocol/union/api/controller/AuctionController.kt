@@ -2,6 +2,8 @@ package com.rarible.protocol.union.api.controller
 
 import com.rarible.protocol.union.core.service.AuctionService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
+import com.rarible.protocol.union.dto.AuctionBidDto
+import com.rarible.protocol.union.dto.AuctionBidsDto
 import com.rarible.protocol.union.dto.AuctionDto
 import com.rarible.protocol.union.dto.AuctionSortDto
 import com.rarible.protocol.union.dto.AuctionStatusDto
@@ -30,6 +32,16 @@ class AuctionController(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     private val empty = AuctionsDto(0, null, emptyList())
+
+    override suspend fun getAuctionBidsById(
+        id: String,
+        continuation: String?,
+        size: Int?
+    ): ResponseEntity<AuctionBidsDto> {
+        val auctionId = IdParser.parseAuctionId(id)
+        val slice = router.getService(auctionId.blockchain).getAuctionsBidsById(auctionId.value, continuation, size)
+        return ResponseEntity.ok(toDto(slice))
+    }
 
     override suspend fun getAuctionById(id: String): ResponseEntity<AuctionDto> {
         val auctionId = IdParser.parseAuctionId(id)
@@ -189,6 +201,14 @@ class AuctionController(
             total = slice.entities.size.toLong(),
             continuation = slice.continuation,
             auctions = slice.entities
+        )
+    }
+
+    private fun toDto(slice: Slice<AuctionBidDto>): AuctionBidsDto {
+        return AuctionBidsDto(
+            total = slice.entities.size.toLong(),
+            continuation = slice.continuation,
+            bids = slice.entities
         )
     }
 

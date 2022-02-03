@@ -1,7 +1,6 @@
 package com.rarible.protocol.union.api.controller
 
 import com.rarible.core.common.nowMillis
-import com.rarible.core.test.data.randomBigInt
 import com.rarible.core.test.data.randomInt
 import com.rarible.core.test.data.randomString
 import com.rarible.protocol.dto.Erc20AssetTypeDto
@@ -396,8 +395,6 @@ class OrderControllerFt : AbstractIntegrationTest() {
     @Test
     fun `get sell orders by item - multiple blockchain specified`() = runBlocking<Unit> {
         val ethItemId = randomEthItemId()
-        val contract = randomEthAddress()
-        val tokenId = randomBigInt()
         val maker = randomFlowAddress()
 
         val result = orderControllerClient.getSellOrdersByItem(

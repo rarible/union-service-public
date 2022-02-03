@@ -203,11 +203,11 @@ class ItemController(
         return when {
             result.url?.isNotEmpty() == true -> {
                 val httpHeaders = HttpHeaders()
-                httpHeaders.location = URI(result.url)
+                httpHeaders.location = URI(result.url!!)
                 ResponseEntity(httpHeaders, HttpStatus.TEMPORARY_REDIRECT)
             }
             result.content?.isNotEmpty() == true -> {
-                val resource = ByteArrayResource(result.content)
+                val resource = ByteArrayResource(result.content!!)
                 ResponseEntity.ok()
                     .contentLength(resource.contentLength())
                     .contentType(MediaType.parseMediaType(result.mime))

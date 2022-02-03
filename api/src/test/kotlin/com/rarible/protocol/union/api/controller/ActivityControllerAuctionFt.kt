@@ -83,7 +83,7 @@ class ActivityControllerAuctionFt : AbstractIntegrationTest() {
 
     @Test
     fun `get auctions activities by collection - ethereum`() = runBlocking<Unit> {
-        val types = listOf(ActivityTypeDto.STARTED_AUCTION)
+        val types = listOf(ActivityTypeDto.AUCTION_STARTED)
         val ethCollectionId = ContractAddressConverter.convert(BlockchainDto.ETHEREUM, randomEthAddress())
         val auctionActivity = randomEthAuctionStartActivity()
 
@@ -101,7 +101,7 @@ class ActivityControllerAuctionFt : AbstractIntegrationTest() {
 
     @Test
     fun `get auctions activities by item - ethereum`() = runBlocking<Unit> {
-        val types = listOf(ActivityTypeDto.CANCEL_AUCTION)
+        val types = listOf(ActivityTypeDto.AUCTION_CANCEL)
         val ethItemId = randomEthItemId()
         val auctionActivity = randomEthAuctionCancelActivity()
 

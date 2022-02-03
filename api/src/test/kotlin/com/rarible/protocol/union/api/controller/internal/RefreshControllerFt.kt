@@ -31,6 +31,7 @@ import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipDt
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipId
 import io.mockk.coVerify
 import io.mockk.every
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -39,6 +40,7 @@ import reactor.core.publisher.Mono
 import scalether.domain.Address
 
 @IntegrationTest
+@ExperimentalCoroutinesApi
 class RefreshControllerFt : AbstractIntegrationTest() {
 
     @Autowired

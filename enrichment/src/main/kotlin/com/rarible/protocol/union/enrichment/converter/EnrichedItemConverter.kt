@@ -3,6 +3,7 @@ package com.rarible.protocol.union.enrichment.converter
 import com.rarible.protocol.union.core.converter.ContractAddressConverter
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.dto.AuctionDto
+import com.rarible.protocol.union.dto.AuctionIdDto
 import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.MetaDto
 import com.rarible.protocol.union.dto.OrderDto
@@ -17,7 +18,7 @@ object EnrichedItemConverter {
         shortItem: ShortItem? = null,
         meta: MetaDto? = null,
         orders: Map<OrderIdDto, OrderDto> = emptyMap(),
-        auctions: List<AuctionDto> = emptyList()
+        auctions: Map<AuctionIdDto, AuctionDto> = emptyMap()
     ): ItemDto {
         return ItemDto(
             id = item.id,
@@ -39,7 +40,7 @@ object EnrichedItemConverter {
             // Enrichment data
             bestSellOrder = shortItem?.bestSellOrder?.let { orders[it.dtoId] },
             bestBidOrder = shortItem?.bestBidOrder?.let { orders[it.dtoId] },
-            auctions = auctions,
+            auctions = shortItem?.auctions?.mapNotNull { auctions[it] } ?: emptyList(),
             totalStock = shortItem?.totalStock ?: BigInteger.ZERO,
             sellers = shortItem?.sellers ?: 0
         )

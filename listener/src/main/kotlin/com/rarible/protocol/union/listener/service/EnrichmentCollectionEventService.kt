@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.map
 import org.slf4j.LoggerFactory
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
 
 @Component
@@ -69,7 +70,15 @@ class EnrichmentCollectionEventService(
         try {
             call()
         } catch (ex: WebClientResponseProxyException) {
-            logger.warn("Received NOT_FOUND code from client, details: {}, message: {}", ex.data, ex.message)
+            if (ex.statusCode == HttpStatus.NOT_FOUND) {
+                logger.warn(
+                    "Received NOT_FOUND code from client during Collection update, details: {}, message: {}",
+                    ex.data,
+                    ex.message
+                )
+            } else {
+                throw ex
+            }
         }
     }
 }

@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.listener.handler.internal
 
 import com.rarible.protocol.union.core.handler.InternalEventHandler
+import com.rarible.protocol.union.core.model.UnionWrappedAuctionEvent
 import com.rarible.protocol.union.core.model.UnionWrappedEvent
 import com.rarible.protocol.union.core.model.UnionWrappedItemEvent
 import com.rarible.protocol.union.core.model.UnionWrappedOrderEvent
@@ -14,7 +15,8 @@ import org.springframework.stereotype.Component
 class UnionWrappedEventHandler(
     private val wrappedItemEventHandler: UnionWrappedItemEventHandler,
     private val wrappedOwnershipEventHandler: UnionWrappedOwnershipEventHandler,
-    private val wrappedOrderEventHandler: UnionWrappedOrderEventHandler
+    private val wrappedOrderEventHandler: UnionWrappedOrderEventHandler,
+    private val wrappedAuctionEventHandler: UnionWrappedAuctionEventHandler
 ) : InternalEventHandler<UnionWrappedEvent> {
 
     override suspend fun handle(event: UnionWrappedEvent) {
@@ -22,6 +24,7 @@ class UnionWrappedEventHandler(
             is UnionWrappedItemEvent -> wrappedItemEventHandler.onEvent(event.event)
             is UnionWrappedOwnershipEvent -> wrappedOwnershipEventHandler.onEvent(event.event)
             is UnionWrappedOrderEvent -> wrappedOrderEventHandler.onEvent(event.event)
+            is UnionWrappedAuctionEvent -> wrappedAuctionEventHandler.onEvent(event.event)
         }
     }
 }

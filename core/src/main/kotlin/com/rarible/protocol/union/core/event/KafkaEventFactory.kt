@@ -1,13 +1,16 @@
 package com.rarible.protocol.union.core.event
 
 import com.rarible.core.kafka.KafkaMessage
+import com.rarible.protocol.union.core.model.UnionAuctionEvent
 import com.rarible.protocol.union.core.model.UnionItemEvent
 import com.rarible.protocol.union.core.model.UnionOrderEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipEvent
+import com.rarible.protocol.union.core.model.UnionWrappedAuctionEvent
 import com.rarible.protocol.union.core.model.UnionWrappedEvent
 import com.rarible.protocol.union.core.model.UnionWrappedItemEvent
 import com.rarible.protocol.union.core.model.UnionWrappedOrderEvent
 import com.rarible.protocol.union.core.model.UnionWrappedOwnershipEvent
+import com.rarible.protocol.union.core.model.getItemId
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.CollectionEventDto
 import com.rarible.protocol.union.dto.ContractAddress
@@ -43,6 +46,10 @@ object KafkaEventFactory {
 
     private val COLLECTION_EVENT_HEADERS = mapOf(
         "protocol.union.collection.event.version" to UnionEventTopicProvider.VERSION
+    )
+
+    private val AUCTION_EVENT_HEADERS = mapOf(
+        "protocol.union.auction.event.version" to UnionEventTopicProvider.VERSION
     )
 
     fun activityEvent(dto: ActivityDto): KafkaMessage<ActivityDto> {
@@ -136,6 +143,15 @@ object KafkaEventFactory {
             key = key,
             value = UnionWrappedOrderEvent(event),
             headers = ORDER_EVENT_HEADERS
+        )
+    }
+
+    fun wrappedAuctionEvent(event: UnionAuctionEvent): KafkaMessage<UnionWrappedEvent> {
+        return KafkaMessage(
+            id = UUID.randomUUID().toString(),
+            key = event.auction.getItemId().fullId(),
+            value = UnionWrappedAuctionEvent(event),
+            headers = AUCTION_EVENT_HEADERS
         )
     }
 
