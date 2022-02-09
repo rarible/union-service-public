@@ -190,7 +190,9 @@ object EthConverter {
                 data = RaribleAuctionV1BidDataV1Dto(
                     originFees = source.data.originFees.map { convertToPayout(it, blockchain) },
                     payouts = source.data.payouts.map { convertToPayout(it, blockchain) }
-                )
+                ),
+                date = source.date,
+                status = convert(source.status)
             )
         }
     }
@@ -216,6 +218,13 @@ object EthConverter {
             AuctionStatusDto.ACTIVE -> com.rarible.protocol.dto.AuctionStatusDto.ACTIVE
             AuctionStatusDto.CANCELLED -> com.rarible.protocol.dto.AuctionStatusDto.CANCELLED
             AuctionStatusDto.FINISHED -> com.rarible.protocol.dto.AuctionStatusDto.FINISHED
+        }
+    }
+
+    private fun convert(source: com.rarible.protocol.dto.AuctionBidDto.Status): AuctionBidDto.Status {
+        return when (source) {
+            com.rarible.protocol.dto.AuctionBidDto.Status.ACTIVE -> AuctionBidDto.Status.ACTIVE
+            com.rarible.protocol.dto.AuctionBidDto.Status.HISTORICAL -> AuctionBidDto.Status.HISTORICAL
         }
     }
 }

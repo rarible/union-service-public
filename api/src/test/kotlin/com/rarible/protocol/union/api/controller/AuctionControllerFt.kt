@@ -4,6 +4,7 @@ import com.rarible.protocol.union.api.client.AuctionControllerApi
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
+import com.rarible.protocol.union.dto.AuctionBidDto
 import com.rarible.protocol.union.dto.AuctionIdDto
 import com.rarible.protocol.union.dto.AuctionSortDto
 import com.rarible.protocol.union.dto.AuctionStatusDto
@@ -61,10 +62,15 @@ class AuctionControllerFt : AbstractIntegrationTest() {
 
         val unionBids = auctionControllerClient.getAuctionBidsById(auctionIdFull, null, null).awaitFirst()
 
-        assertThat(unionBids.bids).hasSize(1)
+        assertThat(unionBids.bids).hasSize(2)
         assertThat(unionBids.bids[0].amount).isEqualTo(ethBids.bids[0].amount)
         assertThat(unionBids.bids[0].buyer).isEqualTo(
             UnionAddressConverter.convert(BlockchainDto.ETHEREUM, ethBids.bids[0].buyer.prefixed()))
+        assertThat(unionBids.bids[0].date).isNotNull
+        assertThat(unionBids.bids[0].status).isEqualTo(AuctionBidDto.Status.ACTIVE)
+
+        assertThat(unionBids.bids[1].amount).isEqualTo(ethBids.bids[1].amount)
+        assertThat(unionBids.bids[1].status).isEqualTo(AuctionBidDto.Status.HISTORICAL)
     }
 
     @Test
