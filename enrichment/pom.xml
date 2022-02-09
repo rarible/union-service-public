@@ -46,6 +46,10 @@
             <groupId>com.rarible.protocol.union</groupId>
             <artifactId>rarible-union-integration-tezos</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.rarible.protocol.union</groupId>
+            <artifactId>rarible-union-integration-solana</artifactId>
+        </dependency>
 
         <!-- =============== Rarible-core ================ -->
         <dependency>
@@ -96,6 +100,13 @@
         <dependency>
             <groupId>com.rarible.protocol.union</groupId>
             <artifactId>rarible-union-integration-tezos</artifactId>
+            <classifier>tests</classifier>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.rarible.protocol.union</groupId>
+            <artifactId>rarible-union-integration-solana</artifactId>
             <classifier>tests</classifier>
             <type>test-jar</type>
             <scope>test</scope>

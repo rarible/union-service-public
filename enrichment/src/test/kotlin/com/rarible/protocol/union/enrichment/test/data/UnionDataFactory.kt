@@ -23,6 +23,8 @@ import com.rarible.protocol.union.integration.ethereum.data.randomEthNftItemDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipId
 import com.rarible.protocol.union.integration.flow.converter.FlowItemConverter
+import com.rarible.protocol.union.integration.solana.converter.SolanaItemConverter
+import com.rarible.protocol.union.integration.solana.data.randomSolanaTokenDto
 import com.rarible.protocol.union.test.data.randomFlowNftItemDto
 import com.rarible.protocol.union.test.mock.CurrencyMock
 import kotlinx.coroutines.runBlocking
@@ -50,6 +52,10 @@ fun randomUnionItem(id: ItemIdDto): UnionItem {
             id.blockchain
         )
         BlockchainDto.TEZOS -> TODO()
+        BlockchainDto.SOLANA -> SolanaItemConverter.convert(
+            randomSolanaTokenDto(id),
+            id.blockchain
+        )
     }
 }
 
