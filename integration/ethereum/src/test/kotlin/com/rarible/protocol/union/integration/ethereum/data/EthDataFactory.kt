@@ -17,6 +17,7 @@ import com.rarible.protocol.dto.AuctionActivityEndDto
 import com.rarible.protocol.dto.AuctionActivityFinishDto
 import com.rarible.protocol.dto.AuctionActivityOpenDto
 import com.rarible.protocol.dto.AuctionActivityStartDto
+import com.rarible.protocol.dto.AuctionBidDto
 import com.rarible.protocol.dto.AuctionBidsPaginationDto
 import com.rarible.protocol.dto.AuctionDto
 import com.rarible.protocol.dto.AuctionHistoryDto
@@ -492,7 +493,9 @@ fun randomEthAuctionDto(itemId: ItemIdDto): AuctionDto {
             data = RaribleAuctionV1BidDataV1Dto(
                 originFees = listOf(PartDto(randomAddress(), 100)),
                 payouts = listOf(PartDto(randomAddress(), 100))
-            )
+            ),
+            date = Instant.now(),
+            status = AuctionBidDto.Status.ACTIVE
         ),
         data = RaribleAuctionV1DataV1Dto(
             originFees = listOf(PartDto(randomAddress(), 100)),
@@ -509,11 +512,23 @@ fun randomEthAuctionBidsDto(): AuctionBidsPaginationDto {
         bids = listOf(
             RaribleAuctionV1BidV1Dto(
                 buyer = randomAddress(),
+                amount = BigDecimal.TEN,
+                data = RaribleAuctionV1BidDataV1Dto(
+                    originFees = listOf(PartDto(randomAddress(), 100)),
+                    payouts = listOf(PartDto(randomAddress(), 100))
+                ),
+                date = Instant.now(),
+                status = AuctionBidDto.Status.ACTIVE
+            ),
+            RaribleAuctionV1BidV1Dto(
+                buyer = randomAddress(),
                 amount = BigDecimal.ONE,
                 data = RaribleAuctionV1BidDataV1Dto(
                     originFees = listOf(PartDto(randomAddress(), 100)),
                     payouts = listOf(PartDto(randomAddress(), 100))
-                )
+                ),
+                date = Instant.now().minusSeconds(10),
+                status = AuctionBidDto.Status.HISTORICAL
             )
         ),
         continuation = null
@@ -603,7 +618,9 @@ fun randomEthAuctionBidActivity(): AuctionActivityBidDto {
         bid = RaribleAuctionV1BidV1Dto(
             buyer = randomAddress(),
             amount = randomBigDecimal(),
-            data = RaribleAuctionV1BidDataV1Dto(listOf(randomEthPartDto()), listOf(randomEthPartDto()))
+            data = RaribleAuctionV1BidDataV1Dto(listOf(randomEthPartDto()), listOf(randomEthPartDto())),
+            date = Instant.now(),
+            status = AuctionBidDto.Status.ACTIVE
         )
     )
 }
