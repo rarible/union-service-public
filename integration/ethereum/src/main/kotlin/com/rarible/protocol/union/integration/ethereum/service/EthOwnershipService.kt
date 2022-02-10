@@ -17,7 +17,7 @@ open class EthOwnershipService(
 ) : AbstractBlockchainService(blockchain), OwnershipService {
 
     override suspend fun getOwnershipById(ownershipId: String): UnionOwnership {
-        val ownership = ownershipControllerApi.getNftOwnershipById(ownershipId).awaitFirst()
+        val ownership = ownershipControllerApi.getNftOwnershipById(ownershipId, false).awaitFirst()
         return EthOwnershipConverter.convert(ownership, blockchain)
     }
 

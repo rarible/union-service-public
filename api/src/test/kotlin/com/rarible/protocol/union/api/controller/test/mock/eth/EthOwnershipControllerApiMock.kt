@@ -15,13 +15,13 @@ class EthOwnershipControllerApiMock(
 
     fun mockGetNftOwnershipById(ownershipId: OwnershipIdDto, returnOwnership: NftOwnershipDto?) {
         every {
-            nftOwnershipControllerApi.getNftOwnershipById(ownershipId.value)
+            nftOwnershipControllerApi.getNftOwnershipById(ownershipId.value, false)
         } returns (if (returnOwnership == null) Mono.empty() else Mono.just(returnOwnership))
     }
 
     fun mockGetNftOwnershipByIdNotFound(ownershipId: OwnershipIdDto) {
         every {
-            nftOwnershipControllerApi.getNftOwnershipById(ownershipId.value)
+            nftOwnershipControllerApi.getNftOwnershipById(ownershipId.value, false)
         } throws WebClientResponseException(404, "", null, null, null, null)
     }
 

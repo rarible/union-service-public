@@ -71,7 +71,7 @@ class EnrichmentCollectionEventServiceIt : AbstractIntegrationTest() {
 
         coEvery { testEthereumItemApi.getNftItemById(itemId.value) } returns ethItem.toMono()
         coEvery { testEthereumItemApi.getNftItemMetaById(itemId.value) } returns ethItem.meta!!.toMono()
-        coEvery { testEthereumOwnershipApi.getNftOwnershipById(ownershipId.value) } returns ethOwnership.toMono()
+        coEvery { testEthereumOwnershipApi.getNftOwnershipById(ownershipId.value, false) } returns ethOwnership.toMono()
 
         val nft = randomEthNftItemDto(itemId)
         coEvery { testEthereumItemApi.getNftItemsByCollection(eq(collection.value), any(), any(), any())

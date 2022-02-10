@@ -28,7 +28,7 @@ class EthOwnershipServiceTest {
 
         val expected = EthOwnershipConverter.convert(ownership, BlockchainDto.ETHEREUM)
 
-        coEvery { ownershipControllerApi.getNftOwnershipById(ownership.id) } returns ownership.toMono()
+        coEvery { ownershipControllerApi.getNftOwnershipById(ownership.id, false) } returns ownership.toMono()
 
         val result = service.getOwnershipById(ownershipId.value)
 
