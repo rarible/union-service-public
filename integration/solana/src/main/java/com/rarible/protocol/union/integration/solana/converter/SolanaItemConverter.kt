@@ -5,7 +5,6 @@ import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CreatorDto
 import com.rarible.protocol.union.dto.ItemIdDto
-import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.solana.protocol.dto.TokenCreatorPartDto
 import com.rarible.solana.protocol.dto.TokenDto
 import java.math.BigInteger
@@ -18,6 +17,7 @@ object SolanaItemConverter {
                 contract = token.address,
                 tokenId = BigInteger.ZERO // TODO[solana]: not applicable.
             ),
+            collection = null,
             creators = emptyList(), // TODO[solana]: set up creators.
             owners = emptyList(),
             royalties = emptyList(), // TODO[solana]: royalties are not supported yet.
