@@ -21,6 +21,7 @@ class SolanaItemConverterTest {
                     contract = tokenDto.address,
                     tokenId = BigInteger.ZERO // TODO[solana]: not applicable.
                 ),
+                collection = null,
                 creators = emptyList(),
                 owners = emptyList(),
                 royalties = emptyList(),
