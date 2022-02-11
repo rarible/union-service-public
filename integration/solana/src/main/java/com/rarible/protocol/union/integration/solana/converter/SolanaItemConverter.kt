@@ -18,7 +18,6 @@ object SolanaItemConverter {
                 contract = token.address,
                 tokenId = BigInteger.ZERO // TODO[solana]: not applicable.
             ),
-            collection = null,
             creators = emptyList(), // TODO[solana]: set up creators.
             collection = null, // TODO[solana]: may be fill from Solana API.
             owners = emptyList(),
