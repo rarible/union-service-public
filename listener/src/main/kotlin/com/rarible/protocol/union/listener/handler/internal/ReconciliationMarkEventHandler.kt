@@ -2,46 +2,48 @@ package com.rarible.protocol.union.listener.handler.internal
 
 import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.core.handler.InternalEventHandler
-import com.rarible.protocol.union.enrichment.model.ItemReconciliationMark
-import com.rarible.protocol.union.enrichment.model.OwnershipReconciliationMark
 import com.rarible.protocol.union.enrichment.model.ReconciliationItemMarkEvent
+import com.rarible.protocol.union.enrichment.model.ReconciliationMark
+import com.rarible.protocol.union.enrichment.model.ReconciliationMarkAbstractEvent
 import com.rarible.protocol.union.enrichment.model.ReconciliationMarkEvent
+import com.rarible.protocol.union.enrichment.model.ReconciliationMarkType
 import com.rarible.protocol.union.enrichment.model.ReconciliationOwnershipMarkEvent
-import com.rarible.protocol.union.enrichment.repository.ItemReconciliationMarkRepository
-import com.rarible.protocol.union.enrichment.repository.OwnershipReconciliationMarkRepository
+import com.rarible.protocol.union.enrichment.repository.ReconciliationMarkRepository
 import org.springframework.stereotype.Component
 
 @Component
 class ReconciliationMarkEventHandler(
-    private val itemReconciliationMarkRepository: ItemReconciliationMarkRepository,
-    private val ownershipReconciliationMarkRepository: OwnershipReconciliationMarkRepository
-) : InternalEventHandler<ReconciliationMarkEvent> {
+    private val itemReconciliationMarkRepository: ReconciliationMarkRepository
+) : InternalEventHandler<ReconciliationMarkAbstractEvent> {
 
-    override suspend fun handle(event: ReconciliationMarkEvent) {
-        when (event) {
+    override suspend fun handle(event: ReconciliationMarkAbstractEvent) {
+        val mark = when (event) {
+            // TODO remove later
             is ReconciliationItemMarkEvent -> {
-                val mark = ItemReconciliationMark(
-                    blockchain = event.itemId.blockchain,
-                    token = event.itemId.contract,
-                    tokenId = event.itemId.tokenId,
+                ReconciliationMark(
+                    id = event.itemId.fullId(),
+                    type = ReconciliationMarkType.ITEM,
                     lastUpdatedAt = nowMillis()
                 )
-                if (itemReconciliationMarkRepository.get(mark.id) == null) {
-                    itemReconciliationMarkRepository.save(mark)
-                }
             }
+            // TODO remove later
             is ReconciliationOwnershipMarkEvent -> {
-                val mark = OwnershipReconciliationMark(
-                    blockchain = event.ownershipId.blockchain,
-                    token = event.ownershipId.contract,
-                    tokenId = event.ownershipId.tokenId,
-                    owner = event.ownershipId.owner.value,
+                ReconciliationMark(
+                    id = event.ownershipId.fullId(),
+                    type = ReconciliationMarkType.OWNERSHIP,
                     lastUpdatedAt = nowMillis()
                 )
-                if (ownershipReconciliationMarkRepository.get(mark.id) == null) {
-                    ownershipReconciliationMarkRepository.save(mark)
-                }
             }
+            is ReconciliationMarkEvent -> {
+                ReconciliationMark(
+                    id = event.entityId,
+                    type = event.type,
+                    lastUpdatedAt = nowMillis()
+                )
+            }
+        }
+        if (itemReconciliationMarkRepository.get(mark.id) == null) {
+            itemReconciliationMarkRepository.save(mark)
         }
     }
 }

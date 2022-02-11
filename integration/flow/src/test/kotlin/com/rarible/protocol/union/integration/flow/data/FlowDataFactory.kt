@@ -31,11 +31,11 @@ import com.rarible.protocol.dto.MetaAttributeDto
 import com.rarible.protocol.dto.MetaDto
 import com.rarible.protocol.dto.PayInfoDto
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
+import com.rarible.protocol.union.core.util.CompositeItemIdParser
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.UnionAddress
-import com.rarible.protocol.union.dto.parser.ItemIdParser
 import java.math.BigInteger
 
 fun randomFlowContract() = randomString(12)
@@ -46,23 +46,16 @@ fun randomFlowItemIdShortValue() = randomFlowItemId().value
 fun randomFlowItemIdFullValue() = randomFlowItemId().fullId()
 
 fun randomFlowOwnershipId() = randomFlowOwnershipId(randomFlowItemId())
-fun randomFlowOwnershipId(itemId: ItemIdDto) = randomFlowOwnershipId(itemId, randomFlowAddress().value)
-fun randomFlowOwnershipId(itemId: ItemIdDto, owner: String): OwnershipIdDto {
-    return OwnershipIdDto(
-        contract = itemId.contract,
-        tokenId = itemId.tokenId,
-        owner = UnionAddressConverter.convert(BlockchainDto.FLOW, owner),
-        blockchain = BlockchainDto.FLOW
-    )
-}
+fun randomFlowOwnershipId(itemId: ItemIdDto) = itemId.toOwnership(randomFlowAddress().value)
 
 fun randomFlowNftItemDto() = randomFlowNftItemDto(randomFlowItemId(), randomString())
 fun randomFlowNftItemDto(itemId: ItemIdDto) = randomFlowNftItemDto(itemId, randomString())
 fun randomFlowNftItemDto(itemId: ItemIdDto, creator: String): FlowNftItemDto {
+    val (contract, tokenId) = CompositeItemIdParser.split(itemId.value)
     return FlowNftItemDto(
         id = itemId.value,
-        collection = itemId.contract,
-        tokenId = itemId.tokenId,
+        collection = contract,
+        tokenId = tokenId,
         mintedAt = nowMillis(),
         lastUpdatedAt = nowMillis(),
         meta = randomFlowMetaDto(),
@@ -94,16 +87,17 @@ fun randomFlowMetaAttributeDto(): MetaAttributeDto {
 fun randomFlowNftOwnershipDto() = randomFlowNftOwnershipDto(randomFlowOwnershipId())
 fun randomFlowNftOwnershipDto(itemId: ItemIdDto) = randomFlowNftOwnershipDto(randomFlowOwnershipId(itemId))
 fun randomFlowNftOwnershipDto(ownershipId: OwnershipIdDto) = randomFlowNftOwnershipDto(
-    ItemIdParser.parseShort("${ownershipId.contract}:${ownershipId.tokenId}", BlockchainDto.FLOW),
+    ownershipId.getItemId(),
     ownershipId.owner.value
 )
 
 fun randomFlowNftOwnershipDto(itemId: ItemIdDto, creator: String): FlowNftOwnershipDto {
-    val ownershipId = randomFlowOwnershipId(itemId, creator)
+    val ownershipId = itemId.toOwnership(creator)
+    val (contract, tokenId) = CompositeItemIdParser.split(itemId.value)
     return FlowNftOwnershipDto(
         id = ownershipId.value,
-        contract = ownershipId.contract,
-        tokenId = ownershipId.tokenId,
+        contract = contract,
+        tokenId = tokenId,
         owner = ownershipId.owner.value,
         creators = listOf(PayInfoDto(creator, randomBigDecimal(0, 2))),
         createdAt = nowMillis()

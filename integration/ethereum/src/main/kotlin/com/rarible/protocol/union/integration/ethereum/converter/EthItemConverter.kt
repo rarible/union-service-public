@@ -14,6 +14,7 @@ import com.rarible.protocol.union.core.model.UnionMetaContent
 import com.rarible.protocol.union.core.model.UnionMetaContentProperties
 import com.rarible.protocol.union.core.model.UnionVideoProperties
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.ItemRoyaltyDto
 import com.rarible.protocol.union.dto.ItemTransferDto
@@ -36,12 +37,14 @@ object EthItemConverter {
     }
 
     private fun convertInternal(item: NftItemDto, blockchain: BlockchainDto): UnionItem {
+        val contract = EthConverter.convert(item.contract)
         return UnionItem(
             id = ItemIdDto(
-                contract = EthConverter.convert(item.contract),
+                contract = contract,
                 tokenId = item.tokenId,
                 blockchain = blockchain
             ),
+            collection = CollectionIdDto(blockchain, contract), // For ETH collection is a contract value
             mintedAt = item.mintedAt ?: nowMillis(),
             lastUpdatedAt = item.lastUpdatedAt ?: nowMillis(),
             supply = item.supply,
@@ -100,7 +103,7 @@ object EthItemConverter {
                 )
             },
             content = convertMetaContent(source.image, this::getImageHint)
-                    + convertMetaContent(source.animation, this::getVideoHint),
+                + convertMetaContent(source.animation, this::getVideoHint),
             // TODO ETHEREUM - implement it
             restrictions = emptyList()
         )

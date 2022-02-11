@@ -92,7 +92,7 @@ class OwnershipApiService(
         val totalSize = PageSize.OWNERSHIP.limit(fullAuctions.size + size)
 
         val ownershipPage = ownershipRouter.getService(itemId.blockchain)
-            .getOwnershipsByItem(itemId.contract, itemId.tokenId, continuation, totalSize)
+            .getOwnershipsByItem(itemId.value, continuation, totalSize)
 
         val ownerships = ownershipPage.entities.filter {
             // Removing all auction ownerships

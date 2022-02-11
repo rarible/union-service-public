@@ -1,13 +1,11 @@
 package com.rarible.protocol.union.listener.service
 
-import com.rarible.core.test.data.randomBigInt
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
 import com.rarible.protocol.union.enrichment.test.data.randomShortOwnership
 import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrderDto
-import com.rarible.protocol.union.integration.ethereum.data.randomAddressString
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.listener.test.IntegrationTest
 import kotlinx.coroutines.runBlocking
@@ -35,14 +33,11 @@ class EnrichmentOwnershipServiceIt {
 
         // should not be included into calculation
         val ownership4 = randomShortOwnership(itemId)
-        // Token ID is different
-        val ownership5 = randomShortOwnership(itemId.copy(tokenId = randomBigInt()))
+        // Item ID is different
+        val ownership5 = randomShortOwnership(randomEthItemId())
             .copy(bestSellOrder = orderDto1)
-        // Token is different
-        val ownership6 = randomShortOwnership(itemId.copy(contract = randomAddressString()))
-            .copy(bestSellOrder = orderDto2)
         // Blockchain is different
-        val ownership7 = randomShortOwnership(itemId.copy(blockchain = BlockchainDto.POLYGON))
+        val ownership6 = randomShortOwnership(itemId.copy(blockchain = BlockchainDto.POLYGON))
             .copy(bestSellOrder = orderDto3)
 
         ownershipService.save(ownership1)
@@ -51,7 +46,6 @@ class EnrichmentOwnershipServiceIt {
         ownershipService.save(ownership4)
         ownershipService.save(ownership5)
         ownershipService.save(ownership6)
-        ownershipService.save(ownership7)
 
         val itemSellStats = ownershipService.getItemSellStats(ShortItemId(itemId))
 

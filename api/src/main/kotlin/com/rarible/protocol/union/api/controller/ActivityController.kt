@@ -1,7 +1,6 @@
 package com.rarible.protocol.union.api.controller
 
 import com.rarible.protocol.union.api.service.ActivityApiService
-import com.rarible.protocol.union.api.service.extractItemId
 import com.rarible.protocol.union.core.service.ActivityService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.ActivitiesDto
@@ -82,15 +81,15 @@ class ActivityController(
         size: Int?,
         sort: ActivitySortDto?
     ): ResponseEntity<ActivitiesDto> {
-        val collectionAddress = IdParser.parseContract(collection)
-        val blockchain = collectionAddress.blockchain
+        val collectionId = IdParser.parseCollectionId(collection)
+        val blockchain = collectionId.blockchain
         val dto = withCursor(continuation, cursor, blockchain, size, sort) { cont, safeSize ->
-            router.getService(collectionAddress.blockchain)
-                .getActivitiesByCollection(type, collectionAddress.value, cont, safeSize, sort)
+            router.getService(collectionId.blockchain)
+                .getActivitiesByCollection(type, collectionId.value, cont, safeSize, sort)
         }
         logger.info(
             "Response for getActivitiesByCollection(type={}, collection={}, continuation={}, size={}, sort={}): " +
-                    "Slice(size={}, continuation={}) ",
+                "Slice(size={}, continuation={}) ",
             type, collection, continuation, size, sort, dto.activities.size, dto.continuation
         )
         return ResponseEntity.ok(dto)
@@ -98,21 +97,18 @@ class ActivityController(
 
     override suspend fun getActivitiesByItem(
         type: List<ActivityTypeDto>,
-        itemId: String?,
-        contract: String?,
-        tokenId: String?,
+        itemId: String,
         continuation: String?,
         cursor: String?,
         size: Int?,
         sort: ActivitySortDto?
     ): ResponseEntity<ActivitiesDto> {
-        val fullItemId = extractItemId(contract, tokenId, itemId)
+        val fullItemId = IdParser.parseItemId(itemId)
         val dto = withCursor(continuation, cursor, fullItemId.blockchain, size, sort) { cont, safeSize ->
             router.getService(fullItemId.blockchain)
                 .getActivitiesByItem(
                     type,
-                    fullItemId.contract,
-                    fullItemId.tokenId.toString(),
+                    fullItemId.value,
                     cont,
                     safeSize,
                     sort

@@ -13,8 +13,6 @@ class EthOwnershipConverterTest {
 
         val converted = EthOwnershipConverter.convert(dto, BlockchainDto.ETHEREUM)
 
-        assertThat(converted.id.contract).isEqualTo(dto.contract.prefixed())
-        assertThat(converted.id.tokenId).isEqualTo(dto.tokenId)
         assertThat(converted.id.owner.value).isEqualTo(dto.owner.prefixed())
 
         assertThat(converted.value).isEqualTo(dto.value)

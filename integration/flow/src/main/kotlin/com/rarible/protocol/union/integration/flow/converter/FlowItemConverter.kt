@@ -9,6 +9,7 @@ import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.UnionMetaContent
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.CreatorDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.MetaAttributeDto
@@ -32,15 +33,13 @@ object FlowItemConverter {
     }
 
     private fun convertInternal(item: FlowNftItemDto, blockchain: BlockchainDto): UnionItem {
-        val collection = UnionAddressConverter.convert(blockchain, item.collection)
-
         return UnionItem(
             id = ItemIdDto(
                 blockchain = blockchain,
-                contract = collection.value,
+                contract = item.collection,
                 tokenId = item.tokenId
             ),
-
+            collection = CollectionIdDto(blockchain, item.collection),
             mintedAt = item.mintedAt,
             lastUpdatedAt = item.lastUpdatedAt,
             supply = item.supply,

@@ -89,8 +89,7 @@ class EnrichmentOwnershipService(
         val result = ArrayList<UnionOwnership>()
         do {
             val page = ownershipServiceRouter.getService(itemId.blockchain).getOwnershipsByItem(
-                itemId.token,
-                itemId.tokenId,
+                itemId.toDto().value,
                 continuation,
                 PageSize.OWNERSHIP.max
             )
@@ -151,7 +150,7 @@ class EnrichmentOwnershipService(
     private fun disguiseAuctionOwnership(auctionOwnership: OwnershipDto, auction: AuctionDto): OwnershipDto {
         val id = auctionOwnership.id
         return auctionOwnership.copy(
-            id = OwnershipIdDto(id.blockchain, id.contract, id.tokenId, auction.seller),
+            id = OwnershipIdDto(id.blockchain, id.itemIdValue, auction.seller),
             owner = auction.seller,
             auction = auction,
             // Auction ownership may have summarized value from several auctions, so here we need to use value

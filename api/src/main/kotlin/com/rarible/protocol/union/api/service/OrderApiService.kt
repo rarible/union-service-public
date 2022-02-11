@@ -38,9 +38,8 @@ class OrderApiService(
 
     suspend fun getSellOrdersByItem(
         blockchain: BlockchainDto,
+        itemId: String,
         platform: PlatformDto?,
-        contract: String,
-        tokenId: String,
         maker: String?,
         origin: String?,
         status: List<OrderStatusDto>?,
@@ -48,7 +47,7 @@ class OrderApiService(
         size: Int
     ): Slice<OrderDto> {
         val currencyAssetTypes = router.getService(blockchain)
-            .getSellCurrencies(contract, tokenId)
+            .getSellCurrencies(itemId)
             .map { it.ext.currencyAddress() }
 
         if (currencyAssetTypes.isEmpty()) {
@@ -59,7 +58,7 @@ class OrderApiService(
             continuation, currencyAssetTypes
         ) { currency, currencyContinuation ->
             router.getService(blockchain).getSellOrdersByItem(
-                platform, contract, tokenId, maker, origin, status, currency, currencyContinuation, size
+                platform, itemId, maker, origin, status, currency, currencyContinuation, size
             )
         }
 
@@ -87,9 +86,8 @@ class OrderApiService(
 
     suspend fun getOrderBidsByItem(
         blockchain: BlockchainDto,
+        itemId: String,
         platform: PlatformDto?,
-        contract: String,
-        tokenId: String,
         makers: List<String>?,
         origin: String?,
         status: List<OrderStatusDto>?,
@@ -99,7 +97,7 @@ class OrderApiService(
         size: Int
     ): Slice<OrderDto> {
         val currencyContracts = router.getService(blockchain)
-            .getBidCurrencies(contract, tokenId)
+            .getBidCurrencies(itemId)
             .map { it.ext.currencyAddress() }
 
         if (currencyContracts.isEmpty()) {
@@ -110,7 +108,7 @@ class OrderApiService(
             continuation, currencyContracts
         ) { currency, currencyContinuation ->
             router.getService(blockchain).getOrderBidsByItem(
-                platform, contract, tokenId, makers, origin, status, start, end, currency, currencyContinuation, size
+                platform, itemId, makers, origin, status, start, end, currency, currencyContinuation, size
             )
         }
 

@@ -4,10 +4,10 @@ import com.rarible.protocol.tezos.dto.NftCollectionDto
 import com.rarible.protocol.tezos.dto.NftCollectionFeatureDto
 import com.rarible.protocol.tezos.dto.NftCollectionTypeDto
 import com.rarible.protocol.tezos.dto.NftCollectionsDto
-import com.rarible.protocol.union.core.converter.ContractAddressConverter
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionDto
+import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.continuation.page.Page
 import org.slf4j.LoggerFactory
 
@@ -26,7 +26,7 @@ object TezosCollectionConverter {
 
     private fun convertInternal(source: NftCollectionDto, blockchain: BlockchainDto): CollectionDto {
         return CollectionDto(
-            id = ContractAddressConverter.convert(blockchain, source.id),
+            id = CollectionIdDto(blockchain, source.id),
             blockchain = blockchain,
             name = source.name,
             symbol = source.symbol,

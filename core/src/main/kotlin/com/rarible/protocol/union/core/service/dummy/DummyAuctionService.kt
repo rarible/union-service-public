@@ -55,8 +55,7 @@ class DummyAuctionService(
     }
 
     override suspend fun getAuctionsByItem(
-        contract: String,
-        tokenId: String,
+        itemId: String,
         seller: String?,
         sort: AuctionSortDto?,
         origin: String?,

@@ -18,7 +18,6 @@ import com.rarible.protocol.union.dto.continuation.page.Paging
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.dto.group
 import com.rarible.protocol.union.dto.parser.IdParser
-import com.rarible.protocol.union.dto.parser.ItemIdParser
 import com.rarible.protocol.union.dto.subchains
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
@@ -114,7 +113,7 @@ class AuctionController(
         continuation: String?,
         size: Int?
     ): ResponseEntity<AuctionsDto> {
-        val fullItemId = ItemIdParser.parseFull(itemId)
+        val fullItemId = IdParser.parseItemId(itemId)
         val sellerAddress = safeAddress(seller)
         val originAddress = safeAddress(origin)
 
@@ -132,8 +131,7 @@ class AuctionController(
         }
 
         val slice = router.getService(fullItemId.blockchain).getAuctionsByItem(
-            fullItemId.contract,
-            fullItemId.tokenId.toString(),
+            fullItemId.value,
             sellerAddress?.value,
             sort,
             originAddress?.value,

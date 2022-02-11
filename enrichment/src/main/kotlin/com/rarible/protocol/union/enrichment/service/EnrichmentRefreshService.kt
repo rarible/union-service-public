@@ -75,7 +75,7 @@ class EnrichmentRefreshService(
     ) {
         // Skipping ownerships of Auctions
         val ownerships = ownershipService.fetchAllByItemId(ShortItemId(itemId))
-            .filter { !auctionContractService.isAuctionContract(it.id.blockchain, it.id.contract) }
+            .filter { !auctionContractService.isAuctionContract(it.id.blockchain, it.id.owner.value) }
 
         val auctions = itemAuctions.associateBy { it.getSellerOwnershipId() }
 
@@ -92,11 +92,11 @@ class EnrichmentRefreshService(
     }
 
     suspend fun reconcileOwnership(ownershipId: OwnershipIdDto) = coroutineScope {
-        if (auctionContractService.isAuctionContract(ownershipId.blockchain, ownershipId.contract)) {
+        if (auctionContractService.isAuctionContract(ownershipId.blockchain, ownershipId.owner.value)) {
             throw UnionException("Reconciliation for Auction Ownerships is forbidden: $ownershipId")
         }
         // We don't have specific query for ownership, so will use currencies for item
-        val itemIdDto = ItemIdDto(ownershipId.blockchain, ownershipId.contract, ownershipId.tokenId)
+        val itemIdDto = ownershipId.getItemId()
         val shortOwnershipId = ShortOwnershipId(ownershipId)
 
         val sellCurrencies = async { getSellCurrencies(itemIdDto) }
@@ -266,7 +266,7 @@ class EnrichmentRefreshService(
 
     private suspend fun getBidCurrencies(itemId: ItemIdDto): List<String> {
         val result = orderServiceRouter.getService(itemId.blockchain)
-            .getBidCurrencies(itemId.contract, itemId.tokenId.toString())
+            .getBidCurrencies(itemId.value)
 
         logger.info("Found Bid currencies for Item [{}] : {}", itemId.fullId(), result)
         return result.map { it.ext.currencyAddress() }
@@ -274,7 +274,7 @@ class EnrichmentRefreshService(
 
     private suspend fun getSellCurrencies(itemId: ItemIdDto): List<String> {
         val result = orderServiceRouter.getService(itemId.blockchain)
-            .getSellCurrencies(itemId.contract, itemId.tokenId.toString())
+            .getSellCurrencies(itemId.value)
 
         logger.info("Found Sell currencies for Item [{}] : {}", itemId.fullId(), result)
         return result.map { it.ext.currencyAddress() }

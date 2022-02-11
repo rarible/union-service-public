@@ -10,8 +10,9 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.converter.EnrichedOwnershipConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOwnershipConverter
+import com.rarible.protocol.union.enrichment.model.ReconciliationMarkType
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
-import com.rarible.protocol.union.enrichment.repository.OwnershipReconciliationMarkRepository
+import com.rarible.protocol.union.enrichment.repository.ReconciliationMarkRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
 import com.rarible.protocol.union.enrichment.test.data.randomShortOwnership
 import com.rarible.protocol.union.enrichment.test.data.randomUnionAuctionDto
@@ -54,7 +55,7 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
     lateinit var ethAuctionConverter: EthAuctionConverter
 
     @Autowired
-    private lateinit var ownershipReconciliationMarkRepository: OwnershipReconciliationMarkRepository
+    private lateinit var reconciliationMarkRepository: ReconciliationMarkRepository
 
     @BeforeEach
     fun beforeEach() {
@@ -108,7 +109,7 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
         ownershipService.save(shortOwnership)
 
         coEvery { testEthereumOrderApi.getOrderByHash(unionBestSell.id.value) } returns bestSellOrder.toMono()
-        coEvery { testEthereumOwnershipApi.getNftOwnershipById(itemId.value) } returns ethOwnership.toMono()
+        coEvery { testEthereumOwnershipApi.getNftOwnershipById(itemId.value, false) } returns ethOwnership.toMono()
         coEvery {
             testEthereumAuctionApi.getAuctionsByItem(any(), any(), any(), any(), any(), any(), any(), any(), any(), 1)
         } returns AuctionsPaginationDto(emptyList(), null).toMono()
@@ -151,7 +152,7 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
         ownershipService.save(shortOwnership)
 
         coEvery { testEthereumOrderApi.getOrderByHash(unionBestSell.id.value) } returns bestSellOrder.toMono()
-        coEvery { testEthereumOwnershipApi.getNftOwnershipById(itemId.value) } returns ethOwnership.toMono()
+        coEvery { testEthereumOwnershipApi.getNftOwnershipById(itemId.value, false) } returns ethOwnership.toMono()
         coEvery {
             testEthereumAuctionApi.getAuctionsByItem(any(), any(), any(), any(), any(), any(), any(), any(), any(), 1)
         } returns AuctionsPaginationDto(emptyList(), null).toMono()
@@ -166,8 +167,8 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
             assertThat(messages[0].id).isEqualTo(itemId.fullId())
 
             // Reconciliation mark should be created for such ownership
-            val reconcileMarks = ownershipReconciliationMarkRepository.findAll(100)
-            val expectedMark = reconcileMarks.find { it.id.toDto() == ownershipId }
+            val reconcileMarks = reconciliationMarkRepository.findByType(ReconciliationMarkType.OWNERSHIP, 100)
+            val expectedMark = reconcileMarks.find { it.id == ownershipId.fullId() }
             assertThat(expectedMark).isNotNull()
         }
     }
@@ -185,7 +186,7 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
         val bestSellOrder = randomEthLegacySellOrderDto(itemId)
         val unionBestSell = ethOrderConverter.convert(bestSellOrder, itemId.blockchain)
 
-        coEvery { testEthereumOwnershipApi.getNftOwnershipById(ownershipId.value) } returns ethOwnership.toMono()
+        coEvery { testEthereumOwnershipApi.getNftOwnershipById(ownershipId.value, false) } returns ethOwnership.toMono()
         coEvery {
             testEthereumAuctionApi.getAuctionsByItem(any(), any(), any(), any(), any(), any(), any(), any(), any(), 1)
         } returns AuctionsPaginationDto(emptyList(), null).toMono()
@@ -218,7 +219,7 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
 
         val auction = randomUnionAuctionDto(ownershipId)
 
-        coEvery { testEthereumOwnershipApi.getNftOwnershipById(ownershipId.value) } returns ethOwnership.toMono()
+        coEvery { testEthereumOwnershipApi.getNftOwnershipById(ownershipId.value, false) } returns ethOwnership.toMono()
 
         ownershipEventHandler.onAuctionUpdated(auction)
 
@@ -245,7 +246,7 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
 
         val auction = randomUnionAuctionDto(ownershipId).copy(status = AuctionStatusDto.CANCELLED)
 
-        coEvery { testEthereumOwnershipApi.getNftOwnershipById(ownershipId.value) } returns ethOwnership.toMono()
+        coEvery { testEthereumOwnershipApi.getNftOwnershipById(ownershipId.value, false) } returns ethOwnership.toMono()
         coEvery {
             testEthereumAuctionApi.getAuctionsByItem(any(), any(), any(), any(), any(), any(), any(), any(), any(), 1)
         } returns AuctionsPaginationDto(emptyList(), null).toMono()
@@ -273,11 +274,11 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
         val unionAuctionOwnership = EthOwnershipConverter.convert(auctionOwnership, itemId.blockchain)
 
         coEvery {
-            testEthereumOwnershipApi.getNftOwnershipById(unionAuctionOwnership.id.value)
+            testEthereumOwnershipApi.getNftOwnershipById(unionAuctionOwnership.id.value, false)
         } returns auctionOwnership.toMono()
 
         coEvery {
-            testEthereumOwnershipApi.getNftOwnershipById(ownershipId.value)
+            testEthereumOwnershipApi.getNftOwnershipById(ownershipId.value, false)
         } throws WebClientResponseException(404, "", null, null, null)
 
         ownershipEventHandler.onAuctionUpdated(auction)
@@ -299,7 +300,7 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
         val ownershipId = auction.getSellerOwnershipId()
 
         coEvery {
-            testEthereumOwnershipApi.getNftOwnershipById(ownershipId.value)
+            testEthereumOwnershipApi.getNftOwnershipById(ownershipId.value, false)
         } throws WebClientResponseException(404, "", null, null, null)
 
         ownershipEventHandler.onAuctionUpdated(auction)
@@ -365,10 +366,10 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
         val itemId = randomEthItemId()
         val auction = randomEthAuctionDto(itemId)
         val unionAuction = ethAuctionConverter.convert(auction, BlockchainDto.ETHEREUM)
-        val auctionOwnershipId = randomEthOwnershipId(itemId, unionAuction.contract.value)
+        val auctionOwnershipId = itemId.toOwnership(unionAuction.contract.value)
         val auctionOwnership = randomEthOwnershipDto(auctionOwnershipId)
 
-        val ownershipId = randomEthOwnershipId(itemId, unionAuction.seller.value)
+        val ownershipId = itemId.toOwnership(unionAuction.seller.value)
         val shortOwnershipId = ShortOwnershipId(ownershipId)
 
         coEvery {
@@ -376,7 +377,7 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
         } returns AuctionsPaginationDto(listOf(auction), null).toMono()
 
         coEvery {
-            testEthereumOwnershipApi.getNftOwnershipById(auctionOwnershipId.value)
+            testEthereumOwnershipApi.getNftOwnershipById(auctionOwnershipId.value, false)
         } returns auctionOwnership.toMono()
 
         ownershipEventHandler.onOwnershipDeleted(ownershipId)

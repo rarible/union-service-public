@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.core.service
 
-import com.rarible.core.test.data.randomBigInt
 import com.rarible.core.test.data.randomString
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.model.Restriction
@@ -36,7 +35,7 @@ class RestrictionServiceTest {
 
     @Test
     fun `check ownership restriction`() = runBlocking<Unit> {
-        val itemId = ItemIdDto(BlockchainDto.ETHEREUM, randomString(), randomBigInt())
+        val itemId = ItemIdDto(BlockchainDto.ETHEREUM, randomString())
         val user = randomString()
         val form = OwnershipRestrictionCheckFormDto(
             UnionAddressConverter.convert(BlockchainDto.ETHEREUM, user)
@@ -58,7 +57,7 @@ class RestrictionServiceTest {
 
     @Test
     fun `check item without restrictions`() = runBlocking<Unit> {
-        val itemId = ItemIdDto(BlockchainDto.ETHEREUM, randomString(), randomBigInt())
+        val itemId = ItemIdDto(BlockchainDto.ETHEREUM, randomString())
         val user = randomString()
         val form = OwnershipRestrictionCheckFormDto(
             UnionAddressConverter.convert(BlockchainDto.ETHEREUM, user)

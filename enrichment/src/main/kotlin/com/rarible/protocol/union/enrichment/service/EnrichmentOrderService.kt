@@ -52,8 +52,7 @@ class EnrichmentOrderService(
         val result = withPreferredRariblePlatform(id) { platform, continuation, size ->
             orderServiceRouter.getService(id.blockchain).getSellOrdersByItem(
                 platform,
-                id.token,
-                id.tokenId.toString(),
+                id.toDto().value,
                 null,
                 null,
                 listOf(OrderStatusDto.ACTIVE),
@@ -74,8 +73,7 @@ class EnrichmentOrderService(
         val result = withPreferredRariblePlatform(id) { platform, continuation, size ->
             orderServiceRouter.getService(id.blockchain).getSellOrdersByItem(
                 platform,
-                id.token,
-                id.tokenId.toString(),
+                id.toDto().itemIdValue,
                 id.owner,
                 null,
                 listOf(OrderStatusDto.ACTIVE),
@@ -96,8 +94,7 @@ class EnrichmentOrderService(
         val result = withPreferredRariblePlatform(id) { platform, continuation, size ->
             orderServiceRouter.getService(id.blockchain).getOrderBidsByItem(
                 platform,
-                id.token,
-                id.tokenId.toString(),
+                id.toDto().value,
                 null,
                 null,
                 listOf(OrderStatusDto.ACTIVE),

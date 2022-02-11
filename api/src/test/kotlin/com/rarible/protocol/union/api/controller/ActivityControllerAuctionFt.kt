@@ -9,7 +9,6 @@ import com.rarible.protocol.dto.OrderActivitiesDto
 import com.rarible.protocol.union.api.client.ActivityControllerApi
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
-import com.rarible.protocol.union.core.converter.ContractAddressConverter
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
@@ -17,6 +16,7 @@ import com.rarible.protocol.union.dto.AuctionBidActivityDto
 import com.rarible.protocol.union.dto.AuctionCancelActivityDto
 import com.rarible.protocol.union.dto.AuctionStartActivityDto
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
 import com.rarible.protocol.union.dto.continuation.page.PageSize
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAddress
@@ -84,7 +84,7 @@ class ActivityControllerAuctionFt : AbstractIntegrationTest() {
     @Test
     fun `get auctions activities by collection - ethereum`() = runBlocking<Unit> {
         val types = listOf(ActivityTypeDto.AUCTION_STARTED)
-        val ethCollectionId = ContractAddressConverter.convert(BlockchainDto.ETHEREUM, randomEthAddress())
+        val ethCollectionId = CollectionIdDto(BlockchainDto.ETHEREUM, randomEthAddress())
         val auctionActivity = randomEthAuctionStartActivity()
 
         coEvery {
@@ -110,7 +110,7 @@ class ActivityControllerAuctionFt : AbstractIntegrationTest() {
         } returns AuctionActivitiesDto(null, listOf(auctionActivity)).toMono()
 
         val activities = activityControllerApi.getActivitiesByItem(
-            types, ethItemId.fullId(), null, null, null, null, size, sort
+            types, ethItemId.fullId(), null, null, size, sort
         ).awaitFirst()
 
         assertThat(activities.activities).hasSize(1)

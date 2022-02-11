@@ -1,7 +1,7 @@
 package com.rarible.protocol.union.listener.service
 
 import com.rarible.core.client.WebClientResponseProxyException
-import com.rarible.protocol.union.dto.ContractAddress
+import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
@@ -25,7 +25,7 @@ class EnrichmentCollectionEventService(
     private val concurrency = 4
 
     suspend fun onCollectionBestSellOrderUpdate(
-        collectionId: ContractAddress,
+        collectionId: CollectionIdDto,
         order: OrderDto,
         notificationEnabled: Boolean
     ) = coroutineScope {
@@ -53,7 +53,7 @@ class EnrichmentCollectionEventService(
     }
 
     suspend fun onCollectionBestBidOrderUpdate(
-        collectionId: ContractAddress,
+        collectionId: CollectionIdDto,
         order: OrderDto,
         notificationEnabled: Boolean
     ) = coroutineScope {

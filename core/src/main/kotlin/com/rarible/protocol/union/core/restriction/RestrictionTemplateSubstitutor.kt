@@ -11,9 +11,7 @@ class RestrictionTemplateSubstitutor(
 
     companion object {
         val defaultParameters = mapOf<String, (itemId: ItemIdDto) -> String>(
-            "itemId" to ({ itemId -> itemId.value }),
-            "contract" to ({ itemId -> itemId.contract }),
-            "tokenId" to ({ itemId -> itemId.tokenId.toString() })
+            "itemId" to ({ itemId -> itemId.value })
         )
     }
 

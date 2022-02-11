@@ -129,7 +129,11 @@ internal class PriceUpdateJobTest : AbstractIntegrationTest() {
             lastUpdatedAt = Instant.EPOCH
         )
 
-        coEvery { testEthereumOwnershipApi.getNftOwnershipById(ownershipId.value) } returns randomEthOwnershipDto().toMono()
+        coEvery {
+            testEthereumOwnershipApi.getNftOwnershipById(
+                ownershipId.value, false
+            )
+        } returns randomEthOwnershipDto().toMono()
         coEvery { testEthereumOrderApi.getOrderByHash(any()) } returns randomEthLegacySellOrderDto().toMono()
         coEvery {
             testEthereumAuctionApi.getAuctionsByItem(any(), any(), any(), any(), any(), any(), any(), any(), any(), 1)

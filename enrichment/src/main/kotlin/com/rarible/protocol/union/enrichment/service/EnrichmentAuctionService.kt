@@ -24,8 +24,7 @@ class EnrichmentAuctionService(
     suspend fun fetchOwnershipAuction(shortOwnershipId: ShortOwnershipId): AuctionDto? {
         val auctionPage = auctionServiceRouter.getService(shortOwnershipId.blockchain)
             .getAuctionsByItem(
-                contract = shortOwnershipId.token,
-                tokenId = shortOwnershipId.tokenId.toString(),
+                itemId = shortOwnershipId.toDto().itemIdValue,
                 seller = shortOwnershipId.owner,
                 status = listOf(AuctionStatusDto.ACTIVE),
                 size = 1
@@ -58,8 +57,7 @@ class EnrichmentAuctionService(
 
         do {
             val page = auctionServiceRouter.getService(itemId.blockchain).getAuctionsByItem(
-                itemId.token,
-                itemId.tokenId.toString(),
+                itemId.toDto().value,
                 null,
                 null,
                 null,

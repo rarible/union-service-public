@@ -41,7 +41,7 @@ class OrderApiServiceTest {
     @Test
     fun `get best bids - no currencies found`() = runBlocking<Unit> {
         val itemId = randomEthItemId()
-        coEvery { orderService.getBidCurrencies(itemId.contract, itemId.tokenId.toString()) } returns emptyList()
+        coEvery { orderService.getBidCurrencies(itemId.value) } returns emptyList()
         val result = getOrderBidsByItem(itemId, null, 10)
 
         assertThat(result.continuation).isNull()
@@ -51,7 +51,7 @@ class OrderApiServiceTest {
     @Test
     fun `get best sells - no currencies found`() = runBlocking<Unit> {
         val itemId = randomEthItemId()
-        coEvery { orderService.getSellCurrencies(itemId.contract, itemId.tokenId.toString()) } returns emptyList()
+        coEvery { orderService.getSellCurrencies(itemId.value) } returns emptyList()
         val result = getSellOrdersByItem(itemId, null, 10)
 
         assertThat(result.continuation).isNull()
@@ -65,7 +65,7 @@ class OrderApiServiceTest {
         val unionOrder = ethOrderConverter.convert(ethOrder, ethItemId.blockchain)
 
         coEvery {
-            orderService.getBidCurrencies(ethItemId.contract, ethItemId.tokenId.toString())
+            orderService.getBidCurrencies(ethItemId.value)
         } returns listOf(
             EthErc20AssetTypeDto(
                 ContractAddressConverter.convert(
@@ -84,9 +84,8 @@ class OrderApiServiceTest {
     private suspend fun getOrderBidsByItem(itemId: ItemIdDto, continuation: String?, size: Int): Slice<OrderDto> {
         return orderApiService.getOrderBidsByItem(
             blockchain = BlockchainDto.ETHEREUM,
+            itemId = itemId.value,
             platform = PlatformDto.RARIBLE,
-            contract = itemId.contract,
-            tokenId = itemId.tokenId.toString(),
             makers = null,
             origin = null,
             status = emptyList(),
@@ -100,9 +99,8 @@ class OrderApiServiceTest {
     private suspend fun getSellOrdersByItem(itemId: ItemIdDto, continuation: String?, size: Int): Slice<OrderDto> {
         return orderApiService.getSellOrdersByItem(
             blockchain = BlockchainDto.ETHEREUM,
+            itemId = itemId.value,
             platform = PlatformDto.RARIBLE,
-            contract = itemId.contract,
-            tokenId = itemId.tokenId.toString(),
             maker = null,
             origin = null,
             status = null,

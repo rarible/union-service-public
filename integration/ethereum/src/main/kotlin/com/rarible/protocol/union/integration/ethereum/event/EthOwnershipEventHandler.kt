@@ -32,11 +32,12 @@ abstract class EthOwnershipEventHandler(
                 handler.onEvent(UnionOwnershipUpdateEvent(ownership))
             }
             is NftOwnershipDeleteEventDto -> {
+                val deletedOwnership = event.ownership!!
                 val ownershipId = OwnershipIdDto(
                     blockchain = blockchain,
-                    contract = EthConverter.convert(event.ownership.token),
-                    tokenId = event.ownership.tokenId,
-                    owner = UnionAddressConverter.convert(blockchain, EthConverter.convert(event.ownership.owner))
+                    contract = EthConverter.convert(deletedOwnership.token),
+                    tokenId = deletedOwnership.tokenId,
+                    owner = UnionAddressConverter.convert(blockchain, EthConverter.convert(deletedOwnership.owner))
                 )
                 handler.onEvent(UnionOwnershipDeleteEvent(ownershipId))
             }

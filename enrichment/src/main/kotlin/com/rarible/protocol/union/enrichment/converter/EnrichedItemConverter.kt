@@ -2,6 +2,7 @@ package com.rarible.protocol.union.enrichment.converter
 
 import com.rarible.protocol.union.core.converter.ContractAddressConverter
 import com.rarible.protocol.union.core.model.UnionItem
+import com.rarible.protocol.union.core.util.CompositeItemIdParser
 import com.rarible.protocol.union.dto.AuctionDto
 import com.rarible.protocol.union.dto.AuctionIdDto
 import com.rarible.protocol.union.dto.ItemDto
@@ -20,15 +21,16 @@ object EnrichedItemConverter {
         orders: Map<OrderIdDto, OrderDto> = emptyMap(),
         auctions: Map<AuctionIdDto, AuctionDto> = emptyMap()
     ): ItemDto {
+        val (contract, tokenId) = CompositeItemIdParser.split(item.id.value)
         return ItemDto(
             id = item.id,
             blockchain = item.id.blockchain,
-            contract = ContractAddressConverter.convert(item.id.blockchain, item.id.contract),
-            tokenId = item.id.tokenId,
+            collection = item.collection,
+            contract = ContractAddressConverter.convert(item.id.blockchain, contract), // TODO remove later
+            tokenId = tokenId, // TODO remove later
             creators = item.creators,
-            owners = item.owners,
-            // TODO UNION Remove in 1.19
-            royalties = item.royalties,
+            owners = item.owners, // TODO UNION Remove in 1.19
+            royalties = item.royalties, // TODO UNION Remove in 1.19
             lazySupply = item.lazySupply,
             pending = item.pending,
             mintedAt = item.mintedAt,

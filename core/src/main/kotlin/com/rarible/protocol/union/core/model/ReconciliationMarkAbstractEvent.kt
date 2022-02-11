@@ -10,13 +10,25 @@ import com.rarible.protocol.union.dto.OwnershipIdDto
     JsonSubTypes.Type(name = "ITEM", value = ReconciliationItemMarkEvent::class),
     JsonSubTypes.Type(name = "OWNERSHIP", value = ReconciliationOwnershipMarkEvent::class)
 )
-sealed class ReconciliationMarkEvent
+sealed class ReconciliationMarkAbstractEvent
 
+@Deprecated("Should be removed")
 data class ReconciliationItemMarkEvent(
     val itemId: ItemIdDto
-) : ReconciliationMarkEvent()
+) : ReconciliationMarkAbstractEvent()
 
+@Deprecated("Should be removed")
 data class ReconciliationOwnershipMarkEvent(
     val ownershipId: OwnershipIdDto
-) : ReconciliationMarkEvent()
+) : ReconciliationMarkAbstractEvent()
+
+data class ReconciliationMarkEvent(
+    val entityId: String,
+    val type: ReconciliationMarkType
+) : ReconciliationMarkAbstractEvent()
+
+enum class ReconciliationMarkType {
+    ITEM,
+    OWNERSHIP
+}
 

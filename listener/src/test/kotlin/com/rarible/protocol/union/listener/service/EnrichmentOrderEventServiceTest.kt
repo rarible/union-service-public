@@ -11,6 +11,7 @@ import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAssetErc1155
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAssetErc20
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAssetErc721
+import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipId
 import io.mockk.clearMocks
@@ -73,8 +74,8 @@ class EnrichmentOrderEventServiceTest {
         val ownershipId = randomEthOwnershipId(itemId)
 
         val shortItemId = ShortItemId(itemId)
-        val collectionId = ContractAddressConverter.convert(itemId.blockchain, itemId.contract)
-        val assetAddress = ContractAddressConverter.convert(itemId.blockchain, itemId.contract)
+        val collectionId = randomEthCollectionId()
+        val assetAddress = ContractAddressConverter.convert(itemId.blockchain, collectionId.value)
 
         val order = randomUnionSellOrderDto(itemId, ownershipId.owner.value)
             .copy(
@@ -97,8 +98,8 @@ class EnrichmentOrderEventServiceTest {
         val ownershipId = randomEthOwnershipId(itemId)
 
         val shortItemId = ShortItemId(itemId)
-        val collectionId = ContractAddressConverter.convert(itemId.blockchain, itemId.contract)
-        val assetAddress = ContractAddressConverter.convert(itemId.blockchain, itemId.contract)
+        val collectionId = randomEthCollectionId()
+        val assetAddress = ContractAddressConverter.convert(itemId.blockchain, collectionId.value)
 
         val order = randomUnionSellOrderDto(itemId, ownershipId.owner.value)
             .copy(

@@ -9,6 +9,7 @@ import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.model.UnionItemDeleteEvent
 import com.rarible.protocol.union.core.model.UnionItemEvent
 import com.rarible.protocol.union.core.model.UnionItemUpdateEvent
+import com.rarible.protocol.union.core.util.CompositeItemIdParser
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.ethereum.converter.EthItemConverter
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
@@ -47,10 +48,11 @@ class EthereumItemEventHandlerTest {
     @Test
     fun `ethereum item delete event`() = runBlocking {
         val itemId = randomEthItemId()
+        val (contract, tokenId) = CompositeItemIdParser.split(itemId.value)
         val deletedDto = NftDeletedItemDto(
             itemId.value,
-            Address.apply(itemId.contract),
-            itemId.tokenId
+            Address.apply(contract),
+            tokenId
         )
 
         val dto: NftItemEventDto = NftItemDeleteEventDto(randomString(), itemId.value, deletedDto)

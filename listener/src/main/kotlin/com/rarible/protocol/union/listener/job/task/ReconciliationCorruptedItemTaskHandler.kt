@@ -4,7 +4,6 @@ import com.rarible.core.task.RunTask
 import com.rarible.core.task.TaskHandler
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.parser.IdParser
-import com.rarible.protocol.union.dto.parser.ItemIdParser
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.listener.job.ReconciliationCorruptedItemJob
 import kotlinx.coroutines.flow.Flow
@@ -24,7 +23,7 @@ class ReconciliationCorruptedItemTaskHandler(
     }
 
     override fun runLongTask(from: String?, param: String): Flow<String> {
-        val itemId = from?.let { ItemIdParser.parseFull(it) }?.let { ShortItemId(it) }
+        val itemId = from?.let { IdParser.parseItemId(it) }?.let { ShortItemId(it) }
         val blockchain = IdParser.parseBlockchain(param)
         return job.reconcileCorruptedItems(itemId, blockchain).map { it.toDto().fullId() }
     }

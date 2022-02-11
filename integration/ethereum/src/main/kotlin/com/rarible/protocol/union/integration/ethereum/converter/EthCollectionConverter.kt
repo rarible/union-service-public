@@ -2,9 +2,9 @@ package com.rarible.protocol.union.integration.ethereum.converter
 
 import com.rarible.protocol.dto.NftCollectionDto
 import com.rarible.protocol.dto.NftCollectionsDto
-import com.rarible.protocol.union.core.converter.ContractAddressConverter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionDto
+import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.continuation.page.Page
 import org.slf4j.LoggerFactory
 
@@ -24,7 +24,7 @@ object EthCollectionConverter {
     private fun convertInternal(source: NftCollectionDto, blockchain: BlockchainDto): CollectionDto {
         val contract = EthConverter.convert(source.id)
         return CollectionDto(
-            id = ContractAddressConverter.convert(blockchain, contract),
+            id = CollectionIdDto(blockchain, contract),
             blockchain = blockchain,
             name = source.name,
             symbol = source.symbol,

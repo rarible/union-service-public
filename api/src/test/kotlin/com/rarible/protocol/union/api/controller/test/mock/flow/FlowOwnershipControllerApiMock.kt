@@ -3,6 +3,7 @@ package com.rarible.protocol.union.api.controller.test.mock.flow
 import com.rarible.protocol.dto.FlowNftOwnershipDto
 import com.rarible.protocol.dto.FlowNftOwnershipsDto
 import com.rarible.protocol.flow.nft.api.client.FlowNftOwnershipControllerApi
+import com.rarible.protocol.union.core.util.CompositeItemIdParser
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import io.mockk.every
@@ -24,10 +25,11 @@ class FlowOwnershipControllerApiMock(
         size: Int?,
         vararg returnOwnerships: FlowNftOwnershipDto
     ) {
+        val (contract, tokenId) = CompositeItemIdParser.split(itemId.value)
         every {
             nftOwnershipControllerApi.getNftOwnershipsByItem(
-                itemId.contract,
-                itemId.tokenId.toString(),
+                contract,
+                tokenId.toString(),
                 continuation,
                 size
             )

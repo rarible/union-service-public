@@ -3,7 +3,7 @@ package com.rarible.protocol.union.listener.job.task
 import com.rarible.core.task.RunTask
 import com.rarible.core.task.TaskHandler
 import com.rarible.protocol.union.dto.PlatformDto
-import com.rarible.protocol.union.dto.parser.ItemIdParser
+import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.listener.job.ReconciliationItemJob
 import kotlinx.coroutines.flow.Flow
@@ -22,7 +22,7 @@ class ReconciliationOpenSeaItemTaskHandler(
     }
 
     override fun runLongTask(from: String?, param: String): Flow<String> {
-        val itemId = from?.let { ItemIdParser.parseFull(it) }?.let { ShortItemId(it) }
+        val itemId = from?.let { IdParser.parseItemId(it) }?.let { ShortItemId(it) }
         val platform = PlatformDto.valueOf(param)
         return job.reconcileForPlatform(platform, itemId).map { it.toDto().fullId() }
     }

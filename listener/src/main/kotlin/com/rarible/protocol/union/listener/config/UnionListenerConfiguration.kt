@@ -9,7 +9,7 @@ import com.rarible.protocol.union.core.handler.InternalEventHandler
 import com.rarible.protocol.union.core.handler.KafkaConsumerWorker
 import com.rarible.protocol.union.core.model.UnionWrappedEvent
 import com.rarible.protocol.union.enrichment.configuration.EnrichmentConsumerConfiguration
-import com.rarible.protocol.union.enrichment.model.ReconciliationMarkEvent
+import com.rarible.protocol.union.enrichment.model.ReconciliationMarkAbstractEvent
 import com.rarible.protocol.union.subscriber.UnionKafkaJsonDeserializer
 import org.apache.kafka.clients.consumer.OffsetResetStrategy
 import org.springframework.boot.context.properties.EnableConfigurationProperties
@@ -61,11 +61,11 @@ class UnionListenerConfiguration(
     }
 
     @Bean
-    fun unionReconciliationMarkEventConsumer(): RaribleKafkaConsumer<ReconciliationMarkEvent> {
+    fun unionReconciliationMarkEventConsumer(): RaribleKafkaConsumer<ReconciliationMarkAbstractEvent> {
         return RaribleKafkaConsumer(
             clientId = "$clientIdPrefix.union-reconciliation-mark-consumer",
             valueDeserializerClass = UnionKafkaJsonDeserializer::class.java,
-            valueClass = ReconciliationMarkEvent::class.java,
+            valueClass = ReconciliationMarkAbstractEvent::class.java,
             consumerGroup = consumerGroup("reconciliation"),
             defaultTopic = UnionInternalTopicProvider.getReconciliationMarkTopic(env),
             bootstrapServers = listenerProperties.consumer.brokerReplicaSet,
@@ -75,9 +75,9 @@ class UnionListenerConfiguration(
 
     @Bean
     fun unionReconciliationMarkEventWorker(
-        consumer: RaribleKafkaConsumer<ReconciliationMarkEvent>,
-        handler: InternalEventHandler<ReconciliationMarkEvent>
-    ): KafkaConsumerWorker<ReconciliationMarkEvent> {
+        consumer: RaribleKafkaConsumer<ReconciliationMarkAbstractEvent>,
+        handler: InternalEventHandler<ReconciliationMarkAbstractEvent>
+    ): KafkaConsumerWorker<ReconciliationMarkAbstractEvent> {
         return consumerFactory.createReconciliationMarkEventConsumer(
             consumer = consumer,
             handler = handler,

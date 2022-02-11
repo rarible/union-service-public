@@ -11,11 +11,12 @@ import com.rarible.protocol.dto.OrderActivitiesDto
 import com.rarible.protocol.union.api.client.ActivityControllerApi
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
-import com.rarible.protocol.union.core.converter.ContractAddressConverter
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
+import com.rarible.protocol.union.core.util.CompositeItemIdParser
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.AuctionStartActivityDto
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.MintActivityDto
 import com.rarible.protocol.union.dto.OrderBidActivityDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
@@ -56,7 +57,7 @@ class ActivityControllerFt : AbstractIntegrationTest() {
     fun `get activities by collection - ethereum`() = runBlocking<Unit> {
         // Here we expect only one query - to Order activities, since there is only order-related activity type
         val types = listOf(ActivityTypeDto.SELL)
-        val ethCollectionId = ContractAddressConverter.convert(BlockchainDto.ETHEREUM, randomEthAddress())
+        val ethCollectionId = CollectionIdDto(BlockchainDto.ETHEREUM, randomEthAddress())
         val orderActivity = randomEthOrderBidActivity()
 
         coEvery {
@@ -75,7 +76,7 @@ class ActivityControllerFt : AbstractIntegrationTest() {
     fun `get activities by collection with cursor - ethereum`() = runBlocking<Unit> {
         // Here we expect only one query - to Order activities, since there is only order-related activity type
         val types = listOf(ActivityTypeDto.SELL)
-        val ethCollectionId = ContractAddressConverter.convert(BlockchainDto.ETHEREUM, randomEthAddress())
+        val ethCollectionId = CollectionIdDto(BlockchainDto.ETHEREUM, randomEthAddress())
         val orderActivity = randomEthOrderBidActivity()
         val ethContinuation = randomEthAddress()
         val cursor = CombinedContinuation(
@@ -158,7 +159,7 @@ class ActivityControllerFt : AbstractIntegrationTest() {
         } returns NftActivitiesDto(null, listOf(itemActivity)).toMono()
 
         val activities = activityControllerApi.getActivitiesByItem(
-            types, ethItemId.fullId(), null, null, continuation, null, 10000000, sort
+            types, ethItemId.fullId(), continuation, null, 10000000, sort
         ).awaitFirst()
 
         assertThat(activities.activities).hasSize(3)
@@ -210,7 +211,7 @@ class ActivityControllerFt : AbstractIntegrationTest() {
         } returns NftActivitiesDto(null, listOf(itemActivity)).toMono()
 
         val activities = activityControllerApi.getActivitiesByItem(
-            types, ethItemId.fullId(), null, null, null, cursor.toString(), 1, sort
+            types, ethItemId.fullId(), null, cursor.toString(), 1, sort
         ).awaitFirst()
 
         assertThat(activities.activities).hasSize(1)
@@ -222,19 +223,20 @@ class ActivityControllerFt : AbstractIntegrationTest() {
     fun `get activities by item - flow`() = runBlocking<Unit> {
         val types = ActivityTypeDto.values().toList()
         val flowItemId = randomFlowItemId()
+        val (contract, tokenId) = CompositeItemIdParser.split(flowItemId.value)
         val activity = randomFlowCancelListActivityDto()
 
         coEvery {
             testFlowActivityApi.getNftOrderActivitiesByItem(
                 types.map { it.name },
-                flowItemId.contract,
-                flowItemId.tokenId.toLong(),
+                contract,
+                tokenId.toLong(),
                 continuation, size, any()
             )
         } returns FlowActivitiesDto(1, null, listOf(activity)).toMono()
 
         val activities = activityControllerApi.getActivitiesByItem(
-            types, flowItemId.fullId(), null, null, continuation, null, size, sort
+            types, flowItemId.fullId(), continuation, null, size, sort
         ).awaitFirst()
 
         val flowItem = activities.activities[0]

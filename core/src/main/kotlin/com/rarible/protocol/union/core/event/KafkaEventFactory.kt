@@ -13,7 +13,6 @@ import com.rarible.protocol.union.core.model.UnionWrappedOwnershipEvent
 import com.rarible.protocol.union.core.model.getItemId
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.CollectionEventDto
-import com.rarible.protocol.union.dto.ContractAddress
 import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OrderEventDto
@@ -22,7 +21,7 @@ import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.UnionEventTopicProvider
 import com.rarible.protocol.union.dto.ext
 import com.rarible.protocol.union.enrichment.model.ReconciliationItemMarkEvent
-import com.rarible.protocol.union.enrichment.model.ReconciliationMarkEvent
+import com.rarible.protocol.union.enrichment.model.ReconciliationMarkAbstractEvent
 import com.rarible.protocol.union.enrichment.model.ReconciliationOwnershipMarkEvent
 import java.util.*
 
@@ -87,14 +86,9 @@ object KafkaEventFactory {
     }
 
     fun ownershipEvent(dto: OwnershipEventDto): KafkaMessage<OwnershipEventDto> {
-        val itemId = ItemIdDto(
-            dto.ownershipId.blockchain,
-            dto.ownershipId.contract,
-            dto.ownershipId.tokenId
-        )
         return KafkaMessage(
             id = dto.eventId,
-            key = itemId.fullId(),
+            key = dto.ownershipId.getItemId().fullId(),
             value = dto,
             headers = OWNERSHIP_EVENT_HEADERS
         )
@@ -110,15 +104,9 @@ object KafkaEventFactory {
     }
 
     fun wrappedOwnershipEvent(event: UnionOwnershipEvent): KafkaMessage<UnionWrappedEvent> {
-        val ownershipId = event.ownershipId
-        val itemId = ItemIdDto(
-            ownershipId.blockchain,
-            ownershipId.contract,
-            ownershipId.tokenId
-        )
         return KafkaMessage(
             id = UUID.randomUUID().toString(),
-            key = itemId.fullId(),
+            key = event.ownershipId.getItemId().fullId(),
             value = UnionWrappedOwnershipEvent(event),
             headers = OWNERSHIP_EVENT_HEADERS
         )
@@ -131,8 +119,8 @@ object KafkaEventFactory {
         val takeAssetExt = order.take.type.ext
 
         val key = when {
-            makeAssetExt.isCollection -> ContractAddress(order.id.blockchain, makeAssetExt.contract).fullId()
-            takeAssetExt.isCollection -> ContractAddress(order.id.blockchain, takeAssetExt.contract).fullId()
+            makeAssetExt.isCollection -> makeAssetExt.collectionId!!.fullId()
+            takeAssetExt.isCollection -> takeAssetExt.collectionId!!.fullId()
             makeAssetExt.itemId != null -> makeAssetExt.itemId!!.fullId()
             takeAssetExt.itemId != null -> takeAssetExt.itemId!!.fullId()
             else -> order.id.fullId()
@@ -155,7 +143,7 @@ object KafkaEventFactory {
         )
     }
 
-    fun reconciliationItemMarkEvent(itemId: ItemIdDto): KafkaMessage<ReconciliationMarkEvent> {
+    fun reconciliationItemMarkEvent(itemId: ItemIdDto): KafkaMessage<ReconciliationMarkAbstractEvent> {
         return KafkaMessage(
             id = UUID.randomUUID().toString(),
             key = itemId.fullId(),
@@ -163,7 +151,7 @@ object KafkaEventFactory {
         )
     }
 
-    fun reconciliationOwnershipMarkEvent(ownershipId: OwnershipIdDto): KafkaMessage<ReconciliationMarkEvent> {
+    fun reconciliationOwnershipMarkEvent(ownershipId: OwnershipIdDto): KafkaMessage<ReconciliationMarkAbstractEvent> {
         return KafkaMessage(
             id = UUID.randomUUID().toString(),
             key = ownershipId.fullId(),

@@ -8,6 +8,7 @@ import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.model.UnionOwnershipDeleteEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipUpdateEvent
+import com.rarible.protocol.union.core.util.CompositeItemIdParser
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.ethereum.converter.EthOwnershipConverter
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipDto
@@ -47,11 +48,12 @@ class EthereumOwnershipEventHandlerTest {
     fun `ethereum ownership delete event`() = runBlocking {
 
         val ownershipId = randomEthOwnershipId()
+        val (contract, tokenId) = CompositeItemIdParser.split(ownershipId.itemIdValue)
 
         val deletedDto = NftDeletedOwnershipDto(
             ownershipId.value,
-            Address.apply(ownershipId.contract),
-            ownershipId.tokenId,
+            Address.apply(contract),
+            tokenId,
             Address.apply(ownershipId.owner.value)
         )
 

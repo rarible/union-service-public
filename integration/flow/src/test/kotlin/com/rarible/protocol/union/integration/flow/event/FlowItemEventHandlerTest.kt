@@ -8,6 +8,7 @@ import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.model.UnionItemDeleteEvent
 import com.rarible.protocol.union.core.model.UnionItemEvent
 import com.rarible.protocol.union.core.model.UnionItemUpdateEvent
+import com.rarible.protocol.union.core.util.CompositeItemIdParser
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.flow.converter.FlowItemConverter
 import com.rarible.protocol.union.test.data.randomFlowItemId
@@ -45,10 +46,11 @@ class FlowItemEventHandlerTest {
     @Test
     fun `flow item delete event`() = runBlocking {
         val itemId = randomFlowItemId()
+        val (contract, tokenId) = CompositeItemIdParser.split(itemId.value)
         val deletedDto = FlowNftDeletedItemDto(
             itemId.value,
-            itemId.contract,
-            itemId.tokenId.toLong()
+            contract,
+            tokenId.toLong()
         )
 
         val dto = FlowNftItemDeleteEventDto(randomString(), itemId.value, deletedDto)

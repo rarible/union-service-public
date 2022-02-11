@@ -3,9 +3,9 @@ package com.rarible.protocol.union.integration.tezos.service
 import com.rarible.core.apm.CaptureSpan
 import com.rarible.protocol.tezos.api.client.OrderControllerApi
 import com.rarible.protocol.tezos.dto.OrderIdsDto
-import com.rarible.protocol.union.core.converter.UnionConverter
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
+import com.rarible.protocol.union.core.util.CompositeItemIdParser
 import com.rarible.protocol.union.dto.AssetTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderDto
@@ -50,15 +50,16 @@ open class TezosOrderService(
         return orders.map { tezosOrderConverter.convert(it, blockchain) }
     }
 
-    override suspend fun getBidCurrencies(contract: String, tokenId: String): List<AssetTypeDto> {
-        val assetTypes = orderControllerApi.getCurrenciesByBidOrdersOfItem(contract, tokenId).awaitFirst()
+    override suspend fun getBidCurrencies(itemId: String): List<AssetTypeDto> {
+        val (contract, tokenId) = CompositeItemIdParser.split(itemId)
+        val assetTypes = orderControllerApi.getCurrenciesByBidOrdersOfItem(contract, tokenId.toString())
+            .awaitFirst()
         return assetTypes.currencies.map { TezosConverter.convert(it, blockchain) }
     }
 
     override suspend fun getOrderBidsByItem(
         platform: PlatformDto?,
-        contract: String,
-        tokenId: String,
+        itemId: String,
         makers: List<String>?,
         origin: String?,
         status: List<OrderStatusDto>?,
@@ -68,9 +69,10 @@ open class TezosOrderService(
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
+        val (contract, tokenId) = CompositeItemIdParser.split(itemId)
         val orders = orderControllerApi.getOrderBidsByItem(
             contract,
-            UnionConverter.convertToBigInteger(tokenId).toString(),
+            tokenId.toString(),
             makers?.firstOrNull(), // TODO TEZOS support
             origin,
             currencyAddress,
@@ -103,8 +105,10 @@ open class TezosOrderService(
         return tezosOrderConverter.convert(orders, blockchain)
     }
 
-    override suspend fun getSellCurrencies(contract: String, tokenId: String): List<AssetTypeDto> {
-        val assetTypes = orderControllerApi.getCurrenciesBySellOrdersOfItem(contract, tokenId).awaitFirst()
+    override suspend fun getSellCurrencies(itemId: String): List<AssetTypeDto> {
+        val (contract, tokenId) = CompositeItemIdParser.split(itemId)
+        val assetTypes = orderControllerApi.getCurrenciesBySellOrdersOfItem(contract, tokenId.toString())
+            .awaitFirst()
         return assetTypes.currencies.map { TezosConverter.convert(it, blockchain) }
     }
 
@@ -140,8 +144,7 @@ open class TezosOrderService(
 
     override suspend fun getSellOrdersByItem(
         platform: PlatformDto?,
-        contract: String,
-        tokenId: String,
+        itemId: String,
         maker: String?,
         origin: String?,
         status: List<OrderStatusDto>?,
@@ -149,9 +152,10 @@ open class TezosOrderService(
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
+        val (contract, tokenId) = CompositeItemIdParser.split(itemId)
         val orders = orderControllerApi.getSellOrderByItem(
             contract,
-            UnionConverter.convertToBigInteger(tokenId).toString(),
+            tokenId.toString(),
             maker,
             origin,
             currencyId,

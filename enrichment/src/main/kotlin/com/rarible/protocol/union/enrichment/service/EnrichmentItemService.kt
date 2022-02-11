@@ -9,7 +9,7 @@ import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.AuctionDto
 import com.rarible.protocol.union.dto.AuctionIdDto
-import com.rarible.protocol.union.dto.ContractAddress
+import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.UnionAddress
@@ -62,7 +62,7 @@ class EnrichmentItemService(
         return itemRepository.findAll(ids)
     }
 
-    fun findByCollection(address: ContractAddress, owner: UnionAddress? = null): Flow<ShortItemId> = flow {
+    fun findByCollection(address: CollectionIdDto, owner: UnionAddress? = null): Flow<ShortItemId> = flow {
         var continuation: String? = null
         logger.info("Fetching all items for collection {} and owner {}", address, owner)
         var count = 0

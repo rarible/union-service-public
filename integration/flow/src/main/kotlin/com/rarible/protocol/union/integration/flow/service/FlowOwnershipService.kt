@@ -5,11 +5,11 @@ import com.rarible.protocol.flow.nft.api.client.FlowNftOwnershipControllerApi
 import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.core.service.OwnershipService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
+import com.rarible.protocol.union.core.util.CompositeItemIdParser
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.continuation.page.Page
 import com.rarible.protocol.union.integration.flow.converter.FlowOwnershipConverter
 import kotlinx.coroutines.reactive.awaitFirst
-import java.math.BigInteger
 
 @CaptureSpan(type = "blockchain")
 open class FlowOwnershipService(
@@ -22,17 +22,17 @@ open class FlowOwnershipService(
     }
 
     override suspend fun getOwnershipsByItem(
-        contract: String,
-        tokenId: BigInteger,
+        itemId: String,
         continuation: String?,
         size: Int
     ): Page<UnionOwnership> {
-        val items = ownershipControllerApi.getNftOwnershipsByItem(
+        val (contract, tokenId) = CompositeItemIdParser.split(itemId)
+        val ownerships = ownershipControllerApi.getNftOwnershipsByItem(
             contract,
             tokenId.toString(),
             continuation,
             size
         ).awaitFirst()
-        return FlowOwnershipConverter.convert(items, blockchain)
+        return FlowOwnershipConverter.convert(ownerships, blockchain)
     }
 }

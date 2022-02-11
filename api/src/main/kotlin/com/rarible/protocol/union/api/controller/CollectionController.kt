@@ -50,7 +50,7 @@ class CollectionController(
     override suspend fun getCollectionById(
         collection: String
     ): ResponseEntity<CollectionDto> {
-        val collectionId = IdParser.parseContract(collection)
+        val collectionId = IdParser.parseCollectionId(collection)
         val result = router.getService(collectionId.blockchain).getCollectionById(collectionId.value)
         return ResponseEntity.ok(result)
     }

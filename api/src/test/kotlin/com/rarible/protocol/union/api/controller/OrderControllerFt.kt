@@ -12,6 +12,7 @@ import com.rarible.protocol.union.api.client.OrderControllerApi
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
+import com.rarible.protocol.union.core.util.CompositeItemIdParser
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
@@ -206,8 +207,7 @@ class OrderControllerFt : AbstractIntegrationTest() {
     fun `get order bids by item - ethereum`() = runBlocking<Unit> {
         val ethItemId = randomEthItemId()
 
-        val contract = ethItemId.contract
-        val tokenId = ethItemId.tokenId
+        val (contract, tokenId) = CompositeItemIdParser.split(ethItemId.value)
         val maker = UnionAddressConverter.convert(BlockchainDto.ETHEREUM, randomEthAddress())
 
         val order = randomEthLegacyBidOrderDto(ethItemId)
@@ -239,10 +239,8 @@ class OrderControllerFt : AbstractIntegrationTest() {
         ).toMono()
 
         val orders = orderControllerClient.getOrderBidsByItem(
-            platform,
             ethItemId.fullId(),
-            null,
-            null,
+            platform,
             listOf(maker.fullId()),
             null,
             null,
@@ -322,8 +320,7 @@ class OrderControllerFt : AbstractIntegrationTest() {
     fun `get sell orders by item - ethereum`() = runBlocking<Unit> {
         val ethItemId = randomEthItemId()
 
-        val contract = ethItemId.contract
-        val tokenId = ethItemId.tokenId
+        val (contract, tokenId) = CompositeItemIdParser.split(ethItemId.value)
         val maker = UnionAddressConverter.convert(BlockchainDto.ETHEREUM, randomEthAddress())
 
         val order = randomEthLegacySellOrderDto(ethItemId)
@@ -353,10 +350,8 @@ class OrderControllerFt : AbstractIntegrationTest() {
         ).toMono()
 
         val orders = orderControllerClient.getSellOrdersByItem(
-            platform,
             ethItemId.fullId(),
-            null,
-            null,
+            platform,
             maker.fullId(),
             null,
             null,
@@ -398,10 +393,8 @@ class OrderControllerFt : AbstractIntegrationTest() {
         val maker = randomFlowAddress()
 
         val result = orderControllerClient.getSellOrdersByItem(
-            platform,
             ethItemId.fullId(),
-            null,
-            null,
+            platform,
             maker.fullId(),
             null,
             null,
