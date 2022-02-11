@@ -16,5 +16,6 @@
         <module>ethereum</module>
         <module>flow</module>
         <module>tezos</module>
+        <module>solana</module>
     </modules>
 </project>
