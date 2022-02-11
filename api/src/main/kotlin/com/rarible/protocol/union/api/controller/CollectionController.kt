@@ -1,14 +1,18 @@
 package com.rarible.protocol.union.api.controller
 
+import com.rarible.protocol.union.api.service.CollectionApiService
+import com.rarible.protocol.union.core.continuation.UnionItemContinuation
 import com.rarible.protocol.union.core.service.CollectionService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.dto.CollectionsDto
 import com.rarible.protocol.union.dto.continuation.CollectionContinuation
+import com.rarible.protocol.union.dto.continuation.page.ArgPaging
 import com.rarible.protocol.union.dto.continuation.page.Page
 import com.rarible.protocol.union.dto.continuation.page.PageSize
 import com.rarible.protocol.union.dto.continuation.page.Paging
+import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.dto.subchains
 import org.slf4j.LoggerFactory
@@ -17,7 +21,8 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 class CollectionController(
-    private val router: BlockchainRouter<CollectionService>
+    private val router: BlockchainRouter<CollectionService>,
+    private val apiService: CollectionApiService
 ) : CollectionControllerApi {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -28,23 +33,17 @@ class CollectionController(
         size: Int?
     ): ResponseEntity<CollectionsDto> {
         val safeSize = PageSize.COLLECTION.limit(size)
-        val blockchainPages = router.executeForAll(blockchains) {
-            it.getAllCollections(continuation, safeSize)
-        }
-
-        val total = blockchainPages.map { it.total }.sum()
-
-        val combinedPage = Paging(
-            CollectionContinuation.ById,
-            blockchainPages.flatMap { it.entities }
-        ).getPage(safeSize, total)
+        val slices = apiService.getAllCollections(blockchains, continuation, safeSize)
+        val total = slices.sumOf { it.page.total }
+        val arg = ArgPaging(CollectionContinuation.ById, slices.map { it.toSlice() }).getSlice(safeSize)
 
         logger.info("Response for getAllCollections(blockchains={}, continuation={}, size={}):" +
                 " Page(size={}, total={}, continuation={}) from blockchain pages {} ",
-            blockchains, continuation, size, combinedPage.entities.size, combinedPage.total,
-            combinedPage.continuation, blockchainPages.map { it.entities.size }
+            blockchains, continuation, size, arg.entities.size, total,
+            arg.continuation, slices.map { it.page.entities.size }
         )
-        return ResponseEntity.ok(toDto(combinedPage))
+        val result = toDto(arg, total)
+        return ResponseEntity.ok(result)
     }
 
     override suspend fun getCollectionById(
@@ -84,6 +83,14 @@ class CollectionController(
     private fun toDto(page: Page<CollectionDto>): CollectionsDto {
         return CollectionsDto(
             total = page.total,
+            continuation = page.continuation,
+            collections = page.entities
+        )
+    }
+
+    private fun toDto(page: Slice<CollectionDto>, total: Long): CollectionsDto {
+        return CollectionsDto(
+            total = total,
             continuation = page.continuation,
             collections = page.entities
         )
