@@ -3,6 +3,7 @@ package com.rarible.protocol.union.api.controller.test.mock.eth
 import com.rarible.protocol.dto.NftOwnershipDto
 import com.rarible.protocol.dto.NftOwnershipsDto
 import com.rarible.protocol.nft.api.client.NftOwnershipControllerApi
+import com.rarible.protocol.union.core.util.CompositeItemIdParser
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import io.mockk.every
@@ -31,10 +32,11 @@ class EthOwnershipControllerApiMock(
         size: Int?,
         vararg returnOwnerships: NftOwnershipDto
     ) {
+        val (contract, tokenId) = CompositeItemIdParser.split(itemId.value)
         every {
             nftOwnershipControllerApi.getNftOwnershipsByItem(
-                itemId.contract,
-                itemId.tokenId.toString(),
+                contract,
+                tokenId.toString(),
                 continuation,
                 size
             )

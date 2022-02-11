@@ -3,9 +3,9 @@ package com.rarible.protocol.union.integration.ethereum.service
 import com.rarible.core.apm.CaptureSpan
 import com.rarible.protocol.dto.OrderIdsDto
 import com.rarible.protocol.order.api.client.OrderControllerApi
-import com.rarible.protocol.union.core.converter.UnionConverter
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
+import com.rarible.protocol.union.core.util.CompositeItemIdParser
 import com.rarible.protocol.union.dto.AssetTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderDto
@@ -49,21 +49,18 @@ open class EthOrderService(
         return orders.map { ethOrderConverter.convert(it, blockchain) }
     }
 
-    override suspend fun getBidCurrencies(
-        contract: String,
-        tokenId: String
-    ): List<AssetTypeDto> {
+    override suspend fun getBidCurrencies(itemId: String): List<AssetTypeDto> {
+        val (contract, tokenId) = CompositeItemIdParser.split(itemId)
         val assetTypes = orderControllerApi.getCurrenciesByBidOrdersOfItem(
             contract,
-            UnionConverter.convertToBigInteger(tokenId).toString()
+            tokenId.toString()
         ).awaitFirst()
         return assetTypes.currencies.map { EthConverter.convert(it, blockchain) }
     }
 
     override suspend fun getOrderBidsByItem(
         platform: PlatformDto?,
-        contract: String,
-        tokenId: String,
+        itemId: String,
         makers: List<String>?,
         origin: String?,
         status: List<OrderStatusDto>?,
@@ -73,10 +70,11 @@ open class EthOrderService(
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
+        val (contract, tokenId) = CompositeItemIdParser.split(itemId)
         val makerAddresses = makers?.map { EthConverter.convertToAddress(it) }
         val orders = orderControllerApi.getOrderBidsByItemAndByStatus(
             contract,
-            UnionConverter.convertToBigInteger(tokenId).toString(),
+            tokenId.toString(),
             ethOrderConverter.convert(status),
             makerAddresses,
             origin,
@@ -114,12 +112,12 @@ open class EthOrderService(
     }
 
     override suspend fun getSellCurrencies(
-        contract: String,
-        tokenId: String
+        itemId: String
     ): List<AssetTypeDto> {
+        val (contract, tokenId) = CompositeItemIdParser.split(itemId)
         val assetTypes = orderControllerApi.getCurrenciesBySellOrdersOfItem(
             contract,
-            UnionConverter.convertToBigInteger(tokenId).toString()
+            tokenId.toString()
         ).awaitFirst()
         return assetTypes.currencies.map { EthConverter.convert(it, blockchain) }
     }
@@ -157,8 +155,7 @@ open class EthOrderService(
 
     override suspend fun getSellOrdersByItem(
         platform: PlatformDto?,
-        contract: String,
-        tokenId: String,
+        itemId: String,
         maker: String?,
         origin: String?,
         status: List<OrderStatusDto>?,
@@ -166,9 +163,10 @@ open class EthOrderService(
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
+        val (contract, tokenId) = CompositeItemIdParser.split(itemId)
         val orders = orderControllerApi.getSellOrdersByItemAndByStatus(
             contract,
-            UnionConverter.convertToBigInteger(tokenId).toString(),
+            tokenId.toString(),
             maker,
             origin,
             EthConverter.convert(platform),

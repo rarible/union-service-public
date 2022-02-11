@@ -2,9 +2,9 @@ package com.rarible.protocol.union.integration.flow.service
 
 import com.rarible.core.apm.CaptureSpan
 import com.rarible.protocol.flow.nft.api.client.FlowNftOrderActivityControllerApi
-import com.rarible.protocol.union.core.converter.UnionConverter
 import com.rarible.protocol.union.core.service.ActivityService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
+import com.rarible.protocol.union.core.util.CompositeItemIdParser
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
@@ -55,16 +55,16 @@ open class FlowActivityService(
 
     override suspend fun getActivitiesByItem(
         types: List<ActivityTypeDto>,
-        contract: String,
-        tokenId: String,
+        itemId: String,
         continuation: String?,
         size: Int,
         sort: ActivitySortDto?
     ): Slice<ActivityDto> {
+        val (contract, tokenId) = CompositeItemIdParser.split(itemId)
         val result = activityControllerApi.getNftOrderActivitiesByItem(
             types.map { it.name },
             contract,
-            UnionConverter.convertToLong(tokenId),
+            tokenId.toLong(),
             continuation,
             size,
             sort?.name

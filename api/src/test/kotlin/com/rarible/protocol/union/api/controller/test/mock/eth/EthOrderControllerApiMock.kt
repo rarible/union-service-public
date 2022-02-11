@@ -6,6 +6,7 @@ import com.rarible.protocol.dto.OrderDto
 import com.rarible.protocol.dto.OrderIdsDto
 import com.rarible.protocol.dto.OrdersPaginationDto
 import com.rarible.protocol.order.api.client.OrderControllerApi
+import com.rarible.protocol.union.core.util.CompositeItemIdParser
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import io.mockk.every
@@ -33,10 +34,11 @@ class EthOrderControllerApiMock(
     }
 
     fun mockGetSellOrdersByItemAndByStatus(itemId: ItemIdDto, currencyId: String, vararg returnOrders: OrderDto) {
+        val (contract, tokenId) = CompositeItemIdParser.split(itemId.value)
         every {
             orderControllerApi.getSellOrdersByItemAndByStatus(
-                eq(itemId.contract),
-                eq(itemId.tokenId.toString()),
+                eq(contract),
+                eq(tokenId.toString()),
                 any(),
                 any(),
                 any(),
@@ -53,10 +55,11 @@ class EthOrderControllerApiMock(
         currencyId: String,
         vararg returnOrders: OrderDto
     ) {
+        val (contract, tokenId) = CompositeItemIdParser.split(ownershipId.itemIdValue)
         every {
             orderControllerApi.getSellOrdersByItemAndByStatus(
-                eq(ownershipId.contract),
-                eq(ownershipId.tokenId.toString()),
+                eq(contract),
+                eq(tokenId.toString()),
                 eq(ownershipId.owner.value),
                 any(),
                 any(),
@@ -69,10 +72,11 @@ class EthOrderControllerApiMock(
     }
 
     fun mockGetOrderBidsByItemAndByStatus(itemId: ItemIdDto, currencyId: String, vararg returnOrders: OrderDto) {
+        val (contract, tokenId) = CompositeItemIdParser.split(itemId.value)
         every {
             orderControllerApi.getOrderBidsByItemAndByStatus(
-                eq(itemId.contract),
-                eq(itemId.tokenId.toString()),
+                eq(contract),
+                eq(tokenId.toString()),
                 any(),
                 any(),
                 any(),
@@ -87,19 +91,21 @@ class EthOrderControllerApiMock(
     }
 
     fun mockGetCurrenciesByBidOrdersOfItem(itemId: ItemIdDto, vararg returnTypes: AssetTypeDto) {
+        val (contract, tokenId) = CompositeItemIdParser.split(itemId.value)
         every {
             orderControllerApi.getCurrenciesByBidOrdersOfItem(
-                itemId.contract,
-                itemId.tokenId.toString()
+                contract,
+                tokenId.toString()
             )
         } returns Mono.just(OrderCurrenciesDto(OrderCurrenciesDto.OrderType.BID, returnTypes.asList()))
     }
 
     fun mockGetCurrenciesBySellOrdersOfItem(itemId: ItemIdDto, vararg returnTypes: AssetTypeDto) {
+        val (contract, tokenId) = CompositeItemIdParser.split(itemId.value)
         every {
             orderControllerApi.getCurrenciesBySellOrdersOfItem(
-                itemId.contract,
-                itemId.tokenId.toString()
+                contract,
+                tokenId.toString()
             )
         } returns Mono.just(OrderCurrenciesDto(OrderCurrenciesDto.OrderType.SELL, returnTypes.asList()))
     }

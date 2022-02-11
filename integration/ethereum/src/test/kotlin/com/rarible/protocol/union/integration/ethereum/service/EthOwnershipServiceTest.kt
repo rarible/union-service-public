@@ -4,8 +4,8 @@ import com.rarible.core.test.data.randomInt
 import com.rarible.core.test.data.randomString
 import com.rarible.protocol.dto.NftOwnershipsDto
 import com.rarible.protocol.nft.api.client.NftOwnershipControllerApi
+import com.rarible.protocol.union.core.util.CompositeItemIdParser
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOwnershipConverter
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipId
@@ -38,6 +38,7 @@ class EthOwnershipServiceTest {
     @Test
     fun `ethereum get ownerships by item`() = runBlocking<Unit> {
         val ownershipId = randomEthOwnershipId()
+        val (contract, tokenId) = CompositeItemIdParser.split(ownershipId.itemIdValue)
         val ownership = randomEthOwnershipDto(ownershipId)
 
         val continuation = randomString()
@@ -47,16 +48,15 @@ class EthOwnershipServiceTest {
 
         coEvery {
             ownershipControllerApi.getNftOwnershipsByItem(
-                ownershipId.contract,
-                ownershipId.tokenId.toString(),
+                contract,
+                tokenId.toString(),
                 continuation,
                 size
             )
         } returns NftOwnershipsDto(100, "abc", listOf(ownership)).toMono()
 
         val result = service.getOwnershipsByItem(
-            EthConverter.convert(ownership.contract),
-            ownership.tokenId,
+            ownershipId.itemIdValue,
             continuation,
             size
         )

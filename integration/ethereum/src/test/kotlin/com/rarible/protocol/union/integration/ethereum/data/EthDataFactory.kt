@@ -64,10 +64,11 @@ import com.rarible.protocol.dto.RaribleAuctionV1Dto
 import com.rarible.protocol.dto.RaribleV2OrderDto
 import com.rarible.protocol.dto.TransferDto
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
+import com.rarible.protocol.union.core.util.CompositeItemIdParser
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
-import com.rarible.protocol.union.dto.parser.ItemIdParser
 import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
 import io.daonomic.rpc.domain.Word
 import scalether.domain.Address
@@ -88,23 +89,16 @@ fun randomPolygonItemId() = randomEthItemId().copy(blockchain = BlockchainDto.PO
 
 fun randomEthOwnershipId() = randomEthOwnershipId(randomEthItemId())
 fun randomPolygonOwnershipId() = randomEthOwnershipId().copy(blockchain = BlockchainDto.POLYGON)
-fun randomEthOwnershipId(itemId: ItemIdDto) = randomEthOwnershipId(itemId, randomAddressString())
-fun randomEthOwnershipId(itemId: ItemIdDto, owner: String): OwnershipIdDto {
-    return OwnershipIdDto(
-        contract = itemId.contract,
-        tokenId = itemId.tokenId,
-        owner = UnionAddressConverter.convert(BlockchainDto.ETHEREUM, owner),
-        blockchain = BlockchainDto.ETHEREUM
-    )
-}
+fun randomEthOwnershipId(itemId: ItemIdDto) = itemId.toOwnership(randomAddressString())
 
 fun randomEthNftItemDto() = randomEthNftItemDto(randomEthItemId())
 fun randomEthNftItemDto(itemId: ItemIdDto): NftItemDto {
+    val (contract, tokenId) = CompositeItemIdParser.split(itemId.value)
     return NftItemDto(
         id = itemId.value,
-        contract = Address.apply(itemId.contract),
-        tokenId = itemId.tokenId,
-        creators = listOf(randomEthPartDto(Address.apply(itemId.contract))),
+        contract = Address.apply(contract),
+        tokenId = tokenId,
+        creators = listOf(randomEthPartDto(Address.apply(contract))),
         supply = randomBigInt(),
         lazySupply = randomBigInt(),
         royalties = listOf(randomEthPartDto()),
@@ -174,25 +168,23 @@ fun randomEthItemMediaMeta(type: String): NftMediaMetaDto {
 
 fun randomEthOwnershipDto() = randomEthOwnershipDto(randomEthOwnershipId())
 fun randomEthOwnershipDto(itemId: ItemIdDto) = randomEthOwnershipDto(
-    OwnershipIdDto(
-        itemId.blockchain,
-        itemId.contract,
-        itemId.tokenId,
-        UnionAddressConverter.convert(BlockchainDto.ETHEREUM, randomAddressString())
-    )
+    itemId.toOwnership(randomAddressString())
 )
 
-fun randomEthOwnershipDto(ownershipId: OwnershipIdDto) = randomEthOwnershipDto(
-    ItemIdParser.parseShort("${ownershipId.contract}:${ownershipId.tokenId}", BlockchainDto.ETHEREUM),
-    PartDto(Address.apply(ownershipId.owner.value), randomInt())
-)
+fun randomEthOwnershipDto(ownershipId: OwnershipIdDto): NftOwnershipDto {
+    return randomEthOwnershipDto(
+        ownershipId.getItemId(),
+        PartDto(Address.apply(ownershipId.owner.value), randomInt())
+    )
+}
 
 fun randomEthOwnershipDto(itemId: ItemIdDto, creator: PartDto): NftOwnershipDto {
-    val ownershipId = randomEthOwnershipId(itemId, creator.account.toString())
+    val (contract, tokenId) = CompositeItemIdParser.split(itemId.value)
+    val ownershipId = itemId.toOwnership(creator.account.toString())
     return NftOwnershipDto(
         id = ownershipId.value,
-        contract = Address.apply(ownershipId.contract),
-        tokenId = ownershipId.tokenId,
+        contract = Address.apply(contract),
+        tokenId = tokenId,
         owner = Address.apply(ownershipId.owner.value),
         creators = listOf(creator),
         value = randomBigInt(),
@@ -203,11 +195,14 @@ fun randomEthOwnershipDto(itemId: ItemIdDto, creator: PartDto): NftOwnershipDto 
 }
 
 fun randomEthAssetErc721() = randomEthAssetErc721(randomEthItemId())
-fun randomEthAssetErc721(itemId: ItemIdDto) = AssetDto(
-    assetType = Erc721AssetTypeDto(Address.apply(itemId.contract), itemId.tokenId),
-    value = randomBigInt(),
-    valueDecimal = randomBigInt().toBigDecimal()
-)
+fun randomEthAssetErc721(itemId: ItemIdDto): AssetDto {
+    val (contract, tokenId) = CompositeItemIdParser.split(itemId.value)
+    return AssetDto(
+        assetType = Erc721AssetTypeDto(Address.apply(contract), tokenId),
+        value = randomBigInt(),
+        valueDecimal = randomBigInt().toBigDecimal()
+    )
+}
 
 fun randomEthAssetErc20() = randomEthAssetErc20(randomAddress())
 fun randomEthAssetErc20(address: Address) = AssetDto(
@@ -224,11 +219,14 @@ fun randomEthCollectionAsset(address: Address) = AssetDto(
 )
 
 fun randomEthAssetErc1155() = randomEthAssetErc1155(randomEthItemId())
-fun randomEthAssetErc1155(itemId: ItemIdDto) = AssetDto(
-    assetType = Erc1155AssetTypeDto(Address.apply(itemId.contract), itemId.tokenId),
-    value = randomBigInt(),
-    valueDecimal = randomBigInt().toBigDecimal()
-)
+fun randomEthAssetErc1155(itemId: ItemIdDto): AssetDto {
+    val (contract, tokenId) = CompositeItemIdParser.split(itemId.value)
+    return AssetDto(
+        assetType = Erc1155AssetTypeDto(Address.apply(contract), tokenId),
+        value = randomBigInt(),
+        valueDecimal = randomBigInt().toBigDecimal()
+    )
+}
 
 fun randomEthLegacySellOrderDto() =
     randomEthLegacyOrderDto(randomEthAssetErc721(), randomAddress(), randomEthAssetErc20())
@@ -414,7 +412,6 @@ fun randomEthOrderOpenSeaV1DataV1Dto(): OrderOpenSeaV1DataV1Dto {
     )
 }
 
-
 fun randomEthOrderSideMatchDto(): OrderSideMatchDto {
     return OrderSideMatchDto(
         date = nowMillis(),
@@ -444,7 +441,6 @@ fun randomEthOrderCancelDto(): OrderCancelDto {
     )
 }
 
-
 fun randomEthOnChainOrderDto(): OnChainOrderDto {
     return OnChainOrderDto(
         date = nowMillis(),
@@ -454,6 +450,8 @@ fun randomEthOnChainOrderDto(): OnChainOrderDto {
         maker = randomAddress()
     )
 }
+
+fun randomEthCollectionId() = CollectionIdDto(BlockchainDto.ETHEREUM, randomEthAddress())
 
 fun randomEthCollectionDto() = randomEthCollectionDto(randomAddress())
 fun randomEthCollectionDto(id: Address): NftCollectionDto {

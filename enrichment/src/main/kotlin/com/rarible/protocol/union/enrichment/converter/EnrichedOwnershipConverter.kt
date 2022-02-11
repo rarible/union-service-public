@@ -2,6 +2,7 @@ package com.rarible.protocol.union.enrichment.converter
 
 import com.rarible.protocol.union.core.converter.ContractAddressConverter
 import com.rarible.protocol.union.core.model.UnionOwnership
+import com.rarible.protocol.union.core.util.CompositeItemIdParser
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.OwnershipDto
@@ -14,11 +15,13 @@ object EnrichedOwnershipConverter {
         shortOwnership: ShortOwnership? = null,
         orders: Map<OrderIdDto, OrderDto> = emptyMap()
     ): OwnershipDto {
+        val (contract, tokenId) = CompositeItemIdParser.split(ownership.id.itemIdValue)
         return OwnershipDto(
             id = ownership.id,
             blockchain = ownership.id.blockchain,
-            contract = ContractAddressConverter.convert(ownership.id.blockchain, ownership.id.contract),
-            tokenId = ownership.id.tokenId,
+            itemId = ownership.id.getItemId(),
+            contract = ContractAddressConverter.convert(ownership.id.blockchain, contract), // TODO remove later
+            tokenId = tokenId, // TODO remove later
             owner = ownership.id.owner,
             creators = ownership.creators,
             value = ownership.value,

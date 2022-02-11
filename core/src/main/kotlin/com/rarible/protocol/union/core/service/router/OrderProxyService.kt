@@ -37,14 +37,13 @@ class OrderProxyService(
         return orderService.getOrdersByIds(orderIds)
     }
 
-    override suspend fun getBidCurrencies(contract: String, tokenId: String): List<AssetTypeDto> {
-        return orderService.getBidCurrencies(contract, tokenId)
+    override suspend fun getBidCurrencies(itemId: String): List<AssetTypeDto> {
+        return orderService.getBidCurrencies(itemId)
     }
 
     override suspend fun getOrderBidsByItem(
         platform: PlatformDto?,
-        contract: String,
-        tokenId: String,
+        itemId: String,
         makers: List<String>?,
         origin: String?,
         status: List<OrderStatusDto>?,
@@ -57,8 +56,7 @@ class OrderProxyService(
         if (!isPlatformSupported(platform)) return Slice.empty()
         return orderService.getOrderBidsByItem(
             platform,
-            contract,
-            tokenId,
+            itemId,
             makers,
             origin,
             status,
@@ -93,8 +91,8 @@ class OrderProxyService(
         )
     }
 
-    override suspend fun getSellCurrencies(contract: String, tokenId: String): List<AssetTypeDto> {
-        return orderService.getSellCurrencies(contract, tokenId)
+    override suspend fun getSellCurrencies(itemId: String): List<AssetTypeDto> {
+        return orderService.getSellCurrencies(itemId)
     }
 
     override suspend fun getSellOrders(
@@ -131,8 +129,7 @@ class OrderProxyService(
 
     override suspend fun getSellOrdersByItem(
         platform: PlatformDto?,
-        contract: String,
-        tokenId: String,
+        itemId: String,
         maker: String?,
         origin: String?,
         status: List<OrderStatusDto>?,
@@ -143,8 +140,7 @@ class OrderProxyService(
         if (!isPlatformSupported(platform)) return Slice.empty()
         return orderService.getSellOrdersByItem(
             platform,
-            contract,
-            tokenId,
+            itemId,
             maker,
             origin,
             status,

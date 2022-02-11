@@ -25,7 +25,6 @@ import com.rarible.protocol.union.integration.ethereum.converter.EthOwnershipCon
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAuctionDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipDto
-import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipId
 import com.rarible.protocol.union.test.mock.CurrencyMock
 import io.mockk.clearMocks
 import io.mockk.coEvery
@@ -165,7 +164,7 @@ class OwnershipApiServiceTest {
         vararg ownerships: UnionOwnership
     ) {
         coEvery {
-            ownershipService.getOwnershipsByItem(itemId.contract, itemId.tokenId, continuation, size)
+            ownershipService.getOwnershipsByItem(itemId.value, continuation, size)
         } returns Page(0, null, ownerships.asList())
     }
 
@@ -205,7 +204,7 @@ class OwnershipApiServiceTest {
 
     private fun ownership(itemId: ItemIdDto, owner: String): UnionOwnership {
         return EthOwnershipConverter.convert(
-            randomEthOwnershipDto(randomEthOwnershipId(itemId, owner)),
+            randomEthOwnershipDto(itemId.toOwnership(owner)),
             BlockchainDto.ETHEREUM
         )
     }

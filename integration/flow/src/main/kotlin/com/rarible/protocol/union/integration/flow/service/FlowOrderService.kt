@@ -4,9 +4,9 @@ import com.rarible.core.apm.CaptureSpan
 import com.rarible.protocol.dto.FlowOrderIdsDto
 import com.rarible.protocol.flow.nft.api.client.FlowBidOrderControllerApi
 import com.rarible.protocol.flow.nft.api.client.FlowOrderControllerApi
-import com.rarible.protocol.union.core.converter.UnionConverter
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
+import com.rarible.protocol.union.core.util.CompositeItemIdParser
 import com.rarible.protocol.union.dto.AssetTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderDto
@@ -52,17 +52,15 @@ open class FlowOrderService(
         return orders.map { flowOrderConverter.convert(it, blockchain) }
     }
 
-    override suspend fun getBidCurrencies(contract: String, tokenId: String): List<AssetTypeDto> {
-        UnionConverter.convertToLong(tokenId) // Validation
-        val assets = bidControllerApi.getBidCurrencies("$contract:$tokenId")
+    override suspend fun getBidCurrencies(itemId: String): List<AssetTypeDto> {
+        val assets = bidControllerApi.getBidCurrencies(itemId)
             .collectList().awaitFirst()
         return assets.map { FlowConverter.convert(it, blockchain).type }
     }
 
     override suspend fun getOrderBidsByItem(
         platform: PlatformDto?,
-        contract: String,
-        tokenId: String,
+        itemId: String,
         makers: List<String>?,
         origin: String?,
         status: List<OrderStatusDto>?,
@@ -72,9 +70,10 @@ open class FlowOrderService(
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
+        val (contract, tokenId) = CompositeItemIdParser.split(itemId)
         val result = bidControllerApi.getBidsByItem(
             contract,
-            UnionConverter.convertToLong(tokenId).toString(),
+            tokenId.toString(),
             flowOrderConverter.convert(status),
             makers,
             origin,
@@ -109,9 +108,8 @@ open class FlowOrderService(
         return flowOrderConverter.convert(result, blockchain)
     }
 
-    override suspend fun getSellCurrencies(contract: String, tokenId: String): List<AssetTypeDto> {
-        UnionConverter.convertToLong(tokenId) // Validation
-        val assets = orderControllerApi.getSellCurrencies("$contract:$tokenId")
+    override suspend fun getSellCurrencies(itemId: String): List<AssetTypeDto> {
+        val assets = orderControllerApi.getSellCurrencies(itemId)
             .collectList().awaitFirst()
         return assets.map { FlowConverter.convert(it, blockchain).type }
     }
@@ -148,8 +146,7 @@ open class FlowOrderService(
 
     override suspend fun getSellOrdersByItem(
         platform: PlatformDto?,
-        contract: String,
-        tokenId: String,
+        itemId: String,
         maker: String?,
         origin: String?,
         status: List<OrderStatusDto>?,
@@ -157,9 +154,10 @@ open class FlowOrderService(
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
+        val (contract, tokenId) = CompositeItemIdParser.split(itemId)
         val result = orderControllerApi.getSellOrdersByItemAndByStatus(
             contract,
-            UnionConverter.convertToLong(tokenId).toString(),
+            tokenId.toString(),
             maker,
             origin,
             continuation,

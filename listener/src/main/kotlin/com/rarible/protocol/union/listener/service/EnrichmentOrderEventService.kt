@@ -1,7 +1,6 @@
 package com.rarible.protocol.union.listener.service
 
 import com.rarible.core.client.WebClientResponseProxyException
-import com.rarible.protocol.union.core.converter.ContractAddressConverter
 import com.rarible.protocol.union.core.event.OutgoingOrderEventListener
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderUpdateEventDto
@@ -26,7 +25,7 @@ class EnrichmentOrderEventService(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     suspend fun updateOrder(order: OrderDto, notificationEnabled: Boolean = true) = coroutineScope {
-        val blockchain = order.id.blockchain
+
         val makeAssetExt = order.make.type.ext
         val takeAssetExt = order.take.type.ext
 
@@ -60,19 +59,21 @@ class EnrichmentOrderEventService(
             }
         }
 
-        val sellCollectionUpdateFuture = if (order.make.type.ext.isCollection) {
+        val sellCollectionUpdateFuture = if (makeAssetExt.isCollection) {
             async {
-                val collectionId = ContractAddressConverter.convert(blockchain, makeAssetExt.contract)
+                val collectionId = makeAssetExt.collectionId!!
                 enrichmentCollectionEventService.onCollectionBestSellOrderUpdate(
                     collectionId, order, notificationEnabled
                 )
             }
         } else null
 
-        val bidCollectionUpdateFuture = if (order.take.type.ext.isCollection) {
+        val bidCollectionUpdateFuture = if (takeAssetExt.isCollection) {
             async {
-                val address = ContractAddressConverter.convert(blockchain, takeAssetExt.contract)
-                enrichmentCollectionEventService.onCollectionBestBidOrderUpdate(address, order, notificationEnabled)
+                val collectionId = takeAssetExt.collectionId!!
+                enrichmentCollectionEventService.onCollectionBestBidOrderUpdate(
+                    collectionId, order, notificationEnabled
+                )
             }
         } else null
 

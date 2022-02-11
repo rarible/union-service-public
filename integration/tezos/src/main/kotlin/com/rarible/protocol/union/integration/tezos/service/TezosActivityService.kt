@@ -15,9 +15,9 @@ import com.rarible.protocol.tezos.dto.OrderActivityFilterByCollectionDto
 import com.rarible.protocol.tezos.dto.OrderActivityFilterByItemDto
 import com.rarible.protocol.tezos.dto.OrderActivityFilterByUserDto
 import com.rarible.protocol.tezos.dto.OrderActivityFilterDto
-import com.rarible.protocol.union.core.converter.UnionConverter
 import com.rarible.protocol.union.core.service.ActivityService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
+import com.rarible.protocol.union.core.util.CompositeItemIdParser
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
@@ -80,18 +80,17 @@ open class TezosActivityService(
 
     override suspend fun getActivitiesByItem(
         types: List<ActivityTypeDto>,
-        contract: String,
-        tokenId: String,
+        itemId: String,
         continuation: String?,
         size: Int,
         sort: ActivitySortDto?
     ): Slice<ActivityDto> {
-        val tokenIdInt = UnionConverter.convertToBigInteger(tokenId)
+        val (contract, tokenId) = CompositeItemIdParser.split(itemId)
         val nftFilter = tezosActivityConverter.convertToNftTypes(types)?.let {
-            NftActivityFilterByItemDto(it, contract, tokenIdInt)
+            NftActivityFilterByItemDto(it, contract, tokenId)
         }
         val orderFilter = tezosActivityConverter.convertToOrderTypes(types)?.let {
-            OrderActivityFilterByItemDto(it, contract, tokenIdInt)
+            OrderActivityFilterByItemDto(it, contract, tokenId)
         }
         return getTezosActivities(nftFilter, orderFilter, continuation, size, sort)
     }

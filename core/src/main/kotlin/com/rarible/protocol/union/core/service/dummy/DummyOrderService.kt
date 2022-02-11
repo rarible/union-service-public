@@ -32,14 +32,13 @@ class DummyOrderService(
         return emptyList()
     }
 
-    override suspend fun getBidCurrencies(contract: String, tokenId: String): List<AssetTypeDto> {
+    override suspend fun getBidCurrencies(itemId: String): List<AssetTypeDto> {
         return emptyList()
     }
 
     override suspend fun getOrderBidsByItem(
         platform: PlatformDto?,
-        contract: String,
-        tokenId: String,
+        itemId: String,
         makers: List<String>?,
         origin: String?,
         status: List<OrderStatusDto>?,
@@ -65,7 +64,7 @@ class DummyOrderService(
         return Slice.empty()
     }
 
-    override suspend fun getSellCurrencies(contract: String, tokenId: String): List<AssetTypeDto> {
+    override suspend fun getSellCurrencies(itemId: String): List<AssetTypeDto> {
         return emptyList()
     }
 
@@ -90,8 +89,7 @@ class DummyOrderService(
 
     override suspend fun getSellOrdersByItem(
         platform: PlatformDto?,
-        contract: String,
-        tokenId: String,
+        itemId: String,
         maker: String?,
         origin: String?,
         status: List<OrderStatusDto>?,

@@ -1,9 +1,11 @@
 package com.rarible.protocol.union.listener.handler.internal
 
 import com.rarible.protocol.union.enrichment.model.ReconciliationItemMarkEvent
+import com.rarible.protocol.union.enrichment.model.ReconciliationMark
+import com.rarible.protocol.union.enrichment.model.ReconciliationMarkEvent
+import com.rarible.protocol.union.enrichment.model.ReconciliationMarkType
 import com.rarible.protocol.union.enrichment.model.ReconciliationOwnershipMarkEvent
-import com.rarible.protocol.union.enrichment.repository.ItemReconciliationMarkRepository
-import com.rarible.protocol.union.enrichment.repository.OwnershipReconciliationMarkRepository
+import com.rarible.protocol.union.enrichment.repository.ReconciliationMarkRepository
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipId
 import com.rarible.protocol.union.listener.test.AbstractIntegrationTest
@@ -22,51 +24,57 @@ class ReconciliationMarkEventHandlerIt : AbstractIntegrationTest() {
     lateinit var reconciliationMarkEventHandler: ReconciliationMarkEventHandler
 
     @Autowired
-    lateinit var itemReconciliationMarkRepository: ItemReconciliationMarkRepository
-
-    @Autowired
-    lateinit var ownershipReconciliationMarkRepository: OwnershipReconciliationMarkRepository
+    lateinit var reconciliationMarkRepository: ReconciliationMarkRepository
 
     @Test
-    fun `item marks are not duplicated`() = runBlocking<Unit> {
+    fun `marks are not duplicated`() = runBlocking<Unit> {
         val itemId = randomEthItemId()
-        assertThat(itemReconciliationMarkRepository.findAll(100)).hasSize(0)
+        val ownershipId = randomEthOwnershipId()
+        assertThat(findAllMarks(ReconciliationMarkType.ITEM)).hasSize(0)
+        assertThat(findAllMarks(ReconciliationMarkType.OWNERSHIP)).hasSize(0)
 
-        reconciliationMarkEventHandler.handle(ReconciliationItemMarkEvent(itemId))
-        val allMarks = itemReconciliationMarkRepository.findAll(100)
-        assertThat(allMarks).hasSize(1)
-        assertThat(allMarks[0].retries).isEqualTo(0)
+        // Checking both legacy and actual formats works
+        val itemEvent1 = ReconciliationMarkEvent(itemId.fullId(), ReconciliationMarkType.ITEM)
+        val ownershipEvent1 = ReconciliationOwnershipMarkEvent(ownershipId)
+        reconciliationMarkEventHandler.handle(itemEvent1)
+        reconciliationMarkEventHandler.handle(ownershipEvent1)
 
-        // replacing retries
-        itemReconciliationMarkRepository.save(allMarks[0].copy(retries = 5))
+        assertThat(findAllMarks(ReconciliationMarkType.ITEM)).hasSize(1)
+        assertThat(findAllMarks(ReconciliationMarkType.OWNERSHIP)).hasSize(1)
 
-        reconciliationMarkEventHandler.handle(ReconciliationItemMarkEvent(itemId))
-        val allMarksAfterUpdate = itemReconciliationMarkRepository.findAll(100)
+        // Send same marks again
+        val itemEvent2 = ReconciliationItemMarkEvent(itemId)
+        val ownershipEvent2 = ReconciliationMarkEvent(ownershipId.fullId(), ReconciliationMarkType.OWNERSHIP)
+        reconciliationMarkEventHandler.handle(itemEvent2)
+        reconciliationMarkEventHandler.handle(ownershipEvent2)
 
-        // Ensure retries is still 5
-        assertThat(allMarksAfterUpdate).hasSize(1)
-        assertThat(allMarksAfterUpdate[0].retries).isEqualTo(5)
+        // Checking there is no duplicates
+        assertThat(findAllMarks(ReconciliationMarkType.ITEM)).hasSize(1)
+        assertThat(findAllMarks(ReconciliationMarkType.OWNERSHIP)).hasSize(1)
     }
 
     @Test
-    fun `ownership marks are not duplicated`() = runBlocking<Unit> {
-        val ownershipId = randomEthOwnershipId()
-        assertThat(ownershipReconciliationMarkRepository.findAll(100)).hasSize(0)
+    fun `retries are not reset`() = runBlocking<Unit> {
+        val itemId = randomEthItemId()
 
-        reconciliationMarkEventHandler.handle(ReconciliationOwnershipMarkEvent(ownershipId))
-        val allMarks = ownershipReconciliationMarkRepository.findAll(100)
-        assertThat(allMarks).hasSize(1)
-        assertThat(allMarks[0].retries).isEqualTo(0)
+        val itemEvent = ReconciliationMarkEvent(itemId.fullId(), ReconciliationMarkType.ITEM)
+        reconciliationMarkEventHandler.handle(itemEvent)
 
-        // replacing retries
-        ownershipReconciliationMarkRepository.save(allMarks[0].copy(retries = 5))
+        val currentMark = findAllMarks(ReconciliationMarkType.ITEM)[0]
+        reconciliationMarkRepository.save(currentMark.copy(retries = 5))
 
-        reconciliationMarkEventHandler.handle(ReconciliationOwnershipMarkEvent(ownershipId))
-        val allMarksAfterUpdate = ownershipReconciliationMarkRepository.findAll(100)
+        // Send event again and ensure retry counter has not been changed
+        reconciliationMarkEventHandler.handle(itemEvent)
 
-        // Ensure retries is still 5
-        assertThat(allMarksAfterUpdate).hasSize(1)
-        assertThat(allMarksAfterUpdate[0].retries).isEqualTo(5)
+        val lastMark = findAllMarks(ReconciliationMarkType.ITEM)[0]
+        assertThat(lastMark.retries).isEqualTo(5)
+    }
+
+    private suspend fun findAllMarks(type: ReconciliationMarkType): List<ReconciliationMark> {
+        return reconciliationMarkRepository.findByType(
+            type,
+            100
+        )
     }
 
 }

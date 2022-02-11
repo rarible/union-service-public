@@ -18,8 +18,7 @@ class FlowItemConverterTest {
         val converted = FlowItemConverter.convert(dto, BlockchainDto.FLOW)
 
         assertThat(converted.id.value).isEqualTo(dto.id)
-        assertThat(converted.id.contract).isEqualTo(dto.collection)
-        assertThat(converted.id.tokenId).isEqualTo(dto.tokenId)
+        assertThat(converted.collection!!.value).isEqualTo(dto.collection)
         assertThat(converted.mintedAt).isEqualTo(dto.mintedAt)
         assertThat(converted.lastUpdatedAt).isEqualTo(dto.lastUpdatedAt)
         assertThat(converted.supply).isEqualTo(dto.supply)

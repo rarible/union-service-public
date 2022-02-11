@@ -1,16 +1,13 @@
 package com.rarible.protocol.union.core.restriction
 
-import com.rarible.core.test.data.randomBigInt
 import com.rarible.core.test.data.randomString
 import com.rarible.protocol.union.api.ApiClient
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.model.RestrictionApiRule
 import com.rarible.protocol.union.core.model.RestrictionCheckResult
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.BlockchainGroupDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OwnershipRestrictionCheckFormDto
-import com.rarible.protocol.union.dto.UnionAddress
 import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -22,7 +19,6 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.client.WebClient
 import java.nio.charset.StandardCharsets
-
 
 class RestrictionApiRuleCheckerTest {
 
@@ -51,7 +47,7 @@ class RestrictionApiRuleCheckerTest {
         val mockedResult = RestrictionCheckResult(true, null)
         mockBackEnd.enqueue(mockOkResponse(mockedResult))
 
-        val itemId = ItemIdDto(BlockchainDto.ETHEREUM, randomString(), randomBigInt())
+        val itemId = ItemIdDto(BlockchainDto.ETHEREUM, randomString())
         val form = OwnershipRestrictionCheckFormDto(
             UnionAddressConverter.convert(BlockchainDto.ETHEREUM, "abc")
         )
@@ -74,14 +70,14 @@ class RestrictionApiRuleCheckerTest {
         val mockedResult = RestrictionCheckResult(false, "error")
         mockBackEnd.enqueue(mockOkResponse(mockedResult))
 
-        val itemId = ItemIdDto(BlockchainDto.ETHEREUM, randomString(), randomBigInt())
+        val itemId = ItemIdDto(BlockchainDto.ETHEREUM, randomString())
         val form = OwnershipRestrictionCheckFormDto(
             UnionAddressConverter.convert(BlockchainDto.ETHEREUM, "abc")
         )
         val rule = RestrictionApiRule(
             method = RestrictionApiRule.Method.POST,
             uriTemplate = "${mockHost}/check",
-            bodyTemplate = "{\"contract\":\"\${contract}\", \"address\":\"\${user}\"}"
+            bodyTemplate = "{\"itemId\":\"\${itemId}\", \"address\":\"\${user}\"}"
         )
 
         val checkResult = checker.checkRule(itemId, rule, form)
@@ -92,7 +88,7 @@ class RestrictionApiRuleCheckerTest {
         assertThat(checkResult).isEqualTo(mockedResult)
         assertThat(recordedRequest.method).isEqualTo("POST")
         assertThat(recordedRequest.path).isEqualTo("/check")
-        assertThat(recordedBody).isEqualTo("""{"contract":"${itemId.contract}", "address":"abc"}""")
+        assertThat(recordedBody).isEqualTo("""{"itemId":"${itemId.value}", "address":"abc"}""")
     }
 
     private fun mockOkResponse(result: RestrictionCheckResult): MockResponse {

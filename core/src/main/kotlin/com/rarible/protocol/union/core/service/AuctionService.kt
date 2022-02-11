@@ -42,8 +42,7 @@ interface AuctionService : BlockchainService {
     ): Slice<AuctionDto>
 
     suspend fun getAuctionsByItem(
-        contract: String,
-        tokenId: String,
+        itemId: String,
         seller: String? = null,
         sort: AuctionSortDto? = null,
         origin: String? = null,

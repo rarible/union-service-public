@@ -5,6 +5,7 @@ import com.rarible.protocol.dto.AuctionDto
 import com.rarible.protocol.dto.AuctionIdsDto
 import com.rarible.protocol.dto.AuctionsPaginationDto
 import com.rarible.protocol.order.api.client.AuctionControllerApi
+import com.rarible.protocol.union.core.util.CompositeItemIdParser
 import com.rarible.protocol.union.dto.ItemIdDto
 import io.daonomic.rpc.domain.Word
 import io.mockk.every
@@ -16,10 +17,11 @@ class EthAuctionControllerApiMock(
 ) {
 
     fun mockGetAuctionsByItem(itemId: ItemIdDto, seller: String, returnItems: List<AuctionDto>?) {
+        val (contract, tokenId) = CompositeItemIdParser.split(itemId.value)
         every {
             auctionControllerApi.getAuctionsByItem(
-                itemId.contract,
-                itemId.tokenId.toString(),
+                contract,
+                tokenId.toString(),
                 seller,
                 any(),
                 any(),
@@ -33,10 +35,11 @@ class EthAuctionControllerApiMock(
     }
 
     fun mockGetAuctionsByItem(itemId: ItemIdDto, returnItems: List<AuctionDto>?) {
+        val (contract, tokenId) = CompositeItemIdParser.split(itemId.value)
         every {
             auctionControllerApi.getAuctionsByItem(
-                itemId.contract,
-                itemId.tokenId.toString(),
+                contract,
+                tokenId.toString(),
                 any(),
                 any(),
                 any(),

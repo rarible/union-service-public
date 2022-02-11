@@ -10,6 +10,7 @@ import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.UnionMetaContent
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.MetaAttributeDto
 import com.rarible.protocol.union.dto.MetaContentDto
@@ -38,6 +39,7 @@ object TezosItemConverter {
                 contract = item.contract,
                 tokenId = item.tokenId
             ),
+            collection = CollectionIdDto(blockchain, item.contract), // For TEZOS collection is a contract value
             creators = item.creators.map { TezosConverter.convertToCreator(it, blockchain) },
             deleted = item.deleted,
             lastUpdatedAt = item.date,

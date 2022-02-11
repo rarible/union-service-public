@@ -2,10 +2,10 @@ package com.rarible.protocol.union.integration.flow.converter
 
 import com.rarible.protocol.dto.FlowNftCollectionDto
 import com.rarible.protocol.dto.FlowNftCollectionsDto
-import com.rarible.protocol.union.core.converter.ContractAddressConverter
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionDto
+import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.continuation.page.Page
 import org.slf4j.LoggerFactory
 
@@ -24,7 +24,7 @@ object FlowCollectionConverter {
 
     private fun convertInternal(source: FlowNftCollectionDto, blockchain: BlockchainDto): CollectionDto {
         return CollectionDto(
-            id = ContractAddressConverter.convert(blockchain, source.id),
+            id = CollectionIdDto(blockchain, source.id),
             blockchain = blockchain,
             name = source.name,
             symbol = source.symbol,

@@ -3,8 +3,6 @@ package com.rarible.protocol.union.listener.service
 import com.rarible.core.test.data.randomAddress
 import com.rarible.core.test.wait.Wait
 import com.rarible.protocol.dto.NftItemsDto
-import com.rarible.protocol.union.core.converter.ContractAddressConverter
-import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.enrichment.converter.EnrichedItemConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.model.ShortItemId
@@ -16,6 +14,7 @@ import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConvert
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAssetErc20
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAssetErc721
 import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionAsset
+import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthLegacyOrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthNftItemDto
@@ -53,7 +52,6 @@ class EnrichmentCollectionEventServiceIt : AbstractIntegrationTest() {
     @Disabled // TODO UNION enable when we can use this method without field 'owners'
     fun `on best sell collection order updated`() = runWithKafka {
         val itemId = randomEthItemId()
-        val collection = UnionAddressConverter.convert(itemId.blockchain, itemId.contract)
         val shortItem = randomShortItem(itemId)
         val ethItem = randomEthNftItemDto(itemId)
         val unionItem = EthItemConverter.convert(ethItem, itemId.blockchain)
@@ -61,7 +59,7 @@ class EnrichmentCollectionEventServiceIt : AbstractIntegrationTest() {
         val ownershipId = randomEthOwnershipId(itemId)
         val ethOwnership = randomEthOwnershipDto(ownershipId)
 
-        val collectionId = ContractAddressConverter.convert(itemId.blockchain, itemId.contract)
+        val collectionId = randomEthCollectionId()
         val bestSellOrder = randomEthLegacyOrderDto(
             randomEthCollectionAsset(Address.apply(collectionId.value)),
             ethOwnership.owner,
@@ -74,7 +72,8 @@ class EnrichmentCollectionEventServiceIt : AbstractIntegrationTest() {
         coEvery { testEthereumOwnershipApi.getNftOwnershipById(ownershipId.value, false) } returns ethOwnership.toMono()
 
         val nft = randomEthNftItemDto(itemId)
-        coEvery { testEthereumItemApi.getNftItemsByCollection(eq(collection.value), any(), any(), any())
+        coEvery {
+            testEthereumItemApi.getNftItemsByCollection(eq(collectionId.value), any(), any(), any())
         } returns Mono.just(NftItemsDto(1, null, listOf(nft)))
 
         collectionEventService.onCollectionBestSellOrderUpdate(collectionId, unionBestSell, true)
@@ -103,12 +102,11 @@ class EnrichmentCollectionEventServiceIt : AbstractIntegrationTest() {
     @Test
     fun `on best bid collection order updated`() = runWithKafka {
         val itemId = randomEthItemId()
-        val collection = UnionAddressConverter.convert(itemId.blockchain, itemId.contract)
         val shortItem = randomShortItem(itemId)
         val ethItem = randomEthNftItemDto(itemId)
         val unionItem = EthItemConverter.convert(ethItem, itemId.blockchain)
 
-        val collectionId = ContractAddressConverter.convert(itemId.blockchain, itemId.contract)
+        val collectionId = randomEthCollectionId()
         val bestBidOrder = randomEthLegacyOrderDto(
             randomEthAssetErc20(),
             randomAddress(),
@@ -120,7 +118,8 @@ class EnrichmentCollectionEventServiceIt : AbstractIntegrationTest() {
         coEvery { testEthereumItemApi.getNftItemMetaById(itemId.value) } returns ethItem.meta!!.toMono()
 
         val nft = randomEthNftItemDto(itemId)
-        coEvery { testEthereumItemApi.getNftItemsByCollection(eq(collection.value), any(), any(), any())
+        coEvery {
+            testEthereumItemApi.getNftItemsByCollection(eq(collectionId.value), any(), any(), any())
         } returns Mono.just(NftItemsDto(1, null, listOf(nft)))
 
         collectionEventService.onCollectionBestBidOrderUpdate(collectionId, unionBestBid, true)
@@ -142,4 +141,5 @@ class EnrichmentCollectionEventServiceIt : AbstractIntegrationTest() {
             assertThat(messages[0].value.item.bestBidOrder!!.id).isEqualTo(expected.bestBidOrder!!.id)
         }
     }
+
 }

@@ -10,8 +10,9 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.converter.EnrichedOwnershipConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOwnershipConverter
+import com.rarible.protocol.union.enrichment.model.ReconciliationMarkType
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
-import com.rarible.protocol.union.enrichment.repository.OwnershipReconciliationMarkRepository
+import com.rarible.protocol.union.enrichment.repository.ReconciliationMarkRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
 import com.rarible.protocol.union.enrichment.test.data.randomShortOwnership
 import com.rarible.protocol.union.enrichment.test.data.randomUnionAuctionDto
@@ -54,7 +55,7 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
     lateinit var ethAuctionConverter: EthAuctionConverter
 
     @Autowired
-    private lateinit var ownershipReconciliationMarkRepository: OwnershipReconciliationMarkRepository
+    private lateinit var reconciliationMarkRepository: ReconciliationMarkRepository
 
     @BeforeEach
     fun beforeEach() {
@@ -166,8 +167,8 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
             assertThat(messages[0].id).isEqualTo(itemId.fullId())
 
             // Reconciliation mark should be created for such ownership
-            val reconcileMarks = ownershipReconciliationMarkRepository.findAll(100)
-            val expectedMark = reconcileMarks.find { it.id.toDto() == ownershipId }
+            val reconcileMarks = reconciliationMarkRepository.findByType(ReconciliationMarkType.OWNERSHIP, 100)
+            val expectedMark = reconcileMarks.find { it.id == ownershipId.fullId() }
             assertThat(expectedMark).isNotNull()
         }
     }
@@ -365,10 +366,10 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
         val itemId = randomEthItemId()
         val auction = randomEthAuctionDto(itemId)
         val unionAuction = ethAuctionConverter.convert(auction, BlockchainDto.ETHEREUM)
-        val auctionOwnershipId = randomEthOwnershipId(itemId, unionAuction.contract.value)
+        val auctionOwnershipId = itemId.toOwnership(unionAuction.contract.value)
         val auctionOwnership = randomEthOwnershipDto(auctionOwnershipId)
 
-        val ownershipId = randomEthOwnershipId(itemId, unionAuction.seller.value)
+        val ownershipId = itemId.toOwnership(unionAuction.seller.value)
         val shortOwnershipId = ShortOwnershipId(ownershipId)
 
         coEvery {

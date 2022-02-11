@@ -35,8 +35,7 @@ class DummyActivityService(
 
     override suspend fun getActivitiesByItem(
         types: List<ActivityTypeDto>,
-        contract: String,
-        tokenId: String,
+        itemId: String,
         continuation: String?,
         size: Int,
         sort: ActivitySortDto?

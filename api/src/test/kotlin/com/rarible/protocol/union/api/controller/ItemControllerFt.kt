@@ -9,12 +9,12 @@ import com.rarible.protocol.dto.NftMediaDto
 import com.rarible.protocol.union.api.client.ItemControllerApi
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
-import com.rarible.protocol.union.core.converter.ContractAddressConverter
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.continuation.CombinedContinuation
 import com.rarible.protocol.union.dto.continuation.page.PageSize
-import com.rarible.protocol.union.dto.parser.ItemIdParser
+import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.converter.ShortItemConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
@@ -131,7 +131,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
     @Test
     fun `get item by id - flow, not enriched`() = runBlocking<Unit> {
         val itemIdFull = randomFlowItemIdFullValue()
-        val itemId = ItemIdParser.parseFull(itemIdFull)
+        val itemId = IdParser.parseItemId(itemIdFull)
         val item = randomFlowNftItemDto(itemId)
 
         flowItemControllerApiMock.mockGetNftItemById(itemId, item)
@@ -145,7 +145,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
     @Test
     fun `get item by id - tezos, not enriched`() = runBlocking<Unit> {
         val itemIdFull = randomTezosItemIdFullValue()
-        val itemId = ItemIdParser.parseFull(itemIdFull)
+        val itemId = IdParser.parseItemId(itemIdFull)
         val item = randomTezosNftItemDto(itemId)
 
         tezosItemControllerApiMock.mockGetNftItemById(itemId, item)
@@ -221,7 +221,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
             .copy(bestBidOrder = ShortOrderConverter.convert(ethUnionOrder))
         enrichmentItemService.save(ethShortItem)
 
-        val ethCollectionId = ContractAddressConverter.convert(BlockchainDto.ETHEREUM, randomEthAddress())
+        val ethCollectionId = CollectionIdDto(BlockchainDto.ETHEREUM, randomEthAddress())
 
         ethereumOrderControllerApiMock.mockGetByIds(ethOrder)
         ethereumItemControllerApiMock.mockGetNftOrderItemsByCollection(

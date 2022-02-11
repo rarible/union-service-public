@@ -117,17 +117,12 @@ fun randomUnionBidOrderDto(itemId: ItemIdDto) = runBlocking {
 }
 
 fun randomUnionAuctionDto(itemId: ItemIdDto) = randomUnionAuctionDto(
-    OwnershipIdDto(
-        itemId.blockchain,
-        itemId.contract,
-        itemId.tokenId,
-        randomUnionAddress()
-    )
+    itemId.toOwnership(randomString())
 )
 
 fun randomUnionAuctionDto(ownershipId: OwnershipIdDto) = runBlocking {
     mockedEthAuctionConverter.convert(
-        randomEthAuctionDto(ItemIdDto(ownershipId.blockchain, ownershipId.contract, ownershipId.tokenId)),
+        randomEthAuctionDto(ownershipId.getItemId()),
         ownershipId.blockchain
     ).copy(seller = ownershipId.owner)
 }

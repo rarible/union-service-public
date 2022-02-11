@@ -168,7 +168,7 @@ class OwnershipControllerFt : AbstractIntegrationTest() {
         )
 
         val ownerships = ownershipControllerClient.getOwnershipsByItem(
-            ethItemId.fullId(), null, null, continuation, size
+            ethItemId.fullId(), continuation, size
         ).awaitFirst()
 
         val resultEmptyOwnership = ownerships.ownerships[0]
@@ -199,11 +199,11 @@ class OwnershipControllerFt : AbstractIntegrationTest() {
         val ethOwnership = randomEthOwnershipDto(ethOwnershipId)
 
         // Part of ownership is not participating in auction
-        val ethAuctionedOwnershipId = randomEthOwnershipId(ethItemId, EthConverter.convert(auction.seller))
+        val ethAuctionedOwnershipId = ethItemId.toOwnership(EthConverter.convert(auction.seller))
         val ethAuctionedOwnership = randomEthOwnershipDto(ethAuctionedOwnershipId)
 
         // Non-existing user ownership - all items set for sale
-        val ethFullyAuctionedOwnershipId = randomEthOwnershipId(ethItemId, EthConverter.convert(fullAuction.seller))
+        val ethFullyAuctionedOwnershipId = ethItemId.toOwnership(EthConverter.convert(fullAuction.seller))
 
         ethereumAuctionControllerApiMock.mockGetAuctionsByItem(ethItemId, listOf(auction, fullAuction))
         ethereumOwnershipControllerApiMock.mockGetNftOwnershipById(fullAuctionOwnershipId, fullAuctionOwnership)
@@ -214,7 +214,7 @@ class OwnershipControllerFt : AbstractIntegrationTest() {
         )
 
         val ownerships = ownershipControllerClient.getOwnershipsByItem(
-            ethItemId.fullId(), null, null, continuation, 50
+            ethItemId.fullId(), continuation, 50
         ).awaitFirst().ownerships
 
         // AS a result we expect 3 ownerships: free, partial and disguised by full auction
@@ -243,7 +243,7 @@ class OwnershipControllerFt : AbstractIntegrationTest() {
         )
 
         val ownerships = ownershipControllerClient.getOwnershipsByItem(
-            flowItemId.fullId(), null, null, continuation, size
+            flowItemId.fullId(), continuation, size
         ).awaitFirst()
 
         assertThat(ownerships.ownerships).hasSize(0)
@@ -259,7 +259,7 @@ class OwnershipControllerFt : AbstractIntegrationTest() {
         )
 
         val ownerships = ownershipControllerClient.getOwnershipsByItem(
-            itemId.fullId(), null, null, continuation, size
+            itemId.fullId(), continuation, size
         ).awaitFirst()
 
         assertThat(ownerships.ownerships).hasSize(1)

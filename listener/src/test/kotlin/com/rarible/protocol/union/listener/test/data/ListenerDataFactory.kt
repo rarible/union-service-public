@@ -1,11 +1,9 @@
 package com.rarible.protocol.union.listener.test.data
 
 import com.rarible.core.common.nowMillis
-import com.rarible.core.test.data.randomBigInt
-import com.rarible.core.test.data.randomString
-import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.enrichment.model.ItemReconciliationMark
-import com.rarible.protocol.union.enrichment.model.OwnershipReconciliationMark
+import com.rarible.protocol.union.enrichment.model.ReconciliationMark
+import com.rarible.protocol.union.enrichment.model.ReconciliationMarkType
+import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.listener.config.InternalConsumerProperties
 import com.rarible.protocol.union.listener.config.PriceUpdateProperties
 import com.rarible.protocol.union.listener.config.ReconciliationProperties
@@ -19,21 +17,10 @@ fun defaultUnionListenerProperties(): UnionListenerProperties {
     )
 }
 
-fun randomItemMark(): ItemReconciliationMark {
-    return ItemReconciliationMark(
-        blockchain = BlockchainDto.ETHEREUM,
-        token = randomString(),
-        tokenId = randomBigInt(),
-        lastUpdatedAt = nowMillis()
-    )
-}
-
-fun randomOwnershipMark(): OwnershipReconciliationMark {
-    return OwnershipReconciliationMark(
-        blockchain = BlockchainDto.ETHEREUM,
-        token = randomString(),
-        tokenId = randomBigInt(),
-        owner = randomString(),
+fun randomItemMark(): ReconciliationMark {
+    return ReconciliationMark(
+        id = randomEthItemId().fullId(),
+        type = ReconciliationMarkType.ITEM,
         lastUpdatedAt = nowMillis()
     )
 }

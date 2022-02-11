@@ -3,6 +3,7 @@ package com.rarible.protocol.union.api.controller.test.mock.tezos
 import com.rarible.protocol.tezos.api.client.NftOwnershipControllerApi
 import com.rarible.protocol.tezos.dto.NftOwnershipDto
 import com.rarible.protocol.tezos.dto.NftOwnershipsDto
+import com.rarible.protocol.union.core.util.CompositeItemIdParser
 
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
@@ -25,10 +26,11 @@ class TezosOwnershipControllerApiMock(
         size: Int?,
         vararg returnOwnerships: NftOwnershipDto
     ) {
+        val (contract, tokenId) = CompositeItemIdParser.split(itemId.value)
         every {
             nftOwnershipControllerApi.getNftOwnershipByItem(
-                itemId.contract,
-                itemId.tokenId.toString(),
+                contract,
+                tokenId.toString(),
                 size,
                 continuation
             )

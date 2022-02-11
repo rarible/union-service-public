@@ -21,7 +21,6 @@ import com.rarible.protocol.union.dto.continuation.page.PageSize
 import com.rarible.protocol.union.dto.continuation.page.Paging
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.dto.parser.IdParser
-import com.rarible.protocol.union.dto.parser.ItemIdParser
 import com.rarible.protocol.union.dto.subchains
 import com.rarible.protocol.union.enrichment.service.EnrichmentMetaService
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -84,7 +83,7 @@ class ItemController(
     override suspend fun getItemById(
         itemId: String
     ): ResponseEntity<ItemDto> {
-        val fullItemId = ItemIdParser.parseFull(itemId)
+        val fullItemId = IdParser.parseItemId(itemId)
         val result = router.getService(fullItemId.blockchain).getItemById(fullItemId.value)
         val enriched = itemApiService.enrich(result)
         return ResponseEntity.ok(enriched)
@@ -93,7 +92,7 @@ class ItemController(
     override suspend fun getItemRoyaltiesById(
         itemId: String
     ): ResponseEntity<RoyaltiesDto> {
-        val fullItemId = ItemIdParser.parseFull(itemId)
+        val fullItemId = IdParser.parseItemId(itemId)
         val royalties = router.getService(fullItemId.blockchain).getItemRoyaltiesById(fullItemId.value)
         return ResponseEntity.ok(RoyaltiesDto(royalties))
     }
@@ -102,7 +101,7 @@ class ItemController(
         itemId: String,
         restrictionCheckFormDto: RestrictionCheckFormDto
     ): ResponseEntity<RestrictionCheckResultDto> {
-        val fullItemId = ItemIdParser.parseFull(itemId)
+        val fullItemId = IdParser.parseItemId(itemId)
         val checkResult = restrictionService.checkRestriction(fullItemId, restrictionCheckFormDto)
         val dto = RestrictionCheckResultDto(
             success = checkResult.success,
@@ -112,7 +111,7 @@ class ItemController(
     }
 
     override suspend fun resetItemMeta(itemId: String): ResponseEntity<Unit> {
-        val fullItemId = ItemIdParser.parseFull(itemId)
+        val fullItemId = IdParser.parseItemId(itemId)
         enrichmentMetaService.resetMeta(fullItemId)
         router.getService(fullItemId.blockchain).resetItemMeta(fullItemId.value)
 
@@ -126,13 +125,13 @@ class ItemController(
         size: Int?
     ): ResponseEntity<ItemsDto> {
         val safeSize = PageSize.ITEM.limit(size)
-        val collectionAddress = IdParser.parseContract(collection)
-        val result = router.getService(collectionAddress.blockchain)
-            .getItemsByCollection(collectionAddress.value, null, continuation, safeSize)
+        val collectionId = IdParser.parseCollectionId(collection)
+        val result = router.getService(collectionId.blockchain)
+            .getItemsByCollection(collectionId.value, null, continuation, safeSize)
 
         logger.info(
             "Response for getItemsByCollection(collection={}, continuation={}, size={}):" +
-                    " Page(size={}, total={}, continuation={}) from blockchain pages {} ",
+                " Page(size={}, total={}, continuation={}) from blockchain pages {} ",
             collection, continuation, size, result.entities.size, result.total, result.continuation
         )
 
@@ -189,7 +188,7 @@ class ItemController(
 
         logger.info(
             "Response for getItemsByCreator(owner={}, continuation={}, size={}):" +
-                    " Page(size={}, total={}, continuation={}) from blockchain pages {} ",
+                " Page(size={}, total={}, continuation={}) from blockchain pages {} ",
             owner, continuation, size, combinedPage.entities.size, combinedPage.total, combinedPage.continuation
         )
 
@@ -197,8 +196,10 @@ class ItemController(
         return ResponseEntity.ok(enriched)
     }
 
-    suspend fun getMedia(itemId: String, action: suspend (fullId: ItemIdDto) -> UnionMedia): ResponseEntity<Resource> {
-        val fullItemId = ItemIdParser.parseFull(itemId)
+    private suspend fun getMedia(
+        itemId: String, action: suspend (fullId: ItemIdDto) -> UnionMedia
+    ): ResponseEntity<Resource> {
+        val fullItemId = IdParser.parseItemId(itemId)
         val result = action(fullItemId)
         return when {
             result.url?.isNotEmpty() == true -> {

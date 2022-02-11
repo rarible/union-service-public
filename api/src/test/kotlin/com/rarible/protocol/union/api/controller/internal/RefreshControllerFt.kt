@@ -4,6 +4,7 @@ import com.rarible.core.kafka.KafkaMessage
 import com.rarible.protocol.dto.OrdersPaginationDto
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
+import com.rarible.protocol.union.core.util.CompositeItemIdParser
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemDeleteEventDto
 import com.rarible.protocol.union.dto.ItemEventDto
@@ -28,7 +29,6 @@ import com.rarible.protocol.union.integration.ethereum.data.randomEthLegacyBidOr
 import com.rarible.protocol.union.integration.ethereum.data.randomEthLegacySellOrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthNftItemDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipDto
-import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipId
 import io.mockk.coVerify
 import io.mockk.every
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -74,12 +74,12 @@ class RefreshControllerFt : AbstractIntegrationTest() {
         val auction = ethAuctionConverter.convert(ethAuction, BlockchainDto.ETHEREUM)
 
         // Fully auctioned ownership, should not be saved, but disguised event is expected for it
-        val ethAuctionedOwnershipId = randomEthOwnershipId(ethItemId, auction.seller.value)
-        val auctionOwnershipId = randomEthOwnershipId(ethItemId, auction.contract.value)
+        val ethAuctionedOwnershipId = ethItemId.toOwnership(auction.seller.value)
+        val auctionOwnershipId = ethItemId.toOwnership(auction.contract.value)
         val auctionOwnership = randomEthOwnershipDto(auctionOwnershipId)
 
         // Free ownership - should be reconciled in regular way
-        val ethFreeOwnershipId = randomEthOwnershipId(ethItemId, auction.seller.value)
+        val ethFreeOwnershipId = ethItemId.toOwnership(auction.seller.value)
         val ethOwnership = randomEthOwnershipDto(ethFreeOwnershipId)
         val unionOwnership = EthOwnershipConverter.convert(ethOwnership, ethFreeOwnershipId.blockchain)
         val shortOwnership = ShortOwnershipConverter.convert(unionOwnership)
@@ -153,7 +153,7 @@ class RefreshControllerFt : AbstractIntegrationTest() {
         val ethAuction = randomEthAuctionDto(ethItemId)
         val auction = ethAuctionConverter.convert(ethAuction, BlockchainDto.ETHEREUM)
 
-        val ethOwnershipId = randomEthOwnershipId(ethItemId, auction.seller.value)
+        val ethOwnershipId = ethItemId.toOwnership(auction.seller.value)
         val ethOwnership = randomEthOwnershipDto(ethOwnershipId)
         val unionOwnership = EthOwnershipConverter.convert(ethOwnership, ethOwnershipId.blockchain)
         val shortOwnership = ShortOwnershipConverter.convert(unionOwnership)
@@ -200,8 +200,8 @@ class RefreshControllerFt : AbstractIntegrationTest() {
         val ethAuction = randomEthAuctionDto(ethItemId)
         val auction = ethAuctionConverter.convert(ethAuction, BlockchainDto.ETHEREUM)
 
-        val ethOwnershipId = randomEthOwnershipId(ethItemId, auction.seller.value)
-        val auctionOwnershipId = randomEthOwnershipId(ethItemId, auction.contract.value)
+        val ethOwnershipId = ethItemId.toOwnership(auction.seller.value)
+        val auctionOwnershipId = ethItemId.toOwnership(auction.contract.value)
         val auctionOwnership = randomEthOwnershipDto(auctionOwnershipId)
 
         ethereumAuctionControllerApiMock.mockGetAuctionsByItem(
@@ -318,6 +318,7 @@ class RefreshControllerFt : AbstractIntegrationTest() {
     @Test
     fun `should ignore best sell order with filled taker for the first time`() = runBlocking<Unit> {
         val ethItemId = randomEthItemId()
+        val (ethItemContract, ethItemTokenId) = CompositeItemIdParser.split(ethItemId.value)
         val ethItem = randomEthNftItemDto(ethItemId)
         val unionItem = EthItemConverter.convert(ethItem, ethItemId.blockchain)
         val shortItem = ShortItemConverter.convert(unionItem)
@@ -339,8 +340,8 @@ class RefreshControllerFt : AbstractIntegrationTest() {
         val continuation = "continuation"
         every {
             testEthereumOrderApi.getSellOrdersByItemAndByStatus(
-                eq(ethItemId.contract),
-                eq(ethItemId.tokenId.toString()),
+                eq(ethItemContract),
+                eq(ethItemTokenId.toString()),
                 any(),
                 any(),
                 any(),
@@ -353,8 +354,8 @@ class RefreshControllerFt : AbstractIntegrationTest() {
 
         every {
             testEthereumOrderApi.getSellOrdersByItemAndByStatus(
-                eq(ethItemId.contract),
-                eq(ethItemId.tokenId.toString()),
+                eq(ethItemContract),
+                eq(ethItemTokenId.toString()),
                 any(),
                 any(),
                 any(),

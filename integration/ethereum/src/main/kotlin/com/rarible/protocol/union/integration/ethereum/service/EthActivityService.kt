@@ -24,6 +24,7 @@ import com.rarible.protocol.order.api.client.AuctionActivityControllerApi
 import com.rarible.protocol.order.api.client.OrderActivityControllerApi
 import com.rarible.protocol.union.core.service.ActivityService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
+import com.rarible.protocol.union.core.util.CompositeItemIdParser
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
@@ -94,20 +95,20 @@ open class EthActivityService(
 
     override suspend fun getActivitiesByItem(
         types: List<ActivityTypeDto>,
-        contract: String,
-        tokenId: String,
+        itemId: String,
         continuation: String?,
         size: Int,
         sort: ActivitySortDto?
     ): Slice<ActivityDto> {
+        val (contract, tokenId) = CompositeItemIdParser.split(itemId)
         val nftFilter = ethActivityConverter.convertToNftItemTypes(types)?.let {
-            NftActivityFilterByItemDto(Address.apply(contract), tokenId.toBigInteger(), it)
+            NftActivityFilterByItemDto(Address.apply(contract), tokenId, it)
         }
         val orderFilter = ethActivityConverter.convertToOrderItemTypes(types)?.let {
-            OrderActivityFilterByItemDto(Address.apply(contract), tokenId.toBigInteger(), it)
+            OrderActivityFilterByItemDto(Address.apply(contract), tokenId, it)
         }
         val auctionFilter = ethActivityConverter.convertToAuctionItemTypes(types)?.let {
-            AuctionActivityFilterByItemDto(Address.apply(contract), tokenId.toBigInteger(), it)
+            AuctionActivityFilterByItemDto(Address.apply(contract), tokenId, it)
         }
         return getEthereumActivities(nftFilter, orderFilter, auctionFilter, continuation, size, sort)
     }

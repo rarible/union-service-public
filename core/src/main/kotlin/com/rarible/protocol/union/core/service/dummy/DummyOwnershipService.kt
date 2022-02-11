@@ -6,7 +6,6 @@ import com.rarible.protocol.union.core.service.OwnershipService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.continuation.page.Page
-import java.math.BigInteger
 
 class DummyOwnershipService(
     blockchain: BlockchainDto
@@ -17,8 +16,7 @@ class DummyOwnershipService(
     }
 
     override suspend fun getOwnershipsByItem(
-        contract: String,
-        tokenId: BigInteger,
+        itemId: String,
         continuation: String?,
         size: Int
     ): Page<UnionOwnership> {

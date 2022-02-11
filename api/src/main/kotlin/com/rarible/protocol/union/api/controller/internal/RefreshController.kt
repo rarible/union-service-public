@@ -3,7 +3,7 @@ package com.rarible.protocol.union.api.controller.internal
 import com.rarible.protocol.union.core.exception.UnionNotFoundException
 import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
-import com.rarible.protocol.union.dto.parser.ItemIdParser
+import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.dto.parser.OwnershipIdParser
 import com.rarible.protocol.union.enrichment.service.EnrichmentRefreshService
 import org.springframework.http.ResponseEntity
@@ -25,7 +25,7 @@ class RefreshController(
         @PathVariable("itemId") itemId: String,
         @RequestParam(value = "full", required = false, defaultValue = "false") full: Boolean
     ): ResponseEntity<ItemEventDto> {
-        val unionItemId = ItemIdParser.parseFull(itemId)
+        val unionItemId = IdParser.parseItemId(itemId)
         val result = refreshService.reconcileItem(unionItemId, full)
         return ResponseEntity.ok(result)
     }

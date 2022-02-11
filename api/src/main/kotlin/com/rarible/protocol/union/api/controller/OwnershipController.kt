@@ -1,10 +1,10 @@
 package com.rarible.protocol.union.api.controller
 
 import com.rarible.protocol.union.api.service.OwnershipApiService
-import com.rarible.protocol.union.api.service.extractItemId
 import com.rarible.protocol.union.dto.OwnershipDto
 import com.rarible.protocol.union.dto.OwnershipsDto
 import com.rarible.protocol.union.dto.continuation.page.PageSize
+import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.dto.parser.OwnershipIdParser
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.slf4j.LoggerFactory
@@ -30,14 +30,12 @@ class OwnershipController(
     }
 
     override suspend fun getOwnershipsByItem(
-        itemId: String?,
-        contract: String?,
-        tokenId: String?,
+        itemId: String,
         continuation: String?,
         size: Int?
     ): ResponseEntity<OwnershipsDto> {
         val safeSize = PageSize.OWNERSHIP.limit(size)
-        val fullItemId = extractItemId(contract, tokenId, itemId)
+        val fullItemId = IdParser.parseItemId(itemId)
         val result = ownershipApiService.getOwnershipsByItem(fullItemId, continuation, safeSize)
 
         logger.info(

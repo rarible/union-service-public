@@ -5,6 +5,7 @@ import com.rarible.protocol.dto.AuctionIdsDto
 import com.rarible.protocol.order.api.client.AuctionControllerApi
 import com.rarible.protocol.union.core.service.AuctionService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
+import com.rarible.protocol.union.core.util.CompositeItemIdParser
 import com.rarible.protocol.union.dto.AuctionBidDto
 import com.rarible.protocol.union.dto.AuctionDto
 import com.rarible.protocol.union.dto.AuctionSortDto
@@ -83,8 +84,7 @@ open class EthAuctionService(
     }
 
     override suspend fun getAuctionsByItem(
-        contract: String,
-        tokenId: String,
+        itemId: String,
         seller: String?,
         sort: AuctionSortDto?,
         origin: String?,
@@ -94,9 +94,10 @@ open class EthAuctionService(
         continuation: String?,
         size: Int?
     ): Slice<AuctionDto> {
+        val (contract, tokenId) = CompositeItemIdParser.split(itemId)
         val auctions = auctionControllerApi.getAuctionsByItem(
             contract,
-            tokenId,
+            tokenId.toString(),
             seller,
             EthConverter.convert(sort),
             origin,

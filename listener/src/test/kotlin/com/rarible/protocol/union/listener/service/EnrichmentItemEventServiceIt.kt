@@ -6,14 +6,15 @@ import com.rarible.protocol.dto.AuctionIdsDto
 import com.rarible.protocol.dto.NftItemsDto
 import com.rarible.protocol.dto.OrderStatusDto
 import com.rarible.protocol.dto.OrdersPaginationDto
-import com.rarible.protocol.union.core.converter.ContractAddressConverter
+import com.rarible.protocol.union.core.util.CompositeItemIdParser
 import com.rarible.protocol.union.dto.AuctionStatusDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.converter.EnrichedItemConverter
 import com.rarible.protocol.union.enrichment.converter.ShortItemConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
+import com.rarible.protocol.union.enrichment.model.ReconciliationMarkType
 import com.rarible.protocol.union.enrichment.model.ShortItemId
-import com.rarible.protocol.union.enrichment.repository.ItemReconciliationMarkRepository
+import com.rarible.protocol.union.enrichment.repository.ReconciliationMarkRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.service.EnrichmentMetaService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
@@ -26,6 +27,7 @@ import com.rarible.protocol.union.integration.ethereum.converter.EthAuctionConve
 import com.rarible.protocol.union.integration.ethereum.converter.EthItemConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAuctionDto
+import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthLegacyBidOrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthLegacySellOrderDto
@@ -68,7 +70,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
     lateinit var enrichmentMetaService: EnrichmentMetaService
 
     @Autowired
-    private lateinit var itemReconciliationMarkRepository: ItemReconciliationMarkRepository
+    private lateinit var itemReconciliationMarkRepository: ReconciliationMarkRepository
 
     @Test
     fun `update event - item doesn't exist`() = runWithKafka {
@@ -171,8 +173,8 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
             assertThat(messages[0].id).isEqualTo(itemId.fullId())
 
             // Reconciliation mark should be created for such item
-            val reconcileMarks = itemReconciliationMarkRepository.findAll(100)
-            val expectedMark = reconcileMarks.find { it.id.toDto() == itemId }
+            val reconcileMarks = itemReconciliationMarkRepository.findByType(ReconciliationMarkType.ITEM, 100)
+            val expectedMark = reconcileMarks.find { it.id == itemId.fullId() }
             assertThat(expectedMark).isNotNull()
         }
     }
@@ -275,6 +277,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
     @Test
     fun `on best bid order updated - item exists with same order, order cancelled`() = runWithKafka {
         val itemId = randomEthItemId()
+        val (contract, tokenId) = CompositeItemIdParser.split(itemId.value)
 
         val bestBidOrder = randomEthLegacyBidOrderDto(itemId).copy(status = OrderStatusDto.CANCELLED)
         val unionBestBid = ethOrderConverter.convert(bestBidOrder, itemId.blockchain)
@@ -287,8 +290,8 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         coEvery { testEthereumItemApi.getNftItemMetaById(itemId.value) } returns ethItem.meta!!.toMono()
         coEvery {
             testEthereumOrderApi.getOrderBidsByItemAndByStatus(
-                eq(itemId.contract),
-                eq(itemId.tokenId.toString()),
+                eq(contract),
+                eq(tokenId.toString()),
                 eq(listOf(OrderStatusDto.ACTIVE)),
                 any(),
                 any(),
@@ -392,7 +395,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
     @Test
     fun `should return pages after continuation`() = runBlocking {
         val itemId = randomEthItemId()
-        val collectionId = ContractAddressConverter.convert(itemId.blockchain, itemId.contract)
+        val collectionId = randomEthCollectionId()
 
         val nft = randomEthNftItemDto(itemId)
         coEvery {

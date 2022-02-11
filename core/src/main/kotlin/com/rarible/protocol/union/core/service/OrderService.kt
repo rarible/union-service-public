@@ -26,14 +26,12 @@ interface OrderService : BlockchainService {
     ): List<OrderDto>
 
     suspend fun getBidCurrencies(
-        contract: String,
-        tokenId: String
+        itemId: String
     ): List<AssetTypeDto>
 
     suspend fun getOrderBidsByItem(
         platform: PlatformDto?,
-        contract: String,
-        tokenId: String,
+        itemId: String,
         makers: List<String>?,
         origin: String?,
         status: List<OrderStatusDto>?,
@@ -56,8 +54,7 @@ interface OrderService : BlockchainService {
     ): Slice<OrderDto>
 
     suspend fun getSellCurrencies(
-        contract: String,
-        tokenId: String
+        itemId: String
     ): List<AssetTypeDto>
 
     suspend fun getSellOrders(
@@ -77,8 +74,7 @@ interface OrderService : BlockchainService {
 
     suspend fun getSellOrdersByItem(
         platform: PlatformDto?,
-        contract: String,
-        tokenId: String,
+        itemId: String,
         maker: String?,
         origin: String?,
         status: List<OrderStatusDto>?,

@@ -3,8 +3,10 @@ package com.rarible.protocol.union.enrichment.model
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
+import com.rarible.protocol.union.dto.parser.IdParser
 import java.math.BigInteger
 
+@Deprecated("Should be replaced by implementation without token/tokenId")
 data class ShortOwnershipId(
     val blockchain: BlockchainDto,
     val token: String,
@@ -14,8 +16,9 @@ data class ShortOwnershipId(
 
     constructor(dto: OwnershipIdDto) : this(
         dto.blockchain,
-        dto.contract,
-        dto.tokenId,
+        // TODO won't work with Solana
+        dto.itemIdValue.substringBefore(IdParser.DELIMITER),
+        BigInteger(dto.itemIdValue.substringAfter(IdParser.DELIMITER)),
         dto.owner.value
     )
 

@@ -37,38 +37,31 @@ import com.rarible.protocol.tezos.dto.PartDto
 import com.rarible.protocol.tezos.dto.TransferDto
 import com.rarible.protocol.tezos.dto.XTZAssetTypeDto
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
+import com.rarible.protocol.union.core.util.CompositeItemIdParser
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
-import com.rarible.protocol.union.dto.parser.ItemIdParser
 
 fun randomTezosContract() = randomString(12)
 fun randomTezosAddress() = UnionAddressConverter.convert(BlockchainDto.TEZOS, randomString())
 
-fun randomTezosItemId() = ItemIdDto(BlockchainDto.TEZOS, randomTezosContract(), randomLong().toBigInteger())
+fun randomTezosItemId() = ItemIdDto(BlockchainDto.TEZOS, randomTezosContract() + ":" + randomLong().toBigInteger())
 fun randomTezosItemIdFullValue() = randomTezosItemId().fullId()
 
 fun randomTezosPartDto() = randomTezosPartDto(randomString())
 fun randomTezosPartDto(account: String) = PartDto(account, randomInt())
 
 fun randomTezosOwnershipId() = randomTezosOwnershipId(randomTezosItemId())
-fun randomTezosOwnershipId(itemId: ItemIdDto) = randomTezosOwnershipId(itemId, randomTezosAddress().value)
-fun randomTezosOwnershipId(itemId: ItemIdDto, owner: String): OwnershipIdDto {
-    return OwnershipIdDto(
-        contract = itemId.contract,
-        tokenId = itemId.tokenId,
-        owner = UnionAddressConverter.convert(BlockchainDto.TEZOS, owner),
-        blockchain = BlockchainDto.TEZOS
-    )
-}
+fun randomTezosOwnershipId(itemId: ItemIdDto) = itemId.toOwnership(randomTezosAddress().value)
 
 fun randomTezosNftItemDto() = randomTezosNftItemDto(randomTezosItemId(), randomString())
 fun randomTezosNftItemDto(itemId: ItemIdDto) = randomTezosNftItemDto(itemId, randomString())
 fun randomTezosNftItemDto(itemId: ItemIdDto, creator: String): NftItemDto {
+    val (contract, tokenId) = CompositeItemIdParser.split(itemId.value)
     return NftItemDto(
         id = itemId.value,
-        contract = itemId.contract,
-        tokenId = itemId.tokenId,
+        contract = contract,
+        tokenId = tokenId,
         mintedAt = nowMillis(),
         date = nowMillis(),
         meta = randomTezosMetaDto(),
@@ -83,25 +76,21 @@ fun randomTezosNftItemDto(itemId: ItemIdDto, creator: String): NftItemDto {
 
 fun randomTezosOwnershipDto() = randomTezosOwnershipDto(randomTezosOwnershipId())
 fun randomTezosOwnershipDto(itemId: ItemIdDto) = randomTezosOwnershipDto(
-    OwnershipIdDto(
-        itemId.blockchain,
-        itemId.contract,
-        itemId.tokenId,
-        UnionAddressConverter.convert(BlockchainDto.TEZOS, randomString())
-    )
+    itemId.toOwnership(randomString())
 )
 
 fun randomTezosOwnershipDto(ownershipId: OwnershipIdDto) = randomTezosOwnershipDto(
-    ItemIdParser.parseShort("${ownershipId.contract}:${ownershipId.tokenId}", BlockchainDto.TEZOS),
+    ownershipId.getItemId(),
     PartDto(ownershipId.owner.value, randomInt())
 )
 
 fun randomTezosOwnershipDto(itemId: ItemIdDto, creator: PartDto): NftOwnershipDto {
-    val ownershipId = randomTezosOwnershipId(itemId, creator.account)
+    val ownershipId = itemId.toOwnership(creator.account)
+    val (contract, tokenId) = CompositeItemIdParser.split(itemId.value)
     return NftOwnershipDto(
         id = ownershipId.value,
-        contract = ownershipId.contract,
-        tokenId = ownershipId.tokenId,
+        contract = contract,
+        tokenId = tokenId,
         owner = ownershipId.owner.value,
         creators = listOf(creator),
         value = randomBigInt(),
@@ -177,12 +166,14 @@ fun randomTezosItemMetaAttribute(): NftItemAttributeDto {
     )
 }
 
-
 fun randomTezosAssetNFT() = randomTezosAssetNFT(randomTezosItemId())
-fun randomTezosAssetNFT(itemId: ItemIdDto) = AssetDto(
-    assetType = NFTAssetTypeDto(itemId.contract, itemId.tokenId),
-    value = randomBigDecimal()
-)
+fun randomTezosAssetNFT(itemId: ItemIdDto): AssetDto {
+    val (contract, tokenId) = CompositeItemIdParser.split(itemId.value)
+    return AssetDto(
+        assetType = NFTAssetTypeDto(contract, tokenId),
+        value = randomBigDecimal()
+    )
+}
 
 fun randomTezosAssetXtz() = AssetDto(
     assetType = XTZAssetTypeDto(),

@@ -2,7 +2,6 @@ package com.rarible.protocol.union.api.controller
 
 import com.rarible.core.logging.withMdc
 import com.rarible.protocol.union.api.service.OrderApiService
-import com.rarible.protocol.union.api.service.extractItemId
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -50,18 +49,16 @@ class OrderController(
         val result = orderApiService.getOrdersAll(blockchains, continuation, safeSize, sort, status)
         logger.info(
             "Response for getOrdersAll" +
-                    "(blockchains={}, continuation={}, size={}): " +
-                    "Slice(size={}, continuation={})",
+                "(blockchains={}, continuation={}, size={}): " +
+                "Slice(size={}, continuation={})",
             blockchains, continuation, size, result.entities.size, result.continuation
         )
         return ResponseEntity.ok(toDto(result))
     }
 
     override suspend fun getOrderBidsByItem(
+        itemId: String,
         platform: PlatformDto?,
-        itemId: String?,
-        contract: String?,
-        tokenId: String?,
         maker: List<String>?,
         origin: String?,
         status: List<OrderStatusDto>?,
@@ -71,17 +68,17 @@ class OrderController(
         size: Int?
     ): ResponseEntity<OrdersDto> {
         val safeSize = PageSize.ORDER.limit(size)
-        val fullItemId = extractItemId(contract, tokenId, itemId)
+        val fullItemId = IdParser.parseItemId(itemId)
 
         val makerAddresses = if (maker.isNullOrEmpty()) null else maker.map { IdParser.parseAddress(it) }
         val makerBlockchainGroups = makerAddresses?.let { list -> list.map { it.blockchainGroup } } ?: emptyList()
         val originAddress = safeAddress(origin)
         if (!ensureSameBlockchain(
                 makerBlockchainGroups +
-                        listOf(
-                            fullItemId.blockchain.group(),
-                            originAddress?.blockchainGroup
-                        ),
+                    listOf(
+                        fullItemId.blockchain.group(),
+                        originAddress?.blockchainGroup
+                    ),
             )
         ) {
             logger.warn(
@@ -93,9 +90,8 @@ class OrderController(
 
         val result = orderApiService.getOrderBidsByItem(
             fullItemId.blockchain,
+            fullItemId.value,
             platform,
-            fullItemId.contract,
-            fullItemId.tokenId.toString(),
             makerAddresses?.map { it.value },
             originAddress?.value,
             status,
@@ -107,8 +103,8 @@ class OrderController(
 
         logger.info(
             "Response for getOrderBidsByItem" +
-                    "(itemId={}, platform={}, maker={}, origin={}, status={}, start={}, end={}, continuation={}, size={}): " +
-                    "Slice(size={}, continuation={})",
+                "(itemId={}, platform={}, maker={}, origin={}, status={}, start={}, end={}, continuation={}, size={}): " +
+                "Slice(size={}, continuation={})",
             fullItemId.fullId(), platform, maker, origin, status, start, end, continuation, size,
             result.entities.size, result.continuation
         )
@@ -177,8 +173,8 @@ class OrderController(
 
         logger.info(
             "Response for getOrderBidsByMaker" +
-                    "(maker={}, platform={}, origin={}, status={}, start={}, end={}, continuation={}, size={}): " +
-                    "Slice(size={}, continuation={})",
+                "(maker={}, platform={}, origin={}, status={}, start={}, end={}, continuation={}, size={}): " +
+                "Slice(size={}, continuation={})",
             maker, platform, origin, status, start, end, continuation, size,
             combinedSlice.entities.size, combinedSlice.continuation
         )
@@ -224,7 +220,7 @@ class OrderController(
         ).getSlice(safeSize)
 
         logger.info("Response for getSellOrders(blockchains={}, platform={}, origin={}, continuation={}, size={}):" +
-                " Slice(size={}, continuation={}) from blockchain slices {} ",
+            " Slice(size={}, continuation={}) from blockchain slices {} ",
             evaluatedBlockchains, platform, origin, continuation, size,
             combinedSlice.entities.size, combinedSlice.continuation, blockchainPages.map { it.entities.size }
         )
@@ -233,10 +229,8 @@ class OrderController(
     }
 
     override suspend fun getSellOrdersByItem(
+        itemId: String,
         platform: PlatformDto?,
-        itemId: String?,
-        contract: String?,
-        tokenId: String?,
         maker: String?,
         origin: String?,
         status: List<OrderStatusDto>?,
@@ -244,7 +238,7 @@ class OrderController(
         size: Int?
     ): ResponseEntity<OrdersDto> {
         val safeSize = PageSize.ORDER.limit(size)
-        val fullItemId = extractItemId(contract, tokenId, itemId)
+        val fullItemId = IdParser.parseItemId(itemId)
 
         val originAddress = safeAddress(origin)
         val makerAddress = safeAddress(maker)
@@ -263,9 +257,8 @@ class OrderController(
 
         val result = orderApiService.getSellOrdersByItem(
             fullItemId.blockchain,
+            fullItemId.value,
             platform,
-            fullItemId.contract,
-            fullItemId.tokenId.toString(),
             makerAddress?.value,
             originAddress?.value,
             status,
@@ -275,10 +268,9 @@ class OrderController(
 
         logger.info(
             "Response for getSellOrdersByItem" +
-                    "(contract={}, tokenId={}, platform={}, maker={}, origin={}, status={}, continuation={}, size={}): " +
-                    "Slice(size={}, continuation={})",
-            contract, tokenId, platform, maker, origin, status, continuation, size,
-            result.entities.size, result.continuation
+                "(itemId={}, platform={}, maker={}, origin={}, status={}, continuation={}, size={}): " +
+                "Slice(size={}, continuation={})",
+            itemId, platform, maker, origin, status, continuation, size, result.entities.size, result.continuation
         )
 
         return ResponseEntity.ok(toDto(result))
@@ -313,8 +305,8 @@ class OrderController(
 
         logger.info(
             "Response for getSellOrdersByMaker" +
-                    "(maker={}, platform={}, maker={}, origin={}, continuation={}, size={}): " +
-                    "Slice(size={}, continuation={})",
+                "(maker={}, platform={}, maker={}, origin={}, continuation={}, size={}): " +
+                "Slice(size={}, continuation={})",
             maker, platform, maker, origin, continuation, size, combinedSlice.entities.size, combinedSlice.continuation
         )
 
