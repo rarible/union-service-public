@@ -10,12 +10,10 @@ import org.springframework.boot.context.properties.ConstructorBinding
 @ConstructorBinding
 @ConfigurationProperties(prefix = "integration.solana")
 class SolanaIntegrationProperties(
-    enabled: Boolean,
-    consumer: DefaultConsumerProperties?,
-    client: DefaultClientProperties?
+    enabled: Boolean
 ) : DefaultBlockchainProperties(
     BlockchainDto.SOLANA,
     enabled,
-    consumer,
-    client
+    null,
+    null
 )

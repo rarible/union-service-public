@@ -89,6 +89,8 @@ integration:
         ownership: 1
         order: 1
     auctionContracts: ${consul.tezos.auctionContracts:}
+  solana:
+    enabled: ${consul.solana.enabled:true}
 
 listener:
   consumer:
