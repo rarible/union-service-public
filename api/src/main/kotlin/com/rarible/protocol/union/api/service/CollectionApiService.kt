@@ -43,7 +43,7 @@ class CollectionApiService(
             blockchains.map { blockchain ->
                 async {
                     val blockchainContinuation = currentContinuation.continuations[blockchain]
-                    // For completed blockchain we do not request orders
+                    // For completed blockchain we do not request collections
                     if (blockchainContinuation == ArgSlice.COMPLETED) {
                         ArgPage(blockchain, blockchainContinuation, Page(0, null, emptyList()))
                     } else {
