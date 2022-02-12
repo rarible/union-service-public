@@ -50,6 +50,8 @@ integration:
     client:
       url: ${consul.tezos.api.baseUrl}
     auctionContracts: ${consul.tezos.auctionContracts:}
+  solana:
+    enabled: ${consul.solana.enabled:false}
 
 common:
   producer:

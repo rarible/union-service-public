@@ -90,7 +90,7 @@ integration:
         order: 1
     auctionContracts: ${consul.tezos.auctionContracts:}
   solana:
-    enabled: ${consul.solana.enabled:true}
+    enabled: ${consul.solana.enabled:false}
 
 listener:
   consumer:
