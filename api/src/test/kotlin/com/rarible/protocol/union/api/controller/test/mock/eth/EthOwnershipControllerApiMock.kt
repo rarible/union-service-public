@@ -43,6 +43,21 @@ class EthOwnershipControllerApiMock(
         } returns Mono.just(NftOwnershipsDto(returnOwnerships.size.toLong(), null, returnOwnerships.asList()))
     }
 
+    fun mockGetNftOwnershipsByOwner(
+        owner: String,
+        continuation: String?,
+        size: Int?,
+        returnOwnerships: List<NftOwnershipDto>
+    ) {
+        every {
+            nftOwnershipControllerApi.getNftOwnershipsByOwner(
+                owner,
+                continuation,
+                size
+            )
+        } returns Mono.just(NftOwnershipsDto(returnOwnerships.size.toLong(), null, returnOwnerships))
+    }
+
     fun mockGetNftAllOwnerships(continuation: String?, size: Int, vararg returnOwnerships: NftOwnershipDto) {
         every {
             nftOwnershipControllerApi.getNftAllOwnerships(

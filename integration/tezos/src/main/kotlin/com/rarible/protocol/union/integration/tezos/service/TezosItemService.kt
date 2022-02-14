@@ -113,4 +113,7 @@ open class TezosItemService(
         return TezosItemConverter.convert(items, blockchain)
     }
 
+    override suspend fun getItemsByIds(itemIds: List<String>): List<UnionItem> {
+        return emptyList()
+    }
 }

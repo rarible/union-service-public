@@ -12,6 +12,7 @@ import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
+import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.continuation.CombinedContinuation
 import com.rarible.protocol.union.dto.continuation.page.PageSize
 import com.rarible.protocol.union.dto.parser.IdParser
@@ -22,10 +23,12 @@ import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.integration.ethereum.converter.EthItemConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAddress
+import com.rarible.protocol.union.integration.ethereum.data.randomEthAuctionDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemMediaMeta
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemMeta
 import com.rarible.protocol.union.integration.ethereum.data.randomEthNftItemDto
+import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthV2OrderDto
 import com.rarible.protocol.union.integration.tezos.data.randomTezosAddress
 import com.rarible.protocol.union.integration.tezos.data.randomTezosItemId
@@ -338,6 +341,104 @@ class ItemControllerFt : AbstractIntegrationTest() {
 
         val result = items.items[0]
         assertThat(result.id.value).isEqualTo(tezosItem.id)
+    }
+
+    @Test
+    fun `get items by owner with ownerships - ethereum`() = runBlocking<Unit> {
+        val ethItemId = randomEthItemId()
+        val ethItem = randomEthNftItemDto(ethItemId)
+
+        val ethOwnership = randomEthOwnershipDto(ethItemId).copy(value = BigInteger.ONE)
+        val ethOwnerId = UnionAddressConverter.convert(BlockchainDto.ETHEREUM, ethOwnership.owner.prefixed())
+        val ethOwnershipId = OwnershipIdDto(BlockchainDto.ETHEREUM, ethItemId.contract, ethItemId.tokenId, ethOwnerId)
+
+        ethereumOwnershipControllerApiMock.mockGetNftOwnershipsByOwner(ethOwnerId.value, continuation, size, listOf(ethOwnership))
+        polygonOwnershipControllerApiMock.mockGetNftOwnershipsByOwner(ethOwnerId.value, continuation, size, emptyList())
+
+        ethereumAuctionControllerApiMock.mockGetAuctionsBySeller(ethOwnerId.value, listOf())
+        polygonAuctionControllerApiMock.mockGetAuctionsBySeller(ethOwnerId.value, listOf())
+
+        ethereumItemControllerApiMock.mockGetNftItemsByIds(listOf(ethItemId.value), listOf(ethItem))
+
+        val items = itemControllerClient.getItemsByOwnerWithOwnership(
+            ethOwnerId.fullId(), continuation, size
+        ).awaitFirst()
+
+        assertThat(items.items).hasSize(1)
+        val resultedItem = items.items[0]
+
+        assertThat(resultedItem.item.id).isEqualTo(ethItemId)
+        assertThat(resultedItem.ownership.id).isEqualTo(ethOwnershipId)
+        assertThat(resultedItem.ownership.value).isEqualTo(BigInteger.ONE)
+    }
+
+    @Test
+    fun `get items by owner with ownerships - ethereum with auction`() = runBlocking<Unit> {
+        val ethOwner = randomEthAddress()
+        val owner = UnionAddressConverter.convert(BlockchainDto.ETHEREUM, ethOwner)
+
+        val ethItemId = randomEthItemId()
+        val ethItem = randomEthNftItemDto(ethItemId)
+
+        val auction = randomEthAuctionDto(ethItemId)
+        val auctionSeller = UnionAddressConverter.convert(BlockchainDto.ETHEREUM, auction.seller.prefixed())
+        val auctionOwnershipId = OwnershipIdDto(BlockchainDto.ETHEREUM, ethItemId.contract, ethItemId.tokenId, auctionSeller)
+        val auctionOwnership = randomEthOwnershipDto(ethItemId).copy(owner = auction.seller, value = BigInteger.ONE)
+
+        ethereumOwnershipControllerApiMock.mockGetNftOwnershipsByOwner(ethOwner, continuation, size, emptyList())
+        polygonOwnershipControllerApiMock.mockGetNftOwnershipsByOwner(ethOwner, continuation, size, emptyList())
+
+        ethereumAuctionControllerApiMock.mockGetAuctionsBySeller(ethOwner, listOf(auction))
+        polygonAuctionControllerApiMock.mockGetAuctionsBySeller(ethOwner, listOf())
+        ethereumOwnershipControllerApiMock.mockGetNftOwnershipById(auctionOwnershipId, auctionOwnership)
+
+        ethereumItemControllerApiMock.mockGetNftItemsByIds(listOf(ethItemId.value), listOf(ethItem))
+
+        val items = itemControllerClient.getItemsByOwnerWithOwnership(
+            owner.fullId(), continuation, size
+        ).awaitFirst()
+
+        assertThat(items.items).hasSize(1)
+        val resultedItem = items.items[0]
+
+        assertThat(resultedItem.item.id).isEqualTo(ethItemId)
+        assertThat(resultedItem.ownership.id).isEqualTo(auctionOwnershipId.copy(owner = owner))
+        assertThat(resultedItem.ownership.value).isEqualTo(BigInteger.ONE)
+    }
+
+    @Test
+    fun `get items by owner with ownerships - ethereum with partial auction`() = runBlocking<Unit> {
+        val ethItemId = randomEthItemId()
+        val ethItem = randomEthNftItemDto(ethItemId)
+
+        val ethOwnership = randomEthOwnershipDto(ethItemId).copy(value = BigInteger.ONE)
+        val ethOwnerId = UnionAddressConverter.convert(BlockchainDto.ETHEREUM, ethOwnership.owner.prefixed())
+        val ethOwnershipId = OwnershipIdDto(BlockchainDto.ETHEREUM, ethItemId.contract, ethItemId.tokenId, ethOwnerId)
+
+        val auction = randomEthAuctionDto(ethItemId)
+        val auctionSeller = UnionAddressConverter.convert(BlockchainDto.ETHEREUM, auction.seller.prefixed())
+        val auctionOwnershipId = OwnershipIdDto(BlockchainDto.ETHEREUM, ethItemId.contract, ethItemId.tokenId, auctionSeller)
+        val auctionOwnership = randomEthOwnershipDto(ethItemId).copy(owner = auction.seller, value = BigInteger.ONE)
+
+        ethereumOwnershipControllerApiMock.mockGetNftOwnershipsByOwner(ethOwnerId.value, continuation, size, listOf(ethOwnership))
+        polygonOwnershipControllerApiMock.mockGetNftOwnershipsByOwner(ethOwnerId.value, continuation, size, emptyList())
+
+        ethereumAuctionControllerApiMock.mockGetAuctionsBySeller(ethOwnerId.value, listOf(auction))
+        polygonAuctionControllerApiMock.mockGetAuctionsBySeller(ethOwnerId.value, listOf())
+        ethereumOwnershipControllerApiMock.mockGetNftOwnershipById(auctionOwnershipId, auctionOwnership)
+
+        ethereumItemControllerApiMock.mockGetNftItemsByIds(listOf(ethItemId.value), listOf(ethItem))
+
+        val items = itemControllerClient.getItemsByOwnerWithOwnership(
+            ethOwnerId.fullId(), continuation, size
+        ).awaitFirst()
+
+        assertThat(items.items).hasSize(1)
+        val resultedItem = items.items[0]
+
+        assertThat(resultedItem.item.id).isEqualTo(ethItemId)
+        assertThat(resultedItem.ownership.id).isEqualTo(ethOwnershipId)
+        assertThat(resultedItem.ownership.value).isEqualTo(BigInteger.valueOf(2))
     }
 
     @Test

@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.api.service
 
 import com.rarible.protocol.union.core.continuation.UnionAuctionOwnershipWrapperContinuation
+import com.rarible.protocol.union.core.continuation.UnionOwnershipContinuation
 import com.rarible.protocol.union.core.exception.UnionNotFoundException
 import com.rarible.protocol.union.core.model.UnionAuctionOwnershipWrapper
 import com.rarible.protocol.union.core.model.UnionOwnership
@@ -12,9 +13,12 @@ import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OwnershipDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.OwnershipsDto
+import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.continuation.DateIdContinuation
 import com.rarible.protocol.union.dto.continuation.page.PageSize
 import com.rarible.protocol.union.dto.continuation.page.Paging
+import com.rarible.protocol.union.dto.continuation.page.Slice
+import com.rarible.protocol.union.dto.subchains
 import com.rarible.protocol.union.enrichment.converter.EnrichedOwnershipConverter
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortOwnership
@@ -60,6 +64,49 @@ class OwnershipApiService(
                 throw UnionNotFoundException("Ownership ${fullOwnershipId.fullId()} not found")
             }
         }
+    }
+
+    suspend fun getOwnershipByOwner(owner: UnionAddress, continuation: String?, size: Int): Slice<UnionOwnership> {
+        val lastPageEnd = DateIdContinuation.parse(continuation)
+
+        val ownershipsMap = ownershipRouter.executeForAll(owner.blockchainGroup.subchains()) {
+            it.getOwnershipsByOwner(owner.value, continuation, size)
+        }.flatMap { it.entities }.associateBy { it.id.toItemId() }.toMutableMap()
+
+        // get owner's auctions
+        val ownerAuctionsList = enrichmentAuctionService.findBySeller(owner).map {
+            coroutineScope {
+                async {
+                    val ownershipId = it.getSellerOwnershipId()
+                    enrichmentOwnershipService.fetchOrNull(ShortOwnershipId(ownershipId))
+                }
+            }
+        }.awaitAll().filterNotNull().filter {
+            val fullAuctionContinuation = DateIdContinuation(it.createdAt, it.id.value)
+
+            // if continuation exists we need to filter, works for desc only
+            lastPageEnd == null || lastPageEnd.compareTo(fullAuctionContinuation) == 1
+        }
+
+        // Merging with auction ownerships
+        ownerAuctionsList.forEach {
+            val itemId = it.id.toItemId()
+            val partial = ownershipsMap[itemId]
+            if (null != partial) {
+                ownershipsMap[itemId] = partial.copy(value = it.value + partial.value)
+            } else {
+                // disguising ownership
+                ownershipsMap[itemId] = it.copy(id = it.id.copy(owner = owner))
+            }
+        }
+
+        // Now we can trim combined list to requested size
+        val page = Paging(
+            UnionOwnershipContinuation.ByLastUpdatedAndId,
+            ownershipsMap.values
+        ).getSlice(size)
+
+        return page
     }
 
     suspend fun getOwnershipsByItem(itemId: ItemIdDto, continuation: String?, size: Int): OwnershipsDto {
@@ -161,5 +208,6 @@ class OwnershipApiService(
 
         return enrichmentOwnershipService.enrichOwnership(shortOwnership, unionOwnership)
     }
-
 }
+
+fun OwnershipIdDto.toItemId(): ItemIdDto = ItemIdDto(this.blockchain, this.contract, this.tokenId)

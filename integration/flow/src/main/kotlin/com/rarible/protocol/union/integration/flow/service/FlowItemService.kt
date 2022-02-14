@@ -99,4 +99,8 @@ open class FlowItemService(
         return FlowItemConverter.convert(items, blockchain)
     }
 
+    override suspend fun getItemsByIds(itemIds: List<String>): List<UnionItem> {
+        return emptyList()
+    }
+
 }

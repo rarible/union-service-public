@@ -35,4 +35,8 @@ open class FlowOwnershipService(
         ).awaitFirst()
         return FlowOwnershipConverter.convert(ownerships, blockchain)
     }
+
+    override suspend fun getOwnershipsByOwner(address: String, continuation: String?, size: Int): Page<UnionOwnership> {
+        return Page.empty()
+    }
 }

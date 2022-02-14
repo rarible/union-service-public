@@ -51,4 +51,8 @@ interface ItemService : BlockchainService {
         size: Int
     ): Page<UnionItem>
 
+    suspend fun getItemsByIds(
+        itemIds: List<String>
+    ): List<UnionItem>
+
 }

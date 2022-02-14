@@ -63,4 +63,8 @@ class DummyItemService(
     ): Page<UnionItem> {
         return Page.empty()
     }
+
+    override suspend fun getItemsByIds(itemIds: List<String>): List<UnionItem> {
+        return emptyList()
+    }
 }
