@@ -140,7 +140,9 @@ class OwnershipApiServiceTest {
         mockOwnershipsNotFound(fullAuction.getSellerOwnershipId())
         mockOwnerships(partialOwnership)
 
-        val continuation = DateIdContinuation(fullAuction.createdAt, fullAuctionOwnership.id.value).toString()
+        val continuation = DateIdContinuation(
+            fullAuction.createdAt.plusSeconds(1), fullAuctionOwnership.id.value
+        ).toString()
 
         // 2 ownerships should be requested since full auction was filtered
         mockItemOwnerships(

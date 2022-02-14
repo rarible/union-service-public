@@ -57,7 +57,7 @@ class EnrichmentOwnershipService(
     }
 
     suspend fun findAll(ids: List<ShortOwnershipId>): List<ShortOwnership> {
-        return ownershipRepository.findAll(ids)
+        return ownershipRepository.getAll(ids)
     }
 
     suspend fun getItemSellStats(itemId: ShortItemId): ItemSellStats {

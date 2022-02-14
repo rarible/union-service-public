@@ -43,7 +43,7 @@ class EnrichmentOrderEventService(
                 }
                 ignoreApi404 {
                     val ownershipId = ShortOwnershipId(
-                        makeItemId.blockchain, makeItemId.token, makeItemId.tokenId, order.maker.value
+                        makeItemId.blockchain, makeItemId.itemId, order.maker.value
                     )
                     enrichmentOwnershipEventService.onOwnershipBestSellOrderUpdated(
                         ownershipId, order, notificationEnabled

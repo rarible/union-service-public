@@ -50,9 +50,9 @@ internal class ItemRepositoryIt : AbstractIntegrationTest() {
 
     @Test
     fun `find all by blockchain`() = runBlocking<Unit> {
-        val item1 = itemRepository.save(randomShortItem().copy(blockchain = BlockchainDto.ETHEREUM, token = "1"))
-        val item2 = itemRepository.save(randomShortItem().copy(blockchain = BlockchainDto.ETHEREUM, token = "2"))
-        val item3 = itemRepository.save(randomShortItem().copy(blockchain = BlockchainDto.ETHEREUM, token = "3"))
+        val item1 = itemRepository.save(randomShortItem().copy(blockchain = BlockchainDto.ETHEREUM, itemId = "aaa:1"))
+        val item2 = itemRepository.save(randomShortItem().copy(blockchain = BlockchainDto.ETHEREUM, itemId = "bbb:2"))
+        val item3 = itemRepository.save(randomShortItem().copy(blockchain = BlockchainDto.ETHEREUM, itemId = "ccc:3"))
         itemRepository.save(randomShortItem().copy(blockchain = BlockchainDto.FLOW))
 
         val firstPage = itemRepository.findByBlockchain(null, BlockchainDto.ETHEREUM, 2).toList()

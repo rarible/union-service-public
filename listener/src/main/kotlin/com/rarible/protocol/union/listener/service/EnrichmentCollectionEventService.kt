@@ -37,8 +37,7 @@ class EnrichmentCollectionEventService(
                     }
                     val ownershipId = ShortOwnershipId(
                         item.blockchain,
-                        item.token,
-                        item.tokenId,
+                        item.itemId,
                         order.maker.value
                     )
                     ignoreApi404 {
