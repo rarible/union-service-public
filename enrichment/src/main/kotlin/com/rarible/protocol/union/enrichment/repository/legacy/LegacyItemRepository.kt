@@ -88,12 +88,12 @@ class LegacyItemRepository(
         fromShortItemId: ShortItemId?, blockchain: BlockchainDto?, limit: Int
     ): Flow<ShortItem> {
         val legacyFromId = fromShortItemId?.let { LegacyShortItemId(it) }
-        val criteria = Criteria().andOperator(
-            listOfNotNull(
-                blockchain?.let { LegacyShortItem::blockchain isEqualTo it },
-                legacyFromId?.let { Criteria.where("_id").gt(it) }
-            )
+        val criteriaList = listOfNotNull(
+            blockchain?.let { LegacyShortItem::blockchain isEqualTo it },
+            legacyFromId?.let { Criteria.where("_id").gt(it) }
         )
+
+        val criteria = if (criteriaList.isEmpty()) Criteria() else Criteria().andOperator(criteriaList)
 
         val query = Query(criteria)
             .with(Sort.by("_id"))

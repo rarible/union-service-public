@@ -76,11 +76,7 @@ class LegacyOwnershipRepository(
 
     fun findAll(fromShortOwnershipId: ShortOwnershipId?): Flow<ShortOwnership> {
         val legacyFromId = fromShortOwnershipId?.let { LegacyShortOwnershipId(it) }
-        val criteria = Criteria().andOperator(
-            listOfNotNull(
-                legacyFromId?.let { Criteria.where("_id").gt(it) }
-            )
-        )
+        val criteria = legacyFromId?.let { Criteria.where("_id").gt(it) } ?: Criteria()
 
         val query = Query(criteria)
             .with(Sort.by("_id"))
