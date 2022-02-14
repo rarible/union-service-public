@@ -54,7 +54,7 @@ common:
     refresh:
       cron: "0 0/30 * * * *"
   feature-flags:
-    enablePolygonInApi: false
+    enablePolygonInApi: true
 
 meta:
   ipfsGateway: "https://rarible.mypinata.cloud/"
