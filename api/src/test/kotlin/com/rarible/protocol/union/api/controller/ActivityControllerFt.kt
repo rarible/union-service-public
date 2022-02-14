@@ -451,7 +451,7 @@ class ActivityControllerFt : AbstractIntegrationTest() {
         val now = Instant.now()
         val oneWeekAgo = now.minus(7, ChronoUnit.DAYS)
         val activities = activityControllerApi.getActivitiesByUser(
-            types, listOf(userEth.fullId(), userFlow.fullId()), oneWeekAgo, now, null, null, size, sort
+            types, listOf(userEth.fullId(), userFlow.fullId()), null, oneWeekAgo, now, null, null, size, sort
         ).awaitFirst()
 
         assertThat(activities.activities).hasSize(3)
@@ -511,7 +511,8 @@ class ActivityControllerFt : AbstractIntegrationTest() {
 
         val oneWeekAgo = now.minus(7, ChronoUnit.DAYS)
         val activities = activityControllerApi.getActivitiesByUser(
-            types, listOf(userEth.fullId(), userFlow.fullId()), oneWeekAgo, now, null, cursorArg.toString(), size, sort
+            types, listOf(userEth.fullId(), userFlow.fullId()), null, oneWeekAgo, now, null, cursorArg.toString(), size,
+            sort
         ).awaitFirst()
 
         assertThat(activities.activities).hasSize(3)
@@ -558,7 +559,7 @@ class ActivityControllerFt : AbstractIntegrationTest() {
         val now = Instant.now()
         val oneWeekAgo = now.minus(7, ChronoUnit.DAYS)
         val activities = activityControllerApi.getActivitiesByUser(
-            types, listOf(userEth.fullId(), userFlow.fullId()), oneWeekAgo, now, null, null, size, sort
+            types, listOf(userEth.fullId(), userFlow.fullId()), null, oneWeekAgo, now, null, null, size, sort
         ).awaitFirst()
 
         assertThat(activities.activities).hasSize(size)

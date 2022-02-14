@@ -1,5 +1,8 @@
 protocol-union-api:
   replicas: 3
+  service:
+    enabled: true
+    nodePort: 30118
   resources:
     jvm:
       xmx_megabytes: 1024

@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.api.controller
 
 import com.rarible.protocol.union.api.service.ActivityApiService
+import com.rarible.protocol.union.api.util.BlockchainFilter
 import com.rarible.protocol.union.core.service.ActivityService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.ActivitiesDto
@@ -16,7 +17,6 @@ import com.rarible.protocol.union.dto.continuation.page.ArgSlice
 import com.rarible.protocol.union.dto.continuation.page.PageSize
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.dto.parser.IdParser
-import com.rarible.protocol.union.dto.subchains
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
@@ -125,6 +125,7 @@ class ActivityController(
     override suspend fun getActivitiesByUser(
         type: List<UserActivityTypeDto>,
         user: List<String>,
+        blockchains: List<BlockchainDto>?,
         from: Instant?,
         to: Instant?,
         continuation: String?,
@@ -133,9 +134,10 @@ class ActivityController(
         sort: ActivitySortDto?
     ): ResponseEntity<ActivitiesDto> {
         val safeSize = PageSize.ACTIVITY.limit(size)
+        val filter = BlockchainFilter(blockchains)
         val groupedByBlockchain = user.map { IdParser.parseAddress(it) }
             // Since user specified here with blockchain group, we need to route request to all subchains
-            .flatMap { address -> address.blockchainGroup.subchains().map { it to address.value } }
+            .flatMap { address -> filter.exclude(address.blockchainGroup).map { it to address.value } }
             .groupBy({ it.first }, { it.second })
 
         val (result, slicesCounter) = if (null == cursor) {
@@ -224,4 +226,5 @@ class ActivityController(
         ActivitySortDto.EARLIEST_FIRST -> ActivityContinuation.ByLastUpdatedAndIdAsc
         ActivitySortDto.LATEST_FIRST, null -> ActivityContinuation.ByLastUpdatedAndIdDesc
     }
+
 }

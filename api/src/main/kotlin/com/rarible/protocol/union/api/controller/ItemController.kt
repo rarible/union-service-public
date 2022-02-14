@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.api.controller
 
 import com.rarible.protocol.union.api.service.ItemApiService
+import com.rarible.protocol.union.api.util.BlockchainFilter
 import com.rarible.protocol.union.core.continuation.UnionItemContinuation
 import com.rarible.protocol.union.core.exception.UnionNotFoundException
 import com.rarible.protocol.union.core.model.UnionItem
@@ -141,13 +142,15 @@ class ItemController(
 
     override suspend fun getItemsByCreator(
         creator: String,
+        blockchains: List<BlockchainDto>?,
         continuation: String?,
         size: Int?
     ): ResponseEntity<ItemsDto> {
         val safeSize = PageSize.ITEM.limit(size)
         val creatorAddress = IdParser.parseAddress(creator)
+        val filter = BlockchainFilter(blockchains)
 
-        val blockchainPages = router.executeForAll(creatorAddress.blockchainGroup.subchains()) {
+        val blockchainPages = router.executeForAll(filter.exclude(creatorAddress.blockchainGroup)) {
             it.getItemsByCreator(creatorAddress.value, continuation, safeSize)
         }
 
@@ -170,12 +173,14 @@ class ItemController(
 
     override suspend fun getItemsByOwner(
         owner: String,
+        blockchains: List<BlockchainDto>?,
         continuation: String?,
         size: Int?
     ): ResponseEntity<ItemsDto> {
         val safeSize = PageSize.ITEM.limit(size)
         val ownerAddress = IdParser.parseAddress(owner)
-        val blockchainPages = router.executeForAll(ownerAddress.blockchainGroup.subchains()) {
+        val filter = BlockchainFilter(blockchains)
+        val blockchainPages = router.executeForAll(filter.exclude(ownerAddress.blockchainGroup)) {
             it.getItemsByOwner(ownerAddress.value, continuation, safeSize)
         }
 

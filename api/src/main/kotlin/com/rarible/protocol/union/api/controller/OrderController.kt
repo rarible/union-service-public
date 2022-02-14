@@ -2,6 +2,7 @@ package com.rarible.protocol.union.api.controller
 
 import com.rarible.core.logging.withMdc
 import com.rarible.protocol.union.api.service.OrderApiService
+import com.rarible.protocol.union.api.util.BlockchainFilter
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -19,7 +20,6 @@ import com.rarible.protocol.union.dto.continuation.page.Paging
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.dto.group
 import com.rarible.protocol.union.dto.parser.IdParser
-import com.rarible.protocol.union.dto.subchains
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
@@ -121,6 +121,7 @@ class OrderController(
     )
     suspend fun getOrderBidsByMaker0(
         @RequestParam(value = "maker", required = true) maker: kotlin.String,
+        @RequestParam(value = "blockchains", required = false) blockchains: kotlin.collections.List<BlockchainDto>?,
         @RequestParam(value = "platform", required = false) platform: PlatformDto?,
         @RequestParam(value = "origin", required = false) origin: kotlin.String?,
         @RequestParam(value = "status", required = false) status: kotlin.collections.List<OrderStatusDto>?,
@@ -129,11 +130,16 @@ class OrderController(
         @RequestParam(value = "continuation", required = false) continuation: kotlin.String?,
         @RequestParam(value = "size", required = false) size: kotlin.Int?
     ): ResponseEntity<OrdersDto> {
-        return withMdc { getOrderBidsByMaker(maker, platform, origin, status, start, end, continuation, size) }
+        return withMdc {
+            getOrderBidsByMaker(
+                maker, blockchains, platform, origin, status, start, end, continuation, size
+            )
+        }
     }
 
     suspend fun getOrderBidsByMaker(
         maker: String,
+        blockchains: List<BlockchainDto>?,
         platform: PlatformDto?,
         origin: String?,
         status: List<OrderStatusDto>?,
@@ -145,6 +151,7 @@ class OrderController(
         val safeSize = PageSize.ORDER.limit(size)
         val makerAddress = IdParser.parseAddress(maker)
         val originAddress = safeAddress(origin)
+        val filter = BlockchainFilter(blockchains)
         if (!ensureSameBlockchain(makerAddress.blockchainGroup, originAddress?.blockchainGroup)) {
             logger.warn(
                 "Incompatible blockchain groups specified in getOrderBidsByMaker: origin={}, maker={}",
@@ -153,7 +160,7 @@ class OrderController(
             return ResponseEntity.ok(empty)
         }
 
-        val blockchainSlices = router.executeForAll(makerAddress.blockchainGroup.subchains()) {
+        val blockchainSlices = router.executeForAll(filter.exclude(makerAddress.blockchainGroup)) {
             it.getOrderBidsByMaker(
                 platform,
                 makerAddress.value,
@@ -208,7 +215,9 @@ class OrderController(
     ): ResponseEntity<OrdersDto> {
         val safeSize = PageSize.ORDER.limit(size)
         val originAddress = safeAddress(origin)
-        val evaluatedBlockchains = originAddress?.blockchainGroup?.subchains() ?: blockchains
+        val filter = BlockchainFilter(blockchains)
+
+        val evaluatedBlockchains = originAddress?.blockchainGroup?.let { filter.exclude(it) } ?: blockchains
 
         val blockchainPages = router.executeForAll(evaluatedBlockchains) {
             it.getSellOrders(platform, originAddress?.value, continuation, safeSize)
@@ -278,6 +287,7 @@ class OrderController(
 
     override suspend fun getSellOrdersByMaker(
         maker: String,
+        blockchains: List<BlockchainDto>?,
         platform: PlatformDto?,
         origin: String?,
         continuation: String?,
@@ -286,6 +296,8 @@ class OrderController(
         val safeSize = PageSize.ORDER.limit(size)
         val makerAddress = IdParser.parseAddress(maker)
         val originAddress = safeAddress(origin)
+        val filter = BlockchainFilter(blockchains)
+
         if (!ensureSameBlockchain(makerAddress.blockchainGroup, originAddress?.blockchainGroup)) {
             logger.warn(
                 "Incompatible blockchain groups specified in getSellOrdersByMaker: origin={}, maker={}",
@@ -294,7 +306,7 @@ class OrderController(
             return ResponseEntity.ok(empty)
         }
 
-        val blockchainSlices = router.executeForAll(makerAddress.blockchainGroup.subchains()) {
+        val blockchainSlices = router.executeForAll(filter.exclude(makerAddress.blockchainGroup)) {
             it.getSellOrdersByMaker(platform, makerAddress.value, originAddress?.value, continuation, safeSize)
         }
 

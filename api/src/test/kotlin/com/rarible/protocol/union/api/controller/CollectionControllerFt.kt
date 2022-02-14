@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.api.controller
 
-import com.rarible.core.common.nowMillis
 import com.rarible.core.test.data.randomAddress
 import com.rarible.core.test.data.randomString
 import com.rarible.protocol.dto.FlowNftCollectionsDto
@@ -11,6 +10,7 @@ import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionDto
+import com.rarible.protocol.union.dto.continuation.CombinedContinuation
 import com.rarible.protocol.union.dto.continuation.page.PageSize
 import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAddress
@@ -92,7 +92,7 @@ class CollectionControllerFt : AbstractIntegrationTest() {
         } returns NftCollectionsDto(1, null, listOf(collection)).toMono()
 
         val unionCollections = collectionControllerClient.getCollectionsByOwner(
-            ethOwnerId.fullId(), continuation, size
+            ethOwnerId.fullId(), null, continuation, size
         ).awaitFirst()
 
         val ethCollection = unionCollections.collections[0]
@@ -110,7 +110,7 @@ class CollectionControllerFt : AbstractIntegrationTest() {
         } returns com.rarible.protocol.tezos.dto.NftCollectionsDto(1, null, listOf(collection)).toMono()
 
         val unionCollections = collectionControllerClient.getCollectionsByOwner(
-            tezosOwnerId.fullId(), continuation, size
+            tezosOwnerId.fullId(), null, continuation, size
         ).awaitFirst()
 
         val tezosCollection = unionCollections.collections[0]
@@ -127,7 +127,7 @@ class CollectionControllerFt : AbstractIntegrationTest() {
         } returns FlowNftCollectionsDto(1, null, listOf(collection)).toMono()
 
         val unionCollections = collectionControllerClient.getCollectionsByOwner(
-            flowOwnerId.fullId(), continuation, size
+            flowOwnerId.fullId(), null, continuation, size
         ).awaitFirst()
 
         val flowCollection = unionCollections.collections[0]
@@ -137,7 +137,12 @@ class CollectionControllerFt : AbstractIntegrationTest() {
     @Test
     fun `get all collections`() = runBlocking<Unit> {
         val blockchains = listOf(BlockchainDto.ETHEREUM, BlockchainDto.FLOW, BlockchainDto.TEZOS)
-        val continuation = "${nowMillis()}_${randomString()}"
+        val ethContinuation = randomEthAddress()
+        val continuation = CombinedContinuation(
+            mapOf(
+                BlockchainDto.ETHEREUM.toString() to ethContinuation
+            )
+        )
         val size = 10
 
         val flowCollections = listOf(randomFlowCollectionDto(), randomFlowCollectionDto())
@@ -145,19 +150,19 @@ class CollectionControllerFt : AbstractIntegrationTest() {
         val tezosCollections = listOf(randomTezosCollectionDto())
 
         coEvery {
-            testFlowCollectionApi.searchNftAllCollections(continuation, size)
+            testFlowCollectionApi.searchNftAllCollections(null, size)
         } returns FlowNftCollectionsDto(2, null, flowCollections).toMono()
 
         coEvery {
-            testEthereumCollectionApi.searchNftAllCollections(continuation, size)
+            testEthereumCollectionApi.searchNftAllCollections(ethContinuation, size)
         } returns NftCollectionsDto(3, null, ethCollections).toMono()
 
         coEvery {
-            testTezosCollectionApi.searchNftAllCollections(size, continuation)
+            testTezosCollectionApi.searchNftAllCollections(size, null)
         } returns com.rarible.protocol.tezos.dto.NftCollectionsDto(1, null, tezosCollections).toMono()
 
         val unionCollections = collectionControllerClient.getAllCollections(
-            blockchains, continuation, size
+            blockchains, continuation.toString(), size
         ).awaitFirst()
 
         assertThat(unionCollections.collections).hasSize(6)

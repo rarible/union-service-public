@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.api.controller
 
+import com.rarible.protocol.union.api.util.BlockchainFilter
 import com.rarible.protocol.union.core.service.AuctionService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.AuctionBidDto
@@ -59,7 +60,9 @@ class AuctionController(
     ): ResponseEntity<AuctionsDto> {
         val safeSize = PageSize.AUCTION.limit(size)
         val originAddress = safeAddress(origin)
-        val evaluatedBlockchains = originAddress?.blockchainGroup?.subchains() ?: blockchains
+        val filter = BlockchainFilter(blockchains)
+
+        val evaluatedBlockchains = originAddress?.blockchainGroup?.let { filter.exclude(it) } ?: blockchains
 
         val blockchainSlices = router.executeForAll(evaluatedBlockchains) {
             it.getAuctionsAll(sort, status, origin, platform, continuation, size)
@@ -146,6 +149,7 @@ class AuctionController(
 
     override suspend fun getAuctionsBySeller(
         seller: String,
+        blockchains: List<BlockchainDto>?,
         status: List<AuctionStatusDto>?,
         origin: String?,
         platform: PlatformDto?,
@@ -155,6 +159,7 @@ class AuctionController(
         val sellerAddress = IdParser.parseAddress(seller)
         val originAddress = safeAddress(origin)
         val safeSize = PageSize.AUCTION.limit(size)
+        val filter = BlockchainFilter(blockchains)
         if (!ensureSameBlockchain(sellerAddress.blockchainGroup, originAddress?.blockchainGroup)) {
             logger.warn(
                 "Incompatible blockchain groups specified in getAuctionsBySeller: origin={}, seller={}",
@@ -163,7 +168,7 @@ class AuctionController(
             return ResponseEntity.ok(empty)
         }
 
-        val blockchainSlices = router.executeForAll(sellerAddress.blockchainGroup.subchains()) {
+        val blockchainSlices = router.executeForAll(filter.exclude(sellerAddress.blockchainGroup)) {
             it.getAuctionsBySeller(
                 sellerAddress.value,
                 status,
