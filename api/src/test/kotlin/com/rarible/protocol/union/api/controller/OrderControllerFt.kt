@@ -381,6 +381,7 @@ class OrderControllerFt : AbstractIntegrationTest() {
 
         val orders = orderControllerClient.getSellOrdersByMaker(
             maker.fullId(),
+            null,
             platform,
             null,
             continuation,

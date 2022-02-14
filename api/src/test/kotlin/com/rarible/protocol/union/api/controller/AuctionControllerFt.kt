@@ -85,7 +85,7 @@ class AuctionControllerFt : AbstractIntegrationTest() {
         polygonAuctionControllerApiMock.mockGetAllAuctions(listOf(polygonAuction))
 
         val unionAuctions = auctionControllerClient.getAuctionsAll(
-            listOf(BlockchainDto.ETHEREUM),
+            listOf(BlockchainDto.ETHEREUM, BlockchainDto.POLYGON),
             AuctionSortDto.LAST_UPDATE_DESC,
             listOf(AuctionStatusDto.ACTIVE),
             origin.fullId(),
@@ -155,6 +155,7 @@ class AuctionControllerFt : AbstractIntegrationTest() {
 
         val unionAuctions = auctionControllerClient.getAuctionsBySeller(
             seller.fullId(),
+            null,
             listOf(AuctionStatusDto.ACTIVE),
             origin.fullId(),
             platform, continuation, size
