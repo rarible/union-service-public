@@ -59,6 +59,7 @@ common:
   currency:
     refresh:
       cron: "0 0/30 * * * *"
+  useLegacyRepository: true
 
 meta:
   ipfsGateway: "https://rarible.mypinata.cloud/"

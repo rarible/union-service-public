@@ -7,16 +7,14 @@ import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.Transient
 import org.springframework.data.annotation.Version
 import org.springframework.data.mongodb.core.mapping.Document
-import java.math.BigInteger
 import java.time.Instant
 
-@Document("ownership")
+@Document("enrichment_ownership")
 data class ShortOwnership(
 
     val blockchain: BlockchainDto,
-    val token: String,
-    val tokenId: BigInteger,
-    val owner: String,
+    val itemId: String, // ItemId without blockchain prefix
+    val owner: String, // Owner without blockchain prefix
 
     val bestSellOrders: Map<String, ShortOrder>,
 
@@ -40,8 +38,7 @@ data class ShortOwnership(
         fun empty(ownershipId: ShortOwnershipId): ShortOwnership {
             return ShortOwnership(
                 blockchain = ownershipId.blockchain,
-                token = ownershipId.token,
-                tokenId = ownershipId.tokenId,
+                itemId = ownershipId.itemId,
                 owner = ownershipId.owner,
 
                 bestSellOrders = emptyMap(),
@@ -58,7 +55,7 @@ data class ShortOwnership(
     }
 
     @Transient
-    private val _id: ShortOwnershipId = ShortOwnershipId(blockchain, token, tokenId, owner)
+    private val _id: ShortOwnershipId = ShortOwnershipId(blockchain, itemId, owner)
 
     @get:Id
     @get:AccessType(AccessType.Type.PROPERTY)

@@ -18,8 +18,7 @@ class SolanaItemConverterTest {
             UnionItem(
                 id = ItemIdDto(
                     blockchain = BlockchainDto.SOLANA,
-                    contract = tokenDto.address,
-                    tokenId = BigInteger.ZERO // TODO[solana]: not applicable.
+                    value = tokenDto.address
                 ),
                 collection = null,
                 creators = emptyList(),

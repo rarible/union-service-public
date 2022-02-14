@@ -59,7 +59,7 @@ class EnrichmentItemService(
     }
 
     suspend fun findAll(ids: List<ShortItemId>): List<ShortItem> {
-        return itemRepository.findAll(ids)
+        return itemRepository.getAll(ids)
     }
 
     fun findByCollection(address: CollectionIdDto, owner: UnionAddress? = null): Flow<ShortItemId> = flow {

@@ -11,12 +11,11 @@ import org.springframework.data.mongodb.core.mapping.Document
 import java.math.BigInteger
 import java.time.Instant
 
-@Document("item")
+@Document("enrichment_item")
 data class ShortItem(
 
     val blockchain: BlockchainDto,
-    val token: String,
-    val tokenId: BigInteger,
+    val itemId: String,
 
     val sellers: Int = 0,
     val totalStock: BigInteger,
@@ -49,8 +48,7 @@ data class ShortItem(
             return ShortItem(
                 version = null,
                 blockchain = itemId.blockchain,
-                token = itemId.token,
-                tokenId = itemId.tokenId,
+                itemId = itemId.itemId,
 
                 sellers = 0,
                 totalStock = BigInteger.ZERO,
@@ -73,7 +71,7 @@ data class ShortItem(
     }
 
     @Transient
-    private val _id: ShortItemId = ShortItemId(blockchain, token, tokenId)
+    private val _id: ShortItemId = ShortItemId(blockchain, itemId)
 
     @get:Id
     @get:AccessType(AccessType.Type.PROPERTY)

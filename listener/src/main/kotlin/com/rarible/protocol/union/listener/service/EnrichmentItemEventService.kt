@@ -43,7 +43,7 @@ class EnrichmentItemEventService(
         order: OrderDto?,
         notificationEnabled: Boolean = true
     ) {
-        val itemId = ShortItemId(ownershipId.blockchain, ownershipId.token, ownershipId.tokenId)
+        val itemId = ShortItemId(ownershipId.blockchain, ownershipId.itemId)
         optimisticLock {
             val item = itemService.get(itemId)
             if (item == null) {

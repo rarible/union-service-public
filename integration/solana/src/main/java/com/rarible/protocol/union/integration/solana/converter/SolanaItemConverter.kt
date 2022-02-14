@@ -3,7 +3,6 @@ package com.rarible.protocol.union.integration.solana.converter
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.CreatorDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.solana.protocol.dto.TokenCreatorPartDto
@@ -15,8 +14,7 @@ object SolanaItemConverter {
         return UnionItem(
             id = ItemIdDto(
                 blockchain = BlockchainDto.SOLANA,
-                contract = token.address,
-                tokenId = BigInteger.ZERO // TODO[solana]: not applicable.
+                value = token.address
             ),
             creators = emptyList(), // TODO[solana]: set up creators.
             collection = null, // TODO[solana]: may be fill from Solana API.
