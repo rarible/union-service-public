@@ -53,6 +53,8 @@ common:
   currency:
     refresh:
       cron: "0 0/30 * * * *"
+  feature-flags:
+    enablePolygonInApi: false
 
 meta:
   ipfsGateway: "https://rarible.mypinata.cloud/"

@@ -2,6 +2,7 @@ package com.rarible.protocol.union.api.controller
 
 import com.rarible.protocol.union.api.service.ActivityApiService
 import com.rarible.protocol.union.api.service.extractItemId
+import com.rarible.protocol.union.api.util.BlockchainFilter
 import com.rarible.protocol.union.core.service.ActivityService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.ActivitiesDto
@@ -17,7 +18,6 @@ import com.rarible.protocol.union.dto.continuation.page.ArgSlice
 import com.rarible.protocol.union.dto.continuation.page.PageSize
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.dto.parser.IdParser
-import com.rarible.protocol.union.dto.subchains
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
@@ -28,7 +28,8 @@ import java.time.Instant
 @RestController
 class ActivityController(
     private val router: BlockchainRouter<ActivityService>,
-    private val activityApiService: ActivityApiService
+    private val activityApiService: ActivityApiService,
+    private val blockchainFilter: BlockchainFilter
 ) : ActivityControllerApi {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -60,7 +61,7 @@ class ActivityController(
         }
         logger.info(
             "Response for getAllActivities(type={}, blockchains={}, continuation={}, size={}, sort={}):" +
-                    " Slice(size={}, continuation={}, cursor={}) from blockchain slices {} ",
+                " Slice(size={}, continuation={}, cursor={}) from blockchain slices {} ",
             type,
             blockchains,
             continuation,
@@ -90,7 +91,7 @@ class ActivityController(
         }
         logger.info(
             "Response for getActivitiesByCollection(type={}, collection={}, continuation={}, size={}, sort={}): " +
-                    "Slice(size={}, continuation={}) ",
+                "Slice(size={}, continuation={}) ",
             type, collection, continuation, size, sort, dto.activities.size, dto.continuation
         )
         return ResponseEntity.ok(dto)
@@ -120,7 +121,7 @@ class ActivityController(
         }
         logger.info(
             "Response for getActivitiesByItem(type={}, itemId={} continuation={}, size={}, sort={}): " +
-                    "Slice(size={}, continuation={}) ",
+                "Slice(size={}, continuation={}) ",
             type, fullItemId.fullId(), continuation, size, sort, dto.activities.size, dto.continuation
         )
         return ResponseEntity.ok(dto)
@@ -139,7 +140,10 @@ class ActivityController(
         val safeSize = PageSize.ACTIVITY.limit(size)
         val groupedByBlockchain = user.map { IdParser.parseAddress(it) }
             // Since user specified here with blockchain group, we need to route request to all subchains
-            .flatMap { address -> address.blockchainGroup.subchains().map { it to address.value } }
+            .flatMap { address ->
+                blockchainFilter.getEnabledInApi(address.blockchainGroup)
+                    .map { it to address.value }
+            }
             .groupBy({ it.first }, { it.second })
 
         val (result, slicesCounter) = if (null == cursor) {
@@ -163,7 +167,7 @@ class ActivityController(
         }
         logger.info(
             "Response for getActivitiesByUser(type={}, users={}, continuation={}, size={}, sort={}):" +
-                    " Slice(size={}, continuation={}, cursor={}) from user slices {} ",
+                " Slice(size={}, continuation={}, cursor={}) from user slices {} ",
             type, user, continuation, size, sort,
             result.activities.size, result.continuation, result.cursor, slicesCounter
         )

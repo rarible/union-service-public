@@ -3,6 +3,7 @@ package com.rarible.protocol.union.api.controller
 import com.rarible.core.logging.withMdc
 import com.rarible.protocol.union.api.service.OrderApiService
 import com.rarible.protocol.union.api.service.extractItemId
+import com.rarible.protocol.union.api.util.BlockchainFilter
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -20,7 +21,6 @@ import com.rarible.protocol.union.dto.continuation.page.Paging
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.dto.group
 import com.rarible.protocol.union.dto.parser.IdParser
-import com.rarible.protocol.union.dto.subchains
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
@@ -32,7 +32,8 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 class OrderController(
     private val orderApiService: OrderApiService,
-    private val router: BlockchainRouter<OrderService>
+    private val router: BlockchainRouter<OrderService>,
+    private val blockchainFilter: BlockchainFilter
 ) : OrderControllerApi {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -154,7 +155,7 @@ class OrderController(
             return ResponseEntity.ok(empty)
         }
 
-        val blockchainSlices = router.executeForAll(makerAddress.blockchainGroup.subchains()) {
+        val blockchainSlices = router.executeForAll(blockchainFilter.getEnabledInApi(makerAddress.blockchainGroup)) {
             it.getOrderBidsByMaker(
                 platform,
                 makerAddress.value,
@@ -209,7 +210,8 @@ class OrderController(
     ): ResponseEntity<OrdersDto> {
         val safeSize = PageSize.ORDER.limit(size)
         val originAddress = safeAddress(origin)
-        val evaluatedBlockchains = originAddress?.blockchainGroup?.subchains() ?: blockchains
+        val evaluatedBlockchains = originAddress?.blockchainGroup?.let { blockchainFilter.getEnabledInApi(it) }
+            ?: blockchains
 
         val blockchainPages = router.executeForAll(evaluatedBlockchains) {
             it.getSellOrders(platform, originAddress?.value, continuation, safeSize)
@@ -299,7 +301,7 @@ class OrderController(
             return ResponseEntity.ok(empty)
         }
 
-        val blockchainSlices = router.executeForAll(makerAddress.blockchainGroup.subchains()) {
+        val blockchainSlices = router.executeForAll(blockchainFilter.getEnabledInApi(makerAddress.blockchainGroup)) {
             it.getSellOrdersByMaker(platform, makerAddress.value, originAddress?.value, continuation, safeSize)
         }
 

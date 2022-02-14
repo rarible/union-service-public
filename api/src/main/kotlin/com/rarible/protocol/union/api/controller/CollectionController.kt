@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.api.controller
 
+import com.rarible.protocol.union.api.util.BlockchainFilter
 import com.rarible.protocol.union.core.service.CollectionService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -10,14 +11,14 @@ import com.rarible.protocol.union.dto.continuation.page.Page
 import com.rarible.protocol.union.dto.continuation.page.PageSize
 import com.rarible.protocol.union.dto.continuation.page.Paging
 import com.rarible.protocol.union.dto.parser.IdParser
-import com.rarible.protocol.union.dto.subchains
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
 class CollectionController(
-    private val router: BlockchainRouter<CollectionService>
+    private val router: BlockchainRouter<CollectionService>,
+    private val blockchainFilter: BlockchainFilter
 ) : CollectionControllerApi {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -62,7 +63,7 @@ class CollectionController(
     ): ResponseEntity<CollectionsDto> {
         val safeSize = PageSize.COLLECTION.limit(size)
         val ownerAddress = IdParser.parseAddress(owner)
-        val blockchainPages = router.executeForAll(ownerAddress.blockchainGroup.subchains()) {
+        val blockchainPages = router.executeForAll(blockchainFilter.getEnabledInApi(ownerAddress.blockchainGroup)) {
             it.getCollectionsByOwner(ownerAddress.value, continuation, safeSize)
         }
 

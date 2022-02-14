@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.api.controller
 
 import com.rarible.protocol.union.api.service.ItemApiService
+import com.rarible.protocol.union.api.util.BlockchainFilter
 import com.rarible.protocol.union.core.continuation.UnionItemContinuation
 import com.rarible.protocol.union.core.exception.UnionNotFoundException
 import com.rarible.protocol.union.core.model.UnionItem
@@ -22,7 +23,6 @@ import com.rarible.protocol.union.dto.continuation.page.Paging
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.dto.parser.ItemIdParser
-import com.rarible.protocol.union.dto.subchains
 import com.rarible.protocol.union.enrichment.service.EnrichmentMetaService
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.slf4j.LoggerFactory
@@ -43,7 +43,8 @@ class ItemController(
     private val itemApiService: ItemApiService,
     private val router: BlockchainRouter<ItemService>,
     private val enrichmentMetaService: EnrichmentMetaService,
-    private val restrictionService: RestrictionService
+    private val restrictionService: RestrictionService,
+    private val blockchainFilter: BlockchainFilter
 ) : ItemControllerApi {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -148,7 +149,7 @@ class ItemController(
         val safeSize = PageSize.ITEM.limit(size)
         val creatorAddress = IdParser.parseAddress(creator)
 
-        val blockchainPages = router.executeForAll(creatorAddress.blockchainGroup.subchains()) {
+        val blockchainPages = router.executeForAll(blockchainFilter.getEnabledInApi(creatorAddress.blockchainGroup)) {
             it.getItemsByCreator(creatorAddress.value, continuation, safeSize)
         }
 
@@ -176,7 +177,7 @@ class ItemController(
     ): ResponseEntity<ItemsDto> {
         val safeSize = PageSize.ITEM.limit(size)
         val ownerAddress = IdParser.parseAddress(owner)
-        val blockchainPages = router.executeForAll(ownerAddress.blockchainGroup.subchains()) {
+        val blockchainPages = router.executeForAll(blockchainFilter.getEnabledInApi(ownerAddress.blockchainGroup)) {
             it.getItemsByOwner(ownerAddress.value, continuation, safeSize)
         }
 
