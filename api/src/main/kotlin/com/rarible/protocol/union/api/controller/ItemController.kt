@@ -25,6 +25,7 @@ import com.rarible.protocol.union.dto.continuation.page.PageSize
 import com.rarible.protocol.union.dto.continuation.page.Paging
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.dto.parser.IdParser
+import com.rarible.protocol.union.enrichment.configuration.MetaProperties
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.service.EnrichmentMetaService
@@ -46,6 +47,7 @@ class ItemController(
     private val router: BlockchainRouter<ItemService>,
     private val enrichmentItemService: EnrichmentItemService,
     private val enrichmentMetaService: EnrichmentMetaService,
+    private val metaProperties: MetaProperties,
     private val restrictionService: RestrictionService
 ) : ItemControllerApi {
 
@@ -94,8 +96,10 @@ class ItemController(
 
     private suspend fun getOrAwaitMeta(itemId: String): UnionMeta {
         val fullItemId = IdParser.parseItemId(itemId)
-        return itemApiService.getAvailableMetaOrScheduleAndWait(fullItemId)
-            ?: throw UnionNotFoundException("No item found for $itemId")
+        return enrichmentMetaService.getAvailableMetaOrScheduleAndWait(
+            itemId = fullItemId,
+            loadingWaitTimeout = metaProperties.timeoutSyncLoadingMeta
+        ) ?: throw UnionNotFoundException("No item found for $itemId")
     }
 
     override suspend fun getItemById(

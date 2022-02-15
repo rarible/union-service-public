@@ -73,12 +73,6 @@ class ItemApiService(
         )
     }
 
-    suspend fun getAvailableMetaOrScheduleAndWait(itemId: ItemIdDto): UnionMeta? =
-        enrichmentMetaService.getAvailableMetaOrScheduleAndWait(
-            itemId = itemId,
-            loadingWaitTimeout = metaProperties.timeoutSyncLoadingMeta
-        )
-
     private suspend fun enrich(unionItems: List<UnionItem>): List<ItemDto> {
         if (unionItems.isEmpty()) {
             return emptyList()

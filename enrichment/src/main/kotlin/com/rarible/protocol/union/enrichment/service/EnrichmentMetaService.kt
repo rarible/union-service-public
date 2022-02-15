@@ -5,6 +5,7 @@ import com.rarible.loader.cache.CacheEntry
 import com.rarible.loader.cache.CacheLoaderService
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.dto.ItemIdDto
+import com.rarible.protocol.union.enrichment.meta.UnionMetaMetrics
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.time.withTimeoutOrNull
@@ -16,7 +17,8 @@ import java.time.Duration
 @Component
 class EnrichmentMetaService(
     @Qualifier("union.meta.cache.loader.service")
-    private val unionMetaCacheLoaderService: CacheLoaderService<UnionMeta>
+    private val unionMetaCacheLoaderService: CacheLoaderService<UnionMeta>,
+    private val unionMetaMetrics: UnionMetaMetrics
 ) {
     private val logger = LoggerFactory.getLogger(EnrichmentMetaService::class.java)
 
@@ -24,8 +26,13 @@ class EnrichmentMetaService(
      * Get available item metadata. Return `null` if the meta hasn't been requested yet,
      * has failed to be loaded or is being loaded now.
      */
-    suspend fun getAvailableMeta(itemId: ItemIdDto): UnionMeta? =
-        unionMetaCacheLoaderService.getAvailable(itemId.fullId())
+    suspend fun getAvailableMeta(itemId: ItemIdDto): UnionMeta? {
+        val meta = unionMetaCacheLoaderService.getAvailable(itemId.fullId())
+        if (meta == null) {
+            unionMetaMetrics.onMetaCacheMiss(itemId, null)
+        }
+        return meta
+    }
 
     /**
      * Return available meta (same as [getAvailableMeta]) but additionally schedule an update
@@ -64,7 +71,11 @@ class EnrichmentMetaService(
             while (isActive) {
                 if (isMetaInitiallyLoadedOrFailed(itemId)) {
                     // Return meta as is, irrespective whether an error has happened or the meta has been loaded.
-                    return@withTimeoutOrNull getAvailableMeta(itemId)
+                    val meta = getAvailableMeta(itemId)
+                    if (meta == null) {
+                        unionMetaMetrics.onMetaCacheMiss(itemId, loadingWaitTimeout)
+                    }
+                    return@withTimeoutOrNull meta
                 }
                 delay(100)
             }
