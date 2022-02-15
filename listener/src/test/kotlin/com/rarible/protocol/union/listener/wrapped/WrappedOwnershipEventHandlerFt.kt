@@ -18,7 +18,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import reactor.kotlin.core.publisher.toMono
 
-@FlowPreview
 @IntegrationTest
 class WrappedOwnershipEventHandlerFt : AbstractIntegrationTest() {
 

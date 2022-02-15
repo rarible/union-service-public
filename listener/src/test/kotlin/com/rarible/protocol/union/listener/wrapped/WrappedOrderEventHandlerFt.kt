@@ -12,7 +12,6 @@ import kotlinx.coroutines.FlowPreview
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 
-@FlowPreview
 @IntegrationTest
 class WrappedOrderEventHandlerFt : AbstractIntegrationTest() {
 

@@ -17,6 +17,7 @@ import com.rarible.protocol.union.dto.OrderUpdateEventDto
 import com.rarible.protocol.union.dto.OwnershipDeleteEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.dto.OwnershipUpdateEventDto
+import com.rarible.protocol.union.enrichment.configuration.MetaProperties
 import com.rarible.protocol.union.enrichment.meta.UnionMetaLoader
 import io.mockk.clearMocks
 import kotlinx.coroutines.CoroutineScope
@@ -38,6 +39,9 @@ abstract class AbstractIntegrationTest {
     @Autowired
     @Qualifier("test.union.meta.loader")
     lateinit var testUnionMetaLoader: UnionMetaLoader
+
+    @Autowired
+    lateinit var metaProperties: MetaProperties
 
     //--------------------- ETHEREUM ---------------------//
     @Autowired
@@ -93,6 +97,7 @@ abstract class AbstractIntegrationTest {
     @BeforeEach
     fun cleanupMetaMocks() {
         clearMocks(testUnionMetaLoader)
+        metaProperties.timeoutSyncLoadingMetaMs = 3000
     }
 
     fun <T> runWithKafka(block: suspend CoroutineScope.() -> T): T = runBlocking {

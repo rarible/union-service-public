@@ -104,7 +104,11 @@ class ItemController(
         val fullItemId = IdParser.parseItemId(itemId)
         val unionItem = enrichmentItemService.fetch(fullItemId)
         val shortItem = enrichmentItemService.get(ShortItemId(fullItemId))
-        val enrichedUnionItem = enrichmentItemService.enrichItem(shortItem, unionItem)
+        val enrichedUnionItem = enrichmentItemService.enrichItem(
+            shortItem = shortItem,
+            item = unionItem,
+            waitForMetaLoadingTimeout = null
+        )
         return ResponseEntity.ok(enrichedUnionItem)
     }
 

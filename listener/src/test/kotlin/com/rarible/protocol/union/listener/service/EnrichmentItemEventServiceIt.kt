@@ -48,7 +48,6 @@ import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
 
-@FlowPreview
 @IntegrationTest
 class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
 
@@ -75,7 +74,11 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         val itemId = randomEthItemId()
         val unionItem = randomUnionItem(itemId)
 
-        val expected = EnrichedItemConverter.convert(unionItem)
+        val expected = EnrichedItemConverter.convert(
+            item = unionItem,
+            // Item already has an attached meta, no need to load.
+            meta = unionItem.meta
+        )
 
         itemEventService.onItemUpdated(unionItem)
 
@@ -200,7 +203,9 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         // In result event for item we expect updated totalStock/sellers
         val expected = EnrichedItemConverter.convert(unionItem).copy(
             sellers = 2,
-            totalStock = 30.toBigInteger()
+            totalStock = 30.toBigInteger(),
+            // Item already has an attached meta, no need to load.
+            meta = EnrichedMetaConverter.convert(unionItem.meta!!)
         )
 
         Wait.waitAssert {

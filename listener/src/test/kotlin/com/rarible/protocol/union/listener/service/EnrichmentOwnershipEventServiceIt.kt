@@ -37,9 +37,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import reactor.kotlin.core.publisher.toMono
 
-@FlowPreview
 @IntegrationTest
-@Suppress("ReactiveStreamsUnusedPublisher")
 class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
 
     @Autowired

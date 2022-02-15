@@ -11,6 +11,7 @@ import com.rarible.protocol.union.dto.ItemDeleteEventDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.ItemUpdateEventDto
 import com.rarible.protocol.union.dto.OrderDto
+import com.rarible.protocol.union.enrichment.configuration.MetaProperties
 import com.rarible.protocol.union.enrichment.converter.ShortItemConverter
 import com.rarible.protocol.union.enrichment.model.ItemSellStats
 import com.rarible.protocol.union.enrichment.model.ShortItem
@@ -30,7 +31,8 @@ class EnrichmentItemEventService(
     private val ownershipService: EnrichmentOwnershipService,
     private val itemEventListeners: List<OutgoingItemEventListener>,
     private val bestOrderService: BestOrderService,
-    private val reconciliationEventService: ReconciliationEventService
+    private val reconciliationEventService: ReconciliationEventService,
+    private val metaProperties: MetaProperties
 ) {
 
     private val logger = LoggerFactory.getLogger(EnrichmentItemEventService::class.java)
@@ -216,7 +218,8 @@ class EnrichmentItemEventService(
             shortItem = short,
             item = item,
             orders = listOfNotNull(order).associateBy { it.id },
-            auctions = listOfNotNull(auction).associateBy { it.id }
+            auctions = listOfNotNull(auction).associateBy { it.id },
+            waitForMetaLoadingTimeout = metaProperties.timeoutSyncLoadingMeta
         )
         val event = ItemUpdateEventDto(
             itemId = dto.id,

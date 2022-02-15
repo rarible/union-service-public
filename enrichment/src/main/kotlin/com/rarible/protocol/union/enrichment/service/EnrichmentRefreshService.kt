@@ -22,6 +22,7 @@ import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.OwnershipUpdateEventDto
 import com.rarible.protocol.union.dto.ext
+import com.rarible.protocol.union.enrichment.configuration.MetaProperties
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortOwnership
@@ -44,6 +45,7 @@ class EnrichmentRefreshService(
     private val enrichmentOrderService: EnrichmentOrderService,
     private val enrichmentAuctionService: EnrichmentAuctionService,
     private val enrichmentItemService: EnrichmentItemService,
+    private val metaProperties: MetaProperties,
     private val enrichmentOwnershipService: EnrichmentOwnershipService,
     private val itemEventListeners: List<OutgoingItemEventListener>,
     private val ownershipEventListeners: List<OutgoingOwnershipEventListener>,
@@ -176,7 +178,13 @@ class EnrichmentRefreshService(
         } else {
             val ordersHint = (bestSellOrdersDto + bestBidOrdersDto).associateBy { it.id }
             val auctionsHint = auctions.associateBy { it.id }
-            val enriched = enrichmentItemService.enrichItem(updatedItem, itemDto, ordersHint, auctionsHint)
+            val enriched = enrichmentItemService.enrichItem(
+                shortItem = updatedItem,
+                item = itemDto,
+                orders = ordersHint,
+                auctions = auctionsHint,
+                waitForMetaLoadingTimeout = metaProperties.timeoutSyncLoadingMeta
+            )
             notifyUpdate(enriched)
         }
         event

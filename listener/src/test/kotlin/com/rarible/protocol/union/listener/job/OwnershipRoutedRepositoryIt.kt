@@ -15,9 +15,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
-@FlowPreview
 @IntegrationTest
-@Deprecated("Remove after migration")
 class OwnershipRoutedRepositoryIt : AbstractIntegrationTest() {
 
     lateinit var ownershipRoutedRepository: OwnershipRoutedRepository

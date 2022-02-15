@@ -98,7 +98,12 @@ class ItemApiService(
 
         val enrichedItems = unionItems.map {
             val shortItem = shortItems[it.id]
-            enrichmentItemService.enrichItem(shortItem, it, orders)
+            enrichmentItemService.enrichItem(
+                shortItem = shortItem,
+                item = it,
+                orders = orders,
+                waitForMetaLoadingTimeout = null
+            )
         }
 
         logger.info(

@@ -26,6 +26,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
+import java.time.Duration
 
 @Component
 @CaptureSpan(type = SpanType.APP)
@@ -91,7 +92,8 @@ class EnrichmentItemService(
         shortItem: ShortItem?,
         item: UnionItem? = null,
         orders: Map<OrderIdDto, OrderDto> = emptyMap(),
-        auctions: Map<AuctionIdDto, AuctionDto> = emptyMap()
+        auctions: Map<AuctionIdDto, AuctionDto> = emptyMap(),
+        waitForMetaLoadingTimeout: Duration? = null
     ) = coroutineScope {
         logger.info("Enriching item shortItem={}, item={}", shortItem, item)
         require(shortItem != null || item != null)
@@ -102,7 +104,11 @@ class EnrichmentItemService(
         val meta = async {
             item?.meta
                 ?: fetchedItem.await().meta
-                ?: enrichmentMetaService.getAvailableMetaOrScheduleLoading(itemId)
+                ?: (if (waitForMetaLoadingTimeout != null) {
+                    enrichmentMetaService.getAvailableMetaOrScheduleAndWait(itemId, waitForMetaLoadingTimeout)
+                } else {
+                    enrichmentMetaService.getAvailableMetaOrScheduleLoading(itemId)
+                })
         }
 
         val bestOrders = listOf(bestSellOrder, bestBidOrder)

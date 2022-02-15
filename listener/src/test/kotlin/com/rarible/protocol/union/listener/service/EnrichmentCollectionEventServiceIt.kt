@@ -32,7 +32,6 @@ import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
 import scalether.domain.Address
 
-@FlowPreview
 @IntegrationTest
 class EnrichmentCollectionEventServiceIt : AbstractIntegrationTest() {
 

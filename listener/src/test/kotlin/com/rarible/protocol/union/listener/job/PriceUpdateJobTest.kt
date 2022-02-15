@@ -34,7 +34,6 @@ import reactor.kotlin.core.publisher.toMono
 import java.math.BigDecimal
 import java.time.Instant
 
-@FlowPreview
 @IntegrationTest
 internal class PriceUpdateJobTest : AbstractIntegrationTest() {
 
