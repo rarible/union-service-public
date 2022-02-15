@@ -132,7 +132,7 @@ class ItemController(
 
         logger.info(
             "Response for getItemsByCollection(collection={}, continuation={}, size={}):" +
-                    " Page(size={}, total={}, continuation={}) from blockchain pages {} ",
+                " Page(size={}, total={}, continuation={}) ",
             collection, continuation, size, result.entities.size, result.total, result.continuation
         )
 
@@ -163,8 +163,9 @@ class ItemController(
 
         logger.info(
             "Response for getItemsByCreator(creator={}, continuation={}, size={}):" +
-                    " Page(size={}, total={}, continuation={}) from blockchain pages {} ",
-            creator, continuation, size, combinedPage.entities.size, combinedPage.total, combinedPage.continuation
+                " Page(size={}, total={}, continuation={}) from blockchain pages {} ",
+            creator, continuation, size, combinedPage.entities.size, combinedPage.total, combinedPage.continuation,
+            blockchainPages.map { it.entities.size }
         )
 
         val enriched = itemApiService.enrich(combinedPage)
@@ -192,9 +193,10 @@ class ItemController(
         ).getPage(safeSize, total)
 
         logger.info(
-            "Response for getItemsByCreator(owner={}, continuation={}, size={}):" +
-                    " Page(size={}, total={}, continuation={}) from blockchain pages {} ",
-            owner, continuation, size, combinedPage.entities.size, combinedPage.total, combinedPage.continuation
+            "Response for getItemsByOwner(owner={}, continuation={}, size={}):" +
+                " Page(size={}, total={}, continuation={}) from blockchain pages {} ",
+            owner, continuation, size, combinedPage.entities.size, combinedPage.total, combinedPage.continuation,
+            blockchainPages.map { it.entities.size }
         )
 
         val enriched = itemApiService.enrich(combinedPage)
