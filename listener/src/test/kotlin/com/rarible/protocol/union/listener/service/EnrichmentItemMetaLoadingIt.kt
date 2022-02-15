@@ -115,7 +115,7 @@ class EnrichmentItemMetaLoadingIt : AbstractIntegrationTest() {
     }
 
     @Test
-    fun `item update - meta available - send event immediately`() = runWithKafka {
+    fun `item update - meta available - send event immediately`() = runWithKafka<Unit> {
         val itemId = randomEthItemId()
         val ethItem = randomEthNftItemDto(itemId)
         val (unionItem, meta) = EthItemConverter.convert(ethItem, itemId.blockchain).let {
@@ -125,6 +125,7 @@ class EnrichmentItemMetaLoadingIt : AbstractIntegrationTest() {
             delay(100L)
             meta
         }
+        coEvery { testEthereumItemApi.getNftItemById(itemId.value) } returns ethItem.toMono()
         assertThat(itemMetaService.getAvailableMetaOrScheduleAndWait(itemId, Duration.ofMillis(3000))).isEqualTo(meta)
         Wait.waitAssert {
             val events = findItemUpdates(itemId.value)
@@ -133,7 +134,6 @@ class EnrichmentItemMetaLoadingIt : AbstractIntegrationTest() {
                 .isEqualTo(EnrichedItemConverter.convert(unionItem, meta = meta))
         }
         metaProperties.timeoutSyncLoadingMetaMs = 2000
-        coEvery { testEthereumItemApi.getNftItemById(itemId.value) } returns ethItem.toMono()
         itemEventService.onItemUpdated(unionItem)
         Wait.waitAssert {
             val events = findItemUpdates(itemId.value)
