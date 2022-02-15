@@ -5,6 +5,7 @@ import com.rarible.protocol.union.core.model.UnionWrappedEvent
 import com.rarible.protocol.union.core.model.UnionWrappedItemEvent
 import com.rarible.protocol.union.core.model.UnionWrappedOrderEvent
 import com.rarible.protocol.union.core.model.UnionWrappedOwnershipEvent
+import com.rarible.protocol.union.dto.BlockchainDto
 import org.springframework.stereotype.Component
 
 /**
@@ -19,9 +20,15 @@ class UnionWrappedEventHandler(
 
     override suspend fun handle(event: UnionWrappedEvent) {
         when (event) {
-            is UnionWrappedItemEvent -> wrappedItemEventHandler.onEvent(event.event)
-            is UnionWrappedOwnershipEvent -> wrappedOwnershipEventHandler.onEvent(event.event)
-            is UnionWrappedOrderEvent -> wrappedOrderEventHandler.onEvent(event.event)
+            is UnionWrappedItemEvent -> if (event.event.itemId.blockchain != BlockchainDto.FLOW) {
+                wrappedItemEventHandler.onEvent(event.event)
+            }
+            is UnionWrappedOwnershipEvent -> if (event.event.ownershipId.blockchain != BlockchainDto.FLOW) {
+                wrappedOwnershipEventHandler.onEvent(event.event)
+            }
+            is UnionWrappedOrderEvent -> if (event.event.orderId.blockchain != BlockchainDto.FLOW) {
+                wrappedOrderEventHandler.onEvent(event.event)
+            }
         }
     }
 }
