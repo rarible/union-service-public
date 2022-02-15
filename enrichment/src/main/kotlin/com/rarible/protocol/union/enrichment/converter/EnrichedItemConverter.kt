@@ -21,13 +21,17 @@ object EnrichedItemConverter {
         orders: Map<OrderIdDto, OrderDto> = emptyMap(),
         auctions: Map<AuctionIdDto, AuctionDto> = emptyMap()
     ): ItemDto {
-        val (contract, tokenId) = CompositeItemIdParser.split(item.id.value)
+        val contractAndTokenId = if (item.id.value.contains(":")) {
+            CompositeItemIdParser.split(item.id.value)
+        } else {
+            null
+        }
         return ItemDto(
             id = item.id,
             blockchain = item.id.blockchain,
             collection = item.collection,
-            contract = ContractAddressConverter.convert(item.id.blockchain, contract), // TODO remove later
-            tokenId = tokenId, // TODO remove later
+            contract = contractAndTokenId?.let { ContractAddressConverter.convert(item.id.blockchain, it.first) }, // TODO remove later
+            tokenId = contractAndTokenId?.second, // TODO remove later
             creators = item.creators,
             owners = item.owners, // TODO UNION Remove in 1.19
             royalties = item.royalties, // TODO UNION Remove in 1.19
