@@ -53,12 +53,10 @@ class UnionMetaLoader(
         itemId: ItemIdDto
     ): UnionMetaContent {
         val resolvedUrl = ipfsUrlResolver.resolveRealUrl(content.url)
-        if (content.url != resolvedUrl) {
-            logger.info(
-                "Content meta resolution: content URL of item {} was resolved from {} to {}",
-                itemId.fullId(), content.url, resolvedUrl
-            )
-        }
+        logger.info(
+            "Resolving content meta for item ${itemId.fullId()} for URL ${content.url}" +
+                    if (resolvedUrl != content.url) " resolved as $resolvedUrl" else "",
+        )
         val knownContentProperties = content.properties
         if (knownContentProperties != null && !knownContentProperties.isEmpty()) {
             return content.copy(url = resolvedUrl)
