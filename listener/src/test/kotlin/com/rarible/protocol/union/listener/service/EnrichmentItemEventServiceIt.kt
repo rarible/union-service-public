@@ -10,11 +10,9 @@ import com.rarible.protocol.union.core.util.CompositeItemIdParser
 import com.rarible.protocol.union.dto.AuctionStatusDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.converter.EnrichedItemConverter
-import com.rarible.protocol.union.enrichment.converter.EnrichedMetaConverter
 import com.rarible.protocol.union.enrichment.converter.ShortItemConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.model.ReconciliationMarkType
-import com.rarible.protocol.union.enrichment.service.EnrichmentMetaService
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.repository.ReconciliationMarkRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
@@ -36,7 +34,6 @@ import com.rarible.protocol.union.integration.ethereum.data.randomEthNftItemDto
 import com.rarible.protocol.union.listener.test.AbstractIntegrationTest
 import com.rarible.protocol.union.listener.test.IntegrationTest
 import io.mockk.coEvery
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
@@ -72,13 +69,11 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
     @Test
     fun `update event - item doesn't exist`() = runWithKafka {
         val itemId = randomEthItemId()
-        val unionItem = randomUnionItem(itemId)
+        val (unionItem, unionMeta) = randomUnionItem(itemId).let {
+            it.copy(meta = null) to it.meta!!
+        }
 
-        val expected = EnrichedItemConverter.convert(
-            item = unionItem,
-            // Item already has an attached meta, no need to load.
-            meta = unionItem.meta
-        )
+        coEvery { testUnionMetaLoader.load(itemId) } returns unionMeta
 
         itemEventService.onItemUpdated(unionItem)
 
@@ -93,7 +88,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
             assertThat(messages[0].key).isEqualTo(itemId.fullId())
             assertThat(messages[0].id).isEqualTo(itemId.fullId())
             assertThat(messages[0].value.itemId).isEqualTo(itemId)
-            assertThat(messages[0].value.item).isEqualTo(expected)
+            assertThat(messages[0].value.item).isEqualTo(EnrichedItemConverter.convert(unionItem, meta = unionMeta))
         }
     }
 
@@ -180,8 +175,12 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         val itemId = randomEthItemId()
         val shortItem = randomShortItem(itemId).copy(sellers = 3, totalStock = 20.toBigInteger())
         val ethItem = randomEthNftItemDto(itemId)
-        val unionItem = EthItemConverter.convert(ethItem, itemId.blockchain)
+        val (unionItem, unionMeta) = EthItemConverter.convert(ethItem, itemId.blockchain).let {
+            it.copy(meta = null) to it.meta!!
+        }
         itemService.save(shortItem)
+
+        coEvery { testUnionMetaLoader.load(itemId) } returns unionMeta
 
         val bestSellOrder1 = randomUnionSellOrderDto(itemId).copy(makeStock = 20.toBigDecimal())
         val ownership1 = randomShortOwnership(itemId).copy(bestSellOrder = ShortOrderConverter.convert(bestSellOrder1))
@@ -201,18 +200,18 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         assertThat(saved.totalStock).isEqualTo(30.toBigInteger())
 
         // In result event for item we expect updated totalStock/sellers
-        val expected = EnrichedItemConverter.convert(unionItem).copy(
+        val expected = EnrichedItemConverter.convert(unionItem, meta = unionMeta).copy(
             sellers = 2,
-            totalStock = 30.toBigInteger(),
-            // Item already has an attached meta, no need to load.
-            meta = EnrichedMetaConverter.convert(unionItem.meta!!)
+            totalStock = 30.toBigInteger()
         )
 
         Wait.waitAssert {
             val messages = findItemUpdates(itemId.value)
-            assertThat(messages).hasSize(1)
-            assertThat(messages[0].value.itemId).isEqualTo(itemId)
-            assertThat(messages[0].value.item).isEqualTo(expected)
+            // There may be several events for item update (when meta gets loaded)
+            assertThat(messages).allSatisfy {
+                assertThat(it.value.itemId).isEqualTo(itemId)
+                assertThat(it.value.item).isEqualTo(expected)
+            }
         }
     }
 
