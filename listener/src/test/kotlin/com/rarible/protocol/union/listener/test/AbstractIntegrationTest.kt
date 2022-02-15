@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.listener.test
 
+import com.rarible.core.content.meta.loader.ContentMetaLoader
 import com.rarible.core.kafka.KafkaMessage
 import com.rarible.core.kafka.RaribleKafkaConsumer
 import com.rarible.core.kafka.RaribleKafkaProducer
@@ -39,6 +40,10 @@ abstract class AbstractIntegrationTest {
     @Autowired
     @Qualifier("test.union.meta.loader")
     lateinit var testUnionMetaLoader: UnionMetaLoader
+
+    @Autowired
+    @Qualifier("test.content.meta.loader")
+    lateinit var testContentMetaLoader: ContentMetaLoader
 
     @Autowired
     lateinit var metaProperties: MetaProperties

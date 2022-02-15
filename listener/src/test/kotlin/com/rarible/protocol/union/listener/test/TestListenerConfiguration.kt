@@ -66,6 +66,11 @@ class TestListenerConfiguration {
     @Qualifier("test.union.meta.loader")
     fun testUnionMetaLoader(): UnionMetaLoader = mockk()
 
+    @Bean
+    @Primary
+    @Qualifier("test.content.meta.loader")
+    fun testContentMetaLoader(): ContentMetaLoader = mockk()
+
     //----------------- UNION CONSUMERS ------------------//
     // Test consumers with EARLIEST offset
 

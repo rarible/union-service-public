@@ -2,7 +2,6 @@ package com.rarible.protocol.union.enrichment.meta
 
 import com.rarible.core.client.WebClientResponseProxyException
 import com.rarible.core.content.meta.loader.ContentMeta
-import com.rarible.core.content.meta.loader.ContentMetaLoader
 import com.rarible.protocol.union.core.model.UnionImageProperties
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.UnionMetaContent
@@ -21,7 +20,7 @@ import org.springframework.stereotype.Component
 @Component
 class UnionMetaLoader(
     private val router: BlockchainRouter<ItemService>,
-    private val contentMetaLoader: ContentMetaLoader,
+    private val unionContentMetaLoader: UnionContentMetaLoader,
     private val ipfsUrlResolver: IpfsUrlResolver
 ) {
     private val logger = LoggerFactory.getLogger(UnionMetaLoader::class.java)
@@ -64,7 +63,7 @@ class UnionMetaLoader(
         if (knownContentProperties != null && !knownContentProperties.isEmpty()) {
             return content.copy(url = resolvedUrl)
         }
-        val fetchedContentMeta = fetchContentMeta(resolvedUrl, itemId)
+        val fetchedContentMeta = unionContentMetaLoader.fetchContentMeta(resolvedUrl, itemId)
         val enrichedProperties = fetchedContentMeta?.toUnionMetaContentProperties()
             ?: knownContentProperties // Use at least some fields of the known properties.
             ?: UnionImageProperties() // Questionable, but let's consider that was an image.
@@ -95,19 +94,6 @@ class UnionMetaLoader(
         height = height,
         size = size
     )
-
-    private suspend fun fetchContentMeta(url: String, itemId: ItemIdDto): ContentMeta? {
-        val contentMeta = try {
-            contentMetaLoader.fetchContentMeta(url)
-        } catch (e: Exception) {
-            logger.warn("Content meta resolution: error for {} by URL {}", itemId.fullId(), url, e)
-            return null
-        }
-        if (contentMeta == null) {
-            logger.warn("Content meta resolution: nothing was resolved for {} by URL {}", itemId.fullId(), url)
-        }
-        return contentMeta
-    }
 
     class UnionMetaResolutionException(message: String) : RuntimeException(message)
 }
