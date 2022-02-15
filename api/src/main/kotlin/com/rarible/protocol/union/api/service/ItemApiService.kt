@@ -2,7 +2,6 @@ package com.rarible.protocol.union.api.service
 
 import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.core.model.UnionItem
-import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -33,10 +32,7 @@ import org.springframework.stereotype.Component
 class ItemApiService(
     private val orderApiService: OrderApiService,
     private val enrichmentItemService: EnrichmentItemService,
-    private val enrichmentMetaService: EnrichmentMetaService,
-    private val metaProperties: MetaProperties,
-    private val router: BlockchainRouter<ItemService>,
-    private val ipfsUrlResolver: IpfsUrlResolver
+    private val router: BlockchainRouter<ItemService>
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
