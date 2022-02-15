@@ -60,4 +60,8 @@ class SolanaItemService(
     override suspend fun getItemsByOwner(owner: String, continuation: String?, size: Int): Page<UnionItem> {
         TODO("Not yet implemented")
     }
+
+    override suspend fun getItemsByIds(itemIds: List<String>): List<UnionItem> {
+        TODO("Not yet implemented")
+    }
 }

@@ -71,7 +71,7 @@ class OwnershipApiService(
 
         val ownershipsMap = ownershipRouter.executeForAll(owner.blockchainGroup.subchains()) {
             it.getOwnershipsByOwner(owner.value, continuation, size)
-        }.flatMap { it.entities }.associateBy { it.id.toItemId() }.toMutableMap()
+        }.flatMap { it.entities }.associateBy { it.id.getItemId() }.toMutableMap()
 
         // get owner's auctions
         val ownerAuctionsList = enrichmentAuctionService.findBySeller(owner).map {
@@ -90,7 +90,7 @@ class OwnershipApiService(
 
         // Merging with auction ownerships
         ownerAuctionsList.forEach {
-            val itemId = it.id.toItemId()
+            val itemId = it.id.getItemId()
             val partial = ownershipsMap[itemId]
             if (null != partial) {
                 ownershipsMap[itemId] = partial.copy(value = it.value + partial.value)
@@ -210,4 +210,4 @@ class OwnershipApiService(
     }
 }
 
-fun OwnershipIdDto.toItemId(): ItemIdDto = ItemIdDto(this.blockchain, this.contract, this.tokenId)
+//fun OwnershipIdDto.toItemId(): ItemIdDto = ItemIdDto(this.blockchain, this.value)

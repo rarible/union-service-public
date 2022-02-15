@@ -2,7 +2,6 @@ package com.rarible.protocol.union.api.controller
 
 import com.rarible.protocol.union.api.service.ItemApiService
 import com.rarible.protocol.union.api.service.OwnershipApiService
-import com.rarible.protocol.union.api.service.toItemId
 import com.rarible.protocol.union.api.util.BlockchainFilter
 import com.rarible.protocol.union.core.continuation.UnionItemContinuation
 import com.rarible.protocol.union.core.exception.UnionNotFoundException
@@ -32,8 +31,6 @@ import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.configuration.MetaProperties
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
-import com.rarible.protocol.union.dto.subchains
-import com.rarible.protocol.union.dto.parser.ItemIdParser
 import com.rarible.protocol.union.dto.subchains
 import com.rarible.protocol.union.enrichment.converter.ItemOwnershipConverter
 import com.rarible.protocol.union.enrichment.service.EnrichmentMetaService
@@ -254,13 +251,13 @@ class ItemController(
         val safeSize = PageSize.ITEM.limit(size)
         val ownerAddress = IdParser.parseAddress(owner)
         val page = ownershipApiService.getOwnershipByOwner(ownerAddress, continuation, safeSize)
-        val ids = page.entities.map { ItemIdDto(it.id.blockchain, it.id.contract, it.id.tokenId) }
+        val ids = page.entities.map { it.id.getItemId() }
         val items = router.executeForAll(ownerAddress.blockchainGroup.subchains()) {
             it.getItemsByIds(ids.map { it.value })
         }.flatten().associateBy { it.id }
 
         val wrapped = page.entities.map {
-            val item = items[it.id.toItemId()]
+            val item = items[it.id.getItemId()]
             coroutineScope {
                 async {
                     if (null != item) {

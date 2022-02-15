@@ -350,7 +350,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
 
         val ethOwnership = randomEthOwnershipDto(ethItemId).copy(value = BigInteger.ONE)
         val ethOwnerId = UnionAddressConverter.convert(BlockchainDto.ETHEREUM, ethOwnership.owner.prefixed())
-        val ethOwnershipId = OwnershipIdDto(BlockchainDto.ETHEREUM, ethItemId.contract, ethItemId.tokenId, ethOwnerId)
+        val ethOwnershipId = OwnershipIdDto(BlockchainDto.ETHEREUM, ethItemId.value, ethOwnerId)
 
         ethereumOwnershipControllerApiMock.mockGetNftOwnershipsByOwner(ethOwnerId.value, continuation, size, listOf(ethOwnership))
         polygonOwnershipControllerApiMock.mockGetNftOwnershipsByOwner(ethOwnerId.value, continuation, size, emptyList())
@@ -382,7 +382,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
 
         val auction = randomEthAuctionDto(ethItemId)
         val auctionSeller = UnionAddressConverter.convert(BlockchainDto.ETHEREUM, auction.seller.prefixed())
-        val auctionOwnershipId = OwnershipIdDto(BlockchainDto.ETHEREUM, ethItemId.contract, ethItemId.tokenId, auctionSeller)
+        val auctionOwnershipId = OwnershipIdDto(BlockchainDto.ETHEREUM, ethItemId.value, auctionSeller)
         val auctionOwnership = randomEthOwnershipDto(ethItemId).copy(owner = auction.seller, value = BigInteger.ONE)
 
         ethereumOwnershipControllerApiMock.mockGetNftOwnershipsByOwner(ethOwner, continuation, size, emptyList())
@@ -413,11 +413,11 @@ class ItemControllerFt : AbstractIntegrationTest() {
 
         val ethOwnership = randomEthOwnershipDto(ethItemId).copy(value = BigInteger.ONE)
         val ethOwnerId = UnionAddressConverter.convert(BlockchainDto.ETHEREUM, ethOwnership.owner.prefixed())
-        val ethOwnershipId = OwnershipIdDto(BlockchainDto.ETHEREUM, ethItemId.contract, ethItemId.tokenId, ethOwnerId)
+        val ethOwnershipId = OwnershipIdDto(BlockchainDto.ETHEREUM, ethItemId.value, ethOwnerId)
 
         val auction = randomEthAuctionDto(ethItemId)
         val auctionSeller = UnionAddressConverter.convert(BlockchainDto.ETHEREUM, auction.seller.prefixed())
-        val auctionOwnershipId = OwnershipIdDto(BlockchainDto.ETHEREUM, ethItemId.contract, ethItemId.tokenId, auctionSeller)
+        val auctionOwnershipId = OwnershipIdDto(BlockchainDto.ETHEREUM, ethItemId.value, auctionSeller)
         val auctionOwnership = randomEthOwnershipDto(ethItemId).copy(owner = auction.seller, value = BigInteger.ONE)
 
         ethereumOwnershipControllerApiMock.mockGetNftOwnershipsByOwner(ethOwnerId.value, continuation, size, listOf(ethOwnership))
