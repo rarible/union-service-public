@@ -30,6 +30,7 @@ import com.rarible.protocol.union.api.controller.test.mock.tezos.TezosOrderContr
 import com.rarible.protocol.union.api.controller.test.mock.tezos.TezosOwnershipControllerApiMock
 import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
+import com.rarible.protocol.union.enrichment.meta.UnionMetaLoader
 import io.mockk.clearMocks
 import io.mockk.coEvery
 import kotlinx.coroutines.FlowPreview
@@ -57,6 +58,10 @@ abstract class AbstractIntegrationTest {
 
     @Autowired
     protected lateinit var testOwnershipEventProducer: RaribleKafkaProducer<OwnershipEventDto>
+
+    @Autowired
+    @Qualifier("test.union.meta.loader")
+    lateinit var testUnionMetaLoader: UnionMetaLoader
 
     //--------------------- CURRENCY ---------------------//
 

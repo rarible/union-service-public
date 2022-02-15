@@ -1,9 +1,12 @@
 package com.rarible.protocol.union.api.controller
 
+import com.rarible.core.common.justOrEmpty
 import com.rarible.core.test.data.randomAddress
 import com.rarible.core.test.data.randomString
+import com.rarible.core.test.wait.Wait
 import com.rarible.protocol.dto.FlowNftCollectionsDto
 import com.rarible.protocol.dto.NftCollectionsDto
+import com.rarible.protocol.dto.NftItemsDto
 import com.rarible.protocol.union.api.client.CollectionControllerApi
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
@@ -13,19 +16,26 @@ import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.dto.continuation.CombinedContinuation
 import com.rarible.protocol.union.dto.continuation.page.PageSize
 import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
+import com.rarible.protocol.union.integration.ethereum.converter.EthItemConverter
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAddress
 import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionDto
+import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
+import com.rarible.protocol.union.integration.ethereum.data.randomEthNftItemDto
 import com.rarible.protocol.union.integration.tezos.data.randomTezosAddress
 import com.rarible.protocol.union.integration.tezos.data.randomTezosCollectionDto
 import com.rarible.protocol.union.test.data.randomFlowAddress
 import com.rarible.protocol.union.test.data.randomFlowCollectionDto
 import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.every
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.reactive.awaitFirst
+import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
 
 @FlowPreview
@@ -169,4 +179,47 @@ class CollectionControllerFt : AbstractIntegrationTest() {
         assertThat(unionCollections.total).isEqualTo(6)
         assertThat(unionCollections.continuation).isNull()
     }
+
+    @Test
+    fun `refresh collection meta`() = runBlocking<Unit> {
+        val collectionAddress = randomAddress()
+        val collectionId = EthConverter.convert(collectionAddress, BlockchainDto.ETHEREUM)
+        val itemId1 = randomEthItemId()
+        val itemId2 = randomEthItemId()
+
+        val item1 = randomEthNftItemDto(itemId1)
+        val item2 = randomEthNftItemDto(itemId2)
+
+        val page1 = NftItemsDto(1, "page2", items = listOf(item1))
+        val page2 = NftItemsDto(1, "no more", items = listOf(item2))
+
+        every {
+            testEthereumCollectionApi.resetNftCollectionMetaById(collectionAddress.prefixed())
+        } returns Mono.empty()
+
+        every {
+            testEthereumItemApi.getNftItemsByCollection(
+                collectionAddress.prefixed(),
+                any(),
+                any(),
+                any()
+            )
+        } answers {
+            when (thirdArg<String?>()) {
+                null -> page1.justOrEmpty()
+                "page2" -> page2.justOrEmpty()
+                else -> NftItemsDto(0, null, emptyList()).justOrEmpty()
+            }
+        }
+        coEvery { testUnionMetaLoader.load(itemId1) } returns EthItemConverter.convert(item1.meta!!)
+        coEvery { testUnionMetaLoader.load(itemId2) } returns EthItemConverter.convert(item2.meta!!)
+
+        collectionControllerClient.refreshCollectionMeta(collectionId.fullId()).awaitFirstOrNull()
+
+        Wait.waitAssert {
+            coVerify(exactly = 1) { testUnionMetaLoader.load(itemId1) }
+            coVerify(exactly = 1) { testUnionMetaLoader.load(itemId2) }
+        }
+    }
+
 }

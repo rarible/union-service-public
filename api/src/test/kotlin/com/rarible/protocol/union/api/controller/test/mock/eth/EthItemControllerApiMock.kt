@@ -54,7 +54,7 @@ class EthItemControllerApiMock(
         } returns Mono.just(NftItemsDto(returnItems.size.toLong(), null, returnItems.asList()))
     }
 
-    fun mockGetNftOrderItemsByCollection(
+    fun mockGetNftItemsByCollection(
         collection: String,
         continuation: String?,
         size: Int,

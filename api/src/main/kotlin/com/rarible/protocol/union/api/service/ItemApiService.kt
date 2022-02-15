@@ -5,6 +5,7 @@ import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.ItemsDto
@@ -12,18 +13,18 @@ import com.rarible.protocol.union.dto.continuation.CombinedContinuation
 import com.rarible.protocol.union.dto.continuation.page.ArgPage
 import com.rarible.protocol.union.dto.continuation.page.ArgSlice
 import com.rarible.protocol.union.dto.continuation.page.Page
+import com.rarible.protocol.union.dto.continuation.page.PageSize
 import com.rarible.protocol.union.dto.continuation.page.Slice
-import com.rarible.protocol.union.enrichment.configuration.MetaProperties
-import com.rarible.protocol.union.enrichment.meta.IpfsUrlResolver
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
-import com.rarible.protocol.union.enrichment.service.EnrichmentMetaService
 import com.rarible.protocol.union.enrichment.util.spent
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
@@ -67,6 +68,23 @@ class ItemApiService(
             continuation = unionItemsSlice.continuation,
             items = enrich(unionItemsSlice.entities)
         )
+    }
+
+    suspend fun getAllItemIdsByCollection(collectionId: CollectionIdDto): Flow<ItemIdDto> {
+        val pageSize = PageSize.ITEM.max
+        var continuation: String? = null
+        var returned = 0L
+        return flow {
+            while (true) {
+                val page = router.getService(collectionId.blockchain)
+                    .getItemsByCollection(collectionId.value, null, continuation, pageSize)
+                page.entities.forEach { emit(it.id) }
+                continuation = page.continuation
+                if (continuation == null || page.total == 0) break
+                returned += page.total
+                check(returned < 1_000_000) { "Cyclic continuation $continuation for collection $collectionId" }
+            }
+        }
     }
 
     private suspend fun enrich(unionItems: List<UnionItem>): List<ItemDto> {

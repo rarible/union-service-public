@@ -72,10 +72,6 @@ class ItemControllerFt : AbstractIntegrationTest() {
     @Autowired
     lateinit var restTemplate: RestTemplate
 
-    @Autowired
-    @Qualifier("test.union.meta.loader")
-    lateinit var testUnionMetaLoader: UnionMetaLoader
-
     @Test
     fun `get item by id - ethereum, enriched`() = runBlocking<Unit> {
         // Enriched item
@@ -230,7 +226,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
         val ethCollectionId = CollectionIdDto(BlockchainDto.ETHEREUM, randomEthAddress())
 
         ethereumOrderControllerApiMock.mockGetByIds(ethOrder)
-        ethereumItemControllerApiMock.mockGetNftOrderItemsByCollection(
+        ethereumItemControllerApiMock.mockGetNftItemsByCollection(
             ethCollectionId.value, continuation, size, ethItem
         )
 
