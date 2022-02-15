@@ -1,24 +1,23 @@
-package com.rarible.protocol.union.listener.meta
+package com.rarible.protocol.union.enrichment.meta
 
+import com.rarible.core.kafka.RaribleKafkaProducer
 import com.rarible.loader.cache.CacheEntry
 import com.rarible.loader.cache.CacheLoaderEvent
 import com.rarible.loader.cache.CacheLoaderEventListener
-import com.rarible.protocol.union.core.handler.IncomingEventHandler
-import com.rarible.protocol.union.core.model.UnionItemEvent
+import com.rarible.protocol.union.core.event.KafkaEventFactory
 import com.rarible.protocol.union.core.model.UnionItemUpdateEvent
 import com.rarible.protocol.union.core.model.UnionMeta
+import com.rarible.protocol.union.core.model.UnionWrappedEvent
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.parser.IdParser
-import com.rarible.protocol.union.enrichment.meta.UnionMetaCacheLoader
-import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
 class UnionMetaCacheLoaderListener(
     private val itemServiceRouter: BlockchainRouter<ItemService>,
-    private val itemEventHandler: IncomingEventHandler<UnionItemEvent>
+    private val wrappedEventProducer: RaribleKafkaProducer<UnionWrappedEvent>
 ) : CacheLoaderEventListener<UnionMeta> {
 
     private val logger = LoggerFactory.getLogger(UnionMetaCacheLoaderListener::class.java)
@@ -47,6 +46,6 @@ class UnionMetaCacheLoaderListener(
         }
         val item = itemServiceRouter.getService(itemId.blockchain).getItemById(itemId.value)
         val itemWithMeta = item.copy(meta = meta)
-        itemEventHandler.onEvent(UnionItemUpdateEvent(itemWithMeta))
+        wrappedEventProducer.send(KafkaEventFactory.wrappedItemEvent(UnionItemUpdateEvent(itemWithMeta)))
     }
 }

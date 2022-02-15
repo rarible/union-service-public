@@ -70,12 +70,6 @@ class TestApiConfiguration {
     fun testUnionMetaLoader(): UnionMetaLoader = mockk()
 
     @Bean
-    fun testCacheLoaderEventListener(): CacheLoaderEventListener<UnionMeta> = mockk {
-        coEvery { type } returns UnionMetaCacheLoader.TYPE
-        coJustRun { onEvent(any()) }
-    }
-
-    @Bean
     @Primary
     fun testItemEventProducer(): RaribleKafkaProducer<ItemEventDto> = mockk()
 
