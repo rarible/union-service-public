@@ -30,13 +30,15 @@ class OpenSeaOrderItemCleanupJobIt {
 
     val itemService: EnrichmentItemService = mockk()
     val listener: OutgoingItemEventListener = mockk()
+    val filter: OpenSeaCleanupOrderFilter = mockk()
 
     lateinit var job: OpenSeaOrderItemCleanupJob
 
     @BeforeEach
     fun beforeEach() {
-        job = OpenSeaOrderItemCleanupJob(itemRepository, itemService, listOf(listener))
+        job = OpenSeaOrderItemCleanupJob(itemRepository, itemService, listOf(listener), filter)
         coEvery { listener.onEvent(any()) } returns Unit
+        coEvery { filter.isOld(any(), any()) } returns false
         coEvery { itemService.enrichItem(any()) } answers {
             val shortItem = it.invocation.args[0] as ShortItem
             EnrichedItemConverter.convert(randomUnionItem(shortItem.id.toDto()), shortItem)

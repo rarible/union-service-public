@@ -29,13 +29,15 @@ class OpenSeaOrderOwnershipCleanupJobIt {
 
     val ownershipService: EnrichmentOwnershipService = mockk()
     val listener: OutgoingOwnershipEventListener = mockk()
+    val filter: OpenSeaCleanupOrderFilter = mockk()
 
     lateinit var job: OpenSeaOrderOwnershipCleanupJob
 
     @BeforeEach
     fun beforeEach() {
-        job = OpenSeaOrderOwnershipCleanupJob(ownershipRepository, ownershipService, listOf(listener))
+        job = OpenSeaOrderOwnershipCleanupJob(ownershipRepository, ownershipService, listOf(listener), filter)
         coEvery { listener.onEvent(any()) } returns Unit
+        coEvery { filter.isOld(any(), any()) } returns false
         coEvery { ownershipService.enrichOwnership(any()) } answers {
             val shortOwnership = it.invocation.args[0] as ShortOwnership
             EnrichedOwnershipConverter.convert(randomUnionOwnershipDto(shortOwnership.id.toDto()), shortOwnership)

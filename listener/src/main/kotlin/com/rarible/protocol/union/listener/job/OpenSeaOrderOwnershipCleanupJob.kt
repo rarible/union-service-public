@@ -22,7 +22,8 @@ import java.util.*
 class OpenSeaOrderOwnershipCleanupJob(
     private val ownershipRepository: OwnershipRepository,
     private val ownershipService: EnrichmentOwnershipService,
-    private val ownershipEventListeners: List<OutgoingOwnershipEventListener>
+    private val ownershipEventListeners: List<OutgoingOwnershipEventListener>,
+    private val orderFilter: OpenSeaCleanupOrderFilter
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -57,6 +58,10 @@ class OpenSeaOrderOwnershipCleanupJob(
 
     private suspend fun cleanup(ownership: ShortOwnership) {
         val openSeaOrder = ownership.bestSellOrder ?: return
+
+        if (orderFilter.isOld(ownership.blockchain, openSeaOrder.id)) {
+            return
+        }
 
         val updated = ownership.copy(bestSellOrder = null, bestSellOrders = emptyMap())
 

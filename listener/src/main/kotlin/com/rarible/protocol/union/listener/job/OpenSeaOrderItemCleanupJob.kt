@@ -22,7 +22,8 @@ import java.util.*
 class OpenSeaOrderItemCleanupJob(
     private val itemRepository: ItemRepository,
     private val itemService: EnrichmentItemService,
-    private val itemEventListeners: List<OutgoingItemEventListener>
+    private val itemEventListeners: List<OutgoingItemEventListener>,
+    private val orderFilter: OpenSeaCleanupOrderFilter
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -57,6 +58,10 @@ class OpenSeaOrderItemCleanupJob(
 
     private suspend fun cleanup(item: ShortItem) {
         val openSeaOrder = item.bestSellOrder ?: return
+
+        if (orderFilter.isOld(item.blockchain, openSeaOrder.id)) {
+            return
+        }
 
         val updated = item.copy(bestSellOrder = null, bestSellOrders = emptyMap())
 
