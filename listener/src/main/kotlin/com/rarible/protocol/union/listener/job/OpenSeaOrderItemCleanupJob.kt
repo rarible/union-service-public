@@ -27,7 +27,7 @@ class OpenSeaOrderItemCleanupJob(
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    private val batchSize = 50
+    private val batchSize = 100
 
     fun execute(fromShortItemId: ShortItemId?): Flow<ShortItemId> {
         return flow {
