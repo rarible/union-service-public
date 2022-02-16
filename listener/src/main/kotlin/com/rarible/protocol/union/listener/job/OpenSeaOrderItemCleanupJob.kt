@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.listener.job
 
+import com.rarible.core.client.WebClientResponseProxyException
 import com.rarible.protocol.union.core.event.OutgoingItemEventListener
 import com.rarible.protocol.union.dto.ItemUpdateEventDto
 import com.rarible.protocol.union.dto.PlatformDto
@@ -69,12 +70,24 @@ class OpenSeaOrderItemCleanupJob(
 
         val dto = itemService.enrichItem(updated)
 
-        val event = ItemUpdateEventDto(
-            itemId = dto.id,
-            item = dto,
-            eventId = UUID.randomUUID().toString()
-        )
+        ignoreApi404 {
+            val event = ItemUpdateEventDto(
+                itemId = dto.id,
+                item = dto,
+                eventId = UUID.randomUUID().toString()
+            )
 
-        itemEventListeners.forEach { it.onEvent(event) }
+            itemEventListeners.forEach { it.onEvent(event) }
+        }
+    }
+
+    private suspend fun ignoreApi404(call: suspend () -> Unit) {
+        try {
+            call()
+        } catch (ex: WebClientResponseProxyException) {
+            logger.warn(
+                "Received NOT_FOUND code from client during item update: {}, message: {}", ex.data, ex.message
+            )
+        }
     }
 }
