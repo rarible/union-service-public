@@ -8,10 +8,12 @@ import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
+import com.rarible.protocol.union.listener.config.UnionListenerProperties
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.toList
 import org.slf4j.LoggerFactory
@@ -23,14 +25,20 @@ class OpenSeaOrderItemCleanupJob(
     private val itemRepository: ItemRepository,
     private val itemService: EnrichmentItemService,
     private val itemEventListeners: List<OutgoingItemEventListener>,
-    private val orderFilter: OpenSeaCleanupOrderFilter
+    private val orderFilter: OpenSeaCleanupOrderFilter,
+    private val properties: UnionListenerProperties
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    private val batchSize = 100
+    private val batchSize = properties.openSeaCleanup.itemBatchSize
+    private val from = properties.openSeaCleanup.sellOrderFrom
+    private val enabled = properties.openSeaCleanup.enabled
 
     fun execute(fromShortItemId: ShortItemId?): Flow<ShortItemId> {
+        if (!enabled) {
+            return emptyFlow()
+        }
         return flow {
             var next = fromShortItemId
             do {
@@ -59,7 +67,7 @@ class OpenSeaOrderItemCleanupJob(
     private suspend fun cleanup(item: ShortItem) {
         val openSeaOrder = item.bestSellOrder ?: return
 
-        if (orderFilter.isOld(item.blockchain, openSeaOrder.id)) {
+        if (orderFilter.isOld(item.blockchain, openSeaOrder.id, from)) {
             return
         }
 

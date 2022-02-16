@@ -12,6 +12,7 @@ import com.rarible.protocol.union.enrichment.test.data.randomUnionOwnershipDto
 import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.listener.test.IntegrationTest
+import com.rarible.protocol.union.listener.test.data.defaultUnionListenerProperties
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.flow.collect
@@ -35,14 +36,15 @@ class OpenSeaOrderOwnershipCleanupJobIt {
 
     @BeforeEach
     fun beforeEach() {
-        job = OpenSeaOrderOwnershipCleanupJob(ownershipRepository, ownershipService, listOf(listener), filter)
+        job = OpenSeaOrderOwnershipCleanupJob(
+            ownershipRepository, ownershipService, listOf(listener), filter, defaultUnionListenerProperties()
+        )
         coEvery { listener.onEvent(any()) } returns Unit
-        coEvery { filter.isOld(any(), any()) } returns false
+        coEvery { filter.isOld(any(), any(), any()) } returns false
         coEvery { ownershipService.enrichOwnership(any()) } answers {
             val shortOwnership = it.invocation.args[0] as ShortOwnership
             EnrichedOwnershipConverter.convert(randomUnionOwnershipDto(shortOwnership.id.toDto()), shortOwnership)
         }
-
     }
 
     @Test
