@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component
 import java.util.*
 
 @Component
-class OpenSeaOrderCleanupJob(
+class OpenSeaOrderItemCleanupJob(
     private val itemRepository: ItemRepository,
     private val itemService: EnrichmentItemService,
     private val itemEventListeners: List<OutgoingItemEventListener>
@@ -26,7 +26,7 @@ class OpenSeaOrderCleanupJob(
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    private val batchSize = 10
+    private val batchSize = 50
 
     fun execute(fromShortItemId: ShortItemId?): Flow<ShortItemId> {
         return flow {
