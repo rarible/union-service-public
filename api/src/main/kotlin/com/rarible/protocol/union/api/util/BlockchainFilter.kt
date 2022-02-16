@@ -15,7 +15,7 @@ class BlockchainFilter(
     }
 
     fun exclude(blockchains: List<BlockchainDto>): List<BlockchainDto> {
-        if (filter == null) {
+        if (filter == null || filter.isEmpty()) {
             return blockchains
         }
         return blockchains.filter { filter.contains(it) }
