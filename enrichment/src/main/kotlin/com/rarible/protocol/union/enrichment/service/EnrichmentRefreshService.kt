@@ -75,7 +75,7 @@ class EnrichmentRefreshService(
     ) {
         // Skipping ownerships of Auctions
         val ownerships = ownershipService.fetchAllByItemId(ShortItemId(itemId))
-            .filter { !auctionContractService.isAuctionContract(it.id.blockchain, it.id.contract) }
+            .filter { !auctionContractService.isAuctionContract(it.id.blockchain, it.id.owner.value) }
 
         val auctions = itemAuctions.associateBy { it.getSellerOwnershipId() }
 
