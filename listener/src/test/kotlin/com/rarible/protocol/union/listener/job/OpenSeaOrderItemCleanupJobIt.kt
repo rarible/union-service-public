@@ -13,6 +13,7 @@ import com.rarible.protocol.union.enrichment.test.data.randomUnionItem
 import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.listener.test.IntegrationTest
+import com.rarible.protocol.union.listener.test.data.defaultUnionListenerProperties
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.flow.collect
@@ -30,13 +31,17 @@ class OpenSeaOrderItemCleanupJobIt {
 
     val itemService: EnrichmentItemService = mockk()
     val listener: OutgoingItemEventListener = mockk()
+    val filter: OpenSeaCleanupOrderFilter = mockk()
 
     lateinit var job: OpenSeaOrderItemCleanupJob
 
     @BeforeEach
     fun beforeEach() {
-        job = OpenSeaOrderItemCleanupJob(itemRepository, itemService, listOf(listener))
+        job = OpenSeaOrderItemCleanupJob(
+            itemRepository, itemService, listOf(listener), filter, defaultUnionListenerProperties()
+        )
         coEvery { listener.onEvent(any()) } returns Unit
+        coEvery { filter.isOld(any(), any(), any()) } returns false
         coEvery { itemService.enrichItem(any()) } answers {
             val shortItem = it.invocation.args[0] as ShortItem
             EnrichedItemConverter.convert(randomUnionItem(shortItem.id.toDto()), shortItem)
