@@ -26,7 +26,7 @@ class OpenSeaOrderCleanupJob(
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    private val batchSize = 100
+    private val batchSize = 10
 
     fun execute(fromShortItemId: ShortItemId?): Flow<ShortItemId> {
         return flow {
@@ -45,11 +45,9 @@ class OpenSeaOrderCleanupJob(
             .toList()
 
         coroutineScope {
-            batch.chunked(8).forEach { subBatch ->
-                subBatch.map {
-                    async { cleanup(it) }
-                }.awaitAll()
-            }
+            batch.map {
+                async { cleanup(it) }
+            }.awaitAll()
         }
         val next = batch.lastOrNull()?.id
         logger.info("CleanedUp {} OpenSea items, last ItemId: [{}]", batch.size, next)
