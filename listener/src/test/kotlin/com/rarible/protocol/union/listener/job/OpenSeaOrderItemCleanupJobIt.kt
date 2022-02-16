@@ -1,7 +1,6 @@
 package com.rarible.protocol.union.listener.job
 
 import com.rarible.protocol.union.core.event.OutgoingItemEventListener
-import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.enrichment.converter.EnrichedItemConverter
 import com.rarible.protocol.union.enrichment.converter.ShortItemConverter
@@ -24,7 +23,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
 @IntegrationTest
-class OpenSeaOrderCleanupJobIt {
+class OpenSeaOrderItemCleanupJobIt {
 
     @Autowired
     lateinit var itemRepository: ItemRepository
@@ -32,13 +31,11 @@ class OpenSeaOrderCleanupJobIt {
     val itemService: EnrichmentItemService = mockk()
     val listener: OutgoingItemEventListener = mockk()
 
-    lateinit var job: OpenSeaOrderCleanupJob
-
-    val mockDto: ItemDto = mockk()
+    lateinit var job: OpenSeaOrderItemCleanupJob
 
     @BeforeEach
     fun beforeEach() {
-        job = OpenSeaOrderCleanupJob(itemRepository, itemService, listOf(listener))
+        job = OpenSeaOrderItemCleanupJob(itemRepository, itemService, listOf(listener))
         coEvery { listener.onEvent(any()) } returns Unit
         coEvery { itemService.enrichItem(any()) } answers {
             val shortItem = it.invocation.args[0] as ShortItem
@@ -48,7 +45,7 @@ class OpenSeaOrderCleanupJobIt {
     }
 
     @Test
-    fun `cleanup openSea best sells`() = runBlocking {
+    fun `cleanup openSea best sells`() = runBlocking<Unit> {
         val bestSellOs = ShortOrderConverter.convert(randomUnionSellOrderDto().copy(platform = PlatformDto.OPEN_SEA))
         val bestBidOs = ShortOrderConverter.convert(randomUnionBidOrderDto())
         val withOpenSea = ShortItemConverter.convert(randomUnionItem(randomEthItemId())).copy(
