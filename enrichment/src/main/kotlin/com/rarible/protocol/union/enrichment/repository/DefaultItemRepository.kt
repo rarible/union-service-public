@@ -90,7 +90,9 @@ class DefaultItemRepository(
         return template.find(query, ShortItem::class.java).asFlow()
     }
 
-    override fun findByPlatformWithSell(platform: PlatformDto, fromShortItemId: ShortItemId?): Flow<ShortItem> {
+    override fun findByPlatformWithSell(
+        platform: PlatformDto, fromShortItemId: ShortItemId?, limit: Int?
+    ): Flow<ShortItem> {
         val criteria = Criteria().andOperator(
             listOfNotNull(
                 ShortItem::bestSellOrder / ShortOrder::platform isEqualTo platform.name,
@@ -100,6 +102,8 @@ class DefaultItemRepository(
         val query = Query(criteria)
             .with(Sort.by("${ShortItem::bestSellOrder.name}.${ShortOrder::platform.name}", "_id"))
             .withHint(BY_BEST_SELL_PLATFORM_DEFINITION.indexKeys)
+
+        limit?.let { query.limit(it) }
 
         return template.find(query, ShortItem::class.java).asFlow()
     }

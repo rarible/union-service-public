@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.enrichment.repository
 
 import com.mongodb.client.result.DeleteResult
+import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.enrichment.model.ItemSellStats
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortOwnership
@@ -17,6 +18,10 @@ interface OwnershipRepository {
     suspend fun get(id: ShortOwnershipId): ShortOwnership?
 
     suspend fun getAll(ids: List<ShortOwnershipId>): List<ShortOwnership>
+
+    fun findByPlatformWithSell(
+        platform: PlatformDto, fromShortOwnershipId: ShortOwnershipId?, limit: Int?
+    ): Flow<ShortOwnership>
 
     fun findWithMultiCurrency(lastUpdateAt: Instant): Flow<ShortOwnership>
 

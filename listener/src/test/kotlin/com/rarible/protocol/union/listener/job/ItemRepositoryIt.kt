@@ -10,7 +10,6 @@ import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.listener.test.AbstractIntegrationTest
 import com.rarible.protocol.union.listener.test.IntegrationTest
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
@@ -39,10 +38,11 @@ internal class ItemRepositoryIt : AbstractIntegrationTest() {
         val item6 = itemRepository.save(randomShortItem().copy(bestSellOrder = randomSellOrder(PlatformDto.OPEN_SEA)))
         val item7 = itemRepository.save(randomShortItem().copy(bestSellOrder = null))
 
-        val openSeaItems = itemRepository.findByPlatformWithSell(PlatformDto.OPEN_SEA, null).toList()
+        val openSeaItems = itemRepository.findByPlatformWithSell(PlatformDto.OPEN_SEA, null, null).toList()
         assertThat(openSeaItems.map { it.id }).containsExactlyInAnyOrder(item1.id, item3.id, item5.id, item6.id)
 
-        val fromOpenSeaItems = itemRepository.findByPlatformWithSell(PlatformDto.OPEN_SEA, openSeaItems[1].id).toList()
+        val fromOpenSeaItems = itemRepository.findByPlatformWithSell(PlatformDto.OPEN_SEA, openSeaItems[1].id, null)
+            .toList()
         assertThat(fromOpenSeaItems.size).isEqualTo(2)
         assertThat(fromOpenSeaItems.map { it.id }).contains(openSeaItems[2].id, openSeaItems[3].id)
     }

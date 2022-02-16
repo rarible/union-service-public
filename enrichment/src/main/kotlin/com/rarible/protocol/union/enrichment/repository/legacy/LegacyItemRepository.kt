@@ -111,7 +111,9 @@ class LegacyItemRepository(
             .map { it.toShortItem() }
     }
 
-    override fun findByPlatformWithSell(platform: PlatformDto, fromShortItemId: ShortItemId?): Flow<ShortItem> {
+    override fun findByPlatformWithSell(
+        platform: PlatformDto, fromShortItemId: ShortItemId?, limit: Int?
+    ): Flow<ShortItem> {
         val legacyFromId = fromShortItemId?.let { LegacyShortItemId(it) }
         val criteria = Criteria().andOperator(
             listOfNotNull(
@@ -122,6 +124,8 @@ class LegacyItemRepository(
         val query = Query(criteria)
             .with(Sort.by("${LegacyShortItem::bestSellOrder.name}.${ShortOrder::platform.name}", "_id"))
             .withHint(BY_BEST_SELL_PLATFORM_DEFINITION.indexKeys)
+
+        limit?.let { query.limit(it) }
 
         return template.find(query, LegacyShortItem::class.java)
             .asFlow()

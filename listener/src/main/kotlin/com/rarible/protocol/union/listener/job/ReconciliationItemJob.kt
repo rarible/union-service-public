@@ -19,7 +19,7 @@ class ReconciliationItemJob(
 
     fun reconcileForPlatform(platform: PlatformDto, fromShortItemId: ShortItemId?): Flow<ShortItemId> {
 
-        return itemRepository.findByPlatformWithSell(platform, fromShortItemId)
+        return itemRepository.findByPlatformWithSell(platform, fromShortItemId, null)
             .onEach { shortItem ->
                 refreshService.reconcileItem(shortItem.id.toDto(), full = true)
                 logger.info("Item ${shortItem.id} was reconciled, bestSellOrder=${shortItem.bestSellOrder}")

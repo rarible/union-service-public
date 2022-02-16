@@ -3,6 +3,7 @@ package com.rarible.protocol.union.enrichment.repository
 import com.mongodb.client.result.DeleteResult
 import com.rarible.core.common.optimisticLock
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.enrichment.model.ItemSellStats
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortOwnership
@@ -56,6 +57,12 @@ class OwnershipRoutedRepository(
 
     override suspend fun getAll(ids: List<ShortOwnershipId>): List<ShortOwnership> {
         return repository.getAll(ids)
+    }
+
+    override fun findByPlatformWithSell(
+        platform: PlatformDto, fromShortOwnershipId: ShortOwnershipId?, limit: Int?
+    ): Flow<ShortOwnership> {
+        return repository.findByPlatformWithSell(platform, fromShortOwnershipId, limit)
     }
 
     override fun findWithMultiCurrency(lastUpdateAt: Instant): Flow<ShortOwnership> {

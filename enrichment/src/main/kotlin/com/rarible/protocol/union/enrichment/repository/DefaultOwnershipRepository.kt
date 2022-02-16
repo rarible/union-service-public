@@ -3,6 +3,8 @@ package com.rarible.protocol.union.enrichment.repository
 import com.mongodb.client.result.DeleteResult
 import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.apm.SpanType
+import com.rarible.core.mongo.util.div
+import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.enrichment.model.ItemSellStats
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortOrder
@@ -62,6 +64,23 @@ class DefaultOwnershipRepository(
         ).collectList().awaitFirst()
     }
 
+    override fun findByPlatformWithSell(
+        platform: PlatformDto, fromShortOwnershipId: ShortOwnershipId?, limit: Int?
+    ): Flow<ShortOwnership> {
+        val criteria = Criteria().andOperator(
+            listOfNotNull(
+                ShortOwnership::bestSellOrder / ShortOrder::platform isEqualTo platform.name,
+                fromShortOwnershipId?.let { Criteria.where("_id").gt(it) }
+            )
+        )
+        val query = Query(criteria)
+            .with(Sort.by("${ShortOwnership::bestSellOrder.name}.${ShortOrder::platform.name}", "_id"))
+
+        limit?.let { query.limit(it) }
+
+        return template.find(query, ShortOwnership::class.java).asFlow()
+    }
+
     override fun findWithMultiCurrency(lastUpdateAt: Instant): Flow<ShortOwnership> {
         val query = Query(
             Criteria().andOperator(
@@ -113,7 +132,13 @@ class DefaultOwnershipRepository(
             .on(ShortOwnership::lastUpdatedAt.name, Sort.Direction.DESC)
             .background()
 
+        val BY_BEST_SELL_PLATFORM_DEFINITION = Index()
+            .on("${ShortOwnership::bestSellOrder.name}.${ShortOrder::platform.name}", Sort.Direction.ASC)
+            .on("_id", Sort.Direction.ASC)
+            .background()
+
         val ALL = listOf(
+            BY_BEST_SELL_PLATFORM_DEFINITION,
             BLOCKCHAIN_ITEM_ID,
             MULTI_CURRENCY_OWNERSHIP
         )

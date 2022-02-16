@@ -72,8 +72,10 @@ class ItemRoutedRepository(
         return repository.findByAuction(auctionId)
     }
 
-    override fun findByPlatformWithSell(platform: PlatformDto, fromShortItemId: ShortItemId?): Flow<ShortItem> {
-        return repository.findByPlatformWithSell(platform, fromShortItemId)
+    override fun findByPlatformWithSell(
+        platform: PlatformDto, fromShortItemId: ShortItemId?, limit: Int?
+    ): Flow<ShortItem> {
+        return repository.findByPlatformWithSell(platform, fromShortItemId, limit)
     }
 
     override suspend fun delete(itemId: ShortItemId): DeleteResult? {

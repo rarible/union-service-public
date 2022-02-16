@@ -3,7 +3,9 @@ package com.rarible.protocol.union.enrichment.repository.legacy
 import com.mongodb.client.result.DeleteResult
 import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.apm.SpanType
+import com.rarible.core.mongo.util.div
 import com.rarible.protocol.union.core.util.CompositeItemIdParser
+import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.enrichment.model.ItemSellStats
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortOrder
@@ -99,6 +101,23 @@ class LegacyOwnershipRepository(
             .map { it.toShortOwnership() }
     }
 
+    override fun findByPlatformWithSell(
+        platform: PlatformDto, fromShortOwnershipId: ShortOwnershipId?, limit: Int?
+    ): Flow<ShortOwnership> {
+        val criteria = Criteria().andOperator(
+            listOfNotNull(
+                LegacyShortOwnership::bestSellOrder / ShortOrder::platform isEqualTo platform.name,
+                fromShortOwnershipId?.let { Criteria.where("_id").gt(it) }
+            )
+        )
+        val query = Query(criteria)
+            .with(Sort.by("${LegacyShortOwnership::bestSellOrder.name}.${ShortOrder::platform.name}", "_id"))
+
+        limit?.let { query.limit(it) }
+
+        return template.find(query, LegacyShortOwnership::class.java).asFlow().map { it.toShortOwnership() }
+    }
+
     override suspend fun delete(ownershipId: ShortOwnershipId): DeleteResult? {
         val legacyId = LegacyShortOwnershipId(ownershipId)
         val criteria = Criteria("_id").isEqualTo(legacyId)
@@ -143,7 +162,13 @@ class LegacyOwnershipRepository(
             .on(LegacyShortOwnership::lastUpdatedAt.name, Sort.Direction.DESC)
             .background()
 
+        val BY_BEST_SELL_PLATFORM_DEFINITION = Index()
+            .on("${LegacyShortOwnership::bestSellOrder.name}.${ShortOrder::platform.name}", Sort.Direction.ASC)
+            .on("_id", Sort.Direction.ASC)
+            .background()
+
         val ALL = listOf(
+            BY_BEST_SELL_PLATFORM_DEFINITION,
             OWNERSHIP_CONTRACT_TOKEN_ID,
             MULTI_CURRENCY_OWNERSHIP
         )

@@ -22,7 +22,7 @@ interface ItemRepository {
     fun findWithMultiCurrency(lastUpdateAt: Instant): Flow<ShortItem>
     fun findByBlockchain(fromShortItemId: ShortItemId?, blockchain: BlockchainDto?, limit: Int): Flow<ShortItem>
     fun findByAuction(auctionId: AuctionIdDto): Flow<ShortItem>
-    fun findByPlatformWithSell(platform: PlatformDto, fromShortItemId: ShortItemId?): Flow<ShortItem>
+    fun findByPlatformWithSell(platform: PlatformDto, fromShortItemId: ShortItemId?, limit: Int?): Flow<ShortItem>
 
     suspend fun delete(itemId: ShortItemId): DeleteResult?
 }
