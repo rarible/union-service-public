@@ -371,7 +371,7 @@ class OrderControllerFt : AbstractIntegrationTest() {
         val polygonOrders = listOf(randomEthLegacySellOrderDto())
 
         coEvery {
-            testPolygonOrderApi.getSellOrdersByMaker(maker.value, null, ethPlatform, continuation, size)
+            testPolygonOrderApi.getSellOrdersByMakerAndByStatus(maker.value, null, ethPlatform, continuation, size, emptyList())
         } returns OrdersPaginationDto(polygonOrders, continuation).toMono()
 
         val orders = orderControllerClient.getSellOrdersByMaker(
@@ -380,7 +380,8 @@ class OrderControllerFt : AbstractIntegrationTest() {
             platform,
             null,
             continuation,
-            size
+            size,
+            null
         ).awaitFirst()
 
         assertThat(orders.orders).hasSize(1)
