@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.listener.job
 
+import com.rarible.core.client.WebClientResponseProxyException
 import com.rarible.protocol.union.core.event.OutgoingOwnershipEventListener
 import com.rarible.protocol.union.dto.OwnershipUpdateEventDto
 import com.rarible.protocol.union.dto.PlatformDto
@@ -67,14 +68,26 @@ class OpenSeaOrderOwnershipCleanupJob(
             ownershipRepository.delete(ownership.id)
         }
 
-        val dto = ownershipService.enrichOwnership(updated)
+        ignoreApi404 {
+            val dto = ownershipService.enrichOwnership(updated)
 
-        val event = OwnershipUpdateEventDto(
-            eventId = UUID.randomUUID().toString(),
-            ownershipId = dto.id,
-            ownership = dto
-        )
+            val event = OwnershipUpdateEventDto(
+                eventId = UUID.randomUUID().toString(),
+                ownershipId = dto.id,
+                ownership = dto
+            )
 
-        ownershipEventListeners.forEach { it.onEvent(event) }
+            ownershipEventListeners.forEach { it.onEvent(event) }
+        }
+    }
+
+    private suspend fun ignoreApi404(call: suspend () -> Unit) {
+        try {
+            call()
+        } catch (ex: WebClientResponseProxyException) {
+            logger.warn(
+                "Received NOT_FOUND code from client during ownership update: {}, message: {}", ex.data, ex.message
+            )
+        }
     }
 }
