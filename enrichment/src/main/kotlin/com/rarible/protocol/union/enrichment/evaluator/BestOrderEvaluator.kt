@@ -2,7 +2,6 @@ package com.rarible.protocol.union.enrichment.evaluator
 
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderStatusDto
-import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.model.ShortOrder
 import org.slf4j.LoggerFactory
@@ -17,6 +16,7 @@ class BestOrderEvaluator(
     private val name = comparator.name
 
     companion object {
+
         private val logger = LoggerFactory.getLogger(BestOrderEvaluator::class.java)
     }
 
@@ -71,16 +71,8 @@ class BestOrderEvaluator(
 
     // Select best Order between current and updated if they are different and alive
     private fun evaluateBestOrder(current: ShortOrder, updated: ShortOrder): ShortOrder {
-        val isCurrentPreferred = isPreferred(current)
-        val isUpdatedPreferred = isPreferred(updated)
-
-        val bestOrder = if (isCurrentPreferred != isUpdatedPreferred) {
-            // if one of orders has preferred type and second hasn't return select preferred Order
-            if (isCurrentPreferred) current else updated
-        } else {
-            // If both orders has preferred type or both are not preferred, comparing them
-            comparator.compare(current, updated)
-        }
+        val preferredComparator = BestPreferredOrderComparator(comparator)
+        val bestOrder = preferredComparator.compare(current, updated)
 
         logger.info(
             "Evaluated {} for {} [{}] (current = [{}], updated = [{}], best = [{}])",
@@ -117,10 +109,6 @@ class BestOrderEvaluator(
             name, updated.dtoId.fullId(), type, id, current.dtoId.fullId()
         )
         return current
-    }
-
-    private fun isPreferred(order: ShortOrder): Boolean {
-        return order.platform == PlatformDto.RARIBLE.name
     }
 
     private fun isAlive(order: OrderDto): Boolean {

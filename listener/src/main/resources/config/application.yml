@@ -102,14 +102,14 @@ listener:
     notificationEnabled: false
   openSeaCleanup:
     enabled: true
-    sellOrderFrom: "2022-02-06T00:00:00.000Z"
+    #sellOrderFrom: "2022-02-06T00:00:00.000Z"
     itemBatchSize: 100
     ownershipBatchSize: 50
   price-update:
     rate: PT5M
     delay: PT1M
   reconcile-marks:
-    rate: PT1M
+    rate: PT15S
     delay: PT1M
 
 meta:

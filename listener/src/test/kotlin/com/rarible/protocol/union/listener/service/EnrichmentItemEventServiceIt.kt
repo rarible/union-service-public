@@ -166,9 +166,9 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         itemEventService.onItemUpdated(unionItem)
 
         Wait.waitAssert {
+            // Event should not be sent in case of corrupted enrichment data
             val messages = findItemUpdates(itemId.value)
-            assertThat(messages).hasSize(1)
-            assertThat(messages[0].id).isEqualTo(itemId.fullId())
+            assertThat(messages).hasSize(0)
 
             // Reconciliation mark should be created for such item
             val reconcileMarks = itemReconciliationMarkRepository.findAll(100)

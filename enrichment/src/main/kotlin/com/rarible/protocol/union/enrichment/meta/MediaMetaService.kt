@@ -72,6 +72,7 @@ class MediaMetaService(
                 url.endsWith(".mp3") -> ContentMeta("audio/mp3").toMono()
                 url.endsWith(".mpga") -> ContentMeta("audio/mpeg").toMono()
                 url.endsWith(".wav") -> ContentMeta("audio/wav").toMono()
+                url.endsWith(".flac") -> ContentMeta("audio/flac").toMono()
                 url.endsWith(".svg") -> ContentMeta("image/svg+xml", 192, 192).toMono()
                 else -> {
                     getMetadata(url)

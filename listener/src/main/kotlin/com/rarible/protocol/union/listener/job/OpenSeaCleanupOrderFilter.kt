@@ -10,7 +10,11 @@ import java.time.Instant
 class OpenSeaCleanupOrderFilter(
     private val orderService: EnrichmentOrderService
 ) {
-    suspend fun isOld(blockchain: BlockchainDto, orderId: String, from: Instant): Boolean {
+
+    suspend fun isOld(blockchain: BlockchainDto, orderId: String, from: Instant?): Boolean {
+        if (from == null) {
+            return false
+        }
         val order = orderService.getById(OrderIdDto(blockchain, orderId))
         return order != null && order.createdAt.isBefore(from)
     }
