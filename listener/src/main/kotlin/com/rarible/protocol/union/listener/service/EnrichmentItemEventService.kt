@@ -141,7 +141,7 @@ class EnrichmentItemEventService(
         updateAction: suspend (item: ShortItem) -> ShortItem
     ) = optimisticLock {
         val itemId = ShortItemId(auction.getItemId())
-        val (short, updated, exist) = updateItem(itemId, updateAction)
+        val (short, updated, exist) = update(itemId, updateAction)
         if (short != updated) {
             if (updated.isNotEmpty()) {
                 saveAndNotify(updated = updated, notificationEnabled = notificationEnabled, auction = auction)

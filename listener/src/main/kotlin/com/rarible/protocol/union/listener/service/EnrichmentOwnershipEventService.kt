@@ -41,7 +41,7 @@ class EnrichmentOwnershipEventService(
     suspend fun onOwnershipUpdated(ownership: UnionOwnership) {
         val existing = enrichmentOwnershipService.getOrEmpty(ShortOwnershipId(ownership.id))
         val event = buildUpdateEvent(existing, ownership)
-        sendUpdate(event)
+        event?.let { sendUpdate(it) }
     }
 
     suspend fun recalculateBestOrder(ownership: ShortOwnership): Boolean {
@@ -72,11 +72,11 @@ class EnrichmentOwnershipEventService(
 
         if (short != updated) {
             if (updated.isNotEmpty()) {
-                saveAndNotify(updated, notificationEnabled, null, order)
+                saveAndNotify(updated, notificationEnabled, null, null, order)
                 enrichmentItemEventService.onOwnershipUpdated(ownershipId, order, notificationEnabled)
             } else if (exist) {
                 logger.info("Deleting Ownership [{}] without related bestSellOrder", ownershipId)
-                cleanupAndNotify(updated, notificationEnabled, null, order)
+                cleanupAndNotify(updated, notificationEnabled, null, null, order)
                 enrichmentItemEventService.onOwnershipUpdated(ownershipId, order, notificationEnabled)
             }
         } else {
@@ -94,7 +94,7 @@ class EnrichmentOwnershipEventService(
         if (auction != null) {
             // In case such ownership is belongs to auction, we have to do not send delete event
             val dto = enrichmentOwnershipService.disguiseAuction(auction)
-            dto?.let { notifyUpdate(dto) }
+            dto?.let { sendUpdate(buildUpdateEvent(dto)) }
         } else {
             sendDelete(shortOwnershipId)
             if (deleted) {
@@ -121,10 +121,10 @@ class EnrichmentOwnershipEventService(
             )
             if (auction.status == AuctionStatusDto.ACTIVE) {
                 // Attaching new ACTIVE auction version to existing ownership
-                notifyUpdate(existing, ownership, auction, null)
+                buildUpdateEvent(existing, ownership, auction, null)?.let { sendUpdate(it) }
             } else {
                 // There is no sense to attach inactive auctions to Ownerships
-                notifyUpdate(existing, ownership, null, null)
+                buildUpdateEvent(existing, ownership, null, null)?.let { sendUpdate(it) }
             }
         } else if (auction.status == AuctionStatusDto.ACTIVE) {
             logger.info(
@@ -133,7 +133,7 @@ class EnrichmentOwnershipEventService(
             )
             // Send disguised ownership with updated auction
             enrichmentOwnershipService.disguiseAuction(auction)?.let {
-                notifyUpdate(it)
+                sendUpdate(buildUpdateEvent(it))
             }
         } else if (auction.status == AuctionStatusDto.FINISHED) {
             // If auction is finished and there is still no related ownership,
@@ -175,7 +175,7 @@ class EnrichmentOwnershipEventService(
 
         val event = buildUpdateEvent(updated, ownership, auction, order)
         enrichmentOwnershipService.save(updated)
-        sendUpdate(event)
+        event?.let { sendUpdate(event) }
     }
 
     private suspend fun cleanupAndNotify(
@@ -192,7 +192,7 @@ class EnrichmentOwnershipEventService(
 
         val event = buildUpdateEvent(updated, ownership, auction, order)
         enrichmentOwnershipService.delete(updated.id)
-        sendUpdate(event)
+        event?.let { sendUpdate(event) }
     }
 
     private suspend fun buildUpdateEvent(
@@ -200,11 +200,11 @@ class EnrichmentOwnershipEventService(
         ownership: UnionOwnership? = null,
         auction: AuctionDto? = null,
         order: OrderDto? = null
-    ): OwnershipUpdateEventDto {
+    ): OwnershipUpdateEventDto? {
         val isAuctionOwnership = (auctionContractService.isAuctionContract(short.blockchain, short.owner))
         if (isAuctionOwnership) {
             // We should skip auction ownerships
-            return
+            return null
         }
 
         val dto = coroutineScope {
@@ -214,6 +214,10 @@ class EnrichmentOwnershipEventService(
             enrichmentOwnershipService.mergeWithAuction(enriched, auctionDeferred.await())
         }
 
+        return buildUpdateEvent(dto)
+    }
+
+    private suspend fun buildUpdateEvent(dto: OwnershipDto): OwnershipUpdateEventDto {
         return OwnershipUpdateEventDto(
             eventId = UUID.randomUUID().toString(),
             ownershipId = dto.id,
