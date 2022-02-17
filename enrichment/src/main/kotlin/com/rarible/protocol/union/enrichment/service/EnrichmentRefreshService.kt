@@ -239,7 +239,7 @@ class EnrichmentRefreshService(
     private suspend fun notifyUpdate(
         auction: AuctionDto
     ): OwnershipEventDto? {
-        val dto = enrichmentOwnershipService.disguiseAuction(auction)
+        val dto = enrichmentOwnershipService.disguiseAuctionWithEnrichment(auction)
         return dto?.let { notifyUpdate(dto) }
     }
 

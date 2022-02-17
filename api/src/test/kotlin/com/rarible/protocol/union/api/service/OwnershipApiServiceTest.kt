@@ -12,6 +12,7 @@ import com.rarible.protocol.union.dto.AuctionDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ContractAddress
 import com.rarible.protocol.union.dto.ItemIdDto
+import com.rarible.protocol.union.dto.OwnershipDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.continuation.DateIdContinuation
 import com.rarible.protocol.union.dto.continuation.page.Page
@@ -71,7 +72,8 @@ class OwnershipApiServiceTest {
         clearMocks(ownershipRouter, enrichmentOwnershipService, enrichmentAuctionService, orderApiService)
         every { ownershipRouter.getService(BlockchainDto.ETHEREUM) } returns ownershipService
         coEvery { enrichmentOwnershipService.findAll(any()) } returns emptyList()
-        coEvery { enrichmentOwnershipService.mergeWithAuction(any(), any()) } returnsArgument 0
+        coEvery { enrichmentOwnershipService.mergeWithAuction(any<OwnershipDto>(), any()) } returnsArgument 0
+        coEvery { enrichmentOwnershipService.mergeWithAuction(any<UnionOwnership>(), any()) } returnsArgument 0
         coEvery { orderApiService.getByIds(any()) } returns emptyList()
     }
 
@@ -184,7 +186,7 @@ class OwnershipApiServiceTest {
 
     private suspend fun mockDisguise(auction: AuctionDto, ownership: UnionOwnership) {
         coEvery {
-            enrichmentOwnershipService.disguiseAuction(auction)
+            enrichmentOwnershipService.disguiseAuctionWithEnrichment(auction)
         } returns EnrichedOwnershipConverter.convert(ownership)
     }
 

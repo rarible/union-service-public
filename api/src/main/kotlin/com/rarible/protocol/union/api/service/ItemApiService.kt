@@ -146,4 +146,10 @@ class ItemApiService(
             }
         }.awaitAll()
     }
+
+    suspend fun enrich(unionItem: UnionItem): ItemDto {
+        val shortId = ShortItemId(unionItem.id)
+        val shortItem = enrichmentItemService.get(shortId)
+        return enrichmentItemService.enrichItem(shortItem, unionItem)
+    }
 }

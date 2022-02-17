@@ -57,7 +57,7 @@ class OwnershipApiService(
                 // Some or zero of user's items are participated in auction
                 enrichmentOwnershipService.mergeWithAuction(enrich(freeOwnership), auction)
             } else if (auction != null) {
-                val resultOwnership = enrichmentOwnershipService.disguiseAuction(auction)
+                val resultOwnership = enrichmentOwnershipService.disguiseAuctionWithEnrichment(auction)
                     ?: throw UnionNotFoundException("Ownership ${fullOwnershipId.fullId()} not found")
 
                 resultOwnership
@@ -194,7 +194,7 @@ class OwnershipApiService(
                         enrichmentOwnershipService.mergeWithAuction(ownership, it.auction)
                     } else {
                         // If we have fully auctioned ownership, it should be disguised as Ownership
-                        enrichmentOwnershipService.disguiseAuction(it.auction!!)
+                        enrichmentOwnershipService.disguiseAuctionWithEnrichment(it.auction!!)
                     }
                 }
             }.awaitAll().filterNotNull()
@@ -215,24 +215,8 @@ class OwnershipApiService(
             async {
                 val (ownership, auction) = it.split()
                 when {
-                    ownership != null && auction != null -> ownership.copy(value = ownership.value + auction.sell.value.toBigInteger())
-                    auction != null -> {
-                        val sellerOwnershipId = ShortOwnershipId(auction.getSellerOwnershipId())
-                        val auctionOwnershipId = sellerOwnershipId.copy(owner = auction.contract.value)
-                        val auctionUnionOwnership = enrichmentOwnershipService.fetchOrNull(auctionOwnershipId)
-
-                        if (auctionUnionOwnership != null) {
-                            val id = auctionUnionOwnership.id
-                            auctionUnionOwnership.copy(
-                                id = OwnershipIdDto(id.blockchain, id.itemIdValue, auction.seller),
-                                value = auction.sell.value.toBigInteger(),
-                                createdAt = auction.createdAt
-                            )
-                        } else {
-                            logger.warn("Auction ownership [{}] not found", auctionOwnershipId)
-                            null
-                        }
-                    }
+                    ownership != null && auction != null -> enrichmentOwnershipService.mergeWithAuction(ownership, auction)
+                    auction != null -> enrichmentOwnershipService.disguiseAuction(auction)
                     else -> it.ownership
                 }
             }
