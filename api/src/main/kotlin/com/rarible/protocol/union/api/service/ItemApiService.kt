@@ -54,6 +54,19 @@ class ItemApiService(
         return slices
     }
 
+    suspend fun getItemsByIds(ids: List<ItemIdDto>): List<ItemDto> = coroutineScope {
+        logger.info("Getting items by IDs: [{}]", ids.map { "${it.blockchain}:${it.value}" })
+        val groupedIds = ids.groupBy({ it.blockchain }, { it.value })
+
+        groupedIds.flatMap {
+            router.getService(it.key).getItemsByIds(it.value)
+        }.map {
+            async {
+                enrich(it)
+            }
+        }.awaitAll()
+    }
+
     suspend fun enrich(unionItemsPage: Page<UnionItem>): ItemsDto {
         return ItemsDto(
             total = unionItemsPage.total,
