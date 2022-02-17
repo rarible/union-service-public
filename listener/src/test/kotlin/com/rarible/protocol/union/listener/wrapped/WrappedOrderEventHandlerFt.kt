@@ -8,9 +8,11 @@ import com.rarible.protocol.union.integration.ethereum.data.randomEthAssetErc20
 import com.rarible.protocol.union.integration.ethereum.data.randomEthLegacyBidOrderDto
 import com.rarible.protocol.union.listener.test.AbstractIntegrationTest
 import com.rarible.protocol.union.listener.test.IntegrationTest
+import io.mockk.coEvery
 import kotlinx.coroutines.FlowPreview
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
+import reactor.kotlin.core.publisher.toMono
 
 @FlowPreview
 @IntegrationTest
@@ -24,6 +26,8 @@ class WrappedOrderEventHandlerFt : AbstractIntegrationTest() {
             .copy(take = randomEthAssetErc20())
 
         val orderId = order.hash.prefixed()
+
+        coEvery { testEthereumOrderApi.getOrderByHash(orderId) } returns order.toMono()
 
         ethOrderProducer.send(
             KafkaMessage(

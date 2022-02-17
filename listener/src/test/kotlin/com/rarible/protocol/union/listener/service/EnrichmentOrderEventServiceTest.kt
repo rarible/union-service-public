@@ -6,6 +6,7 @@ import com.rarible.protocol.union.dto.AssetDto
 import com.rarible.protocol.union.dto.EthCollectionAssetTypeDto
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
+import com.rarible.protocol.union.enrichment.service.EnrichmentOrderService
 import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrderDto
 import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAssetErc1155
@@ -23,11 +24,13 @@ import org.junit.jupiter.api.Test
 
 class EnrichmentOrderEventServiceTest {
 
+    private val enrichmentOrderService: EnrichmentOrderService = mockk()
     private val enrichmentItemEventService: EnrichmentItemEventService = mockk()
     private val enrichmentOwnershipEventService: EnrichmentOwnershipEventService = mockk()
     private val enrichmentCollectionEventService: EnrichmentCollectionEventService = mockk()
 
     private val orderEventService = EnrichmentOrderEventService(
+        enrichmentOrderService,
         enrichmentItemEventService,
         enrichmentOwnershipEventService,
         enrichmentCollectionEventService,
@@ -58,6 +61,7 @@ class EnrichmentOrderEventServiceTest {
                 take = EthConverter.convert(randomEthAssetErc20(), itemId.blockchain)
             )
 
+        coEvery { enrichmentOrderService.getById(order.id) } returns order
         orderEventService.updateOrder(order)
 
         coVerify(exactly = 1) { enrichmentItemEventService.onItemBestSellOrderUpdated(shortItemId, order) }
@@ -82,6 +86,7 @@ class EnrichmentOrderEventServiceTest {
                 take = EthConverter.convert(randomEthAssetErc20(), itemId.blockchain)
             )
 
+        coEvery { enrichmentOrderService.getById(order.id) } returns order
         orderEventService.updateOrder(order)
 
         coVerify(exactly = 0) { enrichmentItemEventService.onItemBestSellOrderUpdated(shortItemId, order) }
@@ -106,6 +111,7 @@ class EnrichmentOrderEventServiceTest {
                 take = AssetDto(EthCollectionAssetTypeDto(assetAddress), randomBigDecimal())
             )
 
+        coEvery { enrichmentOrderService.getById(order.id) } returns order
         orderEventService.updateOrder(order)
 
         coVerify(exactly = 0) { enrichmentItemEventService.onItemBestSellOrderUpdated(shortItemId, order) }
@@ -128,6 +134,7 @@ class EnrichmentOrderEventServiceTest {
                 take = EthConverter.convert(randomEthAssetErc721(itemId), itemId.blockchain)
             )
 
+        coEvery { enrichmentOrderService.getById(order.id) } returns order
         orderEventService.updateOrder(order)
 
         coVerify(exactly = 0) { enrichmentItemEventService.onItemBestSellOrderUpdated(any(), any()) }
