@@ -5,6 +5,7 @@ import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.enrichment.evaluator.BestBidOrderComparator
 import com.rarible.protocol.union.enrichment.evaluator.BestOrderComparator
 import com.rarible.protocol.union.enrichment.evaluator.BestOrderEvaluator
+import com.rarible.protocol.union.enrichment.evaluator.BestPreferredOrderComparator
 import com.rarible.protocol.union.enrichment.evaluator.BestSellOrderComparator
 import com.rarible.protocol.union.enrichment.evaluator.ItemBestBidOrderProvider
 import com.rarible.protocol.union.enrichment.evaluator.ItemBestSellOrderProvider
@@ -89,14 +90,6 @@ class BestOrderService(
         return getBestOrderByUsd(orders, BestBidOrderComparator)
     }
 
-    suspend fun getBestSellOrder(orders: List<ShortOrder>): ShortOrder? {
-        return getBestOrder(orders, BestSellOrderComparator)
-    }
-
-    suspend fun getBestBidOrder(orders: List<ShortOrder>): ShortOrder? {
-        return getBestOrder(orders, BestBidOrderComparator)
-    }
-
     private suspend fun getBestOrderByUsd(
         orders: Map<String, ShortOrder>,
         comparator: BestOrderComparator
@@ -119,7 +112,8 @@ class BestOrderService(
 
     private fun getBestOrder(orders: List<ShortOrder>, comparator: BestOrderComparator): ShortOrder? {
         if (orders.isEmpty()) return null
-        return orders.reduce { current, next -> comparator.compare(current, next) }
+        val preferredOrderComparator = BestPreferredOrderComparator(comparator)
+        return orders.reduce { current, next -> preferredOrderComparator.compare(current, next) }
     }
 
     private suspend fun updateCurrencyOrders(
