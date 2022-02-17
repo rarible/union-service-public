@@ -3,11 +3,13 @@ package com.rarible.protocol.union.listener.service
 import com.rarible.core.client.WebClientResponseProxyException
 import com.rarible.protocol.union.core.converter.ContractAddressConverter
 import com.rarible.protocol.union.core.event.OutgoingOrderEventListener
+import com.rarible.protocol.union.core.exception.UnionNotFoundException
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderUpdateEventDto
 import com.rarible.protocol.union.dto.ext
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
+import com.rarible.protocol.union.enrichment.service.EnrichmentOrderService
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
@@ -16,6 +18,7 @@ import java.util.*
 
 @Component
 class EnrichmentOrderEventService(
+    private val enrichmentOrderService: EnrichmentOrderService,
     private val enrichmentItemEventService: EnrichmentItemEventService,
     private val enrichmentOwnershipEventService: EnrichmentOwnershipEventService,
     private val enrichmentCollectionEventService: EnrichmentCollectionEventService,
@@ -24,7 +27,12 @@ class EnrichmentOrderEventService(
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    suspend fun updateOrder(order: OrderDto, notificationEnabled: Boolean = true) = coroutineScope {
+    suspend fun updateOrder(incomingOrder: OrderDto, notificationEnabled: Boolean = true) = coroutineScope {
+        // Since there could be delay of message delivery, it's better to re-fetch order
+        // to have it in actual state
+        val order = enrichmentOrderService.getById(incomingOrder.id)
+            ?: throw UnionNotFoundException("Order [{}] not found in blockchain")
+
         val blockchain = order.id.blockchain
         val makeAssetExt = order.make.type.ext
         val takeAssetExt = order.take.type.ext
