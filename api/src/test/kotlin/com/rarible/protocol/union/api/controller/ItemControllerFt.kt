@@ -13,13 +13,13 @@ import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
+import com.rarible.protocol.union.dto.ItemIdsDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.continuation.CombinedContinuation
 import com.rarible.protocol.union.dto.continuation.page.PageSize
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.converter.ShortItemConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
-import com.rarible.protocol.union.enrichment.meta.UnionMetaLoader
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.integration.ethereum.converter.EthItemConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
@@ -50,7 +50,6 @@ import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpStatus
 import org.springframework.web.client.RestTemplate
 import reactor.core.publisher.Mono
@@ -97,6 +96,29 @@ class ItemControllerFt : AbstractIntegrationTest() {
         assertThat(result.id).isEqualTo(ethItemId)
         assertThat(result.id.blockchain).isEqualTo(BlockchainDto.ETHEREUM)
         assertThat(result.bestSellOrder!!.id).isEqualTo(ethUnionOrder.id)
+    }
+
+    @Test
+    fun `get items by ids - ethereum, enriched`() = runBlocking<Unit> {
+        // Enriched item
+        val ethItemId = randomEthItemId()
+        val ethItem = randomEthNftItemDto(ethItemId)
+        val ethUnionItem = EthItemConverter.convert(ethItem, ethItemId.blockchain)
+        val ethOrder = randomEthV2OrderDto(ethItemId)
+        val ethUnionOrder = ethOrderConverter.convert(ethOrder, ethItemId.blockchain)
+        val ethShortItem = ShortItemConverter.convert(ethUnionItem)
+            .copy(bestSellOrder = ShortOrderConverter.convert(ethUnionOrder))
+        enrichmentItemService.save(ethShortItem)
+
+        ethereumOrderControllerApiMock.mockGetById(ethOrder)
+        ethereumItemControllerApiMock.mockGetNftItemsByIds(listOf(ethItemId.value), listOf(ethItem))
+
+        val result = itemControllerClient.getItemByIds(ItemIdsDto(listOf(ethItemId))).awaitFirst()
+        val resultItem = result.items.first()
+
+        assertThat(resultItem.id).isEqualTo(ethItemId)
+        assertThat(resultItem.id.blockchain).isEqualTo(BlockchainDto.ETHEREUM)
+        assertThat(resultItem.bestSellOrder!!.id).isEqualTo(ethUnionOrder.id)
     }
 
     @Test
