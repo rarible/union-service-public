@@ -35,6 +35,19 @@ open class EthOwnershipService(
         ).awaitFirst()
         return EthOwnershipConverter.convert(ownerships, blockchain)
     }
+
+    override suspend fun getOwnershipsByOwner(
+        address: String,
+        continuation: String?,
+        size: Int
+    ): Page<UnionOwnership> {
+        val ownerships = ownershipControllerApi.getNftOwnershipsByOwner(
+            address,
+            continuation,
+            size
+        ).awaitFirst()
+        return EthOwnershipConverter.convert(ownerships, blockchain)
+    }
 }
 
 @CaptureSpan(type = "blockchain")

@@ -7,8 +7,13 @@ import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.AuctionDto
 import com.rarible.protocol.union.dto.AuctionIdDto
 import com.rarible.protocol.union.dto.AuctionStatusDto
+import com.rarible.protocol.union.dto.UnionAddress
+import com.rarible.protocol.union.dto.subchains
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
@@ -72,6 +77,30 @@ class EnrichmentAuctionService(
         } while (continuation != null)
 
         logger.info("Fetched {} auctions for item [{}]", result.size, itemId)
+        return result
+    }
+
+    suspend fun findBySeller(seller: UnionAddress): List<AuctionDto> {
+        logger.info("Fetching all auction for seller {}", seller)
+
+        var continuation: String? = null
+        val result = ArrayList<AuctionDto>()
+
+        val blockchains = seller.blockchainGroup.subchains()
+        blockchains.map { blockchain ->
+            coroutineScope {
+                async {
+                    do {
+                        val page = auctionServiceRouter.getService(blockchain).getAuctionsBySeller(
+                            seller.value, listOf(AuctionStatusDto.ACTIVE), null, null, continuation, FETCH_SIZE)
+                        result.addAll(page.entities)
+                        continuation = page.continuation
+                    } while (continuation != null)
+                }
+            }
+        }.awaitAll()
+
+        logger.info("Fetched {} auctions for seller [{}]", result.size, seller)
         return result
     }
 

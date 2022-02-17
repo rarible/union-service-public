@@ -22,4 +22,8 @@ class DummyOwnershipService(
     ): Page<UnionOwnership> {
         return Page.empty()
     }
+
+    override suspend fun getOwnershipsByOwner(address: String, continuation: String?, size: Int): Page<UnionOwnership> {
+        return Page.empty()
+    }
 }

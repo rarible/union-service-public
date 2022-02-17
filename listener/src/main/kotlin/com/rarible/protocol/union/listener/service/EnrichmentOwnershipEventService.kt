@@ -100,7 +100,7 @@ class EnrichmentOwnershipEventService(
         val auction = ownershipAuctionDeferred.await()
         if (auction != null) {
             // In case such ownership is belongs to auction, we have to do not send delete event
-            val dto = enrichmentOwnershipService.disguiseAuction(auction)
+            val dto = enrichmentOwnershipService.disguiseAuctionWithEnrichment(auction)
             dto?.let { notifyUpdate(dto) }
         } else {
             notifyDelete(shortOwnershipId)
@@ -139,7 +139,7 @@ class EnrichmentOwnershipEventService(
                 auction.id, auction.status, ownershipId
             )
             // Send disguised ownership with updated auction
-            enrichmentOwnershipService.disguiseAuction(auction)?.let {
+            enrichmentOwnershipService.disguiseAuctionWithEnrichment(auction)?.let {
                 notifyUpdate(it)
             }
         } else if (auction.status == AuctionStatusDto.FINISHED) {

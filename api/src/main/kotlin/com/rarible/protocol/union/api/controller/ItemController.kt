@@ -1,11 +1,11 @@
 package com.rarible.protocol.union.api.controller
 
 import com.rarible.protocol.union.api.service.ItemApiService
+import com.rarible.protocol.union.api.service.OwnershipApiService
 import com.rarible.protocol.union.api.util.BlockchainFilter
 import com.rarible.protocol.union.core.continuation.UnionItemContinuation
 import com.rarible.protocol.union.core.exception.UnionNotFoundException
 import com.rarible.protocol.union.core.model.UnionImageProperties
-import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.UnionMetaContent
 import com.rarible.protocol.union.core.model.UnionVideoProperties
@@ -14,22 +14,27 @@ import com.rarible.protocol.union.core.service.RestrictionService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemDto
+import com.rarible.protocol.union.dto.ItemWithOwnershipDto
 import com.rarible.protocol.union.dto.ItemsDto
 import com.rarible.protocol.union.dto.MetaContentDto
+import com.rarible.protocol.union.dto.ItemsWithOwnershipDto
 import com.rarible.protocol.union.dto.RestrictionCheckFormDto
 import com.rarible.protocol.union.dto.RestrictionCheckResultDto
 import com.rarible.protocol.union.dto.RoyaltiesDto
 import com.rarible.protocol.union.dto.continuation.page.ArgPaging
-import com.rarible.protocol.union.dto.continuation.page.Page
 import com.rarible.protocol.union.dto.continuation.page.PageSize
 import com.rarible.protocol.union.dto.continuation.page.Paging
-import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.configuration.MetaProperties
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
+import com.rarible.protocol.union.dto.subchains
+import com.rarible.protocol.union.enrichment.converter.ItemOwnershipConverter
 import com.rarible.protocol.union.enrichment.service.EnrichmentMetaService
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
 import org.springframework.core.io.Resource
 import org.springframework.http.HttpHeaders
@@ -44,6 +49,7 @@ import java.net.URI
 @RestController
 class ItemController(
     private val itemApiService: ItemApiService,
+    private val ownershipApiService: OwnershipApiService,
     private val router: BlockchainRouter<ItemService>,
     private val enrichmentItemService: EnrichmentItemService,
     private val enrichmentMetaService: EnrichmentMetaService,
@@ -234,7 +240,35 @@ class ItemController(
         return ResponseEntity(httpHeaders, HttpStatus.TEMPORARY_REDIRECT)
     }
 
-    fun Page<UnionItem>.toSlice(): Slice<UnionItem> {
-        return Slice(this.continuation, this.entities)
+    override suspend fun getItemsByOwnerWithOwnership(
+        owner: String,
+        continuation: String?,
+        size: Int?
+    ): ResponseEntity<ItemsWithOwnershipDto> {
+        val safeSize = PageSize.ITEM.limit(size)
+        val ownerAddress = IdParser.parseAddress(owner)
+        val page = ownershipApiService.getOwnershipByOwner(ownerAddress, continuation, safeSize)
+        val ids = page.entities.map { it.id.getItemId() }
+        val items = router.executeForAll(ownerAddress.blockchainGroup.subchains()) {
+            it.getItemsByIds(ids.map { it.value })
+        }.flatten().associateBy { it.id }
+
+        val wrapped = page.entities.map {
+            val item = items[it.id.getItemId()]
+            coroutineScope {
+                async {
+                    if (null != item) {
+                        ItemWithOwnershipDto(
+                            itemApiService.enrich(item), ItemOwnershipConverter.convert(it)
+                        )
+                    } else {
+                        logger.warn("Item for ${it.id} ownership wasn't found")
+                        null
+                    }
+                }
+            }
+        }.awaitAll().filterNotNull()
+
+        return ResponseEntity.ok(ItemsWithOwnershipDto(wrapped.size.toLong(), page.continuation, wrapped))
     }
 }

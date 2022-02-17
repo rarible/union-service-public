@@ -126,19 +126,34 @@ class EnrichmentOwnershipService(
         }
     }
 
-    suspend fun disguiseAuction(auction: AuctionDto): OwnershipDto? {
+    fun mergeWithAuction(ownership: UnionOwnership, auction: AuctionDto): UnionOwnership =
+        ownership.copy(value = ownership.value + auction.sell.value.toBigInteger())
+
+    suspend fun disguiseAuctionWithEnrichment(auction: AuctionDto): OwnershipDto? {
+        return withDisguising(auction) {
+            // we need to enrich ownership BEFORE disguising it
+            // such ownership is "fake" and doesn't exist in blockchain DB
+            disguiseAuctionOwnership(EnrichedOwnershipConverter.convert(it), auction)
+        }
+    }
+
+    suspend fun disguiseAuction(auction: AuctionDto): UnionOwnership? {
+        return withDisguising(auction) {
+            // without enrichment
+            disguiseAuctionOwnership(it, auction)
+        }
+    }
+
+    private suspend fun <T> withDisguising(auction: AuctionDto, call: (ownership: UnionOwnership) -> T): T? {
         // If there is an auction for this item, we need to retrieve its ownership and disguise it
         val sellerOwnershipId = ShortOwnershipId(auction.getSellerOwnershipId())
         val auctionOwnershipId = sellerOwnershipId.copy(owner = auction.contract.value)
         val auctionUnionOwnership = fetchOrNull(auctionOwnershipId)
 
         return if (auctionUnionOwnership != null) {
-            // we need to enrich ownership BEFORE disguising it
-            // such ownership is "fake" and doesn't exist in blockchain DB
-            val enriched = EnrichedOwnershipConverter.convert(auctionUnionOwnership)
 
             // All user's items are published in auction, making disguised Ownership here
-            disguiseAuctionOwnership(enriched, auction)
+            call(auctionUnionOwnership)
         } else {
             // Originally, it should not happen, but for page responses it is better to skip
             // entity instead of completely fail the entire request
@@ -155,6 +170,15 @@ class EnrichmentOwnershipService(
             auction = auction,
             // Auction ownership may have summarized value from several auctions, so here we need to use value
             // from 'sell' field from auction entity
+            value = auction.sell.value.toBigInteger(),
+            createdAt = auction.createdAt
+        )
+    }
+
+    private fun disguiseAuctionOwnership(auctionOwnership: UnionOwnership, auction: AuctionDto): UnionOwnership {
+        val id = auctionOwnership.id
+        return auctionOwnership.copy(
+            id = OwnershipIdDto(id.blockchain, id.itemIdValue, auction.seller),
             value = auction.sell.value.toBigInteger(),
             createdAt = auction.createdAt
         )
