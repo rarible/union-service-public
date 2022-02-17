@@ -154,6 +154,7 @@ class OrderProxyService(
         platform: PlatformDto?,
         maker: String,
         origin: String?,
+        status: List<OrderStatusDto>?,
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
@@ -162,6 +163,7 @@ class OrderProxyService(
             platform,
             maker,
             origin,
+            status,
             continuation,
             size
         )

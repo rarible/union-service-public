@@ -112,32 +112,7 @@ class OrderController(
         return ResponseEntity.ok(toDto(result))
     }
 
-    //--------- TODO UNION - this method should be implemented with currencies, like getBidsByItem ---------//
-    // For now it is hidden from openapi since nobody using it
-    @ExperimentalCoroutinesApi
-    @GetMapping(
-        value = ["/v0.1/orders/bids/byMaker"],
-        produces = ["application/json"]
-    )
-    suspend fun getOrderBidsByMaker0(
-        @RequestParam(value = "maker", required = true) maker: kotlin.String,
-        @RequestParam(value = "blockchains", required = false) blockchains: kotlin.collections.List<BlockchainDto>?,
-        @RequestParam(value = "platform", required = false) platform: PlatformDto?,
-        @RequestParam(value = "origin", required = false) origin: kotlin.String?,
-        @RequestParam(value = "status", required = false) status: kotlin.collections.List<OrderStatusDto>?,
-        @RequestParam(value = "start", required = false) start: kotlin.Long?,
-        @RequestParam(value = "end", required = false) end: kotlin.Long?,
-        @RequestParam(value = "continuation", required = false) continuation: kotlin.String?,
-        @RequestParam(value = "size", required = false) size: kotlin.Int?
-    ): ResponseEntity<OrdersDto> {
-        return withMdc {
-            getOrderBidsByMaker(
-                maker, blockchains, platform, origin, status, start, end, continuation, size
-            )
-        }
-    }
-
-    suspend fun getOrderBidsByMaker(
+    override suspend fun getOrderBidsByMaker(
         maker: String,
         blockchains: List<BlockchainDto>?,
         platform: PlatformDto?,
@@ -174,7 +149,7 @@ class OrderController(
         }
 
         val combinedSlice = Paging(
-            OrderContinuation.ByBidPriceUsdAndIdDesc, // TODO UNION - Should be by price in USD
+            OrderContinuation.ByLastUpdatedAndIdAsc,
             blockchainSlices.flatMap { it.entities }
         ).getSlice(safeSize)
 
@@ -188,7 +163,6 @@ class OrderController(
 
         return ResponseEntity.ok(toDto(combinedSlice))
     }
-//-----------------------------------------------------------------------//
 
     override suspend fun getOrderById(id: String): ResponseEntity<OrderDto> {
         val orderId = IdParser.parseOrderId(id)
@@ -291,7 +265,8 @@ class OrderController(
         platform: PlatformDto?,
         origin: String?,
         continuation: String?,
-        size: Int?
+        size: Int?,
+        status: List<OrderStatusDto>?
     ): ResponseEntity<OrdersDto> {
         val safeSize = PageSize.ORDER.limit(size)
         val makerAddress = IdParser.parseAddress(maker)
@@ -307,7 +282,7 @@ class OrderController(
         }
 
         val blockchainSlices = router.executeForAll(filter.exclude(makerAddress.blockchainGroup)) {
-            it.getSellOrdersByMaker(platform, makerAddress.value, originAddress?.value, continuation, safeSize)
+            it.getSellOrdersByMaker(platform, makerAddress.value, originAddress?.value, status, continuation, safeSize)
         }
 
         val combinedSlice = Paging(
@@ -317,9 +292,9 @@ class OrderController(
 
         logger.info(
             "Response for getSellOrdersByMaker" +
-                "(maker={}, platform={}, maker={}, origin={}, continuation={}, size={}): " +
-                "Slice(size={}, continuation={})",
-            maker, platform, maker, origin, continuation, size, combinedSlice.entities.size, combinedSlice.continuation
+                    "(maker={}, platform={}, maker={}, origin={}, status={}, continuation={}, size={}): " +
+                    "Slice(size={}, continuation={})",
+            maker, platform, maker, origin, status, continuation, size, combinedSlice.entities.size, combinedSlice.continuation
         )
 
         return ResponseEntity.ok(toDto(combinedSlice))

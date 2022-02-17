@@ -182,15 +182,17 @@ open class EthOrderService(
         platform: PlatformDto?,
         maker: String,
         origin: String?,
+        status: List<OrderStatusDto>?,
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
-        val orders = orderControllerApi.getSellOrdersByMaker(
+        val orders = orderControllerApi.getSellOrdersByMakerAndByStatus(
             maker,
             origin,
             EthConverter.convert(platform),
             continuation,
-            size
+            size,
+            ethOrderConverter.convert(status)
         ).awaitFirst()
         return ethOrderConverter.convert(orders, blockchain)
     }
