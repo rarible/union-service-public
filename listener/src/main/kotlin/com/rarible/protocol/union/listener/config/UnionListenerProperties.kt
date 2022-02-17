@@ -35,7 +35,7 @@ class PriceUpdateProperties(
 
 data class OpenSeaCleanUpProperties(
     val enabled: Boolean = true,
-    val sellOrderFrom: Instant,
+    val sellOrderFrom: Instant?,
     val itemBatchSize: Int = 100,
     val ownershipBatchSize: Int = 100
 )
