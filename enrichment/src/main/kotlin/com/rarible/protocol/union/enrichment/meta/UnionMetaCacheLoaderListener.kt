@@ -10,14 +10,19 @@ import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.UnionWrappedEvent
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
+import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.parser.IdParser
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
+import java.io.Closeable
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicReference
 
 @Component
 class UnionMetaCacheLoaderListener(
     private val itemServiceRouter: BlockchainRouter<ItemService>,
-    private val wrappedEventProducer: RaribleKafkaProducer<UnionWrappedEvent>
+    private val wrappedEventProducer: RaribleKafkaProducer<UnionWrappedEvent>,
+    private val unionMetaLoadingAwaitService: UnionMetaLoadingAwaitService
 ) : CacheLoaderEventListener<UnionMeta> {
 
     private val logger = LoggerFactory.getLogger(UnionMetaCacheLoaderListener::class.java)
@@ -27,9 +32,17 @@ class UnionMetaCacheLoaderListener(
 
     override suspend fun onEvent(cacheLoaderEvent: CacheLoaderEvent<UnionMeta>) {
         val itemId = IdParser.parseItemId(cacheLoaderEvent.key)
+        unionMetaLoadingAwaitService.onMetaEvent(itemId, cacheLoaderEvent.cacheEntry)
+        sendItemUpdateEvent(itemId, cacheLoaderEvent)
+    }
+
+    private suspend fun sendItemUpdateEvent(
+        itemId: ItemIdDto,
+        cacheLoaderEvent: CacheLoaderEvent<UnionMeta>
+    ) {
         val meta = when (val cacheEntry = cacheLoaderEvent.cacheEntry) {
             is CacheEntry.Loaded -> {
-                logger.info("Loaded meta for $itemId, sending item update event")
+                logger.info("Loaded meta for $itemId")
                 cacheEntry.data
             }
             is CacheEntry.LoadedAndUpdateFailed -> {
@@ -44,6 +57,7 @@ class UnionMetaCacheLoaderListener(
             is CacheEntry.InitialLoadScheduled -> return
             is CacheEntry.NotAvailable -> return
         }
+        logger.info("Sending meta item update event for $itemId")
         val item = itemServiceRouter.getService(itemId.blockchain).getItemById(itemId.value)
         val itemWithMeta = item.copy(meta = meta)
         wrappedEventProducer.send(KafkaEventFactory.wrappedItemEvent(UnionItemUpdateEvent(itemWithMeta)))

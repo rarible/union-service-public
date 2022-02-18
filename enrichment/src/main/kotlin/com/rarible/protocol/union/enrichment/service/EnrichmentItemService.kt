@@ -103,7 +103,7 @@ class EnrichmentItemService(
         val bestBidOrder = async { enrichmentOrderService.fetchOrderIfDiffers(shortItem?.bestBidOrder, orders) }
         val meta = async {
             if (waitForMetaLoadingTimeout != null) {
-                enrichmentMetaService.getAvailableMetaOrScheduleAndWait(itemId, waitForMetaLoadingTimeout)
+                enrichmentMetaService.getAvailableMetaOrScheduleLoadingAndWaitWithTimeout(itemId, waitForMetaLoadingTimeout)
             } else {
                 enrichmentMetaService.getAvailableMetaOrScheduleLoading(itemId)
             }

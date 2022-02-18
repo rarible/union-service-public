@@ -103,7 +103,7 @@ class ItemController(
 
     private suspend fun getOrAwaitMeta(itemId: String): UnionMeta {
         val fullItemId = IdParser.parseItemId(itemId)
-        return enrichmentMetaService.getAvailableMetaOrScheduleAndWait(
+        return enrichmentMetaService.getAvailableMetaOrScheduleLoadingAndWaitWithTimeout(
             itemId = fullItemId,
             loadingWaitTimeout = metaProperties.timeoutSyncLoadingMeta
         ) ?: throw UnionNotFoundException("No item found for $itemId")

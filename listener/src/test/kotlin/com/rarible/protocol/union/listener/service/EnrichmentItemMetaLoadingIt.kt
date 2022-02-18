@@ -126,7 +126,7 @@ class EnrichmentItemMetaLoadingIt : AbstractIntegrationTest() {
             meta
         }
         coEvery { testEthereumItemApi.getNftItemById(itemId.value) } returns ethItem.toMono()
-        assertThat(itemMetaService.getAvailableMetaOrScheduleAndWait(itemId, Duration.ofMillis(3000))).isEqualTo(meta)
+        assertThat(itemMetaService.getAvailableMetaOrScheduleLoadingAndWaitWithTimeout(itemId, Duration.ofMillis(3000))).isEqualTo(meta)
         Wait.waitAssert {
             val events = findItemUpdates(itemId.value)
             assertThat(events).hasSize(1)
