@@ -54,7 +54,7 @@ object EthItemConverter {
             // TODO UNION Remove in 1.19
             owners = emptyList(),
             // TODO UNION Remove in 1.19
-            royalties = item.royalties.map { EthConverter.convertToRoyalty(it, blockchain) },
+            royalties = item.royalties?.map { EthConverter.convertToRoyalty(it, blockchain) } ?: emptyList(),
             lazySupply = item.lazySupply,
             pending = item.pending?.map { convert(it, blockchain) } ?: listOf()
         )
