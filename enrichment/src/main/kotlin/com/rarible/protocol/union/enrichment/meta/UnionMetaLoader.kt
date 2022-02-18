@@ -25,6 +25,7 @@ class UnionMetaLoader(
     private val unionContentMetaLoader: UnionContentMetaLoader,
     private val ipfsUrlResolver: IpfsUrlResolver
 ) {
+
     private val logger = LoggerFactory.getLogger(UnionMetaLoader::class.java)
 
     suspend fun load(itemId: ItemIdDto): UnionMeta {
@@ -57,15 +58,20 @@ class UnionMetaLoader(
         val resolvedUrl = ipfsUrlResolver.resolveRealUrl(content.url)
         logger.info(
             "Resolving content meta for item ${itemId.fullId()} for URL ${content.url}" +
-                    if (resolvedUrl != content.url) " resolved as $resolvedUrl" else "",
+                if (resolvedUrl != content.url) " resolved as $resolvedUrl" else "",
         )
+        /*
+        // We should NOT re-use content properties received from blockchains since they are not support
+        // model/audio types
         val knownContentProperties = content.properties
         if (knownContentProperties != null && !knownContentProperties.isEmpty()) {
             return content.copy(url = resolvedUrl)
         }
+        */
         val fetchedContentMeta = unionContentMetaLoader.fetchContentMeta(resolvedUrl, itemId)
         val enrichedProperties = fetchedContentMeta?.toUnionMetaContentProperties()
-            ?: knownContentProperties // Use at least some fields of the known properties.
+        // Use at least some fields of the known properties - deprecated since audio/model has been introduced
+        //?: knownContentProperties
             ?: UnionImageProperties() // Questionable, but let's consider that was an image.
         return content.copy(url = resolvedUrl, properties = enrichedProperties)
     }
