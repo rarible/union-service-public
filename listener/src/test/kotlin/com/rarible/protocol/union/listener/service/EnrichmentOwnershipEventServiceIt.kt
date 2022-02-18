@@ -159,10 +159,9 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
 
 
         Wait.waitAssert {
-            assertThat(ownershipEvents).hasSize(1)
+            // Event should not be sent in case of corrupted enrichment data
             val messages = findOwnershipUpdates(ownershipId.value)
-            assertThat(messages).hasSize(1)
-            assertThat(messages[0].id).isEqualTo(itemId.fullId())
+            assertThat(messages).hasSize(0)
 
             // Reconciliation mark should be created for such ownership
             val reconcileMarks = reconciliationMarkRepository.findByType(ReconciliationMarkType.OWNERSHIP, 100)

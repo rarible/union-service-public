@@ -13,7 +13,6 @@ import com.rarible.protocol.union.dto.OwnershipDeleteEventDto
 import com.rarible.protocol.union.dto.OwnershipDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.OwnershipUpdateEventDto
-import com.rarible.protocol.union.enrichment.converter.ShortOwnershipConverter
 import com.rarible.protocol.union.enrichment.model.ShortOwnership
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
 import com.rarible.protocol.union.enrichment.service.BestOrderService
@@ -36,12 +35,13 @@ class EnrichmentOwnershipEventService(
     private val auctionContractService: AuctionContractService,
     private val reconciliationEventService: ReconciliationEventService
 ) {
+
     private val logger = LoggerFactory.getLogger(EnrichmentOwnershipEventService::class.java)
 
     suspend fun onOwnershipUpdated(ownership: UnionOwnership) {
-        val received = ShortOwnershipConverter.convert(ownership)
-        val existing = enrichmentOwnershipService.getOrEmpty(received.id)
-        notifyUpdate(existing, ownership)
+        val existing = enrichmentOwnershipService.getOrEmpty(ShortOwnershipId(ownership.id))
+        val event = buildUpdateEvent(existing, ownership)
+        event?.let { sendUpdate(it) }
     }
 
     suspend fun recalculateBestOrder(ownership: ShortOwnership): Boolean {
@@ -52,8 +52,7 @@ class EnrichmentOwnershipEventService(
                 ownership.bestSellOrder?.dtoId, updated.bestSellOrder?.dtoId
             )
 
-            val saved = enrichmentOwnershipService.save(updated)
-            notifyUpdate(saved, null, null)
+            saveAndNotify(updated, false)
             enrichmentItemEventService.onOwnershipUpdated(ownership.id, null)
             return true
         }
@@ -73,17 +72,11 @@ class EnrichmentOwnershipEventService(
 
         if (short != updated) {
             if (updated.isNotEmpty()) {
-                val saved = enrichmentOwnershipService.save(updated)
-                if (notificationEnabled) {
-                    notifyUpdate(saved, null, null, order)
-                }
+                saveAndNotify(updated, notificationEnabled, null, null, order)
                 enrichmentItemEventService.onOwnershipUpdated(ownershipId, order, notificationEnabled)
             } else if (exist) {
                 logger.info("Deleting Ownership [{}] without related bestSellOrder", ownershipId)
-                enrichmentOwnershipService.delete(ownershipId)
-                if (notificationEnabled) {
-                    notifyUpdate(updated, null, null, order)
-                }
+                cleanupAndNotify(updated, notificationEnabled, null, null, order)
                 enrichmentItemEventService.onOwnershipUpdated(ownershipId, order, notificationEnabled)
             }
         } else {
@@ -101,9 +94,9 @@ class EnrichmentOwnershipEventService(
         if (auction != null) {
             // In case such ownership is belongs to auction, we have to do not send delete event
             val dto = enrichmentOwnershipService.disguiseAuctionWithEnrichment(auction)
-            dto?.let { notifyUpdate(dto) }
+            dto?.let { sendUpdate(buildUpdateEvent(dto)) }
         } else {
-            notifyDelete(shortOwnershipId)
+            sendDelete(shortOwnershipId)
             if (deleted) {
                 logger.info(
                     "Ownership [{}] deleted (removed from NFT-Indexer), refreshing sell stats",
@@ -128,10 +121,10 @@ class EnrichmentOwnershipEventService(
             )
             if (auction.status == AuctionStatusDto.ACTIVE) {
                 // Attaching new ACTIVE auction version to existing ownership
-                notifyUpdate(existing, ownership, auction, null)
+                buildUpdateEvent(existing, ownership, auction, null)?.let { sendUpdate(it) }
             } else {
                 // There is no sense to attach inactive auctions to Ownerships
-                notifyUpdate(existing, ownership, null, null)
+                buildUpdateEvent(existing, ownership, null, null)?.let { sendUpdate(it) }
             }
         } else if (auction.status == AuctionStatusDto.ACTIVE) {
             logger.info(
@@ -140,7 +133,7 @@ class EnrichmentOwnershipEventService(
             )
             // Send disguised ownership with updated auction
             enrichmentOwnershipService.disguiseAuctionWithEnrichment(auction)?.let {
-                notifyUpdate(it)
+                sendUpdate(buildUpdateEvent(it))
             }
         } else if (auction.status == AuctionStatusDto.FINISHED) {
             // If auction is finished and there is still no related ownership,
@@ -150,7 +143,7 @@ class EnrichmentOwnershipEventService(
                 auction.id, auction.status, ownershipId
             )
             deleteOwnership(ownershipId)
-            notifyDelete(ownershipId)
+            sendDelete(ownershipId)
         }
         // If status = CANCELLED, nothing to do here, we'll receive updated via OwnershipEvents
     }
@@ -168,24 +161,50 @@ class EnrichmentOwnershipEventService(
         return result != null && result.deletedCount > 0
     }
 
-    private suspend fun notifyDelete(ownershipId: ShortOwnershipId) {
-        val event = OwnershipDeleteEventDto(
-            eventId = UUID.randomUUID().toString(),
-            ownershipId = ownershipId.toDto()
-        )
-        ownershipEventListeners.forEach { it.onEvent(event) }
-    }
-
-    private suspend fun notifyUpdate(
-        short: ShortOwnership,
+    private suspend fun saveAndNotify(
+        updated: ShortOwnership,
+        notificationEnabled: Boolean,
         ownership: UnionOwnership? = null,
         auction: AuctionDto? = null,
         order: OrderDto? = null
     ) {
+        if (!notificationEnabled) {
+            enrichmentOwnershipService.save(updated)
+            return
+        }
+
+        val event = buildUpdateEvent(updated, ownership, auction, order)
+        enrichmentOwnershipService.save(updated)
+        event?.let { sendUpdate(event) }
+    }
+
+    private suspend fun cleanupAndNotify(
+        updated: ShortOwnership,
+        notificationEnabled: Boolean,
+        ownership: UnionOwnership? = null,
+        auction: AuctionDto? = null,
+        order: OrderDto? = null
+    ) {
+        if (!notificationEnabled) {
+            enrichmentOwnershipService.delete(updated.id)
+            return
+        }
+
+        val event = buildUpdateEvent(updated, ownership, auction, order)
+        enrichmentOwnershipService.delete(updated.id)
+        event?.let { sendUpdate(event) }
+    }
+
+    private suspend fun buildUpdateEvent(
+        short: ShortOwnership,
+        ownership: UnionOwnership? = null,
+        auction: AuctionDto? = null,
+        order: OrderDto? = null
+    ): OwnershipUpdateEventDto? {
         val isAuctionOwnership = (auctionContractService.isAuctionContract(short.blockchain, short.owner))
         if (isAuctionOwnership) {
             // We should skip auction ownerships
-            return
+            return null
         }
 
         val dto = coroutineScope {
@@ -195,19 +214,32 @@ class EnrichmentOwnershipEventService(
             enrichmentOwnershipService.mergeWithAuction(enriched, auctionDeferred.await())
         }
 
-        notifyUpdate(dto)
+        return buildUpdateEvent(dto)
     }
 
-    private suspend fun notifyUpdate(dto: OwnershipDto) {
-        val event = OwnershipUpdateEventDto(
+    private suspend fun buildUpdateEvent(dto: OwnershipDto): OwnershipUpdateEventDto {
+        return OwnershipUpdateEventDto(
             eventId = UUID.randomUUID().toString(),
             ownershipId = dto.id,
             ownership = dto
         )
+    }
 
-        if (!OwnershipValidator.isValid(dto)) {
-            reconciliationEventService.onCorruptedOwnership(dto.id)
+    private suspend fun sendUpdate(event: OwnershipUpdateEventDto) {
+        // If ownership in corrupted state, we will try to reconcile it instead of sending corrupted
+        // data to the customers
+        if (!OwnershipValidator.isValid(event.ownership)) {
+            reconciliationEventService.onCorruptedOwnership(event.ownership.id)
+        } else {
+            ownershipEventListeners.forEach { it.onEvent(event) }
         }
+    }
+
+    private suspend fun sendDelete(ownershipId: ShortOwnershipId) {
+        val event = OwnershipDeleteEventDto(
+            eventId = UUID.randomUUID().toString(),
+            ownershipId = ownershipId.toDto()
+        )
         ownershipEventListeners.forEach { it.onEvent(event) }
     }
 }
