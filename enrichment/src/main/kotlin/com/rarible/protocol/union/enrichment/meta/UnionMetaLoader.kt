@@ -2,10 +2,12 @@ package com.rarible.protocol.union.enrichment.meta
 
 import com.rarible.core.client.WebClientResponseProxyException
 import com.rarible.core.content.meta.loader.ContentMeta
+import com.rarible.protocol.union.core.model.UnionAudioProperties
 import com.rarible.protocol.union.core.model.UnionImageProperties
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.UnionMetaContent
 import com.rarible.protocol.union.core.model.UnionMetaContentProperties
+import com.rarible.protocol.union.core.model.UnionModel3dProperties
 import com.rarible.protocol.union.core.model.UnionVideoProperties
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
@@ -72,9 +74,12 @@ class UnionMetaLoader(
         val isImage = type.contains("image")
         val isVideo = type.contains("video")
         val isAudio = type.contains("audio") // TODO[media]: add dedicated properties for audio.
+        val isModel = type.contains("model")
         return when {
             isImage -> toImageProperties()
-            isVideo || isAudio -> toVideoProperties()
+            isVideo -> toVideoProperties()
+            isAudio -> toAudioProperties()
+            isModel -> toModel3dProperties()
             else -> return null
         }
     }
@@ -90,6 +95,17 @@ class UnionMetaLoader(
         mimeType = type,
         width = width,
         height = height,
+        size = size
+    )
+
+    private fun ContentMeta.toAudioProperties() = UnionAudioProperties(
+        mimeType = type,
+        size = size,
+        duration = null // Not supported yet
+    )
+
+    private fun ContentMeta.toModel3dProperties() = UnionModel3dProperties(
+        mimeType = type,
         size = size
     )
 
