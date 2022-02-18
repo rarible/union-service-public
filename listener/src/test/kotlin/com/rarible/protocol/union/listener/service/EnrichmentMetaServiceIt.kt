@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.listener.service
 
+import com.rarible.core.test.wait.Wait
 import com.rarible.protocol.union.enrichment.service.EnrichmentMetaService
 import com.rarible.protocol.union.enrichment.test.data.randomUnionItem
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
@@ -39,8 +40,9 @@ class EnrichmentMetaServiceIt : AbstractIntegrationTest() {
             meta
         }
         assertThat(enrichmentMetaService.getAvailableMetaOrScheduleLoading(itemId)).isNull()
-        delay(1000)
-        assertThat(enrichmentMetaService.getAvailableMeta(itemId)).isEqualTo(meta)
+        Wait.waitAssert(timeout = Duration.ofSeconds(2)) {
+            assertThat(enrichmentMetaService.getAvailableMeta(itemId)).isEqualTo(meta)
+        }
     }
 
     @Test
