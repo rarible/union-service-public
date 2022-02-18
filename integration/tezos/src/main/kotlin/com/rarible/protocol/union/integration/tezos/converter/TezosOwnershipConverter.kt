@@ -5,6 +5,7 @@ import com.rarible.protocol.tezos.dto.NftOwnershipsDto
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.continuation.page.Page
 import org.slf4j.LoggerFactory
@@ -33,6 +34,7 @@ object TezosOwnershipConverter {
                 tokenId = tokenId,
                 owner = owner
             ),
+            collection = CollectionIdDto(blockchain, ownership.contract),
             value = ownership.value,
             createdAt = ownership.createdAt,
             creators = ownership.creators.map { TezosConverter.convertToCreator(it, blockchain) },
