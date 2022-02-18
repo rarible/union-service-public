@@ -3,6 +3,7 @@ package com.rarible.protocol.union.enrichment.converter
 import com.rarible.protocol.union.core.converter.ContractAddressConverter
 import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.core.util.CompositeItemIdParser
+import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.OwnershipDto
@@ -15,13 +16,23 @@ object EnrichedOwnershipConverter {
         shortOwnership: ShortOwnership? = null,
         orders: Map<OrderIdDto, OrderDto> = emptyMap()
     ): OwnershipDto {
-        val (contract, tokenId) = CompositeItemIdParser.split(ownership.id.itemIdValue)
+        // TODO remove it later with contract/tokenId
+        val contractAndTokenId = if (ownership.id.blockchain != BlockchainDto.SOLANA) {
+            CompositeItemIdParser.split(ownership.id.itemIdValue)
+        } else {
+            null
+        }
         return OwnershipDto(
             id = ownership.id,
             blockchain = ownership.id.blockchain,
             itemId = ownership.id.getItemId(),
-            contract = ContractAddressConverter.convert(ownership.id.blockchain, contract), // TODO remove later
-            tokenId = tokenId, // TODO remove later
+            collection = ownership.collection,
+            contract = contractAndTokenId?.let {
+                ContractAddressConverter.convert(
+                    ownership.id.blockchain, it.first
+                )
+            }, // TODO remove later
+            tokenId = contractAndTokenId?.second, // TODO remove later
             owner = ownership.id.owner,
             creators = ownership.creators,
             value = ownership.value,

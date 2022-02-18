@@ -17,6 +17,7 @@ class FlowOwnershipConverterTest {
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.createdAt).isEqualTo(dto.createdAt)
         assertThat(converted.value).isEqualTo(BigInteger.ONE)
+        assertThat(converted.collection!!.value).isEqualTo(dto.contract)
 
         assertThat(converted.id.owner.value).isEqualTo(dto.owner)
         assertThat(converted.creators[0].value).isEqualTo(FlowConverter.toBasePoints(dto.creators[0].value))
