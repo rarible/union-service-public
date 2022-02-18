@@ -14,6 +14,7 @@ import com.rarible.protocol.union.core.service.RestrictionService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemDto
+import com.rarible.protocol.union.dto.ItemIdsDto
 import com.rarible.protocol.union.dto.ItemWithOwnershipDto
 import com.rarible.protocol.union.dto.ItemsDto
 import com.rarible.protocol.union.dto.MetaContentDto
@@ -120,6 +121,11 @@ class ItemController(
             waitForMetaLoadingTimeout = null
         )
         return ResponseEntity.ok(enrichedUnionItem)
+    }
+
+    override suspend fun getItemByIds(itemIdsDto: ItemIdsDto): ResponseEntity<ItemsDto> {
+        val items = itemApiService.getItemsByIds(itemIdsDto.ids)
+        return ResponseEntity.ok(ItemsDto(items = items, total = items.size.toLong()))
     }
 
     override suspend fun getItemRoyaltiesById(
