@@ -139,7 +139,7 @@ class EnrichmentMetaService(
         if (mimeType.contains("image")) {
             return UnionImageProperties(mimeType)
         }
-        if (mimeType.contains("video") || mimeType.contains("audio")) {
+        if (mimeType.contains("video") || mimeType.contains("audio") || (mimeType.contains("model"))) {
             return UnionVideoProperties(mimeType)
         }
         return null
