@@ -73,6 +73,11 @@ class MediaMetaService(
                 url.endsWith(".mpga") -> ContentMeta("audio/mpeg").toMono()
                 url.endsWith(".wav") -> ContentMeta("audio/wav").toMono()
                 url.endsWith(".flac") -> ContentMeta("audio/flac").toMono()
+
+                // See https://www.khronos.org/registry/glTF/specs/2.0/glTF-2.0.pdf
+                url.endsWith(".gltf") -> ContentMeta("model/gltf+json").toMono()
+                url.endsWith(".glb") -> ContentMeta("model/gltf-binary").toMono()
+
                 url.endsWith(".svg") -> ContentMeta("image/svg+xml", 192, 192).toMono()
                 else -> {
                     getMetadata(url)
