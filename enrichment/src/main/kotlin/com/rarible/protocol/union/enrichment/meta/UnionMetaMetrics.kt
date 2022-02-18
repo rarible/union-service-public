@@ -16,7 +16,6 @@ class UnionMetaMetrics(
 
     private val metaCacheMisses = Counter
         .builder(META_CACHE_MISSES)
-        .tag("sync", "true")
         .register(meterRegistry)
 
     private val metaCacheMissesWithSyncLoading = Counter
