@@ -208,10 +208,11 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         Wait.waitAssert {
             val messages = findItemUpdates(itemId.value)
             // There may be several events for item update (when meta gets loaded)
-            assertThat(messages).allSatisfy {
-                assertThat(it.value.itemId).isEqualTo(itemId)
-                assertThat(it.value.item).isEqualTo(expected)
-            }
+            // TODO but since we're testing it on service level, first message
+            // sent by meta-loader with not-updated Item enrichment data
+            assertThat(messages).hasSize(2)
+            assertThat(messages[1].value.itemId).isEqualTo(itemId)
+            assertThat(messages[1].value.item).isEqualTo(expected)
         }
     }
 

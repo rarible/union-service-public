@@ -42,11 +42,10 @@ data class UnionVideoProperties(
 
 data class UnionAudioProperties(
     override val mimeType: String? = null,
-    override val size: Long? = null,
-    val duration: Int? = null
+    override val size: Long? = null
 ) : UnionMetaContentProperties() {
 
-    override fun isEmpty(): Boolean = mimeType == null // Do not consider duration, we can't extract it ATM
+    override fun isEmpty(): Boolean = mimeType == null
 
 }
 

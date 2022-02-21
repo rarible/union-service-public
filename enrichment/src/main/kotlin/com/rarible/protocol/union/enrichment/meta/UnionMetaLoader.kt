@@ -106,8 +106,7 @@ class UnionMetaLoader(
 
     private fun ContentMeta.toAudioProperties() = UnionAudioProperties(
         mimeType = type,
-        size = size,
-        duration = null // Not supported yet
+        size = size
     )
 
     private fun ContentMeta.toModel3dProperties() = UnionModel3dProperties(

@@ -43,12 +43,14 @@ object EnrichedMetaConverter {
             // TODO Convert to correct type when market support it
             is UnionAudioProperties -> VideoContentDto(
                 url = content.url,
+                size = properties.size,
                 representation = content.representation,
                 mimeType = properties.mimeType
             )
             // TODO Convert to correct type when market support it
             is UnionModel3dProperties -> VideoContentDto(
                 url = content.url,
+                size = properties.size,
                 representation = content.representation,
                 mimeType = properties.mimeType
             )
