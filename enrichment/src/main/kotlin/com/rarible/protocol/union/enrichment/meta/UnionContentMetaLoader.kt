@@ -37,7 +37,7 @@ class UnionContentMetaLoader(
         for (candidateUrl in getCandidateUrls(url)) {
             val cacheEntry = template.findById<CachedContentMetaEntry>(
                 id = url,
-                collectionName = CachedContentMetaEntry.CACHE_META_TABLE
+                collectionName = CachedContentMetaEntry.CACHE_META_COLLECTION
             ).awaitFirstOrNull()
             if (cacheEntry != null) {
                 return cacheEntry.data.let {
@@ -73,7 +73,6 @@ class UnionContentMetaLoader(
     }
 
     companion object {
-        const val COLLECTION = "cache_meta"
         private const val rariblePinata = "https://rarible.mypinata.cloud/ipfs/"
         private const val ipfsRarible = "https://ipfs.rarible.com/ipfs/"
         private val ipfsPrefixes = listOf(rariblePinata, ipfsRarible)

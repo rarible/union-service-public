@@ -9,6 +9,6 @@ data class CachedContentMetaEntry(
     val data: CachedContentMeta
 ) {
     companion object {
-        const val CACHE_META_TABLE = "cache_meta"
+        const val CACHE_META_COLLECTION = "cache_meta"
     }
 }

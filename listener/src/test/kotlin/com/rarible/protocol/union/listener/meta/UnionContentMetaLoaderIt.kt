@@ -4,6 +4,7 @@ import com.rarible.core.content.meta.loader.ContentMeta
 import com.rarible.core.test.data.randomInt
 import com.rarible.core.test.data.randomLong
 import com.rarible.core.test.data.randomString
+import com.rarible.protocol.union.enrichment.meta.CachedContentMetaEntry
 import com.rarible.protocol.union.enrichment.meta.UnionContentMetaLoader
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.listener.test.AbstractIntegrationTest
@@ -37,7 +38,7 @@ class UnionContentMetaLoaderIt : AbstractIntegrationTest() {
 
     @Test
     fun `return content meta from cache`() = runBlocking<Unit> {
-        val collection = mongoTemplate.getCollection(UnionContentMetaLoader.COLLECTION).awaitFirst()
+        val collection = mongoTemplate.getCollection(CachedContentMetaEntry.CACHE_META_COLLECTION).awaitFirst()
         collection.insertOne(
             Document.parse(
                 """
