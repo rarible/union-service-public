@@ -1,8 +1,10 @@
 package com.rarible.protocol.union.enrichment.converter
 
+import com.rarible.protocol.union.core.model.UnionAudioProperties
 import com.rarible.protocol.union.core.model.UnionImageProperties
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.UnionMetaContent
+import com.rarible.protocol.union.core.model.UnionModel3dProperties
 import com.rarible.protocol.union.core.model.UnionVideoProperties
 import com.rarible.protocol.union.dto.ImageContentDto
 import com.rarible.protocol.union.dto.MetaContentDto
@@ -37,6 +39,20 @@ object EnrichedMetaConverter {
                 height = properties.height,
                 size = properties.size,
                 width = properties.width
+            )
+            // TODO Convert to correct type when market support it
+            is UnionAudioProperties -> VideoContentDto(
+                url = content.url,
+                size = properties.size,
+                representation = content.representation,
+                mimeType = properties.mimeType
+            )
+            // TODO Convert to correct type when market support it
+            is UnionModel3dProperties -> VideoContentDto(
+                url = content.url,
+                size = properties.size,
+                representation = content.representation,
+                mimeType = properties.mimeType
             )
             null -> null
         }

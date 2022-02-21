@@ -3,9 +3,14 @@ package com.rarible.protocol.union.enrichment.test.data
 import com.rarible.core.test.data.randomString
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.model.UnionItem
+import com.rarible.protocol.union.core.model.UnionMeta
+import com.rarible.protocol.union.core.model.UnionMetaContent
+import com.rarible.protocol.union.core.model.UnionMetaContentProperties
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.dto.ItemIdDto
+import com.rarible.protocol.union.dto.MetaAttributeDto
+import com.rarible.protocol.union.dto.MetaContentDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.integration.ethereum.converter.EthAuctionConverter
@@ -57,6 +62,33 @@ fun randomUnionItem(id: ItemIdDto): UnionItem {
             id.blockchain
         )
     }
+}
+
+fun randomUnionMeta(): UnionMeta {
+    return UnionMeta(
+        name = randomString(),
+        description = randomString(),
+        attributes = listOf(randomUnionMetaAttribute()),
+        content = listOf(),
+        restrictions = listOf()
+    )
+}
+
+fun randomUnionMetaAttribute(): MetaAttributeDto {
+    return MetaAttributeDto(
+        key = randomString(),
+        value = randomString(),
+        type = randomString(),
+        format = randomString()
+    )
+}
+
+fun randomUnionContent(properties: UnionMetaContentProperties): UnionMetaContent {
+    return UnionMetaContent(
+        url = randomString(),
+        representation = MetaContentDto.Representation.ORIGINAL,
+        properties = properties
+    )
 }
 
 fun randomUnionOwnershipDto() = EthOwnershipConverter.convert(
