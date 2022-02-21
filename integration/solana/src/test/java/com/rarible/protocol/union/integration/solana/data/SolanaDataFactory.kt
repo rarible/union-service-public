@@ -5,6 +5,7 @@ import com.rarible.core.test.data.randomBigInt
 import com.rarible.core.test.data.randomString
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
+import com.rarible.solana.protocol.dto.BalanceDto
 import com.rarible.solana.protocol.dto.TokenDto
 import java.math.BigInteger
 
@@ -14,6 +15,15 @@ fun randomSolanaTokenDto(itemId: ItemIdDto) = TokenDto(
     createdAt = nowMillis(),
     updatedAt = nowMillis(),
     closed = false
+)
+
+fun randomSolanaBalanceDto() = BalanceDto(
+    account = randomString(),
+    owner = randomString(),
+    mint = randomString(),
+    createdAt = nowMillis(),
+    updatedAt = nowMillis(),
+    value = randomBigInt()
 )
 
 fun randomSolanaTokenAddress() = randomString()
