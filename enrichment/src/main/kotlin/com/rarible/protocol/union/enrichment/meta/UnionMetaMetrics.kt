@@ -2,6 +2,7 @@ package com.rarible.protocol.union.enrichment.meta
 
 import com.rarible.protocol.union.dto.ItemIdDto
 import io.micrometer.core.instrument.Counter
+import io.micrometer.core.instrument.Gauge
 import io.micrometer.core.instrument.MeterRegistry
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -16,7 +17,6 @@ class UnionMetaMetrics(
 
     private val metaCacheMisses = Counter
         .builder(META_CACHE_MISSES)
-        .tag("sync", "true")
         .register(meterRegistry)
 
     private val metaCacheMissesWithSyncLoading = Counter
@@ -42,11 +42,18 @@ class UnionMetaMetrics(
         }
     }
 
+    fun registerMetaLoadingAwaitingItemsGauge(awaitingItemsCountProvider: () -> Int) {
+        Gauge
+            .builder(META_LOADING_AWAITING_ITEMS, awaitingItemsCountProvider)
+            .register(meterRegistry)
+    }
+
     fun reset() {
         meterRegistry.clear()
     }
 
     private companion object {
         const val META_CACHE_MISSES = "meta_cache_misses"
+        const val META_LOADING_AWAITING_ITEMS = "meta_loading_awaiting_items"
     }
 }

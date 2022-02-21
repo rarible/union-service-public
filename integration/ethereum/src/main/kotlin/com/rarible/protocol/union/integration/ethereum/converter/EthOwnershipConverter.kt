@@ -6,6 +6,7 @@ import com.rarible.protocol.dto.NftOwnershipDto
 import com.rarible.protocol.dto.NftOwnershipsDto
 import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ItemHistoryDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.continuation.page.Page
@@ -33,6 +34,7 @@ object EthOwnershipConverter {
                 owner = EthConverter.convert(source.owner, blockchain),
                 blockchain = blockchain
             ),
+            collection = CollectionIdDto(blockchain, contract),
             value = source.value,
             createdAt = source.date,
             creators = (source.creators ?: emptyList()).map { EthConverter.convertToCreator(it, blockchain) },

@@ -15,6 +15,7 @@ class TezosOwnershipConverterTest {
 
         assertThat(converted.id.owner.value).isEqualTo(dto.owner)
 
+        assertThat(converted.collection!!.value).isEqualTo(dto.contract)
         assertThat(converted.value).isEqualTo(dto.value)
         assertThat(converted.createdAt).isEqualTo(dto.createdAt)
         assertThat(converted.lazyValue).isEqualTo(dto.lazyValue)

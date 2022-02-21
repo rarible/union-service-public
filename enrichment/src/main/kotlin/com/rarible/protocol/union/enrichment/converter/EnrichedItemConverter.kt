@@ -6,6 +6,7 @@ import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.util.CompositeItemIdParser
 import com.rarible.protocol.union.dto.AuctionDto
 import com.rarible.protocol.union.dto.AuctionIdDto
+import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
@@ -21,7 +22,7 @@ object EnrichedItemConverter {
         orders: Map<OrderIdDto, OrderDto> = emptyMap(),
         auctions: Map<AuctionIdDto, AuctionDto> = emptyMap()
     ): ItemDto {
-        val contractAndTokenId = if (item.id.value.contains(":")) {
+        val contractAndTokenId = if (item.id.blockchain != BlockchainDto.SOLANA) {
             CompositeItemIdParser.split(item.id.value)
         } else {
             null

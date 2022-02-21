@@ -21,27 +21,26 @@ class EnrichmentMetaServiceIt : AbstractIntegrationTest() {
     private lateinit var enrichmentMetaService: EnrichmentMetaService
 
     @Test
-    fun `get available - null - then update - then get`() = runBlocking<Unit> {
+    fun `get available or schedule - null - then update - then get`() = runBlocking<Unit> {
         val itemId = randomEthItemId()
         val meta = randomUnionItem(itemId).meta!!
         coEvery { testUnionMetaLoader.load(itemId) } returns meta
-        assertThat(enrichmentMetaService.getAvailableMeta(itemId)).isNull()
-        enrichmentMetaService.scheduleLoading(itemId)
+        assertThat(enrichmentMetaService.getAvailableMetaOrScheduleLoading(itemId)).isNull()
         delay(500)
-        assertThat(enrichmentMetaService.getAvailableMeta(itemId)).isEqualTo(meta)
+        assertThat(enrichmentMetaService.getAvailableMetaOrScheduleLoading(itemId)).isEqualTo(meta)
     }
 
     @Test
-    fun `get available - null on timeout - then get`() = runBlocking<Unit> {
+    fun `get available and wait - null on timeout - then get`() = runBlocking<Unit> {
         val itemId = randomEthItemId()
         val meta = randomUnionItem(itemId).meta!!
         coEvery { testUnionMetaLoader.load(itemId) } coAnswers {
             delay(1000)
             meta
         }
-        assertThat(enrichmentMetaService.getAvailableMetaOrScheduleLoading(itemId)).isNull()
+        assertThat(enrichmentMetaService.getAvailableMetaOrScheduleLoadingAndWaitWithTimeout(itemId, Duration.ofMillis(500))).isNull()
         Wait.waitAssert(timeout = Duration.ofSeconds(2)) {
-            assertThat(enrichmentMetaService.getAvailableMeta(itemId)).isEqualTo(meta)
+            assertThat(enrichmentMetaService.getAvailableMetaOrScheduleLoading(itemId)).isEqualTo(meta)
         }
     }
 
@@ -54,7 +53,7 @@ class EnrichmentMetaServiceIt : AbstractIntegrationTest() {
             meta
         }
         assertThat(
-            enrichmentMetaService.getAvailableMetaOrScheduleAndWait(
+            enrichmentMetaService.getAvailableMetaOrScheduleLoadingAndWaitWithTimeout(
                 itemId = itemId,
                 loadingWaitTimeout = Duration.ofMillis(5000)
             )

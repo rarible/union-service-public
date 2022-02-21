@@ -5,6 +5,7 @@ import com.rarible.protocol.dto.FlowNftOwnershipsDto
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.continuation.page.Page
 import org.slf4j.LoggerFactory
@@ -34,6 +35,7 @@ object FlowOwnershipConverter {
                 tokenId = tokenId,
                 owner = owner
             ),
+            collection = CollectionIdDto(blockchain, ownership.contract),
             value = BigInteger.ONE, // TODO FLOW always one?
             createdAt = ownership.createdAt,
             lazyValue = BigInteger.ZERO,

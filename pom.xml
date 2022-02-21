@@ -50,7 +50,9 @@
         <rarible.protocol.flow.version>2.3.0</rarible.protocol.flow.version>
         <rarible.protocol.tezos.version>1.0.2</rarible.protocol.tezos.version>
         <rarible.protocol.solana.version>0.0.12</rarible.protocol.solana.version>
+
         <rarible.protocol.union.version>1.23.13</rarible.protocol.union.version>
+
         <dev-jna.version>5.7.0</dev-jna.version>
     </properties>
 
