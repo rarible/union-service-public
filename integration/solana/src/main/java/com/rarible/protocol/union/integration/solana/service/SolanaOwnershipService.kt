@@ -5,7 +5,7 @@ import com.rarible.protocol.union.core.service.OwnershipService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.continuation.page.Page
-import com.rarible.protocol.union.integration.solana.converter.SolanaBalanceConverter
+import com.rarible.protocol.union.integration.solana.converter.SolanaOwnershipConverter
 import com.rarible.solana.protocol.api.client.BalanceControllerApi
 import kotlinx.coroutines.reactive.awaitFirst
 
@@ -16,20 +16,20 @@ open class SolanaOwnershipService(
     override suspend fun getOwnershipById(ownershipId: String): UnionOwnership {
         val balance = balanceApi.getBalanceByAccount(ownershipId).awaitFirst()
 
-        return SolanaBalanceConverter.convert(balance)
+        return SolanaOwnershipConverter.convert(balance)
     }
 
     // TODO add continuation
     override suspend fun getOwnershipsByItem(itemId: String, continuation: String?, size: Int): Page<UnionOwnership> {
         val balancesDto = balanceApi.getBalanceByMint(itemId).awaitFirst()
-        val ownerships = balancesDto.balances.map { balance -> SolanaBalanceConverter.convert(balance) }
+        val ownerships = balancesDto.balances.map { balance -> SolanaOwnershipConverter.convert(balance) }
 
         return Page(balancesDto.total, null, ownerships)
     }
 
     override suspend fun getOwnershipsByOwner(address: String, continuation: String?, size: Int): Page<UnionOwnership> {
         val balancesDto = balanceApi.getBalanceByOwner(address).awaitFirst()
-        val ownerships = balancesDto.balances.map { balance -> SolanaBalanceConverter.convert(balance) }
+        val ownerships = balancesDto.balances.map { balance -> SolanaOwnershipConverter.convert(balance) }
 
         return Page(balancesDto.total, null, ownerships)
     }

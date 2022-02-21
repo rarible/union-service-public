@@ -8,7 +8,7 @@ import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.solana.protocol.dto.BalanceDto
 import java.math.BigInteger
 
-object SolanaBalanceConverter {
+object SolanaOwnershipConverter {
     // TODO think about collection & creators
     fun convert(balance: BalanceDto): UnionOwnership {
         return UnionOwnership(
