@@ -36,7 +36,7 @@ class UnionContentMetaLoader(
     private suspend fun fetchFromCache(url: String): ContentMeta? {
         for (candidateUrl in getCandidateUrls(url)) {
             val cacheEntry = template.findById<CachedContentMetaEntry>(
-                id = url,
+                id = candidateUrl,
                 collectionName = CachedContentMetaEntry.CACHE_META_COLLECTION
             ).awaitFirstOrNull()
             if (cacheEntry != null) {
