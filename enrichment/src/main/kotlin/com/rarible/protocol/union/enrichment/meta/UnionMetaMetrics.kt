@@ -31,7 +31,7 @@ class UnionMetaMetrics(
         metaCacheMisses.increment()
         logger.info(
             buildString {
-                append("Meta for item $itemId is not available")
+                append("Meta for item ${itemId.fullId()} is not available")
                 if (loadingWaitTimeout != null) {
                     append(" even though we waited for loading with timeout of ${loadingWaitTimeout.toMillis()} ms")
                 }
