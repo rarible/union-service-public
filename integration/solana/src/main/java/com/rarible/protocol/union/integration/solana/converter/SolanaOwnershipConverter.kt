@@ -3,9 +3,12 @@ package com.rarible.protocol.union.integration.solana.converter
 import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.BlockchainGroupDto
+import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.solana.protocol.dto.BalanceDto
+import com.rarible.solana.protocol.dto.JsonCollectionDto
+import com.rarible.solana.protocol.dto.OnChainCollectionDto
 import java.math.BigInteger
 
 object SolanaOwnershipConverter {
@@ -20,7 +23,11 @@ object SolanaOwnershipConverter {
                     value = balance.owner
                 )
             ),
-            collection = null,
+            collection = when (val collection = balance.collection) {
+                is JsonCollectionDto -> CollectionIdDto(BlockchainDto.SOLANA, collection.hash)
+                is OnChainCollectionDto -> CollectionIdDto(BlockchainDto.SOLANA, collection.address)
+                null -> null
+            },
             value = balance.value,
             createdAt = balance.createdAt,
             creators = emptyList(),
