@@ -3,6 +3,7 @@ package com.rarible.protocol.union.enrichment.service
 import com.mongodb.client.result.DeleteResult
 import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.apm.SpanType
+import com.rarible.core.apm.withSpan
 import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.service.ItemService
@@ -102,10 +103,15 @@ class EnrichmentItemService(
         val bestSellOrder = async { enrichmentOrderService.fetchOrderIfDiffers(shortItem?.bestSellOrder, orders) }
         val bestBidOrder = async { enrichmentOrderService.fetchOrderIfDiffers(shortItem?.bestBidOrder, orders) }
         val meta = async {
-            if (waitForMetaLoadingTimeout != null) {
-                enrichmentMetaService.getAvailableMetaOrScheduleLoadingAndWaitWithTimeout(itemId, waitForMetaLoadingTimeout)
-            } else {
-                enrichmentMetaService.getAvailableMetaOrScheduleLoading(itemId)
+            withSpan(name = "enrichItem_meta", labels = listOf("item" to itemId.fullId())) {
+                if (waitForMetaLoadingTimeout != null) {
+                    enrichmentMetaService.getAvailableMetaOrScheduleLoadingAndWaitWithTimeout(
+                        itemId,
+                        waitForMetaLoadingTimeout
+                    )
+                } else {
+                    enrichmentMetaService.getAvailableMetaOrScheduleLoading(itemId)
+                }
             }
         }
 
