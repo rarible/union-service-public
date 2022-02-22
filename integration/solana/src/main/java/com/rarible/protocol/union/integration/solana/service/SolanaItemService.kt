@@ -18,7 +18,7 @@ class SolanaItemService(
 
     override suspend fun getItemById(itemId: String): UnionItem {
         val token = tokenApi.getTokenByAddress(itemId).awaitFirst()
-        return SolanaItemConverter.convert(token, blockchain)
+        return SolanaItemConverter.convert(token)
     }
 
     override suspend fun getItemMetaById(itemId: String): UnionMeta {
