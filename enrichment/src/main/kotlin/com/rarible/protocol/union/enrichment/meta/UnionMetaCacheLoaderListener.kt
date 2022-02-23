@@ -12,6 +12,7 @@ import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.parser.IdParser
+import com.rarible.protocol.union.enrichment.configuration.MetaProperties
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.io.Closeable
@@ -22,7 +23,8 @@ import java.util.concurrent.atomic.AtomicReference
 class UnionMetaCacheLoaderListener(
     private val itemServiceRouter: BlockchainRouter<ItemService>,
     private val wrappedEventProducer: RaribleKafkaProducer<UnionWrappedEvent>,
-    private val unionMetaLoadingAwaitService: UnionMetaLoadingAwaitService
+    private val unionMetaLoadingAwaitService: UnionMetaLoadingAwaitService,
+    private val metaProperties: MetaProperties
 ) : CacheLoaderEventListener<UnionMeta> {
 
     private val logger = LoggerFactory.getLogger(UnionMetaCacheLoaderListener::class.java)
@@ -56,6 +58,10 @@ class UnionMetaCacheLoaderListener(
             is CacheEntry.LoadedAndUpdateScheduled -> return
             is CacheEntry.InitialLoadScheduled -> return
             is CacheEntry.NotAvailable -> return
+        }
+        if (metaProperties.skipAttachingMetaInEvents) {
+            logger.info("Skip meta item update event for $itemId")
+            return
         }
         logger.info("Sending meta item update event for $itemId")
         val item = itemServiceRouter.getService(itemId.blockchain).getItemById(itemId.value)
