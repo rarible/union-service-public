@@ -15,6 +15,7 @@ import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.UnionAddress
+import com.rarible.protocol.union.enrichment.configuration.MetaProperties
 import com.rarible.protocol.union.enrichment.converter.EnrichedItemConverter
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
@@ -36,7 +37,8 @@ class EnrichmentItemService(
     private val itemRepository: ItemRepository,
     private val enrichmentOrderService: EnrichmentOrderService,
     private val enrichmentAuctionService: EnrichmentAuctionService,
-    private val enrichmentMetaService: EnrichmentMetaService
+    private val enrichmentMetaService: EnrichmentMetaService,
+    private val metaProperties: MetaProperties
 ) {
 
     private val logger = LoggerFactory.getLogger(EnrichmentItemService::class.java)
@@ -103,6 +105,9 @@ class EnrichmentItemService(
         val bestSellOrder = async { enrichmentOrderService.fetchOrderIfDiffers(shortItem?.bestSellOrder, orders) }
         val bestBidOrder = async { enrichmentOrderService.fetchOrderIfDiffers(shortItem?.bestBidOrder, orders) }
         val meta = async {
+            if (metaProperties.skipAttachingMetaInEvents) {
+                return@async null
+            }
             withSpan(name = "enrichItem_meta", labels = listOf("item" to itemId.fullId())) {
                 if (waitForMetaLoadingTimeout != null) {
                     enrichmentMetaService.getAvailableMetaOrScheduleLoadingAndWaitWithTimeout(
