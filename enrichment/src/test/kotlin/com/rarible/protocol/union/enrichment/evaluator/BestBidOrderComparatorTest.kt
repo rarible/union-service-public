@@ -48,4 +48,15 @@ class BestBidOrderComparatorTest {
         assertThat(result).isEqualTo(shortUpdated)
     }
 
+    @Test
+    fun `updated has same price as current`() {
+        val current = randomUnionSellOrderDto().copy(takePrice = BigDecimal.valueOf(1))
+        val updated = randomUnionSellOrderDto().copy(takePrice = BigDecimal.valueOf(1))
+        val shortCurrent = ShortOrderConverter.convert(current)
+        val shortUpdated = ShortOrderConverter.convert(updated)
+        val result = BestBidOrderComparator.compare(shortCurrent, shortUpdated)
+        // Current best order should not be changed
+        assertThat(result).isEqualTo(shortCurrent)
+    }
+
 }

@@ -15,7 +15,7 @@ object BestSellOrderComparator : BestOrderComparator {
 
         val isCurrentMakePriceGreater = when {
             currentMakePrice == null -> true
-            updatedMakePrice != null -> currentMakePrice >= updatedMakePrice
+            updatedMakePrice != null -> currentMakePrice > updatedMakePrice
             else -> false
         }
 
