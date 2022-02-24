@@ -54,7 +54,6 @@ class ItemController(
     private val router: BlockchainRouter<ItemService>,
     private val enrichmentItemService: EnrichmentItemService,
     private val enrichmentMetaService: EnrichmentMetaService,
-    private val metaProperties: MetaProperties,
     private val restrictionService: RestrictionService
 ) : ItemControllerApi {
 
@@ -103,10 +102,8 @@ class ItemController(
 
     private suspend fun getOrAwaitMeta(itemId: String): UnionMeta {
         val fullItemId = IdParser.parseItemId(itemId)
-        return enrichmentMetaService.getAvailableMetaOrScheduleLoadingAndWaitWithTimeout(
-            itemId = fullItemId,
-            loadingWaitTimeout = metaProperties.timeoutSyncLoadingMeta
-        ) ?: throw UnionNotFoundException("No item found for $itemId")
+        return enrichmentMetaService.getAvailableMetaOrScheduleLoading(itemId = fullItemId)
+            ?: throw UnionNotFoundException("No item found for $itemId")
     }
 
     override suspend fun getItemById(

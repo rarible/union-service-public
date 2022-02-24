@@ -15,7 +15,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import reactor.kotlin.core.publisher.toMono
-import java.time.Duration
 
 @IntegrationTest
 class EnrichmentItemMetaLoadingIt : AbstractIntegrationTest() {
@@ -27,7 +26,7 @@ class EnrichmentItemMetaLoadingIt : AbstractIntegrationTest() {
     private lateinit var itemMetaService: EnrichmentMetaService
 
     @Test
-    fun `item update - meta not available - timeout waiting - event without meta - then with meta`() = runWithKafka {
+    fun `item update - meta not available - event without meta - event with meta`() = runWithKafka {
         val itemId = randomEthItemId()
         val ethItem = randomEthNftItemDto(itemId)
         val (unionItem, meta) = EthItemConverter.convert(ethItem, itemId.blockchain).let {
@@ -64,7 +63,6 @@ class EnrichmentItemMetaLoadingIt : AbstractIntegrationTest() {
             delay(100L)
             throw UnionMetaLoader.UnionMetaResolutionException("error")
         }
-        metaProperties.timeoutSyncLoadingMetaMs = 2000
         coEvery { testEthereumItemApi.getNftItemById(itemId.value) } returns ethItem.toMono()
         itemEventService.onItemUpdated(unionItem)
         Wait.waitAssert {
@@ -95,23 +93,12 @@ class EnrichmentItemMetaLoadingIt : AbstractIntegrationTest() {
         val (unionItem, meta) = EthItemConverter.convert(ethItem, itemId.blockchain).let {
             it.copy(meta = null) to it.meta!!
         }
-        coEvery { testUnionMetaLoader.load(itemId) } coAnswers {
-            delay(100L)
-            meta
-        }
+        itemMetaService.save(itemId, meta)
         coEvery { testEthereumItemApi.getNftItemById(itemId.value) } returns ethItem.toMono()
-        assertThat(itemMetaService.getAvailableMetaOrScheduleLoadingAndWaitWithTimeout(itemId, Duration.ofMillis(3000))).isEqualTo(meta)
-        Wait.waitAssert {
-            val events = findItemUpdates(itemId.value)
-            assertThat(events).hasSize(1)
-            assertThat(events[0].value.item)
-                .isEqualTo(EnrichedItemConverter.convert(unionItem, meta = meta))
-        }
-        metaProperties.timeoutSyncLoadingMetaMs = 2000
         itemEventService.onItemUpdated(unionItem)
         Wait.waitAssert {
             val events = findItemUpdates(itemId.value)
-            assertThat(events).hasSize(2).allSatisfy {
+            assertThat(events).hasSize(1).allSatisfy {
                 assertThat(it.value.item)
                     .isEqualTo(EnrichedItemConverter.convert(unionItem, meta = meta))
             }
