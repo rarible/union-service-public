@@ -40,12 +40,6 @@ class EnrichmentItemMetaLoadingIt : AbstractIntegrationTest() {
         itemEventService.onItemUpdated(unionItem)
         Wait.waitAssert {
             val events = findItemUpdates(itemId.value)
-            assertThat(events).hasSize(1)
-            assertThat(events[0].value.item)
-                .isEqualTo(EnrichedItemConverter.convert(unionItem, meta = null))
-        }
-        Wait.waitAssert {
-            val events = findItemUpdates(itemId.value)
             assertThat(events).hasSize(2)
             assertThat(events[1].value.item)
                 .isEqualTo(EnrichedItemConverter.convert(unionItem, meta = meta))
