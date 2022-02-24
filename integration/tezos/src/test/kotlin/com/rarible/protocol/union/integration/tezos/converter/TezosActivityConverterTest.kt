@@ -310,13 +310,15 @@ class TezosActivityConverterTest {
             UserActivityTypeDto.values().toList() + UserActivityTypeDto.values().toList()
         )
 
-        assertThat(result).hasSize(5)
+        assertThat(result).hasSize(7)
         assertThat(result).contains(
             OrderActivityFilterUserTypeDto.SELL,
             OrderActivityFilterUserTypeDto.LIST,
             OrderActivityFilterUserTypeDto.GET_BID,
             OrderActivityFilterUserTypeDto.BUY,
-            OrderActivityFilterUserTypeDto.MAKE_BID
+            OrderActivityFilterUserTypeDto.MAKE_BID,
+            OrderActivityFilterUserTypeDto.CANCEL_LIST,
+            OrderActivityFilterUserTypeDto.CANCEL_BID
         )
     }
 
