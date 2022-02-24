@@ -28,10 +28,10 @@ import com.rarible.protocol.union.dto.continuation.page.PageSize
 import com.rarible.protocol.union.dto.continuation.page.Paging
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.dto.subchains
-import com.rarible.protocol.union.enrichment.configuration.MetaProperties
+import com.rarible.protocol.union.enrichment.configuration.UnionMetaProperties
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
-import com.rarible.protocol.union.enrichment.service.EnrichmentMetaService
+import com.rarible.protocol.union.enrichment.meta.UnionMetaService
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -53,9 +53,9 @@ class ItemController(
     private val ownershipApiService: OwnershipApiService,
     private val router: BlockchainRouter<ItemService>,
     private val enrichmentItemService: EnrichmentItemService,
-    private val enrichmentMetaService: EnrichmentMetaService,
+    private val unionMetaService: UnionMetaService,
     private val restrictionService: RestrictionService,
-    private val metaProperties: MetaProperties
+    private val unionMetaProperties: UnionMetaProperties
 ) : ItemControllerApi {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -103,9 +103,9 @@ class ItemController(
 
     private suspend fun getAvailableMetaOrLoadSynchronouslyWithTimeout(itemId: String): UnionMeta {
         val fullItemId = IdParser.parseItemId(itemId)
-        return enrichmentMetaService.getAvailableMetaOrLoadSynchronouslyWithTimeout(
+        return unionMetaService.getAvailableMetaOrLoadSynchronouslyWithTimeout(
             itemId = fullItemId,
-            timeout = metaProperties.timeoutSyncLoadingMeta
+            timeout = unionMetaProperties.timeoutSyncLoadingMeta
         ) ?: throw UnionNotFoundException("No item meta found for $itemId")
     }
 
@@ -152,7 +152,7 @@ class ItemController(
         val fullItemId = IdParser.parseItemId(itemId)
         // TODO[meta]: when all Blockchains stop caching the meta, we can remove this endpoint call.
         router.getService(fullItemId.blockchain).resetItemMeta(fullItemId.value)
-        enrichmentMetaService.scheduleLoading(fullItemId)
+        unionMetaService.scheduleLoading(fullItemId)
         return ResponseEntity.ok().build()
     }
 

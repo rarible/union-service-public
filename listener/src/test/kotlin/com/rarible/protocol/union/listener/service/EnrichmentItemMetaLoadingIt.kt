@@ -3,7 +3,7 @@ package com.rarible.protocol.union.listener.service
 import com.rarible.core.test.wait.Wait
 import com.rarible.protocol.union.enrichment.converter.EnrichedItemConverter
 import com.rarible.protocol.union.enrichment.meta.UnionMetaLoader
-import com.rarible.protocol.union.enrichment.service.EnrichmentMetaService
+import com.rarible.protocol.union.enrichment.meta.UnionMetaService
 import com.rarible.protocol.union.integration.ethereum.converter.EthItemConverter
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthNftItemDto
@@ -23,7 +23,7 @@ class EnrichmentItemMetaLoadingIt : AbstractIntegrationTest() {
     private lateinit var itemEventService: EnrichmentItemEventService
 
     @Autowired
-    private lateinit var itemMetaService: EnrichmentMetaService
+    private lateinit var itemMetaService: UnionMetaService
 
     @Test
     fun `item update - meta not available - event without meta - event with meta`() = runWithKafka {

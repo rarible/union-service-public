@@ -42,14 +42,8 @@ rarible:
   loader:
     broker-replica-set: ${kafka.hosts}
     topicsPrefix: protocol.${application.environment}.union.internal.loader
-    workers: 4
-    loadTasksBatchSize: 10
-    retry:
-      # Retry after 24h
-      backoffDelaysMillis: [ 86400000 ]
-      job:
-        runner:
-          period: 30000 # Schedule retry tasks every 30s
+    enableWorkers: false
+    enableNotifications: true # Enable notifications to send item update events when meta gets loaded.
 
 common:
   producer:

@@ -1,11 +1,11 @@
 package com.rarible.protocol.union.enrichment.meta
 
-import com.rarible.protocol.union.enrichment.configuration.MetaProperties
+import com.rarible.protocol.union.enrichment.configuration.UnionMetaProperties
 import org.springframework.stereotype.Component
 
 @Component
 class IpfsUrlResolver(
-    ipfsProperties: MetaProperties
+    ipfsProperties: UnionMetaProperties
 ) {
 
     private val gateway = ipfsProperties.ipfsGateway.trimEnd('/')

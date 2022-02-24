@@ -17,6 +17,7 @@ rarible:
   task:
     initialDelay: 600000
   loader:
+    enableWorkers: true # Enable workers in the tests.
     workers: 1
     retry:
       backoffDelaysMillis: []

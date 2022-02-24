@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.listener.service
 
-import com.rarible.core.apm.withSpan
 import com.rarible.core.common.optimisticLock
 import com.rarible.protocol.union.core.event.OutgoingItemEventListener
 import com.rarible.protocol.union.core.model.UnionItem
@@ -12,8 +11,7 @@ import com.rarible.protocol.union.dto.ItemDeleteEventDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.ItemUpdateEventDto
 import com.rarible.protocol.union.dto.OrderDto
-import com.rarible.protocol.union.enrichment.configuration.MetaProperties
-import com.rarible.protocol.union.enrichment.converter.ShortItemConverter
+import com.rarible.protocol.union.enrichment.configuration.UnionMetaProperties
 import com.rarible.protocol.union.enrichment.model.ItemSellStats
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
@@ -33,7 +31,7 @@ class EnrichmentItemEventService(
     private val itemEventListeners: List<OutgoingItemEventListener>,
     private val bestOrderService: BestOrderService,
     private val reconciliationEventService: ReconciliationEventService,
-    private val metaProperties: MetaProperties
+    private val unionMetaProperties: UnionMetaProperties
 ) {
 
     private val logger = LoggerFactory.getLogger(EnrichmentItemEventService::class.java)

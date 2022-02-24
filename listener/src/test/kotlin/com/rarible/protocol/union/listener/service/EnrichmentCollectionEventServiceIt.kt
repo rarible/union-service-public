@@ -6,7 +6,7 @@ import com.rarible.protocol.dto.NftItemsDto
 import com.rarible.protocol.union.enrichment.converter.EnrichedItemConverter
 import com.rarible.protocol.union.enrichment.converter.EnrichedMetaConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
-import com.rarible.protocol.union.enrichment.service.EnrichmentMetaService
+import com.rarible.protocol.union.enrichment.meta.UnionMetaService
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.test.data.randomShortItem
 import com.rarible.protocol.union.integration.ethereum.converter.EthItemConverter
@@ -23,7 +23,6 @@ import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipId
 import com.rarible.protocol.union.listener.test.AbstractIntegrationTest
 import com.rarible.protocol.union.listener.test.IntegrationTest
 import io.mockk.coEvery
-import kotlinx.coroutines.FlowPreview
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
@@ -42,7 +41,7 @@ class EnrichmentCollectionEventServiceIt : AbstractIntegrationTest() {
     lateinit var ethOrderConverter: EthOrderConverter
 
     @Autowired
-    lateinit var enrichmentMetaService: EnrichmentMetaService
+    lateinit var unionMetaService: UnionMetaService
 
     @Autowired
     private lateinit var collectionEventService: EnrichmentCollectionEventService

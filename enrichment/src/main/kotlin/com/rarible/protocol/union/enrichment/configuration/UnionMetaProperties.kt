@@ -6,7 +6,7 @@ import java.time.Duration
 
 @ConstructorBinding
 @ConfigurationProperties("meta")
-data class MetaProperties(
+data class UnionMetaProperties(
     val ipfsGateway: String,
     val mediaFetchTimeout: Int,
     val mediaFetchMaxSize: Long,
