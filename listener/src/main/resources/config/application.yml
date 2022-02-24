@@ -43,6 +43,7 @@ rarible:
     broker-replica-set: ${kafka.hosts}
     topicsPrefix: protocol.${application.environment}.union.internal.loader
     workers: 4
+    loadTasksBatchSize: 10
     retry:
       # Retry after 30s, 5m, 1h, 6h, 24h
       backoffDelaysMillis: [ 30000, 300000, 3600000, 21600000, 86400000 ]

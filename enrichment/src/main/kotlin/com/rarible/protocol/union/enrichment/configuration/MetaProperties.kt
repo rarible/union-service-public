@@ -11,7 +11,8 @@ data class MetaProperties(
     val mediaFetchTimeout: Int,
     val mediaFetchMaxSize: Long,
     val openSeaProxyUrl: String,
-    var timeoutSyncLoadingMetaMs: Long = 3000
+    var timeoutSyncLoadingMetaMs: Long = 3000,
+    val skipAttachingMetaInEvents: Boolean = false
 ) {
     val timeoutSyncLoadingMeta: Duration get() = Duration.ofMillis(timeoutSyncLoadingMetaMs)
 }
