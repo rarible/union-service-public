@@ -27,7 +27,7 @@ class EnrichmentItemMetaLoadingIt : AbstractIntegrationTest() {
     private lateinit var itemMetaService: EnrichmentMetaService
 
     @Test
-    fun `item update - meta not available - wait synchronously - send two events with meta`() = runWithKafka {
+    fun `item update - meta not available - timeout waiting - event without meta - then with meta`() = runWithKafka {
         val itemId = randomEthItemId()
         val ethItem = randomEthNftItemDto(itemId)
         val (unionItem, meta) = EthItemConverter.convert(ethItem, itemId.blockchain).let {
@@ -37,32 +37,6 @@ class EnrichmentItemMetaLoadingIt : AbstractIntegrationTest() {
             delay(100L)
             meta
         }
-        metaProperties.timeoutSyncLoadingMetaMs = 3000
-        coEvery { testEthereumItemApi.getNftItemById(itemId.value) } returns ethItem.toMono()
-        itemEventService.onItemUpdated(unionItem)
-        Wait.waitAssert {
-            val events = findItemUpdates(itemId.value)
-            // We receive two events here:
-            // 1) from the synchronous event handler
-            // 2) from the meta loader listener
-            assertThat(events).hasSize(2).allSatisfy {
-                assertThat(it.value.item).isEqualTo(EnrichedItemConverter.convert(unionItem, meta = meta))
-            }
-        }
-    }
-
-    @Test
-    fun `item update - meta not available - timeout waiting - event without meta - then with meta`() = runWithKafka {
-        val itemId = randomEthItemId()
-        val ethItem = randomEthNftItemDto(itemId)
-        val (unionItem, meta) = EthItemConverter.convert(ethItem, itemId.blockchain).let {
-            it.copy(meta = null) to it.meta!!
-        }
-        coEvery { testUnionMetaLoader.load(itemId) } coAnswers {
-            delay(2000L) // Long loading meta
-            meta
-        }
-        metaProperties.timeoutSyncLoadingMetaMs = 1000
         coEvery { testEthereumItemApi.getNftItemById(itemId.value) } returns ethItem.toMono()
         itemEventService.onItemUpdated(unionItem)
         Wait.waitAssert {

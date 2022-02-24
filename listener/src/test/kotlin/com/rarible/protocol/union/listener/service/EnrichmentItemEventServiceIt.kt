@@ -34,6 +34,7 @@ import com.rarible.protocol.union.integration.ethereum.data.randomEthNftItemDto
 import com.rarible.protocol.union.listener.test.AbstractIntegrationTest
 import com.rarible.protocol.union.listener.test.IntegrationTest
 import io.mockk.coEvery
+import io.mockk.every
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
@@ -69,11 +70,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
     @Test
     fun `update event - item doesn't exist`() = runWithKafka {
         val itemId = randomEthItemId()
-        val (unionItem, unionMeta) = randomUnionItem(itemId).let {
-            it.copy(meta = null) to it.meta!!
-        }
-
-        coEvery { testUnionMetaLoader.load(itemId) } returns unionMeta
+        val unionItem = randomUnionItem(itemId).copy(meta = null)
 
         itemEventService.onItemUpdated(unionItem)
 
@@ -88,7 +85,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
             assertThat(messages[0].key).isEqualTo(itemId.fullId())
             assertThat(messages[0].id).isEqualTo(itemId.fullId())
             assertThat(messages[0].value.itemId).isEqualTo(itemId)
-            assertThat(messages[0].value.item).isEqualTo(EnrichedItemConverter.convert(unionItem, meta = unionMeta))
+            assertThat(messages[0].value.item).isEqualTo(EnrichedItemConverter.convert(unionItem, meta = null))
         }
     }
 
