@@ -3,7 +3,6 @@ package com.rarible.protocol.union.enrichment.service
 import com.mongodb.client.result.DeleteResult
 import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.apm.SpanType
-import com.rarible.core.apm.withSpan
 import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.service.ItemService
@@ -28,7 +27,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
-import java.time.Duration
 
 @Component
 @CaptureSpan(type = SpanType.APP)
@@ -37,8 +35,7 @@ class EnrichmentItemService(
     private val itemRepository: ItemRepository,
     private val enrichmentOrderService: EnrichmentOrderService,
     private val enrichmentAuctionService: EnrichmentAuctionService,
-    private val enrichmentMetaService: EnrichmentMetaService,
-    private val metaProperties: MetaProperties
+    private val enrichmentMetaService: EnrichmentMetaService
 ) {
 
     private val logger = LoggerFactory.getLogger(EnrichmentItemService::class.java)
@@ -95,8 +92,7 @@ class EnrichmentItemService(
         shortItem: ShortItem?,
         item: UnionItem? = null,
         orders: Map<OrderIdDto, OrderDto> = emptyMap(),
-        auctions: Map<AuctionIdDto, AuctionDto> = emptyMap(),
-        waitForMetaLoadingTimeout: Duration? = null
+        auctions: Map<AuctionIdDto, AuctionDto> = emptyMap()
     ) = coroutineScope {
         logger.info("Enriching item shortItem={}, item={}", shortItem, item)
         require(shortItem != null || item != null)
@@ -104,21 +100,7 @@ class EnrichmentItemService(
         val fetchedItem = async { item ?: fetch(itemId) }
         val bestSellOrder = async { enrichmentOrderService.fetchOrderIfDiffers(shortItem?.bestSellOrder, orders) }
         val bestBidOrder = async { enrichmentOrderService.fetchOrderIfDiffers(shortItem?.bestBidOrder, orders) }
-        val meta = async {
-            if (metaProperties.skipAttachingMetaInEvents) {
-                return@async null
-            }
-            withSpan(name = "enrichItem_meta", labels = listOf("item" to itemId.fullId())) {
-                if (waitForMetaLoadingTimeout != null) {
-                    enrichmentMetaService.getAvailableMetaOrScheduleLoadingAndWaitWithTimeout(
-                        itemId,
-                        waitForMetaLoadingTimeout
-                    )
-                } else {
-                    enrichmentMetaService.getAvailableMetaOrScheduleLoading(itemId)
-                }
-            }
-        }
+        val meta = async { enrichmentMetaService.getAvailableMetaOrScheduleLoading(itemId) }
 
         val bestOrders = listOf(bestSellOrder, bestBidOrder)
             .awaitAll().filterNotNull()

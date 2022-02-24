@@ -102,7 +102,6 @@ abstract class AbstractIntegrationTest {
     @BeforeEach
     fun cleanupMetaMocks() {
         clearMocks(testUnionMetaLoader)
-        metaProperties.timeoutSyncLoadingMetaMs = 3000
     }
 
     fun <T> runWithKafka(block: suspend CoroutineScope.() -> T): T = runBlocking {

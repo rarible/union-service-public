@@ -122,8 +122,7 @@ class ItemApiService(
             enrichmentItemService.enrichItem(
                 shortItem = shortItem,
                 item = it,
-                orders = orders,
-                waitForMetaLoadingTimeout = null
+                orders = orders
             )
         }
 

@@ -15,15 +15,11 @@ import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.configuration.MetaProperties
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
-import java.io.Closeable
-import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.atomic.AtomicReference
 
 @Component
 class UnionMetaCacheLoaderListener(
     private val itemServiceRouter: BlockchainRouter<ItemService>,
     private val wrappedEventProducer: RaribleKafkaProducer<UnionWrappedEvent>,
-    private val unionMetaLoadingAwaitService: UnionMetaLoadingAwaitService,
     private val metaProperties: MetaProperties
 ) : CacheLoaderEventListener<UnionMeta> {
 
@@ -34,7 +30,6 @@ class UnionMetaCacheLoaderListener(
 
     override suspend fun onEvent(cacheLoaderEvent: CacheLoaderEvent<UnionMeta>) {
         val itemId = IdParser.parseItemId(cacheLoaderEvent.key)
-        unionMetaLoadingAwaitService.onMetaEvent(itemId, cacheLoaderEvent.cacheEntry)
         sendItemUpdateEvent(itemId, cacheLoaderEvent)
     }
 

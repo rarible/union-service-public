@@ -54,8 +54,8 @@ class ItemController(
     private val router: BlockchainRouter<ItemService>,
     private val enrichmentItemService: EnrichmentItemService,
     private val enrichmentMetaService: EnrichmentMetaService,
-    private val metaProperties: MetaProperties,
-    private val restrictionService: RestrictionService
+    private val restrictionService: RestrictionService,
+    private val metaProperties: MetaProperties
 ) : ItemControllerApi {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -85,7 +85,7 @@ class ItemController(
 
     @GetMapping(value = ["/v0.1/items/{itemId}/animation"])
     suspend fun getItemAnimationById(@PathVariable("itemId") itemId: String): ResponseEntity<Resource> {
-        val meta = getOrAwaitMeta(itemId)
+        val meta = getAvailableMetaOrLoadSynchronouslyWithTimeout(itemId)
         val unionMetaContent = meta.content
             .find { it.properties is UnionVideoProperties && it.representation == MetaContentDto.Representation.ORIGINAL }
             ?: throw UnionNotFoundException("No animation found for item $itemId")
@@ -94,19 +94,19 @@ class ItemController(
 
     @GetMapping(value = ["/v0.1/items/{itemId}/image"])
     suspend fun getItemImageById(@PathVariable("itemId") itemId: String): ResponseEntity<Resource> {
-        val meta = getOrAwaitMeta(itemId)
+        val meta = getAvailableMetaOrLoadSynchronouslyWithTimeout(itemId)
         val unionMetaContent = meta.content
             .find { it.properties is UnionImageProperties && it.representation == MetaContentDto.Representation.ORIGINAL }
             ?: throw UnionNotFoundException("No image found for item $itemId")
         return createRedirectResponse(unionMetaContent)
     }
 
-    private suspend fun getOrAwaitMeta(itemId: String): UnionMeta {
+    private suspend fun getAvailableMetaOrLoadSynchronouslyWithTimeout(itemId: String): UnionMeta {
         val fullItemId = IdParser.parseItemId(itemId)
-        return enrichmentMetaService.getAvailableMetaOrScheduleLoadingAndWaitWithTimeout(
+        return enrichmentMetaService.getAvailableMetaOrLoadSynchronouslyWithTimeout(
             itemId = fullItemId,
-            loadingWaitTimeout = metaProperties.timeoutSyncLoadingMeta
-        ) ?: throw UnionNotFoundException("No item found for $itemId")
+            timeout = metaProperties.timeoutSyncLoadingMeta
+        ) ?: throw UnionNotFoundException("No item meta found for $itemId")
     }
 
     override suspend fun getItemById(
@@ -117,8 +117,7 @@ class ItemController(
         val shortItem = enrichmentItemService.get(ShortItemId(fullItemId))
         val enrichedUnionItem = enrichmentItemService.enrichItem(
             shortItem = shortItem,
-            item = unionItem,
-            waitForMetaLoadingTimeout = null
+            item = unionItem
         )
         return ResponseEntity.ok(enrichedUnionItem)
     }

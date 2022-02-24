@@ -3,11 +3,12 @@ package com.rarible.protocol.union.enrichment.service
 import com.rarible.loader.cache.CacheLoaderService
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.dto.ItemIdDto
-import com.rarible.protocol.union.enrichment.meta.UnionMetaLoadingAwaitService
+import com.rarible.protocol.union.enrichment.meta.UnionMetaCacheLoader
 import com.rarible.protocol.union.enrichment.meta.UnionMetaMetrics
 import com.rarible.protocol.union.enrichment.meta.getAvailable
 import com.rarible.protocol.union.enrichment.meta.isMetaInitiallyLoadedOrFailed
 import com.rarible.protocol.union.enrichment.meta.isMetaInitiallyScheduledForLoading
+import kotlinx.coroutines.time.withTimeout
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Component
@@ -17,8 +18,8 @@ import java.time.Duration
 class EnrichmentMetaService(
     @Qualifier("union.meta.cache.loader.service")
     private val unionMetaCacheLoaderService: CacheLoaderService<UnionMeta>,
-    private val unionMetaLoadingAwaitService: UnionMetaLoadingAwaitService,
-    private val unionMetaMetrics: UnionMetaMetrics
+    private val unionMetaMetrics: UnionMetaMetrics,
+    private val unionMetaCacheLoader: UnionMetaCacheLoader
 ) {
     private val logger = LoggerFactory.getLogger(EnrichmentMetaService::class.java)
 
@@ -27,15 +28,15 @@ class EnrichmentMetaService(
      * Schedule an update in the last case.
      */
     suspend fun getAvailableMetaOrScheduleLoading(itemId: ItemIdDto): UnionMeta? =
-        getAvailableMetaOrScheduleLoadingAndWaitWithTimeout(itemId, null)
+        getAvailableMetaOrLoadSynchronously(itemId, false)
 
     /**
-     * Same as [getAvailableMetaOrScheduleLoading] and synchronously (in a coroutine) wait up to
-     * [loadingWaitTimeout] until the meta is loaded or failed.
+     * Return available meta, if any. Otherwise, load the meta in the current coroutine (it may be slow).
+     * Additionally, schedule loading if the meta hasn't been requested for this item.
      */
-    suspend fun getAvailableMetaOrScheduleLoadingAndWaitWithTimeout(
+    suspend fun getAvailableMetaOrLoadSynchronously(
         itemId: ItemIdDto,
-        loadingWaitTimeout: Duration?
+        synchronous: Boolean
     ): UnionMeta? {
         val metaCacheEntry = unionMetaCacheLoaderService.get(itemId.fullId())
         val availableMeta = metaCacheEntry.getAvailable()
@@ -49,10 +50,35 @@ class EnrichmentMetaService(
         if (!metaCacheEntry.isMetaInitiallyScheduledForLoading()) {
             scheduleLoading(itemId)
         }
-        if (loadingWaitTimeout == null) {
-            return null
+        if (synchronous) {
+            return unionMetaCacheLoader.load(itemId.fullId())
         }
-        return unionMetaLoadingAwaitService.waitForMetaLoadingWithTimeout(itemId, loadingWaitTimeout)
+        return null
+    }
+
+    /**
+     * The same as [getAvailableMetaOrLoadSynchronously] but with [timeout].
+     */
+    suspend fun getAvailableMetaOrLoadSynchronouslyWithTimeout(
+        itemId: ItemIdDto,
+        timeout: Duration
+    ): UnionMeta? = try {
+        withTimeout(timeout) {
+            getAvailableMetaOrLoadSynchronously(
+                itemId = itemId,
+                synchronous = true
+            )
+        }
+    } catch (e: Exception) {
+        logger.error("Cannot synchronously load meta for ${itemId.fullId()} with timeout ${timeout.toMillis()} ms", e)
+        null
+    }
+
+    /**
+     * Save pre-defined meta for an item. Useful in tests.
+     */
+    suspend fun save(itemId: ItemIdDto, unionMeta: UnionMeta) {
+        unionMetaCacheLoaderService.save(itemId.fullId(), unionMeta)
     }
 
     /**

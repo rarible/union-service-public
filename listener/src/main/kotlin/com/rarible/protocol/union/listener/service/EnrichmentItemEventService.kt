@@ -237,8 +237,7 @@ class EnrichmentItemEventService(
             shortItem = short,
             item = item,
             orders = listOfNotNull(order).associateBy { it.id },
-            auctions = listOfNotNull(auction).associateBy { it.id },
-            waitForMetaLoadingTimeout = metaProperties.timeoutSyncLoadingMeta
+            auctions = listOfNotNull(auction).associateBy { it.id }
         )
 
         return ItemUpdateEventDto(

@@ -38,6 +38,7 @@ rarible:
     broker-replica-set: ${kafka.hosts}
     topicsPrefix: protocol.${application.environment}.union.internal.loader
     enableWorkers: false
+    enableNotifications: false
 
 integration:
   ethereum:
