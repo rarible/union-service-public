@@ -253,6 +253,8 @@ class TezosActivityConverter(
             UserActivityTypeDto.BUY -> OrderActivityFilterUserTypeDto.BUY
             UserActivityTypeDto.LIST -> OrderActivityFilterUserTypeDto.LIST
             UserActivityTypeDto.SELL -> OrderActivityFilterUserTypeDto.SELL
+            UserActivityTypeDto.CANCEL_LIST -> OrderActivityFilterUserTypeDto.CANCEL_LIST
+            UserActivityTypeDto.CANCEL_BID -> OrderActivityFilterUserTypeDto.CANCEL_BID
             else -> null
         }
     }
