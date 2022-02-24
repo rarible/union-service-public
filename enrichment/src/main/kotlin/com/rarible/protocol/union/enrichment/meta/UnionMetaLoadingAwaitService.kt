@@ -3,8 +3,11 @@ package com.rarible.protocol.union.enrichment.meta
 import com.rarible.loader.cache.CacheEntry
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.dto.ItemIdDto
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
+import kotlinx.coroutines.time.withTimeout
 import kotlinx.coroutines.time.withTimeoutOrNull
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -36,19 +39,23 @@ class UnionMetaLoadingAwaitService(
         // TODO: if we have 2 instances of union-listener, 1 will miss the event and return null. Think how to synchronize them.
         logger.info("Starting to wait for the meta loading of ${itemId.fullId()} for ${timeout.toMillis()} ms")
         return register(itemId).use { awaitingHandle ->
-            withTimeoutOrNull(timeout) {
-                while (isActive) {
-                    val cacheEntry = awaitingHandle.cacheEntryRef.get()
-                    if (cacheEntry != null && cacheEntry.isMetaInitiallyLoadedOrFailed()) {
-                        val meta = cacheEntry.getAvailable()
-                        if (meta == null) {
-                            unionMetaMetrics.onMetaCacheMiss(itemId, timeout)
+            try {
+                withTimeout(timeout) {
+                    while (isActive) {
+                        val cacheEntry = awaitingHandle.cacheEntryRef.get()
+                        if (cacheEntry != null && cacheEntry.isMetaInitiallyLoadedOrFailed()) {
+                            val meta = cacheEntry.getAvailable()
+                            if (meta == null) {
+                                unionMetaMetrics.onMetaCacheMiss(itemId, timeout)
+                            }
+                            return@withTimeout meta
                         }
-                        return@withTimeoutOrNull meta
+                        delay(100)
                     }
-                    delay(100)
+                    return@withTimeout null
                 }
-                return@withTimeoutOrNull null
+            } catch (e: CancellationException) {
+                return null
             }
         }
     }
