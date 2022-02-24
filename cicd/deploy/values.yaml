@@ -36,5 +36,23 @@ protocol-union-listener:
       xmx_megabytes: 1536
       max_direct_memory_megabytes: 128
   networks:
-    common: 
+    common:
     - '{{ include "service.appEnv" $ }}-backend'
+
+protocol-union-meta-loader:
+  image:
+    repository: union-service-meta-loader
+  environments:
+    APPLICATION_ENVIRONMENT: '{{ include "service.appEnv" $ }}'
+    CONSUL_ROOT_PATH: '{{ include "service.appEnv" $ }}/protocol/union'
+    SPRING_PROFILES_ACTIVE: 'consul,{{ include "service.appEnv" $ }}'
+    SERVICE_PREFIX: '{{ include "service.appEnv" $ }}-union'
+  nodeSelector:
+    node.labels.rarible.service: true
+  resources:
+    jvm:
+      xmx_megabytes: 2048
+      max_direct_memory_megabytes: 512
+  networks:
+    common:
+      - '{{ include "service.appEnv" $ }}-backend'

@@ -10,3 +10,7 @@ dependencies:
   alias: protocol-union-listener
   repository: file://../resources/helm/rarible
   version: 0.1.0
+- name: rarible-helm-chart
+  alias: protocol-union-meta-loader
+  repository: file://../resources/helm/rarible
+  version: 0.1.0

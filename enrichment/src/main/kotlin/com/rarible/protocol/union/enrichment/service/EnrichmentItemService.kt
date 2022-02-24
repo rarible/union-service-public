@@ -14,8 +14,8 @@ import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.UnionAddress
-import com.rarible.protocol.union.enrichment.configuration.MetaProperties
 import com.rarible.protocol.union.enrichment.converter.EnrichedItemConverter
+import com.rarible.protocol.union.enrichment.meta.UnionMetaService
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
@@ -35,7 +35,7 @@ class EnrichmentItemService(
     private val itemRepository: ItemRepository,
     private val enrichmentOrderService: EnrichmentOrderService,
     private val enrichmentAuctionService: EnrichmentAuctionService,
-    private val enrichmentMetaService: EnrichmentMetaService
+    private val unionMetaService: UnionMetaService
 ) {
 
     private val logger = LoggerFactory.getLogger(EnrichmentItemService::class.java)
@@ -100,7 +100,7 @@ class EnrichmentItemService(
         val fetchedItem = async { item ?: fetch(itemId) }
         val bestSellOrder = async { enrichmentOrderService.fetchOrderIfDiffers(shortItem?.bestSellOrder, orders) }
         val bestBidOrder = async { enrichmentOrderService.fetchOrderIfDiffers(shortItem?.bestBidOrder, orders) }
-        val meta = async { enrichmentMetaService.getAvailableMetaOrScheduleLoading(itemId) }
+        val meta = async { unionMetaService.getAvailableMetaOrScheduleLoading(itemId) }
 
         val bestOrders = listOf(bestSellOrder, bestBidOrder)
             .awaitAll().filterNotNull()
