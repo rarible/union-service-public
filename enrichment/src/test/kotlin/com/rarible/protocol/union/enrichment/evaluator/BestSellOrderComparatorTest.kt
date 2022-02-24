@@ -50,7 +50,7 @@ class BestSellOrderComparatorTest {
 
     @Test
     fun `updated has same price as current`() {
-        val current = randomUnionSellOrderDto().copy(makePrice = BigDecimal.valueOf(2))
+        val current = randomUnionSellOrderDto().copy(makePrice = BigDecimal.valueOf(1))
         val updated = randomUnionSellOrderDto().copy(makePrice = BigDecimal.valueOf(1))
         val shortCurrent = ShortOrderConverter.convert(current)
         val shortUpdated = ShortOrderConverter.convert(updated)
