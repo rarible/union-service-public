@@ -182,8 +182,7 @@ class EnrichmentRefreshService(
                 shortItem = updatedItem,
                 item = itemDto,
                 orders = ordersHint,
-                auctions = auctionsHint,
-                waitForMetaLoadingTimeout = null
+                auctions = auctionsHint
             )
             notifyUpdate(enriched)
         }
