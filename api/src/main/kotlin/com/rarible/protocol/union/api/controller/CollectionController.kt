@@ -3,7 +3,6 @@ package com.rarible.protocol.union.api.controller
 import com.rarible.protocol.union.api.util.BlockchainFilter
 import com.rarible.protocol.union.api.service.CollectionApiService
 import com.rarible.protocol.union.api.service.ItemApiService
-import com.rarible.protocol.union.core.continuation.UnionItemContinuation
 import com.rarible.protocol.union.core.service.CollectionService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -16,7 +15,7 @@ import com.rarible.protocol.union.dto.continuation.page.PageSize
 import com.rarible.protocol.union.dto.continuation.page.Paging
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.dto.parser.IdParser
-import com.rarible.protocol.union.enrichment.service.EnrichmentMetaService
+import com.rarible.protocol.union.enrichment.meta.UnionMetaService
 import kotlinx.coroutines.flow.collect
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
@@ -27,7 +26,7 @@ class CollectionController(
     private val router: BlockchainRouter<CollectionService>,
     private val apiService: CollectionApiService,
     private val itemApiService: ItemApiService,
-    private val enrichmentMetaService: EnrichmentMetaService
+    private val unionMetaService: UnionMetaService
 ) : CollectionControllerApi {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -63,7 +62,7 @@ class CollectionController(
         val collectionId = IdParser.parseCollectionId(collection)
         logger.info("Refreshing collection meta for '{}'", collection)
         router.getService(collectionId.blockchain).refreshCollectionMeta(collectionId.value)
-        itemApiService.getAllItemIdsByCollection(collectionId).collect { enrichmentMetaService.scheduleLoading(it) }
+        itemApiService.getAllItemIdsByCollection(collectionId).collect { unionMetaService.scheduleLoading(it) }
         return ResponseEntity.ok().build()
     }
 

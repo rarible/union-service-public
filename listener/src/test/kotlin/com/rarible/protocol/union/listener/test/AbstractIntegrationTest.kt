@@ -18,12 +18,11 @@ import com.rarible.protocol.union.dto.OrderUpdateEventDto
 import com.rarible.protocol.union.dto.OwnershipDeleteEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.dto.OwnershipUpdateEventDto
-import com.rarible.protocol.union.enrichment.configuration.MetaProperties
+import com.rarible.protocol.union.enrichment.configuration.UnionMetaProperties
 import com.rarible.protocol.union.enrichment.meta.UnionMetaLoader
 import io.mockk.clearMocks
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.async
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.collect
@@ -46,7 +45,7 @@ abstract class AbstractIntegrationTest {
     lateinit var testContentMetaLoader: ContentMetaLoader
 
     @Autowired
-    lateinit var metaProperties: MetaProperties
+    lateinit var unionMetaProperties: UnionMetaProperties
 
     //--------------------- ETHEREUM ---------------------//
     @Autowired

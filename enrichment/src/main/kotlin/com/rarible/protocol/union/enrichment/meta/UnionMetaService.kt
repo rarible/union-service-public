@@ -1,13 +1,8 @@
-package com.rarible.protocol.union.enrichment.service
+package com.rarible.protocol.union.enrichment.meta
 
 import com.rarible.loader.cache.CacheLoaderService
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.dto.ItemIdDto
-import com.rarible.protocol.union.enrichment.meta.UnionMetaCacheLoader
-import com.rarible.protocol.union.enrichment.meta.UnionMetaMetrics
-import com.rarible.protocol.union.enrichment.meta.getAvailable
-import com.rarible.protocol.union.enrichment.meta.isMetaInitiallyLoadedOrFailed
-import com.rarible.protocol.union.enrichment.meta.isMetaInitiallyScheduledForLoading
 import kotlinx.coroutines.time.withTimeout
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
@@ -15,13 +10,13 @@ import org.springframework.stereotype.Component
 import java.time.Duration
 
 @Component
-class EnrichmentMetaService(
+class UnionMetaService(
     @Qualifier("union.meta.cache.loader.service")
     private val unionMetaCacheLoaderService: CacheLoaderService<UnionMeta>,
     private val unionMetaMetrics: UnionMetaMetrics,
     private val unionMetaCacheLoader: UnionMetaCacheLoader
 ) {
-    private val logger = LoggerFactory.getLogger(EnrichmentMetaService::class.java)
+    private val logger = LoggerFactory.getLogger(UnionMetaService::class.java)
 
     /**
      * Return available meta or `null` if it hasn't been loaded, has failed, or hasn't been requested yet.

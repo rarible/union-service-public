@@ -94,6 +94,11 @@
             </dependency>
             <dependency>
                 <groupId>com.rarible.protocol.union</groupId>
+                <artifactId>rarible-union-meta-loader</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.rarible.protocol.union</groupId>
                 <artifactId>rarible-union-enrichment</artifactId>
                 <classifier>tests</classifier>
                 <type>test-jar</type>
@@ -386,5 +391,6 @@
         <module>enrichment</module>
         <module>integration</module>
         <module>listener</module>
+        <module>meta-loader</module>
     </modules>
 </project>
