@@ -183,7 +183,7 @@ class EnrichmentRefreshService(
                 item = itemDto,
                 orders = ordersHint,
                 auctions = auctionsHint,
-                waitForMetaLoadingTimeout = metaProperties.timeoutSyncLoadingMeta
+                waitForMetaLoadingTimeout = null
             )
             notifyUpdate(enriched)
         }
