@@ -13,3 +13,41 @@ rarible:
       job:
         runner:
         period: 1000000000000000000 # Disable in the tests. Run RetryTasksService manually.
+
+integration:
+  ethereum:
+    enabled: true
+    consumer:
+      broker-replica-set: ${kafka.hosts}
+      workers:
+        item: 1
+        ownership: 1
+        order: 1
+  polygon:
+    enabled: true
+    consumer:
+      broker-replica-set: ${kafka.hosts}
+      workers:
+        item: 1
+        ownership: 1
+        order: 1
+  flow:
+    enabled: true
+    consumer:
+      broker-replica-set: ${kafka.hosts}
+      workers:
+        item: 1
+        ownership: 1
+        order: 1
+  tezos:
+    enabled: true
+    client:
+      url: "http://localhost:8080"
+    consumer:
+      broker-replica-set: ${kafka.hosts}
+      username:
+      password:
+      workers:
+        item: 1
+        ownership: 1
+        order: 1
