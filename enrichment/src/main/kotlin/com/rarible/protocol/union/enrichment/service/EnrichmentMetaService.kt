@@ -3,19 +3,23 @@ package com.rarible.protocol.union.enrichment.service
 import com.rarible.loader.cache.CacheLoaderService
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.dto.ItemIdDto
+import com.rarible.protocol.union.enrichment.meta.UnionMetaCacheLoader
 import com.rarible.protocol.union.enrichment.meta.UnionMetaMetrics
 import com.rarible.protocol.union.enrichment.meta.getAvailable
 import com.rarible.protocol.union.enrichment.meta.isMetaInitiallyLoadedOrFailed
 import com.rarible.protocol.union.enrichment.meta.isMetaInitiallyScheduledForLoading
+import kotlinx.coroutines.time.withTimeout
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Component
+import java.time.Duration
 
 @Component
 class EnrichmentMetaService(
     @Qualifier("union.meta.cache.loader.service")
     private val unionMetaCacheLoaderService: CacheLoaderService<UnionMeta>,
-    private val unionMetaMetrics: UnionMetaMetrics
+    private val unionMetaMetrics: UnionMetaMetrics,
+    private val unionMetaCacheLoader: UnionMetaCacheLoader
 ) {
     private val logger = LoggerFactory.getLogger(EnrichmentMetaService::class.java)
 
@@ -23,7 +27,17 @@ class EnrichmentMetaService(
      * Return available meta or `null` if it hasn't been loaded, has failed, or hasn't been requested yet.
      * Schedule an update in the last case.
      */
-    suspend fun getAvailableMetaOrScheduleLoading(itemId: ItemIdDto): UnionMeta? {
+    suspend fun getAvailableMetaOrScheduleLoading(itemId: ItemIdDto): UnionMeta? =
+        getAvailableMetaOrLoadSynchronously(itemId, false)
+
+    /**
+     * Return available meta, if any. Otherwise, load the meta in the current coroutine (it may be slow).
+     * Additionally, schedule loading if the meta hasn't been requested for this item.
+     */
+    suspend fun getAvailableMetaOrLoadSynchronously(
+        itemId: ItemIdDto,
+        synchronous: Boolean
+    ): UnionMeta? {
         val metaCacheEntry = unionMetaCacheLoaderService.get(itemId.fullId())
         val availableMeta = metaCacheEntry.getAvailable()
         if (availableMeta != null) {
@@ -36,7 +50,28 @@ class EnrichmentMetaService(
         if (!metaCacheEntry.isMetaInitiallyScheduledForLoading()) {
             scheduleLoading(itemId)
         }
-        return availableMeta
+        if (synchronous) {
+            return unionMetaCacheLoader.load(itemId.fullId())
+        }
+        return null
+    }
+
+    /**
+     * The same as [getAvailableMetaOrLoadSynchronously] but with [timeout].
+     */
+    suspend fun getAvailableMetaOrLoadSynchronouslyWithTimeout(
+        itemId: ItemIdDto,
+        timeout: Duration
+    ): UnionMeta? = try {
+        withTimeout(timeout) {
+            getAvailableMetaOrLoadSynchronously(
+                itemId = itemId,
+                synchronous = true
+            )
+        }
+    } catch (e: Exception) {
+        logger.error("Cannot synchronously load meta for ${itemId.fullId()} with timeout ${timeout.toMillis()} ms", e)
+        null
     }
 
     /**
