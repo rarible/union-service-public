@@ -54,15 +54,7 @@
         <!-- =============== Rarible-core ================ -->
         <dependency>
             <groupId>com.rarible.core</groupId>
-            <artifactId>rarible-core-cache</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.rarible.core</groupId>
             <artifactId>rarible-core-content-meta-loader</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.rarible.core</groupId>
-            <artifactId>rarible-core-lock-redis</artifactId>
         </dependency>
         <dependency>
             <groupId>com.rarible.core</groupId>
