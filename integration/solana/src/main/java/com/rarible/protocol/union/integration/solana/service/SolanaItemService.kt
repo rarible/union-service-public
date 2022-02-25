@@ -9,11 +9,12 @@ import com.rarible.protocol.union.dto.RoyaltyDto
 import com.rarible.protocol.union.dto.continuation.page.Page
 import com.rarible.protocol.union.integration.solana.converter.SolanaItemConverter
 import com.rarible.protocol.union.integration.solana.converter.SolanaItemMetaConverter
+import com.rarible.solana.protocol.api.client.BalanceControllerApi
 import com.rarible.solana.protocol.api.client.TokenControllerApi
 import kotlinx.coroutines.reactive.awaitFirst
 
 class SolanaItemService(
-    private val tokenApi: TokenControllerApi,
+    private val tokenApi: TokenControllerApi
 ) : AbstractBlockchainService(BlockchainDto.SOLANA), ItemService {
 
     override suspend fun getItemById(itemId: String): UnionItem {
@@ -64,10 +65,18 @@ class SolanaItemService(
     }
 
     override suspend fun getItemsByOwner(owner: String, continuation: String?, size: Int): Page<UnionItem> {
-        TODO("Not yet implemented")
+        val tokensDto = tokenApi.getTokensByOwner(owner).awaitFirst()
+
+        return Page(
+            total = tokensDto.total,
+            null, // TODO add continuation,
+            tokensDto.tokens.map { SolanaItemConverter.convert(it) }
+        )
     }
 
     override suspend fun getItemsByIds(itemIds: List<String>): List<UnionItem> {
-        TODO("Not yet implemented")
+        val tokensDto = tokenApi.getTokensByAddresses(itemIds).awaitFirst()
+
+        return tokensDto.tokens.map { SolanaItemConverter.convert(it) }
     }
 }
