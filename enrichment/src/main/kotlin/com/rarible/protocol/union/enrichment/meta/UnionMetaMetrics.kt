@@ -2,11 +2,9 @@ package com.rarible.protocol.union.enrichment.meta
 
 import com.rarible.protocol.union.dto.ItemIdDto
 import io.micrometer.core.instrument.Counter
-import io.micrometer.core.instrument.Gauge
 import io.micrometer.core.instrument.MeterRegistry
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
-import java.time.Duration
 
 @Component
 class UnionMetaMetrics(
@@ -15,37 +13,24 @@ class UnionMetaMetrics(
 
     private val logger = LoggerFactory.getLogger(UnionMetaMetrics::class.java)
 
+    private val metaCacheHits = Counter
+        .builder(META_CACHE_HITS)
+        .register(meterRegistry)
+
     private val metaCacheMisses = Counter
         .builder(META_CACHE_MISSES)
         .register(meterRegistry)
 
-    private val metaCacheMissesWithSyncLoading = Counter
-        .builder(META_CACHE_MISSES)
-        .tag("sync", "true")
-        .register(meterRegistry)
-
-    fun onMetaCacheMiss(
+    fun onMetaCacheHitOrMiss(
         itemId: ItemIdDto,
-        loadingWaitTimeout: Duration?
+        hitOrMiss: Boolean
     ) {
-        metaCacheMisses.increment()
-        logger.info(
-            buildString {
-                append("Meta for item $itemId is not available")
-                if (loadingWaitTimeout != null) {
-                    append(" even though we waited for loading with timeout of ${loadingWaitTimeout.toMillis()} ms")
-                }
-            }
-        )
-        if (loadingWaitTimeout != null) {
-            metaCacheMissesWithSyncLoading.increment()
+        if (hitOrMiss) {
+            metaCacheHits.increment()
+        } else {
+            metaCacheMisses.increment()
         }
-    }
-
-    fun registerMetaLoadingAwaitingItemsGauge(awaitingItemsCountProvider: () -> Int) {
-        Gauge
-            .builder(META_LOADING_AWAITING_ITEMS, awaitingItemsCountProvider)
-            .register(meterRegistry)
+        logger.info("Meta for item $itemId is not available")
     }
 
     fun reset() {
@@ -53,7 +38,7 @@ class UnionMetaMetrics(
     }
 
     private companion object {
+        const val META_CACHE_HITS = "meta_cache_hits"
         const val META_CACHE_MISSES = "meta_cache_misses"
-        const val META_LOADING_AWAITING_ITEMS = "meta_loading_awaiting_items"
     }
 }

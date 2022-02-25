@@ -35,10 +35,13 @@ class UnionMetaService(
     ): UnionMeta? {
         val metaCacheEntry = unionMetaCacheLoaderService.get(itemId.fullId())
         val availableMeta = metaCacheEntry.getAvailable()
+        unionMetaMetrics.onMetaCacheHitOrMiss(
+            itemId = itemId,
+            hitOrMiss = availableMeta != null
+        )
         if (availableMeta != null) {
             return availableMeta
         }
-        unionMetaMetrics.onMetaCacheMiss(itemId, null)
         if (metaCacheEntry.isMetaInitiallyLoadedOrFailed()) {
             return null
         }
