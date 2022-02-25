@@ -25,8 +25,11 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.withTimeoutOrNull
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
+import java.time.Duration
 
 @Component
 @CaptureSpan(type = SpanType.APP)
@@ -92,7 +95,8 @@ class EnrichmentItemService(
         shortItem: ShortItem?,
         item: UnionItem? = null,
         orders: Map<OrderIdDto, OrderDto> = emptyMap(),
-        auctions: Map<AuctionIdDto, AuctionDto> = emptyMap()
+        auctions: Map<AuctionIdDto, AuctionDto> = emptyMap(),
+        waitSyncTimeout: Duration? = null
     ) = coroutineScope {
         logger.info("Enriching item shortItem={}, item={}", shortItem, item)
         require(shortItem != null || item != null)
@@ -100,7 +104,13 @@ class EnrichmentItemService(
         val fetchedItem = async { item ?: fetch(itemId) }
         val bestSellOrder = async { enrichmentOrderService.fetchOrderIfDiffers(shortItem?.bestSellOrder, orders) }
         val bestBidOrder = async { enrichmentOrderService.fetchOrderIfDiffers(shortItem?.bestBidOrder, orders) }
-        val meta = async { unionMetaService.getAvailableMetaOrScheduleLoading(itemId) }
+        val meta = async {
+            if (waitSyncTimeout != null) {
+                unionMetaService.getAvailableMetaOrLoadSynchronouslyWithTimeout(itemId, waitSyncTimeout)
+            } else {
+                unionMetaService.getAvailableMetaOrScheduleLoading(itemId)
+            }
+        }
 
         val bestOrders = listOf(bestSellOrder, bestBidOrder)
             .awaitAll().filterNotNull()
