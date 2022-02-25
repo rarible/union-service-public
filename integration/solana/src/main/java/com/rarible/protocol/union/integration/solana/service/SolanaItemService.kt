@@ -50,7 +50,13 @@ class SolanaItemService(
         continuation: String?,
         size: Int
     ): Page<UnionItem> {
-        TODO("Not yet implemented")
+        val tokensDto = tokenApi.getTokensByCollection(collection).awaitFirst()
+
+        return Page(
+            total = tokensDto.total,
+            null, // TODO add continuation,
+            tokensDto.tokens.map { SolanaItemConverter.convert(it) }
+        )
     }
 
     override suspend fun getItemsByCreator(creator: String, continuation: String?, size: Int): Page<UnionItem> {
