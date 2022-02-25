@@ -54,10 +54,6 @@ class UnionMetaCacheLoaderListener(
             is CacheEntry.InitialLoadScheduled -> return
             is CacheEntry.NotAvailable -> return
         }
-        if (unionMetaProperties.skipAttachingMetaInEvents) {
-            logger.info("Skip meta item update event for $itemId")
-            return
-        }
         logger.info("Sending meta item update event for $itemId")
         val item = itemServiceRouter.getService(itemId.blockchain).getItemById(itemId.value)
         val itemWithMeta = item.copy(meta = meta)
