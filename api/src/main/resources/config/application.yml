@@ -32,8 +32,6 @@ rarible:
   ethereum:
     converter:
       enabled: true
-  cache:
-    use-locks: true
   loader:
     broker-replica-set: ${kafka.hosts}
     topicsPrefix: protocol.${application.environment}.union.internal.loader
