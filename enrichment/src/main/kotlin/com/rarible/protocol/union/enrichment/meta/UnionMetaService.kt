@@ -45,6 +45,7 @@ class UnionMetaService(
             return availableMeta
         }
         if (metaCacheEntry.isMetaInitiallyLoadedOrFailed()) {
+            logger.info("Meta loading for item $itemId was failed")
             return null
         }
         if (!metaCacheEntry.isMetaInitiallyScheduledForLoading()) {

@@ -30,7 +30,6 @@ class UnionMetaMetrics(
         } else {
             metaCacheMisses.increment()
         }
-        logger.info("Meta for item $itemId is not available")
     }
 
     fun reset() {
