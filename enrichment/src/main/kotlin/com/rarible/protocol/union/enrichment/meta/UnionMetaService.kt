@@ -3,6 +3,8 @@ package com.rarible.protocol.union.enrichment.meta
 import com.rarible.loader.cache.CacheLoaderService
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.dto.ItemIdDto
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.time.withTimeout
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
@@ -67,6 +69,12 @@ class UnionMetaService(
                 synchronous = true
             )
         }
+    } catch (e: CancellationException) {
+        logger.warn("Timeout synchronously load meta for $itemId with timeout ${timeout.toMillis()} ms", e)
+        null
+    } catch (e: UnionMetaLoader.UnionMetaResolutionException) {
+        logger.info("No meta can be resolved for $itemId")
+        null
     } catch (e: Exception) {
         logger.error("Cannot synchronously load meta for ${itemId.fullId()} with timeout ${timeout.toMillis()} ms", e)
         null
