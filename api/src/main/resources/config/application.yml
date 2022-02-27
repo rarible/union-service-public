@@ -37,6 +37,7 @@ rarible:
     topicsPrefix: protocol.${application.environment}.union.internal.loader
     enableWorkers: false
     enableNotifications: false
+    enableRetrySchedulerJob: false
 
 integration:
   ethereum:
