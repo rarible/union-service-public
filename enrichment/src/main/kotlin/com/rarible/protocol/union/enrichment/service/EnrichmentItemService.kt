@@ -3,6 +3,7 @@ package com.rarible.protocol.union.enrichment.service
 import com.mongodb.client.result.DeleteResult
 import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.apm.SpanType
+import com.rarible.core.apm.withSpan
 import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.service.ItemService
@@ -20,6 +21,8 @@ import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
 import com.rarible.protocol.union.enrichment.util.spent
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -97,10 +100,18 @@ class EnrichmentItemService(
         logger.info("Enriching item shortItem={}, item={}", shortItem, item)
         require(shortItem != null || item != null)
         val itemId = shortItem?.id?.toDto() ?: item!!.id
-        val fetchedItem = async { item ?: fetch(itemId) }
-        val bestSellOrder = async { enrichmentOrderService.fetchOrderIfDiffers(shortItem?.bestSellOrder, orders) }
-        val bestBidOrder = async { enrichmentOrderService.fetchOrderIfDiffers(shortItem?.bestBidOrder, orders) }
-        val meta = async { unionMetaService.getAvailableMetaOrScheduleLoading(itemId) }
+        val fetchedItem = withSpanAsync("fetchItem", spanType = SpanType.EXT) {
+            item ?: fetch(itemId)
+        }
+        val bestSellOrder = withSpanAsync("fetchBestSellOrder", spanType = SpanType.EXT) {
+            enrichmentOrderService.fetchOrderIfDiffers(shortItem?.bestSellOrder, orders)
+        }
+        val bestBidOrder = withSpanAsync("fetchBestBidOrder", spanType = SpanType.EXT) {
+            enrichmentOrderService.fetchOrderIfDiffers(shortItem?.bestBidOrder, orders)
+        }
+        val meta = withSpanAsync("fetchMeta", spanType = SpanType.CACHE) {
+            unionMetaService.getAvailableMetaOrScheduleLoading(itemId)
+        }
 
         val bestOrders = listOf(bestSellOrder, bestBidOrder)
             .awaitAll().filterNotNull()
@@ -108,7 +119,9 @@ class EnrichmentItemService(
 
         val auctionIds = shortItem?.auctions ?: emptySet()
 
-        val auctionsData = async { enrichmentAuctionService.fetchAuctionsIfAbsent(auctionIds, auctions) }
+        val auctionsData = withSpanAsync("fetchAuction", spanType = SpanType.EXT) {
+            enrichmentAuctionService.fetchAuctionsIfAbsent(auctionIds, auctions)
+        }
 
         EnrichedItemConverter.convert(
             item = fetchedItem.await(),
@@ -118,4 +131,11 @@ class EnrichmentItemService(
             auctions = auctionsData.await()
         )
     }
+
+    private fun <T> CoroutineScope.withSpanAsync(
+        spanName: String,
+        spanType: String = SpanType.APP,
+        block: suspend () -> T
+    ): Deferred<T> =
+        async { withSpan(name = spanName, type = spanType, body = block) }
 }
