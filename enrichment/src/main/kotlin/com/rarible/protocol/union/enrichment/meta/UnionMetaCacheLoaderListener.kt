@@ -22,8 +22,7 @@ import org.springframework.stereotype.Component
 @Component
 class UnionMetaCacheLoaderListener(
     private val itemServiceRouter: BlockchainRouter<ItemService>,
-    private val wrappedEventProducer: RaribleKafkaProducer<UnionWrappedEvent>,
-    private val unionMetaProperties: UnionMetaProperties
+    private val wrappedEventProducer: RaribleKafkaProducer<UnionWrappedEvent>
 ) : CacheLoaderEventListener<UnionMeta> {
 
     private val logger = LoggerFactory.getLogger(UnionMetaCacheLoaderListener::class.java)
