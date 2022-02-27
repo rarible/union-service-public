@@ -31,7 +31,7 @@ class UnionMetaService(
      * Return available meta, if any. Otherwise, load the meta in the current coroutine (it may be slow).
      * Additionally, schedule loading if the meta hasn't been requested for this item.
      */
-    suspend fun getAvailableMetaOrLoadSynchronously(
+    private suspend fun getAvailableMetaOrLoadSynchronously(
         itemId: ItemIdDto,
         synchronous: Boolean
     ): UnionMeta? {
