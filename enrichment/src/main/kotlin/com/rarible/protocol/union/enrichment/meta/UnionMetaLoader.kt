@@ -1,5 +1,8 @@
 package com.rarible.protocol.union.enrichment.meta
 
+import com.rarible.core.apm.CaptureTransaction
+import com.rarible.core.apm.SpanType
+import com.rarible.core.apm.withSpan
 import com.rarible.core.client.WebClientResponseProxyException
 import com.rarible.core.content.meta.loader.ContentMeta
 import com.rarible.protocol.union.core.model.UnionAudioProperties
@@ -28,9 +31,17 @@ class UnionMetaLoader(
 
     private val logger = LoggerFactory.getLogger(UnionMetaLoader::class.java)
 
+    @CaptureTransaction("UnionMetaLoader")
     suspend fun load(itemId: ItemIdDto): UnionMeta {
-        val unionMeta = getItemMeta(itemId) ?: throw UnionMetaResolutionException("Cannot resolve meta for $itemId")
-        return enrichContentMeta(unionMeta, itemId)
+        val unionMeta = withSpan(
+            name = "getItemMetaById",
+            type = SpanType.EXT,
+            labels = listOf("itemId" to itemId.fullId())
+        ) { getItemMeta(itemId) ?: throw UnionMetaResolutionException("Cannot resolve meta for $itemId") }
+        return withSpan(
+            name = "enrichContentMeta",
+            labels = listOf("itemId" to itemId.fullId())
+        ) { enrichContentMeta(unionMeta, itemId) }
     }
 
     private suspend fun getItemMeta(itemId: ItemIdDto): UnionMeta? {
