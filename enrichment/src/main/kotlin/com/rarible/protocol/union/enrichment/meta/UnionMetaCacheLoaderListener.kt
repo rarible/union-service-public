@@ -1,10 +1,13 @@
 package com.rarible.protocol.union.enrichment.meta
 
+import com.rarible.core.apm.CaptureSpan
+import com.rarible.core.apm.CaptureTransaction
 import com.rarible.core.kafka.RaribleKafkaProducer
 import com.rarible.loader.cache.CacheEntry
 import com.rarible.loader.cache.CacheLoaderEvent
 import com.rarible.loader.cache.CacheLoaderEventListener
 import com.rarible.protocol.union.core.event.KafkaEventFactory
+import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.UnionItemUpdateEvent
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.UnionWrappedEvent
@@ -28,6 +31,7 @@ class UnionMetaCacheLoaderListener(
     override val type
         get() = UnionMetaCacheLoader.TYPE
 
+    @CaptureTransaction("UnionMetaCacheLoaderListener")
     override suspend fun onEvent(cacheLoaderEvent: CacheLoaderEvent<UnionMeta>) {
         val itemId = IdParser.parseItemId(cacheLoaderEvent.key)
         sendItemUpdateEvent(itemId, cacheLoaderEvent)
@@ -55,8 +59,12 @@ class UnionMetaCacheLoaderListener(
             is CacheEntry.NotAvailable -> return
         }
         logger.info("Sending meta item update event for $itemId")
-        val item = itemServiceRouter.getService(itemId.blockchain).getItemById(itemId.value)
+        val item = getItem(itemId)
         val itemWithMeta = item.copy(meta = meta)
         wrappedEventProducer.send(KafkaEventFactory.wrappedItemEvent(UnionItemUpdateEvent(itemWithMeta)))
     }
+
+    @CaptureSpan("getItemById")
+    private suspend fun getItem(itemId: ItemIdDto): UnionItem =
+        itemServiceRouter.getService(itemId.blockchain).getItemById(itemId.value)
 }
