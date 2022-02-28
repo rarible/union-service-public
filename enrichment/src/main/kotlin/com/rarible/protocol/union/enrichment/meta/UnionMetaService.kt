@@ -45,7 +45,7 @@ class UnionMetaService(
             return availableMeta
         }
         if (metaCacheEntry.isMetaInitiallyLoadedOrFailed()) {
-            logger.info("Meta loading for item $itemId was failed")
+            logger.info("Meta loading for item ${itemId.fullId()} was failed")
             return null
         }
         if (!metaCacheEntry.isMetaInitiallyScheduledForLoading()) {
@@ -71,10 +71,10 @@ class UnionMetaService(
             )
         }
     } catch (e: CancellationException) {
-        logger.warn("Timeout synchronously load meta for $itemId with timeout ${timeout.toMillis()} ms", e)
+        logger.warn("Timeout synchronously load meta for ${itemId.fullId()} with timeout ${timeout.toMillis()} ms", e)
         null
     } catch (e: UnionMetaLoader.UnionMetaResolutionException) {
-        logger.info("No meta can be resolved for $itemId")
+        logger.info("No meta can be resolved for ${itemId.fullId()}")
         null
     } catch (e: Exception) {
         logger.error("Cannot synchronously load meta for ${itemId.fullId()} with timeout ${timeout.toMillis()} ms", e)

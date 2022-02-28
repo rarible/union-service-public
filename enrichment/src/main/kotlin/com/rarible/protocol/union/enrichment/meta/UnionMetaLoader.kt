@@ -38,7 +38,7 @@ class UnionMetaLoader(
                 name = "getItemMetaById",
                 type = SpanType.EXT,
                 labels = listOf("itemId" to itemId.fullId())
-            ) { getItemMeta(itemId) ?: throw UnionMetaResolutionException("Cannot resolve meta for $itemId") }
+            ) { getItemMeta(itemId) ?: throw UnionMetaResolutionException("Cannot resolve meta for ${itemId.fullId()}") }
             withSpan(
                 name = "enrichContentMeta",
                 labels = listOf("itemId" to itemId.fullId())

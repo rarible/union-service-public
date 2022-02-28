@@ -42,22 +42,22 @@ class UnionMetaCacheLoaderListener(
     ) {
         val meta = when (val cacheEntry = cacheLoaderEvent.cacheEntry) {
             is CacheEntry.Loaded -> {
-                logger.info("Loaded meta for $itemId")
+                logger.info("Loaded meta for ${itemId.fullId()}")
                 cacheEntry.data
             }
             is CacheEntry.LoadedAndUpdateFailed -> {
-                logger.info("Failed to update meta for $itemId: ${cacheEntry.failedUpdateStatus.errorMessage}")
+                logger.info("Failed to update meta for ${itemId.fullId()}: ${cacheEntry.failedUpdateStatus.errorMessage}")
                 return
             }
             is CacheEntry.InitialFailed -> {
-                logger.info("Failed to load meta for $itemId: ${cacheEntry.failedStatus.errorMessage}")
+                logger.info("Failed to load meta for ${itemId.fullId()}: ${cacheEntry.failedStatus.errorMessage}")
                 return
             }
             is CacheEntry.LoadedAndUpdateScheduled -> return
             is CacheEntry.InitialLoadScheduled -> return
             is CacheEntry.NotAvailable -> return
         }
-        logger.info("Sending meta item update event for $itemId")
+        logger.info("Sending meta item update event for ${itemId.fullId()}")
         val item = getItem(itemId)
         val itemWithMeta = item.copy(meta = meta)
         wrappedEventProducer.send(KafkaEventFactory.wrappedItemEvent(UnionItemUpdateEvent(itemWithMeta)))
