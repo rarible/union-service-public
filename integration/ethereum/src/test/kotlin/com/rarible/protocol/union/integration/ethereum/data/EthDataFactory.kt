@@ -546,7 +546,8 @@ fun randomEthOrderActivityMatch(): OrderActivityMatchDto {
         blockHash = Word.apply(randomWord()),
         blockNumber = randomLong(),
         logIndex = randomInt(),
-        type = OrderActivityMatchDto.Type.SELL
+        type = OrderActivityMatchDto.Type.SELL,
+        reverted = false
     )
 }
 
@@ -560,7 +561,8 @@ fun randomEthOrderBidActivity(): OrderActivityBidDto {
         make = AssetDto(Erc20AssetTypeDto(randomAddress()), randomBigInt(), randomBigDecimal()),
         take = AssetDto(Erc20AssetTypeDto(randomAddress()), randomBigInt(), randomBigDecimal()),
         price = randomBigDecimal(),
-        priceUsd = randomBigDecimal()
+        priceUsd = randomBigDecimal(),
+        reverted = false
     )
 }
 
@@ -573,7 +575,8 @@ fun randomEthAuctionOpenActivity(): AuctionActivityOpenDto {
         transactionHash = Word.apply(randomWord()),
         blockHash = Word.apply(randomWord()),
         blockNumber = randomLong(),
-        logIndex = randomInt()
+        logIndex = randomInt(),
+        reverted = false
     )
 }
 
@@ -586,7 +589,8 @@ fun randomEthAuctionCancelActivity(): AuctionActivityCancelDto {
         transactionHash = Word.apply(randomWord()),
         blockHash = Word.apply(randomWord()),
         blockNumber = randomLong(),
-        logIndex = randomInt()
+        logIndex = randomInt(),
+        reverted = false
     )
 }
 
@@ -599,7 +603,8 @@ fun randomEthAuctionFinishActivity(): AuctionActivityFinishDto {
         transactionHash = Word.apply(randomWord()),
         blockHash = Word.apply(randomWord()),
         blockNumber = randomLong(),
-        logIndex = randomInt()
+        logIndex = randomInt(),
+        reverted = false
     )
 }
 
@@ -619,7 +624,8 @@ fun randomEthAuctionBidActivity(): AuctionActivityBidDto {
             data = RaribleAuctionV1BidDataV1Dto(listOf(randomEthPartDto()), listOf(randomEthPartDto())),
             date = Instant.now(),
             status = AuctionBidDto.Status.ACTIVE
-        )
+        ),
+        reverted = false
     )
 }
 
@@ -628,7 +634,8 @@ fun randomEthAuctionStartActivity(): AuctionActivityStartDto {
         id = randomString(),
         date = nowMillis(),
         source = AuctionActivityDto.Source.RARIBLE,
-        auction = randomEthAuctionDto()
+        auction = randomEthAuctionDto(),
+        reverted = false
     )
 }
 
@@ -637,7 +644,8 @@ fun randomEthAuctionEndActivity(): AuctionActivityEndDto {
         id = randomString(),
         date = nowMillis(),
         source = AuctionActivityDto.Source.RARIBLE,
-        auction = randomEthAuctionDto()
+        auction = randomEthAuctionDto(),
+        reverted = false
     )
 }
 
@@ -651,7 +659,8 @@ fun randomEthOrderListActivity(): OrderActivityListDto {
         make = AssetDto(Erc20AssetTypeDto(randomAddress()), randomBigInt(), randomBigDecimal()),
         take = AssetDto(Erc20AssetTypeDto(randomAddress()), randomBigInt(), randomBigDecimal()),
         price = randomBigDecimal(),
-        priceUsd = randomBigDecimal()
+        priceUsd = randomBigDecimal(),
+        reverted = false
     )
 }
 
@@ -667,7 +676,8 @@ fun randomEthOrderActivityCancelBid(): OrderActivityCancelBidDto {
         maker = randomAddress(),
         hash = Word.apply(randomWord()),
         make = randomEthAssetErc20().assetType,
-        take = randomEthAssetErc721().assetType
+        take = randomEthAssetErc721().assetType,
+        reverted = false
     )
 }
 
@@ -683,7 +693,8 @@ fun randomEthOrderActivityCancelList(): OrderActivityCancelListDto {
         maker = randomAddress(),
         hash = Word.apply(randomWord()),
         make = randomEthAssetErc20().assetType,
-        take = randomEthAssetErc721().assetType
+        take = randomEthAssetErc721().assetType,
+        reverted = false
     )
 }
 
@@ -698,7 +709,8 @@ fun randomEthItemMintActivity(): MintDto {
         transactionHash = Word.apply(randomWord()),
         blockHash = Word.apply(randomWord()),
         blockNumber = randomLong(),
-        logIndex = randomInt()
+        logIndex = randomInt(),
+        reverted = false
     )
 }
 
@@ -713,7 +725,8 @@ fun randomEthItemBurnActivity(): BurnDto {
         transactionHash = Word.apply(randomWord()),
         blockHash = Word.apply(randomWord()),
         blockNumber = randomLong(),
-        logIndex = randomInt()
+        logIndex = randomInt(),
+        reverted = false
     )
 }
 
@@ -729,7 +742,8 @@ fun randomEthItemTransferActivity(): TransferDto {
         transactionHash = Word.apply(randomWord()),
         blockHash = Word.apply(randomWord()),
         blockNumber = randomLong(),
-        logIndex = randomInt()
+        logIndex = randomInt(),
+        reverted = false
     )
 }
 
