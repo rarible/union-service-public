@@ -51,6 +51,8 @@ common:
     refresh:
       cron: "0 0/30 * * * *"
   useLegacyRepository: true
+  feature-flags:
+    enableRevertedActivityEvents: false
 
 
 integration:
