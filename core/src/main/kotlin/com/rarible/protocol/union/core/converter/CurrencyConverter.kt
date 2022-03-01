@@ -17,7 +17,7 @@ object CurrencyConverter {
 
     fun convert(blockchain: BlockchainDto): com.rarible.protocol.currency.dto.BlockchainDto {
         return when (blockchain) {
-            BlockchainDto.ETHEREUM -> com.rarible.protocol.currency.dto.BlockchainDto.ETHEREUM
+            BlockchainDto.ETHEREUM, BlockchainDto.IMMUTABLEX -> com.rarible.protocol.currency.dto.BlockchainDto.ETHEREUM
             BlockchainDto.FLOW -> com.rarible.protocol.currency.dto.BlockchainDto.FLOW
             BlockchainDto.POLYGON -> com.rarible.protocol.currency.dto.BlockchainDto.POLYGON
             BlockchainDto.TEZOS -> com.rarible.protocol.currency.dto.BlockchainDto.TEZOS

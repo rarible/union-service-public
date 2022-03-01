@@ -48,7 +48,7 @@ fun randomUnionCollection(): CollectionDto =
 
 fun randomUnionItem(id: ItemIdDto): UnionItem {
     return when (id.blockchain) {
-        BlockchainDto.ETHEREUM, BlockchainDto.POLYGON -> EthItemConverter.convert(
+        BlockchainDto.ETHEREUM, BlockchainDto.POLYGON, BlockchainDto.IMMUTABLEX -> EthItemConverter.convert(
             randomEthNftItemDto(id),
             id.blockchain
         )
