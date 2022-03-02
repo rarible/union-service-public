@@ -41,7 +41,8 @@ rarible:
     broker-replica-set: ${kafka.hosts}
     topicsPrefix: protocol.${application.environment}.union.internal.loader
     enableWorkers: false
-    enableNotifications: true # Enable notifications to send item update events when meta gets loaded.
+    enableNotifications: true # Enable notifications processor to send item update events when meta gets loaded.
+    enableRetrySchedulerJob: true
 
 common:
   producer:
@@ -50,6 +51,8 @@ common:
     refresh:
       cron: "0 0/30 * * * *"
   useLegacyRepository: true
+  feature-flags:
+    enableRevertedActivityEvents: false
 
 
 integration:

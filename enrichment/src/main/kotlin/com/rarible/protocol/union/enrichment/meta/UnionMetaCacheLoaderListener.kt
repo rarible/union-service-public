@@ -15,15 +15,13 @@ import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.parser.IdParser
-import com.rarible.protocol.union.enrichment.configuration.UnionMetaProperties
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
 class UnionMetaCacheLoaderListener(
     private val itemServiceRouter: BlockchainRouter<ItemService>,
-    private val wrappedEventProducer: RaribleKafkaProducer<UnionWrappedEvent>,
-    private val unionMetaProperties: UnionMetaProperties
+    private val wrappedEventProducer: RaribleKafkaProducer<UnionWrappedEvent>
 ) : CacheLoaderEventListener<UnionMeta> {
 
     private val logger = LoggerFactory.getLogger(UnionMetaCacheLoaderListener::class.java)
@@ -43,26 +41,22 @@ class UnionMetaCacheLoaderListener(
     ) {
         val meta = when (val cacheEntry = cacheLoaderEvent.cacheEntry) {
             is CacheEntry.Loaded -> {
-                logger.info("Loaded meta for $itemId")
+                logger.info("Loaded meta for ${itemId.fullId()}")
                 cacheEntry.data
             }
             is CacheEntry.LoadedAndUpdateFailed -> {
-                logger.info("Failed to update meta for $itemId: ${cacheEntry.failedUpdateStatus.errorMessage}")
+                logger.info("Failed to update meta for ${itemId.fullId()}: ${cacheEntry.failedUpdateStatus.errorMessage}")
                 return
             }
             is CacheEntry.InitialFailed -> {
-                logger.info("Failed to load meta for $itemId: ${cacheEntry.failedStatus.errorMessage}")
+                logger.info("Failed to load meta for ${itemId.fullId()}: ${cacheEntry.failedStatus.errorMessage}")
                 return
             }
             is CacheEntry.LoadedAndUpdateScheduled -> return
             is CacheEntry.InitialLoadScheduled -> return
             is CacheEntry.NotAvailable -> return
         }
-        if (unionMetaProperties.skipAttachingMetaInEvents) {
-            logger.info("Skip meta item update event for $itemId")
-            return
-        }
-        logger.info("Sending meta item update event for $itemId")
+        logger.info("Sending meta item update event for ${itemId.fullId()}")
         val item = getItem(itemId)
         val itemWithMeta = item.copy(meta = meta)
         wrappedEventProducer.send(KafkaEventFactory.wrappedItemEvent(UnionItemUpdateEvent(itemWithMeta)))

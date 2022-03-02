@@ -11,8 +11,10 @@ data class UnionMetaProperties(
     val mediaFetchTimeout: Int,
     val mediaFetchMaxSize: Long,
     val openSeaProxyUrl: String,
-    var timeoutSyncLoadingMetaMs: Long = 3000,
-    val skipAttachingMetaInEvents: Boolean = false
+    var timeoutSyncLoadingMetaMs: Long = 8000,
+    val maxLoadingTimeMs: Long = 30000
 ) {
     val timeoutSyncLoadingMeta: Duration get() = Duration.ofMillis(timeoutSyncLoadingMetaMs)
+
+    val maxLoadingTime: Duration get() = Duration.ofMillis(maxLoadingTimeMs)
 }

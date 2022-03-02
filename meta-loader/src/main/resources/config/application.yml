@@ -36,6 +36,7 @@ rarible:
     topicsPrefix: protocol.${application.environment}.union.internal.loader
     enableNotifications: false
     enableWorkers: true
+    enableRetrySchedulerJob: false
     workers: 4
     loadTasksBatchSize: 10
     retry:

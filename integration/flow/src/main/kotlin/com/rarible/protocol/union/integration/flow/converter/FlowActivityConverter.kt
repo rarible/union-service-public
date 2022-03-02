@@ -100,7 +100,8 @@ class FlowActivityConverter(
                     hash = source.hash,
                     maker = UnionAddressConverter.convert(blockchain, source.maker),
                     make = FlowConverter.convert(source.make, blockchain),
-                    take = payment
+                    take = payment,
+                    reverted = false
                 )
             }
             is FlowNftOrderActivityCancelListDto -> {
@@ -118,7 +119,8 @@ class FlowActivityConverter(
                         blockHash = source.blockHash ?: "",
                         blockNumber = source.blockNumber ?: 0,
                         logIndex = source.logIndex ?: 0
-                    )
+                    ),
+                    reverted = false
                 )
             }
             is FlowMintDto -> {
@@ -136,7 +138,8 @@ class FlowActivityConverter(
                         blockHash = source.blockHash,
                         blockNumber = source.blockNumber,
                         logIndex = source.logIndex
-                    )
+                    ),
+                    reverted = false
                 )
             }
             is FlowBurnDto -> {
@@ -154,7 +157,8 @@ class FlowActivityConverter(
                         blockHash = source.blockHash,
                         blockNumber = source.blockNumber,
                         logIndex = source.logIndex
-                    )
+                    ),
+                    reverted = false
                 )
             }
             is FlowTransferDto -> {
@@ -173,7 +177,8 @@ class FlowActivityConverter(
                         blockHash = source.blockHash,
                         blockNumber = source.blockNumber,
                         logIndex = source.logIndex
-                    )
+                    ),
+                    reverted = false
                 )
             }
             is FlowNftOrderActivityBidDto -> {
@@ -190,8 +195,8 @@ class FlowActivityConverter(
                     hash = source.hash,
                     maker = UnionAddressConverter.convert(blockchain, source.maker),
                     make = payment,
-                    take = FlowConverter.convert(source.take, blockchain)
-
+                    take = FlowConverter.convert(source.take, blockchain),
+                    reverted = false
                 )
             }
             is FlowNftOrderActivityCancelBidDto -> {
@@ -203,6 +208,7 @@ class FlowActivityConverter(
                     make = FlowConverter.convertToType(source.make, blockchain),
                     take = FlowConverter.convertToType(source.take, blockchain),
                     transactionHash = source.transactionHash ?: "",
+                    reverted = false
                 )
             }
         }
@@ -245,6 +251,7 @@ class FlowActivityConverter(
                 blockNumber = source.blockNumber,
                 logIndex = source.logIndex
             ),
+            reverted = false
         )
     }
 
@@ -265,7 +272,8 @@ class FlowActivityConverter(
             logIndex = source.logIndex
         ),
         left = convert(source.left, blockchain),
-        right = convert(source.right, blockchain)
+        right = convert(source.right, blockchain),
+        reverted = false
     )
 
     private fun convert(

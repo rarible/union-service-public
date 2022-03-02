@@ -1,5 +1,9 @@
 package com.rarible.protocol.union.enrichment.meta
 
+import com.rarible.core.apm.CaptureTransaction
+import com.rarible.core.apm.SpanType
+import com.rarible.core.apm.withSpan
+import com.rarible.core.apm.withTransaction
 import com.rarible.core.client.WebClientResponseProxyException
 import com.rarible.core.content.meta.loader.ContentMeta
 import com.rarible.protocol.union.core.model.UnionAudioProperties
@@ -28,10 +32,18 @@ class UnionMetaLoader(
 
     private val logger = LoggerFactory.getLogger(UnionMetaLoader::class.java)
 
-    suspend fun load(itemId: ItemIdDto): UnionMeta {
-        val unionMeta = getItemMeta(itemId) ?: throw UnionMetaResolutionException("Cannot resolve meta for $itemId")
-        return enrichContentMeta(unionMeta, itemId)
-    }
+    suspend fun load(itemId: ItemIdDto): UnionMeta =
+        withTransaction("UnionMetaLoader") {
+            val unionMeta = withSpan(
+                name = "getItemMetaById",
+                type = SpanType.EXT,
+                labels = listOf("itemId" to itemId.fullId())
+            ) { getItemMeta(itemId) ?: throw UnionMetaResolutionException("Cannot resolve meta for ${itemId.fullId()}") }
+            withSpan(
+                name = "enrichContentMeta",
+                labels = listOf("itemId" to itemId.fullId())
+            ) { enrichContentMeta(unionMeta, itemId) }
+        }
 
     private suspend fun getItemMeta(itemId: ItemIdDto): UnionMeta? {
         return try {
@@ -58,7 +70,7 @@ class UnionMetaLoader(
         val resolvedUrl = ipfsUrlResolver.resolveRealUrl(content.url)
         logger.info(
             "Resolving content meta for item ${itemId.fullId()} for URL ${content.url}" +
-                if (resolvedUrl != content.url) " resolved as $resolvedUrl" else "",
+                    if (resolvedUrl != content.url) " resolved as $resolvedUrl" else "",
         )
         /*
         // We should NOT re-use content properties received from blockchains since they are not support

@@ -3,6 +3,8 @@ package com.rarible.protocol.union.enrichment.meta
 import com.rarible.loader.cache.CacheLoaderService
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.dto.ItemIdDto
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.time.withTimeout
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
@@ -29,17 +31,21 @@ class UnionMetaService(
      * Return available meta, if any. Otherwise, load the meta in the current coroutine (it may be slow).
      * Additionally, schedule loading if the meta hasn't been requested for this item.
      */
-    suspend fun getAvailableMetaOrLoadSynchronously(
+    private suspend fun getAvailableMetaOrLoadSynchronously(
         itemId: ItemIdDto,
         synchronous: Boolean
     ): UnionMeta? {
         val metaCacheEntry = unionMetaCacheLoaderService.get(itemId.fullId())
         val availableMeta = metaCacheEntry.getAvailable()
+        unionMetaMetrics.onMetaCacheHitOrMiss(
+            itemId = itemId,
+            hitOrMiss = metaCacheEntry.isMetaInitiallyLoadedOrFailed()
+        )
         if (availableMeta != null) {
             return availableMeta
         }
-        unionMetaMetrics.onMetaCacheMiss(itemId, null)
         if (metaCacheEntry.isMetaInitiallyLoadedOrFailed()) {
+            logger.info("Meta loading for item ${itemId.fullId()} was failed")
             return null
         }
         if (!metaCacheEntry.isMetaInitiallyScheduledForLoading()) {
@@ -64,6 +70,12 @@ class UnionMetaService(
                 synchronous = true
             )
         }
+    } catch (e: CancellationException) {
+        logger.warn("Timeout synchronously load meta for ${itemId.fullId()} with timeout ${timeout.toMillis()} ms", e)
+        null
+    } catch (e: UnionMetaLoader.UnionMetaResolutionException) {
+        logger.info("No meta can be resolved for ${itemId.fullId()}")
+        null
     } catch (e: Exception) {
         logger.error("Cannot synchronously load meta for ${itemId.fullId()} with timeout ${timeout.toMillis()} ms", e)
         null

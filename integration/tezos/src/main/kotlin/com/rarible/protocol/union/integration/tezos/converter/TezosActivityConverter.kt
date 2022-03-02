@@ -121,7 +121,8 @@ class TezosActivityConverter(
                     hash = activity.hash,
                     maker = UnionAddressConverter.convert(blockchain, activity.maker),
                     make = payment,
-                    take = nft
+                    take = nft,
+                    reverted = false
                 )
             }
             is OrderActivityListDto -> {
@@ -136,7 +137,8 @@ class TezosActivityConverter(
                     hash = activity.hash,
                     maker = UnionAddressConverter.convert(blockchain, activity.maker),
                     make = nft,
-                    take = payment
+                    take = payment,
+                    reverted = false
                 )
             }
             is OrderActivityCancelBidDto -> {
@@ -155,7 +157,8 @@ class TezosActivityConverter(
                         blockHash = activity.blockHash,
                         blockNumber = activity.blockNumber.toLong(),
                         logIndex = activity.logIndex
-                    )
+                    ),
+                    reverted = false
                 )
             }
             is OrderActivityCancelListDto -> {
@@ -174,7 +177,8 @@ class TezosActivityConverter(
                         blockHash = activity.blockHash,
                         blockNumber = activity.blockNumber.toLong(),
                         logIndex = activity.logIndex
-                    )
+                    ),
+                    reverted = false
                 )
             }
 
@@ -201,7 +205,8 @@ class TezosActivityConverter(
                         blockHash = activity.blockHash,
                         blockNumber = activity.blockNumber.toLong(),
                         logIndex = /*source.elt.logIndex*/ 0 // TODO UNION we're planning to remove it
-                    )
+                    ),
+                    reverted = false
                 )
             }
             is BurnDto -> {
@@ -220,7 +225,8 @@ class TezosActivityConverter(
                         blockHash = activity.blockHash,
                         blockNumber = activity.blockNumber.toLong(),
                         logIndex = /*source.elt.logIndex*/ 0 // TODO UNION we're planning to remove it
-                    )
+                    ),
+                    reverted = false
                 )
             }
             is TransferDto -> {
@@ -240,7 +246,8 @@ class TezosActivityConverter(
                         blockHash = activity.elt.blockHash,
                         blockNumber = activity.elt.blockNumber.toLong(),
                         logIndex = /*source.elt.logIndex*/ 0 // TODO UNION we're planning to remove it
-                    )
+                    ),
+                    reverted = false
                 )
             }
         }
@@ -337,7 +344,8 @@ class TezosActivityConverter(
             price = activity.price,
             priceUsd = priceUsd,
             amountUsd = priceUsd?.multiply(nft.asset.value),
-            type = type
+            type = type,
+            reverted = false
         )
     }
 
@@ -355,7 +363,8 @@ class TezosActivityConverter(
         // TODO UNION remove in 1.19
         blockchainInfo = asActivityBlockchainInfo(activity),
         left = convert(activity.left, blockchain),
-        right = convert(activity.right, blockchain)
+        right = convert(activity.right, blockchain),
+        reverted = false
     )
 
     private fun asActivityBlockchainInfo(source: OrderActivityMatchDto) = ActivityBlockchainInfoDto(

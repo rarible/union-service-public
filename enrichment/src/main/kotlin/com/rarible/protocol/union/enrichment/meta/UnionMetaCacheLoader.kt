@@ -4,11 +4,14 @@ import com.rarible.loader.cache.CacheLoader
 import com.rarible.loader.cache.CacheType
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.dto.parser.IdParser
+import com.rarible.protocol.union.enrichment.configuration.UnionMetaProperties
+import kotlinx.coroutines.time.withTimeout
 import org.springframework.stereotype.Component
 
 @Component
 class UnionMetaCacheLoader(
-    private val unionMetaLoader: UnionMetaLoader
+    private val unionMetaLoader: UnionMetaLoader,
+    private val unionMetaProperties: UnionMetaProperties
 ) : CacheLoader<UnionMeta> {
 
     override val type
@@ -16,7 +19,9 @@ class UnionMetaCacheLoader(
 
     override suspend fun load(key: String): UnionMeta {
         val itemId = IdParser.parseItemId(key)
-        return unionMetaLoader.load(itemId)
+        return withTimeout(unionMetaProperties.maxLoadingTime) {
+            unionMetaLoader.load(itemId)
+        }
     }
 
     companion object {
