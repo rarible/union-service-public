@@ -27,7 +27,7 @@ class ReconciliationMarkJob(
     )
 
     @Scheduled(
-        fixedRateString = "\${listener.reconcile-marks.rate}",
+        fixedDelayString = "\${listener.reconcile-marks.rate}",
         initialDelayString = "\${listener.reconcile-marks.delay}"
     )
     fun reconcileMarkedRecords() = runBlocking {
