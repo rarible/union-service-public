@@ -42,7 +42,10 @@ class UnionMetaLoader(
             withSpan(
                 name = "enrichContentMeta",
                 labels = listOf("itemId" to itemId.fullId())
-            ) { enrichContentMeta(unionMeta, itemId) }
+            ) {
+                val content = enrichContentMetaWithTimeout(unionMeta.content, itemId)
+                unionMeta.copy(content = content ?: unionMeta.content)
+            }
         }
 
     private suspend fun getItemMeta(itemId: ItemIdDto): UnionMeta? {
@@ -57,37 +60,38 @@ class UnionMetaLoader(
         }
     }
 
-    private suspend fun enrichContentMeta(meta: UnionMeta, itemId: ItemIdDto): UnionMeta {
-        return meta.copy(content = coroutineScope {
-            meta.content.map { async { enrichContentMeta(it, itemId) } }.awaitAll()
-        })
+    private suspend fun enrichContentMetaWithTimeout(
+        metaContent: List<UnionMetaContent>,
+        itemId: ItemIdDto
+    ): List<UnionMetaContent>? {
+        return try {
+            withTimeout(Duration.ofMillis(metaProperties.mediaFetchTimeout.toLong())) {
+                enrichContentMeta(metaContent, itemId)
+            }
+        } catch (e: CancellationException) {
+            logger.info("Content meta resolution for ${itemId.fullId()}: timeout of ${metaProperties.mediaFetchTimeout.toLong()} ms")
+            null
+        }
     }
 
     private suspend fun enrichContentMeta(
-        content: UnionMetaContent,
+        metaContent: List<UnionMetaContent>,
         itemId: ItemIdDto
-    ): UnionMetaContent {
-        val resolvedUrl = ipfsUrlResolver.resolveRealUrl(content.url)
-        logger.info(
-            "Resolving content meta for item ${itemId.fullId()} for URL ${content.url}" +
-                    if (resolvedUrl != content.url) " resolved as $resolvedUrl" else "",
-        )
-        val enrichedProperties = try {
-            withTimeout(Duration.ofMillis(metaProperties.mediaFetchTimeout.toLong())) {
-                unionContentMetaLoader.fetchContentMeta(resolvedUrl, itemId)
-            }
-        } catch (e: CancellationException) {
-            logger.info(
-                "Timeout of ${metaProperties.mediaFetchTimeout} ms to resolve content meta for ${itemId.fullId()} by $resolvedUrl",
-                e
-            )
-            null
-        } catch (e: Exception) {
-            logger.info("Failed to resolve content meta for ${itemId.fullId()} by $resolvedUrl",)
-            null
+    ): List<UnionMetaContent> {
+        return coroutineScope {
+            metaContent.map { content ->
+                async {
+                    val resolvedUrl = ipfsUrlResolver.resolveRealUrl(content.url)
+                    logger.info(
+                        "Content meta resolution for ${itemId.fullId()} by URL ${content.url}: " +
+                                if (resolvedUrl != content.url) " resolved as $resolvedUrl" else ""
+                    )
+
+                    val contentProperties = unionContentMetaLoader.fetchContentMeta(resolvedUrl, itemId)
+                    content.copy(url = resolvedUrl, properties = contentProperties)
+                }
+            }.awaitAll()
         }
-        logger.info("Resolved content meta for ${itemId.fullId()} by $resolvedUrl: $enrichedProperties")
-        return content.copy(url = resolvedUrl, properties = enrichedProperties)
     }
 
     class UnionMetaResolutionException(message: String) : RuntimeException(message)
