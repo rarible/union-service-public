@@ -32,7 +32,7 @@ class UnionContentMetaLoaderIt : AbstractIntegrationTest() {
     fun `load content meta`() = runBlocking<Unit> {
         val url = createRandomUrl()
         val contentMeta = createRandomContent()
-        coEvery { testContentMetaLoader.fetchContentMeta(url) } returns contentMeta
+        coEvery { testContentMetaReceiver.receive(url) } returns contentMeta
         assertThat(unionContentMetaLoader.fetchContentMeta(url, randomEthItemId())).isEqualTo(contentMeta)
     }
 
@@ -104,7 +104,7 @@ class UnionContentMetaLoaderIt : AbstractIntegrationTest() {
                 height = 1080
             )
         )
-        coVerify(exactly = 0) { testContentMetaLoader.fetchContentMeta(any()) }
+        coVerify(exactly = 0) { testContentMetaReceiver.receive(any<String>()) }
     }
 
     private fun createRandomUrl(): String =

@@ -124,5 +124,5 @@ listener:
 meta:
   ipfsGateway: "https://rarible.mypinata.cloud/"
   mediaFetchTimeout: 10000
-  mediaFetchMaxSize: 10485760
+  mediaFetchMaxSize: 131072 # 128 Kb
   openSeaProxyUrl: ${consul.meta.openSeaProxyUrl}
