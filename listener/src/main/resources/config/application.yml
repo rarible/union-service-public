@@ -126,3 +126,8 @@ meta:
   mediaFetchTimeout: 10000
   mediaFetchMaxSize: 131072 # 128 Kb
   openSeaProxyUrl: ${consul.meta.openSeaProxyUrl}
+
+# Disable verbose logs of Apache HTTP client used to load content media metadata.
+logging:
+  level:
+    org.apache.http: ERROR

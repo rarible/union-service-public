@@ -100,3 +100,8 @@ integration:
 common:
   producer:
     broker-replica-set: ${kafka.hosts}
+
+# Disable verbose logs of Apache HTTP client used to load content media metadata.
+logging:
+  level:
+    org.apache.http: ERROR
