@@ -78,16 +78,15 @@ class UnionMetaLoader(
             }
         } catch (e: CancellationException) {
             logger.info(
-                "Timeout of ${metaProperties.mediaFetchTimeout} ms to resolve content meta for ${itemId.fullId()} for URL ${content.url}",
+                "Timeout of ${metaProperties.mediaFetchTimeout} ms to resolve content meta for ${itemId.fullId()} by $resolvedUrl",
                 e
             )
             null
         } catch (e: Exception) {
-            logger.info(
-                "Failed to resolve content meta for ${itemId.fullId()} for URL ${content.url}",
-            )
+            logger.info("Failed to resolve content meta for ${itemId.fullId()} by $resolvedUrl",)
             null
         }
+        logger.info("Resolved content meta for ${itemId.fullId()} by $resolvedUrl: $enrichedProperties")
         return content.copy(url = resolvedUrl, properties = enrichedProperties)
     }
 
