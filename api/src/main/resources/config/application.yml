@@ -55,6 +55,10 @@ integration:
     auctionContracts: ${consul.tezos.auctionContracts:}
   solana:
     enabled: ${consul.solana.enabled:false}
+  immutablex:
+    enabled: ${consul.immutblex.enabled:true}
+    client:
+      url: ${consul.immutablex.api.baseUrl:}
 
 common:
   producer:

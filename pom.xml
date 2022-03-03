@@ -168,6 +168,19 @@
                 <scope>test</scope>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.rarible.protocol.union</groupId>
+                <artifactId>rarible-union-integration-immutablex</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.rarible.protocol.union</groupId>
+                <artifactId>rarible-union-integration-immutablex</artifactId>
+                <classifier>tests</classifier>
+                <type>test-jar</type>
+                <scope>test</scope>
+                <version>${project.version}</version>
+            </dependency>
 
             <!-- =========== Union Protocol-API =========== -->
             <dependency>

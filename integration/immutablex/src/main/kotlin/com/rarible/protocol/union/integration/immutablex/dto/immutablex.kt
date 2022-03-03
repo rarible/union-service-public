@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.integration.immutablex.dto
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 import java.math.BigDecimal
 import java.time.Instant
@@ -35,3 +36,33 @@ data class ImmutablexCollection(
 
 data class ImmutablexFee(val address: String, val percentage: BigDecimal, val type: String)
 
+data class ImmutablexAssetsPage(
+    val cursor: String,
+    val remaining: Boolean,
+    val result: List<ImmutablexAsset>
+)
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class ImmutableMint(
+    val transactionId: Long,
+    val token: Token,
+    val user: String,
+    val timestamp: Instant
+)
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class Token(val type: String, val data: TokenData)
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class TokenData(
+    @JsonProperty("token_id")
+    val tokenId: String,
+    @JsonProperty("token_address")
+    val tokenAddress: String
+)
+
+data class ImmutablexMintsPage(
+    val cursor: String,
+    val remaining: Boolean,
+    val result: List<ImmutableMint>
+)

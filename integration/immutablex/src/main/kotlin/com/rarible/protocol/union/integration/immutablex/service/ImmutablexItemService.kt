@@ -22,7 +22,12 @@ class ImmutablexItemService(
         lastUpdatedFrom: Long?,
         lastUpdatedTo: Long?,
     ): Page<UnionItem> {
-        TODO("Not yet implemented")
+        val page = client.getAllAssets(continuation, size, lastUpdatedTo, lastUpdatedFrom)
+        return Page(
+            total = page.result.size.toLong(),
+            continuation = if (page.remaining) page.cursor else null,
+            entities = page.result.map { ImmutablexItemConverter.convert(it, blockchain) }
+        )
     }
 
     override suspend fun getItemById(itemId: String): UnionItem {
@@ -51,18 +56,33 @@ class ImmutablexItemService(
         continuation: String?,
         size: Int,
     ): Page<UnionItem> {
-        TODO("Not yet implemented")
+        val page = client.getAssetsByCollection(collection, owner, continuation, size)
+        return Page(
+            total = page.result.size.toLong(),
+            continuation = if (page.remaining) page.cursor else null,
+            entities = page.result.map { ImmutablexItemConverter.convert(it, blockchain) }
+        )
     }
 
     override suspend fun getItemsByCreator(creator: String, continuation: String?, size: Int): Page<UnionItem> {
-        TODO("Not yet implemented")
+        val page = client.getAssetsByCreator(creator, continuation, size)
+        return Page(
+            total = page.result.size.toLong(),
+            continuation = if (page.remaining) page.cursor else null,
+            entities = page.result.map { ImmutablexItemConverter.convert(it, blockchain) }
+        )
     }
 
     override suspend fun getItemsByOwner(owner: String, continuation: String?, size: Int): Page<UnionItem> {
-        TODO("Not yet implemented")
+        val page = client.getAssetsByOwner(owner, continuation, size)
+        return Page(
+            total = page.result.size.toLong(),
+            continuation = if (page.remaining) page.cursor else null,
+            entities = page.result.map { ImmutablexItemConverter.convert(it, blockchain) }
+        )
     }
 
     override suspend fun getItemsByIds(itemIds: List<String>): List<UnionItem> {
-        TODO("Not yet implemented")
+        return client.getAssetsByIds(itemIds).map { ImmutablexItemConverter.convert(it, blockchain) }
     }
 }

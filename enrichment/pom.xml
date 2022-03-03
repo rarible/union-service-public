@@ -50,6 +50,10 @@
             <groupId>com.rarible.protocol.union</groupId>
             <artifactId>rarible-union-integration-solana</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.rarible.protocol.union</groupId>
+            <artifactId>rarible-union-integration-immutablex</artifactId>
+        </dependency>
 
         <!-- =============== Rarible-core ================ -->
         <dependency>
@@ -107,6 +111,13 @@
         <dependency>
             <groupId>com.rarible.protocol.union</groupId>
             <artifactId>rarible-union-integration-solana</artifactId>
+            <classifier>tests</classifier>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.rarible.protocol.union</groupId>
+            <artifactId>rarible-union-integration-immutablex</artifactId>
             <classifier>tests</classifier>
             <type>test-jar</type>
             <scope>test</scope>

@@ -16,7 +16,6 @@ class ImmutablexIntegrationProperties(
     client: DefaultClientProperties?,
     daemon: DaemonWorkerProperties = DaemonWorkerProperties(),
     auctionContracts: String? = null,
-    val apiUrl: String
 ): DefaultBlockchainProperties(
     BlockchainDto.IMMUTABLEX,
     enabled,

@@ -16,6 +16,10 @@ class ImmutablexItemServiceTest {
 
     private val mapper = jacksonObjectMapper().registerModule(JavaTimeModule())
 
+    private val itemId = "0xacb3c6a43d15b907e8433077b6d38ae40936fe2c:51267701"
+
+    private val fullItemId = "${BlockchainDto.IMMUTABLEX}:$itemId"
+
     private val expectedAsset by lazy {
         mapper.readValue(
             ImmutablexItemServiceTest::class.java.getResourceAsStream("asset.json"),
@@ -31,10 +35,8 @@ class ImmutablexItemServiceTest {
 
 
     @Test
-    internal fun `should parse item from api`() {
+    internal fun `get item by id`() {
         runBlocking {
-            val itemId = "0xacb3c6a43d15b907e8433077b6d38ae40936fe2c:51267701"
-            val fullItemId = "${BlockchainDto.IMMUTABLEX}:$itemId"
             val item = service.getItemById(itemId)
             Assertions.assertNotNull(item)
             Assertions.assertEquals(fullItemId, item.id.fullId())
@@ -47,6 +49,18 @@ class ImmutablexItemServiceTest {
             Assertions.assertEquals(expectedAsset.updatedAt, item.lastUpdatedAt)
             Assertions.assertEquals(BigInteger.ZERO, item.lazySupply)
             Assertions.assertEquals(BigInteger.ONE, item.supply)
+        }
+    }
+
+    @Test
+    internal fun `get item meta by id`() {
+        runBlocking {
+            val meta = service.getItemMetaById(itemId)
+            Assertions.assertNotNull(meta)
+            Assertions.assertEquals(expectedAsset.name, meta.name)
+            Assertions.assertEquals(expectedAsset.description, meta.description)
+            Assertions.assertFalse(meta.content.isEmpty())
+            Assertions.assertFalse(meta.attributes.isEmpty())
         }
     }
 }
