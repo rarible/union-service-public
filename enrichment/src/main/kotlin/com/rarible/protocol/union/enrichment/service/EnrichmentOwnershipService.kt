@@ -63,7 +63,7 @@ class EnrichmentOwnershipService(
     suspend fun getItemSellStats(itemId: ShortItemId): ItemSellStats {
         val now = nowMillis()
         val result = ownershipRepository.getItemSellStats(itemId)
-        logger.info("SellStat query executed for ItemId [{}]: [{}] ({}ms)", itemId, result, spent(now))
+        logger.info("SellStat query executed for ItemId [{}]: [{}] ({}ms)", itemId.toDto().fullId(), result, spent(now))
         return result
     }
 
