@@ -32,10 +32,15 @@ class UnionContentMetaLoader(
             logger.warn("Content meta resolution: error for {} by URL {}", itemId.fullId(), url, e)
             return null
         }
-        if (contentMeta == null) {
-            logger.warn("Content meta resolution: nothing was resolved for {} by URL {}", itemId.fullId(), url)
-        }
-        return contentMeta?.toUnionMetaContentProperties()
+        val contentProperties = contentMeta?.toUnionMetaContentProperties()
+        logger.info(
+            "Content meta resolution: for {} by URL {} resolved {} converted to {}",
+            itemId.fullId(),
+            url,
+            contentMeta,
+            contentProperties
+        )
+        return contentProperties
     }
 
     private suspend fun fetchFromCache(url: String): ContentMeta? {
