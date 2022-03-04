@@ -51,6 +51,7 @@ meta:
   mediaFetchTimeout: 10000
   mediaFetchMaxSize: 131072 # 128 Kb
   openSeaProxyUrl: ${consul.meta.openSeaProxyUrl}
+  ktorApacheHttpClientThreadCount: 64
 
 integration:
   ethereum:

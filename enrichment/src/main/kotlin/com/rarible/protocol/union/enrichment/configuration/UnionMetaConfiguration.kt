@@ -27,7 +27,8 @@ class UnionMetaConfiguration {
     fun contentReceiver(
         unionMetaProperties: UnionMetaProperties
     ): ContentReceiver = KtorApacheClientContentReceiver(
-        timeout = unionMetaProperties.mediaFetchTimeout
+        timeout = unionMetaProperties.mediaFetchTimeout,
+        threadsCount = unionMetaProperties.ktorApacheHttpClientThreadCount
     )
 
     @Bean
