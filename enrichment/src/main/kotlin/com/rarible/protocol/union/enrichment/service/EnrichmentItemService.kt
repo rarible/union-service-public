@@ -99,7 +99,6 @@ class EnrichmentItemService(
         auctions: Map<AuctionIdDto, AuctionDto> = emptyMap(),
         waitSyncTimeout: Duration? = null
     ) = coroutineScope {
-        logger.info("Enriching item shortItem={}, item={}", shortItem, item)
         require(shortItem != null || item != null)
         val itemId = shortItem?.id?.toDto() ?: item!!.id
         val fetchedItem = withSpanAsync("fetchItem", spanType = SpanType.EXT) {
@@ -129,13 +128,15 @@ class EnrichmentItemService(
             enrichmentAuctionService.fetchAuctionsIfAbsent(auctionIds, auctions)
         }
 
-        EnrichedItemConverter.convert(
+        val itemDto = EnrichedItemConverter.convert(
             item = fetchedItem.await(),
             shortItem = shortItem,
             meta = meta.await(),
             orders = bestOrders,
             auctions = auctionsData.await()
         )
+        logger.info("Enriched item {}: {}", itemId.fullId(), itemDto)
+        itemDto
     }
 
     private fun <T> CoroutineScope.withSpanAsync(
