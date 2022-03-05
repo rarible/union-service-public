@@ -14,7 +14,8 @@ object ShortOwnershipConverter {
             // Default enrichment data
             bestSellOrders = emptyMap(),
             bestSellOrder = null,
-            lastUpdatedAt = Instant.EPOCH
+            lastUpdatedAt = Instant.EPOCH,
+            source = null
         )
     }
 }

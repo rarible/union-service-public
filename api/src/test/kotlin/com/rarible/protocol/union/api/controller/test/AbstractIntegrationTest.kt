@@ -21,6 +21,7 @@ import com.rarible.protocol.nftorder.api.test.mock.EthItemControllerApiMock
 import com.rarible.protocol.nftorder.api.test.mock.EthOrderControllerApiMock
 import com.rarible.protocol.order.api.client.AuctionActivityControllerApi
 import com.rarible.protocol.order.api.client.OrderActivityControllerApi
+import com.rarible.protocol.union.api.controller.test.mock.eth.EthActivityControllerApiMock
 import com.rarible.protocol.union.api.controller.test.mock.eth.EthOwnershipControllerApiMock
 import com.rarible.protocol.union.api.controller.test.mock.flow.FlowItemControllerApiMock
 import com.rarible.protocol.union.api.controller.test.mock.flow.FlowOrderControllerApiMock
@@ -109,6 +110,7 @@ abstract class AbstractIntegrationTest {
     lateinit var ethereumOwnershipControllerApiMock: EthOwnershipControllerApiMock
     lateinit var ethereumOrderControllerApiMock: EthOrderControllerApiMock
     lateinit var ethereumAuctionControllerApiMock: EthAuctionControllerApiMock
+    lateinit var ethereumActivityControllerApiMock: EthActivityControllerApiMock
 
     //--------------------- POLYGON ---------------------//
     @Autowired
@@ -217,6 +219,7 @@ abstract class AbstractIntegrationTest {
         ethereumOwnershipControllerApiMock = EthOwnershipControllerApiMock(testEthereumOwnershipApi)
         ethereumOrderControllerApiMock = EthOrderControllerApiMock(testEthereumOrderApi)
         ethereumAuctionControllerApiMock = EthAuctionControllerApiMock(testEthereumAuctionApi)
+        ethereumActivityControllerApiMock = EthActivityControllerApiMock(testEthereumActivityItemApi)
 
         polygonItemControllerApiMock = EthItemControllerApiMock(testPolygonItemApi)
         polygonOwnershipControllerApiMock = EthOwnershipControllerApiMock(testPolygonOwnershipApi)

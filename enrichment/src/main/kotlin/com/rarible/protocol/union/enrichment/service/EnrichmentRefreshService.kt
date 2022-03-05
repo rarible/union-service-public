@@ -44,6 +44,7 @@ class EnrichmentRefreshService(
     private val bestOrderService: BestOrderService,
     private val enrichmentOrderService: EnrichmentOrderService,
     private val enrichmentAuctionService: EnrichmentAuctionService,
+    private val enrichmentActivityService: EnrichmentActivityService,
     private val enrichmentItemService: EnrichmentItemService,
     private val unionMetaProperties: UnionMetaProperties,
     private val enrichmentOwnershipService: EnrichmentOwnershipService,
@@ -196,6 +197,8 @@ class EnrichmentRefreshService(
     ) = coroutineScope {
         val shortOwnershipId = ShortOwnershipId(ownership.id)
 
+        val ownershipSource = async { enrichmentActivityService.getOwnershipSource(shortOwnershipId.toDto()) }
+
         val bestSellOrdersDto = currencies.map { currencyId ->
             async { enrichmentOrderService.getBestSell(shortOwnershipId, currencyId) }
         }.awaitAll().filterNotNull()
@@ -206,7 +209,8 @@ class EnrichmentRefreshService(
         val updatedOwnership = optimisticLock {
             val shortOwnership = enrichmentOwnershipService.getOrEmpty(shortOwnershipId).copy(
                 bestSellOrders = bestSellOrders,
-                bestSellOrder = bestOrderService.getBestSellOrderInUsd(bestSellOrders)
+                bestSellOrder = bestOrderService.getBestSellOrderInUsd(bestSellOrders),
+                source = ownershipSource.await()
             )
 
             if (shortOwnership.isNotEmpty()) {

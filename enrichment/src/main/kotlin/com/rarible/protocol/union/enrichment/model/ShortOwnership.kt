@@ -2,6 +2,7 @@ package com.rarible.protocol.union.enrichment.model
 
 import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.OwnershipSourceDto
 import org.springframework.data.annotation.AccessType
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.Transient
@@ -21,6 +22,8 @@ data class ShortOwnership(
     val multiCurrency: Boolean = bestSellOrders.size > 1,
 
     val bestSellOrder: ShortOrder?,
+
+    val source: OwnershipSourceDto?,
 
     val lastUpdatedAt: Instant,
 
@@ -45,7 +48,8 @@ data class ShortOwnership(
                 bestSellOrder = null,
                 lastUpdatedAt = nowMillis(),
 
-                version = null
+                version = null,
+                source = null
             )
         }
     }

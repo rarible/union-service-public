@@ -24,6 +24,7 @@ import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivityIdDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.BurnActivityDto
+import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.MintActivityDto
 import com.rarible.protocol.union.dto.OrderActivityMatchSideDto
 import com.rarible.protocol.union.dto.OrderActivitySourceDto
@@ -194,8 +195,9 @@ class TezosActivityConverter(
                     id = activityId,
                     date = date,
                     owner = UnionAddressConverter.convert(blockchain, activity.owner),
-                    contract = ContractAddressConverter.convert(blockchain, activity.contract),
-                    tokenId = activity.tokenId,
+                    contract = ContractAddressConverter.convert(blockchain, activity.contract), // TODO remove later
+                    tokenId = activity.tokenId, // TODO remove later
+                    itemId = ItemIdDto(blockchain, activity.contract, activity.tokenId),
                     // Tezos send it as BigDecimal, but in fact, that's BigInteger
                     value = activity.value.toBigInteger(),
                     transactionHash = activity.transactionHash,
@@ -214,8 +216,9 @@ class TezosActivityConverter(
                     id = activityId,
                     date = date,
                     owner = UnionAddressConverter.convert(blockchain, activity.owner),
-                    contract = ContractAddressConverter.convert(blockchain, activity.contract),
-                    tokenId = activity.tokenId,
+                    contract = ContractAddressConverter.convert(blockchain, activity.contract), // TODO remove later
+                    tokenId = activity.tokenId, // TODO remove later
+                    itemId = ItemIdDto(blockchain, activity.contract, activity.tokenId),
                     // Tezos send it as BigDecimal, but in fact, that's BigInteger
                     value = activity.value.toBigInteger(),
                     transactionHash = activity.transactionHash,
@@ -235,8 +238,9 @@ class TezosActivityConverter(
                     date = date,
                     from = UnionAddressConverter.convert(blockchain, activity.from),
                     owner = UnionAddressConverter.convert(blockchain, activity.elt.owner),
-                    contract = ContractAddressConverter.convert(blockchain, activity.elt.contract),
-                    tokenId = activity.elt.tokenId,
+                    contract = ContractAddressConverter.convert(blockchain, activity.elt.contract), // TODO remove later
+                    tokenId = activity.elt.tokenId, // TODO remove later
+                    itemId = ItemIdDto(blockchain, activity.elt.contract, activity.elt.tokenId),
                     // Tezos send it as BigDecimal, but in fact, that's BigInteger
                     value = activity.elt.value.toBigInteger(),
                     transactionHash = activity.elt.transactionHash,

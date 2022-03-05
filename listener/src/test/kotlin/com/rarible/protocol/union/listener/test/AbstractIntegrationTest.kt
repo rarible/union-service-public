@@ -74,6 +74,9 @@ abstract class AbstractIntegrationTest {
     lateinit var ethOrderProducer: RaribleKafkaProducer<com.rarible.protocol.dto.OrderEventDto>
 
     @Autowired
+    lateinit var ethActivityProducer: RaribleKafkaProducer<com.rarible.protocol.dto.ActivityDto>
+
+    @Autowired
     lateinit var collectionConsumer: RaribleKafkaConsumer<CollectionEventDto>
     var collectionEvents: Queue<KafkaMessage<CollectionEventDto>>? = null
     private var collectionJob: Deferred<Unit>? = null
