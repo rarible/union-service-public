@@ -41,7 +41,9 @@ object EnrichedItemConverter {
             mintedAt = item.mintedAt,
             lastUpdatedAt = item.lastUpdatedAt,
             supply = item.supply,
-            meta = meta?.let { EnrichedMetaConverter.convert(it) },
+            // TODO: see CHARLIE-158: we will ignore meta from blockhain Item DTOs' soon and only load metadata on union.
+            //  This fallback is needed to guarantee that the first event for a just minted item contains meta.
+            meta = (meta ?: item.meta)?.let { EnrichedMetaConverter.convert(it) },
             deleted = item.deleted,
 
             // Enrichment data

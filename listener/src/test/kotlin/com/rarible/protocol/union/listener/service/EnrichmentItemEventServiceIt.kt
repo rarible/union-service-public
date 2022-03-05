@@ -70,7 +70,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
     @Test
     fun `update event - item doesn't exist`() = runWithKafka {
         val itemId = randomEthItemId()
-        val unionItem = randomUnionItem(itemId).copy(meta = null)
+        val unionItem = randomUnionItem(itemId)
 
         itemEventService.onItemUpdated(unionItem)
 
@@ -85,7 +85,9 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
             assertThat(messages[0].key).isEqualTo(itemId.fullId())
             assertThat(messages[0].id).isEqualTo(itemId.fullId())
             assertThat(messages[0].value.itemId).isEqualTo(itemId)
-            assertThat(messages[0].value.item).isEqualTo(EnrichedItemConverter.convert(unionItem, meta = null))
+
+            // TODO: see CHARLIE-158: here we ensure that meta is taken from the blockchain's Item.
+            assertThat(messages[0].value.item).isEqualTo(EnrichedItemConverter.convert(unionItem, meta = unionItem.meta))
         }
     }
 
