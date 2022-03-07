@@ -1,7 +1,12 @@
 package com.rarible.protocol.union.enrichment.meta
 
 import com.rarible.core.content.meta.loader.ContentMeta
-import com.rarible.core.content.meta.loader.ContentMetaLoader
+import com.rarible.core.content.meta.loader.ContentMetaReceiver
+import com.rarible.protocol.union.core.model.UnionAudioProperties
+import com.rarible.protocol.union.core.model.UnionImageProperties
+import com.rarible.protocol.union.core.model.UnionMetaContentProperties
+import com.rarible.protocol.union.core.model.UnionModel3dProperties
+import com.rarible.protocol.union.core.model.UnionVideoProperties
 import com.rarible.protocol.union.dto.ItemIdDto
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.slf4j.LoggerFactory
@@ -11,26 +16,31 @@ import org.springframework.stereotype.Component
 
 @Component
 class UnionContentMetaLoader(
-    private val contentMetaLoader: ContentMetaLoader,
+    private val contentMetaReceiver: ContentMetaReceiver,
     private val template: ReactiveMongoTemplate
 ) {
     private val logger = LoggerFactory.getLogger(UnionContentMetaLoader::class.java)
 
-    suspend fun fetchContentMeta(url: String, itemId: ItemIdDto): ContentMeta? {
+    suspend fun fetchContentMeta(url: String, itemId: ItemIdDto): UnionMetaContentProperties? {
         val fromCache = fetchFromCache(url)
         if (fromCache != null) {
-            return fromCache
+            return fromCache.toUnionMetaContentProperties()
         }
         val contentMeta = try {
-            contentMetaLoader.fetchContentMeta(url)
+            contentMetaReceiver.receive(url)
         } catch (e: Exception) {
             logger.warn("Content meta resolution: error for {} by URL {}", itemId.fullId(), url, e)
             return null
         }
-        if (contentMeta == null) {
-            logger.warn("Content meta resolution: nothing was resolved for {} by URL {}", itemId.fullId(), url)
-        }
-        return contentMeta
+        val contentProperties = contentMeta?.toUnionMetaContentProperties()
+        logger.info(
+            "Content meta resolution: for {} by URL {} resolved {} converted to {}",
+            itemId.fullId(),
+            url,
+            contentMeta,
+            contentProperties
+        )
+        return contentProperties
     }
 
     private suspend fun fetchFromCache(url: String): ContentMeta? {
@@ -52,6 +62,44 @@ class UnionContentMetaLoader(
         }
         return null
     }
+
+    private fun ContentMeta.toUnionMetaContentProperties(): UnionMetaContentProperties? {
+        val isImage = type.contains("image")
+        val isVideo = type.contains("video")
+        val isAudio = type.contains("audio") // TODO[media]: add dedicated properties for audio.
+        val isModel = type.contains("model")
+        return when {
+            isImage -> toImageProperties()
+            isVideo -> toVideoProperties()
+            isAudio -> toAudioProperties()
+            isModel -> toModel3dProperties()
+            else -> return null
+        }
+    }
+
+    private fun ContentMeta.toVideoProperties() = UnionVideoProperties(
+        mimeType = type,
+        width = width,
+        height = height,
+        size = size
+    )
+
+    private fun ContentMeta.toImageProperties() = UnionImageProperties(
+        mimeType = type,
+        width = width,
+        height = height,
+        size = size
+    )
+
+    private fun ContentMeta.toAudioProperties() = UnionAudioProperties(
+        mimeType = type,
+        size = size
+    )
+
+    private fun ContentMeta.toModel3dProperties() = UnionModel3dProperties(
+        mimeType = type,
+        size = size
+    )
 
     @OptIn(ExperimentalStdlibApi::class)
     private fun getCandidateUrls(url: String): List<String> =

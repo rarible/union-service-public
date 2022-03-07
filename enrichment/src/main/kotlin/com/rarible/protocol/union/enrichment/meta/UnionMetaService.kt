@@ -4,7 +4,6 @@ import com.rarible.loader.cache.CacheLoaderService
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.dto.ItemIdDto
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.time.withTimeout
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
@@ -52,6 +51,7 @@ class UnionMetaService(
             scheduleLoading(itemId)
         }
         if (synchronous) {
+            logger.info("Loading meta synchronously for ${itemId.fullId()}")
             return unionMetaCacheLoader.load(itemId.fullId())
         }
         return null

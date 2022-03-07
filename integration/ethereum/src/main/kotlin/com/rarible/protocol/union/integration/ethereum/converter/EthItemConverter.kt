@@ -48,6 +48,7 @@ object EthItemConverter {
             mintedAt = item.mintedAt ?: nowMillis(),
             lastUpdatedAt = item.lastUpdatedAt ?: nowMillis(),
             supply = item.supply,
+            // TODO: see CHARLIE-158: at some point, we will ignore meta from blockchains, and always load meta on union service.
             meta = item.meta?.let { convert(it) },
             deleted = item.deleted ?: false,
             creators = item.creators.map { EthConverter.convertToCreator(it, blockchain) },
