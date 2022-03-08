@@ -12,10 +12,8 @@ data class UnionMetaProperties(
     val mediaFetchMaxSize: Long,
     val openSeaProxyUrl: String,
     val ktorApacheHttpClientThreadCount: Int = 8,
-    var timeoutSyncLoadingMetaMs: Long = 8000,
+    var timeoutSyncLoadingMetaMs: Long = 15000,
     val maxLoadingTimeMs: Long = 30000
 ) {
     val timeoutSyncLoadingMeta: Duration get() = Duration.ofMillis(timeoutSyncLoadingMetaMs)
-
-    val maxLoadingTime: Duration get() = Duration.ofMillis(maxLoadingTimeMs)
 }
