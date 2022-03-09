@@ -20,6 +20,7 @@ import com.rarible.protocol.union.dto.ActivityIdDto
 import com.rarible.protocol.union.dto.AssetDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.BurnActivityDto
+import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.MintActivityDto
 import com.rarible.protocol.union.dto.OrderActivityMatchSideDto
 import com.rarible.protocol.union.dto.OrderActivitySourceDto
@@ -128,8 +129,9 @@ class FlowActivityConverter(
                     id = activityId,
                     date = source.date,
                     owner = UnionAddressConverter.convert(blockchain, source.owner),
-                    contract = ContractAddressConverter.convert(blockchain, source.contract),
-                    tokenId = source.tokenId,
+                    contract = ContractAddressConverter.convert(blockchain, source.contract), // TODO remove later
+                    tokenId = source.tokenId, // TODO remove later
+                    itemId = ItemIdDto(blockchain, source.contract, source.tokenId),
                     value = source.value,
                     transactionHash = source.transactionHash,
                     // TODO UNION remove in 1.19
@@ -147,8 +149,9 @@ class FlowActivityConverter(
                     id = activityId,
                     date = source.date,
                     owner = UnionAddressConverter.convert(blockchain, source.owner),
-                    contract = ContractAddressConverter.convert(blockchain, source.contract),
-                    tokenId = source.tokenId,
+                    contract = ContractAddressConverter.convert(blockchain, source.contract), // TODO remove later
+                    tokenId = source.tokenId, // TODO remove later
+                    itemId = ItemIdDto(blockchain, source.contract, source.tokenId),
                     value = source.value,
                     transactionHash = source.transactionHash,
                     // TODO UNION remove in 1.19
@@ -167,8 +170,9 @@ class FlowActivityConverter(
                     date = source.date,
                     from = UnionAddressConverter.convert(blockchain, source.from),
                     owner = UnionAddressConverter.convert(blockchain, source.owner),
-                    contract = ContractAddressConverter.convert(blockchain, source.contract),
-                    tokenId = source.tokenId,
+                    contract = ContractAddressConverter.convert(blockchain, source.contract), // TODO remove later
+                    tokenId = source.tokenId, // TODO remove later
+                    itemId = ItemIdDto(blockchain, source.contract, source.tokenId),
                     value = source.value,
                     transactionHash = source.transactionHash,
                     // TODO UNION remove in 1.19

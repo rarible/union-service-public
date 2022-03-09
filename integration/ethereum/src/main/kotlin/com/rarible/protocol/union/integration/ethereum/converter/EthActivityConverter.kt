@@ -55,6 +55,7 @@ import com.rarible.protocol.union.dto.AuctionOpenActivityDto
 import com.rarible.protocol.union.dto.AuctionStartActivityDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.BurnActivityDto
+import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.MintActivityDto
 import com.rarible.protocol.union.dto.OrderActivityMatchSideDto
 import com.rarible.protocol.union.dto.OrderActivitySourceDto
@@ -208,8 +209,11 @@ class EthActivityConverter(
                     id = activityId,
                     date = source.date,
                     owner = EthConverter.convert(source.owner, blockchain),
-                    contract = ContractAddressConverter.convert(blockchain, EthConverter.convert(source.contract)),
-                    tokenId = source.tokenId,
+                    contract = ContractAddressConverter.convert(
+                        blockchain, EthConverter.convert(source.contract)
+                    ), // TODO remove later
+                    tokenId = source.tokenId, // TODO remove later
+                    itemId = ItemIdDto(blockchain, EthConverter.convert(source.contract), source.tokenId),
                     value = source.value,
                     transactionHash = EthConverter.convert(source.transactionHash),
                     // TODO UNION remove in 1.19
@@ -227,8 +231,11 @@ class EthActivityConverter(
                     id = activityId,
                     date = source.date,
                     owner = EthConverter.convert(source.owner, blockchain),
-                    contract = ContractAddressConverter.convert(blockchain, EthConverter.convert(source.contract)),
-                    tokenId = source.tokenId,
+                    contract = ContractAddressConverter.convert(
+                        blockchain, EthConverter.convert(source.contract)
+                    ), // TODO remove later
+                    tokenId = source.tokenId, // TODO remove later
+                    itemId = ItemIdDto(blockchain, EthConverter.convert(source.contract), source.tokenId),
                     value = source.value,
                     transactionHash = EthConverter.convert(source.transactionHash),
                     // TODO UNION remove in 1.19
@@ -247,8 +254,11 @@ class EthActivityConverter(
                     date = source.date,
                     from = EthConverter.convert(source.from, blockchain),
                     owner = EthConverter.convert(source.owner, blockchain),
-                    contract = ContractAddressConverter.convert(blockchain, EthConverter.convert(source.contract)),
-                    tokenId = source.tokenId,
+                    contract = ContractAddressConverter.convert(
+                        blockchain, EthConverter.convert(source.contract)
+                    ), // TODO remove later
+                    tokenId = source.tokenId, // TODO remove later
+                    itemId = ItemIdDto(blockchain, EthConverter.convert(source.contract), source.tokenId),
                     value = source.value,
                     transactionHash = EthConverter.convert(source.transactionHash),
                     // TODO UNION remove in 1.19

@@ -2,16 +2,22 @@ package com.rarible.protocol.union.listener.service
 
 import com.mongodb.client.result.DeleteResult
 import com.rarible.protocol.union.core.event.OutgoingOwnershipEventListener
+import com.rarible.protocol.union.core.model.ownershipId
 import com.rarible.protocol.union.core.service.AuctionContractService
 import com.rarible.protocol.union.core.service.ReconciliationEventService
+import com.rarible.protocol.union.dto.OwnershipSourceDto
 import com.rarible.protocol.union.enrichment.converter.EnrichedOwnershipConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.model.ShortOwnership
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
 import com.rarible.protocol.union.enrichment.service.BestOrderService
+import com.rarible.protocol.union.enrichment.service.EnrichmentActivityService
 import com.rarible.protocol.union.enrichment.service.EnrichmentAuctionService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
 import com.rarible.protocol.union.enrichment.test.data.randomShortOwnership
+import com.rarible.protocol.union.enrichment.test.data.randomUnionActivityBurn
+import com.rarible.protocol.union.enrichment.test.data.randomUnionActivityMint
+import com.rarible.protocol.union.enrichment.test.data.randomUnionActivityTransfer
 import com.rarible.protocol.union.enrichment.test.data.randomUnionOwnershipDto
 import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
@@ -27,6 +33,7 @@ import org.junit.jupiter.api.Test
 class EnrichmentOwnershipEventServiceTest {
 
     private val ownershipService: EnrichmentOwnershipService = mockk()
+    private val activityService: EnrichmentActivityService = mockk()
     private val itemEventService: EnrichmentItemEventService = mockk()
     private val eventListener: OutgoingOwnershipEventListener = mockk()
     private val auctionContractService: AuctionContractService = mockk()
@@ -39,6 +46,7 @@ class EnrichmentOwnershipEventServiceTest {
         ownershipService,
         itemEventService,
         enrichmentAuctionService,
+        activityService,
         ownershipEventListeners,
         bestOrderService,
         auctionContractService,
@@ -51,7 +59,8 @@ class EnrichmentOwnershipEventServiceTest {
             ownershipService,
             itemEventService,
             eventListener,
-            bestOrderService
+            bestOrderService,
+            activityService
         )
         coEvery { eventListener.onEvent(any()) } returns Unit
         coEvery { itemEventService.onOwnershipUpdated(any(), any()) } returns Unit
@@ -191,6 +200,91 @@ class EnrichmentOwnershipEventServiceTest {
         coVerify(exactly = 1) { eventListener.onEvent(any()) }
         coVerify(exactly = 1) { ownershipService.delete(ownershipId) }
         coVerify(exactly = 0) { itemEventService.onOwnershipUpdated(ownershipId, null) }
+    }
+
+    @Test
+    fun `on activity - source or ownershipId not extracted`() = runBlocking<Unit> {
+        val burn = randomUnionActivityBurn(randomEthItemId())
+        val emptySource = randomUnionActivityTransfer(randomEthItemId()).copy(purchase = null)
+
+        ownershipEventService.onActivity(burn)
+        ownershipEventService.onActivity(emptySource)
+
+        coVerify(exactly = 0) { ownershipService.get(any()) }
+    }
+
+    @Test
+    fun `on activity - source updated`() = runBlocking<Unit> {
+        val mint = randomUnionActivityMint(randomEthItemId())
+        val ownershipId = mint.ownershipId()!!
+
+        val shortOwnership = randomShortOwnership(ownershipId).copy(source = OwnershipSourceDto.TRANSFER)
+
+        coEvery { ownershipService.getOrEmpty(ShortOwnershipId(ownershipId)) } returns shortOwnership
+        coEvery { ownershipService.save(any()) } returnsArgument 1
+
+        ownershipEventService.onActivity(mint, false)
+
+        coVerify(exactly = 1) { ownershipService.save(shortOwnership.copy(source = OwnershipSourceDto.MINT)) }
+    }
+
+    @Test
+    fun `on activity - source is the same`() = runBlocking<Unit> {
+        val mint = randomUnionActivityMint(randomEthItemId())
+        val ownershipId = mint.ownershipId()!!
+
+        val shortOwnership = randomShortOwnership(ownershipId).copy(source = OwnershipSourceDto.MINT)
+
+        coEvery { ownershipService.getOrEmpty(ShortOwnershipId(ownershipId)) } returns shortOwnership
+
+        ownershipEventService.onActivity(mint, false)
+
+        coVerify(exactly = 0) { ownershipService.save(any()) }
+    }
+
+    @Test
+    fun `on activity - source is not preferred`() = runBlocking<Unit> {
+        val mint = randomUnionActivityTransfer(randomEthItemId())
+        val ownershipId = mint.ownershipId()!!
+
+        val shortOwnership = randomShortOwnership(ownershipId).copy(source = OwnershipSourceDto.MINT)
+
+        coEvery { ownershipService.getOrEmpty(ShortOwnershipId(ownershipId)) } returns shortOwnership
+
+        ownershipEventService.onActivity(mint, false)
+
+        coVerify(exactly = 0) { ownershipService.save(any()) }
+    }
+
+    @Test
+    fun `on reverted activity - source changed`() = runBlocking<Unit> {
+        val mint = randomUnionActivityMint(randomEthItemId()).copy(reverted = true)
+        val ownershipId = mint.ownershipId()!!
+
+        val shortOwnership = randomShortOwnership(ownershipId).copy(source = OwnershipSourceDto.MINT)
+
+        coEvery { ownershipService.getOrEmpty(ShortOwnershipId(ownershipId)) } returns shortOwnership
+        coEvery { activityService.getOwnershipSource(ownershipId) } returns OwnershipSourceDto.TRANSFER
+        coEvery { ownershipService.save(any()) } returnsArgument 1
+
+        ownershipEventService.onActivity(mint, false)
+
+        coVerify(exactly = 1) { ownershipService.save(shortOwnership.copy(source = OwnershipSourceDto.TRANSFER)) }
+    }
+
+    @Test
+    fun `on reverted activity - source not changed`() = runBlocking<Unit> {
+        // We have reverted MINT, but current already is TRANSFER - nothing should be changed
+        val mint = randomUnionActivityMint(randomEthItemId()).copy(reverted = true)
+        val ownershipId = mint.ownershipId()!!
+
+        val shortOwnership = randomShortOwnership(ownershipId).copy(source = OwnershipSourceDto.TRANSFER)
+
+        coEvery { ownershipService.getOrEmpty(ShortOwnershipId(ownershipId)) } returns shortOwnership
+
+        ownershipEventService.onActivity(mint, false)
+
+        coVerify(exactly = 0) { ownershipService.save(any()) }
     }
 
 }
