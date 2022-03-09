@@ -1,7 +1,7 @@
 package com.rarible.protocol.union.listener.test
 
 import com.rarible.core.application.ApplicationEnvironmentInfo
-import com.rarible.core.content.meta.loader.ContentMetaLoader
+import com.rarible.core.content.meta.loader.ContentMetaReceiver
 import com.rarible.core.kafka.RaribleKafkaConsumer
 import com.rarible.core.kafka.RaribleKafkaProducer
 import com.rarible.core.test.ext.KafkaTestExtension.Companion.kafkaContainer
@@ -65,8 +65,8 @@ class TestListenerConfiguration {
 
     @Bean
     @Primary
-    @Qualifier("test.content.meta.loader")
-    fun testContentMetaLoader(): ContentMetaLoader = mockk()
+    @Qualifier("test.content.meta.receiver")
+    fun testContentMetaReceiver(): ContentMetaReceiver = mockk()
 
     //----------------- UNION CONSUMERS ------------------//
     // Test consumers with EARLIEST offset

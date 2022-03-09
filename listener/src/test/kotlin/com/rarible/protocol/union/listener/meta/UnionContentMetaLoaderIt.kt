@@ -4,6 +4,7 @@ import com.rarible.core.content.meta.loader.ContentMeta
 import com.rarible.core.test.data.randomInt
 import com.rarible.core.test.data.randomLong
 import com.rarible.core.test.data.randomString
+import com.rarible.protocol.union.core.model.UnionImageProperties
 import com.rarible.protocol.union.enrichment.meta.CachedContentMetaEntry
 import com.rarible.protocol.union.enrichment.meta.UnionContentMetaLoader
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
@@ -31,9 +32,22 @@ class UnionContentMetaLoaderIt : AbstractIntegrationTest() {
     @Test
     fun `load content meta`() = runBlocking<Unit> {
         val url = createRandomUrl()
-        val contentMeta = createRandomContent()
-        coEvery { testContentMetaLoader.fetchContentMeta(url) } returns contentMeta
-        assertThat(unionContentMetaLoader.fetchContentMeta(url, randomEthItemId())).isEqualTo(contentMeta)
+        val contentMeta = ContentMeta(
+            type = "image/" + randomString(),
+            width = randomInt(),
+            height = randomInt(),
+            size = randomLong()
+        )
+        coEvery { testContentMetaReceiver.receive(url) } returns contentMeta
+        assertThat(unionContentMetaLoader.fetchContentMeta(url, randomEthItemId()))
+            .isEqualTo(
+                UnionImageProperties(
+                    mimeType = contentMeta.type,
+                    width = contentMeta.width,
+                    height = contentMeta.height,
+                    size = contentMeta.size
+                )
+            )
     }
 
     @Test
@@ -84,8 +98,8 @@ class UnionContentMetaLoaderIt : AbstractIntegrationTest() {
                 randomEthItemId()
             )
         ).isEqualTo(
-            ContentMeta(
-                type = "image/jpeg",
+            UnionImageProperties(
+                mimeType = "image/jpeg",
                 width = 3840,
                 height = 2160,
                 size = 5246840
@@ -98,22 +112,16 @@ class UnionContentMetaLoaderIt : AbstractIntegrationTest() {
                 randomEthItemId()
             )
         ).isEqualTo(
-            ContentMeta(
-                type = "image/jpeg",
+            UnionImageProperties(
+                mimeType = "image/jpeg",
                 width = 1920,
                 height = 1080
             )
         )
-        coVerify(exactly = 0) { testContentMetaLoader.fetchContentMeta(any()) }
+        coVerify(exactly = 0) { testContentMetaReceiver.receive(any<String>()) }
     }
 
     private fun createRandomUrl(): String =
         "https://image.com/${randomString()}"
 
-    private fun createRandomContent(): ContentMeta = ContentMeta(
-        type = randomString(),
-        width = randomInt(),
-        height = randomInt(),
-        size = randomLong()
-    )
 }

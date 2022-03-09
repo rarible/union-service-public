@@ -49,8 +49,9 @@ rarible:
 meta:
   ipfsGateway: "https://rarible.mypinata.cloud/"
   mediaFetchTimeout: 10000
-  mediaFetchMaxSize: 10485760
+  mediaFetchMaxSize: 131072 # 128 Kb
   openSeaProxyUrl: ${consul.meta.openSeaProxyUrl}
+  ktorApacheHttpClientThreadCount: 64
 
 integration:
   ethereum:
@@ -100,3 +101,8 @@ integration:
 common:
   producer:
     broker-replica-set: ${kafka.hosts}
+
+# Disable verbose logs of Apache HTTP client used to load content media metadata.
+logging:
+  level:
+    org.apache.http: ERROR

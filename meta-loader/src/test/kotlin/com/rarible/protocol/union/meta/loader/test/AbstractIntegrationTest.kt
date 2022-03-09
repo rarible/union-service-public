@@ -1,6 +1,6 @@
 package com.rarible.protocol.union.meta.loader.test
 
-import com.rarible.core.content.meta.loader.ContentMetaLoader
+import com.rarible.core.content.meta.loader.ContentMetaReceiver
 import com.rarible.protocol.union.enrichment.meta.UnionMetaLoader
 import io.mockk.clearMocks
 import org.junit.jupiter.api.BeforeEach
@@ -15,8 +15,8 @@ abstract class AbstractIntegrationTest {
     lateinit var testUnionMetaLoader: UnionMetaLoader
 
     @Autowired
-    @Qualifier("test.content.meta.loader")
-    lateinit var testContentMetaLoader: ContentMetaLoader
+    @Qualifier("test.content.meta.receiver")
+    lateinit var testContentMetaReceiver: ContentMetaReceiver
 
     @BeforeEach
     fun cleanupMetaMocks() {

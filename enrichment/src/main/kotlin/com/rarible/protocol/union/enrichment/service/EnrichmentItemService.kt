@@ -60,7 +60,7 @@ class EnrichmentItemService(
     suspend fun delete(itemId: ShortItemId): DeleteResult? {
         val now = nowMillis()
         val result = itemRepository.delete(itemId)
-        logger.info("Deleting Item [{}], deleted: {} ({}ms)", itemId, result?.deletedCount, spent(now))
+        logger.info("Deleting Item [{}], deleted: {} ({}ms)", itemId.toDto().fullId(), result?.deletedCount, spent(now))
         return result
     }
 
@@ -87,7 +87,7 @@ class EnrichmentItemService(
     suspend fun fetch(itemId: ItemIdDto): UnionItem {
         val now = nowMillis()
         val itemDto = itemServiceRouter.getService(itemId.blockchain).getItemById(itemId.value)
-        logger.info("Fetched Item by Id [{}] ({} ms)", itemId, spent(now))
+        logger.info("Fetched item [{}] ({} ms)", itemId.fullId(), spent(now))
         return itemDto
     }
 
@@ -129,13 +129,15 @@ class EnrichmentItemService(
             enrichmentAuctionService.fetchAuctionsIfAbsent(auctionIds, auctions)
         }
 
-        EnrichedItemConverter.convert(
+        val itemDto = EnrichedItemConverter.convert(
             item = fetchedItem.await(),
             shortItem = shortItem,
             meta = meta.await(),
             orders = bestOrders,
             auctions = auctionsData.await()
         )
+        logger.info("Enriched item {}: {}", itemId.fullId(), itemDto)
+        itemDto
     }
 
     private fun <T> CoroutineScope.withSpanAsync(
