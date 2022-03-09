@@ -36,6 +36,16 @@ data class ImmutablexCollection(
 
 data class ImmutablexFee(val address: String, val percentage: BigDecimal, val type: String)
 
+data class ImmutablexOrderFee(val address: String, val amount: BigDecimal, val token: FeeToken, val type: String)
+
+data class FeeToken(val type: String, val data: FeeTokenData)
+
+data class FeeTokenData(
+    @JsonProperty("contract_address")
+    val contractAddress: String?,
+    val decimals: Int
+)
+
 data class ImmutablexAssetsPage(
     val cursor: String,
     val remaining: Boolean,
@@ -56,13 +66,54 @@ data class Token(val type: String, val data: TokenData)
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class TokenData(
     @JsonProperty("token_id")
-    val tokenId: String,
+    val tokenId: String?,
     @JsonProperty("token_address")
-    val tokenAddress: String
+    val tokenAddress: String?
 )
 
 data class ImmutablexMintsPage(
     val cursor: String,
     val remaining: Boolean,
     val result: List<ImmutableMint>
+)
+
+data class ImmutablexOrder(
+    @JsonProperty("order_id")
+    val orderId: Long,
+    @JsonProperty("amount_sold")
+    val amountSold: String?,
+    val buy: ImmutablexOrderSide,
+    @JsonProperty("expiration_timestamp")
+    val expirationTimestamp: Instant,
+    val fees: List<ImmutablexOrderFee>?,
+    val sell: ImmutablexOrderSide,
+    val status: String,
+    @JsonProperty("timestamp")
+    val createdAt: Instant,
+    @JsonProperty("updated_timestamp")
+    val updatedAt: Instant?,
+    @JsonProperty("user")
+    val creator: String
+)
+
+data class ImmutablexOrderSide(
+    val data: ImmutablexOrderData,
+    val type: String
+)
+
+data class ImmutablexOrderData(
+    val decimals: Int,
+    val id: String?,
+    val quantity: String,
+    @JsonProperty("token_address")
+    val tokenAddress: String?,
+    @JsonProperty("token_id")
+    val tokenId: String?,
+    val properties: ImmutablexOrderDataProperties?
+)
+
+data class ImmutablexOrderDataProperties(
+    val name: String?,
+    val imageUrl: String?,
+    val collection: ImmutablexCollection
 )

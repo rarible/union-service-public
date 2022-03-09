@@ -3,6 +3,7 @@ package com.rarible.protocol.union.integration.immutablex.client
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexAsset
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexAssetsPage
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexMintsPage
+import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexOrder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -102,8 +103,16 @@ class ImmutablexApiClient(
             cursor = mints.cursor,
             remaining = mints.remaining,
             result = getAssetsByIds(
-                mints.result.map { it.token.data.tokenId }
+                mints.result.map { it.token.data.tokenId!! }
             )
         )
+    }
+
+    suspend fun getOrderById(id: Long): ImmutablexOrder {
+        return webClient.get().uri("$apiUrl/orders/$id?include_fees=true")
+            .accept(MediaType.APPLICATION_JSON)
+            .retrieve()
+            .toEntity(ImmutablexOrder::class.java)
+            .awaitSingle().body!!
     }
 }
