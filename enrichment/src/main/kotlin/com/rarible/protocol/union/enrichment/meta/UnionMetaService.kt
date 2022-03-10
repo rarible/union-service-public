@@ -52,7 +52,12 @@ class UnionMetaService(
         }
         if (synchronous) {
             logger.info("Loading meta synchronously for ${itemId.fullId()}")
-            return unionMetaCacheLoader.load(itemId.fullId())
+            return try {
+                unionMetaCacheLoader.load(itemId.fullId())
+            } catch (e: Exception) {
+                logger.warn("Failed to synchronously load meta for ${itemId.fullId()}", e)
+                null
+            }
         }
         return null
     }
