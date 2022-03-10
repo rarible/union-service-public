@@ -412,19 +412,13 @@ class ActivityControllerFt : AbstractIntegrationTest() {
 
     @Test
     fun `get all activities - with null size`() = runBlocking<Unit> {
-        val types = ActivityTypeDto.values().toList()
+        val types = listOf(ActivityTypeDto.BID)
         val blockchains = listOf(BlockchainDto.ETHEREUM)
 
         val ethOrderActivities = List(defaultSize * 2) { randomEthOrderBidActivity() }
         coEvery {
             testEthereumActivityOrderApi.getOrderActivities(any(), any(), any(), any())
         } returns OrderActivitiesDto(null, ethOrderActivities).toMono()
-        coEvery {
-            testEthereumActivityAuctionApi.getAuctionActivities(any(), any(), any(), any())
-        } returns AuctionActivitiesDto(null, emptyList()).toMono()
-        coEvery {
-            testEthereumActivityItemApi.getNftActivities(any(), any(), any(), any())
-        } returns NftActivitiesDto(null, emptyList()).toMono()
 
         val activities = activityControllerApi.getAllActivities(types, blockchains, null, null, null, null)
             .awaitFirst()
