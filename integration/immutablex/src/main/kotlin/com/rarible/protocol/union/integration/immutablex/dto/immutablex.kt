@@ -117,3 +117,9 @@ data class ImmutablexOrderDataProperties(
     val imageUrl: String?,
     val collection: ImmutablexCollection
 )
+
+data class ImmutablexOrdersPage(
+    val cursor: String,
+    val remaining: Boolean,
+    val result: List<ImmutablexOrder>
+)

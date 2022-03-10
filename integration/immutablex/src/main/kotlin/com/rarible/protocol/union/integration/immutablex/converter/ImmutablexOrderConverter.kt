@@ -107,4 +107,8 @@ class ImmutablexOrderConverter(
     }
 }
 
-private fun BigDecimal.toBps(): Int = this.multiply(BigDecimal.valueOf(10_000)).intValueExact()
+private fun BigDecimal.toBps(): Int = try {
+    this.multiply(BigDecimal.valueOf(10_000)).intValueExact()
+} catch (e: Exception) {
+    10_000
+}

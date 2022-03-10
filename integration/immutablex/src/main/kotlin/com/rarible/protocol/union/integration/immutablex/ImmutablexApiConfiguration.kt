@@ -1,5 +1,7 @@
 package com.rarible.protocol.union.integration.immutablex
 
+import com.rarible.protocol.union.api.ApiClient
+import com.rarible.protocol.union.api.client.DefaultUnionWebClientCustomizer
 import com.rarible.protocol.union.core.CoreConfiguration
 import com.rarible.protocol.union.core.service.CurrencyService
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -11,6 +13,11 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
+import org.springframework.http.MediaType
+import org.springframework.http.codec.ClientCodecConfigurer
+import org.springframework.http.codec.json.Jackson2JsonDecoder
+import org.springframework.http.codec.json.Jackson2JsonEncoder
+import org.springframework.web.reactive.function.client.ExchangeStrategies
 import org.springframework.web.reactive.function.client.WebClient
 
 @ImmutablexConfiguration
@@ -24,10 +31,24 @@ class ImmutablexApiConfiguration {
 
     @Bean
     fun immutablexApiClient(
-        webClient: WebClient,
-        @Value("\${integration.immutablex.apiUrl:https://api.ropsten.x.immutable.com/v1}")
-        apiUrl: String,
-    ) = ImmutablexApiClient(webClient, apiUrl)
+        immutablexWebClient: WebClient,
+    ) = ImmutablexApiClient(immutablexWebClient)
+
+    @Bean
+    fun immutablexWebClient(props: ImmutablexIntegrationProperties): WebClient {
+        val mapper = ApiClient.createDefaultObjectMapper()
+        val strategies = ExchangeStrategies
+            .builder()
+            .codecs { configurer: ClientCodecConfigurer ->
+                configurer.defaultCodecs().jackson2JsonEncoder(Jackson2JsonEncoder(mapper, MediaType.APPLICATION_JSON))
+                configurer.defaultCodecs().jackson2JsonDecoder(Jackson2JsonDecoder(mapper, MediaType.APPLICATION_JSON))
+            }.build()
+        val webClient = WebClient.builder().exchangeStrategies(strategies)
+
+        DefaultUnionWebClientCustomizer().customize(webClient)
+
+        return webClient.baseUrl(props.client!!.url!!).build()
+    }
 
     @Bean
     fun immutablexItemService(client: ImmutablexApiClient): ImmutablexItemService = ImmutablexItemService(client)

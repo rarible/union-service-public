@@ -6,6 +6,10 @@ import com.rarible.protocol.union.dto.*
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexApiClient
 import com.rarible.protocol.union.integration.immutablex.converter.ImmutablexOrderConverter
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 
 class ImmutablexOrderService(
     private val client: ImmutablexApiClient,
@@ -17,7 +21,11 @@ class ImmutablexOrderService(
         sort: OrderSortDto?,
         status: List<OrderStatusDto>?,
     ): Slice<OrderDto> {
-        TODO("Not yet implemented")
+        val orders =  client.getAllOrders(continuation, size, sort, status).map {
+            orderConverter.convert(it, blockchain)
+        }
+        val cont = if (orders.isEmpty()) null else "${orders.last().lastUpdatedAt.toEpochMilli()}_${orders.last().id}"
+        return Slice(continuation = cont, entities = orders)
     }
 
     override suspend fun getOrderById(id: String): OrderDto {
@@ -26,12 +34,16 @@ class ImmutablexOrderService(
     }
 
     override suspend fun getOrdersByIds(orderIds: List<String>): List<OrderDto> {
-        TODO("Not yet implemented")
+        val orders = orderIds.map {
+            coroutineScope {
+                async(Dispatchers.IO) { getOrderById(it) }
+            }
+        }
+        return orders.awaitAll()
     }
 
-    override suspend fun getBidCurrencies(itemId: String): List<AssetTypeDto> {
-        TODO("Not yet implemented")
-    }
+    override suspend fun getBidCurrencies(itemId: String): List<AssetTypeDto> =
+        listOf(EthEthereumAssetTypeDto(BlockchainDto.IMMUTABLEX))
 
     override suspend fun getOrderBidsByItem(
         platform: PlatformDto?,
@@ -57,9 +69,8 @@ class ImmutablexOrderService(
         size: Int,
     ): Slice<OrderDto> = Slice.empty()
 
-    override suspend fun getSellCurrencies(itemId: String): List<AssetTypeDto> {
-        TODO("Not yet implemented")
-    }
+    override suspend fun getSellCurrencies(itemId: String): List<AssetTypeDto> =
+        listOf(EthEthereumAssetTypeDto(BlockchainDto.IMMUTABLEX))
 
     override suspend fun getSellOrders(
         platform: PlatformDto?,
@@ -67,7 +78,12 @@ class ImmutablexOrderService(
         continuation: String?,
         size: Int,
     ): Slice<OrderDto> {
-        TODO("Not yet implemented")
+        val orders = client.getSellOrders(continuation, size).map {
+            orderConverter.convert(it, blockchain)
+        }
+        val cont = if (orders.isEmpty()) null else "${orders.last().lastUpdatedAt.toEpochMilli()}_${orders.last().id}"
+        return Slice(continuation = cont, entities = orders)
+
     }
 
     override suspend fun getSellOrdersByCollection(
@@ -77,7 +93,12 @@ class ImmutablexOrderService(
         continuation: String?,
         size: Int,
     ): Slice<OrderDto> {
-        TODO("Not yet implemented")
+        val orders = client.getSellOrdersByCollection(collection, continuation, size).map {
+            orderConverter.convert(it, blockchain)
+        }
+        val cont = if (orders.isEmpty()) null else "${orders.last().lastUpdatedAt.toEpochMilli()}_${orders.last().id}"
+        return Slice(continuation = cont, entities = orders)
+
     }
 
     override suspend fun getSellOrdersByItem(
@@ -90,7 +111,12 @@ class ImmutablexOrderService(
         continuation: String?,
         size: Int,
     ): Slice<OrderDto> {
-        TODO("Not yet implemented")
+        val orders = client.getSellOrdersByItem(itemId, maker, status, currencyId, continuation, size).map {
+            orderConverter.convert(it, blockchain)
+        }
+        val cont = if (orders.isEmpty()) null else "${orders.last().lastUpdatedAt.toEpochMilli()}_${orders.last().id}"
+        return Slice(continuation = cont, entities = orders)
+
     }
 
     override suspend fun getSellOrdersByMaker(
@@ -101,6 +127,11 @@ class ImmutablexOrderService(
         continuation: String?,
         size: Int,
     ): Slice<OrderDto> {
-        TODO("Not yet implemented")
+        val orders = client.getSellOrdersByMaker(maker, status, continuation, size).map {
+            orderConverter.convert(it, blockchain)
+        }
+        val cont = if (orders.isEmpty()) null else "${orders.last().lastUpdatedAt.toEpochMilli()}_${orders.last().id}"
+        return Slice(continuation = cont, entities = orders)
+
     }
 }
