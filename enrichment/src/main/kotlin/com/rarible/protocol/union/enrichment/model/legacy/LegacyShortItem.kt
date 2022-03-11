@@ -4,6 +4,7 @@ import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.dto.AuctionIdDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.parser.IdParser
+import com.rarible.protocol.union.enrichment.model.ItemLastSale
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortOrder
 import org.springframework.data.annotation.AccessType
@@ -35,6 +36,8 @@ data class LegacyShortItem(
     val bestSellOrder: ShortOrder?,
     val bestBidOrder: ShortOrder?,
 
+    val lastSale: ItemLastSale?,
+
     val lastUpdatedAt: Instant,
 
     @Version
@@ -61,6 +64,8 @@ data class LegacyShortItem(
             bestSellOrder = shortItem.bestSellOrder,
             bestBidOrder = shortItem.bestBidOrder,
 
+            lastSale = shortItem.lastSale,
+
             lastUpdatedAt = shortItem.lastUpdatedAt
         )
 
@@ -78,6 +83,8 @@ data class LegacyShortItem(
 
             auctions = auctions,
             multiCurrency = multiCurrency,
+
+            lastSale = lastSale,
 
             bestSellOrder = bestSellOrder,
             bestBidOrder = bestBidOrder,
@@ -100,6 +107,8 @@ data class LegacyShortItem(
 
                 bestSellOrders = emptyMap(),
                 bestBidOrders = emptyMap(),
+
+                lastSale = null,
 
                 auctions = emptySet(),
 

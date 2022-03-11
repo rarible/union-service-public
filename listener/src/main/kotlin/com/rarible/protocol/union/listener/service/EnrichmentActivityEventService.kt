@@ -9,12 +9,16 @@ import org.springframework.stereotype.Component
 class EnrichmentActivityEventService(
     private val activityEventListeners: List<OutgoingActivityEventListener>,
     private val ownershipEventService: EnrichmentOwnershipEventService,
+    private val itemEventService: EnrichmentItemEventService,
     private val ff: FeatureFlagsProperties
 ) {
 
     suspend fun onActivity(activity: ActivityDto) {
-        val shouldHandle = ff.enableRevertedActivityEventHandling || activity.reverted != true
-        if (shouldHandle) {
+        if (ff.enableItemLastSaleEnrichment) {
+            itemEventService.onActivity(activity)
+        }
+
+        if (ff.enableOwnershipSourceEnrichment) {
             ownershipEventService.onActivity(activity)
         }
 

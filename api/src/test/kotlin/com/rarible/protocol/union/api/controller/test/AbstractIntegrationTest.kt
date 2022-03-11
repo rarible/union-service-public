@@ -219,7 +219,9 @@ abstract class AbstractIntegrationTest {
         ethereumOwnershipControllerApiMock = EthOwnershipControllerApiMock(testEthereumOwnershipApi)
         ethereumOrderControllerApiMock = EthOrderControllerApiMock(testEthereumOrderApi)
         ethereumAuctionControllerApiMock = EthAuctionControllerApiMock(testEthereumAuctionApi)
-        ethereumActivityControllerApiMock = EthActivityControllerApiMock(testEthereumActivityItemApi)
+        ethereumActivityControllerApiMock = EthActivityControllerApiMock(
+            testEthereumActivityItemApi, testEthereumActivityOrderApi
+        )
 
         polygonItemControllerApiMock = EthItemControllerApiMock(testPolygonItemApi)
         polygonOwnershipControllerApiMock = EthOwnershipControllerApiMock(testPolygonOwnershipApi)

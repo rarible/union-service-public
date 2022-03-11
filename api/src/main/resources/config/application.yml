@@ -64,6 +64,10 @@ common:
     refresh:
       cron: "0 0/30 * * * *"
   useLegacyRepository: true
+  feature-flags:
+    enableRevertedActivityEventSending: false
+    enableOwnershipSourceEnrichment: false
+    enableItemLastSaleEnrichment: true
 
 meta:
   ipfsGateway: "https://rarible.mypinata.cloud/"

@@ -11,12 +11,17 @@ import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.OwnershipSourceDto
 import com.rarible.protocol.union.dto.TransferActivityDto
 import com.rarible.protocol.union.dto.UnionAddress
+import com.rarible.protocol.union.enrichment.converter.ItemLastSaleConverter
+import com.rarible.protocol.union.enrichment.model.ItemLastSale
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
 class EnrichmentActivityService(
     private val activityRouter: BlockchainRouter<ActivityService>
 ) {
+
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     suspend fun getOwnershipSource(ownershipId: OwnershipIdDto): OwnershipSourceDto {
         val itemId = ownershipId.getItemId()
@@ -42,9 +47,11 @@ class EnrichmentActivityService(
 
         // Originally, there ALWAYS should be a mint
         if (mint == null || (mint as MintActivityDto).owner != owner) {
+            logger.info("Mint activity NOT found for Item [{}] and owner [{}]", itemId, owner.fullId())
             return null
         }
 
+        logger.info("Mint Activity found for Item [{}] and owner [{}]: [{}]", itemId, owner.fullId(), mint.id)
         return mint
     }
 
@@ -65,12 +72,37 @@ class EnrichmentActivityService(
                     && it.purchase == true
             }
             if (purchase != null) {
+                logger.info(
+                    "Transfer (purchase) Activity found for Item [{}] and owner [{}]: [{}]",
+                    itemId, owner.fullId(), purchase.id
+                )
                 return purchase
             }
             continuation = response.continuation
         } while (continuation != null)
 
+        logger.info("Transfer (purchase) activity NOT found for Item [{}] and owner [{}]", itemId, owner.fullId())
         return null
+    }
+
+    suspend fun getItemLastSale(itemId: ItemIdDto): ItemLastSale? {
+        val sell = activityRouter.getService(itemId.blockchain).getActivitiesByItem(
+            types = listOf(ActivityTypeDto.SELL), // TODO what about auctions and on-chain orders?
+            itemId = itemId.value,
+            continuation = null,
+            size = 1,
+            sort = ActivitySortDto.LATEST_FIRST
+        ).entities.firstOrNull()
+
+        val result = ItemLastSaleConverter.convert(sell)
+
+        if (result == null) {
+            logger.info("Last sale NOT found for Item [{}]", itemId)
+        } else {
+            logger.info("Last sale found for Item [{}] : activity = [{}], lastSale = {}", itemId, sell?.id, result)
+        }
+
+        return result
     }
 
 }
