@@ -16,6 +16,8 @@ class ImmutablexApiClient(
     private val webClient: WebClient,
 ) {
 
+    val collectionsApi = CollectionsApi(webClient)
+
     suspend fun getAsset(itemId: String): ImmutablexAsset {
         val (collection, tokenId) = itemId.split(":")
         return webClient.get().uri("/assets/${collection}/${tokenId}?include_fees=true")

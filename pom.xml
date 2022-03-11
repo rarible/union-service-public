@@ -34,7 +34,7 @@
     </pluginRepositories>
 
     <properties>
-        <revision>1.24</revision>
+        <revision>1.25</revision>
         <maven.deploy.skip>true</maven.deploy.skip>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -42,7 +42,7 @@
         <mockserver-netty.version>5.11.2</mockserver-netty.version>
         <mockserver.version>1.15.3</mockserver.version>
 
-        <rarible.core.version>2.3.16</rarible.core.version>
+        <rarible.core.version>2.3.37</rarible.core.version>
         <rarible.ethereum.version>1.4.0</rarible.ethereum.version>
 
         <rarible.protocol.currency.version>1.23.2</rarible.protocol.currency.version>
@@ -51,7 +51,7 @@
         <rarible.protocol.tezos.version>1.0.2</rarible.protocol.tezos.version>
         <rarible.protocol.solana.version>0.0.25</rarible.protocol.solana.version>
 
-        <rarible.protocol.union.version>1.25.0</rarible.protocol.union.version>
+        <rarible.protocol.union.version>1.25.1</rarible.protocol.union.version>
 
         <dev-jna.version>5.7.0</dev-jna.version>
     </properties>
