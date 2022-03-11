@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.listener.job
 
+import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.enrichment.repository.ItemReconciliationMarkRepository
@@ -42,7 +43,8 @@ class ReconciliationMarkJobIt : AbstractIntegrationTest() {
         job = ReconciliationMarkJob(
             itemReconciliationMarkRepository,
             ownershipReconciliationMarkRepository,
-            refreshService
+            refreshService,
+            listOf(BlockchainDto.ETHEREUM)
         )
         clearMocks(refreshService)
     }

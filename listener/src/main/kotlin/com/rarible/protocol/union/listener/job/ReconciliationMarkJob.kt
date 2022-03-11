@@ -2,6 +2,7 @@ package com.rarible.protocol.union.listener.job
 
 import com.rarible.core.client.WebClientResponseProxyException
 import com.rarible.core.common.nowMillis
+import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.repository.ItemReconciliationMarkRepository
 import com.rarible.protocol.union.enrichment.repository.OwnershipReconciliationMarkRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentRefreshService
@@ -15,10 +16,12 @@ import org.springframework.stereotype.Component
 class ReconciliationMarkJob(
     private val itemReconciliationMarkRepository: ItemReconciliationMarkRepository,
     private val ownershipReconciliationMarkRepository: OwnershipReconciliationMarkRepository,
-    private val refreshService: EnrichmentRefreshService
+    private val refreshService: EnrichmentRefreshService,
+    activeBlockchains: List<BlockchainDto>
 ) {
 
     private val batch: Int = 20
+    private val blockchains = activeBlockchains.toSet()
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -57,7 +60,18 @@ class ReconciliationMarkJob(
 
         items.forEach {
             try {
-                refreshService.reconcileItem(it.id.toDto(), false)
+                // If blockchain disabled, there is no sense to reconcile items/ownerships and store its mark
+                if (blockchains.contains(it.blockchain)) {
+                    try {
+                        refreshService.reconcileItem(it.id.toDto(), false)
+                    } catch (e: WebClientResponseProxyException) {
+                        if (e.statusCode == HttpStatus.NOT_FOUND) {
+                            logger.info("Unable to reconcile Item [{}], NOT_FOUND received: {}", it.id, e.data)
+                        } else {
+                            throw e
+                        }
+                    }
+                }
                 itemReconciliationMarkRepository.delete(it)
             } catch (e: Exception) {
                 withFails++
@@ -82,13 +96,16 @@ class ReconciliationMarkJob(
         var withFails = 0
         ownerships.forEach {
             try {
-                try {
-                    refreshService.reconcileOwnership(it.id.toDto())
-                } catch (e: WebClientResponseProxyException) {
-                    if (e.statusCode == HttpStatus.NOT_FOUND) {
-                        logger.info("Unable to reconcile Ownership [{}], NOT_FOUND received: {}", it.id, e.data)
-                    } else {
-                        throw e
+                // If blockchain disabled, there is no sense to reconcile items/ownerships and store its mark
+                if (blockchains.contains(it.blockchain)) {
+                    try {
+                        refreshService.reconcileOwnership(it.id.toDto())
+                    } catch (e: WebClientResponseProxyException) {
+                        if (e.statusCode == HttpStatus.NOT_FOUND) {
+                            logger.info("Unable to reconcile Ownership [{}], NOT_FOUND received: {}", it.id, e.data)
+                        } else {
+                            throw e
+                        }
                     }
                 }
                 ownershipReconciliationMarkRepository.delete(it)
