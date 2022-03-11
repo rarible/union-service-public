@@ -1,7 +1,7 @@
 package com.rarible.protocol.union.listener.job
 
+import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemEventDto
-import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.model.ReconciliationMarkType
 import com.rarible.protocol.union.enrichment.repository.ReconciliationMarkRepository
@@ -13,7 +13,6 @@ import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -31,13 +30,13 @@ class ReconciliationMarkJobIt : AbstractIntegrationTest() {
     lateinit var job: ReconciliationMarkJob
 
     private val itemEvent: ItemEventDto = mockk()
-    private val ownershipEvent: OwnershipEventDto = mockk()
 
     @BeforeEach
     fun beforeEach() {
         job = ReconciliationMarkJob(
             itemReconciliationMarkRepository,
-            refreshService
+            refreshService,
+            listOf(BlockchainDto.ETHEREUM)
         )
         clearMocks(refreshService)
     }

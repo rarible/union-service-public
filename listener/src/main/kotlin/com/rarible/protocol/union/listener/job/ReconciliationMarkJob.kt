@@ -1,6 +1,8 @@
 package com.rarible.protocol.union.listener.job
 
+import com.rarible.core.client.WebClientResponseProxyException
 import com.rarible.core.common.nowMillis
+import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.dto.parser.OwnershipIdParser
 import com.rarible.protocol.union.enrichment.model.ReconciliationMarkType
@@ -8,16 +10,19 @@ import com.rarible.protocol.union.enrichment.repository.ReconciliationMarkReposi
 import com.rarible.protocol.union.enrichment.service.EnrichmentRefreshService
 import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
+import org.springframework.http.HttpStatus
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 
 @Component
 class ReconciliationMarkJob(
     private val reconciliationMarkRepository: ReconciliationMarkRepository,
-    private val refreshService: EnrichmentRefreshService
+    private val refreshService: EnrichmentRefreshService,
+    activeBlockchains: List<BlockchainDto>
 ) {
 
     private val batch: Int = 20
+    private val blockchains = activeBlockchains.toSet()
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -68,14 +73,26 @@ class ReconciliationMarkJob(
     }
 
     private suspend fun reconcileEntity(markId: String, type: ReconciliationMarkType) {
-        when (type) {
-            ReconciliationMarkType.ITEM -> {
-                val itemId = IdParser.parseItemId(markId)
-                refreshService.reconcileItem(itemId, false)
+        try {
+            when (type) {
+                ReconciliationMarkType.ITEM -> {
+                    val itemId = IdParser.parseItemId(markId)
+                    if (blockchains.contains(itemId.blockchain)) {
+                        refreshService.reconcileItem(itemId, false)
+                    }
+                }
+                ReconciliationMarkType.OWNERSHIP -> {
+                    val ownershipId = OwnershipIdParser.parseFull(markId)
+                    if (blockchains.contains(ownershipId.blockchain)) {
+                        refreshService.reconcileOwnership(ownershipId)
+                    }
+                }
             }
-            ReconciliationMarkType.OWNERSHIP -> {
-                val ownershipId = OwnershipIdParser.parseFull(markId)
-                refreshService.reconcileOwnership(ownershipId)
+        } catch (e: WebClientResponseProxyException) {
+            if (e.statusCode == HttpStatus.NOT_FOUND) {
+                logger.info("Unable to reconcile mark [{}], NOT_FOUND received: {}", markId, e.data)
+            } else {
+                throw e
             }
         }
     }
