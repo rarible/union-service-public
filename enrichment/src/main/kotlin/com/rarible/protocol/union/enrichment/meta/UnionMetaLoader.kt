@@ -9,22 +9,17 @@ import com.rarible.protocol.union.core.model.UnionMetaContent
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.ItemIdDto
-import com.rarible.protocol.union.enrichment.configuration.UnionMetaProperties
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.time.withTimeout
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
-import java.time.Duration
 
 @Component
 class UnionMetaLoader(
     private val router: BlockchainRouter<ItemService>,
     private val unionContentMetaLoader: UnionContentMetaLoader,
-    private val metaProperties: UnionMetaProperties,
     private val ipfsUrlResolver: IpfsUrlResolver
 ) {
 
@@ -63,35 +58,17 @@ class UnionMetaLoader(
     private suspend fun enrichContentMetaWithTimeout(
         metaContent: List<UnionMetaContent>,
         itemId: ItemIdDto
-    ): List<UnionMetaContent>? {
-        return try {
-            withTimeout(Duration.ofMillis(metaProperties.mediaFetchTimeout.toLong())) {
-                enrichContentMeta(metaContent, itemId)
+    ): List<UnionMetaContent> = coroutineScope {
+        metaContent.map { content ->
+            val resolvedUrl = ipfsUrlResolver.resolveRealUrl(content.url)
+            logger.info(
+                "Content meta resolution for ${itemId.fullId()}: content URL ${content.url} was resolved to $resolvedUrl"
+            )
+            async {
+                val contentProperties = unionContentMetaLoader.fetchContentMeta(content.url, itemId)
+                content.copy(url = resolvedUrl, properties = contentProperties)
             }
-        } catch (e: CancellationException) {
-            logger.info("Content meta resolution for ${itemId.fullId()}: timeout of ${metaProperties.mediaFetchTimeout.toLong()} ms")
-            null
-        }
-    }
-
-    private suspend fun enrichContentMeta(
-        metaContent: List<UnionMetaContent>,
-        itemId: ItemIdDto
-    ): List<UnionMetaContent> {
-        return coroutineScope {
-            metaContent.map { content ->
-                async {
-                    val resolvedUrl = ipfsUrlResolver.resolveRealUrl(content.url)
-                    logger.info(
-                        "Content meta resolution for ${itemId.fullId()} by URL ${content.url}: " +
-                                if (resolvedUrl != content.url) " resolved as $resolvedUrl" else ""
-                    )
-
-                    val contentProperties = unionContentMetaLoader.fetchContentMeta(resolvedUrl, itemId)
-                    content.copy(url = resolvedUrl, properties = contentProperties)
-                }
-            }.awaitAll()
-        }
+        }.awaitAll()
     }
 
     class UnionMetaResolutionException(message: String) : RuntimeException(message)
