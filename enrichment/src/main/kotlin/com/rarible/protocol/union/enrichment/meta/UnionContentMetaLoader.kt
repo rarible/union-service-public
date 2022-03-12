@@ -29,18 +29,22 @@ class UnionContentMetaLoader(
         val contentMeta = try {
             contentMetaReceiver.receive(url)
         } catch (e: Exception) {
-            logger.warn("Content meta resolution: error for {} by URL {}", itemId.fullId(), url, e)
-            return null
-        }
-        val contentProperties = contentMeta?.toUnionMetaContentProperties()
+            logger.warn("Content meta resolution for {} by {}: error", itemId.fullId(), url, e)
+            null
+        } ?: return getFallbackProperties(url, itemId)
+        val contentProperties = contentMeta.toUnionMetaContentProperties()
         logger.info(
-            "Content meta resolution: for {} by URL {} resolved {} converted to {}",
+            "Content meta resolution for {} by URL {}: resolved content properties {}",
             itemId.fullId(),
             url,
-            contentMeta,
             contentProperties
         )
         return contentProperties
+    }
+
+    private fun getFallbackProperties(url: String, itemId: ItemIdDto): UnionMetaContentProperties {
+        logger.warn("Content meta resolution for {} by URL {}: fallback to image properties", itemId.fullId(), url)
+        return UnionImageProperties()
     }
 
     private suspend fun fetchFromCache(url: String): ContentMeta? {
