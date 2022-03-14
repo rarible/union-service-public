@@ -171,9 +171,7 @@ class EnrichmentOwnershipEventService(
             val newSource = if (activity.reverted == true) {
                 // We should re-evaluate source only if received activity has the same source
                 if (source == existing.source) {
-                    logger.info(
-                        "Received reverted Activity {} for Ownership [{}], reverting it", source, ownershipId
-                    )
+                    logger.info("Reverting Activity source {} for Ownership [{}]", source, ownershipId)
                     enrichmentActivityService.getOwnershipSource(ownershipId)
                 } else {
                     existing.source
@@ -183,11 +181,11 @@ class EnrichmentOwnershipEventService(
             }
 
             if (newSource == existing.source) {
-                logger.info("Ownership [{}] not changed after Activity event, event won't be published", ownershipId)
+                logger.info("Ownership [{}] not changed after Activity event [{}]", ownershipId, activity.id)
             } else {
                 logger.info(
-                    "Ownership [{}] source changed on Activity event [{}]: {} -> {}", ownershipId, activity.id,
-                    existing.source, newSource
+                    "Ownership [{}] source changed on Activity event [{}]: {} -> {}",
+                    ownershipId, activity.id, existing.source, newSource
                 )
                 saveAndNotify(existing.copy(source = newSource), notificationEnabled)
             }

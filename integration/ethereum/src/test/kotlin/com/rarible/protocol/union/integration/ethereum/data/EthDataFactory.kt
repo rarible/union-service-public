@@ -743,7 +743,8 @@ fun randomEthItemTransferActivity(): TransferDto {
         blockHash = Word.apply(randomWord()),
         blockNumber = randomLong(),
         logIndex = randomInt(),
-        reverted = false
+        reverted = false,
+        purchase = false
     )
 }
 

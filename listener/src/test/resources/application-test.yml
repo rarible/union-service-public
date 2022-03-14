@@ -8,6 +8,10 @@ common:
   client:
     tezos:
       url: "http://localhost:8080"
+  feature-flags:
+    enableRevertedActivityEventSending: false
+    enableOwnershipSourceEnrichment: true
+    enableItemLastSaleEnrichment: true
 
 rarible:
   core:

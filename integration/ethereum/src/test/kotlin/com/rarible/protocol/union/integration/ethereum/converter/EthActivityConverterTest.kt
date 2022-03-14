@@ -242,6 +242,7 @@ class EthActivityConverterTest {
         assertThat(converted.tokenId).isEqualTo(dto.tokenId) // TODO remove later
         assertThat(converted.itemId).isEqualTo(ItemIdDto(BlockchainDto.ETHEREUM, dto.contract.prefixed(), dto.tokenId))
         assertThat(converted.value).isEqualTo(dto.value)
+        assertThat(converted.purchase).isEqualTo(dto.purchase)
         assertThat(converted.transactionHash).isEqualTo(dto.transactionHash.prefixed())
         // TODO UNION remove in 1.19
         assertThat(converted.blockchainInfo!!.transactionHash).isEqualTo(dto.transactionHash.prefixed())

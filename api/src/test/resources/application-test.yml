@@ -17,3 +17,7 @@ common:
   currency:
     refresh:
       cron: "-"
+  feature-flags:
+    enableRevertedActivityEventSending: false
+    enableOwnershipSourceEnrichment: true
+    enableItemLastSaleEnrichment: true

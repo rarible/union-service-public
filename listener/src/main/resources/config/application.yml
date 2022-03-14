@@ -52,7 +52,9 @@ common:
       cron: "0 0/30 * * * *"
   useLegacyRepository: true
   feature-flags:
-    enableRevertedActivityEvents: false
+    enableRevertedActivityEventSending: false
+    enableOwnershipSourceEnrichment: false
+    enableItemLastSaleEnrichment: true
 
 
 integration:

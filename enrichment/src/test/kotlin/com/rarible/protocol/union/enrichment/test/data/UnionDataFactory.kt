@@ -13,6 +13,7 @@ import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.MetaAttributeDto
 import com.rarible.protocol.union.dto.MetaContentDto
 import com.rarible.protocol.union.dto.MintActivityDto
+import com.rarible.protocol.union.dto.OrderMatchSellDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.TransferActivityDto
 import com.rarible.protocol.union.dto.UnionAddress
@@ -23,6 +24,7 @@ import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthItemConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOwnershipConverter
+import com.rarible.protocol.union.integration.ethereum.data.randomEthAssetErc1155
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAssetErc20
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAssetErc721
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAuctionDto
@@ -32,6 +34,7 @@ import com.rarible.protocol.union.integration.ethereum.data.randomEthItemMintAct
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemTransferActivity
 import com.rarible.protocol.union.integration.ethereum.data.randomEthLegacySellOrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthNftItemDto
+import com.rarible.protocol.union.integration.ethereum.data.randomEthOrderActivityMatch
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipId
 import com.rarible.protocol.union.integration.flow.converter.FlowItemConverter
@@ -187,6 +190,15 @@ fun randomUnionActivityBurn(itemId: ItemIdDto) = runBlocking {
     ) as BurnActivityDto
 
     mint.copy(itemId = itemId)
+}
+
+fun randomUnionActivitySale(itemId: ItemIdDto) = runBlocking {
+    val swapDto = randomEthOrderActivityMatch()
+    val dto = swapDto.copy(left = swapDto.left.copy(asset = randomEthAssetErc1155(itemId)))
+
+    mockedEthActivityConverter.convert(
+        dto, itemId.blockchain
+    ) as OrderMatchSellDto
 }
 
 private val mockedEthOrderConverter = EthOrderConverter(CurrencyMock.currencyServiceMock)

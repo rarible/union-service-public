@@ -97,7 +97,7 @@ data class LegacyShortOwnership(
     }
 
     fun isNotEmpty(): Boolean {
-        return bestSellOrder != null
+        return bestSellOrder != null || source != null
     }
 
     @Transient
