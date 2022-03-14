@@ -42,6 +42,7 @@ rarible:
     topicsPrefix: protocol.${application.environment}.union.internal.loader
     enableWorkers: false
     enableNotifications: true # Enable notifications processor to send item update events when meta gets loaded.
+    loadNotificationsTopicPartitions: 50
     enableRetrySchedulerJob: true
 
 common:
