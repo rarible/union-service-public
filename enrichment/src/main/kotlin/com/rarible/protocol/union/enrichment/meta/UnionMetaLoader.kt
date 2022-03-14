@@ -25,21 +25,21 @@ class UnionMetaLoader(
 
     private val logger = LoggerFactory.getLogger(UnionMetaLoader::class.java)
 
-    suspend fun load(itemId: ItemIdDto): UnionMeta =
+    suspend fun load(itemId: ItemIdDto): UnionMeta? =
         withTransaction("UnionMetaLoader") {
             val unionMeta = withSpan(
                 name = "getItemMetaById",
                 type = SpanType.EXT,
                 labels = listOf("itemId" to itemId.fullId())
             ) {
-                getItemMeta(itemId) ?: throw UnionMetaResolutionException("Cannot resolve meta for ${itemId.fullId()}")
-            }
+                getItemMeta(itemId)
+            } ?: return@withTransaction null
             withSpan(
                 name = "enrichContentMeta",
                 labels = listOf("itemId" to itemId.fullId())
             ) {
                 val content = enrichContentMetaWithTimeout(unionMeta.content, itemId)
-                unionMeta.copy(content = content ?: unionMeta.content)
+                unionMeta.copy(content = content)
             }
         }
 
@@ -70,6 +70,4 @@ class UnionMetaLoader(
             }
         }.awaitAll()
     }
-
-    class UnionMetaResolutionException(message: String) : RuntimeException(message)
 }

@@ -30,7 +30,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
-import java.time.Duration
 
 @Component
 @CaptureSpan(type = SpanType.APP)
@@ -82,8 +81,6 @@ class EnrichmentItemService(
         logger.info("Fetched {} items for collection {} and owner {}", count, address, owner)
     }
 
-    fun findByAuctionId(auctionIdDto: AuctionIdDto) = itemRepository.findByAuction(auctionIdDto)
-
     suspend fun fetch(itemId: ItemIdDto): UnionItem {
         val now = nowMillis()
         val itemDto = itemServiceRouter.getService(itemId.blockchain).getItemById(itemId.value)
@@ -97,7 +94,7 @@ class EnrichmentItemService(
         item: UnionItem? = null,
         orders: Map<OrderIdDto, OrderDto> = emptyMap(),
         auctions: Map<AuctionIdDto, AuctionDto> = emptyMap(),
-        waitSyncTimeout: Duration? = null
+        loadMetaSynchronously: Boolean = false
     ) = coroutineScope {
         require(shortItem != null || item != null)
         val itemId = shortItem?.id?.toDto() ?: item!!.id
@@ -111,8 +108,8 @@ class EnrichmentItemService(
             enrichmentOrderService.fetchOrderIfDiffers(shortItem?.bestBidOrder, orders)
         }
         val meta = withSpanAsync("fetchMeta", spanType = SpanType.CACHE) {
-            if (waitSyncTimeout != null) {
-                unionMetaService.getAvailableMetaOrLoadSynchronouslyWithTimeout(itemId, waitSyncTimeout)
+            if (loadMetaSynchronously) {
+                unionMetaService.getAvailableMetaOrLoadSynchronously(itemId, synchronous = true)
             } else {
                 unionMetaService.getAvailableMetaOrScheduleLoading(itemId)
             }
