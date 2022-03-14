@@ -33,6 +33,7 @@ import com.rarible.protocol.dto.ItemTransferDto
 import com.rarible.protocol.dto.LegacyOrderDto
 import com.rarible.protocol.dto.MintDto
 import com.rarible.protocol.dto.NftCollectionDto
+import com.rarible.protocol.dto.NftCollectionMetaDto
 import com.rarible.protocol.dto.NftItemAttributeDto
 import com.rarible.protocol.dto.NftItemDto
 import com.rarible.protocol.dto.NftItemMetaDto
@@ -154,7 +155,7 @@ fun randomEthItemMedia(): NftMediaDto {
     val type = "ORIGINAL"
     return NftMediaDto(
         url = mapOf(Pair(type, randomString())),
-        meta = mapOf(Pair(type, randomEthItemMediaMeta(type)))
+        meta = mapOf(Pair(type, randomEthItemMediaMeta("image/png")))
     )
 }
 
@@ -462,7 +463,19 @@ fun randomEthCollectionDto(id: Address): NftCollectionDto {
         type = NftCollectionDto.Type.ERC1155,
         owner = randomAddress(),
         features = listOf(NftCollectionDto.Features.values()[randomInt(NftCollectionDto.Features.values().size)]),
-        supportsLazyMint = true
+        supportsLazyMint = true,
+        meta = randomEthCollectionMetaDto(),
+    )
+}
+
+fun randomEthCollectionMetaDto(): NftCollectionMetaDto {
+    return NftCollectionMetaDto(
+        name = randomString(),
+        description = randomString(),
+        image = randomEthItemMedia(),
+        external_link = randomString(),
+        seller_fee_basis_points = randomInt(),
+        fee_recipient = randomAddress(),
     )
 }
 
