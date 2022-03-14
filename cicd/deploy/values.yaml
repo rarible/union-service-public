@@ -42,7 +42,6 @@ protocol-union-listener:
 protocol-union-meta-loader:
   image:
     repository: union-service-meta-loader
-  replicas: 3
   environments:
     APPLICATION_ENVIRONMENT: '{{ include "service.appEnv" $ }}'
     CONSUL_ROOT_PATH: '{{ include "service.appEnv" $ }}/protocol/union'
