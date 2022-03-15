@@ -2,3 +2,6 @@ protocol-union-api:
   service:
     enabled: true
     nodePort: 30218
+
+protocol-union-meta-loader:
+  replicas: 3
