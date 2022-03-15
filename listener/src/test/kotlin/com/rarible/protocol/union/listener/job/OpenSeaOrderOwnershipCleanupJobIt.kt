@@ -8,7 +8,7 @@ import com.rarible.protocol.union.enrichment.converter.ShortOwnershipConverter
 import com.rarible.protocol.union.enrichment.model.ShortOwnership
 import com.rarible.protocol.union.enrichment.repository.OwnershipRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
-import com.rarible.protocol.union.enrichment.test.data.randomUnionOwnershipDto
+import com.rarible.protocol.union.enrichment.test.data.randomUnionOwnership
 import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.listener.test.IntegrationTest
@@ -43,20 +43,20 @@ class OpenSeaOrderOwnershipCleanupJobIt {
         coEvery { filter.isOld(any(), any(), any()) } returns false
         coEvery { ownershipService.enrichOwnership(any()) } answers {
             val shortOwnership = it.invocation.args[0] as ShortOwnership
-            EnrichedOwnershipConverter.convert(randomUnionOwnershipDto(shortOwnership.id.toDto()), shortOwnership)
+            EnrichedOwnershipConverter.convert(randomUnionOwnership(shortOwnership.id.toDto()), shortOwnership)
         }
     }
 
     @Test
     fun `cleanup openSea best sells`() = runBlocking<Unit> {
         val bestSellOs = ShortOrderConverter.convert(randomUnionSellOrderDto().copy(platform = PlatformDto.OPEN_SEA))
-        val withOpenSea = ShortOwnershipConverter.convert(randomUnionOwnershipDto(randomEthItemId())).copy(
+        val withOpenSea = ShortOwnershipConverter.convert(randomUnionOwnership(randomEthItemId())).copy(
             bestSellOrder = bestSellOs,
             bestSellOrders = mapOf("123" to bestSellOs)
         )
 
         val bestSell = ShortOrderConverter.convert(randomUnionSellOrderDto())
-        val withoutOpenSea = ShortOwnershipConverter.convert(randomUnionOwnershipDto(randomEthItemId())).copy(
+        val withoutOpenSea = ShortOwnershipConverter.convert(randomUnionOwnership(randomEthItemId())).copy(
             bestSellOrder = bestSell,
             bestSellOrders = mapOf("123" to bestSell)
         )

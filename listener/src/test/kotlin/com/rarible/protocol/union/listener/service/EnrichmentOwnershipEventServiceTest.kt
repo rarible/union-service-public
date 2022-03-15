@@ -18,7 +18,7 @@ import com.rarible.protocol.union.enrichment.test.data.randomShortOwnership
 import com.rarible.protocol.union.enrichment.test.data.randomUnionActivityBurn
 import com.rarible.protocol.union.enrichment.test.data.randomUnionActivityMint
 import com.rarible.protocol.union.enrichment.test.data.randomUnionActivityTransfer
-import com.rarible.protocol.union.enrichment.test.data.randomUnionOwnershipDto
+import com.rarible.protocol.union.enrichment.test.data.randomUnionOwnership
 import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipId
@@ -88,7 +88,7 @@ class EnrichmentOwnershipEventServiceTest {
                 expectedShortOwnership,
                 null,
                 listOf(order).associateBy { it.id })
-        } returns EnrichedOwnershipConverter.convert(randomUnionOwnershipDto(), shortOwnership)
+        } returns EnrichedOwnershipConverter.convert(randomUnionOwnership(), shortOwnership)
 
         ownershipEventService.onOwnershipBestSellOrderUpdated(shortOwnership.id, order)
 
@@ -140,7 +140,7 @@ class EnrichmentOwnershipEventServiceTest {
                 expectedShortOwnership,
                 null,
                 listOf(order).associateBy { it.id })
-        } returns EnrichedOwnershipConverter.convert(randomUnionOwnershipDto(), shortOwnership)
+        } returns EnrichedOwnershipConverter.convert(randomUnionOwnership(), shortOwnership)
 
         ownershipEventService.onOwnershipBestSellOrderUpdated(shortOwnership.id, order)
 
@@ -223,7 +223,7 @@ class EnrichmentOwnershipEventServiceTest {
         coEvery { ownershipService.getOrEmpty(ShortOwnershipId(ownershipId)) } returns shortOwnership
         coEvery { ownershipService.save(any()) } returnsArgument 1
 
-        ownershipEventService.onActivity(mint, false)
+        ownershipEventService.onActivity(mint, null, false)
 
         coVerify(exactly = 1) { ownershipService.save(shortOwnership.copy(source = OwnershipSourceDto.MINT)) }
     }
@@ -237,7 +237,7 @@ class EnrichmentOwnershipEventServiceTest {
 
         coEvery { ownershipService.getOrEmpty(ShortOwnershipId(ownershipId)) } returns shortOwnership
 
-        ownershipEventService.onActivity(mint, false)
+        ownershipEventService.onActivity(mint, null, false)
 
         coVerify(exactly = 0) { ownershipService.save(any()) }
     }
@@ -251,7 +251,7 @@ class EnrichmentOwnershipEventServiceTest {
 
         coEvery { ownershipService.getOrEmpty(ShortOwnershipId(ownershipId)) } returns shortOwnership
 
-        ownershipEventService.onActivity(mint, false)
+        ownershipEventService.onActivity(mint, null, false)
 
         coVerify(exactly = 0) { ownershipService.save(any()) }
     }
@@ -267,7 +267,7 @@ class EnrichmentOwnershipEventServiceTest {
         coEvery { activityService.getOwnershipSource(ownershipId) } returns OwnershipSourceDto.TRANSFER
         coEvery { ownershipService.save(any()) } returnsArgument 1
 
-        ownershipEventService.onActivity(mint, false)
+        ownershipEventService.onActivity(mint, null, false)
 
         coVerify(exactly = 1) { ownershipService.save(shortOwnership.copy(source = OwnershipSourceDto.TRANSFER)) }
     }
@@ -282,7 +282,7 @@ class EnrichmentOwnershipEventServiceTest {
 
         coEvery { ownershipService.getOrEmpty(ShortOwnershipId(ownershipId)) } returns shortOwnership
 
-        ownershipEventService.onActivity(mint, false)
+        ownershipEventService.onActivity(mint, null, false)
 
         coVerify(exactly = 0) { ownershipService.save(any()) }
     }

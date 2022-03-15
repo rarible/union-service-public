@@ -24,6 +24,7 @@ class InternalConsumerProperties(
 class ReconciliationProperties(
     val orderBatchSize: Int = 50,
     val auctionBatchSize: Int = 50,
+    val activityBatchSize: Int = 100,
     val threadCount: Int = 4,
     val notificationEnabled: Boolean = true
 )

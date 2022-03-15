@@ -11,7 +11,6 @@ import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.AuctionDto
 import com.rarible.protocol.union.dto.AuctionIdDto
 import com.rarible.protocol.union.dto.CollectionIdDto
-import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.UnionAddress
@@ -29,7 +28,9 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import org.slf4j.LoggerFactory
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
+import org.springframework.web.reactive.function.client.WebClientResponseException
 import java.time.Duration
 
 @Component
@@ -84,11 +85,23 @@ class EnrichmentItemService(
 
     fun findByAuctionId(auctionIdDto: AuctionIdDto) = itemRepository.findByAuction(auctionIdDto)
 
-    suspend fun fetch(itemId: ItemIdDto): UnionItem {
+    suspend fun fetch(itemId: ShortItemId): UnionItem {
         val now = nowMillis()
-        val itemDto = itemServiceRouter.getService(itemId.blockchain).getItemById(itemId.value)
-        logger.info("Fetched item [{}] ({} ms)", itemId.fullId(), spent(now))
+        val itemDto = itemServiceRouter.getService(itemId.blockchain).getItemById(itemId.itemId)
+        logger.info("Fetched item [{}] ({} ms)", itemId.toDto().fullId(), spent(now))
         return itemDto
+    }
+
+    suspend fun fetchOrNull(itemId: ShortItemId): UnionItem? {
+        return try {
+            fetch(itemId)
+        } catch (e: WebClientResponseException) {
+            if (e.statusCode == HttpStatus.NOT_FOUND) {
+                null
+            } else {
+                throw e
+            }
+        }
     }
 
     // [orders] is a set of already fetched orders that can be used as cache to avoid unnecessary 'getById' calls
@@ -103,7 +116,7 @@ class EnrichmentItemService(
     require(shortItem != null || item != null)
         val itemId = shortItem?.id?.toDto() ?: item!!.id
         val fetchedItem = withSpanAsync("fetchItem", spanType = SpanType.EXT) {
-            item ?: fetch(itemId)
+            item ?: fetch(ShortItemId(itemId))
         }
         val bestSellOrder = withSpanAsync("fetchBestSellOrder", spanType = SpanType.EXT) {
             enrichmentOrderService.fetchOrderIfDiffers(shortItem?.bestSellOrder, orders)

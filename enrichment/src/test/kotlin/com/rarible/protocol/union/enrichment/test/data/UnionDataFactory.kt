@@ -100,17 +100,17 @@ fun randomUnionContent(properties: UnionMetaContentProperties): UnionMetaContent
     )
 }
 
-fun randomUnionOwnershipDto() = EthOwnershipConverter.convert(
+fun randomUnionOwnership() = EthOwnershipConverter.convert(
     randomEthOwnershipDto(randomEthOwnershipId()),
     BlockchainDto.ETHEREUM
 )
 
-fun randomUnionOwnershipDto(itemId: ItemIdDto) = EthOwnershipConverter.convert(
+fun randomUnionOwnership(itemId: ItemIdDto) = EthOwnershipConverter.convert(
     randomEthOwnershipDto(itemId),
     itemId.blockchain
 )
 
-fun randomUnionOwnershipDto(ownershipId: OwnershipIdDto) = EthOwnershipConverter.convert(
+fun randomUnionOwnership(ownershipId: OwnershipIdDto) = EthOwnershipConverter.convert(
     randomEthOwnershipDto(ownershipId),
     ownershipId.blockchain
 )
