@@ -27,6 +27,7 @@ class IpfsUrlResolver(
             ipfsUri.startsWith("ipfs:///ipfs/") -> "$gateway/ipfs/${ipfsUri.removePrefix("ipfs:///ipfs/")}"
             ipfsUri.startsWith("ipfs://ipfs/") -> "$gateway/ipfs/${ipfsUri.removePrefix("ipfs://ipfs/")}"
             ipfsUri.startsWith("ipfs://") -> "$gateway/ipfs/${ipfsUri.removePrefix("ipfs://")}"
+            ipfsUri.startsWith("ipfs:/") -> "$gateway/ipfs/${ipfsUri.removePrefix("ipfs:/")}"
             ipfsUri.startsWith("Qm") -> "$gateway/ipfs/$ipfsUri"
             else -> "$gateway/${ipfsUri.trimStart('/')}"
         }.encodeHtmlUrl()
