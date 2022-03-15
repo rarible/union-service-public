@@ -22,28 +22,31 @@ class UnionContentMetaLoader(
     private val logger = LoggerFactory.getLogger(UnionContentMetaLoader::class.java)
 
     suspend fun fetchContentMeta(url: String, itemId: ItemIdDto): UnionMetaContentProperties? {
+        val logPrefix = "Content meta resolution for ${itemId.fullId()} by $url"
+        logger.info("$logPrefix: starting to resolve")
         val fromCache = fetchFromCache(url)
         if (fromCache != null) {
-            return fromCache.toUnionMetaContentProperties()
+            val properties = fromCache.toUnionMetaContentProperties()
+            logger.info("$logPrefix: found in the cache: $properties")
+            return properties
         }
         val contentMeta = try {
             contentMetaReceiver.receive(url)
         } catch (e: Exception) {
-            logger.warn("Content meta resolution for {} by {}: error", itemId.fullId(), url, e)
+            logger.warn("$logPrefix: error", itemId.fullId(), url, e)
             null
-        } ?: return getFallbackProperties(url, itemId)
+        } ?: return getFallbackProperties(url, itemId, logPrefix)
         val contentProperties = contentMeta.toUnionMetaContentProperties()
-        logger.info(
-            "Content meta resolution for {} by URL {}: resolved content properties {}",
-            itemId.fullId(),
-            url,
-            contentProperties
-        )
+        logger.info("$logPrefix: resolved $contentProperties")
         return contentProperties
     }
 
-    private fun getFallbackProperties(url: String, itemId: ItemIdDto): UnionMetaContentProperties {
-        logger.warn("Content meta resolution for {} by URL {}: fallback to image properties", itemId.fullId(), url)
+    private fun getFallbackProperties(
+        url: String,
+        itemId: ItemIdDto,
+        logPrefix: String
+    ): UnionMetaContentProperties {
+        logger.warn("$logPrefix: fallback to image properties", itemId.fullId(), url)
         return UnionImageProperties()
     }
 
