@@ -88,17 +88,17 @@ object EthCollectionConverter {
     private fun convert(sourceImage: NftMediaDto?): List<MetaContentDto> {
         if (sourceImage == null) return emptyList()
         return sourceImage.url.keys.map { key ->
-            convert(key, sourceImage.url[key]!!, sourceImage.meta[key]!!)
+            convert(key, sourceImage.url[key]!!, sourceImage.meta[key])
         }
     }
 
-    private fun convert(key: String, url: String, meta: NftMediaMetaDto): MetaContentDto {
+    private fun convert(key: String, url: String, meta: NftMediaMetaDto?): MetaContentDto {
         return ImageContentDto(
             url = url,
             representation = MetaContentDto.Representation.valueOf(key),
-            mimeType = meta.type,
-            width = meta.width,
-            height = meta.height,
+            mimeType = meta?.type,
+            width = meta?.width,
+            height = meta?.height,
             size = null, // TODO find where to get size from
         )
     }

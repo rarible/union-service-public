@@ -71,11 +71,13 @@ class EthCollectionConverterTest {
         val contentImage = meta.content!!.first()
         assertThat(contentImage).isExactlyInstanceOf(ImageContentDto::class.java)
         contentImage as ImageContentDto
-        assertThat(contentImage.url).isEqualTo(originalMeta.image!!.url.values.first())
+        val originalUrl = originalMeta.image!!.url.values.first()
+        val originalMediaMeta = originalMeta.image!!.meta.values.first()
+        assertThat(contentImage.url).isEqualTo(originalUrl)
         assertThat(contentImage.representation).isEqualTo(MetaContentDto.Representation.ORIGINAL)
-        assertThat(contentImage.mimeType).isEqualTo(originalMeta.image!!.meta.values.first().type)
-        assertThat(contentImage.width).isEqualTo(originalMeta.image!!.meta.values.first().width)
-        assertThat(contentImage.height).isEqualTo(originalMeta.image!!.meta.values.first().height)
+        assertThat(contentImage.mimeType).isEqualTo(originalMediaMeta.type)
+        assertThat(contentImage.width).isEqualTo(originalMediaMeta.width)
+        assertThat(contentImage.height).isEqualTo(originalMediaMeta.height)
         assertThat(contentImage.size).isNull()
     }
 }
