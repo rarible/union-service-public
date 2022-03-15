@@ -16,7 +16,7 @@ import com.rarible.protocol.union.enrichment.repository.ReconciliationMarkReposi
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
 import com.rarible.protocol.union.enrichment.test.data.randomShortOwnership
 import com.rarible.protocol.union.enrichment.test.data.randomUnionAuctionDto
-import com.rarible.protocol.union.enrichment.test.data.randomUnionOwnershipDto
+import com.rarible.protocol.union.enrichment.test.data.randomUnionOwnership
 import com.rarible.protocol.union.integration.ethereum.converter.EthAuctionConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOwnershipConverter
@@ -29,7 +29,6 @@ import com.rarible.protocol.union.listener.test.AbstractIntegrationTest
 import com.rarible.protocol.union.listener.test.IntegrationTest
 import io.mockk.clearMocks
 import io.mockk.coEvery
-import kotlinx.coroutines.FlowPreview
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -64,7 +63,7 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
     fun `update event - ownership doesn't exist`() = runWithKafka {
         val itemId = randomEthItemId()
         val ownershipId = randomEthOwnershipId(itemId)
-        val ownershipDto = randomUnionOwnershipDto(ownershipId)
+        val ownershipDto = randomUnionOwnership(ownershipId)
 
         val expected = EnrichedOwnershipConverter.convert(ownershipDto)
 

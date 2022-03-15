@@ -162,7 +162,11 @@ class EnrichmentOwnershipEventService(
         }
     }
 
-    suspend fun onActivity(activity: ActivityDto, notificationEnabled: Boolean = true) {
+    suspend fun onActivity(
+        activity: ActivityDto,
+        ownership: UnionOwnership? = null,
+        notificationEnabled: Boolean = true
+    ) {
         val source = activity.source() ?: return
         val ownershipId = activity.ownershipId() ?: return
 
@@ -187,7 +191,7 @@ class EnrichmentOwnershipEventService(
                     "Ownership [{}] source changed on Activity event [{}]: {} -> {}",
                     ownershipId, activity.id, existing.source, newSource
                 )
-                saveAndNotify(existing.copy(source = newSource), notificationEnabled)
+                saveAndNotify(existing.copy(source = newSource), notificationEnabled, ownership)
             }
         }
     }

@@ -109,6 +109,7 @@ listener:
   reconciliation:
     orderBatchSize: 50
     auctionBatchSize: 50
+    activityBatchSize: 100
     threadCount: 2
     notificationEnabled: false
   openSeaCleanup:

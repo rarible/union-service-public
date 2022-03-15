@@ -78,7 +78,7 @@ class EnrichmentItemEventService(
         }
     }
 
-    suspend fun onActivity(activity: ActivityDto, notificationEnabled: Boolean = true) {
+    suspend fun onActivity(activity: ActivityDto, item: UnionItem? = null, notificationEnabled: Boolean = true) {
         val lastSale = ItemLastSaleConverter.convert(activity) ?: return
         val itemId = activity.itemId() ?: return
 
@@ -109,7 +109,7 @@ class EnrichmentItemEventService(
                     "Item [{}] LastSale changed on Activity event [{}]: {} -> {}",
                     itemId, activity.id, currentLastSale, newLastSale
                 )
-                saveAndNotify(existing.copy(lastSale = newLastSale), notificationEnabled)
+                saveAndNotify(existing.copy(lastSale = newLastSale), notificationEnabled, item)
             }
         }
     }

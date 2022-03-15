@@ -133,7 +133,7 @@ class EnrichmentRefreshService(
         val lastSaleDeferred = async {
             if (ff.enableItemLastSaleEnrichment) enrichmentActivityService.getItemLastSale(itemId) else null
         }
-        val itemDtoDeferred = async { itemService.fetch(itemId) }
+        val itemDtoDeferred = async { itemService.fetch(shortItemId) }
         val sellStatsDeferred = async { ownershipService.getItemSellStats(shortItemId) }
 
         // Looking for best sell orders

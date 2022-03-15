@@ -29,9 +29,9 @@ import com.rarible.protocol.union.dto.continuation.page.Paging
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.dto.subchains
 import com.rarible.protocol.union.enrichment.configuration.UnionMetaProperties
+import com.rarible.protocol.union.enrichment.meta.UnionMetaService
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
-import com.rarible.protocol.union.enrichment.meta.UnionMetaService
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -113,8 +113,9 @@ class ItemController(
         itemId: String
     ): ResponseEntity<ItemDto> {
         val fullItemId = IdParser.parseItemId(itemId)
-        val unionItem = enrichmentItemService.fetch(fullItemId)
-        val shortItem = enrichmentItemService.get(ShortItemId(fullItemId))
+        val shortItemId = ShortItemId(fullItemId)
+        val unionItem = enrichmentItemService.fetch(shortItemId)
+        val shortItem = enrichmentItemService.get(shortItemId)
         val enrichedUnionItem = enrichmentItemService.enrichItem(
             shortItem = shortItem,
             item = unionItem,

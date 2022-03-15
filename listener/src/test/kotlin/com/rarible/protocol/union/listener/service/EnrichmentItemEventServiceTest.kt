@@ -75,7 +75,7 @@ class EnrichmentItemEventServiceTest {
         coEvery { itemService.getOrEmpty(ShortItemId(itemId)) } returns shortItem
         coEvery { itemService.save(any()) } returnsArgument 1
 
-        itemEventService.onActivity(sell, false)
+        itemEventService.onActivity(sell, null, false)
 
         coVerify(exactly = 1) { itemService.save(shortItem.copy(lastSale = lastSale)) }
     }
@@ -92,7 +92,7 @@ class EnrichmentItemEventServiceTest {
         coEvery { itemService.getOrEmpty(ShortItemId(itemId)) } returns shortItem
         coEvery { itemService.save(any()) } returnsArgument 1
 
-        itemEventService.onActivity(sell, false)
+        itemEventService.onActivity(sell, null, false)
 
         coVerify(exactly = 1) { itemService.save(shortItem.copy(lastSale = lastSale)) }
     }
@@ -107,7 +107,7 @@ class EnrichmentItemEventServiceTest {
 
         coEvery { itemService.getOrEmpty(ShortItemId(itemId)) } returns shortItem
 
-        itemEventService.onActivity(sell, false)
+        itemEventService.onActivity(sell, null, false)
 
         coVerify(exactly = 0) { itemService.save(any()) }
     }
@@ -123,7 +123,7 @@ class EnrichmentItemEventServiceTest {
 
         coEvery { itemService.getOrEmpty(ShortItemId(itemId)) } returns shortItem
 
-        itemEventService.onActivity(sell, false)
+        itemEventService.onActivity(sell, null, false)
 
         coVerify(exactly = 0) { itemService.save(any()) }
     }
@@ -141,7 +141,7 @@ class EnrichmentItemEventServiceTest {
         coEvery { activityService.getItemLastSale(itemId) } returns actualLastSale
         coEvery { itemService.save(any()) } returnsArgument 1
 
-        itemEventService.onActivity(sell, false)
+        itemEventService.onActivity(sell, null, false)
 
         coVerify(exactly = 1) { itemService.save(shortItem.copy(lastSale = actualLastSale)) }
     }
@@ -159,7 +159,7 @@ class EnrichmentItemEventServiceTest {
 
         coEvery { itemService.getOrEmpty(ShortItemId(itemId)) } returns shortItem
 
-        itemEventService.onActivity(sell, false)
+        itemEventService.onActivity(sell, null, false)
 
         coVerify(exactly = 0) { itemService.save(any()) }
     }
