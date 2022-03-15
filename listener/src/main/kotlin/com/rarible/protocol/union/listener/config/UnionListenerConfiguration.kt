@@ -34,10 +34,9 @@ class UnionListenerConfiguration(
 
     private val clientIdPrefix = "$env.$host.${UUID.randomUUID()}"
 
-    @Bean
-    fun unionWrappedEventConsumer(): RaribleKafkaConsumer<UnionWrappedEvent> {
+    private fun createUnionWrappedEventConsumer(index: Int): RaribleKafkaConsumer<UnionWrappedEvent> {
         return RaribleKafkaConsumer(
-            clientId = "$clientIdPrefix.union-wrapped-event-consumer",
+            clientId = "$clientIdPrefix.union-wrapped-event-consumer-$index",
             valueDeserializerClass = UnionKafkaJsonDeserializer::class.java,
             valueClass = UnionWrappedEvent::class.java,
             consumerGroup = consumerGroup("wrapped"),
@@ -49,21 +48,21 @@ class UnionListenerConfiguration(
 
     @Bean
     fun unionWrappedEventWorker(
-        consumer: RaribleKafkaConsumer<UnionWrappedEvent>,
         handler: InternalEventHandler<UnionWrappedEvent>
     ): KafkaConsumerWorker<UnionWrappedEvent> {
         return consumerFactory.createWrappedEventConsumer(
-            consumer = consumer,
+            consumer = { index -> createUnionWrappedEventConsumer(index) },
             handler = handler,
             daemon = listenerProperties.monitoringWorker,
             workers = listenerProperties.consumer.workers
         )
     }
 
-    @Bean
-    fun unionReconciliationMarkEventConsumer(): RaribleKafkaConsumer<ReconciliationMarkAbstractEvent> {
+    private fun createUnionReconciliationMarkEventConsumer(
+        index: Int
+    ): RaribleKafkaConsumer<ReconciliationMarkAbstractEvent> {
         return RaribleKafkaConsumer(
-            clientId = "$clientIdPrefix.union-reconciliation-mark-consumer",
+            clientId = "$clientIdPrefix.union-reconciliation-mark-consumer-$index",
             valueDeserializerClass = UnionKafkaJsonDeserializer::class.java,
             valueClass = ReconciliationMarkAbstractEvent::class.java,
             consumerGroup = consumerGroup("reconciliation"),
@@ -75,11 +74,10 @@ class UnionListenerConfiguration(
 
     @Bean
     fun unionReconciliationMarkEventWorker(
-        consumer: RaribleKafkaConsumer<ReconciliationMarkAbstractEvent>,
         handler: InternalEventHandler<ReconciliationMarkAbstractEvent>
     ): KafkaConsumerWorker<ReconciliationMarkAbstractEvent> {
         return consumerFactory.createReconciliationMarkEventConsumer(
-            consumer = consumer,
+            consumer = { index -> createUnionReconciliationMarkEventConsumer(index) },
             handler = handler,
             daemon = listenerProperties.monitoringWorker,
             workerCount = 1
