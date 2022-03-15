@@ -21,7 +21,7 @@ class InternalConsumerFactory(
     }
 
     fun <T> createReconciliationMarkEventConsumer(
-        consumer: RaribleKafkaConsumer<T>,
+        consumer: (i: Int) -> RaribleKafkaConsumer<T>,
         handler: InternalEventHandler<T>,
         daemon: DaemonWorkerProperties,
         workerCount: Int
@@ -31,7 +31,7 @@ class InternalConsumerFactory(
     }
 
     fun <T> createWrappedEventConsumer(
-        consumer: RaribleKafkaConsumer<T>,
+        consumer: (i: Int) -> RaribleKafkaConsumer<T>,
         handler: InternalEventHandler<T>,
         daemon: DaemonWorkerProperties,
         workers: Map<String, Int>
@@ -40,7 +40,7 @@ class InternalConsumerFactory(
     }
 
     fun <T> createInternalBatchedConsumerWorker(
-        consumer: RaribleKafkaConsumer<T>,
+        consumer: (i: Int) -> RaribleKafkaConsumer<T>,
         handler: InternalEventHandler<T>,
         daemonWorkerProperties: DaemonWorkerProperties,
         workers: Map<String, Int>,
@@ -49,7 +49,7 @@ class InternalConsumerFactory(
         val workerCount = workers.getOrDefault(entityType, 1)
         val workerSet = (1..workerCount).map {
             ConsumerWorker(
-                consumer = consumer,
+                consumer = consumer(it),
                 properties = daemonWorkerProperties,
                 eventHandler = InternalEventHandlerWrapper(handler),
                 meterRegistry = meterRegistry,
