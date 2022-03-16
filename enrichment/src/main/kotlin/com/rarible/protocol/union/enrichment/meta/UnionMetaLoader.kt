@@ -67,7 +67,7 @@ class UnionMetaLoader(
                     logPrefix + if (resolvedUrl != content.url)
                         ": content URL ${content.url} was resolved to $resolvedUrl" else ""
                 )
-                val contentProperties = unionContentMetaLoader.fetchContentMeta(content.url, itemId)
+                val contentProperties = unionContentMetaLoader.fetchContentMeta(resolvedUrl, itemId)
                 content.copy(url = resolvedUrl, properties = contentProperties)
             }
         }.awaitAll()
