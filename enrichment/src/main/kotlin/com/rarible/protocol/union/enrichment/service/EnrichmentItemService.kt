@@ -21,6 +21,7 @@ import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
 import com.rarible.protocol.union.enrichment.util.spent
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
@@ -107,11 +108,15 @@ class EnrichmentItemService(
         val bestBidOrder = withSpanAsync("fetchBestBidOrder", spanType = SpanType.EXT) {
             enrichmentOrderService.fetchOrderIfDiffers(shortItem?.bestBidOrder, orders)
         }
-        val meta = withSpanAsync("fetchMeta", spanType = SpanType.CACHE) {
-            if (loadMetaSynchronously) {
-                unionMetaService.getAvailableMetaOrLoadSynchronously(itemId, synchronous = true)
-            } else {
-                unionMetaService.getAvailableMetaOrScheduleLoading(itemId)
+        val meta = if (item?.meta != null) {
+            CompletableDeferred(item.meta)
+        } else {
+            withSpanAsync("fetchMeta", spanType = SpanType.CACHE) {
+                if (loadMetaSynchronously) {
+                    unionMetaService.getAvailableMetaOrLoadSynchronously(itemId, synchronous = true)
+                } else {
+                    unionMetaService.getAvailableMetaOrScheduleLoading(itemId)
+                }
             }
         }
 
