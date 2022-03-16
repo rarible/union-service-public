@@ -1,18 +1,25 @@
 package com.rarible.protocol.union.integration.immutablex
 
+import com.rarible.core.application.ApplicationEnvironmentInfo
+import com.rarible.core.kafka.RaribleKafkaProducer
 import com.rarible.protocol.union.api.ApiClient
 import com.rarible.protocol.union.api.client.DefaultUnionWebClientCustomizer
 import com.rarible.protocol.union.core.CoreConfiguration
+import com.rarible.protocol.union.core.ProducerProperties
 import com.rarible.protocol.union.core.service.CurrencyService
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.integration.immutablex.client.EventsApi
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexApiClient
 import com.rarible.protocol.union.integration.immutablex.converter.ImmutablexOrderConverter
+import com.rarible.protocol.union.integration.immutablex.dto.*
+import com.rarible.protocol.union.integration.immutablex.kafka.ImmutablexInternalProducer
 import com.rarible.protocol.union.integration.immutablex.service.ImmutablexItemService
 import com.rarible.protocol.union.integration.immutablex.service.ImmutablexOrderService
-import org.springframework.beans.factory.annotation.Value
+import com.rarible.protocol.union.subscriber.UnionKafkaJsonSerializer
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
+import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.http.MediaType
 import org.springframework.http.codec.ClientCodecConfigurer
 import org.springframework.http.codec.json.Jackson2JsonDecoder
@@ -23,7 +30,10 @@ import org.springframework.web.reactive.function.client.WebClient
 @ImmutablexConfiguration
 @Import(CoreConfiguration::class)
 @EnableConfigurationProperties(ImmutablexIntegrationProperties::class)
-class ImmutablexApiConfiguration {
+class ImmutablexApiConfiguration(
+    private val appEnvInfo: ApplicationEnvironmentInfo,
+    private val producerProperties: ProducerProperties
+) {
 
 
     @Bean
@@ -63,5 +73,75 @@ class ImmutablexApiConfiguration {
         client: ImmutablexApiClient,
         converter: ImmutablexOrderConverter,
     ): ImmutablexOrderService = ImmutablexOrderService(client, converter)
+
+
+    @Bean
+    fun mintsProducer(): RaribleKafkaProducer<ImmutablexMint> {
+        return RaribleKafkaProducer(
+            clientId = "${appEnvInfo.name}.immutablex.mints",
+            valueSerializerClass = UnionKafkaJsonSerializer::class.java,
+            defaultTopic = "protocol.${appEnvInfo.name}.immutablex.internal.mints",
+            bootstrapServers = producerProperties.brokerReplicaSet
+        )
+    }
+
+    @Bean
+    fun transferProducer(): RaribleKafkaProducer<ImmutablexTransfer> {
+        return RaribleKafkaProducer(
+            clientId = "${appEnvInfo.name}.immutablex.transfers",
+            valueSerializerClass = UnionKafkaJsonSerializer::class.java,
+            defaultTopic = "protocol.${appEnvInfo.name}.immutablex.internal.transfers",
+            bootstrapServers = producerProperties.brokerReplicaSet
+        )
+    }
+
+    @Bean
+    fun tradingProducer(): RaribleKafkaProducer<ImmutablexTrade> {
+        return RaribleKafkaProducer(
+            clientId = "${appEnvInfo.name}.immutablex.tradings",
+            valueSerializerClass = UnionKafkaJsonSerializer::class.java,
+            defaultTopic = "protocol.${appEnvInfo.name}.immutablex.internal.tradings",
+            bootstrapServers = producerProperties.brokerReplicaSet
+        )
+    }
+
+    @Bean
+    fun depositProducer(): RaribleKafkaProducer<ImmutablexDeposit> {
+        return RaribleKafkaProducer(
+            clientId = "${appEnvInfo.name}.immutablex.deposits",
+            valueSerializerClass = UnionKafkaJsonSerializer::class.java,
+            defaultTopic = "protocol.${appEnvInfo.name}.immutablex.internal.deposits",
+            bootstrapServers = producerProperties.brokerReplicaSet
+        )
+    }
+
+    @Bean
+    fun withdrawalsProducer(): RaribleKafkaProducer<ImmutablexWithdrawal> {
+        return RaribleKafkaProducer(
+            clientId = "${appEnvInfo.name}.immutablex.withdrawals",
+            valueSerializerClass = UnionKafkaJsonSerializer::class.java,
+            defaultTopic = "protocol.${appEnvInfo.name}.immutablex.internal.withdrawals",
+            bootstrapServers = producerProperties.brokerReplicaSet
+        )
+    }
+
+    @Bean
+    fun eventsApi(immutablexWebClient: WebClient) = EventsApi(immutablexWebClient)
+
+    @Bean
+    fun internalProducer(
+        mintsProducer: RaribleKafkaProducer<ImmutablexMint>,
+        transferProducer: RaribleKafkaProducer<ImmutablexTransfer>,
+        tradesProducer: RaribleKafkaProducer<ImmutablexTrade>,
+        depositProducer: RaribleKafkaProducer<ImmutablexDeposit>,
+        withdrawalsProducer: RaribleKafkaProducer<ImmutablexWithdrawal>
+    ) = ImmutablexInternalProducer(mintsProducer, transferProducer, tradesProducer, depositProducer, withdrawalsProducer)
+
+    @Bean
+    fun immutablexScanner(
+        eventsApi: EventsApi,
+        mongo: MongoTemplate,
+        internalProducer: ImmutablexInternalProducer
+    ): ImmutablexScanner = ImmutablexScanner(eventsApi, mongo, internalProducer)
 
 }

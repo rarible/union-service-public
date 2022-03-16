@@ -3,7 +3,6 @@ package com.rarible.protocol.union.integration.immutablex.dto
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.PropertyNamingStrategies
-import com.fasterxml.jackson.databind.PropertyNamingStrategy
 import com.fasterxml.jackson.databind.annotation.JsonNaming
 import java.math.BigDecimal
 import java.time.Instant
@@ -73,11 +72,12 @@ data class ImmutablexPage<T>(
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class ImmutableMint(
+data class ImmutablexMint(
     val transactionId: Long,
     val token: Token,
     val user: String,
-    val timestamp: Instant
+    val timestamp: Instant,
+    val fees: List<ImmutablexFee>?
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -88,13 +88,16 @@ data class TokenData(
     @JsonProperty("token_id")
     val tokenId: String?,
     @JsonProperty("token_address")
-    val tokenAddress: String?
+    val tokenAddress: String?,
+    val properties: ImmutablexDataProperties?,
+    val decimals: Int?,
+    val quantity: String?,
 )
 
 data class ImmutablexMintsPage(
     val cursor: String,
     val remaining: Boolean,
-    val result: List<ImmutableMint>
+    val result: List<ImmutablexMint>
 )
 
 data class ImmutablexOrder(
@@ -129,10 +132,10 @@ data class ImmutablexOrderData(
     val tokenAddress: String?,
     @JsonProperty("token_id")
     val tokenId: String?,
-    val properties: ImmutablexOrderDataProperties?
+    val properties: ImmutablexDataProperties?
 )
 
-data class ImmutablexOrderDataProperties(
+data class ImmutablexDataProperties(
     val name: String?,
     val imageUrl: String?,
     val collection: ImmutablexCollectionShort
@@ -142,4 +145,58 @@ data class ImmutablexOrdersPage(
     val cursor: String,
     val remaining: Boolean,
     val result: List<ImmutablexOrder>
+)
+
+data class ImmutablexTransfer(
+    val token: Token,
+    val receiver: String,
+    val status: String,
+    val timestamp: Instant,
+    @JsonProperty("transaction_id")
+    val transactionId: Long
+)
+
+data class TradeSide(
+    @JsonProperty("order_id")
+    val orderId: Long,
+    val sold: BigDecimal,
+    @JsonProperty("token_address")
+    val tokenAddress: String?,
+    @JsonProperty("token_id")
+    val tokenId: String?,
+    @JsonProperty("token_type")
+    val tokenType: String?
+)
+
+data class ImmutablexTrade(
+    @JsonProperty("transaction_id")
+    val transactionId: Long,
+    @JsonProperty("b")
+    val make: TradeSide,
+    @JsonProperty("a")
+    val take: TradeSide,
+    val status: String,
+    val timestamp: Instant
+)
+
+data class ImmutablexDeposit(
+    @JsonProperty("transaction_id")
+    val transactionId: Long,
+    val token: Token,
+    val status: String,
+    val timestamp: Instant,
+    val user: String
+)
+
+data class ImmutablexWithdrawal(
+    @JsonProperty("transaction_id")
+    val transactionId: Long,
+    val token: Token,
+    @JsonProperty("rollup_status")
+    val rollupStatus: String,
+    val sender: String,
+    val status: String,
+    val timestamp: Instant,
+    @JsonProperty("withdrawn_to_wallet")
+    val withdrawnToWallet: Boolean
 )
