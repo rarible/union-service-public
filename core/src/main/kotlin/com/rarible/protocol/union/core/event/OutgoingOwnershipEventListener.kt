@@ -18,6 +18,6 @@ class OutgoingOwnershipEventListener(
     override suspend fun onEvent(event: OwnershipEventDto) {
         eventsProducer.send(KafkaEventFactory.ownershipEvent(event))
             .ensureSuccess()
-        logger.info("Ownership Event sent: {}", event)
+        logger.info("Ownership Event sent for item {}: {}", event.ownershipId.getItemId().fullId(), event)
     }
 }
