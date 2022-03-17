@@ -5,6 +5,8 @@ import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.dto.ItemIdDto
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.dao.DuplicateKeyException
+import org.springframework.dao.OptimisticLockingFailureException
 import org.springframework.stereotype.Component
 
 @Component
@@ -44,17 +46,29 @@ class UnionMetaService(
             logger.info("Meta loading for item ${itemId.fullId()} was failed")
             return null
         }
-        if (!metaCacheEntry.isMetaInitiallyScheduledForLoading()) {
+        if (!synchronous && !metaCacheEntry.isMetaInitiallyScheduledForLoading()) {
             scheduleLoading(itemId)
         }
         if (synchronous) {
             logger.info("Loading meta synchronously for ${itemId.fullId()}")
-            return try {
+            val itemMeta = try {
                 unionMetaLoader.load(itemId)
             } catch (e: Exception) {
-                logger.warn("Failed to synchronously load meta for ${itemId.fullId()}", e)
+                logger.warn("Synchronous meta loading failed for ${itemId.fullId()}")
                 null
             }
+            if (itemMeta != null) {
+                logger.warn("Saving synchronously loaded meta to cache for ${itemId.fullId()}")
+                try {
+                    unionMetaCacheLoaderService.save(itemId.fullId(), itemMeta)
+                } catch (e: Exception) {
+                    if (e !is OptimisticLockingFailureException && e !is DuplicateKeyException) {
+                        logger.error("Failed to save synchronously loaded meta to cache for ${itemId.fullId()}")
+                        throw e
+                    }
+                }
+            }
+            return itemMeta
         }
         return null
     }
