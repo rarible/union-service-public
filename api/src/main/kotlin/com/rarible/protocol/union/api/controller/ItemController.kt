@@ -164,6 +164,7 @@ class ItemController(
     override suspend fun resetItemMeta(itemId: String): ResponseEntity<Unit> {
         val fullItemId = IdParser.parseItemId(itemId)
         // TODO[meta]: when all Blockchains stop caching the meta, we can remove this endpoint call.
+        logger.info("Refreshing item meta for $itemId")
         router.getService(fullItemId.blockchain).resetItemMeta(fullItemId.value)
         unionMetaService.scheduleLoading(fullItemId)
         return ResponseEntity.ok().build()
