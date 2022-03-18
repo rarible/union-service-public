@@ -4,6 +4,7 @@ import com.rarible.core.apm.SpanType
 import com.rarible.core.apm.withSpan
 import com.rarible.core.apm.withTransaction
 import com.rarible.core.client.WebClientResponseProxyException
+import com.rarible.protocol.union.core.model.UnionImageProperties
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.UnionMetaContent
 import com.rarible.protocol.union.core.service.ItemService
@@ -67,7 +68,21 @@ class UnionMetaLoader(
                     logPrefix + if (resolvedUrl != content.url)
                         ": content URL ${content.url} was resolved to $resolvedUrl" else ""
                 )
-                val contentProperties = unionContentMetaLoader.fetchContentMeta(resolvedUrl, itemId)
+                val resolvedContentMeta = unionContentMetaLoader.fetchContentMeta(resolvedUrl, itemId)
+                val contentProperties = when {
+                    resolvedContentMeta != null -> {
+                        logger.info("$logPrefix: resolved to $resolvedContentMeta")
+                        resolvedContentMeta
+                    }
+                    content.properties != null -> {
+                        logger.info("$logPrefix: falling back to blockchain's meta ${content.properties}")
+                        content.properties
+                    }
+                    else -> {
+                        logger.warn("$logPrefix: falling back to image properties")
+                        UnionImageProperties()
+                    }
+                }
                 content.copy(url = resolvedUrl, properties = contentProperties)
             }
         }.awaitAll()

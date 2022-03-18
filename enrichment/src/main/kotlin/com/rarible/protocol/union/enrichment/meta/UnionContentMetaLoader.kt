@@ -35,19 +35,10 @@ class UnionContentMetaLoader(
         } catch (e: Exception) {
             logger.warn("$logPrefix: error", itemId.fullId(), url, e)
             null
-        } ?: return getFallbackProperties(url, itemId, logPrefix)
+        } ?: return null
         val contentProperties = contentMeta.toUnionMetaContentProperties()
         logger.info("$logPrefix: resolved $contentProperties")
         return contentProperties
-    }
-
-    private fun getFallbackProperties(
-        url: String,
-        itemId: ItemIdDto,
-        logPrefix: String
-    ): UnionMetaContentProperties {
-        logger.warn("$logPrefix: fallback to image properties", itemId.fullId(), url)
-        return UnionImageProperties()
     }
 
     private suspend fun fetchFromCache(url: String): ContentMeta? {
