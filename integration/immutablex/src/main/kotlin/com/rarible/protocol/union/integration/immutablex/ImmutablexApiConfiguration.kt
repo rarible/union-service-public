@@ -6,10 +6,11 @@ import com.rarible.protocol.union.core.CoreConfiguration
 import com.rarible.protocol.union.core.service.CurrencyService
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexApiClient
+import com.rarible.protocol.union.integration.immutablex.converter.ImmutablexActivityConverter
 import com.rarible.protocol.union.integration.immutablex.converter.ImmutablexOrderConverter
+import com.rarible.protocol.union.integration.immutablex.service.ImmutablexActivityService
 import com.rarible.protocol.union.integration.immutablex.service.ImmutablexItemService
 import com.rarible.protocol.union.integration.immutablex.service.ImmutablexOrderService
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
@@ -63,5 +64,15 @@ class ImmutablexApiConfiguration {
         client: ImmutablexApiClient,
         converter: ImmutablexOrderConverter,
     ): ImmutablexOrderService = ImmutablexOrderService(client, converter)
+
+
+    @Bean
+    fun immutablexActivityConverter(): ImmutablexActivityConverter = ImmutablexActivityConverter()
+
+    @Bean
+    fun immutablesActivityService(
+        client: ImmutablexApiClient,
+        converter: ImmutablexActivityConverter,
+    ): ImmutablexActivityService = ImmutablexActivityService(client, converter)
 
 }

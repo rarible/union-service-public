@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategies
 import com.fasterxml.jackson.databind.PropertyNamingStrategy
 import com.fasterxml.jackson.databind.annotation.JsonNaming
 import java.math.BigDecimal
+import java.math.BigInteger
 import java.time.Instant
 
 
@@ -73,14 +74,6 @@ data class ImmutablexPage<T>(
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class ImmutableMint(
-    val transactionId: Long,
-    val token: Token,
-    val user: String,
-    val timestamp: Instant
-)
-
-@JsonIgnoreProperties(ignoreUnknown = true)
 data class Token(val type: String, val data: TokenData)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -88,13 +81,109 @@ data class TokenData(
     @JsonProperty("token_id")
     val tokenId: String?,
     @JsonProperty("token_address")
-    val tokenAddress: String?
+    val tokenAddress: String?,
+    val decimals: Int?,
+    val quantity: BigInteger?,
 )
+
+interface ImmutablexActivity {
+    val transactionId: Long
+    val status: String
+    val timestamp: Instant
+}
 
 data class ImmutablexMintsPage(
     val cursor: String,
     val remaining: Boolean,
-    val result: List<ImmutableMint>
+    val result: List<ImmutablexMint>,
+)
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class ImmutablexMint(
+    @JsonProperty("transaction_id")
+    override val transactionId: Long,
+    override val status: String,
+    val user: String,
+    val token: Token,
+    override val timestamp: Instant,
+) : ImmutablexActivity
+
+data class ImmutablexTransfersPage(
+    val cursor: String,
+    val remaining: Boolean,
+    val result: List<ImmutablexTransfer>,
+)
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class ImmutablexTransfer(
+    override val transactionId: Long,
+    override val status: String,
+    val user: String,
+    val receiver: String,
+    val token: Token,
+    override val timestamp: Instant,
+) : ImmutablexActivity
+
+data class ImmutablexTradesPage(
+    val cursor: String,
+    val remaining: Boolean,
+    val result: List<ImmutablexTrade>,
+)
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class ImmutablexTrade(
+    override val transactionId: Long,
+    override val status: String,
+    val a: ImmutablexTradeAsset,
+    val b: ImmutablexTradeAsset,
+    override val timestamp: Instant,
+) : ImmutablexActivity
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class ImmutablexTradeAsset(
+    val orderId: Long,
+    @JsonProperty("token_type")
+    val tokenType: String,
+    @JsonProperty("token_id")
+    val tokenId: String?,
+    @JsonProperty("token_address")
+    val tokenAddress: String?,
+    val sold: BigInteger,
+)
+
+
+data class ImmutablexDepositsPage(
+    val cursor: String,
+    val remaining: Boolean,
+    val result: List<ImmutablexDeposit>,
+)
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class ImmutablexDeposit(
+    val transactionId: Long,
+    val status: String,
+    val user: String,
+    val token: Token,
+    val timestamp: Instant,
+)
+
+data class ImmutablexWithdrawalPage(
+    val cursor: String,
+    val remaining: Boolean,
+    val result: List<ImmutablexWithdrawal>,
+)
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class ImmutablexWithdrawal(
+    val transactionId: Long,
+    val status: String,
+    @JsonProperty("rollup_status")
+    val rollupStatus: String,
+    @JsonProperty("withdrawn_to_wallet")
+    val withdrawnToWallet: Boolean,
+    val sender: String,
+    val token: Token,
+    val timestamp: Instant,
 )
 
 data class ImmutablexOrder(
@@ -113,7 +202,7 @@ data class ImmutablexOrder(
     @JsonProperty("updated_timestamp")
     val updatedAt: Instant?,
     @JsonProperty("user")
-    val creator: String
+    val creator: String,
 )
 
 data class ImmutablexOrderSide(

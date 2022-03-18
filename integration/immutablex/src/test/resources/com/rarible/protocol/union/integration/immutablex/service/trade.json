@@ -1,0 +1,17 @@
+{
+  "transaction_id": 3439648,
+  "status": "success",
+  "a": {
+    "order_id": 28308,
+    "token_type": "ETH",
+    "sold": "2000000000000000"
+  },
+  "b": {
+    "order_id": 28307,
+    "token_type": "ERC721",
+    "token_id": "58792",
+    "token_address": "0x0f859cd4597fbe7e972b458692f1ab2c696a79b0",
+    "sold": "1"
+  },
+  "timestamp": "2022-03-14T09:35:52.431135Z"
+}
