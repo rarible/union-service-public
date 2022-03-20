@@ -20,6 +20,7 @@ import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
 import com.rarible.protocol.union.enrichment.util.spent
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
@@ -31,7 +32,6 @@ import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClientResponseException
-import java.time.Duration
 
 @Component
 @CaptureSpan(type = SpanType.APP)
@@ -110,7 +110,7 @@ class EnrichmentItemService(
         item: UnionItem? = null,
         orders: Map<OrderIdDto, OrderDto> = emptyMap(),
         auctions: Map<AuctionIdDto, AuctionDto> = emptyMap(),
-        waitSyncTimeout: Duration? = null
+        loadMetaSynchronously: Boolean = false
     ) = coroutineScope {
 
     require(shortItem != null || item != null)
@@ -124,11 +124,15 @@ class EnrichmentItemService(
         val bestBidOrder = withSpanAsync("fetchBestBidOrder", spanType = SpanType.EXT) {
             enrichmentOrderService.fetchOrderIfDiffers(shortItem?.bestBidOrder, orders)
         }
-        val meta = withSpanAsync("fetchMeta", spanType = SpanType.CACHE) {
-            if (waitSyncTimeout != null) {
-                unionMetaService.getAvailableMetaOrLoadSynchronouslyWithTimeout(itemId, waitSyncTimeout)
-            } else {
-                unionMetaService.getAvailableMetaOrScheduleLoading(itemId)
+        val meta = if (item?.meta != null) {
+            CompletableDeferred(item.meta)
+        } else {
+            withSpanAsync("fetchMeta", spanType = SpanType.CACHE) {
+                if (loadMetaSynchronously) {
+                    unionMetaService.getAvailableMetaOrLoadSynchronously(itemId, synchronous = true)
+                } else {
+                    unionMetaService.getAvailableMetaOrScheduleLoading(itemId)
+                }
             }
         }
 

@@ -6,9 +6,11 @@ import com.rarible.protocol.tezos.dto.NftItemMetaDto
 import com.rarible.protocol.tezos.dto.NftItemsDto
 import com.rarible.protocol.tezos.dto.PartDto
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
+import com.rarible.protocol.union.core.model.UnionImageProperties
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.UnionMetaContent
+import com.rarible.protocol.union.core.model.UnionVideoProperties
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ItemIdDto
@@ -68,8 +70,8 @@ object TezosItemConverter {
             description = meta.description,
             attributes = meta.attributes.orEmpty().map(::convert),
             content = listOfNotNull(
-                meta.image?.let { UnionMetaContent(it, MetaContentDto.Representation.ORIGINAL) },
-                meta.animation?.let { UnionMetaContent(it, MetaContentDto.Representation.ORIGINAL) }
+                meta.image?.let { UnionMetaContent(it, MetaContentDto.Representation.ORIGINAL, UnionImageProperties()) },
+                meta.animation?.let { UnionMetaContent(it, MetaContentDto.Representation.ORIGINAL, UnionVideoProperties()) }
             ),
             // TODO TEZOS - implement it
             restrictions = listOf()

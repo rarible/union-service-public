@@ -22,24 +22,22 @@ class UnionContentMetaLoader(
     private val logger = LoggerFactory.getLogger(UnionContentMetaLoader::class.java)
 
     suspend fun fetchContentMeta(url: String, itemId: ItemIdDto): UnionMetaContentProperties? {
+        val logPrefix = "Content meta resolution for ${itemId.fullId()} by $url"
+        logger.info("$logPrefix: starting to resolve")
         val fromCache = fetchFromCache(url)
         if (fromCache != null) {
-            return fromCache.toUnionMetaContentProperties()
+            val properties = fromCache.toUnionMetaContentProperties()
+            logger.info("$logPrefix: found in the cache: $properties")
+            return properties
         }
         val contentMeta = try {
             contentMetaReceiver.receive(url)
         } catch (e: Exception) {
-            logger.warn("Content meta resolution: error for {} by URL {}", itemId.fullId(), url, e)
-            return null
-        }
-        val contentProperties = contentMeta?.toUnionMetaContentProperties()
-        logger.info(
-            "Content meta resolution: for {} by URL {} resolved {} converted to {}",
-            itemId.fullId(),
-            url,
-            contentMeta,
-            contentProperties
-        )
+            logger.warn("$logPrefix: error", itemId.fullId(), url, e)
+            null
+        } ?: return null
+        val contentProperties = contentMeta.toUnionMetaContentProperties()
+        logger.info("$logPrefix: resolved $contentProperties")
         return contentProperties
     }
 

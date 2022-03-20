@@ -55,7 +55,7 @@ class EnrichmentItemMetaLoadingIt : AbstractIntegrationTest() {
         }
         coEvery { testUnionMetaLoader.load(itemId) } coAnswers {
             delay(100L)
-            throw UnionMetaLoader.UnionMetaResolutionException("error")
+            throw RuntimeException("error")
         }
         coEvery { testEthereumItemApi.getNftItemById(itemId.value) } returns ethItem.toMono()
         itemEventService.onItemUpdated(unionItem)

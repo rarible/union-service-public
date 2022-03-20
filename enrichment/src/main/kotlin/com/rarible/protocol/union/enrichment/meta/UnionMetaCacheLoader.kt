@@ -17,9 +17,12 @@ class UnionMetaCacheLoader(
     override suspend fun load(key: String): UnionMeta {
         val itemId = IdParser.parseItemId(key)
         return unionMetaLoader.load(itemId)
+            ?: throw UnionMetaResolutionException("No meta resolved for ${itemId.fullId()}")
     }
 
     companion object {
         const val TYPE: CacheType = "union-meta"
     }
+
+    class UnionMetaResolutionException(message: String) : RuntimeException(message)
 }

@@ -17,6 +17,6 @@ class OutgoingItemEventListener(
 
     override suspend fun onEvent(event: ItemEventDto) {
         eventsProducer.send(KafkaEventFactory.itemEvent(event)).ensureSuccess()
-        logger.info("Item Event sent: {}", event)
+        logger.info("Item Event sent for {}: {}", event.itemId.fullId(), event)
     }
 }
