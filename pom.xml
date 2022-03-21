@@ -392,5 +392,6 @@
         <module>integration</module>
         <module>listener</module>
         <module>meta-loader</module>
+        <module>search</module>
     </modules>
 </project>
