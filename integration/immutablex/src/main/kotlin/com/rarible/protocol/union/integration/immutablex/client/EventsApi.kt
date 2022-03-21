@@ -13,74 +13,64 @@ class EventsApi(
 ) {
 
     suspend fun mints(cursor: String? = null): ImmutablexPage<ImmutablexMint> {
-        return withContext(Dispatchers.IO) {
-            webClient.get().uri { builder ->
-                builder.path("/mints")
-                builder.defaultQueryParams()
-                builder.queryParam("include_fees", true)
-                if (cursor != null) {
-                    builder.queryParam("cursor", cursor)
-                }
-                builder.build()
-            }.retrieve().toEntity<ImmutablexPage<ImmutablexMint>>().awaitSingle().body!!
-        }
+        return webClient.get().uri { builder ->
+            builder.path("/mints")
+            builder.defaultQueryParams()
+            builder.queryParam("include_fees", true)
+            if (cursor != null) {
+                builder.queryParam("cursor", cursor)
+            }
+            builder.build()
+        }.retrieve().toEntity<ImmutablexPage<ImmutablexMint>>().awaitSingle().body!!
     }
 
     suspend fun transfers(cursor: String? = null): ImmutablexPage<ImmutablexTransfer> {
-        return withContext(Dispatchers.IO) {
-            webClient.get().uri { builder ->
-                builder.path("/transfers")
-                builder.defaultQueryParams()
-                builder.queryParam("token_type", "ERC721")
-                if (cursor != null) {
-                    builder.queryParam("cursor", cursor)
-                }
-                builder.build()
-            }.retrieve().toEntity<ImmutablexPage<ImmutablexTransfer>>().awaitSingle().body!!
-        }
+        return webClient.get().uri { builder ->
+            builder.path("/transfers")
+            builder.defaultQueryParams()
+            builder.queryParam("token_type", "ERC721")
+            if (cursor != null) {
+                builder.queryParam("cursor", cursor)
+            }
+            builder.build()
+        }.retrieve().toEntity<ImmutablexPage<ImmutablexTransfer>>().awaitSingle().body!!
     }
 
     suspend fun trades(cursor: String? = null): ImmutablexPage<ImmutablexTrade> {
-        return withContext(Dispatchers.IO) {
-            webClient.get().uri { builder ->
-                builder.path("/trades")
-                builder.defaultQueryParams()
-                builder.queryParam("party_b_token_type", "ERC721")
-                if (cursor != null) {
-                    builder.queryParam("cursor", cursor)
-                }
-                builder.build()
-            }.retrieve().toEntity<ImmutablexPage<ImmutablexTrade>>().awaitSingle().body!!
-        }
+        return webClient.get().uri { builder ->
+            builder.path("/trades")
+            builder.defaultQueryParams()
+            builder.queryParam("party_b_token_type", "ERC721")
+            if (cursor != null) {
+                builder.queryParam("cursor", cursor)
+            }
+            builder.build()
+        }.retrieve().toEntity<ImmutablexPage<ImmutablexTrade>>().awaitSingle().body!!
     }
 
     suspend fun deposits(cursor: String? = null): ImmutablexPage<ImmutablexDeposit> {
-        return withContext(Dispatchers.IO) {
-            webClient.get().uri { builder ->
-                builder.path("/deposits")
-                builder.defaultQueryParams()
-                builder.queryParam("token_type", "ERC721")
-                if (cursor != null) {
-                    builder.queryParam("cursor", cursor)
-                }
-                builder.build()
-            }.retrieve().toEntity<ImmutablexPage<ImmutablexDeposit>>().awaitSingle().body!!
-        }
+        return webClient.get().uri { builder ->
+            builder.path("/deposits")
+            builder.defaultQueryParams()
+            builder.queryParam("token_type", "ERC721")
+            if (cursor != null) {
+                builder.queryParam("cursor", cursor)
+            }
+            builder.build()
+        }.retrieve().toEntity<ImmutablexPage<ImmutablexDeposit>>().awaitSingle().body!!
 
     }
 
     suspend fun withdrawals(cursor: String? = null): ImmutablexPage<ImmutablexWithdrawal> {
-        return withContext(Dispatchers.IO) {
-            webClient.get().uri { builder ->
-                builder.path("/withdrawals")
-                builder.defaultQueryParams()
-                builder.queryParam("token_type", "ERC721")
-                if (cursor != null) {
-                    builder.queryParam("cursor", cursor)
-                }
-                builder.build()
-            }.retrieve().toEntity<ImmutablexPage<ImmutablexWithdrawal>>().awaitSingle().body!!
-        }
+        return webClient.get().uri { builder ->
+            builder.path("/withdrawals")
+            builder.defaultQueryParams()
+            builder.queryParam("token_type", "ERC721")
+            if (cursor != null) {
+                builder.queryParam("cursor", cursor)
+            }
+            builder.build()
+        }.retrieve().toEntity<ImmutablexPage<ImmutablexWithdrawal>>().awaitSingle().body!!
 
     }
 

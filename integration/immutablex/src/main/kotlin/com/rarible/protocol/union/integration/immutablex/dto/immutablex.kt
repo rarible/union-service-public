@@ -2,8 +2,18 @@ package com.rarible.protocol.union.integration.immutablex.dto
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.annotation.JsonSubTypes
+import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.databind.PropertyNamingStrategies
 import com.fasterxml.jackson.databind.annotation.JsonNaming
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.jacksonTypeRef
+import com.fasterxml.jackson.module.kotlin.readValue
+import org.apache.kafka.common.errors.SerializationException
+import org.apache.kafka.common.serialization.Deserializer
+import org.apache.kafka.common.serialization.Serde
+import org.apache.kafka.common.serialization.Serializer
 import java.math.BigDecimal
 import java.time.Instant
 
@@ -71,19 +81,17 @@ data class ImmutablexPage<T>(
     val result: List<T>
 )
 
-@JsonIgnoreProperties(ignoreUnknown = true)
 data class ImmutablexMint(
-    val transactionId: Long,
+    @JsonProperty("transaction_id")
+    override val transactionId: Long,
     val token: Token,
     val user: String,
-    val timestamp: Instant,
+    override val timestamp: Instant,
     val fees: List<ImmutablexFee>?
-)
+): ImmutablexEvent(transactionId, timestamp)
 
-@JsonIgnoreProperties(ignoreUnknown = true)
 data class Token(val type: String, val data: TokenData)
 
-@JsonIgnoreProperties(ignoreUnknown = true)
 data class TokenData(
     @JsonProperty("token_id")
     val tokenId: String?,
@@ -151,10 +159,11 @@ data class ImmutablexTransfer(
     val token: Token,
     val receiver: String,
     val status: String,
-    val timestamp: Instant,
+    override val timestamp: Instant,
     @JsonProperty("transaction_id")
-    val transactionId: Long
-)
+    override val transactionId: Long,
+    val user: String
+): ImmutablexEvent(transactionId, timestamp)
 
 data class TradeSide(
     @JsonProperty("order_id")
@@ -170,33 +179,86 @@ data class TradeSide(
 
 data class ImmutablexTrade(
     @JsonProperty("transaction_id")
-    val transactionId: Long,
+    override val transactionId: Long,
     @JsonProperty("b")
     val make: TradeSide,
     @JsonProperty("a")
     val take: TradeSide,
     val status: String,
-    val timestamp: Instant
-)
+    override val timestamp: Instant
+): ImmutablexEvent(transactionId, timestamp)
 
 data class ImmutablexDeposit(
     @JsonProperty("transaction_id")
-    val transactionId: Long,
+    override val transactionId: Long,
     val token: Token,
     val status: String,
-    val timestamp: Instant,
+    override val timestamp: Instant,
     val user: String
-)
+): ImmutablexEvent(transactionId, timestamp)
 
 data class ImmutablexWithdrawal(
-    @JsonProperty("transaction_id")
-    val transactionId: Long,
     val token: Token,
     @JsonProperty("rollup_status")
     val rollupStatus: String,
     val sender: String,
     val status: String,
-    val timestamp: Instant,
     @JsonProperty("withdrawn_to_wallet")
-    val withdrawnToWallet: Boolean
-)
+    val withdrawnToWallet: Boolean,
+    @JsonProperty("transaction_id")
+    override val transactionId: Long,
+    override val timestamp: Instant,
+): ImmutablexEvent(transactionId, timestamp)
+
+//@JsonTypeInfo(use = JsonTypeInfo.Id.NAME)
+@JsonSubTypes(JsonSubTypes.Type(value = ImmutablexMint::class),
+    JsonSubTypes.Type(value = ImmutablexTransfer::class),
+    JsonSubTypes.Type(value = ImmutablexTrade::class),
+    JsonSubTypes.Type(value = ImmutablexDeposit::class),
+    JsonSubTypes.Type(value = ImmutablexWithdrawal::class))
+sealed class ImmutablexEvent(open val transactionId: Long, open val timestamp: Instant): ImmutablexJson
+
+@JsonSubTypes(JsonSubTypes.Type(value = ImmutablexMint::class),
+    JsonSubTypes.Type(value = ImmutablexTransfer::class),
+    JsonSubTypes.Type(value = ImmutablexTrade::class),
+    JsonSubTypes.Type(value = ImmutablexDeposit::class),
+    JsonSubTypes.Type(value = ImmutablexWithdrawal::class))
+sealed interface ImmutablexJson
+
+class JSONSerde<T: Any> : Serializer<T>, Deserializer<T>, Serde<T> {
+
+    companion object {
+        private val OBJ_MAPPER = jacksonObjectMapper().apply {
+            registerModule(JavaTimeModule())
+        }
+    }
+
+    override fun close() {}
+
+    override fun configure(configs: MutableMap<String, *>?, isKey: Boolean) {}
+
+    override fun serialize(topic: String, data: T?): ByteArray? {
+        if (data == null) return null
+
+        return try {
+            OBJ_MAPPER.writeValueAsBytes(data)
+        } catch (e: Exception) {
+            throw SerializationException("Error serializing JSON message", e)
+        }
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    override fun deserialize(topic: String, data: ByteArray?): T? {
+        if (data == null) return null
+
+        return try {
+            OBJ_MAPPER.readValue<Any?>(data) as T?
+        } catch (e: Exception) {
+            throw SerializationException(e)
+        }
+    }
+
+    override fun serializer(): Serializer<T> = this
+
+    override fun deserializer(): Deserializer<T> = this
+}
