@@ -3,6 +3,8 @@ package com.rarible.protocol.union.integration.tezos.converter
 import com.rarible.core.test.data.randomString
 import com.rarible.protocol.tezos.dto.NftItemAttributeDto
 import com.rarible.protocol.tezos.dto.NftItemMetaDto
+import com.rarible.protocol.union.core.model.UnionImageProperties
+import com.rarible.protocol.union.core.model.UnionVideoProperties
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.MetaContentDto
 import com.rarible.protocol.union.integration.tezos.data.randomTezosNftItemDto
@@ -60,14 +62,16 @@ class TezosItemConverterTest {
 
         val originalImage = converted.content[0]
         val originalAnim = converted.content[1]
+        val emptyImageProperties = UnionImageProperties()
+        val emptyVideoProperties = UnionVideoProperties()
 
         assertThat(originalImage.url).isEqualTo("url1")
         assertThat(originalImage.representation).isEqualTo(MetaContentDto.Representation.ORIGINAL)
-        assertThat(originalImage.properties).isEqualTo(null)
+        assertThat(originalImage.properties).isEqualTo(emptyImageProperties)
 
         assertThat(originalAnim.url).isEqualTo("url2")
         assertThat(originalAnim.representation).isEqualTo(MetaContentDto.Representation.ORIGINAL)
-        assertThat(originalAnim.properties).isEqualTo(null)
+        assertThat(originalAnim.properties).isEqualTo(emptyVideoProperties)
     }
 
     @Test
