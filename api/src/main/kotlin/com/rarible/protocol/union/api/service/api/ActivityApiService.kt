@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.api.service
+package com.rarible.protocol.union.api.service.api
 
 import com.rarible.protocol.union.api.util.BlockchainFilter
 import com.rarible.protocol.union.core.service.ActivityService
