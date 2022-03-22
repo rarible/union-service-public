@@ -1,19 +1,16 @@
-package com.rarible.protocol.union.api.controller
+package com.rarible.protocol.union.api.service.elastic
 
-import com.rarible.protocol.union.api.service.select.ActivitySourceSelectService
+import com.rarible.protocol.union.api.service.ActivityService
 import com.rarible.protocol.union.dto.ActivitiesDto
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
-import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.stereotype.Service
 import java.time.Instant
 
-@RestController
-class ActivityController(
-    private val activitySourceSelector: ActivitySourceSelectService,
-) : ActivityControllerApi {
+@Service
+class ActivityElasticService : ActivityService {
 
     override suspend fun getAllActivities(
         type: List<ActivityTypeDto>,
@@ -22,9 +19,8 @@ class ActivityController(
         cursor: String?,
         size: Int?,
         sort: ActivitySortDto?
-    ): ResponseEntity<ActivitiesDto> {
-        val result = activitySourceSelector.getAllActivities(type, blockchains, continuation, cursor, size, sort)
-        return ResponseEntity.ok(result)
+    ): ActivitiesDto {
+        TODO("To be implemented under ALPHA-276 Epic")
     }
 
     override suspend fun getActivitiesByCollection(
@@ -34,9 +30,8 @@ class ActivityController(
         cursor: String?,
         size: Int?,
         sort: ActivitySortDto?
-    ): ResponseEntity<ActivitiesDto> {
-        val result = activitySourceSelector.getActivitiesByCollection(type, collection, continuation, cursor, size, sort)
-        return ResponseEntity.ok(result)
+    ): ActivitiesDto {
+        TODO("To be implemented under ALPHA-276 Epic")
     }
 
     override suspend fun getActivitiesByItem(
@@ -46,9 +41,8 @@ class ActivityController(
         cursor: String?,
         size: Int?,
         sort: ActivitySortDto?
-    ): ResponseEntity<ActivitiesDto> {
-        val result = activitySourceSelector.getActivitiesByItem(type, itemId, continuation, cursor, size, sort)
-        return ResponseEntity.ok(result)
+    ): ActivitiesDto {
+        TODO("To be implemented under ALPHA-276 Epic")
     }
 
     override suspend fun getActivitiesByUser(
@@ -61,8 +55,7 @@ class ActivityController(
         cursor: String?,
         size: Int?,
         sort: ActivitySortDto?
-    ): ResponseEntity<ActivitiesDto> {
-        val result = activitySourceSelector.getActivitiesByUser(type, user, blockchains, from, to, continuation, cursor, size, sort)
-        return ResponseEntity.ok(result)
+    ): ActivitiesDto {
+        TODO("To be implemented under ALPHA-276 Epic")
     }
 }
