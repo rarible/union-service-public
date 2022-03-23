@@ -1,6 +1,6 @@
 package com.rarible.protocol.union.api.service.elastic
 
-import com.rarible.protocol.union.api.service.ActivityService
+import com.rarible.protocol.union.api.service.ActivityQueryService
 import com.rarible.protocol.union.dto.ActivitiesDto
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service
 import java.time.Instant
 
 @Service
-class ActivityElasticService : ActivityService {
+class ActivityElasticService : ActivityQueryService {
 
     override suspend fun getAllActivities(
         type: List<ActivityTypeDto>,

@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.api.service.api
 
+import com.rarible.protocol.union.api.service.ActivityQueryService
 import com.rarible.protocol.union.api.util.BlockchainFilter
 import com.rarible.protocol.union.core.service.ActivityService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
@@ -26,11 +27,11 @@ import java.time.Instant
 @Service
 class ActivityApiService(
     private val router: BlockchainRouter<ActivityService>
-) {
+) : ActivityQueryService {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    suspend fun getAllActivities(
+    override suspend fun getAllActivities(
         type: List<ActivityTypeDto>,
         blockchains: List<BlockchainDto>?,
         continuation: String?,
@@ -71,7 +72,7 @@ class ActivityApiService(
         return result
     }
 
-    suspend fun getActivitiesByCollection(
+    override suspend fun getActivitiesByCollection(
         type: List<ActivityTypeDto>,
         collection: String,
         continuation: String?,
@@ -93,7 +94,7 @@ class ActivityApiService(
         return dto
     }
 
-    suspend fun getActivitiesByItem(
+    override suspend fun getActivitiesByItem(
         type: List<ActivityTypeDto>,
         itemId: String,
         continuation: String?,
@@ -120,7 +121,7 @@ class ActivityApiService(
         return dto
     }
 
-    suspend fun getActivitiesByUser(
+    override suspend fun getActivitiesByUser(
         type: List<UserActivityTypeDto>,
         user: List<String>,
         blockchains: List<BlockchainDto>?,
