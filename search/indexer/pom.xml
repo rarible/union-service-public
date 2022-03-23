@@ -28,54 +28,6 @@
         </plugins>
     </build>
 
-    <dependencies>
-        <!-- ============ Internal dependencies ============ -->
-        <dependency>
-            <groupId>com.rarible.protocol.union</groupId>
-            <artifactId>rarible-union-core</artifactId>
-        </dependency>
-
-        <!-- ============= Eth Protocol-API ============== -->
-        <dependency>
-            <groupId>com.rarible.protocol.ethereum</groupId>
-            <artifactId>protocol-client-nft-starter</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.rarible.protocol.ethereum</groupId>
-            <artifactId>protocol-client-order-starter</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.rarible.protocol.ethereum</groupId>
-            <artifactId>protocol-subscriber-nft</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.rarible.protocol.ethereum</groupId>
-            <artifactId>protocol-subscriber-order</artifactId>
-        </dependency>
-
-        <!-- ================== Test ===================== -->
-        <dependency>
-            <groupId>com.rarible.protocol.union</groupId>
-            <artifactId>rarible-union-core</artifactId>
-            <classifier>tests</classifier>
-            <type>test-jar</type>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.rarible.core</groupId>
-            <artifactId>rarible-core-test-common</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>net.java.dev.jna</groupId>
-            <artifactId>jna</artifactId>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
+    <dependencies></dependencies>
 
 </project>
