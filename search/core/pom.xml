@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.rarible.protocol.union</groupId>
-        <artifactId>rarible-union-integration</artifactId>
+        <artifactId>rarible-union-search</artifactId>
         <version>${revision}</version>
     </parent>
 
