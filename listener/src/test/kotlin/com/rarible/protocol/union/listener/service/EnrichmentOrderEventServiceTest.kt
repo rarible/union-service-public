@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.listener.service
 
 import com.rarible.core.test.data.randomBigDecimal
+import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.converter.ContractAddressConverter
 import com.rarible.protocol.union.dto.AssetDto
 import com.rarible.protocol.union.dto.EthCollectionAssetTypeDto
@@ -32,7 +33,8 @@ class EnrichmentOrderEventServiceTest {
         enrichmentItemEventService,
         enrichmentOwnershipEventService,
         enrichmentCollectionEventService,
-        emptyList()
+        emptyList(),
+        FeatureFlagsProperties()
     )
 
     @BeforeEach
