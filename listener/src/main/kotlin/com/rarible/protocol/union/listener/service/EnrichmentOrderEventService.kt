@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.listener.service
 
 import com.rarible.core.client.WebClientResponseProxyException
+import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.event.OutgoingOrderEventListener
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderUpdateEventDto
@@ -19,7 +20,8 @@ class EnrichmentOrderEventService(
     private val enrichmentItemEventService: EnrichmentItemEventService,
     private val enrichmentOwnershipEventService: EnrichmentOwnershipEventService,
     private val enrichmentCollectionEventService: EnrichmentCollectionEventService,
-    private val orderEventListeners: List<OutgoingOrderEventListener>
+    private val orderEventListeners: List<OutgoingOrderEventListener>,
+    private val ff: FeatureFlagsProperties
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -63,7 +65,7 @@ class EnrichmentOrderEventService(
             async {
                 val collectionId = makeAssetExt.collectionId!!
                 enrichmentCollectionEventService.onCollectionBestSellOrderUpdate(
-                    collectionId, order, notificationEnabled
+                    collectionId, order, notificationEnabled && ff.enableNotificationOnCollectionOrders
                 )
             }
         } else null
@@ -72,7 +74,7 @@ class EnrichmentOrderEventService(
             async {
                 val collectionId = takeAssetExt.collectionId!!
                 enrichmentCollectionEventService.onCollectionBestBidOrderUpdate(
-                    collectionId, order, notificationEnabled
+                    collectionId, order, notificationEnabled && ff.enableNotificationOnCollectionOrders
                 )
             }
         } else null
