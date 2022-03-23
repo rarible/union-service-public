@@ -54,6 +54,7 @@ common:
   useLegacyRepository: true
   feature-flags:
     enableRevertedActivityEvents: false
+    enableNotificationOnCollectionOrders: true
 
 
 integration:
