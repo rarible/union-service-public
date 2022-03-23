@@ -6,6 +6,7 @@ import com.rarible.core.apm.SpanType
 import com.rarible.core.apm.withSpan
 import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.core.model.UnionItem
+import com.rarible.protocol.union.core.model.loadMetaSynchronously
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.AuctionDto
@@ -128,7 +129,7 @@ class EnrichmentItemService(
             CompletableDeferred(item.meta)
         } else {
             withSpanAsync("fetchMeta", spanType = SpanType.CACHE) {
-                if (loadMetaSynchronously) {
+                if (loadMetaSynchronously || item?.loadMetaSynchronously == true) {
                     unionMetaService.getAvailableMetaOrLoadSynchronously(itemId, synchronous = true)
                 } else {
                     unionMetaService.getAvailableMetaOrScheduleLoading(itemId)
