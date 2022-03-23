@@ -1,0 +1,1 @@
+Search-Indexer is the service that pulls events from Kafka and stores them in the specific ES indices.
