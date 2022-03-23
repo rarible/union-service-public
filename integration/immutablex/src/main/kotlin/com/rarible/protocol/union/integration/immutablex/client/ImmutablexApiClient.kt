@@ -11,6 +11,7 @@ import kotlinx.coroutines.reactor.awaitSingle
 import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.toEntity
+import java.time.Instant
 
 class ImmutablexApiClient(
     private val webClient: WebClient,
@@ -235,12 +236,63 @@ class ImmutablexApiClient(
         return ordersByStatus(continuation, size, null, OrderSortDto.LAST_UPDATE_DESC, params).result
     }
 
+    suspend fun getMints(
+        pageSize: Int = 50,
+        continuation: String? = null,
+        tokenId: String? = null,
+        from: Instant? = null,
+        to: Instant? = null,
+        user: String? = null,
+    ) = activityQuery<ImmutablexMintsPage>(
+        "/mints",
+        pageSize,
+        continuation,
+        tokenId,
+        from,
+        to,
+        user
+    ) ?: ImmutablexMintsPage("", false, emptyList())
+
+    suspend fun getTransfers(
+        pageSize: Int = 50,
+        continuation: String? = null,
+        tokenId: String? = null,
+        from: Instant? = null,
+        to: Instant? = null,
+        user: String? = null,
+    ) = activityQuery<ImmutablexTransfersPage>(
+        "/transfers",
+        pageSize,
+        continuation,
+        tokenId,
+        from,
+        to,
+        user
+    ) ?: ImmutablexTransfersPage("", false, emptyList())
+
+    suspend fun getTrades(
+        pageSize: Int = 50,
+        continuation: String? = null,
+        tokenId: String? = null,
+        from: Instant? = null,
+        to: Instant? = null,
+        user: String? = null,
+    ) = activityQuery<ImmutablexTradesPage>(
+        "/trades",
+        pageSize,
+        continuation,
+        tokenId,
+        from,
+        to,
+        user
+    ) ?: ImmutablexTradesPage("", false, emptyList())
+
     private suspend fun ordersByStatus(
         continuation: String?,
         size: Int,
         status: OrderStatusDto? = null,
         direction: OrderSortDto,
-        additionalQueryParams: Map<String, Any> = emptyMap()
+        additionalQueryParams: Map<String, Any> = emptyMap(),
     ): ImmutablexOrdersPage {
         return webClient.get().uri { uriBuilder ->
             uriBuilder.path("/orders")
@@ -265,6 +317,48 @@ class ImmutablexApiClient(
             .awaitSingle().body!!
     }
 
+    private fun getDateFromContinuation(continuation: String?): Instant? {
+        if (!continuation.isNullOrEmpty()) {
+            val (d, _) = continuation.split("_")
+            val millis = d.toLongOrNull()
+            if (millis != null) {
+                return Instant.ofEpochMilli(millis)
+            }
+        }
+        return null
+    }
+
+    private suspend inline fun <reified T> activityQuery(
+        path: String,
+        pageSize: Int,
+        continuation: String?,
+        tokenId: String?,
+        from: Instant?,
+        to: Instant?,
+        user: String?,
+    ) = webClient.get()
+        .uri {
+            it.path(path)
+            it.queryParam("page_size", pageSize)
+
+            val c = listOfNotNull(from, getDateFromContinuation(continuation)).maxOrNull()
+            if (c != null) {
+                it.queryParam("min_timestamp", c)
+            }
+            if (to != null) {
+                it.queryParam("max_timestamp", to)
+            }
+            if (tokenId != null) {
+                it.queryParam("token_id", tokenId)
+            }
+            if (user != null) {
+                it.queryParam("user", user)
+            }
+            it.build()
+        }
+        .accept(MediaType.APPLICATION_JSON)
+        .retrieve()
+        .toEntity(T::class.java).awaitSingle().body
 
 }
 
