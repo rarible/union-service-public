@@ -8,5 +8,6 @@ import org.springframework.boot.context.properties.ConstructorBinding
 data class FeatureFlagsProperties(
     val enableRevertedActivityEventSending: Boolean = false,
     val enableOwnershipSourceEnrichment: Boolean = false,
-    val enableItemLastSaleEnrichment: Boolean = true
+    val enableItemLastSaleEnrichment: Boolean = true,
+    var enableActivityQueriesToElasticSearch: Boolean = false,
 )
