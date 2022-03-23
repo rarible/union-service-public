@@ -7,7 +7,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
 import java.time.Instant
 
-interface ActivityService {
+interface ActivityQueryService {
 
     suspend fun getAllActivities(
         type: List<ActivityTypeDto>,

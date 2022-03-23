@@ -1,6 +1,6 @@
 package com.rarible.protocol.union.api.service.select
 
-import com.rarible.protocol.union.api.service.ActivityService
+import com.rarible.protocol.union.api.service.ActivityQueryService
 import com.rarible.protocol.union.api.service.api.ActivityApiService
 import com.rarible.protocol.union.api.service.elastic.ActivityElasticService
 import com.rarible.protocol.union.core.FeatureFlagsProperties
@@ -17,7 +17,7 @@ class ActivitySourceSelectService(
     private val featureFlagsProperties: FeatureFlagsProperties,
     private val activityApiMergeService: ActivityApiService,
     private val activityElasticService: ActivityElasticService,
-) : ActivityService {
+) : ActivityQueryService {
 
     override suspend fun getAllActivities(
         type: List<ActivityTypeDto>,
@@ -27,10 +27,7 @@ class ActivitySourceSelectService(
         size: Int?,
         sort: ActivitySortDto?
     ): ActivitiesDto {
-        return when (featureFlagsProperties.enableActivityQueriesToElasticSearch) {
-            true -> activityElasticService.getAllActivities(type, blockchains, continuation, cursor, size, sort)
-            else -> activityApiMergeService.getAllActivities(type, blockchains, continuation, cursor, size, sort)
-        }
+        return getQuerySource().getAllActivities(type, blockchains, continuation, cursor, size, sort)
     }
 
     override suspend fun getActivitiesByCollection(
@@ -41,10 +38,7 @@ class ActivitySourceSelectService(
         size: Int?,
         sort: ActivitySortDto?
     ): ActivitiesDto {
-        return when (featureFlagsProperties.enableActivityQueriesToElasticSearch) {
-            true -> activityElasticService.getActivitiesByCollection(type, collection, continuation, cursor, size, sort)
-            else -> activityApiMergeService.getActivitiesByCollection(type, collection, continuation, cursor, size, sort)
-        }
+        return getQuerySource().getActivitiesByCollection(type, collection, continuation, cursor, size, sort)
     }
 
     override suspend fun getActivitiesByItem(
@@ -55,10 +49,7 @@ class ActivitySourceSelectService(
         size: Int?,
         sort: ActivitySortDto?
     ): ActivitiesDto {
-        return when (featureFlagsProperties.enableActivityQueriesToElasticSearch) {
-            true -> activityElasticService.getActivitiesByItem(type, itemId, continuation, cursor, size, sort)
-            else -> activityApiMergeService.getActivitiesByItem(type, itemId, continuation, cursor, size, sort)
-        }
+        return getQuerySource().getActivitiesByItem(type, itemId, continuation, cursor, size, sort)
     }
 
     override suspend fun getActivitiesByUser(
@@ -72,9 +63,13 @@ class ActivitySourceSelectService(
         size: Int?,
         sort: ActivitySortDto?
     ): ActivitiesDto {
+        return getQuerySource().getActivitiesByUser(type, user, blockchains, from, to, continuation, cursor, size, sort)
+    }
+
+    private fun getQuerySource(): ActivityQueryService {
         return when (featureFlagsProperties.enableActivityQueriesToElasticSearch) {
-            true -> activityElasticService.getActivitiesByUser(type, user, blockchains, from, to, continuation, cursor, size, sort)
-            else -> activityApiMergeService.getActivitiesByUser(type, user, blockchains, from, to, continuation, cursor, size, sort)
+            true -> activityElasticService
+            else -> activityApiMergeService
         }
     }
 }
