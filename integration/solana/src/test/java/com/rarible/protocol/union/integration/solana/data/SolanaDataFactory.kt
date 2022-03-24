@@ -21,6 +21,7 @@ fun randomSolanaTokenDto(itemId: ItemIdDto) = TokenDto(
     updatedAt = nowMillis(),
     creators = listOf(randomTokenCreatorPartDto()),
     collection = randomCollectionDto(),
+    decimals = randomInt(),
     closed = false
 )
 

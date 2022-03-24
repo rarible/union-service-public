@@ -329,7 +329,7 @@
             </dependency>
             <dependency>
                 <groupId>com.rarible.solana.protocol</groupId>
-                <artifactId>solana-protocol-subscriber-starter</artifactId>
+                <artifactId>solana-protocol-subscriber</artifactId>
                 <version>${rarible.protocol.solana.version}</version>
             </dependency>
 

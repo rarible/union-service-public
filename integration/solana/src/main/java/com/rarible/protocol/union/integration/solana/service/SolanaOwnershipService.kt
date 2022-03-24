@@ -11,7 +11,7 @@ import com.rarible.solana.protocol.api.client.BalanceControllerApi
 import kotlinx.coroutines.reactive.awaitFirst
 
 @CaptureSpan(type = "blockchain")
-class SolanaOwnershipService(
+open class SolanaOwnershipService(
     private val balanceApi: BalanceControllerApi
 ) : AbstractBlockchainService(BlockchainDto.SOLANA), OwnershipService {
 

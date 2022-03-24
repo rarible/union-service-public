@@ -14,7 +14,7 @@ import com.rarible.solana.protocol.api.client.TokenControllerApi
 import kotlinx.coroutines.reactive.awaitFirst
 
 @CaptureSpan(type = "blockchain")
-class SolanaItemService(
+open class SolanaItemService(
     private val tokenApi: TokenControllerApi
 ) : AbstractBlockchainService(BlockchainDto.SOLANA), ItemService {
 

@@ -62,6 +62,14 @@ integration:
         item: 1
         ownership: 1
         order: 1
+  solana:
+    enabled: true
+    consumer:
+      broker-replica-set: ${kafka.hosts}
+      workers:
+        item: 1
+        ownership: 1
+        order: 1
 
 listener:
   reconciliation:
