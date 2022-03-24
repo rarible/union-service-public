@@ -29,7 +29,10 @@
     </build>
 
     <dependencies>
-
+        <dependency>
+            <groupId>com.rarible.protocol.union</groupId>
+            <artifactId>rarible-union-core</artifactId>
+        </dependency>
     </dependencies>
 
 </project>
