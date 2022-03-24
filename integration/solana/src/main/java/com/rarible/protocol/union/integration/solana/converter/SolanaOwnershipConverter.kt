@@ -7,8 +7,6 @@ import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.group
 import com.rarible.solana.protocol.dto.BalanceDto
-import com.rarible.solana.protocol.dto.JsonCollectionDto
-import com.rarible.solana.protocol.dto.OnChainCollectionDto
 import java.math.BigInteger
 
 object SolanaOwnershipConverter {
@@ -24,11 +22,8 @@ object SolanaOwnershipConverter {
                     value = balance.owner
                 )
             ),
-            collection = when (val collection = balance.collection) {
-                is JsonCollectionDto -> CollectionIdDto(blockchain, collection.hash)
-                is OnChainCollectionDto -> CollectionIdDto(blockchain, collection.address)
-                null -> null
-            },
+            // TODO it MUST be not-null
+            collection = balance.collection?.let { CollectionIdDto(blockchain, it) },
             value = balance.value,
             createdAt = balance.createdAt,
             creators = emptyList(),

@@ -8,8 +8,6 @@ import com.rarible.protocol.union.dto.CreatorDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.integration.solana.data.randomSolanaItemId
 import com.rarible.protocol.union.integration.solana.data.randomSolanaTokenDto
-import com.rarible.solana.protocol.dto.JsonCollectionDto
-import com.rarible.solana.protocol.dto.OnChainCollectionDto
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.math.BigInteger
@@ -27,10 +25,7 @@ class SolanaItemConverterTest {
                 ),
                 collection = CollectionIdDto(
                     blockchain = BlockchainDto.SOLANA,
-                    value = when (val collection = tokenDto.collection!!) {
-                        is JsonCollectionDto -> collection.hash
-                        is OnChainCollectionDto -> collection.address
-                    }
+                    value = tokenDto.collection!!
                 ),
                 creators = tokenDto.creators.orEmpty().map {
                     CreatorDto(

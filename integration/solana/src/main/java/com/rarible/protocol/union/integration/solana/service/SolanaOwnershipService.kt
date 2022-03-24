@@ -22,20 +22,28 @@ open class SolanaOwnershipService(
 
     // TODO add continuation
     override suspend fun getOwnershipsByItem(itemId: String, continuation: String?, size: Int): Page<UnionOwnership> {
-        val balancesDto = balanceApi.getBalanceByMint(itemId).awaitFirst()
+        val balancesDto = balanceApi.getBalanceByMint(
+            itemId,
+            continuation,
+            size
+        ).awaitFirst()
         val ownerships = balancesDto.balances.map { balance ->
             SolanaOwnershipConverter.convert(balance, blockchain)
         }
 
-        return Page(balancesDto.total, null, ownerships)
+        return Page(0, balancesDto.continuation, ownerships)
     }
 
     override suspend fun getOwnershipsByOwner(address: String, continuation: String?, size: Int): Page<UnionOwnership> {
-        val balancesDto = balanceApi.getBalanceByOwner(address).awaitFirst()
+        val balancesDto = balanceApi.getBalanceByOwner(
+            address,
+            continuation,
+            size
+        ).awaitFirst()
         val ownerships = balancesDto.balances.map { balance ->
             SolanaOwnershipConverter.convert(balance, blockchain)
         }
 
-        return Page(balancesDto.total, null, ownerships)
+        return Page(0, balancesDto.continuation, ownerships)
     }
 }

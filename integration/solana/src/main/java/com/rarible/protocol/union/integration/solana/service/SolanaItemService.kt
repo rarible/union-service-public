@@ -35,17 +35,25 @@ open class SolanaItemService(
         lastUpdatedFrom: Long?,
         lastUpdatedTo: Long?
     ): Page<UnionItem> {
-        // TODO SOLANA implement
-        return Page.empty()
+        val page = tokenApi.getAllTokens(
+            showDeleted,
+            lastUpdatedFrom,
+            lastUpdatedTo,
+            continuation,
+            size
+        ).awaitFirst()
+
+        return SolanaItemConverter.convert(page, blockchain)
     }
 
     override suspend fun getItemRoyaltiesById(itemId: String): List<RoyaltyDto> {
-        // TODO SOLANA implement
-        return emptyList()
+        val royaltyList = tokenApi.getTokenRoyaltiesByAddress(itemId).awaitFirst()
+        val royalties = royaltyList.royalties
+        return royalties.map { SolanaItemConverter.convert(it, blockchain) }
     }
 
     override suspend fun resetItemMeta(itemId: String) {
-        // TODO SOLANA implement
+        tokenApi.resetTokenMeta(itemId).awaitFirst()
     }
 
     override suspend fun getItemsByCollection(
@@ -54,27 +62,33 @@ open class SolanaItemService(
         continuation: String?,
         size: Int
     ): Page<UnionItem> {
-        val tokensDto = tokenApi.getTokensByCollection(collection).awaitFirst()
+        val page = tokenApi.getTokensByCollection(
+            collection,
+            continuation,
+            size
+        ).awaitFirst()
 
-        return Page(
-            total = tokensDto.total,
-            null, // TODO SOLANA add continuation,
-            tokensDto.tokens.map { SolanaItemConverter.convert(it, blockchain) }
-        )
+        return SolanaItemConverter.convert(page, blockchain)
     }
 
     override suspend fun getItemsByCreator(creator: String, continuation: String?, size: Int): Page<UnionItem> {
-        return Page.empty() // TODO SOLANA implement
+        val page = tokenApi.getTokensByCreator(
+            creator,
+            continuation,
+            size
+        ).awaitFirst()
+
+        return SolanaItemConverter.convert(page, blockchain)
     }
 
     override suspend fun getItemsByOwner(owner: String, continuation: String?, size: Int): Page<UnionItem> {
-        val tokensDto = tokenApi.getTokensByOwner(owner).awaitFirst()
+        val page = tokenApi.getTokensByOwner(
+            owner,
+            continuation,
+            size
+        ).awaitFirst()
 
-        return Page(
-            total = tokensDto.total,
-            null, // TODO SOLANA add continuation,
-            tokensDto.tokens.map { SolanaItemConverter.convert(it, blockchain) }
-        )
+        return SolanaItemConverter.convert(page, blockchain)
     }
 
     override suspend fun getItemsByIds(itemIds: List<String>): List<UnionItem> {
