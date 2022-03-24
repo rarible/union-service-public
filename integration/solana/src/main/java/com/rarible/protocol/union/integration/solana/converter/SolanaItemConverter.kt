@@ -13,20 +13,21 @@ import com.rarible.solana.protocol.dto.TokenDto
 import java.math.BigInteger
 
 object SolanaItemConverter {
-    fun convert(token: TokenDto): UnionItem {
+
+    fun convert(token: TokenDto, blockchain: BlockchainDto): UnionItem {
         return UnionItem(
             id = ItemIdDto(
-                blockchain = BlockchainDto.SOLANA,
+                blockchain = blockchain,
                 value = token.address
             ),
-            creators = token.creators.orEmpty().map { it.convert() },
+            creators = token.creators.orEmpty().map { convert(it, blockchain) },
             collection = when (val collection = token.collection) {
-                is JsonCollectionDto -> CollectionIdDto(BlockchainDto.SOLANA, collection.hash)
-                is OnChainCollectionDto -> CollectionIdDto(BlockchainDto.SOLANA, collection.address)
+                is JsonCollectionDto -> CollectionIdDto(blockchain, collection.hash)
+                is OnChainCollectionDto -> CollectionIdDto(blockchain, collection.address)
                 null -> null
             },
             owners = emptyList(),
-            royalties = emptyList(), // TODO[solana]: royalties are not supported yet.
+            royalties = emptyList(), // TODO SOLANA: royalties are not supported yet.
             lazySupply = BigInteger.ZERO,
             pending = emptyList(),
             mintedAt = token.createdAt,
@@ -37,9 +38,9 @@ object SolanaItemConverter {
         )
     }
 
-    private fun TokenCreatorPartDto.convert() =
+    private fun convert(creator: TokenCreatorPartDto, blockchain: BlockchainDto) =
         CreatorDto(
-            account = UnionAddressConverter.convert(BlockchainDto.SOLANA, address),
-            value = share
+            account = UnionAddressConverter.convert(blockchain, creator.address),
+            value = creator.share
         )
 }
