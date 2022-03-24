@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory
 
 open class SolanaItemEventHandler(
     override val handler: IncomingEventHandler<UnionItemEvent>
-) : AbstractBlockchainEventHandler<TokenEventDto, UnionItemEvent>(BlockchainDto.FLOW) {
+) : AbstractBlockchainEventHandler<TokenEventDto, UnionItemEvent>(BlockchainDto.SOLANA) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 

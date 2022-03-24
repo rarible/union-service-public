@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory
 
 open class SolanaOwnershipEventHandler(
     override val handler: IncomingEventHandler<UnionOwnershipEvent>
-) : AbstractBlockchainEventHandler<BalanceEventDto, UnionOwnershipEvent>(BlockchainDto.FLOW) {
+) : AbstractBlockchainEventHandler<BalanceEventDto, UnionOwnershipEvent>(BlockchainDto.SOLANA) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
