@@ -68,7 +68,8 @@ fun randomUnionItem(id: ItemIdDto): UnionItem {
         )
         BlockchainDto.TEZOS -> TODO()
         BlockchainDto.SOLANA -> SolanaItemConverter.convert(
-            randomSolanaTokenDto(id)
+            randomSolanaTokenDto(id),
+            BlockchainDto.SOLANA
         )
     }
 }

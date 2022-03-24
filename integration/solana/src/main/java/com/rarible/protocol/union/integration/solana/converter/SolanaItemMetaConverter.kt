@@ -34,7 +34,7 @@ object SolanaItemMetaConverter {
                 TokenMetaContentDto.Representation.BIG -> MetaContentDto.Representation.BIG
                 TokenMetaContentDto.Representation.ORIGINAL -> MetaContentDto.Representation.ORIGINAL
             },
-            properties = null // TODO[Solana]: fill in properties if available.
+            properties = null // TODO SOLANA: fill in properties if available.
         )
     }
 }

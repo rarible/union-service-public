@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.integration.solana.service
 
+import com.rarible.core.apm.CaptureSpan
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.service.ItemService
@@ -9,17 +10,17 @@ import com.rarible.protocol.union.dto.RoyaltyDto
 import com.rarible.protocol.union.dto.continuation.page.Page
 import com.rarible.protocol.union.integration.solana.converter.SolanaItemConverter
 import com.rarible.protocol.union.integration.solana.converter.SolanaItemMetaConverter
-import com.rarible.solana.protocol.api.client.BalanceControllerApi
 import com.rarible.solana.protocol.api.client.TokenControllerApi
 import kotlinx.coroutines.reactive.awaitFirst
 
+@CaptureSpan(type = "blockchain")
 class SolanaItemService(
     private val tokenApi: TokenControllerApi
 ) : AbstractBlockchainService(BlockchainDto.SOLANA), ItemService {
 
     override suspend fun getItemById(itemId: String): UnionItem {
         val token = tokenApi.getTokenByAddress(itemId).awaitFirst()
-        return SolanaItemConverter.convert(token)
+        return SolanaItemConverter.convert(token, blockchain)
     }
 
     override suspend fun getItemMetaById(itemId: String): UnionMeta {
@@ -34,15 +35,17 @@ class SolanaItemService(
         lastUpdatedFrom: Long?,
         lastUpdatedTo: Long?
     ): Page<UnionItem> {
-        TODO("Not yet implemented")
+        // TODO SOLANA implement
+        return Page.empty()
     }
 
     override suspend fun getItemRoyaltiesById(itemId: String): List<RoyaltyDto> {
-        TODO("Not yet implemented")
+        // TODO SOLANA implement
+        return emptyList()
     }
 
     override suspend fun resetItemMeta(itemId: String) {
-        TODO("Not yet implemented")
+        // TODO SOLANA implement
     }
 
     override suspend fun getItemsByCollection(
@@ -55,13 +58,13 @@ class SolanaItemService(
 
         return Page(
             total = tokensDto.total,
-            null, // TODO add continuation,
-            tokensDto.tokens.map { SolanaItemConverter.convert(it) }
+            null, // TODO SOLANA add continuation,
+            tokensDto.tokens.map { SolanaItemConverter.convert(it, blockchain) }
         )
     }
 
     override suspend fun getItemsByCreator(creator: String, continuation: String?, size: Int): Page<UnionItem> {
-        TODO("Not yet implemented")
+        return Page.empty() // TODO SOLANA implement
     }
 
     override suspend fun getItemsByOwner(owner: String, continuation: String?, size: Int): Page<UnionItem> {
@@ -69,14 +72,14 @@ class SolanaItemService(
 
         return Page(
             total = tokensDto.total,
-            null, // TODO add continuation,
-            tokensDto.tokens.map { SolanaItemConverter.convert(it) }
+            null, // TODO SOLANA add continuation,
+            tokensDto.tokens.map { SolanaItemConverter.convert(it, blockchain) }
         )
     }
 
     override suspend fun getItemsByIds(itemIds: List<String>): List<UnionItem> {
         val tokensDto = tokenApi.getTokensByAddresses(itemIds).awaitFirst()
 
-        return tokensDto.tokens.map { SolanaItemConverter.convert(it) }
+        return tokensDto.tokens.map { SolanaItemConverter.convert(it, blockchain) }
     }
 }

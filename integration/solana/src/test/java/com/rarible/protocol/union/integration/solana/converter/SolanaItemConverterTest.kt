@@ -19,7 +19,7 @@ class SolanaItemConverterTest {
     fun `solana item`() {
         val tokenDto = randomSolanaTokenDto(randomSolanaItemId())
 
-        assertThat(SolanaItemConverter.convert(tokenDto)).isEqualTo(
+        assertThat(SolanaItemConverter.convert(tokenDto, BlockchainDto.SOLANA)).isEqualTo(
             UnionItem(
                 id = ItemIdDto(
                     blockchain = BlockchainDto.SOLANA,

@@ -40,6 +40,10 @@
             <groupId>com.rarible.solana.protocol</groupId>
             <artifactId>solana-protocol-client-starter</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.rarible.solana.protocol</groupId>
+            <artifactId>solana-protocol-subscriber-starter</artifactId>
+        </dependency>
 
         <!-- ================== Test ===================== -->
         <dependency>

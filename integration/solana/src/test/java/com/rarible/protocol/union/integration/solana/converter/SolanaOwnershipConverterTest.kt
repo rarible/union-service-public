@@ -15,7 +15,7 @@ class SolanaOwnershipConverterTest {
     fun `solana ownership`() {
         val balanceDto = randomSolanaBalanceDto()
 
-        assertThat(SolanaOwnershipConverter.convert(balanceDto)).isEqualTo(
+        assertThat(SolanaOwnershipConverter.convert(balanceDto, BlockchainDto.SOLANA)).isEqualTo(
             UnionOwnership(
                 OwnershipIdDto(
                     blockchain = BlockchainDto.SOLANA,
