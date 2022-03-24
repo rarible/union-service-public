@@ -14,7 +14,7 @@ data class ElasticActivity(
     // Sort fields
     val date: Instant,
     val blockNumber: Long?,
-    val logIndex: Long?,
+    val logIndex: Int?,
     // Filter fields
     val blockchain: BlockchainDto,
     val type: ActivityTypeDto,
