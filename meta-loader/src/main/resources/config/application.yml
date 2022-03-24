@@ -40,8 +40,8 @@ rarible:
     workers: 4
     loadTasksBatchSize: 10
     retry:
-      # Retry after 24h
-      backoffDelaysMillis: [ 86400000 ]
+      # Retry after 5m, 12h, 24h
+      backoffDelaysMillis: [ 300000, 43200000, 86400000 ]
       job:
         runner:
           period: 30000 # Schedule retry tasks every 30s
