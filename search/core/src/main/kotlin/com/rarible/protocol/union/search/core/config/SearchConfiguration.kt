@@ -6,6 +6,7 @@ import co.elastic.clients.transport.rest_client.RestClientTransport
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.rarible.protocol.union.search.core.repository.ActivityEsRepository
 import org.apache.http.HttpHost
+import org.elasticsearch.client.Node
 import org.elasticsearch.client.RestClient
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.context.properties.EnableConfigurationProperties
@@ -24,7 +25,7 @@ class SearchConfiguration(
         objectMapper: ObjectMapper
     ): ElasticsearchAsyncClient {
         val lowLevelClient = RestClient
-            .builder(HttpHost.create(elasticsearchHost))
+            .builder(HttpHost.create("localhost"))
             .build()
         val transport = RestClientTransport(lowLevelClient, JacksonJsonpMapper(objectMapper))
         return ElasticsearchAsyncClient(transport)

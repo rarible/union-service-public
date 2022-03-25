@@ -2,9 +2,7 @@
   "aliases": {
     "activity": {}
   },
-
   "settings": {
-
   },
   "mappings": {
     "properties": {
@@ -29,8 +27,14 @@
         "ignore_above": 256
       },
       "collection": {
-        "type": "keyword",
-        "ignore_above": 512
+        "properties": {
+          "make": {
+            "type": "keyword"
+          },
+          "take": {
+            "type": "keyword"
+          }
+        }
       },
       "item": {
         "properties": {
