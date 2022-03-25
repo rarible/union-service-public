@@ -1,0 +1,2 @@
+search:
+  host: ${elasticsearch.host}

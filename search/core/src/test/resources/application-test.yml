@@ -1,0 +1,6 @@
+spring:
+  application:
+    name: union-search-core
+
+search:
+  host: ${elasticsearch.host}
