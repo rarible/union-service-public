@@ -17,11 +17,12 @@ class OpenapiController(
 servers:
   - url: "${openapiProperties.baseUrl}"
     description: "${openapiProperties.description}"
+paths:"""
 
-"""
-
-    private val yamlCache = serversBlock +
+    // TODO Ugly hack, originally should be managed by model-generator
+    private val yamlCache =
         UnionOpenapiReader.getOpenapi().bufferedReader().use { it.readText() }
+            .replaceFirst("paths:", serversBlock)
 
     @GetMapping(
         value = ["/openapi.yaml"],
