@@ -3,6 +3,7 @@ package com.rarible.protocol.union.search.core.converter
 import com.rarible.core.test.data.randomAddress
 import com.rarible.core.test.data.randomBigDecimal
 import com.rarible.core.test.data.randomBigInt
+import com.rarible.core.test.data.randomBoolean
 import com.rarible.core.test.data.randomInt
 import com.rarible.core.test.data.randomLong
 import com.rarible.core.test.data.randomString
@@ -11,6 +12,18 @@ import com.rarible.protocol.union.dto.ActivityIdDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.AssetDto
 import com.rarible.protocol.union.dto.AssetTypeDto
+import com.rarible.protocol.union.dto.AuctionBidActivityDto
+import com.rarible.protocol.union.dto.AuctionBidDto
+import com.rarible.protocol.union.dto.AuctionCancelActivityDto
+import com.rarible.protocol.union.dto.AuctionDataDto
+import com.rarible.protocol.union.dto.AuctionDto
+import com.rarible.protocol.union.dto.AuctionEndActivityDto
+import com.rarible.protocol.union.dto.AuctionFinishActivityDto
+import com.rarible.protocol.union.dto.AuctionHistoryDto
+import com.rarible.protocol.union.dto.AuctionIdDto
+import com.rarible.protocol.union.dto.AuctionOpenActivityDto
+import com.rarible.protocol.union.dto.AuctionStartActivityDto
+import com.rarible.protocol.union.dto.AuctionStatusDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.BlockchainGroupDto
 import com.rarible.protocol.union.dto.BurnActivityDto
@@ -26,6 +39,9 @@ import com.rarible.protocol.union.dto.OrderCancelListActivityDto
 import com.rarible.protocol.union.dto.OrderListActivityDto
 import com.rarible.protocol.union.dto.OrderMatchSellDto
 import com.rarible.protocol.union.dto.OrderMatchSwapDto
+import com.rarible.protocol.union.dto.RaribleAuctionV1BidDataV1Dto
+import com.rarible.protocol.union.dto.RaribleAuctionV1BidV1Dto
+import com.rarible.protocol.union.dto.RaribleAuctionV1DataV1Dto
 import com.rarible.protocol.union.dto.TransferActivityDto
 import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.ext
@@ -365,6 +381,173 @@ class ElasticActivityConverterTest {
         assertThat(actual.item.take).isEqualTo(source.take.ext.itemId!!.value)
     }
 
+    @Test
+    fun `should convert AuctionOpenActivityDto`() {
+        // given
+        val source = AuctionOpenActivityDto(
+            id = randomActivityId(),
+            date = randomDate(),
+            auction = randomAuction(),
+            transactionHash = randomString(),
+        )
+
+        // when
+        val actual = converter.convert(source)
+
+        // then
+        assertThat(actual.activityId).isEqualTo(source.id.value)
+        assertThat(actual.date).isEqualTo(source.date)
+        assertThat(actual.blockNumber).isNull()
+        assertThat(actual.logIndex).isNull()
+        assertThat(actual.blockchain).isEqualTo(source.id.blockchain)
+        assertThat(actual.type).isEqualTo(ActivityTypeDto.AUCTION_CREATED)
+        assertThat(actual.user.maker).isEqualTo(source.auction.seller.value)
+        assertThat(actual.user.taker).isNull()
+        assertThat(actual.collection.make).isEqualTo(source.auction.sell.type.ext.contract)
+        assertThat(actual.collection.take).isEqualTo(source.auction.buy.ext.contract)
+        assertThat(actual.item.make).isEqualTo(source.auction.sell.type.ext.itemId!!.value)
+        assertThat(actual.item.take).isEqualTo(source.auction.buy.ext.itemId!!.value)
+    }
+
+    @Test
+    fun `should convert AuctionBidActivityDto`() {
+        // given
+        val source = AuctionBidActivityDto(
+            id = randomActivityId(),
+            date = randomDate(),
+            auction = randomAuction(),
+            transactionHash = randomString(),
+            bid = randomAuctionBidData(),
+        )
+
+        // when
+        val actual = converter.convert(source)
+
+        // then
+        assertThat(actual.activityId).isEqualTo(source.id.value)
+        assertThat(actual.date).isEqualTo(source.date)
+        assertThat(actual.blockNumber).isNull()
+        assertThat(actual.logIndex).isNull()
+        assertThat(actual.blockchain).isEqualTo(source.id.blockchain)
+        assertThat(actual.type).isEqualTo(ActivityTypeDto.AUCTION_BID)
+        assertThat(actual.user.maker).isEqualTo(source.auction.seller.value)
+        assertThat(actual.user.taker).isEqualTo(source.bid.buyer.value)
+        assertThat(actual.collection.make).isEqualTo(source.auction.sell.type.ext.contract)
+        assertThat(actual.collection.take).isEqualTo(source.auction.buy.ext.contract)
+        assertThat(actual.item.make).isEqualTo(source.auction.sell.type.ext.itemId!!.value)
+        assertThat(actual.item.take).isEqualTo(source.auction.buy.ext.itemId!!.value)
+    }
+
+    @Test
+    fun `should convert AuctionFinishActivityDto`() {
+        // given
+        val source = AuctionFinishActivityDto(
+            id = randomActivityId(),
+            date = randomDate(),
+            auction = randomAuction(),
+            transactionHash = randomString(),
+        )
+
+        // when
+        val actual = converter.convert(source)
+
+        // then
+        assertThat(actual.activityId).isEqualTo(source.id.value)
+        assertThat(actual.date).isEqualTo(source.date)
+        assertThat(actual.blockNumber).isNull()
+        assertThat(actual.logIndex).isNull()
+        assertThat(actual.blockchain).isEqualTo(source.id.blockchain)
+        assertThat(actual.type).isEqualTo(ActivityTypeDto.AUCTION_FINISHED)
+        assertThat(actual.user.maker).isEqualTo(source.auction.seller.value)
+        assertThat(actual.user.taker).isNull()
+        assertThat(actual.collection.make).isEqualTo(source.auction.sell.type.ext.contract)
+        assertThat(actual.collection.take).isEqualTo(source.auction.buy.ext.contract)
+        assertThat(actual.item.make).isEqualTo(source.auction.sell.type.ext.itemId!!.value)
+        assertThat(actual.item.take).isEqualTo(source.auction.buy.ext.itemId!!.value)
+    }
+
+    @Test
+    fun `should convert AuctionCancelActivityDto`() {
+        // given
+        val source = AuctionCancelActivityDto(
+            id = randomActivityId(),
+            date = randomDate(),
+            auction = randomAuction(),
+            transactionHash = randomString(),
+        )
+
+        // when
+        val actual = converter.convert(source)
+
+        // then
+        assertThat(actual.activityId).isEqualTo(source.id.value)
+        assertThat(actual.date).isEqualTo(source.date)
+        assertThat(actual.blockNumber).isNull()
+        assertThat(actual.logIndex).isNull()
+        assertThat(actual.blockchain).isEqualTo(source.id.blockchain)
+        assertThat(actual.type).isEqualTo(ActivityTypeDto.AUCTION_CANCEL)
+        assertThat(actual.user.maker).isEqualTo(source.auction.seller.value)
+        assertThat(actual.user.taker).isNull()
+        assertThat(actual.collection.make).isEqualTo(source.auction.sell.type.ext.contract)
+        assertThat(actual.collection.take).isEqualTo(source.auction.buy.ext.contract)
+        assertThat(actual.item.make).isEqualTo(source.auction.sell.type.ext.itemId!!.value)
+        assertThat(actual.item.take).isEqualTo(source.auction.buy.ext.itemId!!.value)
+    }
+
+    @Test
+    fun `should convert AuctionStartActivityDto`() {
+        // given
+        val source = AuctionStartActivityDto(
+            id = randomActivityId(),
+            date = randomDate(),
+            auction = randomAuction(),
+        )
+
+        // when
+        val actual = converter.convert(source)
+
+        // then
+        assertThat(actual.activityId).isEqualTo(source.id.value)
+        assertThat(actual.date).isEqualTo(source.date)
+        assertThat(actual.blockNumber).isNull()
+        assertThat(actual.logIndex).isNull()
+        assertThat(actual.blockchain).isEqualTo(source.id.blockchain)
+        assertThat(actual.type).isEqualTo(ActivityTypeDto.AUCTION_STARTED)
+        assertThat(actual.user.maker).isEqualTo(source.auction.seller.value)
+        assertThat(actual.user.taker).isNull()
+        assertThat(actual.collection.make).isEqualTo(source.auction.sell.type.ext.contract)
+        assertThat(actual.collection.take).isEqualTo(source.auction.buy.ext.contract)
+        assertThat(actual.item.make).isEqualTo(source.auction.sell.type.ext.itemId!!.value)
+        assertThat(actual.item.take).isEqualTo(source.auction.buy.ext.itemId!!.value)
+    }
+
+    @Test
+    fun `should convert AuctionEndActivityDto`() {
+        // given
+        val source = AuctionEndActivityDto(
+            id = randomActivityId(),
+            date = randomDate(),
+            auction = randomAuction(),
+        )
+
+        // when
+        val actual = converter.convert(source)
+
+        // then
+        assertThat(actual.activityId).isEqualTo(source.id.value)
+        assertThat(actual.date).isEqualTo(source.date)
+        assertThat(actual.blockNumber).isNull()
+        assertThat(actual.logIndex).isNull()
+        assertThat(actual.blockchain).isEqualTo(source.id.blockchain)
+        assertThat(actual.type).isEqualTo(ActivityTypeDto.AUCTION_ENDED)
+        assertThat(actual.user.maker).isEqualTo(source.auction.seller.value)
+        assertThat(actual.user.taker).isNull()
+        assertThat(actual.collection.make).isEqualTo(source.auction.sell.type.ext.contract)
+        assertThat(actual.collection.take).isEqualTo(source.auction.buy.ext.contract)
+        assertThat(actual.item.make).isEqualTo(source.auction.sell.type.ext.itemId!!.value)
+        assertThat(actual.item.take).isEqualTo(source.auction.buy.ext.itemId!!.value)
+    }
+
     private fun randomActivityId(): ActivityIdDto {
         return ActivityIdDto(
             blockchain = randomBlockchain(),
@@ -421,6 +604,60 @@ class ElasticActivityConverterTest {
                 randomString()
             ),
             tokenId = randomBigInt(),
+        )
+    }
+
+    private fun randomAuction(): AuctionDto {
+        return AuctionDto(
+            id = AuctionIdDto(
+                randomBlockchain(),
+                randomString(),
+            ),
+            contract = ContractAddress(
+                randomBlockchain(),
+                randomString(),
+            ),
+            type = AuctionDto.Type.values().random(),
+            seller = randomUnionAddress(),
+            sell = randomAsset(),
+            buy = randomAssetType(),
+            endTime = randomDate(),
+            minimalStep = randomBigDecimal(),
+            minimalPrice = randomBigDecimal(),
+            createdAt = randomDate(),
+            lastUpdateAt = randomDate(),
+            buyPrice = randomBigDecimal(),
+            buyPriceUsd = randomBigDecimal(),
+            pending = listOf(AuctionHistoryDto(randomString())),
+            status = AuctionStatusDto.values().random(),
+            ongoing = randomBoolean(),
+            hash = randomString(),
+            auctionId = randomBigInt(),
+            lastBid = null,
+            data = randomAuctionData()
+        )
+    }
+
+    private fun randomAuctionBidData(): AuctionBidDto {
+        return RaribleAuctionV1BidV1Dto(
+            buyer = randomUnionAddress(),
+            amount = randomBigDecimal(),
+            date = randomDate(),
+            status = AuctionBidDto.Status.values().random(),
+            data = RaribleAuctionV1BidDataV1Dto(
+                originFees = emptyList(),
+                payouts = emptyList(),
+            )
+        )
+    }
+
+    private fun randomAuctionData(): AuctionDataDto {
+        return RaribleAuctionV1DataV1Dto(
+            originFees = emptyList(),
+            payouts = emptyList(),
+            startTime = randomDate(),
+            duration = randomBigInt(),
+            buyOutPrice = randomBigDecimal(),
         )
     }
 }
