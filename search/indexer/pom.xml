@@ -76,6 +76,10 @@
             <artifactId>mockk</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.rarible.protocol.union</groupId>
+            <artifactId>rarible-union-core</artifactId>
+        </dependency>
 
     </dependencies>
 

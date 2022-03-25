@@ -123,6 +123,12 @@
             </dependency>
             <dependency>
                 <groupId>com.rarible.protocol.union</groupId>
+                <artifactId>rarible-union-search-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.rarible.protocol.union</groupId>
                 <artifactId>rarible-union-integration-ethereum</artifactId>
                 <classifier>tests</classifier>
                 <type>test-jar</type>

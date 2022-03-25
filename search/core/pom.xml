@@ -119,11 +119,6 @@
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>com.rarible.core</groupId>
-            <artifactId>rarible-core-test-common</artifactId>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 
 </project>
