@@ -41,12 +41,12 @@ class ElasticActivityConverter {
             is OrderListActivityDto -> convertOrderList(source)
             is OrderCancelBidActivityDto -> convertOrderCancelBid(source)
             is OrderCancelListActivityDto -> convertOrderCancelList(source)
-            is AuctionOpenActivityDto -> TODO()
-            is AuctionBidActivityDto -> TODO()
-            is AuctionFinishActivityDto -> TODO()
-            is AuctionCancelActivityDto -> TODO()
-            is AuctionStartActivityDto -> TODO()
-            is AuctionEndActivityDto -> TODO()
+            is AuctionOpenActivityDto -> convertAuctionOpen(source)
+            is AuctionBidActivityDto -> convertAuctionBid(source)
+            is AuctionFinishActivityDto -> convertAuctionFinish(source)
+            is AuctionCancelActivityDto -> convertAuctionCancel(source)
+            is AuctionStartActivityDto -> convertAuctionStart(source)
+            is AuctionEndActivityDto -> convertAuctionEnd(source)
         }
     }
 
@@ -179,6 +179,90 @@ class ElasticActivityConverter {
         )
     }
 
+    private fun convertAuctionOpen(source: AuctionOpenActivityDto): ElasticActivity {
+        return ElasticActivity(
+            activityId = source.id.value,
+            date = source.date,
+            blockNumber = null,
+            logIndex = null,
+            blockchain = source.id.blockchain,
+            type = ActivityTypeDto.AUCTION_CREATED,
+            user = singleUser(source.auction.seller),
+            collection = bothCollections(source.auction.sell.type, source.auction.buy),
+            item = bothItems(source.auction.sell.type, source.auction.buy),
+        )
+    }
+
+    private fun convertAuctionBid(source: AuctionBidActivityDto): ElasticActivity {
+        return ElasticActivity(
+            activityId = source.id.value,
+            date = source.date,
+            blockNumber = null,
+            logIndex = null,
+            blockchain = source.id.blockchain,
+            type = ActivityTypeDto.AUCTION_BID,
+            user = bothUsers(source.auction.seller, source.bid.buyer),
+            collection = bothCollections(source.auction.sell.type, source.auction.buy),
+            item = bothItems(source.auction.sell.type, source.auction.buy),
+        )
+    }
+
+    private fun convertAuctionFinish(source: AuctionFinishActivityDto): ElasticActivity {
+        return ElasticActivity(
+            activityId = source.id.value,
+            date = source.date,
+            blockNumber = null,
+            logIndex = null,
+            blockchain = source.id.blockchain,
+            type = ActivityTypeDto.AUCTION_FINISHED,
+            user = singleUser(source.auction.seller),
+            collection = bothCollections(source.auction.sell.type, source.auction.buy),
+            item = bothItems(source.auction.sell.type, source.auction.buy),
+        )
+    }
+
+    private fun convertAuctionCancel(source: AuctionCancelActivityDto): ElasticActivity {
+        return ElasticActivity(
+            activityId = source.id.value,
+            date = source.date,
+            blockNumber = null,
+            logIndex = null,
+            blockchain = source.id.blockchain,
+            type = ActivityTypeDto.AUCTION_CANCEL,
+            user = singleUser(source.auction.seller),
+            collection = bothCollections(source.auction.sell.type, source.auction.buy),
+            item = bothItems(source.auction.sell.type, source.auction.buy),
+        )
+    }
+
+    private fun convertAuctionStart(source: AuctionStartActivityDto): ElasticActivity {
+        return ElasticActivity(
+            activityId = source.id.value,
+            date = source.date,
+            blockNumber = null,
+            logIndex = null,
+            blockchain = source.id.blockchain,
+            type = ActivityTypeDto.AUCTION_STARTED,
+            user = singleUser(source.auction.seller),
+            collection = bothCollections(source.auction.sell.type, source.auction.buy),
+            item = bothItems(source.auction.sell.type, source.auction.buy),
+        )
+    }
+
+    private fun convertAuctionEnd(source: AuctionEndActivityDto): ElasticActivity {
+        return ElasticActivity(
+            activityId = source.id.value,
+            date = source.date,
+            blockNumber = null,
+            logIndex = null,
+            blockchain = source.id.blockchain,
+            type = ActivityTypeDto.AUCTION_ENDED,
+            user = singleUser(source.auction.seller),
+            collection = bothCollections(source.auction.sell.type, source.auction.buy),
+            item = bothItems(source.auction.sell.type, source.auction.buy),
+        )
+    }
+
     private fun singleUser(user: UnionAddress): ElasticActivity.User {
         return ElasticActivity.User(
             maker = user.value,
@@ -206,7 +290,6 @@ class ElasticActivityConverter {
             taker = taker.value,
         )
     }
-
 
     private fun bothCollections(left: AssetDto, right: AssetDto): ElasticActivity.Collection {
         return bothCollections(left.type, right.type)
