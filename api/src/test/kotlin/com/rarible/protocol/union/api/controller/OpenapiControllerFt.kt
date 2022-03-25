@@ -25,6 +25,9 @@ internal class OpenapiControllerFt {
         assertTrue(yaml.contains("/v0.1/"))
         assertTrue(yaml.contains("Item:"))
         assertTrue(yaml.contains("components:"))
+        assertTrue(yaml.contains("servers:"))
+        assertTrue(yaml.contains("  - url: \"https://api-dev.rarible.org\""))
+        assertTrue(yaml.contains("    description: \"Development (Ropsten, Mumbai, Hangzhou)\""))
     }
 
     @Test

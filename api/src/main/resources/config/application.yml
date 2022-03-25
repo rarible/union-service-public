@@ -39,6 +39,11 @@ rarible:
     enableNotifications: false
     enableRetrySchedulerJob: false
 
+api:
+  openapi:
+    baseUrl: "https://api-dev.rarible.org"
+    description: "Development (Ropsten, Mumbai, Hangzhou)"
+
 integration:
   ethereum:
     enabled: ${consul.ethereum.enabled:true}
