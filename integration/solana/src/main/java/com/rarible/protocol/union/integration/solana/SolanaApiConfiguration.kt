@@ -3,9 +3,11 @@ package com.rarible.protocol.union.integration.solana
 import com.rarible.protocol.union.core.CoreConfiguration
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.solana.converter.SolanaItemConverter
+import com.rarible.protocol.union.integration.solana.service.SolanaCollectionService
 import com.rarible.protocol.union.integration.solana.service.SolanaItemService
 import com.rarible.protocol.union.integration.solana.service.SolanaOwnershipService
 import com.rarible.solana.protocol.api.client.BalanceControllerApi
+import com.rarible.solana.protocol.api.client.CollectionControllerApi
 import com.rarible.solana.protocol.api.client.SolanaNftIndexerApiClientFactory
 import com.rarible.solana.protocol.api.client.TokenControllerApi
 import org.springframework.boot.context.properties.EnableConfigurationProperties
@@ -31,6 +33,10 @@ class SolanaApiConfiguration {
     fun solanaBalanceApi(factory: SolanaNftIndexerApiClientFactory): BalanceControllerApi =
         factory.createBalanceControllerApiClient()
 
+    @Bean
+    fun solanaCollectionApi(factory: SolanaNftIndexerApiClientFactory): CollectionControllerApi =
+        factory.createCollectionControllerApiClient()
+
     //-------------------- Services --------------------//
     @Bean
     fun solanaItemService(controllerApi: TokenControllerApi): SolanaItemService {
@@ -40,5 +46,10 @@ class SolanaApiConfiguration {
     @Bean
     fun solanaOwnershipService(controllerApi: BalanceControllerApi): SolanaOwnershipService {
         return SolanaOwnershipService(controllerApi)
+    }
+
+    @Bean
+    fun solanaCollectionService(controllerApi: CollectionControllerApi): SolanaCollectionService {
+        return SolanaCollectionService(controllerApi)
     }
 }
