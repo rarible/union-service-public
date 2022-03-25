@@ -7,6 +7,7 @@ import com.rarible.protocol.union.dto.UnionModelJacksonModule
 import com.rarible.protocol.union.dto.UnionPrimitivesJacksonModule
 import com.rarible.protocol.union.enrichment.configuration.EnrichmentApiConfiguration
 import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer
+import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
@@ -20,6 +21,7 @@ import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource
 @Configuration
 @EnableRaribleCorsWebFilter
 @Import(EnrichmentApiConfiguration::class)
+@EnableConfigurationProperties(value = [OpenapiProperties::class])
 class ApiConfiguration {
 
     @Bean
