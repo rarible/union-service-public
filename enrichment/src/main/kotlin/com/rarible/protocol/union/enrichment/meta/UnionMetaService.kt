@@ -40,7 +40,6 @@ class UnionMetaService(
             hitOrMiss = metaCacheEntry.isMetaInitiallyLoadedOrFailed()
         )
         if (availableMeta != null) {
-            logger.info("Meta was cached for item ${itemId.fullId()}: $availableMeta")
             return availableMeta
         }
         if (metaCacheEntry.isMetaInitiallyLoadedOrFailed()) {
