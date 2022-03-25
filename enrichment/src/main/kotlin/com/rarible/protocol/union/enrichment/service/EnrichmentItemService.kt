@@ -109,6 +109,7 @@ class EnrichmentItemService(
             enrichmentOrderService.fetchOrderIfDiffers(shortItem?.bestBidOrder, orders)
         }
         val meta = if (item?.meta?.content?.any { it.properties != null } == true) {
+            logger.info("Meta was got from fetched ${itemId.fullId()}: ${item.meta}")
             CompletableDeferred(item.meta)
         } else {
             withSpanAsync("fetchMeta", spanType = SpanType.CACHE) {
