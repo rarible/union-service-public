@@ -1,13 +1,19 @@
 package com.rarible.protocol.union.integration.solana
 
 import com.rarible.protocol.union.core.CoreConfiguration
+import com.rarible.protocol.union.core.service.OrderService
+import com.rarible.protocol.union.core.service.router.OrderProxyService
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.integration.solana.converter.SolanaItemConverter
+import com.rarible.protocol.union.integration.solana.converter.SolanaOrderConverter
 import com.rarible.protocol.union.integration.solana.service.SolanaCollectionService
 import com.rarible.protocol.union.integration.solana.service.SolanaItemService
+import com.rarible.protocol.union.integration.solana.service.SolanaOrderService
 import com.rarible.protocol.union.integration.solana.service.SolanaOwnershipService
 import com.rarible.solana.protocol.api.client.BalanceControllerApi
 import com.rarible.solana.protocol.api.client.CollectionControllerApi
+import com.rarible.solana.protocol.api.client.OrderControllerApi
 import com.rarible.solana.protocol.api.client.SolanaNftIndexerApiClientFactory
 import com.rarible.solana.protocol.api.client.TokenControllerApi
 import org.springframework.boot.context.properties.EnableConfigurationProperties
@@ -37,6 +43,10 @@ class SolanaApiConfiguration {
     fun solanaCollectionApi(factory: SolanaNftIndexerApiClientFactory): CollectionControllerApi =
         factory.createCollectionControllerApiClient()
 
+    @Bean
+    fun solanaOrderApi(factory: SolanaNftIndexerApiClientFactory): OrderControllerApi =
+        factory.createOrderControllerApiClient()
+
     //-------------------- Services --------------------//
     @Bean
     fun solanaItemService(controllerApi: TokenControllerApi): SolanaItemService {
@@ -52,4 +62,14 @@ class SolanaApiConfiguration {
     fun solanaCollectionService(controllerApi: CollectionControllerApi): SolanaCollectionService {
         return SolanaCollectionService(controllerApi)
     }
+
+    @Bean
+    fun solanaOrderService(
+        controllerApi: OrderControllerApi,
+        converter: SolanaOrderConverter
+    ): OrderService = OrderProxyService(
+        SolanaOrderService(controllerApi, converter),
+        setOf(PlatformDto.RARIBLE)
+    )
+
 }

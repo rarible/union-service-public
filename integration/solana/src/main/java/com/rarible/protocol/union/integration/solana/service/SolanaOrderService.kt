@@ -1,19 +1,29 @@
-package com.rarible.protocol.union.core.service.router
+package com.rarible.protocol.union.integration.solana.service
 
+import com.rarible.core.apm.CaptureSpan
 import com.rarible.protocol.union.core.service.OrderService
+import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.AssetTypeDto
+import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
+import com.rarible.protocol.union.integration.solana.converter.SolanaOrderConverter
+import com.rarible.solana.protocol.api.client.OrderControllerApi
+import kotlinx.coroutines.reactive.awaitFirst
 
-class OrderProxyService(
-    private val orderService: OrderService,
-    private val supportedPlatforms: Set<PlatformDto>
-) : OrderService {
+@CaptureSpan(type = "blockchain")
+open class SolanaOrderService(
+    private val orderApi: OrderControllerApi,
+    private val solanaOrderConverter: SolanaOrderConverter
+) : AbstractBlockchainService(BlockchainDto.SOLANA), OrderService {
 
-    override val blockchain = orderService.blockchain
+    override suspend fun getOrderById(id: String): OrderDto {
+        val order = orderApi.getOrderById(id).awaitFirst()
+        return solanaOrderConverter.convert(order, blockchain)
+    }
 
     override suspend fun getOrdersAll(
         continuation: String?,
@@ -21,24 +31,21 @@ class OrderProxyService(
         sort: OrderSortDto?,
         status: List<OrderStatusDto>?
     ): Slice<OrderDto> {
-        return orderService.getOrdersAll(
+        val orders = orderApi.getOrdersAll(
             continuation,
             size,
-            sort,
-            status
-        )
-    }
-
-    override suspend fun getOrderById(id: String): OrderDto {
-        return orderService.getOrderById(id)
+            solanaOrderConverter.convert(sort),
+            solanaOrderConverter.convert(status)
+        ).awaitFirst()
+        return solanaOrderConverter.convert(orders, blockchain)
     }
 
     override suspend fun getOrdersByIds(orderIds: List<String>): List<OrderDto> {
-        return orderService.getOrdersByIds(orderIds)
+        TODO("Not yet implemented")
     }
 
     override suspend fun getBidCurrencies(itemId: String): List<AssetTypeDto> {
-        return orderService.getBidCurrencies(itemId)
+        TODO("Not yet implemented")
     }
 
     override suspend fun getOrderBidsByItem(
@@ -53,19 +60,7 @@ class OrderProxyService(
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
-        if (!isPlatformSupported(platform)) return Slice.empty()
-        return orderService.getOrderBidsByItem(
-            platform,
-            itemId,
-            makers,
-            origin,
-            status,
-            start,
-            end,
-            currencyAddress,
-            continuation,
-            size
-        )
+        TODO("Not yet implemented")
     }
 
     override suspend fun getOrderBidsByMaker(
@@ -78,21 +73,11 @@ class OrderProxyService(
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
-        if (!isPlatformSupported(platform)) return Slice.empty()
-        return orderService.getOrderBidsByMaker(
-            platform,
-            maker,
-            origin,
-            status,
-            start,
-            end,
-            continuation,
-            size
-        )
+        TODO("Not yet implemented")
     }
 
     override suspend fun getSellCurrencies(itemId: String): List<AssetTypeDto> {
-        return orderService.getSellCurrencies(itemId)
+        TODO("Not yet implemented")
     }
 
     override suspend fun getSellOrders(
@@ -101,13 +86,7 @@ class OrderProxyService(
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
-        if (!isPlatformSupported(platform)) return Slice.empty()
-        return orderService.getSellOrders(
-            platform,
-            origin,
-            continuation,
-            size
-        )
+        TODO("Not yet implemented")
     }
 
     override suspend fun getSellOrdersByCollection(
@@ -117,14 +96,7 @@ class OrderProxyService(
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
-        if (!isPlatformSupported(platform)) return Slice.empty()
-        return orderService.getSellOrdersByCollection(
-            platform,
-            collection,
-            origin,
-            continuation,
-            size
-        )
+        TODO("Not yet implemented")
     }
 
     override suspend fun getSellOrdersByItem(
@@ -137,17 +109,7 @@ class OrderProxyService(
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
-        if (!isPlatformSupported(platform)) return Slice.empty()
-        return orderService.getSellOrdersByItem(
-            platform,
-            itemId,
-            maker,
-            origin,
-            status,
-            currencyId,
-            continuation,
-            size
-        )
+        TODO("Not yet implemented")
     }
 
     override suspend fun getSellOrdersByMaker(
@@ -158,21 +120,6 @@ class OrderProxyService(
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
-        if (!isPlatformSupported(platform)) return Slice.empty()
-        return orderService.getSellOrdersByMaker(
-            platform,
-            maker,
-            origin,
-            status,
-            continuation,
-            size
-        )
-    }
-
-    private fun isPlatformSupported(platform: PlatformDto?): Boolean {
-        if (platform == null) {
-            return true
-        }
-        return supportedPlatforms.contains(platform)
+        TODO("Not yet implemented")
     }
 }
