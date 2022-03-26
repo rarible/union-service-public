@@ -48,10 +48,13 @@ rarible:
 
 meta:
   ipfsGateway: "https://rarible.mypinata.cloud/"
-  mediaFetchTimeout: 10000
   mediaFetchMaxSize: 131072 # 128 Kb
   openSeaProxyUrl: ${consul.meta.openSeaProxyUrl}
-  ktorApacheHttpClientThreadCount: 64
+  http-client:
+    name: ktor-cio # ktor-apache, ktor-cio
+    thread-count: 1
+    time-out: 10000
+    total-connection: 1000
 
 integration:
   ethereum:
