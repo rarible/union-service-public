@@ -1,12 +1,12 @@
 package com.rarible.protocol.union.integration.solana.converter
 
+import com.rarible.protocol.solana.dto.TokenMetaAttributeDto
+import com.rarible.protocol.solana.dto.TokenMetaContentDto
+import com.rarible.protocol.solana.dto.TokenMetaDto
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.UnionMetaContent
 import com.rarible.protocol.union.dto.MetaAttributeDto
 import com.rarible.protocol.union.dto.MetaContentDto
-import com.rarible.solana.protocol.dto.TokenMetaAttributeDto
-import com.rarible.solana.protocol.dto.TokenMetaContentDto
-import com.rarible.solana.protocol.dto.TokenMetaDto
 
 object SolanaItemMetaConverter {
 

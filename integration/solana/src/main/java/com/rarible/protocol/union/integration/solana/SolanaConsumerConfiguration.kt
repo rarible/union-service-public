@@ -1,6 +1,9 @@
 package com.rarible.protocol.union.integration.solana
 
 import com.rarible.core.application.ApplicationEnvironmentInfo
+import com.rarible.protocol.solana.dto.BalanceEventDto
+import com.rarible.protocol.solana.dto.TokenEventDto
+import com.rarible.protocol.solana.subscriber.SolanaEventsConsumerFactory
 import com.rarible.protocol.union.core.ConsumerFactory
 import com.rarible.protocol.union.core.handler.BlockchainEventHandler
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
@@ -9,9 +12,6 @@ import com.rarible.protocol.union.core.model.UnionItemEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipEvent
 import com.rarible.protocol.union.integration.solana.event.SolanaItemEventHandler
 import com.rarible.protocol.union.integration.solana.event.SolanaOwnershipEventHandler
-import com.rarible.protocol.union.subscriber.SolanaEventsConsumerFactory
-import com.rarible.solana.protocol.dto.BalanceEventDto
-import com.rarible.solana.protocol.dto.TokenEventDto
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
 

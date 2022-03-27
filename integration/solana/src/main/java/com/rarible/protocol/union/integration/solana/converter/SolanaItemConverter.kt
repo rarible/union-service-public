@@ -1,5 +1,8 @@
 package com.rarible.protocol.union.integration.solana.converter
 
+import com.rarible.protocol.solana.dto.TokenCreatorPartDto
+import com.rarible.protocol.solana.dto.TokenDto
+import com.rarible.protocol.solana.dto.TokensDto
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -8,9 +11,6 @@ import com.rarible.protocol.union.dto.CreatorDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.RoyaltyDto
 import com.rarible.protocol.union.dto.continuation.page.Page
-import com.rarible.solana.protocol.dto.TokenCreatorPartDto
-import com.rarible.solana.protocol.dto.TokenDto
-import com.rarible.solana.protocol.dto.TokensDto
 import java.math.BigInteger
 
 object SolanaItemConverter {
@@ -44,7 +44,7 @@ object SolanaItemConverter {
         )
     }
 
-    fun convert(source: com.rarible.solana.protocol.dto.RoyaltyDto, blockchain: BlockchainDto): RoyaltyDto {
+    fun convert(source: com.rarible.protocol.solana.dto.RoyaltyDto, blockchain: BlockchainDto): RoyaltyDto {
         return RoyaltyDto(
             account = UnionAddressConverter.convert(blockchain, source.account),
             value = source.value

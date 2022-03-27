@@ -1,6 +1,9 @@
 package com.rarible.protocol.union.integration.solana.event
 
 import com.rarible.core.apm.CaptureTransaction
+import com.rarible.protocol.solana.dto.TokenDeleteEventDto
+import com.rarible.protocol.solana.dto.TokenEventDto
+import com.rarible.protocol.solana.dto.TokenUpdateEventDto
 import com.rarible.protocol.union.core.handler.AbstractBlockchainEventHandler
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.model.UnionItemDeleteEvent
@@ -9,9 +12,6 @@ import com.rarible.protocol.union.core.model.UnionItemUpdateEvent
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.integration.solana.converter.SolanaItemConverter
-import com.rarible.solana.protocol.dto.TokenDeleteEventDto
-import com.rarible.solana.protocol.dto.TokenEventDto
-import com.rarible.solana.protocol.dto.TokenUpdateEventDto
 import org.slf4j.LoggerFactory
 
 open class SolanaItemEventHandler(

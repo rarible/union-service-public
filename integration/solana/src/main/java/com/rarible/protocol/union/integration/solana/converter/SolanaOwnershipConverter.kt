@@ -1,12 +1,12 @@
 package com.rarible.protocol.union.integration.solana.converter
 
+import com.rarible.protocol.solana.dto.BalanceDto
 import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.group
-import com.rarible.solana.protocol.dto.BalanceDto
 import java.math.BigInteger
 
 object SolanaOwnershipConverter {

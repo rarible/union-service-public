@@ -49,7 +49,7 @@
         <rarible.protocol.ethereum.version>1.25.0</rarible.protocol.ethereum.version>
         <rarible.protocol.flow.version>2.3.1</rarible.protocol.flow.version>
         <rarible.protocol.tezos.version>1.0.2</rarible.protocol.tezos.version>
-        <rarible.protocol.solana.version>0.0.31</rarible.protocol.solana.version>
+        <rarible.protocol.solana.version>0.1.1</rarible.protocol.solana.version>
 
         <rarible.protocol.union.version>1.25.2</rarible.protocol.union.version>
 
@@ -318,17 +318,17 @@
 
             <!-- ============ Solana Protocol-API ============ -->
             <dependency>
-                <groupId>com.rarible.solana.protocol</groupId>
+                <groupId>com.rarible.protocol.solana</groupId>
                 <artifactId>solana-protocol-model</artifactId>
                 <version>${rarible.protocol.solana.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.rarible.solana.protocol</groupId>
+                <groupId>com.rarible.protocol.solana</groupId>
                 <artifactId>solana-protocol-client-starter</artifactId>
                 <version>${rarible.protocol.solana.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.rarible.solana.protocol</groupId>
+                <groupId>com.rarible.protocol.solana</groupId>
                 <artifactId>solana-protocol-subscriber</artifactId>
                 <version>${rarible.protocol.solana.version}</version>
             </dependency>

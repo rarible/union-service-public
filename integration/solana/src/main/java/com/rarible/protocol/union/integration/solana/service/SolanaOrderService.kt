@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.integration.solana.service
 
 import com.rarible.core.apm.CaptureSpan
+import com.rarible.protocol.solana.api.client.OrderControllerApi
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.AssetTypeDto
@@ -11,7 +12,6 @@ import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.integration.solana.converter.SolanaOrderConverter
-import com.rarible.solana.protocol.api.client.OrderControllerApi
 import kotlinx.coroutines.reactive.awaitFirst
 
 @CaptureSpan(type = "blockchain")

@@ -1,5 +1,7 @@
 package com.rarible.protocol.union.integration.solana.converter
 
+import com.rarible.protocol.solana.dto.CollectionsDto
+import com.rarible.protocol.solana.dto.TokenMetaContentDto
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionDto
@@ -8,13 +10,11 @@ import com.rarible.protocol.union.dto.CollectionMetaDto
 import com.rarible.protocol.union.dto.ImageContentDto
 import com.rarible.protocol.union.dto.MetaContentDto
 import com.rarible.protocol.union.dto.continuation.page.Page
-import com.rarible.solana.protocol.dto.CollectionsDto
-import com.rarible.solana.protocol.dto.TokenMetaContentDto
 
 object SolanaCollectionConverter {
 
     fun convert(
-        source: com.rarible.solana.protocol.dto.CollectionDto,
+        source: com.rarible.protocol.solana.dto.CollectionDto,
         blockchain: BlockchainDto
     ): CollectionDto {
         return CollectionDto(
@@ -39,18 +39,18 @@ object SolanaCollectionConverter {
         )
     }
 
-    private fun convert(feature: com.rarible.solana.protocol.dto.CollectionDto.Features): CollectionDto.Features {
+    private fun convert(feature: com.rarible.protocol.solana.dto.CollectionDto.Features): CollectionDto.Features {
         return when (feature) {
-            com.rarible.solana.protocol.dto.CollectionDto.Features.APPROVE_FOR_ALL -> CollectionDto.Features.APPROVE_FOR_ALL
-            com.rarible.solana.protocol.dto.CollectionDto.Features.BURN -> CollectionDto.Features.BURN
-            com.rarible.solana.protocol.dto.CollectionDto.Features.MINT_AND_TRANSFER -> CollectionDto.Features.MINT_AND_TRANSFER
-            com.rarible.solana.protocol.dto.CollectionDto.Features.MINT_WITH_ADDRESS -> CollectionDto.Features.MINT_WITH_ADDRESS
-            com.rarible.solana.protocol.dto.CollectionDto.Features.SECONDARY_SALE_FEES -> CollectionDto.Features.SECONDARY_SALE_FEES
-            com.rarible.solana.protocol.dto.CollectionDto.Features.SET_URI_PREFIX -> CollectionDto.Features.SET_URI_PREFIX
+            com.rarible.protocol.solana.dto.CollectionDto.Features.APPROVE_FOR_ALL -> CollectionDto.Features.APPROVE_FOR_ALL
+            com.rarible.protocol.solana.dto.CollectionDto.Features.BURN -> CollectionDto.Features.BURN
+            com.rarible.protocol.solana.dto.CollectionDto.Features.MINT_AND_TRANSFER -> CollectionDto.Features.MINT_AND_TRANSFER
+            com.rarible.protocol.solana.dto.CollectionDto.Features.MINT_WITH_ADDRESS -> CollectionDto.Features.MINT_WITH_ADDRESS
+            com.rarible.protocol.solana.dto.CollectionDto.Features.SECONDARY_SALE_FEES -> CollectionDto.Features.SECONDARY_SALE_FEES
+            com.rarible.protocol.solana.dto.CollectionDto.Features.SET_URI_PREFIX -> CollectionDto.Features.SET_URI_PREFIX
         }
     }
 
-    private fun convert(meta: com.rarible.solana.protocol.dto.CollectionMetaDto): CollectionMetaDto {
+    private fun convert(meta: com.rarible.protocol.solana.dto.CollectionMetaDto): CollectionMetaDto {
         return CollectionMetaDto(
             name = meta.name,
             description = meta.description,

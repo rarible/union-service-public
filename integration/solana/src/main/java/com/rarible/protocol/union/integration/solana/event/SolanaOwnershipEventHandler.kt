@@ -1,14 +1,14 @@
 package com.rarible.protocol.union.integration.solana.event
 
 import com.rarible.core.apm.CaptureTransaction
+import com.rarible.protocol.solana.dto.BalanceEventDto
+import com.rarible.protocol.solana.dto.BalanceUpdateEventDto
 import com.rarible.protocol.union.core.handler.AbstractBlockchainEventHandler
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.model.UnionOwnershipEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipUpdateEvent
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.solana.converter.SolanaOwnershipConverter
-import com.rarible.solana.protocol.dto.BalanceEventDto
-import com.rarible.solana.protocol.dto.BalanceUpdateEventDto
 import org.slf4j.LoggerFactory
 
 open class SolanaOwnershipEventHandler(
