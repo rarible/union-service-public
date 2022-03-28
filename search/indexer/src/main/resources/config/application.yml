@@ -34,3 +34,7 @@ rarible:
 
 search:
   host: ${elasticsearch.host}
+
+listener:
+  consumer:
+    broker-replica-set: ${kafka.hosts}
