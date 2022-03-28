@@ -16,7 +16,6 @@ import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.web.client.TestRestTemplate
 import reactor.core.publisher.Sinks
 import java.math.BigInteger
 import java.time.Instant
@@ -36,7 +35,7 @@ internal class ItemEventTest {
 
 
     @Test
-    suspend fun `refresh meta two times in a row test`() {
+    suspend fun `item event websocket test`() {
         val token = ADDRESS_ONE
         val tokenId = "0"
         val ownershipId = ADDRESS_TWO
@@ -51,14 +50,14 @@ internal class ItemEventTest {
             )
         )
 
-        val PRODUCER = RaribleKafkaProducer(
+        val raribleKafkaProducer = RaribleKafkaProducer(
             clientId = "test-client",
             defaultTopic = "protocol.e2e.union.activity",
             bootstrapServers = kafkaContainer.kafkaBoostrapServers(),
             valueSerializerClass = UnionKafkaJsonSerializer::class.java,
             valueClass = ItemDto::class.java
         )
-        val ITEM_KAFKA_MESSAGE = KafkaMessage(
+        val kafkaMessage = KafkaMessage(
             key = itemId,
             value = ItemDto(
                 id = ItemIdDto(BlockchainDto.ETHEREUM, randomAddress().prefixed(), randomBigInt()),
@@ -74,7 +73,7 @@ internal class ItemEventTest {
             ) as ItemDto
         )
         runBlocking {
-            PRODUCER.send(ITEM_KAFKA_MESSAGE)
+            raribleKafkaProducer.send(kafkaMessage)
         }
 
         val event = webSocketEventsQueue.poll(5, TimeUnit.SECONDS)!!
