@@ -9,8 +9,16 @@ import com.rarible.protocol.union.core.handler.BlockchainEventHandler
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.handler.KafkaConsumerWorker
 import com.rarible.protocol.union.core.model.UnionItemEvent
+import com.rarible.protocol.union.core.model.UnionOrderEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipEvent
+import com.rarible.protocol.union.dto.ActivityDto
+import com.rarible.protocol.union.dto.CollectionEventDto
+import com.rarible.protocol.union.integration.solana.converter.SolanaActivityConverter
+import com.rarible.protocol.union.integration.solana.converter.SolanaOrderConverter
+import com.rarible.protocol.union.integration.solana.event.SolanaActivityEventHandler
+import com.rarible.protocol.union.integration.solana.event.SolanaCollectionEventHandler
 import com.rarible.protocol.union.integration.solana.event.SolanaItemEventHandler
+import com.rarible.protocol.union.integration.solana.event.SolanaOrderEventHandler
 import com.rarible.protocol.union.integration.solana.event.SolanaOwnershipEventHandler
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
@@ -43,6 +51,27 @@ class SolanaConsumerConfiguration(
         return SolanaOwnershipEventHandler(handler)
     }
 
+    @Bean
+    fun solanaCollectionEventHandler(handler: IncomingEventHandler<CollectionEventDto>): SolanaCollectionEventHandler {
+        return SolanaCollectionEventHandler(handler)
+    }
+
+    @Bean
+    fun solanaOrderEventHandler(
+        handler: IncomingEventHandler<UnionOrderEvent>,
+        converter: SolanaOrderConverter
+    ): SolanaOrderEventHandler {
+        return SolanaOrderEventHandler(handler, converter)
+    }
+
+    @Bean
+    fun solanaActivityEventHandler(
+        handler: IncomingEventHandler<ActivityDto>,
+        converter: SolanaActivityConverter
+    ): SolanaActivityEventHandler {
+        return SolanaActivityEventHandler(handler, converter)
+    }
+
     //-------------------- Workers --------------------//
 
     @Bean
@@ -67,6 +96,33 @@ class SolanaConsumerConfiguration(
     ): KafkaConsumerWorker<BalanceEventDto> {
         val consumer = factory.createBalanceEventConsumer(consumerFactory.ownershipGroup)
         return consumerFactory.createOwnershipConsumer(consumer, handler, daemon, workers)
+    }
+
+    @Bean
+    fun solanaCollectionWorker(
+        factory: SolanaEventsConsumerFactory,
+        handler: BlockchainEventHandler<com.rarible.protocol.solana.dto.CollectionEventDto, CollectionEventDto>
+    ): KafkaConsumerWorker<com.rarible.protocol.solana.dto.CollectionEventDto> {
+        val consumer = factory.createCollectionEventConsumer(consumerFactory.collectionGroup)
+        return consumerFactory.createCollectionConsumer(consumer, handler, daemon, workers)
+    }
+
+    @Bean
+    fun solanaOrderWorker(
+        factory: SolanaEventsConsumerFactory,
+        handler: BlockchainEventHandler<com.rarible.protocol.solana.dto.OrderEventDto, UnionOrderEvent>
+    ): KafkaConsumerWorker<com.rarible.protocol.solana.dto.OrderEventDto> {
+        val consumer = factory.createOrderEventConsumer(consumerFactory.orderGroup)
+        return consumerFactory.createOrderConsumer(consumer, handler, daemon, workers)
+    }
+
+    @Bean
+    fun solanaActivityWorker(
+        factory: SolanaEventsConsumerFactory,
+        handler: BlockchainEventHandler<com.rarible.protocol.solana.dto.ActivityDto, ActivityDto>
+    ): KafkaConsumerWorker<com.rarible.protocol.solana.dto.ActivityDto> {
+        val consumer = factory.createActivityEventConsumer(consumerFactory.activityGroup)
+        return consumerFactory.createActivityConsumer(consumer, handler, daemon, workers)
     }
 
 }

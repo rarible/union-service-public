@@ -2,6 +2,7 @@ package com.rarible.protocol.union.integration.solana.service
 
 import com.rarible.core.apm.CaptureSpan
 import com.rarible.protocol.solana.api.client.OrderControllerApi
+import com.rarible.protocol.solana.dto.OrderIdsDto
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.AssetTypeDto
@@ -11,6 +12,7 @@ import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
+import com.rarible.protocol.union.integration.solana.converter.SolanaConverter
 import com.rarible.protocol.union.integration.solana.converter.SolanaOrderConverter
 import kotlinx.coroutines.reactive.awaitFirst
 
@@ -41,11 +43,13 @@ open class SolanaOrderService(
     }
 
     override suspend fun getOrdersByIds(orderIds: List<String>): List<OrderDto> {
-        TODO("Not yet implemented")
+        val result = orderApi.getOrdersByIds(OrderIdsDto(orderIds)).awaitFirst()
+        return result.orders.map { solanaOrderConverter.convert(it, blockchain) }
     }
 
     override suspend fun getBidCurrencies(itemId: String): List<AssetTypeDto> {
-        TODO("Not yet implemented")
+        val result = orderApi.getBidCurrencies(itemId).awaitFirst()
+        return result.currencies.map { SolanaConverter.convert(it) }
     }
 
     override suspend fun getOrderBidsByItem(
@@ -60,7 +64,18 @@ open class SolanaOrderService(
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
-        TODO("Not yet implemented")
+        val orders = orderApi.getOrderBidsByItem(
+            itemId,
+            currencyAddress,
+            solanaOrderConverter.convert(status),
+            makers,
+            origin,
+            start,
+            end,
+            continuation,
+            size
+        ).awaitFirst()
+        return solanaOrderConverter.convert(orders, blockchain)
     }
 
     override suspend fun getOrderBidsByMaker(
@@ -73,11 +88,21 @@ open class SolanaOrderService(
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
-        TODO("Not yet implemented")
+        val orders = orderApi.getOrderBidsByMaker(
+            maker,
+            origin,
+            solanaOrderConverter.convert(status),
+            start,
+            end,
+            continuation,
+            size
+        ).awaitFirst()
+        return solanaOrderConverter.convert(orders, blockchain)
     }
 
     override suspend fun getSellCurrencies(itemId: String): List<AssetTypeDto> {
-        TODO("Not yet implemented")
+        val result = orderApi.getSellCurrencies(itemId).awaitFirst()
+        return result.currencies.map { SolanaConverter.convert(it) }
     }
 
     override suspend fun getSellOrders(
@@ -86,9 +111,15 @@ open class SolanaOrderService(
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
-        TODO("Not yet implemented")
+        val orders = orderApi.getSellOrders(
+            origin,
+            continuation,
+            size
+        ).awaitFirst()
+        return solanaOrderConverter.convert(orders, blockchain)
     }
 
+    // TODO not used, should be removed
     override suspend fun getSellOrdersByCollection(
         platform: PlatformDto?,
         collection: String,
@@ -96,7 +127,7 @@ open class SolanaOrderService(
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
-        TODO("Not yet implemented")
+        return Slice.empty()
     }
 
     override suspend fun getSellOrdersByItem(
@@ -109,7 +140,16 @@ open class SolanaOrderService(
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
-        TODO("Not yet implemented")
+        val orders = orderApi.getSellOrdersByItem(
+            itemId,
+            currencyId,
+            maker,
+            origin,
+            solanaOrderConverter.convert(status),
+            continuation,
+            size
+        ).awaitFirst()
+        return solanaOrderConverter.convert(orders, blockchain)
     }
 
     override suspend fun getSellOrdersByMaker(
@@ -120,6 +160,13 @@ open class SolanaOrderService(
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
-        TODO("Not yet implemented")
+        val orders = orderApi.getSellOrdersByMaker(
+            maker,
+            origin,
+            solanaOrderConverter.convert(status),
+            continuation,
+            size
+        ).awaitFirst()
+        return solanaOrderConverter.convert(orders, blockchain)
     }
 }

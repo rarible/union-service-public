@@ -20,7 +20,6 @@ open class SolanaOwnershipService(
         return SolanaOwnershipConverter.convert(balance, blockchain)
     }
 
-    // TODO add continuation
     override suspend fun getOwnershipsByItem(itemId: String, continuation: String?, size: Int): Page<UnionOwnership> {
         val balancesDto = balanceApi.getBalanceByMint(
             itemId,

@@ -1,10 +1,12 @@
 package com.rarible.protocol.union.integration.solana.event
 
 import com.rarible.core.apm.CaptureTransaction
+import com.rarible.protocol.solana.dto.BalanceDeleteEventDto
 import com.rarible.protocol.solana.dto.BalanceEventDto
 import com.rarible.protocol.solana.dto.BalanceUpdateEventDto
 import com.rarible.protocol.union.core.handler.AbstractBlockchainEventHandler
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
+import com.rarible.protocol.union.core.model.UnionOwnershipDeleteEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipUpdateEvent
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -26,7 +28,10 @@ open class SolanaOwnershipEventHandler(
                 val unionOwnership = SolanaOwnershipConverter.convert(event.balance, blockchain)
                 handler.onEvent(UnionOwnershipUpdateEvent(unionOwnership))
             }
-            // TODO what about delete event?
+            is BalanceDeleteEventDto -> {
+                val unionOwnership = SolanaOwnershipConverter.convert(event.balance, blockchain)
+                handler.onEvent(UnionOwnershipDeleteEvent(unionOwnership.id))
+            }
         }
     }
 
