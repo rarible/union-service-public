@@ -15,6 +15,11 @@
     <version>${revision}</version>
 
     <repositories>
+      <!--  <repository>
+            <id>nexus-int-maven-public</id>
+            <name>nexus-int-maven-public</name>
+            <url>https://repo.rarible.int/repository/maven-public/</url>
+        </repository>-->
         <repository>
             <id>nexus-ext-maven-public</id>
             <name>nexus-ext-maven-public</name>
@@ -53,6 +58,8 @@
 
         <rarible.protocol.union.version>1.24.0</rarible.protocol.union.version>
 
+        <rarible-core.version>2.0.4</rarible-core.version>
+
         <dev-jna.version>5.7.0</dev-jna.version>
     </properties>
 
@@ -64,6 +71,11 @@
                 <version>${rarible.core.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.rarible.core</groupId>
+                <artifactId>rarible-core-kafka</artifactId>
+                <version>${rarible-core.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.rarible.ethereum</groupId>

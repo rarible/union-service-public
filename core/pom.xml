@@ -64,6 +64,23 @@
             <groupId>com.rarible.ethereum</groupId>
             <artifactId>rarible-ethereum-converters</artifactId>
         </dependency>
+       <!-- <dependency>
+            <groupId>com.rarible.protocol.union</groupId>
+            <artifactId>rarible-union-integration</artifactId>
+        </dependency> -->
+
+
+        <dependency>
+            <groupId>com.rarible.marketplace</groupId>
+            <artifactId>marketplace-core-common</artifactId>
+            <version>1.6.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.rarible.marketplace</groupId>
+            <artifactId>marketplace-core-model</artifactId>
+            <version>1.6.0</version>
+        </dependency>
+
 
         <!-- =============== Currency-API ================ -->
         <dependency>
@@ -85,6 +102,10 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-webflux</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka</artifactId>
         </dependency>
 
         <!-- ================== Other ==================== -->
