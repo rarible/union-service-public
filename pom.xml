@@ -200,6 +200,11 @@
                 <artifactId>protocol-union-subscriber-starter</artifactId>
                 <version>${rarible.protocol.union.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.rarible.protocol.union</groupId>
+                <artifactId>rarible-union-search-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
 
             <!-- ========== Currency Protocol-API ========= -->
             <dependency>
@@ -357,6 +362,10 @@
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-reflect</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains.kotlinx</groupId>
+            <artifactId>kotlinx-coroutines-jdk8</artifactId>
         </dependency>
     </dependencies>
 
