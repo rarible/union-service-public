@@ -16,12 +16,12 @@ import org.springframework.context.annotation.Configuration
 @Configuration
 //@EnableConfigurationProperties(SearchProperties::class)
 class SearchConfiguration(
-    @Value("\${elasticsearch.api-nodes}") private val  elasticsearchHost: String
+    @Value("\${elasticsearch.api-nodes}") private val elasticsearchHost: String
 ): AbstractElasticsearchConfiguration() {
     override fun elasticsearchClient(): RestHighLevelClient {
         val clientConfiguration = ClientConfiguration
             .builder()
-            .connectedTo("localhost")
+            .connectedTo(elasticsearchHost)
             .build()
 
         return RestClients.create(clientConfiguration).rest()
