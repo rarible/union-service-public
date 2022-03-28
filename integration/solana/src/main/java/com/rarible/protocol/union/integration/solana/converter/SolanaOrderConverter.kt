@@ -1,17 +1,20 @@
 package com.rarible.protocol.union.integration.solana.converter
 
+import com.rarible.protocol.solana.dto.AuctionHouseOrderDataV1Dto
+import com.rarible.protocol.solana.dto.AuctionHouseOrderDto
 import com.rarible.protocol.solana.dto.OrdersDto
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.service.CurrencyService
 import com.rarible.protocol.union.core.util.evalMakePrice
 import com.rarible.protocol.union.core.util.evalTakePrice
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.ContractAddress
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PlatformDto
-import com.rarible.protocol.union.dto.SolanaOrderDataDto
+import com.rarible.protocol.union.dto.SolanaAuctionHouseDataV1Dto
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -76,9 +79,20 @@ class SolanaOrderConverter(
             makePriceUsd = makePriceUsd,
             takePriceUsd = takePriceUsd,
 
-            // TODO[orders]: maybe add fees and other fields
-            data = convertData()
+            data = convertOrderData(order, blockchain)
         )
+    }
+
+    private fun convertOrderData(
+        order: com.rarible.protocol.solana.dto.OrderDto,
+        blockchain: BlockchainDto
+    ) = when (order) {
+        is AuctionHouseOrderDto -> when (val orderData = order.data) {
+            is AuctionHouseOrderDataV1Dto -> SolanaAuctionHouseDataV1Dto(
+                // TODO[orders]: maybe add fees and other fields
+                auctionHouse = ContractAddress(blockchain, orderData.auctionHouse)
+            )
+        }
     }
 
     private fun convert(status: com.rarible.protocol.solana.dto.OrderStatusDto): OrderStatusDto = when (status) {
@@ -110,9 +124,4 @@ class SolanaOrderConverter(
         OrderStatusDto.INACTIVE,
         OrderStatusDto.CANCELLED -> com.rarible.protocol.solana.dto.OrderStatusDto.CANCELLED
     }
-
-    private fun convertData(): SolanaOrderDataDto {
-        return SolanaOrderDataDto()
-    }
-
 }
