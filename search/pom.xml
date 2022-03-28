@@ -12,33 +12,20 @@
     <artifactId>rarible-union-search</artifactId>
     <packaging>pom</packaging>
 
-    <properties>
-        <elasticsearch.version>8.1.1</elasticsearch.version>
-    </properties>
-
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>co.elastic.clients</groupId>
-                <artifactId>elasticsearch-java</artifactId>
-                <version>${elasticsearch.version}</version>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-data-elasticsearch</artifactId>
+                <version>2.5.11</version>
             </dependency>
             <dependency>
-                <groupId>jakarta.json</groupId>
-                <artifactId>jakarta.json-api</artifactId>
-                <version>2.0.1</version>
+                <groupId>com.rarible.protocol.union</groupId>
+                <artifactId>rarible-union-search-core</artifactId>
+                <version>${revision}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
-
-    <dependencies>
-        <dependency>
-            <groupId>co.elastic.clients</groupId>
-            <artifactId>elasticsearch-java</artifactId>
-            <version>${elasticsearch.version}</version>
-        </dependency>
-
-    </dependencies>
 
     <modules>
         <module>core</module> <!-- NOTE: search core -->

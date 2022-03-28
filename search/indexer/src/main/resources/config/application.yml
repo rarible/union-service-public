@@ -32,9 +32,6 @@ rarible:
       annotation:
         enabled: true
 
-search:
-  host: ${elasticsearch.host}
-
 listener:
   consumer:
     broker-replica-set: ${kafka.hosts}

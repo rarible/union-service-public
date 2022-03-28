@@ -2,5 +2,17 @@ spring:
   application:
     name: union-search-core
 
-search:
-  host: ${elasticsearch.host}
+
+  data:
+    elasticsearch:
+      cluster-name: docker-cluster
+      cluster-nodes: ${elasticsearch.cluster-nodes}
+
+      client:
+        reactive:
+          endpoints:  ${elasticsearch.api-nodes}
+
+
+  elasticsearch:
+    rest:
+      uris: ${elasticsearch.api-nodes}
