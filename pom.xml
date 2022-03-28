@@ -42,7 +42,7 @@
         <mockserver-netty.version>5.11.2</mockserver-netty.version>
         <mockserver.version>1.15.3</mockserver.version>
 
-        <rarible.core.version>2.3.41</rarible.core.version>
+        <rarible.core.version>2.3.53</rarible.core.version>
         <rarible.ethereum.version>1.4.0</rarible.ethereum.version>
 
         <rarible.protocol.currency.version>1.23.2</rarible.protocol.currency.version>
@@ -199,6 +199,11 @@
                 <groupId>com.rarible.protocol.union</groupId>
                 <artifactId>protocol-union-subscriber-starter</artifactId>
                 <version>${rarible.protocol.union.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.rarible.protocol.union</groupId>
+                <artifactId>rarible-union-search-core</artifactId>
+                <version>${project.version}</version>
             </dependency>
 
             <!-- ========== Currency Protocol-API ========= -->
@@ -357,6 +362,10 @@
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-reflect</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains.kotlinx</groupId>
+            <artifactId>kotlinx-coroutines-jdk8</artifactId>
         </dependency>
     </dependencies>
 

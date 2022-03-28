@@ -1,17 +1,20 @@
 package com.rarible.protocol.union.search.core
 
 import com.rarible.protocol.union.dto.ActivityTypeDto
-import com.rarible.protocol.union.dto.AssetDto
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.OrderActivitySourceDto
-import scalether.domain.Address
-import java.math.BigDecimal
-import java.math.BigInteger
+import com.rarible.protocol.union.search.core.repository.ActivityEsRepository
+import org.springframework.data.annotation.Id
+import org.springframework.data.elasticsearch.annotations.Document
+import org.springframework.data.elasticsearch.annotations.Field
+import org.springframework.data.elasticsearch.annotations.FieldType
 import java.time.Instant
+import java.util.*
 
+@Document(indexName = ActivityEsRepository.INDEX)
 data class ElasticActivity(
     val activityId: String,
     // Sort fields
+    @Field(type = FieldType.Date)
     val date: Instant,
     val blockNumber: Long?,
     val logIndex: Int?,
@@ -22,6 +25,8 @@ data class ElasticActivity(
     val collection: Collection,
     val item: Item,
 
+    @Id
+    val uuid: UUID = UUID.randomUUID(),
 ) {
     data class User(
         val maker: String,

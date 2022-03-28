@@ -12,8 +12,24 @@
     <artifactId>rarible-union-search</artifactId>
     <packaging>pom</packaging>
 
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-data-elasticsearch</artifactId>
+                <version>2.5.11</version>
+            </dependency>
+            <dependency>
+                <groupId>com.rarible.protocol.union</groupId>
+                <artifactId>rarible-union-search-core</artifactId>
+                <version>${revision}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <modules>
         <module>core</module> <!-- NOTE: search core -->
         <module>reindexer</module>
+        <module>indexer</module>
     </modules>
 </project>
