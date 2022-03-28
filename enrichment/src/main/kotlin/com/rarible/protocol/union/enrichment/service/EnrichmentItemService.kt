@@ -125,7 +125,7 @@ class EnrichmentItemService(
         val bestBidOrder = withSpanAsync("fetchBestBidOrder", spanType = SpanType.EXT) {
             enrichmentOrderService.fetchOrderIfDiffers(shortItem?.bestBidOrder, orders)
         }
-        val meta = if (item?.meta?.attributes?.isNotEmpty() == true) {
+        val meta = if (item?.meta?.content?.any { it.properties?.mimeType != null } == true) {
             CompletableDeferred(item.meta)
         } else {
             withSpanAsync("fetchMeta", spanType = SpanType.CACHE) {
