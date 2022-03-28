@@ -16,22 +16,15 @@ import org.springframework.context.annotation.Configuration
 @Configuration
 //@EnableConfigurationProperties(SearchProperties::class)
 class SearchConfiguration(
-    //val searchProperties: SearchProperties
-) {
-
-    @Bean
-    fun elasticSearchClient(
-        @Value("\${elasticsearch.host}") elasticsearchHost: String,
-        objectMapper: ObjectMapper
-    ): ElasticsearchAsyncClient {
-        val lowLevelClient = RestClient
-            .builder(HttpHost.create("localhost"))
+    @Value("\${elasticsearch.api-nodes}") private val  elasticsearchHost: String
+): AbstractElasticsearchConfiguration() {
+    override fun elasticsearchClient(): RestHighLevelClient {
+        val clientConfiguration = ClientConfiguration
+            .builder()
+            .connectedTo("localhost")
             .build()
-        val transport = RestClientTransport(lowLevelClient, JacksonJsonpMapper(objectMapper))
-        return ElasticsearchAsyncClient(transport)
+
+        return RestClients.create(clientConfiguration).rest()
     }
 
-    @Bean
-    fun activityEsRepository(elasticsearchAsyncClient: ElasticsearchAsyncClient) =
-        ActivityEsRepository(elasticsearchAsyncClient)
 }

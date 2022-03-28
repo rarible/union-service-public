@@ -31,6 +31,3 @@ rarible:
           enabled: false
       annotation:
         enabled: true
-
-search:
-  host: ${elasticsearch.host}

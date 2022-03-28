@@ -54,12 +54,6 @@
             <artifactId>kotlinx-coroutines-jdk8</artifactId>
         </dependency>
 
-        <!-- ================== ElasticSearch =================== -->
-        <dependency>
-            <groupId>co.elastic.clients</groupId>
-            <artifactId>elasticsearch-java</artifactId>
-        </dependency>
-
         <!-- ================== Test =================== -->
         <dependency>
             <groupId>com.rarible.core</groupId>
