@@ -1,11 +1,11 @@
 package com.rarible.protocol.union.search.test
 
-import com.rarible.core.test.ext.Elasticsearch8Test
+import com.rarible.core.test.ext.ElasticsearchTest
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
 import org.springframework.test.context.ActiveProfiles
 
-@Elasticsearch8Test
+@ElasticsearchTest
 @SpringBootTest(
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     properties = [
