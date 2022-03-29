@@ -59,7 +59,7 @@ class SolanaOrderConverter(
             make = make,
             take = take,
             taker = null,
-            fill = order.fill.toBigDecimal(),
+            fill = order.fill,
             platform = PlatformDto.RARIBLE,
             status = convert(order.status),
             startedAt = order.start,
