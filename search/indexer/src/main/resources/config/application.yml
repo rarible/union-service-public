@@ -35,3 +35,4 @@ rarible:
 listener:
   consumer:
     broker-replica-set: ${kafka.hosts}
+    worker-count: 4

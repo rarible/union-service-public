@@ -6,6 +6,6 @@ import org.springframework.context.annotation.Configuration
 
 @Configuration
 @EnableConfigurationProperties(value = [KafkaProperties::class])
-@ComponentScan(basePackages = ["com.rarible.protocol.union.search.core"])
+@ComponentScan(basePackages = ["com.rarible.protocol.union.search"])
 class UnionSearchIndexerConfig {
 }
