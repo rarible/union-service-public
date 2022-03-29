@@ -4,6 +4,7 @@ import com.rarible.core.content.meta.loader.ContentMetaReceiver
 import com.rarible.core.content.meta.loader.ContentReceiver
 import com.rarible.core.content.meta.loader.ContentReceiverMetrics
 import com.rarible.core.content.meta.loader.KtorApacheClientContentReceiver
+import com.rarible.core.content.meta.loader.KtorCioClientContentReceiver
 import com.rarible.loader.cache.CacheLoaderService
 import com.rarible.loader.cache.configuration.EnableRaribleCacheLoader
 import com.rarible.protocol.union.core.model.UnionMeta
@@ -23,13 +24,25 @@ import org.springframework.context.annotation.ComponentScan
     ]
 )
 class UnionMetaConfiguration {
+
     @Bean
     fun contentReceiver(
         unionMetaProperties: UnionMetaProperties
-    ): ContentReceiver = KtorApacheClientContentReceiver(
-        timeout = unionMetaProperties.mediaFetchTimeout,
-        threadsCount = unionMetaProperties.ktorApacheHttpClientThreadCount
-    )
+    ): ContentReceiver = when (unionMetaProperties.httpClient.type) {
+        UnionMetaProperties.HttpClient.HttpClientType.KTOR_APACHE ->
+            KtorApacheClientContentReceiver(
+                timeout = unionMetaProperties.httpClient.timeOut,
+                threadsCount = unionMetaProperties.httpClient.threadCount,
+                totalConnection = unionMetaProperties.httpClient.totalConnection
+            )
+
+        UnionMetaProperties.HttpClient.HttpClientType.KTOR_CIO ->
+            KtorCioClientContentReceiver(
+                timeout = unionMetaProperties.httpClient.timeOut,
+                threadsCount = unionMetaProperties.httpClient.threadCount,
+                totalConnection = unionMetaProperties.httpClient.totalConnection
+            )
+    }
 
     @Bean
     fun contentMetaReceiver(
@@ -49,4 +62,5 @@ class UnionMetaConfiguration {
     ): CacheLoaderService<UnionMeta> =
         @Suppress("UNCHECKED_CAST")
         (cacheLoaderServices.find { it.type == UnionMetaCacheLoader.TYPE } as CacheLoaderService<UnionMeta>)
+
 }
