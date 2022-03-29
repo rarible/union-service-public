@@ -51,7 +51,7 @@ meta:
   mediaFetchMaxSize: 131072 # 128 Kb
   openSeaProxyUrl: ${consul.meta.openSeaProxyUrl}
   http-client:
-    name: ktor-cio # ktor-apache, ktor-cio
+    type: KTOR_CIO # KTOR_APACHE, KTOR_CIO
     thread-count: 1
     time-out: 10000
     total-connection: 1000

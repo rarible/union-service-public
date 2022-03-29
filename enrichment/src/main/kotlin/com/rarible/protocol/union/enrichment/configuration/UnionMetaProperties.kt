@@ -12,9 +12,14 @@ data class UnionMetaProperties(
     val httpClient: HttpClient
 ){
     class HttpClient(
-        val name: String = "ktor-apache",
+        val type: HttpClientType = HttpClientType.KTOR_CIO,
         val threadCount: Int = 8,
         val timeOut: Int = 5000,
         val totalConnection: Int = 500
-    )
+    ) {
+        enum class HttpClientType {
+            KTOR_APACHE,
+            KTOR_CIO
+        }
+    }
 }
