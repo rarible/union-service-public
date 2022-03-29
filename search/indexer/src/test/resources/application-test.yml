@@ -1,0 +1,18 @@
+spring:
+  application:
+    name: union-search-indexer
+
+
+  data:
+    elasticsearch:
+      cluster-name: docker-cluster
+      cluster-nodes: ${elasticsearch.cluster-nodes}
+
+      client:
+        reactive:
+          endpoints:  ${elasticsearch.api-nodes}
+
+
+  elasticsearch:
+    rest:
+      uris: ${elasticsearch.api-nodes}
