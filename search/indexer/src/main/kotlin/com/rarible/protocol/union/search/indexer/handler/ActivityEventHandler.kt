@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.search.indexer.handler
 
 import com.rarible.core.daemon.sequential.ConsumerBatchEventHandler
+import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.search.core.converter.ElasticActivityConverter
 import com.rarible.protocol.union.search.core.repository.ActivityEsRepository
@@ -14,7 +15,7 @@ class ActivityEventHandler(
     private val repository: ActivityEsRepository,
 ): ConsumerBatchEventHandler<ActivityDto> {
 
-    private val logger = LoggerFactory.getLogger(javaClass)
+    private val logger by Logger()
 
     override suspend fun handle(events: List<ActivityDto>) {
         logger.info("Handling ${events.size} ActivityDto events")
