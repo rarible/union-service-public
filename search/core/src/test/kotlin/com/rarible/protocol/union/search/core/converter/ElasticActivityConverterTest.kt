@@ -75,7 +75,7 @@ class ElasticActivityConverterTest {
         val actual = converter.convert(source)
 
         // then
-        assertThat(actual.activityId).isEqualTo(source.id.value)
+        assertThat(actual.activityId).isEqualTo(source.id.toString())
         assertThat(actual.date).isEqualTo(source.date)
         assertThat(actual.blockNumber).isEqualTo(source.blockchainInfo!!.blockNumber)
         assertThat(actual.logIndex).isEqualTo(source.blockchainInfo!!.logIndex)
@@ -112,7 +112,7 @@ class ElasticActivityConverterTest {
         val actual = converter.convert(source)
 
         // then
-        assertThat(actual.activityId).isEqualTo(source.id.value)
+        assertThat(actual.activityId).isEqualTo(source.id.toString())
         assertThat(actual.date).isEqualTo(source.date)
         assertThat(actual.blockNumber).isEqualTo(source.blockchainInfo!!.blockNumber)
         assertThat(actual.logIndex).isEqualTo(source.blockchainInfo!!.logIndex)
@@ -150,7 +150,7 @@ class ElasticActivityConverterTest {
         val actual = converter.convert(source)
 
         // then
-        assertThat(actual.activityId).isEqualTo(source.id.value)
+        assertThat(actual.activityId).isEqualTo(source.id.toString())
         assertThat(actual.date).isEqualTo(source.date)
         assertThat(actual.blockNumber).isEqualTo(source.blockchainInfo!!.blockNumber)
         assertThat(actual.logIndex).isEqualTo(source.blockchainInfo!!.logIndex)
@@ -186,7 +186,7 @@ class ElasticActivityConverterTest {
         val actual = converter.convert(source)
 
         // then
-        assertThat(actual.activityId).isEqualTo(source.id.value)
+        assertThat(actual.activityId).isEqualTo(source.id.toString())
         assertThat(actual.date).isEqualTo(source.date)
         assertThat(actual.blockNumber).isEqualTo(source.blockchainInfo!!.blockNumber)
         assertThat(actual.logIndex).isEqualTo(source.blockchainInfo!!.logIndex)
@@ -227,7 +227,7 @@ class ElasticActivityConverterTest {
         val actual = converter.convert(source)
 
         // then
-        assertThat(actual.activityId).isEqualTo(source.id.value)
+        assertThat(actual.activityId).isEqualTo(source.id.toString())
         assertThat(actual.date).isEqualTo(source.date)
         assertThat(actual.blockNumber).isEqualTo(source.blockchainInfo!!.blockNumber)
         assertThat(actual.logIndex).isEqualTo(source.blockchainInfo!!.logIndex)
@@ -259,7 +259,7 @@ class ElasticActivityConverterTest {
         val actual = converter.convert(source)
 
         // then
-        assertThat(actual.activityId).isEqualTo(source.id.value)
+        assertThat(actual.activityId).isEqualTo(source.id.toString())
         assertThat(actual.date).isEqualTo(source.date)
         assertThat(actual.blockNumber).isNull()
         assertThat(actual.logIndex).isNull()
@@ -291,7 +291,7 @@ class ElasticActivityConverterTest {
         val actual = converter.convert(source)
 
         // then
-        assertThat(actual.activityId).isEqualTo(source.id.value)
+        assertThat(actual.activityId).isEqualTo(source.id.toString())
         assertThat(actual.date).isEqualTo(source.date)
         assertThat(actual.blockNumber).isNull()
         assertThat(actual.logIndex).isNull()
@@ -329,7 +329,7 @@ class ElasticActivityConverterTest {
         val actual = converter.convert(source)
 
         // then
-        assertThat(actual.activityId).isEqualTo(source.id.value)
+        assertThat(actual.activityId).isEqualTo(source.id.toString())
         assertThat(actual.date).isEqualTo(source.date)
         assertThat(actual.blockNumber).isEqualTo(source.blockchainInfo!!.blockNumber)
         assertThat(actual.logIndex).isEqualTo(source.blockchainInfo!!.logIndex)
@@ -367,7 +367,7 @@ class ElasticActivityConverterTest {
         val actual = converter.convert(source)
 
         // then
-        assertThat(actual.activityId).isEqualTo(source.id.value)
+        assertThat(actual.activityId).isEqualTo(source.id.toString())
         assertThat(actual.date).isEqualTo(source.date)
         assertThat(actual.blockNumber).isEqualTo(source.blockchainInfo!!.blockNumber)
         assertThat(actual.logIndex).isEqualTo(source.blockchainInfo!!.logIndex)
@@ -395,7 +395,7 @@ class ElasticActivityConverterTest {
         val actual = converter.convert(source)
 
         // then
-        assertThat(actual.activityId).isEqualTo(source.id.value)
+        assertThat(actual.activityId).isEqualTo(source.id.toString())
         assertThat(actual.date).isEqualTo(source.date)
         assertThat(actual.blockNumber).isNull()
         assertThat(actual.logIndex).isNull()
@@ -424,7 +424,7 @@ class ElasticActivityConverterTest {
         val actual = converter.convert(source)
 
         // then
-        assertThat(actual.activityId).isEqualTo(source.id.value)
+        assertThat(actual.activityId).isEqualTo(source.id.toString())
         assertThat(actual.date).isEqualTo(source.date)
         assertThat(actual.blockNumber).isNull()
         assertThat(actual.logIndex).isNull()
@@ -452,7 +452,7 @@ class ElasticActivityConverterTest {
         val actual = converter.convert(source)
 
         // then
-        assertThat(actual.activityId).isEqualTo(source.id.value)
+        assertThat(actual.activityId).isEqualTo(source.id.toString())
         assertThat(actual.date).isEqualTo(source.date)
         assertThat(actual.blockNumber).isNull()
         assertThat(actual.logIndex).isNull()
@@ -480,7 +480,7 @@ class ElasticActivityConverterTest {
         val actual = converter.convert(source)
 
         // then
-        assertThat(actual.activityId).isEqualTo(source.id.value)
+        assertThat(actual.activityId).isEqualTo(source.id.toString())
         assertThat(actual.date).isEqualTo(source.date)
         assertThat(actual.blockNumber).isNull()
         assertThat(actual.logIndex).isNull()
@@ -507,7 +507,7 @@ class ElasticActivityConverterTest {
         val actual = converter.convert(source)
 
         // then
-        assertThat(actual.activityId).isEqualTo(source.id.value)
+        assertThat(actual.activityId).isEqualTo(source.id.toString())
         assertThat(actual.date).isEqualTo(source.date)
         assertThat(actual.blockNumber).isNull()
         assertThat(actual.logIndex).isNull()
@@ -534,7 +534,7 @@ class ElasticActivityConverterTest {
         val actual = converter.convert(source)
 
         // then
-        assertThat(actual.activityId).isEqualTo(source.id.value)
+        assertThat(actual.activityId).isEqualTo(source.id.toString())
         assertThat(actual.date).isEqualTo(source.date)
         assertThat(actual.blockNumber).isNull()
         assertThat(actual.logIndex).isNull()

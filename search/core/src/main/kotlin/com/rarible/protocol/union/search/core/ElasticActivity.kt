@@ -12,7 +12,8 @@ import java.util.*
 
 @Document(indexName = ActivityEsRepository.INDEX)
 data class ElasticActivity(
-    val activityId: String,
+    @Id
+    val activityId: String, // blockchain:value
     // Sort fields
     @Field(type = FieldType.Date)
     val date: Instant,
@@ -24,9 +25,6 @@ data class ElasticActivity(
     val user: User,
     val collection: Collection,
     val item: Item,
-
-    @Id
-    val uuid: UUID = UUID.randomUUID(),
 ) {
     data class User(
         val maker: String,

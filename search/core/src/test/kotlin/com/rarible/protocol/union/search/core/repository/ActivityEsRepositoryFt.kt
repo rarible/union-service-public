@@ -37,7 +37,7 @@ internal class ActivityEsRepositoryFt {
             )
         )
 
-        val id = activityEsRepository.save(activity).awaitFirst().uuid
+        val id = activityEsRepository.save(activity).awaitFirst().activityId
         val found = activityEsRepository.findById(id).awaitFirst()
 
         Assertions.assertThat(found).isEqualTo(activity)
