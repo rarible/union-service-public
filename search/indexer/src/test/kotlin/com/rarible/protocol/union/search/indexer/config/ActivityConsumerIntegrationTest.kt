@@ -6,10 +6,12 @@ import com.rarible.protocol.union.search.core.repository.ActivityEsRepository
 import com.rarible.protocol.union.search.indexer.test.IntegrationTest
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.test.context.ContextConfiguration
+import org.springframework.data.elasticsearch.repository.config.EnableReactiveElasticsearchRepositories
 
 @IntegrationTest
-@ContextConfiguration
+@EnableReactiveElasticsearchRepositories(basePackages = [
+    "com.rarible.protocol.union.search"
+])
 class ActivityConsumerIntegrationTest {
 
     @Autowired
