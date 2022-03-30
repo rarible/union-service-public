@@ -10,6 +10,7 @@
     </parent>
 
     <artifactId>rarible-union-search-core</artifactId>
+    <packaging>jar</packaging>
 
 
     <build>

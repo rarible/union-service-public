@@ -9,9 +9,13 @@ import com.rarible.protocol.union.subscriber.UnionKafkaJsonSerializer
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Lazy
+import org.springframework.data.elasticsearch.repository.config.EnableReactiveElasticsearchRepositories
 
 @Configuration
 @Lazy
+@EnableReactiveElasticsearchRepositories(basePackages = [
+    "com.rarible.protocol.union.search.core.repository"
+])
 class TestIndexerConfiguration {
 
     @Bean
