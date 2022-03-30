@@ -25,11 +25,13 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder
-import org.springframework.test.context.ContextConfiguration
+import org.springframework.data.elasticsearch.repository.config.EnableReactiveElasticsearchRepositories
 import java.time.Instant
 
 @IntegrationTest
-@ContextConfiguration
+@EnableReactiveElasticsearchRepositories(basePackages = [
+    "com.rarible.protocol.union.search"
+])
 class ActivityConsumerIntegrationTest {
 
     @Autowired
