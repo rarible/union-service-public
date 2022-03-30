@@ -1,0 +1,93 @@
+package com.rarible.protocol.union.api.configuration
+
+import com.rarible.core.application.ApplicationEnvironmentInfo
+import com.rarible.core.kafka.RaribleKafkaConsumer
+import com.rarible.core.task.EnableRaribleTask
+import com.rarible.protocol.union.core.event.UnionInternalTopicProvider
+import com.rarible.protocol.union.core.handler.InternalEventHandler
+import com.rarible.protocol.union.core.handler.KafkaConsumerWorker
+import com.rarible.protocol.union.core.model.UnionWrappedEvent
+import com.rarible.protocol.union.enrichment.configuration.EnrichmentConsumerConfiguration
+import com.rarible.protocol.union.enrichment.model.ReconciliationMarkAbstractEvent
+import com.rarible.protocol.union.listener.config.InternalConsumerFactory
+import com.rarible.protocol.union.listener.config.UnionListenerProperties
+import com.rarible.protocol.union.subscriber.UnionKafkaJsonDeserializer
+import org.apache.kafka.clients.consumer.OffsetResetStrategy
+import org.springframework.boot.context.properties.EnableConfigurationProperties
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Import
+import java.util.*
+
+@Configuration
+@EnableRaribleTask
+@Import(value = [EnrichmentConsumerConfiguration::class])
+//@EnableConfigurationProperties(value = [UnionListenerProperties::class])
+class UnionListenerConfig(
+    //private val listenerProperties: UnionListenerProperties,
+    applicationEnvironmentInfo: ApplicationEnvironmentInfo/*,
+    private val consumerFactory: InternalConsumerFactory*/
+) {
+
+    private val env = applicationEnvironmentInfo.name
+    private val host = applicationEnvironmentInfo.host
+
+    private val clientIdPrefix = "$env.$host.${UUID.randomUUID()}"
+
+    @Bean
+    fun unionWrappedEventConsumer(): RaribleKafkaConsumer<UnionWrappedEvent> {
+        return RaribleKafkaConsumer(
+            clientId = "$clientIdPrefix.union-wrapped-event-consumer",
+            valueDeserializerClass = UnionKafkaJsonDeserializer::class.java,
+            valueClass = UnionWrappedEvent::class.java,
+            consumerGroup = consumerGroup("wrapped"),
+            defaultTopic = UnionInternalTopicProvider.getWrappedTopic(env),
+            bootstrapServers = ""/*listenerProperties.consumer.brokerReplicaSet*/,
+            offsetResetStrategy = OffsetResetStrategy.EARLIEST
+        )
+    }
+
+ /*   @Bean
+    fun unionWrappedEventWorker(
+        consumer: RaribleKafkaConsumer<UnionWrappedEvent>,
+        handler: InternalEventHandler<UnionWrappedEvent>
+    ): KafkaConsumerWorker<UnionWrappedEvent> {
+        return consumerFactory.createWrappedEventConsumer(
+            consumer = consumer,
+            handler = handler,
+            daemon = listenerProperties.monitoringWorker,
+            workers = listenerProperties.consumer.workers
+        )
+    }*/
+
+    @Bean
+    fun unionReconciliationMarkEventConsumer(): RaribleKafkaConsumer<ReconciliationMarkAbstractEvent> {
+        return RaribleKafkaConsumer(
+            clientId = "$clientIdPrefix.union-reconciliation-mark-consumer",
+            valueDeserializerClass = UnionKafkaJsonDeserializer::class.java,
+            valueClass = ReconciliationMarkAbstractEvent::class.java,
+            consumerGroup = consumerGroup("reconciliation"),
+            defaultTopic = UnionInternalTopicProvider.getReconciliationMarkTopic(env),
+            bootstrapServers = ""/*listenerProperties.consumer.brokerReplicaSet*/,
+            offsetResetStrategy = OffsetResetStrategy.EARLIEST
+        )
+    }
+
+  /*  @Bean
+    fun unionReconciliationMarkEventWorker(
+        consumer: RaribleKafkaConsumer<ReconciliationMarkAbstractEvent>,
+        handler: InternalEventHandler<ReconciliationMarkAbstractEvent>
+    ): KafkaConsumerWorker<ReconciliationMarkAbstractEvent> {
+        return consumerFactory.createReconciliationMarkEventConsumer(
+            consumer = consumer,
+            handler = handler,
+            daemon = listenerProperties.monitoringWorker,
+            workerCount = 1
+        )
+    }*/
+
+    private fun consumerGroup(suffix: String): String {
+        return "${env}.protocol.union.${suffix}"
+    }
+
+}

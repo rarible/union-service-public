@@ -51,5 +51,4 @@ class ApiConfiguration {
         source.registerCorsConfiguration("/**", config)
         return source
     }
-
 }

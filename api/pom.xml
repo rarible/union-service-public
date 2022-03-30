@@ -69,11 +69,24 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-mongodb-reactive</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-jms</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka</artifactId>
+        </dependency>
 
         <!-- ================== Other =================== -->
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jsr310</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains.kotlinx</groupId>
+            <artifactId>kotlinx-coroutines-slf4j</artifactId>
+            <version>1.5.2</version>
         </dependency>
 
         <!-- ================== Test ===================== -->
@@ -132,6 +145,11 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
+        </dependency>
+        <!-- TODO move dto to common lib-->
+        <dependency>
+            <groupId>com.rarible.protocol.union</groupId>
+            <artifactId>rarible-union-listener</artifactId>
         </dependency>
     </dependencies>
 </project>
