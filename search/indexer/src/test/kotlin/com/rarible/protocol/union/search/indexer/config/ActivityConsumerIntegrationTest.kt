@@ -75,7 +75,7 @@ class ActivityConsumerIntegrationTest {
 
         // then
         val searchQuery = NativeSearchQueryBuilder()
-            .withQuery(matchQuery("activityId", activity.id.value))
+            .withQuery(matchQuery("activityId", activity.id.toString()))
             .build()
         val searchHits = esOperations.search(searchQuery, ElasticActivity::class.java).awaitFirst()
 

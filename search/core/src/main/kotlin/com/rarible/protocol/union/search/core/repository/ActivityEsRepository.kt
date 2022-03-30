@@ -6,7 +6,7 @@ import org.springframework.data.elasticsearch.repository.ReactiveElasticsearchRe
 import org.springframework.stereotype.Component
 import java.util.UUID
 
-interface ActivityEsRepository: ReactiveElasticsearchRepository<ElasticActivity, UUID> {
+interface ActivityEsRepository: ReactiveElasticsearchRepository<ElasticActivity, String> {
 
     companion object {
         const val INDEX = "activity"
