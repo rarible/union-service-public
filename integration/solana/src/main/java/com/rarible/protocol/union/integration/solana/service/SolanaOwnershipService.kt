@@ -7,6 +7,7 @@ import com.rarible.protocol.union.core.service.OwnershipService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.continuation.page.Page
+import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.integration.solana.converter.SolanaOwnershipConverter
 import kotlinx.coroutines.reactive.awaitFirst
 
@@ -16,7 +17,11 @@ open class SolanaOwnershipService(
 ) : AbstractBlockchainService(BlockchainDto.SOLANA), OwnershipService {
 
     override suspend fun getOwnershipById(ownershipId: String): UnionOwnership {
-        val balance = balanceApi.getBalanceByAccount(ownershipId).awaitFirst()
+        val pair = IdParser.split(ownershipId, 2)
+        val mint = pair[0]
+        val owner = pair[1]
+
+        val balance = balanceApi.getBalanceByMintAndOwner(mint, owner).awaitFirst()
         return SolanaOwnershipConverter.convert(balance, blockchain)
     }
 
