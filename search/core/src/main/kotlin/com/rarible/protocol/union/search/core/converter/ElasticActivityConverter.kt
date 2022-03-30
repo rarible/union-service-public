@@ -53,7 +53,7 @@ class ElasticActivityConverter {
     private fun convertMint(source: MintActivityDto): ElasticActivity {
         val itemId = safeItemId(source.contract, source.tokenId, source.itemId)
         return ElasticActivity(
-            activityId = source.id.value,
+            activityId = source.id.toString(),
             date = source.date,
             blockNumber = source.blockchainInfo?.blockNumber,
             logIndex = source.blockchainInfo?.logIndex,
@@ -68,7 +68,7 @@ class ElasticActivityConverter {
     private fun convertBurn(source: BurnActivityDto): ElasticActivity {
         val itemId = safeItemId(source.contract, source.tokenId, source.itemId)
         return ElasticActivity(
-            activityId = source.id.value,
+            activityId = source.id.toString(),
             date = source.date,
             blockNumber = source.blockchainInfo?.blockNumber,
             logIndex = source.blockchainInfo?.logIndex,
@@ -83,7 +83,7 @@ class ElasticActivityConverter {
     private fun convertTransfer(source: TransferActivityDto): ElasticActivity {
         val itemId = safeItemId(source.contract, source.tokenId, source.itemId)
         return ElasticActivity(
-            activityId = source.id.value,
+            activityId = source.id.toString(),
             date = source.date,
             blockNumber = source.blockchainInfo?.blockNumber,
             logIndex = source.blockchainInfo?.logIndex,
@@ -97,7 +97,7 @@ class ElasticActivityConverter {
 
     private fun convertOrderMatchSwap(source: OrderMatchSwapDto): ElasticActivity {
         return ElasticActivity(
-            activityId = source.id.value,
+            activityId = source.id.toString(),
             date = source.date,
             blockNumber = source.blockchainInfo?.blockNumber,
             logIndex = source.blockchainInfo?.logIndex,
@@ -111,7 +111,7 @@ class ElasticActivityConverter {
 
     private fun convertOrderMatchSell(source: OrderMatchSellDto): ElasticActivity {
         return ElasticActivity(
-            activityId = source.id.value,
+            activityId = source.id.toString(),
             date = source.date,
             blockNumber = source.blockchainInfo?.blockNumber,
             logIndex = source.blockchainInfo?.logIndex,
@@ -125,7 +125,7 @@ class ElasticActivityConverter {
 
     private fun convertOrderBid(source: OrderBidActivityDto): ElasticActivity {
         return ElasticActivity(
-            activityId = source.id.value,
+            activityId = source.id.toString(),
             date = source.date,
             blockNumber = null,
             logIndex = null,
@@ -139,7 +139,7 @@ class ElasticActivityConverter {
 
     private fun convertOrderList(source: OrderListActivityDto): ElasticActivity {
         return ElasticActivity(
-            activityId = source.id.value,
+            activityId = source.id.toString(),
             date = source.date,
             blockNumber = null,
             logIndex = null,
@@ -153,7 +153,7 @@ class ElasticActivityConverter {
 
     private fun convertOrderCancelBid(source: OrderCancelBidActivityDto): ElasticActivity {
         return ElasticActivity(
-            activityId = source.id.value,
+            activityId = source.id.toString(),
             date = source.date,
             blockNumber = source.blockchainInfo?.blockNumber,
             logIndex = source.blockchainInfo?.logIndex,
@@ -167,7 +167,7 @@ class ElasticActivityConverter {
 
     private fun convertOrderCancelList(source: OrderCancelListActivityDto): ElasticActivity {
         return ElasticActivity(
-            activityId = source.id.value,
+            activityId = source.id.toString(),
             date = source.date,
             blockNumber = source.blockchainInfo?.blockNumber,
             logIndex = source.blockchainInfo?.logIndex,
@@ -181,7 +181,7 @@ class ElasticActivityConverter {
 
     private fun convertAuctionOpen(source: AuctionOpenActivityDto): ElasticActivity {
         return ElasticActivity(
-            activityId = source.id.value,
+            activityId = source.id.toString(),
             date = source.date,
             blockNumber = null,
             logIndex = null,
@@ -195,7 +195,7 @@ class ElasticActivityConverter {
 
     private fun convertAuctionBid(source: AuctionBidActivityDto): ElasticActivity {
         return ElasticActivity(
-            activityId = source.id.value,
+            activityId = source.id.toString(),
             date = source.date,
             blockNumber = null,
             logIndex = null,
@@ -209,7 +209,7 @@ class ElasticActivityConverter {
 
     private fun convertAuctionFinish(source: AuctionFinishActivityDto): ElasticActivity {
         return ElasticActivity(
-            activityId = source.id.value,
+            activityId = source.id.toString(),
             date = source.date,
             blockNumber = null,
             logIndex = null,
@@ -223,7 +223,7 @@ class ElasticActivityConverter {
 
     private fun convertAuctionCancel(source: AuctionCancelActivityDto): ElasticActivity {
         return ElasticActivity(
-            activityId = source.id.value,
+            activityId = source.id.toString(),
             date = source.date,
             blockNumber = null,
             logIndex = null,
@@ -237,7 +237,7 @@ class ElasticActivityConverter {
 
     private fun convertAuctionStart(source: AuctionStartActivityDto): ElasticActivity {
         return ElasticActivity(
-            activityId = source.id.value,
+            activityId = source.id.toString(),
             date = source.date,
             blockNumber = null,
             logIndex = null,
@@ -251,7 +251,7 @@ class ElasticActivityConverter {
 
     private fun convertAuctionEnd(source: AuctionEndActivityDto): ElasticActivity {
         return ElasticActivity(
-            activityId = source.id.value,
+            activityId = source.id.toString(),
             date = source.date,
             blockNumber = null,
             logIndex = null,
