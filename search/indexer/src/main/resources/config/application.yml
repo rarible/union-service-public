@@ -31,3 +31,8 @@ rarible:
           enabled: false
       annotation:
         enabled: true
+
+listener:
+  consumer:
+    broker-replica-set: ${kafka.hosts}
+    worker-count: 4
