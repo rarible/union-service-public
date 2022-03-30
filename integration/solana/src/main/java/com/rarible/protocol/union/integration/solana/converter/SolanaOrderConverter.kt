@@ -42,8 +42,8 @@ class SolanaOrderConverter(
         order: com.rarible.protocol.solana.dto.OrderDto,
         blockchain: BlockchainDto
     ): OrderDto {
-        val make = SolanaConverter.convert(order.make)
-        val take = SolanaConverter.convert(order.take)
+        val make = SolanaConverter.convert(order.make, blockchain)
+        val take = SolanaConverter.convert(order.take, blockchain)
 
         // For BID (make = currency, take - NFT) we're calculating prices for taker
         val takePrice = evalTakePrice(make, take)
