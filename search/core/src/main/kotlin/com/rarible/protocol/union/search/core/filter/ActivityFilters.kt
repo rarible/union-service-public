@@ -4,6 +4,8 @@ import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import java.time.Instant
 
+sealed class ElasticActivityFilter
+
 /**
  * ALL conditions (that aren't null/empty) must be true to pass the filter
  */
@@ -21,8 +23,8 @@ data class ElasticActivityQueryGenericFilter(
     val takeItems: Set<String>,
     val from: Instant?,
     val to: Instant?,
-    val continuation: String?,
-)
+    val cursor: String?,
+) : ElasticActivityFilter()
 
 /**
  * ALL conditions (that aren't null/empty) must be true to pass the filter,
@@ -32,9 +34,9 @@ data class ElasticActivityQueryPerTypeFilter(
     val blockchains: Set<BlockchainDto>,
     val from: Instant?,
     val to: Instant?,
-    val continuation: String?,
+    val cursor: String?,
     val filters: Map<ActivityTypeDto, Filter>,
-) {
+) : ElasticActivityFilter() {
 
     data class Filter(
         val makers: Set<String>,
