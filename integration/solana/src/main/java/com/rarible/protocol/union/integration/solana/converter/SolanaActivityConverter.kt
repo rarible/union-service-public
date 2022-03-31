@@ -4,7 +4,9 @@ import com.rarible.protocol.solana.dto.ActivityFilterAllTypeDto
 import com.rarible.protocol.solana.dto.ActivityFilterByCollectionTypeDto
 import com.rarible.protocol.solana.dto.ActivityFilterByItemTypeDto
 import com.rarible.protocol.solana.dto.ActivityFilterByUserTypeDto
+import com.rarible.protocol.solana.dto.OrderMatchActivityDto
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
+import com.rarible.protocol.union.core.service.CurrencyService
 import com.rarible.protocol.union.dto.ActivityBlockchainInfoDto
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivityIdDto
@@ -13,17 +15,158 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.BurnActivityDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.MintActivityDto
+import com.rarible.protocol.union.dto.OrderActivityMatchSideDto
+import com.rarible.protocol.union.dto.OrderActivitySourceDto
+import com.rarible.protocol.union.dto.OrderBidActivityDto
+import com.rarible.protocol.union.dto.OrderCancelBidActivityDto
+import com.rarible.protocol.union.dto.OrderCancelListActivityDto
+import com.rarible.protocol.union.dto.OrderListActivityDto
+import com.rarible.protocol.union.dto.OrderMatchSellDto
+import com.rarible.protocol.union.dto.OrderMatchSwapDto
 import com.rarible.protocol.union.dto.TransferActivityDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
+import com.rarible.protocol.union.dto.ext
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
-class SolanaActivityConverter {
+class SolanaActivityConverter(
+    private val currencyService: CurrencyService
+) {
 
-    fun convert(source: com.rarible.protocol.solana.dto.ActivityDto, blockchain: BlockchainDto): ActivityDto {
+    private val logger = LoggerFactory.getLogger(javaClass)
+
+    suspend fun convert(source: com.rarible.protocol.solana.dto.ActivityDto, blockchain: BlockchainDto): ActivityDto {
         val activityId = ActivityIdDto(blockchain, source.id)
+        val activitySource = OrderActivitySourceDto.RARIBLE
         return when (source) {
+            is OrderMatchActivityDto -> {
+                val type = source.type
+
+                val nft = SolanaConverter.convert(source.nft, blockchain)
+                val payment = SolanaConverter.convert(source.payment, blockchain)
+
+                val nftTypeExt = nft.type.ext
+                val paymentTypeExt = payment.type.ext
+
+                val blockchainInfo = convert(source.blockchainInfo)
+
+                val seller = UnionAddressConverter.convert(blockchain, source.seller)
+                val buyer = UnionAddressConverter.convert(blockchain, source.buyer)
+
+                if (nftTypeExt.isNft && paymentTypeExt.isCurrency) {
+                    val priceUsd = currencyService.toUsd(blockchain, payment.type, source.price, source.date)
+                    OrderMatchSellDto(
+                        id = activityId,
+                        date = source.date,
+                        source = activitySource,
+                        transactionHash = blockchainInfo!!.transactionHash, // TODO must be not null
+                        nft = nft,
+                        payment = payment,
+                        seller = seller,
+                        buyer = buyer,
+                        sellerOrderHash = source.sellerOrderHash,
+                        buyerOrderHash = source.buyerOrderHash,
+                        price = source.price,
+                        priceUsd = priceUsd,
+                        amountUsd = priceUsd?.multiply(nft.value),
+                        type = convert(type),
+                        reverted = source.reverted,
+                        // TODO UNION remove in 1.19
+                        blockchainInfo = blockchainInfo,
+                    )
+                } else {
+                    if (paymentTypeExt.isNft || nftTypeExt.isCurrency) {
+                        logger.warn(
+                            "Incorrect SOLANA OrderMatch activity, nft and payment are mixed up: {}",
+                            source
+                        )
+                    }
+                    // Originally we should NOT receive such events
+                    val sellSide = OrderActivityMatchSideDto(seller, source.sellerOrderHash, nft)
+                    val buySide = OrderActivityMatchSideDto(buyer, source.buyerOrderHash, payment)
+
+                    OrderMatchSwapDto(
+                        id = activityId,
+                        date = source.date,
+                        source = activitySource,
+                        transactionHash = source.blockchainInfo!!.transactionHash,
+                        left = if (type == OrderMatchActivityDto.Type.SELL) sellSide else buySide,
+                        right = if (type == OrderMatchActivityDto.Type.ACCEPT_BID) sellSide else buySide,
+                        reverted = source.reverted,
+                        // TODO UNION remove in 1.19
+                        blockchainInfo = blockchainInfo
+                    )
+                }
+            }
+            is com.rarible.protocol.solana.dto.OrderBidActivityDto -> {
+                val payment = SolanaConverter.convert(source.make, blockchain)
+                val nft = SolanaConverter.convert(source.take, blockchain)
+                val priceUsd = currencyService.toUsd(blockchain, payment.type, source.price, source.date)
+
+                OrderBidActivityDto(
+                    id = activityId,
+                    date = source.date,
+                    price = source.price,
+                    priceUsd = priceUsd,
+                    source = activitySource,
+                    hash = source.hash,
+                    maker = UnionAddressConverter.convert(blockchain, source.maker),
+                    make = payment,
+                    take = nft,
+                    reverted = source.reverted
+                )
+            }
+            is com.rarible.protocol.solana.dto.OrderListActivityDto -> {
+                val payment = SolanaConverter.convert(source.take, blockchain)
+                val nft = SolanaConverter.convert(source.make, blockchain)
+                val priceUsd = currencyService.toUsd(blockchain, payment.type, source.price, source.date)
+
+                OrderListActivityDto(
+                    id = activityId,
+                    date = source.date,
+                    price = source.price,
+                    priceUsd = priceUsd,
+                    source = activitySource,
+                    hash = source.hash,
+                    maker = UnionAddressConverter.convert(blockchain, source.maker),
+                    make = nft,
+                    take = payment,
+                    reverted = source.reverted
+                )
+            }
+            is com.rarible.protocol.solana.dto.OrderCancelBidActivityDto -> {
+                OrderCancelBidActivityDto(
+                    id = activityId,
+                    date = source.date,
+                    source = activitySource,
+                    hash = source.hash,
+                    maker = UnionAddressConverter.convert(blockchain, source.maker),
+                    make = SolanaConverter.convert(source.make, blockchain),
+                    take = SolanaConverter.convert(source.take, blockchain),
+                    transactionHash = source.blockchainInfo.transactionHash,
+                    reverted = source.reverted,
+                    // TODO UNION remove in 1.19
+                    blockchainInfo = convert(source.blockchainInfo),
+                )
+            }
+            is com.rarible.protocol.solana.dto.OrderCancelListActivityDto -> {
+                OrderCancelListActivityDto(
+                    id = activityId,
+                    date = source.date,
+                    source = activitySource,
+                    hash = source.hash,
+                    maker = UnionAddressConverter.convert(blockchain, source.maker),
+                    make = SolanaConverter.convert(source.make, blockchain),
+                    take = SolanaConverter.convert(source.take, blockchain),
+                    transactionHash = source.blockchainInfo.transactionHash,
+                    reverted = source.reverted,
+                    // TODO UNION remove in 1.19
+                    blockchainInfo = convert(source.blockchainInfo),
+                )
+            }
             is com.rarible.protocol.solana.dto.MintActivityDto -> {
+
                 MintActivityDto(
                     id = activityId,
                     date = source.date,
@@ -137,5 +280,11 @@ class SolanaActivityConverter {
             logIndex = source.transactionIndex
         )
     }
+
+    private fun convert(source: OrderMatchActivityDto.Type) =
+        when (source) {
+            OrderMatchActivityDto.Type.SELL -> OrderMatchSellDto.Type.SELL
+            OrderMatchActivityDto.Type.ACCEPT_BID -> OrderMatchSellDto.Type.ACCEPT_BID
+        }
 
 }
