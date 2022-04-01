@@ -1,12 +1,20 @@
 package com.rarible.protocol.union.api.service.elastic
 
+import io.mockk.impl.annotations.InjectMockKs
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 
-
+@ExtendWith(MockKExtension::class)
 class ActivityElasticServiceTest {
 
-    private val service = ActivityElasticService()
+    @MockK
+    private lateinit var activityFilterConverter: ActivityFilterConverter
+
+    @InjectMockKs
+    private lateinit var service: ActivityElasticService
 
     @Nested
     inner class GetAllActivitiesTest {
