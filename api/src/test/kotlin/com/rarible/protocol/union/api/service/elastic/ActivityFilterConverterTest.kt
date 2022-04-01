@@ -30,22 +30,7 @@ class ActivityFilterConverterTest {
     @InjectMockKs
     private lateinit var converter: ActivityFilterConverter
 
-    private val emptyGenericFilter = ElasticActivityQueryGenericFilter(
-        blockchains = emptySet(),
-        activityTypes = emptySet(),
-        anyUsers = emptySet(),
-        makers = emptySet(),
-        takers = emptySet(),
-        anyCollections = emptySet(),
-        makeCollections = emptySet(),
-        takeCollections = emptySet(),
-        anyItems = emptySet(),
-        makeItems = emptySet(),
-        takeItems = emptySet(),
-        from = null,
-        to = null,
-        cursor = null,
-    )
+    private val emptyGenericFilter = ElasticActivityQueryGenericFilter()
 
     @Nested
     inner class ConvertGetAllActivitiesTest {

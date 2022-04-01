@@ -27,17 +27,6 @@ class ActivityFilterConverter(
             else -> ElasticActivityQueryGenericFilter(
                 blockchains = blockchains?.toSet().orEmpty(),
                 activityTypes = type.toSet(),
-                anyUsers = emptySet(),
-                makers = emptySet(),
-                takers = emptySet(),
-                anyCollections = emptySet(),
-                makeCollections = emptySet(),
-                takeCollections = emptySet(),
-                anyItems = emptySet(),
-                makeItems = emptySet(),
-                takeItems = emptySet(),
-                from = null,
-                to = null,
                 cursor = cursor,
             )
         }
@@ -54,17 +43,7 @@ class ActivityFilterConverter(
             else -> ElasticActivityQueryGenericFilter(
                 blockchains = setOf(collectionId.blockchain),
                 activityTypes = type.toSet(),
-                anyUsers = emptySet(),
-                makers = emptySet(),
-                takers = emptySet(),
                 anyCollections = setOf(collectionId.value),
-                makeCollections = emptySet(),
-                takeCollections = emptySet(),
-                anyItems = emptySet(),
-                makeItems = emptySet(),
-                takeItems = emptySet(),
-                from = null,
-                to = null,
                 cursor = cursor,
             )
         }
@@ -81,17 +60,7 @@ class ActivityFilterConverter(
             else -> ElasticActivityQueryGenericFilter(
                 blockchains = setOf(fullItemId.blockchain),
                 activityTypes = type.toSet(),
-                anyUsers = emptySet(),
-                makers = emptySet(),
-                takers = emptySet(),
-                anyCollections = emptySet(),
-                makeCollections = emptySet(),
-                takeCollections = emptySet(),
                 anyItems = setOf(fullItemId.value),
-                makeItems = emptySet(),
-                takeItems = emptySet(),
-                from = null,
-                to = null,
                 cursor = cursor,
             )
         }
@@ -111,14 +80,6 @@ class ActivityFilterConverter(
                 blockchains = blockchains?.toSet().orEmpty(),
                 activityTypes = type.map { userActivityTypeConverter.convert(it).activityTypeDto }.toSet(), // isMaker is ignored for now
                 anyUsers = user.toSet(),
-                makers = emptySet(),
-                takers = emptySet(),
-                anyCollections = emptySet(),
-                makeCollections = emptySet(),
-                takeCollections = emptySet(),
-                anyItems = emptySet(),
-                makeItems = emptySet(),
-                takeItems = emptySet(),
                 from = from,
                 to = to,
                 cursor = cursor,
