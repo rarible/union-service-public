@@ -55,6 +55,7 @@ meta:
     thread-count: 1
     time-out: 10000
     total-connection: 1000
+    reset-on-error: true
 
 integration:
   ethereum:
