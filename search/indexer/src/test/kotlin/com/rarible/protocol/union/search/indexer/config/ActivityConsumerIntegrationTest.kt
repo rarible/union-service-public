@@ -29,9 +29,6 @@ import org.springframework.data.elasticsearch.repository.config.EnableReactiveEl
 import java.time.Instant
 
 @IntegrationTest
-@EnableReactiveElasticsearchRepositories(basePackages = [
-    "com.rarible.protocol.union.search"
-])
 class ActivityConsumerIntegrationTest {
 
     @Autowired
