@@ -1,7 +1,6 @@
 package com.rarible.protocol.union.enrichment.service
 
 import com.mongodb.client.result.DeleteResult
-import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.apm.SpanType
 import com.rarible.core.apm.withSpan
 import com.rarible.core.common.nowMillis
@@ -35,7 +34,6 @@ import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClientResponseException
 
 @Component
-@CaptureSpan(type = SpanType.APP)
 class EnrichmentItemService(
     private val itemServiceRouter: BlockchainRouter<ItemService>,
     private val itemRepository: ItemRepository,
@@ -114,21 +112,17 @@ class EnrichmentItemService(
         loadMetaSynchronously: Boolean = false
     ) = coroutineScope {
 
-    require(shortItem != null || item != null)
+        require(shortItem != null || item != null)
         val itemId = shortItem?.id?.toDto() ?: item!!.id
-        val fetchedItem = withSpanAsync("fetchItem", spanType = SpanType.EXT) {
-            item ?: fetch(ShortItemId(itemId))
-        }
-        val bestSellOrder = withSpanAsync("fetchBestSellOrder", spanType = SpanType.EXT) {
-            enrichmentOrderService.fetchOrderIfDiffers(shortItem?.bestSellOrder, orders)
-        }
-        val bestBidOrder = withSpanAsync("fetchBestBidOrder", spanType = SpanType.EXT) {
-            enrichmentOrderService.fetchOrderIfDiffers(shortItem?.bestBidOrder, orders)
-        }
+
+        val fetchedItem = async { item ?: fetch(ShortItemId(itemId)) }
+        val bestSellOrder = async { enrichmentOrderService.fetchOrderIfDiffers(shortItem?.bestSellOrder, orders) }
+        val bestBidOrder = async { enrichmentOrderService.fetchOrderIfDiffers(shortItem?.bestBidOrder, orders) }
+
         val meta = if (item?.meta?.content?.any { it.properties?.mimeType != null } == true) {
             CompletableDeferred(item.meta)
         } else {
-            withSpanAsync("fetchMeta", spanType = SpanType.CACHE) {
+            async {
                 if (loadMetaSynchronously || item?.loadMetaSynchronously == true) {
                     unionMetaService.getAvailableMetaOrLoadSynchronously(itemId, synchronous = true)
                 } else {
@@ -143,9 +137,7 @@ class EnrichmentItemService(
 
         val auctionIds = shortItem?.auctions ?: emptySet()
 
-        val auctionsData = withSpanAsync("fetchAuction", spanType = SpanType.EXT) {
-            enrichmentAuctionService.fetchAuctionsIfAbsent(auctionIds, auctions)
-        }
+        val auctionsData = async { enrichmentAuctionService.fetchAuctionsIfAbsent(auctionIds, auctions) }
 
         val itemDto = EnrichedItemConverter.convert(
             item = fetchedItem.await(),

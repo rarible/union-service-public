@@ -90,7 +90,7 @@ class SolanaActivityConverter(
                         id = activityId,
                         date = source.date,
                         source = activitySource,
-                        transactionHash = source.blockchainInfo!!.transactionHash,
+                        transactionHash = source.blockchainInfo.transactionHash,
                         left = if (type == OrderMatchActivityDto.Type.SELL) sellSide else buySide,
                         right = if (type == OrderMatchActivityDto.Type.ACCEPT_BID) sellSide else buySide,
                         reverted = source.reverted,

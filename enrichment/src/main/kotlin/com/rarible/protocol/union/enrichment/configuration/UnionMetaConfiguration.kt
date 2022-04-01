@@ -1,10 +1,6 @@
 package com.rarible.protocol.union.enrichment.configuration
 
-import com.rarible.core.content.meta.loader.ContentMetaReceiver
-import com.rarible.core.content.meta.loader.ContentReceiver
-import com.rarible.core.content.meta.loader.ContentReceiverMetrics
-import com.rarible.core.content.meta.loader.KtorApacheClientContentReceiver
-import com.rarible.core.content.meta.loader.KtorCioClientContentReceiver
+import com.rarible.core.content.meta.loader.*
 import com.rarible.loader.cache.CacheLoaderService
 import com.rarible.loader.cache.configuration.EnableRaribleCacheLoader
 import com.rarible.protocol.union.core.model.UnionMeta
@@ -28,20 +24,23 @@ class UnionMetaConfiguration {
     @Bean
     fun contentReceiver(
         unionMetaProperties: UnionMetaProperties
-    ): ContentReceiver = when (unionMetaProperties.httpClient.type) {
-        UnionMetaProperties.HttpClient.HttpClientType.KTOR_APACHE ->
-            KtorApacheClientContentReceiver(
-                timeout = unionMetaProperties.httpClient.timeOut,
-                threadsCount = unionMetaProperties.httpClient.threadCount,
-                totalConnection = unionMetaProperties.httpClient.totalConnection
-            )
+    ): ContentReceiver {
+        return when (unionMetaProperties.httpClient.type) {
+            UnionMetaProperties.HttpClient.HttpClientType.KTOR_APACHE ->
+                KtorApacheClientContentReceiver(
+                    timeout = unionMetaProperties.httpClient.timeOut,
+                    threadsCount = unionMetaProperties.httpClient.threadCount,
+                    totalConnection = unionMetaProperties.httpClient.totalConnection,
+                    keepAlive = unionMetaProperties.httpClient.keepAlive
+                )
 
-        UnionMetaProperties.HttpClient.HttpClientType.KTOR_CIO ->
-            KtorCioClientContentReceiver(
-                timeout = unionMetaProperties.httpClient.timeOut,
-                threadsCount = unionMetaProperties.httpClient.threadCount,
-                totalConnection = unionMetaProperties.httpClient.totalConnection
-            )
+            UnionMetaProperties.HttpClient.HttpClientType.KTOR_CIO ->
+                KtorCioClientContentReceiver(
+                    timeout = unionMetaProperties.httpClient.timeOut,
+                    threadsCount = unionMetaProperties.httpClient.threadCount,
+                    totalConnection = unionMetaProperties.httpClient.totalConnection
+                )
+        }
     }
 
     @Bean
@@ -50,7 +49,7 @@ class UnionMetaConfiguration {
         unionMetaProperties: UnionMetaProperties,
         meterRegistry: MeterRegistry
     ): ContentMetaReceiver = ContentMetaReceiver(
-        contentReceiver = contentReceiver,
+        contentReceiver = MeasurableContentReceiver(contentReceiver, meterRegistry),
         maxBytes = unionMetaProperties.mediaFetchMaxSize.toInt(),
         contentReceiverMetrics = ContentReceiverMetrics(meterRegistry)
     )
