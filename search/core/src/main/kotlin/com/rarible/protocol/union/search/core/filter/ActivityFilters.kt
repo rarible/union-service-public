@@ -4,25 +4,27 @@ import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import java.time.Instant
 
+sealed class ElasticActivityFilter
+
 /**
  * ALL conditions (that aren't null/empty) must be true to pass the filter
  */
 data class ElasticActivityQueryGenericFilter(
-    val blockchains: Set<BlockchainDto>,
-    val activityTypes: Set<ActivityTypeDto>,
-    val anyUsers: Set<String>,
-    val makers: Set<String>,
-    val takers: Set<String>,
-    val anyCollections: Set<String>,
-    val makeCollections: Set<String>,
-    val takeCollections: Set<String>,
-    val anyItems: Set<String>,
-    val makeItems: Set<String>,
-    val takeItems: Set<String>,
-    val from: Instant?,
-    val to: Instant?,
-    val continuation: String?,
-)
+    val blockchains: Set<BlockchainDto> = emptySet(),
+    val activityTypes: Set<ActivityTypeDto> = emptySet(),
+    val anyUsers: Set<String> = emptySet(),
+    val makers: Set<String> = emptySet(),
+    val takers: Set<String> = emptySet(),
+    val anyCollections: Set<String> = emptySet(),
+    val makeCollections: Set<String> = emptySet(),
+    val takeCollections: Set<String> = emptySet(),
+    val anyItems: Set<String> = emptySet(),
+    val makeItems: Set<String> = emptySet(),
+    val takeItems: Set<String> = emptySet(),
+    val from: Instant? = null,
+    val to: Instant? = null,
+    val cursor: String? = null,
+) : ElasticActivityFilter()
 
 /**
  * ALL conditions (that aren't null/empty) must be true to pass the filter,
@@ -32,9 +34,9 @@ data class ElasticActivityQueryPerTypeFilter(
     val blockchains: Set<BlockchainDto>,
     val from: Instant?,
     val to: Instant?,
-    val continuation: String?,
+    val cursor: String?,
     val filters: Map<ActivityTypeDto, Filter>,
-) {
+) : ElasticActivityFilter() {
 
     data class Filter(
         val makers: Set<String>,

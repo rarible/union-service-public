@@ -10,7 +10,9 @@ import org.springframework.stereotype.Service
 import java.time.Instant
 
 @Service
-class ActivityElasticService : ActivityQueryService {
+class ActivityElasticService(
+    private val filterConverter: ActivityFilterConverter
+) : ActivityQueryService {
 
     override suspend fun getAllActivities(
         type: List<ActivityTypeDto>,
@@ -20,6 +22,8 @@ class ActivityElasticService : ActivityQueryService {
         size: Int?,
         sort: ActivitySortDto?
     ): ActivitiesDto {
+        val effectiveCursor = cursor ?: continuation
+        val filter = filterConverter.convertGetAllActivities(type, blockchains, effectiveCursor)
         TODO("To be implemented under ALPHA-276 Epic")
     }
 
@@ -31,6 +35,8 @@ class ActivityElasticService : ActivityQueryService {
         size: Int?,
         sort: ActivitySortDto?
     ): ActivitiesDto {
+        val effectiveCursor = cursor ?: continuation
+        val filter = filterConverter.convertGetActivitiesByCollection(type, collection, effectiveCursor)
         TODO("To be implemented under ALPHA-276 Epic")
     }
 
@@ -42,6 +48,8 @@ class ActivityElasticService : ActivityQueryService {
         size: Int?,
         sort: ActivitySortDto?
     ): ActivitiesDto {
+        val effectiveCursor = cursor ?: continuation
+        val filter = filterConverter.convertGetActivitiesByItem(type, itemId, effectiveCursor)
         TODO("To be implemented under ALPHA-276 Epic")
     }
 
@@ -56,6 +64,8 @@ class ActivityElasticService : ActivityQueryService {
         size: Int?,
         sort: ActivitySortDto?
     ): ActivitiesDto {
+        val effectiveCursor = cursor ?: continuation
+        val filter = filterConverter.convertGetActivitiesByUser(type, user, blockchains, from, to, effectiveCursor)
         TODO("To be implemented under ALPHA-276 Epic")
     }
 }
