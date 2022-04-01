@@ -48,11 +48,15 @@ class UnionMetaConfiguration {
         contentReceiver: ContentReceiver,
         unionMetaProperties: UnionMetaProperties,
         meterRegistry: MeterRegistry
-    ): ContentMetaReceiver = ContentMetaReceiver(
-        contentReceiver = MeasurableContentReceiver(contentReceiver, meterRegistry),
-        maxBytes = unionMetaProperties.mediaFetchMaxSize.toInt(),
-        contentReceiverMetrics = ContentReceiverMetrics(meterRegistry)
-    )
+    ): ContentMetaReceiver {
+        val measurableContentReceiver = MeasurableContentReceiver(contentReceiver, meterRegistry)
+        return ContentMetaReceiver(
+            contentReceiver = if (unionMetaProperties.httpClient.resetOnError)
+                ResetableContentReceiver(measurableContentReceiver) else measurableContentReceiver,
+            maxBytes = unionMetaProperties.mediaFetchMaxSize.toInt(),
+            contentReceiverMetrics = ContentReceiverMetrics(meterRegistry)
+        )
+    }
 
     @Bean
     @Qualifier("union.meta.cache.loader.service")

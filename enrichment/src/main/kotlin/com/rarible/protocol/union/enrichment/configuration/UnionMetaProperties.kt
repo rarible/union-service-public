@@ -16,7 +16,8 @@ data class UnionMetaProperties(
         val threadCount: Int = 8,
         val timeOut: Int = 5000,
         val totalConnection: Int = 500,
-        val keepAlive: Boolean = true
+        val keepAlive: Boolean = true,
+        val resetOnError: Boolean = false
     ) {
         enum class HttpClientType {
             KTOR_APACHE,
