@@ -16,17 +16,20 @@ import com.rarible.protocol.union.dto.continuation.page.Paging
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.meta.UnionMetaService
-import kotlinx.coroutines.flow.collect
+import com.rarible.protocol.union.enrichment.model.ShortCollectionId
+import com.rarible.protocol.union.enrichment.service.EnrichmentCollectionService
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.RestController
+import kotlinx.coroutines.flow.collect
 
 @RestController
 class CollectionController(
     private val router: BlockchainRouter<CollectionService>,
     private val apiService: CollectionApiService,
     private val itemApiService: ItemApiService,
-    private val unionMetaService: UnionMetaService
+    private val unionMetaService: UnionMetaService,
+    private val enrichmentCollectionService: EnrichmentCollectionService
 ) : CollectionControllerApi {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -53,9 +56,12 @@ class CollectionController(
     override suspend fun getCollectionById(
         collection: String
     ): ResponseEntity<CollectionDto> {
-        val collectionId = IdParser.parseCollectionId(collection)
-        val result = router.getService(collectionId.blockchain).getCollectionById(collectionId.value)
-        return ResponseEntity.ok(result)
+        val fullCollectionId = IdParser.parseCollectionId(collection)
+        val shortCollectionId = ShortCollectionId(fullCollectionId)
+        val collectionDto = router.getService(fullCollectionId.blockchain).getCollectionById(fullCollectionId.value)
+        val shortCollection = enrichmentCollectionService.get(shortCollectionId)
+        val enrichedCollection = enrichmentCollectionService.enrichCollection(shortCollection, collectionDto)
+        return ResponseEntity.ok(enrichedCollection)
     }
 
     override suspend fun refreshCollectionMeta(collection: String): ResponseEntity<Unit> {
