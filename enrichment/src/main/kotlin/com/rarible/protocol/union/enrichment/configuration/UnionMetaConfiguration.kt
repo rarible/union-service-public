@@ -40,6 +40,13 @@ class UnionMetaConfiguration {
                     threadsCount = unionMetaProperties.httpClient.threadCount,
                     totalConnection = unionMetaProperties.httpClient.totalConnection
                 )
+
+            UnionMetaProperties.HttpClient.HttpClientType.ASYNC_APACHE ->
+                ApacheHttpContentReceiver(
+                    timeout = unionMetaProperties.httpClient.timeOut,
+                    connectionsPerRoute = unionMetaProperties.httpClient.connectionsPerRoute,
+                    keepAlive = unionMetaProperties.httpClient.keepAlive
+                )
         }
     }
 
@@ -49,10 +56,8 @@ class UnionMetaConfiguration {
         unionMetaProperties: UnionMetaProperties,
         meterRegistry: MeterRegistry
     ): ContentMetaReceiver {
-        val measurableContentReceiver = MeasurableContentReceiver(contentReceiver, meterRegistry)
         return ContentMetaReceiver(
-            contentReceiver = if (unionMetaProperties.httpClient.resetOnError)
-                ResetableContentReceiver(measurableContentReceiver) else measurableContentReceiver,
+            contentReceiver = MeasurableContentReceiver(contentReceiver, meterRegistry),
             maxBytes = unionMetaProperties.mediaFetchMaxSize.toInt(),
             contentReceiverMetrics = ContentReceiverMetrics(meterRegistry)
         )
