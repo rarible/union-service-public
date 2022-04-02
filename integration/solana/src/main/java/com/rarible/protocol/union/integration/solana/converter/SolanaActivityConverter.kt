@@ -220,7 +220,12 @@ class SolanaActivityConverter(
             ActivityTypeDto.SELL -> ActivityFilterAllTypeDto.SELL
             ActivityTypeDto.CANCEL_LIST -> ActivityFilterAllTypeDto.CANCEL_LIST
             ActivityTypeDto.CANCEL_BID -> ActivityFilterAllTypeDto.CANCEL_BID
-            else -> null
+            ActivityTypeDto.AUCTION_BID -> null
+            ActivityTypeDto.AUCTION_CREATED -> null
+            ActivityTypeDto.AUCTION_CANCEL -> null
+            ActivityTypeDto.AUCTION_FINISHED -> null
+            ActivityTypeDto.AUCTION_STARTED -> null
+            ActivityTypeDto.AUCTION_ENDED -> null
         }
     }
 
@@ -234,7 +239,12 @@ class SolanaActivityConverter(
             ActivityTypeDto.SELL -> ActivityFilterByCollectionTypeDto.SELL
             ActivityTypeDto.CANCEL_LIST -> ActivityFilterByCollectionTypeDto.CANCEL_LIST
             ActivityTypeDto.CANCEL_BID -> ActivityFilterByCollectionTypeDto.CANCEL_BID
-            else -> null
+            ActivityTypeDto.AUCTION_BID -> null
+            ActivityTypeDto.AUCTION_CREATED -> null
+            ActivityTypeDto.AUCTION_CANCEL -> null
+            ActivityTypeDto.AUCTION_FINISHED -> null
+            ActivityTypeDto.AUCTION_STARTED -> null
+            ActivityTypeDto.AUCTION_ENDED -> null
         }
     }
 
@@ -248,7 +258,12 @@ class SolanaActivityConverter(
             ActivityTypeDto.SELL -> ActivityFilterByItemTypeDto.SELL
             ActivityTypeDto.CANCEL_LIST -> ActivityFilterByItemTypeDto.CANCEL_LIST
             ActivityTypeDto.CANCEL_BID -> ActivityFilterByItemTypeDto.CANCEL_BID
-            else -> null
+            ActivityTypeDto.AUCTION_BID -> null
+            ActivityTypeDto.AUCTION_CREATED -> null
+            ActivityTypeDto.AUCTION_CANCEL -> null
+            ActivityTypeDto.AUCTION_FINISHED -> null
+            ActivityTypeDto.AUCTION_STARTED -> null
+            ActivityTypeDto.AUCTION_ENDED -> null
         }
     }
 
@@ -265,7 +280,12 @@ class SolanaActivityConverter(
             UserActivityTypeDto.SELL -> ActivityFilterByUserTypeDto.SELL
             UserActivityTypeDto.CANCEL_LIST -> ActivityFilterByUserTypeDto.CANCEL_LIST
             UserActivityTypeDto.CANCEL_BID -> ActivityFilterByUserTypeDto.CANCEL_BID
-            else -> null
+            UserActivityTypeDto.AUCTION_BID -> null
+            UserActivityTypeDto.AUCTION_CREATED -> null
+            UserActivityTypeDto.AUCTION_CANCEL -> null
+            UserActivityTypeDto.AUCTION_FINISHED -> null
+            UserActivityTypeDto.AUCTION_STARTED -> null
+            UserActivityTypeDto.AUCTION_ENDED -> null
         }
     }
 
