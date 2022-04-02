@@ -40,6 +40,13 @@ class UnionMetaConfiguration {
                     threadsCount = unionMetaProperties.httpClient.threadCount,
                     totalConnection = unionMetaProperties.httpClient.totalConnection
                 )
+
+            UnionMetaProperties.HttpClient.HttpClientType.ASYNC_APACHE ->
+                ApacheHttpContentReceiver(
+                    timeout = unionMetaProperties.httpClient.timeOut,
+                    connectionsPerRoute = unionMetaProperties.httpClient.connectionsPerRoute,
+                    keepAlive = unionMetaProperties.httpClient.keepAlive
+                )
         }
     }
 
@@ -48,11 +55,13 @@ class UnionMetaConfiguration {
         contentReceiver: ContentReceiver,
         unionMetaProperties: UnionMetaProperties,
         meterRegistry: MeterRegistry
-    ): ContentMetaReceiver = ContentMetaReceiver(
-        contentReceiver = MeasurableContentReceiver(contentReceiver, meterRegistry),
-        maxBytes = unionMetaProperties.mediaFetchMaxSize.toInt(),
-        contentReceiverMetrics = ContentReceiverMetrics(meterRegistry)
-    )
+    ): ContentMetaReceiver {
+        return ContentMetaReceiver(
+            contentReceiver = MeasurableContentReceiver(contentReceiver, meterRegistry),
+            maxBytes = unionMetaProperties.mediaFetchMaxSize.toInt(),
+            contentReceiverMetrics = ContentReceiverMetrics(meterRegistry)
+        )
+    }
 
     @Bean
     @Qualifier("union.meta.cache.loader.service")

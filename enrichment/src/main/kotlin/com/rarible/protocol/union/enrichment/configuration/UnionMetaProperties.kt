@@ -16,11 +16,13 @@ data class UnionMetaProperties(
         val threadCount: Int = 8,
         val timeOut: Int = 5000,
         val totalConnection: Int = 500,
+        val connectionsPerRoute: Int = 20,
         val keepAlive: Boolean = true
     ) {
         enum class HttpClientType {
             KTOR_APACHE,
-            KTOR_CIO
+            KTOR_CIO,
+            ASYNC_APACHE
         }
     }
 }
