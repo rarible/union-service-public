@@ -86,4 +86,14 @@ class ImmutablexApiConfiguration {
         orderService: ImmutablexOrderService
     ) = ImmutablexActivityEventHandler(handler, ImmutablexEventConverter(orderService))
 
+
+    @Bean
+    fun immutablexActivityConverter(): ImmutablexActivityConverter = ImmutablexActivityConverter()
+
+    @Bean
+    fun immutablesActivityService(
+        client: ImmutablexApiClient,
+        converter: ImmutablexActivityConverter,
+    ): ImmutablexActivityService = ImmutablexActivityService(client, converter)
+
 }

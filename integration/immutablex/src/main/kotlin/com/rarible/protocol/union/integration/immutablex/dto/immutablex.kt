@@ -15,6 +15,7 @@ import org.apache.kafka.common.serialization.Deserializer
 import org.apache.kafka.common.serialization.Serde
 import org.apache.kafka.common.serialization.Serializer
 import java.math.BigDecimal
+import java.math.BigInteger
 import java.time.Instant
 
 
@@ -85,7 +86,6 @@ data class ImmutablexMint(
     @JsonProperty("transaction_id")
     override val transactionId: Long,
     val token: Token,
-    val user: String,
     override val timestamp: Instant,
     val fees: List<ImmutablexFee>?
 ): ImmutablexEvent(transactionId, timestamp)
@@ -102,10 +102,34 @@ data class TokenData(
     val quantity: String?,
 )
 
-data class ImmutablexMintsPage(
+data class ImmutablexTransfersPage(
     val cursor: String,
     val remaining: Boolean,
-    val result: List<ImmutablexMint>
+    val result: List<ImmutablexTransfer>,
+)
+
+data class ImmutablexTradeAsset(
+    val orderId: Long,
+    @JsonProperty("token_type")
+    val tokenType: String,
+    @JsonProperty("token_id")
+    val tokenId: String?,
+    @JsonProperty("token_address")
+    val tokenAddress: String?,
+    val sold: BigInteger,
+)
+
+
+data class ImmutablexDepositsPage(
+    val cursor: String,
+    val remaining: Boolean,
+    val result: List<ImmutablexDeposit>,
+)
+
+data class ImmutablexWithdrawalPage(
+    val cursor: String,
+    val remaining: Boolean,
+    val result: List<ImmutablexWithdrawal>
 )
 
 data class ImmutablexOrder(
@@ -124,7 +148,7 @@ data class ImmutablexOrder(
     @JsonProperty("updated_timestamp")
     val updatedAt: Instant?,
     @JsonProperty("user")
-    val creator: String
+    val creator: String,
 )
 
 data class ImmutablexOrderSide(

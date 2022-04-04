@@ -1,0 +1,16 @@
+{
+  "transaction_id": 3439400,
+  "status": "success",
+  "user": "0x524886d3a494ec79bf02f97082a2ea68e878f9e0",
+  "token": {
+    "type": "ETH",
+    "data": {
+      "token_id": "",
+      "id": "",
+      "token_address": "",
+      "decimals": 18,
+      "quantity": "1000000000000000000"
+    }
+  },
+  "timestamp": "2022-03-14T08:32:05.674785Z"
+}
