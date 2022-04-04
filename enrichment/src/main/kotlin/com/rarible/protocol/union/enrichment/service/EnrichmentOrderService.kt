@@ -10,6 +10,7 @@ import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.dto.ext
+import com.rarible.protocol.union.enrichment.model.ShortCollectionId
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortOrder
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
@@ -71,7 +72,7 @@ class EnrichmentOrderService(
 
     suspend fun getBestSell(id: ShortOwnershipId, currencyId: String): OrderDto? {
         val now = nowMillis()
-        val result = withPreferredRariblePlatform(id) { platform, continuation, size ->
+        val result = withPreferredRariblePlatform(id, OrderFilters.ITEM) { platform, continuation, size ->
             orderServiceRouter.getService(id.blockchain).getSellOrdersByItem(
                 platform,
                 id.toDto().itemIdValue,
@@ -90,6 +91,26 @@ class EnrichmentOrderService(
         return result
     }
 
+    suspend fun getBestSell(collectionId: ShortCollectionId, currencyId: String): OrderDto? {
+        val now = nowMillis()
+        val result = withPreferredRariblePlatform(collectionId, OrderFilters.COLLECTION) { platform, continuation, size ->
+            orderServiceRouter.getService(collectionId.blockchain).getSellOrdersByCollection(
+                platform,
+                collectionId.toDto().value,
+                null,
+                listOf(OrderStatusDto.ACTIVE),
+                currencyId,
+                continuation,
+                size
+            )
+        }
+        logger.info(
+            "Fetched best sell Order for Item [{}]: [{}], status = {} ({}ms)",
+            collectionId.toDto().fullId(), result?.id, result?.status, spent(now)
+        )
+        return result
+    }
+
     suspend fun getBestBid(id: ShortItemId, currencyId: String): OrderDto? {
         val now = nowMillis()
         val result = withPreferredRariblePlatform(id, OrderFilters.ITEM) { platform, continuation, size ->
@@ -97,6 +118,28 @@ class EnrichmentOrderService(
                 platform,
                 id.toDto().value,
                 null,
+                null,
+                listOf(OrderStatusDto.ACTIVE),
+                null,
+                null,
+                currencyId,
+                continuation,
+                size
+            )
+        }
+        logger.info(
+            "Fetching best bid Order for Item [{}]: [{}], status = {} ({}ms)",
+            id.toDto().fullId(), result?.id, result?.status, spent(now)
+        )
+        return result
+    }
+
+    suspend fun getBestBid(id: ShortCollectionId, currencyId: String): OrderDto? {
+        val now = nowMillis()
+        val result = withPreferredRariblePlatform(id, OrderFilters.COLLECTION) { platform, continuation, size ->
+            orderServiceRouter.getService(id.blockchain).getOrderBidsByCollection(
+                platform,
+                id.toDto().value,
                 null,
                 listOf(OrderStatusDto.ACTIVE),
                 null,
