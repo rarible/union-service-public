@@ -131,8 +131,6 @@ open class TezosOrderService(
         collectionId: String,
         origin: String?,
         status: List<OrderStatusDto>?,
-        start: Long?,
-        end: Long?,
         currencyAddress: String,
         continuation: String?,
         size: Int

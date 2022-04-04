@@ -115,8 +115,6 @@ class OrderProxyService(
         collectionId: String,
         origin: String?,
         status: List<OrderStatusDto>?,
-        start: Long?,
-        end: Long?,
         currencyAddress: String,
         continuation: String?,
         size: Int
@@ -127,8 +125,6 @@ class OrderProxyService(
             collectionId,
             origin,
             status,
-            start,
-            end,
             currencyAddress,
             continuation,
             size
