@@ -10,15 +10,15 @@ import java.time.Clock
 import java.time.Instant
 
 @Component
-class OwnershipDelayMeterOutgoingItemEventListener<T>(
-    private val clock: Clock,
+class OwnershipDelayMeterOutgoingItemEventListener(
+    clock: Clock,
     ownershipCompositeRegisteredTimer: CompositeRegisteredTimer,
 ) : EntityDelayMeterOutgoingItemEventListener<OwnershipEventDto>(clock, ownershipCompositeRegisteredTimer) {
 
-    override fun extractLastUpdateAt(event: OwnershipEventDto): Instant {
+    override fun extractLastUpdateAt(event: OwnershipEventDto): Instant? {
         return when (event) {
             is OwnershipUpdateEventDto -> event.ownership.createdAt
-            is OwnershipDeleteEventDto -> clock.instant()
+            is OwnershipDeleteEventDto -> null
         }
     }
 

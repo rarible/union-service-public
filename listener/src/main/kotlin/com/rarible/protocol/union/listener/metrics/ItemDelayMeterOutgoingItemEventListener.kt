@@ -10,15 +10,15 @@ import java.time.Clock
 import java.time.Instant
 
 @Component
-class ItemDelayMeterOutgoingItemEventListener<T>(
-    private val clock: Clock,
+class ItemDelayMeterOutgoingItemEventListener(
+    clock: Clock,
     itemCompositeRegisteredTimer: CompositeRegisteredTimer,
 ) : EntityDelayMeterOutgoingItemEventListener<ItemEventDto>(clock, itemCompositeRegisteredTimer) {
 
-    override fun extractLastUpdateAt(event: ItemEventDto): Instant {
+    override fun extractLastUpdateAt(event: ItemEventDto): Instant? {
         return when (event) {
             is ItemUpdateEventDto -> event.item.lastUpdatedAt
-            is ItemDeleteEventDto -> clock.instant()
+            is ItemDeleteEventDto -> null
         }
     }
 

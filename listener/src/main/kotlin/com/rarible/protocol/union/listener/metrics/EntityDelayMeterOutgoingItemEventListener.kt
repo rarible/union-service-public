@@ -16,13 +16,15 @@ abstract class EntityDelayMeterOutgoingItemEventListener<T>(
         val blockchain = extractBlockchain(event)
         val eventTimestamp = extractLastUpdateAt(event)
 
-        val now = clock.instant()
-        val eventDelay = now.toEpochMilli() - eventTimestamp.toEpochMilli()
+        if (eventTimestamp != null) {
+            val now = clock.instant()
+            val eventDelay = now.toEpochMilli() - eventTimestamp.toEpochMilli()
 
-        timer.record(Duration.ofMillis(eventDelay), blockchain)
+            timer.record(Duration.ofMillis(eventDelay), blockchain)
+        }
     }
 
-    protected abstract fun extractLastUpdateAt(event: T): Instant
+    protected abstract fun extractLastUpdateAt(event: T): Instant?
 
     protected abstract fun extractBlockchain(event: T): BlockchainDto
 }

@@ -2,21 +2,10 @@ package com.rarible.protocol.union.enrichment.test.data
 
 import com.rarible.core.test.data.randomString
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
-import com.rarible.protocol.union.core.model.UnionItem
-import com.rarible.protocol.union.core.model.UnionMeta
-import com.rarible.protocol.union.core.model.UnionMetaContent
-import com.rarible.protocol.union.core.model.UnionMetaContentProperties
-import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.BurnActivityDto
-import com.rarible.protocol.union.dto.CollectionDto
-import com.rarible.protocol.union.dto.ItemIdDto
-import com.rarible.protocol.union.dto.MetaAttributeDto
-import com.rarible.protocol.union.dto.MetaContentDto
-import com.rarible.protocol.union.dto.MintActivityDto
-import com.rarible.protocol.union.dto.OrderMatchSellDto
-import com.rarible.protocol.union.dto.OwnershipIdDto
-import com.rarible.protocol.union.dto.TransferActivityDto
-import com.rarible.protocol.union.dto.UnionAddress
+import com.rarible.protocol.union.core.model.*
+import com.rarible.protocol.union.dto.*
+import com.rarible.protocol.union.enrichment.converter.EnrichedItemConverter
+import com.rarible.protocol.union.enrichment.converter.EnrichedOwnershipConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthActivityConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthAuctionConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthCollectionConverter
@@ -24,19 +13,7 @@ import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthItemConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOwnershipConverter
-import com.rarible.protocol.union.integration.ethereum.data.randomEthAssetErc1155
-import com.rarible.protocol.union.integration.ethereum.data.randomEthAssetErc20
-import com.rarible.protocol.union.integration.ethereum.data.randomEthAssetErc721
-import com.rarible.protocol.union.integration.ethereum.data.randomEthAuctionDto
-import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionDto
-import com.rarible.protocol.union.integration.ethereum.data.randomEthItemBurnActivity
-import com.rarible.protocol.union.integration.ethereum.data.randomEthItemMintActivity
-import com.rarible.protocol.union.integration.ethereum.data.randomEthItemTransferActivity
-import com.rarible.protocol.union.integration.ethereum.data.randomEthLegacySellOrderDto
-import com.rarible.protocol.union.integration.ethereum.data.randomEthNftItemDto
-import com.rarible.protocol.union.integration.ethereum.data.randomEthOrderActivityMatch
-import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipDto
-import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipId
+import com.rarible.protocol.union.integration.ethereum.data.*
 import com.rarible.protocol.union.integration.flow.converter.FlowItemConverter
 import com.rarible.protocol.union.integration.solana.converter.SolanaItemConverter
 import com.rarible.protocol.union.integration.solana.data.randomSolanaTokenDto
@@ -199,6 +176,14 @@ fun randomUnionActivitySale(itemId: ItemIdDto) = runBlocking {
     mockedEthActivityConverter.convert(
         dto, itemId.blockchain
     ) as OrderMatchSellDto
+}
+
+fun randomItemDto(itemId: ItemIdDto): ItemDto {
+    return EnrichedItemConverter.convert(randomUnionItem(itemId))
+}
+
+fun randomOwnershipDto(ownershipId: OwnershipIdDto): OwnershipDto {
+    return EnrichedOwnershipConverter.convert(randomUnionOwnership(ownershipId))
 }
 
 private val mockedEthOrderConverter = EthOrderConverter(CurrencyMock.currencyServiceMock)

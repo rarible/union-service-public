@@ -9,7 +9,7 @@ import java.time.Clock
 import java.time.Instant
 
 @Component
-class OrderDelayMeterOutgoingItemEventListener<T>(
+class OrderDelayMeterOutgoingItemEventListener(
     clock: Clock,
     orderCompositeRegisteredTimer: CompositeRegisteredTimer,
 ) : EntityDelayMeterOutgoingItemEventListener<OrderEventDto>(clock, orderCompositeRegisteredTimer) {
