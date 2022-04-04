@@ -62,6 +62,18 @@ integration:
         item: 1
         ownership: 1
         order: 1
+    dipdup:
+      enabled: true
+      dipdupUrl: "http://localhost:8080"
+      tzktUrl: "http://localhost:8080"
+      consumer:
+        broker-replica-set: ${kafka.hosts}
+        username:
+        password:
+        workers:
+          item: 1
+          ownership: 1
+          order: 1
   solana:
     enabled: true
     consumer:

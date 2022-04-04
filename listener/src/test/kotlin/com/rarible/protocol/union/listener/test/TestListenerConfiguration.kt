@@ -5,6 +5,9 @@ import com.rarible.core.content.meta.loader.ContentMetaReceiver
 import com.rarible.core.kafka.RaribleKafkaConsumer
 import com.rarible.core.kafka.RaribleKafkaProducer
 import com.rarible.core.test.ext.KafkaTestExtension.Companion.kafkaContainer
+import com.rarible.dipdup.client.core.model.DipDupActivity
+import com.rarible.dipdup.client.core.model.DipDupOrder
+import com.rarible.dipdup.listener.config.DipDupTopicProvider
 import com.rarible.protocol.currency.api.client.CurrencyControllerApi
 import com.rarible.protocol.dto.ActivityTopicProvider
 import com.rarible.protocol.dto.FlowActivityDto
@@ -173,6 +176,28 @@ class TestListenerConfiguration {
             valueSerializerClass = UnionKafkaJsonSerializer::class.java,
             valueClass = com.rarible.protocol.dto.OrderEventDto::class.java,
             defaultTopic = OrderIndexerTopicProvider.getOrderUpdateTopic(applicationEnvironmentInfo().name, "ethereum"),
+            bootstrapServers = kafkaContainer.kafkaBoostrapServers()
+        )
+    }
+
+    @Bean
+    fun testDipDupOrderEventProducer(): RaribleKafkaProducer<DipDupOrder> {
+        return RaribleKafkaProducer(
+            clientId = "test.union.ethereum.order",
+            valueSerializerClass = UnionKafkaJsonSerializer::class.java,
+            valueClass = DipDupOrder::class.java,
+            defaultTopic = DipDupTopicProvider.ORDER,
+            bootstrapServers = kafkaContainer.kafkaBoostrapServers()
+        )
+    }
+
+    @Bean
+    fun testDipDupActivityEventProducer(): RaribleKafkaProducer<DipDupActivity> {
+        return RaribleKafkaProducer(
+            clientId = "test.union.ethereum.activity",
+            valueSerializerClass = UnionKafkaJsonSerializer::class.java,
+            valueClass = DipDupActivity::class.java,
+            defaultTopic = DipDupTopicProvider.ACTIVITY,
             bootstrapServers = kafkaContainer.kafkaBoostrapServers()
         )
     }
