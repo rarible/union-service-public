@@ -24,6 +24,7 @@ import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthItemConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOwnershipConverter
+import com.rarible.protocol.union.integration.ethereum.data.randomAddressString
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAssetErc1155
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAssetErc20
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAssetErc721
@@ -159,7 +160,7 @@ fun randomUnionBidOrderDto(itemId: ItemIdDto) = runBlocking {
 }
 
 fun randomUnionAuctionDto(itemId: ItemIdDto) = randomUnionAuctionDto(
-    itemId.toOwnership(randomString())
+    itemId.toOwnership(randomAddressString())
 )
 
 fun randomUnionAuctionDto(ownershipId: OwnershipIdDto) = runBlocking {
