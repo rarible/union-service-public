@@ -138,19 +138,56 @@ open class EthOrderService(
 
     override suspend fun getSellOrdersByCollection(
         platform: PlatformDto?,
-        collection: String,
+        collectionId: String,
         origin: String?,
+        status: List<OrderStatusDto>?,
+        start: Long?,
+        end: Long?,
+        currencyAddress: String,
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
-        val orders = orderControllerApi.getSellOrdersByCollection(
-            collection,
+        //We use hack here, get item with id = -1,
+        //since it doesn't exist, we only get collections
+        val itemId = "$collectionId:-1"
+        return getSellOrdersByItem(
+            platform,
+            itemId,
+            null,
             origin,
-            EthConverter.convert(platform),
+            status,
+            currencyAddress,
             continuation,
             size
-        ).awaitFirst()
-        return ethOrderConverter.convert(orders, blockchain)
+        )
+    }
+
+    override suspend fun getOrderBidsByCollection(
+        platform: PlatformDto?,
+        collectionId: String,
+        origin: String?,
+        status: List<OrderStatusDto>?,
+        start: Long?,
+        end: Long?,
+        currencyAddress: String,
+        continuation: String?,
+        size: Int
+    ): Slice<OrderDto> {
+        //We use hack here, get item with id = -1,
+        //since it doesn't exist, we only get  collections
+        val itemId = "$collectionId:-1"
+        return getOrderBidsByItem(
+            platform,
+            itemId,
+            null,
+            origin,
+            status,
+            start,
+            end,
+            currencyAddress,
+            continuation,
+            size
+        )
     }
 
     override suspend fun getSellOrdersByItem(

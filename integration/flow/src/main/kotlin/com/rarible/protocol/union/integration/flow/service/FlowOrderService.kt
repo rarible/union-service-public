@@ -130,18 +130,32 @@ open class FlowOrderService(
 
     override suspend fun getSellOrdersByCollection(
         platform: PlatformDto?,
-        collection: String,
+        collectionId: String,
         origin: String?,
+        status: List<OrderStatusDto>?,
+        start: Long?,
+        end: Long?,
+        currencyAddress: String,
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
-        val result = orderControllerApi.getSellOrdersByCollection(
-            collection,
-            origin,
-            continuation,
-            size
-        ).awaitFirst()
-        return flowOrderConverter.convert(result, blockchain)
+        //Not implemented
+        return Slice.empty()
+    }
+
+    override suspend fun getOrderBidsByCollection(
+        platform: PlatformDto?,
+        collectionId: String,
+        origin: String?,
+        status: List<OrderStatusDto>?,
+        start: Long?,
+        end: Long?,
+        currencyAddress: String,
+        continuation: String?,
+        size: Int
+    ): Slice<OrderDto> {
+        //Not implemented
+        return Slice.empty()
     }
 
     override suspend fun getSellOrdersByItem(

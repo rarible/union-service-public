@@ -33,6 +33,29 @@ data class ShortCollection(
             lastUpdatedAt = nowMillis()
         )
     }
+
+    companion object {
+        fun empty(collectionId: ShortCollectionId): ShortCollection {
+            return ShortCollection(
+                version = null,
+                blockchain = collectionId.blockchain,
+                collectionId = collectionId.collectionId,
+
+                bestSellOrders = emptyMap(),
+                bestBidOrders = emptyMap(),
+
+                bestSellOrder = null,
+                bestBidOrder = null,
+
+                lastUpdatedAt = nowMillis()
+            )
+        }
+    }
+
+    fun isNotEmpty(): Boolean {
+        return bestBidOrder != null || bestSellOrder != null
+    }
+
     @Transient
     private val _id: ShortCollectionId = ShortCollectionId(blockchain, collectionId)
 

@@ -79,8 +79,26 @@ class DummyOrderService(
 
     override suspend fun getSellOrdersByCollection(
         platform: PlatformDto?,
-        collection: String,
+        collectionId: String,
         origin: String?,
+        status: List<OrderStatusDto>?,
+        start: Long?,
+        end: Long?,
+        currencyAddress: String,
+        continuation: String?,
+        size: Int
+    ): Slice<OrderDto> {
+        return Slice.empty()
+    }
+
+    override suspend fun getOrderBidsByCollection(
+        platform: PlatformDto?,
+        collectionId: String,
+        origin: String?,
+        status: List<OrderStatusDto>?,
+        start: Long?,
+        end: Long?,
+        currencyAddress: String,
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {

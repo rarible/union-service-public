@@ -112,16 +112,49 @@ class OrderProxyService(
 
     override suspend fun getSellOrdersByCollection(
         platform: PlatformDto?,
-        collection: String,
+        collectionId: String,
         origin: String?,
+        status: List<OrderStatusDto>?,
+        start: Long?,
+        end: Long?,
+        currencyAddress: String,
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
         if (!isPlatformSupported(platform)) return Slice.empty()
         return orderService.getSellOrdersByCollection(
             platform,
-            collection,
+            collectionId,
             origin,
+            status,
+            start,
+            end,
+            currencyAddress,
+            continuation,
+            size
+        )
+    }
+
+    override suspend fun getOrderBidsByCollection(
+        platform: PlatformDto?,
+        collectionId: String,
+        origin: String?,
+        status: List<OrderStatusDto>?,
+        start: Long?,
+        end: Long?,
+        currencyAddress: String,
+        continuation: String?,
+        size: Int
+    ): Slice<OrderDto> {
+        if (!isPlatformSupported(platform)) return Slice.empty()
+        return orderService.getOrderBidsByCollection(
+            platform,
+            collectionId,
+            origin,
+            status,
+            start,
+            end,
+            currencyAddress,
             continuation,
             size
         )
