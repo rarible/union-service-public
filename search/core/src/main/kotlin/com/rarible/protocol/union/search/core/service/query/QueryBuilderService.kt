@@ -13,7 +13,9 @@ import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilde
 import org.springframework.stereotype.Service
 
 @Service
-class QueryBuilderService {
+class QueryBuilderService(
+    private val sortService: QuerySortService,
+) {
 
     companion object {
         private val userMaker = ElasticActivity::user.name + "." + ElasticActivity.User::maker.name
@@ -30,6 +32,7 @@ class QueryBuilderService {
             is ElasticActivityQueryGenericFilter -> builder.applyGenericFilter(filter)
             is ElasticActivityQueryPerTypeFilter -> builder.applyPerTypeFilter(filter)
         }
+        sortService.applySort(builder, sort)
 
         return builder.build()
     }
