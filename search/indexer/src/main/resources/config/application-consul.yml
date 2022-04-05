@@ -1,0 +1,14 @@
+spring:
+  data:
+    elasticsearch:
+      cluster-name: docker-cluster
+      cluster-nodes: "${elasticsearch.host}:9300"
+
+      client:
+        reactive:
+          endpoints: "${elasticsearch.host}:9200"
+
+
+  elasticsearch:
+    rest:
+      uris: "${elasticsearch.host}:9200"
