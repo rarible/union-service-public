@@ -243,7 +243,7 @@ class ImmutablexApiClient(
         from: Instant? = null,
         to: Instant? = null,
         user: String? = null,
-    ) = activityQuery<ImmutablexMintsPage>(
+    ) = activityQuery<ImmutablexPage<ImmutablexMint>>(
         "/mints",
         pageSize,
         continuation,
@@ -251,7 +251,7 @@ class ImmutablexApiClient(
         from,
         to,
         user
-    ) ?: ImmutablexMintsPage("", false, emptyList())
+    ) ?: ImmutablexPage("", false, emptyList())
 
     suspend fun getTransfers(
         pageSize: Int = 50,
@@ -260,7 +260,7 @@ class ImmutablexApiClient(
         from: Instant? = null,
         to: Instant? = null,
         user: String? = null,
-    ) = activityQuery<ImmutablexTransfersPage>(
+    ) = activityQuery<ImmutablexPage<ImmutablexTransfer>>(
         "/transfers",
         pageSize,
         continuation,
@@ -268,7 +268,7 @@ class ImmutablexApiClient(
         from,
         to,
         user
-    ) ?: ImmutablexTransfersPage("", false, emptyList())
+    ) ?: ImmutablexPage("", false, emptyList())
 
     suspend fun getTrades(
         pageSize: Int = 50,
@@ -277,7 +277,7 @@ class ImmutablexApiClient(
         from: Instant? = null,
         to: Instant? = null,
         user: String? = null,
-    ) = activityQuery<ImmutablexTradesPage>(
+    ) = activityQuery<ImmutablexPage<ImmutablexTrade>>(
         "/trades",
         pageSize,
         continuation,
@@ -285,7 +285,7 @@ class ImmutablexApiClient(
         from,
         to,
         user
-    ) ?: ImmutablexTradesPage("", false, emptyList())
+    ) ?: ImmutablexPage("", false, emptyList())
 
     private suspend fun ordersByStatus(
         continuation: String?,
@@ -298,7 +298,10 @@ class ImmutablexApiClient(
             uriBuilder.path("/orders")
                 .queryParam("page_size", size)
                 .queryParam("order_by", "updated_at")
-                .queryParam("direction", direction.name.lowercase())
+                .queryParam("direction", when(direction) {
+                    OrderSortDto.LAST_UPDATE_DESC -> "DESC"
+                    OrderSortDto.LAST_UPDATE_ASC -> "ASC"
+                })
                 .queryParam("include_fees", true)
             if (!continuation.isNullOrEmpty()) {
                 val (dateStr, idStr) = continuation.split("_")

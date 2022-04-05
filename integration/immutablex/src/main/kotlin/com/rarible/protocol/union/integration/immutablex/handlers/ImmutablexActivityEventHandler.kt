@@ -1,10 +1,9 @@
-package com.rarible.protocol.union.integration.immutablex.events
+package com.rarible.protocol.union.integration.immutablex.handlers
 
 import com.rarible.protocol.union.core.handler.AbstractBlockchainEventHandler
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.MintActivityDto
 import com.rarible.protocol.union.integration.immutablex.converter.ImmutablexEventConverter
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexEvent
 

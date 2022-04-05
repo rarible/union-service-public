@@ -51,12 +51,12 @@ integration:
   tezos:
     enabled: ${consul.tezos.enabled:true}
     client:
-      url: ${consul.tezos.api.baseUrl}
+      url: ${consul.tezos.api.baseUrl:}
     auctionContracts: ${consul.tezos.auctionContracts:}
   solana:
     enabled: ${consul.solana.enabled:false}
   immutablex:
-    enabled: ${consul.immutblex.enabled:true}
+    enabled: ${consul.immutablex.enabled:true}
     client:
       url: ${consul.immutablex.api.baseUrl:}
 

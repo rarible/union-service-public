@@ -3,21 +3,18 @@ package com.rarible.protocol.union.integration.immutablex
 import com.rarible.protocol.union.api.ApiClient
 import com.rarible.protocol.union.api.client.DefaultUnionWebClientCustomizer
 import com.rarible.protocol.union.core.CoreConfiguration
-import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.service.CurrencyService
-import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.immutablex.client.EventsApi
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexApiClient
-import com.rarible.protocol.union.integration.immutablex.converter.ImmutablexEventConverter
+import com.rarible.protocol.union.integration.immutablex.converter.ImmutablexActivityConverter
 import com.rarible.protocol.union.integration.immutablex.converter.ImmutablexOrderConverter
-import com.rarible.protocol.union.integration.immutablex.events.ImmutablexActivityEventHandler
+import com.rarible.protocol.union.integration.immutablex.service.ImmutablexActivityService
 import com.rarible.protocol.union.integration.immutablex.service.ImmutablexItemService
 import com.rarible.protocol.union.integration.immutablex.service.ImmutablexOrderService
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
-import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.http.MediaType
 import org.springframework.http.codec.ClientCodecConfigurer
 import org.springframework.http.codec.json.Jackson2JsonDecoder
@@ -73,18 +70,6 @@ class ImmutablexApiConfiguration {
     @Bean
     fun eventsApi(immutablexWebClient: WebClient) = EventsApi(immutablexWebClient)
 
-    @Bean
-    fun immutablexScanner(
-        eventsApi: EventsApi,
-        mongo: MongoTemplate,
-        activityHandler: ImmutablexActivityEventHandler
-    ): ImmutablexScanner = ImmutablexScanner(eventsApi, mongo, activityHandler)
-
-    @Bean
-    fun immutablexEventHandler(
-        handler: IncomingEventHandler<ActivityDto>,
-        orderService: ImmutablexOrderService
-    ) = ImmutablexActivityEventHandler(handler, ImmutablexEventConverter(orderService))
 
 
     @Bean

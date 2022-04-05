@@ -74,6 +74,20 @@ class EventsApi(
 
     }
 
+    suspend fun orders(cursor: String? = null): ImmutablexPage<ImmutablexOrder> {
+        return webClient.get().uri { builder ->
+            builder.path("/orders")
+            builder.defaultQueryParams()
+            builder.queryParam("sell_token_type", "ERC721")
+            builder.queryParam("order_by", "created_at")
+            builder.queryParam("direction", "DESC")
+            if (cursor != null) {
+                builder.queryParam("cursor", cursor)
+            }
+            builder.build()
+        }.retrieve().toEntity<ImmutablexPage<ImmutablexOrder>>().awaitSingle().body!!
+    }
+
     private fun UriBuilder.defaultQueryParams() {
         this.queryParam("page_size", PAGE_SIZE)
         this.queryParam("order_by", ORDER_BY)

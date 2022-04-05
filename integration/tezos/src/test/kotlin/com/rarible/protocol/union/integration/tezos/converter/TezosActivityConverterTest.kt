@@ -221,7 +221,7 @@ class TezosActivityConverterTest {
         assertThat(converted.date).isEqualTo(dto.date)
 
         assertThat(converted.owner.value).isEqualTo(actType.owner)
-        assertThat(converted.contract.value).isEqualTo(actType.contract)
+        assertThat(converted.contract?.value).isEqualTo(actType.contract)
         assertThat(converted.tokenId).isEqualTo(actType.tokenId)
         assertThat(converted.value).isEqualTo(actType.value.toBigInteger())
         assertThat(converted.transactionHash).isEqualTo(actType.transactionHash)
@@ -241,7 +241,7 @@ class TezosActivityConverterTest {
         assertThat(converted.date).isEqualTo(dto.date)
 
         assertThat(converted.owner.value).isEqualTo(actType.owner)
-        assertThat(converted.contract.value).isEqualTo(actType.contract)
+        assertThat(converted.contract?.value).isEqualTo(actType.contract)
         assertThat(converted.tokenId).isEqualTo(actType.tokenId)
         assertThat(converted.value).isEqualTo(actType.value.toBigInteger())
         assertThat(converted.transactionHash).isEqualTo(actType.transactionHash)
@@ -261,7 +261,7 @@ class TezosActivityConverterTest {
         assertThat(converted.date).isEqualTo(dto.date)
 
         assertThat(converted.owner.value).isEqualTo(actType.elt.owner)
-        assertThat(converted.contract.value).isEqualTo(actType.elt.contract)
+        assertThat(converted.contract?.value).isEqualTo(actType.elt.contract)
         assertThat(converted.tokenId).isEqualTo(actType.elt.tokenId)
         assertThat(converted.value).isEqualTo(actType.elt.value.toBigInteger())
         assertThat(converted.transactionHash).isEqualTo(actType.elt.transactionHash)
