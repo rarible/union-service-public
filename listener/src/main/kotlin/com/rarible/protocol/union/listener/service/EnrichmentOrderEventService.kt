@@ -2,8 +2,10 @@ package com.rarible.protocol.union.listener.service
 
 import com.rarible.core.client.WebClientResponseProxyException
 import com.rarible.protocol.union.core.FeatureFlagsProperties
+import com.rarible.protocol.union.core.event.OutgoingEventListener
 import com.rarible.protocol.union.core.event.OutgoingOrderEventListener
 import com.rarible.protocol.union.dto.OrderDto
+import com.rarible.protocol.union.dto.OrderEventDto
 import com.rarible.protocol.union.dto.OrderUpdateEventDto
 import com.rarible.protocol.union.dto.ext
 import com.rarible.protocol.union.enrichment.model.ShortItemId
@@ -20,7 +22,7 @@ class EnrichmentOrderEventService(
     private val enrichmentItemEventService: EnrichmentItemEventService,
     private val enrichmentOwnershipEventService: EnrichmentOwnershipEventService,
     private val enrichmentCollectionEventService: EnrichmentCollectionEventService,
-    private val orderEventListeners: List<OutgoingOrderEventListener>,
+    private val orderEventListeners: List<OutgoingEventListener<OrderEventDto>>,
     private val ff: FeatureFlagsProperties
 ) {
 
