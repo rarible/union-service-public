@@ -8,7 +8,6 @@ import org.springframework.data.elasticsearch.annotations.Document
 import org.springframework.data.elasticsearch.annotations.Field
 import org.springframework.data.elasticsearch.annotations.FieldType
 import java.time.Instant
-import java.util.*
 
 @Document(indexName = ActivityEsRepository.INDEX)
 data class ElasticActivity(
@@ -19,6 +18,7 @@ data class ElasticActivity(
     val date: Instant,
     val blockNumber: Long?,
     val logIndex: Int?,
+    val salt: Long = kotlin.random.Random.nextLong(),
     // Filter fields
     val blockchain: BlockchainDto,
     val type: ActivityTypeDto,
