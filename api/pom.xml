@@ -142,10 +142,5 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
-        <!-- TODO move dto to common lib-->
-        <dependency>
-            <groupId>com.rarible.protocol.union</groupId>
-            <artifactId>rarible-union-listener</artifactId>
-        </dependency>
     </dependencies>
 </project>
