@@ -99,6 +99,7 @@ class SolanaOrderConverter(
         com.rarible.protocol.solana.dto.OrderStatusDto.ACTIVE -> OrderStatusDto.ACTIVE
         com.rarible.protocol.solana.dto.OrderStatusDto.FILLED -> OrderStatusDto.FILLED
         com.rarible.protocol.solana.dto.OrderStatusDto.CANCELLED -> OrderStatusDto.CANCELLED
+        com.rarible.protocol.solana.dto.OrderStatusDto.INACTIVE -> OrderStatusDto.INACTIVE
     }
 
     suspend fun convert(source: OrdersDto, blockchain: BlockchainDto): Slice<OrderDto> = Slice(
