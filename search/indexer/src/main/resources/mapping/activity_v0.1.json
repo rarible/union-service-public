@@ -18,6 +18,9 @@
       "blockNumber": {
         "type": "long"
       },
+      "salt": {
+        "type": "long"
+      },
       "activityTime": {
         "type": "date",
         "format": "strict_date_optional_time||epoch_millis"

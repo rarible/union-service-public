@@ -4,8 +4,8 @@ import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.search.core.ElasticActivity
 import com.rarible.protocol.union.search.core.config.SearchConfiguration
-import com.rarible.protocol.union.search.core.filter.ActivitySort
-import com.rarible.protocol.union.search.core.filter.ElasticActivityQueryGenericFilter
+import com.rarible.protocol.union.search.core.model.ActivitySort
+import com.rarible.protocol.union.search.core.model.ElasticActivityQueryGenericFilter
 import com.rarible.protocol.union.search.core.repository.ActivityEsRepository
 import com.rarible.protocol.union.search.test.IntegrationTest
 import com.rarible.protocol.union.search.test.buildActivity
