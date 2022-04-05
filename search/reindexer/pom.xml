@@ -77,8 +77,21 @@
 
         <!-- ================== Test =================== -->
         <dependency>
-            <groupId>com.rarible.core</groupId>
-            <artifactId>rarible-core-test-common</artifactId>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>elasticsearch</artifactId>
+            <version>1.16.3</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.rarible.protocol.union</groupId>
+            <artifactId>rarible-union-core</artifactId>
+            <classifier>tests</classifier>
+            <type>test-jar</type>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -86,6 +99,12 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.rarible.core</groupId>
+            <artifactId>rarible-core-test-common</artifactId>
+            <scope>test</scope>
+        </dependency>
+
         <dependency>
             <groupId>io.mockk</groupId>
             <artifactId>mockk</artifactId>

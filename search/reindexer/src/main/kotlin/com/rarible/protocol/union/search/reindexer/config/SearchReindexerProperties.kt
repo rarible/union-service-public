@@ -10,7 +10,7 @@ import org.springframework.boot.context.properties.ConstructorBinding
 @ConstructorBinding
 @ConfigurationProperties(prefix = "reindexer")
 data class SearchReindexerProperties(
-    val activityTasks: List<ActivityTaskConfig>
+    val activityTasks: List<ActivityTaskConfig> = allTasks()
 )
 
 data class ActivityTaskConfig(
@@ -19,4 +19,14 @@ data class ActivityTaskConfig(
     val enabled: Boolean = false
 ) {
     fun taskParam() = "ACTIVITY_${blockchainDto}_$type"
+}
+
+fun allTasks(): MutableList<ActivityTaskConfig> = run {
+    val list = mutableListOf<ActivityTaskConfig>()
+    BlockchainDto.values().forEach { blockchain ->
+        ActivityTypeDto.values().forEach { activity ->
+            list.add(ActivityTaskConfig(blockchain, activity, true))
+        }
+    }
+    list
 }

@@ -7,18 +7,21 @@ import com.rarible.core.task.TaskRepository
 import com.rarible.core.task.TaskStatus
 import com.rarible.protocol.union.api.client.ActivityControllerApi
 import com.rarible.protocol.union.dto.ActivitySortDto
+import com.rarible.protocol.union.search.core.converter.ElasticActivityConverter
 import com.rarible.protocol.union.search.reindexer.config.SearchReindexerConfiguration
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactor.awaitSingleOrNull
-
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations
 
 class ActivityTask(
-    val config: SearchReindexerConfiguration,
-    val activityClient: ActivityControllerApi,
-    val taskRepository: TaskRepository
+    private val config: SearchReindexerConfiguration,
+    private val activityClient: ActivityControllerApi,
+    private val taskRepository: TaskRepository,
+    private val esOperations: ElasticsearchOperations,
+    private val converter: ElasticActivityConverter
 ): TaskHandler<String> {
     override val type: String
         get() = ACTIVITY_REINDEX
@@ -45,6 +48,10 @@ class ActivityTask(
         return true
     }
 
+    /**
+     * from - cursor
+     * param looks like ACTIVITY_ETHEREUM_LIST
+     */
     override fun runLongTask(from: String?, param: String): Flow<String> {
         val task = tasks[param]
         return if(task == null || from == "") {
@@ -56,9 +63,13 @@ class ActivityTask(
                     listOf(task.blockchainDto),
                     from,
                     from,
-                    1000,
+                    PAGE_SIZE,
                     ActivitySortDto.EARLIEST_FIRST
                 ).awaitFirst()
+
+                esOperations.save(
+                    res.activities.mapAsync(converter::convert)
+                )
 
                 emit(res.continuation ?: "")
             }
@@ -69,5 +80,6 @@ class ActivityTask(
 
     companion object {
         private const val ACTIVITY_REINDEX = "ACTIVITY_REINDEX"
+        const val PAGE_SIZE = 1000
     }
 }
