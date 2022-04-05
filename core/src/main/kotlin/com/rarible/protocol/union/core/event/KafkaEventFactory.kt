@@ -2,11 +2,13 @@ package com.rarible.protocol.union.core.event
 
 import com.rarible.core.kafka.KafkaMessage
 import com.rarible.protocol.union.core.model.UnionAuctionEvent
+import com.rarible.protocol.union.core.model.UnionCollectionEvent
 import com.rarible.protocol.union.core.model.UnionItemEvent
 import com.rarible.protocol.union.core.model.UnionOrderEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipEvent
 import com.rarible.protocol.union.core.model.UnionWrappedActivityEvent
 import com.rarible.protocol.union.core.model.UnionWrappedAuctionEvent
+import com.rarible.protocol.union.core.model.UnionWrappedCollectionEvent
 import com.rarible.protocol.union.core.model.UnionWrappedEvent
 import com.rarible.protocol.union.core.model.UnionWrappedItemEvent
 import com.rarible.protocol.union.core.model.UnionWrappedOrderEvent
@@ -15,6 +17,7 @@ import com.rarible.protocol.union.core.model.getItemId
 import com.rarible.protocol.union.core.model.itemId
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.CollectionEventDto
+import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OrderEventDto
@@ -24,6 +27,8 @@ import com.rarible.protocol.union.dto.UnionEventTopicProvider
 import com.rarible.protocol.union.dto.ext
 import com.rarible.protocol.union.enrichment.model.ReconciliationItemMarkEvent
 import com.rarible.protocol.union.enrichment.model.ReconciliationMarkAbstractEvent
+import com.rarible.protocol.union.enrichment.model.ReconciliationMarkEvent
+import com.rarible.protocol.union.enrichment.model.ReconciliationMarkType
 import com.rarible.protocol.union.enrichment.model.ReconciliationOwnershipMarkEvent
 import java.util.*
 
@@ -105,6 +110,15 @@ object KafkaEventFactory {
         )
     }
 
+    fun wrappedCollectionEvent(event: UnionCollectionEvent) : KafkaMessage<UnionWrappedEvent> {
+        return KafkaMessage(
+            id = UUID.randomUUID().toString(),
+            key = event.collectionId.fullId(),
+            value = UnionWrappedCollectionEvent(event),
+            headers = COLLECTION_EVENT_HEADERS
+        )
+    }
+
     fun wrappedOwnershipEvent(event: UnionOwnershipEvent): KafkaMessage<UnionWrappedEvent> {
         return KafkaMessage(
             id = UUID.randomUUID().toString(),
@@ -170,6 +184,14 @@ object KafkaEventFactory {
             id = UUID.randomUUID().toString(),
             key = ownershipId.fullId(),
             value = ReconciliationOwnershipMarkEvent(ownershipId),
+        )
+    }
+
+    fun reconciliationCollectionMarkEvent(collectionId: CollectionIdDto): KafkaMessage<ReconciliationMarkAbstractEvent> {
+        return KafkaMessage(
+            id = UUID.randomUUID().toString(),
+            key = collectionId.fullId(),
+            value = ReconciliationMarkEvent(collectionId.fullId(), ReconciliationMarkType.COLLECTION)
         )
     }
 

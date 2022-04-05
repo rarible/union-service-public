@@ -39,24 +39,29 @@ class EnrichmentOrderEventService(
 
         val sellUpdateFuture = makeItemId?.let {
             async {
-                // Item should be checked first, otherwise ownership could trigger event for outdated item
-                ignoreApi404 {
-                    enrichmentItemEventService.onItemBestSellOrderUpdated(makeItemId, order, notificationEnabled)
-                }
-                ignoreApi404 {
-                    val ownershipId = ShortOwnershipId(
-                        makeItemId.blockchain, makeItemId.itemId, order.maker.value
-                    )
-                    enrichmentOwnershipEventService.onOwnershipBestSellOrderUpdated(
-                        ownershipId, order, notificationEnabled
-                    )
+                if (!makeAssetExt.isCollection) {
+                    // Item should be checked first, otherwise ownership could trigger event for outdated item
+                    ignoreApi404 {
+                        enrichmentItemEventService.onItemBestSellOrderUpdated(makeItemId, order, notificationEnabled)
+                    }
+                    ignoreApi404 {
+                        val ownershipId = ShortOwnershipId(
+                            makeItemId.blockchain, makeItemId.itemId, order.maker.value
+                        )
+                        enrichmentOwnershipEventService.onOwnershipBestSellOrderUpdated(
+                            ownershipId, order, notificationEnabled
+                        )
+                    }
                 }
             }
         }
+
         val bidUpdateFuture = takeItemId?.let {
             async {
-                ignoreApi404 {
-                    enrichmentItemEventService.onItemBestBidOrderUpdated(takeItemId, order, notificationEnabled)
+                if (!makeAssetExt.isCollection) {
+                    ignoreApi404 {
+                        enrichmentItemEventService.onItemBestBidOrderUpdated(takeItemId, order, notificationEnabled)
+                    }
                 }
             }
         }

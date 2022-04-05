@@ -7,9 +7,12 @@ import com.rarible.protocol.union.enrichment.evaluator.BestOrderComparator
 import com.rarible.protocol.union.enrichment.evaluator.BestOrderEvaluator
 import com.rarible.protocol.union.enrichment.evaluator.BestPreferredOrderComparator
 import com.rarible.protocol.union.enrichment.evaluator.BestSellOrderComparator
+import com.rarible.protocol.union.enrichment.evaluator.CollectionBestBidOrderProvider
+import com.rarible.protocol.union.enrichment.evaluator.CollectionBestSellOrderProvider
 import com.rarible.protocol.union.enrichment.evaluator.ItemBestBidOrderProvider
 import com.rarible.protocol.union.enrichment.evaluator.ItemBestSellOrderProvider
 import com.rarible.protocol.union.enrichment.evaluator.OwnershipBestSellOrderProvider
+import com.rarible.protocol.union.enrichment.model.ShortCollection
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortOrder
 import com.rarible.protocol.union.enrichment.model.ShortOwnership
@@ -23,7 +26,7 @@ class BestOrderService(
     private val enrichmentOrderService: EnrichmentOrderService,
     private val currencyService: CurrencyService
 ) {
-
+    /*--------------------------------Update Ownerships----------------------------------------*/
     suspend fun updateBestSellOrder(ownership: ShortOwnership, order: OrderDto): ShortOwnership {
         val currencyId = order.sellCurrencyId
         val evaluator = BestOrderEvaluator(
@@ -42,6 +45,48 @@ class BestOrderService(
         return ownership.copy(bestSellOrder = bestSellOrder)
     }
 
+    /*-----------------------------------Update Collections---------------------------------------------*/
+    suspend fun updateBestSellOrder(collection: ShortCollection, order: OrderDto): ShortCollection {
+        val currencyId = order.sellCurrencyId
+        val evaluator = BestOrderEvaluator(
+            comparator = BestSellOrderComparator,
+            provider = CollectionBestSellOrderProvider(collection.id, currencyId, enrichmentOrderService)
+        )
+
+        val bestSellOrders = updateCurrencyOrders(collection.bestSellOrders, order, evaluator, currencyId)
+        val updatedCollection = collection.copy(bestSellOrders = bestSellOrders)
+        return updateBestSellOrder(updatedCollection)
+    }
+
+    suspend fun updateBestOrders(collection: ShortCollection): ShortCollection {
+        return updateBestBidOrder(updateBestSellOrder(collection))
+    }
+
+    suspend fun updateBestSellOrder(item: ShortCollection): ShortCollection {
+        val bestSellOrder = getBestSellOrderInUsd(item.bestSellOrders)
+        return item.copy(bestSellOrder = bestSellOrder)
+    }
+
+    suspend fun updateBestBidOrder(collection: ShortCollection, order: OrderDto): ShortCollection {
+        val currencyId = order.bidCurrencyId
+
+        val evaluator = BestOrderEvaluator(
+            comparator = BestBidOrderComparator,
+            provider = CollectionBestBidOrderProvider(collection.id, currencyId, enrichmentOrderService)
+        )
+
+        val bestBidOrders = updateCurrencyOrders(collection.bestBidOrders, order, evaluator, currencyId)
+        val updatedCollection = collection.copy(bestBidOrders = bestBidOrders)
+
+        return updateBestBidOrder(updatedCollection)
+    }
+
+    suspend fun updateBestBidOrder(collection: ShortCollection): ShortCollection {
+        val bestBidOrder = getBestBidOrderInUsd(collection.bestBidOrders)
+        return collection.copy(bestBidOrder = bestBidOrder)
+    }
+
+    /*---------------------------------------Update Items---------------------------------------------*/
     suspend fun updateBestSellOrder(item: ShortItem, order: OrderDto): ShortItem {
         val currencyId = order.sellCurrencyId
         val evaluator = BestOrderEvaluator(
@@ -81,6 +126,7 @@ class BestOrderService(
         val bestBidOrder = getBestBidOrderInUsd(item.bestBidOrders)
         return item.copy(bestBidOrder = bestBidOrder)
     }
+    /*------------------------------------------------------------------------------------------*/
 
     suspend fun getBestSellOrderInUsd(orders: Map<String, ShortOrder>): ShortOrder? {
         return getBestOrderByUsd(orders, BestSellOrderComparator)

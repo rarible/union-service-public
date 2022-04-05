@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.enrichment.validator
 
+import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.enrichment.converter.EnrichedItemConverter
 import com.rarible.protocol.union.enrichment.test.data.randomUnionAddress
@@ -27,11 +28,12 @@ class ItemValidatorTest {
         val bidValid = EnrichedItemConverter.convert(randomUnionItem(randomEthItemId()))
             .copy(bestBidOrder = randomUnionBidOrderDto())
 
-        assertThat(ItemValidator.isValid(null)).isTrue()
-        assertThat(ItemValidator.isValid(empty)).isTrue()
-        assertThat(ItemValidator.isValid(bothValid)).isTrue()
-        assertThat(ItemValidator.isValid(sellValid)).isTrue()
-        assertThat(ItemValidator.isValid(bidValid)).isTrue()
+        val item: ItemDto? = null
+        assertThat(EntityValidator.isValid(item)).isTrue()
+        assertThat(EntityValidator.isValid(empty)).isTrue()
+        assertThat(EntityValidator.isValid(bothValid)).isTrue()
+        assertThat(EntityValidator.isValid(sellValid)).isTrue()
+        assertThat(EntityValidator.isValid(bidValid)).isTrue()
     }
 
     @Test
@@ -51,9 +53,9 @@ class ItemValidatorTest {
         val sellInvalid = EnrichedItemConverter.convert(randomUnionItem(randomEthItemId()))
             .copy(bestSellOrder = randomUnionSellOrderDto().copy(status = OrderStatusDto.CANCELLED))
 
-        assertThat(ItemValidator.isValid(bothInvalid)).isFalse()
-        assertThat(ItemValidator.isValid(bidInvalid)).isFalse()
-        assertThat(ItemValidator.isValid(sellInvalid)).isFalse()
+        assertThat(EntityValidator.isValid(bothInvalid)).isFalse()
+        assertThat(EntityValidator.isValid(bidInvalid)).isFalse()
+        assertThat(EntityValidator.isValid(sellInvalid)).isFalse()
     }
 
 }
