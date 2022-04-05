@@ -28,16 +28,16 @@ data class ElasticActivity(
 ) {
     data class User(
         val maker: String,
-        val taker: String?,
+        val taker: String? = null,
     )
 
     data class Collection(
         val make: String,
-        val take: String?
+        val take: String? = null
     )
 
     data class Item(
         val make: String,
-        val take: String?
+        val take: String? = null
     )
 }

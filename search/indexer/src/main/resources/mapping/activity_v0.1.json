@@ -51,7 +51,7 @@
       },
       "type": {
         "type": "keyword",
-        "ignore_above": 256
+        "ignore_above": 512
       },
       "users": {
         "properties": {
