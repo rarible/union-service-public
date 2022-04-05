@@ -94,7 +94,7 @@ class EnrichmentOrderService(
     suspend fun getBestSell(collectionId: ShortCollectionId, currencyId: String): OrderDto? {
         val now = nowMillis()
         val result = withPreferredRariblePlatform(collectionId, OrderFilters.COLLECTION) { platform, continuation, size ->
-            orderServiceRouter.getService(collectionId.blockchain).getSellOrdersByCollection(
+            orderServiceRouter.getService(collectionId.blockchain).getOrderFloorSellsByCollection(
                 platform,
                 collectionId.toDto().value,
                 null,
@@ -137,7 +137,7 @@ class EnrichmentOrderService(
     suspend fun getBestBid(id: ShortCollectionId, currencyId: String): OrderDto? {
         val now = nowMillis()
         val result = withPreferredRariblePlatform(id, OrderFilters.COLLECTION) { platform, continuation, size ->
-            orderServiceRouter.getService(id.blockchain).getOrderBidsByCollection(
+            orderServiceRouter.getService(id.blockchain).getOrderFloorBidsByCollection(
                 platform,
                 id.toDto().value,
                 null,

@@ -128,6 +128,22 @@ open class TezosOrderService(
 
     override suspend fun getSellOrdersByCollection(
         platform: PlatformDto?,
+        collection: String,
+        origin: String?,
+        continuation: String?,
+        size: Int
+    ): Slice<OrderDto> {
+        val orders = orderControllerApi.getSellOrdersByCollection(
+            collection,
+            origin,
+            size,
+            continuation
+        ).awaitFirst()
+        return tezosOrderConverter.convert(orders, blockchain)
+    }
+
+    override suspend fun getOrderFloorSellsByCollection(
+        platform: PlatformDto?,
         collectionId: String,
         origin: String?,
         status: List<OrderStatusDto>?,
@@ -139,7 +155,7 @@ open class TezosOrderService(
         return Slice.empty()
     }
 
-    override suspend fun getOrderBidsByCollection(
+    override suspend fun getOrderFloorBidsByCollection(
         platform: PlatformDto?,
         collectionId: String,
         origin: String?,

@@ -130,6 +130,22 @@ open class FlowOrderService(
 
     override suspend fun getSellOrdersByCollection(
         platform: PlatformDto?,
+        collection: String,
+        origin: String?,
+        continuation: String?,
+        size: Int
+    ): Slice<OrderDto> {
+        val result = orderControllerApi.getSellOrdersByCollection(
+            collection,
+            origin,
+            continuation,
+            size
+        ).awaitFirst()
+        return flowOrderConverter.convert(result, blockchain)
+    }
+
+    override suspend fun getOrderFloorSellsByCollection(
+        platform: PlatformDto?,
         collectionId: String,
         origin: String?,
         status: List<OrderStatusDto>?,
@@ -141,7 +157,7 @@ open class FlowOrderService(
         return Slice.empty()
     }
 
-    override suspend fun getOrderBidsByCollection(
+    override suspend fun getOrderFloorBidsByCollection(
         platform: PlatformDto?,
         collectionId: String,
         origin: String?,
