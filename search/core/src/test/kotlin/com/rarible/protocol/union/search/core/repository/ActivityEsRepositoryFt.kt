@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration
 import org.springframework.test.context.ContextConfiguration
 import java.time.Instant
+import kotlin.random.Random.Default.nextLong
 
 @IntegrationTest
 @EnableAutoConfiguration
@@ -25,7 +26,7 @@ internal class ActivityEsRepositoryFt {
     @Test
     fun `should save and read`(): Unit = runBlocking {
         val activity = ElasticActivity(
-            "1234", Instant.now(), 1, 0, BlockchainDto.ETHEREUM, ActivityTypeDto.BURN,
+            "1234", Instant.now(), 1, 0, salt = nextLong(), BlockchainDto.ETHEREUM, ActivityTypeDto.BURN,
             ElasticActivity.User(
                 "0x01", null
             ),

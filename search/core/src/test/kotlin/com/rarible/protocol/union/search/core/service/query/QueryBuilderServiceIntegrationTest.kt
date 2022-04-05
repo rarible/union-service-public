@@ -1,16 +1,14 @@
 package com.rarible.protocol.union.search.core.service.query
 
-import com.rarible.core.test.data.randomInt
-import com.rarible.core.test.data.randomLong
-import com.rarible.core.test.data.randomString
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.search.core.ElasticActivity
 import com.rarible.protocol.union.search.core.config.SearchConfiguration
-import com.rarible.protocol.union.search.core.filter.ElasticActivityQueryGenericFilter
+import com.rarible.protocol.union.search.core.model.ActivitySort
+import com.rarible.protocol.union.search.core.model.ElasticActivityQueryGenericFilter
 import com.rarible.protocol.union.search.core.repository.ActivityEsRepository
 import com.rarible.protocol.union.search.test.IntegrationTest
-import io.mockk.mockk
+import com.rarible.protocol.union.search.test.buildActivity
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitLast
 import kotlinx.coroutines.runBlocking
@@ -25,7 +23,7 @@ import java.time.Instant
 
 @IntegrationTest
 @EnableAutoConfiguration
-@ContextConfiguration(classes = [SearchConfiguration::class, QueryBuilderService::class])
+@ContextConfiguration(classes = [SearchConfiguration::class])
 internal class QueryBuilderServiceIntegrationTest {
 
     @Autowired
@@ -36,6 +34,8 @@ internal class QueryBuilderServiceIntegrationTest {
 
     @Autowired
     private lateinit var esOperations: ReactiveElasticsearchOperations
+    
+    private val sort = ActivitySort(latestFirst = true)
 
     @BeforeEach
     fun setUp() {
@@ -51,7 +51,7 @@ internal class QueryBuilderServiceIntegrationTest {
         activityEsRepository.saveAll(listOf(toFind1, toFind2)).awaitLast()
 
         // when
-        val searchQuery = service.build(filter, mockk())
+        val searchQuery = service.build(filter, sort)
         val searchHits = esOperations.search(searchQuery, ElasticActivity::class.java).collectList().awaitFirst()
             .map { it.content }
 
@@ -70,7 +70,7 @@ internal class QueryBuilderServiceIntegrationTest {
         activityEsRepository.saveAll(listOf(toFind1, toFind2, toSkip1, toSkip2)).awaitLast()
 
         // when
-        val searchQuery = service.build(filter, mockk())
+        val searchQuery = service.build(filter, sort)
         val searchHits = esOperations.search(searchQuery, ElasticActivity::class.java).collectList().awaitFirst()
             .map { it.content }
 
@@ -89,7 +89,7 @@ internal class QueryBuilderServiceIntegrationTest {
         activityEsRepository.saveAll(listOf(toFind1, toFind2, toSkip1, toSkip2)).awaitLast()
 
         // when
-        val searchQuery = service.build(filter, mockk())
+        val searchQuery = service.build(filter, sort)
         val searchHits = esOperations.search(searchQuery, ElasticActivity::class.java).collectList().awaitFirst()
             .map { it.content }
 
@@ -108,7 +108,7 @@ internal class QueryBuilderServiceIntegrationTest {
         activityEsRepository.saveAll(listOf(toFind1, toFind2, toSkip1, toSkip2)).awaitLast()
 
         // when
-        val searchQuery = service.build(filter, mockk())
+        val searchQuery = service.build(filter, sort)
         val searchHits = esOperations.search(searchQuery, ElasticActivity::class.java).collectList().awaitFirst()
             .map { it.content }
 
@@ -127,7 +127,7 @@ internal class QueryBuilderServiceIntegrationTest {
         activityEsRepository.saveAll(listOf(toFind1, toFind2, toSkip1, toSkip2)).awaitLast()
 
         // when
-        val searchQuery = service.build(filter, mockk())
+        val searchQuery = service.build(filter, sort)
         val searchHits = esOperations.search(searchQuery, ElasticActivity::class.java).collectList().awaitFirst()
             .map { it.content }
 
@@ -146,7 +146,7 @@ internal class QueryBuilderServiceIntegrationTest {
         activityEsRepository.saveAll(listOf(toFind1, toFind2, toSkip1, toSkip2)).awaitLast()
 
         // when
-        val searchQuery = service.build(filter, mockk())
+        val searchQuery = service.build(filter, sort)
         val searchHits = esOperations.search(searchQuery, ElasticActivity::class.java).collectList().awaitFirst()
             .map { it.content }
 
@@ -165,7 +165,7 @@ internal class QueryBuilderServiceIntegrationTest {
         activityEsRepository.saveAll(listOf(toFind1, toFind2, toSkip1, toSkip2)).awaitLast()
 
         // when
-        val searchQuery = service.build(filter, mockk())
+        val searchQuery = service.build(filter, sort)
         val searchHits = esOperations.search(searchQuery, ElasticActivity::class.java).collectList().awaitFirst()
             .map { it.content }
 
@@ -184,7 +184,7 @@ internal class QueryBuilderServiceIntegrationTest {
         activityEsRepository.saveAll(listOf(toFind1, toFind2, toSkip1, toSkip2)).awaitLast()
 
         // when
-        val searchQuery = service.build(filter, mockk())
+        val searchQuery = service.build(filter, sort)
         val searchHits = esOperations.search(searchQuery, ElasticActivity::class.java).collectList().awaitFirst()
             .map { it.content }
 
@@ -204,7 +204,7 @@ internal class QueryBuilderServiceIntegrationTest {
         activityEsRepository.saveAll(listOf(toFind1, toFind2, toSkip1, toSkip2)).awaitLast()
 
         // when
-        val searchQuery = service.build(filter, mockk())
+        val searchQuery = service.build(filter, sort)
         val searchHits = esOperations.search(searchQuery, ElasticActivity::class.java).collectList().awaitFirst()
             .map { it.content }
 
@@ -224,7 +224,7 @@ internal class QueryBuilderServiceIntegrationTest {
         activityEsRepository.saveAll(listOf(toFind1, toFind2, toSkip1, toSkip2)).awaitLast()
 
         // when
-        val searchQuery = service.build(filter, mockk())
+        val searchQuery = service.build(filter, sort)
         val searchHits = esOperations.search(searchQuery, ElasticActivity::class.java).collectList().awaitFirst()
             .map { it.content }
 
@@ -244,7 +244,7 @@ internal class QueryBuilderServiceIntegrationTest {
         activityEsRepository.saveAll(listOf(toFind1, toFind2, toSkip1, toSkip2)).awaitLast()
 
         // when
-        val searchQuery = service.build(filter, mockk())
+        val searchQuery = service.build(filter, sort)
         val searchHits = esOperations.search(searchQuery, ElasticActivity::class.java).collectList().awaitFirst()
             .map { it.content }
 
@@ -264,7 +264,7 @@ internal class QueryBuilderServiceIntegrationTest {
         activityEsRepository.saveAll(listOf(toFind1, toFind2, toSkip1, toSkip2)).awaitLast()
 
         // when
-        val searchQuery = service.build(filter, mockk())
+        val searchQuery = service.build(filter, sort)
         val searchHits = esOperations.search(searchQuery, ElasticActivity::class.java).collectList().awaitFirst()
             .map { it.content }
 
@@ -283,7 +283,7 @@ internal class QueryBuilderServiceIntegrationTest {
         activityEsRepository.saveAll(listOf(toFind1, toFind2, toSkip1, toSkip2)).awaitLast()
 
         // when
-        val searchQuery = service.build(filter, mockk())
+        val searchQuery = service.build(filter, sort)
         val searchHits = esOperations.search(searchQuery, ElasticActivity::class.java).collectList().awaitFirst()
             .map { it.content }
 
@@ -302,7 +302,7 @@ internal class QueryBuilderServiceIntegrationTest {
         activityEsRepository.saveAll(listOf(toFind1, toFind2, toSkip1, toSkip2)).awaitLast()
 
         // when
-        val searchQuery = service.build(filter, mockk())
+        val searchQuery = service.build(filter, sort)
         val searchHits = esOperations.search(searchQuery, ElasticActivity::class.java).collectList().awaitFirst()
             .map { it.content }
 
@@ -321,7 +321,7 @@ internal class QueryBuilderServiceIntegrationTest {
         activityEsRepository.saveAll(listOf(toFind1, toFind2, toSkip1, toSkip2)).awaitLast()
 
         // when
-        val searchQuery = service.build(filter, mockk())
+        val searchQuery = service.build(filter, sort)
         val searchHits = esOperations.search(searchQuery, ElasticActivity::class.java).collectList().awaitFirst()
             .map { it.content }
 
@@ -378,32 +378,11 @@ internal class QueryBuilderServiceIntegrationTest {
         activityEsRepository.saveAll(listOf(toFind1, toFind2, toSkip1, toSkip2, toSkip3)).awaitLast()
 
         // when
-        val searchQuery = service.build(filter, mockk())
+        val searchQuery = service.build(filter, sort)
         val searchHits = esOperations.search(searchQuery, ElasticActivity::class.java).collectList().awaitFirst()
             .map { it.content }
 
         // then
         assertThat(searchHits).containsExactlyInAnyOrder(toFind1, toFind2)
     }
-
-    private fun buildActivity() = ElasticActivity(
-        activityId = randomString(),
-        date = Instant.now(),
-        blockNumber = randomLong(),
-        logIndex = randomInt(),
-        blockchain = BlockchainDto.values().random(),
-        type = ActivityTypeDto.values().random(),
-        user = ElasticActivity.User(
-            maker = randomString(),
-            taker = randomString(),
-        ),
-        collection = ElasticActivity.Collection(
-            make = randomString(),
-            take = randomString(),
-        ),
-        item = ElasticActivity.Item(
-            make = randomString(),
-            take = randomString(),
-        ),
-    )
 }

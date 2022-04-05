@@ -1,10 +1,11 @@
 package com.rarible.protocol.union.search.core.service.query
 
 import com.rarible.protocol.union.search.core.ElasticActivity
-import com.rarible.protocol.union.search.core.filter.ActivitySort
-import com.rarible.protocol.union.search.core.filter.ElasticActivityFilter
-import com.rarible.protocol.union.search.core.filter.ElasticActivityQueryGenericFilter
-import com.rarible.protocol.union.search.core.filter.ElasticActivityQueryPerTypeFilter
+import com.rarible.protocol.union.search.core.model.ActivitySort
+import com.rarible.protocol.union.search.core.model.ElasticActivityFilter
+import com.rarible.protocol.union.search.core.model.ElasticActivityQueryGenericFilter
+import com.rarible.protocol.union.search.core.model.ElasticActivityQueryPerTypeFilter
+import com.rarible.protocol.union.search.core.model.cursor
 import org.elasticsearch.index.query.BoolQueryBuilder
 import org.elasticsearch.index.query.RangeQueryBuilder
 import org.elasticsearch.index.query.TermsQueryBuilder
@@ -13,7 +14,10 @@ import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilde
 import org.springframework.stereotype.Service
 
 @Service
-class QueryBuilderService {
+class QueryBuilderService(
+    private val sortService: QuerySortService,
+    private val cursorService: QueryCursorService,
+) {
 
     companion object {
         private val userMaker = ElasticActivity::user.name + "." + ElasticActivity.User::maker.name
@@ -26,28 +30,30 @@ class QueryBuilderService {
 
     fun build(filter: ElasticActivityFilter, sort: ActivitySort): NativeSearchQuery {
         val builder = NativeSearchQueryBuilder()
+        val query = BoolQueryBuilder()
         when (filter) {
-            is ElasticActivityQueryGenericFilter -> builder.applyGenericFilter(filter)
-            is ElasticActivityQueryPerTypeFilter -> builder.applyPerTypeFilter(filter)
+            is ElasticActivityQueryGenericFilter -> query.applyGenericFilter(filter)
+            is ElasticActivityQueryPerTypeFilter -> query.applyPerTypeFilter(filter)
         }
+        sortService.applySort(builder, sort)
+        cursorService.applyCursor(query, sort, filter.cursor)
 
+        builder.withQuery(query)
         return builder.build()
     }
 
-    private fun NativeSearchQueryBuilder.applyGenericFilter(filter: ElasticActivityQueryGenericFilter) {
-        val queryBuilder = BoolQueryBuilder()
-
-        queryBuilder.mustMatchTerms(filter.blockchains, ElasticActivity::blockchain.name)
-        queryBuilder.mustMatchTerms(filter.activityTypes, ElasticActivity::type.name)
-        queryBuilder.anyMustMatchTerms(filter.anyUsers, userMaker, userTaker)
-        queryBuilder.mustMatchTerms(filter.makers, userMaker)
-        queryBuilder.mustMatchTerms(filter.takers, userTaker)
-        queryBuilder.anyMustMatchTerms(filter.anyCollections, collectionMake, collectionTake)
-        queryBuilder.mustMatchTerms(filter.makeCollections, collectionMake)
-        queryBuilder.mustMatchTerms(filter.takeCollections, collectionTake)
-        queryBuilder.anyMustMatchTerms(filter.anyItems, itemMake, itemTake)
-        queryBuilder.mustMatchTerms(filter.makeItems, itemMake)
-        queryBuilder.mustMatchTerms(filter.takeItems, itemTake)
+    private fun BoolQueryBuilder.applyGenericFilter(filter: ElasticActivityQueryGenericFilter) {
+        mustMatchTerms(filter.blockchains, ElasticActivity::blockchain.name)
+        mustMatchTerms(filter.activityTypes, ElasticActivity::type.name)
+        anyMustMatchTerms(filter.anyUsers, userMaker, userTaker)
+        mustMatchTerms(filter.makers, userMaker)
+        mustMatchTerms(filter.takers, userTaker)
+        anyMustMatchTerms(filter.anyCollections, collectionMake, collectionTake)
+        mustMatchTerms(filter.makeCollections, collectionMake)
+        mustMatchTerms(filter.takeCollections, collectionTake)
+        anyMustMatchTerms(filter.anyItems, itemMake, itemTake)
+        mustMatchTerms(filter.makeItems, itemMake)
+        mustMatchTerms(filter.takeItems, itemTake)
 
         if (filter.from != null || filter.to != null) {
             val rangeQueryBuilder = RangeQueryBuilder(ElasticActivity::date.name)
@@ -57,13 +63,11 @@ class QueryBuilderService {
             if (filter.to != null) {
                 rangeQueryBuilder.lte(filter.to)
             }
-            queryBuilder.must(rangeQueryBuilder)
+            must(rangeQueryBuilder)
         }
-
-        withQuery(queryBuilder)
     }
 
-    private fun NativeSearchQueryBuilder.applyPerTypeFilter(filter: ElasticActivityQueryPerTypeFilter) {
+    private fun BoolQueryBuilder.applyPerTypeFilter(filter: ElasticActivityQueryPerTypeFilter) {
         TODO("To be implemented under ALPHA-276 Epic")
     }
 

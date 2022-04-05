@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.search.core.filter
+package com.rarible.protocol.union.search.core.model
 
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -47,3 +47,9 @@ data class ElasticActivityQueryPerTypeFilter(
         val takeItem: String?,
     )
 }
+
+val ElasticActivityFilter.cursor
+    get() = when(this) {
+        is ElasticActivityQueryGenericFilter -> this.cursor
+        is ElasticActivityQueryPerTypeFilter -> this.cursor
+    }
