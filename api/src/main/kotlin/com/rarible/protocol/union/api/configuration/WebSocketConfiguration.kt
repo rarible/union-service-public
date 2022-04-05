@@ -1,7 +1,7 @@
 package com.rarible.api.configuration
 
 
-import com.rarible.api.changes.ChangesHandler
+import com.rarible.api.handler.ChangesHandler
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.Ordered
@@ -19,7 +19,7 @@ class WebSocketConfiguration {
     fun websocketHandlerMapping(handler: ChangesHandler): HandlerMapping {
         return SimpleUrlHandlerMapping().apply {
             urlMap = mapOf(
-               "/subscribe" to handler
+               "/subscribe" to handler //TODO add version, move to const
             )
             order = Ordered.HIGHEST_PRECEDENCE
         }

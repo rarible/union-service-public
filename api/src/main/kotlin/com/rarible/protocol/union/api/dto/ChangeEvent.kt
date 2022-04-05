@@ -3,6 +3,7 @@ package com.rarible.protocol.union.api.dto
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 
+//TODO move to openapi
 enum class ChangeEventType {
     OWNERSHIP,
     ITEM,

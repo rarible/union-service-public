@@ -266,5 +266,4 @@ class TestApiConfiguration {
     @Bean
     @Primary
     fun testTezosActivityOrderApi(): com.rarible.protocol.tezos.api.client.OrderActivityControllerApi = mockk()
-
 }

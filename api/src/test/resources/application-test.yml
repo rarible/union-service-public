@@ -1,18 +1,3 @@
-rarible:
-  core:
-    apm:
-      agent:
-        enabled: false
-  loader:
-    enableWorkers: true
-    workers: 1
-    enableRetrySchedulerJob: false
-
-integration:
-  tezos:
-    client:
-      url: "http://localhost:8080"
-
 common:
   currency:
     refresh:
@@ -21,3 +6,53 @@ common:
     enableRevertedActivityEventSending: false
     enableOwnershipSourceEnrichment: true
     enableItemLastSaleEnrichment: true
+
+rarible:
+  core:
+    apm:
+      agent:
+        enabled: false
+  task:
+    initialDelay: 600000
+  loader:
+    enableWorkers: true # Enable workers in the tests.
+    workers: 1
+    enableRetrySchedulerJob: false
+
+integration:
+  ethereum:
+    enabled: true
+    consumer:
+      broker-replica-set: ${kafka.hosts}
+      workers:
+        item: 1
+        ownership: 1
+        order: 1
+  polygon:
+    enabled: true
+    consumer:
+      broker-replica-set: ${kafka.hosts}
+      workers:
+        item: 1
+        ownership: 1
+        order: 1
+  flow:
+    enabled: true
+    consumer:
+      broker-replica-set: ${kafka.hosts}
+      workers:
+        item: 1
+        ownership: 1
+        order: 1
+  tezos:
+    enabled: true
+    client:
+      url: "http://localhost:8080"
+    consumer:
+      broker-replica-set: ${kafka.hosts}
+      username:
+      password:
+      workers:
+        item: 1
+        ownership: 1
+        order: 1
