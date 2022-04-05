@@ -6,15 +6,15 @@ import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.service.EnrichmentOrderService
 
 class CollectionBestSellOrderProvider(
-    private val itemId: ShortCollectionId,
+    private val collectionId: ShortCollectionId,
     private val currencyId: String,
     private val enrichmentOrderService: EnrichmentOrderService
 ) : BestOrderProvider<ShortItem> {
 
-    override val entityId: String = itemId.toString()
+    override val entityId: String = collectionId.toString()
     override val entityType: Class<ShortItem> get() = ShortItem::class.java
 
     override suspend fun fetch(): OrderDto? {
-        return enrichmentOrderService.getBestSell(itemId, currencyId)
+        return enrichmentOrderService.getBestSell(collectionId, currencyId)
     }
 }

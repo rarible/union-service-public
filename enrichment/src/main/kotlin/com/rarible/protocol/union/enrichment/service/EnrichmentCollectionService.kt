@@ -64,7 +64,7 @@ class EnrichmentCollectionService(
     ) = coroutineScope {
         require(shortCollection != null || collectionDto != null)
         val collectionId = shortCollection?.id?.toDto() ?: collectionDto!!.id
-        val fetchedItem = withSpanAsync("fetchItem", spanType = SpanType.EXT) {
+        val fetchedItem = withSpanAsync("fetchCollection") {
             collectionDto ?: fetch(ShortCollectionId(collectionId))
         }
 
