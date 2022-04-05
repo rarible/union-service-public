@@ -12,7 +12,9 @@ import org.springframework.data.elasticsearch.repository.config.EnableReactiveEl
 
 @Configuration
 @AutoConfigurationPackage
-@EnableReactiveElasticsearchRepositories
+@EnableReactiveElasticsearchRepositories(basePackages = [
+    "com.rarible.protocol.union.search"
+])
 class SearchConfiguration(
     @Value("\${elasticsearch.api-nodes}") private val elasticsearchHost: String
 ): AbstractElasticsearchConfiguration() {
