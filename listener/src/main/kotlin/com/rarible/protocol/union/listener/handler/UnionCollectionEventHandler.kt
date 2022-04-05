@@ -18,9 +18,11 @@ class UnionCollectionEventHandler(
 ) : IncomingEventHandler<CollectionEventDto> {
 
     override suspend fun onEvent(event: CollectionEventDto) {
-        if (event is CollectionUpdateEventDto) {
-            val unionEvent = UnionCollectionUpdateEvent(event.collection)
-            eventsProducer.send(KafkaEventFactory.wrappedCollectionEvent(unionEvent))
+        when (event) {
+            is CollectionUpdateEventDto -> {
+                val unionEvent = UnionCollectionUpdateEvent(event.collection)
+                eventsProducer.send(KafkaEventFactory.wrappedCollectionEvent(unionEvent))
+            }
         }
     }
 }
