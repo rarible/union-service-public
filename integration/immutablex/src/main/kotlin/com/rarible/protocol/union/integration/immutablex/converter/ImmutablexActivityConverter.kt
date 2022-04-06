@@ -10,7 +10,7 @@ class ImmutablexActivityConverter {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    fun convert(activity: ImmutablexActivity): ActivityDto {
+    fun convert(activity: ImmutablexEvent): ActivityDto {
         try {
             return convertInternal(activity)
         } catch (e: Exception) {
@@ -19,14 +19,14 @@ class ImmutablexActivityConverter {
         }
     }
 
-    private fun convertInternal(activity: ImmutablexActivity) = when (activity) {
+    private fun convertInternal(activity: ImmutablexEvent) = when (activity) {
         is ImmutablexMint -> MintActivityDto(
             id = activity.activityId,
             date = activity.timestamp,
             owner = unionAddress(activity.user),
             contract = contractAddress(activity.token.data.tokenAddress!!),
             tokenId = activity.token.data.tokenId!!.toBigInteger(),
-            value = activity.token.data.quantity ?: BigInteger.ONE,
+            value = activity.token.data.quantity?.toBigInteger() ?: BigInteger.ONE,
             transactionHash = activity.transactionId.toString(),
             blockchainInfo = null,
         )
@@ -37,7 +37,7 @@ class ImmutablexActivityConverter {
             owner = unionAddress(activity.receiver),
             contract = contractAddress(activity.token.data.tokenAddress!!),
             tokenId = activity.token.data.tokenId!!.toBigInteger(),
-            value = activity.token.data.quantity ?: BigInteger.ONE,
+            value = activity.token.data.quantity?.toBigInteger() ?: BigInteger.ONE,
             transactionHash = activity.transactionId.toString(),
             blockchainInfo = null,
         )
@@ -47,12 +47,12 @@ class ImmutablexActivityConverter {
             blockchainInfo = null,
             id = activity.activityId,
             date = activity.timestamp,
-            nft = convertAsset(activity.b),
-            payment = convertAsset(activity.a),
+            nft = convertAsset(activity.make),
+            payment = convertAsset(activity.take),
             buyer = unionAddress(""),
             seller = unionAddress(""),
-            buyerOrderHash = activity.a.orderId.toString(),
-            sellerOrderHash = activity.b.orderId.toString(),
+            buyerOrderHash = activity.take.orderId.toString(),
+            sellerOrderHash = activity.make.orderId.toString(),
             price = BigDecimal.ZERO,
             priceUsd = null,
             amountUsd = null,
@@ -61,25 +61,22 @@ class ImmutablexActivityConverter {
         else -> throw IllegalStateException("Unsupported activity type")
     }
 
-    private fun convertAsset(asset: ImmutablexTradeAsset) =
+    private fun convertAsset(asset: TradeSide) =
         when (asset.tokenType) {
             "ETH" -> AssetDto(
                 type = EthEthereumAssetTypeDto(BlockchainDto.IMMUTABLEX),
-                value = asset.sold.toBigDecimal(scale = 18)
+                value = asset.sold.setScale(18)
             )
             "ERC20" -> AssetDto(
                 type = EthErc20AssetTypeDto(contractAddress(asset.tokenAddress!!)),
-                value = asset.sold.toBigDecimal(scale = 18)
+                value = asset.sold.setScale(18)
             )
             "ERC721" -> AssetDto(
                 type = EthErc721AssetTypeDto(contractAddress(asset.tokenAddress!!), asset.tokenId!!.toBigInteger()),
-                value = asset.sold.toBigDecimal()
+                value = asset.sold
             )
             else -> throw IllegalStateException("Unsupported token type: ${asset.tokenType}")
         }
-
-    private val ImmutablexActivity.activityId
-        get() = ActivityIdDto(BlockchainDto.IMMUTABLEX, transactionId.toString())
 
     private fun unionAddress(value: String) = UnionAddress(BlockchainGroupDto.IMMUTABLEX, value)
 

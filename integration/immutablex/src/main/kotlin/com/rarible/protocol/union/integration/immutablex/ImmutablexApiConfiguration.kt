@@ -5,6 +5,7 @@ import com.rarible.protocol.union.api.client.DefaultUnionWebClientCustomizer
 import com.rarible.protocol.union.core.CoreConfiguration
 import com.rarible.protocol.union.core.service.CurrencyService
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.integration.immutablex.client.EventsApi
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexApiClient
 import com.rarible.protocol.union.integration.immutablex.converter.ImmutablexActivityConverter
 import com.rarible.protocol.union.integration.immutablex.converter.ImmutablexOrderConverter
@@ -20,6 +21,7 @@ import org.springframework.http.codec.json.Jackson2JsonDecoder
 import org.springframework.http.codec.json.Jackson2JsonEncoder
 import org.springframework.web.reactive.function.client.ExchangeStrategies
 import org.springframework.web.reactive.function.client.WebClient
+
 
 @ImmutablexConfiguration
 @Import(CoreConfiguration::class)
@@ -64,6 +66,10 @@ class ImmutablexApiConfiguration {
         client: ImmutablexApiClient,
         converter: ImmutablexOrderConverter,
     ): ImmutablexOrderService = ImmutablexOrderService(client, converter)
+
+    @Bean
+    fun eventsApi(immutablexWebClient: WebClient) = EventsApi(immutablexWebClient)
+
 
 
     @Bean

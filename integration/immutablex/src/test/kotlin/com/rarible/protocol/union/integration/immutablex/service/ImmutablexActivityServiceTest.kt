@@ -16,7 +16,7 @@ internal class ImmutablexActivityServiceTest {
     private val mapper = jacksonObjectMapper().registerModule(JavaTimeModule())
 
     private val expectedMintActivity by lazy {
-        ImmutablexMintsPage("", false,
+        ImmutablexPage<ImmutablexMint>("", false,
             listOf(
                 mapper.readValue(
                     ImmutablexActivityServiceTest::class.java.getResourceAsStream("mint.json"),
@@ -27,7 +27,7 @@ internal class ImmutablexActivityServiceTest {
     }
 
     private val expectedTransfersActivity by lazy {
-        ImmutablexTransfersPage("", false,
+        ImmutablexPage<ImmutablexTransfer>("", false,
             listOf(
                 mapper.readValue(
                     ImmutablexActivityServiceTest::class.java.getResourceAsStream("transfer.json"),
@@ -38,7 +38,7 @@ internal class ImmutablexActivityServiceTest {
     }
 
     private val expectedTradesActivity by lazy {
-        ImmutablexTradesPage("", false,
+        ImmutablexPage<ImmutablexTrade>("", false,
             listOf(
                 mapper.readValue(
                     ImmutablexActivityServiceTest::class.java.getResourceAsStream("trade.json"),
@@ -85,8 +85,8 @@ internal class ImmutablexActivityServiceTest {
                 Assertions.assertEquals(page.entities.size, 1)
                 val activity = page.entities.single() as OrderMatchSellDto
                 val expected = expectedTradesActivity.result.single()
-                Assertions.assertEquals(activity.sellerOrderHash, expected.b.orderId.toString())
-                Assertions.assertEquals(activity.buyerOrderHash, expected.a.orderId.toString())
+                Assertions.assertEquals(activity.sellerOrderHash, expected.make.orderId.toString())
+                Assertions.assertEquals(activity.buyerOrderHash, expected.take.orderId.toString())
             }
 
         service.getAllActivities(listOf(ActivityTypeDto.TRANSFER), null, 50, null)
@@ -95,7 +95,7 @@ internal class ImmutablexActivityServiceTest {
                 val activity = page.entities.single() as TransferActivityDto
                 val expected = expectedTransfersActivity.result.single()
                 Assertions.assertEquals(activity.tokenId, expected.token.data.tokenId!!.toBigInteger())
-                Assertions.assertEquals(activity.value, expected.token.data.quantity)
+                Assertions.assertEquals(activity.value, expected.token.data.quantity?.toBigInteger())
                 Assertions.assertEquals(activity.from.value, expected.user)
                 Assertions.assertEquals(activity.owner.value, expected.receiver)
             }
