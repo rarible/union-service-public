@@ -1,25 +1,6 @@
 package com.rarible.protocol.union.core.model
 
-import com.rarible.protocol.union.dto.ActivityDto
-import com.rarible.protocol.union.dto.AuctionBidActivityDto
-import com.rarible.protocol.union.dto.AuctionCancelActivityDto
-import com.rarible.protocol.union.dto.AuctionEndActivityDto
-import com.rarible.protocol.union.dto.AuctionFinishActivityDto
-import com.rarible.protocol.union.dto.AuctionOpenActivityDto
-import com.rarible.protocol.union.dto.AuctionStartActivityDto
-import com.rarible.protocol.union.dto.BurnActivityDto
-import com.rarible.protocol.union.dto.ItemIdDto
-import com.rarible.protocol.union.dto.MintActivityDto
-import com.rarible.protocol.union.dto.OrderBidActivityDto
-import com.rarible.protocol.union.dto.OrderCancelBidActivityDto
-import com.rarible.protocol.union.dto.OrderCancelListActivityDto
-import com.rarible.protocol.union.dto.OrderListActivityDto
-import com.rarible.protocol.union.dto.OrderMatchSellDto
-import com.rarible.protocol.union.dto.OrderMatchSwapDto
-import com.rarible.protocol.union.dto.OwnershipIdDto
-import com.rarible.protocol.union.dto.OwnershipSourceDto
-import com.rarible.protocol.union.dto.TransferActivityDto
-import com.rarible.protocol.union.dto.ext
+import com.rarible.protocol.union.dto.*
 
 fun ActivityDto.itemId(): ItemIdDto? {
     return when (this) {
@@ -40,6 +21,8 @@ fun ActivityDto.itemId(): ItemIdDto? {
         is AuctionFinishActivityDto -> this.auction.getItemId()
         is AuctionStartActivityDto -> this.auction.getItemId()
         is AuctionEndActivityDto -> this.auction.getItemId()
+        is L2DepositActivityDto -> ItemIdDto(this.id.blockchain, this.contractAddres.value, this.tokenId)
+        is L2WithdrawalActivityDto -> ItemIdDto(this.id.blockchain, this.contractAddres.value, this.tokenId)
     }
 }
 
