@@ -32,7 +32,7 @@ data class ElasticActivity(
     )
 
     data class Collection(
-        val make: String,
+        val make: String? = null,
         val take: String? = null
     )
 
