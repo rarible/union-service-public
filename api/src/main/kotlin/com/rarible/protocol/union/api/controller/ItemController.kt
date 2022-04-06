@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.api.controller
 
+import com.rarible.core.logging.RaribleMDCContext
 import com.rarible.protocol.union.api.service.ItemApiService
 import com.rarible.protocol.union.api.service.OwnershipApiService
 import com.rarible.protocol.union.api.util.BlockchainFilter
@@ -28,17 +29,19 @@ import com.rarible.protocol.union.dto.continuation.page.PageSize
 import com.rarible.protocol.union.dto.continuation.page.Paging
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.dto.subchains
-import com.rarible.protocol.union.enrichment.configuration.UnionMetaProperties
 import com.rarible.protocol.union.enrichment.meta.UnionMetaService
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.time.withTimeout
+import kotlinx.coroutines.withContext
 import org.slf4j.LoggerFactory
+import org.slf4j.MDC
 import org.springframework.core.io.Resource
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
@@ -57,8 +60,7 @@ class ItemController(
     private val router: BlockchainRouter<ItemService>,
     private val enrichmentItemService: EnrichmentItemService,
     private val unionMetaService: UnionMetaService,
-    private val restrictionService: RestrictionService,
-    private val unionMetaProperties: UnionMetaProperties
+    private val restrictionService: RestrictionService
 ) : ItemControllerApi {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -73,7 +75,7 @@ class ItemController(
     ): ResponseEntity<ItemsDto> {
         val safeSize = PageSize.ITEM.limit(size)
         val slices = itemApiService.getAllItems(blockchains, continuation, safeSize, showDeleted, lastUpdatedFrom, lastUpdatedTo)
-        val total = slices.map { it.page.total }.sum()
+        val total = slices.sumOf { it.page.total }
         val arg = ArgPaging(UnionItemContinuation.ByLastUpdatedAndId, slices.map { it.toSlice() }).getSlice(safeSize)
 
         logger.info("Response for getAllItems(blockchains={}, continuation={}, size={}):" +
@@ -165,7 +167,14 @@ class ItemController(
     override suspend fun resetItemMeta(itemId: String): ResponseEntity<Unit> {
         val fullItemId = IdParser.parseItemId(itemId)
         // TODO[meta]: when all Blockchains stop caching the meta, we can remove this endpoint call.
-        logger.info("Refreshing item meta for $itemId")
+        val parts = fullItemId.value.split(":")
+        if (parts.size > 1) {
+            addToMdc("contract" to parts[0]) {
+                logger.info("Refreshing item meta for $itemId")
+            }
+        } else {
+            logger.info("Refreshing item meta for $itemId")
+        }
         router.getService(fullItemId.blockchain).resetItemMeta(fullItemId.value)
         unionMetaService.scheduleLoading(fullItemId)
         return ResponseEntity.ok().build()
@@ -205,7 +214,7 @@ class ItemController(
             it.getItemsByCreator(creatorAddress.value, continuation, safeSize)
         }
 
-        val total = blockchainPages.map { it.total }.sum()
+        val total = blockchainPages.sumOf { it.total }
 
         val combinedPage = Paging(
             UnionItemContinuation.ByLastUpdatedAndId,
@@ -236,7 +245,7 @@ class ItemController(
             it.getItemsByOwner(ownerAddress.value, continuation, safeSize)
         }
 
-        val total = blockchainPages.map { it.total }.sum()
+        val total = blockchainPages.sumOf { it.total }
 
         val combinedPage = Paging(
             UnionItemContinuation.ByLastUpdatedAndId,
@@ -270,7 +279,7 @@ class ItemController(
         val page = ownershipApiService.getOwnershipByOwner(ownerAddress, continuation, safeSize)
         val ids = page.entities.map { it.id.getItemId() }
         val items = router.executeForAll(ownerAddress.blockchainGroup.subchains()) {
-            it.getItemsByIds(ids.map { it.value })
+            it.getItemsByIds(ids.map { id -> id.value })
         }.flatten().associateBy { it.id }
 
         val wrapped = page.entities.map {
@@ -296,4 +305,16 @@ class ItemController(
         // A timeout to avoid infinite meta loading.
         val timeoutSyncLoadingMeta: Duration = Duration.ofSeconds(30)
     }
+}
+
+@ExperimentalCoroutinesApi
+suspend fun <T> addToMdc(vararg values: Pair<String, String>, block: suspend CoroutineScope.() -> T): T {
+    val map = MDC.getCopyOfContextMap()
+    val newValues = mapOf(*values)
+    val resultMap = if (map == null) {
+        newValues
+    } else {
+        newValues + map
+    }
+    return withContext(RaribleMDCContext(resultMap), block)
 }
