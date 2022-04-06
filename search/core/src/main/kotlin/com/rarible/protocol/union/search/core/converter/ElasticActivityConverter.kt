@@ -297,8 +297,8 @@ class ElasticActivityConverter {
 
     private fun bothCollections(left: AssetTypeDto, right: AssetTypeDto): ElasticActivity.Collection {
         return ElasticActivity.Collection(
-            make = left.ext.contract,
-            take = right.ext.contract,
+            make = left.ext.collectionId?.value ?: "", //TODO check if null value is possible here
+            take = right.ext.collectionId?.value,
         )
     }
 
