@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.core.service.dummy
 
 import com.rarible.protocol.union.core.exception.UnionNotFoundException
+import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.core.service.CollectionService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -14,9 +15,9 @@ class DummyCollectionService(
     override suspend fun getAllCollections(
         continuation: String?,
         size: Int
-    ) : Page<CollectionDto> = Page.empty()
+    ) : Page<UnionCollection> = Page.empty()
 
-    override suspend fun getCollectionById(collectionId: String): CollectionDto {
+    override suspend fun getCollectionById(collectionId: String): UnionCollection {
         throw UnionNotFoundException("Collection [$collectionId] not found, ${blockchain.name} is not available")
     }
 
@@ -28,7 +29,7 @@ class DummyCollectionService(
         owner: String,
         continuation: String?,
         size: Int
-    ): Page<CollectionDto> {
+    ): Page<UnionCollection> {
         return Page.empty()
     }
 }

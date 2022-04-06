@@ -16,8 +16,8 @@ sealed  class UnionCollectionEvent {
 
 data class UnionCollectionUpdateEvent(
     override val collectionId: CollectionIdDto,
-    val collection: CollectionDto
+    val collection: UnionCollection
 ) : UnionCollectionEvent() {
-    constructor(collection: CollectionDto) : this(collection.id, collection)
+    constructor(collection: UnionCollection) : this(collection.id, collection)
 }
 

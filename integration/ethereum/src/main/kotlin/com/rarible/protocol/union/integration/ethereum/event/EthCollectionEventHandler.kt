@@ -5,16 +5,17 @@ import com.rarible.protocol.dto.NftCollectionEventDto
 import com.rarible.protocol.dto.NftCollectionUpdateEventDto
 import com.rarible.protocol.union.core.handler.AbstractBlockchainEventHandler
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
+import com.rarible.protocol.union.core.model.UnionCollectionEvent
+import com.rarible.protocol.union.core.model.UnionCollectionUpdateEvent
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionEventDto
-import com.rarible.protocol.union.dto.CollectionUpdateEventDto
 import com.rarible.protocol.union.integration.ethereum.converter.EthCollectionConverter
 import org.slf4j.LoggerFactory
 
 abstract class EthCollectionEventHandler(
     blockchain: BlockchainDto,
-    override val handler: IncomingEventHandler<CollectionEventDto>
-) : AbstractBlockchainEventHandler<NftCollectionEventDto, CollectionEventDto>(blockchain) {
+    override val handler: IncomingEventHandler<UnionCollectionEvent>
+) : AbstractBlockchainEventHandler<NftCollectionEventDto, UnionCollectionEvent>(blockchain) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -24,11 +25,7 @@ abstract class EthCollectionEventHandler(
         when (event) {
             is NftCollectionUpdateEventDto -> {
                 val collection = EthCollectionConverter.convert(event.collection, blockchain)
-                val unionCollectionEvent = CollectionUpdateEventDto(
-                    collectionId = collection.id,
-                    eventId = event.eventId,
-                    collection = collection
-                )
+                val unionCollectionEvent = UnionCollectionUpdateEvent(collection)
                 handler.onEvent(unionCollectionEvent)
             }
         }
@@ -36,14 +33,14 @@ abstract class EthCollectionEventHandler(
 }
 
 open class EthereumCollectionEventHandler(
-    handler: IncomingEventHandler<CollectionEventDto>
+    handler: IncomingEventHandler<UnionCollectionEvent>
 ) : EthCollectionEventHandler(BlockchainDto.ETHEREUM, handler) {
     @CaptureTransaction("CollectionEvent#ETHEREUM")
     override suspend fun handle(event: NftCollectionEventDto) = handleInternal(event)
 }
 
 open class PolygonCollectionEventHandler(
-    handler: IncomingEventHandler<CollectionEventDto>
+    handler: IncomingEventHandler<UnionCollectionEvent>
 ) : EthCollectionEventHandler(BlockchainDto.POLYGON, handler) {
     @CaptureTransaction("CollectionEvent#POLYGON")
     override suspend fun handle(event: NftCollectionEventDto) = handleInternal(event)

@@ -2,8 +2,8 @@ package com.rarible.protocol.union.listener.service
 
 import com.rarible.core.common.optimisticLock
 import com.rarible.protocol.union.core.event.OutgoingCollectionEventListener
+import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.core.service.ReconciliationEventService
-import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.CollectionUpdateEventDto
 import com.rarible.protocol.union.dto.OrderDto
@@ -27,7 +27,7 @@ class EnrichmentCollectionEventService(
 
     private val logger = LoggerFactory.getLogger(EnrichmentCollectionEventService::class.java)
 
-    suspend fun onCollectionUpdate(collection: CollectionDto){
+    suspend fun onCollectionUpdate(collection: UnionCollection){
         val existing = enrichmentCollectionService.getOrEmpty(ShortCollectionId(collection.id))
         val updateEvent = buildUpdateEvent(short = existing, collection = collection)
         sendUpdate(updateEvent)
@@ -90,7 +90,7 @@ class EnrichmentCollectionEventService(
     private suspend fun saveAndNotify(
         updated: ShortCollection,
         notificationEnabled: Boolean,
-        collection: CollectionDto? = null,
+        collection: UnionCollection? = null,
         order: OrderDto? = null
     ) {
         if (!notificationEnabled) {
@@ -106,7 +106,7 @@ class EnrichmentCollectionEventService(
     private suspend fun cleanupAndNotify(
         updated: ShortCollection,
         notificationEnabled: Boolean,
-        item: CollectionDto? = null,
+        collection: UnionCollection? = null,
         order: OrderDto? = null,
     ) {
         if (!notificationEnabled) {
@@ -114,19 +114,19 @@ class EnrichmentCollectionEventService(
             return
         }
 
-        val event = buildUpdateEvent(updated, item, order)
+        val event = buildUpdateEvent(updated, collection, order)
         enrichmentCollectionService.delete(updated.id)
         sendUpdate(event)
     }
 
     private suspend fun buildUpdateEvent(
         short: ShortCollection,
-        collection: CollectionDto? = null,
+        collection: UnionCollection? = null,
         order: OrderDto? = null,
     ): CollectionUpdateEventDto {
         val dto = enrichmentCollectionService.enrichCollection(
             shortCollection = short,
-            collectionDto = collection,
+            collection = collection,
             orders = listOfNotNull(order).associateBy { it.id },
         )
 

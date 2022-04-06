@@ -5,6 +5,8 @@ import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.apm.SpanType
 import com.rarible.protocol.union.enrichment.model.ShortCollection
 import com.rarible.protocol.union.enrichment.model.ShortCollectionId
+import com.rarible.protocol.union.enrichment.model.ShortItem
+import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortOrder
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.asFlow
@@ -13,10 +15,12 @@ import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
+import org.springframework.data.mongodb.core.find
 import org.springframework.data.mongodb.core.findById
 import org.springframework.data.mongodb.core.index.Index
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
+import org.springframework.data.mongodb.core.query.inValues
 import org.springframework.data.mongodb.core.query.isEqualTo
 import org.springframework.stereotype.Component
 
@@ -50,8 +54,9 @@ class DefaultCollectionRepository(
         return template.remove(Query(criteria), collection).awaitFirstOrNull()
     }
 
-    override suspend fun getAll(): List<ShortCollection> {
-        return template.findAll(ShortCollection::class.java, collection).asFlow().toList()
+    override suspend fun getAll(ids: List<ShortCollectionId>): List<ShortCollection> {
+        val criteria = Criteria("_id").inValues(ids)
+        return template.find<ShortCollection>(Query(criteria)).collectList().awaitFirst()
     }
 
     companion object {

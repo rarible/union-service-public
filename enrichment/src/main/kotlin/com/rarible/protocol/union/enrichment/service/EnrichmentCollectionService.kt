@@ -4,11 +4,12 @@ import com.mongodb.client.result.DeleteResult
 import com.rarible.core.apm.SpanType
 import com.rarible.core.apm.withSpan
 import com.rarible.core.common.nowMillis
+import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.core.service.CollectionService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
-import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
+import com.rarible.protocol.union.enrichment.converter.EnrichmentCollectionConverter
 import com.rarible.protocol.union.enrichment.model.ShortCollection
 import com.rarible.protocol.union.enrichment.model.ShortCollectionId
 import com.rarible.protocol.union.enrichment.repository.CollectionRepository
@@ -41,15 +42,15 @@ class EnrichmentCollectionService(
         return collectionRepository.get(collectionId) ?: ShortCollection.empty(collectionId)
     }
 
-    suspend fun getAll(): List<ShortCollection> {
-        return collectionRepository.getAll()
+    suspend fun findAll(ids: List<ShortCollectionId>): List<ShortCollection> {
+        return collectionRepository.getAll(ids)
     }
 
     suspend fun delete(collectionId: ShortCollectionId): DeleteResult? {
         return collectionRepository.delete(collectionId)
     }
 
-    suspend fun fetch(collectionId: ShortCollectionId): CollectionDto {
+    suspend fun fetch(collectionId: ShortCollectionId): UnionCollection {
         val now = nowMillis()
         val itemDto = collectionServiceRouter.getService(collectionId.blockchain).getCollectionById(collectionId.collectionId)
         logger.info("Fetched collection [{}] ({} ms)", collectionId.toDto().fullId(), spent(now))
@@ -58,14 +59,14 @@ class EnrichmentCollectionService(
 
     suspend fun enrichCollection(
         shortCollection: ShortCollection?,
-        collectionDto: CollectionDto?,
+        collection: UnionCollection?,
         orders: Map<OrderIdDto, OrderDto> = emptyMap(),
         loadMetaSynchronously: Boolean = false
     ) = coroutineScope {
-        require(shortCollection != null || collectionDto != null)
-        val collectionId = shortCollection?.id?.toDto() ?: collectionDto!!.id
-        val fetchedItem = withSpanAsync("fetchCollection") {
-            collectionDto ?: fetch(ShortCollectionId(collectionId))
+        require(shortCollection != null || collection != null)
+        val collectionId = shortCollection?.id?.toDto() ?: collection!!.id
+        val fetchedCollection = withSpanAsync("fetchCollection") {
+            collection ?: fetch(ShortCollectionId(collectionId))
         }
 
         val bestSellOrder = withSpanAsync("fetchBestSellOrder", spanType = SpanType.EXT) {
@@ -79,11 +80,13 @@ class EnrichmentCollectionService(
             .awaitAll().filterNotNull()
             .associateBy { it.id }
 
-        val updatedCollectionDto = fetchedItem.await().copy(
-            bestBidOrder = shortCollection?.bestBidOrder?.let { bestOrders[it.dtoId] },
-            bestSellOrder = shortCollection?.bestSellOrder?.let {bestOrders[it.dtoId]}
+        val collectionDto = EnrichmentCollectionConverter.convert(
+            collection = fetchedCollection.await(),
+            shortCollection = shortCollection,
+            orders = bestOrders
         )
-        updatedCollectionDto
+        logger.info("Enriched collection {}: {}", collectionId.fullId(), collectionDto)
+        collectionDto
     }
 
     private fun <T> CoroutineScope.withSpanAsync(

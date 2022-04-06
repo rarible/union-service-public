@@ -12,6 +12,7 @@ import com.rarible.protocol.union.api.client.CollectionControllerApi
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
+import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.dto.continuation.CombinedContinuation
@@ -68,13 +69,13 @@ class CollectionControllerFt : AbstractIntegrationTest() {
         val collectionId = randomAddress()
         val collectionIdFull = EthConverter.convert(collectionId, BlockchainDto.ETHEREUM)
         val ethCollectionDto = randomEthCollectionDto(collectionId)
-        val collectionDto = EthCollectionConverter.convert(ethCollectionDto, BlockchainDto.ETHEREUM)
+        val ethUnionCollection = EthCollectionConverter.convert(ethCollectionDto, BlockchainDto.ETHEREUM)
         val collectionAsset = randomEthCollectionAsset(collectionId)
         val ethOrder = randomEthV2OrderDto(collectionAsset, randomAddress(), randomEthAssetErc20())
         val ethUnionOrder = ethOrderConverter.convert(ethOrder, BlockchainDto.ETHEREUM)
 
         val shortOrder = ShortOrderConverter.convert(ethUnionOrder)
-        val shortCollection = toShortCollection(collectionDto).copy(bestSellOrder = shortOrder)
+        val shortCollection = toShortCollection(ethUnionCollection).copy(bestSellOrder = shortOrder)
         enrichmentCollectionService.save(shortCollection)
 
 
@@ -248,9 +249,9 @@ class CollectionControllerFt : AbstractIntegrationTest() {
         }
     }
 
-    private fun toShortCollection(collection: CollectionDto): ShortCollection {
+    private fun toShortCollection(collection: UnionCollection): ShortCollection {
         return ShortCollection(
-            blockchain = collection.blockchain,
+            blockchain = collection.id.blockchain,
             collectionId = collection.id.value,
             bestSellOrders = emptyMap(),
             bestBidOrders = emptyMap(),

@@ -3,12 +3,14 @@ package com.rarible.protocol.union.api.controller
 import com.rarible.protocol.union.api.util.BlockchainFilter
 import com.rarible.protocol.union.api.service.CollectionApiService
 import com.rarible.protocol.union.api.service.ItemApiService
+import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.core.service.CollectionService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.dto.CollectionsDto
-import com.rarible.protocol.union.dto.continuation.CollectionContinuation
+import com.rarible.protocol.union.dto.continuation.ContinuationFactory
+import com.rarible.protocol.union.dto.continuation.IdContinuation
 import com.rarible.protocol.union.dto.continuation.page.ArgPaging
 import com.rarible.protocol.union.dto.continuation.page.Page
 import com.rarible.protocol.union.dto.continuation.page.PageSize
@@ -26,7 +28,7 @@ import kotlinx.coroutines.flow.collect
 @RestController
 class CollectionController(
     private val router: BlockchainRouter<CollectionService>,
-    private val apiService: CollectionApiService,
+    private val collectionApiService: CollectionApiService,
     private val itemApiService: ItemApiService,
     private val unionMetaService: UnionMetaService,
     private val enrichmentCollectionService: EnrichmentCollectionService
@@ -40,7 +42,7 @@ class CollectionController(
         size: Int?
     ): ResponseEntity<CollectionsDto> {
         val safeSize = PageSize.COLLECTION.limit(size)
-        val slices = apiService.getAllCollections(blockchains, continuation, safeSize)
+        val slices = collectionApiService.getAllCollections(blockchains, continuation, safeSize)
         val total = slices.sumOf { it.page.total }
         val arg = ArgPaging(CollectionContinuation.ById, slices.map { it.toSlice() }).getSlice(safeSize)
 
@@ -58,9 +60,9 @@ class CollectionController(
     ): ResponseEntity<CollectionDto> {
         val fullCollectionId = IdParser.parseCollectionId(collection)
         val shortCollectionId = ShortCollectionId(fullCollectionId)
-        val collectionDto = router.getService(fullCollectionId.blockchain).getCollectionById(fullCollectionId.value)
+        val unionCollection = router.getService(fullCollectionId.blockchain).getCollectionById(fullCollectionId.value)
         val shortCollection = enrichmentCollectionService.get(shortCollectionId)
-        val enrichedCollection = enrichmentCollectionService.enrichCollection(shortCollection, collectionDto)
+        val enrichedCollection = enrichmentCollectionService.enrichCollection(shortCollection, unionCollection)
         return ResponseEntity.ok(enrichedCollection)
     }
 
@@ -85,7 +87,7 @@ class CollectionController(
             it.getCollectionsByOwner(ownerAddress.value, continuation, safeSize)
         }
 
-        val total = blockchainPages.map { it.total }.sum()
+        val total = blockchainPages.sumOf { it.total }
 
         val combinedPage = Paging(
             CollectionContinuation.ById,
@@ -100,20 +102,28 @@ class CollectionController(
         return ResponseEntity.ok(toDto(combinedPage))
     }
 
-    private fun toDto(page: Page<CollectionDto>): CollectionsDto {
+    private suspend fun toDto(page: Page<UnionCollection>): CollectionsDto {
         return CollectionsDto(
             total = page.total,
             continuation = page.continuation,
-            collections = page.entities
+            collections = collectionApiService.enrich(page).collections
         )
     }
 
-    private fun toDto(page: Slice<CollectionDto>, total: Long): CollectionsDto {
+    private suspend fun toDto(page: Slice<UnionCollection>, total: Long): CollectionsDto {
         return CollectionsDto(
             total = total,
             continuation = page.continuation,
-            collections = page.entities
+            collections = collectionApiService.enrich(page, total).collections
         )
+    }
+
+    object CollectionContinuation {
+        object ById : ContinuationFactory<UnionCollection, IdContinuation> {
+            override fun getContinuation(entity: UnionCollection): IdContinuation {
+                return IdContinuation(entity.id.value)
+            }
+        }
     }
 
 }

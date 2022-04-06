@@ -11,6 +11,7 @@ import com.rarible.protocol.union.core.ConsumerFactory
 import com.rarible.protocol.union.core.handler.BlockchainEventHandler
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.handler.KafkaConsumerWorker
+import com.rarible.protocol.union.core.model.UnionCollectionEvent
 import com.rarible.protocol.union.core.model.UnionItemEvent
 import com.rarible.protocol.union.core.model.UnionOrderEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipEvent
@@ -66,7 +67,7 @@ class TezosConsumerConfiguration(
     }
 
     @Bean
-    fun tezosCollectionEventHandler(handler: IncomingEventHandler<CollectionEventDto>): TezosCollectionEventHandler {
+    fun tezosCollectionEventHandler(handler: IncomingEventHandler<UnionCollectionEvent>): TezosCollectionEventHandler {
         return TezosCollectionEventHandler(handler)
     }
 
@@ -100,7 +101,7 @@ class TezosConsumerConfiguration(
     @Bean
     fun tezosCollectionWorker(
         factory: TezosEventsConsumerFactory,
-        handler: BlockchainEventHandler<TezosCollectionSafeEventDto, CollectionEventDto>
+        handler: BlockchainEventHandler<TezosCollectionSafeEventDto, UnionCollectionEvent>
     ): KafkaConsumerWorker<TezosCollectionSafeEventDto> {
         val consumer = factory.createCollectionConsumer(consumerFactory.itemGroup)
         return consumerFactory.createCollectionConsumer(consumer, handler, daemon, workers)
