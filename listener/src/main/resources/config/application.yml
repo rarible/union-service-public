@@ -132,6 +132,8 @@ listener:
   reconcile-marks:
     rate: PT15S
     delay: PT1M
+  metrics:
+    root-path: "protocol.union.listener"
 
 meta:
   ipfsGateway: "https://rarible.mypinata.cloud/"

@@ -20,7 +20,6 @@ import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
 import com.rarible.protocol.union.enrichment.util.spent
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
@@ -82,8 +81,6 @@ class EnrichmentItemService(
         logger.info("Fetched {} items for collection {} and owner {}", count, address, owner)
     }
 
-    fun findByAuctionId(auctionIdDto: AuctionIdDto) = itemRepository.findByAuction(auctionIdDto)
-
     suspend fun fetch(itemId: ShortItemId): UnionItem {
         val now = nowMillis()
         val itemDto = itemServiceRouter.getService(itemId.blockchain).getItemById(itemId.itemId)
@@ -119,18 +116,13 @@ class EnrichmentItemService(
         val bestSellOrder = async { enrichmentOrderService.fetchOrderIfDiffers(shortItem?.bestSellOrder, orders) }
         val bestBidOrder = async { enrichmentOrderService.fetchOrderIfDiffers(shortItem?.bestBidOrder, orders) }
 
-        val meta = if (item?.meta?.content?.any { it.properties?.mimeType != null } == true) {
-            CompletableDeferred(item.meta)
-        } else {
-            async {
-                if (loadMetaSynchronously || item?.loadMetaSynchronously == true) {
-                    unionMetaService.getAvailableMetaOrLoadSynchronously(itemId, synchronous = true)
-                } else {
-                    unionMetaService.getAvailableMetaOrScheduleLoading(itemId)
-                }
+        val meta = withSpanAsync("fetchMeta", spanType = SpanType.CACHE) {
+            if (loadMetaSynchronously || item?.loadMetaSynchronously == true) {
+                unionMetaService.getAvailableMetaOrLoadSynchronously(itemId, synchronous = true)
+            } else {
+                unionMetaService.getAvailableMetaOrScheduleLoading(itemId)
             }
         }
-
         val bestOrders = listOf(bestSellOrder, bestBidOrder)
             .awaitAll().filterNotNull()
             .associateBy { it.id }
