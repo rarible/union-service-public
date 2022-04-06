@@ -19,7 +19,6 @@ import com.rarible.protocol.union.core.model.UnionItemEvent
 import com.rarible.protocol.union.core.model.UnionOrderEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipEvent
 import com.rarible.protocol.union.dto.ActivityDto
-import com.rarible.protocol.union.dto.CollectionEventDto
 import com.rarible.protocol.union.integration.ethereum.converter.EthActivityConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthAuctionConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
@@ -146,7 +145,7 @@ class EthereumConsumerConfiguration(
     @Bean
     fun ethereumCollectionWorker(
         @Qualifier("ethereum.nft.consumer.factory") factory: NftIndexerEventsConsumerFactory,
-        @Qualifier("ethereum.collection.handler") handler: BlockchainEventHandler<NftCollectionEventDto, CollectionEventDto>
+        @Qualifier("ethereum.collection.handler") handler: BlockchainEventHandler<NftCollectionEventDto, UnionCollectionEvent>
     ): KafkaConsumerWorker<NftCollectionEventDto> {
         val consumer = factory.createCollectionEventsConsumer(consumerFactory.collectionGroup, Blockchain.ETHEREUM)
         return consumerFactory.createCollectionConsumer(consumer, handler, daemon, workers)

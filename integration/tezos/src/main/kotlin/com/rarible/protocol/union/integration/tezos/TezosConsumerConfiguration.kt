@@ -15,7 +15,6 @@ import com.rarible.protocol.union.core.model.UnionCollectionEvent
 import com.rarible.protocol.union.core.model.UnionItemEvent
 import com.rarible.protocol.union.core.model.UnionOrderEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipEvent
-import com.rarible.protocol.union.dto.CollectionEventDto
 import com.rarible.protocol.union.integration.tezos.converter.TezosActivityConverter
 import com.rarible.protocol.union.integration.tezos.converter.TezosOrderConverter
 import com.rarible.protocol.union.integration.tezos.event.TezosActivityEventHandler

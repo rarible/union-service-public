@@ -8,7 +8,6 @@ import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.model.UnionCollectionEvent
 import com.rarible.protocol.union.core.model.UnionCollectionUpdateEvent
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.CollectionEventDto
 import com.rarible.protocol.union.integration.ethereum.converter.EthCollectionConverter
 import org.slf4j.LoggerFactory
 

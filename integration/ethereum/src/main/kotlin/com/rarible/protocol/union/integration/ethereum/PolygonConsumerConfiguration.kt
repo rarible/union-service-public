@@ -17,7 +17,6 @@ import com.rarible.protocol.union.core.model.UnionItemEvent
 import com.rarible.protocol.union.core.model.UnionOrderEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipEvent
 import com.rarible.protocol.union.dto.ActivityDto
-import com.rarible.protocol.union.dto.CollectionEventDto
 import com.rarible.protocol.union.integration.ethereum.converter.EthActivityConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
 import com.rarible.protocol.union.integration.ethereum.event.EthActivityEventHandler
@@ -133,7 +132,7 @@ class PolygonConsumerConfiguration(
     @Bean
     fun polygonCollectionWorker(
         @Qualifier("polygon.nft.consumer.factory") factory: NftIndexerEventsConsumerFactory,
-        @Qualifier("polygon.collection.handler") handler: BlockchainEventHandler<NftCollectionEventDto, CollectionEventDto>
+        @Qualifier("polygon.collection.handler") handler: BlockchainEventHandler<NftCollectionEventDto, UnionCollectionEvent>
     ): KafkaConsumerWorker<NftCollectionEventDto> {
         val consumer = factory.createCollectionEventsConsumer(consumerFactory.collectionGroup, Blockchain.POLYGON)
         return consumerFactory.createCollectionConsumer(consumer, handler, daemon, workers)

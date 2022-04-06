@@ -3,8 +3,6 @@ package com.rarible.protocol.union.enrichment.repository
 import com.mongodb.client.result.DeleteResult
 import com.rarible.protocol.union.enrichment.model.ShortCollection
 import com.rarible.protocol.union.enrichment.model.ShortCollectionId
-import com.rarible.protocol.union.enrichment.model.ShortItem
-import com.rarible.protocol.union.enrichment.model.ShortItemId
 
 interface CollectionRepository {
     suspend fun createIndices()

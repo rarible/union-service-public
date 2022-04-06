@@ -7,8 +7,6 @@ import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.model.UnionCollectionEvent
 import com.rarible.protocol.union.core.model.UnionCollectionUpdateEvent
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.CollectionEventDto
-import com.rarible.protocol.union.dto.CollectionUpdateEventDto
 import com.rarible.protocol.union.integration.tezos.converter.TezosCollectionConverter
 import org.slf4j.LoggerFactory
 

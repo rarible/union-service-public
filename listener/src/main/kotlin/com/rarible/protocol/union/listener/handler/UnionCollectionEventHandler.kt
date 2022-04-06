@@ -8,8 +8,6 @@ import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.model.UnionCollectionEvent
 import com.rarible.protocol.union.core.model.UnionCollectionUpdateEvent
 import com.rarible.protocol.union.core.model.UnionWrappedEvent
-import com.rarible.protocol.union.dto.CollectionEventDto
-import com.rarible.protocol.union.dto.CollectionUpdateEventDto
 import org.springframework.stereotype.Component
 
 @Component
