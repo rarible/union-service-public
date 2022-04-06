@@ -1,27 +1,24 @@
 package com.rarible.protocol.union.api.configuration
 
+//import com.rarible.core.task.EnableRaribleTask
 import com.rarible.core.application.ApplicationEnvironmentInfo
-import com.rarible.core.task.EnableRaribleTask
-import com.rarible.ethereum.domain.Blockchain
-import com.rarible.protocol.dto.NftItemEventDto
-import com.rarible.protocol.nft.api.subscriber.NftIndexerEventsConsumerFactory
-import com.rarible.protocol.union.core.ConsumerFactory
-import com.rarible.protocol.union.core.handler.IncomingEventHandler
-import com.rarible.protocol.union.core.handler.KafkaConsumerWorker
-import com.rarible.protocol.union.core.model.UnionItemEvent
+import com.rarible.core.daemon.sequential.ConsumerWorker
+import com.rarible.protocol.union.api.handler.UnionItemEventHandler
+import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.integration.ethereum.EthereumIntegrationProperties
-import com.rarible.protocol.union.integration.ethereum.event.EthItemEventHandler
-import com.rarible.protocol.union.integration.ethereum.event.EthereumItemEventHandler
+import com.rarible.protocol.union.subscriber.UnionEventsConsumerFactory
+import io.micrometer.core.instrument.MeterRegistry
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import java.util.*
 
 @Configuration
-@EnableRaribleTask
+//@EnableRaribleTask
 class UnionListenerConfig(
-    private val consumerFactory: ConsumerFactory,
     properties: EthereumIntegrationProperties,
     applicationEnvironmentInfo: ApplicationEnvironmentInfo,
+    private val meterRegistry: MeterRegistry
 ) {
     private val env = applicationEnvironmentInfo.name
     private val host = applicationEnvironmentInfo.host
@@ -32,24 +29,24 @@ class UnionListenerConfig(
     private val daemon = properties.daemon
 
     @Bean
-    @Qualifier("ethereum.nft.consumer.factory.websocket")
-    fun ethereumNftIndexerConsumerWebsocketFactory(): NftIndexerEventsConsumerFactory {
+    @Qualifier("nft.consumer.factory.websocket")
+    fun ethereumNftIndexerConsumerWebsocketFactory(): UnionEventsConsumerFactory {
         val replicaSet = consumer.brokerReplicaSet
-        return NftIndexerEventsConsumerFactory(replicaSet!!, host, env)
-    }
-
-    @Bean
-    @Qualifier("ethereum.item.handler.websocket")
-    fun ethereumItemEventWebsocketHandler(handler: IncomingEventHandler<UnionItemEvent>): EthItemEventHandler {
-        return EthereumItemEventHandler(handler)
+        return UnionEventsConsumerFactory(replicaSet!!, host, env)
     }
 
     @Bean
     fun ethereumItemWebsocketWorker(
-        @Qualifier("ethereum.nft.consumer.factory.websocket") factory: NftIndexerEventsConsumerFactory,
-        @Qualifier("ethereum.item.handler.websocket") handler: EthItemEventHandler
-    ): KafkaConsumerWorker<NftItemEventDto> {
-        val consumer = factory.createItemEventsConsumer(consumerFactory.itemGroup, Blockchain.ETHEREUM)
-        return consumerFactory.createItemConsumer(consumer, handler, daemon, workers)
+        @Qualifier("nft.consumer.factory.websocket") factory: UnionEventsConsumerFactory
+
+    ): ConsumerWorker<ItemEventDto> {
+        val consumer = factory.createItemConsumer(UUID.randomUUID().toString())
+      return  ConsumerWorker(
+          consumer = consumer,
+          properties = daemon,
+          eventHandler = UnionItemEventHandler(),
+          meterRegistry = meterRegistry,
+          workerName = "internal-websocket"
+      )
     }
 }

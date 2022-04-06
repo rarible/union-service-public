@@ -56,3 +56,7 @@ integration:
         item: 1
         ownership: 1
         order: 1
+protocol:
+  union:
+    subscriber:
+      broker-replica-set: ${kafka.hosts}
