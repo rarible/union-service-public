@@ -2,9 +2,17 @@ package com.rarible.protocol.union.integration.immutablex.service
 
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.rarible.protocol.union.dto.*
+import com.rarible.protocol.union.dto.ActivityTypeDto
+import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.MintActivityDto
+import com.rarible.protocol.union.dto.OrderMatchSellDto
+import com.rarible.protocol.union.dto.TransferActivityDto
+import com.rarible.protocol.union.dto.UserActivityTypeDto
 import com.rarible.protocol.union.integration.immutablex.converter.ImmutablexActivityConverter
-import com.rarible.protocol.union.integration.immutablex.dto.*
+import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexMint
+import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexPage
+import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexTrade
+import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexTransfer
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
@@ -54,7 +62,7 @@ internal class ImmutablexActivityServiceTest {
             coEvery { getTransfers(any(), any(), any(), any(), any(), any()) } returns expectedTransfersActivity
             coEvery { getTrades(any(), any(), any(), any(), any(), any()) } returns expectedTradesActivity
         },
-        ImmutablexActivityConverter(),
+        ImmutablexActivityConverter(BlockchainDto.IMMUTABLEX),
     )
 
     @Test

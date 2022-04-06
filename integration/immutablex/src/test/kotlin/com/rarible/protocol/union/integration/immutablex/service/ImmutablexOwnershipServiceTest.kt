@@ -75,7 +75,7 @@ internal class ImmutablexOwnershipServiceTest {
 
         Assertions.assertThat(ownership).isEqualTo(
             Page(
-                1,
+                0,
                 null,
                 listOf(
                     UnionOwnership(

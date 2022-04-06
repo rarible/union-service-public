@@ -1,12 +1,28 @@
 package com.rarible.protocol.union.integration.immutablex.converter
 
-import com.rarible.protocol.union.dto.*
-import com.rarible.protocol.union.integration.immutablex.dto.*
-import org.slf4j.LoggerFactory
+import com.rarible.protocol.union.dto.ActivityDto
+import com.rarible.protocol.union.dto.AssetDto
+import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.BlockchainGroupDto
+import com.rarible.protocol.union.dto.ContractAddress
+import com.rarible.protocol.union.dto.EthErc20AssetTypeDto
+import com.rarible.protocol.union.dto.EthErc721AssetTypeDto
+import com.rarible.protocol.union.dto.EthEthereumAssetTypeDto
+import com.rarible.protocol.union.dto.MintActivityDto
+import com.rarible.protocol.union.dto.OrderActivitySourceDto
+import com.rarible.protocol.union.dto.OrderMatchSellDto
+import com.rarible.protocol.union.dto.TransferActivityDto
+import com.rarible.protocol.union.dto.UnionAddress
+import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexEvent
+import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexMint
+import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexTrade
+import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexTransfer
+import com.rarible.protocol.union.integration.immutablex.dto.TradeSide
 import java.math.BigDecimal
 import java.math.BigInteger
+import org.slf4j.LoggerFactory
 
-class ImmutablexActivityConverter {
+class ImmutablexActivityConverter (private val blockchain: BlockchainDto) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -14,7 +30,7 @@ class ImmutablexActivityConverter {
         try {
             return convertInternal(activity)
         } catch (e: Exception) {
-            logger.error("Failed to convert {} Activity: {} \n{}", BlockchainDto.IMMUTABLEX, e.message, activity)
+            logger.error("Failed to convert {} Activity: {} \n{}", blockchain, e.message, activity)
             throw e
         }
     }
@@ -64,7 +80,7 @@ class ImmutablexActivityConverter {
     private fun convertAsset(asset: TradeSide) =
         when (asset.tokenType) {
             "ETH" -> AssetDto(
-                type = EthEthereumAssetTypeDto(BlockchainDto.IMMUTABLEX),
+                type = EthEthereumAssetTypeDto(blockchain),
                 value = asset.sold.setScale(18)
             )
             "ERC20" -> AssetDto(
@@ -80,5 +96,5 @@ class ImmutablexActivityConverter {
 
     private fun unionAddress(value: String) = UnionAddress(BlockchainGroupDto.IMMUTABLEX, value)
 
-    private fun contractAddress(value: String) = ContractAddress(BlockchainDto.IMMUTABLEX, value)
+    private fun contractAddress(value: String) = ContractAddress(blockchain, value)
 }

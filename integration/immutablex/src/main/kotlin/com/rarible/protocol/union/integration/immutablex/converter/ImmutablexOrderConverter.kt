@@ -4,12 +4,25 @@ import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.core.service.CurrencyService
 import com.rarible.protocol.union.core.util.evalMakePrice
 import com.rarible.protocol.union.core.util.evalTakePrice
-import com.rarible.protocol.union.dto.*
+import com.rarible.protocol.union.dto.AssetDto
+import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.BlockchainGroupDto
+import com.rarible.protocol.union.dto.ContractAddress
+import com.rarible.protocol.union.dto.EthErc721AssetTypeDto
+import com.rarible.protocol.union.dto.EthEthereumAssetTypeDto
+import com.rarible.protocol.union.dto.ImmutablexOrderDataV1Dto
+import com.rarible.protocol.union.dto.OrderDataDto
+import com.rarible.protocol.union.dto.OrderDto
+import com.rarible.protocol.union.dto.OrderIdDto
+import com.rarible.protocol.union.dto.OrderStatusDto
+import com.rarible.protocol.union.dto.PayoutDto
+import com.rarible.protocol.union.dto.PlatformDto
+import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexOrder
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexOrderSide
+import java.math.BigDecimal
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.math.BigDecimal
 
 class ImmutablexOrderConverter(
     private val currencyService: CurrencyService

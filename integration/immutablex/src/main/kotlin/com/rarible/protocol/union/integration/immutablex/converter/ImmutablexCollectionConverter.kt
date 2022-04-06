@@ -36,7 +36,7 @@ object ImmutablexCollectionConverter {
 
     fun convert(page: ImmutablexPage<ImmutablexCollection>): Page<CollectionDto> {
         return Page(
-            total = page.result.size.toLong(),
+            total = 0L,
             continuation = page.cursor,
             entities = page.result.map { convert(it) }
         )

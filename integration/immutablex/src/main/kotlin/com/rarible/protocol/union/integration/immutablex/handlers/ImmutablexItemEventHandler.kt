@@ -6,13 +6,19 @@ import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.UnionItemDeleteEvent
 import com.rarible.protocol.union.core.model.UnionItemEvent
 import com.rarible.protocol.union.core.model.UnionItemUpdateEvent
-import com.rarible.protocol.union.dto.*
+import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.BlockchainGroupDto
+import com.rarible.protocol.union.dto.CollectionIdDto
+import com.rarible.protocol.union.dto.CreatorDto
+import com.rarible.protocol.union.dto.ItemIdDto
+import com.rarible.protocol.union.dto.RoyaltyDto
+import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexEvent
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexMint
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexTransfer
-import scalether.domain.Address
 import java.math.BigDecimal
 import java.math.BigInteger
+import scalether.domain.Address
 
 class ImmutablexItemEventHandler(
     override val handler: IncomingEventHandler<UnionItemEvent>,

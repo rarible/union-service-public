@@ -27,7 +27,7 @@ class ImmutablexScanner(
     private val activityHandler: ImmutablexActivityEventHandler,
     private val ownershipEventHandler: ImmutablexOwnershipEventHandler,
     private val itemEventHandler: ImmutablexItemEventHandler,
-    private val orderEventHandler: ImmutablexOrderEventHandler
+    private val orderEventHandler: ImmutablexOrderEventHandler,
 ) {
 
     private var info: ImmutablexState by Delegates.notNull()
@@ -37,30 +37,50 @@ class ImmutablexScanner(
         info = mongo.findById(1L) ?: mongo.save(ImmutablexState(id = 1L))
     }
 
-    @Scheduled(initialDelay = 1L, fixedDelay = 5L, timeUnit = TimeUnit.SECONDS)
+    @Scheduled(
+        initialDelayString = "\${integration.immutablex.scanner.job.initialDelay.mints}",
+        fixedDelayString = "\${integration.immutablex.scanner.job.fixedDelay}",
+        timeUnit = TimeUnit.SECONDS)
     fun mints() {
         runBlocking { listen(eventsApi::mints, info::lastMintCursor) }
     }
-    @Scheduled(initialDelay = 2L, fixedDelay = 5L, timeUnit = TimeUnit.SECONDS)
+
+    @Scheduled(
+        initialDelayString = "\${integration.immutablex.scanner.job.initialDelay.transfers}",
+        fixedDelayString = "\${integration.immutablex.scanner.job.fixedDelay}",
+        timeUnit = TimeUnit.SECONDS)
     fun transfers() {
         runBlocking { listen(eventsApi::transfers, info::lastTransferCursor) }
     }
-    @Scheduled(initialDelay = 3L, fixedDelay = 5L, timeUnit = TimeUnit.SECONDS)
+
+    @Scheduled(
+        initialDelayString = "\${integration.immutablex.scanner.job.initialDelay.trades}",
+        fixedDelayString = "\${integration.immutablex.scanner.job.fixedDelay}",
+        timeUnit = TimeUnit.SECONDS)
     fun trades() {
         runBlocking { listen(eventsApi::trades, info::lastTradesCursor) }
     }
 
-    @Scheduled(initialDelay = 4L, fixedDelay = 5L, timeUnit = TimeUnit.SECONDS)
+    @Scheduled(
+        initialDelayString = "\${integration.immutablex.scanner.job.initialDelay.deposits}",
+        fixedDelayString = "\${integration.immutablex.scanner.job.fixedDelay}",
+        timeUnit = TimeUnit.SECONDS)
     fun deposits() {
         runBlocking { listen(eventsApi::deposits, info::lastDepositCursor) }
     }
 
-    @Scheduled(initialDelay = 5L, fixedDelay = 5L, timeUnit = TimeUnit.SECONDS)
+    @Scheduled(
+        initialDelayString = "\${integration.immutablex.scanner.job.initialDelay.withdrawals}",
+        fixedDelayString = "\${integration.immutablex.scanner.job.fixedDelay}",
+        timeUnit = TimeUnit.SECONDS)
     fun withdrawals() {
         runBlocking { listen(eventsApi::withdrawals, info::lastWithdrawCursor) }
     }
 
-    @Scheduled(initialDelay = 5L, fixedDelay = 5L, timeUnit = TimeUnit.SECONDS)
+    @Scheduled(
+        initialDelayString = "\${integration.immutablex.scanner.job.initialDelay.orders}",
+        fixedDelayString = "\${integration.immutablex.scanner.job.fixedDelay}",
+        timeUnit = TimeUnit.SECONDS)
     fun orders() {
         runBlocking {
             val page = eventsApi.orders(info.lastOrderCursor)
@@ -75,7 +95,10 @@ class ImmutablexScanner(
         }
     }
 
-    private suspend fun <T: ImmutablexEvent>listen(apiMethod: suspend (cursor: String?) -> ImmutablexPage<T>, cursorField: KProperty<String?>) {
+    private suspend fun <T : ImmutablexEvent> listen(
+        apiMethod: suspend (cursor: String?) -> ImmutablexPage<T>,
+        cursorField: KProperty<String?>,
+    ) {
         val page = apiMethod(cursorField.call())
         if (page.result.isNotEmpty()) {
             handle(page.result)
@@ -86,7 +109,7 @@ class ImmutablexScanner(
 
     }
 
-    private suspend fun <T: ImmutablexEvent>handle(items: List<T>) {
+    private suspend fun <T : ImmutablexEvent> handle(items: List<T>) {
         items.forEach {
             activityHandler.handle(it)
             itemEventHandler.handle(it)

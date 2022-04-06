@@ -71,9 +71,9 @@ class ImmutablexApiConfiguration {
     fun eventsApi(immutablexWebClient: WebClient) = EventsApi(immutablexWebClient)
 
 
-
     @Bean
-    fun immutablexActivityConverter(): ImmutablexActivityConverter = ImmutablexActivityConverter()
+    fun immutablexActivityConverter(): ImmutablexActivityConverter =
+        ImmutablexActivityConverter(BlockchainDto.IMMUTABLEX)
 
     @Bean
     fun immutablesActivityService(

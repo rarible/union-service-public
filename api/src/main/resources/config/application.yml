@@ -65,6 +65,16 @@ integration:
     enabled: ${consul.immutablex.enabled:true}
     client:
       url: ${consul.immutablex.api.baseUrl:}
+    scanner:
+      job:
+        fixedDelay: 5
+        initialDelay:
+          mints: 1
+          transfers: 2
+          trades: 3
+          deposits: 4
+          withdrawals: 5
+          orders: 6
 
 common:
   producer:

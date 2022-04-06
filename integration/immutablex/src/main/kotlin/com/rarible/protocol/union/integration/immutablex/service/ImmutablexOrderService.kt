@@ -2,7 +2,14 @@ package com.rarible.protocol.union.integration.immutablex.service
 
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
-import com.rarible.protocol.union.dto.*
+import com.rarible.protocol.union.dto.AssetTypeDto
+import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.EthEthereumAssetTypeDto
+import com.rarible.protocol.union.dto.OrderDto
+import com.rarible.protocol.union.dto.OrderSortDto
+import com.rarible.protocol.union.dto.OrderStatusDto
+import com.rarible.protocol.union.dto.PlatformDto
+import com.rarible.protocol.union.dto.continuation.OrderContinuation
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexApiClient
 import com.rarible.protocol.union.integration.immutablex.converter.ImmutablexOrderConverter
@@ -24,8 +31,8 @@ class ImmutablexOrderService(
         val orders =  client.getAllOrders(continuation, size, sort, status).map {
             orderConverter.convert(it, blockchain)
         }
-        val cont = if (orders.isEmpty()) null else "${orders.last().lastUpdatedAt.toEpochMilli()}_${orders.last().id}"
-        return Slice(continuation = cont, entities = orders)
+        val cont = if (orders.isEmpty()) null else OrderContinuation.ByLastUpdatedAndIdDesc.getContinuation(orders.last())
+        return Slice(continuation = "$cont", entities = orders)
     }
 
     override suspend fun getOrderById(id: String): OrderDto {
@@ -81,8 +88,8 @@ class ImmutablexOrderService(
         val orders = client.getSellOrders(continuation, size).map {
             orderConverter.convert(it, blockchain)
         }
-        val cont = if (orders.isEmpty()) null else "${orders.last().lastUpdatedAt.toEpochMilli()}_${orders.last().id}"
-        return Slice(continuation = cont, entities = orders)
+        val cont = if (orders.isEmpty()) null else OrderContinuation.ByLastUpdatedAndIdDesc.getContinuation(orders.last())
+        return Slice(continuation = "$cont", entities = orders)
 
     }
 
@@ -96,8 +103,8 @@ class ImmutablexOrderService(
         val orders = client.getSellOrdersByCollection(collection, continuation, size).map {
             orderConverter.convert(it, blockchain)
         }
-        val cont = if (orders.isEmpty()) null else "${orders.last().lastUpdatedAt.toEpochMilli()}_${orders.last().id}"
-        return Slice(continuation = cont, entities = orders)
+        val cont = if (orders.isEmpty()) null else OrderContinuation.ByLastUpdatedAndIdDesc.getContinuation(orders.last())
+        return Slice(continuation = "$cont", entities = orders)
 
     }
 
@@ -114,8 +121,8 @@ class ImmutablexOrderService(
         val orders = client.getSellOrdersByItem(itemId, maker, status, currencyId, continuation, size).map {
             orderConverter.convert(it, blockchain)
         }
-        val cont = if (orders.isEmpty()) null else "${orders.last().lastUpdatedAt.toEpochMilli()}_${orders.last().id}"
-        return Slice(continuation = cont, entities = orders)
+        val cont = if (orders.isEmpty()) null else OrderContinuation.ByLastUpdatedAndIdDesc.getContinuation(orders.last())
+        return Slice(continuation = "$cont", entities = orders)
 
     }
 
@@ -130,8 +137,8 @@ class ImmutablexOrderService(
         val orders = client.getSellOrdersByMaker(maker, status, continuation, size).map {
             orderConverter.convert(it, blockchain)
         }
-        val cont = if (orders.isEmpty()) null else "${orders.last().lastUpdatedAt.toEpochMilli()}_${orders.last().id}"
-        return Slice(continuation = cont, entities = orders)
+        val cont = if (orders.isEmpty()) null else OrderContinuation.ByLastUpdatedAndIdDesc.getContinuation(orders.last())
+        return Slice(continuation = "$cont", entities = orders)
 
     }
 }

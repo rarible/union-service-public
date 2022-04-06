@@ -29,7 +29,7 @@ class ImmutablexOwnershipService(
 
     override suspend fun getOwnershipsByItem(itemId: String, continuation: String?, size: Int): Page<UnionOwnership> {
         val asset = client.getAsset(itemId)
-        return Page(1, null, listOf(convert(asset)))
+        return Page(0L, null, listOf(convert(asset)))
     }
 
     override suspend fun getOwnershipsByOwner(address: String, continuation: String?, size: Int): Page<UnionOwnership> {
@@ -60,7 +60,7 @@ class ImmutablexOwnershipService(
 
     private fun convert(page: ImmutablexAssetsPage): Page<UnionOwnership> {
         return Page(
-            page.result.size.toLong(),
+            0L,
             page.cursor,
             page.result.map { convert(it) }
         )

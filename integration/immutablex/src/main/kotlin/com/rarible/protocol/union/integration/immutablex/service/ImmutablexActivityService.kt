@@ -2,7 +2,11 @@ package com.rarible.protocol.union.integration.immutablex.service
 
 import com.rarible.protocol.union.core.service.ActivityService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
-import com.rarible.protocol.union.dto.*
+import com.rarible.protocol.union.dto.ActivityDto
+import com.rarible.protocol.union.dto.ActivitySortDto
+import com.rarible.protocol.union.dto.ActivityTypeDto
+import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.UserActivityTypeDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexApiClient
 import com.rarible.protocol.union.integration.immutablex.converter.ImmutablexActivityConverter
