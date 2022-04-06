@@ -13,14 +13,15 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.reactive.awaitFirst
+import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingleOrNull
-import org.springframework.data.elasticsearch.core.ElasticsearchOperations
+import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations
 
 class ActivityTask(
     private val config: SearchReindexerConfiguration,
     private val activityClient: ActivityControllerApi,
     private val taskRepository: TaskRepository,
-    private val esOperations: ElasticsearchOperations,
+    private val esOperations: ReactiveElasticsearchOperations,
     private val converter: ElasticActivityConverter
 ): TaskHandler<String> {
     override val type: String
@@ -69,7 +70,7 @@ class ActivityTask(
 
                 esOperations.save(
                     res.activities.mapAsync(converter::convert)
-                )
+                ).awaitSingle()
 
                 emit(res.continuation ?: "")
             }

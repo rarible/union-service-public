@@ -6,7 +6,6 @@ import com.rarible.protocol.union.search.core.model.ActivitySort
 import com.rarible.protocol.union.search.core.repository.ActivityEsRepository
 import com.rarible.protocol.union.search.test.IntegrationTest
 import com.rarible.protocol.union.search.test.buildActivity
-import io.mockk.InternalPlatformDsl.toStr
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitLast
 import kotlinx.coroutines.runBlocking

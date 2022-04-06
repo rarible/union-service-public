@@ -6,7 +6,6 @@ import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.search.core.converter.ElasticActivityConverter
 import com.rarible.protocol.union.search.core.repository.ActivityEsRepository
 import kotlinx.coroutines.reactive.awaitLast
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
