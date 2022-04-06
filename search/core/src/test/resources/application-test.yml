@@ -3,6 +3,8 @@ spring:
     name: union-search-core
 
 
+
+
   data:
     elasticsearch:
       cluster-name: docker-cluster
@@ -16,3 +18,11 @@ spring:
   elasticsearch:
     rest:
       uris: ${elasticsearch.api-nodes}
+
+logging:
+  level:
+    org:
+      springframework:
+        data:
+          elasticsearch:
+            core: DEBUG
