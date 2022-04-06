@@ -1,11 +1,11 @@
 package com.rarible.protocol.union.enrichment.service
 
 import com.mongodb.client.result.DeleteResult
-import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.apm.SpanType
 import com.rarible.core.apm.withSpan
 import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.core.model.UnionItem
+import com.rarible.protocol.union.core.model.loadMetaSynchronously
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.AuctionDto
@@ -20,7 +20,6 @@ import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
 import com.rarible.protocol.union.enrichment.util.spent
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
@@ -34,7 +33,6 @@ import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClientResponseException
 
 @Component
-@CaptureSpan(type = SpanType.APP)
 class EnrichmentItemService(
     private val itemServiceRouter: BlockchainRouter<ItemService>,
     private val itemRepository: ItemRepository,
@@ -83,8 +81,6 @@ class EnrichmentItemService(
         logger.info("Fetched {} items for collection {} and owner {}", count, address, owner)
     }
 
-    fun findByAuctionId(auctionIdDto: AuctionIdDto) = itemRepository.findByAuction(auctionIdDto)
-
     suspend fun fetch(itemId: ShortItemId): UnionItem {
         val now = nowMillis()
         val itemDto = itemServiceRouter.getService(itemId.blockchain).getItemById(itemId.itemId)
@@ -113,38 +109,27 @@ class EnrichmentItemService(
         loadMetaSynchronously: Boolean = false
     ) = coroutineScope {
 
-    require(shortItem != null || item != null)
+        require(shortItem != null || item != null)
         val itemId = shortItem?.id?.toDto() ?: item!!.id
-        val fetchedItem = withSpanAsync("fetchItem", spanType = SpanType.EXT) {
-            item ?: fetch(ShortItemId(itemId))
-        }
-        val bestSellOrder = withSpanAsync("fetchBestSellOrder", spanType = SpanType.EXT) {
-            enrichmentOrderService.fetchOrderIfDiffers(shortItem?.bestSellOrder, orders)
-        }
-        val bestBidOrder = withSpanAsync("fetchBestBidOrder", spanType = SpanType.EXT) {
-            enrichmentOrderService.fetchOrderIfDiffers(shortItem?.bestBidOrder, orders)
-        }
-        val meta = if (item?.meta != null) {
-            CompletableDeferred(item.meta)
-        } else {
-            withSpanAsync("fetchMeta", spanType = SpanType.CACHE) {
-                if (loadMetaSynchronously) {
-                    unionMetaService.getAvailableMetaOrLoadSynchronously(itemId, synchronous = true)
-                } else {
-                    unionMetaService.getAvailableMetaOrScheduleLoading(itemId)
-                }
+
+        val fetchedItem = async { item ?: fetch(ShortItemId(itemId)) }
+        val bestSellOrder = async { enrichmentOrderService.fetchOrderIfDiffers(shortItem?.bestSellOrder, orders) }
+        val bestBidOrder = async { enrichmentOrderService.fetchOrderIfDiffers(shortItem?.bestBidOrder, orders) }
+
+        val meta = withSpanAsync("fetchMeta", spanType = SpanType.CACHE) {
+            if (loadMetaSynchronously || item?.loadMetaSynchronously == true) {
+                unionMetaService.getAvailableMetaOrLoadSynchronously(itemId, synchronous = true)
+            } else {
+                unionMetaService.getAvailableMetaOrScheduleLoading(itemId)
             }
         }
-
         val bestOrders = listOf(bestSellOrder, bestBidOrder)
             .awaitAll().filterNotNull()
             .associateBy { it.id }
 
         val auctionIds = shortItem?.auctions ?: emptySet()
 
-        val auctionsData = withSpanAsync("fetchAuction", spanType = SpanType.EXT) {
-            enrichmentAuctionService.fetchAuctionsIfAbsent(auctionIds, auctions)
-        }
+        val auctionsData = async { enrichmentAuctionService.fetchAuctionsIfAbsent(auctionIds, auctions) }
 
         val itemDto = EnrichedItemConverter.convert(
             item = fetchedItem.await(),

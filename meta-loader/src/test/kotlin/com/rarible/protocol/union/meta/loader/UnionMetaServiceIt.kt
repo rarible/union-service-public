@@ -1,5 +1,7 @@
 package com.rarible.protocol.union.meta.loader
 
+import com.rarible.core.content.meta.loader.ContentReceiver
+import com.rarible.protocol.union.enrichment.configuration.UnionMetaProperties
 import com.rarible.protocol.union.enrichment.meta.UnionMetaService
 import com.rarible.protocol.union.enrichment.test.data.randomUnionItem
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId

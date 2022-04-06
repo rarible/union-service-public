@@ -3,8 +3,6 @@ spring:
     name: union-search-core
 
 
-
-
   data:
     elasticsearch:
       cluster-name: docker-cluster

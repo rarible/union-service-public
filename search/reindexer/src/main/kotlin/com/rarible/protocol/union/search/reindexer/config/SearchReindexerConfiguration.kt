@@ -12,7 +12,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
-import org.springframework.data.elasticsearch.core.ElasticsearchOperations
+import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations
 
 @Configuration
 @EnableRaribleTask
@@ -31,7 +31,7 @@ class SearchReindexerConfiguration(
     fun activityTask(
         activityClient: ActivityControllerApi,
         taskRepository: TaskRepository,
-        esOperations: ElasticsearchOperations,
+        esOperations: ReactiveElasticsearchOperations,
         activityConverter: ElasticActivityConverter
     ): TaskHandler<String> {
         return ActivityTask(this, activityClient, taskRepository, esOperations, activityConverter)

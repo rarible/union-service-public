@@ -55,6 +55,8 @@ class UnionMetaService(
                 unionMetaLoader.load(itemId)
             } catch (e: Exception) {
                 logger.warn("Synchronous meta loading failed for ${itemId.fullId()}")
+                // Schedule meta loading. Firstly, with retry purpose. Secondly, to cache the "error" if it persists.
+                unionMetaCacheLoaderService.update(itemId.fullId())
                 null
             }
             if (itemMeta != null) {

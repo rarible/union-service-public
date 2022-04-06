@@ -1,33 +1,29 @@
 package com.rarible.protocol.union.integration.solana.converter
 
+import com.rarible.protocol.solana.dto.BalanceDto
 import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.BlockchainGroupDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.UnionAddress
-import com.rarible.solana.protocol.dto.BalanceDto
-import com.rarible.solana.protocol.dto.JsonCollectionDto
-import com.rarible.solana.protocol.dto.OnChainCollectionDto
+import com.rarible.protocol.union.dto.group
 import java.math.BigInteger
 
 object SolanaOwnershipConverter {
-    // TODO think about collection & creators
-    fun convert(balance: BalanceDto): UnionOwnership {
+
+    // TODO SOLANA think about collection & creators
+    fun convert(balance: BalanceDto, blockchain: BlockchainDto): UnionOwnership {
         return UnionOwnership(
             OwnershipIdDto(
-                blockchain = BlockchainDto.SOLANA,
+                blockchain = blockchain,
                 itemIdValue = balance.mint,
                 owner = UnionAddress(
-                    blockchainGroup = BlockchainGroupDto.SOLANA,
+                    blockchainGroup = blockchain.group(),
                     value = balance.owner
                 )
             ),
-            collection = when (val collection = balance.collection) {
-                is JsonCollectionDto -> CollectionIdDto(BlockchainDto.SOLANA, collection.hash)
-                is OnChainCollectionDto -> CollectionIdDto(BlockchainDto.SOLANA, collection.address)
-                null -> null
-            },
+            // TODO it MUST be not-null
+            collection = balance.collection?.let { CollectionIdDto(blockchain, it) },
             value = balance.value,
             createdAt = balance.createdAt,
             creators = emptyList(),

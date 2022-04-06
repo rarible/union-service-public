@@ -7,10 +7,8 @@ import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.UnionEventTopicProvider
 import com.rarible.protocol.union.subscriber.UnionKafkaJsonSerializer
 import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Lazy
-import org.springframework.data.elasticsearch.repository.config.EnableReactiveElasticsearchRepositories
 
 @Configuration
 @Lazy

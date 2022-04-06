@@ -56,6 +56,7 @@ common:
     enableRevertedActivityEventSending: false
     enableOwnershipSourceEnrichment: false
     enableItemLastSaleEnrichment: true
+    enableNotificationOnCollectionOrders: true
 
 
 integration:
@@ -101,6 +102,13 @@ integration:
     auctionContracts: ${consul.tezos.auctionContracts:}
   solana:
     enabled: ${consul.solana.enabled:false}
+    consumer:
+      broker-replica-set: ${kafka.hosts}
+      workers:
+        item: 1
+        ownership: 1
+        order: 1
+    auctionContracts:
 
 listener:
   consumer:
@@ -124,12 +132,19 @@ listener:
   reconcile-marks:
     rate: PT15S
     delay: PT1M
+  metrics:
+    root-path: "protocol.union.listener"
 
 meta:
   ipfsGateway: "https://rarible.mypinata.cloud/"
   mediaFetchTimeout: 10000
   mediaFetchMaxSize: 131072 # 128 Kb
   openSeaProxyUrl: ${consul.meta.openSeaProxyUrl}
+  http-client:
+    type: KTOR_CIO # KTOR_APACHE, KTOR_CIO
+    thread-count: 1
+    time-out: 10000
+    total-connection: 1000
 
 # Disable verbose logs of Apache HTTP client used to load content media metadata.
 logging:
