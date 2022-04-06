@@ -125,18 +125,13 @@ class EnrichmentItemService(
         val bestBidOrder = withSpanAsync("fetchBestBidOrder", spanType = SpanType.EXT) {
             enrichmentOrderService.fetchOrderIfDiffers(shortItem?.bestBidOrder, orders)
         }
-        val meta = if (item?.meta?.content?.any { it.properties?.mimeType != null } == true) {
-            CompletableDeferred(item.meta)
-        } else {
-            withSpanAsync("fetchMeta", spanType = SpanType.CACHE) {
-                if (loadMetaSynchronously || item?.loadMetaSynchronously == true) {
-                    unionMetaService.getAvailableMetaOrLoadSynchronously(itemId, synchronous = true)
-                } else {
-                    unionMetaService.getAvailableMetaOrScheduleLoading(itemId)
-                }
+        val meta = withSpanAsync("fetchMeta", spanType = SpanType.CACHE) {
+            if (loadMetaSynchronously || item?.loadMetaSynchronously == true) {
+                unionMetaService.getAvailableMetaOrLoadSynchronously(itemId, synchronous = true)
+            } else {
+                unionMetaService.getAvailableMetaOrScheduleLoading(itemId)
             }
         }
-
         val bestOrders = listOf(bestSellOrder, bestBidOrder)
             .awaitAll().filterNotNull()
             .associateBy { it.id }
