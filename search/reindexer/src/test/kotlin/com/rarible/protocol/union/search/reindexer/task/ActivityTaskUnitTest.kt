@@ -7,9 +7,7 @@ import com.rarible.protocol.union.dto.ActivityIdDto
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.BlockchainGroupDto
 import com.rarible.protocol.union.dto.OrderListActivityDto
-import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.search.core.ElasticActivity
 import com.rarible.protocol.union.search.core.converter.ElasticActivityConverter
 import com.rarible.protocol.union.search.reindexer.config.SearchReindexerConfiguration
@@ -20,16 +18,17 @@ import io.mockk.verify
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
-import org.springframework.data.elasticsearch.core.ElasticsearchOperations
+import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations
 import reactor.core.publisher.Mono
 import java.time.Instant
+import kotlin.random.Random
 
 class ActivityTaskUnitTest {
 
-    val esOperations = mockk<ElasticsearchOperations> {
+    val esOperations = mockk<ReactiveElasticsearchOperations> {
         every {
             save(any<Iterable<ElasticActivity>>())
-        } answers { arg(0) }
+        } answers { Mono.just(arg(0)) }
     }
 
     val converter = mockk<ElasticActivityConverter> {
@@ -40,6 +39,7 @@ class ActivityTaskUnitTest {
             Instant.now(),
             0xb1,
             42,
+            Random(0).nextLong(),
             BlockchainDto.ETHEREUM,
             ActivityTypeDto.LIST,
             ElasticActivity.User(
