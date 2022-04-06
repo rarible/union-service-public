@@ -1,6 +1,10 @@
 package com.rarible.protocol.union.api.controller.internal
 
 import com.rarible.core.kafka.KafkaMessage
+import com.rarible.protocol.dto.ActivitySortDto
+import com.rarible.protocol.dto.NftActivityFilterByItemDto
+import com.rarible.protocol.dto.OrderActivityFilterByItemDto
+import com.rarible.protocol.dto.OrderActivityMatchDto
 import com.rarible.protocol.dto.OrdersPaginationDto
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
@@ -8,8 +12,10 @@ import com.rarible.protocol.union.core.util.CompositeItemIdParser
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemDeleteEventDto
 import com.rarible.protocol.union.dto.ItemEventDto
+import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.ItemUpdateEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
+import com.rarible.protocol.union.dto.OwnershipSourceDto
 import com.rarible.protocol.union.dto.OwnershipUpdateEventDto
 import com.rarible.protocol.union.enrichment.converter.ShortItemConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
@@ -23,11 +29,14 @@ import com.rarible.protocol.union.integration.ethereum.converter.EthAuctionConve
 import com.rarible.protocol.union.integration.ethereum.converter.EthItemConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOwnershipConverter
+import com.rarible.protocol.union.integration.ethereum.data.randomEthAssetErc1155
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAuctionDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
+import com.rarible.protocol.union.integration.ethereum.data.randomEthItemMintActivity
 import com.rarible.protocol.union.integration.ethereum.data.randomEthLegacyBidOrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthLegacySellOrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthNftItemDto
+import com.rarible.protocol.union.integration.ethereum.data.randomEthOrderActivityMatch
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipDto
 import io.mockk.coVerify
 import io.mockk.every
@@ -84,6 +93,10 @@ class RefreshControllerFt : AbstractIntegrationTest() {
         val unionOwnership = EthOwnershipConverter.convert(ethOwnership, ethFreeOwnershipId.blockchain)
         val shortOwnership = ShortOwnershipConverter.convert(unionOwnership)
 
+        // Last sell activity for item
+        val swapDto = randomEthOrderActivityMatch()
+        val activity = swapDto.copy(left = swapDto.left.copy(asset = randomEthAssetErc1155(ethItemId)))
+
         ethereumOwnershipControllerApiMock.mockGetNftOwnershipsByItem(ethItemId, null, 1000, ethOwnership)
         ethereumOwnershipControllerApiMock.mockGetNftOwnershipById(auctionOwnershipId, auctionOwnership)
         ethereumAuctionControllerApiMock.mockGetAuctionsByItem(ethItemId, listOf(ethAuction))
@@ -102,12 +115,24 @@ class RefreshControllerFt : AbstractIntegrationTest() {
             ethBestSell
         )
 
+        val mintActivity = randomEthItemMintActivity().copy(owner = Address.apply(ethFreeOwnershipId.owner.value))
+        ethereumActivityControllerApiMock.mockGetNftActivitiesByItem(
+            ethItemId,
+            listOf(NftActivityFilterByItemDto.Types.MINT),
+            1,
+            null,
+            ActivitySortDto.LATEST_FIRST,
+            mintActivity
+        )
+
         ethereumOrderControllerApiMock.mockGetCurrenciesByBidOrdersOfItem(ethItemId, ethBestBid.make.assetType)
         ethereumOrderControllerApiMock.mockGetOrderBidsByItemAndByStatus(
             ethItemId,
             unionBestBid.bidCurrencyId,
             ethBestBid
         )
+
+        mockLastSellActivity(ethItemId, activity)
 
         val uri = "$baseUri/v0.1/refresh/item/${ethItemId.fullId()}/reconcile?full=true"
         val result = testRestTemplate.postForEntity(uri, null, ItemEventDto::class.java).body!!
@@ -120,7 +145,9 @@ class RefreshControllerFt : AbstractIntegrationTest() {
         assertThat(savedShortItem.bestSellOrders[unionBestSell.sellCurrencyId]!!.id).isEqualTo(shortBestSell.id)
         assertThat(savedShortItem.bestBidOrders[unionBestBid.bidCurrencyId]!!.id).isEqualTo(shortBestBid.id)
         assertThat(savedShortItem.auctions).isEqualTo(setOf(auction.id))
+        assertThat(savedShortItem.lastSale!!.date).isEqualTo(activity.date)
 
+        assertThat(savedShortOwnership.source).isEqualTo(OwnershipSourceDto.MINT)
         assertThat(savedShortOwnership.bestSellOrder!!.id).isEqualTo(shortBestSell.id)
         assertThat(savedShortOwnership.bestSellOrders[unionBestSell.sellCurrencyId]!!.id).isEqualTo(shortBestSell.id)
 
@@ -175,11 +202,22 @@ class RefreshControllerFt : AbstractIntegrationTest() {
             ethBestSell
         )
 
+        val mintActivity = randomEthItemMintActivity().copy(owner = Address.apply(ethOwnershipId.owner.value))
+        ethereumActivityControllerApiMock.mockGetNftActivitiesByItem(
+            ethItemId,
+            listOf(NftActivityFilterByItemDto.Types.MINT),
+            1,
+            null,
+            ActivitySortDto.LATEST_FIRST,
+            mintActivity
+        )
+
         val uri = "$baseUri/v0.1/refresh/ownership/${ethOwnershipId.fullId()}/reconcile"
         val result = testRestTemplate.postForEntity(uri, null, OwnershipEventDto::class.java).body!!
         val reconciled = (result as OwnershipUpdateEventDto).ownership
         val savedShortOwnership = enrichmentOwnershipService.get(shortOwnership.id)!!
 
+        assertThat(savedShortOwnership.source).isEqualTo(OwnershipSourceDto.MINT)
         assertThat(savedShortOwnership.bestSellOrder!!.id).isEqualTo(shortBestSell.id)
         assertThat(savedShortOwnership.bestSellOrders[unionBestSell.sellCurrencyId]!!.id).isEqualTo(shortBestSell.id)
 
@@ -256,6 +294,7 @@ class RefreshControllerFt : AbstractIntegrationTest() {
             unionBestBid.bidCurrencyId,
             ethBestBid
         )
+        mockLastSellActivity(ethItemId, null)
 
         val uri = "$baseUri/v0.1/refresh/item/${ethItemId.fullId()}/reconcile"
         val result = testRestTemplate.postForEntity(uri, null, ItemEventDto::class.java).body!!
@@ -296,6 +335,7 @@ class RefreshControllerFt : AbstractIntegrationTest() {
             unionBestBid.bidCurrencyId,
             ethBestBid
         )
+        mockLastSellActivity(ethItemId, null)
 
         val uri = "$baseUri/v0.1/refresh/item/${ethItemId.fullId()}/reconcile"
         val result = testRestTemplate.postForEntity(uri, null, ItemEventDto::class.java).body!!
@@ -372,6 +412,7 @@ class RefreshControllerFt : AbstractIntegrationTest() {
             unionBestBid.bidCurrencyId,
             ethBestBid
         )
+        mockLastSellActivity(ethItemId, null)
 
         val uri = "$baseUri/v0.1/refresh/item/${ethItemId.fullId()}/reconcile"
         val result = testRestTemplate.postForEntity(uri, null, ItemEventDto::class.java).body!!
@@ -389,5 +430,16 @@ class RefreshControllerFt : AbstractIntegrationTest() {
                 message.value is ItemUpdateEventDto && message.value.itemId == ethItemId
             })
         }
+    }
+
+    private fun mockLastSellActivity(itemId: ItemIdDto, activity: OrderActivityMatchDto?) {
+        ethereumActivityControllerApiMock.mockGetOrderActivitiesByItem(
+            itemId,
+            listOf(OrderActivityFilterByItemDto.Types.MATCH),
+            1,
+            null,
+            ActivitySortDto.LATEST_FIRST,
+            activity
+        )
     }
 }

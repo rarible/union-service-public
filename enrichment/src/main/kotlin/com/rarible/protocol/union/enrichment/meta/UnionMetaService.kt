@@ -3,18 +3,18 @@ package com.rarible.protocol.union.enrichment.meta
 import com.rarible.loader.cache.CacheLoaderService
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.dto.ItemIdDto
-import kotlinx.coroutines.time.withTimeout
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.dao.DuplicateKeyException
+import org.springframework.dao.OptimisticLockingFailureException
 import org.springframework.stereotype.Component
-import java.time.Duration
 
 @Component
 class UnionMetaService(
     @Qualifier("union.meta.cache.loader.service")
     private val unionMetaCacheLoaderService: CacheLoaderService<UnionMeta>,
     private val unionMetaMetrics: UnionMetaMetrics,
-    private val unionMetaCacheLoader: UnionMetaCacheLoader
+    private val unionMetaLoader: UnionMetaLoader
 ) {
     private val logger = LoggerFactory.getLogger(UnionMetaService::class.java)
 
@@ -35,38 +35,44 @@ class UnionMetaService(
     ): UnionMeta? {
         val metaCacheEntry = unionMetaCacheLoaderService.get(itemId.fullId())
         val availableMeta = metaCacheEntry.getAvailable()
+        unionMetaMetrics.onMetaCacheHitOrMiss(
+            itemId = itemId,
+            hitOrMiss = metaCacheEntry.isMetaInitiallyLoadedOrFailed()
+        )
         if (availableMeta != null) {
             return availableMeta
         }
-        unionMetaMetrics.onMetaCacheMiss(itemId, null)
         if (metaCacheEntry.isMetaInitiallyLoadedOrFailed()) {
+            logger.info("Meta loading for item ${itemId.fullId()} was failed")
             return null
         }
-        if (!metaCacheEntry.isMetaInitiallyScheduledForLoading()) {
+        if (!synchronous && !metaCacheEntry.isMetaInitiallyScheduledForLoading()) {
             scheduleLoading(itemId)
         }
         if (synchronous) {
-            return unionMetaCacheLoader.load(itemId.fullId())
+            logger.info("Loading meta synchronously for ${itemId.fullId()}")
+            val itemMeta = try {
+                unionMetaLoader.load(itemId)
+            } catch (e: Exception) {
+                logger.warn("Synchronous meta loading failed for ${itemId.fullId()}")
+                // Schedule meta loading. Firstly, with retry purpose. Secondly, to cache the "error" if it persists.
+                unionMetaCacheLoaderService.update(itemId.fullId())
+                null
+            }
+            if (itemMeta != null) {
+                logger.warn("Saving synchronously loaded meta to cache for ${itemId.fullId()}")
+                try {
+                    unionMetaCacheLoaderService.save(itemId.fullId(), itemMeta)
+                } catch (e: Exception) {
+                    if (e !is OptimisticLockingFailureException && e !is DuplicateKeyException) {
+                        logger.error("Failed to save synchronously loaded meta to cache for ${itemId.fullId()}")
+                        throw e
+                    }
+                }
+            }
+            return itemMeta
         }
         return null
-    }
-
-    /**
-     * The same as [getAvailableMetaOrLoadSynchronously] but with [timeout].
-     */
-    suspend fun getAvailableMetaOrLoadSynchronouslyWithTimeout(
-        itemId: ItemIdDto,
-        timeout: Duration
-    ): UnionMeta? = try {
-        withTimeout(timeout) {
-            getAvailableMetaOrLoadSynchronously(
-                itemId = itemId,
-                synchronous = true
-            )
-        }
-    } catch (e: Exception) {
-        logger.error("Cannot synchronously load meta for ${itemId.fullId()} with timeout ${timeout.toMillis()} ms", e)
-        null
     }
 
     /**

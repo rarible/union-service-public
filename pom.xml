@@ -34,7 +34,7 @@
     </pluginRepositories>
 
     <properties>
-        <revision>1.25</revision>
+        <revision>1.26</revision>
         <maven.deploy.skip>true</maven.deploy.skip>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -42,14 +42,14 @@
         <mockserver-netty.version>5.11.2</mockserver-netty.version>
         <mockserver.version>1.15.3</mockserver.version>
 
-        <rarible.core.version>2.3.37</rarible.core.version>
+        <rarible.core.version>2.3.65</rarible.core.version>
         <rarible.ethereum.version>1.4.0</rarible.ethereum.version>
 
         <rarible.protocol.currency.version>1.23.2</rarible.protocol.currency.version>
-        <rarible.protocol.ethereum.version>1.24.1</rarible.protocol.ethereum.version>
-        <rarible.protocol.flow.version>2.3.0</rarible.protocol.flow.version>
+        <rarible.protocol.ethereum.version>1.25.0</rarible.protocol.ethereum.version>
+        <rarible.protocol.flow.version>2.3.1</rarible.protocol.flow.version>
         <rarible.protocol.tezos.version>1.0.2</rarible.protocol.tezos.version>
-        <rarible.protocol.solana.version>0.0.25</rarible.protocol.solana.version>
+        <rarible.protocol.solana.version>0.1.17</rarible.protocol.solana.version>
 
         <rarible.protocol.union.version>1.26.3</rarible.protocol.union.version>
 
@@ -331,18 +331,18 @@
 
             <!-- ============ Solana Protocol-API ============ -->
             <dependency>
-                <groupId>com.rarible.solana.protocol</groupId>
+                <groupId>com.rarible.protocol.solana</groupId>
                 <artifactId>solana-protocol-model</artifactId>
                 <version>${rarible.protocol.solana.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.rarible.solana.protocol</groupId>
+                <groupId>com.rarible.protocol.solana</groupId>
                 <artifactId>solana-protocol-client-starter</artifactId>
                 <version>${rarible.protocol.solana.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.rarible.solana.protocol</groupId>
-                <artifactId>solana-protocol-subscriber-starter</artifactId>
+                <groupId>com.rarible.protocol.solana</groupId>
+                <artifactId>solana-protocol-subscriber</artifactId>
                 <version>${rarible.protocol.solana.version}</version>
             </dependency>
 

@@ -6,6 +6,7 @@ import com.rarible.protocol.union.enrichment.meta.UnionMetaLoader
 import com.rarible.protocol.union.enrichment.meta.UnionMetaService
 import com.rarible.protocol.union.integration.ethereum.converter.EthItemConverter
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
+import com.rarible.protocol.union.integration.ethereum.data.randomEthItemTransferDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthNftItemDto
 import com.rarible.protocol.union.listener.test.AbstractIntegrationTest
 import com.rarible.protocol.union.listener.test.IntegrationTest
@@ -15,6 +16,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import reactor.kotlin.core.publisher.toMono
+import java.math.BigInteger
 
 @IntegrationTest
 class EnrichmentItemMetaLoadingIt : AbstractIntegrationTest() {
@@ -28,7 +30,10 @@ class EnrichmentItemMetaLoadingIt : AbstractIntegrationTest() {
     @Test
     fun `item update - meta not available - event without meta - event with meta`() = runWithKafka {
         val itemId = randomEthItemId()
-        val ethItem = randomEthNftItemDto(itemId)
+        val ethItem = randomEthNftItemDto(itemId).copy(
+            lazySupply = BigInteger.ZERO,
+            pending = emptyList()
+        )
         val (unionItem, meta) = EthItemConverter.convert(ethItem, itemId.blockchain).let {
             it.copy(meta = null) to it.meta!!
         }
@@ -47,6 +52,55 @@ class EnrichmentItemMetaLoadingIt : AbstractIntegrationTest() {
     }
 
     @Test
+    fun `lazy item load meta synchronously`() = runWithKafka {
+        val itemId = randomEthItemId()
+        val ethItem = randomEthNftItemDto(itemId).copy(
+            lazySupply = BigInteger.ONE,
+            pending = emptyList()
+        )
+        val (unionItem, meta) = EthItemConverter.convert(ethItem, itemId.blockchain).let {
+            it.copy(meta = null) to it.meta!!
+        }
+        coEvery { testUnionMetaLoader.load(itemId) } coAnswers {
+            delay(100L)
+            meta
+        }
+        coEvery { testEthereumItemApi.getNftItemById(itemId.value) } returns ethItem.toMono()
+        itemEventService.onItemUpdated(unionItem)
+        Wait.waitAssert {
+            val events = findItemUpdates(itemId.value)
+            assertThat(events).hasSize(1)
+            assertThat(events[0].value.item)
+                .isEqualTo(EnrichedItemConverter.convert(unionItem, meta = meta))
+        }
+    }
+
+    @Test
+    fun `just minted pending item load meta synchronously`() = runWithKafka {
+        val itemId = randomEthItemId()
+        val ethItem = randomEthNftItemDto(itemId).copy(
+            lazySupply = BigInteger.ZERO,
+            supply = BigInteger.ZERO,
+            pending = listOf(randomEthItemTransferDto())
+        )
+        val (unionItem, meta) = EthItemConverter.convert(ethItem, itemId.blockchain).let {
+            it.copy(meta = null) to it.meta!!
+        }
+        coEvery { testUnionMetaLoader.load(itemId) } coAnswers {
+            delay(100L)
+            meta
+        }
+        coEvery { testEthereumItemApi.getNftItemById(itemId.value) } returns ethItem.toMono()
+        itemEventService.onItemUpdated(unionItem)
+        Wait.waitAssert {
+            val events = findItemUpdates(itemId.value)
+            assertThat(events).hasSize(1)
+            assertThat(events[0].value.item)
+                .isEqualTo(EnrichedItemConverter.convert(unionItem, meta = meta))
+        }
+    }
+
+    @Test
     fun `item update - meta not available - error loading - send 1 event without meta - then refresh`() = runWithKafka {
         val itemId = randomEthItemId()
         val ethItem = randomEthNftItemDto(itemId)
@@ -55,7 +109,7 @@ class EnrichmentItemMetaLoadingIt : AbstractIntegrationTest() {
         }
         coEvery { testUnionMetaLoader.load(itemId) } coAnswers {
             delay(100L)
-            throw UnionMetaLoader.UnionMetaResolutionException("error")
+            throw RuntimeException("error")
         }
         coEvery { testEthereumItemApi.getNftItemById(itemId.value) } returns ethItem.toMono()
         itemEventService.onItemUpdated(unionItem)

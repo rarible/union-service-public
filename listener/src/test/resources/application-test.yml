@@ -8,6 +8,10 @@ common:
   client:
     tezos:
       url: "http://localhost:8080"
+  feature-flags:
+    enableRevertedActivityEventSending: false
+    enableOwnershipSourceEnrichment: true
+    enableItemLastSaleEnrichment: true
 
 rarible:
   core:
@@ -19,11 +23,7 @@ rarible:
   loader:
     enableWorkers: true # Enable workers in the tests.
     workers: 1
-    retry:
-      backoffDelaysMillis: []
-      job:
-        runner:
-        period: 1000000000000000000 # Disable in the tests. Run RetryTasksService manually.
+    enableRetrySchedulerJob: false
 
 integration:
   ethereum:
@@ -58,6 +58,14 @@ integration:
       broker-replica-set: ${kafka.hosts}
       username:
       password:
+      workers:
+        item: 1
+        ownership: 1
+        order: 1
+  solana:
+    enabled: true
+    consumer:
+      broker-replica-set: ${kafka.hosts}
       workers:
         item: 1
         ownership: 1

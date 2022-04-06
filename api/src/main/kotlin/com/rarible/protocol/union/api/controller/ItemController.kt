@@ -29,13 +29,15 @@ import com.rarible.protocol.union.dto.continuation.page.Paging
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.dto.subchains
 import com.rarible.protocol.union.enrichment.configuration.UnionMetaProperties
+import com.rarible.protocol.union.enrichment.meta.UnionMetaService
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
-import com.rarible.protocol.union.enrichment.meta.UnionMetaService
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.time.withTimeout
 import org.slf4j.LoggerFactory
 import org.springframework.core.io.Resource
 import org.springframework.http.HttpHeaders
@@ -45,6 +47,7 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RestController
 import java.net.URI
+import java.time.Duration
 
 @ExperimentalCoroutinesApi
 @RestController
@@ -85,7 +88,7 @@ class ItemController(
 
     @GetMapping(value = ["/v0.1/items/{itemId}/animation"])
     suspend fun getItemAnimationById(@PathVariable("itemId") itemId: String): ResponseEntity<Resource> {
-        val meta = getAvailableMetaOrLoadSynchronouslyWithTimeout(itemId)
+        val meta = getAvailableMetaOrLoadSynchronously(itemId)
         val unionMetaContent = meta.content
             .find { it.properties is UnionVideoProperties && it.representation == MetaContentDto.Representation.ORIGINAL }
             ?: throw UnionNotFoundException("No animation found for item $itemId")
@@ -94,30 +97,41 @@ class ItemController(
 
     @GetMapping(value = ["/v0.1/items/{itemId}/image"])
     suspend fun getItemImageById(@PathVariable("itemId") itemId: String): ResponseEntity<Resource> {
-        val meta = getAvailableMetaOrLoadSynchronouslyWithTimeout(itemId)
+        val meta = getAvailableMetaOrLoadSynchronously(itemId)
         val unionMetaContent = meta.content
             .find { it.properties is UnionImageProperties && it.representation == MetaContentDto.Representation.ORIGINAL }
             ?: throw UnionNotFoundException("No image found for item $itemId")
         return createRedirectResponse(unionMetaContent)
     }
 
-    private suspend fun getAvailableMetaOrLoadSynchronouslyWithTimeout(itemId: String): UnionMeta {
-        val fullItemId = IdParser.parseItemId(itemId)
-        return unionMetaService.getAvailableMetaOrLoadSynchronouslyWithTimeout(
-            itemId = fullItemId,
-            timeout = unionMetaProperties.timeoutSyncLoadingMeta
-        ) ?: throw UnionNotFoundException("No item meta found for $itemId")
+    private suspend fun getAvailableMetaOrLoadSynchronously(itemId: String): UnionMeta {
+        return try {
+            withTimeout(timeoutSyncLoadingMeta) {
+                unionMetaService.getAvailableMetaOrLoadSynchronously(
+                    itemId = IdParser.parseItemId(itemId),
+                    synchronous = true
+                )
+            }
+        } catch (e: CancellationException) {
+            logger.warn("Timeout synchronously load meta for $itemId", e)
+            null
+        } catch (e: Exception) {
+            logger.error("Cannot synchronously load meta for $itemId", e)
+            null
+        } ?: throw UnionNotFoundException("Meta for $itemId is not found")
     }
 
     override suspend fun getItemById(
         itemId: String
     ): ResponseEntity<ItemDto> {
         val fullItemId = IdParser.parseItemId(itemId)
-        val unionItem = enrichmentItemService.fetch(fullItemId)
-        val shortItem = enrichmentItemService.get(ShortItemId(fullItemId))
+        val shortItemId = ShortItemId(fullItemId)
+        val unionItem = enrichmentItemService.fetch(shortItemId)
+        val shortItem = enrichmentItemService.get(shortItemId)
         val enrichedUnionItem = enrichmentItemService.enrichItem(
             shortItem = shortItem,
-            item = unionItem
+            item = unionItem,
+            loadMetaSynchronously = true
         )
         return ResponseEntity.ok(enrichedUnionItem)
     }
@@ -151,6 +165,7 @@ class ItemController(
     override suspend fun resetItemMeta(itemId: String): ResponseEntity<Unit> {
         val fullItemId = IdParser.parseItemId(itemId)
         // TODO[meta]: when all Blockchains stop caching the meta, we can remove this endpoint call.
+        logger.info("Refreshing item meta for $itemId")
         router.getService(fullItemId.blockchain).resetItemMeta(fullItemId.value)
         unionMetaService.scheduleLoading(fullItemId)
         return ResponseEntity.ok().build()
@@ -168,7 +183,7 @@ class ItemController(
 
         logger.info(
             "Response for getItemsByCollection(collection={}, continuation={}, size={}):" +
-                " Page(size={}, total={}, continuation={})",
+                    " Page(size={}, total={}, continuation={})",
             collection, continuation, size, result.entities.size, result.total, result.continuation
         )
 
@@ -199,7 +214,7 @@ class ItemController(
 
         logger.info(
             "Response for getItemsByCreator(creator={}, continuation={}, size={}):" +
-                " Page(size={}, total={}, continuation={}) from blockchain pages {} ",
+                    " Page(size={}, total={}, continuation={}) from blockchain pages {} ",
             creator, continuation, size, combinedPage.entities.size, combinedPage.total, combinedPage.continuation,
             blockchainPages.map { it.entities.size }
         )
@@ -230,7 +245,7 @@ class ItemController(
 
         logger.info(
             "Response for getItemsByOwner(owner={}, continuation={}, size={}):" +
-                " Page(size={}, total={}, continuation={}) from blockchain pages {} ",
+                    " Page(size={}, total={}, continuation={}) from blockchain pages {} ",
             owner, continuation, size, combinedPage.entities.size, combinedPage.total, combinedPage.continuation,
             blockchainPages.map { it.entities.size }
         )
@@ -275,5 +290,10 @@ class ItemController(
         }.awaitAll().filterNotNull()
 
         return ResponseEntity.ok(ItemsWithOwnershipDto(wrapped.size.toLong(), page.continuation, wrapped))
+    }
+
+    private companion object {
+        // A timeout to avoid infinite meta loading.
+        val timeoutSyncLoadingMeta: Duration = Duration.ofSeconds(30)
     }
 }

@@ -36,20 +36,25 @@ rarible:
     topicsPrefix: protocol.${application.environment}.union.internal.loader
     enableNotifications: false
     enableWorkers: true
+    enableRetrySchedulerJob: false
     workers: 4
     loadTasksBatchSize: 10
     retry:
-      # Retry after 24h
-      backoffDelaysMillis: [ 86400000 ]
+      # Retry after 5m, 12h, 24h
+      backoffDelaysMillis: [ 300000, 43200000, 86400000 ]
       job:
         runner:
           period: 30000 # Schedule retry tasks every 30s
 
 meta:
   ipfsGateway: "https://rarible.mypinata.cloud/"
-  mediaFetchTimeout: 10000
-  mediaFetchMaxSize: 10485760
+  mediaFetchMaxSize: 131072 # 128 Kb
   openSeaProxyUrl: ${consul.meta.openSeaProxyUrl}
+  http-client:
+    type: KTOR_CIO # KTOR_APACHE, KTOR_CIO
+    thread-count: 1
+    time-out: 10000
+    total-connection: 1000
 
 integration:
   ethereum:
@@ -99,3 +104,8 @@ integration:
 common:
   producer:
     broker-replica-set: ${kafka.hosts}
+
+# Disable verbose logs of Apache HTTP client used to load content media metadata.
+logging:
+  level:
+    org.apache.http: ERROR

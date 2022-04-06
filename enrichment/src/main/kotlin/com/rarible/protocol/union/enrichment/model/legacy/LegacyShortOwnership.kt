@@ -2,6 +2,7 @@ package com.rarible.protocol.union.enrichment.model.legacy
 
 import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.OwnershipSourceDto
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.model.ShortOrder
 import com.rarible.protocol.union.enrichment.model.ShortOwnership
@@ -28,6 +29,8 @@ data class LegacyShortOwnership(
 
     val bestSellOrder: ShortOrder?,
 
+    val source: OwnershipSourceDto?,
+
     val lastUpdatedAt: Instant,
 
     @Version
@@ -48,6 +51,8 @@ data class LegacyShortOwnership(
 
         bestSellOrder = shortOwnership.bestSellOrder,
 
+        source = shortOwnership.source,
+
         lastUpdatedAt = shortOwnership.lastUpdatedAt
     )
 
@@ -65,7 +70,9 @@ data class LegacyShortOwnership(
 
             bestSellOrder = this.bestSellOrder,
 
-            lastUpdatedAt = this.lastUpdatedAt
+            lastUpdatedAt = this.lastUpdatedAt,
+
+            source = source
         )
     }
 
@@ -82,13 +89,15 @@ data class LegacyShortOwnership(
                 bestSellOrder = null,
                 lastUpdatedAt = nowMillis(),
 
+                source = null,
+
                 version = null
             )
         }
     }
 
     fun isNotEmpty(): Boolean {
-        return bestSellOrder != null
+        return bestSellOrder != null || source != null
     }
 
     @Transient

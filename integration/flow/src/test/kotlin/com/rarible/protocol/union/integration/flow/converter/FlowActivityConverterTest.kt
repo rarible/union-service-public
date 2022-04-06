@@ -5,6 +5,7 @@ import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.BurnActivityDto
 import com.rarible.protocol.union.dto.FlowAssetTypeFtDto
+import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.MintActivityDto
 import com.rarible.protocol.union.dto.OrderActivityMatchSideDto
 import com.rarible.protocol.union.dto.OrderActivitySourceDto
@@ -175,9 +176,10 @@ class FlowActivityConverterTest {
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.date).isEqualTo(dto.date)
         assertThat(converted.owner.value).isEqualTo(dto.owner)
-        assertThat(converted.contract?.value).isEqualTo(dto.contract)
-        assertThat(converted.value).isEqualTo(dto.value)
+        assertThat(converted.contract!!.value).isEqualTo(dto.contract)
         assertThat(converted.tokenId).isEqualTo(dto.tokenId)
+        assertThat(converted.itemId).isEqualTo(ItemIdDto(BlockchainDto.FLOW, dto.contract, dto.tokenId))
+        assertThat(converted.value).isEqualTo(dto.value)
         assertThat(converted.transactionHash).isEqualTo(dto.transactionHash)
         // TODO UNION remove in 1.19
         assertThat(converted.blockchainInfo!!.transactionHash).isEqualTo(dto.transactionHash)
@@ -194,9 +196,10 @@ class FlowActivityConverterTest {
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.date).isEqualTo(dto.date)
         assertThat(converted.owner.value).isEqualTo(dto.owner)
-        assertThat(converted.contract?.value).isEqualTo(dto.contract)
-        assertThat(converted.value).isEqualTo(dto.value)
+        assertThat(converted.contract!!.value).isEqualTo(dto.contract)
         assertThat(converted.tokenId).isEqualTo(dto.tokenId)
+        assertThat(converted.itemId).isEqualTo(ItemIdDto(BlockchainDto.FLOW, dto.contract, dto.tokenId))
+        assertThat(converted.value).isEqualTo(dto.value)
         assertThat(converted.transactionHash).isEqualTo(dto.transactionHash)
         // TODO UNION remove in 1.19
         assertThat(converted.blockchainInfo!!.transactionHash).isEqualTo(dto.transactionHash)
@@ -213,9 +216,10 @@ class FlowActivityConverterTest {
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.date).isEqualTo(dto.date)
         assertThat(converted.owner.value).isEqualTo(dto.owner)
-        assertThat(converted.contract?.value).isEqualTo(dto.contract)
-        assertThat(converted.value).isEqualTo(dto.value)
+        assertThat(converted.contract!!.value).isEqualTo(dto.contract)
         assertThat(converted.tokenId).isEqualTo(dto.tokenId)
+        assertThat(converted.itemId).isEqualTo(ItemIdDto(BlockchainDto.FLOW, dto.contract, dto.tokenId))
+        assertThat(converted.value).isEqualTo(dto.value)
         assertThat(converted.transactionHash).isEqualTo(dto.transactionHash)
         // TODO UNION remove in 1.19
         assertThat(converted.blockchainInfo!!.transactionHash).isEqualTo(dto.transactionHash)

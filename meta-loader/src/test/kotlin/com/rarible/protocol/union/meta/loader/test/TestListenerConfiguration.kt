@@ -1,7 +1,7 @@
 package com.rarible.protocol.union.meta.loader.test
 
 import com.rarible.core.application.ApplicationEnvironmentInfo
-import com.rarible.core.content.meta.loader.ContentMetaLoader
+import com.rarible.core.content.meta.loader.ContentMetaReceiver
 import com.rarible.protocol.union.core.CoreConfiguration
 import com.rarible.protocol.union.enrichment.meta.UnionMetaLoader
 
@@ -28,6 +28,6 @@ class TestListenerConfiguration {
 
     @Bean
     @Primary
-    @Qualifier("test.content.meta.loader")
-    fun testContentMetaLoader(): ContentMetaLoader = mockk()
+    @Qualifier("test.content.meta.receiver")
+    fun testContentMetaReceiver(): ContentMetaReceiver = mockk()
 }

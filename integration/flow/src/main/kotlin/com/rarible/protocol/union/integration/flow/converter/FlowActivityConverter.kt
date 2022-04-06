@@ -20,6 +20,7 @@ import com.rarible.protocol.union.dto.ActivityIdDto
 import com.rarible.protocol.union.dto.AssetDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.BurnActivityDto
+import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.MintActivityDto
 import com.rarible.protocol.union.dto.OrderActivityMatchSideDto
 import com.rarible.protocol.union.dto.OrderActivitySourceDto
@@ -100,7 +101,8 @@ class FlowActivityConverter(
                     hash = source.hash,
                     maker = UnionAddressConverter.convert(blockchain, source.maker),
                     make = FlowConverter.convert(source.make, blockchain),
-                    take = payment
+                    take = payment,
+                    reverted = false
                 )
             }
             is FlowNftOrderActivityCancelListDto -> {
@@ -118,7 +120,8 @@ class FlowActivityConverter(
                         blockHash = source.blockHash ?: "",
                         blockNumber = source.blockNumber ?: 0,
                         logIndex = source.logIndex ?: 0
-                    )
+                    ),
+                    reverted = false
                 )
             }
             is FlowMintDto -> {
@@ -126,8 +129,9 @@ class FlowActivityConverter(
                     id = activityId,
                     date = source.date,
                     owner = UnionAddressConverter.convert(blockchain, source.owner),
-                    contract = ContractAddressConverter.convert(blockchain, source.contract),
-                    tokenId = source.tokenId,
+                    contract = ContractAddressConverter.convert(blockchain, source.contract), // TODO remove later
+                    tokenId = source.tokenId, // TODO remove later
+                    itemId = ItemIdDto(blockchain, source.contract, source.tokenId),
                     value = source.value,
                     transactionHash = source.transactionHash,
                     // TODO UNION remove in 1.19
@@ -136,7 +140,8 @@ class FlowActivityConverter(
                         blockHash = source.blockHash,
                         blockNumber = source.blockNumber,
                         logIndex = source.logIndex
-                    )
+                    ),
+                    reverted = false
                 )
             }
             is FlowBurnDto -> {
@@ -144,8 +149,9 @@ class FlowActivityConverter(
                     id = activityId,
                     date = source.date,
                     owner = UnionAddressConverter.convert(blockchain, source.owner),
-                    contract = ContractAddressConverter.convert(blockchain, source.contract),
-                    tokenId = source.tokenId,
+                    contract = ContractAddressConverter.convert(blockchain, source.contract), // TODO remove later
+                    tokenId = source.tokenId, // TODO remove later
+                    itemId = ItemIdDto(blockchain, source.contract, source.tokenId),
                     value = source.value,
                     transactionHash = source.transactionHash,
                     // TODO UNION remove in 1.19
@@ -154,7 +160,8 @@ class FlowActivityConverter(
                         blockHash = source.blockHash,
                         blockNumber = source.blockNumber,
                         logIndex = source.logIndex
-                    )
+                    ),
+                    reverted = false
                 )
             }
             is FlowTransferDto -> {
@@ -163,8 +170,9 @@ class FlowActivityConverter(
                     date = source.date,
                     from = UnionAddressConverter.convert(blockchain, source.from),
                     owner = UnionAddressConverter.convert(blockchain, source.owner),
-                    contract = ContractAddressConverter.convert(blockchain, source.contract),
-                    tokenId = source.tokenId,
+                    contract = ContractAddressConverter.convert(blockchain, source.contract), // TODO remove later
+                    tokenId = source.tokenId, // TODO remove later
+                    itemId = ItemIdDto(blockchain, source.contract, source.tokenId),
                     value = source.value,
                     transactionHash = source.transactionHash,
                     // TODO UNION remove in 1.19
@@ -173,7 +181,8 @@ class FlowActivityConverter(
                         blockHash = source.blockHash,
                         blockNumber = source.blockNumber,
                         logIndex = source.logIndex
-                    )
+                    ),
+                    reverted = false
                 )
             }
             is FlowNftOrderActivityBidDto -> {
@@ -190,8 +199,8 @@ class FlowActivityConverter(
                     hash = source.hash,
                     maker = UnionAddressConverter.convert(blockchain, source.maker),
                     make = payment,
-                    take = FlowConverter.convert(source.take, blockchain)
-
+                    take = FlowConverter.convert(source.take, blockchain),
+                    reverted = false
                 )
             }
             is FlowNftOrderActivityCancelBidDto -> {
@@ -203,6 +212,7 @@ class FlowActivityConverter(
                     make = FlowConverter.convertToType(source.make, blockchain),
                     take = FlowConverter.convertToType(source.take, blockchain),
                     transactionHash = source.transactionHash ?: "",
+                    reverted = false
                 )
             }
         }
@@ -245,6 +255,7 @@ class FlowActivityConverter(
                 blockNumber = source.blockNumber,
                 logIndex = source.logIndex
             ),
+            reverted = false
         )
     }
 
@@ -265,7 +276,8 @@ class FlowActivityConverter(
             logIndex = source.logIndex
         ),
         left = convert(source.left, blockchain),
-        right = convert(source.right, blockchain)
+        right = convert(source.right, blockchain),
+        reverted = false
     )
 
     private fun convert(

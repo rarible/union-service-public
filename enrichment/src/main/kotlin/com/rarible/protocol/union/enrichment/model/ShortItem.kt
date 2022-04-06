@@ -30,6 +30,8 @@ data class ShortItem(
     val bestSellOrder: ShortOrder?,
     val bestBidOrder: ShortOrder?,
 
+    val lastSale: ItemLastSale?,
+
     val lastUpdatedAt: Instant,
 
     @Version
@@ -61,13 +63,15 @@ data class ShortItem(
                 bestSellOrder = null,
                 bestBidOrder = null,
 
+                lastSale = null,
+
                 lastUpdatedAt = nowMillis()
             )
         }
     }
 
     fun isNotEmpty(): Boolean {
-        return bestBidOrder != null || bestSellOrder != null || auctions.isNotEmpty()
+        return bestBidOrder != null || bestSellOrder != null || auctions.isNotEmpty() || lastSale != null
     }
 
     @Transient

@@ -1,21 +1,20 @@
 package com.rarible.protocol.union.listener.service
 
 import com.rarible.core.common.optimisticLock
+import com.rarible.protocol.union.core.event.OutgoingEventListener
 import com.rarible.protocol.union.core.event.OutgoingOwnershipEventListener
 import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.core.model.getSellerOwnershipId
+import com.rarible.protocol.union.core.model.ownershipId
+import com.rarible.protocol.union.core.model.source
 import com.rarible.protocol.union.core.service.AuctionContractService
 import com.rarible.protocol.union.core.service.ReconciliationEventService
-import com.rarible.protocol.union.dto.AuctionDto
-import com.rarible.protocol.union.dto.AuctionStatusDto
-import com.rarible.protocol.union.dto.OrderDto
-import com.rarible.protocol.union.dto.OwnershipDeleteEventDto
-import com.rarible.protocol.union.dto.OwnershipDto
-import com.rarible.protocol.union.dto.OwnershipIdDto
-import com.rarible.protocol.union.dto.OwnershipUpdateEventDto
+import com.rarible.protocol.union.dto.*
+import com.rarible.protocol.union.enrichment.evaluator.OwnershipSourceComparator
 import com.rarible.protocol.union.enrichment.model.ShortOwnership
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
 import com.rarible.protocol.union.enrichment.service.BestOrderService
+import com.rarible.protocol.union.enrichment.service.EnrichmentActivityService
 import com.rarible.protocol.union.enrichment.service.EnrichmentAuctionService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
 import com.rarible.protocol.union.enrichment.validator.OwnershipValidator
@@ -30,7 +29,8 @@ class EnrichmentOwnershipEventService(
     private val enrichmentOwnershipService: EnrichmentOwnershipService,
     private val enrichmentItemEventService: EnrichmentItemEventService,
     private val enrichmentAuctionService: EnrichmentAuctionService,
-    private val ownershipEventListeners: List<OutgoingOwnershipEventListener>,
+    private val enrichmentActivityService: EnrichmentActivityService,
+    private val ownershipEventListeners: List<OutgoingEventListener<OwnershipEventDto>>,
     private val bestOrderService: BestOrderService,
     private val auctionContractService: AuctionContractService,
     private val reconciliationEventService: ReconciliationEventService
@@ -153,6 +153,40 @@ class EnrichmentOwnershipEventService(
         enrichmentOwnershipService.fetchOrNull(ownershipId)?.let {
             // Consider as regular update, auction won't be present in event since it is deleted
             onOwnershipUpdated(it)
+        }
+    }
+
+    suspend fun onActivity(
+        activity: ActivityDto,
+        ownership: UnionOwnership? = null,
+        notificationEnabled: Boolean = true
+    ) {
+        val source = activity.source() ?: return
+        val ownershipId = activity.ownershipId() ?: return
+
+        optimisticLock {
+            val existing = enrichmentOwnershipService.getOrEmpty(ShortOwnershipId(ownershipId))
+            val newSource = if (activity.reverted == true) {
+                // We should re-evaluate source only if received activity has the same source
+                if (source == existing.source) {
+                    logger.info("Reverting Activity source {} for Ownership [{}]", source, ownershipId)
+                    enrichmentActivityService.getOwnershipSource(ownershipId)
+                } else {
+                    existing.source
+                }
+            } else {
+                OwnershipSourceComparator.getPreferred(existing.source, source)
+            }
+
+            if (newSource == existing.source) {
+                logger.info("Ownership [{}] not changed after Activity event [{}]", ownershipId, activity.id)
+            } else {
+                logger.info(
+                    "Ownership [{}] source changed on Activity event [{}]: {} -> {}",
+                    ownershipId, activity.id, existing.source, newSource
+                )
+                saveAndNotify(existing.copy(source = newSource), notificationEnabled, ownership)
+            }
         }
     }
 

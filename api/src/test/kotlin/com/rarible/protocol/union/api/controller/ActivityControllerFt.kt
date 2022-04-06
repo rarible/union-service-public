@@ -47,7 +47,8 @@ import java.time.temporal.ChronoUnit
 class ActivityControllerFt : AbstractIntegrationTest() {
 
     private val continuation: String? = null
-    private val size = PageSize.ACTIVITY.default
+    private val defaultSize = PageSize.ACTIVITY.default
+    private val maxSize = PageSize.ACTIVITY.max
     private val sort: com.rarible.protocol.union.dto.ActivitySortDto? = null
 
     @Autowired
@@ -61,11 +62,13 @@ class ActivityControllerFt : AbstractIntegrationTest() {
         val orderActivity = randomEthOrderBidActivity()
 
         coEvery {
-            testEthereumActivityOrderApi.getOrderActivities(any(), isNull(), eq(size), ActivitySortDto.LATEST_FIRST)
+            testEthereumActivityOrderApi.getOrderActivities(
+                any(), isNull(), eq(defaultSize), ActivitySortDto.LATEST_FIRST
+            )
         } returns OrderActivitiesDto(null, listOf(orderActivity)).toMono()
 
         val activities = activityControllerApi.getActivitiesByCollection(
-            types, ethCollectionId.fullId(), continuation, null, size, sort
+            types, ethCollectionId.fullId(), continuation, null, defaultSize, sort
         ).awaitFirst()
 
         assertThat(activities.activities).hasSize(1)
@@ -86,11 +89,13 @@ class ActivityControllerFt : AbstractIntegrationTest() {
         )
 
         coEvery {
-            testEthereumActivityOrderApi.getOrderActivities(any(), eq(ethContinuation), eq(size), ActivitySortDto.LATEST_FIRST)
+            testEthereumActivityOrderApi.getOrderActivities(
+                any(), eq(ethContinuation), eq(defaultSize), ActivitySortDto.LATEST_FIRST
+            )
         } returns OrderActivitiesDto(null, listOf(orderActivity)).toMono()
 
         val activities = activityControllerApi.getActivitiesByCollection(
-            types, ethCollectionId.fullId(), null, cursor.toString(), size, sort
+            types, ethCollectionId.fullId(), null, cursor.toString(), defaultSize, sort
         ).awaitFirst()
 
         assertThat(activities.activities).hasSize(1)
@@ -108,7 +113,7 @@ class ActivityControllerFt : AbstractIntegrationTest() {
                 types.map { it.name },
                 flowCollectionId.value,
                 continuation,
-                size,
+                maxSize,
                 any()
             )
         } returns FlowActivitiesDto(1, null, listOf(activity)).toMono()
@@ -135,7 +140,7 @@ class ActivityControllerFt : AbstractIntegrationTest() {
             testEthereumActivityOrderApi.getOrderActivities(
                 any(),
                 isNull(),
-                eq(PageSize.ACTIVITY.max),
+                eq(maxSize),
                 ActivitySortDto.LATEST_FIRST
             )
         } returns OrderActivitiesDto(null, listOf(orderActivity)).toMono()
@@ -144,7 +149,7 @@ class ActivityControllerFt : AbstractIntegrationTest() {
             testEthereumActivityAuctionApi.getAuctionActivities(
                 any(),
                 isNull(),
-                eq(PageSize.ACTIVITY.max),
+                eq(maxSize),
                 ActivitySortDto.LATEST_FIRST
             )
         } returns AuctionActivitiesDto(null, listOf(auctionActivity)).toMono()
@@ -153,7 +158,7 @@ class ActivityControllerFt : AbstractIntegrationTest() {
             testEthereumActivityItemApi.getNftActivities(
                 any(),
                 isNull(),
-                eq(PageSize.ACTIVITY.max),
+                eq(maxSize),
                 ActivitySortDto.LATEST_FIRST
             )
         } returns NftActivitiesDto(null, listOf(itemActivity)).toMono()
@@ -231,12 +236,12 @@ class ActivityControllerFt : AbstractIntegrationTest() {
                 types.map { it.name },
                 contract,
                 tokenId.toLong(),
-                continuation, size, any()
+                continuation, defaultSize, any()
             )
         } returns FlowActivitiesDto(1, null, listOf(activity)).toMono()
 
         val activities = activityControllerApi.getActivitiesByItem(
-            types, flowItemId.fullId(), continuation, null, size, sort
+            types, flowItemId.fullId(), continuation, null, defaultSize, sort
         ).awaitFirst()
 
         val flowItem = activities.activities[0]
@@ -276,7 +281,9 @@ class ActivityControllerFt : AbstractIntegrationTest() {
         } returns OrderActivitiesDto(null, ethOrderActivities).toMono()
 
         coEvery {
-            testEthereumActivityAuctionApi.getAuctionActivities(any(), isNull(), eq(size), ActivitySortDto.EARLIEST_FIRST)
+            testEthereumActivityAuctionApi.getAuctionActivities(
+                any(), isNull(), eq(size), ActivitySortDto.EARLIEST_FIRST
+            )
         } returns AuctionActivitiesDto(null, emptyList()).toMono()
 
         coEvery {
@@ -288,7 +295,9 @@ class ActivityControllerFt : AbstractIntegrationTest() {
         } returns OrderActivitiesDto(null, polygonOrderActivities).toMono()
 
         coEvery {
-            testPolygonActivityAuctionApi.getAuctionActivities(any(), isNull(), eq(size), ActivitySortDto.EARLIEST_FIRST)
+            testPolygonActivityAuctionApi.getAuctionActivities(
+                any(), isNull(), eq(size), ActivitySortDto.EARLIEST_FIRST
+            )
         } returns AuctionActivitiesDto(null, emptyList()).toMono()
 
         coEvery {
@@ -360,27 +369,39 @@ class ActivityControllerFt : AbstractIntegrationTest() {
 
         // Since all activity types specified in request, all of existing clients should be requested
         coEvery {
-            testEthereumActivityOrderApi.getOrderActivities(any(), eq(ethContinuation), eq(size), ActivitySortDto.EARLIEST_FIRST)
+            testEthereumActivityOrderApi.getOrderActivities(
+                any(), eq(ethContinuation), eq(size), ActivitySortDto.EARLIEST_FIRST
+            )
         } returns OrderActivitiesDto(null, ethOrderActivities).toMono()
 
         coEvery {
-            testEthereumActivityAuctionApi.getAuctionActivities(any(), eq(ethContinuation), eq(size), ActivitySortDto.EARLIEST_FIRST)
+            testEthereumActivityAuctionApi.getAuctionActivities(
+                any(), eq(ethContinuation), eq(size), ActivitySortDto.EARLIEST_FIRST
+            )
         } returns AuctionActivitiesDto(null, emptyList()).toMono()
 
         coEvery {
-            testEthereumActivityItemApi.getNftActivities(any(), eq(ethContinuation), eq(size), ActivitySortDto.EARLIEST_FIRST)
+            testEthereumActivityItemApi.getNftActivities(
+                any(), eq(ethContinuation), eq(size), ActivitySortDto.EARLIEST_FIRST
+            )
         } returns NftActivitiesDto(null, ethItemActivities).toMono()
 
         coEvery {
-            testPolygonActivityOrderApi.getOrderActivities(any(), eq(polyContinuation), eq(size), ActivitySortDto.EARLIEST_FIRST)
+            testPolygonActivityOrderApi.getOrderActivities(
+                any(), eq(polyContinuation), eq(size), ActivitySortDto.EARLIEST_FIRST
+            )
         } returns OrderActivitiesDto(null, polygonOrderActivities).toMono()
 
         coEvery {
-            testPolygonActivityAuctionApi.getAuctionActivities(any(), eq(polyContinuation), eq(size), ActivitySortDto.EARLIEST_FIRST)
+            testPolygonActivityAuctionApi.getAuctionActivities(
+                any(), eq(polyContinuation), eq(size), ActivitySortDto.EARLIEST_FIRST
+            )
         } returns AuctionActivitiesDto(null, emptyList()).toMono()
 
         coEvery {
-            testPolygonActivityItemApi.getNftActivities(any(), eq(polyContinuation), eq(size), ActivitySortDto.EARLIEST_FIRST)
+            testPolygonActivityItemApi.getNftActivities(
+                any(), eq(polyContinuation), eq(size), ActivitySortDto.EARLIEST_FIRST
+            )
         } returns NftActivitiesDto(null, polygonItemActivities).toMono()
 
         coEvery {
@@ -388,7 +409,8 @@ class ActivityControllerFt : AbstractIntegrationTest() {
         } returns FlowActivitiesDto(1, null, flowActivities).toMono()
 
         val activities = activityControllerApi.getAllActivities(
-            types, blockchains, null, cursorArg.toString(), size, com.rarible.protocol.union.dto.ActivitySortDto.EARLIEST_FIRST
+            types, blockchains, null, cursorArg.toString(), size,
+            com.rarible.protocol.union.dto.ActivitySortDto.EARLIEST_FIRST
         ).awaitFirst()
 
         assertThat(activities.activities).hasSize(3)
@@ -407,6 +429,22 @@ class ActivityControllerFt : AbstractIntegrationTest() {
         assertThat(cursor.continuations).containsKey(BlockchainDto.ETHEREUM.name)
         assertThat(cursor.continuations).containsKey(BlockchainDto.POLYGON.name)
         assertThat(cursor.continuations).containsEntry(BlockchainDto.FLOW.name, ArgSlice.COMPLETED)
+    }
+
+    @Test
+    fun `get all activities - with null size`() = runBlocking<Unit> {
+        val types = listOf(ActivityTypeDto.BID)
+        val blockchains = listOf(BlockchainDto.ETHEREUM)
+
+        val ethOrderActivities = List(defaultSize * 2) { randomEthOrderBidActivity() }
+        coEvery {
+            testEthereumActivityOrderApi.getOrderActivities(any(), any(), any(), any())
+        } returns OrderActivitiesDto(null, ethOrderActivities).toMono()
+
+        val activities = activityControllerApi.getAllActivities(types, blockchains, null, null, null, null)
+            .awaitFirst()
+
+        assertThat(activities.activities).hasSize(defaultSize)
     }
 
     @Test
@@ -490,11 +528,15 @@ class ActivityControllerFt : AbstractIntegrationTest() {
         )
 
         coEvery {
-            testEthereumActivityItemApi.getNftActivities(any(), eq(ethContinuation), eq(size), ActivitySortDto.LATEST_FIRST)
+            testEthereumActivityItemApi.getNftActivities(
+                any(), eq(ethContinuation), eq(size), ActivitySortDto.LATEST_FIRST
+            )
         } returns NftActivitiesDto(null, listOf(ethItemActivity)).toMono()
 
         coEvery {
-            testPolygonActivityItemApi.getNftActivities(any(), eq(polyContinuation), eq(size), ActivitySortDto.LATEST_FIRST)
+            testPolygonActivityItemApi.getNftActivities(
+                any(), eq(polyContinuation), eq(size), ActivitySortDto.LATEST_FIRST
+            )
         } returns NftActivitiesDto(null, listOf(polygonItemActivity)).toMono()
 
         coEvery {

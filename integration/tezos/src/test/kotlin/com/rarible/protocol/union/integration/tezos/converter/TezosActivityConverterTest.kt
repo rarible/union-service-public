@@ -18,6 +18,7 @@ import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.BurnActivityDto
+import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.MintActivityDto
 import com.rarible.protocol.union.dto.OrderActivityMatchSideDto
 import com.rarible.protocol.union.dto.OrderBidActivityDto
@@ -221,8 +222,9 @@ class TezosActivityConverterTest {
         assertThat(converted.date).isEqualTo(dto.date)
 
         assertThat(converted.owner.value).isEqualTo(actType.owner)
-        assertThat(converted.contract?.value).isEqualTo(actType.contract)
-        assertThat(converted.tokenId).isEqualTo(actType.tokenId)
+        assertThat(converted.contract!!.value).isEqualTo(actType.contract) // TODO remove later
+        assertThat(converted.tokenId).isEqualTo(actType.tokenId) // TODO remove later
+        assertThat(converted.itemId).isEqualTo(ItemIdDto(BlockchainDto.TEZOS, actType.contract, actType.tokenId))
         assertThat(converted.value).isEqualTo(actType.value.toBigInteger())
         assertThat(converted.transactionHash).isEqualTo(actType.transactionHash)
         // TODO UNION remove in 1.19
@@ -241,8 +243,9 @@ class TezosActivityConverterTest {
         assertThat(converted.date).isEqualTo(dto.date)
 
         assertThat(converted.owner.value).isEqualTo(actType.owner)
-        assertThat(converted.contract?.value).isEqualTo(actType.contract)
-        assertThat(converted.tokenId).isEqualTo(actType.tokenId)
+        assertThat(converted.contract!!.value).isEqualTo(actType.contract) // TODO remove later
+        assertThat(converted.tokenId).isEqualTo(actType.tokenId) // TODO remove later
+        assertThat(converted.itemId).isEqualTo(ItemIdDto(BlockchainDto.TEZOS, actType.contract, actType.tokenId))
         assertThat(converted.value).isEqualTo(actType.value.toBigInteger())
         assertThat(converted.transactionHash).isEqualTo(actType.transactionHash)
         // TODO UNION remove in 1.19
@@ -255,14 +258,16 @@ class TezosActivityConverterTest {
     fun `tezos item activity transfer`() = runBlocking<Unit> {
         val dto = randomTezosItemTransferActivity()
         val actType = dto.type as TransferDto
+        val elt = actType.elt
         val converted = tezosActivityConverter.convert(dto, BlockchainDto.TEZOS) as TransferActivityDto
 
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.date).isEqualTo(dto.date)
 
         assertThat(converted.owner.value).isEqualTo(actType.elt.owner)
-        assertThat(converted.contract?.value).isEqualTo(actType.elt.contract)
-        assertThat(converted.tokenId).isEqualTo(actType.elt.tokenId)
+        assertThat(converted.contract!!.value).isEqualTo(actType.elt.contract) // TODO remove later
+        assertThat(converted.tokenId).isEqualTo(actType.elt.tokenId) // TODO remove later
+        assertThat(converted.itemId).isEqualTo(ItemIdDto(BlockchainDto.TEZOS, elt.contract, elt.tokenId))
         assertThat(converted.value).isEqualTo(actType.elt.value.toBigInteger())
         assertThat(converted.transactionHash).isEqualTo(actType.elt.transactionHash)
         // TODO UNION remove in 1.19

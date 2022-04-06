@@ -37,8 +37,12 @@
 
         <!-- ============= Solana Protocol-API ============== -->
         <dependency>
-            <groupId>com.rarible.solana.protocol</groupId>
+            <groupId>com.rarible.protocol.solana</groupId>
             <artifactId>solana-protocol-client-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.rarible.protocol.solana</groupId>
+            <artifactId>solana-protocol-subscriber</artifactId>
         </dependency>
 
         <!-- ================== Test ===================== -->

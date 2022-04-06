@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.enrichment.service
 
 import com.rarible.core.common.optimisticLock
+import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.event.OutgoingItemEventListener
 import com.rarible.protocol.union.core.event.OutgoingOwnershipEventListener
 import com.rarible.protocol.union.core.exception.UnionException
@@ -22,7 +23,6 @@ import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.OwnershipUpdateEventDto
 import com.rarible.protocol.union.dto.ext
-import com.rarible.protocol.union.enrichment.configuration.UnionMetaProperties
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortOwnership
@@ -44,12 +44,13 @@ class EnrichmentRefreshService(
     private val bestOrderService: BestOrderService,
     private val enrichmentOrderService: EnrichmentOrderService,
     private val enrichmentAuctionService: EnrichmentAuctionService,
+    private val enrichmentActivityService: EnrichmentActivityService,
     private val enrichmentItemService: EnrichmentItemService,
-    private val unionMetaProperties: UnionMetaProperties,
     private val enrichmentOwnershipService: EnrichmentOwnershipService,
     private val itemEventListeners: List<OutgoingItemEventListener>,
     private val ownershipEventListeners: List<OutgoingOwnershipEventListener>,
-    private val auctionContractService: AuctionContractService
+    private val auctionContractService: AuctionContractService,
+    private val ff: FeatureFlagsProperties
 ) {
 
     private val logger = LoggerFactory.getLogger(EnrichmentRefreshService::class.java)
@@ -129,7 +130,10 @@ class EnrichmentRefreshService(
         val shortItemId = ShortItemId(itemId)
 
         logger.info("Starting to reconcile Item [{}]", shortItemId)
-        val itemDtoDeferred = async { itemService.fetch(itemId) }
+        val lastSaleDeferred = async {
+            if (ff.enableItemLastSaleEnrichment) enrichmentActivityService.getItemLastSale(itemId) else null
+        }
+        val itemDtoDeferred = async { itemService.fetch(shortItemId) }
         val sellStatsDeferred = async { ownershipService.getItemSellStats(shortItemId) }
 
         // Looking for best sell orders
@@ -160,7 +164,8 @@ class EnrichmentRefreshService(
                 bestBidOrder = bestOrderService.getBestBidOrderInUsd(bestBidOrders),
                 sellers = sellStats.sellers,
                 totalStock = sellStats.totalStock,
-                auctions = auctions.map { it.id }.toSet()
+                auctions = auctions.map { it.id }.toSet(),
+                lastSale = lastSaleDeferred.await()
             )
 
             if (shortItem.isNotEmpty()) {
@@ -196,6 +201,10 @@ class EnrichmentRefreshService(
     ) = coroutineScope {
         val shortOwnershipId = ShortOwnershipId(ownership.id)
 
+        val ownershipSource = async {
+            if (ff.enableOwnershipSourceEnrichment) enrichmentActivityService.getOwnershipSource(ownership.id) else null
+        }
+
         val bestSellOrdersDto = currencies.map { currencyId ->
             async { enrichmentOrderService.getBestSell(shortOwnershipId, currencyId) }
         }.awaitAll().filterNotNull()
@@ -206,7 +215,8 @@ class EnrichmentRefreshService(
         val updatedOwnership = optimisticLock {
             val shortOwnership = enrichmentOwnershipService.getOrEmpty(shortOwnershipId).copy(
                 bestSellOrders = bestSellOrders,
-                bestSellOrder = bestOrderService.getBestSellOrderInUsd(bestSellOrders)
+                bestSellOrder = bestOrderService.getBestSellOrderInUsd(bestSellOrders),
+                source = ownershipSource.await()
             )
 
             if (shortOwnership.isNotEmpty()) {

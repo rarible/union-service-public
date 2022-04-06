@@ -1,22 +1,20 @@
 package com.rarible.protocol.union.listener.service
 
 import com.rarible.core.common.optimisticLock
+import com.rarible.protocol.union.core.event.OutgoingEventListener
 import com.rarible.protocol.union.core.event.OutgoingItemEventListener
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.getItemId
+import com.rarible.protocol.union.core.model.itemId
 import com.rarible.protocol.union.core.service.ReconciliationEventService
-import com.rarible.protocol.union.dto.AuctionDto
-import com.rarible.protocol.union.dto.AuctionStatusDto
-import com.rarible.protocol.union.dto.ItemDeleteEventDto
-import com.rarible.protocol.union.dto.ItemIdDto
-import com.rarible.protocol.union.dto.ItemUpdateEventDto
-import com.rarible.protocol.union.dto.OrderDto
-import com.rarible.protocol.union.enrichment.configuration.UnionMetaProperties
+import com.rarible.protocol.union.dto.*
+import com.rarible.protocol.union.enrichment.converter.ItemLastSaleConverter
 import com.rarible.protocol.union.enrichment.model.ItemSellStats
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
 import com.rarible.protocol.union.enrichment.service.BestOrderService
+import com.rarible.protocol.union.enrichment.service.EnrichmentActivityService
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
 import com.rarible.protocol.union.enrichment.validator.ItemValidator
@@ -26,12 +24,12 @@ import java.util.*
 
 @Component
 class EnrichmentItemEventService(
-    private val itemService: EnrichmentItemService,
-    private val ownershipService: EnrichmentOwnershipService,
-    private val itemEventListeners: List<OutgoingItemEventListener>,
+    private val enrichmentItemService: EnrichmentItemService,
+    private val enrichmentOwnershipService: EnrichmentOwnershipService,
+    private val enrichmentActivityService: EnrichmentActivityService,
+    private val itemEventListeners: List<OutgoingEventListener<ItemEventDto>>,
     private val bestOrderService: BestOrderService,
-    private val reconciliationEventService: ReconciliationEventService,
-    private val unionMetaProperties: UnionMetaProperties
+    private val reconciliationEventService: ReconciliationEventService
 ) {
 
     private val logger = LoggerFactory.getLogger(EnrichmentItemEventService::class.java)
@@ -46,14 +44,14 @@ class EnrichmentItemEventService(
     ) {
         val itemId = ShortItemId(ownershipId.blockchain, ownershipId.itemId)
         optimisticLock {
-            val item = itemService.get(itemId)
+            val item = enrichmentItemService.get(itemId)
             if (item == null) {
                 logger.debug(
                     "Item [{}] not found in DB, skipping sell stats update on Ownership event: [{}]",
                     itemId, ownershipId
                 )
             } else {
-                val refreshedSellStats = ownershipService.getItemSellStats(itemId)
+                val refreshedSellStats = enrichmentOwnershipService.getItemSellStats(itemId)
                 val currentSellStats = ItemSellStats(item.sellers, item.totalStock)
                 if (refreshedSellStats != currentSellStats) {
                     val updatedItem = item.copy(
@@ -75,8 +73,44 @@ class EnrichmentItemEventService(
         }
     }
 
+    suspend fun onActivity(activity: ActivityDto, item: UnionItem? = null, notificationEnabled: Boolean = true) {
+        val lastSale = ItemLastSaleConverter.convert(activity) ?: return
+        val itemId = activity.itemId() ?: return
+
+        optimisticLock {
+            val existing = enrichmentItemService.getOrEmpty(ShortItemId(itemId))
+            val currentLastSale = existing.lastSale
+
+            val newLastSale = if (activity.reverted == true) {
+                // We should re-evaluate last sale only if received activity has the same sale data
+                if (lastSale == currentLastSale) {
+                    logger.info("Reverting Activity LastSale {} for Item [{}], reverting it", lastSale, itemId)
+                    enrichmentActivityService.getItemLastSale(itemId)
+                } else {
+                    currentLastSale
+                }
+            } else {
+                if (currentLastSale == null || currentLastSale.date.isBefore(lastSale.date)) {
+                    lastSale
+                } else {
+                    currentLastSale
+                }
+            }
+
+            if (newLastSale == currentLastSale) {
+                logger.info("Item [{}] not changed after Activity event [{}]", itemId, activity.id)
+            } else {
+                logger.info(
+                    "Item [{}] LastSale changed on Activity event [{}]: {} -> {}",
+                    itemId, activity.id, currentLastSale, newLastSale
+                )
+                saveAndNotify(existing.copy(lastSale = newLastSale), notificationEnabled, item)
+            }
+        }
+    }
+
     suspend fun onItemUpdated(item: UnionItem) {
-        val existing = itemService.getOrEmpty(ShortItemId(item.id))
+        val existing = enrichmentItemService.getOrEmpty(ShortItemId(item.id))
         val updateEvent = buildUpdateEvent(short = existing, item = item)
         sendUpdate(updateEvent)
     }
@@ -167,7 +201,7 @@ class EnrichmentItemEventService(
     }
 
     private suspend fun deleteItem(itemId: ShortItemId): Boolean {
-        val result = itemService.delete(itemId)
+        val result = enrichmentItemService.delete(itemId)
         return result != null && result.deletedCount > 0
     }
 
@@ -175,7 +209,7 @@ class EnrichmentItemEventService(
         itemId: ShortItemId,
         action: suspend (item: ShortItem) -> ShortItem
     ): Triple<ShortItem?, ShortItem, Boolean> {
-        val current = itemService.get(itemId)
+        val current = enrichmentItemService.get(itemId)
         val exist = current != null
         val short = current ?: ShortItem.empty(itemId)
         return Triple(current, action(short), exist)
@@ -199,12 +233,12 @@ class EnrichmentItemEventService(
         auction: AuctionDto? = null
     ) {
         if (!notificationEnabled) {
-            itemService.save(updated)
+            enrichmentItemService.save(updated)
             return
         }
 
         val event = buildUpdateEvent(updated, item, order, auction)
-        itemService.save(updated)
+        enrichmentItemService.save(updated)
         sendUpdate(event)
     }
 
@@ -216,12 +250,12 @@ class EnrichmentItemEventService(
         auction: AuctionDto? = null
     ) {
         if (!notificationEnabled) {
-            itemService.delete(updated.id)
+            enrichmentItemService.delete(updated.id)
             return
         }
 
         val event = buildUpdateEvent(updated, item, order, auction)
-        itemService.delete(updated.id)
+        enrichmentItemService.delete(updated.id)
         sendUpdate(event)
     }
 
@@ -231,7 +265,7 @@ class EnrichmentItemEventService(
         order: OrderDto? = null,
         auction: AuctionDto? = null
     ): ItemUpdateEventDto {
-        val dto = itemService.enrichItem(
+        val dto = enrichmentItemService.enrichItem(
             shortItem = short,
             item = item,
             orders = listOfNotNull(order).associateBy { it.id },

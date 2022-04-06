@@ -13,7 +13,8 @@ data class UnionListenerProperties(
     val monitoringWorker: DaemonWorkerProperties = DaemonWorkerProperties(),
     val reconciliation: ReconciliationProperties,
     val openSeaCleanup: OpenSeaCleanUpProperties,
-    val priceUpdate: PriceUpdateProperties
+    val priceUpdate: PriceUpdateProperties,
+    val metrics: MetricsProperties
 )
 
 class InternalConsumerProperties(
@@ -24,6 +25,7 @@ class InternalConsumerProperties(
 class ReconciliationProperties(
     val orderBatchSize: Int = 50,
     val auctionBatchSize: Int = 50,
+    val activityBatchSize: Int = 100,
     val threadCount: Int = 4,
     val notificationEnabled: Boolean = true
 )
@@ -38,4 +40,8 @@ data class OpenSeaCleanUpProperties(
     val sellOrderFrom: Instant?,
     val itemBatchSize: Int = 100,
     val ownershipBatchSize: Int = 100
+)
+
+data class MetricsProperties(
+    val rootPath: String = "protocol.union.listener"
 )

@@ -7,10 +7,11 @@ import com.rarible.core.task.EnableRaribleTask
 import com.rarible.protocol.union.core.event.UnionInternalTopicProvider
 import com.rarible.protocol.union.core.handler.InternalEventHandler
 import com.rarible.protocol.union.core.handler.KafkaConsumerWorker
-import com.rarible.protocol.union.core.model.UnionWrappedEvent
+import com.rarible.protocol.union.core.model.*
 import com.rarible.protocol.union.enrichment.configuration.EnrichmentConsumerConfiguration
 import com.rarible.protocol.union.enrichment.model.ReconciliationMarkAbstractEvent
 import com.rarible.protocol.union.subscriber.UnionKafkaJsonDeserializer
+import io.micrometer.core.instrument.MeterRegistry
 import org.apache.kafka.clients.consumer.OffsetResetStrategy
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
@@ -26,7 +27,8 @@ import java.util.*
 class UnionListenerConfiguration(
     private val listenerProperties: UnionListenerProperties,
     applicationEnvironmentInfo: ApplicationEnvironmentInfo,
-    private val consumerFactory: InternalConsumerFactory
+    private val consumerFactory: InternalConsumerFactory,
+    private val meterRegistry: MeterRegistry
 ) {
 
     private val env = applicationEnvironmentInfo.name
@@ -34,10 +36,9 @@ class UnionListenerConfiguration(
 
     private val clientIdPrefix = "$env.$host.${UUID.randomUUID()}"
 
-    @Bean
-    fun unionWrappedEventConsumer(): RaribleKafkaConsumer<UnionWrappedEvent> {
+    private fun createUnionWrappedEventConsumer(index: Int): RaribleKafkaConsumer<UnionWrappedEvent> {
         return RaribleKafkaConsumer(
-            clientId = "$clientIdPrefix.union-wrapped-event-consumer",
+            clientId = "$clientIdPrefix.union-wrapped-event-consumer-$index",
             valueDeserializerClass = UnionKafkaJsonDeserializer::class.java,
             valueClass = UnionWrappedEvent::class.java,
             consumerGroup = consumerGroup("wrapped"),
@@ -49,21 +50,21 @@ class UnionListenerConfiguration(
 
     @Bean
     fun unionWrappedEventWorker(
-        consumer: RaribleKafkaConsumer<UnionWrappedEvent>,
         handler: InternalEventHandler<UnionWrappedEvent>
     ): KafkaConsumerWorker<UnionWrappedEvent> {
         return consumerFactory.createWrappedEventConsumer(
-            consumer = consumer,
+            consumer = { index -> createUnionWrappedEventConsumer(index) },
             handler = handler,
             daemon = listenerProperties.monitoringWorker,
             workers = listenerProperties.consumer.workers
         )
     }
 
-    @Bean
-    fun unionReconciliationMarkEventConsumer(): RaribleKafkaConsumer<ReconciliationMarkAbstractEvent> {
+    private fun createUnionReconciliationMarkEventConsumer(
+        index: Int
+    ): RaribleKafkaConsumer<ReconciliationMarkAbstractEvent> {
         return RaribleKafkaConsumer(
-            clientId = "$clientIdPrefix.union-reconciliation-mark-consumer",
+            clientId = "$clientIdPrefix.union-reconciliation-mark-consumer-$index",
             valueDeserializerClass = UnionKafkaJsonDeserializer::class.java,
             valueClass = ReconciliationMarkAbstractEvent::class.java,
             consumerGroup = consumerGroup("reconciliation"),
@@ -75,11 +76,10 @@ class UnionListenerConfiguration(
 
     @Bean
     fun unionReconciliationMarkEventWorker(
-        consumer: RaribleKafkaConsumer<ReconciliationMarkAbstractEvent>,
         handler: InternalEventHandler<ReconciliationMarkAbstractEvent>
     ): KafkaConsumerWorker<ReconciliationMarkAbstractEvent> {
         return consumerFactory.createReconciliationMarkEventConsumer(
-            consumer = consumer,
+            consumer = { index -> createUnionReconciliationMarkEventConsumer(index) },
             handler = handler,
             daemon = listenerProperties.monitoringWorker,
             workerCount = 1
@@ -90,4 +90,18 @@ class UnionListenerConfiguration(
         return "${env}.protocol.union.${suffix}"
     }
 
+    @Bean
+    fun itemCompositeRegisteredTimer(): CompositeRegisteredTimer {
+        return ItemEventDelayMetric(listenerProperties.metrics.rootPath).bind(meterRegistry)
+    }
+
+    @Bean
+    fun ownershipCompositeRegisteredTimer(): CompositeRegisteredTimer {
+        return OwnershipEventDelayMetric(listenerProperties.metrics.rootPath).bind(meterRegistry)
+    }
+
+    @Bean
+    fun orderCompositeRegisteredTimer(): CompositeRegisteredTimer {
+        return OrderEventDelayMetric(listenerProperties.metrics.rootPath).bind(meterRegistry)
+    }
 }

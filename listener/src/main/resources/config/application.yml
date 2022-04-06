@@ -41,7 +41,9 @@ rarible:
     broker-replica-set: ${kafka.hosts}
     topicsPrefix: protocol.${application.environment}.union.internal.loader
     enableWorkers: false
-    enableNotifications: true # Enable notifications to send item update events when meta gets loaded.
+    enableNotifications: true # Enable notifications processor to send item update events when meta gets loaded.
+    loadNotificationsTopicPartitions: 50
+    enableRetrySchedulerJob: true
 
 common:
   producer:
@@ -50,6 +52,11 @@ common:
     refresh:
       cron: "0 0/30 * * * *"
   useLegacyRepository: true
+  feature-flags:
+    enableRevertedActivityEventSending: false
+    enableOwnershipSourceEnrichment: false
+    enableItemLastSaleEnrichment: true
+    enableNotificationOnCollectionOrders: true
 
 
 integration:
@@ -95,6 +102,13 @@ integration:
     auctionContracts: ${consul.tezos.auctionContracts:}
   solana:
     enabled: ${consul.solana.enabled:false}
+    consumer:
+      broker-replica-set: ${kafka.hosts}
+      workers:
+        item: 1
+        ownership: 1
+        order: 1
+    auctionContracts:
 
 listener:
   consumer:
@@ -104,6 +118,7 @@ listener:
   reconciliation:
     orderBatchSize: 50
     auctionBatchSize: 50
+    activityBatchSize: 100
     threadCount: 2
     notificationEnabled: false
   openSeaCleanup:
@@ -117,9 +132,21 @@ listener:
   reconcile-marks:
     rate: PT15S
     delay: PT1M
+  metrics:
+    root-path: "protocol.union.listener"
 
 meta:
   ipfsGateway: "https://rarible.mypinata.cloud/"
   mediaFetchTimeout: 10000
-  mediaFetchMaxSize: 10485760
+  mediaFetchMaxSize: 131072 # 128 Kb
   openSeaProxyUrl: ${consul.meta.openSeaProxyUrl}
+  http-client:
+    type: KTOR_CIO # KTOR_APACHE, KTOR_CIO
+    thread-count: 1
+    time-out: 10000
+    total-connection: 1000
+
+# Disable verbose logs of Apache HTTP client used to load content media metadata.
+logging:
+  level:
+    org.apache.http: ERROR

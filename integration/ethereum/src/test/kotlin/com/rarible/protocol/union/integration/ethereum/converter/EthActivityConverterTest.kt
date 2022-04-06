@@ -9,6 +9,7 @@ import com.rarible.protocol.union.dto.AuctionOpenActivityDto
 import com.rarible.protocol.union.dto.AuctionStartActivityDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.BurnActivityDto
+import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.MintActivityDto
 import com.rarible.protocol.union.dto.OrderActivityMatchSideDto
 import com.rarible.protocol.union.dto.OrderBidActivityDto
@@ -197,8 +198,9 @@ class EthActivityConverterTest {
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.date).isEqualTo(dto.date)
         assertThat(converted.owner.value).isEqualTo(dto.owner.prefixed())
-        assertThat(converted.contract?.value).isEqualTo(dto.contract.prefixed())
-        assertThat(converted.tokenId).isEqualTo(dto.tokenId)
+        assertThat(converted.contract!!.value).isEqualTo(dto.contract.prefixed()) // TODO remove later
+        assertThat(converted.tokenId).isEqualTo(dto.tokenId) // TODO remove later
+        assertThat(converted.itemId).isEqualTo(ItemIdDto(BlockchainDto.ETHEREUM, dto.contract.prefixed(), dto.tokenId))
         assertThat(converted.value).isEqualTo(dto.value)
         assertThat(converted.transactionHash).isEqualTo(dto.transactionHash.prefixed())
         // TODO UNION remove in 1.19
@@ -216,8 +218,9 @@ class EthActivityConverterTest {
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.date).isEqualTo(dto.date)
         assertThat(converted.owner.value).isEqualTo(dto.owner.prefixed())
-        assertThat(converted.contract?.value).isEqualTo(dto.contract.prefixed())
-        assertThat(converted.tokenId).isEqualTo(dto.tokenId)
+        assertThat(converted.contract!!.value).isEqualTo(dto.contract.prefixed()) // TODO remove later
+        assertThat(converted.tokenId).isEqualTo(dto.tokenId) // TODO remove later
+        assertThat(converted.itemId).isEqualTo(ItemIdDto(BlockchainDto.ETHEREUM, dto.contract.prefixed(), dto.tokenId))
         assertThat(converted.value).isEqualTo(dto.value)
         assertThat(converted.transactionHash).isEqualTo(dto.transactionHash.prefixed())
         // TODO UNION remove in 1.19
@@ -235,9 +238,11 @@ class EthActivityConverterTest {
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.date).isEqualTo(dto.date)
         assertThat(converted.owner.value).isEqualTo(dto.owner.prefixed())
-        assertThat(converted.contract?.value).isEqualTo(dto.contract.prefixed())
-        assertThat(converted.tokenId).isEqualTo(dto.tokenId)
+        assertThat(converted.contract!!.value).isEqualTo(dto.contract.prefixed()) // TODO remove later
+        assertThat(converted.tokenId).isEqualTo(dto.tokenId) // TODO remove later
+        assertThat(converted.itemId).isEqualTo(ItemIdDto(BlockchainDto.ETHEREUM, dto.contract.prefixed(), dto.tokenId))
         assertThat(converted.value).isEqualTo(dto.value)
+        assertThat(converted.purchase).isEqualTo(dto.purchase)
         assertThat(converted.transactionHash).isEqualTo(dto.transactionHash.prefixed())
         // TODO UNION remove in 1.19
         assertThat(converted.blockchainInfo!!.transactionHash).isEqualTo(dto.transactionHash.prefixed())

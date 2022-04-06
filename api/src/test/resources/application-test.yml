@@ -6,11 +6,7 @@ rarible:
   loader:
     enableWorkers: true
     workers: 1
-    retry:
-      backoffDelaysMillis: [ ]
-      job:
-        runner:
-        period: 1000000000000000000 # Disable in the tests.
+    enableRetrySchedulerJob: false
 
 integration:
   tezos:
@@ -21,3 +17,7 @@ common:
   currency:
     refresh:
       cron: "-"
+  feature-flags:
+    enableRevertedActivityEventSending: false
+    enableOwnershipSourceEnrichment: true
+    enableItemLastSaleEnrichment: true

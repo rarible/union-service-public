@@ -8,8 +8,10 @@ import com.rarible.protocol.union.dto.AuctionDto
 import com.rarible.protocol.union.dto.AuctionIdDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemDto
+import com.rarible.protocol.union.dto.ItemLastSaleDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
+import com.rarible.protocol.union.enrichment.model.ItemLastSale
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import java.math.BigInteger
 
@@ -31,7 +33,9 @@ object EnrichedItemConverter {
             id = item.id,
             blockchain = item.id.blockchain,
             collection = item.collection,
-            contract = contractAndTokenId?.let { ContractAddressConverter.convert(item.id.blockchain, it.first) }, // TODO remove later
+            contract = contractAndTokenId?.let { // TODO remove later
+                ContractAddressConverter.convert(item.id.blockchain, it.first)
+            },
             tokenId = contractAndTokenId?.second, // TODO remove later
             creators = item.creators,
             owners = item.owners, // TODO UNION Remove in 1.19
@@ -41,7 +45,9 @@ object EnrichedItemConverter {
             mintedAt = item.mintedAt,
             lastUpdatedAt = item.lastUpdatedAt,
             supply = item.supply,
-            meta = meta?.let { EnrichedMetaConverter.convert(it) },
+            // TODO: see CHARLIE-158: we will ignore meta from blockhain Item DTOs' soon and only load metadata on union.
+            //  This fallback is needed to guarantee that the first event for a just minted item contains meta.
+            meta = (meta ?: item.meta)?.let { EnrichedMetaConverter.convert(it) },
             deleted = item.deleted,
 
             // Enrichment data
@@ -49,7 +55,19 @@ object EnrichedItemConverter {
             bestBidOrder = shortItem?.bestBidOrder?.let { orders[it.dtoId] },
             auctions = shortItem?.auctions?.mapNotNull { auctions[it] } ?: emptyList(),
             totalStock = shortItem?.totalStock ?: BigInteger.ZERO,
-            sellers = shortItem?.sellers ?: 0
+            sellers = shortItem?.sellers ?: 0,
+            lastSale = shortItem?.lastSale?.let { convert(it) }
+        )
+    }
+
+    private fun convert(lastSale: ItemLastSale): ItemLastSaleDto {
+        return ItemLastSaleDto(
+            date = lastSale.date,
+            seller = lastSale.seller,
+            buyer = lastSale.buyer,
+            currency = lastSale.currency,
+            value = lastSale.value,
+            price = lastSale.price
         )
     }
 }

@@ -54,7 +54,15 @@ object EnrichedMetaConverter {
                 representation = content.representation,
                 mimeType = properties.mimeType
             )
-            null -> null
+            // Fallback: consider this was an image. It is better than to return nothing.
+            null -> ImageContentDto(
+                url = content.url,
+                representation = MetaContentDto.Representation.ORIGINAL,
+                mimeType = null,
+                size = null,
+                width = null,
+                height = null
+            )
         }
     }
 }

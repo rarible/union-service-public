@@ -128,7 +128,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
         val meta = randomEthItemMeta().copy(
             image = NftMediaDto(
                 url = mapOf(Pair("ORIGINAL", imageUrl)),
-                meta = mapOf(Pair("ORIGINAL", randomEthItemMediaMeta("ORIGINAL")))
+                meta = mapOf(Pair("ORIGINAL", randomEthItemMediaMeta("image/png")))
             )
         )
 
@@ -146,7 +146,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
         val meta = randomEthItemMeta().copy(
             animation = NftMediaDto(
                 url = mapOf(Pair("ORIGINAL", animationUrl)),
-                meta = mapOf(Pair("ORIGINAL", randomEthItemMediaMeta("ORIGINAL")))
+                meta = mapOf(Pair("ORIGINAL", randomEthItemMediaMeta("image/gif")))
             )
         )
 

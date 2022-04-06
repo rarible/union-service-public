@@ -29,7 +29,7 @@ class BestOrderCheckJob(
     private val enabledBlockchains = blockchains.toSet()
 
     @Scheduled(
-        fixedRateString = "\${listener.price-update.rate}",
+        fixedDelayString = "\${listener.price-update.rate}",
         initialDelayString = "\${listener.price-update.delay}"
     )
     fun updateBestOrderPrice() = runBlocking<Unit> {

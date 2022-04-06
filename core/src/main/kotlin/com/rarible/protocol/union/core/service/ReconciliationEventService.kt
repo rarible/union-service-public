@@ -2,6 +2,9 @@ package com.rarible.protocol.union.core.service
 
 import com.rarible.core.kafka.RaribleKafkaProducer
 import com.rarible.protocol.union.core.event.KafkaEventFactory
+import com.rarible.protocol.union.core.model.itemId
+import com.rarible.protocol.union.core.model.ownershipId
+import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
@@ -43,6 +46,11 @@ class ReconciliationEventService(
         if (takeItemId != null) {
             onCorruptedItem(takeItemId)
         }
+    }
+
+    suspend fun onFailedActivity(activity: ActivityDto) {
+        activity.itemId()?.let { onCorruptedItem(it) }
+        activity.ownershipId()?.let { onCorruptedOwnership(it) }
     }
 
 }
