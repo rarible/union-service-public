@@ -13,6 +13,8 @@ import com.rarible.protocol.union.dto.AuctionStartActivityDto
 import com.rarible.protocol.union.dto.BurnActivityDto
 import com.rarible.protocol.union.dto.ContractAddress
 import com.rarible.protocol.union.dto.ItemIdDto
+import com.rarible.protocol.union.dto.L2DepositActivityDto
+import com.rarible.protocol.union.dto.L2WithdrawalActivityDto
 import com.rarible.protocol.union.dto.MintActivityDto
 import com.rarible.protocol.union.dto.OrderBidActivityDto
 import com.rarible.protocol.union.dto.OrderCancelBidActivityDto
@@ -47,6 +49,8 @@ class ElasticActivityConverter {
             is AuctionCancelActivityDto -> convertAuctionCancel(source)
             is AuctionStartActivityDto -> convertAuctionStart(source)
             is AuctionEndActivityDto -> convertAuctionEnd(source)
+            is L2WithdrawalActivityDto -> convertL2Withdrawal(source)
+            is L2DepositActivityDto -> convertL2Deposit(source)
         }
     }
 
@@ -260,6 +264,34 @@ class ElasticActivityConverter {
             user = singleUser(source.auction.seller),
             collection = bothCollections(source.auction.sell.type, source.auction.buy),
             item = bothItems(source.auction.sell.type, source.auction.buy),
+        )
+    }
+
+    private fun convertL2Withdrawal(source: L2WithdrawalActivityDto): ElasticActivity {
+        return ElasticActivity(
+            activityId = source.id.toString(),
+            date = source.date,
+            blockNumber = null,
+            logIndex = null,
+            blockchain = source.id.blockchain,
+            type = ActivityTypeDto.TRANSFER, // TODO
+            user = singleUser(source.user),
+            collection = ElasticActivity.Collection("", ""), // TODO
+            item = ElasticActivity.Item("", ""), // TODO
+        )
+    }
+
+    private fun convertL2Deposit(source: L2DepositActivityDto): ElasticActivity {
+        return ElasticActivity(
+            activityId = source.id.toString(),
+            date = source.date,
+            blockNumber = null,
+            logIndex = null,
+            blockchain = source.id.blockchain,
+            type = ActivityTypeDto.TRANSFER, // TODO
+            user = singleUser(source.user),
+            collection = ElasticActivity.Collection("", ""), // TODO
+            item = ElasticActivity.Item("", ""), // TODO
         )
     }
 

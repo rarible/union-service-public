@@ -9,6 +9,8 @@ import com.rarible.protocol.union.dto.AuctionOpenActivityDto
 import com.rarible.protocol.union.dto.AuctionStartActivityDto
 import com.rarible.protocol.union.dto.BurnActivityDto
 import com.rarible.protocol.union.dto.ItemIdDto
+import com.rarible.protocol.union.dto.L2DepositActivityDto
+import com.rarible.protocol.union.dto.L2WithdrawalActivityDto
 import com.rarible.protocol.union.dto.MintActivityDto
 import com.rarible.protocol.union.dto.OrderBidActivityDto
 import com.rarible.protocol.union.dto.OrderCancelBidActivityDto
@@ -40,6 +42,9 @@ fun ActivityDto.itemId(): ItemIdDto? {
         is AuctionFinishActivityDto -> this.auction.getItemId()
         is AuctionStartActivityDto -> this.auction.getItemId()
         is AuctionEndActivityDto -> this.auction.getItemId()
+
+        is L2DepositActivityDto -> null // TODO
+        is L2WithdrawalActivityDto -> null // TODO
     }
 }
 
