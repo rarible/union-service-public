@@ -47,7 +47,7 @@
 
         <rarible.protocol.currency.version>1.23.2</rarible.protocol.currency.version>
         <rarible.protocol.ethereum.version>1.25.0</rarible.protocol.ethereum.version>
-        <rarible.protocol.flow.version>2.3.1</rarible.protocol.flow.version>
+        <rarible.protocol.flow.version>2.3.2</rarible.protocol.flow.version>
         <rarible.protocol.tezos.version>1.0.2</rarible.protocol.tezos.version>
         <rarible.protocol.solana.version>0.1.18</rarible.protocol.solana.version>
 
