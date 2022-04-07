@@ -56,7 +56,6 @@ class ElasticOrderConverter {
         }
     }
 
-    // TODO: needs to check
     fun origins(data: OrderDataDto): List<UnionAddress> {
         return when(data) {
             is EthOrderDataRaribleV2DataV1Dto -> data.payouts.map { it.account }

@@ -51,7 +51,7 @@ class KafkaConsumerConfiguration(
     fun orderWorker(
         handler: ConsumerBatchEventHandler<OrderEventDto>
     ): ConsumerWorkerHolder<OrderEventDto> {
-        val workers = (1..4).map { index ->
+        val workers = (1..kafkaProperties.workerCount).map { index ->
             val consumer = consumerFactory.createOrderConsumer(consumerGroup(ORDER))
             ConsumerBatchWorker(
                 consumer = consumer,
