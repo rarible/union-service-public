@@ -2,13 +2,13 @@ spring:
   data:
     elasticsearch:
       cluster-name: docker-cluster
-      cluster-nodes: "${elasticsearch.host}:9300"
+      cluster-nodes: ${elasticsearch.cluster-nodes}
 
       client:
         reactive:
-          endpoints: "${elasticsearch.host}:9200"
+          endpoints:  ${elasticsearch.api-nodes}
 
 
   elasticsearch:
     rest:
-      uris: "${elasticsearch.host}:9200"
+      uris: ${elasticsearch.api-nodes}
