@@ -5,6 +5,7 @@ import com.rarible.core.kafka.KafkaMessage
 import com.rarible.core.kafka.RaribleKafkaConsumer
 import com.rarible.core.kafka.RaribleKafkaProducer
 import com.rarible.core.test.data.randomString
+import com.rarible.protocol.nft.api.client.NftCollectionControllerApi
 import com.rarible.protocol.nft.api.client.NftItemControllerApi
 import com.rarible.protocol.nft.api.client.NftOwnershipControllerApi
 import com.rarible.protocol.union.dto.ActivityDto
@@ -51,6 +52,10 @@ abstract class AbstractIntegrationTest {
     @Autowired
     @Qualifier("ethereum.item.api")
     lateinit var testEthereumItemApi: NftItemControllerApi
+
+    @Autowired
+    @Qualifier("ethereum.collection.api")
+    lateinit var testEthereumCollectionApi: NftCollectionControllerApi
 
     @Autowired
     @Qualifier("ethereum.ownership.api")

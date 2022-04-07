@@ -13,18 +13,18 @@ object EntityValidator {
         if (item == null) {
             return true
         }
-        return isAllValid(item.bestBidOrder, item.id.fullId())
+        return isAllValid(item.bestBidOrder, item.bestSellOrder, item.id.fullId())
     }
 
     fun isValid(collection: CollectionDto?): Boolean {
         if (collection == null) {
             return true
         }
-        return isAllValid(collection.bestBidOrder, collection.id.fullId())
+        return isAllValid(collection.bestBidOrder, collection.bestSellOrder, collection.id.fullId())
     }
 
-    private fun isAllValid(order: OrderDto?, id: String): Boolean {
-        return isBestBidValid(order,id) && isBestSellValid(order, id)
+    private fun isAllValid(bestBidOrder: OrderDto?, bestSellOrder: OrderDto?, id: String): Boolean {
+        return isBestBidValid(bestBidOrder,id) && isBestSellValid(bestSellOrder, id)
     }
 
     private fun isBestBidValid(order: OrderDto?, id: String): Boolean {

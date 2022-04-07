@@ -9,7 +9,7 @@ import com.rarible.protocol.union.core.model.UnionMetaContent
 import com.rarible.protocol.union.core.model.UnionMetaContentProperties
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.BurnActivityDto
-import com.rarible.protocol.union.dto.CollectionDto
+import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.MetaAttributeDto
 import com.rarible.protocol.union.dto.MetaContentDto
@@ -56,6 +56,13 @@ fun randomUnionCollection(): UnionCollection =
         randomEthCollectionDto(),
         BlockchainDto.ETHEREUM
     )
+
+fun randomUnionCollection(id: CollectionIdDto): UnionCollection =
+    EthCollectionConverter.convert(
+        randomEthCollectionDto(),
+        id.blockchain
+    ).copy(id = id)
+
 
 fun randomUnionItem(id: ItemIdDto): UnionItem {
     return when (id.blockchain) {
