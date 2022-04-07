@@ -26,8 +26,8 @@ import com.rarible.protocol.union.dto.TransferActivityDto
 import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.ext
 import com.rarible.protocol.union.search.core.ElasticActivity
-import org.springframework.stereotype.Service
 import java.math.BigInteger
+import org.springframework.stereotype.Service
 
 @Service
 class ElasticActivityConverter {
@@ -276,8 +276,8 @@ class ElasticActivityConverter {
             blockchain = source.id.blockchain,
             type = ActivityTypeDto.TRANSFER, // TODO
             user = singleUser(source.user),
-            collection = ElasticActivity.Collection("", ""), // TODO
-            item = ElasticActivity.Item("", ""), // TODO
+            collection = singleCollection(source.itemId),
+            item = singleItem(source.itemId)
         )
     }
 
@@ -290,8 +290,8 @@ class ElasticActivityConverter {
             blockchain = source.id.blockchain,
             type = ActivityTypeDto.TRANSFER, // TODO
             user = singleUser(source.user),
-            collection = ElasticActivity.Collection("", ""), // TODO
-            item = ElasticActivity.Item("", ""), // TODO
+            collection = singleCollection(source.itemId),
+            item = singleItem(source.itemId),
         )
     }
 
