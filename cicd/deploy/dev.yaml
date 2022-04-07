@@ -5,3 +5,9 @@ protocol-union-api:
 
 protocol-union-meta-loader:
   replicas: 1
+
+protocol-union-search-indexer:
+  replicas: 1
+
+protocol-union-search-reindexer:
+  replicas: 1

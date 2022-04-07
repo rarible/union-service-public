@@ -18,6 +18,7 @@ import com.rarible.protocol.union.dto.SolanaAuctionHouseDataV1Dto
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
+import java.math.BigDecimal
 
 @Component
 class SolanaOrderConverter(
@@ -73,7 +74,7 @@ class SolanaOrderConverter(
             signature = null,
             pending = emptyList(),
 
-            makeStock = order.make.value,
+            makeStock = order.makeStock ?: BigDecimal.ZERO, // TODO make it required later
             makePrice = makePrice,
             takePrice = takePrice,
             makePriceUsd = makePriceUsd,
