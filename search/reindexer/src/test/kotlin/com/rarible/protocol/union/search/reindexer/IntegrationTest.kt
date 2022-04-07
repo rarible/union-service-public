@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Import
 import org.springframework.test.context.ActiveProfiles
 
 
-@KafkaTest
+//@KafkaTest
 @ElasticsearchTest
 @EnableAutoConfiguration
 @SpringBootTest(
