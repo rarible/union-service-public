@@ -1,9 +1,6 @@
 package com.rarible.protocol.union.enrichment.configuration
 
-import com.rarible.core.content.meta.loader.ContentMetaReceiver
-import com.rarible.core.content.meta.loader.ContentReceiver
-import com.rarible.core.content.meta.loader.ContentReceiverMetrics
-import com.rarible.core.content.meta.loader.KtorApacheClientContentReceiver
+import com.rarible.core.content.meta.loader.*
 import com.rarible.loader.cache.CacheLoaderService
 import com.rarible.loader.cache.configuration.EnableRaribleCacheLoader
 import com.rarible.protocol.union.core.model.UnionMeta
@@ -23,24 +20,48 @@ import org.springframework.context.annotation.ComponentScan
     ]
 )
 class UnionMetaConfiguration {
+
     @Bean
     fun contentReceiver(
         unionMetaProperties: UnionMetaProperties
-    ): ContentReceiver = KtorApacheClientContentReceiver(
-        timeout = unionMetaProperties.mediaFetchTimeout,
-        threadsCount = unionMetaProperties.ktorApacheHttpClientThreadCount
-    )
+    ): ContentReceiver {
+        return when (unionMetaProperties.httpClient.type) {
+            UnionMetaProperties.HttpClient.HttpClientType.KTOR_APACHE ->
+                KtorApacheClientContentReceiver(
+                    timeout = unionMetaProperties.httpClient.timeOut,
+                    threadsCount = unionMetaProperties.httpClient.threadCount,
+                    totalConnection = unionMetaProperties.httpClient.totalConnection,
+                    keepAlive = unionMetaProperties.httpClient.keepAlive
+                )
+
+            UnionMetaProperties.HttpClient.HttpClientType.KTOR_CIO ->
+                KtorCioClientContentReceiver(
+                    timeout = unionMetaProperties.httpClient.timeOut,
+                    threadsCount = unionMetaProperties.httpClient.threadCount,
+                    totalConnection = unionMetaProperties.httpClient.totalConnection
+                )
+
+            UnionMetaProperties.HttpClient.HttpClientType.ASYNC_APACHE ->
+                ApacheHttpContentReceiver(
+                    timeout = unionMetaProperties.httpClient.timeOut,
+                    connectionsPerRoute = unionMetaProperties.httpClient.connectionsPerRoute,
+                    keepAlive = unionMetaProperties.httpClient.keepAlive
+                )
+        }
+    }
 
     @Bean
     fun contentMetaReceiver(
         contentReceiver: ContentReceiver,
         unionMetaProperties: UnionMetaProperties,
         meterRegistry: MeterRegistry
-    ): ContentMetaReceiver = ContentMetaReceiver(
-        contentReceiver = contentReceiver,
-        maxBytes = unionMetaProperties.mediaFetchMaxSize.toInt(),
-        contentReceiverMetrics = ContentReceiverMetrics(meterRegistry)
-    )
+    ): ContentMetaReceiver {
+        return ContentMetaReceiver(
+            contentReceiver = MeasurableContentReceiver(contentReceiver, meterRegistry),
+            maxBytes = unionMetaProperties.mediaFetchMaxSize.toInt(),
+            contentReceiverMetrics = ContentReceiverMetrics(meterRegistry)
+        )
+    }
 
     @Bean
     @Qualifier("union.meta.cache.loader.service")
@@ -49,4 +70,5 @@ class UnionMetaConfiguration {
     ): CacheLoaderService<UnionMeta> =
         @Suppress("UNCHECKED_CAST")
         (cacheLoaderServices.find { it.type == UnionMetaCacheLoader.TYPE } as CacheLoaderService<UnionMeta>)
+
 }

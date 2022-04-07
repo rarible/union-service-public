@@ -25,8 +25,8 @@ class UnionContentMetaLoader(
         val logPrefix = "Content meta resolution for ${itemId.fullId()} by $url"
         logger.info("$logPrefix: starting to resolve")
         val fromCache = fetchFromCache(url)
-        if (fromCache != null) {
-            val properties = fromCache.toUnionMetaContentProperties()
+        val properties = fromCache?.toUnionMetaContentProperties()
+        if (properties != null) {
             logger.info("$logPrefix: found in the cache: $properties")
             return properties
         }

@@ -1,21 +1,14 @@
 package com.rarible.protocol.union.listener.service
 
 import com.rarible.core.common.optimisticLock
-import com.rarible.protocol.union.core.event.OutgoingOwnershipEventListener
+import com.rarible.protocol.union.core.event.OutgoingEventListener
 import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.core.model.getSellerOwnershipId
 import com.rarible.protocol.union.core.model.ownershipId
 import com.rarible.protocol.union.core.model.source
 import com.rarible.protocol.union.core.service.AuctionContractService
 import com.rarible.protocol.union.core.service.ReconciliationEventService
-import com.rarible.protocol.union.dto.ActivityDto
-import com.rarible.protocol.union.dto.AuctionDto
-import com.rarible.protocol.union.dto.AuctionStatusDto
-import com.rarible.protocol.union.dto.OrderDto
-import com.rarible.protocol.union.dto.OwnershipDeleteEventDto
-import com.rarible.protocol.union.dto.OwnershipDto
-import com.rarible.protocol.union.dto.OwnershipIdDto
-import com.rarible.protocol.union.dto.OwnershipUpdateEventDto
+import com.rarible.protocol.union.dto.*
 import com.rarible.protocol.union.enrichment.evaluator.OwnershipSourceComparator
 import com.rarible.protocol.union.enrichment.model.ShortOwnership
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
@@ -36,7 +29,7 @@ class EnrichmentOwnershipEventService(
     private val enrichmentItemEventService: EnrichmentItemEventService,
     private val enrichmentAuctionService: EnrichmentAuctionService,
     private val enrichmentActivityService: EnrichmentActivityService,
-    private val ownershipEventListeners: List<OutgoingOwnershipEventListener>,
+    private val ownershipEventListeners: List<OutgoingEventListener<OwnershipEventDto>>,
     private val bestOrderService: BestOrderService,
     private val auctionContractService: AuctionContractService,
     private val reconciliationEventService: ReconciliationEventService

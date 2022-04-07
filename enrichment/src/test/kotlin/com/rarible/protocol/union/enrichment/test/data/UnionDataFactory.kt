@@ -10,14 +10,18 @@ import com.rarible.protocol.union.core.model.UnionMetaContentProperties
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.BurnActivityDto
 import com.rarible.protocol.union.dto.CollectionIdDto
+import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.MetaAttributeDto
 import com.rarible.protocol.union.dto.MetaContentDto
 import com.rarible.protocol.union.dto.MintActivityDto
 import com.rarible.protocol.union.dto.OrderMatchSellDto
+import com.rarible.protocol.union.dto.OwnershipDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.TransferActivityDto
 import com.rarible.protocol.union.dto.UnionAddress
+import com.rarible.protocol.union.enrichment.converter.EnrichedItemConverter
+import com.rarible.protocol.union.enrichment.converter.EnrichedOwnershipConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthActivityConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthAuctionConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthCollectionConverter
@@ -49,12 +53,6 @@ fun randomUnionAddress(): UnionAddress =
     UnionAddressConverter.convert(
         BlockchainDto.ETHEREUM,
         randomString()
-    )
-
-fun randomUnionCollection(): UnionCollection =
-    EthCollectionConverter.convert(
-        randomEthCollectionDto(),
-        BlockchainDto.ETHEREUM
     )
 
 fun randomUnionCollection(id: CollectionIdDto): UnionCollection =
@@ -207,6 +205,14 @@ fun randomUnionActivitySale(itemId: ItemIdDto) = runBlocking {
     mockedEthActivityConverter.convert(
         dto, itemId.blockchain
     ) as OrderMatchSellDto
+}
+
+fun randomItemDto(itemId: ItemIdDto): ItemDto {
+    return EnrichedItemConverter.convert(randomUnionItem(itemId))
+}
+
+fun randomOwnershipDto(ownershipId: OwnershipIdDto): OwnershipDto {
+    return EnrichedOwnershipConverter.convert(randomUnionOwnership(ownershipId))
 }
 
 private val mockedEthOrderConverter = EthOrderConverter(CurrencyMock.currencyServiceMock)
