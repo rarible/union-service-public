@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.enrichment.converter
 
+import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.core.model.UnionCollectionMeta
 import com.rarible.protocol.union.dto.CollectionDto
@@ -29,4 +30,17 @@ object EnrichmentCollectionConverter {
             bestBidOrder = shortCollection?.bestBidOrder?.let { orders[it.dtoId] }
         )
     }
+
+    fun convertToShortCollection(collection: UnionCollection): ShortCollection {
+        return ShortCollection(
+            blockchain = collection.id.blockchain,
+            collectionId = collection.id.value,
+            bestSellOrders = emptyMap(),
+            bestBidOrders = emptyMap(),
+            bestSellOrder = null,
+            bestBidOrder = null,
+            lastUpdatedAt = nowMillis()
+        )
+    }
+
 }

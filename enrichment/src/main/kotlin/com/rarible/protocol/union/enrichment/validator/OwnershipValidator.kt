@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory
 
 object OwnershipValidator {
 
-    private val logger = LoggerFactory.getLogger(OwnershipValidator::class.java)
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     fun isValid(ownership: OwnershipDto?): Boolean {
         if (ownership == null) {

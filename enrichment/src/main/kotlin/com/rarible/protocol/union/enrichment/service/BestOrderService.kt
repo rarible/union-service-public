@@ -126,7 +126,6 @@ class BestOrderService(
         val bestBidOrder = getBestBidOrderInUsd(item.bestBidOrders)
         return item.copy(bestBidOrder = bestBidOrder)
     }
-    /*------------------------------------------------------------------------------------------*/
 
     suspend fun getBestSellOrderInUsd(orders: Map<String, ShortOrder>): ShortOrder? {
         return getBestOrderByUsd(orders, BestSellOrderComparator)

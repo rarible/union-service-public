@@ -5,7 +5,6 @@ import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.apm.SpanType
 import com.rarible.protocol.union.enrichment.model.ShortCollection
 import com.rarible.protocol.union.enrichment.model.ShortCollectionId
-import com.rarible.protocol.union.enrichment.model.ShortOrder
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.slf4j.LoggerFactory
@@ -66,15 +65,9 @@ class DefaultCollectionRepository(
             .on(ShortCollection::lastUpdatedAt.name, Sort.Direction.DESC)
             .background()
 
-        private val BY_BEST_SELL_PLATFORM_DEFINITION = Index()
-            .on("${ShortCollection::bestSellOrder.name}.${ShortOrder::platform.name}", Sort.Direction.ASC)
-            .on("_id", Sort.Direction.ASC)
-            .background()
-
         private val ALL_INDEXES = listOf(
             BLOCKCHAIN_DEFINITION,
-            MULTI_CURRENCY_DEFINITION,
-            BY_BEST_SELL_PLATFORM_DEFINITION,
+            MULTI_CURRENCY_DEFINITION
         )
     }
 

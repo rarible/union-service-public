@@ -1,8 +1,6 @@
 package com.rarible.protocol.union.enrichment.service
 
 import com.mongodb.client.result.DeleteResult
-import com.rarible.core.apm.SpanType
-import com.rarible.core.apm.withSpan
 import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.core.service.CollectionService
@@ -14,8 +12,6 @@ import com.rarible.protocol.union.enrichment.model.ShortCollection
 import com.rarible.protocol.union.enrichment.model.ShortCollectionId
 import com.rarible.protocol.union.enrichment.repository.CollectionRepository
 import com.rarible.protocol.union.enrichment.util.spent
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -65,14 +61,14 @@ class EnrichmentCollectionService(
     ) = coroutineScope {
         require(shortCollection != null || collection != null)
         val collectionId = shortCollection?.id?.toDto() ?: collection!!.id
-        val fetchedCollection = withSpanAsync("fetchCollection") {
+        val fetchedCollection = async {
             collection ?: fetch(ShortCollectionId(collectionId))
         }
 
-        val bestSellOrder = withSpanAsync("fetchBestSellOrder", spanType = SpanType.EXT) {
+        val bestSellOrder = async {
             enrichmentOrderService.fetchOrderIfDiffers(shortCollection?.bestSellOrder, orders)
         }
-        val bestBidOrder = withSpanAsync("fetchBestBidOrder", spanType = SpanType.EXT) {
+        val bestBidOrder = async {
             enrichmentOrderService.fetchOrderIfDiffers(shortCollection?.bestBidOrder, orders)
         }
 
@@ -88,11 +84,5 @@ class EnrichmentCollectionService(
         logger.info("Enriched collection {}: {}", collectionId.fullId(), collectionDto)
         collectionDto
     }
-
-    private fun <T> CoroutineScope.withSpanAsync(
-        spanName: String,
-        spanType: String = SpanType.APP,
-        block: suspend () -> T
-    ): Deferred<T> = async { withSpan(name = spanName, type = spanType, body = block) }
 
 }

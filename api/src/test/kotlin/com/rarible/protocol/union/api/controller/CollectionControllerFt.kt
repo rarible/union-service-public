@@ -1,7 +1,6 @@
 package com.rarible.protocol.union.api.controller
 
 import com.rarible.core.common.justOrEmpty
-import com.rarible.core.common.nowMillis
 import com.rarible.core.test.data.randomAddress
 import com.rarible.core.test.data.randomString
 import com.rarible.core.test.wait.Wait
@@ -12,13 +11,12 @@ import com.rarible.protocol.union.api.client.CollectionControllerApi
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
-import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.dto.continuation.CombinedContinuation
 import com.rarible.protocol.union.dto.continuation.page.PageSize
+import com.rarible.protocol.union.enrichment.converter.EnrichmentCollectionConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
-import com.rarible.protocol.union.enrichment.model.ShortCollection
 import com.rarible.protocol.union.enrichment.service.EnrichmentCollectionService
 import com.rarible.protocol.union.integration.ethereum.converter.EthCollectionConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
@@ -75,9 +73,8 @@ class CollectionControllerFt : AbstractIntegrationTest() {
         val ethUnionOrder = ethOrderConverter.convert(ethOrder, BlockchainDto.ETHEREUM)
 
         val shortOrder = ShortOrderConverter.convert(ethUnionOrder)
-        val shortCollection = toShortCollection(ethUnionCollection).copy(bestSellOrder = shortOrder)
+        val shortCollection = EnrichmentCollectionConverter.convertToShortCollection(ethUnionCollection).copy(bestSellOrder = shortOrder)
         enrichmentCollectionService.save(shortCollection)
-
 
         ethereumOrderControllerApiMock.mockGetById(ethOrder)
         coEvery { testEthereumCollectionApi.getNftCollectionById(collectionIdFull.value) } returns ethCollectionDto.toMono()
@@ -247,18 +244,6 @@ class CollectionControllerFt : AbstractIntegrationTest() {
             coVerify(exactly = 1) { testUnionMetaLoader.load(itemId1) }
             coVerify(exactly = 1) { testUnionMetaLoader.load(itemId2) }
         }
-    }
-
-    private fun toShortCollection(collection: UnionCollection): ShortCollection {
-        return ShortCollection(
-            blockchain = collection.id.blockchain,
-            collectionId = collection.id.value,
-            bestSellOrders = emptyMap(),
-            bestBidOrders = emptyMap(),
-            bestSellOrder = null,
-            bestBidOrder = null,
-            lastUpdatedAt = nowMillis()
-        )
     }
 
 }

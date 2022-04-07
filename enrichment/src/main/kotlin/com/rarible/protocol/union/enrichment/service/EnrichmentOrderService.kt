@@ -51,7 +51,7 @@ class EnrichmentOrderService(
 
     suspend fun getBestSell(id: ShortItemId, currencyId: String): OrderDto? {
         val now = nowMillis()
-        val result = withPreferredRariblePlatform(id, OrderFilters.ITEM) { platform, continuation, size ->
+        val result = withPreferredRariblePlatform(id, OrderType.SELL, OrderFilters.ITEM) { platform, continuation, size ->
             orderServiceRouter.getService(id.blockchain).getSellOrdersByItem(
                 platform,
                 id.toDto().value,
@@ -72,7 +72,7 @@ class EnrichmentOrderService(
 
     suspend fun getBestSell(id: ShortOwnershipId, currencyId: String): OrderDto? {
         val now = nowMillis()
-        val result = withPreferredRariblePlatform(id, OrderFilters.ITEM) { platform, continuation, size ->
+        val result = withPreferredRariblePlatform(id, OrderType.SELL, OrderFilters.ITEM) { platform, continuation, size ->
             orderServiceRouter.getService(id.blockchain).getSellOrdersByItem(
                 platform,
                 id.toDto().itemIdValue,
@@ -93,7 +93,7 @@ class EnrichmentOrderService(
 
     suspend fun getBestSell(collectionId: ShortCollectionId, currencyId: String): OrderDto? {
         val now = nowMillis()
-        val result = withPreferredRariblePlatform(collectionId, OrderFilters.COLLECTION) { platform, continuation, size ->
+        val result = withPreferredRariblePlatform(collectionId, OrderType.SELL, OrderFilters.COLLECTION) { platform, continuation, size ->
             orderServiceRouter.getService(collectionId.blockchain).getOrderFloorSellsByCollection(
                 platform,
                 collectionId.toDto().value,
@@ -113,7 +113,7 @@ class EnrichmentOrderService(
 
     suspend fun getBestBid(id: ShortItemId, currencyId: String): OrderDto? {
         val now = nowMillis()
-        val result = withPreferredRariblePlatform(id, OrderFilters.ITEM) { platform, continuation, size ->
+        val result = withPreferredRariblePlatform(id, OrderType.BID, OrderFilters.ITEM) { platform, continuation, size ->
             orderServiceRouter.getService(id.blockchain).getOrderBidsByItem(
                 platform,
                 id.toDto().value,
@@ -136,7 +136,7 @@ class EnrichmentOrderService(
 
     suspend fun getBestBid(id: ShortCollectionId, currencyId: String): OrderDto? {
         val now = nowMillis()
-        val result = withPreferredRariblePlatform(id, OrderFilters.COLLECTION) { platform, continuation, size ->
+        val result = withPreferredRariblePlatform(id, OrderType.BID, OrderFilters.COLLECTION) { platform, continuation, size ->
             orderServiceRouter.getService(id.blockchain).getOrderFloorBidsByCollection(
                 platform,
                 id.toDto().value,
@@ -158,16 +158,17 @@ class EnrichmentOrderService(
 
     private suspend fun withPreferredRariblePlatform(
         id: Any,
+        orderType: OrderType,
         filter: OrderFilters = OrderFilters.ALL,
         clientCall: suspend (platform: PlatformDto?, continuation: String?, size: Int) -> Slice<OrderDto>
     ): OrderDto? {
-        val bestOfAll = ignoreFilledTaker(id, clientCall, null, filter = filter)
+        val bestOfAll = ignoreFilledTaker(id, clientCall, null, orderType = orderType, filter = filter)
         logger.debug("Found best order from ALL platforms: [{}]", bestOfAll)
         if (bestOfAll == null || bestOfAll.platform == PlatformDto.RARIBLE) {
             return bestOfAll
         }
         logger.debug("Order [{}] is not a preferred platform order, checking preferred platform...", bestOfAll)
-        val preferredPlatformBestOrder = ignoreFilledTaker(id, clientCall, PlatformDto.RARIBLE, filter = filter)
+        val preferredPlatformBestOrder = ignoreFilledTaker(id, clientCall, PlatformDto.RARIBLE, orderType = orderType, filter = filter)
         logger.debug("Checked preferred platform for best order: [{}]")
         return preferredPlatformBestOrder ?: bestOfAll
     }
@@ -176,6 +177,7 @@ class EnrichmentOrderService(
         id: Any,
         clientCall: suspend (platform: PlatformDto?, continuation: String?, size: Int) -> Slice<OrderDto>,
         platform: PlatformDto?,
+        orderType: OrderType,
         filter: OrderFilters
     ): OrderDto? {
         var order: OrderDto?
@@ -189,7 +191,7 @@ class EnrichmentOrderService(
             val slice = clientCall(platform, continuation, size)
             order = slice.entities.firstOrNull {
                 // TODO important! may affect performance
-                BestOrderValidator.isValid(it) && orderFilter(it, filter)
+                BestOrderValidator.isValid(it) && orderFilter(it, filter, orderType)
             }
             continuation = slice.continuation
             attempts++
@@ -209,10 +211,25 @@ class EnrichmentOrderService(
         return order
     }
 
-    private fun orderFilter(order: OrderDto, filter: OrderFilters): Boolean {
+    private fun orderFilter(order: OrderDto, filter: OrderFilters, orderType: OrderType ): Boolean {
+        return when(orderType) {
+            OrderType.BID -> orderBidFilter(order, filter)
+            OrderType.SELL-> orderSellFilter(order, filter)
+        }
+    }
+
+    private fun orderBidFilter(order: OrderDto, filter: OrderFilters): Boolean {
         return when (filter) {
             OrderFilters.COLLECTION -> order.make.type.ext.isCollection
             OrderFilters.ITEM -> !order.make.type.ext.isCollection
+            OrderFilters.ALL -> true
+        }
+    }
+
+    private fun orderSellFilter(order: OrderDto, filter: OrderFilters): Boolean {
+        return when (filter) {
+            OrderFilters.COLLECTION -> order.take.type.ext.isCollection
+            OrderFilters.ITEM -> !order.take.type.ext.isCollection
             OrderFilters.ALL -> true
         }
     }
@@ -225,5 +242,6 @@ class EnrichmentOrderService(
         private const val ORDER_BATCH = 10
 
         enum class OrderFilters { ALL, COLLECTION, ITEM }
+        enum class OrderType { BID, SELL }
     }
 }

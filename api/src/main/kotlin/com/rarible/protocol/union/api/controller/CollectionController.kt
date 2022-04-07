@@ -3,14 +3,13 @@ package com.rarible.protocol.union.api.controller
 import com.rarible.protocol.union.api.util.BlockchainFilter
 import com.rarible.protocol.union.api.service.CollectionApiService
 import com.rarible.protocol.union.api.service.ItemApiService
+import com.rarible.protocol.union.core.continuation.UnionCollectionContinuation
 import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.core.service.CollectionService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.dto.CollectionsDto
-import com.rarible.protocol.union.dto.continuation.ContinuationFactory
-import com.rarible.protocol.union.dto.continuation.IdContinuation
 import com.rarible.protocol.union.dto.continuation.page.ArgPaging
 import com.rarible.protocol.union.dto.continuation.page.Page
 import com.rarible.protocol.union.dto.continuation.page.PageSize
@@ -44,7 +43,7 @@ class CollectionController(
         val safeSize = PageSize.COLLECTION.limit(size)
         val slices = collectionApiService.getAllCollections(blockchains, continuation, safeSize)
         val total = slices.sumOf { it.page.total }
-        val arg = ArgPaging(CollectionContinuation.ById, slices.map { it.toSlice() }).getSlice(safeSize)
+        val arg = ArgPaging(UnionCollectionContinuation.ById, slices.map { it.toSlice() }).getSlice(safeSize)
 
         logger.info("Response for getAllCollections(blockchains={}, continuation={}, size={}):" +
                 " Page(size={}, total={}, continuation={}) from blockchain pages {} ",
@@ -90,7 +89,7 @@ class CollectionController(
         val total = blockchainPages.sumOf { it.total }
 
         val combinedPage = Paging(
-            CollectionContinuation.ById,
+            UnionCollectionContinuation.ById,
             blockchainPages.flatMap { it.entities }
         ).getPage(safeSize, total)
 
@@ -116,14 +115,6 @@ class CollectionController(
             continuation = page.continuation,
             collections = collectionApiService.enrich(page, total).collections
         )
-    }
-
-    object CollectionContinuation {
-        object ById : ContinuationFactory<UnionCollection, IdContinuation> {
-            override fun getContinuation(entity: UnionCollection): IdContinuation {
-                return IdContinuation(entity.id.value)
-            }
-        }
     }
 
 }
