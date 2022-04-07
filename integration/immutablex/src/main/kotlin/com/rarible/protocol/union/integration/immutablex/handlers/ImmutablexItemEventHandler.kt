@@ -7,12 +7,12 @@ import com.rarible.protocol.union.core.model.UnionItemDeleteEvent
 import com.rarible.protocol.union.core.model.UnionItemEvent
 import com.rarible.protocol.union.core.model.UnionItemUpdateEvent
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.BlockchainGroupDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.CreatorDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.RoyaltyDto
 import com.rarible.protocol.union.dto.UnionAddress
+import com.rarible.protocol.union.dto.group
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexEvent
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexMint
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexTransfer
@@ -40,16 +40,16 @@ class ImmutablexItemEventHandler(
                         collection = CollectionIdDto(blockchain, event.token.data.tokenAddress),
                         creators = listOf(
                             CreatorDto(
-                                account = UnionAddress(BlockchainGroupDto.IMMUTABLEX, event.user),
+                                account = UnionAddress(blockchain.group(), event.user),
                                 value = 1
                             )
                         ),
                         owners = listOf(
-                            UnionAddress(BlockchainGroupDto.IMMUTABLEX, event.user)
+                            UnionAddress(blockchain.group(), event.user)
                         ),
                         royalties = event.fees?.map {
                             RoyaltyDto(
-                                account = UnionAddress(BlockchainGroupDto.IMMUTABLEX, it.address),
+                                account = UnionAddress(blockchain.group(), it.address),
                                 value = toBasePoints(it.percentage)
                             )
                         } ?: emptyList(),

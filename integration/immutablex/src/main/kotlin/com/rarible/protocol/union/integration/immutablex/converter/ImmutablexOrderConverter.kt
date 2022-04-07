@@ -1,12 +1,10 @@
 package com.rarible.protocol.union.integration.immutablex.converter
 
 import com.rarible.core.common.nowMillis
-import com.rarible.protocol.union.core.service.CurrencyService
 import com.rarible.protocol.union.core.util.evalMakePrice
 import com.rarible.protocol.union.core.util.evalTakePrice
 import com.rarible.protocol.union.dto.AssetDto
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.BlockchainGroupDto
 import com.rarible.protocol.union.dto.ContractAddress
 import com.rarible.protocol.union.dto.EthErc721AssetTypeDto
 import com.rarible.protocol.union.dto.EthEthereumAssetTypeDto
@@ -18,15 +16,14 @@ import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PayoutDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.UnionAddress
+import com.rarible.protocol.union.dto.group
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexOrder
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexOrderSide
 import java.math.BigDecimal
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-class ImmutablexOrderConverter(
-    private val currencyService: CurrencyService
-) {
+class ImmutablexOrderConverter {
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
@@ -48,10 +45,10 @@ class ImmutablexOrderConverter(
 
         val status = convertStatus(order)
         return OrderDto(
-            id = OrderIdDto(BlockchainDto.IMMUTABLEX, "${order.orderId}"),
+            id = OrderIdDto(blockchain, "${order.orderId}"),
             make = make,
             take = take,
-            maker = UnionAddress(BlockchainGroupDto.IMMUTABLEX, order.creator),
+            maker = UnionAddress(blockchain.group(), order.creator),
             taker = null,
             makePrice = makePrice,
             takePrice = takePrice,
@@ -63,11 +60,11 @@ class ImmutablexOrderConverter(
             createdAt = order.createdAt,
             cancelled = status == OrderStatusDto.CANCELLED,
             makeStock = order.sell.data.quantity.toBigDecimal(),
-            data = makeData(order)
+            data = makeData(order, blockchain)
         )
     }
 
-    private fun makeData(order: ImmutablexOrder): OrderDataDto {
+    private fun makeData(order: ImmutablexOrder, blockchain: BlockchainDto): OrderDataDto {
         if (order.fees.isNullOrEmpty()) {
             return ImmutablexOrderDataV1Dto(
                 payouts = emptyList(),
@@ -78,7 +75,7 @@ class ImmutablexOrderConverter(
             "royalty" == it.type
         }.map {
             PayoutDto(
-                account = UnionAddress(blockchainGroup = BlockchainGroupDto.IMMUTABLEX, value = it.address),
+                account = UnionAddress(blockchainGroup = blockchain.group(), value = it.address),
                 value = it.amount.divide(BigDecimal.TEN.pow(it.token.data.decimals)).toBps()
             )
         }
@@ -87,7 +84,7 @@ class ImmutablexOrderConverter(
             "ecosystem" == it.type
         }.map {
             PayoutDto(
-                account = UnionAddress(blockchainGroup = BlockchainGroupDto.IMMUTABLEX, value = it.address),
+                account = UnionAddress(blockchainGroup = blockchain.group(), value = it.address),
                 value = it.amount.divide(BigDecimal.TEN.pow(it.token.data.decimals)).toBps()
             )
         }
@@ -123,5 +120,7 @@ class ImmutablexOrderConverter(
 private fun BigDecimal.toBps(): Int = try {
     this.multiply(BigDecimal.valueOf(10_000)).intValueExact()
 } catch (e: Exception) {
+    val logger = LoggerFactory.getLogger(ImmutablexOrderConverter::class.java)
+    logger.warn("Unable convert BigDecimal to base-points $this")
     10_000
 }

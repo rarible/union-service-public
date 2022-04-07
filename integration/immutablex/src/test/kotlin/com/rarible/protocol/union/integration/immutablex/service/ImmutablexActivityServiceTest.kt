@@ -3,7 +3,6 @@ package com.rarible.protocol.union.integration.immutablex.service
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.rarible.protocol.union.dto.ActivityTypeDto
-import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.MintActivityDto
 import com.rarible.protocol.union.dto.OrderMatchSellDto
 import com.rarible.protocol.union.dto.TransferActivityDto
@@ -58,11 +57,11 @@ internal class ImmutablexActivityServiceTest {
 
     private val service = ImmutablexActivityService(
         mockk {
-            coEvery { getMints(any(), any(), any(), any(), any(), any()) } returns expectedMintActivity
-            coEvery { getTransfers(any(), any(), any(), any(), any(), any()) } returns expectedTransfersActivity
-            coEvery { getTrades(any(), any(), any(), any(), any(), any()) } returns expectedTradesActivity
+            coEvery { getMints(any(), any(), any(), any(), any(), any(), any()) } returns expectedMintActivity
+            coEvery { getTransfers(any(), any(), any(), any(), any(), any(), any()) } returns expectedTransfersActivity
+            coEvery { getTrades(any(), any(), any(), any(), any(), any(), any()) } returns expectedTradesActivity
         },
-        ImmutablexActivityConverter(BlockchainDto.IMMUTABLEX),
+        ImmutablexActivityConverter(mockk()),
     )
 
     @Test

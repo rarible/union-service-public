@@ -1,8 +1,18 @@
 package com.rarible.protocol.union.integration.immutablex.client
 
+import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
-import com.rarible.protocol.union.integration.immutablex.dto.*
+import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexAsset
+import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexAssetsPage
+import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexMint
+import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexMintsPage
+import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexOrder
+import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexOrdersPage
+import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexPage
+import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexTrade
+import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexTransfer
+import java.time.Instant
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -11,7 +21,6 @@ import kotlinx.coroutines.reactor.awaitSingle
 import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.toEntity
-import java.time.Instant
 
 class ImmutablexApiClient(
     private val webClient: WebClient,
@@ -243,6 +252,7 @@ class ImmutablexApiClient(
         from: Instant? = null,
         to: Instant? = null,
         user: String? = null,
+        sort: ActivitySortDto? = null
     ) = activityQuery<ImmutablexPage<ImmutablexMint>>(
         "/mints",
         pageSize,
@@ -250,7 +260,8 @@ class ImmutablexApiClient(
         tokenId,
         from,
         to,
-        user
+        user,
+        sort
     ) ?: ImmutablexPage("", false, emptyList())
 
     suspend fun getTransfers(
@@ -260,6 +271,7 @@ class ImmutablexApiClient(
         from: Instant? = null,
         to: Instant? = null,
         user: String? = null,
+        sort: ActivitySortDto?
     ) = activityQuery<ImmutablexPage<ImmutablexTransfer>>(
         "/transfers",
         pageSize,
@@ -267,7 +279,8 @@ class ImmutablexApiClient(
         tokenId,
         from,
         to,
-        user
+        user,
+        sort
     ) ?: ImmutablexPage("", false, emptyList())
 
     suspend fun getTrades(
@@ -277,6 +290,7 @@ class ImmutablexApiClient(
         from: Instant? = null,
         to: Instant? = null,
         user: String? = null,
+        sort: ActivitySortDto?
     ) = activityQuery<ImmutablexPage<ImmutablexTrade>>(
         "/trades",
         pageSize,
@@ -284,7 +298,8 @@ class ImmutablexApiClient(
         tokenId,
         from,
         to,
-        user
+        user,
+        sort
     ) ?: ImmutablexPage("", false, emptyList())
 
     private suspend fun ordersByStatus(
@@ -339,6 +354,7 @@ class ImmutablexApiClient(
         from: Instant?,
         to: Instant?,
         user: String?,
+        sort: ActivitySortDto?,
     ) = webClient.get()
         .uri {
             it.path(path)
@@ -356,6 +372,13 @@ class ImmutablexApiClient(
             }
             if (user != null) {
                 it.queryParam("user", user)
+            }
+            if (sort != null) {
+                it.queryParam("order_by", "updated_at")
+                it.queryParam("direction", when(sort) {
+                    ActivitySortDto.LATEST_FIRST -> "desc"
+                    ActivitySortDto.EARLIEST_FIRST -> "asc"
+                })
             }
             it.build()
         }

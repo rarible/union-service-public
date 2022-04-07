@@ -7,6 +7,8 @@ import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
+import com.rarible.protocol.union.dto.continuation.ActivityContinuation
+import com.rarible.protocol.union.dto.continuation.page.Paging
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexApiClient
 import com.rarible.protocol.union.integration.immutablex.converter.ImmutablexActivityConverter
@@ -38,11 +40,11 @@ class ImmutablexActivityService(
             .flatMap { type ->
                 when (type) {
                     ActivityTypeDto.MINT ->
-                        client.getMints(size, continuation).result
+                        client.getMints(size, continuation, sort = sort).result
                     ActivityTypeDto.TRANSFER ->
-                        client.getTransfers(size, continuation).result
+                        client.getTransfers(size, continuation, sort = sort).result
                     ActivityTypeDto.SELL ->
-                        client.getTrades(size, continuation).result
+                        client.getTrades(size, continuation, sort = sort).result
                     else -> emptyList()
                 }
             }.asSequence()
@@ -52,10 +54,7 @@ class ImmutablexActivityService(
             .let {
                 if (sort == ActivitySortDto.LATEST_FIRST) it.toList().asReversed() else it.toList()
             }
-        val c = result.lastOrNull()?.let {
-            "${it.date.toEpochMilli()}_${it.id.fullId()}"
-        }
-        return Slice(c, result)
+        return Paging(ActivityContinuation.ByLastUpdatedAndIdDesc, result).getSlice(size)
     }
 
     override suspend fun getActivitiesByCollection(
@@ -64,7 +63,7 @@ class ImmutablexActivityService(
         continuation: String?,
         size: Int,
         sort: ActivitySortDto?,
-    ): Slice<ActivityDto> = Slice("", emptyList())
+    ): Slice<ActivityDto> = Slice.empty()
 
     override suspend fun getActivitiesByItem(
         types: List<ActivityTypeDto>,
@@ -77,11 +76,11 @@ class ImmutablexActivityService(
             .flatMap { type ->
                 when (type) {
                     ActivityTypeDto.MINT ->
-                        client.getMints(size, continuation, itemId).result
+                        client.getMints(size, continuation, itemId, sort = sort).result
                     ActivityTypeDto.TRANSFER ->
-                        client.getTransfers(size, continuation, itemId).result
+                        client.getTransfers(size, continuation, itemId, sort = sort).result
                     ActivityTypeDto.SELL ->
-                        client.getTrades(size, continuation, itemId).result
+                        client.getTrades(size, continuation, itemId, sort = sort).result
                     else -> emptyList()
                 }
             }.asSequence()
@@ -91,10 +90,7 @@ class ImmutablexActivityService(
             .let {
                 if (sort == ActivitySortDto.LATEST_FIRST) it.toList().asReversed() else it.toList()
             }
-        val c = result.lastOrNull()?.let {
-            "${it.date.toEpochMilli()}_${it.id.fullId()}"
-        }
-        return Slice(c, result)
+        return Paging(ActivityContinuation.ByLastUpdatedAndIdDesc, result).getSlice(size)
     }
 
     override suspend fun getActivitiesByUser(
@@ -111,11 +107,11 @@ class ImmutablexActivityService(
                 users.flatMap { user ->
                     when (type) {
                         UserActivityTypeDto.MINT ->
-                            client.getMints(size, continuation, null, from, to, user).result
+                            client.getMints(size, continuation, null, from, to, user, sort = sort).result
                         UserActivityTypeDto.TRANSFER_FROM ->
-                            client.getTransfers(size, continuation, null, from, to, user).result
+                            client.getTransfers(size, continuation, null, from, to, user, sort = sort).result
                         UserActivityTypeDto.SELL ->
-                            client.getTrades(size, continuation, null, from, to, user).result
+                            client.getTrades(size, continuation, null, from, to, user, sort = sort).result
                         else -> emptyList()
                     }
                 }
@@ -126,9 +122,6 @@ class ImmutablexActivityService(
             .let {
                 if (sort == ActivitySortDto.LATEST_FIRST) it.toList().asReversed() else it.toList()
             }
-        val c = result.lastOrNull()?.let {
-            "${it.date.toEpochMilli()}_${it.id.fullId()}"
-        }
-        return Slice(c, result)
+        return Paging(ActivityContinuation.ByLastUpdatedAndIdDesc, result).getSlice(size)
     }
 }

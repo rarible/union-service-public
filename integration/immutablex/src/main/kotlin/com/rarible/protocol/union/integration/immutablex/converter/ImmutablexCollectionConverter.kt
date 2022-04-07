@@ -12,25 +12,25 @@ import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexPage
 object ImmutablexCollectionConverter {
     private val logger by Logger()
 
-    fun convert(source: ImmutablexCollection): CollectionDto {
+    fun convert(source: ImmutablexCollection, blockchain: BlockchainDto = BlockchainDto.IMMUTABLEX): CollectionDto {
         try {
-            return convertInternal(source)
+            return convertInternal(source, blockchain)
         } catch (e: Exception) {
-            logger.error("Failed to convert {} Collection: {} \n{}", BlockchainDto.IMMUTABLEX, e.message, source)
+            logger.error("Failed to convert {} Collection: {} \n{}", blockchain, e.message, source)
             throw e
         }
     }
 
-    private fun convertInternal(source: ImmutablexCollection): CollectionDto {
+    private fun convertInternal(source: ImmutablexCollection, blockchain: BlockchainDto): CollectionDto {
         return CollectionDto(
-            id = CollectionIdDto(BlockchainDto.IMMUTABLEX, source.address),
-            blockchain = BlockchainDto.IMMUTABLEX,
+            id = CollectionIdDto(blockchain, source.address),
+            blockchain = blockchain,
             name = source.name,
             symbol = source.name,
             owner = null,
             type = CollectionDto.Type.IMMUTABLEX,
             features = emptyList(),
-            minters = null // Not supported
+            minters = emptyList()
         )
     }
 

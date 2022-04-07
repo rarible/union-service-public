@@ -3,7 +3,6 @@ package com.rarible.protocol.union.integration.immutablex
 import com.rarible.protocol.union.api.ApiClient
 import com.rarible.protocol.union.api.client.DefaultUnionWebClientCustomizer
 import com.rarible.protocol.union.core.CoreConfiguration
-import com.rarible.protocol.union.core.service.CurrencyService
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.immutablex.client.EventsApi
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexApiClient
@@ -57,8 +56,7 @@ class ImmutablexApiConfiguration {
     fun immutablexItemService(client: ImmutablexApiClient): ImmutablexItemService = ImmutablexItemService(client)
 
     @Bean
-    fun immutablexOrderConverter(currencyService: CurrencyService): ImmutablexOrderConverter =
-        ImmutablexOrderConverter(currencyService)
+    fun immutablexOrderConverter(): ImmutablexOrderConverter = ImmutablexOrderConverter()
 
 
     @Bean
@@ -72,8 +70,8 @@ class ImmutablexApiConfiguration {
 
 
     @Bean
-    fun immutablexActivityConverter(): ImmutablexActivityConverter =
-        ImmutablexActivityConverter(BlockchainDto.IMMUTABLEX)
+    fun immutablexActivityConverter(orderService: ImmutablexOrderService): ImmutablexActivityConverter =
+        ImmutablexActivityConverter(orderService)
 
     @Bean
     fun immutablesActivityService(

@@ -6,6 +6,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.BlockchainGroupDto
 import com.rarible.protocol.union.dto.BurnActivityDto
 import com.rarible.protocol.union.dto.ContractAddress
+import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.L2DepositActivityDto
 import com.rarible.protocol.union.dto.L2WithdrawalActivityDto
 import com.rarible.protocol.union.dto.MintActivityDto
@@ -13,6 +14,7 @@ import com.rarible.protocol.union.dto.OrderActivitySourceDto
 import com.rarible.protocol.union.dto.OrderMatchSellDto
 import com.rarible.protocol.union.dto.TransferActivityDto
 import com.rarible.protocol.union.dto.UnionAddress
+import com.rarible.protocol.union.dto.group
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexDeposit
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexEvent
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexMint
@@ -29,24 +31,24 @@ class ImmutablexEventConverter(
     private val orderService: ImmutablexOrderService
 ) {
 
-    suspend fun convert(event: ImmutablexEvent): ActivityDto {
-        val id = ActivityIdDto(BlockchainDto.IMMUTABLEX, "${event.transactionId}.${event.timestamp.toEpochMilli()}")
+    suspend fun convert(event: ImmutablexEvent, blockchain: BlockchainDto = BlockchainDto.IMMUTABLEX): ActivityDto {
+        val id = ActivityIdDto(blockchain, "${event.transactionId}.${event.timestamp.toEpochMilli()}")
         return when(event) {
             is ImmutablexMint -> MintActivityDto(
                 id = id,
                 date = event.timestamp,
-                owner = UnionAddress(BlockchainGroupDto.IMMUTABLEX, event.user),
-                contract = ContractAddress(BlockchainDto.IMMUTABLEX, event.token.data.tokenAddress.orEmpty()),
+                owner = UnionAddress(blockchain.group(), event.user),
+                contract = ContractAddress(blockchain, event.token.data.tokenAddress.orEmpty()),
                 tokenId = event.token.data.tokenId?.toBigInteger() ?: BigInteger.ZERO,
                 value = event.token.data.quantity?.toBigInteger() ?: BigInteger.ONE,
                 transactionHash = "${event.transactionId}",
             )
 
             is ImmutablexTransfer -> {
-                val from = UnionAddress(BlockchainGroupDto.IMMUTABLEX, event.user)
-                val to = UnionAddress(BlockchainGroupDto.IMMUTABLEX, event.receiver)
-                val contract = ContractAddress(BlockchainDto.IMMUTABLEX, event.token.data.tokenAddress!!)
-                if (to.value == "${Address.ZERO()}") {
+                val from = UnionAddress(blockchain.group(), event.user)
+                val to = UnionAddress(blockchain.group(), event.receiver)
+                val contract = ContractAddress(blockchain, event.token.data.tokenAddress!!)
+                if (to.value == Address.ZERO().toString()) {
                     BurnActivityDto(
                         id = id,
                         date = event.timestamp,
@@ -71,9 +73,8 @@ class ImmutablexEventConverter(
             }
             is ImmutablexDeposit -> L2DepositActivityDto(
                 id = id, date = event.timestamp,
-                user = UnionAddress(BlockchainGroupDto.IMMUTABLEX, event.user),
-                status = event.status, contractAddres = ContractAddress(BlockchainDto.IMMUTABLEX, event.token.data.tokenAddress!!),
-                tokenId = event.token.data.tokenId!!.toBigInteger(), value = event.token.data.quantity?.toBigInteger()
+                user = UnionAddress(blockchain.group(), event.user),
+                status = event.status, itemId = ItemIdDto(blockchain, event.token.data.tokenAddress!!, event.token.data.tokenId!!.toBigInteger()), value = event.token.data.quantity?.toBigInteger()
             )
             is ImmutablexTrade -> {
                 val (makeOrder, takeOrder) = runBlocking(Dispatchers.IO) {
@@ -93,10 +94,12 @@ class ImmutablexEventConverter(
                 )
             }
             is ImmutablexWithdrawal -> L2WithdrawalActivityDto(
-                id = id, date = event.timestamp,
+                id = id,
+                date = event.timestamp,
                 user = UnionAddress(BlockchainGroupDto.IMMUTABLEX, event.sender),
-                status = event.status, contractAddres = ContractAddress(BlockchainDto.IMMUTABLEX, event.token.data.tokenAddress!!),
-                tokenId = event.token.data.tokenId!!.toBigInteger(), value = event.token.data.quantity?.toBigInteger()
+                status = event.status,
+                itemId = ItemIdDto(blockchain, event.token.data.tokenAddress!!, event.token.data.tokenId!!.toBigInteger()),
+                value = event.token.data.quantity?.toBigInteger()
             )
         }
 

@@ -9,11 +9,11 @@ import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.RoyaltyDto
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexAsset
+import java.math.BigDecimal
+import java.math.BigInteger
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import scalether.domain.Address
-import java.math.BigDecimal
-import java.math.BigInteger
 
 object ImmutablexItemConverter {
 
@@ -38,7 +38,7 @@ object ImmutablexItemConverter {
             royalties = asset.fees.map {
                 RoyaltyDto(
                     account = UnionAddressConverter.convert(ContractAddressConverter.convert(blockchain, it.address)),
-                    value = it.percentage.multiply(BigDecimal(10_000)).toInt()
+                    value = it.percentage.multiply(BigDecimal(100)).toInt()
                 )
             },
             lazySupply = BigInteger.ZERO,

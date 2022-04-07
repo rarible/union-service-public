@@ -42,8 +42,9 @@ fun ActivityDto.itemId(): ItemIdDto? {
         is AuctionFinishActivityDto -> this.auction.getItemId()
         is AuctionStartActivityDto -> this.auction.getItemId()
         is AuctionEndActivityDto -> this.auction.getItemId()
-        is L2DepositActivityDto -> ItemIdDto(this.id.blockchain, this.contractAddres.value, this.tokenId)
-        is L2WithdrawalActivityDto -> ItemIdDto(this.id.blockchain, this.contractAddres.value, this.tokenId)
+        is L2DepositActivityDto -> this.itemId
+        is L2WithdrawalActivityDto -> this.itemId
+
     }
 }
 
