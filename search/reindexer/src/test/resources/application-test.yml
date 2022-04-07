@@ -1,4 +1,8 @@
 spring:
+  application:
+    name: union-search-indexer
+
+
   data:
     elasticsearch:
       cluster-name: docker-cluster
@@ -12,3 +16,7 @@ spring:
   elasticsearch:
     rest:
       uris: ${elasticsearch.api-nodes}
+
+logging:
+  level:
+    org.springframework.context.annotation: "DEBUG"

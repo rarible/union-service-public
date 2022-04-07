@@ -1,7 +1,6 @@
 package com.rarible.protocol.union.search.reindexer
 
 import com.rarible.core.test.ext.ElasticsearchTest
-import com.rarible.core.test.ext.KafkaTest
 import com.rarible.protocol.union.search.core.config.SearchConfiguration
 import com.rarible.protocol.union.search.reindexer.config.SearchReindexerConfiguration
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration
@@ -9,8 +8,6 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
 import org.springframework.test.context.ActiveProfiles
 
-
-@KafkaTest
 @ElasticsearchTest
 @EnableAutoConfiguration
 @SpringBootTest(

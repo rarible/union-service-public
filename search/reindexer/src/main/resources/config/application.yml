@@ -33,12 +33,3 @@ rarible:
         enabled: true
 
 reindexer:
-
-  activity-tasks:
-    - blockchain: ETHEREUM
-      type: MINT
-      enabled: true
-
-    - blockchain: FLOW
-      type: MINT
-      enabled: true

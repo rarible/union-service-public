@@ -10,6 +10,7 @@ import com.rarible.protocol.union.search.core.converter.ElasticActivityConverter
 import com.rarible.protocol.union.search.reindexer.task.ActivityTask
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
 import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations
@@ -18,6 +19,9 @@ import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperatio
 @EnableRaribleTask
 @Import(SearchConfiguration::class)
 @EnableConfigurationProperties(SearchReindexerProperties::class)
+@ComponentScan(basePackages = [
+    "com.rarible.protocol.union.search"
+])
 class SearchReindexerConfiguration(
     val properties: SearchReindexerProperties
 ) {

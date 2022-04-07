@@ -75,6 +75,6 @@ class ActivityConsumerIntegrationTest {
             .build()
         val searchHits = esOperations.search(searchQuery, ElasticActivity::class.java).awaitFirst()
 
-        assertThat(searchHits.content.user.maker).isEqualTo(activity.owner.value)
+        assertThat(searchHits.content.user.maker).isEqualToIgnoringCase(activity.owner.value)
     }
 }
