@@ -34,7 +34,7 @@
     </pluginRepositories>
 
     <properties>
-        <revision>1.25</revision>
+        <revision>1.26</revision>
         <maven.deploy.skip>true</maven.deploy.skip>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -47,11 +47,11 @@
 
         <rarible.protocol.currency.version>1.23.2</rarible.protocol.currency.version>
         <rarible.protocol.ethereum.version>1.25.0</rarible.protocol.ethereum.version>
-        <rarible.protocol.flow.version>2.3.1</rarible.protocol.flow.version>
+        <rarible.protocol.flow.version>2.3.2</rarible.protocol.flow.version>
         <rarible.protocol.tezos.version>1.0.2</rarible.protocol.tezos.version>
         <rarible.protocol.solana.version>0.1.18</rarible.protocol.solana.version>
 
-        <rarible.protocol.union.version>1.25.7</rarible.protocol.union.version>
+        <rarible.protocol.union.version>1.26.5</rarible.protocol.union.version>
 
         <dev-jna.version>5.7.0</dev-jna.version>
     </properties>
@@ -168,6 +168,19 @@
                 <scope>test</scope>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.rarible.protocol.union</groupId>
+                <artifactId>rarible-union-integration-immutablex</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.rarible.protocol.union</groupId>
+                <artifactId>rarible-union-integration-immutablex</artifactId>
+                <classifier>tests</classifier>
+                <type>test-jar</type>
+                <scope>test</scope>
+                <version>${project.version}</version>
+            </dependency>
 
             <!-- =========== Union Protocol-API =========== -->
             <dependency>
@@ -199,6 +212,11 @@
                 <groupId>com.rarible.protocol.union</groupId>
                 <artifactId>protocol-union-subscriber-starter</artifactId>
                 <version>${rarible.protocol.union.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.rarible.protocol.union</groupId>
+                <artifactId>rarible-union-search-core</artifactId>
+                <version>${project.version}</version>
             </dependency>
 
             <!-- ========== Currency Protocol-API ========= -->
@@ -358,6 +376,10 @@
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-reflect</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.jetbrains.kotlinx</groupId>
+            <artifactId>kotlinx-coroutines-jdk8</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -392,5 +414,6 @@
         <module>integration</module>
         <module>listener</module>
         <module>meta-loader</module>
+        <module>search</module>
     </modules>
 </project>

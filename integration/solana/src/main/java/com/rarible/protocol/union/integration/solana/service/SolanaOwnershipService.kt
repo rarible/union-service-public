@@ -35,7 +35,11 @@ open class SolanaOwnershipService(
             SolanaOwnershipConverter.convert(balance, blockchain)
         }
 
-        return Page(0, balancesDto.continuation, ownerships)
+        return Page(
+            total = balancesDto.balances.size.toLong(),
+            continuation = balancesDto.continuation,
+            entities = ownerships
+        )
     }
 
     override suspend fun getOwnershipsByOwner(address: String, continuation: String?, size: Int): Page<UnionOwnership> {
@@ -48,6 +52,10 @@ open class SolanaOwnershipService(
             SolanaOwnershipConverter.convert(balance, blockchain)
         }
 
-        return Page(0, balancesDto.continuation, ownerships)
+        return Page(
+            total = balancesDto.balances.size.toLong(),
+            continuation = balancesDto.continuation,
+            entities = ownerships
+        )
     }
 }

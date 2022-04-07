@@ -1,0 +1,1 @@
+Search-Reindexer module is the ES schema migration tool. Supposed to run once and fail fast.

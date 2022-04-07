@@ -17,5 +17,6 @@
         <module>flow</module>
         <module>tezos</module>
         <module>solana</module>
+        <module>immutablex</module>
     </modules>
 </project>

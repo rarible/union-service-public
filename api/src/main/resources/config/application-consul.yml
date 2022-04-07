@@ -10,4 +10,16 @@ spring:
     bootstrap:
       enabled: true
 
+    elasticsearch:
+      cluster-name: docker-cluster
+      cluster-nodes: ${elasticsearch.cluster-nodes}
+
+      client:
+        reactive:
+          endpoints:  ${elasticsearch.api-nodes}
+
+  elasticsearch:
+    rest:
+      uris: ${elasticsearch.api-nodes}
+
 redisUri: ${consul.redis.uri}

@@ -1,0 +1,29 @@
+{
+  "token_address": "0xacb3c6a43d15b907e8433077b6d38ae40936fe2c",
+  "token_id": "51267701",
+  "id": "0x338240ccc941020240e14a3861cea81b70df1dddbb3841a97f2e27d5dc960178",
+  "user": "0x28ff636e69dcc37a7443ecdae2aa44f6362976d0",
+  "status": "imx",
+  "uri": null,
+  "name": "Counterfeit",
+  "description": null,
+  "image_url": "https://card.godsunchained.com/?id=1444\u0026q=4",
+  "metadata": {
+    "god": "deception",
+    "set": "order",
+    "mana": 2,
+    "name": "Counterfeit",
+    "type": "card",
+    "image": "https://card.godsunchained.com/?id=1444\u0026q=4",
+    "proto": 1444,
+    "effect": "If your opponent has a relic equipped and you don't, equip a copy of your opponent's relic.\nOtherwise, draw a card.",
+    "rarity": "epic",
+    "quality": "Meteorite"
+  },
+  "collection": {
+    "name": "Gods Unchained",
+    "icon_url": "https://images.godsunchained.com/misc/gu-sigel.png"
+  },
+  "created_at": "2021-09-28T01:47:41.671164Z",
+  "updated_at": "2022-03-01T05:28:29.729605Z"
+}

@@ -1,0 +1,34 @@
+{
+  "order_id": 25407,
+  "status": "active",
+  "user": "0x0a7dc653b4bb7a2a894daeb86b0a721092627244",
+  "sell": {
+    "type": "ERC721",
+    "data": {
+      "token_id": "4",
+      "id": "0x673ef702649470360891bd6be7e7abe7da82764122c5c57319e5521ed0dc7a9a",
+      "token_address": "0x4e9697f7cffaabca1c8a06b7299093772c75deff",
+      "quantity": "1",
+      "properties": {
+        "name": null,
+        "image_url": null,
+        "collection": {
+          "name": "PUPPY",
+          "icon_url": "https://gateway.pinata.cloud/ipfs/QmT7rymTYy7GzdiMkab1hCzQDaHoXz3RVwghHDQPQGUVsQ"
+        }
+      }
+    }
+  },
+  "buy": {
+    "type": "ETH",
+    "data": {
+      "token_address": "",
+      "decimals": 18,
+      "quantity": "101000000000000000"
+    }
+  },
+  "amount_sold": null,
+  "expiration_timestamp": "2121-03-04T04:00:00Z",
+  "timestamp": "2022-03-04T04:46:11.032152Z",
+  "updated_timestamp": "2022-03-04T04:46:11.032152Z"
+}

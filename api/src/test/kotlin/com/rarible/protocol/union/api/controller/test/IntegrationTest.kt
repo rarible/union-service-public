@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.api.controller.test
 
+import com.rarible.core.test.ext.ElasticsearchTest
 import com.rarible.core.test.ext.KafkaTest
 import com.rarible.core.test.ext.MongoCleanup
 import com.rarible.core.test.ext.MongoTest
@@ -13,6 +14,7 @@ import org.springframework.test.context.ActiveProfiles
 @MongoTest
 @MongoCleanup
 @RedisTest
+@ElasticsearchTest
 @SpringBootTest(
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     properties = [
