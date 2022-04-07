@@ -42,9 +42,9 @@ fun ActivityDto.itemId(): ItemIdDto? {
         is AuctionFinishActivityDto -> this.auction.getItemId()
         is AuctionStartActivityDto -> this.auction.getItemId()
         is AuctionEndActivityDto -> this.auction.getItemId()
+        is L2DepositActivityDto -> this.itemId
+        is L2WithdrawalActivityDto -> this.itemId
 
-        is L2DepositActivityDto -> null // TODO
-        is L2WithdrawalActivityDto -> null // TODO
     }
 }
 
