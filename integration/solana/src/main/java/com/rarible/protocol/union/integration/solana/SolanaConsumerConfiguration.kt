@@ -8,11 +8,11 @@ import com.rarible.protocol.union.core.ConsumerFactory
 import com.rarible.protocol.union.core.handler.BlockchainEventHandler
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.handler.KafkaConsumerWorker
+import com.rarible.protocol.union.core.model.UnionCollectionEvent
 import com.rarible.protocol.union.core.model.UnionItemEvent
 import com.rarible.protocol.union.core.model.UnionOrderEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipEvent
 import com.rarible.protocol.union.dto.ActivityDto
-import com.rarible.protocol.union.dto.CollectionEventDto
 import com.rarible.protocol.union.integration.solana.converter.SolanaActivityConverter
 import com.rarible.protocol.union.integration.solana.converter.SolanaOrderConverter
 import com.rarible.protocol.union.integration.solana.event.SolanaActivityEventHandler
@@ -52,7 +52,7 @@ class SolanaConsumerConfiguration(
     }
 
     @Bean
-    fun solanaCollectionEventHandler(handler: IncomingEventHandler<CollectionEventDto>): SolanaCollectionEventHandler {
+    fun solanaCollectionEventHandler(handler: IncomingEventHandler<UnionCollectionEvent>): SolanaCollectionEventHandler {
         return SolanaCollectionEventHandler(handler)
     }
 
@@ -101,7 +101,7 @@ class SolanaConsumerConfiguration(
     @Bean
     fun solanaCollectionWorker(
         factory: SolanaEventsConsumerFactory,
-        handler: BlockchainEventHandler<com.rarible.protocol.solana.dto.CollectionEventDto, CollectionEventDto>
+        handler: BlockchainEventHandler<com.rarible.protocol.solana.dto.CollectionEventDto, UnionCollectionEvent>
     ): KafkaConsumerWorker<com.rarible.protocol.solana.dto.CollectionEventDto> {
         val consumer = factory.createCollectionEventConsumer(consumerFactory.collectionGroup)
         return consumerFactory.createCollectionConsumer(consumer, handler, daemon, workers)

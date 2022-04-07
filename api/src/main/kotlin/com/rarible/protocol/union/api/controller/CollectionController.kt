@@ -3,12 +3,13 @@ package com.rarible.protocol.union.api.controller
 import com.rarible.protocol.union.api.util.BlockchainFilter
 import com.rarible.protocol.union.api.service.CollectionApiService
 import com.rarible.protocol.union.api.service.ItemApiService
+import com.rarible.protocol.union.core.continuation.UnionCollectionContinuation
+import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.core.service.CollectionService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.dto.CollectionsDto
-import com.rarible.protocol.union.dto.continuation.CollectionContinuation
 import com.rarible.protocol.union.dto.continuation.page.ArgPaging
 import com.rarible.protocol.union.dto.continuation.page.Page
 import com.rarible.protocol.union.dto.continuation.page.PageSize
@@ -16,17 +17,20 @@ import com.rarible.protocol.union.dto.continuation.page.Paging
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.meta.UnionMetaService
-import kotlinx.coroutines.flow.collect
+import com.rarible.protocol.union.enrichment.model.ShortCollectionId
+import com.rarible.protocol.union.enrichment.service.EnrichmentCollectionService
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.RestController
+import kotlinx.coroutines.flow.collect
 
 @RestController
 class CollectionController(
     private val router: BlockchainRouter<CollectionService>,
-    private val apiService: CollectionApiService,
+    private val collectionApiService: CollectionApiService,
     private val itemApiService: ItemApiService,
-    private val unionMetaService: UnionMetaService
+    private val unionMetaService: UnionMetaService,
+    private val enrichmentCollectionService: EnrichmentCollectionService
 ) : CollectionControllerApi {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -37,9 +41,9 @@ class CollectionController(
         size: Int?
     ): ResponseEntity<CollectionsDto> {
         val safeSize = PageSize.COLLECTION.limit(size)
-        val slices = apiService.getAllCollections(blockchains, continuation, safeSize)
+        val slices = collectionApiService.getAllCollections(blockchains, continuation, safeSize)
         val total = slices.sumOf { it.page.total }
-        val arg = ArgPaging(CollectionContinuation.ById, slices.map { it.toSlice() }).getSlice(safeSize)
+        val arg = ArgPaging(UnionCollectionContinuation.ById, slices.map { it.toSlice() }).getSlice(safeSize)
 
         logger.info("Response for getAllCollections(blockchains={}, continuation={}, size={}):" +
                 " Page(size={}, total={}, continuation={}) from blockchain pages {} ",
@@ -53,9 +57,12 @@ class CollectionController(
     override suspend fun getCollectionById(
         collection: String
     ): ResponseEntity<CollectionDto> {
-        val collectionId = IdParser.parseCollectionId(collection)
-        val result = router.getService(collectionId.blockchain).getCollectionById(collectionId.value)
-        return ResponseEntity.ok(result)
+        val fullCollectionId = IdParser.parseCollectionId(collection)
+        val shortCollectionId = ShortCollectionId(fullCollectionId)
+        val unionCollection = router.getService(fullCollectionId.blockchain).getCollectionById(fullCollectionId.value)
+        val shortCollection = enrichmentCollectionService.get(shortCollectionId)
+        val enrichedCollection = enrichmentCollectionService.enrichCollection(shortCollection, unionCollection)
+        return ResponseEntity.ok(enrichedCollection)
     }
 
     override suspend fun refreshCollectionMeta(collection: String): ResponseEntity<Unit> {
@@ -79,10 +86,10 @@ class CollectionController(
             it.getCollectionsByOwner(ownerAddress.value, continuation, safeSize)
         }
 
-        val total = blockchainPages.map { it.total }.sum()
+        val total = blockchainPages.sumOf { it.total }
 
         val combinedPage = Paging(
-            CollectionContinuation.ById,
+            UnionCollectionContinuation.ById,
             blockchainPages.flatMap { it.entities }
         ).getPage(safeSize, total)
 
@@ -94,19 +101,19 @@ class CollectionController(
         return ResponseEntity.ok(toDto(combinedPage))
     }
 
-    private fun toDto(page: Page<CollectionDto>): CollectionsDto {
+    private suspend fun toDto(page: Page<UnionCollection>): CollectionsDto {
         return CollectionsDto(
             total = page.total,
             continuation = page.continuation,
-            collections = page.entities
+            collections = collectionApiService.enrich(page).collections
         )
     }
 
-    private fun toDto(page: Slice<CollectionDto>, total: Long): CollectionsDto {
+    private suspend fun toDto(page: Slice<UnionCollection>, total: Long): CollectionsDto {
         return CollectionsDto(
             total = total,
             continuation = page.continuation,
-            collections = page.entities
+            collections = collectionApiService.enrich(page, total).collections
         )
     }
 

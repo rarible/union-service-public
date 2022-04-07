@@ -3,7 +3,6 @@ package com.rarible.protocol.union.api.controller.test
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.rarible.core.application.ApplicationEnvironmentInfo
 import com.rarible.core.kafka.RaribleKafkaProducer
-import com.rarible.loader.cache.CacheLoaderEventListener
 import com.rarible.protocol.currency.api.client.CurrencyControllerApi
 import com.rarible.protocol.flow.nft.api.client.FlowNftCollectionControllerApi
 import com.rarible.protocol.flow.nft.api.client.FlowNftCryptoControllerApi
@@ -20,15 +19,11 @@ import com.rarible.protocol.order.api.client.OrderActivityControllerApi
 import com.rarible.protocol.order.api.client.OrderControllerApi
 import com.rarible.protocol.union.api.client.FixedUnionApiServiceUriProvider
 import com.rarible.protocol.union.api.client.UnionApiClientFactory
-import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.dto.CollectionEventDto
 import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
-import com.rarible.protocol.union.enrichment.meta.UnionMetaCacheLoader
 import com.rarible.protocol.union.enrichment.meta.UnionMetaLoader
 import com.rarible.protocol.union.test.mock.CurrencyMock
-import io.mockk.coEvery
-import io.mockk.coJustRun
 import io.mockk.mockk
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.web.server.LocalServerPort

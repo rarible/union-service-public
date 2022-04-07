@@ -24,6 +24,7 @@ import com.rarible.protocol.dto.OrderIndexerTopicProvider
 import com.rarible.protocol.flow.nft.api.client.FlowNftItemControllerApi
 import com.rarible.protocol.flow.nft.api.client.FlowNftOwnershipControllerApi
 import com.rarible.protocol.flow.nft.api.client.FlowOrderControllerApi
+import com.rarible.protocol.nft.api.client.NftCollectionControllerApi
 import com.rarible.protocol.nft.api.client.NftItemControllerApi
 import com.rarible.protocol.nft.api.client.NftOwnershipControllerApi
 import com.rarible.protocol.tezos.dto.TezosActivitySafeDto
@@ -284,6 +285,11 @@ class TestListenerConfiguration {
     @Primary
     @Qualifier("ethereum.ownership.api")
     fun testEthereumOwnershipApi(): NftOwnershipControllerApi = mockk()
+
+    @Bean
+    @Primary
+    @Qualifier("ethereum.collection.api")
+    fun testEthereumCollectionApi(): NftCollectionControllerApi = mockk()
 
     @Bean
     @Primary

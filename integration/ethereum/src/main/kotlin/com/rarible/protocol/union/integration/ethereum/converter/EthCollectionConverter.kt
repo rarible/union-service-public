@@ -5,12 +5,14 @@ import com.rarible.protocol.dto.NftCollectionMetaDto
 import com.rarible.protocol.dto.NftCollectionsDto
 import com.rarible.protocol.dto.NftMediaDto
 import com.rarible.protocol.dto.NftMediaMetaDto
+import com.rarible.protocol.union.core.model.UnionCollection
+import com.rarible.protocol.union.core.model.UnionCollectionMeta
+import com.rarible.protocol.union.core.model.UnionImageProperties
+import com.rarible.protocol.union.core.model.UnionMetaContent
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.BlockchainGroupDto
 import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.dto.CollectionIdDto
-import com.rarible.protocol.union.dto.CollectionMetaDto
-import com.rarible.protocol.union.dto.ImageContentDto
 import com.rarible.protocol.union.dto.MetaContentDto
 import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.continuation.page.Page
@@ -21,7 +23,7 @@ object EthCollectionConverter {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    fun convert(source: NftCollectionDto, blockchain: BlockchainDto): CollectionDto {
+    fun convert(source: NftCollectionDto, blockchain: BlockchainDto): UnionCollection {
         try {
             return convertInternal(source, blockchain)
         } catch (e: Exception) {
@@ -30,11 +32,10 @@ object EthCollectionConverter {
         }
     }
 
-    private fun convertInternal(source: NftCollectionDto, blockchain: BlockchainDto): CollectionDto {
+    private fun convertInternal(source: NftCollectionDto, blockchain: BlockchainDto): UnionCollection {
         val contract = EthConverter.convert(source.id)
-        return CollectionDto(
+        return UnionCollection(
             id = CollectionIdDto(blockchain, contract),
-            blockchain = blockchain,
             name = source.name,
             symbol = source.symbol,
             type = convert(source.type),
@@ -45,7 +46,7 @@ object EthCollectionConverter {
         )
     }
 
-    fun convert(page: NftCollectionsDto, blockchain: BlockchainDto): Page<CollectionDto> {
+    fun convert(page: NftCollectionsDto, blockchain: BlockchainDto): Page<UnionCollection> {
         return Page(
             total = page.total,
             continuation = page.continuation,
@@ -72,9 +73,9 @@ object EthCollectionConverter {
         }
     }
 
-    private fun convert(source: NftCollectionMetaDto?): CollectionMetaDto? {
+    private fun convert(source: NftCollectionMetaDto?): UnionCollectionMeta? {
         if (source == null) return null
-        return CollectionMetaDto(
+        return UnionCollectionMeta(
             name = source.name,
             description = source.description,
             content = convert(source.image),
@@ -84,22 +85,23 @@ object EthCollectionConverter {
         )
     }
 
-    // Assuming the input NtfMediaDto is an image
-    private fun convert(sourceImage: NftMediaDto?): List<MetaContentDto> {
+    private fun convert(sourceImage: NftMediaDto?): List<UnionMetaContent> {
         if (sourceImage == null) return emptyList()
         return sourceImage.url.keys.map { key ->
             convert(key, sourceImage.url[key]!!, sourceImage.meta[key])
         }
     }
 
-    private fun convert(key: String, url: String, meta: NftMediaMetaDto?): MetaContentDto {
-        return ImageContentDto(
+    private fun convert(key: String, url: String, meta: NftMediaMetaDto?): UnionMetaContent {
+        return UnionMetaContent(
             url = url,
             representation = MetaContentDto.Representation.valueOf(key),
-            mimeType = meta?.type,
-            width = meta?.width,
-            height = meta?.height,
-            size = null, // TODO find where to get size from
+            properties = UnionImageProperties(
+                mimeType = meta?.type,
+                width = meta?.width,
+                height = meta?.height,
+                size = null, // TODO find where to get size from
+            )
         )
     }
 
@@ -110,4 +112,6 @@ object EthCollectionConverter {
             value = EthConverter.convert(source)
         )
     }
+
+
 }

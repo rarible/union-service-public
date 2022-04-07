@@ -15,12 +15,20 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.dto.continuation.CombinedContinuation
 import com.rarible.protocol.union.dto.continuation.page.PageSize
+import com.rarible.protocol.union.enrichment.converter.EnrichmentCollectionConverter
+import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
+import com.rarible.protocol.union.enrichment.service.EnrichmentCollectionService
+import com.rarible.protocol.union.integration.ethereum.converter.EthCollectionConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthItemConverter
+import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAddress
+import com.rarible.protocol.union.integration.ethereum.data.randomEthAssetErc20
+import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionAsset
 import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthNftItemDto
+import com.rarible.protocol.union.integration.ethereum.data.randomEthV2OrderDto
 import com.rarible.protocol.union.integration.tezos.data.randomTezosAddress
 import com.rarible.protocol.union.integration.tezos.data.randomTezosCollectionDto
 import com.rarible.protocol.union.test.data.randomFlowAddress
@@ -48,18 +56,34 @@ class CollectionControllerFt : AbstractIntegrationTest() {
     @Autowired
     lateinit var collectionControllerClient: CollectionControllerApi
 
+    @Autowired
+    lateinit var ethOrderConverter: EthOrderConverter
+
+    @Autowired
+    lateinit var enrichmentCollectionService: EnrichmentCollectionService
+
     @Test
-    fun `get collection by id - ethereum`() = runBlocking<Unit> {
+    fun `get collection by id - ethereum, enriched`() = runBlocking<Unit> {
         val collectionId = randomAddress()
         val collectionIdFull = EthConverter.convert(collectionId, BlockchainDto.ETHEREUM)
-        val collection = randomEthCollectionDto(collectionId)
+        val ethCollectionDto = randomEthCollectionDto(collectionId)
+        val ethUnionCollection = EthCollectionConverter.convert(ethCollectionDto, BlockchainDto.ETHEREUM)
+        val collectionAsset = randomEthCollectionAsset(collectionId)
+        val ethOrder = randomEthV2OrderDto(collectionAsset, randomAddress(), randomEthAssetErc20())
+        val ethUnionOrder = ethOrderConverter.convert(ethOrder, BlockchainDto.ETHEREUM)
 
-        coEvery { testEthereumCollectionApi.getNftCollectionById(collectionIdFull.value) } returns collection.toMono()
+        val shortOrder = ShortOrderConverter.convert(ethUnionOrder)
+        val shortCollection = EnrichmentCollectionConverter.convertToShortCollection(ethUnionCollection).copy(bestSellOrder = shortOrder)
+        enrichmentCollectionService.save(shortCollection)
+
+        ethereumOrderControllerApiMock.mockGetById(ethOrder)
+        coEvery { testEthereumCollectionApi.getNftCollectionById(collectionIdFull.value) } returns ethCollectionDto.toMono()
 
         val unionCollection = collectionControllerClient.getCollectionById(collectionIdFull.fullId()).awaitFirst()
 
         assertThat(unionCollection.id.value).isEqualTo(collectionIdFull.value)
         assertThat(unionCollection.id.blockchain).isEqualTo(BlockchainDto.ETHEREUM)
+        assertThat(unionCollection.bestSellOrder!!.id).isEqualTo(ethUnionOrder.id)
     }
 
     @Test

@@ -2,11 +2,24 @@ package com.rarible.protocol.union.enrichment.test.data
 
 import com.rarible.core.test.data.randomString
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
+import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.UnionMetaContent
 import com.rarible.protocol.union.core.model.UnionMetaContentProperties
-import com.rarible.protocol.union.dto.*
+import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.BurnActivityDto
+import com.rarible.protocol.union.dto.CollectionIdDto
+import com.rarible.protocol.union.dto.ItemDto
+import com.rarible.protocol.union.dto.ItemIdDto
+import com.rarible.protocol.union.dto.MetaAttributeDto
+import com.rarible.protocol.union.dto.MetaContentDto
+import com.rarible.protocol.union.dto.MintActivityDto
+import com.rarible.protocol.union.dto.OrderMatchSellDto
+import com.rarible.protocol.union.dto.OwnershipDto
+import com.rarible.protocol.union.dto.OwnershipIdDto
+import com.rarible.protocol.union.dto.TransferActivityDto
+import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.enrichment.converter.EnrichedItemConverter
 import com.rarible.protocol.union.enrichment.converter.EnrichedOwnershipConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthActivityConverter
@@ -43,7 +56,13 @@ fun randomUnionAddress(): UnionAddress =
         randomString()
     )
 
-fun randomUnionCollection(): CollectionDto =
+fun randomUnionCollection(id: CollectionIdDto): UnionCollection =
+    EthCollectionConverter.convert(
+        randomEthCollectionDto(),
+        id.blockchain
+    ).copy(id = id)
+
+fun randomUnionCollection(): UnionCollection =
     EthCollectionConverter.convert(
         randomEthCollectionDto(),
         BlockchainDto.ETHEREUM

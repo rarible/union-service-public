@@ -1,17 +1,30 @@
 package com.rarible.protocol.union.enrichment.converter
 
 import com.rarible.protocol.union.core.model.UnionAudioProperties
+import com.rarible.protocol.union.core.model.UnionCollectionMeta
 import com.rarible.protocol.union.core.model.UnionImageProperties
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.UnionMetaContent
 import com.rarible.protocol.union.core.model.UnionModel3dProperties
 import com.rarible.protocol.union.core.model.UnionVideoProperties
+import com.rarible.protocol.union.dto.CollectionMetaDto
 import com.rarible.protocol.union.dto.ImageContentDto
 import com.rarible.protocol.union.dto.MetaContentDto
 import com.rarible.protocol.union.dto.MetaDto
 import com.rarible.protocol.union.dto.VideoContentDto
 
 object EnrichedMetaConverter {
+    fun convert(meta: UnionCollectionMeta): CollectionMetaDto {
+        return CollectionMetaDto(
+            description = meta.description,
+            externalLink = meta.externalLink,
+            feeRecipient = meta.feeRecipient,
+            name = meta.name,
+            sellerFeeBasisPoints = meta.sellerFeeBasisPoints,
+            content = meta.content.mapNotNull { convert(it) }
+        )
+    }
+
     fun convert(meta: UnionMeta): MetaDto {
         return MetaDto(
             name = meta.name,

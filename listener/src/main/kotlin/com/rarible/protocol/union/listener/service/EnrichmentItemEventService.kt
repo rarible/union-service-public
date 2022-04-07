@@ -2,12 +2,18 @@ package com.rarible.protocol.union.listener.service
 
 import com.rarible.core.common.optimisticLock
 import com.rarible.protocol.union.core.event.OutgoingEventListener
-import com.rarible.protocol.union.core.event.OutgoingItemEventListener
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.getItemId
 import com.rarible.protocol.union.core.model.itemId
 import com.rarible.protocol.union.core.service.ReconciliationEventService
-import com.rarible.protocol.union.dto.*
+import com.rarible.protocol.union.dto.ActivityDto
+import com.rarible.protocol.union.dto.AuctionDto
+import com.rarible.protocol.union.dto.AuctionStatusDto
+import com.rarible.protocol.union.dto.ItemDeleteEventDto
+import com.rarible.protocol.union.dto.ItemEventDto
+import com.rarible.protocol.union.dto.ItemIdDto
+import com.rarible.protocol.union.dto.ItemUpdateEventDto
+import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.enrichment.converter.ItemLastSaleConverter
 import com.rarible.protocol.union.enrichment.model.ItemSellStats
 import com.rarible.protocol.union.enrichment.model.ShortItem
@@ -17,7 +23,7 @@ import com.rarible.protocol.union.enrichment.service.BestOrderService
 import com.rarible.protocol.union.enrichment.service.EnrichmentActivityService
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
-import com.rarible.protocol.union.enrichment.validator.ItemValidator
+import com.rarible.protocol.union.enrichment.validator.EntityValidator
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.util.*
@@ -282,7 +288,7 @@ class EnrichmentItemEventService(
     private suspend fun sendUpdate(event: ItemUpdateEventDto) {
         // If item in corrupted state, we will try to reconcile it instead of sending corrupted
         // data to the customers
-        if (!ItemValidator.isValid(event.item)) {
+        if (!EntityValidator.isValid(event.item)) {
             reconciliationEventService.onCorruptedItem(event.item.id)
         } else {
             itemEventListeners.forEach { it.onEvent(event) }
