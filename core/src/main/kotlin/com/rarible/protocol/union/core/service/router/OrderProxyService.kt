@@ -9,7 +9,7 @@ import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
 
 class OrderProxyService(
-    val orderService: OrderService,
+    private val orderService: OrderService,
     private val supportedPlatforms: Set<PlatformDto>
 ) : OrderService {
 

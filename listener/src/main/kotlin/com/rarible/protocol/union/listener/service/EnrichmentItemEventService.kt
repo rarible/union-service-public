@@ -1,12 +1,18 @@
 package com.rarible.protocol.union.listener.service
 
 import com.rarible.core.common.optimisticLock
-import com.rarible.protocol.union.core.event.OutgoingEventListener
+import com.rarible.protocol.union.core.event.OutgoingItemEventListener
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.getItemId
 import com.rarible.protocol.union.core.model.itemId
 import com.rarible.protocol.union.core.service.ReconciliationEventService
-import com.rarible.protocol.union.dto.*
+import com.rarible.protocol.union.dto.ActivityDto
+import com.rarible.protocol.union.dto.AuctionDto
+import com.rarible.protocol.union.dto.AuctionStatusDto
+import com.rarible.protocol.union.dto.ItemDeleteEventDto
+import com.rarible.protocol.union.dto.ItemIdDto
+import com.rarible.protocol.union.dto.ItemUpdateEventDto
+import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.enrichment.converter.ItemLastSaleConverter
 import com.rarible.protocol.union.enrichment.model.ItemSellStats
 import com.rarible.protocol.union.enrichment.model.ShortItem

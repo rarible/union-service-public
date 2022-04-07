@@ -1,5 +1,7 @@
 package com.rarible.protocol.union.integration.solana.service
 
+import com.rarible.core.apm.CaptureSpan
+import com.rarible.protocol.solana.api.client.TokenControllerApi
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.service.ItemService
@@ -9,17 +11,16 @@ import com.rarible.protocol.union.dto.RoyaltyDto
 import com.rarible.protocol.union.dto.continuation.page.Page
 import com.rarible.protocol.union.integration.solana.converter.SolanaItemConverter
 import com.rarible.protocol.union.integration.solana.converter.SolanaItemMetaConverter
-import com.rarible.solana.protocol.api.client.BalanceControllerApi
-import com.rarible.solana.protocol.api.client.TokenControllerApi
 import kotlinx.coroutines.reactive.awaitFirst
 
-class SolanaItemService(
+@CaptureSpan(type = "blockchain")
+open class SolanaItemService(
     private val tokenApi: TokenControllerApi
 ) : AbstractBlockchainService(BlockchainDto.SOLANA), ItemService {
 
     override suspend fun getItemById(itemId: String): UnionItem {
         val token = tokenApi.getTokenByAddress(itemId).awaitFirst()
-        return SolanaItemConverter.convert(token)
+        return SolanaItemConverter.convert(token, blockchain)
     }
 
     override suspend fun getItemMetaById(itemId: String): UnionMeta {
@@ -34,15 +35,25 @@ class SolanaItemService(
         lastUpdatedFrom: Long?,
         lastUpdatedTo: Long?
     ): Page<UnionItem> {
-        TODO("Not yet implemented")
+        val page = tokenApi.getAllTokens(
+            showDeleted,
+            lastUpdatedFrom,
+            lastUpdatedTo,
+            continuation,
+            size
+        ).awaitFirst()
+
+        return SolanaItemConverter.convert(page, blockchain)
     }
 
     override suspend fun getItemRoyaltiesById(itemId: String): List<RoyaltyDto> {
-        TODO("Not yet implemented")
+        val royaltyList = tokenApi.getTokenRoyaltiesByAddress(itemId).awaitFirst()
+        val royalties = royaltyList.royalties
+        return royalties.map { SolanaItemConverter.convert(it, blockchain) }
     }
 
     override suspend fun resetItemMeta(itemId: String) {
-        TODO("Not yet implemented")
+        tokenApi.resetTokenMeta(itemId).awaitFirst()
     }
 
     override suspend fun getItemsByCollection(
@@ -51,32 +62,38 @@ class SolanaItemService(
         continuation: String?,
         size: Int
     ): Page<UnionItem> {
-        val tokensDto = tokenApi.getTokensByCollection(collection).awaitFirst()
+        val page = tokenApi.getTokensByCollection(
+            collection,
+            continuation,
+            size
+        ).awaitFirst()
 
-        return Page(
-            total = tokensDto.total,
-            null, // TODO add continuation,
-            tokensDto.tokens.map { SolanaItemConverter.convert(it) }
-        )
+        return SolanaItemConverter.convert(page, blockchain)
     }
 
     override suspend fun getItemsByCreator(creator: String, continuation: String?, size: Int): Page<UnionItem> {
-        TODO("Not yet implemented")
+        val page = tokenApi.getTokensByCreator(
+            creator,
+            continuation,
+            size
+        ).awaitFirst()
+
+        return SolanaItemConverter.convert(page, blockchain)
     }
 
     override suspend fun getItemsByOwner(owner: String, continuation: String?, size: Int): Page<UnionItem> {
-        val tokensDto = tokenApi.getTokensByOwner(owner).awaitFirst()
+        val page = tokenApi.getTokensByOwner(
+            owner,
+            continuation,
+            size
+        ).awaitFirst()
 
-        return Page(
-            total = tokensDto.total,
-            null, // TODO add continuation,
-            tokensDto.tokens.map { SolanaItemConverter.convert(it) }
-        )
+        return SolanaItemConverter.convert(page, blockchain)
     }
 
     override suspend fun getItemsByIds(itemIds: List<String>): List<UnionItem> {
         val tokensDto = tokenApi.getTokensByAddresses(itemIds).awaitFirst()
 
-        return tokensDto.tokens.map { SolanaItemConverter.convert(it) }
+        return tokensDto.tokens.map { SolanaItemConverter.convert(it, blockchain) }
     }
 }

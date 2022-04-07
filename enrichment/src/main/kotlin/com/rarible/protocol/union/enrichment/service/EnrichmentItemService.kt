@@ -84,8 +84,6 @@ class EnrichmentItemService(
         logger.info("Fetched {} items for collection {} and owner {}", count, address, owner)
     }
 
-    fun findByAuctionId(auctionIdDto: AuctionIdDto) = itemRepository.findByAuction(auctionIdDto)
-
     suspend fun fetch(itemId: ShortItemId): UnionItem {
         val now = nowMillis()
         val itemDto = itemServiceRouter.getService(itemId.blockchain).getItemById(itemId.itemId)
@@ -114,26 +112,18 @@ class EnrichmentItemService(
         loadMetaSynchronously: Boolean = false
     ) = coroutineScope {
 
-    require(shortItem != null || item != null)
+        require(shortItem != null || item != null)
         val itemId = shortItem?.id?.toDto() ?: item!!.id
-        val fetchedItem = withSpanAsync("fetchItem", spanType = SpanType.EXT) {
-            item ?: fetch(ShortItemId(itemId))
-        }
-        val bestSellOrder = withSpanAsync("fetchBestSellOrder", spanType = SpanType.EXT) {
-            enrichmentOrderService.fetchOrderIfDiffers(shortItem?.bestSellOrder, orders)
-        }
-        val bestBidOrder = withSpanAsync("fetchBestBidOrder", spanType = SpanType.EXT) {
-            enrichmentOrderService.fetchOrderIfDiffers(shortItem?.bestBidOrder, orders)
-        }
-        val meta = if (item?.meta != null && itemId.value.contains(USE_META_FOR_TOKEN)) {
-            CompletableDeferred(item.meta)
-        } else {
-            withSpanAsync("fetchMeta", spanType = SpanType.CACHE) {
-                if (loadMetaSynchronously || item?.loadMetaSynchronously == true) {
-                    unionMetaService.getAvailableMetaOrLoadSynchronously(itemId, synchronous = true)
-                } else {
-                    unionMetaService.getAvailableMetaOrScheduleLoading(itemId)
-                }
+
+        val fetchedItem = async { item ?: fetch(ShortItemId(itemId)) }
+        val bestSellOrder = async { enrichmentOrderService.fetchOrderIfDiffers(shortItem?.bestSellOrder, orders) }
+        val bestBidOrder = async { enrichmentOrderService.fetchOrderIfDiffers(shortItem?.bestBidOrder, orders) }
+
+        val meta = withSpanAsync("fetchMeta", spanType = SpanType.CACHE) {
+            if (loadMetaSynchronously || item?.loadMetaSynchronously == true) {
+                unionMetaService.getAvailableMetaOrLoadSynchronously(itemId, synchronous = true)
+            } else {
+                unionMetaService.getAvailableMetaOrScheduleLoading(itemId)
             }
         }
         val bestOrders = listOf(bestSellOrder, bestBidOrder)
@@ -142,9 +132,7 @@ class EnrichmentItemService(
 
         val auctionIds = shortItem?.auctions ?: emptySet()
 
-        val auctionsData = withSpanAsync("fetchAuction", spanType = SpanType.EXT) {
-            enrichmentAuctionService.fetchAuctionsIfAbsent(auctionIds, auctions)
-        }
+        val auctionsData = async { enrichmentAuctionService.fetchAuctionsIfAbsent(auctionIds, auctions) }
 
         val itemDto = EnrichedItemConverter.convert(
             item = fetchedItem.await(),
@@ -162,9 +150,4 @@ class EnrichmentItemService(
         spanType: String = SpanType.APP,
         block: suspend () -> T
     ): Deferred<T> = async { withSpan(name = spanName, type = spanType, body = block) }
-
-    private companion object {
-        //TODO: Need remove
-        const val USE_META_FOR_TOKEN = "0x629cdec6acc980ebeebea9e5003bcd44db9fc5ce"
-    }
 }

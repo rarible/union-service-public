@@ -9,19 +9,16 @@ import com.rarible.protocol.union.core.model.UnionMetaContent
 import com.rarible.protocol.union.core.model.UnionMetaContentProperties
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.BurnActivityDto
+import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.dto.CollectionIdDto
-import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.MetaAttributeDto
 import com.rarible.protocol.union.dto.MetaContentDto
 import com.rarible.protocol.union.dto.MintActivityDto
 import com.rarible.protocol.union.dto.OrderMatchSellDto
-import com.rarible.protocol.union.dto.OwnershipDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.TransferActivityDto
 import com.rarible.protocol.union.dto.UnionAddress
-import com.rarible.protocol.union.enrichment.converter.EnrichedItemConverter
-import com.rarible.protocol.union.enrichment.converter.EnrichedOwnershipConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthActivityConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthAuctionConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthCollectionConverter
@@ -61,6 +58,11 @@ fun randomUnionCollection(id: CollectionIdDto): UnionCollection =
         id.blockchain
     ).copy(id = id)
 
+fun randomUnionCollection(): CollectionDto =
+    EthCollectionConverter.convert(
+        randomEthCollectionDto(),
+        BlockchainDto.ETHEREUM
+    )
 
 fun randomUnionItem(id: ItemIdDto): UnionItem {
     return when (id.blockchain) {
@@ -74,7 +76,8 @@ fun randomUnionItem(id: ItemIdDto): UnionItem {
         )
         BlockchainDto.TEZOS -> TODO()
         BlockchainDto.SOLANA -> SolanaItemConverter.convert(
-            randomSolanaTokenDto(id)
+            randomSolanaTokenDto(id),
+            BlockchainDto.SOLANA
         )
     }
 }
@@ -164,7 +167,7 @@ fun randomUnionBidOrderDto(itemId: ItemIdDto) = runBlocking {
 }
 
 fun randomUnionAuctionDto(itemId: ItemIdDto) = randomUnionAuctionDto(
-    itemId.toOwnership(randomString())
+    itemId.toOwnership(randomAddressString())
 )
 
 fun randomUnionAuctionDto(ownershipId: OwnershipIdDto) = runBlocking {
