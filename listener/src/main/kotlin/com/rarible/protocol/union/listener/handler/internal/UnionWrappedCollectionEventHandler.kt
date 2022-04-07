@@ -12,7 +12,7 @@ class UnionWrappedCollectionEventHandler(
     private val collectionEventService: EnrichmentCollectionEventService,
     private val reconciliationEventService: ReconciliationEventService
 ) {
-    @CaptureTransaction("UnionAuctionEvent")
+    @CaptureTransaction("UnionCollectionEvent")
     suspend fun onEvent(event: UnionCollectionEvent) {
         try {
             if (event is UnionCollectionUpdateEvent) {
