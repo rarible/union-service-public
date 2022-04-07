@@ -4,6 +4,7 @@ import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.AssetDto
 import com.rarible.protocol.union.dto.AssetTypeDto
+import com.rarible.protocol.union.dto.AssetTypeExtension
 import com.rarible.protocol.union.dto.AuctionBidActivityDto
 import com.rarible.protocol.union.dto.AuctionCancelActivityDto
 import com.rarible.protocol.union.dto.AuctionEndActivityDto
@@ -297,8 +298,8 @@ class ElasticActivityConverter {
 
     private fun bothCollections(left: AssetTypeDto, right: AssetTypeDto): ElasticActivity.Collection {
         return ElasticActivity.Collection(
-            make = left.ext.collectionId?.value,
-            take = right.ext.collectionId?.value,
+            make = left.ext.getContract(),
+            take = right.ext.getContract(),
         )
     }
 
@@ -308,8 +309,8 @@ class ElasticActivityConverter {
 
     private fun bothItems(left: AssetTypeDto, right: AssetTypeDto): ElasticActivity.Item {
         return ElasticActivity.Item(
-            make = left.ext.itemId?.value.orEmpty(),
-            take = right.ext.itemId?.value.orEmpty()
+            make = left.ext.itemId?.toString().orEmpty(),
+            take = right.ext.itemId?.toString().orEmpty(),
         )
     }
 
@@ -327,5 +328,12 @@ class ElasticActivityConverter {
             )
         }
         throw IllegalArgumentException("contract & tokenId & itemId fields are null")
+    }
+
+    private fun AssetTypeExtension.getContract(): String? {
+        if (this.isCurrency) return currencyAddress()
+        return if (itemId != null) {
+            "${itemId!!.blockchain}:${itemId!!.value.split(':').first()}"
+        } else null
     }
 }
