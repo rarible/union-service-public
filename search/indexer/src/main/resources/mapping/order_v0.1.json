@@ -1,0 +1,77 @@
+{
+  "aliases": {
+    "order": {}
+  },
+  "settings": {
+  },
+  "mappings": {
+    "properties": {
+      "@timestamp": {
+        "type": "date"
+      },
+      "orderId": "keyword",
+      "lastUpdatedAt": {
+        "type": "date"
+      },
+      "type": "keyword",
+      "platform": "keyword",
+      "blockchain": "keyword",
+      "maker": {
+        "properties": {
+          "blockchainGroup": "keyword",
+          "value": "keyword"
+        }
+      },
+      "make": {
+        "properties": {
+          "type": {
+            "properties": {
+              "contract": {
+                "properties": {
+                  "blockchain": "keyword",
+                  "value": "keyword"
+                }
+              },
+              "tokenId": "keyword"
+            }
+          }
+        }
+      },
+      "taker": {
+        "properties": {
+          "blockchainGroup": "keyword",
+          "value": "keyword"
+        }
+      },
+      "take": {
+        "properties": {
+          "type": {
+            "properties": {
+              "contract": {
+                "properties": {
+                  "blockchain": "keyword",
+                  "value": "keyword"
+                }
+              },
+              "tokenId": "keyword"
+            }
+          }
+        }
+      },
+      "start": {
+        "type": "date"
+      },
+      "end": {
+        "type": "date"
+      },
+      "origins": {
+        "type": "nested",
+        "properties": {
+          "blockchainGroup": "keyword",
+          "value": "keyword"
+        }
+      },
+      "status": "keyword"
+    }
+  }
+}
