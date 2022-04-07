@@ -33,7 +33,7 @@ class ImmutablexCollectionServiceTest {
                 "CERTIFICATE3",
                 null,
                 emptyList(),
-                null
+                emptyList()
             ),
             CollectionDto(
                 CollectionIdDto(BlockchainDto.IMMUTABLEX, "0xa8106fe2195c3fa48ed52b52f7981f74d18d8ba4"),
@@ -44,7 +44,7 @@ class ImmutablexCollectionServiceTest {
                 "CERTIFICATE2",
                 null,
                 emptyList(),
-                null
+                emptyList()
             )
         )
     }
@@ -69,7 +69,7 @@ class ImmutablexCollectionServiceTest {
                 "CERTIFICATE3",
                 null,
                 emptyList(),
-                null
+                emptyList()
             )
         )
     }

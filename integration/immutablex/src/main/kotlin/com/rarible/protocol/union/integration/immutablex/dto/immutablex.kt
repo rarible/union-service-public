@@ -139,6 +139,7 @@ data class ImmutablexOrderData(
 
 data class ImmutablexDataProperties(
     val name: String?,
+    @JsonProperty("image_url")
     val imageUrl: String?,
     val collection: ImmutablexCollectionShort
 )

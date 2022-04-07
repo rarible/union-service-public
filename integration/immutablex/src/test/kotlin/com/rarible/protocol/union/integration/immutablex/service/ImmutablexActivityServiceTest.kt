@@ -8,7 +8,9 @@ import com.rarible.protocol.union.dto.OrderMatchSellDto
 import com.rarible.protocol.union.dto.TransferActivityDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
 import com.rarible.protocol.union.integration.immutablex.converter.ImmutablexActivityConverter
+import com.rarible.protocol.union.integration.immutablex.converter.ImmutablexOrderConverter
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexMint
+import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexOrder
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexPage
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexTrade
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexTransfer
@@ -60,8 +62,17 @@ internal class ImmutablexActivityServiceTest {
             coEvery { getMints(any(), any(), any(), any(), any(), any(), any()) } returns expectedMintActivity
             coEvery { getTransfers(any(), any(), any(), any(), any(), any(), any()) } returns expectedTransfersActivity
             coEvery { getTrades(any(), any(), any(), any(), any(), any(), any()) } returns expectedTradesActivity
+
         },
-        ImmutablexActivityConverter(mockk()),
+        ImmutablexActivityConverter(ImmutablexOrderService(
+            client = mockk {
+                coEvery { getOrderById(any()) } returns mapper.readValue(
+                    ImmutablexActivityServiceTest::class.java.getResourceAsStream("order.json"),
+                    ImmutablexOrder::class.java
+                )
+            },
+            orderConverter = ImmutablexOrderConverter()
+        )),
     )
 
     @Test
@@ -73,9 +84,10 @@ internal class ImmutablexActivityServiceTest {
             null
         ).let { page ->
             Assertions.assertEquals(page.entities.size, 3)
-            assert(page.entities[0] is MintActivityDto)
-            assert(page.entities[1] is OrderMatchSellDto)
-            assert(page.entities[2] is TransferActivityDto)
+            page.entities.any { it is MintActivityDto }
+            assert(page.entities.any { it is MintActivityDto })
+            assert(page.entities.any { it is OrderMatchSellDto })
+            assert(page.entities.any { it is TransferActivityDto })
         }
 
         service.getAllActivities(listOf(ActivityTypeDto.MINT), null, 50, null)
