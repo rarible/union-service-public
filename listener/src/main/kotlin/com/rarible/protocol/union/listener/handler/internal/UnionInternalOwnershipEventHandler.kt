@@ -9,7 +9,7 @@ import com.rarible.protocol.union.listener.service.EnrichmentOwnershipEventServi
 import org.springframework.stereotype.Component
 
 @Component
-class UnionWrappedOwnershipEventHandler(
+class UnionInternalOwnershipEventHandler(
     private val ownershipEventService: EnrichmentOwnershipEventService,
     private val reconciliationEventService: ReconciliationEventService
 ) {

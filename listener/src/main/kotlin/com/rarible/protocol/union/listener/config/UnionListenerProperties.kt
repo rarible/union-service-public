@@ -19,7 +19,8 @@ data class UnionListenerProperties(
 
 class InternalConsumerProperties(
     val brokerReplicaSet: String,
-    val workers: Map<String, Int>
+    val workers: Map<String, Int>,
+    val blockchainWorkers: Map<String, Int> = emptyMap()
 )
 
 class ReconciliationProperties(

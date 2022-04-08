@@ -3,6 +3,7 @@ package com.rarible.protocol.union.listener.service
 import com.rarible.core.test.wait.Wait
 import com.rarible.protocol.dto.AuctionsPaginationDto
 import com.rarible.protocol.dto.OrderStatusDto
+import com.rarible.protocol.union.core.model.ReconciliationMarkType
 import com.rarible.protocol.union.core.model.getAuctionOwnershipId
 import com.rarible.protocol.union.core.model.getSellerOwnershipId
 import com.rarible.protocol.union.dto.AuctionStatusDto
@@ -10,7 +11,6 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.converter.EnrichedOwnershipConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOwnershipConverter
-import com.rarible.protocol.union.enrichment.model.ReconciliationMarkType
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
 import com.rarible.protocol.union.enrichment.repository.ReconciliationMarkRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService

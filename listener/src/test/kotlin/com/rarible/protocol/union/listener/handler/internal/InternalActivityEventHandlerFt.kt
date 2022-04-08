@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.listener.wrapped
+package com.rarible.protocol.union.listener.handler.internal
 
 import com.rarible.core.kafka.KafkaMessage
 import com.rarible.core.test.wait.Wait
@@ -10,10 +10,10 @@ import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 
 @IntegrationTest
-class WrappedActivityEventHandlerFt : AbstractIntegrationTest() {
+class InternalActivityEventHandlerFt : AbstractIntegrationTest() {
 
     @Test
-    fun `wrapped activity event`() = runWithKafka {
+    fun `internal activity event`() = runWithKafka {
 
         val activity = randomEthItemBurnActivity()
 

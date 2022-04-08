@@ -2,6 +2,7 @@ package com.rarible.protocol.union.core.service
 
 import com.rarible.core.kafka.RaribleKafkaProducer
 import com.rarible.protocol.union.core.event.KafkaEventFactory
+import com.rarible.protocol.union.core.model.ReconciliationMarkAbstractEvent
 import com.rarible.protocol.union.core.model.itemId
 import com.rarible.protocol.union.core.model.ownershipId
 import com.rarible.protocol.union.dto.ActivityDto
@@ -10,7 +11,6 @@ import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.ext
-import com.rarible.protocol.union.enrichment.model.ReconciliationMarkAbstractEvent
 import org.springframework.stereotype.Component
 
 @Component
