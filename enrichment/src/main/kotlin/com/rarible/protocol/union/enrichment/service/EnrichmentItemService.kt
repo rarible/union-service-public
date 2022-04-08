@@ -116,11 +116,15 @@ class EnrichmentItemService(
         val bestSellOrder = async { enrichmentOrderService.fetchOrderIfDiffers(shortItem?.bestSellOrder, orders) }
         val bestBidOrder = async { enrichmentOrderService.fetchOrderIfDiffers(shortItem?.bestBidOrder, orders) }
 
-        val meta = withSpanAsync("fetchMeta", spanType = SpanType.CACHE) {
-            if (loadMetaSynchronously || item?.loadMetaSynchronously == true) {
-                unionMetaService.getAvailableMetaOrLoadSynchronously(itemId, synchronous = true)
-            } else {
-                unionMetaService.getAvailableMetaOrScheduleLoading(itemId)
+        val meta = if (item?.meta != null && itemId.value.contains(USE_META_FOR_TOKEN)) {
+            CompletableDeferred(item.meta)
+        } else {
+            withSpanAsync("fetchMeta", spanType = SpanType.CACHE) {
+                if (loadMetaSynchronously || item?.loadMetaSynchronously == true) {
+                    unionMetaService.getAvailableMetaOrLoadSynchronously(itemId, synchronous = true)
+                } else {
+                    unionMetaService.getAvailableMetaOrScheduleLoading(itemId)
+                }
             }
         }
         val bestOrders = listOf(bestSellOrder, bestBidOrder)
@@ -147,4 +151,9 @@ class EnrichmentItemService(
         spanType: String = SpanType.APP,
         block: suspend () -> T
     ): Deferred<T> = async { withSpan(name = spanName, type = spanType, body = block) }
+
+    private companion object {
+        //TODO: Need remove
+        const val USE_META_FOR_TOKEN = "0x629cdec6acc980ebeebea9e5003bcd44db9fc5ce"
+    }
 }
