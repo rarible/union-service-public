@@ -6,6 +6,7 @@ import com.rarible.core.test.data.randomBigInt
 import com.rarible.core.test.data.randomInt
 import com.rarible.core.test.data.randomLong
 import com.rarible.core.test.data.randomString
+import com.rarible.core.test.wait.Wait
 import com.rarible.protocol.union.dto.ActivityBlockchainInfoDto
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivityIdDto
@@ -18,6 +19,7 @@ import com.rarible.protocol.union.search.core.ElasticActivity
 import com.rarible.protocol.union.search.indexer.test.IntegrationTest
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.reactive.awaitFirst
+import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.elasticsearch.index.query.QueryBuilders.matchQuery
@@ -28,7 +30,7 @@ import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilde
 import java.time.Instant
 
 @IntegrationTest
-class ActivityConsumerIntegrationTest {
+class ActivityConsumerIT {
 
     @Autowired
     private lateinit var producer: RaribleKafkaProducer<ActivityDto>
@@ -66,15 +68,15 @@ class ActivityConsumerIntegrationTest {
             key = "key",
             value = activity
         )
-        producer.send(message)
-        delay(3000)
+        producer.send(message).ensureSuccess()
 
         // then
-        val searchQuery = NativeSearchQueryBuilder()
-            .withQuery(matchQuery("activityId", activity.id.toString()))
-            .build()
-        val searchHits = esOperations.search(searchQuery, ElasticActivity::class.java).awaitFirst()
-
-        assertThat(searchHits.content.user.maker).isEqualToIgnoringCase(activity.owner.value)
+        Wait.waitAssert {
+            val searchQuery = NativeSearchQueryBuilder()
+                .withQuery(matchQuery("activityId", activity.id.toString()))
+                .build()
+            val searchHits = esOperations.search(searchQuery, ElasticActivity::class.java).awaitFirstOrNull()
+            assertThat(searchHits?.content?.user?.maker).isEqualToIgnoringCase(activity.owner.value)
+        }
     }
 }

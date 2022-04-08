@@ -7,7 +7,6 @@ import com.rarible.protocol.union.dto.continuation.page.Page
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexApiClient
 import com.rarible.protocol.union.integration.immutablex.converter.ImmutablexCollectionConverter
 
-
 class ImmutablexCollectionService(
     private val client: ImmutablexApiClient
 ): AbstractBlockchainService(com.rarible.protocol.union.dto.BlockchainDto.IMMUTABLEX), CollectionService {

@@ -10,7 +10,6 @@ import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 
-
 class ImmutablexCollectionServiceTest {
 
     @Test
@@ -23,10 +22,11 @@ class ImmutablexCollectionServiceTest {
             )
         ).getAllCollections(null, 50)
 
+        // TODO there is no point to check entire object, it should be covered in converter tests
         Assertions.assertThat(page.entities).containsExactly(
             UnionCollection(
                 id = CollectionIdDto(BlockchainDto.IMMUTABLEX, "0x62d25241d4a5d619c1b06114210250d19d2424c0"),
-                parent =null,
+                parent = null,
                 type = CollectionDto.Type.IMMUTABLEX,
                 name = "CERTIFICATE3",
                 symbol = "CERTIFICATE3",
@@ -57,21 +57,22 @@ class ImmutablexCollectionServiceTest {
             )
         ).getCollectionById("0x62d25241d4a5d619c1b06114210250d19d2424c0")
 
+        // TODO there is no point to check entire object, it should be covered in converter tests
         Assertions.assertThat(col).isEqualTo(
             UnionCollection(
                 id = CollectionIdDto(BlockchainDto.IMMUTABLEX, "0x62d25241d4a5d619c1b06114210250d19d2424c0"),
-                parent =null,
+                parent = null,
                 type = CollectionDto.Type.IMMUTABLEX,
                 name = "CERTIFICATE3",
                 symbol = "CERTIFICATE3",
-                owner = null,
-                features = emptyList(),
-                minters = emptyList()
+                minters = emptyList(),
+                features = emptyList()
             )
         )
     }
 
     companion object {
+
         const val ALL_COLLECTIONS = """
             {
               "result": [

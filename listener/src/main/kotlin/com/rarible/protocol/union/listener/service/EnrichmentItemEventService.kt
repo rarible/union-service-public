@@ -222,14 +222,6 @@ class EnrichmentItemEventService(
         return Triple(current, action(short), exist)
     }
 
-    private suspend fun notifyDelete(itemId: ShortItemId) {
-        val event = ItemDeleteEventDto(
-            itemId = itemId.toDto(),
-            eventId = UUID.randomUUID().toString()
-        )
-        itemEventListeners.forEach { it.onEvent(event) }
-    }
-
     // Potentially we could have updated Order here (no matter - bid/sell) and when we need to fetch
     // full version of the order, we can use this already fetched Order if it has same ID (hash)
     private suspend fun saveAndNotify(

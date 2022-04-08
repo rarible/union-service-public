@@ -13,6 +13,7 @@ import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.elasticsearch.index.query.BoolQueryBuilder
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import org.springframework.beans.factory.annotation.Autowired
@@ -216,5 +217,31 @@ internal class QueryCursorServiceIntegrationTest {
         } else {
             assertThat(searchHits).containsExactlyInAnyOrder(gte1, gte2)
         }
+    }
+
+    @Test
+    fun `should skip applying cursor if it is null`() {
+        // given
+        val emptyBoolQuery = BoolQueryBuilder()
+        val boolQuery = BoolQueryBuilder()
+
+        // when
+        service.applyCursor(boolQuery, ActivitySort(false), null)
+
+        // then
+        assertThat(boolQuery).isEqualTo(emptyBoolQuery)
+    }
+
+    @Test
+    fun `should skip applying cursor if it is malformed`() {
+        // given
+        val emptyBoolQuery = BoolQueryBuilder()
+        val boolQuery = BoolQueryBuilder()
+
+        // when
+        service.applyCursor(boolQuery, ActivitySort(false), "some malformed cursor string")
+
+        // then
+        assertThat(boolQuery).isEqualTo(emptyBoolQuery)
     }
 }
