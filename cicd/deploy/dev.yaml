@@ -5,9 +5,21 @@ protocol-union-api:
 
 protocol-union-meta-loader:
   replicas: 1
+  resources:
+    jvm:
+      xmx_megabytes: 512
+      max_direct_memory_megabytes: 128
 
 protocol-union-search-indexer:
   replicas: 1
+  resources:
+    jvm:
+      xmx_megabytes: 256
+      max_direct_memory_megabytes: 128
 
 protocol-union-search-reindexer:
   replicas: 1
+  resources:
+    jvm:
+      xmx_megabytes: 256
+      max_direct_memory_megabytes: 128
