@@ -3,7 +3,6 @@ package com.rarible.protocol.union.listener.service
 import com.rarible.core.test.data.randomAddress
 import com.rarible.core.test.wait.Wait
 import com.rarible.protocol.dto.AuctionIdsDto
-import com.rarible.protocol.dto.NftItemsDto
 import com.rarible.protocol.dto.OrderStatusDto
 import com.rarible.protocol.dto.OrdersPaginationDto
 import com.rarible.protocol.union.core.util.CompositeItemIdParser
@@ -26,7 +25,6 @@ import com.rarible.protocol.union.integration.ethereum.converter.EthAuctionConve
 import com.rarible.protocol.union.integration.ethereum.converter.EthItemConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAuctionDto
-import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthLegacyBidOrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthLegacySellOrderDto
@@ -34,16 +32,12 @@ import com.rarible.protocol.union.integration.ethereum.data.randomEthNftItemDto
 import com.rarible.protocol.union.listener.test.AbstractIntegrationTest
 import com.rarible.protocol.union.listener.test.IntegrationTest
 import io.mockk.coEvery
-import io.mockk.every
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import reactor.core.publisher.Flux
-import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
 
 @IntegrationTest
@@ -381,23 +375,6 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
 
         assertThat(itemWithDotMapKey).isEqualTo(saved.copy(version = null, lastUpdatedAt = item.lastUpdatedAt))
         assertThat(itemWithDotMapKey).isEqualTo(fromMongo.copy(version = null, lastUpdatedAt = item.lastUpdatedAt))
-    }
-
-    @Test
-    fun `should return pages after continuation`() = runBlocking {
-        val itemId = randomEthItemId()
-        val collectionId = randomEthCollectionId()
-
-        val nft = randomEthNftItemDto(itemId)
-        coEvery {
-            testEthereumItemApi.getNftItemsByCollection(eq(collectionId.value), isNull(), any(), any())
-        } returns Mono.just(NftItemsDto(1, "next", listOf(nft)))
-        coEvery {
-            testEthereumItemApi.getNftItemsByCollection(eq(collectionId.value), any(), eq("next"), any())
-        } returns Mono.just(NftItemsDto(2, null, listOf(nft, nft)))
-
-        val list = itemService.findByCollection(collectionId).toList()
-        assertEquals(3, list.size)
     }
 
     @Test
