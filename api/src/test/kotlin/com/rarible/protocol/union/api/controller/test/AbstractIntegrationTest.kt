@@ -213,10 +213,11 @@ abstract class AbstractIntegrationTest {
     private var ownershipJob: Deferred<Unit>? = null
 
     @Autowired
-    lateinit var ethItemProducer: RaribleKafkaProducer<NftItemEventDto>
+    @Qualifier("item.producer.api")
+    lateinit var itemProducer: RaribleKafkaProducer<ItemEventDto>
 
     @Autowired
-    lateinit var ethOwnershipProducer: RaribleKafkaProducer<NftOwnershipEventDto>
+    lateinit var ethOwnershipProducer: RaribleKafkaProducer<ItemEventDto>
 
     @BeforeEach
     fun beforeEach() {

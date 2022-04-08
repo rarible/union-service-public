@@ -1,33 +1,37 @@
 package com.rarible.protocol.union.api.websocket
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.rarible.core.daemon.sequential.ConsumerWorker
 import com.rarible.core.kafka.KafkaMessage
 import com.rarible.core.test.data.randomAddress
 import com.rarible.core.test.data.randomBigInt
-import com.rarible.core.test.data.randomString
 import com.rarible.core.test.wait.Wait
-import com.rarible.protocol.dto.NftItemUpdateEventDto
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
-import com.rarible.protocol.union.api.dto.AbstractSubscribeRequest
-import com.rarible.protocol.union.api.dto.ChangeEvent
-import com.rarible.protocol.union.api.dto.SubscribeRequest
-import com.rarible.protocol.union.api.dto.SubscribeRequestType
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.ItemUpdateEventDto
-import com.rarible.protocol.union.integration.ethereum.data.randomEthNftItemDto
-import org.assertj.core.api.Assertions
+import com.rarible.protocol.union.dto.websocket.AbstractSubscribeRequest
+import com.rarible.protocol.union.dto.websocket.ChangeEvent
+import com.rarible.protocol.union.dto.websocket.ChangeEventType
+import com.rarible.protocol.union.dto.websocket.SubscribeRequest
+import com.rarible.protocol.union.dto.websocket.SubscribeRequestType
+import kotlinx.coroutines.delay
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ContextConfiguration
 import reactor.core.publisher.Sinks
-import java.util.*
+import java.math.BigInteger
+import java.time.Instant
+import java.util.Queue
 import java.util.concurrent.LinkedBlockingQueue
+import java.util.concurrent.TimeUnit
 
 @SpringBootTest(
-    webEnvironment = SpringBootTest.WebEnvironment.MOCK,
+    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     properties = [
         "application.environment = test",
         "spring.cloud.consul.config.enabled = false",
@@ -38,8 +42,9 @@ import java.util.concurrent.LinkedBlockingQueue
         "local.server.host = localhost"
     ]
 )
-@ContextConfiguration
+
 @IntegrationTest
+@ContextConfiguration
 internal class ItemEventTest : AbstractIntegrationTest() {
 
     @Autowired
@@ -50,6 +55,9 @@ internal class ItemEventTest : AbstractIntegrationTest() {
 
     @Autowired
     protected lateinit var webSocketRequests: Sinks.Many<List<AbstractSubscribeRequest>>
+
+    @Autowired
+    private lateinit var worker: ConsumerWorker<ItemEventDto>
 
     private fun <T> filterByValueType(messages: Queue<KafkaMessage<Any>>, type: Class<T>): Collection<KafkaMessage<T>> {
         return messages.filter {
@@ -66,7 +74,25 @@ internal class ItemEventTest : AbstractIntegrationTest() {
 
     @Test
     fun `item event websocket test`() = runWithKafka {
+        worker.start()
         val itemId = ItemIdDto(BlockchainDto.ETHEREUM, randomAddress().prefixed(), randomBigInt())
+
+        val itemEventDto = ItemUpdateEventDto(
+            itemId,
+            "eventId",
+            ItemDto(
+                id = itemId,
+                blockchain = BlockchainDto.ETHEREUM,
+                lazySupply = BigInteger.ONE,
+                pending = emptyList(),
+                mintedAt = Instant.now(),
+                lastUpdatedAt = Instant.now(),
+                supply = BigInteger.ONE,
+                deleted = false,
+                auctions = emptyList(),
+                sellers = 1
+            )
+        )
 
         webSocketRequests.tryEmitNext(
             listOf(
@@ -77,31 +103,21 @@ internal class ItemEventTest : AbstractIntegrationTest() {
             )
         )
 
-            //val itemId = randomEthItemId()
-            val ethItem = randomEthNftItemDto(itemId)
+        delay(1000)
+        webSocketEventsQueue.clear()
 
-            ethItemProducer.send(
-                KafkaMessage(
-                    key = itemId.value,
-                    value = NftItemUpdateEventDto(
-                        eventId = randomString(),
-                        itemId = itemId.value,
-                        item = ethItem
-                    )
-                )
-            ).ensureSuccess()
 
-            Wait.waitAssert {
-                val messages = findItemUpdates(itemId.value)
-                Assertions.assertThat(messages).hasSize(1)
-                Assertions.assertThat(messages[0].key).isEqualTo(itemId.fullId())
-                Assertions.assertThat(messages[0].id).isEqualTo(itemId.fullId())
-                Assertions.assertThat(messages[0].value.itemId).isEqualTo(itemId)
-            }
+        itemProducer.send(
+            KafkaMessage(
+                key = itemId.value,
+                value = itemEventDto
+            )
+        ).ensureSuccess()
 
-          /*  val event = webSocketEventsQueue.poll(5, TimeUnit.SECONDS)!!
+        Wait.waitAssert {
+            val event = webSocketEventsQueue.poll(5, TimeUnit.SECONDS)!!
+            delay(2000)
             assertThat(event.type).isEqualTo(ChangeEventType.ITEM)
-            val item = objectMapper.convertValue(event.value, ItemDto::class.java)
-            assertThat(item.tokenId).isEqualTo(itemId)*/
+        }
     }
 }

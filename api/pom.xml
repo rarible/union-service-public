@@ -55,6 +55,10 @@
             <groupId>com.rarible.core</groupId>
             <artifactId>rarible-core-logging-filter</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.rarible.protocol.union</groupId>
+            <artifactId>protocol-union-model</artifactId>
+        </dependency>
 
         <!-- ================== Spring =================== -->
         <dependency>

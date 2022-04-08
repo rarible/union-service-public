@@ -1,10 +1,7 @@
-package com.rarible.api.handler
+package com.rarible.protocol.union.api.handler
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import com.rarible.protocol.union.api.handler.UnionItemEventHandler
-import com.rarible.protocol.union.api.dto.*
-import com.rarible.protocol.union.api.handler.UnionOwnershipEventHandler
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -15,7 +12,12 @@ import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.time.Duration
 import java.util.concurrent.ConcurrentHashMap
-import javax.swing.event.ChangeEvent
+import com.rarible.protocol.union.dto.websocket.ChangeEvent
+import com.rarible.protocol.union.dto.websocket.AbstractSubscribeRequest
+import com.rarible.protocol.union.dto.websocket.ChangeEventType
+import com.rarible.protocol.union.dto.websocket.SubscribeRequestType
+import com.rarible.protocol.union.dto.websocket.SubscribeRequest
+import com.rarible.protocol.union.dto.websocket.SubscriptionAction
 
 @Component
 class ChangesHandler(
@@ -24,7 +26,7 @@ class ChangesHandler(
     private val ownershipUpdateListener: UnionOwnershipEventHandler
 ) : WebSocketHandler {
 
-   private val fake = objectMapper.writeValueAsString(ChangeEvent(ChangeEventType.FAKE))
+   private val fake = objectMapper.writeValueAsString(ChangeEvent(ChangeEventType.FAKE, null))
 
     override fun handle(session: WebSocketSession): Mono<Void> {
         val subscribedItems = ConcurrentHashMap.newKeySet<String>()

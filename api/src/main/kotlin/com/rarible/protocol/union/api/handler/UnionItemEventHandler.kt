@@ -1,7 +1,6 @@
 package com.rarible.protocol.union.api.handler
 
 import com.rarible.core.daemon.sequential.ConsumerEventHandler
-import com.rarible.protocol.union.core.model.UnionItemEvent
 import com.rarible.protocol.union.dto.ItemEventDto
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
