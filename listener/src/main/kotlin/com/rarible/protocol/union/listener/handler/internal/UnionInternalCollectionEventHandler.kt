@@ -8,10 +8,11 @@ import com.rarible.protocol.union.listener.service.EnrichmentCollectionEventServ
 import org.springframework.stereotype.Component
 
 @Component
-class UnionWrappedCollectionEventHandler(
+class UnionInternalCollectionEventHandler(
     private val collectionEventService: EnrichmentCollectionEventService,
     private val reconciliationEventService: ReconciliationEventService
 ) {
+
     @CaptureTransaction("UnionCollectionEvent")
     suspend fun onEvent(event: UnionCollectionEvent) {
         try {

@@ -11,7 +11,7 @@ import com.rarible.protocol.union.listener.service.EnrichmentAuctionEventService
 import org.springframework.stereotype.Component
 
 @Component
-class UnionWrappedAuctionEventHandler(
+class UnionInternalAuctionEventHandler(
     private val auctionEventService: EnrichmentAuctionEventService,
     private val reconciliationEventService: ReconciliationEventService
 ) {

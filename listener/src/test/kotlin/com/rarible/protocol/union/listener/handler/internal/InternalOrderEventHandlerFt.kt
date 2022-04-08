@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.listener.wrapped
+package com.rarible.protocol.union.listener.handler.internal
 
 import com.rarible.core.kafka.KafkaMessage
 import com.rarible.core.test.data.randomString
@@ -9,16 +9,15 @@ import com.rarible.protocol.union.integration.ethereum.data.randomEthLegacyBidOr
 import com.rarible.protocol.union.listener.test.AbstractIntegrationTest
 import com.rarible.protocol.union.listener.test.IntegrationTest
 import io.mockk.coEvery
-import kotlinx.coroutines.FlowPreview
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import reactor.kotlin.core.publisher.toMono
 
 @IntegrationTest
-class WrappedOrderEventHandlerFt : AbstractIntegrationTest() {
+class InternalOrderEventHandlerFt : AbstractIntegrationTest() {
 
     @Test
-    fun `wrapped order event`() = runWithKafka {
+    fun `internal order event`() = runWithKafka {
 
         // Order without item, we don't need to check Enrichment here
         val order = randomEthLegacyBidOrderDto()

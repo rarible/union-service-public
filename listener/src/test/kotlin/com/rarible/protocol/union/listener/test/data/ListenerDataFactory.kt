@@ -1,10 +1,15 @@
 package com.rarible.protocol.union.listener.test.data
 
 import com.rarible.core.common.nowMillis
+import com.rarible.protocol.union.core.model.ReconciliationMarkType
 import com.rarible.protocol.union.enrichment.model.ReconciliationMark
-import com.rarible.protocol.union.enrichment.model.ReconciliationMarkType
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
-import com.rarible.protocol.union.listener.config.*
+import com.rarible.protocol.union.listener.config.InternalConsumerProperties
+import com.rarible.protocol.union.listener.config.MetricsProperties
+import com.rarible.protocol.union.listener.config.OpenSeaCleanUpProperties
+import com.rarible.protocol.union.listener.config.PriceUpdateProperties
+import com.rarible.protocol.union.listener.config.ReconciliationProperties
+import com.rarible.protocol.union.listener.config.UnionListenerProperties
 import java.time.temporal.ChronoUnit
 
 fun defaultUnionListenerProperties(): UnionListenerProperties {

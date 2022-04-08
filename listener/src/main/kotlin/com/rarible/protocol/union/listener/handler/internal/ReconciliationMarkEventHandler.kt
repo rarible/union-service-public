@@ -2,12 +2,12 @@ package com.rarible.protocol.union.listener.handler.internal
 
 import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.core.handler.InternalEventHandler
-import com.rarible.protocol.union.enrichment.model.ReconciliationItemMarkEvent
+import com.rarible.protocol.union.core.model.ReconciliationItemMarkEvent
+import com.rarible.protocol.union.core.model.ReconciliationMarkAbstractEvent
+import com.rarible.protocol.union.core.model.ReconciliationMarkEvent
+import com.rarible.protocol.union.core.model.ReconciliationMarkType
+import com.rarible.protocol.union.core.model.ReconciliationOwnershipMarkEvent
 import com.rarible.protocol.union.enrichment.model.ReconciliationMark
-import com.rarible.protocol.union.enrichment.model.ReconciliationMarkAbstractEvent
-import com.rarible.protocol.union.enrichment.model.ReconciliationMarkEvent
-import com.rarible.protocol.union.enrichment.model.ReconciliationMarkType
-import com.rarible.protocol.union.enrichment.model.ReconciliationOwnershipMarkEvent
 import com.rarible.protocol.union.enrichment.repository.ReconciliationMarkRepository
 import org.springframework.stereotype.Component
 

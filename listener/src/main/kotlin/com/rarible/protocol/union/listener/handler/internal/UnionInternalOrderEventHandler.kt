@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
-class UnionWrappedOrderEventHandler(
+class UnionInternalOrderEventHandler(
     private val orderEventService: EnrichmentOrderEventService,
     private val enrichmentOrderService: EnrichmentOrderService,
     private val reconciliationEventService: ReconciliationEventService
