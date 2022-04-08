@@ -45,6 +45,7 @@ import com.rarible.protocol.union.dto.RaribleAuctionV1DataV1Dto
 import com.rarible.protocol.union.dto.TransferActivityDto
 import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.ext
+import com.sun.xml.internal.bind.v2.runtime.property.StructureLoaderBuilder
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.Instant
@@ -194,10 +195,10 @@ class ElasticActivityConverterTest {
         assertThat(actual.type).isEqualTo(ActivityTypeDto.SELL)
         assertThat(actual.user.maker).isEqualTo(source.left.maker.value)
         assertThat(actual.user.taker).isEqualTo(source.right.maker.value)
-        assertThat(actual.collection.make).isEqualTo(source.left.asset.type.ext.collectionId?.value)
-        assertThat(actual.collection.take).isEqualTo(source.right.asset.type.ext.collectionId?.value)
-        assertThat(actual.item.make).isEqualTo(source.left.asset.type.ext.itemId!!.value)
-        assertThat(actual.item.take).isEqualTo(source.right.asset.type.ext.itemId!!.value)
+        assertThat(actual.collection.make).isEqualTo(source.left.asset.type.ext.itemId!!.extractCollection())
+        assertThat(actual.collection.take).isEqualTo(source.right.asset.type.ext.itemId!!.extractCollection())
+        assertThat(actual.item.make).isEqualTo(source.left.asset.type.ext.itemId.toString())
+        assertThat(actual.item.take).isEqualTo(source.right.asset.type.ext.itemId.toString())
     }
 
     @Test
@@ -235,10 +236,10 @@ class ElasticActivityConverterTest {
         assertThat(actual.type).isEqualTo(ActivityTypeDto.SELL)
         assertThat(actual.user.maker).isEqualTo(source.seller.value)
         assertThat(actual.user.taker).isEqualTo(source.buyer.value)
-        assertThat(actual.collection.make).isEqualTo(source.nft.type.ext.collectionId?.value)
-        assertThat(actual.collection.take).isEqualTo(source.payment.type.ext.collectionId?.value)
-        assertThat(actual.item.make).isEqualTo(source.nft.type.ext.itemId!!.value)
-        assertThat(actual.item.take).isEqualTo(source.payment.type.ext.itemId!!.value)
+        assertThat(actual.collection.make).isEqualTo(source.nft.type.ext.itemId!!.extractCollection())
+        assertThat(actual.collection.take).isEqualTo(source.payment.type.ext.itemId!!.extractCollection())
+        assertThat(actual.item.make).isEqualTo(source.nft.type.ext.itemId.toString())
+        assertThat(actual.item.take).isEqualTo(source.payment.type.ext.itemId.toString())
     }
 
     @Test
@@ -267,10 +268,10 @@ class ElasticActivityConverterTest {
         assertThat(actual.type).isEqualTo(ActivityTypeDto.BID)
         assertThat(actual.user.maker).isEqualTo(source.maker.value)
         assertThat(actual.user.taker).isNull()
-        assertThat(actual.collection.make).isEqualTo(source.make.type.ext.collectionId?.value)
-        assertThat(actual.collection.take).isEqualTo(source.take.type.ext.collectionId?.value)
-        assertThat(actual.item.make).isEqualTo(source.make.type.ext.itemId!!.value)
-        assertThat(actual.item.take).isEqualTo(source.take.type.ext.itemId!!.value)
+        assertThat(actual.collection.make).isEqualTo(source.make.type.ext.itemId!!.extractCollection())
+        assertThat(actual.collection.take).isEqualTo(source.take.type.ext.itemId!!.extractCollection())
+        assertThat(actual.item.make).isEqualTo(source.make.type.ext.itemId.toString())
+        assertThat(actual.item.take).isEqualTo(source.take.type.ext.itemId.toString())
     }
 
     @Test
@@ -299,10 +300,10 @@ class ElasticActivityConverterTest {
         assertThat(actual.type).isEqualTo(ActivityTypeDto.LIST)
         assertThat(actual.user.maker).isEqualTo(source.maker.value)
         assertThat(actual.user.taker).isNull()
-        assertThat(actual.collection.make).isEqualTo(source.make.type.ext.collectionId?.value)
-        assertThat(actual.collection.take).isEqualTo(source.take.type.ext.collectionId?.value)
-        assertThat(actual.item.make).isEqualTo(source.make.type.ext.itemId!!.value)
-        assertThat(actual.item.take).isEqualTo(source.take.type.ext.itemId!!.value)
+        assertThat(actual.collection.make).isEqualTo(source.make.type.ext.itemId!!.extractCollection())
+        assertThat(actual.collection.take).isEqualTo(source.take.type.ext.itemId!!.extractCollection())
+        assertThat(actual.item.make).isEqualTo(source.make.type.ext.itemId.toString())
+        assertThat(actual.item.take).isEqualTo(source.take.type.ext.itemId.toString())
     }
 
     @Test
@@ -337,10 +338,10 @@ class ElasticActivityConverterTest {
         assertThat(actual.type).isEqualTo(ActivityTypeDto.CANCEL_BID)
         assertThat(actual.user.maker).isEqualTo(source.maker.value)
         assertThat(actual.user.taker).isNull()
-        assertThat(actual.collection.make).isEqualTo(source.make.ext.collectionId?.value)
-        assertThat(actual.collection.take).isEqualTo(source.take.ext.collectionId?.value)
-        assertThat(actual.item.make).isEqualTo(source.make.ext.itemId!!.value)
-        assertThat(actual.item.take).isEqualTo(source.take.ext.itemId!!.value)
+        assertThat(actual.collection.make).isEqualTo(source.make.ext.itemId!!.extractCollection())
+        assertThat(actual.collection.take).isEqualTo(source.take.ext.itemId!!.extractCollection())
+        assertThat(actual.item.make).isEqualTo(source.make.ext.itemId!!.toString())
+        assertThat(actual.item.take).isEqualTo(source.take.ext.itemId!!.toString())
     }
 
     @Test
@@ -375,10 +376,10 @@ class ElasticActivityConverterTest {
         assertThat(actual.type).isEqualTo(ActivityTypeDto.CANCEL_LIST)
         assertThat(actual.user.maker).isEqualTo(source.maker.value)
         assertThat(actual.user.taker).isNull()
-        assertThat(actual.collection.make).isEqualTo(source.make.ext.collectionId?.value)
-        assertThat(actual.collection.take).isEqualTo(source.take.ext.collectionId?.value)
-        assertThat(actual.item.make).isEqualTo(source.make.ext.itemId!!.value)
-        assertThat(actual.item.take).isEqualTo(source.take.ext.itemId!!.value)
+        assertThat(actual.collection.make).isEqualTo(source.make.ext.itemId!!.extractCollection())
+        assertThat(actual.collection.take).isEqualTo(source.take.ext.itemId!!.extractCollection())
+        assertThat(actual.item.make).isEqualTo(source.make.ext.itemId!!.toString())
+        assertThat(actual.item.take).isEqualTo(source.take.ext.itemId!!.toString())
     }
 
     @Test
@@ -403,10 +404,10 @@ class ElasticActivityConverterTest {
         assertThat(actual.type).isEqualTo(ActivityTypeDto.AUCTION_CREATED)
         assertThat(actual.user.maker).isEqualTo(source.auction.seller.value)
         assertThat(actual.user.taker).isNull()
-        assertThat(actual.collection.make).isEqualTo(source.auction.sell.type.ext.collectionId?.value)
-        assertThat(actual.collection.take).isEqualTo(source.auction.buy.ext.collectionId?.value)
-        assertThat(actual.item.make).isEqualTo(source.auction.sell.type.ext.itemId!!.value)
-        assertThat(actual.item.take).isEqualTo(source.auction.buy.ext.itemId!!.value)
+        assertThat(actual.collection.make).isEqualTo(source.auction.sell.type.ext.itemId!!.extractCollection())
+        assertThat(actual.collection.take).isEqualTo(source.auction.buy.ext.itemId!!.extractCollection())
+        assertThat(actual.item.make).isEqualTo(source.auction.sell.type.ext.itemId.toString())
+        assertThat(actual.item.take).isEqualTo(source.auction.buy.ext.itemId.toString())
     }
 
     @Test
@@ -432,10 +433,10 @@ class ElasticActivityConverterTest {
         assertThat(actual.type).isEqualTo(ActivityTypeDto.AUCTION_BID)
         assertThat(actual.user.maker).isEqualTo(source.auction.seller.value)
         assertThat(actual.user.taker).isEqualTo(source.bid.buyer.value)
-        assertThat(actual.collection.make).isEqualTo(source.auction.sell.type.ext.collectionId?.value)
-        assertThat(actual.collection.take).isEqualTo(source.auction.buy.ext.collectionId?.value)
-        assertThat(actual.item.make).isEqualTo(source.auction.sell.type.ext.itemId!!.value)
-        assertThat(actual.item.take).isEqualTo(source.auction.buy.ext.itemId!!.value)
+        assertThat(actual.collection.make).isEqualTo(source.auction.sell.type.ext.itemId!!.extractCollection())
+        assertThat(actual.collection.take).isEqualTo(source.auction.buy.ext.itemId!!.extractCollection())
+        assertThat(actual.item.make).isEqualTo(source.auction.sell.type.ext.itemId.toString())
+        assertThat(actual.item.take).isEqualTo(source.auction.buy.ext.itemId.toString())
     }
 
     @Test
@@ -460,10 +461,10 @@ class ElasticActivityConverterTest {
         assertThat(actual.type).isEqualTo(ActivityTypeDto.AUCTION_FINISHED)
         assertThat(actual.user.maker).isEqualTo(source.auction.seller.value)
         assertThat(actual.user.taker).isNull()
-        assertThat(actual.collection.make).isEqualTo(source.auction.sell.type.ext.collectionId?.value)
-        assertThat(actual.collection.take).isEqualTo(source.auction.buy.ext.collectionId?.value)
-        assertThat(actual.item.make).isEqualTo(source.auction.sell.type.ext.itemId!!.value)
-        assertThat(actual.item.take).isEqualTo(source.auction.buy.ext.itemId!!.value)
+        assertThat(actual.collection.make).isEqualTo(source.auction.sell.type.ext.itemId!!.extractCollection())
+        assertThat(actual.collection.take).isEqualTo(source.auction.buy.ext.itemId!!.extractCollection())
+        assertThat(actual.item.make).isEqualTo(source.auction.sell.type.ext.itemId.toString())
+        assertThat(actual.item.take).isEqualTo(source.auction.buy.ext.itemId.toString())
     }
 
     @Test
@@ -488,10 +489,10 @@ class ElasticActivityConverterTest {
         assertThat(actual.type).isEqualTo(ActivityTypeDto.AUCTION_CANCEL)
         assertThat(actual.user.maker).isEqualTo(source.auction.seller.value)
         assertThat(actual.user.taker).isNull()
-        assertThat(actual.collection.make).isEqualTo(source.auction.sell.type.ext.collectionId?.value)
-        assertThat(actual.collection.take).isEqualTo(source.auction.buy.ext.collectionId?.value)
-        assertThat(actual.item.make).isEqualTo(source.auction.sell.type.ext.itemId!!.value)
-        assertThat(actual.item.take).isEqualTo(source.auction.buy.ext.itemId!!.value)
+        assertThat(actual.collection.make).isEqualTo(source.auction.sell.type.ext.itemId!!.extractCollection())
+        assertThat(actual.collection.take).isEqualTo(source.auction.buy.ext.itemId!!.extractCollection())
+        assertThat(actual.item.make).isEqualTo(source.auction.sell.type.ext.itemId.toString())
+        assertThat(actual.item.take).isEqualTo(source.auction.buy.ext.itemId.toString())
     }
 
     @Test
@@ -515,10 +516,10 @@ class ElasticActivityConverterTest {
         assertThat(actual.type).isEqualTo(ActivityTypeDto.AUCTION_STARTED)
         assertThat(actual.user.maker).isEqualTo(source.auction.seller.value)
         assertThat(actual.user.taker).isNull()
-        assertThat(actual.collection.make).isEqualTo(source.auction.sell.type.ext.collectionId?.value)
-        assertThat(actual.collection.take).isEqualTo(source.auction.buy.ext.collectionId?.value)
-        assertThat(actual.item.make).isEqualTo(source.auction.sell.type.ext.itemId!!.value)
-        assertThat(actual.item.take).isEqualTo(source.auction.buy.ext.itemId!!.value)
+        assertThat(actual.collection.make).isEqualTo(source.auction.sell.type.ext.itemId!!.extractCollection())
+        assertThat(actual.collection.take).isEqualTo(source.auction.buy.ext.itemId!!.extractCollection())
+        assertThat(actual.item.make).isEqualTo(source.auction.sell.type.ext.itemId.toString())
+        assertThat(actual.item.take).isEqualTo(source.auction.buy.ext.itemId.toString())
     }
 
     @Test
@@ -542,10 +543,10 @@ class ElasticActivityConverterTest {
         assertThat(actual.type).isEqualTo(ActivityTypeDto.AUCTION_ENDED)
         assertThat(actual.user.maker).isEqualTo(source.auction.seller.value)
         assertThat(actual.user.taker).isNull()
-        assertThat(actual.collection.make).isEqualTo(source.auction.sell.type.ext.collectionId?.value)
-        assertThat(actual.collection.take).isEqualTo(source.auction.buy.ext.collectionId?.value)
-        assertThat(actual.item.make).isEqualTo(source.auction.sell.type.ext.itemId!!.value)
-        assertThat(actual.item.take).isEqualTo(source.auction.buy.ext.itemId!!.value)
+        assertThat(actual.collection.make).isEqualTo(source.auction.sell.type.ext.itemId!!.extractCollection())
+        assertThat(actual.collection.take).isEqualTo(source.auction.buy.ext.itemId!!.extractCollection())
+        assertThat(actual.item.make).isEqualTo(source.auction.sell.type.ext.itemId.toString())
+        assertThat(actual.item.take).isEqualTo(source.auction.buy.ext.itemId.toString())
     }
 
     private fun randomActivityId(): ActivityIdDto {
@@ -659,5 +660,11 @@ class ElasticActivityConverterTest {
             duration = randomBigInt(),
             buyOutPrice = randomBigDecimal(),
         )
+    }
+
+    private fun ItemIdDto.extractCollection(): String {
+        val split = this.toString().split(':')
+        if (split.size == 2) return this.toString()
+        return "${split[0]}:${split[1]}"
     }
 }
