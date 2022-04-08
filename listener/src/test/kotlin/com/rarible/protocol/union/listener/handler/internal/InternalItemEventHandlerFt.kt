@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.listener.wrapped
+package com.rarible.protocol.union.listener.handler.internal
 
 import com.rarible.core.kafka.KafkaMessage
 import com.rarible.core.test.data.randomString
@@ -8,15 +8,14 @@ import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthNftItemDto
 import com.rarible.protocol.union.listener.test.AbstractIntegrationTest
 import com.rarible.protocol.union.listener.test.IntegrationTest
-import kotlinx.coroutines.FlowPreview
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 
 @IntegrationTest
-class WrappedItemEventHandlerFt : AbstractIntegrationTest() {
+class InternalItemEventHandlerFt : AbstractIntegrationTest() {
 
     @Test
-    fun `wrapped item event`() = runWithKafka {
+    fun `internal item event`() = runWithKafka {
         val itemId = randomEthItemId()
         val ethItem = randomEthNftItemDto(itemId)
 

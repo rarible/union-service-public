@@ -5,13 +5,13 @@ import com.rarible.core.test.wait.Wait
 import com.rarible.protocol.dto.AuctionIdsDto
 import com.rarible.protocol.dto.OrderStatusDto
 import com.rarible.protocol.dto.OrdersPaginationDto
+import com.rarible.protocol.union.core.model.ReconciliationMarkType
 import com.rarible.protocol.union.core.util.CompositeItemIdParser
 import com.rarible.protocol.union.dto.AuctionStatusDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.converter.EnrichedItemConverter
 import com.rarible.protocol.union.enrichment.converter.ShortItemConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
-import com.rarible.protocol.union.enrichment.model.ReconciliationMarkType
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.repository.ReconciliationMarkRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService

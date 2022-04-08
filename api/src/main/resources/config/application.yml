@@ -73,6 +73,7 @@ common:
     enableRevertedActivityEventSending: false
     enableOwnershipSourceEnrichment: false
     enableItemLastSaleEnrichment: true
+    enableLegacyWrappedEventTopic: true
 
 meta:
   ipfsGateway: "https://rarible.mypinata.cloud/"
