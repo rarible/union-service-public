@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.core.service
 
+import com.rarible.protocol.union.core.model.TypedActivityId
 import com.rarible.protocol.union.core.service.router.BlockchainService
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivitySortDto
@@ -42,4 +43,8 @@ interface ActivityService : BlockchainService {
         size: Int,
         sort: ActivitySortDto?
     ): Slice<ActivityDto>
+
+    suspend fun getActivitiesByIds(
+        ids: List<TypedActivityId>
+    ): List<ActivityDto>
 }
