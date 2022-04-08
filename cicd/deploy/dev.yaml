@@ -17,9 +17,9 @@ protocol-union-search-indexer:
       xmx_megabytes: 256
       max_direct_memory_megabytes: 128
 
-protocol-union-search-reindexer:
-  replicas: 1
-  resources:
-    jvm:
-      xmx_megabytes: 256
-      max_direct_memory_megabytes: 128
+#protocol-union-search-reindexer:
+#  replicas: 1
+#  resources:
+#    jvm:
+#      xmx_megabytes: 256
+#      max_direct_memory_megabytes: 128
