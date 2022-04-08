@@ -55,7 +55,13 @@ fun randomUnionAddress(): UnionAddress =
         randomString()
     )
 
-fun randomUnionCollection(): CollectionDto =
+fun randomUnionCollection(id: CollectionIdDto): UnionCollection =
+    EthCollectionConverter.convert(
+        randomEthCollectionDto(),
+        id.blockchain
+    ).copy(id = id)
+
+fun randomUnionCollection(): UnionCollection =
     EthCollectionConverter.convert(
         randomEthCollectionDto(),
         BlockchainDto.ETHEREUM

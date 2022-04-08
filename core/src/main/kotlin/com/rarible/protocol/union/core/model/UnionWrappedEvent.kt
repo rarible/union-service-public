@@ -18,6 +18,10 @@ data class UnionWrappedItemEvent(
     val event: UnionItemEvent
 ) : UnionWrappedEvent()
 
+data class UnionWrappedCollectionEvent(
+    val event: UnionCollectionEvent
+) : UnionWrappedEvent()
+
 data class UnionWrappedOwnershipEvent(
     val event: UnionOwnershipEvent
 ) : UnionWrappedEvent()

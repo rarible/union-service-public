@@ -3,11 +3,13 @@ package com.rarible.protocol.union.integration.solana.converter
 import com.rarible.protocol.solana.dto.CollectionsDto
 import com.rarible.protocol.solana.dto.TokenMetaContentDto
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
+import com.rarible.protocol.union.core.model.UnionCollection
+import com.rarible.protocol.union.core.model.UnionCollectionMeta
+import com.rarible.protocol.union.core.model.UnionImageProperties
+import com.rarible.protocol.union.core.model.UnionMetaContent
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.dto.CollectionIdDto
-import com.rarible.protocol.union.dto.CollectionMetaDto
-import com.rarible.protocol.union.dto.ImageContentDto
 import com.rarible.protocol.union.dto.MetaContentDto
 import com.rarible.protocol.union.dto.continuation.page.Page
 
@@ -16,11 +18,10 @@ object SolanaCollectionConverter {
     fun convert(
         source: com.rarible.protocol.solana.dto.CollectionDto,
         blockchain: BlockchainDto
-    ): CollectionDto {
-        return CollectionDto(
+    ): UnionCollection {
+        return UnionCollection(
             id = CollectionIdDto(blockchain, source.address),
             parent = null,
-            blockchain = blockchain,
             type = CollectionDto.Type.SOLANA,
             name = source.name,
             symbol = source.symbol,
@@ -31,7 +32,7 @@ object SolanaCollectionConverter {
         )
     }
 
-    fun convert(page: CollectionsDto, blockchain: BlockchainDto): Page<CollectionDto> {
+    fun convert(page: CollectionsDto, blockchain: BlockchainDto): Page<UnionCollection> {
         return Page(
             total = 0,
             continuation = page.continuation,
@@ -50,8 +51,8 @@ object SolanaCollectionConverter {
         }
     }
 
-    private fun convert(meta: com.rarible.protocol.solana.dto.CollectionMetaDto): CollectionMetaDto {
-        return CollectionMetaDto(
+    private fun convert(meta: com.rarible.protocol.solana.dto.CollectionMetaDto): UnionCollectionMeta {
+        return UnionCollectionMeta(
             name = meta.name,
             description = meta.description,
             content = meta.content.map {
@@ -60,12 +61,14 @@ object SolanaCollectionConverter {
         )
     }
 
-    private fun convert(meta: TokenMetaContentDto): MetaContentDto {
-        return ImageContentDto(
+    private fun convert(meta: TokenMetaContentDto): UnionMetaContent {
+        return UnionMetaContent(
             url = meta.url,
             representation = MetaContentDto.Representation.valueOf(meta.representation.name),
-            mimeType = meta.mimeType,
-            size = meta.size,
+            properties = UnionImageProperties(
+                mimeType = meta.mimeType,
+                size = meta.size
+            )
         )
     }
 

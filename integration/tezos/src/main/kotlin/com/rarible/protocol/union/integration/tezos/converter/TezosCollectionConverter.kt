@@ -5,6 +5,7 @@ import com.rarible.protocol.tezos.dto.NftCollectionFeatureDto
 import com.rarible.protocol.tezos.dto.NftCollectionTypeDto
 import com.rarible.protocol.tezos.dto.NftCollectionsDto
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
+import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.dto.CollectionIdDto
@@ -15,7 +16,7 @@ object TezosCollectionConverter {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    fun convert(source: NftCollectionDto, blockchain: BlockchainDto): CollectionDto {
+    fun convert(source: NftCollectionDto, blockchain: BlockchainDto): UnionCollection {
         try {
             return convertInternal(source, blockchain)
         } catch (e: Exception) {
@@ -24,10 +25,9 @@ object TezosCollectionConverter {
         }
     }
 
-    private fun convertInternal(source: NftCollectionDto, blockchain: BlockchainDto): CollectionDto {
-        return CollectionDto(
+    private fun convertInternal(source: NftCollectionDto, blockchain: BlockchainDto): UnionCollection {
+        return UnionCollection(
             id = CollectionIdDto(blockchain, source.id),
-            blockchain = blockchain,
             name = source.name,
             symbol = source.symbol,
             owner = source.owner?.let { UnionAddressConverter.convert(blockchain, it) },
@@ -37,7 +37,7 @@ object TezosCollectionConverter {
         )
     }
 
-    fun convert(page: NftCollectionsDto, blockchain: BlockchainDto): Page<CollectionDto> {
+    fun convert(page: NftCollectionsDto, blockchain: BlockchainDto): Page<UnionCollection> {
         return Page(
             total = page.total.toLong(),
             continuation = page.continuation,

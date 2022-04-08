@@ -29,6 +29,7 @@ data class ReconciliationMarkEvent(
 
 enum class ReconciliationMarkType {
     ITEM,
-    OWNERSHIP
+    OWNERSHIP,
+    COLLECTION
 }
 

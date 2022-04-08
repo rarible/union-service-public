@@ -5,6 +5,7 @@ import com.rarible.protocol.union.core.event.KafkaEventFactory
 import com.rarible.protocol.union.core.model.itemId
 import com.rarible.protocol.union.core.model.ownershipId
 import com.rarible.protocol.union.dto.ActivityDto
+import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
@@ -26,6 +27,12 @@ class ReconciliationEventService(
     suspend fun onCorruptedOwnership(ownershipId: OwnershipIdDto) {
         eventsProducer.send(
             KafkaEventFactory.reconciliationOwnershipMarkEvent(ownershipId)
+        ).ensureSuccess()
+    }
+
+    suspend fun onCorruptedCollection(collectionId: CollectionIdDto) {
+        eventsProducer.send(
+            KafkaEventFactory.reconciliationCollectionMarkEvent(collectionId)
         ).ensureSuccess()
     }
 

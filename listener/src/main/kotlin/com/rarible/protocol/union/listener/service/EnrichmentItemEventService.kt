@@ -23,8 +23,7 @@ import com.rarible.protocol.union.enrichment.service.BestOrderService
 import com.rarible.protocol.union.enrichment.service.EnrichmentActivityService
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
-import com.rarible.protocol.union.enrichment.validator.ItemValidator
-import java.util.UUID
+import com.rarible.protocol.union.enrichment.validator.EntityValidator
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
@@ -288,7 +287,7 @@ class EnrichmentItemEventService(
     private suspend fun sendUpdate(event: ItemUpdateEventDto) {
         // If item in corrupted state, we will try to reconcile it instead of sending corrupted
         // data to the customers
-        if (!ItemValidator.isValid(event.item)) {
+        if (!EntityValidator.isValid(event.item)) {
             reconciliationEventService.onCorruptedItem(event.item.id)
         } else {
             itemEventListeners.forEach { it.onEvent(event) }

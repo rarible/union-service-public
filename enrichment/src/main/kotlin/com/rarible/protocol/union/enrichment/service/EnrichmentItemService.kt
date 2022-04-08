@@ -10,23 +10,20 @@ import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.AuctionDto
 import com.rarible.protocol.union.dto.AuctionIdDto
-import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
-import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.enrichment.converter.EnrichedItemConverter
 import com.rarible.protocol.union.enrichment.meta.UnionMetaService
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
 import com.rarible.protocol.union.enrichment.util.spent
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
@@ -41,8 +38,7 @@ class EnrichmentItemService(
     private val unionMetaService: UnionMetaService
 ) {
 
-    private val logger = LoggerFactory.getLogger(EnrichmentItemService::class.java)
-    private val FETCH_SIZE = 1_000
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     suspend fun get(itemId: ShortItemId): ShortItem? {
         return itemRepository.get(itemId)
@@ -65,20 +61,6 @@ class EnrichmentItemService(
 
     suspend fun findAll(ids: List<ShortItemId>): List<ShortItem> {
         return itemRepository.getAll(ids)
-    }
-
-    fun findByCollection(address: CollectionIdDto, owner: UnionAddress? = null): Flow<ShortItemId> = flow {
-        var continuation: String? = null
-        logger.info("Fetching all items for collection {} and owner {}", address, owner)
-        var count = 0
-        do {
-            val page = itemServiceRouter.getService(address.blockchain)
-                .getItemsByCollection(address.value, owner?.value, continuation, FETCH_SIZE)
-            page.entities.map { ShortItemId(it.id) }.forEach { emit(it) }
-            count += page.entities.count()
-            continuation = page.continuation
-        } while (continuation != null)
-        logger.info("Fetched {} items for collection {} and owner {}", count, address, owner)
     }
 
     suspend fun fetch(itemId: ShortItemId): UnionItem {
@@ -116,11 +98,15 @@ class EnrichmentItemService(
         val bestSellOrder = async { enrichmentOrderService.fetchOrderIfDiffers(shortItem?.bestSellOrder, orders) }
         val bestBidOrder = async { enrichmentOrderService.fetchOrderIfDiffers(shortItem?.bestBidOrder, orders) }
 
-        val meta = withSpanAsync("fetchMeta", spanType = SpanType.CACHE) {
-            if (loadMetaSynchronously || item?.loadMetaSynchronously == true) {
-                unionMetaService.getAvailableMetaOrLoadSynchronously(itemId, synchronous = true)
-            } else {
-                unionMetaService.getAvailableMetaOrScheduleLoading(itemId)
+        val meta = if (item?.meta != null && itemId.value.contains(USE_META_FOR_TOKEN)) {
+            CompletableDeferred(item.meta)
+        } else {
+            withSpanAsync("fetchMeta", spanType = SpanType.CACHE) {
+                if (loadMetaSynchronously || item?.loadMetaSynchronously == true) {
+                    unionMetaService.getAvailableMetaOrLoadSynchronously(itemId, synchronous = true)
+                } else {
+                    unionMetaService.getAvailableMetaOrScheduleLoading(itemId)
+                }
             }
         }
         val bestOrders = listOf(bestSellOrder, bestBidOrder)
@@ -147,4 +133,9 @@ class EnrichmentItemService(
         spanType: String = SpanType.APP,
         block: suspend () -> T
     ): Deferred<T> = async { withSpan(name = spanName, type = spanType, body = block) }
+
+    private companion object {
+        //TODO: Need remove
+        const val USE_META_FOR_TOKEN = "0x629cdec6acc980ebeebea9e5003bcd44db9fc5ce"
+    }
 }

@@ -3,9 +3,9 @@ package com.rarible.protocol.union.integration.tezos.event
 import com.rarible.core.test.data.randomString
 import com.rarible.protocol.tezos.dto.TezosCollectionSafeEventDto
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
+import com.rarible.protocol.union.core.model.UnionCollectionEvent
+import com.rarible.protocol.union.core.model.UnionCollectionUpdateEvent
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.CollectionEventDto
-import com.rarible.protocol.union.dto.CollectionUpdateEventDto
 import com.rarible.protocol.union.integration.tezos.converter.TezosCollectionConverter
 import com.rarible.protocol.union.integration.tezos.data.randomTezosCollectionDto
 import io.mockk.clearMocks
@@ -18,7 +18,7 @@ import org.junit.jupiter.api.Test
 
 class TezosCollectionEventHandlerTest {
 
-    private val incomingEventHandler: IncomingEventHandler<CollectionEventDto> = mockk()
+    private val incomingEventHandler: IncomingEventHandler<UnionCollectionEvent> = mockk()
     private val handler = TezosCollectionEventHandler(incomingEventHandler)
 
     @BeforeEach
@@ -42,7 +42,7 @@ class TezosCollectionEventHandlerTest {
         )
 
         val unionCollection = TezosCollectionConverter.convert(collection, BlockchainDto.TEZOS)
-        val expected = CollectionUpdateEventDto(unionCollection.id, eventId, unionCollection)
+        val expected = UnionCollectionUpdateEvent(unionCollection)
 
         coVerify(exactly = 1) { incomingEventHandler.onEvent(expected) }
     }

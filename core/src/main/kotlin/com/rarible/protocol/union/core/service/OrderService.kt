@@ -72,6 +72,28 @@ interface OrderService : BlockchainService {
         size: Int
     ): Slice<OrderDto>
 
+    suspend fun getOrderFloorSellsByCollection(
+        platform: PlatformDto?,
+        collectionId: String,
+        origin: String?,
+        status: List<OrderStatusDto>?,
+        currencyAddress: String,
+        continuation: String?,
+        size: Int
+    ): Slice<OrderDto>
+
+    suspend fun getOrderFloorBidsByCollection(
+        platform: PlatformDto?,
+        collectionId: String,
+        origin: String?,
+        status: List<OrderStatusDto>?,
+        start: Long?,
+        end: Long?,
+        currencyAddress: String,
+        continuation: String?,
+        size: Int
+    ): Slice<OrderDto>
+
     suspend fun getSellOrdersByItem(
         platform: PlatformDto?,
         itemId: String,

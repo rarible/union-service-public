@@ -3,7 +3,6 @@ package com.rarible.protocol.union.listener.service
 import com.rarible.core.client.WebClientResponseProxyException
 import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.event.OutgoingEventListener
-import com.rarible.protocol.union.core.event.OutgoingOrderEventListener
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderEventDto
 import com.rarible.protocol.union.dto.OrderUpdateEventDto
@@ -41,24 +40,28 @@ class EnrichmentOrderEventService(
 
         val sellUpdateFuture = makeItemId?.let {
             async {
-                // Item should be checked first, otherwise ownership could trigger event for outdated item
-                ignoreApi404 {
-                    enrichmentItemEventService.onItemBestSellOrderUpdated(makeItemId, order, notificationEnabled)
-                }
-                ignoreApi404 {
-                    val ownershipId = ShortOwnershipId(
-                        makeItemId.blockchain, makeItemId.itemId, order.maker.value
-                    )
-                    enrichmentOwnershipEventService.onOwnershipBestSellOrderUpdated(
-                        ownershipId, order, notificationEnabled
-                    )
+                if (!makeAssetExt.isCollection) {
+                    // Item should be checked first, otherwise ownership could trigger event for outdated item
+                    ignoreApi404 {
+                        enrichmentItemEventService.onItemBestSellOrderUpdated(makeItemId, order, notificationEnabled)
+                    }
+                    ignoreApi404 {
+                        val ownershipId = ShortOwnershipId(
+                            makeItemId.blockchain, makeItemId.itemId, order.maker.value
+                        )
+                        enrichmentOwnershipEventService.onOwnershipBestSellOrderUpdated(
+                            ownershipId, order, notificationEnabled
+                        )
+                    }
                 }
             }
         }
         val bidUpdateFuture = takeItemId?.let {
             async {
-                ignoreApi404 {
-                    enrichmentItemEventService.onItemBestBidOrderUpdated(takeItemId, order, notificationEnabled)
+                if (!makeAssetExt.isCollection) {
+                    ignoreApi404 {
+                        enrichmentItemEventService.onItemBestBidOrderUpdated(takeItemId, order, notificationEnabled)
+                    }
                 }
             }
         }
