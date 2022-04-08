@@ -14,7 +14,7 @@ class QueryCursorService {
 
     fun applyCursor(query: BoolQueryBuilder, sort: ActivitySort, cursorAsString: String?) {
         if (cursorAsString.isNullOrEmpty()) return
-        val cursor = ActivityCursor.fromString(cursorAsString)
+        val cursor = ActivityCursor.fromString(cursorAsString) ?: return
 
         val cursorQuery = BoolQueryBuilder()
         // date <> cursor OR

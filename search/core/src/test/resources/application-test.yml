@@ -16,3 +16,11 @@ spring:
   elasticsearch:
     rest:
       uris: ${elasticsearch.api-nodes}
+
+logging:
+  level:
+    org:
+      springframework:
+        data:
+          elasticsearch:
+            core: DEBUG
