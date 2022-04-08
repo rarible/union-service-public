@@ -26,6 +26,7 @@ import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
 import com.rarible.protocol.union.enrichment.validator.EntityValidator
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
+import java.util.*
 
 @Component
 class EnrichmentItemEventService(
@@ -218,14 +219,6 @@ class EnrichmentItemEventService(
         val exist = current != null
         val short = current ?: ShortItem.empty(itemId)
         return Triple(current, action(short), exist)
-    }
-
-    private suspend fun notifyDelete(itemId: ShortItemId) {
-        val event = ItemDeleteEventDto(
-            itemId = itemId.toDto(),
-            eventId = UUID.randomUUID().toString()
-        )
-        itemEventListeners.forEach { it.onEvent(event) }
     }
 
     // Potentially we could have updated Order here (no matter - bid/sell) and when we need to fetch
