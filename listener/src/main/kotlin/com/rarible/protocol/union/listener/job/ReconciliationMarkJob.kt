@@ -87,6 +87,12 @@ class ReconciliationMarkJob(
                         refreshService.reconcileOwnership(ownershipId)
                     }
                 }
+                ReconciliationMarkType.COLLECTION -> {
+                    val collectionId = IdParser.parseCollectionId(markId)
+                    if(blockchains.contains(collectionId.blockchain)) {
+                        refreshService.reconcileCollection(collectionId)
+                    }
+                }
             }
         } catch (e: WebClientResponseProxyException) {
             if (e.statusCode == HttpStatus.NOT_FOUND) {
