@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.integration.immutablex.service
 
+import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.dto.CollectionIdDto
@@ -22,29 +23,26 @@ class ImmutablexCollectionServiceTest {
             )
         ).getAllCollections(null, 50)
 
-
         Assertions.assertThat(page.entities).containsExactly(
-            CollectionDto(
-                CollectionIdDto(BlockchainDto.IMMUTABLEX, "0x62d25241d4a5d619c1b06114210250d19d2424c0"),
-                null,
-                BlockchainDto.IMMUTABLEX,
-                CollectionDto.Type.IMMUTABLEX,
-                "CERTIFICATE3",
-                "CERTIFICATE3",
-                null,
-                emptyList(),
-                emptyList()
+            UnionCollection(
+                id = CollectionIdDto(BlockchainDto.IMMUTABLEX, "0x62d25241d4a5d619c1b06114210250d19d2424c0"),
+                parent =null,
+                type = CollectionDto.Type.IMMUTABLEX,
+                name = "CERTIFICATE3",
+                symbol = "CERTIFICATE3",
+                owner = null,
+                features = emptyList(),
+                minters = emptyList()
             ),
-            CollectionDto(
-                CollectionIdDto(BlockchainDto.IMMUTABLEX, "0xa8106fe2195c3fa48ed52b52f7981f74d18d8ba4"),
-                null,
-                BlockchainDto.IMMUTABLEX,
-                CollectionDto.Type.IMMUTABLEX,
-                "CERTIFICATE2",
-                "CERTIFICATE2",
-                null,
-                emptyList(),
-                emptyList()
+            UnionCollection(
+                id = CollectionIdDto(BlockchainDto.IMMUTABLEX, "0xa8106fe2195c3fa48ed52b52f7981f74d18d8ba4"),
+                parent = null,
+                type = CollectionDto.Type.IMMUTABLEX,
+                name = "CERTIFICATE2",
+                symbol = "CERTIFICATE2",
+                owner = null,
+                features = emptyList(),
+                minters = emptyList()
             )
         )
     }
@@ -60,16 +58,15 @@ class ImmutablexCollectionServiceTest {
         ).getCollectionById("0x62d25241d4a5d619c1b06114210250d19d2424c0")
 
         Assertions.assertThat(col).isEqualTo(
-            CollectionDto(
-                CollectionIdDto(BlockchainDto.IMMUTABLEX, "0x62d25241d4a5d619c1b06114210250d19d2424c0"),
-                null,
-                BlockchainDto.IMMUTABLEX,
-                CollectionDto.Type.IMMUTABLEX,
-                "CERTIFICATE3",
-                "CERTIFICATE3",
-                null,
-                emptyList(),
-                emptyList()
+            UnionCollection(
+                id = CollectionIdDto(BlockchainDto.IMMUTABLEX, "0x62d25241d4a5d619c1b06114210250d19d2424c0"),
+                parent =null,
+                type = CollectionDto.Type.IMMUTABLEX,
+                name = "CERTIFICATE3",
+                symbol = "CERTIFICATE3",
+                owner = null,
+                features = emptyList(),
+                minters = emptyList()
             )
         )
     }

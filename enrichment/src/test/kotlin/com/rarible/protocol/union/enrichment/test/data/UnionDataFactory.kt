@@ -2,6 +2,7 @@ package com.rarible.protocol.union.enrichment.test.data
 
 import com.rarible.core.test.data.randomString
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
+import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.UnionMetaContent
