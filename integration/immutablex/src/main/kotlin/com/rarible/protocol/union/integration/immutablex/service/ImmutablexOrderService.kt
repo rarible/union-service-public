@@ -52,6 +52,10 @@ class ImmutablexOrderService(
     override suspend fun getBidCurrencies(itemId: String): List<AssetTypeDto> =
         listOf(EthEthereumAssetTypeDto(BlockchainDto.IMMUTABLEX))
 
+    override suspend fun getBidCurrenciesByCollection(collectionId: String): List<AssetTypeDto> {
+        return emptyList()
+    }
+
     override suspend fun getOrderBidsByItem(
         platform: PlatformDto?,
         itemId: String,
@@ -78,6 +82,10 @@ class ImmutablexOrderService(
 
     override suspend fun getSellCurrencies(itemId: String): List<AssetTypeDto> =
         listOf(EthEthereumAssetTypeDto(BlockchainDto.IMMUTABLEX))
+
+    override suspend fun getSellCurrenciesByCollection(collectionId: String): List<AssetTypeDto> {
+        return emptyList()
+    }
 
     override suspend fun getSellOrders(
         platform: PlatformDto?,

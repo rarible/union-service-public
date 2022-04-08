@@ -17,7 +17,7 @@ import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
 import kotlinx.coroutines.reactive.awaitFirst
 
-open class EthOrderService(
+open class  EthOrderService(
     override val blockchain: BlockchainDto,
     private val orderControllerApi: OrderControllerApi,
     private val ethOrderConverter: EthOrderConverter
@@ -54,6 +54,14 @@ open class EthOrderService(
         val assetTypes = orderControllerApi.getCurrenciesByBidOrdersOfItem(
             contract,
             tokenId.toString()
+        ).awaitFirst()
+        return assetTypes.currencies.map { EthConverter.convert(it, blockchain) }
+    }
+
+    override suspend fun getBidCurrenciesByCollection(collectionId: String): List<AssetTypeDto> {
+        val assetTypes = orderControllerApi.getCurrenciesByBidOrdersOfItem(
+            collectionId,
+            "-1"
         ).awaitFirst()
         return assetTypes.currencies.map { EthConverter.convert(it, blockchain) }
     }
@@ -118,6 +126,14 @@ open class EthOrderService(
         val assetTypes = orderControllerApi.getCurrenciesBySellOrdersOfItem(
             contract,
             tokenId.toString()
+        ).awaitFirst()
+        return assetTypes.currencies.map { EthConverter.convert(it, blockchain) }
+    }
+
+    override suspend fun getSellCurrenciesByCollection(collectionId: String): List<AssetTypeDto> {
+        val assetTypes = orderControllerApi.getCurrenciesBySellOrdersOfItem(
+            collectionId,
+            "-1"
         ).awaitFirst()
         return assetTypes.currencies.map { EthConverter.convert(it, blockchain) }
     }
