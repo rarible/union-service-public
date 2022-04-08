@@ -27,6 +27,10 @@
             <groupId>com.rarible.protocol.union</groupId>
             <artifactId>rarible-union-enrichment</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.rarible.protocol.union</groupId>
+            <artifactId>protocol-union-subscriber-starter</artifactId>
+        </dependency>
 
         <!-- ============ Union Protocol-API ============= -->
         <dependency>
@@ -51,6 +55,10 @@
             <groupId>com.rarible.core</groupId>
             <artifactId>rarible-core-logging-filter</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.rarible.protocol.union</groupId>
+            <artifactId>protocol-union-model</artifactId>
+        </dependency>
 
         <!-- ================== Spring =================== -->
         <dependency>
@@ -69,11 +77,20 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-mongodb-reactive</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
 
         <!-- ================== Other =================== -->
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jsr310</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains.kotlinx</groupId>
+            <artifactId>kotlinx-coroutines-slf4j</artifactId>
+            <version>1.5.2</version>
         </dependency>
 
         <!-- ================== Test ===================== -->
