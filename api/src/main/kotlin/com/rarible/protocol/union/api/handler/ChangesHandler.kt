@@ -2,6 +2,15 @@ package com.rarible.protocol.union.api.handler
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import com.rarible.protocol.union.dto.FakeSubscriptionEventDto
+import com.rarible.protocol.union.dto.ItemIdDto
+import com.rarible.protocol.union.dto.ItemSubscriptionEventDto
+import com.rarible.protocol.union.dto.ItemSubscriptionRequestDto
+import com.rarible.protocol.union.dto.OwnershipIdDto
+import com.rarible.protocol.union.dto.OwnershipSubscriptionEventDto
+import com.rarible.protocol.union.dto.OwnershipSubscriptionRequestDto
+import com.rarible.protocol.union.dto.SubscriptionActionDto
+import com.rarible.protocol.union.dto.SubscriptionRequestDto
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -12,12 +21,6 @@ import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.time.Duration
 import java.util.concurrent.ConcurrentHashMap
-import com.rarible.protocol.union.dto.websocket.ChangeEvent
-import com.rarible.protocol.union.dto.websocket.AbstractSubscribeRequest
-import com.rarible.protocol.union.dto.websocket.ChangeEventType
-import com.rarible.protocol.union.dto.websocket.SubscribeRequestType
-import com.rarible.protocol.union.dto.websocket.SubscribeRequest
-import com.rarible.protocol.union.dto.websocket.SubscriptionAction
 
 @Component
 class ChangesHandler(
@@ -26,26 +29,25 @@ class ChangesHandler(
     private val ownershipUpdateListener: UnionOwnershipEventHandler
 ) : WebSocketHandler {
 
-   private val fake = objectMapper.writeValueAsString(ChangeEvent(ChangeEventType.FAKE, null))
+   private val fake = objectMapper.writeValueAsString(FakeSubscriptionEventDto())
 
     override fun handle(session: WebSocketSession): Mono<Void> {
-        val subscribedItems = ConcurrentHashMap.newKeySet<String>()
-        val subscribedOwnerships = ConcurrentHashMap.newKeySet<String>()
+        val subscribedItems = ConcurrentHashMap.newKeySet<ItemIdDto>()
+        val subscribedOwnerships = ConcurrentHashMap.newKeySet<OwnershipIdDto>()
 
         return Mono.`when`(
             session.receive().doOnNext { message ->
                 try {
-                    for (request in objectMapper.readValue<List<AbstractSubscribeRequest>>(message.payloadAsText)) {
-                        when (request.type) {
-                            SubscribeRequestType.ITEM -> handleSubscriptionRequest(request, subscribedItems)
-                            SubscribeRequestType.OWNERSHIP -> handleSubscriptionRequest(request, subscribedOwnerships)
+                    for (request in objectMapper.readValue<List<SubscriptionRequestDto>>(message.payloadAsText)) {
+                        when (request) {
+                            is ItemSubscriptionRequestDto -> handleSubscriptionRequest(request.action, request.id, subscribedItems)
+                            is OwnershipSubscriptionRequestDto -> handleSubscriptionRequest(request.action, request.id, subscribedOwnerships)
                         }
                     }
                 } catch (ex: Throwable) {
                     logger.error("Unable to read message", ex)
                 }
             },
-
             session.send(
                 Flux.merge(
                     Flux.just(0L)
@@ -53,30 +55,30 @@ class ChangesHandler(
                         .map { session.textMessage(fake) },
 
                     itemUpdateListener.updates
-                        .filter { it.itemId.value in subscribedItems}
-                        .map { toMessage(session, ChangeEventType.ITEM, it) },
+                        .filter { it.itemId in subscribedItems }
+                        .map { toMessage(session, ItemSubscriptionEventDto(it)) },
 
-                   ownershipUpdateListener.updates
-                        .filter { it.ownershipId.value in subscribedOwnerships }
-                        .map { toMessage(session, ChangeEventType.OWNERSHIP, it) }
+                    ownershipUpdateListener.updates
+                        .filter { it.ownershipId in subscribedOwnerships }
+                        .map { toMessage(session, OwnershipSubscriptionEventDto(it)) }
                 )
             )
         )
     }
 
-    private fun handleSubscriptionRequest(
-        abstractRequest: AbstractSubscribeRequest,
-        subscribedIds: ConcurrentHashMap.KeySetView<String, Boolean>
+    private fun <T> handleSubscriptionRequest(
+        action: SubscriptionActionDto,
+        id: T,
+        subscribedIds: ConcurrentHashMap.KeySetView<T, Boolean>
     ) {
-        val request = abstractRequest as SubscribeRequest
-        when (request.action) {
-            SubscriptionAction.SUBSCRIBE -> subscribedIds.add(request.id)
-            SubscriptionAction.UNSUBSCRIBE -> subscribedIds.remove(request.id)
+        when (action) {
+            SubscriptionActionDto.SUBSCRIBE -> subscribedIds.add(id)
+            SubscriptionActionDto.UNSUBSCRIBE -> subscribedIds.remove(id)
         }
     }
 
-    private fun toMessage(session: WebSocketSession, type: ChangeEventType, value: Any): WebSocketMessage =
-        session.textMessage(objectMapper.writeValueAsString(ChangeEvent(type, value)))
+    private fun toMessage(session: WebSocketSession, event: Any): WebSocketMessage =
+        session.textMessage(objectMapper.writeValueAsString(event))
 
     companion object {
         private val logger: Logger = LoggerFactory.getLogger(ChangesHandler::class.java)

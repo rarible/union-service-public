@@ -7,8 +7,6 @@ import com.rarible.core.kafka.RaribleKafkaConsumer
 import com.rarible.core.kafka.RaribleKafkaProducer
 import com.rarible.protocol.currency.api.client.CurrencyControllerApi
 import com.rarible.protocol.currency.dto.CurrencyRateDto
-import com.rarible.protocol.dto.NftItemEventDto
-import com.rarible.protocol.dto.NftOwnershipEventDto
 import com.rarible.protocol.flow.nft.api.client.FlowNftCollectionControllerApi
 import com.rarible.protocol.flow.nft.api.client.FlowNftCryptoControllerApi
 import com.rarible.protocol.flow.nft.api.client.FlowNftItemControllerApi
@@ -37,8 +35,12 @@ import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.enrichment.meta.UnionMetaLoader
 import io.mockk.clearMocks
 import io.mockk.coEvery
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.async
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.BeforeEach
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
@@ -49,7 +51,6 @@ import java.net.URI
 import java.util.*
 import java.util.concurrent.LinkedBlockingQueue
 
-@FlowPreview
 abstract class AbstractIntegrationTest {
 
     @Autowired

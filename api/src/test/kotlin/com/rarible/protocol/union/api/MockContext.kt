@@ -1,6 +1,8 @@
 package com.rarible.protocol.union.api
 
+import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import com.rarible.protocol.union.api.configuration.WebSocketConfiguration
 import com.rarible.core.application.ApplicationEnvironmentInfo
 import com.rarible.core.kafka.RaribleKafkaConsumer
@@ -10,18 +12,19 @@ import com.rarible.protocol.dto.NftItemEventDto
 import com.rarible.protocol.dto.NftItemEventTopicProvider
 import com.rarible.protocol.dto.NftOwnershipEventDto
 import com.rarible.protocol.dto.NftOwnershipEventTopicProvider
-import com.rarible.protocol.union.dto.websocket.AbstractSubscribeRequest
-import com.rarible.protocol.union.dto.websocket.ChangeEvent
-import com.rarible.protocol.union.dto.websocket.ChangeEventType
+import com.rarible.protocol.union.dto.FakeSubscriptionEventDto
 import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
+import com.rarible.protocol.union.dto.SubscriptionEventDto
+import com.rarible.protocol.union.dto.SubscriptionRequestDto
 import com.rarible.protocol.union.dto.UnionEventTopicProvider
 import com.rarible.protocol.union.subscriber.UnionKafkaJsonDeserializer
 import com.rarible.protocol.union.subscriber.UnionKafkaJsonSerializer
 import org.apache.kafka.clients.consumer.OffsetResetStrategy
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration
 import org.springframework.boot.web.context.WebServerInitializedEvent
 import org.springframework.context.ApplicationListener
@@ -40,10 +43,6 @@ import java.util.concurrent.LinkedBlockingQueue
 @Import(WebSocketConfiguration::class)
 class MockContext : ApplicationListener<WebServerInitializedEvent> {
 
-
-    @Value("protocol.union.subscriber.broker-replica-set")
-    private var producerBrokerReplicaSet: String? = null
-
     @Autowired
     private lateinit var objectMapper: ObjectMapper
 
@@ -51,13 +50,13 @@ class MockContext : ApplicationListener<WebServerInitializedEvent> {
     private lateinit var applicationEnvironmentInfo: ApplicationEnvironmentInfo
 
     @Bean
-    fun shutdownMono() = Sinks.one<Void>()
+    fun shutdownMono(): Sinks.One<Void> = Sinks.one()
 
     @Bean
-    fun webSocketEventsQueue() = LinkedBlockingQueue<ChangeEvent>()
+    fun webSocketEventsQueue() = LinkedBlockingQueue<SubscriptionEventDto>()
 
     @Bean
-    fun webSocketRequests(): Sinks.Many<List<AbstractSubscribeRequest>> = Sinks.many().unicast()
+    fun webSocketRequests(): Sinks.Many<List<SubscriptionRequestDto>> = Sinks.many().unicast()
         .onBackpressureBuffer()
 
    /* @Bean
@@ -136,27 +135,36 @@ class MockContext : ApplicationListener<WebServerInitializedEvent> {
         val port = event.webServer.port
 
         ReactorNettyWebSocketClient().execute(URI("ws://127.0.0.1:$port/v0.1/subscribe")) { session ->
+            logger.info("Connected to ws")
             session.receive().map { notification ->
-                val event = objectMapper.readValue(
-                    notification.payloadAsText,
-                    ChangeEvent::class.java
-                )
-                if (event.type != ChangeEventType.FAKE) {
-                    webSocketEventsQueue().offer(event)
+                logger.info("received from ws: {}", notification.payloadAsText)
+                val evt: SubscriptionEventDto = objectMapper.readValue(notification.payloadAsText)
+                if (evt !is FakeSubscriptionEventDto) {
+                    webSocketEventsQueue().offer(evt)
                 }
             }.subscribe()
 
             session.send(webSocketRequests().asFlux().map {
+                val bytes = objectMapper.writerFor(typeRef).writeValueAsBytes(it)
+                logger.info("sending to ws: {}", String(bytes))
                 WebSocketMessage(
                     WebSocketMessage.Type.TEXT,
-                    DefaultDataBufferFactory().wrap(
-                        objectMapper.writeValueAsBytes(
-                            it
-                        )
-                    )
+                    DefaultDataBufferFactory().wrap(bytes)
                 )
-            }).subscribe()
+            })
+                .doOnSubscribe { logger.info("subscribed to ws") }
+                .subscribe(
+                {},
+                { logger.error("ws error", it)},
+                { logger.info("disconnected from ws") }
+            )
             shutdownMono().asMono()
         }.subscribe()
     }
+
+    companion object {
+        val logger: Logger = LoggerFactory.getLogger(MockContext::class.java)
+    }
 }
+
+val typeRef = object : TypeReference<List<SubscriptionRequestDto>>() {}

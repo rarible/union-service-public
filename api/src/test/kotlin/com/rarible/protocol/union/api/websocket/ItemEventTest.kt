@@ -10,14 +10,17 @@ import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemDto
+import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.ItemIdDto
+import com.rarible.protocol.union.dto.ItemSubscriptionEventDto
+import com.rarible.protocol.union.dto.ItemSubscriptionRequestDto
 import com.rarible.protocol.union.dto.ItemUpdateEventDto
-import com.rarible.protocol.union.dto.websocket.AbstractSubscribeRequest
-import com.rarible.protocol.union.dto.websocket.ChangeEvent
-import com.rarible.protocol.union.dto.websocket.ChangeEventType
-import com.rarible.protocol.union.dto.websocket.SubscribeRequest
-import com.rarible.protocol.union.dto.websocket.SubscribeRequestType
+import com.rarible.protocol.union.dto.SubscriptionActionDto
+import com.rarible.protocol.union.dto.SubscriptionEventDto
+import com.rarible.protocol.union.dto.SubscriptionRequestDto
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -26,7 +29,7 @@ import org.springframework.test.context.ContextConfiguration
 import reactor.core.publisher.Sinks
 import java.math.BigInteger
 import java.time.Instant
-import java.util.Queue
+import java.util.*
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.TimeUnit
 
@@ -51,10 +54,10 @@ internal class ItemEventTest : AbstractIntegrationTest() {
     private lateinit var objectMapper: ObjectMapper
 
     @Autowired
-    protected lateinit var webSocketEventsQueue: LinkedBlockingQueue<ChangeEvent>
+    protected lateinit var webSocketEventsQueue: LinkedBlockingQueue<SubscriptionEventDto>
 
     @Autowired
-    protected lateinit var webSocketRequests: Sinks.Many<List<AbstractSubscribeRequest>>
+    protected lateinit var webSocketRequests: Sinks.Many<List<SubscriptionRequestDto>>
 
     @Autowired
     private lateinit var worker: ConsumerWorker<ItemEventDto>
@@ -94,18 +97,10 @@ internal class ItemEventTest : AbstractIntegrationTest() {
             )
         )
 
-        webSocketRequests.tryEmitNext(
-            listOf(
-                SubscribeRequest(
-                    type = SubscribeRequestType.ITEM,
-                    id = itemId.value
-                )
-            )
-        )
+        webSocketRequests.tryEmitNext(listOf(ItemSubscriptionRequestDto(SubscriptionActionDto.SUBSCRIBE, itemId)))
 
         delay(1000)
         webSocketEventsQueue.clear()
-
 
         itemProducer.send(
             KafkaMessage(
@@ -115,9 +110,11 @@ internal class ItemEventTest : AbstractIntegrationTest() {
         ).ensureSuccess()
 
         Wait.waitAssert {
-            val event = webSocketEventsQueue.poll(5, TimeUnit.SECONDS)!!
-            delay(2000)
-            assertThat(event.type).isEqualTo(ChangeEventType.ITEM)
+            val event = withContext(Dispatchers.IO) {
+                webSocketEventsQueue.poll(5, TimeUnit.SECONDS)
+            }
+            assertThat(event).isNotNull
+            assertThat(event).isInstanceOf(ItemSubscriptionEventDto::class.java)
         }
     }
 }
