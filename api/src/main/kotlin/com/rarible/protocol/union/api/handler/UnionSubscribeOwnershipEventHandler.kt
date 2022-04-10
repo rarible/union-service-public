@@ -8,7 +8,7 @@ import reactor.core.publisher.Flux
 import reactor.core.publisher.Sinks
 
 @Component
-class UnionOwnershipEventHandler : ConsumerEventHandler<OwnershipEventDto> {
+class UnionSubscribeOwnershipEventHandler : ConsumerEventHandler<OwnershipEventDto> {
 
     private val sink = Sinks.many().multicast().directBestEffort<OwnershipEventDto>()
     val updates: Flux<OwnershipEventDto> = sink.asFlux()

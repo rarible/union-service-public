@@ -2,11 +2,14 @@ package com.rarible.protocol.union.core
 
 import com.rarible.core.application.ApplicationEnvironmentInfo
 import com.rarible.core.daemon.DaemonWorkerProperties
+import com.rarible.core.daemon.sequential.ConsumerEventHandler
 import com.rarible.core.daemon.sequential.ConsumerWorker
 import com.rarible.core.kafka.RaribleKafkaConsumer
 import com.rarible.protocol.union.core.handler.BatchedConsumerWorker
 import com.rarible.protocol.union.core.handler.BlockchainEventHandler
 import com.rarible.protocol.union.core.handler.BlockchainEventHandlerWrapper
+import com.rarible.protocol.union.dto.ItemEventDto
+import com.rarible.protocol.union.dto.OwnershipEventDto
 import io.micrometer.core.instrument.MeterRegistry
 import org.springframework.stereotype.Component
 
@@ -36,6 +39,8 @@ class ConsumerFactory(
     val orderGroup = consumerGroup(ORDER)
     val auctionGroup = consumerGroup(AUCTION)
     val activityGroup = consumerGroup(ACTIVITY)
+    val unionSubscribeItemGroup = subscribeConsumerGroup(ITEM)
+    val unionSubscribeOwnershipGroup = subscribeConsumerGroup(OWNERSHIP)
 
     fun <T> createItemConsumer(
         consumer: RaribleKafkaConsumer<T>,
@@ -112,8 +117,52 @@ class ConsumerFactory(
         return BatchedConsumerWorker(workerSet)
     }
 
+    fun createUnionItemBatchedConsumerWorker(
+        consumer: RaribleKafkaConsumer<ItemEventDto>,
+        handler: ConsumerEventHandler<ItemEventDto>,
+        daemonWorkerProperties: DaemonWorkerProperties,
+        workers: Map<String, Int>,
+        type: String
+    ): BatchedConsumerWorker<ItemEventDto> {
+        return createUnionBatchedConsumerWorker(consumer, handler, daemonWorkerProperties, workers, type, ITEM)
+    }
+
+    fun createUnionOwnershipBatchedConsumerWorker(
+        consumer: RaribleKafkaConsumer<OwnershipEventDto>,
+        handler: ConsumerEventHandler<OwnershipEventDto>,
+        daemonWorkerProperties: DaemonWorkerProperties,
+        workers: Map<String, Int>,
+        type: String
+    ): BatchedConsumerWorker<OwnershipEventDto> {
+        return createUnionBatchedConsumerWorker(consumer, handler, daemonWorkerProperties, workers, type, OWNERSHIP)
+    }
+
+    private fun <T> createUnionBatchedConsumerWorker(
+        consumer: RaribleKafkaConsumer<T>,
+        handler: ConsumerEventHandler<T>,
+        daemonWorkerProperties: DaemonWorkerProperties,
+        workers: Map<String, Int>,
+        type: String,
+        entityType: String
+    ): BatchedConsumerWorker<T> {
+        val workerCount = workers.getOrDefault(entityType, 1)
+        val workerSet = (1..workerCount).map {
+            ConsumerWorker(
+                consumer = consumer,
+                properties = daemonWorkerProperties,
+                eventHandler = handler,
+                meterRegistry = meterRegistry,
+                workerName = "union-$type-${entityType}-$it"
+            )
+        }
+        return BatchedConsumerWorker(workerSet)
+    }
+
     private fun consumerGroup(suffix: String): String {
         return "${env}.protocol.union.${suffix}"
     }
 
+    private fun subscribeConsumerGroup(suffix: String): String {
+        return "${env}.protocol.union.subscribe.${suffix}"
+    }
 }

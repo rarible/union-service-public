@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.api.configuration
 
-
 import com.rarible.protocol.union.api.handler.ChangesHandler
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -14,7 +13,6 @@ import org.springframework.web.reactive.socket.server.upgrade.ReactorNettyReques
 
 @Configuration
 class WebSocketConfiguration {
-
     @Bean
     fun websocketHandlerMapping(handler: ChangesHandler): HandlerMapping {
         return SimpleUrlHandlerMapping().apply {

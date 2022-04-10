@@ -25,8 +25,8 @@ import java.util.concurrent.ConcurrentHashMap
 @Component
 class ChangesHandler(
     private val objectMapper: ObjectMapper,
-    private val itemUpdateListener: UnionItemEventHandler,
-    private val ownershipUpdateListener: UnionOwnershipEventHandler
+    private val itemUpdateListener: UnionSubscribeItemEventHandler,
+    private val ownershipUpdateListener: UnionSubscribeOwnershipEventHandler
 ) : WebSocketHandler {
 
    private val fake = objectMapper.writeValueAsString(FakeSubscriptionEventDto())

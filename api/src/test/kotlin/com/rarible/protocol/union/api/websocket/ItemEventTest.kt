@@ -1,7 +1,5 @@
 package com.rarible.protocol.union.api.websocket
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.rarible.core.daemon.sequential.ConsumerWorker
 import com.rarible.core.kafka.KafkaMessage
 import com.rarible.core.test.data.randomAddress
 import com.rarible.core.test.data.randomBigInt
@@ -10,7 +8,6 @@ import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemDto
-import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.ItemSubscriptionEventDto
 import com.rarible.protocol.union.dto.ItemSubscriptionRequestDto
@@ -49,18 +46,11 @@ import java.util.concurrent.TimeUnit
 @IntegrationTest
 @ContextConfiguration
 internal class ItemEventTest : AbstractIntegrationTest() {
-
-    @Autowired
-    private lateinit var objectMapper: ObjectMapper
-
     @Autowired
     protected lateinit var webSocketEventsQueue: LinkedBlockingQueue<SubscriptionEventDto>
 
     @Autowired
     protected lateinit var webSocketRequests: Sinks.Many<List<SubscriptionRequestDto>>
-
-    @Autowired
-    private lateinit var worker: ConsumerWorker<ItemEventDto>
 
     private fun <T> filterByValueType(messages: Queue<KafkaMessage<Any>>, type: Class<T>): Collection<KafkaMessage<T>> {
         return messages.filter {
@@ -77,7 +67,6 @@ internal class ItemEventTest : AbstractIntegrationTest() {
 
     @Test
     fun `item event websocket test`() = runWithKafka {
-        worker.start()
         val itemId = ItemIdDto(BlockchainDto.ETHEREUM, randomAddress().prefixed(), randomBigInt())
 
         val itemEventDto = ItemUpdateEventDto(
