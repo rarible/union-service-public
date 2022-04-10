@@ -36,14 +36,15 @@ class UnionListenerConfig(
 
     @Bean
     fun ethereumItemWebsocketWorker(
-        @Qualifier("nft.consumer.factory.websocket") factory: UnionEventsConsumerFactory
+        @Qualifier("nft.consumer.factory.websocket") factory: UnionEventsConsumerFactory,
+        unionItemEventHandler: UnionItemEventHandler
 
     ): ConsumerWorker<ItemEventDto> {
         val consumer = factory.createItemConsumer(UUID.randomUUID().toString())
           return  ConsumerWorker(
           consumer = consumer,
           properties = daemon,
-          eventHandler = UnionItemEventHandler(),
+          eventHandler = unionItemEventHandler,
           meterRegistry = meterRegistry,
           workerName = "internal-websocket"
       )
@@ -51,14 +52,15 @@ class UnionListenerConfig(
 
     @Bean
     fun ethereumOwnershipWebsocketWorker(
-        @Qualifier("nft.consumer.factory.websocket") factory: UnionEventsConsumerFactory
+        @Qualifier("nft.consumer.factory.websocket") factory: UnionEventsConsumerFactory,
+        unionOwnershipEventHandler: UnionOwnershipEventHandler
 
     ): ConsumerWorker<OwnershipEventDto> {
         val consumer = factory.createOwnershipConsumer(UUID.randomUUID().toString())
         return  ConsumerWorker(
             consumer = consumer,
             properties = daemon,
-            eventHandler = UnionOwnershipEventHandler(),
+            eventHandler = unionOwnershipEventHandler,
             meterRegistry = meterRegistry,
             workerName = "internal-websocket"
         )
