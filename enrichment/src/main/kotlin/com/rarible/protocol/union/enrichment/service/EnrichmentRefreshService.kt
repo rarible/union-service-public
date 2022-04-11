@@ -2,6 +2,7 @@ package com.rarible.protocol.union.enrichment.service
 
 import com.rarible.core.common.optimisticLock
 import com.rarible.protocol.union.core.FeatureFlagsProperties
+import com.rarible.protocol.union.core.event.OutgoingCollectionEventListener
 import com.rarible.protocol.union.core.event.OutgoingItemEventListener
 import com.rarible.protocol.union.core.event.OutgoingOwnershipEventListener
 import com.rarible.protocol.union.core.exception.UnionException
@@ -11,6 +12,10 @@ import com.rarible.protocol.union.core.service.AuctionContractService
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.AuctionDto
+import com.rarible.protocol.union.dto.CollectionDto
+import com.rarible.protocol.union.dto.CollectionEventDto
+import com.rarible.protocol.union.dto.CollectionIdDto
+import com.rarible.protocol.union.dto.CollectionUpdateEventDto
 import com.rarible.protocol.union.dto.ItemDeleteEventDto
 import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.ItemEventDto
@@ -24,6 +29,7 @@ import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.OwnershipUpdateEventDto
 import com.rarible.protocol.union.dto.ext
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
+import com.rarible.protocol.union.enrichment.model.ShortCollectionId
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortOwnership
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
@@ -45,8 +51,10 @@ class EnrichmentRefreshService(
     private val enrichmentOrderService: EnrichmentOrderService,
     private val enrichmentAuctionService: EnrichmentAuctionService,
     private val enrichmentActivityService: EnrichmentActivityService,
+    private val enrichmentCollectionService: EnrichmentCollectionService,
     private val enrichmentItemService: EnrichmentItemService,
     private val enrichmentOwnershipService: EnrichmentOwnershipService,
+    private val collectionEventListeners: List<OutgoingCollectionEventListener>,
     private val itemEventListeners: List<OutgoingItemEventListener>,
     private val ownershipEventListeners: List<OutgoingOwnershipEventListener>,
     private val auctionContractService: AuctionContractService,
@@ -54,6 +62,17 @@ class EnrichmentRefreshService(
 ) {
 
     private val logger = LoggerFactory.getLogger(EnrichmentRefreshService::class.java)
+
+    suspend fun reconcileCollection(collectionId: CollectionIdDto) = coroutineScope {
+        val shortCollectionId = ShortCollectionId(collectionId)
+        val sellCurrenciesDeferred = async { getSellCurrencies(collectionId) }
+        val bidCurrenciesDeferred = async { getBidCurrencies(collectionId) }
+
+        val sellCurrencies = sellCurrenciesDeferred.await()
+        val bidCurrencies = bidCurrenciesDeferred.await()
+
+        reconcileCollection(shortCollectionId, sellCurrencies, bidCurrencies)
+    }
 
     suspend fun reconcileItem(itemId: ItemIdDto, full: Boolean) = coroutineScope {
         val shortItemId = ShortItemId(itemId)
@@ -119,6 +138,59 @@ class EnrichmentRefreshService(
             // Nothing to reconcile
             null
         }
+    }
+
+    private suspend fun reconcileCollection(
+        shortCollectionId: ShortCollectionId,
+        sellCurrencies: List<String>,
+        bidCurrencies: List<String>
+    ) = coroutineScope {
+        logger.info("Starting to reconcile Item [{}]", shortCollectionId)
+        val unionCollectionDeferred = async { enrichmentCollectionService.fetch(shortCollectionId) }
+
+        // Looking for best sell orders
+        val bestSellOrdersDtoDeferred = sellCurrencies.map { currencyId ->
+            async { enrichmentOrderService.getBestSell(shortCollectionId, currencyId) }
+        }
+
+        // Looking for best bid orders
+        val bestBidOrdersDtoDeferred = bidCurrencies.map { currencyId ->
+            async { enrichmentOrderService.getBestBid(shortCollectionId, currencyId) }
+        }
+        val bestSellOrdersDto = bestSellOrdersDtoDeferred.awaitAll().filterNotNull()
+        val bestBidOrdersDto = bestBidOrdersDtoDeferred.awaitAll().filterNotNull()
+
+        val bestSellOrders = bestSellOrdersDto.associateBy { it.sellCurrencyId }
+            .mapValues { ShortOrderConverter.convert(it.value) }
+
+        val bestBidOrders = bestBidOrdersDto.associateBy { it.bidCurrencyId }
+            .mapValues { ShortOrderConverter.convert(it.value) }
+
+        val updatedCollection = optimisticLock {
+            val shortCollection = enrichmentCollectionService.getOrEmpty(shortCollectionId).copy(
+                bestSellOrders = bestSellOrders,
+                bestSellOrder = bestOrderService.getBestSellOrderInUsd(bestSellOrders),
+                bestBidOrders = bestBidOrders,
+                bestBidOrder = bestOrderService.getBestBidOrderInUsd(bestBidOrders),
+            )
+
+            if (shortCollection.isNotEmpty()) {
+                logger.info("Saving refreshed Item [{}] with gathered enrichment data [{}]", shortCollectionId, shortCollection)
+                enrichmentCollectionService.save(shortCollection)
+            } else {
+                logger.info("Item [{}] has no enrichment data, will be deleted", shortCollectionId)
+                enrichmentCollectionService.delete(shortCollectionId)
+            }
+            shortCollection
+        }
+
+        val ordersHint = (bestSellOrdersDto + bestBidOrdersDto).associateBy { it.id }
+        val enriched = enrichmentCollectionService.enrichCollection(
+            shortCollection = updatedCollection,
+            collection = unionCollectionDeferred.await(),
+            orders = ordersHint,
+        )
+        notifyUpdate(enriched)
     }
 
     private suspend fun reconcileItem(
@@ -281,6 +353,16 @@ class EnrichmentRefreshService(
         return event
     }
 
+    private suspend fun notifyUpdate(collectionDto: CollectionDto): CollectionEventDto {
+        val event = CollectionUpdateEventDto(
+            collectionId = collectionDto.id,
+            collection = collectionDto,
+            eventId = UUID.randomUUID().toString()
+        )
+        collectionEventListeners.forEach { it.onEvent(event) }
+        return event
+    }
+
     private suspend fun getBidCurrencies(itemId: ItemIdDto): List<String> {
         val result = orderServiceRouter.getService(itemId.blockchain)
             .getBidCurrencies(itemId.value)
@@ -294,6 +376,23 @@ class EnrichmentRefreshService(
             .getSellCurrencies(itemId.value)
 
         logger.info("Found Sell currencies for Item [{}] : {}", itemId.fullId(), result)
+        return result.map { it.ext.currencyAddress() }
+
+    }
+
+    private suspend fun getBidCurrencies(collectionId: CollectionIdDto): List<String> {
+        val result = orderServiceRouter.getService(collectionId.blockchain)
+            .getBidCurrenciesByCollection(collectionId.value)
+
+        logger.info("Found Bid currencies for Collection [{}] : {}", collectionId.fullId(), result)
+        return result.map { it.ext.currencyAddress() }
+    }
+
+    private suspend fun getSellCurrencies(collectionId: CollectionIdDto): List<String> {
+        val result = orderServiceRouter.getService(collectionId.blockchain)
+            .getSellCurrenciesByCollection(collectionId.value)
+
+        logger.info("Found Sell currencies for Collection [{}] : {}", collectionId.fullId(), result)
         return result.map { it.ext.currencyAddress() }
 
     }

@@ -29,6 +29,7 @@ class ReconciliationMarkJob(
     private val types = listOf(
         ReconciliationMarkType.ITEM,
         ReconciliationMarkType.OWNERSHIP,
+        ReconciliationMarkType.COLLECTION
     )
 
     @Scheduled(
@@ -85,6 +86,12 @@ class ReconciliationMarkJob(
                     val ownershipId = OwnershipIdParser.parseFull(markId)
                     if (blockchains.contains(ownershipId.blockchain)) {
                         refreshService.reconcileOwnership(ownershipId)
+                    }
+                }
+                ReconciliationMarkType.COLLECTION -> {
+                    val collectionId = IdParser.parseCollectionId(markId)
+                    if(blockchains.contains(collectionId.blockchain)) {
+                        refreshService.reconcileCollection(collectionId)
                     }
                 }
             }

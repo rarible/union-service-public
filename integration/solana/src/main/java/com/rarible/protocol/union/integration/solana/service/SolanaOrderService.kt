@@ -52,6 +52,10 @@ open class SolanaOrderService(
         return result.currencies.map { SolanaConverter.convert(it, blockchain) }
     }
 
+    override suspend fun getBidCurrenciesByCollection(collectionId: String): List<AssetTypeDto> {
+        return emptyList()
+    }
+
     override suspend fun getOrderBidsByItem(
         platform: PlatformDto?,
         itemId: String,
@@ -103,6 +107,10 @@ open class SolanaOrderService(
     override suspend fun getSellCurrencies(itemId: String): List<AssetTypeDto> {
         val result = orderApi.getSellCurrencies(itemId).awaitFirst()
         return result.currencies.map { SolanaConverter.convert(it, blockchain) }
+    }
+
+    override suspend fun getSellCurrenciesByCollection(collectionId: String): List<AssetTypeDto> {
+        return emptyList()
     }
 
     override suspend fun getSellOrders(

@@ -48,9 +48,9 @@ class EnrichmentCollectionService(
 
     suspend fun fetch(collectionId: ShortCollectionId): UnionCollection {
         val now = nowMillis()
-        val itemDto = collectionServiceRouter.getService(collectionId.blockchain).getCollectionById(collectionId.collectionId)
+        val collectionDto = collectionServiceRouter.getService(collectionId.blockchain).getCollectionById(collectionId.collectionId)
         logger.info("Fetched collection [{}] ({} ms)", collectionId.toDto().fullId(), spent(now))
-        return itemDto
+        return collectionDto
     }
 
     suspend fun enrichCollection(
