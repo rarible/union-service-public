@@ -31,6 +31,10 @@
             <groupId>com.rarible.protocol.union</groupId>
             <artifactId>protocol-union-subscriber-starter</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.rarible.protocol.union</groupId>
+            <artifactId>rarible-union-search-core</artifactId>
+        </dependency>
 
         <!-- ============ Union Protocol-API ============= -->
         <dependency>
