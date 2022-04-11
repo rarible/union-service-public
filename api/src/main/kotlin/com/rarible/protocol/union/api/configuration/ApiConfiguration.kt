@@ -2,7 +2,6 @@ package com.rarible.protocol.union.api.configuration
 
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
-import com.rarible.core.autoconfigure.filter.cors.EnableRaribleCorsWebFilter
 import com.rarible.protocol.union.dto.UnionModelJacksonModule
 import com.rarible.protocol.union.dto.UnionPrimitivesJacksonModule
 import com.rarible.protocol.union.enrichment.configuration.EnrichmentApiConfiguration
@@ -12,13 +11,8 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder
-import org.springframework.web.cors.CorsConfiguration
-import org.springframework.web.cors.reactive.CorsConfigurationSource
-import org.springframework.web.cors.reactive.CorsWebFilter
-import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource
 
 @Configuration
-@EnableRaribleCorsWebFilter
 @Import(EnrichmentApiConfiguration::class)
 @EnableConfigurationProperties(value = [OpenapiProperties::class])
 class ApiConfiguration {
@@ -34,22 +28,4 @@ class ApiConfiguration {
             )
         }
     }
-
-    @Bean
-    fun corsFilter(corsConfigurationSource: CorsConfigurationSource): CorsWebFilter {
-        return CorsWebFilter(corsConfigurationSource)
-    }
-
-    @Bean
-    fun corsConfigurationSource(): CorsConfigurationSource {
-        val source = UrlBasedCorsConfigurationSource()
-        val config = CorsConfiguration().applyPermitDefaultValues()
-        config.allowedHeaders = listOf("*")
-        config.allowedMethods = listOf("*")
-        config.allowedOrigins = listOf("*")
-        config.maxAge = 3600
-        source.registerCorsConfiguration("/**", config)
-        return source
-    }
-
 }
