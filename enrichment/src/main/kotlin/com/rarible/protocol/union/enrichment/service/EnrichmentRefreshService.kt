@@ -13,6 +13,7 @@ import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.AuctionDto
 import com.rarible.protocol.union.dto.CollectionDto
+import com.rarible.protocol.union.dto.CollectionEventDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.CollectionUpdateEventDto
 import com.rarible.protocol.union.dto.ItemDeleteEventDto
@@ -352,7 +353,7 @@ class EnrichmentRefreshService(
         return event
     }
 
-    private suspend fun notifyUpdate(collectionDto: CollectionDto): CollectionUpdateEventDto {
+    private suspend fun notifyUpdate(collectionDto: CollectionDto): CollectionEventDto {
         val event = CollectionUpdateEventDto(
             collectionId = collectionDto.id,
             collection = collectionDto,

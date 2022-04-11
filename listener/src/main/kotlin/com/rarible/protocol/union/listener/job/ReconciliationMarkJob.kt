@@ -29,6 +29,7 @@ class ReconciliationMarkJob(
     private val types = listOf(
         ReconciliationMarkType.ITEM,
         ReconciliationMarkType.OWNERSHIP,
+        ReconciliationMarkType.COLLECTION
     )
 
     @Scheduled(

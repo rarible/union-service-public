@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.listener.job
 
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.CollectionEventDto
 import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.model.ReconciliationMarkType
@@ -8,6 +9,7 @@ import com.rarible.protocol.union.enrichment.repository.ReconciliationMarkReposi
 import com.rarible.protocol.union.enrichment.service.EnrichmentRefreshService
 import com.rarible.protocol.union.listener.test.AbstractIntegrationTest
 import com.rarible.protocol.union.listener.test.IntegrationTest
+import com.rarible.protocol.union.listener.test.data.randomCollectionMark
 import com.rarible.protocol.union.listener.test.data.randomItemMark
 import io.mockk.clearMocks
 import io.mockk.coEvery
@@ -31,6 +33,8 @@ class ReconciliationMarkJobIt : AbstractIntegrationTest() {
 
     private val itemEvent: ItemEventDto = mockk()
 
+    private val collectionEvent: CollectionEventDto = mockk()
+
     @BeforeEach
     fun beforeEach() {
         job = ReconciliationMarkJob(
@@ -39,6 +43,43 @@ class ReconciliationMarkJobIt : AbstractIntegrationTest() {
             listOf(BlockchainDto.ETHEREUM)
         )
         clearMocks(refreshService)
+    }
+
+    @Test
+    fun `reconcile collections`() = runBlocking<Unit> {
+        val collectionMarks = (1..50).map { randomCollectionMark() }
+
+        collectionMarks.forEach { itemReconciliationMarkRepository.save(it) }
+        val saved = itemReconciliationMarkRepository.findByType(ReconciliationMarkType.COLLECTION, 100)
+
+        assertThat(saved).hasSize(collectionMarks.size)
+        coEvery { refreshService.reconcileCollection(any()) } returns collectionEvent
+
+        job.reconcileMarkedRecords()
+        val remain = itemReconciliationMarkRepository.findByType(ReconciliationMarkType.COLLECTION, 100)
+
+        coVerify(exactly = collectionMarks.size) { refreshService.reconcileCollection(any()) }
+        assertThat(remain).hasSize(0)
+    }
+
+    @Test
+    fun `reconcile collection - with fail`() = runBlocking<Unit> {
+        val collectionMarks = (1..10).map { randomCollectionMark() }
+        val failedCollectionId = IdParser.parseCollectionId(collectionMarks[5].id)
+
+        collectionMarks.forEach { itemReconciliationMarkRepository.save(it) }
+
+        coEvery { refreshService.reconcileCollection(any()) } returns collectionEvent
+        coEvery { refreshService.reconcileCollection(failedCollectionId) } throws RuntimeException()
+
+        job.reconcileMarkedRecords()
+
+        // 1 additional call for single retry for one corrupted item
+        ///coVerify(exactly = collectionMarks.size + 1) { refreshService.reconcileCollection(any()) }
+        // One failed item mark should remain in DB
+        val failedMarks = itemReconciliationMarkRepository.findByType(ReconciliationMarkType.COLLECTION, 100)
+        assertThat(failedMarks).hasSize(1)
+        assertThat(failedMarks[0].retries).isEqualTo(2)
     }
 
     @Test
