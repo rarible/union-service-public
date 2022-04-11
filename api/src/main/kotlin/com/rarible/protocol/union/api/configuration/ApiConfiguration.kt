@@ -11,7 +11,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
-import org.springframework.http.HttpMethod
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.reactive.CorsConfigurationSource
@@ -45,8 +44,9 @@ class ApiConfiguration {
     fun corsConfigurationSource(): CorsConfigurationSource {
         val source = UrlBasedCorsConfigurationSource()
         val config = CorsConfiguration().applyPermitDefaultValues()
-        config.addAllowedMethod(HttpMethod.GET)
-        config.addAllowedMethod(HttpMethod.POST)
+        config.allowedHeaders = listOf("*")
+        config.allowedMethods = listOf("*")
+        config.allowedOrigins = listOf("*")
         config.maxAge = 3600
         source.registerCorsConfiguration("/**", config)
         return source
