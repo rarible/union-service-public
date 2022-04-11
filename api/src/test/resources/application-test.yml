@@ -1,3 +1,17 @@
+spring:
+  data:
+    elasticsearch:
+      cluster-name: docker-cluster
+      cluster-nodes: ${elasticsearch.cluster-nodes}
+
+      client:
+        reactive:
+          endpoints:  ${elasticsearch.api-nodes}
+
+  elasticsearch:
+    rest:
+      uris: ${elasticsearch.api-nodes}
+
 rarible:
   core:
     apm:
@@ -22,16 +36,7 @@ common:
     enableOwnershipSourceEnrichment: true
     enableItemLastSaleEnrichment: true
 
-spring:
-  data:
-    elasticsearch:
-      cluster-name: docker-cluster
-      cluster-nodes: ${elasticsearch.cluster-nodes}
-
-      client:
-        reactive:
-          endpoints:  ${elasticsearch.api-nodes}
-
-  elasticsearch:
-    rest:
-      uris: ${elasticsearch.api-nodes}
+protocol:
+  union:
+    subscriber:
+      broker-replica-set: ${kafka.hosts}
