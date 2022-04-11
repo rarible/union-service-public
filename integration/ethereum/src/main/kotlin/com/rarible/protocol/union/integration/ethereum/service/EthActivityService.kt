@@ -1,6 +1,8 @@
 package com.rarible.protocol.union.integration.ethereum.service
 
 import com.rarible.core.apm.CaptureSpan
+import com.rarible.core.logging.Logger
+import com.rarible.protocol.dto.ActivitiesByIdRequestDto
 import com.rarible.protocol.dto.AuctionActivitiesDto
 import com.rarible.protocol.dto.AuctionActivityFilterAllDto
 import com.rarible.protocol.dto.AuctionActivityFilterByCollectionDto
@@ -22,12 +24,27 @@ import com.rarible.protocol.dto.OrderActivityFilterDto
 import com.rarible.protocol.nft.api.client.NftActivityControllerApi
 import com.rarible.protocol.order.api.client.AuctionActivityControllerApi
 import com.rarible.protocol.order.api.client.OrderActivityControllerApi
+import com.rarible.protocol.union.core.model.TypedActivityId
 import com.rarible.protocol.union.core.service.ActivityService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.core.util.CompositeItemIdParser
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
+import com.rarible.protocol.union.dto.ActivityTypeDto.AUCTION_BID
+import com.rarible.protocol.union.dto.ActivityTypeDto.AUCTION_CANCEL
+import com.rarible.protocol.union.dto.ActivityTypeDto.AUCTION_CREATED
+import com.rarible.protocol.union.dto.ActivityTypeDto.AUCTION_ENDED
+import com.rarible.protocol.union.dto.ActivityTypeDto.AUCTION_FINISHED
+import com.rarible.protocol.union.dto.ActivityTypeDto.AUCTION_STARTED
+import com.rarible.protocol.union.dto.ActivityTypeDto.BID
+import com.rarible.protocol.union.dto.ActivityTypeDto.BURN
+import com.rarible.protocol.union.dto.ActivityTypeDto.CANCEL_BID
+import com.rarible.protocol.union.dto.ActivityTypeDto.CANCEL_LIST
+import com.rarible.protocol.union.dto.ActivityTypeDto.LIST
+import com.rarible.protocol.union.dto.ActivityTypeDto.MINT
+import com.rarible.protocol.union.dto.ActivityTypeDto.SELL
+import com.rarible.protocol.union.dto.ActivityTypeDto.TRANSFER
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
 import com.rarible.protocol.union.dto.continuation.ActivityContinuation
@@ -40,6 +57,8 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.reactive.awaitFirst
 import scalether.domain.Address
 import java.time.Instant
+import java.util.Arrays
+import java.util.Collections
 
 open class EthActivityService(
     blockchain: BlockchainDto,
@@ -50,6 +69,7 @@ open class EthActivityService(
 ) : AbstractBlockchainService(blockchain), ActivityService {
 
     companion object {
+        private val logger by Logger()
 
         private val EMPTY_ORDER_ACTIVITIES = OrderActivitiesDto(null, listOf())
         private val EMPTY_AUCTION_ACTIVITIES = AuctionActivitiesDto(null, listOf())
@@ -133,6 +153,58 @@ open class EthActivityService(
             AuctionActivityFilterByUserDto(userAddresses, it)
         }
         return getEthereumActivities(nftFilter, orderFilter, auctionFilter, continuation, size, sort)
+    }
+
+    override suspend fun getActivitiesByIds(ids: List<TypedActivityId>): List<ActivityDto> = coroutineScope {
+        val itemActivitiesIds = mutableListOf<String>()
+        val orderActivitiesIds = mutableListOf<String>()
+        val auctionActivitiesIds = mutableListOf<String>()
+
+        ids.forEach { (id, type) ->
+            when (type) {
+                TRANSFER, MINT, BURN -> {
+                    itemActivitiesIds.add(id)
+                }
+                BID, LIST, SELL, CANCEL_LIST, CANCEL_BID -> {
+                    orderActivitiesIds.add(id)
+                }
+                AUCTION_BID, AUCTION_CREATED, AUCTION_CANCEL, AUCTION_FINISHED, AUCTION_STARTED, AUCTION_ENDED -> {
+                    auctionActivitiesIds.add(id)
+                }
+            }
+        }
+
+        val itemRequest = async {
+            if (itemActivitiesIds.isNotEmpty()) {
+                activityItemControllerApi.getNftActivitiesById(ActivitiesByIdRequestDto(itemActivitiesIds)).awaitFirst()
+            } else {
+                EMPTY_ITEM_ACTIVITIES
+            }
+        }
+        val orderRequest = async {
+            if (orderActivitiesIds.isNotEmpty()) {
+                activityOrderControllerApi.getOrderActivitiesById(ActivitiesByIdRequestDto(orderActivitiesIds)).awaitFirst()
+            } else {
+                EMPTY_ORDER_ACTIVITIES
+            }
+        }
+        val auctionRequest = async {
+            if (auctionActivitiesIds.isNotEmpty()) {
+                activityAuctionControllerApi.getAuctionActivitiesById(ActivitiesByIdRequestDto(auctionActivitiesIds)).awaitFirst()
+            } else {
+                EMPTY_AUCTION_ACTIVITIES
+            }
+        }
+
+        val items = itemRequest.await()
+        val orders = orderRequest.await()
+        val auctions = auctionRequest.await()
+
+        val itemActivities = items.items.map { ethActivityConverter.convert(it, blockchain) }
+        val orderActivities = orders.items.map { ethActivityConverter.convert(it, blockchain) }
+        val auctionActivities = auctions.items.map { ethActivityConverter.convert(it, blockchain) }
+
+        itemActivities + orderActivities + auctionActivities
     }
 
     private suspend fun getEthereumActivities(
