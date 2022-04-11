@@ -18,6 +18,7 @@ import com.rarible.protocol.union.dto.FlowAssetTypeFtDto
 import com.rarible.protocol.union.dto.FlowAssetTypeNftDto
 import com.rarible.protocol.union.dto.FlowOrderDataV1Dto
 import com.rarible.protocol.union.dto.OrderDataDto
+import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderEventDto
 import com.rarible.protocol.union.dto.OrderUpdateEventDto
 import com.rarible.protocol.union.dto.SolanaAuctionHouseDataV1Dto
@@ -38,22 +39,26 @@ class ElasticOrderConverter {
 
     fun convert(source: OrderEventDto): ElasticOrder {
         return when (source) {
-            is OrderUpdateEventDto -> ElasticOrder(
-                orderId = source.orderId.fullId(),
-                lastUpdatedAt = source.order.lastUpdatedAt,
-                type = orderType(source.order.make),
-                blockchain = source.orderId.blockchain,
-                platform = source.order.platform,
-                maker = source.order.maker,
-                make = asset(source.order.make),
-                take = asset(source.order.take),
-                taker = source.order.taker,
-                start = source.order.startedAt,
-                end = source.order.endedAt,
-                origins = origins(source.order.data),
-                status = source.order.status
-            )
+            is OrderUpdateEventDto -> convert(source.order)
         }
+    }
+
+    fun convert(source: OrderDto): ElasticOrder {
+        return ElasticOrder(
+                orderId = source.id.fullId(),
+                lastUpdatedAt = source.lastUpdatedAt,
+                type = orderType(source.make),
+                blockchain = source.id.blockchain,
+                platform = source.platform,
+                maker = source.maker,
+                make = asset(source.make),
+                take = asset(source.take),
+                taker = source.taker,
+                start = source.startedAt,
+                end = source.endedAt,
+                origins = origins(source.data),
+                status = source.status
+            )
     }
 
     fun origins(data: OrderDataDto): List<UnionAddress> {

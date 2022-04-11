@@ -7,6 +7,7 @@ import com.rarible.core.task.TaskRepository
 import com.rarible.core.task.TaskStatus
 import com.rarible.protocol.union.api.client.ActivityControllerApi
 import com.rarible.protocol.union.dto.ActivitySortDto
+import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.search.core.converter.ElasticActivityConverter
 import com.rarible.protocol.union.search.reindexer.config.SearchReindexerConfiguration
 import kotlinx.coroutines.flow.Flow
@@ -36,17 +37,7 @@ class ActivityTask(
     }
 
     override suspend fun isAbleToRun(param: String): Boolean {
-        return !allCompleted()
-    }
-
-    private suspend fun allCompleted(): Boolean {
-        tasks.forEach { (param, _) ->
-            val t = taskRepository.findByTypeAndParam(ACTIVITY_REINDEX, param).awaitSingleOrNull()
-            if(t?.lastStatus != TaskStatus.COMPLETED) {
-                return false
-            }
-        }
-        return true
+        return config.properties.startReindexActivity
     }
 
     /**
