@@ -16,8 +16,9 @@ import com.rarible.protocol.union.dto.MetaAttributeDto
 import com.rarible.protocol.union.dto.MetaContentDto
 import com.rarible.protocol.union.dto.RoyaltyDto
 import com.rarible.protocol.union.dto.continuation.page.Page
-import org.slf4j.LoggerFactory
+import com.rarible.protocol.union.dto.parser.IdParser
 import java.math.BigInteger
+import org.slf4j.LoggerFactory
 
 object FlowItemConverter {
 
@@ -36,7 +37,7 @@ object FlowItemConverter {
         return UnionItem(
             id = ItemIdDto(
                 blockchain = blockchain,
-                contract = item.collection,
+                contract = IdParser.split(item.id, 2).first(),
                 tokenId = item.tokenId
             ),
             collection = CollectionIdDto(blockchain, item.collection),
