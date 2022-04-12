@@ -57,6 +57,10 @@ open class TezosOrderService(
         return assetTypes.currencies.map { TezosConverter.convert(it, blockchain) }
     }
 
+    override suspend fun getBidCurrenciesByCollection(collectionId: String): List<AssetTypeDto> {
+        return emptyList()
+    }
+
     override suspend fun getOrderBidsByItem(
         platform: PlatformDto?,
         itemId: String,
@@ -110,6 +114,10 @@ open class TezosOrderService(
         val assetTypes = orderControllerApi.getCurrenciesBySellOrdersOfItem(contract, tokenId.toString())
             .awaitFirst()
         return assetTypes.currencies.map { TezosConverter.convert(it, blockchain) }
+    }
+
+    override suspend fun getSellCurrenciesByCollection(collectionId: String): List<AssetTypeDto> {
+        return emptyList()
     }
 
     override suspend fun getSellOrders(

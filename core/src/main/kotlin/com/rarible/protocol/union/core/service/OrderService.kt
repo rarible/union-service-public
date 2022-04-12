@@ -29,6 +29,10 @@ interface OrderService : BlockchainService {
         itemId: String
     ): List<AssetTypeDto>
 
+    suspend fun getBidCurrenciesByCollection(
+        collectionId: String
+    ): List<AssetTypeDto>
+
     suspend fun getOrderBidsByItem(
         platform: PlatformDto?,
         itemId: String,
@@ -55,6 +59,10 @@ interface OrderService : BlockchainService {
 
     suspend fun getSellCurrencies(
         itemId: String
+    ): List<AssetTypeDto>
+
+    suspend fun getSellCurrenciesByCollection(
+        collectionId: String
     ): List<AssetTypeDto>
 
     suspend fun getSellOrders(

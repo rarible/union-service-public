@@ -8,7 +8,7 @@ import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.continuation.page.Page
 import com.rarible.protocol.union.integration.flow.converter.FlowCollectionConverter
-import kotlinx.coroutines.reactive.awaitFirst
+import kotlinx.coroutines.reactor.awaitSingle
 
 @CaptureSpan(type = "blockchain")
 open class FlowCollectionService(
@@ -22,12 +22,12 @@ open class FlowCollectionService(
         val collections = collectionControllerApi.searchNftAllCollections(
             continuation,
             size
-        ).awaitFirst()
+        ).awaitSingle()
         return FlowCollectionConverter.convert(collections, blockchain)
     }
 
     override suspend fun getCollectionById(collectionId: String): UnionCollection {
-        val collection = collectionControllerApi.getNftCollectionById(collectionId).awaitFirst()
+        val collection = collectionControllerApi.getNftCollectionById(collectionId).awaitSingle()
         return FlowCollectionConverter.convert(collection, blockchain)
     }
 
@@ -44,7 +44,7 @@ open class FlowCollectionService(
             owner,
             continuation,
             size
-        ).awaitFirst()
+        ).awaitSingle()
         return FlowCollectionConverter.convert(items, blockchain)
     }
 }

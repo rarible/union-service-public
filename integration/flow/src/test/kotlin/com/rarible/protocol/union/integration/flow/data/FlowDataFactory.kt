@@ -67,6 +67,23 @@ fun randomFlowNftItemDto(itemId: ItemIdDto, creator: String): FlowNftItemDto {
     )
 }
 
+fun randomFlowItemDtoWithCollection(collectionDto: FlowNftCollectionDto, itemId: ItemIdDto, creator: String): FlowNftItemDto {
+    val (_, tokenId) = CompositeItemIdParser.split(itemId.value)
+    return FlowNftItemDto(
+        id = itemId.value,
+        collection = collectionDto.id,
+        tokenId = tokenId,
+        mintedAt = nowMillis(),
+        lastUpdatedAt = nowMillis(),
+        meta = randomFlowMetaDto(),
+        creators = listOf(FlowCreatorDto(creator, randomBigDecimal(0, 2))),
+        owner = randomString(),
+        royalties = listOf(FlowRoyaltyDto(randomString(), randomBigDecimal(0, 2))),
+        supply = randomBigInt(),
+        deleted = randomBoolean()
+    )
+}
+
 fun randomFlowMetaDto(): MetaDto {
     return MetaDto(
         description = randomString(),

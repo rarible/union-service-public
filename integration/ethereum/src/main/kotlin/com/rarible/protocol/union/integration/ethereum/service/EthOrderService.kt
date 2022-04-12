@@ -58,6 +58,14 @@ open class EthOrderService(
         return assetTypes.currencies.map { EthConverter.convert(it, blockchain) }
     }
 
+    override suspend fun getBidCurrenciesByCollection(collectionId: String): List<AssetTypeDto> {
+        val assetTypes = orderControllerApi.getCurrenciesByBidOrdersOfItem(
+            collectionId,
+            "-1"
+        ).awaitFirst()
+        return assetTypes.currencies.map { EthConverter.convert(it, blockchain) }
+    }
+
     override suspend fun getOrderBidsByItem(
         platform: PlatformDto?,
         itemId: String,
@@ -118,6 +126,14 @@ open class EthOrderService(
         val assetTypes = orderControllerApi.getCurrenciesBySellOrdersOfItem(
             contract,
             tokenId.toString()
+        ).awaitFirst()
+        return assetTypes.currencies.map { EthConverter.convert(it, blockchain) }
+    }
+
+    override suspend fun getSellCurrenciesByCollection(collectionId: String): List<AssetTypeDto> {
+        val assetTypes = orderControllerApi.getCurrenciesBySellOrdersOfItem(
+            collectionId,
+            "-1"
         ).awaitFirst()
         return assetTypes.currencies.map { EthConverter.convert(it, blockchain) }
     }
