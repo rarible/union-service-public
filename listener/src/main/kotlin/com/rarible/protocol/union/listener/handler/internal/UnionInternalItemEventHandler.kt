@@ -9,7 +9,7 @@ import com.rarible.protocol.union.listener.service.EnrichmentItemEventService
 import org.springframework.stereotype.Component
 
 @Component
-class UnionWrappedItemEventHandler(
+class UnionInternalItemEventHandler(
     private val itemEventService: EnrichmentItemEventService,
     private val reconciliationEventService: ReconciliationEventService
 ) {

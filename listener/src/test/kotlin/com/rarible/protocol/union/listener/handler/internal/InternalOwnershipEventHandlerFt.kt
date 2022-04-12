@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.listener.wrapped
+package com.rarible.protocol.union.listener.handler.internal
 
 import com.rarible.core.kafka.KafkaMessage
 import com.rarible.core.test.data.randomString
@@ -12,14 +12,13 @@ import com.rarible.protocol.union.listener.test.AbstractIntegrationTest
 import com.rarible.protocol.union.listener.test.IntegrationTest
 import io.mockk.clearMocks
 import io.mockk.coEvery
-import kotlinx.coroutines.FlowPreview
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import reactor.kotlin.core.publisher.toMono
 
 @IntegrationTest
-class WrappedOwnershipEventHandlerFt : AbstractIntegrationTest() {
+class InternalOwnershipEventHandlerFt : AbstractIntegrationTest() {
 
     @BeforeEach
     fun beforeEach() {
@@ -27,7 +26,7 @@ class WrappedOwnershipEventHandlerFt : AbstractIntegrationTest() {
     }
 
     @Test
-    fun `wrapped ownership event`() = runWithKafka {
+    fun `internal ownership event`() = runWithKafka {
         val itemId = randomEthItemId()
         val ownershipId = randomEthOwnershipId(itemId)
         val ownership = randomEthOwnershipDto(ownershipId)

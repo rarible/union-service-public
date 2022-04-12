@@ -57,6 +57,7 @@ common:
     enableOwnershipSourceEnrichment: false
     enableItemLastSaleEnrichment: true
     enableNotificationOnCollectionOrders: true
+    enableLegacyWrappedEventTopic: true
 
 
 integration:

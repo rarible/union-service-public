@@ -1,10 +1,10 @@
 package com.rarible.protocol.union.listener.job
 
+import com.rarible.protocol.union.core.model.ReconciliationMarkType
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionEventDto
 import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.parser.IdParser
-import com.rarible.protocol.union.enrichment.model.ReconciliationMarkType
 import com.rarible.protocol.union.enrichment.repository.ReconciliationMarkRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentRefreshService
 import com.rarible.protocol.union.listener.test.AbstractIntegrationTest

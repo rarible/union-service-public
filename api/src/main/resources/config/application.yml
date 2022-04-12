@@ -43,6 +43,10 @@ api:
   openapi:
     baseUrl: "https://api-dev.rarible.org"
     description: "Development (Ropsten, Mumbai, Hangzhou)"
+  subscribe:
+    workers:
+      item: 4
+      ownership: 4
 
 integration:
   ethereum:
@@ -87,6 +91,7 @@ common:
     enableRevertedActivityEventSending: false
     enableOwnershipSourceEnrichment: false
     enableItemLastSaleEnrichment: true
+    enableLegacyWrappedEventTopic: true
 
 meta:
   ipfsGateway: "https://rarible.mypinata.cloud/"

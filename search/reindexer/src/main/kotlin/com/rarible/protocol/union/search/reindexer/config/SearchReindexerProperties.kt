@@ -11,6 +11,9 @@ import org.springframework.boot.context.properties.ConstructorBinding
 @ConfigurationProperties(prefix = "reindexer")
 class SearchReindexerProperties {
     val activityTasks: List<ActivityTaskConfig> = allTasks()
+    val startReindexActivity = false
+    val orderTasks: Set<BlockchainDto> = BlockchainDto.values().toSet()
+    val startReindexOrder = false
 }
 
 data class ActivityTaskConfig(

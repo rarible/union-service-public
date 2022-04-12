@@ -3,6 +3,7 @@ package com.rarible.protocol.union.api.controller.test
 import com.rarible.core.common.nowMillis
 import com.rarible.core.kafka.KafkaMessage
 import com.rarible.core.kafka.KafkaSendResult
+import com.rarible.core.kafka.RaribleKafkaConsumer
 import com.rarible.core.kafka.RaribleKafkaProducer
 import com.rarible.protocol.currency.api.client.CurrencyControllerApi
 import com.rarible.protocol.currency.dto.CurrencyRateDto
@@ -34,7 +35,12 @@ import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.enrichment.meta.UnionMetaLoader
 import io.mockk.clearMocks
 import io.mockk.coEvery
-import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.async
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.BeforeEach
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
@@ -43,8 +49,8 @@ import reactor.kotlin.core.publisher.toMono
 import java.math.BigDecimal
 import java.net.URI
 import java.util.*
+import java.util.concurrent.LinkedBlockingQueue
 
-@FlowPreview
 abstract class AbstractIntegrationTest {
 
     @Autowired
@@ -197,6 +203,23 @@ abstract class AbstractIntegrationTest {
     lateinit var tezosOwnershipControllerApiMock: TezosOwnershipControllerApiMock
     lateinit var tezosOrderControllerApiMock: TezosOrderControllerApiMock
 
+    @Autowired
+    lateinit var itemConsumer: RaribleKafkaConsumer<ItemEventDto>
+    var itemEvents: Queue<KafkaMessage<ItemEventDto>>? = null
+    private var itemJob: Deferred<Unit>? = null
+
+    @Autowired
+    lateinit var ownershipConsumer: RaribleKafkaConsumer<OwnershipEventDto>
+    var ownershipEvents: Queue<KafkaMessage<OwnershipEventDto>>? = null
+    private var ownershipJob: Deferred<Unit>? = null
+
+    @Autowired
+    @Qualifier("item.producer.api")
+    lateinit var itemProducer: RaribleKafkaProducer<ItemEventDto>
+
+    @Autowired
+    lateinit var ethOwnershipProducer: RaribleKafkaProducer<ItemEventDto>
+
     @BeforeEach
     fun beforeEach() {
         clearMocks(
@@ -252,5 +275,27 @@ abstract class AbstractIntegrationTest {
             rate = BigDecimal.ONE,
             toCurrencyId = UUID.randomUUID().toString()
         ).toMono()
+    }
+
+    fun <T> runWithKafka(block: suspend CoroutineScope.() -> T): T = runBlocking {
+
+        ownershipEvents = LinkedBlockingQueue()
+        ownershipJob = async { ownershipConsumer.receiveAutoAck().collect { ownershipEvents?.add(it) } }
+
+        itemEvents = LinkedBlockingQueue()
+        itemJob = async {
+            itemConsumer.receiveAutoAck().collect {
+                itemEvents?.add(it)
+            }
+        }
+
+
+        val result = try {
+            block()
+        } finally {
+            itemJob?.cancelAndJoin()
+            ownershipJob?.cancelAndJoin()
+        }
+        result
     }
 }

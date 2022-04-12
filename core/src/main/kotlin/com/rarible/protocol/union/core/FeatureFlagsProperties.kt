@@ -10,6 +10,7 @@ data class FeatureFlagsProperties(
     val enableRevertedActivityEventSending: Boolean = false,
     val enableOwnershipSourceEnrichment: Boolean = false,
     val enableItemLastSaleEnrichment: Boolean = true,
+    val enableLegacyWrappedEventTopic: Boolean = true,
     var enableActivityQueriesToElasticSearch: Boolean = false,
-    var enableActivityQueriesPerTypeFilter: Boolean = false,
+    var enableActivityQueriesPerTypeFilter: Boolean = false
 )

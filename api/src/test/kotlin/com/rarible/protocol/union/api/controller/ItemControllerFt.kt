@@ -3,6 +3,7 @@ package com.rarible.protocol.union.api.controller
 import com.rarible.core.common.nowMillis
 import com.rarible.core.test.data.randomAddress
 import com.rarible.core.test.data.randomInt
+import com.rarible.core.test.data.randomString
 import com.rarible.protocol.dto.NftItemRoyaltyDto
 import com.rarible.protocol.dto.NftItemRoyaltyListDto
 import com.rarible.protocol.dto.NftMediaDto
@@ -37,12 +38,15 @@ import com.rarible.protocol.union.integration.tezos.data.randomTezosItemIdFullVa
 import com.rarible.protocol.union.integration.tezos.data.randomTezosMetaDto
 import com.rarible.protocol.union.integration.tezos.data.randomTezosNftItemDto
 import com.rarible.protocol.union.test.data.randomFlowAddress
+import com.rarible.protocol.union.test.data.randomFlowCollectionDto
+import com.rarible.protocol.union.test.data.randomFlowItemDtoWithCollection
 import com.rarible.protocol.union.test.data.randomFlowItemId
 import com.rarible.protocol.union.test.data.randomFlowItemIdFullValue
 import com.rarible.protocol.union.test.data.randomFlowMetaDto
 import com.rarible.protocol.union.test.data.randomFlowNftItemDto
 import io.mockk.coEvery
 import io.mockk.verify
+import java.math.BigInteger
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
@@ -55,7 +59,6 @@ import org.springframework.web.client.RestTemplate
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
 import scalether.domain.Address
-import java.math.BigInteger
 
 @FlowPreview
 @IntegrationTest
@@ -168,6 +171,22 @@ class ItemControllerFt : AbstractIntegrationTest() {
         val result = itemControllerClient.getItemById(itemIdFull).awaitFirst()
 
         assertThat(result.id.value).isEqualTo(itemId.value)
+        assertThat(result.id.blockchain).isEqualTo(BlockchainDto.FLOW)
+    }
+
+    @Test
+    fun `get item by id - flow, not enriched, random collection`() = runBlocking<Unit> {
+        val itemIdFull = randomFlowItemIdFullValue()
+        val itemId = IdParser.parseItemId(itemIdFull)
+        val collection = randomFlowCollectionDto()
+        val item = randomFlowItemDtoWithCollection(collection, itemId, randomString())
+
+        flowItemControllerApiMock.mockGetNftItemById(itemId, item)
+
+        val result = itemControllerClient.getItemById(itemIdFull).awaitFirst()
+
+        assertThat(result.id.value).isEqualTo(itemId.value)
+        assertThat(result.collection).isEqualTo(collection.id)
         assertThat(result.id.blockchain).isEqualTo(BlockchainDto.FLOW)
     }
 
