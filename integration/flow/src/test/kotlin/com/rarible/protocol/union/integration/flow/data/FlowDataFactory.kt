@@ -258,7 +258,8 @@ fun randomFlowTransferDto(): FlowTransferDto {
         transactionHash = randomString(),
         blockHash = randomString(),
         blockNumber = randomLong(),
-        logIndex = randomInt()
+        logIndex = randomInt(),
+        purchased = false
     )
 }
 

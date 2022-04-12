@@ -33,9 +33,9 @@ import com.rarible.protocol.union.dto.OrderMatchSwapDto
 import com.rarible.protocol.union.dto.TransferActivityDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.dto.ext
+import java.math.BigDecimal
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
-import java.math.BigDecimal
 
 @Component
 class FlowActivityConverter(
@@ -182,7 +182,8 @@ class FlowActivityConverter(
                         blockNumber = source.blockNumber,
                         logIndex = source.logIndex
                     ),
-                    reverted = false
+                    reverted = false,
+                    purchase = source.purchased
                 )
             }
             is FlowNftOrderActivityBidDto -> {
