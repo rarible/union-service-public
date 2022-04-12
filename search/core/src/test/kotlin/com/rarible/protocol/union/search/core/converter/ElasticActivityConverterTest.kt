@@ -664,7 +664,7 @@ class ElasticActivityConverterTest {
 
     private fun ItemIdDto.extractCollection(): String {
         val split = this.toString().split(':')
-        if (split.size == 2) return this.toString()
-        return "${split[0]}:${split[1]}"
+        if (split.size == 2) return split.last()
+        return split[1]
     }
 }

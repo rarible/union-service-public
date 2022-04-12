@@ -27,7 +27,7 @@ internal class ActivityQueryServiceIntegrationTest {
     protected lateinit var activityEsRepository: ActivityEsRepository
 
     @Autowired
-    private lateinit var service: ActivityQueryService
+    private lateinit var service: ActivityElasticQueryService
 
     @BeforeEach
     fun setUp() {

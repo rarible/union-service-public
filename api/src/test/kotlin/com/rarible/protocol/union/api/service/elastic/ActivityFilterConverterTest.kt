@@ -122,7 +122,7 @@ class ActivityFilterConverterTest {
                 .isEqualTo(emptyGenericFilter)
             actual as ElasticActivityQueryGenericFilter
             assertThat(actual.activityTypes).containsExactlyInAnyOrder(*types.toTypedArray())
-            assertThat(actual.anyItems).containsExactly("0x00000012345")
+            assertThat(actual.anyItem).isEqualTo("0x00000012345")
             assertThat(actual.blockchains).containsExactly(BlockchainDto.TEZOS)
             assertThat(actual.cursor).isEqualTo(cursor)
         }

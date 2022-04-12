@@ -365,7 +365,7 @@ class ElasticActivityConverter {
     private fun AssetTypeExtension.getContract(): String? {
         if (this.isCurrency) return currencyAddress()
         return if (itemId != null) {
-            "${itemId!!.blockchain}:${itemId!!.value.split(':').first()}"
+            itemId!!.value.split(':').first()
         } else null
     }
 }

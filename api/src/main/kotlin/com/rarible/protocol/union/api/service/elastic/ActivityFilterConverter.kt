@@ -60,7 +60,7 @@ class ActivityFilterConverter(
             else -> ElasticActivityQueryGenericFilter(
                 blockchains = setOf(fullItemId.blockchain),
                 activityTypes = type.toSet(),
-                anyItems = setOf(fullItemId.value),
+                anyItem = fullItemId.value,
                 cursor = cursor,
             )
         }

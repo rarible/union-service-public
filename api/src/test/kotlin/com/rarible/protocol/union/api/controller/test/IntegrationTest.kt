@@ -7,6 +7,7 @@ import com.rarible.core.test.ext.MongoTest
 import com.rarible.core.test.ext.RedisTest
 import com.rarible.loader.cache.configuration.EnableRaribleCacheLoader
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Import
 import org.springframework.test.context.ActiveProfiles
 
@@ -27,4 +28,5 @@ import org.springframework.test.context.ActiveProfiles
 )
 @ActiveProfiles("test")
 @Import(value = [TestApiConfiguration::class])
+@ComponentScan(basePackages = ["com.rarible.protocol.union.api", "com.rarible.protocol.union.search.core"])
 annotation class IntegrationTest

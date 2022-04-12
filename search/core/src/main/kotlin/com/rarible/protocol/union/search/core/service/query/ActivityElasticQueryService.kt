@@ -10,7 +10,7 @@ import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperatio
 import org.springframework.stereotype.Service
 
 @Service
-class ActivityQueryService(
+class ActivityElasticQueryService(
     private val esOperations: ReactiveElasticsearchOperations,
     private val queryBuilderService: QueryBuilderService,
 ) {

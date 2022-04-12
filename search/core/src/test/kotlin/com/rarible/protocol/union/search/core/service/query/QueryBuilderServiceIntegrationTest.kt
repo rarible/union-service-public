@@ -213,13 +213,13 @@ internal class QueryBuilderServiceIntegrationTest {
     }
 
     @Test
-    fun `should query by any items`() = runBlocking<Unit> {
+    fun `should query by any item`() = runBlocking<Unit> {
         // given
-        val filter = ElasticActivityQueryGenericFilter(anyItems = setOf("0x01", "0x02"))
-        val toFind1 = buildActivity().copy(item = ElasticActivity.Item(make = "0x01", take = null))
-        val toFind2 = buildActivity().copy(item = ElasticActivity.Item(make = "0x03", take = "0x02"))
-        val toSkip1 = buildActivity().copy(item = ElasticActivity.Item(make = "0x05", take = null))
-        val toSkip2 = buildActivity().copy(item = ElasticActivity.Item(make = "0x04", take = "0x06"))
+        val filter = ElasticActivityQueryGenericFilter(anyItem = "0x01:111")
+        val toFind1 = buildActivity().copy(item = ElasticActivity.Item(make = "0x01:111", take = null))
+        val toFind2 = buildActivity().copy(item = ElasticActivity.Item(make = "0x03:333", take = "0x01:111"))
+        val toSkip1 = buildActivity().copy(item = ElasticActivity.Item(make = "0x05:555", take = null))
+        val toSkip2 = buildActivity().copy(item = ElasticActivity.Item(make = "0x04:444", take = "0x06:666"))
 
         activityEsRepository.saveAll(listOf(toFind1, toFind2, toSkip1, toSkip2)).awaitLast()
 
@@ -233,15 +233,15 @@ internal class QueryBuilderServiceIntegrationTest {
     }
 
     @Test
-    fun `should query by make items`() = runBlocking<Unit> {
+    fun `should query by make item`() = runBlocking<Unit> {
         // given
-        val filter = ElasticActivityQueryGenericFilter(makeItems = setOf("0x01", "0x02"))
-        val toFind1 = buildActivity().copy(item = ElasticActivity.Item(make = "0x01", take = null))
-        val toFind2 = buildActivity().copy(item = ElasticActivity.Item(make = "0x02", take = "0x03"))
-        val toSkip1 = buildActivity().copy(item = ElasticActivity.Item(make = "0x05", take = "0x01"))
-        val toSkip2 = buildActivity().copy(item = ElasticActivity.Item(make = "0x04", take = "0x02"))
+        val filter = ElasticActivityQueryGenericFilter(makeItem = "0x01:111")
+        val toFind1 = buildActivity().copy(item = ElasticActivity.Item(make = "0x01:111", take = null))
+        val toSkip0 = buildActivity().copy(item = ElasticActivity.Item(make = "0x03:333", take = "0x01:111"))
+        val toSkip1 = buildActivity().copy(item = ElasticActivity.Item(make = "0x05:555", take = null))
+        val toSkip2 = buildActivity().copy(item = ElasticActivity.Item(make = "0x04:444", take = "0x06:666"))
 
-        activityEsRepository.saveAll(listOf(toFind1, toFind2, toSkip1, toSkip2)).awaitLast()
+        activityEsRepository.saveAll(listOf(toFind1, toSkip0, toSkip1, toSkip2)).awaitLast()
 
         // when
         val searchQuery = service.build(filter, sort)
@@ -249,19 +249,20 @@ internal class QueryBuilderServiceIntegrationTest {
             .map { it.content }
 
         // then
-        assertThat(searchHits).containsExactlyInAnyOrder(toFind1, toFind2)
+        assertThat(searchHits).containsExactlyInAnyOrder(toFind1)
     }
 
     @Test
-    fun `should query by take items`() = runBlocking<Unit> {
+    fun `should query by take item`() = runBlocking<Unit> {
         // given
-        val filter = ElasticActivityQueryGenericFilter(takeItems = setOf("0x01", "0x02"))
-        val toFind1 = buildActivity().copy(item = ElasticActivity.Item(make = "0x05", take = "0x01"))
-        val toFind2 = buildActivity().copy(item = ElasticActivity.Item(make = "0x04", take = "0x02"))
-        val toSkip1 = buildActivity().copy(item = ElasticActivity.Item(make = "0x01", take = null))
-        val toSkip2 = buildActivity().copy(item = ElasticActivity.Item(make = "0x02", take = "0x03"))
+        val filter = ElasticActivityQueryGenericFilter(takeItem = "0x01:111")
+        val toSkip0 = buildActivity().copy(item = ElasticActivity.Item(make = "0x01:111", take = null))
+        val toFind1 = buildActivity().copy(item = ElasticActivity.Item(make = "0x03:333", take = "0x01:111"))
+        val toSkip1 = buildActivity().copy(item = ElasticActivity.Item(make = "0x05:555", take = null))
+        val toSkip2 = buildActivity().copy(item = ElasticActivity.Item(make = "0x04:444", take = "0x06:666"))
 
-        activityEsRepository.saveAll(listOf(toFind1, toFind2, toSkip1, toSkip2)).awaitLast()
+
+        activityEsRepository.saveAll(listOf(toFind1, toSkip0, toSkip1, toSkip2)).awaitLast()
 
         // when
         val searchQuery = service.build(filter, sort)
@@ -269,7 +270,7 @@ internal class QueryBuilderServiceIntegrationTest {
             .map { it.content }
 
         // then
-        assertThat(searchHits).containsExactlyInAnyOrder(toFind1, toFind2)
+        assertThat(searchHits).containsExactlyInAnyOrder(toFind1)
     }
 
     @Test
