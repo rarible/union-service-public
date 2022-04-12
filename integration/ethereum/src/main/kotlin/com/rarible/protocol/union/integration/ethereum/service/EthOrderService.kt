@@ -17,7 +17,7 @@ import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
 import kotlinx.coroutines.reactive.awaitFirst
 
-open class  EthOrderService(
+open class EthOrderService(
     override val blockchain: BlockchainDto,
     private val orderControllerApi: OrderControllerApi,
     private val ethOrderConverter: EthOrderConverter
