@@ -7,6 +7,7 @@ import com.rarible.protocol.solana.dto.ActivityFilterByCollectionDto
 import com.rarible.protocol.solana.dto.ActivityFilterByItemDto
 import com.rarible.protocol.solana.dto.ActivityFilterByUserDto
 import com.rarible.protocol.solana.dto.ActivityFilterDto
+import com.rarible.protocol.union.core.model.TypedActivityId
 import com.rarible.protocol.union.core.service.ActivityService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.ActivityDto
@@ -94,6 +95,10 @@ open class SolanaActivityService(
         )
         return searchActivities(filter, continuation, size, sort)
 
+    }
+
+    override suspend fun getActivitiesByIds(ids: List<TypedActivityId>): List<ActivityDto> {
+        TODO("To be implemented under ALPHA-276")
     }
 
     private suspend fun searchActivities(

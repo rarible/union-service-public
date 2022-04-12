@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.integration.immutablex.service
 
+import com.rarible.protocol.union.core.model.TypedActivityId
 import com.rarible.protocol.union.core.service.ActivityService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.ActivityDto
@@ -123,5 +124,9 @@ class ImmutablexActivityService(
                 if (sort == ActivitySortDto.LATEST_FIRST) it.toList().asReversed() else it.toList()
             }
         return Paging(ActivityContinuation.ByLastUpdatedAndIdDesc, result).getSlice(size)
+    }
+
+    override suspend fun getActivitiesByIds(ids: List<TypedActivityId>): List<ActivityDto> {
+        TODO("To be implemented under ALPHA-276")
     }
 }
