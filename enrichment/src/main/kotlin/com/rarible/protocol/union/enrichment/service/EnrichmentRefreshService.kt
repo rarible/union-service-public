@@ -145,7 +145,7 @@ class EnrichmentRefreshService(
         sellCurrencies: List<String>,
         bidCurrencies: List<String>
     ) = coroutineScope {
-        logger.info("Starting to reconcile Item [{}]", shortCollectionId)
+        logger.info("Starting to reconcile Collection [{}]", shortCollectionId)
         val unionCollectionDeferred = async { enrichmentCollectionService.fetch(shortCollectionId) }
 
         // Looking for best sell orders
@@ -175,10 +175,10 @@ class EnrichmentRefreshService(
             )
 
             if (shortCollection.isNotEmpty()) {
-                logger.info("Saving refreshed Item [{}] with gathered enrichment data [{}]", shortCollectionId, shortCollection)
+                logger.info("Saving refreshed Collection [{}] with gathered enrichment data [{}]", shortCollectionId, shortCollection)
                 enrichmentCollectionService.save(shortCollection)
             } else {
-                logger.info("Item [{}] has no enrichment data, will be deleted", shortCollectionId)
+                logger.info("Collection [{}] has no enrichment data, will be deleted", shortCollectionId)
                 enrichmentCollectionService.delete(shortCollectionId)
             }
             shortCollection
