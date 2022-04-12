@@ -3,6 +3,7 @@ package com.rarible.protocol.union.listener.test.data
 import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.core.model.ReconciliationMarkType
 import com.rarible.protocol.union.enrichment.model.ReconciliationMark
+import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.listener.config.InternalConsumerProperties
 import com.rarible.protocol.union.listener.config.MetricsProperties
