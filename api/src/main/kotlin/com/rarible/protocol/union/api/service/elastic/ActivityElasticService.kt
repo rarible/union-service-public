@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.api.service.elastic
 
+import com.rarible.core.common.mapAsync
 import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.api.service.ActivityQueryService
 import com.rarible.protocol.union.core.model.TypedActivityId
@@ -134,16 +135,12 @@ class ActivityElasticService(
 
         val evaluatedBlockchains = router.getEnabledBlockchains(blockchainMap.keys)
 
-        val results = coroutineScope {
-            evaluatedBlockchains.mapNotNull { blockchain ->
-                val ids = blockchainMap[blockchain]
-                if (!ids.isNullOrEmpty()) {
-                    async {
-                        router.getService(blockchain).getActivitiesByIds(ids)
-                    }
-                } else null
-            }.awaitAll()
-        }
+        val results = evaluatedBlockchains.mapAsync { blockchain ->
+            val ids = blockchainMap[blockchain]
+            if (!ids.isNullOrEmpty()) {
+                router.getService(blockchain).getActivitiesByIds(ids)
+            } else null
+        }.filterNotNull()
 
         val mergedResult = arrayOfNulls<ActivityDto>(activities.size)
         results.forEach {
