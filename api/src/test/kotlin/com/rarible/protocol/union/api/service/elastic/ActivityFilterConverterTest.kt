@@ -118,7 +118,7 @@ class ActivityFilterConverterTest {
 
             // then
             assertThat(actual).usingRecursiveComparison()
-                .ignoringFields("activityTypes", "anyItems", "blockchains", "cursor")
+                .ignoringFields("activityTypes", "anyItem", "blockchains", "cursor")
                 .isEqualTo(emptyGenericFilter)
             actual as ElasticActivityQueryGenericFilter
             assertThat(actual.activityTypes).containsExactlyInAnyOrder(*types.toTypedArray())
