@@ -61,7 +61,7 @@ class UnionMetaService(
         }
         if (synchronous) {
             logger.info("Loading meta synchronously for ${itemId.fullId()}")
-            var itemMeta = try {
+            val itemMeta = try {
                 unionMetaLoader.load(itemId)
             } catch (e: Exception) {
                 logger.warn("Synchronous meta loading failed for ${itemId.fullId()}")
