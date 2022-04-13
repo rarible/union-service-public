@@ -58,7 +58,7 @@ class EnrichmentOrderEventService(
         }
         val bidUpdateFuture = takeItemId?.let {
             async {
-                if (!makeAssetExt.isCollection) {
+                if (!takeAssetExt.isCollection) {
                     ignoreApi404 {
                         enrichmentItemEventService.onItemBestBidOrderUpdated(takeItemId, order, notificationEnabled)
                     }
