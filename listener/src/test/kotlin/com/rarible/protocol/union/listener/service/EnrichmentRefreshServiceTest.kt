@@ -1,9 +1,16 @@
 package com.rarible.protocol.union.listener.service
 
-import com.rarible.protocol.dto.*
-import com.rarible.protocol.union.dto.*
+import com.rarible.protocol.dto.OrderCurrenciesDto
+import com.rarible.protocol.dto.EthAssetTypeDto
+import com.rarible.protocol.dto.OrdersPaginationDto
+import com.rarible.protocol.union.dto.CollectionUpdateEventDto
+import com.rarible.protocol.union.dto.ext
 import com.rarible.protocol.union.enrichment.service.EnrichmentRefreshService
-import com.rarible.protocol.union.integration.ethereum.data.*
+import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionId
+import com.rarible.protocol.union.integration.ethereum.data.randomEthV2OrderDto
+import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionDto
+import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionAsset
+import com.rarible.protocol.union.integration.ethereum.data.randomEthAssetErc20
 import com.rarible.protocol.union.listener.test.AbstractIntegrationTest
 import com.rarible.protocol.union.listener.test.IntegrationTest
 import io.mockk.clearMocks
@@ -90,7 +97,6 @@ class EnrichmentRefreshServiceTest : AbstractIntegrationTest(){
         val updateEvent = enrichmentRefreshService.reconcileCollection(collectionId)
 
         assertThat(updateEvent.collectionId).isEqualTo(collectionId)
-        assertThat(updateEvent.javaClass.kotlin).isEqualTo(CollectionUpdateEventDto::class)
         val collectionUpdateEvent = updateEvent as CollectionUpdateEventDto
 
         assertThat(collectionUpdateEvent.collection.bestBidOrder).isNull()
@@ -164,7 +170,6 @@ class EnrichmentRefreshServiceTest : AbstractIntegrationTest(){
         val updateEvent = enrichmentRefreshService.reconcileCollection(collectionId)
 
         assertThat(updateEvent.collectionId).isEqualTo(collectionId)
-        assertThat(updateEvent.javaClass.kotlin).isEqualTo(CollectionUpdateEventDto::class)
         val collectionUpdateEvent = updateEvent as CollectionUpdateEventDto
 
         assertThat(collectionUpdateEvent.collection.bestBidOrder!!.take.type.ext.isCollection).isTrue
