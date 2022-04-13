@@ -3,6 +3,7 @@ package com.rarible.protocol.union.enrichment.meta
 import com.rarible.core.content.meta.loader.ContentMeta
 import com.rarible.core.content.meta.loader.ContentMetaReceiver
 import com.rarible.protocol.union.core.model.UnionAudioProperties
+import com.rarible.protocol.union.core.model.UnionHtmlProperties
 import com.rarible.protocol.union.core.model.UnionImageProperties
 import com.rarible.protocol.union.core.model.UnionMetaContentProperties
 import com.rarible.protocol.union.core.model.UnionModel3dProperties
@@ -66,11 +67,13 @@ class UnionContentMetaLoader(
         val isVideo = type.contains("video")
         val isAudio = type.contains("audio") // TODO[media]: add dedicated properties for audio.
         val isModel = type.contains("model")
+        val isHtml = type.contains("text/html")
         return when {
             isImage -> toImageProperties()
             isVideo -> toVideoProperties()
             isAudio -> toAudioProperties()
             isModel -> toModel3dProperties()
+            isHtml -> toHtmlProperties()
             else -> return null
         }
     }
@@ -95,6 +98,11 @@ class UnionContentMetaLoader(
     )
 
     private fun ContentMeta.toModel3dProperties() = UnionModel3dProperties(
+        mimeType = type,
+        size = size
+    )
+
+    private fun ContentMeta.toHtmlProperties() = UnionHtmlProperties(
         mimeType = type,
         size = size
     )

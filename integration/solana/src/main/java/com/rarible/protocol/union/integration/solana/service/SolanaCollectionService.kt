@@ -9,6 +9,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.continuation.page.Page
 import com.rarible.protocol.union.integration.solana.converter.SolanaCollectionConverter
 import kotlinx.coroutines.reactive.awaitFirst
+import kotlinx.coroutines.reactive.awaitFirstOrNull
 
 @CaptureSpan(type = "blockchain")
 open class SolanaCollectionService(
@@ -31,7 +32,7 @@ open class SolanaCollectionService(
     }
 
     override suspend fun refreshCollectionMeta(collectionId: String) {
-        collectionApi.refreshCollectionMeta(collectionId).awaitFirst()
+        collectionApi.refreshCollectionMeta(collectionId).awaitFirstOrNull()
     }
 
 }

@@ -12,6 +12,7 @@ import com.rarible.protocol.union.dto.continuation.page.Page
 import com.rarible.protocol.union.integration.solana.converter.SolanaItemConverter
 import com.rarible.protocol.union.integration.solana.converter.SolanaItemMetaConverter
 import kotlinx.coroutines.reactive.awaitFirst
+import kotlinx.coroutines.reactive.awaitFirstOrNull
 
 @CaptureSpan(type = "blockchain")
 open class SolanaItemService(
@@ -53,7 +54,7 @@ open class SolanaItemService(
     }
 
     override suspend fun resetItemMeta(itemId: String) {
-        tokenApi.resetTokenMeta(itemId).awaitFirst()
+        tokenApi.resetTokenMeta(itemId).awaitFirstOrNull()
     }
 
     override suspend fun getItemsByCollection(
