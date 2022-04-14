@@ -31,7 +31,9 @@ data class ImmutablexAsset(
     @JsonProperty("updated_at")
     val updatedAt: Instant?,
     val user: String?
-)
+) {
+    val itemId = "$tokenAddress:$tokenId"
+}
 
 data class ImmutablexCollectionShort(
     @JsonProperty("icon_url")
@@ -161,6 +163,11 @@ data class ImmutablexTransfer(
     val user: String
 ): ImmutablexEvent(transactionId, timestamp)
 
+data class ImmutablexTransfersPage(
+    val cursor: String,
+    val remaining: Boolean,
+    val result: List<ImmutablexTransfer>
+)
 data class TradeSide(
     @JsonProperty("order_id")
     val orderId: Long,
@@ -183,6 +190,12 @@ data class ImmutablexTrade(
     val status: String,
     override val timestamp: Instant
 ): ImmutablexEvent(transactionId, timestamp)
+
+data class ImmutablexTradesPage(
+    val cursor: String,
+    val remaining: Boolean,
+    val result: List<ImmutablexTrade>
+)
 
 data class ImmutablexDeposit(
     @JsonProperty("transaction_id")
