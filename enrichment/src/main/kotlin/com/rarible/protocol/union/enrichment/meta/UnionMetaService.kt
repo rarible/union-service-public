@@ -1,5 +1,7 @@
 package com.rarible.protocol.union.enrichment.meta
 
+import com.rarible.core.apm.SpanType
+import com.rarible.core.apm.withSpan
 import com.rarible.loader.cache.CacheLoaderService
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.dto.ItemIdDto
@@ -30,7 +32,10 @@ class UnionMetaService(
     suspend fun getAvailableMeta(itemIds: List<ItemIdDto>): Map<ItemIdDto, UnionMeta> {
         val keyMap = itemIds.associateBy { it.fullId() }
         val result = HashMap<ItemIdDto, UnionMeta>()
-        unionMetaCacheLoaderService.getAll(keyMap.keys.toList()).forEach {
+        val cached = withSpan(name = "fetchCachedMeta", type = SpanType.CACHE) {
+            unionMetaCacheLoaderService.getAll(keyMap.keys.toList())
+        }
+        cached.forEach {
             val id = keyMap[it.key]!!
             unionMetaMetrics.onMetaCacheHitOrMiss(
                 itemId = id,
