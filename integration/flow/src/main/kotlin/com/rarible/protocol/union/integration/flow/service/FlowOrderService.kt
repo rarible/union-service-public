@@ -58,6 +58,10 @@ open class FlowOrderService(
         return assets.map { FlowConverter.convert(it, blockchain).type }
     }
 
+    override suspend fun getBidCurrenciesByCollection(collectionId: String): List<AssetTypeDto> {
+        return emptyList()
+    }
+
     override suspend fun getOrderBidsByItem(
         platform: PlatformDto?,
         itemId: String,
@@ -112,6 +116,10 @@ open class FlowOrderService(
         val assets = orderControllerApi.getSellCurrencies(itemId)
             .collectList().awaitFirst()
         return assets.map { FlowConverter.convert(it, blockchain).type }
+    }
+
+    override suspend fun getSellCurrenciesByCollection(collectionId: String): List<AssetTypeDto> {
+        return emptyList()
     }
 
     override suspend fun getSellOrders(

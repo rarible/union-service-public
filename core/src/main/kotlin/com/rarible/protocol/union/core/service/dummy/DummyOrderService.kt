@@ -36,6 +36,10 @@ class DummyOrderService(
         return emptyList()
     }
 
+    override suspend fun getBidCurrenciesByCollection(collectionId: String): List<AssetTypeDto> {
+        return emptyList()
+    }
+
     override suspend fun getOrderBidsByItem(
         platform: PlatformDto?,
         itemId: String,
@@ -65,6 +69,10 @@ class DummyOrderService(
     }
 
     override suspend fun getSellCurrencies(itemId: String): List<AssetTypeDto> {
+        return emptyList()
+    }
+
+    override suspend fun getSellCurrenciesByCollection(collectionId: String): List<AssetTypeDto> {
         return emptyList()
     }
 

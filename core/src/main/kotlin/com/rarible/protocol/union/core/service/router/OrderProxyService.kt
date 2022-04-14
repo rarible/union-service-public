@@ -41,6 +41,10 @@ class OrderProxyService(
         return orderService.getBidCurrencies(itemId)
     }
 
+    override suspend fun getBidCurrenciesByCollection(collectionId: String): List<AssetTypeDto> {
+        return emptyList()
+    }
+
     override suspend fun getOrderBidsByItem(
         platform: PlatformDto?,
         itemId: String,
@@ -93,6 +97,10 @@ class OrderProxyService(
 
     override suspend fun getSellCurrencies(itemId: String): List<AssetTypeDto> {
         return orderService.getSellCurrencies(itemId)
+    }
+
+    override suspend fun getSellCurrenciesByCollection(collectionId: String): List<AssetTypeDto> {
+        return emptyList()
     }
 
     override suspend fun getSellOrders(

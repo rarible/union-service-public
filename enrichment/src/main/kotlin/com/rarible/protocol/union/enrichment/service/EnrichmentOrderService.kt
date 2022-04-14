@@ -220,16 +220,16 @@ class EnrichmentOrderService(
 
     private fun orderBidFilter(order: OrderDto, filter: OrderFilters): Boolean {
         return when (filter) {
-            OrderFilters.COLLECTION -> order.make.type.ext.isCollection
-            OrderFilters.ITEM -> !order.make.type.ext.isCollection
+            OrderFilters.COLLECTION -> order.take.type.ext.isCollection
+            OrderFilters.ITEM -> !order.take.type.ext.isCollection
             OrderFilters.ALL -> true
         }
     }
 
     private fun orderSellFilter(order: OrderDto, filter: OrderFilters): Boolean {
         return when (filter) {
-            OrderFilters.COLLECTION -> order.take.type.ext.isCollection
-            OrderFilters.ITEM -> !order.take.type.ext.isCollection
+            OrderFilters.COLLECTION -> order.make.type.ext.isCollection
+            OrderFilters.ITEM -> !order.make.type.ext.isCollection
             OrderFilters.ALL -> true
         }
     }

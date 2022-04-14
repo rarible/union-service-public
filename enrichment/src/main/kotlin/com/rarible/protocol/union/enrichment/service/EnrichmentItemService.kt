@@ -5,11 +5,13 @@ import com.rarible.core.apm.SpanType
 import com.rarible.core.apm.withSpan
 import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.core.model.UnionItem
+import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.loadMetaSynchronously
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.AuctionDto
 import com.rarible.protocol.union.dto.AuctionIdDto
+import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.enrichment.converter.EnrichedItemConverter
@@ -88,6 +90,7 @@ class EnrichmentItemService(
         item: UnionItem? = null,
         orders: Map<OrderIdDto, OrderDto> = emptyMap(),
         auctions: Map<AuctionIdDto, AuctionDto> = emptyMap(),
+        meta: Map<ItemIdDto, UnionMeta> = emptyMap(),
         loadMetaSynchronously: Boolean = false
     ) = coroutineScope {
 
@@ -98,7 +101,10 @@ class EnrichmentItemService(
         val bestSellOrder = async { enrichmentOrderService.fetchOrderIfDiffers(shortItem?.bestSellOrder, orders) }
         val bestBidOrder = async { enrichmentOrderService.fetchOrderIfDiffers(shortItem?.bestBidOrder, orders) }
 
-        val meta = if (item?.meta != null && itemId.value.contains(USE_META_FOR_TOKEN)) {
+        val metaHint = meta[itemId]
+        val itemMeta = if (metaHint != null) {
+            CompletableDeferred(metaHint)
+        } else if (item?.meta != null && itemId.value.contains(USE_META_FOR_TOKEN)) {
             CompletableDeferred(item.meta)
         } else {
             withSpanAsync("fetchMeta", spanType = SpanType.CACHE) {
@@ -120,7 +126,7 @@ class EnrichmentItemService(
         val itemDto = EnrichedItemConverter.convert(
             item = fetchedItem.await(),
             shortItem = shortItem,
-            meta = meta.await(),
+            meta = itemMeta.await(),
             orders = bestOrders,
             auctions = auctionsData.await()
         )
@@ -135,6 +141,7 @@ class EnrichmentItemService(
     ): Deferred<T> = async { withSpan(name = spanName, type = spanType, body = block) }
 
     private companion object {
+
         //TODO: Need remove
         const val USE_META_FOR_TOKEN = "0x629cdec6acc980ebeebea9e5003bcd44db9fc5ce"
     }
