@@ -43,7 +43,7 @@ class ActivityElasticService(
     ): ActivitiesDto {
         val effectiveCursor = cursor ?: continuation
         val filter = filterConverter.convertGetAllActivities(type, blockchains, effectiveCursor)
-        val queryResult = queryService.query(filter, convertSort(sort), size ?: 50)
+        val queryResult = queryService.query(filter, convertSort(sort), size)
         val activities = getActivities(queryResult.activities)
         return ActivitiesDto(
             continuation = null,
@@ -62,7 +62,7 @@ class ActivityElasticService(
     ): ActivitiesDto {
         val effectiveCursor = cursor ?: continuation
         val filter = filterConverter.convertGetActivitiesByCollection(type, collection, effectiveCursor)
-        val queryResult = queryService.query(filter, convertSort(sort), size ?: 50)
+        val queryResult = queryService.query(filter, convertSort(sort), size)
         val activities = getActivities(queryResult.activities)
         return ActivitiesDto(
             continuation = null,
@@ -81,7 +81,7 @@ class ActivityElasticService(
     ): ActivitiesDto {
         val effectiveCursor = cursor ?: continuation
         val filter = filterConverter.convertGetActivitiesByItem(type, itemId, effectiveCursor)
-        val queryResult = queryService.query(filter, convertSort(sort), size ?: 50)
+        val queryResult = queryService.query(filter, convertSort(sort), size)
         val activities = getActivities(queryResult.activities)
         return ActivitiesDto(
             continuation = null,
@@ -103,7 +103,7 @@ class ActivityElasticService(
     ): ActivitiesDto {
         val effectiveCursor = cursor ?: continuation
         val filter = filterConverter.convertGetActivitiesByUser(type, user, blockchains, from, to, effectiveCursor)
-        val queryResult = queryService.query(filter, convertSort(sort), size ?: 50)
+        val queryResult = queryService.query(filter, convertSort(sort), size)
         val activities = getActivities(queryResult.activities)
         return ActivitiesDto(
             continuation = null,
