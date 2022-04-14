@@ -5,12 +5,14 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexAsset
+import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexMint
+import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexMintsPage
 import io.mockk.coEvery
 import io.mockk.mockk
+import java.math.BigInteger
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
-import java.math.BigInteger
 
 class ImmutablexItemServiceTest {
 
@@ -27,9 +29,18 @@ class ImmutablexItemServiceTest {
         )
     }
 
+    private val expectedMint by lazy {
+        mapper.readValue(
+            ImmutablexItemServiceTest::class.java.getResourceAsStream("mint.json"),
+            ImmutablexMint::class.java
+        )
+
+    }
+
     private val service = ImmutablexItemService(
         mockk {
             coEvery { getAsset(any()) } returns expectedAsset
+            coEvery { getMints(any(), any(), any(), any(), any(), any(), any()) } returns ImmutablexMintsPage("", false, listOf(expectedMint))
         }
     )
 
