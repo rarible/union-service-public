@@ -107,38 +107,38 @@ class ItemApiService(
             return emptyList()
         }
         val now = nowMillis()
-        val shortItems: Map<ItemIdDto, ShortItem> = enrichmentItemService
-            .findAll(unionItems.map { ShortItemId(it.id) })
-            .associateBy { it.id.toDto() }
-
-        // Looking for full orders for existing items in order-indexer
-        val shortOrderIds = shortItems.values
-            .map { listOfNotNull(it.bestBidOrder?.dtoId, it.bestSellOrder?.dtoId) }
-            .flatten()
 
         val enrichedItems = coroutineScope {
-
-            val orders = async {
-                orderApiService.getByIds(shortOrderIds)
-                    .associateBy { it.id }
-            }
 
             val meta = async {
                 unionMetaService.getAvailableMeta(unionItems.map { it.id })
             }
 
-            unionItems.map {
+            val shortItems: Map<ItemIdDto, ShortItem> = enrichmentItemService
+                .findAll(unionItems.map { ShortItemId(it.id) })
+                .associateBy { it.id.toDto() }
+
+            // Looking for full orders for existing items in order-indexer
+            val shortOrderIds = shortItems.values
+                .map { listOfNotNull(it.bestBidOrder?.dtoId, it.bestSellOrder?.dtoId) }
+                .flatten()
+
+            val orders = orderApiService.getByIds(shortOrderIds)
+                .associateBy { it.id }
+
+            val enriched = unionItems.map {
                 val shortItem = shortItems[it.id]
                 enrichmentItemService.enrichItem(
                     shortItem = shortItem,
                     item = it,
-                    orders = orders.await(),
+                    orders = orders,
                     meta = meta.await()
                 )
             }
+            logger.info("Enriched {} of {} Items ({}ms)", shortItems.size, unionItems.size, spent(now))
+            enriched
         }
 
-        logger.info("Enriched {} of {} Items ({}ms)", shortItems.size, enrichedItems.size, spent(now))
 
         return enrichedItems
     }
