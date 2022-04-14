@@ -223,7 +223,7 @@ internal class ActivityElasticServiceIntegrationTest {
             val blockchains = listOf(BlockchainDto.ETHEREUM)
             val size = 3
             val sort = ActivitySortDto.LATEST_FIRST
-            val users = listOf("0x112233", "0x223344")
+            val users = listOf("ETHEREUM:0x112233", "ETHEREUM:0x223344")
             val eth1 = randomUnionActivityOrderList(BlockchainDto.ETHEREUM).copy(
                 id = ActivityIdDto(BlockchainDto.ETHEREUM, "1"),
             )

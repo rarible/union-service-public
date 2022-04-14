@@ -135,7 +135,7 @@ class ActivityFilterConverterTest {
         fun `should convert - happy path`() {
             // given
             val userActivityTypes = listOf(UserActivityTypeDto.TRANSFER_FROM, UserActivityTypeDto.TRANSFER_TO, UserActivityTypeDto.BUY)
-            val users = listOf("loupa", "poupa")
+            val users = listOf("SOLANA:loupa", "FLOW:poupa")
             val blockchains = listOf(BlockchainDto.SOLANA, BlockchainDto.FLOW)
             val from = Instant.ofEpochMilli(12345)
             val to = Instant.ofEpochMilli(67890)
@@ -152,7 +152,7 @@ class ActivityFilterConverterTest {
             actual as ElasticActivityQueryGenericFilter
             assertThat(actual.activityTypes).containsExactlyInAnyOrder(ActivityTypeDto.TRANSFER, ActivityTypeDto.SELL)
             assertThat(actual.blockchains).containsExactlyInAnyOrder(*blockchains.toTypedArray())
-            assertThat(actual.anyUsers).containsExactlyInAnyOrder(*users.toTypedArray())
+            assertThat(actual.anyUsers).containsExactlyInAnyOrder("loupa", "poupa")
             assertThat(actual.from).isEqualTo(from)
             assertThat(actual.to).isEqualTo(to)
             assertThat(actual.cursor).isEqualTo(cursor)
@@ -162,7 +162,7 @@ class ActivityFilterConverterTest {
         fun `should convert - null blockchains`() {
             // given
             val userActivityTypes = listOf(UserActivityTypeDto.TRANSFER_FROM, UserActivityTypeDto.TRANSFER_TO, UserActivityTypeDto.BUY)
-            val users = listOf("loupa", "poupa")
+            val users = listOf("SOLANA:loupa", "FLOW:poupa")
             val from = Instant.ofEpochMilli(12345)
             val to = Instant.ofEpochMilli(67890)
             val cursor = "some cursor"

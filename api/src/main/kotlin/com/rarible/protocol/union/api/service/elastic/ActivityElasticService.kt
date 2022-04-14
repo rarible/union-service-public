@@ -43,8 +43,7 @@ class ActivityElasticService(
     ): ActivitiesDto {
         val effectiveCursor = cursor ?: continuation
         val filter = filterConverter.convertGetAllActivities(type, blockchains, effectiveCursor)
-        val activitySort = ActivitySort(latestFirst = (sort == ActivitySortDto.LATEST_FIRST))
-        val queryResult = queryService.query(filter, activitySort, size ?: 50)
+        val queryResult = queryService.query(filter, convertSort(sort), size ?: 50)
         val activities = getActivities(queryResult.activities)
         return ActivitiesDto(
             continuation = null,
@@ -63,8 +62,7 @@ class ActivityElasticService(
     ): ActivitiesDto {
         val effectiveCursor = cursor ?: continuation
         val filter = filterConverter.convertGetActivitiesByCollection(type, collection, effectiveCursor)
-        val activitySort = ActivitySort(latestFirst = (sort == ActivitySortDto.LATEST_FIRST))
-        val queryResult = queryService.query(filter, activitySort, size ?: 50)
+        val queryResult = queryService.query(filter, convertSort(sort), size ?: 50)
         val activities = getActivities(queryResult.activities)
         return ActivitiesDto(
             continuation = null,
@@ -83,8 +81,7 @@ class ActivityElasticService(
     ): ActivitiesDto {
         val effectiveCursor = cursor ?: continuation
         val filter = filterConverter.convertGetActivitiesByItem(type, itemId, effectiveCursor)
-        val activitySort = ActivitySort(latestFirst = (sort == ActivitySortDto.LATEST_FIRST))
-        val queryResult = queryService.query(filter, activitySort, size ?: 50)
+        val queryResult = queryService.query(filter, convertSort(sort), size ?: 50)
         val activities = getActivities(queryResult.activities)
         return ActivitiesDto(
             continuation = null,
@@ -106,8 +103,7 @@ class ActivityElasticService(
     ): ActivitiesDto {
         val effectiveCursor = cursor ?: continuation
         val filter = filterConverter.convertGetActivitiesByUser(type, user, blockchains, from, to, effectiveCursor)
-        val activitySort = ActivitySort(latestFirst = (sort == ActivitySortDto.LATEST_FIRST))
-        val queryResult = queryService.query(filter, activitySort, size ?: 50)
+        val queryResult = queryService.query(filter, convertSort(sort), size ?: 50)
         val activities = getActivities(queryResult.activities)
         return ActivitiesDto(
             continuation = null,
@@ -155,5 +151,13 @@ class ActivityElasticService(
         }
 
         return mergedResult.filterNotNull()
+    }
+
+    private fun convertSort(sort: ActivitySortDto?): ActivitySort {
+        val latestFirst = when (sort) {
+            ActivitySortDto.LATEST_FIRST, null -> true
+            ActivitySortDto.EARLIEST_FIRST -> false
+        }
+        return ActivitySort(latestFirst)
     }
 }
