@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.integration.flow.converter
 
 import com.rarible.protocol.dto.FlowOrderDto
+import com.rarible.protocol.dto.FlowOrderPlatformDto
 import com.rarible.protocol.dto.FlowOrderStatusDto
 import com.rarible.protocol.dto.FlowOrdersPaginationDto
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
@@ -54,7 +55,10 @@ class FlowOrderConverter(
 
         return OrderDto(
             id = OrderIdDto(blockchain, order.id.toString()),
-            platform = PlatformDto.RARIBLE,
+            platform = when(order.platform) {
+                FlowOrderPlatformDto.OTHER -> PlatformDto.OTHER
+                else -> PlatformDto.RARIBLE
+            },
             status = status,
             maker = maker,
             taker = taker,
