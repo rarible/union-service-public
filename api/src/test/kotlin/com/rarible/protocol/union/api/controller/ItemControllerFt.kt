@@ -20,7 +20,9 @@ import com.rarible.protocol.union.dto.continuation.page.PageSize
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.converter.ShortItemConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
+import com.rarible.protocol.union.enrichment.meta.UnionMetaService
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
+import com.rarible.protocol.union.enrichment.test.data.randomUnionMeta
 import com.rarible.protocol.union.integration.ethereum.converter.EthItemConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAddress
@@ -75,6 +77,9 @@ class ItemControllerFt : AbstractIntegrationTest() {
 
     @Autowired
     lateinit var restTemplate: RestTemplate
+
+    @Autowired
+    lateinit var unionMetaService: UnionMetaService
 
     @Test
     fun `get item by id - ethereum, enriched`() = runBlocking<Unit> {
@@ -576,5 +581,38 @@ class ItemControllerFt : AbstractIntegrationTest() {
         assertThat(items.items).hasSize(3)
         assertThat(items.total).isEqualTo(4)
         assertThat(items.continuation).isNotNull()
+    }
+
+    @Test
+    fun `get all items - enriched with cached meta`() = runBlocking<Unit> {
+        val blockchains = listOf(BlockchainDto.ETHEREUM)
+
+        val itemIdWithMeta1 = randomEthItemId()
+        val itemIdWithMeta2 = randomEthItemId()
+        val itemIdWithoutMeta = randomEthItemId()
+
+        val meta1 = randomUnionMeta()
+        val meta2 = randomUnionMeta()
+        unionMetaService.save(itemIdWithMeta1, meta1)
+        unionMetaService.save(itemIdWithMeta2, meta2)
+
+        val ethList = listOf(
+            randomEthNftItemDto(itemIdWithMeta1),
+            randomEthNftItemDto(itemIdWithMeta2).copy(meta = null),
+            randomEthNftItemDto(itemIdWithoutMeta).copy(meta = null)
+        )
+
+        ethereumItemControllerApiMock.mockGetNftAllItems(
+            null, size, false, null, null, *ethList.toTypedArray()
+        )
+
+        val items = itemControllerClient.getAllItems(
+            blockchains, null, size, false, null, null
+        ).awaitFirst().items.associateBy { it.id }
+
+        assertThat(items).hasSize(3)
+        assertThat(items[itemIdWithMeta1]!!.meta!!.name).isEqualTo(meta1.name)
+        assertThat(items[itemIdWithMeta2]!!.meta!!.name).isEqualTo(meta2.name)
+        assertThat(items[itemIdWithoutMeta]!!.meta).isNull()
     }
 }

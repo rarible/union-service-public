@@ -16,7 +16,29 @@ class UnionMetaService(
     private val unionMetaMetrics: UnionMetaMetrics,
     private val unionMetaLoader: UnionMetaLoader
 ) {
+
     private val logger = LoggerFactory.getLogger(UnionMetaService::class.java)
+
+    /**
+     * Return available meta or `null` if it hasn't been loaded, has failed, or hasn't been requested yet.
+     * For missed meta no scheduling operations will be performed
+     */
+    suspend fun getAvailableMeta(itemIds: List<ItemIdDto>): Map<ItemIdDto, UnionMeta> {
+        val keyMap = itemIds.associateBy { it.fullId() }
+        val result = HashMap<ItemIdDto, UnionMeta>()
+        unionMetaCacheLoaderService.getAll(keyMap.keys.toList()).forEach {
+            val id = keyMap[it.key]!!
+            unionMetaMetrics.onMetaCacheHitOrMiss(
+                itemId = id,
+                hitOrMiss = it.isMetaInitiallyLoadedOrFailed()
+            )
+            val meta = it.getAvailable()
+            if (meta != null) {
+                result[id] = meta
+            }
+        }
+        return result
+    }
 
     /**
      * Return available meta or `null` if it hasn't been loaded, has failed, or hasn't been requested yet.

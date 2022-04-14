@@ -15,6 +15,7 @@ import com.rarible.protocol.union.dto.continuation.page.ArgSlice
 import com.rarible.protocol.union.dto.continuation.page.Page
 import com.rarible.protocol.union.dto.continuation.page.PageSize
 import com.rarible.protocol.union.dto.continuation.page.Slice
+import com.rarible.protocol.union.enrichment.meta.UnionMetaService
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
@@ -33,6 +34,7 @@ import org.springframework.stereotype.Component
 class ItemApiService(
     private val orderApiService: OrderApiService,
     private val enrichmentItemService: EnrichmentItemService,
+    private val unionMetaService: UnionMetaService,
     private val router: BlockchainRouter<ItemService>
 ) {
 
@@ -114,22 +116,29 @@ class ItemApiService(
             .map { listOfNotNull(it.bestBidOrder?.dtoId, it.bestSellOrder?.dtoId) }
             .flatten()
 
-        val orders = orderApiService.getByIds(shortOrderIds)
-            .associateBy { it.id }
+        val enrichedItems = coroutineScope {
 
-        val enrichedItems = unionItems.map {
-            val shortItem = shortItems[it.id]
-            enrichmentItemService.enrichItem(
-                shortItem = shortItem,
-                item = it,
-                orders = orders
-            )
+            val orders = async {
+                orderApiService.getByIds(shortOrderIds)
+                    .associateBy { it.id }
+            }
+
+            val meta = async {
+                unionMetaService.getAvailableMeta(unionItems.map { it.id })
+            }
+
+            unionItems.map {
+                val shortItem = shortItems[it.id]
+                enrichmentItemService.enrichItem(
+                    shortItem = shortItem,
+                    item = it,
+                    orders = orders.await(),
+                    meta = meta.await()
+                )
+            }
         }
 
-        logger.info(
-            "Enriched {} of {} Items, {} Orders fetched ({}ms)",
-            shortItems.size, enrichedItems.size, orders.size, spent(now)
-        )
+        logger.info("Enriched {} of {} Items ({}ms)", shortItems.size, enrichedItems.size, spent(now))
 
         return enrichedItems
     }
