@@ -3,11 +3,8 @@ package com.rarible.protocol.union.search.reindexer.task
 import com.rarible.core.common.mapAsync
 import com.rarible.core.task.RunTask
 import com.rarible.core.task.TaskHandler
-import com.rarible.core.task.TaskRepository
-import com.rarible.core.task.TaskStatus
 import com.rarible.protocol.union.api.client.ActivityControllerApi
 import com.rarible.protocol.union.dto.ActivitySortDto
-import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.search.core.converter.ElasticActivityConverter
 import com.rarible.protocol.union.search.reindexer.config.SearchReindexerConfiguration
 import kotlinx.coroutines.flow.Flow
@@ -15,13 +12,11 @@ import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitSingle
-import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations
 
 class ActivityTask(
     private val config: SearchReindexerConfiguration,
     private val activityClient: ActivityControllerApi,
-    private val taskRepository: TaskRepository,
     private val esOperations: ReactiveElasticsearchOperations,
     private val converter: ElasticActivityConverter
 ): TaskHandler<String> {
@@ -67,8 +62,6 @@ class ActivityTask(
             }
         }
     }
-
-
 
     companion object {
         private const val ACTIVITY_REINDEX = "ACTIVITY_REINDEX"
