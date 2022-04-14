@@ -19,6 +19,10 @@ class UnionMetaService(
 
     private val logger = LoggerFactory.getLogger(UnionMetaService::class.java)
 
+    companion object {
+        private val SVG_TAG = "<svg"
+    }
+
     /**
      * Return available meta or `null` if it hasn't been loaded, has failed, or hasn't been requested yet.
      * For missed meta no scheduling operations will be performed
@@ -56,19 +60,25 @@ class UnionMetaService(
         synchronous: Boolean
     ): UnionMeta? {
         val metaCacheEntry = unionMetaCacheLoaderService.get(itemId.fullId())
-        val availableMeta = metaCacheEntry.getAvailable()
+        var availableMeta = metaCacheEntry.getAvailable()
+        var metaShouldBeRefreshed = false
         unionMetaMetrics.onMetaCacheHitOrMiss(
             itemId = itemId,
             hitOrMiss = metaCacheEntry.isMetaInitiallyLoadedOrFailed()
         )
         if (availableMeta != null) {
-            return availableMeta
+            //TODO workaround for BRAVO-1954:svg in url
+            if (!removeCachedMetaWithSvgInUrl(availableMeta, itemId)) {
+                return availableMeta
+            } else {
+                metaShouldBeRefreshed = true
+            }
         }
-        if (metaCacheEntry.isMetaInitiallyLoadedOrFailed()) {
+        if (!metaShouldBeRefreshed && metaCacheEntry.isMetaInitiallyLoadedOrFailed()) {
             logger.info("Meta loading for item ${itemId.fullId()} was failed")
             return null
         }
-        if (!synchronous && !metaCacheEntry.isMetaInitiallyScheduledForLoading()) {
+        if (!synchronous && (!metaCacheEntry.isMetaInitiallyScheduledForLoading() || metaShouldBeRefreshed)) {
             scheduleLoading(itemId)
         }
         if (synchronous) {
@@ -95,6 +105,21 @@ class UnionMetaService(
             return itemMeta
         }
         return null
+    }
+
+    private suspend fun removeCachedMetaWithSvgInUrl (
+        availableMeta: UnionMeta?,
+        itemId: ItemIdDto
+    ) : Boolean {
+        var isRemoved = false
+        availableMeta?.content?.forEach { url ->
+            if (SVG_TAG in url.url) {
+                logger.info("Removing from cache svg Item with id: ${itemId.fullId()}")
+                unionMetaCacheLoaderService.remove(itemId.fullId())
+                isRemoved = true
+            }
+        }
+        return isRemoved
     }
 
     /**

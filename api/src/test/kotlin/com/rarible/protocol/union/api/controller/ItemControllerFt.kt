@@ -3,6 +3,7 @@ package com.rarible.protocol.union.api.controller
 import com.rarible.core.common.nowMillis
 import com.rarible.core.test.data.randomAddress
 import com.rarible.core.test.data.randomInt
+import com.rarible.loader.cache.CacheLoaderService
 import com.rarible.protocol.dto.NftItemRoyaltyDto
 import com.rarible.protocol.dto.NftItemRoyaltyListDto
 import com.rarible.protocol.dto.NftMediaDto
@@ -11,6 +12,7 @@ import com.rarible.protocol.union.api.client.ItemControllerApi
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
+import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ItemIdsDto
@@ -52,6 +54,7 @@ import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpStatus
 import org.springframework.web.client.RestTemplate
 import reactor.core.publisher.Mono
@@ -77,6 +80,10 @@ class ItemControllerFt : AbstractIntegrationTest() {
 
     @Autowired
     lateinit var restTemplate: RestTemplate
+
+    @Autowired
+    @Qualifier("union.meta.cache.loader.service")
+    lateinit var unionMetaCacheLoaderService: CacheLoaderService<UnionMeta>
 
     @Autowired
     lateinit var unionMetaService: UnionMetaService
@@ -137,6 +144,33 @@ class ItemControllerFt : AbstractIntegrationTest() {
             )
         )
 
+        coEvery { testUnionMetaLoader.load(itemId) } returns EthItemConverter.convert(meta)
+
+        val response = restTemplate.getForEntity("${baseUri}/v0.1/items/${itemId.fullId()}/image", String::class.java)
+        assertThat(response.statusCode).isEqualTo(HttpStatus.TEMPORARY_REDIRECT)
+        assertThat(response.headers["Location"]).contains(imageUrl)
+    }
+
+    @Test
+    fun `get item svg image by id`() = runBlocking<Unit> {
+        val itemId = randomEthItemId()
+        val imageUrlSvg = "https://rarible.mypinata.cloud/data:image/svg+xml;utf8,<svg%20class='nft'></svg>"
+        val cachedMeta = randomEthItemMeta().copy(
+            image = NftMediaDto(
+                url = mapOf(Pair("ORIGINAL", imageUrlSvg)),
+                meta = mapOf(Pair("ORIGINAL", randomEthItemMediaMeta("image/svg+xml")))
+            )
+        )
+
+        val imageUrl = "https://ethereum-api.rarible.org/v0.1/nft/items/0x5025ebac986d9a5914442c6c0496fbbe41ef1464:6087/image?size=ORIGINAL&animation=false&hash=-1654230677"
+        val meta = randomEthItemMeta().copy(
+            image = NftMediaDto(
+                url = mapOf(Pair("ORIGINAL", imageUrl)),
+                meta = mapOf(Pair("ORIGINAL", randomEthItemMediaMeta("image/svg+xml")))
+            )
+        )
+
+        unionMetaCacheLoaderService.save(itemId.fullId(), EthItemConverter.convert(cachedMeta))
         coEvery { testUnionMetaLoader.load(itemId) } returns EthItemConverter.convert(meta)
 
         val response = restTemplate.getForEntity("${baseUri}/v0.1/items/${itemId.fullId()}/image", String::class.java)
