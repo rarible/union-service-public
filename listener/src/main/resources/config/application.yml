@@ -110,6 +110,21 @@ integration:
         ownership: 1
         order: 1
     auctionContracts:
+  immutablex:
+    enabled: ${consul.immutablex.enabled:true}
+    client:
+      url: ${consul.immutablex.api.baseUrl:}
+    apiKey: ${consul.immutablex.api.key:}
+    scanner:
+      job:
+        fixedDelay: 5
+        initialDelay:
+          mints: 1
+          transfers: 2
+          trades: 3
+          deposits: 4
+          withdrawals: 5
+          orders: 6
 
 listener:
   consumer:

@@ -31,7 +31,7 @@ object ImmutablexItemConverter {
     private fun convertInternal(asset: ImmutablexAsset, blockchain: BlockchainDto): UnionItem {
         val deleted = asset.user!! == "${Address.ZERO()}"
         return UnionItem(
-            id = ItemIdDto(BlockchainDto.IMMUTABLEX, contract = asset.tokenAddress, tokenId = asset.tokenId.toBigInteger()),
+            id = ItemIdDto(BlockchainDto.IMMUTABLEX, contract = asset.tokenAddress, tokenId = asset.tokenId),
             collection = CollectionIdDto(blockchain, asset.tokenAddress),
             creators = emptyList(),
             owners = emptyList(),

@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming
 import com.rarible.protocol.union.dto.ActivityIdDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import java.math.BigDecimal
+import java.math.BigInteger
 import java.time.Instant
 
 
@@ -19,13 +20,13 @@ data class ImmutablexAsset(
     val id: String?,
     @JsonProperty("image_url")
     val imageUrl: String?,
-    val metadata: Map<String, Any>,
+    val metadata: Map<String, Any>?,
     val name: String?,
     val status: String?,
     @JsonProperty("token_address")
     val tokenAddress: String,
     @JsonProperty("token_id")
-    val tokenId: Long,
+    val tokenId: BigInteger,
     val uri: String?,
     @JsonProperty("updated_at")
     val updatedAt: Instant?,

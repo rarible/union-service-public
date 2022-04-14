@@ -319,7 +319,7 @@ class ImmutablexApiClient(
                 })
                 .queryParam("include_fees", true)
             if (!continuation.isNullOrEmpty()) {
-                val (dateStr, idStr) = continuation.split("_")
+                val (dateStr, _) = continuation.split("_")
                 uriBuilder.queryParam("updated_min_timestamp", dateStr)
             }
             if (status != null) {

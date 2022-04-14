@@ -11,6 +11,7 @@ import com.rarible.protocol.union.integration.immutablex.converter.ImmutablexOrd
 import com.rarible.protocol.union.integration.immutablex.service.ImmutablexActivityService
 import com.rarible.protocol.union.integration.immutablex.service.ImmutablexItemService
 import com.rarible.protocol.union.integration.immutablex.service.ImmutablexOrderService
+import com.rarible.protocol.union.integration.immutablex.service.ImmutablexOwnershipService
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
@@ -48,6 +49,9 @@ class ImmutablexApiConfiguration {
         val webClient = WebClient.builder().exchangeStrategies(strategies)
 
         DefaultUnionWebClientCustomizer().customize(webClient)
+        webClient.defaultHeaders {
+            it.add("x-api-key", props.apiKey)
+        }
 
         return webClient.baseUrl(props.client!!.url!!).build()
     }
@@ -78,5 +82,9 @@ class ImmutablexApiConfiguration {
         client: ImmutablexApiClient,
         converter: ImmutablexActivityConverter,
     ): ImmutablexActivityService = ImmutablexActivityService(client, converter)
+
+    @Bean
+    fun immutablexOwnershipService(immutablexApiClient: ImmutablexApiClient): ImmutablexOwnershipService =
+        ImmutablexOwnershipService(immutablexApiClient)
 
 }

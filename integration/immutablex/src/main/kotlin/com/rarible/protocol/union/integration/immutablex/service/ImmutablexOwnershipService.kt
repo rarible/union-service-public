@@ -19,7 +19,7 @@ class ImmutablexOwnershipService(
     override suspend fun getOwnershipById(ownershipId: String): UnionOwnership {
         val (contract, tokenId, owner) = ownershipId.split(":")
         return getAssetsByCollection(
-            contract, owner, tokenId.toLong(), null
+            contract, owner, tokenId.toBigInteger(), null
         ) { contract, owner, cursor ->
             client.getAssetsByCollection(contract, owner, cursor, 100)
         }?.let {
@@ -39,7 +39,7 @@ class ImmutablexOwnershipService(
     }
 
     private suspend fun getAssetsByCollection(
-        contract: String, owner: String, tokenId: Long, cursor: String?, fn: suspend (String, String, String?) -> ImmutablexAssetsPage
+        contract: String, owner: String, tokenId: BigInteger, cursor: String?, fn: suspend (String, String, String?) -> ImmutablexAssetsPage
     ): ImmutablexAsset? {
         val page = fn(contract, owner, cursor)
         val asset: ImmutablexAsset? = page.result.find { it.tokenId == tokenId }
@@ -50,9 +50,9 @@ class ImmutablexOwnershipService(
 
     private fun convert(asset: ImmutablexAsset): UnionOwnership {
         return UnionOwnership(
-            OwnershipIdDto(BlockchainDto.IMMUTABLEX, asset.tokenAddress, asset.tokenId.toBigInteger(), asset.user!!),
-            CollectionIdDto(BlockchainDto.IMMUTABLEX, asset.tokenAddress),
-            1.toBigInteger(),
+            id = OwnershipIdDto(BlockchainDto.IMMUTABLEX, asset.tokenAddress, asset.tokenId, asset.user!!),
+            collection = CollectionIdDto(BlockchainDto.IMMUTABLEX, asset.tokenAddress),
+            value = BigInteger.ONE,
             lazyValue = BigInteger.ZERO,
             createdAt = asset.createdAt!!
         )
