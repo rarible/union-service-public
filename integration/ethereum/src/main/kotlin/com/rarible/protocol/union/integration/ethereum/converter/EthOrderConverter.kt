@@ -30,7 +30,6 @@ import com.rarible.protocol.union.dto.PendingOrderCancelDto
 import com.rarible.protocol.union.dto.PendingOrderDto
 import com.rarible.protocol.union.dto.PendingOrderMatchDto
 import com.rarible.protocol.union.dto.PlatformDto
-import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -95,6 +94,7 @@ class EthOrderConverter(
                     cancelled = order.cancelled,
                     createdAt = order.createdAt,
                     lastUpdatedAt = order.lastUpdateAt,
+                    dbUpdatedAt = order.dbUpdatedAt,
                     makePrice = makePrice,
                     takePrice = takePrice,
                     makePriceUsd = makePriceUsd,
@@ -124,6 +124,7 @@ class EthOrderConverter(
                     cancelled = order.cancelled,
                     createdAt = order.createdAt,
                     lastUpdatedAt = order.lastUpdateAt,
+                    dbUpdatedAt = order.dbUpdatedAt,
                     makePrice = makePrice,
                     takePrice = takePrice,
                     makePriceUsd = makePriceUsd,
@@ -151,6 +152,7 @@ class EthOrderConverter(
                     cancelled = order.cancelled,
                     createdAt = order.createdAt,
                     lastUpdatedAt = order.lastUpdateAt,
+                    dbUpdatedAt = order.dbUpdatedAt,
                     makePrice = makePrice,
                     takePrice = takePrice,
                     makePriceUsd = makePriceUsd,
@@ -194,6 +196,7 @@ class EthOrderConverter(
                     cancelled = order.cancelled,
                     createdAt = order.createdAt,
                     lastUpdatedAt = order.lastUpdateAt,
+                    dbUpdatedAt = order.dbUpdatedAt,
                     makePrice = makePrice,
                     takePrice = takePrice,
                     makePriceUsd = makePriceUsd,
