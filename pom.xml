@@ -414,6 +414,7 @@
         <module>integration</module>
         <module>listener</module>
         <module>meta-loader</module>
-        <module>search</module>
+        <module>indexer</module>
+        <module>reindexer</module>
     </modules>
 </project>

@@ -5,11 +5,11 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.rarible.protocol.union</groupId>
-        <artifactId>rarible-union-search</artifactId>
+        <artifactId>rarible-union-service</artifactId>
         <version>${revision}</version>
     </parent>
 
-    <artifactId>rarible-union-search-reindexer</artifactId>
+    <artifactId>rarible-union-reindexer</artifactId>
     <packaging>jar</packaging>
 
     <build>
