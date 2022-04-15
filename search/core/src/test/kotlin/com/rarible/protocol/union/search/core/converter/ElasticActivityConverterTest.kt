@@ -45,7 +45,7 @@ import com.rarible.protocol.union.dto.RaribleAuctionV1DataV1Dto
 import com.rarible.protocol.union.dto.TransferActivityDto
 import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.ext
-import com.sun.xml.internal.bind.v2.runtime.property.StructureLoaderBuilder
+import com.rarible.protocol.union.dto.parser.IdParser
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.Instant
@@ -84,7 +84,7 @@ class ElasticActivityConverterTest {
         assertThat(actual.type).isEqualTo(ActivityTypeDto.MINT)
         assertThat(actual.user.maker).isEqualTo(source.owner.value)
         assertThat(actual.user.taker).isNull()
-        assertThat(actual.collection.make).isEqualTo(source.itemId!!.value.split(":").first())
+        assertThat(actual.collection.make).isEqualTo(source.itemId!!.extractCollection())
         assertThat(actual.collection.take).isNull()
         assertThat(actual.item.make).isEqualTo(source.itemId!!.value)
         assertThat(actual.item.take).isNull()
@@ -103,8 +103,7 @@ class ElasticActivityConverterTest {
                 logIndex = randomInt(),
             ),
             owner = randomUnionAddress(),
-            contract = ContractAddress(randomBlockchain(), randomString()),
-            tokenId = randomBigInt(),
+            itemId = randomItemId(),
             transactionHash = randomString(),
             value = randomBigInt(),
         )
@@ -121,9 +120,9 @@ class ElasticActivityConverterTest {
         assertThat(actual.type).isEqualTo(ActivityTypeDto.BURN)
         assertThat(actual.user.maker).isEqualTo(source.owner.value)
         assertThat(actual.user.taker).isNull()
-        assertThat(actual.collection.make).isEqualTo(source.contract!!.value)
+        assertThat(actual.collection.make).isEqualTo(source.itemId!!.extractCollection())
         assertThat(actual.collection.take).isNull()
-        assertThat(actual.item.make).isEqualTo("${source.contract!!.value}:${source.tokenId}")
+        assertThat(actual.item.make).isEqualTo(source.itemId!!.value)
         assertThat(actual.item.take).isNull()
     }
 
@@ -141,8 +140,7 @@ class ElasticActivityConverterTest {
             ),
             from = randomUnionAddress(),
             owner = randomUnionAddress(),
-            contract = ContractAddress(randomBlockchain(), randomString()),
-            tokenId = randomBigInt(),
+            itemId = randomItemId(),
             transactionHash = randomString(),
             value = randomBigInt(),
         )
@@ -159,9 +157,9 @@ class ElasticActivityConverterTest {
         assertThat(actual.type).isEqualTo(ActivityTypeDto.TRANSFER)
         assertThat(actual.user.maker).isEqualTo(source.from.value)
         assertThat(actual.user.taker).isEqualTo(source.owner.value)
-        assertThat(actual.collection.make).isEqualTo(source.contract!!.value)
+        assertThat(actual.collection.make).isEqualTo(source.itemId!!.extractCollection())
         assertThat(actual.collection.take).isNull()
-        assertThat(actual.item.make).isEqualTo("${source.contract!!.value}:${source.tokenId}")
+        assertThat(actual.item.make).isEqualTo(source.itemId!!.value)
         assertThat(actual.item.take).isNull()
     }
 
@@ -571,14 +569,6 @@ class ElasticActivityConverterTest {
         )
     }
 
-    private fun randomItemId(): ItemIdDto {
-        return ItemIdDto(
-            blockchain = randomBlockchain(),
-            contract = randomString(),
-            tokenId = randomBigInt()
-        )
-    }
-
     private fun randomBlockchainGroup(): BlockchainGroupDto {
         return BlockchainGroupDto.values().random()
     }
@@ -662,9 +652,12 @@ class ElasticActivityConverterTest {
         )
     }
 
-    private fun ItemIdDto.extractCollection(): String {
-        val split = this.toString().split(':')
-        if (split.size == 2) return this.toString()
-        return "${split[0]}:${split[1]}"
+    private fun ItemIdDto.extractCollection(): String? {
+        return IdParser.extractContract(this)
+    }
+
+    private fun randomItemId(): ItemIdDto {
+        return if (randomBoolean()) ItemIdDto(randomBlockchain(), randomString(), randomBigInt())
+        else ItemIdDto(randomBlockchain(), randomString())
     }
 }
