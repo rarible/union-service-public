@@ -45,6 +45,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
+import java.time.Duration
 
 @FlowPreview
 @IntegrationTest
@@ -240,7 +241,7 @@ class CollectionControllerFt : AbstractIntegrationTest() {
 
         collectionControllerClient.refreshCollectionMeta(collectionId.fullId()).awaitFirstOrNull()
 
-        Wait.waitAssert {
+        Wait.waitAssert(Duration.ofMillis(10_000)) {
             coVerify(exactly = 1) { testUnionMetaLoader.load(itemId1) }
             coVerify(exactly = 1) { testUnionMetaLoader.load(itemId2) }
         }
