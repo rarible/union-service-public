@@ -13,7 +13,7 @@ import org.springframework.data.elasticsearch.annotations.FieldType
 import java.time.Instant
 
 
-@Document(indexName = OrderEsRepository.INDEX)
+@Document(indexName = OrderEsRepository.INDEX, createIndex = false)
 class ElasticOrder(
     @Id
     val orderId: String, // blockchain:value
