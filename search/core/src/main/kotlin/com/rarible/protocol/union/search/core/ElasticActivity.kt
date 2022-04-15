@@ -9,7 +9,7 @@ import org.springframework.data.elasticsearch.annotations.Field
 import org.springframework.data.elasticsearch.annotations.FieldType
 import java.time.Instant
 
-@Document(indexName = ActivityEsRepository.INDEX)
+@Document(indexName = ActivityEsRepository.INDEX, createIndex = false)
 data class ElasticActivity(
     @Id
     val activityId: String, // blockchain:value
