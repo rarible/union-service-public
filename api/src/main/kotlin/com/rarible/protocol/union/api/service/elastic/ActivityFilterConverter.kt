@@ -60,7 +60,7 @@ class ActivityFilterConverter(
             else -> ElasticActivityQueryGenericFilter(
                 blockchains = setOf(fullItemId.blockchain),
                 activityTypes = type.toSet(),
-                anyItems = setOf(fullItemId.value),
+                anyItem = fullItemId.value,
                 cursor = cursor,
             )
         }
@@ -79,7 +79,7 @@ class ActivityFilterConverter(
             else -> ElasticActivityQueryGenericFilter(
                 blockchains = blockchains?.toSet().orEmpty(),
                 activityTypes = type.map { userActivityTypeConverter.convert(it).activityTypeDto }.toSet(), // isMaker is ignored for now
-                anyUsers = user.toSet(),
+                anyUsers = user.map { IdParser.parseAddress(it).value }.toSet(),
                 from = from,
                 to = to,
                 cursor = cursor,

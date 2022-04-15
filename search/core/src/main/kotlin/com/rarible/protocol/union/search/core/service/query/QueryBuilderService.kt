@@ -7,6 +7,7 @@ import com.rarible.protocol.union.search.core.model.ElasticActivityQueryGenericF
 import com.rarible.protocol.union.search.core.model.ElasticActivityQueryPerTypeFilter
 import com.rarible.protocol.union.search.core.model.cursor
 import org.elasticsearch.index.query.BoolQueryBuilder
+import org.elasticsearch.index.query.MatchQueryBuilder
 import org.elasticsearch.index.query.RangeQueryBuilder
 import org.elasticsearch.index.query.TermsQueryBuilder
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery
@@ -51,9 +52,9 @@ class QueryBuilderService(
         anyMustMatchTerms(filter.anyCollections, collectionMake, collectionTake)
         mustMatchTerms(filter.makeCollections, collectionMake)
         mustMatchTerms(filter.takeCollections, collectionTake)
-        anyMustMatchTerms(filter.anyItems, itemMake, itemTake)
-        mustMatchTerms(filter.makeItems, itemMake)
-        mustMatchTerms(filter.takeItems, itemTake)
+        anyMustMatchKeyword(filter.anyItem, itemMake, itemTake)
+        mustMatchKeyword(filter.makeItem, itemMake)
+        mustMatchKeyword(filter.takeItem, itemTake)
 
         if (filter.from != null || filter.to != null) {
             val rangeQueryBuilder = RangeQueryBuilder(ElasticActivity::date.name)
@@ -77,12 +78,29 @@ class QueryBuilderService(
         }
     }
 
+    private fun BoolQueryBuilder.mustMatchKeyword(keyword: String?, field: String) {
+        if (!keyword.isNullOrEmpty()) {
+            must(MatchQueryBuilder(field, keyword))
+        }
+    }
+
     private fun BoolQueryBuilder.anyMustMatchTerms(terms: Set<*>, vararg fields: String) {
         if (terms.isNotEmpty()) {
             val boolQueryBuilder = BoolQueryBuilder()
             val preparedTerms = prepareTerms(terms)
             fields.forEach {
                 boolQueryBuilder.should(TermsQueryBuilder(it, preparedTerms))
+            }
+            boolQueryBuilder.minimumShouldMatch(1)
+            must(boolQueryBuilder)
+        }
+    }
+
+    private fun BoolQueryBuilder.anyMustMatchKeyword(keyword: String?, vararg fields: String) {
+        if (!keyword.isNullOrEmpty()) {
+            val boolQueryBuilder = BoolQueryBuilder()
+            fields.forEach {
+                boolQueryBuilder.should(MatchQueryBuilder(it, keyword))
             }
             boolQueryBuilder.minimumShouldMatch(1)
             must(boolQueryBuilder)

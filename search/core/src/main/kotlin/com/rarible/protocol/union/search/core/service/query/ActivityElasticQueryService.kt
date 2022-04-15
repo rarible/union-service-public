@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.search.core.service.query
 
+import com.rarible.protocol.union.dto.continuation.page.PageSize
 import com.rarible.protocol.union.search.core.ElasticActivity
 import com.rarible.protocol.union.search.core.model.ActivityCursor.Companion.fromActivity
 import com.rarible.protocol.union.search.core.model.ActivityQueryResult
@@ -10,14 +11,14 @@ import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperatio
 import org.springframework.stereotype.Service
 
 @Service
-class ActivityQueryService(
+class ActivityElasticQueryService(
     private val esOperations: ReactiveElasticsearchOperations,
     private val queryBuilderService: QueryBuilderService,
 ) {
 
-    suspend fun query(filter: ElasticActivityFilter, sort: ActivitySort, limit: Int): ActivityQueryResult {
+    suspend fun query(filter: ElasticActivityFilter, sort: ActivitySort, limit: Int?): ActivityQueryResult {
         val query = queryBuilderService.build(filter, sort)
-        query.maxResults = limit
+        query.maxResults = PageSize.ACTIVITY.limit(limit)
 
         val activities = esOperations.search(query, ElasticActivity::class.java)
             .collectList()

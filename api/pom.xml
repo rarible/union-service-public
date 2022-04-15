@@ -115,6 +115,13 @@
         </dependency>
         <dependency>
             <groupId>com.rarible.protocol.union</groupId>
+            <artifactId>rarible-union-search-core</artifactId>
+            <classifier>tests</classifier>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.rarible.protocol.union</groupId>
             <artifactId>rarible-union-integration-ethereum</artifactId>
             <classifier>tests</classifier>
             <type>test-jar</type>
