@@ -14,8 +14,8 @@ import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.OrdersDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.UnionAddress
-import com.rarible.protocol.union.search.core.ElasticOrder
-import com.rarible.protocol.union.search.core.converter.ElasticOrderConverter
+import com.rarible.protocol.union.core.model.EsOrder
+import com.rarible.protocol.union.core.converter.EsOrderConverter
 import com.rarible.protocol.union.search.reindexer.config.SearchReindexerConfiguration
 import com.rarible.protocol.union.search.reindexer.config.SearchReindexerProperties
 import io.mockk.every
@@ -33,23 +33,23 @@ class OrderTaskUnitTest {
 
     val esOperations = mockk<ReactiveElasticsearchOperations> {
         every {
-            save(any<Iterable<ElasticOrder>>())
+            save(any<Iterable<EsOrder>>())
         } answers { Mono.just(arg(0)) }
     }
 
-    val converter = mockk<ElasticOrderConverter> {
+    val converter = mockk<EsOrderConverter> {
         every {
             convert(any<OrderDto>())
-        } returns ElasticOrder(
+        } returns EsOrder(
             orderId = randomOrderId().fullId(),
             lastUpdatedAt = Instant.now(),
-            type = ElasticOrder.Type.SELL,
+            type = EsOrder.Type.SELL,
             blockchain = BlockchainDto.ETHEREUM,
             platform = PlatformDto.RARIBLE,
             maker = randomUnionAddress(),
-            make = ElasticOrder.Asset(EthErc721AssetTypeDto(contract = randomContract(), tokenId = BigInteger.ZERO)),
+            make = EsOrder.Asset(EthErc721AssetTypeDto(contract = randomContract(), tokenId = BigInteger.ZERO)),
             taker = randomUnionAddress(),
-            take = ElasticOrder.Asset(EthEthereumAssetTypeDto()),
+            take = EsOrder.Asset(EthEthereumAssetTypeDto()),
             start = null,
             end = null,
             origins = emptyList(),
@@ -103,7 +103,7 @@ class OrderTaskUnitTest {
             )
 
             converter.convert(any<OrderDto>())
-            esOperations.save(any<Iterable<ElasticOrder>>())
+            esOperations.save(any<Iterable<EsOrder>>())
         }
     }
 
@@ -131,7 +131,7 @@ class OrderTaskUnitTest {
             )
 
             converter.convert(any<OrderDto>())
-            esOperations.save(any<Iterable<ElasticOrder>>())
+            esOperations.save(any<Iterable<EsOrder>>())
         }
     }
 

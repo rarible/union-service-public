@@ -13,9 +13,9 @@ import com.rarible.protocol.union.dto.UserActivityTypeDto
 import com.rarible.protocol.union.enrichment.test.data.randomUnionActivityMint
 import com.rarible.protocol.union.enrichment.test.data.randomUnionActivityOrderList
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
-import com.rarible.protocol.union.search.core.ElasticActivity
-import com.rarible.protocol.union.search.core.repository.ActivityEsRepository
-import com.rarible.protocol.union.search.test.buildActivity
+import com.rarible.protocol.union.core.model.EsActivity
+import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
+import com.rarible.protocol.union.enrichment.test.data.randomEsActivity
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
@@ -26,7 +26,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.Instant
-
 
 @IntegrationTest
 internal class ActivityElasticServiceIntegrationTest {
@@ -44,76 +43,76 @@ internal class ActivityElasticServiceIntegrationTest {
     private lateinit var solanaService: ActivityService
 
     @Autowired
-    private lateinit var repository: ActivityEsRepository
+    private lateinit var repository: EsActivityRepository
 
     @Autowired
     private lateinit var service: ActivityElasticService
 
     @BeforeEach
-    fun setUp() {
+    fun setUp() = runBlocking<Unit> {
         every { router.getEnabledBlockchains(any()) } returns listOf(BlockchainDto.ETHEREUM, BlockchainDto.FLOW, BlockchainDto.SOLANA)
         every { router.getService(BlockchainDto.ETHEREUM) } returns ethereumService
         every { router.getService(BlockchainDto.FLOW) } returns flowService
         every { router.getService(BlockchainDto.SOLANA) } returns solanaService
 
-        repository.deleteAll().block()
+        repository.deleteAll()
         // save some elastic activities
-        val one = buildActivity().copy(
+        val one = randomEsActivity().copy(
             activityId = "ETHEREUM:1",
             type = ActivityTypeDto.MINT,
             blockchain = BlockchainDto.ETHEREUM,
             date = Instant.ofEpochMilli(5_000),
-            user = ElasticActivity.User(
+            user = EsActivity.User(
                 maker = "0x112233",
             )
         )
-        val two = buildActivity().copy(
+        val two = randomEsActivity().copy(
             activityId = "ETHEREUM:2",
             type = ActivityTypeDto.LIST,
             blockchain = BlockchainDto.ETHEREUM,
             date = Instant.ofEpochMilli(4_900),
-            collection = ElasticActivity.Collection(
+            collection = EsActivity.Collection(
                 make = "123"
             )
         )
-        val three = buildActivity().copy(
+        val three = randomEsActivity().copy(
             activityId = "FLOW:3",
             type = ActivityTypeDto.MINT,
             blockchain = BlockchainDto.FLOW,
             date = Instant.ofEpochMilli(4_800)
         )
-        val four = buildActivity().copy(
+        val four = randomEsActivity().copy(
             activityId = "FLOW:4",
             type = ActivityTypeDto.LIST,
             blockchain = BlockchainDto.FLOW,
             date = Instant.ofEpochMilli(4_700)
         )
-        val five = buildActivity().copy(
+        val five = randomEsActivity().copy(
             activityId = "FLOW:5",
             type = ActivityTypeDto.AUCTION_STARTED,
             blockchain = BlockchainDto.FLOW,
             date = Instant.ofEpochMilli(5_700)
         )
-        val six = buildActivity().copy(
+        val six = randomEsActivity().copy(
             activityId = "SOLANA:6",
             type = ActivityTypeDto.LIST,
             blockchain = BlockchainDto.SOLANA,
             date = Instant.ofEpochMilli(6_700)
         )
-        val seven = buildActivity().copy(
+        val seven = randomEsActivity().copy(
             activityId = "ETHEREUM:7",
             type = ActivityTypeDto.AUCTION_STARTED,
             blockchain = BlockchainDto.ETHEREUM,
             date = Instant.ofEpochMilli(4_700),
-            item = ElasticActivity.Item(
+            item = EsActivity.Item(
                 make = "222:333"
             ),
-            user = ElasticActivity.User(
+            user = EsActivity.User(
                 maker = "0",
                 taker = "0x223344",
             )
         )
-        repository.saveAll(listOf(one, two, three, four, five, six, seven).shuffled()).blockLast()
+        repository.saveAll(listOf(one, two, three, four, five, six, seven).shuffled())
     }
 
     @Nested

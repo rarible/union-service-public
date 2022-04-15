@@ -27,9 +27,9 @@ import com.rarible.protocol.union.integration.ethereum.data.randomEthAddress
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAuctionStartActivity
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemMintActivity
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOrderBidActivity
-import com.rarible.protocol.union.search.core.ElasticActivity
-import com.rarible.protocol.union.search.core.repository.ActivityEsRepository
-import com.rarible.protocol.union.search.test.buildActivity
+import com.rarible.protocol.union.core.model.EsActivity
+import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
+import com.rarible.protocol.union.enrichment.test.data.randomEsActivity
 import io.mockk.coEvery
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.reactive.awaitFirst
@@ -58,11 +58,11 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
     private lateinit var activityControllerApi: ActivityControllerApi
 
     @Autowired
-    private lateinit var esActivityEsRepository: ActivityEsRepository
+    private lateinit var repository: EsActivityRepository
 
     @BeforeEach
-    fun setUp() {
-        esActivityEsRepository.deleteAll().block()
+    fun setUp() = runBlocking<Unit> {
+        repository.deleteAll()
     }
 
     @Test
@@ -85,75 +85,75 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
         val polygonItemActivity1 = randomEthItemMintActivity().copy(date = now.minusSeconds(12))
         val polygonItemActivity2 = randomEthItemMintActivity().copy(date = now.minusSeconds(2))
 
-        val elasticEthOrderActivity1 = buildActivity().copy(
+        val elasticEthOrderActivity1 = randomEsActivity().copy(
             activityId = "${BlockchainDto.ETHEREUM}:${ethOrderActivity1.id}",
             type = ActivityTypeDto.BID,
             date = ethOrderActivity1.date,
             blockchain = BlockchainDto.ETHEREUM
         )
-        val elasticEthOrderActivity2 = buildActivity().copy(
+        val elasticEthOrderActivity2 = randomEsActivity().copy(
             activityId = "${BlockchainDto.ETHEREUM}:${ethOrderActivity2.id}",
             type = ActivityTypeDto.BID,
             date = ethOrderActivity2.date,
             blockchain = BlockchainDto.ETHEREUM
         )
-        val elasticEthOrderActivity3 = buildActivity().copy(
+        val elasticEthOrderActivity3 = randomEsActivity().copy(
             activityId = "${BlockchainDto.ETHEREUM}:${ethOrderActivity3.id}",
             type = ActivityTypeDto.BID,
             date = ethOrderActivity3.date,
             blockchain = BlockchainDto.ETHEREUM
         )
-        val elasticEthItemActivity1 = buildActivity().copy(
+        val elasticEthItemActivity1 = randomEsActivity().copy(
             activityId = "${BlockchainDto.ETHEREUM}:${ethItemActivity1.id}",
             type = ActivityTypeDto.MINT,
             date = ethItemActivity1.date,
             blockchain = BlockchainDto.ETHEREUM
         )
-        val elasticEthItemActivity2 = buildActivity().copy(
+        val elasticEthItemActivity2 = randomEsActivity().copy(
             activityId = "${BlockchainDto.ETHEREUM}:${ethItemActivity2.id}",
             type = ActivityTypeDto.MINT,
             date = ethItemActivity2.date,
             blockchain = BlockchainDto.ETHEREUM
         )
-        val elasticEthItemActivity3 = buildActivity().copy(
+        val elasticEthItemActivity3 = randomEsActivity().copy(
             activityId = "${BlockchainDto.ETHEREUM}:${ethItemActivity3.id}",
             type = ActivityTypeDto.MINT,
             date = ethItemActivity3.date,
             blockchain = BlockchainDto.ETHEREUM
         )
-        val elasticPolygonOrderActivity1 = buildActivity().copy(
+        val elasticPolygonOrderActivity1 = randomEsActivity().copy(
             activityId = "${BlockchainDto.POLYGON}:${polygonOrderActivity1.id}",
             type = ActivityTypeDto.BID,
             date = polygonOrderActivity1.date,
             blockchain = BlockchainDto.POLYGON
         )
-        val elasticPolygonOrderActivity2 = buildActivity().copy(
+        val elasticPolygonOrderActivity2 = randomEsActivity().copy(
             activityId = "${BlockchainDto.POLYGON}:${polygonOrderActivity2.id}",
             type = ActivityTypeDto.BID,
             date = polygonOrderActivity2.date,
             blockchain = BlockchainDto.POLYGON
         )
-        val elasticPolygonItemActivity1 = buildActivity().copy(
+        val elasticPolygonItemActivity1 = randomEsActivity().copy(
             activityId = "${BlockchainDto.POLYGON}:${polygonItemActivity1.id}",
             type = ActivityTypeDto.MINT,
             date = polygonItemActivity1.date,
             blockchain = BlockchainDto.POLYGON
         )
-        val elasticPolygonItemActivity2 = buildActivity().copy(
+        val elasticPolygonItemActivity2 = randomEsActivity().copy(
             activityId = "${BlockchainDto.POLYGON}:${polygonItemActivity2.id}",
             type = ActivityTypeDto.MINT,
             date = polygonItemActivity2.date,
             blockchain = BlockchainDto.POLYGON
         )
 
-        esActivityEsRepository.saveAll(
+        repository.saveAll(
             listOf(
                 elasticEthOrderActivity1, elasticEthOrderActivity2, elasticEthOrderActivity3,
                 elasticEthItemActivity1, elasticEthItemActivity2, elasticEthItemActivity3,
                 elasticPolygonOrderActivity1, elasticPolygonOrderActivity2,
                 elasticPolygonItemActivity1, elasticPolygonItemActivity2,
             )
-        ).awaitLast()
+        )
 
         // Since all activity types specified in request, all of existing clients should be requested
         coEvery {
@@ -203,15 +203,15 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
         val types = listOf(ActivityTypeDto.SELL)
         val ethCollectionId = CollectionIdDto(BlockchainDto.ETHEREUM, randomEthAddress())
         val orderActivity = randomEthOrderBidActivity()
-        val elasticActivity = buildActivity().copy(
+        val elasticActivity = randomEsActivity().copy(
             activityId = "${BlockchainDto.ETHEREUM}:${orderActivity.id}",
             type = types.first(),
             blockchain = ethCollectionId.blockchain,
-            collection = ElasticActivity.Collection(
+            collection = EsActivity.Collection(
                 make = ethCollectionId.value
             )
         )
-        esActivityEsRepository.save(elasticActivity).awaitSingle()
+        repository.save(elasticActivity)
 
         coEvery {
             testEthereumActivityOrderApi.getOrderActivitiesById(
@@ -242,36 +242,35 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
         val itemActivity = randomEthItemMintActivity().copy(date = now.minusSeconds(5))
         val auctionActivity = randomEthAuctionStartActivity().copy(date = now.minusSeconds(15))
 
-        val elasticOrderActivity = buildActivity().copy(
+        val elasticOrderActivity = randomEsActivity().copy(
             activityId = "${BlockchainDto.ETHEREUM}:${orderActivity.id}",
             type = ActivityTypeDto.SELL,
             blockchain = BlockchainDto.ETHEREUM,
             date = orderActivity.date,
-            item = ElasticActivity.Item(
+            item = EsActivity.Item(
                 make = "${assetTypeDto.contract}:${assetTypeDto.tokenId}"
             )
         )
-        val elasticItemActivity = buildActivity().copy(
+        val elasticItemActivity = randomEsActivity().copy(
             activityId = "${BlockchainDto.ETHEREUM}:${itemActivity.id}",
             type = ActivityTypeDto.MINT,
             blockchain = BlockchainDto.ETHEREUM,
             date = itemActivity.date,
-            item = ElasticActivity.Item(
+            item = EsActivity.Item(
                 make = "${assetTypeDto.contract}:${assetTypeDto.tokenId}"
             )
         )
-        val elasticAuctionActivity = buildActivity().copy(
+        val elasticAuctionActivity = randomEsActivity().copy(
             activityId = "${BlockchainDto.ETHEREUM}:${auctionActivity.id}",
             type = ActivityTypeDto.AUCTION_STARTED,
             blockchain = BlockchainDto.ETHEREUM,
             date = auctionActivity.date,
-            item = ElasticActivity.Item(
+            item = EsActivity.Item(
                 make = "${assetTypeDto.contract}:${assetTypeDto.tokenId}"
             )
         )
 
-        esActivityEsRepository.saveAll(listOf(elasticOrderActivity, elasticItemActivity, elasticAuctionActivity)).awaitLast()
-
+        repository.saveAll(listOf(elasticOrderActivity, elasticItemActivity, elasticAuctionActivity))
 
         coEvery {
             testEthereumActivityOrderApi.getOrderActivitiesById(
@@ -321,37 +320,37 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
         val polygonItemActivity = randomEthItemMintActivity()
             .copy(date = Instant.now().minusSeconds(7))
 
-        val elasticEthItemActivity = buildActivity().copy(
+        val elasticEthItemActivity = randomEsActivity().copy(
             activityId = "${BlockchainDto.ETHEREUM}:${ethItemActivity.id}",
             type = ActivityTypeDto.MINT,
             blockchain = BlockchainDto.ETHEREUM,
             date = ethItemActivity.date,
-            user = ElasticActivity.User(
+            user = EsActivity.User(
                 maker = userEth.value
             )
         )
-        val elasticEthItemActivity2 = buildActivity().copy(
+        val elasticEthItemActivity2 = randomEsActivity().copy(
             activityId = "${BlockchainDto.ETHEREUM}:${ethItemActivity2.id}",
             type = ActivityTypeDto.MINT,
             blockchain = BlockchainDto.ETHEREUM,
             date = ethItemActivity2.date,
-            user = ElasticActivity.User(
+            user = EsActivity.User(
                 maker = userEth.value
             )
         )
-        val elasticPolygonItemActivity = buildActivity().copy(
+        val elasticPolygonItemActivity = randomEsActivity().copy(
             activityId = "${BlockchainDto.POLYGON}:${polygonItemActivity.id}",
             type = ActivityTypeDto.MINT,
             blockchain = BlockchainDto.POLYGON,
             date = polygonItemActivity.date,
-            user = ElasticActivity.User(
+            user = EsActivity.User(
                 maker = userEth.value
             )
         )
 
-        esActivityEsRepository.saveAll(
+        repository.saveAll(
             listOf(elasticEthItemActivity, elasticEthItemActivity2, elasticPolygonItemActivity)
-        ).awaitLast()
+        )
 
         coEvery {
             testEthereumActivityItemApi.getNftActivitiesById(

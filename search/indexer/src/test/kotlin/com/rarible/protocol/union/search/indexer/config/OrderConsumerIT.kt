@@ -6,7 +6,7 @@ import com.rarible.core.test.data.randomString
 import com.rarible.core.test.wait.Wait
 import com.rarible.protocol.union.dto.OrderEventDto
 import com.rarible.protocol.union.dto.OrderUpdateEventDto
-import com.rarible.protocol.union.search.core.ElasticOrder
+import com.rarible.protocol.union.core.model.EsOrder
 import com.rarible.protocol.union.search.indexer.test.IntegrationTest
 import com.rarible.protocol.union.search.indexer.test.orderEth
 import kotlinx.coroutines.reactive.awaitFirstOrNull
@@ -49,7 +49,7 @@ class OrderConsumerIT {
             val searchQuery = NativeSearchQueryBuilder()
                 .withQuery(matchQuery("orderId", order.id.toString()))
                 .build()
-            val searchHits = esOperations.search(searchQuery, ElasticOrder::class.java).awaitFirstOrNull()
+            val searchHits = esOperations.search(searchQuery, EsOrder::class.java).awaitFirstOrNull()
             assertThat(searchHits?.content?.orderId).isEqualTo(order.id.fullId())
         }
     }

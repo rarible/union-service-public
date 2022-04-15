@@ -31,10 +31,6 @@
             <groupId>com.rarible.protocol.union</groupId>
             <artifactId>protocol-union-subscriber-starter</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.rarible.protocol.union</groupId>
-            <artifactId>rarible-union-search-core</artifactId>
-        </dependency>
 
         <!-- ============ Union Protocol-API ============= -->
         <dependency>
@@ -109,13 +105,6 @@
         <dependency>
             <groupId>com.rarible.protocol.union</groupId>
             <artifactId>rarible-union-enrichment</artifactId>
-            <classifier>tests</classifier>
-            <type>test-jar</type>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.rarible.protocol.union</groupId>
-            <artifactId>rarible-union-search-core</artifactId>
             <classifier>tests</classifier>
             <type>test-jar</type>
             <scope>test</scope>

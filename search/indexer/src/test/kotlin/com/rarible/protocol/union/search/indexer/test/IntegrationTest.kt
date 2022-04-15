@@ -2,7 +2,7 @@ package com.rarible.protocol.union.search.indexer.test
 
 import com.rarible.core.test.ext.ElasticsearchTest
 import com.rarible.core.test.ext.KafkaTest
-import com.rarible.protocol.union.search.core.config.SearchConfiguration
+import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
 import com.rarible.protocol.union.search.indexer.config.SearchIndexerConfiguration
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration
 import org.springframework.boot.test.context.SpringBootTest

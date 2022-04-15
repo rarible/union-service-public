@@ -8,8 +8,8 @@ import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderListActivityDto
-import com.rarible.protocol.union.search.core.ElasticActivity
-import com.rarible.protocol.union.search.core.converter.ElasticActivityConverter
+import com.rarible.protocol.union.core.model.EsActivity
+import com.rarible.protocol.union.core.converter.EsActivityConverter
 import com.rarible.protocol.union.search.reindexer.config.SearchReindexerConfiguration
 import com.rarible.protocol.union.search.reindexer.config.SearchReindexerProperties
 import io.mockk.every
@@ -27,14 +27,14 @@ class ActivityTaskUnitTest {
 
     val esOperations = mockk<ReactiveElasticsearchOperations> {
         every {
-            save(any<Iterable<ElasticActivity>>())
+            save(any<Iterable<EsActivity>>())
         } answers { Mono.just(arg(0)) }
     }
 
-    val converter = mockk<ElasticActivityConverter> {
+    val converter = mockk<EsActivityConverter> {
         every {
             convert(any<OrderListActivityDto>())
-        } returns ElasticActivity(
+        } returns EsActivity(
             randomActivityId().fullId(),
             Instant.now(),
             0xb1,
@@ -42,11 +42,11 @@ class ActivityTaskUnitTest {
             Random(0).nextLong(),
             BlockchainDto.ETHEREUM,
             ActivityTypeDto.LIST,
-            ElasticActivity.User(
+            EsActivity.User(
                 "0x01", null
             ),
-            ElasticActivity.Collection("0xc0"),
-            ElasticActivity.Item("0xa0")
+            EsActivity.Collection("0xc0"),
+            EsActivity.Item("0xa0")
         )
     }
 
@@ -110,7 +110,7 @@ class ActivityTaskUnitTest {
 
             converter.convert(any<OrderListActivityDto>())
 
-            esOperations.save(any<Iterable<ElasticActivity>>())
+            esOperations.save(any<Iterable<EsActivity>>())
         }
     }
 
@@ -140,7 +140,7 @@ class ActivityTaskUnitTest {
 
             converter.convert(any<OrderListActivityDto>())
 
-            esOperations.save(any<Iterable<ElasticActivity>>())
+            esOperations.save(any<Iterable<EsActivity>>())
         }
     }
 

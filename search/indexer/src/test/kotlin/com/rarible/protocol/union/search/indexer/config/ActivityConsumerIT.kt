@@ -15,10 +15,8 @@ import com.rarible.protocol.union.dto.BlockchainGroupDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.MintActivityDto
 import com.rarible.protocol.union.dto.UnionAddress
-import com.rarible.protocol.union.search.core.ElasticActivity
+import com.rarible.protocol.union.core.model.EsActivity
 import com.rarible.protocol.union.search.indexer.test.IntegrationTest
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
@@ -75,7 +73,7 @@ class ActivityConsumerIT {
             val searchQuery = NativeSearchQueryBuilder()
                 .withQuery(matchQuery("activityId", activity.id.toString()))
                 .build()
-            val searchHits = esOperations.search(searchQuery, ElasticActivity::class.java).awaitFirstOrNull()
+            val searchHits = esOperations.search(searchQuery, EsActivity::class.java).awaitFirstOrNull()
             assertThat(searchHits?.content?.user?.maker).isEqualToIgnoringCase(activity.owner.value)
         }
     }

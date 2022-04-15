@@ -12,26 +12,23 @@ import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
-import com.rarible.protocol.union.search.core.ElasticActivity
-import com.rarible.protocol.union.search.core.model.ActivitySort
-import com.rarible.protocol.union.search.core.model.ElasticActivityQueryGenericFilter
-import com.rarible.protocol.union.search.core.service.query.ActivityElasticQueryService
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
+import com.rarible.protocol.union.core.model.EsActivity
+import com.rarible.protocol.union.core.model.EsActivitySort
+import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
 import org.springframework.stereotype.Service
 import java.time.Instant
 
 @Service
 class ActivityElasticService(
     private val filterConverter: ActivityFilterConverter,
-    private val queryService: ActivityElasticQueryService,
+    private val esActivityRepository: EsActivityRepository,
     private val router: BlockchainRouter<ActivityService>,
 ) : ActivityQueryService {
 
     companion object {
         val logger by Logger()
     }
+
 
     override suspend fun getAllActivities(
         type: List<ActivityTypeDto>,
@@ -43,7 +40,7 @@ class ActivityElasticService(
     ): ActivitiesDto {
         val effectiveCursor = cursor ?: continuation
         val filter = filterConverter.convertGetAllActivities(type, blockchains, effectiveCursor)
-        val queryResult = queryService.query(filter, convertSort(sort), size)
+        val queryResult = esActivityRepository.search(filter, convertSort(sort), size)
         val activities = getActivities(queryResult.activities)
         return ActivitiesDto(
             continuation = null,
@@ -62,7 +59,7 @@ class ActivityElasticService(
     ): ActivitiesDto {
         val effectiveCursor = cursor ?: continuation
         val filter = filterConverter.convertGetActivitiesByCollection(type, collection, effectiveCursor)
-        val queryResult = queryService.query(filter, convertSort(sort), size)
+        val queryResult = esActivityRepository.search(filter, convertSort(sort), size)
         val activities = getActivities(queryResult.activities)
         return ActivitiesDto(
             continuation = null,
@@ -81,7 +78,7 @@ class ActivityElasticService(
     ): ActivitiesDto {
         val effectiveCursor = cursor ?: continuation
         val filter = filterConverter.convertGetActivitiesByItem(type, itemId, effectiveCursor)
-        val queryResult = queryService.query(filter, convertSort(sort), size)
+        val queryResult = esActivityRepository.search(filter, convertSort(sort), size)
         val activities = getActivities(queryResult.activities)
         return ActivitiesDto(
             continuation = null,
@@ -103,7 +100,7 @@ class ActivityElasticService(
     ): ActivitiesDto {
         val effectiveCursor = cursor ?: continuation
         val filter = filterConverter.convertGetActivitiesByUser(type, user, blockchains, from, to, effectiveCursor)
-        val queryResult = queryService.query(filter, convertSort(sort), size)
+        val queryResult = esActivityRepository.search(filter, convertSort(sort), size)
         val activities = getActivities(queryResult.activities)
         return ActivitiesDto(
             continuation = null,
@@ -112,7 +109,7 @@ class ActivityElasticService(
         )
     }
 
-    private suspend fun getActivities(activities: List<ElasticActivity>): List<ActivityDto> {
+    private suspend fun getActivities(activities: List<EsActivity>): List<ActivityDto> {
         if (activities.isEmpty()) return emptyList()
 
         val positionMap = mutableMapOf<String, Int>()
@@ -153,11 +150,11 @@ class ActivityElasticService(
         return mergedResult.filterNotNull()
     }
 
-    private fun convertSort(sort: ActivitySortDto?): ActivitySort {
+    private fun convertSort(sort: ActivitySortDto?): EsActivitySort {
         val latestFirst = when (sort) {
             ActivitySortDto.LATEST_FIRST, null -> true
             ActivitySortDto.EARLIEST_FIRST -> false
         }
-        return ActivitySort(latestFirst)
+        return EsActivitySort(latestFirst)
     }
 }

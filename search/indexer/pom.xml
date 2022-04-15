@@ -42,7 +42,7 @@
         <!-- Internal dependencies -->
         <dependency>
             <groupId>com.rarible.protocol.union</groupId>
-            <artifactId>rarible-union-search-core</artifactId>
+            <artifactId>rarible-union-enrichment</artifactId>
         </dependency>
 
         <!-- ================== Spring =================== -->
@@ -65,6 +65,13 @@
         </dependency>
 
         <!-- ================== Test =================== -->
+        <dependency>
+            <groupId>com.rarible.protocol.union</groupId>
+            <artifactId>rarible-union-enrichment</artifactId>
+            <classifier>tests</classifier>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>com.rarible.core</groupId>
             <artifactId>rarible-core-test-common</artifactId>

@@ -1,26 +1,11 @@
 package com.rarible.protocol.union.enrichment.test.data
 
+import com.rarible.core.test.data.randomInt
+import com.rarible.core.test.data.randomLong
 import com.rarible.core.test.data.randomString
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
-import com.rarible.protocol.union.core.model.UnionCollection
-import com.rarible.protocol.union.core.model.UnionItem
-import com.rarible.protocol.union.core.model.UnionMeta
-import com.rarible.protocol.union.core.model.UnionMetaContent
-import com.rarible.protocol.union.core.model.UnionMetaContentProperties
-import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.BurnActivityDto
-import com.rarible.protocol.union.dto.CollectionIdDto
-import com.rarible.protocol.union.dto.ItemDto
-import com.rarible.protocol.union.dto.ItemIdDto
-import com.rarible.protocol.union.dto.MetaAttributeDto
-import com.rarible.protocol.union.dto.MetaContentDto
-import com.rarible.protocol.union.dto.MintActivityDto
-import com.rarible.protocol.union.dto.OrderListActivityDto
-import com.rarible.protocol.union.dto.OrderMatchSellDto
-import com.rarible.protocol.union.dto.OwnershipDto
-import com.rarible.protocol.union.dto.OwnershipIdDto
-import com.rarible.protocol.union.dto.TransferActivityDto
-import com.rarible.protocol.union.dto.UnionAddress
+import com.rarible.protocol.union.core.model.*
+import com.rarible.protocol.union.dto.*
 import com.rarible.protocol.union.enrichment.converter.EnrichedItemConverter
 import com.rarible.protocol.union.enrichment.converter.EnrichedOwnershipConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthActivityConverter
@@ -51,6 +36,7 @@ import com.rarible.protocol.union.integration.solana.data.randomSolanaTokenDto
 import com.rarible.protocol.union.test.data.randomFlowNftItemDto
 import com.rarible.protocol.union.test.mock.CurrencyMock
 import kotlinx.coroutines.runBlocking
+import java.time.Instant
 
 fun randomUnionAddress(): UnionAddress =
     UnionAddressConverter.convert(
@@ -232,8 +218,31 @@ fun randomOwnershipDto(ownershipId: OwnershipIdDto): OwnershipDto {
     return EnrichedOwnershipConverter.convert(randomUnionOwnership(ownershipId))
 }
 
+fun randomEsActivity() = EsActivity(
+    activityId = randomString(),
+    date = Instant.now(),
+    blockNumber = randomLong(),
+    logIndex = randomInt(),
+    blockchain = BlockchainDto.values().random(),
+    type = ActivityTypeDto.values().random(),
+    user = EsActivity.User(
+        maker = randomString(),
+        taker = randomString(),
+    ),
+    collection = EsActivity.Collection(
+        make = randomString(),
+        take = randomString(),
+    ),
+    item = EsActivity.Item(
+        make = randomString(),
+        take = randomString(),
+    ),
+)
+
 private val mockedEthOrderConverter = EthOrderConverter(CurrencyMock.currencyServiceMock)
 private val mockedEthAuctionConverter = EthAuctionConverter(CurrencyMock.currencyServiceMock)
 private val mockedEthActivityConverter = EthActivityConverter(
     CurrencyMock.currencyServiceMock, mockedEthAuctionConverter
 )
+
+

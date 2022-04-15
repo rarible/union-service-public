@@ -6,7 +6,7 @@ import com.rarible.core.task.TaskHandler
 import com.rarible.protocol.union.api.client.OrderControllerApi
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.parser.IdParser
-import com.rarible.protocol.union.search.core.converter.ElasticOrderConverter
+import com.rarible.protocol.union.core.converter.EsOrderConverter
 import com.rarible.protocol.union.search.reindexer.config.SearchReindexerConfiguration
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
@@ -18,7 +18,7 @@ class OrderTask(
     private val config: SearchReindexerConfiguration,
     private val orderClient: OrderControllerApi,
     private val esOperations: ReactiveElasticsearchOperations,
-    private val converter: ElasticOrderConverter
+    private val converter: EsOrderConverter
 ): TaskHandler<String> {
 
     override val type: String

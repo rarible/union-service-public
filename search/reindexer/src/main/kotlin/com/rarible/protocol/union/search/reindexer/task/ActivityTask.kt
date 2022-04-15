@@ -5,7 +5,7 @@ import com.rarible.core.task.RunTask
 import com.rarible.core.task.TaskHandler
 import com.rarible.protocol.union.api.client.ActivityControllerApi
 import com.rarible.protocol.union.dto.ActivitySortDto
-import com.rarible.protocol.union.search.core.converter.ElasticActivityConverter
+import com.rarible.protocol.union.core.converter.EsActivityConverter
 import com.rarible.protocol.union.search.reindexer.config.SearchReindexerConfiguration
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
@@ -18,7 +18,7 @@ class ActivityTask(
     private val config: SearchReindexerConfiguration,
     private val activityClient: ActivityControllerApi,
     private val esOperations: ReactiveElasticsearchOperations,
-    private val converter: ElasticActivityConverter
+    private val converter: EsActivityConverter
 ): TaskHandler<String> {
     override val type: String
         get() = ACTIVITY_REINDEX

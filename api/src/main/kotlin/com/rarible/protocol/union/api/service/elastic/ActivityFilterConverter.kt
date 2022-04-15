@@ -6,8 +6,8 @@ import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
 import com.rarible.protocol.union.dto.parser.IdParser
-import com.rarible.protocol.union.search.core.model.ElasticActivityFilter
-import com.rarible.protocol.union.search.core.model.ElasticActivityQueryGenericFilter
+import com.rarible.protocol.union.core.model.ElasticActivityFilter
+import com.rarible.protocol.union.core.model.ElasticActivityQueryGenericFilter
 import org.springframework.stereotype.Service
 import java.time.Instant
 

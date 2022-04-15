@@ -5,8 +5,8 @@ import com.rarible.core.task.TaskHandler
 import com.rarible.core.task.TaskRepository
 import com.rarible.protocol.union.api.client.ActivityControllerApi
 import com.rarible.protocol.union.api.client.UnionApiClientFactory
-import com.rarible.protocol.union.search.core.config.SearchConfiguration
-import com.rarible.protocol.union.search.core.converter.ElasticActivityConverter
+import com.rarible.protocol.union.core.converter.EsActivityConverter
+import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
 import com.rarible.protocol.union.search.reindexer.task.ActivityTask
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
@@ -36,9 +36,7 @@ class SearchReindexerConfiguration(
         activityClient: ActivityControllerApi,
         taskRepository: TaskRepository,
         esOperations: ReactiveElasticsearchOperations,
-        activityConverter: ElasticActivityConverter
     ): TaskHandler<String> {
-        return ActivityTask(this, activityClient, esOperations, activityConverter)
+        return ActivityTask(this, activityClient, esOperations, EsActivityConverter)
     }
-
 }
