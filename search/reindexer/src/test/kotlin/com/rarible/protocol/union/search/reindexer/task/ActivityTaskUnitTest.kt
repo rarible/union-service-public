@@ -17,12 +17,14 @@ import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations
 import reactor.core.publisher.Mono
 import java.time.Instant
 import kotlin.random.Random
 
+@Disabled
 class ActivityTaskUnitTest {
 
     val esOperations = mockk<ReactiveElasticsearchOperations> {

@@ -23,12 +23,14 @@ import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations
 import reactor.core.publisher.Mono
 import java.math.BigInteger
 import java.time.Instant
 
+@Disabled
 class OrderTaskUnitTest {
 
     val esOperations = mockk<ReactiveElasticsearchOperations> {
