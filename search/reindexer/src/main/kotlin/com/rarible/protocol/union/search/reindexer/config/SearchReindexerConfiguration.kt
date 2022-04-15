@@ -38,7 +38,7 @@ class SearchReindexerConfiguration(
         esOperations: ReactiveElasticsearchOperations,
         activityConverter: ElasticActivityConverter
     ): TaskHandler<String> {
-        return ActivityTask(this, activityClient, taskRepository, esOperations, activityConverter)
+        return ActivityTask(this, activityClient, esOperations, activityConverter)
     }
 
 }

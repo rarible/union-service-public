@@ -186,7 +186,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
         val result = itemControllerClient.getItemById(itemIdFull).awaitFirst()
 
         assertThat(result.id.value).isEqualTo(itemId.value)
-        assertThat(result.collection).isEqualTo(collection.id)
+        assertThat(result.collection?.fullId()).isEqualTo("FLOW:${collection.id}")
         assertThat(result.id.blockchain).isEqualTo(BlockchainDto.FLOW)
     }
 

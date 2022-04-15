@@ -12,7 +12,6 @@ import com.rarible.protocol.union.dto.AuctionFinishActivityDto
 import com.rarible.protocol.union.dto.AuctionOpenActivityDto
 import com.rarible.protocol.union.dto.AuctionStartActivityDto
 import com.rarible.protocol.union.dto.BurnActivityDto
-import com.rarible.protocol.union.dto.ContractAddress
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.L2DepositActivityDto
 import com.rarible.protocol.union.dto.L2WithdrawalActivityDto
@@ -26,8 +25,8 @@ import com.rarible.protocol.union.dto.OrderMatchSwapDto
 import com.rarible.protocol.union.dto.TransferActivityDto
 import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.ext
+import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.search.core.ElasticActivity
-import java.math.BigInteger
 import org.springframework.stereotype.Service
 
 @Service
@@ -56,7 +55,7 @@ class ElasticActivityConverter {
     }
 
     private fun convertMint(source: MintActivityDto): ElasticActivity {
-        val itemId = safeItemId(source.contract, source.tokenId, source.itemId)
+        val itemId = safeItemId(source.itemId)
         return ElasticActivity(
             activityId = source.id.toString(),
             date = source.date,
@@ -71,7 +70,7 @@ class ElasticActivityConverter {
     }
 
     private fun convertBurn(source: BurnActivityDto): ElasticActivity {
-        val itemId = safeItemId(source.contract, source.tokenId, source.itemId)
+        val itemId = safeItemId(source.itemId)
         return ElasticActivity(
             activityId = source.id.toString(),
             date = source.date,
@@ -86,7 +85,7 @@ class ElasticActivityConverter {
     }
 
     private fun convertTransfer(source: TransferActivityDto): ElasticActivity {
-        val itemId = safeItemId(source.contract, source.tokenId, source.itemId)
+        val itemId = safeItemId(source.itemId)
         return ElasticActivity(
             activityId = source.id.toString(),
             date = source.date,
@@ -305,7 +304,7 @@ class ElasticActivityConverter {
 
     private fun singleCollection(itemId: ItemIdDto): ElasticActivity.Collection {
         return ElasticActivity.Collection(
-            make = itemId.value.split(":").first(),
+            make = IdParser.extractContract(itemId),
             take = null,
         )
     }
@@ -330,8 +329,8 @@ class ElasticActivityConverter {
 
     private fun bothCollections(left: AssetTypeDto, right: AssetTypeDto): ElasticActivity.Collection {
         return ElasticActivity.Collection(
-            make = left.ext.getContract(),
-            take = right.ext.getContract(),
+            make = left.ext.getCollections(),
+            take = right.ext.getCollections(),
         )
     }
 
@@ -346,26 +345,17 @@ class ElasticActivityConverter {
         )
     }
 
-    private fun safeItemId(
-        contract: ContractAddress?,
-        tokenId: BigInteger?,
-        itemId: ItemIdDto?,
-    ): ItemIdDto {
+    private fun safeItemId(itemId: ItemIdDto?): ItemIdDto {
         if (itemId != null) return itemId
-        if (contract != null && tokenId != null) {
-            return ItemIdDto(
-                blockchain = contract.blockchain,
-                contract = contract.value,
-                tokenId = tokenId,
-            )
-        }
-        throw IllegalArgumentException("contract & tokenId & itemId fields are null")
+        throw IllegalArgumentException("itemId fields is null")
     }
 
-    private fun AssetTypeExtension.getContract(): String? {
-        if (this.isCurrency) return currencyAddress()
-        return if (itemId != null) {
-            itemId!!.value.split(':').first()
-        } else null
+    private fun AssetTypeExtension.getCollections(): String? {
+        return when {
+            isCurrency -> currencyAddress()
+            itemId != null -> IdParser.extractContract(itemId!!)
+            collectionId != null -> collectionId!!.value
+            else -> null
+        }
     }
 }

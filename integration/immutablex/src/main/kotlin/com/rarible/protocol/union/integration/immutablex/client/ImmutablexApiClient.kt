@@ -3,15 +3,15 @@ package com.rarible.protocol.union.integration.immutablex.client
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
+import com.rarible.protocol.union.dto.continuation.DateIdContinuation
+import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexAsset
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexAssetsPage
-import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexMint
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexMintsPage
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexOrder
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexOrdersPage
-import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexPage
-import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexTrade
-import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexTransfer
+import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexTradesPage
+import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexTransfersPage
 import java.time.Instant
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -43,18 +43,34 @@ class ImmutablexApiClient(
         lastUpdatedTo: Long?,
         lastUpdatedFrom: Long?,
     ): ImmutablexAssetsPage {
-        val query = StringBuilder("?order_by=updated_at&direction=desc&include_fees=true")
-        query.append("&page_size=$size")
-        if (lastUpdatedFrom != null) {
-            query.append("&updated_min_timestamp=$lastUpdatedFrom")
-        }
-        if (lastUpdatedTo != null) {
-            query.append("&updated_max_timestamp=$lastUpdatedTo")
-        }
-        if (!continuation.isNullOrEmpty()) {
-            query.append("&cursor=$continuation")
-        }
-        return webClient.get().uri("$/assets$query").accept(MediaType.APPLICATION_JSON)
+//        val query = StringBuilder("?order_by=updated_at&direction=desc&include_fees=true")
+//        query.append("&page_size=$size")
+//        if (lastUpdatedFrom != null) {
+//            query.append("&updated_min_timestamp=$lastUpdatedFrom")
+//        }
+//        if (lastUpdatedTo != null) {
+//            query.append("&updated_max_timestamp=$lastUpdatedTo")
+//        }
+//        if (!continuation.isNullOrEmpty()) {
+//            query.append("&cursor=$continuation")
+//        }
+        return webClient.get().uri { builder ->
+            builder.path("/assets")
+            builder.queryParam("order_by","updated_at")
+            builder.queryParam("direction","desc")
+            builder.queryParam("include_fees",true)
+            builder.queryParam("page_size", size)
+            lastUpdatedFrom?.let {
+                builder.queryParam("updated_max_timestamp", Instant.ofEpochMilli(it))
+            }
+            lastUpdatedTo?.let {
+                builder.queryParam("updated_min_timestamp", Instant.ofEpochMilli(it))
+            }
+            DateIdContinuation.parse(continuation)?.let {
+                builder.queryParam("updated_max_timestamp", it.date)
+            }
+            builder.build()
+        }.accept(MediaType.APPLICATION_JSON)
             .retrieve()
             .toEntity(ImmutablexAssetsPage::class.java)
             .awaitSingle().body!!
@@ -83,13 +99,25 @@ class ImmutablexApiClient(
     }
 
     suspend fun getAssetsByOwner(owner: String, continuation: String?, size: Int): ImmutablexAssetsPage {
-        val query = StringBuilder("?order_by=updated_at&direction=desc&include_fees=true")
-        query.append("&user=$owner")
-        query.append("&page_size=$size")
-        if (!continuation.isNullOrEmpty()) {
-            query.append("&cursor=$continuation")
-        }
-        return webClient.get().uri("/assets$query").accept(MediaType.APPLICATION_JSON)
+//        val query = StringBuilder("?order_by=updated_at&direction=desc&include_fees=true")
+//        query.append("&user=$owner")
+//        query.append("&page_size=$size")
+//        if (!continuation.isNullOrEmpty()) {
+//            val cont = DateIdContinuation.parse(continuation)
+//
+//        }
+        return webClient.get().uri{ builder ->
+            builder.path("/assets")
+            builder.queryParam("order_by", "updated_at")
+            builder.queryParam("direction", "desc")
+            builder.queryParam("include_fees", true)
+            builder.queryParam("user", owner)
+            builder.queryParam("page_size", size)
+            DateIdContinuation.parse(continuation)?.let {
+                builder.queryParam("updated_max_timestamp", it.date)
+            }
+            builder.build()
+        }.accept(MediaType.APPLICATION_JSON)
             .retrieve()
             .toEntity(ImmutablexAssetsPage::class.java)
             .awaitSingle().body!!
@@ -119,7 +147,7 @@ class ImmutablexApiClient(
             cursor = mints.cursor,
             remaining = mints.remaining,
             result = getAssetsByIds(
-                mints.result.map { it.token.data.tokenId!! }
+                mints.result.map { "${it.token.data.tokenAddress!!}:${it.token.data.tokenId!!}" }
             )
         )
     }
@@ -166,7 +194,7 @@ class ImmutablexApiClient(
                 .queryParam("order_by", "updated_at")
                 .queryParam("direction", "desc")
             if (!continuation.isNullOrEmpty()) {
-                val (dateStr, tokenIdStr) = continuation.split("_")
+                val (dateStr, _) = continuation.split("_")
                 it.queryParam("updated_min_timestamp", dateStr)
             }
             it.build()
@@ -185,7 +213,7 @@ class ImmutablexApiClient(
                 .queryParam("direction", "desc")
                 .queryParam("sell_token_address", collection)
             if (!continuation.isNullOrEmpty()) {
-                val (dateStr, tokenIdStr) = continuation.split("_")
+                val (dateStr, _) = continuation.split("_")
                 it.queryParam("updated_min_timestamp", dateStr)
             }
             it.build()
@@ -248,21 +276,21 @@ class ImmutablexApiClient(
     suspend fun getMints(
         pageSize: Int = 50,
         continuation: String? = null,
-        tokenId: String? = null,
+        itemId: String? = null,
         from: Instant? = null,
         to: Instant? = null,
         user: String? = null,
         sort: ActivitySortDto? = null
-    ) = activityQuery<ImmutablexPage<ImmutablexMint>>(
+    ) = activityQuery<ImmutablexMintsPage>(
         "/mints",
         pageSize,
         continuation,
-        tokenId,
+        itemId,
         from,
         to,
         user,
         sort
-    ) ?: ImmutablexPage("", false, emptyList())
+    ) ?: ImmutablexMintsPage("", false, emptyList())
 
     suspend fun getTransfers(
         pageSize: Int = 50,
@@ -272,7 +300,7 @@ class ImmutablexApiClient(
         to: Instant? = null,
         user: String? = null,
         sort: ActivitySortDto?
-    ) = activityQuery<ImmutablexPage<ImmutablexTransfer>>(
+    ) = activityQuery<ImmutablexTransfersPage>(
         "/transfers",
         pageSize,
         continuation,
@@ -281,7 +309,7 @@ class ImmutablexApiClient(
         to,
         user,
         sort
-    ) ?: ImmutablexPage("", false, emptyList())
+    ) ?: ImmutablexTransfersPage("", false, emptyList())
 
     suspend fun getTrades(
         pageSize: Int = 50,
@@ -291,7 +319,7 @@ class ImmutablexApiClient(
         to: Instant? = null,
         user: String? = null,
         sort: ActivitySortDto?
-    ) = activityQuery<ImmutablexPage<ImmutablexTrade>>(
+    ) = activityQuery<ImmutablexTradesPage>(
         "/trades",
         pageSize,
         continuation,
@@ -300,7 +328,7 @@ class ImmutablexApiClient(
         to,
         user,
         sort
-    ) ?: ImmutablexPage("", false, emptyList())
+    ) ?: ImmutablexTradesPage("", false, emptyList())
 
     private suspend fun ordersByStatus(
         continuation: String?,
@@ -319,7 +347,7 @@ class ImmutablexApiClient(
                 })
                 .queryParam("include_fees", true)
             if (!continuation.isNullOrEmpty()) {
-                val (dateStr, idStr) = continuation.split("_")
+                val (dateStr, _) = continuation.split("_")
                 uriBuilder.queryParam("updated_min_timestamp", dateStr)
             }
             if (status != null) {
@@ -350,7 +378,7 @@ class ImmutablexApiClient(
         path: String,
         pageSize: Int,
         continuation: String?,
-        tokenId: String?,
+        itemId: String?,
         from: Instant?,
         to: Instant?,
         user: String?,
@@ -367,8 +395,10 @@ class ImmutablexApiClient(
             if (to != null) {
                 it.queryParam("max_timestamp", to)
             }
-            if (tokenId != null) {
-                it.queryParam("token_id", tokenId)
+            if (itemId != null) {
+                val (address, id) = IdParser.split(itemId, 2)
+                it.queryParam("token_address", address)
+                it.queryParam("token_id", id)
             }
             if (user != null) {
                 it.queryParam("user", user)

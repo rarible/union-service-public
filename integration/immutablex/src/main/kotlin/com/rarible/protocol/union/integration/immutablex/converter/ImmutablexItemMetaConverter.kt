@@ -27,18 +27,18 @@ object ImmutablexItemMetaConverter {
         return UnionMeta(
             name = asset.name!!,
             description = asset.description,
-            content = asset.metadata.filterKeys { it in contentKeys }.map {
+            content = asset.metadata?.filterKeys { it in contentKeys }?.map {
                 UnionMetaContent(
                     url = it.value as String,
                     representation = MetaContentDto.Representation.ORIGINAL
                 )
-            },
-            attributes = asset.metadata.filterKeys { it !in contentKeys }.map {
+            } ?: emptyList(),
+            attributes = asset.metadata?.filterKeys { it !in contentKeys }?.map {
                 MetaAttributeDto(
                     key = it.key,
                     value = "${it.value}"
                 )
-            },
+            } ?: emptyList(),
             restrictions = emptyList()
         )
     }

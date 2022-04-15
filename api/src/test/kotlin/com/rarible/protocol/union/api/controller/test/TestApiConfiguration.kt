@@ -25,6 +25,7 @@ import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.enrichment.meta.UnionMetaLoader
 import com.rarible.protocol.union.test.mock.CurrencyMock
 import io.mockk.mockk
+import java.net.URI
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.context.annotation.Bean
@@ -33,7 +34,6 @@ import org.springframework.context.annotation.Lazy
 import org.springframework.context.annotation.Primary
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
 import org.springframework.web.client.RestTemplate
-import java.net.URI
 
 @Lazy
 @Configuration

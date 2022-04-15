@@ -4,7 +4,6 @@ import com.rarible.core.common.mapAsync
 import com.rarible.core.task.RunTask
 import com.rarible.core.task.TaskHandler
 import com.rarible.protocol.union.api.client.OrderControllerApi
-import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.search.core.converter.ElasticOrderConverter

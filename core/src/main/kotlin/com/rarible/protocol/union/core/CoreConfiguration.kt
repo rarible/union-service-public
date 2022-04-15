@@ -41,7 +41,8 @@ import org.springframework.web.reactive.function.client.WebClient
 @ComponentScan(basePackageClasses = [CoreConfiguration::class])
 @EnableConfigurationProperties(value = [FeatureFlagsProperties::class])
 class CoreConfiguration(
-    val enabledBlockchains: List<BlockchainDto>
+    val enabledBlockchains: List<BlockchainDto>,
+    val featureFlagsProperties: FeatureFlagsProperties,
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -132,7 +133,11 @@ class CoreConfiguration(
             result.add(DummyActivityService(it))
             logger.info("ActivityService for blockchain {} disabled or not implemented, replaced by dummy", it.name)
         }
-        return BlockchainRouter(result, enabledBlockchains)
+        val blockchains = enabledBlockchains.toMutableList()
+        if (!featureFlagsProperties.enableImmutableXActivitiesQueries) {
+            blockchains -= BlockchainDto.IMMUTABLEX
+        }
+        return BlockchainRouter(result, blockchains)
     }
 
     @Bean

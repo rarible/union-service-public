@@ -6,6 +6,7 @@ import com.rarible.protocol.union.core.util.evalTakePrice
 import com.rarible.protocol.union.dto.AssetDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ContractAddress
+import com.rarible.protocol.union.dto.EthErc20AssetTypeDto
 import com.rarible.protocol.union.dto.EthErc721AssetTypeDto
 import com.rarible.protocol.union.dto.EthEthereumAssetTypeDto
 import com.rarible.protocol.union.dto.ImmutablexOrderDataV1Dto
@@ -110,6 +111,9 @@ class ImmutablexOrderConverter {
             )
             "ETH" -> EthEthereumAssetTypeDto(
                 blockchain = blockchain
+            )
+            "ERC20" -> EthErc20AssetTypeDto(
+                contract = ContractAddress(blockchain, side.data.tokenAddress!!)
             )
             else -> throw IllegalStateException("Unsupported asset type: ${side.type}")
         }

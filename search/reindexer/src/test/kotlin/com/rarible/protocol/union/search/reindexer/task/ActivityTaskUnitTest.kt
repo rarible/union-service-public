@@ -89,7 +89,6 @@ class ActivityTaskUnitTest {
         val task = ActivityTask(
             SearchReindexerConfiguration(SearchReindexerProperties()),
             activityClient,
-            mockk(),
             esOperations,
             converter
         )
@@ -120,7 +119,6 @@ class ActivityTaskUnitTest {
         val task = ActivityTask(
             SearchReindexerConfiguration(SearchReindexerProperties()),
             activityClient,
-            mockk(),
             esOperations,
             converter
         )

@@ -3,7 +3,6 @@ package com.rarible.protocol.union.api
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import com.rarible.protocol.union.api.configuration.WebSocketConfiguration
 import com.rarible.core.application.ApplicationEnvironmentInfo
 import com.rarible.core.kafka.RaribleKafkaConsumer
 import com.rarible.core.kafka.RaribleKafkaProducer
@@ -12,6 +11,7 @@ import com.rarible.protocol.dto.NftItemEventDto
 import com.rarible.protocol.dto.NftItemEventTopicProvider
 import com.rarible.protocol.dto.NftOwnershipEventDto
 import com.rarible.protocol.dto.NftOwnershipEventTopicProvider
+import com.rarible.protocol.union.api.configuration.WebSocketConfiguration
 import com.rarible.protocol.union.dto.FakeSubscriptionEventDto
 import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
@@ -20,6 +20,8 @@ import com.rarible.protocol.union.dto.SubscriptionRequestDto
 import com.rarible.protocol.union.dto.UnionEventTopicProvider
 import com.rarible.protocol.union.subscriber.UnionKafkaJsonDeserializer
 import com.rarible.protocol.union.subscriber.UnionKafkaJsonSerializer
+import java.net.URI
+import java.util.concurrent.LinkedBlockingQueue
 import org.apache.kafka.clients.consumer.OffsetResetStrategy
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -35,8 +37,6 @@ import org.springframework.core.io.buffer.DefaultDataBufferFactory
 import org.springframework.web.reactive.socket.WebSocketMessage
 import org.springframework.web.reactive.socket.client.ReactorNettyWebSocketClient
 import reactor.core.publisher.Sinks
-import java.net.URI
-import java.util.concurrent.LinkedBlockingQueue
 
 @Configuration
 @EnableAutoConfiguration

@@ -8,6 +8,8 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.RoyaltyDto
+import com.rarible.protocol.union.dto.UnionAddress
+import com.rarible.protocol.union.dto.group
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexAsset
 import java.math.BigDecimal
 import java.math.BigInteger
@@ -31,10 +33,10 @@ object ImmutablexItemConverter {
     private fun convertInternal(asset: ImmutablexAsset, blockchain: BlockchainDto): UnionItem {
         val deleted = asset.user!! == "${Address.ZERO()}"
         return UnionItem(
-            id = ItemIdDto(BlockchainDto.IMMUTABLEX, contract = asset.tokenAddress, tokenId = asset.tokenId.toBigInteger()),
+            id = ItemIdDto(BlockchainDto.IMMUTABLEX, contract = asset.tokenAddress, tokenId = asset.tokenId),
             collection = CollectionIdDto(blockchain, asset.tokenAddress),
-            creators = emptyList(),
-            owners = emptyList(),
+            creators = emptyList(), //filling outside of converter
+            owners = listOf(UnionAddress(blockchain.group(), asset.user)),
             royalties = asset.fees.map {
                 RoyaltyDto(
                     account = UnionAddressConverter.convert(ContractAddressConverter.convert(blockchain, it.address)),

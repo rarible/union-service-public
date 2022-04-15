@@ -10,10 +10,12 @@ import com.rarible.protocol.union.dto.UserActivityTypeDto
 import com.rarible.protocol.union.integration.immutablex.converter.ImmutablexActivityConverter
 import com.rarible.protocol.union.integration.immutablex.converter.ImmutablexOrderConverter
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexMint
+import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexMintsPage
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexOrder
-import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexPage
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexTrade
+import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexTradesPage
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexTransfer
+import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexTransfersPage
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
@@ -25,7 +27,7 @@ internal class ImmutablexActivityServiceTest {
     private val mapper = jacksonObjectMapper().registerModule(JavaTimeModule())
 
     private val expectedMintActivity by lazy {
-        ImmutablexPage<ImmutablexMint>("", false,
+        ImmutablexMintsPage("", false,
             listOf(
                 mapper.readValue(
                     ImmutablexActivityServiceTest::class.java.getResourceAsStream("mint.json"),
@@ -36,7 +38,7 @@ internal class ImmutablexActivityServiceTest {
     }
 
     private val expectedTransfersActivity by lazy {
-        ImmutablexPage<ImmutablexTransfer>("", false,
+        ImmutablexTransfersPage("", false,
             listOf(
                 mapper.readValue(
                     ImmutablexActivityServiceTest::class.java.getResourceAsStream("transfer.json"),
@@ -47,7 +49,7 @@ internal class ImmutablexActivityServiceTest {
     }
 
     private val expectedTradesActivity by lazy {
-        ImmutablexPage<ImmutablexTrade>("", false,
+        ImmutablexTradesPage("", false,
             listOf(
                 mapper.readValue(
                     ImmutablexActivityServiceTest::class.java.getResourceAsStream("trade.json"),
