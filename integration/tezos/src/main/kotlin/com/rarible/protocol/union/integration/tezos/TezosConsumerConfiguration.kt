@@ -23,6 +23,7 @@ import com.rarible.protocol.union.integration.tezos.event.TezosItemEventHandler
 import com.rarible.protocol.union.integration.tezos.event.TezosOrderEventHandler
 import com.rarible.protocol.union.integration.tezos.event.TezosOwnershipEventHandler
 import org.apache.commons.lang3.StringUtils
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
 
@@ -31,7 +32,9 @@ import org.springframework.context.annotation.Import
 class TezosConsumerConfiguration(
     applicationEnvironmentInfo: ApplicationEnvironmentInfo,
     properties: TezosIntegrationProperties,
-    private val consumerFactory: ConsumerFactory
+    private val consumerFactory: ConsumerFactory,
+    @Value("\${rarible.core.client.k8s:false}")
+    private val k8s: Boolean
 ) {
 
     private val env = applicationEnvironmentInfo.name
@@ -93,7 +96,7 @@ class TezosConsumerConfiguration(
         factory: TezosEventsConsumerFactory,
         handler: BlockchainEventHandler<TezosItemSafeEventDto, UnionItemEvent>
     ): KafkaConsumerWorker<TezosItemSafeEventDto> {
-        val consumer = factory.createItemConsumer(consumerFactory.itemGroup)
+        val consumer = factory.createItemConsumer(consumerGroup(consumerFactory.itemGroup))
         return consumerFactory.createItemConsumer(consumer, handler, daemon, workers)
     }
 
@@ -102,7 +105,7 @@ class TezosConsumerConfiguration(
         factory: TezosEventsConsumerFactory,
         handler: BlockchainEventHandler<TezosCollectionSafeEventDto, UnionCollectionEvent>
     ): KafkaConsumerWorker<TezosCollectionSafeEventDto> {
-        val consumer = factory.createCollectionConsumer(consumerFactory.itemGroup)
+        val consumer = factory.createCollectionConsumer(consumerGroup(consumerFactory.itemGroup))
         return consumerFactory.createCollectionConsumer(consumer, handler, daemon, workers)
     }
 
@@ -111,7 +114,7 @@ class TezosConsumerConfiguration(
         factory: TezosEventsConsumerFactory,
         handler: BlockchainEventHandler<TezosOwnershipSafeEventDto, UnionOwnershipEvent>
     ): KafkaConsumerWorker<TezosOwnershipSafeEventDto> {
-        val consumer = factory.createOwnershipConsumer(consumerFactory.ownershipGroup)
+        val consumer = factory.createOwnershipConsumer(consumerGroup(consumerFactory.ownershipGroup))
         return consumerFactory.createOwnershipConsumer(consumer, handler, daemon, workers)
     }
 
@@ -120,7 +123,7 @@ class TezosConsumerConfiguration(
         factory: TezosEventsConsumerFactory,
         handler: BlockchainEventHandler<TezosOrderSafeEventDto, UnionOrderEvent>
     ): KafkaConsumerWorker<TezosOrderSafeEventDto> {
-        val consumer = factory.createOrderConsumer(consumerFactory.orderGroup)
+        val consumer = factory.createOrderConsumer(consumerGroup(consumerFactory.orderGroup))
         return consumerFactory.createOrderConsumer(consumer, handler, daemon, workers)
     }
 
@@ -129,7 +132,16 @@ class TezosConsumerConfiguration(
         factory: TezosEventsConsumerFactory,
         handler: BlockchainEventHandler<TezosActivitySafeDto, com.rarible.protocol.union.dto.ActivityDto>
     ): KafkaConsumerWorker<TezosActivitySafeDto> {
-        val consumer = factory.createActivityConsumer(consumerFactory.activityGroup)
+        val consumer = factory.createActivityConsumer(consumerGroup(consumerFactory.activityGroup))
         return consumerFactory.createActivityConsumer(consumer, handler, daemon, workers)
+    }
+
+    private fun consumerGroup(group: String): String {
+        // Since Tezos has kafka outside our cluster and several envs uses same topics, groupId should be customized
+        return if (k8s) {
+            "k8s.$group"
+        } else {
+            group
+        }
     }
 }
