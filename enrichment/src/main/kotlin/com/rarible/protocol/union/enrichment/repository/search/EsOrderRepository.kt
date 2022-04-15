@@ -4,9 +4,9 @@ import com.rarible.protocol.union.core.model.*
 import kotlinx.coroutines.reactive.awaitFirst
 import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations
 import org.springframework.data.elasticsearch.core.query.Query
-import org.springframework.stereotype.Service
+import org.springframework.stereotype.Component
 
-@Service
+@Component
 class EsOrderRepository(
     private val esOperations: ReactiveElasticsearchOperations
 ) {

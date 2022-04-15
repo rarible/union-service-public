@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.search.reindexer.config
+package com.rarible.protocol.union.worker.config
 
 
 

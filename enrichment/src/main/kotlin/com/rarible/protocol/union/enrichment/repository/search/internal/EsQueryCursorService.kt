@@ -7,9 +7,9 @@ import org.elasticsearch.index.query.BoolQueryBuilder
 import org.elasticsearch.index.query.QueryBuilder
 import org.elasticsearch.index.query.RangeQueryBuilder
 import org.elasticsearch.index.query.TermQueryBuilder
-import org.springframework.stereotype.Service
+import org.springframework.stereotype.Component
 
-@Service
+@Component
 class EsQueryCursorService {
 
     fun applyCursor(query: BoolQueryBuilder, sort: EsActivitySort, cursorAsString: String?) {

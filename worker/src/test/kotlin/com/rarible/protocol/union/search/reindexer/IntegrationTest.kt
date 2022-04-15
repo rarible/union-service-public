@@ -2,7 +2,7 @@ package com.rarible.protocol.union.search.reindexer
 
 import com.rarible.core.test.ext.ElasticsearchTest
 import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
-import com.rarible.protocol.union.search.reindexer.config.SearchReindexerConfiguration
+import com.rarible.protocol.union.worker.config.SearchReindexerConfiguration
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import

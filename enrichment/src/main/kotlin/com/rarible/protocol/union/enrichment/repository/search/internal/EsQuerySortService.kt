@@ -5,9 +5,9 @@ import com.rarible.protocol.union.core.model.EsActivitySort
 import org.elasticsearch.search.sort.SortBuilders
 import org.elasticsearch.search.sort.SortOrder
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder
-import org.springframework.stereotype.Service
+import org.springframework.stereotype.Component
 
-@Service
+@Component
 class EsQuerySortService {
 
     fun applySort(builder: NativeSearchQueryBuilder, sort: EsActivitySort) {

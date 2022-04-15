@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.search.reindexer.config
+package com.rarible.protocol.union.worker.config
 
 import com.rarible.core.task.EnableRaribleTask
 import com.rarible.core.task.TaskHandler
@@ -7,21 +7,21 @@ import com.rarible.protocol.union.api.client.ActivityControllerApi
 import com.rarible.protocol.union.api.client.UnionApiClientFactory
 import com.rarible.protocol.union.core.converter.EsActivityConverter
 import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
-import com.rarible.protocol.union.search.reindexer.task.ActivityTask
+import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
+import com.rarible.protocol.union.worker.task.ActivityTask
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
 import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations
 
 @Configuration
 @EnableRaribleTask
-@Import(SearchConfiguration::class)
-@EnableConfigurationProperties(SearchReindexerProperties::class)
-@ComponentScan(basePackages = [
-    "com.rarible.protocol.union.search"
+@Import(value = [
+    SearchConfiguration::class,
+    EsActivityRepository::class
 ])
+@EnableConfigurationProperties(SearchReindexerProperties::class)
 class SearchReindexerConfiguration(
     val properties: SearchReindexerProperties
 ) {

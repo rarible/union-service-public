@@ -14,12 +14,12 @@ class ActivityEventHandler(
 
     private val logger by Logger()
 
-    override suspend fun handle(events: List<ActivityDto>) {
-        logger.info("Handling ${events.size} ActivityDto events")
+    override suspend fun handle(event: List<ActivityDto>) {
+        logger.info("Handling ${event.size} ActivityDto events")
 
-        val convertedEvents = events.map { event ->
-            logger.debug("Converting ActivityDto id = ${event.id}")
-            EsActivityConverter.convert(event)
+        val convertedEvents = event.map {
+            logger.debug("Converting ActivityDto id = ${it.id}")
+            EsActivityConverter.convert(it)
         }
         logger.debug("Saving ${convertedEvents.size} ActivityDto events to ElasticSearch")
         repository.saveAll(convertedEvents)

@@ -10,8 +10,9 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderListActivityDto
 import com.rarible.protocol.union.core.model.EsActivity
 import com.rarible.protocol.union.core.converter.EsActivityConverter
-import com.rarible.protocol.union.search.reindexer.config.SearchReindexerConfiguration
-import com.rarible.protocol.union.search.reindexer.config.SearchReindexerProperties
+import com.rarible.protocol.union.worker.config.SearchReindexerConfiguration
+import com.rarible.protocol.union.worker.config.SearchReindexerProperties
+import com.rarible.protocol.union.worker.task.ActivityTask
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify

@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.search.reindexer.task
+package com.rarible.protocol.union.worker.task
 
 import com.rarible.core.common.mapAsync
 import com.rarible.core.task.RunTask
@@ -7,7 +7,7 @@ import com.rarible.protocol.union.api.client.OrderControllerApi
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.core.converter.EsOrderConverter
-import com.rarible.protocol.union.search.reindexer.config.SearchReindexerConfiguration
+import com.rarible.protocol.union.worker.config.SearchReindexerConfiguration
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow

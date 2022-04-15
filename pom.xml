@@ -415,6 +415,6 @@
         <module>listener</module>
         <module>meta-loader</module>
         <module>indexer</module>
-        <module>reindexer</module>
+        <module>worker</module>
     </modules>
 </project>

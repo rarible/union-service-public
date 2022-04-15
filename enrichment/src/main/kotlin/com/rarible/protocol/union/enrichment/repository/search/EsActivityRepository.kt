@@ -11,9 +11,9 @@ import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations
 import org.springframework.data.elasticsearch.core.query.Query
-import org.springframework.stereotype.Service
+import org.springframework.stereotype.Component
 
-@Service
+@Component
 class EsActivityRepository(
     private val esOperations: ReactiveElasticsearchOperations,
     private val queryBuilderService: EsQueryBuilderService,

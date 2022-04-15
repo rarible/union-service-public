@@ -16,8 +16,9 @@ import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.core.model.EsOrder
 import com.rarible.protocol.union.core.converter.EsOrderConverter
-import com.rarible.protocol.union.search.reindexer.config.SearchReindexerConfiguration
-import com.rarible.protocol.union.search.reindexer.config.SearchReindexerProperties
+import com.rarible.protocol.union.worker.config.SearchReindexerConfiguration
+import com.rarible.protocol.union.worker.config.SearchReindexerProperties
+import com.rarible.protocol.union.worker.task.OrderTask
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify

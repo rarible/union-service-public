@@ -14,12 +14,12 @@ class OrderEventHandler(
 
     private val logger by Logger()
 
-    override suspend fun handle(events: List<OrderEventDto>) {
-        logger.debug("Handling ${events.size} ActivityDto events")
+    override suspend fun handle(event: List<OrderEventDto>) {
+        logger.debug("Handling ${event.size} ActivityDto events")
 
-        val convertedEvents = events.map { event ->
-            logger.debug("Converting OrderDto id = ${event.orderId}")
-            EsOrderConverter.convert(event)
+        val convertedEvents = event.map {
+            logger.debug("Converting OrderDto id = ${it.orderId}")
+            EsOrderConverter.convert(it)
         }
         logger.debug("Saving ${convertedEvents.size} OrderDto events to ElasticSearch")
         repository.saveAll(convertedEvents)
