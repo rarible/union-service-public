@@ -15,6 +15,7 @@ import com.rarible.protocol.union.dto.continuation.page.ArgSlice
 import com.rarible.protocol.union.dto.continuation.page.Page
 import com.rarible.protocol.union.dto.continuation.page.PageSize
 import com.rarible.protocol.union.dto.continuation.page.Slice
+import com.rarible.protocol.union.enrichment.meta.UnionMetaService
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
@@ -33,6 +34,7 @@ import org.springframework.stereotype.Component
 class ItemApiService(
     private val orderApiService: OrderApiService,
     private val enrichmentItemService: EnrichmentItemService,
+    private val unionMetaService: UnionMetaService,
     private val router: BlockchainRouter<ItemService>
 ) {
 
@@ -105,31 +107,38 @@ class ItemApiService(
             return emptyList()
         }
         val now = nowMillis()
-        val shortItems: Map<ItemIdDto, ShortItem> = enrichmentItemService
-            .findAll(unionItems.map { ShortItemId(it.id) })
-            .associateBy { it.id.toDto() }
 
-        // Looking for full orders for existing items in order-indexer
-        val shortOrderIds = shortItems.values
-            .map { listOfNotNull(it.bestBidOrder?.dtoId, it.bestSellOrder?.dtoId) }
-            .flatten()
+        val enrichedItems = coroutineScope {
 
-        val orders = orderApiService.getByIds(shortOrderIds)
-            .associateBy { it.id }
+            val meta = async {
+                unionMetaService.getAvailableMeta(unionItems.map { it.id })
+            }
 
-        val enrichedItems = unionItems.map {
-            val shortItem = shortItems[it.id]
-            enrichmentItemService.enrichItem(
-                shortItem = shortItem,
-                item = it,
-                orders = orders
-            )
+            val shortItems: Map<ItemIdDto, ShortItem> = enrichmentItemService
+                .findAll(unionItems.map { ShortItemId(it.id) })
+                .associateBy { it.id.toDto() }
+
+            // Looking for full orders for existing items in order-indexer
+            val shortOrderIds = shortItems.values
+                .map { listOfNotNull(it.bestBidOrder?.dtoId, it.bestSellOrder?.dtoId) }
+                .flatten()
+
+            val orders = orderApiService.getByIds(shortOrderIds)
+                .associateBy { it.id }
+
+            val enriched = unionItems.map {
+                val shortItem = shortItems[it.id]
+                enrichmentItemService.enrichItem(
+                    shortItem = shortItem,
+                    item = it,
+                    orders = orders,
+                    meta = meta.await()
+                )
+            }
+            logger.info("Enriched {} of {} Items ({}ms)", shortItems.size, unionItems.size, spent(now))
+            enriched
         }
 
-        logger.info(
-            "Enriched {} of {} Items, {} Orders fetched ({}ms)",
-            shortItems.size, enrichedItems.size, orders.size, spent(now)
-        )
 
         return enrichedItems
     }

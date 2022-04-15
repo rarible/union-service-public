@@ -36,8 +36,8 @@ class EthItemControllerApiMock(
         continuation: String?,
         size: Int,
         showDeleted: Boolean,
-        lastUpdatedFrom: Long,
-        lastUpdatedTo: Long,
+        lastUpdatedFrom: Long? = null,
+        lastUpdatedTo: Long? = null,
         vararg returnItems: NftItemDto
     ) {
         every {

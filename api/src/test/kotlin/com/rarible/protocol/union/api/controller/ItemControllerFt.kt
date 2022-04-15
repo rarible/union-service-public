@@ -4,6 +4,7 @@ import com.rarible.core.common.nowMillis
 import com.rarible.core.test.data.randomAddress
 import com.rarible.core.test.data.randomInt
 import com.rarible.core.test.data.randomString
+import com.rarible.loader.cache.CacheLoaderService
 import com.rarible.protocol.dto.NftItemRoyaltyDto
 import com.rarible.protocol.dto.NftItemRoyaltyListDto
 import com.rarible.protocol.dto.NftMediaDto
@@ -12,6 +13,7 @@ import com.rarible.protocol.union.api.client.ItemControllerApi
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
+import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ItemIdsDto
@@ -21,7 +23,9 @@ import com.rarible.protocol.union.dto.continuation.page.PageSize
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.converter.ShortItemConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
+import com.rarible.protocol.union.enrichment.meta.UnionMetaService
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
+import com.rarible.protocol.union.enrichment.test.data.randomUnionMeta
 import com.rarible.protocol.union.integration.ethereum.converter.EthItemConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAddress
@@ -54,6 +58,7 @@ import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpStatus
 import org.springframework.web.client.RestTemplate
 import reactor.core.publisher.Mono
@@ -78,6 +83,13 @@ class ItemControllerFt : AbstractIntegrationTest() {
 
     @Autowired
     lateinit var restTemplate: RestTemplate
+
+    @Autowired
+    @Qualifier("union.meta.cache.loader.service")
+    lateinit var unionMetaCacheLoaderService: CacheLoaderService<UnionMeta>
+
+    @Autowired
+    lateinit var unionMetaService: UnionMetaService
 
     @Test
     fun `get item by id - ethereum, enriched`() = runBlocking<Unit> {
@@ -135,6 +147,33 @@ class ItemControllerFt : AbstractIntegrationTest() {
             )
         )
 
+        coEvery { testUnionMetaLoader.load(itemId) } returns EthItemConverter.convert(meta)
+
+        val response = restTemplate.getForEntity("${baseUri}/v0.1/items/${itemId.fullId()}/image", String::class.java)
+        assertThat(response.statusCode).isEqualTo(HttpStatus.TEMPORARY_REDIRECT)
+        assertThat(response.headers["Location"]).contains(imageUrl)
+    }
+
+    @Test
+    fun `get item svg image by id`() = runBlocking<Unit> {
+        val itemId = randomEthItemId()
+        val imageUrlSvg = "https://rarible.mypinata.cloud/data:image/svg+xml;utf8,<svg%20class='nft'></svg>"
+        val cachedMeta = randomEthItemMeta().copy(
+            image = NftMediaDto(
+                url = mapOf(Pair("ORIGINAL", imageUrlSvg)),
+                meta = mapOf(Pair("ORIGINAL", randomEthItemMediaMeta("image/svg+xml")))
+            )
+        )
+
+        val imageUrl = "https://ethereum-api.rarible.org/v0.1/nft/items/0x5025ebac986d9a5914442c6c0496fbbe41ef1464:6087/image?size=ORIGINAL&animation=false&hash=-1654230677"
+        val meta = randomEthItemMeta().copy(
+            image = NftMediaDto(
+                url = mapOf(Pair("ORIGINAL", imageUrl)),
+                meta = mapOf(Pair("ORIGINAL", randomEthItemMediaMeta("image/svg+xml")))
+            )
+        )
+
+        unionMetaCacheLoaderService.save(itemId.fullId(), EthItemConverter.convert(cachedMeta))
         coEvery { testUnionMetaLoader.load(itemId) } returns EthItemConverter.convert(meta)
 
         val response = restTemplate.getForEntity("${baseUri}/v0.1/items/${itemId.fullId()}/image", String::class.java)
@@ -595,5 +634,38 @@ class ItemControllerFt : AbstractIntegrationTest() {
         assertThat(items.items).hasSize(3)
         assertThat(items.total).isEqualTo(4)
         assertThat(items.continuation).isNotNull()
+    }
+
+    @Test
+    fun `get all items - enriched with cached meta`() = runBlocking<Unit> {
+        val blockchains = listOf(BlockchainDto.ETHEREUM)
+
+        val itemIdWithMeta1 = randomEthItemId()
+        val itemIdWithMeta2 = randomEthItemId()
+        val itemIdWithoutMeta = randomEthItemId()
+
+        val meta1 = randomUnionMeta()
+        val meta2 = randomUnionMeta()
+        unionMetaService.save(itemIdWithMeta1, meta1)
+        unionMetaService.save(itemIdWithMeta2, meta2)
+
+        val ethList = listOf(
+            randomEthNftItemDto(itemIdWithMeta1),
+            randomEthNftItemDto(itemIdWithMeta2).copy(meta = null),
+            randomEthNftItemDto(itemIdWithoutMeta).copy(meta = null)
+        )
+
+        ethereumItemControllerApiMock.mockGetNftAllItems(
+            null, size, false, null, null, *ethList.toTypedArray()
+        )
+
+        val items = itemControllerClient.getAllItems(
+            blockchains, null, size, false, null, null
+        ).awaitFirst().items.associateBy { it.id }
+
+        assertThat(items).hasSize(3)
+        assertThat(items[itemIdWithMeta1]!!.meta!!.name).isEqualTo(meta1.name)
+        assertThat(items[itemIdWithMeta2]!!.meta!!.name).isEqualTo(meta2.name)
+        assertThat(items[itemIdWithoutMeta]!!.meta).isNull()
     }
 }
