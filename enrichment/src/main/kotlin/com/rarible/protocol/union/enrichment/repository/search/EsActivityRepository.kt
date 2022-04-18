@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class EsActivityRepository(
-    val esOperations: ReactiveElasticsearchOperations,
+    private val esOperations: ReactiveElasticsearchOperations,
     private val queryBuilderService: EsQueryBuilderService,
 ) {
     suspend fun findById(id: String): EsActivity? {
