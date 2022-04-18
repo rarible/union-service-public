@@ -17,7 +17,7 @@ class ActivityEventHandler(
     override suspend fun handle(event: List<ActivityDto>) {
         logger.info("Handling ${event.size} ActivityDto events")
 
-        val convertedEvents = event.map {
+        val convertedEvents = event.mapNotNull {
             logger.debug("Converting ActivityDto id = ${it.id}")
             EsActivityConverter.convert(it)
         }

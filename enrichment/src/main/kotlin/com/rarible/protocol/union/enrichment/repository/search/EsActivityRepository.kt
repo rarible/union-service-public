@@ -10,12 +10,13 @@ import com.rarible.protocol.union.enrichment.repository.search.internal.EsQueryB
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations
+import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates
 import org.springframework.data.elasticsearch.core.query.Query
 import org.springframework.stereotype.Component
 
 @Component
 class EsActivityRepository(
-    private val esOperations: ReactiveElasticsearchOperations,
+    val esOperations: ReactiveElasticsearchOperations,
     private val queryBuilderService: EsQueryBuilderService,
 ) {
     suspend fun findById(id: String): EsActivity? {
@@ -31,7 +32,7 @@ class EsActivityRepository(
     }
 
     suspend fun deleteAll() {
-        esOperations.delete(Query.findAll(), EsActivity::class.java).awaitFirst()
+        esOperations.delete(Query.findAll(), Any::class.java, IndexCoordinates.of("activity")).awaitFirstOrNull()
     }
 
     suspend fun search(

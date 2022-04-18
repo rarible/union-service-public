@@ -92,11 +92,11 @@ class ActivityFilterConverterTest {
 
             // then
             assertThat(actual).usingRecursiveComparison()
-                .ignoringFields("activityTypes", "anyCollections", "blockchains", "cursor")
+                .ignoringFields("activityTypes", "collections", "blockchains", "cursor")
                 .isEqualTo(emptyGenericFilter)
             actual as ElasticActivityQueryGenericFilter
             assertThat(actual.activityTypes).containsExactlyInAnyOrder(*types.toTypedArray())
-            assertThat(actual.anyCollections).containsExactly("0x00000012345")
+            assertThat(actual.collections).containsExactly("0x00000012345")
             assertThat(actual.blockchains).containsExactly(BlockchainDto.POLYGON)
             assertThat(actual.cursor).isEqualTo(cursor)
         }
@@ -118,11 +118,11 @@ class ActivityFilterConverterTest {
 
             // then
             assertThat(actual).usingRecursiveComparison()
-                .ignoringFields("activityTypes", "anyItem", "blockchains", "cursor")
+                .ignoringFields("activityTypes", "item", "blockchains", "cursor")
                 .isEqualTo(emptyGenericFilter)
             actual as ElasticActivityQueryGenericFilter
             assertThat(actual.activityTypes).containsExactlyInAnyOrder(*types.toTypedArray())
-            assertThat(actual.anyItem).isEqualTo("0x00000012345")
+            assertThat(actual.item).isEqualTo("0x00000012345")
             assertThat(actual.blockchains).containsExactly(BlockchainDto.TEZOS)
             assertThat(actual.cursor).isEqualTo(cursor)
         }

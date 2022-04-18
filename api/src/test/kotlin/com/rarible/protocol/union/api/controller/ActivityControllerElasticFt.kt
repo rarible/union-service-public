@@ -61,7 +61,7 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
     private lateinit var repository: EsActivityRepository
 
     @BeforeEach
-    fun setUp() = runBlocking<Unit> {
+    fun setUp() = runBlocking {
         repository.deleteAll()
     }
 
@@ -207,9 +207,7 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
             activityId = "${BlockchainDto.ETHEREUM}:${orderActivity.id}",
             type = types.first(),
             blockchain = ethCollectionId.blockchain,
-            collection = EsActivity.Collection(
-                make = ethCollectionId.value
-            )
+            collection = ethCollectionId.value,
         )
         repository.save(elasticActivity)
 
@@ -247,27 +245,21 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
             type = ActivityTypeDto.SELL,
             blockchain = BlockchainDto.ETHEREUM,
             date = orderActivity.date,
-            item = EsActivity.Item(
-                make = "${assetTypeDto.contract}:${assetTypeDto.tokenId}"
-            )
+            item = "${assetTypeDto.contract}:${assetTypeDto.tokenId}"
         )
         val elasticItemActivity = randomEsActivity().copy(
             activityId = "${BlockchainDto.ETHEREUM}:${itemActivity.id}",
             type = ActivityTypeDto.MINT,
             blockchain = BlockchainDto.ETHEREUM,
             date = itemActivity.date,
-            item = EsActivity.Item(
-                make = "${assetTypeDto.contract}:${assetTypeDto.tokenId}"
-            )
+            item = "${assetTypeDto.contract}:${assetTypeDto.tokenId}"
         )
         val elasticAuctionActivity = randomEsActivity().copy(
             activityId = "${BlockchainDto.ETHEREUM}:${auctionActivity.id}",
             type = ActivityTypeDto.AUCTION_STARTED,
             blockchain = BlockchainDto.ETHEREUM,
             date = auctionActivity.date,
-            item = EsActivity.Item(
-                make = "${assetTypeDto.contract}:${assetTypeDto.tokenId}"
-            )
+            item = "${assetTypeDto.contract}:${assetTypeDto.tokenId}"
         )
 
         repository.saveAll(listOf(elasticOrderActivity, elasticItemActivity, elasticAuctionActivity))
@@ -325,27 +317,21 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
             type = ActivityTypeDto.MINT,
             blockchain = BlockchainDto.ETHEREUM,
             date = ethItemActivity.date,
-            user = EsActivity.User(
-                maker = userEth.value
-            )
+            userFrom = userEth.value,
         )
         val elasticEthItemActivity2 = randomEsActivity().copy(
             activityId = "${BlockchainDto.ETHEREUM}:${ethItemActivity2.id}",
             type = ActivityTypeDto.MINT,
             blockchain = BlockchainDto.ETHEREUM,
             date = ethItemActivity2.date,
-            user = EsActivity.User(
-                maker = userEth.value
-            )
+            userFrom = userEth.value,
         )
         val elasticPolygonItemActivity = randomEsActivity().copy(
             activityId = "${BlockchainDto.POLYGON}:${polygonItemActivity.id}",
             type = ActivityTypeDto.MINT,
             blockchain = BlockchainDto.POLYGON,
             date = polygonItemActivity.date,
-            user = EsActivity.User(
-                maker = userEth.value
-            )
+            userFrom = userEth.value,
         )
 
         repository.saveAll(

@@ -74,7 +74,7 @@ class ActivityConsumerIT {
                 .withQuery(matchQuery("activityId", activity.id.toString()))
                 .build()
             val searchHits = esOperations.search(searchQuery, EsActivity::class.java).awaitFirstOrNull()
-            assertThat(searchHits?.content?.user?.maker).isEqualToIgnoringCase(activity.owner.value)
+            assertThat(searchHits?.content?.userTo).isEqualToIgnoringCase(activity.owner.value)
         }
     }
 }

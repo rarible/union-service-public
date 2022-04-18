@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.worker.task
 
-import com.rarible.core.common.mapAsync
 import com.rarible.core.task.RunTask
 import com.rarible.core.task.TaskHandler
 import com.rarible.protocol.union.api.client.ActivityControllerApi
@@ -55,7 +54,7 @@ class ActivityTask(
                 ).awaitFirst()
 
                 esOperations.save(
-                    res.activities.mapAsync(converter::convert)
+                    res.activities.mapNotNull(converter::convert)
                 ).awaitSingle()
 
                 emit(res.continuation ?: "")
