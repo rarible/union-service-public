@@ -45,11 +45,10 @@ class ActivityTaskUnitTest {
             Random(0).nextLong(),
             BlockchainDto.ETHEREUM,
             ActivityTypeDto.LIST,
-            EsActivity.User(
-                "0x01", null
-            ),
-            EsActivity.Collection("0xc0"),
-            EsActivity.Item("0xa0")
+                "0x01",
+            null,
+            "0xc0",
+            "0xa0",
         )
     }
 
