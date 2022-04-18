@@ -90,10 +90,10 @@ internal class QueryBuilderServiceIntegrationTest {
     fun `should query by any users`() = runBlocking<Unit> {
         // given
         val filter = ElasticActivityQueryGenericFilter(anyUsers = setOf("loupa", "poupa"))
-        val toFind1 = randomEsActivity().copy(user = EsActivity.User(maker = "loupa", taker = null))
-        val toFind2 = randomEsActivity().copy(user = EsActivity.User(maker = "0x00", taker = "poupa"))
-        val toSkip1 = randomEsActivity().copy(user = EsActivity.User(maker = "0x01", taker = "0x00"))
-        val toSkip2 = randomEsActivity().copy(user = EsActivity.User(maker = "0x03", taker = null))
+        val toFind1 = randomEsActivity().copy(userFrom = "loupa", userTo = null)
+        val toFind2 = randomEsActivity().copy(userFrom = "0x00", userTo = "poupa")
+        val toSkip1 = randomEsActivity().copy(userFrom = "0x01", userTo = "0x00")
+        val toSkip2 = randomEsActivity().copy(userFrom = "0x03", userTo = null)
         repository.saveAll(listOf(toFind1, toFind2, toSkip1, toSkip2))
 
         // when
@@ -104,13 +104,13 @@ internal class QueryBuilderServiceIntegrationTest {
     }
 
     @Test
-    fun `should query by makers`() = runBlocking<Unit> {
+    fun `should query by userFrom`() = runBlocking<Unit> {
         // given
-        val filter = ElasticActivityQueryGenericFilter(makers = setOf("loupa", "poupa"))
-        val toFind1 = randomEsActivity().copy(user = EsActivity.User(maker = "loupa", taker = null))
-        val toFind2 = randomEsActivity().copy(user = EsActivity.User(maker = "poupa", taker = "0x02"))
-        val toSkip1 = randomEsActivity().copy(user = EsActivity.User(maker = "0x01", taker = "loupa"))
-        val toSkip2 = randomEsActivity().copy(user = EsActivity.User(maker = "0x03", taker = "poupa"))
+        val filter = ElasticActivityQueryGenericFilter(usersFrom = setOf("loupa", "poupa"))
+        val toFind1 = randomEsActivity().copy(userFrom = "loupa", userTo = null)
+        val toFind2 = randomEsActivity().copy(userFrom = "poupa", userTo = "0x02")
+        val toSkip1 = randomEsActivity().copy(userFrom = "0x01", userTo = "loupa")
+        val toSkip2 = randomEsActivity().copy(userFrom = "0x03", userTo = "poupa")
         repository.saveAll(listOf(toFind1, toFind2, toSkip1, toSkip2))
 
         // when
@@ -121,13 +121,13 @@ internal class QueryBuilderServiceIntegrationTest {
     }
 
     @Test
-    fun `should query by takers`() = runBlocking<Unit> {
+    fun `should query by userTo`() = runBlocking<Unit> {
         // given
-        val filter = ElasticActivityQueryGenericFilter(takers = setOf("loupa", "poupa"))
-        val toFind1 = randomEsActivity().copy(user = EsActivity.User(maker = "0x01", taker = "loupa"))
-        val toFind2 = randomEsActivity().copy(user = EsActivity.User(maker = "0x03", taker = "poupa"))
-        val toSkip1 = randomEsActivity().copy(user = EsActivity.User(maker = "loupa", taker = null))
-        val toSkip2 = randomEsActivity().copy(user = EsActivity.User(maker = "poupa", taker = "0x02"))
+        val filter = ElasticActivityQueryGenericFilter(usersTo = setOf("loupa", "poupa"))
+        val toFind1 = randomEsActivity().copy(userFrom = "0x01", userTo = "loupa")
+        val toFind2 = randomEsActivity().copy(userFrom = "0x03", userTo = "poupa")
+        val toSkip1 = randomEsActivity().copy(userFrom = "loupa", userTo = null)
+        val toSkip2 = randomEsActivity().copy(userFrom = "poupa", userTo = "0x02")
         repository.saveAll(listOf(toFind1, toFind2, toSkip1, toSkip2))
 
         // when
@@ -138,48 +138,13 @@ internal class QueryBuilderServiceIntegrationTest {
     }
 
     @Test
-    fun `should query by any collections`() = runBlocking<Unit> {
+    fun `should query by collections`() = runBlocking<Unit> {
         // given
-        val filter = ElasticActivityQueryGenericFilter(anyCollections = setOf("boredApes", "cryptoPunks"))
-        val toFind1 = randomEsActivity().copy(collection = EsActivity.Collection(make = "boredApes", take = null))
-        val toFind2 = randomEsActivity().copy(collection = EsActivity.Collection(make = "ethDomains", take = "cryptoPunks"))
-        val toSkip1 = randomEsActivity().copy(collection = EsActivity.Collection(make = "cryptoKitties", take = null))
-        val toSkip2 = randomEsActivity().copy(collection = EsActivity.Collection(make = "cyberBrokers", take = "ethDomains"))
-        repository.saveAll(listOf(toFind1, toFind2, toSkip1, toSkip2))
-
-        // when
-        val result = repository.search(filter, sort, null)
-
-        // then
-        assertThat(result.activities).containsExactlyInAnyOrder(toFind1, toFind2)
-    }
-
-    @Test
-    fun `should query by make collections`() = runBlocking<Unit> {
-        // given
-        val filter = ElasticActivityQueryGenericFilter(makeCollections = setOf("boredApes", "cryptoPunks"))
-        val toFind1 = randomEsActivity().copy(collection = EsActivity.Collection(make = "boredApes", take = null))
-        val toFind2 = randomEsActivity().copy(collection = EsActivity.Collection(make = "cryptoPunks", take = "ethDomains"))
-        val toSkip1 = randomEsActivity().copy(collection = EsActivity.Collection(make = "cryptoKitties", take = "cryptoPunks"))
-        val toSkip2 = randomEsActivity().copy(collection = EsActivity.Collection(make = "cyberBrokers", take = "boredApes"))
-        repository.saveAll(listOf(toFind1, toFind2, toSkip1, toSkip2))
-
-        // when
-        val result = repository.search(filter, sort, null)
-
-        // then
-        assertThat(result.activities).containsExactlyInAnyOrder(toFind1, toFind2)
-    }
-
-    @Test
-    fun `should query by take collections`() = runBlocking<Unit> {
-        // given
-        val filter = ElasticActivityQueryGenericFilter(takeCollections = setOf("boredApes", "cryptoPunks"))
-        val toFind1 = randomEsActivity().copy(collection = EsActivity.Collection(make = "cryptoKitties", take = "cryptoPunks"))
-        val toFind2 = randomEsActivity().copy(collection = EsActivity.Collection(make = "cyberBrokers", take = "boredApes"))
-        val toSkip1 = randomEsActivity().copy(collection = EsActivity.Collection(make = "boredApes", take = null))
-        val toSkip2 = randomEsActivity().copy(collection = EsActivity.Collection(make = "cryptoPunks", take = "ethDomains"))
-
+        val filter = ElasticActivityQueryGenericFilter(collections = setOf("boredApes", "cryptoPunks"))
+        val toFind1 = randomEsActivity().copy(collection = "boredApes")
+        val toFind2 = randomEsActivity().copy(collection = "cryptoPunks")
+        val toSkip1 = randomEsActivity().copy(collection = "cryptoKitties")
+        val toSkip2 = randomEsActivity().copy(collection = "cyberBrokers")
         repository.saveAll(listOf(toFind1, toFind2, toSkip1, toSkip2))
 
         // when
@@ -192,11 +157,11 @@ internal class QueryBuilderServiceIntegrationTest {
     @Test
     fun `should query by any item`() = runBlocking<Unit> {
         // given
-        val filter = ElasticActivityQueryGenericFilter(anyItem = "0x01:111")
-        val toFind1 = randomEsActivity().copy(item = EsActivity.Item(make = "0x01:111", take = null))
-        val toFind2 = randomEsActivity().copy(item = EsActivity.Item(make = "0x03:333", take = "0x01:111"))
-        val toSkip1 = randomEsActivity().copy(item = EsActivity.Item(make = "0x05:555", take = null))
-        val toSkip2 = randomEsActivity().copy(item = EsActivity.Item(make = "0x04:444", take = "0x06:666"))
+        val filter = ElasticActivityQueryGenericFilter(item = "0x01:111")
+        val toFind1 = randomEsActivity().copy(item = "0x01:111")
+        val toFind2 = randomEsActivity().copy(item = "0x01:111")
+        val toSkip1 = randomEsActivity().copy(item = "0x05:555")
+        val toSkip2 = randomEsActivity().copy(item = "0x06:666")
 
         repository.saveAll(listOf(toFind1, toFind2, toSkip1, toSkip2))
 
@@ -205,42 +170,6 @@ internal class QueryBuilderServiceIntegrationTest {
 
         // then
         assertThat(result.activities).containsExactlyInAnyOrder(toFind1, toFind2)
-    }
-
-    @Test
-    fun `should query by make item`() = runBlocking<Unit> {
-        // given
-        val filter = ElasticActivityQueryGenericFilter(makeItem = "0x01:111")
-        val toFind1 = randomEsActivity().copy(item = EsActivity.Item(make = "0x01:111", take = null))
-        val toSkip0 = randomEsActivity().copy(item = EsActivity.Item(make = "0x03:333", take = "0x01:111"))
-        val toSkip1 = randomEsActivity().copy(item = EsActivity.Item(make = "0x05:555", take = null))
-        val toSkip2 = randomEsActivity().copy(item = EsActivity.Item(make = "0x04:444", take = "0x06:666"))
-
-        repository.saveAll(listOf(toFind1, toSkip0, toSkip1, toSkip2))
-
-        // when
-        val result = repository.search(filter, sort, null)
-
-        // then
-        assertThat(result.activities).containsExactlyInAnyOrder(toFind1)
-    }
-
-    @Test
-    fun `should query by take item`() = runBlocking<Unit> {
-        // given
-        val filter = ElasticActivityQueryGenericFilter(takeItem = "0x01:111")
-        val toSkip0 = randomEsActivity().copy(item = EsActivity.Item(make = "0x01:111", take = null))
-        val toFind1 = randomEsActivity().copy(item = EsActivity.Item(make = "0x03:333", take = "0x01:111"))
-        val toSkip1 = randomEsActivity().copy(item = EsActivity.Item(make = "0x05:555", take = null))
-        val toSkip2 = randomEsActivity().copy(item = EsActivity.Item(make = "0x04:444", take = "0x06:666"))
-
-        repository.saveAll(listOf(toFind1, toSkip0, toSkip1, toSkip2))
-
-        // when
-        val result = repository.search(filter, sort, null)
-
-        // then
-        assertThat(result.activities).containsExactlyInAnyOrder(toFind1)
     }
 
     @Test
@@ -301,43 +230,47 @@ internal class QueryBuilderServiceIntegrationTest {
             blockchains = setOf(BlockchainDto.SOLANA, BlockchainDto.TEZOS),
             activityTypes = setOf(ActivityTypeDto.SELL, ActivityTypeDto.BURN),
             anyUsers = setOf("loupa", "poupa"),
-            anyCollections = setOf("boredApes", "cryptoPunks"),
+            collections = setOf("boredApes", "cryptoPunks"),
             from = Instant.ofEpochMilli(500),
             to = Instant.ofEpochMilli(1000),
         )
         val toFind1 = randomEsActivity().copy(
             blockchain = BlockchainDto.SOLANA,
             type = ActivityTypeDto.BURN,
-            user = EsActivity.User(maker = "loupa", taker = null),
-            collection = EsActivity.Collection(make = "boredApes", take = null),
+            userFrom = "loupa",
+            userTo = null,
+            collection = "boredApes",
             date = Instant.ofEpochMilli(600),
         )
         val toFind2 = randomEsActivity().copy(
             blockchain = BlockchainDto.TEZOS,
             type = ActivityTypeDto.SELL,
-            user = EsActivity.User(maker = "0x00", taker = "poupa"),
-            collection = EsActivity.Collection(make = "ethDomains", take = "cryptoPunks"),
+            userFrom = "0x00",
+            userTo = "poupa",
+            collection = "cryptoPunks",
             date = Instant.ofEpochMilli(900),
         )
         val toSkip1 = randomEsActivity().copy(
             blockchain = BlockchainDto.SOLANA,
             type = ActivityTypeDto.CANCEL_BID,
-            user = EsActivity.User(maker = "loupa", taker = null),
-            collection = EsActivity.Collection(make = "ethDomains", take = "cryptoPunks"),
+            userFrom = "loupa",
+            userTo = null,
+            collection = "ethDomains",
             date = Instant.ofEpochMilli(600),
         )
         val toSkip2 = randomEsActivity().copy(
             blockchain = BlockchainDto.ETHEREUM,
             type = ActivityTypeDto.SELL,
-            user = EsActivity.User(maker = "0x00", taker = "poupa"),
-            collection = EsActivity.Collection(make = "boredApes", take = null),
+            userFrom = "0x00",
+            userTo = "poupa",
+            collection = "boredApes",
             date = Instant.ofEpochMilli(250),
         )
         val toSkip3 = randomEsActivity().copy(
             blockchain = BlockchainDto.ETHEREUM,
             type = ActivityTypeDto.CANCEL_LIST,
-            user = EsActivity.User(maker = "loupa", taker = "poupa"),
-            collection = EsActivity.Collection(make = "cryptoKitties", take = "cryptoPunks"),
+            userFrom = "loupa", userTo = "poupa",
+            collection = "cryptoPunks",
             date = Instant.ofEpochMilli(1500),
         )
         repository.saveAll(listOf(toFind1, toFind2, toSkip1, toSkip2, toSkip3))

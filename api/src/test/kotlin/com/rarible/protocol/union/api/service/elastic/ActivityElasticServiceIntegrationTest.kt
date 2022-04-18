@@ -62,18 +62,14 @@ internal class ActivityElasticServiceIntegrationTest {
             type = ActivityTypeDto.MINT,
             blockchain = BlockchainDto.ETHEREUM,
             date = Instant.ofEpochMilli(5_000),
-            user = EsActivity.User(
-                maker = "0x112233",
-            )
+            userFrom = "0x112233",
         )
         val two = randomEsActivity().copy(
             activityId = "ETHEREUM:2",
             type = ActivityTypeDto.LIST,
             blockchain = BlockchainDto.ETHEREUM,
             date = Instant.ofEpochMilli(4_900),
-            collection = EsActivity.Collection(
-                make = "123"
-            )
+            collection = "123",
         )
         val three = randomEsActivity().copy(
             activityId = "FLOW:3",
@@ -104,13 +100,9 @@ internal class ActivityElasticServiceIntegrationTest {
             type = ActivityTypeDto.AUCTION_STARTED,
             blockchain = BlockchainDto.ETHEREUM,
             date = Instant.ofEpochMilli(4_700),
-            item = EsActivity.Item(
-                make = "222:333"
-            ),
-            user = EsActivity.User(
-                maker = "0",
-                taker = "0x223344",
-            )
+            item = "222:333",
+            userFrom = "0",
+            userTo = "0x223344",
         )
         repository.saveAll(listOf(one, two, three, four, five, six, seven).shuffled())
     }

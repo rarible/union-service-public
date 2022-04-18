@@ -50,7 +50,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.Instant
 
-class ElasticActivityConverterTest {
+class EsActivityConverterTest {
 
     private val converter = EsActivityConverter
 
@@ -73,7 +73,7 @@ class ElasticActivityConverterTest {
         )
 
         // when
-        val actual = converter.convert(source)
+        val actual = converter.convert(source)!!
 
         // then
         assertThat(actual.activityId).isEqualTo(source.id.toString())
@@ -82,12 +82,10 @@ class ElasticActivityConverterTest {
         assertThat(actual.logIndex).isEqualTo(source.blockchainInfo!!.logIndex)
         assertThat(actual.blockchain).isEqualTo(source.id.blockchain)
         assertThat(actual.type).isEqualTo(ActivityTypeDto.MINT)
-        assertThat(actual.user.maker).isEqualTo(source.owner.value)
-        assertThat(actual.user.taker).isNull()
-        assertThat(actual.collection.make).isEqualTo(source.itemId!!.extractCollection())
-        assertThat(actual.collection.take).isNull()
-        assertThat(actual.item.make).isEqualTo(source.itemId!!.value)
-        assertThat(actual.item.take).isNull()
+        assertThat(actual.userFrom).isNull()
+        assertThat(actual.userTo).isEqualTo(source.owner.value)
+        assertThat(actual.collection).isEqualTo(source.itemId!!.extractCollection())
+        assertThat(actual.item).isEqualTo(source.itemId!!.value)
     }
 
     @Test
@@ -109,7 +107,7 @@ class ElasticActivityConverterTest {
         )
 
         // when
-        val actual = converter.convert(source)
+        val actual = converter.convert(source)!!
 
         // then
         assertThat(actual.activityId).isEqualTo(source.id.toString())
@@ -118,12 +116,10 @@ class ElasticActivityConverterTest {
         assertThat(actual.logIndex).isEqualTo(source.blockchainInfo!!.logIndex)
         assertThat(actual.blockchain).isEqualTo(source.id.blockchain)
         assertThat(actual.type).isEqualTo(ActivityTypeDto.BURN)
-        assertThat(actual.user.maker).isEqualTo(source.owner.value)
-        assertThat(actual.user.taker).isNull()
-        assertThat(actual.collection.make).isEqualTo(source.itemId!!.extractCollection())
-        assertThat(actual.collection.take).isNull()
-        assertThat(actual.item.make).isEqualTo(source.itemId!!.value)
-        assertThat(actual.item.take).isNull()
+        assertThat(actual.userFrom).isEqualTo(source.owner.value)
+        assertThat(actual.userTo).isNull()
+        assertThat(actual.collection).isEqualTo(source.itemId!!.extractCollection())
+        assertThat(actual.item).isEqualTo(source.itemId!!.value)
     }
 
     @Test
@@ -146,7 +142,7 @@ class ElasticActivityConverterTest {
         )
 
         // when
-        val actual = converter.convert(source)
+        val actual = converter.convert(source)!!
 
         // then
         assertThat(actual.activityId).isEqualTo(source.id.toString())
@@ -155,12 +151,10 @@ class ElasticActivityConverterTest {
         assertThat(actual.logIndex).isEqualTo(source.blockchainInfo!!.logIndex)
         assertThat(actual.blockchain).isEqualTo(source.id.blockchain)
         assertThat(actual.type).isEqualTo(ActivityTypeDto.TRANSFER)
-        assertThat(actual.user.maker).isEqualTo(source.from.value)
-        assertThat(actual.user.taker).isEqualTo(source.owner.value)
-        assertThat(actual.collection.make).isEqualTo(source.itemId!!.extractCollection())
-        assertThat(actual.collection.take).isNull()
-        assertThat(actual.item.make).isEqualTo(source.itemId!!.value)
-        assertThat(actual.item.take).isNull()
+        assertThat(actual.userFrom).isEqualTo(source.from.value)
+        assertThat(actual.userTo).isEqualTo(source.owner.value)
+        assertThat(actual.collection).isEqualTo(source.itemId!!.extractCollection())
+        assertThat(actual.item).isEqualTo(source.itemId!!.value)
     }
 
     @Test
@@ -184,19 +178,7 @@ class ElasticActivityConverterTest {
         // when
         val actual = converter.convert(source)
 
-        // then
-        assertThat(actual.activityId).isEqualTo(source.id.toString())
-        assertThat(actual.date).isEqualTo(source.date)
-        assertThat(actual.blockNumber).isEqualTo(source.blockchainInfo!!.blockNumber)
-        assertThat(actual.logIndex).isEqualTo(source.blockchainInfo!!.logIndex)
-        assertThat(actual.blockchain).isEqualTo(source.id.blockchain)
-        assertThat(actual.type).isEqualTo(ActivityTypeDto.SELL)
-        assertThat(actual.user.maker).isEqualTo(source.left.maker.value)
-        assertThat(actual.user.taker).isEqualTo(source.right.maker.value)
-        assertThat(actual.collection.make).isEqualTo(source.left.asset.type.ext.itemId!!.extractCollection())
-        assertThat(actual.collection.take).isEqualTo(source.right.asset.type.ext.itemId!!.extractCollection())
-        assertThat(actual.item.make).isEqualTo(source.left.asset.type.ext.itemId.toString())
-        assertThat(actual.item.take).isEqualTo(source.right.asset.type.ext.itemId.toString())
+        assertThat(actual).isNull()
     }
 
     @Test
@@ -223,7 +205,7 @@ class ElasticActivityConverterTest {
             )
 
         // when
-        val actual = converter.convert(source)
+        val actual = converter.convert(source)!!
 
         // then
         assertThat(actual.activityId).isEqualTo(source.id.toString())
@@ -232,12 +214,10 @@ class ElasticActivityConverterTest {
         assertThat(actual.logIndex).isEqualTo(source.blockchainInfo!!.logIndex)
         assertThat(actual.blockchain).isEqualTo(source.id.blockchain)
         assertThat(actual.type).isEqualTo(ActivityTypeDto.SELL)
-        assertThat(actual.user.maker).isEqualTo(source.seller.value)
-        assertThat(actual.user.taker).isEqualTo(source.buyer.value)
-        assertThat(actual.collection.make).isEqualTo(source.nft.type.ext.itemId!!.extractCollection())
-        assertThat(actual.collection.take).isEqualTo(source.payment.type.ext.itemId!!.extractCollection())
-        assertThat(actual.item.make).isEqualTo(source.nft.type.ext.itemId.toString())
-        assertThat(actual.item.take).isEqualTo(source.payment.type.ext.itemId.toString())
+        assertThat(actual.userFrom).isEqualTo(source.seller.value)
+        assertThat(actual.userTo).isEqualTo(source.buyer.value)
+        assertThat(actual.collection).isEqualTo(source.nft.type.ext.itemId!!.extractCollection())
+        assertThat(actual.item).isEqualTo(source.nft.type.ext.itemId!!.value)
     }
 
     @Test
@@ -255,7 +235,7 @@ class ElasticActivityConverterTest {
         )
 
         // when
-        val actual = converter.convert(source)
+        val actual = converter.convert(source)!!
 
         // then
         assertThat(actual.activityId).isEqualTo(source.id.toString())
@@ -264,12 +244,10 @@ class ElasticActivityConverterTest {
         assertThat(actual.logIndex).isNull()
         assertThat(actual.blockchain).isEqualTo(source.id.blockchain)
         assertThat(actual.type).isEqualTo(ActivityTypeDto.BID)
-        assertThat(actual.user.maker).isEqualTo(source.maker.value)
-        assertThat(actual.user.taker).isNull()
-        assertThat(actual.collection.make).isEqualTo(source.make.type.ext.itemId!!.extractCollection())
-        assertThat(actual.collection.take).isEqualTo(source.take.type.ext.itemId!!.extractCollection())
-        assertThat(actual.item.make).isEqualTo(source.make.type.ext.itemId.toString())
-        assertThat(actual.item.take).isEqualTo(source.take.type.ext.itemId.toString())
+        assertThat(actual.userFrom).isEqualTo(source.maker.value)
+        assertThat(actual.userTo).isNull()
+        assertThat(actual.collection).isEqualTo(source.make.type.ext.itemId!!.extractCollection())
+        assertThat(actual.item).isEqualTo(source.make.type.ext.itemId!!.value)
     }
 
     @Test
@@ -287,7 +265,7 @@ class ElasticActivityConverterTest {
         )
 
         // when
-        val actual = converter.convert(source)
+        val actual = converter.convert(source)!!
 
         // then
         assertThat(actual.activityId).isEqualTo(source.id.toString())
@@ -296,12 +274,10 @@ class ElasticActivityConverterTest {
         assertThat(actual.logIndex).isNull()
         assertThat(actual.blockchain).isEqualTo(source.id.blockchain)
         assertThat(actual.type).isEqualTo(ActivityTypeDto.LIST)
-        assertThat(actual.user.maker).isEqualTo(source.maker.value)
-        assertThat(actual.user.taker).isNull()
-        assertThat(actual.collection.make).isEqualTo(source.make.type.ext.itemId!!.extractCollection())
-        assertThat(actual.collection.take).isEqualTo(source.take.type.ext.itemId!!.extractCollection())
-        assertThat(actual.item.make).isEqualTo(source.make.type.ext.itemId.toString())
-        assertThat(actual.item.take).isEqualTo(source.take.type.ext.itemId.toString())
+        assertThat(actual.userFrom).isEqualTo(source.maker.value)
+        assertThat(actual.userTo).isNull()
+        assertThat(actual.collection).isEqualTo(source.make.type.ext.itemId!!.extractCollection())
+        assertThat(actual.item).isEqualTo(source.make.type.ext.itemId!!.value)
     }
 
     @Test
@@ -325,7 +301,7 @@ class ElasticActivityConverterTest {
         )
 
         // when
-        val actual = converter.convert(source)
+        val actual = converter.convert(source)!!
 
         // then
         assertThat(actual.activityId).isEqualTo(source.id.toString())
@@ -334,12 +310,10 @@ class ElasticActivityConverterTest {
         assertThat(actual.logIndex).isEqualTo(source.blockchainInfo!!.logIndex)
         assertThat(actual.blockchain).isEqualTo(source.id.blockchain)
         assertThat(actual.type).isEqualTo(ActivityTypeDto.CANCEL_BID)
-        assertThat(actual.user.maker).isEqualTo(source.maker.value)
-        assertThat(actual.user.taker).isNull()
-        assertThat(actual.collection.make).isEqualTo(source.make.ext.itemId!!.extractCollection())
-        assertThat(actual.collection.take).isEqualTo(source.take.ext.itemId!!.extractCollection())
-        assertThat(actual.item.make).isEqualTo(source.make.ext.itemId!!.toString())
-        assertThat(actual.item.take).isEqualTo(source.take.ext.itemId!!.toString())
+        assertThat(actual.userFrom).isEqualTo(source.maker.value)
+        assertThat(actual.userTo).isNull()
+        assertThat(actual.collection).isEqualTo(source.make.ext.itemId!!.extractCollection())
+        assertThat(actual.item).isEqualTo(source.make.ext.itemId!!.value)
     }
 
     @Test
@@ -363,7 +337,7 @@ class ElasticActivityConverterTest {
         )
 
         // when
-        val actual = converter.convert(source)
+        val actual = converter.convert(source)!!
 
         // then
         assertThat(actual.activityId).isEqualTo(source.id.toString())
@@ -372,12 +346,10 @@ class ElasticActivityConverterTest {
         assertThat(actual.logIndex).isEqualTo(source.blockchainInfo!!.logIndex)
         assertThat(actual.blockchain).isEqualTo(source.id.blockchain)
         assertThat(actual.type).isEqualTo(ActivityTypeDto.CANCEL_LIST)
-        assertThat(actual.user.maker).isEqualTo(source.maker.value)
-        assertThat(actual.user.taker).isNull()
-        assertThat(actual.collection.make).isEqualTo(source.make.ext.itemId!!.extractCollection())
-        assertThat(actual.collection.take).isEqualTo(source.take.ext.itemId!!.extractCollection())
-        assertThat(actual.item.make).isEqualTo(source.make.ext.itemId!!.toString())
-        assertThat(actual.item.take).isEqualTo(source.take.ext.itemId!!.toString())
+        assertThat(actual.userFrom).isEqualTo(source.maker.value)
+        assertThat(actual.userTo).isNull()
+        assertThat(actual.collection).isEqualTo(source.make.ext.itemId!!.extractCollection())
+        assertThat(actual.item).isEqualTo(source.make.ext.itemId!!.value)
     }
 
     @Test
@@ -391,7 +363,7 @@ class ElasticActivityConverterTest {
         )
 
         // when
-        val actual = converter.convert(source)
+        val actual = converter.convert(source)!!
 
         // then
         assertThat(actual.activityId).isEqualTo(source.id.toString())
@@ -400,12 +372,10 @@ class ElasticActivityConverterTest {
         assertThat(actual.logIndex).isNull()
         assertThat(actual.blockchain).isEqualTo(source.id.blockchain)
         assertThat(actual.type).isEqualTo(ActivityTypeDto.AUCTION_CREATED)
-        assertThat(actual.user.maker).isEqualTo(source.auction.seller.value)
-        assertThat(actual.user.taker).isNull()
-        assertThat(actual.collection.make).isEqualTo(source.auction.sell.type.ext.itemId!!.extractCollection())
-        assertThat(actual.collection.take).isEqualTo(source.auction.buy.ext.itemId!!.extractCollection())
-        assertThat(actual.item.make).isEqualTo(source.auction.sell.type.ext.itemId.toString())
-        assertThat(actual.item.take).isEqualTo(source.auction.buy.ext.itemId.toString())
+        assertThat(actual.userFrom).isEqualTo(source.auction.seller.value)
+        assertThat(actual.userTo).isNull()
+        assertThat(actual.collection).isEqualTo(source.auction.sell.type.ext.itemId!!.extractCollection())
+        assertThat(actual.item).isEqualTo(source.auction.sell.type.ext.itemId!!.value)
     }
 
     @Test
@@ -420,7 +390,7 @@ class ElasticActivityConverterTest {
         )
 
         // when
-        val actual = converter.convert(source)
+        val actual = converter.convert(source)!!
 
         // then
         assertThat(actual.activityId).isEqualTo(source.id.toString())
@@ -429,12 +399,10 @@ class ElasticActivityConverterTest {
         assertThat(actual.logIndex).isNull()
         assertThat(actual.blockchain).isEqualTo(source.id.blockchain)
         assertThat(actual.type).isEqualTo(ActivityTypeDto.AUCTION_BID)
-        assertThat(actual.user.maker).isEqualTo(source.auction.seller.value)
-        assertThat(actual.user.taker).isEqualTo(source.bid.buyer.value)
-        assertThat(actual.collection.make).isEqualTo(source.auction.sell.type.ext.itemId!!.extractCollection())
-        assertThat(actual.collection.take).isEqualTo(source.auction.buy.ext.itemId!!.extractCollection())
-        assertThat(actual.item.make).isEqualTo(source.auction.sell.type.ext.itemId.toString())
-        assertThat(actual.item.take).isEqualTo(source.auction.buy.ext.itemId.toString())
+        assertThat(actual.userFrom).isEqualTo(source.auction.seller.value)
+        assertThat(actual.userTo).isEqualTo(source.bid.buyer.value)
+        assertThat(actual.collection).isEqualTo(source.auction.sell.type.ext.itemId!!.extractCollection())
+        assertThat(actual.item).isEqualTo(source.auction.sell.type.ext.itemId!!.value)
     }
 
     @Test
@@ -448,7 +416,7 @@ class ElasticActivityConverterTest {
         )
 
         // when
-        val actual = converter.convert(source)
+        val actual = converter.convert(source)!!
 
         // then
         assertThat(actual.activityId).isEqualTo(source.id.toString())
@@ -457,12 +425,10 @@ class ElasticActivityConverterTest {
         assertThat(actual.logIndex).isNull()
         assertThat(actual.blockchain).isEqualTo(source.id.blockchain)
         assertThat(actual.type).isEqualTo(ActivityTypeDto.AUCTION_FINISHED)
-        assertThat(actual.user.maker).isEqualTo(source.auction.seller.value)
-        assertThat(actual.user.taker).isNull()
-        assertThat(actual.collection.make).isEqualTo(source.auction.sell.type.ext.itemId!!.extractCollection())
-        assertThat(actual.collection.take).isEqualTo(source.auction.buy.ext.itemId!!.extractCollection())
-        assertThat(actual.item.make).isEqualTo(source.auction.sell.type.ext.itemId.toString())
-        assertThat(actual.item.take).isEqualTo(source.auction.buy.ext.itemId.toString())
+        assertThat(actual.userFrom).isEqualTo(source.auction.seller.value)
+        assertThat(actual.userTo).isNull()
+        assertThat(actual.collection).isEqualTo(source.auction.sell.type.ext.itemId!!.extractCollection())
+        assertThat(actual.item).isEqualTo(source.auction.sell.type.ext.itemId!!.value)
     }
 
     @Test
@@ -476,7 +442,7 @@ class ElasticActivityConverterTest {
         )
 
         // when
-        val actual = converter.convert(source)
+        val actual = converter.convert(source)!!
 
         // then
         assertThat(actual.activityId).isEqualTo(source.id.toString())
@@ -485,12 +451,10 @@ class ElasticActivityConverterTest {
         assertThat(actual.logIndex).isNull()
         assertThat(actual.blockchain).isEqualTo(source.id.blockchain)
         assertThat(actual.type).isEqualTo(ActivityTypeDto.AUCTION_CANCEL)
-        assertThat(actual.user.maker).isEqualTo(source.auction.seller.value)
-        assertThat(actual.user.taker).isNull()
-        assertThat(actual.collection.make).isEqualTo(source.auction.sell.type.ext.itemId!!.extractCollection())
-        assertThat(actual.collection.take).isEqualTo(source.auction.buy.ext.itemId!!.extractCollection())
-        assertThat(actual.item.make).isEqualTo(source.auction.sell.type.ext.itemId.toString())
-        assertThat(actual.item.take).isEqualTo(source.auction.buy.ext.itemId.toString())
+        assertThat(actual.userFrom).isEqualTo(source.auction.seller.value)
+        assertThat(actual.userTo).isNull()
+        assertThat(actual.collection).isEqualTo(source.auction.sell.type.ext.itemId!!.extractCollection())
+        assertThat(actual.item).isEqualTo(source.auction.sell.type.ext.itemId!!.value)
     }
 
     @Test
@@ -503,7 +467,7 @@ class ElasticActivityConverterTest {
         )
 
         // when
-        val actual = converter.convert(source)
+        val actual = converter.convert(source)!!
 
         // then
         assertThat(actual.activityId).isEqualTo(source.id.toString())
@@ -512,12 +476,10 @@ class ElasticActivityConverterTest {
         assertThat(actual.logIndex).isNull()
         assertThat(actual.blockchain).isEqualTo(source.id.blockchain)
         assertThat(actual.type).isEqualTo(ActivityTypeDto.AUCTION_STARTED)
-        assertThat(actual.user.maker).isEqualTo(source.auction.seller.value)
-        assertThat(actual.user.taker).isNull()
-        assertThat(actual.collection.make).isEqualTo(source.auction.sell.type.ext.itemId!!.extractCollection())
-        assertThat(actual.collection.take).isEqualTo(source.auction.buy.ext.itemId!!.extractCollection())
-        assertThat(actual.item.make).isEqualTo(source.auction.sell.type.ext.itemId.toString())
-        assertThat(actual.item.take).isEqualTo(source.auction.buy.ext.itemId.toString())
+        assertThat(actual.userFrom).isEqualTo(source.auction.seller.value)
+        assertThat(actual.userTo).isNull()
+        assertThat(actual.collection).isEqualTo(source.auction.sell.type.ext.itemId!!.extractCollection())
+        assertThat(actual.item).isEqualTo(source.auction.sell.type.ext.itemId!!.value)
     }
 
     @Test
@@ -530,7 +492,7 @@ class ElasticActivityConverterTest {
         )
 
         // when
-        val actual = converter.convert(source)
+        val actual = converter.convert(source)!!
 
         // then
         assertThat(actual.activityId).isEqualTo(source.id.toString())
@@ -539,12 +501,10 @@ class ElasticActivityConverterTest {
         assertThat(actual.logIndex).isNull()
         assertThat(actual.blockchain).isEqualTo(source.id.blockchain)
         assertThat(actual.type).isEqualTo(ActivityTypeDto.AUCTION_ENDED)
-        assertThat(actual.user.maker).isEqualTo(source.auction.seller.value)
-        assertThat(actual.user.taker).isNull()
-        assertThat(actual.collection.make).isEqualTo(source.auction.sell.type.ext.itemId!!.extractCollection())
-        assertThat(actual.collection.take).isEqualTo(source.auction.buy.ext.itemId!!.extractCollection())
-        assertThat(actual.item.make).isEqualTo(source.auction.sell.type.ext.itemId.toString())
-        assertThat(actual.item.take).isEqualTo(source.auction.buy.ext.itemId.toString())
+        assertThat(actual.userFrom).isEqualTo(source.auction.seller.value)
+        assertThat(actual.userTo).isNull()
+        assertThat(actual.collection).isEqualTo(source.auction.sell.type.ext.itemId!!.extractCollection())
+        assertThat(actual.item).isEqualTo(source.auction.sell.type.ext.itemId!!.value)
     }
 
     private fun randomActivityId(): ActivityIdDto {

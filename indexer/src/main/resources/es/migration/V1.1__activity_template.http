@@ -38,38 +38,24 @@ PUT _index_template/activity_template
           "ignore_above": 256
         },
         "collection": {
-          "properties": {
-            "make": {
-              "type": "keyword"
-            },
-            "take": {
-              "type": "keyword"
-            }
-          }
+          "type": "keyword",
+          "ignore_above": 512
         },
         "item": {
-          "properties": {
-            "make": {
-              "type": "keyword"
-            },
-            "take": {
-              "type": "keyword"
-            }
-          }
+          "type": "keyword",
+          "ignore_above": 512
         },
         "type": {
           "type": "keyword",
           "ignore_above": 512
         },
-        "users": {
-          "properties": {
-            "maker": {
-              "type": "keyword"
-            },
-            "taker": {
-              "type": "keyword"
-            }
-          }
+        "userFrom": {
+          "type": "keyword",
+          "ignore_above": 256
+        },
+        "userTo": {
+          "type": "keyword",
+          "ignore_above": 256
         }
       }
     }

@@ -225,18 +225,10 @@ fun randomEsActivity() = EsActivity(
     logIndex = randomInt(),
     blockchain = BlockchainDto.values().random(),
     type = ActivityTypeDto.values().random(),
-    user = EsActivity.User(
-        maker = randomString(),
-        taker = randomString(),
-    ),
-    collection = EsActivity.Collection(
-        make = randomString(),
-        take = randomString(),
-    ),
-    item = EsActivity.Item(
-        make = randomString(),
-        take = randomString(),
-    ),
+    userFrom = randomString(),
+    userTo = randomString(),
+    collection = randomString(),
+    item = randomString(),
 )
 
 private val mockedEthOrderConverter = EthOrderConverter(CurrencyMock.currencyServiceMock)

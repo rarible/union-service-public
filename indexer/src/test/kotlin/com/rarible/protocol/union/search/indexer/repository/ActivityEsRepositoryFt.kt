@@ -27,15 +27,10 @@ internal class ActivityEsRepositoryFt {
     fun `should save and read`(): Unit = runBlocking {
         val activity = EsActivity(
             "1234", Instant.now(), 1, 0, salt = nextLong(), BlockchainDto.ETHEREUM, ActivityTypeDto.BURN,
-            EsActivity.User(
-                "0x01", null
-            ),
-            EsActivity.Collection(
-                "0x02", null
-            ),
-            EsActivity.Item(
-                "0x03", null
-            )
+            "0x01",
+            null,
+            "0x02",
+            "0x03",
         )
 
         val id = repository.save(activity).activityId

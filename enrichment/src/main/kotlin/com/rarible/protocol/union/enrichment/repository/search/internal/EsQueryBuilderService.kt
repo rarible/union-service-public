@@ -21,12 +21,10 @@ class EsQueryBuilderService(
 ) {
 
     companion object {
-        private val userMaker = EsActivity::user.name + "." + EsActivity.User::maker.name
-        private val userTaker = EsActivity::user.name + "." + EsActivity.User::taker.name
-        private val collectionMake = EsActivity::collection.name + "." + EsActivity.Collection::make.name
-        private val collectionTake = EsActivity::collection.name + "." + EsActivity.Collection::take.name
-        private val itemMake = EsActivity::item.name + "." + EsActivity.Item::make.name
-        private val itemTake = EsActivity::item.name + "." + EsActivity.Item::take.name
+        private val userFrom = EsActivity::userFrom.name
+        private val userTo = EsActivity::userTo.name
+        private val collection = EsActivity::collection.name
+        private val item = EsActivity::item.name
     }
 
     fun build(filter: ElasticActivityFilter, sort: EsActivitySort): NativeSearchQuery {
@@ -46,15 +44,11 @@ class EsQueryBuilderService(
     private fun BoolQueryBuilder.applyGenericFilter(filter: ElasticActivityQueryGenericFilter) {
         mustMatchTerms(filter.blockchains, EsActivity::blockchain.name)
         mustMatchTerms(filter.activityTypes, EsActivity::type.name)
-        anyMustMatchTerms(filter.anyUsers, userMaker, userTaker)
-        mustMatchTerms(filter.makers, userMaker)
-        mustMatchTerms(filter.takers, userTaker)
-        anyMustMatchTerms(filter.anyCollections, collectionMake, collectionTake)
-        mustMatchTerms(filter.makeCollections, collectionMake)
-        mustMatchTerms(filter.takeCollections, collectionTake)
-        anyMustMatchKeyword(filter.anyItem, itemMake, itemTake)
-        mustMatchKeyword(filter.makeItem, itemMake)
-        mustMatchKeyword(filter.takeItem, itemTake)
+        anyMustMatchTerms(filter.anyUsers, userFrom, userTo)
+        mustMatchTerms(filter.usersFrom, userFrom)
+        mustMatchTerms(filter.usersTo, userTo)
+        mustMatchTerms(filter.collections, collection)
+        mustMatchKeyword(filter.item, item)
 
         if (filter.from != null || filter.to != null) {
             val rangeQueryBuilder = RangeQueryBuilder(EsActivity::date.name)
@@ -96,18 +90,7 @@ class EsQueryBuilderService(
         }
     }
 
-    private fun BoolQueryBuilder.anyMustMatchKeyword(keyword: String?, vararg fields: String) {
-        if (!keyword.isNullOrEmpty()) {
-            val boolQueryBuilder = BoolQueryBuilder()
-            fields.forEach {
-                boolQueryBuilder.should(MatchQueryBuilder(it, keyword))
-            }
-            boolQueryBuilder.minimumShouldMatch(1)
-            must(boolQueryBuilder)
-        }
-    }
-
     private fun prepareTerms(terms: Set<*>): List<String> {
-        return terms.map { it.toString().lowercase() }
+        return terms.map { it.toString() /* .lowercase() */ }
     }
 }

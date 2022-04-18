@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.core.converter
 
+import com.rarible.protocol.union.core.converter.EsActivityConverter.getCollections
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.AssetDto
@@ -30,12 +31,12 @@ import com.rarible.protocol.union.core.model.EsActivity
 
 object EsActivityConverter {
 
-    fun convert(source: ActivityDto): EsActivity {
+    fun convert(source: ActivityDto): EsActivity? {
         return when (source) {
             is MintActivityDto -> convertMint(source)
             is BurnActivityDto -> convertBurn(source)
             is TransferActivityDto -> convertTransfer(source)
-            is OrderMatchSwapDto -> convertOrderMatchSwap(source)
+            is OrderMatchSwapDto -> null
             is OrderMatchSellDto -> convertOrderMatchSell(source)
             is OrderBidActivityDto -> convertOrderBid(source)
             is OrderListActivityDto -> convertOrderList(source)
@@ -61,9 +62,10 @@ object EsActivityConverter {
             logIndex = source.blockchainInfo?.logIndex,
             blockchain = source.id.blockchain,
             type = ActivityTypeDto.MINT,
-            user = singleUser(source.owner),
-            collection = singleCollection(itemId),
-            item = singleItem(itemId)
+            userTo = source.owner.value,
+            userFrom = null,
+            collection = IdParser.extractContract(itemId),
+            item = itemId.value,
         )
     }
 
@@ -76,9 +78,10 @@ object EsActivityConverter {
             logIndex = source.blockchainInfo?.logIndex,
             blockchain = source.id.blockchain,
             type = ActivityTypeDto.BURN,
-            user = singleUser(source.owner),
-            collection = singleCollection(itemId),
-            item = singleItem(itemId)
+            userFrom = source.owner.value,
+            userTo = null,
+            collection = IdParser.extractContract(itemId),
+            item = itemId.value,
         )
     }
 
@@ -91,23 +94,10 @@ object EsActivityConverter {
             logIndex = source.blockchainInfo?.logIndex,
             blockchain = source.id.blockchain,
             type = ActivityTypeDto.TRANSFER,
-            user = bothUsers(source.from, source.owner),
-            collection = singleCollection(itemId),
-            item = singleItem(itemId)
-        )
-    }
-
-    private fun convertOrderMatchSwap(source: OrderMatchSwapDto): EsActivity {
-        return EsActivity(
-            activityId = source.id.toString(),
-            date = source.date,
-            blockNumber = source.blockchainInfo?.blockNumber,
-            logIndex = source.blockchainInfo?.logIndex,
-            blockchain = source.id.blockchain,
-            type = ActivityTypeDto.SELL,
-            user = bothUsers(source.left.maker, source.right.maker),
-            collection = bothCollections(source.left.asset, source.right.asset),
-            item = bothItems(source.left.asset, source.right.asset),
+            userFrom = source.from.value,
+            userTo = source.owner.value,
+            collection = IdParser.extractContract(itemId),
+            item = itemId.value,
         )
     }
 
@@ -119,9 +109,10 @@ object EsActivityConverter {
             logIndex = source.blockchainInfo?.logIndex,
             blockchain = source.id.blockchain,
             type = ActivityTypeDto.SELL,
-            user = bothUsers(source.seller, source.buyer),
-            collection = bothCollections(source.nft, source.payment),
-            item = bothItems(source.nft, source.payment),
+            userFrom = source.seller.value,
+            userTo = source.buyer.value,
+            collection = source.nft.type.ext.getCollections(),
+            item = source.nft.type.ext.itemId?.value.orEmpty(),
         )
     }
 
@@ -133,9 +124,10 @@ object EsActivityConverter {
             logIndex = null,
             blockchain = source.id.blockchain,
             type = ActivityTypeDto.BID,
-            user = singleUser(source.maker),
-            collection = bothCollections(source.make, source.take),
-            item = bothItems(source.make, source.take),
+            userFrom = source.maker.value,
+            userTo = null,
+            collection = source.make.type.ext.getCollections(),
+            item = source.make.type.ext.itemId?.value.orEmpty(),
         )
     }
 
@@ -147,9 +139,10 @@ object EsActivityConverter {
             logIndex = null,
             blockchain = source.id.blockchain,
             type = ActivityTypeDto.LIST,
-            user = singleUser(source.maker),
-            collection = bothCollections(source.make, source.take),
-            item = bothItems(source.make, source.take),
+            userFrom = source.maker.value,
+            userTo = null,
+            collection = source.make.type.ext.getCollections(),
+            item = source.make.type.ext.itemId?.value.orEmpty(),
         )
     }
 
@@ -161,9 +154,10 @@ object EsActivityConverter {
             logIndex = source.blockchainInfo?.logIndex,
             blockchain = source.id.blockchain,
             type = ActivityTypeDto.CANCEL_BID,
-            user = singleUser(source.maker),
-            collection = bothCollections(source.make, source.take),
-            item = bothItems(source.make, source.take),
+            userFrom = source.maker.value,
+            userTo = null,
+            collection = source.make.ext.getCollections(),
+            item = source.make.ext.itemId?.value.orEmpty(),
         )
     }
 
@@ -175,9 +169,10 @@ object EsActivityConverter {
             logIndex = source.blockchainInfo?.logIndex,
             blockchain = source.id.blockchain,
             type = ActivityTypeDto.CANCEL_LIST,
-            user = singleUser(source.maker),
-            collection = bothCollections(source.make, source.take),
-            item = bothItems(source.make, source.take),
+            userFrom = source.maker.value,
+            userTo = null,
+            collection = source.make.ext.getCollections(),
+            item = source.make.ext.itemId?.value.orEmpty(),
         )
     }
 
@@ -189,9 +184,10 @@ object EsActivityConverter {
             logIndex = null,
             blockchain = source.id.blockchain,
             type = ActivityTypeDto.AUCTION_CREATED,
-            user = singleUser(source.auction.seller),
-            collection = bothCollections(source.auction.sell.type, source.auction.buy),
-            item = bothItems(source.auction.sell.type, source.auction.buy),
+            userFrom = source.auction.seller.value,
+            userTo = null,
+            collection = source.auction.sell.type.ext.getCollections(),
+            item = source.auction.sell.type.ext.itemId?.value.orEmpty(),
         )
     }
 
@@ -203,9 +199,10 @@ object EsActivityConverter {
             logIndex = null,
             blockchain = source.id.blockchain,
             type = ActivityTypeDto.AUCTION_BID,
-            user = bothUsers(source.auction.seller, source.bid.buyer),
-            collection = bothCollections(source.auction.sell.type, source.auction.buy),
-            item = bothItems(source.auction.sell.type, source.auction.buy),
+            userFrom = source.auction.seller.value,
+            userTo = source.bid.buyer.value,
+            collection = source.auction.sell.type.ext.getCollections(),
+            item = source.auction.sell.type.ext.itemId?.value.orEmpty(),
         )
     }
 
@@ -217,9 +214,10 @@ object EsActivityConverter {
             logIndex = null,
             blockchain = source.id.blockchain,
             type = ActivityTypeDto.AUCTION_FINISHED,
-            user = singleUser(source.auction.seller),
-            collection = bothCollections(source.auction.sell.type, source.auction.buy),
-            item = bothItems(source.auction.sell.type, source.auction.buy),
+            userFrom = source.auction.seller.value,
+            userTo = null,
+            collection = source.auction.sell.type.ext.getCollections(),
+            item = source.auction.sell.type.ext.itemId?.value.orEmpty(),
         )
     }
 
@@ -231,9 +229,10 @@ object EsActivityConverter {
             logIndex = null,
             blockchain = source.id.blockchain,
             type = ActivityTypeDto.AUCTION_CANCEL,
-            user = singleUser(source.auction.seller),
-            collection = bothCollections(source.auction.sell.type, source.auction.buy),
-            item = bothItems(source.auction.sell.type, source.auction.buy),
+            userFrom = source.auction.seller.value,
+            userTo = null,
+            collection = source.auction.sell.type.ext.getCollections(),
+            item = source.auction.sell.type.ext.itemId?.value.orEmpty(),
         )
     }
 
@@ -245,9 +244,10 @@ object EsActivityConverter {
             logIndex = null,
             blockchain = source.id.blockchain,
             type = ActivityTypeDto.AUCTION_STARTED,
-            user = singleUser(source.auction.seller),
-            collection = bothCollections(source.auction.sell.type, source.auction.buy),
-            item = bothItems(source.auction.sell.type, source.auction.buy),
+            userFrom = source.auction.seller.value,
+            userTo = null,
+            collection = source.auction.sell.type.ext.getCollections(),
+            item = source.auction.sell.type.ext.itemId?.value.orEmpty(),
         )
     }
 
@@ -259,9 +259,10 @@ object EsActivityConverter {
             logIndex = null,
             blockchain = source.id.blockchain,
             type = ActivityTypeDto.AUCTION_ENDED,
-            user = singleUser(source.auction.seller),
-            collection = bothCollections(source.auction.sell.type, source.auction.buy),
-            item = bothItems(source.auction.sell.type, source.auction.buy),
+            userFrom = source.auction.seller.value,
+            userTo = null,
+            collection = source.auction.sell.type.ext.getCollections(),
+            item = source.auction.sell.type.ext.itemId?.value.orEmpty(),
         )
     }
 
@@ -273,9 +274,10 @@ object EsActivityConverter {
             logIndex = null,
             blockchain = source.id.blockchain,
             type = ActivityTypeDto.TRANSFER, // TODO
-            user = singleUser(source.user),
-            collection = singleCollection(source.itemId),
-            item = singleItem(source.itemId)
+            userFrom = null,
+            userTo = source.user.value,
+            collection = IdParser.extractContract(source.itemId),
+            item = source.itemId.value,
         )
     }
 
@@ -287,59 +289,10 @@ object EsActivityConverter {
             logIndex = null,
             blockchain = source.id.blockchain,
             type = ActivityTypeDto.TRANSFER, // TODO
-            user = singleUser(source.user),
-            collection = singleCollection(source.itemId),
-            item = singleItem(source.itemId),
-        )
-    }
-
-    private fun singleUser(user: UnionAddress): EsActivity.User {
-        return EsActivity.User(
-            maker = user.value,
-            taker = null,
-        )
-    }
-
-    private fun singleCollection(itemId: ItemIdDto): EsActivity.Collection {
-        return EsActivity.Collection(
-            make = IdParser.extractContract(itemId),
-            take = null,
-        )
-    }
-
-    private fun singleItem(itemId: ItemIdDto): EsActivity.Item {
-        return EsActivity.Item(
-            make = itemId.value,
-            take = null,
-        )
-    }
-
-    private fun bothUsers(maker: UnionAddress, taker: UnionAddress): EsActivity.User {
-        return EsActivity.User(
-            maker = maker.value,
-            taker = taker.value,
-        )
-    }
-
-    private fun bothCollections(left: AssetDto, right: AssetDto): EsActivity.Collection {
-        return bothCollections(left.type, right.type)
-    }
-
-    private fun bothCollections(left: AssetTypeDto, right: AssetTypeDto): EsActivity.Collection {
-        return EsActivity.Collection(
-            make = left.ext.getCollections(),
-            take = right.ext.getCollections(),
-        )
-    }
-
-    private fun bothItems(left: AssetDto, right: AssetDto): EsActivity.Item {
-        return bothItems(left.type, right.type)
-    }
-
-    private fun bothItems(left: AssetTypeDto, right: AssetTypeDto): EsActivity.Item {
-        return EsActivity.Item(
-            make = left.ext.itemId?.toString().orEmpty(),
-            take = right.ext.itemId?.toString().orEmpty(),
+            userFrom = source.user.value,
+            userTo = null,
+            collection = IdParser.extractContract(source.itemId),
+            item = source.itemId.value,
         )
     }
 

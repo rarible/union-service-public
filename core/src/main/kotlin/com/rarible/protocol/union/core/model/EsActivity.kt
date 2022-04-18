@@ -21,22 +21,9 @@ data class EsActivity(
     // Filter fields
     val blockchain: BlockchainDto,
     val type: ActivityTypeDto,
-    val user: User,
-    val collection: Collection,
-    val item: Item,
+    val userFrom: String?,
+    val userTo: String?,
+    val collection: String?,
+    val item: String,
 ) {
-    data class User(
-        val maker: String,
-        val taker: String? = null,
-    )
-
-    data class Collection(
-        val make: String? = null,
-        val take: String? = null
-    )
-
-    data class Item(
-        val make: String,
-        val take: String? = null
-    )
 }

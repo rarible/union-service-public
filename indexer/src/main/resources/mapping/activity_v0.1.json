@@ -21,7 +21,7 @@
       "salt": {
         "type": "long"
       },
-      "activityTime": {
+      "date": {
         "type": "date",
         "format": "strict_date_optional_time||epoch_millis"
       },
@@ -30,38 +30,24 @@
         "ignore_above": 256
       },
       "collection": {
-        "properties": {
-          "make": {
-            "type": "keyword"
-          },
-          "take": {
-            "type": "keyword"
-          }
-        }
+        "type": "keyword",
+        "ignore_above": 512
       },
       "item": {
-        "properties": {
-          "make": {
-            "type": "keyword"
-          },
-          "take": {
-            "type": "keyword"
-          }
-        }
+        "type": "keyword",
+        "ignore_above": 512
       },
       "type": {
         "type": "keyword",
         "ignore_above": 512
       },
-      "users": {
-        "properties": {
-          "maker": {
-            "type": "keyword"
-          },
-          "taker": {
-            "type": "keyword"
-          }
-        }
+      "userFrom": {
+        "type": "keyword",
+        "ignore_above": 256
+      },
+      "userTo": {
+        "type": "keyword",
+        "ignore_above": 256
       }
     }
   }
