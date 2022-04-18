@@ -31,7 +31,7 @@ class EsActivityRepository(
     }
 
     suspend fun deleteAll() {
-        esOperations.delete(Query.findAll(), EsActivity::class.java).awaitFirst()
+        esOperations.delete(Query.findAll(), EsActivity::class.java).awaitFirstOrNull()
     }
 
     suspend fun search(
