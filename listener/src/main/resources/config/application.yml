@@ -137,7 +137,9 @@ listener:
     root-path: "protocol.union.listener"
 
 meta:
-  ipfsGateway: "https://rarible.mypinata.cloud/"
+  ipfsGateway: "https://ipfs.io"
+  ipfsPublicGateway: "https://ipfs.io"
+  ipfsLegacyGateway: "https://rarible.mypinata.cloud"
   mediaFetchTimeout: 10000
   mediaFetchMaxSize: 131072 # 128 Kb
   openSeaProxyUrl: ${consul.meta.openSeaProxyUrl}
