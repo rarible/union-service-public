@@ -6,12 +6,13 @@ import com.rarible.core.daemon.sequential.ConsumerBatchEventHandler
 import com.rarible.core.daemon.sequential.ConsumerBatchWorker
 import com.rarible.core.daemon.sequential.ConsumerWorkerHolder
 import com.rarible.protocol.union.dto.ActivityDto
+import com.rarible.protocol.union.dto.CollectionEventDto
 import com.rarible.protocol.union.dto.OrderEventDto
 import com.rarible.protocol.union.subscriber.UnionEventsConsumerFactory
 import io.micrometer.core.instrument.MeterRegistry
+import java.time.Duration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import java.time.Duration
 
 @Configuration
 class KafkaConsumerConfiguration(
@@ -22,6 +23,7 @@ class KafkaConsumerConfiguration(
     companion object {
         const val ACTIVITY = "activity"
         const val ORDER = "order"
+        const val COLLECTION = "collection"
     }
 
     private val env = applicationEnvironmentInfo.name
@@ -60,6 +62,22 @@ class KafkaConsumerConfiguration(
                 properties = kafkaProperties.daemon,
                 retryProperties = RetryProperties(attempts = Integer.MAX_VALUE, delay = Duration.ofMillis(1000)),
                 meterRegistry = meterRegistry,
+            )
+        }
+        return ConsumerWorkerHolder(workers)
+    }
+
+    @Bean
+    fun collectionWorker(handler: ConsumerBatchEventHandler<CollectionEventDto>): ConsumerWorkerHolder<CollectionEventDto> {
+        val workers = (1..kafkaProperties.workerCount).map {i ->
+            val consumer = consumerFactory.createCollectionConsumer(consumerGroup(COLLECTION))
+            ConsumerBatchWorker(
+                consumer = consumer,
+                eventHandler = handler,
+                workerName = worker(COLLECTION, i),
+                properties = kafkaProperties.daemon,
+                retryProperties = RetryProperties(attempts = Int.MAX_VALUE, delay = Duration.ofSeconds(1L)),
+                meterRegistry = meterRegistry
             )
         }
         return ConsumerWorkerHolder(workers)
