@@ -80,7 +80,9 @@ common:
     enableLegacyWrappedEventTopic: true
 
 meta:
-  ipfsGateway: "https://rarible.mypinata.cloud/"
+  ipfsGateway: "https://ipfs.io,https://nftstorage.link"
+  ipfsPublicGateway: "https://ipfs.io"
+  ipfsLegacyGateway: "https://rarible.mypinata.cloud"
   mediaFetchTimeout: 10000
   mediaFetchMaxSize: 131072 # 128 Kb
   openSeaProxyUrl: ${consul.meta.openSeaProxyUrl}
