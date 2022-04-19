@@ -2,11 +2,10 @@ package com.rarible.protocol.union.core.converter
 
 import com.rarible.core.test.data.randomAddress
 import com.rarible.core.test.data.randomString
-import com.rarible.protocol.union.core.model.UnionCollection
-import com.rarible.protocol.union.core.model.UnionCollectionMeta
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.dto.CollectionIdDto
+import com.rarible.protocol.union.dto.CollectionMetaDto
 import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.group
 import java.util.stream.Stream
@@ -20,7 +19,7 @@ class EsCollectionConverterTest {
 
     @ParameterizedTest
     @MethodSource("args")
-    internal fun `collection parser test`(unionCollection: UnionCollection) {
+    internal fun `collection parser test`(unionCollection: CollectionDto) {
         val esCollection = EsCollectionConverter.convert(unionCollection)
         assertThat(esCollection.collectionId).isEqualTo(unionCollection.id.fullId())
         assertThat(esCollection.name).isEqualTo(unionCollection.name)
@@ -40,35 +39,38 @@ class EsCollectionConverterTest {
         @JvmStatic
         private fun args(): Stream<Arguments> {
             return listOf(
-                UnionCollection(
+                CollectionDto(
                     id = CollectionIdDto(BlockchainDto.ETHEREUM, randomAddress().toString()),
+                    blockchain = BlockchainDto.ETHEREUM,
                     name = randomString(),
                     type = CollectionDto.Type.ERC721,
                     minters = listOf(
                         UnionAddress(BlockchainDto.ETHEREUM.group(), randomAddress().toString())
                     ),
                     features = listOf(CollectionDto.Features.BURN),
-                    meta = UnionCollectionMeta(
+                    meta = CollectionMetaDto(
                         name = randomString(),
                         description = randomString(),
                         feeRecipient = UnionAddress(BlockchainDto.ETHEREUM.group(), randomAddress().toString())
                     ),
                     owner = UnionAddress(BlockchainDto.ETHEREUM.group(), randomAddress().toString())
                 ),
-                UnionCollection(
+                CollectionDto(
                     id = CollectionIdDto(BlockchainDto.FLOW, randomString()),
+                    blockchain = BlockchainDto.FLOW,
                     name = randomString(),
                     type = CollectionDto.Type.FLOW,
                     features = listOf(CollectionDto.Features.BURN),
-                    meta = UnionCollectionMeta(
+                    meta = CollectionMetaDto(
                         name = randomString(),
                     ),
                     symbol = randomString(),
                     owner = UnionAddress(BlockchainDto.FLOW.group(), randomString()),
                     parent = CollectionIdDto(BlockchainDto.FLOW, randomString())
                 ),
-                UnionCollection(
+                CollectionDto(
                     id = CollectionIdDto(BlockchainDto.SOLANA, randomString()),
+                    blockchain = BlockchainDto.SOLANA,
                     name = randomString(),
                     type = CollectionDto.Type.SOLANA,
                     features = listOf(CollectionDto.Features.BURN),

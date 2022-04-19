@@ -1,11 +1,11 @@
 package com.rarible.protocol.union.core.converter
 
 import com.rarible.protocol.union.core.model.EsCollection
-import com.rarible.protocol.union.core.model.UnionCollection
+import com.rarible.protocol.union.dto.CollectionDto
 
 object EsCollectionConverter {
 
-    fun convert(collection: UnionCollection): EsCollection {
+    fun convert(collection: CollectionDto): EsCollection {
         return EsCollection(
             collectionId = collection.id.fullId(),
             type = collection.type.name,
