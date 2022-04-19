@@ -1,0 +1,36 @@
+PUT _index_template/collection_template
+
+{
+  "version": 1,
+
+  "index_patterns": [
+    "collection_*"
+  ],
+
+  "template": {
+    "aliases": {
+      "collection": {}
+    },
+    "settings": {},
+    "mappings": {
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "collectionId": "keyword",
+        "type": "keyword",
+        "name": "keyword",
+        "symbol": "keyword",
+        "owner": "keyword",
+        "parent": "keyword",
+        "meta": {
+          "properties": {
+            "name": "keyword",
+            "description": "keyword",
+            "feeRecipient": "keyword"
+          }
+        }
+      }
+    }
+  }
+}
