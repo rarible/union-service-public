@@ -1,0 +1,26 @@
+{
+  "aliases": {
+    "collection": {}
+  },
+  "settings": {},
+  "mappings": {
+    "properties": {
+      "@timestamp": {
+        "type": "date"
+      },
+      "collectionId": "keyword",
+      "type": "keyword",
+      "name": "keyword",
+      "symbol": "keyword",
+      "owner": "keyword",
+      "parent": "keyword",
+      "meta": {
+        "properties": {
+          "name": "keyword",
+          "description": "keyword",
+          "feeRecipient": "keyword"
+        }
+      }
+    }
+  }
+}
