@@ -2,6 +2,7 @@ package com.rarible.protocol.union.enrichment.meta
 
 import com.rarible.protocol.union.enrichment.configuration.UnionMetaProperties
 import org.springframework.stereotype.Component
+import java.util.*
 import java.util.regex.Pattern
 
 @Component
@@ -9,12 +10,13 @@ class IpfsUrlResolver(
     ipfsProperties: UnionMetaProperties
 ) {
 
-    private val innerGateway = ipfsProperties.ipfsGateway.trimEnd('/')
+    private val innerGateway = ipfsProperties.ipfsGateway.split(",").map { it.trimEnd('/') }
     private val publicGateway = ipfsProperties.ipfsPublicGateway.trimEnd('/')
     private val legacyGateway = ipfsProperties.ipfsLegacyGateway?.trimEnd('/')
 
-    fun resolveRealUrl(uri: String): String {
-        return resolveRealUrl(uri, innerGateway)
+    fun resolveInnerUrl(uri: String): String {
+        val randomInnerGateway = innerGateway[Random().nextInt(innerGateway.size)]
+        return resolveRealUrl(uri, randomInnerGateway)
     }
 
     fun resolvePublicUrl(uri: String): String {

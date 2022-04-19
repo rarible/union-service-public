@@ -80,7 +80,7 @@ common:
     enableLegacyWrappedEventTopic: true
 
 meta:
-  ipfsGateway: "https://ipfs.io"
+  ipfsGateway: "https://ipfs.io,https://nftstorage.link"
   ipfsPublicGateway: "https://ipfs.io"
   ipfsLegacyGateway: "https://rarible.mypinata.cloud"
   mediaFetchTimeout: 10000

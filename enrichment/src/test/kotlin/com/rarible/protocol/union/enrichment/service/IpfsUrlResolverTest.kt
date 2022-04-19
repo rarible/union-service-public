@@ -40,12 +40,12 @@ class IpfsUrlResolverTest {
             "http://api.guccinfts.xyz/ipfs/8" to "http://api.guccinfts.xyz/ipfs/8"
         )
         for ((input, output) in pairs) {
-            assertThat(service.resolveRealUrl(input)).isEqualTo(output)
+            assertThat(service.resolveInnerUrl(input)).isEqualTo(output)
         }
     }
 
     @Test
     fun `replace legacy`() {
-        assertThat(service.resolveRealUrl("$ipfsLegacyGateway/ipfs/abc")).isEqualTo("$ipfsGateway/ipfs/abc")
+        assertThat(service.resolveInnerUrl("$ipfsLegacyGateway/ipfs/abc")).isEqualTo("$ipfsGateway/ipfs/abc")
     }
 }
