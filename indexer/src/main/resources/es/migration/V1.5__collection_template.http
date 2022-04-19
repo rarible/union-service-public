@@ -17,17 +17,35 @@ PUT _index_template/collection_template
         "@timestamp": {
           "type": "date"
         },
-        "collectionId": "keyword",
-        "type": "keyword",
-        "name": "keyword",
-        "symbol": "keyword",
-        "owner": "keyword",
-        "parent": "keyword",
+        "collectionId": {
+           "type": "keyword"
+        },
+        "type": {
+           "type": "keyword"
+        },
+        "name": {
+           "type": "keyword"
+        },
+        "symbol": {
+           "type": "keyword"
+        },
+        "owner": {
+           "type": "keyword"
+        },
+        "parent": {
+           "type": "keyword"
+        },
         "meta": {
           "properties": {
-            "name": "keyword",
-            "description": "keyword",
-            "feeRecipient": "keyword"
+            "name": {
+              "type": "keyword"
+            },
+            "description": {
+              "type": "keyword"
+            },
+            "feeRecipient": {
+              "type": "keyword"
+            }
           }
         }
       }
