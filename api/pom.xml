@@ -131,6 +131,11 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>com.rarible.protocol.union</groupId>
+            <artifactId>rarible-union-es-evolution</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>com.rarible.core</groupId>
             <artifactId>rarible-core-test-common</artifactId>
             <scope>test</scope>

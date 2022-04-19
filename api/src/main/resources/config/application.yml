@@ -17,6 +17,10 @@ spring:
     banner-mode: log
     web-application-type: reactive
 
+  elasticsearch:
+    evolution:
+      enabled: false
+
 rarible:
   core:
     apm:

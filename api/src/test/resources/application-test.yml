@@ -12,6 +12,9 @@ spring:
     rest:
       uris: ${elasticsearch.api-nodes}
 
+    evolution:
+      enabled: true
+
 rarible:
   core:
     apm:

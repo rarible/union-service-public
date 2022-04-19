@@ -33,12 +33,6 @@
     </build>
 
     <dependencies>
-        <dependency>
-            <groupId>com.senacor.elasticsearch.evolution</groupId>
-            <artifactId>spring-boot-starter-elasticsearch-evolution</artifactId>
-            <version>0.4.0</version>
-        </dependency>
-
         <!-- Internal dependencies -->
         <dependency>
             <groupId>com.rarible.core</groupId>
@@ -47,6 +41,10 @@
         <dependency>
             <groupId>com.rarible.protocol.union</groupId>
             <artifactId>rarible-union-enrichment</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.rarible.protocol.union</groupId>
+            <artifactId>rarible-union-es-evolution</artifactId>
         </dependency>
 
         <!-- ================== Spring =================== -->

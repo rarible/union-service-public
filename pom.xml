@@ -353,6 +353,11 @@
 
             <!-- ================== Other =================== -->
             <dependency>
+                <groupId>com.rarible.protocol.union</groupId>
+                <artifactId>rarible-union-es-evolution</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
                 <groupId>net.java.dev.jna</groupId>
                 <artifactId>jna</artifactId>
                 <version>${dev-jna.version}</version>
@@ -416,5 +421,6 @@
         <module>meta-loader</module>
         <module>indexer</module>
         <module>worker</module>
+        <module>es-evolution</module>
     </modules>
 </project>
