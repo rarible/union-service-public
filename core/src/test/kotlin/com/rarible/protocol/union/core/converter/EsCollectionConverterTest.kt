@@ -37,7 +37,7 @@ class EsCollectionConverterTest {
 
     companion object {
         @JvmStatic
-        private fun args(): Stream<Arguments> {
+        fun args(): Stream<Arguments> {
             return listOf(
                 CollectionDto(
                     id = CollectionIdDto(BlockchainDto.ETHEREUM, randomAddress().toString()),
