@@ -14,7 +14,7 @@ data class EsOwnership(
     val blockchain: BlockchainDto,
     val itemId: String? = null,
     val collection: String? = null,
-    val value: String,
+    val owner: String,
     @Field(type = FieldType.Date)
     val date: Instant,
 )

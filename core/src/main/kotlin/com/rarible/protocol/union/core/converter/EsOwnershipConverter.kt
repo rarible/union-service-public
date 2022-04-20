@@ -9,7 +9,7 @@ object EsOwnershipConverter {
         blockchain = source.blockchain,
         itemId = source.itemId?.fullId(),
         collection = source.collection?.fullId(),
-        value = source.value.toString(),
+        owner = source.owner.fullId(),
         date = source.createdAt,
     )
 }

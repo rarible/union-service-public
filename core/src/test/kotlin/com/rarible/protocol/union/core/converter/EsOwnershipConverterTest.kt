@@ -22,7 +22,7 @@ internal class EsOwnershipConverterTest {
         assertThat(result.blockchain).isEqualTo(source.blockchain)
         assertThat(result.itemId).isEqualTo(source.itemId?.fullId())
         assertThat(result.collection).isEqualTo(source.collection?.fullId())
-        assertThat(result.value).isEqualTo(source.value.toString())
+        assertThat(result.owner).isEqualTo(source.owner.fullId())
         assertThat(result.date).isEqualTo(source.createdAt)
     }
 
