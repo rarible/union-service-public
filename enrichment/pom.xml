@@ -142,9 +142,5 @@
             <artifactId>rarible-core-test-common</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>com.rarible.protocol.union</groupId>
-            <artifactId>rarible-union-integration-ethereum</artifactId>
-        </dependency>
     </dependencies>
 </project>
