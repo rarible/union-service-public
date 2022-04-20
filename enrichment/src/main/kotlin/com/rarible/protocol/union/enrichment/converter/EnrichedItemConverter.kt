@@ -38,7 +38,6 @@ object EnrichedItemConverter {
             },
             tokenId = contractAndTokenId?.second, // TODO remove later
             creators = item.creators,
-            royalties = item.royalties, // TODO UNION Remove in 1.19
             lazySupply = item.lazySupply,
             pending = item.pending,
             mintedAt = item.mintedAt,
