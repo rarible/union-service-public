@@ -11,7 +11,10 @@ data class FeatureFlagsProperties(
     val enableOwnershipSourceEnrichment: Boolean = false,
     val enableItemLastSaleEnrichment: Boolean = true,
     val enableLegacyWrappedEventTopic: Boolean = true,
+    // activities
     var enableActivityQueriesToElasticSearch: Boolean = false,
     var enableActivityQueriesPerTypeFilter: Boolean = false,
     var enableImmutableXActivitiesQueries: Boolean = false,
+    // orders
+    var enableOrderQueriesToElasticSearch: Boolean = false,
 )

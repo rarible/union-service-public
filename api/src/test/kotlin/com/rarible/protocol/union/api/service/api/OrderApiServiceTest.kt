@@ -1,5 +1,6 @@
-package com.rarible.protocol.union.api.service
+package com.rarible.protocol.union.api.service.api
 
+import com.rarible.protocol.union.api.service.api.OrderApiService
 import com.rarible.protocol.union.core.converter.ContractAddressConverter
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
