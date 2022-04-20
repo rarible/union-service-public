@@ -7,6 +7,9 @@ import com.rarible.protocol.union.dto.OwnershipDeleteEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.dto.OwnershipUpdateEventDto
 import com.rarible.protocol.union.enrichment.repository.search.EsOwnershipRepository
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import org.springframework.stereotype.Service
 
 @Service
@@ -28,12 +31,18 @@ class OwnershipEventHandler(
             it.ownershipId.fullId()
         }
 
-        logger.debug("Saving ${events.size} OwnershipDto events to ElasticSearch")
-        repository.saveAll(events)
-
-        logger.debug("Removing ${deleted.size} OwnershipDto events from ElasticSearch")
-        repository.deleteAll(deleted)
-
+        coroutineScope {
+            listOf(
+                async {
+                    logger.debug("Saving ${events.size} OwnershipDto events to ElasticSearch")
+                    repository.saveAll(events)
+                },
+                async {
+                    logger.debug("Removing ${deleted.size} OwnershipDto events from ElasticSearch")
+                    repository.deleteAll(deleted)
+                },
+            ).awaitAll()
+        }
 
         logger.info("Handling completed")
     }
