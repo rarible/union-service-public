@@ -5,6 +5,7 @@ import com.rarible.core.kafka.RaribleKafkaProducer
 import com.rarible.core.test.ext.KafkaTestExtension
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.OrderEventDto
+import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.dto.UnionEventTopicProvider
 import com.rarible.protocol.union.subscriber.UnionKafkaJsonSerializer
 import org.springframework.context.annotation.Bean
@@ -39,6 +40,17 @@ class TestIndexerConfiguration {
             valueSerializerClass = UnionKafkaJsonSerializer::class.java,
             valueClass = OrderEventDto::class.java,
             defaultTopic = UnionEventTopicProvider.getOrderTopic(applicationEnvironmentInfo().name),
+            bootstrapServers = KafkaTestExtension.kafkaContainer.kafkaBoostrapServers()
+        )
+    }
+
+    @Bean
+    fun testUnionOwnershipEventProducer(): RaribleKafkaProducer<OwnershipEventDto> {
+        return RaribleKafkaProducer(
+            clientId = "test.union.order",
+            valueSerializerClass = UnionKafkaJsonSerializer::class.java,
+            valueClass = OwnershipEventDto::class.java,
+            defaultTopic = UnionEventTopicProvider.getOwnershipTopic(applicationEnvironmentInfo().name),
             bootstrapServers = KafkaTestExtension.kafkaContainer.kafkaBoostrapServers()
         )
     }
