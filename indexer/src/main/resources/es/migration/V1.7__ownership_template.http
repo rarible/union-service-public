@@ -11,7 +11,6 @@ PUT _index_template/ownership_template
     "aliases": {
       "order": {}
     },
-
     "mappings": {
       "properties": {
         "@timestamp": {
@@ -21,40 +20,22 @@ PUT _index_template/ownership_template
           "type": "keyword"
         },
         "blockchain": {
-          "type": "keyword"
-        },
-        "token": {
-          "type": "keyword"
-        },
-        "tokenId": {
-          "type": "keyword"
+          "type": "keyword",
+          "ignore_above": 256
         },
         "itemId": {
           "type": "keyword"
         },
         "collection": {
-          "type": "keyword"
-        },
-        "owner": {
-          "type": "keyword"
+          "type": "keyword",
+          "ignore_above": 512
         },
         "value": {
           "type": "keyword"
         },
         "date": {
-          "type": "date"
-        },
-        "price": {
-          "type": "keyword"
-        },
-        "priceUsd": {
-          "type": "keyword"
-        },
-        "auctionEndDate": {
-          "type": "date"
-        },
-        "orderSource": {
-          "type": "keyword"
+          "type": "date",
+          "format": "strict_date_optional_time||epoch_millis"
         }
       }
     }
