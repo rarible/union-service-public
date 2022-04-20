@@ -46,6 +46,7 @@ import com.rarible.protocol.union.test.data.randomFlowItemIdFullValue
 import com.rarible.protocol.union.test.data.randomFlowMetaDto
 import com.rarible.protocol.union.test.data.randomFlowNftItemDto
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.verify
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.reactive.awaitFirst
@@ -231,9 +232,23 @@ class ItemControllerFt : AbstractIntegrationTest() {
         coEvery { testEthereumItemApi.resetNftItemMetaById(itemId.value) } returns Mono.empty()
         coEvery { testEthereumItemApi.getNftItemMetaById(itemId.value) } returns Mono.just(randomEthItemMeta())
 
-        itemControllerClient.resetItemMeta(itemId.fullId()).awaitFirstOrNull()
+        itemControllerClient.resetItemMeta(itemId.fullId(), false).awaitFirstOrNull()
 
         verify(exactly = 1) { testEthereumItemApi.resetNftItemMetaById(itemId.value) }
+    }
+
+    @Test
+    fun `reset item meta by id sync`() = runBlocking<Unit> {
+        val itemId = randomEthItemId()
+
+        coEvery { testEthereumItemApi.resetNftItemMetaById(itemId.value) } returns Mono.empty()
+        coEvery { testEthereumItemApi.getNftItemMetaById(itemId.value) } returns Mono.just(randomEthItemMeta())
+        coEvery { testUnionMetaLoader.load(itemId) } returns randomUnionMeta()
+
+        itemControllerClient.resetItemMeta(itemId.fullId(), true).awaitFirstOrNull()
+
+        verify(exactly = 1) { testEthereumItemApi.resetNftItemMetaById(itemId.value) }
+        coVerify(exactly = 1) { testUnionMetaLoader.load(itemId) }
     }
 
     @Test
@@ -243,7 +258,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
         coEvery { testFlowItemApi.resetItemMeta(itemId.value) } returns Mono.empty()
         coEvery { testFlowItemApi.getNftItemMetaById(itemId.value) } returns Mono.just(randomFlowMetaDto())
 
-        itemControllerClient.resetItemMeta(itemId.fullId()).awaitFirstOrNull()
+        itemControllerClient.resetItemMeta(itemId.fullId(), false).awaitFirstOrNull()
 
         verify(exactly = 1) { testFlowItemApi.resetItemMeta(itemId.value) }
     }
@@ -255,7 +270,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
         coEvery { testTezosItemApi.resetNftItemMetaById(itemId.value) } returns Mono.empty()
         coEvery { testTezosItemApi.getNftItemMetaById(itemId.value) } returns Mono.just(randomTezosMetaDto())
 
-        itemControllerClient.resetItemMeta(itemId.fullId()).awaitFirstOrNull()
+        itemControllerClient.resetItemMeta(itemId.fullId(), false).awaitFirstOrNull()
 
         verify(exactly = 1) { testTezosItemApi.resetNftItemMetaById(itemId.value) }
     }
