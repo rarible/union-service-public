@@ -179,12 +179,7 @@ class ItemController(
         }
         router.getService(fullItemId.blockchain).resetItemMeta(fullItemId.value)
         if (sync == true) {
-            try {
-                unionMetaLoader.load(fullItemId)
-            } catch (e: Exception) {
-                logger.warn("Synchronous meta loading failed for $fullItemId")
-                unionMetaService.scheduleLoading(fullItemId)
-            }
+            unionMetaService.loadMetaSynchronously(fullItemId)
         } else {
             unionMetaService.scheduleLoading(fullItemId)
         }

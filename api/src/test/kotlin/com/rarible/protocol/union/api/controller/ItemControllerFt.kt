@@ -23,6 +23,7 @@ import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.converter.ShortItemConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.meta.UnionMetaService
+import com.rarible.protocol.union.enrichment.meta.getAvailable
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.test.data.randomUnionMeta
 import com.rarible.protocol.union.integration.ethereum.converter.EthItemConverter
@@ -240,15 +241,22 @@ class ItemControllerFt : AbstractIntegrationTest() {
     @Test
     fun `reset item meta by id sync`() = runBlocking<Unit> {
         val itemId = randomEthItemId()
+        val randomMeta = randomEthItemMeta()
+        val randomUnionMeta = randomUnionMeta()
+
+        var cachedMeta = unionMetaCacheLoaderService.get(itemId.fullId())
+        assertThat(cachedMeta.getAvailable()).isNull()
 
         coEvery { testEthereumItemApi.resetNftItemMetaById(itemId.value) } returns Mono.empty()
-        coEvery { testEthereumItemApi.getNftItemMetaById(itemId.value) } returns Mono.just(randomEthItemMeta())
-        coEvery { testUnionMetaLoader.load(itemId) } returns randomUnionMeta()
+        coEvery { testEthereumItemApi.getNftItemMetaById(itemId.value) } returns Mono.just(randomMeta)
+        coEvery { testUnionMetaLoader.load(itemId) } returns randomUnionMeta
 
         itemControllerClient.resetItemMeta(itemId.fullId(), true).awaitFirstOrNull()
 
         verify(exactly = 1) { testEthereumItemApi.resetNftItemMetaById(itemId.value) }
         coVerify(exactly = 1) { testUnionMetaLoader.load(itemId) }
+        cachedMeta = unionMetaCacheLoaderService.get(itemId.fullId())
+        assertThat(cachedMeta.getAvailable()).isEqualTo(randomUnionMeta)
     }
 
     @Test
