@@ -139,7 +139,6 @@ fun randomTezosOrderDto(make: AssetDto, maker: String, take: AssetDto): OrderDto
         makeBalance = randomBigInt(),
         start = randomInt(),
         end = randomInt(),
-        priceHistory = listOf(),
         makerEdpk = randomString(),
         takerEdpk = randomString(),
         status = OrderStatusDto.ACTIVE,

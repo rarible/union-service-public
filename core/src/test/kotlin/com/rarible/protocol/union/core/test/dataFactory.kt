@@ -24,7 +24,6 @@ import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OrderDataDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
-import com.rarible.protocol.union.dto.OrderPriceHistoryRecordDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.OwnershipDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
@@ -161,7 +160,6 @@ fun randomOrder(
     takePrice: BigDecimal? = null,
     makePriceUsd: BigDecimal? = null,
     takePriceUsd: BigDecimal? = null,
-    priceHistory: List<OrderPriceHistoryRecordDto>? = listOf(),
     maker: UnionAddress = randomUnionAddress(id.blockchain),
     taker: UnionAddress? = null,
     make: AssetDto = AssetDto(randomAssetType(id.blockchain), randomBigDecimal()),
@@ -185,7 +183,6 @@ fun randomOrder(
     takePrice = takePrice,
     makePriceUsd = makePriceUsd,
     takePriceUsd = takePriceUsd,
-    priceHistory = priceHistory,
     maker = maker,
     taker = taker,
     make = make,
