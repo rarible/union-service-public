@@ -21,8 +21,9 @@
         "type": "keyword",
         "ignore_above": 512
       },
-      "value": {
-        "type": "keyword"
+      "owner": {
+        "type": "keyword",
+        "ignore_above": 256
       },
       "date": {
         "type": "date",

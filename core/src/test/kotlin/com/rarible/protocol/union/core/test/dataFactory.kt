@@ -4,6 +4,7 @@ import com.rarible.core.test.data.randomBoolean
 import com.rarible.core.test.data.randomInt
 import com.rarible.core.test.data.randomLong
 import com.rarible.core.test.data.randomString
+import com.rarible.protocol.union.core.model.EsOwnership
 import com.rarible.protocol.union.dto.AssetDto
 import com.rarible.protocol.union.dto.AssetTypeDto
 import com.rarible.protocol.union.dto.AuctionBidDto
@@ -196,3 +197,14 @@ fun randomOrder(
 )
 
 fun randomOrderData(): OrderDataDto = EthOrderDataRaribleV2DataV1Dto(emptyList(), emptyList())
+
+fun randomEsOwnership(
+    id: OwnershipIdDto = randomOwnershipId(),
+) = EsOwnership(
+    id.fullId(),
+    id.blockchain,
+    ItemIdDto(id.blockchain, id.itemIdValue).fullId(),
+    CollectionIdDto(id.blockchain, randomString()).fullId(),
+    randomBigInt().toString(),
+    randomInstant(),
+)

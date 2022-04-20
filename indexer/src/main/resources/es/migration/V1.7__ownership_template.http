@@ -30,8 +30,9 @@ PUT _index_template/ownership_template
           "type": "keyword",
           "ignore_above": 512
         },
-        "value": {
-          "type": "keyword"
+        "owner": {
+          "type": "keyword",
+          "ignore_above": 256
         },
         "date": {
           "type": "date",
