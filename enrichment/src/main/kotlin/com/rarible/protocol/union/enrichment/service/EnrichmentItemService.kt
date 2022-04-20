@@ -126,7 +126,8 @@ class EnrichmentItemService(
         val itemDto = EnrichedItemConverter.convert(
             item = fetchedItem.await(),
             shortItem = shortItem,
-            meta = itemMeta.await(),
+            // replacing inner IPFS urls with public urls
+            meta = unionMetaService.exposePublicIpfsUrls(itemMeta.await()),
             orders = bestOrders,
             auctions = auctionsData.await()
         )
