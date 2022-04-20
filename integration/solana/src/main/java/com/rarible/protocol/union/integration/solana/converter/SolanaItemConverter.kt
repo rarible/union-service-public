@@ -24,7 +24,6 @@ object SolanaItemConverter {
             creators = token.creators.orEmpty().map { convert(it, blockchain) },
             // TODO it MUST be not-null
             collection = token.collection?.let { CollectionIdDto(blockchain, it) },
-            owners = emptyList(),
             royalties = emptyList(), // TODO SOLANA: royalties are not supported yet.
             lazySupply = BigInteger.ZERO,
             pending = emptyList(),

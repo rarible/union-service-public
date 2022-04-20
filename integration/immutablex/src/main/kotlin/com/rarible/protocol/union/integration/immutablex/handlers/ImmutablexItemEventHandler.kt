@@ -44,9 +44,6 @@ class ImmutablexItemEventHandler(
                                 value = 1
                             )
                         ),
-                        owners = listOf(
-                            UnionAddress(blockchain.group(), event.user)
-                        ),
                         royalties = event.fees?.map {
                             RoyaltyDto(
                                 account = UnionAddress(blockchain.group(), it.address),

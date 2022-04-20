@@ -53,8 +53,6 @@ object EthItemConverter {
             deleted = item.deleted ?: false,
             creators = item.creators.map { EthConverter.convertToCreator(it, blockchain) },
             // TODO UNION Remove in 1.19
-            owners = emptyList(),
-            // TODO UNION Remove in 1.19
             royalties = item.royalties?.map { EthConverter.convertToRoyalty(it, blockchain) } ?: emptyList(),
             lazySupply = item.lazySupply,
             pending = item.pending?.map { convert(it, blockchain) } ?: listOf()

@@ -48,7 +48,6 @@ object TezosItemConverter {
             lazySupply = item.lazySupply,
             meta = item.meta?.let { convert(it) },
             mintedAt = item.mintedAt,
-            owners = emptyList(),
             // TODO TEZOS Remove when Tezos implement getItemRoyalties
             royalties = item.royalties.map { toRoyalty(it, blockchain) },
             supply = item.supply,

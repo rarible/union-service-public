@@ -48,7 +48,6 @@ object FlowItemConverter {
             deleted = item.deleted,
             // TODO TEZOS Remove when Flow implement getItemRoyalties
             creators = item.creators.map { convert(it, blockchain) },
-            owners = emptyList(),
             royalties = item.royalties.map { convert(it, blockchain) },
             lazySupply = BigInteger.ZERO
         )

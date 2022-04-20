@@ -36,7 +36,6 @@ object ImmutablexItemConverter {
             id = ItemIdDto(BlockchainDto.IMMUTABLEX, contract = asset.tokenAddress, tokenId = asset.tokenId),
             collection = CollectionIdDto(blockchain, asset.tokenAddress),
             creators = emptyList(), //filling outside of converter
-            owners = listOf(UnionAddress(blockchain.group(), asset.user)),
             royalties = asset.fees.map {
                 RoyaltyDto(
                     account = UnionAddressConverter.convert(ContractAddressConverter.convert(blockchain, it.address)),
