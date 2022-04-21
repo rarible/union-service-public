@@ -47,7 +47,7 @@ class TestIndexerConfiguration {
     @Bean
     fun testUnionOwnershipEventProducer(): RaribleKafkaProducer<OwnershipEventDto> {
         return RaribleKafkaProducer(
-            clientId = "test.union.order",
+            clientId = "test.union.ownership",
             valueSerializerClass = UnionKafkaJsonSerializer::class.java,
             valueClass = OwnershipEventDto::class.java,
             defaultTopic = UnionEventTopicProvider.getOwnershipTopic(applicationEnvironmentInfo().name),

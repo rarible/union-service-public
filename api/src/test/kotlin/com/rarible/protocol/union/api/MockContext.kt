@@ -12,6 +12,11 @@ import com.rarible.protocol.dto.NftItemEventTopicProvider
 import com.rarible.protocol.dto.NftOwnershipEventDto
 import com.rarible.protocol.dto.NftOwnershipEventTopicProvider
 import com.rarible.protocol.union.api.configuration.WebSocketConfiguration
+import com.rarible.protocol.union.core.elasticsearch.EsNameResolver
+import com.rarible.protocol.union.core.elasticsearch.IndexMetadataService
+import com.rarible.protocol.union.core.elasticsearch.NoopReindexSchedulingService
+import com.rarible.protocol.union.core.elasticsearch.bootstrap.ElasticsearchBootstraper
+import com.rarible.protocol.union.core.model.elasticsearch.EsEntitiesConfig
 import com.rarible.protocol.union.dto.FakeSubscriptionEventDto
 import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
@@ -20,9 +25,8 @@ import com.rarible.protocol.union.dto.SubscriptionRequestDto
 import com.rarible.protocol.union.dto.UnionEventTopicProvider
 import com.rarible.protocol.union.subscriber.UnionKafkaJsonDeserializer
 import com.rarible.protocol.union.subscriber.UnionKafkaJsonSerializer
-import java.net.URI
-import java.util.concurrent.LinkedBlockingQueue
 import org.apache.kafka.clients.consumer.OffsetResetStrategy
+import org.elasticsearch.client.RestHighLevelClient
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -37,6 +41,8 @@ import org.springframework.core.io.buffer.DefaultDataBufferFactory
 import org.springframework.web.reactive.socket.WebSocketMessage
 import org.springframework.web.reactive.socket.client.ReactorNettyWebSocketClient
 import reactor.core.publisher.Sinks
+import java.net.URI
+import java.util.concurrent.LinkedBlockingQueue
 
 @Configuration
 @EnableAutoConfiguration
@@ -59,10 +65,26 @@ class MockContext : ApplicationListener<WebServerInitializedEvent> {
     fun webSocketRequests(): Sinks.Many<List<SubscriptionRequestDto>> = Sinks.many().unicast()
         .onBackpressureBuffer()
 
-   /* @Bean
-    fun applicationEnvironmentInfo(): ApplicationEnvironmentInfo {
-        return ApplicationEnvironmentInfo("test", "test.com")
-    }*/
+    @Bean(initMethod = "bootstrap")
+    fun elasticsearchBootstrap(
+        elasticsearchHighLevelClient: RestHighLevelClient,
+        esNameResolver: EsNameResolver,
+        indexMetadataService: IndexMetadataService
+    ): ElasticsearchBootstraper {
+
+        return ElasticsearchBootstraper(
+            esNameResolver = esNameResolver,
+            client = elasticsearchHighLevelClient,
+            entityDefinitions = EsEntitiesConfig.createEsEntities(),
+            reindexSchedulingService = NoopReindexSchedulingService(indexMetadataService),
+            forceUpdate = emptySet()
+        )
+    }
+
+    /* @Bean
+     fun applicationEnvironmentInfo(): ApplicationEnvironmentInfo {
+         return ApplicationEnvironmentInfo("test", "test.com")
+     }*/
 
     @Bean
     fun testItemConsumer(): RaribleKafkaConsumer<ItemEventDto> {
@@ -154,10 +176,10 @@ class MockContext : ApplicationListener<WebServerInitializedEvent> {
             })
                 .doOnSubscribe { logger.info("subscribed to ws") }
                 .subscribe(
-                {},
-                { logger.error("ws error", it)},
-                { logger.info("disconnected from ws") }
-            )
+                    {},
+                    { logger.error("ws error", it) },
+                    { logger.info("disconnected from ws") }
+                )
             shutdownMono().asMono()
         }.subscribe()
     }

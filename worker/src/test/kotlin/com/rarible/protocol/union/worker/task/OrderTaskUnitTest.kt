@@ -1,7 +1,9 @@
-package com.rarible.protocol.union.search.reindexer.task
+package com.rarible.protocol.union.worker.task
 
 import com.rarible.core.test.data.randomAddress
 import com.rarible.protocol.union.api.client.OrderControllerApi
+import com.rarible.protocol.union.core.converter.EsOrderConverter
+import com.rarible.protocol.union.core.model.EsOrder
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.BlockchainGroupDto
 import com.rarible.protocol.union.dto.ContractAddress
@@ -14,11 +16,8 @@ import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.OrdersDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.UnionAddress
-import com.rarible.protocol.union.core.model.EsOrder
-import com.rarible.protocol.union.core.converter.EsOrderConverter
 import com.rarible.protocol.union.worker.config.SearchReindexerConfiguration
 import com.rarible.protocol.union.worker.config.SearchReindexerProperties
-import com.rarible.protocol.union.worker.task.OrderTask
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify

@@ -1,12 +1,11 @@
-package com.rarible.protocol.union.search.reindexer
+package com.rarible.protocol.union.worker
 
 import org.junit.jupiter.api.Test
 
 @IntegrationTest
-class ReindexerContextTest {
+class UnionWorkerApplicationContextTest {
 
     @Test
     fun `should start up`() {
-
     }
 }
