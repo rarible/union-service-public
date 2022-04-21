@@ -8,6 +8,7 @@ import com.rarible.core.daemon.sequential.ConsumerWorkerHolder
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.CollectionEventDto
 import com.rarible.protocol.union.dto.OrderEventDto
+import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.subscriber.UnionEventsConsumerFactory
 import io.micrometer.core.instrument.MeterRegistry
 import java.time.Duration
@@ -23,6 +24,7 @@ class KafkaConsumerConfiguration(
     companion object {
         const val ACTIVITY = "activity"
         const val ORDER = "order"
+        const val OWNERSHIP = "ownership"
         const val COLLECTION = "collection"
     }
 
@@ -61,6 +63,24 @@ class KafkaConsumerConfiguration(
                 workerName = worker(ORDER, index),
                 properties = kafkaProperties.daemon,
                 retryProperties = RetryProperties(attempts = Integer.MAX_VALUE, delay = Duration.ofMillis(1000)),
+                meterRegistry = meterRegistry,
+            )
+        }
+        return ConsumerWorkerHolder(workers)
+    }
+
+    @Bean
+    fun ownershipWorker(
+        handler: ConsumerBatchEventHandler<OwnershipEventDto>,
+    ): ConsumerWorkerHolder<OwnershipEventDto> {
+        val workers = (1..kafkaProperties.workerCount).map { index ->
+            val consumer = consumerFactory.createOwnershipConsumer(consumerGroup(OWNERSHIP))
+            ConsumerBatchWorker(
+                consumer = consumer,
+                eventHandler = handler,
+                workerName = worker(OWNERSHIP, index),
+                properties = kafkaProperties.daemon,
+                retryProperties = RetryProperties(attempts = Int.MAX_VALUE, delay = Duration.ofMillis(1000)),
                 meterRegistry = meterRegistry,
             )
         }

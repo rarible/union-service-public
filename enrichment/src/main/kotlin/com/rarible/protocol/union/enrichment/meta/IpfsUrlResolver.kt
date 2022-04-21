@@ -2,6 +2,7 @@ package com.rarible.protocol.union.enrichment.meta
 
 import com.rarible.protocol.union.enrichment.configuration.UnionMetaProperties
 import org.springframework.stereotype.Component
+import java.util.*
 import java.util.regex.Pattern
 
 @Component
@@ -9,9 +10,20 @@ class IpfsUrlResolver(
     ipfsProperties: UnionMetaProperties
 ) {
 
-    private val gateway = ipfsProperties.ipfsGateway.trimEnd('/')
+    private val innerGateway = ipfsProperties.ipfsGateway.split(",").map { it.trimEnd('/') }
+    private val publicGateway = ipfsProperties.ipfsPublicGateway.trimEnd('/')
+    private val legacyGateway = ipfsProperties.ipfsLegacyGateway?.trimEnd('/')
 
-    fun resolveRealUrl(uri: String): String {
+    fun resolveInnerUrl(uri: String): String {
+        val randomInnerGateway = innerGateway[Random().nextInt(innerGateway.size)]
+        return resolveRealUrl(uri, randomInnerGateway)
+    }
+
+    fun resolvePublicUrl(uri: String): String {
+        return resolveRealUrl(uri, publicGateway)
+    }
+
+    private fun resolveRealUrl(uri: String, gateway: String): String {
         val ipfsUri = if (uri.contains("/ipfs/")) {
             val ipfsHash = uri.substringAfterLast("/ipfs/")
             if (isCid(ipfsHash.substringBefore("/"))) {
@@ -22,6 +34,12 @@ class IpfsUrlResolver(
         } else {
             uri
         }
+
+        // Sometimes we have in mypinata urls not a CID-matched value, so here checking for legacy host
+        if (legacyGateway != null && ipfsUri.startsWith(legacyGateway)) {
+            return gateway + ipfsUri.substring(legacyGateway.length)
+        }
+
         return when {
             ipfsUri.startsWith("http") -> ipfsUri
             ipfsUri.startsWith("ipfs:///ipfs/") -> "$gateway/ipfs/${ipfsUri.removePrefix("ipfs:///ipfs/")}"

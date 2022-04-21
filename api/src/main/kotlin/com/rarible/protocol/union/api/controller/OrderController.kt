@@ -1,7 +1,6 @@
 package com.rarible.protocol.union.api.controller
 
-import com.rarible.core.logging.withMdc
-import com.rarible.protocol.union.api.service.OrderApiService
+import com.rarible.protocol.union.api.service.api.OrderApiService
 import com.rarible.protocol.union.api.util.BlockchainFilter
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
@@ -23,15 +22,13 @@ import com.rarible.protocol.union.dto.parser.IdParser
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 @ExperimentalCoroutinesApi
 @RestController
 class OrderController(
     private val orderApiService: OrderApiService,
-    private val router: BlockchainRouter<OrderService>
+    private val router: BlockchainRouter<OrderService>,
 ) : OrderControllerApi {
 
     private val logger = LoggerFactory.getLogger(javaClass)

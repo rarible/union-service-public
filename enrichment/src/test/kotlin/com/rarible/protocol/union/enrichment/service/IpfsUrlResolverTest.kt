@@ -1,18 +1,23 @@
 package com.rarible.protocol.union.enrichment.service
 
+import com.rarible.protocol.union.enrichment.configuration.UnionMetaProperties
 import com.rarible.protocol.union.enrichment.meta.IpfsUrlResolver
-import io.mockk.every
-import io.mockk.mockk
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 class IpfsUrlResolverTest {
-    private val ipfsGateway = "https://rarible.mypinata.cloud"
+
+    private val ipfsGateway = "https://ipfs.io"
+    private val ipfsLegacyGateway = "https://rarible.mypinata.com"
 
     private val service = IpfsUrlResolver(
-        mockk {
-            every { ipfsGateway } returns this@IpfsUrlResolverTest.ipfsGateway
-        }
+        UnionMetaProperties(
+            ipfsGateway = ipfsGateway,
+            ipfsPublicGateway = ipfsGateway,
+            ipfsLegacyGateway = ipfsLegacyGateway,
+            mediaFetchMaxSize = 10,
+            openSeaProxyUrl = ""
+        )
     )
 
     @Test
@@ -27,7 +32,7 @@ class IpfsUrlResolverTest {
     @Test
     fun testRealUrl() {
         val pairs = listOf(
-            "https://ipfs.io/ipfs/https://ipfs.io/ipfs/QmQzqPpcBFkc9AwV4B2tscLy9dBwN7o9yEHE9aRCHeN6KW" to "$ipfsGateway/ipfs/QmQzqPpcBFkc9AwV4B2tscLy9dBwN7o9yEHE9aRCHeN6KW",
+            "https://rarible.mypinata.com/ipfs/https://ipfs.io/ipfs/QmQzqPpcBFkc9AwV4B2tscLy9dBwN7o9yEHE9aRCHeN6KW" to "$ipfsGateway/ipfs/QmQzqPpcBFkc9AwV4B2tscLy9dBwN7o9yEHE9aRCHeN6KW",
             "QmbpJhWFiwzNu7MebvKG3hrYiyWmSiz5dTUYMQLXsjT9vw" to "$ipfsGateway/ipfs/QmbpJhWFiwzNu7MebvKG3hrYiyWmSiz5dTUYMQLXsjT9vw",
             "ipfs://ipfs/QmaMTrfaPkHrD3RsoN7VECBn8Wea6pBg175GCWFNbQRK6R/cusses/some URL with space.gif" to "$ipfsGateway/ipfs/QmaMTrfaPkHrD3RsoN7VECBn8Wea6pBg175GCWFNbQRK6R/cusses/some%20URL%20with%20space.gif",
             "ipfs:/Qmdrvn5GWSycxKZso83ntdCpqFPgno8vLZgBXi3iaPUVFj/859.json" to "$ipfsGateway/ipfs/Qmdrvn5GWSycxKZso83ntdCpqFPgno8vLZgBXi3iaPUVFj/859.json",
@@ -35,7 +40,12 @@ class IpfsUrlResolverTest {
             "http://api.guccinfts.xyz/ipfs/8" to "http://api.guccinfts.xyz/ipfs/8"
         )
         for ((input, output) in pairs) {
-            assertThat(service.resolveRealUrl(input)).isEqualTo(output)
+            assertThat(service.resolveInnerUrl(input)).isEqualTo(output)
         }
+    }
+
+    @Test
+    fun `replace legacy`() {
+        assertThat(service.resolveInnerUrl("$ipfsLegacyGateway/ipfs/abc")).isEqualTo("$ipfsGateway/ipfs/abc")
     }
 }

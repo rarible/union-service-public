@@ -154,7 +154,7 @@ fun randomEthItemMetaAttribute(): NftItemAttributeDto {
 fun randomEthItemMedia(): NftMediaDto {
     val type = "ORIGINAL"
     return NftMediaDto(
-        url = mapOf(Pair(type, randomString())),
+        url = mapOf(Pair(type, "http://localhost:8080/image/" + randomString())),
         meta = mapOf(Pair(type, randomEthItemMediaMeta("image/png")))
     )
 }
