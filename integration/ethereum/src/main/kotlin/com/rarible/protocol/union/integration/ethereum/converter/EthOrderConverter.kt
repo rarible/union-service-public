@@ -26,11 +26,11 @@ import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.OrderPriceHistoryRecordDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
+import com.rarible.protocol.union.dto.OrderSyncSortDto
 import com.rarible.protocol.union.dto.PendingOrderCancelDto
 import com.rarible.protocol.union.dto.PendingOrderDto
 import com.rarible.protocol.union.dto.PendingOrderMatchDto
 import com.rarible.protocol.union.dto.PlatformDto
-import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -95,6 +95,7 @@ class EthOrderConverter(
                     cancelled = order.cancelled,
                     createdAt = order.createdAt,
                     lastUpdatedAt = order.lastUpdateAt,
+                    dbUpdatedAt = order.dbUpdatedAt,
                     makePrice = makePrice,
                     takePrice = takePrice,
                     makePriceUsd = makePriceUsd,
@@ -124,6 +125,7 @@ class EthOrderConverter(
                     cancelled = order.cancelled,
                     createdAt = order.createdAt,
                     lastUpdatedAt = order.lastUpdateAt,
+                    dbUpdatedAt = order.dbUpdatedAt,
                     makePrice = makePrice,
                     takePrice = takePrice,
                     makePriceUsd = makePriceUsd,
@@ -151,6 +153,7 @@ class EthOrderConverter(
                     cancelled = order.cancelled,
                     createdAt = order.createdAt,
                     lastUpdatedAt = order.lastUpdateAt,
+                    dbUpdatedAt = order.dbUpdatedAt,
                     makePrice = makePrice,
                     takePrice = takePrice,
                     makePriceUsd = makePriceUsd,
@@ -194,6 +197,7 @@ class EthOrderConverter(
                     cancelled = order.cancelled,
                     createdAt = order.createdAt,
                     lastUpdatedAt = order.lastUpdateAt,
+                    dbUpdatedAt = order.dbUpdatedAt,
                     makePrice = makePrice,
                     takePrice = takePrice,
                     makePriceUsd = makePriceUsd,
@@ -253,6 +257,14 @@ class EthOrderConverter(
         return when (source) {
             OrderSortDto.LAST_UPDATE_ASC -> com.rarible.protocol.dto.OrderSortDto.LAST_UPDATE_ASC
             OrderSortDto.LAST_UPDATE_DESC -> com.rarible.protocol.dto.OrderSortDto.LAST_UPDATE_DESC
+            else -> null
+        }
+    }
+
+    fun convert(source: OrderSyncSortDto?): com.rarible.protocol.dto.OrderSyncSortDto? {
+        return when (source) {
+            OrderSyncSortDto.DB_UPDATE_ASC -> com.rarible.protocol.dto.OrderSyncSortDto.DB_UPDATE_ASC
+            OrderSyncSortDto.DB_UPDATE_DESC -> com.rarible.protocol.dto.OrderSyncSortDto.DB_UPDATE_DESC
             else -> null
         }
     }

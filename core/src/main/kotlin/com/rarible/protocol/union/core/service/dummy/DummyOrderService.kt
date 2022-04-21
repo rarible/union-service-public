@@ -8,6 +8,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
+import com.rarible.protocol.union.dto.OrderSyncSortDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
 
@@ -20,6 +21,14 @@ class DummyOrderService(
         size: Int,
         sort: OrderSortDto?,
         status: List<OrderStatusDto>?
+    ): Slice<OrderDto> {
+        return Slice.empty()
+    }
+
+    override suspend fun getAllSync(
+        continuation: String?,
+        size: Int,
+        sort: OrderSyncSortDto?
     ): Slice<OrderDto> {
         return Slice.empty()
     }
