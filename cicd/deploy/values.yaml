@@ -51,8 +51,8 @@ protocol-union-meta-loader:
     node.labels.rarible.service: true
   resources:
     jvm:
-      xmx_megabytes: 2048
-      max_direct_memory_megabytes: 512
+      xmx_megabytes: 1024
+      max_direct_memory_megabytes: 256
   networks:
     common:
       - '{{ include "service.appEnv" $ }}-backend'
