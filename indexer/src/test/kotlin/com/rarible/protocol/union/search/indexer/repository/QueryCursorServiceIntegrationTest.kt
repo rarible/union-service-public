@@ -32,9 +32,6 @@ internal class QueryCursorServiceIntegrationTest {
     protected lateinit var repository: EsActivityRepository
 
     @Autowired
-    private lateinit var esOperations: ReactiveElasticsearchOperations
-
-    @Autowired
     private lateinit var service: EsQueryCursorService
 
     @BeforeEach
@@ -61,14 +58,13 @@ internal class QueryCursorServiceIntegrationTest {
         // when
         service.applyCursor(boolQuery, EsActivitySort(latestFirst), cursor.toString())
         builder.withQuery(boolQuery)
-        val searchHits = esOperations.search(builder.build(), EsActivity::class.java).collectList().awaitFirst()
-            .map { it.content }
+        val actual = repository.search(builder.build())
 
         // then
         if (latestFirst) {
-            assertThat(searchHits).containsExactlyInAnyOrder(lte1)
+            assertThat(actual.activities).containsExactlyInAnyOrder(lte1)
         } else {
-            assertThat(searchHits).containsExactlyInAnyOrder(gte1)
+            assertThat(actual.activities).containsExactlyInAnyOrder(gte1)
         }
     }
 
@@ -106,14 +102,13 @@ internal class QueryCursorServiceIntegrationTest {
         // when
         service.applyCursor(boolQuery, EsActivitySort(latestFirst), cursor.toString())
         builder.withQuery(boolQuery)
-        val searchHits = esOperations.search(builder.build(), EsActivity::class.java).collectList().awaitFirst()
-            .map { it.content }
+        val actual = repository.search(builder.build())
 
         // then
         if (latestFirst) {
-            assertThat(searchHits).containsExactlyInAnyOrder(lte1, lte2)
+            assertThat(actual.activities).containsExactlyInAnyOrder(lte1, lte2)
         } else {
-            assertThat(searchHits).containsExactlyInAnyOrder(gte1, gte2)
+            assertThat(actual.activities).containsExactlyInAnyOrder(gte1, gte2)
         }
     }
 
@@ -155,14 +150,13 @@ internal class QueryCursorServiceIntegrationTest {
         // when
         service.applyCursor(boolQuery, EsActivitySort(latestFirst), cursor.toString())
         builder.withQuery(boolQuery)
-        val searchHits = esOperations.search(builder.build(), EsActivity::class.java).collectList().awaitFirst()
-            .map { it.content }
+        val actual = repository.search(builder.build())
 
         // then
         if (latestFirst) {
-            assertThat(searchHits).containsExactlyInAnyOrder(lte1, lte2)
+            assertThat(actual.activities).containsExactlyInAnyOrder(lte1, lte2)
         } else {
-            assertThat(searchHits).containsExactlyInAnyOrder(gte1, gte2)
+            assertThat(actual.activities).containsExactlyInAnyOrder(gte1, gte2)
         }
     }
 
@@ -208,14 +202,13 @@ internal class QueryCursorServiceIntegrationTest {
         // when
         service.applyCursor(boolQuery, EsActivitySort(latestFirst), cursor.toString())
         builder.withQuery(boolQuery)
-        val searchHits = esOperations.search(builder.build(), EsActivity::class.java).collectList().awaitFirst()
-            .map { it.content }
+        val actual = repository.search(builder.build())
 
         // then
         if (latestFirst) {
-            assertThat(searchHits).containsExactlyInAnyOrder(lte1, lte2)
+            assertThat(actual.activities).containsExactlyInAnyOrder(lte1, lte2)
         } else {
-            assertThat(searchHits).containsExactlyInAnyOrder(gte1, gte2)
+            assertThat(actual.activities).containsExactlyInAnyOrder(gte1, gte2)
         }
     }
 

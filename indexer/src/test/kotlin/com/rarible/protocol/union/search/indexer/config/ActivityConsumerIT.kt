@@ -16,6 +16,7 @@ import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.MintActivityDto
 import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.core.model.EsActivity
+import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
 import com.rarible.protocol.union.search.indexer.test.IntegrationTest
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.runBlocking
@@ -34,7 +35,7 @@ class ActivityConsumerIT {
     private lateinit var producer: RaribleKafkaProducer<ActivityDto>
 
     @Autowired
-    private lateinit var esOperations: ReactiveElasticsearchOperations
+    private lateinit var repository: EsActivityRepository
 
     @Test
     fun `should consume and save activity event`(): Unit = runBlocking {
@@ -73,8 +74,9 @@ class ActivityConsumerIT {
             val searchQuery = NativeSearchQueryBuilder()
                 .withQuery(matchQuery("activityId", activity.id.toString()))
                 .build()
-            val searchHits = esOperations.search(searchQuery, EsActivity::class.java).awaitFirstOrNull()
-            assertThat(searchHits?.content?.userTo).isEqualToIgnoringCase(activity.owner.value)
+            val actual = repository.search(searchQuery)
+            assertThat(actual.activities).isNotEmpty
+            assertThat(actual.activities.first().userTo).isEqualToIgnoringCase(activity.owner.value)
         }
     }
 }
