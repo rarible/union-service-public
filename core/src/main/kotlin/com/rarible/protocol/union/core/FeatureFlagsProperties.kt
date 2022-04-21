@@ -19,4 +19,6 @@ data class FeatureFlagsProperties(
     val enableCollectionQueriesToElastic: Boolean = false,
     // orders
     var enableOrderQueriesToElasticSearch: Boolean = false,
+    // ownerships
+    var enableOwnershipQueriesToElasticSearch: Boolean = false,
 )

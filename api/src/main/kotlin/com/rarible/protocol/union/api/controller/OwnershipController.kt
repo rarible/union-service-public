@@ -1,6 +1,6 @@
 package com.rarible.protocol.union.api.controller
 
-import com.rarible.protocol.union.api.service.OwnershipApiService
+import com.rarible.protocol.union.api.service.select.OwnershipSourceSelectService
 import com.rarible.protocol.union.dto.OwnershipDto
 import com.rarible.protocol.union.dto.OwnershipsDto
 import com.rarible.protocol.union.dto.continuation.page.PageSize
@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController
 @ExperimentalCoroutinesApi
 @RestController
 class OwnershipController(
-    private val ownershipApiService: OwnershipApiService
+    private val ownershipApiService: OwnershipSourceSelectService,
 ) : OwnershipControllerApi {
 
     private val logger = LoggerFactory.getLogger(javaClass)

@@ -1,6 +1,6 @@
-package com.rarible.protocol.union.api.service
+package com.rarible.protocol.union.api.service.api
 
-import com.rarible.protocol.union.api.service.api.OrderApiService
+import com.rarible.protocol.union.api.service.OwnershipQueryService
 import com.rarible.protocol.union.core.continuation.UnionAuctionOwnershipWrapperContinuation
 import com.rarible.protocol.union.core.continuation.UnionOwnershipContinuation
 import com.rarible.protocol.union.core.exception.UnionNotFoundException
@@ -34,19 +34,19 @@ import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
-@ExperimentalCoroutinesApi
+//@ExperimentalCoroutinesApi
 @Component
 class OwnershipApiService(
     private val orderApiService: OrderApiService,
     private val ownershipRouter: BlockchainRouter<OwnershipService>,
     private val auctionContractService: AuctionContractService,
     private val enrichmentOwnershipService: EnrichmentOwnershipService,
-    private val enrichmentAuctionService: EnrichmentAuctionService
-) {
+    private val enrichmentAuctionService: EnrichmentAuctionService,
+) : OwnershipQueryService {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    suspend fun getOwnershipById(fullOwnershipId: OwnershipIdDto): OwnershipDto {
+    override suspend fun getOwnershipById(fullOwnershipId: OwnershipIdDto): OwnershipDto {
         val shortOwnershipId = ShortOwnershipId(fullOwnershipId)
 
         return coroutineScope {
@@ -68,7 +68,11 @@ class OwnershipApiService(
         }
     }
 
-    suspend fun getOwnershipByOwner(owner: UnionAddress, continuation: String?, size: Int): Slice<UnionOwnership> {
+    override suspend fun getOwnershipByOwner(
+        owner: UnionAddress,
+        continuation: String?,
+        size: Int,
+    ): Slice<UnionOwnership> {
         val lastPageEnd = DateIdContinuation.parse(continuation)
         val ownerships = ownershipRouter.executeForAll(owner.blockchainGroup.subchains()) {
             it.getOwnershipsByOwner(owner.value, continuation, size)
@@ -110,7 +114,7 @@ class OwnershipApiService(
         return page
     }
 
-    suspend fun getOwnershipsByItem(itemId: ItemIdDto, continuation: String?, size: Int): OwnershipsDto {
+    override suspend fun getOwnershipsByItem(itemId: ItemIdDto, continuation: String?, size: Int): OwnershipsDto {
         val shortItemId = ShortItemId(itemId)
         val lastPageEnd = DateIdContinuation.parse(continuation)
 

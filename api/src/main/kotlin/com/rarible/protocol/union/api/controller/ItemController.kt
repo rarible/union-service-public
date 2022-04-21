@@ -1,7 +1,6 @@
 package com.rarible.protocol.union.api.controller
 
-import com.rarible.protocol.union.api.service.ItemApiService
-import com.rarible.protocol.union.api.service.OwnershipApiService
+import com.rarible.protocol.union.api.service.api.OwnershipApiService
 import com.rarible.protocol.union.api.service.select.ItemSourceSelectService
 import com.rarible.protocol.union.api.util.BlockchainFilter
 import com.rarible.protocol.union.core.continuation.UnionItemContinuation
