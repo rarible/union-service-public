@@ -69,7 +69,6 @@ class SolanaOrderConverter(
             createdAt = order.createdAt,
             lastUpdatedAt = order.updatedAt,
 
-            priceHistory = null,
             salt = "",
             signature = null,
             pending = emptyList(),

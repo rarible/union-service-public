@@ -75,7 +75,6 @@ class FlowOrderConverter(
             takePrice = takePrice,
             makePriceUsd = makePriceUsd,
             takePriceUsd = takePriceUsd,
-            priceHistory = emptyList(),
             data = convert(order.data, blockchain),
             salt = ""// Not supported on Flow
         )

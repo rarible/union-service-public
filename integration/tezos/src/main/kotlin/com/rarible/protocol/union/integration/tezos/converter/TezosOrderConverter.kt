@@ -10,7 +10,6 @@ import com.rarible.protocol.union.core.util.evalTakePrice
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
-import com.rarible.protocol.union.dto.OrderPriceHistoryRecordDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PayoutDto
@@ -76,8 +75,6 @@ class TezosOrderConverter(
             makePriceUsd = makePriceUsd,
             takePriceUsd = takePriceUsd,
             signature = order.signature,
-            // TODO UNION Remove in 1.19
-            priceHistory = order.priceHistory?.map { convert(it) } ?: listOf(),
             data = convertData(order, blockchain),
             salt = order.salt.toString(),
             pending = emptyList() // In Union we won't use this field for Tezos
@@ -123,15 +120,6 @@ class TezosOrderConverter(
             else -> null
         }
     }
-
-    private fun convert(source: com.rarible.protocol.tezos.dto.OrderPriceHistoryRecordDto): OrderPriceHistoryRecordDto {
-        return OrderPriceHistoryRecordDto(
-            date = source.date,
-            makeValue = source.makeValue,
-            takeValue = source.takeValue
-        )
-    }
-
 
     private fun convertData(
         source: com.rarible.protocol.tezos.dto.OrderDto,
