@@ -21,11 +21,11 @@ import org.springframework.stereotype.Component
 
 @Component
 @CaptureSpan(type = SpanType.DB)
-class DefaultCollectionRepository(
+class CollectionRepositoryImpl(
     private val template: ReactiveMongoTemplate
 ) : CollectionRepository {
 
-    private val logger = LoggerFactory.getLogger(DefaultItemRepository::class.java)
+    private val logger = LoggerFactory.getLogger(ItemRepositoryImpl::class.java)
 
     private val collection: String = template.getCollectionName(ShortCollection::class.java)
 

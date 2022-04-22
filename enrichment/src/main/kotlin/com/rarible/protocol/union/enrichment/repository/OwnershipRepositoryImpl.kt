@@ -1,21 +1,16 @@
-package com.rarible.protocol.union.enrichment.repository.legacy
+package com.rarible.protocol.union.enrichment.repository
 
 import com.mongodb.client.result.DeleteResult
 import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.apm.SpanType
 import com.rarible.core.mongo.util.div
-import com.rarible.protocol.union.core.util.CompositeItemIdParser
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.enrichment.model.ItemSellStats
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortOrder
 import com.rarible.protocol.union.enrichment.model.ShortOwnership
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
-import com.rarible.protocol.union.enrichment.model.legacy.LegacyShortOwnership
-import com.rarible.protocol.union.enrichment.model.legacy.LegacyShortOwnershipId
-import com.rarible.protocol.union.enrichment.repository.OwnershipRepository
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrElse
@@ -39,14 +34,13 @@ import java.time.Instant
 
 @Component
 @CaptureSpan(type = SpanType.DB)
-@Deprecated("Should be replaced by implementation without token/tokenId")
-class LegacyOwnershipRepository(
+class OwnershipRepositoryImpl(
     private val template: ReactiveMongoTemplate
 ) : OwnershipRepository {
 
-    private val logger = LoggerFactory.getLogger(LegacyOwnershipRepository::class.java)
+    private val logger = LoggerFactory.getLogger(OwnershipRepositoryImpl::class.java)
 
-    val collection: String = template.getCollectionName(LegacyShortOwnership::class.java)
+    val collection: String = template.getCollectionName(ShortOwnership::class.java)
 
     override suspend fun createIndices() = runBlocking {
         Indices.ALL.forEach { index ->
@@ -56,49 +50,18 @@ class LegacyOwnershipRepository(
     }
 
     override suspend fun save(ownership: ShortOwnership): ShortOwnership {
-        return template.save(LegacyShortOwnership(ownership)).awaitFirst().toShortOwnership()
+        return template.save(ownership).awaitFirst()
     }
 
     override suspend fun get(id: ShortOwnershipId): ShortOwnership? {
-        val legacyId = LegacyShortOwnershipId(id)
-        return template.findById<LegacyShortOwnership>(legacyId)
-            .awaitFirstOrNull()
-            ?.toShortOwnership()
+        return template.findById<ShortOwnership>(id).awaitFirstOrNull()
     }
 
     override suspend fun getAll(ids: List<ShortOwnershipId>): List<ShortOwnership> {
-        val legacyIds = ids.map { LegacyShortOwnershipId(it) }
         return template.find(
-            Query(LegacyShortOwnership::id inValues legacyIds),
-            LegacyShortOwnership::class.java
-        ).collectList()
-            .awaitFirst()
-            .map { it.toShortOwnership() }
-    }
-
-    fun findAll(fromShortOwnershipId: ShortOwnershipId?): Flow<ShortOwnership> {
-        val legacyFromId = fromShortOwnershipId?.let { LegacyShortOwnershipId(it) }
-        val criteria = legacyFromId?.let { Criteria.where("_id").gt(it) } ?: Criteria()
-
-        val query = Query(criteria)
-            .with(Sort.by("_id"))
-
-        return template.find(query, LegacyShortOwnership::class.java)
-            .asFlow()
-            .map { it.toShortOwnership() }
-    }
-
-    override fun findWithMultiCurrency(lastUpdateAt: Instant): Flow<ShortOwnership> {
-        val query = Query(
-            Criteria().andOperator(
-                LegacyShortOwnership::multiCurrency isEqualTo true,
-                LegacyShortOwnership::lastUpdatedAt lte lastUpdateAt
-            )
-        ).withHint(Indices.MULTI_CURRENCY_OWNERSHIP.indexKeys)
-
-        return template.find(query, LegacyShortOwnership::class.java)
-            .asFlow()
-            .map { it.toShortOwnership() }
+            Query(ShortOwnership::id inValues ids),
+            ShortOwnership::class.java
+        ).collectList().awaitFirst()
     }
 
     override fun findByPlatformWithSell(
@@ -106,34 +69,42 @@ class LegacyOwnershipRepository(
     ): Flow<ShortOwnership> {
         val criteria = Criteria().andOperator(
             listOfNotNull(
-                LegacyShortOwnership::bestSellOrder / ShortOrder::platform isEqualTo platform.name,
+                ShortOwnership::bestSellOrder / ShortOrder::platform isEqualTo platform.name,
                 fromShortOwnershipId?.let { Criteria.where("_id").gt(it) }
             )
         )
         val query = Query(criteria)
-            .with(Sort.by("${LegacyShortOwnership::bestSellOrder.name}.${ShortOrder::platform.name}", "_id"))
+            .with(Sort.by("${ShortOwnership::bestSellOrder.name}.${ShortOrder::platform.name}", "_id"))
 
         limit?.let { query.limit(it) }
 
-        return template.find(query, LegacyShortOwnership::class.java).asFlow().map { it.toShortOwnership() }
+        return template.find(query, ShortOwnership::class.java).asFlow()
+    }
+
+    override fun findWithMultiCurrency(lastUpdateAt: Instant): Flow<ShortOwnership> {
+        val query = Query(
+            Criteria().andOperator(
+                ShortOwnership::multiCurrency isEqualTo true,
+                ShortOwnership::lastUpdatedAt lte lastUpdateAt
+            )
+        ).withHint(Indices.MULTI_CURRENCY_OWNERSHIP.indexKeys)
+
+        return template.find(query, ShortOwnership::class.java).asFlow()
     }
 
     override suspend fun delete(ownershipId: ShortOwnershipId): DeleteResult? {
-        val legacyId = LegacyShortOwnershipId(ownershipId)
-        val criteria = Criteria("_id").isEqualTo(legacyId)
+        val criteria = Criteria("_id").isEqualTo(ownershipId)
         return template.remove(Query(criteria), collection).awaitFirstOrNull()
     }
 
     override suspend fun getItemSellStats(itemId: ShortItemId): ItemSellStats {
-        val (token, tokenId) = CompositeItemIdParser.split(itemId.itemId)
-        val bestSellOrderField = LegacyShortOwnership::bestSellOrder.name
+        val bestSellOrderField = ShortOwnership::bestSellOrder.name
         val makeStockField = ShortOrder::makeStock.name
         val query = Query(
             Criteria().andOperator(
-                LegacyShortOwnership::blockchain isEqualTo itemId.blockchain,
-                LegacyShortOwnership::token isEqualTo token,
-                LegacyShortOwnership::tokenId isEqualTo tokenId,
-                LegacyShortOwnership::bestSellOrder exists true
+                ShortOwnership::blockchain isEqualTo itemId.blockchain,
+                ShortOwnership::itemId isEqualTo itemId.itemId,
+                ShortOwnership::bestSellOrder exists true
             )
         )
 
@@ -151,25 +122,24 @@ class LegacyOwnershipRepository(
 
     object Indices {
 
-        private val OWNERSHIP_CONTRACT_TOKEN_ID: Index = Index()
-            .on(LegacyShortOwnership::blockchain.name, Sort.Direction.ASC)
-            .on(LegacyShortOwnership::token.name, Sort.Direction.ASC)
-            .on(LegacyShortOwnership::tokenId.name, Sort.Direction.ASC)
+        private val BLOCKCHAIN_ITEM_ID: Index = Index()
+            .on(ShortOwnership::blockchain.name, Sort.Direction.ASC)
+            .on(ShortOwnership::itemId.name, Sort.Direction.ASC)
             .background()
 
         val MULTI_CURRENCY_OWNERSHIP: Index = Index()
-            .on(LegacyShortOwnership::multiCurrency.name, Sort.Direction.DESC)
-            .on(LegacyShortOwnership::lastUpdatedAt.name, Sort.Direction.DESC)
+            .on(ShortOwnership::multiCurrency.name, Sort.Direction.DESC)
+            .on(ShortOwnership::lastUpdatedAt.name, Sort.Direction.DESC)
             .background()
 
         val BY_BEST_SELL_PLATFORM_DEFINITION = Index()
-            .on("${LegacyShortOwnership::bestSellOrder.name}.${ShortOrder::platform.name}", Sort.Direction.ASC)
+            .on("${ShortOwnership::bestSellOrder.name}.${ShortOrder::platform.name}", Sort.Direction.ASC)
             .on("_id", Sort.Direction.ASC)
             .background()
 
         val ALL = listOf(
             BY_BEST_SELL_PLATFORM_DEFINITION,
-            OWNERSHIP_CONTRACT_TOKEN_ID,
+            BLOCKCHAIN_ITEM_ID,
             MULTI_CURRENCY_OWNERSHIP
         )
     }

@@ -1,7 +1,6 @@
 package com.rarible.protocol.union.core.event
 
 import com.rarible.core.kafka.KafkaMessage
-import com.rarible.protocol.union.core.model.ReconciliationMarkAbstractEvent
 import com.rarible.protocol.union.core.model.ReconciliationMarkEvent
 import com.rarible.protocol.union.core.model.ReconciliationMarkType
 import com.rarible.protocol.union.core.model.UnionAuctionEvent
@@ -28,7 +27,7 @@ import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.UnionEventTopicProvider
 import com.rarible.protocol.union.dto.ext
-import java.util.*
+import java.util.UUID
 
 object KafkaEventFactory {
 
@@ -169,7 +168,7 @@ object KafkaEventFactory {
         )
     }
 
-    fun reconciliationItemMarkEvent(itemId: ItemIdDto): KafkaMessage<ReconciliationMarkAbstractEvent> {
+    fun reconciliationItemMarkEvent(itemId: ItemIdDto): KafkaMessage<ReconciliationMarkEvent> {
         return KafkaMessage(
             id = UUID.randomUUID().toString(),
             key = itemId.fullId(),
@@ -177,7 +176,7 @@ object KafkaEventFactory {
         )
     }
 
-    fun reconciliationOwnershipMarkEvent(ownershipId: OwnershipIdDto): KafkaMessage<ReconciliationMarkAbstractEvent> {
+    fun reconciliationOwnershipMarkEvent(ownershipId: OwnershipIdDto): KafkaMessage<ReconciliationMarkEvent> {
         return KafkaMessage(
             id = UUID.randomUUID().toString(),
             key = ownershipId.fullId(),
@@ -185,7 +184,7 @@ object KafkaEventFactory {
         )
     }
 
-    fun reconciliationCollectionMarkEvent(collectionId: CollectionIdDto): KafkaMessage<ReconciliationMarkAbstractEvent> {
+    fun reconciliationCollectionMarkEvent(collectionId: CollectionIdDto): KafkaMessage<ReconciliationMarkEvent> {
         return KafkaMessage(
             id = UUID.randomUUID().toString(),
             key = collectionId.fullId(),
