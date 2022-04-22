@@ -28,5 +28,5 @@ import org.springframework.test.context.ActiveProfiles
 )
 @ActiveProfiles("test")
 @Import(value = [TestApiConfiguration::class])
-@ComponentScan(basePackages = ["com.rarible.protocol.union.api", "com.rarible.protocol.union.search.core"])
+@ComponentScan(basePackages = ["com.rarible.protocol.union.api"])
 annotation class IntegrationTest
