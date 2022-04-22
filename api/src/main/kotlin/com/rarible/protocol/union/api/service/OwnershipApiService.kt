@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.api.service
 
+import com.rarible.protocol.union.api.service.api.OrderApiService
 import com.rarible.protocol.union.core.continuation.UnionAuctionOwnershipWrapperContinuation
 import com.rarible.protocol.union.core.continuation.UnionOwnershipContinuation
 import com.rarible.protocol.union.core.exception.UnionNotFoundException

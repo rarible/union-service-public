@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration
 import org.springframework.test.context.ContextConfiguration
+import randomInstant
 import java.time.Instant
 import kotlin.random.Random.Default.nextLong
 
@@ -26,7 +27,7 @@ internal class ActivityEsRepositoryFt {
     @Test
     fun `should save and read`(): Unit = runBlocking {
         val activity = EsActivity(
-            "1234", Instant.now(), 1, 0, salt = nextLong(), BlockchainDto.ETHEREUM, ActivityTypeDto.BURN,
+            "1234", randomInstant(), 1, 0, salt = nextLong(), BlockchainDto.ETHEREUM, ActivityTypeDto.BURN,
             "0x01",
             null,
             "0x02",

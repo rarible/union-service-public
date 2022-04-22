@@ -4,6 +4,7 @@ import com.rarible.protocol.dto.FlowCreatorDto
 import com.rarible.protocol.dto.FlowNftItemDto
 import com.rarible.protocol.dto.FlowNftItemsDto
 import com.rarible.protocol.dto.FlowRoyaltyDto
+import com.rarible.protocol.dto.PayInfoDto
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.UnionMeta
@@ -46,10 +47,7 @@ object FlowItemConverter {
             supply = item.supply,
             meta = item.meta?.let { convert(it) },
             deleted = item.deleted,
-            // TODO TEZOS Remove when Flow implement getItemRoyalties
             creators = item.creators.map { convert(it, blockchain) },
-            owners = emptyList(),
-            royalties = item.royalties.map { convert(it, blockchain) },
             lazySupply = BigInteger.ZERO
         )
     }
@@ -72,8 +70,8 @@ object FlowItemConverter {
         )
     }
 
-    private fun convert(
-        source: FlowRoyaltyDto,
+    fun toRoyalty(
+        source: PayInfoDto,
         blockchain: BlockchainDto
     ): RoyaltyDto {
         return RoyaltyDto(

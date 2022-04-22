@@ -1,5 +1,6 @@
-package com.rarible.protocol.union.api.service
+package com.rarible.protocol.union.api.service.api
 
+import com.rarible.protocol.union.api.service.OrderQueryService
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -23,11 +24,11 @@ import org.springframework.stereotype.Component
 @Component
 class OrderApiService(
     private val router: BlockchainRouter<OrderService>
-) {
+): OrderQueryService {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    suspend fun getByIds(ids: List<OrderIdDto>): List<OrderDto> {
+    override suspend fun getByIds(ids: List<OrderIdDto>): List<OrderDto> {
         logger.info("Getting orders by IDs: [{}]", ids.map { "${it.blockchain}:${it.value}" })
         val groupedIds = ids.groupBy({ it.blockchain }, { it.value })
 
@@ -36,7 +37,7 @@ class OrderApiService(
         }
     }
 
-    suspend fun getSellOrdersByItem(
+    override suspend fun getSellOrdersByItem(
         blockchain: BlockchainDto,
         itemId: String,
         platform: PlatformDto?,
@@ -69,7 +70,7 @@ class OrderApiService(
         ).getSlice(size)
     }
 
-    suspend fun getOrdersAll(
+    override suspend fun getOrdersAll(
         blockchains: List<BlockchainDto>?,
         continuation: String?,
         size: Int,
@@ -84,7 +85,7 @@ class OrderApiService(
         return ArgPaging(continuationFactory(sort), slices).getSlice(size)
     }
 
-    suspend fun getOrderBidsByItem(
+    override suspend fun getOrderBidsByItem(
         blockchain: BlockchainDto,
         itemId: String,
         platform: PlatformDto?,

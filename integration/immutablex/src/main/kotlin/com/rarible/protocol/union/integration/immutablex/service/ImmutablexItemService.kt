@@ -51,7 +51,7 @@ class ImmutablexItemService(
 
     override suspend fun getItemRoyaltiesById(itemId: String): List<RoyaltyDto> {
         val asset = client.getAsset(itemId)
-        return ImmutablexItemConverter.convert(asset, blockchain).royalties
+        return ImmutablexItemConverter.convertToRoyaltyDto(asset, blockchain)
     }
 
     override suspend fun getItemMetaById(itemId: String): UnionMeta {

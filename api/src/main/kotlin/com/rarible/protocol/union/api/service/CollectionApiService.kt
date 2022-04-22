@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.api.service
 
 import com.rarible.core.common.nowMillis
+import com.rarible.protocol.union.api.service.api.OrderApiService
 import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.core.service.CollectionService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter

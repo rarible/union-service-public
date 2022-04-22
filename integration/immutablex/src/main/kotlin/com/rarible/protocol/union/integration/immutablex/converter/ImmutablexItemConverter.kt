@@ -36,13 +36,6 @@ object ImmutablexItemConverter {
             id = ItemIdDto(BlockchainDto.IMMUTABLEX, contract = asset.tokenAddress, tokenId = asset.tokenId),
             collection = CollectionIdDto(blockchain, asset.tokenAddress),
             creators = emptyList(), //filling outside of converter
-            owners = listOf(UnionAddress(blockchain.group(), asset.user)),
-            royalties = asset.fees.map {
-                RoyaltyDto(
-                    account = UnionAddressConverter.convert(ContractAddressConverter.convert(blockchain, it.address)),
-                    value = it.percentage.multiply(BigDecimal(100)).toInt()
-                )
-            },
             lazySupply = BigInteger.ZERO,
             deleted = deleted,
             supply = if (deleted) BigInteger.ZERO else BigInteger.ONE,
@@ -50,4 +43,12 @@ object ImmutablexItemConverter {
             lastUpdatedAt = asset.updatedAt ?: nowMillis()
         )
     }
+
+    fun convertToRoyaltyDto(asset: ImmutablexAsset, blockchain: BlockchainDto): List<RoyaltyDto> =
+        asset.fees.map {
+            RoyaltyDto(
+                account = UnionAddressConverter.convert(ContractAddressConverter.convert(blockchain, it.address)),
+                value = it.percentage.multiply(BigDecimal(100)).toInt()
+            )
+        }
 }
