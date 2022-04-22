@@ -10,6 +10,7 @@ import com.rarible.protocol.union.dto.continuation.page.Page
 import com.rarible.protocol.union.integration.ethereum.converter.EthCollectionConverter
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
+import kotlinx.coroutines.reactor.awaitSingle
 
 open class EthCollectionService(
     blockchain: BlockchainDto,
@@ -37,7 +38,8 @@ open class EthCollectionService(
     }
 
     override suspend fun getCollectionsByIds(ids: List<String>): Page<UnionCollection> {
-        TODO("Not yet implemented")
+        val collections = collectionControllerApi.searchNftCollectionsByIds(ids).awaitSingle()
+        return EthCollectionConverter.convert(collections, blockchain)
     }
 
     override suspend fun getCollectionsByOwner(
