@@ -3,7 +3,7 @@ package com.rarible.protocol.union.core
 import com.rarible.core.application.ApplicationEnvironmentInfo
 import com.rarible.core.kafka.RaribleKafkaProducer
 import com.rarible.protocol.union.core.event.UnionInternalTopicProvider
-import com.rarible.protocol.union.core.model.ReconciliationMarkAbstractEvent
+import com.rarible.protocol.union.core.model.ReconciliationMarkEvent
 import com.rarible.protocol.union.core.model.UnionInternalBlockchainEvent
 import com.rarible.protocol.union.core.producer.UnionInternalBlockchainEventProducer
 import com.rarible.protocol.union.dto.ActivityDto
@@ -74,9 +74,9 @@ class ProducerConfiguration(
     }
 
     @Bean
-    fun reconciliationMarkEventProducer(): RaribleKafkaProducer<ReconciliationMarkAbstractEvent> {
+    fun reconciliationMarkEventProducer(): RaribleKafkaProducer<ReconciliationMarkEvent> {
         val topic = UnionInternalTopicProvider.getReconciliationMarkTopic(env)
-        return createUnionProducer("reconciliation", topic, ReconciliationMarkAbstractEvent::class.java)
+        return createUnionProducer("reconciliation", topic, ReconciliationMarkEvent::class.java)
     }
 
     private fun <T> createUnionProducer(clientSuffix: String, topic: String, type: Class<T>): RaribleKafkaProducer<T> {

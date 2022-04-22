@@ -13,7 +13,7 @@ import com.rarible.protocol.union.core.model.CompositeRegisteredTimer
 import com.rarible.protocol.union.core.model.ItemEventDelayMetric
 import com.rarible.protocol.union.core.model.OrderEventDelayMetric
 import com.rarible.protocol.union.core.model.OwnershipEventDelayMetric
-import com.rarible.protocol.union.core.model.ReconciliationMarkAbstractEvent
+import com.rarible.protocol.union.core.model.ReconciliationMarkEvent
 import com.rarible.protocol.union.core.model.UnionInternalBlockchainEvent
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.configuration.EnrichmentConsumerConfiguration
@@ -109,11 +109,11 @@ class UnionListenerConfiguration(
 
     private fun createUnionReconciliationMarkEventConsumer(
         index: Int
-    ): RaribleKafkaConsumer<ReconciliationMarkAbstractEvent> {
+    ): RaribleKafkaConsumer<ReconciliationMarkEvent> {
         return RaribleKafkaConsumer(
             clientId = "$clientIdPrefix.union-reconciliation-mark-consumer-$index",
             valueDeserializerClass = UnionKafkaJsonDeserializer::class.java,
-            valueClass = ReconciliationMarkAbstractEvent::class.java,
+            valueClass = ReconciliationMarkEvent::class.java,
             consumerGroup = consumerGroup("reconciliation"),
             defaultTopic = UnionInternalTopicProvider.getReconciliationMarkTopic(env),
             bootstrapServers = properties.brokerReplicaSet,
@@ -123,8 +123,8 @@ class UnionListenerConfiguration(
 
     @Bean
     fun unionReconciliationMarkEventWorker(
-        handler: InternalEventHandler<ReconciliationMarkAbstractEvent>
-    ): KafkaConsumerWorker<ReconciliationMarkAbstractEvent> {
+        handler: InternalEventHandler<ReconciliationMarkEvent>
+    ): KafkaConsumerWorker<ReconciliationMarkEvent> {
         return consumerFactory.createReconciliationMarkEventConsumer(
             consumer = { index -> createUnionReconciliationMarkEventConsumer(index) },
             handler = handler,
