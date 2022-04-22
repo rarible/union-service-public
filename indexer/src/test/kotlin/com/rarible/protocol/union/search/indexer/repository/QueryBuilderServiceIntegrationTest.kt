@@ -27,9 +27,6 @@ internal class QueryBuilderServiceIntegrationTest {
     @Autowired
     protected lateinit var repository: EsActivityRepository
 
-    @Autowired
-    private lateinit var esOperations: ReactiveElasticsearchOperations
-    
     private val sort = EsActivitySort(latestFirst = true)
 
     @BeforeEach

@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.search.indexer.repository
 
+import com.rarible.protocol.union.core.model.ElasticActivityQueryGenericFilter
 import com.rarible.protocol.union.core.model.EsActivity
 import com.rarible.protocol.union.core.model.EsActivitySort
 import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
@@ -28,9 +29,6 @@ internal class QuerySortServiceIntegrationTest {
     protected lateinit var repository: EsActivityRepository
 
     @Autowired
-    private lateinit var esOperations: ReactiveElasticsearchOperations
-
-    @Autowired
     private lateinit var service: EsQuerySortService
 
     @BeforeEach
@@ -55,11 +53,10 @@ internal class QuerySortServiceIntegrationTest {
 
         // when
         service.applySort(builder, EsActivitySort(latestFirst = false))
-        val searchHits = esOperations.search(builder.build(), EsActivity::class.java).collectList().awaitFirst()
-            .map { it.content }
+        val actual = repository.search(builder.build())
 
         // then
-        assertThat(searchHits).containsExactly(first, second, third, fourth, fifth, sixth, seventh, eighth)
+        assertThat(actual.activities).containsExactly(first, second, third, fourth, fifth, sixth, seventh, eighth)
     }
 
     @Test
@@ -79,11 +76,10 @@ internal class QuerySortServiceIntegrationTest {
 
         // when
         service.applySort(builder, EsActivitySort(latestFirst = true))
-        val searchHits = esOperations.search(builder.build(), EsActivity::class.java).collectList().awaitFirst()
-            .map { it.content }
+        val actual = repository.search(builder.build())
 
         // then
-        assertThat(searchHits).containsExactly(eighth, seventh, sixth, fifth, fourth, third, second, first)
+        assertThat(actual.activities).containsExactly(eighth, seventh, sixth, fifth, fourth, third, second, first)
     }
 
     private fun activityWithSortFields(dateMillis: Long, blockNumber: Long, logIndex: Int, salt: Long): EsActivity {

@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration
 import org.springframework.test.context.ContextConfiguration
 import randomInstant
-import java.time.Instant
 import kotlin.random.Random.Default.nextLong
 
 @IntegrationTest
