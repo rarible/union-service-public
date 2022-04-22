@@ -15,6 +15,7 @@ data class FeatureFlagsProperties(
     var enableActivityQueriesToElasticSearch: Boolean = false,
     var enableActivityQueriesPerTypeFilter: Boolean = false,
     var enableImmutableXActivitiesQueries: Boolean = false,
+    val enableCollectionQueriesToElastic: Boolean = false,
     // orders
     var enableOrderQueriesToElasticSearch: Boolean = false,
 )

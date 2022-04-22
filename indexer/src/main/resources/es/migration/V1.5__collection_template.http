@@ -23,6 +23,9 @@ PUT _index_template/collection_template
         "type": {
            "type": "keyword"
         },
+        "blockchain": {
+           "type": "keyword"
+        },
         "name": {
            "type": "keyword"
         },

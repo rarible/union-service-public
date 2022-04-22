@@ -33,4 +33,8 @@ class ImmutablexCollectionService(
     override suspend fun refreshCollectionMeta(collectionId: String) {
         return
     }
+
+    override suspend fun getCollectionsByIds(ids: List<String>): Page<UnionCollection> {
+        TODO("Not yet implemented")
+    }
 }

@@ -35,4 +35,8 @@ open class SolanaCollectionService(
         collectionApi.refreshCollectionMeta(collectionId).awaitFirstOrNull()
     }
 
+    override suspend fun getCollectionsByIds(ids: List<String>): Page<UnionCollection> {
+        TODO("Not yet implemented")
+    }
+
 }

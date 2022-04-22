@@ -36,6 +36,10 @@ open class EthCollectionService(
         collectionControllerApi.resetNftCollectionMetaById(collectionId).awaitFirstOrNull()
     }
 
+    override suspend fun getCollectionsByIds(ids: List<String>): Page<UnionCollection> {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun getCollectionsByOwner(
         owner: String,
         continuation: String?,

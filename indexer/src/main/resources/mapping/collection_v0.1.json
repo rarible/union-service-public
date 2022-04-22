@@ -10,6 +10,7 @@
       },
       "collectionId": "keyword",
       "type": "keyword",
+      "blockchain": "keyword",
       "name": "keyword",
       "symbol": "keyword",
       "owner": "keyword",
