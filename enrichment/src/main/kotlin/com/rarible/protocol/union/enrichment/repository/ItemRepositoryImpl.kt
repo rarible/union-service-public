@@ -30,11 +30,11 @@ import java.time.Instant
 
 @Component
 @CaptureSpan(type = SpanType.DB)
-class DefaultItemRepository(
+class ItemRepositoryImpl(
     private val template: ReactiveMongoTemplate
 ) : ItemRepository {
 
-    private val logger = LoggerFactory.getLogger(DefaultItemRepository::class.java)
+    private val logger = LoggerFactory.getLogger(ItemRepositoryImpl::class.java)
 
     val collection: String = template.getCollectionName(ShortItem::class.java)
 

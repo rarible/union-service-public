@@ -34,11 +34,11 @@ import java.time.Instant
 
 @Component
 @CaptureSpan(type = SpanType.DB)
-class DefaultOwnershipRepository(
+class OwnershipRepositoryImpl(
     private val template: ReactiveMongoTemplate
 ) : OwnershipRepository {
 
-    private val logger = LoggerFactory.getLogger(DefaultOwnershipRepository::class.java)
+    private val logger = LoggerFactory.getLogger(OwnershipRepositoryImpl::class.java)
 
     val collection: String = template.getCollectionName(ShortOwnership::class.java)
 

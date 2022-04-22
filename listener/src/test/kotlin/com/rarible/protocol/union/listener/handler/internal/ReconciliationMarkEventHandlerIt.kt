@@ -23,18 +23,28 @@ class ReconciliationMarkEventHandlerIt : AbstractIntegrationTest() {
     lateinit var reconciliationMarkRepository: ReconciliationMarkRepository
 
     @Test
-    fun `happy path`() = runBlocking<Unit> {
+    fun `marks are not duplicated`() = runBlocking<Unit> {
         val itemId = randomEthItemId()
         val ownershipId = randomEthOwnershipId()
         assertThat(findAllMarks(ReconciliationMarkType.ITEM)).hasSize(0)
         assertThat(findAllMarks(ReconciliationMarkType.OWNERSHIP)).hasSize(0)
 
         // Checking both legacy and actual formats works
-        val itemEvent = ReconciliationMarkEvent(itemId.fullId(), ReconciliationMarkType.ITEM)
-        val ownershipEvent = ReconciliationMarkEvent(ownershipId.fullId(), ReconciliationMarkType.OWNERSHIP)
-        reconciliationMarkEventHandler.handle(itemEvent)
-        reconciliationMarkEventHandler.handle(ownershipEvent)
+        val itemEvent1 = ReconciliationMarkEvent(itemId.fullId(), ReconciliationMarkType.ITEM)
+        val ownershipEvent1 = ReconciliationMarkEvent(ownershipId.fullId(), ReconciliationMarkType.OWNERSHIP)
+        reconciliationMarkEventHandler.handle(itemEvent1)
+        reconciliationMarkEventHandler.handle(ownershipEvent1)
 
+        assertThat(findAllMarks(ReconciliationMarkType.ITEM)).hasSize(1)
+        assertThat(findAllMarks(ReconciliationMarkType.OWNERSHIP)).hasSize(1)
+
+        // Send same marks again
+        val itemEvent2 = ReconciliationMarkEvent(itemId.fullId(), ReconciliationMarkType.ITEM)
+        val ownershipEvent2 = ReconciliationMarkEvent(ownershipId.fullId(), ReconciliationMarkType.OWNERSHIP)
+        reconciliationMarkEventHandler.handle(itemEvent2)
+        reconciliationMarkEventHandler.handle(ownershipEvent2)
+
+        // Checking there is no duplicates
         assertThat(findAllMarks(ReconciliationMarkType.ITEM)).hasSize(1)
         assertThat(findAllMarks(ReconciliationMarkType.OWNERSHIP)).hasSize(1)
     }
