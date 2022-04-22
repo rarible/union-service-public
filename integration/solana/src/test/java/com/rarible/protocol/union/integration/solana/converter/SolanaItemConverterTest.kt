@@ -36,8 +36,6 @@ class SolanaItemConverterTest {
                         value = it.share
                     )
                 },
-                owners = emptyList(),
-                royalties = emptyList(),
                 lazySupply = BigInteger.ZERO,
                 pending = emptyList(),
                 mintedAt = tokenDto.createdAt,

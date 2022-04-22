@@ -39,9 +39,9 @@ open class FlowItemService(
     }
 
     override suspend fun getItemRoyaltiesById(itemId: String): List<RoyaltyDto> {
-        // TODO FLOW implement
         try {
-            return getItemById(itemId).royalties
+            val royalties = flowNftItemControllerApi.getNftItemRoyaltyById(itemId).awaitFirst()
+            return royalties.royalty.map { FlowItemConverter.toRoyalty(it, blockchain) }
         } catch (e: WebClientResponseException) {
             if (e.statusCode == HttpStatus.NOT_FOUND) {
                 return emptyList()

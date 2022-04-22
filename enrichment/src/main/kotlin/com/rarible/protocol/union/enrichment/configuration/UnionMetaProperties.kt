@@ -7,9 +7,11 @@ import org.springframework.boot.context.properties.ConstructorBinding
 @ConfigurationProperties("meta")
 data class UnionMetaProperties(
     val ipfsGateway: String,
+    val ipfsPublicGateway: String,
+    val ipfsLegacyGateway: String?,
     val mediaFetchMaxSize: Long,
     val openSeaProxyUrl: String,
-    val httpClient: HttpClient
+    val httpClient: HttpClient = HttpClient()
 ){
     class HttpClient(
         val type: HttpClientType = HttpClientType.KTOR_CIO,

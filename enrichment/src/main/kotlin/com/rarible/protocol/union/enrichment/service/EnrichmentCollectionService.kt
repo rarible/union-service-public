@@ -8,6 +8,7 @@ import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.enrichment.converter.EnrichmentCollectionConverter
+import com.rarible.protocol.union.enrichment.meta.UnionMetaService
 import com.rarible.protocol.union.enrichment.model.ShortCollection
 import com.rarible.protocol.union.enrichment.model.ShortCollectionId
 import com.rarible.protocol.union.enrichment.repository.CollectionRepository
@@ -22,7 +23,8 @@ import org.springframework.stereotype.Component
 class EnrichmentCollectionService(
     private val collectionServiceRouter: BlockchainRouter<CollectionService>,
     private val collectionRepository: CollectionRepository,
-    private val enrichmentOrderService: EnrichmentOrderService
+    private val enrichmentOrderService: EnrichmentOrderService,
+    private val unionMetaService: UnionMetaService
 ) {
     private val logger = LoggerFactory.getLogger(EnrichmentCollectionService::class.java)
 
@@ -76,8 +78,12 @@ class EnrichmentCollectionService(
             .awaitAll().filterNotNull()
             .associateBy { it.id }
 
+        val unionCollection = fetchedCollection.await()
+
         val collectionDto = EnrichmentCollectionConverter.convert(
-            collection = fetchedCollection.await(),
+            collection = unionCollection,
+            // replacing inner IPFS urls with public urls
+            meta = unionMetaService.exposePublicIpfsUrls(unionCollection.meta),
             shortCollection = shortCollection,
             orders = bestOrders
         )

@@ -23,14 +23,12 @@ import com.rarible.protocol.union.dto.EthOrderOpenSeaV1DataV1Dto
 import com.rarible.protocol.union.dto.OnChainOrderDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
-import com.rarible.protocol.union.dto.OrderPriceHistoryRecordDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PendingOrderCancelDto
 import com.rarible.protocol.union.dto.PendingOrderDto
 import com.rarible.protocol.union.dto.PendingOrderMatchDto
 import com.rarible.protocol.union.dto.PlatformDto
-import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -72,8 +70,6 @@ class EthOrderConverter(
         val endedAt = order.end?.let { Instant.ofEpochSecond(it) }
         val signature = order.signature?.let { EthConverter.convert(it) }
         val pending = order.pending?.map { convert(it, blockchain) }
-        // TODO UNION Remove in 1.19
-        val priceHistory = order.priceHistory?.map { convert(it) } ?: listOf()
         val status = convert(order.status!!) // TODO ETHEREUM should be required
         return when (order) {
             is LegacyOrderDto -> {
@@ -99,7 +95,6 @@ class EthOrderConverter(
                     takePrice = takePrice,
                     makePriceUsd = makePriceUsd,
                     takePriceUsd = takePriceUsd,
-                    priceHistory = priceHistory,
                     data = EthOrderDataLegacyDto(
                         fee = order.data.fee.toBigInteger()
                     )
@@ -128,7 +123,6 @@ class EthOrderConverter(
                     takePrice = takePrice,
                     makePriceUsd = makePriceUsd,
                     takePriceUsd = takePriceUsd,
-                    priceHistory = priceHistory,
                     data = convert(order.data, blockchain)
                 )
             }
@@ -155,7 +149,6 @@ class EthOrderConverter(
                     takePrice = takePrice,
                     makePriceUsd = makePriceUsd,
                     takePriceUsd = takePriceUsd,
-                    priceHistory = priceHistory,
                     data = EthOrderOpenSeaV1DataV1Dto(
                         exchange = EthConverter.convert(order.data.exchange, blockchain),
                         makerRelayerFee = order.data.makerRelayerFee,
@@ -198,7 +191,6 @@ class EthOrderConverter(
                     takePrice = takePrice,
                     makePriceUsd = makePriceUsd,
                     takePriceUsd = takePriceUsd,
-                    priceHistory = priceHistory,
                     data = EthOrderCryptoPunksDataDto()
                 )
             }
@@ -295,14 +287,6 @@ class EthOrderConverter(
             OrderSideDto.RIGHT -> PendingOrderMatchDto.Side.RIGHT
             OrderSideDto.LEFT -> PendingOrderMatchDto.Side.LEFT
         }
-    }
-
-    private fun convert(source: com.rarible.protocol.dto.OrderPriceHistoryRecordDto): OrderPriceHistoryRecordDto {
-        return OrderPriceHistoryRecordDto(
-            date = source.date,
-            makeValue = source.makeValue,
-            takeValue = source.takeValue
-        )
     }
 
     private fun convert(source: OrderExchangeHistoryDto, blockchain: BlockchainDto): PendingOrderDto {
