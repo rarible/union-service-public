@@ -88,6 +88,8 @@ integration:
     auctionContracts: ${consul.flow.auctionContracts:}
   tezos:
     enabled: ${consul.tezos.enabled:true}
+    dipdup:
+      enabled: ${consul.tezos.dipdup.enabled:false}
     client:
       url: ${consul.tezos.api.baseUrl}
     consumer:
