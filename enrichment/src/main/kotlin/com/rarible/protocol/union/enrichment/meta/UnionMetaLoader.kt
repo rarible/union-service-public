@@ -62,8 +62,8 @@ class UnionMetaLoader(
     ): List<UnionMetaContent> = coroutineScope {
         metaContent.map { content ->
             async {
-                val resolvedUrl = ipfsUrlResolver.resolveInnerUrl(content.url)
-                val publicUrl = ipfsUrlResolver.resolvePublicUrl(content.url)
+                val resolvedUrl = ipfsUrlResolver.resolveInnerHttpUrl(content.url)
+                val publicUrl = ipfsUrlResolver.resolvePublicHttpUrl(content.url)
                 val logPrefix = "Content meta resolution for ${itemId.fullId()}"
                 logger.info(
                     logPrefix + if (resolvedUrl != content.url)

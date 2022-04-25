@@ -161,7 +161,7 @@ class UnionMetaService(
 
     private fun exposePublicIpfsUrls(content: List<UnionMetaContent>): List<UnionMetaContent> {
         return content.map {
-            it.copy(url = ipfsUrlResolver.resolvePublicUrl(it.url))
+            it.copy(url = ipfsUrlResolver.resolvePublicHttpUrl(it.url))
         }
     }
 }
