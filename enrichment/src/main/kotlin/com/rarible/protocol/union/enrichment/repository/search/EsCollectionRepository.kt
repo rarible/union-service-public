@@ -22,6 +22,7 @@ class EsCollectionRepository(
         return esOperations.get(collectionId, clazz).awaitFirstOrNull()
     }
 
+
     suspend fun findByFilter(filter: EsCollectionFilter): List<EsCollection> {
         return esOperations.search(filter.toQuery(), clazz).collectList().awaitSingle().map { it.content }
     }

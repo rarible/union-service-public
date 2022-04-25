@@ -8,7 +8,6 @@ import org.springframework.data.elasticsearch.annotations.Field
 import org.springframework.data.elasticsearch.annotations.FieldType
 import java.time.Instant
 
-@Document(indexName = "activity", createIndex = false)
 data class EsActivity(
     @Id
     val activityId: String, // blockchain:value
@@ -25,5 +24,4 @@ data class EsActivity(
     val userTo: String?,
     val collection: String?,
     val item: String,
-) {
-}
+)

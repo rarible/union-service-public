@@ -51,7 +51,6 @@ common:
   currency:
     refresh:
       cron: "0 0/30 * * * *"
-  useLegacyRepository: true
   feature-flags:
     enableRevertedActivityEventSending: false
     enableOwnershipSourceEnrichment: false

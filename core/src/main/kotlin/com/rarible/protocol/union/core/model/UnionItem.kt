@@ -13,8 +13,6 @@ data class UnionItem(
     val id: ItemIdDto,
     val collection: CollectionIdDto?,
     val creators: List<CreatorDto> = listOf(),
-    val owners: List<UnionAddress> = listOf(),
-    val royalties: List<RoyaltyDto> = listOf(),
     val lazySupply: BigInteger,
     val pending: List<ItemTransferDto> = listOf(),
     val mintedAt: Instant,

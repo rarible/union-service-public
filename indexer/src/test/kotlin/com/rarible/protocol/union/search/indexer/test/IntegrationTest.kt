@@ -2,9 +2,11 @@ package com.rarible.protocol.union.search.indexer.test
 
 import com.rarible.core.test.ext.ElasticsearchTest
 import com.rarible.core.test.ext.KafkaTest
+import com.rarible.protocol.union.core.EsIndexProvider
 import com.rarible.protocol.union.search.indexer.config.UnionIndexerConfiguration
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Import
 import org.springframework.test.context.ActiveProfiles
 
@@ -22,5 +24,5 @@ import org.springframework.test.context.ActiveProfiles
     ]
 )
 @ActiveProfiles("test")
-@Import(value = [TestIndexerConfiguration::class, UnionIndexerConfiguration::class])
+@Import(value = [TestIndexerConfiguration::class, UnionIndexerConfiguration::class, EsIndexProvider::class])
 annotation class IntegrationTest

@@ -46,6 +46,17 @@ class TestIndexerConfiguration {
     }
 
     @Bean
+    fun testUnionCollectionEventProducer(): RaribleKafkaProducer<CollectionEventDto> {
+        return RaribleKafkaProducer(
+            clientId = "test.union.collection",
+            valueSerializerClass = UnionKafkaJsonSerializer::class.java,
+            valueClass = CollectionEventDto::class.java,
+            defaultTopic = UnionEventTopicProvider.getCollectionTopic(applicationEnvironmentInfo().name),
+            bootstrapServers = KafkaTestExtension.kafkaContainer.kafkaBoostrapServers()
+        )
+    }
+    
+    @Bean
     fun testUnionOwnershipEventProducer(): RaribleKafkaProducer<OwnershipEventDto> {
         return RaribleKafkaProducer(
             clientId = "test.union.order",

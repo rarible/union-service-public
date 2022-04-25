@@ -35,7 +35,6 @@ fun orderEth() = OrderDto(
     takePrice = null,
     makePriceUsd = null,
     takePriceUsd = null,
-    priceHistory = null,
     maker = UnionAddress(BlockchainGroupDto.ETHEREUM, randomString()),
     taker = UnionAddress(BlockchainGroupDto.ETHEREUM, randomString()),
     make = AssetDto(

@@ -44,15 +44,6 @@ class ImmutablexItemEventHandler(
                                 value = 1
                             )
                         ),
-                        owners = listOf(
-                            UnionAddress(blockchain.group(), event.user)
-                        ),
-                        royalties = event.fees?.map {
-                            RoyaltyDto(
-                                account = UnionAddress(blockchain.group(), it.address),
-                                value = toBasePoints(it.percentage)
-                            )
-                        } ?: emptyList(),
                         lazySupply = BigInteger.ZERO,
                         supply = BigInteger.ONE,
                         mintedAt = event.timestamp,
