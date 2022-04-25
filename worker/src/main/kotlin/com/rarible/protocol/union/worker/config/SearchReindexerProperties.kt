@@ -14,6 +14,7 @@ class SearchReindexerProperties {
     val startReindexActivity = false
     val orderTasks: Set<BlockchainDto> = BlockchainDto.values().toSet()
     val startReindexOrder = false
+    val startReindexCollection = false
 }
 
 data class ActivityTaskConfig(
