@@ -2,13 +2,13 @@ package com.rarible.protocol.union.enrichment.meta
 
 import com.rarible.core.apm.SpanType
 import com.rarible.core.apm.withSpan
-import com.rarible.core.apm.withTransaction
 import com.rarible.core.client.WebClientResponseProxyException
 import com.rarible.protocol.union.core.model.UnionImageProperties
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.UnionMetaContent
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
+import com.rarible.protocol.union.core.util.LogUtils
 import com.rarible.protocol.union.dto.ItemIdDto
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -26,23 +26,23 @@ class UnionMetaLoader(
 
     private val logger = LoggerFactory.getLogger(UnionMetaLoader::class.java)
 
-    suspend fun load(itemId: ItemIdDto): UnionMeta? =
-        withTransaction("UnionMetaLoader") {
-            val unionMeta = withSpan(
-                name = "getItemMetaById",
-                type = SpanType.EXT,
-                labels = listOf("itemId" to itemId.fullId())
-            ) {
-                getItemMeta(itemId)
-            } ?: return@withTransaction null
-            withSpan(
-                name = "enrichContentMeta",
-                labels = listOf("itemId" to itemId.fullId())
-            ) {
-                val content = enrichContentMetaWithTimeout(unionMeta.content, itemId)
-                unionMeta.copy(content = content)
-            }
+    suspend fun load(itemId: ItemIdDto): UnionMeta? = LogUtils.addToMdc(itemId) {
+        val unionMeta = withSpan(
+            name = "getItemMetaById",
+            type = SpanType.EXT,
+            labels = listOf("itemId" to itemId.fullId())
+        ) {
+            getItemMeta(itemId)
+        } ?: return@addToMdc null
+
+        withSpan(
+            name = "enrichContentMeta",
+            labels = listOf("itemId" to itemId.fullId())
+        ) {
+            val content = enrichContentMetaWithTimeout(unionMeta.content, itemId)
+            unionMeta.copy(content = content)
         }
+    }
 
     private suspend fun getItemMeta(itemId: ItemIdDto): UnionMeta? {
         return try {
