@@ -29,6 +29,7 @@ import com.rarible.protocol.union.dto.continuation.page.PageSize
 import com.rarible.protocol.union.dto.continuation.page.Paging
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.dto.subchains
+import com.rarible.protocol.union.enrichment.meta.UnionMetaLoader
 import com.rarible.protocol.union.enrichment.meta.UnionMetaService
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
@@ -60,7 +61,8 @@ class ItemController(
     private val router: BlockchainRouter<ItemService>,
     private val enrichmentItemService: EnrichmentItemService,
     private val unionMetaService: UnionMetaService,
-    private val restrictionService: RestrictionService
+    private val restrictionService: RestrictionService,
+    private val unionMetaLoader: UnionMetaLoader
 ) : ItemControllerApi {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -164,7 +166,7 @@ class ItemController(
         return ResponseEntity.ok(dto)
     }
 
-    override suspend fun resetItemMeta(itemId: String): ResponseEntity<Unit> {
+    override suspend fun resetItemMeta(itemId: String, sync: Boolean?): ResponseEntity<Unit> {
         val fullItemId = IdParser.parseItemId(itemId)
         // TODO[meta]: when all Blockchains stop caching the meta, we can remove this endpoint call.
         val parts = fullItemId.value.split(":")
@@ -176,7 +178,12 @@ class ItemController(
             logger.info("Refreshing item meta for $itemId")
         }
         router.getService(fullItemId.blockchain).resetItemMeta(fullItemId.value)
-        unionMetaService.scheduleLoading(fullItemId)
+        if (sync == true) {
+            unionMetaService.loadMetaSynchronously(fullItemId)
+        } else {
+            unionMetaService.scheduleLoading(fullItemId)
+        }
+
         return ResponseEntity.ok().build()
     }
 

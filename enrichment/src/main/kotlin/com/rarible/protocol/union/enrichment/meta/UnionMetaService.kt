@@ -91,28 +91,32 @@ class UnionMetaService(
         }
         if (synchronous) {
             logger.info("Loading meta synchronously for ${itemId.fullId()}")
-            val itemMeta = try {
-                unionMetaLoader.load(itemId)
-            } catch (e: Exception) {
-                logger.warn("Synchronous meta loading failed for ${itemId.fullId()}")
-                // Schedule meta loading. Firstly, with retry purpose. Secondly, to cache the "error" if it persists.
-                unionMetaCacheLoaderService.update(itemId.fullId())
-                null
-            }
-            if (itemMeta != null) {
-                logger.warn("Saving synchronously loaded meta to cache for ${itemId.fullId()}")
-                try {
-                    unionMetaCacheLoaderService.save(itemId.fullId(), itemMeta)
-                } catch (e: Exception) {
-                    if (e !is OptimisticLockingFailureException && e !is DuplicateKeyException) {
-                        logger.error("Failed to save synchronously loaded meta to cache for ${itemId.fullId()}")
-                        throw e
-                    }
-                }
-            }
-            return itemMeta
+            return loadMetaSynchronously(itemId)
         }
         return null
+    }
+
+    suspend fun loadMetaSynchronously(itemId: ItemIdDto): UnionMeta? {
+        val itemMeta = try {
+            unionMetaLoader.load(itemId)
+        } catch (e: Exception) {
+            logger.warn("Synchronous meta loading failed for ${itemId.fullId()}")
+            // Schedule meta loading. Firstly, with retry purpose. Secondly, to cache the "error" if it persists.
+            unionMetaCacheLoaderService.update(itemId.fullId())
+            null
+        }
+        if (itemMeta != null) {
+            logger.warn("Saving synchronously loaded meta to cache for ${itemId.fullId()}")
+            try {
+                unionMetaCacheLoaderService.save(itemId.fullId(), itemMeta)
+            } catch (e: Exception) {
+                if (e !is OptimisticLockingFailureException && e !is DuplicateKeyException) {
+                    logger.error("Failed to save synchronously loaded meta to cache for ${itemId.fullId()}")
+                    throw e
+                }
+            }
+        }
+        return itemMeta
     }
 
     private suspend fun removeCachedMetaWithSvgInUrl (
