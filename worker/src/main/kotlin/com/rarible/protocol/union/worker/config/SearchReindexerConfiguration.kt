@@ -12,13 +12,13 @@ import com.rarible.protocol.union.enrichment.configuration.EnrichmentApiConfigur
 import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
 import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
 import com.rarible.protocol.union.enrichment.repository.search.EsCollectionRepository
-import com.rarible.protocol.union.worker.task.ActivityTask
 import com.rarible.protocol.union.worker.task.CollectionTask
+import com.rarible.protocol.union.worker.task.search.activity.ActivityTask
+import com.rarible.protocol.union.worker.task.search.activity.ActivityTaskState
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
-import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations
 
 @Configuration
 @EnableRaribleTask
@@ -41,9 +41,9 @@ class SearchReindexerConfiguration(
     fun activityTask(
         activityClient: ActivityControllerApi,
         taskRepository: TaskRepository,
-        esOperations: ReactiveElasticsearchOperations,
-    ): TaskHandler<String> {
-        return ActivityTask(this, activityClient, esOperations, EsActivityConverter)
+        esActivityRepository: EsActivityRepository,
+    ): TaskHandler<ActivityTaskState> {
+        return ActivityTask(this, activityClient, esActivityRepository, EsActivityConverter)
     }
 
     @Bean
