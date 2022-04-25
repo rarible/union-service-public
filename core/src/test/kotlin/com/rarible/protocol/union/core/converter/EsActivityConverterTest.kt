@@ -47,6 +47,7 @@ import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.ext
 import com.rarible.protocol.union.dto.parser.IdParser
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatCode
 import org.junit.jupiter.api.Test
 import java.time.Instant
 
@@ -505,6 +506,31 @@ class EsActivityConverterTest {
         assertThat(actual.userTo).isNull()
         assertThat(actual.collection).isEqualTo(source.auction.sell.type.ext.itemId!!.extractCollection())
         assertThat(actual.item).isEqualTo(source.auction.sell.type.ext.itemId!!.value)
+    }
+
+    @Test
+    fun `should not fail when itemId is null`() {
+        // given
+        val source = TransferActivityDto(
+            id = randomActivityId(),
+            date = randomDate(),
+            blockchainInfo = ActivityBlockchainInfoDto(
+                transactionHash = randomString(),
+                blockHash = randomString(),
+                blockNumber = randomLong(),
+                logIndex = randomInt(),
+            ),
+            from = randomUnionAddress(),
+            owner = randomUnionAddress(),
+            itemId = null,
+            transactionHash = randomString(),
+            value = randomBigInt(),
+        )
+
+        // when
+        assertThatCode {
+            converter.convert(source)
+        }.doesNotThrowAnyException()
     }
 
     private fun randomActivityId(): ActivityIdDto {
