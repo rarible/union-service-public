@@ -45,6 +45,14 @@
             <groupId>com.rarible.protocol.tezos</groupId>
             <artifactId>protocol-tezos-subscriber</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.rarible.protocol.tezos</groupId>
+            <artifactId>dipdup-listener</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.rarible.protocol.tezos</groupId>
+            <artifactId>dipdup-client</artifactId>
+        </dependency>
 
         <!-- ================== Test ===================== -->
         <dependency>

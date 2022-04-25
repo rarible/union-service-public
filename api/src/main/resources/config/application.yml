@@ -60,6 +60,10 @@ integration:
     auctionContracts: ${consul.flow.auctionContracts:}
   tezos:
     enabled: ${consul.tezos.enabled:true}
+    dipdup:
+      enabled: ${consul.tezos.dipdup.enabled:false}
+      dipdupUrl: ${consul.tezos.dipdup.dipdupUrl:}
+      tzktUrl: ${consul.tezos.dipdup.tzktUrl:}
     client:
       url: ${consul.tezos.api.baseUrl:}
     auctionContracts: ${consul.tezos.auctionContracts:}

@@ -18,6 +18,9 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.integration.tezos.converter.TezosActivityConverter
 import com.rarible.protocol.union.integration.tezos.converter.TezosOrderConverter
+import com.rarible.protocol.union.integration.tezos.dipdup.DipDupApiConfiguration
+import com.rarible.protocol.union.integration.tezos.dipdup.DipDupDummyApiConfiguration
+import com.rarible.protocol.union.integration.tezos.dipdup.service.DipdupOrderService
 import com.rarible.protocol.union.integration.tezos.service.TezosActivityService
 import com.rarible.protocol.union.integration.tezos.service.TezosAuctionService
 import com.rarible.protocol.union.integration.tezos.service.TezosCollectionService
@@ -32,7 +35,7 @@ import org.springframework.context.annotation.Import
 import java.net.URI
 
 @TezosConfiguration
-@Import(CoreConfiguration::class)
+@Import(value = [CoreConfiguration::class, DipDupApiConfiguration::class, DipDupDummyApiConfiguration::class])
 @ComponentScan(basePackageClasses = [TezosOrderConverter::class])
 @EnableConfigurationProperties(value = [TezosIntegrationProperties::class])
 class TezosApiConfiguration(
@@ -97,10 +100,11 @@ class TezosApiConfiguration(
     @Bean
     fun tezosOrderService(
         controllerApi: OrderControllerApi,
-        converter: TezosOrderConverter
+        converter: TezosOrderConverter,
+        dipdupOrderService: DipdupOrderService
     ): OrderService {
         return OrderProxyService(
-            TezosOrderService(controllerApi, converter),
+            TezosOrderService(controllerApi, converter, dipdupOrderService),
             setOf(PlatformDto.RARIBLE)
         )
     }

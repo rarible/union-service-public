@@ -17,6 +17,8 @@ import com.rarible.protocol.union.core.model.UnionOrderEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipEvent
 import com.rarible.protocol.union.integration.tezos.converter.TezosActivityConverter
 import com.rarible.protocol.union.integration.tezos.converter.TezosOrderConverter
+import com.rarible.protocol.union.integration.tezos.dipdup.DipDupConsumerConfiguration
+import com.rarible.protocol.union.integration.tezos.dipdup.DipDupDummyApiConfiguration
 import com.rarible.protocol.union.integration.tezos.event.TezosActivityEventHandler
 import com.rarible.protocol.union.integration.tezos.event.TezosCollectionEventHandler
 import com.rarible.protocol.union.integration.tezos.event.TezosItemEventHandler
@@ -28,13 +30,13 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
 
 @TezosConfiguration
-@Import(TezosApiConfiguration::class)
+@Import(value = [TezosApiConfiguration::class, DipDupConsumerConfiguration::class])
 class TezosConsumerConfiguration(
     applicationEnvironmentInfo: ApplicationEnvironmentInfo,
     properties: TezosIntegrationProperties,
-    private val consumerFactory: ConsumerFactory,
     @Value("\${rarible.core.client.k8s:false}")
-    private val k8s: Boolean
+    private val k8s: Boolean,
+    private val consumerFactory: ConsumerFactory
 ) {
 
     private val env = applicationEnvironmentInfo.name
