@@ -30,6 +30,9 @@ import com.rarible.protocol.flow.nft.api.client.FlowOrderControllerApi
 import com.rarible.protocol.nft.api.client.NftCollectionControllerApi
 import com.rarible.protocol.nft.api.client.NftItemControllerApi
 import com.rarible.protocol.nft.api.client.NftOwnershipControllerApi
+import com.rarible.protocol.solana.api.client.TokenControllerApi
+import com.rarible.protocol.solana.dto.SolanaEventTopicProvider
+import com.rarible.protocol.solana.dto.TokenMetaEventDto
 import com.rarible.protocol.tezos.dto.TezosActivitySafeDto
 import com.rarible.protocol.tezos.dto.TezosEventTopicProvider
 import com.rarible.protocol.tezos.dto.TezosOrderSafeEventDto
@@ -293,6 +296,24 @@ class TestListenerConfiguration {
             bootstrapServers = kafkaContainer.kafkaBoostrapServers()
         )
     }
+
+    //---------------- SOLANA producers ----------------//
+
+    @Bean
+    fun testSolanaTokenMetaEventProducer(): RaribleKafkaProducer<TokenMetaEventDto> {
+        return RaribleKafkaProducer(
+            clientId = "test.union.solana.token.meta",
+            valueSerializerClass = UnionKafkaJsonSerializer::class.java,
+            valueClass = TokenMetaEventDto::class.java,
+            defaultTopic = SolanaEventTopicProvider.getTokenMetaTopic(applicationEnvironmentInfo().name),
+            bootstrapServers = kafkaContainer.kafkaBoostrapServers()
+        )
+    }
+
+    @Bean
+    @Primary
+    @Qualifier("solana.token.api")
+    fun testSolanaTokenApi(): TokenControllerApi = mockk()
 
     //--------------------- CURRENCY ---------------------//
 

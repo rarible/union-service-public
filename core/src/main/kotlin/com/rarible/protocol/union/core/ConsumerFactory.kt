@@ -25,6 +25,7 @@ class ConsumerFactory(
         const val AUCTION = "auction"
         const val ACTIVITY = "activity"
         const val ITEM = "item"
+        const val ITEM_META = "itemMeta"
         const val COLLECTION = "collection"
         const val OWNERSHIP = "ownership"
     }
@@ -34,6 +35,7 @@ class ConsumerFactory(
     //---------------- Blockchain handlers (external) ---------------//
 
     val itemGroup = consumerGroup(ITEM)
+    val itemMetaGroup = consumerGroup(ITEM_META)
     val ownershipGroup = consumerGroup(OWNERSHIP)
     val collectionGroup = consumerGroup(COLLECTION)
     val orderGroup = consumerGroup(ORDER)
@@ -49,6 +51,15 @@ class ConsumerFactory(
         workers: Map<String, Int>
     ): BatchedConsumerWorker<T> {
         return createBlockchainBatchedConsumerWorker(consumer, handler, daemon, workers, ITEM)
+    }
+
+    fun <T> createItemMetaConsumer(
+        consumer: RaribleKafkaConsumer<T>,
+        handler: BlockchainEventHandler<T, *>,
+        daemon: DaemonWorkerProperties,
+        workers: Map<String, Int>
+    ): BatchedConsumerWorker<T> {
+        return createBlockchainBatchedConsumerWorker(consumer, handler, daemon, workers, ITEM_META)
     }
 
     fun <T> createOwnershipConsumer(
