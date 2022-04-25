@@ -26,7 +26,7 @@ class ActivityElasticService(
 ) : ActivityQueryService {
 
     companion object {
-        val logger by Logger()
+        private val logger by Logger()
     }
 
 
@@ -38,9 +38,12 @@ class ActivityElasticService(
         size: Int?,
         sort: ActivitySortDto?
     ): ActivitiesDto {
+        logger.debug("getAllActivities() from ElasticSearch")
         val effectiveCursor = cursor ?: continuation
         val filter = filterConverter.convertGetAllActivities(type, blockchains, effectiveCursor)
+        logger.debug("Built filter: $filter")
         val queryResult = esActivityRepository.search(filter, convertSort(sort), size)
+        logger.debug("Query result: $queryResult")
         val activities = getActivities(queryResult.activities)
         return ActivitiesDto(
             continuation = null,
@@ -60,6 +63,7 @@ class ActivityElasticService(
         val effectiveCursor = cursor ?: continuation
         val filter = filterConverter.convertGetActivitiesByCollection(type, collection, effectiveCursor)
         val queryResult = esActivityRepository.search(filter, convertSort(sort), size)
+        logger.debug("Query result: $queryResult")
         val activities = getActivities(queryResult.activities)
         return ActivitiesDto(
             continuation = null,
@@ -127,13 +131,18 @@ class ActivityElasticService(
         }
 
         val evaluatedBlockchains = router.getEnabledBlockchains(blockchainMap.keys)
+        logger.debug("Blockchains to query: $evaluatedBlockchains")
 
         val results = evaluatedBlockchains.mapAsync { blockchain ->
             val ids = blockchainMap[blockchain]
             if (!ids.isNullOrEmpty()) {
+                logger.debug("Querying getActivitiesByIds for $blockchain")
                 router.getService(blockchain).getActivitiesByIds(ids)
+                    .also { logger.debug("Queried getActivitiesByIds for $blockchain") }
             } else null
         }.filterNotNull()
+
+        logger.debug("Raw results: $results")
 
         val mergedResult = arrayOfNulls<ActivityDto>(activities.size)
         results.forEach {
@@ -146,6 +155,8 @@ class ActivityElasticService(
                 }
             }
         }
+
+        logger.debug("Merged result: $mergedResult")
 
         return mergedResult.filterNotNull()
     }

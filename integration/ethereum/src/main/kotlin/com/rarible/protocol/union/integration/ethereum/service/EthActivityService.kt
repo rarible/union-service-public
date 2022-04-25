@@ -174,6 +174,10 @@ open class EthActivityService(
             }
         }
 
+        logger.debug("Item Activities ids: $itemActivitiesIds")
+        logger.debug("Order Activities ids: $orderActivitiesIds")
+        logger.debug("Auction Activities ids: $auctionActivitiesIds")
+
         val itemRequest = async {
             if (itemActivitiesIds.isNotEmpty()) {
                 activityItemControllerApi.getNftActivitiesById(ActivitiesByIdRequestDto(itemActivitiesIds)).awaitFirst()

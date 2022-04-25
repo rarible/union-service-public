@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.api.controller
 
+import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.api.service.select.ActivitySourceSelectService
 import com.rarible.protocol.union.dto.ActivitiesDto
 import com.rarible.protocol.union.dto.ActivitySortDto
@@ -15,6 +16,10 @@ class ActivityController(
     private val activitySourceSelector: ActivitySourceSelectService,
 ) : ActivityControllerApi {
 
+    companion object {
+        private val logger by Logger()
+    }
+
     override suspend fun getAllActivities(
         type: List<ActivityTypeDto>,
         blockchains: List<BlockchainDto>?,
@@ -23,6 +28,7 @@ class ActivityController(
         size: Int?,
         sort: ActivitySortDto?
     ): ResponseEntity<ActivitiesDto> {
+        logger.debug("Got request to get all activities, parameters: $type, $blockchains, $continuation, $cursor, $size, $sort")
         val result = activitySourceSelector.getAllActivities(type, blockchains, continuation, cursor, size, sort)
         return ResponseEntity.ok(result)
     }
