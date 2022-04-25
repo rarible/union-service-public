@@ -7,6 +7,7 @@ import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
+import com.rarible.protocol.union.dto.OrderSyncSortDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.continuation.CombinedContinuation
 import com.rarible.protocol.union.dto.continuation.OrderContinuation
@@ -82,6 +83,15 @@ class OrderApiService(
             router.getService(blockDto).getOrdersAll(cont, size, sort, status)
         }
         return ArgPaging(continuationFactory(sort), slices).getSlice(size)
+    }
+
+    suspend fun getAllSync (
+        blockchain: BlockchainDto,
+        continuation: String?,
+        size: Int,
+        sort: OrderSyncSortDto?
+    ): Slice<OrderDto>{
+        return router.getService(blockchain).getAllSync(continuation, size, sort)
     }
 
     suspend fun getOrderBidsByItem(

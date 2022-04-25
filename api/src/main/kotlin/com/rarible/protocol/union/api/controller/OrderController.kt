@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.api.controller
 
-import com.rarible.core.logging.withMdc
 import com.rarible.protocol.union.api.service.OrderApiService
 import com.rarible.protocol.union.api.util.BlockchainFilter
 import com.rarible.protocol.union.core.service.OrderService
@@ -11,6 +10,7 @@ import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdsDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
+import com.rarible.protocol.union.dto.OrderSyncSortDto
 import com.rarible.protocol.union.dto.OrdersDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.UnionAddress
@@ -23,8 +23,6 @@ import com.rarible.protocol.union.dto.parser.IdParser
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 @ExperimentalCoroutinesApi
@@ -298,6 +296,23 @@ class OrderController(
         )
 
         return ResponseEntity.ok(toDto(combinedSlice))
+    }
+
+    override suspend fun getAllSync(
+        blockchain: BlockchainDto,
+        continuation: String?,
+        size: Int?,
+        sort: OrderSyncSortDto?
+    ): ResponseEntity<OrdersDto> {
+        val safeSize = PageSize.ORDER.limit(size)
+        val result = orderApiService.getAllSync(blockchain, continuation, safeSize, sort)
+        logger.info(
+            "Response for getAllSync" +
+                    "(blockchains={}, continuation={}, size={}): " +
+                    "Slice(size={}, continuation={})",
+            blockchain, continuation, size, result.entities.size, result.continuation
+        )
+        return ResponseEntity.ok(toDto(result))
     }
 
     private fun toDto(slice: Slice<OrderDto>): OrdersDto {

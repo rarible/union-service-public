@@ -132,6 +132,24 @@ class OrderControllerFt : AbstractIntegrationTest() {
         assertThat(orders.continuation).isNull()
     }
 
+    @Test
+    fun `get all sync - no origin`() = runBlocking<Unit> {
+        val size = 8
+
+        val ethOrders = listOf(randomEthLegacySellOrderDto(), randomEthLegacySellOrderDto())
+
+        coEvery {
+            testEthereumOrderApi.getAllSync(any(), any(), size)
+        } returns OrdersPaginationDto(ethOrders, null).toMono()
+
+        val orders = orderControllerClient.getAllSync(
+            BlockchainDto.ETHEREUM, null, size,  null
+        ).awaitFirst()
+
+        assertThat(orders.orders).hasSize(2)
+        assertThat(orders.continuation).isNull()
+    }
+
     // we removed origin param from api
     @Disabled
     @Test

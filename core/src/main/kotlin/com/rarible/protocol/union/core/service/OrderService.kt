@@ -5,6 +5,7 @@ import com.rarible.protocol.union.dto.AssetTypeDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
+import com.rarible.protocol.union.dto.OrderSyncSortDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
 
@@ -16,6 +17,12 @@ interface OrderService : BlockchainService {
         sort: OrderSortDto?,
         status: List<OrderStatusDto>?
     ): Slice<OrderDto>
+
+    suspend fun getAllSync(
+        continuation: String?,
+        size: Int,
+        sort: OrderSyncSortDto?
+    ) : Slice<OrderDto>
 
     suspend fun getOrderById(
         id: String
