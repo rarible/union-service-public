@@ -1,24 +1,34 @@
 package com.rarible.protocol.union.api.service.api
 
+import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.api.service.OrderQueryService
+import com.rarible.protocol.union.api.util.BlockchainFilter
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.BlockchainGroupDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
+import com.rarible.protocol.union.dto.OrderIdsDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
+import com.rarible.protocol.union.dto.OrdersDto
 import com.rarible.protocol.union.dto.PlatformDto
+import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.continuation.CombinedContinuation
 import com.rarible.protocol.union.dto.continuation.OrderContinuation
 import com.rarible.protocol.union.dto.continuation.page.ArgPaging
 import com.rarible.protocol.union.dto.continuation.page.ArgSlice
+import com.rarible.protocol.union.dto.continuation.page.PageSize
+import com.rarible.protocol.union.dto.continuation.page.Paging
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.dto.ext
+import com.rarible.protocol.union.dto.group
+import com.rarible.protocol.union.dto.parser.IdParser
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
-import org.slf4j.LoggerFactory
+import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Component
 
 @Component
@@ -26,9 +36,17 @@ class OrderApiService(
     private val router: BlockchainRouter<OrderService>
 ): OrderQueryService {
 
-    private val logger = LoggerFactory.getLogger(javaClass)
+    companion object {
+        private val logger by Logger()
+        private val empty = OrdersDto(null, emptyList())
+    }
 
-    override suspend fun getByIds(ids: List<OrderIdDto>): List<OrderDto> {
+    suspend fun getOrderById(id: String): OrderDto {
+        val orderId = IdParser.parseOrderId(id)
+        return router.getService(orderId.blockchain).getOrderById(orderId.value)
+    }
+
+    suspend fun getByIds(ids: List<OrderIdDto>): List<OrderDto> {
         logger.info("Getting orders by IDs: [{}]", ids.map { "${it.blockchain}:${it.value}" })
         val groupedIds = ids.groupBy({ it.blockchain }, { it.value })
 
@@ -37,87 +55,269 @@ class OrderApiService(
         }
     }
 
+    suspend fun getByIds(orderIdsDto: OrderIdsDto): List<OrderDto> {
+        val ids = orderIdsDto.ids
+            .map { IdParser.parseOrderId(it) }
+
+        return getByIds(ids)
+    }
+
     override suspend fun getSellOrdersByItem(
-        blockchain: BlockchainDto,
         itemId: String,
         platform: PlatformDto?,
         maker: String?,
         origin: String?,
         status: List<OrderStatusDto>?,
         continuation: String?,
-        size: Int
-    ): Slice<OrderDto> {
+        size: Int?
+    ): OrdersDto {
+        val safeSize = PageSize.ORDER.limit(size)
+        val fullItemId = IdParser.parseItemId(itemId)
+        val blockchain = fullItemId.blockchain
+
+        val originAddress = safeAddress(origin)
+        val makerAddress = safeAddress(maker)
+        if (!ensureSameBlockchain(
+                fullItemId.blockchain.group(),
+                originAddress?.blockchainGroup,
+                makerAddress?.blockchainGroup
+            )
+        ) {
+            logger.warn(
+                "Incompatible blockchain groups specified in getSellOrdersByItem: itemId={}, origin={}, maker={}",
+                fullItemId.fullId(), origin, maker
+            )
+            return empty
+        }
+
         val currencyAssetTypes = router.getService(blockchain)
-            .getSellCurrencies(itemId)
+            .getSellCurrencies(fullItemId.value)
             .map { it.ext.currencyAddress() }
 
         if (currencyAssetTypes.isEmpty()) {
-            return Slice.empty()
+            return empty
         }
 
         val currencySlices = getMultiCurrencyOrdersForItem(
             continuation, currencyAssetTypes
         ) { currency, currencyContinuation ->
             router.getService(blockchain).getSellOrdersByItem(
-                platform, itemId, maker, origin, status, currency, currencyContinuation, size
+                platform, fullItemId.value, makerAddress?.value, originAddress?.value, status, currency, currencyContinuation, safeSize
             )
         }
 
         // Here we're sorting orders using price evaluated in USD (DESC)
-        return ArgPaging(
+        val slice = ArgPaging(
             OrderContinuation.BySellPriceUsdAndIdAsc,
             currencySlices
-        ).getSlice(size)
+        ).getSlice(safeSize)
+        return toDto(slice)
     }
 
     override suspend fun getOrdersAll(
         blockchains: List<BlockchainDto>?,
         continuation: String?,
-        size: Int,
+        size: Int?,
         sort: OrderSortDto?,
         status: List<OrderStatusDto>?
-    ): Slice<OrderDto> {
+    ): OrdersDto {
+        val safeSize = PageSize.ORDER.limit(size)
         val evaluatedBlockchains = router.getEnabledBlockchains(blockchains).map(BlockchainDto::name)
         val slices = getOrdersByBlockchains(continuation, evaluatedBlockchains) { blockchain, cont ->
             val blockDto = BlockchainDto.valueOf(blockchain)
-            router.getService(blockDto).getOrdersAll(cont, size, sort, status)
+            router.getService(blockDto).getOrdersAll(cont, safeSize, sort, status)
         }
-        return ArgPaging(continuationFactory(sort), slices).getSlice(size)
+        val slice = ArgPaging(continuationFactory(sort), slices).getSlice(safeSize)
+        logger.info(
+            "Response for getOrdersAll" +
+                    "(blockchains={}, continuation={}, size={}): " +
+                    "Slice(size={}, continuation={})",
+            blockchains, continuation, size, slice.entities.size, slice.continuation
+        )
+        return toDto(slice)
     }
 
     override suspend fun getOrderBidsByItem(
-        blockchain: BlockchainDto,
         itemId: String,
         platform: PlatformDto?,
-        makers: List<String>?,
+        maker: List<String>?,
         origin: String?,
         status: List<OrderStatusDto>?,
         start: Long?,
         end: Long?,
         continuation: String?,
-        size: Int
-    ): Slice<OrderDto> {
+        size: Int?
+    ): OrdersDto {
+        val safeSize = PageSize.ORDER.limit(size)
+        val fullItemId = IdParser.parseItemId(itemId)
+
+        val makerAddresses = if (maker.isNullOrEmpty()) null else maker.map { IdParser.parseAddress(it) }
+        val makerBlockchainGroups = makerAddresses?.let { list -> list.map { it.blockchainGroup } } ?: emptyList()
+        val originAddress = safeAddress(origin)
+        val blockchain = fullItemId.blockchain
+        val makers = makerAddresses?.map { it.value }
+        if (!ensureSameBlockchain(
+                makerBlockchainGroups +
+                        listOf(
+                            fullItemId.blockchain.group(),
+                            originAddress?.blockchainGroup
+                        ),
+            )
+        ) {
+            logger.warn(
+                "Incompatible blockchain groups specified in getOrderBidsByItem: itemId={}, origin={}, maker={}",
+                fullItemId.fullId(), origin, makers
+            )
+            return empty
+        }
+
         val currencyContracts = router.getService(blockchain)
-            .getBidCurrencies(itemId)
+            .getBidCurrencies(fullItemId.value)
             .map { it.ext.currencyAddress() }
 
         if (currencyContracts.isEmpty()) {
-            return Slice.empty()
+            return empty
         }
 
         val currencySlices = getMultiCurrencyOrdersForItem(
             continuation, currencyContracts
         ) { currency, currencyContinuation ->
             router.getService(blockchain).getOrderBidsByItem(
-                platform, itemId, makers, origin, status, start, end, currency, currencyContinuation, size
+                platform, fullItemId.value, makers, origin, status, start, end, currency, currencyContinuation, safeSize
             )
         }
 
         // Here we're sorting orders using price evaluated in USD (DESC)
-        return ArgPaging(
+        val slice = ArgPaging(
             OrderContinuation.ByBidPriceUsdAndIdDesc,
             currencySlices
-        ).getSlice(size)
+        ).getSlice(safeSize)
+
+        return toDto(slice)
+    }
+
+    override suspend fun getOrderBidsByMaker(
+        blockchains: List<BlockchainDto>?,
+        platform: PlatformDto?,
+        maker: String,
+        origin: String?,
+        status: List<OrderStatusDto>?,
+        start: Long?,
+        end: Long?,
+        continuation: String?,
+        size: Int?
+    ): OrdersDto {
+        val safeSize = PageSize.ORDER.limit(size)
+        val makerAddress = IdParser.parseAddress(maker)
+        val originAddress = safeAddress(origin)
+        val filter = BlockchainFilter(blockchains)
+        if (!ensureSameBlockchain(makerAddress.blockchainGroup, originAddress?.blockchainGroup)) {
+            logger.warn(
+                "Incompatible blockchain groups specified in getOrderBidsByMaker: origin={}, maker={}",
+                origin, maker
+            )
+            return empty
+        }
+
+        val blockchainSlices = router.executeForAll(filter.exclude(makerAddress.blockchainGroup)) {
+            it.getOrderBidsByMaker(
+                platform,
+                makerAddress.value,
+                originAddress?.value,
+                status,
+                start,
+                end,
+                continuation,
+                safeSize
+            )
+        }
+
+        val combinedSlice = Paging(
+            OrderContinuation.ByLastUpdatedAndIdAsc,
+            blockchainSlices.flatMap { it.entities }
+        ).getSlice(safeSize)
+
+        logger.info(
+            "Response for getOrderBidsByMaker" +
+                    "(maker={}, platform={}, origin={}, status={}, start={}, end={}, continuation={}, size={}): " +
+                    "Slice(size={}, continuation={})",
+            maker, platform, origin, status, start, end, continuation, size,
+            combinedSlice.entities.size, combinedSlice.continuation
+        )
+
+        return toDto(combinedSlice)
+    }
+
+    override suspend fun getSellOrders(
+        blockchains: List<BlockchainDto>?,
+        platform: PlatformDto?,
+        origin: String?,
+        continuation: String?,
+        size: Int?
+    ): OrdersDto {
+        val safeSize = PageSize.ORDER.limit(size)
+        val originAddress = safeAddress(origin)
+        val filter = BlockchainFilter(blockchains)
+
+        val evaluatedBlockchains = originAddress?.blockchainGroup?.let { filter.exclude(it) } ?: blockchains
+
+        val blockchainPages = router.executeForAll(evaluatedBlockchains) {
+            it.getSellOrders(platform, originAddress?.value, continuation, safeSize)
+        }
+
+        val combinedSlice = Paging(
+            OrderContinuation.ByLastUpdatedAndIdDesc,
+            blockchainPages.flatMap { it.entities }
+        ).getSlice(safeSize)
+
+        logger.info("Response for getSellOrders(blockchains={}, platform={}, origin={}, continuation={}, size={}):" +
+                " Slice(size={}, continuation={}) from blockchain slices {} ",
+            evaluatedBlockchains, platform, origin, continuation, size,
+            combinedSlice.entities.size, combinedSlice.continuation, blockchainPages.map { it.entities.size }
+        )
+
+        return toDto(combinedSlice)
+    }
+
+    override suspend fun getSellOrdersByMaker(
+        maker: String,
+        blockchains: List<BlockchainDto>?,
+        platform: PlatformDto?,
+        origin: String?,
+        continuation: String?,
+        size: Int?,
+        status: List<OrderStatusDto>?
+    ): OrdersDto {
+        val safeSize = PageSize.ORDER.limit(size)
+        val makerAddress = IdParser.parseAddress(maker)
+        val originAddress = safeAddress(origin)
+        val filter = BlockchainFilter(blockchains)
+
+        if (!ensureSameBlockchain(makerAddress.blockchainGroup, originAddress?.blockchainGroup)) {
+            logger.warn(
+                "Incompatible blockchain groups specified in getSellOrdersByMaker: origin={}, maker={}",
+                origin, maker
+            )
+            return empty
+        }
+
+        val blockchainSlices = router.executeForAll(filter.exclude(makerAddress.blockchainGroup)) {
+            it.getSellOrdersByMaker(platform, makerAddress.value, originAddress?.value, status, continuation, safeSize)
+        }
+
+        val combinedSlice = Paging(
+            OrderContinuation.ByLastUpdatedAndIdDesc,
+            blockchainSlices.flatMap { it.entities }
+        ).getSlice(safeSize)
+
+        logger.info(
+            "Response for getSellOrdersByMaker" +
+                    "(maker={}, platform={}, maker={}, origin={}, status={}, continuation={}, size={}): " +
+                    "Slice(size={}, continuation={})",
+            maker, platform, maker, origin, status, continuation, size, combinedSlice.entities.size, combinedSlice.continuation
+        )
+
+        return toDto(combinedSlice)
     }
 
     private suspend fun getMultiCurrencyOrdersForItem(
@@ -169,4 +369,23 @@ class OrderApiService(
         OrderSortDto.LAST_UPDATE_DESC, null -> OrderContinuation.ByLastUpdatedAndIdDesc
     }
 
+    private fun safeAddress(id: String?): UnionAddress? {
+        return if (id == null) null else IdParser.parseAddress(id)
+    }
+
+    private fun ensureSameBlockchain(vararg blockchains: BlockchainGroupDto?): Boolean {
+        return ensureSameBlockchain(blockchains.asList())
+    }
+
+    private fun ensureSameBlockchain(blockchains: Collection<BlockchainGroupDto?>): Boolean {
+        val set = blockchains.filterNotNull().toSet()
+        return set.size == 1
+    }
+
+    private fun toDto(slice: Slice<OrderDto>): OrdersDto {
+        return OrdersDto(
+            continuation = slice.continuation,
+            orders = slice.entities
+        )
+    }
 }

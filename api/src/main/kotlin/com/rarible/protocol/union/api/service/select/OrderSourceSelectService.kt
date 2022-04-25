@@ -4,13 +4,19 @@ import com.rarible.protocol.union.api.service.OrderQueryService
 import com.rarible.protocol.union.api.service.api.OrderApiService
 import com.rarible.protocol.union.api.service.elastic.OrderElasticService
 import com.rarible.protocol.union.core.FeatureFlagsProperties
+import com.rarible.protocol.union.core.service.OrderService
+import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
+import com.rarible.protocol.union.dto.OrderIdsDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
+import com.rarible.protocol.union.dto.OrdersDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
+import com.rarible.protocol.union.dto.parser.IdParser
+import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 
 @Service
@@ -20,46 +26,90 @@ class OrderSourceSelectService(
     private val orderElasticService: OrderElasticService,
 ): OrderQueryService {
 
-    override suspend fun getByIds(ids: List<OrderIdDto>): List<OrderDto> {
-        return getQuerySource().getByIds(ids)
+    /**
+     * Should always route to OrderApiService
+     */
+    suspend fun getOrderById(id: String): OrderDto {
+        return orderApiService.getOrderById(id)
+    }
+
+    /**
+     * Should always route to OrderApiService
+     */
+    suspend fun getByIds(orderIdsDto: OrderIdsDto): List<OrderDto> {
+        return orderApiService.getByIds(orderIdsDto)
     }
 
     override suspend fun getOrdersAll(
         blockchains: List<BlockchainDto>?,
         continuation: String?,
-        size: Int,
+        size: Int?,
         sort: OrderSortDto?,
         status: List<OrderStatusDto>?
-    ): Slice<OrderDto> {
+    ): OrdersDto {
         return getQuerySource().getOrdersAll(blockchains, continuation, size, sort, status)
     }
 
     override suspend fun getSellOrdersByItem(
-        blockchain: BlockchainDto,
         itemId: String,
         platform: PlatformDto?,
         maker: String?,
         origin: String?,
         status: List<OrderStatusDto>?,
         continuation: String?,
-        size: Int
-    ): Slice<OrderDto> {
-        return getQuerySource().getSellOrdersByItem(blockchain, itemId, platform, maker, origin, status, continuation, size)
+        size: Int?
+    ): OrdersDto {
+        return getQuerySource().getSellOrdersByItem(itemId, platform, maker, origin, status, continuation, size)
     }
 
     override suspend fun getOrderBidsByItem(
-        blockchain: BlockchainDto,
         itemId: String,
         platform: PlatformDto?,
-        makers: List<String>?,
+        maker: List<String>?,
         origin: String?,
         status: List<OrderStatusDto>?,
         start: Long?,
         end: Long?,
         continuation: String?,
-        size: Int
-    ): Slice<OrderDto> {
-        return getQuerySource().getOrderBidsByItem(blockchain, itemId, platform, makers, origin, status, start, end, continuation, size)
+        size: Int?
+    ): OrdersDto {
+        return getQuerySource().getOrderBidsByItem(itemId, platform, maker, origin, status, start, end, continuation, size)
+    }
+
+    override suspend fun getOrderBidsByMaker(
+        blockchains: List<BlockchainDto>?,
+        platform: PlatformDto?,
+        maker: String,
+        origin: String?,
+        status: List<OrderStatusDto>?,
+        start: Long?,
+        end: Long?,
+        continuation: String?,
+        size: Int?
+    ): OrdersDto {
+        return getQuerySource().getOrderBidsByMaker(blockchains, platform, maker, origin, status, start, end, continuation, size)
+    }
+
+    override suspend fun getSellOrders(
+        blockchains: List<BlockchainDto>?,
+        platform: PlatformDto?,
+        origin: String?,
+        continuation: String?,
+        size: Int?
+    ): OrdersDto {
+        return getQuerySource().getSellOrders(blockchains, platform, origin, continuation, size)
+    }
+
+    override suspend fun getSellOrdersByMaker(
+        maker: String,
+        blockchains: List<BlockchainDto>?,
+        platform: PlatformDto?,
+        origin: String?,
+        continuation: String?,
+        size: Int?,
+        status: List<OrderStatusDto>?
+    ): OrdersDto {
+        return getQuerySource().getSellOrdersByMaker(maker, blockchains, platform, origin, continuation, size, status)
     }
 
     private fun getQuerySource(): OrderQueryService {

@@ -1,15 +1,13 @@
 package com.rarible.protocol.union.api.service.api
 
-import com.rarible.protocol.union.api.service.api.OrderApiService
 import com.rarible.protocol.union.core.converter.ContractAddressConverter
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.EthErc20AssetTypeDto
 import com.rarible.protocol.union.dto.ItemIdDto
-import com.rarible.protocol.union.dto.OrderDto
+import com.rarible.protocol.union.dto.OrdersDto
 import com.rarible.protocol.union.dto.PlatformDto
-import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.enrichment.util.bidCurrencyId
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
@@ -46,7 +44,7 @@ class OrderApiServiceTest {
         val result = getOrderBidsByItem(itemId, null, 10)
 
         assertThat(result.continuation).isNull()
-        assertThat(result.entities).hasSize(0)
+        assertThat(result.orders).hasSize(0)
     }
 
     @Test
@@ -56,7 +54,7 @@ class OrderApiServiceTest {
         val result = getSellOrdersByItem(itemId, null, 10)
 
         assertThat(result.continuation).isNull()
-        assertThat(result.entities).hasSize(0)
+        assertThat(result.orders).hasSize(0)
     }
 
     @Test
@@ -79,15 +77,14 @@ class OrderApiServiceTest {
         val result = getOrderBidsByItem(ethItemId, "${unionOrder.bidCurrencyId}:COMPLETED", 10)
 
         assertThat(result.continuation).isNull()
-        assertThat(result.entities).hasSize(0)
+        assertThat(result.orders).hasSize(0)
     }
 
-    private suspend fun getOrderBidsByItem(itemId: ItemIdDto, continuation: String?, size: Int): Slice<OrderDto> {
+    private suspend fun getOrderBidsByItem(itemId: ItemIdDto, continuation: String?, size: Int): OrdersDto {
         return orderApiService.getOrderBidsByItem(
-            blockchain = BlockchainDto.ETHEREUM,
-            itemId = itemId.value,
+            itemId = itemId.fullId(),
             platform = PlatformDto.RARIBLE,
-            makers = null,
+            maker = null,
             origin = null,
             status = emptyList(),
             start = null,
@@ -97,10 +94,9 @@ class OrderApiServiceTest {
         )
     }
 
-    private suspend fun getSellOrdersByItem(itemId: ItemIdDto, continuation: String?, size: Int): Slice<OrderDto> {
+    private suspend fun getSellOrdersByItem(itemId: ItemIdDto, continuation: String?, size: Int): OrdersDto {
         return orderApiService.getSellOrdersByItem(
-            blockchain = BlockchainDto.ETHEREUM,
-            itemId = itemId.value,
+            itemId = itemId.fullId(),
             platform = PlatformDto.RARIBLE,
             maker = null,
             origin = null,
