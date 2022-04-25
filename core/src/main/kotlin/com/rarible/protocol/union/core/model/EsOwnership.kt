@@ -1,7 +1,8 @@
 package com.rarible.protocol.union.core.model
 
 import com.rarible.protocol.union.core.model.elasticsearch.EntityDefinition
-import com.rarible.protocol.union.core.model.elasticsearch.EsEntitiesConfig
+import com.rarible.protocol.union.core.model.elasticsearch.EsEntitiesConfig.INDEX_SETTINGS
+import com.rarible.protocol.union.core.model.elasticsearch.EsEntitiesConfig.loadMapping
 import com.rarible.protocol.union.dto.BlockchainDto
 import org.springframework.data.annotation.Id
 import org.springframework.data.elasticsearch.annotations.Field
@@ -20,7 +21,15 @@ data class EsOwnership(
 ) {
     companion object {
         const val NAME = "ownership"
-        const val VERSION: Int = 1
-        val ENTITY_DEFINITION = EntityDefinition(name = NAME, mapping = EsEntitiesConfig.loadMapping(NAME), VERSION)
+        private const val REINDEX_TASK_NAME = "OWNERSHIP_REINDEX"
+        private const val VERSION: Int = 1
+        val ENTITY_DEFINITION =
+            EntityDefinition(
+                name = NAME,
+                mapping = loadMapping(NAME),
+                versionData = VERSION,
+                settings = INDEX_SETTINGS,
+                reindexTaskName = REINDEX_TASK_NAME
+            )
     }
 }

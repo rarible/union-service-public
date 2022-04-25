@@ -2,9 +2,12 @@ package com.rarible.protocol.union.worker.task
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import com.rarible.core.application.ApplicationEnvironmentInfo
 import com.rarible.core.test.data.randomAddress
 import com.rarible.protocol.union.api.client.ActivityControllerApi
 import com.rarible.protocol.union.core.converter.EsActivityConverter
+import com.rarible.protocol.union.core.elasticsearch.EsNameResolver
+import com.rarible.protocol.union.core.elasticsearch.IndexService
 import com.rarible.protocol.union.core.model.EsActivity
 import com.rarible.protocol.union.dto.ActivitiesDto
 import com.rarible.protocol.union.dto.ActivityIdDto
@@ -17,8 +20,6 @@ import com.rarible.protocol.union.worker.config.SearchReindexerConfiguration
 import com.rarible.protocol.union.worker.config.SearchReindexerProperties
 import com.rarible.protocol.union.worker.task.search.ParamFactory
 import com.rarible.protocol.union.worker.task.search.activity.ActivityTask
-import com.rarible.protocol.union.worker.task.search.activity.ActivityTaskParam
-import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
@@ -31,13 +32,27 @@ import kotlin.random.Random
 
 class ActivityTaskUnitTest {
 
-    val esActivityRepository = mockk<EsActivityRepository> {
-        coEvery {
-            saveAll(any(), "activity_test_index")
-        } answers { arg(0) }
+    private val esNameResolver = EsNameResolver(ApplicationEnvironmentInfo("test", "test.com"))
+
+    private val esActivityRepository = mockk<EsActivityRepository> {
+        every {
+            runBlocking {
+                saveAll(any())
+            }
+        } answers {
+            emptyList()
+        }
+
+        every { entityDefinition } answers { esNameResolver.createEntityDefinitionExtended(EsActivity.ENTITY_DEFINITION) }
+
+        every { runBlocking { refresh() } } answers {}
     }
 
-    val converter = mockk<EsActivityConverter> {
+    private val indexService = mockk<IndexService> {
+        every { runBlocking { finishIndexing(any(), any()) } } answers {}
+    }
+
+    private val converter = mockk<EsActivityConverter> {
         every {
             convert(any<OrderListActivityDto>())
         } returns EsActivity(
@@ -55,7 +70,7 @@ class ActivityTaskUnitTest {
         )
     }
 
-    val activityClient = mockk<ActivityControllerApi> {
+    private val activityClient = mockk<ActivityControllerApi> {
         every {
             getAllActivities(
                 listOf(ActivityTypeDto.LIST),
@@ -98,9 +113,10 @@ class ActivityTaskUnitTest {
             val task = ActivityTask(
                 SearchReindexerConfiguration(SearchReindexerProperties()),
                 activityClient,
-                esActivityRepository,
+                ParamFactory(jacksonObjectMapper().registerKotlinModule()),
                 converter,
-                ParamFactory(jacksonObjectMapper().registerKotlinModule())
+                esActivityRepository,
+                indexService
             )
 
             task.runLongTask(
@@ -119,8 +135,9 @@ class ActivityTaskUnitTest {
                 )
 
                 converter.convert(any<OrderListActivityDto>())
-
-                esActivityRepository.saveAll(any(), "activity_test_index")
+                esActivityRepository.saveAll(any())
+                esActivityRepository.refresh()
+                indexService.finishIndexing(any(), any())
             }
         }
     }
@@ -130,9 +147,10 @@ class ActivityTaskUnitTest {
         val task = ActivityTask(
             SearchReindexerConfiguration(SearchReindexerProperties()),
             activityClient,
-            esActivityRepository,
+            ParamFactory(jacksonObjectMapper().registerKotlinModule()),
             converter,
-            ParamFactory(jacksonObjectMapper().registerKotlinModule())
+            esActivityRepository,
+            indexService
         )
 
         task.runLongTask(
@@ -141,6 +159,7 @@ class ActivityTaskUnitTest {
         ).toList()
 
         coVerify {
+
             activityClient.getAllActivities(
                 listOf(ActivityTypeDto.LIST),
                 listOf(BlockchainDto.ETHEREUM),
@@ -151,8 +170,9 @@ class ActivityTaskUnitTest {
             )
 
             converter.convert(any<OrderListActivityDto>())
-
-            esActivityRepository.saveAll(any(), "activity_test_index")
+            esActivityRepository.saveAll(any())
+            esActivityRepository.refresh()
+            indexService.finishIndexing(any(), any())
         }
     }
 

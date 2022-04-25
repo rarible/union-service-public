@@ -5,7 +5,7 @@ import com.rarible.protocol.union.core.model.elasticsearch.EntityDefinitionExten
 enum class EsEntityMetadataType(val suffix: String) {
     MAPPING("_mapping"),
     SETTINGS("_settings"),
-    VERSION_DATA("_version_data"),
+    VERSION_DATA("_version"),
 }
 
 fun EsEntityMetadataType.getId(entityDefinition: EntityDefinitionExtended) = entityDefinition.name + suffix

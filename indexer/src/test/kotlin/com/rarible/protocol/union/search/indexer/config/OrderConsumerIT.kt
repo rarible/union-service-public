@@ -6,6 +6,7 @@ import com.rarible.core.test.data.randomString
 import com.rarible.core.test.wait.Wait
 import com.rarible.protocol.union.dto.OrderEventDto
 import com.rarible.protocol.union.dto.OrderUpdateEventDto
+import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
 import com.rarible.protocol.union.enrichment.repository.search.EsOrderRepository
 import com.rarible.protocol.union.search.indexer.test.IntegrationTest
 import com.rarible.protocol.union.search.indexer.test.orderEth
@@ -13,6 +14,8 @@ import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration
+import org.springframework.test.context.ContextConfiguration
 import java.time.Duration
 import java.time.temporal.ChronoUnit
 

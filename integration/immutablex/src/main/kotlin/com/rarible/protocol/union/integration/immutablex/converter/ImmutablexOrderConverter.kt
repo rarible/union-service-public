@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.integration.immutablex.converter
 
 import com.rarible.core.common.nowMillis
+import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.core.util.evalMakePrice
 import com.rarible.protocol.union.core.util.evalTakePrice
 import com.rarible.protocol.union.dto.AssetDto
@@ -20,13 +21,12 @@ import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.group
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexOrder
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexOrderSide
-import java.math.BigDecimal
-import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.math.BigDecimal
 
 class ImmutablexOrderConverter {
 
-    private val logger: Logger = LoggerFactory.getLogger(javaClass)
+    private val logger by Logger()
 
     fun convert(order: ImmutablexOrder, blockchain: BlockchainDto): OrderDto {
         return try {
@@ -95,7 +95,7 @@ class ImmutablexOrderConverter {
         )
     }
 
-    private fun convertStatus(order: ImmutablexOrder): OrderStatusDto = when(order.status) {
+    private fun convertStatus(order: ImmutablexOrder): OrderStatusDto = when (order.status) {
         "active" -> OrderStatusDto.ACTIVE
         "inactive" -> OrderStatusDto.INACTIVE
         "filled" -> OrderStatusDto.FILLED
@@ -104,7 +104,7 @@ class ImmutablexOrderConverter {
     }
 
     private fun makeAsset(side: ImmutablexOrderSide, blockchain: BlockchainDto): AssetDto {
-        val assetType = when(side.type) {
+        val assetType = when (side.type) {
             "ERC721" -> EthErc721AssetTypeDto(
                 tokenId = side.data.tokenId!!.toBigInteger(),
                 contract = ContractAddress(blockchain, side.data.tokenAddress!!)

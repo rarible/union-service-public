@@ -6,6 +6,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.rarible.core.application.ApplicationEnvironmentInfo
 import com.rarible.core.kafka.RaribleKafkaConsumer
 import com.rarible.core.kafka.RaribleKafkaProducer
+import com.rarible.core.logging.Logger
 import com.rarible.core.test.ext.KafkaTestExtension
 import com.rarible.protocol.dto.NftItemEventDto
 import com.rarible.protocol.dto.NftItemEventTopicProvider
@@ -13,7 +14,7 @@ import com.rarible.protocol.dto.NftOwnershipEventDto
 import com.rarible.protocol.dto.NftOwnershipEventTopicProvider
 import com.rarible.protocol.union.api.configuration.WebSocketConfiguration
 import com.rarible.protocol.union.core.elasticsearch.EsNameResolver
-import com.rarible.protocol.union.core.elasticsearch.IndexMetadataService
+import com.rarible.protocol.union.core.elasticsearch.IndexService
 import com.rarible.protocol.union.core.elasticsearch.NoopReindexSchedulingService
 import com.rarible.protocol.union.core.elasticsearch.bootstrap.ElasticsearchBootstraper
 import com.rarible.protocol.union.core.model.elasticsearch.EsEntitiesConfig
@@ -26,18 +27,17 @@ import com.rarible.protocol.union.dto.UnionEventTopicProvider
 import com.rarible.protocol.union.subscriber.UnionKafkaJsonDeserializer
 import com.rarible.protocol.union.subscriber.UnionKafkaJsonSerializer
 import org.apache.kafka.clients.consumer.OffsetResetStrategy
-import org.elasticsearch.client.RestHighLevelClient
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.web.context.WebServerInitializedEvent
 import org.springframework.context.ApplicationListener
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
 import org.springframework.core.io.buffer.DefaultDataBufferFactory
+import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations
 import org.springframework.web.reactive.socket.WebSocketMessage
 import org.springframework.web.reactive.socket.client.ReactorNettyWebSocketClient
 import reactor.core.publisher.Sinks
@@ -66,17 +66,19 @@ class MockContext : ApplicationListener<WebServerInitializedEvent> {
         .onBackpressureBuffer()
 
     @Bean(initMethod = "bootstrap")
+    @ConditionalOnMissingBean
     fun elasticsearchBootstrap(
-        elasticsearchHighLevelClient: RestHighLevelClient,
+        reactiveElasticSearchOperations: ReactiveElasticsearchOperations,
         esNameResolver: EsNameResolver,
-        indexMetadataService: IndexMetadataService
+        indexService: IndexService
     ): ElasticsearchBootstraper {
 
         return ElasticsearchBootstraper(
             esNameResolver = esNameResolver,
-            client = elasticsearchHighLevelClient,
+            esOperations = reactiveElasticSearchOperations,
             entityDefinitions = EsEntitiesConfig.createEsEntities(),
-            reindexSchedulingService = NoopReindexSchedulingService(indexMetadataService),
+            reindexSchedulingService = NoopReindexSchedulingService(indexService),
+            indexService = indexService,
             forceUpdate = emptySet()
         )
     }
@@ -185,7 +187,7 @@ class MockContext : ApplicationListener<WebServerInitializedEvent> {
     }
 
     companion object {
-        val logger: Logger = LoggerFactory.getLogger(MockContext::class.java)
+        private val logger by Logger()
     }
 }
 

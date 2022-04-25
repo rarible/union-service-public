@@ -5,8 +5,6 @@ import com.rarible.protocol.union.core.model.EsOwnership
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.elasticsearch.action.admin.indices.refresh.RefreshRequest
-import org.elasticsearch.client.RequestOptions
-import org.elasticsearch.client.RestHighLevelClient
 import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations
 import org.springframework.data.elasticsearch.core.query.Criteria
 import org.springframework.data.elasticsearch.core.query.CriteriaQuery
@@ -15,7 +13,6 @@ import java.io.IOException
 
 @Component
 class EsOwnershipRepository(
-    private val elasticClient: RestHighLevelClient,
     private val esOperations: ReactiveElasticsearchOperations,
     esNameResolver: EsNameResolver
 ) {
@@ -39,11 +36,11 @@ class EsOwnershipRepository(
         ).awaitFirstOrNull()
     }
 
-    fun refresh() {
+    suspend fun refresh() {
         val refreshRequest = RefreshRequest().indices(entityDefinition.aliasName, entityDefinition.writeAliasName)
 
         try {
-            elasticClient.indices().refresh(refreshRequest, RequestOptions.DEFAULT)
+            esOperations.execute { it.indices().refreshIndex(refreshRequest) }.awaitFirstOrNull()
         } catch (e: IOException) {
             throw RuntimeException(entityDefinition.writeAliasName + " refreshModifyIndex failed", e)
         }

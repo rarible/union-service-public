@@ -4,6 +4,7 @@ import com.rarible.core.task.RunTask
 import com.rarible.core.task.TaskHandler
 import com.rarible.protocol.union.api.client.CollectionControllerApi
 import com.rarible.protocol.union.core.converter.EsCollectionConverter
+import com.rarible.protocol.union.core.model.EsCollection
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.repository.search.EsCollectionRepository
 import kotlinx.coroutines.flow.Flow
@@ -16,12 +17,12 @@ class CollectionTask(
     private val ableToRun: Boolean,
     private val client: CollectionControllerApi,
     private val repository: EsCollectionRepository
-): TaskHandler<String> {
+) : TaskHandler<String> {
 
-    private val tasksByParam = activeBlockchains.associateBy { "${COLLECTION_REINDEX}_${it.name}" }
+    private val tasksByParam = activeBlockchains.associateBy { "${type}_${it.name}" }
 
     override val type: String
-        get() = COLLECTION_REINDEX
+        get() = EsCollection.ENTITY_DEFINITION.reindexTaskName
 
     override fun getAutorunParams(): List<RunTask> {
         return tasksByParam.keys.map { RunTask(it) }
@@ -49,7 +50,6 @@ class CollectionTask(
     }
 
     companion object {
-        private const val COLLECTION_REINDEX = "COLLECTION_REINDEX"
         private const val PAGE_SIZE = 1000
     }
 }

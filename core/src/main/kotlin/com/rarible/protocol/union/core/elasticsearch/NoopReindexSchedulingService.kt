@@ -3,16 +3,15 @@ package com.rarible.protocol.union.core.elasticsearch
 import com.rarible.protocol.union.core.model.elasticsearch.EntityDefinitionExtended
 
 class NoopReindexSchedulingService(
-    private val indexMetadataService: IndexMetadataService
+    private val indexService: IndexService
 ) : ReindexSchedulingService {
-    override fun scheduleReindex(
+
+    override suspend fun scheduleReindex(
         newIndexName: String,
-        entityDefinition: EntityDefinitionExtended,
-        indexSettings: String
+        entityDefinition: EntityDefinitionExtended
     ) {
-        indexMetadataService.updateMetadata(
-            entityDefinition = entityDefinition,
-            settings = indexSettings
+        indexService.updateMetadata(
+            entityDefinition = entityDefinition
         )
     }
 }
