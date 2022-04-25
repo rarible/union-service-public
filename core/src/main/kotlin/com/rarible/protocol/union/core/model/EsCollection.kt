@@ -1,9 +1,9 @@
 package com.rarible.protocol.union.core.model
 
+import com.rarible.protocol.union.core.model.elasticsearch.EntityDefinition
+import com.rarible.protocol.union.core.model.elasticsearch.EsEntitiesConfig.loadMapping
 import org.springframework.data.annotation.Id
-import org.springframework.data.elasticsearch.annotations.Document
 
-@Document(indexName = "collection", createIndex = false)
 data class EsCollection(
     @Id
     val collectionId: String,
@@ -20,6 +20,10 @@ data class EsCollection(
         val description: String? = null,
         val feeRecipient: String? = null
     )
+
+    companion object {
+        const val NAME = "collection"
+        private const val VERSION = 1
+        val ENTITY_DEFINITION = EntityDefinition(name = NAME, mapping = loadMapping(NAME), VERSION)
+    }
 }
-
-

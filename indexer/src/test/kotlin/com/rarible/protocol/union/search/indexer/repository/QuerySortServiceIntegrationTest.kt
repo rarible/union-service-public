@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.search.indexer.repository
 
-import com.rarible.protocol.union.core.model.ElasticActivityQueryGenericFilter
 import com.rarible.protocol.union.core.model.EsActivity
 import com.rarible.protocol.union.core.model.EsActivitySort
 import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
@@ -8,14 +7,12 @@ import com.rarible.protocol.union.enrichment.repository.search.EsActivityReposit
 import com.rarible.protocol.union.enrichment.repository.search.internal.EsQuerySortService
 import com.rarible.protocol.union.enrichment.test.data.randomEsActivity
 import com.rarible.protocol.union.search.indexer.test.IntegrationTest
-import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration
-import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder
 import org.springframework.test.context.ContextConfiguration
 import java.time.Instant

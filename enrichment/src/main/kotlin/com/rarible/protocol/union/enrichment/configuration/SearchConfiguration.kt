@@ -1,7 +1,10 @@
 package com.rarible.protocol.union.enrichment.configuration
 
+import com.rarible.protocol.union.core.elasticsearch.EsNameResolver
+import com.rarible.protocol.union.core.elasticsearch.IndexMetadataService
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Import
 import org.springframework.core.convert.converter.Converter
 import org.springframework.data.convert.ReadingConverter
 import org.springframework.data.convert.WritingConverter
@@ -9,7 +12,8 @@ import org.springframework.data.elasticsearch.core.convert.ElasticsearchCustomCo
 import java.math.BigInteger
 
 @Configuration
-class SearchConfiguration  {
+@Import(EsNameResolver::class, IndexMetadataService::class)
+class SearchConfiguration {
     @Bean
     fun elasticsearchCustomConversions(): ElasticsearchCustomConversions {
         return ElasticsearchCustomConversions(listOf(BigIntegerWriter(), BigIntegerReader()))
@@ -18,7 +22,6 @@ class SearchConfiguration  {
     @WritingConverter
     internal class BigIntegerWriter : Converter<BigInteger, String> {
         override fun convert(source: BigInteger) = source.toString()
-
     }
 
     @ReadingConverter

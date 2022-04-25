@@ -1,17 +1,17 @@
 package com.rarible.protocol.union.core.model
 
+import com.rarible.protocol.union.core.model.elasticsearch.EntityDefinition
+import com.rarible.protocol.union.core.model.elasticsearch.EsEntitiesConfig.loadMapping
 import com.rarible.protocol.union.dto.AssetTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.UnionAddress
 import org.springframework.data.annotation.Id
-import org.springframework.data.elasticsearch.annotations.Document
 import org.springframework.data.elasticsearch.annotations.Field
 import org.springframework.data.elasticsearch.annotations.FieldType
 import java.time.Instant
 
-@Document(indexName = "order", createIndex = false)
 class EsOrder(
     @Id
     val orderId: String, // blockchain:value
@@ -40,4 +40,9 @@ class EsOrder(
         SELL, BID
     }
 
+    companion object {
+        const val NAME = "order"
+        private const val VERSION = 1
+        val ENTITY_DEFINITION = EntityDefinition(name = NAME, mapping = loadMapping(NAME), VERSION)
+    }
 }

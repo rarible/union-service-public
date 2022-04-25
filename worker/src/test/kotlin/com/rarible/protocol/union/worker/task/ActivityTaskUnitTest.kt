@@ -1,18 +1,17 @@
-package com.rarible.protocol.union.search.reindexer.task
+package com.rarible.protocol.union.worker.task
 
 import com.rarible.core.test.data.randomAddress
 import com.rarible.protocol.union.api.client.ActivityControllerApi
+import com.rarible.protocol.union.core.converter.EsActivityConverter
+import com.rarible.protocol.union.core.model.EsActivity
 import com.rarible.protocol.union.dto.ActivitiesDto
 import com.rarible.protocol.union.dto.ActivityIdDto
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderListActivityDto
-import com.rarible.protocol.union.core.model.EsActivity
-import com.rarible.protocol.union.core.converter.EsActivityConverter
 import com.rarible.protocol.union.worker.config.SearchReindexerConfiguration
 import com.rarible.protocol.union.worker.config.SearchReindexerProperties
-import com.rarible.protocol.union.worker.task.ActivityTask
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -45,7 +44,7 @@ class ActivityTaskUnitTest {
             Random(0).nextLong(),
             BlockchainDto.ETHEREUM,
             ActivityTypeDto.LIST,
-                "0x01",
+            "0x01",
             null,
             "0xc0",
             "0xa0",
@@ -64,10 +63,11 @@ class ActivityTaskUnitTest {
             )
         } returns Mono.just(
             ActivitiesDto(
-            "ETHEREUM:cursor_1", "ETHEREUM:cursor_1", listOf(
-                mockk()
+                "ETHEREUM:cursor_1", "ETHEREUM:cursor_1", listOf(
+                    mockk()
+                )
             )
-        ))
+        )
 
         every {
             getAllActivities(
@@ -83,7 +83,8 @@ class ActivityTaskUnitTest {
                 null, null, listOf(
                     mockk()
                 )
-            ))
+            )
+        )
     }
 
     @Test

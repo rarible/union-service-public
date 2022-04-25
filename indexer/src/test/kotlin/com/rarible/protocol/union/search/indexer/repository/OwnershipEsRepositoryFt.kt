@@ -28,6 +28,9 @@ internal class OwnershipEsRepositoryFt {
         assertThat(actual).isEqualTo(expected)
 
         repository.deleteAll(listOf(expected.ownershipId))
+
+        repository.refresh()
+
         val deleted = repository.findById(expected.ownershipId)
         assertNull(deleted)
     }
