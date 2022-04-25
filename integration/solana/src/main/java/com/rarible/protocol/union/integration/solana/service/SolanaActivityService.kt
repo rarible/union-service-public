@@ -18,8 +18,9 @@ import com.rarible.protocol.union.dto.UserActivityTypeDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.integration.solana.converter.SolanaActivityConverter
 import com.rarible.protocol.union.integration.solana.converter.SolanaConverter
-import kotlinx.coroutines.reactive.awaitFirst
 import java.time.Instant
+import kotlinx.coroutines.reactive.awaitFirst
+import kotlinx.coroutines.reactive.awaitSingle
 
 @CaptureSpan(type = "blockchain")
 open class SolanaActivityService(
@@ -98,7 +99,10 @@ open class SolanaActivityService(
     }
 
     override suspend fun getActivitiesByIds(ids: List<TypedActivityId>): List<ActivityDto> {
-        TODO("To be implemented under ALPHA-276")
+        return activityApi.searchActivitiesByIds(ids.map { it.id })
+            .awaitSingle().activities.map {
+                activityConverter.convert(it, blockchain)
+            }
     }
 
     private suspend fun searchActivities(
