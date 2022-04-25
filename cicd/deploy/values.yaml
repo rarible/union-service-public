@@ -59,7 +59,7 @@ protocol-union-meta-loader:
 
 protocol-union-search-indexer:
   image:
-    repository: union-service-search-indexer
+    repository: union-service-indexer
   environments:
     APPLICATION_ENVIRONMENT: '{{ include "service.appEnv" $ }}'
     CONSUL_ROOT_PATH: '{{ include "service.appEnv" $ }}/protocol/union'
