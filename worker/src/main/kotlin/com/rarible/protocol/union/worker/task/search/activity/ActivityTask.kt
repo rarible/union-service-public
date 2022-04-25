@@ -15,17 +15,16 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.reactive.awaitFirst
 import scala.annotation.meta.param
+import org.springframework.stereotype.Component
 
+@Component
 class ActivityTask(
     private val config: SearchReindexerConfiguration,
-    private val activityClient: ActivityControllerApi,
     private val paramFactory: ParamFactory,
-    private val converter: EsActivityConverter,
+    private val activityReindexService: ActivityReindexService,
     private val repository: EsActivityRepository,
     private val indexService: IndexService,
-
-    ) : TaskHandler<String> {
-
+): TaskHandler<String> {
     private val entityDefinition = repository.entityDefinition
 
     override val type: String
@@ -43,31 +42,16 @@ class ActivityTask(
         return if(from == "") {
             emptyFlow()
         } else {
-            val taskParam = paramFactory.parse<ActivityTaskParam>(param)
-            flow {
-                val res = fetch(taskParam, from)
-                repository.saveAll(res.activities.mapNotNull(converter::convert))
-                logger.info("Reindex of ${entityDefinition.name} entities ${res.activities.size} continuation ${res.continuation}")
-                emit(res.cursor ?: "")
-            }.onCompletion {
-                indexService.finishIndexing(taskParam.index, entityDefinition)
-                repository.refresh()
-                logger.info("Finished reindex of ${entityDefinition.name} with param $param")
-            }
+            val param = paramFactory.parse<ActivityTaskParam>(param)
+            return activityReindexService
+                .reindex(param.blockchain, param.activityType, param.index, from)
+                .onCompletion {
+                    indexService.finishIndexing(taskParam.index, entityDefinition)
+                    repository.refresh()
+                    logger.info("Finished reindex of ${entityDefinition.name} with param $param")
+                }
         }
     }
-
-    private suspend fun fetch(
-        taskParam: ActivityTaskParam,
-        from: String?
-    ) = activityClient.getAllActivities(
-        listOf(taskParam.activityType),
-        listOf(taskParam.blockchain),
-        from,
-        from,
-        PAGE_SIZE,
-        ActivitySortDto.EARLIEST_FIRST
-    ).awaitFirst()
 
     companion object {
         const val PAGE_SIZE = 1000
