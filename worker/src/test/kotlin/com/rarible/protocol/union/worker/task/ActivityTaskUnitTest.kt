@@ -14,7 +14,7 @@ import com.rarible.protocol.union.enrichment.repository.search.EsActivityReposit
 import com.rarible.protocol.union.worker.config.SearchReindexerConfiguration
 import com.rarible.protocol.union.worker.config.SearchReindexerProperties
 import com.rarible.protocol.union.worker.task.search.activity.ActivityTask
-import com.rarible.protocol.union.worker.task.search.activity.ActivityTaskState
+import com.rarible.protocol.union.worker.task.search.activity.ActivityTaskParam
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -100,7 +100,7 @@ class ActivityTaskUnitTest {
             )
 
             task.runLongTask(
-                ActivityTaskState(BlockchainDto.ETHEREUM, ActivityTypeDto.LIST, "activity_test_index"),
+                ActivityTaskParam(BlockchainDto.ETHEREUM, ActivityTypeDto.LIST, "activity_test_index"),
                 "ACTIVITY_ETHEREUM_LIST"
             ).toList()
 
@@ -131,7 +131,7 @@ class ActivityTaskUnitTest {
         )
 
         task.runLongTask(
-            ActivityTaskState(BlockchainDto.ETHEREUM, ActivityTypeDto.LIST, "activity_test_index", "ETHEREUM:cursor_1"),
+            ActivityTaskParam(BlockchainDto.ETHEREUM, ActivityTypeDto.LIST, "activity_test_index", "ETHEREUM:cursor_1"),
             "ACTIVITY_ETHEREUM_LIST"
         ).toList()
 

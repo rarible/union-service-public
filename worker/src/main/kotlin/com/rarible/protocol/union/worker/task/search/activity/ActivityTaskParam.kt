@@ -11,13 +11,12 @@ import com.rarible.protocol.union.dto.BlockchainDto
  * @param index elasticsearch index name, including environment, version, etc.
  * @param cursor next request cursor
  */
-data class ActivityTaskState(
+data class ActivityTaskParam(
     val blockchain: BlockchainDto,
     val activityType: ActivityTypeDto,
     val index: String? = null,
-    val cursor: String? = null
 ) {
-    fun next(cursor: String?): ActivityTaskState {
-        return copy(cursor = cursor)
+    override fun toString(): String {
+        return super.toString()
     }
 }

@@ -6,7 +6,7 @@ import com.rarible.core.task.TaskRepository
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.worker.task.search.activity.ActivityTask
-import com.rarible.protocol.union.worker.task.search.activity.ActivityTaskState
+import com.rarible.protocol.union.worker.task.search.activity.ActivityTaskParam
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactor.awaitSingle
 import org.springframework.stereotype.Component
@@ -30,7 +30,7 @@ class ReindexerService(
             Task(
                 ActivityTask.ACTIVITY_REINDEX,
                 "",
-                ActivityTaskState(blockchain, activityType, indexName, cursor),
+                ActivityTaskParam(blockchain, activityType, indexName, cursor),
                 false
             )
         ).awaitSingle()
@@ -50,7 +50,7 @@ class ReindexerService(
             Task(
                 ActivityTask.ACTIVITY_REINDEX,
                 "",
-                ActivityTaskState(blockchain, activity, indexName),
+                ActivityTaskParam(blockchain, activity, indexName),
                 false
             )
         }
