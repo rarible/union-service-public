@@ -22,16 +22,20 @@ class EsActivityQueryCursorService {
             mustDiffer(EsActivity::date.name, cursor.date, sort)
         )
         // date == cursor && blockNumber <> cursor OR
-        cursorQuery.shouldAll(
-            { this.mustEqual(EsActivity::date.name, cursor.date) },
-            { this.mustDiffer(EsActivity::blockNumber.name, cursor.blockNumber, sort) }
-        )
+        if (cursor.blockNumber != null) {
+            cursorQuery.shouldAll(
+                { this.mustEqual(EsActivity::date.name, cursor.date) },
+                { this.mustDiffer(EsActivity::blockNumber.name, cursor.blockNumber, sort) }
+            )
+        }
         // date == cursor && blockNumber == cursor && logIndex <> cursor OR
-        cursorQuery.shouldAll(
-            { this.mustEqual(EsActivity::date.name, cursor.date) },
-            { this.mustEqual(EsActivity::blockNumber.name, cursor.blockNumber) },
-            { this.mustDiffer(EsActivity::logIndex.name, cursor.logIndex, sort) }
-        )
+        if (cursor.blockNumber != null && cursor.logIndex != null) {
+            cursorQuery.shouldAll(
+                { this.mustEqual(EsActivity::date.name, cursor.date) },
+                { this.mustEqual(EsActivity::blockNumber.name, cursor.blockNumber) },
+                { this.mustDiffer(EsActivity::logIndex.name, cursor.logIndex, sort) }
+            )
+        }
         // date == cursor && blockNumber == cursor && logIndex == cursor && salt <> cursor
         cursorQuery.shouldAll(
             { this.mustEqual(EsActivity::date.name, cursor.date) },

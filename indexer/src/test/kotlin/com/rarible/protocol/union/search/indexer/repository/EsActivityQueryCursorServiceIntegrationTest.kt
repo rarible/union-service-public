@@ -209,6 +209,58 @@ internal class EsActivityQueryCursorServiceIntegrationTest {
         }
     }
 
+    @ParameterizedTest
+    @ValueSource(booleans = [false, true])
+    fun `should query with cursor - same date, null blockNumber, logIndex`(latestFirst: Boolean) = runBlocking<Unit> {
+        // given
+        val builder = NativeSearchQueryBuilder()
+        val boolQuery = BoolQueryBuilder()
+        val gte1 = randomEsActivity().copy(
+            date = Instant.ofEpochMilli(2000),
+            blockNumber = null,
+            logIndex = null,
+            salt = 120,
+        )
+        val gte2 = randomEsActivity().copy(
+            date = Instant.ofEpochMilli(2000),
+            blockNumber = null,
+            logIndex = null,
+            salt = 100,
+        )
+        val lte1 = randomEsActivity().copy(
+            date = Instant.ofEpochMilli(2000),
+            blockNumber = null,
+            logIndex = null,
+            salt = 80,
+        )
+        val lte2 = randomEsActivity().copy(
+            date = Instant.ofEpochMilli(2000),
+            blockNumber = null,
+            logIndex = null,
+            salt = 60,
+        )
+
+        val cursor = EsActivityCursor(
+            date = Instant.ofEpochMilli(2000),
+            blockNumber = null,
+            logIndex = null,
+            salt = 100,
+        )
+        repository.saveAll(listOf(gte1, gte2, lte1, lte2))
+
+        // when
+        service.applyCursor(boolQuery, EsActivitySort(latestFirst), cursor.toString())
+        builder.withQuery(boolQuery)
+        val actual = repository.search(builder.build())
+
+        // then
+        if (latestFirst) {
+            assertThat(actual.activities).containsExactlyInAnyOrder(lte1, lte2)
+        } else {
+            assertThat(actual.activities).containsExactlyInAnyOrder(gte1) // gte2 excluded because cursor points to it
+        }
+    }
+
     @Test
     fun `should skip applying cursor if it is null`() {
         // given
