@@ -129,13 +129,13 @@ internal class ActivityElasticServiceIntegrationTest {
 
             coEvery {
                 ethereumService.getActivitiesByIds(listOf(
-                    TypedActivityId("ETHEREUM:1", ActivityTypeDto.MINT),
-                    TypedActivityId("ETHEREUM:2", ActivityTypeDto.LIST),
+                    TypedActivityId("1", ActivityTypeDto.MINT),
+                    TypedActivityId("2", ActivityTypeDto.LIST),
                 ))
             } returns listOf(eth1, eth2)
             coEvery {
                 flowService.getActivitiesByIds(listOf(
-                    TypedActivityId("FLOW:3", ActivityTypeDto.MINT),
+                    TypedActivityId("3", ActivityTypeDto.MINT),
                 ))
             } returns listOf(flow1)
 
@@ -163,7 +163,7 @@ internal class ActivityElasticServiceIntegrationTest {
             )
             coEvery {
                 ethereumService.getActivitiesByIds(listOf(
-                    TypedActivityId("ETHEREUM:2", ActivityTypeDto.LIST),
+                    TypedActivityId("2", ActivityTypeDto.LIST),
                 ))
             } returns listOf(eth2)
             // when
@@ -190,7 +190,7 @@ internal class ActivityElasticServiceIntegrationTest {
             )
             coEvery {
                 ethereumService.getActivitiesByIds(listOf(
-                    TypedActivityId("ETHEREUM:7", ActivityTypeDto.AUCTION_STARTED),
+                    TypedActivityId("7", ActivityTypeDto.AUCTION_STARTED),
                 ))
             } returns listOf(eth7)
 
@@ -222,8 +222,8 @@ internal class ActivityElasticServiceIntegrationTest {
             )
             coEvery {
                 ethereumService.getActivitiesByIds(listOf(
-                    TypedActivityId("ETHEREUM:1", ActivityTypeDto.MINT),
-                    TypedActivityId("ETHEREUM:7", ActivityTypeDto.AUCTION_STARTED),
+                    TypedActivityId("1", ActivityTypeDto.MINT),
+                    TypedActivityId("7", ActivityTypeDto.AUCTION_STARTED),
                 ))
             } returns listOf(eth1, eth7)
 

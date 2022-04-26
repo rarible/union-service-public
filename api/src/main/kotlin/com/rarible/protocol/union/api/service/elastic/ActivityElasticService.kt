@@ -14,6 +14,8 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
 import com.rarible.protocol.union.core.model.EsActivity
 import com.rarible.protocol.union.core.model.EsActivitySort
+import com.rarible.protocol.union.dto.ActivityIdDto
+import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
 import org.springframework.stereotype.Service
 import java.time.Instant
@@ -120,11 +122,12 @@ class ActivityElasticService(
         val blockchainMap = mutableMapOf<BlockchainDto, MutableList<TypedActivityId>>()
         activities.forEachIndexed { index, activity ->
             positionMap[activity.activityId] = index
+            val id = IdParser.parseActivityId(activity.activityId).value
             blockchainMap.compute(activity.blockchain) { _, v ->
                 if (v == null) {
-                    mutableListOf(TypedActivityId(activity.activityId, activity.type))
+                    mutableListOf(TypedActivityId(id, activity.type))
                 } else {
-                    v.add(TypedActivityId(activity.activityId, activity.type))
+                    v.add(TypedActivityId(id, activity.type))
                     v
                 }
             }
@@ -147,7 +150,7 @@ class ActivityElasticService(
         val mergedResult = arrayOfNulls<ActivityDto>(activities.size)
         results.forEach {
             it.forEach { activity ->
-                val index = positionMap[activity.id.toString()]
+                val index = positionMap[activity.id.fullId()]
                 if (index != null) {
                     mergedResult[index] = activity
                 } else {

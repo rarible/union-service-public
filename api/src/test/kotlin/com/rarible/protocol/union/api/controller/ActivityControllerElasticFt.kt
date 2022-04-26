@@ -161,7 +161,7 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
         coEvery {
             testEthereumActivityOrderApi.getOrderActivitiesById(
                 ActivitiesByIdRequestDto(listOf(
-                    elasticEthOrderActivity3.activityId
+                    ethOrderActivity3.id,
                 ))
             )
         } returns OrderActivitiesDto(null, listOf(ethOrderActivity3)).toMono()
@@ -169,7 +169,7 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
         coEvery {
             testEthereumActivityItemApi.getNftActivitiesById(
                 ActivitiesByIdRequestDto(listOf(
-                    elasticEthItemActivity3.activityId
+                    ethItemActivity3.id,
                 ))
             )
         } returns NftActivitiesDto(null, listOf(ethItemActivity3)).toMono()
@@ -177,7 +177,7 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
         coEvery {
             testPolygonActivityItemApi.getNftActivitiesById(
                 ActivitiesByIdRequestDto(listOf(
-                    elasticPolygonItemActivity1.activityId,
+                    polygonItemActivity1.id,
                 ))
             )
         } returns NftActivitiesDto(null, listOf(polygonItemActivity1)).toMono()
@@ -215,7 +215,7 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
 
         coEvery {
             testEthereumActivityOrderApi.getOrderActivitiesById(
-                ActivitiesByIdRequestDto(ids = listOf(elasticActivity.activityId))
+                ActivitiesByIdRequestDto(ids = listOf(orderActivity.id))
             )
         } returns OrderActivitiesDto(null, listOf(orderActivity)).toMono()
 
@@ -268,19 +268,19 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
 
         coEvery {
             testEthereumActivityOrderApi.getOrderActivitiesById(
-                ActivitiesByIdRequestDto(ids = listOf(elasticOrderActivity.activityId))
+                ActivitiesByIdRequestDto(ids = listOf(orderActivity.id))
             )
         } returns OrderActivitiesDto(null, listOf(orderActivity)).toMono()
 
         coEvery {
             testEthereumActivityAuctionApi.getAuctionActivitiesById(
-                ActivitiesByIdRequestDto(ids = listOf(elasticAuctionActivity.activityId))
+                ActivitiesByIdRequestDto(ids = listOf(auctionActivity.id))
             )
         } returns AuctionActivitiesDto(null, listOf(auctionActivity)).toMono()
 
         coEvery {
             testEthereumActivityItemApi.getNftActivitiesById(
-                ActivitiesByIdRequestDto(ids = listOf(elasticItemActivity.activityId))
+                ActivitiesByIdRequestDto(ids = listOf(itemActivity.id))
             )
         } returns NftActivitiesDto(null, listOf(itemActivity)).toMono()
 
@@ -342,13 +342,13 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
 
         coEvery {
             testEthereumActivityItemApi.getNftActivitiesById(
-                ActivitiesByIdRequestDto(ids = listOf(elasticEthItemActivity.activityId, elasticEthItemActivity2.activityId))
+                ActivitiesByIdRequestDto(ids = listOf(ethItemActivity.id, ethItemActivity2.id))
             )
         } returns NftActivitiesDto(null, listOf(ethItemActivity, ethItemActivity2)).toMono()
 
         coEvery {
             testPolygonActivityItemApi.getNftActivitiesById(
-                ActivitiesByIdRequestDto(ids = listOf(elasticPolygonItemActivity.activityId))
+                ActivitiesByIdRequestDto(ids = listOf(polygonItemActivity.id))
             )
         } returns NftActivitiesDto(null, listOf(polygonItemActivity)).toMono()
 
