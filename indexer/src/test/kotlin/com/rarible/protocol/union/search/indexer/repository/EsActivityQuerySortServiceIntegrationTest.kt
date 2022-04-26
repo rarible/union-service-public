@@ -4,7 +4,7 @@ import com.rarible.protocol.union.core.model.EsActivity
 import com.rarible.protocol.union.core.model.EsActivitySort
 import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
 import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
-import com.rarible.protocol.union.enrichment.repository.search.internal.EsQuerySortService
+import com.rarible.protocol.union.enrichment.repository.search.internal.EsActivityQuerySortService
 import com.rarible.protocol.union.enrichment.test.data.randomEsActivity
 import com.rarible.protocol.union.search.indexer.test.IntegrationTest
 import kotlinx.coroutines.runBlocking
@@ -20,13 +20,13 @@ import java.time.Instant
 @IntegrationTest
 @EnableAutoConfiguration
 @ContextConfiguration(classes = [SearchConfiguration::class])
-internal class QuerySortServiceIntegrationTest {
+internal class EsActivityQuerySortServiceIntegrationTest {
 
     @Autowired
     protected lateinit var repository: EsActivityRepository
 
     @Autowired
-    private lateinit var service: EsQuerySortService
+    private lateinit var service: EsActivityQuerySortService
 
     @BeforeEach
     fun setUp() = runBlocking<Unit> {

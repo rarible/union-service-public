@@ -20,7 +20,7 @@ import java.time.Instant
 @IntegrationTest
 @EnableAutoConfiguration
 @ContextConfiguration(classes = [SearchConfiguration::class])
-internal class ActivityQueryServiceIntegrationTest {
+internal class EsActivityQueryServiceIntegrationTest {
 
     @Autowired
     protected lateinit var repository: EsActivityRepository

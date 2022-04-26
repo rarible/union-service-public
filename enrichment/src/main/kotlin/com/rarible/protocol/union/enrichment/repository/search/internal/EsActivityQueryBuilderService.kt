@@ -15,9 +15,9 @@ import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilde
 import org.springframework.stereotype.Component
 
 @Component
-class EsQueryBuilderService(
-    private val sortService: EsQuerySortService,
-    private val cursorService: EsQueryCursorService,
+class EsActivityQueryBuilderService(
+    private val sortService: EsActivityQuerySortService,
+    private val cursorService: EsActivityQueryCursorService,
 ) {
 
     companion object {

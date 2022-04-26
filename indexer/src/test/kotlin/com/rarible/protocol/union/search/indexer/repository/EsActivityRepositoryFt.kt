@@ -18,7 +18,7 @@ import kotlin.random.Random.Default.nextLong
 @IntegrationTest
 @EnableAutoConfiguration
 @ContextConfiguration(classes = [SearchConfiguration::class])
-internal class ActivityEsRepositoryFt {
+internal class EsActivityRepositoryFt {
 
     @Autowired
     protected lateinit var repository: EsActivityRepository

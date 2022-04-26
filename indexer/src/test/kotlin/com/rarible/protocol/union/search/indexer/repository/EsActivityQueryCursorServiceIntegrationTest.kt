@@ -1,14 +1,12 @@
 package com.rarible.protocol.union.search.indexer.repository
 
-import com.rarible.protocol.union.core.model.EsActivity
 import com.rarible.protocol.union.core.model.EsActivityCursor
 import com.rarible.protocol.union.core.model.EsActivitySort
 import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
 import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
-import com.rarible.protocol.union.enrichment.repository.search.internal.EsQueryCursorService
+import com.rarible.protocol.union.enrichment.repository.search.internal.EsActivityQueryCursorService
 import com.rarible.protocol.union.enrichment.test.data.randomEsActivity
 import com.rarible.protocol.union.search.indexer.test.IntegrationTest
-import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.elasticsearch.index.query.BoolQueryBuilder
@@ -18,8 +16,6 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration
-import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations
-import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder
 import org.springframework.test.context.ContextConfiguration
 import java.time.Instant
@@ -27,13 +23,13 @@ import java.time.Instant
 @IntegrationTest
 @EnableAutoConfiguration
 @ContextConfiguration(classes = [SearchConfiguration::class])
-internal class QueryCursorServiceIntegrationTest {
+internal class EsActivityQueryCursorServiceIntegrationTest {
 
     @Autowired
     protected lateinit var repository: EsActivityRepository
 
     @Autowired
-    private lateinit var service: EsQueryCursorService
+    private lateinit var service: EsActivityQueryCursorService
 
     @BeforeEach
     fun setUp() = runBlocking {

@@ -8,7 +8,7 @@ import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilde
 import org.springframework.stereotype.Component
 
 @Component
-class EsQuerySortService {
+class EsActivityQuerySortService {
 
     fun applySort(builder: NativeSearchQueryBuilder, sort: EsActivitySort) {
         val sortOrder = if (sort.latestFirst) SortOrder.DESC else SortOrder.ASC

@@ -2,7 +2,6 @@ package com.rarible.protocol.union.search.indexer.repository
 
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.core.model.EsActivity
 import com.rarible.protocol.union.core.model.EsActivitySort
 import com.rarible.protocol.union.core.model.ElasticActivityQueryGenericFilter
 import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
@@ -15,14 +14,13 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration
-import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations
 import org.springframework.test.context.ContextConfiguration
 import java.time.Instant
 
 @IntegrationTest
 @EnableAutoConfiguration
 @ContextConfiguration(classes = [SearchConfiguration::class])
-internal class QueryBuilderServiceIntegrationTest {
+internal class EsActivityQueryBuilderServiceIntegrationTest {
 
     @Autowired
     protected lateinit var repository: EsActivityRepository

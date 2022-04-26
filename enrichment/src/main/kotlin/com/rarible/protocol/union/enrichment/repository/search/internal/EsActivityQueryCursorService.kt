@@ -10,7 +10,7 @@ import org.elasticsearch.index.query.TermQueryBuilder
 import org.springframework.stereotype.Component
 
 @Component
-class EsQueryCursorService {
+class EsActivityQueryCursorService {
 
     fun applyCursor(query: BoolQueryBuilder, sort: EsActivitySort, cursorAsString: String?) {
         if (cursorAsString.isNullOrEmpty()) return

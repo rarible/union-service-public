@@ -7,7 +7,7 @@ import com.rarible.protocol.union.core.model.EsActivityCursor.Companion.fromActi
 import com.rarible.protocol.union.core.model.EsActivityQueryResult
 import com.rarible.protocol.union.core.model.EsActivitySort
 import com.rarible.protocol.union.dto.continuation.page.PageSize
-import com.rarible.protocol.union.enrichment.repository.search.internal.EsQueryBuilderService
+import com.rarible.protocol.union.enrichment.repository.search.internal.EsActivityQueryBuilderService
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.elasticsearch.action.admin.indices.refresh.RefreshRequest
@@ -23,7 +23,7 @@ import java.io.IOException
 class EsActivityRepository(
     private val elasticClient: RestHighLevelClient,
     private val esOperations: ReactiveElasticsearchOperations,
-    private val queryBuilderService: EsQueryBuilderService,
+    private val queryBuilderService: EsActivityQueryBuilderService,
     esNameResolver: EsNameResolver
 ) {
 
