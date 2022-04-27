@@ -53,9 +53,7 @@ open class SolanaItemService(
         return royalties.map { SolanaItemConverter.convert(it, blockchain) }
     }
 
-    override suspend fun resetItemMeta(itemId: String) {
-        tokenApi.resetTokenMeta(itemId).awaitFirstOrNull()
-    }
+    override suspend fun resetItemMeta(itemId: String) = Unit
 
     override suspend fun getItemsByCollection(
         collection: String,

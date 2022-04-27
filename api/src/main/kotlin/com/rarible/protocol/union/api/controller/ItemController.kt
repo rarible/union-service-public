@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.api.controller
 
-import com.rarible.core.logging.RaribleMDCContext
 import com.rarible.protocol.union.api.service.ItemApiService
 import com.rarible.protocol.union.api.service.OwnershipApiService
 import com.rarible.protocol.union.api.util.BlockchainFilter
@@ -14,6 +13,7 @@ import com.rarible.protocol.union.core.model.UnionVideoProperties
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.RestrictionService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
+import com.rarible.protocol.union.core.util.LogUtils
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.ItemIdsDto
@@ -33,15 +33,12 @@ import com.rarible.protocol.union.enrichment.meta.UnionMetaService
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.time.withTimeout
-import kotlinx.coroutines.withContext
 import org.slf4j.LoggerFactory
-import org.slf4j.MDC
 import org.springframework.core.io.Resource
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
@@ -164,19 +161,22 @@ class ItemController(
         return ResponseEntity.ok(dto)
     }
 
-    override suspend fun resetItemMeta(itemId: String): ResponseEntity<Unit> {
+    override suspend fun resetItemMeta(itemId: String, sync: Boolean?): ResponseEntity<Unit> {
         val fullItemId = IdParser.parseItemId(itemId)
-        // TODO[meta]: when all Blockchains stop caching the meta, we can remove this endpoint call.
-        val parts = fullItemId.value.split(":")
-        if (parts.size > 1) {
-            addToMdc("contract" to parts[0]) {
-                logger.info("Refreshing item meta for $itemId")
-            }
-        } else {
-            logger.info("Refreshing item meta for $itemId")
+        val safeSync = sync ?: false
+
+        LogUtils.addToMdc(fullItemId) {
+            logger.info("Refreshing item meta for $itemId (sync=$safeSync)")
         }
+
+        // TODO[meta]: when all Blockchains stop caching the meta, we can remove this endpoint call.
         router.getService(fullItemId.blockchain).resetItemMeta(fullItemId.value)
-        unionMetaService.scheduleLoading(fullItemId)
+        if (safeSync) {
+            unionMetaService.loadMetaSynchronously(fullItemId)
+        } else {
+            unionMetaService.scheduleLoading(fullItemId)
+        }
+
         return ResponseEntity.ok().build()
     }
 
@@ -307,14 +307,4 @@ class ItemController(
     }
 }
 
-@ExperimentalCoroutinesApi
-suspend fun <T> addToMdc(vararg values: Pair<String, String>, block: suspend CoroutineScope.() -> T): T {
-    val map = MDC.getCopyOfContextMap()
-    val newValues = mapOf(*values)
-    val resultMap = if (map == null) {
-        newValues
-    } else {
-        newValues + map
-    }
-    return withContext(RaribleMDCContext(resultMap), block)
-}
+

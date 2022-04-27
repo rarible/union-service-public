@@ -236,7 +236,9 @@ abstract class AbstractIntegrationTest {
             testFlowOrderApi,
 
             testItemEventProducer,
-            testOwnershipEventProducer
+            testOwnershipEventProducer,
+
+            testUnionMetaLoader
         )
         ethereumItemControllerApiMock = EthItemControllerApiMock(testEthereumItemApi)
         ethereumOwnershipControllerApiMock = EthOwnershipControllerApiMock(testEthereumOwnershipApi)

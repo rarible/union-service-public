@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.enrichment.meta
 
+import com.rarible.core.apm.CaptureTransaction
 import com.rarible.loader.cache.CacheLoader
 import com.rarible.loader.cache.CacheType
 import com.rarible.protocol.union.core.model.UnionMeta
@@ -14,6 +15,7 @@ class UnionMetaCacheLoader(
     override val type
         get() = TYPE
 
+    @CaptureTransaction
     override suspend fun load(key: String): UnionMeta {
         val itemId = IdParser.parseItemId(key)
         return unionMetaLoader.load(itemId)

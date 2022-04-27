@@ -43,7 +43,7 @@ class UnionMetaServiceTest {
         val content1 = randomUnionContent(UnionImageProperties()).copy(url = "https://rarible.mypinata.com/ipfs/abc")
         // Should stay the same
         val content2 = randomUnionContent(UnionImageProperties()).copy(url = "$ipfsPublicGateway/ipfs/$cid")
-        // CID found, not a legacy ipfs - should be replaced
+        // Not a legacy ipfs - should be kept as is
         val content3 = randomUnionContent(UnionImageProperties()).copy(url = "https://mypinata.com/ipfs/$cid")
 
         val meta = randomUnionMeta().copy(content = listOf(content1, content2, content3))
@@ -52,7 +52,7 @@ class UnionMetaServiceTest {
 
         assertThat(withPublicIpfs.content[0].url).isEqualTo("$ipfsPublicGateway/ipfs/abc")
         assertThat(withPublicIpfs.content[1].url).isEqualTo("$ipfsPublicGateway/ipfs/$cid")
-        assertThat(withPublicIpfs.content[2].url).isEqualTo("$ipfsPublicGateway/ipfs/$cid")
+        assertThat(withPublicIpfs.content[2].url).isEqualTo("https://mypinata.com/ipfs/$cid")
 
     }
 

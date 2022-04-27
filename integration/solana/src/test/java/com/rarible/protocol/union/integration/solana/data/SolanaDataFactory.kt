@@ -2,6 +2,7 @@ package com.rarible.protocol.union.integration.solana.data
 
 import com.rarible.core.common.nowMillis
 import com.rarible.core.test.data.randomBigInt
+import com.rarible.core.test.data.randomBoolean
 import com.rarible.core.test.data.randomInt
 import com.rarible.core.test.data.randomString
 import com.rarible.protocol.solana.dto.BalanceDto
@@ -27,10 +28,13 @@ fun randomTokenCreatorPartDto() = TokenCreatorPartDto(
     share = randomInt()
 )
 
-fun randomSolanaBalanceDto() = BalanceDto(
+fun randomSolanaBalanceDto(
+    isAssociatedTokenAccount: Boolean = randomBoolean()
+) = BalanceDto(
     account = randomString(),
     owner = randomString(),
     mint = randomString(),
+    isAssociatedTokenAccount = isAssociatedTokenAccount,
     createdAt = nowMillis(),
     updatedAt = nowMillis(),
     value = randomBigInt()
