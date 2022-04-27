@@ -1,5 +1,7 @@
 package com.rarible.protocol.union.api.service.elastic
 
+import com.rarible.core.apm.CaptureSpan
+import com.rarible.core.apm.SpanType
 import com.rarible.core.common.mapAsync
 import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.api.service.ActivityQueryService
@@ -21,6 +23,7 @@ import org.springframework.stereotype.Service
 import java.time.Instant
 
 @Service
+@CaptureSpan(type = SpanType.APP)
 class ActivityElasticService(
     private val filterConverter: ActivityFilterConverter,
     private val esActivityRepository: EsActivityRepository,
@@ -31,7 +34,6 @@ class ActivityElasticService(
         private val logger by Logger()
     }
 
-
     override suspend fun getAllActivities(
         type: List<ActivityTypeDto>,
         blockchains: List<BlockchainDto>?,
@@ -40,12 +42,12 @@ class ActivityElasticService(
         size: Int?,
         sort: ActivitySortDto?
     ): ActivitiesDto {
-        logger.debug("getAllActivities() from ElasticSearch")
+        logger.info("getAllActivities() from ElasticSearch")
         val effectiveCursor = cursor ?: continuation
         val filter = filterConverter.convertGetAllActivities(type, blockchains, effectiveCursor)
-        logger.debug("Built filter: $filter")
+        logger.info("Built filter: $filter")
         val queryResult = esActivityRepository.search(filter, convertSort(sort), size)
-        logger.debug("Query result: $queryResult")
+        logger.info("Query result: $queryResult")
         val activities = getActivities(queryResult.activities)
         return ActivitiesDto(
             continuation = null,
@@ -134,18 +136,18 @@ class ActivityElasticService(
         }
 
         val evaluatedBlockchains = router.getEnabledBlockchains(blockchainMap.keys)
-        logger.debug("Blockchains to query: $evaluatedBlockchains")
+        logger.info("Blockchains to query: $evaluatedBlockchains")
 
         val results = evaluatedBlockchains.mapAsync { blockchain ->
             val ids = blockchainMap[blockchain]
             if (!ids.isNullOrEmpty()) {
-                logger.debug("Querying getActivitiesByIds for $blockchain")
+                logger.info("Querying getActivitiesByIds for $blockchain")
                 router.getService(blockchain).getActivitiesByIds(ids)
-                    .also { logger.debug("Queried getActivitiesByIds for $blockchain") }
+                    .also { logger.info("Queried getActivitiesByIds for $blockchain") }
             } else null
         }.filterNotNull()
 
-        logger.debug("Raw results: $results")
+        logger.info("Raw results: $results")
 
         val mergedResult = arrayOfNulls<ActivityDto>(activities.size)
         results.forEach {
@@ -159,7 +161,7 @@ class ActivityElasticService(
             }
         }
 
-        logger.debug("Merged result: $mergedResult")
+        logger.info("Merged result: $mergedResult")
 
         return mergedResult.filterNotNull()
     }

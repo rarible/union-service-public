@@ -28,7 +28,7 @@ class ActivityController(
         size: Int?,
         sort: ActivitySortDto?
     ): ResponseEntity<ActivitiesDto> {
-        logger.debug("Got request to get all activities, parameters: $type, $blockchains, $continuation, $cursor, $size, $sort")
+        logger.info("Got request to get all activities, parameters: $type, $blockchains, $continuation, $cursor, $size, $sort")
         val result = activitySourceSelector.getAllActivities(type, blockchains, continuation, cursor, size, sort)
         return ResponseEntity.ok(result)
     }

@@ -1,5 +1,7 @@
 package com.rarible.protocol.union.enrichment.repository.search
 
+import com.rarible.core.apm.CaptureSpan
+import com.rarible.core.apm.SpanType
 import com.rarible.protocol.union.core.elasticsearch.EsNameResolver
 import com.rarible.protocol.union.core.model.ElasticActivityFilter
 import com.rarible.protocol.union.core.model.EsActivity
@@ -20,6 +22,7 @@ import org.springframework.stereotype.Component
 import java.io.IOException
 
 @Component
+@CaptureSpan(type = SpanType.DB)
 class EsActivityRepository(
     private val elasticClient: RestHighLevelClient,
     private val esOperations: ReactiveElasticsearchOperations,
