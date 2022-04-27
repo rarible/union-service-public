@@ -49,7 +49,7 @@ internal class ActivityElasticServiceIntegrationTest {
 
     @BeforeEach
     fun setUp() = runBlocking<Unit> {
-        every { router.getEnabledBlockchains(any()) } returns listOf(BlockchainDto.ETHEREUM, BlockchainDto.FLOW, BlockchainDto.SOLANA)
+        every { router.getEnabledBlockchains(any()) } returns setOf(BlockchainDto.ETHEREUM, BlockchainDto.FLOW, BlockchainDto.SOLANA)
         every { router.getService(BlockchainDto.ETHEREUM) } returns ethereumService
         every { router.getService(BlockchainDto.FLOW) } returns flowService
         every { router.getService(BlockchainDto.SOLANA) } returns solanaService

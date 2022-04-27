@@ -12,6 +12,7 @@ import com.rarible.protocol.union.enrichment.repository.search.EsCollectionRepos
 import com.rarible.protocol.union.worker.task.CollectionTask
 import io.mockk.coEvery
 import io.mockk.coVerifyAll
+import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verifyAll
 import kotlinx.coroutines.flow.toList
@@ -38,7 +39,7 @@ class CollectionTaskUnitTest {
 
 
     private val client = mockk<CollectionControllerApi> {
-        coEvery { getAllCollections(any<List<BlockchainDto>>(), null, any()) } returns CollectionsDto(
+        every { getAllCollections(any<List<BlockchainDto>>(), null, any()) } returns CollectionsDto(
             total = 1L,
             collections = listOf(
                 collection
@@ -46,7 +47,7 @@ class CollectionTaskUnitTest {
             continuation = CollectionContinuation.ById.getContinuation(collection).toString()
         ).toMono()
 
-        coEvery {
+        every {
             getAllCollections(any<List<BlockchainDto>>(),
                 CollectionContinuation.ById.getContinuation(collection).toString(),
                 any())
