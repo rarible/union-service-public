@@ -48,7 +48,7 @@ object EthCollectionConverter {
 
     fun convert(page: NftCollectionsDto, blockchain: BlockchainDto): Page<UnionCollection> {
         return Page(
-            total = page.total,
+            total = page.total ?: 0,
             continuation = page.continuation,
             entities = page.collections.map { convert(it, blockchain) }
         )

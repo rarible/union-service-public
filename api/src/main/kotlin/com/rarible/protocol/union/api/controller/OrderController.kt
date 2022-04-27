@@ -6,6 +6,7 @@ import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdsDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
+import com.rarible.protocol.union.dto.OrderSyncSortDto
 import com.rarible.protocol.union.dto.OrdersDto
 import com.rarible.protocol.union.dto.PlatformDto
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -26,6 +27,16 @@ class OrderController(
         status: List<OrderStatusDto>?
     ): ResponseEntity<OrdersDto> {
         val result = orderSourceSelector.getOrdersAll(blockchains, continuation, size, sort, status)
+        return ResponseEntity.ok(result)
+    }
+
+    override suspend fun getAllSync(
+        blockchain: BlockchainDto,
+        continuation: String?,
+        size: Int?,
+        sort: OrderSyncSortDto?
+    ): ResponseEntity<OrdersDto> {
+        val result = orderSourceSelector.getAllSync(blockchain, continuation, size, sort)
         return ResponseEntity.ok(result)
     }
 

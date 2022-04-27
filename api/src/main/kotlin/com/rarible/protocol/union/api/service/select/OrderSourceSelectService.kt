@@ -4,19 +4,14 @@ import com.rarible.protocol.union.api.service.OrderQueryService
 import com.rarible.protocol.union.api.service.api.OrderApiService
 import com.rarible.protocol.union.api.service.elastic.OrderElasticService
 import com.rarible.protocol.union.core.FeatureFlagsProperties
-import com.rarible.protocol.union.core.service.OrderService
-import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderDto
-import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.OrderIdsDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
+import com.rarible.protocol.union.dto.OrderSyncSortDto
 import com.rarible.protocol.union.dto.OrdersDto
 import com.rarible.protocol.union.dto.PlatformDto
-import com.rarible.protocol.union.dto.continuation.page.Slice
-import com.rarible.protocol.union.dto.parser.IdParser
-import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 
 @Service
@@ -24,7 +19,7 @@ class OrderSourceSelectService(
     private val featureFlagsProperties: FeatureFlagsProperties,
     private val orderApiService: OrderApiService,
     private val orderElasticService: OrderElasticService,
-): OrderQueryService {
+) : OrderQueryService {
 
     /**
      * Should always route to OrderApiService
@@ -50,6 +45,15 @@ class OrderSourceSelectService(
         return getQuerySource().getOrdersAll(blockchains, continuation, size, sort, status)
     }
 
+    override suspend fun getAllSync(
+        blockchain: BlockchainDto,
+        continuation: String?,
+        size: Int?,
+        sort: OrderSyncSortDto?
+    ): OrdersDto {
+        return getQuerySource().getAllSync(blockchain, continuation, size, sort)
+    }
+
     override suspend fun getSellOrdersByItem(
         itemId: String,
         platform: PlatformDto?,
@@ -73,7 +77,17 @@ class OrderSourceSelectService(
         continuation: String?,
         size: Int?
     ): OrdersDto {
-        return getQuerySource().getOrderBidsByItem(itemId, platform, maker, origin, status, start, end, continuation, size)
+        return getQuerySource().getOrderBidsByItem(
+            itemId,
+            platform,
+            maker,
+            origin,
+            status,
+            start,
+            end,
+            continuation,
+            size
+        )
     }
 
     override suspend fun getOrderBidsByMaker(
@@ -87,7 +101,17 @@ class OrderSourceSelectService(
         continuation: String?,
         size: Int?
     ): OrdersDto {
-        return getQuerySource().getOrderBidsByMaker(blockchains, platform, maker, origin, status, start, end, continuation, size)
+        return getQuerySource().getOrderBidsByMaker(
+            blockchains,
+            platform,
+            maker,
+            origin,
+            status,
+            start,
+            end,
+            continuation,
+            size
+        )
     }
 
     override suspend fun getSellOrders(

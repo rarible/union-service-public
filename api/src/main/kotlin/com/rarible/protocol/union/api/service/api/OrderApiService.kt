@@ -12,6 +12,7 @@ import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.OrderIdsDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
+import com.rarible.protocol.union.dto.OrderSyncSortDto
 import com.rarible.protocol.union.dto.OrdersDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.UnionAddress
@@ -135,6 +136,23 @@ class OrderApiService(
             blockchains, continuation, size, slice.entities.size, slice.continuation
         )
         return toDto(slice)
+    }
+
+    override suspend fun getAllSync(
+        blockchain: BlockchainDto,
+        continuation: String?,
+        size: Int?,
+        sort: OrderSyncSortDto?
+    ): OrdersDto {
+        val safeSize = PageSize.ORDER.limit(size)
+        val result = router.getService(blockchain).getAllSync(continuation, safeSize, sort)
+        logger.info(
+            "Response for getAllSync" +
+                    "(blockchains={}, continuation={}, size={}): " +
+                    "Slice(size={}, continuation={})",
+            blockchain, continuation, size, result.entities.size, result.continuation
+        )
+        return toDto(result)
     }
 
     override suspend fun getOrderBidsByItem(
