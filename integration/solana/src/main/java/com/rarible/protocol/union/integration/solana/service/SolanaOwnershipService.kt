@@ -47,7 +47,7 @@ open class SolanaOwnershipService(
         }
 
         return Page(
-            total = balancesDto.balances.size.toLong(),
+            total = 0,
             continuation = balancesDto.continuation,
             entities = ownerships
         )
@@ -65,7 +65,7 @@ open class SolanaOwnershipService(
         }
 
         return Page(
-            total = balancesDto.balances.size.toLong(),
+            total = 0,
             continuation = balancesDto.continuation,
             entities = ownerships
         )
