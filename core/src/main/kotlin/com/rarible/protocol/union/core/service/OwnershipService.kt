@@ -7,19 +7,23 @@ import com.rarible.protocol.union.dto.continuation.page.Page
 interface OwnershipService : BlockchainService {
 
     suspend fun getOwnershipById(
-        ownershipId: String
+        ownershipId: String,
     ): UnionOwnership
+
+    suspend fun getAllOwnerships(
+        ownershipIds: List<String>,
+    ): List<UnionOwnership>
 
     suspend fun getOwnershipsByItem(
         itemId: String,
         continuation: String?,
-        size: Int
+        size: Int,
     ): Page<UnionOwnership>
 
     suspend fun getOwnershipsByOwner(
         address: String,
         continuation: String?,
-        size: Int
+        size: Int,
     ): Page<UnionOwnership>
 
 }

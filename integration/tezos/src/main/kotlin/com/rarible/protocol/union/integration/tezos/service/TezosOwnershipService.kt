@@ -26,6 +26,10 @@ open class TezosOwnershipService(
         return TezosOwnershipConverter.convert(ownership, blockchain)
     }
 
+    override suspend fun getAllOwnerships(ownershipIds: List<String>): List<UnionOwnership> {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun getOwnershipsByItem(
         itemId: String,
         continuation: String?,

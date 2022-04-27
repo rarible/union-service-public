@@ -52,9 +52,7 @@ class OwnershipElasticService(
 
         val ownerships = idsMap.filterKeys { it in enabledBlockchains }
             .flatMapAsync { (blockchain, ids) ->
-                ids.map { // todo add api for bulk read
-                    router.getService(blockchain).getOwnershipById(it.ownershipId)
-                }
+                router.getService(blockchain).getAllOwnerships(ids.map { it.ownershipId })
             }
 
         log.debug("Obtained ${ownerships.size} ownerships")

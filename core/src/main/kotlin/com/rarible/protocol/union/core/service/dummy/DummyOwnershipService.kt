@@ -15,6 +15,9 @@ class DummyOwnershipService(
         throw UnionNotFoundException("Ownership [$ownershipId] not found, ${blockchain.name} is not available")
     }
 
+    override suspend fun getAllOwnerships(ownershipIds: List<String>): List<UnionOwnership> =
+        emptyList()
+
     override suspend fun getOwnershipsByItem(
         itemId: String,
         continuation: String?,

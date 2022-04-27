@@ -27,6 +27,10 @@ class ImmutablexOwnershipService(
         } ?: throw IllegalArgumentException("Ownership is not found for id $ownershipId")
     }
 
+    override suspend fun getAllOwnerships(ownershipIds: List<String>): List<UnionOwnership> {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun getOwnershipsByItem(itemId: String, continuation: String?, size: Int): Page<UnionOwnership> {
         val asset = client.getAsset(itemId)
         return Page(0L, null, listOf(convert(asset)))
