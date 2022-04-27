@@ -20,14 +20,6 @@ class OwnershipController(
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    override suspend fun getAllOwnerships(
-        blockchains: List<BlockchainDto>?,
-        continuation: String?,
-        size: Int?,
-    ): ResponseEntity<OwnershipsDto> {
-        TODO("Not yet implemented")
-    }
-
     override suspend fun getOwnershipById(
         ownershipId: String,
     ): ResponseEntity<OwnershipDto> {
