@@ -5,12 +5,17 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.core.model.EsActivity
 import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
 import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
+import com.rarible.protocol.union.enrichment.test.data.randomEsActivity
 import com.rarible.protocol.union.search.indexer.test.IntegrationTest
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
+import org.elasticsearch.index.query.BoolQueryBuilder
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration
+import org.springframework.data.elasticsearch.core.query.NativeSearchQuery
+import org.springframework.data.elasticsearch.core.query.Query
 import org.springframework.test.context.ContextConfiguration
 import randomInstant
 import kotlin.random.Random.Default.nextLong
@@ -36,5 +41,20 @@ internal class EsActivityRepositoryFt {
         val id = repository.save(activity).activityId
         val found = repository.findById(id)
         Assertions.assertThat(found).isEqualTo(activity)
+    }
+
+    @Test
+    fun `should be able to search up to 1000 activities`(): Unit = runBlocking {
+        // given
+        val activities = List(1000) { randomEsActivity() }
+        repository.saveAll(activities)
+
+        // when
+        val query = NativeSearchQuery(BoolQueryBuilder())
+        query.maxResults = 1000
+        val actual = repository.search(query)
+
+        // then
+        assertThat(actual.activities).hasSize(1000)
     }
 }
