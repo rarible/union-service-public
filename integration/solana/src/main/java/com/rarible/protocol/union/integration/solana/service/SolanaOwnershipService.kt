@@ -18,6 +18,12 @@ open class SolanaOwnershipService(
     private val balanceApi: BalanceControllerApi
 ) : AbstractBlockchainService(BlockchainDto.SOLANA), OwnershipService {
 
+    /**
+     * TODO: here we filter balances that correspond only to the associated token account.
+     *  A better fix will be implemented in https://rarible.atlassian.net/browse/CHARLIE-272
+     *  by means of introducing a new entity Ownership (Mint + Owner).
+     */
+
     override suspend fun getOwnershipById(ownershipId: String): UnionOwnership {
         val pair = IdParser.split(ownershipId, 2)
         val mint = pair[0]
