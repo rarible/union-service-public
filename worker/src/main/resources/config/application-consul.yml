@@ -1,5 +1,8 @@
 spring:
   data:
+    mongodb:
+      uri: mongodb://${mongodb.hosts}
+      database: ${mongodb.database}
     elasticsearch:
       cluster-name: docker-cluster
       cluster-nodes: ${elasticsearch.cluster-nodes}
@@ -8,7 +11,13 @@ spring:
         reactive:
           endpoints:  ${elasticsearch.api-nodes}
 
-
   elasticsearch:
     rest:
       uris: ${elasticsearch.api-nodes}
+
+  config:
+    use-legacy-processing: true
+    import: "consul:"
+  cloud:
+    bootstrap:
+      enabled: true
