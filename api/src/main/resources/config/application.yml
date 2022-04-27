@@ -64,6 +64,7 @@ integration:
       enabled: ${consul.tezos.dipdup.enabled:false}
       dipdupUrl: ${consul.tezos.dipdup.dipdupUrl:}
       tzktUrl: ${consul.tezos.dipdup.tzktUrl:}
+      ipfsUrl: ${consul.tezos.dipdup.ipfsUrl:"https://ipfs.io"}
     client:
       url: ${consul.tezos.api.baseUrl:}
     pg:

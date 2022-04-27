@@ -22,6 +22,9 @@ import com.rarible.protocol.union.integration.tezos.dipdup.DipDupApiConfiguratio
 import com.rarible.protocol.union.integration.tezos.dipdup.DipDupDummyApiConfiguration
 import com.rarible.protocol.union.integration.tezos.dipdup.PGIntegrationProperties
 import com.rarible.protocol.union.integration.tezos.dipdup.service.DipdupOrderService
+import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktCollectionService
+import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktItemService
+import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktOwnershipService
 import com.rarible.protocol.union.integration.tezos.service.TezosActivityService
 import com.rarible.protocol.union.integration.tezos.service.TezosAuctionService
 import com.rarible.protocol.union.integration.tezos.service.TezosCollectionService
@@ -110,18 +113,21 @@ class TezosApiConfiguration(
     //-------------------- Services --------------------//
 
     @Bean
-    fun tezosItemService(controllerApi: NftItemControllerApi): TezosItemService {
-        return TezosItemService(controllerApi)
+    fun tezosItemService(controllerApi: NftItemControllerApi, tzktItemService: TzktItemService): TezosItemService {
+        return TezosItemService(controllerApi, tzktItemService)
     }
 
     @Bean
-    fun tezosOwnershipService(controllerApi: NftOwnershipControllerApi): TezosOwnershipService {
-        return TezosOwnershipService(controllerApi)
+    fun tezosOwnershipService(controllerApi: NftOwnershipControllerApi, tzktOwnershipService: TzktOwnershipService): TezosOwnershipService {
+        return TezosOwnershipService(controllerApi, tzktOwnershipService)
     }
 
     @Bean
-    fun tezosCollectionService(controllerApi: NftCollectionControllerApi): TezosCollectionService {
-        return TezosCollectionService(controllerApi)
+    fun tezosCollectionService(
+        controllerApi: NftCollectionControllerApi,
+        tzktCollectionService: TzktCollectionService
+    ): TezosCollectionService {
+        return TezosCollectionService(controllerApi, tzktCollectionService)
     }
 
     @Bean

@@ -8,27 +8,37 @@ import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.continuation.page.Page
 import com.rarible.protocol.union.integration.tezos.converter.TezosCollectionConverter
+import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktCollectionService
 import kotlinx.coroutines.reactive.awaitFirst
 
 @CaptureSpan(type = "blockchain")
 open class TezosCollectionService(
-    private val collectionControllerApi: NftCollectionControllerApi
+    private val collectionControllerApi: NftCollectionControllerApi,
+    private val tzktCollectionService: TzktCollectionService
 ) : AbstractBlockchainService(BlockchainDto.TEZOS), CollectionService {
 
     override suspend fun getAllCollections(
         continuation: String?,
         size: Int
     ): Page<UnionCollection> {
-        val collections = collectionControllerApi.searchNftAllCollections(
-            size,
-            continuation
-        ).awaitFirst()
-        return TezosCollectionConverter.convert(collections, blockchain)
+        return if (tzktCollectionService.enabled()) {
+            tzktCollectionService.getAllCollections(continuation, size)
+        } else {
+            val collections = collectionControllerApi.searchNftAllCollections(
+                size,
+                continuation
+            ).awaitFirst()
+            TezosCollectionConverter.convert(collections, blockchain)
+        }
     }
 
     override suspend fun getCollectionById(collectionId: String): UnionCollection {
-        val collection = collectionControllerApi.getNftCollectionById(collectionId).awaitFirst()
-        return TezosCollectionConverter.convert(collection, blockchain)
+        return if (tzktCollectionService.enabled()) {
+            tzktCollectionService.getCollectionById(collectionId)
+        } else {
+            val collection = collectionControllerApi.getNftCollectionById(collectionId).awaitFirst()
+            TezosCollectionConverter.convert(collection, blockchain)
+        }
     }
 
     override suspend fun refreshCollectionMeta(collectionId: String) {
