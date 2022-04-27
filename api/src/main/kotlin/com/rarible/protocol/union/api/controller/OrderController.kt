@@ -40,6 +40,15 @@ class OrderController(
         return ResponseEntity.ok(result)
     }
 
+    override suspend fun getAllSync(
+        blockchain: BlockchainDto,
+        continuation: String?,
+        size: Int?,
+        sort: OrderSyncSortDto?,
+    ): ResponseEntity<OrdersDto> {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun getOrderBidsByItem(
         itemId: String,
         platform: PlatformDto?,

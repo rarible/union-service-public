@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.api.controller
 
-import com.rarible.protocol.union.api.service.select.OwnershipSourceSelectService
+import com.rarible.protocol.union.api.service.EnrichedOwnershipApiService
+import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OwnershipDto
 import com.rarible.protocol.union.dto.OwnershipsDto
 import com.rarible.protocol.union.dto.continuation.page.PageSize
@@ -14,13 +15,21 @@ import org.springframework.web.bind.annotation.RestController
 @ExperimentalCoroutinesApi
 @RestController
 class OwnershipController(
-    private val ownershipApiService: OwnershipSourceSelectService,
+    private val ownershipApiService: EnrichedOwnershipApiService,
 ) : OwnershipControllerApi {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
+    override suspend fun getAllOwnerships(
+        blockchains: List<BlockchainDto>?,
+        continuation: String?,
+        size: Int?,
+    ): ResponseEntity<OwnershipsDto> {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun getOwnershipById(
-        ownershipId: String
+        ownershipId: String,
     ): ResponseEntity<OwnershipDto> {
         val fullOwnershipId = OwnershipIdParser.parseFull(ownershipId)
 
