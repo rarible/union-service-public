@@ -33,7 +33,7 @@ class ActivityTaskUnitTest {
 
     val esActivityRepository = mockk<EsActivityRepository> {
         coEvery {
-            saveAll(any())
+            saveAll(any(), "activity_test_index")
         } answers { arg(0) }
     }
 
@@ -104,7 +104,7 @@ class ActivityTaskUnitTest {
             )
 
             task.runLongTask(
-                "",
+                null,
                 """{"blockchain": "ETHEREUM", "activityType": "LIST", "index":"activity_test_index"}"""
             ).toList()
 
@@ -120,7 +120,7 @@ class ActivityTaskUnitTest {
 
                 converter.convert(any<OrderListActivityDto>())
 
-                esActivityRepository.saveAll(any())
+                esActivityRepository.saveAll(any(), "activity_test_index")
             }
         }
     }
@@ -152,7 +152,7 @@ class ActivityTaskUnitTest {
 
             converter.convert(any<OrderListActivityDto>())
 
-            esActivityRepository.saveAll(any())
+            esActivityRepository.saveAll(any(), "activity_test_index")
         }
     }
 

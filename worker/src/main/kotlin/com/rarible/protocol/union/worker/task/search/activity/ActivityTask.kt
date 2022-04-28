@@ -38,7 +38,7 @@ class ActivityTask(
      * param looks like ACTIVITY_ETHEREUM_LIST
      */
     override fun runLongTask(from: String?, param: String): Flow<String> {
-        return if(from == null || from == "") {
+        return if(from == "") {
             emptyFlow()
         } else {
             val param = paramFactory.parse<ActivityTaskParam>(param)
