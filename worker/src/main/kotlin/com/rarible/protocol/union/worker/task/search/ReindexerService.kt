@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.worker.task.search
 
+import com.rarible.core.common.mapAsync
 import com.rarible.core.logging.Logger
 import com.rarible.core.task.Task
 import com.rarible.core.task.TaskRepository
@@ -8,33 +9,14 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.worker.task.search.activity.ActivityTask
 import com.rarible.protocol.union.worker.task.search.activity.ActivityTaskParam
 import kotlinx.coroutines.reactive.awaitFirst
-import kotlinx.coroutines.reactor.awaitSingle
+import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.springframework.stereotype.Component
 
 @Component
 class ReindexerService(
-    private val taskRepository: TaskRepository
+    private val taskRepository: TaskRepository,
+    private val paramFactory: ParamFactory
 ) {
-
-    suspend fun scheduleActivityReindex(
-        blockchain: BlockchainDto,
-        activityType: ActivityTypeDto,
-        indexName: String,
-        cursor: String? = null
-    ): Task {
-        logger.info(
-            "Scheduling activity reindexing with params: blockchain={}, activityType={}, indexName={}, cursor={}",
-            blockchain, activityType, indexName, cursor
-        )
-        return taskRepository.save(
-            Task(
-                ActivityTask.ACTIVITY_REINDEX,
-                "",
-                ActivityTaskParam(blockchain, activityType, indexName, cursor),
-                false
-            )
-        ).awaitSingle()
-    }
 
     suspend fun scheduleActivityReindex(
         blockchains: Collection<BlockchainDto>,
@@ -46,14 +28,20 @@ class ReindexerService(
             blockchains, activityTypes, indexName
         )
 
-        val tasks = blockchains.zip(activityTypes).map { (blockchain, activity) ->
-            Task(
-                ActivityTask.ACTIVITY_REINDEX,
-                "",
-                ActivityTaskParam(blockchain, activity, indexName),
-                false
-            )
-        }
+        val tasks = blockchains.zip(activityTypes).mapAsync { (blockchain, activity) ->
+            val taskParam = ActivityTaskParam(blockchain, activity, indexName)
+            val existing = taskRepository
+                .findByTypeAndParam(ActivityTask.ACTIVITY_REINDEX, paramFactory.toString(taskParam))
+                .awaitSingleOrNull()
+            if(existing == null) {
+                Task(
+                    ActivityTask.ACTIVITY_REINDEX,
+                    "",
+                    taskParam,
+                    false
+                )
+            } else null
+        }.filterNotNull()
 
         return taskRepository.saveAll(tasks).collectList().awaitFirst()
     }

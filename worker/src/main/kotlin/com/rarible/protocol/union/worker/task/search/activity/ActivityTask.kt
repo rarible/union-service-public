@@ -19,7 +19,7 @@ class ActivityTask(
     private val esActivityRepository: EsActivityRepository,
     private val converter: EsActivityConverter,
     private val paramFactory: ParamFactory
-): TaskHandler<ActivityTaskState> {
+): TaskHandler<String> {
     override val type: String
         get() = ACTIVITY_REINDEX
 
