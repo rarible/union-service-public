@@ -27,6 +27,12 @@ integration:
   tezos:
     client:
       url: "http://localhost:8080"
+    pg:
+      host: "localhost"
+      port: 5432
+      user: "test"
+      password: "test"
+      database: "test"
   solana:
     enabled: true
 
