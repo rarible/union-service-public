@@ -19,12 +19,11 @@ open class TezosOwnershipService(
 ) : AbstractBlockchainService(BlockchainDto.TEZOS), OwnershipService {
 
     override suspend fun getOwnershipById(ownershipId: String): UnionOwnership {
-        return if (tzktOwnershipService.enabled()) {
-            tzktOwnershipService.getOwnershipById(ownershipId)
-        } else {
-            val ownership = ownershipControllerApi.getNftOwnershipById(ownershipId).awaitFirst()
-            return TezosOwnershipConverter.convert(ownership, blockchain)
+        if (tzktOwnershipService.enabled()) {
+            return tzktOwnershipService.getOwnershipById(ownershipId)
         }
+        val ownership = ownershipControllerApi.getNftOwnershipById(ownershipId).awaitFirst()
+        return TezosOwnershipConverter.convert(ownership, blockchain)
     }
 
     override suspend fun getOwnershipsByItem(
@@ -32,18 +31,17 @@ open class TezosOwnershipService(
         continuation: String?,
         size: Int
     ): Page<UnionOwnership> {
-        return if (tzktOwnershipService.enabled()) {
+        if (tzktOwnershipService.enabled()) {
             tzktOwnershipService.getOwnershipsByItem(itemId, continuation, size)
-        } else {
-            val (contract, tokenId) = CompositeItemIdParser.split(itemId)
-            val ownerships = ownershipControllerApi.getNftOwnershipByItem(
-                contract,
-                tokenId.toString(),
-                size,
-                continuation
-            ).awaitFirst()
-            return TezosOwnershipConverter.convert(ownerships, blockchain)
         }
+        val (contract, tokenId) = CompositeItemIdParser.split(itemId)
+        val ownerships = ownershipControllerApi.getNftOwnershipByItem(
+            contract,
+            tokenId.toString(),
+            size,
+            continuation
+        ).awaitFirst()
+        return TezosOwnershipConverter.convert(ownerships, blockchain)
     }
 
     override suspend fun getOwnershipsByOwner(address: String, continuation: String?, size: Int): Page<UnionOwnership> {

@@ -31,33 +31,31 @@ open class TezosItemService(
         lastUpdatedFrom: Long?,
         lastUpdatedTo: Long?
     ): Page<UnionItem> {
-        return if (tzktItemService.enabled()) {
+        if (tzktItemService.enabled()) {
             // others params are not implemented in tzkt yet
-            tzktItemService.getAllItems(continuation, size)
-        } else {
-            val items = itemControllerApi.getNftAllItems(
-                lastUpdatedFrom?.toString(),
-                lastUpdatedTo?.toString(),
-                showDeleted,
-                WITH_META,
-                size,
-                continuation
-            ).awaitFirst()
-            TezosItemConverter.convert(items, blockchain)
+            return tzktItemService.getAllItems(continuation, size)
         }
+        val items = itemControllerApi.getNftAllItems(
+            lastUpdatedFrom?.toString(),
+            lastUpdatedTo?.toString(),
+            showDeleted,
+            WITH_META,
+            size,
+            continuation
+        ).awaitFirst()
+        return TezosItemConverter.convert(items, blockchain)
     }
 
     override suspend fun getItemById(
         itemId: String
     ): UnionItem {
-        return if (tzktItemService.enabled()) {
-            tzktItemService.getItemById(itemId)
-        } else {
-            val item = itemControllerApi.getNftItemById(
-                itemId, WITH_META
-            ).awaitFirst()
-            TezosItemConverter.convert(item, blockchain)
+        if (tzktItemService.enabled()) {
+            return tzktItemService.getItemById(itemId)
         }
+        val item = itemControllerApi.getNftItemById(
+            itemId, WITH_META
+        ).awaitFirst()
+        return TezosItemConverter.convert(item, blockchain)
     }
 
     override suspend fun getItemRoyaltiesById(itemId: String): List<RoyaltyDto> {
@@ -73,12 +71,11 @@ open class TezosItemService(
     }
 
     override suspend fun getItemMetaById(itemId: String): UnionMeta {
-        return if (tzktItemService.enabled()) {
-            tzktItemService.getItemMetaById(itemId)
-        } else {
-            val meta = itemControllerApi.getNftItemMetaById(itemId).awaitFirst()
-            TezosItemConverter.convert(meta)
+        if (tzktItemService.enabled()) {
+            return tzktItemService.getItemMetaById(itemId)
         }
+        val meta = itemControllerApi.getNftItemMetaById(itemId).awaitFirst()
+        return TezosItemConverter.convert(meta)
     }
 
     override suspend fun resetItemMeta(itemId: String) {
@@ -129,11 +126,10 @@ open class TezosItemService(
     }
 
     override suspend fun getItemsByIds(itemIds: List<String>): List<UnionItem> {
-        return if (tzktItemService.enabled()) {
-            tzktItemService.getItemsByIds(itemIds)
-        } else {
-            // Not implemented in legacy indexer
-            emptyList()
+        if (tzktItemService.enabled()) {
+            return tzktItemService.getItemsByIds(itemIds)
         }
+        // Not implemented in legacy indexer
+        return emptyList()
     }
 }

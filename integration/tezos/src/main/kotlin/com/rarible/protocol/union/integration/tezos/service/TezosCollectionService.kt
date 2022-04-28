@@ -21,24 +21,22 @@ open class TezosCollectionService(
         continuation: String?,
         size: Int
     ): Page<UnionCollection> {
-        return if (tzktCollectionService.enabled()) {
-            tzktCollectionService.getAllCollections(continuation, size)
-        } else {
-            val collections = collectionControllerApi.searchNftAllCollections(
-                size,
-                continuation
-            ).awaitFirst()
-            TezosCollectionConverter.convert(collections, blockchain)
+        if (tzktCollectionService.enabled()) {
+            return tzktCollectionService.getAllCollections(continuation, size)
         }
+        val collections = collectionControllerApi.searchNftAllCollections(
+            size,
+            continuation
+        ).awaitFirst()
+        return TezosCollectionConverter.convert(collections, blockchain)
     }
 
     override suspend fun getCollectionById(collectionId: String): UnionCollection {
-        return if (tzktCollectionService.enabled()) {
+        if (tzktCollectionService.enabled()) {
             tzktCollectionService.getCollectionById(collectionId)
-        } else {
-            val collection = collectionControllerApi.getNftCollectionById(collectionId).awaitFirst()
-            TezosCollectionConverter.convert(collection, blockchain)
         }
+        val collection = collectionControllerApi.getNftCollectionById(collectionId).awaitFirst()
+        return TezosCollectionConverter.convert(collection, blockchain)
     }
 
     override suspend fun refreshCollectionMeta(collectionId: String) {
