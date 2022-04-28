@@ -98,7 +98,9 @@ open class SolanaActivityService(
     }
 
     override suspend fun getActivitiesByIds(ids: List<TypedActivityId>): List<ActivityDto> {
-        TODO("To be implemented under ALPHA-276")
+        val result = activityApi.searchActivitiesByIds(ids.map { it.id })
+            .awaitFirst()
+        return result.activities.map { activityConverter.convert(it, blockchain) }
     }
 
     private suspend fun searchActivities(

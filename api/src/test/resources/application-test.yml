@@ -27,6 +27,8 @@ integration:
   tezos:
     client:
       url: "http://localhost:8080"
+  solana:
+    enabled: true
 
 common:
   currency:

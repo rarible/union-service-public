@@ -22,6 +22,7 @@ import com.rarible.protocol.nftorder.api.test.mock.EthItemControllerApiMock
 import com.rarible.protocol.nftorder.api.test.mock.EthOrderControllerApiMock
 import com.rarible.protocol.order.api.client.AuctionActivityControllerApi
 import com.rarible.protocol.order.api.client.OrderActivityControllerApi
+import com.rarible.protocol.solana.api.client.ActivityControllerApi as SolanaActivityControllerApi
 import com.rarible.protocol.union.api.controller.test.mock.eth.EthActivityControllerApiMock
 import com.rarible.protocol.union.api.controller.test.mock.eth.EthOwnershipControllerApiMock
 import com.rarible.protocol.union.api.controller.test.mock.flow.FlowItemControllerApiMock
@@ -48,7 +49,8 @@ import org.springframework.web.client.RestTemplate
 import reactor.kotlin.core.publisher.toMono
 import java.math.BigDecimal
 import java.net.URI
-import java.util.*
+import java.util.Queue
+import java.util.UUID
 import java.util.concurrent.LinkedBlockingQueue
 
 abstract class AbstractIntegrationTest {
@@ -159,6 +161,11 @@ abstract class AbstractIntegrationTest {
     lateinit var polygonOwnershipControllerApiMock: EthOwnershipControllerApiMock
     lateinit var polygonOrderControllerApiMock: EthOrderControllerApiMock
     lateinit var polygonAuctionControllerApiMock: EthAuctionControllerApiMock
+
+    //--------------------- SOLANA ---------------------//
+
+    @Autowired
+    lateinit var testSolanaActivityApi: SolanaActivityControllerApi
 
     //--------------------- FLOW ---------------------//
     @Autowired
