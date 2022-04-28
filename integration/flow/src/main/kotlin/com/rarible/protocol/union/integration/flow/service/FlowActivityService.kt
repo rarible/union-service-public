@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.integration.flow.service
 
 import com.rarible.core.apm.CaptureSpan
+import com.rarible.protocol.dto.NftActivitiesByIdRequestDto
 import com.rarible.protocol.flow.nft.api.client.FlowNftOrderActivityControllerApi
 import com.rarible.protocol.union.core.model.TypedActivityId
 import com.rarible.protocol.union.core.service.ActivityService
@@ -95,6 +96,8 @@ open class FlowActivityService(
     }
 
     override suspend fun getActivitiesByIds(ids: List<TypedActivityId>): List<ActivityDto> {
-        TODO("To be implemented under ALPHA-276")
+        val result = activityControllerApi.getNftOrderActivitiesById(NftActivitiesByIdRequestDto(ids.map { it.id }))
+            .awaitFirst()
+        return flowActivityConverter.convert(result, blockchain).entities
     }
 }

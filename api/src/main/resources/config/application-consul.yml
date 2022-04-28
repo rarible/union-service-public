@@ -11,6 +11,7 @@ spring:
       client:
         reactive:
           endpoints: ${elasticsearch.api-nodes}
+          max-in-memory-size: 4194304
 
   config:
     use-legacy-processing: true
