@@ -13,8 +13,8 @@ import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
 import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
 import com.rarible.protocol.union.enrichment.repository.search.EsCollectionRepository
 import com.rarible.protocol.union.worker.task.CollectionTask
+import com.rarible.protocol.union.worker.task.search.ParamFactory
 import com.rarible.protocol.union.worker.task.search.activity.ActivityTask
-import com.rarible.protocol.union.worker.task.search.activity.ActivityTaskParam
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -42,8 +42,9 @@ class SearchReindexerConfiguration(
         activityClient: ActivityControllerApi,
         taskRepository: TaskRepository,
         esActivityRepository: EsActivityRepository,
-    ): TaskHandler<ActivityTaskParam> {
-        return ActivityTask(this, activityClient, esActivityRepository, EsActivityConverter)
+        paramFactory: ParamFactory
+    ): TaskHandler<String> {
+        return ActivityTask(this, activityClient, esActivityRepository, EsActivityConverter, paramFactory)
     }
 
     @Bean
