@@ -207,8 +207,7 @@ class CollectionControllerFt : AbstractIntegrationTest() {
     }
 
     @Test
-    @Disabled("failed")
-    // todo fix me please
+    @Disabled // TODO unstable test
     fun `refresh collection meta`() = runBlocking<Unit> {
         val collectionAddress = randomAddress()
         val collectionId = EthConverter.convert(collectionAddress, BlockchainDto.ETHEREUM)

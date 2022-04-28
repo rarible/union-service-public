@@ -23,6 +23,7 @@ object EnrichmentCollectionConverter {
             owner = collection.owner,
             minters = collection.minters,
             name = collection.name,
+            symbol = collection.symbol,
             parent = collection.parent,
             meta = (meta ?: collection.meta)?.let { EnrichedMetaConverter.convert(it) },
             type = collection.type,
