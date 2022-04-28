@@ -33,7 +33,13 @@ class UnionMetaLoader(
             labels = listOf("itemId" to itemId.fullId())
         ) {
             getItemMeta(itemId)
-        } ?: return@addToMdc null
+        }
+
+        if (unionMeta == null) {
+            // this log tagged by itemId, used in Kibana in analytics dashboards
+            logger.warn("Meta not found in blockchain for Item {}", itemId)
+            return@addToMdc null
+        }
 
         withSpan(
             name = "enrichContentMeta",
