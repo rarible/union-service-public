@@ -52,6 +52,13 @@ data class EsOwnershipByIdFilter(
         NativeSearchQueryBuilder().withQuery(idsQuery().addIds(ownershipId)).build()
 }
 
+data class EsOwnershipByIdsFilter(
+    val ownershipsIds: Collection<String>,
+) : EsOwnershipFilter {
+    override fun asQuery(): Query =
+        NativeSearchQueryBuilder().withQuery(idsQuery().addIds(*ownershipsIds.toTypedArray())).build()
+}
+
 data class EsOwnershipByOwnerFilter(
     val owner: UnionAddress,
     val continuation: DateIdContinuation?,
