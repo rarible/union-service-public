@@ -9,7 +9,6 @@ import com.rarible.protocol.union.dto.BlockchainDto
  * @param blockchain blockchain
  * @param activityType activity type
  * @param index elasticsearch index name, including environment, version, etc.
- * @param cursor next request cursor
  */
 data class ActivityTaskParam(
     val blockchain: BlockchainDto,
