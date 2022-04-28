@@ -1,5 +1,7 @@
 package com.rarible.protocol.union.worker.task
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.rarible.core.test.data.randomAddress
 import com.rarible.protocol.union.api.client.ActivityControllerApi
 import com.rarible.protocol.union.core.converter.EsActivityConverter
@@ -10,27 +12,29 @@ import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderListActivityDto
+import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
 import com.rarible.protocol.union.worker.config.SearchReindexerConfiguration
 import com.rarible.protocol.union.worker.config.SearchReindexerProperties
+import com.rarible.protocol.union.worker.task.search.ParamFactory
+import com.rarible.protocol.union.worker.task.search.activity.ActivityTask
+import com.rarible.protocol.union.worker.task.search.activity.ActivityTaskParam
+import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.verify
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
-import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations
 import reactor.core.publisher.Mono
 import java.time.Instant
 import kotlin.random.Random
 
-@Disabled
 class ActivityTaskUnitTest {
 
-    val esOperations = mockk<ReactiveElasticsearchOperations> {
-        every {
-            save(any<Iterable<EsActivity>>())
-        } answers { Mono.just(arg(0)) }
+    val esActivityRepository = mockk<EsActivityRepository> {
+        coEvery {
+            saveAll(any())
+        } answers { arg(0) }
     }
 
     val converter = mockk<EsActivityConverter> {
@@ -88,32 +92,36 @@ class ActivityTaskUnitTest {
     }
 
     @Test
-    fun `should launch first run of the task`(): Unit = runBlocking {
-        val task = ActivityTask(
-            SearchReindexerConfiguration(SearchReindexerProperties()),
-            activityClient,
-            esOperations,
-            converter
-        )
+    fun `should launch first run of the task`(): Unit {
 
-        task.runLongTask(
-            null,
-            "ACTIVITY_ETHEREUM_LIST"
-        ).toList()
-
-        verify {
-            activityClient.getAllActivities(
-                listOf(ActivityTypeDto.LIST),
-                listOf(BlockchainDto.ETHEREUM),
-                null,
-                null,
-                ActivityTask.PAGE_SIZE,
-                ActivitySortDto.EARLIEST_FIRST
+        runBlocking {
+            val task = ActivityTask(
+                SearchReindexerConfiguration(SearchReindexerProperties()),
+                activityClient,
+                esActivityRepository,
+                converter,
+                ParamFactory(jacksonObjectMapper().registerKotlinModule())
             )
 
-            converter.convert(any<OrderListActivityDto>())
+            task.runLongTask(
+                "",
+                """{"blockchain": "ETHEREUM", "activityType": "LIST", "index":"activity_test_index"}"""
+            ).toList()
 
-            esOperations.save(any<Iterable<EsActivity>>())
+            coVerify {
+                activityClient.getAllActivities(
+                    listOf(ActivityTypeDto.LIST),
+                    listOf(BlockchainDto.ETHEREUM),
+                    null,
+                    null,
+                    ActivityTask.PAGE_SIZE,
+                    ActivitySortDto.EARLIEST_FIRST
+                )
+
+                converter.convert(any<OrderListActivityDto>())
+
+                esActivityRepository.saveAll(any())
+            }
         }
     }
 
@@ -122,16 +130,17 @@ class ActivityTaskUnitTest {
         val task = ActivityTask(
             SearchReindexerConfiguration(SearchReindexerProperties()),
             activityClient,
-            esOperations,
-            converter
+            esActivityRepository,
+            converter,
+            ParamFactory(jacksonObjectMapper().registerKotlinModule())
         )
 
         task.runLongTask(
             "ETHEREUM:cursor_1",
-            "ACTIVITY_ETHEREUM_LIST"
+            """{"blockchain": "ETHEREUM", "activityType": "LIST", "index":"activity_test_index"}"""
         ).toList()
 
-        verify {
+        coVerify {
             activityClient.getAllActivities(
                 listOf(ActivityTypeDto.LIST),
                 listOf(BlockchainDto.ETHEREUM),
@@ -143,7 +152,7 @@ class ActivityTaskUnitTest {
 
             converter.convert(any<OrderListActivityDto>())
 
-            esOperations.save(any<Iterable<EsActivity>>())
+            esActivityRepository.saveAll(any())
         }
     }
 

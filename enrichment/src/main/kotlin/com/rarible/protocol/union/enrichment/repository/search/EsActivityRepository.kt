@@ -16,6 +16,7 @@ import org.elasticsearch.action.admin.indices.refresh.RefreshRequest
 import org.elasticsearch.client.RequestOptions
 import org.elasticsearch.client.RestHighLevelClient
 import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations
+import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery
 import org.springframework.data.elasticsearch.core.query.Query
 import org.springframework.stereotype.Component
@@ -42,8 +43,22 @@ class EsActivityRepository(
     }
 
     suspend fun saveAll(esActivities: List<EsActivity>): List<EsActivity> {
-        return esOperations.saveAll(esActivities, entityDefinition.writeIndexCoordinates)
-            .collectList().awaitFirst()
+        return saveAllToIndex(esActivities, entityDefinition.writeIndexCoordinates)
+    }
+
+    suspend fun saveAll(esActivities: List<EsActivity>, indexName: String?): List<EsActivity> {
+        return if(indexName == null) {
+            saveAll(esActivities)
+        } else {
+            saveAllToIndex(esActivities, IndexCoordinates.of(indexName))
+        }
+    }
+
+    private suspend fun  saveAllToIndex(esActivities: List<EsActivity>, index: IndexCoordinates): List<EsActivity> {
+        return esOperations
+            .saveAll(esActivities, index)
+            .collectList()
+            .awaitFirst()
     }
 
     /**
