@@ -1,5 +1,7 @@
 package com.rarible.protocol.union.worker.task
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.rarible.core.test.data.randomAddress
 import com.rarible.protocol.union.api.client.ActivityControllerApi
 import com.rarible.protocol.union.core.converter.EsActivityConverter
@@ -13,6 +15,7 @@ import com.rarible.protocol.union.dto.OrderListActivityDto
 import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
 import com.rarible.protocol.union.worker.config.SearchReindexerConfiguration
 import com.rarible.protocol.union.worker.config.SearchReindexerProperties
+import com.rarible.protocol.union.worker.task.search.ParamFactory
 import com.rarible.protocol.union.worker.task.search.activity.ActivityTask
 import com.rarible.protocol.union.worker.task.search.activity.ActivityTaskParam
 import io.mockk.coEvery
@@ -96,12 +99,13 @@ class ActivityTaskUnitTest {
                 SearchReindexerConfiguration(SearchReindexerProperties()),
                 activityClient,
                 esActivityRepository,
-                converter
+                converter,
+                ParamFactory(jacksonObjectMapper().registerKotlinModule())
             )
 
             task.runLongTask(
-                ActivityTaskParam(BlockchainDto.ETHEREUM, ActivityTypeDto.LIST, "activity_test_index"),
-                "ACTIVITY_ETHEREUM_LIST"
+                "",
+                """{"blockchain": "ETHEREUM", "activityType": "LIST", "index":"activity_test_index"}"""
             ).toList()
 
             coVerify {
@@ -127,12 +131,13 @@ class ActivityTaskUnitTest {
             SearchReindexerConfiguration(SearchReindexerProperties()),
             activityClient,
             esActivityRepository,
-            converter
+            converter,
+            ParamFactory(jacksonObjectMapper().registerKotlinModule())
         )
 
         task.runLongTask(
-            ActivityTaskParam(BlockchainDto.ETHEREUM, ActivityTypeDto.LIST, "activity_test_index", "ETHEREUM:cursor_1"),
-            "ACTIVITY_ETHEREUM_LIST"
+            "ETHEREUM:cursor_1",
+            """{"blockchain": "ETHEREUM", "activityType": "LIST", "index":"activity_test_index"}"""
         ).toList()
 
         coVerify {
