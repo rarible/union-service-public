@@ -123,8 +123,8 @@ object EsActivityConverter {
             type = ActivityTypeDto.BID,
             userFrom = source.maker.value,
             userTo = null,
-            collection = source.make.type.ext.getCollections(),
-            item = source.make.type.ext.itemId?.value.orEmpty(),
+            collection = source.take.type.ext.getCollections(),
+            item = source.take.type.ext.itemId?.value.orEmpty(),
         )
     }
 
@@ -153,8 +153,8 @@ object EsActivityConverter {
             type = ActivityTypeDto.CANCEL_BID,
             userFrom = source.maker.value,
             userTo = null,
-            collection = source.make.ext.getCollections(),
-            item = source.make.ext.itemId?.value.orEmpty(),
+            collection = source.take.ext.getCollections(),
+            item = source.take.ext.itemId?.value.orEmpty(),
         )
     }
 

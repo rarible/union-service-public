@@ -247,8 +247,8 @@ class EsActivityConverterTest {
         assertThat(actual.type).isEqualTo(ActivityTypeDto.BID)
         assertThat(actual.userFrom).isEqualTo(source.maker.value)
         assertThat(actual.userTo).isNull()
-        assertThat(actual.collection).isEqualTo(source.make.type.ext.itemId!!.extractCollection())
-        assertThat(actual.item).isEqualTo(source.make.type.ext.itemId!!.value)
+        assertThat(actual.collection).isEqualTo(source.take.type.ext.itemId!!.extractCollection())
+        assertThat(actual.item).isEqualTo(source.take.type.ext.itemId!!.value)
     }
 
     @Test
@@ -313,8 +313,8 @@ class EsActivityConverterTest {
         assertThat(actual.type).isEqualTo(ActivityTypeDto.CANCEL_BID)
         assertThat(actual.userFrom).isEqualTo(source.maker.value)
         assertThat(actual.userTo).isNull()
-        assertThat(actual.collection).isEqualTo(source.make.ext.itemId!!.extractCollection())
-        assertThat(actual.item).isEqualTo(source.make.ext.itemId!!.value)
+        assertThat(actual.collection).isEqualTo(source.take.ext.itemId!!.extractCollection())
+        assertThat(actual.item).isEqualTo(source.take.ext.itemId!!.value)
     }
 
     @Test
