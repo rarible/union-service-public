@@ -29,21 +29,29 @@ class ReindexerService(
         )
 
         val tasks = blockchains.zip(activityTypes).mapAsync { (blockchain, activity) ->
-            val taskParam = ActivityTaskParam(blockchain, activity, indexName)
-            val existing = taskRepository
-                .findByTypeAndParam(ActivityTask.ACTIVITY_REINDEX, paramFactory.toString(taskParam))
-                .awaitSingleOrNull()
-            if(existing == null) {
-                Task(
-                    ActivityTask.ACTIVITY_REINDEX,
-                    "",
-                    taskParam,
-                    false
-                )
-            } else null
+            task(blockchain, activity, indexName)
         }.filterNotNull()
 
         return taskRepository.saveAll(tasks).collectList().awaitFirst()
+    }
+
+    private suspend fun task(
+        blockchain: BlockchainDto,
+        activity: ActivityTypeDto,
+        indexName: String
+    ): Task? {
+        val taskParam = ActivityTaskParam(blockchain, activity, indexName)
+        val existing = taskRepository
+            .findByTypeAndParam(ActivityTask.ACTIVITY_REINDEX, paramFactory.toString(taskParam))
+            .awaitSingleOrNull()
+        return if (existing == null) {
+            Task(
+                ActivityTask.ACTIVITY_REINDEX,
+                "",
+                taskParam,
+                false
+            )
+        } else null
     }
 
     companion object {
