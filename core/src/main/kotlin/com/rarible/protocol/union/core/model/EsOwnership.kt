@@ -20,6 +20,7 @@ data class EsOwnership(
     val owner: String,
     @Field(type = FieldType.Date, fielddata = true)
     val date: Instant,
+    val auctionId: String?,
 ) {
     companion object {
         private const val VERSION: Int = 1

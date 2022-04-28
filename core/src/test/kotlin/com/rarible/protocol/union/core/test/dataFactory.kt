@@ -204,4 +204,5 @@ fun randomEsOwnership(
     collection = CollectionIdDto(id.blockchain, randomString()).fullId(),
     owner = id.owner.fullId(),
     date = randomInstant(),
+    auctionId = randomString(),
 )
