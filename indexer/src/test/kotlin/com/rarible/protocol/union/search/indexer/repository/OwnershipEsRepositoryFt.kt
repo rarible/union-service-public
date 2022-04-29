@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.search.indexer.repository
 
 import com.rarible.core.test.data.randomString
+import com.rarible.protocol.union.core.model.EsOwnershipByAuctionOwnershipIdsFilter
 import com.rarible.protocol.union.core.model.EsOwnershipByIdFilter
 import com.rarible.protocol.union.core.model.EsOwnershipByIdsFilter
 import com.rarible.protocol.union.core.model.EsOwnershipByItemFilter
@@ -75,6 +76,23 @@ internal class OwnershipEsRepositoryFt {
         repository.saveAll(expected.values).first()
 
         val filter = EsOwnershipByIdsFilter(expected.keys)
+        repository.findByFilter(filter).let { actual ->
+            assertThat(actual).hasSize(3)
+            assertThat(actual.toSet()).isEqualTo(expected.values.toSet())
+        }
+    }
+
+    @Test
+    fun `should find with by auctionOwnershipIds filter`(): Unit = runBlocking {
+        val expected = listOf(
+            randomEsOwnership(),
+            randomEsOwnership(),
+            randomEsOwnership(),
+        ).associateBy { it.auctionOwnershipId!! }
+
+        repository.saveAll(expected.values).first()
+
+        val filter = EsOwnershipByAuctionOwnershipIdsFilter(expected.keys)
         repository.findByFilter(filter).let { actual ->
             assertThat(actual).hasSize(3)
             assertThat(actual.toSet()).isEqualTo(expected.values.toSet())

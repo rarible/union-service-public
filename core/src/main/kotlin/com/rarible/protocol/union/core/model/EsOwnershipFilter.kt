@@ -8,6 +8,7 @@ import org.elasticsearch.index.query.QueryBuilders.boolQuery
 import org.elasticsearch.index.query.QueryBuilders.idsQuery
 import org.elasticsearch.index.query.QueryBuilders.rangeQuery
 import org.elasticsearch.index.query.QueryBuilders.termQuery
+import org.elasticsearch.index.query.QueryBuilders.termsQuery
 import org.elasticsearch.search.sort.SortBuilders.fieldSort
 import org.elasticsearch.search.sort.SortOrder
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder
@@ -57,6 +58,15 @@ data class EsOwnershipByIdsFilter(
 ) : EsOwnershipFilter {
     override fun asQuery(): Query =
         NativeSearchQueryBuilder().withQuery(idsQuery().addIds(*ownershipsIds.toTypedArray())).build()
+}
+
+data class EsOwnershipByAuctionOwnershipIdsFilter(
+    val ownershipsIds: Collection<String>,
+) : EsOwnershipFilter {
+    override fun asQuery(): Query {
+        val builder = termsQuery(EsOwnership::auctionOwnershipId.name, ownershipsIds)
+        return NativeSearchQueryBuilder().withQuery(builder).build()
+    }
 }
 
 data class EsOwnershipByOwnerFilter(

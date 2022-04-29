@@ -2,6 +2,7 @@ package com.rarible.protocol.union.core.converter
 
 import com.rarible.protocol.union.core.model.EsOwnership
 import com.rarible.protocol.union.core.model.UnionOwnership
+import com.rarible.protocol.union.core.model.getAuctionOwnershipId
 import com.rarible.protocol.union.core.model.getItemId
 import com.rarible.protocol.union.core.model.getSellerOwnershipId
 import com.rarible.protocol.union.dto.AuctionDto
@@ -17,6 +18,7 @@ object EsOwnershipConverter {
         owner = source.owner.fullId(),
         date = source.createdAt,
         auctionId = source.auction?.id?.fullId(),
+        auctionOwnershipId = source.auction?.getAuctionOwnershipId()?.fullId(),
     )
 
     fun convert(source: UnionOwnership): EsOwnership = EsOwnership(
@@ -27,6 +29,7 @@ object EsOwnershipConverter {
         owner = source.id.owner.fullId(),
         date = source.createdAt,
         auctionId = null,
+        auctionOwnershipId = null,
     )
 
     fun convert(source: AuctionDto) = EsOwnership(
@@ -37,6 +40,7 @@ object EsOwnershipConverter {
         owner = source.seller.fullId(),
         date = source.createdAt,
         auctionId = source.id.fullId(),
+        auctionOwnershipId = source.getAuctionOwnershipId().fullId(),
     )
 
     fun convertOrMerge(source: UnionOwnership, esOwnership: EsOwnership?): EsOwnership = when (esOwnership) {
@@ -50,6 +54,7 @@ object EsOwnershipConverter {
         null -> convert(source)
         else -> esOwnership.copy(
             auctionId = source.id.fullId(),
+            auctionOwnershipId = source.getAuctionOwnershipId().fullId(),
         )
     }
 }

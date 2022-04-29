@@ -205,4 +205,9 @@ fun randomEsOwnership(
     owner = id.owner.fullId(),
     date = randomInstant(),
     auctionId = randomString(),
+    auctionOwnershipId = OwnershipIdDto(
+        id.blockchain,
+        id.itemIdValue,
+        randomUnionAddress(id.blockchain, randomString())
+    ).fullId(),
 )
