@@ -31,7 +31,8 @@ class ActivityTaskUnitTest {
             val task = ActivityTask(
                 SearchReindexerConfiguration(SearchReindexerProperties()),
                 ParamFactory(jacksonObjectMapper().registerKotlinModule()),
-                service
+                service,
+                mockk()
             )
 
             task.runLongTask(
