@@ -9,6 +9,7 @@ import com.rarible.protocol.union.core.model.EsActivity
 import com.rarible.protocol.union.core.model.elasticsearch.EntityDefinitionExtended
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.worker.config.SearchReindexerProperties
 import com.rarible.protocol.union.worker.task.search.activity.ActivityTaskParam
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactor.awaitSingleOrNull
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class ReindexerService(
+    private val searchReindexerProperties : SearchReindexerProperties,
     private val taskRepository: TaskRepository,
     private val paramFactory: ParamFactory
 ) : ReindexSchedulingService {
@@ -25,8 +27,12 @@ class ReindexerService(
         entityDefinition: EntityDefinitionExtended
     ) {
         when (entityDefinition.name){
-            // todo set blockchains and activityTypes
-            EsActivity.NAME -> scheduleActivityReindex(emptyList(), emptyList(), newIndexName)
+
+            EsActivity.NAME -> {
+                val blockchainDtoList = searchReindexerProperties.activityTasks.map { it.blockchainDto }
+                val activityTypeDtos = searchReindexerProperties.activityTasks.map { it.type }
+                scheduleActivityReindex(blockchainDtoList, activityTypeDtos, newIndexName)
+            }
         }
     }
 
