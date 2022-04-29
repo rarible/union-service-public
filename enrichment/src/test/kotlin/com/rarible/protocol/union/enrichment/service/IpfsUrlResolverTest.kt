@@ -77,6 +77,12 @@ class IpfsUrlResolverTest {
     }
 
     @Test
+    fun `foreign ipfs urls - replaced by internal gateway`() {
+        val result = service.resolveInnerHttpUrl("https://dweb.link/ipfs/$cid/1.png")
+        assertThat(result).isEqualTo("${ipfsGateway}/ipfs/$cid/1.png")
+    }
+
+    @Test
     fun `single sid`() {
         assertFixedIpfsUrl(cid, cid)
     }
