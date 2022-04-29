@@ -2,6 +2,7 @@ package com.rarible.protocol.union.api.controller
 
 import com.rarible.protocol.union.api.service.ItemApiService
 import com.rarible.protocol.union.api.service.OwnershipApiService
+import com.rarible.protocol.union.api.service.select.ItemSourceSelectService
 import com.rarible.protocol.union.api.util.BlockchainFilter
 import com.rarible.protocol.union.core.continuation.UnionItemContinuation
 import com.rarible.protocol.union.core.converter.ItemOwnershipConverter
@@ -52,7 +53,7 @@ import java.time.Duration
 @ExperimentalCoroutinesApi
 @RestController
 class ItemController(
-    private val itemApiService: ItemApiService,
+    private val itemSourceSelectService: ItemSourceSelectService,
     private val ownershipApiService: OwnershipApiService,
     private val router: BlockchainRouter<ItemService>,
     private val enrichmentItemService: EnrichmentItemService,
@@ -71,7 +72,7 @@ class ItemController(
         lastUpdatedTo: Long?
     ): ResponseEntity<ItemsDto> {
         val safeSize = PageSize.ITEM.limit(size)
-        val slices = itemApiService.getAllItems(blockchains, continuation, safeSize, showDeleted, lastUpdatedFrom, lastUpdatedTo)
+        val slices = itemSourceSelectService.getAllItems(blockchains, continuation, safeSize, showDeleted, lastUpdatedFrom, lastUpdatedTo)
         val total = slices.sumOf { it.page.total }
         val arg = ArgPaging(UnionItemContinuation.ByLastUpdatedAndId, slices.map { it.toSlice() }).getSlice(safeSize)
 
@@ -81,7 +82,7 @@ class ItemController(
             arg.continuation, slices.map { it.page.entities.size }
         )
 
-        val result = itemApiService.enrich(arg, total)
+        val result = itemSourceSelectService.enrich(arg, total)
         return ResponseEntity.ok(result)
     }
 
@@ -136,7 +137,7 @@ class ItemController(
     }
 
     override suspend fun getItemByIds(itemIdsDto: ItemIdsDto): ResponseEntity<ItemsDto> {
-        val items = itemApiService.getItemsByIds(itemIdsDto.ids)
+        val items = itemSourceSelectService.getItemsByIds(itemIdsDto.ids)
         return ResponseEntity.ok(ItemsDto(items = items, total = items.size.toLong()))
     }
 
@@ -196,7 +197,7 @@ class ItemController(
             collection, continuation, size, result.entities.size, result.total, result.continuation
         )
 
-        val enriched = itemApiService.enrich(result)
+        val enriched = itemSourceSelectService.enrich(result)
         return ResponseEntity.ok(enriched)
     }
 
@@ -228,7 +229,7 @@ class ItemController(
             blockchainPages.map { it.entities.size }
         )
 
-        val enriched = itemApiService.enrich(combinedPage)
+        val enriched = itemSourceSelectService.enrich(combinedPage)
         return ResponseEntity.ok(enriched)
     }
 
@@ -259,7 +260,7 @@ class ItemController(
             blockchainPages.map { it.entities.size }
         )
 
-        val enriched = itemApiService.enrich(combinedPage)
+        val enriched = itemSourceSelectService.enrich(combinedPage)
         return ResponseEntity.ok(enriched)
     }
 
@@ -288,7 +289,7 @@ class ItemController(
                 async {
                     if (null != item) {
                         ItemWithOwnershipDto(
-                            itemApiService.enrich(item), ItemOwnershipConverter.convert(it)
+                            itemSourceSelectService.enrich(item), ItemOwnershipConverter.convert(it)
                         )
                     } else {
                         logger.warn("Item for ${it.id} ownership wasn't found")
