@@ -47,6 +47,7 @@ import org.springframework.test.context.TestPropertySource
 import reactor.kotlin.core.publisher.toMono
 import java.time.Instant
 import java.time.temporal.ChronoUnit
+import com.rarible.protocol.solana.dto.ActivitiesByIdRequestDto as SolanaActivitiesByIdRequestDto
 
 @FlowPreview
 @IntegrationTest
@@ -216,7 +217,7 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
 
         coEvery {
             testSolanaActivityApi.searchActivitiesByIds(
-                listOf(solanaActivity1.id)
+                SolanaActivitiesByIdRequestDto(listOf(solanaActivity1.id))
             )
         } returns ActivitiesDto(null, listOf(solanaActivity1)).toMono()
 

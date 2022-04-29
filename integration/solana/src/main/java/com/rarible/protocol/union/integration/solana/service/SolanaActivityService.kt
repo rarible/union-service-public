@@ -2,6 +2,7 @@ package com.rarible.protocol.union.integration.solana.service
 
 import com.rarible.core.apm.CaptureSpan
 import com.rarible.protocol.solana.api.client.ActivityControllerApi
+import com.rarible.protocol.solana.dto.ActivitiesByIdRequestDto
 import com.rarible.protocol.solana.dto.ActivityFilterAllDto
 import com.rarible.protocol.solana.dto.ActivityFilterByCollectionDto
 import com.rarible.protocol.solana.dto.ActivityFilterByItemDto
@@ -98,7 +99,7 @@ open class SolanaActivityService(
     }
 
     override suspend fun getActivitiesByIds(ids: List<TypedActivityId>): List<ActivityDto> {
-        val result = activityApi.searchActivitiesByIds(ids.map { it.id })
+        val result = activityApi.searchActivitiesByIds(ActivitiesByIdRequestDto(ids.map { it.id }))
             .awaitFirst()
         return result.activities.map { activityConverter.convert(it, blockchain) }
     }
