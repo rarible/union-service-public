@@ -20,6 +20,7 @@ import com.rarible.protocol.union.integration.tezos.converter.TezosActivityConve
 import com.rarible.protocol.union.integration.tezos.converter.TezosOrderConverter
 import com.rarible.protocol.union.integration.tezos.dipdup.DipDupApiConfiguration
 import com.rarible.protocol.union.integration.tezos.dipdup.DipDupDummyApiConfiguration
+import com.rarible.protocol.union.integration.tezos.dipdup.PGIntegrationProperties
 import com.rarible.protocol.union.integration.tezos.dipdup.service.DipdupOrderService
 import com.rarible.protocol.union.integration.tezos.service.TezosActivityService
 import com.rarible.protocol.union.integration.tezos.service.TezosAuctionService
@@ -27,24 +28,50 @@ import com.rarible.protocol.union.integration.tezos.service.TezosCollectionServi
 import com.rarible.protocol.union.integration.tezos.service.TezosItemService
 import com.rarible.protocol.union.integration.tezos.service.TezosOrderService
 import com.rarible.protocol.union.integration.tezos.service.TezosOwnershipService
+import com.rarible.protocol.union.integration.tezos.service.TezosPgActivityService
 import com.rarible.protocol.union.integration.tezos.service.TezosSignatureService
+import io.r2dbc.spi.ConnectionFactories
+import io.r2dbc.spi.ConnectionFactory
+import io.r2dbc.spi.ConnectionFactoryOptions
+import io.r2dbc.spi.ConnectionFactoryOptions.DATABASE
+import io.r2dbc.spi.ConnectionFactoryOptions.DRIVER
+import io.r2dbc.spi.ConnectionFactoryOptions.HOST
+import io.r2dbc.spi.ConnectionFactoryOptions.PORT
+import io.r2dbc.spi.ConnectionFactoryOptions.PASSWORD
+import io.r2dbc.spi.ConnectionFactoryOptions.USER
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Import
 import java.net.URI
 
+
 @TezosConfiguration
 @Import(value = [CoreConfiguration::class, DipDupApiConfiguration::class, DipDupDummyApiConfiguration::class])
 @ComponentScan(basePackageClasses = [TezosOrderConverter::class])
-@EnableConfigurationProperties(value = [TezosIntegrationProperties::class])
+@EnableConfigurationProperties(value = [TezosIntegrationProperties::class, PGIntegrationProperties::class])
 class TezosApiConfiguration(
-    private val properties: TezosIntegrationProperties
+    private val properties: TezosIntegrationProperties,
+    private val pgProperties: PGIntegrationProperties
 ) {
 
     @Bean
     fun tezosBlockchain(): BlockchainDto {
         return BlockchainDto.TEZOS
+    }
+
+    @Bean
+    fun connectionFactory(): ConnectionFactory {
+        return ConnectionFactories.get(
+            ConnectionFactoryOptions.builder()
+                .option(DRIVER, "postgresql")
+                .option(HOST, pgProperties.host)
+                .option(PORT, pgProperties.port)
+                .option(USER, pgProperties.user)
+                .option(PASSWORD, pgProperties.password)
+                .option(DATABASE, pgProperties.database)
+                .build()
+        )
     }
 
     @Bean
@@ -120,11 +147,17 @@ class TezosApiConfiguration(
     }
 
     @Bean
+    fun tezosPgActivityService(connectionFactory: ConnectionFactory): TezosPgActivityService {
+        return TezosPgActivityService(connectionFactory)
+    }
+
+    @Bean
     fun tezosActivityService(
         itemActivityApi: NftActivityControllerApi,
         orderActivityApi: OrderActivityControllerApi,
-        converter: TezosActivityConverter
+        converter: TezosActivityConverter,
+        pgActivityService: TezosPgActivityService
     ): TezosActivityService {
-        return TezosActivityService(itemActivityApi, orderActivityApi, converter)
+        return TezosActivityService(itemActivityApi, orderActivityApi, converter, pgActivityService)
     }
 }

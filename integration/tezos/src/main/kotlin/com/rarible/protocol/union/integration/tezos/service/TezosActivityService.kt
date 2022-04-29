@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.integration.tezos.service
 
 import com.rarible.core.apm.CaptureSpan
+import com.rarible.core.logging.Logger
 import com.rarible.protocol.tezos.api.client.NftActivityControllerApi
 import com.rarible.protocol.tezos.api.client.OrderActivityControllerApi
 import com.rarible.protocol.tezos.dto.NftActivitiesDto
@@ -39,10 +40,12 @@ import java.time.Instant
 open class TezosActivityService(
     private val activityItemControllerApi: NftActivityControllerApi,
     private val activityOrderControllerApi: OrderActivityControllerApi,
-    private val tezosActivityConverter: TezosActivityConverter
+    private val tezosActivityConverter: TezosActivityConverter,
+    private val pgService: TezosPgActivityService
 ) : AbstractBlockchainService(BlockchainDto.TEZOS), ActivityService {
 
     companion object {
+        private val logger by Logger()
 
         private val EMPTY_ORDER_ACTIVITIES = OrderActivitiesDto(listOf(), null)
         private val EMPTY_ITEM_ACTIVITIES = NftActivitiesDto(null, listOf())
@@ -114,8 +117,46 @@ open class TezosActivityService(
         return getTezosActivities(nftFilter, orderFilter, continuation, size, sort)
     }
 
-    override suspend fun getActivitiesByIds(ids: List<TypedActivityId>): List<ActivityDto> {
-        TODO("To be implemented under ALPHA-276")
+    override suspend fun getActivitiesByIds(ids: List<TypedActivityId>): List<ActivityDto> = coroutineScope {
+        val itemActivitiesIds = mutableListOf<String>()
+        val orderActivitiesIds = mutableListOf<String>()
+
+        ids.forEach { (id, type) ->
+            when (type) {
+                ActivityTypeDto.TRANSFER, ActivityTypeDto.MINT, ActivityTypeDto.BURN -> {
+                    itemActivitiesIds.add(id)
+                }
+                ActivityTypeDto.BID, ActivityTypeDto.LIST, ActivityTypeDto.SELL, ActivityTypeDto.CANCEL_LIST, ActivityTypeDto.CANCEL_BID -> {
+                    orderActivitiesIds.add(id)
+                }
+            }
+        }
+
+        logger.info("Item Activities ids: $itemActivitiesIds")
+        logger.info("Order Activities ids: $orderActivitiesIds")
+
+        val itemRequest = async {
+            if (itemActivitiesIds.isNotEmpty()) {
+                pgService.nftActivities(itemActivitiesIds)
+            } else {
+                EMPTY_ITEM_ACTIVITIES
+            }
+        }
+        val orderRequest = async {
+            if (orderActivitiesIds.isNotEmpty()) {
+                pgService.orderActivities(orderActivitiesIds)
+            } else {
+                EMPTY_ORDER_ACTIVITIES
+            }
+        }
+
+        val items = itemRequest.await()
+        val orders = orderRequest.await()
+
+        val itemActivities = items.items.map { tezosActivityConverter.convert(it, blockchain) }
+        val orderActivities = orders.items.map { tezosActivityConverter.convert(it, blockchain) }
+
+        itemActivities + orderActivities
     }
 
     private suspend fun getTezosActivities(
