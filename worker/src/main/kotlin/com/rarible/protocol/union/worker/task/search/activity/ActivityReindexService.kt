@@ -17,7 +17,6 @@ import org.springframework.stereotype.Component
 class ActivityReindexService(
     private val activityClient: ActivityControllerApi,
     private val esActivityRepository: EsActivityRepository,
-    private val converter: EsActivityConverter,
     private val meterRegistry: MeterRegistry
 ) {
 
@@ -38,7 +37,7 @@ class ActivityReindexService(
             ).awaitFirst()
 
             val savedActivities = esActivityRepository.saveAll(
-                res.activities.mapNotNull(converter::convert),
+                res.activities.mapNotNull(EsActivityConverter::convert),
                 index
             )
 
