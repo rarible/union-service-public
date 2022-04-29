@@ -4,9 +4,10 @@ import com.rarible.core.common.mapAsync
 import com.rarible.core.task.RunTask
 import com.rarible.core.task.TaskHandler
 import com.rarible.protocol.union.api.client.OrderControllerApi
+import com.rarible.protocol.union.core.converter.EsOrderConverter
+import com.rarible.protocol.union.core.model.EsOrder
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.parser.IdParser
-import com.rarible.protocol.union.core.converter.EsOrderConverter
 import com.rarible.protocol.union.worker.config.SearchReindexerConfiguration
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
@@ -19,10 +20,10 @@ class OrderTask(
     private val orderClient: OrderControllerApi,
     private val esOperations: ReactiveElasticsearchOperations,
     private val converter: EsOrderConverter
-): TaskHandler<String> {
+) : TaskHandler<String> {
 
     override val type: String
-        get() = ORDER_REINDEX
+        get() = EsOrder.ENTITY_DEFINITION.reindexTaskName
 
     override fun getAutorunParams(): List<RunTask> {
         return config.properties.orderTasks.map { RunTask(it.name) }
@@ -56,7 +57,6 @@ class OrderTask(
     }
 
     companion object {
-        private const val ORDER_REINDEX = "ORDER_REINDEX"
         const val PAGE_SIZE = 1000
     }
 }

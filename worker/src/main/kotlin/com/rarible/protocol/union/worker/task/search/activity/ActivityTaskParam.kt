@@ -13,7 +13,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 data class ActivityTaskParam(
     val blockchain: BlockchainDto,
     val activityType: ActivityTypeDto,
-    val index: String? = null,
+    val index: String,
 ) {
     override fun toString(): String {
         return super.toString()

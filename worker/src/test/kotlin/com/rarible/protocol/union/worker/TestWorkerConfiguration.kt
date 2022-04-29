@@ -3,7 +3,7 @@ package com.rarible.protocol.union.worker
 import com.rarible.core.application.ApplicationEnvironmentInfo
 import com.rarible.protocol.union.api.client.FixedUnionApiServiceUriProvider
 import com.rarible.protocol.union.api.client.UnionApiClientFactory
-import com.rarible.protocol.union.core.elasticsearch.IndexMetadataService
+import com.rarible.protocol.union.core.elasticsearch.IndexService
 import com.rarible.protocol.union.core.elasticsearch.NoopReindexSchedulingService
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.web.server.LocalServerPort
@@ -32,6 +32,6 @@ class TestWorkerConfiguration {
     }
 
     @Bean
-    fun reindexSchedulingService(indexMetadataService: IndexMetadataService) =
-        NoopReindexSchedulingService(indexMetadataService)
+    fun reindexSchedulingService(indexService: IndexService) =
+        NoopReindexSchedulingService(indexService)
 }

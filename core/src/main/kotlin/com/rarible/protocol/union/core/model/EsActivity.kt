@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.core.model
 
 import com.rarible.protocol.union.core.model.elasticsearch.EntityDefinition
+import com.rarible.protocol.union.core.model.elasticsearch.EsEntitiesConfig.INDEX_SETTINGS
 import com.rarible.protocol.union.core.model.elasticsearch.EsEntitiesConfig.loadMapping
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -28,7 +29,14 @@ data class EsActivity(
 ) {
     companion object {
         const val NAME = "activity"
-        private const val VERSION: Int = 1
-        val ENTITY_DEFINITION = EntityDefinition(name = NAME, mapping = loadMapping(NAME), VERSION)
+        const val VERSION: Int = 2
+        private const val REINDEX_TASK_NAME = "ACTIVITY_REINDEX"
+        val ENTITY_DEFINITION = EntityDefinition(
+            name = NAME,
+            mapping = loadMapping(NAME),
+            versionData = VERSION,
+            settings = INDEX_SETTINGS,
+            REINDEX_TASK_NAME
+        )
     }
 }

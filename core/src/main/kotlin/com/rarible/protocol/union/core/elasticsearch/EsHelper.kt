@@ -1,44 +1,46 @@
 package com.rarible.protocol.union.core.elasticsearch
 
-import org.elasticsearch.ElasticsearchStatusException
+import com.rarible.core.logging.Logger
+import kotlinx.coroutines.reactive.awaitFirst
+import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.elasticsearch.action.admin.indices.alias.IndicesAliasesRequest
-import org.elasticsearch.client.RequestOptions
-import org.elasticsearch.client.RestHighLevelClient
 import org.elasticsearch.client.indices.CreateIndexRequest
 import org.elasticsearch.client.indices.GetIndexRequest
 import org.elasticsearch.common.xcontent.XContentType
-import org.elasticsearch.rest.RestStatus
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
+import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations
 
 object EsHelper {
 
-    fun createIndex(client: RestHighLevelClient, name: String, settings: String, mapping: String) {
-        try {
-            client.indices().get(GetIndexRequest(name), RequestOptions.DEFAULT)
-            logger.info("Index $name already exists")
-        } catch (e: ElasticsearchStatusException) {
-            logger.info("Creating index $name")
-            if (e.status() == RestStatus.NOT_FOUND) {
-                val request = CreateIndexRequest(name)
-                    .settings(settings, XContentType.JSON)
-                    .mapping(mapping, XContentType.JSON)
-                client.indices().create(request, RequestOptions.DEFAULT)
-            } else {
-                throw e
-            }
-        }
+    suspend fun createIndex(
+        reactiveElasticSearchOperations: ReactiveElasticsearchOperations,
+        name: String, settings: String, mapping: String
+    ) {
+        val existIndex = reactiveElasticSearchOperations.execute { it.indices().existsIndex(GetIndexRequest(name)) }
+            .awaitFirst()
+        if (existIndex) return
+        val request = CreateIndexRequest(name)
+            .settings(settings, XContentType.JSON)
+            .mapping(mapping, XContentType.JSON)
+        reactiveElasticSearchOperations.execute { it.indices().createIndex(request) }.awaitFirstOrNull()
     }
 
-    fun moveAlias(client: RestHighLevelClient, alias: String, fromIndex: String, toIndex: String) {
-        removeAlias(client, fromIndex, alias)
-        createAlias(client, toIndex, alias)
+    suspend fun moveAlias(
+        reactiveElasticSearchOperations: ReactiveElasticsearchOperations,
+        alias: String,
+        fromIndex: String,
+        toIndex: String
+    ) {
+        removeAlias(reactiveElasticSearchOperations, fromIndex, alias)
+        createAlias(reactiveElasticSearchOperations, toIndex, alias)
     }
 
-    private fun removeAlias(client: RestHighLevelClient, indexName: String, alias: String) {
+    private suspend fun removeAlias(
+        reactiveElasticSearchOperations: ReactiveElasticsearchOperations,
+        indexName: String, alias: String
+    ) {
         logger.info("Removing alias '$alias' from '$indexName'")
-        val realName = getRealName(client, indexName)
-        val existingAliases = getAliasesOfIndex(client, realName)
+        val realName = getRealName(reactiveElasticSearchOperations, indexName)
+        val existingAliases = getAliasesOfIndex(reactiveElasticSearchOperations, realName)
         if (alias !in existingAliases) {
             logger.info("Alias '$alias' does not exist in '$indexName' ('$realName')")
             return
@@ -50,12 +52,16 @@ object EsHelper {
                     .index(realName)
                     .alias(alias)
             )
-        client.indices().updateAliases(request, RequestOptions.DEFAULT)
+        reactiveElasticSearchOperations.execute { it.indices().updateAliases(request) }.awaitFirstOrNull()
     }
 
-    fun createAlias(client: RestHighLevelClient, indexName: String, alias: String) {
+    suspend fun createAlias(
+        reactiveElasticSearchOperations: ReactiveElasticsearchOperations,
+        indexName: String,
+        alias: String
+    ) {
         logger.info("Adding alias '$alias' to '$indexName'")
-        val realName = getRealName(client, indexName)
+        val realName = getRealName(reactiveElasticSearchOperations, indexName)
         val request = IndicesAliasesRequest()
             .addAliasAction(
                 IndicesAliasesRequest.AliasActions
@@ -63,18 +69,31 @@ object EsHelper {
                     .index(realName)
                     .alias(alias)
             )
-        client.indices().updateAliases(request, RequestOptions.DEFAULT)
+        reactiveElasticSearchOperations.execute { it.indices().updateAliases(request) }.awaitFirstOrNull()
     }
 
-    fun getRealName(client: RestHighLevelClient, indexName: String): String {
-        val response = client.indices().get(GetIndexRequest(indexName), RequestOptions.DEFAULT)
-        return response.aliases.entries.first().key
+    suspend fun getRealName(
+        esOperations: ReactiveElasticsearchOperations,
+        indexName: String
+    ): String? {
+
+        val exists = esOperations.execute { it.indices().existsIndex(GetIndexRequest(indexName)) }.awaitFirst()
+
+        return if (exists) {
+            val response =
+                esOperations.execute { it.indices().getIndex(GetIndexRequest(indexName)) }.awaitFirst()
+            response.aliases.entries.first().key
+        } else null
     }
 
-    private fun getAliasesOfIndex(client: RestHighLevelClient, indexName: String?): List<String> {
-        val response = client.indices().get(GetIndexRequest(indexName), RequestOptions.DEFAULT)
+    private suspend fun getAliasesOfIndex(
+        reactiveElasticSearchOperations: ReactiveElasticsearchOperations,
+        indexName: String?
+    ): List<String> {
+        val response =
+            reactiveElasticSearchOperations.execute { it.indices().getIndex(GetIndexRequest(indexName)) }.awaitFirst()
         return response.aliases.entries.first().value.map { it.alias }
     }
 
-   private val logger: Logger = LoggerFactory.getLogger(EsHelper::class.java)
+    private val logger by Logger()
 }

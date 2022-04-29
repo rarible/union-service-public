@@ -1,11 +1,10 @@
 package com.rarible.protocol.union.core.model.elasticsearch
 
+import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.core.model.EsActivity
 import com.rarible.protocol.union.core.model.EsCollection
 import com.rarible.protocol.union.core.model.EsOrder
 import com.rarible.protocol.union.core.model.EsOwnership
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 object EsEntitiesConfig {
 
@@ -16,6 +15,10 @@ object EsEntitiesConfig {
         EsOwnership.ENTITY_DEFINITION,
     )
 
+    fun prodEsEntities(): List<EntityDefinition> = listOf(
+        EsActivity.ENTITY_DEFINITION,
+    )
+
     fun loadMapping(entityName: String): String =
         try {
             EsEntitiesConfig::class.java.getResource("/mappings/$entityName.json")!!.readText()
@@ -24,5 +27,7 @@ object EsEntitiesConfig {
             throw e
         }
 
-    val logger: Logger = LoggerFactory.getLogger(EsEntitiesConfig::class.java)
+    val INDEX_SETTINGS = loadMapping("settings")
+
+    private val logger by Logger()
 }

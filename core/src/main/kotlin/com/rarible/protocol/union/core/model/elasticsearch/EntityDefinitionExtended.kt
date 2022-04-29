@@ -9,8 +9,10 @@ data class EntityDefinitionExtended(
     val indexRootName: String,
     val aliasName: String,
     val writeAliasName: String,
+    val settings: String,
+    val reindexTaskName: String
 
-    ) {
+) {
     val searchIndexCoordinates: IndexCoordinates = IndexCoordinates.of(aliasName)
     val writeIndexCoordinates: IndexCoordinates = IndexCoordinates.of(aliasName, writeAliasName)
     fun indexName(minorVersion: Int) = "$indexRootName$minorVersion"

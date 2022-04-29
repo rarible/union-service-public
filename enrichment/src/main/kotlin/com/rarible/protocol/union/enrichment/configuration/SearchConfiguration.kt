@@ -1,7 +1,7 @@
 package com.rarible.protocol.union.enrichment.configuration
 
 import com.rarible.protocol.union.core.elasticsearch.EsNameResolver
-import com.rarible.protocol.union.core.elasticsearch.IndexMetadataService
+import com.rarible.protocol.union.core.elasticsearch.IndexService
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
@@ -12,7 +12,7 @@ import org.springframework.data.elasticsearch.core.convert.ElasticsearchCustomCo
 import java.math.BigInteger
 
 @Configuration
-@Import(EsNameResolver::class, IndexMetadataService::class)
+@Import(EsNameResolver::class, IndexService::class)
 class SearchConfiguration {
     @Bean
     fun elasticsearchCustomConversions(): ElasticsearchCustomConversions {

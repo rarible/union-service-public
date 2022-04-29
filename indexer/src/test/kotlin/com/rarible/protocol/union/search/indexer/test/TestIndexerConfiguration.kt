@@ -55,7 +55,7 @@ class TestIndexerConfiguration {
             bootstrapServers = KafkaTestExtension.kafkaContainer.kafkaBoostrapServers()
         )
     }
-    
+
     @Bean
     fun testUnionOwnershipEventProducer(): RaribleKafkaProducer<OwnershipEventDto> {
         return RaribleKafkaProducer(

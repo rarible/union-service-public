@@ -4,9 +4,11 @@ import com.rarible.core.common.mapAsync
 import com.rarible.core.logging.Logger
 import com.rarible.core.task.Task
 import com.rarible.core.task.TaskRepository
+import com.rarible.protocol.union.core.elasticsearch.ReindexSchedulingService
+import com.rarible.protocol.union.core.model.EsActivity
+import com.rarible.protocol.union.core.model.elasticsearch.EntityDefinitionExtended
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.worker.task.search.activity.ActivityTask
 import com.rarible.protocol.union.worker.task.search.activity.ActivityTaskParam
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactor.awaitSingleOrNull
@@ -16,7 +18,17 @@ import org.springframework.stereotype.Component
 class ReindexerService(
     private val taskRepository: TaskRepository,
     private val paramFactory: ParamFactory
-) {
+) : ReindexSchedulingService {
+
+    override suspend fun scheduleReindex(
+        newIndexName: String,
+        entityDefinition: EntityDefinitionExtended
+    ) {
+        when (entityDefinition.name){
+            // todo set blockchains and activityTypes
+            EsActivity.NAME -> scheduleActivityReindex(emptyList(), emptyList(), newIndexName)
+        }
+    }
 
     suspend fun scheduleActivityReindex(
         blockchains: Collection<BlockchainDto>,
@@ -42,11 +54,11 @@ class ReindexerService(
     ): Task? {
         val taskParam = ActivityTaskParam(blockchain, activity, indexName)
         val existing = taskRepository
-            .findByTypeAndParam(ActivityTask.ACTIVITY_REINDEX, paramFactory.toString(taskParam))
+            .findByTypeAndParam(EsActivity.ENTITY_DEFINITION.reindexTaskName, paramFactory.toString(taskParam))
             .awaitSingleOrNull()
         return if (existing == null) {
             Task(
-                ActivityTask.ACTIVITY_REINDEX,
+                EsActivity.ENTITY_DEFINITION.reindexTaskName,
                 "",
                 taskParam,
                 false
