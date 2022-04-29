@@ -2,120 +2,65 @@ package com.rarible.protocol.union.worker.task
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
-import com.rarible.core.application.ApplicationEnvironmentInfo
-import com.rarible.core.test.data.randomAddress
-import com.rarible.protocol.union.api.client.ActivityControllerApi
-import com.rarible.protocol.union.core.converter.EsActivityConverter
-import com.rarible.protocol.union.core.elasticsearch.EsNameResolver
 import com.rarible.protocol.union.core.elasticsearch.IndexService
 import com.rarible.protocol.union.core.model.EsActivity
-import com.rarible.protocol.union.dto.ActivitiesDto
-import com.rarible.protocol.union.dto.ActivityIdDto
-import com.rarible.protocol.union.dto.ActivitySortDto
+import com.rarible.protocol.union.core.model.elasticsearch.EntityDefinitionExtended
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.OrderListActivityDto
 import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
 import com.rarible.protocol.union.worker.config.SearchReindexerConfiguration
 import com.rarible.protocol.union.worker.config.SearchReindexerProperties
 import com.rarible.protocol.union.worker.task.search.ParamFactory
+import com.rarible.protocol.union.worker.task.search.activity.ActivityReindexService
 import com.rarible.protocol.union.worker.task.search.activity.ActivityTask
+import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
-import reactor.core.publisher.Mono
-import java.time.Instant
-import kotlin.random.Random
 
 class ActivityTaskUnitTest {
 
-    private val esNameResolver = EsNameResolver(ApplicationEnvironmentInfo("test", "test.com"))
-
-    private val esActivityRepository = mockk<EsActivityRepository> {
-        every {
-            runBlocking {
-                saveAll(any())
-            }
-        } answers {
-            emptyList()
-        }
-
-        every { entityDefinition } answers { esNameResolver.createEntityDefinitionExtended(EsActivity.ENTITY_DEFINITION) }
-
-        every { runBlocking { refresh() } } answers {}
+    val service = mockk<ActivityReindexService> {
+        coEvery {
+            reindex(any(), any(), "activity_test_index", any())
+        } returns flowOf("next_cursor")
     }
 
-    private val indexService = mockk<IndexService> {
-        every { runBlocking { finishIndexing(any(), any()) } } answers {}
+    val repository = mockk<EsActivityRepository> {
+        every {
+            entityDefinition
+        } returns EntityDefinitionExtended(
+            name = EsActivity.ENTITY_DEFINITION.name,
+            mapping = EsActivity.ENTITY_DEFINITION.mapping,
+            versionData = EsActivity.ENTITY_DEFINITION.versionData,
+            indexRootName = "activity_test_index",
+            aliasName = "activity",
+            writeAliasName = "activity",
+            settings = EsActivity.ENTITY_DEFINITION.settings,
+            reindexTaskName = EsActivity.ENTITY_DEFINITION.reindexTaskName
+        )
+
+        coEvery { refresh() } returns Unit
     }
 
-    private val converter = mockk<EsActivityConverter> {
-        every {
-            convert(any<OrderListActivityDto>())
-        } returns EsActivity(
-            randomActivityId().fullId(),
-            Instant.now(),
-            0xb1,
-            42,
-            Random(0).nextLong(),
-            BlockchainDto.ETHEREUM,
-            ActivityTypeDto.LIST,
-            "0x01",
-            null,
-            "0xc0",
-            "0xa0",
-        )
-    }
-
-    private val activityClient = mockk<ActivityControllerApi> {
-        every {
-            getAllActivities(
-                listOf(ActivityTypeDto.LIST),
-                listOf(BlockchainDto.ETHEREUM),
-                null,
-                null,
-                ActivityTask.PAGE_SIZE,
-                ActivitySortDto.EARLIEST_FIRST
-            )
-        } returns Mono.just(
-            ActivitiesDto(
-                "ETHEREUM:cursor_1", "ETHEREUM:cursor_1", listOf(
-                    mockk()
-                )
-            )
-        )
-
-        every {
-            getAllActivities(
-                listOf(ActivityTypeDto.LIST),
-                listOf(BlockchainDto.ETHEREUM),
-                "ETHEREUM:cursor_1",
-                "ETHEREUM:cursor_1",
-                ActivityTask.PAGE_SIZE,
-                ActivitySortDto.EARLIEST_FIRST
-            )
-        } returns Mono.just(
-            ActivitiesDto(
-                null, null, listOf(
-                    mockk()
-                )
-            )
-        )
+    val indexService = mockk<IndexService> {
+        coEvery {
+            finishIndexing(any(), any())
+        } returns Unit
     }
 
     @Test
     fun `should launch first run of the task`(): Unit {
-
         runBlocking {
             val task = ActivityTask(
                 SearchReindexerConfiguration(SearchReindexerProperties()),
-                activityClient,
                 ParamFactory(jacksonObjectMapper().registerKotlinModule()),
-                converter,
-                esActivityRepository,
+                service,
+                repository,
                 indexService
             )
 
@@ -125,19 +70,7 @@ class ActivityTaskUnitTest {
             ).toList()
 
             coVerify {
-                activityClient.getAllActivities(
-                    listOf(ActivityTypeDto.LIST),
-                    listOf(BlockchainDto.ETHEREUM),
-                    null,
-                    null,
-                    ActivityTask.PAGE_SIZE,
-                    ActivitySortDto.EARLIEST_FIRST
-                )
-
-                converter.convert(any<OrderListActivityDto>())
-                esActivityRepository.saveAll(any())
-                esActivityRepository.refresh()
-                indexService.finishIndexing(any(), any())
+                service.reindex(BlockchainDto.ETHEREUM, ActivityTypeDto.LIST, "activity_test_index", null)
             }
         }
     }
@@ -146,10 +79,9 @@ class ActivityTaskUnitTest {
     fun `should launch next run of the task`(): Unit = runBlocking {
         val task = ActivityTask(
             SearchReindexerConfiguration(SearchReindexerProperties()),
-            activityClient,
             ParamFactory(jacksonObjectMapper().registerKotlinModule()),
-            converter,
-            esActivityRepository,
+            service,
+            repository,
             indexService
         )
 
@@ -159,29 +91,7 @@ class ActivityTaskUnitTest {
         ).toList()
 
         coVerify {
-
-            activityClient.getAllActivities(
-                listOf(ActivityTypeDto.LIST),
-                listOf(BlockchainDto.ETHEREUM),
-                "ETHEREUM:cursor_1",
-                "ETHEREUM:cursor_1",
-                ActivityTask.PAGE_SIZE,
-                ActivitySortDto.EARLIEST_FIRST
-            )
-
-            converter.convert(any<OrderListActivityDto>())
-            esActivityRepository.saveAll(any())
-            esActivityRepository.refresh()
-            indexService.finishIndexing(any(), any())
-        }
-    }
-
-    companion object {
-        private fun randomActivityId(): ActivityIdDto {
-            return ActivityIdDto(
-                blockchain = BlockchainDto.ETHEREUM,
-                value = randomAddress().toString()
-            )
+            service.reindex(BlockchainDto.ETHEREUM, ActivityTypeDto.LIST, "activity_test_index", "ETHEREUM:cursor_1")
         }
     }
 }

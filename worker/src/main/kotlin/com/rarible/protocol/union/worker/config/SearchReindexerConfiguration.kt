@@ -2,11 +2,9 @@ package com.rarible.protocol.union.worker.config
 
 import com.rarible.core.task.EnableRaribleTask
 import com.rarible.core.task.TaskHandler
-import com.rarible.core.task.TaskRepository
 import com.rarible.protocol.union.api.client.ActivityControllerApi
 import com.rarible.protocol.union.api.client.CollectionControllerApi
 import com.rarible.protocol.union.api.client.UnionApiClientFactory
-import com.rarible.protocol.union.core.converter.EsActivityConverter
 import com.rarible.protocol.union.core.elasticsearch.EsNameResolver
 import com.rarible.protocol.union.core.elasticsearch.IndexService
 import com.rarible.protocol.union.core.elasticsearch.bootstrap.ElasticsearchBootstraper
@@ -17,9 +15,7 @@ import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
 import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
 import com.rarible.protocol.union.enrichment.repository.search.EsCollectionRepository
 import com.rarible.protocol.union.worker.task.CollectionTask
-import com.rarible.protocol.union.worker.task.search.ParamFactory
 import com.rarible.protocol.union.worker.task.search.ReindexerService
-import com.rarible.protocol.union.worker.task.search.activity.ActivityTask
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import org.springframework.boot.context.properties.EnableConfigurationProperties
@@ -45,17 +41,6 @@ class SearchReindexerConfiguration(
     @Bean
     fun activityClient(factory: UnionApiClientFactory): ActivityControllerApi {
         return factory.createActivityApiClient()
-    }
-
-    @Bean
-    fun activityTask(
-        activityClient: ActivityControllerApi,
-        taskRepository: TaskRepository,
-        esActivityRepository: EsActivityRepository,
-        paramFactory: ParamFactory,
-        indexService: IndexService,
-    ): TaskHandler<String> {
-        return ActivityTask(this, activityClient, paramFactory, EsActivityConverter, esActivityRepository, indexService)
     }
 
     @Bean
