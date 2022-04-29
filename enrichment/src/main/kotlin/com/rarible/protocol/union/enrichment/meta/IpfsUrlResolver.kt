@@ -69,7 +69,7 @@ class IpfsUrlResolver(
 
         val pathEnd = uri.substring(ipfsPathIndex + IPFS_PATH_PART.length).removeLeadingSlashes()
         // Works only for IPFS CIDs
-        if (!isCid(pathEnd)) {
+        if (!isCid(pathEnd.substringBefore("/"))) {
             return null
         }
 
