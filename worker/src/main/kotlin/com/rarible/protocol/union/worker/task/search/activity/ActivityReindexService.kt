@@ -28,21 +28,23 @@ class ActivityReindexService(
         val counter = searchTaskMetricFactory.createReindexActivityCounter(blockchain, type)
 
         return flow {
-            val res = activityClient.getAllActivities(
-                listOf(type),
-                listOf(blockchain),
-                cursor,
-                cursor,
-                PageSize.ACTIVITY.max,
-                ActivitySortDto.EARLIEST_FIRST
-            ).awaitFirst()
+            do {
+                val res = activityClient.getAllActivities(
+                    listOf(type),
+                    listOf(blockchain),
+                    cursor,
+                    cursor,
+                    PageSize.ACTIVITY.max,
+                    ActivitySortDto.EARLIEST_FIRST
+                ).awaitFirst()
 
-            val savedActivities = esActivityRepository.saveAll(
-                res.activities.mapNotNull(EsActivityConverter::convert),
-                index
-            )
-            counter.increment(savedActivities.size)
-            emit(res.cursor ?: "")
+                val savedActivities = esActivityRepository.saveAll(
+                    res.activities.mapNotNull(EsActivityConverter::convert),
+                    index
+                )
+                counter.increment(savedActivities.size)
+                emit(res.cursor ?: "")
+            } while (res.cursor != null)
         }
     }
 }
