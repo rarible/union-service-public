@@ -6,12 +6,9 @@ import com.rarible.protocol.union.core.elasticsearch.EsHelper.moveAlias
 import com.rarible.protocol.union.core.model.EsMetadata
 import com.rarible.protocol.union.core.model.elasticsearch.CurrentEntityDefinition
 import com.rarible.protocol.union.core.model.elasticsearch.EntityDefinitionExtended
-import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.elasticsearch.action.admin.indices.refresh.RefreshRequest
-import org.elasticsearch.action.index.IndexRequest
 import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations
-import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates
 import org.springframework.stereotype.Service
 
 @Service
@@ -21,7 +18,6 @@ class IndexService(
     esNameResolver: EsNameResolver
 ) {
     private val metadataIndexName: String = esNameResolver.metadataIndexName
-    private val metadataIndexCoordinate: IndexCoordinates = IndexCoordinates.of(esNameResolver.metadataIndexName)
 
     suspend fun updateMetadata(entityDefinition: EntityDefinitionExtended) {
         innerUpdateMetadata(entityDefinition)
@@ -51,25 +47,24 @@ class IndexService(
     }
 
     suspend fun getEntityMetadata(
-        entity: EntityDefinitionExtended,
+        definition: EntityDefinitionExtended,
         realIndexName: String
     ): CurrentEntityDefinition? {
-
-        val id = entity.name + EsEntityMetadataType.MAPPING.suffix
+        val id = EsEntityMetadataType.MAPPING.getId(definition)
         var response = esMetadataRepository.findById(id)
 
         if (response == null) {
-            logger.info("Index ${entity.name} exists with name $realIndexName but metadata does not. Update metadata")
-            innerUpdateMetadata(entity)
+            logger.info("Index ${definition.entity} exists with name $realIndexName but metadata does not. Update metadata")
+            innerUpdateMetadata(definition)
             return null
         }
         val mapping = response.content
 
-        response = esMetadataRepository.findById(entity.name + EsEntityMetadataType.SETTINGS.suffix)
-        val settings: String = if (response != null) response.content else "{}"
+        response = esMetadataRepository.findById(EsEntityMetadataType.SETTINGS.getId(definition))
+        val settings: String = response?.content ?: "{}"
 
-        response = esMetadataRepository.findById(entity.name + EsEntityMetadataType.VERSION_DATA.suffix)
-        val version: Int = if (response != null) response.content.toInt() else 1
+        response = esMetadataRepository.findById(EsEntityMetadataType.VERSION_DATA.getId(definition))
+        val version: Int = response?.content?.toInt() ?: 1
 
         return CurrentEntityDefinition(
             mapping = mapping,
@@ -78,13 +73,13 @@ class IndexService(
         )
     }
 
-    suspend fun finishIndexing(newIndexName: String, entityDefinition: EntityDefinitionExtended) {
-        val realIndexName = getRealName(reactiveElasticSearchOperations, entityDefinition.aliasName)
+    suspend fun finishIndexing(newIndexName: String, definition: EntityDefinitionExtended) {
+        val realIndexName = getRealName(reactiveElasticSearchOperations, definition.aliasName)
             ?: throw IllegalStateException("Index not found")
         if (realIndexName != newIndexName) {
-            moveAlias(reactiveElasticSearchOperations, entityDefinition.aliasName, realIndexName, newIndexName)
+            moveAlias(reactiveElasticSearchOperations, definition.aliasName, realIndexName, newIndexName)
         }
-        updateMetadata(entityDefinition)
+        updateMetadata(definition)
     }
 
     companion object {

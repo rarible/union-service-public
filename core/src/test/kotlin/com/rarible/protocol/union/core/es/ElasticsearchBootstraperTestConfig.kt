@@ -4,7 +4,7 @@ import com.rarible.protocol.union.core.elasticsearch.EsMetadataRepository
 import com.rarible.protocol.union.core.elasticsearch.EsNameResolver
 import com.rarible.protocol.union.core.elasticsearch.IndexService
 import com.rarible.protocol.union.core.elasticsearch.NoopReindexSchedulingService
-import com.rarible.protocol.union.core.elasticsearch.bootstrap.ElasticsearchBootstraper
+import com.rarible.protocol.union.core.elasticsearch.bootstrap.ElasticsearchBootstrapper
 import com.rarible.protocol.union.core.model.elasticsearch.EsEntitiesConfig
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
@@ -18,9 +18,9 @@ class ElasticsearchBootstraperTestConfig {
         reactiveElasticSearchOperations: ReactiveElasticsearchOperations,
         esNameResolver: EsNameResolver,
         indexService: IndexService
-    ): ElasticsearchBootstraper {
+    ): ElasticsearchBootstrapper {
 
-        return ElasticsearchBootstraper(
+        return ElasticsearchBootstrapper(
             esNameResolver = esNameResolver,
             esOperations = reactiveElasticSearchOperations,
             entityDefinitions = EsEntitiesConfig.createEsEntities(),

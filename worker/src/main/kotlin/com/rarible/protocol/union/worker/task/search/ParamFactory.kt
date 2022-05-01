@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component
 class ParamFactory(
     val objectMapper: ObjectMapper
 ) {
-
     final inline fun <reified T> parse(str: String): T {
         return objectMapper.readValue(str)
     }

@@ -7,15 +7,11 @@ import com.rarible.protocol.union.dto.BlockchainDto
  * Reindexing task state
  *
  * @param blockchain blockchain
- * @param activityType activity type
+ * @param type activity type
  * @param index elasticsearch index name, including environment, version, etc.
  */
 data class ActivityTaskParam(
     val blockchain: BlockchainDto,
-    val activityType: ActivityTypeDto,
-    val index: String,
-) {
-    override fun toString(): String {
-        return super.toString()
-    }
-}
+    val type: ActivityTypeDto,
+    val index: String
+)

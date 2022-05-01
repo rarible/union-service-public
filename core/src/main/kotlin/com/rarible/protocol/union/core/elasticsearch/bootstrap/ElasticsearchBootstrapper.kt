@@ -10,6 +10,7 @@ import com.rarible.protocol.union.core.elasticsearch.IndexService
 import com.rarible.protocol.union.core.elasticsearch.ReindexSchedulingService
 import com.rarible.protocol.union.core.model.elasticsearch.EntityDefinition
 import com.rarible.protocol.union.core.model.elasticsearch.EntityDefinitionExtended
+import com.rarible.protocol.union.core.model.elasticsearch.EsEntity
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.toList
@@ -21,15 +22,14 @@ import org.elasticsearch.client.indices.PutMappingRequest
 import org.elasticsearch.common.xcontent.XContentType
 import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations
 
-class ElasticsearchBootstraper(
+class ElasticsearchBootstrapper(
     private val esNameResolver: EsNameResolver,
     private val esOperations: ReactiveElasticsearchOperations,
     entityDefinitions: List<EntityDefinition>,
     private val reindexSchedulingService: ReindexSchedulingService,
     private val indexService: IndexService,
-    private val forceUpdate: Set<String> = emptySet(),
+    private val forceUpdate: Set<EsEntity> = emptySet(),
 ) {
-
     private val metadataMapping = metadataIndex()
 
     private val extendedEntityDefinitions: List<EntityDefinitionExtended> =
@@ -44,15 +44,15 @@ class ElasticsearchBootstraper(
             mapping = metadataMapping,
             settings = "{}"
         )
-        for (entity in extendedEntityDefinitions) {
+        for (definition in extendedEntityDefinitions) {
 
-            logger.info("Updating index for entity ${entity.name}")
+            logger.info("Updating index for entity ${definition.entity}")
 
-            if (checkReindexInProgress(entity.writeAliasName)) {
-                logger.info("Updating index for entity ${entity.name} is in progress. Skip")
+            if (checkReindexInProgress(definition.writeAliasName)) {
+                logger.info("Updating index for entity ${definition.entity} is in progress. Skip")
                 continue
             }
-            updateIndexMapping(entity)
+            updateIndexMapping(definition)
         }
         logger.info("Finished elasticsearch initialization")
     }
@@ -73,71 +73,68 @@ class ElasticsearchBootstraper(
         return false
     }
 
-    private suspend fun updateIndexMapping(
-        entity: EntityDefinitionExtended
-    ) {
-        val realIndexName = getRealName(esOperations, entity.aliasName)
+    private suspend fun updateIndexMapping(definition: EntityDefinitionExtended) {
+        val realIndexName = getRealName(esOperations, definition.aliasName)
 
         if (realIndexName == null) {
-            createFirstIndex(entity)
+            createFirstIndex(definition)
             return
         }
-        val currentEntityMetadata = indexService.getEntityMetadata(entity, realIndexName) ?: return
+        val currentEntityMetadata = indexService.getEntityMetadata(definition, realIndexName) ?: return
         when {
-            currentEntityMetadata.versionData != entity.versionData -> recreateIndex(realIndexName, entity)
-            currentEntityMetadata.settings != entity.settings -> recreateIndex(realIndexName, entity)
-            currentEntityMetadata.mapping != entity.mapping || forceUpdate.contains(entity.name) ->
-                updateMappings(
-                    realIndexName,
-                    entity
-                )
-            else -> logger.info("Index ${entity.name} mapping and settings has not changed. Skipping index update")
+            currentEntityMetadata.versionData != definition.versionData ->
+                recreateIndex(realIndexName, definition)
+            currentEntityMetadata.settings != definition.settings ->
+                recreateIndex(realIndexName, definition)
+            currentEntityMetadata.mapping != definition.mapping || forceUpdate.contains(definition.entity) ->
+                updateMappings(realIndexName, definition)
+            else -> logger.info("Index ${definition.entity} mapping and settings has not changed. Skipping index update")
         }
     }
 
-    private suspend fun createFirstIndex(entity: EntityDefinitionExtended) {
-        val newIndexName = entity.indexName(minorVersion = entity.versionData)
+    private suspend fun createFirstIndex(definition: EntityDefinitionExtended) {
+        val newIndexName = definition.indexName(minorVersion = definition.versionData)
         createIndex(
             reactiveElasticSearchOperations = esOperations,
             name = newIndexName,
-            mapping = entity.mapping,
-            settings = entity.settings
+            mapping = definition.mapping,
+            settings = definition.settings
         )
         createAlias(
             reactiveElasticSearchOperations = esOperations,
             indexName = newIndexName,
-            alias = entity.aliasName
+            alias = definition.aliasName
         )
         createAlias(
             reactiveElasticSearchOperations = esOperations,
             indexName = newIndexName,
-            alias = entity.writeAliasName
+            alias = definition.writeAliasName
         )
         scheduleReindex(
-            entity = entity,
+            definition = definition,
             newIndexName = newIndexName
         )
     }
 
     private suspend fun updateMappings(
         realIndexName: String,
-        entity: EntityDefinitionExtended
+        definition: EntityDefinitionExtended
     ) {
-        logger.info("Index ${entity.name} mappings changed. Updating")
+        logger.info("Index ${definition.entity} mappings changed. Updating")
         esOperations.execute {
             it.indices().putMapping(
                 PutMappingRequest(realIndexName)
-                    .source(entity.mapping, XContentType.JSON)
+                    .source(definition.mapping, XContentType.JSON)
             )
         }
             .asFlow()
             .catch {
-                logger.info("Failed to update index ${entity.name} mapping. Recreating index")
-                recreateIndex(realIndexName, entity)
+                logger.info("Failed to update index ${definition.entity} mapping. Recreating index")
+                recreateIndex(realIndexName, definition)
             }
             .onCompletion {
                 scheduleReindex(
-                    entity = entity,
+                    definition = definition,
                     newIndexName = realIndexName,
                 )
             }
@@ -146,30 +143,30 @@ class ElasticsearchBootstraper(
 
     private suspend fun recreateIndex(
         realIndexName: String,
-        entity: EntityDefinitionExtended,
+        definition: EntityDefinitionExtended,
     ) {
-        val indexVersion = entity.getVersion(realIndexName)
-        val newIndexName = entity.indexName(minorVersion = indexVersion + 1)
+        val indexVersion = definition.getVersion(realIndexName)
+        val newIndexName = definition.indexName(minorVersion = indexVersion + 1)
         createIndex(
             reactiveElasticSearchOperations = esOperations,
             name = newIndexName,
-            mapping = entity.mapping,
-            settings = entity.settings
+            mapping = definition.mapping,
+            settings = definition.settings
         )
         createAlias(
             reactiveElasticSearchOperations = esOperations,
             indexName = newIndexName,
-            alias = entity.writeAliasName
+            alias = definition.writeAliasName
         )
-        scheduleReindex(entity, newIndexName)
+        scheduleReindex(definition, newIndexName)
     }
 
     private fun scheduleReindex(
-        entity: EntityDefinitionExtended,
+        definition: EntityDefinitionExtended,
         newIndexName: String
     ) = runBlocking {
-        logger.info("Scheduling reindex for ${entity.name} to $newIndexName")
-        reindexSchedulingService.scheduleReindex(newIndexName, entity)
+        logger.info("Scheduling reindex for ${definition.entity} to $newIndexName")
+        reindexSchedulingService.scheduleReindex(newIndexName, definition)
     }
 
     companion object {
@@ -178,6 +175,5 @@ class ElasticsearchBootstraper(
 }
 
 fun metadataIndex(): String {
-    return ElasticsearchBootstraper::class.java.getResource("/mappings/${METADATA_INDEX}.json")!!
-        .readText()
+    return ElasticsearchBootstrapper::class.java.getResource("/mappings/${METADATA_INDEX}.json")!!.readText()
 }

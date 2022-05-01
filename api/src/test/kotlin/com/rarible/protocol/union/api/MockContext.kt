@@ -16,7 +16,7 @@ import com.rarible.protocol.union.api.configuration.WebSocketConfiguration
 import com.rarible.protocol.union.core.elasticsearch.EsNameResolver
 import com.rarible.protocol.union.core.elasticsearch.IndexService
 import com.rarible.protocol.union.core.elasticsearch.NoopReindexSchedulingService
-import com.rarible.protocol.union.core.elasticsearch.bootstrap.ElasticsearchBootstraper
+import com.rarible.protocol.union.core.elasticsearch.bootstrap.ElasticsearchBootstrapper
 import com.rarible.protocol.union.core.model.elasticsearch.EsEntitiesConfig
 import com.rarible.protocol.union.dto.FakeSubscriptionEventDto
 import com.rarible.protocol.union.dto.ItemEventDto
@@ -71,9 +71,9 @@ class MockContext : ApplicationListener<WebServerInitializedEvent> {
         reactiveElasticSearchOperations: ReactiveElasticsearchOperations,
         esNameResolver: EsNameResolver,
         indexService: IndexService
-    ): ElasticsearchBootstraper {
+    ): ElasticsearchBootstrapper {
 
-        return ElasticsearchBootstraper(
+        return ElasticsearchBootstrapper(
             esNameResolver = esNameResolver,
             esOperations = reactiveElasticSearchOperations,
             entityDefinitions = EsEntitiesConfig.createEsEntities(),

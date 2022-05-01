@@ -4,7 +4,7 @@ import com.rarible.protocol.union.core.elasticsearch.EsEntityMetadataType
 import com.rarible.protocol.union.core.elasticsearch.EsNameResolver
 import com.rarible.protocol.union.core.elasticsearch.IndexService
 import com.rarible.protocol.union.core.elasticsearch.ReindexSchedulingService
-import com.rarible.protocol.union.core.elasticsearch.bootstrap.ElasticsearchBootstraper
+import com.rarible.protocol.union.core.elasticsearch.bootstrap.ElasticsearchBootstrapper
 import com.rarible.protocol.union.core.elasticsearch.getId
 import com.rarible.protocol.union.core.model.EsActivity
 import com.rarible.protocol.union.core.model.elasticsearch.EntityDefinition
@@ -42,7 +42,7 @@ internal class ElasticsearchBootstraperTest {
         val entityDefinitions = listOf(EsActivity.ENTITY_DEFINITION)
         val entityDefinition = esNameResolver.createEntityDefinitionExtended(EsActivity.ENTITY_DEFINITION)
 
-        val bootstraper = ElasticsearchBootstraper(
+        val bootstraper = ElasticsearchBootstrapper(
             esNameResolver = esNameResolver,
             esOperations = reactiveElasticSearchOperations,
             entityDefinitions = entityDefinitions,
@@ -85,11 +85,9 @@ internal class ElasticsearchBootstraperTest {
 
         // Up version
         val entityDefinitionNew = EntityDefinition(
-            entityDefinition.name, entityDefinition.mapping, newVersionData, entityDefinition.settings,
-            entityDefinition.reindexTaskName
+            entityDefinition.entity, entityDefinition.mapping, newVersionData, entityDefinition.settings
         )
-
-        val bootstraperNew = ElasticsearchBootstraper(
+        val bootstrapperNew = ElasticsearchBootstrapper(
             esNameResolver = esNameResolver,
             esOperations = reactiveElasticSearchOperations,
             entityDefinitions = listOf(entityDefinitionNew),
@@ -97,8 +95,7 @@ internal class ElasticsearchBootstraperTest {
             indexService,
             forceUpdate = emptySet()
         )
-
-        bootstraperNew.bootstrap()
+        bootstrapperNew.bootstrap()
         indexInfo = reactiveElasticSearchOperations.execute { it.indices().getIndex(GetIndexRequest(indexName)) }
             .awaitFirst()
         assertThat(indexInfo.aliases.values.first().first().alias()).isEqualTo(aliasName)

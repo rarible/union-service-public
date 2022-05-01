@@ -27,7 +27,6 @@ class EsActivityRepository(
     private val queryBuilderService: EsActivityQueryBuilderService,
     esNameResolver: EsNameResolver
 ) {
-
     val entityDefinition = esNameResolver.createEntityDefinitionExtended(EsActivity.ENTITY_DEFINITION)
 
     suspend fun findById(id: String): EsActivity? {
@@ -35,8 +34,7 @@ class EsActivityRepository(
     }
 
     suspend fun save(esActivity: EsActivity): EsActivity {
-        return esOperations.save(esActivity, entityDefinition.writeIndexCoordinates)
-            .awaitFirst()
+        return esOperations.save(esActivity, entityDefinition.writeIndexCoordinates).awaitFirst()
     }
 
     suspend fun saveAll(esActivities: List<EsActivity>): List<EsActivity> {

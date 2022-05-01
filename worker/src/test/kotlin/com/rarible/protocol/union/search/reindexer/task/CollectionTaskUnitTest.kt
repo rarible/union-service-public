@@ -9,7 +9,9 @@ import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.CollectionsDto
 import com.rarible.protocol.union.dto.continuation.CollectionContinuation
 import com.rarible.protocol.union.enrichment.repository.search.EsCollectionRepository
-import com.rarible.protocol.union.worker.task.CollectionTask
+import com.rarible.protocol.union.worker.config.BlockchainReindexProperties
+import com.rarible.protocol.union.worker.config.CollectionReindexProperties
+import com.rarible.protocol.union.worker.task.search.collection.CollectionTask
 import io.mockk.coEvery
 import io.mockk.coVerifyAll
 import io.mockk.every
@@ -64,11 +66,13 @@ class CollectionTaskUnitTest {
     internal fun `should start first task`() {
         runBlocking {
             val task = CollectionTask(
-                listOf(BlockchainDto.ETHEREUM),
-                true,
-                client, repo
+                CollectionReindexProperties(
+                    enabled = true,
+                    blockchains = listOf(BlockchainReindexProperties(enabled = true, BlockchainDto.ETHEREUM))
+                ),
+                client,
+                repo
             )
-
             task.runLongTask(null, "COLLECTION_REINDEX_ETHEREUM").toList()
 
             coVerifyAll {
@@ -87,9 +91,12 @@ class CollectionTaskUnitTest {
     internal fun `should return empty continuation`() {
         runBlocking {
             val task = CollectionTask(
-                listOf(BlockchainDto.ETHEREUM),
-                true,
-                client, repo
+                CollectionReindexProperties(
+                    enabled = true,
+                    blockchains = listOf(BlockchainReindexProperties(enabled = true, BlockchainDto.ETHEREUM))
+                ),
+                client,
+                repo
             )
 
             val from = CollectionContinuation.ById.getContinuation(collection).toString()

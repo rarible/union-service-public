@@ -8,32 +8,31 @@ import org.springframework.stereotype.Component
 
 @Component
 class EsNameResolver(
-    val applicationEnvironmentInfo: ApplicationEnvironmentInfo
+    private val applicationEnvironmentInfo: ApplicationEnvironmentInfo
 ) {
     final val metadataIndexName = "${PREFIX}_${applicationEnvironmentInfo.name}_$METADATA_INDEX"
 
-    val matadataIndexCoordinate = IndexCoordinates.of(metadataIndexName)
+    val matadataIndexCoordinate: IndexCoordinates = IndexCoordinates.of(metadataIndexName)
 
     fun createEntityDefinitionExtended(entity: EntityDefinition) =
         EntityDefinitionExtended(
-            name = entity.name,
+            entity = entity.entity,
             mapping = entity.mapping,
             versionData = entity.versionData,
             indexRootName = indexRootName(entity),
             aliasName = aliasName(entity),
             writeAliasName = writeAliasName(entity),
-            settings = entity.settings,
-            reindexTaskName = entity.reindexTaskName
+            settings = entity.settings
         )
 
     private fun indexRootName(entity: EntityDefinition) =
-        "${PREFIX}_${applicationEnvironmentInfo.name}_${entity.name}_"
+        "${PREFIX}_${applicationEnvironmentInfo.name}_${entity.entity}_"
 
     private fun aliasName(entity: EntityDefinition) =
-        "${PREFIX}_${applicationEnvironmentInfo.name}_${entity.name}_alias"
+        "${PREFIX}_${applicationEnvironmentInfo.name}_${entity.entity}_alias"
 
     private fun writeAliasName(entity: EntityDefinition) =
-        "${PREFIX}_${applicationEnvironmentInfo.name}_${entity.name}_write_alias"
+        "${PREFIX}_${applicationEnvironmentInfo.name}_${entity.entity}_write_alias"
 
     companion object {
         const val METADATA_INDEX = "metadata"

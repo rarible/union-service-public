@@ -3,17 +3,16 @@ package com.rarible.protocol.union.worker.task.search.activity
 import com.rarible.core.logging.Logger
 import com.rarible.core.task.TaskHandler
 import com.rarible.protocol.union.core.elasticsearch.IndexService
+import com.rarible.protocol.union.core.model.EsActivity
 import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
-import com.rarible.protocol.union.worker.config.SearchReindexerConfiguration
+import com.rarible.protocol.union.worker.config.ActivityReindexProperties
 import com.rarible.protocol.union.worker.task.search.ParamFactory
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.onCompletion
-import org.springframework.stereotype.Component
 
-@Component
 class ActivityTask(
-    private val config: SearchReindexerConfiguration,
+    private val properties: ActivityReindexProperties,
     private val paramFactory: ParamFactory,
     private val activityReindexService: ActivityReindexService,
     private val repository: EsActivityRepository,
@@ -22,10 +21,11 @@ class ActivityTask(
     private val entityDefinition = repository.entityDefinition
 
     override val type: String
-        get() = entityDefinition.reindexTaskName
+        get() = EsActivity.ENTITY_DEFINITION.reindexTask
 
     override suspend fun isAbleToRun(param: String): Boolean {
-        return config.properties.startReindexActivity
+        val blockchain = paramFactory.parse<ActivityTaskParam>(param).blockchain
+        return properties.enabled && properties.blockchains.single { it.blockchain == blockchain }.enabled
     }
 
     /**
@@ -36,19 +36,23 @@ class ActivityTask(
         return if(from == "") {
             emptyFlow()
         } else {
-            val param = paramFactory.parse<ActivityTaskParam>(param)
+            val taskParam = paramFactory.parse<ActivityTaskParam>(param)
             return activityReindexService
-                .reindex(param.blockchain, param.activityType, param.index, from)
+                .reindex(
+                    blockchain = taskParam.blockchain,
+                    type = taskParam.type,
+                    index = taskParam.index,
+                    cursor = from
+                )
                 .onCompletion {
-                    indexService.finishIndexing(param.index, entityDefinition)
+                    indexService.finishIndexing(taskParam.index, entityDefinition)
                     repository.refresh()
-                    logger.info("Finished reindex of ${entityDefinition.name} with param $param")
+                    logger.info("Finished reindex of ${entityDefinition.entity} with param $param")
                 }
         }
     }
 
     companion object {
-        const val PAGE_SIZE = 1000
         private val logger by Logger()
     }
 }

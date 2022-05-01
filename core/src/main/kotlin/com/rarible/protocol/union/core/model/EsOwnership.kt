@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.core.model
 
+import com.rarible.protocol.union.core.model.elasticsearch.EsEntity
 import com.rarible.protocol.union.core.model.elasticsearch.EntityDefinition
 import com.rarible.protocol.union.core.model.elasticsearch.EsEntitiesConfig.INDEX_SETTINGS
 import com.rarible.protocol.union.core.model.elasticsearch.EsEntitiesConfig.loadMapping
@@ -20,16 +21,15 @@ data class EsOwnership(
     val date: Instant,
 ) {
     companion object {
-        const val NAME = "ownership"
-        private const val REINDEX_TASK_NAME = "OWNERSHIP_REINDEX"
         private const val VERSION: Int = 1
-        val ENTITY_DEFINITION =
+
+        val ENTITY_DEFINITION = EsEntity.OWNERSHIP.let {
             EntityDefinition(
-                name = NAME,
-                mapping = loadMapping(NAME),
+                entity = it,
+                mapping = loadMapping(it),
                 versionData = VERSION,
-                settings = INDEX_SETTINGS,
-                reindexTaskName = REINDEX_TASK_NAME
+                settings = INDEX_SETTINGS
             )
+        }
     }
 }

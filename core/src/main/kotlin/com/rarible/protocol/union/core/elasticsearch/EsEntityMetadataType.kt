@@ -8,4 +8,4 @@ enum class EsEntityMetadataType(val suffix: String) {
     VERSION_DATA("_version"),
 }
 
-fun EsEntityMetadataType.getId(entityDefinition: EntityDefinitionExtended) = entityDefinition.name + suffix
+fun EsEntityMetadataType.getId(entityDefinition: EntityDefinitionExtended) = entityDefinition.entity.name.lowercase() + suffix

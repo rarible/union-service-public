@@ -19,11 +19,15 @@ object EsEntitiesConfig {
         EsActivity.ENTITY_DEFINITION,
     )
 
-    fun loadMapping(entityName: String): String =
+    fun loadMapping(entity: EsEntity): String {
+        return loadMapping(entity.name.lowercase())
+    }
+
+    fun loadMapping(mapping: String): String =
         try {
-            EsEntitiesConfig::class.java.getResource("/mappings/$entityName.json")!!.readText()
+            EsEntitiesConfig::class.java.getResource("/mappings/$mapping.json")!!.readText()
         } catch (e: Exception) {
-            logger.error("Not found mapping for index $entityName")
+            logger.error("Not found mapping for index $mapping")
             throw e
         }
 

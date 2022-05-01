@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.core.model
 
+import com.rarible.protocol.union.core.model.elasticsearch.EsEntity
 import com.rarible.protocol.union.core.model.elasticsearch.EntityDefinition
 import com.rarible.protocol.union.core.model.elasticsearch.EsEntitiesConfig.INDEX_SETTINGS
 import com.rarible.protocol.union.core.model.elasticsearch.EsEntitiesConfig.loadMapping
@@ -42,15 +43,15 @@ class EsOrder(
     }
 
     companion object {
-        const val NAME = "order"
-        private const val REINDEX_TASK_NAME = "ORDER_REINDEX"
         private const val VERSION = 1
-        val ENTITY_DEFINITION = EntityDefinition(
-            name = NAME,
-            mapping = loadMapping(NAME),
-            versionData = VERSION,
-            settings = INDEX_SETTINGS,
-            reindexTaskName = REINDEX_TASK_NAME
-        )
+
+        val ENTITY_DEFINITION = EsEntity.ORDER.let {
+            EntityDefinition(
+                entity = it,
+                mapping = loadMapping(it),
+                versionData = VERSION,
+                settings = INDEX_SETTINGS
+            )
+        }
     }
 }

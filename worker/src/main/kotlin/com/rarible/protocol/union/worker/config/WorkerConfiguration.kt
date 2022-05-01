@@ -1,21 +1,17 @@
 package com.rarible.protocol.union.worker.config
 
 import com.rarible.core.task.EnableRaribleTask
-import com.rarible.core.task.TaskHandler
 import com.rarible.protocol.union.api.client.ActivityControllerApi
 import com.rarible.protocol.union.api.client.CollectionControllerApi
 import com.rarible.protocol.union.api.client.UnionApiClientFactory
 import com.rarible.protocol.union.core.elasticsearch.EsNameResolver
 import com.rarible.protocol.union.core.elasticsearch.IndexService
-import com.rarible.protocol.union.core.elasticsearch.bootstrap.ElasticsearchBootstraper
+import com.rarible.protocol.union.core.elasticsearch.bootstrap.ElasticsearchBootstrapper
 import com.rarible.protocol.union.core.model.elasticsearch.EsEntitiesConfig
-import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.configuration.EnrichmentApiConfiguration
 import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
 import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
-import com.rarible.protocol.union.enrichment.repository.search.EsCollectionRepository
-import com.rarible.protocol.union.worker.task.CollectionTask
-import com.rarible.protocol.union.worker.task.search.ReindexerService
+import com.rarible.protocol.union.worker.task.search.ReindexService
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import org.springframework.boot.context.properties.EnableConfigurationProperties
@@ -33,10 +29,24 @@ import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperatio
         EnrichmentApiConfiguration::class
     ]
 )
-@EnableConfigurationProperties(SearchReindexerProperties::class)
-class SearchReindexerConfiguration(
-    val properties: SearchReindexerProperties,
+@EnableConfigurationProperties(WorkerProperties::class)
+class WorkerConfiguration(
+    val properties: WorkerProperties
 ) {
+    @Bean
+    fun activityReindexProperties(): ActivityReindexProperties {
+        return properties.searchReindex.activity
+    }
+
+    @Bean
+    fun collectionReindexProperties(): CollectionReindexProperties {
+        return properties.searchReindex.collection
+    }
+
+    @Bean
+    fun orderReindexProperties(): OrderReindexProperties {
+        return properties.searchReindex.order
+    }
 
     @Bean
     fun activityClient(factory: UnionApiClientFactory): ActivityControllerApi {
@@ -48,26 +58,17 @@ class SearchReindexerConfiguration(
         return factory.createCollectionApiClient()
     }
 
-    @Bean
-    fun collectionTask(
-        collectionClient: CollectionControllerApi,
-        repository: EsCollectionRepository,
-        activeBlockchains: List<BlockchainDto>
-    ): TaskHandler<String> {
-        return CollectionTask(activeBlockchains, properties.startReindexCollection, collectionClient, repository)
-    }
-
-    @Bean(initMethod = "bootstrap")
     @FlowPreview
     @ExperimentalCoroutinesApi
+    @Bean(initMethod = "bootstrap")
     fun elasticsearchBootstrap(
         reactiveElasticSearchOperations: ReactiveElasticsearchOperations,
         esNameResolver: EsNameResolver,
-        reindexerService: ReindexerService,
+        reindexerService: ReindexService,
         indexService: IndexService
-    ): ElasticsearchBootstraper {
+    ): ElasticsearchBootstrapper {
 
-        return ElasticsearchBootstraper(
+        return ElasticsearchBootstrapper(
             esNameResolver = esNameResolver,
             esOperations = reactiveElasticSearchOperations,
             entityDefinitions = EsEntitiesConfig.prodEsEntities(),

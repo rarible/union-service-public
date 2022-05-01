@@ -16,27 +16,25 @@ import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.OrdersDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.UnionAddress
-import com.rarible.protocol.union.worker.config.SearchReindexerConfiguration
-import com.rarible.protocol.union.worker.config.SearchReindexerProperties
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.verify
+import com.rarible.protocol.union.dto.continuation.page.PageSize
+import com.rarible.protocol.union.enrichment.repository.search.EsOrderRepository
+import com.rarible.protocol.union.worker.config.*
+import com.rarible.protocol.union.worker.task.search.order.OrderTask
+import io.mockk.*
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
-import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations
 import reactor.core.publisher.Mono
 import java.math.BigInteger
 import java.time.Instant
 
 @Disabled
 class OrderTaskUnitTest {
-
-    val esOperations = mockk<ReactiveElasticsearchOperations> {
-        every {
-            save(any<Iterable<EsOrder>>())
-        } answers { Mono.just(arg(0)) }
+    private val orderRepository = mockk<EsOrderRepository> {
+        coEvery {
+            saveAll(any<List<EsOrder>>())
+        } answers { arg(0) }
     }
 
     val converter = mockk<EsOrderConverter> {
@@ -64,7 +62,7 @@ class OrderTaskUnitTest {
             getOrdersAll(
                 listOf(BlockchainDto.ETHEREUM),
                 null,
-                OrderTask.PAGE_SIZE,
+                PageSize.ORDER.max,
                 OrderSortDto.LAST_UPDATE_ASC,
                 emptyList()
             )
@@ -74,7 +72,7 @@ class OrderTaskUnitTest {
             getOrdersAll(
                 listOf(BlockchainDto.ETHEREUM),
                 "ETHEREUM:cursor_1",
-                OrderTask.PAGE_SIZE,
+                PageSize.ORDER.max,
                 OrderSortDto.LAST_UPDATE_ASC,
                 emptyList()
             )
@@ -84,10 +82,12 @@ class OrderTaskUnitTest {
     @Test
     fun `should launch first run of the task`(): Unit = runBlocking {
         val task = OrderTask(
-            SearchReindexerConfiguration(SearchReindexerProperties()),
+            OrderReindexProperties(
+                enabled = true,
+                blockchains = listOf(BlockchainReindexProperties(enabled = true, BlockchainDto.ETHEREUM))
+            ),
             orderClient,
-            esOperations,
-            converter
+            orderRepository,
         )
 
         task.runLongTask(
@@ -95,27 +95,29 @@ class OrderTaskUnitTest {
             "ETHEREUM"
         ).toList()
 
-        verify {
+        coVerify {
             orderClient.getOrdersAll(
                 listOf(BlockchainDto.ETHEREUM),
                 null,
-                OrderTask.PAGE_SIZE,
+                PageSize.ORDER.max,
                 OrderSortDto.LAST_UPDATE_ASC,
                 emptyList()
             )
 
             converter.convert(any<OrderDto>())
-            esOperations.save(any<Iterable<EsOrder>>())
+            orderRepository.saveAll(any())
         }
     }
 
     @Test
     fun `should launch next run of the task`(): Unit = runBlocking {
         val task = OrderTask(
-            SearchReindexerConfiguration(SearchReindexerProperties()),
+            OrderReindexProperties(
+                enabled = true,
+                blockchains = listOf(BlockchainReindexProperties(enabled = true, BlockchainDto.ETHEREUM))
+            ),
             orderClient,
-            esOperations,
-            converter
+            orderRepository
         )
 
         task.runLongTask(
@@ -123,17 +125,16 @@ class OrderTaskUnitTest {
             "ETHEREUM"
         ).toList()
 
-        verify {
+        coVerify {
             orderClient.getOrdersAll(
                 listOf(BlockchainDto.ETHEREUM),
                 "ETHEREUM:cursor_1",
-                OrderTask.PAGE_SIZE,
+                PageSize.ORDER.max,
                 OrderSortDto.LAST_UPDATE_ASC,
                 emptyList()
             )
-
             converter.convert(any<OrderDto>())
-            esOperations.save(any<Iterable<EsOrder>>())
+            orderRepository.saveAll(any())
         }
     }
 
