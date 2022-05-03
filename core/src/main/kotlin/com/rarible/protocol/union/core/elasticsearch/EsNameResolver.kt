@@ -26,13 +26,13 @@ class EsNameResolver(
         )
 
     private fun indexRootName(entity: EntityDefinition) =
-        "${PREFIX}_${applicationEnvironmentInfo.name}_${entity.entity}_"
+        "${PREFIX}_${applicationEnvironmentInfo.name}_${entity.entity.entityName}_"
 
     private fun aliasName(entity: EntityDefinition) =
-        "${PREFIX}_${applicationEnvironmentInfo.name}_${entity.entity}_alias"
+        "${PREFIX}_${applicationEnvironmentInfo.name}_${entity.entity.entityName}_alias"
 
     private fun writeAliasName(entity: EntityDefinition) =
-        "${PREFIX}_${applicationEnvironmentInfo.name}_${entity.entity}_write_alias"
+        "${PREFIX}_${applicationEnvironmentInfo.name}_${entity.entity.entityName}_write_alias"
 
     companion object {
         const val METADATA_INDEX = "metadata"

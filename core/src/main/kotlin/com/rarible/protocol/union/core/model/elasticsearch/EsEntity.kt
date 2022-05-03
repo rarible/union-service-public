@@ -4,5 +4,7 @@ enum class EsEntity {
     ACTIVITY,
     ORDER,
     COLLECTION,
-    OWNERSHIP
+    OWNERSHIP;
+
+    val entityName: String = name.lowercase()
 }
