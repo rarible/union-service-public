@@ -2,6 +2,7 @@ package com.rarible.protocol.union.worker
 
 import com.rarible.core.test.ext.ElasticsearchTest
 import com.rarible.core.test.ext.KafkaTest
+import com.rarible.core.test.ext.MongoCleanup
 import com.rarible.core.test.ext.MongoTest
 import com.rarible.protocol.solana.api.client.autoconfigure.SolanaApiClientAutoConfiguration
 import com.rarible.protocol.union.enrichment.configuration.EnrichmentApiConfiguration
@@ -15,6 +16,7 @@ import org.springframework.test.context.ActiveProfiles
 
 @KafkaTest
 @MongoTest
+@MongoCleanup
 @ElasticsearchTest
 @EnableAutoConfiguration(
     exclude = [

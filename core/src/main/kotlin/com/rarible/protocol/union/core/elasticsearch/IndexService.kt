@@ -30,19 +30,23 @@ class IndexService(
             mappingMetadata?.copy(content = entityDefinition.mapping)
                 ?: EsMetadata(mappingId, entityDefinition.mapping)
         )
+
         val settingsId = EsEntityMetadataType.SETTINGS.getId(entityDefinition)
         val settingsMetadata = esMetadataRepository.findById(settingsId)
         esMetadataRepository.save(
             settingsMetadata?.copy(content = entityDefinition.settings)
                 ?: EsMetadata(settingsId, entityDefinition.settings)
         )
+
         val versionId = EsEntityMetadataType.VERSION_DATA.getId(entityDefinition)
         val versionMetadata = esMetadataRepository.findById(versionId)
         esMetadataRepository.save(
-            versionMetadata?.copy(content = entityDefinition.settings)
+            versionMetadata?.copy(content = entityDefinition.versionData.toString())
                 ?: EsMetadata(versionId, entityDefinition.versionData.toString())
         )
-        reactiveElasticSearchOperations.execute { it.indices().refreshIndex(RefreshRequest(metadataIndexName)) }
+
+        reactiveElasticSearchOperations
+            .execute { it.indices().refreshIndex(RefreshRequest(metadataIndexName)) }
             .awaitFirstOrNull()
     }
 
