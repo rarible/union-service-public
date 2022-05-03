@@ -67,7 +67,7 @@ class ActivityTaskUnitTest {
 
             task.runLongTask(
                 null,
-                """{"blockchain": "ETHEREUM", "activityType": "LIST", "index":"activity_test_index"}"""
+                """{"blockchain": "ETHEREUM", "type": "LIST", "index":"activity_test_index"}"""
             ).toList()
 
             coVerify {
@@ -91,7 +91,7 @@ class ActivityTaskUnitTest {
 
         task.runLongTask(
             "ETHEREUM:cursor_1",
-            """{"blockchain": "ETHEREUM", "activityType": "LIST", "index":"activity_test_index"}"""
+            """{"blockchain": "ETHEREUM", "type": "LIST", "index":"activity_test_index"}"""
         ).toList()
 
         coVerify {
