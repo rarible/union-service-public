@@ -9,7 +9,7 @@ import java.math.BigInteger
 
 interface DipdupOrderService {
 
-    fun enabled(): Boolean
+    fun enabled() = false
 
     suspend fun getOrderById(id: String): OrderDto {
         throw UnionNotFoundException(null)

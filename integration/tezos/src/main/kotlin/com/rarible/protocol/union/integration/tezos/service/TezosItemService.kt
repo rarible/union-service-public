@@ -10,6 +10,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.RoyaltyDto
 import com.rarible.protocol.union.dto.continuation.page.Page
 import com.rarible.protocol.union.integration.tezos.converter.TezosItemConverter
+import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktItemService
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.http.HttpStatus
@@ -17,7 +18,8 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 
 @CaptureSpan(type = "blockchain")
 open class TezosItemService(
-    private val itemControllerApi: NftItemControllerApi
+    private val itemControllerApi: NftItemControllerApi,
+    private val tzktItemService: TzktItemService
 ) : AbstractBlockchainService(BlockchainDto.TEZOS), ItemService {
 
     private val WITH_META = true
@@ -29,6 +31,10 @@ open class TezosItemService(
         lastUpdatedFrom: Long?,
         lastUpdatedTo: Long?
     ): Page<UnionItem> {
+        if (tzktItemService.enabled()) {
+            // others params are not implemented in tzkt yet
+            return tzktItemService.getAllItems(continuation, size)
+        }
         val items = itemControllerApi.getNftAllItems(
             lastUpdatedFrom?.toString(),
             lastUpdatedTo?.toString(),
@@ -43,6 +49,9 @@ open class TezosItemService(
     override suspend fun getItemById(
         itemId: String
     ): UnionItem {
+        if (tzktItemService.enabled()) {
+            return tzktItemService.getItemById(itemId)
+        }
         val item = itemControllerApi.getNftItemById(
             itemId, WITH_META
         ).awaitFirst()
@@ -62,6 +71,9 @@ open class TezosItemService(
     }
 
     override suspend fun getItemMetaById(itemId: String): UnionMeta {
+        if (tzktItemService.enabled()) {
+            return tzktItemService.getItemMetaById(itemId)
+        }
         val meta = itemControllerApi.getNftItemMetaById(itemId).awaitFirst()
         return TezosItemConverter.convert(meta)
     }
@@ -114,6 +126,10 @@ open class TezosItemService(
     }
 
     override suspend fun getItemsByIds(itemIds: List<String>): List<UnionItem> {
+        if (tzktItemService.enabled()) {
+            return tzktItemService.getItemsByIds(itemIds)
+        }
+        // Not implemented in legacy indexer
         return emptyList()
     }
 }

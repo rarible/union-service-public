@@ -53,6 +53,10 @@
             <groupId>com.rarible.protocol.tezos</groupId>
             <artifactId>dipdup-client</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.rarible.protocol.tezos</groupId>
+            <artifactId>tzkt-client</artifactId>
+        </dependency>
 
         <!-- =============== Tezos legacy backend =========== -->
 
