@@ -12,7 +12,7 @@ class EsNameResolver(
 ) {
     final val metadataIndexName = "${PREFIX}_${applicationEnvironmentInfo.name}_$METADATA_INDEX"
 
-    val matadataIndexCoordinate: IndexCoordinates = IndexCoordinates.of(metadataIndexName)
+    val metadataIndexCoordinate: IndexCoordinates = IndexCoordinates.of(metadataIndexName)
 
     fun createEntityDefinitionExtended(entity: EntityDefinition) =
         EntityDefinitionExtended(
