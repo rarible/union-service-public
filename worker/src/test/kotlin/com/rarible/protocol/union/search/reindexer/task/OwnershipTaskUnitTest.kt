@@ -9,7 +9,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.repository.search.EsOwnershipRepository
 import com.rarible.protocol.union.worker.config.BlockchainReindexProperties
 import com.rarible.protocol.union.worker.config.OwnershipReindexProperties
-import com.rarible.protocol.union.worker.task.OwnershipTask
+import com.rarible.protocol.union.worker.task.search.ownership.OwnershipTask
 import com.rarible.protocol.union.worker.task.search.ParamFactory
 import com.rarible.protocol.union.worker.task.search.ownership.OwnershipReindexService
 import io.mockk.coEvery

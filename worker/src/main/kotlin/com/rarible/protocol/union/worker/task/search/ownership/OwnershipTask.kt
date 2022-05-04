@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.worker.task
+package com.rarible.protocol.union.worker.task.search.ownership
 
 import com.rarible.core.logging.Logger
 import com.rarible.core.task.TaskHandler
@@ -7,8 +7,6 @@ import com.rarible.protocol.union.core.model.EsOwnership
 import com.rarible.protocol.union.enrichment.repository.search.EsOwnershipRepository
 import com.rarible.protocol.union.worker.config.OwnershipReindexProperties
 import com.rarible.protocol.union.worker.task.search.ParamFactory
-import com.rarible.protocol.union.worker.task.search.ownership.OwnershipReindexService
-import com.rarible.protocol.union.worker.task.search.ownership.OwnershipTaskParam
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.onCompletion
