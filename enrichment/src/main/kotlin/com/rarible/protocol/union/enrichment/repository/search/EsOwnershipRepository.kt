@@ -8,6 +8,7 @@ import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.elasticsearch.action.admin.indices.refresh.RefreshRequest
 import org.elasticsearch.index.query.QueryBuilders.idsQuery
 import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations
+import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder
 import org.springframework.stereotype.Component
 import java.io.IOException
@@ -30,14 +31,14 @@ class EsOwnershipRepository(
             .collectList().awaitFirst().map { it.content }
     }
 
-    suspend fun saveAll(esOwnerships: Collection<EsOwnership>): List<EsOwnership> {
-        return esOperations.saveAll(esOwnerships, entityDefinition.writeIndexCoordinates).collectList().awaitFirst()
+    suspend fun saveAll(esOwnerships: Collection<EsOwnership>, indexName: String?): List<EsOwnership> {
+        return esOperations.saveAll(esOwnerships, index(indexName)).collectList().awaitFirst()
     }
 
-    suspend fun deleteAll(ownershipIds: Collection<String>) {
+    suspend fun deleteAll(ownershipIds: Collection<String>, indexName: String?) {
         val idsQuery = idsQuery().addIds(*ownershipIds.toTypedArray())
         val query = NativeSearchQueryBuilder().withQuery(idsQuery).build()
-        esOperations.delete(query, EsOwnership::class.java, entityDefinition.writeIndexCoordinates).awaitFirstOrNull()
+        esOperations.delete(query, EsOwnership::class.java, index(indexName)).awaitFirstOrNull()
     }
 
     suspend fun refresh() {
@@ -49,4 +50,7 @@ class EsOwnershipRepository(
             throw RuntimeException(entityDefinition.writeAliasName + " refreshModifyIndex failed", e)
         }
     }
+
+    private fun index(indexName: String?) = indexName
+        ?.let { IndexCoordinates.of(it) } ?: entityDefinition.writeIndexCoordinates
 }

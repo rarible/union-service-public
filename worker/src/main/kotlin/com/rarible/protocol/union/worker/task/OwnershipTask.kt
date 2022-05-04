@@ -1,51 +1,52 @@
 package com.rarible.protocol.union.worker.task
 
-import com.rarible.core.task.RunTask
+import com.rarible.core.logging.Logger
 import com.rarible.core.task.TaskHandler
-import com.rarible.protocol.union.api.client.OwnershipControllerApi
-import com.rarible.protocol.union.core.converter.EsOwnershipConverter
+import com.rarible.protocol.union.core.elasticsearch.IndexService
+import com.rarible.protocol.union.core.model.EsOwnership
 import com.rarible.protocol.union.enrichment.repository.search.EsOwnershipRepository
-import com.rarible.protocol.union.worker.config.SearchReindexerConfiguration
+import com.rarible.protocol.union.worker.config.OwnershipReindexProperties
+import com.rarible.protocol.union.worker.task.search.ParamFactory
+import com.rarible.protocol.union.worker.task.search.ownership.OwnershipReindexService
+import com.rarible.protocol.union.worker.task.search.ownership.OwnershipTaskParam
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.reactive.awaitFirst
+import kotlinx.coroutines.flow.onCompletion
 
 class OwnershipTask(
-    private val config: SearchReindexerConfiguration,
-    private val ownershipClient: OwnershipControllerApi,
-    private val ownershipRepository: EsOwnershipRepository,
-    private val converter: EsOwnershipConverter,
+    private val properties: OwnershipReindexProperties,
+    private val paramFactory: ParamFactory,
+    private val reindexService: OwnershipReindexService,
+    private val repository: EsOwnershipRepository,
+    private val indexService: IndexService,
 ) : TaskHandler<String> {
+    private val entityDefinition = repository.entityDefinition
 
     override val type: String
-        get() = OWNERSHIP_REINDEX
+        get() = EsOwnership.ENTITY_DEFINITION.reindexTask
 
-    override fun getAutorunParams(): List<RunTask> =
-        config.properties.ownershipTasks.map { RunTask(it.taskParam()) }
+    override suspend fun isAbleToRun(param: String): Boolean {
+        val blockchain = paramFactory.parse<OwnershipTaskParam>(param).blockchain
+        return properties.enabled && properties.blockchains.single { it.blockchain == blockchain }.enabled
+    }
 
-    override suspend fun isAbleToRun(param: String): Boolean =
-        config.properties.startReindexOwnership
-
-    override fun runLongTask(from: String?, param: String): Flow<String> {
-        val task = tasks[param] ?: return emptyFlow()
-        return if (from == "") {
-            emptyFlow()
-        } else {
-            flow {
-                val res = ownershipClient.getAllOwnerships(
-                    listOf(task.blockchainDto), from, PAGE_SIZE
-                ).awaitFirst()
-                ownershipRepository.saveAll(res.ownerships.map { converter.convert(it) })
-                emit(res.continuation ?: "")
+    override fun runLongTask(from: String?, param: String): Flow<String> = when (from) {
+        "" -> emptyFlow()
+        else -> {
+            val taskParam = paramFactory.parse<OwnershipTaskParam>(param)
+            reindexService.reindex(
+                blockchain = taskParam.blockchain,
+                index = taskParam.index,
+                cursor = from,
+            ).onCompletion {
+                indexService.finishIndexing(taskParam.index, entityDefinition)
+                repository.refresh()
+                logger.info("Finished reindex of ${entityDefinition.entity} with param $param")
             }
         }
     }
 
-    private val tasks = config.properties.ownershipTasks.associateBy { it.taskParam() }
-
     companion object {
-        private const val OWNERSHIP_REINDEX = "OWNERSHIP_REINDEX"
-        const val PAGE_SIZE = 1000
+        private val logger by Logger()
     }
 }

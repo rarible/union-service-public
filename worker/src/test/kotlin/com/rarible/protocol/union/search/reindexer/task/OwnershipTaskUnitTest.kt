@@ -1,116 +1,101 @@
 package com.rarible.protocol.union.search.reindexer.task
 
-import com.rarible.protocol.union.api.client.OwnershipControllerApi
-import com.rarible.protocol.union.core.converter.EsOwnershipConverter
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import com.rarible.protocol.union.core.elasticsearch.IndexService
 import com.rarible.protocol.union.core.model.EsOwnership
+import com.rarible.protocol.union.core.model.elasticsearch.EntityDefinitionExtended
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.OwnershipDto
-import com.rarible.protocol.union.dto.OwnershipsDto
 import com.rarible.protocol.union.enrichment.repository.search.EsOwnershipRepository
-import com.rarible.protocol.union.worker.config.SearchReindexerConfiguration
-import com.rarible.protocol.union.worker.config.SearchReindexerProperties
+import com.rarible.protocol.union.worker.config.BlockchainReindexProperties
+import com.rarible.protocol.union.worker.config.OwnershipReindexProperties
 import com.rarible.protocol.union.worker.task.OwnershipTask
+import com.rarible.protocol.union.worker.task.search.ParamFactory
+import com.rarible.protocol.union.worker.task.search.ownership.OwnershipReindexService
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
-import randomEsOwnership
-import randomOwnershipId
-import reactor.core.publisher.Mono
 
 @Disabled
 class OwnershipTaskUnitTest {
 
-    private val repository = mockk<EsOwnershipRepository> {
+    private val reindexService = mockk<OwnershipReindexService> {
         coEvery {
-            saveAll(any<List<EsOwnership>>())
-        } returns emptyList()
+            reindex(any(), "ownership_test_index", any())
+        } returns flowOf("next_cursor")
     }
 
-    private val converter = mockk<EsOwnershipConverter> {
+    private val repository = mockk<EsOwnershipRepository> {
         every {
-            convert(any<OwnershipDto>())
-        } returns randomEsOwnership(randomOwnershipId(BlockchainDto.ETHEREUM))
+            entityDefinition
+        } returns EntityDefinitionExtended(
+            entity = EsOwnership.ENTITY_DEFINITION.entity,
+            mapping = EsOwnership.ENTITY_DEFINITION.mapping,
+            versionData = EsOwnership.ENTITY_DEFINITION.versionData,
+            indexRootName = "ownership_test_index",
+            aliasName = "ownership",
+            writeAliasName = "ownership",
+            settings = EsOwnership.ENTITY_DEFINITION.settings
+        )
+
+        coEvery { refresh() } returns Unit
     }
 
-    private val client = mockk<OwnershipControllerApi> {
-        every {
-            getAllOwnerships(
-                listOf(BlockchainDto.ETHEREUM),
-                null,
-                OwnershipTask.PAGE_SIZE,
-            )
-        } returns Mono.just(
-            OwnershipsDto(
-                OwnershipTask.PAGE_SIZE.toLong(),
-                "ETHEREUM:cursor_1",
-                listOf(mockk()),
-            )
-        )
-        every {
-            getAllOwnerships(
-                listOf(BlockchainDto.ETHEREUM),
-                "ETHEREUM:cursor_1",
-                OwnershipTask.PAGE_SIZE,
-            )
-        } returns Mono.just(
-            OwnershipsDto(
-                OwnershipTask.PAGE_SIZE.toLong(),
-                null,
-                listOf(mockk()),
-            )
-        )
+    private val indexService = mockk<IndexService> {
+        coEvery {
+            finishIndexing(any(), any())
+        } returns Unit
     }
 
     @Test
-    fun `should launch first run of the task`() = runBlocking<Unit> {
+    fun `should launch first run of the task`() = runBlocking {
         val task = OwnershipTask(
-            SearchReindexerConfiguration(SearchReindexerProperties()),
-            client,
+            OwnershipReindexProperties(
+                enabled = true,
+                blockchains = listOf(BlockchainReindexProperties(enabled = true, BlockchainDto.ETHEREUM))
+            ),
+            ParamFactory(jacksonObjectMapper().registerKotlinModule()),
+            reindexService,
             repository,
-            converter,
+            indexService,
         )
 
-        task.runLongTask(null, "OWNERSHIP_ETHEREUM").toList()
+        task.runLongTask(
+            from = null,
+            param = """{"blockchain": "ETHEREUM", "index":"ownership_test_index"}"""
+        ).toList()
 
         coVerify {
-            client.getAllOwnerships(
-                listOf(BlockchainDto.ETHEREUM),
-                null,
-                OwnershipTask.PAGE_SIZE,
-            )
-
-            converter.convert(any<OwnershipDto>())
-
-            repository.saveAll(any())
+            reindexService.reindex(BlockchainDto.ETHEREUM, "ownership_test_index", null)
         }
     }
 
     @Test
     fun `should launch next run of the task`(): Unit = runBlocking {
         val task = OwnershipTask(
-            SearchReindexerConfiguration(SearchReindexerProperties()),
-            client,
+            OwnershipReindexProperties(
+                enabled = true,
+                blockchains = listOf(BlockchainReindexProperties(enabled = true, BlockchainDto.ETHEREUM))
+            ),
+            ParamFactory(jacksonObjectMapper().registerKotlinModule()),
+            reindexService,
             repository,
-            converter
+            indexService,
         )
 
-        task.runLongTask("ETHEREUM:cursor_1", "OWNERSHIP_ETHEREUM").toList()
+        task.runLongTask(
+            from = "ETHEREUM:cursor_1",
+            param = """{"blockchain": "ETHEREUM", "index":"ownership_test_index"}"""
+        ).toList()
 
         coVerify {
-            client.getAllOwnerships(
-                listOf(BlockchainDto.ETHEREUM),
-                "ETHEREUM:cursor_1",
-                OwnershipTask.PAGE_SIZE,
-            )
-
-            converter.convert(any())
-
-            repository.saveAll(any())
+            reindexService.reindex(BlockchainDto.ETHEREUM, "ownership_test_index", "ETHEREUM:cursor_1")
         }
     }
 }
