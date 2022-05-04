@@ -16,6 +16,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
 import com.rarible.protocol.union.core.model.EsActivity
 import com.rarible.protocol.union.core.model.EsActivitySort
+import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
 import org.springframework.stereotype.Service
 import java.time.Instant
@@ -122,12 +123,13 @@ class ActivityElasticService(
         esActivities.forEach { activity ->
             mapping
                 .computeIfAbsent(activity.blockchain) { ArrayList(esActivities.size) }
-                .add(TypedActivityId(activity.activityId, activity.type))
+                .add(TypedActivityId(IdParser.parseActivityId(activity.activityId).value, activity.type))
         }
         val activities = mapping.mapAsync { element ->
             val blockchain = element.key
             val ids = element.value
-            router.getService(blockchain).getActivitiesByIds(ids)
+            val isBlockchainEnabled = router.isBlockchainEnabled(blockchain)
+            if (isBlockchainEnabled) router.getService(blockchain).getActivitiesByIds(ids) else emptyList()
         }.flatten()
 
         val activitiesIdMapping = activities.associateBy { it.id.fullId() }
