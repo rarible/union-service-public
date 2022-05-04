@@ -3,6 +3,7 @@ package com.rarible.protocol.union.search.indexer.repository
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.core.model.EsActivity
+import com.rarible.protocol.union.core.model.EsActivityInfo
 import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
 import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
 import com.rarible.protocol.union.enrichment.test.data.randomEsActivity
@@ -56,5 +57,16 @@ internal class EsActivityRepositoryFt {
 
         // then
         assertThat(actual.activities).hasSize(1000)
+    }
+
+    @Test
+    fun `field names of EsActivity and EsActivityInfo should stay the same`() {
+        assertThat(EsActivity::activityId.name).isEqualTo(EsActivityInfo::activityId.name)
+        assertThat(EsActivity::blockchain.name).isEqualTo(EsActivityInfo::blockchain.name)
+        assertThat(EsActivity::type.name).isEqualTo(EsActivityInfo::type.name)
+        assertThat(EsActivity::date.name).isEqualTo(EsActivityInfo::date.name)
+        assertThat(EsActivity::blockNumber.name).isEqualTo(EsActivityInfo::blockNumber.name)
+        assertThat(EsActivity::logIndex.name).isEqualTo(EsActivityInfo::logIndex.name)
+        assertThat(EsActivity::salt.name).isEqualTo(EsActivityInfo::salt.name)
     }
 }
