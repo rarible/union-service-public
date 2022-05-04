@@ -347,6 +347,11 @@
                 <artifactId>dipdup-client</artifactId>
                 <version>${rarible.protocol.tezos.api.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.rarible.protocol.tezos</groupId>
+                <artifactId>tzkt-client</artifactId>
+                <version>${rarible.protocol.tezos.api.version}</version>
+            </dependency>
 
             <!-- ============ Solana Protocol-API ============ -->
             <dependency>

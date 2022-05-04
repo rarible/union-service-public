@@ -65,6 +65,15 @@ integration:
       dipdupUrl: ${consul.tezos.dipdup.dipdupUrl:}
       tzktUrl: ${consul.tezos.dipdup.tzktUrl:}
       ipfsUrl: ${consul.tezos.dipdup.ipfsUrl:"https://ipfs.io"}
+      royaltyConfig:
+        hen: ${consul.tezos.dipdup.royaltyConfig.hen:}
+        henRoyalties: ${consul.tezos.dipdup.royaltyConfig.henRoyalties:}
+        kalamint: ${consul.tezos.dipdup.royaltyConfig.kalamint:}
+        fxhashV1: ${consul.tezos.dipdup.royaltyConfig.fxhashV1:}
+        fxhashV1Manager: ${consul.tezos.dipdup.royaltyConfig.fxhashV1Manager:}
+        fxhashV2: ${consul.tezos.dipdup.royaltyConfig.fxhashV2:}
+        versum: ${consul.tezos.dipdup.royaltyConfig.versum:}
+        royaltiesManager: ${consul.tezos.dipdup.royaltyConfig.royaltiesManager:}
     client:
       url: ${consul.tezos.api.baseUrl:}
     pg:

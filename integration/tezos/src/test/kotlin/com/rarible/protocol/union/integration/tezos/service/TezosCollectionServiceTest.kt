@@ -58,8 +58,19 @@ class TezosCollectionServiceTest {
     fun contract(address: String): Contract = Contract(
         type = "contract",
         alias = "",
+        balance = 1L,
         address = address,
-        tzips = listOf("fa2")
+        tzips = listOf("fa2"),
+        kind = "",
+        numContracts = 1,
+        activeTokensCount = 1,
+        tokenBalancesCount = 1,
+        tokenTransfersCount = 1,
+        numDelegations = 1,
+        numOriginations = 1,
+        numTransactions = 1,
+        numReveals = 1,
+        numMigrations = 1
     )
 
 }

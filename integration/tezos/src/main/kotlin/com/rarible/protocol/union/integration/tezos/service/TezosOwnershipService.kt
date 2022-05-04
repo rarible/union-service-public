@@ -32,7 +32,7 @@ open class TezosOwnershipService(
         size: Int
     ): Page<UnionOwnership> {
         if (tzktOwnershipService.enabled()) {
-            tzktOwnershipService.getOwnershipsByItem(itemId, continuation, size)
+            return tzktOwnershipService.getOwnershipsByItem(itemId, continuation, size)
         }
         val (contract, tokenId) = CompositeItemIdParser.split(itemId)
         val ownerships = ownershipControllerApi.getNftOwnershipByItem(

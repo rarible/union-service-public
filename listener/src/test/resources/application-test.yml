@@ -88,7 +88,16 @@ integration:
         item: 1
         ownership: 1
         order: 1
-
+  immutablex:
+    scanner:
+      job:
+        initialDelay:
+          mints: 600
+          transfers: 600
+          trades: 600
+          deposits: 600
+          withdrawals: 600
+          orders: 600
 listener:
   reconciliation:
     orderBatchSize: 50

@@ -352,4 +352,12 @@ class TestListenerConfiguration {
     @Bean
     @Primary
     fun testTezosOrderApi(): com.rarible.protocol.tezos.api.client.OrderControllerApi = mockk()
+
+    @Bean
+    @Primary
+    fun testTezosTokenClient(): com.rarible.tzkt.client.TokenClient = mockk()
+
+    @Bean
+    @Primary
+    fun testTezosOwnershipClient(): com.rarible.tzkt.client.OwnershipClient = mockk()
 }
