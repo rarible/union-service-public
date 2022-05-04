@@ -7,6 +7,7 @@ import com.rarible.protocol.union.core.service.OwnershipService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.continuation.page.Page
+import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.integration.solana.converter.SolanaOwnershipConverter
 import kotlinx.coroutines.reactive.awaitFirst
@@ -35,7 +36,11 @@ open class SolanaOwnershipService(
         return SolanaOwnershipConverter.convert(associatedTokenAccountBalance, blockchain)
     }
 
-    override suspend fun getAllOwnerships(ownershipIds: List<String>): List<UnionOwnership> {
+    override suspend fun getOwnershipsByIds(ownershipIds: List<String>): List<UnionOwnership> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getOwnershipsAll(continuation: String?, size: Int): Slice<UnionOwnership> {
         TODO("Not yet implemented")
     }
 

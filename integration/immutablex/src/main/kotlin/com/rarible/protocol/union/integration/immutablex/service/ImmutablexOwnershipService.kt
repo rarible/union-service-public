@@ -7,6 +7,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.continuation.page.Page
+import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexApiClient
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexAsset
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexAssetsPage
@@ -27,7 +28,11 @@ class ImmutablexOwnershipService(
         } ?: throw IllegalArgumentException("Ownership is not found for id $ownershipId")
     }
 
-    override suspend fun getAllOwnerships(ownershipIds: List<String>): List<UnionOwnership> {
+    override suspend fun getOwnershipsByIds(ownershipIds: List<String>): List<UnionOwnership> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getOwnershipsAll(continuation: String?, size: Int): Slice<UnionOwnership> {
         TODO("Not yet implemented")
     }
 
