@@ -2,7 +2,7 @@ package com.rarible.protocol.union.integration.tezos.dipdup
 
 import com.rarible.core.daemon.DaemonWorkerProperties
 import com.rarible.protocol.union.core.DefaultConsumerProperties
-import com.rarible.tzkt.royalties.RoyaltiesConfig
+import com.rarible.tzkt.config.KnownAddresses
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.ConstructorBinding
 
@@ -13,7 +13,7 @@ data class DipDupIntegrationProperties(
     val tzktUrl: String, // could be in config
     val tzktProperties: TzktProperties = TzktProperties(),
     val ipfsUrl: String,
-    val royaltyConfig: RoyaltiesConfig?,
+    val knownAddresses: KnownAddresses?,
     val consumer: DefaultConsumerProperties?,
     val daemon: DaemonWorkerProperties = DaemonWorkerProperties()
 ) {
