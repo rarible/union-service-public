@@ -2,6 +2,7 @@ package com.rarible.protocol.union.listener.tezos
 
 import com.rarible.core.kafka.KafkaMessage
 import com.rarible.core.test.data.randomBigInt
+import com.rarible.core.test.data.randomInt
 import com.rarible.core.test.data.randomString
 import com.rarible.core.test.wait.Wait
 import com.rarible.dipdup.client.core.model.Asset
@@ -20,6 +21,7 @@ import com.rarible.protocol.union.dto.TransferActivityDto
 import com.rarible.protocol.union.integration.tezos.data.randomTezosOrderListActivity
 import com.rarible.protocol.union.listener.test.IntegrationTest
 import com.rarible.tzkt.model.Alias
+import com.rarible.tzkt.model.Token
 import com.rarible.tzkt.model.TokenBalance
 import com.rarible.tzkt.model.TokenInfo
 import io.mockk.coEvery
@@ -73,6 +75,7 @@ class DipDupActivityEventHandlerFt : AbstractDipDupIntegrationTest() {
             owner = activity.owner
         )
 
+        coEvery { tokenClient.token(ownershipId.getItemId().value) } returns token(activity.contract, activity.tokenId, BigInteger.ONE)
         coEvery { ownershipClient.ownershipById(ownershipId.value) } returns tokenBalance(activity.contract, activity.tokenId, activity.owner)
 
         dipDupActivityProducer.send(
@@ -88,6 +91,9 @@ class DipDupActivityEventHandlerFt : AbstractDipDupIntegrationTest() {
 
             val ownerships = findOwnershipUpdates(ownershipId.value)
             Assertions.assertThat(ownerships).hasSizeGreaterThan(0) // We got 2 msg because the second msg is sent from enrichment
+
+            val items = findItemUpdates(ownershipId.getItemId().value)
+            Assertions.assertThat(items).hasSize(1)
         }
     }
 
@@ -143,6 +149,7 @@ class DipDupActivityEventHandlerFt : AbstractDipDupIntegrationTest() {
             owner = activity.owner
         )
 
+        coEvery { tokenClient.token(ownershipId.getItemId().value) } returns token(activity.contract, activity.tokenId, BigInteger.ZERO)
         coEvery { ownershipClient.ownershipById(ownershipId.value) } returns tokenBalance(activity.contract, activity.tokenId, activity.owner)
 
         dipDupActivityProducer.send(
@@ -158,6 +165,9 @@ class DipDupActivityEventHandlerFt : AbstractDipDupIntegrationTest() {
 
             val ownerships = findOwnershipUpdates(ownershipId.value)
             Assertions.assertThat(ownerships).hasSize(1)
+
+            val items = findItemDeletions(ownershipId.getItemId().value)
+            Assertions.assertThat(items).hasSize(1)
         }
     }
 
@@ -245,6 +255,22 @@ class DipDupActivityEventHandlerFt : AbstractDipDupIntegrationTest() {
             lastLevel = 1,
             lastTime = OffsetDateTime.now(),
             transfersCount = 1
+        )
+    }
+
+    private fun token(contract: String, tokenId: BigInteger, supply: BigInteger): Token {
+        return Token(
+            id = randomInt(),
+            contract = Alias(
+                address = contract
+            ),
+            tokenId = tokenId.toString(),
+            balancesCount = 1,
+            holdersCount = 1,
+            transfersCount = 1,
+            totalSupply = supply.toString(),
+            firstTime = OffsetDateTime.now(),
+            lastTime = OffsetDateTime.now()
         )
     }
 }

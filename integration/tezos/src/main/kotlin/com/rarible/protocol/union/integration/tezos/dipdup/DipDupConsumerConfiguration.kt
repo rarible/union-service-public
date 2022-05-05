@@ -8,11 +8,10 @@ import com.rarible.dipdup.listener.config.DipDupEventsConsumerFactory
 import com.rarible.protocol.union.core.ConsumerFactory
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.handler.KafkaConsumerWorker
+import com.rarible.protocol.union.core.model.UnionItemEvent
 import com.rarible.protocol.union.core.model.UnionOrderEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipEvent
 import com.rarible.protocol.union.dto.ActivityDto
-import com.rarible.protocol.union.dto.OwnershipDto
-import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.integration.tezos.TezosIntegrationProperties
 import com.rarible.protocol.union.integration.tezos.dipdup.converter.DipDupActivityConverter
 import com.rarible.protocol.union.integration.tezos.dipdup.converter.DipDupOrderConverter
@@ -78,9 +77,10 @@ class DipDupConsumerConfiguration(
     fun dipDupTransferEventHandler(
         ownershipHandler: IncomingEventHandler<UnionOwnershipEvent>,
         ownershipService: TzktOwnershipService,
+        itemHandler: IncomingEventHandler<UnionItemEvent>,
         itemService: TzktItemService
     ): DipDupTransfersEventHandler {
-        return DipDupTransfersEventHandler(ownershipHandler, ownershipService, itemService)
+        return DipDupTransfersEventHandler(ownershipHandler, ownershipService, itemHandler, itemService)
     }
 
     @Bean
