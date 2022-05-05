@@ -4,6 +4,7 @@ import com.rarible.core.daemon.sequential.ConsumerBatchEventHandler
 import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.core.converter.EsActivityConverter
+import com.rarible.protocol.union.core.model.elasticsearch.EsEntity
 import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
 import com.rarible.protocol.union.search.indexer.metrics.IndexerMetricFactory
 import org.springframework.stereotype.Service
@@ -16,10 +17,9 @@ class ActivityEventHandler(
 
     companion object {
         private val logger by Logger()
-        private const val ENTITY_NAME = "activity"
     }
 
-    private val gauge = metricFactory.createEventHandlerGaugeMetric(ENTITY_NAME)
+    private val gauge = metricFactory.createEventHandlerGaugeMetric(EsEntity.ACTIVITY)
 
     override suspend fun handle(event: List<ActivityDto>) {
         logger.info("Handling ${event.size} ActivityDto events")
@@ -29,7 +29,7 @@ class ActivityEventHandler(
             EsActivityConverter.convert(it)
         }
 
-        if (convertedEvents.isNotEmpty()) gauge.set(convertedEvents.last().date.toEpochMilli())
+        if (convertedEvents.isNotEmpty()) gauge.set(convertedEvents.last().date.epochSecond)
 
         logger.debug("Saving ${convertedEvents.size} ActivityDto events to ElasticSearch")
         repository.saveAll(convertedEvents)

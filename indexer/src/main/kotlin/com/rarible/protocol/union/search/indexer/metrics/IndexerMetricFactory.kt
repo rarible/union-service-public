@@ -2,24 +2,24 @@ package com.rarible.protocol.union.search.indexer.metrics
 
 import com.rarible.core.telemetry.metrics.LongGaugeMetric
 import com.rarible.core.telemetry.metrics.RegisteredGauge
+import com.rarible.protocol.union.core.model.elasticsearch.EsEntity
+import com.rarible.protocol.union.search.indexer.config.IndexerProperties
 import io.micrometer.core.instrument.MeterRegistry
 import org.springframework.stereotype.Component
 
 @Component
 class IndexerMetricFactory(
     private val meterRegistry: MeterRegistry,
+    private val properties: IndexerProperties,
 ) {
-    companion object {
-        const val rootPath: String = "protocol.union.indexer"
-    }
 
-    fun createEventHandlerGaugeMetric(entity: String): RegisteredGauge<Long> {
+    fun createEventHandlerGaugeMetric(entity: EsEntity): RegisteredGauge<Long> {
         return object : LongGaugeMetric(
             name = eventHandlerGaugeMetric(entity)
         ){}.bind(meterRegistry)
     }
 
-    private fun eventHandlerGaugeMetric(entity: String): String {
-        return "${rootPath}.event-handler.${entity}"
+    private fun eventHandlerGaugeMetric(entity: EsEntity): String {
+        return "${properties.metrics.rootPath}.event.${entity.entityName}"
     }
 }
