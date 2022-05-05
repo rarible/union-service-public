@@ -41,7 +41,9 @@ class ReindexService(
         val blockchains = BlockchainDto.values()
         val types = ActivityTypeDto.values()
         val tasks = blockchains.zip(types).mapNotNull { (blockchain, type) -> task(blockchain, type, indexName) }
-        return taskRepository.saveAll(tasks).collectList().awaitFirst()
+        return emptyList()
+        // TODO return real reindex ALPHA-482
+        //return taskRepository.saveAll(tasks).collectList().awaitFirst()
     }
 
     private suspend fun task(
