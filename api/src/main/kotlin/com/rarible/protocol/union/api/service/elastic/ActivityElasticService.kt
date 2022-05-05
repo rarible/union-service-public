@@ -14,7 +14,7 @@ import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
-import com.rarible.protocol.union.core.model.EsActivity
+import com.rarible.protocol.union.core.model.EsActivityLite
 import com.rarible.protocol.union.core.model.EsActivitySort
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
@@ -116,7 +116,7 @@ class ActivityElasticService(
         )
     }
 
-    private suspend fun getActivities(esActivities: List<EsActivity>): List<ActivityDto> {
+    private suspend fun getActivities(esActivities: List<EsActivityLite>): List<ActivityDto> {
         if (esActivities.isEmpty()) return emptyList()
         val mapping = hashMapOf<BlockchainDto, MutableList<TypedActivityId>>()
 
