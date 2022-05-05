@@ -231,8 +231,8 @@ fun randomEsActivity() = EsActivity(
     item = randomString(),
 )
 
-val EsActivity.info: EsActivityInfo
-    get() = EsActivityInfo(activityId, blockchain, type, date, blockNumber, logIndex, salt)
+val EsActivity.info: EsActivityLite
+    get() = EsActivityLite(activityId, blockchain, type, date, blockNumber, logIndex, salt)
 
 private val mockedEthOrderConverter = EthOrderConverter(CurrencyMock.currencyServiceMock)
 private val mockedEthAuctionConverter = EthAuctionConverter(CurrencyMock.currencyServiceMock)

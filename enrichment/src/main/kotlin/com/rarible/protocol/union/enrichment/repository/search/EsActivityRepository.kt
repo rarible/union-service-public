@@ -5,8 +5,8 @@ import com.rarible.core.apm.SpanType
 import com.rarible.protocol.union.core.elasticsearch.EsNameResolver
 import com.rarible.protocol.union.core.model.ElasticActivityFilter
 import com.rarible.protocol.union.core.model.EsActivity
-import com.rarible.protocol.union.core.model.EsActivityCursor.Companion.fromActivityInfo
-import com.rarible.protocol.union.core.model.EsActivityInfo
+import com.rarible.protocol.union.core.model.EsActivityCursor.Companion.fromActivityLite
+import com.rarible.protocol.union.core.model.EsActivityLite
 import com.rarible.protocol.union.core.model.EsActivityQueryResult
 import com.rarible.protocol.union.core.model.EsActivitySort
 import com.rarible.protocol.union.dto.continuation.page.PageSize
@@ -80,7 +80,7 @@ class EsActivityRepository(
     }
 
     suspend fun search(query: NativeSearchQuery): EsActivityQueryResult {
-        val activities = esOperations.search(query, EsActivityInfo::class.java, entityDefinition.searchIndexCoordinates)
+        val activities = esOperations.search(query, EsActivityLite::class.java, entityDefinition.searchIndexCoordinates)
             .collectList()
             .awaitFirst()
             .map { it.content }
@@ -88,7 +88,7 @@ class EsActivityRepository(
         val cursor = if (activities.isEmpty()) {
             null
         } else {
-            activities.last().fromActivityInfo().toString()
+            activities.last().fromActivityLite().toString()
         }
 
         return EsActivityQueryResult(
