@@ -91,7 +91,7 @@ class DipDupApiConfiguration(
 
     @Bean
     fun tzktItemService(tzktTokenClient: TokenClient): TzktItemService {
-        return TzktItemServiceImpl(tzktTokenClient)
+        return TzktItemServiceImpl(tzktTokenClient, properties)
     }
 
     @Bean

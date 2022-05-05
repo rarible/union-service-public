@@ -20,6 +20,8 @@ import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.dto.OwnershipUpdateEventDto
 import com.rarible.protocol.union.enrichment.configuration.UnionMetaProperties
 import com.rarible.protocol.union.enrichment.meta.UnionMetaLoader
+import com.rarible.tzkt.client.OwnershipClient
+import com.rarible.tzkt.client.TokenClient
 import io.mockk.clearMocks
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
@@ -58,6 +60,12 @@ abstract class AbstractDipDupIntegrationTest {
     @Autowired
     lateinit var testTezosOwnershipApi: com.rarible.protocol.tezos.api.client.NftOwnershipControllerApi
 
+    @Autowired
+    lateinit var ownershipClient: OwnershipClient
+
+    @Autowired
+    lateinit var tokenClient: TokenClient
+
 
     @Autowired
     lateinit var dipDupOrderProducer: RaribleKafkaProducer<DipDupOrder>
@@ -93,6 +101,8 @@ abstract class AbstractDipDupIntegrationTest {
     @BeforeEach
     fun cleanupMetaMocks() {
         clearMocks(testUnionMetaLoader)
+        clearMocks(ownershipClient)
+        clearMocks(tokenClient)
     }
 
     fun <T> runWithKafka(block: suspend CoroutineScope.() -> T): T = runBlocking {

@@ -9,12 +9,18 @@ import com.rarible.protocol.union.core.ConsumerFactory
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.handler.KafkaConsumerWorker
 import com.rarible.protocol.union.core.model.UnionOrderEvent
+import com.rarible.protocol.union.core.model.UnionOwnershipEvent
 import com.rarible.protocol.union.dto.ActivityDto
+import com.rarible.protocol.union.dto.OwnershipDto
+import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.integration.tezos.TezosIntegrationProperties
 import com.rarible.protocol.union.integration.tezos.dipdup.converter.DipDupActivityConverter
 import com.rarible.protocol.union.integration.tezos.dipdup.converter.DipDupOrderConverter
 import com.rarible.protocol.union.integration.tezos.dipdup.event.DipDupActivityEventHandler
 import com.rarible.protocol.union.integration.tezos.dipdup.event.DipDupOrderEventHandler
+import com.rarible.protocol.union.integration.tezos.dipdup.event.DipDupTransfersEventHandler
+import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktItemService
+import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktOwnershipService
 import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
@@ -69,12 +75,22 @@ class DipDupConsumerConfiguration(
     }
 
     @Bean
+    fun dipDupTransferEventHandler(
+        ownershipHandler: IncomingEventHandler<UnionOwnershipEvent>,
+        ownershipService: TzktOwnershipService,
+        itemService: TzktItemService
+    ): DipDupTransfersEventHandler {
+        return DipDupTransfersEventHandler(ownershipHandler, ownershipService, itemService)
+    }
+
+    @Bean
     fun dipDupActivityEventHandler(
         handler: IncomingEventHandler<ActivityDto>,
         converter: DipDupActivityConverter,
+        transfersEventHandler: DipDupTransfersEventHandler,
         mapper: ObjectMapper
     ): DipDupActivityEventHandler {
-        return DipDupActivityEventHandler(handler, converter, mapper)
+        return DipDupActivityEventHandler(handler, converter, transfersEventHandler, mapper)
     }
 
     @Bean

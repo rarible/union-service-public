@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory
 open class DipDupActivityEventHandler(
     override val handler: IncomingEventHandler<ActivityDto>,
     private val dipDupOrderConverter: DipDupActivityConverter,
+    private val dipDupTransfersEventHandler: DipDupTransfersEventHandler,
     private val mapper: ObjectMapper
 ) : AbstractBlockchainEventHandler<DipDupActivity, ActivityDto>(com.rarible.protocol.union.dto.BlockchainDto.TEZOS) {
 
@@ -18,8 +19,16 @@ open class DipDupActivityEventHandler(
 
     override suspend fun handle(event: DipDupActivity) {
         logger.info("Received DipDup activity event: {}", mapper.writeValueAsString(event))
-        val unionEvent = dipDupOrderConverter.convert(event, blockchain)
-        handler.onEvent(unionEvent)
+        try {
+            val unionEvent = dipDupOrderConverter.convert(event, blockchain)
+            handler.onEvent(unionEvent)
+
+            if (dipDupTransfersEventHandler.isTransfersEvent(unionEvent)) {
+                dipDupTransfersEventHandler.handle(unionEvent)
+            }
+        } catch (e: DipDupActivityConverter.WrongValue) {
+            logger.warn("Activity event was skipped because wrong value")
+        }
     }
 
 }

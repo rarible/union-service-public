@@ -34,12 +34,6 @@ import java.util.*
 class DipDupOrderEventHandlerFt : AbstractDipDupIntegrationTest() {
 
     @Autowired
-    private lateinit var tokenClient: TokenClient
-
-    @Autowired
-    private lateinit var ownershipClient: OwnershipClient
-
-    @Autowired
     private lateinit var unionMetaLoader: UnionMetaLoader
 
     @Test

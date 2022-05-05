@@ -35,4 +35,8 @@ interface TzktItemService {
         throw UnionNotFoundException(null)
     }
 
+    suspend fun isNft(itemId: String): Boolean {
+        throw UnionNotFoundException(null)
+    }
+
 }
