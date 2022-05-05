@@ -16,7 +16,6 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
 import com.rarible.protocol.union.core.model.EsActivity
 import com.rarible.protocol.union.core.model.EsActivitySort
-import com.rarible.protocol.union.dto.ActivityIdDto
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
 import org.springframework.stereotype.Service
@@ -117,53 +116,26 @@ class ActivityElasticService(
         )
     }
 
-    private suspend fun getActivities(activities: List<EsActivity>): List<ActivityDto> {
-        if (activities.isEmpty()) return emptyList()
+    private suspend fun getActivities(esActivities: List<EsActivity>): List<ActivityDto> {
+        if (esActivities.isEmpty()) return emptyList()
+        val mapping = hashMapOf<BlockchainDto, MutableList<TypedActivityId>>()
 
-        val positionMap = mutableMapOf<String, Int>()
-        val blockchainMap = mutableMapOf<BlockchainDto, MutableList<TypedActivityId>>()
-        activities.forEachIndexed { index, activity ->
-            positionMap[activity.activityId] = index
-            val id = IdParser.parseActivityId(activity.activityId).value
-            blockchainMap.compute(activity.blockchain) { _, v ->
-                if (v == null) {
-                    mutableListOf(TypedActivityId(id, activity.type))
-                } else {
-                    v.add(TypedActivityId(id, activity.type))
-                    v
-                }
-            }
+        esActivities.forEach { activity ->
+            mapping
+                .computeIfAbsent(activity.blockchain) { ArrayList(esActivities.size) }
+                .add(TypedActivityId(IdParser.parseActivityId(activity.activityId).value, activity.type))
         }
+        val activities = mapping.mapAsync { element ->
+            val blockchain = element.key
+            val ids = element.value
+            val isBlockchainEnabled = router.isBlockchainEnabled(blockchain)
+            if (isBlockchainEnabled) router.getService(blockchain).getActivitiesByIds(ids) else emptyList()
+        }.flatten()
 
-        val evaluatedBlockchains = router.getEnabledBlockchains(blockchainMap.keys)
-        logger.info("Blockchains to query: $evaluatedBlockchains")
-
-        val results = evaluatedBlockchains.mapAsync { blockchain ->
-            val ids = blockchainMap[blockchain]
-            if (!ids.isNullOrEmpty()) {
-                logger.info("Querying getActivitiesByIds for $blockchain")
-                router.getService(blockchain).getActivitiesByIds(ids)
-                    .also { logger.info("Queried getActivitiesByIds for $blockchain") }
-            } else null
-        }.filterNotNull()
-
-        logger.info("Raw results: $results")
-
-        val mergedResult = arrayOfNulls<ActivityDto>(activities.size)
-        results.forEach {
-            it.forEach { activity ->
-                val index = positionMap[activity.id.fullId()]
-                if (index != null) {
-                    mergedResult[index] = activity
-                } else {
-                    logger.warn("Couldn't find position of ${activity.id} in result array")
-                }
-            }
+        val activitiesIdMapping = activities.associateBy { it.id.fullId() }
+        return esActivities.mapNotNull { esActivity ->
+            activitiesIdMapping[esActivity.activityId]
         }
-
-        logger.info("Merged result: $mergedResult")
-
-        return mergedResult.filterNotNull()
     }
 
     private fun convertSort(sort: ActivitySortDto?): EsActivitySort {

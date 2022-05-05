@@ -288,6 +288,7 @@ open class TezosOrderService(
         val orders = orderControllerApi.getSellOrdersByMaker(
             maker,
             origin,
+            tezosOrderConverter.convert(status),
             size,
             continuation
         ).awaitFirst()

@@ -40,7 +40,7 @@ internal class EsActivityRepositoryFt {
 
         val id = repository.save(activity).activityId
         val found = repository.findById(id)
-        Assertions.assertThat(found).isEqualTo(activity)
+        assertThat(found).isEqualTo(activity)
     }
 
     @Test
