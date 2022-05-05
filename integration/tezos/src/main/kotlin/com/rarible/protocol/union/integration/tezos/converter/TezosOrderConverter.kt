@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.integration.tezos.converter
 
-import com.rarible.protocol.tezos.dto.ActivitySortDto
 import com.rarible.protocol.tezos.dto.OrderPaginationDto
 import com.rarible.protocol.tezos.dto.PartDto
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
@@ -113,10 +112,10 @@ class TezosOrderConverter(
     }
 
     // TODO TEZOS there should be separate enum for Order sorting
-    fun convert(source: OrderSortDto?): ActivitySortDto? {
+    fun convert(source: OrderSortDto?): com.rarible.protocol.tezos.dto.OrderSortDto? {
         return when (source) {
-            OrderSortDto.LAST_UPDATE_ASC -> ActivitySortDto.EARLIEST_FIRST
-            OrderSortDto.LAST_UPDATE_DESC -> ActivitySortDto.LATEST_FIRST
+            OrderSortDto.LAST_UPDATE_ASC -> com.rarible.protocol.tezos.dto.OrderSortDto.EARLIEST_FIRST
+            OrderSortDto.LAST_UPDATE_DESC -> com.rarible.protocol.tezos.dto.OrderSortDto.LATEST_FIRST
             else -> null
         }
     }
