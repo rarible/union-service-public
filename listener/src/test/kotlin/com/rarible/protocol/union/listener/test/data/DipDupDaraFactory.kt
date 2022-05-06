@@ -22,7 +22,7 @@ import java.time.ZoneOffset
 import java.util.*
 
 
-fun activityOrderListEvent(activityId: String): DipDupActivity {
+fun randomDipDupActivityOrderListEvent(activityId: String): DipDupActivity {
     return DipDupOrderListActivity(
         id = activityId,
         date = Instant.now().atOffset(ZoneOffset.UTC),
@@ -45,7 +45,7 @@ fun activityOrderListEvent(activityId: String): DipDupActivity {
     )
 }
 
-fun activityMintEvent(): DipDupMintActivity {
+fun randomDipDupActivityMintEvent(): DipDupMintActivity {
     return DipDupMintActivity(
         id = randomString(),
         transferId = randomString(),
@@ -59,7 +59,7 @@ fun activityMintEvent(): DipDupMintActivity {
     )
 }
 
-fun activityTransferEvent(): DipDupTransferActivity {
+fun randomDipDupActivityTransferEvent(): DipDupTransferActivity {
     return DipDupTransferActivity(
         id = randomString(),
         transferId = randomString(),
@@ -74,7 +74,7 @@ fun activityTransferEvent(): DipDupTransferActivity {
     )
 }
 
-fun activityBurnEvent(): DipDupBurnActivity {
+fun randomDipDupActivityBurnEvent(): DipDupBurnActivity {
     return DipDupBurnActivity(
         id = randomString(),
         transferId = randomString(),
@@ -88,7 +88,7 @@ fun activityBurnEvent(): DipDupBurnActivity {
     )
 }
 
-fun tokenBalance(contract: String, tokenId: BigInteger, owner: String): TokenBalance {
+fun randomTzktTokenBalance(contract: String, tokenId: BigInteger, owner: String): TokenBalance {
     return TokenBalance(
         id = 1,
         account = Alias(
@@ -109,7 +109,7 @@ fun tokenBalance(contract: String, tokenId: BigInteger, owner: String): TokenBal
     )
 }
 
-fun token(contract: String, tokenId: BigInteger, supply: BigInteger): Token {
+fun randomTzktToken(contract: String, tokenId: BigInteger, supply: BigInteger): Token {
     return Token(
         id = randomInt(),
         contract = Alias(

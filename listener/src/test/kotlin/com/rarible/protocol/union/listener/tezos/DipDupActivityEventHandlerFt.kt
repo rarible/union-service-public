@@ -34,7 +34,7 @@ class DipDupActivityEventHandlerFt : AbstractDipDupIntegrationTest() {
         dipDupActivityProducer.send(
             KafkaMessage(
                 key = activityId,
-                value = activityOrderListEvent(activityId)
+                value = randomDipDupActivityOrderListEvent(activityId)
             )
         ).ensureSuccess()
 
@@ -47,7 +47,7 @@ class DipDupActivityEventHandlerFt : AbstractDipDupIntegrationTest() {
     @Test
     fun `should send dipdup mint activity to outgoing topic`() = runWithKafka {
 
-        val activity = activityMintEvent()
+        val activity = randomDipDupActivityMintEvent()
         val activityId = activity.transferId
         val ownershipId = OwnershipIdDto(
             blockchain = BlockchainDto.TEZOS,
@@ -56,8 +56,8 @@ class DipDupActivityEventHandlerFt : AbstractDipDupIntegrationTest() {
             owner = activity.owner
         )
 
-        coEvery { tokenClient.token(ownershipId.getItemId().value) } returns token(activity.contract, activity.tokenId, BigInteger.ONE)
-        coEvery { ownershipClient.ownershipById(ownershipId.value) } returns tokenBalance(activity.contract, activity.tokenId, activity.owner)
+        coEvery { tokenClient.token(ownershipId.getItemId().value) } returns randomTzktToken(activity.contract, activity.tokenId, BigInteger.ONE)
+        coEvery { ownershipClient.ownershipById(ownershipId.value) } returns randomTzktTokenBalance(activity.contract, activity.tokenId, activity.owner)
 
         dipDupActivityProducer.send(
             KafkaMessage(
@@ -81,7 +81,7 @@ class DipDupActivityEventHandlerFt : AbstractDipDupIntegrationTest() {
     @Test
     fun `should send dipdup transfer activity to outgoing topic`() = runWithKafka {
 
-        val activity = activityTransferEvent()
+        val activity = randomDipDupActivityTransferEvent()
         val activityId = activity.transferId
         val ownershipIdFrom = OwnershipIdDto(
             blockchain = BlockchainDto.TEZOS,
@@ -96,8 +96,8 @@ class DipDupActivityEventHandlerFt : AbstractDipDupIntegrationTest() {
             owner = activity.owner
         )
 
-        coEvery { ownershipClient.ownershipById(ownershipIdFrom.value) } returns tokenBalance(activity.contract, activity.tokenId, activity.from)
-        coEvery { ownershipClient.ownershipById(ownershipIdTo.value) } returns tokenBalance(activity.contract, activity.tokenId, activity.owner)
+        coEvery { ownershipClient.ownershipById(ownershipIdFrom.value) } returns randomTzktTokenBalance(activity.contract, activity.tokenId, activity.from)
+        coEvery { ownershipClient.ownershipById(ownershipIdTo.value) } returns randomTzktTokenBalance(activity.contract, activity.tokenId, activity.owner)
 
         dipDupActivityProducer.send(
             KafkaMessage(
@@ -121,7 +121,7 @@ class DipDupActivityEventHandlerFt : AbstractDipDupIntegrationTest() {
     @Test
     fun `should send dipdup burn activity to outgoing topic`() = runWithKafka {
 
-        val activity = activityBurnEvent()
+        val activity = randomDipDupActivityBurnEvent()
         val activityId = activity.transferId
         val ownershipId = OwnershipIdDto(
             blockchain = BlockchainDto.TEZOS,
@@ -130,8 +130,8 @@ class DipDupActivityEventHandlerFt : AbstractDipDupIntegrationTest() {
             owner = activity.owner
         )
 
-        coEvery { tokenClient.token(ownershipId.getItemId().value) } returns token(activity.contract, activity.tokenId, BigInteger.ZERO)
-        coEvery { ownershipClient.ownershipById(ownershipId.value) } returns tokenBalance(activity.contract, activity.tokenId, activity.owner)
+        coEvery { tokenClient.token(ownershipId.getItemId().value) } returns randomTzktToken(activity.contract, activity.tokenId, BigInteger.ZERO)
+        coEvery { ownershipClient.ownershipById(ownershipId.value) } returns randomTzktTokenBalance(activity.contract, activity.tokenId, activity.owner)
 
         dipDupActivityProducer.send(
             KafkaMessage(
