@@ -9,9 +9,10 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.repository.search.EsOwnershipRepository
 import com.rarible.protocol.union.worker.config.BlockchainReindexProperties
 import com.rarible.protocol.union.worker.config.OwnershipReindexProperties
-import com.rarible.protocol.union.worker.task.search.ownership.OwnershipTask
 import com.rarible.protocol.union.worker.task.search.ParamFactory
 import com.rarible.protocol.union.worker.task.search.ownership.OwnershipReindexService
+import com.rarible.protocol.union.worker.task.search.ownership.OwnershipTask
+import com.rarible.protocol.union.worker.task.search.ownership.OwnershipTaskParam
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -27,7 +28,7 @@ class OwnershipTaskUnitTest {
 
     private val reindexService = mockk<OwnershipReindexService> {
         coEvery {
-            reindex(any(), "ownership_test_index", any())
+            reindex(any(), any(), "ownership_test_index", any())
         } returns flowOf("next_cursor")
     }
 
@@ -68,11 +69,14 @@ class OwnershipTaskUnitTest {
 
         task.runLongTask(
             from = null,
-            param = """{"blockchain": "ETHEREUM", "index":"ownership_test_index"}"""
+            param = """{"blockchain": "ETHEREUM", "target": "OWNERSHIP", "index":"ownership_test_index"}"""
         ).toList()
 
         coVerify {
-            reindexService.reindex(BlockchainDto.ETHEREUM, "ownership_test_index", null)
+            reindexService.reindex(BlockchainDto.ETHEREUM,
+                OwnershipTaskParam.Target.OWNERSHIP,
+                "ownership_test_index",
+                null)
         }
     }
 
@@ -91,11 +95,14 @@ class OwnershipTaskUnitTest {
 
         task.runLongTask(
             from = "ETHEREUM:cursor_1",
-            param = """{"blockchain": "ETHEREUM", "index":"ownership_test_index"}"""
+            param = """{"blockchain": "ETHEREUM", "target": "OWNERSHIP", "index":"ownership_test_index"}"""
         ).toList()
 
         coVerify {
-            reindexService.reindex(BlockchainDto.ETHEREUM, "ownership_test_index", "ETHEREUM:cursor_1")
+            reindexService.reindex(BlockchainDto.ETHEREUM,
+                OwnershipTaskParam.Target.OWNERSHIP,
+                "ownership_test_index",
+                "ETHEREUM:cursor_1")
         }
     }
 }

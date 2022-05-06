@@ -34,6 +34,7 @@ class OwnershipTask(
             val taskParam = paramFactory.parse<OwnershipTaskParam>(param)
             reindexService.reindex(
                 blockchain = taskParam.blockchain,
+                target = taskParam.target,
                 index = taskParam.index,
                 cursor = from,
             ).onCompletion {

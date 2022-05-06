@@ -10,5 +10,11 @@ import com.rarible.protocol.union.dto.BlockchainDto
  */
 data class OwnershipTaskParam(
     val blockchain: BlockchainDto,
+    val target: Target,
     val index: String,
-)
+) {
+    enum class Target {
+        OWNERSHIP,
+        AUCTIONED_OWNERSHIP,
+    }
+}

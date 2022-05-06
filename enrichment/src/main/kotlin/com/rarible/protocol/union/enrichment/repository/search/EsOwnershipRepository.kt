@@ -31,11 +31,11 @@ class EsOwnershipRepository(
             .collectList().awaitFirst().map { it.content }
     }
 
-    suspend fun saveAll(esOwnerships: Collection<EsOwnership>, indexName: String?): List<EsOwnership> {
+    suspend fun saveAll(esOwnerships: Collection<EsOwnership>, indexName: String? = null): List<EsOwnership> {
         return esOperations.saveAll(esOwnerships, index(indexName)).collectList().awaitFirst()
     }
 
-    suspend fun deleteAll(ownershipIds: Collection<String>, indexName: String?) {
+    suspend fun deleteAll(ownershipIds: Collection<String>, indexName: String? = null) {
         val idsQuery = idsQuery().addIds(*ownershipIds.toTypedArray())
         val query = NativeSearchQueryBuilder().withQuery(idsQuery).build()
         esOperations.delete(query, EsOwnership::class.java, index(indexName)).awaitFirstOrNull()

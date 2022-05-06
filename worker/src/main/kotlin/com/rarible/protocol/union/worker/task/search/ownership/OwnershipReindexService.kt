@@ -16,9 +16,11 @@ class OwnershipReindexService(
 
     fun reindex(
         blockchain: BlockchainDto,
+        target: OwnershipTaskParam.Target,
         index: String?,
         cursor: String? = null,
-    ): Flow<String> {
-        TODO()
+    ): Flow<String> = when (target) {
+        OwnershipTaskParam.Target.OWNERSHIP -> TODO()
+        OwnershipTaskParam.Target.AUCTIONED_OWNERSHIP -> TODO()
     }
 }
