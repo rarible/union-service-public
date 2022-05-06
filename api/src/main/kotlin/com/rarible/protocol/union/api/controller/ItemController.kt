@@ -1,9 +1,6 @@
 package com.rarible.protocol.union.api.controller
 
-import com.rarible.core.logging.RaribleMDCContext
-import com.rarible.protocol.union.api.service.ItemApiService
-import com.rarible.protocol.union.api.service.EnrichedOwnershipApiService
-import com.rarible.protocol.union.api.service.api.OwnershipApiService
+import com.rarible.protocol.union.api.service.OwnershipQueryService
 import com.rarible.protocol.union.api.service.select.ItemSourceSelectService
 import com.rarible.protocol.union.api.util.BlockchainFilter
 import com.rarible.protocol.union.core.continuation.UnionItemContinuation
@@ -58,7 +55,7 @@ import java.time.Duration
 @RestController
 class ItemController(
     private val itemSourceSelectService: ItemSourceSelectService,
-    private val ownershipApiService: EnrichedOwnershipApiService,
+    private val ownershipApiService: OwnershipQueryService,
     private val router: BlockchainRouter<ItemService>,
     private val enrichmentItemService: EnrichmentItemService,
     private val unionMetaService: UnionMetaService,

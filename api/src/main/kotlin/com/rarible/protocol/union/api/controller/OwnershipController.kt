@@ -1,7 +1,6 @@
 package com.rarible.protocol.union.api.controller
 
-import com.rarible.protocol.union.api.service.EnrichedOwnershipApiService
-import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.api.service.OwnershipQueryService
 import com.rarible.protocol.union.dto.OwnershipDto
 import com.rarible.protocol.union.dto.OwnershipsDto
 import com.rarible.protocol.union.dto.continuation.page.PageSize
@@ -15,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController
 @ExperimentalCoroutinesApi
 @RestController
 class OwnershipController(
-    private val ownershipApiService: EnrichedOwnershipApiService,
+    private val ownershipApiService: OwnershipQueryService,
 ) : OwnershipControllerApi {
 
     private val logger = LoggerFactory.getLogger(javaClass)

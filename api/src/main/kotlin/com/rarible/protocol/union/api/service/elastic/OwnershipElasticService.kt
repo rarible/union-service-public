@@ -1,18 +1,19 @@
 package com.rarible.protocol.union.api.service.elastic
 
-import com.rarible.core.common.flatMapAsync
-import com.rarible.core.logging.Logger
+import com.rarible.protocol.union.api.service.EnrichedOwnershipApiHelper
 import com.rarible.protocol.union.api.service.OwnershipQueryService
-import com.rarible.protocol.union.core.model.EsOwnership
-import com.rarible.protocol.union.core.model.EsOwnershipByItemFilter
-import com.rarible.protocol.union.core.model.EsOwnershipByOwnerFilter
+import com.rarible.protocol.union.core.continuation.UnionAuctionOwnershipWrapperContinuation
+import com.rarible.protocol.union.core.continuation.UnionOwnershipContinuation
 import com.rarible.protocol.union.core.model.UnionOwnership
-import com.rarible.protocol.union.core.service.OwnershipService
-import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.ItemIdDto
+import com.rarible.protocol.union.dto.OwnershipDto
+import com.rarible.protocol.union.dto.OwnershipIdDto
+import com.rarible.protocol.union.dto.OwnershipsDto
 import com.rarible.protocol.union.dto.UnionAddress
-import com.rarible.protocol.union.dto.continuation.DateIdContinuation
-import com.rarible.protocol.union.enrichment.repository.search.EsOwnershipRepository
+import com.rarible.protocol.union.dto.continuation.page.Paging
+import com.rarible.protocol.union.dto.continuation.page.Slice
+import com.rarible.protocol.union.enrichment.model.ShortItemId
+import com.rarible.protocol.union.enrichment.service.EnrichmentAuctionService
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Primary
 import org.springframework.stereotype.Component
@@ -20,46 +21,52 @@ import org.springframework.stereotype.Component
 @Component
 @Primary
 @ConditionalOnProperty(
-    value = ["enableOrderQueriesToElasticSearch"],
+    value = ["enableOwnershipQueriesToElasticSearch"],
     prefix = "common.feature-flags",
 )
 class OwnershipElasticService(
-    private val repository: EsOwnershipRepository,
-    private val router: BlockchainRouter<OwnershipService>,
+    val enrichmentAuctionService: EnrichmentAuctionService,
+    private val apiHelper: EnrichedOwnershipApiHelper,
+    private val elasticHelper: OwnershipElasticHelper,
 ) : OwnershipQueryService {
+
+    override suspend fun getOwnershipById(fullOwnershipId: OwnershipIdDto): OwnershipDto =
+        apiHelper.getOwnershipById(fullOwnershipId)
 
     override suspend fun getOwnershipByOwner(
         owner: UnionAddress,
         continuation: String?,
         size: Int,
-    ): List<UnionOwnership> = repository
-        .findByFilter(EsOwnershipByOwnerFilter(owner, DateIdContinuation.parse(continuation), size))
-        .getOwnerships()
+    ): Slice<UnionOwnership> {
+        return apiHelper.getEnrichedOwnerships(
+            continuation,
+            size,
+            { enrichmentAuctionService.findBySeller(owner) },
+            { elasticHelper.getRawOwnershipsByOwner(owner, continuation, it) },
+            { ownerships ->
+                Paging(
+                    UnionOwnershipContinuation.ByLastUpdatedAndId,
+                    apiHelper.merge(ownerships),
+                ).getSlice(size)
+            }
+        )
+    }
 
     override suspend fun getOwnershipsByItem(
         itemId: ItemIdDto,
         continuation: String?,
         size: Int,
-    ): List<UnionOwnership> = repository
-        .findByFilter(EsOwnershipByItemFilter(itemId, DateIdContinuation.parse(continuation), size))
-        .getOwnerships()
-
-    suspend fun List<EsOwnership>.getOwnerships(): List<UnionOwnership> {
-        log.debug("Enrich elastic ownerships with blockchains api (count=$size)")
-        val idsMap = groupBy { it.blockchain }
-        val enabledBlockchains = router.getEnabledBlockchains(idsMap.keys).toSet()
-        log.debug("Source blockchains: ${idsMap.keys.intersect(enabledBlockchains)} (${idsMap.keys - enabledBlockchains} disabled)")
-
-        val ownerships = idsMap.filterKeys { it in enabledBlockchains }
-            .flatMapAsync { (blockchain, ids) ->
-                router.getService(blockchain).getAllOwnerships(ids.map { it.ownershipId })
+    ): OwnershipsDto {
+        return apiHelper.getEnrichedOwnerships(
+            continuation,
+            size,
+            { enrichmentAuctionService.findByItem(ShortItemId(itemId)) },
+            { elasticHelper.getRawOwnershipsByItem(itemId, continuation, it) },
+            { ownerships ->
+                val page =
+                    Paging(UnionAuctionOwnershipWrapperContinuation.ByLastUpdatedAndId, ownerships).getSlice(size)
+                OwnershipsDto(page.entities.size.toLong(), page.continuation, apiHelper.enrich(page.entities))
             }
-
-        log.debug("Obtained ${ownerships.size} ownerships")
-        return ownerships
-    }
-
-    companion object {
-        private val log by Logger()
+        )
     }
 }

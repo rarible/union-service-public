@@ -3,11 +3,12 @@ package com.rarible.protocol.union.api.service
 import com.rarible.core.common.nowMillis
 import com.rarible.core.test.data.randomAddress
 import com.rarible.protocol.union.api.service.api.OrderApiService
+import com.rarible.protocol.union.api.service.elastic.OwnershipElasticHelper
+import com.rarible.protocol.union.api.service.elastic.OwnershipElasticService
 import com.rarible.protocol.union.core.DefaultBlockchainProperties
 import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.core.model.getSellerOwnershipId
 import com.rarible.protocol.union.core.service.AuctionContractService
-import com.rarible.protocol.union.core.service.OwnershipService
 import com.rarible.protocol.union.dto.AuctionDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ContractAddress
@@ -16,10 +17,10 @@ import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.OwnershipDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.continuation.DateIdContinuation
-import com.rarible.protocol.union.dto.continuation.page.Page
 import com.rarible.protocol.union.enrichment.converter.EnrichedOwnershipConverter
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
+import com.rarible.protocol.union.enrichment.repository.search.EsOwnershipRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentAuctionService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
 import com.rarible.protocol.union.integration.ethereum.converter.EthAuctionConverter
@@ -38,7 +39,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 @ExperimentalCoroutinesApi
-class EnrichedOwnershipApiServiceTest {
+class OwnershipElasticServiceTest {
 
     private val auctionContract = randomAddress()
 
@@ -51,30 +52,36 @@ class EnrichedOwnershipApiServiceTest {
     )
 
     private val orderApiService: OrderApiService = mockk()
-    private val ownershipService: OwnershipService = mockk()
-    private val ownershipQueryService: OwnershipQueryService = mockk()
     private val auctionContractService: AuctionContractService = AuctionContractService(listOf(properties))
     private val enrichmentOwnershipService: EnrichmentOwnershipService = mockk()
     private val enrichmentAuctionService: EnrichmentAuctionService = mockk()
+    private val repository = mockk<EsOwnershipRepository>()
+    private val elasticHelper = mockk<OwnershipElasticHelper>()
 
     private val ethAuctionConverter = EthAuctionConverter(CurrencyMock.currencyServiceMock)
 
-    private val enrichedOwnershipApiService = EnrichedOwnershipApiService(
+    private val apiHelper: EnrichedOwnershipApiHelper = EnrichedOwnershipApiHelper(
         orderApiService,
-        ownershipQueryService,
         auctionContractService,
         enrichmentOwnershipService,
-        enrichmentAuctionService
+        enrichmentAuctionService,
+        mockk(),
+    )
+
+    private val ownershipElasticService = OwnershipElasticService(
+        enrichmentAuctionService,
+        apiHelper,
+        elasticHelper,
     )
 
     @BeforeEach
     fun beforeEach() {
-        clearMocks(ownershipQueryService, enrichmentOwnershipService, enrichmentAuctionService, orderApiService)
+        clearMocks(repository, enrichmentOwnershipService, enrichmentAuctionService, orderApiService)
         coEvery { enrichmentOwnershipService.findAll(any()) } returns emptyList()
         coEvery { enrichmentOwnershipService.mergeWithAuction(any<OwnershipDto>(), any()) } returnsArgument 0
         coEvery { enrichmentOwnershipService.mergeWithAuction(any<UnionOwnership>(), any()) } returnsArgument 0
-        coEvery { ownershipQueryService.getOwnershipsByItem(any(), any(), any()) } returns emptyList()
         coEvery { orderApiService.getByIds(any<List<OrderIdDto>>()) } returns emptyList()
+        coEvery { repository.findByFilter(any()) } returns emptyList()
     }
 
     @Test
@@ -112,7 +119,7 @@ class EnrichedOwnershipApiServiceTest {
             fullAuctionOwnership // should be disguised
         )
 
-        val result = enrichedOwnershipApiService.getOwnershipsByItem(itemId, null, 2).ownerships
+        val result = ownershipElasticService.getOwnershipsByItem(itemId, null, 2).ownerships
 
         // Full auction ownership - the earliest
         assertThat(result[0].id).isEqualTo(fullAuctionOwnership.id.copy(owner = fullAuction.seller))
@@ -153,7 +160,7 @@ class EnrichedOwnershipApiServiceTest {
             partialOwnership,
         )
 
-        val result = enrichedOwnershipApiService.getOwnershipsByItem(itemId, continuation, 2).ownerships
+        val result = ownershipElasticService.getOwnershipsByItem(itemId, continuation, 2).ownerships
 
         // Partial auction ownership - first
         assertThat(result[0].id).isEqualTo(partialOwnership.id)
@@ -165,22 +172,11 @@ class EnrichedOwnershipApiServiceTest {
         itemId: ItemIdDto,
         continuation: String?,
         size: Int,
-        vararg ownerships: UnionOwnership
+        vararg ownerships: UnionOwnership,
     ) {
         coEvery {
-            ownershipQueryService.getOwnershipsByItem(itemId, continuation, size)
+            elasticHelper.getRawOwnershipsByItem(itemId, continuation, size)
         } returns ownerships.asList()
-    }
-
-    private suspend fun mockItemOwnerships(
-        itemId: ItemIdDto,
-        continuation: String?,
-        size: Int,
-        vararg ownerships: UnionOwnership
-    ) {
-        coEvery {
-            ownershipService.getOwnershipsByItem(itemId.value, continuation, size)
-        } returns Page(0, null, ownerships.asList())
     }
 
     private suspend fun mockOwnerships(vararg ownerships: UnionOwnership) {
