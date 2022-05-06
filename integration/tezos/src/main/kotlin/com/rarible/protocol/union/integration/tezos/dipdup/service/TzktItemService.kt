@@ -14,29 +14,29 @@ interface TzktItemService {
         continuation: String?,
         size: Int
     ): Page<UnionItem> {
-        throw UnionNotFoundException(null)
+        TODO("Not implemented")
     }
 
     suspend fun getItemById(
         itemId: String
     ): UnionItem {
-        throw UnionNotFoundException(null)
+        TODO("Not implemented")
     }
 
     suspend fun getItemRoyaltiesById(itemId: String): List<RoyaltyDto> {
-        throw UnionNotFoundException(null)
+        TODO("Not implemented")
     }
 
     suspend fun getItemMetaById(itemId: String): UnionMeta {
-        throw UnionNotFoundException(null)
+        TODO("Not implemented")
     }
 
     suspend fun getItemsByIds(itemIds: List<String>): List<UnionItem> {
-        throw UnionNotFoundException(null)
+        TODO("Not implemented")
     }
 
     suspend fun isNft(itemId: String): Boolean {
-        throw UnionNotFoundException(null)
+        TODO("Not implemented")
     }
 
 }

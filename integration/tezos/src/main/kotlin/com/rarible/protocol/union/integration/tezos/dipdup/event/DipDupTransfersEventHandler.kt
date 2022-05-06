@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.integration.tezos.dipdup.event
 
+import com.rarible.protocol.union.core.exception.UnionValidationException
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.UnionItemDeleteEvent
@@ -20,7 +21,6 @@ import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.TransferActivityDto
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktItemService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktOwnershipService
-import com.rarible.tzkt.model.OwnershipId
 import org.slf4j.LoggerFactory
 import java.math.BigInteger
 
@@ -78,11 +78,11 @@ open class DipDupTransfersEventHandler(
     }
 
     private suspend fun getOwnership(id: OwnershipIdDto?): UnionOwnership {
-        return id?.let { ownershipService.getOwnershipById(it.value) } ?: throw RuntimeException("Ownership is empty")
+        return id?.let { ownershipService.getOwnershipById(it.value) } ?: throw UnionValidationException("Ownership is empty")
     }
 
     private suspend fun getItem(id: ItemIdDto?): UnionItem {
-        return id?.let { tokenService.getItemById(id.value) } ?: throw RuntimeException("ItemId is empty")
+        return id?.let { tokenService.getItemById(id.value) } ?: throw UnionValidationException("ItemId is empty")
     }
 
     private suspend fun isNft(event: ActivityDto): Boolean {

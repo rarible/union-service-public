@@ -1,17 +1,7 @@
 package com.rarible.protocol.union.listener.tezos
 
 import com.rarible.core.kafka.KafkaMessage
-import com.rarible.core.test.data.randomBigInt
-import com.rarible.core.test.data.randomInt
-import com.rarible.core.test.data.randomString
 import com.rarible.core.test.wait.Wait
-import com.rarible.dipdup.client.core.model.Asset
-import com.rarible.dipdup.client.core.model.DipDupActivity
-import com.rarible.dipdup.client.core.model.DipDupBurnActivity
-import com.rarible.dipdup.client.core.model.DipDupMintActivity
-import com.rarible.dipdup.client.core.model.DipDupOrderListActivity
-import com.rarible.dipdup.client.core.model.DipDupTransferActivity
-import com.rarible.dipdup.client.core.model.TezosPlatform
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.BurnActivityDto
 import com.rarible.protocol.union.dto.MintActivityDto
@@ -20,21 +10,12 @@ import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.TransferActivityDto
 import com.rarible.protocol.union.integration.tezos.data.randomTezosOrderListActivity
 import com.rarible.protocol.union.listener.test.IntegrationTest
-import com.rarible.tzkt.model.Alias
-import com.rarible.tzkt.model.Token
-import com.rarible.tzkt.model.TokenBalance
-import com.rarible.tzkt.model.TokenInfo
 import io.mockk.coEvery
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.math.BigDecimal
 import java.math.BigInteger
-import java.time.Instant
-import java.time.OffsetDateTime
-import java.time.ZoneOffset
-import java.util.*
 
 @IntegrationTest
 class DipDupActivityEventHandlerFt : AbstractDipDupIntegrationTest() {
@@ -169,108 +150,5 @@ class DipDupActivityEventHandlerFt : AbstractDipDupIntegrationTest() {
             val items = findItemDeletions(ownershipId.getItemId().value)
             Assertions.assertThat(items).hasSize(1)
         }
-    }
-
-    private fun activityOrderListEvent(activityId: String): DipDupActivity {
-        return DipDupOrderListActivity(
-            id = activityId,
-            date = Instant.now().atOffset(ZoneOffset.UTC),
-            reverted = false,
-            hash = "",
-            maker = UUID.randomUUID().toString(),
-            make = Asset(
-                type = Asset.NFT(
-                    contract = UUID.randomUUID().toString(),
-                    tokenId = BigInteger.ONE
-                ),
-                value = BigDecimal.ONE
-            ),
-            take = Asset(
-                type = Asset.XTZ(),
-                value = BigDecimal.ONE
-            ),
-            price = BigDecimal.ONE,
-            source = TezosPlatform.RARIBLE
-        )
-    }
-
-    private fun activityMintEvent(): DipDupMintActivity {
-        return DipDupMintActivity(
-            id = randomString(),
-            transferId = randomString(),
-            contract = randomString(),
-            tokenId = randomBigInt(),
-            value = BigDecimal("1"),
-            owner = randomString(),
-            date = OffsetDateTime.now(),
-            reverted = false,
-            transactionId = randomString(),
-        )
-    }
-
-    private fun activityTransferEvent(): DipDupTransferActivity {
-        return DipDupTransferActivity(
-            id = randomString(),
-            transferId = randomString(),
-            contract = randomString(),
-            tokenId = randomBigInt(),
-            value = BigDecimal("1"),
-            owner = randomString(),
-            from = randomString(),
-            date = OffsetDateTime.now(),
-            reverted = false,
-            transactionId = randomString(),
-        )
-    }
-
-    private fun activityBurnEvent(): DipDupBurnActivity {
-        return DipDupBurnActivity(
-            id = randomString(),
-            transferId = randomString(),
-            contract = randomString(),
-            tokenId = randomBigInt(),
-            value = BigDecimal("1"),
-            owner = randomString(),
-            date = OffsetDateTime.now(),
-            reverted = false,
-            transactionId = randomString(),
-        )
-    }
-
-    private fun tokenBalance(contract: String, tokenId: BigInteger, owner: String): TokenBalance {
-        return TokenBalance(
-            id = 1,
-            account = Alias(
-                address = owner,
-            ),
-            token = TokenInfo(
-                contract = Alias(
-                    address = contract
-                ),
-                tokenId = tokenId.toString()
-            ),
-            balance = "1",
-            firstLevel = 1,
-            firstTime = OffsetDateTime.now(),
-            lastLevel = 1,
-            lastTime = OffsetDateTime.now(),
-            transfersCount = 1
-        )
-    }
-
-    private fun token(contract: String, tokenId: BigInteger, supply: BigInteger): Token {
-        return Token(
-            id = randomInt(),
-            contract = Alias(
-                address = contract
-            ),
-            tokenId = tokenId.toString(),
-            balancesCount = 1,
-            holdersCount = 1,
-            transfersCount = 1,
-            totalSupply = supply.toString(),
-            firstTime = OffsetDateTime.now(),
-            lastTime = OffsetDateTime.now()
-        )
     }
 }

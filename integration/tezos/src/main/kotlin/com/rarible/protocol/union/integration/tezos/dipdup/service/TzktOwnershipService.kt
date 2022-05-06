@@ -9,7 +9,7 @@ interface TzktOwnershipService {
     fun enabled() = false
 
     suspend fun getOwnershipById(ownershipId: String): UnionOwnership {
-        throw UnionNotFoundException(null)
+        TODO("Not implemented")
     }
 
     suspend fun getOwnershipsByItem(
@@ -17,7 +17,7 @@ interface TzktOwnershipService {
         continuation: String?,
         size: Int
     ): Page<UnionOwnership> {
-        throw UnionNotFoundException(null)
+        TODO("Not implemented")
     }
 
 }

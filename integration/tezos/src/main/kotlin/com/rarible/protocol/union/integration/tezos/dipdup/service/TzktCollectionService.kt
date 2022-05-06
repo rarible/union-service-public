@@ -12,11 +12,11 @@ interface TzktCollectionService {
         continuation: String?,
         size: Int
     ): Page<UnionCollection> {
-        throw UnionNotFoundException(null)
+        TODO("Not implemented")
     }
 
     suspend fun getCollectionById(collectionId: String): UnionCollection {
-        throw UnionNotFoundException(null)
+        TODO("Not implemented")
     }
 
 }

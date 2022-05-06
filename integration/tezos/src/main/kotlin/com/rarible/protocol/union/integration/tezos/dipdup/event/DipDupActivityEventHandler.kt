@@ -2,6 +2,7 @@ package com.rarible.protocol.union.integration.tezos.dipdup.event
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.rarible.dipdup.client.core.model.DipDupActivity
+import com.rarible.protocol.union.core.exception.UnionDataFormatException
 import com.rarible.protocol.union.core.handler.AbstractBlockchainEventHandler
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.dto.ActivityDto
@@ -26,8 +27,8 @@ open class DipDupActivityEventHandler(
             if (dipDupTransfersEventHandler.isTransfersEvent(unionEvent)) {
                 dipDupTransfersEventHandler.handle(unionEvent)
             }
-        } catch (e: DipDupActivityConverter.WrongValue) {
-            logger.warn("Activity event was skipped because wrong value")
+        } catch (e: UnionDataFormatException) {
+            logger.warn("Activity event was skipped because wrong data format", e)
         }
     }
 

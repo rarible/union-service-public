@@ -10,6 +10,7 @@ import com.rarible.dipdup.client.core.model.DipDupTransferActivity
 import com.rarible.dipdup.client.core.model.TezosPlatform
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.converter.UnionConverter
+import com.rarible.protocol.union.core.exception.UnionDataFormatException
 import com.rarible.protocol.union.core.service.CurrencyService
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivityIdDto
@@ -148,19 +149,17 @@ class DipDupActivityConverter(
     }
 
     private fun convertValue(bd: BigDecimal, id: ActivityIdDto): BigInteger {
-        if (bd.stripTrailingZeros().scale() > 0) throw WrongValue(bd, id)
+        if (bd.stripTrailingZeros().scale() > 0) throw UnionDataFormatException("Value: $bd must be BigInteger for token activity: $id")
         else return bd.toBigInteger()
     }
 
     private fun convert(source: TezosPlatform): OrderActivitySourceDto {
         return when(source) {
             TezosPlatform.RARIBLE -> OrderActivitySourceDto.RARIBLE
-            TezosPlatform.HEN -> OrderActivitySourceDto.RARIBLE // TODO: fix source!
-            TezosPlatform.OBJKT -> OrderActivitySourceDto.RARIBLE // TODO: fix source!
-            TezosPlatform.OBJKT_V2 -> OrderActivitySourceDto.RARIBLE // TODO: fix source!
+            TezosPlatform.HEN -> OrderActivitySourceDto.HEN
+            TezosPlatform.OBJKT -> OrderActivitySourceDto.OBJKT
+            TezosPlatform.OBJKT_V2 -> OrderActivitySourceDto.OBJKT
         }
     }
-
-    class WrongValue(value: BigDecimal, id: ActivityIdDto) : RuntimeException("Value: $value must be BigInteger for token activity: $id")
 }
 
