@@ -12,11 +12,11 @@ interface DipdupOrderService {
     fun enabled() = false
 
     suspend fun getOrderById(id: String): OrderDto {
-        throw UnionNotFoundException(null)
+        TODO("Not implemented")
     }
 
     suspend fun getOrderByIds(id: List<String>): List<OrderDto> {
-        throw UnionNotFoundException(null)
+        TODO("Not implemented")
     }
 
     suspend fun getOrdersAll(
@@ -25,7 +25,7 @@ interface DipdupOrderService {
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
-        throw UnionNotFoundException(null)
+        TODO("Not implemented")
     }
 
     suspend fun getSellOrdersByItem(
@@ -36,7 +36,7 @@ interface DipdupOrderService {
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
-        throw UnionNotFoundException(null)
+        TODO("Not implemented")
     }
 }
 

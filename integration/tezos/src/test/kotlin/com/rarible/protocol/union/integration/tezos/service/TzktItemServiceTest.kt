@@ -24,7 +24,7 @@ class TzktItemServiceTest {
     private val tokenClient: TokenClient = mockk()
 
 
-    private val tzktItemService = TzktItemServiceImpl(tokenClient)
+    private val tzktItemService = TzktItemServiceImpl(tokenClient, mockk())
     private val service = TezosItemService(itemControllerApi, tzktItemService)
 
     @BeforeEach

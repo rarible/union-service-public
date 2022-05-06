@@ -65,13 +65,14 @@ class DipDupApiConfiguration(
     fun tokenActivityClient() = TokenActivityClient(tzktWebClient)
 
     @Bean
-    fun metaService(mapper: ObjectMapper) = MetaService(mapper)
+    fun metaService(mapper: ObjectMapper, bigMapKeyClient: BigMapKeyClient) =
+        MetaService(mapper, bigMapKeyClient, properties.knownAddresses!!)
 
     @Bean
     fun royaltyService(
         bigMapKeyClient: BigMapKeyClient,
         ipfsClient: IPFSClient
-    ) = RoyaltiesHandler(bigMapKeyClient, ipfsClient, properties.royaltyConfig!!)
+    ) = RoyaltiesHandler(bigMapKeyClient, ipfsClient, properties.knownAddresses!!)
 
     @Bean
     fun tokenClient(metaService: MetaService, royaltiesHandler: RoyaltiesHandler) =
@@ -91,7 +92,7 @@ class DipDupApiConfiguration(
 
     @Bean
     fun tzktItemService(tzktTokenClient: TokenClient): TzktItemService {
-        return TzktItemServiceImpl(tzktTokenClient)
+        return TzktItemServiceImpl(tzktTokenClient, properties)
     }
 
     @Bean
