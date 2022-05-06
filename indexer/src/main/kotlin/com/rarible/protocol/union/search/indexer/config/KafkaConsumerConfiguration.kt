@@ -35,7 +35,7 @@ class KafkaConsumerConfiguration(
     private val consumerFactory = UnionEventsConsumerFactory(kafkaProperties.brokerReplicaSet, host, env)
 
     @Bean
-    @ConditionalOnProperty(prefix = "consul.indexer.activity.enabled", name = ["enabled"], havingValue = "true")
+    @ConditionalOnProperty(prefix = "handler.activity", name = ["enabled"], havingValue = "true")
     fun activityWorker(
         handler: ConsumerBatchEventHandler<ActivityDto>
     ): ConsumerWorkerHolder<ActivityDto> {
@@ -54,7 +54,7 @@ class KafkaConsumerConfiguration(
     }
 
     @Bean
-    @ConditionalOnProperty(prefix = "consul.indexer.order.enabled", name = ["enabled"], havingValue = "true")
+    @ConditionalOnProperty(prefix = "handler.order", name = ["enabled"], havingValue = "true")
     fun orderWorker(
         handler: ConsumerBatchEventHandler<OrderEventDto>
     ): ConsumerWorkerHolder<OrderEventDto> {
@@ -73,7 +73,7 @@ class KafkaConsumerConfiguration(
     }
 
     @Bean
-    @ConditionalOnProperty(prefix = "consul.indexer.collection.enabled", name = ["enabled"], havingValue = "true")
+    @ConditionalOnProperty(prefix = "handler.collection", name = ["enabled"], havingValue = "true")
     fun collectionWorker(handler: ConsumerBatchEventHandler<CollectionEventDto>): ConsumerWorkerHolder<CollectionEventDto> {
         val workers = (1..kafkaProperties.workerCount).map {i ->
             val consumer = consumerFactory.createCollectionConsumer(consumerGroup(COLLECTION))
@@ -90,7 +90,7 @@ class KafkaConsumerConfiguration(
     }
 
     @Bean
-    @ConditionalOnProperty(prefix = "consul.indexer.ownership.enabled", name = ["enabled"], havingValue = "true")
+    @ConditionalOnProperty(prefix = "handler.ownership", name = ["enabled"], havingValue = "true")
     fun ownershipWorker(
         handler: ConsumerBatchEventHandler<OwnershipEventDto>,
     ): ConsumerWorkerHolder<OwnershipEventDto> {
