@@ -15,10 +15,7 @@ class ActivityTask(
     private val properties: ActivityReindexProperties,
     private val paramFactory: ParamFactory,
     private val activityReindexService: ActivityReindexService,
-    private val repository: EsActivityRepository,
-    private val indexService: IndexService,
 ): TaskHandler<String> {
-    private val entityDefinition = repository.entityDefinition
 
     override val type: String
         get() = EsActivity.ENTITY_DEFINITION.reindexTask
@@ -30,7 +27,7 @@ class ActivityTask(
 
     /**
      * from - cursor
-     * param looks like ACTIVITY_ETHEREUM_LIST
+     * param is json-serialized ActivityTaskParam
      */
     override fun runLongTask(from: String?, param: String): Flow<String> {
         return if(from == "") {
@@ -44,15 +41,7 @@ class ActivityTask(
                     index = taskParam.index,
                     cursor = from
                 )
-                .onCompletion {
-                    indexService.finishIndexing(taskParam.index, entityDefinition)
-                    repository.refresh()
-                    logger.info("Finished reindex of ${entityDefinition.entity} with param $param")
-                }
         }
     }
 
-    companion object {
-        private val logger by Logger()
-    }
 }

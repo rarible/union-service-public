@@ -1,0 +1,58 @@
+package com.rarible.protocol.union.worker.task.search
+
+import com.rarible.core.common.mapAsync
+import com.rarible.core.logging.Logger
+import com.rarible.core.task.TaskHandler
+import com.rarible.core.task.TaskRepository
+import com.rarible.core.task.TaskStatus
+import com.rarible.protocol.union.core.elasticsearch.IndexService
+import com.rarible.protocol.union.core.model.EsActivity
+import com.rarible.protocol.union.dto.ActivityTypeDto
+import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
+import com.rarible.protocol.union.worker.task.search.activity.ActivityTaskParam
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.reactor.awaitSingleOrNull
+import org.springframework.stereotype.Component
+
+@Component
+class AliasTask(
+    private val taskRepository: TaskRepository,
+    private val esActivityRepository: EsActivityRepository,
+    private val indexService: IndexService,
+    private val paramFactory: ParamFactory
+): TaskHandler<Unit> {
+    override val type: String
+        get() = TYPE
+
+    private val entityDefinition = esActivityRepository.entityDefinition
+
+    override suspend fun isAbleToRun(param: String): Boolean {
+        val tasks = BlockchainDto.values().zip(ActivityTypeDto.values()).mapAsync { (b, a) ->
+            val taskParam = ActivityTaskParam(b, a, param)
+            taskRepository.findByTypeAndParam(
+                EsActivity.ENTITY_DEFINITION.reindexTask,
+                paramFactory.toString(taskParam)
+            ).awaitSingleOrNull()
+        }.filterNotNull()
+
+        return tasks.isEmpty() || tasks.all { it.lastStatus == TaskStatus.COMPLETED }
+    }
+
+    /**
+     * @param param - ES index name
+     */
+    override fun runLongTask(from: Unit?, param: String): Flow<Unit> {
+        return flow {
+            indexService.finishIndexing(param, entityDefinition)
+            esActivityRepository.refresh()
+            logger.info("Finished reindex of ${entityDefinition.entity} with index $param")
+        }
+    }
+
+    companion object {
+        const val TYPE = "ALIAS_TASK"
+        private val logger by Logger()
+    }
+}
