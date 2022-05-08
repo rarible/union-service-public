@@ -42,19 +42,4 @@ object EsOwnershipConverter {
         auctionId = source.id.fullId(),
         auctionOwnershipId = source.getAuctionOwnershipId().fullId(),
     )
-
-    fun convertOrMerge(source: UnionOwnership, esOwnership: EsOwnership?): EsOwnership = when (esOwnership) {
-        null -> convert(source)
-        else -> esOwnership.copy(
-            collection = source.collection?.fullId(),
-        )
-    }
-
-    fun convertOrMerge(source: AuctionDto, esOwnership: EsOwnership?): EsOwnership = when (esOwnership) {
-        null -> convert(source)
-        else -> esOwnership.copy(
-            auctionId = source.id.fullId(),
-            auctionOwnershipId = source.getAuctionOwnershipId().fullId(),
-        )
-    }
 }
