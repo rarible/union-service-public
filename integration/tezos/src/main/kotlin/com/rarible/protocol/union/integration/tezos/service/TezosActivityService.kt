@@ -132,12 +132,13 @@ open class TezosActivityService(
             }
         }
 
-        logger.info("Item Activities ids: $itemActivitiesIds")
-        logger.info("Order Activities ids: $orderActivitiesIds")
+        logger.info("Item Activities ids (total ${itemActivitiesIds.size}): $itemActivitiesIds")
+        logger.info("Order Activities ids (total ${orderActivitiesIds.size}): $orderActivitiesIds")
 
         val itemRequest = async {
             if (itemActivitiesIds.isNotEmpty()) {
                 pgService.nftActivities(itemActivitiesIds)
+                    .also { logger.info("Total item activities returned: ${it.items.size}") }
             } else {
                 EMPTY_ITEM_ACTIVITIES
             }
@@ -145,6 +146,7 @@ open class TezosActivityService(
         val orderRequest = async {
             if (orderActivitiesIds.isNotEmpty()) {
                 pgService.orderActivities(orderActivitiesIds)
+                    .also { logger.info("Total order activities returned: ${it.items.size}") }
             } else {
                 EMPTY_ORDER_ACTIVITIES
             }
