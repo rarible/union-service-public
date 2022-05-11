@@ -3,7 +3,9 @@ package com.rarible.protocol.union.search.indexer.metrics
 import com.rarible.core.telemetry.metrics.LongGaugeMetric
 import com.rarible.core.telemetry.metrics.RegisteredGauge
 import com.rarible.protocol.union.core.model.elasticsearch.EsEntity
+import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.search.indexer.config.IndexerProperties
+import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.MeterRegistry
 import org.springframework.stereotype.Component
 
@@ -13,13 +15,18 @@ class IndexerMetricFactory(
     private val properties: IndexerProperties,
 ) {
 
-    fun createEventHandlerGaugeMetric(entity: EsEntity): RegisteredGauge<Long> {
+    fun createEventHandlerDelayMetric(entity: EsEntity, blockchain: BlockchainDto): RegisteredGauge<Long> {
         return object : LongGaugeMetric(
-            name = eventHandlerGaugeMetric(entity)
+            name = "${properties.metrics.rootPath}.event.delay",
+            tag("entity", entity.entityName),
+            tag("blockchain", blockchain.name)
         ){}.bind(meterRegistry)
     }
 
-    private fun eventHandlerGaugeMetric(entity: EsEntity): String {
-        return "${properties.metrics.rootPath}.event.${entity.entityName}"
+    fun createEventHandlerCountMetric(entity: EsEntity, blockchain: BlockchainDto): Counter {
+        return Counter.builder("${properties.metrics.rootPath}.event.count")
+            .tag("entity", entity.entityName)
+            .tag("blockchain", blockchain.name)
+            .register(meterRegistry)
     }
 }
