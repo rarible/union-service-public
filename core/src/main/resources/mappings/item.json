@@ -41,16 +41,39 @@
       "type": "keyword"
     },
     "traits": {
+      "type": "nested",
       "properties": {
-          "type": "nested",
-          "properties": {
-            "key": {
-              //TODO
-            },
-            "value": {
-              //TODO
+        "key": {
+          "type": "text",
+          "fields": {
+            "raw": {
+              "type": "keyword"
             }
-          }
+          },
+          "analyzer": "stemmer_analyzer",
+          "search_analyzer": "stemmer_stop_analyzer",
+          "search_quote_analyzer": "stemmer_analyzer"
+        },
+        "value": {
+          "type": "text",
+          "fields": {
+            "raw": {
+              "type": "keyword"
+            },
+            "numeric": {
+              "type": "double",
+              "ignore_malformed": true,
+              "coerce": true
+            },
+            "date": {
+              "type": "date",
+              "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||MM//dd/yyyy||epoch_millis",
+              "ignore_malformed": true
+            }
+          },
+          "analyzer": "stemmer_analyzer",
+          "search_analyzer": "stemmer_stop_analyzer",
+          "search_quote_analyzer": "stemmer_analyzer"
         }
       }
     },

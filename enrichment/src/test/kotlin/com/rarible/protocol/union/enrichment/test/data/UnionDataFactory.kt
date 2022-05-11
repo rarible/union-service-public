@@ -230,6 +230,18 @@ fun randomEsActivity() = EsActivity(
     collection = randomString(),
     item = randomString(),
 )
+fun randomEsItem() = EsItem(
+    itemId = randomString(),
+    blockchain = BlockchainDto.values().random(),
+    collection = randomString(),
+    name = randomString(),
+    description = randomString(),
+    traits = listOf(EsTrait(randomString(), randomInt().toString()), EsTrait(randomString(), randomString())),
+    creators = listOf(randomString()),
+    owner = randomString(),
+    mintedAt = Instant.now(),
+    lastUpdatedAt = Instant.now()
+)
 
 private val mockedEthOrderConverter = EthOrderConverter(CurrencyMock.currencyServiceMock)
 private val mockedEthAuctionConverter = EthAuctionConverter(CurrencyMock.currencyServiceMock)

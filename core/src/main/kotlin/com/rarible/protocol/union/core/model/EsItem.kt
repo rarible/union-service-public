@@ -1,9 +1,9 @@
 package com.rarible.protocol.union.core.model
 
-import com.rarible.protocol.union.core.model.elasticsearch.EsEntity
 import com.rarible.protocol.union.core.model.elasticsearch.EntityDefinition
 import com.rarible.protocol.union.core.model.elasticsearch.EsEntitiesConfig.INDEX_SETTINGS
 import com.rarible.protocol.union.core.model.elasticsearch.EsEntitiesConfig.loadMapping
+import com.rarible.protocol.union.core.model.elasticsearch.EsEntity
 import com.rarible.protocol.union.dto.BlockchainDto
 import org.springframework.data.annotation.Id
 import org.springframework.data.elasticsearch.annotations.Field
@@ -18,7 +18,7 @@ data class EsItem(
 
     val name: String,
     val description: String,
-    val traits: Map<String, String>,
+    val traits: List<EsTrait>,
 
     val creators: List<String>,
     val owner: String,
@@ -40,3 +40,5 @@ data class EsItem(
         )
     }
 }
+
+data class EsTrait(val key: String, val value: String)
