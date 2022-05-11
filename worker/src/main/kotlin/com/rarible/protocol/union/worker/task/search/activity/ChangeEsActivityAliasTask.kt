@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.worker.task.search
+package com.rarible.protocol.union.worker.task.search.activity
 
 import com.rarible.core.common.mapAsync
 import com.rarible.core.logging.Logger
@@ -7,17 +7,15 @@ import com.rarible.core.task.TaskRepository
 import com.rarible.core.task.TaskStatus
 import com.rarible.protocol.union.core.elasticsearch.IndexService
 import com.rarible.protocol.union.core.model.EsActivity
-import com.rarible.protocol.union.dto.ActivityTypeDto
-import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
-import com.rarible.protocol.union.worker.task.search.activity.ActivityTaskParam
+import com.rarible.protocol.union.worker.task.search.ParamFactory
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.springframework.stereotype.Component
 
 @Component
-class AliasTask(
+class ChangeEsActivityAliasTask(
     private val taskRepository: TaskRepository,
     private val esActivityRepository: EsActivityRepository,
     private val indexService: IndexService,
@@ -29,15 +27,15 @@ class AliasTask(
     private val entityDefinition = esActivityRepository.entityDefinition
 
     override suspend fun isAbleToRun(param: String): Boolean {
-        val tasks = BlockchainDto.values().zip(ActivityTypeDto.values()).mapAsync { (b, a) ->
-            val taskParam = ActivityTaskParam(b, a, param)
+        val parameter = paramFactory.parse<ChangeEsActivityAliasTaskParam>(param)
+        val tasks = parameter.tasks.mapAsync { taskParam ->
             taskRepository.findByTypeAndParam(
                 EsActivity.ENTITY_DEFINITION.reindexTask,
                 paramFactory.toString(taskParam)
             ).awaitSingleOrNull()
         }.filterNotNull()
 
-        return tasks.isEmpty() || tasks.all { it.lastStatus == TaskStatus.COMPLETED }
+        return tasks.all { it.lastStatus == TaskStatus.COMPLETED }
     }
 
     /**
@@ -52,7 +50,7 @@ class AliasTask(
     }
 
     companion object {
-        const val TYPE = "ALIAS_TASK"
+        const val TYPE = "CHANGE_ES_ACTIVITY_ALIAS_TASK"
         private val logger by Logger()
     }
 }
