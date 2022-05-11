@@ -1,0 +1,64 @@
+{
+  "dynamic": "false",
+  "properties": {
+    "@timestamp": {
+      "type": "date"
+    },
+    "itemId": {
+      "type": "keyword"
+    },
+    "blockchain": {
+      "type": "keyword"
+    },
+    "collection": {
+      "type": "keyword"
+    },
+    "name": {
+      "type": "text",
+      "fields": {
+        "english": {
+          "type": "text",
+          "analyzer": "english"
+        },
+        "keyword": {
+          "type": "keyword"
+        }
+      }
+    },
+    "description": {
+      "type": "text",
+      "fields": {
+        "english": {
+          "type": "text",
+          "analyzer": "english"
+        }
+      }
+    },
+    "owner": {
+      "type": "keyword"
+    },
+    "creators": {
+      "type": "keyword"
+    },
+    "traits": {
+      "properties": {
+          "type": "nested",
+          "properties": {
+            "key": {
+              //TODO
+            },
+            "value": {
+              //TODO
+            }
+          }
+        }
+      }
+    },
+    "mintedAt": {
+      "type": "date"
+    },
+    "lastUpdatedAt": {
+      "type": "date"
+    }
+  }
+}
