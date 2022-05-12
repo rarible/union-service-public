@@ -25,7 +25,7 @@ import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
-import com.rarible.protocol.union.dto.OrderSyncSortDto
+import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.PendingOrderCancelDto
 import com.rarible.protocol.union.dto.PendingOrderDto
 import com.rarible.protocol.union.dto.PendingOrderMatchDto
@@ -254,10 +254,10 @@ class EthOrderConverter(
         }
     }
 
-    fun convert(source: OrderSyncSortDto?): com.rarible.protocol.dto.OrderSyncSortDto? {
+    fun convert(source: SyncSortDto?): com.rarible.protocol.dto.SyncSortDto? {
         return when (source) {
-            OrderSyncSortDto.DB_UPDATE_ASC -> com.rarible.protocol.dto.OrderSyncSortDto.DB_UPDATE_ASC
-            OrderSyncSortDto.DB_UPDATE_DESC -> com.rarible.protocol.dto.OrderSyncSortDto.DB_UPDATE_DESC
+            SyncSortDto.DB_UPDATE_ASC -> com.rarible.protocol.dto.SyncSortDto.DB_UPDATE_ASC
+            SyncSortDto.DB_UPDATE_DESC -> com.rarible.protocol.dto.SyncSortDto.DB_UPDATE_DESC
             else -> null
         }
     }

@@ -12,7 +12,7 @@ import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.OrderIdsDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
-import com.rarible.protocol.union.dto.OrderSyncSortDto
+import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.OrdersDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.UnionAddress
@@ -29,7 +29,6 @@ import com.rarible.protocol.union.dto.parser.IdParser
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
-import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Component
 
 @Component
@@ -142,7 +141,7 @@ class OrderApiService(
         blockchain: BlockchainDto,
         continuation: String?,
         size: Int?,
-        sort: OrderSyncSortDto?
+        sort: SyncSortDto?
     ): OrdersDto {
         val safeSize = PageSize.ORDER.limit(size)
         val result = router.getService(blockchain).getAllSync(continuation, safeSize, sort)

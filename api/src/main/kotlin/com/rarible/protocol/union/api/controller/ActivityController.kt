@@ -2,11 +2,15 @@ package com.rarible.protocol.union.api.controller
 
 import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.api.service.select.ActivitySourceSelectService
+import com.rarible.protocol.union.core.service.ActivityService
+import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.ActivitiesDto
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
+import com.rarible.protocol.union.dto.continuation.page.PageSize
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.RestController
 import java.time.Instant
@@ -14,6 +18,7 @@ import java.time.Instant
 @RestController
 class ActivityController(
     private val activitySourceSelector: ActivitySourceSelectService,
+    private val router: BlockchainRouter<ActivityService>
 ) : ActivityControllerApi {
 
     companion object {
@@ -30,6 +35,22 @@ class ActivityController(
     ): ResponseEntity<ActivitiesDto> {
         logger.info("Got request to get all activities, parameters: $type, $blockchains, $continuation, $cursor, $size, $sort")
         val result = activitySourceSelector.getAllActivities(type, blockchains, continuation, cursor, size, sort)
+        return ResponseEntity.ok(result)
+    }
+
+    override suspend fun getAllActivitiesSync(
+        blockchain: BlockchainDto,
+        continuation: String?,
+        size: Int?,
+        sort: SyncSortDto?
+    ): ResponseEntity<ActivitiesDto> {
+        logger.info("Got request to get all activities sync, parameters: $blockchain, $continuation, $size, $sort")
+        val safeSize = PageSize.ACTIVITY.limit(size)
+        val activitySlice = router.getService(blockchain).getAllActivitiesSync(continuation, safeSize, sort)
+        val result = ActivitiesDto(
+            activities = activitySlice.entities,
+            continuation = activitySlice.continuation
+        )
         return ResponseEntity.ok(result)
     }
 
