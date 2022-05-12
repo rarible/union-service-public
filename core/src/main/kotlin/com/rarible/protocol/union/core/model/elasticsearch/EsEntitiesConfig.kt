@@ -3,6 +3,7 @@ package com.rarible.protocol.union.core.model.elasticsearch
 import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.core.model.EsActivity
 import com.rarible.protocol.union.core.model.EsCollection
+import com.rarible.protocol.union.core.model.EsItem
 import com.rarible.protocol.union.core.model.EsOrder
 import com.rarible.protocol.union.core.model.EsOwnership
 
@@ -13,6 +14,7 @@ object EsEntitiesConfig {
         EsCollection.ENTITY_DEFINITION,
         EsOrder.ENTITY_DEFINITION,
         EsOwnership.ENTITY_DEFINITION,
+        EsItem.ENTITY_DEFINITION
     )
 
     fun prodEsEntities(): List<EntityDefinition> = listOf(
