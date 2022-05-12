@@ -1,15 +1,11 @@
 package com.rarible.protocol.union.worker.task.search.activity
 
-import com.rarible.core.logging.Logger
 import com.rarible.core.task.TaskHandler
-import com.rarible.protocol.union.core.elasticsearch.IndexService
 import com.rarible.protocol.union.core.model.EsActivity
-import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
 import com.rarible.protocol.union.worker.config.ActivityReindexProperties
 import com.rarible.protocol.union.worker.task.search.ParamFactory
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.onCompletion
 
 class ActivityTask(
     private val properties: ActivityReindexProperties,
