@@ -49,7 +49,7 @@
 
         <rarible.protocol.ethereum.version>1.25.3</rarible.protocol.ethereum.version>
         <rarible.protocol.flow.version>2.3.6</rarible.protocol.flow.version>
-        <rarible.protocol.tezos.version>1.0.4</rarible.protocol.tezos.version>
+        <rarible.protocol.tezos.version>1.0.5</rarible.protocol.tezos.version>
         <rarible.protocol.solana.version>0.1.32</rarible.protocol.solana.version>
 
         <rarible.protocol.union.version>1.25.13</rarible.protocol.union.version>
