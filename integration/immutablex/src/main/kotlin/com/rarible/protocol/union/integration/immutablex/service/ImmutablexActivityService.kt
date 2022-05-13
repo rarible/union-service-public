@@ -7,6 +7,7 @@ import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
 import com.rarible.protocol.union.dto.continuation.ActivityContinuation
 import com.rarible.protocol.union.dto.continuation.page.Paging
@@ -57,6 +58,12 @@ class ImmutablexActivityService(
             }
         return Paging(ActivityContinuation.ByLastUpdatedAndIdDesc, result).getSlice(size)
     }
+
+    override suspend fun getAllActivitiesSync(
+        continuation: String?,
+        size: Int,
+        sort: SyncSortDto?
+    ): Slice<ActivityDto> = Slice.empty()
 
     override suspend fun getActivitiesByCollection(
         types: List<ActivityTypeDto>,

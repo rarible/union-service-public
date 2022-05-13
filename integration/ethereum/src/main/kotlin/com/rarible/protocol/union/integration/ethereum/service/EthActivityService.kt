@@ -46,6 +46,7 @@ import com.rarible.protocol.union.dto.ActivityTypeDto.MINT
 import com.rarible.protocol.union.dto.ActivityTypeDto.SELL
 import com.rarible.protocol.union.dto.ActivityTypeDto.TRANSFER
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
 import com.rarible.protocol.union.dto.continuation.ActivityContinuation
 import com.rarible.protocol.union.dto.continuation.page.Paging
@@ -57,8 +58,6 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.reactive.awaitFirst
 import scalether.domain.Address
 import java.time.Instant
-import java.util.Arrays
-import java.util.Collections
 
 open class EthActivityService(
     blockchain: BlockchainDto,
@@ -92,6 +91,37 @@ open class EthActivityService(
             AuctionActivityFilterAllDto(it)
         }
         return getEthereumActivities(nftFilter, orderFilter, auctionFilter, continuation, size, sort)
+    }
+
+    override suspend fun getAllActivitiesSync(
+        continuation: String?,
+        size: Int,
+        sort: SyncSortDto?
+    ) : Slice<ActivityDto> = coroutineScope {
+        val continuationFactory = when (sort) {
+            SyncSortDto.DB_UPDATE_DESC -> ActivityContinuation.ByLastUpdatedSyncAndIdDesc
+            SyncSortDto.DB_UPDATE_ASC, null -> ActivityContinuation.ByLastUpdatedSyncAndIdAsc
+        }
+
+        val ethSort = EthConverter.convert(sort)
+
+        val itemReq = async { activityItemControllerApi.getNftActivitiesSync(continuation, size, ethSort).awaitFirst() }
+        val orderReq = async { activityOrderControllerApi.getOrderActivitiesSync(continuation, size, ethSort).awaitFirst() }
+        val auctionReq = async { activityAuctionControllerApi.getAuctionActivitiesSync(continuation, size, ethSort).awaitFirst() }
+
+        val itemsPage = itemReq.await()
+        val ordersPage = orderReq.await()
+        val auctionsPage = auctionReq.await()
+
+        val itemActivities = itemsPage.items.map { ethActivityConverter.convert(it, blockchain) }
+        val orderActivities = ordersPage.items.map { ethActivityConverter.convert(it, blockchain) }
+        val auctionActivities = auctionsPage.items.map { ethActivityConverter.convert(it, blockchain) }
+        val allActivities = itemActivities + orderActivities + auctionActivities
+
+        Paging(
+            continuationFactory,
+            allActivities
+        ).getSlice(size)
     }
 
     override suspend fun getActivitiesByCollection(
