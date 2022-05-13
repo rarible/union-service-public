@@ -51,7 +51,7 @@ class OrderSourceSelectService(
         size: Int?,
         sort: OrderSyncSortDto?
     ): OrdersDto {
-        return getQuerySource().getAllSync(blockchain, continuation, size, sort)
+        return orderApiService.getAllSync(blockchain, continuation, size, sort)
     }
 
     override suspend fun getSellOrdersByItem(
