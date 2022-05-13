@@ -2,6 +2,9 @@ package com.rarible.protocol.union.core.util
 
 import com.rarible.core.logging.RaribleMDCContext
 import com.rarible.protocol.union.core.model.UnionItem
+import com.rarible.protocol.union.core.service.ItemService
+import com.rarible.protocol.union.core.service.router.BlockchainRouter
+import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -26,17 +29,28 @@ object LogUtils {
     }
 
     @ExperimentalCoroutinesApi
-    suspend fun <T> addToMdc(itemId: ItemIdDto, block: suspend CoroutineScope.() -> T): T {
-        // Works for non-SOLANA items only
-        val pair = itemId.value.split(":")
-        val collection = if (pair.size > 1) pair[0] else ""
-        return addToMdc(
-            listOf(
-                "blockchain" to itemId.blockchain.name,
-                "itemId" to itemId.value,
-                "collection" to collection
-            ), block
-        )
+    suspend fun <T> addToMdc(
+        itemId: ItemIdDto,
+        router: BlockchainRouter<ItemService>,
+        block: suspend CoroutineScope.() -> T
+    ): T {
+        if (itemId.blockchain == BlockchainDto.SOLANA) {
+            return addToMdc(
+                item = router.getService(itemId.blockchain).getItemById(itemId.toString()),
+                block = block
+            )
+        } else {
+            val pair = itemId.value.split(":")
+            val collection = if (pair.size > 1) pair[0] else ""
+            return addToMdc(
+                values = listOf(
+                    "blockchain" to itemId.blockchain.name,
+                    "itemId" to itemId.value,
+                    "collection" to collection
+                ),
+                block = block
+            )
+        }
     }
 
     @ExperimentalCoroutinesApi
