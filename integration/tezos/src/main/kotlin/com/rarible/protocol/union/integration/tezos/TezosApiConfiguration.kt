@@ -39,9 +39,11 @@ import io.r2dbc.spi.ConnectionFactoryOptions
 import io.r2dbc.spi.ConnectionFactoryOptions.DATABASE
 import io.r2dbc.spi.ConnectionFactoryOptions.DRIVER
 import io.r2dbc.spi.ConnectionFactoryOptions.HOST
-import io.r2dbc.spi.ConnectionFactoryOptions.PORT
 import io.r2dbc.spi.ConnectionFactoryOptions.PASSWORD
+import io.r2dbc.spi.ConnectionFactoryOptions.PORT
+import io.r2dbc.spi.ConnectionFactoryOptions.PROTOCOL
 import io.r2dbc.spi.ConnectionFactoryOptions.USER
+import io.r2dbc.spi.Option
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
@@ -67,12 +69,15 @@ class TezosApiConfiguration(
     fun connectionFactory(): ConnectionFactory {
         return ConnectionFactories.get(
             ConnectionFactoryOptions.builder()
-                .option(DRIVER, "postgresql")
+                .option(DRIVER, "pool")
+                .option(PROTOCOL, "postgresql")
                 .option(HOST, pgProperties.host)
                 .option(PORT, pgProperties.port)
                 .option(USER, pgProperties.user)
                 .option(PASSWORD, pgProperties.password)
                 .option(DATABASE, pgProperties.database)
+                .option(Option.valueOf("initialSize"), pgProperties.poolSize.toString())
+                .option(Option.valueOf("maxSize"), pgProperties.poolSize.toString())
                 .build()
         )
     }

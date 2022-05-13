@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.worker.task.search
 
+import com.rarible.core.common.mapAsync
 import com.rarible.core.logging.Logger
 import com.rarible.core.task.Task
 import com.rarible.core.task.TaskRepository
@@ -11,6 +12,8 @@ import com.rarible.protocol.union.core.model.elasticsearch.EsEntity
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.worker.task.search.activity.ActivityTaskParam
+import com.rarible.protocol.union.worker.task.search.activity.ChangeEsActivityAliasTask
+import com.rarible.protocol.union.worker.task.search.activity.ChangeEsActivityAliasTaskParam
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.springframework.stereotype.Component
@@ -37,37 +40,85 @@ class ReindexService(
         }
     }
 
-    suspend fun scheduleActivityReindex(indexName: String): List<Task> {
+    suspend fun scheduleActivityReindex(indexName: String) {
         val blockchains = BlockchainDto.values()
         val types = ActivityTypeDto.values()
-        val tasks = blockchains.zip(types).mapNotNull { (blockchain, type) -> task(blockchain, type, indexName) }
-        return taskRepository.saveAll(tasks).collectList().awaitFirst()
+        val taskParams = blockchains.zip(types).map { (blockchain, type) ->
+            ActivityTaskParam(blockchain, type, indexName)
+        }
+        val tasks = tasks(taskParams)
+        val indexSwitch = indexSwitchTask(taskParams, indexName)
+        taskRepository.saveAll(tasks + indexSwitch).collectList().awaitFirst()
+    }
+
+    private suspend fun tasks(params: List<ActivityTaskParam>): List<Task> {
+        return params.mapAsync {
+            task(it)
+        }.filterNotNull()
     }
 
     private suspend fun task(
-        blockchain: BlockchainDto,
-        type: ActivityTypeDto,
-        index: String
+        param: ActivityTaskParam
     ): Task? {
-        val taskParam = paramFactory.toString(ActivityTaskParam(blockchain, type, index))
+        val taskParamJson = paramFactory.toString(param)
         val taskType = EsActivity.ENTITY_DEFINITION.reindexTask
 
         val existing = taskRepository
-            .findByTypeAndParam(taskType, taskParam)
+            .findByTypeAndParam(taskType, taskParamJson)
             .awaitSingleOrNull()
         return if (existing == null) {
             logger.info(
-                "Scheduling activity reindexing: blockchains={}, type={}, indexName={}",
-                blockchain, type, index
+                "Scheduling activity reindexing with param: {}",
+                param
             )
             Task(
                 type = taskType,
-                param = taskParam,
+                param = taskParamJson,
                 state = null,
                 running = false,
                 lastStatus = TaskStatus.NONE
             )
-        } else null
+        } else {
+            logger.info(
+                "Activity reindexing with param {} already exists with id={}",
+                param, existing.id.toHexString()
+            )
+            null
+        }
+    }
+
+    private suspend fun indexSwitchTask(
+        activityParams: List<ActivityTaskParam>,
+        indexName: String
+    ): List<Task> {
+        val changeEsActivityAliasTaskParam = ChangeEsActivityAliasTaskParam(
+            indexName, activityParams
+        )
+        val taskParamJson = paramFactory.toString(changeEsActivityAliasTaskParam)
+        val taskType = ChangeEsActivityAliasTask.TYPE
+
+        val existing = taskRepository
+            .findByTypeAndParam(taskType, taskParamJson)
+            .awaitSingleOrNull()
+        return if (existing == null) {
+            logger.info(
+                "Scheduling activity index alias switch with param: {}",
+                changeEsActivityAliasTaskParam
+            )
+            listOf(Task(
+                type = taskType,
+                param = taskParamJson,
+                state = null,
+                running = false,
+                lastStatus = TaskStatus.NONE
+            ))
+        } else {
+            logger.info(
+                "Activity index alias switch with param {} already exists with id={}",
+                changeEsActivityAliasTaskParam, existing.id.toHexString()
+            )
+            emptyList()
+        }
     }
 
     companion object {

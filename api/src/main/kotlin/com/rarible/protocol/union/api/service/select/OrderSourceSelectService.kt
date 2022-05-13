@@ -9,7 +9,7 @@ import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdsDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
-import com.rarible.protocol.union.dto.OrderSyncSortDto
+import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.OrdersDto
 import com.rarible.protocol.union.dto.PlatformDto
 import org.springframework.stereotype.Service
@@ -49,7 +49,7 @@ class OrderSourceSelectService(
         blockchain: BlockchainDto,
         continuation: String?,
         size: Int?,
-        sort: OrderSyncSortDto?
+        sort: SyncSortDto?
     ): OrdersDto {
         return getQuerySource().getAllSync(blockchain, continuation, size, sort)
     }

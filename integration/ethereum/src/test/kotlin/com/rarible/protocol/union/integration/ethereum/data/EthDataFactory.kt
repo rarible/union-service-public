@@ -560,7 +560,8 @@ fun randomEthOrderActivityMatch(): OrderActivityMatchDto {
         blockNumber = randomLong(),
         logIndex = randomInt(),
         type = OrderActivityMatchDto.Type.SELL,
-        reverted = false
+        reverted = false,
+        lastUpdatedAt = nowMillis()
     )
 }
 
@@ -575,7 +576,8 @@ fun randomEthOrderBidActivity(): OrderActivityBidDto {
         take = AssetDto(Erc20AssetTypeDto(randomAddress()), randomBigInt(), randomBigDecimal()),
         price = randomBigDecimal(),
         priceUsd = randomBigDecimal(),
-        reverted = false
+        reverted = false,
+        lastUpdatedAt = nowMillis()
     )
 }
 
@@ -589,7 +591,8 @@ fun randomEthAuctionOpenActivity(): AuctionActivityOpenDto {
         blockHash = Word.apply(randomWord()),
         blockNumber = randomLong(),
         logIndex = randomInt(),
-        reverted = false
+        reverted = false,
+        lastUpdatedAt = nowMillis()
     )
 }
 
@@ -603,7 +606,8 @@ fun randomEthAuctionCancelActivity(): AuctionActivityCancelDto {
         blockHash = Word.apply(randomWord()),
         blockNumber = randomLong(),
         logIndex = randomInt(),
-        reverted = false
+        reverted = false,
+        lastUpdatedAt = nowMillis()
     )
 }
 
@@ -617,7 +621,8 @@ fun randomEthAuctionFinishActivity(): AuctionActivityFinishDto {
         blockHash = Word.apply(randomWord()),
         blockNumber = randomLong(),
         logIndex = randomInt(),
-        reverted = false
+        reverted = false,
+        lastUpdatedAt = nowMillis()
     )
 }
 
@@ -638,7 +643,8 @@ fun randomEthAuctionBidActivity(): AuctionActivityBidDto {
             date = Instant.now(),
             status = AuctionBidDto.Status.ACTIVE
         ),
-        reverted = false
+        reverted = false,
+        lastUpdatedAt = nowMillis()
     )
 }
 
@@ -648,7 +654,8 @@ fun randomEthAuctionStartActivity(): AuctionActivityStartDto {
         date = nowMillis(),
         source = AuctionActivityDto.Source.RARIBLE,
         auction = randomEthAuctionDto(),
-        reverted = false
+        reverted = false,
+        lastUpdatedAt = nowMillis()
     )
 }
 
@@ -658,7 +665,8 @@ fun randomEthAuctionEndActivity(): AuctionActivityEndDto {
         date = nowMillis(),
         source = AuctionActivityDto.Source.RARIBLE,
         auction = randomEthAuctionDto(),
-        reverted = false
+        reverted = false,
+        lastUpdatedAt = nowMillis()
     )
 }
 
@@ -673,7 +681,8 @@ fun randomEthOrderListActivity(): OrderActivityListDto {
         take = AssetDto(Erc20AssetTypeDto(randomAddress()), randomBigInt(), randomBigDecimal()),
         price = randomBigDecimal(),
         priceUsd = randomBigDecimal(),
-        reverted = false
+        reverted = false,
+        lastUpdatedAt = nowMillis()
     )
 }
 
@@ -690,7 +699,8 @@ fun randomEthOrderActivityCancelBid(): OrderActivityCancelBidDto {
         hash = Word.apply(randomWord()),
         make = randomEthAssetErc20().assetType,
         take = randomEthAssetErc721().assetType,
-        reverted = false
+        reverted = false,
+        lastUpdatedAt = nowMillis()
     )
 }
 
@@ -707,7 +717,8 @@ fun randomEthOrderActivityCancelList(): OrderActivityCancelListDto {
         hash = Word.apply(randomWord()),
         make = randomEthAssetErc20().assetType,
         take = randomEthAssetErc721().assetType,
-        reverted = false
+        reverted = false,
+        lastUpdatedAt = nowMillis()
     )
 }
 
@@ -723,7 +734,8 @@ fun randomEthItemMintActivity(): MintDto {
         blockHash = Word.apply(randomWord()),
         blockNumber = randomLong(),
         logIndex = randomInt(),
-        reverted = false
+        reverted = false,
+        lastUpdatedAt = nowMillis()
     )
 }
 
@@ -739,7 +751,8 @@ fun randomEthItemBurnActivity(): BurnDto {
         blockHash = Word.apply(randomWord()),
         blockNumber = randomLong(),
         logIndex = randomInt(),
-        reverted = false
+        reverted = false,
+        lastUpdatedAt = nowMillis()
     )
 }
 
@@ -757,7 +770,8 @@ fun randomEthItemTransferActivity(): TransferDto {
         blockNumber = randomLong(),
         logIndex = randomInt(),
         reverted = false,
-        purchase = false
+        purchase = false,
+        lastUpdatedAt = nowMillis()
     )
 }
 

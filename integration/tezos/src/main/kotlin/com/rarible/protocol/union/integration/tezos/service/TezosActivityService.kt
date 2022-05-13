@@ -24,6 +24,7 @@ import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
 import com.rarible.protocol.union.dto.continuation.ActivityContinuation
 import com.rarible.protocol.union.dto.continuation.page.Paging
@@ -65,6 +66,12 @@ open class TezosActivityService(
         }
         return getTezosActivities(nftFilter, orderFilter, continuation, size, sort)
     }
+
+    override suspend fun getAllActivitiesSync(
+        continuation: String?,
+        size: Int,
+        sort: SyncSortDto?
+    ): Slice<ActivityDto> = Slice.empty()
 
     override suspend fun getActivitiesByCollection(
         types: List<ActivityTypeDto>,
@@ -132,12 +139,13 @@ open class TezosActivityService(
             }
         }
 
-        logger.info("Item Activities ids: $itemActivitiesIds")
-        logger.info("Order Activities ids: $orderActivitiesIds")
+        logger.info("Item Activities ids (total ${itemActivitiesIds.size}): $itemActivitiesIds")
+        logger.info("Order Activities ids (total ${orderActivitiesIds.size}): $orderActivitiesIds")
 
         val itemRequest = async {
             if (itemActivitiesIds.isNotEmpty()) {
                 pgService.nftActivities(itemActivitiesIds)
+                    .also { logger.info("Total item activities returned: ${it.items.size}") }
             } else {
                 EMPTY_ITEM_ACTIVITIES
             }
@@ -145,6 +153,7 @@ open class TezosActivityService(
         val orderRequest = async {
             if (orderActivitiesIds.isNotEmpty()) {
                 pgService.orderActivities(orderActivitiesIds)
+                    .also { logger.info("Total order activities returned: ${it.items.size}") }
             } else {
                 EMPTY_ORDER_ACTIVITIES
             }

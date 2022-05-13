@@ -4,7 +4,7 @@ import com.rarible.protocol.union.api.service.OrderQueryService
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
-import com.rarible.protocol.union.dto.OrderSyncSortDto
+import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.OrdersDto
 import com.rarible.protocol.union.dto.PlatformDto
 import org.springframework.stereotype.Service
@@ -25,7 +25,7 @@ class OrderElasticService : OrderQueryService {
         blockchain: BlockchainDto,
         continuation: String?,
         size: Int?,
-        sort: OrderSyncSortDto?
+        sort: SyncSortDto?
     ): OrdersDto {
         // TODO: probably this will return empty result.
         TODO("Not yet implemented")
