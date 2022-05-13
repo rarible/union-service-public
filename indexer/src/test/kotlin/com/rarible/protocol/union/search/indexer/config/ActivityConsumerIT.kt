@@ -23,6 +23,7 @@ import org.elasticsearch.index.query.QueryBuilders.matchQuery
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder
+import java.time.Duration
 import java.time.Instant
 
 @IntegrationTest
@@ -73,7 +74,7 @@ class ActivityConsumerIT {
                 .build()
             val actual = repository.search(searchQuery)
             assertThat(actual.activities).isNotEmpty
-            assertThat(actual.activities.first().userTo).isEqualToIgnoringCase(activity.owner.value)
+            assertThat(actual.activities.first().date).isEqualTo(activity.date)
         }
     }
 }

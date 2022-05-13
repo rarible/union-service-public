@@ -12,7 +12,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
-import com.rarible.protocol.union.dto.OrderSyncSortDto
+import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.integration.flow.converter.FlowConverter
@@ -45,7 +45,7 @@ open class FlowOrderService(
     override suspend fun getAllSync(
         continuation: String?,
         size: Int,
-        sort: OrderSyncSortDto?
+        sort: SyncSortDto?
     ): Slice<OrderDto> {
         return Slice.empty()
     }

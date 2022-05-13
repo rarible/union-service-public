@@ -8,6 +8,7 @@ import com.rarible.protocol.union.dto.ActivitiesDto
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
 import org.springframework.stereotype.Service
 import java.time.Instant
@@ -28,6 +29,15 @@ class ActivitySourceSelectService(
         sort: ActivitySortDto?
     ): ActivitiesDto {
         return getQuerySource().getAllActivities(type, blockchains, continuation, cursor, size, sort)
+    }
+
+    override suspend fun getAllActivitiesSync(
+        blockchain: BlockchainDto,
+        continuation: String?,
+        size: Int?,
+        sort: SyncSortDto?
+    ): ActivitiesDto {
+        return activityApiMergeService.getAllActivitiesSync(blockchain, continuation, size, sort)
     }
 
     override suspend fun getActivitiesByCollection(

@@ -38,6 +38,7 @@ import com.rarible.protocol.union.dto.RaribleAuctionV1BidDataV1Dto
 import com.rarible.protocol.union.dto.RaribleAuctionV1BidV1Dto
 import com.rarible.protocol.union.dto.RaribleAuctionV1DataV1Dto
 import com.rarible.protocol.union.dto.RoyaltyDto
+import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.UnionAddress
 import io.daonomic.rpc.domain.Binary
 import io.daonomic.rpc.domain.Word
@@ -75,6 +76,14 @@ object EthConverter {
 
     fun convert(source: Address, blockchain: BlockchainDto): UnionAddress {
         return UnionAddressConverter.convert(blockchain, convert(source))
+    }
+
+    fun convert(source: SyncSortDto?): com.rarible.protocol.dto.SyncSortDto {
+        return when (source) {
+            null -> com.rarible.protocol.dto.SyncSortDto.DB_UPDATE_ASC
+            SyncSortDto.DB_UPDATE_ASC -> com.rarible.protocol.dto.SyncSortDto.DB_UPDATE_ASC
+            SyncSortDto.DB_UPDATE_DESC -> com.rarible.protocol.dto.SyncSortDto.DB_UPDATE_DESC
+        }
     }
 
     fun convert(source: ActivitySortDto?): com.rarible.protocol.dto.ActivitySortDto {
