@@ -4,6 +4,7 @@ import com.rarible.protocol.union.dto.ActivitiesDto
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
 import java.time.Instant
 
@@ -16,6 +17,13 @@ interface ActivityQueryService {
         cursor: String?,
         size: Int?,
         sort: ActivitySortDto?
+    ): ActivitiesDto
+
+    suspend fun getAllActivitiesSync(
+        blockchain: BlockchainDto,
+        continuation: String?,
+        size: Int?,
+        sort: SyncSortDto?
     ): ActivitiesDto
 
     suspend fun getActivitiesByCollection(

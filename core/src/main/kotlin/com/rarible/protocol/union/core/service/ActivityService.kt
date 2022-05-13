@@ -5,6 +5,7 @@ import com.rarible.protocol.union.core.service.router.BlockchainService
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
+import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import java.time.Instant
@@ -16,6 +17,12 @@ interface ActivityService : BlockchainService {
         continuation: String?,
         size: Int,
         sort: ActivitySortDto?
+        ): Slice<ActivityDto>
+
+    suspend fun getAllActivitiesSync(
+        continuation: String?,
+        size: Int,
+        sort: SyncSortDto?
     ): Slice<ActivityDto>
 
     suspend fun getActivitiesByCollection(
