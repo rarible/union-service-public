@@ -16,6 +16,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
 import com.rarible.protocol.union.core.model.EsActivityLite
 import com.rarible.protocol.union.core.model.EsActivitySort
+import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
 import org.springframework.stereotype.Service
@@ -53,6 +54,15 @@ class ActivityElasticService(
             cursor = queryResult.cursor,
             activities = activities
         )
+    }
+
+    override suspend fun getAllActivitiesSync(
+        blockchain: BlockchainDto,
+        continuation: String?,
+        size: Int?,
+        sort: SyncSortDto?
+    ): ActivitiesDto {
+        throw UnsupportedOperationException("Operation is not supported for Elastic Search")
     }
 
     override suspend fun getActivitiesByCollection(
