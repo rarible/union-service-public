@@ -5,7 +5,7 @@ import com.rarible.protocol.union.dto.AssetTypeDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
-import com.rarible.protocol.union.dto.OrderSyncSortDto
+import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
 
@@ -33,7 +33,7 @@ class OrderProxyService(
     override suspend fun getAllSync(
         continuation: String?,
         size: Int,
-        sort: OrderSyncSortDto?
+        sort: SyncSortDto?
     ): Slice<OrderDto> {
         return orderService.getAllSync(
             continuation,

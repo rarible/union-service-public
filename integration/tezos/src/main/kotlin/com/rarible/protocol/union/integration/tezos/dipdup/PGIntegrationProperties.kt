@@ -10,5 +10,6 @@ data class PGIntegrationProperties(
     val port: Int,
     val user: String,
     val password: String,
-    val database: String
+    val database: String,
+    val poolSize: Int = 10
 )

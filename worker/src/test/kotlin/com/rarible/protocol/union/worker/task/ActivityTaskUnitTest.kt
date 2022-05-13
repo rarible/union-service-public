@@ -23,32 +23,10 @@ import org.junit.jupiter.api.Test
 
 class ActivityTaskUnitTest {
 
-    val service = mockk<ActivityReindexService> {
+    private val service = mockk<ActivityReindexService> {
         coEvery {
             reindex(any(), any(), "activity_test_index", any())
         } returns flowOf("next_cursor")
-    }
-
-    val repository = mockk<EsActivityRepository> {
-        every {
-            entityDefinition
-        } returns EntityDefinitionExtended(
-            entity = EsActivity.ENTITY_DEFINITION.entity,
-            mapping = EsActivity.ENTITY_DEFINITION.mapping,
-            versionData = EsActivity.ENTITY_DEFINITION.versionData,
-            indexRootName = "activity_test_index",
-            aliasName = "activity",
-            writeAliasName = "activity",
-            settings = EsActivity.ENTITY_DEFINITION.settings
-        )
-
-        coEvery { refresh() } returns Unit
-    }
-
-    val indexService = mockk<IndexService> {
-        coEvery {
-            finishIndexing(any(), any())
-        } returns Unit
     }
 
     @Test
@@ -61,8 +39,6 @@ class ActivityTaskUnitTest {
                 ),
                 ParamFactory(jacksonObjectMapper().registerKotlinModule()),
                 service,
-                repository,
-                indexService
             )
 
             task.runLongTask(
@@ -84,9 +60,7 @@ class ActivityTaskUnitTest {
                 blockchains = listOf(BlockchainReindexProperties(enabled = true, BlockchainDto.ETHEREUM))
             ),
             ParamFactory(jacksonObjectMapper().registerKotlinModule()),
-            service,
-            repository,
-            indexService
+            service
         )
 
         task.runLongTask(

@@ -78,10 +78,11 @@ class IndexService(
     }
 
     suspend fun finishIndexing(newIndexName: String, definition: EntityDefinitionExtended) {
-        val realIndexName = getRealName(reactiveElasticSearchOperations, definition.aliasName)
+        val alias = definition.aliasName
+        val realIndexName = getRealName(reactiveElasticSearchOperations, alias)
             ?: throw IllegalStateException("Index not found")
         if (realIndexName != newIndexName) {
-            moveAlias(reactiveElasticSearchOperations, definition.aliasName, realIndexName, newIndexName)
+            moveAlias(reactiveElasticSearchOperations, alias, realIndexName, newIndexName)
         }
         updateMetadata(definition)
     }

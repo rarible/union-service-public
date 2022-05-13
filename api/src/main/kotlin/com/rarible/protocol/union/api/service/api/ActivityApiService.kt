@@ -9,6 +9,7 @@ import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
 import com.rarible.protocol.union.dto.continuation.ActivityContinuation
 import com.rarible.protocol.union.dto.continuation.CombinedContinuation
@@ -70,6 +71,26 @@ class ActivityApiService(
             slicesCounter
         )
         return result
+    }
+
+    override suspend fun getAllActivitiesSync(
+        blockchain: BlockchainDto,
+        continuation: String?,
+        size: Int?,
+        sort: SyncSortDto?
+    ): ActivitiesDto {
+        val safeSize = PageSize.ACTIVITY.limit(size)
+        val activitySlice = router.getService(blockchain).getAllActivitiesSync(continuation, safeSize, sort)
+        val dto = ActivitiesDto(
+            activities = activitySlice.entities,
+            continuation = activitySlice.continuation
+        )
+        logger.info(
+            "Response for getActivitiesByCollection(type={}, collection={}, continuation={}, size={}, sort={}): " +
+                    "Slice(size={}, continuation={}) ",
+            continuation, size, sort, dto.activities.size, dto.continuation
+        )
+        return dto
     }
 
     override suspend fun getActivitiesByCollection(

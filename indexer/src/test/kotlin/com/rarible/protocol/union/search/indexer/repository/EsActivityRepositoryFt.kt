@@ -8,14 +8,12 @@ import com.rarible.protocol.union.enrichment.repository.search.EsActivityReposit
 import com.rarible.protocol.union.enrichment.test.data.randomEsActivity
 import com.rarible.protocol.union.search.indexer.test.IntegrationTest
 import kotlinx.coroutines.runBlocking
-import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.elasticsearch.index.query.BoolQueryBuilder
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery
-import org.springframework.data.elasticsearch.core.query.Query
 import org.springframework.test.context.ContextConfiguration
 import randomInstant
 import kotlin.random.Random.Default.nextLong
