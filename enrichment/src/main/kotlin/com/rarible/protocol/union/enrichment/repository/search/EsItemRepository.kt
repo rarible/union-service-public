@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.enrichment.repository.search
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.apm.SpanType
 import com.rarible.protocol.union.core.elasticsearch.EsNameResolver
@@ -7,11 +8,16 @@ import com.rarible.protocol.union.core.model.ElasticItemFilter
 import com.rarible.protocol.union.core.model.EsItem
 import com.rarible.protocol.union.core.model.EsItemQueryResult
 import com.rarible.protocol.union.core.model.EsItemSort
+import com.rarible.protocol.union.dto.continuation.page.ArgSlice
 import com.rarible.protocol.union.dto.continuation.page.PageSize
 import com.rarible.protocol.union.enrichment.repository.search.internal.EsItemBuilderService
+import com.rarible.protocol.union.enrichment.repository.search.internal.EsItemQuerySortService
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.elasticsearch.action.admin.indices.refresh.RefreshRequest
+import org.elasticsearch.action.search.SearchRequest
+import org.elasticsearch.search.builder.SearchSourceBuilder
+import org.springframework.data.elasticsearch.client.reactive.ReactiveElasticsearchClient
 import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery
@@ -22,8 +28,11 @@ import java.io.IOException
 @Component
 @CaptureSpan(type = SpanType.DB)
 class EsItemRepository(
+    private val objectMapper: ObjectMapper,
+    private val client: ReactiveElasticsearchClient,
     private val esOperations: ReactiveElasticsearchOperations,
     private val esItemBuilderService: EsItemBuilderService,
+    private val esItemQuerySortService: EsItemQuerySortService,
     esNameResolver: EsNameResolver
 ) {
     val entityDefinition = esNameResolver.createEntityDefinitionExtended(EsItem.ENTITY_DEFINITION)
@@ -71,27 +80,47 @@ class EsItemRepository(
         sort: EsItemSort,
         limit: Int?
     ): EsItemQueryResult {
-        val query = esItemBuilderService.build(filter, sort)
-        query.maxResults = PageSize.ITEM.limit(limit)
+        val boolQuery = esItemBuilderService.build2(filter)
+        val sourceBuilder = SearchSourceBuilder().query(boolQuery).size(PageSize.ITEM.limit(limit))
+        esItemQuerySortService.applySort(sourceBuilder, sort)
+        filter.cursor?.let { sourceBuilder.searchAfter(arrayOf(it)) }
 
-        return search(query)
-    }
+        val searchResponse = client.searchForResponse(
+            SearchRequest().indices(entityDefinition.searchIndexCoordinates.indexName)
+                .source(sourceBuilder)
+        ).awaitFirst()
 
-    suspend fun search(query: NativeSearchQuery): EsItemQueryResult {
-        val items = esOperations.search(query, EsItem::class.java, entityDefinition.searchIndexCoordinates)
-            .collectList()
-            .awaitFirst()
-            .map { it.content }
+        val hits = searchResponse.hits
+        val items = hits.hits.map { objectMapper.readValue(it.sourceAsString, EsItem::class.java) }
 
-        val cursor = if (items.isEmpty()) {
-            null
-        } else {
-            items.last().itemId
-        }
+        val continuationString = if ((hits.lastOrNull()?.sortValues?.size ?: 0) > 0) {
+            objectMapper.writeValueAsString(
+                hits.last().sortValues.toList()
+            )
+        } else ArgSlice.COMPLETED
 
         return EsItemQueryResult(
             items = items,
-            cursor = cursor
+            continuation = continuationString
+        )
+    }
+
+    suspend fun search(query: NativeSearchQuery): EsItemQueryResult {
+
+        val hits = esOperations.search(query, EsItem::class.java, entityDefinition.searchIndexCoordinates)
+            .collectList()
+            .awaitFirst()
+        val items = hits.map { it.content }
+
+        val continuationString = if (hits.last().sortValues.size > 0) {
+            objectMapper.writeValueAsString(
+                hits.last().sortValues.toList()
+            )
+        } else ArgSlice.COMPLETED
+
+        return EsItemQueryResult(
+            items = items,
+            continuation = continuationString
         )
     }
 
