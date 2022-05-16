@@ -7,6 +7,7 @@ import com.rarible.protocol.union.core.continuation.UnionItemContinuation
 import com.rarible.protocol.union.core.converter.ItemOwnershipConverter
 import com.rarible.protocol.union.core.exception.UnionNotFoundException
 import com.rarible.protocol.union.core.model.UnionImageProperties
+import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.UnionMetaContent
 import com.rarible.protocol.union.core.model.UnionVideoProperties
@@ -16,6 +17,7 @@ import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.core.util.LogUtils
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemDto
+import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.ItemIdsDto
 import com.rarible.protocol.union.dto.ItemWithOwnershipDto
 import com.rarible.protocol.union.dto.ItemsDto
@@ -165,7 +167,7 @@ class ItemController(
         val fullItemId = IdParser.parseItemId(itemId)
         val safeSync = sync ?: false
 
-        LogUtils.addToMdc(fullItemId) {
+        LogUtils.addToMdc(fullItemId, router) {
             logger.info("Refreshing item meta for $itemId (sync=$safeSync)")
         }
 
