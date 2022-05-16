@@ -19,14 +19,14 @@ class IndexerMetricFactory(
         return object : LongGaugeMetric(
             name = "${properties.metrics.rootPath}.event.delay",
             tag(ENTITY_TAG, entity.entityName),
-            tag(BLOCKCHAIN_TAG, blockchain.name)
+            tag(BLOCKCHAIN_TAG, blockchain.name.lowercase())
         ){}.bind(meterRegistry)
     }
 
     fun createEventHandlerCountMetric(entity: EsEntity, blockchain: BlockchainDto): Counter {
         return Counter.builder("${properties.metrics.rootPath}.event.income")
             .tag(ENTITY_TAG, entity.entityName)
-            .tag(BLOCKCHAIN_TAG, blockchain.name)
+            .tag(BLOCKCHAIN_TAG, blockchain.name.lowercase())
             .register(meterRegistry)
     }
 
