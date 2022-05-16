@@ -9,3 +9,17 @@ protocol-union-api:
 
 protocol-union-meta-loader:
   replicas: 3
+
+protocol-union-indexer:
+  replicas: 3
+  resources:
+    jvm:
+      xmx_megabytes: 256
+      max_direct_memory_megabytes: 128
+
+protocol-union-worker:
+  replicas: 1
+  resources:
+    jvm:
+      xmx_megabytes: 256
+      max_direct_memory_megabytes: 128

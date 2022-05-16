@@ -5,6 +5,7 @@ import com.rarible.protocol.union.core.model.EsActivitySort
 import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
 import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
 import com.rarible.protocol.union.enrichment.repository.search.internal.EsActivityQueryCursorService
+import com.rarible.protocol.union.enrichment.test.data.info
 import com.rarible.protocol.union.enrichment.test.data.randomEsActivity
 import com.rarible.protocol.union.search.indexer.test.IntegrationTest
 import kotlinx.coroutines.runBlocking
@@ -59,9 +60,9 @@ internal class EsActivityQueryCursorServiceIntegrationTest {
 
         // then
         if (latestFirst) {
-            assertThat(actual.activities).containsExactlyInAnyOrder(lte1)
+            assertThat(actual.activities).containsExactlyInAnyOrder(lte1.info)
         } else {
-            assertThat(actual.activities).containsExactlyInAnyOrder(gte1)
+            assertThat(actual.activities).containsExactlyInAnyOrder(gte1.info)
         }
     }
 
@@ -103,9 +104,9 @@ internal class EsActivityQueryCursorServiceIntegrationTest {
 
         // then
         if (latestFirst) {
-            assertThat(actual.activities).containsExactlyInAnyOrder(lte1, lte2)
+            assertThat(actual.activities).containsExactlyInAnyOrder(lte1.info, lte2.info)
         } else {
-            assertThat(actual.activities).containsExactlyInAnyOrder(gte1, gte2)
+            assertThat(actual.activities).containsExactlyInAnyOrder(gte1.info, gte2.info)
         }
     }
 
@@ -151,9 +152,9 @@ internal class EsActivityQueryCursorServiceIntegrationTest {
 
         // then
         if (latestFirst) {
-            assertThat(actual.activities).containsExactlyInAnyOrder(lte1, lte2)
+            assertThat(actual.activities).containsExactlyInAnyOrder(lte1.info, lte2.info)
         } else {
-            assertThat(actual.activities).containsExactlyInAnyOrder(gte1, gte2)
+            assertThat(actual.activities).containsExactlyInAnyOrder(gte1.info, gte2.info)
         }
     }
 
@@ -203,9 +204,9 @@ internal class EsActivityQueryCursorServiceIntegrationTest {
 
         // then
         if (latestFirst) {
-            assertThat(actual.activities).containsExactlyInAnyOrder(lte1, lte2)
+            assertThat(actual.activities).containsExactlyInAnyOrder(lte1.info, lte2.info)
         } else {
-            assertThat(actual.activities).containsExactlyInAnyOrder(gte1, gte2)
+            assertThat(actual.activities).containsExactlyInAnyOrder(gte1.info, gte2.info)
         }
     }
 
@@ -255,9 +256,9 @@ internal class EsActivityQueryCursorServiceIntegrationTest {
 
         // then
         if (latestFirst) {
-            assertThat(actual.activities).containsExactlyInAnyOrder(lte1, lte2)
+            assertThat(actual.activities).containsExactlyInAnyOrder(lte1.info, lte2.info)
         } else {
-            assertThat(actual.activities).containsExactlyInAnyOrder(gte1) // gte2 excluded because cursor points to it
+            assertThat(actual.activities).containsExactlyInAnyOrder(gte1.info) // gte2 excluded because cursor points to it
         }
     }
 

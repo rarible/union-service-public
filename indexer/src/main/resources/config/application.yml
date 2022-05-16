@@ -32,6 +32,16 @@ rarible:
       annotation:
         enabled: true
 
+handler:
+  activity:
+    enabled: ${consul.indexer.activity.enabled:true}
+  collection:
+    enabled: ${consul.indexer.collection.enabled:false}
+  order:
+    enabled: ${consul.indexer.order.enabled:false}
+  ownership:
+    enabled: ${consul.indexer.ownership.enabled:false}
+
 listener:
   consumer:
     broker-replica-set: ${kafka.hosts}

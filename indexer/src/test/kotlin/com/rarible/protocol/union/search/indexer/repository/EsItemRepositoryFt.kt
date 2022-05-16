@@ -1,11 +1,11 @@
 package com.rarible.protocol.union.search.indexer.repository
 
-import com.rarible.protocol.union.dto.ActivityTypeDto
+import com.rarible.protocol.union.core.model.EsItem
+import com.rarible.protocol.union.core.model.EsTrait
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.core.model.EsActivity
 import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
-import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
-import com.rarible.protocol.union.enrichment.test.data.randomEsActivity
+import com.rarible.protocol.union.enrichment.repository.search.EsItemRepository
+import com.rarible.protocol.union.enrichment.test.data.randomEsItem
 import com.rarible.protocol.union.search.indexer.test.IntegrationTest
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
@@ -15,37 +15,42 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery
 import org.springframework.test.context.ContextConfiguration
-import randomInstant
-import kotlin.random.Random.Default.nextLong
+import java.time.Instant
 
 @IntegrationTest
 @EnableAutoConfiguration
 @ContextConfiguration(classes = [SearchConfiguration::class])
-internal class EsActivityRepositoryFt {
+internal class EsItemRepositoryFt {
 
     @Autowired
-    protected lateinit var repository: EsActivityRepository
+    protected lateinit var repository: EsItemRepository
 
     @Test
     fun `should save and read`(): Unit = runBlocking {
-        val activity = EsActivity(
-            "1234", randomInstant(), 1, 0, salt = nextLong(), BlockchainDto.ETHEREUM, ActivityTypeDto.BURN,
-            "0x01",
-            null,
-            "0x02",
-            "0x03",
+
+        val esItem = EsItem(
+            itemId = "0x03",
+            blockchain = BlockchainDto.ETHEREUM,
+            collection = "0x02",
+            name = "TestItem",
+            description = "description",
+            traits = listOf(EsTrait("long", "10"), EsTrait("test", "eye")),
+            creators = listOf("0x01"),
+            owner = "0x05",
+            mintedAt = Instant.now(),
+            lastUpdatedAt = Instant.now()
         )
 
-        val id = repository.save(activity).activityId
+        val id = repository.save(esItem).itemId
         val found = repository.findById(id)
-        assertThat(found).isEqualTo(activity)
+        assertThat(found).isEqualTo(esItem)
     }
 
     @Test
-    fun `should be able to search up to 1000 activities`(): Unit = runBlocking {
+    fun `should be able to search up to 1000 items`(): Unit = runBlocking {
         // given
-        val activities = List(1000) { randomEsActivity() }
-        repository.saveAll(activities)
+        val items = List(1000) { randomEsItem() }
+        repository.saveAll(items)
 
         // when
         val query = NativeSearchQuery(BoolQueryBuilder())
@@ -53,6 +58,6 @@ internal class EsActivityRepositoryFt {
         val actual = repository.search(query)
 
         // then
-        assertThat(actual.activities).hasSize(1000)
+        assertThat(actual.items).hasSize(1000)
     }
 }
