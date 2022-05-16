@@ -18,15 +18,20 @@ class IndexerMetricFactory(
     fun createEventHandlerDelayMetric(entity: EsEntity, blockchain: BlockchainDto): RegisteredGauge<Long> {
         return object : LongGaugeMetric(
             name = "${properties.metrics.rootPath}.event.delay",
-            tag("entity", entity.entityName),
-            tag("blockchain", blockchain.name)
+            tag(ENTITY_TAG, entity.entityName),
+            tag(BLOCKCHAIN_TAG, blockchain.name.lowercase())
         ){}.bind(meterRegistry)
     }
 
     fun createEventHandlerCountMetric(entity: EsEntity, blockchain: BlockchainDto): Counter {
-        return Counter.builder("${properties.metrics.rootPath}.event.count")
-            .tag("entity", entity.entityName)
-            .tag("blockchain", blockchain.name)
+        return Counter.builder("${properties.metrics.rootPath}.event.income")
+            .tag(ENTITY_TAG, entity.entityName)
+            .tag(BLOCKCHAIN_TAG, blockchain.name.lowercase())
             .register(meterRegistry)
+    }
+
+    private companion object {
+        const val ENTITY_TAG = "entity"
+        const val BLOCKCHAIN_TAG = "blockchain"
     }
 }
