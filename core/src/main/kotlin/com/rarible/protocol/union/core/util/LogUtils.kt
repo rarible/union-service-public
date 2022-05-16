@@ -34,23 +34,38 @@ object LogUtils {
         router: BlockchainRouter<ItemService>,
         block: suspend CoroutineScope.() -> T
     ): T {
-        if (itemId.blockchain == BlockchainDto.SOLANA) {
-            return addToMdc(
-                item = router.getService(itemId.blockchain).getItemById(itemId.toString()),
-                block = block
-            )
+        val collection = if (itemId.blockchain == BlockchainDto.SOLANA) {
+            getSolanaCollection(itemId, router)
         } else {
-            val pair = itemId.value.split(":")
-            val collection = if (pair.size > 1) pair[0] else ""
-            return addToMdc(
-                values = listOf(
-                    "blockchain" to itemId.blockchain.name,
-                    "itemId" to itemId.value,
-                    "collection" to collection
-                ),
-                block = block
-            )
+            getCollection(itemId)
         }
+
+        return addToMdc(
+            values = listOf(
+                "blockchain" to itemId.blockchain.name,
+                "itemId" to itemId.value,
+                "collection" to collection
+            ),
+            block = block
+        )
+    }
+
+    private suspend fun getSolanaCollection(
+        itemId: ItemIdDto,
+        router: BlockchainRouter<ItemService>
+    ): String =
+        try {
+            router
+                .getService(itemId.blockchain)
+                .getItemById(itemId.toString())
+                .collection.toString()
+        } catch (e: NoSuchElementException) {
+            ""
+        }
+
+    private fun getCollection(itemId: ItemIdDto): String {
+        val pair = itemId.value.split(":")
+        return if (pair.size > 1) pair[0] else ""
     }
 
     @ExperimentalCoroutinesApi
