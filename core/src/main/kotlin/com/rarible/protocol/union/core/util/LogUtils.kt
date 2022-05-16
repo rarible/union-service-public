@@ -10,6 +10,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.withContext
 import org.slf4j.MDC
+import org.springframework.http.HttpStatus
+import org.springframework.web.reactive.function.client.WebClientResponseException
 
 object LogUtils {
 
@@ -58,9 +60,13 @@ object LogUtils {
             router
                 .getService(itemId.blockchain)
                 .getItemById(itemId.toString())
-                .collection.toString()
-        } catch (e: NoSuchElementException) {
-            ""
+                .collection?.value ?: ""
+        } catch (e: WebClientResponseException) {
+            if (e.statusCode == HttpStatus.NOT_FOUND) {
+                ""
+            } else {
+                throw e
+            }
         }
 
     private fun getCollection(itemId: ItemIdDto): String {
