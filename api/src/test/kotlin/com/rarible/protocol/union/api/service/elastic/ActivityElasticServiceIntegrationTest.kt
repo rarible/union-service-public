@@ -2,9 +2,11 @@ package com.rarible.protocol.union.api.service.elastic
 
 import com.ninjasquad.springmockk.MockkBean
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
+import com.rarible.protocol.union.core.elasticsearch.repository.EsActivityRepository
 import com.rarible.protocol.union.core.model.TypedActivityId
 import com.rarible.protocol.union.core.service.ActivityService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
+import com.rarible.protocol.union.core.test.randomEsActivity
 import com.rarible.protocol.union.dto.ActivityIdDto
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
@@ -13,8 +15,6 @@ import com.rarible.protocol.union.dto.UserActivityTypeDto
 import com.rarible.protocol.union.enrichment.test.data.randomUnionActivityMint
 import com.rarible.protocol.union.enrichment.test.data.randomUnionActivityOrderList
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
-import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
-import com.rarible.protocol.union.enrichment.test.data.randomEsActivity
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.impl.annotations.MockK

@@ -40,7 +40,7 @@
         </dependency>
         <dependency>
             <groupId>com.rarible.protocol.union</groupId>
-            <artifactId>rarible-union-enrichment</artifactId>
+            <artifactId>rarible-union-core</artifactId>
 
             <exclusions>
                 <exclusion>
@@ -80,13 +80,6 @@
         <dependency>
             <groupId>com.rarible.protocol.union</groupId>
             <artifactId>rarible-union-core</artifactId>
-            <classifier>tests</classifier>
-            <type>test-jar</type>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.rarible.protocol.union</groupId>
-            <artifactId>rarible-union-enrichment</artifactId>
             <classifier>tests</classifier>
             <type>test-jar</type>
             <scope>test</scope>

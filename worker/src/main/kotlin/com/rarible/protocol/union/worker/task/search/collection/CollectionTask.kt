@@ -6,7 +6,7 @@ import com.rarible.protocol.union.core.converter.EsCollectionConverter
 import com.rarible.protocol.union.core.model.EsCollection
 import com.rarible.protocol.union.dto.continuation.page.PageSize
 import com.rarible.protocol.union.dto.parser.IdParser
-import com.rarible.protocol.union.enrichment.repository.search.EsCollectionRepository
+import com.rarible.protocol.union.core.elasticsearch.repository.EsCollectionRepository
 import com.rarible.protocol.union.worker.config.CollectionReindexProperties
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow

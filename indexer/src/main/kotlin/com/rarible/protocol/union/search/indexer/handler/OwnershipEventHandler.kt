@@ -6,7 +6,7 @@ import com.rarible.protocol.union.core.converter.EsOwnershipConverter
 import com.rarible.protocol.union.dto.OwnershipDeleteEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.dto.OwnershipUpdateEventDto
-import com.rarible.protocol.union.enrichment.repository.search.EsOwnershipRepository
+import com.rarible.protocol.union.core.elasticsearch.repository.EsOwnershipRepository
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope

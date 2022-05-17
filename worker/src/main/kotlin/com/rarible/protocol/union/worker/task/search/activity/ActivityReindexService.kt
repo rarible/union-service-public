@@ -6,7 +6,7 @@ import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.continuation.page.PageSize
-import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
+import com.rarible.protocol.union.core.elasticsearch.repository.EsActivityRepository
 import com.rarible.protocol.union.worker.metrics.SearchTaskMetricFactory
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow

@@ -7,7 +7,7 @@ import com.rarible.core.task.TaskRepository
 import com.rarible.core.task.TaskStatus
 import com.rarible.protocol.union.core.elasticsearch.IndexService
 import com.rarible.protocol.union.core.model.EsActivity
-import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
+import com.rarible.protocol.union.core.elasticsearch.repository.EsActivityRepository
 import com.rarible.protocol.union.worker.task.search.ParamFactory
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow

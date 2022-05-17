@@ -1,10 +1,15 @@
+package com.rarible.protocol.union.core.test
+
 import com.rarible.core.test.data.randomBigDecimal
 import com.rarible.core.test.data.randomBigInt
 import com.rarible.core.test.data.randomBoolean
 import com.rarible.core.test.data.randomInt
 import com.rarible.core.test.data.randomLong
 import com.rarible.core.test.data.randomString
+import com.rarible.protocol.union.core.model.EsActivity
+import com.rarible.protocol.union.core.model.EsActivityLite
 import com.rarible.protocol.union.core.model.EsOwnership
+import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.AssetDto
 import com.rarible.protocol.union.dto.AssetTypeDto
 import com.rarible.protocol.union.dto.AuctionBidDto
@@ -205,3 +210,19 @@ fun randomEsOwnership(
     randomBigInt().toString(),
     randomInstant(),
 )
+
+fun randomEsActivity() = EsActivity(
+    activityId = randomString(),
+    date = Instant.now(),
+    blockNumber = randomLong(),
+    logIndex = randomInt(),
+    blockchain = BlockchainDto.values().random(),
+    type = ActivityTypeDto.values().random(),
+    userFrom = randomString(),
+    userTo = randomString(),
+    collection = randomString(),
+    item = randomString(),
+)
+
+val EsActivity.info: EsActivityLite
+    get() = EsActivityLite(activityId, blockchain, type, date, blockNumber, logIndex, salt)

@@ -2,19 +2,14 @@ package com.rarible.protocol.union.worker.task
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
-import com.rarible.protocol.union.core.elasticsearch.IndexService
-import com.rarible.protocol.union.core.model.EsActivity
-import com.rarible.protocol.union.core.model.elasticsearch.EntityDefinitionExtended
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
 import com.rarible.protocol.union.worker.config.*
 import com.rarible.protocol.union.worker.task.search.ParamFactory
 import com.rarible.protocol.union.worker.task.search.activity.ActivityReindexService
 import com.rarible.protocol.union.worker.task.search.activity.ActivityTask
 import io.mockk.coEvery
 import io.mockk.coVerify
-import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.toList

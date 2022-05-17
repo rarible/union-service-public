@@ -7,7 +7,7 @@ import com.rarible.protocol.union.core.model.EsOrder
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.continuation.page.PageSize
 import com.rarible.protocol.union.dto.parser.IdParser
-import com.rarible.protocol.union.enrichment.repository.search.EsOrderRepository
+import com.rarible.protocol.union.core.elasticsearch.repository.EsOrderRepository
 import com.rarible.protocol.union.worker.config.OrderReindexProperties
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow

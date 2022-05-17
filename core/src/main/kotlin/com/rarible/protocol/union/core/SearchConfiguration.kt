@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.enrichment.configuration
+package com.rarible.protocol.union.core
 
 import com.rarible.protocol.union.core.elasticsearch.EsMetadataRepository
 import com.rarible.protocol.union.core.elasticsearch.EsNameResolver

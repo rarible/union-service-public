@@ -2,7 +2,7 @@ package com.rarible.protocol.union.search.indexer.repository
 
 import com.rarible.protocol.union.core.elasticsearch.EsMetadataRepository
 import com.rarible.protocol.union.core.model.EsMetadata
-import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
+import com.rarible.protocol.union.core.SearchConfiguration
 import com.rarible.protocol.union.search.indexer.test.IntegrationTest
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat

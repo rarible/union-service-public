@@ -4,7 +4,7 @@ import com.rarible.core.daemon.sequential.ConsumerBatchEventHandler
 import com.rarible.protocol.union.core.converter.EsCollectionConverter
 import com.rarible.protocol.union.dto.CollectionEventDto
 import com.rarible.protocol.union.dto.CollectionUpdateEventDto
-import com.rarible.protocol.union.enrichment.repository.search.EsCollectionRepository
+import com.rarible.protocol.union.core.elasticsearch.repository.EsCollectionRepository
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service

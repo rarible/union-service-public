@@ -8,7 +8,7 @@ import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.CollectionsDto
 import com.rarible.protocol.union.dto.continuation.CollectionContinuation
-import com.rarible.protocol.union.enrichment.repository.search.EsCollectionRepository
+import com.rarible.protocol.union.core.elasticsearch.repository.EsCollectionRepository
 import com.rarible.protocol.union.worker.config.BlockchainReindexProperties
 import com.rarible.protocol.union.worker.config.CollectionReindexProperties
 import com.rarible.protocol.union.worker.task.search.collection.CollectionTask

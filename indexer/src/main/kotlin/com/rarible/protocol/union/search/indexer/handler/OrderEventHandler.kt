@@ -4,7 +4,7 @@ import com.rarible.core.daemon.sequential.ConsumerBatchEventHandler
 import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.dto.OrderEventDto
 import com.rarible.protocol.union.core.converter.EsOrderConverter
-import com.rarible.protocol.union.enrichment.repository.search.EsOrderRepository
+import com.rarible.protocol.union.core.elasticsearch.repository.EsOrderRepository
 import org.springframework.stereotype.Service
 
 @Service

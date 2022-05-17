@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.enrichment.repository.search.internal
+package com.rarible.protocol.union.core.elasticsearch.repository.internal
 
 import com.rarible.protocol.union.core.model.EsActivity
 import com.rarible.protocol.union.core.model.EsActivityCursor

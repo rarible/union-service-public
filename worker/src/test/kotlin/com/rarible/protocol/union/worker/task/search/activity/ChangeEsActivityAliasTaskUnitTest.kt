@@ -7,7 +7,7 @@ import com.rarible.core.task.TaskStatus
 import com.rarible.protocol.union.core.elasticsearch.IndexService
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
+import com.rarible.protocol.union.core.elasticsearch.repository.EsActivityRepository
 import com.rarible.protocol.union.worker.task.search.ParamFactory
 import io.mockk.coEvery
 import io.mockk.every

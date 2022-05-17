@@ -1,7 +1,8 @@
 package com.rarible.protocol.union.search.indexer.repository
 
-import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
-import com.rarible.protocol.union.enrichment.repository.search.EsOwnershipRepository
+import com.rarible.protocol.union.core.SearchConfiguration
+import com.rarible.protocol.union.core.elasticsearch.repository.EsOwnershipRepository
+import com.rarible.protocol.union.core.test.randomEsOwnership
 import com.rarible.protocol.union.search.indexer.test.IntegrationTest
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
@@ -10,7 +11,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration
 import org.springframework.test.context.ContextConfiguration
-import randomEsOwnership
 
 @IntegrationTest
 @EnableAutoConfiguration

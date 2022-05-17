@@ -14,7 +14,7 @@ import com.rarible.protocol.union.dto.CollectionMetaDto
 import com.rarible.protocol.union.dto.CollectionUpdateEventDto
 import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.group
-import com.rarible.protocol.union.enrichment.repository.search.EsCollectionRepository
+import com.rarible.protocol.union.core.elasticsearch.repository.EsCollectionRepository
 import com.rarible.protocol.union.search.indexer.test.IntegrationTest
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat

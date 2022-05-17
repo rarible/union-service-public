@@ -18,7 +18,7 @@ import com.rarible.protocol.union.core.model.EsActivityLite
 import com.rarible.protocol.union.core.model.EsActivitySort
 import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.parser.IdParser
-import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
+import com.rarible.protocol.union.core.elasticsearch.repository.EsActivityRepository
 import org.springframework.stereotype.Service
 import java.time.Instant
 

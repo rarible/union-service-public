@@ -2,11 +2,11 @@ package com.rarible.protocol.union.search.indexer.repository
 
 import com.rarible.protocol.union.core.model.EsActivity
 import com.rarible.protocol.union.core.model.EsActivitySort
-import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
-import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
-import com.rarible.protocol.union.enrichment.repository.search.internal.EsActivityQuerySortService
-import com.rarible.protocol.union.enrichment.test.data.info
-import com.rarible.protocol.union.enrichment.test.data.randomEsActivity
+import com.rarible.protocol.union.core.SearchConfiguration
+import com.rarible.protocol.union.core.elasticsearch.repository.EsActivityRepository
+import com.rarible.protocol.union.core.elasticsearch.repository.internal.EsActivityQuerySortService
+import com.rarible.protocol.union.core.test.info
+import com.rarible.protocol.union.core.test.randomEsActivity
 import com.rarible.protocol.union.search.indexer.test.IntegrationTest
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat

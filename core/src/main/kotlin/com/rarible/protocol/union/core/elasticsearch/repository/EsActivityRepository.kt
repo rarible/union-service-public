@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.enrichment.repository.search
+package com.rarible.protocol.union.core.elasticsearch.repository
 
 import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.apm.SpanType
@@ -10,7 +10,7 @@ import com.rarible.protocol.union.core.model.EsActivityLite
 import com.rarible.protocol.union.core.model.EsActivityQueryResult
 import com.rarible.protocol.union.core.model.EsActivitySort
 import com.rarible.protocol.union.dto.continuation.page.PageSize
-import com.rarible.protocol.union.enrichment.repository.search.internal.EsActivityQueryBuilderService
+import com.rarible.protocol.union.core.elasticsearch.repository.internal.EsActivityQueryBuilderService
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.elasticsearch.action.admin.indices.refresh.RefreshRequest

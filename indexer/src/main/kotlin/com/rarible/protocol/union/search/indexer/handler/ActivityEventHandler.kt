@@ -4,7 +4,7 @@ import com.rarible.core.daemon.sequential.ConsumerBatchEventHandler
 import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.core.converter.EsActivityConverter
-import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
+import com.rarible.protocol.union.core.elasticsearch.repository.EsActivityRepository
 import org.springframework.stereotype.Service
 
 @Service

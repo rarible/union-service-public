@@ -10,8 +10,8 @@ import com.rarible.protocol.union.core.elasticsearch.IndexService
 import com.rarible.protocol.union.core.elasticsearch.bootstrap.ElasticsearchBootstrapper
 import com.rarible.protocol.union.core.model.elasticsearch.EsEntitiesConfig
 import com.rarible.protocol.union.enrichment.configuration.EnrichmentApiConfiguration
-import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
-import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
+import com.rarible.protocol.union.core.SearchConfiguration
+import com.rarible.protocol.union.core.elasticsearch.repository.EsActivityRepository
 import com.rarible.protocol.union.worker.task.search.ReindexService
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview

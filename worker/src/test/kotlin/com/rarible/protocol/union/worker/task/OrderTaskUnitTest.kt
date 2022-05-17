@@ -17,7 +17,7 @@ import com.rarible.protocol.union.dto.OrdersDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.continuation.page.PageSize
-import com.rarible.protocol.union.enrichment.repository.search.EsOrderRepository
+import com.rarible.protocol.union.core.elasticsearch.repository.EsOrderRepository
 import com.rarible.protocol.union.worker.config.*
 import com.rarible.protocol.union.worker.task.search.order.OrderTask
 import io.mockk.*

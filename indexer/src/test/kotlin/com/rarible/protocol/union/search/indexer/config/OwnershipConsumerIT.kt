@@ -4,20 +4,19 @@ import com.rarible.core.kafka.KafkaMessage
 import com.rarible.core.kafka.RaribleKafkaProducer
 import com.rarible.core.test.data.randomString
 import com.rarible.core.test.wait.Wait
+import com.rarible.protocol.union.core.elasticsearch.repository.EsOwnershipRepository
+import com.rarible.protocol.union.core.test.randomEsOwnership
+import com.rarible.protocol.union.core.test.randomOwnership
+import com.rarible.protocol.union.core.test.randomOwnershipId
 import com.rarible.protocol.union.dto.OwnershipDeleteEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.dto.OwnershipUpdateEventDto
-import com.rarible.protocol.union.enrichment.repository.search.EsOwnershipRepository
 import com.rarible.protocol.union.search.indexer.test.IntegrationTest
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations
-import randomEsOwnership
-import randomOwnership
-import randomOwnershipId
 
 @IntegrationTest
 class OwnershipConsumerIT {
