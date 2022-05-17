@@ -2,11 +2,16 @@ package com.rarible.protocol.union.core.util
 
 import com.rarible.core.logging.RaribleMDCContext
 import com.rarible.protocol.union.core.model.UnionItem
+import com.rarible.protocol.union.core.service.ItemService
+import com.rarible.protocol.union.core.service.router.BlockchainRouter
+import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.withContext
 import org.slf4j.MDC
+import org.springframework.http.HttpStatus
+import org.springframework.web.reactive.function.client.WebClientResponseException
 
 object LogUtils {
 
@@ -26,17 +31,47 @@ object LogUtils {
     }
 
     @ExperimentalCoroutinesApi
-    suspend fun <T> addToMdc(itemId: ItemIdDto, block: suspend CoroutineScope.() -> T): T {
-        // Works for non-SOLANA items only
-        val pair = itemId.value.split(":")
-        val collection = if (pair.size > 1) pair[0] else ""
+    suspend fun <T> addToMdc(
+        itemId: ItemIdDto,
+        router: BlockchainRouter<ItemService>,
+        block: suspend CoroutineScope.() -> T
+    ): T {
+        val collection = if (itemId.blockchain == BlockchainDto.SOLANA) {
+            getSolanaCollection(itemId, router)
+        } else {
+            getCollection(itemId)
+        }
+
         return addToMdc(
-            listOf(
+            values = listOf(
                 "blockchain" to itemId.blockchain.name,
                 "itemId" to itemId.value,
                 "collection" to collection
-            ), block
+            ),
+            block = block
         )
+    }
+
+    private suspend fun getSolanaCollection(
+        itemId: ItemIdDto,
+        router: BlockchainRouter<ItemService>
+    ): String =
+        try {
+            router
+                .getService(itemId.blockchain)
+                .getItemById(itemId.toString())
+                .collection?.value ?: ""
+        } catch (e: WebClientResponseException) {
+            if (e.statusCode == HttpStatus.NOT_FOUND) {
+                ""
+            } else {
+                throw e
+            }
+        }
+
+    private fun getCollection(itemId: ItemIdDto): String {
+        val pair = itemId.value.split(":")
+        return if (pair.size > 1) pair[0] else ""
     }
 
     @ExperimentalCoroutinesApi
