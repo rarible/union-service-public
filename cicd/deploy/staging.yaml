@@ -11,6 +11,7 @@ protocol-union-meta-loader:
   replicas: 3
 
 protocol-union-indexer:
+  enabled: true
   replicas: 3
   resources:
     jvm:
