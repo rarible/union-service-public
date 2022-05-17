@@ -14,11 +14,11 @@ dependencies:
   alias: protocol-union-meta-loader
   repository: file://../resources/helm/rarible
   version: 0.1.0
-- name: rarible-helm-chart
-  alias: protocol-union-indexer
-  repository: file://../resources/helm/rarible
-  version: 0.1.0
-- name: rarible-helm-chart
-  alias: protocol-union-worker
-  repository: file://../resources/helm/rarible
-  version: 0.1.0
+#- name: rarible-helm-chart
+#  alias: protocol-union-indexer
+#  repository: file://../resources/helm/rarible
+#  version: 0.1.0
+#- name: rarible-helm-chart
+#  alias: protocol-union-worker
+#  repository: file://../resources/helm/rarible
+#  version: 0.1.0
