@@ -23,6 +23,7 @@ import org.springframework.test.context.TestPropertySource
 import reactor.kotlin.core.publisher.toFlux
 import scalether.domain.Address
 import java.math.BigInteger
+import java.time.Instant
 
 @FlowPreview
 @IntegrationTest
@@ -53,56 +54,56 @@ class ItemsControllerElasticFt : AbstractIntegrationTest() {
             BlockchainDto.SOLANA,
             BlockchainDto.TEZOS
         )
-
+        val now = Instant.now()
         val contract = Address.ONE().toString()
         val ethItemId1 = ItemIdDto(BlockchainDto.ETHEREUM, contract, BigInteger.valueOf(1))
         val ethItem1 = randomEthNftItemDto(ethItemId1)
-        val ethEsItem1 = randomEsItem().copy(itemId = ethItemId1.toString(), blockchain = BlockchainDto.ETHEREUM)
+        val ethEsItem1 = randomEsItem().copy(itemId = ethItemId1.toString(), blockchain = BlockchainDto.ETHEREUM, lastUpdatedAt = now.plusMillis(-1))
         repository.save(ethEsItem1)
         val ethItemId2 = ItemIdDto(BlockchainDto.ETHEREUM, contract, BigInteger.valueOf(2))
         val ethItem2 = randomEthNftItemDto(ethItemId2)
-        val ethEsItem2 = randomEsItem().copy(itemId = ethItemId2.toString(), blockchain = BlockchainDto.ETHEREUM)
+        val ethEsItem2 = randomEsItem().copy(itemId = ethItemId2.toString(), blockchain = BlockchainDto.ETHEREUM, lastUpdatedAt = now.plusMillis(-2))
         repository.save(ethEsItem2)
         val ethItemId3 = ItemIdDto(BlockchainDto.ETHEREUM, contract, BigInteger.valueOf(3))
         val ethItem3 = randomEthNftItemDto(ethItemId3)
-        val ethEsItem3 = randomEsItem().copy(itemId = ethItemId3.toString(), blockchain = BlockchainDto.ETHEREUM)
+        val ethEsItem3 = randomEsItem().copy(itemId = ethItemId3.toString(), blockchain = BlockchainDto.ETHEREUM, lastUpdatedAt = now.plusMillis(-3))
         repository.save(ethEsItem3)
         val ethItemId4 = ItemIdDto(BlockchainDto.ETHEREUM, contract, BigInteger.valueOf(4))
         val ethItem4 = randomEthNftItemDto(ethItemId4)
-        val ethEsItem4 = randomEsItem().copy(itemId = ethItemId4.toString(), blockchain = BlockchainDto.ETHEREUM)
+        val ethEsItem4 = randomEsItem().copy(itemId = ethItemId4.toString(), blockchain = BlockchainDto.ETHEREUM, lastUpdatedAt = now.plusMillis(-4))
         repository.save(ethEsItem4)
         val ethItemId5 = ItemIdDto(BlockchainDto.ETHEREUM, contract, BigInteger.valueOf(5))
         val ethItem5 = randomEthNftItemDto(ethItemId5)
-        val ethEsItem5 = randomEsItem().copy(itemId = ethItemId5.toString(), blockchain = BlockchainDto.ETHEREUM)
+        val ethEsItem5 = randomEsItem().copy(itemId = ethItemId5.toString(), blockchain = BlockchainDto.ETHEREUM, lastUpdatedAt = now.plusMillis(-5))
         repository.save(ethEsItem5)
         val ethItemId6 = ItemIdDto(BlockchainDto.ETHEREUM, contract, BigInteger.valueOf(6))
         val ethItem6 = randomEthNftItemDto(ethItemId6)
-        val ethEsItem6 = randomEsItem().copy(itemId = ethItemId6.toString(), blockchain = BlockchainDto.ETHEREUM)
+        val ethEsItem6 = randomEsItem().copy(itemId = ethItemId6.toString(), blockchain = BlockchainDto.ETHEREUM, lastUpdatedAt = now.plusMillis(-6))
         repository.save(ethEsItem6)
 
         val polygonItemId1 = ItemIdDto(BlockchainDto.POLYGON, contract, BigInteger.valueOf(1))
         val polygonItem1 = randomEthNftItemDto(polygonItemId1)
-        val polygonEsItem1 = randomEsItem().copy(itemId = polygonItemId1.toString(), blockchain = BlockchainDto.POLYGON)
+        val polygonEsItem1 = randomEsItem().copy(itemId = polygonItemId1.toString(), blockchain = BlockchainDto.POLYGON, lastUpdatedAt = now.plusMillis(-7))
         repository.save(polygonEsItem1)
         val polygonItemId2 = ItemIdDto(BlockchainDto.POLYGON, contract, BigInteger.valueOf(2))
         val polygonItem2 = randomEthNftItemDto(polygonItemId2)
-        val polygonEsItem2 = randomEsItem().copy(itemId = polygonItemId2.toString(), blockchain = BlockchainDto.POLYGON)
+        val polygonEsItem2 = randomEsItem().copy(itemId = polygonItemId2.toString(), blockchain = BlockchainDto.POLYGON, lastUpdatedAt = now.plusMillis(-8))
         repository.save(polygonEsItem2)
         val polygonItemId3 = ItemIdDto(BlockchainDto.POLYGON, contract, BigInteger.valueOf(3))
         val polygonItem3 = randomEthNftItemDto(polygonItemId3)
-        val polygonEsItem3 = randomEsItem().copy(itemId = polygonItemId3.toString(), blockchain = BlockchainDto.POLYGON)
+        val polygonEsItem3 = randomEsItem().copy(itemId = polygonItemId3.toString(), blockchain = BlockchainDto.POLYGON, lastUpdatedAt = now.plusMillis(-9))
         repository.save(polygonEsItem3)
         val polygonItemId4 = ItemIdDto(BlockchainDto.POLYGON, contract, BigInteger.valueOf(4))
         val polygonItem4 = randomEthNftItemDto(polygonItemId4)
-        val polygonEsItem4 = randomEsItem().copy(itemId = polygonItemId4.toString(), blockchain = BlockchainDto.POLYGON)
+        val polygonEsItem4 = randomEsItem().copy(itemId = polygonItemId4.toString(), blockchain = BlockchainDto.POLYGON, lastUpdatedAt = now.plusMillis(-10))
         repository.save(polygonEsItem4)
         val polygonItemId5 = ItemIdDto(BlockchainDto.POLYGON, contract, BigInteger.valueOf(5))
         val polygonItem5 = randomEthNftItemDto(polygonItemId5)
-        val polygonEsItem5 = randomEsItem().copy(itemId = polygonItemId5.toString(), blockchain = BlockchainDto.POLYGON)
+        val polygonEsItem5 = randomEsItem().copy(itemId = polygonItemId5.toString(), blockchain = BlockchainDto.POLYGON, lastUpdatedAt = now.plusMillis(-11))
         repository.save(polygonEsItem5)
         val polygonItemId6 = ItemIdDto(BlockchainDto.POLYGON, contract, BigInteger.valueOf(6))
         val polygonItem6 = randomEthNftItemDto(polygonItemId6)
-        val polygonEsItem6 = randomEsItem().copy(itemId = polygonItemId6.toString(), blockchain = BlockchainDto.POLYGON)
+        val polygonEsItem6 = randomEsItem().copy(itemId = polygonItemId6.toString(), blockchain = BlockchainDto.POLYGON, lastUpdatedAt = now.plusMillis(-12))
         repository.save(polygonEsItem6)
 
         // Since all items types specified in request, all of existing clients should be requested

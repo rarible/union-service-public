@@ -15,5 +15,5 @@ data class ElasticItemFilter(
     val updatedTo: Instant? = null,
     val deleted: Boolean? = null,
     val meta: String? = null,
-    val cursor: String? = null,
+    val cursor: EsItemCursor? = null,
 )

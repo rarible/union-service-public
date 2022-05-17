@@ -10,14 +10,10 @@ import com.rarible.protocol.union.core.model.EsItemQueryResult
 import com.rarible.protocol.union.core.model.EsItemSort
 import com.rarible.protocol.union.dto.continuation.page.ArgSlice
 import com.rarible.protocol.union.dto.continuation.page.PageSize
-import com.rarible.protocol.union.enrichment.repository.search.internal.EsItemBuilderService
-import com.rarible.protocol.union.enrichment.repository.search.internal.EsItemQuerySortService
+import com.rarible.protocol.union.enrichment.repository.search.internal.EsItemBuilderService.buildQuery
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.elasticsearch.action.admin.indices.refresh.RefreshRequest
-import org.elasticsearch.action.search.SearchRequest
-import org.elasticsearch.search.builder.SearchSourceBuilder
-import org.springframework.data.elasticsearch.client.reactive.ReactiveElasticsearchClient
 import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery
@@ -29,10 +25,7 @@ import java.io.IOException
 @CaptureSpan(type = SpanType.DB)
 class EsItemRepository(
     private val objectMapper: ObjectMapper,
-    private val client: ReactiveElasticsearchClient,
     private val esOperations: ReactiveElasticsearchOperations,
-    private val esItemBuilderService: EsItemBuilderService,
-    private val esItemQuerySortService: EsItemQuerySortService,
     esNameResolver: EsNameResolver
 ) {
     val entityDefinition = esNameResolver.createEntityDefinitionExtended(EsItem.ENTITY_DEFINITION)
@@ -80,29 +73,9 @@ class EsItemRepository(
         sort: EsItemSort,
         limit: Int?
     ): EsItemQueryResult {
-        val boolQuery = esItemBuilderService.build2(filter)
-        val sourceBuilder = SearchSourceBuilder().query(boolQuery).size(PageSize.ITEM.limit(limit))
-        esItemQuerySortService.applySort(sourceBuilder, sort)
-        filter.cursor?.let { sourceBuilder.searchAfter(arrayOf(it)) }
-
-        val searchResponse = client.searchForResponse(
-            SearchRequest().indices(entityDefinition.searchIndexCoordinates.indexName)
-                .source(sourceBuilder)
-        ).awaitFirst()
-
-        val hits = searchResponse.hits
-        val items = hits.hits.map { objectMapper.readValue(it.sourceAsString, EsItem::class.java) }
-
-        val continuationString = if ((hits.lastOrNull()?.sortValues?.size ?: 0) > 0) {
-            objectMapper.writeValueAsString(
-                hits.last().sortValues.toList()
-            )
-        } else ArgSlice.COMPLETED
-
-        return EsItemQueryResult(
-            items = items,
-            continuation = continuationString
-        )
+        val query = filter.buildQuery(sort)
+        query.maxResults = PageSize.ITEM.limit(limit)
+        return search(query)
     }
 
     suspend fun search(query: NativeSearchQuery): EsItemQueryResult {
@@ -112,9 +85,10 @@ class EsItemRepository(
             .awaitFirst()
         val items = hits.map { it.content }
 
-        val continuationString = if (hits.last().sortValues.size > 0) {
+        val last = hits.lastOrNull()
+        val continuationString = if (last != null && last.sortValues.size > 0) {
             objectMapper.writeValueAsString(
-                hits.last().sortValues.toList()
+                hits.last().sortValues.last()
             )
         } else ArgSlice.COMPLETED
 

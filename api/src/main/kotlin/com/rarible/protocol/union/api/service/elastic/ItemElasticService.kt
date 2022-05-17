@@ -47,15 +47,8 @@ class ItemElasticService(
         logger.info("getAllActivities() from ElasticSearch")
         val evaluatedBlockchains = router.getEnabledBlockchains(blockchains).map { it.name }.toSet()
 
-        val сontinuation = if (cursor != null) {
-            val currentContinuation = CombinedContinuation.parse(cursor)
-            val entry = currentContinuation.continuations.entries.first()
-            val dateIdContinuation = DateIdContinuation.parse(entry.value)
-            ItemIdDto(BlockchainDto.valueOf(entry.key), dateIdContinuation!!.id).toString()
-        } else null
-
         val filter = itemFilterConverter.convertGetAllItems(
-            evaluatedBlockchains, showDeleted, lastUpdatedFrom, lastUpdatedTo, сontinuation
+            evaluatedBlockchains, showDeleted, lastUpdatedFrom, lastUpdatedTo, cursor
         )
         logger.info("Built filter: $filter")
         val queryResult = esItemRepository.search(filter, EsItemSort.DEFAULT, safeSize)
