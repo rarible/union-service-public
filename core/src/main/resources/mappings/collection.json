@@ -10,6 +10,10 @@
     "type": {
       "type": "keyword"
     },
+    "blockchain": {
+      "type": "keyword",
+      "ignore_above": 256
+    },
     "name": {
       "type": "keyword"
     },
