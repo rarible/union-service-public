@@ -26,7 +26,7 @@ class UnionMetaLoader(
 
     private val logger = LoggerFactory.getLogger(UnionMetaLoader::class.java)
 
-    suspend fun load(itemId: ItemIdDto): UnionMeta? = LogUtils.addToMdc(itemId) {
+    suspend fun load(itemId: ItemIdDto): UnionMeta? = LogUtils.addToMdc(itemId, router) {
         val unionMeta = withSpan(
             name = "getItemMetaById",
             type = SpanType.EXT,
