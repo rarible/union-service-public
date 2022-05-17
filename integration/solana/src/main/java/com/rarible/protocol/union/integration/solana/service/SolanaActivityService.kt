@@ -2,6 +2,7 @@ package com.rarible.protocol.union.integration.solana.service
 
 import com.rarible.core.apm.CaptureSpan
 import com.rarible.protocol.solana.api.client.ActivityControllerApi
+import com.rarible.protocol.solana.dto.ActivitiesByIdRequestDto
 import com.rarible.protocol.solana.dto.ActivityFilterAllDto
 import com.rarible.protocol.solana.dto.ActivityFilterByCollectionDto
 import com.rarible.protocol.solana.dto.ActivityFilterByItemDto
@@ -14,6 +15,7 @@ import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.integration.solana.converter.SolanaActivityConverter
@@ -41,6 +43,12 @@ open class SolanaActivityService(
         )
         return searchActivities(filter, continuation, size, sort)
     }
+
+    override suspend fun getAllActivitiesSync(
+        continuation: String?,
+        size: Int,
+        sort: SyncSortDto?
+    ): Slice<ActivityDto> = Slice.empty()
 
     override suspend fun getActivitiesByCollection(
         types: List<ActivityTypeDto>,
@@ -98,7 +106,9 @@ open class SolanaActivityService(
     }
 
     override suspend fun getActivitiesByIds(ids: List<TypedActivityId>): List<ActivityDto> {
-        TODO("To be implemented under ALPHA-276")
+        val result = activityApi.searchActivitiesByIds(ActivitiesByIdRequestDto(ids.map { it.id }))
+            .awaitFirst()
+        return result.activities.map { activityConverter.convert(it, blockchain) }
     }
 
     private suspend fun searchActivities(

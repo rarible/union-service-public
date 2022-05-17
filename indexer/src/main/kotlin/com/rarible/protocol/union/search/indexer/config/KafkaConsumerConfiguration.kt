@@ -9,8 +9,10 @@ import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.CollectionEventDto
 import com.rarible.protocol.union.dto.OrderEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
+import com.rarible.protocol.union.search.indexer.metrics.MetricConsumerBatchEventHandlerFactory
 import com.rarible.protocol.union.subscriber.UnionEventsConsumerFactory
 import io.micrometer.core.instrument.MeterRegistry
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import java.time.Duration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -20,6 +22,7 @@ class KafkaConsumerConfiguration(
     applicationEnvironmentInfo: ApplicationEnvironmentInfo,
     private val kafkaProperties: KafkaProperties,
     private val meterRegistry: MeterRegistry,
+    private val metricEventHandlerFactory: MetricConsumerBatchEventHandlerFactory
 ) {
     companion object {
         const val ACTIVITY = "activity"
@@ -35,14 +38,16 @@ class KafkaConsumerConfiguration(
     private val consumerFactory = UnionEventsConsumerFactory(kafkaProperties.brokerReplicaSet, host, env)
 
     @Bean
+    @ConditionalOnProperty(prefix = "handler.activity", name = ["enabled"], havingValue = "true")
     fun activityWorker(
         handler: ConsumerBatchEventHandler<ActivityDto>
     ): ConsumerWorkerHolder<ActivityDto> {
+        val wrappedHandler = metricEventHandlerFactory.wrap(handler)
         val workers = (1..kafkaProperties.workerCount).map { index ->
             val consumer = consumerFactory.createActivityConsumer(consumerGroup(ACTIVITY))
             ConsumerBatchWorker(
                 consumer = consumer,
-                eventHandler = handler,
+                eventHandler = wrappedHandler,
                 workerName = worker(ACTIVITY, index),
                 properties = kafkaProperties.daemon,
                 retryProperties = RetryProperties(attempts = Integer.MAX_VALUE, delay = Duration.ofMillis(1000)),
@@ -53,6 +58,7 @@ class KafkaConsumerConfiguration(
     }
 
     @Bean
+    @ConditionalOnProperty(prefix = "handler.order", name = ["enabled"], havingValue = "true")
     fun orderWorker(
         handler: ConsumerBatchEventHandler<OrderEventDto>
     ): ConsumerWorkerHolder<OrderEventDto> {
@@ -71,6 +77,7 @@ class KafkaConsumerConfiguration(
     }
 
     @Bean
+    @ConditionalOnProperty(prefix = "handler.collection", name = ["enabled"], havingValue = "true")
     fun collectionWorker(handler: ConsumerBatchEventHandler<CollectionEventDto>): ConsumerWorkerHolder<CollectionEventDto> {
         val workers = (1..kafkaProperties.workerCount).map {i ->
             val consumer = consumerFactory.createCollectionConsumer(consumerGroup(COLLECTION))
@@ -87,6 +94,7 @@ class KafkaConsumerConfiguration(
     }
 
     @Bean
+    @ConditionalOnProperty(prefix = "handler.ownership", name = ["enabled"], havingValue = "true")
     fun ownershipWorker(
         handler: ConsumerBatchEventHandler<OwnershipEventDto>,
     ): ConsumerWorkerHolder<OwnershipEventDto> {

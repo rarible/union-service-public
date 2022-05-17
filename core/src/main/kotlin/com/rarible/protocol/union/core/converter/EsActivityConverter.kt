@@ -1,10 +1,8 @@
 package com.rarible.protocol.union.core.converter
 
-import com.rarible.protocol.union.core.converter.EsActivityConverter.getCollections
+import com.rarible.protocol.union.core.model.EsActivity
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
-import com.rarible.protocol.union.dto.AssetDto
-import com.rarible.protocol.union.dto.AssetTypeDto
 import com.rarible.protocol.union.dto.AssetTypeExtension
 import com.rarible.protocol.union.dto.AuctionBidActivityDto
 import com.rarible.protocol.union.dto.AuctionCancelActivityDto
@@ -12,6 +10,7 @@ import com.rarible.protocol.union.dto.AuctionEndActivityDto
 import com.rarible.protocol.union.dto.AuctionFinishActivityDto
 import com.rarible.protocol.union.dto.AuctionOpenActivityDto
 import com.rarible.protocol.union.dto.AuctionStartActivityDto
+import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.BurnActivityDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.L2DepositActivityDto
@@ -24,10 +23,8 @@ import com.rarible.protocol.union.dto.OrderListActivityDto
 import com.rarible.protocol.union.dto.OrderMatchSellDto
 import com.rarible.protocol.union.dto.OrderMatchSwapDto
 import com.rarible.protocol.union.dto.TransferActivityDto
-import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.ext
 import com.rarible.protocol.union.dto.parser.IdParser
-import com.rarible.protocol.union.core.model.EsActivity
 
 object EsActivityConverter {
 
@@ -54,7 +51,7 @@ object EsActivityConverter {
     }
 
     private fun convertMint(source: MintActivityDto): EsActivity {
-        val itemId = safeItemId(source.itemId)
+        val itemId = safeItemId(source.itemId, source.id.blockchain)
         return EsActivity(
             activityId = source.id.toString(),
             date = source.date,
@@ -70,7 +67,7 @@ object EsActivityConverter {
     }
 
     private fun convertBurn(source: BurnActivityDto): EsActivity {
-        val itemId = safeItemId(source.itemId)
+        val itemId = safeItemId(source.itemId, source.id.blockchain)
         return EsActivity(
             activityId = source.id.toString(),
             date = source.date,
@@ -86,7 +83,7 @@ object EsActivityConverter {
     }
 
     private fun convertTransfer(source: TransferActivityDto): EsActivity {
-        val itemId = safeItemId(source.itemId)
+        val itemId = safeItemId(source.itemId, source.id.blockchain)
         return EsActivity(
             activityId = source.id.toString(),
             date = source.date,
@@ -126,8 +123,8 @@ object EsActivityConverter {
             type = ActivityTypeDto.BID,
             userFrom = source.maker.value,
             userTo = null,
-            collection = source.make.type.ext.getCollections(),
-            item = source.make.type.ext.itemId?.value.orEmpty(),
+            collection = source.take.type.ext.getCollections(),
+            item = source.take.type.ext.itemId?.value.orEmpty(),
         )
     }
 
@@ -156,8 +153,8 @@ object EsActivityConverter {
             type = ActivityTypeDto.CANCEL_BID,
             userFrom = source.maker.value,
             userTo = null,
-            collection = source.make.ext.getCollections(),
-            item = source.make.ext.itemId?.value.orEmpty(),
+            collection = source.take.ext.getCollections(),
+            item = source.take.ext.itemId?.value.orEmpty(),
         )
     }
 
@@ -296,9 +293,10 @@ object EsActivityConverter {
         )
     }
 
-    private fun safeItemId(itemId: ItemIdDto?): ItemIdDto {
+    private fun safeItemId(itemId: ItemIdDto?, blockchain: BlockchainDto): ItemIdDto {
         if (itemId != null) return itemId
-        throw IllegalArgumentException("itemId fields is null")
+        // TODO ALPHA-454: Decide how to handle activity events with itemId=null
+        return ItemIdDto(blockchain, "")
     }
 
     private fun AssetTypeExtension.getCollections(): String? {

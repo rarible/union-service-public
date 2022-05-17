@@ -45,7 +45,7 @@ object EthOwnershipConverter {
 
     fun convert(page: NftOwnershipsDto, blockchain: BlockchainDto): Page<UnionOwnership> {
         return Page(
-            total = page.total,
+            total = page.total ?: 0,
             continuation = page.continuation,
             entities = page.ownerships.map { convert(it, blockchain) }
         )

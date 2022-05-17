@@ -33,12 +33,6 @@
     </build>
 
     <dependencies>
-        <dependency>
-            <groupId>com.senacor.elasticsearch.evolution</groupId>
-            <artifactId>spring-boot-starter-elasticsearch-evolution</artifactId>
-            <version>0.4.0</version>
-        </dependency>
-
         <!-- Internal dependencies -->
         <dependency>
             <groupId>com.rarible.core</groupId>
@@ -47,6 +41,17 @@
         <dependency>
             <groupId>com.rarible.protocol.union</groupId>
             <artifactId>rarible-union-enrichment</artifactId>
+
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-data-r2dbc</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>io.r2dbc</groupId>
+                    <artifactId>r2dbc-postgresql</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- ================== Spring =================== -->
@@ -85,6 +90,17 @@
             <classifier>tests</classifier>
             <type>test-jar</type>
             <scope>test</scope>
+
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-data-r2dbc</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>io.r2dbc</groupId>
+                    <artifactId>r2dbc-postgresql</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.rarible.core</groupId>

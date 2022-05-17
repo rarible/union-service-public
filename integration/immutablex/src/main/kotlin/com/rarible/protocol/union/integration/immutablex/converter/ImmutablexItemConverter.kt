@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.integration.immutablex.converter
 
 import com.rarible.core.common.nowMillis
+import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.core.converter.ContractAddressConverter
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.model.UnionItem
@@ -8,18 +9,14 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.RoyaltyDto
-import com.rarible.protocol.union.dto.UnionAddress
-import com.rarible.protocol.union.dto.group
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexAsset
+import scalether.domain.Address
 import java.math.BigDecimal
 import java.math.BigInteger
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
-import scalether.domain.Address
 
 object ImmutablexItemConverter {
 
-    private val logger: Logger = LoggerFactory.getLogger(javaClass)
+    private val logger by Logger()
 
     fun convert(asset: ImmutablexAsset, blockchain: BlockchainDto): UnionItem {
         return try {

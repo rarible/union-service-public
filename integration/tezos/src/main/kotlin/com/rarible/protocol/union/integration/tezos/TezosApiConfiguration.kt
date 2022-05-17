@@ -18,30 +18,68 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.integration.tezos.converter.TezosActivityConverter
 import com.rarible.protocol.union.integration.tezos.converter.TezosOrderConverter
+import com.rarible.protocol.union.integration.tezos.dipdup.DipDupApiConfiguration
+import com.rarible.protocol.union.integration.tezos.dipdup.DipDupDummyApiConfiguration
+import com.rarible.protocol.union.integration.tezos.dipdup.PGIntegrationProperties
+import com.rarible.protocol.union.integration.tezos.dipdup.service.DipdupOrderService
+import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktCollectionService
+import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktItemService
+import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktOwnershipService
 import com.rarible.protocol.union.integration.tezos.service.TezosActivityService
 import com.rarible.protocol.union.integration.tezos.service.TezosAuctionService
 import com.rarible.protocol.union.integration.tezos.service.TezosCollectionService
 import com.rarible.protocol.union.integration.tezos.service.TezosItemService
 import com.rarible.protocol.union.integration.tezos.service.TezosOrderService
 import com.rarible.protocol.union.integration.tezos.service.TezosOwnershipService
+import com.rarible.protocol.union.integration.tezos.service.TezosPgActivityService
 import com.rarible.protocol.union.integration.tezos.service.TezosSignatureService
+import io.r2dbc.spi.ConnectionFactories
+import io.r2dbc.spi.ConnectionFactory
+import io.r2dbc.spi.ConnectionFactoryOptions
+import io.r2dbc.spi.ConnectionFactoryOptions.DATABASE
+import io.r2dbc.spi.ConnectionFactoryOptions.DRIVER
+import io.r2dbc.spi.ConnectionFactoryOptions.HOST
+import io.r2dbc.spi.ConnectionFactoryOptions.PASSWORD
+import io.r2dbc.spi.ConnectionFactoryOptions.PORT
+import io.r2dbc.spi.ConnectionFactoryOptions.PROTOCOL
+import io.r2dbc.spi.ConnectionFactoryOptions.USER
+import io.r2dbc.spi.Option
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Import
 import java.net.URI
 
+
 @TezosConfiguration
-@Import(CoreConfiguration::class)
+@Import(value = [CoreConfiguration::class, DipDupApiConfiguration::class, DipDupDummyApiConfiguration::class])
 @ComponentScan(basePackageClasses = [TezosOrderConverter::class])
-@EnableConfigurationProperties(value = [TezosIntegrationProperties::class])
+@EnableConfigurationProperties(value = [TezosIntegrationProperties::class, PGIntegrationProperties::class])
 class TezosApiConfiguration(
-    private val properties: TezosIntegrationProperties
+    private val properties: TezosIntegrationProperties,
+    private val pgProperties: PGIntegrationProperties
 ) {
 
     @Bean
     fun tezosBlockchain(): BlockchainDto {
         return BlockchainDto.TEZOS
+    }
+
+    @Bean
+    fun connectionFactory(): ConnectionFactory {
+        return ConnectionFactories.get(
+            ConnectionFactoryOptions.builder()
+                .option(DRIVER, "pool")
+                .option(PROTOCOL, "postgresql")
+                .option(HOST, pgProperties.host)
+                .option(PORT, pgProperties.port)
+                .option(USER, pgProperties.user)
+                .option(PASSWORD, pgProperties.password)
+                .option(DATABASE, pgProperties.database)
+                .option(Option.valueOf("initialSize"), pgProperties.poolSize.toString())
+                .option(Option.valueOf("maxSize"), pgProperties.poolSize.toString())
+                .build()
+        )
     }
 
     @Bean
@@ -80,27 +118,31 @@ class TezosApiConfiguration(
     //-------------------- Services --------------------//
 
     @Bean
-    fun tezosItemService(controllerApi: NftItemControllerApi): TezosItemService {
-        return TezosItemService(controllerApi)
+    fun tezosItemService(controllerApi: NftItemControllerApi, tzktItemService: TzktItemService): TezosItemService {
+        return TezosItemService(controllerApi, tzktItemService)
     }
 
     @Bean
-    fun tezosOwnershipService(controllerApi: NftOwnershipControllerApi): TezosOwnershipService {
-        return TezosOwnershipService(controllerApi)
+    fun tezosOwnershipService(controllerApi: NftOwnershipControllerApi, tzktOwnershipService: TzktOwnershipService): TezosOwnershipService {
+        return TezosOwnershipService(controllerApi, tzktOwnershipService)
     }
 
     @Bean
-    fun tezosCollectionService(controllerApi: NftCollectionControllerApi): TezosCollectionService {
-        return TezosCollectionService(controllerApi)
+    fun tezosCollectionService(
+        controllerApi: NftCollectionControllerApi,
+        tzktCollectionService: TzktCollectionService
+    ): TezosCollectionService {
+        return TezosCollectionService(controllerApi, tzktCollectionService)
     }
 
     @Bean
     fun tezosOrderService(
         controllerApi: OrderControllerApi,
-        converter: TezosOrderConverter
+        converter: TezosOrderConverter,
+        dipdupOrderService: DipdupOrderService
     ): OrderService {
         return OrderProxyService(
-            TezosOrderService(controllerApi, converter),
+            TezosOrderService(controllerApi, converter, dipdupOrderService),
             setOf(PlatformDto.RARIBLE)
         )
     }
@@ -116,11 +158,17 @@ class TezosApiConfiguration(
     }
 
     @Bean
+    fun tezosPgActivityService(connectionFactory: ConnectionFactory): TezosPgActivityService {
+        return TezosPgActivityService(connectionFactory)
+    }
+
+    @Bean
     fun tezosActivityService(
         itemActivityApi: NftActivityControllerApi,
         orderActivityApi: OrderActivityControllerApi,
-        converter: TezosActivityConverter
+        converter: TezosActivityConverter,
+        pgActivityService: TezosPgActivityService
     ): TezosActivityService {
-        return TezosActivityService(itemActivityApi, orderActivityApi, converter)
+        return TezosActivityService(itemActivityApi, orderActivityApi, converter, pgActivityService)
     }
 }

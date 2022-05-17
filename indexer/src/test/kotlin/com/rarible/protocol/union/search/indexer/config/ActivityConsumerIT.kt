@@ -15,17 +15,15 @@ import com.rarible.protocol.union.dto.BlockchainGroupDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.MintActivityDto
 import com.rarible.protocol.union.dto.UnionAddress
-import com.rarible.protocol.union.core.model.EsActivity
 import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
 import com.rarible.protocol.union.search.indexer.test.IntegrationTest
-import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.elasticsearch.index.query.QueryBuilders.matchQuery
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder
+import java.time.Duration
 import java.time.Instant
 
 @IntegrationTest
@@ -76,7 +74,7 @@ class ActivityConsumerIT {
                 .build()
             val actual = repository.search(searchQuery)
             assertThat(actual.activities).isNotEmpty
-            assertThat(actual.activities.first().userTo).isEqualToIgnoringCase(activity.owner.value)
+            assertThat(actual.activities.first().date).isEqualTo(activity.date)
         }
     }
 }

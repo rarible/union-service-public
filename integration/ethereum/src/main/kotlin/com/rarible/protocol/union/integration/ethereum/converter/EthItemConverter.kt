@@ -59,7 +59,7 @@ object EthItemConverter {
 
     fun convert(page: NftItemsDto, blockchain: BlockchainDto): Page<UnionItem> {
         return Page(
-            total = page.total,
+            total = page.total ?: 0,
             continuation = page.continuation,
             entities = page.items.map { convert(it, blockchain) }
         )

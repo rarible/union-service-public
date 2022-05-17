@@ -54,6 +54,12 @@ integration:
     enabled: true
     client:
       url: "http://localhost:8080"
+    pg:
+      host: "localhost"
+      port: 5432
+      user: "test"
+      password: "test"
+      database: "test"
     consumer:
       broker-replica-set: ${kafka.hosts}
       username:
@@ -62,6 +68,18 @@ integration:
         item: 1
         ownership: 1
         order: 1
+    dipdup:
+      enabled: true
+      dipdupUrl: "http://localhost:8080"
+      tzktUrl: "http://localhost:8080"
+      consumer:
+        broker-replica-set: ${kafka.hosts}
+        username:
+        password:
+        workers:
+          item: 1
+          ownership: 1
+          order: 1
   solana:
     enabled: true
     consumer:
@@ -70,7 +88,16 @@ integration:
         item: 1
         ownership: 1
         order: 1
-
+  immutablex:
+    scanner:
+      job:
+        initialDelay:
+          mints: 600
+          transfers: 600
+          trades: 600
+          deposits: 600
+          withdrawals: 600
+          orders: 600
 listener:
   reconciliation:
     orderBatchSize: 50

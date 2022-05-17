@@ -2,55 +2,94 @@ package com.rarible.protocol.union.api.service.elastic
 
 import com.rarible.protocol.union.api.service.OrderQueryService
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.OrderDto
-import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
+import com.rarible.protocol.union.dto.SyncSortDto
+import com.rarible.protocol.union.dto.OrdersDto
 import com.rarible.protocol.union.dto.PlatformDto
-import com.rarible.protocol.union.dto.continuation.page.Slice
 import org.springframework.stereotype.Service
 
 @Service
 class OrderElasticService : OrderQueryService {
-    override suspend fun getByIds(ids: List<OrderIdDto>): List<OrderDto> {
-        TODO("Not yet implemented")
-    }
-
     override suspend fun getOrdersAll(
         blockchains: List<BlockchainDto>?,
         continuation: String?,
-        size: Int,
+        size: Int?,
         sort: OrderSortDto?,
         status: List<OrderStatusDto>?
-    ): Slice<OrderDto> {
+    ): OrdersDto {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getAllSync(
+        blockchain: BlockchainDto,
+        continuation: String?,
+        size: Int?,
+        sort: SyncSortDto?
+    ): OrdersDto {
+        // TODO: probably this will return empty result.
         TODO("Not yet implemented")
     }
 
     override suspend fun getSellOrdersByItem(
-        blockchain: BlockchainDto,
         itemId: String,
         platform: PlatformDto?,
         maker: String?,
         origin: String?,
         status: List<OrderStatusDto>?,
         continuation: String?,
-        size: Int
-    ): Slice<OrderDto> {
+        size: Int?
+    ): OrdersDto {
         TODO("Not yet implemented")
     }
 
     override suspend fun getOrderBidsByItem(
-        blockchain: BlockchainDto,
         itemId: String,
         platform: PlatformDto?,
-        makers: List<String>?,
+        maker: List<String>?,
         origin: String?,
         status: List<OrderStatusDto>?,
         start: Long?,
         end: Long?,
         continuation: String?,
-        size: Int
-    ): Slice<OrderDto> {
+        size: Int?
+    ): OrdersDto {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getOrderBidsByMaker(
+        blockchains: List<BlockchainDto>?,
+        platform: PlatformDto?,
+        maker: String,
+        origin: String?,
+        status: List<OrderStatusDto>?,
+        start: Long?,
+        end: Long?,
+        continuation: String?,
+        size: Int?
+    ): OrdersDto {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getSellOrders(
+        blockchains: List<BlockchainDto>?,
+        platform: PlatformDto?,
+        origin: String?,
+        continuation: String?,
+        size: Int?
+    ): OrdersDto {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getSellOrdersByMaker(
+        maker: String,
+        blockchains: List<BlockchainDto>?,
+        platform: PlatformDto?,
+        origin: String?,
+        continuation: String?,
+        size: Int?,
+        status: List<OrderStatusDto>?
+    ): OrdersDto {
         TODO("Not yet implemented")
     }
 }

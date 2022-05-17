@@ -38,6 +38,7 @@ import com.rarible.protocol.union.dto.RaribleAuctionV1BidDataV1Dto
 import com.rarible.protocol.union.dto.RaribleAuctionV1BidV1Dto
 import com.rarible.protocol.union.dto.RaribleAuctionV1DataV1Dto
 import com.rarible.protocol.union.dto.RoyaltyDto
+import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.UnionAddress
 import io.daonomic.rpc.domain.Binary
 import io.daonomic.rpc.domain.Word
@@ -77,6 +78,14 @@ object EthConverter {
         return UnionAddressConverter.convert(blockchain, convert(source))
     }
 
+    fun convert(source: SyncSortDto?): com.rarible.protocol.dto.SyncSortDto {
+        return when (source) {
+            null -> com.rarible.protocol.dto.SyncSortDto.DB_UPDATE_ASC
+            SyncSortDto.DB_UPDATE_ASC -> com.rarible.protocol.dto.SyncSortDto.DB_UPDATE_ASC
+            SyncSortDto.DB_UPDATE_DESC -> com.rarible.protocol.dto.SyncSortDto.DB_UPDATE_DESC
+        }
+    }
+
     fun convert(source: ActivitySortDto?): com.rarible.protocol.dto.ActivitySortDto {
         return when (source) {
             null -> com.rarible.protocol.dto.ActivitySortDto.LATEST_FIRST
@@ -96,10 +105,10 @@ object EthConverter {
 
     fun convert(source: PlatformDto?): com.rarible.protocol.dto.PlatformDto? {
         return when (source) {
-            null, PlatformDto.OTHER -> null
             PlatformDto.RARIBLE, PlatformDto.IMMUTABLEX -> com.rarible.protocol.dto.PlatformDto.RARIBLE
             PlatformDto.OPEN_SEA -> com.rarible.protocol.dto.PlatformDto.OPEN_SEA
             PlatformDto.CRYPTO_PUNKS -> com.rarible.protocol.dto.PlatformDto.CRYPTO_PUNKS
+            else -> null
         }
     }
 

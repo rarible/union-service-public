@@ -13,6 +13,7 @@ import com.rarible.protocol.union.dto.AuctionDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ContractAddress
 import com.rarible.protocol.union.dto.ItemIdDto
+import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.OwnershipDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.continuation.DateIdContinuation
@@ -75,7 +76,7 @@ class OwnershipApiServiceTest {
         coEvery { enrichmentOwnershipService.findAll(any()) } returns emptyList()
         coEvery { enrichmentOwnershipService.mergeWithAuction(any<OwnershipDto>(), any()) } returnsArgument 0
         coEvery { enrichmentOwnershipService.mergeWithAuction(any<UnionOwnership>(), any()) } returnsArgument 0
-        coEvery { orderApiService.getByIds(any()) } returns emptyList()
+        coEvery { orderApiService.getByIds(any<List<OrderIdDto>>()) } returns emptyList()
     }
 
     @Test

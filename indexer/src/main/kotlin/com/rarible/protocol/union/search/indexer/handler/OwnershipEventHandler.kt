@@ -35,11 +35,15 @@ class OwnershipEventHandler(
             listOf(
                 async {
                     logger.debug("Saving ${events.size} OwnershipDto events to ElasticSearch")
-                    repository.saveAll(events)
+                    if (events.isNotEmpty()) {
+                        repository.saveAll(events)
+                    }
                 },
                 async {
                     logger.debug("Removing ${deleted.size} OwnershipDto events from ElasticSearch")
-                    repository.deleteAll(deleted)
+                    if (deleted.isNotEmpty()) {
+                        repository.deleteAll(deleted)
+                    }
                 },
             ).awaitAll()
         }

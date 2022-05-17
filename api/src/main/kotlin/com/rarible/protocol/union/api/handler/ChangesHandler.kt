@@ -2,6 +2,7 @@ package com.rarible.protocol.union.api.handler
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.dto.FakeSubscriptionEventDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.ItemSubscriptionEventDto
@@ -11,8 +12,6 @@ import com.rarible.protocol.union.dto.OwnershipSubscriptionEventDto
 import com.rarible.protocol.union.dto.OwnershipSubscriptionRequestDto
 import com.rarible.protocol.union.dto.SubscriptionActionDto
 import com.rarible.protocol.union.dto.SubscriptionRequestDto
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.socket.WebSocketHandler
 import org.springframework.web.reactive.socket.WebSocketMessage
@@ -29,7 +28,7 @@ class ChangesHandler(
     private val ownershipUpdateListener: UnionSubscribeOwnershipEventHandler
 ) : WebSocketHandler {
 
-   private val fake = objectMapper.writeValueAsString(FakeSubscriptionEventDto())
+    private val fake = objectMapper.writeValueAsString(FakeSubscriptionEventDto())
 
     override fun handle(session: WebSocketSession): Mono<Void> {
         val subscribedItems = ConcurrentHashMap.newKeySet<ItemIdDto>()
@@ -40,8 +39,16 @@ class ChangesHandler(
                 try {
                     for (request in objectMapper.readValue<List<SubscriptionRequestDto>>(message.payloadAsText)) {
                         when (request) {
-                            is ItemSubscriptionRequestDto -> handleSubscriptionRequest(request.action, request.id, subscribedItems)
-                            is OwnershipSubscriptionRequestDto -> handleSubscriptionRequest(request.action, request.id, subscribedOwnerships)
+                            is ItemSubscriptionRequestDto -> handleSubscriptionRequest(
+                                request.action,
+                                request.id,
+                                subscribedItems
+                            )
+                            is OwnershipSubscriptionRequestDto -> handleSubscriptionRequest(
+                                request.action,
+                                request.id,
+                                subscribedOwnerships
+                            )
                         }
                     }
                 } catch (ex: Throwable) {
@@ -81,7 +88,7 @@ class ChangesHandler(
         session.textMessage(objectMapper.writeValueAsString(event))
 
     companion object {
-        private val logger: Logger = LoggerFactory.getLogger(ChangesHandler::class.java)
+        private val logger by Logger()
     }
 }
 

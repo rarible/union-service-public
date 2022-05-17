@@ -11,6 +11,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
+import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
@@ -34,6 +35,19 @@ open class EthOrderService(
             continuation,
             size,
             ethOrderConverter.convert(status)
+        ).awaitFirst()
+        return ethOrderConverter.convert(orders, blockchain)
+    }
+
+    override suspend fun getAllSync(
+        continuation: String?,
+        size: Int,
+        sort: SyncSortDto?
+    ): Slice<OrderDto> {
+        val orders = orderControllerApi.getAllSync(
+            ethOrderConverter.convert(sort),
+            continuation,
+            size
         ).awaitFirst()
         return ethOrderConverter.convert(orders, blockchain)
     }

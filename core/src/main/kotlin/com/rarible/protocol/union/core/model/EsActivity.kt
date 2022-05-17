@@ -1,27 +1,66 @@
 package com.rarible.protocol.union.core.model
 
+import com.rarible.protocol.union.core.model.elasticsearch.EsEntity
+import com.rarible.protocol.union.core.model.elasticsearch.EntityDefinition
+import com.rarible.protocol.union.core.model.elasticsearch.EsEntitiesConfig.INDEX_SETTINGS
+import com.rarible.protocol.union.core.model.elasticsearch.EsEntitiesConfig.loadMapping
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import org.springframework.data.annotation.Id
-import org.springframework.data.elasticsearch.annotations.Document
 import org.springframework.data.elasticsearch.annotations.Field
 import org.springframework.data.elasticsearch.annotations.FieldType
 import java.time.Instant
 
+
+sealed class EsActivitySealed {
+    abstract val activityId: String // blockchain:value
+    abstract val blockchain: BlockchainDto
+    abstract val type: ActivityTypeDto
+
+    // TODO: replace with single cursor field?
+    abstract val date: Instant
+    abstract val blockNumber: Long?
+    abstract val logIndex: Int?
+    abstract val salt: Long
+}
+
+data class EsActivityLite(
+    override val activityId: String, // blockchain:value
+    override val blockchain: BlockchainDto,
+    override val type: ActivityTypeDto,
+    override val date: Instant,
+    override val blockNumber: Long?,
+    override val logIndex: Int?,
+    override val salt: Long,
+) : EsActivitySealed()
+
 data class EsActivity(
     @Id
-    val activityId: String, // blockchain:value
+    override val activityId: String, // blockchain:value
     // Sort fields
     @Field(type = FieldType.Date)
-    val date: Instant,
-    val blockNumber: Long?,
-    val logIndex: Int?,
-    val salt: Long = kotlin.random.Random.nextLong(),
+    override val date: Instant,
+    override val blockNumber: Long?,
+    override val logIndex: Int?,
+    override val salt: Long = kotlin.random.Random.nextLong(),
     // Filter fields
-    val blockchain: BlockchainDto,
-    val type: ActivityTypeDto,
+    override val blockchain: BlockchainDto,
+    override val type: ActivityTypeDto,
     val userFrom: String?,
     val userTo: String?,
     val collection: String?,
     val item: String,
-)
+) : EsActivitySealed() {
+    companion object {
+        const val VERSION: Int = 2
+
+        val ENTITY_DEFINITION = EsEntity.ACTIVITY.let {
+            EntityDefinition(
+                entity = it,
+                mapping = loadMapping(it),
+                versionData = VERSION,
+                settings = INDEX_SETTINGS
+            )
+        }
+    }
+}

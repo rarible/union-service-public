@@ -24,7 +24,7 @@ class UnionContentMetaLoader(
         val contentMeta = try {
             contentMetaReceiver.receive(url)
         } catch (e: Exception) {
-            logger.warn("$logPrefix: error", itemId.fullId(), url, e)
+            logger.warn("$logPrefix: error: ${e.message}", itemId.fullId(), url, e)
             null
         } ?: return null
         val contentProperties = contentMeta.toUnionMetaContentProperties()

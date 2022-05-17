@@ -8,17 +8,22 @@ import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.continuation.page.Page
 import com.rarible.protocol.union.integration.tezos.converter.TezosCollectionConverter
+import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktCollectionService
 import kotlinx.coroutines.reactive.awaitFirst
 
 @CaptureSpan(type = "blockchain")
 open class TezosCollectionService(
-    private val collectionControllerApi: NftCollectionControllerApi
+    private val collectionControllerApi: NftCollectionControllerApi,
+    private val tzktCollectionService: TzktCollectionService
 ) : AbstractBlockchainService(BlockchainDto.TEZOS), CollectionService {
 
     override suspend fun getAllCollections(
         continuation: String?,
         size: Int
     ): Page<UnionCollection> {
+        if (tzktCollectionService.enabled()) {
+            return tzktCollectionService.getAllCollections(continuation, size)
+        }
         val collections = collectionControllerApi.searchNftAllCollections(
             size,
             continuation
@@ -27,6 +32,9 @@ open class TezosCollectionService(
     }
 
     override suspend fun getCollectionById(collectionId: String): UnionCollection {
+        if (tzktCollectionService.enabled()) {
+            return tzktCollectionService.getCollectionById(collectionId)
+        }
         val collection = collectionControllerApi.getNftCollectionById(collectionId).awaitFirst()
         return TezosCollectionConverter.convert(collection, blockchain)
     }

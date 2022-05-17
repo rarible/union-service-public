@@ -12,8 +12,9 @@ class ActivityEventHandler(
     private val repository: EsActivityRepository
 ): ConsumerBatchEventHandler<ActivityDto> {
 
-    private val logger by Logger()
-
+    companion object {
+        private val logger by Logger()
+    }
     override suspend fun handle(event: List<ActivityDto>) {
         logger.info("Handling ${event.size} ActivityDto events")
 
@@ -21,8 +22,8 @@ class ActivityEventHandler(
             logger.debug("Converting ActivityDto id = ${it.id}")
             EsActivityConverter.convert(it)
         }
-        logger.debug("Saving ${convertedEvents.size} ActivityDto events to ElasticSearch")
         repository.saveAll(convertedEvents)
         logger.info("Handling completed")
     }
 }
+

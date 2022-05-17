@@ -8,9 +8,11 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
 
 @Configuration
-@EnableConfigurationProperties(value = [KafkaProperties::class])
+@EnableConfigurationProperties(value = [KafkaProperties::class, IndexerProperties::class])
 @ComponentScan(basePackageClasses = [EsActivityRepository::class])
-@Import(value = [
-    SearchConfiguration::class,
-])
+@Import(
+    value = [
+        SearchConfiguration::class,
+    ]
+)
 class UnionIndexerConfiguration

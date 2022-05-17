@@ -49,7 +49,9 @@ internal class ActivityElasticServiceIntegrationTest {
 
     @BeforeEach
     fun setUp() = runBlocking<Unit> {
-        every { router.getEnabledBlockchains(any()) } returns listOf(BlockchainDto.ETHEREUM, BlockchainDto.FLOW, BlockchainDto.SOLANA)
+        every { router.isBlockchainEnabled(BlockchainDto.ETHEREUM) } returns true
+        every { router.isBlockchainEnabled(BlockchainDto.FLOW) } returns true
+        every { router.isBlockchainEnabled(BlockchainDto.SOLANA) } returns true
         every { router.getService(BlockchainDto.ETHEREUM) } returns ethereumService
         every { router.getService(BlockchainDto.FLOW) } returns flowService
         every { router.getService(BlockchainDto.SOLANA) } returns solanaService
@@ -129,13 +131,13 @@ internal class ActivityElasticServiceIntegrationTest {
 
             coEvery {
                 ethereumService.getActivitiesByIds(listOf(
-                    TypedActivityId("ETHEREUM:1", ActivityTypeDto.MINT),
-                    TypedActivityId("ETHEREUM:2", ActivityTypeDto.LIST),
+                    TypedActivityId("1", ActivityTypeDto.MINT),
+                    TypedActivityId("2", ActivityTypeDto.LIST),
                 ))
             } returns listOf(eth1, eth2)
             coEvery {
                 flowService.getActivitiesByIds(listOf(
-                    TypedActivityId("FLOW:3", ActivityTypeDto.MINT),
+                    TypedActivityId("3", ActivityTypeDto.MINT),
                 ))
             } returns listOf(flow1)
 
@@ -163,7 +165,7 @@ internal class ActivityElasticServiceIntegrationTest {
             )
             coEvery {
                 ethereumService.getActivitiesByIds(listOf(
-                    TypedActivityId("ETHEREUM:2", ActivityTypeDto.LIST),
+                    TypedActivityId("2", ActivityTypeDto.LIST),
                 ))
             } returns listOf(eth2)
             // when
@@ -190,7 +192,7 @@ internal class ActivityElasticServiceIntegrationTest {
             )
             coEvery {
                 ethereumService.getActivitiesByIds(listOf(
-                    TypedActivityId("ETHEREUM:7", ActivityTypeDto.AUCTION_STARTED),
+                    TypedActivityId("7", ActivityTypeDto.AUCTION_STARTED),
                 ))
             } returns listOf(eth7)
 
@@ -222,8 +224,8 @@ internal class ActivityElasticServiceIntegrationTest {
             )
             coEvery {
                 ethereumService.getActivitiesByIds(listOf(
-                    TypedActivityId("ETHEREUM:1", ActivityTypeDto.MINT),
-                    TypedActivityId("ETHEREUM:7", ActivityTypeDto.AUCTION_STARTED),
+                    TypedActivityId("1", ActivityTypeDto.MINT),
+                    TypedActivityId("7", ActivityTypeDto.AUCTION_STARTED),
                 ))
             } returns listOf(eth1, eth7)
 

@@ -41,17 +41,21 @@
         <spring-cloud-gateway.version>2.2.6.RELEASE</spring-cloud-gateway.version>
         <mockserver-netty.version>5.11.2</mockserver-netty.version>
         <mockserver.version>1.15.3</mockserver.version>
+        <r2dbc.version>0.8.12.RELEASE</r2dbc.version>
+        <spring.data.r2dbc>2.5.7</spring.data.r2dbc>
+        <postgresql.version>42.3.4</postgresql.version>
 
-        <rarible.core.version>2.3.71</rarible.core.version>
+        <rarible.core.version>2.3.74</rarible.core.version>
         <rarible.ethereum.version>1.4.0</rarible.ethereum.version>
 
         <rarible.protocol.currency.version>1.23.2</rarible.protocol.currency.version>
-        <rarible.protocol.ethereum.version>1.26.4</rarible.protocol.ethereum.version>
+        <rarible.protocol.ethereum.version>1.26.7</rarible.protocol.ethereum.version>
         <rarible.protocol.flow.version>3.1.7</rarible.protocol.flow.version>
-        <rarible.protocol.tezos.version>1.0.2</rarible.protocol.tezos.version>
-        <rarible.protocol.solana.version>0.1.20</rarible.protocol.solana.version>
+        <rarible.protocol.tezos.version>1.0.5</rarible.protocol.tezos.version>
+        <rarible.protocol.solana.version>0.1.32</rarible.protocol.solana.version>
+        <rarible.protocol.tezos.api.version>1.0.9</rarible.protocol.tezos.api.version>
 
-        <rarible.protocol.union.version>1.26.14</rarible.protocol.union.version>
+        <rarible.protocol.union.version>1.27.2</rarible.protocol.union.version>
 
         <dev-jna.version>5.7.0</dev-jna.version>
     </properties>
@@ -332,6 +336,40 @@
                 <version>${rarible.protocol.tezos.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.rarible.protocol.tezos</groupId>
+                <artifactId>dipdup-listener</artifactId>
+                <version>${rarible.protocol.tezos.api.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.rarible.protocol.tezos</groupId>
+                <artifactId>dipdup-client</artifactId>
+                <version>${rarible.protocol.tezos.api.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.rarible.protocol.tezos</groupId>
+                <artifactId>tzkt-client</artifactId>
+                <version>${rarible.protocol.tezos.api.version}</version>
+            </dependency>
+
+            <!-- Tezos-legacy -->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-data-r2dbc</artifactId>
+                <version>${spring.data.r2dbc}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.r2dbc</groupId>
+                <artifactId>r2dbc-postgresql</artifactId>
+                <version>${r2dbc.version}</version>
+                <scope>runtime</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.postgresql</groupId>
+                <artifactId>postgresql</artifactId>
+                <version>${postgresql.version}</version>
+                <scope>test</scope>
             </dependency>
 
             <!-- ============ Solana Protocol-API ============ -->

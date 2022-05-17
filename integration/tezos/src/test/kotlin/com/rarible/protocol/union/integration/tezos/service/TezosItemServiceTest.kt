@@ -4,6 +4,7 @@ import com.rarible.protocol.tezos.api.client.NftItemControllerApi
 import com.rarible.protocol.tezos.dto.NftItemRoyaltiesDto
 import com.rarible.protocol.union.integration.tezos.data.randomTezosItemId
 import com.rarible.protocol.union.integration.tezos.data.randomTezosPartDto
+import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktItemService
 import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.mockk
@@ -18,7 +19,7 @@ import reactor.kotlin.core.publisher.toMono
 class TezosItemServiceTest {
 
     private val itemControllerApi: NftItemControllerApi = mockk()
-    private val service = TezosItemService(itemControllerApi)
+    private val service = TezosItemService(itemControllerApi, object: TzktItemService {})
 
     @BeforeEach
     fun beforeEach() {

@@ -1,16 +1,16 @@
 package com.rarible.protocol.union.integration.immutablex.converter
 
+import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.UnionMetaContent
 import com.rarible.protocol.union.dto.MetaAttributeDto
 import com.rarible.protocol.union.dto.MetaContentDto
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexAsset
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
+
 
 object ImmutablexItemMetaConverter {
 
-    private val logger: Logger = LoggerFactory.getLogger(javaClass)
+    private val logger by Logger()
 
     private val contentKeys = setOf("image_url", "image", "animation_url", "youtube_url")
 

@@ -1,0 +1,87 @@
+{
+  "dynamic": "false",
+  "properties": {
+    "@timestamp": {
+      "type": "date"
+    },
+    "itemId": {
+      "type": "keyword"
+    },
+    "blockchain": {
+      "type": "keyword"
+    },
+    "collection": {
+      "type": "keyword"
+    },
+    "name": {
+      "type": "text",
+      "fields": {
+        "english": {
+          "type": "text",
+          "analyzer": "english"
+        },
+        "keyword": {
+          "type": "keyword"
+        }
+      }
+    },
+    "description": {
+      "type": "text",
+      "fields": {
+        "english": {
+          "type": "text",
+          "analyzer": "english"
+        }
+      }
+    },
+    "owner": {
+      "type": "keyword"
+    },
+    "creators": {
+      "type": "keyword"
+    },
+    "traits": {
+      "type": "nested",
+      "properties": {
+        "key": {
+          "type": "text",
+          "fields": {
+            "raw": {
+              "type": "keyword"
+            }
+          },
+          "analyzer": "stemmer_analyzer",
+          "search_analyzer": "stemmer_stop_analyzer",
+          "search_quote_analyzer": "stemmer_analyzer"
+        },
+        "value": {
+          "type": "text",
+          "fields": {
+            "raw": {
+              "type": "keyword"
+            },
+            "numeric": {
+              "type": "double",
+              "ignore_malformed": true,
+              "coerce": true
+            },
+            "date": {
+              "type": "date",
+              "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||MM//dd/yyyy||epoch_millis",
+              "ignore_malformed": true
+            }
+          },
+          "analyzer": "stemmer_analyzer",
+          "search_analyzer": "stemmer_stop_analyzer",
+          "search_quote_analyzer": "stemmer_analyzer"
+        }
+      }
+    },
+    "mintedAt": {
+      "type": "date"
+    },
+    "lastUpdatedAt": {
+      "type": "date"
+    }
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "dynamic": "false",
+  "properties": {
+    "@timestamp": {
+      "type": "date"
+    },
+    "collectionId": {
+      "type": "keyword"
+    },
+    "type": {
+      "type": "keyword"
+    },
+    "name": {
+      "type": "keyword"
+    },
+    "symbol": {
+      "type": "keyword"
+    },
+    "owner": {
+      "type": "keyword"
+    },
+    "parent": {
+      "type": "keyword"
+    },
+    "meta": {
+      "properties": {
+        "name": {
+          "type": "keyword"
+        },
+        "description": {
+          "type": "keyword"
+        },
+        "feeRecipient": {
+          "type": "keyword"
+        }
+      }
+    }
+  }
+}

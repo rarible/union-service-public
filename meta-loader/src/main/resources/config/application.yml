@@ -40,8 +40,8 @@ rarible:
     workers: 4
     loadTasksBatchSize: 10
     retry:
-      # Retry after 5m, 12h, 24h
-      backoffDelaysMillis: [ 300000, 43200000, 86400000 ]
+      # Retry after 5m, 24h
+      backoffDelaysMillis: [ 300000, 86400000 ]
       job:
         runner:
           period: 30000 # Schedule retry tasks every 30s
@@ -88,8 +88,16 @@ integration:
     auctionContracts: ${consul.flow.auctionContracts:}
   tezos:
     enabled: ${consul.tezos.enabled:true}
+    dipdup:
+      enabled: ${consul.tezos.dipdup.enabled:false}
     client:
       url: ${consul.tezos.api.baseUrl}
+    pg:
+      host: ${consul.tezos.pg.host:}
+      port: ${consul.tezos.pg.port:}
+      user: ${consul.tezos.pg.user:}
+      password: ${consul.tezos.pg.password:}
+      database: ${consul.tezos.pg.database:}
     consumer:
       broker-replica-set: ${consul.tezos.kafka.hosts}
       username: ${consul.tezos.kafka.username}

@@ -37,11 +37,11 @@ class ItemApiService(
     private val enrichmentItemService: EnrichmentItemService,
     private val unionMetaService: UnionMetaService,
     private val router: BlockchainRouter<ItemService>
-) {
+) : ItemQueryService {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    suspend fun getAllItems(
+    override suspend fun getAllItems(
         blockchains: List<BlockchainDto>?,
         cursor: String?,
         safeSize: Int,
@@ -57,7 +57,7 @@ class ItemApiService(
         return slices
     }
 
-    suspend fun getItemsByIds(ids: List<ItemIdDto>): List<ItemDto> = coroutineScope {
+    override suspend fun getItemsByIds(ids: List<ItemIdDto>): List<ItemDto> = coroutineScope {
         logger.info("Getting items by IDs: [{}]", ids.map { "${it.blockchain}:${it.value}" })
         val groupedIds = ids.groupBy({ it.blockchain }, { it.value })
 
@@ -70,7 +70,7 @@ class ItemApiService(
         }.awaitAll()
     }
 
-    suspend fun enrich(unionItemsPage: Page<UnionItem>): ItemsDto {
+    override suspend fun enrich(unionItemsPage: Page<UnionItem>): ItemsDto {
         return ItemsDto(
             total = unionItemsPage.total,
             continuation = unionItemsPage.continuation,
@@ -78,7 +78,7 @@ class ItemApiService(
         )
     }
 
-    suspend fun enrich(unionItemsSlice: Slice<UnionItem>, total: Long): ItemsDto {
+    override suspend fun enrich(unionItemsSlice: Slice<UnionItem>, total: Long): ItemsDto {
         return ItemsDto(
             total = total,
             continuation = unionItemsSlice.continuation,
@@ -86,7 +86,7 @@ class ItemApiService(
         )
     }
 
-    suspend fun getAllItemIdsByCollection(collectionId: CollectionIdDto): Flow<ItemIdDto> {
+    override suspend fun getAllItemIdsByCollection(collectionId: CollectionIdDto): Flow<ItemIdDto> {
         val pageSize = PageSize.ITEM.max
         var continuation: String? = null
         var returned = 0L
@@ -169,7 +169,7 @@ class ItemApiService(
         }.awaitAll()
     }
 
-    suspend fun enrich(unionItem: UnionItem): ItemDto {
+    override suspend fun enrich(unionItem: UnionItem): ItemDto {
         val shortId = ShortItemId(unionItem.id)
         val shortItem = enrichmentItemService.get(shortId)
         return enrichmentItemService.enrichItem(shortItem, unionItem)

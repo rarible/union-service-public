@@ -6,12 +6,18 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.rarible.core.application.ApplicationEnvironmentInfo
 import com.rarible.core.kafka.RaribleKafkaConsumer
 import com.rarible.core.kafka.RaribleKafkaProducer
+import com.rarible.core.logging.Logger
 import com.rarible.core.test.ext.KafkaTestExtension
 import com.rarible.protocol.dto.NftItemEventDto
 import com.rarible.protocol.dto.NftItemEventTopicProvider
 import com.rarible.protocol.dto.NftOwnershipEventDto
 import com.rarible.protocol.dto.NftOwnershipEventTopicProvider
 import com.rarible.protocol.union.api.configuration.WebSocketConfiguration
+import com.rarible.protocol.union.core.elasticsearch.EsNameResolver
+import com.rarible.protocol.union.core.elasticsearch.IndexService
+import com.rarible.protocol.union.core.elasticsearch.NoopReindexSchedulingService
+import com.rarible.protocol.union.core.elasticsearch.bootstrap.ElasticsearchBootstrapper
+import com.rarible.protocol.union.core.model.elasticsearch.EsEntitiesConfig
 import com.rarible.protocol.union.dto.FakeSubscriptionEventDto
 import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
@@ -20,23 +26,23 @@ import com.rarible.protocol.union.dto.SubscriptionRequestDto
 import com.rarible.protocol.union.dto.UnionEventTopicProvider
 import com.rarible.protocol.union.subscriber.UnionKafkaJsonDeserializer
 import com.rarible.protocol.union.subscriber.UnionKafkaJsonSerializer
-import java.net.URI
-import java.util.concurrent.LinkedBlockingQueue
 import org.apache.kafka.clients.consumer.OffsetResetStrategy
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.web.context.WebServerInitializedEvent
 import org.springframework.context.ApplicationListener
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
 import org.springframework.core.io.buffer.DefaultDataBufferFactory
+import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations
 import org.springframework.web.reactive.socket.WebSocketMessage
 import org.springframework.web.reactive.socket.client.ReactorNettyWebSocketClient
 import reactor.core.publisher.Sinks
+import java.net.URI
+import java.util.concurrent.LinkedBlockingQueue
 
 @Configuration
 @EnableAutoConfiguration
@@ -59,10 +65,28 @@ class MockContext : ApplicationListener<WebServerInitializedEvent> {
     fun webSocketRequests(): Sinks.Many<List<SubscriptionRequestDto>> = Sinks.many().unicast()
         .onBackpressureBuffer()
 
-   /* @Bean
-    fun applicationEnvironmentInfo(): ApplicationEnvironmentInfo {
-        return ApplicationEnvironmentInfo("test", "test.com")
-    }*/
+    @Bean(initMethod = "bootstrap")
+    @ConditionalOnMissingBean
+    fun elasticsearchBootstrap(
+        reactiveElasticSearchOperations: ReactiveElasticsearchOperations,
+        esNameResolver: EsNameResolver,
+        indexService: IndexService
+    ): ElasticsearchBootstrapper {
+
+        return ElasticsearchBootstrapper(
+            esNameResolver = esNameResolver,
+            esOperations = reactiveElasticSearchOperations,
+            entityDefinitions = EsEntitiesConfig.createEsEntities(),
+            reindexSchedulingService = NoopReindexSchedulingService(indexService),
+            indexService = indexService,
+            forceUpdate = emptySet()
+        )
+    }
+
+    /* @Bean
+     fun applicationEnvironmentInfo(): ApplicationEnvironmentInfo {
+         return ApplicationEnvironmentInfo("test", "test.com")
+     }*/
 
     @Bean
     fun testItemConsumer(): RaribleKafkaConsumer<ItemEventDto> {
@@ -154,16 +178,16 @@ class MockContext : ApplicationListener<WebServerInitializedEvent> {
             })
                 .doOnSubscribe { logger.info("subscribed to ws") }
                 .subscribe(
-                {},
-                { logger.error("ws error", it)},
-                { logger.info("disconnected from ws") }
-            )
+                    {},
+                    { logger.error("ws error", it) },
+                    { logger.info("disconnected from ws") }
+                )
             shutdownMono().asMono()
         }.subscribe()
     }
 
     companion object {
-        val logger: Logger = LoggerFactory.getLogger(MockContext::class.java)
+        private val logger by Logger()
     }
 }
 

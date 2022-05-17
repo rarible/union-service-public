@@ -31,5 +31,59 @@ rarible:
           enabled: false
       annotation:
         enabled: true
+  loader:
+    broker-replica-set: ${kafka.hosts}
+    topicsPrefix: protocol.${application.environment}.union.internal.loader
+    enableNotifications: false
+    enableWorkers: true
+    enableRetrySchedulerJob: false
+    workers: 4
+    loadTasksBatchSize: 10
+    retry:
+      # Retry after 5m, 12h, 24h
+      backoffDelaysMillis: [ 300000, 43200000, 86400000 ]
+      job:
+        runner:
+          period: 30000 # Schedule retry tasks every 30s
+common:
+  producer:
+    broker-replica-set: ${kafka.hosts}
+meta:
+  ipfsGateway: "https://ipfs.io,https://nftstorage.link"
+  ipfsPublicGateway: "https://ipfs.io"
+  ipfsLegacyGateway: "https://rarible.mypinata.cloud"
+  mediaFetchTimeout: 10000
+  mediaFetchMaxSize: 131072 # 128 Kb
+  openSeaProxyUrl: ${consul.meta.openSeaProxyUrl}
+  http-client:
+    type: KTOR_CIO # KTOR_APACHE, KTOR_CIO
+    thread-count: 1
+    time-out: 10000
+    total-connection: 1000
 
-reindexer:
+worker:
+  search-reindex:
+    activity:
+      enabled: true
+      blockchains:
+        - blockchain: ETHEREUM
+          enabled: true
+        - blockchain: POLYGON
+          enabled: true
+        - blockchain: FLOW
+          enabled: true
+        - blockchain: TEZOS
+          enabled: true
+        - blockchain: SOLANA
+          enabled: true
+        - blockchain: IMMUTABLEX
+          enabled: false
+    order:
+      enabled: false
+      blockchains:
+    collection:
+      enabled: false
+      blockchains:
+    ownership:
+      enabled: false
+      blockchains:
