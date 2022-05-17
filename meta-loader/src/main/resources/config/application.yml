@@ -90,6 +90,7 @@ integration:
     enabled: ${consul.tezos.enabled:true}
     dipdup:
       enabled: ${consul.tezos.dipdup.enabled:false}
+      network: ${consul.tezos.dipdup.network:}
     client:
       url: ${consul.tezos.api.baseUrl}
     pg:

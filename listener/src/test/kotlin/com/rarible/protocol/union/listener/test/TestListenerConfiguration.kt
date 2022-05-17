@@ -186,7 +186,7 @@ class TestListenerConfiguration {
             clientId = "test.union.ethereum.order",
             valueSerializerClass = UnionKafkaJsonSerializer::class.java,
             valueClass = DipDupOrder::class.java,
-            defaultTopic = DipDupTopicProvider.ORDER,
+            defaultTopic = "${DipDupTopicProvider.ORDER}_",
             bootstrapServers = kafkaContainer.kafkaBoostrapServers()
         )
     }
@@ -197,7 +197,7 @@ class TestListenerConfiguration {
             clientId = "test.union.ethereum.activity",
             valueSerializerClass = UnionKafkaJsonSerializer::class.java,
             valueClass = DipDupActivity::class.java,
-            defaultTopic = DipDupTopicProvider.ACTIVITY,
+            defaultTopic = "${DipDupTopicProvider.ACTIVITY}_",
             bootstrapServers = kafkaContainer.kafkaBoostrapServers()
         )
     }

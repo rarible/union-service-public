@@ -46,6 +46,7 @@ class DipDupConsumerConfiguration(
     @Bean
     fun dipDupConsumerFactory(): DipDupEventsConsumerFactory {
         return DipDupEventsConsumerFactory(
+            dipDupProperties.network,
             dipDupProperties.consumer!!.brokerReplicaSet!!,
             host,
             env,
