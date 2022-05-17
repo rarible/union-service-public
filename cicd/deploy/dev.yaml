@@ -11,7 +11,6 @@ protocol-union-meta-loader:
       max_direct_memory_megabytes: 128
 
 protocol-union-indexer:
-  enabled: true
   replicas: 1
   resources:
     jvm:
