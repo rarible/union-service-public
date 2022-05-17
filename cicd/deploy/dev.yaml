@@ -19,7 +19,6 @@ protocol-union-indexer:
       max_direct_memory_megabytes: 128
 
 protocol-union-worker:
-  enabled: true
   replicas: 1
   resources:
     jvm:
