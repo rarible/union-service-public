@@ -106,6 +106,13 @@ integration:
         royaltiesManager: ${consul.tezos.dipdup.knownAddresses.royaltiesManager:}
         bidou8x8: ${consul.tezos.dipdup.knownAddresses.bidou8x8:}
         bidou24x24: ${consul.tezos.dipdup.knownAddresses.bidou24x24:}
+      consumer:
+        broker-replica-set: ${consul.tezos.dipdup.consumer.hosts:}
+        username: ${consul.tezos.dipdup.consumer.username:}
+        password: ${consul.tezos.dipdup.consumer.password:}
+        workers:
+          order: 1
+          activity: 1
     client:
       url: ${consul.tezos.api.baseUrl}
     pg:
