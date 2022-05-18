@@ -44,6 +44,7 @@
         <r2dbc.version>0.8.12.RELEASE</r2dbc.version>
         <spring.data.r2dbc>2.5.7</spring.data.r2dbc>
         <postgresql.version>42.3.4</postgresql.version>
+        <okhttp.version>4.9.3</okhttp.version>
 
         <rarible.core.version>2.3.79</rarible.core.version>
         <rarible.ethereum.version>1.4.0</rarible.ethereum.version>
@@ -351,6 +352,22 @@
                 <groupId>com.rarible.protocol.tezos</groupId>
                 <artifactId>tzkt-client</artifactId>
                 <version>${rarible.protocol.tezos.api.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.squareup.okhttp3</groupId>
+                <artifactId>okhttp</artifactId>
+                <version>${okhttp.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.squareup.okhttp3</groupId>
+                <artifactId>logging-interceptor</artifactId>
+                <version>${okhttp.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.squareup.okhttp3</groupId>
+                <artifactId>mockwebserver</artifactId>
+                <version>${okhttp.version}</version>
+                <scope>test</scope>
             </dependency>
 
             <!-- Tezos-legacy -->
