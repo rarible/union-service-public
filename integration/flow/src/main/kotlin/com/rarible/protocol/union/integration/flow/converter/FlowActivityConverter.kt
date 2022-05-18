@@ -216,6 +216,7 @@ class FlowActivityConverter(
                     reverted = false
                 )
             }
+            else -> throw IllegalStateException("Unsupported flow activity! $source")
         }
     }
 

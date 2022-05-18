@@ -10,6 +10,7 @@ data class EsCollection(
     @Id
     val collectionId: String,
     val type: String,
+    val blockchain: String,
     val name: String,
     val symbol: String? = null,
     val owner: String? = null,

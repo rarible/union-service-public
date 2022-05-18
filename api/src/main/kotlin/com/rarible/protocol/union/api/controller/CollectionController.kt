@@ -1,33 +1,27 @@
 package com.rarible.protocol.union.api.controller
 
-import com.rarible.protocol.union.api.util.BlockchainFilter
-import com.rarible.protocol.union.api.service.CollectionApiService
+import com.rarible.protocol.union.api.service.CollectionQueryService
 import com.rarible.protocol.union.api.service.ItemApiService
-import com.rarible.protocol.union.core.continuation.UnionCollectionContinuation
-import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.core.service.CollectionService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.dto.CollectionsDto
-import com.rarible.protocol.union.dto.continuation.page.ArgPaging
-import com.rarible.protocol.union.dto.continuation.page.Page
-import com.rarible.protocol.union.dto.continuation.page.PageSize
-import com.rarible.protocol.union.dto.continuation.page.Paging
-import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.meta.UnionMetaService
 import com.rarible.protocol.union.enrichment.model.ShortCollectionId
 import com.rarible.protocol.union.enrichment.service.EnrichmentCollectionService
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.collect
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.RestController
-import kotlinx.coroutines.flow.collect
 
+@ExperimentalCoroutinesApi
 @RestController
 class CollectionController(
     private val router: BlockchainRouter<CollectionService>,
-    private val collectionApiService: CollectionApiService,
+    private val collectionApiService: CollectionQueryService,
     private val itemApiService: ItemApiService,
     private val unionMetaService: UnionMetaService,
     private val enrichmentCollectionService: EnrichmentCollectionService
@@ -40,17 +34,7 @@ class CollectionController(
         continuation: String?,
         size: Int?
     ): ResponseEntity<CollectionsDto> {
-        val safeSize = PageSize.COLLECTION.limit(size)
-        val slices = collectionApiService.getAllCollections(blockchains, continuation, safeSize)
-        val total = slices.sumOf { it.page.total }
-        val arg = ArgPaging(UnionCollectionContinuation.ById, slices.map { it.toSlice() }).getSlice(safeSize)
-
-        logger.info("Response for getAllCollections(blockchains={}, continuation={}, size={}):" +
-                " Page(size={}, total={}, continuation={}) from blockchain pages {} ",
-            blockchains, continuation, size, arg.entities.size, total,
-            arg.continuation, slices.map { it.page.entities.size }
-        )
-        val result = toDto(arg, total)
+        val result = collectionApiService.getAllCollections(blockchains, continuation, size)
         return ResponseEntity.ok(result)
     }
 
@@ -79,42 +63,8 @@ class CollectionController(
         continuation: String?,
         size: Int?
     ): ResponseEntity<CollectionsDto> {
-        val safeSize = PageSize.COLLECTION.limit(size)
-        val ownerAddress = IdParser.parseAddress(owner)
-        val filter = BlockchainFilter(blockchains)
-        val blockchainPages = router.executeForAll(filter.exclude(ownerAddress.blockchainGroup)) {
-            it.getCollectionsByOwner(ownerAddress.value, continuation, safeSize)
-        }
-
-        val total = blockchainPages.sumOf { it.total }
-
-        val combinedPage = Paging(
-            UnionCollectionContinuation.ById,
-            blockchainPages.flatMap { it.entities }
-        ).getPage(safeSize, total)
-
-        logger.info(
-            "Response for getCollectionsByOwner(owner={}, continuation={}, size={}):" +
-                    " Page(size={}, total={}, continuation={})",
-            owner, continuation, size, combinedPage.entities.size, combinedPage.total, combinedPage.continuation
-        )
-        return ResponseEntity.ok(toDto(combinedPage))
-    }
-
-    private suspend fun toDto(page: Page<UnionCollection>): CollectionsDto {
-        return CollectionsDto(
-            total = page.total,
-            continuation = page.continuation,
-            collections = collectionApiService.enrich(page).collections
-        )
-    }
-
-    private suspend fun toDto(page: Slice<UnionCollection>, total: Long): CollectionsDto {
-        return CollectionsDto(
-            total = total,
-            continuation = page.continuation,
-            collections = collectionApiService.enrich(page, total).collections
-        )
+        val result = collectionApiService.getCollectionsByOwner(owner, blockchains, continuation, size)
+        return ResponseEntity.ok(result)
     }
 
 }

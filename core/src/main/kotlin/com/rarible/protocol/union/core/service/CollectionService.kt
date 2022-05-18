@@ -24,4 +24,7 @@ interface CollectionService : BlockchainService {
     suspend fun refreshCollectionMeta(
         collectionId: String
     )
+
+    suspend fun getCollectionsByIds(ids: List<String>): Page<UnionCollection>
+
 }

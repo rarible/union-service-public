@@ -35,6 +35,11 @@ open class FlowCollectionService(
         // TODO[FLOW]: implement.
     }
 
+    override suspend fun getCollectionsByIds(ids: List<String>): Page<UnionCollection> {
+        val collections = collectionControllerApi.searchNftCollectionsByIds(ids).awaitSingle()
+        return FlowCollectionConverter.convert(collections, blockchain)
+    }
+
     override suspend fun getCollectionsByOwner(
         owner: String,
         continuation: String?,

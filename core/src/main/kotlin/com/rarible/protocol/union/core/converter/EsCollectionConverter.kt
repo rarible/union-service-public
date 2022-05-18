@@ -9,6 +9,7 @@ object EsCollectionConverter {
         return EsCollection(
             collectionId = collection.id.fullId(),
             type = collection.type.name,
+            blockchain = collection.blockchain.name,
             name = collection.name,
             symbol = collection.symbol,
             owner = collection.owner?.fullId(),
