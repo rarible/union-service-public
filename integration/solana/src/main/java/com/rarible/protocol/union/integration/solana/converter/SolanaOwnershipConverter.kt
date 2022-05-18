@@ -26,6 +26,7 @@ object SolanaOwnershipConverter {
             collection = balance.collection?.let { CollectionIdDto(blockchain, it) },
             value = balance.value,
             createdAt = balance.createdAt,
+            lastUpdatedAt = balance.updatedAt,
             creators = emptyList(),
             lazyValue = BigInteger.ZERO,
             pending = emptyList()

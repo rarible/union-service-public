@@ -58,7 +58,8 @@ internal class ImmutablexOwnershipServiceTest {
                 CollectionIdDto(BlockchainDto.IMMUTABLEX, ImmutablexData.contract_1),
                 BigInteger.ONE,
                 ImmutablexData.item_1.createdAt!!,
-                lazyValue = BigInteger.ZERO
+                lazyValue = BigInteger.ZERO,
+                lastUpdatedAt = ImmutablexData.item_1.updatedAt!!
             )
         )
     }
@@ -87,7 +88,8 @@ internal class ImmutablexOwnershipServiceTest {
                         CollectionIdDto(BlockchainDto.IMMUTABLEX, ImmutablexData.contract_1),
                         BigInteger.ONE,
                         ImmutablexData.item_1.createdAt!!,
-                        lazyValue = BigInteger.ZERO
+                        lazyValue = BigInteger.ZERO,
+                        lastUpdatedAt = ImmutablexData.item_1.updatedAt!!,
                     )
                 )
             )

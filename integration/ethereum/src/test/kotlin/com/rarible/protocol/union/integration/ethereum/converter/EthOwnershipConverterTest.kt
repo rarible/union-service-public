@@ -18,6 +18,7 @@ class EthOwnershipConverterTest {
         assertThat(converted.value).isEqualTo(dto.value)
         assertThat(converted.collection!!.value).isEqualTo(dto.contract.prefixed())
         assertThat(converted.createdAt).isEqualTo(dto.date)
+        assertThat(converted.lastUpdatedAt).isEqualTo(dto.lastUpdatedAt)
         assertThat(converted.lazyValue).isEqualTo(dto.lazyValue)
         assertThat(converted.creators[0].account.value).isEqualTo(dto.creators!![0].account.prefixed())
         assertThat(converted.creators[0].value).isEqualTo(dto.creators!![0].value)

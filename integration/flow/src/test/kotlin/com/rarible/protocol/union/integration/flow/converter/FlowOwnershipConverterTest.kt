@@ -16,6 +16,7 @@ class FlowOwnershipConverterTest {
 
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.createdAt).isEqualTo(dto.createdAt)
+        assertThat(converted.lastUpdatedAt).isNull() // TODO FLOW update later
         assertThat(converted.value).isEqualTo(BigInteger.ONE)
         assertThat(converted.collection!!.value).isEqualTo(dto.contract)
 
