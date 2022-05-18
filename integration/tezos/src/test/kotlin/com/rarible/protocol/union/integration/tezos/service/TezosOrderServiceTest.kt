@@ -222,16 +222,16 @@ class TezosOrderServiceTest {
             makePrice = BigDecimal.ONE,
             maker = UUID.randomUUID().toString(),
             make = Asset(
-                type = Asset.NFT(
+                assetType = Asset.NFT(
                     contract = UUID.randomUUID().toString(),
                     tokenId = BigInteger.ONE
                 ),
-                value = BigDecimal.ONE
+                assetValue = BigDecimal.ONE
             ),
             taker = null,
             take = Asset(
-                type = Asset.XTZ(),
-                value = BigDecimal.ONE
+                assetType = Asset.XTZ(),
+                assetValue = BigDecimal.ONE
             ),
             cancelled = false,
             salt = BigInteger.ONE

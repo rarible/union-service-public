@@ -24,8 +24,8 @@ object DipDupConverter {
 
     fun convert(source: Asset, blockchain: BlockchainDto): AssetDto {
         return AssetDto(
-            type = convert(source = source.type, blockchain = blockchain),
-            value = source.value
+            type = convert(source = source.assetType, blockchain = blockchain),
+            value = source.assetValue
         )
     }
 

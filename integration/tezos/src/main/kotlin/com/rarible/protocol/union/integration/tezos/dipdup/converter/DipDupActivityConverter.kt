@@ -68,8 +68,8 @@ class DipDupActivityConverter(
                 )
             }
             is DipDupOrderCancelActivity -> {
-                val make = DipDupConverter.convert(activity.make.type, blockchain)
-                val take = DipDupConverter.convert(activity.take.type, blockchain)
+                val make = DipDupConverter.convert(activity.make.assetType, blockchain)
+                val take = DipDupConverter.convert(activity.take.assetType, blockchain)
 
                 OrderCancelListActivityDto(
                     id = activityId,
