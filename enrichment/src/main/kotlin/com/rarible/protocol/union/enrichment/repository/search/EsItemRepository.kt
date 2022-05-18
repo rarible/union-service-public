@@ -94,7 +94,7 @@ class EsItemRepository(
 
         return EsItemQueryResult(
             items = items,
-            continuation = continuationString
+            cursor = continuationString
         )
     }
 

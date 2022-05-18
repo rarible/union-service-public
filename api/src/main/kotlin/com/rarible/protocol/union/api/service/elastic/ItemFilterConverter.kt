@@ -39,4 +39,37 @@ class ItemFilterConverter(
             updatedTo = lastUpdatedTo?.let { Instant.ofEpochMilli(it) },
         )
     }
+
+    fun getItemsByCollection(collectionId: String, curor: EsItemCursor?): ElasticItemFilter {
+
+        return ElasticItemFilter(
+            cursor = curor,
+            collections = setOf(collectionId)
+        )
+    }
+
+    fun getItemsByOwner(owner: String, blockchains: Set<String>?, curor: EsItemCursor?): ElasticItemFilter {
+
+        return ElasticItemFilter(
+            cursor = curor,
+            owners = setOf(owner),
+            blockchains = blockchains
+        )
+    }
+
+    fun getItemsByCreator(creator: String, curor: EsItemCursor?): ElasticItemFilter {
+
+        return ElasticItemFilter(
+            cursor = curor,
+            creators = setOf(creator)
+        )
+    }
+
+    fun getAllItemIdsByCollection(collectionId: String, curor: EsItemCursor?): ElasticItemFilter {
+
+        return ElasticItemFilter(
+            cursor = curor,
+            collections = setOf(collectionId)
+        )
+    }
 }

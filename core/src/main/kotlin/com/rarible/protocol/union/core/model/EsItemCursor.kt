@@ -4,11 +4,11 @@ import com.rarible.core.logging.Logger
 import java.time.Instant
 
 data class EsItemCursor(
-    val date: Instant,
+    val date: Instant? = null,
     val itemId: String?,
 ) {
     override fun toString(): String {
-        return "${date.toEpochMilli()}_${itemId}"
+        return "${date?.toEpochMilli()}_${itemId}"
     }
 
     companion object {

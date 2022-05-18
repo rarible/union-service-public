@@ -1,35 +1,44 @@
 package com.rarible.protocol.union.api.service
 
-import com.rarible.protocol.union.core.model.UnionItem
-import com.rarible.protocol.union.dto.ActivitiesDto
-import com.rarible.protocol.union.dto.ActivitySortDto
-import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.ItemsDto
-import com.rarible.protocol.union.dto.UserActivityTypeDto
-import com.rarible.protocol.union.dto.continuation.page.ArgPage
-import com.rarible.protocol.union.dto.continuation.page.Page
-import com.rarible.protocol.union.dto.continuation.page.Slice
+import com.rarible.protocol.union.dto.ItemsWithOwnershipDto
 import kotlinx.coroutines.flow.Flow
-import java.time.Instant
 
 interface ItemQueryService {
 
     suspend fun getAllItems(
         blockchains: List<BlockchainDto>?,
-        cursor: String?,
-        safeSize: Int,
+        continuation: String?,
+        size: Int?,
         showDeleted: Boolean?,
         lastUpdatedFrom: Long?,
         lastUpdatedTo: Long?
-    ): List<ArgPage<UnionItem>>
+    ): ItemsDto
 
     suspend fun getAllItemIdsByCollection(collectionId: CollectionIdDto): Flow<ItemIdDto>
     suspend fun getItemsByIds(ids: List<ItemIdDto>): List<ItemDto>
-    suspend fun enrich(unionItemsPage: Page<UnionItem>): ItemsDto
-    suspend fun enrich(unionItemsSlice: Slice<UnionItem>, total: Long): ItemsDto
-    suspend fun enrich(unionItem: UnionItem): ItemDto
+    suspend fun getItemsByCollection(collection: String, continuation: String?, size: Int?): ItemsDto
+    suspend fun getItemsByCreator(
+        creator: String,
+        blockchains: List<BlockchainDto>?,
+        continuation: String?,
+        size: Int?
+    ): ItemsDto
+
+    suspend fun getItemsByOwner(
+        owner: String,
+        blockchains: List<BlockchainDto>?,
+        continuation: String?,
+        size: Int?
+    ): ItemsDto
+
+    suspend fun getItemsByOwnerWithOwnership(
+        owner: String,
+        continuation: String?,
+        size: Int?
+    ): ItemsWithOwnershipDto
 }

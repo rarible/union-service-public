@@ -7,6 +7,7 @@ import com.rarible.core.daemon.sequential.ConsumerBatchWorker
 import com.rarible.core.daemon.sequential.ConsumerWorkerHolder
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.CollectionEventDto
+import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.OrderEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.search.indexer.metrics.MetricConsumerBatchEventHandlerFactory
@@ -28,6 +29,7 @@ class KafkaConsumerConfiguration(
         const val ACTIVITY = "activity"
         const val ORDER = "order"
         const val COLLECTION = "collection"
+        const val ITEM = "collection"
         const val OWNERSHIP = "ownership"
     }
 
@@ -78,7 +80,7 @@ class KafkaConsumerConfiguration(
     @Bean
     @ConditionalOnProperty(prefix = "handler.collection", name = ["enabled"], havingValue = "true")
     fun collectionWorker(handler: ConsumerBatchEventHandler<CollectionEventDto>): ConsumerWorkerHolder<CollectionEventDto> {
-        val workers = (1..kafkaProperties.workerCount).map {i ->
+        val workers = (1..kafkaProperties.workerCount).map { i ->
             val consumer = consumerFactory.createCollectionConsumer(consumerGroup(COLLECTION))
             ConsumerBatchWorker(
                 consumer = consumer,
@@ -87,7 +89,23 @@ class KafkaConsumerConfiguration(
                 properties = kafkaProperties.daemon,
                 retryProperties = RetryProperties(attempts = Int.MAX_VALUE, delay = Duration.ofSeconds(1L)),
                 meterRegistry = meterRegistry
-           )
+            )
+        }
+        return ConsumerWorkerHolder(workers)
+    }
+
+    @Bean
+    fun itemWorker(handler: ConsumerBatchEventHandler<ItemEventDto>): ConsumerWorkerHolder<ItemEventDto> {
+        val workers = (1..kafkaProperties.workerCount).map { i ->
+            val consumer = consumerFactory.createItemConsumer(consumerGroup(ITEM))
+            ConsumerBatchWorker(
+                consumer = consumer,
+                eventHandler = handler,
+                workerName = worker(ITEM, i),
+                properties = kafkaProperties.daemon,
+                retryProperties = RetryProperties(attempts = Int.MAX_VALUE, delay = Duration.ofSeconds(1L)),
+                meterRegistry = meterRegistry
+            )
         }
         return ConsumerWorkerHolder(workers)
     }
