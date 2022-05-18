@@ -21,7 +21,6 @@ import com.rarible.protocol.union.integration.tezos.dipdup.event.DipDupTransfers
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktItemService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktOwnershipService
 import org.apache.commons.lang3.StringUtils
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.DependsOn
 import org.springframework.context.annotation.Import
@@ -31,8 +30,6 @@ import org.springframework.context.annotation.Import
 class DipDupConsumerConfiguration(
     applicationEnvironmentInfo: ApplicationEnvironmentInfo,
     properties: TezosIntegrationProperties,
-    @Value("\${rarible.core.client.k8s:false}")
-    private val k8s: Boolean,
     private val dipDupProperties: DipDupIntegrationProperties,
     private val consumerFactory: ConsumerFactory
 ) {
@@ -70,7 +67,7 @@ class DipDupConsumerConfiguration(
         factory: DipDupEventsConsumerFactory,
         handler: DipDupOrderEventHandler
     ): KafkaConsumerWorker<DipDupOrder> {
-        val consumer = factory.createOrderConsumer(consumerGroup(consumerFactory.activityGroup))
+        val consumer = factory.createOrderConsumer(dipdupGroup(consumerFactory.activityGroup))
         return consumerFactory.createOrderConsumer(consumer, handler, daemon, workers)
     }
 
@@ -99,16 +96,9 @@ class DipDupConsumerConfiguration(
         factory: DipDupEventsConsumerFactory,
         handler: DipDupActivityEventHandler
     ): KafkaConsumerWorker<DipDupActivity> {
-        val consumer = factory.createActivityConsumer(consumerGroup(consumerFactory.activityGroup))
+        val consumer = factory.createActivityConsumer(dipdupGroup(consumerFactory.activityGroup))
         return consumerFactory.createActivityConsumer(consumer, handler, daemon, workers)
     }
 
-    private fun consumerGroup(group: String): String {
-        // Since Tezos has kafka outside our cluster and several envs uses same topics, groupId should be customized
-        return if (k8s) {
-            "k8s.$group"
-        } else {
-            group
-        }
-    }
+    private fun dipdupGroup(group: String) = "dipdup.$group"
 }
