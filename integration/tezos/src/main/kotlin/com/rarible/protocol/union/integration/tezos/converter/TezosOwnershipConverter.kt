@@ -37,6 +37,7 @@ object TezosOwnershipConverter {
             collection = CollectionIdDto(blockchain, ownership.contract),
             value = ownership.value,
             createdAt = ownership.createdAt,
+            lastUpdatedAt = null, // TODO TEZOS add field
             creators = ownership.creators.map { TezosConverter.convertToCreator(it, blockchain) },
             lazyValue = ownership.lazyValue,
             pending = emptyList() // In Union we won't use this field for Tezos

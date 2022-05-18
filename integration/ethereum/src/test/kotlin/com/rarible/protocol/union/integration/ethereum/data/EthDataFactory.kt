@@ -191,6 +191,7 @@ fun randomEthOwnershipDto(itemId: ItemIdDto, creator: PartDto): NftOwnershipDto 
         value = randomBigInt(),
         lazyValue = randomBigInt(),
         date = nowMillis(),
+        lastUpdatedAt = nowMillis().plusSeconds(1),
         pending = listOf(randomEthItemTransferDto())
     )
 }
