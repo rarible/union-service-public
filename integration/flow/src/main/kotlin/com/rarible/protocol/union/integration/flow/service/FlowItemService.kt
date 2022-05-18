@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.integration.flow.service
 
 import com.rarible.core.apm.CaptureSpan
+import com.rarible.protocol.dto.FlowItemIdsDto
 import com.rarible.protocol.flow.nft.api.client.FlowNftItemControllerApi
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.UnionMeta
@@ -12,6 +13,7 @@ import com.rarible.protocol.union.dto.continuation.page.Page
 import com.rarible.protocol.union.integration.flow.converter.FlowItemConverter
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
+import kotlinx.coroutines.reactive.awaitSingle
 import org.springframework.http.HttpStatus
 import org.springframework.web.reactive.function.client.WebClientResponseException
 
@@ -100,7 +102,8 @@ open class FlowItemService(
     }
 
     override suspend fun getItemsByIds(itemIds: List<String>): List<UnionItem> {
-        return emptyList()
+        val items = flowNftItemControllerApi.getItemByIds(FlowItemIdsDto(itemIds)).awaitSingle().items
+        return items.map { FlowItemConverter.convert(it, blockchain) }
     }
 
 }
