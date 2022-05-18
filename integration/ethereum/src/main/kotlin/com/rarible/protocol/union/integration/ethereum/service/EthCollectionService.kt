@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.integration.ethereum.service
 
 import com.rarible.core.apm.CaptureSpan
+import com.rarible.protocol.dto.CollectionsByIdRequestDto
 import com.rarible.protocol.nft.api.client.NftCollectionControllerApi
 import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.core.service.CollectionService
@@ -38,7 +39,7 @@ open class EthCollectionService(
     }
 
     override suspend fun getCollectionsByIds(ids: List<String>): Page<UnionCollection> {
-        val collections = collectionControllerApi.searchNftCollectionsByIds(ids).awaitSingle()
+        val collections = collectionControllerApi.getNftCollectionsByIds(CollectionsByIdRequestDto(ids)).awaitSingle()
         return EthCollectionConverter.convert(collections, blockchain)
     }
 

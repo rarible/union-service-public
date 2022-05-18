@@ -13,7 +13,7 @@ class EsCollectionRepository(
     private val esOperations: ReactiveElasticsearchOperations,
     esNameResolver: EsNameResolver
 ) {
-    val entityDefinition = esNameResolver.createEntityDefinitionExtended(EsOrder.ENTITY_DEFINITION)
+    val entityDefinition = esNameResolver.createEntityDefinitionExtended(EsCollection.ENTITY_DEFINITION)
     private val clazz = EsCollection::class.java
 
     suspend fun saveAll(collections: List<EsCollection>): List<EsCollection> {
