@@ -47,6 +47,7 @@ object TzktOwnershipConverter {
             collection = CollectionIdDto(blockchain, contract),
             value = BigInteger(ownership.balance),
             createdAt = ownership.firstTime.toInstant(),
+            lastUpdatedAt = ownership.lastTime.toInstant(),
             creators = emptyList(), // Deprecated field
             lazyValue = BigInteger.ZERO, // lazy isn't supported yet
             pending = emptyList() // In Union we won't use this field for Tezos
