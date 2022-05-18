@@ -18,12 +18,12 @@ import org.springframework.test.context.ActiveProfiles
 @MongoTest
 @MongoCleanup
 @ElasticsearchTest
-@EnableAutoConfiguration(
-    exclude = [
-        // duplicate beans
-        SolanaApiClientAutoConfiguration::class
-    ]
-)
+//@EnableAutoConfiguration(
+//    exclude = [
+//        // duplicate beans
+//        SolanaApiClientAutoConfiguration::class
+//    ]
+//)
 @SpringBootTest(
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     properties = [
