@@ -67,7 +67,7 @@ class DipDupConsumerConfiguration(
         factory: DipDupEventsConsumerFactory,
         handler: DipDupOrderEventHandler
     ): KafkaConsumerWorker<DipDupOrder> {
-        val consumer = factory.createOrderConsumer(dipdupGroup(consumerFactory.activityGroup))
+        val consumer = factory.createOrderConsumer(dipdupGroup(consumerFactory.orderGroup))
         return consumerFactory.createOrderConsumer(consumer, handler, daemon, workers)
     }
 
