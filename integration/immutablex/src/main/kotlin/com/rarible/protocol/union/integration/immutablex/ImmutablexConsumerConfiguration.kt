@@ -15,10 +15,12 @@ import com.rarible.protocol.union.integration.immutablex.handlers.ImmutablexOwne
 import com.rarible.protocol.union.integration.immutablex.service.ImmutablexOrderService
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
+import org.springframework.data.mongodb.config.EnableMongoAuditing
 import org.springframework.data.mongodb.core.MongoTemplate
 
 @ImmutablexConfiguration
 @Import(ImmutablexApiConfiguration::class)
+@EnableMongoAuditing
 class ImmutablexConsumerConfiguration {
 
     @Bean

@@ -10,9 +10,9 @@ import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.RoyaltyDto
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexAsset
-import scalether.domain.Address
 import java.math.BigDecimal
 import java.math.BigInteger
+import scalether.domain.Address
 
 object ImmutablexItemConverter {
 
@@ -30,7 +30,7 @@ object ImmutablexItemConverter {
     private fun convertInternal(asset: ImmutablexAsset, blockchain: BlockchainDto): UnionItem {
         val deleted = asset.user!! == "${Address.ZERO()}"
         return UnionItem(
-            id = ItemIdDto(BlockchainDto.IMMUTABLEX, contract = asset.tokenAddress, tokenId = asset.tokenId),
+            id = ItemIdDto(BlockchainDto.IMMUTABLEX, contract = asset.tokenAddress, tokenId = asset.tokenId()),
             collection = CollectionIdDto(blockchain, asset.tokenAddress),
             creators = emptyList(), //filling outside of converter
             lazySupply = BigInteger.ZERO,

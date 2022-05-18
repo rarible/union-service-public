@@ -1,9 +1,13 @@
 package com.rarible.protocol.union.integration.immutablex.client
 
-import com.rarible.protocol.union.integration.immutablex.dto.*
-import kotlinx.coroutines.Dispatchers
+import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexDeposit
+import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexMint
+import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexOrder
+import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexPage
+import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexTrade
+import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexTransfer
+import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexWithdrawal
 import kotlinx.coroutines.reactor.awaitSingle
-import kotlinx.coroutines.withContext
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.toEntity
 import org.springframework.web.util.UriBuilder
@@ -16,7 +20,6 @@ class EventsApi(
         return webClient.get().uri { builder ->
             builder.path("/mints")
             builder.defaultQueryParams()
-            builder.queryParam("include_fees", true)
             if (cursor != null) {
                 builder.queryParam("cursor", cursor)
             }

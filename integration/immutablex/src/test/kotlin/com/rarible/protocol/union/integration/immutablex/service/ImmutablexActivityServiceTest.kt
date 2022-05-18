@@ -97,7 +97,7 @@ internal class ImmutablexActivityServiceTest {
                 Assertions.assertEquals(page.entities.size, 1)
                 val activity = page.entities.single() as MintActivityDto
                 val expected = expectedMintActivity.result.single()
-                Assertions.assertEquals(activity.tokenId, expected.token.data.tokenId!!.toBigInteger())
+                Assertions.assertEquals(activity.tokenId, expected.token.data.tokenId())
                 Assertions.assertEquals(activity.owner.value, expected.user)
             }
 
@@ -115,8 +115,8 @@ internal class ImmutablexActivityServiceTest {
                 Assertions.assertEquals(page.entities.size, 1)
                 val activity = page.entities.single() as TransferActivityDto
                 val expected = expectedTransfersActivity.result.single()
-                Assertions.assertEquals(activity.tokenId, expected.token.data.tokenId!!.toBigInteger())
-                Assertions.assertEquals(activity.value, expected.token.data.quantity?.toBigInteger())
+                Assertions.assertEquals(activity.tokenId, expected.token.data.tokenId())
+                Assertions.assertEquals(activity.value, expected.token.data.quantity)
                 Assertions.assertEquals(activity.from.value, expected.user)
                 Assertions.assertEquals(activity.owner.value, expected.receiver)
             }
@@ -124,11 +124,11 @@ internal class ImmutablexActivityServiceTest {
 
     @Test
     fun getActivitiesByItem() = runBlocking {
-        val itemId = expectedMintActivity.result.single().token.data.tokenId!!
+        val itemId = expectedMintActivity.result.single().token.data.tokenId()
 
         service.getActivitiesByItem(
             listOf(ActivityTypeDto.MINT),
-            itemId,
+            "$itemId",
             null,
             50,
             null

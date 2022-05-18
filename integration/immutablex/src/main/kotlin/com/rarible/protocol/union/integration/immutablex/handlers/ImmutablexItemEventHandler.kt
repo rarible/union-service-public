@@ -10,13 +10,11 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.CreatorDto
 import com.rarible.protocol.union.dto.ItemIdDto
-import com.rarible.protocol.union.dto.RoyaltyDto
 import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.group
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexEvent
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexMint
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexTransfer
-import java.math.BigDecimal
 import java.math.BigInteger
 import scalether.domain.Address
 
@@ -24,15 +22,11 @@ class ImmutablexItemEventHandler(
     override val handler: IncomingEventHandler<UnionItemEvent>,
 ): AbstractBlockchainEventHandler<ImmutablexEvent, UnionItemEvent>(BlockchainDto.IMMUTABLEX) {
 
-    private fun toBasePoints(v: BigDecimal): Int {
-        return v.multiply(BigDecimal(10000)).toInt()
-    }
-
     override suspend fun handle(event: ImmutablexEvent) {
         val itemEvent = when (event) {
             is ImmutablexMint -> {
                 val itemId =
-                    ItemIdDto(blockchain, event.token.data.tokenAddress!!, event.token.data.tokenId!!.toBigInteger())
+                    ItemIdDto(blockchain, event.token.data.tokenAddress, event.token.data.tokenId())
                 UnionItemUpdateEvent(
                     itemId = itemId,
                     item = UnionItem(
@@ -55,7 +49,7 @@ class ImmutablexItemEventHandler(
             is ImmutablexTransfer -> {
                 if (event.user == Address.ZERO().hex()) {
                     val itemId =
-                        ItemIdDto(blockchain, event.token.data.tokenAddress!!, event.token.data.tokenId!!.toBigInteger())
+                        ItemIdDto(blockchain, event.token.data.tokenAddress, event.token.data.tokenId())
                     UnionItemDeleteEvent(itemId)
                 } else null
 

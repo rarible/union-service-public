@@ -18,7 +18,7 @@ class ImmutablexItemServiceTest {
 
     private val mapper = jacksonObjectMapper().registerModule(JavaTimeModule())
 
-    private val itemId = "0xacb3c6a43d15b907e8433077b6d38ae40936fe2c:51267701"
+    private val itemId = "0xacb3c6a43d15b907e8433077b6d38ae40936fe2c:3832899966304989233"
 
     private val fullItemId = "${BlockchainDto.IMMUTABLEX}:$itemId"
 

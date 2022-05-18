@@ -18,6 +18,10 @@ spring:
   main:
     banner-mode: log
     web-application-type: reactive
+  task:
+    scheduling:
+      pool:
+        size: 16
 mongock:
   change-logs-scan-package:
     - com.rarible.protocol.union.enrichment.migration

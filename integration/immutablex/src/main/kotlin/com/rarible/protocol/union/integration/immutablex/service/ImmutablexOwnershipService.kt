@@ -42,7 +42,7 @@ class ImmutablexOwnershipService(
         contract: String, owner: String, tokenId: BigInteger, cursor: String?, fn: suspend (String, String, String?) -> ImmutablexAssetsPage
     ): ImmutablexAsset? {
         val page = fn(contract, owner, cursor)
-        val asset: ImmutablexAsset? = page.result.find { it.tokenId == tokenId }
+        val asset: ImmutablexAsset? = page.result.find { it.tokenId == String(tokenId.toByteArray()) }
         return if(asset == null && page.cursor.isNotEmpty()) {
             getAssetsByCollection(contract, owner, tokenId, page.cursor, fn)
         } else asset
@@ -50,7 +50,7 @@ class ImmutablexOwnershipService(
 
     private fun convert(asset: ImmutablexAsset): UnionOwnership {
         return UnionOwnership(
-            id = OwnershipIdDto(BlockchainDto.IMMUTABLEX, asset.tokenAddress, asset.tokenId, asset.user!!),
+            id = OwnershipIdDto(BlockchainDto.IMMUTABLEX, asset.tokenAddress, asset.tokenId(), asset.user!!),
             collection = CollectionIdDto(BlockchainDto.IMMUTABLEX, asset.tokenAddress),
             value = BigInteger.ONE,
             lazyValue = BigInteger.ZERO,
