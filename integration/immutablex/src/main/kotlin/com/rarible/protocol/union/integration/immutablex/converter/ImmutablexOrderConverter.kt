@@ -21,8 +21,8 @@ import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.group
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexOrder
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexOrderSide
-import org.slf4j.LoggerFactory
 import java.math.BigDecimal
+import org.slf4j.LoggerFactory
 
 class ImmutablexOrderConverter {
 
@@ -106,7 +106,7 @@ class ImmutablexOrderConverter {
     private fun makeAsset(side: ImmutablexOrderSide, blockchain: BlockchainDto): AssetDto {
         val assetType = when (side.type) {
             "ERC721" -> EthErc721AssetTypeDto(
-                tokenId = side.data.tokenId!!.toBigInteger(),
+                tokenId = side.data.tokenId()!!,
                 contract = ContractAddress(blockchain, side.data.tokenAddress!!)
             )
             "ETH" -> EthEthereumAssetTypeDto(
