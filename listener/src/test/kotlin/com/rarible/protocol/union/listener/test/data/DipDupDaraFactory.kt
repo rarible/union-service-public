@@ -41,7 +41,7 @@ fun randomDipDupActivityOrderListEvent(activityId: String): DipDupActivity {
             value = BigDecimal.ONE
         ),
         price = BigDecimal.ONE,
-        source = TezosPlatform.RARIBLE
+        source = TezosPlatform.Rarible
     )
 }
 

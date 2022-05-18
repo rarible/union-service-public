@@ -155,10 +155,10 @@ class DipDupActivityConverter(
 
     private fun convert(source: TezosPlatform): OrderActivitySourceDto {
         return when(source) {
-            TezosPlatform.RARIBLE -> OrderActivitySourceDto.RARIBLE
-            TezosPlatform.HEN -> OrderActivitySourceDto.HEN
-            TezosPlatform.OBJKT -> OrderActivitySourceDto.OBJKT
-            TezosPlatform.OBJKT_V2 -> OrderActivitySourceDto.OBJKT
+            TezosPlatform.Rarible -> OrderActivitySourceDto.RARIBLE
+            TezosPlatform.Hen -> OrderActivitySourceDto.HEN
+            TezosPlatform.Objkt -> OrderActivitySourceDto.OBJKT
+            TezosPlatform.Objkt_v2 -> OrderActivitySourceDto.OBJKT
         }
     }
 }
