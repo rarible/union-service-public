@@ -15,6 +15,7 @@ data class DipDupIntegrationProperties(
     val ipfsUrl: String,
     val knownAddresses: KnownAddresses?,
     val consumer: DefaultConsumerProperties?,
+    val network: String,
     val daemon: DaemonWorkerProperties = DaemonWorkerProperties()
 ) {
 

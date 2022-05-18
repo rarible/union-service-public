@@ -58,6 +58,7 @@ protocol-union-meta-loader:
       - '{{ include "service.appEnv" $ }}-backend'
 
 protocol-union-indexer:
+  enabled: false
   image:
     repository: union-service-indexer
   environments:
@@ -76,6 +77,7 @@ protocol-union-indexer:
       - '{{ include "service.appEnv" $ }}-backend'
 
 protocol-union-worker:
+  enabled: false
   image:
     repository: union-service-worker
   environments:

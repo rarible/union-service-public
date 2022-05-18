@@ -26,13 +26,15 @@ data class ImmutablexAsset(
     @JsonProperty("token_address")
     val tokenAddress: String,
     @JsonProperty("token_id")
-    val tokenId: BigInteger,
+    val tokenId: String,
     val uri: String?,
     @JsonProperty("updated_at")
     val updatedAt: Instant?,
     val user: String?
 ) {
-    val itemId = "$tokenAddress:$tokenId"
+    val itemId = "$tokenAddress:${tokenId()}"
+
+    fun tokenId(): BigInteger = BigInteger(tokenId.toByteArray())
 }
 
 data class ImmutablexCollectionShort(
@@ -90,14 +92,16 @@ data class Token(val type: String, val data: TokenData)
 
 data class TokenData(
     @JsonProperty("token_id")
-    val tokenId: String?,
+    val tokenId: String,
     @JsonProperty("token_address")
-    val tokenAddress: String?,
+    val tokenAddress: String,
     val properties: ImmutablexDataProperties?,
     val decimals: Int?,
-    val quantity: String?,
+    val quantity: BigInteger,
     val id: String?
-)
+) {
+    fun tokenId(): BigInteger = BigInteger(tokenId.toByteArray())
+}
 
 data class ImmutablexMintsPage(
     val cursor: String,
@@ -132,13 +136,17 @@ data class ImmutablexOrderSide(
 data class ImmutablexOrderData(
     val decimals: Int,
     val id: String?,
-    val quantity: String,
+    val quantity: BigInteger,
     @JsonProperty("token_address")
     val tokenAddress: String?,
     @JsonProperty("token_id")
     val tokenId: String?,
     val properties: ImmutablexDataProperties?
-)
+) {
+    fun tokenId(): BigInteger? = tokenId?.let {
+        BigInteger(it.toByteArray())
+    }
+}
 
 data class ImmutablexDataProperties(
     val name: String?,

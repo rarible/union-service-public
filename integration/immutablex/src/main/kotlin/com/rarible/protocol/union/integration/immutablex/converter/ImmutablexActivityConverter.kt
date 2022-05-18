@@ -20,7 +20,6 @@ import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexTransfer
 import com.rarible.protocol.union.integration.immutablex.dto.TradeSide
 import com.rarible.protocol.union.integration.immutablex.service.ImmutablexOrderService
 import java.math.BigDecimal
-import java.math.BigInteger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
@@ -45,9 +44,9 @@ class ImmutablexActivityConverter(
             id = activity.activityId,
             date = activity.timestamp,
             owner = unionAddress(activity.user, blockchain),
-            contract = contractAddress(activity.token.data.tokenAddress!!, blockchain),
-            tokenId = activity.token.data.tokenId!!.toBigInteger(),
-            value = activity.token.data.quantity?.toBigInteger() ?: BigInteger.ONE,
+            contract = contractAddress(activity.token.data.tokenAddress, blockchain),
+            tokenId = activity.token.data.tokenId(),
+            value = activity.token.data.quantity,
             transactionHash = activity.transactionId.toString(),
             blockchainInfo = null,
         )
@@ -56,9 +55,9 @@ class ImmutablexActivityConverter(
             date = activity.timestamp,
             from = unionAddress(activity.user, blockchain),
             owner = unionAddress(activity.receiver, blockchain),
-            contract = contractAddress(activity.token.data.tokenAddress!!, blockchain),
-            tokenId = activity.token.data.tokenId!!.toBigInteger(),
-            value = activity.token.data.quantity?.toBigInteger() ?: BigInteger.ONE,
+            contract = contractAddress(activity.token.data.tokenAddress, blockchain),
+            tokenId = activity.token.data.tokenId(),
+            value = activity.token.data.quantity,
             transactionHash = activity.transactionId.toString(),
             blockchainInfo = null,
         )

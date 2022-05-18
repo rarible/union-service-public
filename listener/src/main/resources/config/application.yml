@@ -18,6 +18,10 @@ spring:
   main:
     banner-mode: log
     web-application-type: reactive
+  task:
+    scheduling:
+      pool:
+        size: 16
 mongock:
   change-logs-scan-package:
     - com.rarible.protocol.union.enrichment.migration
@@ -91,6 +95,7 @@ integration:
     enabled: ${consul.tezos.enabled:true}
     dipdup:
       enabled: ${consul.tezos.dipdup.enabled:false}
+      network: ${consul.tezos.dipdup.network:}
       dipdupUrl: ${consul.tezos.dipdup.dipdupUrl:}
       tzktUrl: ${consul.tezos.dipdup.tzktUrl:}
       ipfsUrl: ${consul.tezos.dipdup.ipfsUrl:"https://ipfs.io"}
@@ -105,6 +110,13 @@ integration:
         royaltiesManager: ${consul.tezos.dipdup.knownAddresses.royaltiesManager:}
         bidou8x8: ${consul.tezos.dipdup.knownAddresses.bidou8x8:}
         bidou24x24: ${consul.tezos.dipdup.knownAddresses.bidou24x24:}
+      consumer:
+        broker-replica-set: ${consul.tezos.dipdup.consumer.hosts:}
+        username: ${consul.tezos.dipdup.consumer.username:}
+        password: ${consul.tezos.dipdup.consumer.password:}
+        workers:
+          order: 1
+          activity: 1
     client:
       url: ${consul.tezos.api.baseUrl}
     pg:

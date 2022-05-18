@@ -22,8 +22,8 @@ class ImmutablexOwnershipEventHandler(
                 UnionOwnershipDeleteEvent(
                     ownershipId = OwnershipIdDto(
                         blockchain = blockchain,
-                        contract = event.token.data.tokenAddress!!,
-                        tokenId = event.token.data.tokenId!!.toBigInteger(),
+                        contract = event.token.data.tokenAddress,
+                        tokenId = event.token.data.tokenId(),
                         owner = event.user
                     )
                 )
@@ -34,11 +34,11 @@ class ImmutablexOwnershipEventHandler(
                         id = OwnershipIdDto(
                             blockchain = blockchain,
                             contract = event.token.data.tokenAddress,
-                            tokenId = event.token.data.tokenId.toBigInteger(),
+                            tokenId = event.token.data.tokenId(),
                             owner = event.receiver
                         ),
                         collection = CollectionIdDto(blockchain, event.token.data.tokenAddress),
-                        value = event.token.data.quantity!!.toBigInteger(),
+                        value = event.token.data.quantity,
                         createdAt = event.timestamp,
                         lazyValue = BigInteger.ZERO
                     )

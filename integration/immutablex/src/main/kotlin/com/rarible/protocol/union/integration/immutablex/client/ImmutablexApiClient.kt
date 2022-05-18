@@ -30,7 +30,8 @@ class ImmutablexApiClient(
 
     suspend fun getAsset(itemId: String): ImmutablexAsset {
         val (collection, tokenId) = itemId.split(":")
-        return webClient.get().uri("/assets/${collection}/${tokenId}?include_fees=true")
+        val assetId = String(tokenId.toBigInteger().toByteArray())
+        return webClient.get().uri("/assets/${collection}/${assetId}?include_fees=true")
             .accept(MediaType.APPLICATION_JSON)
             .retrieve()
             .toEntity(ImmutablexAsset::class.java)
@@ -43,17 +44,6 @@ class ImmutablexApiClient(
         lastUpdatedTo: Long?,
         lastUpdatedFrom: Long?,
     ): ImmutablexAssetsPage {
-//        val query = StringBuilder("?order_by=updated_at&direction=desc&include_fees=true")
-//        query.append("&page_size=$size")
-//        if (lastUpdatedFrom != null) {
-//            query.append("&updated_min_timestamp=$lastUpdatedFrom")
-//        }
-//        if (lastUpdatedTo != null) {
-//            query.append("&updated_max_timestamp=$lastUpdatedTo")
-//        }
-//        if (!continuation.isNullOrEmpty()) {
-//            query.append("&cursor=$continuation")
-//        }
         return webClient.get().uri { builder ->
             builder.path("/assets")
             builder.queryParam("order_by","updated_at")
@@ -99,13 +89,6 @@ class ImmutablexApiClient(
     }
 
     suspend fun getAssetsByOwner(owner: String, continuation: String?, size: Int): ImmutablexAssetsPage {
-//        val query = StringBuilder("?order_by=updated_at&direction=desc&include_fees=true")
-//        query.append("&user=$owner")
-//        query.append("&page_size=$size")
-//        if (!continuation.isNullOrEmpty()) {
-//            val cont = DateIdContinuation.parse(continuation)
-//
-//        }
         return webClient.get().uri{ builder ->
             builder.path("/assets")
             builder.queryParam("order_by", "updated_at")
@@ -147,7 +130,7 @@ class ImmutablexApiClient(
             cursor = mints.cursor,
             remaining = mints.remaining,
             result = getAssetsByIds(
-                mints.result.map { "${it.token.data.tokenAddress!!}:${it.token.data.tokenId!!}" }
+                mints.result.map { "${it.token.data.tokenAddress}:${it.token.data.tokenId}" }
             )
         )
     }
@@ -348,7 +331,7 @@ class ImmutablexApiClient(
                 .queryParam("include_fees", true)
             if (!continuation.isNullOrEmpty()) {
                 val (dateStr, _) = continuation.split("_")
-                uriBuilder.queryParam("updated_min_timestamp", dateStr)
+                uriBuilder.queryParam("updated_min_timestamp", "${Instant.ofEpochMilli(dateStr.toLong())}")
             }
             if (status != null) {
                 uriBuilder.queryParam("status", status.immStatus())
@@ -398,7 +381,7 @@ class ImmutablexApiClient(
             if (itemId != null) {
                 val (address, id) = IdParser.split(itemId, 2)
                 it.queryParam("token_address", address)
-                it.queryParam("token_id", id)
+                it.queryParam("token_id", String(id.toBigInteger().toByteArray()))
             }
             if (user != null) {
                 it.queryParam("user", user)
