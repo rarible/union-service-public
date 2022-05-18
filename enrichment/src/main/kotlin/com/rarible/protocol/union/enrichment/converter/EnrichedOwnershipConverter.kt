@@ -38,6 +38,7 @@ object EnrichedOwnershipConverter {
             value = ownership.value,
             lazyValue = ownership.lazyValue,
             createdAt = ownership.createdAt,
+            lastUpdatedAt = ownership.lastUpdatedAt,
             pending = ownership.pending,
             // Enrichment data
             bestSellOrder = shortOwnership?.bestSellOrder?.let { orders[it.dtoId] }

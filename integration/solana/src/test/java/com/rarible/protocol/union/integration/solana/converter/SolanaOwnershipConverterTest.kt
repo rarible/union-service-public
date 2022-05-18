@@ -28,6 +28,7 @@ class SolanaOwnershipConverterTest {
                 collection = null,
                 value = balanceDto.value,
                 createdAt = balanceDto.createdAt,
+                lastUpdatedAt = balanceDto.updatedAt,
                 creators = emptyList(),
                 lazyValue = BigInteger.ZERO,
                 pending = emptyList()

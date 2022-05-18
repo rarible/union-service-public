@@ -12,6 +12,7 @@ data class UnionOwnership(
     val collection: CollectionIdDto?,
     val value: BigInteger,
     val createdAt: Instant,
+    val lastUpdatedAt: Instant?,
     val creators: List<CreatorDto> = listOf(),
     val lazyValue: BigInteger,
     val pending: List<ItemHistoryDto> = listOf()

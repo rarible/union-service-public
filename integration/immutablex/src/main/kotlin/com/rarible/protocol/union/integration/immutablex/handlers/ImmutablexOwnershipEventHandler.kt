@@ -40,6 +40,7 @@ class ImmutablexOwnershipEventHandler(
                         collection = CollectionIdDto(blockchain, event.token.data.tokenAddress),
                         value = event.token.data.quantity!!.toBigInteger(),
                         createdAt = event.timestamp,
+                        lastUpdatedAt = event.timestamp, // TODO is it correct?
                         lazyValue = BigInteger.ZERO
                     )
                 )

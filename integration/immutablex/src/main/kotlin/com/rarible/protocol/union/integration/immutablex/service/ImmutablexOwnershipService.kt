@@ -54,7 +54,8 @@ class ImmutablexOwnershipService(
             collection = CollectionIdDto(BlockchainDto.IMMUTABLEX, asset.tokenAddress),
             value = BigInteger.ONE,
             lazyValue = BigInteger.ZERO,
-            createdAt = asset.createdAt!!
+            createdAt = asset.createdAt!!,
+            lastUpdatedAt = asset.updatedAt
         )
     }
 
