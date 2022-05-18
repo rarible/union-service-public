@@ -36,7 +36,13 @@ open class SolanaCollectionService(
     }
 
     override suspend fun getCollectionsByIds(ids: List<String>): Page<UnionCollection> {
-        TODO("Not yet implemented")
+        // TODO: improve implementation.
+        val collections = ids.map { getCollectionById(it) }
+        return Page(
+            total = collections.size.toLong(),
+            continuation = null,
+            entities = collections
+        )
     }
 
 }
