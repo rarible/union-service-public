@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder
 import java.time.Duration
 import java.time.Instant
+import java.time.temporal.ChronoUnit
 
 @IntegrationTest
 class ActivityConsumerIT {
@@ -43,7 +44,7 @@ class ActivityConsumerIT {
                 BlockchainDto.ETHEREUM,
                 randomString()
             ),
-            date = Instant.now(),
+            date = Instant.now().truncatedTo(ChronoUnit.MILLIS),
             blockchainInfo = ActivityBlockchainInfoDto(
                 transactionHash = randomString(),
                 blockHash = randomString(),
