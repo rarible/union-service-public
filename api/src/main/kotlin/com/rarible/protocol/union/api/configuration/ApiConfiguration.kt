@@ -47,6 +47,7 @@ class ApiConfiguration {
         val config = CorsConfiguration().applyPermitDefaultValues()
         config.addAllowedMethod(HttpMethod.GET)
         config.addAllowedMethod(HttpMethod.POST)
+        config.addAllowedMethod(HttpMethod.DELETE)
         config.maxAge = 3600
         source.registerCorsConfiguration("/**", config)
         return source
