@@ -4,6 +4,7 @@ import com.rarible.core.task.EnableRaribleTask
 import com.rarible.protocol.union.api.client.ActivityControllerApi
 import com.rarible.protocol.union.api.client.CollectionControllerApi
 import com.rarible.protocol.union.api.client.UnionApiClientFactory
+import com.rarible.protocol.union.api.client.autoconfigure.UnionApiClientAutoConfiguration
 import com.rarible.protocol.union.core.elasticsearch.EsNameResolver
 import com.rarible.protocol.union.core.elasticsearch.IndexService
 import com.rarible.protocol.union.core.elasticsearch.bootstrap.ElasticsearchBootstrapper
@@ -13,6 +14,7 @@ import com.rarible.protocol.union.enrichment.repository.search.EsActivityReposit
 import com.rarible.protocol.union.worker.task.search.ReindexService
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
@@ -24,11 +26,12 @@ import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperatio
 @ComponentScan(basePackageClasses = [EsActivityRepository::class])
 @Import(
     value = [
-        SearchConfiguration::class,
+        SearchConfiguration::class
     ]
 )
 @EnableRaribleTask
 @EnableConfigurationProperties(WorkerProperties::class)
+@EnableAutoConfiguration(exclude = [UnionApiClientAutoConfiguration::class])
 class WorkerConfiguration(
     val properties: WorkerProperties
 ) {
