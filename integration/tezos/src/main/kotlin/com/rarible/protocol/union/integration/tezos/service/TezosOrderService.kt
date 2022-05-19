@@ -262,9 +262,9 @@ open class TezosOrderService(
             val slice = tezosOrderConverter.convert(orders, blockchain)
 
             // If legacy orders ended, we should try to get orders from new indexer
-            if (dipdupOrderService.enabled() && continuation != null && slice.entities.size < size) {
+            if (dipdupOrderService.enabled() && slice.entities.size < size) {
                 val delta = size - slice.entities.size
-                val nextSlice = dipdupOrderService.getSellOrdersByItem(contract, tokenId, maker, status, continuation, delta)
+                val nextSlice = dipdupOrderService.getSellOrdersByItem(contract, tokenId, maker, status, null, delta)
                 return Slice(
                     continuation = nextSlice.continuation,
                     entities = slice.entities + nextSlice.entities
