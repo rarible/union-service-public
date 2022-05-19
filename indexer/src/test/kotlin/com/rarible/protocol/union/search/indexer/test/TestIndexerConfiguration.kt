@@ -113,7 +113,7 @@ class TestIndexerConfiguration {
         )
     }
 
-      @Bean
+    @Bean
     fun testUnionItemEventProducer(): RaribleKafkaProducer<ItemEventDto> {
         return RaribleKafkaProducer(
             clientId = "test.union.item",

@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service
 @Service
 class ItemEventHandler(
     private val repository: EsItemRepository
-): ConsumerBatchEventHandler<ItemEventDto> {
+) : ConsumerBatchEventHandler<ItemEventDto> {
 
     private val logger: Logger = LoggerFactory.getLogger(ItemEventHandler::class.java)
 

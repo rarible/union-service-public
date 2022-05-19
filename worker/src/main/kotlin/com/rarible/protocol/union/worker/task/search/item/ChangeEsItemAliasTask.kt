@@ -1,27 +1,28 @@
-package com.rarible.protocol.union.worker.task.search.activity
+package com.rarible.protocol.union.worker.task.search.item
 
 import com.rarible.core.task.TaskRepository
 import com.rarible.protocol.union.core.elasticsearch.IndexService
-import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
+import com.rarible.protocol.union.enrichment.repository.search.EsItemRepository
 import com.rarible.protocol.union.worker.task.search.ChangeEsAliasTask
 import com.rarible.protocol.union.worker.task.search.ParamFactory
 import org.springframework.stereotype.Component
 
 @Component
-class ChangeEsActivityAliasTask(
+class ChangeEsItemAliasTask(
     taskRepository: TaskRepository,
-    esActivityRepository: EsActivityRepository,
+    esItemRepository: EsItemRepository,
     indexService: IndexService,
     paramFactory: ParamFactory
 ) : ChangeEsAliasTask(
     TYPE,
-    esActivityRepository.entityDefinition,
+    esItemRepository.entityDefinition,
     taskRepository,
-    esActivityRepository,
+    esItemRepository,
     indexService,
     paramFactory
 ) {
+
     companion object {
-        const val TYPE = "CHANGE_ES_ACTIVITY_ALIAS_TASK"
+        const val TYPE = "CHANGE_ES_ITEM_ALIAS_TASK"
     }
 }
