@@ -8,12 +8,12 @@ You can find detailed documentation at [docs.rarible.org](https://docs.rarible.o
 
 Use these base URLs to access our API on different networks:
 
-| Documentation                                                                        | Base URL                             | Environments                          |
-|:-------------------------------------------------------------------------------------|:-------------------------------------|:--------------------------------------|
-| [https://multichain.redoc.ly/](https://multichain.redoc.ly/)                         |                                      | For all environments                  |
-| [https://api.rarible.org/v0.1/doc](https://api.rarible.org/v0.1/doc)                 | https://api.rarible.org/v0.1         | Production (Mainnet)                  |
-| [https://api-staging.rarible.org/v0.1/doc](https://api-staging.rarible.org/v0.1/doc) | https://api-staging.rarible.org/v0.1 | Staging (Rinkeby, Mumbai)             |
-| [https://api-dev.rarible.org/v0.1/doc](https://api-dev.rarible.org/v0.1/doc)         | https://api-dev.rarible.org/v0.1     | Development (Ropsten, Mumbai, Ithaca) |
+| Documentation                                                                | Base URL                             | Environments                          |
+|:-----------------------------------------------------------------------------|:-------------------------------------|:--------------------------------------|
+| [multichain.redoc.ly/](https://multichain.redoc.ly/)                         |                                      | For all environments                  |
+| [api.rarible.org/v0.1/doc](https://api.rarible.org/v0.1/doc)                 | https://api.rarible.org/v0.1         | Production (Mainnet)                  |
+| [api-staging.rarible.org/v0.1/doc](https://api-staging.rarible.org/v0.1/doc) | https://api-staging.rarible.org/v0.1 | Staging (Rinkeby, Mumbai)             |
+| [dev-api.rarible.org/v0.1/doc](https://dev-api.rarible.org/v0.1/doc)         | https://dev-api.rarible.org/v0.1     | Development (Ropsten, Mumbai, Ithaca) |
 
 Also see additional information and usage examples on the [API Reference](https://docs.rarible.org/api-reference/) and [Search Capabilities](https://docs.rarible.org/reference/search-capabilities/) pages.
 
