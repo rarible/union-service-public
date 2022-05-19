@@ -89,7 +89,8 @@ class SolanaOrderConverter(
     ) = when (order) {
         is AuctionHouseOrderDto -> when (val orderData = order.data) {
             is AuctionHouseOrderDataV1Dto -> SolanaAuctionHouseDataV1Dto(
-                // TODO[orders]: maybe add fees and other fields
+                fee = order.auctionHouseFee,
+                requiresSignOff = order.auctionHouseRequiresSignOff,
                 auctionHouse = ContractAddress(blockchain, orderData.auctionHouse)
             )
         }
