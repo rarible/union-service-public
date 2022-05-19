@@ -43,9 +43,12 @@ class ReindexService(
     suspend fun scheduleActivityReindex(indexName: String) {
         val blockchains = BlockchainDto.values()
         val types = ActivityTypeDto.values()
-        val taskParams = blockchains.zip(types).map { (blockchain, type) ->
-            ActivityTaskParam(blockchain, type, indexName)
+        val taskParams = blockchains.flatMap { blockchain ->
+            types.map { type ->
+                ActivityTaskParam(blockchain, type, indexName)
+            }
         }
+
         val tasks = tasks(taskParams)
         val indexSwitch = indexSwitchTask(taskParams, indexName)
         taskRepository.saveAll(tasks + indexSwitch).collectList().awaitFirst()
