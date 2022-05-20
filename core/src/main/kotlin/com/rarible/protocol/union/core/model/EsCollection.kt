@@ -19,19 +19,16 @@ data class EsCollection(
     @Id
     override val collectionId: String, //blockchain:value
 
-    val type: String,
     val blockchain: BlockchainDto,
     val name: String,
     val symbol: String? = null,
     val owner: String? = null,
     val meta: CollectionMeta? = null,
-    val parent: String? = null
 ) : EsCollectionSealed() {
 
     data class CollectionMeta(
         val name: String,
         val description: String? = null,
-        val feeRecipient: String? = null
     )
 
     companion object {
