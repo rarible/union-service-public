@@ -2,9 +2,11 @@ package com.rarible.protocol.union.core.service
 
 import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.core.client.CurrencyClient
+import com.rarible.protocol.union.core.converter.CurrencyConverter
 import com.rarible.protocol.union.core.exception.UnionCurrencyException
 import com.rarible.protocol.union.dto.AssetTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.CurrencyDto
 import com.rarible.protocol.union.dto.CurrencyUsdRateDto
 import com.rarible.protocol.union.dto.ext
 import kotlinx.coroutines.async
@@ -26,6 +28,11 @@ class CurrencyService(
 
     private val caches = BlockchainDto.values().associate {
         it to ConcurrentHashMap<String, CurrencyUsdRateDto?>()
+    }
+
+    suspend fun getAllCurrencies(): List<CurrencyDto> {
+        return currencyClient.getAllCurrencies()
+            .map { CurrencyConverter.convert(it) }
     }
 
     // Read currency rate directly from Currency-Service (for API calls)

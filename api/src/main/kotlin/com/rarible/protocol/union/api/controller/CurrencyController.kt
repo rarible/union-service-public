@@ -2,6 +2,7 @@ package com.rarible.protocol.union.api.controller
 
 import com.rarible.protocol.union.core.service.CurrencyService
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.CurrenciesDto
 import com.rarible.protocol.union.dto.CurrencyIdDto
 import com.rarible.protocol.union.dto.CurrencyUsdRateDto
 import com.rarible.protocol.union.dto.parser.CurrencyIdParser
@@ -21,6 +22,11 @@ class CurrencyController(
         val parsedCurrencyId = CurrencyIdParser.parse(currencyId)
         val result = currencyService.getRate(parsedCurrencyId.blockchain, parsedCurrencyId.value, at)
         return ResponseEntity.ok(result)
+    }
+
+    override suspend fun getAllCurrencies(): ResponseEntity<CurrenciesDto> {
+        val currencies = currencyService.getAllCurrencies()
+        return ResponseEntity.ok(CurrenciesDto(currencies))
     }
 
     override suspend fun getCurrencyUsdRate(

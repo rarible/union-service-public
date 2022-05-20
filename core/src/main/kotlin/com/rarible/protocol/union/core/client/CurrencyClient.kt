@@ -4,6 +4,7 @@ import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.apm.SpanType
 import com.rarible.core.common.nowMillis
 import com.rarible.protocol.currency.api.client.CurrencyControllerApi
+import com.rarible.protocol.currency.dto.CurrencyDto
 import com.rarible.protocol.union.core.converter.CurrencyConverter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CurrencyUsdRateDto
@@ -25,5 +26,10 @@ class CurrencyClient(
         ).awaitFirstOrNull()
 
         return result?.let { CurrencyConverter.convert(result) }
+    }
+
+    suspend fun getAllCurrencies(): List<CurrencyDto> {
+        return currencyControllerApi.getAllCurrencies()
+            .awaitFirstOrNull()?.currencies ?: emptyList()
     }
 }

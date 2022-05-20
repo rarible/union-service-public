@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.worker.config
 
 import com.rarible.core.task.EnableRaribleTask
+import com.rarible.protocol.solana.api.client.autoconfigure.SolanaApiClientAutoConfiguration
 import com.rarible.protocol.union.api.client.ActivityControllerApi
 import com.rarible.protocol.union.api.client.CollectionControllerApi
 import com.rarible.protocol.union.api.client.UnionApiClientFactory
@@ -31,7 +32,7 @@ import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperatio
 )
 @EnableRaribleTask
 @EnableConfigurationProperties(WorkerProperties::class)
-@EnableAutoConfiguration(exclude = [UnionApiClientAutoConfiguration::class])
+@EnableAutoConfiguration(exclude = [SolanaApiClientAutoConfiguration::class])
 class WorkerConfiguration(
     val properties: WorkerProperties
 ) {
