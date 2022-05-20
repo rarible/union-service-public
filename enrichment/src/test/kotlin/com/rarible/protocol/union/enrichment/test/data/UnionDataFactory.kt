@@ -233,7 +233,6 @@ fun randomEsActivity() = EsActivity(
 
 fun randomEsCollection() = EsCollection(
     collectionId = randomString(),
-    type = randomString(),
     blockchain = BlockchainDto.values().random(),
     name = randomString(),
     symbol = randomString(),
@@ -241,9 +240,7 @@ fun randomEsCollection() = EsCollection(
     meta = EsCollection.CollectionMeta(
         name = randomString(),
         description = randomString(),
-        feeRecipient = randomString(),
     ),
-    parent = randomString(),
 )
 
 fun randomEsItem() = EsItem(
