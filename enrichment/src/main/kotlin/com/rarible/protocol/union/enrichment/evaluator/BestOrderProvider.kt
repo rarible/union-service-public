@@ -7,6 +7,6 @@ interface BestOrderProvider<E> {
     val entityId: String
     val entityType: Class<E>
 
-    suspend fun fetch(): OrderDto?
+    suspend fun fetch(currencyId: String): OrderDto?
 
 }

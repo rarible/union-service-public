@@ -2,6 +2,8 @@ package com.rarible.protocol.union.enrichment.model
 
 import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.enrichment.evaluator.BestBidOrderOwner
+import com.rarible.protocol.union.enrichment.evaluator.BestSellOrderOwner
 import org.springframework.data.annotation.AccessType
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.Transient
@@ -14,19 +16,20 @@ data class ShortCollection(
     val blockchain: BlockchainDto,
     val collectionId: String,
 
-    val bestSellOrders: Map<String, ShortOrder>,
-    val bestBidOrders: Map<String, ShortOrder>,
+    override val bestSellOrder: ShortOrder?,
+    override val bestSellOrders: Map<String, ShortOrder>,
+
+    override val bestBidOrder: ShortOrder?,
+    override val bestBidOrders: Map<String, ShortOrder>,
 
     val multiCurrency: Boolean = bestSellOrders.size > 1 || bestBidOrders.size > 1,
-
-    val bestSellOrder: ShortOrder?,
-    val bestBidOrder: ShortOrder?,
 
     val lastUpdatedAt: Instant,
 
     @Version
     val version: Long? = null
-) {
+) : BestSellOrderOwner<ShortCollection>, BestBidOrderOwner<ShortCollection> {
+
     fun withCalculatedFields(): ShortCollection {
         return this.copy(
             multiCurrency = bestSellOrders.size > 1 || bestBidOrders.size > 1,
@@ -35,17 +38,18 @@ data class ShortCollection(
     }
 
     companion object {
+
         fun empty(collectionId: ShortCollectionId): ShortCollection {
             return ShortCollection(
                 version = null,
                 blockchain = collectionId.blockchain,
                 collectionId = collectionId.collectionId,
 
-                bestSellOrders = emptyMap(),
-                bestBidOrders = emptyMap(),
-
                 bestSellOrder = null,
+                bestSellOrders = emptyMap(),
+
                 bestBidOrder = null,
+                bestBidOrders = emptyMap(),
 
                 lastUpdatedAt = nowMillis()
             )
@@ -64,5 +68,21 @@ data class ShortCollection(
     var id: ShortCollectionId
         get() = _id
         set(_) {}
+
+    override fun withBestBidOrders(orders: Map<String, ShortOrder>): ShortCollection {
+        return this.copy(bestBidOrders = orders)
+    }
+
+    override fun withBestBidOrder(order: ShortOrder?): ShortCollection {
+        return this.copy(bestBidOrder = order)
+    }
+
+    override fun withBestSellOrders(orders: Map<String, ShortOrder>): ShortCollection {
+        return this.copy(bestSellOrders = orders)
+    }
+
+    override fun withBestSellOrder(order: ShortOrder?): ShortCollection {
+        return this.copy(bestSellOrder = order)
+    }
 
 }

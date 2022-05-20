@@ -25,11 +25,11 @@ import com.rarible.protocol.union.enrichment.service.EnrichmentActivityService
 import com.rarible.protocol.union.enrichment.service.EnrichmentAuctionService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
 import com.rarible.protocol.union.enrichment.validator.OwnershipValidator
-import java.util.UUID
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
+import java.util.*
 
 @Component
 class EnrichmentOwnershipEventService(
@@ -52,7 +52,7 @@ class EnrichmentOwnershipEventService(
     }
 
     suspend fun recalculateBestOrder(ownership: ShortOwnership): Boolean {
-        val updated = bestOrderService.updateBestSellOrder(ownership)
+        val updated = bestOrderService.updateBestOrders(ownership)
         if (ownership.bestSellOrder != updated.bestSellOrder) {
             logger.info(
                 "Ownership BestSellOrder updated ([{}] -> [{}]) due to currency rate changed",

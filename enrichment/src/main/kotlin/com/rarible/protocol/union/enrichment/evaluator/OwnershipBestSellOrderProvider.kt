@@ -7,14 +7,13 @@ import com.rarible.protocol.union.enrichment.service.EnrichmentOrderService
 
 class OwnershipBestSellOrderProvider(
     private val ownershipId: ShortOwnershipId,
-    private val currencyId: String,
     private val enrichmentOrderService: EnrichmentOrderService
 ) : BestOrderProvider<ShortOwnership> {
 
     override val entityId: String = ownershipId.toString()
     override val entityType: Class<ShortOwnership> get() = ShortOwnership::class.java
 
-    override suspend fun fetch(): OrderDto? {
+    override suspend fun fetch(currencyId: String): OrderDto? {
         return enrichmentOrderService.getBestSell(ownershipId, currencyId)
     }
 }

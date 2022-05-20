@@ -3,10 +3,13 @@ package com.rarible.protocol.union.enrichment.service
 import com.rarible.protocol.union.core.service.CurrencyService
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.enrichment.evaluator.BestBidOrderComparator
+import com.rarible.protocol.union.enrichment.evaluator.BestBidOrderOwner
 import com.rarible.protocol.union.enrichment.evaluator.BestOrderComparator
 import com.rarible.protocol.union.enrichment.evaluator.BestOrderEvaluator
+import com.rarible.protocol.union.enrichment.evaluator.BestOrderProvider
 import com.rarible.protocol.union.enrichment.evaluator.BestPreferredOrderComparator
 import com.rarible.protocol.union.enrichment.evaluator.BestSellOrderComparator
+import com.rarible.protocol.union.enrichment.evaluator.BestSellOrderOwner
 import com.rarible.protocol.union.enrichment.evaluator.CollectionBestBidOrderProvider
 import com.rarible.protocol.union.enrichment.evaluator.CollectionBestSellOrderProvider
 import com.rarible.protocol.union.enrichment.evaluator.ItemBestBidOrderProvider
@@ -26,107 +29,48 @@ class BestOrderService(
     private val enrichmentOrderService: EnrichmentOrderService,
     private val currencyService: CurrencyService
 ) {
-    /*--------------------------------Update Ownerships----------------------------------------*/
+
+    //---------------------- Ownership ----------------------//
     suspend fun updateBestSellOrder(ownership: ShortOwnership, order: OrderDto): ShortOwnership {
-        val currencyId = order.sellCurrencyId
-        val evaluator = BestOrderEvaluator(
-            comparator = BestSellOrderComparator,
-            provider = OwnershipBestSellOrderProvider(ownership.id, currencyId, enrichmentOrderService)
-        )
-
-        val bestSellOrders = updateCurrencyOrders(ownership.bestSellOrders, order, evaluator, currencyId)
-
-        val updatedOwnership = ownership.copy(bestSellOrders = bestSellOrders)
-        return updateBestSellOrder(updatedOwnership)
+        val provider = OwnershipBestSellOrderProvider(ownership.id, enrichmentOrderService)
+        return updateBestSellOrder(ownership, provider, order)
     }
 
-    suspend fun updateBestSellOrder(ownership: ShortOwnership): ShortOwnership {
-        val bestSellOrder = getBestSellOrderInUsd(ownership.bestSellOrders)
-        return ownership.copy(bestSellOrder = bestSellOrder)
+    suspend fun updateBestOrders(ownership: ShortOwnership): ShortOwnership {
+        return updateBestSellOrder(ownership)
     }
 
-    /*-----------------------------------Update Collections---------------------------------------------*/
+    //---------------------- Collection ---------------------//
     suspend fun updateBestSellOrder(collection: ShortCollection, order: OrderDto): ShortCollection {
-        val currencyId = order.sellCurrencyId
-        val evaluator = BestOrderEvaluator(
-            comparator = BestSellOrderComparator,
-            provider = CollectionBestSellOrderProvider(collection.id, currencyId, enrichmentOrderService)
-        )
+        val provider = CollectionBestSellOrderProvider(collection.id, enrichmentOrderService)
+        return updateBestSellOrder(collection, provider, order)
+    }
 
-        val bestSellOrders = updateCurrencyOrders(collection.bestSellOrders, order, evaluator, currencyId)
-        val updatedCollection = collection.copy(bestSellOrders = bestSellOrders)
-        return updateBestSellOrder(updatedCollection)
+    suspend fun updateBestBidOrder(collection: ShortCollection, order: OrderDto): ShortCollection {
+        val provider = CollectionBestBidOrderProvider(collection.id, enrichmentOrderService)
+        return updateBestBidOrder(collection, provider, order)
     }
 
     suspend fun updateBestOrders(collection: ShortCollection): ShortCollection {
         return updateBestBidOrder(updateBestSellOrder(collection))
     }
 
-    suspend fun updateBestSellOrder(item: ShortCollection): ShortCollection {
-        val bestSellOrder = getBestSellOrderInUsd(item.bestSellOrders)
-        return item.copy(bestSellOrder = bestSellOrder)
-    }
-
-    suspend fun updateBestBidOrder(collection: ShortCollection, order: OrderDto): ShortCollection {
-        val currencyId = order.bidCurrencyId
-
-        val evaluator = BestOrderEvaluator(
-            comparator = BestBidOrderComparator,
-            provider = CollectionBestBidOrderProvider(collection.id, currencyId, enrichmentOrderService)
-        )
-
-        val bestBidOrders = updateCurrencyOrders(collection.bestBidOrders, order, evaluator, currencyId)
-        val updatedCollection = collection.copy(bestBidOrders = bestBidOrders)
-
-        return updateBestBidOrder(updatedCollection)
-    }
-
-    suspend fun updateBestBidOrder(collection: ShortCollection): ShortCollection {
-        val bestBidOrder = getBestBidOrderInUsd(collection.bestBidOrders)
-        return collection.copy(bestBidOrder = bestBidOrder)
-    }
-
-    /*---------------------------------------Update Items---------------------------------------------*/
+    //------------------------- Item ------------------------//
     suspend fun updateBestSellOrder(item: ShortItem, order: OrderDto): ShortItem {
-        val currencyId = order.sellCurrencyId
-        val evaluator = BestOrderEvaluator(
-            comparator = BestSellOrderComparator,
-            provider = ItemBestSellOrderProvider(item.id, currencyId, enrichmentOrderService)
-        )
+        val provider = ItemBestSellOrderProvider(item.id, enrichmentOrderService)
+        return updateBestSellOrder(item, provider, order)
+    }
 
-        val bestSellOrders = updateCurrencyOrders(item.bestSellOrders, order, evaluator, currencyId)
-        val updatedItem = item.copy(bestSellOrders = bestSellOrders)
-        return updateBestSellOrder(updatedItem)
+    suspend fun updateBestBidOrder(item: ShortItem, order: OrderDto): ShortItem {
+        val provider = ItemBestBidOrderProvider(item.id, enrichmentOrderService)
+        return updateBestBidOrder(item, provider, order)
     }
 
     suspend fun updateBestOrders(item: ShortItem): ShortItem {
         return updateBestBidOrder(updateBestSellOrder(item))
     }
 
-    suspend fun updateBestSellOrder(item: ShortItem): ShortItem {
-        val bestSellOrder = getBestSellOrderInUsd(item.bestSellOrders)
-        return item.copy(bestSellOrder = bestSellOrder)
-    }
-
-    suspend fun updateBestBidOrder(item: ShortItem, order: OrderDto): ShortItem {
-        val currencyId = order.bidCurrencyId
-
-        val evaluator = BestOrderEvaluator(
-            comparator = BestBidOrderComparator,
-            provider = ItemBestBidOrderProvider(item.id, currencyId, enrichmentOrderService)
-        )
-
-        val bestBidOrders = updateCurrencyOrders(item.bestBidOrders, order, evaluator, currencyId)
-        val updatedItem = item.copy(bestBidOrders = bestBidOrders)
-
-        return updateBestBidOrder(updatedItem)
-    }
-
-    suspend fun updateBestBidOrder(item: ShortItem): ShortItem {
-        val bestBidOrder = getBestBidOrderInUsd(item.bestBidOrders)
-        return item.copy(bestBidOrder = bestBidOrder)
-    }
-
+    //------------------------- USD -------------------------//
     suspend fun getBestSellOrderInUsd(orders: Map<String, ShortOrder>): ShortOrder? {
         return getBestOrderByUsd(orders, BestSellOrderComparator)
     }
@@ -164,9 +108,9 @@ class BestOrderService(
     private suspend fun updateCurrencyOrders(
         orders: Map<String, ShortOrder>,
         updated: OrderDto,
-        evaluator: BestOrderEvaluator,
-        currencyId: String
+        evaluator: BestOrderEvaluator
     ): Map<String, ShortOrder> {
+        val currencyId = evaluator.currencyId
         val updatedOrders = TreeMap(orders)
 
         val bestCurrent = orders[currencyId]
@@ -175,6 +119,53 @@ class BestOrderService(
         bestUpdated?.let { updatedOrders[currencyId] = bestUpdated } ?: updatedOrders.remove(currencyId)
 
         return updatedOrders
+    }
+
+    //--------------------- Best bid/sell -------------------//
+    private suspend fun <T : BestSellOrderOwner<T>> updateBestSellOrder(
+        bestSellOwner: T,
+        bestOrderProvider: BestOrderProvider<T>,
+        order: OrderDto
+    ): T {
+        val currencyId = order.sellCurrencyId
+        val evaluator = BestOrderEvaluator(
+            comparator = BestSellOrderComparator,
+            provider = bestOrderProvider,
+            currencyId = currencyId
+        )
+
+        val bestOrders = updateCurrencyOrders(bestSellOwner.bestSellOrders, order, evaluator)
+
+        val updatedOwner = bestSellOwner.withBestSellOrders(bestOrders)
+        return updateBestSellOrder(updatedOwner)
+    }
+
+    private suspend fun <T : BestBidOrderOwner<T>> updateBestBidOrder(
+        bestBidOwner: T,
+        bestOrderProvider: BestOrderProvider<T>,
+        order: OrderDto
+    ): T {
+        val currencyId = order.bidCurrencyId
+        val evaluator = BestOrderEvaluator(
+            comparator = BestBidOrderComparator,
+            provider = bestOrderProvider,
+            currencyId = currencyId
+        )
+
+        val bestOrders = updateCurrencyOrders(bestBidOwner.bestBidOrders, order, evaluator)
+
+        val updatedOwner = bestBidOwner.withBestBidOrders(bestOrders)
+        return updateBestBidOrder(updatedOwner)
+    }
+
+    private suspend fun <T : BestSellOrderOwner<T>> updateBestSellOrder(owner: T): T {
+        val bestSellOrder = getBestSellOrderInUsd(owner.bestSellOrders)
+        return owner.withBestSellOrder(bestSellOrder)
+    }
+
+    private suspend fun <T : BestBidOrderOwner<T>> updateBestBidOrder(owner: T): T {
+        val bestSellOrder = getBestBidOrderInUsd(owner.bestBidOrders)
+        return owner.withBestBidOrder(bestSellOrder)
     }
 
 }
