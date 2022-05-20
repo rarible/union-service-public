@@ -1,7 +1,7 @@
 package com.rarible.protocol.union.api.controller
 
-import com.rarible.protocol.union.api.service.CollectionQueryService
 import com.rarible.protocol.union.api.service.ItemApiService
+import com.rarible.protocol.union.api.service.select.CollectionSourceSelectService
 import com.rarible.protocol.union.core.service.CollectionService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 class CollectionController(
     private val router: BlockchainRouter<CollectionService>,
-    private val collectionApiService: CollectionQueryService,
+    private val collectionSourceSelector: CollectionSourceSelectService,
     private val itemApiService: ItemApiService,
     private val unionMetaService: UnionMetaService,
     private val enrichmentCollectionService: EnrichmentCollectionService
@@ -34,7 +34,7 @@ class CollectionController(
         continuation: String?,
         size: Int?
     ): ResponseEntity<CollectionsDto> {
-        val result = collectionApiService.getAllCollections(blockchains, continuation, size)
+        val result = collectionSourceSelector.getAllCollections(blockchains, continuation, size)
         return ResponseEntity.ok(result)
     }
 
@@ -63,8 +63,7 @@ class CollectionController(
         continuation: String?,
         size: Int?
     ): ResponseEntity<CollectionsDto> {
-        val result = collectionApiService.getCollectionsByOwner(owner, blockchains, continuation, size)
+        val result = collectionSourceSelector.getCollectionsByOwner(owner, blockchains, continuation, size)
         return ResponseEntity.ok(result)
     }
-
 }
