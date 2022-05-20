@@ -18,6 +18,7 @@ import com.rarible.protocol.order.api.client.AuctionActivityControllerApi
 import com.rarible.protocol.order.api.client.OrderActivityControllerApi
 import com.rarible.protocol.order.api.client.OrderControllerApi
 import com.rarible.protocol.solana.api.client.ActivityControllerApi as SolanaActivityControllerApi
+import com.rarible.protocol.solana.api.client.CollectionControllerApi as SolanaCollectionControllerApi
 import com.rarible.protocol.union.api.client.FixedUnionApiServiceUriProvider
 import com.rarible.protocol.union.api.client.UnionApiClientFactory
 import com.rarible.protocol.union.dto.CollectionEventDto
@@ -212,6 +213,10 @@ class TestApiConfiguration {
     @Bean
     @Primary
     fun testSolanaActivityApi(): SolanaActivityControllerApi = mockk()
+
+    @Bean
+    @Primary
+    fun testSolanaCollectionApi(): SolanaCollectionControllerApi = mockk()
 
     //--------------------- FLOW ---------------------//
     @Bean

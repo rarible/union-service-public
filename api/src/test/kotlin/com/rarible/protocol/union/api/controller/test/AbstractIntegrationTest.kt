@@ -23,6 +23,7 @@ import com.rarible.protocol.nftorder.api.test.mock.EthOrderControllerApiMock
 import com.rarible.protocol.order.api.client.AuctionActivityControllerApi
 import com.rarible.protocol.order.api.client.OrderActivityControllerApi
 import com.rarible.protocol.solana.api.client.ActivityControllerApi as SolanaActivityControllerApi
+import com.rarible.protocol.solana.api.client.CollectionControllerApi as SolanaCollectionControllerApi
 import com.rarible.protocol.union.api.controller.test.mock.eth.EthActivityControllerApiMock
 import com.rarible.protocol.union.api.controller.test.mock.eth.EthOwnershipControllerApiMock
 import com.rarible.protocol.union.api.controller.test.mock.flow.FlowItemControllerApiMock
@@ -176,6 +177,9 @@ abstract class AbstractIntegrationTest {
 
     @Autowired
     lateinit var testFlowCollectionApi: FlowNftCollectionControllerApi
+
+    @Autowired
+    lateinit var testSolanaCollectionApi: SolanaCollectionControllerApi
 
     @Autowired
     lateinit var testFlowOrderApi: FlowOrderControllerApi

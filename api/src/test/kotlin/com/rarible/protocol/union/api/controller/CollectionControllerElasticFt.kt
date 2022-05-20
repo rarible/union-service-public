@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.api.controller
 
 import com.rarible.protocol.dto.CollectionsByIdRequestDto
+import com.rarible.protocol.dto.FlowNftCollectionsDto
 import com.rarible.protocol.dto.NftCollectionsDto
 import com.rarible.protocol.union.api.client.CollectionControllerApi
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
@@ -9,6 +10,8 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.repository.search.EsCollectionRepository
 import com.rarible.protocol.union.enrichment.test.data.randomEsCollection
 import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionDto
+import com.rarible.protocol.union.integration.solana.data.randomSolanaBalanceDto
+import com.rarible.protocol.union.integration.solana.data.randomSolanaCollectionDto
 import com.rarible.protocol.union.integration.tezos.data.randomTezosCollectionDto
 import com.rarible.protocol.union.test.data.randomFlowCollectionDto
 import io.mockk.coEvery
@@ -49,12 +52,13 @@ class CollectionControllerElasticFt: AbstractIntegrationTest() {
     @Test
     fun `get all collections`() = runBlocking<Unit> {
         // given
-        val blockchains = listOf(BlockchainDto.ETHEREUM, BlockchainDto.POLYGON)
+        val blockchains = listOf(BlockchainDto.ETHEREUM, BlockchainDto.POLYGON, BlockchainDto.FLOW, BlockchainDto.SOLANA)
         val size = 10
 
         val ethDto1 = randomEthCollectionDto()
         val polygonDto1 = randomEthCollectionDto()
         val flowDto1 = randomFlowCollectionDto()
+        val solanaDto1 = randomSolanaCollectionDto()
         val tezosDto1 = randomTezosCollectionDto()
 
         val esEth1 = randomEsCollection().copy(
@@ -69,6 +73,10 @@ class CollectionControllerElasticFt: AbstractIntegrationTest() {
             collectionId = "${BlockchainDto.FLOW}:${flowDto1.id}",
             blockchain = BlockchainDto.FLOW
         )
+        val esSolana1 = randomEsCollection().copy(
+            collectionId = "${BlockchainDto.SOLANA}:${solanaDto1.address}",
+            blockchain = BlockchainDto.SOLANA
+        )
         val esTezos1 = randomEsCollection().copy(
             collectionId = "${BlockchainDto.TEZOS}:${tezosDto1.id}",
             blockchain = BlockchainDto.TEZOS
@@ -78,6 +86,7 @@ class CollectionControllerElasticFt: AbstractIntegrationTest() {
             esEth1,
             esPolygon1,
             esFlow1,
+            esSolana1,
             esTezos1,
         ))
 
@@ -93,14 +102,24 @@ class CollectionControllerElasticFt: AbstractIntegrationTest() {
             polygonDto1
         )).toMono()
 
+        coEvery {
+            testFlowCollectionApi.searchNftCollectionsByIds((listOf(flowDto1.id)))
+        } returns FlowNftCollectionsDto(total = 1, continuation = null, data = listOf(
+            flowDto1
+        )).toMono()
+
+        coEvery {
+            testSolanaCollectionApi.getCollectionById(solanaDto1.address)
+        } returns solanaDto1.toMono()
+
         // when
         val unionCollections = collectionControllerApi.getAllCollections(
             blockchains, null, size
         ).awaitFirst()
 
         // then
-        assertThat(unionCollections.collections).hasSize(2)
-        assertThat(unionCollections.total).isEqualTo(2)
+        assertThat(unionCollections.collections).hasSize(4)
+        assertThat(unionCollections.total).isEqualTo(4)
     }
 
     @Test
