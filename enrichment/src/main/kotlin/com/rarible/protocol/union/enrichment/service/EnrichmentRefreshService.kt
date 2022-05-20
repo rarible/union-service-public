@@ -150,12 +150,12 @@ class EnrichmentRefreshService(
 
         // Looking for best sell orders
         val bestSellOrdersDtoDeferred = sellCurrencies.map { currencyId ->
-            async { enrichmentOrderService.getBestSell(shortCollectionId, currencyId) }
+            async { enrichmentOrderService.getBestSell(shortCollectionId, currencyId, null) }
         }
 
         // Looking for best bid orders
         val bestBidOrdersDtoDeferred = bidCurrencies.map { currencyId ->
-            async { enrichmentOrderService.getBestBid(shortCollectionId, currencyId) }
+            async { enrichmentOrderService.getBestBid(shortCollectionId, currencyId, null) }
         }
         val bestSellOrdersDto = bestSellOrdersDtoDeferred.awaitAll().filterNotNull()
         val bestBidOrdersDto = bestBidOrdersDtoDeferred.awaitAll().filterNotNull()
@@ -210,7 +210,7 @@ class EnrichmentRefreshService(
 
         // Looking for best sell orders
         val bestSellOrdersDto = sellCurrencies.map { currencyId ->
-            async { enrichmentOrderService.getBestSell(shortItemId, currencyId) }
+            async { enrichmentOrderService.getBestSell(shortItemId, currencyId, null) }
         }.awaitAll().filterNotNull()
 
         val bestSellOrders = bestSellOrdersDto.associateBy { it.sellCurrencyId }
@@ -218,7 +218,7 @@ class EnrichmentRefreshService(
 
         // Looking for best bid orders
         val bestBidOrdersDto = bidCurrencies.map { currencyId ->
-            async { enrichmentOrderService.getBestBid(shortItemId, currencyId) }
+            async { enrichmentOrderService.getBestBid(shortItemId, currencyId, null) }
         }.awaitAll().filterNotNull()
 
         val bestBidOrders = bestBidOrdersDto.associateBy { it.bidCurrencyId }
@@ -278,7 +278,7 @@ class EnrichmentRefreshService(
         }
 
         val bestSellOrdersDto = currencies.map { currencyId ->
-            async { enrichmentOrderService.getBestSell(shortOwnershipId, currencyId) }
+            async { enrichmentOrderService.getBestSell(shortOwnershipId, currencyId, null) }
         }.awaitAll().filterNotNull()
 
         val bestSellOrders = bestSellOrdersDto.associateBy { it.sellCurrencyId }

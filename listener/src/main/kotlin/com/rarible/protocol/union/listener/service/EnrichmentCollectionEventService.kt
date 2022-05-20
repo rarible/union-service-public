@@ -15,7 +15,7 @@ import com.rarible.protocol.union.enrichment.validator.EntityValidator
 import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
-import java.util.UUID
+import java.util.*
 
 @Component
 class EnrichmentCollectionEventService(
@@ -42,7 +42,9 @@ class EnrichmentCollectionEventService(
             ShortCollectionId(collectionId),
             order,
             notificationEnabled
-        ) { collection -> bestOrderService.updateBestSellOrder(collection, order) }
+        ) { collection ->
+            bestOrderService.updateBestSellOrder(collection, order, emptyList()) // TODO add origins
+        }
     }
 
     suspend fun onCollectionBestBidOrderUpdate(
@@ -54,7 +56,9 @@ class EnrichmentCollectionEventService(
             ShortCollectionId(collectionId),
             order,
             notificationEnabled
-        ) { collection -> bestOrderService.updateBestBidOrder(collection, order) }
+        ) { collection ->
+            bestOrderService.updateBestBidOrder(collection, order, emptyList()) // TODO add origins
+        }
     }
 
     private suspend fun updateCollection(

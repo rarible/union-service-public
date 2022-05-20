@@ -20,6 +20,9 @@ data class ShortOwnership(
 
     override val bestSellOrder: ShortOrder?,
     override val bestSellOrders: Map<String, ShortOrder>,
+
+    val originOrders: Set<OriginOrders> = emptySet(),
+
     val multiCurrency: Boolean = bestSellOrders.size > 1,
 
     val source: OwnershipSourceDto?,
@@ -47,6 +50,7 @@ data class ShortOwnership(
 
                 bestSellOrders = emptyMap(),
                 bestSellOrder = null,
+                originOrders = emptySet(),
                 lastUpdatedAt = nowMillis(),
 
                 version = null,

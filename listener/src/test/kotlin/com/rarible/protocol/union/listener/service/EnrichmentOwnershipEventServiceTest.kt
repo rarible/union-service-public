@@ -81,7 +81,9 @@ class EnrichmentOwnershipEventServiceTest {
         val expectedShortOwnership = shortOwnership.copy(bestSellOrder = shortOrder)
 
         coEvery { ownershipService.get(shortOwnership.id) } returns shortOwnership
-        coEvery { bestOrderService.updateBestSellOrder(shortOwnership, order) } returns expectedShortOwnership
+        coEvery {
+            bestOrderService.updateBestSellOrder(shortOwnership, order, emptyList())
+        } returns expectedShortOwnership
         coEvery { ownershipService.save(expectedShortOwnership) } returns expectedShortOwnership
         coEvery {
             ownershipService.enrichOwnership(
@@ -109,7 +111,9 @@ class EnrichmentOwnershipEventServiceTest {
 
         // There is no existing short ownership, and order is cancelled
         coEvery { ownershipService.get(shortOwnership.id) } returns null
-        coEvery { bestOrderService.updateBestSellOrder(any<ShortOwnership>(), eq(order)) } returns shortOwnership
+        coEvery {
+            bestOrderService.updateBestSellOrder(any<ShortOwnership>(), eq(order), emptyList())
+        } returns shortOwnership
 
         ownershipEventService.onOwnershipBestSellOrderUpdated(shortOwnership.id, order)
 
@@ -133,7 +137,10 @@ class EnrichmentOwnershipEventServiceTest {
         // Ownership exists, best Order is cancelled - Ownership should be deleted
         coEvery { ownershipService.get(shortOwnership.id) } returns shortOwnership
         // Means order is cancelled
-        coEvery { bestOrderService.updateBestSellOrder(shortOwnership, order) } returns expectedShortOwnership
+        coEvery {
+            bestOrderService.updateBestSellOrder(shortOwnership, order, emptyList())
+        } returns expectedShortOwnership
+
         coEvery { ownershipService.delete(shortOwnership.id) } returns DeleteResult.acknowledged(1)
         coEvery {
             ownershipService.enrichOwnership(
@@ -162,7 +169,7 @@ class EnrichmentOwnershipEventServiceTest {
 
         // Ownership exists, best Order is the same - nothing should happen here
         coEvery { ownershipService.get(ownership.id) } returns ownership
-        coEvery { bestOrderService.updateBestSellOrder(ownership, order) } returns ownership
+        coEvery { bestOrderService.updateBestSellOrder(ownership, order, emptyList()) } returns ownership
 
         ownershipEventService.onOwnershipBestSellOrderUpdated(ownership.id, order)
 

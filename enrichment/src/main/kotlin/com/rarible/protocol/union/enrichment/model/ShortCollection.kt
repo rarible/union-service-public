@@ -22,6 +22,8 @@ data class ShortCollection(
     override val bestBidOrder: ShortOrder?,
     override val bestBidOrders: Map<String, ShortOrder>,
 
+    val originOrders: Set<OriginOrders> = emptySet(),
+
     val multiCurrency: Boolean = bestSellOrders.size > 1 || bestBidOrders.size > 1,
 
     val lastUpdatedAt: Instant,
@@ -47,6 +49,8 @@ data class ShortCollection(
 
                 bestSellOrder = null,
                 bestSellOrders = emptyMap(),
+
+                originOrders = emptySet(),
 
                 bestBidOrder = null,
                 bestBidOrders = emptyMap(),

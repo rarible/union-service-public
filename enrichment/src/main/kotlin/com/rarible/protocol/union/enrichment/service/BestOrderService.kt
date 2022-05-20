@@ -7,6 +7,7 @@ import com.rarible.protocol.union.enrichment.evaluator.BestBidOrderOwner
 import com.rarible.protocol.union.enrichment.evaluator.BestOrderComparator
 import com.rarible.protocol.union.enrichment.evaluator.BestOrderEvaluator
 import com.rarible.protocol.union.enrichment.evaluator.BestOrderProvider
+import com.rarible.protocol.union.enrichment.evaluator.BestOrderProviderFactory
 import com.rarible.protocol.union.enrichment.evaluator.BestPreferredOrderComparator
 import com.rarible.protocol.union.enrichment.evaluator.BestSellOrderComparator
 import com.rarible.protocol.union.enrichment.evaluator.BestSellOrderOwner
@@ -15,6 +16,7 @@ import com.rarible.protocol.union.enrichment.evaluator.CollectionBestSellOrderPr
 import com.rarible.protocol.union.enrichment.evaluator.ItemBestBidOrderProvider
 import com.rarible.protocol.union.enrichment.evaluator.ItemBestSellOrderProvider
 import com.rarible.protocol.union.enrichment.evaluator.OwnershipBestSellOrderProvider
+import com.rarible.protocol.union.enrichment.model.OriginOrders
 import com.rarible.protocol.union.enrichment.model.ShortCollection
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortOrder
@@ -31,43 +33,71 @@ class BestOrderService(
 ) {
 
     //---------------------- Ownership ----------------------//
-    suspend fun updateBestSellOrder(ownership: ShortOwnership, order: OrderDto): ShortOwnership {
-        val provider = OwnershipBestSellOrderProvider(ownership.id, enrichmentOrderService)
-        return updateBestSellOrder(ownership, provider, order)
+    suspend fun updateBestSellOrder(
+        ownership: ShortOwnership,
+        order: OrderDto,
+        origins: List<String>
+    ): ShortOwnership {
+        val providerFactory = OwnershipBestSellOrderProvider.Factory(ownership.id, enrichmentOrderService)
+        val originOrders = updateOriginSell(ownership.originOrders, order, origins, providerFactory)
+        val updated = updateBestSell(ownership, providerFactory.create(null), order)
+        return updated.copy(originOrders = originOrders)
     }
 
     suspend fun updateBestOrders(ownership: ShortOwnership): ShortOwnership {
-        return updateBestSellOrder(ownership)
+        return refreshBestSellOrder(ownership)
     }
 
     //---------------------- Collection ---------------------//
-    suspend fun updateBestSellOrder(collection: ShortCollection, order: OrderDto): ShortCollection {
-        val provider = CollectionBestSellOrderProvider(collection.id, enrichmentOrderService)
-        return updateBestSellOrder(collection, provider, order)
+    suspend fun updateBestSellOrder(
+        collection: ShortCollection,
+        order: OrderDto,
+        origins: List<String>
+    ): ShortCollection {
+        val providerFactory = CollectionBestSellOrderProvider.Factory(collection.id, enrichmentOrderService)
+        val originOrders = updateOriginSell(collection.originOrders, order, origins, providerFactory)
+        val updated = updateBestSell(collection, providerFactory.create(null), order)
+        return updated.copy(originOrders = originOrders)
     }
 
-    suspend fun updateBestBidOrder(collection: ShortCollection, order: OrderDto): ShortCollection {
-        val provider = CollectionBestBidOrderProvider(collection.id, enrichmentOrderService)
-        return updateBestBidOrder(collection, provider, order)
+    suspend fun updateBestBidOrder(
+        collection: ShortCollection,
+        order: OrderDto,
+        origins: List<String>
+    ): ShortCollection {
+        val providerFactory = CollectionBestBidOrderProvider.Factory(collection.id, enrichmentOrderService)
+        val originOrders = updateOriginBid(collection.originOrders, order, origins, providerFactory)
+        val updated = updateBestBid(collection, providerFactory.create(null), order)
+        return updated.copy(originOrders = originOrders)
     }
 
     suspend fun updateBestOrders(collection: ShortCollection): ShortCollection {
-        return updateBestBidOrder(updateBestSellOrder(collection))
+        return refreshBestBidOrder(refreshBestSellOrder(collection))
     }
 
     //------------------------- Item ------------------------//
-    suspend fun updateBestSellOrder(item: ShortItem, order: OrderDto): ShortItem {
-        val provider = ItemBestSellOrderProvider(item.id, enrichmentOrderService)
-        return updateBestSellOrder(item, provider, order)
+    suspend fun updateBestSellOrder(
+        item: ShortItem, order: OrderDto,
+        origins: List<String>
+    ): ShortItem {
+        val providerFactory = ItemBestSellOrderProvider.Factory(item.id, enrichmentOrderService)
+        val originOrders = updateOriginSell(item.originOrders, order, origins, providerFactory)
+        val updated = updateBestSell(item, providerFactory.create(null), order)
+        return updated.copy(originOrders = originOrders)
     }
 
-    suspend fun updateBestBidOrder(item: ShortItem, order: OrderDto): ShortItem {
-        val provider = ItemBestBidOrderProvider(item.id, enrichmentOrderService)
-        return updateBestBidOrder(item, provider, order)
+    suspend fun updateBestBidOrder(
+        item: ShortItem, order: OrderDto,
+        origins: List<String>
+    ): ShortItem {
+        val providerFactory = ItemBestBidOrderProvider.Factory(item.id, enrichmentOrderService)
+        val originOrders = updateOriginBid(item.originOrders, order, origins, providerFactory)
+        val updated = updateBestBid(item, providerFactory.create(null), order)
+        return updated.copy(originOrders = originOrders)
     }
 
     suspend fun updateBestOrders(item: ShortItem): ShortItem {
-        return updateBestBidOrder(updateBestSellOrder(item))
+        return refreshBestBidOrder(refreshBestSellOrder(item))
     }
 
     //------------------------- USD -------------------------//
@@ -122,9 +152,9 @@ class BestOrderService(
     }
 
     //--------------------- Best bid/sell -------------------//
-    private suspend fun <T : BestSellOrderOwner<T>> updateBestSellOrder(
+    private suspend fun <T : BestSellOrderOwner<T>> updateBestSell(
         bestSellOwner: T,
-        bestOrderProvider: BestOrderProvider<T>,
+        bestOrderProvider: BestOrderProvider<*>,
         order: OrderDto
     ): T {
         val currencyId = order.sellCurrencyId
@@ -137,12 +167,12 @@ class BestOrderService(
         val bestOrders = updateCurrencyOrders(bestSellOwner.bestSellOrders, order, evaluator)
 
         val updatedOwner = bestSellOwner.withBestSellOrders(bestOrders)
-        return updateBestSellOrder(updatedOwner)
+        return refreshBestSellOrder(updatedOwner)
     }
 
-    private suspend fun <T : BestBidOrderOwner<T>> updateBestBidOrder(
+    private suspend fun <T : BestBidOrderOwner<T>> updateBestBid(
         bestBidOwner: T,
-        bestOrderProvider: BestOrderProvider<T>,
+        bestOrderProvider: BestOrderProvider<*>,
         order: OrderDto
     ): T {
         val currencyId = order.bidCurrencyId
@@ -155,17 +185,43 @@ class BestOrderService(
         val bestOrders = updateCurrencyOrders(bestBidOwner.bestBidOrders, order, evaluator)
 
         val updatedOwner = bestBidOwner.withBestBidOrders(bestOrders)
-        return updateBestBidOrder(updatedOwner)
+        return refreshBestBidOrder(updatedOwner)
     }
 
-    private suspend fun <T : BestSellOrderOwner<T>> updateBestSellOrder(owner: T): T {
+    private suspend fun <T : BestSellOrderOwner<T>> refreshBestSellOrder(owner: T): T {
         val bestSellOrder = getBestSellOrderInUsd(owner.bestSellOrders)
         return owner.withBestSellOrder(bestSellOrder)
     }
 
-    private suspend fun <T : BestBidOrderOwner<T>> updateBestBidOrder(owner: T): T {
+    private suspend fun <T : BestBidOrderOwner<T>> refreshBestBidOrder(owner: T): T {
         val bestSellOrder = getBestBidOrderInUsd(owner.bestBidOrders)
         return owner.withBestBidOrder(bestSellOrder)
+    }
+
+    private suspend fun updateOriginSell(
+        originOrders: Set<OriginOrders>,
+        order: OrderDto,
+        origins: List<String>,
+        providerFactory: BestOrderProviderFactory<*>
+    ): Set<OriginOrders> {
+        return origins.map { origin ->
+            val current = originOrders.find { it.origin == origin } ?: OriginOrders(origin)
+            val provider = providerFactory.create(origin)
+            updateBestSell(current, provider, order)
+        }.toSet()
+    }
+
+    private suspend fun updateOriginBid(
+        originOrders: Set<OriginOrders>,
+        order: OrderDto,
+        origins: List<String>,
+        providerFactory: BestOrderProviderFactory<*>
+    ): Set<OriginOrders> {
+        return origins.map { origin ->
+            val current = originOrders.find { it.origin == origin } ?: OriginOrders(origin)
+            val provider = providerFactory.create(origin)
+            updateBestBid(current, provider, order)
+        }.toSet()
     }
 
 }

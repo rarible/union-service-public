@@ -28,6 +28,8 @@ data class ShortItem(
     override val bestBidOrder: ShortOrder?,
     override val bestBidOrders: Map<String, ShortOrder>,
 
+    val originOrders: Set<OriginOrders> = emptySet(),
+
     val multiCurrency: Boolean = bestSellOrders.size > 1 || bestBidOrders.size > 1,
 
     val auctions: Set<AuctionIdDto> = emptySet(),
@@ -63,6 +65,8 @@ data class ShortItem(
 
                 bestBidOrder = null,
                 bestBidOrders = emptyMap(),
+
+                originOrders = emptySet(),
 
                 auctions = emptySet(),
 

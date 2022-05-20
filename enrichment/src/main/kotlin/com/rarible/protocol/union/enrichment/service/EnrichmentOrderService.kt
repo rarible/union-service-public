@@ -49,14 +49,16 @@ class EnrichmentOrderService(
         return getById(existing.dtoId)
     }
 
-    suspend fun getBestSell(id: ShortItemId, currencyId: String): OrderDto? {
+    suspend fun getBestSell(id: ShortItemId, currencyId: String, origin: String?): OrderDto? {
         val now = nowMillis()
-        val result = withPreferredRariblePlatform(id, OrderType.SELL, OrderFilters.ITEM) { platform, continuation, size ->
+        val result = withPreferredRariblePlatform(
+            id, OrderType.SELL, OrderFilters.ITEM
+        ) { platform, continuation, size ->
             orderServiceRouter.getService(id.blockchain).getSellOrdersByItem(
                 platform,
                 id.toDto().value,
                 null,
-                null,
+                origin,
                 listOf(OrderStatusDto.ACTIVE),
                 currencyId,
                 continuation,
@@ -70,14 +72,16 @@ class EnrichmentOrderService(
         return result
     }
 
-    suspend fun getBestSell(id: ShortOwnershipId, currencyId: String): OrderDto? {
+    suspend fun getBestSell(id: ShortOwnershipId, currencyId: String, origin: String?): OrderDto? {
         val now = nowMillis()
-        val result = withPreferredRariblePlatform(id, OrderType.SELL, OrderFilters.ITEM) { platform, continuation, size ->
+        val result = withPreferredRariblePlatform(
+            id, OrderType.SELL, OrderFilters.ITEM
+        ) { platform, continuation, size ->
             orderServiceRouter.getService(id.blockchain).getSellOrdersByItem(
                 platform,
                 id.toDto().itemIdValue,
                 id.owner,
-                null,
+                origin,
                 listOf(OrderStatusDto.ACTIVE),
                 currencyId,
                 continuation,
@@ -91,13 +95,15 @@ class EnrichmentOrderService(
         return result
     }
 
-    suspend fun getBestSell(collectionId: ShortCollectionId, currencyId: String): OrderDto? {
+    suspend fun getBestSell(collectionId: ShortCollectionId, currencyId: String, origin: String?): OrderDto? {
         val now = nowMillis()
-        val result = withPreferredRariblePlatform(collectionId, OrderType.SELL, OrderFilters.COLLECTION) { platform, continuation, size ->
+        val result = withPreferredRariblePlatform(
+            collectionId, OrderType.SELL, OrderFilters.COLLECTION
+        ) { platform, continuation, size ->
             orderServiceRouter.getService(collectionId.blockchain).getOrderFloorSellsByCollection(
                 platform,
                 collectionId.toDto().value,
-                null,
+                origin,
                 listOf(OrderStatusDto.ACTIVE),
                 currencyId,
                 continuation,
@@ -111,14 +117,16 @@ class EnrichmentOrderService(
         return result
     }
 
-    suspend fun getBestBid(id: ShortItemId, currencyId: String): OrderDto? {
+    suspend fun getBestBid(id: ShortItemId, currencyId: String, origin: String?): OrderDto? {
         val now = nowMillis()
-        val result = withPreferredRariblePlatform(id, OrderType.BID, OrderFilters.ITEM) { platform, continuation, size ->
+        val result = withPreferredRariblePlatform(
+            id, OrderType.BID, OrderFilters.ITEM
+        ) { platform, continuation, size ->
             orderServiceRouter.getService(id.blockchain).getOrderBidsByItem(
                 platform,
                 id.toDto().value,
                 null,
-                null,
+                origin,
                 listOf(OrderStatusDto.ACTIVE),
                 null,
                 null,
@@ -134,13 +142,15 @@ class EnrichmentOrderService(
         return result
     }
 
-    suspend fun getBestBid(id: ShortCollectionId, currencyId: String): OrderDto? {
+    suspend fun getBestBid(id: ShortCollectionId, currencyId: String, origin: String?): OrderDto? {
         val now = nowMillis()
-        val result = withPreferredRariblePlatform(id, OrderType.BID, OrderFilters.COLLECTION) { platform, continuation, size ->
+        val result = withPreferredRariblePlatform(
+            id, OrderType.BID, OrderFilters.COLLECTION
+        ) { platform, continuation, size ->
             orderServiceRouter.getService(id.blockchain).getOrderFloorBidsByCollection(
                 platform,
                 id.toDto().value,
-                null,
+                origin,
                 listOf(OrderStatusDto.ACTIVE),
                 null,
                 null,

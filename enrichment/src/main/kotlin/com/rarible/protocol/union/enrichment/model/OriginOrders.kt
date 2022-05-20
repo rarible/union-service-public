@@ -5,10 +5,10 @@ import com.rarible.protocol.union.enrichment.evaluator.BestSellOrderOwner
 
 data class OriginOrders(
     val origin: String,
-    override val bestSellOrder: ShortOrder?,
-    override val bestSellOrders: Map<String, ShortOrder>,
-    override val bestBidOrder: ShortOrder?,
-    override val bestBidOrders: Map<String, ShortOrder>
+    override val bestSellOrder: ShortOrder? = null,
+    override val bestSellOrders: Map<String, ShortOrder> = emptyMap(),
+    override val bestBidOrder: ShortOrder? = null,
+    override val bestBidOrders: Map<String, ShortOrder> = emptyMap()
 ) : BestSellOrderOwner<OriginOrders>, BestBidOrderOwner<OriginOrders> {
 
     override fun withBestSellOrders(orders: Map<String, ShortOrder>): OriginOrders {

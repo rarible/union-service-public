@@ -75,7 +75,7 @@ class EnrichmentOwnershipEventService(
         val exist = current != null
         val short = current ?: ShortOwnership.empty(ownershipId)
 
-        val updated = bestOrderService.updateBestSellOrder(short, order)
+        val updated = bestOrderService.updateBestSellOrder(short, order, emptyList()) // TODO add origins
 
         if (short != updated) {
             if (updated.isNotEmpty()) {
