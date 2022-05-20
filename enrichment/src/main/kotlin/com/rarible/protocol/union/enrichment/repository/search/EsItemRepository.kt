@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.enrichment.repository.search
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.apm.SpanType
 import com.rarible.protocol.union.core.elasticsearch.EsNameResolver
@@ -7,8 +8,9 @@ import com.rarible.protocol.union.core.model.ElasticItemFilter
 import com.rarible.protocol.union.core.model.EsItem
 import com.rarible.protocol.union.core.model.EsItemQueryResult
 import com.rarible.protocol.union.core.model.EsItemSort
+import com.rarible.protocol.union.dto.continuation.page.ArgSlice
 import com.rarible.protocol.union.dto.continuation.page.PageSize
-import com.rarible.protocol.union.enrichment.repository.search.internal.EsItemBuilderService
+import com.rarible.protocol.union.enrichment.repository.search.internal.EsItemBuilderService.buildQuery
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.elasticsearch.action.admin.indices.refresh.RefreshRequest
@@ -22,8 +24,8 @@ import java.io.IOException
 @Component
 @CaptureSpan(type = SpanType.DB)
 class EsItemRepository(
+    private val objectMapper: ObjectMapper,
     private val esOperations: ReactiveElasticsearchOperations,
-    private val esItemBuilderService: EsItemBuilderService,
     esNameResolver: EsNameResolver
 ) {
     val entityDefinition = esNameResolver.createEntityDefinitionExtended(EsItem.ENTITY_DEFINITION)
@@ -71,27 +73,28 @@ class EsItemRepository(
         sort: EsItemSort,
         limit: Int?
     ): EsItemQueryResult {
-        val query = esItemBuilderService.build(filter, sort)
+        val query = filter.buildQuery(sort)
         query.maxResults = PageSize.ITEM.limit(limit)
-
         return search(query)
     }
 
     suspend fun search(query: NativeSearchQuery): EsItemQueryResult {
-        val items = esOperations.search(query, EsItem::class.java, entityDefinition.searchIndexCoordinates)
+
+        val hits = esOperations.search(query, EsItem::class.java, entityDefinition.searchIndexCoordinates)
             .collectList()
             .awaitFirst()
-            .map { it.content }
+        val items = hits.map { it.content }
 
-        val cursor = if (items.isEmpty()) {
-            null
-        } else {
-            items.last().itemId
-        }
+        val last = hits.lastOrNull()
+        val continuationString = if (last != null && last.sortValues.size > 0) {
+            objectMapper.writeValueAsString(
+                hits.last().sortValues.last()
+            )
+        } else ArgSlice.COMPLETED
 
         return EsItemQueryResult(
             items = items,
-            cursor = cursor
+            cursor = continuationString
         )
     }
 

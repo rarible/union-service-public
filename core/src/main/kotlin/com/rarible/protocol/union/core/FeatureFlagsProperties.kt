@@ -13,10 +13,11 @@ data class FeatureFlagsProperties(
     val enableLegacyWrappedEventTopic: Boolean = true,
     // activities
     var enableActivityQueriesToElasticSearch: Boolean = false,
-    var enableItemQueriesToElasticSearch: Boolean = false,
     var enableActivityQueriesPerTypeFilter: Boolean = false,
     var enableImmutableXActivitiesQueries: Boolean = false,
     val enableCollectionQueriesToElastic: Boolean = false,
     // orders
     var enableOrderQueriesToElasticSearch: Boolean = false,
+    // items
+    var enableItemQueriesToElasticSearch: Boolean = false,
 )

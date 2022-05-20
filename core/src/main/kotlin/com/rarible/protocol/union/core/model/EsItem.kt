@@ -14,14 +14,14 @@ data class EsItem(
     @Id
     val itemId: String,
     val blockchain: BlockchainDto,
-    val collection: String,
+    val collection: String?,
 
-    val name: String,
-    val description: String,
+    val name: String?,
+    val description: String?,
     val traits: List<EsTrait>,
 
     val creators: List<String>,
-    val owner: String,
+    val owner: String?,
 
     @Field(type = FieldType.Date)
     val mintedAt: Instant,
@@ -41,4 +41,4 @@ data class EsItem(
     }
 }
 
-data class EsTrait(val key: String, val value: String)
+data class EsTrait(val key: String, val value: String?)
