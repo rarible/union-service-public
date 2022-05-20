@@ -1,16 +1,12 @@
 package com.rarible.protocol.union.search.indexer.repository
 
-import com.rarible.protocol.union.core.model.EsActivity
 import com.rarible.protocol.union.core.model.EsCollection
-import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
 import com.rarible.protocol.union.enrichment.repository.search.EsCollectionRepository
-import com.rarible.protocol.union.enrichment.test.data.randomEsActivity
 import com.rarible.protocol.union.enrichment.test.data.randomEsCollection
 import com.rarible.protocol.union.search.indexer.test.IntegrationTest
 import kotlinx.coroutines.runBlocking
-import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.elasticsearch.index.query.BoolQueryBuilder
 import org.junit.jupiter.api.Test
@@ -18,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery
 import org.springframework.test.context.ContextConfiguration
-import kotlin.random.Random
 
 @IntegrationTest
 @EnableAutoConfiguration
@@ -32,13 +27,11 @@ class EsCollectionRepositoryFt {
     fun `should save and read`(): Unit = runBlocking {
         val collection = EsCollection(
             collectionId = "ETHEREUM:12345",
-            type = "some type",
             blockchain = BlockchainDto.ETHEREUM,
             name = "some name",
             symbol = "SMBL",
             owner = "some owner",
             meta = null,
-            parent = "some parent",
         )
 
         val id = repository.saveAll(listOf(collection)).first().collectionId

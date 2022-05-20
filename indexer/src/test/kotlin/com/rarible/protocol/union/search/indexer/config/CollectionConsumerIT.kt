@@ -69,13 +69,11 @@ class CollectionConsumerIT {
     private suspend fun assert(actualCollection: EsCollection) {
         assertThat(collection).isNotNull
         assertThat(actualCollection.collectionId).isEqualTo(collectionId.fullId())
-        assertThat(actualCollection.type).isEqualTo(collection.type.name)
         assertThat(actualCollection.name).isEqualTo(collection.name)
         assertThat(actualCollection.symbol).isEqualTo(collection.symbol)
         assertThat(actualCollection.owner).isEqualTo(collection.owner?.fullId())
         assertThat(actualCollection.meta).isNotNull
         assertThat(actualCollection.meta!!.name).isEqualTo(collection.meta!!.name)
         assertThat(actualCollection.meta!!.description).isEqualTo(collection.meta!!.description)
-        assertThat(actualCollection.meta!!.feeRecipient).isEqualTo(collection.meta!!.feeRecipient?.fullId())
     }
 }
