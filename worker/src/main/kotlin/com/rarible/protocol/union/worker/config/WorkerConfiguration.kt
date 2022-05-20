@@ -31,7 +31,6 @@ import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperatio
 )
 @EnableRaribleTask
 @EnableConfigurationProperties(WorkerProperties::class)
-@EnableAutoConfiguration(exclude = [UnionApiClientAutoConfiguration::class])
 class WorkerConfiguration(
     val properties: WorkerProperties
 ) {
