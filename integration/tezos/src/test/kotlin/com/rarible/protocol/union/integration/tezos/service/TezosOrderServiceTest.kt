@@ -146,6 +146,7 @@ class TezosOrderServiceTest {
                 any(),
                 any(),
                 any(),
+                any(),
                 any()
             )
         } returns DipDupOrdersPage(orders = listOf(dipDupOrder), continuation = continuation)
@@ -185,6 +186,7 @@ class TezosOrderServiceTest {
             dipdupOrderClient.getOrdersByItem(
                 contract = token,
                 tokenId = tokenId.toString(),
+                any(),
                 any(),
                 any(),
                 any(),

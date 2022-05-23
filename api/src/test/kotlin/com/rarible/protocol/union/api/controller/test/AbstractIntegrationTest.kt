@@ -5,6 +5,7 @@ import com.rarible.core.kafka.KafkaMessage
 import com.rarible.core.kafka.KafkaSendResult
 import com.rarible.core.kafka.RaribleKafkaConsumer
 import com.rarible.core.kafka.RaribleKafkaProducer
+import com.rarible.dipdup.client.OrderClient
 import com.rarible.protocol.currency.api.client.CurrencyControllerApi
 import com.rarible.protocol.currency.dto.CurrencyRateDto
 import com.rarible.protocol.flow.nft.api.client.FlowNftCollectionControllerApi
@@ -209,6 +210,9 @@ abstract class AbstractIntegrationTest {
 
     @Autowired
     lateinit var testTezosSignatureApi: com.rarible.protocol.tezos.api.client.OrderSignatureControllerApi
+
+    @Autowired
+    lateinit var testDipDupOrderClient: com.rarible.dipdup.client.OrderClient
 
     lateinit var tezosItemControllerApiMock: TezosItemControllerApiMock
     lateinit var tezosOwnershipControllerApiMock: TezosOwnershipControllerApiMock

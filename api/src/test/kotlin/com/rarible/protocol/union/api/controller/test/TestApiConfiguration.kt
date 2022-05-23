@@ -245,7 +245,6 @@ class TestApiConfiguration {
 
     //--------------------- TEZOS ---------------------//
 
-
     @Bean
     @Primary
     fun testTezosItemApi(): com.rarible.protocol.tezos.api.client.NftItemControllerApi = mockk()
@@ -273,4 +272,9 @@ class TestApiConfiguration {
     @Bean
     @Primary
     fun testTezosActivityOrderApi(): com.rarible.protocol.tezos.api.client.OrderActivityControllerApi = mockk()
+
+    @Bean
+    @Primary
+    fun testDipDupOrderClient(): com.rarible.dipdup.client.OrderClient = mockk()
+
 }
