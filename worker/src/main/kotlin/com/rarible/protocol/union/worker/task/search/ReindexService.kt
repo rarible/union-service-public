@@ -33,7 +33,7 @@ class ReindexService(
                 scheduleActivityReindex(newIndexName)
             }
             EsEntity.ORDER,
-            EsEntity.COLLECTION,
+            // EsEntity.COLLECTION,
             EsEntity.OWNERSHIP -> {
                 throw UnsupportedOperationException("Unsupported entity ${entityDefinition.entity} reindex")
             }
