@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 @Suppress("ReactiveStreamsUnusedPublisher")
-@Disabled("investigate test failure on jenkins")
 class CollectionTaskUnitTest {
 
     private val collection = CollectionDto(

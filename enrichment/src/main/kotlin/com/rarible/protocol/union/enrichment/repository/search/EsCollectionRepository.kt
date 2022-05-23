@@ -11,10 +11,12 @@ import com.rarible.protocol.union.enrichment.repository.search.internal.EsCollec
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactor.awaitSingle
+import org.elasticsearch.action.admin.indices.refresh.RefreshRequest
 import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery
 import org.springframework.data.elasticsearch.core.query.Query
 import org.springframework.stereotype.Component
+import java.io.IOException
 
 @Component
 @CaptureSpan(type = SpanType.DB)
@@ -57,5 +59,15 @@ class EsCollectionRepository(
             Any::class.java,
             entityDefinition.writeIndexCoordinates
         ).awaitFirstOrNull()
+    }
+
+    suspend fun refresh() {
+        val refreshRequest = RefreshRequest().indices(entityDefinition.aliasName, entityDefinition.writeAliasName)
+
+        try {
+            esOperations.execute { it.indices().refreshIndex(refreshRequest) }.awaitFirstOrNull()
+        } catch (e: IOException) {
+            throw RuntimeException(entityDefinition.writeAliasName + " refreshModifyIndex failed", e)
+        }
     }
 }
