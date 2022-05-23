@@ -9,6 +9,7 @@ import com.rarible.protocol.union.integration.immutablex.client.ImmutablexApiCli
 import com.rarible.protocol.union.integration.immutablex.converter.ImmutablexActivityConverter
 import com.rarible.protocol.union.integration.immutablex.converter.ImmutablexOrderConverter
 import com.rarible.protocol.union.integration.immutablex.service.ImmutablexActivityService
+import com.rarible.protocol.union.integration.immutablex.service.ImmutablexCollectionService
 import com.rarible.protocol.union.integration.immutablex.service.ImmutablexItemService
 import com.rarible.protocol.union.integration.immutablex.service.ImmutablexOrderService
 import com.rarible.protocol.union.integration.immutablex.service.ImmutablexOwnershipService
@@ -95,4 +96,7 @@ class ImmutablexApiConfiguration {
     fun immutablexOwnershipService(immutablexApiClient: ImmutablexApiClient): ImmutablexOwnershipService =
         ImmutablexOwnershipService(immutablexApiClient)
 
+    @Bean
+    fun immutablexCollectionService(immutablexApiClient: ImmutablexApiClient): ImmutablexCollectionService =
+        ImmutablexCollectionService(immutablexApiClient)
 }
