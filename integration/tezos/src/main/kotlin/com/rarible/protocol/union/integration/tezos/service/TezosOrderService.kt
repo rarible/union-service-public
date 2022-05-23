@@ -36,7 +36,7 @@ open class TezosOrderService(
     ): Slice<OrderDto> {
 
         // We try to get new orders only if we get all legacy and continuation != null
-        if (dipdupOrderService.enabled() && (isDipDupContinuation(continuation) || continuation == null)) {
+        if (dipdupOrderService.enabled() && continuation != null && isDipDupContinuation(continuation)) {
             val slice = dipdupOrderService.getOrdersAll(sort, status, continuation, size)
             return slice
 
@@ -248,7 +248,7 @@ open class TezosOrderService(
         val (contract, tokenId) = CompositeItemIdParser.split(itemId)
 
         // We try to get new orders only if we get all legacy and continuation != null
-        if (dipdupOrderService.enabled() && (isDipDupContinuation(continuation) || continuation == null)) {
+        if (dipdupOrderService.enabled() && continuation != null && isDipDupContinuation(continuation)) {
             val slice = dipdupOrderService.getSellOrdersByItem(contract, tokenId, maker, currencyId, status, continuation, size)
             return slice
 
