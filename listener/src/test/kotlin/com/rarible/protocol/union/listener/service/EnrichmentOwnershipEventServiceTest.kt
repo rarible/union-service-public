@@ -13,6 +13,7 @@ import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
 import com.rarible.protocol.union.enrichment.service.BestOrderService
 import com.rarible.protocol.union.enrichment.service.EnrichmentActivityService
 import com.rarible.protocol.union.enrichment.service.EnrichmentAuctionService
+import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
 import com.rarible.protocol.union.enrichment.test.data.randomShortOwnership
 import com.rarible.protocol.union.enrichment.test.data.randomUnionActivityBurn
@@ -33,6 +34,7 @@ import org.junit.jupiter.api.Test
 class EnrichmentOwnershipEventServiceTest {
 
     private val ownershipService: EnrichmentOwnershipService = mockk()
+    private val itemService: EnrichmentItemService = mockk()
     private val activityService: EnrichmentActivityService = mockk()
     private val itemEventService: EnrichmentItemEventService = mockk()
     private val eventListener: OutgoingOwnershipEventListener = mockk()
@@ -44,6 +46,7 @@ class EnrichmentOwnershipEventServiceTest {
 
     private val ownershipEventService = EnrichmentOwnershipEventService(
         ownershipService,
+        itemService,
         itemEventService,
         enrichmentAuctionService,
         activityService,
@@ -62,6 +65,7 @@ class EnrichmentOwnershipEventServiceTest {
             bestOrderService,
             activityService
         )
+        coEvery { itemService.getItemOrigins(any()) } returns emptyList()
         coEvery { eventListener.onEvent(any()) } returns Unit
         coEvery { itemEventService.onOwnershipUpdated(any(), any()) } returns Unit
         coEvery { auctionContractService.isAuctionContract(any(), any()) } returns false

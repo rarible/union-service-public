@@ -8,9 +8,11 @@ import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.loadMetaSynchronously
 import com.rarible.protocol.union.core.service.ItemService
+import com.rarible.protocol.union.core.service.OriginService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.AuctionDto
 import com.rarible.protocol.union.dto.AuctionIdDto
+import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
@@ -37,13 +39,25 @@ class EnrichmentItemService(
     private val itemRepository: ItemRepository,
     private val enrichmentOrderService: EnrichmentOrderService,
     private val enrichmentAuctionService: EnrichmentAuctionService,
-    private val unionMetaService: UnionMetaService
+    private val unionMetaService: UnionMetaService,
+    private val originService: OriginService
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
     suspend fun get(itemId: ShortItemId): ShortItem? {
         return itemRepository.get(itemId)
+    }
+
+    suspend fun getItemCollection(itemId: ShortItemId): CollectionIdDto? {
+        val collectionId = itemServiceRouter.getService(itemId.blockchain)
+            .getItemCollectionId(itemId.itemId) ?: return null
+        return CollectionIdDto(itemId.blockchain, collectionId)
+    }
+
+    suspend fun getItemOrigins(itemId: ShortItemId): List<String> {
+        val collectionId = getItemCollection(itemId)
+        return originService.getOrigins(collectionId)
     }
 
     suspend fun getOrEmpty(itemId: ShortItemId): ShortItem {

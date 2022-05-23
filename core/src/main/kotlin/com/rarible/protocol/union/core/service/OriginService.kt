@@ -42,8 +42,9 @@ class OriginService(
         }
     }
 
-    fun getOrigins(collectionId: CollectionIdDto): Set<String> {
-        return globalOrigins + (collectionOrigins[collectionId] ?: emptySet())
+    fun getOrigins(collectionId: CollectionIdDto?): List<String> {
+        val collectionOrigins = collectionId?.let { collectionOrigins[collectionId] } ?: emptySet()
+        return (globalOrigins + collectionOrigins).toList()
     }
 
 }

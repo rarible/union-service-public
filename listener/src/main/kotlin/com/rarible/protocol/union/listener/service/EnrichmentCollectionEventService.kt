@@ -3,6 +3,7 @@ package com.rarible.protocol.union.listener.service
 import com.rarible.core.common.optimisticLock
 import com.rarible.protocol.union.core.event.OutgoingCollectionEventListener
 import com.rarible.protocol.union.core.model.UnionCollection
+import com.rarible.protocol.union.core.service.OriginService
 import com.rarible.protocol.union.core.service.ReconciliationEventService
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.CollectionUpdateEventDto
@@ -22,7 +23,8 @@ class EnrichmentCollectionEventService(
     private val itemEventListeners: List<OutgoingCollectionEventListener>,
     private val enrichmentCollectionService: EnrichmentCollectionService,
     private val reconciliationEventService: ReconciliationEventService,
-    private val bestOrderService: BestOrderService
+    private val bestOrderService: BestOrderService,
+    private val originService: OriginService
 ) {
 
     private val logger = LoggerFactory.getLogger(EnrichmentCollectionEventService::class.java)
@@ -43,7 +45,8 @@ class EnrichmentCollectionEventService(
             order,
             notificationEnabled
         ) { collection ->
-            bestOrderService.updateBestSellOrder(collection, order, emptyList()) // TODO add origins
+            val origins = originService.getOrigins(collectionId)
+            bestOrderService.updateBestSellOrder(collection, order, origins)
         }
     }
 
@@ -57,7 +60,8 @@ class EnrichmentCollectionEventService(
             order,
             notificationEnabled
         ) { collection ->
-            bestOrderService.updateBestBidOrder(collection, order, emptyList()) // TODO add origins
+            val origins = originService.getOrigins(collectionId)
+            bestOrderService.updateBestBidOrder(collection, order, origins)
         }
     }
 

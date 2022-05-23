@@ -137,13 +137,15 @@ class EnrichmentItemEventService(
 
     suspend fun onItemBestSellOrderUpdated(itemId: ShortItemId, order: OrderDto, notificationEnabled: Boolean = true) {
         updateOrder(itemId, order, notificationEnabled) { item ->
-            bestOrderService.updateBestSellOrder(item, order, emptyList()) // TODO add origins
+            val origins = enrichmentItemService.getItemOrigins(itemId)
+            bestOrderService.updateBestSellOrder(item, order, origins)
         }
     }
 
     suspend fun onItemBestBidOrderUpdated(itemId: ShortItemId, order: OrderDto, notificationEnabled: Boolean = true) {
         updateOrder(itemId, order, notificationEnabled) { item ->
-            bestOrderService.updateBestBidOrder(item, order, emptyList()) // TODO add origins
+            val origins = enrichmentItemService.getItemOrigins(itemId)
+            bestOrderService.updateBestBidOrder(item, order, origins)
         }
     }
 

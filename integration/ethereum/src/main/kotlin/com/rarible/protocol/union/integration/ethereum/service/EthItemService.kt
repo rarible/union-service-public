@@ -1,8 +1,8 @@
 package com.rarible.protocol.union.integration.ethereum.service
 
 import com.rarible.core.apm.CaptureSpan
-import com.rarible.protocol.dto.NftItemDto
 import com.rarible.protocol.dto.NftItemIdsDto
+import com.rarible.protocol.dto.parser.AddressParser
 import com.rarible.protocol.nft.api.client.NftItemControllerApi
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.UnionMeta
@@ -13,7 +13,6 @@ import com.rarible.protocol.union.dto.RoyaltyDto
 import com.rarible.protocol.union.dto.continuation.page.Page
 import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthItemConverter
-import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactive.awaitSingle
@@ -104,6 +103,12 @@ open class EthItemService(
     override suspend fun getItemsByIds(itemIds: List<String>): List<UnionItem> {
         val items = itemControllerApi.getNftItemsByIds(NftItemIdsDto(itemIds)).collectList().awaitSingle()
         return items.map { EthItemConverter.convert(it, blockchain) }
+    }
+
+    override suspend fun getItemCollectionId(itemId: String): String {
+        // Conversion used as validation here
+        val ethToken = AddressParser.parse(itemId.substringBefore(":"))
+        return EthConverter.convert(ethToken)
     }
 }
 

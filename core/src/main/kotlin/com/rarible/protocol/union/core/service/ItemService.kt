@@ -55,4 +55,7 @@ interface ItemService : BlockchainService {
         itemIds: List<String>
     ): List<UnionItem>
 
+    suspend fun getItemCollectionId(
+        itemId: String
+    ): String?
 }

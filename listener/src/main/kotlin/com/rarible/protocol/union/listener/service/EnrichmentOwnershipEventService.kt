@@ -23,6 +23,7 @@ import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
 import com.rarible.protocol.union.enrichment.service.BestOrderService
 import com.rarible.protocol.union.enrichment.service.EnrichmentActivityService
 import com.rarible.protocol.union.enrichment.service.EnrichmentAuctionService
+import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
 import com.rarible.protocol.union.enrichment.validator.OwnershipValidator
 import kotlinx.coroutines.async
@@ -34,6 +35,7 @@ import java.util.*
 @Component
 class EnrichmentOwnershipEventService(
     private val enrichmentOwnershipService: EnrichmentOwnershipService,
+    private val enrichmentItemService: EnrichmentItemService,
     private val enrichmentItemEventService: EnrichmentItemEventService,
     private val enrichmentAuctionService: EnrichmentAuctionService,
     private val enrichmentActivityService: EnrichmentActivityService,
@@ -75,7 +77,8 @@ class EnrichmentOwnershipEventService(
         val exist = current != null
         val short = current ?: ShortOwnership.empty(ownershipId)
 
-        val updated = bestOrderService.updateBestSellOrder(short, order, emptyList()) // TODO add origins
+        val origins = enrichmentItemService.getItemOrigins(ownershipId.getItemId())
+        val updated = bestOrderService.updateBestSellOrder(short, order, origins)
 
         if (short != updated) {
             if (updated.isNotEmpty()) {
