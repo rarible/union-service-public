@@ -43,7 +43,7 @@ class ActivitySourceSelectService(
 
     suspend fun getActivitiesByCollection(
         type: List<ActivityTypeDto>,
-        collection: String,
+        collection: List<String>,
         continuation: String?,
         cursor: String?,
         size: Int?,

@@ -94,13 +94,14 @@ class ActivityApiMergeService(
 
     override suspend fun getActivitiesByCollection(
         type: List<ActivityTypeDto>,
-        collection: String,
+        collection: List<String>,
         continuation: String?,
         cursor: String?,
         size: Int?,
         sort: ActivitySortDto?
     ): ActivitiesDto {
-        val collectionId = IdParser.parseCollectionId(collection)
+        val collectionValue = collection.first() // fallback for API variant
+        val collectionId = IdParser.parseCollectionId(collectionValue)
         val blockchain = collectionId.blockchain
         val dto = withCursor(continuation, cursor, blockchain, size, sort) { cont, safeSize ->
             router.getService(collectionId.blockchain)
@@ -109,7 +110,7 @@ class ActivityApiMergeService(
         logger.info(
             "Response for getActivitiesByCollection(type={}, collection={}, continuation={}, size={}, sort={}): " +
                     "Slice(size={}, continuation={}) ",
-            type, collection, continuation, size, sort, dto.activities.size, dto.continuation
+            type, collectionValue, continuation, size, sort, dto.activities.size, dto.continuation
         )
         return dto
     }
