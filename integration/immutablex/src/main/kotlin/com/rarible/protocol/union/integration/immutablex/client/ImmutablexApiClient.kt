@@ -12,6 +12,7 @@ import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexOrder
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexOrdersPage
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexTradesPage
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexTransfersPage
+import java.math.BigInteger
 import java.time.Instant
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -130,7 +131,7 @@ class ImmutablexApiClient(
             cursor = mints.cursor,
             remaining = mints.remaining,
             result = getAssetsByIds(
-                mints.result.map { "${it.token.data.tokenAddress}:${it.token.data.tokenId}" }
+                mints.result.map { "${it.token.data.tokenAddress}:${BigInteger(it.token.data.tokenId.toByteArray())}" }
             )
         )
     }
