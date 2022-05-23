@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.core.model
 
-import com.rarible.protocol.union.dto.BlockchainDto
 import java.time.Instant
 
 data class ElasticItemFilter(
@@ -14,6 +13,6 @@ data class ElasticItemFilter(
     val updatedFrom: Instant? = null,
     val updatedTo: Instant? = null,
     val deleted: Boolean? = null,
-    val meta: String? = null,
+    val text: String? = null,
     val cursor: EsItemCursor? = null,
 )

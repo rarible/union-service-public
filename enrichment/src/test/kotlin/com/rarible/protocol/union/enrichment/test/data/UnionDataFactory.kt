@@ -266,7 +266,6 @@ fun randomEsItem() = EsItem(
     description = randomString(),
     traits = listOf(EsTrait(randomString(), randomInt().toString()), EsTrait(randomString(), randomString())),
     creators = listOf(randomString()),
-    owner = randomString(),
     mintedAt = Instant.now(),
     lastUpdatedAt = Instant.now()
 )
