@@ -10,6 +10,7 @@ import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.core.model.getSellerOwnershipId
 import com.rarible.protocol.union.core.service.AuctionContractService
 import com.rarible.protocol.union.core.service.OrderService
+import com.rarible.protocol.union.core.service.OriginService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.AuctionDto
 import com.rarible.protocol.union.dto.CollectionDto
@@ -29,6 +30,14 @@ import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.OwnershipUpdateEventDto
 import com.rarible.protocol.union.dto.ext
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
+import com.rarible.protocol.union.enrichment.evaluator.BestOrderProviderFactory
+import com.rarible.protocol.union.enrichment.evaluator.CollectionBestBidOrderProvider
+import com.rarible.protocol.union.enrichment.evaluator.CollectionBestSellOrderProvider
+import com.rarible.protocol.union.enrichment.evaluator.ItemBestBidOrderProvider
+import com.rarible.protocol.union.enrichment.evaluator.ItemBestSellOrderProvider
+import com.rarible.protocol.union.enrichment.evaluator.OwnershipBestBidOrderProvider
+import com.rarible.protocol.union.enrichment.evaluator.OwnershipBestSellOrderProvider
+import com.rarible.protocol.union.enrichment.model.OriginOrders
 import com.rarible.protocol.union.enrichment.model.ShortCollectionId
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortOwnership
@@ -58,6 +67,7 @@ class EnrichmentRefreshService(
     private val itemEventListeners: List<OutgoingItemEventListener>,
     private val ownershipEventListeners: List<OutgoingOwnershipEventListener>,
     private val auctionContractService: AuctionContractService,
+    private val originService: OriginService,
     private val ff: FeatureFlagsProperties
 ) {
 
@@ -96,15 +106,17 @@ class EnrichmentRefreshService(
         itemAuctions: Collection<AuctionDto>
     ) {
         // Skipping ownerships of Auctions
-        val ownerships = ownershipService.fetchAllByItemId(ShortItemId(itemId))
+        val shortItemId = ShortItemId(itemId)
+        val ownerships = ownershipService.fetchAllByItemId(shortItemId)
             .filter { !auctionContractService.isAuctionContract(it.id.blockchain, it.id.owner.value) }
 
         val auctions = itemAuctions.associateBy { it.getSellerOwnershipId() }
+        val origins = enrichmentItemService.getItemOrigins(shortItemId)
 
         // Checking free or partially auctioned ownerships
         logger.info("Reconciling {} Ownerships for Item [{}]", ownerships.size, itemId)
         coroutineScope {
-            ownerships.map { async { reconcileOwnership(it, sellCurrencies, auctions) } }
+            ownerships.map { async { reconcileOwnership(it, sellCurrencies, auctions, origins) } }
         }.awaitAll()
 
         // Checking full auctions and send notifications with disguised ownerships
@@ -130,7 +142,8 @@ class EnrichmentRefreshService(
         if (unionOwnership != null) {
             // Free or partially auctioned ownership
             val auctions = auction?.let { mapOf(ownershipId to it) } ?: emptyMap()
-            reconcileOwnership(unionOwnership, sellCurrencies.await(), auctions)
+            val origins = enrichmentItemService.getItemOrigins(shortOwnershipId.getItemId())
+            reconcileOwnership(unionOwnership, sellCurrencies.await(), auctions, origins)
         } else if (auction != null) {
             // Fully auctioned ownerships - just send disguised ownership event, no enrichment data available here
             notifyUpdate(auction)
@@ -148,34 +161,28 @@ class EnrichmentRefreshService(
         logger.info("Starting to reconcile Collection [{}]", shortCollectionId)
         val unionCollectionDeferred = async { enrichmentCollectionService.fetch(shortCollectionId) }
 
-        // Looking for best sell orders
-        val bestSellOrdersDtoDeferred = sellCurrencies.map { currencyId ->
-            async { enrichmentOrderService.getBestSell(shortCollectionId, currencyId, null) }
-        }
+        val bestSellProviderFactory = CollectionBestSellOrderProvider.Factory(shortCollectionId, enrichmentOrderService)
+        val bestBidProviderFactory = CollectionBestBidOrderProvider.Factory(shortCollectionId, enrichmentOrderService)
 
-        // Looking for best bid orders
-        val bestBidOrdersDtoDeferred = bidCurrencies.map { currencyId ->
-            async { enrichmentOrderService.getBestBid(shortCollectionId, currencyId, null) }
-        }
-        val bestSellOrdersDto = bestSellOrdersDtoDeferred.awaitAll().filterNotNull()
-        val bestBidOrdersDto = bestBidOrdersDtoDeferred.awaitAll().filterNotNull()
-
-        val bestSellOrders = bestSellOrdersDto.associateBy { it.sellCurrencyId }
-            .mapValues { ShortOrderConverter.convert(it.value) }
-
-        val bestBidOrders = bestBidOrdersDto.associateBy { it.bidCurrencyId }
-            .mapValues { ShortOrderConverter.convert(it.value) }
+        val origins = originService.getOrigins(shortCollectionId.toDto())
+        val bestOrders = getOriginBestOrders(
+            origins, sellCurrencies, bidCurrencies, bestSellProviderFactory, bestBidProviderFactory
+        )
 
         val updatedCollection = optimisticLock {
             val shortCollection = enrichmentCollectionService.getOrEmpty(shortCollectionId).copy(
-                bestSellOrders = bestSellOrders,
-                bestSellOrder = bestOrderService.getBestSellOrderInUsd(bestSellOrders),
-                bestBidOrders = bestBidOrders,
-                bestBidOrder = bestOrderService.getBestBidOrderInUsd(bestBidOrders),
+                bestSellOrders = bestOrders.global.bestSellOrders,
+                bestSellOrder = bestOrders.global.bestSellOrder,
+                bestBidOrders = bestOrders.global.bestBidOrders,
+                bestBidOrder = bestOrders.global.bestBidOrder,
+                originOrders = bestOrders.originOrders
             )
 
             if (shortCollection.isNotEmpty()) {
-                logger.info("Saving refreshed Collection [{}] with gathered enrichment data [{}]", shortCollectionId, shortCollection)
+                logger.info(
+                    "Saving refreshed Collection [{}] with gathered enrichment data [{}]", shortCollectionId,
+                    shortCollection
+                )
                 enrichmentCollectionService.save(shortCollection)
             } else {
                 logger.info("Collection [{}] has no enrichment data, will be deleted", shortCollectionId)
@@ -184,7 +191,7 @@ class EnrichmentRefreshService(
             shortCollection
         }
 
-        val ordersHint = (bestSellOrdersDto + bestBidOrdersDto).associateBy { it.id }
+        val ordersHint = bestOrders.all
         val enriched = enrichmentCollectionService.enrichCollection(
             shortCollection = updatedCollection,
             collection = unionCollectionDeferred.await(),
@@ -208,21 +215,13 @@ class EnrichmentRefreshService(
         val itemDtoDeferred = async { itemService.fetch(shortItemId) }
         val sellStatsDeferred = async { ownershipService.getItemSellStats(shortItemId) }
 
-        // Looking for best sell orders
-        val bestSellOrdersDto = sellCurrencies.map { currencyId ->
-            async { enrichmentOrderService.getBestSell(shortItemId, currencyId, null) }
-        }.awaitAll().filterNotNull()
+        val bestSellProviderFactory = ItemBestSellOrderProvider.Factory(shortItemId, enrichmentOrderService)
+        val bestBidProviderFactory = ItemBestBidOrderProvider.Factory(shortItemId, enrichmentOrderService)
 
-        val bestSellOrders = bestSellOrdersDto.associateBy { it.sellCurrencyId }
-            .mapValues { ShortOrderConverter.convert(it.value) }
-
-        // Looking for best bid orders
-        val bestBidOrdersDto = bidCurrencies.map { currencyId ->
-            async { enrichmentOrderService.getBestBid(shortItemId, currencyId, null) }
-        }.awaitAll().filterNotNull()
-
-        val bestBidOrders = bestBidOrdersDto.associateBy { it.bidCurrencyId }
-            .mapValues { ShortOrderConverter.convert(it.value) }
+        val origins = enrichmentItemService.getItemOrigins(shortItemId)
+        val bestOrders = getOriginBestOrders(
+            origins, sellCurrencies, bidCurrencies, bestSellProviderFactory, bestBidProviderFactory
+        )
 
         // Waiting other operations completed
         val sellStats = sellStatsDeferred.await()
@@ -230,10 +229,11 @@ class EnrichmentRefreshService(
 
         val updatedItem = optimisticLock {
             val shortItem = itemService.getOrEmpty(shortItemId).copy(
-                bestSellOrders = bestSellOrders,
-                bestSellOrder = bestOrderService.getBestSellOrderInUsd(bestSellOrders),
-                bestBidOrders = bestBidOrders,
-                bestBidOrder = bestOrderService.getBestBidOrderInUsd(bestBidOrders),
+                bestSellOrders = bestOrders.global.bestSellOrders,
+                bestSellOrder = bestOrders.global.bestSellOrder,
+                bestBidOrders = bestOrders.global.bestBidOrders,
+                bestBidOrder = bestOrders.global.bestBidOrder,
+                originOrders = bestOrders.originOrders,
                 sellers = sellStats.sellers,
                 totalStock = sellStats.totalStock,
                 auctions = auctions.map { it.id }.toSet(),
@@ -253,7 +253,7 @@ class EnrichmentRefreshService(
         val event = if (itemDto.deleted) {
             notifyDelete(itemDto.id)
         } else {
-            val ordersHint = (bestSellOrdersDto + bestBidOrdersDto).associateBy { it.id }
+            val ordersHint = bestOrders.all
             val auctionsHint = auctions.associateBy { it.id }
             val enriched = enrichmentItemService.enrichItem(
                 shortItem = updatedItem,
@@ -269,7 +269,8 @@ class EnrichmentRefreshService(
     private suspend fun reconcileOwnership(
         ownership: UnionOwnership,
         currencies: List<String>,
-        auctions: Map<OwnershipIdDto, AuctionDto>
+        auctions: Map<OwnershipIdDto, AuctionDto>,
+        origins: List<String>
     ) = coroutineScope {
         val shortOwnershipId = ShortOwnershipId(ownership.id)
 
@@ -277,17 +278,18 @@ class EnrichmentRefreshService(
             if (ff.enableOwnershipSourceEnrichment) enrichmentActivityService.getOwnershipSource(ownership.id) else null
         }
 
-        val bestSellOrdersDto = currencies.map { currencyId ->
-            async { enrichmentOrderService.getBestSell(shortOwnershipId, currencyId, null) }
-        }.awaitAll().filterNotNull()
+        val bestSellProviderFactory = OwnershipBestSellOrderProvider.Factory(shortOwnershipId, enrichmentOrderService)
+        val bestBidProviderFactory = OwnershipBestBidOrderProvider.Factory(shortOwnershipId, enrichmentOrderService)
 
-        val bestSellOrders = bestSellOrdersDto.associateBy { it.sellCurrencyId }
-            .mapValues { ShortOrderConverter.convert(it.value) }
+        val bestOrders = getOriginBestOrders(
+            origins, currencies, emptyList(), bestSellProviderFactory, bestBidProviderFactory
+        )
 
         val updatedOwnership = optimisticLock {
             val shortOwnership = enrichmentOwnershipService.getOrEmpty(shortOwnershipId).copy(
-                bestSellOrders = bestSellOrders,
-                bestSellOrder = bestOrderService.getBestSellOrderInUsd(bestSellOrders),
+                bestSellOrders = bestOrders.global.bestSellOrders,
+                bestSellOrder = bestOrders.global.bestSellOrder,
+                originOrders = bestOrders.originOrders,
                 source = ownershipSource.await()
             )
 
@@ -301,7 +303,7 @@ class EnrichmentRefreshService(
             shortOwnership
         }
 
-        val ordersHint = bestSellOrdersDto.associateBy { it.id }
+        val ordersHint = bestOrders.all
 
         notifyUpdate(updatedOwnership, ownership, ordersHint, auctions)
     }
@@ -394,6 +396,86 @@ class EnrichmentRefreshService(
 
         logger.info("Found Sell currencies for Collection [{}] : {}", collectionId.fullId(), result)
         return result.map { it.ext.currencyAddress() }
-
     }
+
+    private suspend fun getOriginBestOrders(
+        origins: List<String>,
+        sellCurrencies: List<String>,
+        bidCurrencies: List<String>,
+        bestSellProviderFactory: BestOrderProviderFactory<*>,
+        bestBidProviderFactory: BestOrderProviderFactory<*>
+    ) = coroutineScope {
+        val originsDeferred = origins.map {
+            async {
+                getBestOrders(
+                    null, sellCurrencies, bidCurrencies, bestSellProviderFactory, bestBidProviderFactory
+                )
+            }
+        }
+        val global = getBestOrders(
+            null, sellCurrencies, bidCurrencies, bestSellProviderFactory, bestBidProviderFactory
+        )
+
+        val byOrigin = originsDeferred.awaitAll()
+
+        val all = HashMap(global.all)
+        byOrigin.forEach { all.putAll(it.all) }
+
+        OriginBestOrders(
+            all,
+            global.orders,
+            byOrigin.map { it.orders }.toSet()
+        )
+    }
+
+    private suspend fun getBestOrders(
+        origin: String?,
+        sellCurrencies: List<String>,
+        bidCurrencies: List<String>,
+        bestSellProviderFactory: BestOrderProviderFactory<*>,
+        bestBidProviderFactory: BestOrderProviderFactory<*>
+    ) = coroutineScope {
+        // Looking for best sell orders
+        val bestSellOrdersDtoDeferred = sellCurrencies.map { currencyId ->
+            async { bestSellProviderFactory.create(origin).fetch(currencyId) }
+        }
+
+        // Looking for best bid orders
+        val bestBidOrdersDtoDeferred = bidCurrencies.map { currencyId ->
+            async { bestBidProviderFactory.create(origin).fetch(currencyId) }
+        }
+        val bestSellOrdersDto = bestSellOrdersDtoDeferred.awaitAll().filterNotNull()
+        val bestBidOrdersDto = bestBidOrdersDtoDeferred.awaitAll().filterNotNull()
+
+        val bestSellOrders = bestSellOrdersDto.associateBy { it.sellCurrencyId }
+            .mapValues { ShortOrderConverter.convert(it.value) }
+
+        val bestBidOrders = bestBidOrdersDto.associateBy { it.bidCurrencyId }
+            .mapValues { ShortOrderConverter.convert(it.value) }
+
+        val all = (bestSellOrdersDto + bestBidOrdersDto).associateBy { it.id }
+
+        BestOrders(
+            all,
+            OriginOrders(
+                origin ?: "global",
+                bestOrderService.getBestSellOrderInUsd(bestSellOrders),
+                bestSellOrders,
+                bestOrderService.getBestBidOrderInUsd(bestBidOrders),
+                bestBidOrders
+            )
+        )
+    }
+
+    data class OriginBestOrders(
+        val all: Map<OrderIdDto, OrderDto>,
+        val global: OriginOrders,
+        val originOrders: Set<OriginOrders>
+    )
+
+    data class BestOrders(
+        val all: Map<OrderIdDto, OrderDto>,
+        val orders: OriginOrders
+    )
+
 }
