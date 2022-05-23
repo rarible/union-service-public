@@ -88,7 +88,7 @@ class ActivityFilterConverterTest {
             every { featureFlagsProperties.enableActivityQueriesPerTypeFilter } returns false
 
             // when
-            val actual = converter.convertGetActivitiesByCollection(types, collection, cursor)
+            val actual = converter.convertGetActivitiesByCollection(types, listOf(collection), cursor)
 
             // then
             assertThat(actual).usingRecursiveComparison()

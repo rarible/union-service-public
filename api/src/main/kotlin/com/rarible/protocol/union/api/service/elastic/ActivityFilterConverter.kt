@@ -34,16 +34,23 @@ class ActivityFilterConverter(
 
     fun convertGetActivitiesByCollection(
         type: List<ActivityTypeDto>,
-        collection: String,
+        collections: List<String>,
         cursor: String?,
     ): ElasticActivityFilter {
-        val collectionId = IdParser.parseCollectionId(collection)
+        val (blockchains, values) = collections
+            .map {
+                IdParser.parseCollectionId(it).let {c ->
+                    c.blockchain to c.value
+                }
+            }
+            .unzip()
+
         return when (featureFlagsProperties.enableActivityQueriesPerTypeFilter) {
             true -> TODO("To be implemented under ALPHA-276 Epic")
             else -> ElasticActivityQueryGenericFilter(
-                blockchains = setOf(collectionId.blockchain),
+                blockchains = blockchains.toSet(),
                 activityTypes = type.toSet(),
-                collections = setOf(collectionId.value),
+                collections = values.toSet(),
                 cursor = cursor,
             )
         }
