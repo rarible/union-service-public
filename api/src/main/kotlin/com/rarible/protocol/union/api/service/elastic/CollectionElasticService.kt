@@ -71,7 +71,7 @@ class CollectionElasticService(
                 val ids = v.map { IdParser.parseCollectionId(it).value }
                 router.getService(k).getCollectionsByIds(ids)
             }
-        .map { it.entities }.flatten().associateBy { seq[it.id.fullId()] }.toSortedMap(compareBy { it })
+        .flatten().associateBy { seq[it.id.fullId()] }.toSortedMap(compareBy { it })
 
         return CollectionsDto(
             total = result.size.toLong(),
