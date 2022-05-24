@@ -43,7 +43,8 @@ class ChangeEsActivityAliasTask(
      */
     override fun runLongTask(from: Unit?, param: String): Flow<Unit> {
         return flow {
-            indexService.finishIndexing(param, entityDefinition)
+            val parameter = paramFactory.parse<ChangeEsActivityAliasTaskParam>(param)
+            indexService.finishIndexing(parameter.indexName, entityDefinition)
             esActivityRepository.refresh()
             logger.info("Finished reindex of ${entityDefinition.entity} with index $param")
         }
