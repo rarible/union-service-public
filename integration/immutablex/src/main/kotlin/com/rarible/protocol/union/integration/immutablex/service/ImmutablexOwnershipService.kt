@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.integration.immutablex.service
 
+import com.rarible.protocol.union.core.exception.UnionNotFoundException
 import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.core.service.OwnershipService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
@@ -24,7 +25,7 @@ class ImmutablexOwnershipService(
             client.getAssetsByCollection(contract, owner, cursor, 100)
         }?.let {
             convert(it)
-        } ?: throw IllegalArgumentException("Ownership is not found for id $ownershipId")
+        } ?: throw UnionNotFoundException("Ownership ${blockchain}:${ownershipId} not found")
     }
 
     override suspend fun getOwnershipsByItem(itemId: String, continuation: String?, size: Int): Page<UnionOwnership> {
