@@ -43,7 +43,7 @@ open class TezosCollectionService(
         // TODO[TEZOS]: implement.
     }
 
-    override suspend fun getCollectionsByIds(ids: List<String>): Page<UnionCollection> {
+    override suspend fun getCollectionsByIds(ids: List<String>): List<UnionCollection> {
         TODO("Not yet implemented")
     }
 

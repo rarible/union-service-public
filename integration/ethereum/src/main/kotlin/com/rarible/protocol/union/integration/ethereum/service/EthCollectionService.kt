@@ -38,9 +38,9 @@ open class EthCollectionService(
         collectionControllerApi.resetNftCollectionMetaById(collectionId).awaitFirstOrNull()
     }
 
-    override suspend fun getCollectionsByIds(ids: List<String>): Page<UnionCollection> {
+    override suspend fun getCollectionsByIds(ids: List<String>): List<UnionCollection> {
         val collections = collectionControllerApi.getNftCollectionsByIds(CollectionsByIdRequestDto(ids)).awaitSingle()
-        return EthCollectionConverter.convert(collections, blockchain)
+        return EthCollectionConverter.convert(collections, blockchain).entities
     }
 
     override suspend fun getCollectionsByOwner(

@@ -25,6 +25,5 @@ interface CollectionService : BlockchainService {
         collectionId: String
     )
 
-    suspend fun getCollectionsByIds(ids: List<String>): Page<UnionCollection>
-
+    suspend fun getCollectionsByIds(ids: List<String>): List<UnionCollection>
 }
