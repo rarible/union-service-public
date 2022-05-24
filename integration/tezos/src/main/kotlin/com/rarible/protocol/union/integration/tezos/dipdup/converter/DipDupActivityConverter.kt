@@ -8,12 +8,14 @@ import com.rarible.dipdup.client.core.model.DipDupOrderListActivity
 import com.rarible.dipdup.client.core.model.DipDupOrderSellActivity
 import com.rarible.dipdup.client.core.model.DipDupTransferActivity
 import com.rarible.dipdup.client.core.model.TezosPlatform
+import com.rarible.dipdup.client.model.DipDupActivityType
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.converter.UnionConverter
 import com.rarible.protocol.union.core.exception.UnionDataFormatException
 import com.rarible.protocol.union.core.service.CurrencyService
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivityIdDto
+import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.BurnActivityDto
 import com.rarible.protocol.union.dto.ContractAddress
@@ -43,6 +45,17 @@ class DipDupActivityConverter(
             logger.error("Failed to convert {} Activity: {} \n{}", blockchain, e.message, source)
             throw e
         }
+    }
+
+    fun convertToDipDupTypes(source: List<ActivityTypeDto>): List<DipDupActivityType> {
+        return source.mapNotNull { convertToDipDupType(it) }
+    }
+
+    fun convertToDipDupType(source: ActivityTypeDto) = when (source) {
+        ActivityTypeDto.LIST -> DipDupActivityType.LIST
+        ActivityTypeDto.SELL -> DipDupActivityType.SELL
+        ActivityTypeDto.CANCEL_LIST -> DipDupActivityType.CANCEL_LIST
+        else -> null
     }
 
     private suspend fun convertInternal(activity: DipDupActivity, blockchain: BlockchainDto): ActivityDto {

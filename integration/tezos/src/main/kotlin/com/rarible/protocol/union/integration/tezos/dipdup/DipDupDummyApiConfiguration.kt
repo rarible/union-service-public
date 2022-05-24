@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.integration.tezos.dipdup
 
+import com.rarible.protocol.union.integration.tezos.dipdup.service.DipdupOrderActivityService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.DipdupOrderService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktCollectionService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktItemService
@@ -14,6 +15,9 @@ class DipDupDummyApiConfiguration {
 
     @Bean
     fun dipdupDummyOrderService() = object: DipdupOrderService {}
+
+    @Bean
+    fun dipdupDummyOrderActivityService() = object: DipdupOrderActivityService {}
 
     @Bean
     fun tzktDummyCollectionService() = object: TzktCollectionService {}

@@ -2,6 +2,7 @@ package com.rarible.protocol.union.integration.tezos.service
 
 import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.logging.Logger
+import com.rarible.dipdup.client.model.DipDupContinuation
 import com.rarible.protocol.tezos.api.client.NftActivityControllerApi
 import com.rarible.protocol.tezos.api.client.OrderActivityControllerApi
 import com.rarible.protocol.tezos.dto.NftActivitiesDto
@@ -31,10 +32,13 @@ import com.rarible.protocol.union.dto.continuation.page.Paging
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.integration.tezos.converter.TezosActivityConverter
 import com.rarible.protocol.union.integration.tezos.converter.TezosConverter
+import com.rarible.protocol.union.integration.tezos.dipdup.service.DipdupOrderActivityService
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.reactive.awaitFirst
 import java.time.Instant
+import java.util.*
+import java.util.regex.Pattern
 
 // TODO UNION add tests when tezos add sorting
 @CaptureSpan(type = "blockchain")
@@ -42,7 +46,8 @@ open class TezosActivityService(
     private val activityItemControllerApi: NftActivityControllerApi,
     private val activityOrderControllerApi: OrderActivityControllerApi,
     private val tezosActivityConverter: TezosActivityConverter,
-    private val pgService: TezosPgActivityService
+    private val pgService: TezosPgActivityService,
+    private val dipdupOrderActivityService: DipdupOrderActivityService
 ) : AbstractBlockchainService(BlockchainDto.TEZOS), ActivityService {
 
     companion object {
@@ -58,13 +63,49 @@ open class TezosActivityService(
         size: Int,
         sort: ActivitySortDto?
     ): Slice<ActivityDto> {
-        val nftFilter = tezosActivityConverter.convertToNftTypes(types)?.let {
-            NftActivityFilterAllDto(it)
+        if (dipdupOrderActivityService.enabled()) {
+
+            // We try to get new activities only if we get all legacy and continuation != null
+            if (continuation != null && isDipDupContinuation(continuation)) {
+                return getDipDupActivities(types, continuation, size, sort)
+            } else {
+
+                // We need only order activities from legacy backend
+                val orderFilter = tezosActivityConverter.convertToOrderTypes(types)?.let {
+                    OrderActivityFilterAllDto(it)
+                }
+                val legacySlice = getTezosActivities(null, orderFilter, continuation, size, sort)
+
+                if (legacySlice.entities.size < size) {
+                    val delta = size - legacySlice.entities.size
+                    val dipdupSlice = getDipDupActivities(types, continuation, delta, sort)
+                    return Slice(
+                        continuation = dipdupSlice.continuation,
+                        entities = legacySlice.entities + legacySlice.entities
+                    )
+                } else {
+                    return legacySlice
+                }
+            }
+        } else {
+            val nftFilter = tezosActivityConverter.convertToNftTypes(types)?.let {
+                NftActivityFilterAllDto(it)
+            }
+            val orderFilter = tezosActivityConverter.convertToOrderTypes(types)?.let {
+                OrderActivityFilterAllDto(it)
+            }
+            return getTezosActivities(nftFilter, orderFilter, continuation, size, sort)
         }
-        val orderFilter = tezosActivityConverter.convertToOrderTypes(types)?.let {
-            OrderActivityFilterAllDto(it)
-        }
-        return getTezosActivities(nftFilter, orderFilter, continuation, size, sort)
+    }
+
+    suspend fun getDipDupActivities(
+        types: List<ActivityTypeDto>,
+        continuation: String?,
+        size: Int,
+        sort: ActivitySortDto?
+    ): Slice<ActivityDto> {
+        val orderActivities = dipdupOrderActivityService.getAll(types, continuation, size, sort)
+        return orderActivities
     }
 
     override suspend fun getAllActivitiesSync(
@@ -151,21 +192,32 @@ open class TezosActivityService(
             }
         }
         val orderRequest = async {
-            if (orderActivitiesIds.isNotEmpty()) {
-                pgService.orderActivities(orderActivitiesIds)
+            val ids = orderActivitiesIds.filter { !isValidUUID(it) }
+            if (ids.isNotEmpty()) {
+                pgService.orderActivities(ids)
                     .also { logger.info("Total order activities returned: ${it.items.size}") }
             } else {
                 EMPTY_ORDER_ACTIVITIES
             }
         }
+        val dipdupOrderRequest = async {
+            val ids = orderActivitiesIds.filter { isValidUUID(it) }
+            if (dipdupOrderActivityService.enabled() && ids.isNotEmpty()) {
+                dipdupOrderActivityService.getByIds(ids)
+                    .also { logger.info("Total dipdup order activities returned: ${it.size}") }
+            } else {
+                emptyList()
+            }
+        }
 
         val items = itemRequest.await()
         val orders = orderRequest.await()
+        val dipdupOrders = dipdupOrderRequest.await()
 
         val itemActivities = items.items.map { tezosActivityConverter.convert(it, blockchain) }
         val orderActivities = orders.items.map { tezosActivityConverter.convert(it, blockchain) }
 
-        itemActivities + orderActivities
+        itemActivities + orderActivities + dipdupOrders
     }
 
     private suspend fun getTezosActivities(
@@ -221,4 +273,16 @@ open class TezosActivityService(
             EMPTY_ORDER_ACTIVITIES
         }
     }
+
+    fun isDipDupContinuation(continuation: String?) = continuation?.let { DipDupContinuation.isValid(it) } ?: false
+
+    fun isValidUUID(str: String?): Boolean {
+        return if (str == null) {
+            false
+        } else UUID_REGEX_PATTERN.matcher(str).matches()
+    }
+
+    private val UUID_REGEX_PATTERN: Pattern =
+        Pattern.compile("^[{]?[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}[}]?$")
+
 }
