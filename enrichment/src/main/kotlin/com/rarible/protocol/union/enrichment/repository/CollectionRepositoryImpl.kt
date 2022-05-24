@@ -5,6 +5,8 @@ import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.apm.SpanType
 import com.rarible.protocol.union.enrichment.model.ShortCollection
 import com.rarible.protocol.union.enrichment.model.ShortCollectionId
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.slf4j.LoggerFactory
@@ -17,7 +19,9 @@ import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.inValues
 import org.springframework.data.mongodb.core.query.isEqualTo
+import org.springframework.data.mongodb.core.query.lte
 import org.springframework.stereotype.Component
+import java.time.Instant
 
 @Component
 @CaptureSpan(type = SpanType.DB)
@@ -54,7 +58,19 @@ class CollectionRepositoryImpl(
         return template.find<ShortCollection>(Query(criteria)).collectList().awaitFirst()
     }
 
+    override fun findWithMultiCurrency(lastUpdateAt: Instant): Flow<ShortCollection> {
+        val query = Query(
+            Criteria().andOperator(
+                ShortCollection::multiCurrency isEqualTo true,
+                ShortCollection::lastUpdatedAt lte lastUpdateAt
+            )
+        ).withHint(MULTI_CURRENCY_DEFINITION.indexKeys)
+
+        return template.find(query, ShortCollection::class.java).asFlow()
+    }
+
     companion object {
+
         private val BLOCKCHAIN_DEFINITION = Index()
             .on(ShortCollection::blockchain.name, Sort.Direction.ASC)
             .on("_id", Sort.Direction.ASC)

@@ -45,7 +45,9 @@ class BestOrderService(
     }
 
     suspend fun updateBestOrders(ownership: ShortOwnership): ShortOwnership {
+        val originBestOrders = refreshBestOrders(ownership.originOrders)
         return refreshBestSellOrder(ownership)
+            .copy(originOrders = originBestOrders)
     }
 
     //---------------------- Collection ---------------------//
@@ -72,7 +74,9 @@ class BestOrderService(
     }
 
     suspend fun updateBestOrders(collection: ShortCollection): ShortCollection {
+        val originBestOrders = refreshBestOrders(collection.originOrders)
         return refreshBestBidOrder(refreshBestSellOrder(collection))
+            .copy(originOrders = originBestOrders)
     }
 
     //------------------------- Item ------------------------//
@@ -97,7 +101,9 @@ class BestOrderService(
     }
 
     suspend fun updateBestOrders(item: ShortItem): ShortItem {
+        val originBestOrders = refreshBestOrders(item.originOrders)
         return refreshBestBidOrder(refreshBestSellOrder(item))
+            .copy(originOrders = originBestOrders)
     }
 
     //------------------------- USD -------------------------//
@@ -186,6 +192,10 @@ class BestOrderService(
 
         val updatedOwner = bestBidOwner.withBestBidOrders(bestOrders)
         return refreshBestBidOrder(updatedOwner)
+    }
+
+    private suspend fun refreshBestOrders(originOrders: Set<OriginOrders>): Set<OriginOrders> {
+        return originOrders.map { refreshBestBidOrder(refreshBestSellOrder(it)) }.toSet()
     }
 
     private suspend fun <T : BestSellOrderOwner<T>> refreshBestSellOrder(owner: T): T {

@@ -65,6 +65,20 @@ class EnrichmentCollectionEventService(
         }
     }
 
+    suspend fun recalculateBestOrders(collection: ShortCollection): Boolean {
+        val updated = bestOrderService.updateBestOrders(collection)
+        if (updated != collection) {
+            logger.info(
+                "Collection BestSellOrder updated ([{}] -> [{}]), BestBidOrder updated ([{}] -> [{}]) due to currency rate changed",
+                collection.bestSellOrder?.dtoId, updated.bestSellOrder?.dtoId,
+                collection.bestBidOrder?.dtoId, updated.bestBidOrder?.dtoId
+            )
+            saveAndNotify(updated, true)
+            return true
+        }
+        return false
+    }
+
     private suspend fun updateCollection(
         itemId: ShortCollectionId,
         order: OrderDto,

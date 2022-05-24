@@ -53,7 +53,7 @@ class EnrichmentOwnershipEventService(
         event?.let { sendUpdate(it) }
     }
 
-    suspend fun recalculateBestOrder(ownership: ShortOwnership): Boolean {
+    suspend fun recalculateBestOrders(ownership: ShortOwnership): Boolean {
         val updated = bestOrderService.updateBestOrders(ownership)
         if (ownership.bestSellOrder != updated.bestSellOrder) {
             logger.info(
