@@ -27,7 +27,7 @@ class EsActivityRepository(
     private val esOperations: ReactiveElasticsearchOperations,
     private val queryBuilderService: EsActivityQueryBuilderService,
     esNameResolver: EsNameResolver
-) {
+) : EsRepository {
     val entityDefinition = esNameResolver.createEntityDefinitionExtended(EsActivity.ENTITY_DEFINITION)
 
     suspend fun findById(id: String): EsActivity? {
@@ -43,14 +43,14 @@ class EsActivityRepository(
     }
 
     suspend fun saveAll(esActivities: List<EsActivity>, indexName: String?): List<EsActivity> {
-        return if(indexName == null) {
+        return if (indexName == null) {
             saveAll(esActivities)
         } else {
             saveAllToIndex(esActivities, IndexCoordinates.of(indexName))
         }
     }
 
-    private suspend fun  saveAllToIndex(esActivities: List<EsActivity>, index: IndexCoordinates): List<EsActivity> {
+    private suspend fun saveAllToIndex(esActivities: List<EsActivity>, index: IndexCoordinates): List<EsActivity> {
         return esOperations
             .saveAll(esActivities, index)
             .collectList()
@@ -60,7 +60,7 @@ class EsActivityRepository(
     /**
      * For tests only
      */
-    suspend fun deleteAll() {
+    override suspend fun deleteAll() {
         esOperations.delete(
             Query.findAll(),
             Any::class.java,
@@ -97,7 +97,7 @@ class EsActivityRepository(
         )
     }
 
-    suspend fun refresh() {
+    override suspend fun refresh() {
         val refreshRequest = RefreshRequest().indices(entityDefinition.aliasName, entityDefinition.writeAliasName)
 
         try {

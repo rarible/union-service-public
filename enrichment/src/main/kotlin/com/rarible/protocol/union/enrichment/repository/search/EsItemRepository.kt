@@ -27,7 +27,7 @@ class EsItemRepository(
     private val objectMapper: ObjectMapper,
     private val esOperations: ReactiveElasticsearchOperations,
     esNameResolver: EsNameResolver
-) {
+) : EsRepository {
     val entityDefinition = esNameResolver.createEntityDefinitionExtended(EsItem.ENTITY_DEFINITION)
 
     suspend fun findById(id: String): EsItem? {
@@ -60,7 +60,7 @@ class EsItemRepository(
     /**
      * For tests only
      */
-    suspend fun deleteAll() {
+    override suspend fun deleteAll() {
         esOperations.delete(
             Query.findAll(),
             Any::class.java,
@@ -98,7 +98,7 @@ class EsItemRepository(
         )
     }
 
-    suspend fun refresh() {
+    override suspend fun refresh() {
         val refreshRequest = RefreshRequest().indices(entityDefinition.aliasName, entityDefinition.writeAliasName)
 
         try {
