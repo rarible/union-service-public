@@ -7,18 +7,24 @@ import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
+import com.rarible.protocol.union.dto.CreatorDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.RoyaltyDto
+import com.rarible.protocol.union.dto.UnionAddress
+import com.rarible.protocol.union.dto.group
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexApiClient
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexAsset
 import java.math.BigDecimal
 import java.math.BigInteger
 import scalether.domain.Address
 
-object ImmutablexItemConverter {
+class ImmutablexItemConverter(
+    private val client: ImmutablexApiClient
+) {
 
     private val logger by Logger()
 
-    fun convert(asset: ImmutablexAsset, blockchain: BlockchainDto): UnionItem {
+    suspend fun convert(asset: ImmutablexAsset, blockchain: BlockchainDto): UnionItem {
         return try {
             convertInternal(asset, blockchain)
         } catch (e: Exception) {
@@ -27,17 +33,18 @@ object ImmutablexItemConverter {
         }
     }
 
-    private fun convertInternal(asset: ImmutablexAsset, blockchain: BlockchainDto): UnionItem {
+    private suspend fun convertInternal(asset: ImmutablexAsset, blockchain: BlockchainDto): UnionItem {
         val deleted = asset.user!! == "${Address.ZERO()}"
+        val creator = client.getMints(pageSize = 1, itemId = asset.itemId).result.first().user
         return UnionItem(
             id = ItemIdDto(BlockchainDto.IMMUTABLEX, contract = asset.tokenAddress, tokenId = asset.tokenId()),
             collection = CollectionIdDto(blockchain, asset.tokenAddress),
-            creators = emptyList(), //filling outside of converter
+            creators = listOf(CreatorDto(account = UnionAddress(blockchain.group(), creator), 1)),
             lazySupply = BigInteger.ZERO,
             deleted = deleted,
             supply = if (deleted) BigInteger.ZERO else BigInteger.ONE,
             mintedAt = asset.createdAt ?: nowMillis(),
-            lastUpdatedAt = asset.updatedAt ?: nowMillis()
+            lastUpdatedAt = asset.updatedAt ?: nowMillis(),
         )
     }
 

@@ -5,18 +5,16 @@ import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.CreatorDto
 import com.rarible.protocol.union.dto.RoyaltyDto
-import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.continuation.DateIdContinuation
 import com.rarible.protocol.union.dto.continuation.page.Page
-import com.rarible.protocol.union.dto.group
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexApiClient
 import com.rarible.protocol.union.integration.immutablex.converter.ImmutablexItemConverter
 import com.rarible.protocol.union.integration.immutablex.converter.ImmutablexItemMetaConverter
 
 class ImmutablexItemService(
-    private val client: ImmutablexApiClient
+    private val client: ImmutablexApiClient,
+    private val converter: ImmutablexItemConverter
 ): AbstractBlockchainService(BlockchainDto.IMMUTABLEX), ItemService {
 
     override suspend fun getAllItems(
@@ -33,25 +31,19 @@ class ImmutablexItemService(
             total = page.result.size.toLong(),
             continuation = cont,
             entities = page.result.map {
-                val mint = client.getMints(pageSize = 1, it.itemId).result.first()
-                ImmutablexItemConverter.convert(it, blockchain).copy(
-                    creators = listOf(CreatorDto(account = UnionAddress(blockchain.group(), mint.user), 1))
-                )
+                converter.convert(it, blockchain)
             }
         )
     }
 
     override suspend fun getItemById(itemId: String): UnionItem {
         val asset = client.getAsset(itemId)
-        val mint = client.getMints(pageSize = 1, itemId = itemId).result.first()
-        val dto =  ImmutablexItemConverter.convert(asset, blockchain)
-        return dto.copy(creators = listOf(CreatorDto(account = UnionAddress(blockchain.group(), mint.user), 1)))
-
+        return converter.convert(asset, blockchain)
     }
 
     override suspend fun getItemRoyaltiesById(itemId: String): List<RoyaltyDto> {
         val asset = client.getAsset(itemId)
-        return ImmutablexItemConverter.convertToRoyaltyDto(asset, blockchain)
+        return converter.convertToRoyaltyDto(asset, blockchain)
     }
 
     override suspend fun getItemMetaById(itemId: String): UnionMeta {
@@ -73,7 +65,7 @@ class ImmutablexItemService(
         return Page(
             total = page.result.size.toLong(),
             continuation = if (page.remaining) page.cursor else null,
-            entities = page.result.map { ImmutablexItemConverter.convert(it, blockchain) }
+            entities = page.result.map { converter.convert(it, blockchain) }
         )
     }
 
@@ -82,7 +74,7 @@ class ImmutablexItemService(
         return Page(
             total = page.result.size.toLong(),
             continuation = if (page.remaining) page.cursor else null,
-            entities = page.result.map { ImmutablexItemConverter.convert(it, blockchain) }
+            entities = page.result.map { converter.convert(it, blockchain) }
         )
     }
 
@@ -91,11 +83,11 @@ class ImmutablexItemService(
         return Page(
             total = page.result.size.toLong(),
             continuation = if (page.remaining) page.cursor else null,
-            entities = page.result.map { ImmutablexItemConverter.convert(it, blockchain) }
+            entities = page.result.map { converter.convert(it, blockchain) }
         )
     }
 
     override suspend fun getItemsByIds(itemIds: List<String>): List<UnionItem> {
-        return client.getAssetsByIds(itemIds).map { ImmutablexItemConverter.convert(it, blockchain) }
+        return client.getAssetsByIds(itemIds).map { converter.convert(it, blockchain) }
     }
 }
