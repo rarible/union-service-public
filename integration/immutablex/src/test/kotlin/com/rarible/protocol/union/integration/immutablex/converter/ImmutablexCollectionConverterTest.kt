@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.integration.immutablex.converter
 
+import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexCollection
 import java.util.stream.Stream
 import org.assertj.core.api.Assertions.assertThat
@@ -25,6 +26,7 @@ class ImmutablexCollectionConverterTest {
             assertThat(actual.meta?.content).isNotEmpty
             assertThat(actual.meta?.content?.get(0)?.url).isEqualTo(source.collectionImageUrl)
         }
+        assertThat(actual.features).isEqualTo(listOf(CollectionDto.Features.APPROVE_FOR_ALL))
     }
 
 
