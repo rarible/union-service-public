@@ -12,11 +12,13 @@ import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.dto.UnionEventTopicProvider
 import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
 import com.rarible.protocol.union.enrichment.repository.search.EsCollectionRepository
+import com.rarible.protocol.union.enrichment.repository.search.EsItemRepository
 import com.rarible.protocol.union.enrichment.repository.search.EsOrderRepository
 import com.rarible.protocol.union.enrichment.repository.search.EsOwnershipRepository
 import com.rarible.protocol.union.search.indexer.config.IndexerProperties
 import com.rarible.protocol.union.search.indexer.handler.ActivityEventHandler
 import com.rarible.protocol.union.search.indexer.handler.CollectionEventHandler
+import com.rarible.protocol.union.search.indexer.handler.ItemEventHandler
 import com.rarible.protocol.union.search.indexer.handler.OrderEventHandler
 import com.rarible.protocol.union.search.indexer.handler.OwnershipEventHandler
 import com.rarible.protocol.union.search.indexer.metrics.IndexerMetricFactory
@@ -69,6 +71,11 @@ class TestIndexerConfiguration {
     @Bean
     fun ownershipHandler(repository: EsOwnershipRepository): ConsumerBatchEventHandler<OwnershipEventDto> {
         return OwnershipEventHandler(repository)
+    }
+
+    @Bean
+    fun itemHandler(repository: EsItemRepository): ConsumerBatchEventHandler<ItemEventDto> {
+        return ItemEventHandler(repository)
     }
 
     //---------------- UNION producers ----------------//

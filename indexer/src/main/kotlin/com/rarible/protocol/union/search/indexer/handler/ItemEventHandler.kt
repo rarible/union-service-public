@@ -1,14 +1,9 @@
 package com.rarible.protocol.union.search.indexer.handler
 
 import com.rarible.core.daemon.sequential.ConsumerBatchEventHandler
-import com.rarible.protocol.union.core.converter.EsCollectionConverter
-import com.rarible.protocol.union.core.converter.EsItemConverter
 import com.rarible.protocol.union.core.converter.EsItemConverter.toEsItem
-import com.rarible.protocol.union.dto.CollectionEventDto
-import com.rarible.protocol.union.dto.CollectionUpdateEventDto
 import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.ItemUpdateEventDto
-import com.rarible.protocol.union.enrichment.repository.search.EsCollectionRepository
 import com.rarible.protocol.union.enrichment.repository.search.EsItemRepository
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

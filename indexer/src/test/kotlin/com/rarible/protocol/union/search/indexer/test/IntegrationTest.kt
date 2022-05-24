@@ -28,6 +28,7 @@ import org.springframework.test.context.ContextConfiguration
         "handler.order.enabled = true",
         "handler.collection.enabled = true",
         "handler.ownership.enabled = true",
+        "handler.item.enabled = true",
     ]
 )
 @ActiveProfiles("test")

@@ -13,8 +13,8 @@ import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.search.indexer.metrics.MetricConsumerBatchEventHandlerFactory
 import com.rarible.protocol.union.subscriber.UnionEventsConsumerFactory
 import io.micrometer.core.instrument.MeterRegistry
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import java.time.Duration
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
@@ -29,7 +29,7 @@ class KafkaConsumerConfiguration(
         const val ACTIVITY = "activity"
         const val ORDER = "order"
         const val COLLECTION = "collection"
-        const val ITEM = "collection"
+        const val ITEM = "item"
         const val OWNERSHIP = "ownership"
     }
 
@@ -95,6 +95,7 @@ class KafkaConsumerConfiguration(
     }
 
     @Bean
+    @ConditionalOnProperty(prefix = "handler.item", name = ["enabled"], havingValue = "true")
     fun itemWorker(handler: ConsumerBatchEventHandler<ItemEventDto>): ConsumerWorkerHolder<ItemEventDto> {
         val workers = (1..kafkaProperties.workerCount).map { i ->
             val consumer = consumerFactory.createItemConsumer(consumerGroup(ITEM))
