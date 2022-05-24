@@ -45,8 +45,10 @@ class ImmutablexApiConfiguration {
     @Bean
     fun immutablexWebClient(props: ImmutablexIntegrationProperties): WebClient {
         val mapper = ApiClient.createDefaultObjectMapper()
-        val httpClient = HttpClient.create().wiretap("reactor.netty.http.client.HttpClient",
-            LogLevel.DEBUG, AdvancedByteBufFormat.TEXTUAL)
+        val httpClient = HttpClient.create().wiretap(
+            "reactor.netty.http.client.HttpClient",
+            LogLevel.DEBUG, AdvancedByteBufFormat.TEXTUAL
+        )
         val strategies = ExchangeStrategies
             .builder()
             .codecs { configurer: ClientCodecConfigurer ->
