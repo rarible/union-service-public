@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.integration.immutablex.service
 
 import com.rarible.protocol.union.core.model.UnionCollection
+import com.rarible.protocol.union.core.model.UnionCollectionMeta
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.dto.CollectionIdDto
@@ -27,22 +28,32 @@ class ImmutablexCollectionServiceTest {
             UnionCollection(
                 id = CollectionIdDto(BlockchainDto.IMMUTABLEX, "0x62d25241d4a5d619c1b06114210250d19d2424c0"),
                 parent = null,
-                type = CollectionDto.Type.IMMUTABLEX,
+                type = CollectionDto.Type.ERC721,
                 name = "CERTIFICATE3",
-                symbol = "CERTIFICATE3",
+                symbol = null,
                 owner = null,
-                features = emptyList(),
-                minters = emptyList()
+                features = listOf(CollectionDto.Features.APPROVE_FOR_ALL),
+                minters = emptyList(),
+                meta = UnionCollectionMeta(
+                    name = "CERTIFICATE3",
+                    description = "ASRA City DAO is an innovative, utility focused NFT project- decentralizing the collective ownership, development, and governance of virtual land and experiences in the Metaverse.",
+                    content = emptyList()
+                )
             ),
             UnionCollection(
                 id = CollectionIdDto(BlockchainDto.IMMUTABLEX, "0xa8106fe2195c3fa48ed52b52f7981f74d18d8ba4"),
                 parent = null,
-                type = CollectionDto.Type.IMMUTABLEX,
+                type = CollectionDto.Type.ERC721,
                 name = "CERTIFICATE2",
-                symbol = "CERTIFICATE2",
+                symbol = null,
                 owner = null,
-                features = emptyList(),
-                minters = emptyList()
+                features = listOf(CollectionDto.Features.APPROVE_FOR_ALL),
+                minters = emptyList(),
+                meta = UnionCollectionMeta(
+                    name = "CERTIFICATE2",
+                    description = "",
+                    content = emptyList()
+                )
             )
         )
     }
@@ -62,11 +73,16 @@ class ImmutablexCollectionServiceTest {
             UnionCollection(
                 id = CollectionIdDto(BlockchainDto.IMMUTABLEX, "0x62d25241d4a5d619c1b06114210250d19d2424c0"),
                 parent = null,
-                type = CollectionDto.Type.IMMUTABLEX,
+                type = CollectionDto.Type.ERC721,
                 name = "CERTIFICATE3",
-                symbol = "CERTIFICATE3",
+                symbol = null,
                 minters = emptyList(),
-                features = emptyList()
+                features = listOf(CollectionDto.Features.APPROVE_FOR_ALL),
+                meta = UnionCollectionMeta(
+                    name = "CERTIFICATE3",
+                    description = "ASRA City DAO is an innovative, utility focused NFT project- decentralizing the collective ownership, development, and governance of virtual land and experiences in the Metaverse.",
+                    content = emptyList()
+                )
             )
         )
     }
