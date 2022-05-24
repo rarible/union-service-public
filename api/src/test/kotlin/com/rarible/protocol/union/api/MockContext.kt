@@ -14,6 +14,7 @@ import com.rarible.protocol.dto.NftOwnershipEventDto
 import com.rarible.protocol.dto.NftOwnershipEventTopicProvider
 import com.rarible.protocol.union.api.configuration.WebSocketConfiguration
 import com.rarible.protocol.union.core.elasticsearch.EsNameResolver
+import com.rarible.protocol.union.core.elasticsearch.EsRepository
 import com.rarible.protocol.union.core.elasticsearch.IndexService
 import com.rarible.protocol.union.core.es.ElasticsearchTestBootstrapper
 import com.rarible.protocol.union.core.model.elasticsearch.EsEntitiesConfig
@@ -68,13 +69,15 @@ class MockContext : ApplicationListener<WebServerInitializedEvent> {
     fun elasticsearchBootstrap(
         reactiveElasticSearchOperations: ReactiveElasticsearchOperations,
         esNameResolver: EsNameResolver,
-        indexService: IndexService
+        indexService: IndexService,
+        repositories: List<EsRepository>,
     ): ElasticsearchTestBootstrapper {
 
         return ElasticsearchTestBootstrapper(
             esNameResolver = esNameResolver,
             esOperations = reactiveElasticSearchOperations,
             entityDefinitions = EsEntitiesConfig.createEsEntities(),
+            repositories = repositories
         )
     }
 

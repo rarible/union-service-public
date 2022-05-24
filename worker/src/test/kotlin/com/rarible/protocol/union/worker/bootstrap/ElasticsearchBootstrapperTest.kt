@@ -54,6 +54,7 @@ internal class ElasticsearchBootstrapperTest {
             reindexSchedulingService,
             indexService,
             forceUpdate = emptySet(),
+            repositories = emptyList()
         )
 
         val elasticsearchTestBootstrapper = ElasticsearchTestBootstrapper(
@@ -114,7 +115,8 @@ internal class ElasticsearchBootstrapperTest {
             entityDefinitions = listOf(entityDefinitionNew),
             reindexSchedulingService,
             indexService,
-            forceUpdate = emptySet()
+            forceUpdate = emptySet(),
+            repositories = emptyList()
         )
         bootstrapperNew.bootstrap()
         indexInfo =

@@ -4,13 +4,12 @@ import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.apm.SpanType
 import com.rarible.core.common.mapAsync
 import com.rarible.core.logging.Logger
-import com.rarible.protocol.union.enrichment.service.query.item.ItemEnrichService
-import com.rarible.protocol.union.enrichment.service.query.item.ItemQueryService
 import com.rarible.protocol.union.core.continuation.UnionItemContinuation
 import com.rarible.protocol.union.core.model.EsItem
 import com.rarible.protocol.union.core.model.EsItemCursor
 import com.rarible.protocol.union.core.model.EsItemSort
 import com.rarible.protocol.union.core.model.EsOwnership
+import com.rarible.protocol.union.core.model.EsOwnershipByOwnerFilter
 import com.rarible.protocol.union.core.model.EsQueryResult
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.service.ItemService
@@ -21,6 +20,7 @@ import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.ItemsDto
 import com.rarible.protocol.union.dto.ItemsWithOwnershipDto
+import com.rarible.protocol.union.dto.continuation.DateIdContinuation
 import com.rarible.protocol.union.dto.continuation.page.ArgPage
 import com.rarible.protocol.union.dto.continuation.page.ArgPaging
 import com.rarible.protocol.union.dto.continuation.page.ArgSlice
@@ -29,6 +29,8 @@ import com.rarible.protocol.union.dto.continuation.page.PageSize
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.repository.search.EsItemRepository
 import com.rarible.protocol.union.enrichment.repository.search.EsOwnershipRepository
+import com.rarible.protocol.union.enrichment.service.query.item.ItemEnrichService
+import com.rarible.protocol.union.enrichment.service.query.item.ItemQueryService
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -202,14 +204,14 @@ class ItemElasticService(
         return items
     }
 
-    private suspend fun getItemsByOwnerships(queryResult: EsQueryResult<EsOwnership>): List<UnionItem> {
+    private suspend fun getItemsByOwnerships(ownerships: List<EsOwnership>): List<UnionItem> {
         val mapping = hashMapOf<BlockchainDto, MutableList<String>>()
 
-        queryResult.content
+        ownerships
             .filter { it.itemId != null }
             .forEach { item ->
                 mapping
-                    .computeIfAbsent(item.blockchain) { ArrayList(queryResult.content.size) }
+                    .computeIfAbsent(item.blockchain) { ArrayList(ownerships.size) }
                     .add(item.itemId!!)
             }
 
@@ -230,7 +232,22 @@ class ItemElasticService(
         continuation: String?,
         size: Int?
     ): ItemsDto {
-        TODO("Implemented in another PR")
+        val evaluatedBlockchains = router.getEnabledBlockchains(blockchains)
+        val ownerAddress = IdParser.parseAddress(owner)
+        val ownerships = esOwnershipRepository.findByFilter(
+            EsOwnershipByOwnerFilter(
+                owner = ownerAddress,
+                blockchains = evaluatedBlockchains,
+                continuation = DateIdContinuation.parse(continuation),
+                size = PageSize.OWNERSHIP.limit(size)
+            )
+        )
+
+        val dateIdContinuation = ownerships.lastOrNull()?.let { DateIdContinuation(it.date, it.ownershipId).toString() }
+
+        val items: List<UnionItem> = getItemsByOwnerships(ownerships)
+
+        return itemEnrichService.enrich(items, dateIdContinuation, null)
     }
 
     override suspend fun getItemsByOwnerWithOwnership(
