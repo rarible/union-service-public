@@ -53,6 +53,17 @@ class DummyActivityService(
         return Slice.empty()
     }
 
+    override suspend fun getActivitiesByItemAndOwner(
+        types: List<ActivityTypeDto>,
+        itemId: String,
+        owner: String,
+        continuation: String?,
+        size: Int,
+        sort: ActivitySortDto?,
+    ): Slice<ActivityDto> {
+        return Slice.empty()
+    }
+
     override suspend fun getActivitiesByUser(
         types: List<UserActivityTypeDto>,
         users: List<String>,

@@ -157,4 +157,22 @@ internal class ImmutablexActivityServiceTest {
         }
     }
 
+    @Test
+    fun getActivitiesByItemAndOwner() = runBlocking {
+        val (itemId, owner) = expectedMintActivity.result.single().run {
+            token.data.tokenId() to user
+        }
+
+        service.getActivitiesByItemAndOwner(
+            types = listOf(ActivityTypeDto.MINT),
+            itemId = "$itemId",
+            owner = owner,
+            null,
+            50,
+            null
+        ).let { page ->
+            Assertions.assertEquals(page.entities.size, 1)
+            assert(page.entities[0] is MintActivityDto)
+        }
+    }
 }

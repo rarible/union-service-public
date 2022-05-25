@@ -103,6 +103,35 @@ class ImmutablexActivityService(
         return Paging(ActivityContinuation.ByLastUpdatedAndIdDesc, result).getSlice(size)
     }
 
+    override suspend fun getActivitiesByItemAndOwner(
+        types: List<ActivityTypeDto>,
+        itemId: String,
+        owner: String,
+        continuation: String?,
+        size: Int,
+        sort: ActivitySortDto?,
+    ): Slice<ActivityDto> {
+        val result = allowedTypes.intersect(types.toSet())
+            .flatMap { type ->
+                when (type) {
+                    ActivityTypeDto.MINT ->
+                        client.getMints(size, continuation, itemId, user = owner, sort = sort).result
+                    ActivityTypeDto.TRANSFER ->
+                        client.getTransfers(size, continuation, itemId, user = owner, sort = sort).result
+                    ActivityTypeDto.SELL ->
+                        client.getTrades(size, continuation, itemId, user = owner, sort = sort).result
+                    else -> emptyList()
+                }
+            }.asSequence()
+            .map { converter.convert(it) }
+            .sortedBy { it.date }
+            .take(size)
+            .let {
+                if (sort == ActivitySortDto.LATEST_FIRST) it.toList().asReversed() else it.toList()
+            }
+        return Paging(ActivityContinuation.ByLastUpdatedAndIdDesc, result).getSlice(size)
+    }
+
     override suspend fun getActivitiesByUser(
         types: List<UserActivityTypeDto>,
         users: List<String>,

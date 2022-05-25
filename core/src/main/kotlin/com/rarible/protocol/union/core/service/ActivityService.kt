@@ -38,6 +38,15 @@ interface ActivityService : BlockchainService {
         itemId: String,
         continuation: String?,
         size: Int,
+        sort: ActivitySortDto?,
+    ): Slice<ActivityDto>
+
+    suspend fun getActivitiesByItemAndOwner(
+        types: List<ActivityTypeDto>,
+        itemId: String,
+        owner: String,
+        continuation: String?,
+        size: Int,
         sort: ActivitySortDto?
     ): Slice<ActivityDto>
 

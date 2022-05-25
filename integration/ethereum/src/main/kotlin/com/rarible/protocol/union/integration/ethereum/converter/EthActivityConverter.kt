@@ -14,6 +14,7 @@ import com.rarible.protocol.dto.BurnDto
 import com.rarible.protocol.dto.MintDto
 import com.rarible.protocol.dto.NftActivityFilterAllDto
 import com.rarible.protocol.dto.NftActivityFilterByCollectionDto
+import com.rarible.protocol.dto.NftActivityFilterByItemAndOwnerDto
 import com.rarible.protocol.dto.NftActivityFilterByItemDto
 import com.rarible.protocol.dto.NftActivityFilterByUserDto
 import com.rarible.protocol.dto.OrderActivityBidDto
@@ -405,6 +406,11 @@ class EthActivityConverter(
         }
     }
 
+    fun convertToNftItemAndOwnerTypes(types: List<ActivityTypeDto>): List<NftActivityFilterByItemAndOwnerDto.Types>? {
+        val result = types.mapNotNull { asNftActivityItemAndOwnerType(it) }.distinct()
+        return result.ifEmpty { null }
+    }
+
     fun asNftActivityCollectionType(source: ActivityTypeDto): NftActivityFilterByCollectionDto.Types? {
         return when (source) {
             TRANSFER -> NftActivityFilterByCollectionDto.Types.TRANSFER
@@ -429,6 +435,14 @@ class EthActivityConverter(
             UserActivityTypeDto.TRANSFER_TO -> NftActivityFilterByUserDto.Types.TRANSFER_TO
             UserActivityTypeDto.MINT -> NftActivityFilterByUserDto.Types.MINT
             UserActivityTypeDto.BURN -> NftActivityFilterByUserDto.Types.BURN
+            else -> null
+        }
+    }
+
+    fun asNftActivityItemAndOwnerType(source: ActivityTypeDto): NftActivityFilterByItemAndOwnerDto.Types? {
+        return when (source) {
+            TRANSFER -> NftActivityFilterByItemAndOwnerDto.Types.TRANSFER
+            MINT -> NftActivityFilterByItemAndOwnerDto.Types.MINT
             else -> null
         }
     }

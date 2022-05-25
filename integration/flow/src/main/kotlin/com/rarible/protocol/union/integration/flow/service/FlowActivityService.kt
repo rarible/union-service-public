@@ -81,6 +81,17 @@ open class FlowActivityService(
         return flowActivityConverter.convert(result, blockchain)
     }
 
+    override suspend fun getActivitiesByItemAndOwner(
+        types: List<ActivityTypeDto>,
+        itemId: String,
+        owner: String,
+        continuation: String?,
+        size: Int,
+        sort: ActivitySortDto?,
+    ): Slice<ActivityDto> {
+        return Slice.empty() // TODO Not implemented
+    }
+
     override suspend fun getActivitiesByUser(
         types: List<UserActivityTypeDto>,
         users: List<String>,
