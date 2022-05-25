@@ -18,6 +18,7 @@ import com.rarible.protocol.order.api.client.AuctionActivityControllerApi
 import com.rarible.protocol.order.api.client.OrderActivityControllerApi
 import com.rarible.protocol.order.api.client.OrderControllerApi
 import com.rarible.protocol.solana.api.client.ActivityControllerApi as SolanaActivityControllerApi
+import com.rarible.protocol.solana.api.client.CollectionControllerApi as SolanaCollectionControllerApi
 import com.rarible.protocol.union.api.client.FixedUnionApiServiceUriProvider
 import com.rarible.protocol.union.api.client.UnionApiClientFactory
 import com.rarible.protocol.union.dto.CollectionEventDto
@@ -213,6 +214,10 @@ class TestApiConfiguration {
     @Primary
     fun testSolanaActivityApi(): SolanaActivityControllerApi = mockk()
 
+    @Bean
+    @Primary
+    fun testSolanaCollectionApi(): SolanaCollectionControllerApi = mockk()
+
     //--------------------- FLOW ---------------------//
     @Bean
     @Primary
@@ -239,7 +244,6 @@ class TestApiConfiguration {
     fun testFlowActivityApi(): FlowNftOrderActivityControllerApi = mockk()
 
     //--------------------- TEZOS ---------------------//
-
 
     @Bean
     @Primary
@@ -268,4 +272,9 @@ class TestApiConfiguration {
     @Bean
     @Primary
     fun testTezosActivityOrderApi(): com.rarible.protocol.tezos.api.client.OrderActivityControllerApi = mockk()
+
+    @Bean
+    @Primary
+    fun testDipDupOrderClient(): com.rarible.dipdup.client.OrderClient = mockk()
+
 }

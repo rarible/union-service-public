@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.integration.tezos.dipdup.converter
 
+import com.rarible.dipdup.client.core.model.Asset
 import com.rarible.dipdup.client.core.model.DipDupOrder
 import com.rarible.dipdup.client.core.model.OrderStatus
 import com.rarible.dipdup.client.model.DipDupOrderSort
@@ -7,6 +8,7 @@ import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.service.CurrencyService
 import com.rarible.protocol.union.core.util.evalMakePrice
 import com.rarible.protocol.union.core.util.evalTakePrice
+import com.rarible.protocol.union.dto.AssetTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderDataDto
 import com.rarible.protocol.union.dto.OrderDto
@@ -29,6 +31,15 @@ class DipDupOrderConverter(
             return convertInternal(order, blockchain)
         } catch (e: Exception) {
             logger.error("Failed to convert {} Order: {} \n{}", blockchain, e.message, order)
+            throw e
+        }
+    }
+
+    suspend fun convert(source: List<Asset.AssetType>, blockchain: BlockchainDto): List<AssetTypeDto> {
+        try {
+            return source.map { DipDupConverter.convert(it, blockchain) }
+        } catch (e: Exception) {
+            logger.error("Failed to convert {} list of assets: {} \n{}", blockchain, e.message, source)
             throw e
         }
     }
@@ -109,4 +120,3 @@ class DipDupOrderConverter(
         OrderSortDto.LAST_UPDATE_DESC -> DipDupOrderSort.LAST_UPDATE_DESC
     }
 }
-

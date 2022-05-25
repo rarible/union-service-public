@@ -1,8 +1,7 @@
-package com.rarible.protocol.union.api.service
+package com.rarible.protocol.union.api.service.api
 
 import com.rarible.core.common.nowMillis
-import com.rarible.protocol.union.api.service.api.OrderApiService
-import com.rarible.protocol.union.api.service.elastic.CollectionElasticService
+import com.rarible.protocol.union.api.service.CollectionQueryService
 import com.rarible.protocol.union.api.util.BlockchainFilter
 import com.rarible.protocol.union.core.continuation.UnionCollectionContinuation
 import com.rarible.protocol.union.core.model.UnionCollection
@@ -29,11 +28,9 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
-import org.springframework.stereotype.Component
+import org.springframework.stereotype.Service
 
-@Component
-@ConditionalOnMissingBean(CollectionElasticService::class)
+@Service
 class CollectionApiMergeService(
     private val orderApiService: OrderApiService,
     private val router: BlockchainRouter<CollectionService>,

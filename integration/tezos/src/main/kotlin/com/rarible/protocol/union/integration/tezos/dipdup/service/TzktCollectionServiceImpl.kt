@@ -1,10 +1,12 @@
 package com.rarible.protocol.union.integration.tezos.dipdup.service
 
+import com.rarible.protocol.union.core.exception.UnionNotFoundException
 import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.continuation.page.Page
 import com.rarible.protocol.union.integration.tezos.dipdup.converter.TzktCollectionConverter
 import com.rarible.tzkt.client.CollectionClient
+import com.rarible.tzkt.model.TzktNotFound
 
 class TzktCollectionServiceImpl(
     val collectionClient: CollectionClient
@@ -23,8 +25,16 @@ class TzktCollectionServiceImpl(
     }
 
     override suspend fun getCollectionById(collectionId: String): UnionCollection {
-        val tzktCollection = collectionClient.collection(collectionId)
+        val tzktCollection = safeApiCall { collectionClient.collection(collectionId) }
         return TzktCollectionConverter.convert(tzktCollection, blockchain)
+    }
+
+    private suspend fun <T> safeApiCall(clientCall: suspend () -> T): T {
+        return try {
+            clientCall()
+        } catch (e: TzktNotFound) {
+            throw UnionNotFoundException(message = e.message ?: "")
+        }
     }
 
 }

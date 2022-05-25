@@ -27,8 +27,7 @@ class OrderElasticService : OrderQueryService {
         size: Int?,
         sort: SyncSortDto?
     ): OrdersDto {
-        // TODO: probably this will return empty result.
-        TODO("Not yet implemented")
+        throw UnsupportedOperationException("Operation is not supported for Elastic Search")
     }
 
     override suspend fun getSellOrdersByItem(

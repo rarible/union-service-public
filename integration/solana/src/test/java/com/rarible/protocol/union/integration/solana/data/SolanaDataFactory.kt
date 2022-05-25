@@ -9,6 +9,8 @@ import com.rarible.core.test.data.randomString
 import com.rarible.protocol.solana.dto.ActivityBlockchainInfoDto
 import com.rarible.protocol.solana.dto.ActivityDto
 import com.rarible.protocol.solana.dto.BalanceDto
+import com.rarible.protocol.solana.dto.CollectionDto
+import com.rarible.protocol.solana.dto.CollectionMetaDto
 import com.rarible.protocol.solana.dto.MintActivityDto
 import com.rarible.protocol.solana.dto.TokenCreatorPartDto
 import com.rarible.protocol.solana.dto.TokenDto
@@ -70,4 +72,17 @@ fun randomActivityBlockchainInfoDto() = ActivityBlockchainInfoDto(
     transactionHash = randomString(),
     instructionIndex = randomInt(),
     innerInstructionIndex = randomInt(),
+)
+
+fun randomSolanaCollectionDto() = CollectionDto(
+    address = randomSolanaTokenAddress(),
+    parent = randomString(),
+    name = randomString(),
+    symbol = randomString(),
+    owner = randomString(),
+    features = listOf(
+        CollectionDto.Features.values().random()
+    ),
+    creators = listOf(randomString()),
+    meta = null,
 )

@@ -36,7 +36,7 @@ open class TezosOrderService(
     ): Slice<OrderDto> {
 
         // We try to get new orders only if we get all legacy and continuation != null
-        if (dipdupOrderService.enabled() && isDipDupContinuation(continuation)) {
+        if (dipdupOrderService.enabled() && continuation != null && isDipDupContinuation(continuation)) {
             val slice = dipdupOrderService.getOrdersAll(sort, status, continuation, size)
             return slice
 
@@ -163,11 +163,18 @@ open class TezosOrderService(
         val (contract, tokenId) = CompositeItemIdParser.split(itemId)
         val assetTypes = orderControllerApi.getCurrenciesBySellOrdersOfItem(contract, tokenId.toString())
             .awaitFirst()
-        return assetTypes.currencies.map { TezosConverter.convert(it, blockchain) }
+        val legacyList = assetTypes.currencies.map { TezosConverter.convert(it, blockchain) }
+        if (dipdupOrderService.enabled()) {
+            val newList = dipdupOrderService.getSellOrderCurrenciesByItem(contract, tokenId)
+            return (legacyList + newList).distinct()
+        }
+        return legacyList
     }
 
     override suspend fun getSellCurrenciesByCollection(collectionId: String): List<AssetTypeDto> {
-        return emptyList()
+        return if (dipdupOrderService.enabled()) {
+            dipdupOrderService.getSellOrderCurrenciesByCollection(collectionId)
+        } else emptyList()
     }
 
     override suspend fun getSellOrders(
@@ -241,8 +248,8 @@ open class TezosOrderService(
         val (contract, tokenId) = CompositeItemIdParser.split(itemId)
 
         // We try to get new orders only if we get all legacy and continuation != null
-        if (dipdupOrderService.enabled() && isDipDupContinuation(continuation)) {
-            val slice = dipdupOrderService.getSellOrdersByItem(contract, tokenId, maker, status, continuation, size)
+        if (dipdupOrderService.enabled() && continuation != null && isDipDupContinuation(continuation)) {
+            val slice = dipdupOrderService.getSellOrdersByItem(contract, tokenId, maker, currencyId, status, continuation, size)
             return slice
 
         } else {
@@ -264,7 +271,7 @@ open class TezosOrderService(
             // If legacy orders ended, we should try to get orders from new indexer
             if (dipdupOrderService.enabled() && slice.entities.size < size) {
                 val delta = size - slice.entities.size
-                val nextSlice = dipdupOrderService.getSellOrdersByItem(contract, tokenId, maker, status, null, delta)
+                val nextSlice = dipdupOrderService.getSellOrdersByItem(contract, tokenId, maker, currencyId, status, null, delta)
                 return Slice(
                     continuation = nextSlice.continuation,
                     entities = slice.entities + nextSlice.entities

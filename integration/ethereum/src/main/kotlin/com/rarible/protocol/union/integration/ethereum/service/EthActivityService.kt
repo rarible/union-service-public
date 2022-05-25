@@ -12,6 +12,7 @@ import com.rarible.protocol.dto.AuctionActivityFilterDto
 import com.rarible.protocol.dto.NftActivitiesDto
 import com.rarible.protocol.dto.NftActivityFilterAllDto
 import com.rarible.protocol.dto.NftActivityFilterByCollectionDto
+import com.rarible.protocol.dto.NftActivityFilterByItemAndOwnerDto
 import com.rarible.protocol.dto.NftActivityFilterByItemDto
 import com.rarible.protocol.dto.NftActivityFilterByUserDto
 import com.rarible.protocol.dto.NftActivityFilterDto
@@ -24,6 +25,7 @@ import com.rarible.protocol.dto.OrderActivityFilterDto
 import com.rarible.protocol.nft.api.client.NftActivityControllerApi
 import com.rarible.protocol.order.api.client.AuctionActivityControllerApi
 import com.rarible.protocol.order.api.client.OrderActivityControllerApi
+import com.rarible.protocol.union.core.model.ItemAndOwnerActivityType
 import com.rarible.protocol.union.core.model.TypedActivityId
 import com.rarible.protocol.union.core.service.ActivityService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
@@ -161,6 +163,21 @@ open class EthActivityService(
             AuctionActivityFilterByItemDto(Address.apply(contract), tokenId, it)
         }
         return getEthereumActivities(nftFilter, orderFilter, auctionFilter, continuation, size, sort)
+    }
+
+    override suspend fun getActivitiesByItemAndOwner(
+        types: List<ItemAndOwnerActivityType>,
+        itemId: String,
+        owner: String,
+        continuation: String?,
+        size: Int,
+        sort: ActivitySortDto?,
+    ): Slice<ActivityDto> {
+        val (contract, tokenId) = CompositeItemIdParser.split(itemId)
+        val nftFilter = ethActivityConverter.convertToNftItemAndOwnerTypes(types)?.let {
+            NftActivityFilterByItemAndOwnerDto(Address.apply(contract), tokenId, Address.apply(owner), it)
+        }
+        return getEthereumActivities(nftFilter, null, null, continuation, size, sort)
     }
 
     override suspend fun getActivitiesByUser(

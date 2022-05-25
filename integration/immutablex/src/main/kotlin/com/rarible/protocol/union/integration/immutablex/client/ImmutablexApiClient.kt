@@ -12,6 +12,7 @@ import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexOrder
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexOrdersPage
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexTradesPage
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexTransfersPage
+import java.math.BigInteger
 import java.time.Instant
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -21,6 +22,7 @@ import kotlinx.coroutines.reactor.awaitSingle
 import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.toEntity
+import scalether.domain.Address
 
 class ImmutablexApiClient(
     private val webClient: WebClient,
@@ -130,7 +132,7 @@ class ImmutablexApiClient(
             cursor = mints.cursor,
             remaining = mints.remaining,
             result = getAssetsByIds(
-                mints.result.map { "${it.token.data.tokenAddress}:${it.token.data.tokenId}" }
+                mints.result.map { "${it.token.data.tokenAddress}:${BigInteger(it.token.data.tokenId.toByteArray())}" }
             )
         )
     }
@@ -216,8 +218,10 @@ class ImmutablexApiClient(
         val (tokenAddress, tokenId) = itemId.split(":")
         val params = mutableMapOf<String, Any>()
         params["sell_token_address"] = tokenAddress
-        params["sell_token_id"] = tokenId
-        params["buy_token_address"] = currencyId
+        params["sell_token_id"] = String(tokenId.toBigInteger().toByteArray())
+        if (currencyId != "${Address.ZERO()}") {
+            params["buy_token_address"] = currencyId
+        }
 
         if (maker != null) {
             params["user"] = maker
@@ -310,7 +314,9 @@ class ImmutablexApiClient(
         from,
         to,
         user,
-        sort
+        sort,
+        "party_b_token_address",
+        "party_b_token_id"
     ) ?: ImmutablexTradesPage("", false, emptyList())
 
     private suspend fun ordersByStatus(
@@ -366,6 +372,8 @@ class ImmutablexApiClient(
         to: Instant?,
         user: String?,
         sort: ActivitySortDto?,
+        tokenAddressParamName: String = "token_address",
+        tokenIdParamName: String = "token_id"
     ) = webClient.get()
         .uri {
             it.path(path)
@@ -380,8 +388,8 @@ class ImmutablexApiClient(
             }
             if (itemId != null) {
                 val (address, id) = IdParser.split(itemId, 2)
-                it.queryParam("token_address", address)
-                it.queryParam("token_id", String(id.toBigInteger().toByteArray()))
+                it.queryParam(tokenAddressParamName, address)
+                it.queryParam(tokenIdParamName, String(id.toBigInteger().toByteArray()))
             }
             if (user != null) {
                 it.queryParam("user", user)

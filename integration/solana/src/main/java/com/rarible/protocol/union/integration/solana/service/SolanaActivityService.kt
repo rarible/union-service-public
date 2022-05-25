@@ -8,6 +8,7 @@ import com.rarible.protocol.solana.dto.ActivityFilterByCollectionDto
 import com.rarible.protocol.solana.dto.ActivityFilterByItemDto
 import com.rarible.protocol.solana.dto.ActivityFilterByUserDto
 import com.rarible.protocol.solana.dto.ActivityFilterDto
+import com.rarible.protocol.union.core.model.ItemAndOwnerActivityType
 import com.rarible.protocol.union.core.model.TypedActivityId
 import com.rarible.protocol.union.core.service.ActivityService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
@@ -82,6 +83,17 @@ open class SolanaActivityService(
             types = solanaTypes
         )
         return searchActivities(filter, continuation, size, sort)
+    }
+
+    override suspend fun getActivitiesByItemAndOwner(
+        types: List<ItemAndOwnerActivityType>,
+        itemId: String,
+        owner: String,
+        continuation: String?,
+        size: Int,
+        sort: ActivitySortDto?,
+    ): Slice<ActivityDto> {
+        return Slice.empty() // TODO Not implemented
     }
 
     override suspend fun getActivitiesByUser(

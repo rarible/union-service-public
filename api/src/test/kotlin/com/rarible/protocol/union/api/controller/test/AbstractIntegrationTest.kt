@@ -5,6 +5,7 @@ import com.rarible.core.kafka.KafkaMessage
 import com.rarible.core.kafka.KafkaSendResult
 import com.rarible.core.kafka.RaribleKafkaConsumer
 import com.rarible.core.kafka.RaribleKafkaProducer
+import com.rarible.dipdup.client.OrderClient
 import com.rarible.protocol.currency.api.client.CurrencyControllerApi
 import com.rarible.protocol.currency.dto.CurrencyRateDto
 import com.rarible.protocol.flow.nft.api.client.FlowNftCollectionControllerApi
@@ -23,6 +24,7 @@ import com.rarible.protocol.nftorder.api.test.mock.EthOrderControllerApiMock
 import com.rarible.protocol.order.api.client.AuctionActivityControllerApi
 import com.rarible.protocol.order.api.client.OrderActivityControllerApi
 import com.rarible.protocol.solana.api.client.ActivityControllerApi as SolanaActivityControllerApi
+import com.rarible.protocol.solana.api.client.CollectionControllerApi as SolanaCollectionControllerApi
 import com.rarible.protocol.union.api.controller.test.mock.eth.EthActivityControllerApiMock
 import com.rarible.protocol.union.api.controller.test.mock.eth.EthOwnershipControllerApiMock
 import com.rarible.protocol.union.api.controller.test.mock.flow.FlowItemControllerApiMock
@@ -178,6 +180,9 @@ abstract class AbstractIntegrationTest {
     lateinit var testFlowCollectionApi: FlowNftCollectionControllerApi
 
     @Autowired
+    lateinit var testSolanaCollectionApi: SolanaCollectionControllerApi
+
+    @Autowired
     lateinit var testFlowOrderApi: FlowOrderControllerApi
 
     @Autowired
@@ -205,6 +210,9 @@ abstract class AbstractIntegrationTest {
 
     @Autowired
     lateinit var testTezosSignatureApi: com.rarible.protocol.tezos.api.client.OrderSignatureControllerApi
+
+    @Autowired
+    lateinit var testDipDupOrderClient: com.rarible.dipdup.client.OrderClient
 
     lateinit var tezosItemControllerApiMock: TezosItemControllerApiMock
     lateinit var tezosOwnershipControllerApiMock: TezosOwnershipControllerApiMock

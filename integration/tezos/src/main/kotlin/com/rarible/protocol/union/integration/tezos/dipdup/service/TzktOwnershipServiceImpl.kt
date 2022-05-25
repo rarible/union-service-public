@@ -1,10 +1,12 @@
 package com.rarible.protocol.union.integration.tezos.dipdup.service
 
+import com.rarible.protocol.union.core.exception.UnionNotFoundException
 import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.continuation.page.Page
 import com.rarible.protocol.union.integration.tezos.dipdup.converter.TzktOwnershipConverter
 import com.rarible.tzkt.client.OwnershipClient
+import com.rarible.tzkt.model.TzktNotFound
 
 class TzktOwnershipServiceImpl(val ownershipClient: OwnershipClient): TzktOwnershipService {
 
@@ -13,13 +15,21 @@ class TzktOwnershipServiceImpl(val ownershipClient: OwnershipClient): TzktOwners
     private val blockchain = BlockchainDto.TEZOS
 
     override suspend fun getOwnershipById(ownershipId: String): UnionOwnership {
-        val tzktOwnership = ownershipClient.ownershipById(ownershipId)
+        val tzktOwnership = safeApiCall { ownershipClient.ownershipById(ownershipId) }
         return TzktOwnershipConverter.convert(tzktOwnership, blockchain)
     }
 
     override suspend fun getOwnershipsByItem(itemId: String, continuation: String?, size: Int): Page<UnionOwnership> {
         val tzktPage = ownershipClient.ownershipsByToken(itemId, size, continuation)
         return TzktOwnershipConverter.convert(tzktPage, blockchain)
+    }
+
+    private suspend fun <T> safeApiCall(clientCall: suspend () -> T): T {
+        return try {
+            clientCall()
+        } catch (e: TzktNotFound) {
+            throw UnionNotFoundException(message = e.message ?: "")
+        }
     }
 
 }

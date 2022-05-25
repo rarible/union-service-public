@@ -14,7 +14,6 @@ import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations
 import randomEsOwnership
 import randomOwnership
 import randomOwnershipId

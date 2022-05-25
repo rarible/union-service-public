@@ -230,6 +230,19 @@ fun randomEsActivity() = EsActivity(
     collection = randomString(),
     item = randomString(),
 )
+
+fun randomEsCollection() = EsCollection(
+    collectionId = randomString(),
+    blockchain = BlockchainDto.values().random(),
+    name = randomString(),
+    symbol = randomString(),
+    owner = randomString(),
+    meta = EsCollection.CollectionMeta(
+        name = randomString(),
+        description = randomString(),
+    ),
+)
+
 fun randomEsItem() = EsItem(
     itemId = randomString(),
     blockchain = BlockchainDto.values().random(),
@@ -246,10 +259,11 @@ fun randomEsItem() = EsItem(
 val EsActivity.info: EsActivityLite
     get() = EsActivityLite(activityId, blockchain, type, date, blockNumber, logIndex, salt)
 
+val EsCollection.info: EsCollectionLite
+    get() = EsCollectionLite(collectionId)
+
 private val mockedEthOrderConverter = EthOrderConverter(CurrencyMock.currencyServiceMock)
 private val mockedEthAuctionConverter = EthAuctionConverter(CurrencyMock.currencyServiceMock)
 private val mockedEthActivityConverter = EthActivityConverter(
     CurrencyMock.currencyServiceMock, mockedEthAuctionConverter
 )
-
-

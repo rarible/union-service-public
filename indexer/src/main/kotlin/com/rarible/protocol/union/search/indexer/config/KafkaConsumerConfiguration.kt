@@ -7,13 +7,14 @@ import com.rarible.core.daemon.sequential.ConsumerBatchWorker
 import com.rarible.core.daemon.sequential.ConsumerWorkerHolder
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.CollectionEventDto
+import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.OrderEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.search.indexer.metrics.MetricConsumerBatchEventHandlerFactory
 import com.rarible.protocol.union.subscriber.UnionEventsConsumerFactory
 import io.micrometer.core.instrument.MeterRegistry
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import java.time.Duration
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
@@ -28,6 +29,7 @@ class KafkaConsumerConfiguration(
         const val ACTIVITY = "activity"
         const val ORDER = "order"
         const val COLLECTION = "collection"
+        const val ITEM = "item"
         const val OWNERSHIP = "ownership"
     }
 
@@ -41,7 +43,7 @@ class KafkaConsumerConfiguration(
     fun activityWorker(
         handler: ConsumerBatchEventHandler<ActivityDto>
     ): ConsumerWorkerHolder<ActivityDto> {
-        val wrappedHandler = metricEventHandlerFactory.wrap(handler)
+        val wrappedHandler = metricEventHandlerFactory.wrapActivity(handler)
         val workers = (1..kafkaProperties.workerCount).map { index ->
             val consumer = consumerFactory.createActivityConsumer(consumerGroup(ACTIVITY))
             ConsumerBatchWorker(
@@ -78,16 +80,34 @@ class KafkaConsumerConfiguration(
     @Bean
     @ConditionalOnProperty(prefix = "handler.collection", name = ["enabled"], havingValue = "true")
     fun collectionWorker(handler: ConsumerBatchEventHandler<CollectionEventDto>): ConsumerWorkerHolder<CollectionEventDto> {
-        val workers = (1..kafkaProperties.workerCount).map {i ->
+        val workers = (1..kafkaProperties.workerCount).map { i ->
+            val wrappedHandler = metricEventHandlerFactory.wrapCollection(handler)
             val consumer = consumerFactory.createCollectionConsumer(consumerGroup(COLLECTION))
             ConsumerBatchWorker(
                 consumer = consumer,
-                eventHandler = handler,
+                eventHandler = wrappedHandler,
                 workerName = worker(COLLECTION, i),
                 properties = kafkaProperties.daemon,
                 retryProperties = RetryProperties(attempts = Int.MAX_VALUE, delay = Duration.ofSeconds(1L)),
                 meterRegistry = meterRegistry
-           )
+            )
+        }
+        return ConsumerWorkerHolder(workers)
+    }
+
+    @Bean
+    @ConditionalOnProperty(prefix = "handler.item", name = ["enabled"], havingValue = "true")
+    fun itemWorker(handler: ConsumerBatchEventHandler<ItemEventDto>): ConsumerWorkerHolder<ItemEventDto> {
+        val workers = (1..kafkaProperties.workerCount).map { i ->
+            val consumer = consumerFactory.createItemConsumer(consumerGroup(ITEM))
+            ConsumerBatchWorker(
+                consumer = consumer,
+                eventHandler = handler,
+                workerName = worker(ITEM, i),
+                properties = kafkaProperties.daemon,
+                retryProperties = RetryProperties(attempts = Int.MAX_VALUE, delay = Duration.ofSeconds(1L)),
+                meterRegistry = meterRegistry
+            )
         }
         return ConsumerWorkerHolder(workers)
     }

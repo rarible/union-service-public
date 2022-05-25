@@ -7,8 +7,10 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.immutablex.client.EventsApi
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexApiClient
 import com.rarible.protocol.union.integration.immutablex.converter.ImmutablexActivityConverter
+import com.rarible.protocol.union.integration.immutablex.converter.ImmutablexItemConverter
 import com.rarible.protocol.union.integration.immutablex.converter.ImmutablexOrderConverter
 import com.rarible.protocol.union.integration.immutablex.service.ImmutablexActivityService
+import com.rarible.protocol.union.integration.immutablex.service.ImmutablexCollectionService
 import com.rarible.protocol.union.integration.immutablex.service.ImmutablexItemService
 import com.rarible.protocol.union.integration.immutablex.service.ImmutablexOrderService
 import com.rarible.protocol.union.integration.immutablex.service.ImmutablexOwnershipService
@@ -44,8 +46,10 @@ class ImmutablexApiConfiguration {
     @Bean
     fun immutablexWebClient(props: ImmutablexIntegrationProperties): WebClient {
         val mapper = ApiClient.createDefaultObjectMapper()
-        val httpClient = HttpClient.create().wiretap("reactor.netty.http.client.HttpClient",
-            LogLevel.DEBUG, AdvancedByteBufFormat.TEXTUAL)
+        val httpClient = HttpClient.create().wiretap(
+            "reactor.netty.http.client.HttpClient",
+            LogLevel.DEBUG, AdvancedByteBufFormat.TEXTUAL
+        )
         val strategies = ExchangeStrategies
             .builder()
             .codecs { configurer: ClientCodecConfigurer ->
@@ -65,7 +69,8 @@ class ImmutablexApiConfiguration {
     }
 
     @Bean
-    fun immutablexItemService(client: ImmutablexApiClient): ImmutablexItemService = ImmutablexItemService(client)
+    fun immutablexItemService(client: ImmutablexApiClient): ImmutablexItemService =
+        ImmutablexItemService(client, ImmutablexItemConverter(client))
 
     @Bean
     fun immutablexOrderConverter(): ImmutablexOrderConverter = ImmutablexOrderConverter()
@@ -95,4 +100,7 @@ class ImmutablexApiConfiguration {
     fun immutablexOwnershipService(immutablexApiClient: ImmutablexApiClient): ImmutablexOwnershipService =
         ImmutablexOwnershipService(immutablexApiClient)
 
+    @Bean
+    fun immutablexCollectionService(immutablexApiClient: ImmutablexApiClient): ImmutablexCollectionService =
+        ImmutablexCollectionService(immutablexApiClient)
 }

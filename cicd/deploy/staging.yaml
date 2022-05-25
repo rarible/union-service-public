@@ -12,13 +12,14 @@ protocol-union-meta-loader:
 
 protocol-union-indexer:
   enabled: true
-  replicas: 3
+  replicas: 2
   resources:
     jvm:
       xmx_megabytes: 256
       max_direct_memory_megabytes: 128
 
 protocol-union-worker:
+  enabled: true
   replicas: 1
   resources:
     jvm:

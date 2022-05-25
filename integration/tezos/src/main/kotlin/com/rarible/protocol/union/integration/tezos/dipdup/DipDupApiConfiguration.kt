@@ -5,7 +5,10 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.rarible.dipdup.client.OrderActivityClient
 import com.rarible.dipdup.client.OrderClient
 import com.rarible.protocol.union.core.CoreConfiguration
+import com.rarible.protocol.union.integration.tezos.dipdup.converter.DipDupActivityConverter
 import com.rarible.protocol.union.integration.tezos.dipdup.converter.DipDupOrderConverter
+import com.rarible.protocol.union.integration.tezos.dipdup.service.DipdupOrderActivityService
+import com.rarible.protocol.union.integration.tezos.dipdup.service.DipdupOrderActivityServiceImpl
 import com.rarible.protocol.union.integration.tezos.dipdup.service.DipdupOrderService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.DipdupOrderServiceImpl
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktCollectionService
@@ -83,6 +86,11 @@ class DipDupApiConfiguration(
     @Bean
     fun dipdupOrderService(orderClient: OrderClient, dipDupOrderConverter: DipDupOrderConverter): DipdupOrderService {
         return DipdupOrderServiceImpl(orderClient, dipDupOrderConverter)
+    }
+
+    @Bean
+    fun dipdupOrderActivitiesService(orderActivityClient: OrderActivityClient, dipDupActivityConverter: DipDupActivityConverter): DipdupOrderActivityService {
+        return DipdupOrderActivityServiceImpl(orderActivityClient, dipDupActivityConverter)
     }
 
     @Bean

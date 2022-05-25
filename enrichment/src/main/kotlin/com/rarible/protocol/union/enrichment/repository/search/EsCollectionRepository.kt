@@ -1,16 +1,26 @@
 package com.rarible.protocol.union.enrichment.repository.search
 
+import com.rarible.core.apm.CaptureSpan
+import com.rarible.core.apm.SpanType
 import com.rarible.protocol.union.core.elasticsearch.EsNameResolver
 import com.rarible.protocol.union.core.model.EsCollection
 import com.rarible.protocol.union.core.model.EsCollectionFilter
+import com.rarible.protocol.union.core.model.EsCollectionLite
+import com.rarible.protocol.union.dto.continuation.page.PageSize
+import com.rarible.protocol.union.enrichment.repository.search.internal.EsCollectionQueryBuilderService
+import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactor.awaitSingle
 import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations
+import org.springframework.data.elasticsearch.core.query.NativeSearchQuery
+import org.springframework.data.elasticsearch.core.query.Query
 import org.springframework.stereotype.Component
 
 @Component
+@CaptureSpan(type = SpanType.DB)
 class EsCollectionRepository(
     private val esOperations: ReactiveElasticsearchOperations,
+    private val queryBuilderService: EsCollectionQueryBuilderService,
     esNameResolver: EsNameResolver
 ) {
     val entityDefinition = esNameResolver.createEntityDefinitionExtended(EsCollection.ENTITY_DEFINITION)
@@ -24,8 +34,28 @@ class EsCollectionRepository(
         return esOperations.get(collectionId, clazz, entityDefinition.searchIndexCoordinates).awaitFirstOrNull()
     }
 
+    suspend fun search(filter: EsCollectionFilter, limit: Int?): List<EsCollectionLite> {
+        val query = queryBuilderService.build(filter)
+        query.maxResults = PageSize.COLLECTION.limit(limit)
 
-    suspend fun findByFilter(filter: EsCollectionFilter): List<EsCollection> {
-        return esOperations.search(filter.toQuery(), clazz).collectList().awaitSingle().map { it.content }
+        return search(query)
+    }
+
+    suspend fun search(query: NativeSearchQuery): List<EsCollectionLite> {
+        return esOperations.search(query, EsCollectionLite::class.java, entityDefinition.searchIndexCoordinates)
+            .collectList()
+            .awaitFirst()
+            .map { it.content }
+    }
+
+    /**
+     * For tests only
+     */
+    suspend fun deleteAll() {
+        esOperations.delete(
+            Query.findAll(),
+            Any::class.java,
+            entityDefinition.writeIndexCoordinates
+        ).awaitFirstOrNull()
     }
 }
