@@ -43,7 +43,7 @@ class KafkaConsumerConfiguration(
     fun activityWorker(
         handler: ConsumerBatchEventHandler<ActivityDto>
     ): ConsumerWorkerHolder<ActivityDto> {
-        val wrappedHandler = metricEventHandlerFactory.wrap(handler)
+        val wrappedHandler = metricEventHandlerFactory.wrapActivity(handler)
         val workers = (1..kafkaProperties.workerCount).map { index ->
             val consumer = consumerFactory.createActivityConsumer(consumerGroup(ACTIVITY))
             ConsumerBatchWorker(
@@ -81,10 +81,11 @@ class KafkaConsumerConfiguration(
     @ConditionalOnProperty(prefix = "handler.collection", name = ["enabled"], havingValue = "true")
     fun collectionWorker(handler: ConsumerBatchEventHandler<CollectionEventDto>): ConsumerWorkerHolder<CollectionEventDto> {
         val workers = (1..kafkaProperties.workerCount).map { i ->
+            val wrappedHandler = metricEventHandlerFactory.wrapCollection(handler)
             val consumer = consumerFactory.createCollectionConsumer(consumerGroup(COLLECTION))
             ConsumerBatchWorker(
                 consumer = consumer,
-                eventHandler = handler,
+                eventHandler = wrappedHandler,
                 workerName = worker(COLLECTION, i),
                 properties = kafkaProperties.daemon,
                 retryProperties = RetryProperties(attempts = Int.MAX_VALUE, delay = Duration.ofSeconds(1L)),
