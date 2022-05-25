@@ -26,6 +26,7 @@ import com.rarible.protocol.union.integration.tezos.event.TezosOrderEventHandler
 import com.rarible.protocol.union.integration.tezos.event.TezosOwnershipEventHandler
 import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
 
@@ -36,6 +37,8 @@ class TezosConsumerConfiguration(
     properties: TezosIntegrationProperties,
     @Value("\${rarible.core.client.k8s:false}")
     private val k8s: Boolean,
+    @Value("\${integration.tezos.dipdup.enable:false}")
+    private val isDipDupEnabled: Boolean,
     private val consumerFactory: ConsumerFactory
 ) {
 
@@ -60,16 +63,19 @@ class TezosConsumerConfiguration(
 
     //-------------------- Handlers -------------------//
 
+    @ConditionalOnProperty(prefix = "integration.tezos.dipdup", name = ["enabled"], havingValue = "false", matchIfMissing = true)
     @Bean
     fun tezosItemEventHandler(handler: IncomingEventHandler<UnionItemEvent>): TezosItemEventHandler {
         return TezosItemEventHandler(handler)
     }
 
+    @ConditionalOnProperty(prefix = "integration.tezos.dipdup", name = ["enabled"], havingValue = "false", matchIfMissing = true)
     @Bean
     fun tezosOwnershipEventHandler(handler: IncomingEventHandler<UnionOwnershipEvent>): TezosOwnershipEventHandler {
         return TezosOwnershipEventHandler(handler)
     }
 
+    @ConditionalOnProperty(prefix = "integration.tezos.dipdup", name = ["enabled"], havingValue = "false", matchIfMissing = true)
     @Bean
     fun tezosCollectionEventHandler(handler: IncomingEventHandler<UnionCollectionEvent>): TezosCollectionEventHandler {
         return TezosCollectionEventHandler(handler)
@@ -88,11 +94,12 @@ class TezosConsumerConfiguration(
         handler: IncomingEventHandler<com.rarible.protocol.union.dto.ActivityDto>,
         converter: TezosActivityConverter
     ): TezosActivityEventHandler {
-        return TezosActivityEventHandler(handler, converter)
+        return TezosActivityEventHandler(handler, converter, isDipDupEnabled)
     }
 
     //-------------------- Workers --------------------//
 
+    @ConditionalOnProperty(prefix = "integration.tezos.dipdup", name = ["enabled"], havingValue = "false", matchIfMissing = true)
     @Bean
     fun tezosItemWorker(
         factory: TezosEventsConsumerFactory,
@@ -102,6 +109,7 @@ class TezosConsumerConfiguration(
         return consumerFactory.createItemConsumer(consumer, handler, daemon, workers)
     }
 
+    @ConditionalOnProperty(prefix = "integration.tezos.dipdup", name = ["enabled"], havingValue = "false", matchIfMissing = true)
     @Bean
     fun tezosCollectionWorker(
         factory: TezosEventsConsumerFactory,
@@ -111,6 +119,7 @@ class TezosConsumerConfiguration(
         return consumerFactory.createCollectionConsumer(consumer, handler, daemon, workers)
     }
 
+    @ConditionalOnProperty(prefix = "integration.tezos.dipdup", name = ["enabled"], havingValue = "false", matchIfMissing = true)
     @Bean
     fun tezosOwnershipWorker(
         factory: TezosEventsConsumerFactory,

@@ -1,10 +1,10 @@
 package com.rarible.protocol.union.integration.tezos.service
 
+import com.rarible.core.test.data.randomInt
+import com.rarible.core.test.data.randomString
 import com.rarible.dipdup.client.OrderActivityClient
-import com.rarible.dipdup.client.core.model.Asset
-import com.rarible.dipdup.client.core.model.DipDupActivity
-import com.rarible.dipdup.client.core.model.DipDupOrderListActivity
-import com.rarible.dipdup.client.core.model.TezosPlatform
+import com.rarible.dipdup.client.model.DipDupActivitiesPage
+import com.rarible.dipdup.client.model.DipDupActivityType
 import com.rarible.protocol.tezos.api.client.NftActivityControllerApi
 import com.rarible.protocol.tezos.api.client.OrderActivityControllerApi
 import com.rarible.protocol.tezos.dto.OrderActivitiesDto
@@ -12,20 +12,24 @@ import com.rarible.protocol.union.core.model.TypedActivityId
 import com.rarible.protocol.union.core.service.CurrencyService
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.integration.tezos.converter.TezosActivityConverter
-import com.rarible.protocol.union.integration.tezos.data.randomTezosOrderActivityCancelList
+import com.rarible.protocol.union.integration.tezos.data.randomDipDupActivityOrderListEvent
+import com.rarible.protocol.union.integration.tezos.data.randomTezosOrderListActivity
+import com.rarible.protocol.union.integration.tezos.data.randomTzktItemMintActivity
 import com.rarible.protocol.union.integration.tezos.dipdup.converter.DipDupActivityConverter
 import com.rarible.protocol.union.integration.tezos.dipdup.service.DipdupOrderActivityService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.DipdupOrderActivityServiceImpl
+import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktItemActivityService
+import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktItemActivityServiceImpl
 import com.rarible.protocol.union.test.mock.CurrencyMock
+import com.rarible.tzkt.client.TokenActivityClient
+import com.rarible.tzkt.model.ActivityType
+import com.rarible.tzkt.model.Page
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
-import java.math.BigDecimal
-import java.math.BigInteger
-import java.time.Instant
-import java.time.ZoneOffset
+import reactor.kotlin.core.publisher.toMono
 import java.util.*
 
 class TezosActivityServiceTest {
@@ -39,62 +43,77 @@ class TezosActivityServiceTest {
     private val dipdupOrderActivityService: DipdupOrderActivityService = DipdupOrderActivityServiceImpl(
         testDipDupOrderActivityClient, DipDupActivityConverter(currencyService)
     )
+    private val tzktTokenClient: TokenActivityClient = mockk()
+    private val tzktItemActivityService: TzktItemActivityService = TzktItemActivityServiceImpl(tzktTokenClient)
 
     private val service = TezosActivityService(
         activityItemControllerApi,
         activityOrderControllerApi,
         tezosActivityConverter,
         pgService,
-        dipdupOrderActivityService
+        dipdupOrderActivityService,
+        tzktItemActivityService
     )
 
     @Test
-    fun `should get legacy activity + dipdup activity`() = runBlocking<Unit> {
+    fun `should get legacy activity + dipdup|tzkt activitis by ids`() = runBlocking<Unit> {
         val legacyActivity = TypedActivityId(
             id = "BKpJX4yv2JsxezPcvgnavyjJZBZVbQ5hicMwQLEkxv9516Qz27N_46",
             type = ActivityTypeDto.LIST
         )
-        val activity = TypedActivityId(
+        val orderActivity = TypedActivityId(
             id = UUID.randomUUID().toString(),
             type = ActivityTypeDto.LIST
         )
+        val itemActivity = TypedActivityId(
+            id = randomInt().toString(),
+            type = ActivityTypeDto.MINT
+        )
 
         coEvery { pgService.orderActivities(listOf(legacyActivity.id)) } returns OrderActivitiesDto(
-            items = listOf(randomTezosOrderActivityCancelList()),
+            items = listOf(randomTezosOrderListActivity()),
             continuation = null
         )
-        coEvery { testDipDupOrderActivityClient.getActivities(listOf(activity.id)) } returns listOf(
-            randomDipDupActivityOrderListEvent(activity.id)
+        coEvery { testDipDupOrderActivityClient.getActivities(listOf(orderActivity.id)) } returns listOf(
+            randomDipDupActivityOrderListEvent(orderActivity.id)
+        )
+        coEvery { tzktTokenClient.activityByIds(listOf(itemActivity.id)) } returns listOf(
+            randomTzktItemMintActivity(itemActivity.id)
         )
         val types = listOf(
             legacyActivity,
-            activity
+            orderActivity,
+            itemActivity
         )
         val activities = service.getActivitiesByIds(types)
-        Assertions.assertThat(activities).hasSize(2)
+        Assertions.assertThat(activities).hasSize(3)
     }
 
-    private fun randomDipDupActivityOrderListEvent(activityId: String): DipDupActivity {
-        return DipDupOrderListActivity(
-            id = activityId,
-            date = Instant.now().atOffset(ZoneOffset.UTC),
-            reverted = false,
-            hash = "",
-            maker = UUID.randomUUID().toString(),
-            make = Asset(
-                assetType = Asset.NFT(
-                    contract = UUID.randomUUID().toString(),
-                    tokenId = BigInteger.ONE
-                ),
-                assetValue = BigDecimal.ONE
-            ),
-            take = Asset(
-                assetType = Asset.XTZ(),
-                assetValue = BigDecimal.ONE
-            ),
-            price = BigDecimal.ONE,
-            source = TezosPlatform.Rarible
+    @Test
+    fun `should return all dipdup|tzkt activities`() = runBlocking<Unit> {
+
+        coEvery { activityOrderControllerApi.getOrderActivities(any(), 10, any(), any()) } returns OrderActivitiesDto(
+            continuation = null,
+            items = listOf(randomTezosOrderListActivity())
+        ).toMono()
+        coEvery {
+            testDipDupOrderActivityClient.getActivities(
+                listOf(DipDupActivityType.LIST),
+                9,
+                null,
+                false
+            )
+        } returns DipDupActivitiesPage(
+            continuation = null,
+            activities = listOf(randomDipDupActivityOrderListEvent(randomString()))
         )
+        coEvery { tzktTokenClient.activities(9, null, false, listOf(ActivityType.MINT)) } returns Page(
+            continuation = null,
+            items = listOf(randomTzktItemMintActivity(randomInt().toString()))
+        )
+
+        val activities = service.getAllActivities(listOf(ActivityTypeDto.MINT, ActivityTypeDto.LIST), null, 10, null)
+        Assertions.assertThat(activities.entities).hasSize(3)
     }
 
 }

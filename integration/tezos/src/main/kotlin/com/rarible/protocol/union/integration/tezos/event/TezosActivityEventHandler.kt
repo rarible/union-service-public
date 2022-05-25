@@ -12,7 +12,8 @@ import org.slf4j.LoggerFactory
 
 open class TezosActivityEventHandler(
     override val handler: IncomingEventHandler<ActivityDto>,
-    private val tezosActivityConverter: TezosActivityConverter
+    private val tezosActivityConverter: TezosActivityConverter,
+    private val isDipDupEnabled: Boolean
 ) : AbstractBlockchainEventHandler<TezosActivitySafeDto, ActivityDto>(BlockchainDto.TEZOS) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -21,8 +22,9 @@ open class TezosActivityEventHandler(
 
     @CaptureTransaction("ActivityEvent#TEZOS")
     override suspend fun handle(event: TezosActivitySafeDto) {
-        if (event.nftType != null) {
-            logger.info("Received Tezos ({}) Order Activity event: {}", blockchain, mapper.writeValueAsString(event))
+        // we should skip tezos nft activity so that not to double events from new indexer
+        if (event.nftType != null && !isDipDupEnabled) {
+            logger.info("Received Tezos ({}) Item Activity event: {}", blockchain, mapper.writeValueAsString(event))
             val unionEventDto = tezosActivityConverter.convert(event.nftType!!, blockchain)
             handler.onEvent(unionEventDto)
         } else if (event.orderType != null) {
