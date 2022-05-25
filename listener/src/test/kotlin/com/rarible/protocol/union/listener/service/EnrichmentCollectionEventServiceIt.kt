@@ -1,7 +1,7 @@
 package com.rarible.protocol.union.listener.service
 
 import com.rarible.core.test.wait.Wait
-import com.rarible.protocol.union.enrichment.converter.EnrichmentCollectionConverter
+import com.rarible.protocol.union.enrichment.converter.EnrichedCollectionConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.service.EnrichmentCollectionService
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
@@ -53,7 +53,7 @@ class EnrichmentCollectionEventServiceIt : AbstractIntegrationTest() {
         collectionEventService.onCollectionBestSellOrderUpdate(collectionId, unionBestSell, true)
 
         // In result event for Item we expect updated bestSellOrder
-        val expected = EnrichmentCollectionConverter.convert(unionCollection).copy(bestSellOrder = unionBestSell)
+        val expected = EnrichedCollectionConverter.convert(unionCollection).copy(bestSellOrder = unionBestSell)
 
         val saved = collectionService.get(shortCollection.id)!!
         assertThat(saved.bestSellOrder).isEqualTo(ShortOrderConverter.convert(unionBestSell))
@@ -84,7 +84,7 @@ class EnrichmentCollectionEventServiceIt : AbstractIntegrationTest() {
         collectionEventService.onCollectionBestBidOrderUpdate(collectionId, unionBestBid, true)
 
         // In result event for Item we expect updated bestSellOrder
-        val expected = EnrichmentCollectionConverter.convert(unionCollection).copy(bestBidOrder = unionBestBid)
+        val expected = EnrichedCollectionConverter.convert(unionCollection).copy(bestBidOrder = unionBestBid)
 
         val saved = collectionService.get(shortCollection.id)!!
         assertThat(saved.bestBidOrder).isEqualTo(ShortOrderConverter.convert(unionBestBid))

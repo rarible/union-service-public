@@ -7,7 +7,7 @@ import com.rarible.protocol.union.core.service.CollectionService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
-import com.rarible.protocol.union.enrichment.converter.EnrichmentCollectionConverter
+import com.rarible.protocol.union.enrichment.converter.EnrichedCollectionConverter
 import com.rarible.protocol.union.enrichment.meta.UnionMetaService
 import com.rarible.protocol.union.enrichment.model.ShortCollection
 import com.rarible.protocol.union.enrichment.model.ShortCollectionId
@@ -80,7 +80,7 @@ class EnrichmentCollectionService(
 
         val unionCollection = fetchedCollection.await()
 
-        val collectionDto = EnrichmentCollectionConverter.convert(
+        val collectionDto = EnrichedCollectionConverter.convert(
             collection = unionCollection,
             // replacing inner IPFS urls with public urls
             meta = unionMetaService.exposePublicIpfsUrls(unionCollection.meta),

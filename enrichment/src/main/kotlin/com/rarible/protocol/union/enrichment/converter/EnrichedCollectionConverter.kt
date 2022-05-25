@@ -8,8 +8,8 @@ import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.enrichment.model.ShortCollection
 
+object EnrichedCollectionConverter {
 
-object EnrichmentCollectionConverter {
     fun convert(
         collection: UnionCollection,
         shortCollection: ShortCollection? = null,
@@ -28,7 +28,9 @@ object EnrichmentCollectionConverter {
             meta = (meta ?: collection.meta)?.let { EnrichedMetaConverter.convert(it) },
             type = collection.type,
             bestSellOrder = shortCollection?.bestSellOrder?.let { orders[it.dtoId] },
-            bestBidOrder = shortCollection?.bestBidOrder?.let { orders[it.dtoId] }
+            bestBidOrder = shortCollection?.bestBidOrder?.let { orders[it.dtoId] },
+            originOrders = shortCollection?.originOrders?.let { OriginOrdersConverter.convert(it, orders) }
+                ?: emptyList()
         )
     }
 
