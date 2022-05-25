@@ -1,9 +1,10 @@
-package com.rarible.protocol.nftorder.api.test.mock
+package com.rarible.protocol.union.integration.ethereum.mock
 
 import com.rarible.protocol.dto.AssetTypeDto
 import com.rarible.protocol.dto.OrderCurrenciesDto
 import com.rarible.protocol.dto.OrderDto
 import com.rarible.protocol.dto.OrderIdsDto
+import com.rarible.protocol.dto.OrderStatusDto
 import com.rarible.protocol.dto.OrdersPaginationDto
 import com.rarible.protocol.order.api.client.OrderControllerApi
 import com.rarible.protocol.union.core.util.CompositeItemIdParser
@@ -77,12 +78,12 @@ class EthOrderControllerApiMock(
             orderControllerApi.getOrderBidsByItemAndByStatus(
                 eq(contract),
                 eq(tokenId.toString()),
+                eq(listOf(OrderStatusDto.ACTIVE)),
                 any(),
                 any(),
                 any(),
                 any(),
-                any(),
-                any(),
+                eq(1),
                 eq(currencyId),
                 any(),
                 any()

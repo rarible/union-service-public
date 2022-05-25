@@ -26,4 +26,8 @@ data class OriginOrders(
     override fun withBestBidOrder(order: ShortOrder?): OriginOrders {
         return this.copy(bestBidOrder = order)
     }
+
+    fun isEmpty(): Boolean {
+        return bestSellOrder == null && bestBidOrder == null
+    }
 }

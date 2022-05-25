@@ -16,6 +16,9 @@ import com.rarible.protocol.union.enrichment.model.ShortOrder
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
 import com.rarible.protocol.union.enrichment.util.spent
 import com.rarible.protocol.union.enrichment.validator.BestOrderValidator
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
@@ -35,6 +38,18 @@ class EnrichmentOrderService(
         }
     }
 
+    suspend fun getByIds(ids: List<OrderIdDto>): List<OrderDto> = coroutineScope {
+        val byBlockchain = ids.groupBy { it.blockchain }
+        byBlockchain.map { pair ->
+            async {
+                val blockchain = pair.key
+                val nativeIds = pair.value.map { it.value }
+                orderServiceRouter.getService(blockchain).getOrdersByIds(nativeIds)
+            }
+        }.awaitAll().flatten()
+
+    }
+
     suspend fun fetchOrderIfDiffers(existing: ShortOrder?, orders: Map<OrderIdDto, OrderDto>): OrderDto? {
         // Nothing to download - there is no existing short order
         if (existing == null) {
@@ -47,6 +62,25 @@ class EnrichmentOrderService(
         }
         // Downloading full order in common case
         return getById(existing.dtoId)
+    }
+
+    suspend fun fetchMissingOrders(
+        existing: List<ShortOrder?>,
+        orders: Map<OrderIdDto, OrderDto>
+    ): Map<OrderIdDto, OrderDto> {
+        val notNull = existing.filterNotNull()
+            .map { it.dtoId }
+            .filterNot { orders.containsKey(it) }
+
+        // Nothing to download
+        if (notNull.isEmpty()) {
+            return orders
+        }
+
+        val fetched = getByIds(notNull)
+
+        // Merging with already known orders
+        return fetched.associateBy { it.id } + orders
     }
 
     suspend fun getBestSell(id: ShortItemId, currencyId: String, origin: String?): OrderDto? {
@@ -178,7 +212,9 @@ class EnrichmentOrderService(
             return bestOfAll
         }
         logger.debug("Order [{}] is not a preferred platform order, checking preferred platform...", bestOfAll)
-        val preferredPlatformBestOrder = ignoreFilledTaker(id, clientCall, PlatformDto.RARIBLE, orderType = orderType, filter = filter)
+        val preferredPlatformBestOrder = ignoreFilledTaker(
+            id, clientCall, PlatformDto.RARIBLE, orderType = orderType, filter = filter
+        )
         logger.debug("Checked preferred platform for best order: [{}]")
         return preferredPlatformBestOrder ?: bestOfAll
     }
@@ -221,10 +257,10 @@ class EnrichmentOrderService(
         return order
     }
 
-    private fun orderFilter(order: OrderDto, filter: OrderFilters, orderType: OrderType ): Boolean {
-        return when(orderType) {
+    private fun orderFilter(order: OrderDto, filter: OrderFilters, orderType: OrderType): Boolean {
+        return when (orderType) {
             OrderType.BID -> orderBidFilter(order, filter)
-            OrderType.SELL-> orderSellFilter(order, filter)
+            OrderType.SELL -> orderSellFilter(order, filter)
         }
     }
 
@@ -245,6 +281,7 @@ class EnrichmentOrderService(
     }
 
     companion object {
+
         private const val MAX_ATTEMPTS = 50
         private const val WARN_ATTEMPTS = 5
 

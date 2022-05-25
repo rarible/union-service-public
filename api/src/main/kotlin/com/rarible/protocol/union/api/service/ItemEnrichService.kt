@@ -78,8 +78,9 @@ class ItemEnrichService(
 
             // Looking for full orders for existing items in order-indexer
             val shortOrderIds = shortItems.values
-                .map { listOfNotNull(it.bestBidOrder?.dtoId, it.bestSellOrder?.dtoId) }
+                .map { it.getAllBestOrders() }
                 .flatten()
+                .map { it.dtoId }
 
             val orders = orderApiService.getByIds(shortOrderIds)
                 .associateBy { it.id }

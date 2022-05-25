@@ -5,7 +5,6 @@ import com.rarible.core.kafka.KafkaMessage
 import com.rarible.core.kafka.KafkaSendResult
 import com.rarible.core.kafka.RaribleKafkaConsumer
 import com.rarible.core.kafka.RaribleKafkaProducer
-import com.rarible.dipdup.client.OrderClient
 import com.rarible.protocol.currency.api.client.CurrencyControllerApi
 import com.rarible.protocol.currency.dto.CurrencyRateDto
 import com.rarible.protocol.flow.nft.api.client.FlowNftCollectionControllerApi
@@ -18,24 +17,22 @@ import com.rarible.protocol.nft.api.client.NftActivityControllerApi
 import com.rarible.protocol.nft.api.client.NftCollectionControllerApi
 import com.rarible.protocol.nft.api.client.NftItemControllerApi
 import com.rarible.protocol.nft.api.client.NftOwnershipControllerApi
-import com.rarible.protocol.nftorder.api.test.mock.EthAuctionControllerApiMock
-import com.rarible.protocol.nftorder.api.test.mock.EthItemControllerApiMock
-import com.rarible.protocol.nftorder.api.test.mock.EthOrderControllerApiMock
 import com.rarible.protocol.order.api.client.AuctionActivityControllerApi
 import com.rarible.protocol.order.api.client.OrderActivityControllerApi
-import com.rarible.protocol.solana.api.client.ActivityControllerApi as SolanaActivityControllerApi
-import com.rarible.protocol.solana.api.client.CollectionControllerApi as SolanaCollectionControllerApi
-import com.rarible.protocol.union.api.controller.test.mock.eth.EthActivityControllerApiMock
-import com.rarible.protocol.union.api.controller.test.mock.eth.EthOwnershipControllerApiMock
-import com.rarible.protocol.union.api.controller.test.mock.flow.FlowItemControllerApiMock
-import com.rarible.protocol.union.api.controller.test.mock.flow.FlowOrderControllerApiMock
-import com.rarible.protocol.union.api.controller.test.mock.flow.FlowOwnershipControllerApiMock
-import com.rarible.protocol.union.api.controller.test.mock.tezos.TezosItemControllerApiMock
-import com.rarible.protocol.union.api.controller.test.mock.tezos.TezosOrderControllerApiMock
-import com.rarible.protocol.union.api.controller.test.mock.tezos.TezosOwnershipControllerApiMock
 import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.enrichment.meta.UnionMetaLoader
+import com.rarible.protocol.union.integration.ethereum.mock.EthActivityControllerApiMock
+import com.rarible.protocol.union.integration.ethereum.mock.EthAuctionControllerApiMock
+import com.rarible.protocol.union.integration.ethereum.mock.EthItemControllerApiMock
+import com.rarible.protocol.union.integration.ethereum.mock.EthOrderControllerApiMock
+import com.rarible.protocol.union.integration.ethereum.mock.EthOwnershipControllerApiMock
+import com.rarible.protocol.union.integration.flow.mock.FlowItemControllerApiMock
+import com.rarible.protocol.union.integration.flow.mock.FlowOrderControllerApiMock
+import com.rarible.protocol.union.integration.flow.mock.FlowOwnershipControllerApiMock
+import com.rarible.protocol.union.integration.tezos.mock.TezosItemControllerApiMock
+import com.rarible.protocol.union.integration.tezos.mock.TezosOrderControllerApiMock
+import com.rarible.protocol.union.integration.tezos.mock.TezosOwnershipControllerApiMock
 import io.mockk.clearMocks
 import io.mockk.coEvery
 import kotlinx.coroutines.CoroutineScope
@@ -51,9 +48,10 @@ import org.springframework.web.client.RestTemplate
 import reactor.kotlin.core.publisher.toMono
 import java.math.BigDecimal
 import java.net.URI
-import java.util.Queue
-import java.util.UUID
+import java.util.*
 import java.util.concurrent.LinkedBlockingQueue
+import com.rarible.protocol.solana.api.client.ActivityControllerApi as SolanaActivityControllerApi
+import com.rarible.protocol.solana.api.client.CollectionControllerApi as SolanaCollectionControllerApi
 
 abstract class AbstractIntegrationTest {
 

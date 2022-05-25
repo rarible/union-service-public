@@ -52,7 +52,6 @@ import com.rarible.protocol.union.test.data.randomFlowNftItemDto
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.verify
-import java.math.BigInteger
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
@@ -66,6 +65,7 @@ import org.springframework.web.client.RestTemplate
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
 import scalether.domain.Address
+import java.math.BigInteger
 
 @FlowPreview
 @IntegrationTest
@@ -105,7 +105,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
             .copy(bestSellOrder = ShortOrderConverter.convert(ethUnionOrder))
         enrichmentItemService.save(ethShortItem)
 
-        ethereumOrderControllerApiMock.mockGetById(ethOrder)
+        ethereumOrderControllerApiMock.mockGetByIds(ethOrder)
         ethereumItemControllerApiMock.mockGetNftItemById(ethItemId, ethItem)
 
         val result = itemControllerClient.getItemById(ethItemId.fullId()).awaitFirst()
@@ -127,7 +127,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
             .copy(bestSellOrder = ShortOrderConverter.convert(ethUnionOrder))
         enrichmentItemService.save(ethShortItem)
 
-        ethereumOrderControllerApiMock.mockGetById(ethOrder)
+        ethereumOrderControllerApiMock.mockGetByIds(ethOrder)
         ethereumItemControllerApiMock.mockGetNftItemsByIds(listOf(ethItemId.value), listOf(ethItem))
 
         val result = itemControllerClient.getItemByIds(ItemIdsDto(listOf(ethItemId))).awaitFirst()

@@ -28,7 +28,7 @@ data class ShortItem(
     override val bestBidOrder: ShortOrder?,
     override val bestBidOrders: Map<String, ShortOrder>,
 
-    val originOrders: Set<OriginOrders> = emptySet(),
+    override val originOrders: Set<OriginOrders> = emptySet(),
 
     val multiCurrency: Boolean = bestSellOrders.size > 1 || bestBidOrders.size > 1,
 
@@ -40,7 +40,7 @@ data class ShortItem(
 
     @Version
     val version: Long? = null
-) : BestSellOrderOwner<ShortItem>, BestBidOrderOwner<ShortItem> {
+) : BestSellOrderOwner<ShortItem>, BestBidOrderOwner<ShortItem>, OriginOrdersOwner {
 
     fun withCalculatedFields(): ShortItem {
         return this.copy(
@@ -106,6 +106,9 @@ data class ShortItem(
         return this.copy(bestSellOrder = order)
     }
 
+    override fun getAllBestOrders(): List<ShortOrder> {
+        return listOfNotNull(bestSellOrder, bestBidOrder) + getAllOriginBestOrders()
+    }
 }
 
 

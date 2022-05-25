@@ -26,7 +26,7 @@ class OriginService(
     }
 
     private fun addOrigin(blockchain: BlockchainDto, properties: OriginProperties) {
-        val collections = safeSplit(properties.collections)
+        val collections = safeSplit(properties.collections).map { it.trim() }
         val origin = properties.origin
         if (collections.isEmpty()) {
             globalOrigins.add(origin)

@@ -1,16 +1,16 @@
 package com.rarible.protocol.union.listener.service
 
-import com.rarible.protocol.dto.OrderCurrenciesDto
-import com.rarible.protocol.dto.EthAssetTypeDto
-import com.rarible.protocol.dto.OrdersPaginationDto
+import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionUpdateEventDto
+import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.ext
 import com.rarible.protocol.union.enrichment.service.EnrichmentRefreshService
+import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
+import com.rarible.protocol.union.integration.ethereum.data.randomEthAssetErc20
+import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionAsset
+import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthV2OrderDto
-import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionDto
-import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionAsset
-import com.rarible.protocol.union.integration.ethereum.data.randomEthAssetErc20
 import com.rarible.protocol.union.listener.test.AbstractIntegrationTest
 import com.rarible.protocol.union.listener.test.IntegrationTest
 import io.mockk.clearMocks
@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import reactor.kotlin.core.publisher.toMono
 import scalether.domain.Address
+import java.math.BigInteger
 
 @IntegrationTest
 class EnrichmentRefreshServiceTest : AbstractIntegrationTest(){
@@ -38,61 +39,22 @@ class EnrichmentRefreshServiceTest : AbstractIntegrationTest(){
     @Test
     fun `reconcile collection null best sell bid`() = runBlocking<Unit> {
         val collectionId = randomEthCollectionId()
+        val fakeItemId = ItemIdDto(BlockchainDto.ETHEREUM, collectionId.value, BigInteger("-1"))
+        val currencyAsset = randomEthAssetErc20()
+        val currencyId = EthConverter.convert(currencyAsset, BlockchainDto.ETHEREUM).type.ext.currencyAddress()
 
-        coEvery {
-            testEthereumOrderApi.getCurrenciesBySellOrdersOfItem(collectionId.value, "-1")
-        } returns OrderCurrenciesDto(
-            OrderCurrenciesDto.OrderType.SELL,
-            listOf(EthAssetTypeDto())
-        ).toMono()
-
-        coEvery {
-            testEthereumOrderApi.getCurrenciesByBidOrdersOfItem(collectionId.value, "-1")
-        } returns OrderCurrenciesDto(
-            OrderCurrenciesDto.OrderType.BID,
-            listOf(EthAssetTypeDto())
-        ).toMono()
+        ethereumOrderControllerApiMock.mockGetCurrenciesBySellOrdersOfItem(fakeItemId, currencyAsset.assetType)
+        ethereumOrderControllerApiMock.mockGetCurrenciesByBidOrdersOfItem(fakeItemId, currencyAsset.assetType)
 
         val sellOrder = randomEthV2OrderDto()
         val bidOrder = randomEthV2OrderDto()
-
-        val ordersPaginationDtoSell = OrdersPaginationDto(listOf(sellOrder), "")
-        val ordersPaginationDtoBid = OrdersPaginationDto(listOf(bidOrder), "")
 
         val ethCollectionDto = randomEthCollectionDto(Address.apply(collectionId.value))
 
         coEvery { testEthereumCollectionApi.getNftCollectionById(collectionId.value) } returns ethCollectionDto.toMono()
 
-        coEvery {
-            testEthereumOrderApi.getSellOrdersByItemAndByStatus(
-                collectionId.value,
-                "-1",
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any()
-            )
-        } returns ordersPaginationDtoSell.toMono()
-
-        coEvery {
-            testEthereumOrderApi.getOrderBidsByItemAndByStatus(
-                collectionId.value,
-                "-1",
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any()
-            )
-        } returns ordersPaginationDtoBid.toMono()
-
+        ethereumOrderControllerApiMock.mockGetSellOrdersByItemAndByStatus(fakeItemId, currencyId, sellOrder)
+        ethereumOrderControllerApiMock.mockGetOrderBidsByItemAndByStatus(fakeItemId, currencyId, bidOrder)
 
         val updateEvent = enrichmentRefreshService.reconcileCollection(collectionId)
 
@@ -106,66 +68,28 @@ class EnrichmentRefreshServiceTest : AbstractIntegrationTest(){
     @Test
     fun `reconcile collection`() = runBlocking<Unit> {
         val collectionId = randomEthCollectionId()
+        val currencyAsset = randomEthAssetErc20()
+        val currencyId = EthConverter.convert(currencyAsset, BlockchainDto.ETHEREUM).type.ext.currencyAddress()
 
-        coEvery {
-            testEthereumOrderApi.getCurrenciesBySellOrdersOfItem(collectionId.value, "-1")
-        } returns OrderCurrenciesDto(
-            OrderCurrenciesDto.OrderType.SELL,
-            listOf(EthAssetTypeDto())
-        ).toMono()
+        val fakeItemId = ItemIdDto(BlockchainDto.ETHEREUM, collectionId.value, BigInteger("-1"))
 
-        coEvery {
-            testEthereumOrderApi.getCurrenciesByBidOrdersOfItem(collectionId.value, "-1")
-        } returns OrderCurrenciesDto(
-            OrderCurrenciesDto.OrderType.BID,
-            listOf(EthAssetTypeDto())
-        ).toMono()
+        ethereumOrderControllerApiMock.mockGetCurrenciesBySellOrdersOfItem(fakeItemId, currencyAsset.assetType)
+        ethereumOrderControllerApiMock.mockGetCurrenciesByBidOrdersOfItem(fakeItemId, currencyAsset.assetType)
 
         val sellOrder = randomEthV2OrderDto().copy(
             make = randomEthCollectionAsset(Address.apply(collectionId.value))
         )
         val bidOrder = randomEthV2OrderDto().copy(
             take = randomEthCollectionAsset(Address.apply(collectionId.value)),
-            make = randomEthAssetErc20()
+            make = currencyAsset
         )
-
-        val ordersPaginationDtoSell = OrdersPaginationDto(listOf(sellOrder), "")
-        val ordersPaginationDtoBid = OrdersPaginationDto(listOf(bidOrder), "")
 
         val ethCollectionDto = randomEthCollectionDto(Address.apply(collectionId.value))
 
         coEvery { testEthereumCollectionApi.getNftCollectionById(collectionId.value) } returns ethCollectionDto.toMono()
 
-        coEvery {
-            testEthereumOrderApi.getSellOrdersByItemAndByStatus(
-                collectionId.value,
-                "-1",
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any()
-            )
-        } returns ordersPaginationDtoSell.toMono()
-
-        coEvery {
-            testEthereumOrderApi.getOrderBidsByItemAndByStatus(
-                collectionId.value,
-                "-1",
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any()
-            )
-        } returns ordersPaginationDtoBid.toMono()
-
+        ethereumOrderControllerApiMock.mockGetSellOrdersByItemAndByStatus(fakeItemId, currencyId, sellOrder)
+        ethereumOrderControllerApiMock.mockGetOrderBidsByItemAndByStatus(fakeItemId, currencyId, bidOrder)
 
         val updateEvent = enrichmentRefreshService.reconcileCollection(collectionId)
 

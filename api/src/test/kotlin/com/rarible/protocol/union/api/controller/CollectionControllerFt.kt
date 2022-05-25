@@ -79,7 +79,7 @@ class CollectionControllerFt : AbstractIntegrationTest() {
             .copy(bestSellOrder = shortOrder)
         enrichmentCollectionService.save(shortCollection)
 
-        ethereumOrderControllerApiMock.mockGetById(ethOrder)
+        ethereumOrderControllerApiMock.mockGetByIds(ethOrder)
         coEvery { testEthereumCollectionApi.getNftCollectionById(collectionIdFull.value) } returns ethCollectionDto.toMono()
 
         val unionCollection = collectionControllerClient.getCollectionById(collectionIdFull.fullId()).awaitFirst()

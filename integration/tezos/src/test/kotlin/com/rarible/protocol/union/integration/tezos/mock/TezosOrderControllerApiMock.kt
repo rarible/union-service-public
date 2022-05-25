@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.api.controller.test.mock.tezos
+package com.rarible.protocol.union.integration.tezos.mock
 
 import com.rarible.protocol.tezos.api.client.OrderControllerApi
 import com.rarible.protocol.tezos.dto.OrderDto

@@ -21,6 +21,10 @@ import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.dto.OwnershipUpdateEventDto
 import com.rarible.protocol.union.enrichment.configuration.UnionMetaProperties
 import com.rarible.protocol.union.enrichment.meta.UnionMetaLoader
+import com.rarible.protocol.union.integration.ethereum.mock.EthAuctionControllerApiMock
+import com.rarible.protocol.union.integration.ethereum.mock.EthItemControllerApiMock
+import com.rarible.protocol.union.integration.ethereum.mock.EthOrderControllerApiMock
+import com.rarible.protocol.union.integration.ethereum.mock.EthOwnershipControllerApiMock
 import io.mockk.clearMocks
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
@@ -69,6 +73,11 @@ abstract class AbstractIntegrationTest {
     @Qualifier("ethereum.auction.api")
     lateinit var testEthereumAuctionApi: com.rarible.protocol.order.api.client.AuctionControllerApi
 
+    lateinit var ethereumItemControllerApiMock: EthItemControllerApiMock
+    lateinit var ethereumOwnershipControllerApiMock: EthOwnershipControllerApiMock
+    lateinit var ethereumOrderControllerApiMock: EthOrderControllerApiMock
+    lateinit var ethereumAuctionControllerApiMock: EthAuctionControllerApiMock
+
     @Autowired
     lateinit var ethItemProducer: RaribleKafkaProducer<com.rarible.protocol.dto.NftItemEventDto>
 
@@ -107,8 +116,19 @@ abstract class AbstractIntegrationTest {
     private var activityJob: Deferred<Unit>? = null
 
     @BeforeEach
-    fun cleanupMetaMocks() {
-        clearMocks(testUnionMetaLoader)
+    fun beforeEachTest() {
+        clearMocks(
+            testEthereumItemApi,
+            testEthereumOwnershipApi,
+            testEthereumOrderApi,
+            testEthereumAuctionApi,
+
+            testUnionMetaLoader
+        )
+        ethereumItemControllerApiMock = EthItemControllerApiMock(testEthereumItemApi)
+        ethereumOwnershipControllerApiMock = EthOwnershipControllerApiMock(testEthereumOwnershipApi)
+        ethereumOrderControllerApiMock = EthOrderControllerApiMock(testEthereumOrderApi)
+        ethereumAuctionControllerApiMock = EthAuctionControllerApiMock(testEthereumAuctionApi)
     }
 
     fun <T> runWithKafka(block: suspend CoroutineScope.() -> T): T = runBlocking {

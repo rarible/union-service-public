@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.api.controller.test.mock
+package com.rarible.protocol.union.integration.ethereum.mock
 
 import com.rarible.core.client.WebClientResponseProxyException
 import com.rarible.protocol.nft.api.ApiClient

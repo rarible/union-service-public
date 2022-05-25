@@ -1,6 +1,6 @@
 package com.rarible.protocol.union.listener.job
 
-import com.rarible.protocol.dto.AuctionsPaginationDto
+import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
 import com.rarible.protocol.union.enrichment.repository.OwnershipRepository
@@ -8,29 +8,23 @@ import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
 import com.rarible.protocol.union.enrichment.test.data.randomShortItem
 import com.rarible.protocol.union.enrichment.test.data.randomShortOwnership
-import com.rarible.protocol.union.enrichment.test.data.randomUnionBidOrderDto
 import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrderDto
 import com.rarible.protocol.union.enrichment.util.bidCurrencyId
 import com.rarible.protocol.union.enrichment.util.sellCurrencyId
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
+import com.rarible.protocol.union.integration.ethereum.data.randomEthLegacyBidOrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthLegacySellOrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthNftItemDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipId
-import com.rarible.protocol.union.listener.service.EnrichmentItemEventService
 import com.rarible.protocol.union.listener.test.AbstractIntegrationTest
 import com.rarible.protocol.union.listener.test.IntegrationTest
-import io.mockk.clearMocks
-import io.mockk.coEvery
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
-import reactor.kotlin.core.publisher.toMono
 import java.math.BigDecimal
 import java.time.Instant
 
@@ -40,7 +34,7 @@ internal class PriceUpdateJobTest : AbstractIntegrationTest() {
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @Autowired
-    private lateinit var itemEventService: EnrichmentItemEventService
+    private lateinit var ethereumOrderConverter: EthOrderConverter
 
     @Autowired
     private lateinit var itemService: EnrichmentItemService
@@ -57,28 +51,21 @@ internal class PriceUpdateJobTest : AbstractIntegrationTest() {
     @Autowired
     private lateinit var priceUpdateJob: BestOrderCheckJob
 
-    @Autowired
-    lateinit var ethOrderConverter: EthOrderConverter
-
-    @BeforeEach
-    fun beforeEach() = runBlocking<Unit> {
-        clearMocks(
-            testEthereumOrderApi,
-            testEthereumOwnershipApi
-        )
-    }
-
     @Test
     fun `should update best order for multi orders items`() = runBlocking<Unit> {
         val itemId = randomEthItemId()
 
-        val unionSellOrder1 = randomUnionSellOrderDto(randomEthItemId())
-        val unionSellOrder2 = randomUnionSellOrderDto(randomEthItemId())
+        val ethSellOrder1 = randomEthLegacySellOrderDto(randomEthItemId())
+        val ethSellOrder2 = randomEthLegacySellOrderDto(randomEthItemId())
+        val unionSellOrder1 = ethereumOrderConverter.convert(ethSellOrder1, BlockchainDto.ETHEREUM)
+        val unionSellOrder2 = ethereumOrderConverter.convert(ethSellOrder2, BlockchainDto.ETHEREUM)
         val sellOrder1 = ShortOrderConverter.convert(unionSellOrder1).copy(makePrice = BigDecimal.valueOf(1))
         val sellOrder2 = ShortOrderConverter.convert(unionSellOrder2).copy(makePrice = BigDecimal.valueOf(2))
 
-        val unionBidOrder1 = randomUnionBidOrderDto(randomEthItemId())
-        val unionBidOrder2 = randomUnionBidOrderDto(randomEthItemId())
+        val ethBidOrder1 = randomEthLegacyBidOrderDto(randomEthItemId())
+        val ethBidOrder2 = randomEthLegacyBidOrderDto(randomEthItemId())
+        val unionBidOrder1 = ethereumOrderConverter.convert(ethBidOrder1, BlockchainDto.ETHEREUM)
+        val unionBidOrder2 = ethereumOrderConverter.convert(ethBidOrder2, BlockchainDto.ETHEREUM)
         val bidOrder1 = ShortOrderConverter.convert(unionBidOrder1).copy(takePrice = BigDecimal.valueOf(2))
         val bidOrder2 = ShortOrderConverter.convert(unionBidOrder2).copy(takePrice = BigDecimal.valueOf(1))
 
@@ -94,10 +81,10 @@ internal class PriceUpdateJobTest : AbstractIntegrationTest() {
             lastUpdatedAt = Instant.EPOCH
         )
 
-        val nftItemDto = randomEthNftItemDto()
-        coEvery { testEthereumItemApi.getNftItemById(itemId.value) } returns nftItemDto.toMono()
-        coEvery { testEthereumItemApi.getNftItemMetaById(itemId.value) } returns nftItemDto.meta!!.toMono()
-        coEvery { testEthereumOrderApi.getOrderByHash(any()) } returns randomEthLegacySellOrderDto().toMono()
+        val ethItem = randomEthNftItemDto()
+        ethereumItemControllerApiMock.mockGetNftItemById(itemId, ethItem)
+        ethereumItemControllerApiMock.mockGetNftItemMetaById(itemId, ethItem.meta!!)
+        ethereumOrderControllerApiMock.mockGetByIds(ethSellOrder1, ethBidOrder1)
 
         itemRepository.save(shortItem)
         priceUpdateJob.updateBestOrderPrice()
@@ -128,15 +115,9 @@ internal class PriceUpdateJobTest : AbstractIntegrationTest() {
             lastUpdatedAt = Instant.EPOCH
         )
 
-        coEvery {
-            testEthereumOwnershipApi.getNftOwnershipById(
-                ownershipId.value, false
-            )
-        } returns randomEthOwnershipDto().toMono()
-        coEvery { testEthereumOrderApi.getOrderByHash(any()) } returns randomEthLegacySellOrderDto().toMono()
-        coEvery {
-            testEthereumAuctionApi.getAuctionsByItem(any(), any(), any(), any(), any(), any(), any(), any(), any(), 1)
-        } returns AuctionsPaginationDto(emptyList(), null).toMono()
+        ethereumOwnershipControllerApiMock.mockGetNftOwnershipById(ownershipId, randomEthOwnershipDto())
+        ethereumOrderControllerApiMock.mockGetByIds(randomEthLegacySellOrderDto())
+        ethereumAuctionControllerApiMock.mockGetAuctionsByItem(shortOwnership.id.toDto().getItemId(), emptyList())
 
         ownershipRepository.save(shortOwnership)
         priceUpdateJob.updateBestOrderPrice()

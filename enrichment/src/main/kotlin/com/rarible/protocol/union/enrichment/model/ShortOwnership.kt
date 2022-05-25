@@ -21,7 +21,7 @@ data class ShortOwnership(
     override val bestSellOrder: ShortOrder?,
     override val bestSellOrders: Map<String, ShortOrder>,
 
-    val originOrders: Set<OriginOrders> = emptySet(),
+    override val originOrders: Set<OriginOrders> = emptySet(),
 
     val multiCurrency: Boolean = bestSellOrders.size > 1,
 
@@ -31,7 +31,7 @@ data class ShortOwnership(
 
     @Version
     val version: Long? = null
-) : BestSellOrderOwner<ShortOwnership> {
+) : BestSellOrderOwner<ShortOwnership>, OriginOrdersOwner {
 
     fun withCalculatedFields(): ShortOwnership {
         return copy(
@@ -80,4 +80,7 @@ data class ShortOwnership(
         return this.copy(bestSellOrder = order)
     }
 
+    override fun getAllBestOrders(): List<ShortOrder> {
+        return listOfNotNull(bestSellOrder) + getAllOriginBestOrders()
+    }
 }

@@ -174,7 +174,9 @@ class OwnershipApiService(
 
         // Looking for full orders for existing ownerships in order-indexer
         val shortOrderIds = existingEnrichedOwnerships.values
-            .mapNotNull { it.bestSellOrder?.dtoId }
+            .map { it.getAllBestOrders() }
+            .flatten()
+            .map { it.dtoId }
 
         val orders = orderApiService.getByIds(shortOrderIds)
             .associateBy { it.id }

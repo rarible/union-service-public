@@ -218,7 +218,7 @@ class BestOrderService(
             val current = originOrders.find { it.origin == origin } ?: OriginOrders(origin)
             val provider = providerFactory.create(origin)
             updateBestSell(current, provider, order)
-        }.toSet()
+        }.filterNot { it.isEmpty() }.toSet()
     }
 
     private suspend fun updateOriginBid(
@@ -231,7 +231,7 @@ class BestOrderService(
             val current = originOrders.find { it.origin == origin } ?: OriginOrders(origin)
             val provider = providerFactory.create(origin)
             updateBestBid(current, provider, order)
-        }.toSet()
+        }.filterNot { it.isEmpty() }.toSet()
     }
 
 }

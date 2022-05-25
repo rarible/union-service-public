@@ -26,7 +26,6 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -112,8 +111,6 @@ class EnrichmentItemService(
         val itemId = shortItem?.id?.toDto() ?: item!!.id
 
         val fetchedItem = async { item ?: fetch(ShortItemId(itemId)) }
-        val bestSellOrder = async { enrichmentOrderService.fetchOrderIfDiffers(shortItem?.bestSellOrder, orders) }
-        val bestBidOrder = async { enrichmentOrderService.fetchOrderIfDiffers(shortItem?.bestBidOrder, orders) }
 
         val metaHint = meta[itemId]
         val itemMeta = if (metaHint != null) {
@@ -129,9 +126,10 @@ class EnrichmentItemService(
                 }
             }
         }
-        val bestOrders = listOf(bestSellOrder, bestBidOrder)
-            .awaitAll().filterNotNull()
-            .associateBy { it.id }
+        val bestOrders = enrichmentOrderService.fetchMissingOrders(
+            existing = shortItem?.getAllBestOrders() ?: emptyList(),
+            orders = orders
+        )
 
         val auctionIds = shortItem?.auctions ?: emptySet()
 

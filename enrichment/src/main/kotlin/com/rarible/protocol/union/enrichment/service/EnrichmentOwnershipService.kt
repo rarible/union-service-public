@@ -105,10 +105,10 @@ class EnrichmentOwnershipService(
         orders: Map<OrderIdDto, OrderDto> = emptyMap()
     ) = coroutineScope {
         val fetchedOwnership = async { ownership ?: fetch(short.id) }
-        val bestSellOrder = enrichmentOrderService.fetchOrderIfDiffers(short.bestSellOrder, orders)
-
-        val bestOrders = listOfNotNull(bestSellOrder)
-            .associateBy { it.id }
+        val bestOrders = enrichmentOrderService.fetchMissingOrders(
+            existing = short.getAllBestOrders(),
+            orders = orders
+        )
 
         EnrichedOwnershipConverter.convert(fetchedOwnership.await(), short, bestOrders)
     }

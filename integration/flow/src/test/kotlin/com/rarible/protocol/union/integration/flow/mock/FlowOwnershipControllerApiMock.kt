@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.api.controller.test.mock.flow
+package com.rarible.protocol.union.integration.flow.mock
 
 import com.rarible.protocol.dto.FlowNftOwnershipDto
 import com.rarible.protocol.dto.FlowNftOwnershipsDto

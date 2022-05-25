@@ -22,7 +22,7 @@ data class ShortCollection(
     override val bestBidOrder: ShortOrder?,
     override val bestBidOrders: Map<String, ShortOrder>,
 
-    val originOrders: Set<OriginOrders> = emptySet(),
+    override val originOrders: Set<OriginOrders> = emptySet(),
 
     val multiCurrency: Boolean = bestSellOrders.size > 1 || bestBidOrders.size > 1,
 
@@ -30,7 +30,7 @@ data class ShortCollection(
 
     @Version
     val version: Long? = null
-) : BestSellOrderOwner<ShortCollection>, BestBidOrderOwner<ShortCollection> {
+) : BestSellOrderOwner<ShortCollection>, BestBidOrderOwner<ShortCollection>, OriginOrdersOwner {
 
     fun withCalculatedFields(): ShortCollection {
         return this.copy(
@@ -87,6 +87,10 @@ data class ShortCollection(
 
     override fun withBestSellOrder(order: ShortOrder?): ShortCollection {
         return this.copy(bestSellOrder = order)
+    }
+
+    override fun getAllBestOrders(): List<ShortOrder> {
+        return listOfNotNull(bestSellOrder, bestBidOrder) + getAllOriginBestOrders()
     }
 
 }
