@@ -2,6 +2,7 @@ package com.rarible.protocol.union.integration.immutablex.service
 
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.rarible.protocol.union.core.model.ItemAndOwnerActivityType
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.MintActivityDto
 import com.rarible.protocol.union.dto.OrderMatchSellDto
@@ -164,14 +165,14 @@ internal class ImmutablexActivityServiceTest {
         }
 
         service.getActivitiesByItemAndOwner(
-            types = listOf(ActivityTypeDto.MINT),
+            types = listOf(ItemAndOwnerActivityType.MINT),
             itemId = "$itemId",
             owner = owner,
             null,
             50,
             null
         ).let { page ->
-            Assertions.assertEquals(page.entities.size, 1)
+            Assertions.assertEquals(1, page.entities.size)
             assert(page.entities[0] is MintActivityDto)
         }
     }

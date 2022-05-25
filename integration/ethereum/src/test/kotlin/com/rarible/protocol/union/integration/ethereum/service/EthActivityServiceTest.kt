@@ -14,6 +14,7 @@ import com.rarible.protocol.dto.OrderActivityDto
 import com.rarible.protocol.nft.api.client.NftActivityControllerApi
 import com.rarible.protocol.order.api.client.AuctionActivityControllerApi
 import com.rarible.protocol.order.api.client.OrderActivityControllerApi
+import com.rarible.protocol.union.core.model.ItemAndOwnerActivityType
 import com.rarible.protocol.union.core.model.TypedActivityId
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivityIdDto
@@ -96,7 +97,7 @@ internal class EthActivityServiceTest {
             val itemId = IdParser.parseItemId(fullItemId).value
 
             val actual = service.getActivitiesByItemAndOwner(
-                types = listOf(ActivityTypeDto.MINT, ActivityTypeDto.TRANSFER),
+                types = listOf(ItemAndOwnerActivityType.MINT, ItemAndOwnerActivityType.TRANSFER),
                 itemId = itemId,
                 owner = owner.toString(),
                 continuation = null,

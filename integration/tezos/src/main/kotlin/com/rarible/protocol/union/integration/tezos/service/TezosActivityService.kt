@@ -17,6 +17,7 @@ import com.rarible.protocol.tezos.dto.OrderActivityFilterByCollectionDto
 import com.rarible.protocol.tezos.dto.OrderActivityFilterByItemDto
 import com.rarible.protocol.tezos.dto.OrderActivityFilterByUserDto
 import com.rarible.protocol.tezos.dto.OrderActivityFilterDto
+import com.rarible.protocol.union.core.model.ItemAndOwnerActivityType
 import com.rarible.protocol.union.core.model.TypedActivityId
 import com.rarible.protocol.union.core.service.ActivityService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
@@ -148,7 +149,7 @@ open class TezosActivityService(
     }
 
     override suspend fun getActivitiesByItemAndOwner(
-        types: List<ActivityTypeDto>,
+        types: List<ItemAndOwnerActivityType>,
         itemId: String,
         owner: String,
         continuation: String?,

@@ -29,6 +29,7 @@ import com.rarible.protocol.dto.OrderActivityListDto
 import com.rarible.protocol.dto.OrderActivityMatchDto
 import com.rarible.protocol.dto.TransferDto
 import com.rarible.protocol.union.core.converter.ContractAddressConverter
+import com.rarible.protocol.union.core.model.ItemAndOwnerActivityType
 import com.rarible.protocol.union.core.service.CurrencyService
 import com.rarible.protocol.union.dto.ActivityBlockchainInfoDto
 import com.rarible.protocol.union.dto.ActivityDto
@@ -406,7 +407,7 @@ class EthActivityConverter(
         }
     }
 
-    fun convertToNftItemAndOwnerTypes(types: List<ActivityTypeDto>): List<NftActivityFilterByItemAndOwnerDto.Types>? {
+    fun convertToNftItemAndOwnerTypes(types: List<ItemAndOwnerActivityType>): List<NftActivityFilterByItemAndOwnerDto.Types>? {
         val result = types.mapNotNull { asNftActivityItemAndOwnerType(it) }.distinct()
         return result.ifEmpty { null }
     }
@@ -439,11 +440,10 @@ class EthActivityConverter(
         }
     }
 
-    fun asNftActivityItemAndOwnerType(source: ActivityTypeDto): NftActivityFilterByItemAndOwnerDto.Types? {
+    fun asNftActivityItemAndOwnerType(source: ItemAndOwnerActivityType): NftActivityFilterByItemAndOwnerDto.Types? {
         return when (source) {
-            TRANSFER -> NftActivityFilterByItemAndOwnerDto.Types.TRANSFER
-            MINT -> NftActivityFilterByItemAndOwnerDto.Types.MINT
-            else -> null
+            ItemAndOwnerActivityType.TRANSFER -> NftActivityFilterByItemAndOwnerDto.Types.TRANSFER
+            ItemAndOwnerActivityType.MINT -> NftActivityFilterByItemAndOwnerDto.Types.MINT
         }
     }
 

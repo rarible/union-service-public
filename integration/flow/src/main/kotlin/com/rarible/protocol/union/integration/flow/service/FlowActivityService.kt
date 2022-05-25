@@ -3,6 +3,7 @@ package com.rarible.protocol.union.integration.flow.service
 import com.rarible.core.apm.CaptureSpan
 import com.rarible.protocol.dto.NftActivitiesByIdRequestDto
 import com.rarible.protocol.flow.nft.api.client.FlowNftOrderActivityControllerApi
+import com.rarible.protocol.union.core.model.ItemAndOwnerActivityType
 import com.rarible.protocol.union.core.model.TypedActivityId
 import com.rarible.protocol.union.core.service.ActivityService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
@@ -82,7 +83,7 @@ open class FlowActivityService(
     }
 
     override suspend fun getActivitiesByItemAndOwner(
-        types: List<ActivityTypeDto>,
+        types: List<ItemAndOwnerActivityType>,
         itemId: String,
         owner: String,
         continuation: String?,

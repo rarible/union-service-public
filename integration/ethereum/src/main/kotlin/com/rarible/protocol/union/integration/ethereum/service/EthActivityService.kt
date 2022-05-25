@@ -25,6 +25,7 @@ import com.rarible.protocol.dto.OrderActivityFilterDto
 import com.rarible.protocol.nft.api.client.NftActivityControllerApi
 import com.rarible.protocol.order.api.client.AuctionActivityControllerApi
 import com.rarible.protocol.order.api.client.OrderActivityControllerApi
+import com.rarible.protocol.union.core.model.ItemAndOwnerActivityType
 import com.rarible.protocol.union.core.model.TypedActivityId
 import com.rarible.protocol.union.core.service.ActivityService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
@@ -165,7 +166,7 @@ open class EthActivityService(
     }
 
     override suspend fun getActivitiesByItemAndOwner(
-        types: List<ActivityTypeDto>,
+        types: List<ItemAndOwnerActivityType>,
         itemId: String,
         owner: String,
         continuation: String?,

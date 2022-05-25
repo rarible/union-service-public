@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.core.service
 
+import com.rarible.protocol.union.core.model.ItemAndOwnerActivityType
 import com.rarible.protocol.union.core.model.TypedActivityId
 import com.rarible.protocol.union.core.service.router.BlockchainService
 import com.rarible.protocol.union.dto.ActivityDto
@@ -42,7 +43,7 @@ interface ActivityService : BlockchainService {
     ): Slice<ActivityDto>
 
     suspend fun getActivitiesByItemAndOwner(
-        types: List<ActivityTypeDto>,
+        types: List<ItemAndOwnerActivityType>,
         itemId: String,
         owner: String,
         continuation: String?,
