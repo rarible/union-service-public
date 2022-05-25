@@ -22,6 +22,7 @@ import kotlinx.coroutines.reactor.awaitSingle
 import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.toEntity
+import scalether.domain.Address
 
 class ImmutablexApiClient(
     private val webClient: WebClient,
@@ -217,8 +218,10 @@ class ImmutablexApiClient(
         val (tokenAddress, tokenId) = itemId.split(":")
         val params = mutableMapOf<String, Any>()
         params["sell_token_address"] = tokenAddress
-        params["sell_token_id"] = tokenId
-        params["buy_token_address"] = currencyId
+        params["sell_token_id"] = String(tokenId.toBigInteger().toByteArray())
+        if (currencyId != "${Address.ZERO()}") {
+            params["buy_token_address"] = currencyId
+        }
 
         if (maker != null) {
             params["user"] = maker
