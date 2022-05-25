@@ -39,7 +39,6 @@ import com.rarible.tzkt.model.TzktActivityContinuation
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.reactive.awaitFirst
-import java.lang.Integer.min
 import java.time.Instant
 import java.util.regex.Pattern
 
@@ -115,18 +114,11 @@ open class TezosActivityService(
             tzktItemActivityService.getAll(types, continuation, size, sort)
         }
         val activities = (orderActivitiesRequest.await().entities + itemActivitiesRequest.await().entities)
-        val entities = when (sort) {
-            ActivitySortDto.EARLIEST_FIRST -> activities.sortedWith(compareBy({ it.date }, { it.id.value }))
-            else -> activities.sortedWith(compareBy({ it.date }, { it.id.value })).reversed()
-        }
-        val continuation = when {
-            entities.size >= size -> entities[size-1].let { "${it.date.epochSecond}_${it.id.value}" }
-            else -> null
-        }
-        Slice(
-            continuation = continuation,
-            entities = entities.subList(0, min(size, entities.size))
-        )
+
+        Paging(
+            continuationFactory(sort),
+            activities
+        ).getSlice(size)
     }
 
     override suspend fun getAllActivitiesSync(
@@ -271,11 +263,6 @@ open class TezosActivityService(
         sort: ActivitySortDto?
     ) = coroutineScope {
 
-        val continuationFactory = when (sort) {
-            ActivitySortDto.EARLIEST_FIRST -> ActivityContinuation.ByLastUpdatedAndIdAsc
-            ActivitySortDto.LATEST_FIRST, null -> ActivityContinuation.ByLastUpdatedAndIdDesc
-        }
-
         val tezosSort = TezosConverter.convert(sort ?: ActivitySortDto.LATEST_FIRST)
 
         val itemRequest = async { getItemActivities(nftFilter, continuation, size, tezosSort) }
@@ -286,9 +273,14 @@ open class TezosActivityService(
         val allActivities = itemActivities + orderActivities
 
         Paging(
-            continuationFactory,
+            continuationFactory(sort),
             allActivities
         ).getSlice(size)
+    }
+
+    private fun continuationFactory(sort: ActivitySortDto?) = when (sort) {
+        ActivitySortDto.EARLIEST_FIRST -> ActivityContinuation.ByLastUpdatedAndIdAsc
+        ActivitySortDto.LATEST_FIRST, null -> ActivityContinuation.ByLastUpdatedAndIdDesc
     }
 
     private suspend fun getItemActivities(
