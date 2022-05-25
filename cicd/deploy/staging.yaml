@@ -12,7 +12,7 @@ protocol-union-meta-loader:
 
 protocol-union-indexer:
   enabled: true
-  replicas: 3
+  replicas: 2
   resources:
     jvm:
       xmx_megabytes: 256
