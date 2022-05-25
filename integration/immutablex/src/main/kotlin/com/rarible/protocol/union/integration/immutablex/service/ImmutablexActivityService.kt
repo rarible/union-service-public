@@ -38,7 +38,8 @@ class ImmutablexActivityService(
         size: Int,
         sort: ActivitySortDto?,
     ): Slice<ActivityDto> {
-        val result = allowedTypes.intersect(types.toSet())
+        val resultTypes = if (types.isEmpty()) allowedTypes else allowedTypes.intersect(types.toSet())
+        val result = resultTypes
             .flatMap { type ->
                 when (type) {
                     ActivityTypeDto.MINT ->
@@ -80,7 +81,8 @@ class ImmutablexActivityService(
         size: Int,
         sort: ActivitySortDto?,
     ): Slice<ActivityDto> {
-        val result = allowedTypes.intersect(types.toSet())
+        val resultTypes = if (types.isEmpty()) allowedTypes else allowedTypes.intersect(types.toSet())
+        val result = resultTypes
             .flatMap { type ->
                 when (type) {
                     ActivityTypeDto.MINT ->
@@ -110,7 +112,8 @@ class ImmutablexActivityService(
         size: Int,
         sort: ActivitySortDto?,
     ): Slice<ActivityDto> {
-        val result = allowedUserTypes.intersect(types.toSet())
+        val resultTypes = if (types.isEmpty()) allowedUserTypes else allowedUserTypes.intersect(types.toSet())
+        val result = resultTypes
             .flatMap { type ->
                 users.flatMap { user ->
                     when (type) {

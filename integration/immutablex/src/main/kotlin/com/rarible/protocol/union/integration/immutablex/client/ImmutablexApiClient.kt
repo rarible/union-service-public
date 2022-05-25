@@ -311,7 +311,9 @@ class ImmutablexApiClient(
         from,
         to,
         user,
-        sort
+        sort,
+        "party_b_token_address",
+        "party_b_token_id"
     ) ?: ImmutablexTradesPage("", false, emptyList())
 
     private suspend fun ordersByStatus(
@@ -367,6 +369,8 @@ class ImmutablexApiClient(
         to: Instant?,
         user: String?,
         sort: ActivitySortDto?,
+        tokenAddressParamName: String = "token_address",
+        tokenIdParamName: String = "token_id"
     ) = webClient.get()
         .uri {
             it.path(path)
@@ -381,8 +385,8 @@ class ImmutablexApiClient(
             }
             if (itemId != null) {
                 val (address, id) = IdParser.split(itemId, 2)
-                it.queryParam("token_address", address)
-                it.queryParam("token_id", String(id.toBigInteger().toByteArray()))
+                it.queryParam(tokenAddressParamName, address)
+                it.queryParam(tokenIdParamName, String(id.toBigInteger().toByteArray()))
             }
             if (user != null) {
                 it.queryParam("user", user)
