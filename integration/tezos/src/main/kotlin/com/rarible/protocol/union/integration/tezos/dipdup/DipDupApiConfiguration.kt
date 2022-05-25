@@ -13,6 +13,8 @@ import com.rarible.protocol.union.integration.tezos.dipdup.service.DipdupOrderSe
 import com.rarible.protocol.union.integration.tezos.dipdup.service.DipdupOrderServiceImpl
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktCollectionService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktCollectionServiceImpl
+import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktItemActivityService
+import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktItemActivityServiceImpl
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktItemService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktItemServiceImpl
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktOwnershipService
@@ -106,6 +108,11 @@ class DipDupApiConfiguration(
     @Bean
     fun tzktOwnershipService(ownershipClient: OwnershipClient): TzktOwnershipService {
         return TzktOwnershipServiceImpl(ownershipClient)
+    }
+
+    @Bean
+    fun tzktItemActivityService(tokenActivityClient: TokenActivityClient): TzktItemActivityService {
+        return TzktItemActivityServiceImpl(tokenActivityClient)
     }
 
 }

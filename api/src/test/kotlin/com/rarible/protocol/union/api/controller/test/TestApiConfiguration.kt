@@ -277,4 +277,8 @@ class TestApiConfiguration {
     @Primary
     fun testDipDupOrderClient(): com.rarible.dipdup.client.OrderClient = mockk()
 
+    @Bean
+    @Primary
+    fun testTokenActivityClient(): com.rarible.tzkt.client.TokenActivityClient = mockk()
+
 }
