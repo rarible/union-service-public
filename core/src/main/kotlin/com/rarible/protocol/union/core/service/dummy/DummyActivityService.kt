@@ -2,6 +2,7 @@ package com.rarible.protocol.union.core.service.dummy
 
 import com.rarible.protocol.union.core.model.TypedActivityId
 import com.rarible.protocol.union.core.service.ActivityService
+import com.rarible.protocol.union.core.model.ItemAndOwnerActivityType
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivitySortDto
@@ -49,6 +50,17 @@ class DummyActivityService(
         continuation: String?,
         size: Int,
         sort: ActivitySortDto?
+    ): Slice<ActivityDto> {
+        return Slice.empty()
+    }
+
+    override suspend fun getActivitiesByItemAndOwner(
+        types: List<ItemAndOwnerActivityType>,
+        itemId: String,
+        owner: String,
+        continuation: String?,
+        size: Int,
+        sort: ActivitySortDto?,
     ): Slice<ActivityDto> {
         return Slice.empty()
     }

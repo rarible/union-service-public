@@ -2,6 +2,7 @@ package com.rarible.protocol.union.integration.solana.service
 
 import com.rarible.core.apm.CaptureSpan
 import com.rarible.protocol.solana.api.client.CollectionControllerApi
+import com.rarible.protocol.solana.dto.CollectionsByIdRequestDto
 import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.core.service.CollectionService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
@@ -35,8 +36,10 @@ open class SolanaCollectionService(
         collectionApi.refreshCollectionMeta(collectionId).awaitFirstOrNull()
     }
 
-    override suspend fun getCollectionsByIds(ids: List<String>): Page<UnionCollection> {
-        TODO("Not yet implemented")
+    override suspend fun getCollectionsByIds(ids: List<String>): List<UnionCollection> {
+        return collectionApi.searchCollectionsByIds(CollectionsByIdRequestDto(ids))
+            .awaitFirst().collections.map {
+                SolanaCollectionConverter.convert(it, blockchain)
+            }
     }
-
 }

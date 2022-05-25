@@ -4,15 +4,12 @@ import com.rarible.protocol.union.api.service.ItemApiService
 import com.rarible.protocol.union.api.service.ItemQueryService
 import com.rarible.protocol.union.api.service.elastic.ItemElasticService
 import com.rarible.protocol.union.core.FeatureFlagsProperties
-import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.ItemsDto
-import com.rarible.protocol.union.dto.continuation.page.ArgPage
-import com.rarible.protocol.union.dto.continuation.page.Page
-import com.rarible.protocol.union.dto.continuation.page.Slice
+import com.rarible.protocol.union.dto.ItemsWithOwnershipDto
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import org.springframework.stereotype.Service
@@ -26,13 +23,20 @@ class ItemSourceSelectService(
 ) : ItemQueryService {
     override suspend fun getAllItems(
         blockchains: List<BlockchainDto>?,
-        cursor: String?,
-        safeSize: Int,
+        continuation: String?,
+        size: Int?,
         showDeleted: Boolean?,
         lastUpdatedFrom: Long?,
         lastUpdatedTo: Long?
-    ): List<ArgPage<UnionItem>> {
-        return getQuerySource().getAllItems(blockchains, cursor, safeSize, showDeleted, lastUpdatedFrom, lastUpdatedTo)
+    ): ItemsDto {
+        return getQuerySource().getAllItems(
+            blockchains,
+            continuation,
+            size,
+            showDeleted,
+            lastUpdatedFrom,
+            lastUpdatedTo
+        )
     }
 
     override suspend fun getAllItemIdsByCollection(collectionId: CollectionIdDto): Flow<ItemIdDto> {
@@ -43,16 +47,49 @@ class ItemSourceSelectService(
         return itemApiService.getItemsByIds(ids)
     }
 
-    override suspend fun enrich(unionItemsPage: Page<UnionItem>): ItemsDto {
-        return itemApiService.enrich(unionItemsPage)
+    override suspend fun getItemsByCollection(
+        collection: String,
+        continuation: String?,
+        size: Int?
+    ): ItemsDto {
+        return getQuerySource().getItemsByCollection(collection = collection, continuation = continuation, size = size)
     }
 
-    override suspend fun enrich(unionItemsSlice: Slice<UnionItem>, total: Long): ItemsDto {
-        return itemApiService.enrich(unionItemsSlice, total)
+    override suspend fun getItemsByCreator(
+        creator: String,
+        blockchains: List<BlockchainDto>?,
+        continuation: String?,
+        size: Int?
+    ): ItemsDto {
+        return getQuerySource().getItemsByCreator(
+            creator = creator,
+            blockchains = blockchains,
+            continuation = continuation,
+            size = size
+        )
     }
 
-    override suspend fun enrich(unionItem: UnionItem): ItemDto {
-        return itemApiService.enrich(unionItem)
+    override suspend fun getItemsByOwner(
+        owner: String,
+        blockchains: List<BlockchainDto>?,
+        continuation: String?,
+        size: Int?
+    ): ItemsDto {
+
+        return getQuerySource().getItemsByOwner(
+            owner = owner,
+            blockchains = blockchains,
+            continuation = continuation,
+            size = size
+        )
+    }
+
+    override suspend fun getItemsByOwnerWithOwnership(
+        owner: String,
+        continuation: String?,
+        size: Int?
+    ): ItemsWithOwnershipDto {
+        return getQuerySource().getItemsByOwnerWithOwnership(owner, continuation, size)
     }
 
     private fun getQuerySource(): ItemQueryService {

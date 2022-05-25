@@ -14,6 +14,7 @@ import com.rarible.protocol.dto.BurnDto
 import com.rarible.protocol.dto.MintDto
 import com.rarible.protocol.dto.NftActivityFilterAllDto
 import com.rarible.protocol.dto.NftActivityFilterByCollectionDto
+import com.rarible.protocol.dto.NftActivityFilterByItemAndOwnerDto
 import com.rarible.protocol.dto.NftActivityFilterByItemDto
 import com.rarible.protocol.dto.NftActivityFilterByUserDto
 import com.rarible.protocol.dto.OrderActivityBidDto
@@ -28,6 +29,7 @@ import com.rarible.protocol.dto.OrderActivityListDto
 import com.rarible.protocol.dto.OrderActivityMatchDto
 import com.rarible.protocol.dto.TransferDto
 import com.rarible.protocol.union.core.converter.ContractAddressConverter
+import com.rarible.protocol.union.core.model.ItemAndOwnerActivityType
 import com.rarible.protocol.union.core.service.CurrencyService
 import com.rarible.protocol.union.dto.ActivityBlockchainInfoDto
 import com.rarible.protocol.union.dto.ActivityDto
@@ -405,6 +407,11 @@ class EthActivityConverter(
         }
     }
 
+    fun convertToNftItemAndOwnerTypes(types: List<ItemAndOwnerActivityType>): List<NftActivityFilterByItemAndOwnerDto.Types>? {
+        val result = types.mapNotNull { asNftActivityItemAndOwnerType(it) }.distinct()
+        return result.ifEmpty { null }
+    }
+
     fun asNftActivityCollectionType(source: ActivityTypeDto): NftActivityFilterByCollectionDto.Types? {
         return when (source) {
             TRANSFER -> NftActivityFilterByCollectionDto.Types.TRANSFER
@@ -430,6 +437,13 @@ class EthActivityConverter(
             UserActivityTypeDto.MINT -> NftActivityFilterByUserDto.Types.MINT
             UserActivityTypeDto.BURN -> NftActivityFilterByUserDto.Types.BURN
             else -> null
+        }
+    }
+
+    fun asNftActivityItemAndOwnerType(source: ItemAndOwnerActivityType): NftActivityFilterByItemAndOwnerDto.Types? {
+        return when (source) {
+            ItemAndOwnerActivityType.TRANSFER -> NftActivityFilterByItemAndOwnerDto.Types.TRANSFER
+            ItemAndOwnerActivityType.MINT -> NftActivityFilterByItemAndOwnerDto.Types.MINT
         }
     }
 

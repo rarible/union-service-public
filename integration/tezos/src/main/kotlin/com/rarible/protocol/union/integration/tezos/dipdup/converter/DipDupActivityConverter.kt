@@ -8,12 +8,14 @@ import com.rarible.dipdup.client.core.model.DipDupOrderListActivity
 import com.rarible.dipdup.client.core.model.DipDupOrderSellActivity
 import com.rarible.dipdup.client.core.model.DipDupTransferActivity
 import com.rarible.dipdup.client.core.model.TezosPlatform
+import com.rarible.dipdup.client.model.DipDupActivityType
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.converter.UnionConverter
 import com.rarible.protocol.union.core.exception.UnionDataFormatException
 import com.rarible.protocol.union.core.service.CurrencyService
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivityIdDto
+import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.BurnActivityDto
 import com.rarible.protocol.union.dto.ContractAddress
@@ -45,6 +47,17 @@ class DipDupActivityConverter(
         }
     }
 
+    fun convertToDipDupTypes(source: List<ActivityTypeDto>): List<DipDupActivityType> {
+        return source.mapNotNull { convertToDipDupType(it) }
+    }
+
+    fun convertToDipDupType(source: ActivityTypeDto) = when (source) {
+        ActivityTypeDto.LIST -> DipDupActivityType.LIST
+        ActivityTypeDto.SELL -> DipDupActivityType.SELL
+        ActivityTypeDto.CANCEL_LIST -> DipDupActivityType.CANCEL_LIST
+        else -> null
+    }
+
     private suspend fun convertInternal(activity: DipDupActivity, blockchain: BlockchainDto): ActivityDto {
         val activityId = ActivityIdDto(blockchain, activity.id)
         val date = activity.date.toInstant()
@@ -68,8 +81,8 @@ class DipDupActivityConverter(
                 )
             }
             is DipDupOrderCancelActivity -> {
-                val make = DipDupConverter.convert(activity.make.type, blockchain)
-                val take = DipDupConverter.convert(activity.take.type, blockchain)
+                val make = DipDupConverter.convert(activity.make.assetType, blockchain)
+                val take = DipDupConverter.convert(activity.take.assetType, blockchain)
 
                 OrderCancelListActivityDto(
                     id = activityId,
@@ -155,10 +168,10 @@ class DipDupActivityConverter(
 
     private fun convert(source: TezosPlatform): OrderActivitySourceDto {
         return when(source) {
-            TezosPlatform.RARIBLE -> OrderActivitySourceDto.RARIBLE
-            TezosPlatform.HEN -> OrderActivitySourceDto.HEN
-            TezosPlatform.OBJKT -> OrderActivitySourceDto.OBJKT
-            TezosPlatform.OBJKT_V2 -> OrderActivitySourceDto.OBJKT
+            TezosPlatform.Rarible -> OrderActivitySourceDto.RARIBLE
+            TezosPlatform.Hen -> OrderActivitySourceDto.HEN
+            TezosPlatform.Objkt -> OrderActivitySourceDto.OBJKT
+            TezosPlatform.Objkt_v2 -> OrderActivitySourceDto.OBJKT
         }
     }
 }

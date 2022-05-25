@@ -24,8 +24,8 @@ object DipDupConverter {
 
     fun convert(source: Asset, blockchain: BlockchainDto): AssetDto {
         return AssetDto(
-            type = convert(source = source.type, blockchain = blockchain),
-            value = source.value
+            type = convert(source = source.assetType, blockchain = blockchain),
+            value = source.assetValue
         )
     }
 
@@ -50,10 +50,10 @@ object DipDupConverter {
 
     fun convert(source: TezosPlatform): PlatformDto {
         return when(source) {
-            TezosPlatform.RARIBLE -> PlatformDto.RARIBLE
-            TezosPlatform.HEN -> PlatformDto.HEN
-            TezosPlatform.OBJKT -> PlatformDto.OBJKT
-            TezosPlatform.OBJKT_V2 -> PlatformDto.OBJKT
+            TezosPlatform.Rarible -> PlatformDto.RARIBLE
+            TezosPlatform.Hen -> PlatformDto.HEN
+            TezosPlatform.Objkt -> PlatformDto.OBJKT
+            TezosPlatform.Objkt_v2 -> PlatformDto.OBJKT
         }
     }
 }

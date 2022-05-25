@@ -2,6 +2,7 @@ package com.rarible.protocol.union.listener.job
 
 import com.rarible.core.client.WebClientResponseProxyException
 import com.rarible.core.common.nowMillis
+import com.rarible.protocol.union.core.exception.UnionNotFoundException
 import com.rarible.protocol.union.core.model.ReconciliationMarkType
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.parser.IdParser
@@ -101,6 +102,8 @@ class ReconciliationMarkJob(
             } else {
                 throw e
             }
+        } catch (e: UnionNotFoundException) {
+            logger.info("Unable to reconcile mark [{}], NOT_FOUND received: {}", markId, e.message)
         }
     }
 }

@@ -1,6 +1,6 @@
 package com.rarible.protocol.union.integration.tezos.dipdup.service
 
-import com.rarible.protocol.union.core.exception.UnionNotFoundException
+import com.rarible.protocol.union.dto.AssetTypeDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
@@ -32,10 +32,19 @@ interface DipdupOrderService {
         contract: String,
         tokenId: BigInteger,
         maker: String?,
+        currencyId: String,
         status: List<OrderStatusDto>?,
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
+        TODO("Not implemented")
+    }
+
+    suspend fun getSellOrderCurrenciesByItem(contract: String, tokenId: BigInteger): List<AssetTypeDto> {
+        TODO("Not implemented")
+    }
+
+    suspend fun getSellOrderCurrenciesByCollection(contract: String): List<AssetTypeDto> {
         TODO("Not implemented")
     }
 }

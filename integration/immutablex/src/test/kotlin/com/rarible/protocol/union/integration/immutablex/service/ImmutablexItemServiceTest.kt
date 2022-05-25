@@ -4,6 +4,8 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexApiClient
+import com.rarible.protocol.union.integration.immutablex.converter.ImmutablexItemConverter
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexAsset
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexMint
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexMintsPage
@@ -37,12 +39,16 @@ class ImmutablexItemServiceTest {
 
     }
 
-    private val service = ImmutablexItemService(
-        mockk {
-            coEvery { getAsset(any()) } returns expectedAsset
-            coEvery { getMints(any(), any(), any(), any(), any(), any(), any()) } returns ImmutablexMintsPage("", false, listOf(expectedMint))
-        }
-    )
+    val client = mockk<ImmutablexApiClient> {
+        coEvery { getAsset(any()) } returns expectedAsset
+        coEvery { getMints(any(), any(), any(), any(), any(), any(), any()) } returns ImmutablexMintsPage(
+            "",
+            false,
+            listOf(expectedMint)
+        )
+    }
+
+    private val service = ImmutablexItemService(client, ImmutablexItemConverter(client))
 
 
     @Test
@@ -60,6 +66,7 @@ class ImmutablexItemServiceTest {
             Assertions.assertEquals(expectedAsset.updatedAt, item.lastUpdatedAt)
             Assertions.assertEquals(BigInteger.ZERO, item.lazySupply)
             Assertions.assertEquals(BigInteger.ONE, item.supply)
+            Assertions.assertFalse(item.creators.isEmpty())
         }
     }
 

@@ -3,13 +3,14 @@ package com.rarible.protocol.union.integration.immutablex.service
 import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.core.service.CollectionService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
+import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.continuation.page.Page
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexApiClient
 import com.rarible.protocol.union.integration.immutablex.converter.ImmutablexCollectionConverter
 
 class ImmutablexCollectionService(
     private val client: ImmutablexApiClient
-): AbstractBlockchainService(com.rarible.protocol.union.dto.BlockchainDto.IMMUTABLEX), CollectionService {
+): AbstractBlockchainService(BlockchainDto.IMMUTABLEX), CollectionService {
 
     override suspend fun getAllCollections(
         continuation: String?,
@@ -34,7 +35,7 @@ class ImmutablexCollectionService(
         return
     }
 
-    override suspend fun getCollectionsByIds(ids: List<String>): Page<UnionCollection> {
+    override suspend fun getCollectionsByIds(ids: List<String>): List<UnionCollection> {
         TODO("Not yet implemented")
     }
 }

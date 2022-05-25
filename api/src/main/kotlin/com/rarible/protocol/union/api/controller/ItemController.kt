@@ -1,10 +1,8 @@
 package com.rarible.protocol.union.api.controller
 
 import com.rarible.protocol.union.api.service.OwnershipQueryService
+import com.rarible.protocol.union.api.service.OwnershipApiService
 import com.rarible.protocol.union.api.service.select.ItemSourceSelectService
-import com.rarible.protocol.union.api.util.BlockchainFilter
-import com.rarible.protocol.union.core.continuation.UnionItemContinuation
-import com.rarible.protocol.union.core.converter.ItemOwnershipConverter
 import com.rarible.protocol.union.core.exception.UnionNotFoundException
 import com.rarible.protocol.union.core.model.UnionImageProperties
 import com.rarible.protocol.union.core.model.UnionItem
@@ -19,26 +17,18 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.ItemIdsDto
-import com.rarible.protocol.union.dto.ItemWithOwnershipDto
 import com.rarible.protocol.union.dto.ItemsDto
 import com.rarible.protocol.union.dto.ItemsWithOwnershipDto
 import com.rarible.protocol.union.dto.MetaContentDto
 import com.rarible.protocol.union.dto.RestrictionCheckFormDto
 import com.rarible.protocol.union.dto.RestrictionCheckResultDto
 import com.rarible.protocol.union.dto.RoyaltiesDto
-import com.rarible.protocol.union.dto.continuation.page.ArgPaging
-import com.rarible.protocol.union.dto.continuation.page.PageSize
-import com.rarible.protocol.union.dto.continuation.page.Paging
 import com.rarible.protocol.union.dto.parser.IdParser
-import com.rarible.protocol.union.dto.subchains
 import com.rarible.protocol.union.enrichment.meta.UnionMetaService
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.time.withTimeout
 import org.slf4j.LoggerFactory
 import org.springframework.core.io.Resource
@@ -72,19 +62,17 @@ class ItemController(
         lastUpdatedFrom: Long?,
         lastUpdatedTo: Long?
     ): ResponseEntity<ItemsDto> {
-        val safeSize = PageSize.ITEM.limit(size)
-        val slices = itemSourceSelectService.getAllItems(blockchains, continuation, safeSize, showDeleted, lastUpdatedFrom, lastUpdatedTo)
-        val total = slices.sumOf { it.page.total }
-        val arg = ArgPaging(UnionItemContinuation.ByLastUpdatedAndId, slices.map { it.toSlice() }).getSlice(safeSize)
 
-        logger.info("Response for getAllItems(blockchains={}, continuation={}, size={}):" +
-                " Page(size={}, total={}, continuation={}) from blockchain pages {} ",
-            blockchains, continuation, size, arg.entities.size, total,
-            arg.continuation, slices.map { it.page.entities.size }
+        return ResponseEntity.ok(
+            itemSourceSelectService.getAllItems(
+                blockchains,
+                continuation,
+                size,
+                showDeleted,
+                lastUpdatedFrom,
+                lastUpdatedTo
+            )
         )
-
-        val result = itemSourceSelectService.enrich(arg, total)
-        return ResponseEntity.ok(result)
     }
 
     @GetMapping(value = ["/v0.1/items/{itemId}/animation"])
@@ -188,19 +176,8 @@ class ItemController(
         continuation: String?,
         size: Int?
     ): ResponseEntity<ItemsDto> {
-        val safeSize = PageSize.ITEM.limit(size)
-        val collectionId = IdParser.parseCollectionId(collection)
-        val result = router.getService(collectionId.blockchain)
-            .getItemsByCollection(collectionId.value, null, continuation, safeSize)
 
-        logger.info(
-            "Response for getItemsByCollection(collection={}, continuation={}, size={}):" +
-                    " Page(size={}, total={}, continuation={})",
-            collection, continuation, size, result.entities.size, result.total, result.continuation
-        )
-
-        val enriched = itemSourceSelectService.enrich(result)
-        return ResponseEntity.ok(enriched)
+        return ResponseEntity.ok(itemSourceSelectService.getItemsByCollection(collection, continuation, size))
     }
 
     override suspend fun getItemsByCreator(
@@ -209,30 +186,7 @@ class ItemController(
         continuation: String?,
         size: Int?
     ): ResponseEntity<ItemsDto> {
-        val safeSize = PageSize.ITEM.limit(size)
-        val creatorAddress = IdParser.parseAddress(creator)
-        val filter = BlockchainFilter(blockchains)
-
-        val blockchainPages = router.executeForAll(filter.exclude(creatorAddress.blockchainGroup)) {
-            it.getItemsByCreator(creatorAddress.value, continuation, safeSize)
-        }
-
-        val total = blockchainPages.sumOf { it.total }
-
-        val combinedPage = Paging(
-            UnionItemContinuation.ByLastUpdatedAndId,
-            blockchainPages.flatMap { it.entities }
-        ).getPage(safeSize, total)
-
-        logger.info(
-            "Response for getItemsByCreator(creator={}, continuation={}, size={}):" +
-                    " Page(size={}, total={}, continuation={}) from blockchain pages {} ",
-            creator, continuation, size, combinedPage.entities.size, combinedPage.total, combinedPage.continuation,
-            blockchainPages.map { it.entities.size }
-        )
-
-        val enriched = itemSourceSelectService.enrich(combinedPage)
-        return ResponseEntity.ok(enriched)
+        return ResponseEntity.ok(itemSourceSelectService.getItemsByCreator(creator, blockchains, continuation, size))
     }
 
     override suspend fun getItemsByOwner(
@@ -241,29 +195,7 @@ class ItemController(
         continuation: String?,
         size: Int?
     ): ResponseEntity<ItemsDto> {
-        val safeSize = PageSize.ITEM.limit(size)
-        val ownerAddress = IdParser.parseAddress(owner)
-        val filter = BlockchainFilter(blockchains)
-        val blockchainPages = router.executeForAll(filter.exclude(ownerAddress.blockchainGroup)) {
-            it.getItemsByOwner(ownerAddress.value, continuation, safeSize)
-        }
-
-        val total = blockchainPages.sumOf { it.total }
-
-        val combinedPage = Paging(
-            UnionItemContinuation.ByLastUpdatedAndId,
-            blockchainPages.flatMap { it.entities }
-        ).getPage(safeSize, total)
-
-        logger.info(
-            "Response for getItemsByOwner(owner={}, continuation={}, size={}):" +
-                    " Page(size={}, total={}, continuation={}) from blockchain pages {} ",
-            owner, continuation, size, combinedPage.entities.size, combinedPage.total, combinedPage.continuation,
-            blockchainPages.map { it.entities.size }
-        )
-
-        val enriched = itemSourceSelectService.enrich(combinedPage)
-        return ResponseEntity.ok(enriched)
+        return ResponseEntity.ok(itemSourceSelectService.getItemsByOwner(owner, blockchains, continuation, size))
     }
 
     private fun createRedirectResponse(unionMetaContent: UnionMetaContent): ResponseEntity<Resource> {
@@ -277,31 +209,7 @@ class ItemController(
         continuation: String?,
         size: Int?
     ): ResponseEntity<ItemsWithOwnershipDto> {
-        val safeSize = PageSize.ITEM.limit(size)
-        val ownerAddress = IdParser.parseAddress(owner)
-        val page = ownershipApiService.getOwnershipByOwner(ownerAddress, continuation, safeSize)
-        val ids = page.entities.map { it.id.getItemId() }
-        val items = router.executeForAll(ownerAddress.blockchainGroup.subchains()) {
-            it.getItemsByIds(ids.map { id -> id.value })
-        }.flatten().associateBy { it.id }
-
-        val wrapped = page.entities.map {
-            val item = items[it.id.getItemId()]
-            coroutineScope {
-                async {
-                    if (null != item) {
-                        ItemWithOwnershipDto(
-                            itemSourceSelectService.enrich(item), ItemOwnershipConverter.convert(it)
-                        )
-                    } else {
-                        logger.warn("Item for ${it.id} ownership wasn't found")
-                        null
-                    }
-                }
-            }
-        }.awaitAll().filterNotNull()
-
-        return ResponseEntity.ok(ItemsWithOwnershipDto(wrapped.size.toLong(), page.continuation, wrapped))
+        return ResponseEntity.ok(itemSourceSelectService.getItemsByOwnerWithOwnership(owner, continuation, size))
     }
 
     private companion object {

@@ -5,11 +5,16 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.rarible.dipdup.client.OrderActivityClient
 import com.rarible.dipdup.client.OrderClient
 import com.rarible.protocol.union.core.CoreConfiguration
+import com.rarible.protocol.union.integration.tezos.dipdup.converter.DipDupActivityConverter
 import com.rarible.protocol.union.integration.tezos.dipdup.converter.DipDupOrderConverter
+import com.rarible.protocol.union.integration.tezos.dipdup.service.DipdupOrderActivityService
+import com.rarible.protocol.union.integration.tezos.dipdup.service.DipdupOrderActivityServiceImpl
 import com.rarible.protocol.union.integration.tezos.dipdup.service.DipdupOrderService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.DipdupOrderServiceImpl
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktCollectionService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktCollectionServiceImpl
+import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktItemActivityService
+import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktItemActivityServiceImpl
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktItemService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktItemServiceImpl
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktOwnershipService
@@ -86,6 +91,11 @@ class DipDupApiConfiguration(
     }
 
     @Bean
+    fun dipdupOrderActivitiesService(orderActivityClient: OrderActivityClient, dipDupActivityConverter: DipDupActivityConverter): DipdupOrderActivityService {
+        return DipdupOrderActivityServiceImpl(orderActivityClient, dipDupActivityConverter)
+    }
+
+    @Bean
     fun tzktCollectionService(tzktClient: CollectionClient): TzktCollectionService {
         return TzktCollectionServiceImpl(tzktClient)
     }
@@ -98,6 +108,11 @@ class DipDupApiConfiguration(
     @Bean
     fun tzktOwnershipService(ownershipClient: OwnershipClient): TzktOwnershipService {
         return TzktOwnershipServiceImpl(ownershipClient)
+    }
+
+    @Bean
+    fun tzktItemActivityService(tokenActivityClient: TokenActivityClient): TzktItemActivityService {
+        return TzktItemActivityServiceImpl(tokenActivityClient)
     }
 
 }

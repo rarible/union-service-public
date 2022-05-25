@@ -1,6 +1,9 @@
 package com.rarible.protocol.union.integration.tezos.dipdup.service
 
 import com.rarible.dipdup.client.OrderClient
+import com.rarible.dipdup.client.exception.DipDupNotFound
+import com.rarible.protocol.union.core.exception.UnionNotFoundException
+import com.rarible.protocol.union.dto.AssetTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderSortDto
@@ -19,12 +22,12 @@ class DipdupOrderServiceImpl(
     override fun enabled() = true
 
     override suspend fun getOrderById(id: String): OrderDto {
-        val order = dipdupOrderClient.getOrderById(id)
+        val order = safeApiCall { dipdupOrderClient.getOrderById(id) }
         return dipDupOrderConverter.convert(order, blockchain)
     }
 
     override suspend fun getOrderByIds(ids: List<String>): List<OrderDto> {
-        val orders = dipdupOrderClient.getOrdersByIds(ids)
+        val orders = safeApiCall { dipdupOrderClient.getOrdersByIds(ids) }
         return orders.map { dipDupOrderConverter.convert(it, blockchain) }
     }
 
@@ -46,17 +49,20 @@ class DipdupOrderServiceImpl(
         )
     }
 
-    override suspend fun getSellOrdersByItem(contract: String,
-                                             tokenId: BigInteger,
-                                             maker: String?,
-                                             statuses: List<OrderStatusDto>?,
-                                             continuation: String?,
-                                             size: Int
+    override suspend fun getSellOrdersByItem(
+        contract: String,
+        tokenId: BigInteger,
+        maker: String?,
+        currencyId: String,
+        statuses: List<OrderStatusDto>?,
+        continuation: String?,
+        size: Int
     ): Slice<OrderDto> {
         val page = dipdupOrderClient.getOrdersByItem(
             contract = contract,
             tokenId = tokenId.toString(),
             maker = maker,
+            currencyId = currencyId,
             statuses = statuses?.let { it.map { status -> dipDupOrderConverter.convert(status) } } ?: emptyList(),
             size = size,
             continuation = continuation
@@ -65,6 +71,27 @@ class DipdupOrderServiceImpl(
             continuation = page.continuation,
             entities = page.orders.map { dipDupOrderConverter.convert(it, blockchain) }
         )
+    }
+
+    override suspend fun getSellOrderCurrenciesByItem(contract: String, tokenId: BigInteger): List<AssetTypeDto> {
+        return dipDupOrderConverter.convert(
+            dipdupOrderClient.getOrdersCurrenciesByItem(contract, tokenId.toString()),
+            blockchain
+        )
+    }
+
+    override suspend fun getSellOrderCurrenciesByCollection(contract: String): List<AssetTypeDto> {
+        return dipDupOrderConverter.convert(
+            dipdupOrderClient.getOrdersCurrenciesByCollection(contract),
+            blockchain
+        )
+    }
+    private suspend fun <T> safeApiCall(clientCall: suspend () -> T): T {
+        return try {
+            clientCall()
+        } catch (e: DipDupNotFound) {
+            throw UnionNotFoundException(message = e.message ?: "")
+        }
     }
 }
 

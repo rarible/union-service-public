@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.integration.immutablex.service
 
+import com.rarible.protocol.union.core.model.ItemAndOwnerActivityType
 import com.rarible.protocol.union.core.model.TypedActivityId
 import com.rarible.protocol.union.core.service.ActivityService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
@@ -38,7 +39,8 @@ class ImmutablexActivityService(
         size: Int,
         sort: ActivitySortDto?,
     ): Slice<ActivityDto> {
-        val result = allowedTypes.intersect(types.toSet())
+        val resultTypes = if (types.isEmpty()) allowedTypes else allowedTypes.intersect(types.toSet())
+        val result = resultTypes
             .flatMap { type ->
                 when (type) {
                     ActivityTypeDto.MINT ->
@@ -80,7 +82,8 @@ class ImmutablexActivityService(
         size: Int,
         sort: ActivitySortDto?,
     ): Slice<ActivityDto> {
-        val result = allowedTypes.intersect(types.toSet())
+        val resultTypes = if (types.isEmpty()) allowedTypes else allowedTypes.intersect(types.toSet())
+        val result = resultTypes
             .flatMap { type ->
                 when (type) {
                     ActivityTypeDto.MINT ->
@@ -101,6 +104,34 @@ class ImmutablexActivityService(
         return Paging(ActivityContinuation.ByLastUpdatedAndIdDesc, result).getSlice(size)
     }
 
+    override suspend fun getActivitiesByItemAndOwner(
+        types: List<ItemAndOwnerActivityType>,
+        itemId: String,
+        owner: String,
+        continuation: String?,
+        size: Int,
+        sort: ActivitySortDto?,
+    ): Slice<ActivityDto> {
+        val result = types.flatMap { type ->
+            when (type) {
+                ItemAndOwnerActivityType.MINT ->
+                    client.getMints(size, continuation, itemId, user = owner, sort = sort).result
+                ItemAndOwnerActivityType.TRANSFER ->
+                    client.getTransfers(size, continuation, itemId, user = owner, sort = sort).result
+                // todo: handle transfers with purchased = true
+                // client.getTrades(size, continuation, itemId, user = owner, sort = sort).result
+                else -> emptyList()
+            }
+        }.asSequence()
+            .map { converter.convert(it) }
+            .sortedBy { it.date }
+            .take(size)
+            .let {
+                if (sort == ActivitySortDto.LATEST_FIRST) it.toList().asReversed() else it.toList()
+            }
+        return Paging(ActivityContinuation.ByLastUpdatedAndIdDesc, result).getSlice(size)
+    }
+
     override suspend fun getActivitiesByUser(
         types: List<UserActivityTypeDto>,
         users: List<String>,
@@ -110,7 +141,8 @@ class ImmutablexActivityService(
         size: Int,
         sort: ActivitySortDto?,
     ): Slice<ActivityDto> {
-        val result = allowedUserTypes.intersect(types.toSet())
+        val resultTypes = if (types.isEmpty()) allowedUserTypes else allowedUserTypes.intersect(types.toSet())
+        val result = resultTypes
             .flatMap { type ->
                 users.flatMap { user ->
                     when (type) {

@@ -41,7 +41,7 @@ rarible:
 
 api:
   openapi:
-    baseUrl: "https://api-dev.rarible.org"
+    baseUrl: "https://dev-api.rarible.org"
     description: "Development (Ropsten, Mumbai, Hangzhou)"
   subscribe:
     workers:

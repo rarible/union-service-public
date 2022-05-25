@@ -23,15 +23,12 @@ class EsCollectionConverterTest {
         val esCollection = EsCollectionConverter.convert(unionCollection)
         assertThat(esCollection.collectionId).isEqualTo(unionCollection.id.fullId())
         assertThat(esCollection.name).isEqualTo(unionCollection.name)
-        assertThat(esCollection.type).isEqualTo(unionCollection.type.name)
         assertThat(esCollection.symbol).isEqualTo(unionCollection.symbol)
         assertThat(esCollection.owner).isEqualTo(unionCollection.owner?.fullId())
-        assertThat(esCollection.parent).isEqualTo(unionCollection.parent?.fullId())
         unionCollection.meta?.let {
             assertThat(esCollection.meta).isNotNull
             assertThat(esCollection.meta!!.name).isEqualTo(it.name)
             assertThat(esCollection.meta!!.description).isEqualTo(it.description)
-            assertThat(esCollection.meta!!.feeRecipient).isEqualTo(it.feeRecipient?.fullId())
         }
     }
 

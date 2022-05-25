@@ -10,6 +10,7 @@ data class EntityDefinitionExtended(
     val aliasName: String,
     val writeAliasName: String,
     val settings: String,
+    val reindexTask: String,
 ) {
     val searchIndexCoordinates: IndexCoordinates = IndexCoordinates.of(aliasName)
 
