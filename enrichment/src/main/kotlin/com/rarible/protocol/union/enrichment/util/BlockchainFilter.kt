@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.api.util
+package com.rarible.protocol.union.enrichment.util
 
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.BlockchainGroupDto

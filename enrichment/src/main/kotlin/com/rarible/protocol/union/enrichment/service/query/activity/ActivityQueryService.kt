@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.api.service
+package com.rarible.protocol.union.enrichment.service.query.activity
 
 import com.rarible.protocol.union.dto.ActivitiesDto
 import com.rarible.protocol.union.dto.ActivitySortDto
