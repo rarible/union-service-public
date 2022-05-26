@@ -25,7 +25,7 @@ import org.springframework.context.annotation.Import
 import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations
 
 @Configuration
-@ComponentScan(basePackageClasses = [EsActivityRepository::class, ActivityApiMergeService::class])
+@ComponentScan(basePackages = ["com.rarible.protocol.union.core", "com.rarible.protocol.union.enrichment"])
 @Import(
     value = [
         SearchConfiguration::class
