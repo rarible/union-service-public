@@ -6,7 +6,9 @@ import com.rarible.protocol.union.worker.config.ActivityReindexProperties
 import com.rarible.protocol.union.worker.task.search.ParamFactory
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
+import org.springframework.stereotype.Component
 
+@Component
 class ActivityTask(
     private val properties: ActivityReindexProperties,
     private val paramFactory: ParamFactory,

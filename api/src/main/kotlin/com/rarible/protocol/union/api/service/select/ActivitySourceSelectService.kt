@@ -18,20 +18,21 @@ class ActivitySourceSelectService(
     private val featureFlagsProperties: FeatureFlagsProperties,
     private val activityApiMergeService: ActivityApiMergeService,
     private val activityElasticService: ActivityElasticService,
-) : ActivityQueryService {
+) {
 
-    override suspend fun getAllActivities(
+    suspend fun getAllActivities(
         type: List<ActivityTypeDto>,
         blockchains: List<BlockchainDto>?,
         continuation: String?,
         cursor: String?,
         size: Int?,
-        sort: ActivitySortDto?
+        sort: ActivitySortDto?,
+        overrideSelect: OverrideSelect?,
     ): ActivitiesDto {
-        return getQuerySource().getAllActivities(type, blockchains, continuation, cursor, size, sort)
+        return getQuerySource(overrideSelect).getAllActivities(type, blockchains, continuation, cursor, size, sort)
     }
 
-    override suspend fun getAllActivitiesSync(
+    suspend fun getAllActivitiesSync(
         blockchain: BlockchainDto,
         continuation: String?,
         size: Int?,
@@ -40,29 +41,31 @@ class ActivitySourceSelectService(
         return activityApiMergeService.getAllActivitiesSync(blockchain, continuation, size, sort)
     }
 
-    override suspend fun getActivitiesByCollection(
+    suspend fun getActivitiesByCollection(
         type: List<ActivityTypeDto>,
         collection: String,
         continuation: String?,
         cursor: String?,
         size: Int?,
-        sort: ActivitySortDto?
+        sort: ActivitySortDto?,
+        overrideSelect: OverrideSelect?,
     ): ActivitiesDto {
-        return getQuerySource().getActivitiesByCollection(type, collection, continuation, cursor, size, sort)
+        return getQuerySource(overrideSelect).getActivitiesByCollection(type, collection, continuation, cursor, size, sort)
     }
 
-    override suspend fun getActivitiesByItem(
+    suspend fun getActivitiesByItem(
         type: List<ActivityTypeDto>,
         itemId: String,
         continuation: String?,
         cursor: String?,
         size: Int?,
-        sort: ActivitySortDto?
+        sort: ActivitySortDto?,
+        overrideSelect: OverrideSelect?,
     ): ActivitiesDto {
-        return getQuerySource().getActivitiesByItem(type, itemId, continuation, cursor, size, sort)
+        return getQuerySource(overrideSelect).getActivitiesByItem(type, itemId, continuation, cursor, size, sort)
     }
 
-    override suspend fun getActivitiesByUser(
+    suspend fun getActivitiesByUser(
         type: List<UserActivityTypeDto>,
         user: List<String>,
         blockchains: List<BlockchainDto>?,
@@ -71,12 +74,19 @@ class ActivitySourceSelectService(
         continuation: String?,
         cursor: String?,
         size: Int?,
-        sort: ActivitySortDto?
+        sort: ActivitySortDto?,
+        overrideSelect: OverrideSelect?,
     ): ActivitiesDto {
-        return getQuerySource().getActivitiesByUser(type, user, blockchains, from, to, continuation, cursor, size, sort)
+        return getQuerySource(overrideSelect).getActivitiesByUser(type, user, blockchains, from, to, continuation, cursor, size, sort)
     }
 
-    private fun getQuerySource(): ActivityQueryService {
+    private fun getQuerySource(overrideSelect: OverrideSelect?): ActivityQueryService {
+        if (overrideSelect != null) {
+            return when (overrideSelect) {
+                OverrideSelect.ELASTIC -> activityElasticService
+                OverrideSelect.API_MERGE -> activityApiMergeService
+            }
+        }
         return when (featureFlagsProperties.enableActivityQueriesToElasticSearch) {
             true -> activityElasticService
             else -> activityApiMergeService

@@ -5,28 +5,26 @@ import com.rarible.protocol.solana.api.client.autoconfigure.SolanaApiClientAutoC
 import com.rarible.protocol.union.api.client.ActivityControllerApi
 import com.rarible.protocol.union.api.client.CollectionControllerApi
 import com.rarible.protocol.union.api.client.UnionApiClientFactory
-import com.rarible.protocol.union.api.client.autoconfigure.UnionApiClientAutoConfiguration
 import com.rarible.protocol.union.core.elasticsearch.EsNameResolver
 import com.rarible.protocol.union.core.elasticsearch.IndexService
 import com.rarible.protocol.union.core.elasticsearch.bootstrap.ElasticsearchBootstrapper
 import com.rarible.protocol.union.core.model.elasticsearch.EsEntitiesConfig
+import com.rarible.protocol.union.enrichment.configuration.EnrichmentConfiguration
 import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
-import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
 import com.rarible.protocol.union.worker.task.search.ReindexService
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
 import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations
 
 @Configuration
-@ComponentScan(basePackageClasses = [EsActivityRepository::class])
 @Import(
     value = [
+        EnrichmentConfiguration::class,
         SearchConfiguration::class
     ]
 )

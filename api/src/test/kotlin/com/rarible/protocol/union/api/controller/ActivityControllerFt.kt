@@ -240,7 +240,7 @@ class ActivityControllerFt : AbstractIntegrationTest() {
         } returns OrderActivitiesDto(null, listOf(orderActivity)).toMono()
 
         val activities = activityControllerApi.getActivitiesByCollection(
-            types, ethCollectionId.fullId(), continuation, null, defaultSize, sort
+            types, ethCollectionId.fullId(), continuation, null, defaultSize, sort, null,
         ).awaitFirst()
 
         assertThat(activities.activities).hasSize(1)
@@ -267,7 +267,7 @@ class ActivityControllerFt : AbstractIntegrationTest() {
         } returns OrderActivitiesDto(null, listOf(orderActivity)).toMono()
 
         val activities = activityControllerApi.getActivitiesByCollection(
-            types, ethCollectionId.fullId(), null, cursor.toString(), defaultSize, sort
+            types, ethCollectionId.fullId(), null, cursor.toString(), defaultSize, sort, null,
         ).awaitFirst()
 
         assertThat(activities.activities).hasSize(1)
@@ -291,7 +291,7 @@ class ActivityControllerFt : AbstractIntegrationTest() {
         } returns FlowActivitiesDto(1, null, listOf(activity)).toMono()
 
         val activities = activityControllerApi.getActivitiesByCollection(
-            types, flowCollectionId.fullId(), continuation, null, 100000, sort
+            types, flowCollectionId.fullId(), continuation, null, 100000, sort, null,
         ).awaitFirst()
 
         val flowItem = activities.activities[0]
@@ -336,7 +336,7 @@ class ActivityControllerFt : AbstractIntegrationTest() {
         } returns NftActivitiesDto(null, listOf(itemActivity)).toMono()
 
         val activities = activityControllerApi.getActivitiesByItem(
-            types, ethItemId.fullId(), continuation, null, 10000000, sort
+            types, ethItemId.fullId(), continuation, null, 10000000, sort, null,
         ).awaitFirst()
 
         assertThat(activities.activities).hasSize(3)
@@ -388,7 +388,7 @@ class ActivityControllerFt : AbstractIntegrationTest() {
         } returns NftActivitiesDto(null, listOf(itemActivity)).toMono()
 
         val activities = activityControllerApi.getActivitiesByItem(
-            types, ethItemId.fullId(), null, cursor.toString(), 1, sort
+            types, ethItemId.fullId(), null, cursor.toString(), 1, sort, null,
         ).awaitFirst()
 
         assertThat(activities.activities).hasSize(1)
@@ -413,7 +413,7 @@ class ActivityControllerFt : AbstractIntegrationTest() {
         } returns FlowActivitiesDto(1, null, listOf(activity)).toMono()
 
         val activities = activityControllerApi.getActivitiesByItem(
-            types, flowItemId.fullId(), continuation, null, defaultSize, sort
+            types, flowItemId.fullId(), continuation, null, defaultSize, sort, null,
         ).awaitFirst()
 
         val flowItem = activities.activities[0]
@@ -481,7 +481,7 @@ class ActivityControllerFt : AbstractIntegrationTest() {
         } returns FlowActivitiesDto(1, null, flowActivities).toMono()
 
         val activities = activityControllerApi.getAllActivities(
-            types, blockchains, null, null, size, com.rarible.protocol.union.dto.ActivitySortDto.EARLIEST_FIRST
+            types, blockchains, null, null, size, com.rarible.protocol.union.dto.ActivitySortDto.EARLIEST_FIRST, null,
         ).awaitFirst()
 
         assertThat(activities.activities).hasSize(3)
@@ -582,7 +582,7 @@ class ActivityControllerFt : AbstractIntegrationTest() {
 
         val activities = activityControllerApi.getAllActivities(
             types, blockchains, null, cursorArg.toString(), size,
-            com.rarible.protocol.union.dto.ActivitySortDto.EARLIEST_FIRST
+            com.rarible.protocol.union.dto.ActivitySortDto.EARLIEST_FIRST, null,
         ).awaitFirst()
 
         assertThat(activities.activities).hasSize(3)
@@ -613,7 +613,7 @@ class ActivityControllerFt : AbstractIntegrationTest() {
             testEthereumActivityOrderApi.getOrderActivities(any(), any(), any(), any())
         } returns OrderActivitiesDto(null, ethOrderActivities).toMono()
 
-        val activities = activityControllerApi.getAllActivities(types, blockchains, null, null, null, null)
+        val activities = activityControllerApi.getAllActivities(types, blockchains, null, null, null, null, null,)
             .awaitFirst()
 
         assertThat(activities.activities).hasSize(defaultSize)
@@ -661,7 +661,7 @@ class ActivityControllerFt : AbstractIntegrationTest() {
         val now = Instant.now()
         val oneWeekAgo = now.minus(7, ChronoUnit.DAYS)
         val activities = activityControllerApi.getActivitiesByUser(
-            types, listOf(userEth.fullId(), userFlow.fullId()), null, oneWeekAgo, now, null, null, size, sort
+            types, listOf(userEth.fullId(), userFlow.fullId()), null, oneWeekAgo, now, null, null, size, sort, null,
         ).awaitFirst()
 
         assertThat(activities.activities).hasSize(3)
@@ -726,7 +726,7 @@ class ActivityControllerFt : AbstractIntegrationTest() {
         val oneWeekAgo = now.minus(7, ChronoUnit.DAYS)
         val activities = activityControllerApi.getActivitiesByUser(
             types, listOf(userEth.fullId(), userFlow.fullId()), null, oneWeekAgo, now, null, cursorArg.toString(), size,
-            sort
+            sort, null,
         ).awaitFirst()
 
         assertThat(activities.activities).hasSize(3)
@@ -773,7 +773,7 @@ class ActivityControllerFt : AbstractIntegrationTest() {
         val now = Instant.now()
         val oneWeekAgo = now.minus(7, ChronoUnit.DAYS)
         val activities = activityControllerApi.getActivitiesByUser(
-            types, listOf(userEth.fullId(), userFlow.fullId()), null, oneWeekAgo, now, null, null, size, sort
+            types, listOf(userEth.fullId(), userFlow.fullId()), null, oneWeekAgo, now, null, null, size, sort, null,
         ).awaitFirst()
 
         assertThat(activities.activities).hasSize(size)

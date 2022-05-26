@@ -240,7 +240,7 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
         } returns com.rarible.protocol.tezos.dto.NftActivitiesDto(null, listOf(tezosActivity1))
 
         val activities = activityControllerApi.getAllActivities(
-            types, blockchains, null, null, size, com.rarible.protocol.union.dto.ActivitySortDto.EARLIEST_FIRST
+            types, blockchains, null, null, size, com.rarible.protocol.union.dto.ActivitySortDto.EARLIEST_FIRST, null,
         ).awaitFirst()
 
         assertThat(activities.activities).hasSize(5)
@@ -281,7 +281,7 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
         } returns OrderActivitiesDto(null, listOf(orderActivity)).toMono()
 
         val activities = activityControllerApi.getActivitiesByCollection(
-            types, ethCollectionId.fullId(), continuation, null, defaultSize, sort
+            types, ethCollectionId.fullId(), continuation, null, defaultSize, sort, null,
         ).awaitFirst()
 
         assertThat(activities.activities).hasSize(1)
@@ -346,7 +346,7 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
         } returns NftActivitiesDto(null, listOf(itemActivity)).toMono()
 
         val activities = activityControllerApi.getActivitiesByItem(
-            types, ethItemId.fullId(), continuation, null, 100, sort
+            types, ethItemId.fullId(), continuation, null, 100, sort, null,
         ).awaitFirst()
 
         assertThat(activities.activities).hasSize(3)
@@ -416,7 +416,7 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
         val now = Instant.now()
         val oneWeekAgo = now.minus(7, ChronoUnit.DAYS)
         val activities = activityControllerApi.getActivitiesByUser(
-            types, listOf(userEth.fullId()), null, oneWeekAgo, now, null, null, size, sort
+            types, listOf(userEth.fullId()), null, oneWeekAgo, now, null, null, size, sort, null,
         ).awaitFirst()
 
         assertThat(activities.activities).hasSize(3)
