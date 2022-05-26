@@ -9,7 +9,7 @@ import com.rarible.protocol.union.core.elasticsearch.EsNameResolver
 import com.rarible.protocol.union.core.elasticsearch.IndexService
 import com.rarible.protocol.union.core.elasticsearch.bootstrap.ElasticsearchBootstrapper
 import com.rarible.protocol.union.core.model.elasticsearch.EsEntitiesConfig
-import com.rarible.protocol.union.enrichment.configuration.EnrichmentConfiguration
+import com.rarible.protocol.union.enrichment.configuration.EnrichmentApiConfiguration
 import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
 import com.rarible.protocol.union.worker.task.search.ReindexService
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -24,7 +24,7 @@ import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperatio
 @Configuration
 @Import(
     value = [
-        EnrichmentConfiguration::class,
+        EnrichmentApiConfiguration::class,
         SearchConfiguration::class
     ]
 )
