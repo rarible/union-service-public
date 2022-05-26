@@ -12,6 +12,7 @@ import com.rarible.protocol.union.core.elasticsearch.bootstrap.ElasticsearchBoot
 import com.rarible.protocol.union.core.model.elasticsearch.EsEntitiesConfig
 import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
 import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
+import com.rarible.protocol.union.enrichment.service.query.activity.ActivityApiMergeService
 import com.rarible.protocol.union.worker.task.search.ReindexService
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -24,7 +25,7 @@ import org.springframework.context.annotation.Import
 import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations
 
 @Configuration
-@ComponentScan(basePackageClasses = [EsActivityRepository::class])
+@ComponentScan(basePackageClasses = [EsActivityRepository::class, ActivityApiMergeService::class])
 @Import(
     value = [
         SearchConfiguration::class
