@@ -8,6 +8,8 @@ import com.rarible.core.test.data.randomString
 import com.rarible.protocol.nft.api.client.NftCollectionControllerApi
 import com.rarible.protocol.nft.api.client.NftItemControllerApi
 import com.rarible.protocol.nft.api.client.NftOwnershipControllerApi
+import com.rarible.protocol.solana.api.client.TokenControllerApi
+import com.rarible.protocol.solana.dto.TokenMetaEventDto
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.CollectionEventDto
 import com.rarible.protocol.union.dto.CollectionUpdateEventDto
@@ -25,6 +27,7 @@ import com.rarible.protocol.union.integration.ethereum.mock.EthAuctionController
 import com.rarible.protocol.union.integration.ethereum.mock.EthItemControllerApiMock
 import com.rarible.protocol.union.integration.ethereum.mock.EthOrderControllerApiMock
 import com.rarible.protocol.union.integration.ethereum.mock.EthOwnershipControllerApiMock
+import com.rarible.protocol.union.enrichment.meta.UnionMetaService
 import io.mockk.clearMocks
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
@@ -51,6 +54,9 @@ abstract class AbstractIntegrationTest {
 
     @Autowired
     lateinit var unionMetaProperties: UnionMetaProperties
+
+    @Autowired
+    lateinit var unionMetaService: UnionMetaService
 
     //--------------------- ETHEREUM ---------------------//
     @Autowired
@@ -89,6 +95,14 @@ abstract class AbstractIntegrationTest {
 
     @Autowired
     lateinit var ethActivityProducer: RaribleKafkaProducer<com.rarible.protocol.dto.ActivityDto>
+
+    //--------------------- SOLANA ---------------------//
+    @Autowired
+    @Qualifier("solana.token.api")
+    lateinit var testSolanaTokenControllerApi: TokenControllerApi
+
+    @Autowired
+    lateinit var solanaTokenMetaEventProducer: RaribleKafkaProducer<TokenMetaEventDto>
 
     @Autowired
     lateinit var collectionConsumer: RaribleKafkaConsumer<CollectionEventDto>
