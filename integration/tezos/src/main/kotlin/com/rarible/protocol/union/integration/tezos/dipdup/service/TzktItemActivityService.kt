@@ -5,7 +5,7 @@ import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
 
-interface DipdupOrderActivityService {
+interface TzktItemActivityService {
 
     fun enabled() = false
 

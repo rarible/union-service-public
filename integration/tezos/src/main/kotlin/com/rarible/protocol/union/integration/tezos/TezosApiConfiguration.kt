@@ -24,6 +24,7 @@ import com.rarible.protocol.union.integration.tezos.dipdup.PGIntegrationProperti
 import com.rarible.protocol.union.integration.tezos.dipdup.service.DipdupOrderActivityService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.DipdupOrderService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktCollectionService
+import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktItemActivityService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktItemService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktOwnershipService
 import com.rarible.protocol.union.integration.tezos.service.TezosActivityService
@@ -169,8 +170,9 @@ class TezosApiConfiguration(
         orderActivityApi: OrderActivityControllerApi,
         converter: TezosActivityConverter,
         pgActivityService: TezosPgActivityService,
-        dipdupOrderActivityService: DipdupOrderActivityService
+        dipdupOrderActivityService: DipdupOrderActivityService,
+        tzktItemActivityService: TzktItemActivityService
     ): TezosActivityService {
-        return TezosActivityService(itemActivityApi, orderActivityApi, converter, pgActivityService, dipdupOrderActivityService)
+        return TezosActivityService(itemActivityApi, orderActivityApi, converter, pgActivityService, dipdupOrderActivityService, tzktItemActivityService)
     }
 }
