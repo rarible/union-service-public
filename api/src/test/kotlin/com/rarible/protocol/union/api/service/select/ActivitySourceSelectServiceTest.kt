@@ -21,7 +21,11 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.MethodSource
 import java.time.Instant
+import java.util.stream.Stream
 
 @ExtendWith(MockKExtension::class)
 class ActivitySourceSelectServiceTest {
@@ -51,174 +55,165 @@ class ActivitySourceSelectServiceTest {
     private val from = Instant.ofEpochSecond(12345)
     private val to = Instant.ofEpochSecond(23456)
 
-    private val apiMergeResponse = mockk<ActivitiesDto>()
-    private val elasticResponse = mockk<ActivitiesDto>()
 
-    @Nested
-    inner class GetAllActivitiesTest {
+    companion object {
+        private val apiMergeResponse = mockk<ActivitiesDto>()
+        private val elasticResponse = mockk<ActivitiesDto>()
 
-        @Test
-        fun `should get all activities - select elastic`() = runBlocking {
-            // given
-            every { featureFlagsProperties.enableActivityQueriesToElasticSearch } returns true
-            coEvery {
+        @JvmStatic
+        fun testArguments() = Stream.of(
+            Arguments.of(
+                true,
+                null,
+                elasticResponse,
+            ),
+            Arguments.of(
+                false,
+                null,
+                apiMergeResponse,
+            ),
+            Arguments.of(
+                true,
+                OverrideSelect.API_MERGE,
+                apiMergeResponse,
+            ),
+            Arguments.of(
+                false,
+                OverrideSelect.ELASTIC,
+                elasticResponse,
+            ),
+        )
+    }
+
+    @ParameterizedTest
+    @MethodSource("testArguments")
+    fun `should get all activities`(
+        elasticFeatureFlag: Boolean,
+        overrideSelect: OverrideSelect?,
+        expectedResponse: ActivitiesDto,
+    ) = runBlocking<Unit> {
+        // given
+        every { featureFlagsProperties.enableActivityQueriesToElasticSearch } returns elasticFeatureFlag
+        coEvery {
+            activityElasticService.getAllActivities(type, blockchains, continuation, cursor, size, sort)
+        } returns elasticResponse
+        coEvery {
+            activityApiMergeService.getAllActivities(type, blockchains, continuation, cursor, size, sort)
+        } returns apiMergeResponse
+
+        // when
+        val actual = service.getAllActivities(type, blockchains, continuation, cursor, size, sort, overrideSelect)
+
+        // then
+        assertThat(actual).isEqualTo(expectedResponse)
+        if (expectedResponse == elasticResponse) {
+            coVerify {
                 activityElasticService.getAllActivities(type, blockchains, continuation, cursor, size, sort)
-            } returns elasticResponse
-
-            // when
-            val actual = service.getAllActivities(type, blockchains, continuation, cursor, size, sort)
-
-            // then
-            assertThat(actual).isEqualTo(elasticResponse)
-            coVerify {
-                activityElasticService.getAllActivities(type, blockchains, continuation, cursor, size, sort)
             }
-            confirmVerified(activityApiMergeService, activityElasticService)
-        }
-
-        @Test
-        fun `should get all activities - select apiMerge`() = runBlocking {
-            // given
-            every { featureFlagsProperties.enableActivityQueriesToElasticSearch } returns false
-            coEvery {
-                activityApiMergeService.getAllActivities(type, blockchains, continuation, cursor, size, sort)
-            } returns apiMergeResponse
-
-            // when
-            val actual = service.getAllActivities(type, blockchains, continuation, cursor, size, sort)
-
-            // then
-            assertThat(actual).isEqualTo(apiMergeResponse)
+        } else {
             coVerify {
                 activityApiMergeService.getAllActivities(type, blockchains, continuation, cursor, size, sort)
             }
-            confirmVerified(activityApiMergeService, activityElasticService)
         }
+        confirmVerified(activityApiMergeService, activityElasticService)
     }
 
-    @Nested
-    inner class GetActivitiesByCollectionTest {
+    @ParameterizedTest
+    @MethodSource("testArguments")
+    fun `should get activities by collection - select elastic`(
+        elasticFeatureFlag: Boolean,
+        overrideSelect: OverrideSelect?,
+        expectedResponse: ActivitiesDto,
+    ) = runBlocking<Unit> {
+        // given
+        every { featureFlagsProperties.enableActivityQueriesToElasticSearch } returns elasticFeatureFlag
+        coEvery {
+            activityElasticService.getActivitiesByCollection(type, collection, continuation, cursor, size, sort)
+        } returns elasticResponse
+        coEvery {
+            activityApiMergeService.getActivitiesByCollection(type, collection, continuation, cursor, size, sort)
+        } returns apiMergeResponse
 
-        @Test
-        fun `should get activities by collection - select elastic`() = runBlocking {
-            // given
-            every { featureFlagsProperties.enableActivityQueriesToElasticSearch } returns true
-            coEvery {
-                activityElasticService.getActivitiesByCollection(type, collection, continuation, cursor, size, sort)
-            } returns elasticResponse
+        // when
+        val actual = service.getActivitiesByCollection(type, collection, continuation, cursor, size, sort, overrideSelect)
 
-            // when
-            val actual = service.getActivitiesByCollection(type, collection, continuation, cursor, size, sort)
-
-            // then
-            assertThat(actual).isEqualTo(elasticResponse)
+        // then
+        assertThat(actual).isEqualTo(expectedResponse)
+        if (expectedResponse == elasticResponse) {
             coVerify {
                 activityElasticService.getActivitiesByCollection(type, collection, continuation, cursor, size, sort)
             }
-            confirmVerified(activityApiMergeService, activityElasticService)
-        }
-
-        @Test
-        fun `should get activities by collection - select apiMerge`() = runBlocking {
-            // given
-            every { featureFlagsProperties.enableActivityQueriesToElasticSearch } returns false
-            coEvery {
-                activityApiMergeService.getActivitiesByCollection(type, collection, continuation, cursor, size, sort)
-            } returns apiMergeResponse
-
-            // when
-            val actual = service.getActivitiesByCollection(type, collection, continuation, cursor, size, sort)
-
-            // then
-            assertThat(actual).isEqualTo(apiMergeResponse)
+        } else {
             coVerify {
                 activityApiMergeService.getActivitiesByCollection(type, collection, continuation, cursor, size, sort)
             }
-            confirmVerified(activityApiMergeService, activityElasticService)
         }
+        confirmVerified(activityApiMergeService, activityElasticService)
     }
 
-    @Nested
-    inner class GetActivitiesByItemTest {
+    @ParameterizedTest
+    @MethodSource("testArguments")
+    fun `should get activities by item - select elastic`(
+        elasticFeatureFlag: Boolean,
+        overrideSelect: OverrideSelect?,
+        expectedResponse: ActivitiesDto,
+    ) = runBlocking<Unit> {
+        // given
+        every { featureFlagsProperties.enableActivityQueriesToElasticSearch } returns elasticFeatureFlag
+        coEvery {
+            activityElasticService.getActivitiesByItem(type, itemId, continuation, cursor, size, sort)
+        } returns elasticResponse
+        coEvery {
+            activityApiMergeService.getActivitiesByItem(type, itemId, continuation, cursor, size, sort)
+        } returns apiMergeResponse
 
-        @Test
-        fun `should get activities by item - select elastic`() = runBlocking {
-            // given
-            every { featureFlagsProperties.enableActivityQueriesToElasticSearch } returns true
-            coEvery {
-                activityElasticService.getActivitiesByItem(type, itemId, continuation, cursor, size, sort)
-            } returns elasticResponse
+        // when
+        val actual = service.getActivitiesByItem(type, itemId, continuation, cursor, size, sort, overrideSelect)
 
-            // when
-            val actual = service.getActivitiesByItem(type, itemId, continuation, cursor, size, sort)
-
-            // then
-            assertThat(actual).isEqualTo(elasticResponse)
+        // then
+        assertThat(actual).isEqualTo(expectedResponse)
+        if (expectedResponse == elasticResponse) {
             coVerify {
                 activityElasticService.getActivitiesByItem(type, itemId, continuation, cursor, size, sort)
             }
-            confirmVerified(activityApiMergeService, activityElasticService)
-        }
-
-        @Test
-        fun `should get activities by item - select apiMerge`() = runBlocking {
-            // given
-            every { featureFlagsProperties.enableActivityQueriesToElasticSearch } returns false
-            coEvery {
-                activityApiMergeService.getActivitiesByItem(type, itemId, continuation, cursor, size, sort)
-            } returns apiMergeResponse
-
-            // when
-            val actual = service.getActivitiesByItem(type, itemId, continuation, cursor, size, sort)
-
-            // then
-            assertThat(actual).isEqualTo(apiMergeResponse)
+        } else {
             coVerify {
                 activityApiMergeService.getActivitiesByItem(type, itemId, continuation, cursor, size, sort)
             }
-            confirmVerified(activityApiMergeService, activityElasticService)
         }
+        confirmVerified(activityApiMergeService, activityElasticService)
     }
 
-    @Nested
-    inner class GetActivitiesByUserTest {
+    @ParameterizedTest
+    @MethodSource("testArguments")
+    fun `should get activities by user - select elastic`(
+        elasticFeatureFlag: Boolean,
+        overrideSelect: OverrideSelect?,
+        expectedResponse: ActivitiesDto,
+    ) = runBlocking<Unit> {
+        // given
+        every { featureFlagsProperties.enableActivityQueriesToElasticSearch } returns elasticFeatureFlag
+        coEvery {
+            activityElasticService.getActivitiesByUser(userType, user, blockchains, from, to, continuation, cursor, size, sort)
+        } returns elasticResponse
+        coEvery {
+            activityApiMergeService.getActivitiesByUser(userType, user, blockchains, from, to, continuation, cursor, size, sort)
+        } returns apiMergeResponse
 
-        @Test
-        fun `should get activities by user - select elastic`() = runBlocking {
-            // given
-            every { featureFlagsProperties.enableActivityQueriesToElasticSearch } returns true
-            coEvery {
-                activityElasticService.getActivitiesByUser(userType, user, blockchains, from, to, continuation, cursor, size, sort)
-            } returns elasticResponse
+        // when
+        val actual = service.getActivitiesByUser(userType, user, blockchains, from, to, continuation, cursor, size, sort, overrideSelect)
 
-            // when
-            val actual = service.getActivitiesByUser(userType, user, blockchains, from, to, continuation, cursor, size, sort)
-
-            // then
-            assertThat(actual).isEqualTo(elasticResponse)
+        // then
+        assertThat(actual).isEqualTo(expectedResponse)
+        if (expectedResponse == elasticResponse) {
             coVerify {
                 activityElasticService.getActivitiesByUser(userType, user, blockchains, from, to, continuation, cursor, size, sort)
             }
-            confirmVerified(activityApiMergeService, activityElasticService)
-        }
-
-        @Test
-        fun `should get activities by user - select apiMerge`() = runBlocking {
-            // given
-            every { featureFlagsProperties.enableActivityQueriesToElasticSearch } returns false
-            coEvery {
-                activityApiMergeService.getActivitiesByUser(userType, user, blockchains, from, to, continuation, cursor, size, sort)
-            } returns apiMergeResponse
-
-            // when
-            val actual = service.getActivitiesByUser(userType, user, blockchains, from, to, continuation, cursor, size, sort)
-
-            // then
-            assertThat(actual).isEqualTo(apiMergeResponse)
+        } else {
             coVerify {
                 activityApiMergeService.getActivitiesByUser(userType, user, blockchains, from, to, continuation, cursor, size, sort)
             }
-            confirmVerified(activityApiMergeService, activityElasticService)
         }
+        confirmVerified(activityApiMergeService, activityElasticService)
     }
 }
