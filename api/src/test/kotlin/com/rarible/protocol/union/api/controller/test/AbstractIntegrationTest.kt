@@ -19,6 +19,7 @@ import com.rarible.protocol.nft.api.client.NftItemControllerApi
 import com.rarible.protocol.nft.api.client.NftOwnershipControllerApi
 import com.rarible.protocol.order.api.client.AuctionActivityControllerApi
 import com.rarible.protocol.order.api.client.OrderActivityControllerApi
+import com.rarible.protocol.union.dto.CollectionEventDto
 import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.enrichment.meta.UnionMetaLoader
@@ -67,6 +68,9 @@ abstract class AbstractIntegrationTest {
 
     @Autowired
     protected lateinit var testOwnershipEventProducer: RaribleKafkaProducer<OwnershipEventDto>
+
+    @Autowired
+    protected lateinit var testCollectionEventProducer: RaribleKafkaProducer<CollectionEventDto>
 
     @Autowired
     @Qualifier("test.union.meta.loader")
@@ -280,6 +284,10 @@ abstract class AbstractIntegrationTest {
 
         coEvery {
             testOwnershipEventProducer.send(any() as KafkaMessage<OwnershipEventDto>)
+        } returns KafkaSendResult.Success("")
+
+        coEvery {
+            testCollectionEventProducer.send(any() as KafkaMessage<CollectionEventDto>)
         } returns KafkaSendResult.Success("")
 
         coEvery {
