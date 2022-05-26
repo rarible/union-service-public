@@ -5,7 +5,7 @@ import com.rarible.protocol.union.dto.FlowAssetTypeFtDto
 import com.rarible.protocol.union.dto.FlowAssetTypeNftDto
 import com.rarible.protocol.union.dto.FlowOrderDataV1Dto
 import com.rarible.protocol.union.dto.PlatformDto
-import com.rarible.protocol.union.test.data.randomFlowV1OrderDto
+import com.rarible.protocol.union.integration.flow.data.randomFlowV1OrderDto
 import com.rarible.protocol.union.test.mock.CurrencyMock
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat

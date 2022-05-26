@@ -32,10 +32,12 @@ import com.rarible.protocol.union.integration.ethereum.data.randomEthAuctionStar
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemMintActivity
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOrderBidActivity
-import com.rarible.protocol.union.test.data.randomFlowAddress
-import com.rarible.protocol.union.test.data.randomFlowCancelListActivityDto
-import com.rarible.protocol.union.test.data.randomFlowItemId
+import com.rarible.protocol.union.integration.flow.data.randomFlowAddress
+import com.rarible.protocol.union.integration.flow.data.randomFlowCancelListActivityDto
+import com.rarible.protocol.union.integration.flow.data.randomFlowItemId
 import io.mockk.coEvery
+import java.time.Instant
+import java.time.temporal.ChronoUnit
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.runBlocking
@@ -43,8 +45,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import reactor.kotlin.core.publisher.toMono
-import java.time.Instant
-import java.time.temporal.ChronoUnit
 
 @FlowPreview
 @IntegrationTest

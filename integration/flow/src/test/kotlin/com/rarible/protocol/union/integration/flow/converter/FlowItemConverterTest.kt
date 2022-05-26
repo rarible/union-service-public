@@ -5,7 +5,7 @@ import com.rarible.protocol.dto.MetaAttributeDto
 import com.rarible.protocol.dto.MetaDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.MetaContentDto
-import com.rarible.protocol.union.test.data.randomFlowNftItemDto
+import com.rarible.protocol.union.integration.flow.data.randomFlowNftItemDto
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
