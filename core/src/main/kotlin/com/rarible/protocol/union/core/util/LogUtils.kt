@@ -8,9 +8,12 @@ import com.rarible.protocol.union.dto.ItemIdDto
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.withContext
+import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 
 object LogUtils {
+
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     @ExperimentalCoroutinesApi
     suspend fun <T> addToMdc(vararg values: Pair<String, String>, block: suspend CoroutineScope.() -> T): T {
@@ -36,6 +39,7 @@ object LogUtils {
         val collection = try {
             router.getService(itemId.blockchain).getItemCollectionId(itemId.value) ?: ""
         } catch (e: Exception) {
+            logger.info("Unable to get collection for Item {}: {}", itemId, e.message)
             // should never happen
             ""
         }
