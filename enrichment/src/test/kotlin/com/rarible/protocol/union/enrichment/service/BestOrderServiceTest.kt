@@ -2,7 +2,6 @@ package com.rarible.protocol.union.enrichment.service
 
 import com.rarible.core.common.nowMillis
 import com.rarible.core.test.data.randomBigDecimal
-import com.rarible.core.test.data.randomString
 import com.rarible.protocol.union.core.service.CurrencyService
 import com.rarible.protocol.union.dto.CurrencyUsdRateDto
 import com.rarible.protocol.union.dto.OrderStatusDto
@@ -17,6 +16,7 @@ import com.rarible.protocol.union.enrichment.test.data.randomUnionItem
 import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrderDto
 import com.rarible.protocol.union.enrichment.util.bidCurrencyId
 import com.rarible.protocol.union.enrichment.util.sellCurrencyId
+import com.rarible.protocol.union.integration.ethereum.data.randomAddressString
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import io.mockk.clearMocks
 import io.mockk.coEvery
@@ -303,10 +303,11 @@ class BestOrderServiceTest {
     @Test
     fun `origin orders - best sell updated`() = runBlocking<Unit> {
         val itemId = randomEthItemId()
-        val origin = randomString()
+        val origin = randomAddressString()
+        val origins = listOf(origin)
 
-        val updatedSell = randomUnionSellOrderDto(itemId).copy(makePrice = randomBigDecimal(3, 1))
-        val currentSell = randomUnionSellOrderDto(itemId).copy(makePrice = updatedSell.makePrice!! + (BigDecimal.ONE))
+        val updatedSell = randomUnionSellOrderDto(itemId = itemId, origins = origins).copy(makePrice = BigDecimal.ONE)
+        val currentSell = randomUnionSellOrderDto(itemId = itemId, origins = origins).copy(makePrice = BigDecimal.TEN)
         val currentBid = randomUnionBidOrderDto()
 
         val shortCurrentSell = ShortOrderConverter.convert(currentSell)
@@ -336,9 +337,9 @@ class BestOrderServiceTest {
     @Test
     fun `origin orders - origin orders became empty`() = runBlocking<Unit> {
         val itemId = randomEthItemId()
-        val origin = randomString()
+        val origin = randomAddressString()
 
-        val currentBid = randomUnionBidOrderDto(itemId)
+        val currentBid = randomUnionBidOrderDto(itemId = itemId, origins = listOf(origin))
         val updatedBid = currentBid.copy(status = OrderStatusDto.FILLED)
 
         val shortCurrentBid = ShortOrderConverter.convert(currentBid)
@@ -359,23 +360,30 @@ class BestOrderServiceTest {
     }
 
     @Test
-    fun `origin orders - origin removed`() = runBlocking<Unit> {
-        val origin = randomString()
-        val currentBid = randomUnionBidOrderDto()
+    fun `origin orders - order without origin not updated`() = runBlocking<Unit> {
+        val itemId = randomEthItemId()
+        val origin = randomAddressString()
+        val origins = listOf(origin)
 
-        val shortCurrentBid = ShortOrderConverter.convert(currentBid)
+        val updatedSell = randomUnionSellOrderDto(itemId = itemId).copy(makePrice = BigDecimal.ONE)
+        val currentSell = randomUnionSellOrderDto(itemId = itemId, origins = origins).copy(makePrice = BigDecimal.TEN)
+
+        val shortCurrentSell = ShortOrderConverter.convert(currentSell)
 
         val current = OriginOrders(
             origin = origin,
-            bestBidOrder = shortCurrentBid,
-            bestBidOrders = mapOf(currentBid.bidCurrencyId to shortCurrentBid),
+            bestSellOrder = shortCurrentSell,
+            bestSellOrders = mapOf(updatedSell.sellCurrencyId to shortCurrentSell)
         )
 
-        val item = randomShortItem().copy(originOrders = setOf(current))
+        val item = randomShortItem(itemId).copy(originOrders = setOf(current))
 
-        // Using to update same order, but origin has been removed from config
-        val updatedShortItem = bestOrderService.updateBestBidOrder(item, currentBid, listOf())
+        val updatedShortItem = bestOrderService.updateBestSellOrder(item, updatedSell, listOf(origin))
 
-        assertThat(updatedShortItem.originOrders).hasSize(0)
+        assertThat(updatedShortItem.originOrders).hasSize(1)
+
+        // Best sell should stay the same, updated order doesn't relate to origin of current order
+        val originOrders = updatedShortItem.originOrders.toList()[0]
+        assertThat(originOrders.bestSellOrder).isEqualTo(shortCurrentSell)
     }
 }

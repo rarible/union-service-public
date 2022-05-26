@@ -22,6 +22,7 @@ import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortOrder
 import com.rarible.protocol.union.enrichment.model.ShortOwnership
 import com.rarible.protocol.union.enrichment.util.bidCurrencyId
+import com.rarible.protocol.union.enrichment.util.origins
 import com.rarible.protocol.union.enrichment.util.sellCurrencyId
 import org.springframework.stereotype.Component
 import java.util.*
@@ -214,11 +215,9 @@ class BestOrderService(
         origins: List<String>,
         providerFactory: BestOrderProviderFactory<*>
     ): Set<OriginOrders> {
-        return origins.map { origin ->
-            val current = originOrders.find { it.origin == origin } ?: OriginOrders(origin)
-            val provider = providerFactory.create(origin)
+        return updateOriginOrders(originOrders, order, origins, providerFactory) { current, provider ->
             updateBestSell(current, provider, order)
-        }.filterNot { it.isEmpty() }.toSet()
+        }
     }
 
     private suspend fun updateOriginBid(
@@ -227,10 +226,38 @@ class BestOrderService(
         origins: List<String>,
         providerFactory: BestOrderProviderFactory<*>
     ): Set<OriginOrders> {
-        return origins.map { origin ->
-            val current = originOrders.find { it.origin == origin } ?: OriginOrders(origin)
-            val provider = providerFactory.create(origin)
+        return updateOriginOrders(originOrders, order, origins, providerFactory) { current, provider ->
             updateBestBid(current, provider, order)
+        }
+    }
+
+    private suspend fun updateOriginOrders(
+        originOrders: Set<OriginOrders>,
+        order: OrderDto,
+        origins: List<String>,
+        providerFactory: BestOrderProviderFactory<*>,
+        update: suspend (
+            current: OriginOrders,
+            bestOrderProvider: BestOrderProvider<*>
+        ) -> OriginOrders
+    ): Set<OriginOrders> {
+        val orderOrigins = order.origins
+        val matchedOrigins = origins.intersect(orderOrigins)
+        if (matchedOrigins.isEmpty()) {
+            return originOrders // Just to avoid unnecessary garbage production
+        }
+
+        val mappedOriginOrders = originOrders.associateBy { it.origin }
+        return origins.map { origin ->
+            // Here we need to update only origins related to the order
+            val current = mappedOriginOrders[origin] ?: OriginOrders(origin)
+            if (matchedOrigins.contains(origin)) {
+                val provider = providerFactory.create(origin)
+                update(current, provider)
+            } else {
+                // In case if order doesn't relate to the origin, skip it
+                current
+            }
         }.filterNot { it.isEmpty() }.toSet()
     }
 

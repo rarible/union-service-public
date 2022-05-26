@@ -26,9 +26,9 @@ import com.rarible.protocol.union.enrichment.util.sellCurrencyId
 import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAddress
+import com.rarible.protocol.union.integration.ethereum.data.randomEthBidOrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
-import com.rarible.protocol.union.integration.ethereum.data.randomEthLegacyBidOrderDto
-import com.rarible.protocol.union.integration.ethereum.data.randomEthLegacySellOrderDto
+import com.rarible.protocol.union.integration.ethereum.data.randomEthSellOrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomPolygonAddress
 import com.rarible.protocol.union.integration.tezos.data.randomTezosOrderDto
 import com.rarible.protocol.union.test.data.randomFlowAddress
@@ -64,7 +64,7 @@ class OrderControllerFt : AbstractIntegrationTest() {
 
     @Test
     fun `get order by id - ethereum`() = runBlocking<Unit> {
-        val order = randomEthLegacySellOrderDto()
+        val order = randomEthSellOrderDto()
         val orderId = EthConverter.convert(order.hash)
         val orderIdFull = OrderIdDto(BlockchainDto.ETHEREUM, order.hash.prefixed()).fullId()
 
@@ -110,7 +110,7 @@ class OrderControllerFt : AbstractIntegrationTest() {
 
         val flowOrders = listOf(randomFlowV1OrderDto(), randomFlowV1OrderDto())
         val tezosOrders = listOf(randomTezosOrderDto())
-        val ethOrders = listOf(randomEthLegacySellOrderDto(), randomEthLegacySellOrderDto())
+        val ethOrders = listOf(randomEthSellOrderDto(), randomEthSellOrderDto())
 
         coEvery {
             testFlowOrderApi.getOrdersAllByStatus(any(), any(), size, any())
@@ -136,7 +136,7 @@ class OrderControllerFt : AbstractIntegrationTest() {
     fun `get all sync - no origin`() = runBlocking<Unit> {
         val size = 8
 
-        val ethOrders = listOf(randomEthLegacySellOrderDto(), randomEthLegacySellOrderDto())
+        val ethOrders = listOf(randomEthSellOrderDto(), randomEthSellOrderDto())
 
         coEvery {
             testEthereumOrderApi.getAllSync(any(), any(), size)
@@ -158,8 +158,8 @@ class OrderControllerFt : AbstractIntegrationTest() {
         val origin = UnionAddressConverter.convert(BlockchainDto.ETHEREUM, randomEthAddress())
         val size = 4
 
-        val ethOrders = listOf(randomEthLegacySellOrderDto())
-        val polyOrders = listOf(randomEthLegacySellOrderDto(), randomEthLegacySellOrderDto())
+        val ethOrders = listOf(randomEthSellOrderDto())
+        val polyOrders = listOf(randomEthSellOrderDto(), randomEthSellOrderDto())
 
         coEvery {
             testEthereumOrderApi.getOrdersAll(origin.value, ethPlatform, any(), size)
@@ -192,8 +192,9 @@ class OrderControllerFt : AbstractIntegrationTest() {
         val size = 3
 
         val ethOrders = listOf(
-            randomEthLegacySellOrderDto().copy(lastUpdateAt = now.minusSeconds(2)),
-            randomEthLegacySellOrderDto().copy(lastUpdateAt = now.minusSeconds(10)))
+            randomEthSellOrderDto().copy(lastUpdateAt = now.minusSeconds(2)),
+            randomEthSellOrderDto().copy(lastUpdateAt = now.minusSeconds(10))
+        )
         val flowOrders = listOf(
             randomFlowV1OrderDto().copy(lastUpdateAt = now.minusSeconds(5)),
             randomFlowV1OrderDto().copy(lastUpdateAt = now.plusSeconds(10)))
@@ -228,7 +229,7 @@ class OrderControllerFt : AbstractIntegrationTest() {
         val (contract, tokenId) = CompositeItemIdParser.split(ethItemId.value)
         val maker = UnionAddressConverter.convert(BlockchainDto.ETHEREUM, randomEthAddress())
 
-        val order = randomEthLegacyBidOrderDto(ethItemId)
+        val order = randomEthBidOrderDto(ethItemId)
         val unionOrder = ethOrderConverter.convert(order, ethItemId.blockchain)
 
         val ethOrders = listOf(order)
@@ -291,7 +292,7 @@ class OrderControllerFt : AbstractIntegrationTest() {
 
         val flowOrders = listOf(randomFlowV1OrderDto(), randomFlowV1OrderDto())
         val tezosOrders = listOf(randomTezosOrderDto())
-        val ethOrders = listOf(randomEthLegacySellOrderDto(), randomEthLegacySellOrderDto())
+        val ethOrders = listOf(randomEthSellOrderDto(), randomEthSellOrderDto())
 
         coEvery {
             testFlowOrderApi.getSellOrders(null, continuation, size)
@@ -341,7 +342,7 @@ class OrderControllerFt : AbstractIntegrationTest() {
         val (contract, tokenId) = CompositeItemIdParser.split(ethItemId.value)
         val maker = UnionAddressConverter.convert(BlockchainDto.ETHEREUM, randomEthAddress())
 
-        val order = randomEthLegacySellOrderDto(ethItemId)
+        val order = randomEthSellOrderDto(ethItemId)
         val unionOrder = ethOrderConverter.convert(order, ethItemId.blockchain)
 
         val ethOrders = listOf(order)
@@ -386,7 +387,7 @@ class OrderControllerFt : AbstractIntegrationTest() {
     fun `get sell orders order by maker - polygon`() = runBlocking<Unit> {
         val maker = randomPolygonAddress()
 
-        val polygonOrders = listOf(randomEthLegacySellOrderDto())
+        val polygonOrders = listOf(randomEthSellOrderDto())
 
         coEvery {
             testPolygonOrderApi.getSellOrdersByMakerAndByStatus(maker.value, null, ethPlatform, continuation, size, emptyList())

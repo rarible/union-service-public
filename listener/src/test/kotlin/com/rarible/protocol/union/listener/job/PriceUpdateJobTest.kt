@@ -12,12 +12,12 @@ import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrderDto
 import com.rarible.protocol.union.enrichment.util.bidCurrencyId
 import com.rarible.protocol.union.enrichment.util.sellCurrencyId
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
+import com.rarible.protocol.union.integration.ethereum.data.randomEthBidOrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
-import com.rarible.protocol.union.integration.ethereum.data.randomEthLegacyBidOrderDto
-import com.rarible.protocol.union.integration.ethereum.data.randomEthLegacySellOrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthNftItemDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipId
+import com.rarible.protocol.union.integration.ethereum.data.randomEthSellOrderDto
 import com.rarible.protocol.union.listener.test.AbstractIntegrationTest
 import com.rarible.protocol.union.listener.test.IntegrationTest
 import kotlinx.coroutines.runBlocking
@@ -55,15 +55,15 @@ internal class PriceUpdateJobTest : AbstractIntegrationTest() {
     fun `should update best order for multi orders items`() = runBlocking<Unit> {
         val itemId = randomEthItemId()
 
-        val ethSellOrder1 = randomEthLegacySellOrderDto(randomEthItemId())
-        val ethSellOrder2 = randomEthLegacySellOrderDto(randomEthItemId())
+        val ethSellOrder1 = randomEthSellOrderDto(randomEthItemId())
+        val ethSellOrder2 = randomEthSellOrderDto(randomEthItemId())
         val unionSellOrder1 = ethereumOrderConverter.convert(ethSellOrder1, BlockchainDto.ETHEREUM)
         val unionSellOrder2 = ethereumOrderConverter.convert(ethSellOrder2, BlockchainDto.ETHEREUM)
         val sellOrder1 = ShortOrderConverter.convert(unionSellOrder1).copy(makePrice = BigDecimal.valueOf(1))
         val sellOrder2 = ShortOrderConverter.convert(unionSellOrder2).copy(makePrice = BigDecimal.valueOf(2))
 
-        val ethBidOrder1 = randomEthLegacyBidOrderDto(randomEthItemId())
-        val ethBidOrder2 = randomEthLegacyBidOrderDto(randomEthItemId())
+        val ethBidOrder1 = randomEthBidOrderDto(randomEthItemId())
+        val ethBidOrder2 = randomEthBidOrderDto(randomEthItemId())
         val unionBidOrder1 = ethereumOrderConverter.convert(ethBidOrder1, BlockchainDto.ETHEREUM)
         val unionBidOrder2 = ethereumOrderConverter.convert(ethBidOrder2, BlockchainDto.ETHEREUM)
         val bidOrder1 = ShortOrderConverter.convert(unionBidOrder1).copy(takePrice = BigDecimal.valueOf(2))
@@ -116,7 +116,7 @@ internal class PriceUpdateJobTest : AbstractIntegrationTest() {
         )
 
         ethereumOwnershipControllerApiMock.mockGetNftOwnershipById(ownershipId, randomEthOwnershipDto())
-        ethereumOrderControllerApiMock.mockGetByIds(randomEthLegacySellOrderDto())
+        ethereumOrderControllerApiMock.mockGetByIds(randomEthSellOrderDto())
         ethereumAuctionControllerApiMock.mockGetAuctionsByItem(shortOwnership.id.toDto().getItemId(), emptyList())
 
         ownershipRepository.save(shortOwnership)

@@ -8,11 +8,11 @@ import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.test.data.randomShortCollection
 import com.rarible.protocol.union.integration.ethereum.converter.EthCollectionConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
+import com.rarible.protocol.union.integration.ethereum.data.randomEthBidOrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionAsset
 import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionId
-import com.rarible.protocol.union.integration.ethereum.data.randomEthLegacyBidOrderDto
-import com.rarible.protocol.union.integration.ethereum.data.randomEthLegacySellOrderDto
+import com.rarible.protocol.union.integration.ethereum.data.randomEthSellOrderDto
 import com.rarible.protocol.union.listener.test.AbstractIntegrationTest
 import com.rarible.protocol.union.listener.test.IntegrationTest
 import io.mockk.coEvery
@@ -45,7 +45,9 @@ class EnrichmentCollectionEventServiceIt : AbstractIntegrationTest() {
         val unionCollection = EthCollectionConverter.convert(ethItem, collectionId.blockchain)
         collectionService.save(shortCollection)
 
-        val bestSellOrder = randomEthLegacySellOrderDto().copy(make = randomEthCollectionAsset(Address.apply(collectionId.value)))
+        val bestSellOrder = randomEthSellOrderDto().copy(
+            make = randomEthCollectionAsset(Address.apply(collectionId.value))
+        )
         val unionBestSell = ethOrderConverter.convert(bestSellOrder, collectionId.blockchain)
 
         coEvery { testEthereumCollectionApi.getNftCollectionById(collectionId.value) } returns ethItem.toMono()
@@ -76,7 +78,9 @@ class EnrichmentCollectionEventServiceIt : AbstractIntegrationTest() {
         val unionCollection = EthCollectionConverter.convert(ethItem, collectionId.blockchain)
         collectionService.save(shortCollection)
 
-        val bestBidOrder = randomEthLegacyBidOrderDto().copy(take = randomEthCollectionAsset(Address.apply(collectionId.value)))
+        val bestBidOrder = randomEthBidOrderDto().copy(
+            take = randomEthCollectionAsset(Address.apply(collectionId.value))
+        )
         val unionBestBid = ethOrderConverter.convert(bestBidOrder, collectionId.blockchain)
 
         coEvery { testEthereumCollectionApi.getNftCollectionById(collectionId.value) } returns ethItem.toMono()

@@ -21,9 +21,9 @@ import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConvert
 import com.rarible.protocol.union.integration.ethereum.converter.EthOwnershipConverter
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAuctionDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
-import com.rarible.protocol.union.integration.ethereum.data.randomEthLegacySellOrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipId
+import com.rarible.protocol.union.integration.ethereum.data.randomEthSellOrderDto
 import com.rarible.protocol.union.listener.test.AbstractIntegrationTest
 import com.rarible.protocol.union.listener.test.IntegrationTest
 import org.assertj.core.api.Assertions.assertThat
@@ -82,7 +82,7 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
         val ownershipId = randomEthOwnershipId(itemId)
         val ethOwnership = randomEthOwnershipDto(ownershipId)
 
-        val bestSellOrder = randomEthLegacySellOrderDto(itemId)
+        val bestSellOrder = randomEthSellOrderDto(itemId)
         val unionBestSell = ethOrderConverter.convert(bestSellOrder, itemId.blockchain)
 
         val unionOwnership = EthOwnershipConverter.convert(ethOwnership, itemId.blockchain)
@@ -123,7 +123,7 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
         val ethOwnership = randomEthOwnershipDto(ownershipId)
 
         // Corrupted order with incorrect status
-        val bestSellOrder = randomEthLegacySellOrderDto(itemId).copy(status = OrderStatusDto.INACTIVE)
+        val bestSellOrder = randomEthSellOrderDto(itemId).copy(status = OrderStatusDto.INACTIVE)
         val unionBestSell = ethOrderConverter.convert(bestSellOrder, itemId.blockchain)
 
         val unionOwnership = EthOwnershipConverter.convert(ethOwnership, itemId.blockchain)
@@ -162,7 +162,7 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
         val shortOwnership = ShortOwnershipConverter.convert(unionOwnership)
         ownershipService.save(shortOwnership)
 
-        val bestSellOrder = randomEthLegacySellOrderDto(itemId)
+        val bestSellOrder = randomEthSellOrderDto(itemId)
         val unionBestSell = ethOrderConverter.convert(bestSellOrder, itemId.blockchain)
 
         ethereumOwnershipControllerApiMock.mockGetNftOwnershipById(ownershipId, ethOwnership)

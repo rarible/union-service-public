@@ -23,10 +23,10 @@ import com.rarible.protocol.union.integration.ethereum.converter.EthAuctionConve
 import com.rarible.protocol.union.integration.ethereum.converter.EthItemConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAuctionDto
+import com.rarible.protocol.union.integration.ethereum.data.randomEthBidOrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
-import com.rarible.protocol.union.integration.ethereum.data.randomEthLegacyBidOrderDto
-import com.rarible.protocol.union.integration.ethereum.data.randomEthLegacySellOrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthNftItemDto
+import com.rarible.protocol.union.integration.ethereum.data.randomEthSellOrderDto
 import com.rarible.protocol.union.listener.test.AbstractIntegrationTest
 import com.rarible.protocol.union.listener.test.IntegrationTest
 import io.mockk.coEvery
@@ -85,8 +85,8 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
     fun `update event - existing item updated`() = runWithKafka {
         val itemId = randomEthItemId()
         val ethItem = randomEthNftItemDto(itemId)
-        val bestSellOrder = randomEthLegacySellOrderDto(itemId)
-        val bestBidOrder = randomEthLegacySellOrderDto(itemId)
+        val bestSellOrder = randomEthSellOrderDto(itemId)
+        val bestBidOrder = randomEthSellOrderDto(itemId)
         val unionBestSell = ethOrderConverter.convert(bestSellOrder, itemId.blockchain)
         val unionBestBid = ethOrderConverter.convert(bestBidOrder, itemId.blockchain)
 
@@ -131,7 +131,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         val ethItem = randomEthNftItemDto(itemId)
 
         // Corrupted order with taker
-        val bestBidOrder = randomEthLegacySellOrderDto(itemId).copy(taker = randomAddress())
+        val bestBidOrder = randomEthSellOrderDto(itemId).copy(taker = randomAddress())
         val unionBestBid = ethOrderConverter.convert(bestBidOrder, itemId.blockchain)
 
         val unionItem = EthItemConverter.convert(ethItem, itemId.blockchain)
@@ -230,7 +230,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         val unionItem = EthItemConverter.convert(ethItem, itemId.blockchain)
         itemService.save(shortItem)
 
-        val bestSellOrder = randomEthLegacySellOrderDto(itemId)
+        val bestSellOrder = randomEthSellOrderDto(itemId)
         val unionBestSell = ethOrderConverter.convert(bestSellOrder, itemId.blockchain)
 
         ethereumItemControllerApiMock.mockGetNftItemById(itemId, ethItem)
@@ -259,7 +259,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         val itemId = randomEthItemId()
         val (contract, tokenId) = CompositeItemIdParser.split(itemId.value)
 
-        val bestBidOrder = randomEthLegacyBidOrderDto(itemId).copy(status = OrderStatusDto.CANCELLED)
+        val bestBidOrder = randomEthBidOrderDto(itemId).copy(status = OrderStatusDto.CANCELLED)
         val unionBestBid = ethOrderConverter.convert(bestBidOrder, itemId.blockchain)
 
         val shortItem = randomShortItem(itemId).copy(bestBidOrder = ShortOrderConverter.convert(unionBestBid))
@@ -291,7 +291,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         val ethItem = randomEthNftItemDto(itemId)
         // In this case we don't have saved ShortItem in Enrichment DB
 
-        val bestBidOrder = randomEthLegacyBidOrderDto(itemId).copy(status = OrderStatusDto.INACTIVE)
+        val bestBidOrder = randomEthBidOrderDto(itemId).copy(status = OrderStatusDto.INACTIVE)
         val unionBestBid = ethOrderConverter.convert(bestBidOrder, itemId.blockchain)
 
         ethereumItemControllerApiMock.mockGetNftItemById(itemId, ethItem)
@@ -454,7 +454,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         val itemId = randomEthItemId()
         val ethItem = randomEthNftItemDto(itemId)
 
-        val bestSell = randomEthLegacySellOrderDto()
+        val bestSell = randomEthSellOrderDto()
         val unionBestSell = ethOrderConverter.convert(bestSell, BlockchainDto.ETHEREUM)
 
         val ethAuction = randomEthAuctionDto(itemId)

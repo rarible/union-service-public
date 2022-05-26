@@ -13,5 +13,9 @@ interface OriginOrdersOwner {
         return result
     }
 
+    fun getOriginOrdersMap(): Map<String, OriginOrders> {
+        return originOrders.associateBy { it.origin }
+    }
+
     fun getAllBestOrders(): List<ShortOrder>
 }

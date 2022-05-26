@@ -38,16 +38,16 @@ import com.rarible.protocol.union.integration.ethereum.converter.EthOwnershipCon
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAssetErc1155
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAssetErc20
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAuctionDto
+import com.rarible.protocol.union.integration.ethereum.data.randomEthBidOrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionAsset
 import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemMintActivity
-import com.rarible.protocol.union.integration.ethereum.data.randomEthLegacyBidOrderDto
-import com.rarible.protocol.union.integration.ethereum.data.randomEthLegacySellOrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthNftItemDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOrderActivityMatch
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipDto
+import com.rarible.protocol.union.integration.ethereum.data.randomEthSellOrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthV2OrderDto
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -88,21 +88,21 @@ class RefreshControllerFt : AbstractIntegrationTest() {
         val unionItem = EthItemConverter.convert(ethItem, itemId.blockchain)
         val shortItem = ShortItemConverter.convert(unionItem)
 
-        val ethBestSell = randomEthLegacySellOrderDto(itemId)
+        val ethBestSell = randomEthSellOrderDto(itemId)
         val unionBestSell = ethOrderConverter.convert(ethBestSell, itemId.blockchain)
         val shortBestSell = ShortOrderConverter.convert(unionBestSell)
 
-        val ethBestBid = randomEthLegacyBidOrderDto(itemId)
+        val ethBestBid = randomEthBidOrderDto(itemId)
         val unionBestBid = ethOrderConverter.convert(ethBestBid, itemId.blockchain)
         val shortBestBid = ShortOrderConverter.convert(unionBestBid)
 
         val bidCurrency = unionBestBid.bidCurrencyId
         val sellCurrency = unionBestSell.sellCurrencyId
 
-        val ethOriginBestSell = randomEthLegacySellOrderDto(itemId).copy(take = ethBestSell.take)
+        val ethOriginBestSell = randomEthSellOrderDto(itemId).copy(take = ethBestSell.take)
         val shortOriginBestSell = ShortOrderConverter.convert(unionBestSell)
 
-        val ethOriginBestBid = randomEthLegacyBidOrderDto(itemId).copy(make = ethBestBid.make)
+        val ethOriginBestBid = randomEthBidOrderDto(itemId).copy(make = ethBestBid.make)
         val shorOriginBestBid = ShortOrderConverter.convert(unionBestBid)
 
         val ethAuction = randomEthAuctionDto(itemId)
@@ -219,7 +219,7 @@ class RefreshControllerFt : AbstractIntegrationTest() {
         val unionOwnership = EthOwnershipConverter.convert(ethOwnership, ethOwnershipId.blockchain)
         val shortOwnership = ShortOwnershipConverter.convert(unionOwnership)
 
-        val ethBestSell = randomEthLegacySellOrderDto(ethItemId)
+        val ethBestSell = randomEthSellOrderDto(ethItemId)
         val unionBestSell = ethOrderConverter.convert(ethBestSell, ethOwnershipId.blockchain)
         val shortBestSell = ShortOrderConverter.convert(unionBestSell)
 
@@ -307,10 +307,10 @@ class RefreshControllerFt : AbstractIntegrationTest() {
         val ethItemId = randomEthItemId()
         val ethItem = randomEthNftItemDto(ethItemId).copy(deleted = true)
 
-        val ethBestSell = randomEthLegacySellOrderDto(ethItemId)
+        val ethBestSell = randomEthSellOrderDto(ethItemId)
         val unionBestSell = ethOrderConverter.convert(ethBestSell, ethItemId.blockchain)
 
-        val ethBestBid = randomEthLegacyBidOrderDto(ethItemId)
+        val ethBestBid = randomEthBidOrderDto(ethItemId)
         val unionBestBid = ethOrderConverter.convert(ethBestBid, ethItemId.blockchain)
 
         ethereumAuctionControllerApiMock.mockGetAuctionsByItem(ethItemId, emptyList())
@@ -435,10 +435,10 @@ class RefreshControllerFt : AbstractIntegrationTest() {
         val unionItem = EthItemConverter.convert(ethItem, ethItemId.blockchain)
         val shortItem = ShortItemConverter.convert(unionItem)
 
-        val ethBestSell = randomEthLegacySellOrderDto(ethItemId).copy(taker = Address.ONE())
+        val ethBestSell = randomEthSellOrderDto(ethItemId).copy(taker = Address.ONE())
         val unionBestSell = ethOrderConverter.convert(ethBestSell, ethItemId.blockchain)
 
-        val ethBestBid = randomEthLegacyBidOrderDto(ethItemId)
+        val ethBestBid = randomEthBidOrderDto(ethItemId)
         val unionBestBid = ethOrderConverter.convert(ethBestBid, ethItemId.blockchain)
 
         ethereumAuctionControllerApiMock.mockGetAuctionsByItem(ethItemId, emptyList())
@@ -484,12 +484,12 @@ class RefreshControllerFt : AbstractIntegrationTest() {
         val unionItem = EthItemConverter.convert(ethItem, ethItemId.blockchain)
         val shortItem = ShortItemConverter.convert(unionItem)
 
-        val ethBestSell = randomEthLegacySellOrderDto(ethItemId)
-        val ethBestSellWithTaker = randomEthLegacySellOrderDto(ethItemId).copy(taker = Address.ONE())
+        val ethBestSell = randomEthSellOrderDto(ethItemId)
+        val ethBestSellWithTaker = randomEthSellOrderDto(ethItemId).copy(taker = Address.ONE())
         val unionBestSell = ethOrderConverter.convert(ethBestSell, ethItemId.blockchain)
         val shortBestSell = ShortOrderConverter.convert(unionBestSell)
 
-        val ethBestBid = randomEthLegacyBidOrderDto(ethItemId)
+        val ethBestBid = randomEthBidOrderDto(ethItemId)
         val unionBestBid = ethOrderConverter.convert(ethBestBid, ethItemId.blockchain)
 
         ethereumAuctionControllerApiMock.mockGetAuctionsByItem(ethItemId, emptyList())
