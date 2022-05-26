@@ -12,7 +12,6 @@ import com.rarible.protocol.union.dto.continuation.page.Page
 import com.rarible.protocol.union.integration.solana.converter.SolanaItemConverter
 import com.rarible.protocol.union.integration.solana.converter.SolanaItemMetaConverter
 import kotlinx.coroutines.reactive.awaitFirst
-import kotlinx.coroutines.reactive.awaitFirstOrNull
 
 @CaptureSpan(type = "blockchain")
 open class SolanaItemService(
@@ -94,5 +93,9 @@ open class SolanaItemService(
         val tokensDto = tokenApi.getTokensByAddresses(itemIds).awaitFirst()
 
         return tokensDto.tokens.map { SolanaItemConverter.convert(it, blockchain) }
+    }
+
+    override suspend fun getItemCollectionId(itemId: String): String? {
+        return getItemById(itemId).collection?.value
     }
 }

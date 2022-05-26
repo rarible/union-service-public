@@ -7,7 +7,7 @@ import com.rarible.protocol.union.core.model.UnionOrderEvent
 import com.rarible.protocol.union.core.model.UnionOrderUpdateEvent
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
-import com.rarible.protocol.union.integration.ethereum.data.randomEthLegacySellOrderDto
+import com.rarible.protocol.union.integration.ethereum.data.randomEthSellOrderDto
 import com.rarible.protocol.union.test.mock.CurrencyMock
 import io.mockk.clearMocks
 import io.mockk.coEvery
@@ -31,7 +31,7 @@ class EthereumOrderEventHandlerTest {
 
     @Test
     fun `ethereum order event`() = runBlocking {
-        val order = randomEthLegacySellOrderDto()
+        val order = randomEthSellOrderDto()
 
         handler.handle(OrderUpdateEventDto(randomString(), order.hash.prefixed(), order))
 

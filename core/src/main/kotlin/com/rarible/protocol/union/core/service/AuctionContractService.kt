@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.core.service
 
 import com.rarible.protocol.union.core.DefaultBlockchainProperties
+import com.rarible.protocol.union.core.util.safeSplit
 import com.rarible.protocol.union.dto.BlockchainDto
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -14,10 +15,8 @@ class AuctionContractService(
     private val logger = LoggerFactory.getLogger(AuctionContractService::class.java)
 
     private val auctionContracts = blockchainProperties.associateBy({ it.blockchain }, {
-        val parsedContracts = it.auctionContracts?.split(",")?.filter { str -> str.isNotBlank() } ?: emptyList()
-        HashSet(parsedContracts)
+        HashSet(safeSplit(it.auctionContracts))
     })
-
 
     @PostConstruct
     fun log() {

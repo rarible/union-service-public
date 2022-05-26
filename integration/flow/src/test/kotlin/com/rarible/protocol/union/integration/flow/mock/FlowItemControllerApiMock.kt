@@ -1,9 +1,8 @@
-package com.rarible.protocol.union.api.controller.test.mock.flow
+package com.rarible.protocol.union.integration.flow.mock
 
 import com.rarible.protocol.dto.FlowNftItemDto
 import com.rarible.protocol.dto.FlowNftItemsDto
 import com.rarible.protocol.flow.nft.api.client.FlowNftItemControllerApi
-import com.rarible.protocol.union.api.controller.test.mock.WebClientExceptionMock
 import com.rarible.protocol.union.dto.ItemIdDto
 import io.mockk.every
 import reactor.core.publisher.Mono
@@ -16,12 +15,6 @@ class FlowItemControllerApiMock(
         every {
             nftItemControllerApi.getNftItemById(itemId.value)
         } returns (if (returnItem == null) Mono.empty() else Mono.just(returnItem))
-    }
-
-    fun mockGetNftItemById(itemId: ItemIdDto, status: Int, error: Any) {
-        every {
-            nftItemControllerApi.getNftItemById(itemId.value)
-        } throws WebClientExceptionMock.mock(status, error)
     }
 
     fun mockGetNftAllItems(

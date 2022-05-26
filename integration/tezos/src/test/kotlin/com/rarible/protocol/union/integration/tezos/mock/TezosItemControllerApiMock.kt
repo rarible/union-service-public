@@ -1,9 +1,8 @@
-package com.rarible.protocol.union.api.controller.test.mock.tezos
+package com.rarible.protocol.union.integration.tezos.mock
 
 import com.rarible.protocol.tezos.api.client.NftItemControllerApi
 import com.rarible.protocol.tezos.dto.NftItemDto
 import com.rarible.protocol.tezos.dto.NftItemsDto
-import com.rarible.protocol.union.api.controller.test.mock.WebClientExceptionMock
 import com.rarible.protocol.union.dto.ItemIdDto
 import io.mockk.every
 import reactor.core.publisher.Mono
@@ -16,12 +15,6 @@ class TezosItemControllerApiMock(
         every {
             nftItemControllerApi.getNftItemById(itemId.value, true)
         } returns (if (returnItem == null) Mono.empty() else Mono.just(returnItem))
-    }
-
-    fun mockGetNftItemById(itemId: ItemIdDto, status: Int, error: Any) {
-        every {
-            nftItemControllerApi.getNftItemById(itemId.value, true)
-        } throws WebClientExceptionMock.mock(status, error)
     }
 
     // TODO uncomment when supported

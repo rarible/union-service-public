@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.api.controller.test.mock.eth
+package com.rarible.protocol.union.integration.ethereum.mock
 
 import com.rarible.protocol.dto.NftOwnershipDto
 import com.rarible.protocol.dto.NftOwnershipsDto

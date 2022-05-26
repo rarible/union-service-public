@@ -5,7 +5,7 @@ import com.rarible.protocol.union.enrichment.model.ShortOwnership
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
 import com.rarible.protocol.union.enrichment.service.EnrichmentOrderService
 
-class OwnershipBestSellOrderProvider(
+class OwnershipBestBidOrderProvider(
     private val ownershipId: ShortOwnershipId,
     private val enrichmentOrderService: EnrichmentOrderService,
     private val origin: String? = null
@@ -15,7 +15,7 @@ class OwnershipBestSellOrderProvider(
     override val entityType: Class<ShortOwnership> get() = ShortOwnership::class.java
 
     override suspend fun fetch(currencyId: String): OrderDto? {
-        return enrichmentOrderService.getBestSell(ownershipId, currencyId, origin)
+        return null // Bid order is not supported for ownership yet
     }
 
     class Factory(
@@ -24,7 +24,7 @@ class OwnershipBestSellOrderProvider(
     ) : BestOrderProviderFactory<ShortOwnership> {
 
         override fun create(origin: String?): BestOrderProvider<ShortOwnership> {
-            return OwnershipBestSellOrderProvider(ownershipId, enrichmentOrderService, origin)
+            return OwnershipBestBidOrderProvider(ownershipId, enrichmentOrderService, origin)
         }
 
     }

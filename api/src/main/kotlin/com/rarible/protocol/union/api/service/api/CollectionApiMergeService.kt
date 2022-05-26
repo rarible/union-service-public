@@ -150,8 +150,9 @@ class CollectionApiMergeService(
             .associateBy { it.id.toDto() }
 
         val shortOrderIds = shortCollections.values
-            .map { listOfNotNull(it.bestBidOrder?.dtoId, it.bestSellOrder?.dtoId) }
+            .map { it.getAllBestOrders() }
             .flatten()
+            .map { it.dtoId }
 
         val orders = orderApiService.getByIds(shortOrderIds)
             .associateBy { it.id }
@@ -171,11 +172,5 @@ class CollectionApiMergeService(
         )
 
         return enrichedCollections
-    }
-
-    suspend fun enrich(unionCollection: UnionCollection): CollectionDto {
-        val shortId = ShortCollectionId(unionCollection.id)
-        val shortCollection = enrichmentCollectionService.get(shortId)
-        return enrichmentCollectionService.enrichCollection(shortCollection, unionCollection)
     }
 }

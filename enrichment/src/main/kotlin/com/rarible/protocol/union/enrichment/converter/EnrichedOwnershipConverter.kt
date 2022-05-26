@@ -41,7 +41,9 @@ object EnrichedOwnershipConverter {
             lastUpdatedAt = ownership.lastUpdatedAt,
             pending = ownership.pending,
             // Enrichment data
-            bestSellOrder = shortOwnership?.bestSellOrder?.let { orders[it.dtoId] }
+            bestSellOrder = shortOwnership?.bestSellOrder?.let { orders[it.dtoId] },
+            originOrders = shortOwnership?.originOrders?.let { OriginOrdersConverter.convert(it, orders) }
+                ?: emptyList()
         )
     }
 }

@@ -8,7 +8,8 @@ import org.slf4j.LoggerFactory
 
 class BestOrderEvaluator(
     private val comparator: BestOrderComparator,
-    private val provider: BestOrderProvider<*>
+    private val provider: BestOrderProvider<*>,
+    val currencyId: String
 ) {
 
     private val id = provider.entityId
@@ -97,7 +98,7 @@ class BestOrderEvaluator(
             name, updated.dtoId.fullId(), type, id
         )
         // It means, current best Order is not alive, we have to fetch actual best Order
-        val fetched = provider.fetch()
+        val fetched = provider.fetch(currencyId)
         logger.info("Fetched {} for {} [{}] : [{}]", name, type, id, fetched?.id)
         return fetched?.let { ShortOrderConverter.convert(it) }
     }

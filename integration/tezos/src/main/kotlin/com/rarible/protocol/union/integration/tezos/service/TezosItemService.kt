@@ -132,4 +132,9 @@ open class TezosItemService(
         // Not implemented in legacy indexer
         return emptyList()
     }
+
+    override suspend fun getItemCollectionId(itemId: String): String? {
+        // TODO is validation possible here?
+        return itemId.substringBefore(":")
+    }
 }

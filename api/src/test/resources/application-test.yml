@@ -24,6 +24,11 @@ rarible:
     enableRetrySchedulerJob: false
 
 integration:
+  ethereum:
+    origins:
+      testWhitelabel:
+        origin: "0xWhitelabel"
+        collections: "0xf3348949db80297c78ec17d19611c263fc61f988"
   tezos:
     client:
       url: "http://localhost:8080"

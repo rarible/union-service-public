@@ -23,17 +23,19 @@ import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
 import com.rarible.protocol.union.enrichment.service.BestOrderService
 import com.rarible.protocol.union.enrichment.service.EnrichmentActivityService
 import com.rarible.protocol.union.enrichment.service.EnrichmentAuctionService
+import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
 import com.rarible.protocol.union.enrichment.validator.OwnershipValidator
-import java.util.UUID
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
+import java.util.*
 
 @Component
 class EnrichmentOwnershipEventService(
     private val enrichmentOwnershipService: EnrichmentOwnershipService,
+    private val enrichmentItemService: EnrichmentItemService,
     private val enrichmentItemEventService: EnrichmentItemEventService,
     private val enrichmentAuctionService: EnrichmentAuctionService,
     private val enrichmentActivityService: EnrichmentActivityService,
@@ -51,8 +53,8 @@ class EnrichmentOwnershipEventService(
         event?.let { sendUpdate(it) }
     }
 
-    suspend fun recalculateBestOrder(ownership: ShortOwnership): Boolean {
-        val updated = bestOrderService.updateBestSellOrder(ownership)
+    suspend fun recalculateBestOrders(ownership: ShortOwnership): Boolean {
+        val updated = bestOrderService.updateBestOrders(ownership)
         if (ownership.bestSellOrder != updated.bestSellOrder) {
             logger.info(
                 "Ownership BestSellOrder updated ([{}] -> [{}]) due to currency rate changed",
@@ -75,7 +77,8 @@ class EnrichmentOwnershipEventService(
         val exist = current != null
         val short = current ?: ShortOwnership.empty(ownershipId)
 
-        val updated = bestOrderService.updateBestSellOrder(short, order)
+        val origins = enrichmentItemService.getItemOrigins(ownershipId.getItemId())
+        val updated = bestOrderService.updateBestSellOrder(short, order, origins)
 
         if (short != updated) {
             if (updated.isNotEmpty()) {

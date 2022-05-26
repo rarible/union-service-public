@@ -27,4 +27,8 @@ data class ShortOwnershipId(
             owner = UnionAddressConverter.convert(blockchain, owner)
         )
     }
+
+    fun getItemId(): ShortItemId {
+        return ShortItemId(blockchain, itemId)
+    }
 }

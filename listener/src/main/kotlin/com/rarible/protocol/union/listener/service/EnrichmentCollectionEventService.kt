@@ -3,6 +3,7 @@ package com.rarible.protocol.union.listener.service
 import com.rarible.core.common.optimisticLock
 import com.rarible.protocol.union.core.event.OutgoingCollectionEventListener
 import com.rarible.protocol.union.core.model.UnionCollection
+import com.rarible.protocol.union.core.service.OriginService
 import com.rarible.protocol.union.core.service.ReconciliationEventService
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.CollectionUpdateEventDto
@@ -15,14 +16,15 @@ import com.rarible.protocol.union.enrichment.validator.EntityValidator
 import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
-import java.util.UUID
+import java.util.*
 
 @Component
 class EnrichmentCollectionEventService(
     private val itemEventListeners: List<OutgoingCollectionEventListener>,
     private val enrichmentCollectionService: EnrichmentCollectionService,
     private val reconciliationEventService: ReconciliationEventService,
-    private val bestOrderService: BestOrderService
+    private val bestOrderService: BestOrderService,
+    private val originService: OriginService
 ) {
 
     private val logger = LoggerFactory.getLogger(EnrichmentCollectionEventService::class.java)
@@ -42,7 +44,10 @@ class EnrichmentCollectionEventService(
             ShortCollectionId(collectionId),
             order,
             notificationEnabled
-        ) { collection -> bestOrderService.updateBestSellOrder(collection, order) }
+        ) { collection ->
+            val origins = originService.getOrigins(collectionId)
+            bestOrderService.updateBestSellOrder(collection, order, origins)
+        }
     }
 
     suspend fun onCollectionBestBidOrderUpdate(
@@ -54,7 +59,24 @@ class EnrichmentCollectionEventService(
             ShortCollectionId(collectionId),
             order,
             notificationEnabled
-        ) { collection -> bestOrderService.updateBestBidOrder(collection, order) }
+        ) { collection ->
+            val origins = originService.getOrigins(collectionId)
+            bestOrderService.updateBestBidOrder(collection, order, origins)
+        }
+    }
+
+    suspend fun recalculateBestOrders(collection: ShortCollection): Boolean {
+        val updated = bestOrderService.updateBestOrders(collection)
+        if (updated != collection) {
+            logger.info(
+                "Collection BestSellOrder updated ([{}] -> [{}]), BestBidOrder updated ([{}] -> [{}]) due to currency rate changed",
+                collection.bestSellOrder?.dtoId, updated.bestSellOrder?.dtoId,
+                collection.bestBidOrder?.dtoId, updated.bestBidOrder?.dtoId
+            )
+            saveAndNotify(updated, true)
+            return true
+        }
+        return false
     }
 
     private suspend fun updateCollection(

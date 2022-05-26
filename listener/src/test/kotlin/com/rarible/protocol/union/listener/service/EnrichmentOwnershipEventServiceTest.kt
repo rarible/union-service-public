@@ -13,6 +13,7 @@ import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
 import com.rarible.protocol.union.enrichment.service.BestOrderService
 import com.rarible.protocol.union.enrichment.service.EnrichmentActivityService
 import com.rarible.protocol.union.enrichment.service.EnrichmentAuctionService
+import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
 import com.rarible.protocol.union.enrichment.test.data.randomShortOwnership
 import com.rarible.protocol.union.enrichment.test.data.randomUnionActivityBurn
@@ -33,6 +34,7 @@ import org.junit.jupiter.api.Test
 class EnrichmentOwnershipEventServiceTest {
 
     private val ownershipService: EnrichmentOwnershipService = mockk()
+    private val itemService: EnrichmentItemService = mockk()
     private val activityService: EnrichmentActivityService = mockk()
     private val itemEventService: EnrichmentItemEventService = mockk()
     private val eventListener: OutgoingOwnershipEventListener = mockk()
@@ -44,6 +46,7 @@ class EnrichmentOwnershipEventServiceTest {
 
     private val ownershipEventService = EnrichmentOwnershipEventService(
         ownershipService,
+        itemService,
         itemEventService,
         enrichmentAuctionService,
         activityService,
@@ -62,6 +65,7 @@ class EnrichmentOwnershipEventServiceTest {
             bestOrderService,
             activityService
         )
+        coEvery { itemService.getItemOrigins(any()) } returns emptyList()
         coEvery { eventListener.onEvent(any()) } returns Unit
         coEvery { itemEventService.onOwnershipUpdated(any(), any()) } returns Unit
         coEvery { auctionContractService.isAuctionContract(any(), any()) } returns false
@@ -81,7 +85,9 @@ class EnrichmentOwnershipEventServiceTest {
         val expectedShortOwnership = shortOwnership.copy(bestSellOrder = shortOrder)
 
         coEvery { ownershipService.get(shortOwnership.id) } returns shortOwnership
-        coEvery { bestOrderService.updateBestSellOrder(shortOwnership, order) } returns expectedShortOwnership
+        coEvery {
+            bestOrderService.updateBestSellOrder(shortOwnership, order, emptyList())
+        } returns expectedShortOwnership
         coEvery { ownershipService.save(expectedShortOwnership) } returns expectedShortOwnership
         coEvery {
             ownershipService.enrichOwnership(
@@ -109,7 +115,9 @@ class EnrichmentOwnershipEventServiceTest {
 
         // There is no existing short ownership, and order is cancelled
         coEvery { ownershipService.get(shortOwnership.id) } returns null
-        coEvery { bestOrderService.updateBestSellOrder(any<ShortOwnership>(), eq(order)) } returns shortOwnership
+        coEvery {
+            bestOrderService.updateBestSellOrder(any<ShortOwnership>(), eq(order), emptyList())
+        } returns shortOwnership
 
         ownershipEventService.onOwnershipBestSellOrderUpdated(shortOwnership.id, order)
 
@@ -133,7 +141,10 @@ class EnrichmentOwnershipEventServiceTest {
         // Ownership exists, best Order is cancelled - Ownership should be deleted
         coEvery { ownershipService.get(shortOwnership.id) } returns shortOwnership
         // Means order is cancelled
-        coEvery { bestOrderService.updateBestSellOrder(shortOwnership, order) } returns expectedShortOwnership
+        coEvery {
+            bestOrderService.updateBestSellOrder(shortOwnership, order, emptyList())
+        } returns expectedShortOwnership
+
         coEvery { ownershipService.delete(shortOwnership.id) } returns DeleteResult.acknowledged(1)
         coEvery {
             ownershipService.enrichOwnership(
@@ -162,7 +173,7 @@ class EnrichmentOwnershipEventServiceTest {
 
         // Ownership exists, best Order is the same - nothing should happen here
         coEvery { ownershipService.get(ownership.id) } returns ownership
-        coEvery { bestOrderService.updateBestSellOrder(ownership, order) } returns ownership
+        coEvery { bestOrderService.updateBestSellOrder(ownership, order, emptyList()) } returns ownership
 
         ownershipEventService.onOwnershipBestSellOrderUpdated(ownership.id, order)
 

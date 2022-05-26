@@ -3,6 +3,8 @@ package com.rarible.protocol.union.enrichment.model
 import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.dto.AuctionIdDto
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.enrichment.evaluator.BestBidOrderOwner
+import com.rarible.protocol.union.enrichment.evaluator.BestSellOrderOwner
 import org.springframework.data.annotation.AccessType
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.Transient
@@ -20,15 +22,17 @@ data class ShortItem(
     val sellers: Int = 0,
     val totalStock: BigInteger,
 
-    val bestSellOrders: Map<String, ShortOrder>,
-    val bestBidOrders: Map<String, ShortOrder>,
+    override val bestSellOrder: ShortOrder?,
+    override val bestSellOrders: Map<String, ShortOrder>,
 
-    val auctions: Set<AuctionIdDto> = emptySet(),
+    override val bestBidOrder: ShortOrder?,
+    override val bestBidOrders: Map<String, ShortOrder>,
+
+    override val originOrders: Set<OriginOrders> = emptySet(),
 
     val multiCurrency: Boolean = bestSellOrders.size > 1 || bestBidOrders.size > 1,
 
-    val bestSellOrder: ShortOrder?,
-    val bestBidOrder: ShortOrder?,
+    val auctions: Set<AuctionIdDto> = emptySet(),
 
     val lastSale: ItemLastSale?,
 
@@ -36,7 +40,7 @@ data class ShortItem(
 
     @Version
     val version: Long? = null
-) {
+) : BestSellOrderOwner<ShortItem>, BestBidOrderOwner<ShortItem>, OriginOrdersOwner {
 
     fun withCalculatedFields(): ShortItem {
         return this.copy(
@@ -46,6 +50,7 @@ data class ShortItem(
     }
 
     companion object {
+
         fun empty(itemId: ShortItemId): ShortItem {
             return ShortItem(
                 version = null,
@@ -55,13 +60,15 @@ data class ShortItem(
                 sellers = 0,
                 totalStock = BigInteger.ZERO,
 
+                bestSellOrder = null,
                 bestSellOrders = emptyMap(),
+
+                bestBidOrder = null,
                 bestBidOrders = emptyMap(),
 
-                auctions = emptySet(),
+                originOrders = emptySet(),
 
-                bestSellOrder = null,
-                bestBidOrder = null,
+                auctions = emptySet(),
 
                 lastSale = null,
 
@@ -83,6 +90,25 @@ data class ShortItem(
         get() = _id
         set(_) {}
 
+    override fun withBestBidOrders(orders: Map<String, ShortOrder>): ShortItem {
+        return this.copy(bestBidOrders = orders)
+    }
+
+    override fun withBestBidOrder(order: ShortOrder?): ShortItem {
+        return this.copy(bestBidOrder = order)
+    }
+
+    override fun withBestSellOrders(orders: Map<String, ShortOrder>): ShortItem {
+        return this.copy(bestSellOrders = orders)
+    }
+
+    override fun withBestSellOrder(order: ShortOrder?): ShortItem {
+        return this.copy(bestSellOrder = order)
+    }
+
+    override fun getAllBestOrders(): List<ShortOrder> {
+        return listOfNotNull(bestSellOrder, bestBidOrder) + getAllOriginBestOrders()
+    }
 }
 
 

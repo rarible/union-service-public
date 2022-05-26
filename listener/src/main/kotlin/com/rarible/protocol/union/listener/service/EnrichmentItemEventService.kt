@@ -2,7 +2,6 @@ package com.rarible.protocol.union.listener.service
 
 import com.rarible.core.common.optimisticLock
 import com.rarible.protocol.union.core.event.OutgoingEventListener
-import com.rarible.protocol.union.core.event.OutgoingItemEventListener
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.getItemId
 import com.rarible.protocol.union.core.model.itemId
@@ -137,11 +136,17 @@ class EnrichmentItemEventService(
     }
 
     suspend fun onItemBestSellOrderUpdated(itemId: ShortItemId, order: OrderDto, notificationEnabled: Boolean = true) {
-        updateOrder(itemId, order, notificationEnabled) { item -> bestOrderService.updateBestSellOrder(item, order) }
+        updateOrder(itemId, order, notificationEnabled) { item ->
+            val origins = enrichmentItemService.getItemOrigins(itemId)
+            bestOrderService.updateBestSellOrder(item, order, origins)
+        }
     }
 
     suspend fun onItemBestBidOrderUpdated(itemId: ShortItemId, order: OrderDto, notificationEnabled: Boolean = true) {
-        updateOrder(itemId, order, notificationEnabled) { item -> bestOrderService.updateBestBidOrder(item, order) }
+        updateOrder(itemId, order, notificationEnabled) { item ->
+            val origins = enrichmentItemService.getItemOrigins(itemId)
+            bestOrderService.updateBestBidOrder(item, order, origins)
+        }
     }
 
     suspend fun onAuctionUpdated(auction: AuctionDto, notificationEnabled: Boolean = true) {

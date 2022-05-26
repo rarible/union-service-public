@@ -1,14 +1,15 @@
-package com.rarible.protocol.nftorder.api.test.mock
+package com.rarible.protocol.union.integration.ethereum.mock
 
 import com.rarible.protocol.dto.NftItemDto
 import com.rarible.protocol.dto.NftItemIdsDto
+import com.rarible.protocol.dto.NftItemMetaDto
 import com.rarible.protocol.dto.NftItemsDto
 import com.rarible.protocol.nft.api.client.NftItemControllerApi
-import com.rarible.protocol.union.api.controller.test.mock.WebClientExceptionMock
 import com.rarible.protocol.union.dto.ItemIdDto
 import io.mockk.every
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import reactor.kotlin.core.publisher.toMono
 
 class EthItemControllerApiMock(
     private val nftItemControllerApi: NftItemControllerApi
@@ -18,6 +19,10 @@ class EthItemControllerApiMock(
         every {
             nftItemControllerApi.getNftItemById(itemId.value)
         } returns (if (returnItem == null) Mono.empty() else Mono.just(returnItem))
+    }
+
+    fun mockGetNftItemMetaById(itemId: ItemIdDto, meta: NftItemMetaDto) {
+        every { nftItemControllerApi.getNftItemMetaById(itemId.value) } returns meta.toMono()
     }
 
     fun mockGetNftItemById(itemId: ItemIdDto, status: Int, error: Any) {

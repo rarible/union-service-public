@@ -1,9 +1,10 @@
-package com.rarible.protocol.nftorder.api.test.mock
+package com.rarible.protocol.union.integration.ethereum.mock
 
 import com.rarible.protocol.dto.AssetTypeDto
 import com.rarible.protocol.dto.OrderCurrenciesDto
 import com.rarible.protocol.dto.OrderDto
 import com.rarible.protocol.dto.OrderIdsDto
+import com.rarible.protocol.dto.OrderStatusDto
 import com.rarible.protocol.dto.OrdersPaginationDto
 import com.rarible.protocol.order.api.client.OrderControllerApi
 import com.rarible.protocol.union.core.util.CompositeItemIdParser
@@ -33,14 +34,27 @@ class EthOrderControllerApiMock(
         } returns orders.toFlux()
     }
 
-    fun mockGetSellOrdersByItemAndByStatus(itemId: ItemIdDto, currencyId: String, vararg returnOrders: OrderDto) {
+    fun mockGetSellOrdersByItemAndByStatus(
+        itemId: ItemIdDto,
+        currencyId: String,
+        vararg returnOrders: OrderDto
+    ) {
+        mockGetSellOrdersByItemAndByStatus(itemId, currencyId, null, *returnOrders)
+    }
+
+    fun mockGetSellOrdersByItemAndByStatus(
+        itemId: ItemIdDto,
+        currencyId: String,
+        origin: String?,
+        vararg returnOrders: OrderDto
+    ) {
         val (contract, tokenId) = CompositeItemIdParser.split(itemId.value)
         every {
             orderControllerApi.getSellOrdersByItemAndByStatus(
                 eq(contract),
                 eq(tokenId.toString()),
                 any(),
-                any(),
+                origin?.let { eq(it) } ?: isNull(),
                 any(),
                 any(),
                 any(),
@@ -55,34 +69,56 @@ class EthOrderControllerApiMock(
         currencyId: String,
         vararg returnOrders: OrderDto
     ) {
+        mockGetSellOrdersByItemAndByStatus(ownershipId, currencyId, null, *returnOrders)
+    }
+
+    fun mockGetSellOrdersByItemAndByStatus(
+        ownershipId: OwnershipIdDto,
+        currencyId: String,
+        origin: String?,
+        vararg returnOrders: OrderDto
+    ) {
         val (contract, tokenId) = CompositeItemIdParser.split(ownershipId.itemIdValue)
         every {
             orderControllerApi.getSellOrdersByItemAndByStatus(
                 eq(contract),
                 eq(tokenId.toString()),
                 eq(ownershipId.owner.value),
+                origin?.let { eq(it) } ?: isNull(),
                 any(),
                 any(),
-                any(),
-                any(),
-                any(),
+                eq(1),
+                eq(listOf(OrderStatusDto.ACTIVE)),
                 eq(currencyId)
             )
         } returns Mono.just(OrdersPaginationDto(returnOrders.asList(), null))
     }
 
-    fun mockGetOrderBidsByItemAndByStatus(itemId: ItemIdDto, currencyId: String, vararg returnOrders: OrderDto) {
+    fun mockGetOrderBidsByItemAndByStatus(
+        itemId: ItemIdDto,
+        currencyId: String,
+        vararg returnOrders: OrderDto
+    ) {
+        return mockGetOrderBidsByItemAndByStatus(itemId, currencyId, null, *returnOrders)
+    }
+
+    fun mockGetOrderBidsByItemAndByStatus(
+        itemId: ItemIdDto,
+        currencyId: String,
+        origin: String?,
+        vararg returnOrders: OrderDto
+    ) {
         val (contract, tokenId) = CompositeItemIdParser.split(itemId.value)
         every {
             orderControllerApi.getOrderBidsByItemAndByStatus(
                 eq(contract),
                 eq(tokenId.toString()),
+                eq(listOf(OrderStatusDto.ACTIVE)),
+                any(),
+                origin?.let { eq(it) } ?: isNull(),
                 any(),
                 any(),
-                any(),
-                any(),
-                any(),
-                any(),
+                eq(1),
                 eq(currencyId),
                 any(),
                 any()
