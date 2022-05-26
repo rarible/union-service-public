@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.api.service
 
+import com.rarible.protocol.union.api.service.api.OwnershipApiService
 import com.rarible.protocol.union.api.util.BlockchainFilter
 import com.rarible.protocol.union.core.continuation.UnionItemContinuation
 import com.rarible.protocol.union.core.converter.ItemOwnershipConverter

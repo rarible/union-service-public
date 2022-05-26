@@ -42,7 +42,8 @@ class OwnershipTaskUnitTest {
             indexRootName = "ownership_test_index",
             aliasName = "ownership",
             writeAliasName = "ownership",
-            settings = EsOwnership.ENTITY_DEFINITION.settings
+            settings = EsOwnership.ENTITY_DEFINITION.settings,
+            reindexTask = EsOwnership.ENTITY_DEFINITION.reindexTask
         )
 
         coEvery { refresh() } returns Unit
