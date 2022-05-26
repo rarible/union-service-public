@@ -4,7 +4,7 @@ import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.flow.converter.FlowActivityConverter
-import com.rarible.protocol.union.test.data.randomFlowCancelListActivityDto
+import com.rarible.protocol.union.integration.flow.data.randomFlowCancelListActivityDto
 import com.rarible.protocol.union.test.mock.CurrencyMock
 import io.mockk.clearMocks
 import io.mockk.coEvery

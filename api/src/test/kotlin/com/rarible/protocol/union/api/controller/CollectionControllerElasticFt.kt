@@ -11,10 +11,9 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.repository.search.EsCollectionRepository
 import com.rarible.protocol.union.enrichment.test.data.randomEsCollection
 import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionDto
-import com.rarible.protocol.union.integration.solana.data.randomSolanaBalanceDto
+import com.rarible.protocol.union.integration.flow.data.randomFlowCollectionDto
 import com.rarible.protocol.union.integration.solana.data.randomSolanaCollectionDto
 import com.rarible.protocol.union.integration.tezos.data.randomTezosCollectionDto
-import com.rarible.protocol.union.test.data.randomFlowCollectionDto
 import io.mockk.coEvery
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.runBlocking
