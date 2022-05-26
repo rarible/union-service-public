@@ -23,7 +23,7 @@ class TzktItemServiceImpl(val tzktTokenClient: TokenClient, val properties: DipD
     override fun enabled() = true
 
     override suspend fun getAllItems(continuation: String?, size: Int): Page<UnionItem> {
-        val tzktPage = tzktTokenClient.tokens(size = size, continuation = continuation)
+        val tzktPage = tzktTokenClient.allTokensByLastUpdate(size = size, continuation = continuation)
         return TzktItemConverter.convert(tzktPage, blockchain)
     }
 

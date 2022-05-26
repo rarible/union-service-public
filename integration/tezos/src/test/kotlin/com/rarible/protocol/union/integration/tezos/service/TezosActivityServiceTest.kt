@@ -74,10 +74,10 @@ class TezosActivityServiceTest {
             items = listOf(randomTezosOrderListActivity()),
             continuation = null
         )
-        coEvery { testDipDupOrderActivityClient.getActivities(listOf(orderActivity.id)) } returns listOf(
+        coEvery { testDipDupOrderActivityClient.getActivitiesByIds(listOf(orderActivity.id)) } returns listOf(
             randomDipDupActivityOrderListEvent(orderActivity.id)
         )
-        coEvery { tzktTokenClient.activityByIds(listOf(itemActivity.id)) } returns listOf(
+        coEvery { tzktTokenClient.getActivitiesByIds(listOf(itemActivity.id)) } returns listOf(
             randomTzktItemMintActivity(itemActivity.id)
         )
         val types = listOf(
@@ -97,7 +97,7 @@ class TezosActivityServiceTest {
             items = listOf(randomTezosOrderListActivity())
         ).toMono()
         coEvery {
-            testDipDupOrderActivityClient.getActivities(
+            testDipDupOrderActivityClient.getActivitiesAll(
                 listOf(DipDupActivityType.LIST),
                 9,
                 null,
@@ -107,7 +107,7 @@ class TezosActivityServiceTest {
             continuation = null,
             activities = listOf(randomDipDupActivityOrderListEvent(randomString()))
         )
-        coEvery { tzktTokenClient.activities(9, null, false, listOf(ActivityType.MINT)) } returns Page(
+        coEvery { tzktTokenClient.getActivitiesAll(listOf(ActivityType.MINT), 9, null, false) } returns Page(
             continuation = null,
             items = listOf(randomTzktItemMintActivity(randomInt().toString()))
         )

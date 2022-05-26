@@ -162,8 +162,11 @@ class DipDupActivityConverter(
     }
 
     private fun convertValue(bd: BigDecimal, id: ActivityIdDto): BigInteger {
-        if (bd.stripTrailingZeros().scale() > 0) throw UnionDataFormatException("Value: $bd must be BigInteger for token activity: $id")
-        else return bd.toBigInteger()
+        if (bd.stripTrailingZeros().scale() > 0) {
+//            throw UnionDataFormatException("Value: $bd must be BigInteger for token activity: $id")
+            logger.warn("Value: $bd must be BigInteger for token activity: $id, tring to multiply by 1_000_000")
+            return bd.multiply(BigDecimal(1_000_000)).toBigInteger()
+        } else return bd.toBigInteger()
     }
 
     private fun convert(source: TezosPlatform): OrderActivitySourceDto {
