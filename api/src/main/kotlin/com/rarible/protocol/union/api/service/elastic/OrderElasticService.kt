@@ -1,6 +1,6 @@
 package com.rarible.protocol.union.api.service.elastic
 
-import com.rarible.protocol.union.api.service.OrderQueryService
+import com.rarible.protocol.union.enrichment.service.query.order.OrderQueryService
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto

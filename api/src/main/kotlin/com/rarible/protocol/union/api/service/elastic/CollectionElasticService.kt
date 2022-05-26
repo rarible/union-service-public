@@ -3,7 +3,7 @@ package com.rarible.protocol.union.api.service.elastic
 import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.apm.SpanType
 import com.rarible.core.common.mapAsync
-import com.rarible.protocol.union.api.service.CollectionQueryService
+import com.rarible.protocol.union.enrichment.service.query.collection.CollectionQueryService
 import com.rarible.protocol.union.core.model.EsCollectionGenericFilter
 import com.rarible.protocol.union.core.model.EsCollectionLite
 import com.rarible.protocol.union.core.service.CollectionService
@@ -14,10 +14,6 @@ import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.model.ShortCollectionId
 import com.rarible.protocol.union.enrichment.repository.search.EsCollectionRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentCollectionService
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.withContext
 import org.springframework.stereotype.Service
 
 @Service

@@ -1,7 +1,6 @@
-package com.rarible.protocol.union.api.service.api
+package com.rarible.protocol.union.enrichment.service.query.order
 
 import com.rarible.core.logging.Logger
-import com.rarible.protocol.union.api.service.OrderQueryService
 import com.rarible.protocol.union.enrichment.util.BlockchainFilter
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
@@ -32,7 +31,7 @@ import kotlinx.coroutines.coroutineScope
 import org.springframework.stereotype.Component
 
 @Component
-class OrderApiService(
+class OrderApiMergeService(
     private val router: BlockchainRouter<OrderService>
 ): OrderQueryService {
 

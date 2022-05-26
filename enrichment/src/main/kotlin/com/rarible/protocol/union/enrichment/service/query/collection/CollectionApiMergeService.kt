@@ -1,7 +1,6 @@
-package com.rarible.protocol.union.api.service.api
+package com.rarible.protocol.union.enrichment.service.query.collection
 
 import com.rarible.core.common.nowMillis
-import com.rarible.protocol.union.api.service.CollectionQueryService
 import com.rarible.protocol.union.core.continuation.UnionCollectionContinuation
 import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.core.service.CollectionService
@@ -22,6 +21,7 @@ import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.model.ShortCollection
 import com.rarible.protocol.union.enrichment.model.ShortCollectionId
 import com.rarible.protocol.union.enrichment.service.EnrichmentCollectionService
+import com.rarible.protocol.union.enrichment.service.query.order.OrderApiMergeService
 import com.rarible.protocol.union.enrichment.util.BlockchainFilter
 import com.rarible.protocol.union.enrichment.util.spent
 import kotlinx.coroutines.async
@@ -32,7 +32,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class CollectionApiMergeService(
-    private val orderApiService: OrderApiService,
+    private val orderApiService: OrderApiMergeService,
     private val router: BlockchainRouter<CollectionService>,
     private val enrichmentCollectionService: EnrichmentCollectionService
 ): CollectionQueryService {

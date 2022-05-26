@@ -1,6 +1,6 @@
 package com.rarible.protocol.union.api.service
 
-import com.rarible.protocol.union.api.service.api.OrderApiService
+import com.rarible.protocol.union.enrichment.service.query.order.OrderApiMergeService
 import com.rarible.protocol.union.core.continuation.UnionAuctionOwnershipWrapperContinuation
 import com.rarible.protocol.union.core.continuation.UnionOwnershipContinuation
 import com.rarible.protocol.union.core.exception.UnionNotFoundException
@@ -37,7 +37,7 @@ import org.springframework.stereotype.Component
 @ExperimentalCoroutinesApi
 @Component
 class OwnershipApiService(
-    private val orderApiService: OrderApiService,
+    private val orderApiService: OrderApiMergeService,
     private val ownershipRouter: BlockchainRouter<OwnershipService>,
     private val auctionContractService: AuctionContractService,
     private val enrichmentOwnershipService: EnrichmentOwnershipService,

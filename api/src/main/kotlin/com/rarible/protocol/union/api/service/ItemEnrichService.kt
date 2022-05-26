@@ -2,7 +2,7 @@ package com.rarible.protocol.union.api.service
 
 import com.rarible.core.common.nowMillis
 import com.rarible.core.logging.Logger
-import com.rarible.protocol.union.api.service.api.OrderApiService
+import com.rarible.protocol.union.enrichment.service.query.order.OrderApiMergeService
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.ItemIdDto
@@ -24,7 +24,7 @@ import org.springframework.stereotype.Service
 class ItemEnrichService(
     private val unionMetaService: UnionMetaService,
     private val enrichmentItemService: EnrichmentItemService,
-    private val orderApiService: OrderApiService,
+    private val orderApiService: OrderApiMergeService,
 ) {
 
     companion object {

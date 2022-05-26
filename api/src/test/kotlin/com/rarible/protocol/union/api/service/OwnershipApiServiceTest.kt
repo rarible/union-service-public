@@ -2,7 +2,7 @@ package com.rarible.protocol.union.api.service
 
 import com.rarible.core.common.nowMillis
 import com.rarible.core.test.data.randomAddress
-import com.rarible.protocol.union.api.service.api.OrderApiService
+import com.rarible.protocol.union.enrichment.service.query.order.OrderApiMergeService
 import com.rarible.protocol.union.core.DefaultBlockchainProperties
 import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.core.model.getSellerOwnershipId
@@ -52,7 +52,7 @@ class OwnershipApiServiceTest {
         auctionContracts = auctionContract.prefixed()
     )
 
-    private val orderApiService: OrderApiService = mockk()
+    private val orderApiService: OrderApiMergeService = mockk()
     private val ownershipService: OwnershipService = mockk()
     private val ownershipRouter: BlockchainRouter<OwnershipService> = mockk()
     private val auctionContractService: AuctionContractService = AuctionContractService(listOf(properties))
