@@ -11,7 +11,9 @@ import com.rarible.protocol.union.worker.config.CollectionReindexProperties
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
+import org.springframework.stereotype.Component
 
+@Component
 class CollectionTask(
     private val properties: CollectionReindexProperties,
     private val collectionApiMergeService: CollectionApiMergeService,

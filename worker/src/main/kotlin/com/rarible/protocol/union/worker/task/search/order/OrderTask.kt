@@ -14,6 +14,8 @@ import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.reactor.awaitSingle
 
+//TODO enable when orders are ready
+//@Component
 class OrderTask(
     private val properties: OrderReindexProperties,
     private val orderClient: OrderControllerApi,
