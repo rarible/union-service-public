@@ -2,7 +2,7 @@ package com.rarible.protocol.union.api.service.api
 
 import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.api.service.OrderQueryService
-import com.rarible.protocol.union.api.util.BlockchainFilter
+import com.rarible.protocol.union.enrichment.util.BlockchainFilter
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto

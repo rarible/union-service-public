@@ -1,7 +1,7 @@
 package com.rarible.protocol.union.api.service.select
 
-import com.rarible.protocol.union.api.service.ActivityQueryService
-import com.rarible.protocol.union.api.service.api.ActivityApiService
+import com.rarible.protocol.union.enrichment.service.query.activity.ActivityQueryService
+import com.rarible.protocol.union.enrichment.service.query.activity.ActivityApiMergeService
 import com.rarible.protocol.union.api.service.elastic.ActivityElasticService
 import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.dto.ActivitiesDto
@@ -16,7 +16,7 @@ import java.time.Instant
 @Service
 class ActivitySourceSelectService(
     private val featureFlagsProperties: FeatureFlagsProperties,
-    private val activityApiMergeService: ActivityApiService,
+    private val activityApiMergeService: ActivityApiMergeService,
     private val activityElasticService: ActivityElasticService,
 ) : ActivityQueryService {
 

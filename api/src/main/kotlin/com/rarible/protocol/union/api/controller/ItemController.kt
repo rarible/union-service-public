@@ -1,10 +1,8 @@
 package com.rarible.protocol.union.api.controller
 
-import com.rarible.protocol.union.api.service.OwnershipApiService
 import com.rarible.protocol.union.api.service.select.ItemSourceSelectService
 import com.rarible.protocol.union.core.exception.UnionNotFoundException
 import com.rarible.protocol.union.core.model.UnionImageProperties
-import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.UnionMetaContent
 import com.rarible.protocol.union.core.model.UnionVideoProperties
@@ -14,7 +12,6 @@ import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.core.util.LogUtils
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemDto
-import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.ItemIdsDto
 import com.rarible.protocol.union.dto.ItemsDto
 import com.rarible.protocol.union.dto.ItemsWithOwnershipDto

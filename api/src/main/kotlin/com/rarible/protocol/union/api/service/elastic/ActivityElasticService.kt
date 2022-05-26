@@ -4,7 +4,7 @@ import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.apm.SpanType
 import com.rarible.core.common.mapAsync
 import com.rarible.core.logging.Logger
-import com.rarible.protocol.union.api.service.ActivityQueryService
+import com.rarible.protocol.union.enrichment.service.query.activity.ActivityQueryService
 import com.rarible.protocol.union.core.model.TypedActivityId
 import com.rarible.protocol.union.core.service.ActivityService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
