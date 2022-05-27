@@ -40,6 +40,8 @@ class ActivityReindexService(
                     PageSize.ACTIVITY.max,
                     ActivitySortDto.LATEST_FIRST
                 )
+                if(res.activities.isEmpty()) break;
+
                 val savedActivities = esActivityRepository.saveAll(
                     EsActivityConverter.batchConvert(res.activities, router),
                     index
