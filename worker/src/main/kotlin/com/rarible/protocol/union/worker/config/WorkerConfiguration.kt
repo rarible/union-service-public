@@ -1,9 +1,6 @@
 package com.rarible.protocol.union.worker.config
 
 import com.rarible.core.task.EnableRaribleTask
-import com.rarible.protocol.union.api.client.ActivityControllerApi
-import com.rarible.protocol.union.api.client.CollectionControllerApi
-import com.rarible.protocol.union.api.client.UnionApiClientFactory
 import com.rarible.protocol.union.core.elasticsearch.EsNameResolver
 import com.rarible.protocol.union.core.elasticsearch.IndexService
 import com.rarible.protocol.union.core.elasticsearch.bootstrap.ElasticsearchBootstrapper
@@ -45,16 +42,6 @@ class WorkerConfiguration(
     @Bean
     fun orderReindexProperties(): OrderReindexProperties {
         return properties.searchReindex.order
-    }
-
-    @Bean
-    fun activityClient(factory: UnionApiClientFactory): ActivityControllerApi {
-        return factory.createActivityApiClient()
-    }
-
-    @Bean
-    fun collectionClient(factory: UnionApiClientFactory): CollectionControllerApi {
-        return factory.createCollectionApiClient()
     }
 
     @FlowPreview
