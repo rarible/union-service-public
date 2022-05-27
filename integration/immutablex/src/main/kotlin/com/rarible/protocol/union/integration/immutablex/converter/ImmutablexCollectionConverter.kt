@@ -48,7 +48,7 @@ object ImmutablexCollectionConverter {
         return UnionCollectionMeta(
             name = source.name,
             description = source.description,
-            content = if (source.collectionImageUrl.isNotEmpty()) listOf(
+            content = if (!source.collectionImageUrl.isNullOrEmpty()) listOf(
                 UnionMetaContent(
                     url = source.collectionImageUrl,
                     representation = MetaContentDto.Representation.ORIGINAL

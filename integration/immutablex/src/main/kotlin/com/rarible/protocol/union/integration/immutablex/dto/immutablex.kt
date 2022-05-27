@@ -49,7 +49,7 @@ data class ImmutablexCollection(
     val name: String,
     val description: String,
     val iconUrl: String?,
-    val collectionImageUrl: String,
+    val collectionImageUrl: String?,
     val projectId: Long,
     val metadataApiUrl: String
 )
