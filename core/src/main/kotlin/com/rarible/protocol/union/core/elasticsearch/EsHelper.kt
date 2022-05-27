@@ -13,14 +13,14 @@ object EsHelper {
 
     suspend fun createIndex(
         reactiveElasticSearchOperations: ReactiveElasticsearchOperations,
-        name: String, settings: String, mapping: String
+        name: String,
+        settings: String,
+        mapping: String
     ) {
-        val existIndex = reactiveElasticSearchOperations.execute { it.indices().existsIndex(GetIndexRequest(name)) }
-            .awaitFirst()
+        val existIndex =
+            reactiveElasticSearchOperations.execute { it.indices().existsIndex(GetIndexRequest(name)) }.awaitFirst()
         if (existIndex) return
-        val request = CreateIndexRequest(name)
-            .settings(settings, XContentType.JSON)
-            .mapping(mapping, XContentType.JSON)
+        val request = CreateIndexRequest(name).settings(settings, XContentType.JSON).mapping(mapping, XContentType.JSON)
         reactiveElasticSearchOperations.execute { it.indices().createIndex(request) }.awaitFirstOrNull()
     }
 
@@ -34,9 +34,8 @@ object EsHelper {
         createAlias(reactiveElasticSearchOperations, toIndex, alias)
     }
 
-    private suspend fun removeAlias(
-        reactiveElasticSearchOperations: ReactiveElasticsearchOperations,
-        indexName: String, alias: String
+    suspend fun removeAlias(
+        reactiveElasticSearchOperations: ReactiveElasticsearchOperations, indexName: String, alias: String
     ) {
         logger.info("Removing alias '$alias' from '$indexName'")
         val realName = getRealName(reactiveElasticSearchOperations, indexName)
@@ -45,50 +44,49 @@ object EsHelper {
             logger.info("Alias '$alias' does not exist in '$indexName' ('$realName')")
             return
         }
-        val request = IndicesAliasesRequest()
-            .addAliasAction(
-                IndicesAliasesRequest.AliasActions
-                    .remove()
-                    .index(realName)
-                    .alias(alias)
-            )
+        val request = IndicesAliasesRequest().addAliasAction(
+            IndicesAliasesRequest.AliasActions.remove().index(realName).alias(alias)
+        )
         reactiveElasticSearchOperations.execute { it.indices().updateAliases(request) }.awaitFirstOrNull()
     }
 
     suspend fun createAlias(
-        reactiveElasticSearchOperations: ReactiveElasticsearchOperations,
-        indexName: String,
-        alias: String
+        reactiveElasticSearchOperations: ReactiveElasticsearchOperations, indexName: String, alias: String
     ) {
         logger.info("Adding alias '$alias' to '$indexName'")
         val realName = getRealName(reactiveElasticSearchOperations, indexName)
-        val request = IndicesAliasesRequest()
-            .addAliasAction(
-                IndicesAliasesRequest.AliasActions
-                    .add()
-                    .index(realName)
-                    .alias(alias)
-            )
+        val request = IndicesAliasesRequest().addAliasAction(
+            IndicesAliasesRequest.AliasActions.add().index(realName).alias(alias)
+        )
         reactiveElasticSearchOperations.execute { it.indices().updateAliases(request) }.awaitFirstOrNull()
     }
 
     suspend fun getRealName(
-        esOperations: ReactiveElasticsearchOperations,
-        indexName: String
+        esOperations: ReactiveElasticsearchOperations, indexName: String
     ): String? {
 
         val exists = esOperations.execute { it.indices().existsIndex(GetIndexRequest(indexName)) }.awaitFirst()
 
         return if (exists) {
-            val response =
-                esOperations.execute { it.indices().getIndex(GetIndexRequest(indexName)) }.awaitFirst()
+            val response = esOperations.execute { it.indices().getIndex(GetIndexRequest(indexName)) }.awaitFirst()
             response.aliases.entries.first().key
         } else null
     }
 
+    suspend fun getIndexesByAlias(
+        esOperations: ReactiveElasticsearchOperations, indexRootName: String
+    ): List<String> {
+
+        val exists = esOperations.execute { it.indices().existsIndex(GetIndexRequest("$indexRootName*")) }.awaitFirst()
+        return if (exists) {
+            val response =
+                esOperations.execute { it.indices().getIndex(GetIndexRequest("$indexRootName*")) }.awaitFirst()
+            response.aliases.entries.map { it.key }
+        } else emptyList()
+    }
+
     private suspend fun getAliasesOfIndex(
-        reactiveElasticSearchOperations: ReactiveElasticsearchOperations,
-        indexName: String?
+        reactiveElasticSearchOperations: ReactiveElasticsearchOperations, indexName: String?
     ): List<String> {
         val response =
             reactiveElasticSearchOperations.execute { it.indices().getIndex(GetIndexRequest(indexName)) }.awaitFirst()
