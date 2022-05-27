@@ -20,12 +20,21 @@ class TzktCollectionServiceImpl(
         continuation: String?,
         size: Int
     ): Page<UnionCollection> {
-        val tzktPage = collectionClient.collections(size, continuation)
+        val tzktPage = collectionClient.collectionsAll(size, continuation)
         return TzktCollectionConverter.convert(tzktPage, blockchain)
     }
 
     override suspend fun getCollectionById(collectionId: String): UnionCollection {
         val tzktCollection = safeApiCall { collectionClient.collection(collectionId) }
+        return TzktCollectionConverter.convert(tzktCollection, blockchain)
+    }
+
+    override suspend fun getCollectionByOwner(
+        owner: String,
+        continuation: String?,
+        size: Int
+    ): Page<UnionCollection> {
+        val tzktCollection = safeApiCall { collectionClient.collectionsByOwner(owner, size, continuation) }
         return TzktCollectionConverter.convert(tzktCollection, blockchain)
     }
 
