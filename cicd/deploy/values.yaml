@@ -7,7 +7,7 @@ protocol-union-api:
     CONSUL_ROOT_PATH: '{{ include "service.appEnv" $ }}/protocol/union'
     SPRING_PROFILES_ACTIVE: 'consul,{{ include "service.appEnv" $ }}'
     SERVICE_PREFIX: '{{ include "service.appEnv" $ }}-union'
-    JAVA_OPTIONS: '-XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp'
+    JAVA_OPTIONS: '-XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8000'
   nodeSelector:
     node.labels.rarible.service: true
   resources:
