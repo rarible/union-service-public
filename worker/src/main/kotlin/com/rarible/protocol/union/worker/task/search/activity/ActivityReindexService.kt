@@ -27,12 +27,13 @@ class ActivityReindexService(
         val counter = searchTaskMetricFactory.createReindexActivityCounter(blockchain, type)
 
         return flow {
+            var continuation = cursor
             do {
                 val res = activityApiMergeService.getAllActivities(
                     listOf(type),
                     listOf(blockchain),
-                    cursor,
-                    cursor,
+                    continuation,
+                    continuation,
                     PageSize.ACTIVITY.max,
                     ActivitySortDto.LATEST_FIRST
                 )
@@ -40,9 +41,10 @@ class ActivityReindexService(
                     res.activities.mapNotNull(EsActivityConverter::convert),
                     index
                 )
+                continuation = res.cursor
                 counter.increment(savedActivities.size)
                 emit(res.cursor ?: "")
-            } while (res.cursor != null)
+            } while (res.cursor.isNullOrEmpty().not())
         }
     }
 }
