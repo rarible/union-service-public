@@ -14,6 +14,7 @@ import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
 import com.rarible.protocol.union.worker.task.search.ReindexService
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.runBlocking
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
@@ -68,7 +69,9 @@ class WorkerConfiguration(
         reindexerService: ReindexService,
         indexService: IndexService
     ): ElasticsearchBootstrapper {
-
+        runBlocking {
+            reindexerService.scheduleActivityReindex("protocol_union_prod_activity_2")
+        }
         return ElasticsearchBootstrapper(
             esNameResolver = esNameResolver,
             esOperations = reactiveElasticSearchOperations,
