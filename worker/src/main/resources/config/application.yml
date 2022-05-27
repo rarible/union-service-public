@@ -6,7 +6,7 @@ server:
   port: 8080
 
 spring:
-  application.name: union-search-reindexer
+  application.name: union-search-worker
   jackson:
     mapper:
       ACCEPT_CASE_INSENSITIVE_ENUMS: true
@@ -61,7 +61,7 @@ meta:
 
 integration:
   ethereum:
-    enabled: false
+    enabled: ${consul.ethereum.enabled:true}
     consumer:
       broker-replica-set: ${kafka.hosts}
       workers:
@@ -70,7 +70,7 @@ integration:
         order: 1
     auctionContracts: ${consul.ethereum.auctionContracts:}
   polygon:
-    enabled: false
+    enabled: ${consul.polygon.enabled:true}
     consumer:
       broker-replica-set: ${kafka.hosts}
       workers:
@@ -79,7 +79,7 @@ integration:
         order: 1
     auctionContracts: ${consul.polygon.auctionContracts:}
   flow:
-    enabled: false
+    enabled: ${consul.flow.enabled:true}
     consumer:
       broker-replica-set: ${kafka.hosts}
       workers:
@@ -109,7 +109,9 @@ integration:
         order: 1
     auctionContracts: ${consul.tezos.auctionContracts:}
   solana:
-    enabled: false
+    enabled: ${consul.solana.enabled:true}
+  immutablex:
+    enabled: ${consul.immutablex.enabled:false}
 
 common:
   producer:
