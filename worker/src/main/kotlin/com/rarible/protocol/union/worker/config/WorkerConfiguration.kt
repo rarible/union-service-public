@@ -1,7 +1,6 @@
 package com.rarible.protocol.union.worker.config
 
 import com.rarible.core.task.EnableRaribleTask
-import com.rarible.protocol.solana.api.client.autoconfigure.SolanaApiClientAutoConfiguration
 import com.rarible.protocol.union.api.client.ActivityControllerApi
 import com.rarible.protocol.union.api.client.CollectionControllerApi
 import com.rarible.protocol.union.api.client.UnionApiClientFactory
@@ -15,7 +14,6 @@ import com.rarible.protocol.union.worker.task.search.ReindexService
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.runBlocking
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -31,7 +29,6 @@ import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperatio
 )
 @EnableRaribleTask
 @EnableConfigurationProperties(WorkerProperties::class)
-@EnableAutoConfiguration(exclude = [SolanaApiClientAutoConfiguration::class])
 class WorkerConfiguration(
     val properties: WorkerProperties
 ) {
@@ -66,17 +63,17 @@ class WorkerConfiguration(
     fun elasticsearchBootstrap(
         reactiveElasticSearchOperations: ReactiveElasticsearchOperations,
         esNameResolver: EsNameResolver,
-        reindexerService: ReindexService,
+        reindexService: ReindexService,
         indexService: IndexService
     ): ElasticsearchBootstrapper {
         runBlocking {
-            reindexerService.scheduleActivityReindex("protocol_union_prod_activity_2")
+            reindexService.scheduleActivityReindex("protocol_union_prod_activity_2")
         }
         return ElasticsearchBootstrapper(
             esNameResolver = esNameResolver,
             esOperations = reactiveElasticSearchOperations,
             entityDefinitions = EsEntitiesConfig.prodEsEntities(),
-            reindexSchedulingService = reindexerService,
+            reindexSchedulingService = reindexService,
             forceUpdate = emptySet(),
             indexService = indexService
         )

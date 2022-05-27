@@ -6,7 +6,7 @@ server:
   port: 8080
 
 spring:
-  application.name: union-search-reindexer
+  application.name: union-search-worker
   jackson:
     mapper:
       ACCEPT_CASE_INSENSITIVE_ENUMS: true
@@ -109,7 +109,7 @@ integration:
         order: 1
     auctionContracts: ${consul.tezos.auctionContracts:}
   solana:
-    enabled: ${consul.solana.enabled:false}
+    enabled: ${consul.solana.enabled:true}
   immutablex:
     enabled: ${consul.immutablex.enabled:false}
 
