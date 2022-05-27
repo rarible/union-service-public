@@ -1,11 +1,8 @@
 package com.rarible.protocol.union.worker.task.search.activity
 
-import com.rarible.core.logging.Logger
 import com.rarible.core.telemetry.metrics.RegisteredCounter
 import com.rarible.core.test.data.randomString
-import com.rarible.protocol.union.core.model.EsActivity
 import com.rarible.protocol.union.dto.ActivitiesDto
-import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivityIdDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -14,7 +11,6 @@ import com.rarible.protocol.union.enrichment.repository.search.EsActivityReposit
 import com.rarible.protocol.union.worker.metrics.SearchTaskMetricFactory
 import io.mockk.coEvery
 import io.mockk.coVerify
-import io.mockk.coVerifySequence
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.toList
@@ -26,8 +22,6 @@ import java.math.BigInteger
 import java.time.Instant
 
 internal class ActivityReindexServiceTest {
-
-    private val logger by Logger()
 
     private val counter = mockk<RegisteredCounter> {
         every {
@@ -77,14 +71,11 @@ internal class ActivityReindexServiceTest {
             mockk {
                 coEvery {
                     getAllActivities(listOf(ActivityTypeDto.CANCEL_LIST), listOf(BlockchainDto.ETHEREUM), eq("step_1"), eq("step_1"), any(), any())
-                } answers {
-                    logger.info("Step 1")
-                    ActivitiesDto(
-                        null, null, listOf(
-                            randomActivityDto()
-                        )
+                } returns ActivitiesDto(
+                    null, null, listOf(
+                        randomActivityDto()
                     )
-                }
+                )
 
                 coEvery {
                     getAllActivities(listOf(ActivityTypeDto.CANCEL_LIST), listOf(BlockchainDto.ETHEREUM), null, null, any(), any())
