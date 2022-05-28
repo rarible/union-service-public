@@ -2,11 +2,11 @@ package com.rarible.protocol.union.integration.immutablex.converter
 
 import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexCollection
-import java.util.stream.Stream
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
+import java.util.stream.Stream
 
 class ImmutablexCollectionConverterTest {
 
@@ -22,7 +22,7 @@ class ImmutablexCollectionConverterTest {
         assertThat(actual.meta).isNotNull
         assertThat(actual.meta?.name).isEqualTo(source.name)
         assertThat(actual.meta?.description).isEqualTo(source.description)
-        if (source.collectionImageUrl.isNotEmpty()) {
+        if (!source.collectionImageUrl.isNullOrEmpty()) {
             assertThat(actual.meta?.content).isNotEmpty
             assertThat(actual.meta?.content?.get(0)?.url).isEqualTo(source.collectionImageUrl)
         }
