@@ -64,6 +64,7 @@ import com.rarible.protocol.union.test.data.randomFlowNftItemDto
 import com.rarible.protocol.union.test.mock.CurrencyMock
 import kotlinx.coroutines.runBlocking
 import java.time.Instant
+import java.time.temporal.ChronoUnit
 
 fun randomUnionAddress(): UnionAddress =
     UnionAddressConverter.convert(
@@ -234,7 +235,7 @@ fun randomOwnershipDto(ownershipId: OwnershipIdDto): OwnershipDto {
 
 fun randomEsActivity() = EsActivity(
     activityId = randomString(),
-    date = Instant.now(),
+    date = Instant.now().truncatedTo(ChronoUnit.SECONDS),
     blockNumber = randomLong(),
     logIndex = randomInt(),
     blockchain = BlockchainDto.values().random(),

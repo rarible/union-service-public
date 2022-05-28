@@ -16,6 +16,7 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery
 import org.springframework.test.context.ContextConfiguration
 import java.time.Instant
+import java.time.temporal.ChronoUnit
 
 @IntegrationTest
 @EnableAutoConfiguration
@@ -28,6 +29,7 @@ internal class EsItemRepositoryFt {
     @Test
     fun `should save and read`(): Unit = runBlocking {
 
+        val now = Instant.now().truncatedTo(ChronoUnit.SECONDS)
         val esItem = EsItem(
             itemId = "0x03",
             blockchain = BlockchainDto.ETHEREUM,
@@ -37,8 +39,8 @@ internal class EsItemRepositoryFt {
             traits = listOf(EsTrait("long", "10"), EsTrait("test", "eye")),
             creators = listOf("0x01"),
             owner = "0x05",
-            mintedAt = Instant.now(),
-            lastUpdatedAt = Instant.now()
+            mintedAt = now,
+            lastUpdatedAt = now
         )
 
         val id = repository.save(esItem).itemId
