@@ -23,19 +23,7 @@ class ActivityEventHandler(
     override suspend fun handle(event: List<ActivityDto>) {
         logger.info("Handling ${event.size} ActivityDto events")
 
-        val itemsIdMapping = event.groupBy { it.id.blockchain }
-            .mapAsync { (blockchain, activities) ->
-                val itemIds = activities.map { EsActivityConverter.extractItemId(it).toString() }
-                router.getService(blockchain).getItemsByIds(itemIds)
-            }
-            .flatten()
-            .associateBy { it.id }
-
-        val convertedEvents = event.mapNotNull {
-            logger.debug("Converting ActivityDto id = ${it.id}")
-            val collection = itemsIdMapping[EsActivityConverter.extractItemId(it)]?.collection?.value
-            EsActivityConverter.convert(it, collection)
-        }
+        val convertedEvents = EsActivityConverter.batchConvert(event, router)
 
         repository.saveAll(convertedEvents)
         logger.info("Handling completed")

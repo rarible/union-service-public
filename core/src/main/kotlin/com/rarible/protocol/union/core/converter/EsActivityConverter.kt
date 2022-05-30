@@ -1,6 +1,9 @@
 package com.rarible.protocol.union.core.converter
 
+import com.rarible.core.common.mapAsync
 import com.rarible.protocol.union.core.model.EsActivity
+import com.rarible.protocol.union.core.service.ItemService
+import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.AssetTypeExtension
@@ -28,6 +31,21 @@ import com.rarible.protocol.union.dto.parser.IdParser
 
 object EsActivityConverter {
 
+    suspend fun batchConvert(source: List<ActivityDto>, router: BlockchainRouter<ItemService>): List<EsActivity> {
+        val itemsIdMapping = source.groupBy { it.id.blockchain }
+            .mapAsync { (blockchain, activities) ->
+                val itemIds = activities.map { extractItemId(it).toString() }
+                router.getService(blockchain).getItemsByIds(itemIds)
+            }
+            .flatten()
+            .associateBy { it.id }
+
+        return source.mapNotNull {
+            val collection = itemsIdMapping[extractItemId(it)]?.collection?.value
+            convert(it, collection)
+        }
+    }
+
     fun convert(source: ActivityDto, collection: String?): EsActivity? {
         return when (source) {
             is MintActivityDto -> convertMint(source, collection)
@@ -50,7 +68,7 @@ object EsActivityConverter {
         }
     }
 
-    fun extractItemId(source: ActivityDto): ItemIdDto? {
+    private fun extractItemId(source: ActivityDto): ItemIdDto? {
         return when (source) {
             is MintActivityDto -> source.itemId
             is BurnActivityDto -> source.itemId
