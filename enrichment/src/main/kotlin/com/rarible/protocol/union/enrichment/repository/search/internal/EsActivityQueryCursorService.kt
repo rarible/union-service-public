@@ -22,14 +22,14 @@ class EsActivityQueryCursorService {
             mustDiffer(EsActivity::date.name, cursor.date, sort)
         )
         // date == cursor && blockNumber <> cursor OR
-        if (cursor.blockNumber != null) {
+        if (cursor.blockNumber != 0L) {
             cursorQuery.shouldAll(
                 { this.mustEqual(EsActivity::date.name, cursor.date) },
                 { this.mustDiffer(EsActivity::blockNumber.name, cursor.blockNumber, sort) }
             )
         }
         // date == cursor && blockNumber == cursor && logIndex <> cursor OR
-        if (cursor.blockNumber != null && cursor.logIndex != null) {
+        if (cursor.blockNumber != 0L && cursor.logIndex != 0) {
             cursorQuery.shouldAll(
                 { this.mustEqual(EsActivity::date.name, cursor.date) },
                 { this.mustEqual(EsActivity::blockNumber.name, cursor.blockNumber) },
@@ -59,10 +59,19 @@ class EsActivityQueryCursorService {
         this.should(mustAll)
     }
 
+    private fun mustEqual(fieldName: String, value: Long): QueryBuilder? {
+        if (value == 0L) return null
+        return TermQueryBuilder(fieldName, value)
+    }
+
+    private fun mustEqual(fieldName: String, value: Int): QueryBuilder? {
+        if (value == 0) return null
+        return TermQueryBuilder(fieldName, value)
+    }
+
     private fun mustEqual(fieldName: String, value: Any?): QueryBuilder? {
-        return if (value != null) {
-            TermQueryBuilder(fieldName, value)
-        } else null
+        if (value == null) return null
+        return TermQueryBuilder(fieldName, value)
     }
 
     private fun mustDiffer(fieldName: String, value: Any?, sort: EsActivitySort): QueryBuilder? {
