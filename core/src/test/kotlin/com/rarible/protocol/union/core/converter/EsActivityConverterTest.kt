@@ -74,7 +74,7 @@ class EsActivityConverterTest {
         )
 
         // when
-        val actual = converter.convert(source)!!
+        val actual = converter.convert(source, null)!!
 
         // then
         assertThat(actual.activityId).isEqualTo(source.id.toString())
@@ -108,7 +108,7 @@ class EsActivityConverterTest {
         )
 
         // when
-        val actual = converter.convert(source)!!
+        val actual = converter.convert(source, null)!!
 
         // then
         assertThat(actual.activityId).isEqualTo(source.id.toString())
@@ -143,7 +143,7 @@ class EsActivityConverterTest {
         )
 
         // when
-        val actual = converter.convert(source)!!
+        val actual = converter.convert(source, null)!!
 
         // then
         assertThat(actual.activityId).isEqualTo(source.id.toString())
@@ -177,7 +177,7 @@ class EsActivityConverterTest {
         )
 
         // when
-        val actual = converter.convert(source)
+        val actual = converter.convert(source, null)
 
         assertThat(actual).isNull()
     }
@@ -206,7 +206,7 @@ class EsActivityConverterTest {
             )
 
         // when
-        val actual = converter.convert(source)!!
+        val actual = converter.convert(source, null)!!
 
         // then
         assertThat(actual.activityId).isEqualTo(source.id.toString())
@@ -236,7 +236,7 @@ class EsActivityConverterTest {
         )
 
         // when
-        val actual = converter.convert(source)!!
+        val actual = converter.convert(source, null)!!
 
         // then
         assertThat(actual.activityId).isEqualTo(source.id.toString())
@@ -266,7 +266,7 @@ class EsActivityConverterTest {
         )
 
         // when
-        val actual = converter.convert(source)!!
+        val actual = converter.convert(source, null)!!
 
         // then
         assertThat(actual.activityId).isEqualTo(source.id.toString())
@@ -302,7 +302,7 @@ class EsActivityConverterTest {
         )
 
         // when
-        val actual = converter.convert(source)!!
+        val actual = converter.convert(source, null)!!
 
         // then
         assertThat(actual.activityId).isEqualTo(source.id.toString())
@@ -338,7 +338,7 @@ class EsActivityConverterTest {
         )
 
         // when
-        val actual = converter.convert(source)!!
+        val actual = converter.convert(source, null)!!
 
         // then
         assertThat(actual.activityId).isEqualTo(source.id.toString())
@@ -364,7 +364,7 @@ class EsActivityConverterTest {
         )
 
         // when
-        val actual = converter.convert(source)!!
+        val actual = converter.convert(source, null)!!
 
         // then
         assertThat(actual.activityId).isEqualTo(source.id.toString())
@@ -391,7 +391,7 @@ class EsActivityConverterTest {
         )
 
         // when
-        val actual = converter.convert(source)!!
+        val actual = converter.convert(source, null)!!
 
         // then
         assertThat(actual.activityId).isEqualTo(source.id.toString())
@@ -417,7 +417,7 @@ class EsActivityConverterTest {
         )
 
         // when
-        val actual = converter.convert(source)!!
+        val actual = converter.convert(source, null)!!
 
         // then
         assertThat(actual.activityId).isEqualTo(source.id.toString())
@@ -443,7 +443,7 @@ class EsActivityConverterTest {
         )
 
         // when
-        val actual = converter.convert(source)!!
+        val actual = converter.convert(source, null)!!
 
         // then
         assertThat(actual.activityId).isEqualTo(source.id.toString())
@@ -468,7 +468,7 @@ class EsActivityConverterTest {
         )
 
         // when
-        val actual = converter.convert(source)!!
+        val actual = converter.convert(source, null)!!
 
         // then
         assertThat(actual.activityId).isEqualTo(source.id.toString())
@@ -493,7 +493,7 @@ class EsActivityConverterTest {
         )
 
         // when
-        val actual = converter.convert(source)!!
+        val actual = converter.convert(source, null)!!
 
         // then
         assertThat(actual.activityId).isEqualTo(source.id.toString())
@@ -529,7 +529,7 @@ class EsActivityConverterTest {
 
         // when
         assertThatCode {
-            converter.convert(source)
+            converter.convert(source, null)!!
         }.doesNotThrowAnyException()
     }
 
