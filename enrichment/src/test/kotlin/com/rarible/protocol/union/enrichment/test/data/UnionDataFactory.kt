@@ -235,7 +235,7 @@ fun randomOwnershipDto(ownershipId: OwnershipIdDto): OwnershipDto {
 
 fun randomEsActivity() = EsActivity(
     activityId = randomString(),
-    date = Instant.now().truncatedTo(ChronoUnit.SECONDS),
+    date = Instant.now().truncatedTo(ChronoUnit.MILLIS),
     blockNumber = randomLong(),
     logIndex = randomInt(),
     blockchain = BlockchainDto.values().random(),

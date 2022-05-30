@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
 @IntegrationTest
-internal class ReindexServiceIT {
+internal class ReindexServiceIt {
 
     @Autowired
     lateinit var taskRepository: TaskRepository

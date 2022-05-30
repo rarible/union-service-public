@@ -21,7 +21,7 @@ import java.math.BigInteger
 import java.time.Instant
 
 @IntegrationTest
-class ItemConsumerIT {
+class ItemConsumerIt {
 
     @Autowired
     private lateinit var producer: RaribleKafkaProducer<ItemEventDto>
@@ -50,7 +50,7 @@ class ItemConsumerIT {
         runBlocking {
 
             val event = ItemUpdateEventDto(
-                eventId = randomString(),
+                eventId = itemId.fullId(),
                 itemId = itemId,
                 item = item
             )
@@ -58,14 +58,15 @@ class ItemConsumerIT {
             producer.send(KafkaEventFactory.itemEvent(event)).ensureSuccess()
 
             Wait.waitAssert {
-                val actualItem = repository.findById(itemId.fullId())!!
+                val actualItem = repository.findById(itemId.fullId())
                 assert(actualItem)
             }
         }
     }
 
-    private suspend fun assert(actualItem: EsItem) {
-        assertThat(item).isNotNull
+    private suspend fun assert(actualItem: EsItem?) {
+        assertThat(actualItem).isNotNull
+        actualItem!!
         assertThat(actualItem.itemId).isEqualTo(item.id.fullId())
         assertThat(actualItem.blockchain).isEqualTo(item.blockchain)
         assertThat(actualItem.mintedAt).isEqualTo(item.mintedAt)

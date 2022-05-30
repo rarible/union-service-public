@@ -19,7 +19,7 @@ import randomOwnership
 import randomOwnershipId
 
 @IntegrationTest
-class OwnershipConsumerIT {
+class OwnershipConsumerIt {
 
     @Autowired
     private lateinit var producer: RaribleKafkaProducer<OwnershipEventDto>

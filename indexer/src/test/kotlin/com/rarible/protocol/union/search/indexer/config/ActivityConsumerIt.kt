@@ -23,12 +23,11 @@ import org.elasticsearch.index.query.QueryBuilders.matchQuery
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder
-import java.time.Duration
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
 @IntegrationTest
-class ActivityConsumerIT {
+class ActivityConsumerIt {
 
     @Autowired
     private lateinit var producer: RaribleKafkaProducer<ActivityDto>

@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
 @IntegrationTest
-class CollectionConsumerIT {
+class CollectionConsumerIt {
 
     @Autowired
     private lateinit var producer: RaribleKafkaProducer<CollectionEventDto>
