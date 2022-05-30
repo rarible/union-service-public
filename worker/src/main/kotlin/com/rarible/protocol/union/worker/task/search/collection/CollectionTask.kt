@@ -33,11 +33,12 @@ class CollectionTask(
         return if (from == "") {
             emptyFlow()
         } else {
+            var lastCursor = from
             flow {
                 do {
                     val res = collectionApiMergeService.getAllCollections(
                         listOf(blockchain),
-                        from,
+                        lastCursor,
                         PageSize.COLLECTION.max
                     )
                     if (res.collections.isNotEmpty()) {
@@ -45,8 +46,9 @@ class CollectionTask(
                             res.collections.map { EsCollectionConverter.convert(it) },
                         )
                     }
-                    emit(res.continuation.orEmpty())
-                } while (res.continuation != null)
+                    lastCursor = res.continuation.orEmpty()
+                    emit(lastCursor!!)
+                } while (!lastCursor.isNullOrBlank())
             }
         }
     }
