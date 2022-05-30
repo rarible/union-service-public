@@ -12,6 +12,7 @@ import com.rarible.protocol.union.subscriber.UnionKafkaJsonSerializer
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Lazy
+import org.springframework.context.annotation.Primary
 
 @Lazy
 @Configuration
@@ -24,6 +25,7 @@ class TestIndexerConfiguration {
     //---------------- UNION producers ----------------//
 
     @Bean
+    @Primary
     fun testUnionActivityEventProducer(): RaribleKafkaProducer<ActivityDto> {
         return RaribleKafkaProducer(
             clientId = "test.union.activity",
@@ -35,6 +37,7 @@ class TestIndexerConfiguration {
     }
 
     @Bean
+    @Primary
     fun testUnionOrderEventProducer(): RaribleKafkaProducer<OrderEventDto> {
         return RaribleKafkaProducer(
             clientId = "test.union.order",
@@ -46,6 +49,7 @@ class TestIndexerConfiguration {
     }
 
     @Bean
+    @Primary
     fun testUnionCollectionEventProducer(): RaribleKafkaProducer<CollectionEventDto> {
         return RaribleKafkaProducer(
             clientId = "test.union.collection",
@@ -57,6 +61,7 @@ class TestIndexerConfiguration {
     }
 
     @Bean
+    @Primary
     fun testUnionOwnershipEventProducer(): RaribleKafkaProducer<OwnershipEventDto> {
         return RaribleKafkaProducer(
             clientId = "test.union.ownership",
