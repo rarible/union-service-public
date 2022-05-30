@@ -40,8 +40,7 @@ class ActivityConsumerIt {
         // given
         val activity = MintActivityDto(
             id = ActivityIdDto(
-                BlockchainDto.ETHEREUM,
-                randomString()
+                BlockchainDto.ETHEREUM, randomString()
             ),
             date = Instant.now().truncatedTo(ChronoUnit.MILLIS),
             blockchainInfo = ActivityBlockchainInfoDto(
@@ -62,16 +61,14 @@ class ActivityConsumerIt {
 
         // when
         val message = KafkaMessage<ActivityDto>(
-            key = "key",
-            value = activity
+            key = activity.id.fullId(), value = activity
         )
         producer.send(message).ensureSuccess()
 
         // then
         Wait.waitAssert {
-            val searchQuery = NativeSearchQueryBuilder()
-                .withQuery(matchQuery("activityId", activity.id.toString()))
-                .build()
+            val searchQuery =
+                NativeSearchQueryBuilder().withQuery(matchQuery("activityId", activity.id.toString())).build()
             val actual = repository.search(searchQuery)
             assertThat(actual.activities).isNotEmpty
             assertThat(actual.activities.first().date).isEqualTo(activity.date)
