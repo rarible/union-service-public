@@ -57,9 +57,9 @@ internal class ActivityReindexServiceTest {
             service
                 .reindex(BlockchainDto.FLOW, ActivityTypeDto.CANCEL_LIST, "test_index")
                 .toList()
-        ).isEmpty()
+        ).containsExactly("")
 
-        coVerify(exactly = 0) {
+        coVerify(exactly = 1) {
             esRepo.saveAll(emptyList(), "test_index")
             counter.increment(0)
         }
