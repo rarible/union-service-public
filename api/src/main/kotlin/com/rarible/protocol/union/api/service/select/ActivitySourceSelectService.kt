@@ -9,6 +9,7 @@ import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.SyncSortDto
+import com.rarible.protocol.union.dto.SyncTypeDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
 import org.springframework.stereotype.Service
 import java.time.Instant
@@ -36,9 +37,10 @@ class ActivitySourceSelectService(
         blockchain: BlockchainDto,
         continuation: String?,
         size: Int?,
-        sort: SyncSortDto?
+        sort: SyncSortDto?,
+        type: SyncTypeDto?
     ): ActivitiesDto {
-        return activityApiMergeService.getAllActivitiesSync(blockchain, continuation, size, sort)
+        return activityApiMergeService.getAllActivitiesSync(blockchain, continuation, size, sort, type)
     }
 
     suspend fun getActivitiesByCollection(

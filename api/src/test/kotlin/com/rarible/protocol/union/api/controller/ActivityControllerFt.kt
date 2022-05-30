@@ -23,6 +23,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.MintActivityDto
 import com.rarible.protocol.union.dto.OrderBidActivityDto
+import com.rarible.protocol.union.dto.SyncTypeDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
 import com.rarible.protocol.union.dto.continuation.CombinedContinuation
 import com.rarible.protocol.union.dto.continuation.page.ArgSlice
@@ -59,6 +60,88 @@ class ActivityControllerFt : AbstractIntegrationTest() {
     lateinit var activityControllerApi: ActivityControllerApi
 
     @Test
+    fun `get sync activities - ethereum - nft type - asc`() = runBlocking<Unit> {
+        val size = 55
+        val orderActivities = mutableListOf<OrderActivityDto>()
+        val auctionActivities = mutableListOf<AuctionActivityDto>()
+        val itemActivities = mutableListOf<NftActivityDto>()
+
+        fillActivitiesLists(
+            size = size ,
+            orderActivities = orderActivities,
+            auctionActivities = auctionActivities,
+            itemActivities = itemActivities
+        )
+
+        mockActivitiesSync(
+            size = size,
+            sort = SyncSortDto.DB_UPDATE_ASC,
+            orderActivities = orderActivities,
+            auctionActivities = auctionActivities,
+            itemActivities = itemActivities
+        )
+
+        val activities = activityControllerApi.getAllActivitiesSync(
+            BlockchainDto.ETHEREUM,
+            null,
+            size,
+            com.rarible.protocol.union.dto.SyncSortDto.DB_UPDATE_ASC,
+            SyncTypeDto.NFT
+        ).awaitFirst()
+
+        assertThat(activities.activities).hasSize(size)
+        assertThat(activities.continuation).isNotNull
+        assertThat(activities.activities).isSortedAccordingTo { o1, o2 ->
+            compareValues(
+                o1.lastUpdatedAt,
+                o2.lastUpdatedAt
+            )
+        }
+        activities.activities.forEach { assertThat(it).isExactlyInstanceOf(MintActivityDto::class.java) }
+    }
+
+    @Test
+    fun `get sync activities - ethereum - order type - asc`() = runBlocking<Unit> {
+        val size = 55
+        val orderActivities = mutableListOf<OrderActivityDto>()
+        val auctionActivities = mutableListOf<AuctionActivityDto>()
+        val itemActivities = mutableListOf<NftActivityDto>()
+
+        fillActivitiesLists(
+            size = size ,
+            orderActivities = orderActivities,
+            auctionActivities = auctionActivities,
+            itemActivities = itemActivities
+        )
+
+        mockActivitiesSync(
+            size = size,
+            sort = SyncSortDto.DB_UPDATE_ASC,
+            orderActivities = orderActivities,
+            auctionActivities = auctionActivities,
+            itemActivities = itemActivities
+        )
+
+        val activities = activityControllerApi.getAllActivitiesSync(
+            BlockchainDto.ETHEREUM,
+            null,
+            size,
+            com.rarible.protocol.union.dto.SyncSortDto.DB_UPDATE_ASC,
+            SyncTypeDto.ORDER
+        ).awaitFirst()
+
+        assertThat(activities.activities).hasSize(size)
+        assertThat(activities.continuation).isNotNull
+        assertThat(activities.activities).isSortedAccordingTo { o1, o2 ->
+            compareValues(
+                o1.lastUpdatedAt,
+                o2.lastUpdatedAt
+            )
+        }
+        activities.activities.forEach { assertThat(it).isExactlyInstanceOf(OrderBidActivityDto::class.java) }
+    }
+
+    @Test
     fun `get sync activities - ethereum - asc`() = runBlocking<Unit> {
         val size = 51
         val orderActivities = mutableListOf<OrderActivityDto>()
@@ -84,7 +167,8 @@ class ActivityControllerFt : AbstractIntegrationTest() {
             BlockchainDto.ETHEREUM,
             null,
             size,
-            com.rarible.protocol.union.dto.SyncSortDto.DB_UPDATE_ASC
+            com.rarible.protocol.union.dto.SyncSortDto.DB_UPDATE_ASC,
+            null
         ).awaitFirst()
 
         assertThat(activities.activities).hasSize(size)
@@ -123,7 +207,8 @@ class ActivityControllerFt : AbstractIntegrationTest() {
             BlockchainDto.ETHEREUM,
             null,
             size,
-            com.rarible.protocol.union.dto.SyncSortDto.DB_UPDATE_DESC
+            com.rarible.protocol.union.dto.SyncSortDto.DB_UPDATE_DESC,
+            null
         ).awaitFirst()
 
         assertThat(activities.activities).hasSize(size)
@@ -162,7 +247,8 @@ class ActivityControllerFt : AbstractIntegrationTest() {
             BlockchainDto.ETHEREUM,
             null,
             size,
-            com.rarible.protocol.union.dto.SyncSortDto.DB_UPDATE_DESC
+            com.rarible.protocol.union.dto.SyncSortDto.DB_UPDATE_DESC,
+            null
         ).awaitFirst()
 
         assertThat(activities.activities).hasSize((size*3)/5)

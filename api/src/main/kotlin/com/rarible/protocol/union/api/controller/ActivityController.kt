@@ -8,6 +8,7 @@ import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.SyncSortDto
+import com.rarible.protocol.union.dto.SyncTypeDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.RestController
@@ -41,10 +42,11 @@ class ActivityController(
         blockchain: BlockchainDto,
         continuation: String?,
         size: Int?,
-        sort: SyncSortDto?
+        sort: SyncSortDto?,
+        type: SyncTypeDto?
     ): ResponseEntity<ActivitiesDto> {
         logger.info("Got request to get all activities sync, parameters: $blockchain, $continuation, $size, $sort")
-        val result = activitySourceSelector.getAllActivitiesSync(blockchain, continuation, size, sort)
+        val result = activitySourceSelector.getAllActivitiesSync(blockchain, continuation, size, sort, type)
         return ResponseEntity.ok(result)
     }
 
