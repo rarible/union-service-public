@@ -12,24 +12,46 @@ sharedEnvironments: &sharedEnvironments
   INTEGRATION_TEZOS_ENABLED: false
   INTEGRATION_SOLANA_ENABLED: false
   INTEGRATION_IMMUTABLEX_ENABLED: false
+  # todo see into consul
+  # SPRING_DATA_ELASTICSEARCH_CLUSTERNODES
+  # SPRING_DATA_ELASTICSEARCH_REST_URIS
+  # SPRING_DATA_ELASTICSEARCH_CLIENT_REACTIVE_ENDPOINTS
+  # REDISURI
+  # META_OPENSEAPROXYURL
+
+sharedTolerations: &sharedTolerations
+  effect: NoSchedule
+  key: env
+  operator: Equal
+  value: infura-test
 
 protocol-union-api:
+  tolerations:
+    - *sharedTolerations
   environments:
     <<: *sharedEnvironments
 
 protocol-union-listener:
+  tolerations:
+    - *sharedTolerations
   environments:
     <<: *sharedEnvironments
 
 protocol-union-meta-loader:
+  tolerations:
+    - *sharedTolerations
   environments:
     <<: *sharedEnvironments
 
 protocol-union-indexer:
+  tolerations:
+    - *sharedTolerations
   environments:
     <<: *sharedEnvironments
 
 protocol-union-worker:
+  tolerations:
+    - *sharedTolerations
   environments:
     <<: *sharedEnvironments
     WORKER_REINDEXER_ACTIVITY_BLOCKCHAINS_0_BLOCKCHAIN: "ETHEREUM"
