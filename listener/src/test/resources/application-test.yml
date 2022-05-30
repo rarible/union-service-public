@@ -72,6 +72,9 @@ integration:
       enabled: true
       dipdupUrl: "http://localhost:8080"
       tzktUrl: "http://localhost:8080"
+      nodeAddress: "http://localhost:8080"
+      chainId: ""
+      sigChecker: ""
       consumer:
         broker-replica-set: ${kafka.hosts}
         username:

@@ -13,6 +13,9 @@ data class DipDupIntegrationProperties(
     val tzktUrl: String, // could be in config
     val tzktProperties: TzktProperties = TzktProperties(),
     val ipfsUrl: String,
+    val nodeAddress: String,
+    val chainId: String,
+    val sigChecker: String,
     val knownAddresses: KnownAddresses?,
     val consumer: DefaultConsumerProperties?,
     val network: String,

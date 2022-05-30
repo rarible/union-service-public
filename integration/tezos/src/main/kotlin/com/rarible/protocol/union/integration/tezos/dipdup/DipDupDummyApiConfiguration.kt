@@ -6,6 +6,7 @@ import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktCollectio
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktItemActivityService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktItemService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktOwnershipService
+import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktSignatureService
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -32,4 +33,6 @@ class DipDupDummyApiConfiguration {
     @Bean
     fun tzktItemActivityService() = object: TzktItemActivityService {}
 
+    @Bean
+    fun tzktSignatureService() = object: TzktSignatureService {}
 }

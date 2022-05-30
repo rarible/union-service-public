@@ -19,10 +19,13 @@ import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktItemServi
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktItemServiceImpl
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktOwnershipService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktOwnershipServiceImpl
+import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktSignatureService
+import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktSignatureServiceImpl
 import com.rarible.tzkt.client.BigMapKeyClient
 import com.rarible.tzkt.client.CollectionClient
 import com.rarible.tzkt.client.IPFSClient
 import com.rarible.tzkt.client.OwnershipClient
+import com.rarible.tzkt.client.SignatureClient
 import com.rarible.tzkt.client.TokenActivityClient
 import com.rarible.tzkt.client.TokenClient
 import com.rarible.tzkt.meta.MetaService
@@ -70,6 +73,9 @@ class DipDupApiConfiguration(
     fun tokenActivityClient() = TokenActivityClient(tzktWebClient)
 
     @Bean
+    fun signatureClient() = SignatureClient(properties.nodeAddress, properties.chainId, properties.sigChecker)
+
+    @Bean
     fun metaService(mapper: ObjectMapper, bigMapKeyClient: BigMapKeyClient) =
         MetaService(mapper, bigMapKeyClient, properties.knownAddresses!!)
 
@@ -113,6 +119,11 @@ class DipDupApiConfiguration(
     @Bean
     fun tzktItemActivityService(tokenActivityClient: TokenActivityClient): TzktItemActivityService {
         return TzktItemActivityServiceImpl(tokenActivityClient)
+    }
+
+    @Bean
+    fun tzktSignatureService(signatureClient: SignatureClient): TzktSignatureService {
+        return TzktSignatureServiceImpl(signatureClient)
     }
 
 }

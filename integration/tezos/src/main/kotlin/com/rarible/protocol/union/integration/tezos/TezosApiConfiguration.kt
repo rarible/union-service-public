@@ -27,6 +27,7 @@ import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktCollectio
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktItemActivityService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktItemService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktOwnershipService
+import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktSignatureService
 import com.rarible.protocol.union.integration.tezos.service.TezosActivityService
 import com.rarible.protocol.union.integration.tezos.service.TezosAuctionService
 import com.rarible.protocol.union.integration.tezos.service.TezosCollectionService
@@ -125,7 +126,10 @@ class TezosApiConfiguration(
     }
 
     @Bean
-    fun tezosOwnershipService(controllerApi: NftOwnershipControllerApi, tzktOwnershipService: TzktOwnershipService): TezosOwnershipService {
+    fun tezosOwnershipService(
+        controllerApi: NftOwnershipControllerApi,
+        tzktOwnershipService: TzktOwnershipService
+    ): TezosOwnershipService {
         return TezosOwnershipService(controllerApi, tzktOwnershipService)
     }
 
@@ -155,8 +159,11 @@ class TezosApiConfiguration(
     }
 
     @Bean
-    fun tezosSignatureService(controllerApi: OrderSignatureControllerApi): TezosSignatureService {
-        return TezosSignatureService(controllerApi)
+    fun tezosSignatureService(
+        controllerApi: OrderSignatureControllerApi,
+        tzktSignatureService: TzktSignatureService
+    ): TezosSignatureService {
+        return TezosSignatureService(controllerApi, tzktSignatureService)
     }
 
     @Bean
@@ -173,6 +180,13 @@ class TezosApiConfiguration(
         dipdupOrderActivityService: DipdupOrderActivityService,
         tzktItemActivityService: TzktItemActivityService
     ): TezosActivityService {
-        return TezosActivityService(itemActivityApi, orderActivityApi, converter, pgActivityService, dipdupOrderActivityService, tzktItemActivityService)
+        return TezosActivityService(
+            itemActivityApi,
+            orderActivityApi,
+            converter,
+            pgActivityService,
+            dipdupOrderActivityService,
+            tzktItemActivityService
+        )
     }
 }
