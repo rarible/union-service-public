@@ -10,6 +10,8 @@ import com.rarible.protocol.union.test.mock.CurrencyMock
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import java.math.BigDecimal
+import java.math.BigInteger
 
 class FlowOrderConverterTest {
 
@@ -17,7 +19,7 @@ class FlowOrderConverterTest {
 
     @Test
     fun `order V1`() = runBlocking<Unit> {
-        val dto = randomFlowV1OrderDto()
+        val dto = randomFlowV1OrderDto().copy(makeStock = BigInteger("100000000000000"))
 
         val converted = flowOrderConverter.convert(dto, BlockchainDto.FLOW)
 
@@ -26,7 +28,7 @@ class FlowOrderConverterTest {
         assertThat(converted.startedAt).isNull()
         assertThat(converted.endedAt).isNull()
         // TODO makeStock is needed to be BigDecimal on the flow client side
-        assertThat(converted.makeStock).isEqualTo(dto.makeStock.toBigDecimal())
+        assertThat(converted.makeStock).isEqualTo(BigDecimal("0.0001"))
         assertThat(converted.fill).isEqualTo(dto.fill)
         assertThat(converted.status.name).isEqualTo(dto.status!!.name)
         assertThat(converted.createdAt).isEqualTo(dto.createdAt)
