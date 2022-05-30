@@ -23,32 +23,21 @@ class ActivityEventHandler(
     override suspend fun handle(event: List<ActivityDto>) {
         logger.info("Handling ${event.size} ActivityDto events")
 
-        var convertedEvents = event.mapNotNull {
-            logger.debug("Converting ActivityDto id = ${it.id}")
-            EsActivityConverter.convert(it)
-        }
+        val itemsIdMapping = event.groupBy { it.id.blockchain }
+            .mapAsync { (blockchain, activities) ->
+                val itemIds = activities.map { EsActivityConverter.extractItemId(it).toString() }
+                router.getService(blockchain).getItemsByIds(itemIds)
+            }
+            .flatten()
+            .associateBy { it.id }
 
-        convertedEvents = fillCollections(convertedEvents)
+        val convertedEvents = event.mapNotNull {
+            logger.debug("Converting ActivityDto id = ${it.id}")
+            val collection = itemsIdMapping[EsActivityConverter.extractItemId(it)]?.collection?.value
+            EsActivityConverter.convert(it, collection)
+        }
 
         repository.saveAll(convertedEvents)
         logger.info("Handling completed")
-    }
-
-    private suspend fun fillCollections(activities: List<EsActivity>): List<EsActivity> {
-        val activitiesByBlockchain = activities.groupBy(EsActivity::blockchain)
-
-        val items = activitiesByBlockchain.mapAsync { (blockchain, activities) ->
-            val itemIds = activities.map { blockchain.name + ":" + it.item }
-            router.getService(blockchain).getItemsByIds(itemIds)
-        }.flatten()
-
-        val itemsIdMapping = items.associateBy { it.id.value }
-
-        return activities.map {
-            val collection = itemsIdMapping[it.item]?.collection?.value
-            if (collection != null) {
-                it.copy(collection = collection)
-            } else it
-        }
     }
 }
