@@ -46,3 +46,7 @@ listener:
   consumer:
     broker-replica-set: ${kafka.hosts}
     worker-count: 4
+
+common:
+  producer:
+    broker-replica-set: ${kafka.hosts}
