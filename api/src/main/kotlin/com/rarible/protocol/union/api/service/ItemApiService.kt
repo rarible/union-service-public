@@ -61,13 +61,11 @@ class ItemApiService(
         logger.info("Getting items by IDs: [{}]", ids.map { "${it.blockchain}:${it.value}" })
         val groupedIds = ids.groupBy({ it.blockchain }, { it.value })
 
-        groupedIds.flatMap {
+        val items = groupedIds.flatMap {
             router.getService(it.key).getItemsByIds(it.value)
-        }.map {
-            async {
-                enrich(it)
-            }
-        }.awaitAll()
+        }
+
+        enrich(items)
     }
 
     override suspend fun enrich(unionItemsPage: Page<UnionItem>): ItemsDto {
