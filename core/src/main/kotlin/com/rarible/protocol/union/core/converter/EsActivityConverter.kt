@@ -13,7 +13,6 @@ import com.rarible.protocol.union.dto.AuctionEndActivityDto
 import com.rarible.protocol.union.dto.AuctionFinishActivityDto
 import com.rarible.protocol.union.dto.AuctionOpenActivityDto
 import com.rarible.protocol.union.dto.AuctionStartActivityDto
-import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.BurnActivityDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.L2DepositActivityDto
@@ -32,39 +31,40 @@ import com.rarible.protocol.union.dto.parser.IdParser
 object EsActivityConverter {
 
     suspend fun batchConvert(source: List<ActivityDto>, router: BlockchainRouter<ItemService>): List<EsActivity> {
-        val itemsIdMapping = source.groupBy { it.id.blockchain }
+        val items = source.groupBy { it.id.blockchain }
             .mapAsync { (blockchain, activities) ->
-                val itemIds = activities.map { extractItemId(it).toString() }
+                val itemIds = activities.mapNotNull { extractItemId(it)?.value }
                 router.getService(blockchain).getItemsByIds(itemIds)
             }
             .flatten()
             .associateBy { it.id }
 
         return source.mapNotNull {
-            val collection = itemsIdMapping[extractItemId(it)]?.collection?.value
+            val collection = items[extractItemId(it)]?.collection?.value
             convert(it, collection)
         }
     }
 
     fun convert(source: ActivityDto, collection: String?): EsActivity? {
+        val itemId = extractItemId(source)
         return when (source) {
-            is MintActivityDto -> convertMint(source, collection)
-            is BurnActivityDto -> convertBurn(source, collection)
-            is TransferActivityDto -> convertTransfer(source, collection)
+            is MintActivityDto -> convertMint(source, itemId, collection)
+            is BurnActivityDto -> convertBurn(source, itemId, collection)
+            is TransferActivityDto -> convertTransfer(source, itemId, collection)
+            is OrderMatchSellDto -> convertOrderMatchSell(source, itemId, collection)
+            is OrderBidActivityDto -> convertOrderBid(source, itemId, collection)
+            is OrderListActivityDto -> convertOrderList(source, itemId, collection)
+            is OrderCancelBidActivityDto -> convertOrderCancelBid(source, itemId, collection)
+            is OrderCancelListActivityDto -> convertOrderCancelList(source, itemId, collection)
+            is AuctionOpenActivityDto -> convertAuctionOpen(source, itemId, collection)
+            is AuctionBidActivityDto -> convertAuctionBid(source, itemId, collection)
+            is AuctionFinishActivityDto -> convertAuctionFinish(source, itemId, collection)
+            is AuctionCancelActivityDto -> convertAuctionCancel(source, itemId, collection)
+            is AuctionStartActivityDto -> convertAuctionStart(source, itemId, collection)
+            is AuctionEndActivityDto -> convertAuctionEnd(source, itemId, collection)
+            is L2WithdrawalActivityDto -> convertL2Withdrawal(source, itemId, collection)
+            is L2DepositActivityDto -> convertL2Deposit(source, itemId, collection)
             is OrderMatchSwapDto -> null
-            is OrderMatchSellDto -> convertOrderMatchSell(source, collection)
-            is OrderBidActivityDto -> convertOrderBid(source, collection)
-            is OrderListActivityDto -> convertOrderList(source, collection)
-            is OrderCancelBidActivityDto -> convertOrderCancelBid(source, collection)
-            is OrderCancelListActivityDto -> convertOrderCancelList(source, collection)
-            is AuctionOpenActivityDto -> convertAuctionOpen(source, collection)
-            is AuctionBidActivityDto -> convertAuctionBid(source, collection)
-            is AuctionFinishActivityDto -> convertAuctionFinish(source, collection)
-            is AuctionCancelActivityDto -> convertAuctionCancel(source, collection)
-            is AuctionStartActivityDto -> convertAuctionStart(source, collection)
-            is AuctionEndActivityDto -> convertAuctionEnd(source, collection)
-            is L2WithdrawalActivityDto -> convertL2Withdrawal(source, collection)
-            is L2DepositActivityDto -> convertL2Deposit(source, collection)
         }
     }
 
@@ -73,7 +73,6 @@ object EsActivityConverter {
             is MintActivityDto -> source.itemId
             is BurnActivityDto -> source.itemId
             is TransferActivityDto -> source.itemId
-            is OrderMatchSwapDto -> null
             is OrderMatchSellDto -> source.nft.type.ext.itemId
             is OrderBidActivityDto -> source.take.type.ext.itemId
             is OrderListActivityDto -> source.make.type.ext.itemId
@@ -87,18 +86,18 @@ object EsActivityConverter {
             is AuctionEndActivityDto -> source.auction.sell.type.ext.itemId
             is L2WithdrawalActivityDto -> source.itemId
             is L2DepositActivityDto -> source.itemId
+            is OrderMatchSwapDto -> null
         }
     }
 
-    private fun calcCollection(source: ActivityDto, itemIdOrNull: ItemIdDto?, override: String?): String? {
-        if (override != null) return override
-        // As per ALPHA-454 it is expected to have events with null itemId, e.g. for floor bids
-        val itemId = itemIdOrNull ?: ItemIdDto(source.id.blockchain, "")
+    private fun getCollection(source: ActivityDto, itemId: ItemIdDto?, collection: String?): String? {
+        if (collection != null) return collection
         return when (source) {
-            is MintActivityDto -> IdParser.extractContract(itemId)
-            is BurnActivityDto -> IdParser.extractContract(itemId)
-            is TransferActivityDto -> IdParser.extractContract(itemId)
-            is OrderMatchSwapDto -> null
+            is MintActivityDto,
+            is BurnActivityDto,
+            is L2WithdrawalActivityDto,
+            is L2DepositActivityDto,
+            is TransferActivityDto -> itemId?.let { IdParser.extractContract(itemId) }
             is OrderMatchSellDto -> source.nft.type.ext.getCollections()
             is OrderBidActivityDto -> source.take.type.ext.getCollections()
             is OrderListActivityDto -> source.make.type.ext.getCollections()
@@ -110,14 +109,12 @@ object EsActivityConverter {
             is AuctionCancelActivityDto -> source.auction.sell.type.ext.getCollections()
             is AuctionStartActivityDto -> source.auction.sell.type.ext.getCollections()
             is AuctionEndActivityDto -> source.auction.sell.type.ext.getCollections()
-            is L2WithdrawalActivityDto -> IdParser.extractContract(itemId)
-            is L2DepositActivityDto -> IdParser.extractContract(itemId)
+            is OrderMatchSwapDto -> null
         }
     }
 
 
-    private fun convertMint(source: MintActivityDto, collection: String?): EsActivity {
-        val itemId = extractItemId(source)
+    private fun convertMint(source: MintActivityDto, itemId: ItemIdDto?, collection: String?): EsActivity {
         return EsActivity(
             activityId = source.id.toString(),
             date = source.date,
@@ -127,13 +124,12 @@ object EsActivityConverter {
             type = ActivityTypeDto.MINT,
             userTo = source.owner.value,
             userFrom = null,
-            collection = calcCollection(source, itemId, collection),
+            collection = getCollection(source, itemId, collection),
             item = itemId?.value.orEmpty(),
         )
     }
 
-    private fun convertBurn(source: BurnActivityDto, collection: String?): EsActivity {
-        val itemId = extractItemId(source)
+    private fun convertBurn(source: BurnActivityDto, itemId: ItemIdDto?, collection: String?): EsActivity {
         return EsActivity(
             activityId = source.id.toString(),
             date = source.date,
@@ -143,13 +139,12 @@ object EsActivityConverter {
             type = ActivityTypeDto.BURN,
             userFrom = source.owner.value,
             userTo = null,
-            collection = calcCollection(source, itemId, collection),
+            collection = getCollection(source, itemId, collection),
             item = itemId?.value.orEmpty(),
         )
     }
 
-    private fun convertTransfer(source: TransferActivityDto, collection: String?): EsActivity {
-        val itemId = extractItemId(source)
+    private fun convertTransfer(source: TransferActivityDto, itemId: ItemIdDto?, collection: String?): EsActivity {
         return EsActivity(
             activityId = source.id.toString(),
             date = source.date,
@@ -159,13 +154,12 @@ object EsActivityConverter {
             type = ActivityTypeDto.TRANSFER,
             userFrom = source.from.value,
             userTo = source.owner.value,
-            collection = calcCollection(source, itemId, collection),
+            collection = getCollection(source, itemId, collection),
             item = itemId?.value.orEmpty(),
         )
     }
 
-    private fun convertOrderMatchSell(source: OrderMatchSellDto, collection: String?): EsActivity {
-        val itemId = extractItemId(source)
+    private fun convertOrderMatchSell(source: OrderMatchSellDto, itemId: ItemIdDto?, collection: String?): EsActivity {
         return EsActivity(
             activityId = source.id.toString(),
             date = source.date,
@@ -175,13 +169,12 @@ object EsActivityConverter {
             type = ActivityTypeDto.SELL,
             userFrom = source.seller.value,
             userTo = source.buyer.value,
-            collection = calcCollection(source, itemId, collection),
+            collection = getCollection(source, itemId, collection),
             item = itemId?.value.orEmpty(),
         )
     }
 
-    private fun convertOrderBid(source: OrderBidActivityDto, collection: String?): EsActivity {
-        val itemId = extractItemId(source)
+    private fun convertOrderBid(source: OrderBidActivityDto, itemId: ItemIdDto?, collection: String?): EsActivity {
         return EsActivity(
             activityId = source.id.toString(),
             date = source.date,
@@ -191,13 +184,12 @@ object EsActivityConverter {
             type = ActivityTypeDto.BID,
             userFrom = source.maker.value,
             userTo = null,
-            collection = calcCollection(source, itemId, collection),
+            collection = getCollection(source, itemId, collection),
             item = itemId?.value.orEmpty(),
         )
     }
 
-    private fun convertOrderList(source: OrderListActivityDto, collection: String?): EsActivity {
-        val itemId = extractItemId(source)
+    private fun convertOrderList(source: OrderListActivityDto, itemId: ItemIdDto?, collection: String?): EsActivity {
         return EsActivity(
             activityId = source.id.toString(),
             date = source.date,
@@ -207,13 +199,12 @@ object EsActivityConverter {
             type = ActivityTypeDto.LIST,
             userFrom = source.maker.value,
             userTo = null,
-            collection = calcCollection(source, itemId, collection),
+            collection = getCollection(source, itemId, collection),
             item = itemId?.value.orEmpty(),
         )
     }
 
-    private fun convertOrderCancelBid(source: OrderCancelBidActivityDto, collection: String?): EsActivity {
-        val itemId = extractItemId(source)
+    private fun convertOrderCancelBid(source: OrderCancelBidActivityDto, itemId: ItemIdDto?, collection: String?): EsActivity {
         return EsActivity(
             activityId = source.id.toString(),
             date = source.date,
@@ -223,13 +214,12 @@ object EsActivityConverter {
             type = ActivityTypeDto.CANCEL_BID,
             userFrom = source.maker.value,
             userTo = null,
-            collection = calcCollection(source, itemId, collection),
+            collection = getCollection(source, itemId, collection),
             item = itemId?.value.orEmpty(),
         )
     }
 
-    private fun convertOrderCancelList(source: OrderCancelListActivityDto, collection: String?): EsActivity {
-        val itemId = extractItemId(source)
+    private fun convertOrderCancelList(source: OrderCancelListActivityDto, itemId: ItemIdDto?, collection: String?): EsActivity {
         return EsActivity(
             activityId = source.id.toString(),
             date = source.date,
@@ -239,13 +229,12 @@ object EsActivityConverter {
             type = ActivityTypeDto.CANCEL_LIST,
             userFrom = source.maker.value,
             userTo = null,
-            collection = calcCollection(source, itemId, collection),
+            collection = getCollection(source, itemId, collection),
             item = itemId?.value.orEmpty(),
         )
     }
 
-    private fun convertAuctionOpen(source: AuctionOpenActivityDto, collection: String?): EsActivity {
-        val itemId = extractItemId(source)
+    private fun convertAuctionOpen(source: AuctionOpenActivityDto, itemId: ItemIdDto?, collection: String?): EsActivity {
         return EsActivity(
             activityId = source.id.toString(),
             date = source.date,
@@ -255,13 +244,12 @@ object EsActivityConverter {
             type = ActivityTypeDto.AUCTION_CREATED,
             userFrom = source.auction.seller.value,
             userTo = null,
-            collection = calcCollection(source, itemId, collection),
+            collection = getCollection(source, itemId, collection),
             item = itemId?.value.orEmpty(),
         )
     }
 
-    private fun convertAuctionBid(source: AuctionBidActivityDto, collection: String?): EsActivity {
-        val itemId = extractItemId(source)
+    private fun convertAuctionBid(source: AuctionBidActivityDto, itemId: ItemIdDto?, collection: String?): EsActivity {
         return EsActivity(
             activityId = source.id.toString(),
             date = source.date,
@@ -271,13 +259,12 @@ object EsActivityConverter {
             type = ActivityTypeDto.AUCTION_BID,
             userFrom = source.auction.seller.value,
             userTo = source.bid.buyer.value,
-            collection = calcCollection(source, itemId, collection),
+            collection = getCollection(source, itemId, collection),
             item = itemId?.value.orEmpty(),
         )
     }
 
-    private fun convertAuctionFinish(source: AuctionFinishActivityDto, collection: String?): EsActivity {
-        val itemId = extractItemId(source)
+    private fun convertAuctionFinish(source: AuctionFinishActivityDto, itemId: ItemIdDto?, collection: String?): EsActivity {
         return EsActivity(
             activityId = source.id.toString(),
             date = source.date,
@@ -287,13 +274,12 @@ object EsActivityConverter {
             type = ActivityTypeDto.AUCTION_FINISHED,
             userFrom = source.auction.seller.value,
             userTo = null,
-            collection = calcCollection(source, itemId, collection),
+            collection = getCollection(source, itemId, collection),
             item = itemId?.value.orEmpty(),
         )
     }
 
-    private fun convertAuctionCancel(source: AuctionCancelActivityDto, collection: String?): EsActivity {
-        val itemId = extractItemId(source)
+    private fun convertAuctionCancel(source: AuctionCancelActivityDto, itemId: ItemIdDto?, collection: String?): EsActivity {
         return EsActivity(
             activityId = source.id.toString(),
             date = source.date,
@@ -303,13 +289,12 @@ object EsActivityConverter {
             type = ActivityTypeDto.AUCTION_CANCEL,
             userFrom = source.auction.seller.value,
             userTo = null,
-            collection = calcCollection(source, itemId, collection),
+            collection = getCollection(source, itemId, collection),
             item = itemId?.value.orEmpty(),
         )
     }
 
-    private fun convertAuctionStart(source: AuctionStartActivityDto, collection: String?): EsActivity {
-        val itemId = extractItemId(source)
+    private fun convertAuctionStart(source: AuctionStartActivityDto, itemId: ItemIdDto?, collection: String?): EsActivity {
         return EsActivity(
             activityId = source.id.toString(),
             date = source.date,
@@ -319,13 +304,12 @@ object EsActivityConverter {
             type = ActivityTypeDto.AUCTION_STARTED,
             userFrom = source.auction.seller.value,
             userTo = null,
-            collection = calcCollection(source, itemId, collection),
+            collection = getCollection(source, itemId, collection),
             item = itemId?.value.orEmpty(),
         )
     }
 
-    private fun convertAuctionEnd(source: AuctionEndActivityDto, collection: String?): EsActivity {
-        val itemId = extractItemId(source)
+    private fun convertAuctionEnd(source: AuctionEndActivityDto, itemId: ItemIdDto?, collection: String?): EsActivity {
         return EsActivity(
             activityId = source.id.toString(),
             date = source.date,
@@ -335,13 +319,12 @@ object EsActivityConverter {
             type = ActivityTypeDto.AUCTION_ENDED,
             userFrom = source.auction.seller.value,
             userTo = null,
-            collection = calcCollection(source, itemId, collection),
+            collection = getCollection(source, itemId, collection),
             item = itemId?.value.orEmpty(),
         )
     }
 
-    private fun convertL2Withdrawal(source: L2WithdrawalActivityDto, collection: String?): EsActivity {
-        val itemId = extractItemId(source)
+    private fun convertL2Withdrawal(source: L2WithdrawalActivityDto, itemId: ItemIdDto?, collection: String?): EsActivity {
         return EsActivity(
             activityId = source.id.toString(),
             date = source.date,
@@ -351,13 +334,12 @@ object EsActivityConverter {
             type = ActivityTypeDto.TRANSFER, // TODO
             userFrom = null,
             userTo = source.user.value,
-            collection = calcCollection(source, itemId, collection),
+            collection = getCollection(source, itemId, collection),
             item = itemId?.value.orEmpty(),
         )
     }
 
-    private fun convertL2Deposit(source: L2DepositActivityDto, collection: String?): EsActivity {
-        val itemId = extractItemId(source)
+    private fun convertL2Deposit(source: L2DepositActivityDto, itemId: ItemIdDto?, collection: String?): EsActivity {
         return EsActivity(
             activityId = source.id.toString(),
             date = source.date,
@@ -367,7 +349,7 @@ object EsActivityConverter {
             type = ActivityTypeDto.TRANSFER, // TODO
             userFrom = source.user.value,
             userTo = null,
-            collection = calcCollection(source, itemId, collection),
+            collection = getCollection(source, itemId, collection),
             item = itemId?.value.orEmpty(),
         )
     }

@@ -1,11 +1,9 @@
 package com.rarible.protocol.union.search.indexer.handler
 
-import com.rarible.core.common.mapAsync
 import com.rarible.core.daemon.sequential.ConsumerBatchEventHandler
 import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.core.converter.EsActivityConverter
-import com.rarible.protocol.union.core.model.EsActivity
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
