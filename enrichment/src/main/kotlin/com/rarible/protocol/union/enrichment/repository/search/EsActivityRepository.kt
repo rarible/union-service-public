@@ -17,7 +17,6 @@ import org.elasticsearch.action.admin.indices.refresh.RefreshRequest
 import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery
-import org.springframework.data.elasticsearch.core.query.Query
 import org.springframework.stereotype.Component
 import java.io.IOException
 
@@ -55,17 +54,6 @@ class EsActivityRepository(
             .saveAll(esActivities, index)
             .collectList()
             .awaitFirst()
-    }
-
-    /**
-     * For tests only
-     */
-    override suspend fun deleteAll() {
-        esOperations.delete(
-            Query.findAll(),
-            Any::class.java,
-            entityDefinition.writeIndexCoordinates
-        ).awaitFirstOrNull()
     }
 
     suspend fun search(

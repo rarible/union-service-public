@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.search.indexer.repository
 
+import com.rarible.protocol.union.core.es.ElasticsearchTestBootstrapper
 import com.rarible.protocol.union.core.model.EsActivity
 import com.rarible.protocol.union.core.model.EsActivitySort
 import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
@@ -29,9 +30,12 @@ internal class EsActivityQuerySortServiceIntegrationTest {
     @Autowired
     private lateinit var service: EsActivityQuerySortService
 
+    @Autowired
+    private lateinit var elasticsearchTestBootstrapper: ElasticsearchTestBootstrapper
+
     @BeforeEach
     fun setUp() = runBlocking<Unit> {
-        repository.deleteAll()
+        elasticsearchTestBootstrapper.bootstrap()
     }
 
     @Test
