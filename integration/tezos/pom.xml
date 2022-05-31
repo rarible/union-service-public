@@ -57,8 +57,8 @@
         <!-- =============== Tezos legacy backend =========== -->
 
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-r2dbc</artifactId>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-data-r2dbc</artifactId>
         </dependency>
         <dependency>
             <groupId>io.r2dbc</groupId>
