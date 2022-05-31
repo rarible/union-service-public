@@ -24,7 +24,7 @@ import org.springframework.context.annotation.Import
         EthereumApiConfiguration::class,
         PolygonApiConfiguration::class,
         FlowApiConfiguration::class,
-        TezosApiConfiguration::class,
+        // TezosApiConfiguration::class, // TODO enable with proper config
         SolanaApiConfiguration::class,
         ImmutablexApiConfiguration::class,
         SearchConfiguration::class,
