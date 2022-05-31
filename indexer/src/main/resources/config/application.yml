@@ -50,35 +50,57 @@ listener:
 integration:
   ethereum:
     enabled: ${consul.ethereum.enabled:true}
+    consumer:
+      broker-replica-set: ${kafka.hosts}
+      workers:
+        item: 1
+        ownership: 1
+        order: 1
     auctionContracts: ${consul.ethereum.auctionContracts:}
   polygon:
     enabled: ${consul.polygon.enabled:true}
+    consumer:
+      broker-replica-set: ${kafka.hosts}
+      workers:
+        item: 1
+        ownership: 1
+        order: 1
     auctionContracts: ${consul.polygon.auctionContracts:}
   flow:
     enabled: ${consul.flow.enabled:true}
+    consumer:
+      broker-replica-set: ${kafka.hosts}
+      workers:
+        item: 1
+        ownership: 1
+        order: 1
     auctionContracts: ${consul.flow.auctionContracts:}
   tezos:
-    enabled: ${consul.tezos.enabled:true}
+    enabled: false
     dipdup:
       enabled: ${consul.tezos.dipdup.enabled:false}
-      dipdupUrl: ${consul.tezos.dipdup.dipdupUrl:}
-      tzktUrl: ${consul.tezos.dipdup.tzktUrl:}
     client:
-      url: ${consul.tezos.api.baseUrl:}
+      url: ${consul.tezos.api.baseUrl}
     pg:
       host: ${consul.tezos.pg.host:}
       port: ${consul.tezos.pg.port:}
       user: ${consul.tezos.pg.user:}
       password: ${consul.tezos.pg.password:}
       database: ${consul.tezos.pg.database:}
+    consumer:
+      broker-replica-set: ${consul.tezos.kafka.hosts}
+      username: ${consul.tezos.kafka.username}
+      password: ${consul.tezos.kafka.password}
+      workers:
+        item: 1
+        ownership: 1
+        order: 1
     auctionContracts: ${consul.tezos.auctionContracts:}
   solana:
-    enabled: ${consul.solana.enabled:false}
+    enabled: ${consul.solana.enabled:true}
   immutablex:
     enabled: ${consul.immutablex.enabled:false}
-    client:
-      url: ${consul.immutablex.api.baseUrl:}
-    apiKey: ${consul.immutablex.api.key:}
+
 common:
   producer:
     broker-replica-set: ${kafka.hosts}
