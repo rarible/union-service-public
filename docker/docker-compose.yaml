@@ -6,7 +6,7 @@ x-common-variables: &common-variables
   SPRING_CLOUD_CONSUL_CONFIG_ENABLED: $SPRING_CLOUD_CONSUL_CONFIG_ENABLED
   SPRING_CLOUD_SERVICEREGISTRY_AUTOREGISTRATION_ENABLED: $SPRING_CLOUD_SERVICE_REGISTRY_AUTO_REGISTRATION_ENABLED
   SPRING_CLOUD_DISCOVERY_ENABLED: $SPRING_CLOUD_DISCOVERY_ENABLED
-  SPRING_R2DBC_POOL_ENABLED: $SPRING_R2DBC_POOL_ENABLED
+  SPRING_R2DBC_POOL_ENABLED: "true"
   LOGGING_LOGSTASH_TCP-SOCKET_ENABLED: $LOGGING_LOGSTASH_TCP_SOCKET_ENABLED
   RARIBLE_CORE_APM_AGENT_ENABLED: $RARIBLE_CORE_APM_AGENT_ENABLED
   RARIBLE_CORE_APM_WEB_ENABLED: $RARIBLE_CORE_APM_WEB_ENABLED
@@ -37,29 +37,29 @@ services:
       - "protocol-kafka-1"
       - "protocol-mongodb"
 
-  local-union-listener:
-    build:
-      context: ../listener
-      dockerfile: ../docker/Dockerfile
-    image: protocol-union-listener
-    environment:
-      <<: *common-variables
-      JAVA_OPTIONS: '-Xmx$UNION_LISTENER_HEAP -Xms$UNION_LISTENER_HEAP -XX:MaxDirectMemorySize=$UNION_LISTENER_DIRECT_MEMORY'
-    depends_on:
-      - "protocol-kafka-1"
-      - "protocol-mongodb"
-
-  local-union-meta-loader:
-    build:
-      context: ../meta-loader
-      dockerfile: ../docker/Dockerfile
-    image: protocol-union-meta-loader
-    environment:
-      <<: *common-variables
-      JAVA_OPTIONS: '-Xmx$UNION_META_LOADER_HEAP -Xms$UNION_META_LOADER_HEAP -XX:MaxDirectMemorySize=$UNION_META_LOADER_DIRECT_MEMORY'
-    depends_on:
-      - "protocol-kafka-1"
-      - "protocol-mongodb"
+#  local-union-listener:
+#    build:
+#      context: ../listener
+#      dockerfile: ../docker/Dockerfile
+#    image: protocol-union-listener
+#    environment:
+#      <<: *common-variables
+#      JAVA_OPTIONS: '-Xmx$UNION_LISTENER_HEAP -Xms$UNION_LISTENER_HEAP -XX:MaxDirectMemorySize=$UNION_LISTENER_DIRECT_MEMORY'
+#    depends_on:
+#      - "protocol-kafka-1"
+#      - "protocol-mongodb"
+#
+#  local-union-meta-loader:
+#    build:
+#      context: ../meta-loader
+#      dockerfile: ../docker/Dockerfile
+#    image: protocol-union-meta-loader
+#    environment:
+#      <<: *common-variables
+#      JAVA_OPTIONS: '-Xmx$UNION_META_LOADER_HEAP -Xms$UNION_META_LOADER_HEAP -XX:MaxDirectMemorySize=$UNION_META_LOADER_DIRECT_MEMORY'
+#    depends_on:
+#      - "protocol-kafka-1"
+#      - "protocol-mongodb"
 
   protocol-zookeeper-1:
     image: zookeeper:3.7.0
