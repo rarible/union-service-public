@@ -27,10 +27,14 @@ import com.rarible.protocol.union.dto.OrderMatchSwapDto
 import com.rarible.protocol.union.dto.TransferActivityDto
 import com.rarible.protocol.union.dto.ext
 import com.rarible.protocol.union.dto.parser.IdParser
+import org.springframework.stereotype.Component
 
-object EsActivityConverter {
+@Component
+class EsActivityConverter(
+    private val router: BlockchainRouter<ItemService>
+) {
 
-    suspend fun batchConvert(source: List<ActivityDto>, router: BlockchainRouter<ItemService>): List<EsActivity> {
+    suspend fun batchConvert(source: List<ActivityDto>): List<EsActivity> {
         val items = source.groupBy { it.id.blockchain }
             .mapAsync { (blockchain, activities) ->
                 val itemIds = activities.mapNotNull { extractItemId(it)?.value }

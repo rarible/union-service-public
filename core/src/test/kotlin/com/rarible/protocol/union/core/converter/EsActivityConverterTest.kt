@@ -67,7 +67,7 @@ import java.time.Instant
 
 class EsActivityConverterTest {
 
-    private val converter = EsActivityConverter
+    private val converter = EsActivityConverter(mockk())
 
     @Test
     fun `should convert activities batch`() = runBlocking<Unit> {

@@ -1,9 +1,11 @@
 package com.rarible.protocol.union.worker.task.search.activity
 
 import com.rarible.core.telemetry.metrics.RegisteredCounter
+import com.rarible.core.test.data.randomInt
+import com.rarible.core.test.data.randomLong
 import com.rarible.core.test.data.randomString
-import com.rarible.protocol.union.core.service.ItemService
-import com.rarible.protocol.union.core.service.router.BlockchainRouter
+import com.rarible.protocol.union.core.converter.EsActivityConverter
+import com.rarible.protocol.union.core.model.EsActivity
 import com.rarible.protocol.union.dto.ActivitiesDto
 import com.rarible.protocol.union.dto.ActivityIdDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
@@ -43,12 +45,10 @@ internal class ActivityReindexServiceTest {
         } answers { arg(0) }
     }
 
-    private val itemService = mockk<ItemService> {
-        coEvery { getItemsByIds(any()) } returns emptyList()
-    }
-
-    private val router = mockk<BlockchainRouter<ItemService>> {
-        every { getService(any()) } returns  itemService
+    private val converter = mockk<EsActivityConverter> {
+        coEvery {
+            batchConvert(any())
+        } answers { arg<List<*>>(0).map { randomActivity() }}
     }
 
     @Test
@@ -60,11 +60,9 @@ internal class ActivityReindexServiceTest {
                 } returns ActivitiesDto(
                     null, null, emptyList()
                 )
-            },
-            esRepo,
-            searchTaskMetricFactory,
-            router
+            }, esRepo, searchTaskMetricFactory, converter
         )
+
         Assertions.assertThat(
             service
                 .reindex(BlockchainDto.FLOW, ActivityTypeDto.CANCEL_LIST, "test_index")
@@ -96,10 +94,7 @@ internal class ActivityReindexServiceTest {
                         randomActivityDto()
                     )
                 )
-            },
-            esRepo,
-            searchTaskMetricFactory,
-            router
+            }, esRepo, searchTaskMetricFactory, converter
         )
 
         Assertions.assertThat(
@@ -109,6 +104,7 @@ internal class ActivityReindexServiceTest {
         ).containsExactly("step_1", "") // an empty string is always emitted in the end of loop
 
         coVerify(exactly = 2) {
+            converter.batchConvert(any())
             esRepo.saveAll(any(), "test_index")
             counter.increment(1)
         }
@@ -121,6 +117,21 @@ internal class ActivityReindexServiceTest {
             owner = randomUnionAddress(),
             value = BigInteger.ONE,
             transactionHash = randomString()
+        )
+    }
+
+    private fun randomActivity(): EsActivity {
+        return EsActivity(
+            randomString(),
+            Instant.now(),
+            randomLong(1L, 100000L),
+            randomInt(0, 1000),
+            blockchain = BlockchainDto.ETHEREUM,
+            type = ActivityTypeDto.MINT,
+            item = randomString(),
+            userFrom = null,
+            userTo = null,
+            collection = null
         )
     }
 

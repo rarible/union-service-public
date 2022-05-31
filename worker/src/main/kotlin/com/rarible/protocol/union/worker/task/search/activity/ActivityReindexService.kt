@@ -19,7 +19,7 @@ class ActivityReindexService(
     private val activityApiMergeService: ActivityApiMergeService,
     private val esActivityRepository: EsActivityRepository,
     private val searchTaskMetricFactory: SearchTaskMetricFactory,
-    private val router: BlockchainRouter<ItemService>,
+    private val esActivityConverter: EsActivityConverter
 ) {
     fun reindex(
         blockchain: BlockchainDto,
@@ -42,7 +42,7 @@ class ActivityReindexService(
                 )
 
                 val savedActivities = esActivityRepository.saveAll(
-                    EsActivityConverter.batchConvert(res.activities, router),
+                    esActivityConverter.batchConvert(res.activities),
                     index
                 )
                 continuation = res.cursor

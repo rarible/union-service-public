@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service
 @Service
 class ActivityEventHandler(
     private val repository: EsActivityRepository,
-    private val router: BlockchainRouter<ItemService>,
+    private val esActivityConverter: EsActivityConverter
 ): ConsumerBatchEventHandler<ActivityDto> {
 
     companion object {
@@ -21,7 +21,7 @@ class ActivityEventHandler(
     override suspend fun handle(event: List<ActivityDto>) {
         logger.info("Handling ${event.size} ActivityDto events")
 
-        val convertedEvents = EsActivityConverter.batchConvert(event, router)
+        val convertedEvents = esActivityConverter.batchConvert(event)
 
         repository.saveAll(convertedEvents)
         logger.info("Handling completed")
