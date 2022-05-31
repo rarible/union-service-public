@@ -37,24 +37,28 @@ protocol-union-api:
     - *sharedTolerations
   environments:
     <<: *sharedEnvironments
+    SPRING_DATA_MONGODB_DATABASE: test-protocol-union
 
 protocol-union-listener:
   tolerations:
     - *sharedTolerations
   environments:
     <<: *sharedEnvironments
+    SPRING_DATA_MONGODB_DATABASE: test-protocol-union
 
 protocol-union-meta-loader:
   tolerations:
     - *sharedTolerations
   environments:
     <<: *sharedEnvironments
+    SPRING_DATA_MONGODB_DATABASE: test-protocol-union
 
 protocol-union-indexer:
   tolerations:
     - *sharedTolerations
   environments:
     <<: *sharedEnvironments
+    SPRING_DATA_MONGODB_DATABASE: test-protocol-union
 
 protocol-union-worker:
   tolerations:
@@ -73,3 +77,4 @@ protocol-union-worker:
     WORKER_REINDEXER_ACTIVITY_BLOCKCHAINS_4_ENABLED: false
     WORKER_REINDEXER_ACTIVITY_BLOCKCHAINS_5_BLOCKCHAIN: "IMMUTABLEX"
     WORKER_REINDEXER_ACTIVITY_BLOCKCHAINS_5_ENABLED: false
+    SPRING_DATA_MONGODB_DATABASE: test-protocol-union
