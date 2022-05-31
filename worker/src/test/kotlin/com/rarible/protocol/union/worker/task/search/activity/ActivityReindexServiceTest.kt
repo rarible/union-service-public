@@ -2,6 +2,8 @@ package com.rarible.protocol.union.worker.task.search.activity
 
 import com.rarible.core.telemetry.metrics.RegisteredCounter
 import com.rarible.core.test.data.randomString
+import com.rarible.protocol.union.core.service.ItemService
+import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.ActivitiesDto
 import com.rarible.protocol.union.dto.ActivityIdDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
@@ -41,6 +43,14 @@ internal class ActivityReindexServiceTest {
         } answers { arg(0) }
     }
 
+    private val itemService = mockk<ItemService> {
+        coEvery { getItemsByIds(any()) } returns emptyList()
+    }
+
+    private val router = mockk<BlockchainRouter<ItemService>> {
+        every { getService(any()) } returns  itemService
+    }
+
     @Test
     fun `should skip reindexing if there's nothing to reindex`() = runBlocking<Unit> {
         val service = ActivityReindexService(
@@ -50,9 +60,11 @@ internal class ActivityReindexServiceTest {
                 } returns ActivitiesDto(
                     null, null, emptyList()
                 )
-            }, esRepo, searchTaskMetricFactory
+            },
+            esRepo,
+            searchTaskMetricFactory,
+            router
         )
-
         Assertions.assertThat(
             service
                 .reindex(BlockchainDto.FLOW, ActivityTypeDto.CANCEL_LIST, "test_index")
@@ -84,7 +96,10 @@ internal class ActivityReindexServiceTest {
                         randomActivityDto()
                     )
                 )
-            }, esRepo, searchTaskMetricFactory
+            },
+            esRepo,
+            searchTaskMetricFactory,
+            router
         )
 
         Assertions.assertThat(

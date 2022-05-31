@@ -1,0 +1,105 @@
+﻿version: '3.9'
+
+x-common-variables: &common-variables
+  APPLICATION_ENVIRONMENT: $APPLICATION_ENVIRONMENT
+  SPRING_PROFILES_ACTIVE: $APPLICATION_ENVIRONMENT
+  SPRING_CLOUD_CONSUL_CONFIG_ENABLED: $SPRING_CLOUD_CONSUL_CONFIG_ENABLED
+  SPRING_CLOUD_BOOTSTRAP_ENABLED: $SPRING_CLOUD_BOOTSTRAP_ENABLED
+  SPRING_CLOUD_SERVICEREGISTRY_AUTOREGISTRATION_ENABLED: $SPRING_CLOUD_SERVICE_REGISTRY_AUTO_REGISTRATION_ENABLED
+  SPRING_CLOUD_DISCOVERY_ENABLED: $SPRING_CLOUD_DISCOVERY_ENABLED
+  LOGGING_LOGSTASH_TCP-SOCKET_ENABLED: $LOGGING_LOGSTASH_TCP_SOCKET_ENABLED
+  RARIBLE_CORE_APM_AGENT_ENABLED: $RARIBLE_CORE_APM_AGENT_ENABLED
+  RARIBLE_CORE_APM_WEB_ENABLED: $RARIBLE_CORE_APM_WEB_ENABLED
+  RARIBLE_CORE_APM_ANNOTATION_ENABLED: $RARIBLE_CORE_APM_ANNOTATION_ENABLED
+  SPRING_DATA_MONGODB_URI: $MONGO_CONNECTION_STRING
+  SPRING_DATA_MONGODB_DATABASE: $UNION_COMMON_DATABASE
+  KAFKA_HOSTS: $KAFKA_CONNECTION_STRING
+  INTEGRATION_ETHEREUM_ENABLED: $UNION_INTEGRATION_ETHEREUM_ENABLED
+  INTEGRATION_POLYGON_ENABLED: $UNION_INTEGRATION_POLYGON_ENABLED
+  INTEGRATION_TEZOS_ENABLED: $UNION_INTEGRATION_TEZOS_ENABLED
+  INTEGRATION_FLOW_ENABLED: $UNION_INTEGRATION_FLOW_ENABLED
+  INTEGRATION_SOLANA_ENABLED: $UNION_INTEGRATION_SOLANA_ENABLED
+
+services:
+
+  local-union-api:
+    build:
+      context: ../api
+      dockerfile: ../docker/Dockerfile
+    image: protocol-union-api
+    environment:
+      <<: *common-variables
+      JAVA_OPTIONS: '-Xmx$UNION_API_HEAP -Xms$UNION_API_HEAP -XX:MaxDirectMemorySize=$UNION_API_DIRECT_MEMORY'
+      PROTOCOL_UNION_SUBSCRIBER_BROKER-REPLICA-SET: $KAFKA_CONNECTION_STRING
+    ports:
+      - "${UNION_API_EXPOSE_PORT}:8080"
+    depends_on:
+      - "local-union-listener"
+
+  local-union-listener:
+    build:
+      context: ../listener
+      dockerfile: ../docker/Dockerfile
+    image: protocol-union-listener
+    environment:
+      <<: *common-variables
+      JAVA_OPTIONS: '-Xmx$UNION_LISTENER_HEAP -Xms$UNION_LISTENER_HEAP -XX:MaxDirectMemorySize=$UNION_LISTENER_DIRECT_MEMORY'
+    depends_on:
+      - "protocol-kafka-1"
+      - "protocol-mongodb"
+
+  local-union-meta-loader:
+    build:
+      context: ../meta-loader
+      dockerfile: ../docker/Dockerfile
+    image: protocol-union-meta-loader
+    environment:
+      <<: *common-variables
+      JAVA_OPTIONS: '-Xmx$UNION_META_LOADER_HEAP -Xms$UNION_META_LOADER_HEAP -XX:MaxDirectMemorySize=$UNION_META_LOADER_DIRECT_MEMORY'
+    depends_on:
+      - "protocol-kafka-1"
+      - "protocol-mongodb"
+
+  protocol-zookeeper-1:
+    image: zookeeper:3.7.0
+    environment:
+      ZOO_MY_ID: 1
+      ZOO_PORT: 2181
+      ZOO_SERVERS: server.1=protocol-zookeeper-1:2888:3888;2181
+    volumes:
+      - protocol-zookeeper-1:/data
+      - protocol-zookeeper-log-1:/datalog
+
+  protocol-kafka-1:
+    image: confluentinc/cp-kafka:6.1.1
+    environment:
+      KAFKA_ADVERTISED_LISTENERS: LISTENER_DOCKER_INTERNAL://protocol-kafka-1:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: LISTENER_DOCKER_INTERNAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: LISTENER_DOCKER_INTERNAL
+      KAFKA_ZOOKEEPER_CONNECT: "protocol-zookeeper-1:2181"
+      KAFKA_BROKER_ID: 1
+      KAFKA_LOG4J_LOGGERS: "kafka.controller=INFO,kafka.producer.async.DefaultEventHandler=INFO,state.change.logger=INFO"
+      KAFKA_NUM_PARTITIONS: 9
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_LOG_RETENTION_HOURS: 24
+    volumes:
+      - protocol-kafka-1:/var/lib/kafka/data
+    depends_on:
+      - "protocol-zookeeper-1"
+
+  protocol-mongodb:
+    image: mongo:4.0.21
+    command: --port 27017 --wiredTigerCacheSizeGB 1
+    ports:
+      - "47017:27017"
+    volumes:
+      - protocol-mongodb:/data/db
+
+volumes:
+  protocol-zookeeper-1: {}
+  protocol-zookeeper-log-1: {}
+  protocol-kafka-1: {}
+  protocol-mongodb: {}
