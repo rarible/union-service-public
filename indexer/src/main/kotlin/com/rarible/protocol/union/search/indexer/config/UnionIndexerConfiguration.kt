@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.search.indexer.config
 
+import com.rarible.protocol.union.core.CoreConfiguration
 import com.rarible.protocol.union.enrichment.configuration.EnrichmentApiConfiguration
 import com.rarible.protocol.union.enrichment.configuration.EnrichmentConfiguration
 import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
@@ -20,14 +21,14 @@ import org.springframework.context.annotation.Import
 @ComponentScan(basePackageClasses = [EsActivityRepository::class])
 @Import(
     value = [
-        EnrichmentConfiguration::class,
         EthereumApiConfiguration::class,
         PolygonApiConfiguration::class,
         FlowApiConfiguration::class,
         TezosApiConfiguration::class,
         SolanaApiConfiguration::class,
         ImmutablexApiConfiguration::class,
-        SearchConfiguration::class
+        SearchConfiguration::class,
+        CoreConfiguration::class,
     ]
 )
 class UnionIndexerConfiguration
