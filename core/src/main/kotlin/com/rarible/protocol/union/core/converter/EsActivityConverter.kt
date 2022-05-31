@@ -34,7 +34,9 @@ object EsActivityConverter {
         val items = source.groupBy { it.id.blockchain }
             .mapAsync { (blockchain, activities) ->
                 val itemIds = activities.mapNotNull { extractItemId(it)?.value }
-                router.getService(blockchain).getItemsByIds(itemIds)
+                    .chunked(20)
+                itemIds.map { chunk -> router.getService(blockchain).getItemsByIds(chunk) }
+                    .flatten()
             }
             .flatten()
             .associateBy { it.id }
