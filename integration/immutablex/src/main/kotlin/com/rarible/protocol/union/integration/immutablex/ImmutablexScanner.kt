@@ -149,7 +149,7 @@ class ImmutablexScanner(
                 handle(page.result)
             }
 
-            mongo.save(state.copy(cursor = page.cursor))
+            mongo.save(state.copy(cursor = page.cursor)) //todo generate cursor if empty
         } catch (e: Exception) {
             mongo.save(state.copy(lastError = e.message, lastErrorStacktrace = e.stackTraceToString()))
         }
