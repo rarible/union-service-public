@@ -11,7 +11,6 @@ import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.ActivityBlockchainInfoDto
-import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivityIdDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.AssetDto
@@ -55,12 +54,10 @@ import com.rarible.protocol.union.dto.parser.IdParser
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.confirmVerified
-import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatCode
-import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import java.math.BigInteger
 import java.time.Instant
@@ -130,30 +127,28 @@ class EsActivityConverterTest {
         )
         val solanaListItem = randomUnionItem(solanaListItemId, solanaListColId)
 
-        val router = mockk<BlockchainRouter<ItemService>>()
+
         val source = listOf(ethMint, ethBurn, solanaList)
 
-        coEvery {
-            router.getService(BlockchainDto.ETHEREUM).getItemsByIds(listOf(ethMintItemId.value, ethBurnItemId.value))
-        } returns listOf(ethMintItem, ethBurnItem)
-        coEvery {
-            router.getService(BlockchainDto.SOLANA).getItemsByIds(listOf(solanaListItemId.value))
-        } returns listOf(solanaListItem)
+        val router = mockk<BlockchainRouter<ItemService>>() {
+            coEvery {
+                getService(BlockchainDto.ETHEREUM)
+                    .getItemsByIds(listOf(ethMintItem.id.value, ethBurnItem.id.value))
+            } returns listOf(ethMintItem, ethBurnItem)
+            coEvery {
+                getService(BlockchainDto.SOLANA).getItemsByIds(listOf(solanaListItem.id.value))
+            } returns listOf(solanaListItem)
+        }
 
         // when
-        val actual = converter.batchConvert(source, router)
+        val actual = EsActivityConverter(router).batchConvert(source)
 
         // then
         assertThat(actual).hasSize(3)
-        assertThat(actual[0].activityId).isEqualTo(ethMint.id.toString())
-        assertThat(actual[0].collection).isEqualTo(ethMintColId.value)
-        assertThat(actual[1].activityId).isEqualTo(ethBurn.id.toString())
-        assertThat(actual[1].collection).isEqualTo(ethBurnColId.value)
-        assertThat(actual[2].activityId).isEqualTo(solanaList.id.toString())
-        assertThat(actual[2].collection).isEqualTo(solanaListColId.value)
+
         coVerify {
-            router.getService(BlockchainDto.ETHEREUM).getItemsByIds(listOf(ethMintItemId.value, ethBurnItemId.value))
-            router.getService(BlockchainDto.SOLANA).getItemsByIds(listOf(solanaListItemId.value))
+            router.getService(BlockchainDto.ETHEREUM).getItemsByIds(listOf(ethMintItem.id.value, ethBurnItem.id.value))
+            router.getService(BlockchainDto.SOLANA).getItemsByIds(listOf(solanaListItem.id.value))
         }
         confirmVerified(router)
     }

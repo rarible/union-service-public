@@ -1,6 +1,6 @@
 package com.rarible.protocol.union.core.converter
 
-import com.rarible.core.common.mapAsync
+import com.rarible.core.common.flatMapAsync
 import com.rarible.protocol.union.core.model.EsActivity
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
@@ -36,13 +36,12 @@ class EsActivityConverter(
 
     suspend fun batchConvert(source: List<ActivityDto>): List<EsActivity> {
         val items = source.groupBy { it.id.blockchain }
-            .mapAsync { (blockchain, activities) ->
+            .flatMapAsync { (blockchain, activities) ->
                 val itemIds = activities.mapNotNull { extractItemId(it)?.value }
                     .chunked(20)
                 itemIds.map { chunk -> router.getService(blockchain).getItemsByIds(chunk) }
                     .flatten()
             }
-            .flatten()
             .associateBy { it.id }
 
         return source.mapNotNull {
