@@ -7,7 +7,11 @@ import com.rarible.core.test.data.randomBoolean
 import com.rarible.core.test.data.randomInt
 import com.rarible.core.test.data.randomLong
 import com.rarible.core.test.data.randomString
+import com.rarible.protocol.union.core.model.UnionItem
+import com.rarible.protocol.union.core.service.ItemService
+import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.ActivityBlockchainInfoDto
+import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivityIdDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.AssetDto
@@ -27,6 +31,7 @@ import com.rarible.protocol.union.dto.AuctionStatusDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.BlockchainGroupDto
 import com.rarible.protocol.union.dto.BurnActivityDto
+import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ContractAddress
 import com.rarible.protocol.union.dto.EthErc1155AssetTypeDto
 import com.rarible.protocol.union.dto.ItemIdDto
@@ -42,18 +47,116 @@ import com.rarible.protocol.union.dto.OrderMatchSwapDto
 import com.rarible.protocol.union.dto.RaribleAuctionV1BidDataV1Dto
 import com.rarible.protocol.union.dto.RaribleAuctionV1BidV1Dto
 import com.rarible.protocol.union.dto.RaribleAuctionV1DataV1Dto
+import com.rarible.protocol.union.dto.SolanaNftAssetTypeDto
 import com.rarible.protocol.union.dto.TransferActivityDto
 import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.ext
 import com.rarible.protocol.union.dto.parser.IdParser
+import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.confirmVerified
+import io.mockk.every
+import io.mockk.mockk
+import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatCode
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import java.math.BigInteger
 import java.time.Instant
 
 class EsActivityConverterTest {
 
     private val converter = EsActivityConverter
+
+    @Test
+    fun `should convert activities batch`() = runBlocking<Unit> {
+        // given
+        val ethMintItemId = ItemIdDto(BlockchainDto.ETHEREUM, "contract1", BigInteger.ONE)
+        val ethMintId = "123"
+        val ethMintColId = CollectionIdDto(BlockchainDto.ETHEREUM, "col1")
+        val ethMint = MintActivityDto(
+            id = ActivityIdDto(BlockchainDto.ETHEREUM, ethMintId),
+            date = randomDate(),
+            blockchainInfo = ActivityBlockchainInfoDto(
+                transactionHash = randomString(),
+                blockHash = randomString(),
+                blockNumber = randomLong(),
+                logIndex = randomInt(),
+            ),
+            owner = randomUnionAddress(),
+            itemId = ethMintItemId,
+            transactionHash = randomString(),
+            value = randomBigInt(),
+        )
+        val ethMintItem = randomUnionItem(ethMintItemId, ethMintColId)
+
+        val ethBurnItemId = ItemIdDto(BlockchainDto.ETHEREUM, "contract2", BigInteger.ONE)
+        val ethBurnId = "456"
+        val ethBurnColId = CollectionIdDto(BlockchainDto.ETHEREUM, "col2")
+        val ethBurn = BurnActivityDto(
+            id = ActivityIdDto(BlockchainDto.ETHEREUM, ethBurnId),
+            date = randomDate(),
+            blockchainInfo = ActivityBlockchainInfoDto(
+                transactionHash = randomString(),
+                blockHash = randomString(),
+                blockNumber = randomLong(),
+                logIndex = randomInt(),
+            ),
+            owner = randomUnionAddress(),
+            itemId = ethBurnItemId,
+            transactionHash = randomString(),
+            value = randomBigInt(),
+        )
+        val ethBurnItem = randomUnionItem(ethBurnItemId, ethBurnColId)
+
+        val solanaListItemId = ItemIdDto(BlockchainDto.SOLANA, "contract3", BigInteger.ONE)
+        val solanaListId = "789"
+        val solanaListColId = CollectionIdDto(BlockchainDto.SOLANA, "col3")
+        val solanaList = OrderListActivityDto(
+            id = ActivityIdDto(BlockchainDto.SOLANA, solanaListId),
+            date = randomDate(),
+            maker = randomUnionAddress(),
+            make = AssetDto(
+                type = SolanaNftAssetTypeDto(
+                    solanaListItemId
+                ),
+                value = randomBigDecimal(),
+            ),
+            take = randomAsset(),
+            source = OrderActivitySourceDto.RARIBLE,
+            price = randomBigDecimal(),
+            hash = randomString(),
+        )
+        val solanaListItem = randomUnionItem(solanaListItemId, solanaListColId)
+
+        val router = mockk<BlockchainRouter<ItemService>>()
+        val source = listOf(ethMint, ethBurn, solanaList)
+
+        coEvery {
+            router.getService(BlockchainDto.ETHEREUM).getItemsByIds(listOf(ethMintItemId.value, ethBurnItemId.value))
+        } returns listOf(ethMintItem, ethBurnItem)
+        coEvery {
+            router.getService(BlockchainDto.SOLANA).getItemsByIds(listOf(solanaListItemId.value))
+        } returns listOf(solanaListItem)
+
+        // when
+        val actual = converter.batchConvert(source, router)
+
+        // then
+        assertThat(actual).hasSize(3)
+        assertThat(actual[0].activityId).isEqualTo(ethMint.id.toString())
+        assertThat(actual[0].collection).isEqualTo(ethMintColId.value)
+        assertThat(actual[1].activityId).isEqualTo(ethBurn.id.toString())
+        assertThat(actual[1].collection).isEqualTo(ethBurnColId.value)
+        assertThat(actual[2].activityId).isEqualTo(solanaList.id.toString())
+        assertThat(actual[2].collection).isEqualTo(solanaListColId.value)
+        coVerify {
+            router.getService(BlockchainDto.ETHEREUM).getItemsByIds(listOf(ethMintItemId.value, ethBurnItemId.value))
+            router.getService(BlockchainDto.SOLANA).getItemsByIds(listOf(solanaListItemId.value))
+        }
+        confirmVerified(router)
+    }
 
     @Test
     fun `should convert MintActivityDto`() {
@@ -645,5 +748,17 @@ class EsActivityConverterTest {
     private fun randomItemId(): ItemIdDto {
         return if (randomBoolean()) ItemIdDto(randomBlockchain(), randomString(), randomBigInt())
         else ItemIdDto(randomBlockchain(), randomString())
+    }
+
+    private fun randomUnionItem(id: ItemIdDto, collectionIdDto: CollectionIdDto): UnionItem {
+        return UnionItem(
+            id = id,
+            collection = collectionIdDto,
+            lazySupply = BigInteger.ONE,
+            mintedAt = Instant.now(),
+            lastUpdatedAt = Instant.now(),
+            supply = BigInteger.ONE,
+            deleted = false,
+        )
     }
 }
