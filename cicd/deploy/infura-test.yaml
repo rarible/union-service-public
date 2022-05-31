@@ -1,5 +1,6 @@
 sharedEnvironments: &sharedEnvironments
   APPLICATION_ENVIRONMENT: "infura-test"
+  SPRING_PROFILES_ACTIVE: '{{ include "service.appEnv" $ }}'
   SPRING_CLOUD_CONSUL_ENABLED: false
   RARIBLE_CORE_APM_AGENT_ENABLED: false
   RARIBLE_CORE_CLIENT_K8S: true
