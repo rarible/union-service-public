@@ -75,7 +75,7 @@ integration:
   solana:
     enabled: ${consul.solana.enabled:false}
   immutablex:
-    enabled: ${consul.immutablex.enabled:true}
+    enabled: ${consul.immutablex.enabled:false}
     client:
       url: ${consul.immutablex.api.baseUrl:}
     apiKey: ${consul.immutablex.api.key:}
