@@ -1,7 +1,7 @@
 package com.rarible.protocol.union.enrichment.meta
 
-import com.rarible.core.content.meta.loader.ContentMeta
 import com.rarible.core.content.meta.loader.ContentMetaReceiver
+import com.rarible.core.meta.resource.detector.ContentMeta
 import com.rarible.protocol.union.core.model.UnionAudioProperties
 import com.rarible.protocol.union.core.model.UnionHtmlProperties
 import com.rarible.protocol.union.core.model.UnionImageProperties
