@@ -29,6 +29,11 @@ class TzktCollectionServiceImpl(
         return TzktCollectionConverter.convert(tzktCollection, blockchain)
     }
 
+    override suspend fun getCollectionByIds(collectionIds: List<String>): List<UnionCollection> {
+        val tzktCollections = safeApiCall { collectionClient.collectionsByIds(collectionIds) }
+        return TzktCollectionConverter.convert(tzktCollections, blockchain)
+    }
+
     override suspend fun getCollectionByOwner(
         owner: String,
         continuation: String?,
