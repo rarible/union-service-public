@@ -12,8 +12,6 @@ import com.rarible.protocol.union.integration.tezos.data.randomTezosNftItemDto
 import com.rarible.protocol.union.integration.tezos.data.randomTezosOrderDto
 import com.rarible.protocol.union.integration.tezos.data.randomTezosOwnershipDto
 import com.rarible.protocol.union.listener.test.IntegrationTest
-import com.rarible.tzkt.client.OwnershipClient
-import com.rarible.tzkt.client.TokenClient
 import com.rarible.tzkt.model.Alias
 import com.rarible.tzkt.model.Page
 import com.rarible.tzkt.model.Token
@@ -55,7 +53,7 @@ class DipDupOrderEventHandlerFt : AbstractDipDupIntegrationTest() {
 
         coEvery { ownershipClient.ownershipsByToken(any(), any(), any(), any()) } returns Page(emptyList(), null)
         coEvery { ownershipClient.ownershipById(any()) } returns tokenBalance()
-        coEvery { unionMetaLoader.load(any()) } returns UnionMeta("test", null, emptyList(), emptyList(), emptyList())
+        coEvery { unionMetaLoader.load(any()) } returns UnionMeta("test")
 
         dipDupOrderProducer.send(
             KafkaMessage(

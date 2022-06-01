@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.enrichment.test.data
 
+import com.rarible.core.common.nowMillis
 import com.rarible.core.test.data.randomInt
 import com.rarible.core.test.data.randomLong
 import com.rarible.core.test.data.randomString
@@ -106,6 +107,13 @@ fun randomUnionMeta(): UnionMeta {
     return UnionMeta(
         name = randomString(),
         description = randomString(),
+        language = randomString(2),
+        genres = listOf(randomString(), randomString()),
+        tags = listOf(randomString(), randomString()),
+        createdAt = nowMillis(),
+        rights = randomString(),
+        rightsUri = randomString(),
+        externalUri = randomString(),
         attributes = listOf(randomUnionMetaAttribute()),
         content = listOf(),
         restrictions = listOf()
@@ -124,6 +132,7 @@ fun randomUnionMetaAttribute(): MetaAttributeDto {
 fun randomUnionContent(properties: UnionMetaContentProperties): UnionMetaContent {
     return UnionMetaContent(
         url = randomString(),
+        fileName = "${randomString()}.png}",
         representation = MetaContentDto.Representation.ORIGINAL,
         properties = properties
     )
