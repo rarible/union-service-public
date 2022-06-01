@@ -1,5 +1,6 @@
 sharedEnvironments: &sharedEnvironments
   APPLICATION_ENVIRONMENT: "infura-test"
+  SPRING_PROFILES_ACTIVE: '{{ include "service.appEnv" $ }}'
   SPRING_CLOUD_CONSUL_ENABLED: false
   RARIBLE_CORE_APM_AGENT_ENABLED: false
   SPRING_DATA_ELASTICSEARCH_CLUSTERNAME: "docker-cluster"
@@ -11,12 +12,19 @@ sharedEnvironments: &sharedEnvironments
   INTEGRATION_TEZOS_ENABLED: false
   INTEGRATION_SOLANA_ENABLED: false
   INTEGRATION_IMMUTABLEX_ENABLED: false
+  SPRING_R2DBC_URL: "r2dbc:postgres://infura:infura@localhost:5432/test"
   # todo see into consul
-  # SPRING_DATA_ELASTICSEARCH_CLUSTERNODES
-  # SPRING_DATA_ELASTICSEARCH_REST_URIS
-  # SPRING_DATA_ELASTICSEARCH_CLIENT_REACTIVE_ENDPOINTS
+  # PROTOCOL_UNION_SUBSCRIBER_BROKERREPLICASET
+  # COMMON_PRODUCER_BROKERREPLICASET
+  # INTEGRATION_ETHEREUM_CONSUMER_BROKERREPLICASET
+  # LISTENER_CONSUMER_BROKERREPLICASET
+  # RARIBLE_CORE_LOADER_BROKERREPLICASET
+  # SPRING_DATA_MONGODB_HOST:
+  # SPRING_DATA_MONGODB_PORT:
+  # SPRING_DATA_MONGODB_USERNAME:
+  # SPRING_DATA_MONGODB_PASSWORD:
   # REDISURI
-  # META_OPENSEAPROXYURL
+  # KAFKA_HOSTS
 
 sharedTolerations: &sharedTolerations
   effect: NoSchedule
@@ -29,24 +37,28 @@ protocol-union-api:
     - *sharedTolerations
   environments:
     <<: *sharedEnvironments
+    SPRING_DATA_MONGODB_DATABASE: test-protocol-union
 
 protocol-union-listener:
   tolerations:
     - *sharedTolerations
   environments:
     <<: *sharedEnvironments
+    SPRING_DATA_MONGODB_DATABASE: test-protocol-union
 
 protocol-union-meta-loader:
   tolerations:
     - *sharedTolerations
   environments:
     <<: *sharedEnvironments
+    SPRING_DATA_MONGODB_DATABASE: test-protocol-union
 
 protocol-union-indexer:
   tolerations:
     - *sharedTolerations
   environments:
     <<: *sharedEnvironments
+    SPRING_DATA_MONGODB_DATABASE: test-protocol-union
 
 protocol-union-worker:
   tolerations:
@@ -65,3 +77,4 @@ protocol-union-worker:
     WORKER_REINDEXER_ACTIVITY_BLOCKCHAINS_4_ENABLED: false
     WORKER_REINDEXER_ACTIVITY_BLOCKCHAINS_5_BLOCKCHAIN: "IMMUTABLEX"
     WORKER_REINDEXER_ACTIVITY_BLOCKCHAINS_5_ENABLED: false
+    SPRING_DATA_MONGODB_DATABASE: test-protocol-union
