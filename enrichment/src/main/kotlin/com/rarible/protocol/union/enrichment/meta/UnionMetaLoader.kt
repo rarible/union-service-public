@@ -21,7 +21,7 @@ import org.springframework.stereotype.Component
 class UnionMetaLoader(
     private val router: BlockchainRouter<ItemService>,
     private val unionContentMetaLoader: UnionContentMetaLoader,
-    private val ipfsUrlResolver: IpfsUrlResolver
+    private val urlService: UrlService
 ) {
 
     private val logger = LoggerFactory.getLogger(UnionMetaLoader::class.java)
@@ -68,8 +68,8 @@ class UnionMetaLoader(
     ): List<UnionMetaContent> = coroutineScope {
         metaContent.map { content ->
             async {
-                val resolvedUrl = ipfsUrlResolver.resolveInnerHttpUrl(content.url)
-                val publicUrl = ipfsUrlResolver.resolvePublicHttpUrl(content.url)
+                val resolvedUrl = urlService.resolveInnerHttpUrl(content.url, itemId.fullId())
+                val publicUrl = urlService.resolvePublicHttpUrl(content.url, itemId.fullId())
                 val logPrefix = "Content meta resolution for ${itemId.fullId()}"
                 logger.info(
                     logPrefix + if (resolvedUrl != content.url)

@@ -1,6 +1,6 @@
 package com.rarible.protocol.union.listener.meta
 
-import com.rarible.core.content.meta.loader.ContentMeta
+import com.rarible.core.meta.resource.detector.ContentMeta
 import com.rarible.core.test.data.randomInt
 import com.rarible.core.test.data.randomLong
 import com.rarible.core.test.data.randomString
