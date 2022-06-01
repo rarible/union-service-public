@@ -6,15 +6,13 @@ import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.elasticsearch.action.admin.indices.refresh.RefreshRequest
 import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations
-import org.springframework.data.elasticsearch.core.query.Query
 import org.springframework.stereotype.Component
 import java.io.IOException
 
 @Component
 class EsOrderRepository(
-    private val esOperations: ReactiveElasticsearchOperations,
-    esNameResolver: EsNameResolver
-) {
+    private val esOperations: ReactiveElasticsearchOperations, esNameResolver: EsNameResolver
+) : EsRepository {
     val entityDefinition = esNameResolver.createEntityDefinitionExtended(EsOrder.ENTITY_DEFINITION)
 
     suspend fun findById(id: String): EsOrder? {
@@ -22,21 +20,14 @@ class EsOrderRepository(
     }
 
     suspend fun save(esOrder: EsOrder): EsOrder {
-        return esOperations.save(esOrder, entityDefinition.writeIndexCoordinates)
-            .awaitFirst()
+        return esOperations.save(esOrder, entityDefinition.writeIndexCoordinates).awaitFirst()
     }
 
     suspend fun saveAll(esOrders: List<EsOrder>): List<EsOrder> {
-        return esOperations.saveAll(esOrders, entityDefinition.writeIndexCoordinates)
-            .collectList().awaitFirst()
+        return esOperations.saveAll(esOrders, entityDefinition.writeIndexCoordinates).collectList().awaitFirst()
     }
 
-    suspend fun deleteAll() {
-        esOperations.delete(Query.findAll(), entityDefinition.writeIndexCoordinates)
-            .awaitFirst()
-    }
-
-    suspend fun refresh() {
+    override suspend fun refresh() {
         val refreshRequest = RefreshRequest().indices(entityDefinition.aliasName, entityDefinition.writeAliasName)
 
         try {

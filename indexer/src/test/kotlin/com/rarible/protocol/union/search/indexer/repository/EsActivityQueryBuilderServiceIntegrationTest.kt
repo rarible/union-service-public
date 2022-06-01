@@ -1,9 +1,10 @@
 package com.rarible.protocol.union.search.indexer.repository
 
+import com.rarible.protocol.union.core.es.ElasticsearchTestBootstrapper
+import com.rarible.protocol.union.core.model.ElasticActivityQueryGenericFilter
+import com.rarible.protocol.union.core.model.EsActivitySort
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.core.model.EsActivitySort
-import com.rarible.protocol.union.core.model.ElasticActivityQueryGenericFilter
 import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
 import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
 import com.rarible.protocol.union.enrichment.test.data.info
@@ -26,11 +27,14 @@ internal class EsActivityQueryBuilderServiceIntegrationTest {
     @Autowired
     protected lateinit var repository: EsActivityRepository
 
+    @Autowired
+    private lateinit var elasticsearchTestBootstrapper: ElasticsearchTestBootstrapper
+
     private val sort = EsActivitySort(latestFirst = true)
 
     @BeforeEach
     fun setUp() = runBlocking<Unit> {
-        repository.deleteAll()
+        elasticsearchTestBootstrapper.bootstrap()
     }
 
     @Test

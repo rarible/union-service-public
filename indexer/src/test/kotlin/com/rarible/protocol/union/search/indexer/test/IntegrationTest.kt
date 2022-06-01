@@ -2,7 +2,7 @@ package com.rarible.protocol.union.search.indexer.test
 
 import com.rarible.core.test.ext.ElasticsearchTest
 import com.rarible.core.test.ext.KafkaTest
-import com.rarible.protocol.union.core.es.ElasticsearchBootstraperTestConfig
+import com.rarible.protocol.union.core.es.ElasticsearchBootstrapperTestConfig
 import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
 import com.rarible.protocol.union.search.indexer.config.KafkaConsumerConfiguration
 import com.rarible.protocol.union.search.indexer.config.UnionIndexerConfiguration
@@ -32,6 +32,6 @@ import org.springframework.test.context.ContextConfiguration
     ]
 )
 @ActiveProfiles("test")
-@Import(value = [ElasticsearchBootstraperTestConfig::class, TestIndexerConfiguration::class, UnionIndexerConfiguration::class, TestUnionSearchConfiguration::class])
+@Import(value = [ElasticsearchBootstrapperTestConfig::class, TestIndexerConfiguration::class, UnionIndexerConfiguration::class, TestUnionSearchConfiguration::class])
 @ContextConfiguration(classes = [SearchConfiguration::class, KafkaConsumerConfiguration::class])
 annotation class IntegrationTest

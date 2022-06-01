@@ -77,7 +77,7 @@ object TzktActivityConverter {
     }
 
     private fun TypedTokenActivity.tokenId(): BigInteger {
-        return this.token?.id?.toBigInteger()
+        return this.token?.tokenId?.toBigInteger()
             ?: throw UnionDataFormatException("Token must have tokenId for activity: $id")
     }
 

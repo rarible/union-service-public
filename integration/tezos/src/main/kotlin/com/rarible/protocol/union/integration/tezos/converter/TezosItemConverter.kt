@@ -67,8 +67,16 @@ object TezosItemConverter {
             description = meta.description,
             attributes = meta.attributes.orEmpty().map(::convert),
             content = listOfNotNull(
-                meta.image?.let { UnionMetaContent(it, MetaContentDto.Representation.ORIGINAL, UnionImageProperties()) },
-                meta.animation?.let { UnionMetaContent(it, MetaContentDto.Representation.ORIGINAL, UnionVideoProperties()) }
+                meta.image?.let {
+                    UnionMetaContent(
+                        it, MetaContentDto.Representation.ORIGINAL, null, UnionImageProperties()
+                    )
+                },
+                meta.animation?.let {
+                    UnionMetaContent(
+                        it, MetaContentDto.Representation.ORIGINAL, null, UnionVideoProperties()
+                    )
+                }
             ),
             // TODO TEZOS - implement it
             restrictions = listOf()

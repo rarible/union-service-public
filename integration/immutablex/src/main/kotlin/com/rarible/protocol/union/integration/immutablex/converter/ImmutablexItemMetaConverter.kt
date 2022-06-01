@@ -27,6 +27,7 @@ object ImmutablexItemMetaConverter {
         return UnionMeta(
             name = asset.name!!,
             description = asset.description,
+            createdAt = asset.createdAt,
             content = asset.metadata?.filterKeys { it in contentKeys }?.map {
                 UnionMetaContent(
                     url = it.value as String,

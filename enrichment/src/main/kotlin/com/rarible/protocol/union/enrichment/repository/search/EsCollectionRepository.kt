@@ -11,10 +11,11 @@ import com.rarible.protocol.union.enrichment.repository.search.internal.EsCollec
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactor.awaitSingle
+import org.elasticsearch.action.admin.indices.refresh.RefreshRequest
 import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery
-import org.springframework.data.elasticsearch.core.query.Query
 import org.springframework.stereotype.Component
+import java.io.IOException
 
 @Component
 @CaptureSpan(type = SpanType.DB)
@@ -22,7 +23,7 @@ class EsCollectionRepository(
     private val esOperations: ReactiveElasticsearchOperations,
     private val queryBuilderService: EsCollectionQueryBuilderService,
     esNameResolver: EsNameResolver
-) {
+) : EsRepository {
     val entityDefinition = esNameResolver.createEntityDefinitionExtended(EsCollection.ENTITY_DEFINITION)
     private val clazz = EsCollection::class.java
 
@@ -43,19 +44,16 @@ class EsCollectionRepository(
 
     suspend fun search(query: NativeSearchQuery): List<EsCollectionLite> {
         return esOperations.search(query, EsCollectionLite::class.java, entityDefinition.searchIndexCoordinates)
-            .collectList()
-            .awaitFirst()
-            .map { it.content }
+            .collectList().awaitFirst().map { it.content }
     }
 
-    /**
-     * For tests only
-     */
-    suspend fun deleteAll() {
-        esOperations.delete(
-            Query.findAll(),
-            Any::class.java,
-            entityDefinition.writeIndexCoordinates
-        ).awaitFirstOrNull()
+    override suspend fun refresh() {
+        val refreshRequest = RefreshRequest().indices(entityDefinition.aliasName, entityDefinition.writeAliasName)
+
+        try {
+            esOperations.execute { it.indices().refreshIndex(refreshRequest) }.awaitFirstOrNull()
+        } catch (e: IOException) {
+            throw RuntimeException(entityDefinition.writeAliasName + " refreshModifyIndex failed", e)
+        }
     }
 }

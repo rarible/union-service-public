@@ -13,10 +13,10 @@ import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.search.indexer.metrics.MetricConsumerBatchEventHandlerFactory
 import com.rarible.protocol.union.subscriber.UnionEventsConsumerFactory
 import io.micrometer.core.instrument.MeterRegistry
-import java.time.Duration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import java.time.Duration
 
 @Configuration
 class KafkaConsumerConfiguration(
@@ -99,10 +99,11 @@ class KafkaConsumerConfiguration(
     @ConditionalOnProperty(prefix = "handler.item", name = ["enabled"], havingValue = "true")
     fun itemWorker(handler: ConsumerBatchEventHandler<ItemEventDto>): ConsumerWorkerHolder<ItemEventDto> {
         val workers = (1..kafkaProperties.workerCount).map { i ->
+            val wrappedHandler = metricEventHandlerFactory.wrapItem(handler)
             val consumer = consumerFactory.createItemConsumer(consumerGroup(ITEM))
             ConsumerBatchWorker(
                 consumer = consumer,
-                eventHandler = handler,
+                eventHandler = wrappedHandler,
                 workerName = worker(ITEM, i),
                 properties = kafkaProperties.daemon,
                 retryProperties = RetryProperties(attempts = Int.MAX_VALUE, delay = Duration.ofSeconds(1L)),

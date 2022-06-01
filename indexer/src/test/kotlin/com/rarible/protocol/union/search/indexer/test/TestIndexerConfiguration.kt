@@ -119,7 +119,7 @@ class TestIndexerConfiguration {
             clientId = "test.union.item",
             valueSerializerClass = UnionKafkaJsonSerializer::class.java,
             valueClass = ItemEventDto::class.java,
-            defaultTopic = UnionEventTopicProvider.getCollectionTopic(applicationEnvironmentInfo().name),
+            defaultTopic = UnionEventTopicProvider.getItemTopic(applicationEnvironmentInfo().name),
             bootstrapServers = KafkaTestExtension.kafkaContainer.kafkaBoostrapServers()
         )
     }

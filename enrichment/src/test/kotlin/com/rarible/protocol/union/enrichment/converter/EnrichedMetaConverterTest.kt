@@ -6,7 +6,9 @@ import com.rarible.protocol.union.core.model.UnionAudioProperties
 import com.rarible.protocol.union.core.model.UnionImageProperties
 import com.rarible.protocol.union.core.model.UnionModel3dProperties
 import com.rarible.protocol.union.core.model.UnionVideoProperties
+import com.rarible.protocol.union.dto.AudioContentDto
 import com.rarible.protocol.union.dto.ImageContentDto
+import com.rarible.protocol.union.dto.Model3dContentDto
 import com.rarible.protocol.union.dto.VideoContentDto
 import com.rarible.protocol.union.enrichment.test.data.randomUnionContent
 import com.rarible.protocol.union.enrichment.test.data.randomUnionMeta
@@ -22,6 +24,13 @@ class EnrichedMetaConverterTest {
         val converted = EnrichedMetaConverter.convert(meta)
 
         assertThat(converted.name).isEqualTo(meta.name)
+        assertThat(converted.createdAt).isEqualTo(meta.createdAt)
+        assertThat(converted.tags).isEqualTo(meta.tags)
+        assertThat(converted.genres).isEqualTo(meta.genres)
+        assertThat(converted.language).isEqualTo(meta.language)
+        assertThat(converted.rights).isEqualTo(meta.rights)
+        assertThat(converted.rightsUri).isEqualTo(meta.rightsUri)
+        assertThat(converted.externalUri).isEqualTo(meta.externalUri)
         assertThat(converted.description).isEqualTo(meta.description)
         assertThat(converted.attributes).isEqualTo(meta.attributes)
         assertThat(converted.restrictions).isEqualTo(meta.restrictions.map { it.type })
@@ -43,6 +52,7 @@ class EnrichedMetaConverterTest {
         val convertedImage = converted.content[0] as ImageContentDto
 
         assertThat(convertedImage.url).isEqualTo(image.url)
+        assertThat(convertedImage.fileName).isEqualTo(image.fileName)
         assertThat(convertedImage.representation).isEqualTo(image.representation)
         assertThat(convertedImage.mimeType).isEqualTo(imageProperties.mimeType)
         assertThat(convertedImage.size).isEqualTo(imageProperties.size)
@@ -66,6 +76,7 @@ class EnrichedMetaConverterTest {
         val convertedVideo = converted.content[0] as VideoContentDto
 
         assertThat(convertedVideo.url).isEqualTo(video.url)
+        assertThat(convertedVideo.fileName).isEqualTo(video.fileName)
         assertThat(convertedVideo.representation).isEqualTo(video.representation)
         assertThat(convertedVideo.mimeType).isEqualTo(videoProperties.mimeType)
         assertThat(convertedVideo.size).isEqualTo(videoProperties.size)
@@ -84,10 +95,10 @@ class EnrichedMetaConverterTest {
         val meta = randomUnionMeta().copy(content = listOf(audio))
 
         val converted = EnrichedMetaConverter.convert(meta)
-        // TODO replace with Audio when market support it
-        val convertedAudio = converted.content[0] as VideoContentDto
+        val convertedAudio = converted.content[0] as AudioContentDto
 
         assertThat(convertedAudio.url).isEqualTo(audio.url)
+        assertThat(convertedAudio.fileName).isEqualTo(audio.fileName)
         assertThat(convertedAudio.representation).isEqualTo(audio.representation)
         assertThat(convertedAudio.mimeType).isEqualTo(audioProperties.mimeType)
         assertThat(convertedAudio.size).isEqualTo(audioProperties.size)
@@ -104,13 +115,13 @@ class EnrichedMetaConverterTest {
         val meta = randomUnionMeta().copy(content = listOf(model))
 
         val converted = EnrichedMetaConverter.convert(meta)
-        // TODO replace with Model3D when market support it
-        val convertedAudio = converted.content[0] as VideoContentDto
+        val convertedModel = converted.content[0] as Model3dContentDto
 
-        assertThat(convertedAudio.url).isEqualTo(model.url)
-        assertThat(convertedAudio.representation).isEqualTo(model.representation)
-        assertThat(convertedAudio.mimeType).isEqualTo(modelProperties.mimeType)
-        assertThat(convertedAudio.size).isEqualTo(modelProperties.size)
+        assertThat(convertedModel.url).isEqualTo(model.url)
+        assertThat(convertedModel.fileName).isEqualTo(model.fileName)
+        assertThat(convertedModel.representation).isEqualTo(model.representation)
+        assertThat(convertedModel.mimeType).isEqualTo(modelProperties.mimeType)
+        assertThat(convertedModel.size).isEqualTo(modelProperties.size)
     }
 
 }

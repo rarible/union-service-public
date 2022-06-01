@@ -5,6 +5,7 @@ import com.rarible.protocol.dto.NftItemIdsDto
 import com.rarible.protocol.union.api.client.ItemControllerApi
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
+import com.rarible.protocol.union.core.es.ElasticsearchTestBootstrapper
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ItemIdDto
@@ -54,9 +55,12 @@ class ItemsControllerElasticFt : AbstractIntegrationTest() {
     @Autowired
     lateinit var enrichmentItemService: EnrichmentItemService
 
+    @Autowired
+    private lateinit var elasticsearchTestBootstrapper: ElasticsearchTestBootstrapper
+
     @BeforeEach
     fun setUp() = runBlocking {
-        repository.deleteAll()
+        elasticsearchTestBootstrapper.bootstrap()
     }
 
     @Test

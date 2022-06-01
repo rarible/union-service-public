@@ -12,7 +12,9 @@ class TzktSignatureServiceImpl(
 
     override suspend fun validate(publicKey: String, signature: String, message: String): Boolean {
         try {
-            return signatureClient.validate(publicKey, signature, message)
+            val pair = publicKey.split('_')
+            val edpk = pair[0]
+            return signatureClient.validate(edpk, signature, message)
         } catch (ex: SignatureValidationException) {
             throw UnionValidationException(ex.message)
         }

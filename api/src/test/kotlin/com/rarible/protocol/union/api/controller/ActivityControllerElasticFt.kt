@@ -18,6 +18,7 @@ import com.rarible.protocol.union.api.client.ActivityControllerApi
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
+import com.rarible.protocol.union.core.es.ElasticsearchTestBootstrapper
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.AuctionStartActivityDto
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -27,12 +28,12 @@ import com.rarible.protocol.union.dto.MintActivityDto
 import com.rarible.protocol.union.dto.OrderBidActivityDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
 import com.rarible.protocol.union.dto.continuation.page.PageSize
+import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
+import com.rarible.protocol.union.enrichment.test.data.randomEsActivity
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAddress
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAuctionStartActivity
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemMintActivity
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOrderBidActivity
-import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
-import com.rarible.protocol.union.enrichment.test.data.randomEsActivity
 import com.rarible.protocol.union.integration.solana.data.randomSolanaMintActivity
 import com.rarible.protocol.union.integration.tezos.data.randomTezosItemBurnActivity
 import com.rarible.protocol.union.integration.tezos.service.TezosPgActivityService
@@ -67,12 +68,15 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
     @Autowired
     private lateinit var repository: EsActivityRepository
 
+    @Autowired
+    private lateinit var elasticsearchTestBootstrapper: ElasticsearchTestBootstrapper
+
     @MockkBean
     private lateinit var tezosPgActivityService: TezosPgActivityService
 
     @BeforeEach
     fun setUp() = runBlocking {
-        repository.deleteAll()
+        elasticsearchTestBootstrapper.bootstrap()
     }
 
     @Test

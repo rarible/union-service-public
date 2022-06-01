@@ -13,9 +13,8 @@ import java.io.IOException
 
 @Component
 class EsOwnershipRepository(
-    private val esOperations: ReactiveElasticsearchOperations,
-    esNameResolver: EsNameResolver
-) {
+    private val esOperations: ReactiveElasticsearchOperations, esNameResolver: EsNameResolver
+) : EsRepository {
     val entityDefinition = esNameResolver.createEntityDefinitionExtended(EsOwnership.ENTITY_DEFINITION)
 
     suspend fun findById(id: String): EsOwnership? {
@@ -23,20 +22,17 @@ class EsOwnershipRepository(
     }
 
     suspend fun saveAll(esOwnerships: List<EsOwnership>): List<EsOwnership> {
-        return esOperations.saveAll(esOwnerships, entityDefinition.writeIndexCoordinates)
-            .collectList().awaitFirst()
+        return esOperations.saveAll(esOwnerships, entityDefinition.writeIndexCoordinates).collectList().awaitFirst()
     }
 
     suspend fun deleteAll(ownershipIds: List<String>) {
         val query = CriteriaQuery(Criteria(EsOwnership::ownershipId.name).`in`(ownershipIds))
         esOperations.delete(
-            query,
-            EsOwnership::class.java,
-            entityDefinition.writeIndexCoordinates
+            query, EsOwnership::class.java, entityDefinition.writeIndexCoordinates
         ).awaitFirstOrNull()
     }
 
-    suspend fun refresh() {
+    override suspend fun refresh() {
         val refreshRequest = RefreshRequest().indices(entityDefinition.aliasName, entityDefinition.writeAliasName)
 
         try {

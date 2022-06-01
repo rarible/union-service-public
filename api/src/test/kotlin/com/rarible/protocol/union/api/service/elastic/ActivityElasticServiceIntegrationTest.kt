@@ -2,6 +2,7 @@ package com.rarible.protocol.union.api.service.elastic
 
 import com.ninjasquad.springmockk.MockkBean
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
+import com.rarible.protocol.union.core.es.ElasticsearchTestBootstrapper
 import com.rarible.protocol.union.core.model.TypedActivityId
 import com.rarible.protocol.union.core.service.ActivityService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
@@ -10,11 +11,11 @@ import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
+import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
+import com.rarible.protocol.union.enrichment.test.data.randomEsActivity
 import com.rarible.protocol.union.enrichment.test.data.randomUnionActivityMint
 import com.rarible.protocol.union.enrichment.test.data.randomUnionActivityOrderList
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
-import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
-import com.rarible.protocol.union.enrichment.test.data.randomEsActivity
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
@@ -47,6 +48,9 @@ internal class ActivityElasticServiceIntegrationTest {
     @Autowired
     private lateinit var service: ActivityElasticService
 
+    @Autowired
+    private lateinit var elasticsearchTestBootstrapper: ElasticsearchTestBootstrapper
+
     @BeforeEach
     fun setUp() = runBlocking<Unit> {
         every { router.isBlockchainEnabled(BlockchainDto.ETHEREUM) } returns true
@@ -56,7 +60,7 @@ internal class ActivityElasticServiceIntegrationTest {
         every { router.getService(BlockchainDto.FLOW) } returns flowService
         every { router.getService(BlockchainDto.SOLANA) } returns solanaService
 
-        repository.deleteAll()
+        elasticsearchTestBootstrapper.bootstrap()
         // save some elastic activities
         val one = randomEsActivity().copy(
             activityId = "ETHEREUM:1",
