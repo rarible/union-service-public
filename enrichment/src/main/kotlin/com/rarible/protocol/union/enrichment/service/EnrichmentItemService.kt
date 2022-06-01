@@ -139,7 +139,7 @@ class EnrichmentItemService(
             item = fetchedItem.await(),
             shortItem = shortItem,
             // replacing inner IPFS urls with public urls
-            meta = unionMetaService.exposePublicIpfsUrls(itemMeta.await()),
+            meta = unionMetaService.exposePublicIpfsUrls(meta = itemMeta.await(), itemId.fullId()),
             orders = bestOrders,
             auctions = auctionsData.await()
         )

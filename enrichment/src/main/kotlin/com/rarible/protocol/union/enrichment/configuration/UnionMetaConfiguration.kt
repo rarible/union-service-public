@@ -20,10 +20,6 @@ import com.rarible.core.meta.resource.detector.core.ExifDetector
 import com.rarible.core.meta.resource.detector.core.HtmlDetector
 import com.rarible.core.meta.resource.detector.core.PngDetector
 import com.rarible.core.meta.resource.detector.core.SvgDetector
-import com.rarible.core.meta.resource.detector.embedded.DefaultEmbeddedContentDecoderProvider
-import com.rarible.core.meta.resource.detector.embedded.EmbeddedBase64Decoder
-import com.rarible.core.meta.resource.detector.embedded.EmbeddedContentDetectProcessor
-import com.rarible.core.meta.resource.detector.embedded.EmbeddedSvgDecoder
 import com.rarible.core.meta.resource.parser.ArweaveUrlResourceParser
 import com.rarible.core.meta.resource.parser.CidUrlResourceParser
 import com.rarible.core.meta.resource.parser.DefaultUrlResourceParserProvider
@@ -191,13 +187,4 @@ class UnionMetaConfiguration {
             simpleHttpGatewayResolver = SimpleHttpGatewayResolver()
         )
     }
-
-    @Bean
-    fun embeddedContentDetectProcessor() : EmbeddedContentDetectProcessor =
-        EmbeddedContentDetectProcessor(
-            provider = DefaultEmbeddedContentDecoderProvider(
-                embeddedBase64Decoder = EmbeddedBase64Decoder,
-                embeddedSvgDecoder = EmbeddedSvgDecoder
-            )
-        )
 }

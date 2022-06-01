@@ -19,7 +19,7 @@ class UnionMetaService(
     private val unionMetaCacheLoaderService: CacheLoaderService<UnionMeta>,
     private val unionMetaMetrics: UnionMetaMetrics,
     private val unionMetaLoader: UnionMetaLoader,
-    private val ipfsUrlResolver: IpfsUrlResolver
+    private val urlService: UrlService
 ) {
 
     private val logger = LoggerFactory.getLogger(UnionMetaService::class.java)
@@ -151,17 +151,17 @@ class UnionMetaService(
 
     // We decided to change IPFS service from mypinata to ipfs.io, so in API/events we replace
     // all legacy mypinata urls to new host
-    fun exposePublicIpfsUrls(meta: UnionMeta?): UnionMeta? {
-        return meta?.let { it.copy(content = exposePublicIpfsUrls(it.content)) }
+    fun exposePublicIpfsUrls(meta: UnionMeta?, id: String): UnionMeta? {
+        return meta?.let { it.copy(content = exposePublicIpfsUrls(it.content, id)) }
     }
 
-    fun exposePublicIpfsUrls(meta: UnionCollectionMeta?): UnionCollectionMeta? {
-        return meta?.let { it.copy(content = exposePublicIpfsUrls(it.content)) }
+    fun exposePublicIpfsUrls(collectionMeta: UnionCollectionMeta?, id: String): UnionCollectionMeta? {
+        return collectionMeta?.let { it.copy(content = exposePublicIpfsUrls(it.content, id)) }
     }
 
-    private fun exposePublicIpfsUrls(content: List<UnionMetaContent>): List<UnionMetaContent> {
+    private fun exposePublicIpfsUrls(content: List<UnionMetaContent>, id: String): List<UnionMetaContent> {
         return content.map {
-            it.copy(url = ipfsUrlResolver.resolvePublicHttpUrl(it.url))
+            it.copy(url = urlService.resolvePublicHttpUrl(it.url, id))
         }
     }
 }

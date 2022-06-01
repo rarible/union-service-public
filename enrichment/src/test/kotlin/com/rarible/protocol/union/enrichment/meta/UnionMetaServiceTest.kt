@@ -5,8 +5,8 @@ import com.rarible.protocol.union.core.model.UnionImageProperties
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.enrichment.ResourceTestData.CID
 import com.rarible.protocol.union.enrichment.ResourceTestData.IPFS_PUBLIC_GATEWAY
-import com.rarible.protocol.union.enrichment.ResourceTestData.ipfsUrlResolver
-import com.rarible.protocol.union.enrichment.configuration.UnionMetaProperties
+import com.rarible.protocol.union.enrichment.ResourceTestData.ITEM_ID
+import com.rarible.protocol.union.enrichment.ResourceTestData.urlService
 import com.rarible.protocol.union.enrichment.test.data.randomUnionContent
 import com.rarible.protocol.union.enrichment.test.data.randomUnionMeta
 import io.mockk.mockk
@@ -23,7 +23,7 @@ class UnionMetaServiceTest {
         unionMetaCacheLoaderService,
         unionMetaMetrics,
         unionMetaLoader,
-        ipfsUrlResolver
+        urlService
     )
 
     @Test
@@ -37,7 +37,7 @@ class UnionMetaServiceTest {
 
         val meta = randomUnionMeta().copy(content = listOf(content1, content2, content3))
 
-        val withPublicIpfs = unionMetaService.exposePublicIpfsUrls(meta)!!
+        val withPublicIpfs = unionMetaService.exposePublicIpfsUrls(meta = meta, ITEM_ID)!!
 
         assertThat(withPublicIpfs.content[0].url).isEqualTo("$IPFS_PUBLIC_GATEWAY/ipfs/$CID")
         assertThat(withPublicIpfs.content[1].url).isEqualTo("$IPFS_PUBLIC_GATEWAY/ipfs/$CID")

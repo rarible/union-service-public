@@ -4,11 +4,12 @@ import com.rarible.protocol.union.enrichment.ResourceTestData.CID
 import com.rarible.protocol.union.enrichment.ResourceTestData.IPFS_CUSTOM_GATEWAY
 import com.rarible.protocol.union.enrichment.ResourceTestData.IPFS_PRIVATE_GATEWAY
 import com.rarible.protocol.union.enrichment.ResourceTestData.IPFS_PUBLIC_GATEWAY
-import com.rarible.protocol.union.enrichment.ResourceTestData.ipfsUrlResolver
+import com.rarible.protocol.union.enrichment.ResourceTestData.ITEM_ID
+import com.rarible.protocol.union.enrichment.ResourceTestData.urlService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
-class IpfsUrlResolverTest {
+class UrlServiceTest {
 
     @Test
     fun `foreign ipfs urls - replaced by public gateway`() {
@@ -57,7 +58,7 @@ class IpfsUrlResolverTest {
 
     @Test
     fun `foreign ipfs urls - replaced by internal gateway`() {
-        val result = ipfsUrlResolver.resolveInnerHttpUrl("https://dweb.link/ipfs/$CID/1.png")
+        val result = urlService.resolveInnerHttpUrl("https://dweb.link/ipfs/$CID/1.png", ITEM_ID)
         assertThat(result).isEqualTo("${IPFS_PRIVATE_GATEWAY}/ipfs/$CID/1.png")
     }
 
@@ -71,23 +72,23 @@ class IpfsUrlResolverTest {
         val https = "https://api.t-o-s.xyz/ipfs/gucci/8.gif"
         val http = "http://api.guccinfts.xyz/ipfs/8"
 
-        assertThat(ipfsUrlResolver.resolvePublicHttpUrl(http)).isEqualTo(http)
-        assertThat(ipfsUrlResolver.resolvePublicHttpUrl(https)).isEqualTo(https)
+        assertThat(urlService.resolvePublicHttpUrl(http, ITEM_ID)).isEqualTo(http)
+        assertThat(urlService.resolvePublicHttpUrl(https, ITEM_ID)).isEqualTo(https)
     }
 
     @Test
     fun `replace legacy`() {
-        assertThat(ipfsUrlResolver.resolveInnerHttpUrl("$IPFS_CUSTOM_GATEWAY/ipfs/$CID")).isEqualTo("$IPFS_PRIVATE_GATEWAY/ipfs/$CID")
+        assertThat(urlService.resolveInnerHttpUrl("$IPFS_CUSTOM_GATEWAY/ipfs/$CID", ITEM_ID)).isEqualTo("$IPFS_PRIVATE_GATEWAY/ipfs/$CID")
     }
 
     private fun assertFixedIpfsUrl(url: String, expectedPath: String) {
-        val result = ipfsUrlResolver.resolvePublicHttpUrl(url)
+        val result = urlService.resolvePublicHttpUrl(url, ITEM_ID)
         assertThat(result).isEqualTo("${IPFS_PUBLIC_GATEWAY}/ipfs/$expectedPath")
     }
 
     private fun assertOriginalIpfsUrl(url: String, expectedPath: String? = null) {
         val expected = expectedPath ?: url // in most cases we expect URL not changed
-        val result = ipfsUrlResolver.resolvePublicHttpUrl(url)
+        val result = urlService.resolvePublicHttpUrl(url, ITEM_ID)
         assertThat(result).isEqualTo(expected)
     }
 }
