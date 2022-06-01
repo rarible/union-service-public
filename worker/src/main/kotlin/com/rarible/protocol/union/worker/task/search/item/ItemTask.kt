@@ -15,7 +15,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.reactor.awaitSingle
+import org.springframework.stereotype.Component
 
+@Component
 class ItemTask(
     private val properties: CollectionReindexProperties,
     private val client: ItemControllerApi,
