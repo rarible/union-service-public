@@ -14,6 +14,10 @@ object TzktCollectionConverter {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
+    fun convert(source: List<Contract>, blockchain: BlockchainDto): List<UnionCollection> {
+        return source.map { convert(it, blockchain) }
+    }
+
     fun convert(source: Contract, blockchain: BlockchainDto): UnionCollection {
         try {
             return convertInternal(source, blockchain)
