@@ -6,8 +6,8 @@ import com.rarible.core.apm.SpanType
 import com.rarible.protocol.union.core.elasticsearch.EsNameResolver
 import com.rarible.protocol.union.core.model.ElasticItemFilter
 import com.rarible.protocol.union.core.model.EsItem
-import com.rarible.protocol.union.core.model.EsItemQueryResult
 import com.rarible.protocol.union.core.model.EsItemSort
+import com.rarible.protocol.union.core.model.EsQueryResult
 import com.rarible.protocol.union.dto.continuation.page.ArgSlice
 import com.rarible.protocol.union.dto.continuation.page.PageSize
 import com.rarible.protocol.union.enrichment.repository.search.internal.EsItemBuilderService.buildQuery
@@ -60,18 +60,18 @@ class EsItemRepository(
         filter: ElasticItemFilter,
         sort: EsItemSort,
         limit: Int?
-    ): EsItemQueryResult {
+    ): EsQueryResult<EsItem> {
         val query = filter.buildQuery(sort)
         query.maxResults = PageSize.ITEM.limit(limit)
         return search(query)
     }
 
-    suspend fun search(query: NativeSearchQuery): EsItemQueryResult {
+    suspend fun search(query: NativeSearchQuery): EsQueryResult<EsItem> {
 
         val hits = esOperations.search(query, EsItem::class.java, entityDefinition.searchIndexCoordinates)
             .collectList()
             .awaitFirst()
-        val items = hits.map { it.content }
+        val content = hits.map { it.content }
 
         val last = hits.lastOrNull()
         val continuationString = if (last != null && last.sortValues.size > 0) {
@@ -80,8 +80,8 @@ class EsItemRepository(
             )
         } else ArgSlice.COMPLETED
 
-        return EsItemQueryResult(
-            items = items,
+        return EsQueryResult(
+            content = content,
             cursor = continuationString
         )
     }
