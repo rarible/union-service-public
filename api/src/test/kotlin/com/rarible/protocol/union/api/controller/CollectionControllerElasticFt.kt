@@ -7,11 +7,11 @@ import com.rarible.protocol.solana.dto.CollectionsDto
 import com.rarible.protocol.union.api.client.CollectionControllerApi
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
+import com.rarible.protocol.union.core.es.ElasticsearchTestBootstrapper
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.repository.search.EsCollectionRepository
 import com.rarible.protocol.union.enrichment.test.data.randomEsCollection
 import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionDto
-import com.rarible.protocol.union.integration.solana.data.randomSolanaBalanceDto
 import com.rarible.protocol.union.integration.solana.data.randomSolanaCollectionDto
 import com.rarible.protocol.union.integration.tezos.data.randomTezosCollectionDto
 import com.rarible.protocol.union.test.data.randomFlowCollectionDto
@@ -45,9 +45,12 @@ class CollectionControllerElasticFt : AbstractIntegrationTest() {
     @Autowired
     private lateinit var repository: EsCollectionRepository
 
+    @Autowired
+    private lateinit var elasticsearchTestBootstrapper: ElasticsearchTestBootstrapper
+
     @BeforeEach
     fun setUp() = runBlocking {
-        repository.deleteAll()
+        elasticsearchTestBootstrapper.bootstrap()
     }
 
     @Test

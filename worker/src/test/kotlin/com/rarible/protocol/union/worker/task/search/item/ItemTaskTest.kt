@@ -13,6 +13,8 @@ import com.rarible.protocol.union.dto.continuation.page.ArgSlice
 import com.rarible.protocol.union.enrichment.repository.search.EsItemRepository
 import com.rarible.protocol.union.worker.config.BlockchainReindexProperties
 import com.rarible.protocol.union.worker.config.CollectionReindexProperties
+import com.rarible.protocol.union.worker.metrics.SearchTaskMetricFactory
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import io.mockk.coEvery
 import io.mockk.coVerifyAll
 import io.mockk.every
@@ -73,48 +75,37 @@ internal class ItemTaskTest {
 
     private val client = mockk<ItemControllerApi> {
         every { getAllItems(any<List<BlockchainDto>>(), null, any(), any(), any(), any()) } returns ItemsDto(
-            total = 1L,
-            items = listOf(ethItem, flowItem),
-            continuation = firstCombinedContinuation.toString()
+            total = 1L, items = listOf(ethItem, flowItem), continuation = firstCombinedContinuation.toString()
         ).toMono()
 
         every {
             getAllItems(
-                any<List<BlockchainDto>>(),
-                firstCombinedContinuation.toString(),
-                any(),
-                any(),
-                any(),
-                any()
+                any<List<BlockchainDto>>(), firstCombinedContinuation.toString(), any(), any(), any(), any()
             )
         } returns ItemsDto(
-            total = 0L,
-            items = emptyList(),
-            continuation = completedContinuation.toString()
+            total = 0L, items = emptyList(), continuation = completedContinuation.toString()
         ).toMono()
     }
+
+    private val searchTaskMetricFactory = SearchTaskMetricFactory(SimpleMeterRegistry(), mockk {
+        every { metrics } returns mockk { every { rootPath } returns "protocol.union.worker" }
+    })
 
     @Test
     internal fun `should start first task`() {
         runBlocking {
+
             val task = ItemTask(
                 CollectionReindexProperties(
                     enabled = true,
                     blockchains = listOf(BlockchainReindexProperties(enabled = true, BlockchainDto.ETHEREUM))
-                ),
-                client,
-                repo
+                ), client, repo, searchTaskMetricFactory
             )
             task.runLongTask(null, "ETHEREUM").toList()
 
             coVerifyAll {
                 client.getAllItems(
-                    listOf(BlockchainDto.ETHEREUM),
-                    null,
-                    1000,
-                    true,
-                    Long.MIN_VALUE,
-                    Long.MAX_VALUE
+                    listOf(BlockchainDto.ETHEREUM), null, 1000, true, Long.MIN_VALUE, Long.MAX_VALUE
                 )
 
                 repo.saveAll(any())

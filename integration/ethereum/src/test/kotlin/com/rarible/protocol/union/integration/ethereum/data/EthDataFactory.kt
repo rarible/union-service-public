@@ -30,7 +30,6 @@ import com.rarible.protocol.dto.Erc20AssetTypeDto
 import com.rarible.protocol.dto.Erc721AssetTypeDto
 import com.rarible.protocol.dto.ItemRoyaltyDto
 import com.rarible.protocol.dto.ItemTransferDto
-import com.rarible.protocol.dto.LegacyOrderDto
 import com.rarible.protocol.dto.MintDto
 import com.rarible.protocol.dto.NftCollectionDto
 import com.rarible.protocol.dto.NftCollectionMetaDto
@@ -51,8 +50,8 @@ import com.rarible.protocol.dto.OrderActivityMatchDto
 import com.rarible.protocol.dto.OrderActivityMatchSideDto
 import com.rarible.protocol.dto.OrderCancelDto
 import com.rarible.protocol.dto.OrderCryptoPunksDataDto
-import com.rarible.protocol.dto.OrderDataLegacyDto
 import com.rarible.protocol.dto.OrderOpenSeaV1DataV1Dto
+import com.rarible.protocol.dto.OrderRaribleV2DataDto
 import com.rarible.protocol.dto.OrderRaribleV2DataV1Dto
 import com.rarible.protocol.dto.OrderSideDto
 import com.rarible.protocol.dto.OrderSideMatchDto
@@ -213,15 +212,17 @@ fun randomEthAssetErc20(address: Address) = AssetDto(
     valueDecimal = randomBigDecimal()
 )
 
-fun randomEthCollectionAsset() = randomEthCollectionAsset(randomAddress())
-fun randomEthCollectionAsset(address: Address) = AssetDto(
+fun randomEthCollectionAsset(
+    address: Address = randomAddress()
+) = AssetDto(
     assetType = CollectionAssetTypeDto(address),
     value = randomBigInt(),
     valueDecimal = randomBigDecimal()
 )
 
-fun randomEthAssetErc1155() = randomEthAssetErc1155(randomEthItemId())
-fun randomEthAssetErc1155(itemId: ItemIdDto): AssetDto {
+fun randomEthAssetErc1155(
+    itemId: ItemIdDto = randomEthItemId()
+): AssetDto {
     val (contract, tokenId) = CompositeItemIdParser.split(itemId.value)
     return AssetDto(
         assetType = Erc1155AssetTypeDto(Address.apply(contract), tokenId),
@@ -230,29 +231,36 @@ fun randomEthAssetErc1155(itemId: ItemIdDto): AssetDto {
     )
 }
 
-fun randomEthLegacySellOrderDto() =
-    randomEthLegacyOrderDto(randomEthAssetErc721(), randomAddress(), randomEthAssetErc20())
-
-fun randomEthLegacySellOrderDto(itemId: ItemIdDto) = randomEthLegacySellOrderDto(itemId, randomAddress())
-fun randomEthLegacySellOrderDto(itemId: ItemIdDto, maker: Address) = randomEthLegacyOrderDto(
+fun randomEthSellOrderDto(
+    itemId: ItemIdDto = randomEthItemId(),
+    maker: Address = randomAddress(),
+    data: OrderRaribleV2DataDto = OrderRaribleV2DataV1Dto(emptyList(), emptyList())
+) = randomEthLegacyOrderDto(
     randomEthAssetErc721(itemId),
     maker,
-    randomEthAssetErc20()
+    randomEthAssetErc20(),
+    data
 )
 
-fun randomEthLegacyBidOrderDto() =
-    randomEthLegacyOrderDto(randomEthAssetErc20(), randomAddress(), randomEthAssetErc721())
-
-fun randomEthLegacyBidOrderDto(itemId: ItemIdDto) = randomEthLegacyBidOrderDto(itemId, randomAddress())
-fun randomEthLegacyBidOrderDto(itemId: ItemIdDto, maker: Address) = randomEthLegacyOrderDto(
+fun randomEthBidOrderDto(
+    itemId: ItemIdDto = randomEthItemId(),
+    maker: Address = randomAddress(),
+    data: OrderRaribleV2DataDto = OrderRaribleV2DataV1Dto(emptyList(), emptyList())
+) = randomEthLegacyOrderDto(
     randomEthAssetErc20(),
     maker,
-    randomEthAssetErc721(itemId)
+    randomEthAssetErc721(itemId),
+    data
 )
 
-fun randomEthLegacyOrderDto(make: AssetDto, maker: Address, take: AssetDto): LegacyOrderDto {
+private fun randomEthLegacyOrderDto(
+    make: AssetDto,
+    maker: Address,
+    take: AssetDto,
+    data: OrderRaribleV2DataDto
+): RaribleV2OrderDto {
     val makeStockValue = randomBigDecimal()
-    return LegacyOrderDto(
+    return RaribleV2OrderDto(
         status = OrderStatusDto.ACTIVE,
         maker = maker,
         taker = null,
@@ -264,7 +272,7 @@ fun randomEthLegacyOrderDto(make: AssetDto, maker: Address, take: AssetDto): Leg
         makeStockValue = makeStockValue,
         cancelled = false,
         salt = Word.apply(randomWord()),
-        data = OrderDataLegacyDto(randomInt()),
+        data = data,
         signature = randomBinary(),
         createdAt = nowMillis(),
         lastUpdateAt = nowMillis(),

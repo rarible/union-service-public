@@ -15,8 +15,7 @@ import com.rarible.protocol.dto.NftOwnershipEventTopicProvider
 import com.rarible.protocol.union.api.configuration.WebSocketConfiguration
 import com.rarible.protocol.union.core.elasticsearch.EsNameResolver
 import com.rarible.protocol.union.core.elasticsearch.IndexService
-import com.rarible.protocol.union.core.elasticsearch.NoopReindexSchedulingService
-import com.rarible.protocol.union.core.elasticsearch.bootstrap.ElasticsearchBootstrapper
+import com.rarible.protocol.union.core.es.ElasticsearchTestBootstrapper
 import com.rarible.protocol.union.core.model.elasticsearch.EsEntitiesConfig
 import com.rarible.protocol.union.dto.FakeSubscriptionEventDto
 import com.rarible.protocol.union.dto.ItemEventDto
@@ -62,8 +61,7 @@ class MockContext : ApplicationListener<WebServerInitializedEvent> {
     fun webSocketEventsQueue() = LinkedBlockingQueue<SubscriptionEventDto>()
 
     @Bean
-    fun webSocketRequests(): Sinks.Many<List<SubscriptionRequestDto>> = Sinks.many().unicast()
-        .onBackpressureBuffer()
+    fun webSocketRequests(): Sinks.Many<List<SubscriptionRequestDto>> = Sinks.many().unicast().onBackpressureBuffer()
 
     @Bean(initMethod = "bootstrap")
     @ConditionalOnMissingBean
@@ -71,15 +69,12 @@ class MockContext : ApplicationListener<WebServerInitializedEvent> {
         reactiveElasticSearchOperations: ReactiveElasticsearchOperations,
         esNameResolver: EsNameResolver,
         indexService: IndexService
-    ): ElasticsearchBootstrapper {
+    ): ElasticsearchTestBootstrapper {
 
-        return ElasticsearchBootstrapper(
+        return ElasticsearchTestBootstrapper(
             esNameResolver = esNameResolver,
             esOperations = reactiveElasticSearchOperations,
             entityDefinitions = EsEntitiesConfig.createEsEntities(),
-            reindexSchedulingService = NoopReindexSchedulingService(indexService),
-            indexService = indexService,
-            forceUpdate = emptySet()
         )
     }
 
@@ -172,16 +167,10 @@ class MockContext : ApplicationListener<WebServerInitializedEvent> {
                 val bytes = objectMapper.writerFor(typeRef).writeValueAsBytes(it)
                 logger.info("sending to ws: {}", String(bytes))
                 WebSocketMessage(
-                    WebSocketMessage.Type.TEXT,
-                    DefaultDataBufferFactory().wrap(bytes)
+                    WebSocketMessage.Type.TEXT, DefaultDataBufferFactory().wrap(bytes)
                 )
-            })
-                .doOnSubscribe { logger.info("subscribed to ws") }
-                .subscribe(
-                    {},
-                    { logger.error("ws error", it) },
-                    { logger.info("disconnected from ws") }
-                )
+            }).doOnSubscribe { logger.info("subscribed to ws") }
+                .subscribe({}, { logger.error("ws error", it) }, { logger.info("disconnected from ws") })
             shutdownMono().asMono()
         }.subscribe()
     }

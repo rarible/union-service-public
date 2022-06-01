@@ -10,6 +10,7 @@ import com.rarible.protocol.union.dto.continuation.page.PageSize
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.repository.search.EsItemRepository
 import com.rarible.protocol.union.worker.config.CollectionReindexProperties
+import com.rarible.protocol.union.worker.metrics.SearchTaskMetricFactory
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
@@ -18,7 +19,8 @@ import kotlinx.coroutines.reactor.awaitSingle
 class ItemTask(
     private val properties: CollectionReindexProperties,
     private val client: ItemControllerApi,
-    private val repository: EsItemRepository
+    private val repository: EsItemRepository,
+    private val searchTaskMetricFactory: SearchTaskMetricFactory
 ) : TaskHandler<String> {
 
     override val type: String
@@ -31,6 +33,7 @@ class ItemTask(
 
     override fun runLongTask(from: String?, param: String): Flow<String> {
         val blockchain = IdParser.parseBlockchain(param)
+        val counter = searchTaskMetricFactory.createReindexItemCounter(blockchain)
         return if (from == "") {
             emptyFlow()
         } else {
@@ -50,6 +53,7 @@ class ItemTask(
                         repository.saveAll(
                             res.items.map { it.toEsItem() }
                         )
+                        counter.increment(res.items.size)
                     }
                     emit(res.continuation.orEmpty())
                     val continuations = CombinedContinuation.parse(res.continuation).continuations

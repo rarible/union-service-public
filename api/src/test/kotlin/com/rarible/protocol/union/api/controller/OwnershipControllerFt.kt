@@ -138,7 +138,7 @@ class OwnershipControllerFt : AbstractIntegrationTest() {
         enrichmentOwnershipService.save(flowShortOwnership)
 
         flowOwnershipControllerApiMock.mockGetNftOwnershipById(flowUnionOwnership.id, flowOwnership)
-        flowOrderControllerApiMock.mockGetById(flowOrder)
+        flowOrderControllerApiMock.mockGetByIds(flowOrder)
 
         val result = ownershipControllerClient.getOwnershipById(flowUnionOwnership.id.fullId()).awaitFirst()
 

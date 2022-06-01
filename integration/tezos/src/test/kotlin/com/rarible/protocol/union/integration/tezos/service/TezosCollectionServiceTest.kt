@@ -34,7 +34,7 @@ class TezosCollectionServiceTest {
     fun `should return tzkt collections`() = runBlocking<Unit> {
         val address = "KT1Tu6A2NHKwEjdHTTJBys8Pu8K9Eo87P2Vy"
         val continuation = "test"
-        coEvery { tzktCollectionClient.collections(1, null) } returns Page(
+        coEvery { tzktCollectionClient.collectionsAll(1, null) } returns Page(
             items = listOf(contract(address)),
             continuation = continuation
         )

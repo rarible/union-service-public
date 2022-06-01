@@ -51,6 +51,7 @@ object EnrichedItemConverter {
             // Enrichment data
             bestSellOrder = shortItem?.bestSellOrder?.let { orders[it.dtoId] },
             bestBidOrder = shortItem?.bestBidOrder?.let { orders[it.dtoId] },
+            originOrders = shortItem?.originOrders?.let { OriginOrdersConverter.convert(it, orders) } ?: emptyList(),
             auctions = shortItem?.auctions?.mapNotNull { auctions[it] } ?: emptyList(),
             totalStock = shortItem?.totalStock ?: BigInteger.ZERO,
             sellers = shortItem?.sellers ?: 0,
@@ -68,4 +69,5 @@ object EnrichedItemConverter {
             price = lastSale.price
         )
     }
+
 }

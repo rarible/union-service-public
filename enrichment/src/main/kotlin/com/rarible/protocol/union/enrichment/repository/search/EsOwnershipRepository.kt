@@ -15,10 +15,8 @@ import java.io.IOException
 
 @Component
 class EsOwnershipRepository(
-    private val esOperations: ReactiveElasticsearchOperations,
-    esNameResolver: EsNameResolver
-) {
-
+    private val esOperations: ReactiveElasticsearchOperations, esNameResolver: EsNameResolver
+) : EsRepository {
     val entityDefinition = esNameResolver.createEntityDefinitionExtended(EsOwnership.ENTITY_DEFINITION)
 
     suspend fun findById(id: String): EsOwnership? {
@@ -35,13 +33,14 @@ class EsOwnershipRepository(
         return esOperations.saveAll(esOwnerships, index(indexName)).collectList().awaitFirst()
     }
 
-    suspend fun deleteAll(ownershipIds: Collection<String>, indexName: String? = null) {
-        val idsQuery = idsQuery().addIds(*ownershipIds.toTypedArray())
-        val query = NativeSearchQueryBuilder().withQuery(idsQuery).build()
-        esOperations.delete(query, EsOwnership::class.java, index(indexName)).awaitFirstOrNull()
+    suspend fun deleteAll(ownershipIds: List<String>) {
+        val query = CriteriaQuery(Criteria(EsOwnership::ownershipId.name).`in`(ownershipIds))
+        esOperations.delete(
+            query, EsOwnership::class.java, entityDefinition.writeIndexCoordinates
+        ).awaitFirstOrNull()
     }
 
-    suspend fun refresh() {
+    override suspend fun refresh() {
         val refreshRequest = RefreshRequest().indices(entityDefinition.aliasName, entityDefinition.writeAliasName)
 
         try {

@@ -39,6 +39,7 @@ import com.rarible.tzkt.model.TzktActivityContinuation
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.reactive.awaitFirst
+import java.math.BigInteger
 import java.time.Instant
 import java.util.regex.Pattern
 
@@ -151,13 +152,61 @@ open class TezosActivityService(
         sort: ActivitySortDto?
     ): Slice<ActivityDto> {
         val (contract, tokenId) = CompositeItemIdParser.split(itemId)
-        val nftFilter = tezosActivityConverter.convertToNftTypes(types)?.let {
-            NftActivityFilterByItemDto(it, contract, tokenId)
+        if (dipdupOrderActivityService.enabled()) {
+
+            // We try to get new activities only if we get all legacy and continuation != null
+            if (continuation != null && (isDipDupContinuation(continuation) || isTzktContinuation(continuation))) {
+                return getDipDupAndTzktActivitiesByItem(types, contract, tokenId, continuation, size, sort)
+            } else {
+
+                // We need only order activities from legacy backend
+                val orderFilter = tezosActivityConverter.convertToOrderTypes(types)?.let {
+                    OrderActivityFilterByItemDto(it, contract, tokenId)
+                }
+                val legacySlice = getTezosActivities(null, orderFilter, continuation, size, sort)
+
+                if (legacySlice.entities.size < size) {
+                    val delta = size - legacySlice.entities.size
+                    val dipdupSlice = getDipDupAndTzktActivitiesByItem(types, contract, tokenId, continuation, delta, sort)
+                    return Slice(
+                        continuation = dipdupSlice.continuation,
+                        entities = legacySlice.entities + dipdupSlice.entities
+                    )
+                } else {
+                    return legacySlice
+                }
+            }
+        } else {
+            val nftFilter = tezosActivityConverter.convertToNftTypes(types)?.let {
+                NftActivityFilterByItemDto(it, contract, tokenId)
+            }
+            val orderFilter = tezosActivityConverter.convertToOrderTypes(types)?.let {
+                OrderActivityFilterByItemDto(it, contract, tokenId)
+            }
+            return getTezosActivities(nftFilter, orderFilter, continuation, size, sort)
         }
-        val orderFilter = tezosActivityConverter.convertToOrderTypes(types)?.let {
-            OrderActivityFilterByItemDto(it, contract, tokenId)
+    }
+
+    suspend fun getDipDupAndTzktActivitiesByItem(
+        types: List<ActivityTypeDto>,
+        contract: String,
+        tokenId: BigInteger,
+        continuation: String?,
+        size: Int,
+        sort: ActivitySortDto?
+    ) = coroutineScope  {
+        val orderActivitiesRequest = async {
+            dipdupOrderActivityService.getByItem(types, contract, tokenId, continuation, size, sort)
         }
-        return getTezosActivities(nftFilter, orderFilter, continuation, size, sort)
+        val itemActivitiesRequest = async {
+            tzktItemActivityService.getByItem(types, contract, tokenId, continuation, size, sort)
+        }
+        val activities = (orderActivitiesRequest.await().entities + itemActivitiesRequest.await().entities)
+
+        Paging(
+            continuationFactory(sort),
+            activities
+        ).getSlice(size)
     }
 
     override suspend fun getActivitiesByItemAndOwner(

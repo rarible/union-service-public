@@ -7,14 +7,13 @@ import com.rarible.protocol.union.core.service.CollectionService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
-import com.rarible.protocol.union.enrichment.converter.EnrichmentCollectionConverter
+import com.rarible.protocol.union.enrichment.converter.EnrichedCollectionConverter
 import com.rarible.protocol.union.enrichment.meta.UnionMetaService
 import com.rarible.protocol.union.enrichment.model.ShortCollection
 import com.rarible.protocol.union.enrichment.model.ShortCollectionId
 import com.rarible.protocol.union.enrichment.repository.CollectionRepository
 import com.rarible.protocol.union.enrichment.util.spent
 import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -26,6 +25,7 @@ class EnrichmentCollectionService(
     private val enrichmentOrderService: EnrichmentOrderService,
     private val unionMetaService: UnionMetaService
 ) {
+
     private val logger = LoggerFactory.getLogger(EnrichmentCollectionService::class.java)
 
     suspend fun get(collectionId: ShortCollectionId): ShortCollection? {
@@ -50,7 +50,8 @@ class EnrichmentCollectionService(
 
     suspend fun fetch(collectionId: ShortCollectionId): UnionCollection {
         val now = nowMillis()
-        val collectionDto = collectionServiceRouter.getService(collectionId.blockchain).getCollectionById(collectionId.collectionId)
+        val collectionDto = collectionServiceRouter.getService(collectionId.blockchain)
+            .getCollectionById(collectionId.collectionId)
         logger.info("Fetched collection [{}] ({} ms)", collectionId.toDto().fullId(), spent(now))
         return collectionDto
     }
@@ -67,20 +68,14 @@ class EnrichmentCollectionService(
             collection ?: fetch(ShortCollectionId(collectionId))
         }
 
-        val bestSellOrder = async {
-            enrichmentOrderService.fetchOrderIfDiffers(shortCollection?.bestSellOrder, orders)
-        }
-        val bestBidOrder = async {
-            enrichmentOrderService.fetchOrderIfDiffers(shortCollection?.bestBidOrder, orders)
-        }
-
-        val bestOrders = listOf(bestSellOrder, bestBidOrder)
-            .awaitAll().filterNotNull()
-            .associateBy { it.id }
+        val bestOrders = enrichmentOrderService.fetchMissingOrders(
+            existing = shortCollection?.getAllBestOrders() ?: emptyList(),
+            orders = orders
+        )
 
         val unionCollection = fetchedCollection.await()
 
-        val collectionDto = EnrichmentCollectionConverter.convert(
+        val collectionDto = EnrichedCollectionConverter.convert(
             collection = unionCollection,
             // replacing inner IPFS urls with public urls
             meta = unionMetaService.exposePublicIpfsUrls(unionCollection.meta),

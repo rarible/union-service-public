@@ -19,4 +19,12 @@ interface TzktCollectionService {
         TODO("Not implemented")
     }
 
+    suspend fun getCollectionByOwner(
+        owner: String,
+        continuation: String?,
+        size: Int
+    ): Page<UnionCollection> {
+        TODO("Not implemented")
+    }
+
 }

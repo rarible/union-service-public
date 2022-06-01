@@ -5,7 +5,6 @@ import com.rarible.protocol.solana.api.client.autoconfigure.SolanaApiClientAutoC
 import com.rarible.protocol.union.api.client.ActivityControllerApi
 import com.rarible.protocol.union.api.client.CollectionControllerApi
 import com.rarible.protocol.union.api.client.UnionApiClientFactory
-import com.rarible.protocol.union.api.client.autoconfigure.UnionApiClientAutoConfiguration
 import com.rarible.protocol.union.core.elasticsearch.EsNameResolver
 import com.rarible.protocol.union.core.elasticsearch.IndexService
 import com.rarible.protocol.union.core.elasticsearch.bootstrap.ElasticsearchBootstrapper
@@ -26,9 +25,7 @@ import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperatio
 @Configuration
 @ComponentScan(basePackageClasses = [EsActivityRepository::class])
 @Import(
-    value = [
-        SearchConfiguration::class
-    ]
+    value = [SearchConfiguration::class]
 )
 @EnableRaribleTask
 @EnableConfigurationProperties(WorkerProperties::class)

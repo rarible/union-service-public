@@ -52,6 +52,9 @@ open class TezosCollectionService(
         continuation: String?,
         size: Int
     ): Page<UnionCollection> {
+        if (tzktCollectionService.enabled()) {
+            return tzktCollectionService.getCollectionByOwner(owner, continuation, size)
+        }
         val items = collectionControllerApi.searchNftCollectionsByOwner(
             owner,
             size,

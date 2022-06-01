@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.search.indexer.repository
 
+import com.rarible.protocol.union.core.es.ElasticsearchTestBootstrapper
 import com.rarible.protocol.union.core.model.EsCollectionGenericFilter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
@@ -23,9 +24,12 @@ class EsCollectionQueryBuilderServiceIntegrationTest {
     @Autowired
     protected lateinit var repository: EsCollectionRepository
 
+    @Autowired
+    private lateinit var elasticsearchTestBootstrapper: ElasticsearchTestBootstrapper
+
     @BeforeEach
     fun setUp() = runBlocking<Unit> {
-        repository.deleteAll()
+        elasticsearchTestBootstrapper.bootstrap()
     }
 
     @Test

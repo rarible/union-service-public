@@ -3,8 +3,8 @@ package com.rarible.protocol.union.search.indexer.metrics
 import com.rarible.core.daemon.sequential.ConsumerBatchEventHandler
 import com.rarible.protocol.union.core.model.elasticsearch.EsEntity
 import com.rarible.protocol.union.dto.ActivityDto
-import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.dto.CollectionEventDto
+import com.rarible.protocol.union.dto.ItemEventDto
 import org.springframework.stereotype.Component
 import java.time.Instant
 
@@ -29,6 +29,16 @@ class MetricConsumerBatchEventHandlerFactory(
             esEntity = EsEntity.COLLECTION,
             eventTimestamp = { Instant.now() },
             eventBlockchain = { event -> event.collectionId.blockchain }
+        )
+    }
+
+    fun wrapItem(handler: ConsumerBatchEventHandler<ItemEventDto>): ConsumerBatchEventHandler<ItemEventDto> {
+        return MetricsConsumerBatchEventHandlerWrapper(
+            metricFactory = metricFactory,
+            delegate = handler,
+            esEntity = EsEntity.ITEM,
+            eventTimestamp = { Instant.now() },
+            eventBlockchain = { event -> event.itemId.blockchain }
         )
     }
 }

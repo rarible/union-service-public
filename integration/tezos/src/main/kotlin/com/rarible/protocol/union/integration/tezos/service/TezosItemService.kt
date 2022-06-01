@@ -59,14 +59,18 @@ open class TezosItemService(
     }
 
     override suspend fun getItemRoyaltiesById(itemId: String): List<RoyaltyDto> {
-        try {
-            val royalties = itemControllerApi.getNftItemRoyalties(itemId).awaitFirst()
-            return royalties.royalties.map { TezosItemConverter.toRoyalty(it, blockchain) }
-        } catch (e: WebClientResponseException) {
-            if (e.statusCode == HttpStatus.NOT_FOUND) {
-                return emptyList()
+        if (tzktItemService.enabled()) {
+            return tzktItemService.getItemRoyaltiesById(itemId)
+        } else {
+            try {
+                val royalties = itemControllerApi.getNftItemRoyalties(itemId).awaitFirst()
+                return royalties.royalties.map { TezosItemConverter.toRoyalty(it, blockchain) }
+            } catch (e: WebClientResponseException) {
+                if (e.statusCode == HttpStatus.NOT_FOUND) {
+                    return emptyList()
+                }
+                throw e
             }
-            throw e
         }
     }
 
@@ -131,5 +135,10 @@ open class TezosItemService(
         }
         // Not implemented in legacy indexer
         return emptyList()
+    }
+
+    override suspend fun getItemCollectionId(itemId: String): String? {
+        // TODO is validation possible here?
+        return itemId.substringBefore(":")
     }
 }

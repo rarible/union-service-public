@@ -106,4 +106,9 @@ open class FlowItemService(
         return items.map { FlowItemConverter.convert(it, blockchain) }
     }
 
+    override suspend fun getItemCollectionId(itemId: String): String {
+        // TODO is validation possible here?
+        return itemId.substringBefore(":")
+    }
+
 }

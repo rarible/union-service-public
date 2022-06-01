@@ -7,11 +7,13 @@ import com.rarible.protocol.union.core.exception.UnionValidationException
 import com.rarible.protocol.union.core.service.SignatureService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktSignatureService
 import kotlinx.coroutines.reactive.awaitFirst
 
 @CaptureSpan(type = "blockchain")
 open class TezosSignatureService(
-    private val signatureControllerApi: OrderSignatureControllerApi
+    private val signatureControllerApi: OrderSignatureControllerApi,
+    private val tzktSignatureService: TzktSignatureService
 ) : AbstractBlockchainService(BlockchainDto.TEZOS), SignatureService {
 
     override suspend fun validate(
@@ -24,18 +26,22 @@ open class TezosSignatureService(
             throw UnionValidationException("Public key is not specified")
         }
 
-        val pair = publicKey.split('_')
-        val edpk = pair[0]
-        // Do not trim prefix, Tezos is sensitive for leading/trailing spaces in prefix
-        val prefix = pair.getOrNull(1)
+        if (tzktSignatureService.enabled()) {
+            return tzktSignatureService.validate(publicKey, signature, message)
+        } else {
+            val pair = publicKey.split('_')
+            val edpk = pair[0]
+            // Do not trim prefix, Tezos is sensitive for leading/trailing spaces in prefix
+            val prefix = pair.getOrNull(1)
 
-        val tezosForm = SignatureValidationFormDto(
-            address = signer,
-            edpk = edpk,
-            signature = signature,
-            message = message,
-            prefix = prefix
-        )
-        return signatureControllerApi.validate(tezosForm).awaitFirst()
+            val tezosForm = SignatureValidationFormDto(
+                address = signer,
+                edpk = edpk,
+                signature = signature,
+                message = message,
+                prefix = prefix
+            )
+            return signatureControllerApi.validate(tezosForm).awaitFirst()
+        }
     }
 }

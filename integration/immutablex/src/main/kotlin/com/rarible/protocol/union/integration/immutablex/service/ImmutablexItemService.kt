@@ -90,4 +90,9 @@ class ImmutablexItemService(
     override suspend fun getItemsByIds(itemIds: List<String>): List<UnionItem> {
         return client.getAssetsByIds(itemIds).map { converter.convert(it, blockchain) }
     }
+
+    override suspend fun getItemCollectionId(itemId: String): String {
+        // TODO is validation possible here?
+        return itemId.substringBefore(":")
+    }
 }

@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.search.indexer.repository
 
+import com.rarible.protocol.union.core.es.ElasticsearchTestBootstrapper
 import com.rarible.protocol.union.core.model.EsActivityCursor
 import com.rarible.protocol.union.core.model.EsActivitySort
 import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
@@ -32,9 +33,12 @@ internal class EsActivityQueryCursorServiceIntegrationTest {
     @Autowired
     private lateinit var service: EsActivityQueryCursorService
 
+    @Autowired
+    private lateinit var elasticsearchTestBootstrapper: ElasticsearchTestBootstrapper
+
     @BeforeEach
     fun setUp() = runBlocking {
-        repository.deleteAll()
+        elasticsearchTestBootstrapper.bootstrap()
     }
 
     @ParameterizedTest

@@ -198,7 +198,7 @@ class SolanaActivityConverter(
                     date = source.date,
                     from = UnionAddressConverter.convert(blockchain, source.from),
                     owner = UnionAddressConverter.convert(blockchain, source.owner),
-                    itemId = source.tokenAddress?.let { ItemIdDto(blockchain, it) }, // TODO SOLANA
+                    itemId = ItemIdDto(blockchain, source.tokenAddress),
                     value = source.value,
                     purchase = source.purchase,
                     transactionHash = source.blockchainInfo.transactionHash,

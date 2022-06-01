@@ -67,4 +67,9 @@ class DummyItemService(
     override suspend fun getItemsByIds(itemIds: List<String>): List<UnionItem> {
         return emptyList()
     }
+
+    override suspend fun getItemCollectionId(itemId: String): String? {
+        return null
+    }
+
 }

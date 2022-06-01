@@ -37,7 +37,7 @@ class TezosConsumerConfiguration(
     properties: TezosIntegrationProperties,
     @Value("\${rarible.core.client.k8s:false}")
     private val k8s: Boolean,
-    @Value("\${integration.tezos.dipdup.enable:false}")
+    @Value("\${integration.tezos.dipdup.enabled:false}")
     private val isDipDupEnabled: Boolean,
     private val consumerFactory: ConsumerFactory
 ) {
