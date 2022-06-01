@@ -29,7 +29,6 @@ class ReindexService(
     private val searchReindexProperties: SearchReindexProperties,
     private val taskRepository: TaskRepository,
     private val paramFactory: ParamFactory,
-    private val taskService: TaskService
 ) : ReindexSchedulingService {
 
     override suspend fun scheduleReindex(
