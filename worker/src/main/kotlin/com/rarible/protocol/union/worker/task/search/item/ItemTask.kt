@@ -7,18 +7,21 @@ import com.rarible.protocol.union.core.model.EsItem
 import com.rarible.protocol.union.dto.continuation.CombinedContinuation
 import com.rarible.protocol.union.dto.continuation.page.ArgSlice
 import com.rarible.protocol.union.dto.continuation.page.PageSize
-import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.repository.search.EsItemRepository
 import com.rarible.protocol.union.worker.config.CollectionReindexProperties
 import com.rarible.protocol.union.worker.metrics.SearchTaskMetricFactory
+import com.rarible.protocol.union.worker.task.search.ParamFactory
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.reactor.awaitSingle
+import org.springframework.stereotype.Component
 
+@Component
 class ItemTask(
     private val properties: CollectionReindexProperties,
     private val client: ItemControllerApi,
+    private val paramFactory: ParamFactory,
     private val repository: EsItemRepository,
     private val searchTaskMetricFactory: SearchTaskMetricFactory
 ) : TaskHandler<String> {
@@ -27,12 +30,12 @@ class ItemTask(
         get() = EsItem.ENTITY_DEFINITION.reindexTask
 
     override suspend fun isAbleToRun(param: String): Boolean {
-        val blockchain = IdParser.parseBlockchain(param)
+        val blockchain = paramFactory.parse<ItemTaskParam>(param).blockchain
         return properties.enabled && properties.blockchains.single { it.blockchain == blockchain }.enabled
     }
 
     override fun runLongTask(from: String?, param: String): Flow<String> {
-        val blockchain = IdParser.parseBlockchain(param)
+        val blockchain = paramFactory.parse<ItemTaskParam>(param).blockchain
         val counter = searchTaskMetricFactory.createReindexItemCounter(blockchain)
         return if (from == "") {
             emptyFlow()

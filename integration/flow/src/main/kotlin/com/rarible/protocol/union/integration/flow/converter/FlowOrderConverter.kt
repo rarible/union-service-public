@@ -18,6 +18,7 @@ import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
+import java.math.BigDecimal
 
 @Component
 class FlowOrderConverter(
@@ -67,7 +68,7 @@ class FlowOrderConverter(
             fill = order.fill,
             startedAt = order.start,
             endedAt = order.end,
-            makeStock = order.makeStock.toBigDecimal(),
+            makeStock = makeStock(order.makeStock.toBigDecimal()),
             cancelled = order.cancelled,
             createdAt = order.createdAt,
             lastUpdatedAt = order.lastUpdateAt,
@@ -78,6 +79,10 @@ class FlowOrderConverter(
             data = convert(order.data, blockchain),
             salt = ""// Not supported on Flow
         )
+    }
+
+    private fun makeStock(intVal: BigDecimal): BigDecimal {
+        return intVal.movePointLeft(18).stripTrailingZeros() //convert to regular decimal value
     }
 
     suspend fun convert(order: FlowOrdersPaginationDto, blockchain: BlockchainDto): Slice<OrderDto> {
