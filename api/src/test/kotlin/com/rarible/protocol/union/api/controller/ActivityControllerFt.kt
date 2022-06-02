@@ -385,6 +385,38 @@ class ActivityControllerFt : AbstractIntegrationTest() {
     }
 
     @Test
+    fun `get activities by multiple collections`() = runBlocking<Unit> {
+        val types = ActivityTypeDto.values().toList()
+        val flowCollectionId = randomFlowAddress()
+        val activity = randomFlowCancelListActivityDto()
+
+        coEvery {
+            testFlowActivityApi.getNftOrderActivitiesByCollection(
+                types.map { it.name },
+                flowCollectionId.value,
+                continuation,
+                maxSize,
+                any()
+            )
+        } returns FlowActivitiesDto(1, null, listOf(activity)).toMono()
+
+        val ethCollectionId = CollectionIdDto(BlockchainDto.ETHEREUM, randomEthAddress())
+        val orderActivity = randomEthOrderBidActivity()
+
+        coEvery {
+            testEthereumActivityOrderApi.getOrderActivities(
+                any(), isNull(), eq(defaultSize), ActivitySortDto.LATEST_FIRST
+            )
+        } returns OrderActivitiesDto(null, listOf(orderActivity)).toMono()
+
+        val activities = activityControllerApi.getActivitiesByCollection(
+            types, listOf(flowCollectionId.fullId(), ethCollectionId.fullId()), continuation, null, 100000, sort, null,
+        ).awaitFirst()
+
+        assertThat(activities.activities).hasSize(2)
+    }
+
+    @Test
     fun `get activities by item - ethereum`() = runBlocking<Unit> {
         // All activity types specified here, so both Order and Nft indexer should be requested for activities
         val types = ActivityTypeDto.values().toList()
