@@ -4,6 +4,7 @@ import com.rarible.core.task.EnableRaribleTask
 import com.rarible.protocol.solana.api.client.autoconfigure.SolanaApiClientAutoConfiguration
 import com.rarible.protocol.union.api.client.ActivityControllerApi
 import com.rarible.protocol.union.api.client.CollectionControllerApi
+import com.rarible.protocol.union.api.client.ItemControllerApi
 import com.rarible.protocol.union.api.client.UnionApiClientFactory
 import com.rarible.protocol.union.core.elasticsearch.EsNameResolver
 import com.rarible.protocol.union.core.elasticsearch.IndexService
@@ -51,6 +52,11 @@ class WorkerConfiguration(
     @Bean
     fun activityClient(factory: UnionApiClientFactory): ActivityControllerApi {
         return factory.createActivityApiClient()
+    }
+
+    @Bean
+    fun itemClient(factory: UnionApiClientFactory): ItemControllerApi {
+        return factory.createItemApiClient()
     }
 
     @Bean
