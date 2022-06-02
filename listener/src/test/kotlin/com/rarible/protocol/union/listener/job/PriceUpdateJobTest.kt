@@ -23,7 +23,6 @@ import com.rarible.protocol.union.listener.test.AbstractIntegrationTest
 import com.rarible.protocol.union.listener.test.IntegrationTest
 import io.mockk.clearMocks
 import io.mockk.coEvery
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -55,7 +54,7 @@ internal class PriceUpdateJobTest : AbstractIntegrationTest() {
     private lateinit var ownershipRepository: OwnershipRepository
 
     @Autowired
-    private lateinit var priceUpdateJob: BestOrderCheckJob
+    private lateinit var priceUpdateJob: BestOrderCheckJobHandler
 
     @Autowired
     lateinit var ethOrderConverter: EthOrderConverter
@@ -100,7 +99,7 @@ internal class PriceUpdateJobTest : AbstractIntegrationTest() {
         coEvery { testEthereumOrderApi.getOrderByHash(any()) } returns randomEthLegacySellOrderDto().toMono()
 
         itemRepository.save(shortItem)
-        priceUpdateJob.updateBestOrderPrice()
+        priceUpdateJob.handle()
 
         val updatedItem = itemService.get(shortItem.id)
         assertThat(updatedItem).isNotNull
@@ -139,7 +138,7 @@ internal class PriceUpdateJobTest : AbstractIntegrationTest() {
         } returns AuctionsPaginationDto(emptyList(), null).toMono()
 
         ownershipRepository.save(shortOwnership)
-        priceUpdateJob.updateBestOrderPrice()
+        priceUpdateJob.handle()
 
         val updatedItem = ownershipService.get(shortOwnership.id)
         assertThat(updatedItem).isNotNull

@@ -29,7 +29,7 @@ class ReconciliationMarkJobIt : AbstractIntegrationTest() {
 
     private val refreshService: EnrichmentRefreshService = mockk()
 
-    lateinit var job: ReconciliationMarkJob
+    lateinit var jobHandler: ReconciliationMarkJobHandler
 
     private val itemEvent: ItemEventDto = mockk()
 
@@ -37,7 +37,7 @@ class ReconciliationMarkJobIt : AbstractIntegrationTest() {
 
     @BeforeEach
     fun beforeEach() {
-        job = ReconciliationMarkJob(
+        jobHandler = ReconciliationMarkJobHandler(
             itemReconciliationMarkRepository,
             refreshService,
             listOf(BlockchainDto.ETHEREUM)
@@ -55,7 +55,7 @@ class ReconciliationMarkJobIt : AbstractIntegrationTest() {
         assertThat(saved).hasSize(collectionMarks.size)
         coEvery { refreshService.reconcileCollection(any()) } returns collectionEvent
 
-        job.reconcileMarkedRecords()
+        jobHandler.handle()
         val remain = itemReconciliationMarkRepository.findByType(ReconciliationMarkType.COLLECTION, 100)
 
         coVerify(exactly = collectionMarks.size) { refreshService.reconcileCollection(any()) }
@@ -72,7 +72,7 @@ class ReconciliationMarkJobIt : AbstractIntegrationTest() {
         coEvery { refreshService.reconcileCollection(any()) } returns collectionEvent
         coEvery { refreshService.reconcileCollection(failedCollectionId) } throws RuntimeException()
 
-        job.reconcileMarkedRecords()
+        jobHandler.handle()
 
         // 1 additional call for single retry for one corrupted item
         ///coVerify(exactly = collectionMarks.size + 1) { refreshService.reconcileCollection(any()) }
@@ -92,7 +92,7 @@ class ReconciliationMarkJobIt : AbstractIntegrationTest() {
         assertThat(saved).hasSize(itemMarks.size)
         coEvery { refreshService.reconcileItem(any(), any()) } returns itemEvent
 
-        job.reconcileMarkedRecords()
+        jobHandler.handle()
         val remain = itemReconciliationMarkRepository.findByType(ReconciliationMarkType.ITEM, 100)
 
         coVerify(exactly = itemMarks.size) { refreshService.reconcileItem(any(), false) }
@@ -109,7 +109,7 @@ class ReconciliationMarkJobIt : AbstractIntegrationTest() {
         coEvery { refreshService.reconcileItem(any(), any()) } returns itemEvent
         coEvery { refreshService.reconcileItem(failedItemId, false) } throws RuntimeException()
 
-        job.reconcileMarkedRecords()
+        jobHandler.handle()
 
         // 1 additional call for single retry for one corrupted item
         coVerify(exactly = itemMarks.size + 1) { refreshService.reconcileItem(any(), false) }
