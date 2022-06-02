@@ -45,7 +45,7 @@ handler:
 listener:
   consumer:
     broker-replica-set: ${kafka.hosts}
-    worker-count: 4
+    worker-count: 10
 
 integration:
   ethereum:
