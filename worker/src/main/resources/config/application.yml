@@ -138,6 +138,9 @@ worker:
     collection:
       enabled: false
       blockchains:
+    item:
+      enabled: false
+      blockchains:
     ownership:
       enabled: false
       blockchains:
