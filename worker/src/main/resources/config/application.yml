@@ -139,8 +139,20 @@ worker:
       enabled: false
       blockchains:
     item:
-      enabled: false
+      enabled: true
       blockchains:
+        - blockchain: ETHEREUM
+          enabled: true
+        - blockchain: POLYGON
+          enabled: true
+        - blockchain: FLOW
+          enabled: true
+        - blockchain: TEZOS
+          enabled: true
+        - blockchain: SOLANA
+          enabled: true
+        - blockchain: IMMUTABLEX
+          enabled: false
     ownership:
       enabled: false
       blockchains:
