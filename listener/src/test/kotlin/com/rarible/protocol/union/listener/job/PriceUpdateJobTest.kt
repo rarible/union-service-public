@@ -23,7 +23,6 @@ import com.rarible.protocol.union.listener.test.AbstractIntegrationTest
 import com.rarible.protocol.union.listener.test.IntegrationTest
 import io.mockk.clearMocks
 import io.mockk.coEvery
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -55,7 +54,7 @@ internal class PriceUpdateJobTest : AbstractIntegrationTest() {
     private lateinit var ownershipRepository: OwnershipRepository
 
     @Autowired
-    private lateinit var priceUpdateJob: BestOrderCheckJob
+    private lateinit var priceUpdateJob: BestOrderCheckJobHandler
 
     @Autowired
     lateinit var ethOrderConverter: EthOrderConverter
