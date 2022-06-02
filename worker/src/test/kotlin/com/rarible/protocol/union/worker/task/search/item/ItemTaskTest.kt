@@ -1,5 +1,7 @@
 package com.rarible.protocol.union.worker.task.search.item
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.rarible.core.test.data.randomAddress
 import com.rarible.core.test.data.randomBigInt
 import com.rarible.protocol.union.api.client.ItemControllerApi
@@ -14,6 +16,7 @@ import com.rarible.protocol.union.enrichment.repository.search.EsItemRepository
 import com.rarible.protocol.union.worker.config.BlockchainReindexProperties
 import com.rarible.protocol.union.worker.config.CollectionReindexProperties
 import com.rarible.protocol.union.worker.metrics.SearchTaskMetricFactory
+import com.rarible.protocol.union.worker.task.search.ParamFactory
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import io.mockk.coEvery
 import io.mockk.coVerifyAll
@@ -99,7 +102,7 @@ internal class ItemTaskTest {
                 CollectionReindexProperties(
                     enabled = true,
                     blockchains = listOf(BlockchainReindexProperties(enabled = true, BlockchainDto.ETHEREUM))
-                ), client, repo, searchTaskMetricFactory
+                ), client, ParamFactory(jacksonObjectMapper().registerKotlinModule()), repo, searchTaskMetricFactory
             )
             task.runLongTask(null, "ETHEREUM").toList()
 
