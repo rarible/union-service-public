@@ -94,6 +94,8 @@ internal class ItemTaskTest {
         every { metrics } returns mockk { every { rootPath } returns "protocol.union.worker" }
     })
 
+    private val paramFactory = ParamFactory(jacksonObjectMapper().registerKotlinModule())
+
     @Test
     internal fun `should start first task`() {
         runBlocking {
@@ -102,9 +104,15 @@ internal class ItemTaskTest {
                 CollectionReindexProperties(
                     enabled = true,
                     blockchains = listOf(BlockchainReindexProperties(enabled = true, BlockchainDto.ETHEREUM))
-                ), client, ParamFactory(jacksonObjectMapper().registerKotlinModule()), repo, searchTaskMetricFactory
+                ), client, paramFactory, repo, searchTaskMetricFactory
             )
-            task.runLongTask(null, "ETHEREUM").toList()
+            task.runLongTask(
+                null, paramFactory.toString(
+                    ItemTaskParam(
+                        blockchain = BlockchainDto.ETHEREUM, index = "test_index"
+                    )
+                )
+            ).toList()
 
             coVerifyAll {
                 client.getAllItems(
