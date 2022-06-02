@@ -129,9 +129,9 @@ fun randomUnionMetaAttribute(): MetaAttributeDto {
     )
 }
 
-fun randomUnionContent(properties: UnionMetaContentProperties): UnionMetaContent {
+fun randomUnionContent(properties: UnionMetaContentProperties? = null): UnionMetaContent {
     return UnionMetaContent(
-        url = randomString(),
+        url = "http://localhost:8080/image/${randomString()}",
         fileName = "${randomString()}.png}",
         representation = MetaContentDto.Representation.ORIGINAL,
         properties = properties

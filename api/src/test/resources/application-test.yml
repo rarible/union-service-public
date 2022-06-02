@@ -41,6 +41,10 @@ integration:
   solana:
     enabled: true
 
+meta:
+  embedded:
+    publicUrl: "http://localhost:8080/content/embedded"
+
 common:
   currency:
     refresh:

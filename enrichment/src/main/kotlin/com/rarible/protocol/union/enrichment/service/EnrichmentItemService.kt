@@ -17,6 +17,7 @@ import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.enrichment.converter.EnrichedItemConverter
+import com.rarible.protocol.union.enrichment.meta.UnionContentMetaService
 import com.rarible.protocol.union.enrichment.meta.UnionMetaService
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
@@ -39,6 +40,7 @@ class EnrichmentItemService(
     private val enrichmentOrderService: EnrichmentOrderService,
     private val enrichmentAuctionService: EnrichmentAuctionService,
     private val unionMetaService: UnionMetaService,
+    private val unionMetaContentService: UnionContentMetaService,
     private val originService: OriginService
 ) {
 
@@ -139,7 +141,7 @@ class EnrichmentItemService(
             item = fetchedItem.await(),
             shortItem = shortItem,
             // replacing inner IPFS urls with public urls
-            meta = unionMetaService.exposePublicIpfsUrls(meta = itemMeta.await(), itemId.fullId()),
+            meta = unionMetaContentService.exposePublicUrls(itemMeta.await(), itemId),
             orders = bestOrders,
             auctions = auctionsData.await()
         )

@@ -10,12 +10,16 @@ spring:
 
       client:
         reactive:
-          endpoints:  ${elasticsearch.api-nodes}
+          endpoints: ${elasticsearch.api-nodes}
           max-in-memory-size: 4194304
 
   elasticsearch:
     rest:
       uris: ${elasticsearch.api-nodes}
+
+meta:
+  embedded:
+    publicUrl: "http://localhost:8080/content/embedded"
 
 logging:
   level:
