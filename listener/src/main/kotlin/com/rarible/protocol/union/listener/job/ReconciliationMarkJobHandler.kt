@@ -18,7 +18,6 @@ import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
 
-@Component
 class ReconciliationMarkJob(
     private val handler: ReconciliationMarkJobHandler,
     properties: UnionListenerProperties,

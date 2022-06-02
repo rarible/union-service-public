@@ -34,10 +34,12 @@ class ReconciliationProperties(
 )
 
 class ReconcileMarksProperties(
+    val enabled: Boolean = true,
     val rate: Duration = Duration.ofSeconds(15)
 )
 
 class PriceUpdateProperties(
+    val enabled: Boolean = true,
     val rate: Duration = Duration.ofMinutes(5)
 )
 

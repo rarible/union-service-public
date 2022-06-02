@@ -18,7 +18,6 @@ import org.springframework.dao.OptimisticLockingFailureException
 import org.springframework.stereotype.Component
 import kotlinx.coroutines.time.delay
 
-@Component
 class BestOrderCheckJob(
     private val handler: BestOrderCheckJobHandler,
     properties: UnionListenerProperties,

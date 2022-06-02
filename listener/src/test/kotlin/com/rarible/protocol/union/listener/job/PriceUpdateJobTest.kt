@@ -99,7 +99,7 @@ internal class PriceUpdateJobTest : AbstractIntegrationTest() {
         coEvery { testEthereumOrderApi.getOrderByHash(any()) } returns randomEthLegacySellOrderDto().toMono()
 
         itemRepository.save(shortItem)
-        priceUpdateJob.updateBestOrderPrice()
+        priceUpdateJob.handle()
 
         val updatedItem = itemService.get(shortItem.id)
         assertThat(updatedItem).isNotNull
@@ -138,7 +138,7 @@ internal class PriceUpdateJobTest : AbstractIntegrationTest() {
         } returns AuctionsPaginationDto(emptyList(), null).toMono()
 
         ownershipRepository.save(shortOwnership)
-        priceUpdateJob.updateBestOrderPrice()
+        priceUpdateJob.handle()
 
         val updatedItem = ownershipService.get(shortOwnership.id)
         assertThat(updatedItem).isNotNull
