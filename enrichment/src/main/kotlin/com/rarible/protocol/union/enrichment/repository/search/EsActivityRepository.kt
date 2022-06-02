@@ -13,10 +13,14 @@ import com.rarible.protocol.union.dto.continuation.page.PageSize
 import com.rarible.protocol.union.enrichment.repository.search.internal.EsActivityQueryBuilderService
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
+import org.elasticsearch.action.admin.indices.flush.FlushRequest
 import org.elasticsearch.action.admin.indices.refresh.RefreshRequest
+import org.elasticsearch.index.query.MatchQueryBuilder
+import org.elasticsearch.index.query.TermsQueryBuilder
 import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery
+import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder
 import org.springframework.data.elasticsearch.core.query.Query
 import org.springframework.stereotype.Component
 import java.io.IOException
@@ -55,6 +59,17 @@ class EsActivityRepository(
             .saveAll(esActivities, index)
             .collectList()
             .awaitFirst()
+    }
+
+    suspend fun delete(activityIds: List<String>): Long? {
+        val query = NativeSearchQueryBuilder()
+            .withQuery(TermsQueryBuilder(EsActivity::activityId.name, activityIds))
+            .build()
+        return esOperations.delete(
+            query,
+            Any::class.java,
+            entityDefinition.writeIndexCoordinates
+        ).awaitFirstOrNull()?.deleted
     }
 
     /**
