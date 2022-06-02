@@ -37,7 +37,6 @@ class BestOrderCheckJob(
     }
 }
 
-
 @Component
 class BestOrderCheckJobHandler(
     private val itemRepository: ItemRepository,

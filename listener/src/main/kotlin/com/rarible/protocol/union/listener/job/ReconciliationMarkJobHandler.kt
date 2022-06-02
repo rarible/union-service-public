@@ -37,7 +37,6 @@ class ReconciliationMarkJob(
     }
 }
 
-
 @Component
 class ReconciliationMarkJobHandler(
     private val reconciliationMarkRepository: ReconciliationMarkRepository,
