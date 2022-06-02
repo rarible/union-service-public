@@ -8,7 +8,7 @@ import com.rarible.protocol.union.dto.continuation.CombinedContinuation
 import com.rarible.protocol.union.dto.continuation.page.ArgSlice
 import com.rarible.protocol.union.dto.continuation.page.PageSize
 import com.rarible.protocol.union.enrichment.repository.search.EsItemRepository
-import com.rarible.protocol.union.worker.config.CollectionReindexProperties
+import com.rarible.protocol.union.worker.config.ItemReindexProperties
 import com.rarible.protocol.union.worker.metrics.SearchTaskMetricFactory
 import com.rarible.protocol.union.worker.task.search.ParamFactory
 import kotlinx.coroutines.flow.Flow
@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class ItemTask(
-    private val properties: CollectionReindexProperties,
+    private val properties: ItemReindexProperties,
     private val client: ItemControllerApi,
     private val paramFactory: ParamFactory,
     private val repository: EsItemRepository,
