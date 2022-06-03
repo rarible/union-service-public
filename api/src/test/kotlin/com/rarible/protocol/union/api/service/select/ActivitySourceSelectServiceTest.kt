@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.api.service.select
 
-import com.rarible.protocol.union.enrichment.service.query.activity.ActivityApiMergeService
 import com.rarible.protocol.union.api.service.elastic.ActivityElasticService
 import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.dto.ActivitiesDto
@@ -8,6 +7,7 @@ import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
+import com.rarible.protocol.union.enrichment.service.query.activity.ActivityApiMergeService
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.confirmVerified
@@ -18,8 +18,6 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
@@ -128,24 +126,24 @@ class ActivitySourceSelectServiceTest {
         // given
         every { featureFlagsProperties.enableActivityQueriesToElasticSearch } returns elasticFeatureFlag
         coEvery {
-            activityElasticService.getActivitiesByCollection(type, collection, continuation, cursor, size, sort)
+            activityElasticService.getActivitiesByCollection(type, listOf(collection), continuation, cursor, size, sort)
         } returns elasticResponse
         coEvery {
-            activityApiMergeService.getActivitiesByCollection(type, collection, continuation, cursor, size, sort)
+            activityApiMergeService.getActivitiesByCollection(type, listOf(collection), continuation, cursor, size, sort)
         } returns apiMergeResponse
 
         // when
-        val actual = service.getActivitiesByCollection(type, collection, continuation, cursor, size, sort, overrideSelect)
+        val actual = service.getActivitiesByCollection(type, listOf(collection), continuation, cursor, size, sort, overrideSelect)
 
         // then
         assertThat(actual).isEqualTo(expectedResponse)
         if (expectedResponse == elasticResponse) {
             coVerify {
-                activityElasticService.getActivitiesByCollection(type, collection, continuation, cursor, size, sort)
+                activityElasticService.getActivitiesByCollection(type, listOf(collection), continuation, cursor, size, sort)
             }
         } else {
             coVerify {
-                activityApiMergeService.getActivitiesByCollection(type, collection, continuation, cursor, size, sort)
+                activityApiMergeService.getActivitiesByCollection(type, listOf(collection), continuation, cursor, size, sort)
             }
         }
         confirmVerified(activityApiMergeService, activityElasticService)
