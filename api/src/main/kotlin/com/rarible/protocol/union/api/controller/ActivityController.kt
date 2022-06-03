@@ -3,6 +3,7 @@ package com.rarible.protocol.union.api.controller
 import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.api.service.select.ActivitySourceSelectService
 import com.rarible.protocol.union.api.service.select.OverrideSelect
+import com.rarible.protocol.union.core.exception.UnionException
 import com.rarible.protocol.union.dto.ActivitiesDto
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
@@ -60,6 +61,7 @@ class ActivityController(
         newSearchEngine: Boolean?
     ): ResponseEntity<ActivitiesDto> {
         val overrideSelect = if (newSearchEngine == true) OverrideSelect.ELASTIC else null
+        if (collection.isEmpty()) throw UnionException("No any collection query parameter")
         val result = activitySourceSelector.getActivitiesByCollection(type, collection, continuation, cursor, size, sort, overrideSelect)
         return ResponseEntity.ok(result)
     }
