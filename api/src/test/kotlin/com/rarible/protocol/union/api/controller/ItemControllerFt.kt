@@ -53,6 +53,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.verify
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.runBlocking
@@ -104,6 +105,8 @@ class ItemControllerFt : AbstractIntegrationTest() {
         val ethShortItem = ShortItemConverter.convert(ethUnionItem)
             .copy(bestSellOrder = ShortOrderConverter.convert(ethUnionOrder))
         enrichmentItemService.save(ethShortItem)
+
+        delay(1000)
 
         ethereumOrderControllerApiMock.mockGetById(ethOrder)
         ethereumItemControllerApiMock.mockGetNftItemById(ethItemId, ethItem)
