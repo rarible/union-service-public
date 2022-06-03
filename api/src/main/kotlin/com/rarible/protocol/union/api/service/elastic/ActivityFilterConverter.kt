@@ -2,6 +2,7 @@ package com.rarible.protocol.union.api.service.elastic
 
 import com.rarible.protocol.union.api.service.UserActivityTypeConverter
 import com.rarible.protocol.union.core.FeatureFlagsProperties
+import com.rarible.protocol.union.core.model.ActivityByCollectionFilter
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
@@ -37,20 +38,13 @@ class ActivityFilterConverter(
         collections: List<String>,
         cursor: String?,
     ): ElasticActivityFilter {
-        val (blockchains, values) = collections
-            .map {
-                IdParser.parseCollectionId(it).let {c ->
-                    c.blockchain to c.value
-                }
-            }
-            .unzip()
+        val cols = collections.map(IdParser::parseCollectionId)
 
         return when (featureFlagsProperties.enableActivityQueriesPerTypeFilter) {
             true -> TODO("To be implemented under ALPHA-276 Epic")
-            else -> ElasticActivityQueryGenericFilter(
-                blockchains = blockchains.toSet(),
+            else -> ActivityByCollectionFilter(
                 activityTypes = type.toSet(),
-                collections = values.toSet(),
+                collections = cols,
                 cursor = cursor,
             )
         }
