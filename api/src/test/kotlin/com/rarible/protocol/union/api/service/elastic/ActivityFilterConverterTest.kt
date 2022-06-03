@@ -2,10 +2,12 @@ package com.rarible.protocol.union.api.service.elastic
 
 import com.rarible.protocol.union.api.service.UserActivityTypeConverter
 import com.rarible.protocol.union.core.FeatureFlagsProperties
+import com.rarible.protocol.union.core.model.ActivityByCollectionFilter
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
 import com.rarible.protocol.union.core.model.ElasticActivityQueryGenericFilter
+import com.rarible.protocol.union.dto.CollectionIdDto
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
@@ -94,10 +96,9 @@ class ActivityFilterConverterTest {
             assertThat(actual).usingRecursiveComparison()
                 .ignoringFields("activityTypes", "collections", "blockchains", "cursor")
                 .isEqualTo(emptyGenericFilter)
-            actual as ElasticActivityQueryGenericFilter
+            actual as ActivityByCollectionFilter
             assertThat(actual.activityTypes).containsExactlyInAnyOrder(*types.toTypedArray())
-            assertThat(actual.collections).containsExactly("0x00000012345")
-            assertThat(actual.blockchains).containsExactly(BlockchainDto.POLYGON)
+            assertThat(actual.collections).containsExactly(CollectionIdDto(BlockchainDto.POLYGON, "0x00000012345"))
             assertThat(actual.cursor).isEqualTo(cursor)
         }
     }
