@@ -17,6 +17,7 @@ import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.SyncSortDto
+import com.rarible.protocol.union.dto.SyncTypeDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.integration.solana.converter.SolanaActivityConverter
@@ -48,7 +49,8 @@ open class SolanaActivityService(
     override suspend fun getAllActivitiesSync(
         continuation: String?,
         size: Int,
-        sort: SyncSortDto?
+        sort: SyncSortDto?,
+        type: SyncTypeDto?
     ): Slice<ActivityDto> = Slice.empty()
 
     override suspend fun getActivitiesByCollection(

@@ -49,12 +49,14 @@ import com.rarible.protocol.union.dto.ActivityTypeDto.SELL
 import com.rarible.protocol.union.dto.ActivityTypeDto.TRANSFER
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.SyncSortDto
+import com.rarible.protocol.union.dto.SyncTypeDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
 import com.rarible.protocol.union.dto.continuation.ActivityContinuation
 import com.rarible.protocol.union.dto.continuation.page.Paging
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.integration.ethereum.converter.EthActivityConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.reactive.awaitFirst
@@ -98,8 +100,9 @@ open class EthActivityService(
     override suspend fun getAllActivitiesSync(
         continuation: String?,
         size: Int,
-        sort: SyncSortDto?
-    ) : Slice<ActivityDto> = coroutineScope {
+        sort: SyncSortDto?,
+        type: SyncTypeDto?
+    ): Slice<ActivityDto> = coroutineScope {
         val continuationFactory = when (sort) {
             SyncSortDto.DB_UPDATE_DESC -> ActivityContinuation.ByLastUpdatedSyncAndIdDesc
             SyncSortDto.DB_UPDATE_ASC, null -> ActivityContinuation.ByLastUpdatedSyncAndIdAsc
@@ -107,23 +110,69 @@ open class EthActivityService(
 
         val ethSort = EthConverter.convert(sort)
 
-        val itemReq = async { activityItemControllerApi.getNftActivitiesSync(continuation, size, ethSort).awaitFirst() }
-        val orderReq = async { activityOrderControllerApi.getOrderActivitiesSync(continuation, size, ethSort).awaitFirst() }
-        val auctionReq = async { activityAuctionControllerApi.getAuctionActivitiesSync(continuation, size, ethSort).awaitFirst() }
-
-        val itemsPage = itemReq.await()
-        val ordersPage = orderReq.await()
-        val auctionsPage = auctionReq.await()
-
-        val itemActivities = itemsPage.items.map { ethActivityConverter.convert(it, blockchain) }
-        val orderActivities = ordersPage.items.map { ethActivityConverter.convert(it, blockchain) }
-        val auctionActivities = auctionsPage.items.map { ethActivityConverter.convert(it, blockchain) }
-        val allActivities = itemActivities + orderActivities + auctionActivities
+        val allActivities = when (type) {
+            SyncTypeDto.NFT -> itemActivitiesAsync(continuation, size, ethSort).await()
+            SyncTypeDto.ORDER -> orderActivitiesAsync(continuation, size, ethSort).await()
+            SyncTypeDto.AUCTION -> auctionActivitiesAsync(continuation, size, ethSort).await()
+            else -> allActivities(continuation, size, ethSort)
+        }
 
         Paging(
             continuationFactory,
             allActivities
         ).getSlice(size)
+    }
+
+    private suspend fun allActivities(
+        continuation: String?,
+        size: Int,
+        ethSort: com.rarible.protocol.dto.SyncSortDto?
+    ): List<ActivityDto> = coroutineScope {
+        val itemActivities = itemActivitiesAsync(continuation, size, ethSort)
+        val orderActivities = orderActivitiesAsync(continuation, size, ethSort)
+        val auctionActivities = auctionActivitiesAsync(continuation, size, ethSort)
+
+        itemActivities.await() + orderActivities.await() + auctionActivities.await()
+    }
+
+    private suspend fun itemActivitiesAsync(
+        continuation: String?,
+        size: Int,
+        ethSort: com.rarible.protocol.dto.SyncSortDto?
+    ): Deferred<List<ActivityDto>> = coroutineScope {
+        async {
+            val itemsDto = activityItemControllerApi.getNftActivitiesSync(continuation, size, ethSort).awaitFirst()
+            itemsDto.items.map {
+                ethActivityConverter.convert(it, blockchain)
+            }
+        }
+    }
+
+    private suspend fun orderActivitiesAsync(
+        continuation: String?,
+        size: Int,
+        ethSort: com.rarible.protocol.dto.SyncSortDto?
+    ): Deferred<List<ActivityDto>> = coroutineScope {
+        async {
+            val itemsDto = activityOrderControllerApi.getOrderActivitiesSync(continuation, size, ethSort).awaitFirst()
+            itemsDto.items.map {
+                ethActivityConverter.convert(it, blockchain)
+            }
+        }
+    }
+
+    private suspend fun auctionActivitiesAsync(
+        continuation: String?,
+        size: Int,
+        ethSort: com.rarible.protocol.dto.SyncSortDto?
+    ): Deferred<List<ActivityDto>> = coroutineScope {
+        async {
+            val itemsDto =
+                activityAuctionControllerApi.getAuctionActivitiesSync(continuation, size, ethSort).awaitFirst()
+            itemsDto.items.map {
+                ethActivityConverter.convert(it, blockchain)
+            }
+        }
     }
 
     override suspend fun getActivitiesByCollection(

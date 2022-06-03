@@ -7,9 +7,11 @@ import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
 import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
 import com.rarible.protocol.union.enrichment.test.data.randomEsActivity
 import com.rarible.protocol.union.search.indexer.test.IntegrationTest
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.elasticsearch.index.query.BoolQueryBuilder
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration
@@ -25,6 +27,12 @@ internal class EsActivityRepositoryFt {
 
     @Autowired
     protected lateinit var repository: EsActivityRepository
+
+    @BeforeEach
+    fun setUp(): Unit = runBlocking {
+        repository.deleteAll()
+    }
+
 
     @Test
     fun `should save and read`(): Unit = runBlocking {
@@ -54,5 +62,23 @@ internal class EsActivityRepositoryFt {
 
         // then
         assertThat(actual.activities).hasSize(1000)
+    }
+
+    @Test
+    fun `should delete activities by ids`(): Unit = runBlocking {
+        // given
+        val activities = List(30) { randomEsActivity() }
+        repository.saveAll(activities)
+        val ids = activities.map { it.activityId }
+
+        // when
+        val deleted = repository.delete(ids)
+        val query = NativeSearchQuery(BoolQueryBuilder())
+        query.maxResults = 100
+        val actual = repository.search(query)
+
+        // then
+        assertThat(deleted).isEqualTo(30)
+        assertThat(actual.activities).hasSize(0)
     }
 }

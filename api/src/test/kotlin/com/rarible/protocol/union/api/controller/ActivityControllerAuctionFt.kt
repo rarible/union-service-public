@@ -92,7 +92,7 @@ class ActivityControllerAuctionFt : AbstractIntegrationTest() {
         } returns AuctionActivitiesDto(null, listOf(auctionActivity)).toMono()
 
         val activities = activityControllerApi.getActivitiesByCollection(
-            types, ethCollectionId.fullId(), null, null, size, sort, null,
+            types, listOf(ethCollectionId.fullId()), null, null, size, sort, null,
         ).awaitFirst()
 
         assertThat(activities.activities).hasSize(1)

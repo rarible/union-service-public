@@ -4,6 +4,9 @@ import com.rarible.core.application.ApplicationEnvironmentInfo
 import com.rarible.core.daemon.sequential.ConsumerBatchEventHandler
 import com.rarible.core.kafka.RaribleKafkaProducer
 import com.rarible.core.test.ext.KafkaTestExtension
+import com.rarible.protocol.flow.nft.api.client.FlowNftItemControllerApi
+import com.rarible.protocol.union.core.service.ItemService
+import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.CollectionEventDto
 import com.rarible.protocol.union.dto.ItemEventDto
@@ -26,9 +29,11 @@ import com.rarible.protocol.union.search.indexer.metrics.MetricConsumerBatchEven
 import com.rarible.protocol.union.subscriber.UnionKafkaJsonSerializer
 import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
+import io.mockk.mockk
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Lazy
+import org.springframework.context.annotation.Primary
 
 @Lazy
 @Configuration
@@ -54,8 +59,11 @@ class TestIndexerConfiguration {
     }
 
     @Bean
-    fun activityHandler(repository: EsActivityRepository): ConsumerBatchEventHandler<ActivityDto> {
-        return ActivityEventHandler(repository)
+    fun activityHandler(
+        repository: EsActivityRepository,
+        blockchainRouter: BlockchainRouter<ItemService>
+    ): ConsumerBatchEventHandler<ActivityDto> {
+        return ActivityEventHandler(repository, blockchainRouter)
     }
 
     @Bean
@@ -81,6 +89,7 @@ class TestIndexerConfiguration {
     //---------------- UNION producers ----------------//
 
     @Bean
+    @Primary
     fun testUnionActivityEventProducer(): RaribleKafkaProducer<ActivityDto> {
         return RaribleKafkaProducer(
             clientId = "test.union.activity",
@@ -92,6 +101,7 @@ class TestIndexerConfiguration {
     }
 
     @Bean
+    @Primary
     fun testUnionOrderEventProducer(): RaribleKafkaProducer<OrderEventDto> {
         return RaribleKafkaProducer(
             clientId = "test.union.order",
@@ -103,6 +113,7 @@ class TestIndexerConfiguration {
     }
 
     @Bean
+    @Primary
     fun testUnionCollectionEventProducer(): RaribleKafkaProducer<CollectionEventDto> {
         return RaribleKafkaProducer(
             clientId = "test.union.collection",
@@ -125,6 +136,7 @@ class TestIndexerConfiguration {
     }
 
     @Bean
+    @Primary
     fun testUnionOwnershipEventProducer(): RaribleKafkaProducer<OwnershipEventDto> {
         return RaribleKafkaProducer(
             clientId = "test.union.ownership",
@@ -134,4 +146,10 @@ class TestIndexerConfiguration {
             bootstrapServers = KafkaTestExtension.kafkaContainer.kafkaBoostrapServers()
         )
     }
+
+    // --- APIs ---
+
+    @Bean
+    @Primary
+    fun testFlowItemApi(): FlowNftItemControllerApi = mockk()
 }

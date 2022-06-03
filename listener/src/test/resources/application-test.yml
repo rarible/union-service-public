@@ -105,8 +105,10 @@ listener:
     threadCount: 2
     notificationEnabled: false
   price-update:
+    enabled: false
     rate: PT5M
     delay: PT60M
   reconcile-marks:
+    enabled: false
     rate: PT1M
     delay: PT60M

@@ -21,3 +21,7 @@ spring:
 logging:
   level:
     org.springframework.context.annotation: "DEBUG"
+
+common:
+  producer:
+    broker-replica-set: ${kafka.hosts}

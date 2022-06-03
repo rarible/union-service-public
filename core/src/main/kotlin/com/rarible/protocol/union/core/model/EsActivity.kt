@@ -42,7 +42,7 @@ data class EsActivity(
     override val date: Instant,
     override val blockNumber: Long?,
     override val logIndex: Int?,
-    override val salt: Long = kotlin.random.Random.nextLong(),
+    override val salt: Long = generateSalt(),
     // Filter fields
     override val blockchain: BlockchainDto,
     override val type: ActivityTypeDto,
@@ -61,6 +61,10 @@ data class EsActivity(
                 versionData = VERSION,
                 settings = INDEX_SETTINGS
             )
+        }
+
+        fun generateSalt(): Long {
+            return kotlin.random.Random.nextLong(1, Long.MAX_VALUE)
         }
     }
 }
