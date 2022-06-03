@@ -106,8 +106,6 @@ class ItemControllerFt : AbstractIntegrationTest() {
             .copy(bestSellOrder = ShortOrderConverter.convert(ethUnionOrder))
         enrichmentItemService.save(ethShortItem)
 
-        delay(1000)
-
         ethereumOrderControllerApiMock.mockGetById(ethOrder)
         ethereumItemControllerApiMock.mockGetNftItemById(ethItemId, ethItem)
 
@@ -130,7 +128,8 @@ class ItemControllerFt : AbstractIntegrationTest() {
             .copy(bestSellOrder = ShortOrderConverter.convert(ethUnionOrder))
         enrichmentItemService.save(ethShortItem)
 
-        ethereumOrderControllerApiMock.mockGetByIds(ethOrder)
+        // Might need to be switched back to mockGetByIds() when merged to master
+        ethereumOrderControllerApiMock.mockGetById(ethOrder)
         ethereumItemControllerApiMock.mockGetNftItemsByIds(listOf(ethItemId.value), listOf(ethItem))
 
         val result = itemControllerClient.getItemByIds(ItemIdsDto(listOf(ethItemId))).awaitFirst()
