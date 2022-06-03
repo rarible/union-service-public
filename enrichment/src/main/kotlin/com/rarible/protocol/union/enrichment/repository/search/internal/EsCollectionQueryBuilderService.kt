@@ -5,6 +5,7 @@ import com.rarible.protocol.union.core.model.EsCollectionFilter
 import com.rarible.protocol.union.core.model.EsCollectionGenericFilter
 import org.elasticsearch.index.query.BoolQueryBuilder
 import org.elasticsearch.index.query.RangeQueryBuilder
+import org.elasticsearch.search.sort.SortOrder
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder
 import org.springframework.stereotype.Component
@@ -24,6 +25,7 @@ class EsCollectionQueryBuilderService {
         }
 
         builder.withQuery(query)
+        builder.sortByField(EsCollection::collectionId.name, SortOrder.ASC)
         return builder.build()
     }
 

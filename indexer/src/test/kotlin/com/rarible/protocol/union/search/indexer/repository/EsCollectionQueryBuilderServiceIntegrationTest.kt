@@ -81,18 +81,20 @@ class EsCollectionQueryBuilderServiceIntegrationTest {
     @Test
     fun `should query with cursor`()  = runBlocking<Unit> {
         // given
-        val filter = EsCollectionGenericFilter(cursor = "bbb")
+        val filter = EsCollectionGenericFilter(cursor = "ccc")
         val toFind1 = randomEsCollection().copy(collectionId = "ddd")
-        val toFind2 = randomEsCollection().copy(collectionId = "ccc")
-        val toSkip1 = randomEsCollection().copy(collectionId = "bbb")
-        val toSkip2 = randomEsCollection().copy(collectionId = "aaa")
-        repository.saveAll(listOf(toFind1, toFind2, toSkip1, toSkip2))
+        val toFind2 = randomEsCollection().copy(collectionId = "eee")
+        val toFind3 = randomEsCollection().copy(collectionId = "fff")
+        val toSkip1 = randomEsCollection().copy(collectionId = "ccc")
+        val toSkip2 = randomEsCollection().copy(collectionId = "bbb")
+        val toSkip3 = randomEsCollection().copy(collectionId = "aaa")
+        repository.saveAll(listOf(toFind1, toFind2, toFind3, toSkip1, toSkip2, toSkip3))
 
         // when
         val result = repository.search(filter, null)
 
         // then
-        assertThat(result).containsExactlyInAnyOrder(toFind1.info, toFind2.info)
+        assertThat(result).containsExactly(toFind1.info, toFind2.info, toFind3.info)
     }
 
     @Test

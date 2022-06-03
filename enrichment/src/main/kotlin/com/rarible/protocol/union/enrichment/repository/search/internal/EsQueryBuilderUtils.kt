@@ -2,6 +2,9 @@ package com.rarible.protocol.union.enrichment.repository.search.internal
 
 import org.elasticsearch.index.query.BoolQueryBuilder
 import org.elasticsearch.index.query.TermsQueryBuilder
+import org.elasticsearch.search.sort.SortBuilders
+import org.elasticsearch.search.sort.SortOrder
+import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder
 
 fun BoolQueryBuilder.mustMatchTerms(terms: Set<*>, field: String) {
     if (terms.isNotEmpty()) {
@@ -11,4 +14,11 @@ fun BoolQueryBuilder.mustMatchTerms(terms: Set<*>, field: String) {
 
 fun prepareTerms(terms: Set<*>): List<String> {
     return terms.map { it.toString() /* .lowercase() */ }
+}
+
+fun NativeSearchQueryBuilder.sortByField(fieldName: String, order: SortOrder) {
+    val sort = SortBuilders
+        .fieldSort(fieldName)
+        .order(order)
+    withSort(sort)
 }
