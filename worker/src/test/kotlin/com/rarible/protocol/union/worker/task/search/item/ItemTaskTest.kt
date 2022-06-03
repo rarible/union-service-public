@@ -1,5 +1,7 @@
 package com.rarible.protocol.union.worker.task.search.item
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.rarible.core.test.data.randomAddress
 import com.rarible.core.test.data.randomBigInt
 import com.rarible.protocol.union.api.client.ItemControllerApi
@@ -12,8 +14,9 @@ import com.rarible.protocol.union.dto.continuation.CombinedContinuation
 import com.rarible.protocol.union.dto.continuation.page.ArgSlice
 import com.rarible.protocol.union.enrichment.repository.search.EsItemRepository
 import com.rarible.protocol.union.worker.config.BlockchainReindexProperties
-import com.rarible.protocol.union.worker.config.CollectionReindexProperties
+import com.rarible.protocol.union.worker.config.ItemReindexProperties
 import com.rarible.protocol.union.worker.metrics.SearchTaskMetricFactory
+import com.rarible.protocol.union.worker.task.search.ParamFactory
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import io.mockk.coEvery
 import io.mockk.coVerifyAll
@@ -91,17 +94,25 @@ internal class ItemTaskTest {
         every { metrics } returns mockk { every { rootPath } returns "protocol.union.worker" }
     })
 
+    private val paramFactory = ParamFactory(jacksonObjectMapper().registerKotlinModule())
+
     @Test
     internal fun `should start first task`() {
         runBlocking {
 
             val task = ItemTask(
-                CollectionReindexProperties(
+                ItemReindexProperties(
                     enabled = true,
                     blockchains = listOf(BlockchainReindexProperties(enabled = true, BlockchainDto.ETHEREUM))
-                ), client, repo, searchTaskMetricFactory
+                ), client, paramFactory, repo, searchTaskMetricFactory
             )
-            task.runLongTask(null, "ETHEREUM").toList()
+            task.runLongTask(
+                null, paramFactory.toString(
+                    ItemTaskParam(
+                        blockchain = BlockchainDto.ETHEREUM, index = "test_index"
+                    )
+                )
+            ).toList()
 
             coVerifyAll {
                 client.getAllItems(
