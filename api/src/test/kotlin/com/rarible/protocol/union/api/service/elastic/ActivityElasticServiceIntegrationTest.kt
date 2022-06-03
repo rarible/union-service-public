@@ -169,7 +169,7 @@ internal class ActivityElasticServiceIntegrationTest {
                 ))
             } returns listOf(eth2)
             // when
-            val actual = service.getActivitiesByCollection(types, collection, null, null, size, sort)
+            val actual = service.getActivitiesByCollection(types, listOf(collection), null, null, size, sort)
 
             // then
             assertThat(actual.activities).containsExactly(eth2)

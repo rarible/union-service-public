@@ -2,6 +2,7 @@ package com.rarible.protocol.union.core.model
 
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.CollectionIdDto
 import java.time.Instant
 
 sealed class ElasticActivityFilter
@@ -21,6 +22,14 @@ data class ElasticActivityQueryGenericFilter(
     val to: Instant? = null,
     val cursor: String? = null,
 ) : ElasticActivityFilter()
+
+data class ActivityByCollectionFilter(
+    val collections: List<CollectionIdDto>,
+    val activityTypes: Set<ActivityTypeDto>,
+    val cursor: String? = null
+): ElasticActivityFilter() {
+
+}
 
 /**
  * ALL conditions (that aren't null/empty) must be true to pass the filter,
@@ -48,4 +57,5 @@ val ElasticActivityFilter.cursor
     get() = when(this) {
         is ElasticActivityQueryGenericFilter -> this.cursor
         is ElasticActivityQueryPerTypeFilter -> this.cursor
+        is ActivityByCollectionFilter -> this.cursor
     }
