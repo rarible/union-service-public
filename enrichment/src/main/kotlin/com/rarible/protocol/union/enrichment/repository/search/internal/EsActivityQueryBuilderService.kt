@@ -55,13 +55,10 @@ class EsActivityQueryBuilderService(
         }
         must(collectionQuery)
 
-        val typesQuery = QueryBuilders.boolQuery()
-        if(filter.activityTypes.isNotEmpty()) {
-            filter.activityTypes.forEach {
-                typesQuery.should(QueryBuilders.termQuery(EsActivity::type.name, it.name))
-            }
-            must(typesQuery)
-        }
+        mustMatchTerms(
+            filter.activityTypes.map { it.name }.toSet(),
+            EsActivity::type.name
+        )
     }
 
     private fun matchCollection(
