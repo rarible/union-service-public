@@ -62,7 +62,7 @@ class ActivityController(
     ): ResponseEntity<ActivitiesDto> {
         val overrideSelect = if (newSearchEngine == true) OverrideSelect.ELASTIC else null
         if (collection.isEmpty()) throw UnionException("No any collection param in query")
-        val result = activitySourceSelector.getActivitiesByCollection(type, collection.first(), continuation, cursor, size, sort, overrideSelect)
+        val result = activitySourceSelector.getActivitiesByCollection(type, collection, continuation, cursor, size, sort, overrideSelect)
         return ResponseEntity.ok(result)
     }
 
