@@ -10,6 +10,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
     JsonSubTypes.Type(name = "AUDIO", value = UnionAudioProperties::class),
     JsonSubTypes.Type(name = "MODEL_3D", value = UnionModel3dProperties::class),
     JsonSubTypes.Type(name = "HTML", value = UnionHtmlProperties::class),
+    JsonSubTypes.Type(name = "UNKNOWN", value = UnionUnknownProperties::class)
 )
 sealed class UnionMetaContentProperties {
 
@@ -60,6 +61,15 @@ data class UnionModel3dProperties(
 }
 
 data class UnionHtmlProperties(
+    override val mimeType: String? = null,
+    override val size: Long? = null
+) : UnionMetaContentProperties() {
+
+    override fun isEmpty(): Boolean = mimeType == null
+
+}
+
+data class UnionUnknownProperties(
     override val mimeType: String? = null,
     override val size: Long? = null
 ) : UnionMetaContentProperties() {
