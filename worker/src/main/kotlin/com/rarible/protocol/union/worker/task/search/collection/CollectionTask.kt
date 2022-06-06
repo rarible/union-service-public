@@ -8,6 +8,7 @@ import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.repository.search.EsCollectionRepository
 import com.rarible.protocol.union.enrichment.service.query.collection.CollectionApiMergeService
 import com.rarible.protocol.union.worker.config.CollectionReindexProperties
+import com.rarible.protocol.union.worker.metrics.SearchTaskMetricFactory
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
@@ -17,7 +18,8 @@ import org.springframework.stereotype.Component
 class CollectionTask(
     private val properties: CollectionReindexProperties,
     private val collectionApiMergeService: CollectionApiMergeService,
-    private val repository: EsCollectionRepository
+    private val repository: EsCollectionRepository,
+    private val searchTaskMetricFactory: SearchTaskMetricFactory
 ) : TaskHandler<String> {
 
     override val type: String
@@ -34,6 +36,7 @@ class CollectionTask(
             emptyFlow()
         } else {
             var lastCursor = from
+            val counter = searchTaskMetricFactory.createReindexCollectionCounter(blockchain)
             flow {
                 do {
                     val res = collectionApiMergeService.getAllCollections(
@@ -45,6 +48,7 @@ class CollectionTask(
                         repository.saveAll(
                             res.collections.map { EsCollectionConverter.convert(it) },
                         )
+                        counter.increment(res.collections.size)
                     }
                     lastCursor = res.continuation.orEmpty()
                     emit(lastCursor!!)

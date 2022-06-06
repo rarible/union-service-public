@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.search.reindexer.task
 
+import com.rarible.core.telemetry.metrics.RegisteredCounter
 import com.rarible.core.test.data.randomAddress
 import com.rarible.core.test.data.randomString
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -11,15 +12,15 @@ import com.rarible.protocol.union.enrichment.repository.search.EsCollectionRepos
 import com.rarible.protocol.union.enrichment.service.query.collection.CollectionApiMergeService
 import com.rarible.protocol.union.worker.config.BlockchainReindexProperties
 import com.rarible.protocol.union.worker.config.CollectionReindexProperties
+import com.rarible.protocol.union.worker.metrics.SearchTaskMetricFactory
 import com.rarible.protocol.union.worker.task.search.collection.CollectionTask
 import io.mockk.coEvery
 import io.mockk.coVerifyAll
+import io.mockk.every
 import io.mockk.mockk
-import io.mockk.verifyAll
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 @Suppress("ReactiveStreamsUnusedPublisher")
@@ -59,6 +60,16 @@ class CollectionTaskUnitTest {
         )
     }
 
+    private val mockCounter = mockk<RegisteredCounter> {
+        every { increment(any()) } returns Unit
+    }
+
+    private val metricFactory = mockk<SearchTaskMetricFactory> {
+        every {
+            createReindexCollectionCounter(any())
+        } returns mockCounter
+    }
+
     @Test
     internal fun `should start first task`() {
         runBlocking {
@@ -68,9 +79,12 @@ class CollectionTaskUnitTest {
                     blockchains = listOf(BlockchainReindexProperties(enabled = true, BlockchainDto.ETHEREUM))
                 ),
                 collectionApiMergeService,
-                repo
+                repo,
+                metricFactory
             )
-            task.runLongTask(null, "COLLECTION_REINDEX_ETHEREUM").toList()
+            val result = task.runLongTask(null, "ETHEREUM").toList()
+
+            assertThat(result).containsExactly(collection.id.value, "")
 
             coVerifyAll {
                 collectionApiMergeService.getAllCollections(
@@ -79,6 +93,12 @@ class CollectionTaskUnitTest {
                     1000
                 )
                 repo.saveAll(any())
+                mockCounter.increment(1)
+                collectionApiMergeService.getAllCollections(
+                    listOf(BlockchainDto.ETHEREUM),
+                    collection.id.value,
+                    1000
+                )
             }
         }
     }
@@ -92,12 +112,14 @@ class CollectionTaskUnitTest {
                     blockchains = listOf(BlockchainReindexProperties(enabled = true, BlockchainDto.ETHEREUM))
                 ),
                 collectionApiMergeService,
-                repo
+                repo,
+                metricFactory
             )
 
             val from = CollectionContinuation.ById.getContinuation(collection).toString()
-            val list = task.runLongTask(from, "COLLECTION_REINDEX_ETHEREUM").toList()
+            val list = task.runLongTask(from, "ETHEREUM").toList()
 
+            assertThat(list).containsExactly("")
 
             coVerifyAll {
                 collectionApiMergeService.getAllCollections(
