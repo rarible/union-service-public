@@ -24,7 +24,7 @@ internal class ReindexServiceIt {
         reindexService.scheduleActivityReindex("test_activity_index")
 
         val tasks = taskRepository.findAll().collectList().awaitFirstOrDefault(emptyList())
-        Assertions.assertThat(tasks).hasSize(85) //all blockchains * all activities + index switch
+        Assertions.assertThat(tasks).hasSize(99) //all blockchains * all activities + index switch
     }
 
 }

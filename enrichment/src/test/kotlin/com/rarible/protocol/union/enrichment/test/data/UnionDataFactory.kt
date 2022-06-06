@@ -63,9 +63,9 @@ import com.rarible.protocol.union.integration.solana.converter.SolanaItemConvert
 import com.rarible.protocol.union.integration.solana.data.randomSolanaTokenDto
 import com.rarible.protocol.union.test.data.randomFlowNftItemDto
 import com.rarible.protocol.union.test.mock.CurrencyMock
-import kotlinx.coroutines.runBlocking
 import java.time.Instant
 import java.time.temporal.ChronoUnit
+import kotlinx.coroutines.runBlocking
 
 fun randomUnionAddress(): UnionAddress =
     UnionAddressConverter.convert(
@@ -95,7 +95,7 @@ fun randomUnionItem(id: ItemIdDto): UnionItem {
             randomFlowNftItemDto(id),
             id.blockchain
         )
-        BlockchainDto.TEZOS -> TODO()
+        BlockchainDto.TEZOS, BlockchainDto.APTOS -> TODO()
         BlockchainDto.SOLANA -> SolanaItemConverter.convert(
             randomSolanaTokenDto(id),
             BlockchainDto.SOLANA

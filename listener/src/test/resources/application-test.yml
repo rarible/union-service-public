@@ -101,6 +101,10 @@ integration:
           deposits: 600
           withdrawals: 600
           orders: 600
+  aptos:
+    enabled: true
+    client:
+      url: "http://localhost:8080"
 listener:
   reconciliation:
     orderBatchSize: 50
@@ -113,3 +117,8 @@ listener:
   reconcile-marks:
     rate: PT1M
     delay: PT60M
+
+protocol:
+  aptos:
+    subscriber:
+      broker-replica-set: ${kafka.hosts}

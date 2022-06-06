@@ -7,10 +7,11 @@ import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.SyncSortDto
+import com.rarible.protocol.union.dto.SyncTypeDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
+import java.time.Instant
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.RestController
-import java.time.Instant
 
 @RestController
 class ActivityController(
@@ -27,7 +28,8 @@ class ActivityController(
         continuation: String?,
         cursor: String?,
         size: Int?,
-        sort: ActivitySortDto?
+        sort: ActivitySortDto?,
+        newSearchEngine: Boolean?
     ): ResponseEntity<ActivitiesDto> {
         logger.info("Got request to get all activities, parameters: $type, $blockchains, $continuation, $cursor, $size, $sort")
         val result = activitySourceSelector.getAllActivities(type, blockchains, continuation, cursor, size, sort)
@@ -38,7 +40,8 @@ class ActivityController(
         blockchain: BlockchainDto,
         continuation: String?,
         size: Int?,
-        sort: SyncSortDto?
+        sort: SyncSortDto?,
+        type: SyncTypeDto?
     ): ResponseEntity<ActivitiesDto> {
         logger.info("Got request to get all activities sync, parameters: $blockchain, $continuation, $size, $sort")
         val result = activitySourceSelector.getAllActivitiesSync(blockchain, continuation, size, sort)
@@ -47,13 +50,14 @@ class ActivityController(
 
     override suspend fun getActivitiesByCollection(
         type: List<ActivityTypeDto>,
-        collection: String,
+        collection: List<String>,
         continuation: String?,
         cursor: String?,
         size: Int?,
-        sort: ActivitySortDto?
+        sort: ActivitySortDto?,
+        newSearchEngine: Boolean?
     ): ResponseEntity<ActivitiesDto> {
-        val result = activitySourceSelector.getActivitiesByCollection(type, collection, continuation, cursor, size, sort)
+        val result = activitySourceSelector.getActivitiesByCollection(type, collection.first() /** todo support string collection */, continuation, cursor, size, sort)
         return ResponseEntity.ok(result)
     }
 
@@ -63,7 +67,8 @@ class ActivityController(
         continuation: String?,
         cursor: String?,
         size: Int?,
-        sort: ActivitySortDto?
+        sort: ActivitySortDto?,
+        newSearchEngine: Boolean?
     ): ResponseEntity<ActivitiesDto> {
         val result = activitySourceSelector.getActivitiesByItem(type, itemId, continuation, cursor, size, sort)
         return ResponseEntity.ok(result)
@@ -78,7 +83,8 @@ class ActivityController(
         continuation: String?,
         cursor: String?,
         size: Int?,
-        sort: ActivitySortDto?
+        sort: ActivitySortDto?,
+        newSearchEngine: Boolean?
     ): ResponseEntity<ActivitiesDto> {
         val result = activitySourceSelector.getActivitiesByUser(type, user, blockchains, from, to, continuation, cursor, size, sort)
         return ResponseEntity.ok(result)

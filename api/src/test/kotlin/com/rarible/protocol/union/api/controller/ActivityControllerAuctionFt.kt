@@ -27,6 +27,8 @@ import com.rarible.protocol.union.integration.ethereum.data.randomEthAuctionOpen
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAuctionStartActivity
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import io.mockk.coEvery
+import java.time.Instant
+import java.time.temporal.ChronoUnit
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.runBlocking
@@ -34,8 +36,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import reactor.kotlin.core.publisher.toMono
-import java.time.Instant
-import java.time.temporal.ChronoUnit
 
 @FlowPreview
 @IntegrationTest
@@ -75,7 +75,7 @@ class ActivityControllerAuctionFt : AbstractIntegrationTest() {
         } returns AuctionActivitiesDto(null, list).toMono()
 
         val activities = activityControllerApi.getAllActivities(
-            types, blockchains, null, null, size, sort
+            types, blockchains, null, null, size, sort, false
         ).awaitFirst()
 
         checkActivities(list, activities.activities)
@@ -92,7 +92,7 @@ class ActivityControllerAuctionFt : AbstractIntegrationTest() {
         } returns AuctionActivitiesDto(null, listOf(auctionActivity)).toMono()
 
         val activities = activityControllerApi.getActivitiesByCollection(
-            types, ethCollectionId.fullId(), null, null, size, sort
+            types, listOf(ethCollectionId.fullId()), null, null, size, sort, false
         ).awaitFirst()
 
         assertThat(activities.activities).hasSize(1)
@@ -110,7 +110,7 @@ class ActivityControllerAuctionFt : AbstractIntegrationTest() {
         } returns AuctionActivitiesDto(null, listOf(auctionActivity)).toMono()
 
         val activities = activityControllerApi.getActivitiesByItem(
-            types, ethItemId.fullId(), null, null, size, sort
+            types, ethItemId.fullId(), null, null, size, sort, false
         ).awaitFirst()
 
         assertThat(activities.activities).hasSize(1)
@@ -142,7 +142,7 @@ class ActivityControllerAuctionFt : AbstractIntegrationTest() {
         val now = Instant.now()
         val oneWeekAgo = now.minus(7, ChronoUnit.DAYS)
         val activities = activityControllerApi.getActivitiesByUser(
-            types, listOf(userEth.fullId()), null, oneWeekAgo, now, null, null, size, sort
+            types, listOf(userEth.fullId()), null, oneWeekAgo, now, null, null, size, sort, false
         ).awaitFirst()
 
         assertThat(activities.activities).hasSize(1)
