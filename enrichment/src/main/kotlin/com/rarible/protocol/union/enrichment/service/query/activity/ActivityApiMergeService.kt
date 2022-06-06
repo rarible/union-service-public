@@ -20,7 +20,6 @@ import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.util.BlockchainFilter
 import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -296,24 +295,6 @@ class ActivityApiMergeService(
                 ArgSlice(blockchain, blockchainContinuation, Slice(null, emptyList()))
             } else {
                 ArgSlice(blockchain, blockchainContinuation, clientCall(blockchain, blockchainContinuation))
-            }
-        }
-    }
-
-    private suspend fun getActivitiesByBlockchains2(
-        continuation: String?,
-        blockchains: Collection<BlockchainDto>,
-        clientCall: suspend (blockchain: BlockchainDto, continuation: String?) -> Slice<ActivityDto>
-    ): List<ArgSlice<ActivityDto>> {
-        val currentContinuation = CombinedContinuation.parse(continuation)
-
-        return router.getEnabledBlockchains(blockchains).mapAsync { blockchain ->
-            val blockchainContinuation = currentContinuation.continuations[blockchain.name]
-            // For completed blockchain we do not request orders
-            if (blockchainContinuation == ArgSlice.COMPLETED) {
-                ArgSlice(blockchain.name, blockchainContinuation, Slice(null, emptyList()))
-            } else {
-                ArgSlice(blockchain.name, blockchainContinuation, clientCall(blockchain, blockchainContinuation))
             }
         }
     }
