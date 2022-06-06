@@ -46,7 +46,23 @@ open class FlowActivityService(
         size: Int,
         sort: SyncSortDto?,
         type: SyncTypeDto?
-    ): Slice<ActivityDto> = Slice.empty()
+    ): Slice<ActivityDto> {
+        if (type == SyncTypeDto.AUCTION) {
+            return Slice.empty()
+        }
+
+        val flowSort = flowActivityConverter.convert(sort)
+        val flowTypes = flowActivityConverter.convert(type)
+
+        val result = activityControllerApi.getNftOrderActivitiesSync(
+            flowTypes,
+            continuation,
+            size,
+            flowSort
+        ).awaitFirst()
+
+        return flowActivityConverter.convert(result, blockchain)
+    }
 
     override suspend fun getActivitiesByCollection(
         types: List<ActivityTypeDto>,

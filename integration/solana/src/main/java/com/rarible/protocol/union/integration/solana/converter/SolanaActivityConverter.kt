@@ -23,6 +23,8 @@ import com.rarible.protocol.union.dto.OrderCancelListActivityDto
 import com.rarible.protocol.union.dto.OrderListActivityDto
 import com.rarible.protocol.union.dto.OrderMatchSellDto
 import com.rarible.protocol.union.dto.OrderMatchSwapDto
+import com.rarible.protocol.union.dto.SyncSortDto
+import com.rarible.protocol.union.dto.SyncTypeDto
 import com.rarible.protocol.union.dto.TransferActivityDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
 import com.rarible.protocol.union.dto.ext
@@ -307,4 +309,16 @@ class SolanaActivityConverter(
             OrderMatchActivityDto.Type.ACCEPT_BID -> OrderMatchSellDto.Type.ACCEPT_BID
         }
 
+    fun convert(source: SyncSortDto): com.rarible.protocol.solana.dto.SyncSortDto =
+        when (source) {
+            SyncSortDto.DB_UPDATE_ASC -> com.rarible.protocol.solana.dto.SyncSortDto.DB_UPDATE_ASC
+            SyncSortDto.DB_UPDATE_DESC -> com.rarible.protocol.solana.dto.SyncSortDto.DB_UPDATE_DESC
+        }
+
+    fun convert(source: SyncTypeDto): com.rarible.protocol.solana.dto.SyncTypeDto =
+        when (source) {
+            SyncTypeDto.ORDER -> com.rarible.protocol.solana.dto.SyncTypeDto.ORDER
+            SyncTypeDto.NFT -> com.rarible.protocol.solana.dto.SyncTypeDto.NFT
+            SyncTypeDto.AUCTION -> com.rarible.protocol.solana.dto.SyncTypeDto.AUCTION
+        }
 }

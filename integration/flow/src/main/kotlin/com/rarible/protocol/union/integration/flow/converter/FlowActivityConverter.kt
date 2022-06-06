@@ -30,6 +30,8 @@ import com.rarible.protocol.union.dto.OrderCancelListActivityDto
 import com.rarible.protocol.union.dto.OrderListActivityDto
 import com.rarible.protocol.union.dto.OrderMatchSellDto
 import com.rarible.protocol.union.dto.OrderMatchSwapDto
+import com.rarible.protocol.union.dto.SyncSortDto
+import com.rarible.protocol.union.dto.SyncTypeDto
 import com.rarible.protocol.union.dto.TransferActivityDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.dto.ext
@@ -309,5 +311,25 @@ class FlowActivityConverter(
             continuation = source.continuation,
             entities = source.items.map { convert(it, blockchain) }
         )
+    }
+
+    fun convert(source: SyncSortDto?): String =
+        when (source) {
+            SyncSortDto.DB_UPDATE_DESC -> "LATEST_FIRST"
+            else -> "EARLIEST_FIRST"
+        }
+
+    fun convert(source: SyncTypeDto?): List<String> =
+        when (source) {
+            SyncTypeDto.ORDER -> ORDER_LIST
+            SyncTypeDto.NFT -> NFT_LIST
+            SyncTypeDto.AUCTION -> emptyList()
+            else -> ALL_LIST
+        }
+
+    companion object {
+        val ORDER_LIST = listOf("SELL", "LIST", "CANCEL_LIST", "BID", "CANCEL_BID")
+        val NFT_LIST = listOf("TRANSFER", "MINT", "BURN")
+        val ALL_LIST = ORDER_LIST + NFT_LIST
     }
 }
