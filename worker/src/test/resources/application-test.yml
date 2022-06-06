@@ -20,3 +20,30 @@ spring:
 logging:
   level:
     org.springframework.context.annotation: "DEBUG"
+
+worker:
+  search-reindex:
+    activity:
+      enabled: true
+      blockchains:
+        - blockchain: ETHEREUM
+          enabled: true
+        - blockchain: POLYGON
+          enabled: true
+        - blockchain: FLOW
+          enabled: true
+        - blockchain: TEZOS
+          enabled: true
+        - blockchain: SOLANA
+          enabled: true
+        - blockchain: IMMUTABLEX
+          enabled: false
+    order:
+      enabled: false
+      blockchains:
+    collection:
+      enabled: false
+      blockchains:
+    ownership:
+      enabled: false
+      blockchains:
