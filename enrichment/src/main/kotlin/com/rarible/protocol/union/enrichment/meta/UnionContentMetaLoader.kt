@@ -1,105 +1,109 @@
 package com.rarible.protocol.union.enrichment.meta
 
 import com.rarible.core.content.meta.loader.ContentMetaReceiver
-import com.rarible.core.meta.resource.detector.ContentMeta
-import com.rarible.protocol.union.core.model.UnionAudioProperties
-import com.rarible.protocol.union.core.model.UnionHtmlProperties
+import com.rarible.core.meta.resource.UrlResource
+import com.rarible.core.meta.resource.model.EmbeddedContent
 import com.rarible.protocol.union.core.model.UnionImageProperties
-import com.rarible.protocol.union.core.model.UnionMetaContentProperties
-import com.rarible.protocol.union.core.model.UnionModel3dProperties
-import com.rarible.protocol.union.core.model.UnionVideoProperties
-import com.rarible.protocol.union.dto.ItemIdDto
+import com.rarible.protocol.union.core.model.UnionMetaContent
+import com.rarible.protocol.union.enrichment.meta.embedded.EmbeddedContentService
+import com.rarible.protocol.union.enrichment.meta.embedded.UnionEmbeddedContent
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
 class UnionContentMetaLoader(
-    private val contentMetaReceiver: ContentMetaReceiver
+    private val contentMetaReceiver: ContentMetaReceiver,
+    private val unionContentMetaService: UnionContentMetaService,
+    private val embeddedContentService: EmbeddedContentService
 ) {
-    private val logger = LoggerFactory.getLogger(UnionContentMetaLoader::class.java)
 
-    suspend fun fetchContentMeta(url: String, itemId: ItemIdDto): UnionMetaContentProperties? {
-        val logPrefix = "Content meta resolution for ${itemId.fullId()} by $url"
-        logger.info("$logPrefix: starting to resolve")
-        val contentMeta = try {
-            contentMetaReceiver.receive(url)
+    private val logger = LoggerFactory.getLogger(UnionMetaLoader::class.java)
+
+    suspend fun enrichContentMeta(
+        metaContent: List<UnionMetaContent>
+    ): List<UnionMetaContent> = coroutineScope {
+        metaContent.map { content ->
+            async {
+                val embedded = unionContentMetaService.detectEmbeddedContent(content.url)
+                embedded?.let {
+                    return@async embedMetaContent(content, it)
+                }
+
+                val resource = unionContentMetaService.parseUrl(content.url)
+                if (resource == null) {
+                    logger.info("Unknown URL format - ${content.url}")
+                    return@async content
+                }
+
+                downloadMetaContent(content, resource)
+            }
+        }.awaitAll()
+    }
+
+    private suspend fun downloadMetaContent(content: UnionMetaContent, resource: UrlResource): UnionMetaContent {
+
+        val internalUrl = unionContentMetaService.resolveInternalHttpUrl(resource)
+        if (internalUrl == content.url) {
+            logger.info("Fetching content meta by URL $internalUrl")
+        } else {
+            logger.info("Fetching content meta by URL $internalUrl (original URL is ${content.url})")
+        }
+
+        val resolvedContentMeta = try {
+            contentMetaReceiver.receive(internalUrl)
         } catch (e: Exception) {
-            logger.warn("$logPrefix: error: ${e.message}", itemId.fullId(), url, e)
+            logger.warn("Failed to receive content meta via URL {}", internalUrl, e)
             null
-        } ?: return null
-        val contentProperties = contentMeta.toUnionMetaContentProperties()
-        logger.info("$logPrefix: resolved $contentProperties")
-        return contentProperties
-    }
-
-    private fun ContentMeta.toUnionMetaContentProperties(): UnionMetaContentProperties? {
-        val isImage = type.contains("image")
-        val isVideo = type.contains("video")
-        val isAudio = type.contains("audio") // TODO[media]: add dedicated properties for audio.
-        val isModel = type.contains("model")
-        val isHtml = type.contains("text/html")
-        return when {
-            isImage -> toImageProperties()
-            isVideo -> toVideoProperties()
-            isAudio -> toAudioProperties()
-            isModel -> toModel3dProperties()
-            isHtml -> toHtmlProperties()
-            else -> return null
         }
-    }
 
-    private fun ContentMeta.toVideoProperties() = UnionVideoProperties(
-        mimeType = type,
-        width = width,
-        height = height,
-        size = size
-    )
-
-    private fun ContentMeta.toImageProperties() = UnionImageProperties(
-        mimeType = type,
-        width = width,
-        height = height,
-        size = size
-    )
-
-    private fun ContentMeta.toAudioProperties() = UnionAudioProperties(
-        mimeType = type,
-        size = size
-    )
-
-    private fun ContentMeta.toModel3dProperties() = UnionModel3dProperties(
-        mimeType = type,
-        size = size
-    )
-
-    private fun ContentMeta.toHtmlProperties() = UnionHtmlProperties(
-        mimeType = type,
-        size = size
-    )
-
-    @OptIn(ExperimentalStdlibApi::class)
-    private fun getCandidateUrls(url: String): List<String> =
-        buildList {
-            add(url)
-            val hash = getIpfsHash(url)
-            if (hash != null) {
-                ipfsPrefixes.mapTo(this) { it + hash }
+        val contentProperties = when {
+            resolvedContentMeta != null -> {
+                logger.info("Content meta from $internalUrl resolved to $resolvedContentMeta")
+                unionContentMetaService.convertToProperties(resolvedContentMeta)
             }
-        }.distinct()
-
-    private fun getIpfsHash(url: String): String? {
-        for (prefix in ipfsPrefixes) {
-            if (url.startsWith(prefix)) {
-                return url.substringAfter(prefix)
+            content.properties != null -> {
+                logger.info("Content meta from $internalUrl is not resolved, using ${content.properties}")
+                content.properties
+            }
+            else -> {
+                logger.warn("Content meta from $internalUrl is not resolved, considered as image")
+                UnionImageProperties()
             }
         }
-        return null
+
+        return content.copy(
+            url = unionContentMetaService.resolveStorageHttpUrl(resource),
+            properties = contentProperties
+        )
     }
 
-    companion object {
-        private const val rariblePinata = "https://rarible.mypinata.cloud/ipfs/"
-        private const val ipfsRarible = "https://ipfs.rarible.com/ipfs/"
-        private val ipfsPrefixes = listOf(rariblePinata, ipfsRarible)
+    private suspend fun embedMetaContent(
+        original: UnionMetaContent,
+        embedded: EmbeddedContent
+    ): UnionMetaContent {
+
+        val contentMeta = embedded.meta
+        val properties = unionContentMetaService.convertToProperties(contentMeta)
+            ?: original.properties
+            ?: UnionImageProperties() // The same logic as for remote meta - we can't determine type, image by default
+
+        val toSave = UnionEmbeddedContent(
+            id = unionContentMetaService.getEmbeddedId(embedded.content),
+            mimeType = properties.mimeType ?: embedded.meta.mimeType,
+            size = embedded.content.size,
+            data = embedded.content
+        )
+
+        embeddedContentService.save(toSave)
+
+        logger.info("Resolved embedded meta content ${original.representation}: $properties")
+        return original.copy(
+            url = unionContentMetaService.getEmbeddedSchemaUrl(toSave.id),
+            properties = properties
+        )
     }
 
 }

@@ -3,9 +3,7 @@ package com.rarible.protocol.union.enrichment.meta
 import com.rarible.core.apm.SpanType
 import com.rarible.core.apm.withSpan
 import com.rarible.loader.cache.CacheLoaderService
-import com.rarible.protocol.union.core.model.UnionCollectionMeta
 import com.rarible.protocol.union.core.model.UnionMeta
-import com.rarible.protocol.union.core.model.UnionMetaContent
 import com.rarible.protocol.union.dto.ItemIdDto
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
@@ -18,8 +16,7 @@ class UnionMetaService(
     @Qualifier("union.meta.cache.loader.service")
     private val unionMetaCacheLoaderService: CacheLoaderService<UnionMeta>,
     private val unionMetaMetrics: UnionMetaMetrics,
-    private val unionMetaLoader: UnionMetaLoader,
-    private val urlService: UrlService
+    private val unionMetaLoader: UnionMetaLoader
 ) {
 
     private val logger = LoggerFactory.getLogger(UnionMetaService::class.java)
@@ -147,21 +144,5 @@ class UnionMetaService(
     suspend fun scheduleLoading(itemId: ItemIdDto) {
         logger.info("Scheduling meta update for {}", itemId.fullId())
         unionMetaCacheLoaderService.update(itemId.fullId())
-    }
-
-    // We decided to change IPFS service from mypinata to ipfs.io, so in API/events we replace
-    // all legacy mypinata urls to new host
-    fun exposePublicIpfsUrls(meta: UnionMeta?, id: String): UnionMeta? {
-        return meta?.let { it.copy(content = exposePublicIpfsUrls(it.content, id)) }
-    }
-
-    fun exposePublicIpfsUrls(collectionMeta: UnionCollectionMeta?, id: String): UnionCollectionMeta? {
-        return collectionMeta?.let { it.copy(content = exposePublicIpfsUrls(it.content, id)) }
-    }
-
-    private fun exposePublicIpfsUrls(content: List<UnionMetaContent>, id: String): List<UnionMetaContent> {
-        return content.map {
-            it.copy(url = urlService.resolvePublicHttpUrl(it.url, id))
-        }
     }
 }
