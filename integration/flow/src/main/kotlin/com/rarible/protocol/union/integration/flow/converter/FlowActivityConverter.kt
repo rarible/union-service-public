@@ -44,16 +44,17 @@ class FlowActivityConverter(
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    suspend fun convert(source: FlowActivityDto, blockchain: BlockchainDto): ActivityDto {
+    suspend fun convert(source: FlowActivityDto): ActivityDto {
         try {
-            return convertInternal(source, blockchain)
+            return convertInternal(source)
         } catch (e: Exception) {
-            logger.error("Failed to convert {} Activity: {} \n{}", blockchain, e.message, source)
+            logger.error("Failed to convert Flow Activity: {} \n{}", e.message, source)
             throw e
         }
     }
 
-    private suspend fun convertInternal(source: FlowActivityDto, blockchain: BlockchainDto): ActivityDto {
+    private suspend fun convertInternal(source: FlowActivityDto): ActivityDto {
+        val blockchain = BlockchainDto.FLOW
         val activityId = ActivityIdDto(blockchain, source.id)
         return when (source) {
             is FlowNftOrderActivitySellDto -> {
@@ -294,10 +295,7 @@ class FlowActivityConverter(
 
     private fun amountUsd(price: BigDecimal, asset: AssetDto) = price.multiply(asset.value)
 
-    suspend fun convert(source: FlowActivitiesDto, blockchain: BlockchainDto): Slice<ActivityDto> {
-        return Slice(
-            continuation = source.continuation,
-            entities = source.items.map { convert(it, blockchain) }
-        )
+    suspend fun convert(source: FlowActivitiesDto): List<ActivityDto> {
+        return source.items.map { convert(it) }
     }
 }
