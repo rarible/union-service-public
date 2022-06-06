@@ -109,6 +109,9 @@ fun randomTzktTokenBalance(contract: String, tokenId: BigInteger, owner: String)
     )
 }
 
+fun randomTzktToken() =
+    randomTzktToken(randomString(), randomBigInt(), BigInteger.ONE)
+
 fun randomTzktToken(contract: String, tokenId: BigInteger, supply: BigInteger): Token {
     return Token(
         id = randomInt(),
@@ -119,6 +122,7 @@ fun randomTzktToken(contract: String, tokenId: BigInteger, supply: BigInteger): 
         balancesCount = 1,
         holdersCount = 1,
         transfersCount = 1,
+        metadata = mapOf("artifactUri" to Object()),
         totalSupply = supply.toString(),
         firstTime = OffsetDateTime.now(),
         lastTime = OffsetDateTime.now()
