@@ -40,7 +40,7 @@ class EnrichmentItemService(
     private val enrichmentOrderService: EnrichmentOrderService,
     private val enrichmentAuctionService: EnrichmentAuctionService,
     private val unionMetaService: UnionMetaService,
-    private val unionMetaContentService: UnionContentMetaService,
+    private val unionContentMetaService: UnionContentMetaService,
     private val originService: OriginService
 ) {
 
@@ -141,7 +141,7 @@ class EnrichmentItemService(
             item = fetchedItem.await(),
             shortItem = shortItem,
             // replacing inner IPFS urls with public urls
-            meta = unionMetaContentService.exposePublicUrls(itemMeta.await(), itemId),
+            meta = unionContentMetaService.exposePublicUrls(itemMeta.await(), itemId),
             orders = bestOrders,
             auctions = auctionsData.await()
         )

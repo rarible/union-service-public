@@ -23,7 +23,7 @@ class EnrichmentCollectionService(
     private val collectionServiceRouter: BlockchainRouter<CollectionService>,
     private val collectionRepository: CollectionRepository,
     private val enrichmentOrderService: EnrichmentOrderService,
-    private val unionMetaContentService: UnionContentMetaService
+    private val unionContentMetaService: UnionContentMetaService
 ) {
 
     private val logger = LoggerFactory.getLogger(EnrichmentCollectionService::class.java)
@@ -78,7 +78,7 @@ class EnrichmentCollectionService(
         val collectionDto = EnrichedCollectionConverter.convert(
             collection = unionCollection,
             // replacing inner IPFS urls with public urls
-            meta = unionMetaContentService.exposePublicUrls(unionCollection.meta, collectionId),
+            meta = unionContentMetaService.exposePublicUrls(unionCollection.meta, collectionId),
             shortCollection = shortCollection,
             orders = bestOrders
         )
