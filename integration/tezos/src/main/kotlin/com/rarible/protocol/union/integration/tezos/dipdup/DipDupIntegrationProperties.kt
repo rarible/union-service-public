@@ -10,7 +10,7 @@ import org.springframework.boot.context.properties.ConstructorBinding
 @ConfigurationProperties(prefix = "integration.tezos.dipdup")
 data class DipDupIntegrationProperties(
     val dipdupUrl: String,
-    val tzktUrl: String, // could be in config
+    val tzktUrl: String,
     val tzktProperties: TzktProperties = TzktProperties(),
     val ipfsUrl: String,
     val nodeAddress: String,
@@ -19,12 +19,14 @@ data class DipDupIntegrationProperties(
     val knownAddresses: KnownAddresses?,
     val consumer: DefaultConsumerProperties?,
     val network: String,
+    val fungibleContracts: Set<String> = emptySet(),
     val daemon: DaemonWorkerProperties = DaemonWorkerProperties()
 ) {
 
     data class TzktProperties(
         val retryAttempts: Int = 5,
-        val retryDelay: Long = 15_000 // ms
+        val retryDelay: Long = 15_000, // ms
+        val ignorePeriod: Long = 1000 * 3600 * 24 // 1 day period
     )
 
 }
