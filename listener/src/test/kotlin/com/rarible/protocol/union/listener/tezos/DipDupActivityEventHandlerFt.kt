@@ -21,7 +21,7 @@ class DipDupActivityEventHandlerFt : AbstractDipDupIntegrationTest() {
 
     @BeforeEach
     fun setUp() = runBlocking<Unit> {
-        coEvery { tokenClient.isNft(any()) } returns true
+        coEvery { tokenClient.token(any()) } returns randomTzktToken()
     }
 
     @Test

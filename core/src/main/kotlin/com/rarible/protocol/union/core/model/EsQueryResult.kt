@@ -1,7 +1,7 @@
 package com.rarible.protocol.union.core.model
 
-data class EsItemQueryResult(
-    val items: List<EsItem>,
+data class EsQueryResult<T>(
+    val content: List<T>,
     val cursor: String?,
     val total: Long? = null
 )

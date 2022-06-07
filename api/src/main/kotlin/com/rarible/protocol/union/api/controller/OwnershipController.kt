@@ -1,11 +1,11 @@
 package com.rarible.protocol.union.api.controller
 
-import com.rarible.protocol.union.api.service.OwnershipApiService
 import com.rarible.protocol.union.dto.OwnershipDto
 import com.rarible.protocol.union.dto.OwnershipsDto
 import com.rarible.protocol.union.dto.continuation.page.PageSize
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.dto.parser.OwnershipIdParser
+import com.rarible.protocol.union.enrichment.service.query.ownership.OwnershipApiService
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
@@ -40,11 +40,10 @@ class OwnershipController(
 
         logger.info(
             "Response for getOwnershipsByItem(itemId={}, continuation={}, size={}):" +
-                    " Slice(size={}, continuation={}) ",
+                " Slice(size={}, continuation={}) ",
             fullItemId.fullId(), continuation, size, result.ownerships.size, result.continuation
         )
 
         return ResponseEntity.ok(result)
     }
-
 }

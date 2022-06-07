@@ -44,6 +44,11 @@ class WorkerConfiguration(
     }
 
     @Bean
+    fun itemReindexProperties(): ItemReindexProperties {
+        return properties.searchReindex.item
+    }
+
+    @Bean
     fun orderReindexProperties(): OrderReindexProperties {
         return properties.searchReindex.order
     }

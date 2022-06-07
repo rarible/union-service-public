@@ -15,13 +15,13 @@ data class EsItem(
     val itemId: String,
     val blockchain: BlockchainDto,
     val collection: String?,
+    val deleted: Boolean = false,
 
     val name: String?,
     val description: String?,
     val traits: List<EsTrait>,
 
     val creators: List<String>,
-    val owner: String?,
 
     @Field(type = FieldType.Date)
     val mintedAt: Instant,

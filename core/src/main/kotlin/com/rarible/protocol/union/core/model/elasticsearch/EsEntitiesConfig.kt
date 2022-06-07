@@ -20,6 +20,7 @@ object EsEntitiesConfig {
     fun prodEsEntities(): List<EntityDefinition> = listOf(
         EsActivity.ENTITY_DEFINITION,
         EsCollection.ENTITY_DEFINITION,
+        EsItem.ENTITY_DEFINITION,
     )
 
     fun loadMapping(entity: EsEntity): String {

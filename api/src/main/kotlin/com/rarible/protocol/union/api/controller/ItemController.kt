@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.api.controller
 
-import com.rarible.protocol.union.api.service.OwnershipApiService
 import com.rarible.protocol.union.api.service.select.ItemSourceSelectService
 import com.rarible.protocol.union.core.exception.UnionNotFoundException
 import com.rarible.protocol.union.core.model.UnionImageProperties

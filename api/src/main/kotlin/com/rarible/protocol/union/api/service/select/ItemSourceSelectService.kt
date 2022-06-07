@@ -1,7 +1,7 @@
 package com.rarible.protocol.union.api.service.select
 
-import com.rarible.protocol.union.api.service.ItemApiService
-import com.rarible.protocol.union.api.service.ItemQueryService
+import com.rarible.protocol.union.enrichment.service.query.item.ItemApiMergeService
+import com.rarible.protocol.union.enrichment.service.query.item.ItemQueryService
 import com.rarible.protocol.union.api.service.elastic.ItemElasticService
 import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service
 @Service
 class ItemSourceSelectService(
     private val featureFlagsProperties: FeatureFlagsProperties,
-    private val itemApiService: ItemApiService,
+    private val itemApiService: ItemApiMergeService,
     private val itemElasticService: ItemElasticService
 ) : ItemQueryService {
     override suspend fun getAllItems(

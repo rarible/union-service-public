@@ -2,7 +2,7 @@ package com.rarible.protocol.union.api.service.api
 
 import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.api.service.CollectionQueryService
-import com.rarible.protocol.union.api.util.BlockchainFilter
+import com.rarible.protocol.union.enrichment.util.BlockchainFilter
 import com.rarible.protocol.union.core.continuation.UnionCollectionContinuation
 import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.core.service.CollectionService
@@ -23,6 +23,7 @@ import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.model.ShortCollection
 import com.rarible.protocol.union.enrichment.model.ShortCollectionId
 import com.rarible.protocol.union.enrichment.service.EnrichmentCollectionService
+import com.rarible.protocol.union.enrichment.service.query.order.OrderApiService
 import com.rarible.protocol.union.enrichment.util.spent
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll

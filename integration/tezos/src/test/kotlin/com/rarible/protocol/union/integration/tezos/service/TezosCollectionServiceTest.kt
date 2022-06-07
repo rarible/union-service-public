@@ -55,6 +55,15 @@ class TezosCollectionServiceTest {
         assertThat(contract.id).isEqualTo(CollectionIdDto(BlockchainDto.TEZOS, address))
     }
 
+    @Test
+    fun `should return tzkt collections by ids`() = runBlocking<Unit> {
+        val addresses = listOf("KT1Tu6A2NHKwEjdHTTJBys8Pu8K9Eo87P2Vy")
+        coEvery { tzktCollectionClient.collectionsByIds(addresses) } returns addresses.map(::contract)
+        val contracts = service.getCollectionsByIds(addresses)
+
+        assertThat(contracts).hasSize(1)
+    }
+
     fun contract(address: String): Contract = Contract(
         type = "contract",
         alias = "",
