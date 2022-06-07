@@ -2,7 +2,6 @@ package com.rarible.protocol.union.listener.handler.internal
 
 import com.rarible.core.kafka.KafkaMessage
 import com.rarible.core.test.data.randomString
-import com.rarible.core.test.wait.Wait
 import com.rarible.protocol.dto.NftItemUpdateEventDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthNftItemDto
@@ -30,7 +29,7 @@ class InternalItemEventHandlerFt : AbstractIntegrationTest() {
             )
         ).ensureSuccess()
 
-        Wait.waitAssert {
+        waitAssert {
             val messages = findItemUpdates(itemId.value)
             Assertions.assertThat(messages).hasSize(1)
             Assertions.assertThat(messages[0].key).isEqualTo(itemId.fullId())

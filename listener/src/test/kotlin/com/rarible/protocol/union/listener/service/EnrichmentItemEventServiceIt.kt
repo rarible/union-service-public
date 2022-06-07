@@ -1,7 +1,6 @@
 package com.rarible.protocol.union.listener.service
 
 import com.rarible.core.test.data.randomAddress
-import com.rarible.core.test.wait.Wait
 import com.rarible.protocol.dto.OrderStatusDto
 import com.rarible.protocol.union.core.model.ReconciliationMarkType
 import com.rarible.protocol.union.core.util.CompositeItemIdParser
@@ -69,7 +68,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         // Item should not be updated since it wasn't in DB before update
         assertThat(created).isNull()
         // But there should be single Item event "as is"
-        Wait.waitAssert {
+        waitAssert {
             val messages = findItemUpdates(itemId.value)
             assertThat(messages).hasSize(1)
             assertThat(messages[0].key).isEqualTo(itemId.fullId())
@@ -77,7 +76,9 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
             assertThat(messages[0].value.itemId).isEqualTo(itemId)
 
             // TODO: see CHARLIE-158: here we ensure that meta is taken from the blockchain's Item.
-            assertThat(messages[0].value.item).isEqualTo(EnrichedItemConverter.convert(unionItem, meta = unionItem.meta))
+            assertThat(messages[0].value.item).isEqualTo(
+                EnrichedItemConverter.convert(unionItem, meta = unionItem.meta)
+            )
         }
     }
 
@@ -113,7 +114,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         assertThat(saved.bestSellOrder).isEqualTo(shortItem.bestSellOrder)
         assertThat(saved.bestBidOrder).isEqualTo(shortItem.bestBidOrder)
 
-        Wait.waitAssert {
+        waitAssert {
             val messages = findItemUpdates(itemId.value)
             assertThat(messages).hasSize(1)
             assertThat(messages[0].key).isEqualTo(itemId.fullId())
@@ -146,7 +147,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
 
         itemEventService.onItemUpdated(unionItem)
 
-        Wait.waitAssert {
+        waitAssert {
             // Event should not be sent in case of corrupted enrichment data
             val messages = findItemUpdates(itemId.value)
             assertThat(messages).hasSize(0)
@@ -193,7 +194,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
             totalStock = 30.toBigInteger()
         )
 
-        Wait.waitAssert {
+        waitAssert {
             val messages = findItemUpdates(itemId.value)
             // There may be several events for item update (when meta gets loaded)
             // TODO but since we're testing it on service level, first message
@@ -244,7 +245,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         val saved = itemService.get(shortItem.id)!!
         assertThat(saved.bestSellOrder).isEqualTo(ShortOrderConverter.convert(unionBestSell))
 
-        Wait.waitAssert {
+        waitAssert {
             val messages = findItemUpdates(itemId.value)
             assertThat(messages).hasSize(1)
             assertThat(messages[0].value.itemId).isEqualTo(itemId)
@@ -276,7 +277,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         val saved = itemService.get(shortItem.id)
         assertThat(saved).isNull()
 
-        Wait.waitAssert {
+        waitAssert {
             val messages = findItemUpdates(itemId.value)
             assertThat(messages).hasSize(1)
             assertThat(messages[0].value.itemId).isEqualTo(itemId)
@@ -303,7 +304,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
 
         // Unfortunately, there is no other way to ensure there is no messages in the Kafka
         delay(1000)
-        Wait.waitAssert {
+        waitAssert {
             assertThat(itemEvents).hasSize(0)
         }
     }
@@ -317,7 +318,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         itemEventService.onItemDeleted(itemId)
 
         assertThat(itemService.get(item.id)).isNull()
-        Wait.waitAssert {
+        waitAssert {
             val messages = findItemDeletions(itemId.value)
             assertThat(messages).hasSize(1)
             assertThat(messages[0].key).isEqualTo(itemId.fullId())
@@ -334,7 +335,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         itemEventService.onItemDeleted(itemId)
 
         assertThat(itemService.get(shortItemId)).isNull()
-        Wait.waitAssert {
+        waitAssert {
             val messages = findItemDeletions(itemId.value)
             assertThat(messages).hasSize(1)
             assertThat(messages[0].key).isEqualTo(itemId.fullId())
@@ -376,7 +377,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         val saved = itemService.get(shortItem.id)!!
         assertThat(saved.auctions).isEqualTo(setOf(auction.id))
 
-        Wait.waitAssert {
+        waitAssert {
             val messages = findItemUpdates(itemId.value)
             assertThat(messages).hasSize(1)
             assertThat(messages[0].value.itemId).isEqualTo(itemId)
@@ -407,7 +408,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         // No enrich data, should be removed
         assertThat(saved).isNull()
 
-        Wait.waitAssert {
+        waitAssert {
             val messages = findItemUpdates(itemId.value)
             assertThat(messages).hasSize(1)
             assertThat(messages[0].value.itemId).isEqualTo(itemId)
@@ -438,7 +439,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         val saved = itemService.get(shortItem.id)!!
         assertThat(saved.auctions.size).isEqualTo(2)
 
-        Wait.waitAssert {
+        waitAssert {
             val messages = findItemUpdates(itemId.value)
             assertThat(messages).hasSize(2)
 
@@ -477,7 +478,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         // Should be not deleted since there is some enrich data
         assertThat(saved.auctions).isNullOrEmpty()
 
-        Wait.waitAssert {
+        waitAssert {
             val messages = findItemUpdates(itemId.value)
             assertThat(messages).hasSize(1)
             assertThat(messages[0].value.itemId).isEqualTo(itemId)

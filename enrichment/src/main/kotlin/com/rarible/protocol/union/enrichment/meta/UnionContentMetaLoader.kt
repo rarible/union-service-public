@@ -1,10 +1,10 @@
 package com.rarible.protocol.union.enrichment.meta
 
-import com.rarible.core.content.meta.loader.ContentMetaReceiver
-import com.rarible.core.meta.resource.UrlResource
 import com.rarible.core.meta.resource.model.EmbeddedContent
+import com.rarible.core.meta.resource.model.UrlResource
 import com.rarible.protocol.union.core.model.UnionImageProperties
 import com.rarible.protocol.union.core.model.UnionMetaContent
+import com.rarible.protocol.union.core.model.UnionUnknownProperties
 import com.rarible.protocol.union.enrichment.meta.embedded.EmbeddedContentService
 import com.rarible.protocol.union.enrichment.meta.embedded.UnionEmbeddedContent
 import kotlinx.coroutines.async
@@ -15,12 +15,12 @@ import org.springframework.stereotype.Component
 
 @Component
 class UnionContentMetaLoader(
-    private val contentMetaReceiver: ContentMetaReceiver,
+    private val unionContentMetaProvider: UnionContentMetaProvider,
     private val unionContentMetaService: UnionContentMetaService,
     private val embeddedContentService: EmbeddedContentService
 ) {
 
-    private val logger = LoggerFactory.getLogger(UnionMetaLoader::class.java)
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     suspend fun enrichContentMeta(
         metaContent: List<UnionMetaContent>
@@ -45,32 +45,21 @@ class UnionContentMetaLoader(
 
     private suspend fun downloadMetaContent(content: UnionMetaContent, resource: UrlResource): UnionMetaContent {
 
+        val resolvedProperties = unionContentMetaProvider.getContentMeta(resource)
         val internalUrl = unionContentMetaService.resolveInternalHttpUrl(resource)
-        if (internalUrl == content.url) {
-            logger.info("Fetching content meta by URL $internalUrl")
-        } else {
-            logger.info("Fetching content meta by URL $internalUrl (original URL is ${content.url})")
-        }
-
-        val resolvedContentMeta = try {
-            contentMetaReceiver.receive(internalUrl)
-        } catch (e: Exception) {
-            logger.warn("Failed to receive content meta via URL {}", internalUrl, e)
-            null
-        }
 
         val contentProperties = when {
-            resolvedContentMeta != null -> {
-                logger.info("Content meta from $internalUrl resolved to $resolvedContentMeta")
-                unionContentMetaService.convertToProperties(resolvedContentMeta)
+            resolvedProperties != null -> {
+                logger.info("Content meta from $internalUrl resolved to $resolvedProperties")
+                resolvedProperties
             }
             content.properties != null -> {
                 logger.info("Content meta from $internalUrl is not resolved, using ${content.properties}")
                 content.properties
             }
             else -> {
-                logger.warn("Content meta from $internalUrl is not resolved, considered as image")
-                UnionImageProperties()
+                logger.warn("Content meta from $internalUrl is not resolved, content metadata is unknown")
+                UnionUnknownProperties()
             }
         }
 

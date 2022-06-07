@@ -6,6 +6,7 @@ import com.rarible.core.test.data.randomInt
 import com.rarible.core.test.data.randomLong
 import com.rarible.protocol.union.core.model.UnionAudioProperties
 import com.rarible.protocol.union.core.model.UnionImageProperties
+import com.rarible.protocol.union.core.model.UnionUnknownProperties
 import com.rarible.protocol.union.core.model.UnionVideoProperties
 import com.rarible.protocol.union.enrichment.meta.UnionContentMetaLoader
 import com.rarible.protocol.union.enrichment.meta.UnionContentMetaService
@@ -114,15 +115,15 @@ class UnionContentMetaLoaderIt : AbstractIntegrationTest() {
         val result = unionMetaConLoader.enrichContentMeta(listOf(content))[0]
         val enriched = result.properties
 
-        assertThat(enriched).isInstanceOf(UnionImageProperties::class.java)
+        assertThat(enriched).isInstanceOf(UnionUnknownProperties::class.java)
         // By default, we suggest it as image
-        assertThat(result).isEqualTo(content.copy(properties = UnionImageProperties()))
+        assertThat(result).isEqualTo(content.copy(properties = UnionUnknownProperties()))
     }
 
     @Test
     fun `downloaded - url replaced`() = runBlocking<Unit> {
         // CID should be replaced with abstract IPFS url
-        val cid = "QmeqeBpsYTuJL8AZhY9fGBeTj9QuvMVqaZeRWFnjA24QEE"
+        val cid = "QmeqeBpsYTuJL8AZhY9fGBeTj9QuvMVqaZeRWFnjA24QEE/abc"
         val content = randomUnionContent(UnionImageProperties()).copy(url = cid)
         val contentMeta = randomContentMeta(MimeType.PNG_IMAGE.value)
 
@@ -131,6 +132,20 @@ class UnionContentMetaLoaderIt : AbstractIntegrationTest() {
         val result = unionMetaConLoader.enrichContentMeta(listOf(content))[0]
 
         assertThat(result.url).isEqualTo("ipfs://$cid")
+    }
+
+    @Test
+    fun `downloaded - url is not replaced`() = runBlocking<Unit> {
+        // IPFS url with gateway, should not be replaced by abstract IPFS url
+        val url = "https://ipfs.io/ipfs/QmeqeBpsYTuJL8AZhY9fGBeTj9QuvMVqaZeRWFnjA24QEE"
+        val content = randomUnionContent(UnionImageProperties()).copy(url = url)
+        val contentMeta = randomContentMeta(MimeType.PNG_IMAGE.value)
+
+        coEvery { testContentMetaReceiver.receive(content.url) } returns contentMeta
+
+        val result = unionMetaConLoader.enrichContentMeta(listOf(content))[0]
+
+        assertThat(result.url).isEqualTo(url)
     }
 
     @Test

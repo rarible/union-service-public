@@ -1,7 +1,6 @@
 package com.rarible.protocol.union.listener.handler.internal
 
 import com.rarible.core.kafka.KafkaMessage
-import com.rarible.core.test.wait.Wait
 import com.rarible.protocol.solana.dto.TokenMetaDto
 import com.rarible.protocol.solana.dto.TokenMetaUpdateEventDto
 import com.rarible.protocol.union.enrichment.converter.EnrichedMetaConverter
@@ -37,7 +36,7 @@ class InternalItemMetaEventHandlerFt : AbstractIntegrationTest() {
             )
         )
 
-        Wait.waitAssert {
+        waitAssert {
             val unionMeta = SolanaItemMetaConverter.convert(tokenMeta)
             assertThat(unionMetaService.getAvailableMeta(listOf(itemId)))
                 .isEqualTo(mapOf(itemId to unionMeta))

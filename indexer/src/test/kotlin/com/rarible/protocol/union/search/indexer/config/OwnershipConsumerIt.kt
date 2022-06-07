@@ -3,7 +3,7 @@ package com.rarible.protocol.union.search.indexer.config
 import com.rarible.core.kafka.KafkaMessage
 import com.rarible.core.kafka.RaribleKafkaProducer
 import com.rarible.core.test.data.randomString
-import com.rarible.core.test.wait.Wait
+import com.rarible.protocol.union.core.test.WaitAssert
 import com.rarible.protocol.union.dto.OwnershipDeleteEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.dto.OwnershipUpdateEventDto
@@ -45,7 +45,7 @@ class OwnershipConsumerIt {
         producer.send(message).ensureSuccess()
 
         // then
-        Wait.waitAssert {
+        WaitAssert.wait {
             val esOwnership = repository.findById(ownership.id.fullId())
             Assertions.assertThat(esOwnership?.ownershipId).isEqualTo(ownership.id.fullId())
         }
@@ -69,7 +69,7 @@ class OwnershipConsumerIt {
         producer.send(message).ensureSuccess()
 
         // then
-        Wait.waitAssert {
+        WaitAssert.wait {
             val result = repository.findById(ownershipId.fullId())
             assertNull(result)
         }

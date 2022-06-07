@@ -18,6 +18,8 @@ sealed class UnionMetaContentProperties {
     abstract val size: Long?
 
     abstract fun isEmpty(): Boolean
+
+    abstract fun isFull(): Boolean
 }
 
 data class UnionImageProperties(
@@ -28,6 +30,13 @@ data class UnionImageProperties(
 ) : UnionMetaContentProperties() {
 
     override fun isEmpty(): Boolean = mimeType == null || width == null || height == null
+
+    override fun isFull(): Boolean {
+        return mimeType != null
+            && size != null
+            && width != null
+            && height != null
+    }
 
 }
 
@@ -40,6 +49,12 @@ data class UnionVideoProperties(
 
     override fun isEmpty(): Boolean = mimeType == null || width == null || height == null
 
+    override fun isFull(): Boolean {
+        return mimeType != null
+            && size != null
+            && width != null
+            && height != null
+    }
 }
 
 data class UnionAudioProperties(
@@ -48,6 +63,8 @@ data class UnionAudioProperties(
 ) : UnionMetaContentProperties() {
 
     override fun isEmpty(): Boolean = mimeType == null
+
+    override fun isFull(): Boolean = mimeType != null && size != null
 
 }
 
@@ -58,6 +75,8 @@ data class UnionModel3dProperties(
 
     override fun isEmpty(): Boolean = mimeType == null
 
+    override fun isFull(): Boolean = mimeType != null && size != null
+
 }
 
 data class UnionHtmlProperties(
@@ -67,6 +86,8 @@ data class UnionHtmlProperties(
 
     override fun isEmpty(): Boolean = mimeType == null
 
+    override fun isFull(): Boolean = mimeType != null && size != null
+
 }
 
 data class UnionUnknownProperties(
@@ -75,5 +96,7 @@ data class UnionUnknownProperties(
 ) : UnionMetaContentProperties() {
 
     override fun isEmpty(): Boolean = mimeType == null
+
+    override fun isFull(): Boolean = false
 
 }

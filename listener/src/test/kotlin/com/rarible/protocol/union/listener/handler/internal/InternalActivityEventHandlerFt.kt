@@ -1,7 +1,6 @@
 package com.rarible.protocol.union.listener.handler.internal
 
 import com.rarible.core.kafka.KafkaMessage
-import com.rarible.core.test.wait.Wait
 import com.rarible.protocol.union.dto.BurnActivityDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemBurnActivity
 import com.rarible.protocol.union.listener.test.AbstractIntegrationTest
@@ -24,7 +23,7 @@ class InternalActivityEventHandlerFt : AbstractIntegrationTest() {
             )
         ).ensureSuccess()
 
-        Wait.waitAssert {
+        waitAssert {
             val messages = findActivityUpdates(activity.id, BurnActivityDto::class.java)
             Assertions.assertThat(messages).hasSize(1)
         }
