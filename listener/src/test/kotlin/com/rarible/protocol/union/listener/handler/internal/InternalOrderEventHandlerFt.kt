@@ -2,7 +2,6 @@ package com.rarible.protocol.union.listener.handler.internal
 
 import com.rarible.core.kafka.KafkaMessage
 import com.rarible.core.test.data.randomString
-import com.rarible.core.test.wait.Wait
 import com.rarible.protocol.dto.OrderUpdateEventDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAssetErc20
 import com.rarible.protocol.union.integration.ethereum.data.randomEthBidOrderDto
@@ -36,7 +35,7 @@ class InternalOrderEventHandlerFt : AbstractIntegrationTest() {
             )
         )
 
-        Wait.waitAssert {
+        waitAssert {
             val messages = findOrderUpdates(orderId)
             Assertions.assertThat(messages).hasSize(1)
         }

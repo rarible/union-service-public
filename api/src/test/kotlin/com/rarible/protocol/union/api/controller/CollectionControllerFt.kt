@@ -3,7 +3,6 @@ package com.rarible.protocol.union.api.controller
 import com.rarible.core.common.justOrEmpty
 import com.rarible.core.test.data.randomAddress
 import com.rarible.core.test.data.randomString
-import com.rarible.core.test.wait.Wait
 import com.rarible.protocol.dto.FlowNftCollectionsDto
 import com.rarible.protocol.dto.NftCollectionsDto
 import com.rarible.protocol.dto.NftItemsDto
@@ -11,6 +10,7 @@ import com.rarible.protocol.union.api.client.CollectionControllerApi
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
+import com.rarible.protocol.union.core.test.WaitAssert
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.dto.continuation.CombinedContinuation
@@ -244,7 +244,7 @@ class CollectionControllerFt : AbstractIntegrationTest() {
 
         collectionControllerClient.refreshCollectionMeta(collectionId.fullId()).awaitFirstOrNull()
 
-        Wait.waitAssert(Duration.ofMillis(10_000)) {
+        WaitAssert.wait(timeout = Duration.ofMillis(10_000)) {
             coVerify(exactly = 1) { testUnionMetaLoader.load(itemId1) }
             coVerify(exactly = 1) { testUnionMetaLoader.load(itemId2) }
         }

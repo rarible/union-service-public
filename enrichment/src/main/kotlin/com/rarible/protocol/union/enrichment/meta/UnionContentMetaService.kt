@@ -1,11 +1,11 @@
 package com.rarible.protocol.union.enrichment.meta
 
-import com.rarible.core.meta.resource.IpfsUrl
-import com.rarible.core.meta.resource.SchemaUrl
-import com.rarible.core.meta.resource.UrlResource
 import com.rarible.core.meta.resource.detector.embedded.EmbeddedContentDetector
 import com.rarible.core.meta.resource.model.ContentMeta
 import com.rarible.core.meta.resource.model.EmbeddedContent
+import com.rarible.core.meta.resource.model.IpfsUrl
+import com.rarible.core.meta.resource.model.SchemaUrl
+import com.rarible.core.meta.resource.model.UrlResource
 import com.rarible.core.meta.resource.parser.UrlParser
 import com.rarible.core.meta.resource.resolver.UrlResolver
 import com.rarible.protocol.union.core.model.UnionAudioProperties
@@ -75,7 +75,7 @@ class UnionContentMetaService(
                 }
             }
             // The same for custom schema urls
-            is SchemaUrl -> resource.original
+            is SchemaUrl -> resource.toSchemaUrl()
             // Other cases - as public urls
             else -> resolvePublicHttpUrl(resource)
         }

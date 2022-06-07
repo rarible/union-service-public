@@ -1,7 +1,6 @@
 package com.rarible.protocol.union.listener.tezos
 
 import com.rarible.core.kafka.KafkaMessage
-import com.rarible.core.test.wait.Wait
 import com.rarible.dipdup.client.core.model.Asset
 import com.rarible.dipdup.client.core.model.DipDupOrder
 import com.rarible.dipdup.client.core.model.OrderStatus
@@ -62,7 +61,7 @@ class DipDupOrderEventHandlerFt : AbstractDipDupIntegrationTest() {
             )
         ).ensureSuccess()
 
-        Wait.waitAssert {
+        waitAssert {
             val messages = findOrderUpdates(orderId)
             Assertions.assertThat(messages).hasSize(1)
         }

@@ -3,9 +3,9 @@ package com.rarible.protocol.union.api.websocket
 import com.rarible.core.kafka.KafkaMessage
 import com.rarible.core.test.data.randomAddress
 import com.rarible.core.test.data.randomBigInt
-import com.rarible.core.test.wait.Wait
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
+import com.rarible.protocol.union.core.test.WaitAssert
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.ItemIdDto
@@ -45,7 +45,8 @@ import java.util.concurrent.TimeUnit
 
 @IntegrationTest
 @ContextConfiguration
-internal class ItemEventTest : AbstractIntegrationTest() {
+internal class ItemEventFt : AbstractIntegrationTest() {
+
     @Autowired
     protected lateinit var webSocketEventsQueue: LinkedBlockingQueue<SubscriptionEventDto>
 
@@ -98,7 +99,7 @@ internal class ItemEventTest : AbstractIntegrationTest() {
             )
         ).ensureSuccess()
 
-        Wait.waitAssert {
+        WaitAssert.wait {
             val event = withContext(Dispatchers.IO) {
                 webSocketEventsQueue.poll(5, TimeUnit.SECONDS)
             }
