@@ -1,26 +1,25 @@
 package com.rarible.protocol.union.worker.task.search.item
 
 import com.rarible.core.task.TaskHandler
-import com.rarible.protocol.union.api.client.ItemControllerApi
 import com.rarible.protocol.union.core.converter.EsItemConverter.toEsItem
 import com.rarible.protocol.union.core.model.EsItem
 import com.rarible.protocol.union.dto.continuation.CombinedContinuation
 import com.rarible.protocol.union.dto.continuation.page.ArgSlice
 import com.rarible.protocol.union.dto.continuation.page.PageSize
 import com.rarible.protocol.union.enrichment.repository.search.EsItemRepository
+import com.rarible.protocol.union.enrichment.service.query.item.ItemApiMergeService
 import com.rarible.protocol.union.worker.config.ItemReindexProperties
 import com.rarible.protocol.union.worker.metrics.SearchTaskMetricFactory
 import com.rarible.protocol.union.worker.task.search.ParamFactory
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.reactor.awaitSingle
 import org.springframework.stereotype.Component
 
 @Component
 class ItemTask(
     private val properties: ItemReindexProperties,
-    private val client: ItemControllerApi,
+    private val itemApiMergeService: ItemApiMergeService,
     private val paramFactory: ParamFactory,
     private val repository: EsItemRepository,
     private val searchTaskMetricFactory: SearchTaskMetricFactory
@@ -43,14 +42,14 @@ class ItemTask(
             var continuation = from
             flow {
                 do {
-                    val res = client.getAllItems(
+                    val res = itemApiMergeService.getAllItems(
                         listOf(blockchain),
                         continuation,
                         PageSize.ITEM.max,
                         true,
                         Long.MIN_VALUE,
                         Long.MAX_VALUE
-                    ).awaitSingle()
+                    )
 
                     if (res.items.isNotEmpty()) {
                         repository.saveAll(

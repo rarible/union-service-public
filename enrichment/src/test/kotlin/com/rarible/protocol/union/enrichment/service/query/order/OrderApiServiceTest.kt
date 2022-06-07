@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.api.service.api
+package com.rarible.protocol.union.enrichment.service.query.order
 
 import com.rarible.protocol.union.core.converter.ContractAddressConverter
 import com.rarible.protocol.union.core.service.OrderService
@@ -18,7 +18,7 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
-import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -43,8 +43,8 @@ class OrderApiServiceTest {
         coEvery { orderService.getBidCurrencies(itemId.value) } returns emptyList()
         val result = getOrderBidsByItem(itemId, null, 10)
 
-        assertThat(result.continuation).isNull()
-        assertThat(result.orders).hasSize(0)
+        Assertions.assertThat(result.continuation).isNull()
+        Assertions.assertThat(result.orders).hasSize(0)
     }
 
     @Test
@@ -53,8 +53,8 @@ class OrderApiServiceTest {
         coEvery { orderService.getSellCurrencies(itemId.value) } returns emptyList()
         val result = getSellOrdersByItem(itemId, null, 10)
 
-        assertThat(result.continuation).isNull()
-        assertThat(result.orders).hasSize(0)
+        Assertions.assertThat(result.continuation).isNull()
+        Assertions.assertThat(result.orders).hasSize(0)
     }
 
     @Test
@@ -76,8 +76,8 @@ class OrderApiServiceTest {
 
         val result = getOrderBidsByItem(ethItemId, "${unionOrder.bidCurrencyId}:COMPLETED", 10)
 
-        assertThat(result.continuation).isNull()
-        assertThat(result.orders).hasSize(0)
+        Assertions.assertThat(result.continuation).isNull()
+        Assertions.assertThat(result.orders).hasSize(0)
     }
 
     private suspend fun getOrderBidsByItem(itemId: ItemIdDto, continuation: String?, size: Int): OrdersDto {

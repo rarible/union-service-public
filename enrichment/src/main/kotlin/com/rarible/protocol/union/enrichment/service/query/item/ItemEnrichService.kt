@@ -1,8 +1,7 @@
-package com.rarible.protocol.union.api.service
+package com.rarible.protocol.union.enrichment.service.query.item
 
 import com.rarible.core.common.nowMillis
 import com.rarible.core.logging.Logger
-import com.rarible.protocol.union.api.service.api.OrderApiService
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.ItemIdDto
@@ -13,6 +12,7 @@ import com.rarible.protocol.union.enrichment.meta.UnionMetaService
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
+import com.rarible.protocol.union.enrichment.service.query.order.OrderApiService
 import com.rarible.protocol.union.enrichment.util.spent
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async

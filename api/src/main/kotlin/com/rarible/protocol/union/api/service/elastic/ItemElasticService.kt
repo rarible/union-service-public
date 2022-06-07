@@ -4,8 +4,8 @@ import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.apm.SpanType
 import com.rarible.core.common.mapAsync
 import com.rarible.core.logging.Logger
-import com.rarible.protocol.union.api.service.ItemEnrichService
-import com.rarible.protocol.union.api.service.ItemQueryService
+import com.rarible.protocol.union.enrichment.service.query.item.ItemEnrichService
+import com.rarible.protocol.union.enrichment.service.query.item.ItemQueryService
 import com.rarible.protocol.union.core.continuation.UnionItemContinuation
 import com.rarible.protocol.union.core.model.EsItem
 import com.rarible.protocol.union.core.model.EsItemCursor

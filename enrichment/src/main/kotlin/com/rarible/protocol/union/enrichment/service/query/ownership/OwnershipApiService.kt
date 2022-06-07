@@ -1,6 +1,5 @@
-package com.rarible.protocol.union.api.service
+package com.rarible.protocol.union.enrichment.service.query.ownership
 
-import com.rarible.protocol.union.api.service.api.OrderApiService
 import com.rarible.protocol.union.core.continuation.UnionAuctionOwnershipWrapperContinuation
 import com.rarible.protocol.union.core.continuation.UnionOwnershipContinuation
 import com.rarible.protocol.union.core.exception.UnionNotFoundException
@@ -27,6 +26,7 @@ import com.rarible.protocol.union.enrichment.model.ShortOwnership
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
 import com.rarible.protocol.union.enrichment.service.EnrichmentAuctionService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
+import com.rarible.protocol.union.enrichment.service.query.order.OrderApiService
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
