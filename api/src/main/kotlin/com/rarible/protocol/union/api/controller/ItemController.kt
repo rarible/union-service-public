@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.api.controller
 
-import com.rarible.protocol.union.api.service.OwnershipQueryService
 import com.rarible.protocol.union.api.service.select.ItemSourceSelectService
 import com.rarible.protocol.union.core.exception.UnionNotFoundException
 import com.rarible.protocol.union.core.model.UnionImageProperties
@@ -10,7 +9,6 @@ import com.rarible.protocol.union.core.model.UnionVideoProperties
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.RestrictionService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
-import com.rarible.protocol.union.core.util.LogUtils
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.ItemIdsDto
@@ -42,7 +40,6 @@ import java.time.Duration
 @RestController
 class ItemController(
     private val itemSourceSelectService: ItemSourceSelectService,
-    private val ownershipApiService: OwnershipQueryService,
     private val router: BlockchainRouter<ItemService>,
     private val enrichmentItemService: EnrichmentItemService,
     private val unionMetaService: UnionMetaService,
@@ -153,9 +150,7 @@ class ItemController(
         val fullItemId = IdParser.parseItemId(itemId)
         val safeSync = sync ?: false
 
-        LogUtils.addToMdc(fullItemId, router) {
-            logger.info("Refreshing item meta for $itemId (sync=$safeSync)")
-        }
+        logger.info("Refreshing item meta for $itemId (sync=$safeSync)")
 
         // TODO[meta]: when all Blockchains stop caching the meta, we can remove this endpoint call.
         router.getService(fullItemId.blockchain).resetItemMeta(fullItemId.value)

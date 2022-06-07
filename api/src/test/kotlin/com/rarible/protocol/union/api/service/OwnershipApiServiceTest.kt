@@ -2,7 +2,6 @@ package com.rarible.protocol.union.api.service
 
 import com.rarible.core.common.nowMillis
 import com.rarible.core.test.data.randomAddress
-import com.rarible.protocol.union.api.service.api.OrderApiService
 import com.rarible.protocol.union.api.service.api.OwnershipApiQueryService
 import com.rarible.protocol.union.core.DefaultBlockchainProperties
 import com.rarible.protocol.union.core.model.UnionOwnership

@@ -2,7 +2,6 @@ package com.rarible.protocol.union.api.service
 
 import com.rarible.core.common.nowMillis
 import com.rarible.core.test.data.randomAddress
-import com.rarible.protocol.union.api.service.api.OrderApiService
 import com.rarible.protocol.union.api.service.elastic.OwnershipElasticHelper
 import com.rarible.protocol.union.api.service.elastic.OwnershipElasticService
 import com.rarible.protocol.union.core.DefaultBlockchainProperties
@@ -23,6 +22,7 @@ import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
 import com.rarible.protocol.union.enrichment.repository.search.EsOwnershipRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentAuctionService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
+import com.rarible.protocol.union.enrichment.service.query.order.OrderApiService
 import com.rarible.protocol.union.integration.ethereum.converter.EthAuctionConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOwnershipConverter
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAuctionDto
@@ -51,7 +51,7 @@ class OwnershipElasticServiceTest {
         auctionContracts = auctionContract.prefixed()
     )
 
-    private val orderApiService: OrderApiService = mockk()
+    private val orderApiService = mockk<OrderApiService>()
     private val auctionContractService: AuctionContractService = AuctionContractService(listOf(properties))
     private val enrichmentOwnershipService: EnrichmentOwnershipService = mockk()
     private val enrichmentAuctionService: EnrichmentAuctionService = mockk()

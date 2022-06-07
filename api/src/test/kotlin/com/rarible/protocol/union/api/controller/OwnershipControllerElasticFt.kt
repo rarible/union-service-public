@@ -31,6 +31,7 @@ import com.rarible.protocol.union.test.data.randomFlowV1OrderDto
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.TestPropertySource
@@ -65,8 +66,8 @@ class OwnershipControllerElasticFt : AbstractIntegrationTest() {
 
         val unionOwnership = ownershipControllerClient.getOwnershipById(ownershipId.fullId()).awaitFirst()
 
-        Assertions.assertThat(unionOwnership.id.value).isEqualTo(ownershipId.value)
-        Assertions.assertThat(unionOwnership.id.blockchain).isEqualTo(BlockchainDto.ETHEREUM)
+        assertThat(unionOwnership.id.value).isEqualTo(ownershipId.value)
+        assertThat(unionOwnership.id.blockchain).isEqualTo(BlockchainDto.ETHEREUM)
     }
 
     @Test
@@ -87,9 +88,9 @@ class OwnershipControllerElasticFt : AbstractIntegrationTest() {
 
         val unionOwnership = ownershipControllerClient.getOwnershipById(ownershipId.fullId()).awaitFirst()
 
-        Assertions.assertThat(unionOwnership.id).isEqualTo(ownershipId)
-        Assertions.assertThat(unionOwnership.id.blockchain).isEqualTo(BlockchainDto.ETHEREUM)
-        Assertions.assertThat(unionOwnership.auction!!.id.value).isEqualTo(EthConverter.convert(auction.hash))
+        assertThat(unionOwnership.id).isEqualTo(ownershipId)
+        assertThat(unionOwnership.id.blockchain).isEqualTo(BlockchainDto.ETHEREUM)
+        assertThat(unionOwnership.auction!!.id.value).isEqualTo(EthConverter.convert(auction.hash))
     }
 
     @Test
@@ -105,10 +106,10 @@ class OwnershipControllerElasticFt : AbstractIntegrationTest() {
 
         val unionOwnership = ownershipControllerClient.getOwnershipById(ownershipId.fullId()).awaitFirst()
 
-        Assertions.assertThat(unionOwnership.id).isEqualTo(ownershipId)
-        Assertions.assertThat(unionOwnership.id.blockchain).isEqualTo(BlockchainDto.ETHEREUM)
-        Assertions.assertThat(unionOwnership.value).isEqualTo(ownership.value + auction.sell.valueDecimal!!.toBigInteger())
-        Assertions.assertThat(unionOwnership.auction!!.id.value).isEqualTo(EthConverter.convert(auction.hash))
+        assertThat(unionOwnership.id).isEqualTo(ownershipId)
+        assertThat(unionOwnership.id.blockchain).isEqualTo(BlockchainDto.ETHEREUM)
+        assertThat(unionOwnership.value).isEqualTo(ownership.value + auction.sell.valueDecimal!!.toBigInteger())
+        assertThat(unionOwnership.auction!!.id.value).isEqualTo(EthConverter.convert(auction.hash))
     }
 
     @Test
@@ -121,8 +122,8 @@ class OwnershipControllerElasticFt : AbstractIntegrationTest() {
 
         val unionOwnership = ownershipControllerClient.getOwnershipById(ownershipIdFull).awaitFirst()
 
-        Assertions.assertThat(unionOwnership.id.value).isEqualTo(ownershipId.value)
-        Assertions.assertThat(unionOwnership.id.blockchain).isEqualTo(BlockchainDto.TEZOS)
+        assertThat(unionOwnership.id.value).isEqualTo(ownershipId.value)
+        assertThat(unionOwnership.id.blockchain).isEqualTo(BlockchainDto.TEZOS)
     }
 
     @Test
@@ -139,12 +140,13 @@ class OwnershipControllerElasticFt : AbstractIntegrationTest() {
 
         flowOwnershipControllerApiMock.mockGetNftOwnershipById(flowUnionOwnership.id, flowOwnership)
         flowOrderControllerApiMock.mockGetById(flowOrder)
+        flowOrderControllerApiMock.mockGetByIds(flowOrder)
 
         val result = ownershipControllerClient.getOwnershipById(flowUnionOwnership.id.fullId()).awaitFirst()
 
-        Assertions.assertThat(result.id).isEqualTo(flowUnionOwnership.id)
-        Assertions.assertThat(result.bestSellOrder!!.id).isEqualTo(flowUnionOrder.id)
-        Assertions.assertThat(result.id.blockchain).isEqualTo(BlockchainDto.FLOW)
+        assertThat(result.id).isEqualTo(flowUnionOwnership.id)
+        assertThat(result.bestSellOrder!!.id).isEqualTo(flowUnionOrder.id)
+        assertThat(result.id.blockchain).isEqualTo(BlockchainDto.FLOW)
     }
 
     @Test
@@ -174,11 +176,11 @@ class OwnershipControllerElasticFt : AbstractIntegrationTest() {
         val resultEmptyOwnership = ownerships.ownerships[0]
         val resultEnrichedOwnership = ownerships.ownerships[1]
 
-        Assertions.assertThat(resultEmptyOwnership.id.value).isEqualTo(emptyEthOwnership.id)
-        Assertions.assertThat(resultEmptyOwnership.bestSellOrder).isEqualTo(null)
+        assertThat(resultEmptyOwnership.id.value).isEqualTo(emptyEthOwnership.id)
+        assertThat(resultEmptyOwnership.bestSellOrder).isEqualTo(null)
 
-        Assertions.assertThat(resultEnrichedOwnership.id).isEqualTo(ethUnionOwnership.id)
-        Assertions.assertThat(resultEnrichedOwnership.bestSellOrder!!.id).isEqualTo(ethUnionOrder.id)
+        assertThat(resultEnrichedOwnership.id).isEqualTo(ethUnionOwnership.id)
+        assertThat(resultEnrichedOwnership.bestSellOrder!!.id).isEqualTo(ethUnionOrder.id)
     }
 
     @Test
@@ -218,19 +220,19 @@ class OwnershipControllerElasticFt : AbstractIntegrationTest() {
         ).awaitFirst().ownerships
 
         // AS a result we expect 3 ownerships: free, partial and disguised by full auction
-        Assertions.assertThat(ownerships).hasSize(3)
+        assertThat(ownerships).hasSize(3)
 
         val freeOwnership = ownerships.find { it.id == ethOwnershipId }!!
         val auctionedOwnership = ownerships.find { it.id == ethAuctionedOwnershipId }!!
         val fullyAuctionedOwnership = ownerships.find { it.id == ethFullyAuctionedOwnershipId }!!
 
-        Assertions.assertThat(freeOwnership.auction).isNull()
-        Assertions.assertThat(auctionedOwnership.auction!!.id.value).isEqualTo(EthConverter.convert(auction.hash))
-        Assertions.assertThat(fullyAuctionedOwnership.auction!!.id.value).isEqualTo(EthConverter.convert(fullAuction.hash))
+        assertThat(freeOwnership.auction).isNull()
+        assertThat(auctionedOwnership.auction!!.id.value).isEqualTo(EthConverter.convert(auction.hash))
+        assertThat(fullyAuctionedOwnership.auction!!.id.value).isEqualTo(EthConverter.convert(fullAuction.hash))
 
-        Assertions.assertThat(auctionedOwnership.value)
+        assertThat(auctionedOwnership.value)
             .isEqualTo(ethAuctionedOwnership.value + auction.sell.valueDecimal!!.toBigInteger())
-        Assertions.assertThat(fullyAuctionedOwnership.value)
+        assertThat(fullyAuctionedOwnership.value)
             .isEqualTo(fullAuction.sell.valueDecimal!!.toBigInteger())
     }
 
@@ -246,7 +248,7 @@ class OwnershipControllerElasticFt : AbstractIntegrationTest() {
             flowItemId.fullId(), continuation, size
         ).awaitFirst()
 
-        Assertions.assertThat(ownerships.ownerships).hasSize(0)
+        assertThat(ownerships.ownerships).hasSize(0)
     }
 
     @Test
@@ -262,6 +264,6 @@ class OwnershipControllerElasticFt : AbstractIntegrationTest() {
             itemId.fullId(), continuation, size
         ).awaitFirst()
 
-        Assertions.assertThat(ownerships.ownerships).hasSize(1)
+        assertThat(ownerships.ownerships).hasSize(1)
     }
 }
