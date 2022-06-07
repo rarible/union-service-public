@@ -49,6 +49,7 @@ protocol-union-listener:
     SPRING_DATA_MONGODB_DATABASE: test-protocol-union
 
 protocol-union-meta-loader:
+  replicas: 3
   tolerations:
     - *sharedTolerations
   environments:
