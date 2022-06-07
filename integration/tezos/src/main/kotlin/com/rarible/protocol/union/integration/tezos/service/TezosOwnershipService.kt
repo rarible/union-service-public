@@ -11,6 +11,9 @@ import com.rarible.protocol.union.dto.continuation.page.Page
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.integration.tezos.converter.TezosOwnershipConverter
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktOwnershipService
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.reactive.awaitFirst
 
 @CaptureSpan(type = "blockchain")
@@ -27,8 +30,13 @@ open class TezosOwnershipService(
         return TezosOwnershipConverter.convert(ownership, blockchain)
     }
 
-    override suspend fun getOwnershipsByIds(ownershipIds: List<String>): List<UnionOwnership> {
-        TODO("Not yet implemented")
+    override suspend fun getOwnershipsByIds(ownershipIds: List<String>): List<UnionOwnership> = coroutineScope {
+        ownershipIds.map {
+            async {
+                val ownership = ownershipControllerApi.getNftOwnershipById(it).awaitFirst()
+                TezosOwnershipConverter.convert(ownership, blockchain)
+            }
+        }.awaitAll()
     }
 
     override suspend fun getOwnershipsAll(continuation: String?, size: Int): Slice<UnionOwnership> {

@@ -4,6 +4,7 @@ import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.api.client.OwnershipControllerApi
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
+import com.rarible.protocol.union.core.converter.EsOwnershipConverter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.continuation.page.PageSize
@@ -11,6 +12,7 @@ import com.rarible.protocol.union.dto.group
 import com.rarible.protocol.union.dto.parser.OwnershipIdParser
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOwnershipConverter
+import com.rarible.protocol.union.enrichment.repository.search.EsOwnershipRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
 import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
@@ -22,6 +24,7 @@ import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthV2OrderDto
 import com.rarible.protocol.union.integration.flow.converter.FlowOrderConverter
 import com.rarible.protocol.union.integration.flow.converter.FlowOwnershipConverter
+import com.rarible.protocol.union.integration.tezos.converter.TezosOwnershipConverter
 import com.rarible.protocol.union.integration.tezos.data.randomTezosItemId
 import com.rarible.protocol.union.integration.tezos.data.randomTezosOwnershipDto
 import com.rarible.protocol.union.integration.tezos.data.randomTezosOwnershipId
@@ -30,7 +33,6 @@ import com.rarible.protocol.union.test.data.randomFlowNftOwnershipDto
 import com.rarible.protocol.union.test.data.randomFlowV1OrderDto
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.runBlocking
-import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -54,6 +56,9 @@ class OwnershipControllerElasticFt : AbstractIntegrationTest() {
 
     @Autowired
     lateinit var flowOrderConverter: FlowOrderConverter
+
+    @Autowired
+    lateinit var ownershipRepository: EsOwnershipRepository
 
     @Test
     fun `get ownership by id - ethereum, not enriched`() = runBlocking<Unit> {
@@ -162,12 +167,21 @@ class OwnershipControllerElasticFt : AbstractIntegrationTest() {
         enrichmentOwnershipService.save(ethShortOwnership)
 
         val emptyEthOwnership = randomEthOwnershipDto(ethItemId)
+        val emptyUnionOwnership = EthOwnershipConverter.convert(emptyEthOwnership, ethItemId.blockchain)
 
+        val esOwnership = EsOwnershipConverter.convert(ethUnionOwnership)
+        val emptyEsOwnership = EsOwnershipConverter.convert(emptyUnionOwnership)
+        ownershipRepository.saveAll(
+            listOf(
+                esOwnership,
+                emptyEsOwnership,
+            )
+        )
+
+        ethereumOwnershipControllerApiMock.mockGetNftOwnershipById(esOwnership.ownershipId, ethOwnership)
+        ethereumOwnershipControllerApiMock.mockGetNftOwnershipById(emptyEsOwnership.ownershipId, emptyEthOwnership)
         ethereumAuctionControllerApiMock.mockGetAuctionsByItem(ethItemId, listOf())
         ethereumOrderControllerApiMock.mockGetByIds(ethOrder)
-        ethereumOwnershipControllerApiMock.mockGetNftOwnershipsByItem(
-            ethItemId, continuation, size, emptyEthOwnership, ethOwnership
-        )
 
         val ownerships = ownershipControllerClient.getOwnershipsByItem(
             ethItemId.fullId(), continuation, size
@@ -199,21 +213,31 @@ class OwnershipControllerElasticFt : AbstractIntegrationTest() {
         // Free ownership of some user - no auction for it
         val ethOwnershipId = randomEthOwnershipId(ethItemId)
         val ethOwnership = randomEthOwnershipDto(ethOwnershipId)
+        val ethUnionOwnership = EthOwnershipConverter.convert(ethOwnership, ethItemId.blockchain)
+        val esOwnership = EsOwnershipConverter.convert(ethUnionOwnership)
 
         // Part of ownership is not participating in auction
         val ethAuctionedOwnershipId = ethItemId.toOwnership(EthConverter.convert(auction.seller))
         val ethAuctionedOwnership = randomEthOwnershipDto(ethAuctionedOwnershipId)
+        val ethAuctionedUnionOwnership = EthOwnershipConverter.convert(ethAuctionedOwnership, ethItemId.blockchain)
+        val esAuctionedOwnership = EsOwnershipConverter.convert(ethAuctionedUnionOwnership)
 
         // Non-existing user ownership - all items set for sale
         val ethFullyAuctionedOwnershipId = ethItemId.toOwnership(EthConverter.convert(fullAuction.seller))
 
-        ethereumAuctionControllerApiMock.mockGetAuctionsByItem(ethItemId, listOf(auction, fullAuction))
-        ethereumOwnershipControllerApiMock.mockGetNftOwnershipById(fullAuctionOwnershipId, fullAuctionOwnership)
-        ethereumOwnershipControllerApiMock.mockGetNftOwnershipById(ethAuctionedOwnershipId, ethAuctionedOwnership)
-        ethereumOwnershipControllerApiMock.mockGetNftOwnershipByIdNotFound(ethFullyAuctionedOwnershipId)
-        ethereumOwnershipControllerApiMock.mockGetNftOwnershipsByItem(
-            ethItemId, continuation, 50 + 1, ethAuctionedOwnership, ethOwnership
+        ownershipRepository.saveAll(
+            listOf(
+                esAuctionedOwnership,
+                esOwnership,
+            )
         )
+
+        ethereumAuctionControllerApiMock.mockGetAuctionsByItem(ethItemId, listOf(auction, fullAuction))
+        ethereumOwnershipControllerApiMock.mockGetNftOwnershipById(esAuctionedOwnership.ownershipId, ethAuctionedOwnership)
+        ethereumOwnershipControllerApiMock.mockGetNftOwnershipById(esOwnership.ownershipId, ethOwnership)
+        ethereumOwnershipControllerApiMock.mockGetNftOwnershipById(fullAuctionOwnership.id, fullAuctionOwnership)
+        ethereumOwnershipControllerApiMock.mockGetNftOwnershipById(ethAuctionedOwnership.id, ethAuctionedOwnership)
+        ethereumOwnershipControllerApiMock.mockGetNftOwnershipByIdNotFound(ethFullyAuctionedOwnershipId)
 
         val ownerships = ownershipControllerClient.getOwnershipsByItem(
             ethItemId.fullId(), continuation, 50
@@ -230,10 +254,8 @@ class OwnershipControllerElasticFt : AbstractIntegrationTest() {
         assertThat(auctionedOwnership.auction!!.id.value).isEqualTo(EthConverter.convert(auction.hash))
         assertThat(fullyAuctionedOwnership.auction!!.id.value).isEqualTo(EthConverter.convert(fullAuction.hash))
 
-        assertThat(auctionedOwnership.value)
-            .isEqualTo(ethAuctionedOwnership.value + auction.sell.valueDecimal!!.toBigInteger())
-        assertThat(fullyAuctionedOwnership.value)
-            .isEqualTo(fullAuction.sell.valueDecimal!!.toBigInteger())
+        assertThat(auctionedOwnership.value).isEqualTo(ethAuctionedOwnership.value + auction.sell.valueDecimal!!.toBigInteger())
+        assertThat(fullyAuctionedOwnership.value).isEqualTo(fullAuction.sell.valueDecimal!!.toBigInteger())
     }
 
     @Test
@@ -255,10 +277,14 @@ class OwnershipControllerElasticFt : AbstractIntegrationTest() {
     fun `get ownerships by item - tezos, nothing enriched`() = runBlocking<Unit> {
         val itemId = randomTezosItemId()
         val ownership = randomTezosOwnershipDto(itemId)
-
-        tezosOwnershipControllerApiMock.mockGetNftOwnershipsByItem(
-            itemId, continuation, size, ownership
+        val tezosUnionOwnership = TezosOwnershipConverter.convert(ownership, itemId.blockchain)
+        val esOwnership = EsOwnershipConverter.convert(tezosUnionOwnership)
+        ownershipRepository.saveAll(
+            listOf(
+                esOwnership
+            )
         )
+        tezosOwnershipControllerApiMock.mockGetNftOwnershipById(esOwnership.ownershipId, ownership)
 
         val ownerships = ownershipControllerClient.getOwnershipsByItem(
             itemId.fullId(), continuation, size

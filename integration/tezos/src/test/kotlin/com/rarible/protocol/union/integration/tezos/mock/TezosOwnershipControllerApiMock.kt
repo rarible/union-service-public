@@ -20,6 +20,12 @@ class TezosOwnershipControllerApiMock(
         } returns (if (returnOwnership == null) Mono.empty() else Mono.just(returnOwnership))
     }
 
+    fun mockGetNftOwnershipById(ownershipId: String, returnOwnership: NftOwnershipDto?) {
+        every {
+            nftOwnershipControllerApi.getNftOwnershipById(ownershipId)
+        } returns (if (returnOwnership == null) Mono.empty() else Mono.just(returnOwnership))
+    }
+
     fun mockGetNftOwnershipsByItem(
         itemId: ItemIdDto,
         continuation: String?,

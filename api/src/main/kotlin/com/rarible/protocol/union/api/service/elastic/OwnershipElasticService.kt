@@ -14,16 +14,9 @@ import com.rarible.protocol.union.dto.continuation.page.Paging
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.service.EnrichmentAuctionService
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
-import org.springframework.context.annotation.Primary
 import org.springframework.stereotype.Component
 
 @Component
-@Primary
-@ConditionalOnProperty(
-    value = ["enableOwnershipQueriesToElasticSearch"],
-    prefix = "common.feature-flags",
-)
 class OwnershipElasticService(
     val enrichmentAuctionService: EnrichmentAuctionService,
     private val apiHelper: EnrichedOwnershipApiHelper,

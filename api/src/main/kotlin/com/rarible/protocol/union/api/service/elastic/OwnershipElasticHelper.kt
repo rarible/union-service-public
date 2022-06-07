@@ -12,14 +12,9 @@ import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.continuation.DateIdContinuation
 import com.rarible.protocol.union.enrichment.repository.search.EsOwnershipRepository
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
 
 @Component
-@ConditionalOnProperty(
-    value = ["enableOwnershipQueriesToElasticSearch"],
-    prefix = "common.feature-flags",
-)
 class OwnershipElasticHelper(
     private val repository: EsOwnershipRepository,
     private val router: BlockchainRouter<OwnershipService>,
