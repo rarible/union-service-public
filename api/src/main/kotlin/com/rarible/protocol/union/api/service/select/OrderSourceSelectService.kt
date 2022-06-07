@@ -1,7 +1,7 @@
 package com.rarible.protocol.union.api.service.select
 
-import com.rarible.protocol.union.api.service.OrderQueryService
-import com.rarible.protocol.union.api.service.api.OrderApiService
+import com.rarible.protocol.union.enrichment.service.query.order.OrderQueryService
+import com.rarible.protocol.union.enrichment.service.query.order.OrderApiService
 import com.rarible.protocol.union.api.service.elastic.OrderElasticService
 import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.dto.BlockchainDto

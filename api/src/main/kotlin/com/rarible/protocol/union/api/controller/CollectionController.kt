@@ -1,6 +1,6 @@
 package com.rarible.protocol.union.api.controller
 
-import com.rarible.protocol.union.api.service.ItemApiService
+import com.rarible.protocol.union.enrichment.service.query.item.ItemApiMergeService
 import com.rarible.protocol.union.api.service.select.CollectionSourceSelectService
 import com.rarible.protocol.union.core.service.CollectionService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController
 class CollectionController(
     private val router: BlockchainRouter<CollectionService>,
     private val collectionSourceSelector: CollectionSourceSelectService,
-    private val itemApiService: ItemApiService,
+    private val itemApiService: ItemApiMergeService,
     private val unionMetaService: UnionMetaService,
     private val enrichmentCollectionService: EnrichmentCollectionService
 ) : CollectionControllerApi {
