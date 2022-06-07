@@ -55,7 +55,7 @@
         <rarible.protocol.tezos.version>1.0.5</rarible.protocol.tezos.version>
         <rarible.protocol.solana.version>0.1.37</rarible.protocol.solana.version>
         <rarible.protocol.tezos.api.version>1.0.31</rarible.protocol.tezos.api.version>
-        <rarible.protocol.aptos.version>1.0</rarible.protocol.aptos.version>
+        <rarible.protocol.aptos.version>1.1</rarible.protocol.aptos.version>
 
         <rarible.protocol.union.version>1.28.5</rarible.protocol.union.version>
 

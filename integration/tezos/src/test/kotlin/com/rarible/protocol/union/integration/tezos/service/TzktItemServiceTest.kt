@@ -15,14 +15,14 @@ import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
+import java.time.Instant.now
+import java.time.ZoneOffset
 import junit.framework.TestCase.assertFalse
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import java.time.Instant.now
-import java.time.ZoneOffset
 
 class TzktItemServiceTest {
 
@@ -106,7 +106,7 @@ class TzktItemServiceTest {
         }
 
         @Test
-        fun `should make only 1 attempt for an "old" nft`() = runBlocking<Unit> {
+        fun `should make only 1 attempt for an old nft`() = runBlocking<Unit> {
             val itemId = "test:123"
             coEvery { dipdupProps.tzktProperties } returns TzktProperties()
             coEvery { tokenClient.token(itemId) } returns tzktToken(itemId).copy(
