@@ -43,7 +43,6 @@ data class EsActivity(
     override val blockNumber: Long?,
     override val logIndex: Int?,
     override val salt: Long = generateSalt(),
-    val dateSeconds: Long = date.epochSecond,
     // Filter fields
     override val blockchain: BlockchainDto,
     override val type: ActivityTypeDto,
@@ -51,6 +50,7 @@ data class EsActivity(
     val userTo: String?,
     val collection: String?,
     val item: String,
+    val dateSeconds: Long = date.epochSecond,
 ) : EsActivitySealed() {
     companion object {
         const val VERSION: Int = 2
