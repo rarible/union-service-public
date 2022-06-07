@@ -109,3 +109,4 @@ meta:
 logging:
   level:
     org.apache.http: ERROR
+    org.springframework.data.elasticsearch.core.QUERY: DEBUG
