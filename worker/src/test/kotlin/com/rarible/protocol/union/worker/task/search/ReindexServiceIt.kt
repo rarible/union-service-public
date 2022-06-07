@@ -27,4 +27,16 @@ internal class ReindexServiceIt {
         Assertions.assertThat(tasks).hasSize(85) //all blockchains * all activities + index switch
     }
 
+    @Test
+    fun `should schedule ownership reindex and alias switch`() = runBlocking<Unit> {
+        taskRepository.deleteAll().awaitSingleOrNull()
+        reindexService.scheduleOwnershipReindex("test_index")
+
+        val tasks = taskRepository.findAll().collectList().awaitFirstOrDefault(emptyList())
+        tasks.onEach {
+            println(it)
+        }
+        Assertions.assertThat(tasks).hasSize(13) //all blockchains * 2 targets + index switch
+    }
+
 }
