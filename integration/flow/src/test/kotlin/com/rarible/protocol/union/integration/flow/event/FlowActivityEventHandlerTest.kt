@@ -32,7 +32,7 @@ class FlowActivityEventHandlerTest() {
 
         handler.handle(event)
 
-        val expected = converter.convert(event, BlockchainDto.FLOW)
+        val expected = converter.convert(event)
         coVerify(exactly = 1) { incomingEventHandler.onEvent(expected) }
     }
 

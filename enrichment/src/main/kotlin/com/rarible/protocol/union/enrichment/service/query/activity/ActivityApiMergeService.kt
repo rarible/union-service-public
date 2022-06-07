@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.enrichment.service.query.activity
 
+import com.rarible.core.common.mapAsync
 import com.rarible.protocol.union.core.service.ActivityService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.ActivitiesDto
@@ -19,7 +20,6 @@ import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.util.BlockchainFilter
 import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -287,18 +287,15 @@ class ActivityApiMergeService(
         clientCall: suspend (blockchain: String, continuation: String?) -> Slice<ActivityDto>
     ): List<ArgSlice<ActivityDto>> {
         val currentContinuation = CombinedContinuation.parse(continuation)
-        return coroutineScope {
-            blockchains.map { blockchain ->
-                async {
-                    val blockchainContinuation = currentContinuation.continuations[blockchain]
-                    // For completed blockchain we do not request orders
-                    if (blockchainContinuation == ArgSlice.COMPLETED) {
-                        ArgSlice(blockchain, blockchainContinuation, Slice(null, emptyList()))
-                    } else {
-                        ArgSlice(blockchain, blockchainContinuation, clientCall(blockchain, blockchainContinuation))
-                    }
-                }
+
+        return blockchains.mapAsync { blockchain ->
+            val blockchainContinuation = currentContinuation.continuations[blockchain]
+            // For completed blockchain we do not request orders
+            if (blockchainContinuation == ArgSlice.COMPLETED) {
+                ArgSlice(blockchain, blockchainContinuation, Slice(null, emptyList()))
+            } else {
+                ArgSlice(blockchain, blockchainContinuation, clientCall(blockchain, blockchainContinuation))
             }
-        }.awaitAll()
+        }
     }
 }
