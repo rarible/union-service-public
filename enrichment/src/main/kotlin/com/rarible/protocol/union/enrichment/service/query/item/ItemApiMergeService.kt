@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.api.service
+package com.rarible.protocol.union.enrichment.service.query.item
 
 import com.rarible.protocol.union.api.service.api.OwnershipApiQueryService
 import com.rarible.protocol.union.api.util.BlockchainFilter
@@ -23,6 +23,8 @@ import com.rarible.protocol.union.dto.continuation.page.PageSize
 import com.rarible.protocol.union.dto.continuation.page.Paging
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.dto.subchains
+import com.rarible.protocol.union.enrichment.service.query.ownership.OwnershipApiService
+import com.rarible.protocol.union.enrichment.util.BlockchainFilter
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -34,7 +36,7 @@ import org.springframework.stereotype.Component
 
 @ExperimentalCoroutinesApi
 @Component
-class ItemApiService(
+class ItemApiMergeService(
     private val itemEnrichService: ItemEnrichService,
     private val router: BlockchainRouter<ItemService>,
     private val ownershipApiQueryService: OwnershipApiQueryService,

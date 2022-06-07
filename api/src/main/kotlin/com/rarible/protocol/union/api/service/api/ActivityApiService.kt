@@ -1,7 +1,7 @@
 package com.rarible.protocol.union.api.service.api
 
 import com.rarible.protocol.union.api.service.ActivityQueryService
-import com.rarible.protocol.union.api.util.BlockchainFilter
+import com.rarible.protocol.union.enrichment.util.BlockchainFilter
 import com.rarible.protocol.union.core.service.ActivityService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.ActivitiesDto

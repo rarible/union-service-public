@@ -16,6 +16,8 @@ import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.elasticsearch.action.admin.indices.refresh.RefreshRequest
 import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates
+import org.springframework.data.elasticsearch.core.query.Criteria
+import org.springframework.data.elasticsearch.core.query.CriteriaQuery
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery
 import org.springframework.stereotype.Component
 import java.io.IOException
@@ -47,6 +49,13 @@ class EsItemRepository(
         } else {
             saveAllToIndex(esItems, IndexCoordinates.of(indexName))
         }
+    }
+
+    suspend fun deleteAll(itemIds: List<String>) {
+        val query = CriteriaQuery(Criteria(EsItem::itemId.name).`in`(itemIds))
+        esOperations.delete(
+            query, EsItem::class.java, entityDefinition.writeIndexCoordinates
+        ).awaitFirstOrNull()
     }
 
     private suspend fun saveAllToIndex(esItems: List<EsItem>, index: IndexCoordinates): List<EsItem> {

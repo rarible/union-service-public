@@ -9,10 +9,13 @@ import com.rarible.protocol.union.dto.continuation.page.Page
 import com.rarible.protocol.union.integration.tezos.dipdup.DipDupIntegrationProperties
 import com.rarible.protocol.union.integration.tezos.dipdup.converter.TzktItemConverter
 import com.rarible.tzkt.client.TokenClient
+import com.rarible.tzkt.model.ItemId
 import com.rarible.tzkt.model.TzktNotFound
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import org.slf4j.LoggerFactory
+import java.time.OffsetDateTime
+import java.time.temporal.ChronoUnit
 
 class TzktItemServiceImpl(val tzktTokenClient: TokenClient, val properties: DipDupIntegrationProperties) :
     TzktItemService {
@@ -48,11 +51,28 @@ class TzktItemServiceImpl(val tzktTokenClient: TokenClient, val properties: DipD
     }
 
     override suspend fun isNft(itemId: String): Boolean {
+
+        // check fungible list first
+        val parsed = ItemId.parse(itemId)
+        if (properties.fungibleContracts.contains(parsed.contract)) {
+            return false
+        }
+
         var retries = 0
 
+        // meta is loaded asynchronously with delay that's why we should retry to check if it's nft
         while (retries++ < properties.tzktProperties.retryAttempts) {
-            val result = tzktTokenClient.isNft(itemId)
-            result?.let { return it } ?: coroutineScope { delay(properties.tzktProperties.retryDelay) }
+
+            val token = tzktTokenClient.token(itemId)
+            val ignoreDate = OffsetDateTime.now().minus(properties.tzktProperties.ignorePeriod, ChronoUnit.MILLIS)
+            val isNft = token.isNft()
+
+            // if token is new we wait and retry
+            if (!isNft && token.lastTime!! > ignoreDate && retries < properties.tzktProperties.retryAttempts) {
+                coroutineScope { delay(properties.tzktProperties.retryDelay) }
+            } else {
+                return isNft
+            }
         }
         return false
     }
