@@ -17,7 +17,7 @@ import com.rarible.protocol.union.enrichment.service.EnrichmentAuctionService
 import org.springframework.stereotype.Component
 
 @Component
-class OwnershipApiService(
+class OwnershipApiQueryService(
     private val enrichmentAuctionService: EnrichmentAuctionService,
     private val apiHelper: EnrichedOwnershipApiHelper,
 ) : OwnershipQueryService {

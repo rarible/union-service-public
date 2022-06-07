@@ -1,6 +1,6 @@
 package com.rarible.protocol.union.api.service
 
-import com.rarible.protocol.union.api.service.api.OwnershipApiService
+import com.rarible.protocol.union.api.service.api.OwnershipApiQueryService
 import com.rarible.protocol.union.api.util.BlockchainFilter
 import com.rarible.protocol.union.core.continuation.UnionItemContinuation
 import com.rarible.protocol.union.core.converter.ItemOwnershipConverter
@@ -37,7 +37,7 @@ import org.springframework.stereotype.Component
 class ItemApiService(
     private val itemEnrichService: ItemEnrichService,
     private val router: BlockchainRouter<ItemService>,
-    private val ownershipApiService: OwnershipApiService,
+    private val ownershipApiQueryService: OwnershipApiQueryService,
 ) : ItemQueryService {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -221,7 +221,7 @@ class ItemApiService(
     ): ItemsWithOwnershipDto {
         val safeSize = PageSize.ITEM.limit(size)
         val ownerAddress = IdParser.parseAddress(owner)
-        val page = ownershipApiService.getOwnershipByOwner(ownerAddress, continuation, safeSize)
+        val page = ownershipApiQueryService.getOwnershipByOwner(ownerAddress, continuation, safeSize)
         val ids = page.entities.map { it.id.getItemId() }
         val items = router.executeForAll(ownerAddress.blockchainGroup.subchains()) {
             it.getItemsByIds(ids.map { id -> id.value })

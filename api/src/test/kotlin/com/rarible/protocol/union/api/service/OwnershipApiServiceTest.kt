@@ -3,7 +3,7 @@ package com.rarible.protocol.union.api.service
 import com.rarible.core.common.nowMillis
 import com.rarible.core.test.data.randomAddress
 import com.rarible.protocol.union.api.service.api.OrderApiService
-import com.rarible.protocol.union.api.service.api.OwnershipApiService
+import com.rarible.protocol.union.api.service.api.OwnershipApiQueryService
 import com.rarible.protocol.union.core.DefaultBlockchainProperties
 import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.core.model.getSellerOwnershipId
@@ -16,7 +16,6 @@ import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.OwnershipDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
-import com.rarible.protocol.union.dto.OwnershipsDto
 import com.rarible.protocol.union.dto.continuation.DateIdContinuation
 import com.rarible.protocol.union.dto.continuation.page.Page
 import com.rarible.protocol.union.enrichment.converter.EnrichedOwnershipConverter
@@ -68,7 +67,7 @@ class OwnershipApiServiceTest {
         mockk(),
     )
 
-    private val ownershipApiService = OwnershipApiService(
+    private val ownershipApiQueryService = OwnershipApiQueryService(
         enrichmentAuctionService,
         helper,
     )
@@ -117,7 +116,7 @@ class OwnershipApiServiceTest {
             fullAuctionOwnership // should be disguised
         )
 
-        val result = this@OwnershipApiServiceTest.ownershipApiService.getOwnershipsByItem(itemId, null, 2).ownerships
+        val result = this@OwnershipApiServiceTest.ownershipApiQueryService.getOwnershipsByItem(itemId, null, 2).ownerships
 
         // Full auction ownership - the earliest
         assertThat(result[0].id).isEqualTo(fullAuctionOwnership.id.copy(owner = fullAuction.seller))
@@ -158,7 +157,7 @@ class OwnershipApiServiceTest {
             partialOwnership,
         )
 
-        val result = this@OwnershipApiServiceTest.ownershipApiService.getOwnershipsByItem(itemId, continuation, 2).ownerships
+        val result = this@OwnershipApiServiceTest.ownershipApiQueryService.getOwnershipsByItem(itemId, continuation, 2).ownerships
 
         // Partial auction ownership - first
         assertThat(result[0].id).isEqualTo(partialOwnership.id)
