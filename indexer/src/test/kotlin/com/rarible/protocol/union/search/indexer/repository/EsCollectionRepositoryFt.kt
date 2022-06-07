@@ -9,11 +9,13 @@ import com.rarible.protocol.union.search.indexer.test.IntegrationTest
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.elasticsearch.index.query.BoolQueryBuilder
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery
 import org.springframework.test.context.ContextConfiguration
+import java.time.Instant
 
 @IntegrationTest
 @EnableAutoConfiguration
@@ -23,10 +25,16 @@ class EsCollectionRepositoryFt {
     @Autowired
     protected lateinit var repository: EsCollectionRepository
 
+    @BeforeEach
+    fun setUp() = runBlocking {
+        repository.deleteAll()
+    }
+
     @Test
     fun `should save and read`(): Unit = runBlocking {
         val collection = EsCollection(
             collectionId = "ETHEREUM:12345",
+            date = Instant.ofEpochSecond(12345),
             blockchain = BlockchainDto.ETHEREUM,
             name = "some name",
             symbol = "SMBL",
