@@ -13,9 +13,7 @@ import com.rarible.protocol.union.dto.continuation.page.PageSize
 import com.rarible.protocol.union.enrichment.repository.search.internal.EsActivityQueryBuilderService
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
-import org.elasticsearch.action.admin.indices.flush.FlushRequest
 import org.elasticsearch.action.admin.indices.refresh.RefreshRequest
-import org.elasticsearch.index.query.MatchQueryBuilder
 import org.elasticsearch.index.query.TermsQueryBuilder
 import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates
@@ -90,6 +88,7 @@ class EsActivityRepository(
     ): EsActivityQueryResult {
         val query = queryBuilderService.build(filter, sort)
         query.maxResults = PageSize.ACTIVITY.limit(limit)
+        query.trackTotalHits = false
 
         return search(query)
     }
