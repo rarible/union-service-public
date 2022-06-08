@@ -2,6 +2,7 @@ package com.rarible.protocol.union.core.es
 
 import com.rarible.protocol.union.core.elasticsearch.EsMetadataRepository
 import com.rarible.protocol.union.core.elasticsearch.EsNameResolver
+import com.rarible.protocol.union.core.elasticsearch.EsRepository
 import com.rarible.protocol.union.core.elasticsearch.IndexService
 import com.rarible.protocol.union.core.model.elasticsearch.EsEntitiesConfig
 import org.springframework.context.annotation.Bean
@@ -15,13 +16,15 @@ class ElasticsearchBootstrapperTestConfig {
     fun elasticsearchBootstrap(
         reactiveElasticSearchOperations: ReactiveElasticsearchOperations,
         esNameResolver: EsNameResolver,
-        indexService: IndexService
+        indexService: IndexService,
+        repositories: List<EsRepository>
     ): ElasticsearchTestBootstrapper {
 
         return ElasticsearchTestBootstrapper(
             esNameResolver = esNameResolver,
             esOperations = reactiveElasticSearchOperations,
             entityDefinitions = EsEntitiesConfig.createEsEntities(),
+            repositories
         )
     }
 }
