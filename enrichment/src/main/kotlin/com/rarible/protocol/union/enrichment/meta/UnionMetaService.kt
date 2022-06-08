@@ -37,14 +37,13 @@ class UnionMetaService(
         }
         cached.forEach {
             val id = keyMap[it.key]!!
-            unionMetaMetrics.onMetaCacheHitOrMiss(
-                itemId = id,
-                hitOrMiss = it.isMetaInitiallyLoadedOrFailed()
-            )
-            val meta = it.getAvailable()
-            if (meta != null) {
-                result[id] = meta
+            if (it.isMetaInitiallyLoadedOrFailed()) {
+                unionMetaMetrics.onMetaCacheMiss(id.blockchain)
+            } else {
+                unionMetaMetrics.onMetaCacheHit(id.blockchain)
             }
+            val meta = it.getAvailable()
+            meta?.let { result[id] = meta }
         }
         return result
     }
@@ -65,12 +64,14 @@ class UnionMetaService(
         synchronous: Boolean
     ): UnionMeta? {
         val metaCacheEntry = unionMetaCacheLoaderService.get(itemId.fullId())
-        var availableMeta = metaCacheEntry.getAvailable()
+        val availableMeta = metaCacheEntry.getAvailable()
         var metaShouldBeRefreshed = false
-        unionMetaMetrics.onMetaCacheHitOrMiss(
-            itemId = itemId,
-            hitOrMiss = metaCacheEntry.isMetaInitiallyLoadedOrFailed()
-        )
+
+        if (metaCacheEntry.isMetaInitiallyLoadedOrFailed()) {
+            unionMetaMetrics.onMetaCacheMiss(itemId.blockchain)
+        } else {
+            unionMetaMetrics.onMetaCacheHit(itemId.blockchain)
+        }
         if (availableMeta != null) {
             //TODO workaround for BRAVO-1954:svg in url
             if (!removeCachedMetaWithSvgInUrl(availableMeta, itemId)) {

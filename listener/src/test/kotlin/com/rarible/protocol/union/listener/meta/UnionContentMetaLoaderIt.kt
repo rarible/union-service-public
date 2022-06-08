@@ -12,6 +12,7 @@ import com.rarible.protocol.union.enrichment.meta.UnionContentMetaLoader
 import com.rarible.protocol.union.enrichment.meta.UnionContentMetaService
 import com.rarible.protocol.union.enrichment.meta.embedded.EmbeddedContentService
 import com.rarible.protocol.union.enrichment.test.data.randomUnionContent
+import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.listener.test.AbstractIntegrationTest
 import com.rarible.protocol.union.listener.test.IntegrationTest
 import io.mockk.coEvery
@@ -21,6 +22,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.io.IOException
+import java.net.URL
 
 @IntegrationTest
 class UnionContentMetaLoaderIt : AbstractIntegrationTest() {
@@ -34,12 +36,14 @@ class UnionContentMetaLoaderIt : AbstractIntegrationTest() {
     @Autowired
     lateinit var embeddedContentService: EmbeddedContentService
 
+    private val itemId = randomEthItemId()
+
     @Test
     fun `url not resolved`() = runBlocking<Unit> {
         val content = randomUnionContent(UnionImageProperties(MimeType.JPEG_IMAGE.value))
             .copy(url = "abc")
 
-        val result = unionMetaConLoader.enrichContentMeta(listOf(content))[0]
+        val result = unionMetaConLoader.enrichContent(itemId, listOf(content))[0]
 
         // Nothing to do here, kept as is
         assertThat(result).isEqualTo(content)
@@ -50,9 +54,9 @@ class UnionContentMetaLoaderIt : AbstractIntegrationTest() {
         val content = randomUnionContent(UnionImageProperties())
         val contentMeta = randomContentMeta(MimeType.PNG_IMAGE.value)
 
-        coEvery { testContentMetaReceiver.receive(content.url) } returns contentMeta
+        coEvery { testContentMetaReceiver.receive(URL(content.url)) } returns contentMeta
 
-        val result = unionMetaConLoader.enrichContentMeta(listOf(content))[0]
+        val result = unionMetaConLoader.enrichContent(itemId, listOf(content))[0]
         val enriched = result.properties!! as UnionImageProperties
 
         assertThat(enriched.size).isEqualTo(contentMeta.size)
@@ -67,9 +71,9 @@ class UnionContentMetaLoaderIt : AbstractIntegrationTest() {
         val content = randomUnionContent(UnionVideoProperties())
         val contentMeta = randomContentMeta(MimeType.PNG_IMAGE.value)
 
-        coEvery { testContentMetaReceiver.receive(content.url) } returns contentMeta
+        coEvery { testContentMetaReceiver.receive(URL(content.url)) } returns contentMeta
 
-        val result = unionMetaConLoader.enrichContentMeta(listOf(content))[0]
+        val result = unionMetaConLoader.enrichContent(itemId, listOf(content))[0]
         val enriched = result.properties!! as UnionImageProperties
 
         assertThat(enriched.size).isEqualTo(contentMeta.size)
@@ -86,7 +90,7 @@ class UnionContentMetaLoaderIt : AbstractIntegrationTest() {
         // failed with exception
         coEvery { testContentMetaReceiver.receive(content.url) } throws IOException()
 
-        val result = unionMetaConLoader.enrichContentMeta(listOf(content))[0]
+        val result = unionMetaConLoader.enrichContent(itemId, listOf(content))[0]
         val enriched = result.properties as UnionImageProperties
 
         assertThat(enriched).isEqualTo(input)
@@ -99,7 +103,7 @@ class UnionContentMetaLoaderIt : AbstractIntegrationTest() {
 
         coEvery { testContentMetaReceiver.receive(content.url) } returns null
 
-        val result = unionMetaConLoader.enrichContentMeta(listOf(content))[0]
+        val result = unionMetaConLoader.enrichContent(itemId, listOf(content))[0]
         val enriched = result.properties as UnionImageProperties
 
         assertThat(enriched).isEqualTo(input)
@@ -112,7 +116,7 @@ class UnionContentMetaLoaderIt : AbstractIntegrationTest() {
         // null returned without exception
         coEvery { testContentMetaReceiver.receive(content.url) } returns null
 
-        val result = unionMetaConLoader.enrichContentMeta(listOf(content))[0]
+        val result = unionMetaConLoader.enrichContent(itemId, listOf(content))[0]
         val enriched = result.properties
 
         assertThat(enriched).isInstanceOf(UnionUnknownProperties::class.java)
@@ -129,7 +133,7 @@ class UnionContentMetaLoaderIt : AbstractIntegrationTest() {
 
         coEvery { testContentMetaReceiver.receive(content.url) } returns contentMeta
 
-        val result = unionMetaConLoader.enrichContentMeta(listOf(content))[0]
+        val result = unionMetaConLoader.enrichContent(itemId, listOf(content))[0]
 
         assertThat(result.url).isEqualTo("ipfs://$cid")
     }
@@ -143,7 +147,7 @@ class UnionContentMetaLoaderIt : AbstractIntegrationTest() {
 
         coEvery { testContentMetaReceiver.receive(content.url) } returns contentMeta
 
-        val result = unionMetaConLoader.enrichContentMeta(listOf(content))[0]
+        val result = unionMetaConLoader.enrichContent(itemId, listOf(content))[0]
 
         assertThat(result.url).isEqualTo(url)
     }
@@ -154,7 +158,7 @@ class UnionContentMetaLoaderIt : AbstractIntegrationTest() {
         val embeddedId = unionContentMetaService.getEmbeddedId(data.toByteArray())
         val content = randomUnionContent(UnionAudioProperties()).copy(url = data)
 
-        val result = unionMetaConLoader.enrichContentMeta(listOf(content))[0]
+        val result = unionMetaConLoader.enrichContent(itemId, listOf(content))[0]
         val enriched = result.properties!! as UnionImageProperties
 
         assertThat(enriched.width).isEqualTo(192)
@@ -175,7 +179,7 @@ class UnionContentMetaLoaderIt : AbstractIntegrationTest() {
         val embeddedId = unionContentMetaService.getEmbeddedId(text.toByteArray())
         val content = randomUnionContent(UnionImageProperties(MimeType.GIF_IMAGE.value)).copy(url = data)
 
-        val result = unionMetaConLoader.enrichContentMeta(listOf(content))[0]
+        val result = unionMetaConLoader.enrichContent(itemId, listOf(content))[0]
         val enriched = result.properties!! as UnionImageProperties
 
         assertThat(enriched.mimeType).isEqualTo(MimeType.GIF_IMAGE.value)
