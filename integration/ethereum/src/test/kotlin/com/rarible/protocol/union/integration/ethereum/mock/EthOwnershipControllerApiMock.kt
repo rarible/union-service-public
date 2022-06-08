@@ -20,6 +20,12 @@ class EthOwnershipControllerApiMock(
         } returns (if (returnOwnership == null) Mono.empty() else Mono.just(returnOwnership))
     }
 
+    fun mockGetNftOwnershipById(ownershipId: String, returnOwnership: NftOwnershipDto?) {
+        every {
+            nftOwnershipControllerApi.getNftOwnershipById(ownershipId, false)
+        } returns (if (returnOwnership == null) Mono.empty() else Mono.just(returnOwnership))
+    }
+
     fun mockGetNftOwnershipByIdNotFound(ownershipId: OwnershipIdDto) {
         every {
             nftOwnershipControllerApi.getNftOwnershipById(ownershipId.value, false)
@@ -67,5 +73,4 @@ class EthOwnershipControllerApiMock(
             )
         } returns Mono.just(NftOwnershipsDto(returnOwnerships.size.toLong(), null, returnOwnerships.asList()))
     }
-
 }

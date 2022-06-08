@@ -12,13 +12,16 @@ import java.time.Instant
 
 data class EsOwnership(
     @Id
+    @Field(fielddata = true)
     val ownershipId: String,
     val blockchain: BlockchainDto,
     val itemId: String? = null,
     val collection: String? = null,
     val owner: String,
-    @Field(type = FieldType.Date)
+    @Field(type = FieldType.Date, fielddata = true)
     val date: Instant,
+    val auctionId: String?,
+    val auctionOwnershipId: String?,
 ) {
     companion object {
         private const val VERSION: Int = 1

@@ -8,6 +8,7 @@ import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.core.util.CompositeItemIdParser
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.continuation.page.Page
+import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.integration.flow.converter.FlowOwnershipConverter
 import kotlinx.coroutines.reactive.awaitFirst
 
@@ -19,6 +20,14 @@ open class FlowOwnershipService(
     override suspend fun getOwnershipById(ownershipId: String): UnionOwnership {
         val ownership = ownershipControllerApi.getNftOwnershipById(ownershipId).awaitFirst()
         return FlowOwnershipConverter.convert(ownership, blockchain)
+    }
+
+    override suspend fun getOwnershipsByIds(ownershipIds: List<String>): List<UnionOwnership> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getOwnershipsAll(continuation: String?, size: Int): Slice<UnionOwnership> {
+        TODO("Not yet implemented")
     }
 
     override suspend fun getOwnershipsByItem(

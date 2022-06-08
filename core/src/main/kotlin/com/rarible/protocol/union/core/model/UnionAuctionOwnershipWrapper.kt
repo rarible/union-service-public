@@ -5,7 +5,7 @@ import com.rarible.protocol.union.dto.OwnershipIdDto
 import java.time.Instant
 
 // For sorting purposes
-class UnionAuctionOwnershipWrapper(
+data class UnionAuctionOwnershipWrapper(
     val ownership: UnionOwnership?,
     val auction: AuctionDto?
 ) {

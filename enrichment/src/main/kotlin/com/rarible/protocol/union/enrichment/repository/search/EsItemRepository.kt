@@ -3,7 +3,9 @@ package com.rarible.protocol.union.enrichment.repository.search
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.apm.SpanType
+import com.rarible.protocol.union.core.elasticsearch.EsHelper
 import com.rarible.protocol.union.core.elasticsearch.EsNameResolver
+import com.rarible.protocol.union.core.elasticsearch.EsRepository
 import com.rarible.protocol.union.core.model.ElasticItemFilter
 import com.rarible.protocol.union.core.model.EsItem
 import com.rarible.protocol.union.core.model.EsItemSort
@@ -13,6 +15,7 @@ import com.rarible.protocol.union.dto.continuation.page.PageSize
 import com.rarible.protocol.union.enrichment.repository.search.internal.EsItemBuilderService.buildQuery
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
+import kotlinx.coroutines.runBlocking
 import org.elasticsearch.action.admin.indices.refresh.RefreshRequest
 import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates
@@ -21,6 +24,7 @@ import org.springframework.data.elasticsearch.core.query.CriteriaQuery
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery
 import org.springframework.stereotype.Component
 import java.io.IOException
+import javax.annotation.PostConstruct
 
 @Component
 @CaptureSpan(type = SpanType.DB)
@@ -30,20 +34,35 @@ class EsItemRepository(
     esNameResolver: EsNameResolver
 ) : EsRepository {
     val entityDefinition = esNameResolver.createEntityDefinitionExtended(EsItem.ENTITY_DEFINITION)
+    var brokenEsState: Boolean = true
+
+    @PostConstruct
+    override fun init() = runBlocking {
+        brokenEsState = !EsHelper.existsIndexesForEntity(esOperations, entityDefinition.indexRootName)
+    }
 
     suspend fun findById(id: String): EsItem? {
         return esOperations.get(id, EsItem::class.java, entityDefinition.searchIndexCoordinates).awaitFirstOrNull()
     }
 
     suspend fun save(esItem: EsItem): EsItem {
+        if (brokenEsState) {
+            throw IllegalStateException("No indexes to save")
+        }
         return esOperations.save(esItem, entityDefinition.writeIndexCoordinates).awaitFirst()
     }
 
     suspend fun saveAll(esItems: List<EsItem>): List<EsItem> {
+        if (brokenEsState) {
+            throw IllegalStateException("No indexes to save")
+        }
         return saveAllToIndex(esItems, entityDefinition.writeIndexCoordinates)
     }
 
     suspend fun saveAll(esItems: List<EsItem>, indexName: String?): List<EsItem> {
+        if (brokenEsState) {
+            throw IllegalStateException("No indexes to save")
+        }
         return if (indexName == null) {
             saveAll(esItems)
         } else {

@@ -8,7 +8,11 @@ import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.core.util.CompositeItemIdParser
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.continuation.page.Page
+import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.integration.ethereum.converter.EthOwnershipConverter
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.reactive.awaitFirst
 
 open class EthOwnershipService(
@@ -21,30 +25,34 @@ open class EthOwnershipService(
         return EthOwnershipConverter.convert(ownership, blockchain)
     }
 
+    override suspend fun getOwnershipsByIds(ownershipIds: List<String>): List<UnionOwnership> = coroutineScope {
+        ownershipIds.map {
+            async {
+                val ownership = ownershipControllerApi.getNftOwnershipById(it, false).awaitFirst()
+                EthOwnershipConverter.convert(ownership, blockchain)
+            }
+        }.awaitAll()
+    }
+
+    override suspend fun getOwnershipsAll(continuation: String?, size: Int): Slice<UnionOwnership> {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun getOwnershipsByItem(
-        itemId: String,
-        continuation: String?,
-        size: Int
+        itemId: String, continuation: String?, size: Int
     ): Page<UnionOwnership> {
         val (contract, tokenId) = CompositeItemIdParser.split(itemId)
         val ownerships = ownershipControllerApi.getNftOwnershipsByItem(
-            contract,
-            tokenId.toString(),
-            continuation,
-            size
+            contract, tokenId.toString(), continuation, size
         ).awaitFirst()
         return EthOwnershipConverter.convert(ownerships, blockchain)
     }
 
     override suspend fun getOwnershipsByOwner(
-        address: String,
-        continuation: String?,
-        size: Int
+        address: String, continuation: String?, size: Int
     ): Page<UnionOwnership> {
         val ownerships = ownershipControllerApi.getNftOwnershipsByOwner(
-            address,
-            continuation,
-            size
+            address, continuation, size
         ).awaitFirst()
         return EthOwnershipConverter.convert(ownerships, blockchain)
     }
@@ -54,14 +62,12 @@ open class EthOwnershipService(
 open class EthereumOwnershipService(
     ownershipControllerApi: NftOwnershipControllerApi
 ) : EthOwnershipService(
-    BlockchainDto.ETHEREUM,
-    ownershipControllerApi
+    BlockchainDto.ETHEREUM, ownershipControllerApi
 )
 
 @CaptureSpan(type = "blockchain")
 open class PolygonOwnershipService(
     ownershipControllerApi: NftOwnershipControllerApi
 ) : EthOwnershipService(
-    BlockchainDto.POLYGON,
-    ownershipControllerApi
+    BlockchainDto.POLYGON, ownershipControllerApi
 )

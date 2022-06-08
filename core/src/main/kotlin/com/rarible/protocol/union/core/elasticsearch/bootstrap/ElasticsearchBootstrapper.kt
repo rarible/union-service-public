@@ -6,6 +6,7 @@ import com.rarible.protocol.union.core.elasticsearch.EsHelper.createIndex
 import com.rarible.protocol.union.core.elasticsearch.EsHelper.getRealName
 import com.rarible.protocol.union.core.elasticsearch.EsNameResolver
 import com.rarible.protocol.union.core.elasticsearch.EsNameResolver.Companion.METADATA_INDEX
+import com.rarible.protocol.union.core.elasticsearch.EsRepository
 import com.rarible.protocol.union.core.elasticsearch.IndexService
 import com.rarible.protocol.union.core.elasticsearch.ReindexSchedulingService
 import com.rarible.protocol.union.core.model.elasticsearch.EntityDefinition
@@ -29,6 +30,7 @@ class ElasticsearchBootstrapper(
     private val reindexSchedulingService: ReindexSchedulingService,
     private val indexService: IndexService,
     private val forceUpdate: Set<EsEntity> = emptySet(),
+    private val repositories: List<EsRepository>,
 ) {
     private val metadataMapping = metadataIndex()
 
@@ -54,6 +56,7 @@ class ElasticsearchBootstrapper(
             }
             updateIndexMapping(definition)
         }
+        repositories.forEach { it.init() }
         logger.info("Finished elasticsearch initialization")
     }
 

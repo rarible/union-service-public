@@ -7,6 +7,7 @@ import com.rarible.protocol.union.core.service.OwnershipService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.continuation.page.Page
+import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.integration.solana.converter.SolanaOwnershipConverter
 import kotlinx.coroutines.reactive.awaitFirst
@@ -33,6 +34,14 @@ open class SolanaOwnershipService(
         val associatedTokenAccountBalance = balancesDto.balances.find { it.isAssociatedTokenAccount == true }
             ?: throw createBalanceNotFoundException("No associated token account balance found for $ownershipId")
         return SolanaOwnershipConverter.convert(associatedTokenAccountBalance, blockchain)
+    }
+
+    override suspend fun getOwnershipsByIds(ownershipIds: List<String>): List<UnionOwnership> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getOwnershipsAll(continuation: String?, size: Int): Slice<UnionOwnership> {
+        TODO("Not yet implemented")
     }
 
     override suspend fun getOwnershipsByItem(itemId: String, continuation: String?, size: Int): Page<UnionOwnership> {
