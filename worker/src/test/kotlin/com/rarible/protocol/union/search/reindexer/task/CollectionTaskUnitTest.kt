@@ -1,5 +1,7 @@
 package com.rarible.protocol.union.search.reindexer.task
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.rarible.core.telemetry.metrics.RegisteredCounter
 import com.rarible.core.test.data.randomAddress
 import com.rarible.core.test.data.randomString
@@ -13,6 +15,7 @@ import com.rarible.protocol.union.enrichment.service.query.collection.Collection
 import com.rarible.protocol.union.worker.config.BlockchainReindexProperties
 import com.rarible.protocol.union.worker.config.CollectionReindexProperties
 import com.rarible.protocol.union.worker.metrics.SearchTaskMetricFactory
+import com.rarible.protocol.union.worker.task.search.ParamFactory
 import com.rarible.protocol.union.worker.task.search.collection.CollectionTask
 import io.mockk.coEvery
 import io.mockk.coVerifyAll
@@ -25,6 +28,8 @@ import org.junit.jupiter.api.Test
 
 @Suppress("ReactiveStreamsUnusedPublisher")
 class CollectionTaskUnitTest {
+
+    private val paramFactory = ParamFactory(jacksonObjectMapper().registerKotlinModule())
 
     private val collection = CollectionDto(
         id = CollectionIdDto(BlockchainDto.ETHEREUM, "${randomAddress()}"),
@@ -78,9 +83,8 @@ class CollectionTaskUnitTest {
                     enabled = true,
                     blockchains = listOf(BlockchainReindexProperties(enabled = true, BlockchainDto.ETHEREUM))
                 ),
-                collectionApiMergeService,
-                repo,
-                metricFactory
+                paramFactory,
+                mockk()
             )
             val result = task.runLongTask(null, "ETHEREUM").toList()
 
@@ -111,9 +115,8 @@ class CollectionTaskUnitTest {
                     enabled = true,
                     blockchains = listOf(BlockchainReindexProperties(enabled = true, BlockchainDto.ETHEREUM))
                 ),
-                collectionApiMergeService,
-                repo,
-                metricFactory
+                paramFactory,
+                mockk()
             )
 
             val from = CollectionContinuation.ById.getContinuation(collection).toString()

@@ -13,6 +13,7 @@ import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactor.awaitSingle
 import org.elasticsearch.action.admin.indices.refresh.RefreshRequest
 import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations
+import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery
 import org.springframework.data.elasticsearch.core.query.Query
 import org.springframework.stereotype.Component
@@ -30,6 +31,21 @@ class EsCollectionRepository(
 
     suspend fun saveAll(collections: List<EsCollection>): List<EsCollection> {
         return esOperations.saveAll(collections, entityDefinition.writeIndexCoordinates).collectList().awaitSingle()
+    }
+
+    suspend fun saveAll(esActivities: List<EsCollection>, indexName: String?): List<EsCollection> {
+        return if (indexName == null) {
+            saveAll(esActivities)
+        } else {
+            saveAllToIndex(esActivities, IndexCoordinates.of(indexName))
+        }
+    }
+
+    private suspend fun saveAllToIndex(esActivities: List<EsCollection>, index: IndexCoordinates): List<EsCollection> {
+        return esOperations
+            .saveAll(esActivities, index)
+            .collectList()
+            .awaitFirst()
     }
 
     suspend fun findById(collectionId: String): EsCollection? {

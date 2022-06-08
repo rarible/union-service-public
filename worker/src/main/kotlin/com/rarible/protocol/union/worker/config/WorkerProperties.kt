@@ -27,6 +27,13 @@ sealed class EntityReindexProperties {
 
         return blockchains.filter { it.enabled }.map { it.blockchain }
     }
+
+    fun isBlockchainActive(blockchain: BlockchainDto): Boolean {
+        return this.enabled && this
+            .blockchains
+            .singleOrNull { it.blockchain == blockchain }
+            ?.enabled ?: false
+    }
 }
 
 data class ActivityReindexProperties(

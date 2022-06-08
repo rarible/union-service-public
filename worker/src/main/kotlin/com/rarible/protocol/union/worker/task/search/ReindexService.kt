@@ -18,6 +18,7 @@ import com.rarible.protocol.union.worker.task.search.activity.ActivityTaskParam
 import com.rarible.protocol.union.worker.task.search.activity.ChangeEsActivityAliasTask
 import com.rarible.protocol.union.worker.task.search.collection.ChangeEsCollectionAliasTask
 import com.rarible.protocol.union.worker.task.search.collection.ChangeEsCollectionAliasTaskParam
+import com.rarible.protocol.union.worker.task.search.collection.CollectionTaskParam
 import com.rarible.protocol.union.worker.task.search.item.ChangeEsItemAliasTask
 import com.rarible.protocol.union.worker.task.search.item.ItemTaskParam
 import kotlinx.coroutines.reactive.awaitFirst
@@ -54,7 +55,9 @@ class ReindexService(
 
     suspend fun scheduleCollectionReindex(newIndexName: String) {
         val blockchains = searchReindexProperties.activity.activeBlockchains()
-        val tasksParams = blockchains.map { it.name }
+        val tasksParams = blockchains.map {
+            paramFactory.toString(CollectionTaskParam(it, newIndexName))
+        }
         val tasks = tasks(EsCollection.ENTITY_DEFINITION.reindexTask, tasksParams)
 
         val changeAliasTaskParam = ChangeEsCollectionAliasTaskParam(
