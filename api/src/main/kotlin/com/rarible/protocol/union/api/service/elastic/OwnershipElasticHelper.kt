@@ -21,7 +21,7 @@ class OwnershipElasticHelper(
 ) {
 
     suspend fun getRawOwnershipsByOwner(owner: UnionAddress, continuation: String?, size: Int): List<UnionOwnership> {
-        val filter = EsOwnershipByOwnerFilter(owner, DateIdContinuation.parse(continuation), size)
+        val filter = EsOwnershipByOwnerFilter(owner, null, DateIdContinuation.parse(continuation), size)
         return repository.findByFilter(filter).getOwnerships()
     }
 

@@ -35,7 +35,11 @@ class EsCollectionRepository(
 
     @PostConstruct
     override fun init() = runBlocking {
-        brokenEsState = !EsHelper.existsIndexesForEntity(esOperations, entityDefinition.indexRootName)
+        brokenEsState = try {
+            !EsHelper.existsIndexesForEntity(esOperations, entityDefinition.indexRootName)
+        } catch (_: Exception) {
+            true
+        }
     }
 
     suspend fun saveAll(collections: List<EsCollection>): List<EsCollection> {

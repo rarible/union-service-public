@@ -116,7 +116,7 @@ internal class OwnershipEsRepositoryFt {
 
         repository.saveAll(listOf(expected)).first()
 
-        val filter = EsOwnershipByOwnerFilter(id.owner, null, 50)
+        val filter = EsOwnershipByOwnerFilter(owner = id.owner, size = 50)
         repository.findByFilter(filter).let { actual ->
             println(actual)
             assertThat(actual).hasSize(1)
@@ -147,28 +147,30 @@ internal class OwnershipEsRepositoryFt {
         }
         repository.saveAll(data)
 
-        val c1 = repository.findByFilter(EsOwnershipByOwnerFilter(id.owner, null, 3)).let { result ->
+        val c1 = repository.findByFilter(EsOwnershipByOwnerFilter(owner = id.owner, size = 3)).let { result ->
             println(null)
             println(result.joinToString("\n"))
             assertThat(result).hasSize(3)
             result.last().let { DateIdContinuation(it.date, it.ownershipId) }
         }
 
-        val c2 = repository.findByFilter(EsOwnershipByOwnerFilter(id.owner, c1, 3)).let { result ->
-            println(c1)
-            println(result.joinToString("\n"))
-            assertThat(result).hasSize(3)
-            result.last().let { DateIdContinuation(it.date, it.ownershipId) }
-        }
+        val c2 = repository.findByFilter(EsOwnershipByOwnerFilter(owner = id.owner, continuation = c1, size = 3))
+            .let { result ->
+                println(c1)
+                println(result.joinToString("\n"))
+                assertThat(result).hasSize(3)
+                result.last().let { DateIdContinuation(it.date, it.ownershipId) }
+            }
 
-        val c3 = repository.findByFilter(EsOwnershipByOwnerFilter(id.owner, c2, 3)).let { result ->
-            println(c2)
-            println(result.joinToString("\n"))
-            assertThat(result).hasSize(3)
-            result.last().let { DateIdContinuation(it.date, it.ownershipId) }
-        }
+        val c3 = repository.findByFilter(EsOwnershipByOwnerFilter(owner = id.owner, continuation = c2, size = 3))
+            .let { result ->
+                println(c2)
+                println(result.joinToString("\n"))
+                assertThat(result).hasSize(3)
+                result.last().let { DateIdContinuation(it.date, it.ownershipId) }
+            }
 
-        repository.findByFilter(EsOwnershipByOwnerFilter(id.owner, c3, 3)).let { result ->
+        repository.findByFilter(EsOwnershipByOwnerFilter(owner = id.owner, continuation = c3, size = 3)).let { result ->
             println(c3)
             println(result.joinToString("\n"))
             assertThat(result).hasSize(1)

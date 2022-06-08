@@ -13,6 +13,7 @@ import com.rarible.protocol.union.dto.continuation.page.PageSize
 import com.rarible.protocol.union.enrichment.converter.ShortItemConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.repository.search.EsItemRepository
+import com.rarible.protocol.union.enrichment.repository.search.EsOwnershipRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.test.data.randomEsItem
 import com.rarible.protocol.union.integration.ethereum.converter.EthItemConverter
@@ -31,6 +32,7 @@ import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.TestPropertySource
+import randomEsOwnership
 import reactor.kotlin.core.publisher.toFlux
 import scalether.domain.Address
 import java.math.BigInteger
@@ -49,6 +51,9 @@ class ItemsControllerElasticFt : AbstractIntegrationTest() {
 
     @Autowired
     private lateinit var repository: EsItemRepository
+
+    @Autowired
+    private lateinit var esOwnershipRepository: EsOwnershipRepository
 
     @Autowired
     lateinit var ethOrderConverter: EthOrderConverter
@@ -223,7 +228,7 @@ class ItemsControllerElasticFt : AbstractIntegrationTest() {
             )
         } returns listOf(polygonItem4, polygonItem5, polygonItem6).toFlux()
 
-        val showDeleted = true
+        val showDeleted: Boolean? = null
         val size = 3
         val lastUpdatedFrom = nowMillis().minusSeconds(120).toEpochMilli()
         val lastUpdatedTo = nowMillis().plusSeconds(120).toEpochMilli()
@@ -335,14 +340,13 @@ class ItemsControllerElasticFt : AbstractIntegrationTest() {
     @Disabled("In another PR it will be fixed")
     fun `get items by owner - ethereum, all enriched`() = runBlocking<Unit> {
         val ethCollectionId = CollectionIdDto(BlockchainDto.ETHEREUM, randomEthAddress())
-        val owner = CollectionIdDto(BlockchainDto.ETHEREUM, randomEthAddress())
         // Enriched item
         val ethItemId1 = ItemIdDto(BlockchainDto.ETHEREUM, ethCollectionId.value, BigInteger.valueOf(1))
-        val ethEsItem1 = randomEsItem().copy(
+        val esOwnership = randomEsOwnership().copy(
             itemId = ethItemId1.toString(),
             blockchain = BlockchainDto.ETHEREUM
         )
-        repository.save(ethEsItem1)
+        esOwnershipRepository.saveAll(listOf(esOwnership))
         val ethItemId = randomEthItemId()
         val ethItem = randomEthNftItemDto(ethItemId)
         val ethUnionItem = EthItemConverter.convert(ethItem, ethItemId.blockchain)
@@ -360,7 +364,7 @@ class ItemsControllerElasticFt : AbstractIntegrationTest() {
 
         ethereumOrderControllerApiMock.mockGetByIds(ethOrder)
         val items = itemControllerClient.getItemsByOwner(
-            owner.fullId(), listOf(BlockchainDto.ETHEREUM), continuation, size
+            esOwnership.owner, listOf(BlockchainDto.ETHEREUM), continuation, size
         ).awaitFirst()
 
         assertThat(items.items).hasSize(1)

@@ -37,7 +37,11 @@ class EsActivityRepository(
 
     @PostConstruct
     override fun init() = runBlocking {
-        brokenEsState = !EsHelper.existsIndexesForEntity(esOperations, entityDefinition.indexRootName)
+        brokenEsState = try {
+            !EsHelper.existsIndexesForEntity(esOperations, entityDefinition.indexRootName)
+        } catch (_: Exception) {
+            true
+        }
     }
 
     suspend fun findById(id: String): EsActivity? {
