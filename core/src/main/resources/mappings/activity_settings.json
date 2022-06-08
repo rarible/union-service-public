@@ -1,8 +1,152 @@
 {
-  "settings": {
-    "index": {
-      "sort.field": [ "date", "dateSeconds", "blockNumber", "logIndex", "salt" ],
-      "sort.order": [ "desc", "asc" ]
+  "index": {
+    "number_of_shards": 3,
+    "number_of_replicas": 1,
+    "refresh_interval": "1s",
+    "sort.field": [ "date", "dateSeconds", "blockNumber", "logIndex", "salt" ],
+    "sort.order": [ "desc", "asc" ]
+  },
+  "analysis": {
+    "filter": {
+      "english_stemmer": {
+        "type": "stemmer",
+        "language": "english"
+      },
+      "english_stop": {
+        "type": "stop",
+        "stopwords": "_english_"
+      }
+    },
+    "char_filter": {
+      "camel_case": {
+        "type": "pattern_replace",
+        "pattern": "(?<=\\p{Lower})(?=\\p{Upper})",
+        "replacement": " "
+      },
+      "join": {
+        "type": "pattern_replace",
+        "pattern": "(\\s)",
+        "replacement": ""
+      },
+      "initials": {
+        "type": "pattern_replace",
+        "pattern": "\\b(\\w)\\w*\\b",
+        "replacement": "$1"
+      },
+      "special_character": {
+        "type": "pattern_replace",
+        "pattern": "[\\x{0021}-\\x{002F}|\\x{003A}-\\x{0040}|\\x{007B}-\\x{007E}|\\x{02B0}-\\x{02FF}|\\x{2010}-\\x{205E}]",
+        "replacement": " "
+      },
+      "blockchain_address": {
+        "type": "pattern_replace",
+        "pattern": "\\w+-(.+)",
+        "replacement": "$1"
+      }
+    },
+    "analyzer": {
+      "stemmer_analyzer": {
+        "filter": [
+          "lowercase",
+          "english_stemmer"
+        ],
+        "type": "custom",
+        "tokenizer": "standard"
+      },
+      "stemmer_stop_analyzer": {
+        "filter": [
+          "lowercase",
+          "english_stop",
+          "english_stemmer"
+        ],
+        "type": "custom",
+        "tokenizer": "standard"
+      },
+      "keyword_analyzer": {
+        "type": "custom",
+        "tokenizer": "keyword",
+        "filter": [
+          "lowercase"
+        ]
+      },
+      "special_character_analyzer": {
+        "type": "custom",
+        "tokenizer": "keyword",
+        "filter": [
+          "lowercase"
+        ],
+        "char_filter": [
+          "special_character"
+        ]
+      },
+      "keyword_camel_case_analyzer": {
+        "type": "custom",
+        "char_filter": [
+          "special_character",
+          "camel_case"
+        ],
+        "tokenizer": "keyword",
+        "filter": [
+          "lowercase"
+        ]
+      },
+      "keyword_join_analyzer": {
+        "type": "custom",
+        "char_filter": [
+          "special_character",
+          "join"
+        ],
+        "tokenizer": "keyword",
+        "filter": [
+          "lowercase"
+        ]
+      },
+      "keyword_initials_analyzer": {
+        "type": "custom",
+        "char_filter": [
+          "special_character",
+          "camel_case",
+          "initials",
+          "join"
+        ],
+        "tokenizer": "keyword",
+        "filter": [
+          "lowercase"
+        ]
+      },
+      "stemmer_camel_case_analyzer": {
+        "type": "custom",
+        "char_filter": [
+          "camel_case"
+        ],
+        "tokenizer": "standard",
+        "filter": [
+          "lowercase",
+          "english_stemmer"
+        ]
+      },
+      "stemmer_join_analyzer": {
+        "type": "custom",
+        "char_filter": [
+          "special_character",
+          "join"
+        ],
+        "tokenizer": "standard",
+        "filter": [
+          "lowercase",
+          "english_stemmer"
+        ]
+      },
+      "blockchain_address_analyzer": {
+        "type": "custom",
+        "tokenizer": "keyword",
+        "char_filter": [
+          "blockchain_address"
+        ],
+        "filter": [
+          "lowercase"
+        ]
+      }
     }
   }
 }

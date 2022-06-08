@@ -4,6 +4,7 @@ import com.rarible.protocol.union.core.model.elasticsearch.EsEntity
 import com.rarible.protocol.union.core.model.elasticsearch.EntityDefinition
 import com.rarible.protocol.union.core.model.elasticsearch.EsEntitiesConfig.INDEX_SETTINGS
 import com.rarible.protocol.union.core.model.elasticsearch.EsEntitiesConfig.loadMapping
+import com.rarible.protocol.union.core.model.elasticsearch.EsEntitiesConfig.loadSettings
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import org.springframework.data.annotation.Id
@@ -60,7 +61,7 @@ data class EsActivity(
                 entity = it,
                 mapping = loadMapping(it),
                 versionData = VERSION,
-                settings = INDEX_SETTINGS
+                settings = loadSettings(it),
             )
         }
 
