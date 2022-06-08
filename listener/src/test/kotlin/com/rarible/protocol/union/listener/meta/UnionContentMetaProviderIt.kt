@@ -9,6 +9,7 @@ import com.rarible.protocol.union.core.model.UnionImageProperties
 import com.rarible.protocol.union.enrichment.meta.UnionContentMetaProvider
 import com.rarible.protocol.union.enrichment.meta.cache.ContentCacheStorage
 import com.rarible.protocol.union.enrichment.meta.cache.UnionContentCacheEntry
+import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.listener.test.AbstractIntegrationTest
 import com.rarible.protocol.union.listener.test.IntegrationTest
 import io.mockk.coEvery
@@ -16,6 +17,7 @@ import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import java.net.URL
 
 @IntegrationTest
 class UnionContentMetaProviderIt : AbstractIntegrationTest() {
@@ -31,6 +33,8 @@ class UnionContentMetaProviderIt : AbstractIntegrationTest() {
 
     private val cid = "QmeqeBpsYTuJL8AZhY9fGBeTj9QuvMVqaZeRWFnjA24QEE"
 
+    private val itemId = randomEthItemId()
+
     @Test
     fun `cacheable url - cached`() = runBlocking<Unit> {
         val path = "$cid/${randomString()}"
@@ -38,9 +42,9 @@ class UnionContentMetaProviderIt : AbstractIntegrationTest() {
         // Fully qualified content, should be cached
         val contentMeta = ContentMeta(MimeType.PNG_IMAGE.value, 100, 100, 100)
 
-        coEvery { testContentMetaReceiver.receive(any<String>()) } returns contentMeta
+        coEvery { testContentMetaReceiver.receive(any<URL>()) } returns contentMeta
 
-        val properties = unionContentMetaProvider.getContentMeta(urlResource)
+        val properties = unionContentMetaProvider.getContent(itemId, urlResource)
 
         val fromCache = contentCacheStorage.get("ipfs://$path")!!
 
@@ -57,7 +61,7 @@ class UnionContentMetaProviderIt : AbstractIntegrationTest() {
 
         coEvery { testContentMetaReceiver.receive(any<String>()) } returns contentMeta
 
-        unionContentMetaProvider.getContentMeta(urlResource)
+        unionContentMetaProvider.getContent(itemId, urlResource)
 
         val fromCache = contentCacheStorage.get("ipfs://$path")
 
@@ -72,7 +76,7 @@ class UnionContentMetaProviderIt : AbstractIntegrationTest() {
         // Content not resolved
         coEvery { testContentMetaReceiver.receive(any<String>()) } returns null
 
-        unionContentMetaProvider.getContentMeta(urlResource)
+        unionContentMetaProvider.getContent(itemId, urlResource)
 
         val fromCache = contentCacheStorage.get("ipfs://$path")
 
@@ -93,7 +97,7 @@ class UnionContentMetaProviderIt : AbstractIntegrationTest() {
 
         contentCacheStorage.save(entry)
 
-        val properties = unionContentMetaProvider.getContentMeta(urlResource)
+        val properties = unionContentMetaProvider.getContent(itemId, urlResource)
 
         // Content returned and cached
         assertThat(properties).isEqualTo(entry.content)
@@ -106,7 +110,7 @@ class UnionContentMetaProviderIt : AbstractIntegrationTest() {
 
         coEvery { testContentMetaReceiver.receive(any<String>()) } returns contentMeta
 
-        unionContentMetaProvider.getContentMeta(urlResource)
+        unionContentMetaProvider.getContent(itemId, urlResource)
 
         val fromCache = contentCacheStorage.get(urlResource.original)
 
