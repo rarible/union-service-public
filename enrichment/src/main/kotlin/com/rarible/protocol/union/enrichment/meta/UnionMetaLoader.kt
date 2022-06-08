@@ -15,7 +15,8 @@ import org.springframework.stereotype.Component
 @Component
 class UnionMetaLoader(
     private val router: BlockchainRouter<ItemService>,
-    private val unionContentMetaLoader: UnionContentMetaLoader
+    private val unionContentMetaLoader: UnionContentMetaLoader,
+    private val metrics: UnionMetaMetrics
 ) {
 
     private val logger = LoggerFactory.getLogger(UnionMetaLoader::class.java)
@@ -29,30 +30,36 @@ class UnionMetaLoader(
             getItemMeta(itemId)
         }
 
-        if (unionMeta == null) {
-            // this log tagged by itemId, used in Kibana in analytics dashboards
-            logger.warn("Meta not found in blockchain for Item {}", itemId)
-            return@addToMdc null
-        }
+        unionMeta ?: return@addToMdc null
+
 
         withSpan(
             name = "enrichContentMeta",
             labels = listOf("itemId" to itemId.fullId())
         ) {
-            val content = unionContentMetaLoader.enrichContentMeta(unionMeta.content)
+            val content = unionContentMetaLoader.enrichContent(itemId, unionMeta.content)
             unionMeta.copy(content = content)
         }
     }
 
     private suspend fun getItemMeta(itemId: ItemIdDto): UnionMeta? {
         return try {
-            router.getService(itemId.blockchain).getItemMetaById(itemId.value)
+            val result = router.getService(itemId.blockchain).getItemMetaById(itemId.value)
+            metrics.onMetaFetched(itemId.blockchain)
+            result
         } catch (e: WebClientResponseProxyException) {
             if (e.statusCode == HttpStatus.NOT_FOUND) {
+                // this log tagged by itemId, used in Kibana in analytics dashboards
+                logger.warn("Meta not found in blockchain for Item {}", itemId)
+                metrics.onMetaFetchNotFound(itemId.blockchain)
                 null
             } else {
+                metrics.onMetaFetchError(itemId.blockchain)
                 throw e
             }
+        } catch (e: Exception) {
+            metrics.onMetaFetchError(itemId.blockchain)
+            throw e
         }
     }
 
