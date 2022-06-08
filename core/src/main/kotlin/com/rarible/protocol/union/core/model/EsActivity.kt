@@ -2,7 +2,6 @@ package com.rarible.protocol.union.core.model
 
 import com.rarible.protocol.union.core.model.elasticsearch.EsEntity
 import com.rarible.protocol.union.core.model.elasticsearch.EntityDefinition
-import com.rarible.protocol.union.core.model.elasticsearch.EsEntitiesConfig.INDEX_SETTINGS
 import com.rarible.protocol.union.core.model.elasticsearch.EsEntitiesConfig.loadMapping
 import com.rarible.protocol.union.core.model.elasticsearch.EsEntitiesConfig.loadSettings
 import com.rarible.protocol.union.dto.ActivityTypeDto
@@ -51,7 +50,6 @@ data class EsActivity(
     val userTo: String?,
     val collection: String?,
     val item: String,
-    val dateSeconds: Long = date.epochSecond,
 ) : EsActivitySealed() {
     companion object {
         const val VERSION: Int = 2
