@@ -88,7 +88,7 @@ integration:
         order: 1
     auctionContracts: ${consul.flow.auctionContracts:}
   tezos:
-    enabled: false
+    enabled: ${consul.tezos.enabled:true}
     dipdup:
       enabled: ${consul.tezos.dipdup.enabled:false}
     client:
