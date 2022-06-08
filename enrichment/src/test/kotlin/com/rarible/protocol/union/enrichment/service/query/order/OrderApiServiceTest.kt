@@ -27,7 +27,7 @@ class OrderApiServiceTest {
     private val router: BlockchainRouter<OrderService> = mockk()
     private val orderService: OrderService = mockk()
     private val ethOrderConverter = EthOrderConverter(CurrencyMock.currencyServiceMock)
-    private val orderApiService = OrderApiService(
+    private val orderApiService = OrderApiMergeService(
         router
     )
 

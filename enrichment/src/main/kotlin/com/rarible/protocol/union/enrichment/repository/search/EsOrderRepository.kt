@@ -4,6 +4,7 @@ import com.rarible.protocol.union.core.elasticsearch.EsHelper
 import com.rarible.protocol.union.core.elasticsearch.EsNameResolver
 import com.rarible.protocol.union.core.elasticsearch.EsRepository
 import com.rarible.protocol.union.core.model.EsOrder
+import com.rarible.protocol.union.core.model.EsOrderFilter
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.runBlocking
@@ -45,6 +46,12 @@ class EsOrderRepository(
             throw IllegalStateException("No indexes to save")
         }
         return esOperations.saveAll(esOrders, entityDefinition.writeIndexCoordinates).collectList().awaitFirst()
+    }
+
+    suspend fun findByFilter(filter: EsOrderFilter): List<EsOrder> {
+        val query = filter.asQuery()
+        return esOperations.search(query, EsOrder::class.java, entityDefinition.searchIndexCoordinates)
+            .collectList().awaitFirst().map { it.content }
     }
 
     override suspend fun refresh() {

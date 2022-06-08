@@ -8,6 +8,7 @@ import com.rarible.core.task.TaskStatus
 import com.rarible.protocol.union.core.elasticsearch.ReindexSchedulingService
 import com.rarible.protocol.union.core.model.EsActivity
 import com.rarible.protocol.union.core.model.EsItem
+import com.rarible.protocol.union.core.model.EsOrder
 import com.rarible.protocol.union.core.model.elasticsearch.EntityDefinitionExtended
 import com.rarible.protocol.union.core.model.elasticsearch.EsEntity
 import com.rarible.protocol.union.dto.ActivityTypeDto
@@ -16,6 +17,8 @@ import com.rarible.protocol.union.worker.task.search.activity.ActivityTaskParam
 import com.rarible.protocol.union.worker.task.search.activity.ChangeEsActivityAliasTask
 import com.rarible.protocol.union.worker.task.search.item.ChangeEsItemAliasTask
 import com.rarible.protocol.union.worker.task.search.item.ItemTaskParam
+import com.rarible.protocol.union.worker.task.search.order.ChangeEsOrderAliasTask
+import com.rarible.protocol.union.worker.task.search.order.OrderTaskParam
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.springframework.stereotype.Component
@@ -37,8 +40,10 @@ class ReindexService(
             EsEntity.ITEM -> {
                 scheduleItemReindex(newIndexName)
             }
-            EsEntity.ORDER,
-                // EsEntity.COLLECTION,
+            EsEntity.ORDER -> {
+                scheduleOrderReindex(newIndexName)
+            }
+            // EsEntity.COLLECTION,
             EsEntity.OWNERSHIP -> {
                 throw UnsupportedOperationException("Unsupported entity ${entityDefinition.entity} reindex")
             }
@@ -80,6 +85,22 @@ class ReindexService(
             entityName = EsEntity.ITEM.entityName,
             changeAliasTaskParam = changeEsItemAliasTaskParam,
             taskType = ChangeEsItemAliasTask.TYPE
+        )
+        taskRepository.saveAll(tasks + indexSwitch).collectList().awaitFirst()
+    }
+
+    suspend fun scheduleOrderReindex(indexName: String) {
+        val taskParams = BlockchainDto.values().map {
+            paramFactory.toString(OrderTaskParam(blockchain = it, index = indexName))
+        }
+        val tasks = tasks(EsOrder.ENTITY_DEFINITION.reindexTask, taskParams)
+        val changeEsOrderAliasTaskParam = ChangeAliasTaskParam(
+            indexName, taskParams
+        )
+        val indexSwitch = indexSwitchTask(
+            entityName = EsEntity.ORDER.entityName,
+            changeAliasTaskParam = changeEsOrderAliasTaskParam,
+            taskType = ChangeEsOrderAliasTask.TYPE
         )
         taskRepository.saveAll(tasks + indexSwitch).collectList().awaitFirst()
     }

@@ -5,6 +5,7 @@ import com.rarible.protocol.union.core.model.elasticsearch.EsEntity
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.CollectionEventDto
 import com.rarible.protocol.union.dto.ItemEventDto
+import com.rarible.protocol.union.dto.OrderEventDto
 import org.springframework.stereotype.Component
 import java.time.Instant
 
@@ -29,6 +30,16 @@ class MetricConsumerBatchEventHandlerFactory(
             esEntity = EsEntity.COLLECTION,
             eventTimestamp = { Instant.now() },
             eventBlockchain = { event -> event.collectionId.blockchain }
+        )
+    }
+
+    fun wrapOrder(handler: ConsumerBatchEventHandler<OrderEventDto>): ConsumerBatchEventHandler<OrderEventDto> {
+        return MetricsConsumerBatchEventHandlerWrapper(
+            metricFactory = metricFactory,
+            delegate = handler,
+            esEntity = EsEntity.COLLECTION,
+            eventTimestamp = { Instant.now() },
+            eventBlockchain = { event -> event.orderId.blockchain }
         )
     }
 

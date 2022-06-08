@@ -31,7 +31,7 @@ import kotlinx.coroutines.coroutineScope
 import org.springframework.stereotype.Component
 
 @Component
-class OrderApiService(
+class OrderApiMergeService(
     private val router: BlockchainRouter<OrderService>
 ): OrderQueryService {
 
@@ -122,7 +122,7 @@ class OrderApiService(
     ): OrdersDto {
         val safeSize = PageSize.ORDER.limit(size)
         val evaluatedBlockchains = router.getEnabledBlockchains(blockchains).map(BlockchainDto::name)
-        val slices = getOrdersByBlockchains(continuation, evaluatedBlockchains) { blockchain, cont ->
+        val slices: List<ArgSlice<OrderDto>> = getOrdersByBlockchains(continuation, evaluatedBlockchains) { blockchain, cont ->
             val blockDto = BlockchainDto.valueOf(blockchain)
             router.getService(blockDto).getOrdersAll(cont, safeSize, sort, status)
         }

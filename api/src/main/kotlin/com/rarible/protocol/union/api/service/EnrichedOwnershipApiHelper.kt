@@ -21,14 +21,14 @@ import com.rarible.protocol.union.enrichment.model.ShortOwnership
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
 import com.rarible.protocol.union.enrichment.service.EnrichmentAuctionService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
-import com.rarible.protocol.union.enrichment.service.query.order.OrderApiService
+import com.rarible.protocol.union.enrichment.service.query.order.OrderApiMergeService
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import org.springframework.stereotype.Component
 
 @Component
 class EnrichedOwnershipApiHelper(
-    private val orderApiService: OrderApiService,
+    private val orderApiService: OrderApiMergeService,
     private val auctionContractService: AuctionContractService,
     private val enrichmentOwnershipService: EnrichmentOwnershipService,
     private val enrichmentAuctionService: EnrichmentAuctionService,
