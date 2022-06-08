@@ -30,7 +30,8 @@ class ElasticsearchBootstrapper(
     private val indexService: IndexService,
     private val forceUpdate: Set<EsEntity> = emptySet(),
 ) {
-    private val metadataMapping = metadataIndex()
+    private val metadataMapping = metadataMappingIndex()
+    private val metadataSettings = metadataSettingsIndex()
 
     private val extendedEntityDefinitions: List<EntityDefinitionExtended> =
         entityDefinitions.map { esNameResolver.createEntityDefinitionExtended(it) }
@@ -42,7 +43,7 @@ class ElasticsearchBootstrapper(
             reactiveElasticSearchOperations = esOperations,
             name = esNameResolver.metadataIndexName,
             mapping = metadataMapping,
-            settings = "{}"
+            settings = metadataSettings,
         )
         for (definition in extendedEntityDefinitions) {
 
@@ -52,7 +53,7 @@ class ElasticsearchBootstrapper(
                 logger.info("Updating index for entity ${definition.entity} is in progress. Skip")
                 continue
             }
-            updateIndexMapping(definition)
+            updateIndexMetadata(definition)
         }
         logger.info("Finished elasticsearch initialization")
     }
@@ -73,7 +74,7 @@ class ElasticsearchBootstrapper(
         return false
     }
 
-    private suspend fun updateIndexMapping(definition: EntityDefinitionExtended) {
+    private suspend fun updateIndexMetadata(definition: EntityDefinitionExtended) {
         val realIndexName = getRealName(esOperations, definition.aliasName)
 
         if (realIndexName == null) {
@@ -174,6 +175,11 @@ class ElasticsearchBootstrapper(
     }
 }
 
-fun metadataIndex(): String {
+fun metadataMappingIndex(): String {
     return ElasticsearchBootstrapper::class.java.getResource("/mappings/${METADATA_INDEX}.json")!!.readText()
+}
+
+fun metadataSettingsIndex(): String {
+    val url = ElasticsearchBootstrapper::class.java.getResource("/mappings/${METADATA_INDEX}_settings.json")
+    return url?.readText() ?: "{}"
 }

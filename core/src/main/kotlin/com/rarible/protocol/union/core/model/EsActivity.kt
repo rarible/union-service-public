@@ -50,6 +50,7 @@ data class EsActivity(
     val userTo: String?,
     val collection: String?,
     val item: String,
+    val dateSeconds: Long = date.epochSecond,
 ) : EsActivitySealed() {
     companion object {
         const val VERSION: Int = 2

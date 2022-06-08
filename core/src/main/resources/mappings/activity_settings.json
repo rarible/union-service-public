@@ -1,0 +1,8 @@
+{
+  "settings": {
+    "index": {
+      "sort.field": [ "date", "dateSeconds", "blockNumber", "logIndex", "salt" ],
+      "sort.order": [ "desc", "asc" ]
+    }
+  }
+}
