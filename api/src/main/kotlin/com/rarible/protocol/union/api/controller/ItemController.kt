@@ -3,17 +3,14 @@ package com.rarible.protocol.union.api.controller
 import com.rarible.protocol.union.api.service.select.ItemSourceSelectService
 import com.rarible.protocol.union.core.exception.UnionNotFoundException
 import com.rarible.protocol.union.core.model.UnionImageProperties
-import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.UnionMetaContent
 import com.rarible.protocol.union.core.model.UnionVideoProperties
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.RestrictionService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
-import com.rarible.protocol.union.core.util.LogUtils
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemDto
-import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.ItemIdsDto
 import com.rarible.protocol.union.dto.ItemsDto
 import com.rarible.protocol.union.dto.ItemsWithOwnershipDto
@@ -149,12 +146,11 @@ class ItemController(
     }
 
     override suspend fun resetItemMeta(itemId: String, sync: Boolean?): ResponseEntity<Unit> {
+        // TODO: handle sync
         val fullItemId = IdParser.parseItemId(itemId)
         val safeSync = sync ?: false
 
-        LogUtils.addToMdc(fullItemId, router) {
-            logger.info("Refreshing item meta for $itemId (sync=$safeSync)")
-        }
+        logger.info("Refreshing item meta for $itemId (sync=$safeSync)")
 
         // TODO[meta]: when all Blockchains stop caching the meta, we can remove this endpoint call.
         router.getService(fullItemId.blockchain).resetItemMeta(fullItemId.value)
