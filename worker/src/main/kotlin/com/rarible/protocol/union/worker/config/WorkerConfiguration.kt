@@ -6,6 +6,7 @@ import com.rarible.protocol.union.api.client.ActivityControllerApi
 import com.rarible.protocol.union.api.client.CollectionControllerApi
 import com.rarible.protocol.union.api.client.UnionApiClientFactory
 import com.rarible.protocol.union.core.elasticsearch.EsNameResolver
+import com.rarible.protocol.union.core.elasticsearch.EsRepository
 import com.rarible.protocol.union.core.elasticsearch.IndexService
 import com.rarible.protocol.union.core.elasticsearch.bootstrap.ElasticsearchBootstrapper
 import com.rarible.protocol.union.core.model.elasticsearch.EsEntitiesConfig
@@ -70,7 +71,8 @@ class WorkerConfiguration(
         reactiveElasticSearchOperations: ReactiveElasticsearchOperations,
         esNameResolver: EsNameResolver,
         reindexerService: ReindexService,
-        indexService: IndexService
+        indexService: IndexService,
+        esRepositories: List<EsRepository>
     ): ElasticsearchBootstrapper {
 
         return ElasticsearchBootstrapper(
@@ -79,7 +81,8 @@ class WorkerConfiguration(
             entityDefinitions = EsEntitiesConfig.prodEsEntities(),
             reindexSchedulingService = reindexerService,
             forceUpdate = emptySet(),
-            indexService = indexService
+            indexService = indexService,
+            repositories = esRepositories
         )
     }
 }

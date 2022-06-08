@@ -2,7 +2,9 @@ package com.rarible.protocol.union.enrichment.repository.search
 
 import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.apm.SpanType
+import com.rarible.protocol.union.core.elasticsearch.EsHelper
 import com.rarible.protocol.union.core.elasticsearch.EsNameResolver
+import com.rarible.protocol.union.core.elasticsearch.EsRepository
 import com.rarible.protocol.union.core.model.EsCollection
 import com.rarible.protocol.union.core.model.EsCollectionFilter
 import com.rarible.protocol.union.core.model.EsCollectionLite
@@ -11,11 +13,13 @@ import com.rarible.protocol.union.enrichment.repository.search.internal.EsCollec
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactor.awaitSingle
+import kotlinx.coroutines.runBlocking
 import org.elasticsearch.action.admin.indices.refresh.RefreshRequest
 import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery
 import org.springframework.stereotype.Component
 import java.io.IOException
+import javax.annotation.PostConstruct
 
 @Component
 @CaptureSpan(type = SpanType.DB)
@@ -27,7 +31,17 @@ class EsCollectionRepository(
     val entityDefinition = esNameResolver.createEntityDefinitionExtended(EsCollection.ENTITY_DEFINITION)
     private val clazz = EsCollection::class.java
 
+    var brokenEsState: Boolean = true
+
+    @PostConstruct
+    override fun init() = runBlocking {
+        brokenEsState = !EsHelper.existsIndexesForEntity(esOperations, entityDefinition.indexRootName)
+    }
+
     suspend fun saveAll(collections: List<EsCollection>): List<EsCollection> {
+        if (brokenEsState) {
+            throw IllegalStateException("No indexes to save")
+        }
         return esOperations.saveAll(collections, entityDefinition.writeIndexCoordinates).collectList().awaitSingle()
     }
 

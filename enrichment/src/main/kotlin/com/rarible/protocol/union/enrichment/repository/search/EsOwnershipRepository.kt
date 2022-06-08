@@ -1,10 +1,13 @@
 package com.rarible.protocol.union.enrichment.repository.search
 
+import com.rarible.protocol.union.core.elasticsearch.EsHelper
 import com.rarible.protocol.union.core.elasticsearch.EsNameResolver
+import com.rarible.protocol.union.core.elasticsearch.EsRepository
 import com.rarible.protocol.union.core.model.EsOwnership
 import com.rarible.protocol.union.core.model.EsOwnershipFilter
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
+import kotlinx.coroutines.runBlocking
 import org.elasticsearch.action.admin.indices.refresh.RefreshRequest
 import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates
@@ -12,13 +15,19 @@ import org.springframework.data.elasticsearch.core.query.Criteria
 import org.springframework.data.elasticsearch.core.query.CriteriaQuery
 import org.springframework.stereotype.Component
 import java.io.IOException
+import javax.annotation.PostConstruct
 
 @Component
 class EsOwnershipRepository(
     private val esOperations: ReactiveElasticsearchOperations, esNameResolver: EsNameResolver
 ) : EsRepository {
     val entityDefinition = esNameResolver.createEntityDefinitionExtended(EsOwnership.ENTITY_DEFINITION)
+    var brokenEsState: Boolean = true
 
+    @PostConstruct
+    override fun init() = runBlocking {
+        brokenEsState = !EsHelper.existsIndexesForEntity(esOperations, entityDefinition.indexRootName)
+    }
     suspend fun findById(id: String): EsOwnership? {
         return esOperations.get(id, EsOwnership::class.java, entityDefinition.searchIndexCoordinates).awaitFirstOrNull()
     }
@@ -30,6 +39,9 @@ class EsOwnershipRepository(
     }
 
     suspend fun saveAll(esOwnerships: Collection<EsOwnership>, indexName: String? = null): List<EsOwnership> {
+        if (brokenEsState) {
+            throw IllegalStateException("No indexes to save")
+        }
         return esOperations.saveAll(esOwnerships, index(indexName)).collectList().awaitFirst()
     }
 

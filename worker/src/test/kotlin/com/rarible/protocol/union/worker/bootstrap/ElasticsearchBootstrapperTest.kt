@@ -59,7 +59,8 @@ internal class ElasticsearchBootstrapperTest {
         val elasticsearchTestBootstrapper = ElasticsearchTestBootstrapper(
             esNameResolver = esNameResolver,
             esOperations = reactiveElasticSearchOperations,
-            entityDefinitions = entityDefinitions
+            entityDefinitions = entityDefinitions,
+            repositories = emptyList()
         )
 
         elasticsearchTestBootstrapper.removeAllIndexes(entityDefinitionExtended)

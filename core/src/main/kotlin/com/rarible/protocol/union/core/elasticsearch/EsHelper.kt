@@ -73,6 +73,10 @@ object EsHelper {
         } else null
     }
 
+    suspend fun existsIndexesForEntity(
+        esOperations: ReactiveElasticsearchOperations, indexPrefix: String
+    ): Boolean = esOperations.execute { it.indices().existsIndex(GetIndexRequest("$indexPrefix*")) }.awaitFirst()
+
     suspend fun getIndexesByAlias(
         esOperations: ReactiveElasticsearchOperations, indexRootName: String
     ): List<String> {
