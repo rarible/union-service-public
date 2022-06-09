@@ -39,7 +39,7 @@ class FlowActivityConverterTest {
             left = randomFlowOrderActivityMatchSideDto(randomFlowFungibleAsset()),
             right = randomFlowOrderActivityMatchSideDto(randomFlowFungibleAsset())
         )
-        val converted = converter.convert(dto, BlockchainDto.FLOW) as OrderMatchActivityDto
+        val converted = converter.convert(dto) as OrderMatchActivityDto
 
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.date).isEqualTo(dto.date)
@@ -56,7 +56,7 @@ class FlowActivityConverterTest {
     @Test
     fun `flow order activity match - nft to payment`() = runBlocking<Unit> {
         val dto = randomFlowNftOrderActivitySell()
-        val converted = converter.convert(dto, BlockchainDto.FLOW) as OrderMatchActivityDto
+        val converted = converter.convert(dto) as OrderMatchActivityDto
 
         assertThat(converted).isInstanceOf(OrderMatchSellDto::class.java)
         converted as OrderMatchSellDto
@@ -96,7 +96,7 @@ class FlowActivityConverterTest {
             left = randomFlowOrderActivityMatchSideDto(randomFlowFungibleAsset()),
             right = randomFlowOrderActivityMatchSideDto(randomFlowNftAsset())
         )
-        val converted = converter.convert(dto, BlockchainDto.FLOW) as OrderMatchActivityDto
+        val converted = converter.convert(dto) as OrderMatchActivityDto
 
         assertThat(converted).isInstanceOf(OrderMatchSellDto::class.java)
         converted as OrderMatchSellDto
@@ -133,7 +133,7 @@ class FlowActivityConverterTest {
     @Test
     fun `flow order activity list`() = runBlocking<Unit> {
         val dto = randomFlowNftOrderActivityListDto()
-        val converted = converter.convert(dto, BlockchainDto.FLOW) as OrderListActivityDto
+        val converted = converter.convert(dto) as OrderListActivityDto
 
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.date).isEqualTo(dto.date)
@@ -154,7 +154,7 @@ class FlowActivityConverterTest {
     fun `flow order activity cancel list`() = runBlocking<Unit> {
         val dto = randomFlowCancelListActivityDto()
         val converted =
-            converter.convert(dto, BlockchainDto.FLOW) as OrderCancelListActivityDto
+            converter.convert(dto) as OrderCancelListActivityDto
 
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.date).isEqualTo(dto.date)
@@ -171,7 +171,7 @@ class FlowActivityConverterTest {
     @Test
     fun `flow item activity mint`() = runBlocking<Unit> {
         val dto = randomFlowMintDto()
-        val converted = converter.convert(dto, BlockchainDto.FLOW) as MintActivityDto
+        val converted = converter.convert(dto) as MintActivityDto
 
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.date).isEqualTo(dto.date)
@@ -191,7 +191,7 @@ class FlowActivityConverterTest {
     @Test
     fun `flow item activity transfer`() = runBlocking<Unit> {
         val dto = randomFlowTransferDto()
-        val converted = converter.convert(dto, BlockchainDto.FLOW) as TransferActivityDto
+        val converted = converter.convert(dto) as TransferActivityDto
 
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.date).isEqualTo(dto.date)
@@ -211,7 +211,7 @@ class FlowActivityConverterTest {
     @Test
     fun `flow item activity burn`() = runBlocking<Unit> {
         val dto = randomFlowBurnDto()
-        val converted = converter.convert(dto, BlockchainDto.FLOW) as BurnActivityDto
+        val converted = converter.convert(dto) as BurnActivityDto
 
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.date).isEqualTo(dto.date)
@@ -231,7 +231,7 @@ class FlowActivityConverterTest {
     @Test
     fun `flow order activity bid`() = runBlocking<Unit> {
         val dto = randomFlowNftOrderActivityListDto()
-        val converted = converter.convert(dto, BlockchainDto.FLOW) as OrderListActivityDto
+        val converted = converter.convert(dto) as OrderListActivityDto
 
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.date).isEqualTo(dto.date)
@@ -252,7 +252,7 @@ class FlowActivityConverterTest {
     fun `flow order activity cancel bid`() = runBlocking<Unit> {
         val dto = randomFlowCancelListActivityDto()
         val converted =
-            converter.convert(dto, BlockchainDto.FLOW) as OrderCancelListActivityDto
+            converter.convert(dto) as OrderCancelListActivityDto
 
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.date).isEqualTo(dto.date)
