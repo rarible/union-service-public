@@ -48,8 +48,6 @@ import com.rarible.protocol.union.enrichment.meta.UnionMetaLoader
 import com.rarible.protocol.union.subscriber.UnionKafkaJsonDeserializer
 import com.rarible.protocol.union.subscriber.UnionKafkaJsonSerializer
 import com.rarible.protocol.union.test.mock.CurrencyMock
-import io.micrometer.core.instrument.MeterRegistry
-import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import io.mockk.mockk
 import org.apache.kafka.clients.consumer.OffsetResetStrategy
 import org.springframework.beans.factory.annotation.Qualifier

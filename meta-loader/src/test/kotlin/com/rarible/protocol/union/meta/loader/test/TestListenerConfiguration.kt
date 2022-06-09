@@ -4,8 +4,6 @@ import com.rarible.core.application.ApplicationEnvironmentInfo
 import com.rarible.core.content.meta.loader.ContentMetaReceiver
 import com.rarible.protocol.union.core.CoreConfiguration
 import com.rarible.protocol.union.enrichment.meta.UnionMetaLoader
-import io.micrometer.core.instrument.MeterRegistry
-import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 
 import io.mockk.mockk
 import org.springframework.beans.factory.annotation.Qualifier

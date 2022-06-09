@@ -9,8 +9,6 @@ import com.rarible.protocol.union.core.model.EsActivityCursor.Companion.fromActi
 import com.rarible.protocol.union.core.model.EsActivityLite
 import com.rarible.protocol.union.core.model.EsActivityQueryResult
 import com.rarible.protocol.union.core.model.EsActivitySort
-import com.rarible.protocol.union.core.model.elasticsearch.EsEntity
-import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.continuation.page.PageSize
 import com.rarible.protocol.union.enrichment.repository.search.internal.EsActivityQueryBuilderService
 import kotlinx.coroutines.reactive.awaitFirst
@@ -30,7 +28,7 @@ import java.io.IOException
 class EsActivityRepository(
     private val esOperations: ReactiveElasticsearchOperations,
     private val queryBuilderService: EsActivityQueryBuilderService,
-    esNameResolver: EsNameResolver,
+    esNameResolver: EsNameResolver
 ) {
     val entityDefinition = esNameResolver.createEntityDefinitionExtended(EsActivity.ENTITY_DEFINITION)
 

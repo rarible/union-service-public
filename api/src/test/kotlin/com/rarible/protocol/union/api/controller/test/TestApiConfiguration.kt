@@ -25,8 +25,6 @@ import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.enrichment.meta.UnionMetaLoader
 import com.rarible.protocol.union.test.mock.CurrencyMock
-import io.micrometer.core.instrument.MeterRegistry
-import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import io.mockk.mockk
 import java.net.URI
 import org.springframework.beans.factory.annotation.Qualifier
@@ -52,7 +50,6 @@ class TestApiConfiguration {
     fun applicationEnvironmentInfo(): ApplicationEnvironmentInfo {
         return ApplicationEnvironmentInfo("test", "test.com")
     }
-
 
     @Bean
     fun testRestTemplate(mapper: ObjectMapper): RestTemplate {

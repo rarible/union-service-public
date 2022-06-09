@@ -19,6 +19,7 @@ import com.rarible.protocol.union.search.indexer.metrics.IndexerMetricFactory
 import com.rarible.protocol.union.search.indexer.metrics.MetricConsumerBatchEventHandlerFactory
 import com.rarible.protocol.union.subscriber.UnionKafkaJsonSerializer
 import io.micrometer.core.instrument.MeterRegistry
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import io.mockk.mockk
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -31,6 +32,11 @@ class TestIndexerConfiguration {
     @Bean
     fun applicationEnvironmentInfo(): ApplicationEnvironmentInfo {
         return ApplicationEnvironmentInfo("test", "test.com")
+    }
+
+    @Bean
+    fun meterRegistry(): MeterRegistry {
+        return SimpleMeterRegistry()
     }
 
     @Bean
