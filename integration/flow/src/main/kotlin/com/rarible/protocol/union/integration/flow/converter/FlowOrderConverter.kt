@@ -15,6 +15,7 @@ import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PlatformDto
+import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -77,7 +78,8 @@ class FlowOrderConverter(
             makePriceUsd = makePriceUsd,
             takePriceUsd = takePriceUsd,
             data = convert(order.data, blockchain),
-            salt = ""// Not supported on Flow
+            salt = "",// Not supported on Flow
+            dbUpdatedAt = order.lastUpdateAt // TODO change to dbUPdatedAt after Flow Api fix
         )
     }
 
@@ -137,5 +139,12 @@ class FlowOrderConverter(
     enum class Sort {
         EARLIEST_FIRST, LATEST_FIRST
     }
+
+    fun convert(source: SyncSortDto?): String? =
+        when (source) {
+            SyncSortDto.DB_UPDATE_ASC -> "UPDATED_AT_ASC"
+            SyncSortDto.DB_UPDATE_DESC -> "UPDATED_AT_DESC"
+            else -> null
+        }
 }
 
