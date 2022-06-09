@@ -257,6 +257,7 @@ fun randomEsActivity() = EsActivity(
 
 fun randomEsCollection() = EsCollection(
     collectionId = randomString(),
+    date = Instant.now(),
     blockchain = BlockchainDto.values().random(),
     name = randomString(),
     symbol = randomString(),
@@ -284,7 +285,7 @@ val EsActivity.info: EsActivityLite
     get() = EsActivityLite(activityId, blockchain, type, date, blockNumber, logIndex, salt)
 
 val EsCollection.info: EsCollectionLite
-    get() = EsCollectionLite(collectionId)
+    get() = EsCollectionLite(collectionId, date, salt)
 
 private val mockedEthOrderConverter = EthOrderConverter(CurrencyMock.currencyServiceMock)
 private val mockedEthAuctionConverter = EthAuctionConverter(CurrencyMock.currencyServiceMock)

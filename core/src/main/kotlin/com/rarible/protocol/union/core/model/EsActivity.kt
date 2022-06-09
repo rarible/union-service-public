@@ -4,6 +4,7 @@ import com.rarible.protocol.union.core.model.elasticsearch.EsEntity
 import com.rarible.protocol.union.core.model.elasticsearch.EntityDefinition
 import com.rarible.protocol.union.core.model.elasticsearch.EsEntitiesConfig.INDEX_SETTINGS
 import com.rarible.protocol.union.core.model.elasticsearch.EsEntitiesConfig.loadMapping
+import com.rarible.protocol.union.core.model.elasticsearch.generateSalt
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import org.springframework.data.annotation.Id
@@ -61,10 +62,6 @@ data class EsActivity(
                 versionData = VERSION,
                 settings = INDEX_SETTINGS
             )
-        }
-
-        fun generateSalt(): Long {
-            return kotlin.random.Random.nextLong(1, Long.MAX_VALUE)
         }
     }
 }
