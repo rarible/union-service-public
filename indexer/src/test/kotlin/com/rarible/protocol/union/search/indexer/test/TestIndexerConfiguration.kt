@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.search.indexer.test
 
-import com.ninjasquad.springmockk.MockkBean
 import com.rarible.core.application.ApplicationEnvironmentInfo
 import com.rarible.core.daemon.sequential.ConsumerBatchEventHandler
 import com.rarible.core.kafka.RaribleKafkaProducer
@@ -13,16 +12,15 @@ import com.rarible.protocol.union.dto.CollectionEventDto
 import com.rarible.protocol.union.dto.OrderEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.dto.UnionEventTopicProvider
+import com.rarible.protocol.union.enrichment.metrics.EsMetricFactory
 import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
 import com.rarible.protocol.union.search.indexer.config.IndexerProperties
 import com.rarible.protocol.union.search.indexer.handler.ActivityEventHandler
-import com.rarible.protocol.union.search.indexer.handler.OwnershipEventHandler
 import com.rarible.protocol.union.search.indexer.metrics.IndexerMetricFactory
 import com.rarible.protocol.union.search.indexer.metrics.MetricConsumerBatchEventHandlerFactory
 import com.rarible.protocol.union.subscriber.UnionKafkaJsonSerializer
 import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
-import io.mockk.every
 import io.mockk.mockk
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -40,6 +38,11 @@ class TestIndexerConfiguration {
     @Bean
     fun meterRegistry(): MeterRegistry {
         return SimpleMeterRegistry()
+    }
+
+    @Bean
+    fun esMetricFactory(meterRegistry: MeterRegistry): EsMetricFactory {
+        return EsMetricFactory(meterRegistry)
     }
 
     @Bean

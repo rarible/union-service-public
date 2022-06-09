@@ -24,7 +24,10 @@ import com.rarible.protocol.union.dto.CollectionEventDto
 import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.enrichment.meta.UnionMetaLoader
+import com.rarible.protocol.union.enrichment.metrics.EsMetricFactory
 import com.rarible.protocol.union.test.mock.CurrencyMock
+import io.micrometer.core.instrument.MeterRegistry
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import io.mockk.mockk
 import java.net.URI
 import org.springframework.beans.factory.annotation.Qualifier
@@ -49,6 +52,16 @@ class TestApiConfiguration {
     @Bean
     fun applicationEnvironmentInfo(): ApplicationEnvironmentInfo {
         return ApplicationEnvironmentInfo("test", "test.com")
+    }
+
+    @Bean
+    fun meterRegistry(): MeterRegistry {
+        return SimpleMeterRegistry()
+    }
+
+    @Bean
+    fun esMetricFactory(meterRegistry: MeterRegistry): EsMetricFactory {
+        return EsMetricFactory(meterRegistry)
     }
 
     @Bean

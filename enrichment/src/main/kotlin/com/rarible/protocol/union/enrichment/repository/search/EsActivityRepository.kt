@@ -9,7 +9,10 @@ import com.rarible.protocol.union.core.model.EsActivityCursor.Companion.fromActi
 import com.rarible.protocol.union.core.model.EsActivityLite
 import com.rarible.protocol.union.core.model.EsActivityQueryResult
 import com.rarible.protocol.union.core.model.EsActivitySort
+import com.rarible.protocol.union.core.model.elasticsearch.EsEntity
+import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.continuation.page.PageSize
+import com.rarible.protocol.union.enrichment.metrics.EsMetricFactory
 import com.rarible.protocol.union.enrichment.repository.search.internal.EsActivityQueryBuilderService
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
@@ -28,9 +31,14 @@ import java.io.IOException
 class EsActivityRepository(
     private val esOperations: ReactiveElasticsearchOperations,
     private val queryBuilderService: EsActivityQueryBuilderService,
-    esNameResolver: EsNameResolver
+    esNameResolver: EsNameResolver,
+    esMetricFactory: EsMetricFactory,
 ) {
     val entityDefinition = esNameResolver.createEntityDefinitionExtended(EsActivity.ENTITY_DEFINITION)
+
+    private val counters = BlockchainDto.values().associateWith {
+        esMetricFactory.createEntitySaveCountMetric(EsEntity.ACTIVITY, it)
+    }
 
     suspend fun findById(id: String): EsActivity? {
         return esOperations.get(id, EsActivity::class.java, entityDefinition.searchIndexCoordinates).awaitFirstOrNull()
@@ -38,6 +46,7 @@ class EsActivityRepository(
 
     suspend fun save(esActivity: EsActivity): EsActivity {
         return esOperations.save(esActivity, entityDefinition.writeIndexCoordinates).awaitFirst()
+            .also { countSingle(esActivity) }
     }
 
     suspend fun saveAll(esActivities: List<EsActivity>): List<EsActivity> {
@@ -57,6 +66,7 @@ class EsActivityRepository(
             .saveAll(esActivities, index)
             .collectList()
             .awaitFirst()
+            .also { countList(esActivities) }
     }
 
     suspend fun delete(activityIds: List<String>): Long? {
@@ -118,6 +128,17 @@ class EsActivityRepository(
             esOperations.execute { it.indices().refreshIndex(refreshRequest) }.awaitFirstOrNull()
         } catch (e: IOException) {
             throw RuntimeException(entityDefinition.writeAliasName + " refreshModifyIndex failed", e)
+        }
+    }
+
+    private fun countSingle(activity: EsActivity) {
+        counters[activity.blockchain]!!.increment()
+    }
+
+    private fun countList(activities: List<EsActivity>) {
+        val countByBlockchain = activities.groupingBy { it.blockchain }.eachCount()
+        countByBlockchain.entries.forEach {
+            counters[it.key]!!.increment(it.value.toDouble())
         }
     }
 }
