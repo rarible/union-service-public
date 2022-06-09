@@ -44,7 +44,6 @@ import com.rarible.protocol.union.dto.OrderEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.dto.UnionEventTopicProvider
 import com.rarible.protocol.union.enrichment.meta.UnionMetaLoader
-import com.rarible.protocol.union.enrichment.metrics.EsMetricFactory
 
 import com.rarible.protocol.union.subscriber.UnionKafkaJsonDeserializer
 import com.rarible.protocol.union.subscriber.UnionKafkaJsonSerializer
@@ -66,16 +65,6 @@ class TestListenerConfiguration {
     @Bean
     fun applicationEnvironmentInfo(): ApplicationEnvironmentInfo {
         return ApplicationEnvironmentInfo("test", "test.com")
-    }
-
-    @Bean
-    fun meterRegistry(): MeterRegistry {
-        return SimpleMeterRegistry()
-    }
-
-    @Bean
-    fun esMetricFactory(meterRegistry: MeterRegistry): EsMetricFactory {
-        return EsMetricFactory(meterRegistry)
     }
 
     @Bean

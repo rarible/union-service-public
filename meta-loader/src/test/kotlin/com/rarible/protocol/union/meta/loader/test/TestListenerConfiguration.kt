@@ -4,7 +4,6 @@ import com.rarible.core.application.ApplicationEnvironmentInfo
 import com.rarible.core.content.meta.loader.ContentMetaReceiver
 import com.rarible.protocol.union.core.CoreConfiguration
 import com.rarible.protocol.union.enrichment.meta.UnionMetaLoader
-import com.rarible.protocol.union.enrichment.metrics.EsMetricFactory
 import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 
@@ -33,14 +32,4 @@ class TestListenerConfiguration {
     @Primary
     @Qualifier("test.content.meta.receiver")
     fun testContentMetaReceiver(): ContentMetaReceiver = mockk()
-
-    @Bean
-    fun meterRegistry(): MeterRegistry {
-        return SimpleMeterRegistry()
-    }
-
-    @Bean
-    fun esMetricFactory(meterRegistry: MeterRegistry): EsMetricFactory {
-        return EsMetricFactory(meterRegistry)
-    }
 }

@@ -24,7 +24,6 @@ import com.rarible.protocol.union.dto.CollectionEventDto
 import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.enrichment.meta.UnionMetaLoader
-import com.rarible.protocol.union.enrichment.metrics.EsMetricFactory
 import com.rarible.protocol.union.test.mock.CurrencyMock
 import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
@@ -54,15 +53,6 @@ class TestApiConfiguration {
         return ApplicationEnvironmentInfo("test", "test.com")
     }
 
-    @Bean
-    fun meterRegistry(): MeterRegistry {
-        return SimpleMeterRegistry()
-    }
-
-    @Bean
-    fun esMetricFactory(meterRegistry: MeterRegistry): EsMetricFactory {
-        return EsMetricFactory(meterRegistry)
-    }
 
     @Bean
     fun testRestTemplate(mapper: ObjectMapper): RestTemplate {
