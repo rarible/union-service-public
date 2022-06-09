@@ -1,14 +1,11 @@
 package com.rarible.protocol.union.worker.task.search.collection
 
 import com.rarible.protocol.union.core.converter.EsCollectionConverter
-import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.continuation.page.PageSize
 import com.rarible.protocol.union.enrichment.repository.search.EsCollectionRepository
 import com.rarible.protocol.union.enrichment.service.query.collection.CollectionApiMergeService
-import com.rarible.protocol.union.worker.config.CollectionReindexProperties
 import com.rarible.protocol.union.worker.metrics.SearchTaskMetricFactory
-import com.rarible.protocol.union.worker.task.search.ParamFactory
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import org.springframework.stereotype.Component
