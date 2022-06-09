@@ -47,7 +47,7 @@ protocol-union-listener:
     <<: *sharedEnvironments
 
 protocol-union-meta-loader:
-  replicas: 3
+  replicas: 5
   tolerations:
     - *sharedTolerations
   environments:
