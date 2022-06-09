@@ -38,7 +38,10 @@ rarible:
     enableWorkers: false
     enableNotifications: false
     enableRetrySchedulerJob: false
-
+protocol:
+  union:
+    subscriber:
+      broker-replica-set: ${kafka.hosts}
 api:
   openapi:
     baseUrl: "https://api-dev.rarible.org"
@@ -91,7 +94,6 @@ common:
     enableOwnershipSourceEnrichment: false
     enableItemLastSaleEnrichment: true
     enableLegacyWrappedEventTopic: true
-
 meta:
   ipfsGateway: "https://ipfs.io,https://nftstorage.link"
   ipfsPublicGateway: "https://ipfs.io"
