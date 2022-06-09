@@ -402,9 +402,7 @@ class ActivityControllerFt : AbstractIntegrationTest() {
         val types = ActivityTypeDto.values().toList()
         val flowCollectionId = randomFlowAddress()
         val flowSourceActivity = randomFlowCancelListActivityDto()
-        val flowActivity = flowActivityConverter.convert(
-            flowSourceActivity, BlockchainDto.FLOW
-        )
+        val flowActivity = flowActivityConverter.convert(flowSourceActivity)
 
         val ethCollectionId = CollectionIdDto(BlockchainDto.ETHEREUM, randomEthAddress())
         val ethSourceActivity = randomEthOrderBidActivity()
