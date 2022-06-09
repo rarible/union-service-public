@@ -14,6 +14,7 @@ import com.rarible.protocol.union.core.model.elasticsearch.EsEntity
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.worker.config.SearchReindexProperties
+import com.rarible.protocol.union.worker.config.WorkerProperties
 import com.rarible.protocol.union.worker.task.search.activity.ActivityTaskParam
 import com.rarible.protocol.union.worker.task.search.activity.ChangeEsActivityAliasTask
 import com.rarible.protocol.union.worker.task.search.collection.ChangeEsCollectionAliasTask
@@ -27,10 +28,12 @@ import org.springframework.stereotype.Component
 
 @Component
 class ReindexService(
-    private val searchReindexProperties: SearchReindexProperties,
+    workerProperties: WorkerProperties,
     private val taskRepository: TaskRepository,
     private val paramFactory: ParamFactory,
 ) : ReindexSchedulingService {
+
+    private val searchReindexProperties = workerProperties.searchReindex
 
     override suspend fun scheduleReindex(
         newIndexName: String,
