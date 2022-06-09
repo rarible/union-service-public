@@ -10,6 +10,7 @@ import com.rarible.protocol.union.core.elasticsearch.EsRepository
 import com.rarible.protocol.union.core.elasticsearch.IndexService
 import com.rarible.protocol.union.core.elasticsearch.bootstrap.ElasticsearchBootstrapper
 import com.rarible.protocol.union.core.model.elasticsearch.EsEntitiesConfig
+import com.rarible.protocol.union.enrichment.configuration.EnrichmentApiConfiguration
 import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
 import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
 import com.rarible.protocol.union.worker.task.search.ReindexService
@@ -26,7 +27,10 @@ import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperatio
 @Configuration
 @ComponentScan(basePackageClasses = [EsActivityRepository::class])
 @Import(
-    value = [SearchConfiguration::class]
+    value = [
+        EnrichmentApiConfiguration::class,
+        SearchConfiguration::class
+    ]
 )
 @EnableRaribleTask
 @EnableConfigurationProperties(WorkerProperties::class)

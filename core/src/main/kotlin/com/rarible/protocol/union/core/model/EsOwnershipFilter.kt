@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.core.model
 
+import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.continuation.DateIdContinuation
@@ -18,9 +19,9 @@ sealed interface EsOwnershipFilter {
     fun asQuery(): Query
 
     fun genericBuild(
-        queryBuilder: QueryBuilder,
         continuation: DateIdContinuation?,
         size: Int,
+        vararg queryBuilders: QueryBuilder,
     ): Query {
         val continuationQuery = continuation?.let {
             boolQuery()
@@ -33,7 +34,7 @@ sealed interface EsOwnershipFilter {
                     rangeQuery(EsOwnership::date.name).lt(it.date)
                 )
         }
-        val builders = listOfNotNull(queryBuilder, continuationQuery)
+        val builders = listOfNotNull(*queryBuilders, continuationQuery)
         val fullQueryBuilder = builders.singleOrNull()
             ?: boolQuery().also { builders.forEach(it::must) }
 
@@ -71,12 +72,21 @@ data class EsOwnershipByAuctionOwnershipIdsFilter(
 
 data class EsOwnershipByOwnerFilter(
     val owner: UnionAddress,
-    val continuation: DateIdContinuation?,
+    val blockchains: Collection<BlockchainDto>? = null,
+    val continuation: DateIdContinuation? = null,
     val size: Int,
 ) : EsOwnershipFilter {
     override fun asQuery(): Query {
-        val query = termQuery(EsOwnership::owner.name, owner.fullId())
-        return genericBuild(query, continuation, size)
+        return if (blockchains == null) {
+            genericBuild(continuation, size, termQuery(EsOwnership::owner.name, owner.fullId()))
+        } else {
+            genericBuild(
+                continuation,
+                size,
+                termQuery(EsOwnership::owner.name, owner.fullId()),
+                termsQuery(EsOwnership::blockchain.name, blockchains.map { it.name })
+            )
+        }
     }
 }
 
@@ -87,6 +97,6 @@ data class EsOwnershipByItemFilter(
 ) : EsOwnershipFilter {
     override fun asQuery(): Query {
         val query = termQuery(EsOwnership::itemId.name, itemId.fullId())
-        return genericBuild(query, continuation, size)
+        return genericBuild(continuation, size, query)
     }
 }
