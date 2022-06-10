@@ -58,3 +58,4 @@ logging:
     com.rarible.core.daemon: ERROR
     com.rarible.core.loader: ERROR
     tracer: TRACE
+    org.springframework.data.elasticsearch.core.QUERY: DEBUG
