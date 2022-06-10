@@ -73,7 +73,7 @@ class DipDupOrderConverter(
             status = status,
             fill = order.fill,
             startedAt = order.startAt?.toInstant(),
-            endedAt = order.endedAt?.toInstant(),
+            endedAt = order.endAt?.toInstant(),
             makeStock = order.makeStock,
             cancelled = order.cancelled,
             createdAt = order.createdAt.toInstant(),
