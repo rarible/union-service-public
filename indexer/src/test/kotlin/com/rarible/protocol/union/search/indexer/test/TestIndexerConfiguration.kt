@@ -61,9 +61,10 @@ class TestIndexerConfiguration {
     @Bean
     fun activityHandler(
         repository: EsActivityRepository,
-        blockchainRouter: BlockchainRouter<ItemService>
+        blockchainRouter: BlockchainRouter<ItemService>,
+        indexerMetricFactory: IndexerMetricFactory
     ): ConsumerBatchEventHandler<ActivityDto> {
-        return ActivityEventHandler(repository, blockchainRouter)
+        return ActivityEventHandler(repository, blockchainRouter, indexerMetricFactory)
     }
 
     @Bean

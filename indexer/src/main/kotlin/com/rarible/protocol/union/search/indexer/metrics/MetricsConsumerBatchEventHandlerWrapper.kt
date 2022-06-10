@@ -44,4 +44,3 @@ class MetricsConsumerBatchEventHandlerWrapper<T>(
         requireNotNull(delayGauges[blockchain]).set(now - last)
     }
 }
-
