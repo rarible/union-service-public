@@ -26,6 +26,15 @@ class SearchTaskMetricFactory(
         ) {}.bind(meterRegistry)
     }
 
+    fun createReindexCollectionCounter(
+        blockchain: BlockchainDto
+    ): RegisteredCounter {
+        return object : CountingMetric(
+            name =  getReindexEntityMetricName(EsEntity.COLLECTION),
+            Tag.of("blockchain", blockchain.name.lowercase()),
+        ) {}.bind(meterRegistry)
+    }
+
     private fun getReindexEntityMetricName(entity: EsEntity): String {
         return "${properties.metrics.rootPath}.reindex.${entity.name.lowercase()}"
     }

@@ -11,10 +11,13 @@ import com.rarible.protocol.union.enrichment.repository.search.internal.EsCollec
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactor.awaitSingle
+import org.elasticsearch.action.admin.indices.refresh.RefreshRequest
 import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations
+import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery
 import org.springframework.data.elasticsearch.core.query.Query
 import org.springframework.stereotype.Component
+import java.io.IOException
 
 @Component
 @CaptureSpan(type = SpanType.DB)
@@ -28,6 +31,21 @@ class EsCollectionRepository(
 
     suspend fun saveAll(collections: List<EsCollection>): List<EsCollection> {
         return esOperations.saveAll(collections, entityDefinition.writeIndexCoordinates).collectList().awaitSingle()
+    }
+
+    suspend fun saveAll(esCollections: List<EsCollection>, indexName: String?): List<EsCollection> {
+        return if (indexName == null) {
+            saveAll(esCollections)
+        } else {
+            saveAllToIndex(esCollections, IndexCoordinates.of(indexName))
+        }
+    }
+
+    private suspend fun saveAllToIndex(esCollections: List<EsCollection>, index: IndexCoordinates): List<EsCollection> {
+        return esOperations
+            .saveAll(esCollections, index)
+            .collectList()
+            .awaitFirst()
     }
 
     suspend fun findById(collectionId: String): EsCollection? {
@@ -57,5 +75,15 @@ class EsCollectionRepository(
             Any::class.java,
             entityDefinition.writeIndexCoordinates
         ).awaitFirstOrNull()
+    }
+
+    suspend fun refresh() {
+        val refreshRequest = RefreshRequest().indices(entityDefinition.aliasName, entityDefinition.writeAliasName)
+
+        try {
+            esOperations.execute { it.indices().refreshIndex(refreshRequest) }.awaitFirstOrNull()
+        } catch (e: IOException) {
+            throw RuntimeException(entityDefinition.writeAliasName + " refreshModifyIndex failed", e)
+        }
     }
 }

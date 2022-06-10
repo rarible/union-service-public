@@ -20,7 +20,7 @@ class ActivityTask(
 
     override suspend fun isAbleToRun(param: String): Boolean {
         val blockchain = paramFactory.parse<ActivityTaskParam>(param).blockchain
-        return properties.enabled && properties.blockchains.single { it.blockchain == blockchain }.enabled
+        return properties.isBlockchainActive(blockchain)
     }
 
     /**
