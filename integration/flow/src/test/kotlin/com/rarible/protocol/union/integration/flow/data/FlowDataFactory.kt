@@ -153,7 +153,8 @@ fun randomFlowV1OrderDto(itemId: ItemIdDto): FlowOrderDto {
         ),
         collection = randomFlowContract(),
         lastUpdateAt = nowMillis(),
-        makeStock = randomBigInt()
+        makeStock = randomBigDecimal(),
+        dbUpdatedAt = nowMillis()
     )
 }
 
