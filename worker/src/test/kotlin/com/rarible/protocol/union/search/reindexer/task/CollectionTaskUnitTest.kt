@@ -19,7 +19,7 @@ import org.junit.jupiter.api.Test
 @Suppress("ReactiveStreamsUnusedPublisher")
 class CollectionTaskUnitTest {
 
-    private val paramFactory = ParamFactory(jacksonObjectMapper().registerKotlinModule())
+    private val paramFactory = ParamFactory(jacksonObjectMapper())
 
     private val service = mockk<CollectionReindexService> {
         coEvery {

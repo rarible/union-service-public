@@ -33,17 +33,17 @@ class EsCollectionRepository(
         return esOperations.saveAll(collections, entityDefinition.writeIndexCoordinates).collectList().awaitSingle()
     }
 
-    suspend fun saveAll(esActivities: List<EsCollection>, indexName: String?): List<EsCollection> {
+    suspend fun saveAll(esCollections: List<EsCollection>, indexName: String?): List<EsCollection> {
         return if (indexName == null) {
-            saveAll(esActivities)
+            saveAll(esCollections)
         } else {
-            saveAllToIndex(esActivities, IndexCoordinates.of(indexName))
+            saveAllToIndex(esCollections, IndexCoordinates.of(indexName))
         }
     }
 
-    private suspend fun saveAllToIndex(esActivities: List<EsCollection>, index: IndexCoordinates): List<EsCollection> {
+    private suspend fun saveAllToIndex(esCollections: List<EsCollection>, index: IndexCoordinates): List<EsCollection> {
         return esOperations
-            .saveAll(esActivities, index)
+            .saveAll(esCollections, index)
             .collectList()
             .awaitFirst()
     }
