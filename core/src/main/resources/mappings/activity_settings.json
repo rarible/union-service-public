@@ -3,8 +3,8 @@
     "number_of_shards": 3,
     "number_of_replicas": 1,
     "refresh_interval": "1s",
-    "sort.field": [ "date", "blockNumber", "logIndex", "salt", "date", "blockNumber", "logIndex", "salt" ],
-    "sort.order": [ "desc", "desc", "desc", "desc", "asc", "asc", "asc", "asc" ]
+    "sort.field": [ "date", "blockNumber", "logIndex", "salt" ],
+    "sort.order": [ "desc", "desc", "desc", "desc" ]
   },
   "analysis": {
     "filter": {

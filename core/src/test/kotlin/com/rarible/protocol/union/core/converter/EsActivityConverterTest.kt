@@ -10,6 +10,7 @@ import com.rarible.core.test.data.randomString
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
+import com.rarible.protocol.union.core.util.truncatedToSeconds
 import com.rarible.protocol.union.dto.ActivityBlockchainInfoDto
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivityIdDto
@@ -62,6 +63,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatCode
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import randomInstant
 import java.math.BigInteger
 import java.time.Instant
 
@@ -644,7 +646,7 @@ class EsActivityConverterTest {
     }
 
     private fun randomDate(): Instant {
-        return Instant.ofEpochMilli(randomLong())
+        return Instant.ofEpochMilli(randomLong()).truncatedToSeconds()
     }
 
     private fun randomBlockchain(): BlockchainDto {
