@@ -3,6 +3,7 @@ package com.rarible.protocol.union.integration.solana.service
 import com.rarible.core.apm.CaptureSpan
 import com.rarible.protocol.solana.api.client.CollectionControllerApi
 import com.rarible.protocol.solana.dto.CollectionsByIdRequestDto
+import com.rarible.protocol.union.core.model.TokenId
 import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.core.service.CollectionService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
@@ -41,5 +42,9 @@ open class SolanaCollectionService(
             .awaitFirst().collections.map {
                 SolanaCollectionConverter.convert(it, blockchain)
             }
+    }
+
+    override suspend fun generateNftTokenId(collectionId: String, minter: String): TokenId {
+        TODO("Not yet implemented")
     }
 }

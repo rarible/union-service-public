@@ -2,6 +2,7 @@ package com.rarible.protocol.union.integration.flow.service
 
 import com.rarible.core.apm.CaptureSpan
 import com.rarible.protocol.flow.nft.api.client.FlowNftCollectionControllerApi
+import com.rarible.protocol.union.core.model.TokenId
 import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.core.service.CollectionService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
@@ -38,6 +39,10 @@ open class FlowCollectionService(
     override suspend fun getCollectionsByIds(ids: List<String>): List<UnionCollection> {
         val collections = collectionControllerApi.searchNftCollectionsByIds(ids).awaitSingle()
         return FlowCollectionConverter.convert(collections, blockchain).entities
+    }
+
+    override suspend fun generateNftTokenId(collectionId: String, minter: String): TokenId {
+        TODO("Not yet implemented")
     }
 
     override suspend fun getCollectionsByOwner(
