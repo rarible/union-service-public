@@ -35,7 +35,8 @@ class ActivityReindexService(
                     cursor,
                     cursor,
                     PageSize.ACTIVITY.max,
-                    ActivitySortDto.EARLIEST_FIRST
+                    ActivitySortDto.EARLIEST_FIRST,
+                    false
                 ).awaitFirst()
 
                 val savedActivities = esActivityRepository.saveAll(

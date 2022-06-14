@@ -10,6 +10,7 @@ import com.rarible.protocol.union.dto.AudioContentDto
 import com.rarible.protocol.union.dto.ImageContentDto
 import com.rarible.protocol.union.dto.Model3dContentDto
 import com.rarible.protocol.union.dto.VideoContentDto
+import com.rarible.protocol.union.enrichment.test.data.randomUnionCollectionMeta
 import com.rarible.protocol.union.enrichment.test.data.randomUnionContent
 import com.rarible.protocol.union.enrichment.test.data.randomUnionMeta
 import org.assertj.core.api.Assertions.assertThat
@@ -18,12 +19,13 @@ import org.junit.jupiter.api.Test
 class EnrichedMetaConverterTest {
 
     @Test
-    fun `convert meta`() {
+    fun `convert item meta`() {
         val meta = randomUnionMeta()
 
         val converted = EnrichedMetaConverter.convert(meta)
 
         assertThat(converted.name).isEqualTo(meta.name)
+        assertThat(converted.description).isEqualTo(meta.description)
         assertThat(converted.createdAt).isEqualTo(meta.createdAt)
         assertThat(converted.tags).isEqualTo(meta.tags)
         assertThat(converted.genres).isEqualTo(meta.genres)
@@ -31,9 +33,30 @@ class EnrichedMetaConverterTest {
         assertThat(converted.rights).isEqualTo(meta.rights)
         assertThat(converted.rightsUri).isEqualTo(meta.rightsUri)
         assertThat(converted.externalUri).isEqualTo(meta.externalUri)
-        assertThat(converted.description).isEqualTo(meta.description)
+        assertThat(converted.originalMetaUri).isEqualTo(meta.originalMetaUri)
         assertThat(converted.attributes).isEqualTo(meta.attributes)
         assertThat(converted.restrictions).isEqualTo(meta.restrictions.map { it.type })
+    }
+
+    @Test
+    fun `convert collection meta`() {
+        val meta = randomUnionCollectionMeta()
+
+        val converted = EnrichedMetaConverter.convert(meta)
+
+        assertThat(converted.name).isEqualTo(meta.name)
+        assertThat(converted.description).isEqualTo(meta.description)
+        assertThat(converted.createdAt).isEqualTo(meta.createdAt)
+        assertThat(converted.tags).isEqualTo(meta.tags)
+        assertThat(converted.genres).isEqualTo(meta.genres)
+        assertThat(converted.language).isEqualTo(meta.language)
+        assertThat(converted.rights).isEqualTo(meta.rights)
+        assertThat(converted.rightsUri).isEqualTo(meta.rightsUri)
+        assertThat(converted.externalUri).isEqualTo(meta.externalUri)
+        assertThat(converted.originalMetaUri).isEqualTo(meta.originalMetaUri)
+
+        assertThat(converted.description).isEqualTo(meta.description)
+        assertThat(converted.description).isEqualTo(meta.description)
     }
 
     @Test

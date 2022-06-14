@@ -139,7 +139,10 @@ fun randomEthItemMeta(): NftItemMetaDto {
         description = randomString(),
         attributes = listOf(randomEthItemMetaAttribute()),
         image = randomEthItemMedia(),
-        animation = randomEthItemMedia()
+        animation = randomEthItemMedia(),
+        tags = emptyList(),
+        genres = emptyList(),
+        content = emptyList(),
     )
 }
 
@@ -482,10 +485,24 @@ fun randomEthCollectionMetaDto(): NftCollectionMetaDto {
         name = randomString(),
         description = randomString(),
         image = randomEthItemMedia(),
+        language = randomString(),
+        genres = listOf(randomString(), randomString()),
+        tags = listOf(randomString(), randomString()),
+        createdAt = nowMillis(),
+        rights = randomString(),
+        rightsUri = randomString(),
+        externalUri = randomString(),
+        originalMetaUri = randomString(),
+        feeRecipient = randomAddress(),
+        sellerFeeBasisPoints = randomInt(),
+        content = emptyList(),
+
+        // TODO should be removed later
         external_link = randomString(),
         seller_fee_basis_points = randomInt(),
         fee_recipient = randomAddress(),
-    )
+
+        )
 }
 
 fun randomEthAuctionDto() = randomEthAuctionDto(randomEthItemId())

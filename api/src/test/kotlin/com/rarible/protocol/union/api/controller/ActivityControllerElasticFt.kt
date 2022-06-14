@@ -82,7 +82,9 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
     @Test
     fun `get all activities`() = runBlocking<Unit> {
         val types = ActivityTypeDto.values().toList()
-        val blockchains = listOf(BlockchainDto.ETHEREUM, BlockchainDto.POLYGON, BlockchainDto.FLOW, BlockchainDto.SOLANA, BlockchainDto.TEZOS)
+        val blockchains = listOf(
+            BlockchainDto.ETHEREUM, BlockchainDto.POLYGON, BlockchainDto.FLOW, BlockchainDto.SOLANA, BlockchainDto.TEZOS
+        )
         val size = 5
         val now = nowMillis()
 
@@ -203,33 +205,41 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
         // Since all activity types specified in request, all of existing clients should be requested
         coEvery {
             testEthereumActivityOrderApi.getOrderActivitiesById(
-                ActivitiesByIdRequestDto(listOf(
-                    ethOrderActivity3.id,
-                ))
+                ActivitiesByIdRequestDto(
+                    listOf(
+                        ethOrderActivity3.id,
+                    )
+                )
             )
         } returns OrderActivitiesDto(null, listOf(ethOrderActivity3)).toMono()
 
         coEvery {
             testEthereumActivityItemApi.getNftActivitiesById(
-                ActivitiesByIdRequestDto(listOf(
-                    ethItemActivity3.id,
-                ))
+                ActivitiesByIdRequestDto(
+                    listOf(
+                        ethItemActivity3.id,
+                    )
+                )
             )
         } returns NftActivitiesDto(null, listOf(ethItemActivity3)).toMono()
 
         coEvery {
             testPolygonActivityItemApi.getNftActivitiesById(
-                ActivitiesByIdRequestDto(listOf(
-                    polygonItemActivity1.id,
-                ))
+                ActivitiesByIdRequestDto(
+                    listOf(
+                        polygonItemActivity1.id,
+                    )
+                )
             )
         } returns NftActivitiesDto(null, listOf(polygonItemActivity1)).toMono()
 
         coEvery {
             testFlowActivityApi.getNftOrderActivitiesById(
-                NftActivitiesByIdRequestDto(listOf(
-                    flowActivity1.id
-                ))
+                NftActivitiesByIdRequestDto(
+                    listOf(
+                        flowActivity1.id
+                    )
+                )
             )
         } returns FlowActivitiesDto(null, null, listOf(flowActivity1)).toMono()
 
@@ -244,7 +254,7 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
         } returns com.rarible.protocol.tezos.dto.NftActivitiesDto(null, listOf(tezosActivity1))
 
         val activities = activityControllerApi.getAllActivities(
-            types, blockchains, null, null, size, com.rarible.protocol.union.dto.ActivitySortDto.EARLIEST_FIRST
+            types, blockchains, null, null, size, com.rarible.protocol.union.dto.ActivitySortDto.EARLIEST_FIRST, false
         ).awaitFirst()
 
         assertThat(activities.activities).hasSize(5)
@@ -285,7 +295,7 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
         } returns OrderActivitiesDto(null, listOf(orderActivity)).toMono()
 
         val activities = activityControllerApi.getActivitiesByCollection(
-            types, ethCollectionId.fullId(), continuation, null, defaultSize, sort
+            types, listOf(ethCollectionId.fullId()), continuation, null, defaultSize, sort, false
         ).awaitFirst()
 
         assertThat(activities.activities).hasSize(1)
@@ -350,7 +360,7 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
         } returns NftActivitiesDto(null, listOf(itemActivity)).toMono()
 
         val activities = activityControllerApi.getActivitiesByItem(
-            types, ethItemId.fullId(), continuation, null, 100, sort
+            types, ethItemId.fullId(), continuation, null, 100, sort, false
         ).awaitFirst()
 
         assertThat(activities.activities).hasSize(3)
@@ -420,7 +430,7 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
         val now = Instant.now()
         val oneWeekAgo = now.minus(7, ChronoUnit.DAYS)
         val activities = activityControllerApi.getActivitiesByUser(
-            types, listOf(userEth.fullId()), null, oneWeekAgo, now, null, null, size, sort
+            types, listOf(userEth.fullId()), null, oneWeekAgo, now, null, null, size, sort, false
         ).awaitFirst()
 
         assertThat(activities.activities).hasSize(3)

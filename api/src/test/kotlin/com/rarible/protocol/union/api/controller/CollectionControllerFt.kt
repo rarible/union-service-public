@@ -20,7 +20,7 @@ import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.service.EnrichmentCollectionService
 import com.rarible.protocol.union.integration.ethereum.converter.EthCollectionConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
-import com.rarible.protocol.union.integration.ethereum.converter.EthItemConverter
+import com.rarible.protocol.union.integration.ethereum.converter.EthMetaConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAddress
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAssetErc20
@@ -239,8 +239,8 @@ class CollectionControllerFt : AbstractIntegrationTest() {
                 else -> NftItemsDto(0, null, emptyList()).justOrEmpty()
             }
         }
-        coEvery { testUnionMetaLoader.load(itemId1) } returns EthItemConverter.convert(item1.meta!!)
-        coEvery { testUnionMetaLoader.load(itemId2) } returns EthItemConverter.convert(item2.meta!!)
+        coEvery { testUnionMetaLoader.load(itemId1) } returns EthMetaConverter.convert(item1.meta!!)
+        coEvery { testUnionMetaLoader.load(itemId2) } returns EthMetaConverter.convert(item2.meta!!)
 
         collectionControllerClient.refreshCollectionMeta(collectionId.fullId()).awaitFirstOrNull()
 
