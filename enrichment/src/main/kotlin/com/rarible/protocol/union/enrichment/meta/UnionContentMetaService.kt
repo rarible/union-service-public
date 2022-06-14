@@ -20,9 +20,9 @@ import com.rarible.protocol.union.core.model.UnionVideoProperties
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.enrichment.meta.embedded.EmbeddedContentUrlProvider
+import org.apache.commons.codec.digest.DigestUtils
 import org.codehaus.plexus.util.StringUtils
 import org.springframework.stereotype.Component
-import org.springframework.util.DigestUtils
 
 @Component
 class UnionContentMetaService(
@@ -45,7 +45,7 @@ class UnionContentMetaService(
     }
 
     fun getEmbeddedId(data: ByteArray): String {
-        return DigestUtils.md5DigestAsHex(data)
+        return DigestUtils.sha256Hex(data)
     }
 
     // Used only for internal operations, such urls should NOT be stored anywhere
