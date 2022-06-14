@@ -3,7 +3,6 @@ package com.rarible.protocol.union.integration.flow.converter
 import com.rarible.protocol.dto.FlowCreatorDto
 import com.rarible.protocol.dto.FlowNftItemDto
 import com.rarible.protocol.dto.FlowNftItemsDto
-import com.rarible.protocol.dto.FlowRoyaltyDto
 import com.rarible.protocol.dto.PayInfoDto
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.model.UnionItem
@@ -18,8 +17,8 @@ import com.rarible.protocol.union.dto.MetaContentDto
 import com.rarible.protocol.union.dto.RoyaltyDto
 import com.rarible.protocol.union.dto.continuation.page.Page
 import com.rarible.protocol.union.dto.parser.IdParser
-import java.math.BigInteger
 import org.slf4j.LoggerFactory
+import java.math.BigInteger
 
 object FlowItemConverter {
 
@@ -45,7 +44,6 @@ object FlowItemConverter {
             mintedAt = item.mintedAt,
             lastUpdatedAt = item.lastUpdatedAt,
             supply = item.supply,
-            meta = item.meta?.let { convert(it) },
             deleted = item.deleted,
             creators = item.creators.map { convert(it, blockchain) },
             lazySupply = BigInteger.ZERO
@@ -80,7 +78,7 @@ object FlowItemConverter {
         )
     }
 
-    fun convert(source: com.rarible.protocol.dto.MetaDto): UnionMeta {
+    fun convert(source: com.rarible.protocol.dto.FlowMetaDto): UnionMeta {
         return UnionMeta(
             name = source.name,
             description = source.description,

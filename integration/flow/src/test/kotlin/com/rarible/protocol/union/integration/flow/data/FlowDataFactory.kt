@@ -12,6 +12,8 @@ import com.rarible.protocol.dto.FlowAssetFungibleDto
 import com.rarible.protocol.dto.FlowAssetNFTDto
 import com.rarible.protocol.dto.FlowBurnDto
 import com.rarible.protocol.dto.FlowCreatorDto
+import com.rarible.protocol.dto.FlowMetaAttributeDto
+import com.rarible.protocol.dto.FlowMetaDto
 import com.rarible.protocol.dto.FlowMintDto
 import com.rarible.protocol.dto.FlowNftCollectionDto
 import com.rarible.protocol.dto.FlowNftItemDto
@@ -27,8 +29,6 @@ import com.rarible.protocol.dto.FlowOrderDto
 import com.rarible.protocol.dto.FlowOrderStatusDto
 import com.rarible.protocol.dto.FlowRoyaltyDto
 import com.rarible.protocol.dto.FlowTransferDto
-import com.rarible.protocol.dto.MetaAttributeDto
-import com.rarible.protocol.dto.MetaDto
 import com.rarible.protocol.dto.PayInfoDto
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.util.CompositeItemIdParser
@@ -57,7 +57,6 @@ fun randomFlowNftItemDto(itemId: ItemIdDto, creator: String): FlowNftItemDto {
         tokenId = tokenId,
         mintedAt = nowMillis(),
         lastUpdatedAt = nowMillis(),
-        meta = randomFlowMetaDto(),
         creators = listOf(FlowCreatorDto(creator, randomBigDecimal(0, 2))),
         owner = randomString(),
         royalties = listOf(FlowRoyaltyDto(randomString(), randomBigDecimal(0, 2))),
@@ -74,7 +73,6 @@ fun randomFlowItemDtoWithCollection(collectionDto: FlowNftCollectionDto, itemId:
         tokenId = tokenId,
         mintedAt = nowMillis(),
         lastUpdatedAt = nowMillis(),
-        meta = randomFlowMetaDto(),
         creators = listOf(FlowCreatorDto(creator, randomBigDecimal(0, 2))),
         owner = randomString(),
         royalties = listOf(FlowRoyaltyDto(randomString(), randomBigDecimal(0, 2))),
@@ -83,8 +81,8 @@ fun randomFlowItemDtoWithCollection(collectionDto: FlowNftCollectionDto, itemId:
     )
 }
 
-fun randomFlowMetaDto(): MetaDto {
-    return MetaDto(
+fun randomFlowMetaDto(): FlowMetaDto {
+    return FlowMetaDto(
         description = randomString(),
         name = randomString(),
         raw = randomString(),
@@ -93,8 +91,8 @@ fun randomFlowMetaDto(): MetaDto {
     )
 }
 
-fun randomFlowMetaAttributeDto(): MetaAttributeDto {
-    return MetaAttributeDto(
+fun randomFlowMetaAttributeDto(): FlowMetaAttributeDto {
+    return FlowMetaAttributeDto(
         key = randomString(),
         value = randomString()
     )
@@ -153,7 +151,7 @@ fun randomFlowV1OrderDto(itemId: ItemIdDto): FlowOrderDto {
         collection = randomFlowContract(),
         lastUpdateAt = nowMillis(),
         makeStock = randomBigDecimal(),
-        dbUpdatedAt = nowMillis()
+        dbUpdatedAt = nowMillis(),
     )
 }
 
@@ -188,7 +186,7 @@ fun randomFlowNftOrderActivitySell(): FlowNftOrderActivitySellDto {
         blockHash = randomString(),
         blockNumber = randomLong(),
         logIndex = randomInt(),
-        updatedAt = nowMillis()
+        updatedAt = nowMillis(),
     )
 }
 
@@ -201,7 +199,7 @@ fun randomFlowNftOrderActivityListDto(): FlowNftOrderActivityListDto {
         make = FlowAssetFungibleDto(randomString(), randomBigDecimal()),
         take = FlowAssetFungibleDto(randomString(), randomBigDecimal()),
         price = randomBigDecimal(),
-        updatedAt = nowMillis()
+        updatedAt = nowMillis(),
     )
 }
 
@@ -214,7 +212,7 @@ fun randomFlowNftOrderActivityBidDto(): FlowNftOrderActivityBidDto {
         make = FlowAssetFungibleDto(randomString(), randomBigDecimal()),
         take = FlowAssetFungibleDto(randomString(), randomBigDecimal()),
         price = randomBigDecimal(),
-        updatedAt = nowMillis()
+        updatedAt = nowMillis(),
     )
 }
 
@@ -232,7 +230,7 @@ fun randomFlowCancelListActivityDto(): FlowNftOrderActivityCancelListDto {
         blockHash = randomString(),
         blockNumber = randomLong(),
         logIndex = randomInt(),
-        updatedAt = nowMillis()
+        updatedAt = nowMillis(),
     )
 }
 
@@ -249,7 +247,7 @@ fun randomFlowCancelBidActivityDto(): FlowNftOrderActivityCancelBidDto {
         blockHash = randomString(),
         blockNumber = randomLong(),
         logIndex = randomInt(),
-        updatedAt = nowMillis()
+        updatedAt = nowMillis(),
     )
 }
 
@@ -265,7 +263,7 @@ fun randomFlowMintDto(): FlowMintDto {
         blockHash = randomString(),
         blockNumber = randomLong(),
         logIndex = randomInt(),
-        updatedAt = nowMillis()
+        updatedAt = nowMillis(),
     )
 }
 
@@ -283,7 +281,7 @@ fun randomFlowTransferDto(): FlowTransferDto {
         blockNumber = randomLong(),
         logIndex = randomInt(),
         purchased = false,
-        updatedAt = nowMillis()
+        updatedAt = nowMillis(),
     )
 }
 
@@ -299,7 +297,7 @@ fun randomFlowBurnDto(): FlowBurnDto {
         blockHash = randomString(),
         blockNumber = randomLong(),
         logIndex = randomInt(),
-        updatedAt = nowMillis()
+        updatedAt = nowMillis(),
     )
 }
 

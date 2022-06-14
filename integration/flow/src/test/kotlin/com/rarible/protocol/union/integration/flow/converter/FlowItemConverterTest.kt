@@ -1,8 +1,8 @@
 package com.rarible.protocol.union.integration.flow.converter
 
 import com.rarible.core.test.data.randomString
-import com.rarible.protocol.dto.MetaAttributeDto
-import com.rarible.protocol.dto.MetaDto
+import com.rarible.protocol.dto.FlowMetaAttributeDto
+import com.rarible.protocol.dto.FlowMetaDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.MetaContentDto
 import com.rarible.protocol.union.integration.flow.data.randomFlowNftItemDto
@@ -29,26 +29,23 @@ class FlowItemConverterTest {
 
     @Test
     fun `flow item meta`() {
-        val item = randomFlowNftItemDto().copy(
-            meta = MetaDto(
-                name = "some_nft_meta",
-                description = randomString(),
-                raw = randomString(),
-                attributes = listOf(
-                    MetaAttributeDto("key1", "value1"),
-                    MetaAttributeDto("key2", "value2")
-                ),
-                contents = listOf(
-                    "url1", "url2"
-                )
+        val meta = FlowMetaDto(
+            name = "some_nft_meta",
+            description = randomString(),
+            raw = randomString(),
+            attributes = listOf(
+                FlowMetaAttributeDto("key1", "value1"),
+                FlowMetaAttributeDto("key2", "value2")
+            ),
+            contents = listOf(
+                "url1", "url2"
             )
         )
-        val dto = item.meta!!
 
-        val converted = FlowItemConverter.convert(item, BlockchainDto.FLOW).meta!!
+        val converted = FlowItemConverter.convert(meta)
 
-        assertThat(converted.name).isEqualTo(dto.name)
-        assertThat(converted.description).isEqualTo(dto.description)
+        assertThat(converted.name).isEqualTo(meta.name)
+        assertThat(converted.description).isEqualTo(meta.description)
         assertThat(converted.content).hasSize(2)
         assertThat(converted.attributes.find { it.key == "key1" }?.value).isEqualTo("value1")
         assertThat(converted.attributes.find { it.key == "key2" }?.value).isEqualTo("value2")
