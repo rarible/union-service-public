@@ -29,7 +29,7 @@ class DummyCollectionService(
         TODO("Not yet implemented")
     }
 
-    override suspend fun generateNftTokenId(collectionId: String, minter: String): TokenId {
+    override suspend fun generateNftTokenId(collectionId: String, minter: String?): TokenId {
         TODO("Not yet implemented")
     }
 

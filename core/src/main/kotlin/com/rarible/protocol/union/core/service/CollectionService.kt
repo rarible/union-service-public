@@ -28,5 +28,5 @@ interface CollectionService : BlockchainService {
 
     suspend fun getCollectionsByIds(ids: List<String>): List<UnionCollection>
 
-    suspend fun generateNftTokenId(collectionId: String, minter: String): TokenId
+    suspend fun generateNftTokenId(collectionId: String, minter: String?): TokenId
 }

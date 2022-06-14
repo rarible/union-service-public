@@ -269,8 +269,7 @@ class CollectionControllerFt : AbstractIntegrationTest() {
     fun `should generates token_ids for tezos`() = runBlocking<Unit> {
         val collectionId = randomTezosAddress()
         val collection = randomTezosCollectionDto(collectionId.value)
-        val minter = randomString()
-        val url = "${baseUrl()}/collections/${collectionId.fullId()}/generate_token_id?minter=${minter}"
+        val url = "${baseUrl()}/collections/${collectionId.fullId()}/generate_token_id"
 
         coEvery {
             testTezosCollectionApi.getNftCollectionById(collectionId.value)
@@ -287,12 +286,23 @@ class CollectionControllerFt : AbstractIntegrationTest() {
     @Test
     fun `should return 400 on non-existent collection`() = runBlocking<Unit> {
         val collectionId = randomTezosAddress()
-        val minter = randomString()
-        val url = "${baseUrl()}/collections/${collectionId.fullId()}/generate_token_id?minter=${minter}"
+        val url = "${baseUrl()}/collections/${collectionId.fullId()}/generate_token_id"
 
         coEvery {
             testTezosCollectionApi.getNftCollectionById(collectionId.value)
         } throws RuntimeException()
+
+        assertThrows<HttpClientErrorException.BadRequest> {
+            runBlocking {
+                testTemplate.getForEntity(url, TokenId::class.java)
+            }
+        }
+    }
+
+    @Test
+    fun `should return 400 on non-supporting blockchain`() = runBlocking<Unit> {
+        val collectionId = randomFlowAddress()
+        val url = "${baseUrl()}/collections/${collectionId.fullId()}/generate_token_id"
 
         assertThrows<HttpClientErrorException.BadRequest> {
             runBlocking {

@@ -54,7 +54,7 @@ open class TezosCollectionService(
         TODO("Not yet implemented")
     }
 
-    override suspend fun generateNftTokenId(collectionId: String, minter: String): TokenId {
+    override suspend fun generateNftTokenId(collectionId: String, minter: String?): TokenId {
         val collection = try { // Checking that collection is existed
             getCollectionById(collectionId)
         } catch (ex: Exception) {
