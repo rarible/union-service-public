@@ -1,5 +1,7 @@
 package com.rarible.protocol.union.integration.immutablex.service
 
+import com.rarible.protocol.union.core.exception.UnionException
+import com.rarible.protocol.union.core.model.TokenId
 import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.core.service.CollectionService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
@@ -37,5 +39,9 @@ class ImmutablexCollectionService(
 
     override suspend fun getCollectionsByIds(ids: List<String>): List<UnionCollection> {
         TODO("Not yet implemented")
+    }
+
+    override suspend fun generateNftTokenId(collectionId: String, minter: String?): TokenId {
+        throw UnionException("Not supported")
     }
 }
