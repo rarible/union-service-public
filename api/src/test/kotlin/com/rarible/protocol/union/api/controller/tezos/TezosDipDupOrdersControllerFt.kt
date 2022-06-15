@@ -120,10 +120,8 @@ class TezosDipDupOrdersControllerFt : AbstractIntegrationTest() {
             startAt = null,
             endAt = null,
             endedAt = null,
-            makeStock = BigDecimal.ONE,
             lastUpdatedAt = Instant.now().atOffset(ZoneOffset.UTC),
             createdAt = Instant.now().atOffset(ZoneOffset.UTC),
-            makePrice = BigDecimal.ONE,
             maker = UUID.randomUUID().toString(),
             make = Asset(
                 assetType = Asset.NFT(
