@@ -86,7 +86,9 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
     @Test
     fun `get all activities`() = runBlocking<Unit> {
         val types = ActivityTypeDto.values().toList()
-        val blockchains = listOf(BlockchainDto.ETHEREUM, BlockchainDto.POLYGON, BlockchainDto.FLOW, BlockchainDto.SOLANA, BlockchainDto.TEZOS)
+        val blockchains = listOf(
+            BlockchainDto.ETHEREUM, BlockchainDto.POLYGON, BlockchainDto.FLOW, BlockchainDto.SOLANA, BlockchainDto.TEZOS
+        )
         val size = 5
         val now = Instant.now().truncatedToSeconds()
 
@@ -207,33 +209,41 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
         // Since all activity types specified in request, all of existing clients should be requested
         coEvery {
             testEthereumActivityOrderApi.getOrderActivitiesById(
-                ActivitiesByIdRequestDto(listOf(
-                    ethOrderActivity3.id,
-                ))
+                ActivitiesByIdRequestDto(
+                    listOf(
+                        ethOrderActivity3.id,
+                    )
+                )
             )
         } returns OrderActivitiesDto(null, listOf(ethOrderActivity3)).toMono()
 
         coEvery {
             testEthereumActivityItemApi.getNftActivitiesById(
-                ActivitiesByIdRequestDto(listOf(
-                    ethItemActivity3.id,
-                ))
+                ActivitiesByIdRequestDto(
+                    listOf(
+                        ethItemActivity3.id,
+                    )
+                )
             )
         } returns NftActivitiesDto(null, listOf(ethItemActivity3)).toMono()
 
         coEvery {
             testPolygonActivityItemApi.getNftActivitiesById(
-                ActivitiesByIdRequestDto(listOf(
-                    polygonItemActivity1.id,
-                ))
+                ActivitiesByIdRequestDto(
+                    listOf(
+                        polygonItemActivity1.id,
+                    )
+                )
             )
         } returns NftActivitiesDto(null, listOf(polygonItemActivity1)).toMono()
 
         coEvery {
             testFlowActivityApi.getNftOrderActivitiesById(
-                NftActivitiesByIdRequestDto(listOf(
-                    flowActivity1.id
-                ))
+                NftActivitiesByIdRequestDto(
+                    listOf(
+                        flowActivity1.id
+                    )
+                )
             )
         } returns FlowActivitiesDto(null, null, listOf(flowActivity1)).toMono()
 

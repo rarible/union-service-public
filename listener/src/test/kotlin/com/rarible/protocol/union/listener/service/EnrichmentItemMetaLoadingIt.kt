@@ -1,8 +1,8 @@
 package com.rarible.protocol.union.listener.service
 
-import com.rarible.core.test.wait.Wait
 import com.rarible.protocol.union.enrichment.converter.EnrichedItemConverter
 import com.rarible.protocol.union.enrichment.meta.UnionMetaService
+import com.rarible.protocol.union.enrichment.test.data.randomUnionMeta
 import com.rarible.protocol.union.integration.ethereum.converter.EthItemConverter
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemTransferDto
@@ -32,16 +32,15 @@ class EnrichmentItemMetaLoadingIt : AbstractIntegrationTest() {
             lazySupply = BigInteger.ZERO,
             pending = emptyList()
         )
-        val (unionItem, meta) = EthItemConverter.convert(ethItem, itemId.blockchain).let {
-            it.copy(meta = null) to it.meta!!
-        }
+        val meta = randomUnionMeta()
+        val unionItem = EthItemConverter.convert(ethItem, itemId.blockchain)
         coEvery { testUnionMetaLoader.load(itemId) } coAnswers {
             delay(100L)
             meta
         }
         ethereumItemControllerApiMock.mockGetNftItemById(itemId, ethItem)
         itemEventService.onItemUpdated(unionItem)
-        Wait.waitAssert {
+        waitAssert {
             val events = findItemUpdates(itemId.value)
             assertThat(events).hasSize(2)
             assertThat(events[1].value.item)
@@ -56,16 +55,16 @@ class EnrichmentItemMetaLoadingIt : AbstractIntegrationTest() {
             lazySupply = BigInteger.ONE,
             pending = emptyList()
         )
-        val (unionItem, meta) = EthItemConverter.convert(ethItem, itemId.blockchain).let {
-            it.copy(meta = null) to it.meta!!
-        }
+        val meta = randomUnionMeta()
+        val unionItem = EthItemConverter.convert(ethItem, itemId.blockchain)
+
         coEvery { testUnionMetaLoader.load(itemId) } coAnswers {
             delay(100L)
             meta
         }
         ethereumItemControllerApiMock.mockGetNftItemById(itemId, ethItem)
         itemEventService.onItemUpdated(unionItem)
-        Wait.waitAssert {
+        waitAssert {
             val events = findItemUpdates(itemId.value)
             assertThat(events).hasSize(1)
             assertThat(events[0].value.item)
@@ -81,16 +80,15 @@ class EnrichmentItemMetaLoadingIt : AbstractIntegrationTest() {
             supply = BigInteger.ZERO,
             pending = listOf(randomEthItemTransferDto())
         )
-        val (unionItem, meta) = EthItemConverter.convert(ethItem, itemId.blockchain).let {
-            it.copy(meta = null) to it.meta!!
-        }
+        val meta = randomUnionMeta()
+        val unionItem = EthItemConverter.convert(ethItem, itemId.blockchain)
         coEvery { testUnionMetaLoader.load(itemId) } coAnswers {
             delay(100L)
             meta
         }
         ethereumItemControllerApiMock.mockGetNftItemById(itemId, ethItem)
         itemEventService.onItemUpdated(unionItem)
-        Wait.waitAssert {
+        waitAssert {
             val events = findItemUpdates(itemId.value)
             assertThat(events).hasSize(1)
             assertThat(events[0].value.item)
@@ -102,16 +100,16 @@ class EnrichmentItemMetaLoadingIt : AbstractIntegrationTest() {
     fun `item update - meta not available - error loading - send 1 event without meta - then refresh`() = runWithKafka {
         val itemId = randomEthItemId()
         val ethItem = randomEthNftItemDto(itemId)
-        val (unionItem, meta) = EthItemConverter.convert(ethItem, itemId.blockchain).let {
-            it.copy(meta = null) to it.meta!!
-        }
+        val meta = randomUnionMeta()
+        val unionItem = EthItemConverter.convert(ethItem, itemId.blockchain)
+
         coEvery { testUnionMetaLoader.load(itemId) } coAnswers {
             delay(100L)
             throw RuntimeException("error")
         }
         ethereumItemControllerApiMock.mockGetNftItemById(itemId, ethItem)
         itemEventService.onItemUpdated(unionItem)
-        Wait.waitAssert {
+        waitAssert {
             val events = findItemUpdates(itemId.value)
             assertThat(events).hasSize(1)
             assertThat(events[0].value.item)
@@ -124,7 +122,7 @@ class EnrichmentItemMetaLoadingIt : AbstractIntegrationTest() {
         }
         itemMetaService.scheduleLoading(itemId)
         // On loading meta, send an event.
-        Wait.waitAssert {
+        waitAssert {
             val events = findItemUpdates(itemId.value)
             assertThat(events).hasSize(2)
             assertThat(events[1].value.item)
@@ -136,13 +134,13 @@ class EnrichmentItemMetaLoadingIt : AbstractIntegrationTest() {
     fun `item update - meta available - send event immediately`() = runWithKafka<Unit> {
         val itemId = randomEthItemId()
         val ethItem = randomEthNftItemDto(itemId)
-        val (unionItem, meta) = EthItemConverter.convert(ethItem, itemId.blockchain).let {
-            it.copy(meta = null) to it.meta!!
-        }
+        val meta = randomUnionMeta()
+        val unionItem = EthItemConverter.convert(ethItem, itemId.blockchain)
+
         itemMetaService.save(itemId, meta)
         ethereumItemControllerApiMock.mockGetNftItemById(itemId, ethItem)
         itemEventService.onItemUpdated(unionItem)
-        Wait.waitAssert {
+        waitAssert {
             val events = findItemUpdates(itemId.value)
             assertThat(events).hasSize(1).allSatisfy {
                 assertThat(it.value.item)

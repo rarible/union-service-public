@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.listener.service
 
-import com.rarible.core.test.wait.Wait
 import com.rarible.protocol.dto.OrderStatusDto
 import com.rarible.protocol.union.core.model.ReconciliationMarkType
 import com.rarible.protocol.union.core.model.getAuctionOwnershipId
@@ -65,7 +64,7 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
         assertThat(created).isNull()
 
         // But there should be single Ownership event "as is"
-        Wait.waitAssert {
+        waitAssert {
             assertThat(ownershipEvents).hasSize(1)
             val messages = findOwnershipUpdates(ownershipId.value)
             assertThat(messages).hasSize(1)
@@ -105,7 +104,7 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
             .copy(bestSellOrder = unionBestSell)
 
         // We don't have related item in enrichment DB, so expect only Ownership update
-        Wait.waitAssert {
+        waitAssert {
             assertThat(ownershipEvents).hasSize(1)
             val messages = findOwnershipUpdates(ownershipId.value)
             assertThat(messages).hasSize(1)
@@ -140,7 +139,7 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
         ownershipEventHandler.onOwnershipUpdated(unionOwnership)
 
 
-        Wait.waitAssert {
+        waitAssert {
             // Event should not be sent in case of corrupted enrichment data
             val messages = findOwnershipUpdates(ownershipId.value)
             assertThat(messages).hasSize(0)
@@ -177,7 +176,7 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
             .copy(bestSellOrder = unionBestSell)
 
         // Since Item doesn't exist in Enrichment DB, we expect only Ownership event
-        Wait.waitAssert {
+        waitAssert {
             assertThat(ownershipEvents).hasSize(1)
             val messages = findOwnershipUpdates(ownershipId.value)
             assertThat(messages).hasSize(1)
@@ -205,7 +204,7 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
             .copy(value = unionOwnership.value + auction.sell.value.toBigInteger())
 
         // Auction should be attached to the Ownership
-        Wait.waitAssert {
+        waitAssert {
             assertThat(ownershipEvents).hasSize(1)
             val messages = findOwnershipUpdates(ownershipId.value)
             assertThat(messages).hasSize(1)
@@ -231,7 +230,7 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
         val expected = EnrichedOwnershipConverter.convert(unionOwnership)
 
         // Auction should be NOT attached to the Ownership since it is cancelled
-        Wait.waitAssert {
+        waitAssert {
             assertThat(ownershipEvents).hasSize(1)
             val messages = findOwnershipUpdates(ownershipId.value)
             assertThat(messages).hasSize(1)
@@ -254,7 +253,7 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
         ownershipEventHandler.onAuctionUpdated(auction)
 
         // Auction should be converted to disguised ownership
-        Wait.waitAssert {
+        waitAssert {
             assertThat(ownershipEvents).hasSize(1)
             val messages = findOwnershipUpdates(ownershipId.value)
             assertThat(messages).hasSize(1)
@@ -274,7 +273,7 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
         ownershipEventHandler.onAuctionUpdated(auction)
 
         // Seller's ownership should be deleted
-        Wait.waitAssert {
+        waitAssert {
             assertThat(ownershipEvents).hasSize(1)
             val messages = findOwnershipDeletions(ownershipId.value)
             assertThat(messages).hasSize(1)
@@ -295,7 +294,7 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
         ownershipEventHandler.onOwnershipDeleted(ownershipId)
 
         assertThat(ownershipService.get(ownership.id)).isNull()
-        Wait.waitAssert {
+        waitAssert {
             val messages = findOwnershipDeletions(ownershipId.value)
             assertThat(messages).hasSize(1)
             assertThat(messages[0].key).isEqualTo(itemId.fullId())
@@ -316,7 +315,7 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
 
         assertThat(ownershipService.get(shortOwnershipId)).isNull()
 
-        Wait.waitAssert {
+        waitAssert {
             val messages = findOwnershipDeletions(ownershipId.value)
             assertThat(messages).hasSize(1)
             assertThat(messages[0].key).isEqualTo(itemId.fullId())
@@ -343,7 +342,7 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
 
         assertThat(ownershipService.get(shortOwnershipId)).isNull()
 
-        Wait.waitAssert {
+        waitAssert {
             val messages = findOwnershipUpdates(ownershipId.value)
             assertThat(messages).hasSize(1)
             assertThat(messages[0].value.ownership.id).isEqualTo(ownershipId)

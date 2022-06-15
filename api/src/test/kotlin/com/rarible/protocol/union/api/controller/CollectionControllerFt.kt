@@ -3,7 +3,6 @@ package com.rarible.protocol.union.api.controller
 import com.rarible.core.common.justOrEmpty
 import com.rarible.core.test.data.randomAddress
 import com.rarible.core.test.data.randomString
-import com.rarible.core.test.wait.Wait
 import com.rarible.protocol.dto.FlowNftCollectionsDto
 import com.rarible.protocol.dto.NftCollectionsDto
 import com.rarible.protocol.dto.NftItemsDto
@@ -11,6 +10,8 @@ import com.rarible.protocol.union.api.client.CollectionControllerApi
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
+import com.rarible.protocol.union.core.model.TokenId
+import com.rarible.protocol.union.core.test.WaitAssert
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.dto.continuation.CombinedContinuation
@@ -20,7 +21,7 @@ import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.service.EnrichmentCollectionService
 import com.rarible.protocol.union.integration.ethereum.converter.EthCollectionConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
-import com.rarible.protocol.union.integration.ethereum.converter.EthItemConverter
+import com.rarible.protocol.union.integration.ethereum.converter.EthMetaConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAddress
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAssetErc20
@@ -251,12 +252,12 @@ class CollectionControllerFt : AbstractIntegrationTest() {
                 else -> NftItemsDto(0, null, emptyList()).justOrEmpty()
             }
         }
-        coEvery { testUnionMetaLoader.load(itemId1) } returns EthItemConverter.convert(item1.meta!!)
-        coEvery { testUnionMetaLoader.load(itemId2) } returns EthItemConverter.convert(item2.meta!!)
+        coEvery { testUnionMetaLoader.load(itemId1) } returns EthMetaConverter.convert(item1.meta!!)
+        coEvery { testUnionMetaLoader.load(itemId2) } returns EthMetaConverter.convert(item2.meta!!)
 
         collectionControllerClient.refreshCollectionMeta(collectionId.fullId()).awaitFirstOrNull()
 
-        Wait.waitAssert(Duration.ofMillis(10_000)) {
+        WaitAssert.wait(timeout = Duration.ofMillis(10_000)) {
             coVerify(exactly = 1) { testUnionMetaLoader.load(itemId1) }
             coVerify(exactly = 1) { testUnionMetaLoader.load(itemId2) }
         }

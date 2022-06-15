@@ -101,6 +101,11 @@ integration:
           deposits: 600
           withdrawals: 600
           orders: 600
+
+meta:
+  embedded:
+    publicUrl: "http://localhost:8080/content/embedded"
+
 listener:
   reconciliation:
     orderBatchSize: 50

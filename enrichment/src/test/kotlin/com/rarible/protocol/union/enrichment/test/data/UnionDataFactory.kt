@@ -13,6 +13,7 @@ import com.rarible.protocol.union.core.model.EsCollectionLite
 import com.rarible.protocol.union.core.model.EsItem
 import com.rarible.protocol.union.core.model.EsTrait
 import com.rarible.protocol.union.core.model.UnionCollection
+import com.rarible.protocol.union.core.model.UnionCollectionMeta
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.UnionMetaContent
@@ -114,9 +115,29 @@ fun randomUnionMeta(): UnionMeta {
         rights = randomString(),
         rightsUri = randomString(),
         externalUri = randomString(),
+        originalMetaUri = randomString(),
         attributes = listOf(randomUnionMetaAttribute()),
         content = listOf(),
         restrictions = listOf()
+    )
+}
+
+fun randomUnionCollectionMeta(): UnionCollectionMeta {
+    return UnionCollectionMeta(
+        name = randomString(),
+        description = randomString(),
+        language = randomString(2),
+        genres = listOf(randomString(), randomString()),
+        tags = listOf(randomString(), randomString()),
+        createdAt = nowMillis(),
+        rights = randomString(),
+        rightsUri = randomString(),
+        externalUri = randomString(),
+        originalMetaUri = randomString(),
+        content = listOf(),
+        feeRecipient = randomUnionAddress(),
+        sellerFeeBasisPoints = randomInt(10000),
+        externalLink = randomString() // TODO remove later
     )
 }
 
@@ -129,9 +150,9 @@ fun randomUnionMetaAttribute(): MetaAttributeDto {
     )
 }
 
-fun randomUnionContent(properties: UnionMetaContentProperties): UnionMetaContent {
+fun randomUnionContent(properties: UnionMetaContentProperties? = null): UnionMetaContent {
     return UnionMetaContent(
-        url = randomString(),
+        url = "http://localhost:8080/image/${randomString()}",
         fileName = "${randomString()}.png}",
         representation = MetaContentDto.Representation.ORIGINAL,
         properties = properties

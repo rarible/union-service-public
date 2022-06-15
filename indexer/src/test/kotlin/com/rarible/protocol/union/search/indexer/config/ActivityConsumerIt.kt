@@ -6,6 +6,7 @@ import com.rarible.core.test.data.randomBigInt
 import com.rarible.core.test.data.randomInt
 import com.rarible.core.test.data.randomLong
 import com.rarible.core.test.data.randomString
+import com.rarible.protocol.union.core.test.WaitAssert
 import com.rarible.core.test.wait.Wait
 import com.rarible.protocol.dto.FlowNftItemsDto
 import com.rarible.protocol.flow.nft.api.client.FlowNftItemControllerApi
@@ -83,7 +84,7 @@ class ActivityConsumerIt {
         producer.send(message).ensureSuccess()
 
         // then
-        Wait.waitAssert {
+        WaitAssert.wait {
             val searchQuery =
                 NativeSearchQueryBuilder().withQuery(matchQuery("activityId", activity.id.toString())).build()
             val actual = repository.search(searchQuery)

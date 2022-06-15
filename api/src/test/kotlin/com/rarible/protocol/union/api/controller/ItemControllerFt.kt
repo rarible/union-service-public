@@ -28,6 +28,7 @@ import com.rarible.protocol.union.enrichment.meta.getAvailable
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.test.data.randomUnionMeta
 import com.rarible.protocol.union.integration.ethereum.converter.EthItemConverter
+import com.rarible.protocol.union.integration.ethereum.converter.EthMetaConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAddress
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAuctionDto
@@ -150,7 +151,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
             )
         )
 
-        coEvery { testUnionMetaLoader.load(itemId) } returns EthItemConverter.convert(meta)
+        coEvery { testUnionMetaLoader.load(itemId) } returns EthMetaConverter.convert(meta)
 
         val response = restTemplate.getForEntity("${baseUri}/v0.1/items/${itemId.fullId()}/image", String::class.java)
         assertThat(response.statusCode).isEqualTo(HttpStatus.TEMPORARY_REDIRECT)
@@ -176,8 +177,8 @@ class ItemControllerFt : AbstractIntegrationTest() {
             )
         )
 
-        unionMetaCacheLoaderService.save(itemId.fullId(), EthItemConverter.convert(cachedMeta))
-        coEvery { testUnionMetaLoader.load(itemId) } returns EthItemConverter.convert(meta)
+        unionMetaCacheLoaderService.save(itemId.fullId(), EthMetaConverter.convert(cachedMeta))
+        coEvery { testUnionMetaLoader.load(itemId) } returns EthMetaConverter.convert(meta)
 
         val response = restTemplate.getForEntity("${baseUri}/v0.1/items/${itemId.fullId()}/image", String::class.java)
         assertThat(response.statusCode).isEqualTo(HttpStatus.TEMPORARY_REDIRECT)
@@ -195,7 +196,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
             )
         )
 
-        coEvery { testUnionMetaLoader.load(itemId) } returns EthItemConverter.convert(meta)
+        coEvery { testUnionMetaLoader.load(itemId) } returns EthMetaConverter.convert(meta)
 
         val response = restTemplate.getForEntity("${baseUri}/v0.1/items/${itemId.fullId()}/animation", String::class.java)
         assertThat(response.statusCode).isEqualTo(HttpStatus.TEMPORARY_REDIRECT)
