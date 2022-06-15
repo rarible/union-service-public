@@ -3,8 +3,8 @@
     "number_of_shards": 3,
     "number_of_replicas": 1,
     "refresh_interval": "1s",
-    "sort.field": [ "date", "salt", "date", "salt" ],
-    "sort.order": [ "desc", "desc", "asc", "asc" ]
+    "sort.field": [ "date", "salt" ],
+    "sort.order": [ "desc", "desc" ]
   },
   "analysis": {
     "filter": {
