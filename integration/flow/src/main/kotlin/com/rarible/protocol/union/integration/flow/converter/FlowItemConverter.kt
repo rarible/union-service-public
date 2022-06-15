@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.integration.flow.converter
 
 import com.rarible.protocol.dto.FlowCreatorDto
+import com.rarible.protocol.dto.FlowMetaContentItemDto
 import com.rarible.protocol.dto.FlowNftItemDto
 import com.rarible.protocol.dto.FlowNftItemsDto
 import com.rarible.protocol.dto.PayInfoDto
@@ -90,14 +91,22 @@ object FlowItemConverter {
                     format = it.format
                 )
             },
-            content = source.contents.orEmpty().map { url ->
-                UnionMetaContent(
-                    url = url,
-                    representation = MetaContentDto.Representation.ORIGINAL
-                )
-            },
+            content = source.content?.map(::convert) ?: source.contents?.map(::convert) ?: emptyList(),
             // TODO FLOW - implement it
             restrictions = emptyList()
         )
     }
+
+    fun convert(source: String): UnionMetaContent =
+        UnionMetaContent(
+            url = source,
+            representation = MetaContentDto.Representation.ORIGINAL
+        )
+
+    fun convert(source: FlowMetaContentItemDto): UnionMetaContent =
+        UnionMetaContent(
+            url = source.url,
+            representation = MetaContentDto.Representation.valueOf(source.representation.name),
+            fileName = source.fileName,
+        )
 }
