@@ -133,8 +133,8 @@ class ActivityControllerFt : AbstractIntegrationTest() {
         ).awaitFirst()
 
         assertThat(activities.activities).hasSize(size)
-        assertThat(activities.continuation).isNull()
         activities.activities.forEach { assertThat(it).isExactlyInstanceOf(OrderListActivityDto::class.java) }
+        assertThat(activities.activities).isSortedAccordingTo{o1,o2 -> compareValues(o1.lastUpdatedAt, o2.lastUpdatedAt)}
     }
 
     @Test
@@ -152,8 +152,8 @@ class ActivityControllerFt : AbstractIntegrationTest() {
         ).awaitFirst()
 
         assertThat(activities.activities).hasSize(size)
-        assertThat(activities.continuation).isNull()
         activities.activities.forEach { assertThat(it).isExactlyInstanceOf(MintActivityDto::class.java) }
+        assertThat(activities.activities).isSortedAccordingTo{o1,o2 -> compareValues(o1.lastUpdatedAt, o2.lastUpdatedAt)}
     }
 
     @Test

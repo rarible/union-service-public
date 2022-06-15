@@ -17,6 +17,8 @@ import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.SyncTypeDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
 import com.rarible.protocol.union.dto.continuation.ActivityContinuation
+import com.rarible.protocol.union.dto.continuation.ContinuationFactory
+import com.rarible.protocol.union.dto.continuation.DateIdContinuation
 import com.rarible.protocol.union.dto.continuation.page.Paging
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.integration.flow.converter.FlowActivityConverter
@@ -57,14 +59,14 @@ open class FlowActivityService(
         val flowSort = flowActivityConverter.convert(sort)
         val flowTypes = flowActivityConverter.convert(type)
 
-        val result = activityControllerApi.getNftOrderActivitiesSync(
+        val activities = activityControllerApi.getNftOrderActivitiesSync(
             flowTypes,
             continuation,
             size,
             flowSort
         ).awaitFirst()
 
-        return flowActivityConverter.convert(result, blockchain)
+        return result(activities,size, sort)
     }
 
     override suspend fun getActivitiesByCollection(
@@ -147,9 +149,26 @@ open class FlowActivityService(
         ActivitySortDto.EARLIEST_FIRST -> ActivityContinuation.ByLastUpdatedAndIdAsc
     }
 
+    private fun SyncSortDto?.toFactory() = when(this) {
+        SyncSortDto.DB_UPDATE_ASC, null -> ActivityContinuation.ByLastUpdatedSyncAndIdAsc
+        SyncSortDto.DB_UPDATE_DESC -> ActivityContinuation.ByLastUpdatedSyncAndIdDesc
+    }
+
     private suspend fun result(activities: FlowActivitiesDto, size: Int, sort: ActivitySortDto?): Slice<ActivityDto> {
+        return resultAll(activities, size, sort.toFactory())
+    }
+
+    private suspend fun result(activities: FlowActivitiesDto, size: Int, sort: SyncSortDto?): Slice<ActivityDto> {
+        return resultAll(activities, size, sort.toFactory())
+    }
+
+    private suspend fun resultAll(
+        activities: FlowActivitiesDto,
+        size: Int,
+        sortFactory: ContinuationFactory<ActivityDto, DateIdContinuation>
+    ): Slice<ActivityDto> {
         return Paging(
-            sort.toFactory(),
+            sortFactory,
             flowActivityConverter.convert(activities)
         ).getSlice(size)
     }
