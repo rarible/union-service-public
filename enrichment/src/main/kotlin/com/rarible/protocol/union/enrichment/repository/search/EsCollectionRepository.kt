@@ -25,7 +25,7 @@ class EsCollectionRepository(
     private val esOperations: ReactiveElasticsearchOperations,
     private val queryBuilderService: EsCollectionQueryBuilderService,
     esNameResolver: EsNameResolver
-) {
+) : EsRepository {
     val entityDefinition = esNameResolver.createEntityDefinitionExtended(EsCollection.ENTITY_DEFINITION)
     private val clazz = EsCollection::class.java
 
@@ -69,7 +69,7 @@ class EsCollectionRepository(
     /**
      * For tests only
      */
-    suspend fun deleteAll() {
+    override suspend fun deleteAll() {
         esOperations.delete(
             Query.findAll(),
             Any::class.java,
@@ -77,7 +77,7 @@ class EsCollectionRepository(
         ).awaitFirstOrNull()
     }
 
-    suspend fun refresh() {
+    override suspend fun refresh() {
         val refreshRequest = RefreshRequest().indices(entityDefinition.aliasName, entityDefinition.writeAliasName)
 
         try {
