@@ -5,6 +5,8 @@ import com.rarible.protocol.dto.NftCollectionMetaDto
 import com.rarible.protocol.dto.NftCollectionsDto
 import com.rarible.protocol.dto.NftMediaDto
 import com.rarible.protocol.dto.NftMediaMetaDto
+import com.rarible.protocol.dto.NftTokenIdDto
+import com.rarible.protocol.union.core.model.TokenId
 import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.core.model.UnionCollectionMeta
 import com.rarible.protocol.union.core.model.UnionImageProperties
@@ -113,5 +115,6 @@ object EthCollectionConverter {
         )
     }
 
+    fun convert(source: NftTokenIdDto) = TokenId(source.tokenId.toString())
 
 }
