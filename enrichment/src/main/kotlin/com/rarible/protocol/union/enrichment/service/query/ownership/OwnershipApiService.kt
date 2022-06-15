@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.enrichment.service.query.ownership
 
+import com.rarible.protocol.union.enrichment.service.query.order.OrderApiMergeService
 import com.rarible.protocol.union.core.continuation.UnionAuctionOwnershipWrapperContinuation
 import com.rarible.protocol.union.core.continuation.UnionOwnershipContinuation
 import com.rarible.protocol.union.core.exception.UnionNotFoundException
@@ -26,26 +27,21 @@ import com.rarible.protocol.union.enrichment.model.ShortOwnership
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
 import com.rarible.protocol.union.enrichment.service.EnrichmentAuctionService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
-import com.rarible.protocol.union.enrichment.service.query.order.OrderApiService
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @ExperimentalCoroutinesApi
 @Component
 class OwnershipApiService(
-    private val orderApiService: OrderApiService,
+    private val orderApiService: OrderApiMergeService,
     private val ownershipRouter: BlockchainRouter<OwnershipService>,
     private val auctionContractService: AuctionContractService,
     private val enrichmentOwnershipService: EnrichmentOwnershipService,
     private val enrichmentAuctionService: EnrichmentAuctionService
 ) {
-
-    private val logger = LoggerFactory.getLogger(javaClass)
-
     suspend fun getOwnershipById(fullOwnershipId: OwnershipIdDto): OwnershipDto {
         val shortOwnershipId = ShortOwnershipId(fullOwnershipId)
 

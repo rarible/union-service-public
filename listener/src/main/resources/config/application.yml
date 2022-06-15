@@ -182,11 +182,11 @@ listener:
     itemBatchSize: 100
     ownershipBatchSize: 50
   price-update:
+    enabled: true
     rate: PT5M
-    delay: PT1M
   reconcile-marks:
+    enabled: true
     rate: PT15S
-    delay: PT1M
   metrics:
     root-path: "protocol.union.listener"
 

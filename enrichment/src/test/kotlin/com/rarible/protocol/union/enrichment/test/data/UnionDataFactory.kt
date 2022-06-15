@@ -60,13 +60,13 @@ import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthPartDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthSellOrderDto
 import com.rarible.protocol.union.integration.flow.converter.FlowItemConverter
+import com.rarible.protocol.union.integration.flow.data.randomFlowNftItemDto
 import com.rarible.protocol.union.integration.solana.converter.SolanaItemConverter
 import com.rarible.protocol.union.integration.solana.data.randomSolanaTokenDto
-import com.rarible.protocol.union.test.data.randomFlowNftItemDto
 import com.rarible.protocol.union.test.mock.CurrencyMock
-import kotlinx.coroutines.runBlocking
 import java.time.Instant
 import java.time.temporal.ChronoUnit
+import kotlinx.coroutines.runBlocking
 
 fun randomUnionAddress(): UnionAddress =
     UnionAddressConverter.convert(
@@ -278,6 +278,7 @@ fun randomEsActivity() = EsActivity(
 
 fun randomEsCollection() = EsCollection(
     collectionId = randomString(),
+    date = Instant.now(),
     blockchain = BlockchainDto.values().random(),
     name = randomString(),
     symbol = randomString(),
@@ -304,7 +305,7 @@ val EsActivity.info: EsActivityLite
     get() = EsActivityLite(activityId, blockchain, type, date, blockNumber, logIndex, salt)
 
 val EsCollection.info: EsCollectionLite
-    get() = EsCollectionLite(collectionId)
+    get() = EsCollectionLite(collectionId, date, salt)
 
 private val mockedEthOrderConverter = EthOrderConverter(CurrencyMock.currencyServiceMock)
 private val mockedEthAuctionConverter = EthAuctionConverter(CurrencyMock.currencyServiceMock)

@@ -27,6 +27,10 @@ object EsEntitiesConfig {
         return loadMapping(entity.name.lowercase())
     }
 
+    fun loadSettings(entity: EsEntity): String {
+        return loadMapping("${entity.entityName.lowercase()}_settings")
+    }
+
     fun loadMapping(mapping: String): String =
         try {
             EsEntitiesConfig::class.java.getResource("/mappings/$mapping.json")!!.readText()

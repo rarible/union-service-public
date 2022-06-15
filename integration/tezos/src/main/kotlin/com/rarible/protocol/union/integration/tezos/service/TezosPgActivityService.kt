@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.integration.tezos.service
 
+import com.rarible.core.logging.Logger
 import com.rarible.protocol.tezos.dto.AssetDto
 import com.rarible.protocol.tezos.dto.AssetTypeDto
 import com.rarible.protocol.tezos.dto.BurnDto
@@ -74,9 +75,11 @@ class TezosPgActivityService(
         """
 
         return client.sql(selectOrders)
-            .bind("ids", ids).map(this::convertList)
+            .bind("ids", ids)
+            .map(this::saveConvertList)
             .all()
-            .collectList().awaitSingle()
+            .collectList()
+            .awaitSingle().filterNotNull()
     }
 
     private suspend fun orderMatchActivities(ids: List<String>): List<OrderActTypeDto> {
@@ -99,6 +102,16 @@ class TezosPgActivityService(
             .bind("ids", ids).map(this::convertMatch)
             .all()
             .collectList().awaitSingle()
+    }
+
+    private fun saveConvertList(row: Row): OrderActTypeDto? {
+        return try {
+            logger.error("Failed to convert row: ${row}")
+            convertList(row)
+        } catch (ex: Exception) {
+            logger.error("Failed to convert row: ${row}", ex)
+            null
+        }
     }
 
     private fun convertList(row: Row): OrderActTypeDto {
@@ -245,9 +258,13 @@ class TezosPgActivityService(
             "MT" -> MTAssetTypeDto(contract!!, tokenId!!)
             "XTZ" -> XTZAssetTypeDto()
             "NFT" -> NFTAssetTypeDto(contract!!, tokenId!!)
-            "FT" -> FTAssetTypeDto(contract!!, tokenId!!)
+            "FT" -> FTAssetTypeDto(contract!!, tokenId)
             else -> throw RuntimeException("Unknown type: $type")
         }
+    }
+
+    companion object {
+        private val logger by Logger()
     }
 
     enum class TYPE(val value: String) {

@@ -32,7 +32,8 @@ class ElasticsearchBootstrapper(
     private val forceUpdate: Set<EsEntity> = emptySet(),
     private val repositories: List<EsRepository>,
 ) {
-    private val metadataMapping = metadataIndex()
+    private val metadataMapping = metadataMappingIndex()
+    private val metadataSettings = metadataSettingsIndex()
 
     private val extendedEntityDefinitions: List<EntityDefinitionExtended> =
         entityDefinitions.map { esNameResolver.createEntityDefinitionExtended(it) }
@@ -44,7 +45,7 @@ class ElasticsearchBootstrapper(
             reactiveElasticSearchOperations = esOperations,
             name = esNameResolver.metadataIndexName,
             mapping = metadataMapping,
-            settings = "{}"
+            settings = metadataSettings,
         )
         for (definition in extendedEntityDefinitions) {
 
@@ -54,7 +55,7 @@ class ElasticsearchBootstrapper(
                 logger.info("Updating index for entity ${definition.entity} is in progress. Skip")
                 continue
             }
-            updateIndexMapping(definition)
+            updateIndexMetadata(definition)
         }
         repositories.forEach { it.init() }
         logger.info("Finished elasticsearch initialization")
@@ -76,14 +77,17 @@ class ElasticsearchBootstrapper(
         return false
     }
 
-    private suspend fun updateIndexMapping(definition: EntityDefinitionExtended) {
+    private suspend fun updateIndexMetadata(definition: EntityDefinitionExtended) {
+        logger.info("Attempt to update index metadata, definition = $definition")
         val realIndexName = getRealName(esOperations, definition.aliasName)
+        logger.info("Real index name = $realIndexName")
 
         if (realIndexName == null) {
             createFirstIndex(definition)
             return
         }
         val currentEntityMetadata = indexService.getEntityMetadata(definition, realIndexName) ?: return
+        logger.info("Current entity metadata = $currentEntityMetadata")
         when {
             currentEntityMetadata.versionData != definition.versionData ->
                 recreateIndex(realIndexName, definition)
@@ -96,6 +100,7 @@ class ElasticsearchBootstrapper(
     }
 
     private suspend fun createFirstIndex(definition: EntityDefinitionExtended) {
+        logger.info("Creating index for first time")
         val newIndexName = definition.indexName(minorVersion = definition.versionData)
         createIndex(
             reactiveElasticSearchOperations = esOperations,
@@ -148,6 +153,7 @@ class ElasticsearchBootstrapper(
         realIndexName: String,
         definition: EntityDefinitionExtended,
     ) {
+        logger.info("Recreating index $realIndexName with definition = $definition")
         val indexVersion = definition.getVersion(realIndexName)
         val newIndexName = definition.indexName(minorVersion = indexVersion + 1)
         createIndex(
@@ -177,6 +183,11 @@ class ElasticsearchBootstrapper(
     }
 }
 
-fun metadataIndex(): String {
+fun metadataMappingIndex(): String {
     return ElasticsearchBootstrapper::class.java.getResource("/mappings/${METADATA_INDEX}.json")!!.readText()
+}
+
+fun metadataSettingsIndex(): String {
+    val url = ElasticsearchBootstrapper::class.java.getResource("/mappings/${METADATA_INDEX}_settings.json")
+    return url?.readText() ?: "{}"
 }

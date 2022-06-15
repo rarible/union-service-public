@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.test.data
+package com.rarible.protocol.union.integration.flow.data
 
 import com.rarible.core.common.nowMillis
 import com.rarible.core.test.data.randomBigDecimal
@@ -42,7 +42,6 @@ fun randomFlowContract() = randomString(12)
 fun randomFlowAddress() = UnionAddressConverter.convert(BlockchainDto.FLOW, randomLong().toString())
 
 fun randomFlowItemId() = ItemIdDto(BlockchainDto.FLOW, randomFlowContract(), randomLong().toBigInteger())
-fun randomFlowItemIdShortValue() = randomFlowItemId().value
 fun randomFlowItemIdFullValue() = randomFlowItemId().fullId()
 
 fun randomFlowOwnershipId() = randomFlowOwnershipId(randomFlowItemId())

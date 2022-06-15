@@ -31,7 +31,6 @@ import com.rarible.protocol.union.dto.OrderListActivityDto
 import com.rarible.protocol.union.dto.OrderMatchSellDto
 import com.rarible.protocol.union.dto.OrderMatchSwapDto
 import com.rarible.protocol.union.dto.TransferActivityDto
-import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.dto.ext
 import java.math.BigDecimal
 import org.slf4j.LoggerFactory
@@ -44,16 +43,17 @@ class FlowActivityConverter(
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    suspend fun convert(source: FlowActivityDto, blockchain: BlockchainDto): ActivityDto {
+    suspend fun convert(source: FlowActivityDto): ActivityDto {
         try {
-            return convertInternal(source, blockchain)
+            return convertInternal(source)
         } catch (e: Exception) {
-            logger.error("Failed to convert {} Activity: {} \n{}", blockchain, e.message, source)
+            logger.error("Failed to convert Flow Activity: {} \n{}", e.message, source)
             throw e
         }
     }
 
-    private suspend fun convertInternal(source: FlowActivityDto, blockchain: BlockchainDto): ActivityDto {
+    private suspend fun convertInternal(source: FlowActivityDto): ActivityDto {
+        val blockchain = BlockchainDto.FLOW
         val activityId = ActivityIdDto(blockchain, source.id)
         return when (source) {
             is FlowNftOrderActivitySellDto -> {
@@ -102,7 +102,8 @@ class FlowActivityConverter(
                     maker = UnionAddressConverter.convert(blockchain, source.maker),
                     make = FlowConverter.convert(source.make, blockchain),
                     take = payment,
-                    reverted = false
+                    reverted = false,
+                    lastUpdatedAt = source.date //TODO: Fix to updatedAt
                 )
             }
             is FlowNftOrderActivityCancelListDto -> {
@@ -121,7 +122,8 @@ class FlowActivityConverter(
                         blockNumber = source.blockNumber ?: 0,
                         logIndex = source.logIndex ?: 0
                     ),
-                    reverted = false
+                    reverted = false,
+                    lastUpdatedAt = source.date //TODO: Fix to updatedAt
                 )
             }
             is FlowMintDto -> {
@@ -141,7 +143,8 @@ class FlowActivityConverter(
                         blockNumber = source.blockNumber,
                         logIndex = source.logIndex
                     ),
-                    reverted = false
+                    reverted = false,
+                    lastUpdatedAt = source.date //TODO: Fix to updatedAt
                 )
             }
             is FlowBurnDto -> {
@@ -161,7 +164,8 @@ class FlowActivityConverter(
                         blockNumber = source.blockNumber,
                         logIndex = source.logIndex
                     ),
-                    reverted = false
+                    reverted = false,
+                    lastUpdatedAt = source.date //TODO: Fix to updatedAt
                 )
             }
             is FlowTransferDto -> {
@@ -183,7 +187,8 @@ class FlowActivityConverter(
                         logIndex = source.logIndex
                     ),
                     reverted = false,
-                    purchase = source.purchased
+                    purchase = source.purchased,
+                    lastUpdatedAt = source.date
                 )
             }
             is FlowNftOrderActivityBidDto -> {
@@ -201,7 +206,8 @@ class FlowActivityConverter(
                     maker = UnionAddressConverter.convert(blockchain, source.maker),
                     make = payment,
                     take = FlowConverter.convert(source.take, blockchain),
-                    reverted = false
+                    reverted = false,
+                    lastUpdatedAt = source.date //TODO: Fix to updatedAt
                 )
             }
             is FlowNftOrderActivityCancelBidDto -> {
@@ -213,7 +219,8 @@ class FlowActivityConverter(
                     make = FlowConverter.convertToType(source.make, blockchain),
                     take = FlowConverter.convertToType(source.take, blockchain),
                     transactionHash = source.transactionHash ?: "",
-                    reverted = false
+                    reverted = false,
+                    lastUpdatedAt = source.date //TODO: Fix to updatedAt
                 )
             }
             else -> throw IllegalStateException("Unsupported flow activity! $source")
@@ -257,7 +264,8 @@ class FlowActivityConverter(
                 blockNumber = source.blockNumber,
                 logIndex = source.logIndex
             ),
-            reverted = false
+            reverted = false,
+            lastUpdatedAt = source.date //TODO: Fix to updatedAt
         )
     }
 
@@ -279,7 +287,8 @@ class FlowActivityConverter(
         ),
         left = convert(source.left, blockchain),
         right = convert(source.right, blockchain),
-        reverted = false
+        reverted = false,
+        lastUpdatedAt = source.date //TODO: Fix to updatedAt
     )
 
     private fun convert(
@@ -289,16 +298,13 @@ class FlowActivityConverter(
         return OrderActivityMatchSideDto(
             maker = UnionAddressConverter.convert(blockchain, source.maker),
             hash = null,
-            asset = FlowConverter.convert(source.asset, blockchain)
+            asset = FlowConverter.convert(source.asset, blockchain),
         )
     }
 
     private fun amountUsd(price: BigDecimal, asset: AssetDto) = price.multiply(asset.value)
 
-    suspend fun convert(source: FlowActivitiesDto, blockchain: BlockchainDto): Slice<ActivityDto> {
-        return Slice(
-            continuation = source.continuation,
-            entities = source.items.map { convert(it, blockchain) }
-        )
+    suspend fun convert(source: FlowActivitiesDto): List<ActivityDto> {
+        return source.items.map { convert(it) }
     }
 }

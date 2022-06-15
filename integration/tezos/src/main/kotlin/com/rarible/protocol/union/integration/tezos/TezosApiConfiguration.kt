@@ -28,6 +28,7 @@ import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktItemActiv
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktItemService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktOwnershipService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktSignatureService
+import com.rarible.protocol.union.integration.tezos.entity.TezosTokenIdRepository
 import com.rarible.protocol.union.integration.tezos.service.TezosActivityService
 import com.rarible.protocol.union.integration.tezos.service.TezosAuctionService
 import com.rarible.protocol.union.integration.tezos.service.TezosCollectionService
@@ -51,6 +52,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Import
+import org.springframework.data.mongodb.core.ReactiveMongoOperations
 import java.net.URI
 
 
@@ -136,9 +138,10 @@ class TezosApiConfiguration(
     @Bean
     fun tezosCollectionService(
         controllerApi: NftCollectionControllerApi,
-        tzktCollectionService: TzktCollectionService
+        tzktCollectionService: TzktCollectionService,
+        tezosTokenIdRepository: TezosTokenIdRepository
     ): TezosCollectionService {
-        return TezosCollectionService(controllerApi, tzktCollectionService)
+        return TezosCollectionService(controllerApi, tzktCollectionService, tezosTokenIdRepository)
     }
 
     @Bean
@@ -188,5 +191,10 @@ class TezosApiConfiguration(
             dipdupOrderActivityService,
             tzktItemActivityService
         )
+    }
+
+    @Bean
+    fun tezosTokenIdRepository(mongoTemplate: ReactiveMongoOperations): TezosTokenIdRepository {
+        return TezosTokenIdRepository(mongoTemplate)
     }
 }

@@ -110,12 +110,11 @@ class DipDupOrderEventHandlerFt : AbstractDipDupIntegrationTest() {
             fill = BigDecimal.ZERO,
             platform = TezosPlatform.Hen,
             status = OrderStatus.ACTIVE,
-            startedAt = null,
+            startAt = null,
             endedAt = null,
-            makeStock = BigDecimal.ONE,
+            endAt = null,
             lastUpdatedAt = Instant.now().atOffset(ZoneOffset.UTC),
             createdAt = Instant.now().atOffset(ZoneOffset.UTC),
-            makePrice = BigDecimal.ONE,
             maker = UUID.randomUUID().toString(),
             make = Asset(
                 assetType = Asset.NFT(

@@ -18,6 +18,7 @@ data class FeatureFlagsProperties(
     var enableActivityQueriesPerTypeFilter: Boolean = false,
     var enableImmutableXActivitiesQueries: Boolean = false,
     val enableCollectionQueriesToElastic: Boolean = false,
+    var enableActivityAscQueriesWithApiMerge: Boolean = true,
     // orders
     var enableOrderQueriesToElasticSearch: Boolean = false,
     // ownerships

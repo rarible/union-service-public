@@ -10,6 +10,7 @@ import com.rarible.protocol.union.api.client.CollectionControllerApi
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
+import com.rarible.protocol.union.core.model.TokenId
 import com.rarible.protocol.union.core.test.WaitAssert
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionDto
@@ -29,13 +30,14 @@ import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionD
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthNftItemDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthV2OrderDto
+import com.rarible.protocol.union.integration.flow.data.randomFlowAddress
+import com.rarible.protocol.union.integration.flow.data.randomFlowCollectionDto
 import com.rarible.protocol.union.integration.tezos.data.randomTezosAddress
 import com.rarible.protocol.union.integration.tezos.data.randomTezosCollectionDto
-import com.rarible.protocol.union.test.data.randomFlowAddress
-import com.rarible.protocol.union.test.data.randomFlowCollectionDto
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
+import java.time.Duration
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
@@ -43,10 +45,13 @@ import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.web.server.LocalServerPort
+import org.springframework.web.client.HttpClientErrorException
+import org.springframework.web.client.RestTemplate
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
-import java.time.Duration
 
 @FlowPreview
 @IntegrationTest
@@ -63,6 +68,16 @@ class CollectionControllerFt : AbstractIntegrationTest() {
 
     @Autowired
     lateinit var enrichmentCollectionService: EnrichmentCollectionService
+
+    @LocalServerPort
+    var port: Int = 0
+
+    @Autowired
+    lateinit var testTemplate: RestTemplate
+
+    private fun baseUrl(): String {
+        return "http://localhost:${port}/v0.1"
+    }
 
     @Test
     fun `get collection by id - ethereum, enriched`() = runBlocking<Unit> {
@@ -247,6 +262,52 @@ class CollectionControllerFt : AbstractIntegrationTest() {
         WaitAssert.wait(timeout = Duration.ofMillis(10_000)) {
             coVerify(exactly = 1) { testUnionMetaLoader.load(itemId1) }
             coVerify(exactly = 1) { testUnionMetaLoader.load(itemId2) }
+        }
+    }
+
+    @Test
+    fun `should generates token_ids for tezos`() = runBlocking<Unit> {
+        val collectionId = randomTezosAddress()
+        val collection = randomTezosCollectionDto(collectionId.value)
+        val url = "${baseUrl()}/collections/${collectionId.fullId()}/generate_token_id"
+
+        coEvery {
+            testTezosCollectionApi.getNftCollectionById(collectionId.value)
+        } returns collection.toMono()
+
+        testTemplate.getForEntity(url, TokenId::class.java).body.apply {
+            assertThat(tokenId).isEqualTo("1")
+        }
+        testTemplate.getForEntity(url, TokenId::class.java).body.apply {
+            assertThat(tokenId).isEqualTo("2")
+        }
+    }
+
+    @Test
+    fun `should return 400 on non-existent collection`() = runBlocking<Unit> {
+        val collectionId = randomTezosAddress()
+        val url = "${baseUrl()}/collections/${collectionId.fullId()}/generate_token_id"
+
+        coEvery {
+            testTezosCollectionApi.getNftCollectionById(collectionId.value)
+        } throws RuntimeException()
+
+        assertThrows<HttpClientErrorException.BadRequest> {
+            runBlocking {
+                testTemplate.getForEntity(url, TokenId::class.java)
+            }
+        }
+    }
+
+    @Test
+    fun `should return 400 on non-supporting blockchain`() = runBlocking<Unit> {
+        val collectionId = randomFlowAddress()
+        val url = "${baseUrl()}/collections/${collectionId.fullId()}/generate_token_id"
+
+        assertThrows<HttpClientErrorException.BadRequest> {
+            runBlocking {
+                testTemplate.getForEntity(url, TokenId::class.java)
+            }
         }
     }
 

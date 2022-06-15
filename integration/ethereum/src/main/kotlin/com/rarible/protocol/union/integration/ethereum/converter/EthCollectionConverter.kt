@@ -2,6 +2,10 @@ package com.rarible.protocol.union.integration.ethereum.converter
 
 import com.rarible.protocol.dto.NftCollectionDto
 import com.rarible.protocol.dto.NftCollectionsDto
+import com.rarible.protocol.dto.NftMediaDto
+import com.rarible.protocol.dto.NftMediaMetaDto
+import com.rarible.protocol.dto.NftTokenIdDto
+import com.rarible.protocol.union.core.model.TokenId
 import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionDto
@@ -62,4 +66,6 @@ object EthCollectionConverter {
             NftCollectionDto.Features.SET_URI_PREFIX -> CollectionDto.Features.SET_URI_PREFIX
         }
     }
+
+    fun convert(source: NftTokenIdDto) = TokenId(source.tokenId.toString())
 }
