@@ -102,8 +102,8 @@ class DipDupApiConfiguration(
     }
 
     @Bean
-    fun tzktCollectionService(tzktClient: CollectionClient): TzktCollectionService {
-        return TzktCollectionServiceImpl(tzktClient)
+    fun tzktCollectionService(tzktClient: CollectionClient, tzktTokenClient: TokenClient): TzktCollectionService {
+        return TzktCollectionServiceImpl(tzktClient, tzktTokenClient)
     }
 
     @Bean

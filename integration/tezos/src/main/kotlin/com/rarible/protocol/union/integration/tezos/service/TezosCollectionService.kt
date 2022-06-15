@@ -55,12 +55,13 @@ open class TezosCollectionService(
     }
 
     override suspend fun generateNftTokenId(collectionId: String, minter: String?): TokenId {
-        val collection = try { // Checking that collection is existed
-            getCollectionById(collectionId)
+        try { // Adjust to existed count
+            val actualCount = tzktCollectionService.tokenCount(collectionId)
+            tezosTokenIdRepository.adjustTokenCount(collectionId, actualCount)
         } catch (ex: Exception) {
             throw UnionException("Collection wasn't found")
         }
-        val tezosTokenId = tezosTokenIdRepository.generateNftTokenId(collection.id.value)
+        val tezosTokenId = tezosTokenIdRepository.generateNftTokenId(collectionId)
         return TokenId(tezosTokenId.toString())
     }
 

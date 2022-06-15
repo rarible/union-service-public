@@ -11,7 +11,6 @@ import com.rarible.protocol.union.api.client.CollectionControllerApi
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
-import com.rarible.protocol.union.core.model.TokenId
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.dto.continuation.CombinedContinuation
@@ -45,10 +44,8 @@ import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.web.server.LocalServerPort
-import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestTemplate
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
@@ -264,51 +261,4 @@ class CollectionControllerFt : AbstractIntegrationTest() {
             coVerify(exactly = 1) { testUnionMetaLoader.load(itemId2) }
         }
     }
-
-    @Test
-    fun `should generates token_ids for tezos`() = runBlocking<Unit> {
-        val collectionId = randomTezosAddress()
-        val collection = randomTezosCollectionDto(collectionId.value)
-        val url = "${baseUrl()}/collections/${collectionId.fullId()}/generate_token_id"
-
-        coEvery {
-            testTezosCollectionApi.getNftCollectionById(collectionId.value)
-        } returns collection.toMono()
-
-        testTemplate.getForEntity(url, TokenId::class.java).body.apply {
-            assertThat(tokenId).isEqualTo("1")
-        }
-        testTemplate.getForEntity(url, TokenId::class.java).body.apply {
-            assertThat(tokenId).isEqualTo("2")
-        }
-    }
-
-    @Test
-    fun `should return 400 on non-existent collection`() = runBlocking<Unit> {
-        val collectionId = randomTezosAddress()
-        val url = "${baseUrl()}/collections/${collectionId.fullId()}/generate_token_id"
-
-        coEvery {
-            testTezosCollectionApi.getNftCollectionById(collectionId.value)
-        } throws RuntimeException()
-
-        assertThrows<HttpClientErrorException.BadRequest> {
-            runBlocking {
-                testTemplate.getForEntity(url, TokenId::class.java)
-            }
-        }
-    }
-
-    @Test
-    fun `should return 400 on non-supporting blockchain`() = runBlocking<Unit> {
-        val collectionId = randomFlowAddress()
-        val url = "${baseUrl()}/collections/${collectionId.fullId()}/generate_token_id"
-
-        assertThrows<HttpClientErrorException.BadRequest> {
-            runBlocking {
-                testTemplate.getForEntity(url, TokenId::class.java)
-            }
-        }
-    }
-
 }
