@@ -281,4 +281,12 @@ class TestApiConfiguration {
     @Primary
     fun testTokenActivityClient(): com.rarible.tzkt.client.TokenActivityClient = mockk()
 
+    @Bean
+    @Primary
+    fun testTzktTokenClient(): com.rarible.tzkt.client.TokenClient = mockk()
+
+    @Bean
+    @Primary
+    fun testTzktCollectionClient(): com.rarible.tzkt.client.CollectionClient = mockk()
+
 }

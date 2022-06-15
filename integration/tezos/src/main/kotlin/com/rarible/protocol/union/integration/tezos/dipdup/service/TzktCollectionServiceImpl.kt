@@ -6,10 +6,13 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.continuation.page.Page
 import com.rarible.protocol.union.integration.tezos.dipdup.converter.TzktCollectionConverter
 import com.rarible.tzkt.client.CollectionClient
+import com.rarible.tzkt.client.TokenClient
 import com.rarible.tzkt.model.TzktNotFound
+import java.math.BigInteger
 
 class TzktCollectionServiceImpl(
-    val collectionClient: CollectionClient
+    val collectionClient: CollectionClient,
+    val tokenClient: TokenClient
 ) : TzktCollectionService {
 
     private val blockchain = BlockchainDto.TEZOS
@@ -41,6 +44,10 @@ class TzktCollectionServiceImpl(
     ): Page<UnionCollection> {
         val tzktCollection = safeApiCall { collectionClient.collectionsByOwner(owner, size, continuation) }
         return TzktCollectionConverter.convert(tzktCollection, blockchain)
+    }
+
+    override suspend fun tokenCount(collectionId: String): BigInteger {
+        return tokenClient.tokenCount(collectionId)
     }
 
     private suspend fun <T> safeApiCall(clientCall: suspend () -> T): T {

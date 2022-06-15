@@ -91,6 +91,24 @@ integration:
     enabled: ${consul.tezos.enabled:true}
     dipdup:
       enabled: ${consul.tezos.dipdup.enabled:false}
+      network: ${consul.tezos.dipdup.network:}
+      dipdupUrl: ${consul.tezos.dipdup.dipdupUrl:}
+      nodeAddress: ${consul.tezos.dipdup.nodeAddress:}
+      chainId: ${consul.tezos.dipdup.chainId:}
+      sigChecker: ${consul.tezos.dipdup.sigChecker:}
+      tzktUrl: ${consul.tezos.dipdup.tzktUrl:}
+      ipfsUrl: ${consul.tezos.dipdup.ipfsUrl:"https://ipfs.io"}
+      knownAddresses:
+        hen: ${consul.tezos.dipdup.knownAddresses.hen:}
+        henRoyalties: ${consul.tezos.dipdup.knownAddresses.henRoyalties:}
+        kalamint: ${consul.tezos.dipdup.knownAddresses.kalamint:}
+        fxhashV1: ${consul.tezos.dipdup.knownAddresses.fxhashV1:}
+        fxhashV1Manager: ${consul.tezos.dipdup.knownAddresses.fxhashV1Manager:}
+        fxhashV2: ${consul.tezos.dipdup.knownAddresses.fxhashV2:}
+        versum: ${consul.tezos.dipdup.knownAddresses.versum:}
+        royaltiesManager: ${consul.tezos.dipdup.knownAddresses.royaltiesManager:}
+        bidou8x8: ${consul.tezos.dipdup.knownAddresses.bidou8x8:}
+        bidou24x24: ${consul.tezos.dipdup.knownAddresses.bidou24x24:}
     client:
       url: ${consul.tezos.api.baseUrl}
     pg:
@@ -112,6 +130,9 @@ integration:
     enabled: ${consul.solana.enabled:true}
   immutablex:
     enabled: ${consul.immutablex.enabled:false}
+    client:
+      url: ${consul.immutablex.api.baseUrl:}
+    apiKey: ${consul.immutablex.api.key:}
 
 common:
   producer:
