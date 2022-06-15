@@ -74,7 +74,7 @@ class CollectionController(
     @GetMapping(value = ["/v0.1/collections/{collectionId}/generate_token_id"])
     suspend fun generateId(
         @PathVariable("collectionId") collectionId: String,
-        @RequestParam(value = "minter") minter: String,
+        @RequestParam(value = "minter", required = false) minter: String,
     ): ResponseEntity<TokenId> {
         val fullCollectionId = IdParser.parseCollectionId(collectionId)
         val tokenId = router.getService(fullCollectionId.blockchain).generateNftTokenId(fullCollectionId.value, minter)
