@@ -68,7 +68,7 @@ class FlowOrderConverter(
             fill = order.fill,
             startedAt = order.start,
             endedAt = order.end,
-            makeStock = makeStock(order.makeStock.toBigDecimal()),
+            makeStock = order.makeStock,
             cancelled = order.cancelled,
             createdAt = order.createdAt,
             lastUpdatedAt = order.lastUpdateAt,
@@ -79,10 +79,6 @@ class FlowOrderConverter(
             data = convert(order.data, blockchain),
             salt = ""// Not supported on Flow
         )
-    }
-
-    private fun makeStock(intVal: BigDecimal): BigDecimal {
-        return intVal.movePointLeft(18).stripTrailingZeros() //convert to regular decimal value
     }
 
     suspend fun convert(order: FlowOrdersPaginationDto, blockchain: BlockchainDto): Slice<OrderDto> {
