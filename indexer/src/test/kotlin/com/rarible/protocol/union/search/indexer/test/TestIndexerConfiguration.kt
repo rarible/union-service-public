@@ -73,8 +73,11 @@ class TestIndexerConfiguration {
     }
 
     @Bean
-    fun collectionHandler(repository: EsCollectionRepository): ConsumerBatchEventHandler<CollectionEventDto> {
-        return CollectionEventHandler(repository)
+    fun collectionHandler(
+        repository: EsCollectionRepository,
+        indexerMetricFactory: IndexerMetricFactory
+    ): ConsumerBatchEventHandler<CollectionEventDto> {
+        return CollectionEventHandler(repository, indexerMetricFactory)
     }
 
     @Bean
