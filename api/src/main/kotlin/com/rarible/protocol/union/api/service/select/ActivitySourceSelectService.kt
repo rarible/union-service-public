@@ -30,7 +30,7 @@ class ActivitySourceSelectService(
         sort: ActivitySortDto?,
         overrideSelect: OverrideSelect?,
     ): ActivitiesDto {
-        return getQuerySource(overrideSelect).getAllActivities(type, blockchains, continuation, cursor, size, sort)
+        return getQuerySource(overrideSelect, sort).getAllActivities(type, blockchains, continuation, cursor, size, sort)
     }
 
     suspend fun getAllActivitiesSync(
@@ -52,7 +52,7 @@ class ActivitySourceSelectService(
         sort: ActivitySortDto?,
         overrideSelect: OverrideSelect?,
     ): ActivitiesDto {
-        return getQuerySource(overrideSelect).getActivitiesByCollection(type, collection, continuation, cursor, size, sort)
+        return getQuerySource(overrideSelect, sort).getActivitiesByCollection(type, collection, continuation, cursor, size, sort)
     }
 
     suspend fun getActivitiesByItem(
@@ -64,7 +64,7 @@ class ActivitySourceSelectService(
         sort: ActivitySortDto?,
         overrideSelect: OverrideSelect?,
     ): ActivitiesDto {
-        return getQuerySource(overrideSelect).getActivitiesByItem(type, itemId, continuation, cursor, size, sort)
+        return getQuerySource(overrideSelect, sort).getActivitiesByItem(type, itemId, continuation, cursor, size, sort)
     }
 
     suspend fun getActivitiesByUser(
@@ -79,19 +79,29 @@ class ActivitySourceSelectService(
         sort: ActivitySortDto?,
         overrideSelect: OverrideSelect?,
     ): ActivitiesDto {
-        return getQuerySource(overrideSelect).getActivitiesByUser(type, user, blockchains, from, to, continuation, cursor, size, sort)
+        return getQuerySource(overrideSelect, sort).getActivitiesByUser(type, user, blockchains, from, to, continuation, cursor, size, sort)
     }
 
-    private fun getQuerySource(overrideSelect: OverrideSelect?): ActivityQueryService {
+    private fun getQuerySource(overrideSelect: OverrideSelect?, sort: ActivitySortDto?): ActivityQueryService {
         if (overrideSelect != null) {
             return when (overrideSelect) {
                 OverrideSelect.ELASTIC -> activityElasticService
                 OverrideSelect.API_MERGE -> activityApiMergeService
             }
         }
-        return when (featureFlagsProperties.enableActivityQueriesToElasticSearch) {
-            true -> activityElasticService
-            else -> activityApiMergeService
+
+        return if (featureFlagsProperties.enableActivityQueriesToElasticSearch) {
+            if (featureFlagsProperties.enableActivityAscQueriesWithApiMerge) {
+                if (sort == ActivitySortDto.EARLIEST_FIRST) {
+                    activityApiMergeService
+                } else {
+                    activityElasticService
+                }
+            } else {
+                activityElasticService
+            }
+        } else {
+            activityApiMergeService
         }
     }
 }

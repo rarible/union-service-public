@@ -4,6 +4,7 @@ import com.rarible.core.common.mapAsync
 import com.rarible.protocol.union.core.model.EsActivity
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
+import com.rarible.protocol.union.core.util.truncatedToSeconds
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.AssetTypeExtension
@@ -117,7 +118,7 @@ object EsActivityConverter {
     private fun convertMint(source: MintActivityDto, itemId: ItemIdDto?, collection: String?): EsActivity {
         return EsActivity(
             activityId = source.id.toString(),
-            date = source.date,
+            date = source.date.truncatedToSeconds(),
             blockNumber = source.blockchainInfo?.blockNumber,
             logIndex = source.blockchainInfo?.logIndex,
             blockchain = source.id.blockchain,
@@ -132,7 +133,7 @@ object EsActivityConverter {
     private fun convertBurn(source: BurnActivityDto, itemId: ItemIdDto?, collection: String?): EsActivity {
         return EsActivity(
             activityId = source.id.toString(),
-            date = source.date,
+            date = source.date.truncatedToSeconds(),
             blockNumber = source.blockchainInfo?.blockNumber,
             logIndex = source.blockchainInfo?.logIndex,
             blockchain = source.id.blockchain,
@@ -147,7 +148,7 @@ object EsActivityConverter {
     private fun convertTransfer(source: TransferActivityDto, itemId: ItemIdDto?, collection: String?): EsActivity {
         return EsActivity(
             activityId = source.id.toString(),
-            date = source.date,
+            date = source.date.truncatedToSeconds(),
             blockNumber = source.blockchainInfo?.blockNumber,
             logIndex = source.blockchainInfo?.logIndex,
             blockchain = source.id.blockchain,
@@ -162,7 +163,7 @@ object EsActivityConverter {
     private fun convertOrderMatchSell(source: OrderMatchSellDto, itemId: ItemIdDto?, collection: String?): EsActivity {
         return EsActivity(
             activityId = source.id.toString(),
-            date = source.date,
+            date = source.date.truncatedToSeconds(),
             blockNumber = source.blockchainInfo?.blockNumber,
             logIndex = source.blockchainInfo?.logIndex,
             blockchain = source.id.blockchain,
@@ -177,7 +178,7 @@ object EsActivityConverter {
     private fun convertOrderBid(source: OrderBidActivityDto, itemId: ItemIdDto?, collection: String?): EsActivity {
         return EsActivity(
             activityId = source.id.toString(),
-            date = source.date,
+            date = source.date.truncatedToSeconds(),
             blockNumber = null,
             logIndex = null,
             blockchain = source.id.blockchain,
@@ -192,7 +193,7 @@ object EsActivityConverter {
     private fun convertOrderList(source: OrderListActivityDto, itemId: ItemIdDto?, collection: String?): EsActivity {
         return EsActivity(
             activityId = source.id.toString(),
-            date = source.date,
+            date = source.date.truncatedToSeconds(),
             blockNumber = null,
             logIndex = null,
             blockchain = source.id.blockchain,
@@ -207,7 +208,7 @@ object EsActivityConverter {
     private fun convertOrderCancelBid(source: OrderCancelBidActivityDto, itemId: ItemIdDto?, collection: String?): EsActivity {
         return EsActivity(
             activityId = source.id.toString(),
-            date = source.date,
+            date = source.date.truncatedToSeconds(),
             blockNumber = source.blockchainInfo?.blockNumber,
             logIndex = source.blockchainInfo?.logIndex,
             blockchain = source.id.blockchain,
@@ -222,7 +223,7 @@ object EsActivityConverter {
     private fun convertOrderCancelList(source: OrderCancelListActivityDto, itemId: ItemIdDto?, collection: String?): EsActivity {
         return EsActivity(
             activityId = source.id.toString(),
-            date = source.date,
+            date = source.date.truncatedToSeconds(),
             blockNumber = source.blockchainInfo?.blockNumber,
             logIndex = source.blockchainInfo?.logIndex,
             blockchain = source.id.blockchain,
@@ -237,7 +238,7 @@ object EsActivityConverter {
     private fun convertAuctionOpen(source: AuctionOpenActivityDto, itemId: ItemIdDto?, collection: String?): EsActivity {
         return EsActivity(
             activityId = source.id.toString(),
-            date = source.date,
+            date = source.date.truncatedToSeconds(),
             blockNumber = null,
             logIndex = null,
             blockchain = source.id.blockchain,
@@ -252,7 +253,7 @@ object EsActivityConverter {
     private fun convertAuctionBid(source: AuctionBidActivityDto, itemId: ItemIdDto?, collection: String?): EsActivity {
         return EsActivity(
             activityId = source.id.toString(),
-            date = source.date,
+            date = source.date.truncatedToSeconds(),
             blockNumber = null,
             logIndex = null,
             blockchain = source.id.blockchain,
@@ -267,7 +268,7 @@ object EsActivityConverter {
     private fun convertAuctionFinish(source: AuctionFinishActivityDto, itemId: ItemIdDto?, collection: String?): EsActivity {
         return EsActivity(
             activityId = source.id.toString(),
-            date = source.date,
+            date = source.date.truncatedToSeconds(),
             blockNumber = null,
             logIndex = null,
             blockchain = source.id.blockchain,
@@ -282,7 +283,7 @@ object EsActivityConverter {
     private fun convertAuctionCancel(source: AuctionCancelActivityDto, itemId: ItemIdDto?, collection: String?): EsActivity {
         return EsActivity(
             activityId = source.id.toString(),
-            date = source.date,
+            date = source.date.truncatedToSeconds(),
             blockNumber = null,
             logIndex = null,
             blockchain = source.id.blockchain,
@@ -297,7 +298,7 @@ object EsActivityConverter {
     private fun convertAuctionStart(source: AuctionStartActivityDto, itemId: ItemIdDto?, collection: String?): EsActivity {
         return EsActivity(
             activityId = source.id.toString(),
-            date = source.date,
+            date = source.date.truncatedToSeconds(),
             blockNumber = null,
             logIndex = null,
             blockchain = source.id.blockchain,
@@ -312,7 +313,7 @@ object EsActivityConverter {
     private fun convertAuctionEnd(source: AuctionEndActivityDto, itemId: ItemIdDto?, collection: String?): EsActivity {
         return EsActivity(
             activityId = source.id.toString(),
-            date = source.date,
+            date = source.date.truncatedToSeconds(),
             blockNumber = null,
             logIndex = null,
             blockchain = source.id.blockchain,
@@ -327,7 +328,7 @@ object EsActivityConverter {
     private fun convertL2Withdrawal(source: L2WithdrawalActivityDto, itemId: ItemIdDto?, collection: String?): EsActivity {
         return EsActivity(
             activityId = source.id.toString(),
-            date = source.date,
+            date = source.date.truncatedToSeconds(),
             blockNumber = null,
             logIndex = null,
             blockchain = source.id.blockchain,
@@ -342,7 +343,7 @@ object EsActivityConverter {
     private fun convertL2Deposit(source: L2DepositActivityDto, itemId: ItemIdDto?, collection: String?): EsActivity {
         return EsActivity(
             activityId = source.id.toString(),
-            date = source.date,
+            date = source.date.truncatedToSeconds(),
             blockNumber = null,
             logIndex = null,
             blockchain = source.id.blockchain,

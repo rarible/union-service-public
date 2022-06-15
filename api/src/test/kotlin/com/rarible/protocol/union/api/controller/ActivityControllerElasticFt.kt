@@ -18,6 +18,7 @@ import com.rarible.protocol.union.api.client.ActivityControllerApi
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
+import com.rarible.protocol.union.core.util.truncatedToSeconds
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.AuctionStartActivityDto
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -54,7 +55,10 @@ import com.rarible.protocol.solana.dto.ActivitiesByIdRequestDto as SolanaActivit
 
 @FlowPreview
 @IntegrationTest
-@TestPropertySource(properties = ["common.feature-flags.enableActivityQueriesToElasticSearch=true"])
+@TestPropertySource(properties = [
+    "common.feature-flags.enableActivityQueriesToElasticSearch=true",
+    "common.feature-flags.enableActivityAscQueriesWithApiMerge=false",
+])
 class ActivityControllerElasticFt : AbstractIntegrationTest() {
 
     private val continuation: String? = null
@@ -80,7 +84,7 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
         val types = ActivityTypeDto.values().toList()
         val blockchains = listOf(BlockchainDto.ETHEREUM, BlockchainDto.POLYGON, BlockchainDto.FLOW, BlockchainDto.SOLANA, BlockchainDto.TEZOS)
         val size = 5
-        val now = nowMillis()
+        val now = Instant.now().truncatedToSeconds()
 
         // From this list of activities we expect only the oldest 5 in response ordered as:
         // flowActivity1, polygonItemActivity1, ethOrderActivity3, tezosActivity1 and solanaActivity1

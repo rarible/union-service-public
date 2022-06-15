@@ -45,7 +45,6 @@ class ActivitySourceSelectServiceTest {
     private val continuation = "some continuation"
     private val cursor = "some cursor"
     private val size = 42
-    private val sort = mockk<ActivitySortDto>()
     private val collection = "some collection"
     private val itemId = "some item id"
     private val userType = listOf(mockk<UserActivityTypeDto>())
@@ -63,21 +62,43 @@ class ActivitySourceSelectServiceTest {
             Arguments.of(
                 true,
                 null,
+                false,
+                ActivitySortDto.EARLIEST_FIRST,
                 elasticResponse,
             ),
             Arguments.of(
                 false,
                 null,
+                false,
+                ActivitySortDto.EARLIEST_FIRST,
                 apiMergeResponse,
             ),
             Arguments.of(
                 true,
                 OverrideSelect.API_MERGE,
+                false,
+                ActivitySortDto.EARLIEST_FIRST,
                 apiMergeResponse,
             ),
             Arguments.of(
                 false,
                 OverrideSelect.ELASTIC,
+                false,
+                ActivitySortDto.EARLIEST_FIRST,
+                elasticResponse,
+            ),
+            Arguments.of(
+                true,
+                null,
+                true,
+                ActivitySortDto.EARLIEST_FIRST,
+                apiMergeResponse,
+            ),
+            Arguments.of(
+                true,
+                null,
+                true,
+                ActivitySortDto.LATEST_FIRST,
                 elasticResponse,
             ),
         )
@@ -88,10 +109,13 @@ class ActivitySourceSelectServiceTest {
     fun `should get all activities`(
         elasticFeatureFlag: Boolean,
         overrideSelect: OverrideSelect?,
+        ascQueriesFeatureFlag: Boolean,
+        sort: ActivitySortDto,
         expectedResponse: ActivitiesDto,
     ) = runBlocking<Unit> {
         // given
         every { featureFlagsProperties.enableActivityQueriesToElasticSearch } returns elasticFeatureFlag
+        every { featureFlagsProperties.enableActivityAscQueriesWithApiMerge } returns ascQueriesFeatureFlag
         coEvery {
             activityElasticService.getAllActivities(type, blockchains, continuation, cursor, size, sort)
         } returns elasticResponse
@@ -121,10 +145,13 @@ class ActivitySourceSelectServiceTest {
     fun `should get activities by collection - select elastic`(
         elasticFeatureFlag: Boolean,
         overrideSelect: OverrideSelect?,
+        ascQueriesFeatureFlag: Boolean,
+        sort: ActivitySortDto,
         expectedResponse: ActivitiesDto,
     ) = runBlocking<Unit> {
         // given
         every { featureFlagsProperties.enableActivityQueriesToElasticSearch } returns elasticFeatureFlag
+        every { featureFlagsProperties.enableActivityAscQueriesWithApiMerge } returns ascQueriesFeatureFlag
         coEvery {
             activityElasticService.getActivitiesByCollection(type, listOf(collection), continuation, cursor, size, sort)
         } returns elasticResponse
@@ -154,10 +181,13 @@ class ActivitySourceSelectServiceTest {
     fun `should get activities by item - select elastic`(
         elasticFeatureFlag: Boolean,
         overrideSelect: OverrideSelect?,
+        ascQueriesFeatureFlag: Boolean,
+        sort: ActivitySortDto,
         expectedResponse: ActivitiesDto,
     ) = runBlocking<Unit> {
         // given
         every { featureFlagsProperties.enableActivityQueriesToElasticSearch } returns elasticFeatureFlag
+        every { featureFlagsProperties.enableActivityAscQueriesWithApiMerge } returns ascQueriesFeatureFlag
         coEvery {
             activityElasticService.getActivitiesByItem(type, itemId, continuation, cursor, size, sort)
         } returns elasticResponse
@@ -187,10 +217,13 @@ class ActivitySourceSelectServiceTest {
     fun `should get activities by user - select elastic`(
         elasticFeatureFlag: Boolean,
         overrideSelect: OverrideSelect?,
+        ascQueriesFeatureFlag: Boolean,
+        sort: ActivitySortDto,
         expectedResponse: ActivitiesDto,
     ) = runBlocking<Unit> {
         // given
         every { featureFlagsProperties.enableActivityQueriesToElasticSearch } returns elasticFeatureFlag
+        every { featureFlagsProperties.enableActivityAscQueriesWithApiMerge } returns ascQueriesFeatureFlag
         coEvery {
             activityElasticService.getActivitiesByUser(userType, user, blockchains, from, to, continuation, cursor, size, sort)
         } returns elasticResponse
