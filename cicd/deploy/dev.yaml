@@ -19,7 +19,7 @@ protocol-union-indexer:
 
 protocol-union-worker:
   enabled: true
-  replicas: 1
+  replicas: 0
   resources:
     jvm:
       xmx_megabytes: 256
