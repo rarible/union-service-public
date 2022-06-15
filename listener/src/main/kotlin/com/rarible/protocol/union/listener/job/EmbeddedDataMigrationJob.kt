@@ -129,6 +129,9 @@ class EmbeddedDataMigrationJob(
         var contentMigrated = false
 
         val updatedContent = data.content.map {
+            if (it.url.startsWith("https://storage.opensea.io")) {
+                logger.info("Found legacy OpenSea content URL for Item: ${entry.key}")
+            }
             val embedded = unionContentMetaService.detectEmbeddedContent(it.url)
             if (embedded != null) {
                 // There is embedded content instead of URL (somebody sent it to us previously)
