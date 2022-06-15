@@ -1,13 +1,16 @@
 package com.rarible.protocol.union.enrichment.repository.search.internal
 
+import com.rarible.protocol.union.core.model.ActivityByCollectionFilter
 import com.rarible.protocol.union.core.model.EsActivity
 import com.rarible.protocol.union.core.model.EsActivitySort
 import com.rarible.protocol.union.core.model.ElasticActivityFilter
 import com.rarible.protocol.union.core.model.ElasticActivityQueryGenericFilter
 import com.rarible.protocol.union.core.model.ElasticActivityQueryPerTypeFilter
 import com.rarible.protocol.union.core.model.cursor
+import com.rarible.protocol.union.dto.BlockchainDto
 import org.elasticsearch.index.query.BoolQueryBuilder
 import org.elasticsearch.index.query.MatchQueryBuilder
+import org.elasticsearch.index.query.QueryBuilders
 import org.elasticsearch.index.query.RangeQueryBuilder
 import org.elasticsearch.index.query.TermsQueryBuilder
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery
@@ -33,6 +36,7 @@ class EsActivityQueryBuilderService(
         when (filter) {
             is ElasticActivityQueryGenericFilter -> query.applyGenericFilter(filter)
             is ElasticActivityQueryPerTypeFilter -> query.applyPerTypeFilter(filter)
+            is ActivityByCollectionFilter -> query.applyByCollectionFilter(filter)
         }
         sortService.applySort(builder, sort)
         cursorService.applyCursor(query, sort, filter.cursor)
@@ -40,6 +44,33 @@ class EsActivityQueryBuilderService(
         builder.withQuery(query)
         return builder.build()
     }
+
+    private fun BoolQueryBuilder.applyByCollectionFilter(filter: ActivityByCollectionFilter) {
+        val collectionQuery = QueryBuilders.boolQuery()
+
+        filter.collections.forEach { (blockchain, address) ->
+            collectionQuery.should(
+                matchCollection(blockchain, address)
+            )
+        }
+        must(collectionQuery)
+
+        mustMatchTerms(
+            filter.activityTypes.map { it.name }.toSet(),
+            EsActivity::type.name
+        )
+    }
+
+    private fun matchCollection(
+        blockchain: BlockchainDto,
+        address: String
+    ) = QueryBuilders
+        .boolQuery()
+        .must(
+            QueryBuilders.termQuery(EsActivity::blockchain.name, blockchain.name)
+        ).must(
+            QueryBuilders.termQuery(EsActivity::collection.name, address)
+        )
 
     private fun BoolQueryBuilder.applyGenericFilter(filter: ElasticActivityQueryGenericFilter) {
         mustMatchTerms(filter.blockchains, EsActivity::blockchain.name)

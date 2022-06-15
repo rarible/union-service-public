@@ -8,6 +8,7 @@ import com.rarible.protocol.union.dto.EthErc20AssetTypeDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OrdersDto
 import com.rarible.protocol.union.dto.PlatformDto
+import com.rarible.protocol.union.enrichment.service.query.order.OrderApiMergeService
 import com.rarible.protocol.union.enrichment.util.bidCurrencyId
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
 import com.rarible.protocol.union.integration.ethereum.data.randomEthBidOrderDto
@@ -27,7 +28,7 @@ class OrderApiServiceTest {
     private val router: BlockchainRouter<OrderService> = mockk()
     private val orderService: OrderService = mockk()
     private val ethOrderConverter = EthOrderConverter(CurrencyMock.currencyServiceMock)
-    private val orderApiService = OrderApiService(
+    private val orderApiService = OrderApiMergeService(
         router
     )
 

@@ -24,13 +24,13 @@ import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthV2OrderDto
 import com.rarible.protocol.union.integration.flow.converter.FlowOrderConverter
 import com.rarible.protocol.union.integration.flow.converter.FlowOwnershipConverter
+import com.rarible.protocol.union.integration.flow.data.randomFlowItemId
+import com.rarible.protocol.union.integration.flow.data.randomFlowNftOwnershipDto
+import com.rarible.protocol.union.integration.flow.data.randomFlowV1OrderDto
 import com.rarible.protocol.union.integration.tezos.converter.TezosOwnershipConverter
 import com.rarible.protocol.union.integration.tezos.data.randomTezosItemId
 import com.rarible.protocol.union.integration.tezos.data.randomTezosOwnershipDto
 import com.rarible.protocol.union.integration.tezos.data.randomTezosOwnershipId
-import com.rarible.protocol.union.test.data.randomFlowItemId
-import com.rarible.protocol.union.test.data.randomFlowNftOwnershipDto
-import com.rarible.protocol.union.test.data.randomFlowV1OrderDto
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat

@@ -34,6 +34,7 @@ internal class EsActivityRepositoryFt {
     @BeforeEach
     fun setUp() = runBlocking<Unit> {
         elasticsearchTestBootstrapper.bootstrap()
+        repository.deleteAll()
     }
 
     @Test
@@ -64,5 +65,23 @@ internal class EsActivityRepositoryFt {
 
         // then
         assertThat(actual.activities).hasSize(1000)
+    }
+
+    @Test
+    fun `should delete activities by ids`(): Unit = runBlocking {
+        // given
+        val activities = List(30) { randomEsActivity() }
+        repository.saveAll(activities)
+        val ids = activities.map { it.activityId }
+
+        // when
+        val deleted = repository.delete(ids)
+        val query = NativeSearchQuery(BoolQueryBuilder())
+        query.maxResults = 100
+        val actual = repository.search(query)
+
+        // then
+        assertThat(deleted).isEqualTo(30)
+        assertThat(actual.activities).hasSize(0)
     }
 }

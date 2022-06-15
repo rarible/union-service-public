@@ -22,6 +22,19 @@ data class SearchReindexProperties(
 sealed class EntityReindexProperties {
     abstract val enabled: Boolean
     abstract val blockchains: List<BlockchainReindexProperties>
+
+    fun activeBlockchains(): List<BlockchainDto> {
+        if (!this.enabled) return emptyList()
+
+        return blockchains.filter { it.enabled }.map { it.blockchain }
+    }
+
+    fun isBlockchainActive(blockchain: BlockchainDto): Boolean {
+        return this.enabled && this
+            .blockchains
+            .singleOrNull { it.blockchain == blockchain }
+            ?.enabled ?: false
+    }
 }
 
 data class ActivityReindexProperties(

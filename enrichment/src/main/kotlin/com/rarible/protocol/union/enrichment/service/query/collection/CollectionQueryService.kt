@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.api.service
+package com.rarible.protocol.union.enrichment.service.query.collection
 
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionsDto

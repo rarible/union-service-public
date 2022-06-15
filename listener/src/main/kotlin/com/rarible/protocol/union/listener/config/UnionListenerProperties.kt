@@ -14,6 +14,7 @@ data class UnionListenerProperties(
     val reconciliation: ReconciliationProperties,
     val openSeaCleanup: OpenSeaCleanUpProperties,
     val priceUpdate: PriceUpdateProperties,
+    val reconcileMarks: ReconcileMarksProperties,
     val metrics: MetricsProperties
 )
 
@@ -32,9 +33,14 @@ class ReconciliationProperties(
     val notificationEnabled: Boolean = true
 )
 
+class ReconcileMarksProperties(
+    val enabled: Boolean = true,
+    val rate: Duration = Duration.ofSeconds(15)
+)
+
 class PriceUpdateProperties(
-    val rate: Duration = Duration.ofMinutes(5),
-    val delay: Duration = Duration.ofMinutes(1)
+    val enabled: Boolean = true,
+    val rate: Duration = Duration.ofMinutes(5)
 )
 
 data class OpenSeaCleanUpProperties(

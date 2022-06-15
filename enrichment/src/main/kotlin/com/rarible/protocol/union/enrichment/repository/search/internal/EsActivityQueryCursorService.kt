@@ -19,61 +19,32 @@ class EsActivityQueryCursorService {
         val cursorQuery = BoolQueryBuilder()
         // date <> cursor OR
         cursorQuery.should(
-            mustDiffer(EsActivity::date.name, cursor.date, sort)
+            mustDiffer(EsActivity::date.name, cursor.date, sort.latestFirst)
         )
         // date == cursor && blockNumber <> cursor OR
-        if (cursor.blockNumber != null) {
+        if (cursor.blockNumber != 0L) {
             cursorQuery.shouldAll(
-                { this.mustEqual(EsActivity::date.name, cursor.date) },
-                { this.mustDiffer(EsActivity::blockNumber.name, cursor.blockNumber, sort) }
+                { mustEqual(EsActivity::date.name, cursor.date) },
+                { mustDiffer(EsActivity::blockNumber.name, cursor.blockNumber, sort.latestFirst) }
             )
         }
         // date == cursor && blockNumber == cursor && logIndex <> cursor OR
-        if (cursor.blockNumber != null && cursor.logIndex != null) {
+        if (cursor.blockNumber != 0L && cursor.logIndex != 0) {
             cursorQuery.shouldAll(
-                { this.mustEqual(EsActivity::date.name, cursor.date) },
-                { this.mustEqual(EsActivity::blockNumber.name, cursor.blockNumber) },
-                { this.mustDiffer(EsActivity::logIndex.name, cursor.logIndex, sort) }
+                { mustEqual(EsActivity::date.name, cursor.date) },
+                { mustEqual(EsActivity::blockNumber.name, cursor.blockNumber) },
+                { mustDiffer(EsActivity::logIndex.name, cursor.logIndex, sort.latestFirst) }
             )
         }
         // date == cursor && blockNumber == cursor && logIndex == cursor && salt <> cursor
         cursorQuery.shouldAll(
-            { this.mustEqual(EsActivity::date.name, cursor.date) },
-            { this.mustEqual(EsActivity::blockNumber.name, cursor.blockNumber) },
-            { this.mustEqual(EsActivity::logIndex.name, cursor.logIndex) },
-            { this.mustDiffer(EsActivity::salt.name, cursor.salt, sort) }
+            { mustEqual(EsActivity::date.name, cursor.date) },
+            { mustEqual(EsActivity::blockNumber.name, cursor.blockNumber) },
+            { mustEqual(EsActivity::logIndex.name, cursor.logIndex) },
+            { mustDiffer(EsActivity::salt.name, cursor.salt, sort.latestFirst) }
         )
 
         cursorQuery.minimumShouldMatch(1)
         query.must(cursorQuery)
-    }
-
-    private fun BoolQueryBuilder.shouldAll(vararg queryBuilders: () -> QueryBuilder?) {
-        val mustAll = BoolQueryBuilder()
-        queryBuilders.forEach {
-            val query = it()
-            if (query != null) {
-                mustAll.must(query)
-            }
-        }
-        this.should(mustAll)
-    }
-
-    private fun mustEqual(fieldName: String, value: Any?): QueryBuilder? {
-        return if (value != null) {
-            TermQueryBuilder(fieldName, value)
-        } else null
-    }
-
-    private fun mustDiffer(fieldName: String, value: Any?, sort: EsActivitySort): QueryBuilder? {
-        return if (value != null) {
-            val rangeQuery = RangeQueryBuilder(fieldName)
-            if (sort.latestFirst) {
-                rangeQuery.lt(value)
-            } else {
-                rangeQuery.gt(value)
-            }
-            rangeQuery
-        } else null
     }
 }

@@ -29,13 +29,14 @@ import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionD
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthNftItemDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthV2OrderDto
+import com.rarible.protocol.union.integration.flow.data.randomFlowAddress
+import com.rarible.protocol.union.integration.flow.data.randomFlowCollectionDto
 import com.rarible.protocol.union.integration.tezos.data.randomTezosAddress
 import com.rarible.protocol.union.integration.tezos.data.randomTezosCollectionDto
-import com.rarible.protocol.union.test.data.randomFlowAddress
-import com.rarible.protocol.union.test.data.randomFlowCollectionDto
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
+import java.time.Duration
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
@@ -46,7 +47,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
-import java.time.Duration
 
 @FlowPreview
 @IntegrationTest

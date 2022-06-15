@@ -4,13 +4,10 @@ import com.rarible.core.test.ext.ElasticsearchTest
 import com.rarible.core.test.ext.KafkaTest
 import com.rarible.core.test.ext.MongoCleanup
 import com.rarible.core.test.ext.MongoTest
-import com.rarible.protocol.solana.api.client.autoconfigure.SolanaApiClientAutoConfiguration
 import com.rarible.protocol.union.enrichment.configuration.EnrichmentApiConfiguration
 import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
 import com.rarible.protocol.union.worker.config.WorkerConfiguration
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Import
 import org.springframework.test.context.ActiveProfiles
 
@@ -18,12 +15,6 @@ import org.springframework.test.context.ActiveProfiles
 @MongoTest
 @MongoCleanup
 @ElasticsearchTest
-//@EnableAutoConfiguration(
-//    exclude = [
-//        // duplicate beans
-//        SolanaApiClientAutoConfiguration::class
-//    ]
-//)
 @SpringBootTest(
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     properties = [
@@ -44,5 +35,4 @@ import org.springframework.test.context.ActiveProfiles
         SearchConfiguration::class,
         WorkerConfiguration::class]
 )
-@ComponentScan(basePackages = ["com.rarible.protocol.union.worker", "com.rarible.protocol.union.enrichment"])
 annotation class IntegrationTest

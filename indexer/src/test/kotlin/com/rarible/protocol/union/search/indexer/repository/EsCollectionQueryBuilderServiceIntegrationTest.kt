@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration
 import org.springframework.test.context.ContextConfiguration
+import java.time.Instant
 
 @IntegrationTest
 @EnableAutoConfiguration
@@ -85,18 +86,20 @@ class EsCollectionQueryBuilderServiceIntegrationTest {
     @Test
     fun `should query with cursor`()  = runBlocking<Unit> {
         // given
-        val filter = EsCollectionGenericFilter(cursor = "bbb")
-        val toFind1 = randomEsCollection().copy(collectionId = "ddd")
-        val toFind2 = randomEsCollection().copy(collectionId = "ccc")
-        val toSkip1 = randomEsCollection().copy(collectionId = "bbb")
-        val toSkip2 = randomEsCollection().copy(collectionId = "aaa")
-        repository.saveAll(listOf(toFind1, toFind2, toSkip1, toSkip2))
+        val filter = EsCollectionGenericFilter(cursor = "500_100")
+        val toFind1 = randomEsCollection().copy(date = Instant.ofEpochMilli(450), salt = 10)
+        val toFind2 = randomEsCollection().copy(date = Instant.ofEpochMilli(450), salt = 5)
+        val toFind3 = randomEsCollection().copy(date = Instant.ofEpochMilli(400), salt = 15)
+        val toSkip1 = randomEsCollection().copy(date = Instant.ofEpochMilli(500), salt = 100)
+        val toSkip2 = randomEsCollection().copy(date = Instant.ofEpochMilli(600), salt = 7)
+        val toSkip3 = randomEsCollection().copy(date = Instant.ofEpochMilli(700), salt = 20)
+        repository.saveAll(listOf(toFind1, toFind2, toFind3, toSkip1, toSkip2, toSkip3).shuffled())
 
         // when
         val result = repository.search(filter, null)
 
         // then
-        assertThat(result).containsExactlyInAnyOrder(toFind1.info, toFind2.info)
+        assertThat(result).containsExactly(toFind1.info, toFind2.info, toFind3.info)
     }
 
     @Test
@@ -105,43 +108,50 @@ class EsCollectionQueryBuilderServiceIntegrationTest {
         val filter = EsCollectionGenericFilter(
             blockchains = setOf(BlockchainDto.SOLANA, BlockchainDto.TEZOS),
             owners = setOf("loupa", "poupa"),
-            cursor = "ccc"
+            cursor = "60000_1"
         )
 
         val toFind1 = randomEsCollection().copy(
             collectionId = "ddd",
             blockchain = BlockchainDto.TEZOS,
             owner = "loupa",
+            date = Instant.ofEpochSecond(50),
         )
         val toFind2 = randomEsCollection().copy(
             collectionId = "eee",
             blockchain = BlockchainDto.SOLANA,
             owner = "poupa",
+            date = Instant.ofEpochSecond(40),
         )
         // out of cursor
         val toSkip1 = randomEsCollection().copy(
             collectionId = "aaa",
             blockchain = BlockchainDto.TEZOS,
             owner = "loupa",
-        )
+            date = Instant.ofEpochSecond(60),
+            )
         // other blockchain
         val toSkip2 = randomEsCollection().copy(
             collectionId = "fff",
             blockchain = BlockchainDto.ETHEREUM,
             owner = "loupa",
-        )
+            date = Instant.ofEpochSecond(30),
+
+            )
         // other owner
         val toSkip3 = randomEsCollection().copy(
             collectionId = "hhh",
             blockchain = BlockchainDto.TEZOS,
             owner = "loupeaux",
-        )
+            date = Instant.ofEpochSecond(20),
+
+            )
         repository.saveAll(listOf(toFind1, toFind2, toSkip1, toSkip2, toSkip3))
 
         // when
         val result = repository.search(filter, null)
 
         // then
-        assertThat(result).containsExactlyInAnyOrder(toFind1.info, toFind2.info)
+        assertThat(result).containsExactly(toFind1.info, toFind2.info)
     }
 }

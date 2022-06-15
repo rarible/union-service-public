@@ -3,8 +3,8 @@ package com.rarible.protocol.union.integration.flow.converter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.FlowAssetTypeFtDto
 import com.rarible.protocol.union.dto.FlowAssetTypeNftDto
-import com.rarible.protocol.union.test.data.randomFlowFungibleAsset
-import com.rarible.protocol.union.test.data.randomFlowNftAsset
+import com.rarible.protocol.union.integration.flow.data.randomFlowFungibleAsset
+import com.rarible.protocol.union.integration.flow.data.randomFlowNftAsset
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 

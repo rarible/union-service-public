@@ -2,11 +2,13 @@ package com.rarible.protocol.union.integration.solana.service
 
 import com.rarible.core.apm.CaptureSpan
 import com.rarible.protocol.solana.api.client.TokenControllerApi
+import com.rarible.protocol.solana.dto.TokenIdsDto
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.ItemIdsDto
 import com.rarible.protocol.union.dto.RoyaltyDto
 import com.rarible.protocol.union.dto.continuation.page.Page
 import com.rarible.protocol.union.integration.solana.converter.SolanaItemConverter
@@ -90,7 +92,7 @@ open class SolanaItemService(
     }
 
     override suspend fun getItemsByIds(itemIds: List<String>): List<UnionItem> {
-        val tokensDto = tokenApi.getTokensByAddresses(itemIds).awaitFirst()
+        val tokensDto = tokenApi.getTokensByAddresses(TokenIdsDto(itemIds)).awaitFirst()
 
         return tokensDto.tokens.map { SolanaItemConverter.convert(it, blockchain) }
     }

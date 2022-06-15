@@ -37,18 +37,18 @@ import com.rarible.protocol.union.integration.ethereum.data.randomEthItemMeta
 import com.rarible.protocol.union.integration.ethereum.data.randomEthNftItemDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthV2OrderDto
+import com.rarible.protocol.union.integration.flow.data.randomFlowAddress
+import com.rarible.protocol.union.integration.flow.data.randomFlowCollectionDto
+import com.rarible.protocol.union.integration.flow.data.randomFlowItemDtoWithCollection
+import com.rarible.protocol.union.integration.flow.data.randomFlowItemId
+import com.rarible.protocol.union.integration.flow.data.randomFlowItemIdFullValue
+import com.rarible.protocol.union.integration.flow.data.randomFlowMetaDto
+import com.rarible.protocol.union.integration.flow.data.randomFlowNftItemDto
 import com.rarible.protocol.union.integration.tezos.data.randomTezosAddress
 import com.rarible.protocol.union.integration.tezos.data.randomTezosItemId
 import com.rarible.protocol.union.integration.tezos.data.randomTezosItemIdFullValue
 import com.rarible.protocol.union.integration.tezos.data.randomTezosMetaDto
 import com.rarible.protocol.union.integration.tezos.data.randomTezosNftItemDto
-import com.rarible.protocol.union.test.data.randomFlowAddress
-import com.rarible.protocol.union.test.data.randomFlowCollectionDto
-import com.rarible.protocol.union.test.data.randomFlowItemDtoWithCollection
-import com.rarible.protocol.union.test.data.randomFlowItemId
-import com.rarible.protocol.union.test.data.randomFlowItemIdFullValue
-import com.rarible.protocol.union.test.data.randomFlowMetaDto
-import com.rarible.protocol.union.test.data.randomFlowNftItemDto
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.verify
@@ -128,6 +128,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
         enrichmentItemService.save(ethShortItem)
 
         ethereumOrderControllerApiMock.mockGetByIds(ethOrder)
+        // Might need to be switched back to mockGetByIds() when merged to master
         ethereumItemControllerApiMock.mockGetNftItemsByIds(listOf(ethItemId.value), listOf(ethItem))
 
         val result = itemControllerClient.getItemByIds(ItemIdsDto(listOf(ethItemId))).awaitFirst()

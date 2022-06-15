@@ -1,6 +1,6 @@
 package com.rarible.protocol.union.api.service.select
 
-import com.rarible.protocol.union.enrichment.service.query.order.OrderApiService
+import com.rarible.protocol.union.enrichment.service.query.order.OrderApiMergeService
 import com.rarible.protocol.union.api.service.elastic.OrderElasticService
 import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -29,7 +29,7 @@ class OrderSourceSelectServiceTest {
     private lateinit var featureFlagsProperties: FeatureFlagsProperties
 
     @MockK
-    private lateinit var orderApiService: OrderApiService
+    private lateinit var orderApiService: OrderApiMergeService
 
     @MockK
     private lateinit var orderElasticService: OrderElasticService
