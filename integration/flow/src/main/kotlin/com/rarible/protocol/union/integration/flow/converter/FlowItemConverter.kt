@@ -1,14 +1,26 @@
 package com.rarible.protocol.union.integration.flow.converter
 
+import com.rarible.protocol.dto.FlowAudioContentDto
 import com.rarible.protocol.dto.FlowCreatorDto
+import com.rarible.protocol.dto.FlowHtmlContentDto
+import com.rarible.protocol.dto.FlowImageContentDto
 import com.rarible.protocol.dto.FlowMetaContentItemDto
+import com.rarible.protocol.dto.FlowModel3dContentDto
 import com.rarible.protocol.dto.FlowNftItemDto
 import com.rarible.protocol.dto.FlowNftItemsDto
+import com.rarible.protocol.dto.FlowUnknownContentDto
+import com.rarible.protocol.dto.FlowVideoContentDto
 import com.rarible.protocol.dto.PayInfoDto
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
+import com.rarible.protocol.union.core.model.UnionAudioProperties
+import com.rarible.protocol.union.core.model.UnionHtmlProperties
+import com.rarible.protocol.union.core.model.UnionImageProperties
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.UnionMetaContent
+import com.rarible.protocol.union.core.model.UnionModel3dProperties
+import com.rarible.protocol.union.core.model.UnionUnknownProperties
+import com.rarible.protocol.union.core.model.UnionVideoProperties
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.CreatorDto
@@ -80,9 +92,21 @@ object FlowItemConverter {
     }
 
     fun convert(source: com.rarible.protocol.dto.FlowMetaDto): UnionMeta {
+        // Legacy format of Flow meta, should not be used
+        val legacyContent = source.contents?.map(::convert) ?: emptyList()
+        val modernContent = source.content?.map(::convert) ?: emptyList()
+        val content = modernContent.ifEmpty { legacyContent }
         return UnionMeta(
             name = source.name,
             description = source.description,
+            language = source.language,
+            genres = source.genres ?: emptyList(),
+            tags = source.tags ?: emptyList(),
+            createdAt = source.createdAt,
+            rights = source.rights,
+            rightsUri = source.rightsUrl,
+            externalUri = source.externalUri,
+            originalMetaUri = source.originalMetaUri,
             attributes = source.attributes.orEmpty().map {
                 MetaAttributeDto(
                     key = it.key,
@@ -91,7 +115,7 @@ object FlowItemConverter {
                     format = it.format
                 )
             },
-            content = source.content?.map(::convert) ?: source.contents?.map(::convert) ?: emptyList(),
+            content = content,
             // TODO FLOW - implement it
             restrictions = emptyList()
         )
@@ -103,10 +127,44 @@ object FlowItemConverter {
             representation = MetaContentDto.Representation.ORIGINAL
         )
 
-    fun convert(source: FlowMetaContentItemDto): UnionMetaContent =
-        UnionMetaContent(
+    fun convert(source: FlowMetaContentItemDto): UnionMetaContent {
+        val size = source.size?.toLong()
+
+        val properties = when (source) {
+            is FlowImageContentDto -> UnionImageProperties(
+                mimeType = source.mimeType,
+                size = size,
+                width = source.width,
+                height = source.height
+            )
+            is FlowVideoContentDto -> UnionVideoProperties(
+                mimeType = source.mimeType,
+                size = size,
+                width = source.width,
+                height = source.height
+            )
+            is FlowAudioContentDto -> UnionAudioProperties(
+                mimeType = source.mimeType,
+                size = size
+            )
+            is FlowModel3dContentDto -> UnionModel3dProperties(
+                mimeType = source.mimeType,
+                size = size
+            )
+            is FlowHtmlContentDto -> UnionHtmlProperties(
+                mimeType = source.mimeType,
+                size = size
+            )
+            is FlowUnknownContentDto -> UnionUnknownProperties(
+                mimeType = source.mimeType,
+                size = size
+            )
+        }
+        return UnionMetaContent(
             url = source.url,
             representation = MetaContentDto.Representation.valueOf(source.representation.name),
             fileName = source.fileName,
+            properties = properties
         )
+    }
 }
