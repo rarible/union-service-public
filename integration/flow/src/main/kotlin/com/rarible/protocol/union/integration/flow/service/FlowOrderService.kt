@@ -47,7 +47,12 @@ open class FlowOrderService(
         size: Int,
         sort: SyncSortDto?
     ): Slice<OrderDto> {
-        return Slice.empty()
+        val result = orderControllerApi.getOrdersSync(
+            continuation,
+            size,
+            flowOrderConverter.convert(sort)
+        ).awaitFirst()
+        return flowOrderConverter.convert(result, blockchain)
     }
 
     override suspend fun getOrderById(id: String): OrderDto {
