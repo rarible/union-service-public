@@ -45,17 +45,25 @@ protocol-union-listener:
     - *sharedTolerations
   environments:
     <<: *sharedEnvironments
+    LISTENER_CONSUMER_BLOCKCHAINWORKERS_ETHEREUM: 24
   resources:
     jvm:
       xmx_megabytes: 2048
       max_direct_memory_megabytes: 1024
 
 protocol-union-meta-loader:
-  replicas: 5
+  replicas: 12
   tolerations:
     - *sharedTolerations
   environments:
     <<: *sharedEnvironments
+    RARIBLE_LOADER_LOADTASKSBATCHSIZE: 128
+    RARIBLE_LOADER_WORKERS: 64
+    RARIBLE_LOADER_LOADTASKSSERVICEINSTANCES: 12
+    RARIBLE_LOADER_LOADTASKSTOPICPARTITIONS: 48
+  resources:
+    jvm:
+      max_direct_memory_megabytes: 512
 
 protocol-union-indexer:
   tolerations:
