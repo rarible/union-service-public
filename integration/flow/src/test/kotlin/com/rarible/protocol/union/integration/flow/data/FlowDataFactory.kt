@@ -152,7 +152,8 @@ fun randomFlowV1OrderDto(itemId: ItemIdDto): FlowOrderDto {
         ),
         collection = randomFlowContract(),
         lastUpdateAt = nowMillis(),
-        makeStock = randomBigInt()
+        makeStock = randomBigDecimal(),
+        dbUpdatedAt = nowMillis()
     )
 }
 
@@ -186,7 +187,8 @@ fun randomFlowNftOrderActivitySell(): FlowNftOrderActivitySellDto {
         transactionHash = randomString(),
         blockHash = randomString(),
         blockNumber = randomLong(),
-        logIndex = randomInt()
+        logIndex = randomInt(),
+        updatedAt = nowMillis()
     )
 }
 
@@ -198,7 +200,8 @@ fun randomFlowNftOrderActivityListDto(): FlowNftOrderActivityListDto {
         maker = randomString(),
         make = FlowAssetFungibleDto(randomString(), randomBigDecimal()),
         take = FlowAssetFungibleDto(randomString(), randomBigDecimal()),
-        price = randomBigDecimal()
+        price = randomBigDecimal(),
+        updatedAt = nowMillis()
     )
 }
 
@@ -210,7 +213,8 @@ fun randomFlowNftOrderActivityBidDto(): FlowNftOrderActivityBidDto {
         maker = randomString(),
         make = FlowAssetFungibleDto(randomString(), randomBigDecimal()),
         take = FlowAssetFungibleDto(randomString(), randomBigDecimal()),
-        price = randomBigDecimal()
+        price = randomBigDecimal(),
+        updatedAt = nowMillis()
     )
 }
 
@@ -227,7 +231,8 @@ fun randomFlowCancelListActivityDto(): FlowNftOrderActivityCancelListDto {
         transactionHash = randomString(),
         blockHash = randomString(),
         blockNumber = randomLong(),
-        logIndex = randomInt()
+        logIndex = randomInt(),
+        updatedAt = nowMillis()
     )
 }
 
@@ -243,7 +248,8 @@ fun randomFlowCancelBidActivityDto(): FlowNftOrderActivityCancelBidDto {
         transactionHash = randomString(),
         blockHash = randomString(),
         blockNumber = randomLong(),
-        logIndex = randomInt()
+        logIndex = randomInt(),
+        updatedAt = nowMillis()
     )
 }
 
@@ -258,7 +264,8 @@ fun randomFlowMintDto(): FlowMintDto {
         transactionHash = randomString(),
         blockHash = randomString(),
         blockNumber = randomLong(),
-        logIndex = randomInt()
+        logIndex = randomInt(),
+        updatedAt = nowMillis()
     )
 }
 
@@ -275,7 +282,8 @@ fun randomFlowTransferDto(): FlowTransferDto {
         blockHash = randomString(),
         blockNumber = randomLong(),
         logIndex = randomInt(),
-        purchased = false
+        purchased = false,
+        updatedAt = nowMillis()
     )
 }
 
@@ -290,7 +298,8 @@ fun randomFlowBurnDto(): FlowBurnDto {
         transactionHash = randomString(),
         blockHash = randomString(),
         blockNumber = randomLong(),
-        logIndex = randomInt()
+        logIndex = randomInt(),
+        updatedAt = nowMillis()
     )
 }
 
