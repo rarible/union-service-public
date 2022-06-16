@@ -26,9 +26,9 @@ open class ChangeEsAliasTask(
         val tasks = parameter.tasks.mapAsync { taskParam ->
             val task = taskRepository.findByTypeAndParam(
                 entityDefinition.reindexTask,
-                paramFactory.toString(taskParam)
+                taskParam
             ).awaitSingleOrNull()
-            logger.info("Search result of ${entityDefinition.reindexTask}, ${paramFactory.toString(taskParam)} = $task")
+            logger.info("Search result of ${entityDefinition.reindexTask}, $taskParam = $task")
             task
         }
 
