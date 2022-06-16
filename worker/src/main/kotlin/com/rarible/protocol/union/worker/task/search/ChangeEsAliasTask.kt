@@ -24,13 +24,15 @@ open class ChangeEsAliasTask(
     override suspend fun isAbleToRun(param: String): Boolean {
         val parameter = paramFactory.parse<ChangeAliasTaskParam>(param)
         val tasks = parameter.tasks.mapAsync { taskParam ->
-            taskRepository.findByTypeAndParam(
+            val task = taskRepository.findByTypeAndParam(
                 entityDefinition.reindexTask,
                 paramFactory.toString(taskParam)
             ).awaitSingleOrNull()
-        }.filterNotNull()
+            logger.info("Search result of ${entityDefinition.reindexTask}, ${paramFactory.toString(taskParam)} = $task")
+            task
+        }
 
-        return tasks.all { it.lastStatus == TaskStatus.COMPLETED }
+        return tasks.all { it?.lastStatus == TaskStatus.COMPLETED }
     }
 
     /**
