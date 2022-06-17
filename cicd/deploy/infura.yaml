@@ -34,6 +34,7 @@ protocol-union-listener:
   environments:
     <<: *sharedEnvironments
     LISTENER_CONSUMER_BLOCKCHAINWORKERS_ETHEREUM: 24
+    INTEGRATION_ETHEREUM_CONSUMER_WORKERS_OWNERSHIP: 8
   resources:
     jvm:
       xmx_megabytes: 2048
