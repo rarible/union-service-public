@@ -1,7 +1,6 @@
 package com.rarible.protocol.union.listener.tezos
 
 import com.rarible.core.kafka.KafkaMessage
-import com.rarible.core.test.wait.Wait
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.BurnActivityDto
 import com.rarible.protocol.union.dto.MintActivityDto
@@ -38,7 +37,7 @@ class DipDupActivityEventHandlerFt : AbstractDipDupIntegrationTest() {
             )
         ).ensureSuccess()
 
-        Wait.waitAssert {
+        waitAssert {
             val messages = findActivityUpdates(activityId, OrderListActivityDto::class.java)
             Assertions.assertThat(messages).hasSize(1)
         }
@@ -66,12 +65,13 @@ class DipDupActivityEventHandlerFt : AbstractDipDupIntegrationTest() {
             )
         ).ensureSuccess()
 
-        Wait.waitAssert {
+        waitAssert {
             val activities = findActivityUpdates(activityId, MintActivityDto::class.java)
             Assertions.assertThat(activities).hasSize(1)
 
             val ownerships = findOwnershipUpdates(ownershipId.value)
-            Assertions.assertThat(ownerships).hasSizeGreaterThan(0) // We got 2 msg because the second msg is sent from enrichment
+            Assertions.assertThat(ownerships)
+                .hasSizeGreaterThan(0) // We got 2 msg because the second msg is sent from enrichment
 
             val items = findItemUpdates(ownershipId.getItemId().value)
             Assertions.assertThat(items).hasSize(1)
@@ -106,7 +106,7 @@ class DipDupActivityEventHandlerFt : AbstractDipDupIntegrationTest() {
             )
         ).ensureSuccess()
 
-        Wait.waitAssert {
+        waitAssert {
             val activities = findActivityUpdates(activityId, TransferActivityDto::class.java)
             Assertions.assertThat(activities).hasSize(1)
 
@@ -140,7 +140,7 @@ class DipDupActivityEventHandlerFt : AbstractDipDupIntegrationTest() {
             )
         ).ensureSuccess()
 
-        Wait.waitAssert {
+        waitAssert {
             val activities = findActivityUpdates(activityId, BurnActivityDto::class.java)
             Assertions.assertThat(activities).hasSize(1)
 

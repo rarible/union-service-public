@@ -16,6 +16,7 @@ import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.runBlocking
 import org.elasticsearch.action.admin.indices.refresh.RefreshRequest
 import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations
+import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery
 import org.springframework.stereotype.Component
 import java.io.IOException
@@ -47,6 +48,21 @@ class EsCollectionRepository(
             throw IllegalStateException("No indexes to save")
         }
         return esOperations.saveAll(collections, entityDefinition.writeIndexCoordinates).collectList().awaitSingle()
+    }
+
+    suspend fun saveAll(esCollections: List<EsCollection>, indexName: String?): List<EsCollection> {
+        return if (indexName == null) {
+            saveAll(esCollections)
+        } else {
+            saveAllToIndex(esCollections, IndexCoordinates.of(indexName))
+        }
+    }
+
+    private suspend fun saveAllToIndex(esCollections: List<EsCollection>, index: IndexCoordinates): List<EsCollection> {
+        return esOperations
+            .saveAll(esCollections, index)
+            .collectList()
+            .awaitFirst()
     }
 
     suspend fun findById(collectionId: String): EsCollection? {

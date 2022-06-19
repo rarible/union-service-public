@@ -3,7 +3,7 @@ package com.rarible.protocol.union.search.indexer.config
 import com.rarible.core.kafka.KafkaMessage
 import com.rarible.core.kafka.RaribleKafkaProducer
 import com.rarible.core.test.data.randomString
-import com.rarible.core.test.wait.Wait
+import com.rarible.protocol.union.core.test.WaitAssert
 import com.rarible.protocol.union.dto.OrderEventDto
 import com.rarible.protocol.union.dto.OrderUpdateEventDto
 import com.rarible.protocol.union.enrichment.repository.search.EsOrderRepository
@@ -43,7 +43,7 @@ class OrderConsumerIt {
         producer.send(message).ensureSuccess()
 
         // then
-        Wait.waitAssert(Duration.of(2, ChronoUnit.SECONDS)) {
+        WaitAssert.wait(timeout = Duration.of(2, ChronoUnit.SECONDS)) {
             val order1 = esOrderRepository.findById(order.id.toString())
             assertThat(order1?.orderId).isEqualTo(order.id.fullId())
         }

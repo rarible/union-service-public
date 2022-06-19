@@ -58,6 +58,10 @@ class TzktItemServiceImpl(val tzktTokenClient: TokenClient, val properties: DipD
             return false
         }
 
+        if (!properties.tzktProperties.nftChecking) {
+            return true
+        }
+
         var retries = 0
 
         // meta is loaded asynchronously with delay that's why we should retry to check if it's nft

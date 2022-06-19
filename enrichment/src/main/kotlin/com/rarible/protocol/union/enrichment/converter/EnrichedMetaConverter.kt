@@ -20,10 +20,18 @@ import com.rarible.protocol.union.dto.VideoContentDto
 object EnrichedMetaConverter {
     fun convert(meta: UnionCollectionMeta): CollectionMetaDto {
         return CollectionMetaDto(
-            description = meta.description,
-            externalLink = meta.externalLink,
-            feeRecipient = meta.feeRecipient,
             name = meta.name,
+            description = meta.description,
+            createdAt = meta.createdAt,
+            tags = meta.tags,
+            genres = meta.genres,
+            language = meta.language,
+            rights = meta.rights,
+            rightsUri = meta.rightsUri,
+            externalUri = meta.externalUri,
+            originalMetaUri = meta.originalMetaUri,
+            externalLink = meta.externalUri, // TODO remove later
+            feeRecipient = meta.feeRecipient,
             sellerFeeBasisPoints = meta.sellerFeeBasisPoints,
             content = meta.content.map { convert(it) }
         )
@@ -40,6 +48,7 @@ object EnrichedMetaConverter {
             rights = meta.rights,
             rightsUri = meta.rightsUri,
             externalUri = meta.externalUri,
+            originalMetaUri = meta.originalMetaUri,
             attributes = meta.attributes,
             content = meta.content.map { convert(it) },
             restrictions = meta.restrictions.map { it.type }.distinct()
@@ -88,7 +97,7 @@ object EnrichedMetaConverter {
                 size = properties.size,
             )
             // Fallback: consider this was an image. It is better than to return nothing.
-            null -> ImageContentDto(
+            else -> ImageContentDto(
                 url = content.url,
                 representation = MetaContentDto.Representation.ORIGINAL,
                 mimeType = null,

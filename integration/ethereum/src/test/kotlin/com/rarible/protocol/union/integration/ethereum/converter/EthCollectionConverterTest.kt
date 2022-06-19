@@ -69,7 +69,7 @@ class EthCollectionConverterTest {
         assertThat(meta.name).isEqualTo(originalMeta.name)
         assertThat(meta.description).isEqualTo(originalMeta.description)
         assertThat(meta.content).hasSize(1)
-        val contentImage = meta.content!!.first()
+        val contentImage = meta.content.first()
 
         assertThat(contentImage).isExactlyInstanceOf(UnionMetaContent::class.java)
         val originalUrl = originalMeta.image!!.url.values.first()

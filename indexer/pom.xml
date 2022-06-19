@@ -41,7 +41,6 @@
         <dependency>
             <groupId>com.rarible.protocol.union</groupId>
             <artifactId>rarible-union-enrichment</artifactId>
-
             <exclusions>
                 <exclusion>
                     <groupId>org.springframework.boot</groupId>

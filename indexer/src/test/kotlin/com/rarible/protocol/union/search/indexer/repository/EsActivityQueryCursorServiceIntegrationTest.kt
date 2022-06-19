@@ -51,8 +51,8 @@ internal class EsActivityQueryCursorServiceIntegrationTest {
         val lte1 = randomEsActivity().copy(date = Instant.ofEpochMilli(1000))
         val cursor = EsActivityCursor(
             date = Instant.ofEpochMilli(1500),
-            blockNumber = null,
-            logIndex = null,
+            blockNumber = 0,
+            logIndex = 0,
             salt = 0,
         )
         repository.saveAll(listOf(gte1, lte1))
@@ -96,7 +96,7 @@ internal class EsActivityQueryCursorServiceIntegrationTest {
         val cursor = EsActivityCursor(
             date = Instant.ofEpochMilli(2000),
             blockNumber = 50,
-            logIndex = null,
+            logIndex = 0,
             salt = 0,
         )
         repository.saveAll(listOf(gte1, gte2, lte1, lte2))
@@ -247,8 +247,8 @@ internal class EsActivityQueryCursorServiceIntegrationTest {
 
         val cursor = EsActivityCursor(
             date = Instant.ofEpochMilli(2000),
-            blockNumber = null,
-            logIndex = null,
+            blockNumber = 0,
+            logIndex = 0,
             salt = 100,
         )
         repository.saveAll(listOf(gte1, gte2, lte1, lte2))

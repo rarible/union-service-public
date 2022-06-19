@@ -19,6 +19,7 @@ import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.es.ElasticsearchTestBootstrapper
+import com.rarible.protocol.union.core.util.truncatedToSeconds
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.AuctionStartActivityDto
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -34,12 +35,14 @@ import com.rarible.protocol.union.integration.ethereum.data.randomEthAddress
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAuctionStartActivity
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemMintActivity
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOrderBidActivity
+import com.rarible.protocol.union.integration.flow.data.randomFlowBurnDto
+import com.rarible.protocol.union.integration.flow.data.randomFlowCancelBidActivityDto
 import com.rarible.protocol.union.integration.solana.data.randomSolanaMintActivity
 import com.rarible.protocol.union.integration.tezos.data.randomTezosItemBurnActivity
 import com.rarible.protocol.union.integration.tezos.service.TezosPgActivityService
-import com.rarible.protocol.union.test.data.randomFlowBurnDto
-import com.rarible.protocol.union.test.data.randomFlowCancelBidActivityDto
 import io.mockk.coEvery
+import java.time.Instant
+import java.time.temporal.ChronoUnit
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.runBlocking
@@ -49,13 +52,14 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.TestPropertySource
 import reactor.kotlin.core.publisher.toMono
-import java.time.Instant
-import java.time.temporal.ChronoUnit
 import com.rarible.protocol.solana.dto.ActivitiesByIdRequestDto as SolanaActivitiesByIdRequestDto
 
 @FlowPreview
 @IntegrationTest
-@TestPropertySource(properties = ["common.feature-flags.enableActivityQueriesToElasticSearch=true"])
+@TestPropertySource(properties = [
+    "common.feature-flags.enableActivityQueriesToElasticSearch=true",
+    "common.feature-flags.enableActivityAscQueriesWithApiMerge=false",
+])
 class ActivityControllerElasticFt : AbstractIntegrationTest() {
 
     private val continuation: String? = null
@@ -82,9 +86,11 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
     @Test
     fun `get all activities`() = runBlocking<Unit> {
         val types = ActivityTypeDto.values().toList()
-        val blockchains = listOf(BlockchainDto.ETHEREUM, BlockchainDto.POLYGON, BlockchainDto.FLOW, BlockchainDto.SOLANA, BlockchainDto.TEZOS)
+        val blockchains = listOf(
+            BlockchainDto.ETHEREUM, BlockchainDto.POLYGON, BlockchainDto.FLOW, BlockchainDto.SOLANA, BlockchainDto.TEZOS
+        )
         val size = 5
-        val now = nowMillis()
+        val now = Instant.now().truncatedToSeconds()
 
         // From this list of activities we expect only the oldest 5 in response ordered as:
         // flowActivity1, polygonItemActivity1, ethOrderActivity3, tezosActivity1 and solanaActivity1
@@ -203,33 +209,41 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
         // Since all activity types specified in request, all of existing clients should be requested
         coEvery {
             testEthereumActivityOrderApi.getOrderActivitiesById(
-                ActivitiesByIdRequestDto(listOf(
-                    ethOrderActivity3.id,
-                ))
+                ActivitiesByIdRequestDto(
+                    listOf(
+                        ethOrderActivity3.id,
+                    )
+                )
             )
         } returns OrderActivitiesDto(null, listOf(ethOrderActivity3)).toMono()
 
         coEvery {
             testEthereumActivityItemApi.getNftActivitiesById(
-                ActivitiesByIdRequestDto(listOf(
-                    ethItemActivity3.id,
-                ))
+                ActivitiesByIdRequestDto(
+                    listOf(
+                        ethItemActivity3.id,
+                    )
+                )
             )
         } returns NftActivitiesDto(null, listOf(ethItemActivity3)).toMono()
 
         coEvery {
             testPolygonActivityItemApi.getNftActivitiesById(
-                ActivitiesByIdRequestDto(listOf(
-                    polygonItemActivity1.id,
-                ))
+                ActivitiesByIdRequestDto(
+                    listOf(
+                        polygonItemActivity1.id,
+                    )
+                )
             )
         } returns NftActivitiesDto(null, listOf(polygonItemActivity1)).toMono()
 
         coEvery {
             testFlowActivityApi.getNftOrderActivitiesById(
-                NftActivitiesByIdRequestDto(listOf(
-                    flowActivity1.id
-                ))
+                NftActivitiesByIdRequestDto(
+                    listOf(
+                        flowActivity1.id
+                    )
+                )
             )
         } returns FlowActivitiesDto(null, null, listOf(flowActivity1)).toMono()
 
@@ -244,7 +258,7 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
         } returns com.rarible.protocol.tezos.dto.NftActivitiesDto(null, listOf(tezosActivity1))
 
         val activities = activityControllerApi.getAllActivities(
-            types, blockchains, null, null, size, com.rarible.protocol.union.dto.ActivitySortDto.EARLIEST_FIRST
+            types, blockchains, null, null, size, com.rarible.protocol.union.dto.ActivitySortDto.EARLIEST_FIRST, null,
         ).awaitFirst()
 
         assertThat(activities.activities).hasSize(5)
@@ -285,7 +299,7 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
         } returns OrderActivitiesDto(null, listOf(orderActivity)).toMono()
 
         val activities = activityControllerApi.getActivitiesByCollection(
-            types, ethCollectionId.fullId(), continuation, null, defaultSize, sort
+            types, listOf(ethCollectionId.fullId()), continuation, null, defaultSize, sort, null,
         ).awaitFirst()
 
         assertThat(activities.activities).hasSize(1)
@@ -350,7 +364,7 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
         } returns NftActivitiesDto(null, listOf(itemActivity)).toMono()
 
         val activities = activityControllerApi.getActivitiesByItem(
-            types, ethItemId.fullId(), continuation, null, 100, sort
+            types, ethItemId.fullId(), continuation, null, 100, sort, null,
         ).awaitFirst()
 
         assertThat(activities.activities).hasSize(3)
@@ -420,7 +434,7 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
         val now = Instant.now()
         val oneWeekAgo = now.minus(7, ChronoUnit.DAYS)
         val activities = activityControllerApi.getActivitiesByUser(
-            types, listOf(userEth.fullId()), null, oneWeekAgo, now, null, null, size, sort
+            types, listOf(userEth.fullId()), null, oneWeekAgo, now, null, null, size, sort, null,
         ).awaitFirst()
 
         assertThat(activities.activities).hasSize(3)

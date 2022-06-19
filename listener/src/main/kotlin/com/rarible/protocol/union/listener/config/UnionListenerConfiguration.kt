@@ -17,9 +17,14 @@ import com.rarible.protocol.union.core.model.ReconciliationMarkEvent
 import com.rarible.protocol.union.core.model.UnionInternalBlockchainEvent
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.configuration.EnrichmentConsumerConfiguration
+import com.rarible.protocol.union.listener.job.BestOrderCheckJob
+import com.rarible.protocol.union.listener.job.BestOrderCheckJobHandler
+import com.rarible.protocol.union.listener.job.ReconciliationMarkJob
+import com.rarible.protocol.union.listener.job.ReconciliationMarkJobHandler
 import com.rarible.protocol.union.subscriber.UnionKafkaJsonDeserializer
 import io.micrometer.core.instrument.MeterRegistry
 import org.apache.kafka.clients.consumer.OffsetResetStrategy
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -105,6 +110,26 @@ class UnionListenerConfiguration(
         }
         val workers = consumers.flatMap { it.workers }
         return BatchedConsumerWorker(workers)
+    }
+
+    @Bean
+    @ConditionalOnProperty(name = ["listener.price-update.enabled"], havingValue = "true")
+    fun bestOrderCheckJob(
+        handler: BestOrderCheckJobHandler,
+        properties: UnionListenerProperties,
+        meterRegistry: MeterRegistry,
+    ): BestOrderCheckJob {
+        return BestOrderCheckJob(handler, properties, meterRegistry)
+    }
+
+    @Bean
+    @ConditionalOnProperty(name = ["listener.reconcile-marks.enabled"], havingValue = "true")
+    fun reconciliationMarkJob(
+        handler: ReconciliationMarkJobHandler,
+        properties: UnionListenerProperties,
+        meterRegistry: MeterRegistry,
+    ): ReconciliationMarkJob {
+        return ReconciliationMarkJob(handler, properties, meterRegistry)
     }
 
     private fun createUnionReconciliationMarkEventConsumer(

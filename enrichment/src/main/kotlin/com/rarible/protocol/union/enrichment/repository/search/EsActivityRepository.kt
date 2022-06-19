@@ -17,9 +17,12 @@ import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.runBlocking
 import org.elasticsearch.action.admin.indices.refresh.RefreshRequest
+import org.elasticsearch.index.query.TermsQueryBuilder
 import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery
+import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder
+import org.springframework.data.elasticsearch.core.query.Query
 import org.springframework.stereotype.Component
 import java.io.IOException
 import javax.annotation.PostConstruct
@@ -80,6 +83,28 @@ class EsActivityRepository(
             .awaitFirst()
     }
 
+    suspend fun delete(activityIds: List<String>): Long? {
+        val query = NativeSearchQueryBuilder()
+            .withQuery(TermsQueryBuilder(EsActivity::activityId.name, activityIds))
+            .build()
+        return esOperations.delete(
+            query,
+            Any::class.java,
+            entityDefinition.writeIndexCoordinates
+        ).awaitFirstOrNull()?.deleted
+    }
+
+    /**
+     * For tests only
+     */
+    suspend fun deleteAll() {
+        esOperations.delete(
+            Query.findAll(),
+            Any::class.java,
+            entityDefinition.writeIndexCoordinates
+        ).awaitFirstOrNull()
+    }
+
     suspend fun search(
         filter: ElasticActivityFilter,
         sort: EsActivitySort,
@@ -87,6 +112,7 @@ class EsActivityRepository(
     ): EsActivityQueryResult {
         val query = queryBuilderService.build(filter, sort)
         query.maxResults = PageSize.ACTIVITY.limit(limit)
+        query.trackTotalHits = false
 
         return search(query)
     }

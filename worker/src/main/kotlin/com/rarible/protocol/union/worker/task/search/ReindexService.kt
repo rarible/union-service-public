@@ -7,14 +7,20 @@ import com.rarible.core.task.TaskRepository
 import com.rarible.core.task.TaskStatus
 import com.rarible.protocol.union.core.elasticsearch.ReindexSchedulingService
 import com.rarible.protocol.union.core.model.EsActivity
+import com.rarible.protocol.union.core.model.EsCollection
 import com.rarible.protocol.union.core.model.EsItem
 import com.rarible.protocol.union.core.model.EsOrder
 import com.rarible.protocol.union.core.model.elasticsearch.EntityDefinitionExtended
 import com.rarible.protocol.union.core.model.elasticsearch.EsEntity
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.worker.config.SearchReindexProperties
+import com.rarible.protocol.union.worker.config.WorkerProperties
 import com.rarible.protocol.union.worker.task.search.activity.ActivityTaskParam
 import com.rarible.protocol.union.worker.task.search.activity.ChangeEsActivityAliasTask
+import com.rarible.protocol.union.worker.task.search.collection.ChangeEsCollectionAliasTask
+import com.rarible.protocol.union.worker.task.search.collection.ChangeEsCollectionAliasTaskParam
+import com.rarible.protocol.union.worker.task.search.collection.CollectionTaskParam
 import com.rarible.protocol.union.worker.task.search.item.ChangeEsItemAliasTask
 import com.rarible.protocol.union.worker.task.search.item.ItemTaskParam
 import com.rarible.protocol.union.worker.task.search.order.ChangeEsOrderAliasTask
@@ -25,9 +31,12 @@ import org.springframework.stereotype.Component
 
 @Component
 class ReindexService(
+    workerProperties: WorkerProperties,
     private val taskRepository: TaskRepository,
-    private val paramFactory: ParamFactory
+    private val paramFactory: ParamFactory,
 ) : ReindexSchedulingService {
+
+    private val searchReindexProperties = workerProperties.searchReindex
 
     override suspend fun scheduleReindex(
         newIndexName: String,
@@ -40,18 +49,40 @@ class ReindexService(
             EsEntity.ITEM -> {
                 scheduleItemReindex(newIndexName)
             }
+            EsEntity.COLLECTION -> {
+                scheduleCollectionReindex(newIndexName)
+            }
             EsEntity.ORDER -> {
                 scheduleOrderReindex(newIndexName)
             }
-            // EsEntity.COLLECTION,
             EsEntity.OWNERSHIP -> {
                 throw UnsupportedOperationException("Unsupported entity ${entityDefinition.entity} reindex")
             }
         }
     }
 
+    suspend fun scheduleCollectionReindex(newIndexName: String) {
+        val blockchains = searchReindexProperties.activity.activeBlockchains()
+        val tasksParams = blockchains.map {
+            paramFactory.toString(CollectionTaskParam(it, newIndexName))
+        }
+        val tasks = tasks(EsCollection.ENTITY_DEFINITION.reindexTask, tasksParams)
+
+        val changeAliasTaskParam = ChangeEsCollectionAliasTaskParam(
+            newIndexName, blockchains
+        )
+
+        val indexSwitch = indexSwitchTask(
+            entityName = EsEntity.COLLECTION.entityName,
+            changeAliasTaskParam = changeAliasTaskParam,
+            taskType = ChangeEsCollectionAliasTask.TYPE
+        )
+
+        taskRepository.saveAll(tasks + indexSwitch).collectList().awaitFirst()
+    }
+
     suspend fun scheduleActivityReindex(indexName: String) {
-        val blockchains = BlockchainDto.values()
+        val blockchains = searchReindexProperties.activity.activeBlockchains()
         val types = ActivityTypeDto.values()
         val taskParams = blockchains.flatMap { blockchain ->
             types.map { type ->
@@ -139,10 +170,10 @@ class ReindexService(
         }
     }
 
-    private suspend fun indexSwitchTask(
+    private suspend fun <T> indexSwitchTask(
         entityName: String,
-        changeAliasTaskParam: ChangeAliasTaskParam,
-        taskType: String,
+        changeAliasTaskParam: T,
+        taskType: String
     ): List<Task> {
 
         val taskParamJson = paramFactory.toString(changeAliasTaskParam)

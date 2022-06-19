@@ -30,9 +30,9 @@ import com.rarible.protocol.union.integration.ethereum.data.randomEthBidOrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthSellOrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomPolygonAddress
+import com.rarible.protocol.union.integration.flow.data.randomFlowAddress
+import com.rarible.protocol.union.integration.flow.data.randomFlowV1OrderDto
 import com.rarible.protocol.union.integration.tezos.data.randomTezosOrderDto
-import com.rarible.protocol.union.test.data.randomFlowAddress
-import com.rarible.protocol.union.test.data.randomFlowV1OrderDto
 import io.mockk.coEvery
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.reactive.awaitFirst

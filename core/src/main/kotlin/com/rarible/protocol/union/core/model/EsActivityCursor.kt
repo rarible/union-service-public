@@ -5,8 +5,8 @@ import java.time.Instant
 
 data class EsActivityCursor(
     val date: Instant,
-    val blockNumber: Long?,
-    val logIndex: Int?,
+    val blockNumber: Long,
+    val logIndex: Int,
     val salt: Long,
 ) {
     override fun toString(): String {
@@ -21,8 +21,8 @@ data class EsActivityCursor(
                 val split = value.split('_')
                 EsActivityCursor(
                     date = Instant.ofEpochMilli(split[0].toLong()),
-                    blockNumber = split[1].toLongOrNull(),
-                    logIndex = split[2].toIntOrNull(),
+                    blockNumber = split[1].toLong(),
+                    logIndex = split[2].toInt(),
                     salt = split[3].toLong()
                 )
             } catch (e: RuntimeException) {
@@ -34,8 +34,8 @@ data class EsActivityCursor(
         fun EsActivityLite.fromActivityLite(): EsActivityCursor {
             return EsActivityCursor(
                 date = this.date,
-                blockNumber = this.blockNumber,
-                logIndex = this.logIndex,
+                blockNumber = this.blockNumber ?: 0,
+                logIndex = this.logIndex ?: 0,
                 salt = this.salt,
             )
         }

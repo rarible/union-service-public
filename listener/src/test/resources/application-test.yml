@@ -101,6 +101,11 @@ integration:
           deposits: 600
           withdrawals: 600
           orders: 600
+
+meta:
+  embedded:
+    publicUrl: "http://localhost:8080/content/embedded"
+
 listener:
   reconciliation:
     orderBatchSize: 50
@@ -108,8 +113,10 @@ listener:
     threadCount: 2
     notificationEnabled: false
   price-update:
+    enabled: false
     rate: PT5M
     delay: PT60M
   reconcile-marks:
+    enabled: false
     rate: PT1M
     delay: PT60M

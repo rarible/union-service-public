@@ -70,7 +70,7 @@ class DipDupActivityConverter(
                 OrderListActivityDto(
                     id = activityId,
                     date = date,
-                    price = activity.price,
+                    price = activity.take.assetValue,
                     priceUsd = currencyService.toUsd(blockchain, take.type, make.value),
                     source = convert(activity.source),
                     hash = activity.hash,
@@ -110,7 +110,7 @@ class DipDupActivityConverter(
                     nft = nft,
                     payment = payment,
                     buyer = UnionAddressConverter.convert(blockchain, activity.buyer),
-                    price = activity.price,
+                    price = activity.payment.assetValue,
                     priceUsd = currencyService.toUsd(blockchain, payment.type, payment.value),
                     type = OrderMatchSellDto.Type.SELL
                 )

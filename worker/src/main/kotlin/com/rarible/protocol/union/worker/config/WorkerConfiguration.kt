@@ -1,10 +1,6 @@
 package com.rarible.protocol.union.worker.config
 
 import com.rarible.core.task.EnableRaribleTask
-import com.rarible.protocol.solana.api.client.autoconfigure.SolanaApiClientAutoConfiguration
-import com.rarible.protocol.union.api.client.ActivityControllerApi
-import com.rarible.protocol.union.api.client.CollectionControllerApi
-import com.rarible.protocol.union.api.client.UnionApiClientFactory
 import com.rarible.protocol.union.core.elasticsearch.EsNameResolver
 import com.rarible.protocol.union.core.elasticsearch.EsRepository
 import com.rarible.protocol.union.core.elasticsearch.IndexService
@@ -12,20 +8,16 @@ import com.rarible.protocol.union.core.elasticsearch.bootstrap.ElasticsearchBoot
 import com.rarible.protocol.union.core.model.elasticsearch.EsEntitiesConfig
 import com.rarible.protocol.union.enrichment.configuration.EnrichmentApiConfiguration
 import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
-import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
 import com.rarible.protocol.union.worker.task.search.ReindexService
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
 import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations
 
 @Configuration
-@ComponentScan(basePackageClasses = [EsActivityRepository::class])
 @Import(
     value = [
         EnrichmentApiConfiguration::class,
@@ -34,7 +26,6 @@ import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperatio
 )
 @EnableRaribleTask
 @EnableConfigurationProperties(WorkerProperties::class)
-@EnableAutoConfiguration(exclude = [SolanaApiClientAutoConfiguration::class])
 class WorkerConfiguration(
     val properties: WorkerProperties
 ) {
@@ -58,16 +49,6 @@ class WorkerConfiguration(
         return properties.searchReindex.order
     }
 
-    @Bean
-    fun activityClient(factory: UnionApiClientFactory): ActivityControllerApi {
-        return factory.createActivityApiClient()
-    }
-
-    @Bean
-    fun collectionClient(factory: UnionApiClientFactory): CollectionControllerApi {
-        return factory.createCollectionApiClient()
-    }
-
     @FlowPreview
     @ExperimentalCoroutinesApi
     @Bean(initMethod = "bootstrap")
@@ -76,14 +57,14 @@ class WorkerConfiguration(
         esNameResolver: EsNameResolver,
         reindexerService: ReindexService,
         indexService: IndexService,
-        esRepositories: List<EsRepository>
+        esRepositories: List<EsRepository>,
+        reindexService: ReindexService
     ): ElasticsearchBootstrapper {
-
         return ElasticsearchBootstrapper(
             esNameResolver = esNameResolver,
             esOperations = reactiveElasticSearchOperations,
             entityDefinitions = EsEntitiesConfig.prodEsEntities(),
-            reindexSchedulingService = reindexerService,
+            reindexSchedulingService = reindexService,
             forceUpdate = emptySet(),
             indexService = indexService,
             repositories = esRepositories

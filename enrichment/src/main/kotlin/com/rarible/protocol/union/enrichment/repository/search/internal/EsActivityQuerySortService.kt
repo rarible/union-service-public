@@ -17,11 +17,4 @@ class EsActivityQuerySortService {
         builder.sortByField(EsActivity::logIndex.name, sortOrder)
         builder.sortByField(EsActivity::salt.name, sortOrder)
     }
-
-    private fun NativeSearchQueryBuilder.sortByField(fieldName: String, order: SortOrder) {
-        val sort = SortBuilders
-            .fieldSort(fieldName)
-            .order(order)
-        withSort(sort)
-    }
 }

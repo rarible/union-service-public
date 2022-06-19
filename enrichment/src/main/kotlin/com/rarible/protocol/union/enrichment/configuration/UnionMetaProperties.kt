@@ -11,6 +11,7 @@ data class UnionMetaProperties(
     val ipfsLegacyGateway: String?,
     val mediaFetchMaxSize: Long,
     val openSeaProxyUrl: String,
+    val embedded: EmbeddedContentProperties,
     val httpClient: HttpClient = HttpClient()
 ){
     class HttpClient(
@@ -21,6 +22,7 @@ data class UnionMetaProperties(
         val connectionsPerRoute: Int = 20,
         val keepAlive: Boolean = true
     ) {
+
         enum class HttpClientType {
             KTOR_APACHE,
             KTOR_CIO,
@@ -28,3 +30,9 @@ data class UnionMetaProperties(
         }
     }
 }
+
+data class EmbeddedContentProperties(
+    val publicUrl: String,
+    @Deprecated("Should be removed after migration")
+    val legacyUrls: String = ""
+)

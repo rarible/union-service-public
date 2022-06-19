@@ -28,6 +28,7 @@ import com.rarible.protocol.union.enrichment.meta.getAvailable
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.test.data.randomUnionMeta
 import com.rarible.protocol.union.integration.ethereum.converter.EthItemConverter
+import com.rarible.protocol.union.integration.ethereum.converter.EthMetaConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAddress
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAuctionDto
@@ -37,18 +38,18 @@ import com.rarible.protocol.union.integration.ethereum.data.randomEthItemMeta
 import com.rarible.protocol.union.integration.ethereum.data.randomEthNftItemDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthV2OrderDto
+import com.rarible.protocol.union.integration.flow.data.randomFlowAddress
+import com.rarible.protocol.union.integration.flow.data.randomFlowCollectionDto
+import com.rarible.protocol.union.integration.flow.data.randomFlowItemDtoWithCollection
+import com.rarible.protocol.union.integration.flow.data.randomFlowItemId
+import com.rarible.protocol.union.integration.flow.data.randomFlowItemIdFullValue
+import com.rarible.protocol.union.integration.flow.data.randomFlowMetaDto
+import com.rarible.protocol.union.integration.flow.data.randomFlowNftItemDto
 import com.rarible.protocol.union.integration.tezos.data.randomTezosAddress
 import com.rarible.protocol.union.integration.tezos.data.randomTezosItemId
 import com.rarible.protocol.union.integration.tezos.data.randomTezosItemIdFullValue
 import com.rarible.protocol.union.integration.tezos.data.randomTezosMetaDto
 import com.rarible.protocol.union.integration.tezos.data.randomTezosNftItemDto
-import com.rarible.protocol.union.test.data.randomFlowAddress
-import com.rarible.protocol.union.test.data.randomFlowCollectionDto
-import com.rarible.protocol.union.test.data.randomFlowItemDtoWithCollection
-import com.rarible.protocol.union.test.data.randomFlowItemId
-import com.rarible.protocol.union.test.data.randomFlowItemIdFullValue
-import com.rarible.protocol.union.test.data.randomFlowMetaDto
-import com.rarible.protocol.union.test.data.randomFlowNftItemDto
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.verify
@@ -128,6 +129,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
         enrichmentItemService.save(ethShortItem)
 
         ethereumOrderControllerApiMock.mockGetByIds(ethOrder)
+        // Might need to be switched back to mockGetByIds() when merged to master
         ethereumItemControllerApiMock.mockGetNftItemsByIds(listOf(ethItemId.value), listOf(ethItem))
 
         val result = itemControllerClient.getItemByIds(ItemIdsDto(listOf(ethItemId))).awaitFirst()
@@ -149,7 +151,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
             )
         )
 
-        coEvery { testUnionMetaLoader.load(itemId) } returns EthItemConverter.convert(meta)
+        coEvery { testUnionMetaLoader.load(itemId) } returns EthMetaConverter.convert(meta)
 
         val response = restTemplate.getForEntity("${baseUri}/v0.1/items/${itemId.fullId()}/image", String::class.java)
         assertThat(response.statusCode).isEqualTo(HttpStatus.TEMPORARY_REDIRECT)
@@ -175,8 +177,8 @@ class ItemControllerFt : AbstractIntegrationTest() {
             )
         )
 
-        unionMetaCacheLoaderService.save(itemId.fullId(), EthItemConverter.convert(cachedMeta))
-        coEvery { testUnionMetaLoader.load(itemId) } returns EthItemConverter.convert(meta)
+        unionMetaCacheLoaderService.save(itemId.fullId(), EthMetaConverter.convert(cachedMeta))
+        coEvery { testUnionMetaLoader.load(itemId) } returns EthMetaConverter.convert(meta)
 
         val response = restTemplate.getForEntity("${baseUri}/v0.1/items/${itemId.fullId()}/image", String::class.java)
         assertThat(response.statusCode).isEqualTo(HttpStatus.TEMPORARY_REDIRECT)
@@ -194,7 +196,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
             )
         )
 
-        coEvery { testUnionMetaLoader.load(itemId) } returns EthItemConverter.convert(meta)
+        coEvery { testUnionMetaLoader.load(itemId) } returns EthMetaConverter.convert(meta)
 
         val response = restTemplate.getForEntity("${baseUri}/v0.1/items/${itemId.fullId()}/animation", String::class.java)
         assertThat(response.statusCode).isEqualTo(HttpStatus.TEMPORARY_REDIRECT)

@@ -13,6 +13,7 @@ import com.rarible.protocol.union.core.model.EsCollectionLite
 import com.rarible.protocol.union.core.model.EsItem
 import com.rarible.protocol.union.core.model.EsTrait
 import com.rarible.protocol.union.core.model.UnionCollection
+import com.rarible.protocol.union.core.model.UnionCollectionMeta
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.UnionMetaContent
@@ -59,13 +60,13 @@ import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthPartDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthSellOrderDto
 import com.rarible.protocol.union.integration.flow.converter.FlowItemConverter
+import com.rarible.protocol.union.integration.flow.data.randomFlowNftItemDto
 import com.rarible.protocol.union.integration.solana.converter.SolanaItemConverter
 import com.rarible.protocol.union.integration.solana.data.randomSolanaTokenDto
-import com.rarible.protocol.union.test.data.randomFlowNftItemDto
 import com.rarible.protocol.union.test.mock.CurrencyMock
-import kotlinx.coroutines.runBlocking
 import java.time.Instant
 import java.time.temporal.ChronoUnit
+import kotlinx.coroutines.runBlocking
 
 fun randomUnionAddress(): UnionAddress =
     UnionAddressConverter.convert(
@@ -114,9 +115,29 @@ fun randomUnionMeta(): UnionMeta {
         rights = randomString(),
         rightsUri = randomString(),
         externalUri = randomString(),
+        originalMetaUri = randomString(),
         attributes = listOf(randomUnionMetaAttribute()),
         content = listOf(),
         restrictions = listOf()
+    )
+}
+
+fun randomUnionCollectionMeta(): UnionCollectionMeta {
+    return UnionCollectionMeta(
+        name = randomString(),
+        description = randomString(),
+        language = randomString(2),
+        genres = listOf(randomString(), randomString()),
+        tags = listOf(randomString(), randomString()),
+        createdAt = nowMillis(),
+        rights = randomString(),
+        rightsUri = randomString(),
+        externalUri = randomString(),
+        originalMetaUri = randomString(),
+        content = listOf(),
+        feeRecipient = randomUnionAddress(),
+        sellerFeeBasisPoints = randomInt(10000),
+        externalLink = randomString() // TODO remove later
     )
 }
 
@@ -129,9 +150,9 @@ fun randomUnionMetaAttribute(): MetaAttributeDto {
     )
 }
 
-fun randomUnionContent(properties: UnionMetaContentProperties): UnionMetaContent {
+fun randomUnionContent(properties: UnionMetaContentProperties? = null): UnionMetaContent {
     return UnionMetaContent(
-        url = randomString(),
+        url = "http://localhost:8080/image/${randomString()}",
         fileName = "${randomString()}.png}",
         representation = MetaContentDto.Representation.ORIGINAL,
         properties = properties
@@ -257,6 +278,7 @@ fun randomEsActivity() = EsActivity(
 
 fun randomEsCollection() = EsCollection(
     collectionId = randomString(),
+    date = Instant.now(),
     blockchain = BlockchainDto.values().random(),
     name = randomString(),
     symbol = randomString(),
@@ -283,7 +305,7 @@ val EsActivity.info: EsActivityLite
     get() = EsActivityLite(activityId, blockchain, type, date, blockNumber, logIndex, salt)
 
 val EsCollection.info: EsCollectionLite
-    get() = EsCollectionLite(collectionId)
+    get() = EsCollectionLite(collectionId, date, salt)
 
 private val mockedEthOrderConverter = EthOrderConverter(CurrencyMock.currencyServiceMock)
 private val mockedEthAuctionConverter = EthAuctionConverter(CurrencyMock.currencyServiceMock)

@@ -1,7 +1,7 @@
 package com.rarible.protocol.union.api.service.select
 
-import com.rarible.protocol.union.api.service.ActivityQueryService
-import com.rarible.protocol.union.api.service.api.ActivityApiService
+import com.rarible.protocol.union.enrichment.service.query.activity.ActivityQueryService
+import com.rarible.protocol.union.enrichment.service.query.activity.ActivityApiMergeService
 import com.rarible.protocol.union.api.service.elastic.ActivityElasticService
 import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.dto.ActivitiesDto
@@ -9,6 +9,7 @@ import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.SyncSortDto
+import com.rarible.protocol.union.dto.SyncTypeDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
 import org.springframework.stereotype.Service
 import java.time.Instant
@@ -16,53 +17,57 @@ import java.time.Instant
 @Service
 class ActivitySourceSelectService(
     private val featureFlagsProperties: FeatureFlagsProperties,
-    private val activityApiMergeService: ActivityApiService,
+    private val activityApiMergeService: ActivityApiMergeService,
     private val activityElasticService: ActivityElasticService,
-) : ActivityQueryService {
+) {
 
-    override suspend fun getAllActivities(
+    suspend fun getAllActivities(
         type: List<ActivityTypeDto>,
         blockchains: List<BlockchainDto>?,
         continuation: String?,
         cursor: String?,
         size: Int?,
-        sort: ActivitySortDto?
+        sort: ActivitySortDto?,
+        overrideSelect: OverrideSelect?,
     ): ActivitiesDto {
-        return getQuerySource().getAllActivities(type, blockchains, continuation, cursor, size, sort)
+        return getQuerySource(overrideSelect, sort).getAllActivities(type, blockchains, continuation, cursor, size, sort)
     }
 
-    override suspend fun getAllActivitiesSync(
+    suspend fun getAllActivitiesSync(
         blockchain: BlockchainDto,
         continuation: String?,
         size: Int?,
-        sort: SyncSortDto?
+        sort: SyncSortDto?,
+        type: SyncTypeDto?
     ): ActivitiesDto {
-        return activityApiMergeService.getAllActivitiesSync(blockchain, continuation, size, sort)
+        return activityApiMergeService.getAllActivitiesSync(blockchain, continuation, size, sort, type)
     }
 
-    override suspend fun getActivitiesByCollection(
+    suspend fun getActivitiesByCollection(
         type: List<ActivityTypeDto>,
-        collection: String,
+        collection: List<String>,
         continuation: String?,
         cursor: String?,
         size: Int?,
-        sort: ActivitySortDto?
+        sort: ActivitySortDto?,
+        overrideSelect: OverrideSelect?,
     ): ActivitiesDto {
-        return getQuerySource().getActivitiesByCollection(type, collection, continuation, cursor, size, sort)
+        return getQuerySource(overrideSelect, sort).getActivitiesByCollection(type, collection, continuation, cursor, size, sort)
     }
 
-    override suspend fun getActivitiesByItem(
+    suspend fun getActivitiesByItem(
         type: List<ActivityTypeDto>,
         itemId: String,
         continuation: String?,
         cursor: String?,
         size: Int?,
-        sort: ActivitySortDto?
+        sort: ActivitySortDto?,
+        overrideSelect: OverrideSelect?,
     ): ActivitiesDto {
-        return getQuerySource().getActivitiesByItem(type, itemId, continuation, cursor, size, sort)
+        return getQuerySource(overrideSelect, sort).getActivitiesByItem(type, itemId, continuation, cursor, size, sort)
     }
 
-    override suspend fun getActivitiesByUser(
+    suspend fun getActivitiesByUser(
         type: List<UserActivityTypeDto>,
         user: List<String>,
         blockchains: List<BlockchainDto>?,
@@ -71,15 +76,32 @@ class ActivitySourceSelectService(
         continuation: String?,
         cursor: String?,
         size: Int?,
-        sort: ActivitySortDto?
+        sort: ActivitySortDto?,
+        overrideSelect: OverrideSelect?,
     ): ActivitiesDto {
-        return getQuerySource().getActivitiesByUser(type, user, blockchains, from, to, continuation, cursor, size, sort)
+        return getQuerySource(overrideSelect, sort).getActivitiesByUser(type, user, blockchains, from, to, continuation, cursor, size, sort)
     }
 
-    private fun getQuerySource(): ActivityQueryService {
-        return when (featureFlagsProperties.enableActivityQueriesToElasticSearch) {
-            true -> activityElasticService
-            else -> activityApiMergeService
+    private fun getQuerySource(overrideSelect: OverrideSelect?, sort: ActivitySortDto?): ActivityQueryService {
+        if (overrideSelect != null) {
+            return when (overrideSelect) {
+                OverrideSelect.ELASTIC -> activityElasticService
+                OverrideSelect.API_MERGE -> activityApiMergeService
+            }
+        }
+
+        return if (featureFlagsProperties.enableActivityQueriesToElasticSearch) {
+            if (featureFlagsProperties.enableActivityAscQueriesWithApiMerge) {
+                if (sort == ActivitySortDto.EARLIEST_FIRST) {
+                    activityApiMergeService
+                } else {
+                    activityElasticService
+                }
+            } else {
+                activityElasticService
+            }
+        } else {
+            activityApiMergeService
         }
     }
 }

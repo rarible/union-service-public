@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.enrichment.service.query.order
 
 import com.rarible.core.logging.Logger
+import com.rarible.protocol.union.enrichment.util.BlockchainFilter
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -24,7 +25,6 @@ import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.dto.ext
 import com.rarible.protocol.union.dto.group
 import com.rarible.protocol.union.dto.parser.IdParser
-import com.rarible.protocol.union.enrichment.util.BlockchainFilter
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope

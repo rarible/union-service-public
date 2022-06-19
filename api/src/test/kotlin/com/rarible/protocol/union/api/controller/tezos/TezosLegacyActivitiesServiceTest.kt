@@ -68,6 +68,7 @@ class TezosLegacyActivitiesServiceTest : AbstractIntegrationTest() {
         @DynamicPropertySource
         fun properties(registry: DynamicPropertyRegistry) {
             registry.add("integration.tezos.pg.port", container::getFirstMappedPort)
+            registry.add("integration.tezos.pg.host", container::getHost)
             registry.add("integration.tezos.pg.user", container::getUsername)
             registry.add("integration.tezos.pg.password", container::getPassword)
             registry.add("integration.tezos.pg.database", container::getDatabaseName)

@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.listener.job
+package com.rarible.protocol.union.listener.repository
 
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.PlatformDto

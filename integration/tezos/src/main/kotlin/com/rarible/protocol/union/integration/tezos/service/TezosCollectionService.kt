@@ -2,6 +2,8 @@ package com.rarible.protocol.union.integration.tezos.service
 
 import com.rarible.core.apm.CaptureSpan
 import com.rarible.protocol.tezos.api.client.NftCollectionControllerApi
+import com.rarible.protocol.union.core.exception.UnionException
+import com.rarible.protocol.union.core.model.TokenId
 import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.core.service.CollectionService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
@@ -9,12 +11,14 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.continuation.page.Page
 import com.rarible.protocol.union.integration.tezos.converter.TezosCollectionConverter
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktCollectionService
+import com.rarible.protocol.union.integration.tezos.entity.TezosTokenIdRepository
 import kotlinx.coroutines.reactive.awaitFirst
 
 @CaptureSpan(type = "blockchain")
 open class TezosCollectionService(
     private val collectionControllerApi: NftCollectionControllerApi,
-    private val tzktCollectionService: TzktCollectionService
+    private val tzktCollectionService: TzktCollectionService,
+    private val tezosTokenIdRepository: TezosTokenIdRepository
 ) : AbstractBlockchainService(BlockchainDto.TEZOS), CollectionService {
 
     override suspend fun getAllCollections(
@@ -48,6 +52,17 @@ open class TezosCollectionService(
             return tzktCollectionService.getCollectionByIds(ids)
         }
         TODO("Not yet implemented")
+    }
+
+    override suspend fun generateNftTokenId(collectionId: String, minter: String?): TokenId {
+        try { // Adjust to existed count
+            val actualCount = tzktCollectionService.tokenCount(collectionId)
+            tezosTokenIdRepository.adjustTokenCount(collectionId, actualCount)
+        } catch (ex: Exception) {
+            throw UnionException("Collection wasn't found")
+        }
+        val tezosTokenId = tezosTokenIdRepository.generateNftTokenId(collectionId)
+        return TokenId(tezosTokenId.toString())
     }
 
     override suspend fun getCollectionsByOwner(

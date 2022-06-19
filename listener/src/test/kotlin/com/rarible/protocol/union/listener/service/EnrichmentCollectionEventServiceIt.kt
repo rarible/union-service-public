@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.listener.service
 
-import com.rarible.core.test.wait.Wait
 import com.rarible.protocol.union.enrichment.converter.EnrichedCollectionConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.service.EnrichmentCollectionService
@@ -60,7 +59,7 @@ class EnrichmentCollectionEventServiceIt : AbstractIntegrationTest() {
         val saved = collectionService.get(shortCollection.id)!!
         assertThat(saved.bestSellOrder).isEqualTo(ShortOrderConverter.convert(unionBestSell))
 
-        Wait.waitAssert {
+        waitAssert {
             val messages = findCollectionUpdates(collectionId.value)
             assertThat(messages).hasSize(1)
             assertThat(messages[0].value.collectionId).isEqualTo(collectionId)
@@ -93,7 +92,7 @@ class EnrichmentCollectionEventServiceIt : AbstractIntegrationTest() {
         val saved = collectionService.get(shortCollection.id)!!
         assertThat(saved.bestBidOrder).isEqualTo(ShortOrderConverter.convert(unionBestBid))
 
-        Wait.waitAssert {
+        waitAssert {
             val messages = findCollectionUpdates(collectionId.value)
             assertThat(messages).hasSize(1)
             assertThat(messages[0].value.collectionId).isEqualTo(collectionId)

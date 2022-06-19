@@ -3,9 +3,7 @@ package com.rarible.protocol.union.enrichment.meta
 import com.rarible.core.apm.SpanType
 import com.rarible.core.apm.withSpan
 import com.rarible.loader.cache.CacheLoaderService
-import com.rarible.protocol.union.core.model.UnionCollectionMeta
 import com.rarible.protocol.union.core.model.UnionMeta
-import com.rarible.protocol.union.core.model.UnionMetaContent
 import com.rarible.protocol.union.dto.ItemIdDto
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
@@ -18,8 +16,7 @@ class UnionMetaService(
     @Qualifier("union.meta.cache.loader.service")
     private val unionMetaCacheLoaderService: CacheLoaderService<UnionMeta>,
     private val unionMetaMetrics: UnionMetaMetrics,
-    private val unionMetaLoader: UnionMetaLoader,
-    private val ipfsUrlResolver: IpfsUrlResolver
+    private val unionMetaLoader: UnionMetaLoader
 ) {
 
     private val logger = LoggerFactory.getLogger(UnionMetaService::class.java)
@@ -40,14 +37,13 @@ class UnionMetaService(
         }
         cached.forEach {
             val id = keyMap[it.key]!!
-            unionMetaMetrics.onMetaCacheHitOrMiss(
-                itemId = id,
-                hitOrMiss = it.isMetaInitiallyLoadedOrFailed()
-            )
-            val meta = it.getAvailable()
-            if (meta != null) {
-                result[id] = meta
+            if (it.isMetaInitiallyLoadedOrFailed()) {
+                unionMetaMetrics.onMetaCacheMiss(id.blockchain)
+            } else {
+                unionMetaMetrics.onMetaCacheHit(id.blockchain)
             }
+            val meta = it.getAvailable()
+            meta?.let { result[id] = meta }
         }
         return result
     }
@@ -68,12 +64,14 @@ class UnionMetaService(
         synchronous: Boolean
     ): UnionMeta? {
         val metaCacheEntry = unionMetaCacheLoaderService.get(itemId.fullId())
-        var availableMeta = metaCacheEntry.getAvailable()
+        val availableMeta = metaCacheEntry.getAvailable()
         var metaShouldBeRefreshed = false
-        unionMetaMetrics.onMetaCacheHitOrMiss(
-            itemId = itemId,
-            hitOrMiss = metaCacheEntry.isMetaInitiallyLoadedOrFailed()
-        )
+
+        if (metaCacheEntry.isMetaInitiallyLoadedOrFailed()) {
+            unionMetaMetrics.onMetaCacheMiss(itemId.blockchain)
+        } else {
+            unionMetaMetrics.onMetaCacheHit(itemId.blockchain)
+        }
         if (availableMeta != null) {
             //TODO workaround for BRAVO-1954:svg in url
             if (!removeCachedMetaWithSvgInUrl(availableMeta, itemId)) {
@@ -147,21 +145,5 @@ class UnionMetaService(
     suspend fun scheduleLoading(itemId: ItemIdDto) {
         logger.info("Scheduling meta update for {}", itemId.fullId())
         unionMetaCacheLoaderService.update(itemId.fullId())
-    }
-
-    // We decided to change IPFS service from mypinata to ipfs.io, so in API/events we replace
-    // all legacy mypinata urls to new host
-    fun exposePublicIpfsUrls(meta: UnionMeta?): UnionMeta? {
-        return meta?.let { it.copy(content = exposePublicIpfsUrls(it.content)) }
-    }
-
-    fun exposePublicIpfsUrls(meta: UnionCollectionMeta?): UnionCollectionMeta? {
-        return meta?.let { it.copy(content = exposePublicIpfsUrls(it.content)) }
-    }
-
-    private fun exposePublicIpfsUrls(content: List<UnionMetaContent>): List<UnionMetaContent> {
-        return content.map {
-            it.copy(url = ipfsUrlResolver.resolvePublicHttpUrl(it.url))
-        }
     }
 }

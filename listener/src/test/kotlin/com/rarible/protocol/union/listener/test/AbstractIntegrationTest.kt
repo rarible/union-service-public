@@ -10,6 +10,7 @@ import com.rarible.protocol.nft.api.client.NftItemControllerApi
 import com.rarible.protocol.nft.api.client.NftOwnershipControllerApi
 import com.rarible.protocol.solana.api.client.TokenControllerApi
 import com.rarible.protocol.solana.dto.TokenMetaEventDto
+import com.rarible.protocol.union.core.test.WaitAssert
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.CollectionEventDto
 import com.rarible.protocol.union.dto.CollectionUpdateEventDto
@@ -23,11 +24,11 @@ import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.dto.OwnershipUpdateEventDto
 import com.rarible.protocol.union.enrichment.configuration.UnionMetaProperties
 import com.rarible.protocol.union.enrichment.meta.UnionMetaLoader
+import com.rarible.protocol.union.enrichment.meta.UnionMetaService
 import com.rarible.protocol.union.integration.ethereum.mock.EthAuctionControllerApiMock
 import com.rarible.protocol.union.integration.ethereum.mock.EthItemControllerApiMock
 import com.rarible.protocol.union.integration.ethereum.mock.EthOrderControllerApiMock
 import com.rarible.protocol.union.integration.ethereum.mock.EthOwnershipControllerApiMock
-import com.rarible.protocol.union.enrichment.meta.UnionMetaService
 import io.mockk.clearMocks
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
@@ -137,7 +138,8 @@ abstract class AbstractIntegrationTest {
             testEthereumOrderApi,
             testEthereumAuctionApi,
 
-            testUnionMetaLoader
+            testUnionMetaLoader,
+            testContentMetaReceiver
         )
         ethereumItemControllerApiMock = EthItemControllerApiMock(testEthereumItemApi)
         ethereumOwnershipControllerApiMock = EthOwnershipControllerApiMock(testEthereumOwnershipApi)
@@ -226,4 +228,7 @@ abstract class AbstractIntegrationTest {
             value = dto
         )
     }
+
+    suspend fun waitAssert(runnable: suspend () -> Unit) = WaitAssert.wait(runnable = runnable)
+
 }

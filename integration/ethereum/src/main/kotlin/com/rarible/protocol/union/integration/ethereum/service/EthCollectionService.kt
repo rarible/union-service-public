@@ -3,6 +3,8 @@ package com.rarible.protocol.union.integration.ethereum.service
 import com.rarible.core.apm.CaptureSpan
 import com.rarible.protocol.dto.CollectionsByIdRequestDto
 import com.rarible.protocol.nft.api.client.NftCollectionControllerApi
+import com.rarible.protocol.union.core.exception.UnionValidationException
+import com.rarible.protocol.union.core.model.TokenId
 import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.core.service.CollectionService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
@@ -41,6 +43,12 @@ open class EthCollectionService(
     override suspend fun getCollectionsByIds(ids: List<String>): List<UnionCollection> {
         val collections = collectionControllerApi.getNftCollectionsByIds(CollectionsByIdRequestDto(ids)).awaitSingle()
         return EthCollectionConverter.convert(collections, blockchain).entities
+    }
+
+    override suspend fun generateNftTokenId(collectionId: String, minter: String?): TokenId {
+        if (minter == null) throw UnionValidationException("Minter mustn't be null")
+        val tokenId = collectionControllerApi.generateNftTokenId(collectionId, minter).awaitSingle()
+        return EthCollectionConverter.convert(tokenId)
     }
 
     override suspend fun getCollectionsByOwner(

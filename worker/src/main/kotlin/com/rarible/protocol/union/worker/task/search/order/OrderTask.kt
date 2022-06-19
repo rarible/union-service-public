@@ -16,6 +16,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
 
+//TODO enable when orders are ready
+//@Component
 class OrderTask(
     private val properties: OrderReindexProperties,
     private val orderApiMergeService: OrderApiMergeService,

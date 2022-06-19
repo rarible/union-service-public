@@ -1,7 +1,6 @@
-package com.rarible.protocol.union.api.service.api
+package com.rarible.protocol.union.enrichment.service.query.collection
 
 import com.rarible.core.common.nowMillis
-import com.rarible.protocol.union.api.service.CollectionQueryService
 import com.rarible.protocol.union.enrichment.util.BlockchainFilter
 import com.rarible.protocol.union.core.continuation.UnionCollectionContinuation
 import com.rarible.protocol.union.core.model.UnionCollection
@@ -46,7 +45,7 @@ class CollectionApiMergeService(
         size: Int?,
     ): CollectionsDto {
         val safeSize = PageSize.COLLECTION.limit(size)
-        val slices = getAllCollections(blockchains, continuation, safeSize)
+        val slices = getAllCollectionsSafe(blockchains, continuation, safeSize)
         val arg = ArgPaging(UnionCollectionContinuation.ById, slices.map { it.toSlice() }).getSlice(safeSize)
         val total = slices.sumOf { it.page.total }
         logger.info("Response for getAllCollections(blockchains={}, continuation={}, size={}):" +
@@ -86,7 +85,7 @@ class CollectionApiMergeService(
         return enrich(combinedPage)
     }
 
-    private suspend fun getAllCollections(
+    private suspend fun getAllCollectionsSafe(
         blockchains: List<BlockchainDto>?,
         continuation: String?,
         safeSize: Int

@@ -1,7 +1,7 @@
-package com.rarible.protocol.union.api.service.api
+package com.rarible.protocol.union.enrichment.service.query.activity
 
-import com.rarible.protocol.union.api.service.ActivityQueryService
 import com.rarible.protocol.union.enrichment.util.BlockchainFilter
+import com.rarible.core.common.mapAsync
 import com.rarible.protocol.union.core.service.ActivityService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.ActivitiesDto
@@ -10,6 +10,7 @@ import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.SyncSortDto
+import com.rarible.protocol.union.dto.SyncTypeDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
 import com.rarible.protocol.union.dto.continuation.ActivityContinuation
 import com.rarible.protocol.union.dto.continuation.CombinedContinuation
@@ -19,14 +20,13 @@ import com.rarible.protocol.union.dto.continuation.page.PageSize
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.dto.parser.IdParser
 import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.Instant
 
 @Service
-class ActivityApiService(
+class ActivityApiMergeService(
     private val router: BlockchainRouter<ActivityService>
 ) : ActivityQueryService {
 
@@ -77,10 +77,11 @@ class ActivityApiService(
         blockchain: BlockchainDto,
         continuation: String?,
         size: Int?,
-        sort: SyncSortDto?
+        sort: SyncSortDto?,
+        type: SyncTypeDto?
     ): ActivitiesDto {
         val safeSize = PageSize.ACTIVITY.limit(size)
-        val activitySlice = router.getService(blockchain).getAllActivitiesSync(continuation, safeSize, sort)
+        val activitySlice = router.getService(blockchain).getAllActivitiesSync(continuation, safeSize, sort, type)
         val dto = ActivitiesDto(
             activities = activitySlice.entities,
             continuation = activitySlice.continuation
@@ -95,13 +96,14 @@ class ActivityApiService(
 
     override suspend fun getActivitiesByCollection(
         type: List<ActivityTypeDto>,
-        collection: String,
+        collection: List<String>,
         continuation: String?,
         cursor: String?,
         size: Int?,
         sort: ActivitySortDto?
     ): ActivitiesDto {
-        val collectionId = IdParser.parseCollectionId(collection)
+        val collectionValue = collection.first() // fallback for API variant
+        val collectionId = IdParser.parseCollectionId(collectionValue)
         val blockchain = collectionId.blockchain
         val dto = withCursor(continuation, cursor, blockchain, size, sort) { cont, safeSize ->
             router.getService(collectionId.blockchain)
@@ -110,7 +112,7 @@ class ActivityApiService(
         logger.info(
             "Response for getActivitiesByCollection(type={}, collection={}, continuation={}, size={}, sort={}): " +
                     "Slice(size={}, continuation={}) ",
-            type, collection, continuation, size, sort, dto.activities.size, dto.continuation
+            type, collectionValue, continuation, size, sort, dto.activities.size, dto.continuation
         )
         return dto
     }
@@ -285,18 +287,15 @@ class ActivityApiService(
         clientCall: suspend (blockchain: String, continuation: String?) -> Slice<ActivityDto>
     ): List<ArgSlice<ActivityDto>> {
         val currentContinuation = CombinedContinuation.parse(continuation)
-        return coroutineScope {
-            blockchains.map { blockchain ->
-                async {
-                    val blockchainContinuation = currentContinuation.continuations[blockchain]
-                    // For completed blockchain we do not request orders
-                    if (blockchainContinuation == ArgSlice.COMPLETED) {
-                        ArgSlice(blockchain, blockchainContinuation, Slice(null, emptyList()))
-                    } else {
-                        ArgSlice(blockchain, blockchainContinuation, clientCall(blockchain, blockchainContinuation))
-                    }
-                }
+
+        return blockchains.mapAsync { blockchain ->
+            val blockchainContinuation = currentContinuation.continuations[blockchain]
+            // For completed blockchain we do not request orders
+            if (blockchainContinuation == ArgSlice.COMPLETED) {
+                ArgSlice(blockchain, blockchainContinuation, Slice(null, emptyList()))
+            } else {
+                ArgSlice(blockchain, blockchainContinuation, clientCall(blockchain, blockchainContinuation))
             }
-        }.awaitAll()
+        }
     }
 }
