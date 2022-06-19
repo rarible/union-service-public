@@ -13,12 +13,10 @@ import com.rarible.protocol.union.core.model.elasticsearch.EntityDefinitionExten
 import com.rarible.protocol.union.core.model.elasticsearch.EsEntity
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.worker.config.SearchReindexProperties
 import com.rarible.protocol.union.worker.config.WorkerProperties
 import com.rarible.protocol.union.worker.task.search.activity.ActivityTaskParam
 import com.rarible.protocol.union.worker.task.search.activity.ChangeEsActivityAliasTask
 import com.rarible.protocol.union.worker.task.search.collection.ChangeEsCollectionAliasTask
-import com.rarible.protocol.union.worker.task.search.collection.ChangeEsCollectionAliasTaskParam
 import com.rarible.protocol.union.worker.task.search.collection.CollectionTaskParam
 import com.rarible.protocol.union.worker.task.search.item.ChangeEsItemAliasTask
 import com.rarible.protocol.union.worker.task.search.item.ItemTaskParam
@@ -56,15 +54,15 @@ class ReindexService(
         }
     }
 
-    suspend fun scheduleCollectionReindex(newIndexName: String) {
+    suspend fun scheduleCollectionReindex(indexName: String) {
         val blockchains = searchReindexProperties.activity.activeBlockchains()
-        val tasksParams = blockchains.map {
-            paramFactory.toString(CollectionTaskParam(it, newIndexName))
+        val taskParams = blockchains.map {
+            paramFactory.toString(CollectionTaskParam(it, indexName))
         }
-        val tasks = tasks(EsCollection.ENTITY_DEFINITION.reindexTask, tasksParams)
+        val tasks = tasks(EsCollection.ENTITY_DEFINITION.reindexTask, taskParams)
 
-        val changeAliasTaskParam = ChangeEsCollectionAliasTaskParam(
-            newIndexName, blockchains
+        val changeAliasTaskParam = ChangeAliasTaskParam(
+            indexName, taskParams
         )
 
         val indexSwitch = indexSwitchTask(

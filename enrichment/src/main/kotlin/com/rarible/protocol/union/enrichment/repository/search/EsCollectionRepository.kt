@@ -72,13 +72,27 @@ class EsCollectionRepository(
     suspend fun search(filter: EsCollectionFilter, limit: Int?): List<EsCollectionLite> {
         val query = queryBuilderService.build(filter)
         query.maxResults = PageSize.COLLECTION.limit(limit)
+        query.trackTotalHits = false
 
         return search(query)
     }
 
     suspend fun search(query: NativeSearchQuery): List<EsCollectionLite> {
         return esOperations.search(query, EsCollectionLite::class.java, entityDefinition.searchIndexCoordinates)
-            .collectList().awaitFirst().map { it.content }
+            .collectList()
+            .awaitFirst()
+            .map { it.content }
+    }
+
+    /**
+     * For tests only
+     */
+    override suspend fun deleteAll() {
+        esOperations.delete(
+            Query.findAll(),
+            Any::class.java,
+            entityDefinition.writeIndexCoordinates
+        ).awaitFirstOrNull()
     }
 
     override suspend fun refresh() {

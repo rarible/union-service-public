@@ -22,7 +22,7 @@ class TezosCollectionServiceTest {
 
 
     private val tzktCollectionService = TzktCollectionServiceImpl(tzktCollectionClient, mockk())
-    private val service = TezosCollectionService(nftCollectionApi, tzktCollectionService, mockk())
+    private val service = TezosCollectionService(nftCollectionApi, mockk(), tzktCollectionService, mockk())
 
     @BeforeEach
     fun beforeEach() {
