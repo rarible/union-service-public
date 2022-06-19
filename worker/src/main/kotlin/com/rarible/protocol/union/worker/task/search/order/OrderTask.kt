@@ -15,9 +15,9 @@ import com.rarible.protocol.union.worker.task.search.ParamFactory
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
+import org.springframework.stereotype.Component
 
-//TODO enable when orders are ready
-//@Component
+@Component
 class OrderTask(
     private val properties: OrderReindexProperties,
     private val orderApiMergeService: OrderApiMergeService,
