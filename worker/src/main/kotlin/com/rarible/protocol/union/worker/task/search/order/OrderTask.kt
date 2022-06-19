@@ -30,8 +30,8 @@ class OrderTask(
         get() = EsOrder.ENTITY_DEFINITION.reindexTask
 
     override suspend fun isAbleToRun(param: String): Boolean {
-        val blockchain = IdParser.parseBlockchain(param)
-        return properties.enabled && properties.blockchains.single { it.blockchain == blockchain }.enabled
+        val blockchain = paramFactory.parse<OrderTaskParam>(param).blockchain
+        return properties.isBlockchainActive(blockchain)
     }
 
     override fun runLongTask(from: String?, param: String): Flow<String> {
