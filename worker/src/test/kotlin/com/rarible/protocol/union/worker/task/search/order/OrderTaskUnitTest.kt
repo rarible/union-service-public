@@ -1,10 +1,7 @@
 package com.rarible.protocol.union.worker.task.search.order
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.OrderSortDto
-import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.OrdersDto
 import com.rarible.protocol.union.enrichment.repository.search.EsOrderRepository
 import com.rarible.protocol.union.enrichment.service.query.order.OrderApiMergeService
@@ -18,6 +15,7 @@ import io.mockk.coVerify
 import io.mockk.coVerifyAll
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
@@ -55,20 +53,23 @@ class OrderTaskUnitTest {
         every { metrics } returns mockk { every { rootPath } returns "protocol.union.worker" }
     })
 
-    private val paramFactory = ParamFactory(jacksonObjectMapper().registerKotlinModule())
+    private val paramFactory = ParamFactory(jacksonObjectMapper())
+
+    private val service = mockk<OrderReindexService> {
+        coEvery {
+            reindex(any(), "test_index", any())
+        } returns flowOf("next_cursor")
+    }
 
     @Test
     internal fun `should start first task`() = runBlocking {
-
         val task = OrderTask(
             OrderReindexProperties(
                 enabled = true,
                 blockchains = listOf(BlockchainReindexProperties(enabled = true, BlockchainDto.ETHEREUM))
             ),
-            orderApiMergeService,
-            repo,
             paramFactory,
-            searchTaskMetricFactory
+            service
         )
         task.runLongTask(
             null, paramFactory.toString(
@@ -79,22 +80,8 @@ class OrderTaskUnitTest {
         ).toList()
 
         coVerifyAll {
-            orderApiMergeService.getOrdersAll(
-                listOf(BlockchainDto.ETHEREUM),
-                continuation,
-                1000,
-                OrderSortDto.LAST_UPDATE_DESC,
-                OrderStatusDto.values().asList()
-            )
-
-            repo.saveAll(any())
-
-            orderApiMergeService.getOrdersAll(
-                listOf(BlockchainDto.ETHEREUM),
-                null,
-                1000,
-                OrderSortDto.LAST_UPDATE_DESC,
-                OrderStatusDto.values().asList()
+            service.reindex(
+                BlockchainDto.ETHEREUM, "test_index", null
             )
         }
     }
@@ -106,10 +93,8 @@ class OrderTaskUnitTest {
                 enabled = true,
                 blockchains = listOf(BlockchainReindexProperties(enabled = true, BlockchainDto.ETHEREUM))
             ),
-            orderApiMergeService,
-            repo,
             paramFactory,
-            searchTaskMetricFactory
+            service
         )
 
         task.runLongTask(
@@ -122,16 +107,9 @@ class OrderTaskUnitTest {
         ).toList()
 
         coVerify {
-            orderApiMergeService.getOrdersAll(
-                listOf(BlockchainDto.ETHEREUM),
-                continuation,
-                1000,
-                OrderSortDto.LAST_UPDATE_DESC,
-                OrderStatusDto.values().asList()
+            service.reindex(
+                BlockchainDto.ETHEREUM, "test_index", orderDto2.id.fullId()
             )
-
-            repo.saveAll(any())
-
         }
     }
 }
