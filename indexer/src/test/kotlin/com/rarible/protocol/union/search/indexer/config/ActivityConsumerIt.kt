@@ -9,7 +9,9 @@ import com.rarible.core.test.data.randomString
 import com.rarible.protocol.union.core.test.WaitAssert
 import com.rarible.core.test.wait.Wait
 import com.rarible.protocol.dto.FlowNftItemsDto
+import com.rarible.protocol.dto.NftItemDto
 import com.rarible.protocol.flow.nft.api.client.FlowNftItemControllerApi
+import com.rarible.protocol.nft.api.client.NftItemControllerApi
 import com.rarible.protocol.union.dto.ActivityBlockchainInfoDto
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivityIdDto
@@ -29,6 +31,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder
+import reactor.core.publisher.Flux
 import reactor.kotlin.core.publisher.toMono
 import java.time.Instant
 import java.time.temporal.ChronoUnit
@@ -45,12 +48,18 @@ class ActivityConsumerIt {
     @Autowired
     private lateinit var flowNftItemControllerApi: FlowNftItemControllerApi
 
+    @Autowired
+    private lateinit var ethereumNftItemControllerApi: NftItemControllerApi
+
     @BeforeEach
     fun setUp(): Unit = runBlocking {
         repository.deleteAll()
         coEvery {
             flowNftItemControllerApi.getItemByIds(any())
         } returns FlowNftItemsDto(0, "", emptyList()).toMono() // TODO more meaningful response
+        coEvery {
+            ethereumNftItemControllerApi.getNftItemsByIds(any())
+        } returns Flux.empty()
     }
 
     @Test
@@ -58,9 +67,9 @@ class ActivityConsumerIt {
         // given
         val activity = MintActivityDto(
             id = ActivityIdDto(
-                BlockchainDto.ETHEREUM, randomString()
+                BlockchainDto.FLOW, randomString()
             ),
-            date = Instant.now().truncatedTo(ChronoUnit.MILLIS),
+            date = Instant.now().truncatedTo(ChronoUnit.SECONDS),
             blockchainInfo = ActivityBlockchainInfoDto(
                 transactionHash = randomString(),
                 blockHash = randomString(),

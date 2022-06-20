@@ -5,6 +5,7 @@ import com.rarible.core.daemon.sequential.ConsumerBatchEventHandler
 import com.rarible.core.kafka.RaribleKafkaProducer
 import com.rarible.core.test.ext.KafkaTestExtension
 import com.rarible.protocol.flow.nft.api.client.FlowNftItemControllerApi
+import com.rarible.protocol.nft.api.client.NftItemControllerApi
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.ActivityDto
@@ -30,6 +31,7 @@ import com.rarible.protocol.union.subscriber.UnionKafkaJsonSerializer
 import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import io.mockk.mockk
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Lazy
@@ -157,4 +159,8 @@ class TestIndexerConfiguration {
     @Bean
     @Primary
     fun testFlowItemApi(): FlowNftItemControllerApi = mockk()
+
+    @Bean("ethereum.item.api")
+    @Primary
+    fun testEthereumItemApi(): NftItemControllerApi = mockk()
 }

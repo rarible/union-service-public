@@ -24,7 +24,7 @@ internal class ReindexServiceIt {
         reindexService.scheduleActivityReindex("test_activity_index")
 
         val tasks = taskRepository.findAll().collectList().awaitFirstOrDefault(emptyList())
-        Assertions.assertThat(tasks).hasSize(85) //all blockchains * all activities + index switch
+        Assertions.assertThat(tasks).hasSize(71) //all blockchains * all activities + index switch (minus immutablex)
     }
 
     @Test
@@ -33,7 +33,7 @@ internal class ReindexServiceIt {
         reindexService.scheduleCollectionReindex("test_collection_index")
 
         val tasks = taskRepository.findAll().collectList().awaitFirstOrDefault(emptyList())
-        Assertions.assertThat(tasks).hasSize(6) //all blockchains + index switch
+        Assertions.assertThat(tasks).hasSize(6) //all blockchains + index switch (minus immutablex)
     }
 
 }

@@ -144,8 +144,7 @@ class TezosApiConfiguration(
         tezosTokenIdRepository: TezosTokenIdRepository,
         tezosPgCollectionService: TezosPgCollectionService,
     ): TezosCollectionService {
-        return TezosCollectionService(controllerApi, tzktCollectionService, tezosTokenIdRepository)
-        return TezosCollectionService(controllerApi, tezosPgCollectionService, tzktCollectionService)
+        return TezosCollectionService(controllerApi, tezosPgCollectionService, tzktCollectionService, tezosTokenIdRepository)
     }
 
     @Bean
