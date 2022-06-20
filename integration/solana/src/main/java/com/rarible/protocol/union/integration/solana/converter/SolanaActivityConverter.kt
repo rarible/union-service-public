@@ -23,6 +23,8 @@ import com.rarible.protocol.union.dto.OrderCancelListActivityDto
 import com.rarible.protocol.union.dto.OrderListActivityDto
 import com.rarible.protocol.union.dto.OrderMatchSellDto
 import com.rarible.protocol.union.dto.OrderMatchSwapDto
+import com.rarible.protocol.union.dto.SyncSortDto
+import com.rarible.protocol.union.dto.SyncTypeDto
 import com.rarible.protocol.union.dto.TransferActivityDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
 import com.rarible.protocol.union.dto.ext
@@ -74,6 +76,7 @@ class SolanaActivityConverter(
                         reverted = source.reverted,
                         // TODO UNION remove in 1.19
                         blockchainInfo = blockchainInfo,
+                        lastUpdatedAt = source.dbUpdatedAt
                     )
                 } else {
                     if (paymentTypeExt.isNft || nftTypeExt.isCurrency) {
@@ -95,7 +98,8 @@ class SolanaActivityConverter(
                         right = if (type == OrderMatchActivityDto.Type.ACCEPT_BID) sellSide else buySide,
                         reverted = source.reverted,
                         // TODO UNION remove in 1.19
-                        blockchainInfo = blockchainInfo
+                        blockchainInfo = blockchainInfo,
+                        lastUpdatedAt = source.dbUpdatedAt
                     )
                 }
             }
@@ -114,7 +118,8 @@ class SolanaActivityConverter(
                     maker = UnionAddressConverter.convert(blockchain, source.maker),
                     make = payment,
                     take = nft,
-                    reverted = source.reverted
+                    reverted = source.reverted,
+                    lastUpdatedAt = source.dbUpdatedAt
                 )
             }
             is com.rarible.protocol.solana.dto.OrderListActivityDto -> {
@@ -132,7 +137,8 @@ class SolanaActivityConverter(
                     maker = UnionAddressConverter.convert(blockchain, source.maker),
                     make = nft,
                     take = payment,
-                    reverted = source.reverted
+                    reverted = source.reverted,
+                    lastUpdatedAt = source.dbUpdatedAt
                 )
             }
             is com.rarible.protocol.solana.dto.OrderCancelBidActivityDto -> {
@@ -148,6 +154,7 @@ class SolanaActivityConverter(
                     reverted = source.reverted,
                     // TODO UNION remove in 1.19
                     blockchainInfo = convert(source.blockchainInfo),
+                    lastUpdatedAt = source.dbUpdatedAt
                 )
             }
             is com.rarible.protocol.solana.dto.OrderCancelListActivityDto -> {
@@ -163,6 +170,7 @@ class SolanaActivityConverter(
                     reverted = source.reverted,
                     // TODO UNION remove in 1.19
                     blockchainInfo = convert(source.blockchainInfo),
+                    lastUpdatedAt = source.dbUpdatedAt
                 )
             }
             is com.rarible.protocol.solana.dto.MintActivityDto -> {
@@ -176,7 +184,8 @@ class SolanaActivityConverter(
                     transactionHash = source.blockchainInfo.transactionHash,
                     // TODO UNION remove in 1.19
                     blockchainInfo = convert(source.blockchainInfo),
-                    reverted = source.reverted
+                    reverted = source.reverted,
+                    lastUpdatedAt = source.dbUpdatedAt
                 )
             }
             is com.rarible.protocol.solana.dto.BurnActivityDto -> {
@@ -189,7 +198,8 @@ class SolanaActivityConverter(
                     transactionHash = source.blockchainInfo.transactionHash,
                     // TODO UNION remove in 1.19
                     blockchainInfo = convert(source.blockchainInfo),
-                    reverted = source.reverted
+                    reverted = source.reverted,
+                    lastUpdatedAt = source.dbUpdatedAt
                 )
             }
             is com.rarible.protocol.solana.dto.TransferActivityDto -> {
@@ -204,7 +214,8 @@ class SolanaActivityConverter(
                     transactionHash = source.blockchainInfo.transactionHash,
                     // TODO UNION remove in 1.19
                     blockchainInfo = convert(source.blockchainInfo),
-                    reverted = source.reverted
+                    reverted = source.reverted,
+                    lastUpdatedAt = source.dbUpdatedAt
                 )
             }
         }
@@ -307,4 +318,16 @@ class SolanaActivityConverter(
             OrderMatchActivityDto.Type.ACCEPT_BID -> OrderMatchSellDto.Type.ACCEPT_BID
         }
 
+    fun convert(source: SyncSortDto): com.rarible.protocol.solana.dto.SyncSortDto =
+        when (source) {
+            SyncSortDto.DB_UPDATE_ASC -> com.rarible.protocol.solana.dto.SyncSortDto.DB_UPDATE_ASC
+            SyncSortDto.DB_UPDATE_DESC -> com.rarible.protocol.solana.dto.SyncSortDto.DB_UPDATE_DESC
+        }
+
+    fun convert(source: SyncTypeDto): com.rarible.protocol.solana.dto.SyncTypeDto =
+        when (source) {
+            SyncTypeDto.ORDER -> com.rarible.protocol.solana.dto.SyncTypeDto.ORDER
+            SyncTypeDto.NFT -> com.rarible.protocol.solana.dto.SyncTypeDto.NFT
+            SyncTypeDto.AUCTION -> com.rarible.protocol.solana.dto.SyncTypeDto.AUCTION
+        }
 }

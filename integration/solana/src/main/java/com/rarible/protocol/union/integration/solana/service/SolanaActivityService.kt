@@ -51,7 +51,16 @@ open class SolanaActivityService(
         size: Int,
         sort: SyncSortDto?,
         type: SyncTypeDto?
-    ): Slice<ActivityDto> = Slice.empty()
+    ): Slice<ActivityDto> {
+        val solanaSort = sort?.let { activityConverter.convert(sort) }
+        val solanaType = type?.let { activityConverter.convert(type) }
+        val result = activityApi.getActivitiesSync(solanaType, continuation, size, solanaSort).awaitFirst()
+
+        return Slice(
+            result.continuation,
+            result.activities.map { activityConverter.convert(it, blockchain) }
+        )
+    }
 
     override suspend fun getActivitiesByCollection(
         types: List<ActivityTypeDto>,

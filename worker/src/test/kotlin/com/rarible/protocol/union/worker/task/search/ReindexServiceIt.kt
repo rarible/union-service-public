@@ -28,12 +28,12 @@ internal class ReindexServiceIt {
     }
 
     @Test
-    fun `should schedule colelction reindex and alias switch`() = runBlocking<Unit> {
+    fun `should schedule collection reindex and alias switch`() = runBlocking<Unit> {
         taskRepository.deleteAll().awaitSingleOrNull()
         reindexService.scheduleCollectionReindex("test_collection_index")
 
         val tasks = taskRepository.findAll().collectList().awaitFirstOrDefault(emptyList())
-        Assertions.assertThat(tasks).hasSize(85) //all blockchains * all activities + index switch
+        Assertions.assertThat(tasks).hasSize(6) //all blockchains + index switch
     }
 
 }

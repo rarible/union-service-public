@@ -7,9 +7,12 @@ import com.rarible.core.test.data.randomInt
 import com.rarible.core.test.data.randomLong
 import com.rarible.core.test.data.randomString
 import com.rarible.protocol.solana.dto.ActivityBlockchainInfoDto
+import com.rarible.protocol.solana.dto.AssetDto
 import com.rarible.protocol.solana.dto.BalanceDto
 import com.rarible.protocol.solana.dto.CollectionDto
 import com.rarible.protocol.solana.dto.MintActivityDto
+import com.rarible.protocol.solana.dto.OrderBidActivityDto
+import com.rarible.protocol.solana.dto.SolanaSolAssetTypeDto
 import com.rarible.protocol.solana.dto.TokenCreatorPartDto
 import com.rarible.protocol.solana.dto.TokenDto
 import com.rarible.protocol.solana.dto.TokenMetaAttributeDto
@@ -17,6 +20,7 @@ import com.rarible.protocol.solana.dto.TokenMetaContentDto
 import com.rarible.protocol.solana.dto.TokenMetaDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
+import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.Instant
 
@@ -131,3 +135,24 @@ fun randomSolanaCollectionDto() = CollectionDto(
     creators = listOf(randomString()),
     meta = null,
 )
+
+fun randomActivityOrderBid() = OrderBidActivityDto(
+    auctionHouse = null,
+    blockchainInfo = randomActivityBlockchainInfoDto(),
+    date = Instant.now(),
+    dbUpdatedAt = Instant.now(),
+    hash = randomString(),
+    id = randomString(),
+    make = randomAsset(),
+    maker = randomString(),
+    price = randomBigDecimal(),
+    reverted = false,
+    take = randomAsset()
+)
+
+fun randomAsset() = AssetDto(
+    type = SolanaSolAssetTypeDto(),
+    value = randomBigDecimal()
+)
+
+fun randomBigDecimal(): BigDecimal = BigDecimal.valueOf((0..100000).random().toLong())
