@@ -49,6 +49,9 @@ open class TezosCollectionService(
     }
 
     override suspend fun getCollectionsByIds(ids: List<String>): List<UnionCollection> {
+        if (tzktCollectionService.enabled()) {
+            return tzktCollectionService.getCollectionByIds(ids)
+        }
         return pgService.getCollectionsByIds(ids)
     }
 
