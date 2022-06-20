@@ -108,3 +108,59 @@ values ('transfer', 'oo22KG27pptFtKEGJ8JcwN44teZoRMTigRaFsKiKPnwvWcg8xB6', 8, 'B
 insert into nft_activities (activity_type, "transaction", index, block, level, main, "date", contract, token_id, owner, amount, tr_from)
 values ('burn', 'ooAYipzS3MU83RKQMXVhmwcC9jgtpPpENQqNGUw9CDMyQbo13wj', 4, 'BLgNWpfjc5xWzvbY7neaE4DPFWGUZvJT77dUAHxb3YubYzMWQCA', 2320179, true, '2022-04-28 19:58:14.000000',
         'KT18pVpRXKPY2c4U2yFEGSH3ZnhB2kL8kwXS', 61026, 'tz1hFesk6GV6fT3vak68zz5JxdZ5kK81rvRB', 1, null);
+
+-- contracts
+create table if not exists contracts
+(
+    kind              varchar                      not null,
+    address           varchar                      not null
+    primary key,
+    owner             varchar,
+    block             varchar                      not null,
+    level             integer                      not null,
+    tsp               timestamp                    not null,
+    main              boolean default false        not null,
+    last_block        varchar                      not null,
+    last_level        integer                      not null,
+    last              timestamp                    not null,
+    tokens_number     bigint  default 0            not null,
+    last_token_id     zarith  default '0'::numeric not null,
+    ledger_id         varchar                      not null,
+    ledger_key        jsonb,
+    ledger_value      jsonb,
+    metadata          jsonb   default '{}'::jsonb  not null,
+    minters           character varying[],
+    uri_pattern       varchar,
+    counter           zarith  default 0            not null,
+    token_metadata_id varchar,
+    metadata_id       varchar,
+    royalties_id      varchar,
+    crawled           boolean default true         not null
+);
+create table if not exists tzip16_metadata
+(
+    contract    varchar               not null
+    primary key,
+    block       varchar               not null,
+    level       integer               not null,
+    tsp         timestamp             not null,
+    main        boolean default false not null,
+    name        varchar,
+    description varchar,
+    version     varchar,
+    license     jsonb,
+    authors     character varying[],
+    homepage    varchar,
+    source      jsonb,
+    interfaces  character varying[],
+    errors      jsonb,
+    views       jsonb
+);
+
+INSERT INTO public.contracts (kind, address, owner, block, level, tsp, main, last_block, last_level, last, tokens_number, last_token_id, ledger_id, ledger_key, ledger_value, metadata, minters, uri_pattern, counter, token_metadata_id, metadata_id, royalties_id, crawled) VALUES ('fa2', 'KT18bKocekp5ei8LvBbMjUEEc8KRpLHsJHRj', null, 'BLjCp3knpNPM4aEXUbWRgr6H6G9KZD662ZUuqoYK6EMoPf8ueLm', 2097947, '2022-02-07 17:35:14.000000', true, 'BLjCp3knpNPM4aEXUbWRgr6H6G9KZD662ZUuqoYK6EMoPf8ueLm', 2097947, '2022-02-07 17:35:14.000000', 0, 0, '101464', '"nat"', '"address"', '{"": "ipfs://QmPAdeiHxAo8f8rNq32mZvPcPsSPqbrr5irC77uDehgdVA"}', null, null, 0, '101466', '101467', null, true);
+INSERT INTO public.tzip16_metadata (contract, block, level, tsp, main, name, description, version, license, authors, homepage, source, interfaces, errors, views) VALUES ('KT18bKocekp5ei8LvBbMjUEEc8KRpLHsJHRj', 'BLjCp3knpNPM4aEXUbWRgr6H6G9KZD662ZUuqoYK6EMoPf8ueLm', 2097947, '2022-02-07 17:35:14.000000', true, 'STATION 020: SKULL CANDY OFFERINGS', 'Do you feel this skull is trying to trick us? I don’t know.', '1', '[]', null, 'https://collectible.sweet.io/series/1206', '[]', '{TZIP-012,TZIP-016,TZIP-021}', '[]', '[]');
+
+INSERT INTO public.contracts (kind, address, owner, block, level, tsp, main, last_block, last_level, last, tokens_number, last_token_id, ledger_id, ledger_key, ledger_value, metadata, minters, uri_pattern, counter, token_metadata_id, metadata_id, royalties_id, crawled) VALUES ('rarible', 'KT18exmo82JomAcRGTNpUvp1wATSqT63AYmF', 'tz1e6t4FD8zV46wsBndy5qcx1ch87hn6F98H', 'BMbA9sDJXDt98g9rJ7LCSRY6UXNQwnahoUegxYaBtFmQ1kLb3YF', 2194928, '2022-03-14 06:49:34.000000', true, 'BMbA9sDJXDt98g9rJ7LCSRY6UXNQwnahoUegxYaBtFmQ1kLb3YF', 2194928, '2022-03-14 06:49:34.000000', 0, 3, '129488', '["nat", "address"]', '"nat"', '{"name": "Spiral", "symbol": "S22", "contractURI": "https://api-mainnet.rarible.com/contractMetadata/{address}"}', null, null, 3, '129490', '129493', '129487', true);
+INSERT INTO public.tzip16_metadata (contract, block, level, tsp, main, name, description, version, license, authors, homepage, source, interfaces, errors, views) VALUES ('KT18exmo82JomAcRGTNpUvp1wATSqT63AYmF', 'BMbA9sDJXDt98g9rJ7LCSRY6UXNQwnahoUegxYaBtFmQ1kLb3YF', 2194928, '2022-03-14 06:49:34.000000', true, 'Spiral', null, null, '[]', null, null, '[]', null, '[]', '[]');
+
+INSERT INTO public.contracts (kind, address, owner, block, level, tsp, main, last_block, last_level, last, tokens_number, last_token_id, ledger_id, ledger_key, ledger_value, metadata, minters, uri_pattern, counter, token_metadata_id, metadata_id, royalties_id, crawled) VALUES ('rarible', 'KT1Gg9cdNu3cFUT2UrUZKBSvTRH8N8AsPk2i', 'tz1RahNvmiJqbymNWJt3Ss9ooNjKRvEKEhpB', 'BM4smaru1v5QWrYSjCX2aFw5UyYk51msRZdU3AwvVHAX8wtDqvp', 2244926, '2022-04-01 20:46:59.000000', true, 'BMVVWg85TKCyexEsu8c4KbWKatqWVaMnjV4yYgbUbGMtzWuZfnx', 2272072, '2022-04-11 14:35:44.000000', 0, 1663, '141400', '"nat"', '"address"', '{"": ""}', '{KT1NF8YjHkJPEfFqfQtcWAjnnrqtMHCbKWqb,KT1NLutkkpwLZ7HWKpWbYPW6FZkzZAkZPXvX}', null, 0, '141402', '141405', '141399', true);

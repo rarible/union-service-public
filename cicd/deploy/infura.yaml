@@ -15,18 +15,6 @@ sharedEnvironments: &sharedEnvironments
   INTEGRATION_SOLANA_ENABLED: false
   INTEGRATION_IMMUTABLEX_ENABLED: false
   SPRING_DATA_MONGODB_DATABASE: protocol-union
-  # todo see into consul
-  # PROTOCOL_UNION_SUBSCRIBER_BROKERREPLICASET
-  # COMMON_PRODUCER_BROKERREPLICASET
-  # INTEGRATION_ETHEREUM_CONSUMER_BROKERREPLICASET
-  # LISTENER_CONSUMER_BROKERREPLICASET
-  # RARIBLE_CORE_LOADER_BROKERREPLICASET
-  # SPRING_DATA_MONGODB_HOST:
-  # SPRING_DATA_MONGODB_PORT:
-  # SPRING_DATA_MONGODB_USERNAME:
-  # SPRING_DATA_MONGODB_PASSWORD:
-  # REDISURI
-  # KAFKA_HOSTS
 
 sharedTolerations: &sharedTolerations
   effect: NoSchedule
@@ -45,17 +33,26 @@ protocol-union-listener:
     - *sharedTolerations
   environments:
     <<: *sharedEnvironments
+    LISTENER_CONSUMER_BLOCKCHAINWORKERS_ETHEREUM: 24
+    INTEGRATION_ETHEREUM_CONSUMER_WORKERS_OWNERSHIP: 8
   resources:
     jvm:
       xmx_megabytes: 2048
       max_direct_memory_megabytes: 1024
 
 protocol-union-meta-loader:
-  replicas: 5
+  replicas: 12
   tolerations:
     - *sharedTolerations
   environments:
     <<: *sharedEnvironments
+    RARIBLE_LOADER_LOADTASKSBATCHSIZE: 128
+    RARIBLE_LOADER_WORKERS: 64
+    RARIBLE_LOADER_LOADTASKSSERVICEINSTANCES: 12
+    RARIBLE_LOADER_LOADTASKSTOPICPARTITIONS: 48
+  resources:
+    jvm:
+      max_direct_memory_megabytes: 512
 
 protocol-union-indexer:
   tolerations:

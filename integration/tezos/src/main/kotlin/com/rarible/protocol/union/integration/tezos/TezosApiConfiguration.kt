@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.integration.tezos
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.rarible.protocol.tezos.api.client.FixedTezosApiServiceUriProvider
 import com.rarible.protocol.tezos.api.client.NftActivityControllerApi
 import com.rarible.protocol.tezos.api.client.NftCollectionControllerApi
@@ -36,6 +37,7 @@ import com.rarible.protocol.union.integration.tezos.service.TezosItemService
 import com.rarible.protocol.union.integration.tezos.service.TezosOrderService
 import com.rarible.protocol.union.integration.tezos.service.TezosOwnershipService
 import com.rarible.protocol.union.integration.tezos.service.TezosPgActivityService
+import com.rarible.protocol.union.integration.tezos.service.TezosPgCollectionService
 import com.rarible.protocol.union.integration.tezos.service.TezosSignatureService
 import io.r2dbc.spi.ConnectionFactories
 import io.r2dbc.spi.ConnectionFactory
@@ -139,9 +141,10 @@ class TezosApiConfiguration(
     fun tezosCollectionService(
         controllerApi: NftCollectionControllerApi,
         tzktCollectionService: TzktCollectionService,
-        tezosTokenIdRepository: TezosTokenIdRepository
+        tezosTokenIdRepository: TezosTokenIdRepository,
+        tezosPgCollectionService: TezosPgCollectionService,
     ): TezosCollectionService {
-        return TezosCollectionService(controllerApi, tzktCollectionService, tezosTokenIdRepository)
+        return TezosCollectionService(controllerApi, tezosPgCollectionService, tzktCollectionService, tezosTokenIdRepository)
     }
 
     @Bean
@@ -172,6 +175,11 @@ class TezosApiConfiguration(
     @Bean
     fun tezosPgActivityService(connectionFactory: ConnectionFactory): TezosPgActivityService {
         return TezosPgActivityService(connectionFactory)
+    }
+
+    @Bean
+    fun tezosPgCollectionService(mapper: ObjectMapper, connectionFactory: ConnectionFactory): TezosPgCollectionService {
+        return TezosPgCollectionService(mapper, connectionFactory)
     }
 
     @Bean

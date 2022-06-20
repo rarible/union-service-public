@@ -17,6 +17,7 @@ import kotlinx.coroutines.reactive.awaitFirst
 @CaptureSpan(type = "blockchain")
 open class TezosCollectionService(
     private val collectionControllerApi: NftCollectionControllerApi,
+    private val pgService: TezosPgCollectionService,
     private val tzktCollectionService: TzktCollectionService,
     private val tezosTokenIdRepository: TezosTokenIdRepository
 ) : AbstractBlockchainService(BlockchainDto.TEZOS), CollectionService {
@@ -51,7 +52,7 @@ open class TezosCollectionService(
         if (tzktCollectionService.enabled()) {
             return tzktCollectionService.getCollectionByIds(ids)
         }
-        TODO("Not yet implemented")
+        return pgService.getCollectionsByIds(ids)
     }
 
     override suspend fun generateNftTokenId(collectionId: String, minter: String?): TokenId {
