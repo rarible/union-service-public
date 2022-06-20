@@ -4,8 +4,11 @@ import com.rarible.protocol.union.core.exception.UnionNotFoundException
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.CreatorDto
 import com.rarible.protocol.union.dto.RoyaltyDto
+import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.continuation.page.Page
+import com.rarible.protocol.union.dto.group
 import com.rarible.protocol.union.integration.tezos.dipdup.DipDupIntegrationProperties
 import com.rarible.protocol.union.integration.tezos.dipdup.converter.TzktItemConverter
 import com.rarible.tzkt.client.TokenClient
@@ -32,7 +35,7 @@ class TzktItemServiceImpl(val tzktTokenClient: TokenClient, val properties: DipD
 
     override suspend fun getItemById(itemId: String): UnionItem {
         val token = safeApiCall { tzktTokenClient.token(itemId) }
-        return TzktItemConverter.convert(token, blockchain)
+        return TzktItemConverter.convert(token, blockchain).copy(creators = creators(itemId))
     }
 
     override suspend fun getItemsByIds(itemIds: List<String>): List<UnionItem> {
@@ -86,6 +89,17 @@ class TzktItemServiceImpl(val tzktTokenClient: TokenClient, val properties: DipD
             clientCall()
         } catch (e: TzktNotFound) {
             throw UnionNotFoundException(message = e.message ?: "")
+        }
+    }
+
+    private suspend fun creators(itemId: String): List<CreatorDto> {
+        return try {
+            val royalty = safeApiCall { tzktTokenClient.royalty(itemId) }.map { CreatorDto(UnionAddress(blockchain.group(), it.address), it.share) }
+            if (royalty.isNotEmpty()) royalty.subList(0, 1)
+            else emptyList()
+        } catch (ex: Exception) {
+            logger.error("Failed to get royalty for setting creators $itemId", ex)
+            emptyList()
         }
     }
 
