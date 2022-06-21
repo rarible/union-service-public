@@ -233,9 +233,9 @@ class TezosLegacyActivitiesServiceTest : AbstractIntegrationTest() {
                     buyer = UnionAddressConverter.convert(blockchain, "tz1YuZGjEMmfBxGtXSxYgU8VDRH847wbt7nP"),
                     sellerOrderHash = "f1dad99bd88f47cecb6f6124c80f726f7b42a7ddb9e6ded3e68e40c20f49ff13",
                     buyerOrderHash = "8c3b89e350b767fa625165050abe157e6fcdd511981d238f6cbe8e47e43e603c",
-                    price = BigDecimal("2"),
-                    priceUsd = BigDecimal("2"),
-                    amountUsd = BigDecimal("4"),
+                    price = BigDecimal("0.025"),
+                    priceUsd = BigDecimal("0.025"),
+                    amountUsd = BigDecimal("0.050"),
                     type = OrderMatchSellDto.Type.SELL,
                     reverted = false
                 )
@@ -263,6 +263,47 @@ class TezosLegacyActivitiesServiceTest : AbstractIntegrationTest() {
                         blockNumber = 0,
                         logIndex = 0
                     ),
+                    reverted = false
+                )
+            ),
+            Arguments.of( // SNDBX-240
+                TypedActivityId(
+                    id = "BMdUs3hgMfEHLyXtJVRaMem6kq9JAaJmhVfV69zHVpnkygrLiNi_59",
+                    type = ActivityTypeDto.SELL
+                ),
+                OrderMatchSellDto(
+                    id = ActivityIdDto(blockchain, "BMdUs3hgMfEHLyXtJVRaMem6kq9JAaJmhVfV69zHVpnkygrLiNi_59"),
+                    date = date("2022-04-08 21:34:44.000000"),
+                    source = OrderActivitySourceDto.RARIBLE,
+                    transactionHash = "",
+                    blockchainInfo = ActivityBlockchainInfoDto(
+                        transactionHash = "",
+                        blockHash = "",
+                        blockNumber = 0,
+                        logIndex = 0
+                    ),
+                    nft = AssetDto(
+                        type = TezosMTAssetTypeDto(
+                            contract = ContractAddressConverter.convert(
+                                blockchain,
+                                "KT18c8n9jbpDRZStQRvZUC1GPBEDEcVgwGFC"
+                            ),
+                            tokenId = 25.toBigInteger()
+                        ),
+                        value = BigDecimal("1")
+                    ),
+                    payment = AssetDto(
+                        type = TezosXTZAssetTypeDto(),
+                        value = BigDecimal("5")
+                    ),
+                    seller = UnionAddressConverter.convert(blockchain, "tz1ZzkVVRaip6kEmUXeWdQf7aTcyzMg9fA3w"),
+                    buyer = UnionAddressConverter.convert(blockchain, "tz1iLaTq7cFBgELhTzBZtRSP76AXKPCqbYGe"),
+                    sellerOrderHash = "606d6c3322000cfffbed0a41c4c641241cc5a93d68f220bb7acb6f06a3c4810c",
+                    buyerOrderHash = "688a049b1695af56a01e3d64d9632e32a13ca5d36dd2ed68b2e28370b38800f7",
+                    price = BigDecimal("5"),
+                    priceUsd = BigDecimal("5"),
+                    amountUsd = BigDecimal("5"),
+                    type = OrderMatchSellDto.Type.SELL,
                     reverted = false
                 )
             )
