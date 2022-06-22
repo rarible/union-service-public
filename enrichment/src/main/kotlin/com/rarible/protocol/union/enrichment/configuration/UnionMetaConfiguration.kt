@@ -19,8 +19,8 @@ import com.rarible.loader.cache.CacheLoaderService
 import com.rarible.loader.cache.configuration.EnableRaribleCacheLoader
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.util.safeSplit
-import com.rarible.protocol.union.enrichment.meta.UnionMetaCacheLoader
 import com.rarible.protocol.union.enrichment.meta.UnionMetaPackage
+import com.rarible.protocol.union.enrichment.meta.item.ItemMetaDownloader
 import io.micrometer.core.instrument.MeterRegistry
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.context.properties.EnableConfigurationProperties
@@ -121,6 +121,6 @@ class UnionMetaConfiguration(
         cacheLoaderServices: List<CacheLoaderService<*>>
     ): CacheLoaderService<UnionMeta> =
         @Suppress("UNCHECKED_CAST")
-        (cacheLoaderServices.find { it.type == UnionMetaCacheLoader.TYPE } as CacheLoaderService<UnionMeta>)
+        (cacheLoaderServices.find { it.type == ItemMetaDownloader.TYPE } as CacheLoaderService<UnionMeta>)
 
 }

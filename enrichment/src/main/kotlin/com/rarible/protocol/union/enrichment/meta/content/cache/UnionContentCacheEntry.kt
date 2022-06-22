@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.enrichment.meta.cache
+package com.rarible.protocol.union.enrichment.meta.content.cache
 
 import com.rarible.protocol.union.core.model.UnionMetaContentProperties
 import org.springframework.data.annotation.Id

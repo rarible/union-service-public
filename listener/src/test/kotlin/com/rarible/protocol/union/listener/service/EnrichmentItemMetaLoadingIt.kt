@@ -1,7 +1,6 @@
 package com.rarible.protocol.union.listener.service
 
 import com.rarible.protocol.union.enrichment.converter.EnrichedItemConverter
-import com.rarible.protocol.union.enrichment.meta.UnionMetaService
 import com.rarible.protocol.union.enrichment.test.data.randomUnionMeta
 import com.rarible.protocol.union.integration.ethereum.converter.EthItemConverter
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
@@ -22,9 +21,6 @@ class EnrichmentItemMetaLoadingIt : AbstractIntegrationTest() {
     @Autowired
     private lateinit var itemEventService: EnrichmentItemEventService
 
-    @Autowired
-    private lateinit var itemMetaService: UnionMetaService
-
     @Test
     fun `item update - meta not available - event without meta - event with meta`() = runWithKafka {
         val itemId = randomEthItemId()
@@ -34,7 +30,7 @@ class EnrichmentItemMetaLoadingIt : AbstractIntegrationTest() {
         )
         val meta = randomUnionMeta()
         val unionItem = EthItemConverter.convert(ethItem, itemId.blockchain)
-        coEvery { testUnionMetaLoader.load(itemId) } coAnswers {
+        coEvery { testItemMetaLoader.load(itemId) } coAnswers {
             delay(100L)
             meta
         }
@@ -58,7 +54,7 @@ class EnrichmentItemMetaLoadingIt : AbstractIntegrationTest() {
         val meta = randomUnionMeta()
         val unionItem = EthItemConverter.convert(ethItem, itemId.blockchain)
 
-        coEvery { testUnionMetaLoader.load(itemId) } coAnswers {
+        coEvery { testItemMetaLoader.load(itemId) } coAnswers {
             delay(100L)
             meta
         }
@@ -82,7 +78,7 @@ class EnrichmentItemMetaLoadingIt : AbstractIntegrationTest() {
         )
         val meta = randomUnionMeta()
         val unionItem = EthItemConverter.convert(ethItem, itemId.blockchain)
-        coEvery { testUnionMetaLoader.load(itemId) } coAnswers {
+        coEvery { testItemMetaLoader.load(itemId) } coAnswers {
             delay(100L)
             meta
         }
@@ -103,7 +99,7 @@ class EnrichmentItemMetaLoadingIt : AbstractIntegrationTest() {
         val meta = randomUnionMeta()
         val unionItem = EthItemConverter.convert(ethItem, itemId.blockchain)
 
-        coEvery { testUnionMetaLoader.load(itemId) } coAnswers {
+        coEvery { testItemMetaLoader.load(itemId) } coAnswers {
             delay(100L)
             throw RuntimeException("error")
         }
@@ -116,11 +112,11 @@ class EnrichmentItemMetaLoadingIt : AbstractIntegrationTest() {
                 .isEqualTo(EnrichedItemConverter.convert(unionItem, meta = null))
         }
         // Schedule a successful update.
-        coEvery { testUnionMetaLoader.load(itemId) } coAnswers {
+        coEvery { testItemMetaLoader.load(itemId) } coAnswers {
             delay(100L)
             meta
         }
-        itemMetaService.scheduleLoading(itemId)
+        itemMetaService.schedule(itemId, "default", false)
         // On loading meta, send an event.
         waitAssert {
             val events = findItemUpdates(itemId.value)

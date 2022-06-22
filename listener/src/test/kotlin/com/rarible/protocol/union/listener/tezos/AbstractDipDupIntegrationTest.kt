@@ -20,7 +20,7 @@ import com.rarible.protocol.union.dto.OwnershipDeleteEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.dto.OwnershipUpdateEventDto
 import com.rarible.protocol.union.enrichment.configuration.UnionMetaProperties
-import com.rarible.protocol.union.enrichment.meta.UnionMetaLoader
+import com.rarible.protocol.union.enrichment.meta.item.ItemMetaLoader
 import com.rarible.tzkt.client.OwnershipClient
 import com.rarible.tzkt.client.TokenClient
 import io.mockk.clearMocks
@@ -41,7 +41,7 @@ abstract class AbstractDipDupIntegrationTest {
 
     @Autowired
     @Qualifier("test.union.meta.loader")
-    lateinit var testUnionMetaLoader: UnionMetaLoader
+    lateinit var testUnionMetaLoader: ItemMetaLoader
 
     @Autowired
     @Qualifier("test.content.meta.receiver")

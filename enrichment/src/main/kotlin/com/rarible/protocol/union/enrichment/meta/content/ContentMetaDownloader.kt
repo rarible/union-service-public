@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.enrichment.meta
+package com.rarible.protocol.union.enrichment.meta.content
 
 import com.rarible.core.meta.resource.model.EmbeddedContent
 import com.rarible.core.meta.resource.model.UrlResource
@@ -15,11 +15,11 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
-class UnionContentMetaLoader(
-    private val unionContentMetaProvider: UnionContentMetaProvider,
-    private val unionContentMetaService: UnionContentMetaService,
+class ContentMetaDownloader(
+    private val contentMetaProvider: ContentMetaProvider,
+    private val contentMetaService: ContentMetaService,
     private val embeddedContentService: EmbeddedContentService,
-    private val metrics: UnionMetaMetrics
+    private val metrics: ContentMetaMetrics
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -31,13 +31,13 @@ class UnionContentMetaLoader(
         metaContent.map { content ->
             async {
                 // Checking if there is embedded content first
-                val embedded = unionContentMetaService.detectEmbeddedContent(content.url)
+                val embedded = contentMetaService.detectEmbeddedContent(content.url)
                 embedded?.let {
                     return@async embedContent(itemId, content, it)
                 }
 
                 // Now check is there is valid url
-                val resource = unionContentMetaService.parseUrl(content.url)
+                val resource = contentMetaService.parseUrl(content.url)
                 if (resource == null) {
                     metrics.onContentResolutionFailed(itemId.blockchain, "remote", "unknown_url_format")
                     logger.warn("Unknown URL format: ${content.url}")
@@ -55,8 +55,8 @@ class UnionContentMetaLoader(
         resource: UrlResource
     ): UnionMetaContent {
 
-        val resolvedProperties = unionContentMetaProvider.getContent(itemId, resource)
-        val internalUrl = unionContentMetaService.resolveInternalHttpUrl(resource)
+        val resolvedProperties = contentMetaProvider.getContent(itemId, resource)
+        val internalUrl = contentMetaService.resolveInternalHttpUrl(resource)
 
         val contentProperties = when {
             resolvedProperties != null -> {
@@ -74,7 +74,7 @@ class UnionContentMetaLoader(
         }
 
         return content.copy(
-            url = unionContentMetaService.resolveStorageHttpUrl(resource),
+            url = contentMetaService.resolveStorageHttpUrl(resource),
             properties = contentProperties
         )
     }
@@ -86,7 +86,7 @@ class UnionContentMetaLoader(
     ): UnionMetaContent {
         val blockchain = itemId.blockchain
         val contentMeta = embedded.meta
-        val converted = unionContentMetaService.convertToProperties(contentMeta)
+        val converted = contentMetaService.convertToProperties(contentMeta)
         when (converted) {
             null -> metrics.onContentResolutionFailed(blockchain, "embedded", "unknown_mime_type")
             else -> metrics.onContentFetched(blockchain, "embedded", converted)
@@ -97,7 +97,7 @@ class UnionContentMetaLoader(
             ?: UnionImageProperties() // The same logic as for remote meta - we can't determine type, image by default
 
         val toSave = UnionEmbeddedContent(
-            id = unionContentMetaService.getEmbeddedId(embedded.content),
+            id = contentMetaService.getEmbeddedId(embedded.content),
             mimeType = properties.mimeType ?: embedded.meta.mimeType,
             size = embedded.content.size,
             data = embedded.content
@@ -107,7 +107,7 @@ class UnionContentMetaLoader(
 
         logger.info("Resolved embedded meta content ${original.representation}: $properties")
         return original.copy(
-            url = unionContentMetaService.getEmbeddedSchemaUrl(toSave.id),
+            url = contentMetaService.getEmbeddedSchemaUrl(toSave.id),
             properties = properties
         )
     }

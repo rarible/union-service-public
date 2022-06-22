@@ -8,8 +8,8 @@ import com.rarible.protocol.union.core.model.UnionAudioProperties
 import com.rarible.protocol.union.core.model.UnionImageProperties
 import com.rarible.protocol.union.core.model.UnionUnknownProperties
 import com.rarible.protocol.union.core.model.UnionVideoProperties
-import com.rarible.protocol.union.enrichment.meta.UnionContentMetaLoader
-import com.rarible.protocol.union.enrichment.meta.UnionContentMetaService
+import com.rarible.protocol.union.enrichment.meta.content.ContentMetaDownloader
+import com.rarible.protocol.union.enrichment.meta.content.ContentMetaService
 import com.rarible.protocol.union.enrichment.meta.embedded.EmbeddedContentService
 import com.rarible.protocol.union.enrichment.test.data.randomUnionContent
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
@@ -28,10 +28,10 @@ import java.net.URL
 class UnionContentMetaLoaderIt : AbstractIntegrationTest() {
 
     @Autowired
-    lateinit var unionMetaConLoader: UnionContentMetaLoader
+    lateinit var unionMetaConLoader: ContentMetaDownloader
 
     @Autowired
-    lateinit var unionContentMetaService: UnionContentMetaService
+    lateinit var unionContentMetaService: ContentMetaService
 
     @Autowired
     lateinit var embeddedContentService: EmbeddedContentService

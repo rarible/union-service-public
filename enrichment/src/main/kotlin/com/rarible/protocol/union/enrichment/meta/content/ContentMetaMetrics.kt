@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.enrichment.meta
+package com.rarible.protocol.union.enrichment.meta.content
 
 import com.rarible.protocol.union.core.model.UnionAudioProperties
 import com.rarible.protocol.union.core.model.UnionHtmlProperties
@@ -8,46 +8,14 @@ import com.rarible.protocol.union.core.model.UnionModel3dProperties
 import com.rarible.protocol.union.core.model.UnionUnknownProperties
 import com.rarible.protocol.union.core.model.UnionVideoProperties
 import com.rarible.protocol.union.dto.BlockchainDto
-import io.micrometer.core.instrument.ImmutableTag
+import com.rarible.protocol.union.enrichment.metrics.UnionMetrics
 import io.micrometer.core.instrument.MeterRegistry
-import io.micrometer.core.instrument.Tag
 import org.springframework.stereotype.Component
 
 @Component
-class UnionMetaMetrics(
-    private val meterRegistry: MeterRegistry
-) {
-
-    //-------------------- Meta fetch -----------------------//
-    // Set of metrics to gather statistics for meta fetching from blockchains
-
-    fun onMetaFetched(blockchain: BlockchainDto) {
-        increment(META_FETCH, tag(blockchain), status("ok"))
-    }
-
-    fun onMetaFetchNotFound(blockchain: BlockchainDto) {
-        increment(META_FETCH, tag(blockchain), status("fail"), reason("not_found"))
-    }
-
-    // TODO not sure it is possible to detect timeouts ATM
-    fun onMetaFetchTimeout(blockchain: BlockchainDto) {
-        increment(META_FETCH, tag(blockchain), status("fail"), reason("timeout"))
-    }
-
-    fun onMetaFetchError(blockchain: BlockchainDto) {
-        increment(META_FETCH, tag(blockchain), status("fail"), reason("error"))
-    }
-
-    //--------------------- Meta cache ----------------------//
-    // Meta cache usage statistics
-
-    fun onMetaCacheHit(blockchain: BlockchainDto) {
-        increment(META_CACHE, tag(blockchain), status("hit"))
-    }
-
-    fun onMetaCacheMiss(blockchain: BlockchainDto) {
-        increment(META_CACHE, tag(blockchain), status("miss"))
-    }
+class ContentMetaMetrics(
+    meterRegistry: MeterRegistry
+) : UnionMetrics(meterRegistry) {
 
     //--------------- Content meta resolution ---------------//
     // Content resolution statistics (for embedded and remote meta content)
@@ -128,34 +96,8 @@ class UnionMetaMetrics(
         )
     }
 
-    private fun tag(blockchain: BlockchainDto): Tag {
-        return tag("blockchain", blockchain.name.lowercase())
-    }
-
-    private fun tag(key: String, value: String): Tag {
-        return ImmutableTag(key, value)
-    }
-
-    private fun status(status: String): Tag {
-        return tag("status", status)
-    }
-
-    private fun type(type: String): Tag {
-        return tag("type", type)
-    }
-
-    private fun reason(reason: String): Tag {
-        return tag("reason", reason)
-    }
-
-    private fun increment(name: String, vararg tags: Tag) {
-        return meterRegistry.counter(name, tags.toList()).increment()
-    }
-
     private companion object {
 
-        const val META_FETCH = "meta_fetch"
-        const val META_CACHE = "meta_cache"
         const val CONTENT_META_RESOLUTION = "content_meta_resolution"
         const val CONTENT_META_CACHE = "content_meta_cache"
         const val CONTENT_META_CACHE_UPDATE = "content_meta_cache_update"

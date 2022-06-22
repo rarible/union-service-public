@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.enrichment.meta
+package com.rarible.protocol.union.enrichment.meta.content
 
 import com.rarible.core.meta.resource.detector.embedded.EmbeddedContentDetector
 import com.rarible.core.meta.resource.model.ContentMeta
@@ -25,7 +25,7 @@ import org.codehaus.plexus.util.StringUtils
 import org.springframework.stereotype.Component
 
 @Component
-class UnionContentMetaService(
+class ContentMetaService(
     private val urlParser: UrlParser,
     private val urlResolver: UrlResolver,
     private val embeddedContentDetector: EmbeddedContentDetector,

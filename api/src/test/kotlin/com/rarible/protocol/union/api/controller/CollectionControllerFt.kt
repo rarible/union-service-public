@@ -10,7 +10,6 @@ import com.rarible.protocol.union.api.client.CollectionControllerApi
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
-import com.rarible.protocol.union.core.model.TokenId
 import com.rarible.protocol.union.core.test.WaitAssert
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionDto
@@ -37,7 +36,6 @@ import com.rarible.protocol.union.integration.tezos.data.randomTezosCollectionDt
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
-import java.time.Duration
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
@@ -50,6 +48,7 @@ import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.web.client.RestTemplate
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
+import java.time.Duration
 
 @FlowPreview
 @IntegrationTest
@@ -252,14 +251,14 @@ class CollectionControllerFt : AbstractIntegrationTest() {
                 else -> NftItemsDto(0, null, emptyList()).justOrEmpty()
             }
         }
-        coEvery { testUnionMetaLoader.load(itemId1) } returns EthMetaConverter.convert(item1.meta!!)
-        coEvery { testUnionMetaLoader.load(itemId2) } returns EthMetaConverter.convert(item2.meta!!)
+        coEvery { testItemMetaLoader.load(itemId1) } returns EthMetaConverter.convert(item1.meta!!)
+        coEvery { testItemMetaLoader.load(itemId2) } returns EthMetaConverter.convert(item2.meta!!)
 
         collectionControllerClient.refreshCollectionMeta(collectionId.fullId()).awaitFirstOrNull()
 
         WaitAssert.wait(timeout = Duration.ofMillis(10_000)) {
-            coVerify(exactly = 1) { testUnionMetaLoader.load(itemId1) }
-            coVerify(exactly = 1) { testUnionMetaLoader.load(itemId2) }
+            coVerify(exactly = 1) { testItemMetaLoader.load(itemId1) }
+            coVerify(exactly = 1) { testItemMetaLoader.load(itemId2) }
         }
     }
 }

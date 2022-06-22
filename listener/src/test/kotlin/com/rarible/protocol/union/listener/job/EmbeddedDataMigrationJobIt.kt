@@ -14,11 +14,11 @@ import com.rarible.protocol.union.core.producer.UnionInternalBlockchainEventProd
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.MetaContentDto
 import com.rarible.protocol.union.enrichment.configuration.EmbeddedContentProperties
-import com.rarible.protocol.union.enrichment.meta.UnionContentMetaService
-import com.rarible.protocol.union.enrichment.meta.UnionMetaCacheLoader
-import com.rarible.protocol.union.enrichment.meta.cache.IpfsContentCache
+import com.rarible.protocol.union.enrichment.meta.content.ContentMetaService
+import com.rarible.protocol.union.enrichment.meta.content.cache.IpfsContentCache
 import com.rarible.protocol.union.enrichment.meta.embedded.EmbeddedContentService
 import com.rarible.protocol.union.enrichment.meta.embedded.LegacyEmbeddedContentUrlDetector
+import com.rarible.protocol.union.enrichment.meta.item.ItemMetaDownloader
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.test.data.randomUnionMeta
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
@@ -46,7 +46,7 @@ class EmbeddedDataMigrationJobIt : AbstractIntegrationTest() {
     lateinit var embeddedContentService: EmbeddedContentService
 
     @Autowired
-    lateinit var unionContentMetaService: UnionContentMetaService
+    lateinit var unionContentMetaService: ContentMetaService
 
     @Autowired
     lateinit var cacheRepository: CacheRepository
@@ -308,7 +308,7 @@ class EmbeddedDataMigrationJobIt : AbstractIntegrationTest() {
             )
         )
         return cacheRepository.save(
-            type = UnionMetaCacheLoader.TYPE,
+            type = ItemMetaDownloader.TYPE,
             key = itemId.fullId(),
             data = meta,
             cachedAt = nowMillis()
@@ -317,7 +317,7 @@ class EmbeddedDataMigrationJobIt : AbstractIntegrationTest() {
 
     private suspend fun getCache(itemId: ItemIdDto): MongoCacheEntry<UnionMeta>? {
         return cacheRepository.get(
-            UnionMetaCacheLoader.TYPE,
+            ItemMetaDownloader.TYPE,
             itemId.fullId()
         )
     }

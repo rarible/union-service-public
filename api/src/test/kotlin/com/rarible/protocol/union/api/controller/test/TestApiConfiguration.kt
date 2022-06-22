@@ -17,17 +17,14 @@ import com.rarible.protocol.nft.api.client.NftOwnershipControllerApi
 import com.rarible.protocol.order.api.client.AuctionActivityControllerApi
 import com.rarible.protocol.order.api.client.OrderActivityControllerApi
 import com.rarible.protocol.order.api.client.OrderControllerApi
-import com.rarible.protocol.solana.api.client.ActivityControllerApi as SolanaActivityControllerApi
-import com.rarible.protocol.solana.api.client.CollectionControllerApi as SolanaCollectionControllerApi
 import com.rarible.protocol.union.api.client.FixedUnionApiServiceUriProvider
 import com.rarible.protocol.union.api.client.UnionApiClientFactory
 import com.rarible.protocol.union.dto.CollectionEventDto
 import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
-import com.rarible.protocol.union.enrichment.meta.UnionMetaLoader
+import com.rarible.protocol.union.enrichment.meta.item.ItemMetaLoader
 import com.rarible.protocol.union.test.mock.CurrencyMock
 import io.mockk.mockk
-import java.net.URI
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.context.annotation.Bean
@@ -36,6 +33,9 @@ import org.springframework.context.annotation.Lazy
 import org.springframework.context.annotation.Primary
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
 import org.springframework.web.client.RestTemplate
+import java.net.URI
+import com.rarible.protocol.solana.api.client.ActivityControllerApi as SolanaActivityControllerApi
+import com.rarible.protocol.solana.api.client.CollectionControllerApi as SolanaCollectionControllerApi
 
 @Lazy
 @Configuration
@@ -64,7 +64,7 @@ class TestApiConfiguration {
     @Bean
     @Primary
     @Qualifier("test.union.meta.loader")
-    fun testUnionMetaLoader(): UnionMetaLoader = mockk()
+    fun testUnionMetaLoader(): ItemMetaLoader = mockk()
 
     @Bean
     @Primary

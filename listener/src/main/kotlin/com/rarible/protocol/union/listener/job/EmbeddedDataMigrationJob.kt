@@ -12,12 +12,12 @@ import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.UnionMetaContent
 import com.rarible.protocol.union.core.producer.UnionInternalBlockchainEventProducer
 import com.rarible.protocol.union.dto.parser.IdParser
-import com.rarible.protocol.union.enrichment.meta.UnionContentMetaService
-import com.rarible.protocol.union.enrichment.meta.UnionMetaCacheLoader
-import com.rarible.protocol.union.enrichment.meta.cache.IpfsContentCache
+import com.rarible.protocol.union.enrichment.meta.content.ContentMetaService
+import com.rarible.protocol.union.enrichment.meta.content.cache.IpfsContentCache
 import com.rarible.protocol.union.enrichment.meta.embedded.EmbeddedContentService
 import com.rarible.protocol.union.enrichment.meta.embedded.LegacyEmbeddedContentUrlDetector
 import com.rarible.protocol.union.enrichment.meta.embedded.UnionEmbeddedContent
+import com.rarible.protocol.union.enrichment.meta.item.ItemMetaDownloader
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import kotlinx.coroutines.async
@@ -41,7 +41,7 @@ import java.util.concurrent.atomic.AtomicInteger
 class EmbeddedDataMigrationJob(
     private val legacyEmbeddedContentUrlDetector: LegacyEmbeddedContentUrlDetector,
     private val embeddedContentService: EmbeddedContentService,
-    private val unionContentMetaService: UnionContentMetaService,
+    private val unionContentMetaService: ContentMetaService,
     private val cacheRepository: CacheRepository,
     private val eventProducer: UnionInternalBlockchainEventProducer,
     private val enrichmentItemService: EnrichmentItemService,
@@ -90,7 +90,7 @@ class EmbeddedDataMigrationJob(
     private suspend fun migrateBatch(fromId: String?): String? {
         logger.info("Starting to migrate Meta, state: $fromId")
         counters.values.forEach { it.set(0) }
-        val entries = cacheRepository.findAll<UnionMeta>(UnionMetaCacheLoader.TYPE, fromId, batchSize)
+        val entries = cacheRepository.findAll<UnionMeta>(ItemMetaDownloader.TYPE, fromId, batchSize)
         coroutineScope {
             entries.chunked(asyncChuckSize).map { chunk ->
                 chunk.map {
@@ -111,9 +111,9 @@ class EmbeddedDataMigrationJob(
                 migrateMeta(entry)
                 // And one more try in case of concurrency, originally, should not happen
             } catch (ex: OptimisticLockingFailureException) {
-                migrateMeta(cacheRepository.get(UnionMetaCacheLoader.TYPE, entry.key)!!)
+                migrateMeta(cacheRepository.get(ItemMetaDownloader.TYPE, entry.key)!!)
             } catch (ex: DuplicateKeyException) {
-                migrateMeta(cacheRepository.get(UnionMetaCacheLoader.TYPE, entry.key)!!)
+                migrateMeta(cacheRepository.get(ItemMetaDownloader.TYPE, entry.key)!!)
             }
         } catch (e: Exception) {
             // Some kind of unexpected exception, should not happen
@@ -171,7 +171,7 @@ class EmbeddedDataMigrationJob(
         }
 
         val updatedMeta = cacheRepository.save(
-            type = UnionMetaCacheLoader.TYPE,
+            type = ItemMetaDownloader.TYPE,
             key = entry.key,
             data = entry.data.copy(content = updatedContent),
             cachedAt = entry.cachedAt

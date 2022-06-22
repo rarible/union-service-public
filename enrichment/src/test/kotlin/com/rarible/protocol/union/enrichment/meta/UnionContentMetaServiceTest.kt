@@ -10,6 +10,7 @@ import com.rarible.core.meta.resource.resolver.RandomGatewayProvider
 import com.rarible.core.meta.resource.resolver.UrlResolver
 import com.rarible.protocol.union.core.model.UnionImageProperties
 import com.rarible.protocol.union.enrichment.configuration.EmbeddedContentProperties
+import com.rarible.protocol.union.enrichment.meta.content.ContentMetaService
 import com.rarible.protocol.union.enrichment.meta.embedded.EmbeddedContentUrlProvider
 import com.rarible.protocol.union.enrichment.test.data.randomUnionContent
 import com.rarible.protocol.union.enrichment.test.data.randomUnionMeta
@@ -29,7 +30,7 @@ class UnionContentMetaServiceTest {
         customGatewaysResolver = LegacyIpfsGatewaySubstitutor(listOf(IPFS_CUSTOM_GATEWAY))
     )
 
-    private val metaContentService = UnionContentMetaService(
+    private val metaContentService = ContentMetaService(
         UrlParser(),
         UrlResolver(ipfsGatewayResolver),
         EmbeddedContentDetector(),

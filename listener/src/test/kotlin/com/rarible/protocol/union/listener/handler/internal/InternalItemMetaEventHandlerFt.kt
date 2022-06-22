@@ -38,7 +38,7 @@ class InternalItemMetaEventHandlerFt : AbstractIntegrationTest() {
 
         waitAssert {
             val unionMeta = SolanaItemMetaConverter.convert(tokenMeta)
-            assertThat(unionMetaService.getAvailableMeta(listOf(itemId)))
+            assertThat(itemMetaService.get(listOf(itemId), "default"))  // TODO PT-49
                 .isEqualTo(mapOf(itemId to unionMeta))
 
             val messages = findItemUpdates(itemId.value)

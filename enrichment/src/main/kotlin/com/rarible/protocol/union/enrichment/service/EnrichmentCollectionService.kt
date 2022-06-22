@@ -8,7 +8,7 @@ import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.enrichment.converter.EnrichedCollectionConverter
-import com.rarible.protocol.union.enrichment.meta.UnionContentMetaService
+import com.rarible.protocol.union.enrichment.meta.content.ContentMetaService
 import com.rarible.protocol.union.enrichment.model.ShortCollection
 import com.rarible.protocol.union.enrichment.model.ShortCollectionId
 import com.rarible.protocol.union.enrichment.repository.CollectionRepository
@@ -23,7 +23,7 @@ class EnrichmentCollectionService(
     private val collectionServiceRouter: BlockchainRouter<CollectionService>,
     private val collectionRepository: CollectionRepository,
     private val enrichmentOrderService: EnrichmentOrderService,
-    private val unionContentMetaService: UnionContentMetaService
+    private val contentMetaService: ContentMetaService
 ) {
 
     private val logger = LoggerFactory.getLogger(EnrichmentCollectionService::class.java)
@@ -78,7 +78,7 @@ class EnrichmentCollectionService(
         val collectionDto = EnrichedCollectionConverter.convert(
             collection = unionCollection,
             // replacing inner IPFS urls with public urls
-            meta = unionContentMetaService.exposePublicUrls(unionCollection.meta, collectionId),
+            meta = contentMetaService.exposePublicUrls(unionCollection.meta, collectionId),
             shortCollection = shortCollection,
             orders = bestOrders
         )

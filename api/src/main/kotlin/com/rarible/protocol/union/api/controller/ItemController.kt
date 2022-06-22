@@ -19,9 +19,9 @@ import com.rarible.protocol.union.dto.RestrictionCheckFormDto
 import com.rarible.protocol.union.dto.RestrictionCheckResultDto
 import com.rarible.protocol.union.dto.RoyaltiesDto
 import com.rarible.protocol.union.dto.parser.IdParser
-import com.rarible.protocol.union.enrichment.meta.UnionMetaService
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
+import com.rarible.protocol.union.enrichment.service.ItemMetaService
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.time.withTimeout
@@ -42,7 +42,7 @@ class ItemController(
     private val itemSourceSelectService: ItemSourceSelectService,
     private val router: BlockchainRouter<ItemService>,
     private val enrichmentItemService: EnrichmentItemService,
-    private val unionMetaService: UnionMetaService,
+    private val itemMetaService: ItemMetaService,
     private val restrictionService: RestrictionService
 ) : ItemControllerApi {
 
@@ -90,9 +90,10 @@ class ItemController(
     private suspend fun getAvailableMetaOrLoadSynchronously(itemId: String): UnionMeta {
         return try {
             withTimeout(timeoutSyncLoadingMeta) {
-                unionMetaService.getAvailableMetaOrLoadSynchronously(
+                itemMetaService.get(
                     itemId = IdParser.parseItemId(itemId),
-                    synchronous = true
+                    sync = true,
+                    pipeline = "default" // TODO PT-49
                 )
             }
         } catch (e: CancellationException) {
@@ -114,7 +115,7 @@ class ItemController(
         val enrichedUnionItem = enrichmentItemService.enrichItem(
             shortItem = shortItem,
             item = unionItem,
-            loadMetaSynchronously = true
+            syncMetaDownload = true
         )
         return ResponseEntity.ok(enrichedUnionItem)
     }
@@ -155,9 +156,9 @@ class ItemController(
         // TODO[meta]: when all Blockchains stop caching the meta, we can remove this endpoint call.
         router.getService(fullItemId.blockchain).resetItemMeta(fullItemId.value)
         if (safeSync) {
-            unionMetaService.loadMetaSynchronously(fullItemId)
+            itemMetaService.download(fullItemId, "default", true)  // TODO PT-49
         } else {
-            unionMetaService.scheduleLoading(fullItemId)
+            itemMetaService.schedule(fullItemId, "default", true)  // TODO PT-49
         }
 
         return ResponseEntity.ok().build()
