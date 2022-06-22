@@ -72,6 +72,15 @@ values ('tz1aSkwEot3L2kmUvcoxzjMomb9mvBNuzFK6', 'edpkurPsQ8eUApnLUJ9ZPDvu98E8VNj
 insert into order_activities (id, match_left, match_right, hash, "transaction", block, level, main, "date",order_activity_type)
 values ('BKpJX4yv2JsxezPcvgnavyjJZBZVbQ5hicMwQLEkxv9516Qz27N_46', 'f1dad99bd88f47cecb6f6124c80f726f7b42a7ddb9e6ded3e68e40c20f49ff13', '8c3b89e350b767fa625165050abe157e6fcdd511981d238f6cbe8e47e43e603c', 'f1dad99bd88f47cecb6f6124c80f726f7b42a7ddb9e6ded3e68e40c20f49ff13', null, null, null, true, '2022-04-28 16:58:44.000000', 'match');
 
+-- SNDBX-240
+INSERT INTO order_activities (id, match_left, match_right, hash, transaction, block, level, main, date, order_activity_type)
+VALUES ('BMdUs3hgMfEHLyXtJVRaMem6kq9JAaJmhVfV69zHVpnkygrLiNi_59', '606d6c3322000cfffbed0a41c4c641241cc5a93d68f220bb7acb6f06a3c4810c', '688a049b1695af56a01e3d64d9632e32a13ca5d36dd2ed68b2e28370b38800f7', '606d6c3322000cfffbed0a41c4c641241cc5a93d68f220bb7acb6f06a3c4810c', 'op84xXAS4xXDFdt9RwAUqoe9gd7wMmMZyYoepQndsdPBSoETH8D', 'BMdUs3hgMfEHLyXtJVRaMem6kq9JAaJmhVfV69zHVpnkygrLiNi', 2264477, true, '2022-04-08 21:34:44.000000', 'match');
+INSERT INTO orders (maker, maker_edpk, taker, taker_edpk, make_asset_type_class, make_asset_type_contract, make_asset_type_token_id, make_asset_value, make_asset_decimals, take_asset_type_class, take_asset_type_contract, take_asset_type_token_id, take_asset_value, take_asset_decimals, start_date, end_date, salt, signature, created_at, last_update_at, hash)
+VALUES ('tz1ZzkVVRaip6kEmUXeWdQf7aTcyzMg9fA3w', 'edpkuveXFUfu161TZbESe4YmfuHiwMbRKMZYTEJcHNM2sHbPMYRvZX', null, null, 'MT', 'KT18c8n9jbpDRZStQRvZUC1GPBEDEcVgwGFC', '25', 1, null, 'XTZ', null, null, 5000000, 6, null, null, '20210317215322916846141579976212017611669124120135979150119163101107117962510214239', 'edsigu5zhj8WLHqZe1HrDwRqs4NKu7dD87kdQBu8JdbvD7ukuWWKfEgavbvAdjAcbXUk89Tnb7b9MwDyqGBV7xaViRmMsTE2FHP', '2022-03-27 16:33:43.000000', '2022-04-08 21:34:44.000000', '606d6c3322000cfffbed0a41c4c641241cc5a93d68f220bb7acb6f06a3c4810c');
+INSERT INTO public.orders (maker, maker_edpk, taker, taker_edpk, make_asset_type_class, make_asset_type_contract, make_asset_type_token_id, make_asset_value, make_asset_decimals, take_asset_type_class, take_asset_type_contract, take_asset_type_token_id, take_asset_value, take_asset_decimals, start_date, end_date, salt, signature, created_at, last_update_at, hash)
+VALUES ('tz1iLaTq7cFBgELhTzBZtRSP76AXKPCqbYGe', 'edpkv9NAho1VUAZhZhxYvy7AqJELmm2jXVYV31z6gvUJHU4w4SFB7r', null, null, 'XTZ', null, null, 5000000, 6, 'MT', 'KT18c8n9jbpDRZStQRvZUC1GPBEDEcVgwGFC', '25', 1, null, null, null, '0', 'NO_SIGNATURE', '2022-04-08 21:34:54.000000', '2022-04-08 21:34:44.000000', '688a049b1695af56a01e3d64d9632e32a13ca5d36dd2ed68b2e28370b38800f7');
+
+
 insert into orders (maker, maker_edpk, taker, taker_edpk, make_asset_type_class, make_asset_type_contract,
                     make_asset_type_token_id, make_asset_value, make_asset_decimals, take_asset_type_class,
                     take_asset_type_contract, take_asset_type_token_id, take_asset_value, take_asset_decimals,
