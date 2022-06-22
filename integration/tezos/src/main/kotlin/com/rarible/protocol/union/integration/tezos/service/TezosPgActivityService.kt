@@ -158,13 +158,14 @@ class TezosPgActivityService(
         val id = row.get("id", String::class.java)
         val makeValue = price(TYPE.MAKE, row)
         val takePrice = price(TYPE.TAKE, row)
+        val price = takePrice.divide(makeValue)
         return OrderActTypeDto(
             id = id,
             date = row.get("date", Instant::class.java),
             source = PlatformDto.RARIBLE.toString(),
             type = OrderActivityMatchDto(
                 type = OrderActivityMatchTypeDto.SELL,
-                price = makeValue,
+                price = price,
                 left = OrderActivitySideMatchDto(
                     maker = row.get("maker", String::class.java),
                     hash = row.get("l_hash", String::class.java),
@@ -172,7 +173,7 @@ class TezosPgActivityService(
                         assetType = assetType(TYPE.MAKE, row),
                         value = makeValue
                     ),
-                    type = OrderActivitySideTypeDto.BID
+                    type = OrderActivitySideTypeDto.SELL
                 ),
                 right = OrderActivitySideMatchDto(
                     maker = row.get("taker", String::class.java),
