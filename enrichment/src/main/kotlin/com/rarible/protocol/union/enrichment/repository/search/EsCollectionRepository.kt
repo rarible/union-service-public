@@ -51,6 +51,9 @@ class EsCollectionRepository(
     }
 
     suspend fun saveAll(esCollections: List<EsCollection>, indexName: String?): List<EsCollection> {
+        if (brokenEsState) {
+            throw IllegalStateException("No indexes to save")
+        }
         return if (indexName == null) {
             saveAll(esCollections)
         } else {

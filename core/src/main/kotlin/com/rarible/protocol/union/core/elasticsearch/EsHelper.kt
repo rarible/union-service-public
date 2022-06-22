@@ -23,7 +23,9 @@ object EsHelper {
         logger.info("Index $name exists = $existIndex")
         if (existIndex) return
         val request = CreateIndexRequest(name).settings(settings, XContentType.JSON).mapping(mapping, XContentType.JSON)
-        reactiveElasticSearchOperations.execute { it.indices().createIndex(request) }.awaitFirstOrNull()
+        reactiveElasticSearchOperations.execute {
+            it.indices().createIndex(request)
+        }.awaitFirstOrNull()
     }
 
     suspend fun moveAlias(
