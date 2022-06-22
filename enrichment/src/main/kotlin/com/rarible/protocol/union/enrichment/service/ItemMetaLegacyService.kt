@@ -103,7 +103,7 @@ class ItemMetaLegacyService(
             null
         }
         if (itemMeta != null) {
-            logger.warn("Saving synchronously loaded meta to cache for ${itemId.fullId()}")
+            logger.info("Saving synchronously loaded meta to cache for ${itemId.fullId()}")
             try {
                 unionMetaCacheLoaderService.save(itemId.fullId(), itemMeta)
             } catch (e: Exception) {
