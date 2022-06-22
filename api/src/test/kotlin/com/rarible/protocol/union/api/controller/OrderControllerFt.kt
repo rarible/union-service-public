@@ -238,12 +238,12 @@ class OrderControllerFt : AbstractIntegrationTest() {
             testEthereumOrderApi.getOrderBidsByItemAndByStatus(
                 contract,
                 tokenId.toString(),
-                emptyList(),
                 listOf(EthConverter.convertToAddress(maker.value)),
                 null,
                 ethPlatform,
                 continuation,
                 size,
+                emptyList(),
                 unionOrder.bidCurrencyId,
                 null,
                 null
