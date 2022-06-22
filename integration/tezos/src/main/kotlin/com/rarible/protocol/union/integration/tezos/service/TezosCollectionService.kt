@@ -13,6 +13,8 @@ import com.rarible.protocol.union.integration.tezos.converter.TezosCollectionCon
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktCollectionService
 import com.rarible.protocol.union.integration.tezos.entity.TezosTokenIdRepository
 import kotlinx.coroutines.reactive.awaitFirst
+import kotlinx.coroutines.reactive.awaitSingle
+import java.math.BigInteger
 
 @CaptureSpan(type = "blockchain")
 open class TezosCollectionService(
@@ -56,14 +58,18 @@ open class TezosCollectionService(
     }
 
     override suspend fun generateNftTokenId(collectionId: String, minter: String?): TokenId {
-        try { // Adjust to existed count
-            val actualCount = tzktCollectionService.tokenCount(collectionId)
-            tezosTokenIdRepository.adjustTokenCount(collectionId, actualCount)
-        } catch (ex: Exception) {
-            throw UnionException("Collection wasn't found")
+        val tokenId: BigInteger = if (tzktCollectionService.enabled()) {
+            try { // Adjust to existed count
+                val actualCount = tzktCollectionService.tokenCount(collectionId)
+                tezosTokenIdRepository.adjustTokenCount(collectionId, actualCount)
+            } catch (ex: Exception) {
+                throw UnionException("Collection wasn't found")
+            }
+            tezosTokenIdRepository.generateNftTokenId(collectionId)
+        } else {
+             collectionControllerApi.generateNftTokenId(collectionId).awaitSingle().tokenId
         }
-        val tezosTokenId = tezosTokenIdRepository.generateNftTokenId(collectionId)
-        return TokenId(tezosTokenId.toString())
+        return TokenId(tokenId.toString())
     }
 
     override suspend fun getCollectionsByOwner(
