@@ -89,7 +89,11 @@ class UnionMetaService(
         }
         if (synchronous) {
             logger.info("Loading meta synchronously for ${itemId.fullId()}")
-            return loadMetaSynchronously(itemId)
+            val result = loadMetaSynchronously(itemId)
+            if (result == null && !metaCacheEntry.isMetaInitiallyScheduledForLoading()) {
+                scheduleLoading(itemId)
+            }
+            return result
         }
         return null
     }
@@ -99,12 +103,10 @@ class UnionMetaService(
             unionMetaLoader.load(itemId)
         } catch (e: Exception) {
             logger.warn("Synchronous meta loading failed for ${itemId.fullId()}")
-            // Schedule meta loading. Firstly, with retry purpose. Secondly, to cache the "error" if it persists.
-            unionMetaCacheLoaderService.update(itemId.fullId())
             null
         }
         if (itemMeta != null) {
-            logger.warn("Saving synchronously loaded meta to cache for ${itemId.fullId()}")
+            logger.info("Saving synchronously loaded meta to cache for ${itemId.fullId()}")
             try {
                 unionMetaCacheLoaderService.save(itemId.fullId(), itemMeta)
             } catch (e: Exception) {
