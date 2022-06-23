@@ -35,6 +35,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Import
+import org.springframework.web.reactive.function.client.ExchangeStrategies
 import org.springframework.web.reactive.function.client.WebClient
 
 @DipDupConfiguration
@@ -46,8 +47,9 @@ class DipDupApiConfiguration(
 ) {
 
     val apolloClient = runBlocking { ApolloClient.Builder().serverUrl(properties.dipdupUrl).build() }
-    val tzktWebClient = WebClient.create(properties.tzktUrl)
-    val ipfsWebClient = WebClient.create(properties.ipfsUrl)
+
+    val tzktWebClient = webClient(properties.tzktUrl)
+    val ipfsWebClient = webClient(properties.ipfsUrl)
 
     // Clients
 
@@ -97,7 +99,10 @@ class DipDupApiConfiguration(
     }
 
     @Bean
-    fun dipdupOrderActivitiesService(orderActivityClient: OrderActivityClient, dipDupActivityConverter: DipDupActivityConverter): DipdupOrderActivityService {
+    fun dipdupOrderActivitiesService(
+        orderActivityClient: OrderActivityClient,
+        dipDupActivityConverter: DipDupActivityConverter
+    ): DipdupOrderActivityService {
         return DipdupOrderActivityServiceImpl(orderActivityClient, dipDupActivityConverter)
     }
 
@@ -125,5 +130,13 @@ class DipDupApiConfiguration(
     fun tzktSignatureService(signatureClient: SignatureClient): TzktSignatureService {
         return TzktSignatureServiceImpl(signatureClient)
     }
+
+    private fun webClient(url: String) = WebClient.builder()
+        .exchangeStrategies(
+            ExchangeStrategies.builder()
+                .codecs { it.defaultCodecs().maxInMemorySize(10_000_000) }
+                .build())
+        .baseUrl(url)
+        .build()
 
 }
