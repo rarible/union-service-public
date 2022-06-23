@@ -30,6 +30,7 @@ import kotlinx.coroutines.reactive.awaitSingle
 import org.springframework.r2dbc.core.DatabaseClient
 import java.math.BigDecimal
 import java.math.BigInteger
+import java.math.MathContext
 import java.time.Instant
 
 class TezosPgActivityService(
@@ -84,14 +85,35 @@ class TezosPgActivityService(
 
     private suspend fun orderMatchActivities(ids: List<String>): List<OrderActTypeDto> {
         val selectOrders = """
-            select 
-                l.hash l_hash, l.maker, l.make_asset_type_class, l.make_asset_type_contract, l.make_asset_type_token_id, l.make_asset_value, l.make_asset_decimals,
-                r.hash r_hash, r.maker taker,
-                r.make_asset_type_class take_asset_type_class, 
-                r.make_asset_type_contract take_asset_type_contract, 
-                r.make_asset_type_token_id take_asset_type_token_id, 
-                r.make_asset_value take_asset_value, 
-                r.make_asset_decimals take_asset_decimals,
+            select
+                l.hash l_hash, l.maker, r.hash r_hash, r.maker taker,
+            
+                l.make_asset_type_class l_make_asset_type_class,
+                l.make_asset_type_contract l_make_asset_type_contract,
+                l.make_asset_type_token_id l_make_asset_type_token_id,
+                l.make_asset_value l_make_asset_value,
+                l.make_asset_decimals l_make_asset_decimals,
+            
+                l.take_asset_type_class l_take_asset_type_class,
+                l.take_asset_type_contract l_take_asset_type_contract,
+                l.take_asset_type_token_id l_take_asset_type_token_id,
+                l.take_asset_value l_take_asset_value,
+                l.take_asset_decimals l_take_asset_decimals,
+                l.salt l_salt,
+            
+                r.make_asset_type_class r_make_asset_type_class,
+                r.make_asset_type_contract r_make_asset_type_contract,
+                r.make_asset_type_token_id r_make_asset_type_token_id,
+                r.make_asset_value r_make_asset_value,
+                r.make_asset_decimals r_make_asset_decimals,
+            
+                r.take_asset_type_class r_take_asset_type_class,
+                r.take_asset_type_contract r_take_asset_type_contract,
+                r.take_asset_type_token_id r_take_asset_type_token_id,
+                r.take_asset_value r_take_asset_value,
+                r.take_asset_decimals r_take_asset_decimals,
+                r.salt r_salt,
+            
                 a.id, a.date from order_activities a
                      left join orders l on l.hash = a.match_left
                      left join orders r on r.hash = a.match_right
@@ -156,9 +178,11 @@ class TezosPgActivityService(
 
     private fun convertMatch(row: Row): OrderActTypeDto {
         val id = row.get("id", String::class.java)
-        val makeValue = price(TYPE.MAKE, row)
-        val takePrice = price(TYPE.TAKE, row)
-        val price = takePrice.divide(makeValue)
+        val leftAssetType = assetType("l_make", row)
+        val rightAssetType = assetType("r_make", row)
+        val rightMakeValue = price("r_make", row)
+        val rightTakeValue = price("r_take", row)
+        val price = price(rightAssetType, rightMakeValue, rightTakeValue)
         return OrderActTypeDto(
             id = id,
             date = row.get("date", Instant::class.java),
@@ -170,19 +194,19 @@ class TezosPgActivityService(
                     maker = row.get("maker", String::class.java),
                     hash = row.get("l_hash", String::class.java),
                     asset = AssetDto(
-                        assetType = assetType(TYPE.MAKE, row),
-                        value = makeValue
+                        assetType = leftAssetType,
+                        value = rightTakeValue
                     ),
-                    type = OrderActivitySideTypeDto.SELL
+                    type = activityType(leftAssetType)
                 ),
                 right = OrderActivitySideMatchDto(
                     maker = row.get("taker", String::class.java),
                     hash = row.get("r_hash", String::class.java),
                     asset = AssetDto(
-                        assetType = assetType(TYPE.TAKE, row),
-                        value = takePrice
+                        assetType = rightAssetType,
+                        value = rightMakeValue
                     ),
-                    type = OrderActivitySideTypeDto.BID
+                    type = activityType(rightAssetType)
                 ),
                 // deprecated
                 transactionHash = "",
@@ -239,6 +263,16 @@ class TezosPgActivityService(
             source = PlatformDto.RARIBLE.toString(),
             type = subType
         )
+    }
+
+    private fun activityType(assetType: AssetTypeDto): OrderActivitySideTypeDto = when (assetType) {
+        is XTZAssetTypeDto -> OrderActivitySideTypeDto.SELL
+        else -> OrderActivitySideTypeDto.BID
+    }
+
+    private fun price(assetType: AssetTypeDto, make: BigDecimal, take: BigDecimal) = when (assetType) {
+        is XTZAssetTypeDto -> make.divide(take, MathContext.DECIMAL128)
+        else -> take.divide(make, MathContext.DECIMAL128)
     }
 
     private fun price(type: TYPE, row: Row) = price(type.value, row)
