@@ -47,7 +47,7 @@ object TzktActivityConverter {
                 id = id,
                 date = source.timestamp.toInstant(),
                 reverted = false,
-                owner = UnionAddressConverter.convert(blockchain, source.to!!.address),
+                owner = UnionAddressConverter.convert(blockchain, source.from!!.address),
                 transactionHash = source.transactionId.toString(),
                 value = convertValue(BigDecimal(source.amount), id),
                 tokenId = source.tokenId(),
