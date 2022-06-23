@@ -18,10 +18,18 @@ import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.runBlocking
+import org.elasticsearch.action.admin.cluster.settings.ClusterUpdateSettingsRequest
+import org.elasticsearch.action.support.AutoCreateIndex
+import org.elasticsearch.client.RequestOptions
+import org.elasticsearch.client.RestHighLevelClient
 import org.elasticsearch.client.indices.GetIndexRequest
 import org.elasticsearch.client.indices.PutMappingRequest
+import org.elasticsearch.cluster.routing.allocation.decider.EnableAllocationDecider
+import org.elasticsearch.common.settings.Settings
 import org.elasticsearch.common.xcontent.XContentType
 import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations
+import kotlin.math.log
+
 
 class ElasticsearchBootstrapper(
     private val esNameResolver: EsNameResolver,
@@ -31,6 +39,7 @@ class ElasticsearchBootstrapper(
     private val indexService: IndexService,
     private val forceUpdate: Set<EsEntity> = emptySet(),
     private val repositories: List<EsRepository>,
+    private val restHighLevelClient: RestHighLevelClient,
 ) {
     private val metadataMapping = metadataMappingIndex()
     private val metadataSettings = metadataSettingsIndex()
@@ -41,6 +50,7 @@ class ElasticsearchBootstrapper(
     fun bootstrap() = runBlocking {
 
         logger.info("Initializing elasticsearch")
+        setupCluster()
         createIndex(
             reactiveElasticSearchOperations = esOperations,
             name = esNameResolver.metadataIndexName,
@@ -59,6 +69,19 @@ class ElasticsearchBootstrapper(
         }
         repositories.forEach { it.init() }
         logger.info("Finished elasticsearch initialization")
+    }
+
+    private fun setupCluster() {
+        val request = ClusterUpdateSettingsRequest()
+
+        val persistentSettings: Settings = Settings.builder()
+            .put("action.auto_create_index", "false")
+            .build()
+
+        request.persistentSettings(persistentSettings)
+        logger.info("Setting up cluster with persistent settings: $persistentSettings")
+        restHighLevelClient.cluster().putSettings(request, RequestOptions.DEFAULT)
+        logger.info("Settings applied")
     }
 
     private suspend fun checkReindexInProgress(writeAlias: String): Boolean {

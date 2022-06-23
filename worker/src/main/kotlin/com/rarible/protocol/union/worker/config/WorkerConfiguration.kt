@@ -11,6 +11,7 @@ import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
 import com.rarible.protocol.union.worker.task.search.ReindexService
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
+import org.elasticsearch.client.RestHighLevelClient
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -58,7 +59,8 @@ class WorkerConfiguration(
         reindexerService: ReindexService,
         indexService: IndexService,
         esRepositories: List<EsRepository>,
-        reindexService: ReindexService
+        reindexService: ReindexService,
+        highLevelClient: RestHighLevelClient,
     ): ElasticsearchBootstrapper {
         return ElasticsearchBootstrapper(
             esNameResolver = esNameResolver,
@@ -67,7 +69,8 @@ class WorkerConfiguration(
             reindexSchedulingService = reindexService,
             forceUpdate = emptySet(),
             indexService = indexService,
-            repositories = esRepositories
+            repositories = esRepositories,
+            restHighLevelClient = highLevelClient,
         )
     }
 }
