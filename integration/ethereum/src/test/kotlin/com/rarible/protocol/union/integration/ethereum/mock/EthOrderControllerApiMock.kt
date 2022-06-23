@@ -113,12 +113,12 @@ class EthOrderControllerApiMock(
             orderControllerApi.getOrderBidsByItemAndByStatus(
                 eq(contract),
                 eq(tokenId.toString()),
-                eq(listOf(OrderStatusDto.ACTIVE)),
                 any(),
                 origin?.let { eq(it) } ?: isNull(),
                 any(),
                 any(),
                 eq(1),
+                eq(listOf(OrderStatusDto.ACTIVE)),
                 eq(currencyId),
                 any(),
                 any()

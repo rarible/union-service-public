@@ -3,6 +3,7 @@ package com.rarible.protocol.union.integration.ethereum.converter
 import com.rarible.protocol.dto.CryptoPunkOrderDto
 import com.rarible.protocol.dto.LegacyOrderDto
 import com.rarible.protocol.dto.OpenSeaV1OrderDto
+import com.rarible.protocol.dto.OrderBasicSeaportDataV1Dto
 import com.rarible.protocol.dto.OrderCancelDto
 import com.rarible.protocol.dto.OrderExchangeHistoryDto
 import com.rarible.protocol.dto.OrderOpenSeaV1DataV1Dto
@@ -12,14 +13,24 @@ import com.rarible.protocol.dto.OrderSideDto
 import com.rarible.protocol.dto.OrderSideMatchDto
 import com.rarible.protocol.dto.OrdersPaginationDto
 import com.rarible.protocol.dto.RaribleV2OrderDto
+import com.rarible.protocol.dto.SeaportConsiderationDto
+import com.rarible.protocol.dto.SeaportItemTypeDto
+import com.rarible.protocol.dto.SeaportOfferDto
+import com.rarible.protocol.dto.SeaportOrderTypeDto
+import com.rarible.protocol.union.dto.EthSeaportOrderTypeDto
+import com.rarible.protocol.dto.SeaportV1OrderDto
 import com.rarible.protocol.union.core.service.CurrencyService
 import com.rarible.protocol.union.core.util.evalMakePrice
 import com.rarible.protocol.union.core.util.evalTakePrice
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.EthOrderBasicSeaportDataV1Dto
 import com.rarible.protocol.union.dto.EthOrderCryptoPunksDataDto
 import com.rarible.protocol.union.dto.EthOrderDataLegacyDto
 import com.rarible.protocol.union.dto.EthOrderDataRaribleV2DataV1Dto
 import com.rarible.protocol.union.dto.EthOrderOpenSeaV1DataV1Dto
+import com.rarible.protocol.union.dto.EthSeaportConsiderationDto
+import com.rarible.protocol.union.dto.EthSeaportItemTypeDto
+import com.rarible.protocol.union.dto.EthSeaportOfferDto
 import com.rarible.protocol.union.dto.OnChainOrderDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
@@ -199,7 +210,86 @@ class EthOrderConverter(
                     data = EthOrderCryptoPunksDataDto()
                 )
             }
+            is SeaportV1OrderDto -> {
+                OrderDto(
+                    id = orderId,
+                    platform = PlatformDto.OPEN_SEA,
+                    status = status,
+                    maker = maker,
+                    taker = taker,
+                    make = make,
+                    take = take,
+                    salt = salt,
+                    signature = signature,
+                    pending = pending,
+                    fill = order.fillValue!!,
+                    startedAt = startedAt,
+                    endedAt = endedAt,
+                    makeStock = order.makeStockValue!!,
+                    cancelled = order.cancelled,
+                    createdAt = order.createdAt,
+                    lastUpdatedAt = order.lastUpdateAt,
+                    dbUpdatedAt = order.dbUpdatedAt,
+                    makePrice = makePrice,
+                    takePrice = takePrice,
+                    makePriceUsd = makePriceUsd,
+                    takePriceUsd = takePriceUsd,
+                    data = when (val data = order.data) {
+                        is OrderBasicSeaportDataV1Dto -> EthOrderBasicSeaportDataV1Dto(
+                            protocol = EthConverter.convert(data.protocol, blockchain),
+                            orderType = convert(data.orderType),
+                            offer = data.offer.map { convert(it, blockchain) },
+                            consideration = data.consideration.map { convert(it, blockchain) },
+                            zone = EthConverter.convert(data.zone, blockchain),
+                            zoneHash = EthConverter.convert(data.zoneHash),
+                            conduitKey = EthConverter.convert(data.conduitKey),
+                            counter = data.counter
+                        )
+                    }
+                )
+            }
         }
+    }
+
+    fun convert(source: SeaportOrderTypeDto): EthSeaportOrderTypeDto {
+        return when (source) {
+            SeaportOrderTypeDto.FULL_OPEN -> EthSeaportOrderTypeDto.FULL_OPEN
+            SeaportOrderTypeDto.PARTIAL_OPEN -> EthSeaportOrderTypeDto.PARTIAL_OPEN
+            SeaportOrderTypeDto.FULL_RESTRICTED -> EthSeaportOrderTypeDto.FULL_RESTRICTED
+            SeaportOrderTypeDto.PARTIAL_RESTRICTED -> EthSeaportOrderTypeDto.PARTIAL_RESTRICTED
+        }
+    }
+
+    fun convert(source: SeaportItemTypeDto): EthSeaportItemTypeDto {
+        return when (source) {
+            SeaportItemTypeDto.NATIVE -> EthSeaportItemTypeDto.NATIVE
+            SeaportItemTypeDto.ERC20 -> EthSeaportItemTypeDto.ERC20
+            SeaportItemTypeDto.ERC721 -> EthSeaportItemTypeDto.ERC721
+            SeaportItemTypeDto.ERC1155 -> EthSeaportItemTypeDto.ERC1155
+            SeaportItemTypeDto.ERC721_WITH_CRITERIA -> EthSeaportItemTypeDto.ERC721_WITH_CRITERIA
+            SeaportItemTypeDto.ERC1155_WITH_CRITERIA -> EthSeaportItemTypeDto.ERC1155_WITH_CRITERIA
+        }
+    }
+
+    fun convert(source: SeaportOfferDto, blockchain: BlockchainDto): EthSeaportOfferDto {
+        return EthSeaportOfferDto(
+            itemType = convert(source.itemType),
+            token = EthConverter.convert(source.token, blockchain),
+            identifierOrCriteria = source.identifierOrCriteria,
+            startAmount = source.startAmount,
+            endAmount = source.endAmount
+        )
+    }
+
+    fun convert(source: SeaportConsiderationDto, blockchain: BlockchainDto): EthSeaportConsiderationDto {
+        return EthSeaportConsiderationDto(
+            itemType = convert(source.itemType),
+            token = EthConverter.convert(source.token, blockchain),
+            identifierOrCriteria = source.identifierOrCriteria,
+            startAmount = source.startAmount,
+            endAmount = source.endAmount,
+            recipient = EthConverter.convert(source.recipient, blockchain)
+        )
     }
 
     fun convert(source: com.rarible.protocol.dto.OrderRaribleV2DataDto, blockchain: BlockchainDto): EthOrderDataRaribleV2DataV1Dto {

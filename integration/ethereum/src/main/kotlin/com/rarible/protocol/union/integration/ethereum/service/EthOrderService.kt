@@ -97,12 +97,12 @@ open class EthOrderService(
         val orders = orderControllerApi.getOrderBidsByItemAndByStatus(
             contract,
             tokenId.toString(),
-            ethOrderConverter.convert(status),
             makerAddresses,
             origin,
             EthConverter.convert(platform),
             continuation,
             size,
+            ethOrderConverter.convert(status),
             currencyAddress,
             start,
             end
@@ -122,11 +122,11 @@ open class EthOrderService(
     ): Slice<OrderDto> {
         val orders = orderControllerApi.getOrderBidsByMakerAndByStatus(
             maker,
-            ethOrderConverter.convert(status),
             origin,
             EthConverter.convert(platform),
             continuation,
             size,
+            ethOrderConverter.convert(status),
             start,
             end
         ).awaitFirst()

@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.enrichment.util
 
+import com.rarible.protocol.union.dto.EthOrderBasicSeaportDataV1Dto
 import com.rarible.protocol.union.dto.EthOrderCryptoPunksDataDto
 import com.rarible.protocol.union.dto.EthOrderDataLegacyDto
 import com.rarible.protocol.union.dto.EthOrderDataRaribleV2DataV1Dto
@@ -25,6 +26,7 @@ val OrderDto.origins: Set<String>
             is EthOrderDataLegacyDto -> emptyList()
             is EthOrderDataRaribleV2DataV1Dto -> data.originFees.map { it.account.value }
             is EthOrderOpenSeaV1DataV1Dto -> emptyList()
+            is EthOrderBasicSeaportDataV1Dto -> emptyList()
             is EthOrderCryptoPunksDataDto -> emptyList()
             is TezosOrderDataRaribleV2DataV1Dto -> data.originFees.map { it.account.value }
             is FlowOrderDataV1Dto -> data.originFees.map { it.account.value }

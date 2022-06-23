@@ -48,11 +48,13 @@ import com.rarible.protocol.dto.OrderActivityDto
 import com.rarible.protocol.dto.OrderActivityListDto
 import com.rarible.protocol.dto.OrderActivityMatchDto
 import com.rarible.protocol.dto.OrderActivityMatchSideDto
+import com.rarible.protocol.dto.OrderBasicSeaportDataV1Dto
 import com.rarible.protocol.dto.OrderCancelDto
 import com.rarible.protocol.dto.OrderCryptoPunksDataDto
 import com.rarible.protocol.dto.OrderOpenSeaV1DataV1Dto
 import com.rarible.protocol.dto.OrderRaribleV2DataDto
 import com.rarible.protocol.dto.OrderRaribleV2DataV1Dto
+import com.rarible.protocol.dto.OrderSeaportDataV1Dto
 import com.rarible.protocol.dto.OrderSideDto
 import com.rarible.protocol.dto.OrderSideMatchDto
 import com.rarible.protocol.dto.OrderStatusDto
@@ -62,11 +64,17 @@ import com.rarible.protocol.dto.RaribleAuctionV1BidV1Dto
 import com.rarible.protocol.dto.RaribleAuctionV1DataV1Dto
 import com.rarible.protocol.dto.RaribleAuctionV1Dto
 import com.rarible.protocol.dto.RaribleV2OrderDto
+import com.rarible.protocol.dto.SeaportConsiderationDto
+import com.rarible.protocol.dto.SeaportItemTypeDto
+import com.rarible.protocol.dto.SeaportOfferDto
+import com.rarible.protocol.dto.SeaportOrderTypeDto
+import com.rarible.protocol.dto.SeaportV1OrderDto
 import com.rarible.protocol.dto.TransferDto
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.util.CompositeItemIdParser
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
+import com.rarible.protocol.union.dto.EthSeaportConsiderationDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
@@ -330,6 +338,9 @@ fun randomEthV2OrderDto(make: AssetDto, maker: Address, take: AssetDto): Rarible
 fun randomEthOpenSeaV1OrderDto() =
     randomEthOpenSeaV1OrderDto(randomEthAssetErc721(), randomAddress(), randomEthAssetErc20())
 
+fun randomEthSeaportV1OrderDto() =
+    randomEthSeaportV1OrderDto(randomEthAssetErc721(), randomAddress(), randomEthAssetErc20())
+
 fun randomEthOpenSeaV1OrderDto(itemId: ItemIdDto) = randomEthOpenSeaV1OrderDto(itemId, randomAddress())
 fun randomEthOpenSeaV1OrderDto(itemId: ItemIdDto, maker: Address) = randomEthOpenSeaV1OrderDto(
     randomEthAssetErc721(itemId),
@@ -352,6 +363,35 @@ fun randomEthOpenSeaV1OrderDto(make: AssetDto, maker: Address, take: AssetDto): 
         cancelled = false,
         salt = Word.apply(randomWord()),
         data = randomEthOrderOpenSeaV1DataV1Dto(),
+        signature = randomBinary(),
+        createdAt = nowMillis(),
+        lastUpdateAt = nowMillis(),
+        pending = emptyList(),
+        hash = Word.apply(randomWord()),
+        makeBalance = randomBigInt(),
+        makePriceUsd = randomBigInt().toBigDecimal(),
+        takePriceUsd = randomBigInt().toBigDecimal(),
+        start = randomInt().toLong(),
+        end = randomInt().toLong(),
+        priceHistory = listOf()
+    )
+}
+
+fun randomEthSeaportV1OrderDto(make: AssetDto, maker: Address, take: AssetDto): SeaportV1OrderDto {
+    val makeStockValue = randomBigDecimal()
+    return SeaportV1OrderDto(
+        status = OrderStatusDto.ACTIVE,
+        maker = maker,
+        taker = null,
+        make = make,
+        take = take,
+        fill = randomBigInt(),
+        fillValue = randomBigDecimal(),
+        makeStock = makeStockValue.toBigInteger(),
+        makeStockValue = makeStockValue,
+        cancelled = false,
+        salt = Word.apply(randomWord()),
+        data = randomEthOrderBasicSeaportDataV1Dto(),
         signature = randomBinary(),
         createdAt = nowMillis(),
         lastUpdateAt = nowMillis(),
@@ -422,6 +462,40 @@ fun randomEthOrderOpenSeaV1DataV1Dto(): OrderOpenSeaV1DataV1Dto {
         staticTarget = randomAddress(),
         staticExtraData = randomBinary(),
         extra = randomBigInt()
+    )
+}
+
+fun randomEthOrderBasicSeaportDataV1Dto(): OrderBasicSeaportDataV1Dto {
+    return OrderBasicSeaportDataV1Dto(
+        protocol = randomAddress(),
+        orderType = SeaportOrderTypeDto.values().random(),
+        offer = listOf(randomEthSeaportOffer(), randomEthSeaportOffer()),
+        consideration = listOf(randomEthSeaportConsideration(), randomEthSeaportConsideration()),
+        zone = randomAddress(),
+        zoneHash = Word.apply(randomWord()),
+        conduitKey = Word.apply(randomWord()),
+        counter = randomLong()
+    )
+}
+
+fun randomEthSeaportOffer(): SeaportOfferDto {
+    return SeaportOfferDto(
+        itemType = SeaportItemTypeDto.values().random(),
+        token = randomAddress(),
+        identifierOrCriteria = randomBigInt(),
+        startAmount = randomBigInt(),
+        endAmount = randomBigInt()
+    )
+}
+
+fun randomEthSeaportConsideration(): SeaportConsiderationDto {
+    return SeaportConsiderationDto(
+        itemType = SeaportItemTypeDto.values().random(),
+        token = randomAddress(),
+        identifierOrCriteria = randomBigInt(),
+        startAmount = randomBigInt(),
+        endAmount = randomBigInt(),
+        recipient = randomAddress()
     )
 }
 
