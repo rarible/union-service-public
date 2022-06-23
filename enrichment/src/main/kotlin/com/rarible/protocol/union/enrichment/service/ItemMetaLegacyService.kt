@@ -40,9 +40,9 @@ class ItemMetaLegacyService(
         cached.forEach {
             val id = keyMap[it.key]!!
             if (it.isMetaInitiallyLoadedOrFailed()) {
-                metrics.onMetaCacheMiss(id.blockchain)
-            } else {
                 metrics.onMetaCacheHit(id.blockchain)
+            } else {
+                metrics.onMetaCacheMiss(id.blockchain)
             }
             val meta = it.getAvailable()
             meta?.let { result[id] = meta }
@@ -63,9 +63,9 @@ class ItemMetaLegacyService(
         val availableMeta = metaCacheEntry.getAvailable()
 
         if (metaCacheEntry.isMetaInitiallyLoadedOrFailed()) {
-            metrics.onMetaCacheMiss(itemId.blockchain)
-        } else {
             metrics.onMetaCacheHit(itemId.blockchain)
+        } else {
+            metrics.onMetaCacheMiss(itemId.blockchain)
         }
 
         if (availableMeta != null) {
