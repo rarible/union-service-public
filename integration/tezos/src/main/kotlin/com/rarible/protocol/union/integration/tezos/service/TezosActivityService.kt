@@ -83,7 +83,7 @@ open class TezosActivityService(
 
                 if (legacySlice.entities.size < size) {
                     val delta = size - legacySlice.entities.size
-                    val dipdupSlice = getDipDupAndTzktActivities(types, continuation, delta, sort)
+                    val dipdupSlice = getDipDupAndTzktActivities(types, null, delta, sort)
                     return Slice(
                         continuation = dipdupSlice.continuation,
                         entities = legacySlice.entities + dipdupSlice.entities
@@ -169,7 +169,7 @@ open class TezosActivityService(
 
                 if (legacySlice.entities.size < size) {
                     val delta = size - legacySlice.entities.size
-                    val dipdupSlice = getDipDupAndTzktActivitiesByItem(types, contract, tokenId, continuation, delta, sort)
+                    val dipdupSlice = getDipDupAndTzktActivitiesByItem(types, contract, tokenId, null, delta, sort)
                     return Slice(
                         continuation = dipdupSlice.continuation,
                         entities = legacySlice.entities + dipdupSlice.entities
