@@ -21,7 +21,7 @@ class SearchTaskMetricFactory(
         type: ActivityTypeDto
     ): RegisteredCounter {
         return object : CountingMetric(
-            name =  getReindexEntityMetricName(EsEntity.ACTIVITY),
+            name = getReindexEntityMetricName(EsEntity.ACTIVITY),
             Tag.of("blockchain", blockchain.name.lowercase()),
             Tag.of("type", type.name.lowercase())
         ) {}.bind(meterRegistry)
@@ -42,7 +42,16 @@ class SearchTaskMetricFactory(
         blockchain: BlockchainDto
     ): RegisteredCounter {
         return object : CountingMetric(
-            name =  getReindexEntityMetricName(EsEntity.ITEM),
+            name = getReindexEntityMetricName(EsEntity.ITEM),
+            Tag.of("blockchain", blockchain.name.lowercase())
+        ) {}.bind(meterRegistry)
+    }
+
+    fun createReindexOrderCounter(
+        blockchain: BlockchainDto
+    ): RegisteredCounter {
+        return object : CountingMetric(
+            name = getReindexEntityMetricName(EsEntity.ITEM),
             Tag.of("blockchain", blockchain.name.lowercase())
         ) {}.bind(meterRegistry)
     }

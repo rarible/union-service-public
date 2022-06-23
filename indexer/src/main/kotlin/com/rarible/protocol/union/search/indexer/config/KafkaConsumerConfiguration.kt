@@ -64,10 +64,11 @@ class KafkaConsumerConfiguration(
         handler: ConsumerBatchEventHandler<OrderEventDto>
     ): ConsumerWorkerHolder<OrderEventDto> {
         val workers = (1..kafkaProperties.workerCount).map { index ->
+            val wrappedHandler = metricEventHandlerFactory.wrapOrder(handler)
             val consumer = consumerFactory.createOrderConsumer(consumerGroup(ORDER))
             ConsumerBatchWorker(
                 consumer = consumer,
-                eventHandler = handler,
+                eventHandler = wrappedHandler,
                 workerName = worker(ORDER, index),
                 properties = kafkaProperties.daemon,
                 retryProperties = RetryProperties(attempts = Integer.MAX_VALUE, delay = Duration.ofMillis(1000)),
