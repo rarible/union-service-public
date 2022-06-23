@@ -2,17 +2,17 @@ package com.rarible.protocol.union.enrichment.service.query.item
 
 import com.rarible.core.common.nowMillis
 import com.rarible.core.logging.Logger
-import com.rarible.protocol.union.enrichment.service.query.order.OrderApiMergeService
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.ItemsDto
 import com.rarible.protocol.union.dto.continuation.page.Page
 import com.rarible.protocol.union.dto.continuation.page.Slice
-import com.rarible.protocol.union.enrichment.meta.UnionMetaService
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
+import com.rarible.protocol.union.enrichment.service.ItemMetaService
+import com.rarible.protocol.union.enrichment.service.query.order.OrderApiMergeService
 import com.rarible.protocol.union.enrichment.util.spent
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
@@ -22,7 +22,7 @@ import org.springframework.stereotype.Service
 @ExperimentalCoroutinesApi
 @Service
 class ItemEnrichService(
-    private val unionMetaService: UnionMetaService,
+    private val itemMetaService: ItemMetaService,
     private val enrichmentItemService: EnrichmentItemService,
     private val orderApiService: OrderApiMergeService,
 ) {
@@ -69,7 +69,7 @@ class ItemEnrichService(
         val enrichedItems = coroutineScope {
 
             val meta = async {
-                unionMetaService.getAvailableMeta(unionItems.map { it.id })
+                itemMetaService.get(unionItems.map { it.id }, "default") // TODO PT-49
             }
 
             val shortItems: Map<ItemIdDto, ShortItem> = enrichmentItemService

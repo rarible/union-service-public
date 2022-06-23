@@ -14,9 +14,11 @@ import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.parser.IdParser
+import com.rarible.protocol.union.enrichment.meta.item.ItemMetaDownloader
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
+@Deprecated("Should be replaced in epic Meta 3.0: Pipeline")
 @Component
 class UnionMetaCacheLoaderListener(
     private val itemServiceRouter: BlockchainRouter<ItemService>,
@@ -26,7 +28,7 @@ class UnionMetaCacheLoaderListener(
     private val logger = LoggerFactory.getLogger(UnionMetaCacheLoaderListener::class.java)
 
     override val type
-        get() = UnionMetaCacheLoader.TYPE
+        get() = ItemMetaDownloader.TYPE
 
     @CaptureTransaction("UnionMetaCacheLoaderListener")
     override suspend fun onEvent(cacheLoaderEvent: CacheLoaderEvent<UnionMeta>) {

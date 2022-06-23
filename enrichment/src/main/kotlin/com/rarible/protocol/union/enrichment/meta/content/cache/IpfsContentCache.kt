@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.enrichment.meta.cache
+package com.rarible.protocol.union.enrichment.meta.content.cache
 
 import com.rarible.core.meta.resource.model.IpfsUrl
 import com.rarible.core.meta.resource.model.UrlResource

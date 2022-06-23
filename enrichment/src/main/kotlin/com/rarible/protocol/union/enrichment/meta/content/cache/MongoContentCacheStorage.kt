@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.enrichment.meta.cache
+package com.rarible.protocol.union.enrichment.meta.content.cache
 
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull

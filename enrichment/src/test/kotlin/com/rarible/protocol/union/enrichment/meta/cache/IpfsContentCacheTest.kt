@@ -4,6 +4,8 @@ import com.rarible.core.meta.resource.model.HttpUrl
 import com.rarible.core.meta.resource.model.IpfsUrl
 import com.rarible.protocol.union.core.model.UnionAudioProperties
 import com.rarible.protocol.union.core.model.UnionImageProperties
+import com.rarible.protocol.union.enrichment.meta.content.cache.ContentCacheException
+import com.rarible.protocol.union.enrichment.meta.content.cache.IpfsContentCache
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test

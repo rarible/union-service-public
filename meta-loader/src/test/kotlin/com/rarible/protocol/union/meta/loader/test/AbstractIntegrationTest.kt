@@ -1,7 +1,7 @@
 package com.rarible.protocol.union.meta.loader.test
 
 import com.rarible.core.content.meta.loader.ContentMetaReceiver
-import com.rarible.protocol.union.enrichment.meta.UnionMetaLoader
+import com.rarible.protocol.union.enrichment.meta.item.ItemMetaLoader
 import io.mockk.clearMocks
 import org.junit.jupiter.api.BeforeEach
 import org.springframework.beans.factory.annotation.Autowired
@@ -12,7 +12,7 @@ abstract class AbstractIntegrationTest {
 
     @Autowired
     @Qualifier("test.union.meta.loader")
-    lateinit var testUnionMetaLoader: UnionMetaLoader
+    lateinit var testUnionMetaLoader: ItemMetaLoader
 
     @Autowired
     @Qualifier("test.content.meta.receiver")

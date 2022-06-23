@@ -8,6 +8,7 @@ import com.rarible.protocol.union.core.model.UnionMeta
  * Returns true if loading of the meta for an item has been scheduled in the past,
  * no matter what the loading result is (in progress, failed or success).
  */
+@Deprecated("Should be replaced in epic Meta 3.0: Pipeline")
 fun CacheEntry<UnionMeta>.isMetaInitiallyScheduledForLoading(): Boolean =
     when (this) {
         // Let's use full 'when' expression to not forget some if branches.
@@ -24,6 +25,7 @@ fun CacheEntry<UnionMeta>.isMetaInitiallyScheduledForLoading(): Boolean =
  * Returns `true` if the meta for item has been loaded or loading has failed,
  * and `false` if we haven't requested the meta loading or haven't received any result yet.
  */
+@Deprecated("Should be replaced in epic Meta 3.0: Pipeline")
 fun CacheEntry<UnionMeta>.isMetaInitiallyLoadedOrFailed(): Boolean =
     when (this) {
         // Let's use full 'when' expression to not forget some if branches.

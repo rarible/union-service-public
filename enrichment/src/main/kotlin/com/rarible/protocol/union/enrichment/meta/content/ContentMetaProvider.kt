@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.enrichment.meta
+package com.rarible.protocol.union.enrichment.meta.content
 
 import com.rarible.core.content.meta.loader.ContentMetaReceiver
 import com.rarible.core.meta.resource.model.ContentMeta
@@ -7,18 +7,18 @@ import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.model.UnionMetaContentProperties
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
-import com.rarible.protocol.union.enrichment.meta.cache.ContentCache
-import com.rarible.protocol.union.enrichment.meta.cache.ContentCacheService
+import com.rarible.protocol.union.enrichment.meta.content.cache.ContentCache
+import com.rarible.protocol.union.enrichment.meta.content.cache.ContentCacheService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.net.URL
 
 @Component
-class UnionContentMetaProvider(
-    private val unionContentMetaService: UnionContentMetaService,
+class ContentMetaProvider(
+    private val contentMetaService: ContentMetaService,
     private val contentCacheService: ContentCacheService,
     private val contentMetaReceiver: ContentMetaReceiver,
-    private val metrics: UnionMetaMetrics,
+    private val metrics: ContentMetaMetrics,
     private val ff: FeatureFlagsProperties
 ) {
 
@@ -88,7 +88,7 @@ class UnionContentMetaProvider(
 
     private suspend fun fetch(itemId: ItemIdDto, resource: UrlResource): UnionMetaContentProperties? {
         val blockchain = itemId.blockchain
-        val internalUrl = unionContentMetaService.resolveInternalHttpUrl(resource)
+        val internalUrl = contentMetaService.resolveInternalHttpUrl(resource)
         if (internalUrl == resource.original) {
             logger.info("Fetching content meta by URL $internalUrl")
         } else {
@@ -105,7 +105,7 @@ class UnionContentMetaProvider(
 
         return try {
             val contentMeta = contentMetaReceiver.receive(parsedUrl)
-            val properties = contentMeta?.let { unionContentMetaService.convertToProperties(contentMeta) }
+            val properties = contentMeta?.let { contentMetaService.convertToProperties(contentMeta) }
             mark(blockchain, contentMeta, properties)
             properties
         } catch (e: Exception) {

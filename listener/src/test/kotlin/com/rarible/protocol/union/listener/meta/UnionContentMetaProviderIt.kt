@@ -6,9 +6,9 @@ import com.rarible.core.meta.resource.model.MimeType
 import com.rarible.core.meta.resource.parser.UrlParser
 import com.rarible.core.test.data.randomString
 import com.rarible.protocol.union.core.model.UnionImageProperties
-import com.rarible.protocol.union.enrichment.meta.UnionContentMetaProvider
-import com.rarible.protocol.union.enrichment.meta.cache.ContentCacheStorage
-import com.rarible.protocol.union.enrichment.meta.cache.UnionContentCacheEntry
+import com.rarible.protocol.union.enrichment.meta.content.ContentMetaProvider
+import com.rarible.protocol.union.enrichment.meta.content.cache.ContentCacheStorage
+import com.rarible.protocol.union.enrichment.meta.content.cache.UnionContentCacheEntry
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.listener.test.AbstractIntegrationTest
 import com.rarible.protocol.union.listener.test.IntegrationTest
@@ -23,7 +23,7 @@ import java.net.URL
 class UnionContentMetaProviderIt : AbstractIntegrationTest() {
 
     @Autowired
-    lateinit var unionContentMetaProvider: UnionContentMetaProvider
+    lateinit var unionContentMetaProvider: ContentMetaProvider
 
     @Autowired
     lateinit var contentCacheStorage: ContentCacheStorage

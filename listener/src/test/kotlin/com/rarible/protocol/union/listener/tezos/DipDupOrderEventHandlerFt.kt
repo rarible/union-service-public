@@ -6,7 +6,7 @@ import com.rarible.dipdup.client.core.model.DipDupOrder
 import com.rarible.dipdup.client.core.model.OrderStatus
 import com.rarible.dipdup.client.core.model.TezosPlatform
 import com.rarible.protocol.union.core.model.UnionMeta
-import com.rarible.protocol.union.enrichment.meta.UnionMetaLoader
+import com.rarible.protocol.union.enrichment.meta.item.ItemMetaLoader
 import com.rarible.protocol.union.integration.tezos.data.randomTezosNftItemDto
 import com.rarible.protocol.union.integration.tezos.data.randomTezosOrderDto
 import com.rarible.protocol.union.integration.tezos.data.randomTezosOwnershipDto
@@ -31,7 +31,7 @@ import java.util.*
 class DipDupOrderEventHandlerFt : AbstractDipDupIntegrationTest() {
 
     @Autowired
-    private lateinit var unionMetaLoader: UnionMetaLoader
+    private lateinit var itemMetaLoader: ItemMetaLoader
 
     @Test
     fun `should send dipdup order to outgoing topic`() = runWithKafka {
@@ -52,7 +52,7 @@ class DipDupOrderEventHandlerFt : AbstractDipDupIntegrationTest() {
 
         coEvery { ownershipClient.ownershipsByToken(any(), any(), any(), any()) } returns Page(emptyList(), null)
         coEvery { ownershipClient.ownershipById(any()) } returns tokenBalance()
-        coEvery { unionMetaLoader.load(any()) } returns UnionMeta("test")
+        coEvery { itemMetaLoader.load(any()) } returns UnionMeta("test")
 
         dipDupOrderProducer.send(
             KafkaMessage(

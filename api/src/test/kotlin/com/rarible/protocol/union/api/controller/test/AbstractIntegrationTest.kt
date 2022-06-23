@@ -22,7 +22,7 @@ import com.rarible.protocol.order.api.client.OrderActivityControllerApi
 import com.rarible.protocol.union.dto.CollectionEventDto
 import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
-import com.rarible.protocol.union.enrichment.meta.UnionMetaLoader
+import com.rarible.protocol.union.enrichment.meta.item.ItemMetaLoader
 import com.rarible.protocol.union.integration.ethereum.mock.EthActivityControllerApiMock
 import com.rarible.protocol.union.integration.ethereum.mock.EthAuctionControllerApiMock
 import com.rarible.protocol.union.integration.ethereum.mock.EthItemControllerApiMock
@@ -31,7 +31,6 @@ import com.rarible.protocol.union.integration.ethereum.mock.EthOwnershipControll
 import com.rarible.protocol.union.integration.flow.mock.FlowItemControllerApiMock
 import com.rarible.protocol.union.integration.flow.mock.FlowOrderControllerApiMock
 import com.rarible.protocol.union.integration.flow.mock.FlowOwnershipControllerApiMock
-import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktItemService
 import com.rarible.protocol.union.integration.tezos.mock.TezosItemControllerApiMock
 import com.rarible.protocol.union.integration.tezos.mock.TezosOrderControllerApiMock
 import com.rarible.protocol.union.integration.tezos.mock.TezosOwnershipControllerApiMock
@@ -75,7 +74,7 @@ abstract class AbstractIntegrationTest {
 
     @Autowired
     @Qualifier("test.union.meta.loader")
-    lateinit var testUnionMetaLoader: UnionMetaLoader
+    lateinit var testItemMetaLoader: ItemMetaLoader
 
     //--------------------- CURRENCY ---------------------//
 
@@ -259,7 +258,7 @@ abstract class AbstractIntegrationTest {
             testItemEventProducer,
             testOwnershipEventProducer,
 
-            testUnionMetaLoader
+            testItemMetaLoader
         )
         ethereumItemControllerApiMock = EthItemControllerApiMock(testEthereumItemApi)
         ethereumOwnershipControllerApiMock = EthOwnershipControllerApiMock(testEthereumOwnershipApi)

@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.enrichment.meta
+package com.rarible.protocol.union.enrichment.meta.item
 
 import com.rarible.core.apm.SpanType
 import com.rarible.core.apm.withSpan
@@ -8,18 +8,20 @@ import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.core.util.LogUtils
 import com.rarible.protocol.union.dto.ItemIdDto
+import com.rarible.protocol.union.enrichment.meta.content.ContentMetaDownloader
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
 
+// TODO refactor with ItemMetaDownloader
 @Component
-class UnionMetaLoader(
+class ItemMetaLoader(
     private val router: BlockchainRouter<ItemService>,
-    private val unionContentMetaLoader: UnionContentMetaLoader,
-    private val metrics: UnionMetaMetrics
+    private val unionContentMetaLoader: ContentMetaDownloader,
+    private val metrics: ItemMetaMetrics
 ) {
 
-    private val logger = LoggerFactory.getLogger(UnionMetaLoader::class.java)
+    private val logger = LoggerFactory.getLogger(ItemMetaLoader::class.java)
 
     suspend fun load(itemId: ItemIdDto): UnionMeta? = LogUtils.addToMdc(itemId, router) {
         val unionMeta = withSpan(
