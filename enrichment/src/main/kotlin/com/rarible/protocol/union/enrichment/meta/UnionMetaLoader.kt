@@ -37,7 +37,8 @@ class UnionMetaLoader(
             name = "enrichContentMeta",
             labels = listOf("itemId" to itemId.fullId())
         ) {
-            val content = unionContentMetaLoader.enrichContent(itemId, unionMeta.content)
+            val notBlank = unionMeta.content.filter { it.url.isNotBlank() }
+            val content = unionContentMetaLoader.enrichContent(itemId, notBlank)
             unionMeta.copy(content = content)
         }
     }
