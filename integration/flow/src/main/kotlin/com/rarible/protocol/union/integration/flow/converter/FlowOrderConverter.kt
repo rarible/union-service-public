@@ -19,7 +19,6 @@ import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
-import java.math.BigDecimal
 
 @Component
 class FlowOrderConverter(
@@ -79,7 +78,7 @@ class FlowOrderConverter(
             takePriceUsd = takePriceUsd,
             data = convert(order.data, blockchain),
             salt = "",// Not supported on Flow
-            dbUpdatedAt = order.lastUpdateAt // TODO change to dbUPdatedAt after Flow Api fix
+            dbUpdatedAt = order.dbUpdatedAt
         )
     }
 
