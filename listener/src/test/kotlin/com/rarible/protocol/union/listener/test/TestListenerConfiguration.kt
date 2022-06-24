@@ -6,6 +6,7 @@ import com.rarible.core.kafka.RaribleKafkaConsumer
 import com.rarible.core.kafka.RaribleKafkaProducer
 import com.rarible.core.test.ext.KafkaTestExtension.Companion.kafkaContainer
 import com.rarible.dipdup.client.core.model.DipDupActivity
+import com.rarible.dipdup.client.core.model.DipDupCollection
 import com.rarible.dipdup.client.core.model.DipDupOrder
 import com.rarible.dipdup.listener.config.DipDupTopicProvider
 import com.rarible.protocol.currency.api.client.CurrencyControllerApi
@@ -201,6 +202,17 @@ class TestListenerConfiguration {
             valueSerializerClass = UnionKafkaJsonSerializer::class.java,
             valueClass = DipDupActivity::class.java,
             defaultTopic = "${DipDupTopicProvider.ACTIVITY}_",
+            bootstrapServers = kafkaContainer.kafkaBoostrapServers()
+        )
+    }
+
+    @Bean
+    fun testDipDupCollectionEventProducer(): RaribleKafkaProducer<DipDupCollection> {
+        return RaribleKafkaProducer(
+            clientId = "test.union.ethereum.collection",
+            valueSerializerClass = UnionKafkaJsonSerializer::class.java,
+            valueClass = DipDupCollection::class.java,
+            defaultTopic = "${DipDupTopicProvider.COLLECTION}_",
             bootstrapServers = kafkaContainer.kafkaBoostrapServers()
         )
     }

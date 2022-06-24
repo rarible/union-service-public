@@ -4,7 +4,9 @@ import com.rarible.core.test.data.randomInt
 import com.rarible.core.test.data.randomString
 import com.rarible.dipdup.client.core.model.Asset
 import com.rarible.dipdup.client.core.model.DipDupActivity
+import com.rarible.dipdup.client.core.model.DipDupCollection
 import com.rarible.dipdup.client.core.model.DipDupOrderListActivity
+import com.rarible.dipdup.client.core.model.EventType
 import com.rarible.dipdup.client.core.model.TezosPlatform
 import com.rarible.tzkt.model.ActivityType
 import com.rarible.tzkt.model.Alias
@@ -60,5 +62,22 @@ fun randomTzktItemMintActivity(activityId: String): TypedTokenActivity {
             amount = "1",
             transactionId = randomInt()
         )
+    )
+}
+
+fun randomDipDupCollectionEvent(collectionId: String): DipDupCollection {
+    return DipDupCollection(
+        id = UUID.randomUUID(),
+        network = "test",
+        eventId = randomString(),
+        collection = DipDupCollection.Collection(
+            id = collectionId,
+            owner = randomString(),
+            name = randomString(),
+            minters = emptyList(),
+            standard = "fa2",
+            symbol = null
+        ),
+        type = EventType.UPDATED
     )
 }

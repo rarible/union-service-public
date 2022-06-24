@@ -51,8 +51,8 @@ object TzktCollectionConverter {
     }
 
     private fun convertType(tzips: List<String>?): CollectionDto.Type {
-        return tzips?.let { if (it.contains("fa2")) CollectionDto.Type.TEZOS_NFT else null }
-            ?: CollectionDto.Type.TEZOS_MT
+        return tzips?.let { if (it.contains("fa2")) CollectionDto.Type.TEZOS_MT else null }
+            ?: CollectionDto.Type.TEZOS_NFT
     }
 
     private fun owner(source: Contract, blockchain: BlockchainDto): UnionAddress? {
@@ -61,7 +61,7 @@ object TzktCollectionConverter {
 
     private fun features(source: Contract): List<CollectionDto.Features> {
         return when(convertType(source.tzips)) {
-            CollectionDto.Type.TEZOS_NFT -> listOf(CollectionDto.Features.SECONDARY_SALE_FEES, CollectionDto.Features.BURN)
+            CollectionDto.Type.TEZOS_MT -> listOf(CollectionDto.Features.SECONDARY_SALE_FEES, CollectionDto.Features.BURN)
             else -> emptyList()
         }
     }
