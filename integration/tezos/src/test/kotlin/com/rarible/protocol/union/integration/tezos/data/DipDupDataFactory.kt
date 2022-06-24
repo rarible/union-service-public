@@ -78,6 +78,6 @@ fun randomDipDupCollectionEvent(collectionId: String): DipDupCollection {
             standard = "fa2",
             symbol = null
         ),
-        type = EventType.UPDATED
+        type = EventType.UPDATE
     )
 }
