@@ -3,19 +3,23 @@ package com.rarible.protocol.union.integration.tezos.dipdup
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.rarible.core.application.ApplicationEnvironmentInfo
 import com.rarible.dipdup.client.core.model.DipDupActivity
+import com.rarible.dipdup.client.core.model.DipDupCollection
 import com.rarible.dipdup.client.core.model.DipDupOrder
 import com.rarible.dipdup.listener.config.DipDupEventsConsumerFactory
 import com.rarible.protocol.union.core.ConsumerFactory
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.handler.KafkaConsumerWorker
+import com.rarible.protocol.union.core.model.UnionCollectionEvent
 import com.rarible.protocol.union.core.model.UnionItemEvent
 import com.rarible.protocol.union.core.model.UnionOrderEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipEvent
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.integration.tezos.TezosIntegrationProperties
 import com.rarible.protocol.union.integration.tezos.dipdup.converter.DipDupActivityConverter
+import com.rarible.protocol.union.integration.tezos.dipdup.converter.DipDupCollectionConverter
 import com.rarible.protocol.union.integration.tezos.dipdup.converter.DipDupOrderConverter
 import com.rarible.protocol.union.integration.tezos.dipdup.event.DipDupActivityEventHandler
+import com.rarible.protocol.union.integration.tezos.dipdup.event.DipDupCollectionEventHandler
 import com.rarible.protocol.union.integration.tezos.dipdup.event.DipDupOrderEventHandler
 import com.rarible.protocol.union.integration.tezos.dipdup.event.DipDupTransfersEventHandler
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktItemService
@@ -98,6 +102,24 @@ class DipDupConsumerConfiguration(
     ): KafkaConsumerWorker<DipDupActivity> {
         val consumer = factory.createActivityConsumer(dipdupGroup(consumerFactory.activityGroup))
         return consumerFactory.createActivityConsumer(consumer, handler, daemon, workers)
+    }
+
+    @Bean
+    fun dipDupCollectionEventHandler(
+        handler: IncomingEventHandler<UnionCollectionEvent>,
+        converter: DipDupCollectionConverter,
+        mapper: ObjectMapper
+    ): DipDupCollectionEventHandler {
+        return DipDupCollectionEventHandler(handler, converter, mapper)
+    }
+
+    @Bean
+    fun dipDupCollectionEventWorker(
+        factory: DipDupEventsConsumerFactory,
+        handler: DipDupCollectionEventHandler
+    ): KafkaConsumerWorker<DipDupCollection> {
+        val consumer = factory.createCollectionConsumer(dipdupGroup(consumerFactory.collectionGroup))
+        return consumerFactory.createCollectionConsumer(consumer, handler, daemon, workers)
     }
 
     private fun dipdupGroup(group: String) = "dipdup.$group"
