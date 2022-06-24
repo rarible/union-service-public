@@ -9,6 +9,9 @@ import com.rarible.protocol.union.core.model.EsOwnership
 
 object EsEntitiesConfig {
 
+    /**
+     * For test purposes only.
+     */
     fun createEsEntities(): List<EntityDefinition> = listOf(
         EsActivity.ENTITY_DEFINITION,
         EsCollection.ENTITY_DEFINITION,
@@ -20,6 +23,7 @@ object EsEntitiesConfig {
     fun prodEsEntities(): List<EntityDefinition> = listOf(
         EsActivity.ENTITY_DEFINITION,
         EsCollection.ENTITY_DEFINITION,
+        EsOwnership.ENTITY_DEFINITION,
         EsItem.ENTITY_DEFINITION,
     )
 
