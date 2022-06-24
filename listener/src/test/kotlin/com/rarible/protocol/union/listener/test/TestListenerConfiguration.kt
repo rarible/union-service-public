@@ -187,7 +187,7 @@ class TestListenerConfiguration {
     @Bean
     fun testDipDupOrderEventProducer(): RaribleKafkaProducer<DipDupOrder> {
         return RaribleKafkaProducer(
-            clientId = "test.union.ethereum.order",
+            clientId = "test.union.tezos.order",
             valueSerializerClass = UnionKafkaJsonSerializer::class.java,
             valueClass = DipDupOrder::class.java,
             defaultTopic = "${DipDupTopicProvider.ORDER}_",
@@ -198,7 +198,7 @@ class TestListenerConfiguration {
     @Bean
     fun testDipDupActivityEventProducer(): RaribleKafkaProducer<DipDupActivity> {
         return RaribleKafkaProducer(
-            clientId = "test.union.ethereum.activity",
+            clientId = "test.union.tezos.activity",
             valueSerializerClass = UnionKafkaJsonSerializer::class.java,
             valueClass = DipDupActivity::class.java,
             defaultTopic = "${DipDupTopicProvider.ACTIVITY}_",
@@ -209,7 +209,7 @@ class TestListenerConfiguration {
     @Bean
     fun testDipDupCollectionEventProducer(): RaribleKafkaProducer<DipDupCollection> {
         return RaribleKafkaProducer(
-            clientId = "test.union.ethereum.collection",
+            clientId = "test.union.tezos.collection",
             valueSerializerClass = UnionKafkaJsonSerializer::class.java,
             valueClass = DipDupCollection::class.java,
             defaultTopic = "${DipDupTopicProvider.COLLECTION}_",

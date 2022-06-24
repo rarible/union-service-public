@@ -118,8 +118,8 @@ class DipDupConsumerConfiguration(
         factory: DipDupEventsConsumerFactory,
         handler: DipDupCollectionEventHandler
     ): KafkaConsumerWorker<DipDupCollection> {
-        val consumer = factory.createCollectionConsumer(dipdupGroup(consumerFactory.activityGroup))
-        return consumerFactory.createActivityConsumer(consumer, handler, daemon, workers)
+        val consumer = factory.createCollectionConsumer(dipdupGroup(consumerFactory.collectionGroup))
+        return consumerFactory.createCollectionConsumer(consumer, handler, daemon, workers)
     }
 
     private fun dipdupGroup(group: String) = "dipdup.$group"
