@@ -7,6 +7,7 @@ import com.rarible.protocol.tezos.dto.PartDto
 import com.rarible.protocol.tezos.dto.XTZAssetTypeDto
 import com.rarible.protocol.union.core.converter.ContractAddressConverter
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
+import com.rarible.protocol.union.core.exception.ContractFormatException
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.AssetDto
 import com.rarible.protocol.union.dto.AssetTypeDto
@@ -16,6 +17,8 @@ import com.rarible.protocol.union.dto.TezosFTAssetTypeDto
 import com.rarible.protocol.union.dto.TezosMTAssetTypeDto
 import com.rarible.protocol.union.dto.TezosNFTAssetTypeDto
 import com.rarible.protocol.union.dto.TezosXTZAssetTypeDto
+import com.rarible.protocol.union.dto.UnionAddress
+import com.rarible.protocol.union.dto.parser.IdParser
 
 object TezosConverter {
 
@@ -63,6 +66,15 @@ object TezosConverter {
             account = UnionAddressConverter.convert(blockchain, source.account),
             value = source.value
         )
+    }
+
+    fun maker(blockchain: BlockchainDto, source: String): UnionAddress {
+        return try {
+            UnionAddressConverter.convert(blockchain, source)
+            // There's a bug in legacy indexer, it sends address with blockchain
+        } catch (e: ContractFormatException) {
+            return IdParser.parseAddress(source)
+        }
     }
 
 }
