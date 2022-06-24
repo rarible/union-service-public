@@ -139,27 +139,30 @@ class TezosPgActivityService(
     private fun convertList(row: Row): OrderActTypeDto {
         val id = row.get("id", String::class.java)
         val hash = row.get("hash", String::class.java)
+        val makeAssetType = assetType(TYPE.MAKE, row)
         val makeValue = price(TYPE.MAKE, row)
-        val takePrice = price(TYPE.TAKE, row)
+        val takeAssetValue = assetType(TYPE.TAKE, row)
+        val takeValue = price(TYPE.TAKE, row)
+        val price = price(makeAssetType, makeValue, takeValue)
         val subType = when (ACTIVITY_TYPE.get(row.get("order_activity_type", String::class.java))) {
             ACTIVITY_TYPE.LIST -> OrderActivityListDto(
-                price = takePrice,
+                price = price,
                 hash = hash,
                 maker = row.get("maker", String::class.java),
                 make = AssetDto(
-                    assetType = assetType(TYPE.MAKE, row),
+                    assetType = makeAssetType,
                     value = makeValue
                 ),
                 take = AssetDto(
-                    assetType = assetType(TYPE.TAKE, row),
-                    value = takePrice
+                    assetType = takeAssetValue,
+                    value = takeValue
                 ),
             )
             ACTIVITY_TYPE.CANCEL_LIST -> OrderActivityCancelListDto(
                 hash = hash,
                 maker = row.get("maker", String::class.java),
-                make = assetType(TYPE.MAKE, row),
-                take = assetType(TYPE.TAKE, row),
+                make = makeAssetType,
+                take = takeAssetValue,
 
                 // deprecated
                 transactionHash = hash,
