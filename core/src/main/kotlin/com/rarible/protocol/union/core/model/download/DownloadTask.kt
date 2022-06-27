@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.enrichment.meta.downloader.model
+package com.rarible.protocol.union.core.model.download
 
 import java.time.Instant
 

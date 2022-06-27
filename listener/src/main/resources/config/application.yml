@@ -187,6 +187,10 @@ listener:
   reconcile-marks:
     enabled: true
     rate: PT15S
+  meta-scheduling:
+    item:
+      workers: 4
+      batchSize: 16
   metrics:
     root-path: "protocol.union.listener"
 

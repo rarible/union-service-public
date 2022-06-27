@@ -1,9 +1,12 @@
 package com.rarible.protocol.union.listener.config
 
 import com.rarible.core.daemon.DaemonWorkerProperties
+import com.rarible.core.daemon.sequential.ConsumerBatchWorker
 import com.rarible.core.daemon.sequential.ConsumerWorker
 import com.rarible.core.kafka.RaribleKafkaConsumer
 import com.rarible.protocol.union.core.handler.BatchedConsumerWorker
+import com.rarible.protocol.union.core.handler.InternalBatchEventHandler
+import com.rarible.protocol.union.core.handler.InternalBatchEventHandlerWrapper
 import com.rarible.protocol.union.core.handler.InternalEventHandler
 import com.rarible.protocol.union.core.handler.InternalEventHandlerWrapper
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -71,6 +74,25 @@ class InternalConsumerFactory(
                 consumer = consumer(it),
                 properties = daemonWorkerProperties,
                 eventHandler = InternalEventHandlerWrapper(handler),
+                meterRegistry = meterRegistry,
+                workerName = "internal-${type}-$it"
+            )
+        }
+        return BatchedConsumerWorker(workerSet)
+    }
+
+    fun <T> createInternalBatchedConsumerWorker(
+        consumer: (i: Int) -> RaribleKafkaConsumer<T>,
+        handler: InternalBatchEventHandler<T>,
+        daemonWorkerProperties: DaemonWorkerProperties,
+        workers: Int,
+        type: String
+    ): BatchedConsumerWorker<T> {
+        val workerSet = (1..workers).map {
+            ConsumerBatchWorker(
+                consumer = consumer(it),
+                properties = daemonWorkerProperties,
+                eventHandler = InternalBatchEventHandlerWrapper(handler),
                 meterRegistry = meterRegistry,
                 workerName = "internal-${type}-$it"
             )

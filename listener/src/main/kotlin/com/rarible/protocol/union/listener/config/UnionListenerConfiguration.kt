@@ -2,6 +2,7 @@ package com.rarible.protocol.union.listener.config
 
 import com.github.cloudyrock.spring.v5.EnableMongock
 import com.rarible.core.application.ApplicationEnvironmentInfo
+import com.rarible.core.daemon.DaemonWorkerProperties
 import com.rarible.core.kafka.RaribleKafkaConsumer
 import com.rarible.core.task.EnableRaribleTask
 import com.rarible.protocol.union.core.FeatureFlagsProperties
@@ -15,8 +16,10 @@ import com.rarible.protocol.union.core.model.OrderEventDelayMetric
 import com.rarible.protocol.union.core.model.OwnershipEventDelayMetric
 import com.rarible.protocol.union.core.model.ReconciliationMarkEvent
 import com.rarible.protocol.union.core.model.UnionInternalBlockchainEvent
+import com.rarible.protocol.union.core.model.download.DownloadTask
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.configuration.EnrichmentConsumerConfiguration
+import com.rarible.protocol.union.listener.handler.downloader.ItemMetaTaskScheduleHandler
 import com.rarible.protocol.union.listener.job.BestOrderCheckJob
 import com.rarible.protocol.union.listener.job.BestOrderCheckJobHandler
 import com.rarible.protocol.union.listener.job.ReconciliationMarkJob
@@ -155,6 +158,38 @@ class UnionListenerConfiguration(
             handler = handler,
             daemon = listenerProperties.monitoringWorker,
             workers = 1
+        )
+    }
+
+    private fun createDownloadTaskConsumer(
+        index: Int,
+        clientIdSuffix: String,
+        topic: String
+    ): RaribleKafkaConsumer<DownloadTask> {
+        return RaribleKafkaConsumer(
+            clientId = "$clientIdPrefix.union-$clientIdSuffix-$index",
+            valueDeserializerClass = UnionKafkaJsonDeserializer::class.java,
+            valueClass = DownloadTask::class.java,
+            consumerGroup = consumerGroup("internal"),
+            defaultTopic = topic,
+            bootstrapServers = properties.brokerReplicaSet,
+            offsetResetStrategy = OffsetResetStrategy.EARLIEST
+        )
+    }
+
+    @Bean
+    fun itemMetaDownloadScheduleWorker(
+        handler: ItemMetaTaskScheduleHandler
+    ): BatchedConsumerWorker<DownloadTask> {
+        val properties = listenerProperties.metaScheduling.item
+        val clientIdSuffix = "item-meta-task-scheduler"
+        val topic = UnionInternalTopicProvider.getItemMetaDownloadTaskSchedulerTopic(env)
+        return consumerFactory.createInternalBatchedConsumerWorker(
+            consumer = { index -> createDownloadTaskConsumer(index, clientIdSuffix, topic) },
+            handler = handler,
+            daemonWorkerProperties = DaemonWorkerProperties(consumerBatchSize = properties.batchSize),
+            workers = properties.workers,
+            type = "item-meta-task-scheduler"
         )
     }
 

@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.enrichment.meta.downloader
 
+import com.rarible.protocol.union.core.model.download.DownloadEntry
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactor.awaitSingle
@@ -12,13 +13,12 @@ import org.springframework.data.mongodb.core.query.inValues
 import org.springframework.data.mongodb.core.query.isEqualTo
 
 abstract class DownloadEntryRepository<T>(
-    protected val template: ReactiveMongoTemplate
+    protected val template: ReactiveMongoTemplate,
+    protected val collection: String
 ) {
 
-    abstract val collection: String
-
     suspend fun save(entry: DownloadEntry<T>): DownloadEntry<T> {
-        return template.save(entry).awaitFirst()
+        return template.save(entry, collection).awaitFirst()
     }
 
     suspend fun get(id: String): DownloadEntry<T>? {
@@ -27,7 +27,7 @@ abstract class DownloadEntryRepository<T>(
 
     suspend fun getAll(ids: Collection<String>): List<DownloadEntry<T>> {
         val criteria = Criteria("_id").inValues(ids)
-        return template.find<DownloadEntry<T>>(Query(criteria)).collectList().awaitFirst()
+        return template.find<DownloadEntry<T>>(Query(criteria), collection).collectList().awaitFirst()
     }
 
     suspend fun delete(id: String): Boolean {

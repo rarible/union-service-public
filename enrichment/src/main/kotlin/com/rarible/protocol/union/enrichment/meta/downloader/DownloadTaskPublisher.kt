@@ -1,12 +1,19 @@
 package com.rarible.protocol.union.enrichment.meta.downloader
 
-import com.rarible.protocol.union.enrichment.meta.downloader.model.DownloadTask
+import com.rarible.core.kafka.RaribleKafkaProducer
+import com.rarible.protocol.union.core.event.KafkaEventFactory
+import com.rarible.protocol.union.core.model.download.DownloadTask
+import kotlinx.coroutines.flow.collect
 
 /**
- * Publisher bringing tasks to the DownloadScheduler.
+ * Publisher of the tasks to the scheduler
  */
-interface DownloadTaskPublisher {
+abstract class DownloadTaskPublisher(
+    private val producer: RaribleKafkaProducer<DownloadTask>
+) {
 
-    suspend fun publish(tasks: List<DownloadTask>)
+    suspend fun publish(tasks: List<DownloadTask>) {
+        producer.send(tasks.map { KafkaEventFactory.downloadTaskEvent(it) }).collect()
+    }
 
 }
