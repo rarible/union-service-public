@@ -3,19 +3,22 @@ package com.rarible.protocol.union.search.indexer.handler
 import com.rarible.core.common.nowMillis
 import com.rarible.core.daemon.sequential.ConsumerBatchEventHandler
 import com.rarible.core.logging.Logger
-import com.rarible.protocol.union.dto.ActivityDto
+import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.converter.EsActivityConverter
 import com.rarible.protocol.union.core.model.EsActivity
 import com.rarible.protocol.union.core.model.elasticsearch.EsEntity
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
+import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
 import com.rarible.protocol.union.search.indexer.metrics.IndexerMetricFactory
+import org.elasticsearch.action.support.WriteRequest
 import org.springframework.stereotype.Service
 
 @Service
 class ActivityEventHandler(
+    private val featureFlagsProperties: FeatureFlagsProperties,
     private val repository: EsActivityRepository,
     private val router: BlockchainRouter<ItemService>,
     metricFactory: IndexerMetricFactory,
@@ -47,12 +50,19 @@ class ActivityEventHandler(
         val convertedEvents = EsActivityConverter.batchConvert(normalEvents, router)
 
         if (convertedEvents.isNotEmpty()) {
-            repository.saveAll(convertedEvents)
+            val refreshPolicy =
+                if (featureFlagsProperties.enableItemSaveImmediateToElasticSearch) {
+                    WriteRequest.RefreshPolicy.IMMEDIATE
+                }
+                else {
+                    WriteRequest.RefreshPolicy.NONE
+                }
+            repository.saveAll(convertedEvents, refreshPolicy = refreshPolicy)
             countSaves(convertedEvents)
             logger.info("Saved ${convertedEvents.size} activities")
         }
         if (revertedEvents.isNotEmpty()) {
-            val deleted = repository.delete(revertedEvents.map { it.id.toString() })
+            val deleted = repository.deleteAll(revertedEvents.map { it.id.toString() })
             logger.info("Deleted $deleted activities")
         }
         val elapsedTime = nowMillis().minusMillis(startTime.toEpochMilli()).toEpochMilli()

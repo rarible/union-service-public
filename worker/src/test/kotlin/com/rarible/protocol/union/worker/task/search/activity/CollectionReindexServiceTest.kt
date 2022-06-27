@@ -36,7 +36,7 @@ class CollectionReindexServiceTest {
 
     private val esRepo = mockk<EsCollectionRepository> {
         coEvery {
-            saveAll(any(), any())
+            saveAll(any(), any(), any())
         } answers { arg(0) }
     }
 

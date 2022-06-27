@@ -6,6 +6,7 @@ import com.rarible.core.kafka.RaribleKafkaProducer
 import com.rarible.core.test.ext.KafkaTestExtension
 import com.rarible.protocol.flow.nft.api.client.FlowNftItemControllerApi
 import com.rarible.protocol.nft.api.client.NftItemControllerApi
+import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.ActivityDto
@@ -31,7 +32,6 @@ import com.rarible.protocol.union.subscriber.UnionKafkaJsonSerializer
 import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import io.mockk.mockk
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Lazy
@@ -62,16 +62,17 @@ class TestIndexerConfiguration {
 
     @Bean
     fun activityHandler(
+        featureFlagsProperties: FeatureFlagsProperties,
         repository: EsActivityRepository,
         blockchainRouter: BlockchainRouter<ItemService>,
         indexerMetricFactory: IndexerMetricFactory
     ): ConsumerBatchEventHandler<ActivityDto> {
-        return ActivityEventHandler(repository, blockchainRouter, indexerMetricFactory)
+        return ActivityEventHandler(featureFlagsProperties, repository, blockchainRouter, indexerMetricFactory)
     }
 
     @Bean
     fun orderHandler(repository: EsOrderRepository): ConsumerBatchEventHandler<OrderEventDto> {
-        return OrderEventHandler(repository)
+        return OrderEventHandler(FeatureFlagsProperties(), repository)
     }
 
     @Bean
@@ -79,17 +80,17 @@ class TestIndexerConfiguration {
         repository: EsCollectionRepository,
         indexerMetricFactory: IndexerMetricFactory
     ): ConsumerBatchEventHandler<CollectionEventDto> {
-        return CollectionEventHandler(repository, indexerMetricFactory)
+        return CollectionEventHandler(FeatureFlagsProperties(), repository, indexerMetricFactory)
     }
 
     @Bean
     fun ownershipHandler(repository: EsOwnershipRepository): ConsumerBatchEventHandler<OwnershipEventDto> {
-        return OwnershipEventHandler(repository)
+        return OwnershipEventHandler(FeatureFlagsProperties(), repository)
     }
 
     @Bean
     fun itemHandler(repository: EsItemRepository): ConsumerBatchEventHandler<ItemEventDto> {
-        return ItemEventHandler(repository)
+        return ItemEventHandler(FeatureFlagsProperties(), repository)
     }
 
     //---------------- UNION producers ----------------//
