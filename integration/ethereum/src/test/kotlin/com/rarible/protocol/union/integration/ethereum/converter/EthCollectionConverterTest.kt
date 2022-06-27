@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.integration.ethereum.converter
 
+import com.rarible.protocol.dto.ImageContentDto
 import com.rarible.protocol.dto.NftCollectionDto
 import com.rarible.protocol.union.core.model.UnionImageProperties
 import com.rarible.protocol.union.core.model.UnionMetaContent
@@ -72,17 +73,17 @@ class EthCollectionConverterTest {
         val contentImage = meta.content.first()
 
         assertThat(contentImage).isExactlyInstanceOf(UnionMetaContent::class.java)
-        val originalUrl = originalMeta.image!!.url.values.first()
-        val originalMediaMeta = originalMeta.image!!.meta.values.first()
-        assertThat(contentImage.url).isEqualTo(originalUrl)
+
+        val expected = dto.meta!!.content[0] as ImageContentDto
+        assertThat(contentImage.url).isEqualTo(expected.url)
         assertThat(contentImage.representation).isEqualTo(MetaContentDto.Representation.ORIGINAL)
 
         val properties = contentImage.properties!!
         assertThat(properties).isExactlyInstanceOf(UnionImageProperties::class.java)
         properties as UnionImageProperties
-        assertThat(properties.mimeType).isEqualTo(originalMediaMeta.type)
-        assertThat(properties.width).isEqualTo(originalMediaMeta.width)
-        assertThat(properties.height).isEqualTo(originalMediaMeta.height)
-        assertThat(properties.size).isNull()
+        assertThat(properties.mimeType).isEqualTo(expected.mimeType)
+        assertThat(properties.width).isEqualTo(expected.width)
+        assertThat(properties.height).isEqualTo(expected.height)
+        assertThat(properties.size).isEqualTo(expected.size)
     }
 }

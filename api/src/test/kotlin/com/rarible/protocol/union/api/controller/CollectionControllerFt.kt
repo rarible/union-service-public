@@ -251,8 +251,8 @@ class CollectionControllerFt : AbstractIntegrationTest() {
                 else -> NftItemsDto(0, null, emptyList()).justOrEmpty()
             }
         }
-        coEvery { testItemMetaLoader.load(itemId1) } returns EthMetaConverter.convert(item1.meta!!)
-        coEvery { testItemMetaLoader.load(itemId2) } returns EthMetaConverter.convert(item2.meta!!)
+//        coEvery { testItemMetaLoader.load(itemId1) } returns EthMetaConverter.convert(item1.meta!!)
+//        coEvery { testItemMetaLoader.load(itemId2) } returns EthMetaConverter.convert(item2.meta!!)
 
         collectionControllerClient.refreshCollectionMeta(collectionId.fullId()).awaitFirstOrNull()
 

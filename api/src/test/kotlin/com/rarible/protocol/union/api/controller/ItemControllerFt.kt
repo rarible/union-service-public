@@ -5,10 +5,12 @@ import com.rarible.core.test.data.randomAddress
 import com.rarible.core.test.data.randomInt
 import com.rarible.core.test.data.randomString
 import com.rarible.loader.cache.CacheLoaderService
+import com.rarible.protocol.dto.ImageContentDto
+import com.rarible.protocol.dto.MetaContentDto
 import com.rarible.protocol.dto.NftItemRoyaltyDto
 import com.rarible.protocol.dto.NftItemRoyaltyListDto
-import com.rarible.protocol.dto.NftMediaDto
 import com.rarible.protocol.dto.RaribleAuctionV1Dto
+import com.rarible.protocol.dto.VideoContentDto
 import com.rarible.protocol.union.api.client.ItemControllerApi
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
@@ -33,7 +35,6 @@ import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConvert
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAddress
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAuctionDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
-import com.rarible.protocol.union.integration.ethereum.data.randomEthItemMediaMeta
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemMeta
 import com.rarible.protocol.union.integration.ethereum.data.randomEthNftItemDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipDto
@@ -145,9 +146,16 @@ class ItemControllerFt : AbstractIntegrationTest() {
         val itemId = randomEthItemId()
         val imageUrl = "https://rarible.mypinata.cloud/ipfs/QfgdfgajhkjkP97RAnx443626262VNFDotF9U4Jkac567457/image.png"
         val meta = randomEthItemMeta().copy(
-            image = NftMediaDto(
-                url = mapOf(Pair("ORIGINAL", imageUrl)),
-                meta = mapOf(Pair("ORIGINAL", randomEthItemMediaMeta("image/png")))
+            content = listOf(
+                ImageContentDto(
+                    fileName = null,
+                    url = imageUrl,
+                    representation = MetaContentDto.Representation.ORIGINAL,
+                    mimeType = "image/png",
+                    size = null,
+                    width = null,
+                    height = null
+                )
             )
         )
 
@@ -159,13 +167,20 @@ class ItemControllerFt : AbstractIntegrationTest() {
     }
 
     @Test
-    fun `get item animation by id`() = runBlocking<Unit> {
+    fun `get item video by id`() = runBlocking<Unit> {
         val itemId = randomEthItemId()
-        val animationUrl = "https://rarible.mypinata.cloud/ipfs/Qmd72hpaFPnP97RAnxHKTCYb41ddVNFDotF9U4JkacsaLi/image.gif"
+        val videoUrl = "https://rarible.mypinata.cloud/ipfs/Qmd72hpaFPnP97RAnxHKTCYb41ddVNFDotF9U4JkacsaLi/image.gif"
         val meta = randomEthItemMeta().copy(
-            animation = NftMediaDto(
-                url = mapOf(Pair("ORIGINAL", animationUrl)),
-                meta = mapOf(Pair("ORIGINAL", randomEthItemMediaMeta("image/gif")))
+            content = listOf(
+                VideoContentDto(
+                    fileName = null,
+                    url = videoUrl,
+                    representation = MetaContentDto.Representation.ORIGINAL,
+                    mimeType = "image/gif",
+                    size = null,
+                    width = null,
+                    height = null
+                )
             )
         )
 
@@ -173,7 +188,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
 
         val response = restTemplate.getForEntity("${baseUri}/v0.1/items/${itemId.fullId()}/animation", String::class.java)
         assertThat(response.statusCode).isEqualTo(HttpStatus.TEMPORARY_REDIRECT)
-        assertThat(response.headers["Location"]).contains(animationUrl)
+        assertThat(response.headers["Location"]).contains(videoUrl)
     }
 
     @Test
@@ -266,7 +281,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
     }
 
     @Test
-    fun `reset item meta by id - tezos`() = runBlocking<Unit> {
+    fun `reset item meta by id - tezos`() = runBlocking {
         val itemId = randomTezosItemId()
 
         coEvery { testTezosItemApi.resetNftItemMetaById(itemId.value) } returns Mono.empty()
@@ -649,8 +664,8 @@ class ItemControllerFt : AbstractIntegrationTest() {
 
         val ethList = listOf(
             randomEthNftItemDto(itemIdWithMeta1),
-            randomEthNftItemDto(itemIdWithMeta2).copy(meta = null),
-            randomEthNftItemDto(itemIdWithoutMeta).copy(meta = null)
+            randomEthNftItemDto(itemIdWithMeta2),
+            randomEthNftItemDto(itemIdWithoutMeta)
         )
 
         ethereumItemControllerApiMock.mockGetNftAllItems(

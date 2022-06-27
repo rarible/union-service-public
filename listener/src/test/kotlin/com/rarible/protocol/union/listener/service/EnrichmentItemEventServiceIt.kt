@@ -21,10 +21,12 @@ import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrderDto
 import com.rarible.protocol.union.enrichment.util.bidCurrencyId
 import com.rarible.protocol.union.integration.ethereum.converter.EthAuctionConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthItemConverter
+import com.rarible.protocol.union.integration.ethereum.converter.EthMetaConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAuctionDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthBidOrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
+import com.rarible.protocol.union.integration.ethereum.data.randomEthItemMeta
 import com.rarible.protocol.union.integration.ethereum.data.randomEthNftItemDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthSellOrderDto
 import com.rarible.protocol.union.listener.test.AbstractIntegrationTest
@@ -165,7 +167,8 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         val itemId = randomEthItemId()
         val shortItem = randomShortItem(itemId).copy(sellers = 3, totalStock = 20.toBigInteger())
         val ethItem = randomEthNftItemDto(itemId)
-        val unionMeta = randomUnionMeta()
+        val ethMeta = randomEthItemMeta()
+        val unionMeta = EthMetaConverter.convert(ethMeta)
         val unionItem = EthItemConverter.convert(ethItem, itemId.blockchain)
         itemService.save(shortItem)
 
@@ -180,7 +183,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         ownershipService.save(ownership2)
 
         ethereumItemControllerApiMock.mockGetNftItemById(itemId, ethItem)
-        ethereumItemControllerApiMock.mockGetNftItemMetaById(itemId, ethItem.meta!!)
+        ethereumItemControllerApiMock.mockGetNftItemMetaById(itemId, ethMeta)
 
         itemEventService.onOwnershipUpdated(ownership1.id, bestSellOrder1)
 
@@ -228,6 +231,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         val itemId = randomEthItemId()
         val shortItem = randomShortItem(itemId)
         val ethItem = randomEthNftItemDto(itemId)
+        val ethMeta = randomEthItemMeta()
         val unionItem = EthItemConverter.convert(ethItem, itemId.blockchain)
         itemService.save(shortItem)
 
@@ -235,7 +239,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         val unionBestSell = ethOrderConverter.convert(bestSellOrder, itemId.blockchain)
 
         ethereumItemControllerApiMock.mockGetNftItemById(itemId, ethItem)
-        ethereumItemControllerApiMock.mockGetNftItemMetaById(itemId, ethItem.meta!!)
+        ethereumItemControllerApiMock.mockGetNftItemMetaById(itemId, ethMeta)
 
         itemEventService.onItemBestSellOrderUpdated(shortItem.id, unionBestSell)
 
@@ -265,10 +269,11 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
 
         val shortItem = randomShortItem(itemId).copy(bestBidOrder = ShortOrderConverter.convert(unionBestBid))
         val ethItem = randomEthNftItemDto(itemId)
+        val ethMeta = randomEthItemMeta()
         itemService.save(shortItem)
 
         ethereumItemControllerApiMock.mockGetNftItemById(itemId, ethItem)
-        ethereumItemControllerApiMock.mockGetNftItemMetaById(itemId, ethItem.meta!!)
+        ethereumItemControllerApiMock.mockGetNftItemMetaById(itemId, ethMeta)
         ethereumOrderControllerApiMock.mockGetOrderBidsByItemAndByStatus(itemId, unionBestBid.bidCurrencyId)
 
         itemEventService.onItemBestBidOrderUpdated(shortItem.id, unionBestBid)
@@ -363,6 +368,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
     fun `on auction update`() = runWithKafka {
         val itemId = randomEthItemId()
         val ethItem = randomEthNftItemDto(itemId)
+        val ethMeta = randomEthItemMeta()
 
         val unionItem = EthItemConverter.convert(ethItem, itemId.blockchain)
         val shortItem = ShortItemConverter.convert(unionItem)
@@ -370,7 +376,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         itemService.save(shortItem)
 
         ethereumItemControllerApiMock.mockGetNftItemById(itemId, ethItem)
-        ethereumItemControllerApiMock.mockGetNftItemMetaById(itemId, ethItem.meta!!)
+        ethereumItemControllerApiMock.mockGetNftItemMetaById(itemId, ethMeta)
 
         itemEventService.onAuctionUpdated(auction)
 
@@ -389,6 +395,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
     fun `on auction update - inactive removed`() = runWithKafka {
         val itemId = randomEthItemId()
         val ethItem = randomEthNftItemDto(itemId)
+        val ethMeta = randomEthItemMeta()
 
         val auction = ethAuctionConverter.convert(randomEthAuctionDto(itemId), BlockchainDto.ETHEREUM)
             .copy(status = AuctionStatusDto.CANCELLED)
@@ -400,7 +407,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         itemService.save(shortItem)
 
         ethereumItemControllerApiMock.mockGetNftItemById(itemId, ethItem)
-        ethereumItemControllerApiMock.mockGetNftItemMetaById(itemId, ethItem.meta!!)
+        ethereumItemControllerApiMock.mockGetNftItemMetaById(itemId, ethMeta)
 
         itemEventService.onAuctionUpdated(auction)
 
@@ -420,6 +427,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
     fun `on auction update - another auction fetched`() = runWithKafka {
         val itemId = randomEthItemId()
         val ethItem = randomEthNftItemDto(itemId)
+        val ethMeta = randomEthItemMeta()
 
         val unionItem = EthItemConverter.convert(ethItem, itemId.blockchain)
         val shortItem = ShortItemConverter.convert(unionItem)
@@ -428,7 +436,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         itemService.save(shortItem)
 
         ethereumItemControllerApiMock.mockGetNftItemById(itemId, ethItem)
-        ethereumItemControllerApiMock.mockGetNftItemMetaById(itemId, ethItem.meta!!)
+        ethereumItemControllerApiMock.mockGetNftItemMetaById(itemId, ethMeta)
         ethereumAuctionControllerApiMock.mockGetAuctionsByIds(ethAuction)
 
         itemEventService.onAuctionUpdated(auction)
@@ -454,6 +462,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
     fun `on auction delete`() = runWithKafka {
         val itemId = randomEthItemId()
         val ethItem = randomEthNftItemDto(itemId)
+        val ethMeta = randomEthItemMeta()
 
         val bestSell = randomEthSellOrderDto()
         val unionBestSell = ethOrderConverter.convert(bestSell, BlockchainDto.ETHEREUM)
@@ -469,7 +478,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         itemService.save(shortItem)
 
         ethereumItemControllerApiMock.mockGetNftItemById(itemId, ethItem)
-        ethereumItemControllerApiMock.mockGetNftItemMetaById(itemId, ethItem.meta!!)
+        ethereumItemControllerApiMock.mockGetNftItemMetaById(itemId, ethMeta)
         ethereumOrderControllerApiMock.mockGetByIds(bestSell)
 
         itemEventService.onAuctionDeleted(auction)

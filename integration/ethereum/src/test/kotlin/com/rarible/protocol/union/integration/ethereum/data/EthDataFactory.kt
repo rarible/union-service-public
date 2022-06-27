@@ -22,22 +22,25 @@ import com.rarible.protocol.dto.AuctionBidsPaginationDto
 import com.rarible.protocol.dto.AuctionDto
 import com.rarible.protocol.dto.AuctionHistoryDto
 import com.rarible.protocol.dto.AuctionStatusDto
+import com.rarible.protocol.dto.AudioContentDto
 import com.rarible.protocol.dto.BurnDto
 import com.rarible.protocol.dto.CollectionAssetTypeDto
 import com.rarible.protocol.dto.CryptoPunkOrderDto
 import com.rarible.protocol.dto.Erc1155AssetTypeDto
 import com.rarible.protocol.dto.Erc20AssetTypeDto
 import com.rarible.protocol.dto.Erc721AssetTypeDto
+import com.rarible.protocol.dto.HtmlContentDto
+import com.rarible.protocol.dto.ImageContentDto
 import com.rarible.protocol.dto.ItemRoyaltyDto
 import com.rarible.protocol.dto.ItemTransferDto
+import com.rarible.protocol.dto.MetaContentDto
 import com.rarible.protocol.dto.MintDto
+import com.rarible.protocol.dto.Model3dContentDto
 import com.rarible.protocol.dto.NftCollectionDto
 import com.rarible.protocol.dto.NftCollectionMetaDto
 import com.rarible.protocol.dto.NftItemAttributeDto
 import com.rarible.protocol.dto.NftItemDto
 import com.rarible.protocol.dto.NftItemMetaDto
-import com.rarible.protocol.dto.NftMediaDto
-import com.rarible.protocol.dto.NftMediaMetaDto
 import com.rarible.protocol.dto.NftOwnershipDto
 import com.rarible.protocol.dto.OnChainOrderDto
 import com.rarible.protocol.dto.OpenSeaV1OrderDto
@@ -54,7 +57,6 @@ import com.rarible.protocol.dto.OrderCryptoPunksDataDto
 import com.rarible.protocol.dto.OrderOpenSeaV1DataV1Dto
 import com.rarible.protocol.dto.OrderRaribleV2DataDto
 import com.rarible.protocol.dto.OrderRaribleV2DataV1Dto
-import com.rarible.protocol.dto.OrderSeaportDataV1Dto
 import com.rarible.protocol.dto.OrderSideDto
 import com.rarible.protocol.dto.OrderSideMatchDto
 import com.rarible.protocol.dto.OrderStatusDto
@@ -70,11 +72,12 @@ import com.rarible.protocol.dto.SeaportOfferDto
 import com.rarible.protocol.dto.SeaportOrderTypeDto
 import com.rarible.protocol.dto.SeaportV1OrderDto
 import com.rarible.protocol.dto.TransferDto
+import com.rarible.protocol.dto.UnknownContentDto
+import com.rarible.protocol.dto.VideoContentDto
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.util.CompositeItemIdParser
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
-import com.rarible.protocol.union.dto.EthSeaportConsiderationDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
@@ -114,8 +117,7 @@ fun randomEthNftItemDto(itemId: ItemIdDto): NftItemDto {
         mintedAt = nowMillis().minusSeconds(1),
         owners = listOf(),
         pending = listOf(randomEthItemTransferDto()),
-        deleted = false,
-        meta = randomEthItemMeta()
+        deleted = false
     )
 }
 
@@ -146,11 +148,9 @@ fun randomEthItemMeta(): NftItemMetaDto {
         name = randomString(),
         description = randomString(),
         attributes = listOf(randomEthItemMetaAttribute()),
-        image = randomEthItemMedia(),
-        animation = randomEthItemMedia(),
         tags = emptyList(),
         genres = emptyList(),
-        content = emptyList(),
+        content = randomMetaContentDtoList(),
     )
 }
 
@@ -158,22 +158,6 @@ fun randomEthItemMetaAttribute(): NftItemAttributeDto {
     return NftItemAttributeDto(
         key = randomString(),
         value = randomString()
-    )
-}
-
-fun randomEthItemMedia(): NftMediaDto {
-    val type = "ORIGINAL"
-    return NftMediaDto(
-        url = mapOf(Pair(type, "http://localhost:8080/image/" + randomString())),
-        meta = mapOf(Pair(type, randomEthItemMediaMeta("image/png")))
-    )
-}
-
-fun randomEthItemMediaMeta(type: String): NftMediaMetaDto {
-    return NftMediaMetaDto(
-        type = type,
-        width = randomInt(400, 1200),
-        height = randomInt(200, 800)
     )
 }
 
@@ -558,7 +542,6 @@ fun randomEthCollectionMetaDto(): NftCollectionMetaDto {
     return NftCollectionMetaDto(
         name = randomString(),
         description = randomString(),
-        image = randomEthItemMedia(),
         language = randomString(),
         genres = listOf(randomString(), randomString()),
         tags = listOf(randomString(), randomString()),
@@ -569,14 +552,22 @@ fun randomEthCollectionMetaDto(): NftCollectionMetaDto {
         originalMetaUri = randomString(),
         feeRecipient = randomAddress(),
         sellerFeeBasisPoints = randomInt(),
-        content = emptyList(),
+        content = randomMetaContentDtoList()
+    )
+}
 
-        // TODO should be removed later
-        external_link = randomString(),
-        seller_fee_basis_points = randomInt(),
-        fee_recipient = randomAddress(),
-
+fun randomMetaContentDtoList(): List<MetaContentDto> {
+    return listOf(
+        ImageContentDto(
+            fileName = randomString(),
+            url = randomString(),
+            representation = MetaContentDto.Representation.ORIGINAL,
+            mimeType = randomString(),
+            size = randomLong(),
+            width = randomInt(400, 1200),
+            height = randomInt(200, 800)
         )
+    )
 }
 
 fun randomEthAuctionDto() = randomEthAuctionDto(randomEthItemId())

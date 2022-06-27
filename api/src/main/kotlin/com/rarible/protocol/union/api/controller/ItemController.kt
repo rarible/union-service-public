@@ -74,7 +74,7 @@ class ItemController(
         val meta = getAvailableMetaOrLoadSynchronously(itemId)
         val unionMetaContent = meta.content
             .find { it.properties is UnionVideoProperties && it.representation == MetaContentDto.Representation.ORIGINAL }
-            ?: throw UnionNotFoundException("No animation found for item $itemId")
+            ?: throw UnionNotFoundException("No video found for item $itemId")
         return createRedirectResponse(unionMetaContent)
     }
 

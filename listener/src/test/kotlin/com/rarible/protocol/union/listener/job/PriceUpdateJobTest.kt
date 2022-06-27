@@ -14,6 +14,7 @@ import com.rarible.protocol.union.enrichment.util.sellCurrencyId
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
 import com.rarible.protocol.union.integration.ethereum.data.randomEthBidOrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
+import com.rarible.protocol.union.integration.ethereum.data.randomEthItemMeta
 import com.rarible.protocol.union.integration.ethereum.data.randomEthNftItemDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipId
@@ -79,7 +80,7 @@ internal class PriceUpdateJobTest : AbstractIntegrationTest() {
 
         val ethItem = randomEthNftItemDto()
         ethereumItemControllerApiMock.mockGetNftItemById(itemId, ethItem)
-        ethereumItemControllerApiMock.mockGetNftItemMetaById(itemId, ethItem.meta!!)
+        ethereumItemControllerApiMock.mockGetNftItemMetaById(itemId, randomEthItemMeta())
         ethereumOrderControllerApiMock.mockGetByIds(ethSellOrder1, ethBidOrder1)
 
         itemRepository.save(shortItem)
