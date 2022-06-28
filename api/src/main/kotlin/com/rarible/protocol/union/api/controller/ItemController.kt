@@ -9,6 +9,7 @@ import com.rarible.protocol.union.core.model.UnionVideoProperties
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.RestrictionService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
+import com.rarible.protocol.union.core.util.LogUtils
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.ItemIdsDto
@@ -151,8 +152,9 @@ class ItemController(
         val fullItemId = IdParser.parseItemId(itemId)
         val safeSync = sync ?: false
 
-        logger.info("Refreshing item meta for $itemId (sync=$safeSync)")
-
+        LogUtils.addToMdc(fullItemId, router) {
+            logger.info("Refreshing item meta for $itemId (sync=$safeSync)")
+        }
         // TODO[meta]: when all Blockchains stop caching the meta, we can remove this endpoint call.
         router.getService(fullItemId.blockchain).resetItemMeta(fullItemId.value)
         if (safeSync) {
