@@ -1,13 +1,13 @@
 package com.rarible.protocol.union.enrichment.meta.downloader.executor
 
+import com.rarible.protocol.union.core.model.download.DownloadEntry
+import com.rarible.protocol.union.core.model.download.DownloadException
+import com.rarible.protocol.union.core.model.download.DownloadStatus
+import com.rarible.protocol.union.core.model.download.DownloadTask
 import com.rarible.protocol.union.enrichment.configuration.DownloaderProperties
-import com.rarible.protocol.union.enrichment.meta.downloader.DownloadEntry
 import com.rarible.protocol.union.enrichment.meta.downloader.DownloadEntryRepository
 import com.rarible.protocol.union.enrichment.meta.downloader.DownloadNotifier
-import com.rarible.protocol.union.enrichment.meta.downloader.DownloadStatus
 import com.rarible.protocol.union.enrichment.meta.downloader.Downloader
-import com.rarible.protocol.union.enrichment.meta.downloader.model.DownloadException
-import com.rarible.protocol.union.enrichment.meta.downloader.model.DownloadTask
 import com.rarible.protocol.union.enrichment.util.optimisticLockWithInitial
 import kotlinx.coroutines.awaitAll
 import org.slf4j.LoggerFactory

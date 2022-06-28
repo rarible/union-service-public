@@ -19,4 +19,19 @@ object UnionInternalTopicProvider {
         return "protocol.$environment.union.internal.reconciliation"
     }
 
+    fun getItemMetaDownloadTaskSchedulerTopic(environment: String): String {
+        return "protocol.$environment.union.internal.download.item-meta"
+    }
+
+    fun getItemMetaDownloadTaskExecutorTopic(environment: String, pipeline: String): String {
+        return "protocol.$environment.union.internal.download.item-meta.$pipeline"
+    }
+
+    fun getCollectionMetaDownloadTaskSchedulerTopic(environment: String): String {
+        return "protocol.$environment.union.internal.download.collection-meta"
+    }
+
+    fun getCollectionMetaDownloadTaskExecutorTopic(environment: String, pipeline: String): String {
+        return "protocol.$environment.union.internal.download.collection-meta.$pipeline"
+    }
 }

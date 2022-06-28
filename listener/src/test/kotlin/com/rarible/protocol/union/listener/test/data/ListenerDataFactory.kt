@@ -6,6 +6,7 @@ import com.rarible.protocol.union.enrichment.model.ReconciliationMark
 import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.listener.config.InternalConsumerProperties
+import com.rarible.protocol.union.listener.config.MetaSchedulingProperties
 import com.rarible.protocol.union.listener.config.MetricsProperties
 import com.rarible.protocol.union.listener.config.OpenSeaCleanUpProperties
 import com.rarible.protocol.union.listener.config.PriceUpdateProperties
@@ -23,7 +24,8 @@ fun defaultUnionListenerProperties(): UnionListenerProperties {
         openSeaCleanup = OpenSeaCleanUpProperties(
             sellOrderFrom = nowMillis().minus(10, ChronoUnit.DAYS)
         ),
-        metrics = MetricsProperties()
+        metrics = MetricsProperties(),
+        metaScheduling = MetaSchedulingProperties()
     )
 }
 

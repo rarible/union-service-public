@@ -14,7 +14,11 @@ class TzktSignatureServiceImpl(
         try {
             val pair = publicKey.split('_')
             val edpk = pair[0]
-            return signatureClient.validate(edpk, signature, message)
+            // Do not trim prefix, Tezos is sensitive for leading/trailing spaces in prefix
+            val prefix = pair.getOrNull(1)
+            val fullMsg = prefix?.let { it+message } ?: message
+
+            return signatureClient.validate(edpk, signature, fullMsg)
         } catch (ex: SignatureValidationException) {
             throw UnionValidationException(ex.message)
         }
