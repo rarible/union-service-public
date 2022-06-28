@@ -4,6 +4,7 @@ import com.rarible.core.apm.SpanType
 import com.rarible.core.apm.withSpan
 import com.rarible.core.client.WebClientResponseProxyException
 import com.rarible.protocol.union.core.model.UnionMeta
+import com.rarible.protocol.union.core.model.UnionMetaContent
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.core.util.LogUtils
@@ -37,8 +38,8 @@ class UnionMetaLoader(
             name = "enrichContentMeta",
             labels = listOf("itemId" to itemId.fullId())
         ) {
-            val notBlank = unionMeta.content.filter { it.url.isNotBlank() }
-            val content = unionContentMetaLoader.enrichContent(itemId, notBlank)
+            val sanitized = sanitizeContent(unionMeta.content)
+            val content = unionContentMetaLoader.enrichContent(itemId, sanitized)
             unionMeta.copy(content = content)
         }
     }
@@ -61,6 +62,16 @@ class UnionMetaLoader(
         } catch (e: Exception) {
             metrics.onMetaFetchError(itemId.blockchain)
             throw e
+        }
+    }
+
+    private fun sanitizeContent(content: List<UnionMetaContent>): List<UnionMetaContent> {
+        return content.mapNotNull {
+            if (it.url.isBlank()) {
+                null
+            } else {
+                it.copy(url = it.url.trim())
+            }
         }
     }
 
