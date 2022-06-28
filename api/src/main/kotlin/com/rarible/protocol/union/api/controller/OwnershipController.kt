@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.api.controller
 
+import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.api.service.select.OwnershipSourceSelectService
 import com.rarible.protocol.union.dto.OwnershipDto
 import com.rarible.protocol.union.dto.OwnershipsDto
@@ -11,13 +12,14 @@ import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.RestController
 
-@ExperimentalCoroutinesApi
 @RestController
 class OwnershipController(
     private val ownershipSourceSelectService: OwnershipSourceSelectService,
 ) : OwnershipControllerApi {
 
-    private val logger = LoggerFactory.getLogger(javaClass)
+    companion object {
+        private val logger by Logger()
+    }
 
     override suspend fun getOwnershipById(
         ownershipId: String,

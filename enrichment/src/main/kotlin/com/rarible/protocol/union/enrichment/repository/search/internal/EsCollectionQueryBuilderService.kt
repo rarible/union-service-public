@@ -4,6 +4,7 @@ import com.rarible.protocol.union.core.model.EsCollection
 import com.rarible.protocol.union.core.model.EsCollectionCursor
 import com.rarible.protocol.union.core.model.EsCollectionFilter
 import com.rarible.protocol.union.core.model.EsCollectionGenericFilter
+import com.rarible.protocol.union.core.model.EsOwnership
 import org.elasticsearch.index.query.BoolQueryBuilder
 import org.elasticsearch.index.query.RangeQueryBuilder
 import org.elasticsearch.search.sort.SortOrder

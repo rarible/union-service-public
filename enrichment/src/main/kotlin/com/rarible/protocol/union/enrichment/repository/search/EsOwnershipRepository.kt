@@ -5,6 +5,8 @@ import com.rarible.protocol.union.core.elasticsearch.EsNameResolver
 import com.rarible.protocol.union.core.elasticsearch.EsRepository
 import com.rarible.protocol.union.core.model.EsOwnership
 import com.rarible.protocol.union.core.model.EsOwnershipFilter
+import com.rarible.protocol.union.dto.continuation.page.PageSize
+import com.rarible.protocol.union.enrichment.repository.search.internal.EsOwnershipQueryBuilderService
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.runBlocking
@@ -13,12 +15,14 @@ import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperatio
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates
 import org.springframework.data.elasticsearch.core.query.Criteria
 import org.springframework.data.elasticsearch.core.query.CriteriaQuery
+import org.springframework.data.elasticsearch.core.query.Query
 import org.springframework.stereotype.Component
 import java.io.IOException
 import javax.annotation.PostConstruct
 
 @Component
 class EsOwnershipRepository(
+    private val queryBuilderService: EsOwnershipQueryBuilderService,
     private val esOperations: ReactiveElasticsearchOperations, esNameResolver: EsNameResolver
 ) : EsRepository {
     val entityDefinition = esNameResolver.createEntityDefinitionExtended(EsOwnership.ENTITY_DEFINITION)
@@ -36,8 +40,11 @@ class EsOwnershipRepository(
         return esOperations.get(id, EsOwnership::class.java, entityDefinition.searchIndexCoordinates).awaitFirstOrNull()
     }
 
-    suspend fun findByFilter(filter: EsOwnershipFilter): List<EsOwnership> {
-        val query = filter.asQuery()
+    suspend fun search(filter: EsOwnershipFilter, limit: Int? = null): List<EsOwnership> {
+        val query = queryBuilderService.build(filter)
+        query.maxResults = PageSize.OWNERSHIP.limit(limit)
+        query.trackTotalHits = false
+
         return esOperations.search(query, EsOwnership::class.java, entityDefinition.searchIndexCoordinates)
             .collectList().awaitFirst().map { it.content }
     }
@@ -53,6 +60,17 @@ class EsOwnershipRepository(
         val query = CriteriaQuery(Criteria(EsOwnership::ownershipId.name).`in`(ownershipIds))
         esOperations.delete(
             query, EsOwnership::class.java, entityDefinition.writeIndexCoordinates
+        ).awaitFirstOrNull()
+    }
+
+    /**
+     * For tests only
+     */
+    suspend fun deleteAll() {
+        esOperations.delete(
+            Query.findAll(),
+            Any::class.java,
+            entityDefinition.writeIndexCoordinates
         ).awaitFirstOrNull()
     }
 

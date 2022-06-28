@@ -32,13 +32,11 @@ import com.rarible.protocol.union.test.mock.CurrencyMock
 import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.mockk
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-@ExperimentalCoroutinesApi
 class OwnershipElasticServiceTest {
 
     private val auctionContract = randomAddress()
@@ -81,7 +79,7 @@ class OwnershipElasticServiceTest {
         coEvery { enrichmentOwnershipService.mergeWithAuction(any<OwnershipDto>(), any()) } returnsArgument 0
         coEvery { enrichmentOwnershipService.mergeWithAuction(any<UnionOwnership>(), any()) } returnsArgument 0
         coEvery { orderApiService.getByIds(any<List<OrderIdDto>>()) } returns emptyList()
-        coEvery { repository.findByFilter(any()) } returns emptyList()
+        coEvery { repository.search(any()) } returns emptyList()
     }
 
     @Test
