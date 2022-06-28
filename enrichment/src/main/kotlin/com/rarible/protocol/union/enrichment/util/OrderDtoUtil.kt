@@ -10,6 +10,7 @@ import com.rarible.protocol.union.dto.ImmutablexOrderDataV1Dto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.SolanaAuctionHouseDataV1Dto
 import com.rarible.protocol.union.dto.TezosOrderDataRaribleV2DataV1Dto
+import com.rarible.protocol.union.dto.TezosOrderDataRaribleV2DataV2Dto
 import com.rarible.protocol.union.dto.ext
 
 // TODO move to openapi
@@ -29,6 +30,7 @@ val OrderDto.origins: Set<String>
             is EthOrderBasicSeaportDataV1Dto -> emptyList()
             is EthOrderCryptoPunksDataDto -> emptyList()
             is TezosOrderDataRaribleV2DataV1Dto -> data.originFees.map { it.account.value }
+            is TezosOrderDataRaribleV2DataV2Dto -> data.originFees.map { it.account.value }
             is FlowOrderDataV1Dto -> data.originFees.map { it.account.value }
             is SolanaAuctionHouseDataV1Dto -> listOfNotNull(data.auctionHouse?.value)
             is ImmutablexOrderDataV1Dto -> data.originFees.map { it.account.value }

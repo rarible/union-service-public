@@ -15,7 +15,7 @@ import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
-import com.rarible.protocol.union.dto.TezosOrderDataRaribleV2DataV1Dto
+import com.rarible.protocol.union.dto.TezosOrderDataRaribleV2DataV2Dto
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
@@ -89,7 +89,7 @@ class DipDupOrderConverter(
     }
 
     fun orderData(): OrderDataDto {
-        return TezosOrderDataRaribleV2DataV1Dto(
+        return TezosOrderDataRaribleV2DataV2Dto(
             payouts = listOf(),
             originFees = listOf()
         )
