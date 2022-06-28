@@ -50,6 +50,11 @@ class WorkerConfiguration(
         return properties.searchReindex.order
     }
 
+    @Bean
+    fun ownershipReindexProperties(): OwnershipReindexProperties {
+        return properties.searchReindex.ownership
+    }
+
     @FlowPreview
     @ExperimentalCoroutinesApi
     @Bean(initMethod = "bootstrap")
