@@ -18,6 +18,8 @@ import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.UnionMetaContent
 import com.rarible.protocol.union.core.model.UnionMetaContentProperties
+import com.rarible.protocol.union.core.model.download.DownloadEntry
+import com.rarible.protocol.union.core.model.download.DownloadStatus
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.BurnActivityDto
@@ -64,9 +66,9 @@ import com.rarible.protocol.union.integration.flow.data.randomFlowNftItemDto
 import com.rarible.protocol.union.integration.solana.converter.SolanaItemConverter
 import com.rarible.protocol.union.integration.solana.data.randomSolanaTokenDto
 import com.rarible.protocol.union.test.mock.CurrencyMock
+import kotlinx.coroutines.runBlocking
 import java.time.Instant
 import java.time.temporal.ChronoUnit
-import kotlinx.coroutines.runBlocking
 
 fun randomUnionAddress(): UnionAddress =
     UnionAddressConverter.convert(
@@ -312,3 +314,33 @@ private val mockedEthAuctionConverter = EthAuctionConverter(CurrencyMock.currenc
 private val mockedEthActivityConverter = EthActivityConverter(
     CurrencyMock.currencyServiceMock, mockedEthAuctionConverter
 )
+
+fun randomItemMetaDownloadEntry(
+    id: String = randomEthItemId().fullId(),
+    version: Int? = null,
+    status: DownloadStatus = DownloadStatus.SUCCESS,
+    data: UnionMeta? = randomUnionMeta(),
+    downloads: Int = 1,
+    fails: Int = 1,
+    retries: Int = 0,
+    scheduledAt: Instant? = nowMillis().minusSeconds(60),
+    updatedAt: Instant? = nowMillis().minusSeconds(20),
+    succeedAt: Instant? = nowMillis().minusSeconds(20),
+    failedAt: Instant? = nowMillis().minusSeconds(40),
+    errorMessage: String? = "Error: ${randomString()}",
+): DownloadEntry<UnionMeta> {
+    return DownloadEntry(
+        id = id,
+        version = version,
+        status = status,
+        data = data,
+        downloads = downloads,
+        fails = fails,
+        retries = retries,
+        scheduledAt = scheduledAt,
+        updatedAt = updatedAt,
+        succeedAt = succeedAt,
+        failedAt = failedAt,
+        errorMessage = errorMessage
+    )
+}

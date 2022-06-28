@@ -15,6 +15,7 @@ data class UnionListenerProperties(
     val openSeaCleanup: OpenSeaCleanUpProperties,
     val priceUpdate: PriceUpdateProperties,
     val reconcileMarks: ReconcileMarksProperties,
+    val metaScheduling: MetaSchedulingProperties,
     val metrics: MetricsProperties
 )
 
@@ -52,4 +53,14 @@ data class OpenSeaCleanUpProperties(
 
 data class MetricsProperties(
     val rootPath: String = "protocol.union.listener"
+)
+
+data class MetaSchedulingProperties(
+    val item: MetaEntrySchedulingProperties = MetaEntrySchedulingProperties(),
+    // TODO add collection
+)
+
+data class MetaEntrySchedulingProperties(
+    val workers: Int = 4,
+    val batchSize: Int = 16
 )

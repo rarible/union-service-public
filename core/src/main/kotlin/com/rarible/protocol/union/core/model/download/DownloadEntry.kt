@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.enrichment.meta.downloader
+package com.rarible.protocol.union.core.model.download
 
 import com.rarible.core.common.nowMillis
 import org.springframework.data.annotation.Id

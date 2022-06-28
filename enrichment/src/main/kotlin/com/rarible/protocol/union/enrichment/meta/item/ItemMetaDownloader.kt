@@ -4,9 +4,9 @@ import com.rarible.core.apm.CaptureTransaction
 import com.rarible.loader.cache.CacheLoader
 import com.rarible.loader.cache.CacheType
 import com.rarible.protocol.union.core.model.UnionMeta
+import com.rarible.protocol.union.core.model.download.DownloadException
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.meta.downloader.Downloader
-import com.rarible.protocol.union.enrichment.meta.downloader.model.DownloadException
 import org.springframework.stereotype.Component
 
 @Component

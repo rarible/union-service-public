@@ -5,6 +5,7 @@ import com.rarible.core.kafka.RaribleKafkaProducer
 import com.rarible.protocol.union.core.event.UnionInternalTopicProvider
 import com.rarible.protocol.union.core.model.ReconciliationMarkEvent
 import com.rarible.protocol.union.core.model.UnionInternalBlockchainEvent
+import com.rarible.protocol.union.core.model.download.DownloadTask
 import com.rarible.protocol.union.core.producer.UnionInternalBlockchainEventProducer
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -14,6 +15,7 @@ import com.rarible.protocol.union.dto.OrderEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.dto.UnionEventTopicProvider
 import com.rarible.protocol.union.subscriber.UnionKafkaJsonSerializer
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -78,6 +80,22 @@ class ProducerConfiguration(
         val topic = UnionInternalTopicProvider.getReconciliationMarkTopic(env)
         return createUnionProducer("reconciliation", topic, ReconciliationMarkEvent::class.java)
     }
+
+    @Bean
+    @Qualifier("download.scheduler.task.producer.item-meta")
+    fun itemDownloadTaskProducer(): RaribleKafkaProducer<DownloadTask> {
+        val topic = UnionInternalTopicProvider.getItemMetaDownloadTaskSchedulerTopic(env)
+        return createUnionProducer("download.scheduler.item-meta", topic, DownloadTask::class.java)
+    }
+
+/*
+    @Bean
+    @Qualifier("download.scheduler.task.producer.collection-meta")
+    fun collectionDownloadTaskProducer() : RaribleKafkaProducer<DownloadTask> {
+        val topic = UnionInternalTopicProvider.getItemMetaDownloadTaskSchedulerTopic(env)
+        return createUnionProducer("download.scheduler.collection-meta", topic, DownloadTask::class.java)
+    }
+*/
 
     private fun <T> createUnionProducer(clientSuffix: String, topic: String, type: Class<T>): RaribleKafkaProducer<T> {
         return RaribleKafkaProducer(

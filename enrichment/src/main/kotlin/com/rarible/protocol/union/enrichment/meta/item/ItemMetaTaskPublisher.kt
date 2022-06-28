@@ -1,13 +1,13 @@
 package com.rarible.protocol.union.enrichment.meta.item
 
+import com.rarible.core.kafka.RaribleKafkaProducer
+import com.rarible.protocol.union.core.model.download.DownloadTask
 import com.rarible.protocol.union.enrichment.meta.downloader.DownloadTaskPublisher
-import com.rarible.protocol.union.enrichment.meta.downloader.model.DownloadTask
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Component
 
 @Component
-class ItemMetaTaskPublisher : DownloadTaskPublisher {
-
-    override suspend fun publish(tasks: List<DownloadTask>) {
-        // TODO PT-49
-    }
-}
+class ItemMetaTaskPublisher(
+    @Qualifier("download.scheduler.task.producer.item-meta")
+    producer: RaribleKafkaProducer<DownloadTask>
+) : DownloadTaskPublisher(producer)
