@@ -109,6 +109,8 @@ class DipDupOrderEventHandlerFt : AbstractDipDupIntegrationTest() {
             id = orderId,
             fill = BigDecimal.ZERO,
             platform = TezosPlatform.Hen,
+            payouts = emptyList(),
+            originFees = emptyList(),
             status = OrderStatus.ACTIVE,
             startAt = null,
             endedAt = null,
