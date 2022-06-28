@@ -10,7 +10,9 @@ import com.rarible.protocol.union.worker.task.search.ParamFactory
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.onCompletion
+import org.springframework.stereotype.Component
 
+@Component
 class OwnershipTask(
     private val properties: OwnershipReindexProperties,
     private val paramFactory: ParamFactory,
