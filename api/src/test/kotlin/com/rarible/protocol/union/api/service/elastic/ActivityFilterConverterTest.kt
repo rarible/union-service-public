@@ -26,9 +26,6 @@ class ActivityFilterConverterTest {
     @SpyK
     private var userActivityTypeConverter: UserActivityTypeConverter = UserActivityTypeConverter()
 
-    @MockK
-    private lateinit var featureFlagsProperties: FeatureFlagsProperties
-
     @InjectMockKs
     private lateinit var converter: ActivityFilterConverter
 
@@ -43,7 +40,6 @@ class ActivityFilterConverterTest {
             val types = listOf(ActivityTypeDto.MINT, ActivityTypeDto.BURN)
             val blockchains = listOf(BlockchainDto.POLYGON, BlockchainDto.SOLANA)
             val cursor = "some cursor"
-            every { featureFlagsProperties.enableActivityQueriesPerTypeFilter } returns false
 
             // when
             val actual = converter.convertGetAllActivities(types, blockchains, cursor)
@@ -63,7 +59,6 @@ class ActivityFilterConverterTest {
             // given
             val types = listOf(ActivityTypeDto.MINT, ActivityTypeDto.BURN)
             val cursor = "some cursor"
-            every { featureFlagsProperties.enableActivityQueriesPerTypeFilter } returns false
 
             // when
             val actual = converter.convertGetAllActivities(types, null, cursor)
@@ -87,7 +82,6 @@ class ActivityFilterConverterTest {
             val types = listOf(ActivityTypeDto.LIST, ActivityTypeDto.BID)
             val collection = "POLYGON:0x00000012345"
             val cursor = "some cursor"
-            every { featureFlagsProperties.enableActivityQueriesPerTypeFilter } returns false
 
             // when
             val actual = converter.convertGetActivitiesByCollection(types, listOf(collection), cursor)
@@ -112,7 +106,6 @@ class ActivityFilterConverterTest {
             val types = listOf(ActivityTypeDto.CANCEL_LIST, ActivityTypeDto.CANCEL_BID)
             val itemId = "TEZOS:0x00000012345"
             val cursor = "some cursor"
-            every { featureFlagsProperties.enableActivityQueriesPerTypeFilter } returns false
 
             // when
             val actual = converter.convertGetActivitiesByItem(types, itemId, cursor)
@@ -141,7 +134,6 @@ class ActivityFilterConverterTest {
             val from = Instant.ofEpochMilli(12345)
             val to = Instant.ofEpochMilli(67890)
             val cursor = "some cursor"
-            every { featureFlagsProperties.enableActivityQueriesPerTypeFilter } returns false
 
             // when
             val actual = converter.convertGetActivitiesByUser(userActivityTypes, users, blockchains, from, to, cursor)
@@ -167,7 +159,6 @@ class ActivityFilterConverterTest {
             val from = Instant.ofEpochMilli(12345)
             val to = Instant.ofEpochMilli(67890)
             val cursor = "some cursor"
-            every { featureFlagsProperties.enableActivityQueriesPerTypeFilter } returns false
 
             // when
             val actual = converter.convertGetActivitiesByUser(userActivityTypes, users, null, from, to, cursor)

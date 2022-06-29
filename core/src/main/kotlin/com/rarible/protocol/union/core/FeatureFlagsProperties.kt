@@ -15,7 +15,6 @@ data class FeatureFlagsProperties(
     val enableEmbeddedContentMigrationJob: Boolean = true,
     // activities
     var enableActivityQueriesToElasticSearch: Boolean = false,
-    var enableActivityQueriesPerTypeFilter: Boolean = false,
     var enableImmutableXActivitiesQueries: Boolean = false,
     val enableCollectionQueriesToElastic: Boolean = false,
     var enableActivityAscQueriesWithApiMerge: Boolean = true,

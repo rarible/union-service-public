@@ -5,8 +5,6 @@ import com.rarible.protocol.union.core.model.EsActivity
 import com.rarible.protocol.union.core.model.EsActivitySort
 import com.rarible.protocol.union.core.model.ElasticActivityFilter
 import com.rarible.protocol.union.core.model.ElasticActivityQueryGenericFilter
-import com.rarible.protocol.union.core.model.ElasticActivityQueryPerTypeFilter
-import com.rarible.protocol.union.core.model.cursor
 import com.rarible.protocol.union.dto.BlockchainDto
 import org.elasticsearch.index.query.BoolQueryBuilder
 import org.elasticsearch.index.query.MatchQueryBuilder
@@ -35,7 +33,6 @@ class EsActivityQueryBuilderService(
         val query = BoolQueryBuilder()
         when (filter) {
             is ElasticActivityQueryGenericFilter -> query.applyGenericFilter(filter)
-            is ElasticActivityQueryPerTypeFilter -> query.applyPerTypeFilter(filter)
             is ActivityByCollectionFilter -> query.applyByCollectionFilter(filter)
         }
         sortService.applySort(builder, sort)
@@ -91,10 +88,6 @@ class EsActivityQueryBuilderService(
             }
             must(rangeQueryBuilder)
         }
-    }
-
-    private fun BoolQueryBuilder.applyPerTypeFilter(filter: ElasticActivityQueryPerTypeFilter) {
-        TODO("To be implemented under ALPHA-276 Epic")
     }
 
     private fun BoolQueryBuilder.mustMatchTerms(terms: Set<*>, field: String) {

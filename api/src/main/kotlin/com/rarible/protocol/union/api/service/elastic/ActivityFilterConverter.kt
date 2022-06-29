@@ -15,7 +15,6 @@ import java.time.Instant
 @Service
 class ActivityFilterConverter(
     private val userActivityTypeConverter: UserActivityTypeConverter,
-    private val featureFlagsProperties: FeatureFlagsProperties,
 ) {
 
     fun convertGetAllActivities(
@@ -23,14 +22,11 @@ class ActivityFilterConverter(
         blockchains: List<BlockchainDto>?,
         cursor: String?,
     ): ElasticActivityFilter {
-        return when (featureFlagsProperties.enableActivityQueriesPerTypeFilter) {
-            true -> TODO("To be implemented under ALPHA-276 Epic")
-            else -> ElasticActivityQueryGenericFilter(
-                blockchains = blockchains?.toSet().orEmpty(),
-                activityTypes = type.toSet(),
-                cursor = cursor,
-            )
-        }
+        return ElasticActivityQueryGenericFilter(
+            blockchains = blockchains?.toSet().orEmpty(),
+            activityTypes = type.toSet(),
+            cursor = cursor,
+        )
     }
 
     fun convertGetActivitiesByCollection(
@@ -39,15 +35,11 @@ class ActivityFilterConverter(
         cursor: String?,
     ): ElasticActivityFilter {
         val cols = collections.map(IdParser::parseCollectionId)
-
-        return when (featureFlagsProperties.enableActivityQueriesPerTypeFilter) {
-            true -> TODO("To be implemented under ALPHA-276 Epic")
-            else -> ActivityByCollectionFilter(
-                activityTypes = type.toSet(),
-                collections = cols,
-                cursor = cursor,
-            )
-        }
+        return ActivityByCollectionFilter(
+            activityTypes = type.toSet(),
+            collections = cols,
+            cursor = cursor,
+        )
     }
 
     fun convertGetActivitiesByItem(
@@ -56,15 +48,12 @@ class ActivityFilterConverter(
         cursor: String?,
     ): ElasticActivityFilter {
         val fullItemId = IdParser.parseItemId(itemId)
-        return when (featureFlagsProperties.enableActivityQueriesPerTypeFilter) {
-            true -> TODO("To be implemented under ALPHA-276 Epic")
-            else -> ElasticActivityQueryGenericFilter(
-                blockchains = setOf(fullItemId.blockchain),
-                activityTypes = type.toSet(),
-                item = fullItemId.value,
-                cursor = cursor,
-            )
-        }
+        return ElasticActivityQueryGenericFilter(
+            blockchains = setOf(fullItemId.blockchain),
+            activityTypes = type.toSet(),
+            item = fullItemId.value,
+            cursor = cursor,
+        )
     }
 
     fun convertGetActivitiesByUser(
@@ -75,16 +64,13 @@ class ActivityFilterConverter(
         to: Instant?,
         cursor: String?,
     ): ElasticActivityFilter {
-        return when (featureFlagsProperties.enableActivityQueriesPerTypeFilter) {
-            true -> TODO("To be implemented under ALPHA-276 Epic")
-            else -> ElasticActivityQueryGenericFilter(
-                blockchains = blockchains?.toSet().orEmpty(),
-                activityTypes = type.map { userActivityTypeConverter.convert(it).activityTypeDto }.toSet(), // isMaker is ignored for now
-                anyUsers = user.map { IdParser.parseAddress(it).value }.toSet(),
-                from = from,
-                to = to,
-                cursor = cursor,
-            )
-        }
+        return ElasticActivityQueryGenericFilter(
+            blockchains = blockchains?.toSet().orEmpty(),
+            activityTypes = type.map { userActivityTypeConverter.convert(it).activityTypeDto }.toSet(), // isMaker is ignored for now
+            anyUsers = user.map { IdParser.parseAddress(it).value }.toSet(),
+            from = from,
+            to = to,
+            cursor = cursor,
+        )
     }
 }
