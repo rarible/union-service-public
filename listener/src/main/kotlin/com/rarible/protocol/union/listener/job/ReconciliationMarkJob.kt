@@ -2,24 +2,47 @@ package com.rarible.protocol.union.listener.job
 
 import com.rarible.core.client.WebClientResponseProxyException
 import com.rarible.core.common.nowMillis
+import com.rarible.protocol.union.core.exception.UnionNotFoundException
+import com.rarible.core.daemon.DaemonWorkerProperties
+import com.rarible.core.daemon.job.JobHandler
+import com.rarible.core.daemon.sequential.SequentialDaemonWorker
+import com.rarible.protocol.union.core.model.ReconciliationMarkType
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.dto.parser.OwnershipIdParser
-import com.rarible.protocol.union.enrichment.model.ReconciliationMarkType
 import com.rarible.protocol.union.enrichment.repository.ReconciliationMarkRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentRefreshService
-import kotlinx.coroutines.runBlocking
+import com.rarible.protocol.union.listener.config.UnionListenerProperties
+import io.micrometer.core.instrument.MeterRegistry
+import kotlinx.coroutines.time.delay
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
-import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 
-@Component
 class ReconciliationMarkJob(
+    private val handler: ReconciliationMarkJobHandler,
+    properties: UnionListenerProperties,
+    meterRegistry: MeterRegistry,
+): SequentialDaemonWorker(
+    meterRegistry = meterRegistry,
+    properties = DaemonWorkerProperties().copy(
+        pollingPeriod = properties.reconcileMarks.rate,
+        errorDelay = properties.reconcileMarks.rate
+    ),
+    workerName = "reconciliation-mark-job"
+) {
+    override suspend fun handle() {
+        handler.handle()
+        delay(pollingPeriod)
+    }
+}
+
+@Component
+class ReconciliationMarkJobHandler(
     private val reconciliationMarkRepository: ReconciliationMarkRepository,
     private val refreshService: EnrichmentRefreshService,
     activeBlockchains: List<BlockchainDto>
-) {
+) : JobHandler {
 
     private val batch: Int = 20
     private val blockchains = activeBlockchains.toSet()
@@ -29,13 +52,10 @@ class ReconciliationMarkJob(
     private val types = listOf(
         ReconciliationMarkType.ITEM,
         ReconciliationMarkType.OWNERSHIP,
+        ReconciliationMarkType.COLLECTION
     )
 
-    @Scheduled(
-        fixedDelayString = "\${listener.reconcile-marks.rate}",
-        initialDelayString = "\${listener.reconcile-marks.delay}"
-    )
-    fun reconcileMarkedRecords() = runBlocking {
+    override suspend fun handle() {
         types.forEach { type ->
             var reconciledEntities = 0
             logger.info("Starting to reconcile marks for {}", type)
@@ -87,6 +107,12 @@ class ReconciliationMarkJob(
                         refreshService.reconcileOwnership(ownershipId)
                     }
                 }
+                ReconciliationMarkType.COLLECTION -> {
+                    val collectionId = IdParser.parseCollectionId(markId)
+                    if(blockchains.contains(collectionId.blockchain)) {
+                        refreshService.reconcileCollection(collectionId)
+                    }
+                }
             }
         } catch (e: WebClientResponseProxyException) {
             if (e.statusCode == HttpStatus.NOT_FOUND) {
@@ -94,6 +120,8 @@ class ReconciliationMarkJob(
             } else {
                 throw e
             }
+        } catch (e: UnionNotFoundException) {
+            logger.info("Unable to reconcile mark [{}], NOT_FOUND received: {}", markId, e.message)
         }
     }
 }

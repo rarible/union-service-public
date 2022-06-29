@@ -5,6 +5,10 @@ import com.rarible.core.content.meta.loader.ContentMetaReceiver
 import com.rarible.core.kafka.RaribleKafkaConsumer
 import com.rarible.core.kafka.RaribleKafkaProducer
 import com.rarible.core.test.ext.KafkaTestExtension.Companion.kafkaContainer
+import com.rarible.dipdup.client.core.model.DipDupActivity
+import com.rarible.dipdup.client.core.model.DipDupCollection
+import com.rarible.dipdup.client.core.model.DipDupOrder
+import com.rarible.dipdup.listener.config.DipDupTopicProvider
 import com.rarible.protocol.currency.api.client.CurrencyControllerApi
 import com.rarible.protocol.dto.ActivityTopicProvider
 import com.rarible.protocol.dto.FlowActivityDto
@@ -24,8 +28,12 @@ import com.rarible.protocol.dto.OrderIndexerTopicProvider
 import com.rarible.protocol.flow.nft.api.client.FlowNftItemControllerApi
 import com.rarible.protocol.flow.nft.api.client.FlowNftOwnershipControllerApi
 import com.rarible.protocol.flow.nft.api.client.FlowOrderControllerApi
+import com.rarible.protocol.nft.api.client.NftCollectionControllerApi
 import com.rarible.protocol.nft.api.client.NftItemControllerApi
 import com.rarible.protocol.nft.api.client.NftOwnershipControllerApi
+import com.rarible.protocol.solana.api.client.TokenControllerApi
+import com.rarible.protocol.solana.dto.SolanaEventTopicProvider
+import com.rarible.protocol.solana.dto.TokenMetaEventDto
 import com.rarible.protocol.tezos.dto.TezosActivitySafeDto
 import com.rarible.protocol.tezos.dto.TezosEventTopicProvider
 import com.rarible.protocol.tezos.dto.TezosOrderSafeEventDto
@@ -36,7 +44,7 @@ import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.OrderEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.dto.UnionEventTopicProvider
-import com.rarible.protocol.union.enrichment.meta.UnionMetaLoader
+import com.rarible.protocol.union.enrichment.meta.item.ItemMetaLoader
 
 import com.rarible.protocol.union.subscriber.UnionKafkaJsonDeserializer
 import com.rarible.protocol.union.subscriber.UnionKafkaJsonSerializer
@@ -61,7 +69,7 @@ class TestListenerConfiguration {
     @Bean
     @Primary
     @Qualifier("test.union.meta.loader")
-    fun testUnionMetaLoader(): UnionMetaLoader = mockk()
+    fun testUnionMetaLoader(): ItemMetaLoader = mockk()
 
     @Bean
     @Primary
@@ -177,6 +185,39 @@ class TestListenerConfiguration {
     }
 
     @Bean
+    fun testDipDupOrderEventProducer(): RaribleKafkaProducer<DipDupOrder> {
+        return RaribleKafkaProducer(
+            clientId = "test.union.tezos.order",
+            valueSerializerClass = UnionKafkaJsonSerializer::class.java,
+            valueClass = DipDupOrder::class.java,
+            defaultTopic = "${DipDupTopicProvider.ORDER}_",
+            bootstrapServers = kafkaContainer.kafkaBoostrapServers()
+        )
+    }
+
+    @Bean
+    fun testDipDupActivityEventProducer(): RaribleKafkaProducer<DipDupActivity> {
+        return RaribleKafkaProducer(
+            clientId = "test.union.tezos.activity",
+            valueSerializerClass = UnionKafkaJsonSerializer::class.java,
+            valueClass = DipDupActivity::class.java,
+            defaultTopic = "${DipDupTopicProvider.ACTIVITY}_",
+            bootstrapServers = kafkaContainer.kafkaBoostrapServers()
+        )
+    }
+
+    @Bean
+    fun testDipDupCollectionEventProducer(): RaribleKafkaProducer<DipDupCollection> {
+        return RaribleKafkaProducer(
+            clientId = "test.union.tezos.collection",
+            valueSerializerClass = UnionKafkaJsonSerializer::class.java,
+            valueClass = DipDupCollection::class.java,
+            defaultTopic = "${DipDupTopicProvider.COLLECTION}_",
+            bootstrapServers = kafkaContainer.kafkaBoostrapServers()
+        )
+    }
+
+    @Bean
     fun testEthereumCollectionEventProducer(): RaribleKafkaProducer<com.rarible.protocol.dto.NftCollectionEventDto> {
         return RaribleKafkaProducer(
             clientId = "test.union.ethereum.activity",
@@ -268,6 +309,24 @@ class TestListenerConfiguration {
         )
     }
 
+    //---------------- SOLANA producers ----------------//
+
+    @Bean
+    fun testSolanaTokenMetaEventProducer(): RaribleKafkaProducer<TokenMetaEventDto> {
+        return RaribleKafkaProducer(
+            clientId = "test.union.solana.token.meta",
+            valueSerializerClass = UnionKafkaJsonSerializer::class.java,
+            valueClass = TokenMetaEventDto::class.java,
+            defaultTopic = SolanaEventTopicProvider.getTokenMetaTopic(applicationEnvironmentInfo().name),
+            bootstrapServers = kafkaContainer.kafkaBoostrapServers()
+        )
+    }
+
+    @Bean
+    @Primary
+    @Qualifier("solana.token.api")
+    fun testSolanaTokenApi(): TokenControllerApi = mockk()
+
     //--------------------- CURRENCY ---------------------//
 
     @Bean
@@ -284,6 +343,11 @@ class TestListenerConfiguration {
     @Primary
     @Qualifier("ethereum.ownership.api")
     fun testEthereumOwnershipApi(): NftOwnershipControllerApi = mockk()
+
+    @Bean
+    @Primary
+    @Qualifier("ethereum.collection.api")
+    fun testEthereumCollectionApi(): NftCollectionControllerApi = mockk()
 
     @Bean
     @Primary
@@ -321,4 +385,12 @@ class TestListenerConfiguration {
     @Bean
     @Primary
     fun testTezosOrderApi(): com.rarible.protocol.tezos.api.client.OrderControllerApi = mockk()
+
+    @Bean
+    @Primary
+    fun testTezosTokenClient(): com.rarible.tzkt.client.TokenClient = mockk()
+
+    @Bean
+    @Primary
+    fun testTezosOwnershipClient(): com.rarible.tzkt.client.OwnershipClient = mockk()
 }

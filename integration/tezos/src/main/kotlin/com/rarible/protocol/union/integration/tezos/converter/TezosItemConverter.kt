@@ -48,9 +48,6 @@ object TezosItemConverter {
             lazySupply = item.lazySupply,
             meta = item.meta?.let { convert(it) },
             mintedAt = item.mintedAt,
-            owners = emptyList(),
-            // TODO TEZOS Remove when Tezos implement getItemRoyalties
-            royalties = item.royalties.map { toRoyalty(it, blockchain) },
             supply = item.supply,
             pending = emptyList() // In Union we won't use this field for Tezos
         )
@@ -70,8 +67,16 @@ object TezosItemConverter {
             description = meta.description,
             attributes = meta.attributes.orEmpty().map(::convert),
             content = listOfNotNull(
-                meta.image?.let { UnionMetaContent(it, MetaContentDto.Representation.ORIGINAL, UnionImageProperties()) },
-                meta.animation?.let { UnionMetaContent(it, MetaContentDto.Representation.ORIGINAL, UnionVideoProperties()) }
+                meta.image?.let {
+                    UnionMetaContent(
+                        it, MetaContentDto.Representation.ORIGINAL, null, UnionImageProperties()
+                    )
+                },
+                meta.animation?.let {
+                    UnionMetaContent(
+                        it, MetaContentDto.Representation.ORIGINAL, null, UnionVideoProperties()
+                    )
+                }
             ),
             // TODO TEZOS - implement it
             restrictions = listOf()

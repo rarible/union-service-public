@@ -37,6 +37,7 @@ object EthOwnershipConverter {
             collection = CollectionIdDto(blockchain, contract),
             value = source.value,
             createdAt = source.date,
+            lastUpdatedAt = source.lastUpdatedAt,
             creators = (source.creators ?: emptyList()).map { EthConverter.convertToCreator(it, blockchain) },
             lazyValue = source.lazyValue,
             pending = source.pending.map { convert(it, blockchain) }
@@ -45,7 +46,7 @@ object EthOwnershipConverter {
 
     fun convert(page: NftOwnershipsDto, blockchain: BlockchainDto): Page<UnionOwnership> {
         return Page(
-            total = page.total,
+            total = page.total ?: 0,
             continuation = page.continuation,
             entities = page.ownerships.map { convert(it, blockchain) }
         )

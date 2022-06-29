@@ -5,6 +5,7 @@ import com.rarible.protocol.union.dto.AssetTypeDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
+import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
 
@@ -17,6 +18,12 @@ interface OrderService : BlockchainService {
         status: List<OrderStatusDto>?
     ): Slice<OrderDto>
 
+    suspend fun getAllSync(
+        continuation: String?,
+        size: Int,
+        sort: SyncSortDto?
+    ) : Slice<OrderDto>
+
     suspend fun getOrderById(
         id: String
     ): OrderDto
@@ -27,6 +34,10 @@ interface OrderService : BlockchainService {
 
     suspend fun getBidCurrencies(
         itemId: String
+    ): List<AssetTypeDto>
+
+    suspend fun getBidCurrenciesByCollection(
+        collectionId: String
     ): List<AssetTypeDto>
 
     suspend fun getOrderBidsByItem(
@@ -57,6 +68,10 @@ interface OrderService : BlockchainService {
         itemId: String
     ): List<AssetTypeDto>
 
+    suspend fun getSellCurrenciesByCollection(
+        collectionId: String
+    ): List<AssetTypeDto>
+
     suspend fun getSellOrders(
         platform: PlatformDto?,
         origin: String?,
@@ -68,6 +83,28 @@ interface OrderService : BlockchainService {
         platform: PlatformDto?,
         collection: String,
         origin: String?,
+        continuation: String?,
+        size: Int
+    ): Slice<OrderDto>
+
+    suspend fun getOrderFloorSellsByCollection(
+        platform: PlatformDto?,
+        collectionId: String,
+        origin: String?,
+        status: List<OrderStatusDto>?,
+        currencyAddress: String,
+        continuation: String?,
+        size: Int
+    ): Slice<OrderDto>
+
+    suspend fun getOrderFloorBidsByCollection(
+        platform: PlatformDto?,
+        collectionId: String,
+        origin: String?,
+        status: List<OrderStatusDto>?,
+        start: Long?,
+        end: Long?,
+        currencyAddress: String,
         continuation: String?,
         size: Int
     ): Slice<OrderDto>

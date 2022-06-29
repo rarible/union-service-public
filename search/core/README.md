@@ -1,1 +1,0 @@
-Search-Core module contains ES indices defintions, ES models and repository objects.

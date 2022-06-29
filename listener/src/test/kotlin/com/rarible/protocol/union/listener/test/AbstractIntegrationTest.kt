@@ -5,8 +5,12 @@ import com.rarible.core.kafka.KafkaMessage
 import com.rarible.core.kafka.RaribleKafkaConsumer
 import com.rarible.core.kafka.RaribleKafkaProducer
 import com.rarible.core.test.data.randomString
+import com.rarible.protocol.nft.api.client.NftCollectionControllerApi
 import com.rarible.protocol.nft.api.client.NftItemControllerApi
 import com.rarible.protocol.nft.api.client.NftOwnershipControllerApi
+import com.rarible.protocol.solana.api.client.TokenControllerApi
+import com.rarible.protocol.solana.dto.TokenMetaEventDto
+import com.rarible.protocol.union.core.test.WaitAssert
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.CollectionEventDto
 import com.rarible.protocol.union.dto.CollectionUpdateEventDto
@@ -19,7 +23,12 @@ import com.rarible.protocol.union.dto.OwnershipDeleteEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.dto.OwnershipUpdateEventDto
 import com.rarible.protocol.union.enrichment.configuration.UnionMetaProperties
-import com.rarible.protocol.union.enrichment.meta.UnionMetaLoader
+import com.rarible.protocol.union.enrichment.meta.item.ItemMetaLoader
+import com.rarible.protocol.union.enrichment.service.ItemMetaService
+import com.rarible.protocol.union.integration.ethereum.mock.EthAuctionControllerApiMock
+import com.rarible.protocol.union.integration.ethereum.mock.EthItemControllerApiMock
+import com.rarible.protocol.union.integration.ethereum.mock.EthOrderControllerApiMock
+import com.rarible.protocol.union.integration.ethereum.mock.EthOwnershipControllerApiMock
 import io.mockk.clearMocks
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
@@ -38,7 +47,7 @@ abstract class AbstractIntegrationTest {
 
     @Autowired
     @Qualifier("test.union.meta.loader")
-    lateinit var testUnionMetaLoader: UnionMetaLoader
+    lateinit var testItemMetaLoader: ItemMetaLoader
 
     @Autowired
     @Qualifier("test.content.meta.receiver")
@@ -47,10 +56,17 @@ abstract class AbstractIntegrationTest {
     @Autowired
     lateinit var unionMetaProperties: UnionMetaProperties
 
+    @Autowired
+    lateinit var itemMetaService: ItemMetaService
+
     //--------------------- ETHEREUM ---------------------//
     @Autowired
     @Qualifier("ethereum.item.api")
     lateinit var testEthereumItemApi: NftItemControllerApi
+
+    @Autowired
+    @Qualifier("ethereum.collection.api")
+    lateinit var testEthereumCollectionApi: NftCollectionControllerApi
 
     @Autowired
     @Qualifier("ethereum.ownership.api")
@@ -64,6 +80,11 @@ abstract class AbstractIntegrationTest {
     @Qualifier("ethereum.auction.api")
     lateinit var testEthereumAuctionApi: com.rarible.protocol.order.api.client.AuctionControllerApi
 
+    lateinit var ethereumItemControllerApiMock: EthItemControllerApiMock
+    lateinit var ethereumOwnershipControllerApiMock: EthOwnershipControllerApiMock
+    lateinit var ethereumOrderControllerApiMock: EthOrderControllerApiMock
+    lateinit var ethereumAuctionControllerApiMock: EthAuctionControllerApiMock
+
     @Autowired
     lateinit var ethItemProducer: RaribleKafkaProducer<com.rarible.protocol.dto.NftItemEventDto>
 
@@ -75,6 +96,14 @@ abstract class AbstractIntegrationTest {
 
     @Autowired
     lateinit var ethActivityProducer: RaribleKafkaProducer<com.rarible.protocol.dto.ActivityDto>
+
+    //--------------------- SOLANA ---------------------//
+    @Autowired
+    @Qualifier("solana.token.api")
+    lateinit var testSolanaTokenControllerApi: TokenControllerApi
+
+    @Autowired
+    lateinit var solanaTokenMetaEventProducer: RaribleKafkaProducer<TokenMetaEventDto>
 
     @Autowired
     lateinit var collectionConsumer: RaribleKafkaConsumer<CollectionEventDto>
@@ -102,8 +131,20 @@ abstract class AbstractIntegrationTest {
     private var activityJob: Deferred<Unit>? = null
 
     @BeforeEach
-    fun cleanupMetaMocks() {
-        clearMocks(testUnionMetaLoader)
+    fun beforeEachTest() {
+        clearMocks(
+            testEthereumItemApi,
+            testEthereumOwnershipApi,
+            testEthereumOrderApi,
+            testEthereumAuctionApi,
+
+            testItemMetaLoader,
+            testContentMetaReceiver
+        )
+        ethereumItemControllerApiMock = EthItemControllerApiMock(testEthereumItemApi)
+        ethereumOwnershipControllerApiMock = EthOwnershipControllerApiMock(testEthereumOwnershipApi)
+        ethereumOrderControllerApiMock = EthOrderControllerApiMock(testEthereumOrderApi)
+        ethereumAuctionControllerApiMock = EthAuctionControllerApiMock(testEthereumAuctionApi)
     }
 
     fun <T> runWithKafka(block: suspend CoroutineScope.() -> T): T = runBlocking {
@@ -187,4 +228,7 @@ abstract class AbstractIntegrationTest {
             value = dto
         )
     }
+
+    suspend fun waitAssert(runnable: suspend () -> Unit) = WaitAssert.wait(runnable = runnable)
+
 }

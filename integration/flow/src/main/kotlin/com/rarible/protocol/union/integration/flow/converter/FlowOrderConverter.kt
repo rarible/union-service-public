@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.integration.flow.converter
 
 import com.rarible.protocol.dto.FlowOrderDto
+import com.rarible.protocol.dto.FlowOrderPlatformDto
 import com.rarible.protocol.dto.FlowOrderStatusDto
 import com.rarible.protocol.dto.FlowOrdersPaginationDto
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
@@ -14,6 +15,7 @@ import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PlatformDto
+import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -54,7 +56,10 @@ class FlowOrderConverter(
 
         return OrderDto(
             id = OrderIdDto(blockchain, order.id.toString()),
-            platform = PlatformDto.RARIBLE,
+            platform = when(order.platform) {
+                FlowOrderPlatformDto.OTHER -> PlatformDto.OTHER
+                else -> PlatformDto.RARIBLE
+            },
             status = status,
             maker = maker,
             taker = taker,
@@ -63,7 +68,7 @@ class FlowOrderConverter(
             fill = order.fill,
             startedAt = order.start,
             endedAt = order.end,
-            makeStock = order.makeStock.toBigDecimal(),
+            makeStock = order.makeStock,
             cancelled = order.cancelled,
             createdAt = order.createdAt,
             lastUpdatedAt = order.lastUpdateAt,
@@ -71,9 +76,9 @@ class FlowOrderConverter(
             takePrice = takePrice,
             makePriceUsd = makePriceUsd,
             takePriceUsd = takePriceUsd,
-            priceHistory = emptyList(),
             data = convert(order.data, blockchain),
-            salt = ""// Not supported on Flow
+            salt = "",// Not supported on Flow
+            dbUpdatedAt = order.dbUpdatedAt
         )
     }
 
@@ -129,5 +134,12 @@ class FlowOrderConverter(
     enum class Sort {
         EARLIEST_FIRST, LATEST_FIRST
     }
+
+    fun convert(source: SyncSortDto?): String? =
+        when (source) {
+            SyncSortDto.DB_UPDATE_ASC -> "UPDATED_AT_ASC"
+            SyncSortDto.DB_UPDATE_DESC -> "UPDATED_AT_DESC"
+            else -> null
+        }
 }
 

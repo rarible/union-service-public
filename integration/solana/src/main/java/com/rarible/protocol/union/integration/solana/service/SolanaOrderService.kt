@@ -10,6 +10,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
+import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.integration.solana.converter.SolanaConverter
@@ -42,6 +43,14 @@ open class SolanaOrderService(
         return solanaOrderConverter.convert(orders, blockchain)
     }
 
+    override suspend fun getAllSync(
+        continuation: String?,
+        size: Int,
+        sort: SyncSortDto?
+    ): Slice<OrderDto> {
+        return Slice.empty()
+    }
+
     override suspend fun getOrdersByIds(orderIds: List<String>): List<OrderDto> {
         val result = orderApi.getOrdersByIds(OrderIdsDto(orderIds)).awaitFirst()
         return result.orders.map { solanaOrderConverter.convert(it, blockchain) }
@@ -50,6 +59,10 @@ open class SolanaOrderService(
     override suspend fun getBidCurrencies(itemId: String): List<AssetTypeDto> {
         val result = orderApi.getBidCurrencies(itemId).awaitFirst()
         return result.currencies.map { SolanaConverter.convert(it, blockchain) }
+    }
+
+    override suspend fun getBidCurrenciesByCollection(collectionId: String): List<AssetTypeDto> {
+        return emptyList()
     }
 
     override suspend fun getOrderBidsByItem(
@@ -105,6 +118,10 @@ open class SolanaOrderService(
         return result.currencies.map { SolanaConverter.convert(it, blockchain) }
     }
 
+    override suspend fun getSellCurrenciesByCollection(collectionId: String): List<AssetTypeDto> {
+        return emptyList()
+    }
+
     override suspend fun getSellOrders(
         platform: PlatformDto?,
         origin: String?,
@@ -127,6 +144,34 @@ open class SolanaOrderService(
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
+        return Slice.empty()
+    }
+
+    override suspend fun getOrderFloorSellsByCollection(
+        platform: PlatformDto?,
+        collectionId: String,
+        origin: String?,
+        status: List<OrderStatusDto>?,
+        currencyAddress: String,
+        continuation: String?,
+        size: Int
+    ): Slice<OrderDto> {
+        //Not implemented
+        return Slice.empty()
+    }
+
+    override suspend fun getOrderFloorBidsByCollection(
+        platform: PlatformDto?,
+        collectionId: String,
+        origin: String?,
+        status: List<OrderStatusDto>?,
+        start: Long?,
+        end: Long?,
+        currencyAddress: String,
+        continuation: String?,
+        size: Int
+    ): Slice<OrderDto> {
+        //Not implemented
         return Slice.empty()
     }
 

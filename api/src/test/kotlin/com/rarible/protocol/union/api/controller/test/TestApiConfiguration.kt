@@ -3,7 +3,6 @@ package com.rarible.protocol.union.api.controller.test
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.rarible.core.application.ApplicationEnvironmentInfo
 import com.rarible.core.kafka.RaribleKafkaProducer
-import com.rarible.loader.cache.CacheLoaderEventListener
 import com.rarible.protocol.currency.api.client.CurrencyControllerApi
 import com.rarible.protocol.flow.nft.api.client.FlowNftCollectionControllerApi
 import com.rarible.protocol.flow.nft.api.client.FlowNftCryptoControllerApi
@@ -20,15 +19,11 @@ import com.rarible.protocol.order.api.client.OrderActivityControllerApi
 import com.rarible.protocol.order.api.client.OrderControllerApi
 import com.rarible.protocol.union.api.client.FixedUnionApiServiceUriProvider
 import com.rarible.protocol.union.api.client.UnionApiClientFactory
-import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.dto.CollectionEventDto
 import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
-import com.rarible.protocol.union.enrichment.meta.UnionMetaCacheLoader
-import com.rarible.protocol.union.enrichment.meta.UnionMetaLoader
+import com.rarible.protocol.union.enrichment.meta.item.ItemMetaLoader
 import com.rarible.protocol.union.test.mock.CurrencyMock
-import io.mockk.coEvery
-import io.mockk.coJustRun
 import io.mockk.mockk
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.web.server.LocalServerPort
@@ -39,6 +34,8 @@ import org.springframework.context.annotation.Primary
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
 import org.springframework.web.client.RestTemplate
 import java.net.URI
+import com.rarible.protocol.solana.api.client.ActivityControllerApi as SolanaActivityControllerApi
+import com.rarible.protocol.solana.api.client.CollectionControllerApi as SolanaCollectionControllerApi
 
 @Lazy
 @Configuration
@@ -67,7 +64,7 @@ class TestApiConfiguration {
     @Bean
     @Primary
     @Qualifier("test.union.meta.loader")
-    fun testUnionMetaLoader(): UnionMetaLoader = mockk()
+    fun testUnionMetaLoader(): ItemMetaLoader = mockk()
 
     @Bean
     @Primary
@@ -211,6 +208,16 @@ class TestApiConfiguration {
     @Qualifier("polygon.activity.api.auction")
     fun testPolygonActivityAuctionApi(): AuctionActivityControllerApi = mockk()
 
+    //--------------------- SOLANA -------------------//
+
+    @Bean
+    @Primary
+    fun testSolanaActivityApi(): SolanaActivityControllerApi = mockk()
+
+    @Bean
+    @Primary
+    fun testSolanaCollectionApi(): SolanaCollectionControllerApi = mockk()
+
     //--------------------- FLOW ---------------------//
     @Bean
     @Primary
@@ -237,7 +244,6 @@ class TestApiConfiguration {
     fun testFlowActivityApi(): FlowNftOrderActivityControllerApi = mockk()
 
     //--------------------- TEZOS ---------------------//
-
 
     @Bean
     @Primary
@@ -266,5 +272,21 @@ class TestApiConfiguration {
     @Bean
     @Primary
     fun testTezosActivityOrderApi(): com.rarible.protocol.tezos.api.client.OrderActivityControllerApi = mockk()
+
+    @Bean
+    @Primary
+    fun testDipDupOrderClient(): com.rarible.dipdup.client.OrderClient = mockk()
+
+    @Bean
+    @Primary
+    fun testTokenActivityClient(): com.rarible.tzkt.client.TokenActivityClient = mockk()
+
+    @Bean
+    @Primary
+    fun testTzktTokenClient(): com.rarible.tzkt.client.TokenClient = mockk()
+
+    @Bean
+    @Primary
+    fun testTzktCollectionClient(): com.rarible.tzkt.client.CollectionClient = mockk()
 
 }

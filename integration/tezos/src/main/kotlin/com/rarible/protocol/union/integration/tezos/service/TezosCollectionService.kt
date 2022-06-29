@@ -2,23 +2,35 @@ package com.rarible.protocol.union.integration.tezos.service
 
 import com.rarible.core.apm.CaptureSpan
 import com.rarible.protocol.tezos.api.client.NftCollectionControllerApi
+import com.rarible.protocol.union.core.exception.UnionException
+import com.rarible.protocol.union.core.model.TokenId
+import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.core.service.CollectionService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.dto.continuation.page.Page
 import com.rarible.protocol.union.integration.tezos.converter.TezosCollectionConverter
+import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktCollectionService
+import com.rarible.protocol.union.integration.tezos.entity.TezosTokenIdRepository
 import kotlinx.coroutines.reactive.awaitFirst
+import kotlinx.coroutines.reactive.awaitSingle
+import java.math.BigInteger
 
 @CaptureSpan(type = "blockchain")
 open class TezosCollectionService(
-    private val collectionControllerApi: NftCollectionControllerApi
+    private val collectionControllerApi: NftCollectionControllerApi,
+    private val pgService: TezosPgCollectionService,
+    private val tzktCollectionService: TzktCollectionService,
+    private val tezosTokenIdRepository: TezosTokenIdRepository
 ) : AbstractBlockchainService(BlockchainDto.TEZOS), CollectionService {
 
     override suspend fun getAllCollections(
         continuation: String?,
         size: Int
-    ): Page<CollectionDto> {
+    ): Page<UnionCollection> {
+        if (tzktCollectionService.enabled()) {
+            return tzktCollectionService.getAllCollections(continuation, size)
+        }
         val collections = collectionControllerApi.searchNftAllCollections(
             size,
             continuation
@@ -26,7 +38,10 @@ open class TezosCollectionService(
         return TezosCollectionConverter.convert(collections, blockchain)
     }
 
-    override suspend fun getCollectionById(collectionId: String): CollectionDto {
+    override suspend fun getCollectionById(collectionId: String): UnionCollection {
+        if (tzktCollectionService.enabled()) {
+            return tzktCollectionService.getCollectionById(collectionId)
+        }
         val collection = collectionControllerApi.getNftCollectionById(collectionId).awaitFirst()
         return TezosCollectionConverter.convert(collection, blockchain)
     }
@@ -35,11 +50,36 @@ open class TezosCollectionService(
         // TODO[TEZOS]: implement.
     }
 
+    override suspend fun getCollectionsByIds(ids: List<String>): List<UnionCollection> {
+        if (tzktCollectionService.enabled()) {
+            return tzktCollectionService.getCollectionByIds(ids)
+        }
+        return pgService.getCollectionsByIds(ids)
+    }
+
+    override suspend fun generateNftTokenId(collectionId: String, minter: String?): TokenId {
+        val tokenId: BigInteger = if (tzktCollectionService.enabled()) {
+            try { // Adjust to existed count
+                val actualCount = tzktCollectionService.tokenCount(collectionId)
+                tezosTokenIdRepository.adjustTokenCount(collectionId, actualCount)
+            } catch (ex: Exception) {
+                throw UnionException("Collection wasn't found")
+            }
+            tezosTokenIdRepository.generateNftTokenId(collectionId)
+        } else {
+             collectionControllerApi.generateNftTokenId(collectionId).awaitSingle().tokenId
+        }
+        return TokenId(tokenId.toString())
+    }
+
     override suspend fun getCollectionsByOwner(
         owner: String,
         continuation: String?,
         size: Int
-    ): Page<CollectionDto> {
+    ): Page<UnionCollection> {
+        if (tzktCollectionService.enabled()) {
+            return tzktCollectionService.getCollectionByOwner(owner, continuation, size)
+        }
         val items = collectionControllerApi.searchNftCollectionsByOwner(
             owner,
             size,

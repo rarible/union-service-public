@@ -18,7 +18,7 @@ import org.springframework.context.annotation.Import
         FlowConsumerConfiguration::class,
         TezosConsumerConfiguration::class,
         ImmutablexConsumerConfiguration::class,
-        SolanaConsumerConfiguration::class,
+        SolanaConsumerConfiguration::class
     ]
 )
 class EnrichmentConsumerConfiguration

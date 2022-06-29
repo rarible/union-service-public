@@ -1,0 +1,86 @@
+application:
+  project: protocol
+
+server:
+  shutdown: graceful
+  port: 8080
+
+spring:
+  application.name: union-search-indexer
+  jackson:
+    mapper:
+      ACCEPT_CASE_INSENSITIVE_ENUMS: true
+    deserialization:
+      FAIL_ON_UNKNOWN_PROPERTIES: false
+    default-property-inclusion: non_null
+  aop:
+    proxy-target-class: false
+  main:
+    banner-mode: log
+    web-application-type: reactive
+
+rarible:
+  core:
+    apm:
+      agent:
+        enabled: true
+        server: http://elk_apm-server:8200
+        packages: com.rarible.protocol.union.search
+      web:
+        filter:
+          enabled: false
+      annotation:
+        enabled: true
+
+handler:
+  activity:
+    enabled: ${consul.indexer.activity.enabled:true}
+  collection:
+    enabled: ${consul.indexer.collection.enabled:true}
+  item:
+    enabled: ${consul.indexer.item.enabled:true}
+  order:
+    enabled: ${consul.indexer.order.enabled:true}
+  ownership:
+    enabled: ${consul.indexer.ownership.enabled:true}
+
+listener:
+  consumer:
+    broker-replica-set: ${kafka.hosts}
+    worker-count: 10
+
+integration:
+  ethereum:
+    enabled: ${consul.ethereum.enabled:true}
+    auctionContracts: ${consul.ethereum.auctionContracts:}
+  polygon:
+    enabled: ${consul.polygon.enabled:true}
+    auctionContracts: ${consul.polygon.auctionContracts:}
+  flow:
+    enabled: ${consul.flow.enabled:true}
+    auctionContracts: ${consul.flow.auctionContracts:}
+  tezos:
+    enabled: ${consul.tezos.enabled:true}
+    dipdup:
+      enabled: ${consul.tezos.dipdup.enabled:false}
+      dipdupUrl: ${consul.tezos.dipdup.dipdupUrl:}
+      tzktUrl: ${consul.tezos.dipdup.tzktUrl:}
+    client:
+      url: ${consul.tezos.api.baseUrl:}
+    pg:
+      host: ${consul.tezos.pg.host:}
+      port: ${consul.tezos.pg.port:}
+      user: ${consul.tezos.pg.user:}
+      password: ${consul.tezos.pg.password:}
+      database: ${consul.tezos.pg.database:}
+    auctionContracts: ${consul.tezos.auctionContracts:}
+  solana:
+    enabled: ${consul.solana.enabled:false}
+  immutablex:
+    enabled: ${consul.immutablex.enabled:false}
+    client:
+      url: ${consul.immutablex.api.baseUrl:}
+    apiKey: ${consul.immutablex.api.key:}
+common:
+  producer:
+    broker-replica-set: ${kafka.hosts}

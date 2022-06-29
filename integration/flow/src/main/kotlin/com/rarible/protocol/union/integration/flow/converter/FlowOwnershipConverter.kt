@@ -38,6 +38,7 @@ object FlowOwnershipConverter {
             collection = CollectionIdDto(blockchain, ownership.contract),
             value = BigInteger.ONE, // TODO FLOW always one?
             createdAt = ownership.createdAt,
+            lastUpdatedAt = null, // TODO FLOW add field
             lazyValue = BigInteger.ZERO,
             creators = ownership.creators.map { FlowConverter.convertToCreator(it, blockchain) }
         )

@@ -2,7 +2,7 @@ package com.rarible.protocol.union.integration.flow.converter
 
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionDto
-import com.rarible.protocol.union.test.data.randomFlowCollectionDto
+import com.rarible.protocol.union.integration.flow.data.randomFlowCollectionDto
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 

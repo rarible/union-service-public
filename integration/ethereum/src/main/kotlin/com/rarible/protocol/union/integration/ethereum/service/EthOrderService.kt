@@ -11,6 +11,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
+import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
@@ -38,6 +39,19 @@ open class EthOrderService(
         return ethOrderConverter.convert(orders, blockchain)
     }
 
+    override suspend fun getAllSync(
+        continuation: String?,
+        size: Int,
+        sort: SyncSortDto?
+    ): Slice<OrderDto> {
+        val orders = orderControllerApi.getAllSync(
+            ethOrderConverter.convert(sort),
+            continuation,
+            size
+        ).awaitFirst()
+        return ethOrderConverter.convert(orders, blockchain)
+    }
+
     override suspend fun getOrderById(id: String): OrderDto {
         val order = orderControllerApi.getOrderByHash(id).awaitFirst()
         return ethOrderConverter.convert(order, blockchain)
@@ -54,6 +68,14 @@ open class EthOrderService(
         val assetTypes = orderControllerApi.getCurrenciesByBidOrdersOfItem(
             contract,
             tokenId.toString()
+        ).awaitFirst()
+        return assetTypes.currencies.map { EthConverter.convert(it, blockchain) }
+    }
+
+    override suspend fun getBidCurrenciesByCollection(collectionId: String): List<AssetTypeDto> {
+        val assetTypes = orderControllerApi.getCurrenciesByBidOrdersOfItem(
+            collectionId,
+            "-1"
         ).awaitFirst()
         return assetTypes.currencies.map { EthConverter.convert(it, blockchain) }
     }
@@ -75,12 +97,12 @@ open class EthOrderService(
         val orders = orderControllerApi.getOrderBidsByItemAndByStatus(
             contract,
             tokenId.toString(),
-            ethOrderConverter.convert(status),
             makerAddresses,
             origin,
             EthConverter.convert(platform),
             continuation,
             size,
+            ethOrderConverter.convert(status),
             currencyAddress,
             start,
             end
@@ -100,11 +122,11 @@ open class EthOrderService(
     ): Slice<OrderDto> {
         val orders = orderControllerApi.getOrderBidsByMakerAndByStatus(
             maker,
-            ethOrderConverter.convert(status),
             origin,
             EthConverter.convert(platform),
             continuation,
             size,
+            ethOrderConverter.convert(status),
             start,
             end
         ).awaitFirst()
@@ -118,6 +140,14 @@ open class EthOrderService(
         val assetTypes = orderControllerApi.getCurrenciesBySellOrdersOfItem(
             contract,
             tokenId.toString()
+        ).awaitFirst()
+        return assetTypes.currencies.map { EthConverter.convert(it, blockchain) }
+    }
+
+    override suspend fun getSellCurrenciesByCollection(collectionId: String): List<AssetTypeDto> {
+        val assetTypes = orderControllerApi.getCurrenciesBySellOrdersOfItem(
+            collectionId,
+            "-1"
         ).awaitFirst()
         return assetTypes.currencies.map { EthConverter.convert(it, blockchain) }
     }
@@ -151,6 +181,58 @@ open class EthOrderService(
             size
         ).awaitFirst()
         return ethOrderConverter.convert(orders, blockchain)
+    }
+
+    override suspend fun getOrderFloorSellsByCollection(
+        platform: PlatformDto?,
+        collectionId: String,
+        origin: String?,
+        status: List<OrderStatusDto>?,
+        currencyAddress: String,
+        continuation: String?,
+        size: Int
+    ): Slice<OrderDto> {
+        //We use hack here, get item with id = -1,
+        //since it doesn't exist, we only get collections
+        val itemId = "$collectionId:-1"
+        return getSellOrdersByItem(
+            platform,
+            itemId,
+            null,
+            origin,
+            status,
+            currencyAddress,
+            continuation,
+            size
+        )
+    }
+
+    override suspend fun getOrderFloorBidsByCollection(
+        platform: PlatformDto?,
+        collectionId: String,
+        origin: String?,
+        status: List<OrderStatusDto>?,
+        start: Long?,
+        end: Long?,
+        currencyAddress: String,
+        continuation: String?,
+        size: Int
+    ): Slice<OrderDto> {
+        //We use hack here, get item with id = -1,
+        //since it doesn't exist, we only get  collections
+        val itemId = "$collectionId:-1"
+        return getOrderBidsByItem(
+            platform,
+            itemId,
+            null,
+            origin,
+            status,
+            start,
+            end,
+            currencyAddress,
+            continuation,
+            size
+        )
     }
 
     override suspend fun getSellOrdersByItem(

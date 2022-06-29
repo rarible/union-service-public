@@ -23,6 +23,16 @@ open class SolanaOwnershipEventHandler(
     override suspend fun handle(event: BalanceEventDto) {
         logger.info("Received {} Ownership event: {}", blockchain, event)
 
+        val isAssociatedTokenAccount = when (event) {
+            is BalanceUpdateEventDto -> event.balance.isAssociatedTokenAccount == null || event.balance.isAssociatedTokenAccount!!
+            is BalanceDeleteEventDto -> event.balance.isAssociatedTokenAccount == null || event.balance.isAssociatedTokenAccount!!
+        }
+
+        if (!isAssociatedTokenAccount) {
+            logger.info("Skipping balance event for the secondary account ${event.account} of ${event.mint}")
+            return
+        }
+
         when (event) {
             is BalanceUpdateEventDto -> {
                 val unionOwnership = SolanaOwnershipConverter.convert(event.balance, blockchain)

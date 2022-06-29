@@ -1,10 +1,10 @@
 package com.rarible.protocol.union.integration.flow.converter
 
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.test.data.randomFlowNftOwnershipDto
+import com.rarible.protocol.union.integration.flow.data.randomFlowNftOwnershipDto
+import java.math.BigInteger
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import java.math.BigInteger
 
 class FlowOwnershipConverterTest {
 
@@ -16,6 +16,7 @@ class FlowOwnershipConverterTest {
 
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.createdAt).isEqualTo(dto.createdAt)
+        assertThat(converted.lastUpdatedAt).isNull() // TODO FLOW update later
         assertThat(converted.value).isEqualTo(BigInteger.ONE)
         assertThat(converted.collection!!.value).isEqualTo(dto.contract)
 

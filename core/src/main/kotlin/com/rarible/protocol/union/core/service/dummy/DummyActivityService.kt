@@ -1,11 +1,15 @@
 package com.rarible.protocol.union.core.service.dummy
 
+import com.rarible.protocol.union.core.model.TypedActivityId
 import com.rarible.protocol.union.core.service.ActivityService
+import com.rarible.protocol.union.core.model.ItemAndOwnerActivityType
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.SyncSortDto
+import com.rarible.protocol.union.dto.SyncTypeDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import java.time.Instant
@@ -19,6 +23,15 @@ class DummyActivityService(
         continuation: String?,
         size: Int,
         sort: ActivitySortDto?
+    ): Slice<ActivityDto> {
+        return Slice.empty()
+    }
+
+    override suspend fun getAllActivitiesSync(
+        continuation: String?,
+        size: Int,
+        sort: SyncSortDto?,
+        type: SyncTypeDto?
     ): Slice<ActivityDto> {
         return Slice.empty()
     }
@@ -43,6 +56,17 @@ class DummyActivityService(
         return Slice.empty()
     }
 
+    override suspend fun getActivitiesByItemAndOwner(
+        types: List<ItemAndOwnerActivityType>,
+        itemId: String,
+        owner: String,
+        continuation: String?,
+        size: Int,
+        sort: ActivitySortDto?,
+    ): Slice<ActivityDto> {
+        return Slice.empty()
+    }
+
     override suspend fun getActivitiesByUser(
         types: List<UserActivityTypeDto>,
         users: List<String>,
@@ -53,5 +77,9 @@ class DummyActivityService(
         sort: ActivitySortDto?
     ): Slice<ActivityDto> {
         return Slice.empty()
+    }
+
+    override suspend fun getActivitiesByIds(ids: List<TypedActivityId>): List<ActivityDto> {
+        return emptyList()
     }
 }

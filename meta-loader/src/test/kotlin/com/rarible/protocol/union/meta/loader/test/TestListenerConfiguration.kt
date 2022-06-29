@@ -3,7 +3,7 @@ package com.rarible.protocol.union.meta.loader.test
 import com.rarible.core.application.ApplicationEnvironmentInfo
 import com.rarible.core.content.meta.loader.ContentMetaReceiver
 import com.rarible.protocol.union.core.CoreConfiguration
-import com.rarible.protocol.union.enrichment.meta.UnionMetaLoader
+import com.rarible.protocol.union.enrichment.meta.item.ItemMetaLoader
 
 import io.mockk.mockk
 import org.springframework.beans.factory.annotation.Qualifier
@@ -24,7 +24,7 @@ class TestListenerConfiguration {
     @Bean
     @Primary
     @Qualifier("test.union.meta.loader")
-    fun testUnionMetaLoader(): UnionMetaLoader = mockk()
+    fun testUnionMetaLoader(): ItemMetaLoader = mockk()
 
     @Bean
     @Primary

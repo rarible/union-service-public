@@ -12,6 +12,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
+import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.integration.flow.converter.FlowConverter
@@ -41,6 +42,19 @@ open class FlowOrderService(
         return flowOrderConverter.convert(result, blockchain)
     }
 
+    override suspend fun getAllSync(
+        continuation: String?,
+        size: Int,
+        sort: SyncSortDto?
+    ): Slice<OrderDto> {
+        val result = orderControllerApi.getOrdersSync(
+            continuation,
+            size,
+            flowOrderConverter.convert(sort)
+        ).awaitFirst()
+        return flowOrderConverter.convert(result, blockchain)
+    }
+
     override suspend fun getOrderById(id: String): OrderDto {
         val order = orderControllerApi.getOrderByOrderId(id).awaitFirst()
         return flowOrderConverter.convert(order, blockchain)
@@ -56,6 +70,10 @@ open class FlowOrderService(
         val assets = bidControllerApi.getBidCurrencies(itemId)
             .collectList().awaitFirst()
         return assets.map { FlowConverter.convert(it, blockchain).type }
+    }
+
+    override suspend fun getBidCurrenciesByCollection(collectionId: String): List<AssetTypeDto> {
+        return emptyList()
     }
 
     override suspend fun getOrderBidsByItem(
@@ -114,6 +132,10 @@ open class FlowOrderService(
         return assets.map { FlowConverter.convert(it, blockchain).type }
     }
 
+    override suspend fun getSellCurrenciesByCollection(collectionId: String): List<AssetTypeDto> {
+        return emptyList()
+    }
+
     override suspend fun getSellOrders(
         platform: PlatformDto?,
         origin: String?,
@@ -142,6 +164,34 @@ open class FlowOrderService(
             size
         ).awaitFirst()
         return flowOrderConverter.convert(result, blockchain)
+    }
+
+    override suspend fun getOrderFloorSellsByCollection(
+        platform: PlatformDto?,
+        collectionId: String,
+        origin: String?,
+        status: List<OrderStatusDto>?,
+        currencyAddress: String,
+        continuation: String?,
+        size: Int
+    ): Slice<OrderDto> {
+        //Not implemented
+        return Slice.empty()
+    }
+
+    override suspend fun getOrderFloorBidsByCollection(
+        platform: PlatformDto?,
+        collectionId: String,
+        origin: String?,
+        status: List<OrderStatusDto>?,
+        start: Long?,
+        end: Long?,
+        currencyAddress: String,
+        continuation: String?,
+        size: Int
+    ): Slice<OrderDto> {
+        //Not implemented
+        return Slice.empty()
     }
 
     override suspend fun getSellOrdersByItem(

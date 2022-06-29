@@ -1,3 +1,18 @@
+spring:
+  data:
+    elasticsearch:
+      cluster-name: docker-cluster
+      cluster-nodes: ${elasticsearch.cluster-nodes}
+
+      client:
+        reactive:
+          endpoints:  ${elasticsearch.api-nodes}
+          max-in-memory-size: 4194304
+
+  elasticsearch:
+    rest:
+      uris: ${elasticsearch.api-nodes}
+
 rarible:
   core:
     apm:
@@ -9,9 +24,26 @@ rarible:
     enableRetrySchedulerJob: false
 
 integration:
+  ethereum:
+    origins:
+      testWhitelabel:
+        origin: "0xWhitelabel"
+        collections: "0xf3348949db80297c78ec17d19611c263fc61f988"
   tezos:
     client:
       url: "http://localhost:8080"
+    pg:
+      host: "localhost"
+      port: 5432
+      user: "test"
+      password: "test"
+      database: "test"
+  solana:
+    enabled: true
+
+meta:
+  embedded:
+    publicUrl: "http://localhost:8080/content/embedded"
 
 common:
   currency:
@@ -22,16 +54,17 @@ common:
     enableOwnershipSourceEnrichment: true
     enableItemLastSaleEnrichment: true
 
-spring:
-  data:
-    elasticsearch:
-      cluster-name: docker-cluster
-      cluster-nodes: ${elasticsearch.cluster-nodes}
+protocol:
+  union:
+    subscriber:
+      broker-replica-set: ${kafka.hosts}
 
-      client:
-        reactive:
-          endpoints:  ${elasticsearch.api-nodes}
-
-  elasticsearch:
-    rest:
-      uris: ${elasticsearch.api-nodes}
+logging:
+  level:
+    com.rarible.protocol.union: DEBUG
+    org.apache.kafka: ERROR
+    org.apache.activemq: ERROR
+    com.rarible.core.daemon: ERROR
+    com.rarible.core.loader: ERROR
+    tracer: TRACE
+    org.springframework.data.elasticsearch.core.QUERY: DEBUG

@@ -23,10 +23,10 @@ import com.rarible.protocol.union.enrichment.service.BestOrderService
 import com.rarible.protocol.union.enrichment.service.EnrichmentActivityService
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
-import com.rarible.protocol.union.enrichment.validator.ItemValidator
-import java.util.UUID
+import com.rarible.protocol.union.enrichment.validator.EntityValidator
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
+import java.util.*
 
 @Component
 class EnrichmentItemEventService(
@@ -136,11 +136,17 @@ class EnrichmentItemEventService(
     }
 
     suspend fun onItemBestSellOrderUpdated(itemId: ShortItemId, order: OrderDto, notificationEnabled: Boolean = true) {
-        updateOrder(itemId, order, notificationEnabled) { item -> bestOrderService.updateBestSellOrder(item, order) }
+        updateOrder(itemId, order, notificationEnabled) { item ->
+            val origins = enrichmentItemService.getItemOrigins(itemId)
+            bestOrderService.updateBestSellOrder(item, order, origins)
+        }
     }
 
     suspend fun onItemBestBidOrderUpdated(itemId: ShortItemId, order: OrderDto, notificationEnabled: Boolean = true) {
-        updateOrder(itemId, order, notificationEnabled) { item -> bestOrderService.updateBestBidOrder(item, order) }
+        updateOrder(itemId, order, notificationEnabled) { item ->
+            val origins = enrichmentItemService.getItemOrigins(itemId)
+            bestOrderService.updateBestBidOrder(item, order, origins)
+        }
     }
 
     suspend fun onAuctionUpdated(auction: AuctionDto, notificationEnabled: Boolean = true) {
@@ -221,14 +227,6 @@ class EnrichmentItemEventService(
         return Triple(current, action(short), exist)
     }
 
-    private suspend fun notifyDelete(itemId: ShortItemId) {
-        val event = ItemDeleteEventDto(
-            itemId = itemId.toDto(),
-            eventId = UUID.randomUUID().toString()
-        )
-        itemEventListeners.forEach { it.onEvent(event) }
-    }
-
     // Potentially we could have updated Order here (no matter - bid/sell) and when we need to fetch
     // full version of the order, we can use this already fetched Order if it has same ID (hash)
     private suspend fun saveAndNotify(
@@ -288,7 +286,7 @@ class EnrichmentItemEventService(
     private suspend fun sendUpdate(event: ItemUpdateEventDto) {
         // If item in corrupted state, we will try to reconcile it instead of sending corrupted
         // data to the customers
-        if (!ItemValidator.isValid(event.item)) {
+        if (!EntityValidator.isValid(event.item)) {
             reconciliationEventService.onCorruptedItem(event.item.id)
         } else {
             itemEventListeners.forEach { it.onEvent(event) }

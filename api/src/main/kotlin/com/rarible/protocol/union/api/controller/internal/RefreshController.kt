@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.api.controller.internal
 
 import com.rarible.protocol.union.core.exception.UnionNotFoundException
+import com.rarible.protocol.union.dto.CollectionEventDto
 import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.dto.parser.IdParser
@@ -16,6 +17,17 @@ import org.springframework.web.bind.annotation.RestController
 class RefreshController(
     private val refreshService: EnrichmentRefreshService
 ) {
+    @PostMapping(
+        value = ["/v0.1/refresh/collection/{collectionId}/reconcile"],
+        produces = ["application/json"]
+    )
+    suspend fun reconcileCollection(
+        @PathVariable("collectionId") collectionId: String
+    ): ResponseEntity<CollectionEventDto> {
+        val unionCollectionId = IdParser.parseCollectionId(collectionId)
+        val result = refreshService.reconcileCollection(unionCollectionId)
+        return ResponseEntity.ok(result)
+    }
 
     @PostMapping(
         value = ["/v0.1/refresh/item/{itemId}/reconcile"],

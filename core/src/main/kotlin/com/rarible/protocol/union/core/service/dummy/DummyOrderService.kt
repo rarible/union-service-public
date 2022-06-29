@@ -8,6 +8,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
+import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
 
@@ -24,6 +25,14 @@ class DummyOrderService(
         return Slice.empty()
     }
 
+    override suspend fun getAllSync(
+        continuation: String?,
+        size: Int,
+        sort: SyncSortDto?
+    ): Slice<OrderDto> {
+        return Slice.empty()
+    }
+
     override suspend fun getOrderById(id: String): OrderDto {
         throw UnionNotFoundException("Order [$id] not found, ${blockchain.name} is not available")
     }
@@ -33,6 +42,10 @@ class DummyOrderService(
     }
 
     override suspend fun getBidCurrencies(itemId: String): List<AssetTypeDto> {
+        return emptyList()
+    }
+
+    override suspend fun getBidCurrenciesByCollection(collectionId: String): List<AssetTypeDto> {
         return emptyList()
     }
 
@@ -68,6 +81,10 @@ class DummyOrderService(
         return emptyList()
     }
 
+    override suspend fun getSellCurrenciesByCollection(collectionId: String): List<AssetTypeDto> {
+        return emptyList()
+    }
+
     override suspend fun getSellOrders(
         platform: PlatformDto?,
         origin: String?,
@@ -81,6 +98,32 @@ class DummyOrderService(
         platform: PlatformDto?,
         collection: String,
         origin: String?,
+        continuation: String?,
+        size: Int
+    ): Slice<OrderDto> {
+        return Slice.empty()
+    }
+
+    override suspend fun getOrderFloorSellsByCollection(
+        platform: PlatformDto?,
+        collectionId: String,
+        origin: String?,
+        status: List<OrderStatusDto>?,
+        currencyAddress: String,
+        continuation: String?,
+        size: Int
+    ): Slice<OrderDto> {
+        return Slice.empty()
+    }
+
+    override suspend fun getOrderFloorBidsByCollection(
+        platform: PlatformDto?,
+        collectionId: String,
+        origin: String?,
+        status: List<OrderStatusDto>?,
+        start: Long?,
+        end: Long?,
+        currencyAddress: String,
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {

@@ -1,10 +1,9 @@
 package com.rarible.protocol.union.listener.metrics
 
+import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.core.event.OutgoingEventListener
 import com.rarible.protocol.union.core.model.CompositeRegisteredTimer
 import com.rarible.protocol.union.dto.BlockchainDto
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import java.time.Clock
 import java.time.Duration
 import java.time.Instant
@@ -14,7 +13,7 @@ abstract class EntityDelayMeterOutgoingItemEventListener<T>(
     private val timer: CompositeRegisteredTimer,
 ) : OutgoingEventListener<T> {
 
-    private val logger: Logger = LoggerFactory.getLogger(javaClass)
+    private val logger by Logger()
 
     override suspend fun onEvent(event: T) {
         try {

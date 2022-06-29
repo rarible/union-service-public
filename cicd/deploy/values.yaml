@@ -3,10 +3,10 @@ protocol-union-api:
     repository: union-service-api
   replicas: 2
   environments:
-    APPLICATION_ENVIRONMENT: '{{ include "service.appEnv" $ }}'
-    CONSUL_ROOT_PATH: '{{ include "service.appEnv" $ }}/protocol/union'
-    SPRING_PROFILES_ACTIVE: 'consul,{{ include "service.appEnv" $ }}'
-    SERVICE_PREFIX: '{{ include "service.appEnv" $ }}-union'
+    APPLICATION_ENVIRONMENT: '{{ include "service.env" $ }}'
+    CONSUL_ROOT_PATH: '{{ include "service.env" $ }}/protocol/union'
+    SPRING_PROFILES_ACTIVE: 'consul,{{ include "service.env" $ }}'
+    SERVICE_PREFIX: '{{ include "service.env" $ }}-union'
     JAVA_OPTIONS: '-XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp'
   nodeSelector:
     node.labels.rarible.service: true
@@ -14,21 +14,25 @@ protocol-union-api:
     jvm:
       xmx_megabytes: 384
       max_direct_memory_megabytes: 32
+  service:
+    enabled: true
   updateConfig:
     order: start-first
   networks:
     common:
-    - '{{ include "service.appEnv" $ }}-backend'
+    - '{{ include "service.env" $ }}-backend'
     - proxy-staging
+  podAnnotations:
+    fluentbit.io/parser: logfmt
 
 protocol-union-listener:
   image:
     repository: union-service-listener
   environments:
-    APPLICATION_ENVIRONMENT: '{{ include "service.appEnv" $ }}'
-    CONSUL_ROOT_PATH: '{{ include "service.appEnv" $ }}/protocol/union'
-    SPRING_PROFILES_ACTIVE: 'consul,{{ include "service.appEnv" $ }}'
-    SERVICE_PREFIX: '{{ include "service.appEnv" $ }}-union'
+    APPLICATION_ENVIRONMENT: '{{ include "service.env" $ }}'
+    CONSUL_ROOT_PATH: '{{ include "service.env" $ }}/protocol/union'
+    SPRING_PROFILES_ACTIVE: 'consul,{{ include "service.env" $ }}'
+    SERVICE_PREFIX: '{{ include "service.env" $ }}-union'
   nodeSelector:
     node.labels.rarible.service: true
   resources:
@@ -37,34 +41,39 @@ protocol-union-listener:
       max_direct_memory_megabytes: 128
   networks:
     common:
-    - '{{ include "service.appEnv" $ }}-backend'
+    - '{{ include "service.env" $ }}-backend'
+  podAnnotations:
+    fluentbit.io/parser: logfmt
 
 protocol-union-meta-loader:
   image:
     repository: union-service-meta-loader
   environments:
-    APPLICATION_ENVIRONMENT: '{{ include "service.appEnv" $ }}'
-    CONSUL_ROOT_PATH: '{{ include "service.appEnv" $ }}/protocol/union'
-    SPRING_PROFILES_ACTIVE: 'consul,{{ include "service.appEnv" $ }}'
-    SERVICE_PREFIX: '{{ include "service.appEnv" $ }}-union'
+    APPLICATION_ENVIRONMENT: '{{ include "service.env" $ }}'
+    CONSUL_ROOT_PATH: '{{ include "service.env" $ }}/protocol/union'
+    SPRING_PROFILES_ACTIVE: 'consul,{{ include "service.env" $ }}'
+    SERVICE_PREFIX: '{{ include "service.env" $ }}-union'
   nodeSelector:
     node.labels.rarible.service: true
   resources:
     jvm:
       xmx_megabytes: 1024
-      max_direct_memory_megabytes: 128
+      max_direct_memory_megabytes: 256
   networks:
     common:
-      - '{{ include "service.appEnv" $ }}-backend'
+      - '{{ include "service.env" $ }}-backend'
+  podAnnotations:
+    fluentbit.io/parser: logfmt
 
-protocol-union-search-indexer:
+protocol-union-indexer:
+  enabled: false
   image:
-    repository: union-service-search-indexer
+    repository: union-service-indexer
   environments:
-    APPLICATION_ENVIRONMENT: '{{ include "service.appEnv" $ }}'
-    CONSUL_ROOT_PATH: '{{ include "service.appEnv" $ }}/protocol/union'
-    SPRING_PROFILES_ACTIVE: 'consul,{{ include "service.appEnv" $ }}'
-    SERVICE_PREFIX: '{{ include "service.appEnv" $ }}-union'
+    APPLICATION_ENVIRONMENT: '{{ include "service.env" $ }}'
+    CONSUL_ROOT_PATH: '{{ include "service.env" $ }}/protocol/union'
+    SPRING_PROFILES_ACTIVE: 'consul,{{ include "service.env" $ }}'
+    SERVICE_PREFIX: '{{ include "service.env" $ }}-union'
   nodeSelector:
     node.labels.rarible.service: true
   resources:
@@ -73,16 +82,19 @@ protocol-union-search-indexer:
       max_direct_memory_megabytes: 128
   networks:
     common:
-      - '{{ include "service.appEnv" $ }}-backend'
+      - '{{ include "service.env" $ }}-backend'
+  podAnnotations:
+    fluentbit.io/parser: logfmt
 
-protocol-union-search-reindexer:
+protocol-union-worker:
+  enabled: false
   image:
-    repository: union-service-search-reindexer
+    repository: union-service-worker
   environments:
-    APPLICATION_ENVIRONMENT: '{{ include "service.appEnv" $ }}'
-    CONSUL_ROOT_PATH: '{{ include "service.appEnv" $ }}/protocol/union'
-    SPRING_PROFILES_ACTIVE: 'consul,{{ include "service.appEnv" $ }}'
-    SERVICE_PREFIX: '{{ include "service.appEnv" $ }}-union'
+    APPLICATION_ENVIRONMENT: '{{ include "service.env" $ }}'
+    CONSUL_ROOT_PATH: '{{ include "service.env" $ }}/protocol/union'
+    SPRING_PROFILES_ACTIVE: 'consul,{{ include "service.env" $ }}'
+    SERVICE_PREFIX: '{{ include "service.env" $ }}-union'
   nodeSelector:
     node.labels.rarible.service: true
   resources:
@@ -91,4 +103,6 @@ protocol-union-search-reindexer:
       max_direct_memory_megabytes: 128
   networks:
     common:
-      - '{{ include "service.appEnv" $ }}-backend'
+      - '{{ include "service.env" $ }}-backend'
+  podAnnotations:
+    fluentbit.io/parser: logfmt

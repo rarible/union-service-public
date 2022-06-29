@@ -1,0 +1,50 @@
+{
+  "dynamic": "false",
+  "properties": {
+    "@timestamp": {
+      "type": "date"
+    },
+    "collectionId": {
+      "type": "keyword"
+    },
+    "type": {
+      "type": "keyword"
+    },
+    "blockchain": {
+      "type": "keyword",
+      "ignore_above": 256
+    },
+    "salt": {
+      "type": "long"
+    },
+    "date": {
+      "type": "date",
+      "format": "strict_date_optional_time||epoch_second"
+    },
+    "name": {
+      "type": "keyword"
+    },
+    "symbol": {
+      "type": "keyword"
+    },
+    "owner": {
+      "type": "keyword"
+    },
+    "parent": {
+      "type": "keyword"
+    },
+    "meta": {
+      "properties": {
+        "name": {
+          "type": "keyword"
+        },
+        "description": {
+          "type": "keyword"
+        },
+        "feeRecipient": {
+          "type": "keyword"
+        }
+      }
+    }
+  }
+}

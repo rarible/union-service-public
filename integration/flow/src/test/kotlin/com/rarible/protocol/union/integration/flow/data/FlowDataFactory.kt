@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.test.data
+package com.rarible.protocol.union.integration.flow.data
 
 import com.rarible.core.common.nowMillis
 import com.rarible.core.test.data.randomBigDecimal
@@ -12,6 +12,8 @@ import com.rarible.protocol.dto.FlowAssetFungibleDto
 import com.rarible.protocol.dto.FlowAssetNFTDto
 import com.rarible.protocol.dto.FlowBurnDto
 import com.rarible.protocol.dto.FlowCreatorDto
+import com.rarible.protocol.dto.FlowMetaAttributeDto
+import com.rarible.protocol.dto.FlowMetaDto
 import com.rarible.protocol.dto.FlowMintDto
 import com.rarible.protocol.dto.FlowNftCollectionDto
 import com.rarible.protocol.dto.FlowNftItemDto
@@ -27,8 +29,6 @@ import com.rarible.protocol.dto.FlowOrderDto
 import com.rarible.protocol.dto.FlowOrderStatusDto
 import com.rarible.protocol.dto.FlowRoyaltyDto
 import com.rarible.protocol.dto.FlowTransferDto
-import com.rarible.protocol.dto.MetaAttributeDto
-import com.rarible.protocol.dto.MetaDto
 import com.rarible.protocol.dto.PayInfoDto
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.util.CompositeItemIdParser
@@ -42,7 +42,6 @@ fun randomFlowContract() = randomString(12)
 fun randomFlowAddress() = UnionAddressConverter.convert(BlockchainDto.FLOW, randomLong().toString())
 
 fun randomFlowItemId() = ItemIdDto(BlockchainDto.FLOW, randomFlowContract(), randomLong().toBigInteger())
-fun randomFlowItemIdShortValue() = randomFlowItemId().value
 fun randomFlowItemIdFullValue() = randomFlowItemId().fullId()
 
 fun randomFlowOwnershipId() = randomFlowOwnershipId(randomFlowItemId())
@@ -58,7 +57,6 @@ fun randomFlowNftItemDto(itemId: ItemIdDto, creator: String): FlowNftItemDto {
         tokenId = tokenId,
         mintedAt = nowMillis(),
         lastUpdatedAt = nowMillis(),
-        meta = randomFlowMetaDto(),
         creators = listOf(FlowCreatorDto(creator, randomBigDecimal(0, 2))),
         owner = randomString(),
         royalties = listOf(FlowRoyaltyDto(randomString(), randomBigDecimal(0, 2))),
@@ -67,8 +65,24 @@ fun randomFlowNftItemDto(itemId: ItemIdDto, creator: String): FlowNftItemDto {
     )
 }
 
-fun randomFlowMetaDto(): MetaDto {
-    return MetaDto(
+fun randomFlowItemDtoWithCollection(collectionDto: FlowNftCollectionDto, itemId: ItemIdDto, creator: String): FlowNftItemDto {
+    val (_, tokenId) = CompositeItemIdParser.split(itemId.value)
+    return FlowNftItemDto(
+        id = itemId.value,
+        collection = collectionDto.id,
+        tokenId = tokenId,
+        mintedAt = nowMillis(),
+        lastUpdatedAt = nowMillis(),
+        creators = listOf(FlowCreatorDto(creator, randomBigDecimal(0, 2))),
+        owner = randomString(),
+        royalties = listOf(FlowRoyaltyDto(randomString(), randomBigDecimal(0, 2))),
+        supply = randomBigInt(),
+        deleted = randomBoolean()
+    )
+}
+
+fun randomFlowMetaDto(): FlowMetaDto {
+    return FlowMetaDto(
         description = randomString(),
         name = randomString(),
         raw = randomString(),
@@ -77,8 +91,8 @@ fun randomFlowMetaDto(): MetaDto {
     )
 }
 
-fun randomFlowMetaAttributeDto(): MetaAttributeDto {
-    return MetaAttributeDto(
+fun randomFlowMetaAttributeDto(): FlowMetaAttributeDto {
+    return FlowMetaAttributeDto(
         key = randomString(),
         value = randomString()
     )
@@ -136,7 +150,8 @@ fun randomFlowV1OrderDto(itemId: ItemIdDto): FlowOrderDto {
         ),
         collection = randomFlowContract(),
         lastUpdateAt = nowMillis(),
-        makeStock = randomBigInt()
+        makeStock = randomBigDecimal(),
+        dbUpdatedAt = nowMillis(),
     )
 }
 
@@ -170,7 +185,8 @@ fun randomFlowNftOrderActivitySell(): FlowNftOrderActivitySellDto {
         transactionHash = randomString(),
         blockHash = randomString(),
         blockNumber = randomLong(),
-        logIndex = randomInt()
+        logIndex = randomInt(),
+        updatedAt = nowMillis(),
     )
 }
 
@@ -182,7 +198,8 @@ fun randomFlowNftOrderActivityListDto(): FlowNftOrderActivityListDto {
         maker = randomString(),
         make = FlowAssetFungibleDto(randomString(), randomBigDecimal()),
         take = FlowAssetFungibleDto(randomString(), randomBigDecimal()),
-        price = randomBigDecimal()
+        price = randomBigDecimal(),
+        updatedAt = nowMillis(),
     )
 }
 
@@ -194,7 +211,8 @@ fun randomFlowNftOrderActivityBidDto(): FlowNftOrderActivityBidDto {
         maker = randomString(),
         make = FlowAssetFungibleDto(randomString(), randomBigDecimal()),
         take = FlowAssetFungibleDto(randomString(), randomBigDecimal()),
-        price = randomBigDecimal()
+        price = randomBigDecimal(),
+        updatedAt = nowMillis(),
     )
 }
 
@@ -211,7 +229,8 @@ fun randomFlowCancelListActivityDto(): FlowNftOrderActivityCancelListDto {
         transactionHash = randomString(),
         blockHash = randomString(),
         blockNumber = randomLong(),
-        logIndex = randomInt()
+        logIndex = randomInt(),
+        updatedAt = nowMillis(),
     )
 }
 
@@ -227,7 +246,8 @@ fun randomFlowCancelBidActivityDto(): FlowNftOrderActivityCancelBidDto {
         transactionHash = randomString(),
         blockHash = randomString(),
         blockNumber = randomLong(),
-        logIndex = randomInt()
+        logIndex = randomInt(),
+        updatedAt = nowMillis(),
     )
 }
 
@@ -242,7 +262,8 @@ fun randomFlowMintDto(): FlowMintDto {
         transactionHash = randomString(),
         blockHash = randomString(),
         blockNumber = randomLong(),
-        logIndex = randomInt()
+        logIndex = randomInt(),
+        updatedAt = nowMillis(),
     )
 }
 
@@ -258,7 +279,9 @@ fun randomFlowTransferDto(): FlowTransferDto {
         transactionHash = randomString(),
         blockHash = randomString(),
         blockNumber = randomLong(),
-        logIndex = randomInt()
+        logIndex = randomInt(),
+        purchased = false,
+        updatedAt = nowMillis(),
     )
 }
 
@@ -273,7 +296,8 @@ fun randomFlowBurnDto(): FlowBurnDto {
         transactionHash = randomString(),
         blockHash = randomString(),
         blockNumber = randomLong(),
-        logIndex = randomInt()
+        logIndex = randomInt(),
+        updatedAt = nowMillis(),
     )
 }
 

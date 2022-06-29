@@ -1,20 +1,26 @@
 package com.rarible.protocol.union.core.event
 
 import com.rarible.core.kafka.KafkaMessage
+import com.rarible.protocol.union.core.model.ReconciliationMarkEvent
+import com.rarible.protocol.union.core.model.ReconciliationMarkType
 import com.rarible.protocol.union.core.model.UnionAuctionEvent
+import com.rarible.protocol.union.core.model.UnionCollectionEvent
+import com.rarible.protocol.union.core.model.UnionInternalActivityEvent
+import com.rarible.protocol.union.core.model.UnionInternalAuctionEvent
+import com.rarible.protocol.union.core.model.UnionInternalBlockchainEvent
+import com.rarible.protocol.union.core.model.UnionInternalCollectionEvent
+import com.rarible.protocol.union.core.model.UnionInternalItemEvent
+import com.rarible.protocol.union.core.model.UnionInternalOrderEvent
+import com.rarible.protocol.union.core.model.UnionInternalOwnershipEvent
 import com.rarible.protocol.union.core.model.UnionItemEvent
 import com.rarible.protocol.union.core.model.UnionOrderEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipEvent
-import com.rarible.protocol.union.core.model.UnionWrappedActivityEvent
-import com.rarible.protocol.union.core.model.UnionWrappedAuctionEvent
-import com.rarible.protocol.union.core.model.UnionWrappedEvent
-import com.rarible.protocol.union.core.model.UnionWrappedItemEvent
-import com.rarible.protocol.union.core.model.UnionWrappedOrderEvent
-import com.rarible.protocol.union.core.model.UnionWrappedOwnershipEvent
+import com.rarible.protocol.union.core.model.download.DownloadTask
 import com.rarible.protocol.union.core.model.getItemId
 import com.rarible.protocol.union.core.model.itemId
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.CollectionEventDto
+import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OrderEventDto
@@ -22,9 +28,6 @@ import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.UnionEventTopicProvider
 import com.rarible.protocol.union.dto.ext
-import com.rarible.protocol.union.enrichment.model.ReconciliationItemMarkEvent
-import com.rarible.protocol.union.enrichment.model.ReconciliationMarkAbstractEvent
-import com.rarible.protocol.union.enrichment.model.ReconciliationOwnershipMarkEvent
 import java.util.*
 
 object KafkaEventFactory {
@@ -96,25 +99,34 @@ object KafkaEventFactory {
         )
     }
 
-    fun wrappedItemEvent(event: UnionItemEvent): KafkaMessage<UnionWrappedEvent> {
+    fun internalItemEvent(event: UnionItemEvent): KafkaMessage<UnionInternalBlockchainEvent> {
         return KafkaMessage(
             id = UUID.randomUUID().toString(),
             key = event.itemId.fullId(),
-            value = UnionWrappedItemEvent(event),
+            value = UnionInternalItemEvent(event),
             headers = ITEM_EVENT_HEADERS
         )
     }
 
-    fun wrappedOwnershipEvent(event: UnionOwnershipEvent): KafkaMessage<UnionWrappedEvent> {
+    fun internalCollectionEvent(event: UnionCollectionEvent): KafkaMessage<UnionInternalBlockchainEvent> {
+        return KafkaMessage(
+            id = UUID.randomUUID().toString(),
+            key = event.collectionId.fullId(),
+            value = UnionInternalCollectionEvent(event),
+            headers = COLLECTION_EVENT_HEADERS
+        )
+    }
+
+    fun internalOwnershipEvent(event: UnionOwnershipEvent): KafkaMessage<UnionInternalBlockchainEvent> {
         return KafkaMessage(
             id = UUID.randomUUID().toString(),
             key = event.ownershipId.getItemId().fullId(),
-            value = UnionWrappedOwnershipEvent(event),
+            value = UnionInternalOwnershipEvent(event),
             headers = OWNERSHIP_EVENT_HEADERS
         )
     }
 
-    fun wrappedOrderEvent(event: UnionOrderEvent): KafkaMessage<UnionWrappedEvent> {
+    fun internalOrderEvent(event: UnionOrderEvent): KafkaMessage<UnionInternalBlockchainEvent> {
         val order = event.order
 
         val makeAssetExt = order.make.type.ext
@@ -131,45 +143,61 @@ object KafkaEventFactory {
         return KafkaMessage(
             id = UUID.randomUUID().toString(),
             key = key,
-            value = UnionWrappedOrderEvent(event),
+            value = UnionInternalOrderEvent(event),
             headers = ORDER_EVENT_HEADERS
         )
     }
 
-    fun wrappedAuctionEvent(event: UnionAuctionEvent): KafkaMessage<UnionWrappedEvent> {
+    fun internalAuctionEvent(event: UnionAuctionEvent): KafkaMessage<UnionInternalBlockchainEvent> {
         return KafkaMessage(
             id = UUID.randomUUID().toString(),
             key = event.auction.getItemId().fullId(),
-            value = UnionWrappedAuctionEvent(event),
+            value = UnionInternalAuctionEvent(event),
             headers = AUCTION_EVENT_HEADERS
         )
     }
 
-    fun wrappedActivityEvent(dto: ActivityDto): KafkaMessage<UnionWrappedEvent> {
+    fun internalActivityEvent(dto: ActivityDto): KafkaMessage<UnionInternalBlockchainEvent> {
         val itemId = dto.itemId()
 
         val key = itemId?.fullId() ?: dto.id.fullId()
 
         return KafkaMessage(
             key = key,
-            value = UnionWrappedActivityEvent(dto),
+            value = UnionInternalActivityEvent(dto),
             headers = ACTIVITY_EVENT_HEADERS
         )
     }
 
-    fun reconciliationItemMarkEvent(itemId: ItemIdDto): KafkaMessage<ReconciliationMarkAbstractEvent> {
+    fun reconciliationItemMarkEvent(itemId: ItemIdDto): KafkaMessage<ReconciliationMarkEvent> {
         return KafkaMessage(
             id = UUID.randomUUID().toString(),
             key = itemId.fullId(),
-            value = ReconciliationItemMarkEvent(itemId),
+            value = ReconciliationMarkEvent(itemId.fullId(), ReconciliationMarkType.ITEM),
         )
     }
 
-    fun reconciliationOwnershipMarkEvent(ownershipId: OwnershipIdDto): KafkaMessage<ReconciliationMarkAbstractEvent> {
+    fun reconciliationOwnershipMarkEvent(ownershipId: OwnershipIdDto): KafkaMessage<ReconciliationMarkEvent> {
         return KafkaMessage(
             id = UUID.randomUUID().toString(),
             key = ownershipId.fullId(),
-            value = ReconciliationOwnershipMarkEvent(ownershipId),
+            value = ReconciliationMarkEvent(ownershipId.fullId(), ReconciliationMarkType.OWNERSHIP),
+        )
+    }
+
+    fun reconciliationCollectionMarkEvent(collectionId: CollectionIdDto): KafkaMessage<ReconciliationMarkEvent> {
+        return KafkaMessage(
+            id = UUID.randomUUID().toString(),
+            key = collectionId.fullId(),
+            value = ReconciliationMarkEvent(collectionId.fullId(), ReconciliationMarkType.COLLECTION)
+        )
+    }
+
+    fun downloadTaskEvent(task: DownloadTask): KafkaMessage<DownloadTask> {
+        return KafkaMessage(
+            id = UUID.randomUUID().toString(),
+            key = task.id,
+            value = task
         )
     }
 

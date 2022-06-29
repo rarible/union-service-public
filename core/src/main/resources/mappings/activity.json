@@ -1,0 +1,48 @@
+{
+  "dynamic": "false",
+  "properties": {
+    "@timestamp": {
+      "type": "date"
+    },
+    "activityId": {
+      "type": "keyword"
+    },
+    "logIndex": {
+      "type": "long"
+    },
+    "blockNumber": {
+      "type": "long"
+    },
+    "salt": {
+      "type": "long"
+    },
+    "date": {
+      "type": "date",
+      "format": "strict_date_optional_time||epoch_second"
+    },
+    "blockchain": {
+      "type": "keyword",
+      "ignore_above": 256
+    },
+    "collection": {
+      "type": "keyword",
+      "ignore_above": 512
+    },
+    "item": {
+      "type": "keyword",
+      "ignore_above": 512
+    },
+    "type": {
+      "type": "keyword",
+      "ignore_above": 512
+    },
+    "userFrom": {
+      "type": "keyword",
+      "ignore_above": 256
+    },
+    "userTo": {
+      "type": "keyword",
+      "ignore_above": 256
+    }
+  }
+}

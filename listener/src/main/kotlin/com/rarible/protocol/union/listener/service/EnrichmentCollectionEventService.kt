@@ -1,54 +1,53 @@
 package com.rarible.protocol.union.listener.service
 
-import com.rarible.core.client.WebClientResponseProxyException
+import com.rarible.core.common.optimisticLock
+import com.rarible.protocol.union.core.event.OutgoingCollectionEventListener
+import com.rarible.protocol.union.core.model.UnionCollection
+import com.rarible.protocol.union.core.service.OriginService
+import com.rarible.protocol.union.core.service.ReconciliationEventService
 import com.rarible.protocol.union.dto.CollectionIdDto
+import com.rarible.protocol.union.dto.CollectionUpdateEventDto
 import com.rarible.protocol.union.dto.OrderDto
-import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
-import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
-import kotlinx.coroutines.async
+import com.rarible.protocol.union.enrichment.model.ShortCollection
+import com.rarible.protocol.union.enrichment.model.ShortCollectionId
+import com.rarible.protocol.union.enrichment.service.BestOrderService
+import com.rarible.protocol.union.enrichment.service.EnrichmentCollectionService
+import com.rarible.protocol.union.enrichment.validator.EntityValidator
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.flow.buffer
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.map
 import org.slf4j.LoggerFactory
-import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
+import java.util.*
 
 @Component
 class EnrichmentCollectionEventService(
-    private val itemService: EnrichmentItemService,
-    private val enrichmentItemEventService: EnrichmentItemEventService,
-    private val enrichmentOwnershipEventService: EnrichmentOwnershipEventService
+    private val itemEventListeners: List<OutgoingCollectionEventListener>,
+    private val enrichmentCollectionService: EnrichmentCollectionService,
+    private val reconciliationEventService: ReconciliationEventService,
+    private val bestOrderService: BestOrderService,
+    private val originService: OriginService
 ) {
 
     private val logger = LoggerFactory.getLogger(EnrichmentCollectionEventService::class.java)
-    private val concurrency = 4
+
+    suspend fun onCollectionUpdate(collection: UnionCollection){
+        val existing = enrichmentCollectionService.getOrEmpty(ShortCollectionId(collection.id))
+        val updateEvent = buildUpdateEvent(short = existing, collection = collection)
+        sendUpdate(updateEvent)
+    }
 
     suspend fun onCollectionBestSellOrderUpdate(
         collectionId: CollectionIdDto,
         order: OrderDto,
         notificationEnabled: Boolean
     ) = coroutineScope {
-        itemService.findByCollection(collectionId, order.maker)
-            .map { item ->
-                async {
-                    ignoreApi404 {
-                        enrichmentItemEventService.onItemBestSellOrderUpdated(item, order, notificationEnabled)
-                    }
-                    val ownershipId = ShortOwnershipId(
-                        item.blockchain,
-                        item.itemId,
-                        order.maker.value
-                    )
-                    ignoreApi404 {
-                        enrichmentOwnershipEventService.onOwnershipBestSellOrderUpdated(
-                            ownershipId,
-                            order,
-                            notificationEnabled
-                        )
-                    }
-                }
-            }.buffer(concurrency).map { it.await() }.collect()
+        updateCollection(
+            ShortCollectionId(collectionId),
+            order,
+            notificationEnabled
+        ) { collection ->
+            val origins = originService.getOrigins(collectionId)
+            bestOrderService.updateBestSellOrder(collection, order, origins)
+        }
     }
 
     suspend fun onCollectionBestBidOrderUpdate(
@@ -56,28 +55,117 @@ class EnrichmentCollectionEventService(
         order: OrderDto,
         notificationEnabled: Boolean
     ) = coroutineScope {
-        itemService.findByCollection(collectionId).map { item ->
-            async {
-                ignoreApi404 {
-                    enrichmentItemEventService.onItemBestBidOrderUpdated(item, order, notificationEnabled)
-                }
-            }
-        }.buffer(concurrency).map { it.await() }.collect()
+        updateCollection(
+            ShortCollectionId(collectionId),
+            order,
+            notificationEnabled
+        ) { collection ->
+            val origins = originService.getOrigins(collectionId)
+            bestOrderService.updateBestBidOrder(collection, order, origins)
+        }
     }
 
-    private suspend fun ignoreApi404(call: suspend () -> Unit) {
-        try {
-            call()
-        } catch (ex: WebClientResponseProxyException) {
-            if (ex.statusCode == HttpStatus.NOT_FOUND) {
-                logger.warn(
-                    "Received NOT_FOUND code from client during Collection update, details: {}, message: {}",
-                    ex.data,
-                    ex.message
-                )
-            } else {
-                throw ex
+    suspend fun recalculateBestOrders(collection: ShortCollection): Boolean {
+        val updated = bestOrderService.updateBestOrders(collection)
+        if (updated != collection) {
+            logger.info(
+                "Collection BestSellOrder updated ([{}] -> [{}]), BestBidOrder updated ([{}] -> [{}]) due to currency rate changed",
+                collection.bestSellOrder?.dtoId, updated.bestSellOrder?.dtoId,
+                collection.bestBidOrder?.dtoId, updated.bestBidOrder?.dtoId
+            )
+            saveAndNotify(updated, true)
+            return true
+        }
+        return false
+    }
+
+    private suspend fun updateCollection(
+        itemId: ShortCollectionId,
+        order: OrderDto,
+        notificationEnabled: Boolean,
+        orderUpdateAction: suspend (item: ShortCollection) -> ShortCollection
+    ) = optimisticLock {
+        val (short, updated, exist) = update(itemId, orderUpdateAction)
+        if (short != updated) {
+            if (updated.isNotEmpty()) {
+                saveAndNotify(updated = updated, notificationEnabled = notificationEnabled, order = order)
+                logger.info("Saved Collection [{}] after Order event [{}]", itemId, order.id)
+            } else if (exist) {
+                cleanupAndNotify(updated = updated, notificationEnabled = notificationEnabled, order = order)
+                logger.info("Deleted Collection [{}] without enrichment data", itemId)
             }
+        } else {
+            logger.info("Collection [{}] not changed after Order event [{}], event won't be published", itemId, order.id)
+        }
+    }
+
+    private suspend fun update(
+        collectionId: ShortCollectionId,
+        action: suspend (collection: ShortCollection) -> ShortCollection
+    ): Triple<ShortCollection?, ShortCollection, Boolean> {
+        val current = enrichmentCollectionService.get(collectionId)
+        val exist = current != null
+        val short = current ?: ShortCollection.empty(collectionId)
+        return Triple(current, action(short), exist)
+    }
+
+    private suspend fun saveAndNotify(
+        updated: ShortCollection,
+        notificationEnabled: Boolean,
+        collection: UnionCollection? = null,
+        order: OrderDto? = null
+    ) {
+        if (!notificationEnabled) {
+            enrichmentCollectionService.save(updated)
+            return
+        }
+
+        val event = buildUpdateEvent(updated, collection, order)
+        enrichmentCollectionService.save(updated)
+        sendUpdate(event)
+    }
+
+    private suspend fun cleanupAndNotify(
+        updated: ShortCollection,
+        notificationEnabled: Boolean,
+        collection: UnionCollection? = null,
+        order: OrderDto? = null,
+    ) {
+        if (!notificationEnabled) {
+            enrichmentCollectionService.delete(updated.id)
+            return
+        }
+
+        val event = buildUpdateEvent(updated, collection, order)
+        enrichmentCollectionService.delete(updated.id)
+        sendUpdate(event)
+    }
+
+    private suspend fun buildUpdateEvent(
+        short: ShortCollection,
+        collection: UnionCollection? = null,
+        order: OrderDto? = null,
+    ): CollectionUpdateEventDto {
+        val dto = enrichmentCollectionService.enrichCollection(
+            shortCollection = short,
+            collection = collection,
+            orders = listOfNotNull(order).associateBy { it.id },
+        )
+
+        return CollectionUpdateEventDto(
+            collectionId = dto.id,
+            collection = dto,
+            eventId = UUID.randomUUID().toString()
+        )
+    }
+
+    private suspend fun sendUpdate(event: CollectionUpdateEventDto) {
+        // If collection in corrupted state, we will try to reconcile it instead of sending corrupted
+        // data to the customers
+        if (!EntityValidator.isValid(event.collection)) {
+            reconciliationEventService.onCorruptedCollection(event.collection.id)
+        } else {
+            itemEventListeners.forEach { it.onEvent(event) }
         }
     }
 }

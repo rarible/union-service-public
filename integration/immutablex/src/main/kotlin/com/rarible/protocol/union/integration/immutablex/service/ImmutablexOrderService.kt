@@ -8,6 +8,7 @@ import com.rarible.protocol.union.dto.EthEthereumAssetTypeDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
+import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.continuation.OrderContinuation
 import com.rarible.protocol.union.dto.continuation.page.Paging
@@ -35,6 +36,12 @@ class ImmutablexOrderService(
         return Paging(OrderContinuation.ByLastUpdatedAndIdDesc, orders).getSlice(size)
     }
 
+    override suspend fun getAllSync(
+        continuation: String?,
+        size: Int,
+        sort: SyncSortDto?
+    ): Slice<OrderDto> = Slice.empty()
+
     override suspend fun getOrderById(id: String): OrderDto {
         val order = client.getOrderById(id.toLong())
         return orderConverter.convert(order, blockchain)
@@ -51,6 +58,10 @@ class ImmutablexOrderService(
 
     override suspend fun getBidCurrencies(itemId: String): List<AssetTypeDto> =
         listOf(EthEthereumAssetTypeDto(BlockchainDto.IMMUTABLEX))
+
+    override suspend fun getBidCurrenciesByCollection(collectionId: String): List<AssetTypeDto> {
+        return emptyList()
+    }
 
     override suspend fun getOrderBidsByItem(
         platform: PlatformDto?,
@@ -79,6 +90,10 @@ class ImmutablexOrderService(
     override suspend fun getSellCurrencies(itemId: String): List<AssetTypeDto> =
         listOf(EthEthereumAssetTypeDto(BlockchainDto.IMMUTABLEX))
 
+    override suspend fun getSellCurrenciesByCollection(collectionId: String): List<AssetTypeDto> {
+        return emptyList()
+    }
+
     override suspend fun getSellOrders(
         platform: PlatformDto?,
         origin: String?,
@@ -102,6 +117,20 @@ class ImmutablexOrderService(
             orderConverter.convert(it, blockchain)
         }
         return Paging(OrderContinuation.ByLastUpdatedAndIdDesc, orders).getSlice(size)
+    }
+
+    override suspend fun getOrderFloorSellsByCollection(
+        platform: PlatformDto?, collectionId: String, origin: String?, status: List<OrderStatusDto>?,
+        currencyAddress: String, continuation: String?, size: Int
+    ): Slice<OrderDto> {
+        return Slice.empty()
+    }
+
+    override suspend fun getOrderFloorBidsByCollection(
+        platform: PlatformDto?, collectionId: String, origin: String?, status: List<OrderStatusDto>?, start: Long?,
+        end: Long?, currencyAddress: String, continuation: String?, size: Int
+    ): Slice<OrderDto> {
+        return Slice.empty()
     }
 
     override suspend fun getSellOrdersByItem(

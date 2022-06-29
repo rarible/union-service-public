@@ -1,16 +1,13 @@
 package com.rarible.protocol.union.listener.handler.internal
 
-import com.rarible.protocol.union.enrichment.model.ReconciliationItemMarkEvent
+import com.rarible.protocol.union.core.model.ReconciliationMarkEvent
+import com.rarible.protocol.union.core.model.ReconciliationMarkType
 import com.rarible.protocol.union.enrichment.model.ReconciliationMark
-import com.rarible.protocol.union.enrichment.model.ReconciliationMarkEvent
-import com.rarible.protocol.union.enrichment.model.ReconciliationMarkType
-import com.rarible.protocol.union.enrichment.model.ReconciliationOwnershipMarkEvent
 import com.rarible.protocol.union.enrichment.repository.ReconciliationMarkRepository
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipId
 import com.rarible.protocol.union.listener.test.AbstractIntegrationTest
 import com.rarible.protocol.union.listener.test.IntegrationTest
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -34,7 +31,7 @@ class ReconciliationMarkEventHandlerIt : AbstractIntegrationTest() {
 
         // Checking both legacy and actual formats works
         val itemEvent1 = ReconciliationMarkEvent(itemId.fullId(), ReconciliationMarkType.ITEM)
-        val ownershipEvent1 = ReconciliationOwnershipMarkEvent(ownershipId)
+        val ownershipEvent1 = ReconciliationMarkEvent(ownershipId.fullId(), ReconciliationMarkType.OWNERSHIP)
         reconciliationMarkEventHandler.handle(itemEvent1)
         reconciliationMarkEventHandler.handle(ownershipEvent1)
 
@@ -42,7 +39,7 @@ class ReconciliationMarkEventHandlerIt : AbstractIntegrationTest() {
         assertThat(findAllMarks(ReconciliationMarkType.OWNERSHIP)).hasSize(1)
 
         // Send same marks again
-        val itemEvent2 = ReconciliationItemMarkEvent(itemId)
+        val itemEvent2 = ReconciliationMarkEvent(itemId.fullId(), ReconciliationMarkType.ITEM)
         val ownershipEvent2 = ReconciliationMarkEvent(ownershipId.fullId(), ReconciliationMarkType.OWNERSHIP)
         reconciliationMarkEventHandler.handle(itemEvent2)
         reconciliationMarkEventHandler.handle(ownershipEvent2)

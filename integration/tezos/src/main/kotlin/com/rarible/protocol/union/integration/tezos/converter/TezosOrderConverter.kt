@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.integration.tezos.converter
 
-import com.rarible.protocol.tezos.dto.ActivitySortDto
 import com.rarible.protocol.tezos.dto.OrderPaginationDto
 import com.rarible.protocol.tezos.dto.PartDto
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
@@ -10,13 +9,13 @@ import com.rarible.protocol.union.core.util.evalTakePrice
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
-import com.rarible.protocol.union.dto.OrderPriceHistoryRecordDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PayoutDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.TezosOrderDataRaribleV2DataV1Dto
 import com.rarible.protocol.union.dto.continuation.page.Slice
+import com.rarible.protocol.union.integration.tezos.converter.TezosConverter.maker
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.time.Instant
@@ -42,7 +41,7 @@ class TezosOrderConverter(
         val make = TezosConverter.convert(order.make, blockchain)
         val take = TezosConverter.convert(order.take, blockchain)
 
-        val maker = UnionAddressConverter.convert(blockchain, order.maker)
+        val maker = maker(blockchain, order.maker)
         val taker = order.taker?.let { UnionAddressConverter.convert(blockchain, it) }
 
         // For BID (make = currency, take - NFT) we're calculating prices for taker
@@ -76,8 +75,6 @@ class TezosOrderConverter(
             makePriceUsd = makePriceUsd,
             takePriceUsd = takePriceUsd,
             signature = order.signature,
-            // TODO UNION Remove in 1.19
-            priceHistory = order.priceHistory?.map { convert(it) } ?: listOf(),
             data = convertData(order, blockchain),
             salt = order.salt.toString(),
             pending = emptyList() // In Union we won't use this field for Tezos
@@ -116,22 +113,13 @@ class TezosOrderConverter(
     }
 
     // TODO TEZOS there should be separate enum for Order sorting
-    fun convert(source: OrderSortDto?): ActivitySortDto? {
+    fun convert(source: OrderSortDto?): com.rarible.protocol.tezos.dto.OrderSortDto? {
         return when (source) {
-            OrderSortDto.LAST_UPDATE_ASC -> ActivitySortDto.EARLIEST_FIRST
-            OrderSortDto.LAST_UPDATE_DESC -> ActivitySortDto.LATEST_FIRST
+            OrderSortDto.LAST_UPDATE_ASC -> com.rarible.protocol.tezos.dto.OrderSortDto.EARLIEST_FIRST
+            OrderSortDto.LAST_UPDATE_DESC -> com.rarible.protocol.tezos.dto.OrderSortDto.LATEST_FIRST
             else -> null
         }
     }
-
-    private fun convert(source: com.rarible.protocol.tezos.dto.OrderPriceHistoryRecordDto): OrderPriceHistoryRecordDto {
-        return OrderPriceHistoryRecordDto(
-            date = source.date,
-            makeValue = source.makeValue,
-            takeValue = source.takeValue
-        )
-    }
-
 
     private fun convertData(
         source: com.rarible.protocol.tezos.dto.OrderDto,

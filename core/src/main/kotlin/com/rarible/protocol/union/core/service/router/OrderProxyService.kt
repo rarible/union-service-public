@@ -5,6 +5,7 @@ import com.rarible.protocol.union.dto.AssetTypeDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
+import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
 
@@ -29,6 +30,18 @@ class OrderProxyService(
         )
     }
 
+    override suspend fun getAllSync(
+        continuation: String?,
+        size: Int,
+        sort: SyncSortDto?
+    ): Slice<OrderDto> {
+        return orderService.getAllSync(
+            continuation,
+            size,
+            sort
+        )
+    }
+
     override suspend fun getOrderById(id: String): OrderDto {
         return orderService.getOrderById(id)
     }
@@ -39,6 +52,10 @@ class OrderProxyService(
 
     override suspend fun getBidCurrencies(itemId: String): List<AssetTypeDto> {
         return orderService.getBidCurrencies(itemId)
+    }
+
+    override suspend fun getBidCurrenciesByCollection(collectionId: String): List<AssetTypeDto> {
+        return emptyList()
     }
 
     override suspend fun getOrderBidsByItem(
@@ -95,6 +112,10 @@ class OrderProxyService(
         return orderService.getSellCurrencies(itemId)
     }
 
+    override suspend fun getSellCurrenciesByCollection(collectionId: String): List<AssetTypeDto> {
+        return emptyList()
+    }
+
     override suspend fun getSellOrders(
         platform: PlatformDto?,
         origin: String?,
@@ -122,6 +143,52 @@ class OrderProxyService(
             platform,
             collection,
             origin,
+            continuation,
+            size
+        )
+    }
+
+    override suspend fun getOrderFloorSellsByCollection(
+        platform: PlatformDto?,
+        collectionId: String,
+        origin: String?,
+        status: List<OrderStatusDto>?,
+        currencyAddress: String,
+        continuation: String?,
+        size: Int
+    ): Slice<OrderDto> {
+        if (!isPlatformSupported(platform)) return Slice.empty()
+        return orderService.getOrderFloorSellsByCollection(
+            platform,
+            collectionId,
+            origin,
+            status,
+            currencyAddress,
+            continuation,
+            size
+        )
+    }
+
+    override suspend fun getOrderFloorBidsByCollection(
+        platform: PlatformDto?,
+        collectionId: String,
+        origin: String?,
+        status: List<OrderStatusDto>?,
+        start: Long?,
+        end: Long?,
+        currencyAddress: String,
+        continuation: String?,
+        size: Int
+    ): Slice<OrderDto> {
+        if (!isPlatformSupported(platform)) return Slice.empty()
+        return orderService.getOrderFloorBidsByCollection(
+            platform,
+            collectionId,
+            origin,
+            status,
+            start,
+            end,
+            currencyAddress,
             continuation,
             size
         )

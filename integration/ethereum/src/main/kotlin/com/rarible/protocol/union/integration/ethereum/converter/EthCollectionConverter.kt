@@ -1,27 +1,21 @@
 package com.rarible.protocol.union.integration.ethereum.converter
 
 import com.rarible.protocol.dto.NftCollectionDto
-import com.rarible.protocol.dto.NftCollectionMetaDto
 import com.rarible.protocol.dto.NftCollectionsDto
-import com.rarible.protocol.dto.NftMediaDto
-import com.rarible.protocol.dto.NftMediaMetaDto
+import com.rarible.protocol.dto.NftTokenIdDto
+import com.rarible.protocol.union.core.model.TokenId
+import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.BlockchainGroupDto
 import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.dto.CollectionIdDto
-import com.rarible.protocol.union.dto.CollectionMetaDto
-import com.rarible.protocol.union.dto.ImageContentDto
-import com.rarible.protocol.union.dto.MetaContentDto
-import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.continuation.page.Page
 import org.slf4j.LoggerFactory
-import scalether.domain.Address
 
 object EthCollectionConverter {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    fun convert(source: NftCollectionDto, blockchain: BlockchainDto): CollectionDto {
+    fun convert(source: NftCollectionDto, blockchain: BlockchainDto): UnionCollection {
         try {
             return convertInternal(source, blockchain)
         } catch (e: Exception) {
@@ -30,24 +24,23 @@ object EthCollectionConverter {
         }
     }
 
-    private fun convertInternal(source: NftCollectionDto, blockchain: BlockchainDto): CollectionDto {
+    private fun convertInternal(source: NftCollectionDto, blockchain: BlockchainDto): UnionCollection {
         val contract = EthConverter.convert(source.id)
-        return CollectionDto(
+        return UnionCollection(
             id = CollectionIdDto(blockchain, contract),
-            blockchain = blockchain,
             name = source.name,
             symbol = source.symbol,
             type = convert(source.type),
             owner = source.owner?.let { EthConverter.convert(it, blockchain) },
             features = source.features.map { convert(it) },
             minters = source.minters?.let { minters -> minters.map { EthConverter.convert(it, blockchain) } },
-            meta = convert(source.meta),
+            meta = EthMetaConverter.convert(source.meta, blockchain),
         )
     }
 
-    fun convert(page: NftCollectionsDto, blockchain: BlockchainDto): Page<CollectionDto> {
+    fun convert(page: NftCollectionsDto, blockchain: BlockchainDto): Page<UnionCollection> {
         return Page(
-            total = page.total,
+            total = page.total ?: 0,
             continuation = page.continuation,
             entities = page.collections.map { convert(it, blockchain) }
         )
@@ -72,42 +65,5 @@ object EthCollectionConverter {
         }
     }
 
-    private fun convert(source: NftCollectionMetaDto?): CollectionMetaDto? {
-        if (source == null) return null
-        return CollectionMetaDto(
-            name = source.name,
-            description = source.description,
-            content = convert(source.image),
-            externalLink = source.external_link,
-            sellerFeeBasisPoints = source.seller_fee_basis_points,
-            feeRecipient = convert(source.fee_recipient),
-        )
-    }
-
-    // Assuming the input NtfMediaDto is an image
-    private fun convert(sourceImage: NftMediaDto?): List<MetaContentDto> {
-        if (sourceImage == null) return emptyList()
-        return sourceImage.url.keys.map { key ->
-            convert(key, sourceImage.url[key]!!, sourceImage.meta[key])
-        }
-    }
-
-    private fun convert(key: String, url: String, meta: NftMediaMetaDto?): MetaContentDto {
-        return ImageContentDto(
-            url = url,
-            representation = MetaContentDto.Representation.valueOf(key),
-            mimeType = meta?.type,
-            width = meta?.width,
-            height = meta?.height,
-            size = null, // TODO find where to get size from
-        )
-    }
-
-    private fun convert(source: Address?): UnionAddress? {
-        if (source == null) return null
-        return UnionAddress(
-            blockchainGroup = BlockchainGroupDto.ETHEREUM,
-            value = EthConverter.convert(source)
-        )
-    }
+    fun convert(source: NftTokenIdDto) = TokenId(source.tokenId.toString())
 }

@@ -9,8 +9,8 @@ import com.rarible.protocol.union.core.model.UnionOwnershipEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipUpdateEvent
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.flow.converter.FlowOwnershipConverter
-import com.rarible.protocol.union.test.data.randomFlowNftOwnershipDto
-import com.rarible.protocol.union.test.data.randomFlowOwnershipId
+import com.rarible.protocol.union.integration.flow.data.randomFlowNftOwnershipDto
+import com.rarible.protocol.union.integration.flow.data.randomFlowOwnershipId
 import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.coVerify

@@ -38,11 +38,18 @@ rarible:
     enableWorkers: false
     enableNotifications: false
     enableRetrySchedulerJob: false
-
+protocol:
+  union:
+    subscriber:
+      broker-replica-set: ${kafka.hosts}
 api:
   openapi:
-    baseUrl: "https://api-dev.rarible.org"
+    baseUrl: "https://dev-api.rarible.org"
     description: "Development (Ropsten, Mumbai, Hangzhou)"
+  subscribe:
+    workers:
+      item: 4
+      ownership: 4
 
 integration:
   ethereum:
@@ -56,8 +63,34 @@ integration:
     auctionContracts: ${consul.flow.auctionContracts:}
   tezos:
     enabled: ${consul.tezos.enabled:true}
+    dipdup:
+      enabled: ${consul.tezos.dipdup.enabled:false}
+      network: ${consul.tezos.dipdup.network:}
+      dipdupUrl: ${consul.tezos.dipdup.dipdupUrl:}
+      nodeAddress: ${consul.tezos.dipdup.nodeAddress:}
+      chainId: ${consul.tezos.dipdup.chainId:}
+      sigChecker: ${consul.tezos.dipdup.sigChecker:}
+      tzktUrl: ${consul.tezos.dipdup.tzktUrl:}
+      ipfsUrl: ${consul.tezos.dipdup.ipfsUrl:"https://ipfs.io"}
+      knownAddresses:
+        hen: ${consul.tezos.dipdup.knownAddresses.hen:}
+        henRoyalties: ${consul.tezos.dipdup.knownAddresses.henRoyalties:}
+        kalamint: ${consul.tezos.dipdup.knownAddresses.kalamint:}
+        fxhashV1: ${consul.tezos.dipdup.knownAddresses.fxhashV1:}
+        fxhashV1Manager: ${consul.tezos.dipdup.knownAddresses.fxhashV1Manager:}
+        fxhashV2: ${consul.tezos.dipdup.knownAddresses.fxhashV2:}
+        versum: ${consul.tezos.dipdup.knownAddresses.versum:}
+        royaltiesManager: ${consul.tezos.dipdup.knownAddresses.royaltiesManager:}
+        bidou8x8: ${consul.tezos.dipdup.knownAddresses.bidou8x8:}
+        bidou24x24: ${consul.tezos.dipdup.knownAddresses.bidou24x24:}
     client:
       url: ${consul.tezos.api.baseUrl:}
+    pg:
+      host: ${consul.tezos.pg.host:}
+      port: ${consul.tezos.pg.port:}
+      user: ${consul.tezos.pg.user:}
+      password: ${consul.tezos.pg.password:}
+      database: ${consul.tezos.pg.database:}
     auctionContracts: ${consul.tezos.auctionContracts:}
   solana:
     enabled: ${consul.solana.enabled:false}
@@ -65,31 +98,22 @@ integration:
     enabled: ${consul.immutablex.enabled:true}
     client:
       url: ${consul.immutablex.api.baseUrl:}
-    scanner:
-      job:
-        fixedDelay: 5
-        initialDelay:
-          mints: 1
-          transfers: 2
-          trades: 3
-          deposits: 4
-          withdrawals: 5
-          orders: 6
-
+    apiKey: ${consul.immutablex.api.key:}
 common:
   producer:
     broker-replica-set: ${kafka.hosts}
   currency:
     refresh:
       cron: "0 0/30 * * * *"
-  useLegacyRepository: true
   feature-flags:
     enableRevertedActivityEventSending: false
     enableOwnershipSourceEnrichment: false
     enableItemLastSaleEnrichment: true
-
+    enableLegacyWrappedEventTopic: true
 meta:
-  ipfsGateway: "https://rarible.mypinata.cloud/"
+  ipfsGateway: "https://ipfs.io,https://nftstorage.link"
+  ipfsPublicGateway: "https://ipfs.io"
+  ipfsLegacyGateway: "https://rarible.mypinata.cloud"
   mediaFetchTimeout: 10000
   mediaFetchMaxSize: 131072 # 128 Kb
   openSeaProxyUrl: ${consul.meta.openSeaProxyUrl}
@@ -103,3 +127,4 @@ meta:
 logging:
   level:
     org.apache.http: ERROR
+    org.springframework.data.elasticsearch.core.QUERY: DEBUG

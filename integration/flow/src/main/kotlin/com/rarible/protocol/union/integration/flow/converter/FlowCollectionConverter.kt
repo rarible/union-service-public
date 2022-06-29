@@ -3,6 +3,7 @@ package com.rarible.protocol.union.integration.flow.converter
 import com.rarible.protocol.dto.FlowNftCollectionDto
 import com.rarible.protocol.dto.FlowNftCollectionsDto
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
+import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.dto.CollectionIdDto
@@ -13,7 +14,7 @@ object FlowCollectionConverter {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    fun convert(source: FlowNftCollectionDto, blockchain: BlockchainDto): CollectionDto {
+    fun convert(source: FlowNftCollectionDto, blockchain: BlockchainDto): UnionCollection {
         try {
             return convertInternal(source, blockchain)
         } catch (e: Exception) {
@@ -22,10 +23,9 @@ object FlowCollectionConverter {
         }
     }
 
-    private fun convertInternal(source: FlowNftCollectionDto, blockchain: BlockchainDto): CollectionDto {
-        return CollectionDto(
+    private fun convertInternal(source: FlowNftCollectionDto, blockchain: BlockchainDto): UnionCollection {
+        return UnionCollection(
             id = CollectionIdDto(blockchain, source.id),
-            blockchain = blockchain,
             name = source.name,
             symbol = source.symbol,
             owner = UnionAddressConverter.convert(blockchain, source.owner),
@@ -35,7 +35,7 @@ object FlowCollectionConverter {
         )
     }
 
-    fun convert(page: FlowNftCollectionsDto, blockchain: BlockchainDto): Page<CollectionDto> {
+    fun convert(page: FlowNftCollectionsDto, blockchain: BlockchainDto): Page<UnionCollection> {
         return Page(
             total = page.total,
             continuation = page.continuation,

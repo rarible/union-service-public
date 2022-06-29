@@ -38,8 +38,6 @@ object EnrichedItemConverter {
             },
             tokenId = contractAndTokenId?.second, // TODO remove later
             creators = item.creators,
-            owners = item.owners, // TODO UNION Remove in 1.19
-            royalties = item.royalties, // TODO UNION Remove in 1.19
             lazySupply = item.lazySupply,
             pending = item.pending,
             mintedAt = item.mintedAt,
@@ -53,6 +51,7 @@ object EnrichedItemConverter {
             // Enrichment data
             bestSellOrder = shortItem?.bestSellOrder?.let { orders[it.dtoId] },
             bestBidOrder = shortItem?.bestBidOrder?.let { orders[it.dtoId] },
+            originOrders = shortItem?.originOrders?.let { OriginOrdersConverter.convert(it, orders) } ?: emptyList(),
             auctions = shortItem?.auctions?.mapNotNull { auctions[it] } ?: emptyList(),
             totalStock = shortItem?.totalStock ?: BigInteger.ZERO,
             sellers = shortItem?.sellers ?: 0,
@@ -70,4 +69,5 @@ object EnrichedItemConverter {
             price = lastSale.price
         )
     }
+
 }

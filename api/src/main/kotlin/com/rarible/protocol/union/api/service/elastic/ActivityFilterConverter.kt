@@ -2,12 +2,13 @@ package com.rarible.protocol.union.api.service.elastic
 
 import com.rarible.protocol.union.api.service.UserActivityTypeConverter
 import com.rarible.protocol.union.core.FeatureFlagsProperties
+import com.rarible.protocol.union.core.model.ActivityByCollectionFilter
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
 import com.rarible.protocol.union.dto.parser.IdParser
-import com.rarible.protocol.union.search.core.model.ElasticActivityFilter
-import com.rarible.protocol.union.search.core.model.ElasticActivityQueryGenericFilter
+import com.rarible.protocol.union.core.model.ElasticActivityFilter
+import com.rarible.protocol.union.core.model.ElasticActivityQueryGenericFilter
 import org.springframework.stereotype.Service
 import java.time.Instant
 
@@ -34,16 +35,16 @@ class ActivityFilterConverter(
 
     fun convertGetActivitiesByCollection(
         type: List<ActivityTypeDto>,
-        collection: String,
+        collections: List<String>,
         cursor: String?,
     ): ElasticActivityFilter {
-        val collectionId = IdParser.parseCollectionId(collection)
+        val cols = collections.map(IdParser::parseCollectionId)
+
         return when (featureFlagsProperties.enableActivityQueriesPerTypeFilter) {
             true -> TODO("To be implemented under ALPHA-276 Epic")
-            else -> ElasticActivityQueryGenericFilter(
-                blockchains = setOf(collectionId.blockchain),
+            else -> ActivityByCollectionFilter(
                 activityTypes = type.toSet(),
-                anyCollections = setOf(collectionId.value),
+                collections = cols,
                 cursor = cursor,
             )
         }
@@ -60,7 +61,7 @@ class ActivityFilterConverter(
             else -> ElasticActivityQueryGenericFilter(
                 blockchains = setOf(fullItemId.blockchain),
                 activityTypes = type.toSet(),
-                anyItems = setOf(fullItemId.value),
+                item = fullItemId.value,
                 cursor = cursor,
             )
         }
@@ -79,7 +80,7 @@ class ActivityFilterConverter(
             else -> ElasticActivityQueryGenericFilter(
                 blockchains = blockchains?.toSet().orEmpty(),
                 activityTypes = type.map { userActivityTypeConverter.convert(it).activityTypeDto }.toSet(), // isMaker is ignored for now
-                anyUsers = user.toSet(),
+                anyUsers = user.map { IdParser.parseAddress(it).value }.toSet(),
                 from = from,
                 to = to,
                 cursor = cursor,

@@ -3,8 +3,8 @@ package com.rarible.protocol.union.enrichment.repository
 import com.mongodb.client.result.DeleteResult
 import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.apm.SpanType
+import com.rarible.protocol.union.core.model.ReconciliationMarkType
 import com.rarible.protocol.union.enrichment.model.ReconciliationMark
-import com.rarible.protocol.union.enrichment.model.ReconciliationMarkType
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.slf4j.LoggerFactory

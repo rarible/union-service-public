@@ -1,8 +1,7 @@
 package com.rarible.protocol.union.listener.service
 
-import com.rarible.core.test.wait.Wait
-import com.rarible.protocol.dto.AuctionsPaginationDto
 import com.rarible.protocol.dto.OrderStatusDto
+import com.rarible.protocol.union.core.model.ReconciliationMarkType
 import com.rarible.protocol.union.core.model.getAuctionOwnershipId
 import com.rarible.protocol.union.core.model.getSellerOwnershipId
 import com.rarible.protocol.union.dto.AuctionStatusDto
@@ -10,7 +9,6 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.converter.EnrichedOwnershipConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOwnershipConverter
-import com.rarible.protocol.union.enrichment.model.ReconciliationMarkType
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
 import com.rarible.protocol.union.enrichment.repository.ReconciliationMarkRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
@@ -22,19 +20,14 @@ import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConvert
 import com.rarible.protocol.union.integration.ethereum.converter.EthOwnershipConverter
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAuctionDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
-import com.rarible.protocol.union.integration.ethereum.data.randomEthLegacySellOrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipId
+import com.rarible.protocol.union.integration.ethereum.data.randomEthSellOrderDto
 import com.rarible.protocol.union.listener.test.AbstractIntegrationTest
 import com.rarible.protocol.union.listener.test.IntegrationTest
-import io.mockk.clearMocks
-import io.mockk.coEvery
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.web.reactive.function.client.WebClientResponseException
-import reactor.kotlin.core.publisher.toMono
 
 @IntegrationTest
 class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
@@ -54,11 +47,6 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
     @Autowired
     private lateinit var reconciliationMarkRepository: ReconciliationMarkRepository
 
-    @BeforeEach
-    fun beforeEach() {
-        clearMocks(testEthereumAuctionApi)
-    }
-
     @Test
     fun `update event - ownership doesn't exist`() = runWithKafka {
         val itemId = randomEthItemId()
@@ -67,9 +55,7 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
 
         val expected = EnrichedOwnershipConverter.convert(ownershipDto)
 
-        coEvery {
-            testEthereumAuctionApi.getAuctionsByItem(any(), any(), any(), any(), any(), any(), any(), any(), any(), 1)
-        } returns AuctionsPaginationDto(emptyList(), null).toMono()
+        ethereumAuctionControllerApiMock.mockGetAuctionsByItem(itemId, emptyList())
 
         ownershipEventHandler.onOwnershipUpdated(ownershipDto)
 
@@ -78,7 +64,7 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
         assertThat(created).isNull()
 
         // But there should be single Ownership event "as is"
-        Wait.waitAssert {
+        waitAssert {
             assertThat(ownershipEvents).hasSize(1)
             val messages = findOwnershipUpdates(ownershipId.value)
             assertThat(messages).hasSize(1)
@@ -95,7 +81,7 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
         val ownershipId = randomEthOwnershipId(itemId)
         val ethOwnership = randomEthOwnershipDto(ownershipId)
 
-        val bestSellOrder = randomEthLegacySellOrderDto(itemId)
+        val bestSellOrder = randomEthSellOrderDto(itemId)
         val unionBestSell = ethOrderConverter.convert(bestSellOrder, itemId.blockchain)
 
         val unionOwnership = EthOwnershipConverter.convert(ethOwnership, itemId.blockchain)
@@ -105,11 +91,9 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
 
         ownershipService.save(shortOwnership)
 
-        coEvery { testEthereumOrderApi.getOrderByHash(unionBestSell.id.value) } returns bestSellOrder.toMono()
-        coEvery { testEthereumOwnershipApi.getNftOwnershipById(itemId.value, false) } returns ethOwnership.toMono()
-        coEvery {
-            testEthereumAuctionApi.getAuctionsByItem(any(), any(), any(), any(), any(), any(), any(), any(), any(), 1)
-        } returns AuctionsPaginationDto(emptyList(), null).toMono()
+        ethereumOrderControllerApiMock.mockGetByIds(bestSellOrder)
+        ethereumOwnershipControllerApiMock.mockGetNftOwnershipById(ownershipId, ethOwnership)
+        ethereumAuctionControllerApiMock.mockGetAuctionsByItem(itemId, emptyList())
 
         ownershipEventHandler.onOwnershipUpdated(unionOwnership)
 
@@ -120,7 +104,7 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
             .copy(bestSellOrder = unionBestSell)
 
         // We don't have related item in enrichment DB, so expect only Ownership update
-        Wait.waitAssert {
+        waitAssert {
             assertThat(ownershipEvents).hasSize(1)
             val messages = findOwnershipUpdates(ownershipId.value)
             assertThat(messages).hasSize(1)
@@ -138,7 +122,7 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
         val ethOwnership = randomEthOwnershipDto(ownershipId)
 
         // Corrupted order with incorrect status
-        val bestSellOrder = randomEthLegacySellOrderDto(itemId).copy(status = OrderStatusDto.INACTIVE)
+        val bestSellOrder = randomEthSellOrderDto(itemId).copy(status = OrderStatusDto.INACTIVE)
         val unionBestSell = ethOrderConverter.convert(bestSellOrder, itemId.blockchain)
 
         val unionOwnership = EthOwnershipConverter.convert(ethOwnership, itemId.blockchain)
@@ -148,16 +132,14 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
 
         ownershipService.save(shortOwnership)
 
-        coEvery { testEthereumOrderApi.getOrderByHash(unionBestSell.id.value) } returns bestSellOrder.toMono()
-        coEvery { testEthereumOwnershipApi.getNftOwnershipById(itemId.value, false) } returns ethOwnership.toMono()
-        coEvery {
-            testEthereumAuctionApi.getAuctionsByItem(any(), any(), any(), any(), any(), any(), any(), any(), any(), 1)
-        } returns AuctionsPaginationDto(emptyList(), null).toMono()
+        ethereumOrderControllerApiMock.mockGetByIds(bestSellOrder)
+        ethereumOwnershipControllerApiMock.mockGetNftOwnershipById(ownershipId, ethOwnership)
+        ethereumAuctionControllerApiMock.mockGetAuctionsByItem(itemId, emptyList())
 
         ownershipEventHandler.onOwnershipUpdated(unionOwnership)
 
 
-        Wait.waitAssert {
+        waitAssert {
             // Event should not be sent in case of corrupted enrichment data
             val messages = findOwnershipUpdates(ownershipId.value)
             assertThat(messages).hasSize(0)
@@ -179,13 +161,11 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
         val shortOwnership = ShortOwnershipConverter.convert(unionOwnership)
         ownershipService.save(shortOwnership)
 
-        val bestSellOrder = randomEthLegacySellOrderDto(itemId)
+        val bestSellOrder = randomEthSellOrderDto(itemId)
         val unionBestSell = ethOrderConverter.convert(bestSellOrder, itemId.blockchain)
 
-        coEvery { testEthereumOwnershipApi.getNftOwnershipById(ownershipId.value, false) } returns ethOwnership.toMono()
-        coEvery {
-            testEthereumAuctionApi.getAuctionsByItem(any(), any(), any(), any(), any(), any(), any(), any(), any(), 1)
-        } returns AuctionsPaginationDto(emptyList(), null).toMono()
+        ethereumOwnershipControllerApiMock.mockGetNftOwnershipById(ownershipId, ethOwnership)
+        ethereumAuctionControllerApiMock.mockGetAuctionsByItem(itemId, emptyList())
 
         ownershipEventHandler.onOwnershipBestSellOrderUpdated(shortOwnership.id, unionBestSell)
 
@@ -196,7 +176,7 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
             .copy(bestSellOrder = unionBestSell)
 
         // Since Item doesn't exist in Enrichment DB, we expect only Ownership event
-        Wait.waitAssert {
+        waitAssert {
             assertThat(ownershipEvents).hasSize(1)
             val messages = findOwnershipUpdates(ownershipId.value)
             assertThat(messages).hasSize(1)
@@ -215,7 +195,7 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
 
         val auction = randomUnionAuctionDto(ownershipId)
 
-        coEvery { testEthereumOwnershipApi.getNftOwnershipById(ownershipId.value, false) } returns ethOwnership.toMono()
+        ethereumOwnershipControllerApiMock.mockGetNftOwnershipById(ownershipId, ethOwnership)
 
         ownershipEventHandler.onAuctionUpdated(auction)
 
@@ -224,7 +204,7 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
             .copy(value = unionOwnership.value + auction.sell.value.toBigInteger())
 
         // Auction should be attached to the Ownership
-        Wait.waitAssert {
+        waitAssert {
             assertThat(ownershipEvents).hasSize(1)
             val messages = findOwnershipUpdates(ownershipId.value)
             assertThat(messages).hasSize(1)
@@ -242,17 +222,15 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
 
         val auction = randomUnionAuctionDto(ownershipId).copy(status = AuctionStatusDto.CANCELLED)
 
-        coEvery { testEthereumOwnershipApi.getNftOwnershipById(ownershipId.value, false) } returns ethOwnership.toMono()
-        coEvery {
-            testEthereumAuctionApi.getAuctionsByItem(any(), any(), any(), any(), any(), any(), any(), any(), any(), 1)
-        } returns AuctionsPaginationDto(emptyList(), null).toMono()
+        ethereumOwnershipControllerApiMock.mockGetNftOwnershipById(ownershipId, ethOwnership)
+        ethereumAuctionControllerApiMock.mockGetAuctionsByItem(itemId, emptyList())
 
         ownershipEventHandler.onAuctionUpdated(auction)
 
         val expected = EnrichedOwnershipConverter.convert(unionOwnership)
 
         // Auction should be NOT attached to the Ownership since it is cancelled
-        Wait.waitAssert {
+        waitAssert {
             assertThat(ownershipEvents).hasSize(1)
             val messages = findOwnershipUpdates(ownershipId.value)
             assertThat(messages).hasSize(1)
@@ -269,18 +247,13 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
         val auctionOwnership = randomEthOwnershipDto(auction.getAuctionOwnershipId())
         val unionAuctionOwnership = EthOwnershipConverter.convert(auctionOwnership, itemId.blockchain)
 
-        coEvery {
-            testEthereumOwnershipApi.getNftOwnershipById(unionAuctionOwnership.id.value, false)
-        } returns auctionOwnership.toMono()
-
-        coEvery {
-            testEthereumOwnershipApi.getNftOwnershipById(ownershipId.value, false)
-        } throws WebClientResponseException(404, "", null, null, null)
+        ethereumOwnershipControllerApiMock.mockGetNftOwnershipById(unionAuctionOwnership.id, auctionOwnership)
+        ethereumOwnershipControllerApiMock.mockGetNftOwnershipByIdNotFound(ownershipId)
 
         ownershipEventHandler.onAuctionUpdated(auction)
 
         // Auction should be converted to disguised ownership
-        Wait.waitAssert {
+        waitAssert {
             assertThat(ownershipEvents).hasSize(1)
             val messages = findOwnershipUpdates(ownershipId.value)
             assertThat(messages).hasSize(1)
@@ -295,14 +268,12 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
         val auction = randomUnionAuctionDto(itemId).copy(status = AuctionStatusDto.FINISHED)
         val ownershipId = auction.getSellerOwnershipId()
 
-        coEvery {
-            testEthereumOwnershipApi.getNftOwnershipById(ownershipId.value, false)
-        } throws WebClientResponseException(404, "", null, null, null)
+        ethereumOwnershipControllerApiMock.mockGetNftOwnershipByIdNotFound(ownershipId)
 
         ownershipEventHandler.onAuctionUpdated(auction)
 
         // Seller's ownership should be deleted
-        Wait.waitAssert {
+        waitAssert {
             assertThat(ownershipEvents).hasSize(1)
             val messages = findOwnershipDeletions(ownershipId.value)
             assertThat(messages).hasSize(1)
@@ -318,14 +289,12 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
 
         assertThat(ownershipService.get(ownership.id)).isNotNull()
 
-        coEvery {
-            testEthereumAuctionApi.getAuctionsByItem(any(), any(), any(), any(), any(), any(), any(), any(), any(), 1)
-        } returns AuctionsPaginationDto(emptyList(), null).toMono()
+        ethereumAuctionControllerApiMock.mockGetAuctionsByItem(itemId, emptyList())
 
         ownershipEventHandler.onOwnershipDeleted(ownershipId)
 
         assertThat(ownershipService.get(ownership.id)).isNull()
-        Wait.waitAssert {
+        waitAssert {
             val messages = findOwnershipDeletions(ownershipId.value)
             assertThat(messages).hasSize(1)
             assertThat(messages[0].key).isEqualTo(itemId.fullId())
@@ -340,15 +309,13 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
         val shortOwnershipId = randomShortOwnership(itemId).id
         val ownershipId = shortOwnershipId.toDto()
 
-        coEvery {
-            testEthereumAuctionApi.getAuctionsByItem(any(), any(), any(), any(), any(), any(), any(), any(), any(), 1)
-        } returns AuctionsPaginationDto(emptyList(), null).toMono()
+        ethereumAuctionControllerApiMock.mockGetAuctionsByItem(itemId, emptyList())
 
         ownershipEventHandler.onOwnershipDeleted(ownershipId)
 
         assertThat(ownershipService.get(shortOwnershipId)).isNull()
 
-        Wait.waitAssert {
+        waitAssert {
             val messages = findOwnershipDeletions(ownershipId.value)
             assertThat(messages).hasSize(1)
             assertThat(messages[0].key).isEqualTo(itemId.fullId())
@@ -368,19 +335,14 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
         val ownershipId = itemId.toOwnership(unionAuction.seller.value)
         val shortOwnershipId = ShortOwnershipId(ownershipId)
 
-        coEvery {
-            testEthereumAuctionApi.getAuctionsByItem(any(), any(), any(), any(), any(), any(), any(), any(), any(), 1)
-        } returns AuctionsPaginationDto(listOf(auction), null).toMono()
-
-        coEvery {
-            testEthereumOwnershipApi.getNftOwnershipById(auctionOwnershipId.value, false)
-        } returns auctionOwnership.toMono()
+        ethereumOwnershipControllerApiMock.mockGetNftOwnershipById(auctionOwnershipId, auctionOwnership)
+        ethereumAuctionControllerApiMock.mockGetAuctionsByItem(itemId, listOf(auction))
 
         ownershipEventHandler.onOwnershipDeleted(ownershipId)
 
         assertThat(ownershipService.get(shortOwnershipId)).isNull()
 
-        Wait.waitAssert {
+        waitAssert {
             val messages = findOwnershipUpdates(ownershipId.value)
             assertThat(messages).hasSize(1)
             assertThat(messages[0].value.ownership.id).isEqualTo(ownershipId)

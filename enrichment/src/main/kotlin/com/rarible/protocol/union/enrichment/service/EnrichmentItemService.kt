@@ -5,28 +5,28 @@ import com.rarible.core.apm.SpanType
 import com.rarible.core.apm.withSpan
 import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.core.model.UnionItem
+import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.loadMetaSynchronously
 import com.rarible.protocol.union.core.service.ItemService
+import com.rarible.protocol.union.core.service.OriginService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.AuctionDto
 import com.rarible.protocol.union.dto.AuctionIdDto
 import com.rarible.protocol.union.dto.CollectionIdDto
+import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
-import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.enrichment.converter.EnrichedItemConverter
-import com.rarible.protocol.union.enrichment.meta.UnionMetaService
+import com.rarible.protocol.union.enrichment.meta.content.ContentMetaService
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
 import com.rarible.protocol.union.enrichment.util.spent
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
@@ -38,14 +38,26 @@ class EnrichmentItemService(
     private val itemRepository: ItemRepository,
     private val enrichmentOrderService: EnrichmentOrderService,
     private val enrichmentAuctionService: EnrichmentAuctionService,
-    private val unionMetaService: UnionMetaService
+    private val itemMetaService: ItemMetaService,
+    private val contentMetaService: ContentMetaService,
+    private val originService: OriginService
 ) {
 
-    private val logger = LoggerFactory.getLogger(EnrichmentItemService::class.java)
-    private val FETCH_SIZE = 1_000
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     suspend fun get(itemId: ShortItemId): ShortItem? {
         return itemRepository.get(itemId)
+    }
+
+    suspend fun getItemCollection(itemId: ShortItemId): CollectionIdDto? {
+        val collectionId = itemServiceRouter.getService(itemId.blockchain)
+            .getItemCollectionId(itemId.itemId) ?: return null
+        return CollectionIdDto(itemId.blockchain, collectionId)
+    }
+
+    suspend fun getItemOrigins(itemId: ShortItemId): List<String> {
+        val collectionId = getItemCollection(itemId)
+        return originService.getOrigins(collectionId)
     }
 
     suspend fun getOrEmpty(itemId: ShortItemId): ShortItem {
@@ -65,20 +77,6 @@ class EnrichmentItemService(
 
     suspend fun findAll(ids: List<ShortItemId>): List<ShortItem> {
         return itemRepository.getAll(ids)
-    }
-
-    fun findByCollection(address: CollectionIdDto, owner: UnionAddress? = null): Flow<ShortItemId> = flow {
-        var continuation: String? = null
-        logger.info("Fetching all items for collection {} and owner {}", address, owner)
-        var count = 0
-        do {
-            val page = itemServiceRouter.getService(address.blockchain)
-                .getItemsByCollection(address.value, owner?.value, continuation, FETCH_SIZE)
-            page.entities.map { ShortItemId(it.id) }.forEach { emit(it) }
-            count += page.entities.count()
-            continuation = page.continuation
-        } while (continuation != null)
-        logger.info("Fetched {} items for collection {} and owner {}", count, address, owner)
     }
 
     suspend fun fetch(itemId: ShortItemId): UnionItem {
@@ -106,26 +104,29 @@ class EnrichmentItemService(
         item: UnionItem? = null,
         orders: Map<OrderIdDto, OrderDto> = emptyMap(),
         auctions: Map<AuctionIdDto, AuctionDto> = emptyMap(),
-        loadMetaSynchronously: Boolean = false
+        meta: Map<ItemIdDto, UnionMeta> = emptyMap(),
+        syncMetaDownload: Boolean = false,
+        metaPipeline: String = "default" // TODO PT-49
     ) = coroutineScope {
 
         require(shortItem != null || item != null)
         val itemId = shortItem?.id?.toDto() ?: item!!.id
 
         val fetchedItem = async { item ?: fetch(ShortItemId(itemId)) }
-        val bestSellOrder = async { enrichmentOrderService.fetchOrderIfDiffers(shortItem?.bestSellOrder, orders) }
-        val bestBidOrder = async { enrichmentOrderService.fetchOrderIfDiffers(shortItem?.bestBidOrder, orders) }
 
-        val meta = withSpanAsync("fetchMeta", spanType = SpanType.CACHE) {
-            if (loadMetaSynchronously || item?.loadMetaSynchronously == true) {
-                unionMetaService.getAvailableMetaOrLoadSynchronously(itemId, synchronous = true)
-            } else {
-                unionMetaService.getAvailableMetaOrScheduleLoading(itemId)
+        val metaHint = meta[itemId]
+        val itemMeta = if (metaHint != null) {
+            CompletableDeferred(metaHint)
+        } else {
+            val sync = (syncMetaDownload || item?.loadMetaSynchronously == true)
+            withSpanAsync("fetchMeta", spanType = SpanType.CACHE) {
+                itemMetaService.get(itemId, sync, metaPipeline)
             }
         }
-        val bestOrders = listOf(bestSellOrder, bestBidOrder)
-            .awaitAll().filterNotNull()
-            .associateBy { it.id }
+        val bestOrders = enrichmentOrderService.fetchMissingOrders(
+            existing = shortItem?.getAllBestOrders() ?: emptyList(),
+            orders = orders
+        )
 
         val auctionIds = shortItem?.auctions ?: emptySet()
 
@@ -134,7 +135,8 @@ class EnrichmentItemService(
         val itemDto = EnrichedItemConverter.convert(
             item = fetchedItem.await(),
             shortItem = shortItem,
-            meta = meta.await(),
+            // replacing inner IPFS urls with public urls
+            meta = contentMetaService.exposePublicUrls(itemMeta.await(), itemId),
             orders = bestOrders,
             auctions = auctionsData.await()
         )
@@ -147,4 +149,5 @@ class EnrichmentItemService(
         spanType: String = SpanType.APP,
         block: suspend () -> T
     ): Deferred<T> = async { withSpan(name = spanName, type = spanType, body = block) }
+
 }

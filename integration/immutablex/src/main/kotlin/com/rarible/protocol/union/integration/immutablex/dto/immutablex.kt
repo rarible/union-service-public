@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming
 import com.rarible.protocol.union.dto.ActivityIdDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import java.math.BigDecimal
+import java.math.BigInteger
 import java.time.Instant
 
 
@@ -19,23 +20,27 @@ data class ImmutablexAsset(
     val id: String?,
     @JsonProperty("image_url")
     val imageUrl: String?,
-    val metadata: Map<String, Any>,
+    val metadata: Map<String, Any>?,
     val name: String?,
     val status: String?,
     @JsonProperty("token_address")
     val tokenAddress: String,
     @JsonProperty("token_id")
-    val tokenId: Long,
+    val tokenId: String,
     val uri: String?,
     @JsonProperty("updated_at")
     val updatedAt: Instant?,
-    val user: String?
-)
+    val user: String?,
+) {
+    val itemId = "$tokenAddress:${tokenId()}"
+
+    fun tokenId(): BigInteger = BigInteger(tokenId.toByteArray())
+}
 
 data class ImmutablexCollectionShort(
     @JsonProperty("icon_url")
     val iconUrl: String?,
-    val name: String?
+    val name: String?,
 )
 
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy::class)
@@ -44,9 +49,9 @@ data class ImmutablexCollection(
     val name: String,
     val description: String,
     val iconUrl: String?,
-    val collectionImageUrl: String,
+    val collectionImageUrl: String?,
     val projectId: Long,
-    val metadataApiUrl: String
+    val metadataApiUrl: String,
 )
 
 data class ImmutablexFee(val address: String, val percentage: BigDecimal, val type: String)
@@ -58,48 +63,50 @@ data class FeeToken(val type: String, val data: FeeTokenData)
 data class FeeTokenData(
     @JsonProperty("contract_address")
     val contractAddress: String?,
-    val decimals: Int
+    val decimals: Int,
 )
 
 data class ImmutablexAssetsPage(
     val cursor: String,
     val remaining: Boolean,
-    val result: List<ImmutablexAsset>
+    val result: List<ImmutablexAsset>,
 )
 
 data class ImmutablexPage<T>(
     val cursor: String,
     val remaining: Boolean,
-    val result: List<T>
+    val result: List<T>,
 )
 
 data class ImmutablexMint(
     @JsonProperty("transaction_id")
     override val transactionId: Long,
-    val token: Token,
+    override val token: Token,
     val user: String,
     override val timestamp: Instant,
     val fees: List<ImmutablexFee>?,
-    val status: String?
-): ImmutablexEvent(transactionId, timestamp)
+    val status: String?,
+) : ImmutablexTokenEvent(transactionId, timestamp, token)
 
 data class Token(val type: String, val data: TokenData)
 
 data class TokenData(
     @JsonProperty("token_id")
-    val tokenId: String?,
+    val tokenId: String,
     @JsonProperty("token_address")
-    val tokenAddress: String?,
+    val tokenAddress: String,
     val properties: ImmutablexDataProperties?,
     val decimals: Int?,
-    val quantity: String?,
-    val id: String?
-)
+    val quantity: BigInteger,
+    val id: String?,
+) {
+    fun tokenId(): BigInteger = BigInteger(tokenId.toByteArray())
+}
 
 data class ImmutablexMintsPage(
     val cursor: String,
     val remaining: Boolean,
-    val result: List<ImmutablexMint>
+    val result: List<ImmutablexMint>,
 )
 
 data class ImmutablexOrder(
@@ -123,42 +130,54 @@ data class ImmutablexOrder(
 
 data class ImmutablexOrderSide(
     val data: ImmutablexOrderData,
-    val type: String
+    val type: String,
 )
 
 data class ImmutablexOrderData(
     val decimals: Int,
     val id: String?,
-    val quantity: String,
+    val quantity: BigInteger,
     @JsonProperty("token_address")
     val tokenAddress: String?,
     @JsonProperty("token_id")
     val tokenId: String?,
-    val properties: ImmutablexDataProperties?
-)
+    val properties: ImmutablexDataProperties?,
+) {
+    fun tokenId(): BigInteger? = tokenId?.let {
+        BigInteger(it.toByteArray())
+    }
+
+    fun itemId(): String = "${tokenAddress}:${tokenId()}"
+}
 
 data class ImmutablexDataProperties(
     val name: String?,
     @JsonProperty("image_url")
     val imageUrl: String?,
-    val collection: ImmutablexCollectionShort
+    val collection: ImmutablexCollectionShort,
 )
 
 data class ImmutablexOrdersPage(
     val cursor: String,
     val remaining: Boolean,
-    val result: List<ImmutablexOrder>
+    val result: List<ImmutablexOrder>,
 )
 
 data class ImmutablexTransfer(
-    val token: Token,
+    override val token: Token,
     val receiver: String,
     val status: String,
     override val timestamp: Instant,
     @JsonProperty("transaction_id")
     override val transactionId: Long,
-    val user: String
-): ImmutablexEvent(transactionId, timestamp)
+    val user: String,
+) : ImmutablexTokenEvent(transactionId, timestamp, token)
+
+data class ImmutablexTransfersPage(
+    val cursor: String,
+    val remaining: Boolean,
+    val result: List<ImmutablexTransfer>,
+)
 
 data class TradeSide(
     @JsonProperty("order_id")
@@ -169,7 +188,7 @@ data class TradeSide(
     @JsonProperty("token_id")
     val tokenId: String?,
     @JsonProperty("token_type")
-    val tokenType: String?
+    val tokenType: String?,
 )
 
 data class ImmutablexTrade(
@@ -180,20 +199,26 @@ data class ImmutablexTrade(
     @JsonProperty("a")
     val take: TradeSide,
     val status: String,
-    override val timestamp: Instant
-): ImmutablexEvent(transactionId, timestamp)
+    override val timestamp: Instant,
+) : ImmutablexEvent(transactionId, timestamp)
+
+data class ImmutablexTradesPage(
+    val cursor: String,
+    val remaining: Boolean,
+    val result: List<ImmutablexTrade>,
+)
 
 data class ImmutablexDeposit(
     @JsonProperty("transaction_id")
     override val transactionId: Long,
-    val token: Token,
+    override val token: Token,
     val status: String,
     override val timestamp: Instant,
-    val user: String
-): ImmutablexEvent(transactionId, timestamp)
+    val user: String,
+) : ImmutablexTokenEvent(transactionId, timestamp, token)
 
 data class ImmutablexWithdrawal(
-    val token: Token,
+    override val token: Token,
     @JsonProperty("rollup_status")
     val rollupStatus: String,
     val sender: String,
@@ -203,23 +228,32 @@ data class ImmutablexWithdrawal(
     @JsonProperty("transaction_id")
     override val transactionId: Long,
     override val timestamp: Instant,
-): ImmutablexEvent(transactionId, timestamp)
+) : ImmutablexTokenEvent(transactionId, timestamp, token)
 
-@JsonSubTypes(JsonSubTypes.Type(value = ImmutablexMint::class),
-    JsonSubTypes.Type(value = ImmutablexTransfer::class),
-    JsonSubTypes.Type(value = ImmutablexTrade::class),
-    JsonSubTypes.Type(value = ImmutablexDeposit::class),
-    JsonSubTypes.Type(value = ImmutablexWithdrawal::class))
-sealed class ImmutablexEvent(open val transactionId: Long, open val timestamp: Instant): ImmutablexJson {
-
-    val activityId
-    get() = ActivityIdDto(BlockchainDto.IMMUTABLEX, transactionId.toString())
+sealed class ImmutablexTokenEvent(transactionId: Long, timestamp: Instant, open val token: Token) :
+    ImmutablexEvent(transactionId, timestamp) {
+        fun itemId(): String = "${token.data.tokenAddress}:${token.data.tokenId()}"
 }
 
-@JsonSubTypes(JsonSubTypes.Type(value = ImmutablexMint::class),
+@JsonSubTypes(
+    JsonSubTypes.Type(value = ImmutablexMint::class),
     JsonSubTypes.Type(value = ImmutablexTransfer::class),
     JsonSubTypes.Type(value = ImmutablexTrade::class),
     JsonSubTypes.Type(value = ImmutablexDeposit::class),
-    JsonSubTypes.Type(value = ImmutablexWithdrawal::class))
+    JsonSubTypes.Type(value = ImmutablexWithdrawal::class)
+)
+sealed class ImmutablexEvent(open val transactionId: Long, open val timestamp: Instant) : ImmutablexJson {
+
+    val activityId
+        get() = ActivityIdDto(BlockchainDto.IMMUTABLEX, transactionId.toString())
+}
+
+@JsonSubTypes(
+    JsonSubTypes.Type(value = ImmutablexMint::class),
+    JsonSubTypes.Type(value = ImmutablexTransfer::class),
+    JsonSubTypes.Type(value = ImmutablexTrade::class),
+    JsonSubTypes.Type(value = ImmutablexDeposit::class),
+    JsonSubTypes.Type(value = ImmutablexWithdrawal::class)
+)
 sealed interface ImmutablexJson
 

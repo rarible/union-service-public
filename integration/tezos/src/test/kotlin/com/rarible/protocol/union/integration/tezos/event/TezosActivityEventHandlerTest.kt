@@ -18,7 +18,7 @@ class TezosActivityEventHandlerTest {
 
     private val incomingEventHandler: IncomingEventHandler<com.rarible.protocol.union.dto.ActivityDto> = mockk()
     private val converter = TezosActivityConverter(CurrencyMock.currencyServiceMock)
-    private val handler = TezosActivityEventHandler(incomingEventHandler, converter)
+    private val handler = TezosActivityEventHandler(incomingEventHandler, converter, false)
 
     @BeforeEach
     fun beforeEach() {

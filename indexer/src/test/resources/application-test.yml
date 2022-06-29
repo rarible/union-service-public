@@ -1,0 +1,27 @@
+spring:
+  application:
+    name: union-search-indexer
+
+
+  data:
+    elasticsearch:
+      cluster-name: docker-cluster
+      cluster-nodes: ${elasticsearch.cluster-nodes}
+
+      client:
+        reactive:
+          endpoints:  ${elasticsearch.api-nodes}
+          max-in-memory-size: 4194304
+
+
+  elasticsearch:
+    rest:
+      uris: ${elasticsearch.api-nodes}
+
+logging:
+  level:
+    org.springframework.context.annotation: "DEBUG"
+
+common:
+  producer:
+    broker-replica-set: ${kafka.hosts}

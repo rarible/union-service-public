@@ -18,6 +18,10 @@ spring:
   main:
     banner-mode: log
     web-application-type: reactive
+  task:
+    scheduling:
+      pool:
+        size: 16
 mongock:
   change-logs-scan-package:
     - com.rarible.protocol.union.enrichment.migration
@@ -51,12 +55,12 @@ common:
   currency:
     refresh:
       cron: "0 0/30 * * * *"
-  useLegacyRepository: true
   feature-flags:
     enableRevertedActivityEventSending: false
     enableOwnershipSourceEnrichment: false
     enableItemLastSaleEnrichment: true
     enableNotificationOnCollectionOrders: true
+    enableLegacyWrappedEventTopic: true
 
 
 integration:
@@ -89,8 +93,44 @@ integration:
     auctionContracts: ${consul.flow.auctionContracts:}
   tezos:
     enabled: ${consul.tezos.enabled:true}
+    dipdup:
+      enabled: ${consul.tezos.dipdup.enabled:false}
+      network: ${consul.tezos.dipdup.network:}
+      dipdupUrl: ${consul.tezos.dipdup.dipdupUrl:}
+      nodeAddress: ${consul.tezos.dipdup.nodeAddress:}
+      chainId: ${consul.tezos.dipdup.chainId:}
+      sigChecker: ${consul.tezos.dipdup.sigChecker:}
+      tzktUrl: ${consul.tezos.dipdup.tzktUrl:}
+      ipfsUrl: ${consul.tezos.dipdup.ipfsUrl:"https://ipfs.io"}
+      tzktProperties:
+        retryAttempts: ${consul.tezos.dipdup.tzktProperties.retryAttempts:2}
+        retryDelay: ${consul.tezos.dipdup.tzktProperties.retryDelay:15000}
+      knownAddresses:
+        hen: ${consul.tezos.dipdup.knownAddresses.hen:}
+        henRoyalties: ${consul.tezos.dipdup.knownAddresses.henRoyalties:}
+        kalamint: ${consul.tezos.dipdup.knownAddresses.kalamint:}
+        fxhashV1: ${consul.tezos.dipdup.knownAddresses.fxhashV1:}
+        fxhashV1Manager: ${consul.tezos.dipdup.knownAddresses.fxhashV1Manager:}
+        fxhashV2: ${consul.tezos.dipdup.knownAddresses.fxhashV2:}
+        versum: ${consul.tezos.dipdup.knownAddresses.versum:}
+        royaltiesManager: ${consul.tezos.dipdup.knownAddresses.royaltiesManager:}
+        bidou8x8: ${consul.tezos.dipdup.knownAddresses.bidou8x8:}
+        bidou24x24: ${consul.tezos.dipdup.knownAddresses.bidou24x24:}
+      consumer:
+        broker-replica-set: ${consul.tezos.dipdup.consumer.hosts:}
+        username: ${consul.tezos.dipdup.consumer.username:}
+        password: ${consul.tezos.dipdup.consumer.password:}
+        workers:
+          order: 1
+          activity: 1
     client:
       url: ${consul.tezos.api.baseUrl}
+    pg:
+      host: ${consul.tezos.pg.host:}
+      port: ${consul.tezos.pg.port:}
+      user: ${consul.tezos.pg.user:}
+      password: ${consul.tezos.pg.password:}
+      database: ${consul.tezos.pg.database:}
     consumer:
       broker-replica-set: ${consul.tezos.kafka.hosts}
       username: ${consul.tezos.kafka.username}
@@ -109,6 +149,21 @@ integration:
         ownership: 1
         order: 1
     auctionContracts:
+  immutablex:
+    enabled: ${consul.immutablex.enabled:true}
+    client:
+      url: ${consul.immutablex.api.baseUrl:}
+    apiKey: ${consul.immutablex.api.key:}
+    scanner:
+      job:
+        fixedDelay: 5
+        initialDelay:
+          mints: 1
+          transfers: 2
+          trades: 3
+          deposits: 4
+          withdrawals: 5
+          orders: 6
 
 listener:
   consumer:
@@ -127,16 +182,22 @@ listener:
     itemBatchSize: 100
     ownershipBatchSize: 50
   price-update:
+    enabled: true
     rate: PT5M
-    delay: PT1M
   reconcile-marks:
+    enabled: true
     rate: PT15S
-    delay: PT1M
+  meta-scheduling:
+    item:
+      workers: 4
+      batchSize: 16
   metrics:
     root-path: "protocol.union.listener"
 
 meta:
-  ipfsGateway: "https://rarible.mypinata.cloud/"
+  ipfsGateway: "https://ipfs.io,https://nftstorage.link"
+  ipfsPublicGateway: "https://ipfs.io"
+  ipfsLegacyGateway: "https://rarible.mypinata.cloud"
   mediaFetchTimeout: 10000
   mediaFetchMaxSize: 131072 # 128 Kb
   openSeaProxyUrl: ${consul.meta.openSeaProxyUrl}

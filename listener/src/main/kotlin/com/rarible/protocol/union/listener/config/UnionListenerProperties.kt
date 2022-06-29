@@ -14,15 +14,19 @@ data class UnionListenerProperties(
     val reconciliation: ReconciliationProperties,
     val openSeaCleanup: OpenSeaCleanUpProperties,
     val priceUpdate: PriceUpdateProperties,
+    val reconcileMarks: ReconcileMarksProperties,
+    val metaScheduling: MetaSchedulingProperties,
     val metrics: MetricsProperties
 )
 
 class InternalConsumerProperties(
     val brokerReplicaSet: String,
-    val workers: Map<String, Int>
+    val workers: Map<String, Int>,
+    val blockchainWorkers: Map<String, Int> = emptyMap()
 )
 
 class ReconciliationProperties(
+    val collectionBatchSize: Int = 50,
     val orderBatchSize: Int = 50,
     val auctionBatchSize: Int = 50,
     val activityBatchSize: Int = 100,
@@ -30,9 +34,14 @@ class ReconciliationProperties(
     val notificationEnabled: Boolean = true
 )
 
+class ReconcileMarksProperties(
+    val enabled: Boolean = true,
+    val rate: Duration = Duration.ofSeconds(15)
+)
+
 class PriceUpdateProperties(
-    val rate: Duration = Duration.ofMinutes(5),
-    val delay: Duration = Duration.ofMinutes(1)
+    val enabled: Boolean = true,
+    val rate: Duration = Duration.ofMinutes(5)
 )
 
 data class OpenSeaCleanUpProperties(
@@ -44,4 +53,14 @@ data class OpenSeaCleanUpProperties(
 
 data class MetricsProperties(
     val rootPath: String = "protocol.union.listener"
+)
+
+data class MetaSchedulingProperties(
+    val item: MetaEntrySchedulingProperties = MetaEntrySchedulingProperties(),
+    // TODO add collection
+)
+
+data class MetaEntrySchedulingProperties(
+    val workers: Int = 4,
+    val batchSize: Int = 16
 )

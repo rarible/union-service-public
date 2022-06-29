@@ -15,10 +15,12 @@ dependencies:
   repository: file://../resources/helm/rarible
   version: 0.1.0
 - name: rarible-helm-chart
-  alias: protocol-union-search-indexer
+  alias: protocol-union-indexer
   repository: file://../resources/helm/rarible
   version: 0.1.0
+  condition: protocol-union-indexer.enabled
 - name: rarible-helm-chart
-  alias: protocol-union-search-reindexer
+  alias: protocol-union-worker
   repository: file://../resources/helm/rarible
   version: 0.1.0
+  condition: protocol-union-worker.enabled

@@ -7,9 +7,12 @@ import org.springframework.boot.context.properties.ConstructorBinding
 @ConfigurationProperties("meta")
 data class UnionMetaProperties(
     val ipfsGateway: String,
+    val ipfsPublicGateway: String,
+    val ipfsLegacyGateway: String?,
     val mediaFetchMaxSize: Long,
     val openSeaProxyUrl: String,
-    val httpClient: HttpClient
+    val embedded: EmbeddedContentProperties,
+    val httpClient: HttpClient = HttpClient()
 ){
     class HttpClient(
         val type: HttpClientType = HttpClientType.KTOR_CIO,
@@ -19,6 +22,7 @@ data class UnionMetaProperties(
         val connectionsPerRoute: Int = 20,
         val keepAlive: Boolean = true
     ) {
+
         enum class HttpClientType {
             KTOR_APACHE,
             KTOR_CIO,
@@ -26,3 +30,9 @@ data class UnionMetaProperties(
         }
     }
 }
+
+data class EmbeddedContentProperties(
+    val publicUrl: String,
+    @Deprecated("Should be removed after migration")
+    val legacyUrls: String = ""
+)

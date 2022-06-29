@@ -2,6 +2,7 @@ package com.rarible.protocol.union.integration.immutablex.service
 
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.rarible.protocol.union.core.model.ItemAndOwnerActivityType
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.MintActivityDto
 import com.rarible.protocol.union.dto.OrderMatchSellDto
@@ -10,10 +11,12 @@ import com.rarible.protocol.union.dto.UserActivityTypeDto
 import com.rarible.protocol.union.integration.immutablex.converter.ImmutablexActivityConverter
 import com.rarible.protocol.union.integration.immutablex.converter.ImmutablexOrderConverter
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexMint
+import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexMintsPage
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexOrder
-import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexPage
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexTrade
+import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexTradesPage
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexTransfer
+import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexTransfersPage
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
@@ -25,7 +28,7 @@ internal class ImmutablexActivityServiceTest {
     private val mapper = jacksonObjectMapper().registerModule(JavaTimeModule())
 
     private val expectedMintActivity by lazy {
-        ImmutablexPage<ImmutablexMint>("", false,
+        ImmutablexMintsPage("", false,
             listOf(
                 mapper.readValue(
                     ImmutablexActivityServiceTest::class.java.getResourceAsStream("mint.json"),
@@ -36,7 +39,7 @@ internal class ImmutablexActivityServiceTest {
     }
 
     private val expectedTransfersActivity by lazy {
-        ImmutablexPage<ImmutablexTransfer>("", false,
+        ImmutablexTransfersPage("", false,
             listOf(
                 mapper.readValue(
                     ImmutablexActivityServiceTest::class.java.getResourceAsStream("transfer.json"),
@@ -47,7 +50,7 @@ internal class ImmutablexActivityServiceTest {
     }
 
     private val expectedTradesActivity by lazy {
-        ImmutablexPage<ImmutablexTrade>("", false,
+        ImmutablexTradesPage("", false,
             listOf(
                 mapper.readValue(
                     ImmutablexActivityServiceTest::class.java.getResourceAsStream("trade.json"),
@@ -95,7 +98,7 @@ internal class ImmutablexActivityServiceTest {
                 Assertions.assertEquals(page.entities.size, 1)
                 val activity = page.entities.single() as MintActivityDto
                 val expected = expectedMintActivity.result.single()
-                Assertions.assertEquals(activity.tokenId, expected.token.data.tokenId!!.toBigInteger())
+                Assertions.assertEquals(activity.tokenId, expected.token.data.tokenId())
                 Assertions.assertEquals(activity.owner.value, expected.user)
             }
 
@@ -113,8 +116,8 @@ internal class ImmutablexActivityServiceTest {
                 Assertions.assertEquals(page.entities.size, 1)
                 val activity = page.entities.single() as TransferActivityDto
                 val expected = expectedTransfersActivity.result.single()
-                Assertions.assertEquals(activity.tokenId, expected.token.data.tokenId!!.toBigInteger())
-                Assertions.assertEquals(activity.value, expected.token.data.quantity?.toBigInteger())
+                Assertions.assertEquals(activity.tokenId, expected.token.data.tokenId())
+                Assertions.assertEquals(activity.value, expected.token.data.quantity)
                 Assertions.assertEquals(activity.from.value, expected.user)
                 Assertions.assertEquals(activity.owner.value, expected.receiver)
             }
@@ -122,11 +125,11 @@ internal class ImmutablexActivityServiceTest {
 
     @Test
     fun getActivitiesByItem() = runBlocking {
-        val itemId = expectedMintActivity.result.single().token.data.tokenId!!
+        val itemId = expectedMintActivity.result.single().token.data.tokenId()
 
         service.getActivitiesByItem(
             listOf(ActivityTypeDto.MINT),
-            itemId,
+            "$itemId",
             null,
             50,
             null
@@ -155,4 +158,22 @@ internal class ImmutablexActivityServiceTest {
         }
     }
 
+    @Test
+    fun getActivitiesByItemAndOwner() = runBlocking {
+        val (itemId, owner) = expectedMintActivity.result.single().run {
+            token.data.tokenId() to user
+        }
+
+        service.getActivitiesByItemAndOwner(
+            types = listOf(ItemAndOwnerActivityType.MINT),
+            itemId = "$itemId",
+            owner = owner,
+            null,
+            50,
+            null
+        ).let { page ->
+            Assertions.assertEquals(1, page.entities.size)
+            assert(page.entities[0] is MintActivityDto)
+        }
+    }
 }

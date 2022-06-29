@@ -1,0 +1,36 @@
+{
+  "dynamic": "false",
+  "properties": {
+    "@timestamp": {
+      "type": "date"
+    },
+    "ownershipId": {
+      "type": "keyword"
+    },
+    "blockchain": {
+      "type": "keyword",
+      "ignore_above": 256
+    },
+    "itemId": {
+      "type": "keyword"
+    },
+    "collection": {
+      "type": "keyword",
+      "ignore_above": 512
+    },
+    "owner": {
+      "type": "keyword",
+      "ignore_above": 256
+    },
+    "date": {
+      "type": "date",
+      "format": "strict_date_optional_time||epoch_millis"
+    },
+    "auctionId": {
+      "type": "keyword"
+    },
+    "auctionOwnershipId": {
+      "type": "keyword"
+    }
+  }
+}

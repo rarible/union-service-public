@@ -1,5 +1,7 @@
 package com.rarible.protocol.union.integration.immutablex.service
 
+import com.rarible.protocol.union.core.model.UnionCollection
+import com.rarible.protocol.union.core.model.UnionCollectionMeta
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.dto.CollectionIdDto
@@ -8,7 +10,6 @@ import com.rarible.protocol.union.integration.immutablex.client.ImmutablexApiCli
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
-
 
 class ImmutablexCollectionServiceTest {
 
@@ -22,29 +23,37 @@ class ImmutablexCollectionServiceTest {
             )
         ).getAllCollections(null, 50)
 
-
+        // TODO there is no point to check entire object, it should be covered in converter tests
         Assertions.assertThat(page.entities).containsExactly(
-            CollectionDto(
-                CollectionIdDto(BlockchainDto.IMMUTABLEX, "0x62d25241d4a5d619c1b06114210250d19d2424c0"),
-                null,
-                BlockchainDto.IMMUTABLEX,
-                CollectionDto.Type.IMMUTABLEX,
-                "CERTIFICATE3",
-                "CERTIFICATE3",
-                null,
-                emptyList(),
-                emptyList()
+            UnionCollection(
+                id = CollectionIdDto(BlockchainDto.IMMUTABLEX, "0x62d25241d4a5d619c1b06114210250d19d2424c0"),
+                parent = null,
+                type = CollectionDto.Type.ERC721,
+                name = "CERTIFICATE3",
+                symbol = null,
+                owner = null,
+                features = listOf(CollectionDto.Features.APPROVE_FOR_ALL),
+                minters = emptyList(),
+                meta = UnionCollectionMeta(
+                    name = "CERTIFICATE3",
+                    description = "ASRA City DAO is an innovative, utility focused NFT project- decentralizing the collective ownership, development, and governance of virtual land and experiences in the Metaverse.",
+                    content = emptyList()
+                )
             ),
-            CollectionDto(
-                CollectionIdDto(BlockchainDto.IMMUTABLEX, "0xa8106fe2195c3fa48ed52b52f7981f74d18d8ba4"),
-                null,
-                BlockchainDto.IMMUTABLEX,
-                CollectionDto.Type.IMMUTABLEX,
-                "CERTIFICATE2",
-                "CERTIFICATE2",
-                null,
-                emptyList(),
-                emptyList()
+            UnionCollection(
+                id = CollectionIdDto(BlockchainDto.IMMUTABLEX, "0xa8106fe2195c3fa48ed52b52f7981f74d18d8ba4"),
+                parent = null,
+                type = CollectionDto.Type.ERC721,
+                name = "CERTIFICATE2",
+                symbol = null,
+                owner = null,
+                features = listOf(CollectionDto.Features.APPROVE_FOR_ALL),
+                minters = emptyList(),
+                meta = UnionCollectionMeta(
+                    name = "CERTIFICATE2",
+                    description = "",
+                    content = emptyList()
+                )
             )
         )
     }
@@ -59,22 +68,27 @@ class ImmutablexCollectionServiceTest {
             )
         ).getCollectionById("0x62d25241d4a5d619c1b06114210250d19d2424c0")
 
+        // TODO there is no point to check entire object, it should be covered in converter tests
         Assertions.assertThat(col).isEqualTo(
-            CollectionDto(
-                CollectionIdDto(BlockchainDto.IMMUTABLEX, "0x62d25241d4a5d619c1b06114210250d19d2424c0"),
-                null,
-                BlockchainDto.IMMUTABLEX,
-                CollectionDto.Type.IMMUTABLEX,
-                "CERTIFICATE3",
-                "CERTIFICATE3",
-                null,
-                emptyList(),
-                emptyList()
+            UnionCollection(
+                id = CollectionIdDto(BlockchainDto.IMMUTABLEX, "0x62d25241d4a5d619c1b06114210250d19d2424c0"),
+                parent = null,
+                type = CollectionDto.Type.ERC721,
+                name = "CERTIFICATE3",
+                symbol = null,
+                minters = emptyList(),
+                features = listOf(CollectionDto.Features.APPROVE_FOR_ALL),
+                meta = UnionCollectionMeta(
+                    name = "CERTIFICATE3",
+                    description = "ASRA City DAO is an innovative, utility focused NFT project- decentralizing the collective ownership, development, and governance of virtual land and experiences in the Metaverse.",
+                    content = emptyList()
+                )
             )
         )
     }
 
     companion object {
+
         const val ALL_COLLECTIONS = """
             {
               "result": [

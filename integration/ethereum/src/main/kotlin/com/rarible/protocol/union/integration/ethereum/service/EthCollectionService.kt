@@ -1,15 +1,19 @@
 package com.rarible.protocol.union.integration.ethereum.service
 
 import com.rarible.core.apm.CaptureSpan
+import com.rarible.protocol.dto.CollectionsByIdRequestDto
 import com.rarible.protocol.nft.api.client.NftCollectionControllerApi
+import com.rarible.protocol.union.core.exception.UnionValidationException
+import com.rarible.protocol.union.core.model.TokenId
+import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.core.service.CollectionService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.dto.continuation.page.Page
 import com.rarible.protocol.union.integration.ethereum.converter.EthCollectionConverter
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
+import kotlinx.coroutines.reactor.awaitSingle
 
 open class EthCollectionService(
     blockchain: BlockchainDto,
@@ -19,7 +23,7 @@ open class EthCollectionService(
     override suspend fun getAllCollections(
         continuation: String?,
         size: Int
-    ): Page<CollectionDto> {
+    ): Page<UnionCollection> {
         val collections = collectionControllerApi.searchNftAllCollections(
             continuation,
             size
@@ -27,7 +31,7 @@ open class EthCollectionService(
         return EthCollectionConverter.convert(collections, blockchain)
     }
 
-    override suspend fun getCollectionById(collectionId: String): CollectionDto {
+    override suspend fun getCollectionById(collectionId: String): UnionCollection {
         val collection = collectionControllerApi.getNftCollectionById(collectionId).awaitFirst()
         return EthCollectionConverter.convert(collection, blockchain)
     }
@@ -36,11 +40,22 @@ open class EthCollectionService(
         collectionControllerApi.resetNftCollectionMetaById(collectionId).awaitFirstOrNull()
     }
 
+    override suspend fun getCollectionsByIds(ids: List<String>): List<UnionCollection> {
+        val collections = collectionControllerApi.getNftCollectionsByIds(CollectionsByIdRequestDto(ids)).awaitSingle()
+        return EthCollectionConverter.convert(collections, blockchain).entities
+    }
+
+    override suspend fun generateNftTokenId(collectionId: String, minter: String?): TokenId {
+        if (minter == null) throw UnionValidationException("Minter mustn't be null")
+        val tokenId = collectionControllerApi.generateNftTokenId(collectionId, minter).awaitSingle()
+        return EthCollectionConverter.convert(tokenId)
+    }
+
     override suspend fun getCollectionsByOwner(
         owner: String,
         continuation: String?,
         size: Int
-    ): Page<CollectionDto> {
+    ): Page<UnionCollection> {
         val items = collectionControllerApi.searchNftCollectionsByOwner(
             owner,
             continuation,

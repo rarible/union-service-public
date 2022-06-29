@@ -40,18 +40,21 @@ rarible:
     workers: 4
     loadTasksBatchSize: 10
     retry:
-      # Retry after 5m, 12h, 24h
-      backoffDelaysMillis: [ 300000, 43200000, 86400000 ]
+      # Retry after 5m, 24h
+      backoffDelaysMillis: [ 300000, 86400000 ]
       job:
         runner:
           period: 30000 # Schedule retry tasks every 30s
 
 meta:
-  ipfsGateway: "https://rarible.mypinata.cloud/"
+  ipfsGateway: "https://ipfs.io,https://nftstorage.link"
+  ipfsPublicGateway: "https://ipfs.io"
+  ipfsLegacyGateway: "https://rarible.mypinata.cloud"
   mediaFetchMaxSize: 131072 # 128 Kb
   openSeaProxyUrl: ${consul.meta.openSeaProxyUrl}
   http-client:
-    type: KTOR_CIO # KTOR_APACHE, KTOR_CIO
+    type: ASYNC_APACHE # KTOR_APACHE, KTOR_CIO
+    keep-alive: false
     thread-count: 1
     time-out: 10000
     total-connection: 1000
@@ -86,8 +89,41 @@ integration:
     auctionContracts: ${consul.flow.auctionContracts:}
   tezos:
     enabled: ${consul.tezos.enabled:true}
+    dipdup:
+      enabled: ${consul.tezos.dipdup.enabled:false}
+      network: ${consul.tezos.dipdup.network:}
+      dipdupUrl: ${consul.tezos.dipdup.dipdupUrl:}
+      nodeAddress: ${consul.tezos.dipdup.nodeAddress:}
+      chainId: ${consul.tezos.dipdup.chainId:}
+      sigChecker: ${consul.tezos.dipdup.sigChecker:}
+      tzktUrl: ${consul.tezos.dipdup.tzktUrl:}
+      ipfsUrl: ${consul.tezos.dipdup.ipfsUrl:"https://ipfs.io"}
+      knownAddresses:
+        hen: ${consul.tezos.dipdup.knownAddresses.hen:}
+        henRoyalties: ${consul.tezos.dipdup.knownAddresses.henRoyalties:}
+        kalamint: ${consul.tezos.dipdup.knownAddresses.kalamint:}
+        fxhashV1: ${consul.tezos.dipdup.knownAddresses.fxhashV1:}
+        fxhashV1Manager: ${consul.tezos.dipdup.knownAddresses.fxhashV1Manager:}
+        fxhashV2: ${consul.tezos.dipdup.knownAddresses.fxhashV2:}
+        versum: ${consul.tezos.dipdup.knownAddresses.versum:}
+        royaltiesManager: ${consul.tezos.dipdup.knownAddresses.royaltiesManager:}
+        bidou8x8: ${consul.tezos.dipdup.knownAddresses.bidou8x8:}
+        bidou24x24: ${consul.tezos.dipdup.knownAddresses.bidou24x24:}
+      consumer:
+        broker-replica-set: ${consul.tezos.dipdup.consumer.hosts:}
+        username: ${consul.tezos.dipdup.consumer.username:}
+        password: ${consul.tezos.dipdup.consumer.password:}
+        workers:
+          order: 1
+          activity: 1
     client:
       url: ${consul.tezos.api.baseUrl}
+    pg:
+      host: ${consul.tezos.pg.host:}
+      port: ${consul.tezos.pg.port:}
+      user: ${consul.tezos.pg.user:}
+      password: ${consul.tezos.pg.password:}
+      database: ${consul.tezos.pg.database:}
     consumer:
       broker-replica-set: ${consul.tezos.kafka.hosts}
       username: ${consul.tezos.kafka.username}

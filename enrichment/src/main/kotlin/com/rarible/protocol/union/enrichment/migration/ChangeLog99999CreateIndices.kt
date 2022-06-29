@@ -2,6 +2,7 @@ package com.rarible.protocol.union.enrichment.migration
 
 import com.github.cloudyrock.mongock.ChangeLog
 import com.github.cloudyrock.mongock.ChangeSet
+import com.rarible.protocol.union.enrichment.repository.CollectionRepository
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
 import com.rarible.protocol.union.enrichment.repository.OwnershipRepository
 import com.rarible.protocol.union.enrichment.repository.ReconciliationMarkRepository
@@ -20,10 +21,12 @@ class ChangeLog99999CreateIndices {
     fun createIndicesForAllCollections(
         @NonLockGuarded ownershipRepository: OwnershipRepository,
         @NonLockGuarded itemRepository: ItemRepository,
-        @NonLockGuarded itemReconciliationMarkRepository: ReconciliationMarkRepository
+        @NonLockGuarded itemReconciliationMarkRepository: ReconciliationMarkRepository,
+        @NonLockGuarded collectionRepository: CollectionRepository
     ) = runBlocking {
         ownershipRepository.createIndices()
         itemRepository.createIndices()
         itemReconciliationMarkRepository.createIndices()
+        collectionRepository.createIndices()
     }
 }

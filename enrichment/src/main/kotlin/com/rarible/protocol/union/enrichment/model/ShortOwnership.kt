@@ -3,6 +3,7 @@ package com.rarible.protocol.union.enrichment.model
 import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OwnershipSourceDto
+import com.rarible.protocol.union.enrichment.evaluator.BestSellOrderOwner
 import org.springframework.data.annotation.AccessType
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.Transient
@@ -17,11 +18,12 @@ data class ShortOwnership(
     val itemId: String, // ItemId without blockchain prefix
     val owner: String, // Owner without blockchain prefix
 
-    val bestSellOrders: Map<String, ShortOrder>,
+    override val bestSellOrder: ShortOrder?,
+    override val bestSellOrders: Map<String, ShortOrder>,
+
+    override val originOrders: Set<OriginOrders> = emptySet(),
 
     val multiCurrency: Boolean = bestSellOrders.size > 1,
-
-    val bestSellOrder: ShortOrder?,
 
     val source: OwnershipSourceDto?,
 
@@ -29,7 +31,8 @@ data class ShortOwnership(
 
     @Version
     val version: Long? = null
-) {
+) : BestSellOrderOwner<ShortOwnership>, OriginOrdersOwner {
+
     fun withCalculatedFields(): ShortOwnership {
         return copy(
             multiCurrency = bestSellOrders.size > 1,
@@ -38,6 +41,7 @@ data class ShortOwnership(
     }
 
     companion object {
+
         fun empty(ownershipId: ShortOwnershipId): ShortOwnership {
             return ShortOwnership(
                 blockchain = ownershipId.blockchain,
@@ -46,6 +50,7 @@ data class ShortOwnership(
 
                 bestSellOrders = emptyMap(),
                 bestSellOrder = null,
+                originOrders = emptySet(),
                 lastUpdatedAt = nowMillis(),
 
                 version = null,
@@ -67,4 +72,15 @@ data class ShortOwnership(
         get() = _id
         set(_) {}
 
+    override fun withBestSellOrders(orders: Map<String, ShortOrder>): ShortOwnership {
+        return this.copy(bestSellOrders = orders)
+    }
+
+    override fun withBestSellOrder(order: ShortOrder?): ShortOwnership {
+        return this.copy(bestSellOrder = order)
+    }
+
+    override fun getAllBestOrders(): List<ShortOrder> {
+        return listOfNotNull(bestSellOrder) + getAllOriginBestOrders()
+    }
 }

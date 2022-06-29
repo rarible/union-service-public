@@ -14,6 +14,7 @@ import com.rarible.protocol.dto.BurnDto
 import com.rarible.protocol.dto.MintDto
 import com.rarible.protocol.dto.NftActivityFilterAllDto
 import com.rarible.protocol.dto.NftActivityFilterByCollectionDto
+import com.rarible.protocol.dto.NftActivityFilterByItemAndOwnerDto
 import com.rarible.protocol.dto.NftActivityFilterByItemDto
 import com.rarible.protocol.dto.NftActivityFilterByUserDto
 import com.rarible.protocol.dto.OrderActivityBidDto
@@ -28,6 +29,7 @@ import com.rarible.protocol.dto.OrderActivityListDto
 import com.rarible.protocol.dto.OrderActivityMatchDto
 import com.rarible.protocol.dto.TransferDto
 import com.rarible.protocol.union.core.converter.ContractAddressConverter
+import com.rarible.protocol.union.core.model.ItemAndOwnerActivityType
 import com.rarible.protocol.union.core.service.CurrencyService
 import com.rarible.protocol.union.dto.ActivityBlockchainInfoDto
 import com.rarible.protocol.union.dto.ActivityDto
@@ -144,7 +146,8 @@ class EthActivityConverter(
                     maker = EthConverter.convert(source.maker, blockchain),
                     make = payment,
                     take = nft,
-                    reverted = source.reverted ?: false
+                    reverted = source.reverted ?: false,
+                    lastUpdatedAt = source.lastUpdatedAt
                 )
             }
             is OrderActivityListDto -> {
@@ -161,7 +164,8 @@ class EthActivityConverter(
                     maker = EthConverter.convert(source.maker, blockchain),
                     make = nft,
                     take = payment,
-                    reverted = source.reverted ?: false
+                    reverted = source.reverted ?: false,
+                    lastUpdatedAt = source.lastUpdatedAt
                 )
             }
             is OrderActivityCancelBidDto -> {
@@ -181,7 +185,8 @@ class EthActivityConverter(
                         blockNumber = source.blockNumber,
                         logIndex = source.logIndex
                     ),
-                    reverted = source.reverted ?: false
+                    reverted = source.reverted ?: false,
+                    lastUpdatedAt = source.lastUpdatedAt
                 )
             }
             is OrderActivityCancelListDto -> {
@@ -201,7 +206,8 @@ class EthActivityConverter(
                         blockNumber = source.blockNumber,
                         logIndex = source.logIndex
                     ),
-                    reverted = source.reverted ?: false
+                    reverted = source.reverted ?: false,
+                    lastUpdatedAt = source.lastUpdatedAt
                 )
             }
             is MintDto -> {
@@ -223,7 +229,8 @@ class EthActivityConverter(
                         blockNumber = source.blockNumber,
                         logIndex = source.logIndex
                     ),
-                    reverted = source.reverted ?: false
+                    reverted = source.reverted ?: false,
+                    lastUpdatedAt = source.lastUpdatedAt
                 )
             }
             is BurnDto -> {
@@ -245,7 +252,8 @@ class EthActivityConverter(
                         blockNumber = source.blockNumber,
                         logIndex = source.logIndex
                     ),
-                    reverted = source.reverted ?: false
+                    reverted = source.reverted ?: false,
+                    lastUpdatedAt = source.lastUpdatedAt
                 )
             }
             is TransferDto -> {
@@ -269,7 +277,8 @@ class EthActivityConverter(
                         blockNumber = source.blockNumber,
                         logIndex = source.logIndex
                     ),
-                    reverted = source.reverted ?: false
+                    reverted = source.reverted ?: false,
+                    lastUpdatedAt = source.lastUpdatedAt
                 )
             }
             is AuctionActivityOpenDto -> {
@@ -278,7 +287,8 @@ class EthActivityConverter(
                     date = source.date,
                     auction = auctionConverter.convert(source.auction, blockchain),
                     transactionHash = EthConverter.convert(source.transactionHash),
-                    reverted = source.reverted ?: false
+                    reverted = source.reverted ?: false,
+                    lastUpdatedAt = source.lastUpdatedAt
                 )
             }
             is AuctionActivityBidDto -> {
@@ -288,7 +298,8 @@ class EthActivityConverter(
                     bid = EthConverter.convert(source.bid, blockchain),
                     auction = auctionConverter.convert(source.auction, blockchain),
                     transactionHash = EthConverter.convert(source.transactionHash),
-                    reverted = source.reverted ?: false
+                    reverted = source.reverted ?: false,
+                    lastUpdatedAt = source.lastUpdatedAt
                 )
             }
             is AuctionActivityFinishDto -> {
@@ -297,7 +308,8 @@ class EthActivityConverter(
                     date = source.date,
                     auction = auctionConverter.convert(source.auction, blockchain),
                     transactionHash = EthConverter.convert(source.transactionHash),
-                    reverted = source.reverted ?: false
+                    reverted = source.reverted ?: false,
+                    lastUpdatedAt = source.lastUpdatedAt
                 )
             }
             is AuctionActivityCancelDto -> {
@@ -306,7 +318,8 @@ class EthActivityConverter(
                     date = source.date,
                     auction = auctionConverter.convert(source.auction, blockchain),
                     transactionHash = EthConverter.convert(source.transactionHash),
-                    reverted = source.reverted ?: false
+                    reverted = source.reverted ?: false,
+                    lastUpdatedAt = source.lastUpdatedAt
                 )
             }
             is AuctionActivityStartDto -> {
@@ -314,7 +327,8 @@ class EthActivityConverter(
                     id = activityId,
                     date = source.date,
                     auction = auctionConverter.convert(source.auction, blockchain),
-                    reverted = source.reverted ?: false
+                    reverted = source.reverted ?: false,
+                    lastUpdatedAt = source.lastUpdatedAt
                 )
             }
             is AuctionActivityEndDto -> {
@@ -322,7 +336,8 @@ class EthActivityConverter(
                     id = activityId,
                     date = source.date,
                     auction = auctionConverter.convert(source.auction, blockchain),
-                    reverted = source.reverted ?: false
+                    reverted = source.reverted ?: false,
+                    lastUpdatedAt = source.lastUpdatedAt
                 )
             }
         }
@@ -356,7 +371,8 @@ class EthActivityConverter(
             priceUsd = priceUsd,
             amountUsd = priceUsd?.multiply(nft.asset.valueDecimal),
             type = type,
-            reverted = source.reverted ?: false
+            reverted = source.reverted ?: false,
+            lastUpdatedAt = source.lastUpdatedAt
         )
     }
 
@@ -373,7 +389,8 @@ class EthActivityConverter(
         blockchainInfo = asActivityBlockchainInfo(source),
         left = convert(source.left, blockchain),
         right = convert(source.right, blockchain),
-        reverted = source.reverted ?: false
+        reverted = source.reverted ?: false,
+        lastUpdatedAt = source.lastUpdatedAt
     )
 
     fun convertToNftAllTypes(types: List<ActivityTypeDto>): List<NftActivityFilterAllDto.Types>? {
@@ -405,6 +422,11 @@ class EthActivityConverter(
         }
     }
 
+    fun convertToNftItemAndOwnerTypes(types: List<ItemAndOwnerActivityType>): List<NftActivityFilterByItemAndOwnerDto.Types>? {
+        val result = types.mapNotNull { asNftActivityItemAndOwnerType(it) }.distinct()
+        return result.ifEmpty { null }
+    }
+
     fun asNftActivityCollectionType(source: ActivityTypeDto): NftActivityFilterByCollectionDto.Types? {
         return when (source) {
             TRANSFER -> NftActivityFilterByCollectionDto.Types.TRANSFER
@@ -430,6 +452,13 @@ class EthActivityConverter(
             UserActivityTypeDto.MINT -> NftActivityFilterByUserDto.Types.MINT
             UserActivityTypeDto.BURN -> NftActivityFilterByUserDto.Types.BURN
             else -> null
+        }
+    }
+
+    fun asNftActivityItemAndOwnerType(source: ItemAndOwnerActivityType): NftActivityFilterByItemAndOwnerDto.Types? {
+        return when (source) {
+            ItemAndOwnerActivityType.TRANSFER -> NftActivityFilterByItemAndOwnerDto.Types.TRANSFER
+            ItemAndOwnerActivityType.MINT -> NftActivityFilterByItemAndOwnerDto.Types.MINT
         }
     }
 

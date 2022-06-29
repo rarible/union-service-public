@@ -43,6 +43,12 @@ integration:
     enabled: true
     client:
       url: "http://localhost:8080"
+    pg:
+      host: "localhost"
+      port: 5432
+      user: "test"
+      password: "test"
+      database: "test"
     consumer:
       broker-replica-set: ${kafka.hosts}
       username:
@@ -51,3 +57,7 @@ integration:
         item: 1
         ownership: 1
         order: 1
+
+meta:
+  embedded:
+    publicUrl: "http://localhost:8080/content/embedded"

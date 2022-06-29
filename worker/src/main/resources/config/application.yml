@@ -1,0 +1,205 @@
+application:
+  project: protocol
+
+server:
+  shutdown: graceful
+  port: 8080
+
+spring:
+  application.name: union-search-worker
+  jackson:
+    mapper:
+      ACCEPT_CASE_INSENSITIVE_ENUMS: true
+    deserialization:
+      FAIL_ON_UNKNOWN_PROPERTIES: false
+    default-property-inclusion: non_null
+  aop:
+    proxy-target-class: false
+  main:
+    banner-mode: log
+    web-application-type: reactive
+
+rarible:
+  core:
+    apm:
+      agent:
+        enabled: true
+        server: http://elk_apm-server:8200
+        packages: com.rarible.protocol.union.worker
+      web:
+        filter:
+          enabled: false
+      annotation:
+        enabled: true
+
+  loader:
+    broker-replica-set: ${kafka.hosts}
+    topicsPrefix: protocol.${application.environment}.union.internal.loader
+    enableNotifications: false
+    enableWorkers: false
+    enableRetrySchedulerJob: false
+    workers: 4
+    loadTasksBatchSize: 10
+    retry:
+      # Retry after 5m, 24h
+      backoffDelaysMillis: [ 300000, 86400000 ]
+      job:
+        runner:
+          period: 30000 # Schedule retry tasks every 30s
+
+meta:
+  ipfsGateway: "https://ipfs.io,https://nftstorage.link"
+  ipfsPublicGateway: "https://ipfs.io"
+  ipfsLegacyGateway: "https://rarible.mypinata.cloud"
+  mediaFetchMaxSize: 131072 # 128 Kb
+  openSeaProxyUrl: ${consul.meta.openSeaProxyUrl}
+  http-client:
+    type: KTOR_CIO # KTOR_APACHE, KTOR_CIO
+    thread-count: 1
+    time-out: 10000
+    total-connection: 1000
+
+integration:
+  ethereum:
+    enabled: ${consul.ethereum.enabled:true}
+    consumer:
+      broker-replica-set: ${kafka.hosts}
+      workers:
+        item: 1
+        ownership: 1
+        order: 1
+    auctionContracts: ${consul.ethereum.auctionContracts:}
+  polygon:
+    enabled: ${consul.polygon.enabled:true}
+    consumer:
+      broker-replica-set: ${kafka.hosts}
+      workers:
+        item: 1
+        ownership: 1
+        order: 1
+    auctionContracts: ${consul.polygon.auctionContracts:}
+  flow:
+    enabled: ${consul.flow.enabled:true}
+    consumer:
+      broker-replica-set: ${kafka.hosts}
+      workers:
+        item: 1
+        ownership: 1
+        order: 1
+    auctionContracts: ${consul.flow.auctionContracts:}
+  tezos:
+    enabled: ${consul.tezos.enabled:true}
+    dipdup:
+      enabled: ${consul.tezos.dipdup.enabled:false}
+      network: ${consul.tezos.dipdup.network:}
+      dipdupUrl: ${consul.tezos.dipdup.dipdupUrl:}
+      nodeAddress: ${consul.tezos.dipdup.nodeAddress:}
+      chainId: ${consul.tezos.dipdup.chainId:}
+      sigChecker: ${consul.tezos.dipdup.sigChecker:}
+      tzktUrl: ${consul.tezos.dipdup.tzktUrl:}
+      ipfsUrl: ${consul.tezos.dipdup.ipfsUrl:"https://ipfs.io"}
+      knownAddresses:
+        hen: ${consul.tezos.dipdup.knownAddresses.hen:}
+        henRoyalties: ${consul.tezos.dipdup.knownAddresses.henRoyalties:}
+        kalamint: ${consul.tezos.dipdup.knownAddresses.kalamint:}
+        fxhashV1: ${consul.tezos.dipdup.knownAddresses.fxhashV1:}
+        fxhashV1Manager: ${consul.tezos.dipdup.knownAddresses.fxhashV1Manager:}
+        fxhashV2: ${consul.tezos.dipdup.knownAddresses.fxhashV2:}
+        versum: ${consul.tezos.dipdup.knownAddresses.versum:}
+        royaltiesManager: ${consul.tezos.dipdup.knownAddresses.royaltiesManager:}
+        bidou8x8: ${consul.tezos.dipdup.knownAddresses.bidou8x8:}
+        bidou24x24: ${consul.tezos.dipdup.knownAddresses.bidou24x24:}
+    client:
+      url: ${consul.tezos.api.baseUrl}
+    pg:
+      host: ${consul.tezos.pg.host:}
+      port: ${consul.tezos.pg.port:}
+      user: ${consul.tezos.pg.user:}
+      password: ${consul.tezos.pg.password:}
+      database: ${consul.tezos.pg.database:}
+    consumer:
+      broker-replica-set: ${consul.tezos.kafka.hosts}
+      username: ${consul.tezos.kafka.username}
+      password: ${consul.tezos.kafka.password}
+      workers:
+        item: 1
+        ownership: 1
+        order: 1
+    auctionContracts: ${consul.tezos.auctionContracts:}
+  solana:
+    enabled: ${consul.solana.enabled:true}
+  immutablex:
+    enabled: ${consul.immutablex.enabled:false}
+    client:
+      url: ${consul.immutablex.api.baseUrl:}
+    apiKey: ${consul.immutablex.api.key:}
+
+common:
+  producer:
+    broker-replica-set: ${kafka.hosts}
+
+worker:
+  search-reindex:
+    activity:
+      enabled: true
+      blockchains:
+        - blockchain: ETHEREUM
+          enabled: true
+        - blockchain: POLYGON
+          enabled: true
+        - blockchain: FLOW
+          enabled: true
+        - blockchain: TEZOS
+          enabled: true
+        - blockchain: SOLANA
+          enabled: true
+        - blockchain: IMMUTABLEX
+          enabled: false
+    order:
+      enabled: false
+      blockchains:
+    collection:
+      enabled: true
+      blockchains:
+        - blockchain: ETHEREUM
+          enabled: true
+        - blockchain: POLYGON
+          enabled: true
+        - blockchain: FLOW
+          enabled: true
+        - blockchain: TEZOS
+          enabled: true
+        - blockchain: SOLANA
+          enabled: true
+        - blockchain: IMMUTABLEX
+          enabled: false
+    item:
+      enabled: true
+      blockchains:
+        - blockchain: ETHEREUM
+          enabled: true
+        - blockchain: POLYGON
+          enabled: true
+        - blockchain: FLOW
+          enabled: true
+        - blockchain: TEZOS
+          enabled: true
+        - blockchain: SOLANA
+          enabled: true
+        - blockchain: IMMUTABLEX
+          enabled: false
+    ownership:
+      enabled: true
+      blockchains:
+        - blockchain: ETHEREUM
+          enabled: true
+        - blockchain: POLYGON
+          enabled: true
+        - blockchain: FLOW
+          enabled: true
+        - blockchain: TEZOS
+          enabled: true
+        - blockchain: SOLANA
+          enabled: true
+        - blockchain: IMMUTABLEX
+          enabled: false

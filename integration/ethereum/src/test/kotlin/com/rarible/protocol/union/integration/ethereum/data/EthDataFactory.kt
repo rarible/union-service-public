@@ -22,23 +22,25 @@ import com.rarible.protocol.dto.AuctionBidsPaginationDto
 import com.rarible.protocol.dto.AuctionDto
 import com.rarible.protocol.dto.AuctionHistoryDto
 import com.rarible.protocol.dto.AuctionStatusDto
+import com.rarible.protocol.dto.AudioContentDto
 import com.rarible.protocol.dto.BurnDto
 import com.rarible.protocol.dto.CollectionAssetTypeDto
 import com.rarible.protocol.dto.CryptoPunkOrderDto
 import com.rarible.protocol.dto.Erc1155AssetTypeDto
 import com.rarible.protocol.dto.Erc20AssetTypeDto
 import com.rarible.protocol.dto.Erc721AssetTypeDto
+import com.rarible.protocol.dto.HtmlContentDto
+import com.rarible.protocol.dto.ImageContentDto
 import com.rarible.protocol.dto.ItemRoyaltyDto
 import com.rarible.protocol.dto.ItemTransferDto
-import com.rarible.protocol.dto.LegacyOrderDto
+import com.rarible.protocol.dto.MetaContentDto
 import com.rarible.protocol.dto.MintDto
+import com.rarible.protocol.dto.Model3dContentDto
 import com.rarible.protocol.dto.NftCollectionDto
 import com.rarible.protocol.dto.NftCollectionMetaDto
 import com.rarible.protocol.dto.NftItemAttributeDto
 import com.rarible.protocol.dto.NftItemDto
 import com.rarible.protocol.dto.NftItemMetaDto
-import com.rarible.protocol.dto.NftMediaDto
-import com.rarible.protocol.dto.NftMediaMetaDto
 import com.rarible.protocol.dto.NftOwnershipDto
 import com.rarible.protocol.dto.OnChainOrderDto
 import com.rarible.protocol.dto.OpenSeaV1OrderDto
@@ -49,10 +51,11 @@ import com.rarible.protocol.dto.OrderActivityDto
 import com.rarible.protocol.dto.OrderActivityListDto
 import com.rarible.protocol.dto.OrderActivityMatchDto
 import com.rarible.protocol.dto.OrderActivityMatchSideDto
+import com.rarible.protocol.dto.OrderBasicSeaportDataV1Dto
 import com.rarible.protocol.dto.OrderCancelDto
 import com.rarible.protocol.dto.OrderCryptoPunksDataDto
-import com.rarible.protocol.dto.OrderDataLegacyDto
 import com.rarible.protocol.dto.OrderOpenSeaV1DataV1Dto
+import com.rarible.protocol.dto.OrderRaribleV2DataDto
 import com.rarible.protocol.dto.OrderRaribleV2DataV1Dto
 import com.rarible.protocol.dto.OrderSideDto
 import com.rarible.protocol.dto.OrderSideMatchDto
@@ -63,7 +66,14 @@ import com.rarible.protocol.dto.RaribleAuctionV1BidV1Dto
 import com.rarible.protocol.dto.RaribleAuctionV1DataV1Dto
 import com.rarible.protocol.dto.RaribleAuctionV1Dto
 import com.rarible.protocol.dto.RaribleV2OrderDto
+import com.rarible.protocol.dto.SeaportConsiderationDto
+import com.rarible.protocol.dto.SeaportItemTypeDto
+import com.rarible.protocol.dto.SeaportOfferDto
+import com.rarible.protocol.dto.SeaportOrderTypeDto
+import com.rarible.protocol.dto.SeaportV1OrderDto
 import com.rarible.protocol.dto.TransferDto
+import com.rarible.protocol.dto.UnknownContentDto
+import com.rarible.protocol.dto.VideoContentDto
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.util.CompositeItemIdParser
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -107,8 +117,7 @@ fun randomEthNftItemDto(itemId: ItemIdDto): NftItemDto {
         mintedAt = nowMillis().minusSeconds(1),
         owners = listOf(),
         pending = listOf(randomEthItemTransferDto()),
-        deleted = false,
-        meta = randomEthItemMeta()
+        deleted = false
     )
 }
 
@@ -139,8 +148,9 @@ fun randomEthItemMeta(): NftItemMetaDto {
         name = randomString(),
         description = randomString(),
         attributes = listOf(randomEthItemMetaAttribute()),
-        image = randomEthItemMedia(),
-        animation = randomEthItemMedia()
+        tags = emptyList(),
+        genres = emptyList(),
+        content = randomMetaContentDtoList(),
     )
 }
 
@@ -148,22 +158,6 @@ fun randomEthItemMetaAttribute(): NftItemAttributeDto {
     return NftItemAttributeDto(
         key = randomString(),
         value = randomString()
-    )
-}
-
-fun randomEthItemMedia(): NftMediaDto {
-    val type = "ORIGINAL"
-    return NftMediaDto(
-        url = mapOf(Pair(type, randomString())),
-        meta = mapOf(Pair(type, randomEthItemMediaMeta("image/png")))
-    )
-}
-
-fun randomEthItemMediaMeta(type: String): NftMediaMetaDto {
-    return NftMediaMetaDto(
-        type = type,
-        width = randomInt(400, 1200),
-        height = randomInt(200, 800)
     )
 }
 
@@ -191,6 +185,7 @@ fun randomEthOwnershipDto(itemId: ItemIdDto, creator: PartDto): NftOwnershipDto 
         value = randomBigInt(),
         lazyValue = randomBigInt(),
         date = nowMillis(),
+        lastUpdatedAt = nowMillis().plusSeconds(1),
         pending = listOf(randomEthItemTransferDto())
     )
 }
@@ -212,15 +207,17 @@ fun randomEthAssetErc20(address: Address) = AssetDto(
     valueDecimal = randomBigDecimal()
 )
 
-fun randomEthCollectionAsset() = randomEthCollectionAsset(randomAddress())
-fun randomEthCollectionAsset(address: Address) = AssetDto(
+fun randomEthCollectionAsset(
+    address: Address = randomAddress()
+) = AssetDto(
     assetType = CollectionAssetTypeDto(address),
     value = randomBigInt(),
     valueDecimal = randomBigDecimal()
 )
 
-fun randomEthAssetErc1155() = randomEthAssetErc1155(randomEthItemId())
-fun randomEthAssetErc1155(itemId: ItemIdDto): AssetDto {
+fun randomEthAssetErc1155(
+    itemId: ItemIdDto = randomEthItemId()
+): AssetDto {
     val (contract, tokenId) = CompositeItemIdParser.split(itemId.value)
     return AssetDto(
         assetType = Erc1155AssetTypeDto(Address.apply(contract), tokenId),
@@ -229,29 +226,36 @@ fun randomEthAssetErc1155(itemId: ItemIdDto): AssetDto {
     )
 }
 
-fun randomEthLegacySellOrderDto() =
-    randomEthLegacyOrderDto(randomEthAssetErc721(), randomAddress(), randomEthAssetErc20())
-
-fun randomEthLegacySellOrderDto(itemId: ItemIdDto) = randomEthLegacySellOrderDto(itemId, randomAddress())
-fun randomEthLegacySellOrderDto(itemId: ItemIdDto, maker: Address) = randomEthLegacyOrderDto(
+fun randomEthSellOrderDto(
+    itemId: ItemIdDto = randomEthItemId(),
+    maker: Address = randomAddress(),
+    data: OrderRaribleV2DataDto = OrderRaribleV2DataV1Dto(emptyList(), emptyList())
+) = randomEthLegacyOrderDto(
     randomEthAssetErc721(itemId),
     maker,
-    randomEthAssetErc20()
+    randomEthAssetErc20(),
+    data
 )
 
-fun randomEthLegacyBidOrderDto() =
-    randomEthLegacyOrderDto(randomEthAssetErc20(), randomAddress(), randomEthAssetErc721())
-
-fun randomEthLegacyBidOrderDto(itemId: ItemIdDto) = randomEthLegacyBidOrderDto(itemId, randomAddress())
-fun randomEthLegacyBidOrderDto(itemId: ItemIdDto, maker: Address) = randomEthLegacyOrderDto(
+fun randomEthBidOrderDto(
+    itemId: ItemIdDto = randomEthItemId(),
+    maker: Address = randomAddress(),
+    data: OrderRaribleV2DataDto = OrderRaribleV2DataV1Dto(emptyList(), emptyList())
+) = randomEthLegacyOrderDto(
     randomEthAssetErc20(),
     maker,
-    randomEthAssetErc721(itemId)
+    randomEthAssetErc721(itemId),
+    data
 )
 
-fun randomEthLegacyOrderDto(make: AssetDto, maker: Address, take: AssetDto): LegacyOrderDto {
+private fun randomEthLegacyOrderDto(
+    make: AssetDto,
+    maker: Address,
+    take: AssetDto,
+    data: OrderRaribleV2DataDto
+): RaribleV2OrderDto {
     val makeStockValue = randomBigDecimal()
-    return LegacyOrderDto(
+    return RaribleV2OrderDto(
         status = OrderStatusDto.ACTIVE,
         maker = maker,
         taker = null,
@@ -263,7 +267,7 @@ fun randomEthLegacyOrderDto(make: AssetDto, maker: Address, take: AssetDto): Leg
         makeStockValue = makeStockValue,
         cancelled = false,
         salt = Word.apply(randomWord()),
-        data = OrderDataLegacyDto(randomInt()),
+        data = data,
         signature = randomBinary(),
         createdAt = nowMillis(),
         lastUpdateAt = nowMillis(),
@@ -318,6 +322,9 @@ fun randomEthV2OrderDto(make: AssetDto, maker: Address, take: AssetDto): Rarible
 fun randomEthOpenSeaV1OrderDto() =
     randomEthOpenSeaV1OrderDto(randomEthAssetErc721(), randomAddress(), randomEthAssetErc20())
 
+fun randomEthSeaportV1OrderDto() =
+    randomEthSeaportV1OrderDto(randomEthAssetErc721(), randomAddress(), randomEthAssetErc20())
+
 fun randomEthOpenSeaV1OrderDto(itemId: ItemIdDto) = randomEthOpenSeaV1OrderDto(itemId, randomAddress())
 fun randomEthOpenSeaV1OrderDto(itemId: ItemIdDto, maker: Address) = randomEthOpenSeaV1OrderDto(
     randomEthAssetErc721(itemId),
@@ -340,6 +347,35 @@ fun randomEthOpenSeaV1OrderDto(make: AssetDto, maker: Address, take: AssetDto): 
         cancelled = false,
         salt = Word.apply(randomWord()),
         data = randomEthOrderOpenSeaV1DataV1Dto(),
+        signature = randomBinary(),
+        createdAt = nowMillis(),
+        lastUpdateAt = nowMillis(),
+        pending = emptyList(),
+        hash = Word.apply(randomWord()),
+        makeBalance = randomBigInt(),
+        makePriceUsd = randomBigInt().toBigDecimal(),
+        takePriceUsd = randomBigInt().toBigDecimal(),
+        start = randomInt().toLong(),
+        end = randomInt().toLong(),
+        priceHistory = listOf()
+    )
+}
+
+fun randomEthSeaportV1OrderDto(make: AssetDto, maker: Address, take: AssetDto): SeaportV1OrderDto {
+    val makeStockValue = randomBigDecimal()
+    return SeaportV1OrderDto(
+        status = OrderStatusDto.ACTIVE,
+        maker = maker,
+        taker = null,
+        make = make,
+        take = take,
+        fill = randomBigInt(),
+        fillValue = randomBigDecimal(),
+        makeStock = makeStockValue.toBigInteger(),
+        makeStockValue = makeStockValue,
+        cancelled = false,
+        salt = Word.apply(randomWord()),
+        data = randomEthOrderBasicSeaportDataV1Dto(),
         signature = randomBinary(),
         createdAt = nowMillis(),
         lastUpdateAt = nowMillis(),
@@ -413,6 +449,40 @@ fun randomEthOrderOpenSeaV1DataV1Dto(): OrderOpenSeaV1DataV1Dto {
     )
 }
 
+fun randomEthOrderBasicSeaportDataV1Dto(): OrderBasicSeaportDataV1Dto {
+    return OrderBasicSeaportDataV1Dto(
+        protocol = randomAddress(),
+        orderType = SeaportOrderTypeDto.values().random(),
+        offer = listOf(randomEthSeaportOffer(), randomEthSeaportOffer()),
+        consideration = listOf(randomEthSeaportConsideration(), randomEthSeaportConsideration()),
+        zone = randomAddress(),
+        zoneHash = Word.apply(randomWord()),
+        conduitKey = Word.apply(randomWord()),
+        counter = randomLong()
+    )
+}
+
+fun randomEthSeaportOffer(): SeaportOfferDto {
+    return SeaportOfferDto(
+        itemType = SeaportItemTypeDto.values().random(),
+        token = randomAddress(),
+        identifierOrCriteria = randomBigInt(),
+        startAmount = randomBigInt(),
+        endAmount = randomBigInt()
+    )
+}
+
+fun randomEthSeaportConsideration(): SeaportConsiderationDto {
+    return SeaportConsiderationDto(
+        itemType = SeaportItemTypeDto.values().random(),
+        token = randomAddress(),
+        identifierOrCriteria = randomBigInt(),
+        startAmount = randomBigInt(),
+        endAmount = randomBigInt(),
+        recipient = randomAddress()
+    )
+}
+
 fun randomEthOrderSideMatchDto(): OrderSideMatchDto {
     return OrderSideMatchDto(
         date = nowMillis(),
@@ -472,10 +542,31 @@ fun randomEthCollectionMetaDto(): NftCollectionMetaDto {
     return NftCollectionMetaDto(
         name = randomString(),
         description = randomString(),
-        image = randomEthItemMedia(),
-        external_link = randomString(),
-        seller_fee_basis_points = randomInt(),
-        fee_recipient = randomAddress(),
+        language = randomString(),
+        genres = listOf(randomString(), randomString()),
+        tags = listOf(randomString(), randomString()),
+        createdAt = nowMillis(),
+        rights = randomString(),
+        rightsUri = randomString(),
+        externalUri = randomString(),
+        originalMetaUri = randomString(),
+        feeRecipient = randomAddress(),
+        sellerFeeBasisPoints = randomInt(),
+        content = randomMetaContentDtoList()
+    )
+}
+
+fun randomMetaContentDtoList(): List<MetaContentDto> {
+    return listOf(
+        ImageContentDto(
+            fileName = randomString(),
+            url = randomString(),
+            representation = MetaContentDto.Representation.ORIGINAL,
+            mimeType = randomString(),
+            size = randomLong(),
+            width = randomInt(400, 1200),
+            height = randomInt(200, 800)
+        )
     )
 }
 
@@ -560,7 +651,8 @@ fun randomEthOrderActivityMatch(): OrderActivityMatchDto {
         blockNumber = randomLong(),
         logIndex = randomInt(),
         type = OrderActivityMatchDto.Type.SELL,
-        reverted = false
+        reverted = false,
+        lastUpdatedAt = nowMillis()
     )
 }
 
@@ -575,7 +667,8 @@ fun randomEthOrderBidActivity(): OrderActivityBidDto {
         take = AssetDto(Erc20AssetTypeDto(randomAddress()), randomBigInt(), randomBigDecimal()),
         price = randomBigDecimal(),
         priceUsd = randomBigDecimal(),
-        reverted = false
+        reverted = false,
+        lastUpdatedAt = nowMillis()
     )
 }
 
@@ -589,7 +682,8 @@ fun randomEthAuctionOpenActivity(): AuctionActivityOpenDto {
         blockHash = Word.apply(randomWord()),
         blockNumber = randomLong(),
         logIndex = randomInt(),
-        reverted = false
+        reverted = false,
+        lastUpdatedAt = nowMillis()
     )
 }
 
@@ -603,7 +697,8 @@ fun randomEthAuctionCancelActivity(): AuctionActivityCancelDto {
         blockHash = Word.apply(randomWord()),
         blockNumber = randomLong(),
         logIndex = randomInt(),
-        reverted = false
+        reverted = false,
+        lastUpdatedAt = nowMillis()
     )
 }
 
@@ -617,7 +712,8 @@ fun randomEthAuctionFinishActivity(): AuctionActivityFinishDto {
         blockHash = Word.apply(randomWord()),
         blockNumber = randomLong(),
         logIndex = randomInt(),
-        reverted = false
+        reverted = false,
+        lastUpdatedAt = nowMillis()
     )
 }
 
@@ -638,7 +734,8 @@ fun randomEthAuctionBidActivity(): AuctionActivityBidDto {
             date = Instant.now(),
             status = AuctionBidDto.Status.ACTIVE
         ),
-        reverted = false
+        reverted = false,
+        lastUpdatedAt = nowMillis()
     )
 }
 
@@ -648,7 +745,8 @@ fun randomEthAuctionStartActivity(): AuctionActivityStartDto {
         date = nowMillis(),
         source = AuctionActivityDto.Source.RARIBLE,
         auction = randomEthAuctionDto(),
-        reverted = false
+        reverted = false,
+        lastUpdatedAt = nowMillis()
     )
 }
 
@@ -658,7 +756,8 @@ fun randomEthAuctionEndActivity(): AuctionActivityEndDto {
         date = nowMillis(),
         source = AuctionActivityDto.Source.RARIBLE,
         auction = randomEthAuctionDto(),
-        reverted = false
+        reverted = false,
+        lastUpdatedAt = nowMillis()
     )
 }
 
@@ -673,7 +772,8 @@ fun randomEthOrderListActivity(): OrderActivityListDto {
         take = AssetDto(Erc20AssetTypeDto(randomAddress()), randomBigInt(), randomBigDecimal()),
         price = randomBigDecimal(),
         priceUsd = randomBigDecimal(),
-        reverted = false
+        reverted = false,
+        lastUpdatedAt = nowMillis()
     )
 }
 
@@ -690,7 +790,8 @@ fun randomEthOrderActivityCancelBid(): OrderActivityCancelBidDto {
         hash = Word.apply(randomWord()),
         make = randomEthAssetErc20().assetType,
         take = randomEthAssetErc721().assetType,
-        reverted = false
+        reverted = false,
+        lastUpdatedAt = nowMillis()
     )
 }
 
@@ -707,7 +808,8 @@ fun randomEthOrderActivityCancelList(): OrderActivityCancelListDto {
         hash = Word.apply(randomWord()),
         make = randomEthAssetErc20().assetType,
         take = randomEthAssetErc721().assetType,
-        reverted = false
+        reverted = false,
+        lastUpdatedAt = nowMillis()
     )
 }
 
@@ -723,7 +825,8 @@ fun randomEthItemMintActivity(): MintDto {
         blockHash = Word.apply(randomWord()),
         blockNumber = randomLong(),
         logIndex = randomInt(),
-        reverted = false
+        reverted = false,
+        lastUpdatedAt = nowMillis()
     )
 }
 
@@ -739,7 +842,8 @@ fun randomEthItemBurnActivity(): BurnDto {
         blockHash = Word.apply(randomWord()),
         blockNumber = randomLong(),
         logIndex = randomInt(),
-        reverted = false
+        reverted = false,
+        lastUpdatedAt = nowMillis()
     )
 }
 
@@ -757,7 +861,8 @@ fun randomEthItemTransferActivity(): TransferDto {
         blockNumber = randomLong(),
         logIndex = randomInt(),
         reverted = false,
-        purchase = false
+        purchase = false,
+        lastUpdatedAt = nowMillis()
     )
 }
 
