@@ -69,8 +69,8 @@ protocol-union-search-indexer:
     node.labels.rarible.service: true
   resources:
     jvm:
-      xmx_megabytes: 512
-      max_direct_memory_megabytes: 96
+      xmx_megabytes: 1024
+      max_direct_memory_megabytes: 128
   networks:
     common:
       - '{{ include "service.appEnv" $ }}-backend'
@@ -87,8 +87,8 @@ protocol-union-search-reindexer:
     node.labels.rarible.service: true
   resources:
     jvm:
-      xmx_megabytes: 512
-      max_direct_memory_megabytes: 96
+      xmx_megabytes: 1024
+      max_direct_memory_megabytes: 128
   networks:
     common:
       - '{{ include "service.appEnv" $ }}-backend'
