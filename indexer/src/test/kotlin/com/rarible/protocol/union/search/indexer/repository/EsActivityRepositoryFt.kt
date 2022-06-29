@@ -34,7 +34,6 @@ internal class EsActivityRepositoryFt {
     @BeforeEach
     fun setUp() = runBlocking<Unit> {
         elasticsearchTestBootstrapper.bootstrap()
-        repository.deleteAll()
     }
 
     @Test

@@ -63,17 +63,6 @@ class EsOwnershipRepository(
         ).awaitFirstOrNull()
     }
 
-    /**
-     * For tests only
-     */
-    suspend fun deleteAll() {
-        esOperations.delete(
-            Query.findAll(),
-            Any::class.java,
-            entityDefinition.writeIndexCoordinates
-        ).awaitFirstOrNull()
-    }
-
     override suspend fun refresh() {
         val refreshRequest = RefreshRequest().indices(entityDefinition.aliasName, entityDefinition.writeAliasName)
 

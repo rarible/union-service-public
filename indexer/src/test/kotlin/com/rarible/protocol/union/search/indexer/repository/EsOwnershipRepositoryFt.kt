@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.search.indexer.repository
 
 import com.rarible.core.test.data.randomString
+import com.rarible.protocol.union.core.es.ElasticsearchTestBootstrapper
 import com.rarible.protocol.union.core.model.EsOwnershipByItemFilter
 import com.rarible.protocol.union.core.model.EsOwnershipByOwnerFilter
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -27,12 +28,16 @@ import java.time.Instant
 @EnableAutoConfiguration
 @ContextConfiguration(classes = [SearchConfiguration::class])
 internal class EsOwnershipRepositoryFt {
+
     @Autowired
     protected lateinit var repository: EsOwnershipRepository
 
+    @Autowired
+    private lateinit var elasticsearchTestBootstrapper: ElasticsearchTestBootstrapper
+
     @BeforeEach
     fun setUp() = runBlocking<Unit> {
-        repository.deleteAll()
+        elasticsearchTestBootstrapper.bootstrap()
     }
 
     @Test
