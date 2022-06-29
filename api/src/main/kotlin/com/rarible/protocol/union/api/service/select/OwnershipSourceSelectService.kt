@@ -18,12 +18,13 @@ class OwnershipSourceSelectService(
     private val featureFlagsProperties: FeatureFlagsProperties,
     private val ownershipApiQueryService: OwnershipApiQueryService,
     private val ownershipElasticService: OwnershipElasticService
-) : OwnershipQueryService {
-    override suspend fun getOwnershipById(fullOwnershipId: OwnershipIdDto): OwnershipDto {
-        return getQuerySource().getOwnershipById(fullOwnershipId)
+) {
+
+    suspend fun getOwnershipById(fullOwnershipId: OwnershipIdDto): OwnershipDto {
+        return ownershipApiQueryService.getOwnershipById(fullOwnershipId)
     }
 
-    override suspend fun getOwnershipByOwner(
+    suspend fun getOwnershipByOwner(
         owner: UnionAddress,
         continuation: String?,
         size: Int
@@ -31,7 +32,7 @@ class OwnershipSourceSelectService(
         return getQuerySource().getOwnershipByOwner(owner, continuation, size)
     }
 
-    override suspend fun getOwnershipsByItem(itemId: ItemIdDto, continuation: String?, size: Int): OwnershipsDto {
+    suspend fun getOwnershipsByItem(itemId: ItemIdDto, continuation: String?, size: Int): OwnershipsDto {
         return getQuerySource().getOwnershipsByItem(itemId, continuation, size)
     }
 

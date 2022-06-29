@@ -16,87 +16,16 @@ import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilde
 import org.springframework.data.elasticsearch.core.query.Query
 
 sealed interface EsOwnershipFilter {
-    fun asQuery(): Query
-
-    fun genericBuild(
-        continuation: DateIdContinuation?,
-        size: Int,
-        vararg queryBuilders: QueryBuilder,
-    ): Query {
-        val continuationQuery = continuation?.let {
-            boolQuery()
-                .should(
-                    boolQuery()
-                        .must(termQuery(EsOwnership::date.name, it.date))
-                        .must(rangeQuery(EsOwnership::ownershipId.name).lt(it.id))
-                )
-                .should(
-                    rangeQuery(EsOwnership::date.name).lt(it.date)
-                )
-        }
-        val builders = listOfNotNull(*queryBuilders, continuationQuery)
-        val fullQueryBuilder = builders.singleOrNull()
-            ?: boolQuery().also { builders.forEach(it::must) }
-
-        return NativeSearchQueryBuilder()
-            .withQuery(fullQueryBuilder)
-            .withSort(fieldSort(EsOwnership::date.name).order(SortOrder.DESC))
-            .withSort(fieldSort(EsOwnership::ownershipId.name).order(SortOrder.DESC))
-            .withMaxResults(size)
-            .build()
-    }
-}
-
-data class EsOwnershipByIdFilter(
-    val ownershipId: String,
-) : EsOwnershipFilter {
-    override fun asQuery(): Query =
-        NativeSearchQueryBuilder().withQuery(idsQuery().addIds(ownershipId)).build()
-}
-
-data class EsOwnershipByIdsFilter(
-    val ownershipsIds: Collection<String>,
-) : EsOwnershipFilter {
-    override fun asQuery(): Query =
-        NativeSearchQueryBuilder().withQuery(idsQuery().addIds(*ownershipsIds.toTypedArray())).build()
-}
-
-data class EsOwnershipByAuctionOwnershipIdsFilter(
-    val ownershipsIds: Collection<String>,
-) : EsOwnershipFilter {
-    override fun asQuery(): Query {
-        val builder = termsQuery(EsOwnership::auctionOwnershipId.name, ownershipsIds)
-        return NativeSearchQueryBuilder().withQuery(builder).build()
-    }
+    val cursor: String?
 }
 
 data class EsOwnershipByOwnerFilter(
     val owner: UnionAddress,
     val blockchains: Collection<BlockchainDto>? = null,
-    val continuation: DateIdContinuation? = null,
-    val size: Int,
-) : EsOwnershipFilter {
-    override fun asQuery(): Query {
-        return if (blockchains == null) {
-            genericBuild(continuation, size, termQuery(EsOwnership::owner.name, owner.fullId()))
-        } else {
-            genericBuild(
-                continuation,
-                size,
-                termQuery(EsOwnership::owner.name, owner.fullId()),
-                termsQuery(EsOwnership::blockchain.name, blockchains.map { it.name })
-            )
-        }
-    }
-}
+    override val cursor: String? = null,
+) : EsOwnershipFilter
 
 data class EsOwnershipByItemFilter(
     val itemId: ItemIdDto,
-    val continuation: DateIdContinuation?,
-    val size: Int,
-) : EsOwnershipFilter {
-    override fun asQuery(): Query {
-        val query = termQuery(EsOwnership::itemId.name, itemId.fullId())
-        return genericBuild(continuation, size, query)
-    }
-}
+    override val cursor: String? = null,
+) : EsOwnershipFilter

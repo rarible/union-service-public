@@ -1,26 +1,28 @@
 package com.rarible.protocol.union.enrichment.repository.search.internal
 
-import com.rarible.protocol.union.core.model.EsCollection
-import com.rarible.protocol.union.core.model.EsCollectionCursor
+import com.rarible.protocol.union.core.model.EsOwnership
+import com.rarible.protocol.union.dto.continuation.DateIdContinuation
 import org.elasticsearch.index.query.BoolQueryBuilder
 import org.springframework.stereotype.Component
 
 @Component
-class EsCollectionQueryCursorService {
+class EsOwnershipQueryCursorService {
 
     fun applyCursor(query: BoolQueryBuilder, cursorAsString: String?) {
         if (cursorAsString.isNullOrEmpty()) return
-        val cursor = EsCollectionCursor.fromString(cursorAsString) ?: return
 
+        val cursor = DateIdContinuation.parse(cursorAsString) ?: return
         val cursorQuery = BoolQueryBuilder()
+
         // date <> cursor OR
         cursorQuery.should(
-            mustDiffer(EsCollection::date.name, cursor.date, descending = true)
+            mustDiffer(EsOwnership::date.name, cursor.date, descending = !cursor.asc)
         )
-        // date == cursor salt <> cursor
+
+        // date == cursor AND id <> cursor
         cursorQuery.shouldAll(
-            { mustEqual(EsCollection::date.name, cursor.date) },
-            { mustDiffer(EsCollection::salt.name, cursor.salt, descending = true) }
+            { mustEqual(EsOwnership::date.name, cursor.date) },
+            { mustDiffer(EsOwnership::ownershipId.name, cursor.id, descending = !cursor.asc) }
         )
 
         cursorQuery.minimumShouldMatch(1)

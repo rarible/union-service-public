@@ -94,17 +94,6 @@ class EsActivityRepository(
         ).awaitFirstOrNull()?.deleted
     }
 
-    /**
-     * For tests only
-     */
-    suspend fun deleteAll() {
-        esOperations.delete(
-            Query.findAll(),
-            Any::class.java,
-            entityDefinition.writeIndexCoordinates
-        ).awaitFirstOrNull()
-    }
-
     suspend fun search(
         filter: ElasticActivityFilter,
         sort: EsActivitySort,

@@ -204,6 +204,7 @@ class ItemElasticService(
         return items
     }
 
+    // TODO: apply sort by lastUpdatedAt
     private suspend fun getItemsByOwnerships(ownerships: List<EsOwnership>): List<UnionItem> {
         val mapping = hashMapOf<BlockchainDto, MutableList<String>>()
 
@@ -234,13 +235,13 @@ class ItemElasticService(
     ): ItemsDto {
         val evaluatedBlockchains = router.getEnabledBlockchains(blockchains)
         val ownerAddress = IdParser.parseAddress(owner)
-        val ownerships = esOwnershipRepository.findByFilter(
+        val ownerships = esOwnershipRepository.search(
             EsOwnershipByOwnerFilter(
                 owner = ownerAddress,
                 blockchains = evaluatedBlockchains,
-                continuation = DateIdContinuation.parse(continuation),
-                size = PageSize.OWNERSHIP.limit(size)
-            )
+                cursor = continuation,
+            ),
+            size,
         )
 
         val dateIdContinuation = ownerships.lastOrNull()?.let { DateIdContinuation(it.date, it.ownershipId).toString() }

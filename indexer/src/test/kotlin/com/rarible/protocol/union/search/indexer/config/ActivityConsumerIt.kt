@@ -12,6 +12,7 @@ import com.rarible.protocol.dto.FlowNftItemsDto
 import com.rarible.protocol.dto.NftItemDto
 import com.rarible.protocol.flow.nft.api.client.FlowNftItemControllerApi
 import com.rarible.protocol.nft.api.client.NftItemControllerApi
+import com.rarible.protocol.union.core.es.ElasticsearchTestBootstrapper
 import com.rarible.protocol.union.dto.ActivityBlockchainInfoDto
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivityIdDto
@@ -51,9 +52,12 @@ class ActivityConsumerIt {
     @Autowired
     private lateinit var ethereumNftItemControllerApi: NftItemControllerApi
 
+    @Autowired
+    private lateinit var elasticsearchTestBootstrapper: ElasticsearchTestBootstrapper
+
     @BeforeEach
     fun setUp(): Unit = runBlocking {
-        repository.deleteAll()
+        elasticsearchTestBootstrapper.bootstrap()
         coEvery {
             flowNftItemControllerApi.getItemByIds(any())
         } returns FlowNftItemsDto(0, "", emptyList()).toMono() // TODO more meaningful response
