@@ -1,8 +1,6 @@
 package com.rarible.protocol.union.enrichment.repository.search
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.rarible.core.apm.CaptureSpan
-import com.rarible.core.apm.SpanType
 import com.rarible.protocol.union.core.elasticsearch.EsNameResolver
 import com.rarible.protocol.union.core.model.ElasticItemFilter
 import com.rarible.protocol.union.core.model.EsItem
@@ -19,7 +17,8 @@ import org.springframework.data.elasticsearch.core.query.NativeSearchQuery
 import org.springframework.stereotype.Component
 
 @Component
-@CaptureSpan(type = SpanType.DB)
+// TODO CaptureSpan breaks bean creation
+//@CaptureSpan(type = SpanType.DB)
 class EsItemRepository(
     objectMapper: ObjectMapper,
     elasticsearchConverter: ElasticsearchConverter,

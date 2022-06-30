@@ -96,7 +96,7 @@ class CollectionReindexServiceTest {
         ).containsExactly("step_1", "") // an empty string is always emitted in the end of loop
 
         coVerify(exactly = 2) {
-            esRepo.saveAll(any(), "test_index")
+            esRepo.saveAll(any(), "test_index", any())
             counter.increment(1)
         }
     }
