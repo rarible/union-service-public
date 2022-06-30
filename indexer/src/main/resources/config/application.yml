@@ -38,7 +38,7 @@ handler:
   collection:
     enabled: ${consul.indexer.collection.enabled:true}
   item:
-    enabled: ${consul.indexer.item.enabled:true}
+    enabled: ${consul.indexer.item.enabled:false}
   order:
     enabled: ${consul.indexer.order.enabled:false}
   ownership:
