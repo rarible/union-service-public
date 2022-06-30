@@ -202,7 +202,7 @@ class TezosApiConfiguration(
     }
 
     @Bean
-    fun tezosTokenIdRepository(mongoTemplate: ReactiveMongoOperations): TezosCollectionRepository {
+    fun tezosCollectionRepository(mongoTemplate: ReactiveMongoOperations): TezosCollectionRepository {
         return TezosCollectionRepository(mongoTemplate)
     }
 }

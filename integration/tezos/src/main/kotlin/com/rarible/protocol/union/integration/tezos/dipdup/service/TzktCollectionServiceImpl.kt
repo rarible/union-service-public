@@ -72,7 +72,8 @@ class TzktCollectionServiceImpl(
 
     private suspend fun enrichWithType(items: List<Contract>): List<Contract> {
         val ids = items.mapNotNull { it.address }
-        return items.map { it.copy(collectionType = typeMap(ids)[it.address]) }
+        val cache = typeMap(ids)
+        return items.map { it.copy(collectionType = cache[it.address]) }
     }
 
     private suspend fun typeMap(ids: List<String>): Map<String, CollectionType> {
