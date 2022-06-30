@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.integration.ethereum.service
 
 import com.rarible.core.apm.CaptureSpan
+import com.rarible.protocol.dto.NftOwnershipIdsDto
 import com.rarible.protocol.nft.api.client.NftOwnershipControllerApi
 import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.core.service.OwnershipService
@@ -10,9 +11,6 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.continuation.page.Page
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.integration.ethereum.converter.EthOwnershipConverter
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.reactive.awaitFirst
 
 open class EthOwnershipService(
@@ -25,17 +23,15 @@ open class EthOwnershipService(
         return EthOwnershipConverter.convert(ownership, blockchain)
     }
 
-    override suspend fun getOwnershipsByIds(ownershipIds: List<String>): List<UnionOwnership> = coroutineScope {
-        ownershipIds.map {
-            async {
-                val ownership = ownershipControllerApi.getNftOwnershipById(it, false).awaitFirst()
-                EthOwnershipConverter.convert(ownership, blockchain)
-            }
-        }.awaitAll()
+    override suspend fun getOwnershipsByIds(ownershipIds: List<String>): List<UnionOwnership> {
+        val ownerships = ownershipControllerApi.getNftOwnershipsByIds(NftOwnershipIdsDto(ownershipIds)).awaitFirst()
+        return ownerships.ownerships.map { EthOwnershipConverter.convert(it, blockchain) }
     }
 
     override suspend fun getOwnershipsAll(continuation: String?, size: Int): Slice<UnionOwnership> {
-        TODO("Not yet implemented")
+        val ownerships = ownershipControllerApi.getNftAllOwnerships(continuation, size, false).awaitFirst()
+        val converted = ownerships.ownerships.map { EthOwnershipConverter.convert(it, blockchain) }
+        return Slice(ownerships.continuation, converted)
     }
 
     override suspend fun getOwnershipsByItem(

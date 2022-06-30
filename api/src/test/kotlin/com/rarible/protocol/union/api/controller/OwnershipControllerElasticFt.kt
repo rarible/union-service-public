@@ -37,6 +37,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.TestPropertySource
+import java.time.Instant
 
 @IntegrationTest
 @TestPropertySource(properties = ["common.feature-flags.enableOwnershipQueriesToElasticSearch=true"])
@@ -158,7 +159,8 @@ class OwnershipControllerElasticFt : AbstractIntegrationTest() {
     fun `get ownerships by item - ethereum, partially enriched`() = runBlocking<Unit> {
         // Enriched ownership
         val ethItemId = randomEthItemId()
-        val ethOwnership = randomEthOwnershipDto(ethItemId).copy(date = nowMillis())
+        val ethOwnership = randomEthOwnershipDto(ethItemId)
+            .copy(date = Instant.ofEpochSecond(100))
         val ethUnionOwnership = EthOwnershipConverter.convert(ethOwnership, ethItemId.blockchain)
         val ethOrder = randomEthV2OrderDto(ethItemId)
         val ethUnionOrder = ethOrderConverter.convert(ethOrder, ethItemId.blockchain)
@@ -167,6 +169,7 @@ class OwnershipControllerElasticFt : AbstractIntegrationTest() {
         enrichmentOwnershipService.save(ethShortOwnership)
 
         val emptyEthOwnership = randomEthOwnershipDto(ethItemId)
+            .copy(date = Instant.ofEpochSecond(200))
         val emptyUnionOwnership = EthOwnershipConverter.convert(emptyEthOwnership, ethItemId.blockchain)
 
         val esOwnership = EsOwnershipConverter.convert(ethUnionOwnership)
@@ -180,6 +183,10 @@ class OwnershipControllerElasticFt : AbstractIntegrationTest() {
 
         ethereumOwnershipControllerApiMock.mockGetNftOwnershipById(esOwnership.ownershipId, ethOwnership)
         ethereumOwnershipControllerApiMock.mockGetNftOwnershipById(emptyEsOwnership.ownershipId, emptyEthOwnership)
+        ethereumOwnershipControllerApiMock.mockGetNftOwnershipByIds(
+            listOf(emptyEsOwnership.ownershipId, esOwnership.ownershipId),
+            listOf(emptyEthOwnership, ethOwnership)
+        )
         ethereumAuctionControllerApiMock.mockGetAuctionsByItem(ethItemId, listOf())
         ethereumOrderControllerApiMock.mockGetByIds(ethOrder)
 
@@ -213,12 +220,14 @@ class OwnershipControllerElasticFt : AbstractIntegrationTest() {
         // Free ownership of some user - no auction for it
         val ethOwnershipId = randomEthOwnershipId(ethItemId)
         val ethOwnership = randomEthOwnershipDto(ethOwnershipId)
+            .copy(date = Instant.ofEpochSecond(100))
         val ethUnionOwnership = EthOwnershipConverter.convert(ethOwnership, ethItemId.blockchain)
         val esOwnership = EsOwnershipConverter.convert(ethUnionOwnership)
 
         // Part of ownership is not participating in auction
         val ethAuctionedOwnershipId = ethItemId.toOwnership(EthConverter.convert(auction.seller))
         val ethAuctionedOwnership = randomEthOwnershipDto(ethAuctionedOwnershipId)
+            .copy(date = Instant.ofEpochSecond(200))
         val ethAuctionedUnionOwnership = EthOwnershipConverter.convert(ethAuctionedOwnership, ethItemId.blockchain)
         val esAuctionedOwnership = EsOwnershipConverter.convert(ethAuctionedUnionOwnership)
 
@@ -237,6 +246,14 @@ class OwnershipControllerElasticFt : AbstractIntegrationTest() {
         ethereumOwnershipControllerApiMock.mockGetNftOwnershipById(esOwnership.ownershipId, ethOwnership)
         ethereumOwnershipControllerApiMock.mockGetNftOwnershipById(fullAuctionOwnership.id, fullAuctionOwnership)
         ethereumOwnershipControllerApiMock.mockGetNftOwnershipById(ethAuctionedOwnership.id, ethAuctionedOwnership)
+        ethereumOwnershipControllerApiMock.mockGetNftOwnershipByIds(
+            listOf(esAuctionedOwnership.ownershipId, esOwnership.ownershipId),
+            listOf(ethAuctionedOwnership, ethOwnership)
+        )
+        ethereumOwnershipControllerApiMock.mockGetNftOwnershipByIds(
+            listOf(fullAuctionOwnership.id, ethAuctionedOwnership.id),
+            listOf(fullAuctionOwnership, ethAuctionedOwnership)
+        )
         ethereumOwnershipControllerApiMock.mockGetNftOwnershipByIdNotFound(ethFullyAuctionedOwnershipId)
 
         val ownerships = ownershipControllerClient.getOwnershipsByItem(
