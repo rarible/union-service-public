@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.worker.task.search.ownership
 
+import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.core.service.AuctionService
 import com.rarible.protocol.union.core.service.OwnershipService
@@ -17,15 +18,23 @@ class RawOwnershipClient(
     private val ownershipServiceRouter: BlockchainRouter<OwnershipService>,
 ) {
 
+    companion object {
+        private val logger by Logger()
+    }
+
     suspend fun getRawOwnershipsAll(
         blockchain: BlockchainDto,
         continuation: String?,
         size: Int,
-    ): Slice<UnionOwnership> =
-        ownershipServiceRouter.getService(blockchain).getOwnershipsAll(
+    ): Slice<UnionOwnership> {
+        logger.info("Requested to get all ownerships, blockchain ${blockchain.name}, cursor $continuation, size $size")
+        return ownershipServiceRouter.getService(blockchain).getOwnershipsAll(
             continuation = continuation,
             size = size
-        )
+        ).also {
+            logger.info("Got ${it.entities.size} ownerships, blockchain ${blockchain.name}, cursor ${it.continuation}")
+        }
+    }
 
     suspend fun getAuctionAll(
         blockchain: BlockchainDto,
