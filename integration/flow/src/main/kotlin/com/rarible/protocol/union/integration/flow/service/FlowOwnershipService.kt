@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.integration.flow.service
 
 import com.rarible.core.apm.CaptureSpan
+import com.rarible.protocol.dto.NftOwnershipsByIdRequestDto
 import com.rarible.protocol.flow.nft.api.client.FlowNftOwnershipControllerApi
 import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.core.service.OwnershipService
@@ -23,11 +24,14 @@ open class FlowOwnershipService(
     }
 
     override suspend fun getOwnershipsByIds(ownershipIds: List<String>): List<UnionOwnership> {
-        TODO("Not yet implemented")
+        val ownerships = ownershipControllerApi.getNftOwnershipsById(NftOwnershipsByIdRequestDto(ownershipIds)).awaitFirst()
+        return ownerships.ownerships.map { FlowOwnershipConverter.convert(it, blockchain) }
     }
 
     override suspend fun getOwnershipsAll(continuation: String?, size: Int): Slice<UnionOwnership> {
-        TODO("Not yet implemented")
+        val ownerships = ownershipControllerApi.getNftAllOwnerships(continuation, size).awaitFirst()
+        val converted = ownerships.ownerships.map { FlowOwnershipConverter.convert(it, blockchain) }
+        return Slice(ownerships.continuation, converted)
     }
 
     override suspend fun getOwnershipsByItem(

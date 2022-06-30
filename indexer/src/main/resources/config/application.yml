@@ -38,16 +38,16 @@ handler:
   collection:
     enabled: ${consul.indexer.collection.enabled:true}
   item:
-    enabled: ${consul.indexer.item.enabled:true}
+    enabled: ${consul.indexer.item.enabled:false}
   order:
-    enabled: ${consul.indexer.order.enabled:true}
+    enabled: ${consul.indexer.order.enabled:false}
   ownership:
     enabled: ${consul.indexer.ownership.enabled:true}
 
-listener:
+indexer:
   consumer:
     broker-replica-set: ${kafka.hosts}
-    worker-count: 10
+    worker-count: 3
 
 integration:
   ethereum:

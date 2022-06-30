@@ -11,7 +11,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.continuation.page.Page
 import com.rarible.protocol.union.integration.tezos.converter.TezosCollectionConverter
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktCollectionService
-import com.rarible.protocol.union.integration.tezos.entity.TezosTokenIdRepository
+import com.rarible.protocol.union.integration.tezos.entity.TezosCollectionRepository
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitSingle
 import java.math.BigInteger
@@ -21,7 +21,7 @@ open class TezosCollectionService(
     private val collectionControllerApi: NftCollectionControllerApi,
     private val pgService: TezosPgCollectionService,
     private val tzktCollectionService: TzktCollectionService,
-    private val tezosTokenIdRepository: TezosTokenIdRepository
+    private val tezosCollectionRepository: TezosCollectionRepository
 ) : AbstractBlockchainService(BlockchainDto.TEZOS), CollectionService {
 
     override suspend fun getAllCollections(
@@ -61,11 +61,11 @@ open class TezosCollectionService(
         val tokenId: BigInteger = if (tzktCollectionService.enabled()) {
             try { // Adjust to existed count
                 val actualCount = tzktCollectionService.tokenCount(collectionId)
-                tezosTokenIdRepository.adjustTokenCount(collectionId, actualCount)
+                tezosCollectionRepository.adjustTokenCount(collectionId, actualCount)
             } catch (ex: Exception) {
                 throw UnionException("Collection wasn't found")
             }
-            tezosTokenIdRepository.generateNftTokenId(collectionId)
+            tezosCollectionRepository.generateTokenId(collectionId)
         } else {
              collectionControllerApi.generateNftTokenId(collectionId).awaitSingle().tokenId
         }

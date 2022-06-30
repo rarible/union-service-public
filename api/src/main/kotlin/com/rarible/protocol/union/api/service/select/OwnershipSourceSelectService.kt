@@ -24,6 +24,10 @@ class OwnershipSourceSelectService(
         return ownershipApiQueryService.getOwnershipById(fullOwnershipId)
     }
 
+    suspend fun getOwnershipsByIds(ids: List<OwnershipIdDto>): List<OwnershipDto> {
+        return getQuerySource().getOwnershipsByIds(ids)
+    }
+
     suspend fun getOwnershipByOwner(
         owner: UnionAddress,
         continuation: String?,

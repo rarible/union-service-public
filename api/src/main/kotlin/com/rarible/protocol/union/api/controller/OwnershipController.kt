@@ -3,6 +3,7 @@ package com.rarible.protocol.union.api.controller
 import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.api.service.select.OwnershipSourceSelectService
 import com.rarible.protocol.union.dto.OwnershipDto
+import com.rarible.protocol.union.dto.OwnershipIdsDto
 import com.rarible.protocol.union.dto.OwnershipsDto
 import com.rarible.protocol.union.dto.continuation.page.PageSize
 import com.rarible.protocol.union.dto.parser.IdParser
@@ -29,6 +30,11 @@ class OwnershipController(
         val ownership = ownershipSourceSelectService.getOwnershipById(fullOwnershipId)
 
         return ResponseEntity.ok(ownership)
+    }
+
+    override suspend fun getOwnershipsByIds(ownershipIdsDto: OwnershipIdsDto): ResponseEntity<OwnershipsDto> {
+        val result = ownershipSourceSelectService.getOwnershipsByIds(ownershipIdsDto.ids)
+        return ResponseEntity.ok(OwnershipsDto(0, null, result))
     }
 
     override suspend fun getOwnershipsByItem(
