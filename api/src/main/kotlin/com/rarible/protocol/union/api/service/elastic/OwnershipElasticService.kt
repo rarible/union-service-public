@@ -26,6 +26,10 @@ class OwnershipElasticService(
     override suspend fun getOwnershipById(fullOwnershipId: OwnershipIdDto): OwnershipDto =
         apiHelper.getOwnershipById(fullOwnershipId)
 
+    override suspend fun getOwnershipsByIds(ids: List<OwnershipIdDto>): List<OwnershipDto> {
+        return apiHelper.getOwnershipsByIds(ids)
+    }
+
     override suspend fun getOwnershipByOwner(
         owner: UnionAddress,
         continuation: String?,

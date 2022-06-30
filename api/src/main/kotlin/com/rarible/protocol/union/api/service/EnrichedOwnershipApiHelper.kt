@@ -43,6 +43,17 @@ class EnrichedOwnershipApiHelper(
     suspend fun getRawOwnershipsByItem(itemId: ItemIdDto, continuation: String?, size: Int): List<UnionOwnership> =
         router.getService(itemId.blockchain).getOwnershipsByItem(itemId.value, continuation, size).entities
 
+    suspend fun getOwnershipsByIds(ids: List<OwnershipIdDto>): List<OwnershipDto> {
+        val groupedIds = ids.groupBy({ it.blockchain }, { it.value })
+
+        val unionOwnerships = groupedIds.flatMap {
+            router.getService(it.key).getOwnershipsByIds(it.value)
+        }
+
+        // TODO it works without auction consideration
+        return enrich(unionOwnerships.map { UnionAuctionOwnershipWrapper(it, null) })
+    }
+
     suspend fun getOwnershipById(fullOwnershipId: OwnershipIdDto): OwnershipDto {
         val shortOwnershipId = ShortOwnershipId(fullOwnershipId)
 

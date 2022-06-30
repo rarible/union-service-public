@@ -19,8 +19,13 @@ class OwnershipSourceSelectService(
     private val ownershipApiQueryService: OwnershipApiQueryService,
     private val ownershipElasticService: OwnershipElasticService
 ) : OwnershipQueryService {
+
     override suspend fun getOwnershipById(fullOwnershipId: OwnershipIdDto): OwnershipDto {
         return getQuerySource().getOwnershipById(fullOwnershipId)
+    }
+
+    override suspend fun getOwnershipsByIds(ids: List<OwnershipIdDto>): List<OwnershipDto> {
+        return getQuerySource().getOwnershipsByIds(ids)
     }
 
     override suspend fun getOwnershipByOwner(
