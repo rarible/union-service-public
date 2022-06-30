@@ -1,6 +1,8 @@
 package com.rarible.protocol.union.enrichment.repository.search
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.rarible.core.apm.CaptureSpan
+import com.rarible.core.apm.SpanType
 import com.rarible.protocol.union.core.elasticsearch.EsHelper
 import com.rarible.protocol.union.core.elasticsearch.EsRepository
 import com.rarible.protocol.union.core.model.elasticsearch.EntityDefinitionExtended
@@ -21,6 +23,7 @@ import org.springframework.data.elasticsearch.core.query.CriteriaQuery
 import java.io.IOException
 import javax.annotation.PostConstruct
 
+@CaptureSpan(type = SpanType.DB)
 abstract class ElasticSearchRepository<T>(
     val objectMapper: ObjectMapper,
     val esOperations: ReactiveElasticsearchOperations,
@@ -56,7 +59,7 @@ abstract class ElasticSearchRepository<T>(
     }
 
     suspend fun saveAll(
-        esItems: List<T>,
+        entities: List<T>,
         indexName: String? = null,
         refreshPolicy: WriteRequest.RefreshPolicy = WriteRequest.RefreshPolicy.IMMEDIATE
     ): List<T> {
@@ -66,7 +69,7 @@ abstract class ElasticSearchRepository<T>(
 
         val bulkRequest = BulkRequest().setRefreshPolicy(refreshPolicy)
 
-        for (entity in esItems) {
+        for (entity in entities) {
             val document = elasticsearchConverter.mapObject(entity)
             index(indexName).indexNames.forEach {
                 bulkRequest.add(
@@ -79,7 +82,7 @@ abstract class ElasticSearchRepository<T>(
         }
 
         elasticClient.bulk(bulkRequest).awaitFirst()
-        return esItems
+        return entities
     }
 
     suspend fun deleteAll(ids: List<String>): Long? {

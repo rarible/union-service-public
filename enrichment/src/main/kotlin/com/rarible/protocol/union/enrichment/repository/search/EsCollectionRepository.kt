@@ -15,8 +15,6 @@ import org.springframework.data.elasticsearch.core.query.NativeSearchQuery
 import org.springframework.stereotype.Component
 
 @Component
-// TODO CaptureSpan breaks bean creation
-//@CaptureSpan(type = SpanType.DB)
 class EsCollectionRepository(
     private val queryBuilderService: EsCollectionQueryBuilderService,
     objectMapper: ObjectMapper,
