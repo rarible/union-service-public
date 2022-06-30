@@ -4,6 +4,7 @@ import com.rarible.protocol.tezos.api.client.NftCollectionControllerApi
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktCollectionServiceImpl
+import com.rarible.protocol.union.integration.tezos.entity.TezosCollectionRepository
 import com.rarible.tzkt.client.CollectionClient
 import com.rarible.tzkt.model.Contract
 import com.rarible.tzkt.model.Page
@@ -19,9 +20,10 @@ class TezosCollectionServiceTest {
 
     private val nftCollectionApi: NftCollectionControllerApi = mockk()
     private val tzktCollectionClient: CollectionClient = mockk()
+    private val tezosCollectionRepository: TezosCollectionRepository = mockk()
 
 
-    private val tzktCollectionService = TzktCollectionServiceImpl(tzktCollectionClient, mockk())
+    private val tzktCollectionService = TzktCollectionServiceImpl(tzktCollectionClient, mockk(), tezosCollectionRepository)
     private val service = TezosCollectionService(nftCollectionApi, mockk(), tzktCollectionService, mockk())
 
     @BeforeEach

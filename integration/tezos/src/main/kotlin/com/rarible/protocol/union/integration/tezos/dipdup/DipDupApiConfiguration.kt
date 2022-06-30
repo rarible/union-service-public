@@ -21,6 +21,7 @@ import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktOwnership
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktOwnershipServiceImpl
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktSignatureService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktSignatureServiceImpl
+import com.rarible.protocol.union.integration.tezos.entity.TezosCollectionRepository
 import com.rarible.tzkt.client.BigMapKeyClient
 import com.rarible.tzkt.client.CollectionClient
 import com.rarible.tzkt.client.IPFSClient
@@ -107,8 +108,8 @@ class DipDupApiConfiguration(
     }
 
     @Bean
-    fun tzktCollectionService(tzktClient: CollectionClient, tzktTokenClient: TokenClient): TzktCollectionService {
-        return TzktCollectionServiceImpl(tzktClient, tzktTokenClient)
+    fun tzktCollectionService(tzktClient: CollectionClient, tzktTokenClient: TokenClient, tezosCollectionRepository: TezosCollectionRepository): TzktCollectionService {
+        return TzktCollectionServiceImpl(tzktClient, tzktTokenClient, tezosCollectionRepository)
     }
 
     @Bean

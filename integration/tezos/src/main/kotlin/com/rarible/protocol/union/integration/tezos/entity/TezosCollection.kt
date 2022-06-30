@@ -5,9 +5,14 @@ import org.springframework.data.mongodb.core.mapping.FieldType
 import org.springframework.data.mongodb.core.mapping.MongoId
 import java.math.BigInteger
 
-@Document("tezos_token_id")
-data class TezosTokenId(
+@Document("tezos_collection")
+data class TezosCollection(
     @MongoId(FieldType.STRING)
     val contract: String,
+    val type: Type?,
     val lastTokenId: BigInteger
-)
+) {
+    enum class Type {
+        NFT, MT
+    }
+}

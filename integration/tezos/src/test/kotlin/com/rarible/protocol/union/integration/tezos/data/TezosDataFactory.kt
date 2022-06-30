@@ -41,6 +41,7 @@ import com.rarible.protocol.union.core.util.CompositeItemIdParser
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
+import com.rarible.tzkt.model.Contract
 
 fun randomTezosContract() = randomString(12)
 fun randomTezosAddress() = UnionAddressConverter.convert(BlockchainDto.TEZOS, randomString())
@@ -328,5 +329,25 @@ fun randomTezosOrderActivityMatchSide(): OrderActivitySideMatchDto {
         hash = randomString(16),
         asset = randomTezosAssetFT(),
         type = OrderActivitySideTypeDto.values()[randomInt(OrderActivitySideTypeDto.values().size)]
+    )
+}
+
+fun randomTzktContract(address: String): Contract {
+    return Contract(
+        type = "contract",
+        alias = "",
+        balance = 1L,
+        address = address,
+        tzips = listOf("fa2"),
+        kind = "",
+        numContracts = 1,
+        activeTokensCount = 1,
+        tokenBalancesCount = 1,
+        tokenTransfersCount = 1,
+        numDelegations = 1,
+        numOriginations = 1,
+        numTransactions = 1,
+        numReveals = 1,
+        numMigrations = 1
     )
 }
