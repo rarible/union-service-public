@@ -40,7 +40,7 @@ handler:
   item:
     enabled: ${consul.indexer.item.enabled:false}
   order:
-    enabled: ${consul.indexer.order.enabled:true}
+    enabled: ${consul.indexer.order.enabled:false}
   ownership:
     enabled: ${consul.indexer.ownership.enabled:true}
 
