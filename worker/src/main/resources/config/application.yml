@@ -174,7 +174,7 @@ worker:
         - blockchain: IMMUTABLEX
           enabled: false
     item:
-      enabled: true
+      enabled: false
       blockchains:
         - blockchain: ETHEREUM
           enabled: true
