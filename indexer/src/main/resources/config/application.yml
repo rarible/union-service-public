@@ -44,10 +44,10 @@ handler:
   ownership:
     enabled: ${consul.indexer.ownership.enabled:false}
 
-listener:
+indexer:
   consumer:
     broker-replica-set: ${kafka.hosts}
-    worker-count: 10
+    worker-count: 3
 
 integration:
   ethereum:
