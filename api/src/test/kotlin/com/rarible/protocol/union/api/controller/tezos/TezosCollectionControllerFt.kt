@@ -1,12 +1,19 @@
 package com.rarible.protocol.union.api.controller.tezos
 
+import com.rarible.protocol.union.api.client.CollectionControllerApi
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.core.model.TokenId
-import com.rarible.protocol.union.integration.tezos.data.randomTezosAddress
+import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.integration.flow.data.randomFlowAddress
+import com.rarible.protocol.union.integration.tezos.data.randomTezosAddress
+import com.rarible.protocol.union.integration.tezos.data.randomTzktContract
+import com.rarible.protocol.union.integration.tezos.entity.TezosCollection
+import com.rarible.protocol.union.integration.tezos.entity.TezosCollectionRepository
+import com.rarible.tzkt.model.CollectionType
 import io.mockk.coEvery
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -38,6 +45,12 @@ class TezosCollectionControllerFt : AbstractIntegrationTest() {
 
     @Autowired
     lateinit var testTemplate: RestTemplate
+
+    @Autowired
+    lateinit var tezosCollectionRepository: TezosCollectionRepository
+
+    @Autowired
+    lateinit var collectionControllerClient: CollectionControllerApi
 
     private fun baseUrl(): String {
         return "http://localhost:${port}/v0.1"
@@ -100,6 +113,34 @@ class TezosCollectionControllerFt : AbstractIntegrationTest() {
                 testTemplate.getForEntity(url, TokenId::class.java)
             }
         }
+    }
+
+    @Test
+    fun `should return collection with type`() = runBlocking<Unit> {
+        val collectionId = randomTezosAddress()
+
+        coEvery {
+            tzktCollectionClient.collection(collectionId.value)
+        } returns randomTzktContract(collectionId.value)
+        coEvery {
+            tzktCollectionClient.collectionType(collectionId.value)
+        } returns CollectionType.NFT
+
+        val collection = collectionControllerClient.getCollectionById(collectionId.fullId()).awaitSingle()
+        assertThat(collection.type).isEqualTo(CollectionDto.Type.TEZOS_NFT)
+    }
+
+    @Test
+    fun `should return collection with cached type`() = runBlocking<Unit> {
+        val collectionId = randomTezosAddress()
+
+        coEvery {
+            tzktCollectionClient.collection(collectionId.value)
+        } returns randomTzktContract(collectionId.value)
+        tezosCollectionRepository.adjustCollectionType(collectionId.value, TezosCollection.Type.NFT)
+
+        val collection = collectionControllerClient.getCollectionById(collectionId.fullId()).awaitSingle()
+        assertThat(collection.type).isEqualTo(CollectionDto.Type.TEZOS_NFT)
     }
 
 }
