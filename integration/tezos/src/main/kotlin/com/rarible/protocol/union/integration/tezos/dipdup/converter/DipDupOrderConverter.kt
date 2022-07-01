@@ -4,6 +4,7 @@ import com.rarible.dipdup.client.core.model.Asset
 import com.rarible.dipdup.client.core.model.DipDupOrder
 import com.rarible.dipdup.client.core.model.OrderStatus
 import com.rarible.dipdup.client.core.model.Part
+import com.rarible.dipdup.client.core.model.TezosPlatform
 import com.rarible.dipdup.client.model.DipDupOrderSort
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.service.CurrencyService
@@ -17,6 +18,7 @@ import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PayoutDto
+import com.rarible.protocol.union.dto.TezosOrderDataRaribleV2DataV1Dto
 import com.rarible.protocol.union.dto.TezosOrderDataRaribleV2DataV2Dto
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -91,10 +93,16 @@ class DipDupOrderConverter(
     }
 
     fun orderData(order: DipDupOrder, blockchain: BlockchainDto): OrderDataDto {
-        return TezosOrderDataRaribleV2DataV2Dto(
-            payouts = order.payouts.map { convert(it, blockchain) },
-            originFees = order.originFees.map { convert(it, blockchain) }
-        )
+        return when (order.platform) {
+            TezosPlatform.RARIBLE_V2 -> TezosOrderDataRaribleV2DataV2Dto(
+                payouts = order.payouts.map { convert(it, blockchain) },
+                originFees = order.originFees.map { convert(it, blockchain) }
+            )
+            else -> TezosOrderDataRaribleV2DataV1Dto(
+                payouts = order.payouts.map { convert(it, blockchain) },
+                originFees = order.originFees.map { convert(it, blockchain) }
+            )
+        }
     }
 
     private fun convert(source: Part, blockchain: BlockchainDto): PayoutDto {
