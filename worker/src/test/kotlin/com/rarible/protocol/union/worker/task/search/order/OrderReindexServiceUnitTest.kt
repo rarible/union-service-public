@@ -20,7 +20,7 @@ class OrderReindexServiceUnitTest {
 
     private val repo = mockk<EsOrderRepository> {
         coEvery {
-            saveAll(any())
+            saveAll(any(), any(), any())
         } answers { arg(0) }
     }
 
@@ -76,7 +76,7 @@ class OrderReindexServiceUnitTest {
         ).containsExactly("")
 
         coVerify(exactly = 0) {
-            repo.saveAll(any())
+            repo.saveAll(any(), any(), any())
             counter.increment(0)
         }
     }
@@ -96,10 +96,8 @@ class OrderReindexServiceUnitTest {
         ).containsExactly(orderDto2.id.fullId(), "") // an empty string is always emitted in the end of loop
 
         coVerify {
-            repo.saveAll(any())
+            repo.saveAll(any(), any(), any())
             counter.increment(1)
         }
     }
-
-
 }

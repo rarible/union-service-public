@@ -10,6 +10,7 @@ import com.rarible.protocol.union.enrichment.service.query.order.OrderApiMergeSe
 import com.rarible.protocol.union.worker.metrics.SearchTaskMetricFactory
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import org.elasticsearch.action.support.WriteRequest
 import org.springframework.stereotype.Service
 
 @Service
@@ -38,7 +39,8 @@ class OrderReindexService(
 
                 if (res.orders.isNotEmpty()) {
                     repository.saveAll(
-                        res.orders.map { EsOrderConverter.convert(it) }
+                        res.orders.map { EsOrderConverter.convert(it) },
+                        refreshPolicy = WriteRequest.RefreshPolicy.NONE
                     )
                     counter.increment(res.orders.size)
                 }

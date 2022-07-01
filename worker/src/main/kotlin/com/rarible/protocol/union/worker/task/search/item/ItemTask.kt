@@ -14,6 +14,7 @@ import com.rarible.protocol.union.worker.task.search.ParamFactory
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
+import org.elasticsearch.action.support.WriteRequest
 import org.springframework.stereotype.Component
 
 @Component
@@ -53,7 +54,8 @@ class ItemTask(
 
                     if (res.items.isNotEmpty()) {
                         repository.saveAll(
-                            res.items.map { it.toEsItem() }
+                            res.items.map { it.toEsItem() },
+                            refreshPolicy = WriteRequest.RefreshPolicy.NONE
                         )
                         counter.increment(res.items.size)
                     }

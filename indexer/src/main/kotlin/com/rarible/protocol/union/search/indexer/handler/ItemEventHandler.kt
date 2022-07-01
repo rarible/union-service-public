@@ -1,17 +1,20 @@
 package com.rarible.protocol.union.search.indexer.handler
 
 import com.rarible.core.daemon.sequential.ConsumerBatchEventHandler
+import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.converter.EsItemConverter.toEsItem
 import com.rarible.protocol.union.dto.ItemDeleteEventDto
 import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.ItemUpdateEventDto
 import com.rarible.protocol.union.enrichment.repository.search.EsItemRepository
+import org.elasticsearch.action.support.WriteRequest
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
 class ItemEventHandler(
+    private val featureFlagsProperties: FeatureFlagsProperties,
     private val repository: EsItemRepository
 ) : ConsumerBatchEventHandler<ItemEventDto> {
 
@@ -28,7 +31,15 @@ class ItemEventHandler(
                 it.item.toEsItem()
             }
         logger.debug("Saving ${convertedEvents.size} ItemUpdateEventDto events to ElasticSearch")
-        repository.saveAll(convertedEvents)
+        val refreshPolicy =
+            if (featureFlagsProperties.enableItemSaveImmediateToElasticSearch) {
+                WriteRequest.RefreshPolicy.IMMEDIATE
+            }
+            else {
+                WriteRequest.RefreshPolicy.NONE
+            }
+
+        repository.saveAll(convertedEvents, refreshPolicy = refreshPolicy)
 
         val deletedIds = event
             .filterIsInstance<ItemDeleteEventDto>()

@@ -9,6 +9,7 @@ import com.rarible.protocol.union.enrichment.repository.search.EsOwnershipReposi
 import com.rarible.protocol.union.worker.metrics.SearchTaskMetricFactory
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import org.elasticsearch.action.support.WriteRequest
 import org.springframework.stereotype.Service
 
 @Service
@@ -61,7 +62,7 @@ class OwnershipReindexService(
             current = result.continuation
 
             val ownerships = result.entities.map { convert(it) }
-            val saved = repository.saveAll(ownerships, index)
+            val saved = repository.saveAll(ownerships, index, WriteRequest.RefreshPolicy.NONE)
             counter.increment(saved.size)
 
             emit(current.orEmpty())

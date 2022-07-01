@@ -16,12 +16,18 @@ data class FeatureFlagsProperties(
     // activities
     var enableActivityQueriesToElasticSearch: Boolean = false,
     var enableImmutableXActivitiesQueries: Boolean = false,
-    val enableCollectionQueriesToElastic: Boolean = false,
     var enableActivityAscQueriesWithApiMerge: Boolean = true,
+    var enableActivitySaveImmediateToElasticSearch: Boolean = false,
     // orders
     var enableOrderQueriesToElasticSearch: Boolean = false,
+    var enableOrderSaveImmediateToElasticSearch: Boolean = false,
+    // collections
+    val enableCollectionQueriesToElastic: Boolean = false,
+    var enableCollectionSaveImmediateToElasticSearch: Boolean = false,
     // ownerships
     var enableOwnershipQueriesToElasticSearch: Boolean = false,
+    var enableOwnershipSaveImmediateToElasticSearch: Boolean = false,
     // items
     var enableItemQueriesToElasticSearch: Boolean = false,
+    var enableItemSaveImmediateToElasticSearch: Boolean = false,
 )

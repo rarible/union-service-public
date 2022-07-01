@@ -2,13 +2,16 @@ package com.rarible.protocol.union.search.indexer.handler
 
 import com.rarible.core.daemon.sequential.ConsumerBatchEventHandler
 import com.rarible.core.logging.Logger
-import com.rarible.protocol.union.dto.OrderEventDto
+import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.converter.EsOrderConverter
+import com.rarible.protocol.union.dto.OrderEventDto
 import com.rarible.protocol.union.enrichment.repository.search.EsOrderRepository
+import org.elasticsearch.action.support.WriteRequest
 import org.springframework.stereotype.Service
 
 @Service
 class OrderEventHandler(
+    private val featureFlagsProperties: FeatureFlagsProperties,
     private val repository: EsOrderRepository
 ): ConsumerBatchEventHandler<OrderEventDto> {
 
@@ -22,7 +25,14 @@ class OrderEventHandler(
             EsOrderConverter.convert(it)
         }
         logger.info("Saving ${convertedEvents.size} OrderDto events to ElasticSearch")
-        repository.saveAll(convertedEvents)
+        val refreshPolicy =
+            if (featureFlagsProperties.enableItemSaveImmediateToElasticSearch) {
+                WriteRequest.RefreshPolicy.IMMEDIATE
+            }
+            else {
+                WriteRequest.RefreshPolicy.NONE
+            }
+        repository.saveAll(convertedEvents, refreshPolicy = refreshPolicy)
         logger.info("Handling completed")
     }
 }

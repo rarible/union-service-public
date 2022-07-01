@@ -3,6 +3,7 @@ package com.rarible.protocol.union.search.indexer.handler
 import com.rarible.core.common.nowMillis
 import com.rarible.core.daemon.sequential.ConsumerBatchEventHandler
 import com.rarible.core.logging.Logger
+import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.converter.EsCollectionConverter
 import com.rarible.protocol.union.core.model.EsCollection
 import com.rarible.protocol.union.core.model.elasticsearch.EsEntity
@@ -11,10 +12,12 @@ import com.rarible.protocol.union.dto.CollectionEventDto
 import com.rarible.protocol.union.dto.CollectionUpdateEventDto
 import com.rarible.protocol.union.enrichment.repository.search.EsCollectionRepository
 import com.rarible.protocol.union.search.indexer.metrics.IndexerMetricFactory
+import org.elasticsearch.action.support.WriteRequest
 import org.springframework.stereotype.Service
 
 @Service
 class CollectionEventHandler(
+    private val featureFlagsProperties: FeatureFlagsProperties,
     private val repository: EsCollectionRepository,
     metricFactory: IndexerMetricFactory,
 ): ConsumerBatchEventHandler<CollectionEventDto> {
@@ -37,7 +40,14 @@ class CollectionEventHandler(
             EsCollectionConverter.convert(it.collection)
         }
         logger.debug("Saving ${convertedEvents.size} CollectionEventDto events to ElasticSearch")
-        repository.saveAll(convertedEvents)
+        val refreshPolicy =
+            if (featureFlagsProperties.enableItemSaveImmediateToElasticSearch) {
+                WriteRequest.RefreshPolicy.IMMEDIATE
+            }
+            else {
+                WriteRequest.RefreshPolicy.NONE
+            }
+        repository.saveAll(convertedEvents, refreshPolicy = refreshPolicy)
         countSaves(convertedEvents)
         val elapsedTime = nowMillis().minusMillis(startTime.toEpochMilli()).toEpochMilli()
         logger.info("Handling of ${event.size} CollectionEventDto events completed in $elapsedTime ms")

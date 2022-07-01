@@ -32,7 +32,7 @@ internal class ItemTaskTest {
 
     private val repo = mockk<EsItemRepository> {
         coEvery {
-            saveAll(any())
+            saveAll(any(), any(), any())
         } answers { arg(0) }
     }
 
@@ -74,7 +74,6 @@ internal class ItemTaskTest {
             BlockchainDto.FLOW.toString() to ArgSlice.COMPLETED,
         )
     )
-
 
     private val client = mockk<ItemApiMergeService> {
         coEvery { getAllItems(any<List<BlockchainDto>>(), null, any(), any(), any(), any()) } returns ItemsDto(
@@ -119,7 +118,7 @@ internal class ItemTaskTest {
                     listOf(BlockchainDto.ETHEREUM), null, 1000, true, Long.MIN_VALUE, Long.MAX_VALUE
                 )
 
-                repo.saveAll(any())
+                repo.saveAll(any(), any(), any())
 
                 client.getAllItems(
                     listOf(BlockchainDto.ETHEREUM),

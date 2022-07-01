@@ -36,7 +36,7 @@ class CollectionReindexServiceTest {
 
     private val esRepo = mockk<EsCollectionRepository> {
         coEvery {
-            saveAll(any(), any())
+            saveAll(any(), any(), any())
         } answers { arg(0) }
     }
 
@@ -96,7 +96,7 @@ class CollectionReindexServiceTest {
         ).containsExactly("step_1", "") // an empty string is always emitted in the end of loop
 
         coVerify(exactly = 2) {
-            esRepo.saveAll(any(), "test_index")
+            esRepo.saveAll(any(), "test_index", any())
             counter.increment(1)
         }
     }

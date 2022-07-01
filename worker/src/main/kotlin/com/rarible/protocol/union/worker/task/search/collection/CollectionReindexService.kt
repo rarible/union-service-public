@@ -8,6 +8,7 @@ import com.rarible.protocol.union.enrichment.service.query.collection.Collection
 import com.rarible.protocol.union.worker.metrics.SearchTaskMetricFactory
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import org.elasticsearch.action.support.WriteRequest
 import org.springframework.stereotype.Component
 
 @Component
@@ -34,7 +35,8 @@ class CollectionReindexService(
                 if (res.collections.isNotEmpty()) {
                     repository.saveAll(
                         res.collections.map { EsCollectionConverter.convert(it) },
-                        index
+                        index,
+                        WriteRequest.RefreshPolicy.NONE
                     )
                     counter.increment(res.collections.size)
                 }
