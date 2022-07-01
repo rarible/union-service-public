@@ -81,7 +81,7 @@ object TzktItemConverter {
             TokenMeta.Representation.PREVIEW -> MetaContentDto.Representation.PREVIEW
         }
         return UnionMetaContent(
-            url = content.uri,
+            url = content.uri ?: "", // sometimes people don't fill meta properly
             representation = representation,
             properties = null
         )

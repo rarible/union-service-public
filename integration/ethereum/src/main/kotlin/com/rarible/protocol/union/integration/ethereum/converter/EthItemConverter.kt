@@ -35,7 +35,7 @@ object EthItemConverter {
                 blockchain = blockchain
             ),
             collection = CollectionIdDto(blockchain, contract), // For ETH collection is a contract value
-            mintedAt = item.mintedAt ?: nowMillis(),
+            mintedAt = item.mintedAt ?: item.lastUpdatedAt ?: nowMillis(), // TODO entire reduce required on Eth
             lastUpdatedAt = item.lastUpdatedAt ?: nowMillis(),
             supply = item.supply,
             meta = null, // Eth won't send us meta anymore, should be fetched via API
