@@ -290,7 +290,7 @@ class FlowActivityConverter(
         left = convert(source.left, blockchain),
         right = convert(source.right, blockchain),
         reverted = false,
-        lastUpdatedAt = source.date //TODO: Fix to updatedAt
+        lastUpdatedAt = source.updatedAt
     )
 
     private fun convert(
