@@ -40,7 +40,11 @@ open class TezosOwnershipService(
     }
 
     override suspend fun getOwnershipsAll(continuation: String?, size: Int): Slice<UnionOwnership> {
-        TODO("Not yet implemented")
+        val ownerships = ownershipControllerApi.getNftAllOwnerships(size, continuation).awaitFirst()
+        val converted = ownerships.ownerships.map {
+            TezosOwnershipConverter.convert(it, blockchain)
+        }
+        return Slice(ownerships.continuation, converted)
     }
 
     override suspend fun getOwnershipsByItem(
