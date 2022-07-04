@@ -31,12 +31,16 @@ open class TezosOwnershipService(
     }
 
     override suspend fun getOwnershipsByIds(ownershipIds: List<String>): List<UnionOwnership> = coroutineScope {
-        ownershipIds.map {
-            async {
-                val ownership = ownershipControllerApi.getNftOwnershipById(it).awaitFirst()
-                TezosOwnershipConverter.convert(ownership, blockchain)
-            }
-        }.awaitAll()
+        if (tzktOwnershipService.enabled()) {
+            ownershipIds.map { async { tzktOwnershipService.getOwnershipById(it) } }.awaitAll()
+        } else {
+            ownershipIds.map {
+                async {
+                    val ownership = ownershipControllerApi.getNftOwnershipById(it).awaitFirst()
+                    TezosOwnershipConverter.convert(ownership, blockchain)
+                }
+            }.awaitAll()
+        }
     }
 
     override suspend fun getOwnershipsAll(continuation: String?, size: Int): Slice<UnionOwnership> {
