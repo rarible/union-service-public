@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.api.controller
 
-import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.api.client.OwnershipControllerApi
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
@@ -184,7 +183,10 @@ class OwnershipControllerElasticFt : AbstractIntegrationTest() {
         ethereumOwnershipControllerApiMock.mockGetNftOwnershipById(esOwnership.ownershipId, ethOwnership)
         ethereumOwnershipControllerApiMock.mockGetNftOwnershipById(emptyEsOwnership.ownershipId, emptyEthOwnership)
         ethereumOwnershipControllerApiMock.mockGetNftOwnershipByIds(
-            listOf(emptyEsOwnership.ownershipId, esOwnership.ownershipId),
+            listOf(
+                OwnershipIdParser.parseFull(emptyEsOwnership.ownershipId).value,
+                OwnershipIdParser.parseFull(esOwnership.ownershipId).value,
+            ),
             listOf(emptyEthOwnership, ethOwnership)
         )
         ethereumAuctionControllerApiMock.mockGetAuctionsByItem(ethItemId, listOf())
@@ -247,7 +249,10 @@ class OwnershipControllerElasticFt : AbstractIntegrationTest() {
         ethereumOwnershipControllerApiMock.mockGetNftOwnershipById(fullAuctionOwnership.id, fullAuctionOwnership)
         ethereumOwnershipControllerApiMock.mockGetNftOwnershipById(ethAuctionedOwnership.id, ethAuctionedOwnership)
         ethereumOwnershipControllerApiMock.mockGetNftOwnershipByIds(
-            listOf(esAuctionedOwnership.ownershipId, esOwnership.ownershipId),
+
+            listOf(
+                OwnershipIdParser.parseFull(esAuctionedOwnership.ownershipId).value,
+                OwnershipIdParser.parseFull(esOwnership.ownershipId).value),
             listOf(ethAuctionedOwnership, ethOwnership)
         )
         ethereumOwnershipControllerApiMock.mockGetNftOwnershipByIds(
@@ -301,7 +306,10 @@ class OwnershipControllerElasticFt : AbstractIntegrationTest() {
                 esOwnership
             )
         )
-        tezosOwnershipControllerApiMock.mockGetNftOwnershipById(esOwnership.ownershipId, ownership)
+        tezosOwnershipControllerApiMock.mockGetNftOwnershipById(
+            OwnershipIdParser.parseFull(esOwnership.ownershipId).value,
+            ownership
+        )
 
         val ownerships = ownershipControllerClient.getOwnershipsByItem(
             itemId.fullId(), continuation, size
