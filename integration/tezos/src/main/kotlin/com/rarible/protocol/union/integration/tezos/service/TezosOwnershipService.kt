@@ -44,11 +44,15 @@ open class TezosOwnershipService(
     }
 
     override suspend fun getOwnershipsAll(continuation: String?, size: Int): Slice<UnionOwnership> {
-        val ownerships = ownershipControllerApi.getNftAllOwnerships(size, continuation).awaitFirst()
-        val converted = ownerships.ownerships.map {
-            TezosOwnershipConverter.convert(it, blockchain)
+        if (tzktOwnershipService.enabled()) {
+            return tzktOwnershipService.getOwnershipsAll(continuation, size)
+        } else {
+            val ownerships = ownershipControllerApi.getNftAllOwnerships(size, continuation).awaitFirst()
+            val converted = ownerships.ownerships.map {
+                TezosOwnershipConverter.convert(it, blockchain)
+            }
+            return Slice(ownerships.continuation, converted)
         }
-        return Slice(ownerships.continuation, converted)
     }
 
     override suspend fun getOwnershipsByItem(
