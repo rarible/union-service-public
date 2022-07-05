@@ -1,6 +1,5 @@
 protocol-union-api:
   service:
-    enabled: true
     nodePort: 30418
   resources:
     jvm:

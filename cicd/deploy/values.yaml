@@ -7,7 +7,6 @@ protocol-union-api:
     CONSUL_ROOT_PATH: '{{ include "service.env" $ }}/protocol/union'
     SPRING_PROFILES_ACTIVE: 'consul,{{ include "service.env" $ }}'
     SERVICE_PREFIX: '{{ include "service.env" $ }}-union'
-    JAVA_OPTIONS: '-XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp'
   nodeSelector:
     node.labels.rarible.service: true
   resources:
@@ -18,10 +17,6 @@ protocol-union-api:
     enabled: true
   updateConfig:
     order: start-first
-  networks:
-    common:
-    - '{{ include "service.env" $ }}-backend'
-    - proxy-staging
   podAnnotations:
     fluentbit.io/parser: logfmt
 
@@ -39,9 +34,6 @@ protocol-union-listener:
     jvm:
       xmx_megabytes: 1536
       max_direct_memory_megabytes: 128
-  networks:
-    common:
-    - '{{ include "service.env" $ }}-backend'
   podAnnotations:
     fluentbit.io/parser: logfmt
 
@@ -59,9 +51,6 @@ protocol-union-meta-loader:
     jvm:
       xmx_megabytes: 1024
       max_direct_memory_megabytes: 256
-  networks:
-    common:
-      - '{{ include "service.env" $ }}-backend'
   podAnnotations:
     fluentbit.io/parser: logfmt
 
@@ -80,9 +69,6 @@ protocol-union-indexer:
     jvm:
       xmx_megabytes: 1024
       max_direct_memory_megabytes: 128
-  networks:
-    common:
-      - '{{ include "service.env" $ }}-backend'
   podAnnotations:
     fluentbit.io/parser: logfmt
 
@@ -101,8 +87,5 @@ protocol-union-worker:
     jvm:
       xmx_megabytes: 1024
       max_direct_memory_megabytes: 128
-  networks:
-    common:
-      - '{{ include "service.env" $ }}-backend'
   podAnnotations:
     fluentbit.io/parser: logfmt
