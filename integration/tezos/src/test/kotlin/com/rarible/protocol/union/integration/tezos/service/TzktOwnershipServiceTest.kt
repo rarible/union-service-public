@@ -1,14 +1,11 @@
 package com.rarible.protocol.union.integration.tezos.service
 
-import com.rarible.core.test.data.randomString
+import com.rarible.core.test.data.randomInt
 import com.rarible.protocol.tezos.api.client.NftOwnershipControllerApi
-import com.rarible.protocol.tezos.dto.NftOwnershipsDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.BlockchainGroupDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.UnionAddress
-import com.rarible.protocol.union.integration.tezos.data.randomTezosOwnershipDto
-import com.rarible.protocol.union.integration.tezos.data.randomTezosOwnershipId
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktOwnershipServiceImpl
 import com.rarible.tzkt.client.OwnershipClient
 import com.rarible.tzkt.model.Alias
@@ -24,7 +21,6 @@ import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import reactor.kotlin.core.publisher.toMono
 import java.time.Instant.now
 import java.time.ZoneOffset
 
@@ -74,31 +70,33 @@ class TzktOwnershipServiceTest {
     @Test
     fun `should get all ownerships`() = runBlocking<Unit> {
         // given
-        val continuation = randomString()
-        val size = 42
-        val newContinuation = randomString()
-        val id = randomTezosOwnershipId()
-        val ownership = randomTezosOwnershipDto(id)
+        val continuation = "30"
+        val size = 2
+        val tzktOwnership1 = ownership(20)
+        val tzktOwnership2 = ownership(10)
         coEvery {
-            ownershipControllerApi.getNftAllOwnerships(any(), any())
-        } returns NftOwnershipsDto(2, newContinuation, listOf(ownership)).toMono()
+            ownershipClient.ownershipsAll(any(), any())
+        } returns Page(
+            continuation = tzktOwnership2.id.toString(),
+            items = listOf(tzktOwnership1, tzktOwnership2)
+        )
 
         // when
         val actual = service.getOwnershipsAll(continuation, size)
 
         // then
-        assertThat(actual.continuation).isEqualTo(newContinuation)
-        assertThat(actual.entities).hasSize(1)
-        assertThat(actual.entities.first().id.value).isEqualTo(id.value)
+        assertThat(actual.continuation).isEqualTo(tzktOwnership2.id.toString())
+        assertThat(actual.entities).hasSize(2)
         coVerify {
-            ownershipControllerApi.getNftAllOwnerships(size, continuation)
+            ownershipClient.ownershipsAll(continuation, size)
         }
-        confirmVerified(ownershipControllerApi)
+        confirmVerified(ownershipClient)
     }
 
 
-    fun ownership() = TokenBalance(
-        id = 1,
+    fun ownership() = ownership(randomInt())
+    fun ownership(id: Int) = TokenBalance(
+        id = id,
         account = Alias(
             address = "tz2QH8sqmgnFajFb5vN6b9KaDmd4ht2yGv6d"
         ),
