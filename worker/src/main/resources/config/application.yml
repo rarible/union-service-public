@@ -155,9 +155,6 @@ worker:
           enabled: true
         - blockchain: IMMUTABLEX
           enabled: false
-    order:
-      enabled: false
-      blockchains:
     collection:
       enabled: true
       blockchains:
@@ -189,7 +186,7 @@ worker:
         - blockchain: IMMUTABLEX
           enabled: false
     ownership:
-      enabled: true
+      enabled: false
       blockchains:
         - blockchain: ETHEREUM
           enabled: true
@@ -203,3 +200,6 @@ worker:
           enabled: true
         - blockchain: IMMUTABLEX
           enabled: false
+    order:
+      enabled: false
+      blockchains:

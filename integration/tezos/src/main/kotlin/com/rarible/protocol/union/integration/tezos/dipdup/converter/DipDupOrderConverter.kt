@@ -20,8 +20,10 @@ import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PayoutDto
 import com.rarible.protocol.union.dto.TezosOrderDataRaribleV2DataV1Dto
 import com.rarible.protocol.union.dto.TezosOrderDataRaribleV2DataV2Dto
+import com.rarible.protocol.union.dto.ext
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
+import java.math.BigDecimal
 
 @Component
 class DipDupOrderConverter(
@@ -50,8 +52,17 @@ class DipDupOrderConverter(
 
     private suspend fun convertInternal(order: DipDupOrder, blockchain: BlockchainDto): OrderDto {
 
-        val make = DipDupConverter.convert(order.make, blockchain)
-        val take = DipDupConverter.convert(order.take, blockchain)
+        var make = DipDupConverter.convert(order.make, blockchain)
+        var take = DipDupConverter.convert(order.take, blockchain)
+
+        // It's a critical bug in dupdup-indexer: there's a price for 1 item in take instead of full price of order
+        // Need to fix in the indexer lately
+        if (make.type.ext.isNft) {
+            take = take.copy(value = take.value * make.value)
+        }
+        if (take.type.ext.isNft) {
+            make = make.copy(value = make.value * take.value)
+        }
 
         val maker = UnionAddressConverter.convert(blockchain, order.maker)
         val taker = order.taker?.let { UnionAddressConverter.convert(blockchain, it) }
@@ -78,7 +89,7 @@ class DipDupOrderConverter(
             fill = order.fill,
             startedAt = order.startAt?.toInstant(),
             endedAt = order.endAt?.toInstant(),
-            makeStock = order.make.assetValue,
+            makeStock = makeStock(order.make, order.fill),
             cancelled = order.cancelled,
             createdAt = order.createdAt.toInstant(),
             lastUpdatedAt = order.lastUpdatedAt.toInstant(),
@@ -90,6 +101,10 @@ class DipDupOrderConverter(
             salt = order.salt.toString(),
             pending = emptyList()
         )
+    }
+
+    fun makeStock(asset: Asset, fill: BigDecimal): BigDecimal {
+        return asset.assetValue - fill
     }
 
     fun orderData(order: DipDupOrder, blockchain: BlockchainDto): OrderDataDto {

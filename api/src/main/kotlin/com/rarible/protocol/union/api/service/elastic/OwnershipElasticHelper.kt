@@ -1,16 +1,18 @@
 package com.rarible.protocol.union.api.service.elastic
 
-import com.rarible.core.common.flatMapAsync
+import com.rarible.core.common.mapAsync
 import com.rarible.core.logging.Logger
+import com.rarible.protocol.union.core.model.EsActivityCursor.Companion.fromActivityLite
 import com.rarible.protocol.union.core.model.EsOwnership
 import com.rarible.protocol.union.core.model.EsOwnershipByItemFilter
 import com.rarible.protocol.union.core.model.EsOwnershipByOwnerFilter
 import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.core.service.OwnershipService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
+import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.UnionAddress
-import com.rarible.protocol.union.dto.continuation.DateIdContinuation
+import com.rarible.protocol.union.dto.parser.OwnershipIdParser
 import com.rarible.protocol.union.enrichment.repository.search.EsOwnershipRepository
 import org.springframework.stereotype.Component
 
@@ -22,27 +24,33 @@ class OwnershipElasticHelper(
 
     suspend fun getRawOwnershipsByOwner(owner: UnionAddress, continuation: String?, size: Int): List<UnionOwnership> {
         val filter = EsOwnershipByOwnerFilter(owner, null, cursor = continuation)
-        return repository.search(filter, size).getOwnerships()
+        val ownerships = repository.search(filter, size)
+        return getOwnerships(ownerships)
     }
 
     suspend fun getRawOwnershipsByItem(itemId: ItemIdDto, continuation: String?, size: Int): List<UnionOwnership> {
         val filter = EsOwnershipByItemFilter(itemId, cursor = continuation)
-        return repository.search(filter, size).getOwnerships()
+        val ownerships = repository.search(filter, size)
+        return getOwnerships(ownerships)
     }
 
-    private suspend fun List<EsOwnership>.getOwnerships(): List<UnionOwnership> {
-        log.debug("Enrich elastic ownerships with blockchains api (count=$size)")
-        val idsMap = groupBy { it.blockchain }
-        val enabledBlockchains = router.getEnabledBlockchains(idsMap.keys).toSet()
-        log.debug("Source blockchains: ${idsMap.keys.intersect(enabledBlockchains)} (${idsMap.keys - enabledBlockchains} disabled)")
+    private suspend fun getOwnerships(esOwnerhips: List<EsOwnership>): List<UnionOwnership> {
+        if (esOwnerhips.isEmpty()) return emptyList()
+        log.debug("Enrich elastic ownerships with blockchains api (count=${esOwnerhips.size})")
+        val mapping = hashMapOf<BlockchainDto, MutableList<String>>()
+        esOwnerhips.forEach { ownership ->
+            mapping
+                .computeIfAbsent(ownership.blockchain) { ArrayList(esOwnerhips.size) }
+                .add(OwnershipIdParser.parseFull(ownership.ownershipId).value)
+        }
 
-        val ownerships = idsMap.filterKeys { it in enabledBlockchains }
-            .flatMapAsync { (blockchain, ids) ->
-                router.getService(blockchain).getOwnershipsByIds(ids.map { it.ownershipId })
-            }
+        val ownerships = mapping.mapAsync { (blockchain, ids) ->
+            val isBlockchainEnabled = router.isBlockchainEnabled(blockchain)
+            if (isBlockchainEnabled) router.getService(blockchain).getOwnershipsByIds(ids) else emptyList()
+        }.flatten()
 
-        log.debug("Obtained ${ownerships.size} ownerships")
-        return ownerships
+        val ownershipsIdMapping = ownerships.associateBy { it.id.fullId() }
+        return esOwnerhips.mapNotNull { esOwnership -> ownershipsIdMapping[esOwnership.ownershipId] }
     }
 
     companion object {

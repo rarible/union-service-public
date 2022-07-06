@@ -5,6 +5,7 @@ import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.core.service.OwnershipService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.parser.OwnershipIdParser
 import com.rarible.protocol.union.enrichment.repository.search.EsOwnershipRepository
 import com.rarible.protocol.union.enrichment.test.data.randomItemDto
 import com.rarible.protocol.union.enrichment.test.data.randomUnionAddress
@@ -41,11 +42,11 @@ internal class OwnershipElasticHelperIt {
         val owner = randomUnionAddress()
         val continuation = null
         val size = 42
-        val ownershipService = mockk<OwnershipService>()
-        val expected = randomUnionOwnership()
-        coEvery { ownershipService.getOwnershipsByIds(any()) } returns listOf(expected)
         val ownership = randomEsOwnership().copy(blockchain = BlockchainDto.ETHEREUM, owner = owner.fullId())
         repository.saveAll(listOf(ownership))
+        val ownershipService = mockk<OwnershipService>()
+        val expected = randomUnionOwnership().copy(id = OwnershipIdParser.parseFull(ownership.ownershipId))
+        coEvery { ownershipService.getOwnershipsByIds(any()) } returns listOf(expected)
         every { router.getService(BlockchainDto.ETHEREUM) } returns ownershipService
 
         // when
@@ -54,11 +55,11 @@ internal class OwnershipElasticHelperIt {
         // then
         assertThat(actual).isEqualTo(listOf(expected))
         verify {
-            router.getEnabledBlockchains(setOf(BlockchainDto.ETHEREUM))
+            router.isBlockchainEnabled(BlockchainDto.ETHEREUM)
             router.getService(BlockchainDto.ETHEREUM)
         }
         coVerify {
-            ownershipService.getOwnershipsByIds(listOf(ownership.ownershipId))
+            ownershipService.getOwnershipsByIds(listOf(OwnershipIdParser.parseFull(ownership.ownershipId).value))
         }
         confirmVerified(router, ownershipService)
     }
@@ -69,11 +70,11 @@ internal class OwnershipElasticHelperIt {
         val item = randomFlowItemId()
         val continuation = null
         val size = 42
-        val ownershipService = mockk<OwnershipService>()
-        val expected = randomUnionOwnership()
-        coEvery { ownershipService.getOwnershipsByIds(any()) } returns listOf(expected)
         val ownership = randomEsOwnership().copy(blockchain = BlockchainDto.FLOW, itemId = item.fullId())
         repository.saveAll(listOf(ownership))
+        val ownershipService = mockk<OwnershipService>()
+        val expected = randomUnionOwnership().copy(id = OwnershipIdParser.parseFull(ownership.ownershipId))
+        coEvery { ownershipService.getOwnershipsByIds(any()) } returns listOf(expected)
         every { router.getService(BlockchainDto.FLOW) } returns ownershipService
 
         // when
@@ -82,11 +83,11 @@ internal class OwnershipElasticHelperIt {
         // then
         assertThat(actual).isEqualTo(listOf(expected))
         verify {
-            router.getEnabledBlockchains(setOf(BlockchainDto.FLOW))
+            router.isBlockchainEnabled(BlockchainDto.FLOW)
             router.getService(BlockchainDto.FLOW)
         }
         coVerify {
-            ownershipService.getOwnershipsByIds(listOf(ownership.ownershipId))
+            ownershipService.getOwnershipsByIds(listOf(OwnershipIdParser.parseFull(ownership.ownershipId).value))
         }
         confirmVerified(router, ownershipService)
     }
