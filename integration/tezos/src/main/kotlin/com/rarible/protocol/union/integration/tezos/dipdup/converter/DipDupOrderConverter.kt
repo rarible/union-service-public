@@ -23,6 +23,7 @@ import com.rarible.protocol.union.dto.TezosOrderDataRaribleV2DataV2Dto
 import com.rarible.protocol.union.dto.ext
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
+import java.math.BigDecimal
 
 @Component
 class DipDupOrderConverter(
@@ -88,7 +89,7 @@ class DipDupOrderConverter(
             fill = order.fill,
             startedAt = order.startAt?.toInstant(),
             endedAt = order.endAt?.toInstant(),
-            makeStock = order.make.assetValue,
+            makeStock = makeStock(order.make, order.fill),
             cancelled = order.cancelled,
             createdAt = order.createdAt.toInstant(),
             lastUpdatedAt = order.lastUpdatedAt.toInstant(),
@@ -100,6 +101,10 @@ class DipDupOrderConverter(
             salt = order.salt.toString(),
             pending = emptyList()
         )
+    }
+
+    fun makeStock(asset: Asset, fill: BigDecimal): BigDecimal {
+        return asset.assetValue - fill
     }
 
     fun orderData(order: DipDupOrder, blockchain: BlockchainDto): OrderDataDto {
