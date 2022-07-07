@@ -31,20 +31,28 @@ open class TezosOwnershipService(
     }
 
     override suspend fun getOwnershipsByIds(ownershipIds: List<String>): List<UnionOwnership> = coroutineScope {
-        ownershipIds.map {
-            async {
-                val ownership = ownershipControllerApi.getNftOwnershipById(it).awaitFirst()
-                TezosOwnershipConverter.convert(ownership, blockchain)
-            }
-        }.awaitAll()
+        if (tzktOwnershipService.enabled()) {
+            ownershipIds.map { async { tzktOwnershipService.getOwnershipById(it) } }.awaitAll()
+        } else {
+            ownershipIds.map {
+                async {
+                    val ownership = ownershipControllerApi.getNftOwnershipById(it).awaitFirst()
+                    TezosOwnershipConverter.convert(ownership, blockchain)
+                }
+            }.awaitAll()
+        }
     }
 
     override suspend fun getOwnershipsAll(continuation: String?, size: Int): Slice<UnionOwnership> {
-        val ownerships = ownershipControllerApi.getNftAllOwnerships(size, continuation).awaitFirst()
-        val converted = ownerships.ownerships.map {
-            TezosOwnershipConverter.convert(it, blockchain)
+        if (tzktOwnershipService.enabled()) {
+            return tzktOwnershipService.getOwnershipsAll(continuation, size)
+        } else {
+            val ownerships = ownershipControllerApi.getNftAllOwnerships(size, continuation).awaitFirst()
+            val converted = ownerships.ownerships.map {
+                TezosOwnershipConverter.convert(it, blockchain)
+            }
+            return Slice(ownerships.continuation, converted)
         }
-        return Slice(ownerships.continuation, converted)
     }
 
     override suspend fun getOwnershipsByItem(

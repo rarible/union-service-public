@@ -42,7 +42,7 @@ handler:
   order:
     enabled: ${consul.indexer.order.enabled:false}
   ownership:
-    enabled: ${consul.indexer.ownership.enabled:true}
+    enabled: ${consul.indexer.ownership.enabled:false}
 
 indexer:
   consumer:

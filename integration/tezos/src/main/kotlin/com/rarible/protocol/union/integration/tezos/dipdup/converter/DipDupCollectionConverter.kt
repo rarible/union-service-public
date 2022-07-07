@@ -32,9 +32,17 @@ class DipDupCollectionConverter {
             name = collection.name,
             type = CollectionDto.Type.TEZOS_MT,
             owner = UnionAddress(blockchain.group(), collection.owner),
-            minters = collection.minters.map { UnionAddress(blockchain.group(), it) },
+            minters = minters(collection),
             features = listOf(CollectionDto.Features.SECONDARY_SALE_FEES, CollectionDto.Features.BURN),
             symbol = collection.symbol
         )
+    }
+
+    private fun minters(source: DipDupCollection.Collection): List<UnionAddress> {
+        val minters = source.minters.map { UnionAddress(blockchain.group(), it) }
+
+        // We need to do that due to marketplace will ignore event without minters
+        // When dipdup indexer sends the correct event with minters we can remove this fix
+        return minters.ifEmpty { listOf(UnionAddress(blockchain.group(), source.owner)) }
     }
 }

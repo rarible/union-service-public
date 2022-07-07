@@ -1,6 +1,6 @@
 package com.rarible.protocol.union.integration.tezos.data
 
-import com.rarible.core.test.data.randomInt
+import com.rarible.core.test.data.randomLong
 import com.rarible.core.test.data.randomString
 import com.rarible.dipdup.client.core.model.Asset
 import com.rarible.dipdup.client.core.model.DipDupActivity
@@ -60,7 +60,7 @@ fun randomTzktItemMintActivity(activityId: String): TypedTokenActivity {
                 address = randomString()
             ),
             amount = "1",
-            transactionId = randomInt()
+            transactionId = randomLong()
         )
     )
 }
