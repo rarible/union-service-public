@@ -57,8 +57,8 @@ object TzktCollectionConverter {
                 blockchain,
                 source.address!!
             ), // In model all fields are nullable but in fact they aren't
-            name = source.alias ?: "Unnamed Collection",
-            symbol = null,
+            name = source.name ?: "Unnamed Collection",
+            symbol = source.symbol,
             owner = owner(source, blockchain),
             type = convertType(source),
             features = features(source),
