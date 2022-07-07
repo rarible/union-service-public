@@ -77,6 +77,8 @@ class TezosCollectionServiceTest {
     fun contract(address: String): Contract = Contract(
         type = "contract",
         alias = "",
+        name = "test",
+        symbol = null,
         balance = 1L,
         address = address,
         tzips = listOf("fa2"),

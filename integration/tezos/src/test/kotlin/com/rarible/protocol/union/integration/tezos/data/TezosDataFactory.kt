@@ -336,6 +336,8 @@ fun randomTzktContract(address: String): Contract {
     return Contract(
         type = "contract",
         alias = "",
+        name = "test",
+        symbol = null,
         balance = 1L,
         address = address,
         tzips = listOf("fa2"),
