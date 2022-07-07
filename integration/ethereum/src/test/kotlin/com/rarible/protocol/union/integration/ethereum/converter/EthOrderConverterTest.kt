@@ -11,6 +11,8 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.EthErc20AssetTypeDto
 import com.rarible.protocol.union.dto.EthErc721AssetTypeDto
 import com.rarible.protocol.union.dto.EthOrderDataRaribleV2DataV1Dto
+import com.rarible.protocol.union.dto.EthOrderDataRaribleV2DataV3BuyDto
+import com.rarible.protocol.union.dto.EthOrderDataRaribleV2DataV3SellDto
 import com.rarible.protocol.union.dto.EthOrderOpenSeaV1DataV1Dto
 import com.rarible.protocol.union.dto.EthOrderSeaportDataV1Dto
 import com.rarible.protocol.union.dto.EthSeaportItemTypeDto
@@ -25,6 +27,8 @@ import com.rarible.protocol.union.integration.ethereum.data.randomEthOnChainOrde
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOpenSeaV1OrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOrderBasicSeaportDataV1Dto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOrderCancelDto
+import com.rarible.protocol.union.integration.ethereum.data.randomEthOrderDataRaribleV2DataV3BuyDto
+import com.rarible.protocol.union.integration.ethereum.data.randomEthOrderDataRaribleV2DataV3SellDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOrderSideMatchDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthSeaportConsideration
 import com.rarible.protocol.union.integration.ethereum.data.randomEthSeaportOffer
@@ -180,6 +184,35 @@ class EthOrderConverterTest {
 
         assertThat(data.originFees[0].account.value).isEqualTo((dto.data as OrderRaribleV2DataV1Dto).originFees[0].account.prefixed())
         assertThat(data.originFees[0].value).isEqualTo((dto.data as OrderRaribleV2DataV1Dto).originFees[0].value)
+    }
+
+    @Test
+    fun `eth order rarible v2 data v3 sell`() = runBlocking<Unit> {
+        val dataDto = randomEthOrderDataRaribleV2DataV3SellDto()
+        val orderDto = randomEthV2OrderDto().copy(data = dataDto)
+
+        val converted = ethOrderConverter.convert(orderDto, BlockchainDto.ETHEREUM).data
+        val data = converted as EthOrderDataRaribleV2DataV3SellDto
+
+        assertThat(data.payout!!.account.value).isEqualTo(dataDto.payout?.account?.prefixed())
+        assertThat(data.originFeeFirst!!.account.value).isEqualTo(dataDto.originFeeFirst?.account?.prefixed())
+        assertThat(data.originFeeSecond!!.account?.value).isEqualTo(dataDto.originFeeSecond?.account?.prefixed())
+        assertThat(data.maxFeesBasePoint).isEqualTo(dataDto.maxFeesBasePoint)
+        assertThat(data.marketplaceMarker!!).isEqualTo(dataDto.marketplaceMarker?.prefixed())
+    }
+
+    @Test
+    fun `eth order rarible v2 data v3 buy`() = runBlocking<Unit> {
+        val dataDto = randomEthOrderDataRaribleV2DataV3BuyDto()
+        val orderDto = randomEthV2OrderDto().copy(data = dataDto)
+
+        val converted = ethOrderConverter.convert(orderDto, BlockchainDto.ETHEREUM).data
+        val data = converted as EthOrderDataRaribleV2DataV3BuyDto
+
+        assertThat(data.payout!!.account.value).isEqualTo(dataDto.payout?.account?.prefixed())
+        assertThat(data.originFeeFirst!!.account.value).isEqualTo(dataDto.originFeeFirst?.account?.prefixed())
+        assertThat(data.originFeeSecond!!.account?.value).isEqualTo(dataDto.originFeeSecond?.account?.prefixed())
+        assertThat(data.marketplaceMarker!!).isEqualTo(dataDto.marketplaceMarker?.prefixed())
     }
 
     @Test

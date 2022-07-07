@@ -57,6 +57,8 @@ import com.rarible.protocol.dto.OrderCryptoPunksDataDto
 import com.rarible.protocol.dto.OrderOpenSeaV1DataV1Dto
 import com.rarible.protocol.dto.OrderRaribleV2DataDto
 import com.rarible.protocol.dto.OrderRaribleV2DataV1Dto
+import com.rarible.protocol.dto.OrderRaribleV2DataV3BuyDto
+import com.rarible.protocol.dto.OrderRaribleV2DataV3SellDto
 import com.rarible.protocol.dto.OrderSideDto
 import com.rarible.protocol.dto.OrderSideMatchDto
 import com.rarible.protocol.dto.OrderStatusDto
@@ -78,6 +80,7 @@ import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.util.CompositeItemIdParser
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
+import com.rarible.protocol.union.dto.EthOrderDataRaribleV2DataV3SellDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
@@ -318,6 +321,21 @@ fun randomEthV2OrderDto(make: AssetDto, maker: Address, take: AssetDto): Rarible
         priceHistory = listOf()
     )
 }
+
+fun randomEthOrderDataRaribleV2DataV3SellDto() = OrderRaribleV2DataV3SellDto(
+    payout = randomEthPartDto(),
+    originFeeFirst = randomEthPartDto(),
+    originFeeSecond = randomEthPartDto(),
+    maxFeesBasePoint = randomInt(),
+    marketplaceMarker = Word.apply(randomWord())
+)
+
+fun randomEthOrderDataRaribleV2DataV3BuyDto() = OrderRaribleV2DataV3BuyDto(
+    payout = randomEthPartDto(),
+    originFeeFirst = randomEthPartDto(),
+    originFeeSecond = randomEthPartDto(),
+    marketplaceMarker = Word.apply(randomWord())
+)
 
 fun randomEthOpenSeaV1OrderDto() =
     randomEthOpenSeaV1OrderDto(randomEthAssetErc721(), randomAddress(), randomEthAssetErc20())

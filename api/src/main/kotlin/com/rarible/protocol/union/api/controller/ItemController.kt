@@ -11,6 +11,7 @@ import com.rarible.protocol.union.core.service.RestrictionService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.core.util.LogUtils
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.ExtendedTraitPropertiesDto
 import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.ItemIdsDto
 import com.rarible.protocol.union.dto.ItemsDto
@@ -19,6 +20,8 @@ import com.rarible.protocol.union.dto.MetaContentDto
 import com.rarible.protocol.union.dto.RestrictionCheckFormDto
 import com.rarible.protocol.union.dto.RestrictionCheckResultDto
 import com.rarible.protocol.union.dto.RoyaltiesDto
+import com.rarible.protocol.union.dto.TraitsDto
+import com.rarible.protocol.union.dto.TraitsRarityRequestDto
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
@@ -134,6 +137,10 @@ class ItemController(
         return ResponseEntity.ok(RoyaltiesDto(royalties))
     }
 
+    override suspend fun getItemTraits(filter: String, collectionIds: List<String>): ResponseEntity<TraitsDto> {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun checkItemRestriction(
         itemId: String,
         restrictionCheckFormDto: RestrictionCheckFormDto
@@ -205,6 +212,10 @@ class ItemController(
         size: Int?
     ): ResponseEntity<ItemsWithOwnershipDto> {
         return ResponseEntity.ok(itemSourceSelectService.getItemsByOwnerWithOwnership(owner, continuation, size))
+    }
+
+    override suspend fun queryTraitsWithRarity(traitsRarityRequestDto: TraitsRarityRequestDto): ResponseEntity<ExtendedTraitPropertiesDto> {
+        TODO("Not yet implemented")
     }
 
     private companion object {
