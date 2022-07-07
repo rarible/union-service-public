@@ -38,5 +38,7 @@ val OrderDto.origins: Set<String>
             is FlowOrderDataV1Dto -> data.originFees.map { it.account.value }
             is SolanaAuctionHouseDataV1Dto -> listOfNotNull(data.auctionHouse?.value)
             is ImmutablexOrderDataV1Dto -> data.originFees.map { it.account.value }
+            is EthOrderDataRaribleV2DataV3SellDto -> emptyList()
+            is EthOrderDataRaribleV2DataV3BuyDto -> emptyList()
         }.toSet()
     }
