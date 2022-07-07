@@ -4,18 +4,17 @@ import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.api.service.select.OwnershipSourceSelectService
 import com.rarible.protocol.union.dto.OwnershipDto
 import com.rarible.protocol.union.dto.OwnershipIdsDto
+import com.rarible.protocol.union.dto.OwnershipSearchRequestDto
 import com.rarible.protocol.union.dto.OwnershipsDto
 import com.rarible.protocol.union.dto.continuation.page.PageSize
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.dto.parser.OwnershipIdParser
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
 class OwnershipController(
-    private val ownershipSourceSelectService: OwnershipSourceSelectService,
+    private val ownershipSourceSelectService: OwnershipSourceSelectService
 ) : OwnershipControllerApi {
 
     companion object {
@@ -23,7 +22,7 @@ class OwnershipController(
     }
 
     override suspend fun getOwnershipById(
-        ownershipId: String,
+        ownershipId: String
     ): ResponseEntity<OwnershipDto> {
         val fullOwnershipId = OwnershipIdParser.parseFull(ownershipId)
 
@@ -49,9 +48,17 @@ class OwnershipController(
         logger.info(
             "Response for getOwnershipsByItem(itemId={}, continuation={}, size={}):" +
                 " Slice(size={}, continuation={}) ",
-            fullItemId.fullId(), continuation, size, result.ownerships.size, result.continuation
+            fullItemId.fullId(),
+            continuation,
+            size,
+            result.ownerships.size,
+            result.continuation
         )
 
         return ResponseEntity.ok(result)
+    }
+
+    override suspend fun search(ownershipSearchRequestDto: OwnershipSearchRequestDto): ResponseEntity<OwnershipsDto> {
+        return ResponseEntity.ok(ownershipSourceSelectService.search(ownershipSearchRequestDto))
     }
 }

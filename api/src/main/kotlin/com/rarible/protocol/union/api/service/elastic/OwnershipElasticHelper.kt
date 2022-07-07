@@ -5,12 +5,13 @@ import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.core.model.EsOwnership
 import com.rarible.protocol.union.core.model.EsOwnershipByItemFilter
 import com.rarible.protocol.union.core.model.EsOwnershipByOwnerFilter
+import com.rarible.protocol.union.core.model.EsOwnershipsSearchFilter
 import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.core.service.OwnershipService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.ItemIdDto
+import com.rarible.protocol.union.dto.OwnershipSearchRequestDto
 import com.rarible.protocol.union.dto.UnionAddress
-import com.rarible.protocol.union.dto.continuation.DateIdContinuation
 import com.rarible.protocol.union.enrichment.repository.search.EsOwnershipRepository
 import org.springframework.stereotype.Component
 
@@ -28,6 +29,11 @@ class OwnershipElasticHelper(
     suspend fun getRawOwnershipsByItem(itemId: ItemIdDto, continuation: String?, size: Int): List<UnionOwnership> {
         val filter = EsOwnershipByItemFilter(itemId, cursor = continuation)
         return repository.search(filter, size).getOwnerships()
+    }
+
+    suspend fun getRawOwnershipsBySearchRequest(request: OwnershipSearchRequestDto): List<UnionOwnership> {
+        val filter = EsOwnershipsSearchFilter(request)
+        return repository.search(filter, request.size).getOwnerships()
     }
 
     private suspend fun List<EsOwnership>.getOwnerships(): List<UnionOwnership> {

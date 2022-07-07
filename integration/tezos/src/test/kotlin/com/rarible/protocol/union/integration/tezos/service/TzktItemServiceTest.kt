@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.integration.tezos.service
 
-import com.mongodb.assertions.Assertions.assertTrue
 import com.rarible.protocol.tezos.api.client.NftItemControllerApi
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
@@ -15,14 +14,15 @@ import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
-import junit.framework.TestCase.assertFalse
+import java.time.Instant.now
+import java.time.ZoneOffset
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import java.time.Instant.now
-import java.time.ZoneOffset
 
 class TzktItemServiceTest {
 
@@ -106,7 +106,7 @@ class TzktItemServiceTest {
         }
 
         @Test
-        fun `should make only 1 attempt for an "old" nft`() = runBlocking<Unit> {
+        fun `should make only 1 attempt for an 'old' nft`() = runBlocking<Unit> {
             val itemId = "test:123"
             coEvery { dipdupProps.tzktProperties } returns TzktProperties()
             coEvery { tokenClient.token(itemId) } returns tzktToken(itemId).copy(

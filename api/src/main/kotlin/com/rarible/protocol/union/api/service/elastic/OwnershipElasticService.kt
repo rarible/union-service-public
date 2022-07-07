@@ -8,12 +8,16 @@ import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OwnershipDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
+import com.rarible.protocol.union.dto.OwnershipSearchRequestDto
 import com.rarible.protocol.union.dto.OwnershipsDto
 import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.continuation.page.Paging
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.service.EnrichmentAuctionService
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import org.springframework.stereotype.Component
 
 @Component
@@ -63,6 +67,46 @@ class OwnershipElasticService(
                 val page =
                     Paging(UnionAuctionOwnershipWrapperContinuation.ByLastUpdatedAndId, ownerships).getSlice(size)
                 OwnershipsDto(page.entities.size.toLong(), page.continuation, apiHelper.enrich(page.entities))
+            }
+        )
+    }
+
+    override suspend fun search(request: OwnershipSearchRequestDto): OwnershipsDto {
+        val auctions = coroutineScope {
+            listOf(
+                async {
+                    request.filter.items?.flatMap {
+                        enrichmentAuctionService.findByItem(ShortItemId(it))
+                    }.orEmpty()
+                },
+                async {
+                    request.filter.owners?.flatMap {
+                        enrichmentAuctionService.findBySeller(it)
+                    }.orEmpty()
+                },
+                async {
+                    request.filter.auctions?.let {
+                        enrichmentAuctionService.fetchAuctionsIfAbsent(it.toSet(), emptyMap()).values
+                    }.orEmpty()
+                }
+            )
+        }
+
+        return apiHelper.getEnrichedOwnerships(
+            continuation = request.continuation,
+            size = request.size,
+            { auctions.awaitAll().flatten() },
+            { elasticHelper.getRawOwnershipsBySearchRequest(request) },
+            { ownerships ->
+                val paging =
+                    Paging(
+                        UnionAuctionOwnershipWrapperContinuation.ByLastUpdatedAndId,
+                        ownerships
+                    ).getSlice(request.size)
+                OwnershipsDto(
+                    continuation = paging.continuation,
+                    ownerships = apiHelper.enrich(paging.entities)
+                )
             }
         )
     }

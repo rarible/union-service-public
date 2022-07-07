@@ -8,6 +8,7 @@ import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OwnershipDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
+import com.rarible.protocol.union.dto.OwnershipSearchRequestDto
 import com.rarible.protocol.union.dto.OwnershipsDto
 import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.continuation.page.Paging
@@ -64,5 +65,9 @@ class OwnershipApiQueryService(
                 OwnershipsDto(page.entities.size.toLong(), page.continuation, apiHelper.enrich(page.entities))
             }
         )
+    }
+
+    override suspend fun search(request: OwnershipSearchRequestDto): OwnershipsDto {
+        throw UnsupportedOperationException("Not supported for API query service")
     }
 }
