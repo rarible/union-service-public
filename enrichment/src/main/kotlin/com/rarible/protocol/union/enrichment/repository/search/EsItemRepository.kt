@@ -10,6 +10,7 @@ import com.rarible.protocol.union.dto.continuation.page.ArgSlice
 import com.rarible.protocol.union.dto.continuation.page.PageSize
 import com.rarible.protocol.union.enrichment.repository.search.internal.EsItemBuilderService.buildQuery
 import kotlinx.coroutines.reactive.awaitFirst
+import org.elasticsearch.index.query.QueryBuilders.termQuery
 import org.springframework.data.elasticsearch.client.reactive.ReactiveElasticsearchClient
 import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations
 import org.springframework.data.elasticsearch.core.convert.ElasticsearchConverter
@@ -40,6 +41,18 @@ class EsItemRepository(
         val query = filter.buildQuery(sort)
         query.maxResults = PageSize.ITEM.limit(limit)
         return search(query)
+    }
+
+    suspend fun countItemsInCollection(collectionId: String): Long {
+        val query = NativeSearchQuery(termQuery(EsItem::collection.name, collectionId))
+
+        return esOperations
+            .count(
+                query,
+                EsItem::class.java,
+                entityDefinition.searchIndexCoordinates
+            )
+            .awaitFirst()
     }
 
     suspend fun search(query: NativeSearchQuery): EsQueryResult<EsItem> {
