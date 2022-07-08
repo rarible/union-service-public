@@ -105,7 +105,7 @@ class FlowActivityConverter(
                     make = FlowConverter.convert(source.make, blockchain),
                     take = payment,
                     reverted = false,
-                    lastUpdatedAt = source.date //TODO: Fix to updatedAt
+                    lastUpdatedAt = source.updatedAt
                 )
             }
             is FlowNftOrderActivityCancelListDto -> {
@@ -125,7 +125,7 @@ class FlowActivityConverter(
                         logIndex = source.logIndex ?: 0
                     ),
                     reverted = false,
-                    lastUpdatedAt = source.date //TODO: Fix to updatedAt
+                    lastUpdatedAt = source.updatedAt
                 )
             }
             is FlowMintDto -> {
@@ -146,7 +146,7 @@ class FlowActivityConverter(
                         logIndex = source.logIndex
                     ),
                     reverted = false,
-                    lastUpdatedAt = source.date //TODO: Fix to updatedAt
+                    lastUpdatedAt = source.updatedAt
                 )
             }
             is FlowBurnDto -> {
@@ -167,7 +167,7 @@ class FlowActivityConverter(
                         logIndex = source.logIndex
                     ),
                     reverted = false,
-                    lastUpdatedAt = source.date //TODO: Fix to updatedAt
+                    lastUpdatedAt = source.updatedAt
                 )
             }
             is FlowTransferDto -> {
@@ -190,7 +190,7 @@ class FlowActivityConverter(
                     ),
                     reverted = false,
                     purchase = source.purchased,
-                    lastUpdatedAt = source.date
+                    lastUpdatedAt = source.updatedAt
                 )
             }
             is FlowNftOrderActivityBidDto -> {
@@ -209,7 +209,7 @@ class FlowActivityConverter(
                     make = payment,
                     take = FlowConverter.convert(source.take, blockchain),
                     reverted = false,
-                    lastUpdatedAt = source.date //TODO: Fix to updatedAt
+                    lastUpdatedAt = source.updatedAt
                 )
             }
             is FlowNftOrderActivityCancelBidDto -> {
@@ -222,7 +222,7 @@ class FlowActivityConverter(
                     take = FlowConverter.convertToType(source.take, blockchain),
                     transactionHash = source.transactionHash ?: "",
                     reverted = false,
-                    lastUpdatedAt = source.date //TODO: Fix to updatedAt
+                    lastUpdatedAt = source.updatedAt
                 )
             }
             else -> throw IllegalStateException("Unsupported flow activity! $source")
@@ -267,7 +267,7 @@ class FlowActivityConverter(
                 logIndex = source.logIndex
             ),
             reverted = false,
-            lastUpdatedAt = source.date //TODO: Fix to updatedAt
+            lastUpdatedAt = source.updatedAt
         )
     }
 
