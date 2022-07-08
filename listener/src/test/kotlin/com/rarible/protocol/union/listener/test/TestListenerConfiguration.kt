@@ -393,4 +393,8 @@ class TestListenerConfiguration {
     @Bean
     @Primary
     fun testTezosOwnershipClient(): com.rarible.tzkt.client.OwnershipClient = mockk()
+
+    @Bean
+    @Primary
+    fun testTezosCollectionClient(): com.rarible.tzkt.client.CollectionClient = mockk()
 }
