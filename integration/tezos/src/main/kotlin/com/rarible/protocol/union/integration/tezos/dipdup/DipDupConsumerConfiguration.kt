@@ -22,6 +22,7 @@ import com.rarible.protocol.union.integration.tezos.dipdup.event.DipDupActivityE
 import com.rarible.protocol.union.integration.tezos.dipdup.event.DipDupCollectionEventHandler
 import com.rarible.protocol.union.integration.tezos.dipdup.event.DipDupOrderEventHandler
 import com.rarible.protocol.union.integration.tezos.dipdup.event.DipDupTransfersEventHandler
+import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktCollectionService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktItemService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktOwnershipService
 import org.apache.commons.lang3.StringUtils
@@ -108,9 +109,10 @@ class DipDupConsumerConfiguration(
     fun dipDupCollectionEventHandler(
         handler: IncomingEventHandler<UnionCollectionEvent>,
         converter: DipDupCollectionConverter,
-        mapper: ObjectMapper
+        mapper: ObjectMapper,
+        tzktCollectionService: TzktCollectionService
     ): DipDupCollectionEventHandler {
-        return DipDupCollectionEventHandler(handler, converter, mapper)
+        return DipDupCollectionEventHandler(handler, converter, tzktCollectionService, mapper)
     }
 
     @Bean
