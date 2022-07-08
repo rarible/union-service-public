@@ -2,6 +2,7 @@ package com.rarible.protocol.union.worker.task.search.activity
 
 import com.rarible.core.telemetry.metrics.RegisteredCounter
 import com.rarible.core.test.data.randomString
+import com.rarible.protocol.union.core.converter.EsActivityConverter
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.ActivitiesDto
@@ -18,6 +19,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import randomUnionAddress
 import java.math.BigInteger
@@ -43,12 +45,8 @@ internal class ActivityReindexServiceTest {
         } answers { arg(0) }
     }
 
-    private val itemService = mockk<ItemService> {
-        coEvery { getItemsByIds(any()) } returns emptyList()
-    }
-
-    private val router = mockk<BlockchainRouter<ItemService>> {
-        every { getService(any()) } returns  itemService
+    private val converter = mockk<EsActivityConverter> {
+        coEvery { batchConvert(any()) } returns listOf(mockk())
     }
 
     @Test
@@ -63,9 +61,11 @@ internal class ActivityReindexServiceTest {
             },
             esRepo,
             searchTaskMetricFactory,
-            router
+            converter
         )
-        Assertions.assertThat(
+        coEvery { converter.batchConvert(any()) } returns emptyList()
+
+        assertThat(
             service
                 .reindex(BlockchainDto.FLOW, ActivityTypeDto.CANCEL_LIST, "test_index")
                 .toList()
@@ -99,10 +99,10 @@ internal class ActivityReindexServiceTest {
             },
             esRepo,
             searchTaskMetricFactory,
-            router
+            converter
         )
 
-        Assertions.assertThat(
+        assertThat(
             service
                 .reindex(BlockchainDto.ETHEREUM, ActivityTypeDto.CANCEL_LIST, "test_index")
                 .toList()

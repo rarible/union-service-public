@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.core.converter
 
 import com.rarible.core.common.mapAsync
+import com.rarible.protocol.union.core.converter.helper.SellActivityEnricher
 import com.rarible.protocol.union.core.model.EsActivity
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
@@ -28,14 +29,19 @@ import com.rarible.protocol.union.dto.OrderMatchSwapDto
 import com.rarible.protocol.union.dto.TransferActivityDto
 import com.rarible.protocol.union.dto.ext
 import com.rarible.protocol.union.dto.parser.IdParser
+import org.springframework.stereotype.Component
 
-object EsActivityConverter {
+@Component
+class EsActivityConverter(
+    private val itemRouter: BlockchainRouter<ItemService>,
+    private val sellActivityEnricher: SellActivityEnricher,
+) {
 
-    suspend fun batchConvert(source: List<ActivityDto>, router: BlockchainRouter<ItemService>): List<EsActivity> {
+    suspend fun batchConvert(source: List<ActivityDto>, ): List<EsActivity> {
         val items = source.groupBy { it.id.blockchain }
             .mapAsync { (blockchain, activities) ->
                 val itemIds = activities.mapNotNull { extractItemId(it)?.value }
-                router.getService(blockchain).getItemsByIds(itemIds)
+                itemRouter.getService(blockchain).getItemsByIds(itemIds)
             }
             .flatten()
             .associateBy { it.id }
@@ -46,7 +52,7 @@ object EsActivityConverter {
         }
     }
 
-    fun convert(source: ActivityDto, collection: String?): EsActivity? {
+    suspend fun convert(source: ActivityDto, collection: String?): EsActivity? {
         val itemId = extractItemId(source)
         return when (source) {
             is MintActivityDto -> convertMint(source, itemId, collection)
@@ -160,7 +166,8 @@ object EsActivityConverter {
         )
     }
 
-    private fun convertOrderMatchSell(source: OrderMatchSellDto, itemId: ItemIdDto?, collection: String?): EsActivity {
+    private suspend fun convertOrderMatchSell(source: OrderMatchSellDto, itemId: ItemIdDto?, collection: String?): EsActivity {
+        val volumeInfo = sellActivityEnricher.provideVolumeInfo(source)
         return EsActivity(
             activityId = source.id.toString(),
             date = source.date.truncatedToSeconds(),
@@ -172,6 +179,10 @@ object EsActivityConverter {
             userTo = source.buyer.value,
             collection = getCollection(source, itemId, collection),
             item = itemId?.value.orEmpty(),
+            sellCurrency = volumeInfo.sellCurrency,
+            volumeUsd = volumeInfo.volumeUsd,
+            volumeSell = volumeInfo.volumeSell,
+            volumeNative = volumeInfo.volumeNative,
         )
     }
 
