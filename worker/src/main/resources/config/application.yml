@@ -186,7 +186,7 @@ worker:
         - blockchain: IMMUTABLEX
           enabled: false
     ownership:
-      enabled: false
+      enabled: true
       blockchains:
         - blockchain: ETHEREUM
           enabled: true
