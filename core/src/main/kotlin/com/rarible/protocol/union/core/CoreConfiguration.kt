@@ -39,7 +39,12 @@ import org.springframework.web.reactive.function.client.WebClient
 @Configuration
 @EnableScheduling
 @ComponentScan(basePackageClasses = [CoreConfiguration::class])
-@EnableConfigurationProperties(value = [FeatureFlagsProperties::class])
+@EnableConfigurationProperties(
+    value = [
+        FeatureFlagsProperties::class,
+        EsProperties::class,
+    ]
+)
 class CoreConfiguration(
     val enabledBlockchains: List<BlockchainDto>,
     val featureFlagsProperties: FeatureFlagsProperties,
@@ -161,8 +166,8 @@ class CoreConfiguration(
             if (e.value.size > 1) {
                 throw IllegalArgumentException(
                     "There are several implementations of service " +
-                            "for blockchain ${e.key}: ${e.value.map { it.javaClass.name }}, should be only one" +
-                            "implementation"
+                        "for blockchain ${e.key}: ${e.value.map { it.javaClass.name }}, should be only one" +
+                        "implementation"
                 )
             }
         }

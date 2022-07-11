@@ -289,7 +289,7 @@ open class TezosActivityService(
             val ids = itemActivitiesIds.filter { isValidLong(it) }
             if (tzktItemActivityService.enabled() && ids.isNotEmpty()) {
                 tzktItemActivityService.getByIds(ids)
-                    .also { logger.info("Total dipdup item activities returned: ${it.size}") }
+                    .also { logger.info("Total tzkt item activities returned: ${it.size}") }
             } else {
                 emptyList()
             }

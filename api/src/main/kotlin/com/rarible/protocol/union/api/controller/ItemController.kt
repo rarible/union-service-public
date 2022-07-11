@@ -1,5 +1,8 @@
 package com.rarible.protocol.union.api.controller
 
+import com.rarible.protocol.union.api.service.elastic.ItemTraitService
+import com.rarible.protocol.union.api.service.elastic.toApiDto
+import com.rarible.protocol.union.api.service.elastic.toInner
 import com.rarible.protocol.union.api.service.select.ItemSourceSelectService
 import com.rarible.protocol.union.core.exception.UnionNotFoundException
 import com.rarible.protocol.union.core.model.UnionImageProperties
@@ -11,6 +14,7 @@ import com.rarible.protocol.union.core.service.RestrictionService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.core.util.LogUtils
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.ExtendedTraitPropertiesDto
 import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.ItemIdsDto
 import com.rarible.protocol.union.dto.ItemsDto
@@ -19,6 +23,8 @@ import com.rarible.protocol.union.dto.MetaContentDto
 import com.rarible.protocol.union.dto.RestrictionCheckFormDto
 import com.rarible.protocol.union.dto.RestrictionCheckResultDto
 import com.rarible.protocol.union.dto.RoyaltiesDto
+import com.rarible.protocol.union.dto.TraitsDto
+import com.rarible.protocol.union.dto.TraitsRarityRequestDto
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
@@ -33,6 +39,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import java.net.URI
 import java.time.Duration
@@ -44,7 +51,8 @@ class ItemController(
     private val router: BlockchainRouter<ItemService>,
     private val enrichmentItemService: EnrichmentItemService,
     private val itemMetaService: ItemMetaService,
-    private val restrictionService: RestrictionService
+    private val restrictionService: RestrictionService,
+    private val itemTraitService: ItemTraitService,
 ) : ItemControllerApi {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -205,6 +213,38 @@ class ItemController(
         size: Int?
     ): ResponseEntity<ItemsWithOwnershipDto> {
         return ResponseEntity.ok(itemSourceSelectService.getItemsByOwnerWithOwnership(owner, continuation, size))
+    }
+
+    override suspend fun queryTraits(collectionIds: List<String>, keys: List<String>?): ResponseEntity<TraitsDto> {
+        return ResponseEntity.ok(
+            itemTraitService.queryTraits(
+                collectionIds = collectionIds,
+                keys = keys
+            )
+        )
+    }
+
+    override suspend fun searchTraits(
+        @RequestParam filter: String,
+        @RequestParam collectionIds: List<String>
+    ): ResponseEntity<TraitsDto> {
+        return ResponseEntity.ok(
+            itemTraitService.searchTraits(
+                filter = filter,
+                collectionIds = collectionIds
+            )
+        )
+    }
+
+    override suspend fun queryTraitsWithRarity(request: TraitsRarityRequestDto): ResponseEntity<ExtendedTraitPropertiesDto> {
+        if (request.properties.isEmpty()) return ResponseEntity.ok(ExtendedTraitPropertiesDto())
+
+        return ResponseEntity.ok(
+            ExtendedTraitPropertiesDto(traits = itemTraitService.getTraitsWithRarity(
+                collectionId = request.collectionId,
+                properties = request.properties.map { it.toInner() }.toSet()
+            ).map { it.toApiDto() })
+        )
     }
 
     private companion object {

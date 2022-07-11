@@ -15,6 +15,7 @@ import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.SolanaAuctionHouseDataV1Dto
+import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -107,6 +108,14 @@ class SolanaOrderConverter(
         continuation = source.continuation,
         entities = source.orders.map { convert(it, blockchain) }
     )
+
+    fun convert(source: SyncSortDto?): com.rarible.protocol.solana.dto.SyncSortDto? {
+        return when (source) {
+            SyncSortDto.DB_UPDATE_ASC -> com.rarible.protocol.solana.dto.SyncSortDto.DB_UPDATE_ASC
+            SyncSortDto.DB_UPDATE_DESC -> com.rarible.protocol.solana.dto.SyncSortDto.DB_UPDATE_DESC
+            else -> null
+        }
+    }
 
     fun convert(source: OrderSortDto?): com.rarible.protocol.solana.dto.OrderSortDto? {
         return when (source) {

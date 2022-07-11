@@ -9,6 +9,8 @@ import com.rarible.protocol.dto.OrderExchangeHistoryDto
 import com.rarible.protocol.dto.OrderOpenSeaV1DataV1Dto
 import com.rarible.protocol.dto.OrderRaribleV2DataV1Dto
 import com.rarible.protocol.dto.OrderRaribleV2DataV2Dto
+import com.rarible.protocol.dto.OrderRaribleV2DataV3BuyDto
+import com.rarible.protocol.dto.OrderRaribleV2DataV3SellDto
 import com.rarible.protocol.dto.OrderSideDto
 import com.rarible.protocol.dto.OrderSideMatchDto
 import com.rarible.protocol.dto.OrdersPaginationDto
@@ -27,11 +29,14 @@ import com.rarible.protocol.union.dto.EthOrderBasicSeaportDataV1Dto
 import com.rarible.protocol.union.dto.EthOrderCryptoPunksDataDto
 import com.rarible.protocol.union.dto.EthOrderDataLegacyDto
 import com.rarible.protocol.union.dto.EthOrderDataRaribleV2DataV1Dto
+import com.rarible.protocol.union.dto.EthOrderDataRaribleV2DataV3BuyDto
+import com.rarible.protocol.union.dto.EthOrderDataRaribleV2DataV3SellDto
 import com.rarible.protocol.union.dto.EthOrderOpenSeaV1DataV1Dto
 import com.rarible.protocol.union.dto.EthSeaportConsiderationDto
 import com.rarible.protocol.union.dto.EthSeaportItemTypeDto
 import com.rarible.protocol.union.dto.EthSeaportOfferDto
 import com.rarible.protocol.union.dto.OnChainOrderDto
+import com.rarible.protocol.union.dto.OrderDataDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.OrderSortDto
@@ -292,7 +297,7 @@ class EthOrderConverter(
         )
     }
 
-    fun convert(source: com.rarible.protocol.dto.OrderRaribleV2DataDto, blockchain: BlockchainDto): EthOrderDataRaribleV2DataV1Dto {
+    fun convert(source: com.rarible.protocol.dto.OrderRaribleV2DataDto, blockchain: BlockchainDto): OrderDataDto {
         return when(source) {
             is OrderRaribleV2DataV2Dto -> {
                 EthOrderDataRaribleV2DataV1Dto(
@@ -304,6 +309,23 @@ class EthOrderConverter(
                 EthOrderDataRaribleV2DataV1Dto(
                     payouts = source.payouts.map { EthConverter.convertToPayout(it, blockchain) },
                     originFees = source.originFees.map { EthConverter.convertToPayout(it, blockchain) }
+                )
+            }
+            is OrderRaribleV2DataV3SellDto -> {
+                EthOrderDataRaribleV2DataV3SellDto(
+                    payout = source.payout?.let { EthConverter.convertToPayout(it, blockchain) },
+                    originFeeFirst = source.originFeeFirst?.let { EthConverter.convertToPayout(it, blockchain) },
+                    originFeeSecond = source.originFeeSecond?.let { EthConverter.convertToPayout(it, blockchain) },
+                    maxFeesBasePoint = source.maxFeesBasePoint,
+                    marketplaceMarker = source.marketplaceMarker?.let { EthConverter.convert(it) }
+                )
+            }
+            is OrderRaribleV2DataV3BuyDto -> {
+                EthOrderDataRaribleV2DataV3BuyDto(
+                    payout = source.payout?.let { EthConverter.convertToPayout(it, blockchain) },
+                    originFeeFirst = source.originFeeFirst?.let { EthConverter.convertToPayout(it, blockchain) },
+                    originFeeSecond = source.originFeeSecond?.let { EthConverter.convertToPayout(it, blockchain) },
+                    marketplaceMarker = source.marketplaceMarker?.let { EthConverter.convert(it) }
                 )
             }
         }
