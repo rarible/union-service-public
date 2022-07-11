@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 class OwnershipController(
-    private val ownershipSourceSelectService: OwnershipSourceSelectService
+    private val ownershipSourceSelectService: OwnershipSourceSelectService,
 ) : OwnershipControllerApi {
 
     companion object {

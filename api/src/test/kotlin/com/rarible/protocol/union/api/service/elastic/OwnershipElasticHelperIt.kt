@@ -7,10 +7,8 @@ import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.parser.OwnershipIdParser
 import com.rarible.protocol.union.enrichment.repository.search.EsOwnershipRepository
-import com.rarible.protocol.union.enrichment.test.data.randomItemDto
 import com.rarible.protocol.union.enrichment.test.data.randomUnionAddress
 import com.rarible.protocol.union.enrichment.test.data.randomUnionOwnership
-import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.integration.flow.data.randomFlowItemId
 import io.mockk.coEvery
 import io.mockk.coVerify

@@ -12,7 +12,6 @@ import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.core.util.truncatedToSeconds
 import com.rarible.protocol.union.dto.ActivityBlockchainInfoDto
-import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivityIdDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.AssetDto
@@ -56,16 +55,13 @@ import com.rarible.protocol.union.dto.parser.IdParser
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.confirmVerified
-import io.mockk.every
 import io.mockk.mockk
+import java.math.BigInteger
+import java.time.Instant
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatCode
-import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import randomInstant
-import java.math.BigInteger
-import java.time.Instant
 
 class EsActivityConverterTest {
 

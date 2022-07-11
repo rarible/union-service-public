@@ -66,6 +66,7 @@ class EsOwnershipQueryBuilderService(
         }
 
         matchAddressesList(filter.owners, EsOwnership::owner.name)
+        matchIdsList(filter.items, EsOwnership::itemId.name)
         matchIdsList(filter.collections, EsOwnership::collection.name)
         matchIdsList(filter.auctions, EsOwnership::auctionId.name)
         matchAddressesList(filter.auctionOwners, EsOwnership::auctionOwnershipId.name)
