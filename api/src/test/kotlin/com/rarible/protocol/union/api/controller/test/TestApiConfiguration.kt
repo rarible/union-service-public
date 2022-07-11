@@ -287,6 +287,10 @@ class TestApiConfiguration {
 
     @Bean
     @Primary
+    fun testTzktOwnershipClient(): com.rarible.tzkt.client.OwnershipClient = mockk()
+
+    @Bean
+    @Primary
     fun testTzktCollectionClient(): com.rarible.tzkt.client.CollectionClient = mockk()
 
 }
