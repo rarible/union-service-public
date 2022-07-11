@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.enrichment.service.query.item
 
+import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.core.continuation.UnionItemContinuation
 import com.rarible.protocol.union.core.converter.ItemOwnershipConverter
 import com.rarible.protocol.union.core.model.UnionItem
@@ -23,16 +24,13 @@ import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.dto.subchains
 import com.rarible.protocol.union.enrichment.service.query.ownership.OwnershipApiService
 import com.rarible.protocol.union.enrichment.util.BlockchainFilter
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
-@ExperimentalCoroutinesApi
 @Component
 class ItemApiMergeService(
     private val itemEnrichService: ItemEnrichService,
@@ -40,7 +38,9 @@ class ItemApiMergeService(
     private val ownershipApiService: OwnershipApiService,
 ) : ItemQueryService {
 
-    private val logger = LoggerFactory.getLogger(javaClass)
+    companion object {
+        private val logger by Logger()
+    }
 
     override suspend fun getAllItems(
         blockchains: List<BlockchainDto>?,

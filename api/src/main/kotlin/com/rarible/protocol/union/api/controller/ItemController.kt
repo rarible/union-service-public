@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.api.controller
 
+import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.api.service.elastic.ItemTraitService
 import com.rarible.protocol.union.api.service.elastic.toApiDto
 import com.rarible.protocol.union.api.service.elastic.toInner
@@ -32,7 +33,6 @@ import com.rarible.protocol.union.enrichment.service.ItemMetaService
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.time.withTimeout
-import org.slf4j.LoggerFactory
 import org.springframework.core.io.Resource
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
@@ -55,7 +55,10 @@ class ItemController(
     private val itemTraitService: ItemTraitService,
 ) : ItemControllerApi {
 
-    private val logger = LoggerFactory.getLogger(javaClass)
+    companion object {
+        private val logger by Logger()
+        private val timeoutSyncLoadingMeta: Duration = Duration.ofSeconds(30)
+    }
 
     override suspend fun getAllItems(
         blockchains: List<BlockchainDto>?,
@@ -245,11 +248,6 @@ class ItemController(
                 properties = request.properties.map { it.toInner() }.toSet()
             ).map { it.toApiDto() })
         )
-    }
-
-    private companion object {
-        // A timeout to avoid infinite meta loading.
-        val timeoutSyncLoadingMeta: Duration = Duration.ofSeconds(30)
     }
 }
 

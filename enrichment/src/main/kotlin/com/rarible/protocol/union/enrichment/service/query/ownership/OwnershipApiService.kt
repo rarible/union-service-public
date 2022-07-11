@@ -33,7 +33,6 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import org.springframework.stereotype.Component
 
-@ExperimentalCoroutinesApi
 @Component
 class OwnershipApiService(
     private val orderApiService: OrderApiMergeService,

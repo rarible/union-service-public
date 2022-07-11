@@ -19,7 +19,6 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import org.springframework.stereotype.Service
 
-@ExperimentalCoroutinesApi
 @Service
 class ItemEnrichService(
     private val itemMetaService: ItemMetaService,

@@ -4,7 +4,9 @@ import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.apm.SpanType
 import com.rarible.core.common.mapAsync
 import com.rarible.core.logging.Logger
+import com.rarible.protocol.dto.parser.ItemIdParser
 import com.rarible.protocol.union.core.continuation.UnionItemContinuation
+import com.rarible.protocol.union.core.model.EsActivityCursor.Companion.fromActivityLite
 import com.rarible.protocol.union.core.model.EsItem
 import com.rarible.protocol.union.core.model.EsItemCursor
 import com.rarible.protocol.union.core.model.EsItemSort
@@ -31,14 +33,12 @@ import com.rarible.protocol.union.enrichment.repository.search.EsItemRepository
 import com.rarible.protocol.union.enrichment.repository.search.EsOwnershipRepository
 import com.rarible.protocol.union.enrichment.service.query.item.ItemEnrichService
 import com.rarible.protocol.union.enrichment.service.query.item.ItemQueryService
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import org.springframework.stereotype.Service
 
 @Service
 @CaptureSpan(type = SpanType.APP)
-@ExperimentalCoroutinesApi
 class ItemElasticService(
     private val itemFilterConverter: ItemFilterConverter,
     private val esItemRepository: EsItemRepository,
@@ -185,26 +185,23 @@ class ItemElasticService(
     }
 
     private suspend fun getItems(queryResult: EsQueryResult<EsItem>): List<UnionItem> {
+        val esItems = queryResult.content
         val mapping = hashMapOf<BlockchainDto, MutableList<String>>()
 
-        queryResult.content.forEach { item ->
+        esItems.forEach { item ->
             mapping
                 .computeIfAbsent(item.blockchain) { ArrayList(queryResult.content.size) }
-                .add(item.itemId)
+                .add(IdParser.parseItemId(item.itemId).value)
         }
 
-        val items = mapping.mapAsync { element ->
-            val blockchain = element.key
-            val ids = element.value
-            val isBlockchainEnabled = router.isBlockchainEnabled(blockchain)
-            if (isBlockchainEnabled) {
-                router.getService(blockchain).getItemsByIds(ids)
-            } else emptyList()
-        }.flatten()
-        return items
+        val items = getItemsFromBlockchains(mapping)
+        val itemsIdMapping = items.associateBy { it.id.fullId() }
+
+        return esItems.mapNotNull { esItem ->
+            itemsIdMapping[esItem.itemId]
+        }
     }
 
-    // TODO: apply sort by lastUpdatedAt
     private suspend fun getItemsByOwnerships(ownerships: List<EsOwnership>): List<UnionItem> {
         val mapping = hashMapOf<BlockchainDto, MutableList<String>>()
 
@@ -213,18 +210,15 @@ class ItemElasticService(
             .forEach { item ->
                 mapping
                     .computeIfAbsent(item.blockchain) { ArrayList(ownerships.size) }
-                    .add(item.itemId!!)
+                    .add(IdParser.parseItemId(item.itemId!!).value)
             }
 
-        val items = mapping.mapAsync { element ->
-            val blockchain = element.key
-            val ids = element.value
-            val isBlockchainEnabled = router.isBlockchainEnabled(blockchain)
-            if (isBlockchainEnabled) {
-                router.getService(blockchain).getItemsByIds(ids)
-            } else emptyList()
-        }.flatten()
-        return items
+        val items = getItemsFromBlockchains(mapping)
+        val itemsIdMapping = items.associateBy { it.id.fullId() }
+
+        return ownerships.mapNotNull {
+            itemsIdMapping[it.itemId]
+        }
     }
 
     override suspend fun getItemsByOwner(
@@ -261,5 +255,18 @@ class ItemElasticService(
 
     override suspend fun getItemsByIds(ids: List<ItemIdDto>): List<ItemDto> {
         throw NotImplementedError()
+    }
+
+    private suspend fun getItemsFromBlockchains(itemsPerBlockchain: Map<BlockchainDto, MutableList<String>>): List<UnionItem> {
+        val items = itemsPerBlockchain.mapAsync { element ->
+            val blockchain = element.key
+            val ids = element.value
+            val isBlockchainEnabled = router.isBlockchainEnabled(blockchain)
+            if (isBlockchainEnabled) {
+                router.getService(blockchain).getItemsByIds(ids)
+            } else emptyList()
+        }.flatten()
+
+        return items
     }
 }

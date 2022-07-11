@@ -377,6 +377,7 @@ class ItemsControllerElasticFt : AbstractIntegrationTest() {
 
     @Test
     fun `get items by creator - ethereum, all enriched`() = runBlocking<Unit> {
+        // given
         val ethCollectionId = CollectionIdDto(BlockchainDto.ETHEREUM, randomEthAddress())
         val creatorId = CollectionIdDto(BlockchainDto.ETHEREUM, randomEthAddress())
         // Enriched item
@@ -388,7 +389,7 @@ class ItemsControllerElasticFt : AbstractIntegrationTest() {
         )
         repository.save(ethEsItem1)
         val ethItemId = randomEthItemId()
-        val ethItem = randomEthNftItemDto(ethItemId)
+        val ethItem = randomEthNftItemDto(ethItemId1)
         val ethUnionItem = EthItemConverter.convert(ethItem, ethItemId.blockchain)
         val ethOrder = randomEthV2OrderDto(ethItemId)
         val ethUnionOrder = ethOrderConverter.convert(ethOrder, ethItemId.blockchain)
@@ -398,10 +399,12 @@ class ItemsControllerElasticFt : AbstractIntegrationTest() {
 
         coEvery {
             testEthereumItemApi.getNftItemsByIds(
-                NftItemIdsDto(listOf(ethItemId1.fullId()))
+                NftItemIdsDto(listOf(ethItemId1.value))
             )
         } returns listOf(ethItem).toFlux()
         ethereumOrderControllerApiMock.mockGetByIds(ethOrder)
+
+        // when
         val items = itemControllerClient.getItemsByCreator(
             creatorId.fullId(), listOf(BlockchainDto.ETHEREUM), continuation, size
         ).awaitFirst()
@@ -409,7 +412,7 @@ class ItemsControllerElasticFt : AbstractIntegrationTest() {
         assertThat(items.items).hasSize(1)
         val result = items.items[0]
 
-        assertThat(result.id).isEqualTo(ethItemId)
+        assertThat(result.id).isEqualTo(ethItemId1)
         assertThat(result.id.blockchain).isEqualTo(BlockchainDto.ETHEREUM)
         assertThat(result.bestBidOrder!!.id).isEqualTo(ethUnionOrder.id)
     }

@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.api.controller
 
 import com.rarible.protocol.union.api.service.select.CollectionSourceSelectService
+import com.rarible.protocol.union.api.service.select.ItemSourceSelectService
 import com.rarible.protocol.union.core.model.TokenId
 import com.rarible.protocol.union.core.service.CollectionService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
@@ -26,7 +27,7 @@ import org.springframework.web.bind.annotation.RestController
 class CollectionController(
     private val router: BlockchainRouter<CollectionService>,
     private val collectionSourceSelector: CollectionSourceSelectService,
-    private val itemApiService: ItemApiMergeService,
+    private val itemSourceSelectService: ItemSourceSelectService,
     private val itemMetaService: ItemMetaService,
     private val enrichmentCollectionService: EnrichmentCollectionService
 ) : CollectionControllerApi {
@@ -57,7 +58,7 @@ class CollectionController(
         val collectionId = IdParser.parseCollectionId(collection)
         logger.info("Refreshing collection meta for '{}'", collection)
         router.getService(collectionId.blockchain).refreshCollectionMeta(collectionId.value)
-        itemApiService.getAllItemIdsByCollection(collectionId).collect {
+        itemSourceSelectService.getAllItemIdsByCollection(collectionId).collect {
             itemMetaService.schedule(it, "default", true)  // TODO PT-49
         }
         return ResponseEntity.ok().build()

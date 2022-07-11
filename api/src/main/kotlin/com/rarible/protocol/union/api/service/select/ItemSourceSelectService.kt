@@ -14,14 +14,14 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import org.springframework.stereotype.Service
 
-@ExperimentalCoroutinesApi
 @Service
 class ItemSourceSelectService(
     private val featureFlagsProperties: FeatureFlagsProperties,
     private val itemApiService: ItemApiMergeService,
     private val itemElasticService: ItemElasticService
-) : ItemQueryService {
-    override suspend fun getAllItems(
+) {
+
+    suspend fun getAllItems(
         blockchains: List<BlockchainDto>?,
         continuation: String?,
         size: Int?,
@@ -39,15 +39,15 @@ class ItemSourceSelectService(
         )
     }
 
-    override suspend fun getAllItemIdsByCollection(collectionId: CollectionIdDto): Flow<ItemIdDto> {
+    suspend fun getAllItemIdsByCollection(collectionId: CollectionIdDto): Flow<ItemIdDto> {
         return getQuerySource().getAllItemIdsByCollection(collectionId)
     }
 
-    override suspend fun getItemsByIds(ids: List<ItemIdDto>): List<ItemDto> {
+    suspend fun getItemsByIds(ids: List<ItemIdDto>): List<ItemDto> {
         return itemApiService.getItemsByIds(ids)
     }
 
-    override suspend fun getItemsByCollection(
+    suspend fun getItemsByCollection(
         collection: String,
         continuation: String?,
         size: Int?
@@ -55,7 +55,7 @@ class ItemSourceSelectService(
         return getQuerySource().getItemsByCollection(collection = collection, continuation = continuation, size = size)
     }
 
-    override suspend fun getItemsByCreator(
+    suspend fun getItemsByCreator(
         creator: String,
         blockchains: List<BlockchainDto>?,
         continuation: String?,
@@ -69,7 +69,7 @@ class ItemSourceSelectService(
         )
     }
 
-    override suspend fun getItemsByOwner(
+    suspend fun getItemsByOwner(
         owner: String,
         blockchains: List<BlockchainDto>?,
         continuation: String?,
@@ -84,7 +84,7 @@ class ItemSourceSelectService(
         )
     }
 
-    override suspend fun getItemsByOwnerWithOwnership(
+    suspend fun getItemsByOwnerWithOwnership(
         owner: String,
         continuation: String?,
         size: Int?
