@@ -50,7 +50,10 @@ open class SolanaOwnershipService(
     }
 
     override suspend fun getOwnershipsAll(continuation: String?, size: Int): Slice<UnionOwnership> {
-        TODO("Not yet implemented")
+        val balancesDto = balanceApi.getBalancesAll(continuation, size, false).awaitFirst()
+        val converted = balancesDto.balances.map { SolanaOwnershipConverter.convert(it, blockchain) }
+
+        return Slice(balancesDto.continuation, converted)
     }
 
     override suspend fun getOwnershipsByItem(itemId: String, continuation: String?, size: Int): Page<UnionOwnership> {
