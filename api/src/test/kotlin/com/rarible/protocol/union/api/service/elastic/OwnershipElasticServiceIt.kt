@@ -20,7 +20,9 @@ import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionI
 import com.rarible.protocol.union.integration.flow.data.randomFlowCollectionDto
 import io.mockk.coEvery
 import io.mockk.impl.annotations.MockK
+import java.time.Duration
 import java.time.Instant
+import kotlin.random.Random
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -71,7 +73,7 @@ class OwnershipElasticServiceIt {
                         itemId = oid.getItemId().fullId(),
                         collection = "${randomEthCollectionId()}",
                         owner = oid.owner.fullId(),
-                        date = Instant.now(),
+                        date = Instant.now() + Duration.ofDays(it.toLong()),
                         auctionId = randomString(),
                         auctionOwnershipId = randomString()
                     )
@@ -86,7 +88,7 @@ class OwnershipElasticServiceIt {
                         itemId = oid.getItemId().fullId(),
                         collection = randomFlowCollectionDto().id,
                         owner = oid.owner.fullId(),
-                        date = Instant.now(),
+                        date = Instant.now() - Duration.ofDays(it.toLong()),
                         auctionId = randomString(),
                         auctionOwnershipId = randomString()
                     )
@@ -158,20 +160,122 @@ class OwnershipElasticServiceIt {
     @Test
     internal fun `search by request test`() {
         runBlocking {
-            val expectedItemIds = ownerships.shuffled().take(3).map { IdParser.parseItemId(it.itemId!!) }
 
-            val request = OwnershipSearchRequestDto(
+            var expectedIds = takeRandomIds()
+            check(
+                expectedIds = expectedIds,
                 filter = OwnershipSearchFilterDto(
-                    items = expectedItemIds
-                )
+                    items = ownerships.filter { it.ownershipId in expectedIds }
+                        .map { IdParser.parseItemId(it.itemId!!) }
+                ),
+                failMessage = "Search by itemId failed"
             )
 
+            expectedIds = takeRandomIds()
+            check(
+                expectedIds = expectedIds,
+                filter = OwnershipSearchFilterDto(
+                    collections = ownerships.filter { it.ownershipId in expectedIds }.mapNotNull { esOwnership ->
+                        esOwnership.collection?.let { IdParser.parseCollectionId(it) }
+                    }
+                ),
+                failMessage = "Search by collection failed"
+            )
 
-            val actual = service.search(request)
-            val actualIds = actual.ownerships.mapNotNull { it.itemId }
+            expectedIds = takeRandomIds()
+            check(
+                expectedIds = expectedIds,
+                filter = OwnershipSearchFilterDto(
+                    owners = ownerships.filter { it.ownershipId in expectedIds }.map {
+                        IdParser.parseAddress(it.owner)
+                    }
+                ),
+                failMessage = "Search by owners failed"
+            )
 
-            assertThat(actualIds.size).isEqualTo(expectedItemIds.size)
-            assertThat(actualIds).containsAll(expectedItemIds)
+            expectedIds =
+                ownerships.filter { it.blockchain == BlockchainDto.ETHEREUM }.map { it.ownershipId.lowercase() }
+            check(
+                expectedIds = expectedIds,
+                filter = OwnershipSearchFilterDto(
+                    blockchains = listOf(BlockchainDto.ETHEREUM)
+                ),
+                failMessage = "Search by blockchain failed"
+            )
+
+            expectedIds = takeRandomIds()
+            check(
+                expectedIds = expectedIds,
+                filter = OwnershipSearchFilterDto(
+                    auctions = ownerships.filter { it.ownershipId in expectedIds }.mapNotNull { esOwnership ->
+                        esOwnership.auctionId?.let { IdParser.parseAuctionId(it) }
+                    }
+                ),
+                failMessage = "Search by auctions failed"
+            )
+
+            expectedIds = takeRandomIds()
+            check(
+                expectedIds = expectedIds,
+                filter = OwnershipSearchFilterDto(
+                    auctionsOwners = ownerships.filter { it.ownershipId in expectedIds }.mapNotNull { esOwnership ->
+                        esOwnership.auctionOwnershipId?.let { IdParser.parseAddress(it) }
+                    }
+                ),
+                failMessage = "Search by auctionsOwners failed"
+            )
+
+            expectedIds = ownerships.filter { it.date < Instant.now() }.map { it.ownershipId.lowercase() }
+            check(
+                expectedIds = expectedIds,
+                filter = OwnershipSearchFilterDto(
+                    beforeDate = Instant.now()
+                ),
+                failMessage = "Search by beforeDate failed"
+            )
+
+            expectedIds = ownerships.filter { it.date > Instant.now() }.map { it.ownershipId.lowercase() }
+            check(
+                expectedIds = expectedIds,
+                filter = OwnershipSearchFilterDto(
+                    afterDate = Instant.now()
+                ),
+                failMessage = "Search by afterDate failed"
+            )
+
+            check(
+                expectedIds = ownerships.map { it.ownershipId.lowercase() },
+                filter = OwnershipSearchFilterDto(
+                    beforeDate = ownerships.maxOf { it.date } + Duration.ofHours(1L),
+                    afterDate = ownerships.minOf { it.date } - Duration.ofHours(1L)
+                ),
+                failMessage = "Search by range of dates failed"
+            )
+
+            expectedIds = takeRandomIds()
+            check(
+                expectedIds = expectedIds,
+                filter = OwnershipSearchFilterDto(
+                    owners = ownerships.filter { it.ownershipId in expectedIds }.map {
+                        IdParser.parseAddress(it.owner)
+                    },
+                    items = ownerships.filter { it.ownershipId in expectedIds }.map {
+                        IdParser.parseItemId(it.itemId!!)
+                    }
+                ),
+                failMessage = "Search by owners and items failed!"
+            )
         }
+    }
+
+    private fun takeRandomIds(): List<String> =
+        ownerships.shuffled().take(Random.nextInt(3, 6)).map { it.ownershipId.lowercase() }
+
+    private suspend fun check(expectedIds: List<String>, filter: OwnershipSearchFilterDto, failMessage: String) {
+        val actual = service.search(OwnershipSearchRequestDto(filter = filter))
+        assertThat(actual.ownerships.map { it.id.fullId().lowercase() })
+            .withFailMessage(failMessage)
+            .containsAll(expectedIds)
+
     }
 }
