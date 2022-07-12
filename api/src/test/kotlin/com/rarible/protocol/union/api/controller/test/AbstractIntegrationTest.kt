@@ -220,7 +220,13 @@ abstract class AbstractIntegrationTest {
     lateinit var tzktTokenClient: com.rarible.tzkt.client.TokenClient
 
     @Autowired
+    lateinit var tzktTokenActivityClient: com.rarible.tzkt.client.TokenActivityClient
+
+    @Autowired
     lateinit var tzktCollectionClient: com.rarible.tzkt.client.CollectionClient
+
+    @Autowired
+    lateinit var tzktOwnershipClient: com.rarible.tzkt.client.OwnershipClient
 
     lateinit var tezosItemControllerApiMock: TezosItemControllerApiMock
     lateinit var tezosOwnershipControllerApiMock: TezosOwnershipControllerApiMock

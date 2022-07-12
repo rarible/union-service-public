@@ -85,12 +85,20 @@ open class TezosOrderService(
     override suspend fun getOrdersByIds(orderIds: List<String>): List<OrderDto> {
         if (dipdupOrderService.enabled()) {
             val uuidIds = orderIds.filter(::isValidUUID)
-            val orders = dipdupOrderService.getOrderByIds(uuidIds)
+            val orders = if (uuidIds.isNotEmpty()) {
+                dipdupOrderService.getOrderByIds(uuidIds)
+            } else {
+                return emptyList()
+            }
 
             val legacyIds = orderIds.subtract(uuidIds).toList()
-            val legacyOrders = orderControllerApi.getOrderByIds(OrderIdsDto(legacyIds))
-                .collectList().awaitFirst()
-                .map { tezosOrderConverter.convert(it, blockchain) }
+            val legacyOrders = if (legacyIds.isNotEmpty()) {
+                orderControllerApi.getOrderByIds(OrderIdsDto(legacyIds))
+                    .collectList().awaitFirst()
+                    .map { tezosOrderConverter.convert(it, blockchain) }
+            } else {
+                return emptyList()
+            }
 
             return orders + legacyOrders
         } else {
