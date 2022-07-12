@@ -8,6 +8,7 @@ import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OwnershipDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
+import com.rarible.protocol.union.dto.OwnershipSearchRequestDto
 import com.rarible.protocol.union.dto.OwnershipsDto
 import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.continuation.page.Slice
@@ -38,6 +39,10 @@ class OwnershipSourceSelectService(
 
     suspend fun getOwnershipsByItem(itemId: ItemIdDto, continuation: String?, size: Int): OwnershipsDto {
         return getQuerySource().getOwnershipsByItem(itemId, continuation, size)
+    }
+
+    suspend fun search(request: OwnershipSearchRequestDto): OwnershipsDto {
+        return getQuerySource().search(request)
     }
 
     private fun getQuerySource(): OwnershipQueryService {
