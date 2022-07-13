@@ -30,6 +30,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import reactor.core.publisher.Flux
 import reactor.kotlin.core.publisher.toMono
 import java.math.BigInteger
 import java.time.Instant
@@ -66,6 +67,10 @@ class TezosDipDupOwnershipsControllerFt : AbstractIntegrationTest() {
         coEvery {
             tzktOwnershipClient.ownershipById(ownerId.value)
         } returns tokenBalance
+
+        coEvery {
+            testTezosOrderApi.getOrderByIds(any())
+        } returns Flux.empty()
 
         ownershipRepository.save(ShortOwnership(
             blockchain = BlockchainDto.TEZOS,
