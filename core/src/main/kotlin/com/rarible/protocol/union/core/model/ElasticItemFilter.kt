@@ -15,4 +15,7 @@ data class ElasticItemFilter(
     val deleted: Boolean? = null,
     val text: String? = null,
     val cursor: EsItemCursor? = null,
+    val traitsKeys: Set<String>? = null,
+    val traitsValues: Set<String>? = null,
+    val descriptions: Set<String>? = null
 )

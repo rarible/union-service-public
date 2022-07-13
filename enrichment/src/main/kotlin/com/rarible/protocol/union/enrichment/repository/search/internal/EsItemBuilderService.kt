@@ -40,6 +40,26 @@ object EsItemBuilderService {
             query.must(rangeQuery(EsItem::lastUpdatedAt.name).gte(updatedFrom).lte(updatedTo))
         }
 
+        if (traitsKeys != null) {
+            query.should(
+                QueryBuilders.nestedQuery(
+                    "traits",
+                    QueryBuilders.boolQuery().must(termsQuery("traits.key.raw", traitsKeys)),
+                    ScoreMode.None
+                )
+            )
+        }
+
+        if (traitsValues != null) {
+            query.should(
+                QueryBuilders.nestedQuery(
+                    "traits",
+                    QueryBuilders.boolQuery().must(termsQuery("traits.value.raw", traitsValues)),
+                    ScoreMode.None
+                )
+            )
+        }
+
         if (!text.isNullOrBlank()) {
             query.should(
                 QueryBuilders.nestedQuery(

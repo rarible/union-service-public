@@ -4,10 +4,11 @@ import com.rarible.protocol.union.core.model.ElasticItemFilter
 import com.rarible.protocol.union.core.model.EsItemCursor
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
+import com.rarible.protocol.union.dto.ItemsSearchFilterDto
 import com.rarible.protocol.union.dto.continuation.CombinedContinuation
 import com.rarible.protocol.union.dto.continuation.DateIdContinuation
-import org.springframework.stereotype.Service
 import java.time.Instant
+import org.springframework.stereotype.Service
 
 @Service
 class ItemFilterConverter(
@@ -40,36 +41,53 @@ class ItemFilterConverter(
         )
     }
 
-    fun getItemsByCollection(collectionId: String, curor: EsItemCursor?): ElasticItemFilter {
+    fun getItemsByCollection(collectionId: String, cursor: EsItemCursor?): ElasticItemFilter {
 
         return ElasticItemFilter(
-            cursor = curor,
+            cursor = cursor,
             collections = setOf(collectionId)
         )
     }
 
-    fun getItemsByOwner(owner: String, blockchains: Set<String>?, curor: EsItemCursor?): ElasticItemFilter {
+    fun getItemsByOwner(owner: String, blockchains: Set<String>?, cursor: EsItemCursor?): ElasticItemFilter {
 
         return ElasticItemFilter(
-            cursor = curor,
+            cursor = cursor,
             owners = setOf(owner),
             blockchains = blockchains
         )
     }
 
-    fun getItemsByCreator(creator: String, curor: EsItemCursor?): ElasticItemFilter {
+    fun getItemsByCreator(creator: String, cursor: EsItemCursor?): ElasticItemFilter {
 
         return ElasticItemFilter(
-            cursor = curor,
+            cursor = cursor,
             creators = setOf(creator)
         )
     }
 
-    fun getAllItemIdsByCollection(collectionId: String, curor: EsItemCursor?): ElasticItemFilter {
+    fun getAllItemIdsByCollection(collectionId: String, cursor: EsItemCursor?): ElasticItemFilter {
 
         return ElasticItemFilter(
-            cursor = curor,
+            cursor = cursor,
             collections = setOf(collectionId)
+        )
+    }
+
+    fun searchItems(filter: ItemsSearchFilterDto, cursor: EsItemCursor?): ElasticItemFilter {
+        return ElasticItemFilter(
+            cursor = cursor,
+            blockchains = filter.blockchains?.map { it.name }?.toSet(),
+            collections = filter.collections?.map { it.fullId() }?.toSet(),
+            creators = filter.creators?.map { it.fullId() }?.toSet(),
+            mintedFrom = filter.mintedAtFrom,
+            mintedTo = filter.mintedAtTo,
+            updatedFrom = filter.lastUpdatedAtFrom,
+            updatedTo = filter.lastUpdatedAtTo,
+            deleted = filter.deleted,
+            descriptions = filter.descriptions?.toSet(),
+            traitsKeys = filter.traits?.map { it.key }?.toSet(),
+            traitsValues = filter.traits?.map { it.value }?.toSet()
         )
     }
 }
