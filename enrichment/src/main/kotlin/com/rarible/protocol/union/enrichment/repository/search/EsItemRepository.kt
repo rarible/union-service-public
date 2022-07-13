@@ -2,13 +2,11 @@ package com.rarible.protocol.union.enrichment.repository.search
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.rarible.protocol.union.core.elasticsearch.EsNameResolver
-import com.rarible.protocol.union.core.model.ElasticItemFilter
 import com.rarible.protocol.union.core.model.EsItem
+import com.rarible.protocol.union.core.model.EsItemFilter
 import com.rarible.protocol.union.core.model.EsItemSort
-import com.rarible.protocol.union.core.model.EsQueryResult
-import com.rarible.protocol.union.dto.continuation.page.ArgSlice
 import com.rarible.protocol.union.dto.continuation.page.PageSize
-import com.rarible.protocol.union.enrichment.repository.search.internal.EsItemBuilderService.buildQuery
+import com.rarible.protocol.union.enrichment.repository.search.internal.EsItemQueryBuilderService
 import kotlinx.coroutines.reactive.awaitFirst
 import org.elasticsearch.index.query.QueryBuilders.termQuery
 import org.springframework.data.elasticsearch.client.reactive.ReactiveElasticsearchClient
@@ -19,6 +17,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class EsItemRepository(
+    private val queryBuilderService: EsItemQueryBuilderService,
     objectMapper: ObjectMapper,
     elasticsearchConverter: ElasticsearchConverter,
     esOperations: ReactiveElasticsearchOperations,
@@ -35,12 +34,21 @@ class EsItemRepository(
     EsItem::itemId
 ) {
 
-    suspend fun search(
-        filter: ElasticItemFilter, sort: EsItemSort, limit: Int?
-    ): EsQueryResult<EsItem> {
-        val query = filter.buildQuery(sort)
+    suspend fun search(filter: EsItemFilter, sort: EsItemSort, limit: Int?): List<EsItem> {
+        val query = queryBuilderService.build(filter, sort)
+
         query.maxResults = PageSize.ITEM.limit(limit)
+        query.trackTotalHits = false
+
         return search(query)
+    }
+
+    // TODO: return lightweight EsItem type (similarly to EsActivityLite)
+    suspend fun search(query: NativeSearchQuery): List<EsItem> {
+        return esOperations.search(query, EsItem::class.java, entityDefinition.searchIndexCoordinates)
+            .collectList()
+            .awaitFirst()
+            .map { it.content }
     }
 
     suspend fun countItemsInCollection(collectionId: String): Long {
@@ -53,23 +61,5 @@ class EsItemRepository(
                 entityDefinition.searchIndexCoordinates
             )
             .awaitFirst()
-    }
-
-    suspend fun search(query: NativeSearchQuery): EsQueryResult<EsItem> {
-
-        val hits = esOperations.search(query, EsItem::class.java, entityDefinition.searchIndexCoordinates).collectList()
-            .awaitFirst()
-        val content = hits.map { it.content }
-
-        val last = hits.lastOrNull()
-        val continuationString = if (last != null && last.sortValues.size > 0) {
-            objectMapper.writeValueAsString(
-                hits.last().sortValues.last()
-            )
-        } else ArgSlice.COMPLETED
-
-        return EsQueryResult(
-            content = content, cursor = continuationString
-        )
     }
 }

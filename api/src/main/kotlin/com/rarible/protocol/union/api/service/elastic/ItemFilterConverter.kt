@@ -1,7 +1,8 @@
 package com.rarible.protocol.union.api.service.elastic
 
-import com.rarible.protocol.union.core.model.ElasticItemFilter
 import com.rarible.protocol.union.core.model.EsItemCursor
+import com.rarible.protocol.union.core.model.EsItemFilter
+import com.rarible.protocol.union.core.model.EsItemGenericFilter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.continuation.CombinedContinuation
@@ -19,20 +20,9 @@ class ItemFilterConverter(
         lastUpdatedFrom: Long?,
         lastUpdatedTo: Long?,
         cursor: String?
-    ): ElasticItemFilter {
-
-        val esItemCursor = if (cursor != null) {
-            val currentContinuation = CombinedContinuation.parse(cursor)
-            val entry = currentContinuation.continuations.entries.first()
-            val dateIdContinuation = DateIdContinuation.parse(entry.value)
-            EsItemCursor(
-                date = dateIdContinuation!!.date,
-                itemId = ItemIdDto(BlockchainDto.valueOf(entry.key), dateIdContinuation!!.id).toString()
-            )
-        } else null
-
-        return ElasticItemFilter(
-            cursor = esItemCursor,
+    ): EsItemFilter {
+        return EsItemGenericFilter(
+            cursor = cursor,
             blockchains = blockchains,
             deleted = showDeleted,
             updatedFrom = lastUpdatedFrom?.let { Instant.ofEpochMilli(it) },
@@ -40,35 +30,35 @@ class ItemFilterConverter(
         )
     }
 
-    fun getItemsByCollection(collectionId: String, curor: EsItemCursor?): ElasticItemFilter {
+    fun getItemsByCollection(collectionId: String, cursor: String?): EsItemFilter {
 
-        return ElasticItemFilter(
-            cursor = curor,
+        return EsItemGenericFilter(
+            cursor = cursor,
             collections = setOf(collectionId)
         )
     }
 
-    fun getItemsByOwner(owner: String, blockchains: Set<String>?, curor: EsItemCursor?): ElasticItemFilter {
+    fun getItemsByOwner(owner: String, blockchains: Set<String>?, cursor: String?): EsItemFilter {
 
-        return ElasticItemFilter(
-            cursor = curor,
+        return EsItemGenericFilter(
+            cursor = cursor,
             owners = setOf(owner),
             blockchains = blockchains
         )
     }
 
-    fun getItemsByCreator(creator: String, curor: EsItemCursor?): ElasticItemFilter {
+    fun getItemsByCreator(creator: String, cursor: String?): EsItemFilter {
 
-        return ElasticItemFilter(
-            cursor = curor,
+        return EsItemGenericFilter(
+            cursor = cursor,
             creators = setOf(creator)
         )
     }
 
-    fun getAllItemIdsByCollection(collectionId: String, curor: EsItemCursor?): ElasticItemFilter {
+    fun getAllItemIdsByCollection(collectionId: String, cursor: String?): EsItemFilter {
 
-        return ElasticItemFilter(
-            cursor = curor,
+        return EsItemGenericFilter(
+            cursor = cursor,
             collections = setOf(collectionId)
         )
     }

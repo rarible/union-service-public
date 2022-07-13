@@ -184,9 +184,9 @@ class ItemsControllerElasticFt : AbstractIntegrationTest() {
             testEthereumItemApi.getNftItemsByIds(
                 NftItemIdsDto(
                     listOf(
-                        ethEsItem1.itemId,
-                        ethEsItem2.itemId,
-                        ethEsItem3.itemId
+                        ethItem1.id,
+                        ethItem2.id,
+                        ethItem3.id
                     )
                 )
             )
@@ -196,9 +196,9 @@ class ItemsControllerElasticFt : AbstractIntegrationTest() {
             testEthereumItemApi.getNftItemsByIds(
                 NftItemIdsDto(
                     listOf(
-                        ethEsItem4.itemId,
-                        ethEsItem5.itemId,
-                        ethEsItem6.itemId
+                        ethItem4.id,
+                        ethItem5.id,
+                        ethItem6.id
                     )
                 )
             )
@@ -208,9 +208,9 @@ class ItemsControllerElasticFt : AbstractIntegrationTest() {
             testPolygonItemApi.getNftItemsByIds(
                 NftItemIdsDto(
                     listOf(
-                        polygonEsItem1.itemId,
-                        polygonEsItem2.itemId,
-                        polygonEsItem3.itemId
+                        polygonItem1.id,
+                        polygonItem2.id,
+                        polygonItem3.id,
                     )
                 )
             )
@@ -220,9 +220,9 @@ class ItemsControllerElasticFt : AbstractIntegrationTest() {
             testPolygonItemApi.getNftItemsByIds(
                 NftItemIdsDto(
                     listOf(
-                        polygonEsItem4.itemId,
-                        polygonEsItem5.itemId,
-                        polygonEsItem6.itemId
+                        polygonItem4.id,
+                        polygonItem5.id,
+                        polygonItem6.id,
                     )
                 )
             )
@@ -294,7 +294,7 @@ class ItemsControllerElasticFt : AbstractIntegrationTest() {
         ).awaitFirst()
 
         assertThat(result.items).hasSize(0)
-        assertThat(result.continuation).isEqualTo("")
+        assertThat(result.continuation).isEqualTo("null")
     }
 
     @Test
@@ -309,7 +309,7 @@ class ItemsControllerElasticFt : AbstractIntegrationTest() {
         )
         repository.save(ethEsItem1)
         val ethItemId = randomEthItemId()
-        val ethItem = randomEthNftItemDto(ethItemId)
+        val ethItem = randomEthNftItemDto(ethItemId1)
         val ethUnionItem = EthItemConverter.convert(ethItem, ethItemId.blockchain)
         val ethOrder = randomEthV2OrderDto(ethItemId)
         val ethUnionOrder = ethOrderConverter.convert(ethOrder, ethItemId.blockchain)
@@ -319,7 +319,7 @@ class ItemsControllerElasticFt : AbstractIntegrationTest() {
 
         coEvery {
             testEthereumItemApi.getNftItemsByIds(
-                NftItemIdsDto(listOf(ethItemId1.fullId()))
+                NftItemIdsDto(listOf(ethItemId1.value))
             )
         } returns listOf(ethItem).toFlux()
 
@@ -331,7 +331,7 @@ class ItemsControllerElasticFt : AbstractIntegrationTest() {
         assertThat(items.items).hasSize(1)
         val result = items.items[0]
 
-        assertThat(result.id).isEqualTo(ethItemId)
+        assertThat(result.id.value).isEqualTo(ethItem.id)
         assertThat(result.id.blockchain).isEqualTo(BlockchainDto.ETHEREUM)
         assertThat(result.bestBidOrder!!.id).isEqualTo(ethUnionOrder.id)
     }

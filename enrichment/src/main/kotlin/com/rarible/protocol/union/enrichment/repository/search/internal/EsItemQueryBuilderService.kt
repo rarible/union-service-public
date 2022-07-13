@@ -1,10 +1,9 @@
 package com.rarible.protocol.union.enrichment.repository.search.internal
 
-import com.rarible.protocol.union.core.model.ElasticItemFilter
 import com.rarible.protocol.union.core.model.EsItem
+import com.rarible.protocol.union.core.model.EsItemFilter
+import com.rarible.protocol.union.core.model.EsItemGenericFilter
 import com.rarible.protocol.union.core.model.EsItemSort
-import com.rarible.protocol.union.enrichment.repository.search.internal.EsItemQueryCursorService.applyCursor
-import com.rarible.protocol.union.enrichment.repository.search.internal.EsItemQuerySortService.applySort
 import org.apache.lucene.search.join.ScoreMode
 import org.elasticsearch.index.query.BoolQueryBuilder
 import org.elasticsearch.index.query.MultiMatchQueryBuilder
@@ -14,34 +13,40 @@ import org.elasticsearch.index.query.QueryBuilders.rangeQuery
 import org.elasticsearch.index.query.QueryBuilders.termsQuery
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder
+import org.springframework.stereotype.Component
 
-object EsItemBuilderService {
+@Component
+class EsItemQueryBuilderService(
+    private val cursorService: EsItemQueryCursorService,
+    private val sortService: EsItemQuerySortService,
+) {
 
-    fun ElasticItemFilter.buildQuery(sort: EsItemSort): NativeSearchQuery {
+    fun build(filter: EsItemFilter, sort: EsItemSort): NativeSearchQuery {
         val builder = NativeSearchQueryBuilder()
         val query = BoolQueryBuilder()
-
-        if (!collections.isNullOrEmpty()) {
-            query.must(termsQuery(EsItem::collection.name, collections))
-        }
-        if (!creators.isNullOrEmpty()) {
-            query.must(termsQuery(EsItem::creators.name, creators))
-        }
-        if (!blockchains.isNullOrEmpty()) {
-            query.must(termsQuery(EsItem::blockchain.name, blockchains))
-        }
-        if (!itemIds.isNullOrEmpty()) {
-            query.must(termsQuery(EsItem::itemId.name, itemIds))
-        }
-        if (mintedFrom != null || mintedTo != null) {
-            query.must(rangeQuery(EsItem::mintedAt.name).gte(mintedFrom).lte(mintedTo))
-        }
-        if (updatedFrom != null || updatedTo != null) {
-            query.must(rangeQuery(EsItem::lastUpdatedAt.name).gte(updatedFrom).lte(updatedTo))
+        when (filter) {
+            is EsItemGenericFilter -> query.applyGenericFilter(filter)
         }
 
+        sortService.applySort(builder, sort)
+        cursorService.applyCursor(query, sort, filter.cursor)
+
+        builder.withQuery(query)
+        return builder.build()
+    }
+
+    private fun BoolQueryBuilder.applyGenericFilter(filter: EsItemGenericFilter) {
+        mustMatchTerms(filter.collections, EsItem::collection.name)
+        mustMatchTerms(filter.creators, EsItem::creators.name)
+        mustMatchTerms(filter.blockchains, EsItem::blockchain.name)
+        mustMatchTerms(filter.itemIds, EsItem::itemId.name)
+        mustMatchRange(filter.mintedFrom, filter.mintedTo, EsItem::mintedAt.name)
+        applyTextFilter(filter.text)
+    }
+
+    private fun BoolQueryBuilder.applyTextFilter(text: String?) {
         if (!text.isNullOrBlank()) {
-            query.should(
+            should(
                 QueryBuilders.nestedQuery(
                     "traits",
                     QueryBuilders.boolQuery().must(QueryBuilders.termQuery("traits.value.raw", text)),
@@ -56,7 +61,7 @@ object EsItemBuilderService {
             } else {
                 trimmedText.replaceAfterLast(" ", "($lastTerm | $lastTerm*)")
             }
-            query.should(
+            should(
                 QueryBuilders.simpleQueryStringQuery(textForSearch)
                     .defaultOperator(Operator.AND)
                     .fuzzyTranspositions(false)
@@ -73,12 +78,7 @@ object EsItemBuilderService {
                         .type(MultiMatchQueryBuilder.Type.PHRASE)
                 )
 
-            query.minimumShouldMatch(1)
+            minimumShouldMatch(1)
         }
-
-        query.applyCursor(sort, this.cursor)
-        builder.withQuery(query)
-        builder.applySort(sort)
-        return builder.build()
     }
 }

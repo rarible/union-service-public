@@ -4,8 +4,8 @@ import com.rarible.core.test.data.randomAddress
 import com.rarible.core.test.data.randomLong
 import com.rarible.core.test.data.randomString
 import com.rarible.protocol.union.core.es.ElasticsearchTestBootstrapper
-import com.rarible.protocol.union.core.model.ElasticItemFilter
 import com.rarible.protocol.union.core.model.EsItem
+import com.rarible.protocol.union.core.model.EsItemGenericFilter
 import com.rarible.protocol.union.core.model.EsItemSort
 import com.rarible.protocol.union.core.model.EsTrait
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -76,7 +76,7 @@ internal class EsItemRepositoryFt {
         val actual = repository.search(query)
 
         // then
-        assertThat(actual.content).hasSize(1000)
+        assertThat(actual).hasSize(1000)
     }
 
     @Test
@@ -85,11 +85,11 @@ internal class EsItemRepositoryFt {
         val esItem = randomEsItem()
         repository.save(esItem)
         val result =
-            repository.search(ElasticItemFilter(collections = setOf(esItem.collection!!)), EsItemSort.DEFAULT, 10)
+            repository.search(EsItemGenericFilter(collections = setOf(esItem.collection!!)), EsItemSort.DEFAULT, 10)
 
-        assertThat(result.content.size).isEqualTo(1)
+        assertThat(result.size).isEqualTo(1)
 
-        assertThat(result.content[0].itemId).isEqualTo(esItem.itemId)
+        assertThat(result[0].itemId).isEqualTo(esItem.itemId)
     }
 
     @Test
@@ -98,14 +98,14 @@ internal class EsItemRepositoryFt {
         val esItem = randomEsItem()
         repository.save(esItem)
         val result = repository.search(
-            ElasticItemFilter(
+            EsItemGenericFilter(
 //                    owners = setOf(esItem.owner!!)
             ), EsItemSort.DEFAULT, 10
         )
 
-        assertThat(result.content.size).isEqualTo(1)
+        assertThat(result.size).isEqualTo(1)
 
-        assertThat(result.content[0].itemId).isEqualTo(esItem.itemId)
+        assertThat(result[0].itemId).isEqualTo(esItem.itemId)
     }
 
     @Test
@@ -114,11 +114,11 @@ internal class EsItemRepositoryFt {
         val esItem = randomEsItem()
         repository.save(esItem)
         val result =
-            repository.search(ElasticItemFilter(creators = setOf(esItem.creators.first())), EsItemSort.DEFAULT, 10)
+            repository.search(EsItemGenericFilter(creators = setOf(esItem.creators.first())), EsItemSort.DEFAULT, 10)
 
-        assertThat(result.content.size).isEqualTo(1)
+        assertThat(result.size).isEqualTo(1)
 
-        assertThat(result.content[0].itemId).isEqualTo(esItem.itemId)
+        assertThat(result[0].itemId).isEqualTo(esItem.itemId)
     }
 
     @Test
@@ -127,12 +127,12 @@ internal class EsItemRepositoryFt {
         val esItem = randomEsItem()
         repository.save(esItem)
         val result = repository.search(
-            ElasticItemFilter(blockchains = setOf(esItem.blockchain.toString())), EsItemSort.DEFAULT, 10
+            EsItemGenericFilter(blockchains = setOf(esItem.blockchain.toString())), EsItemSort.DEFAULT, 10
         )
 
-        assertThat(result.content.size).isEqualTo(1)
+        assertThat(result.size).isEqualTo(1)
 
-        assertThat(result.content[0].itemId).isEqualTo(esItem.itemId)
+        assertThat(result[0].itemId).isEqualTo(esItem.itemId)
     }
 
     @Test
@@ -141,12 +141,12 @@ internal class EsItemRepositoryFt {
         val esItem = randomEsItem()
         repository.save(esItem)
         val result = repository.search(
-            ElasticItemFilter(itemIds = setOf(esItem.itemId)), EsItemSort.DEFAULT, 10
+            EsItemGenericFilter(itemIds = setOf(esItem.itemId)), EsItemSort.DEFAULT, 10
         )
 
-        assertThat(result.content.size).isEqualTo(1)
+        assertThat(result.size).isEqualTo(1)
 
-        assertThat(result.content[0].itemId).isEqualTo(esItem.itemId)
+        assertThat(result[0].itemId).isEqualTo(esItem.itemId)
     }
 
     @Test
@@ -160,22 +160,22 @@ internal class EsItemRepositoryFt {
         }
 
         val result = repository.search(
-            ElasticItemFilter(mintedFrom = now), EsItemSort.DEFAULT, 200
+            EsItemGenericFilter(mintedFrom = now), EsItemSort.DEFAULT, 200
         )
 
-        assertThat(result.content.size).isEqualTo(100)
+        assertThat(result.size).isEqualTo(100)
 
         val result1 = repository.search(
-            ElasticItemFilter(mintedFrom = now, mintedTo = now.plusSeconds(50)), EsItemSort.DEFAULT, 200
+            EsItemGenericFilter(mintedFrom = now, mintedTo = now.plusSeconds(50)), EsItemSort.DEFAULT, 200
         )
 
-        assertThat(result1.content.size).isEqualTo(50)
+        assertThat(result1.size).isEqualTo(50)
 
         val result2 = repository.search(
-            ElasticItemFilter(mintedFrom = now.plusSeconds(21), mintedTo = now.plusSeconds(50)), EsItemSort.DEFAULT, 200
+            EsItemGenericFilter(mintedFrom = now.plusSeconds(21), mintedTo = now.plusSeconds(50)), EsItemSort.DEFAULT, 200
         )
 
-        assertThat(result2.content.size).isEqualTo(30)
+        assertThat(result2.size).isEqualTo(30)
     }
 
     @Test
@@ -185,11 +185,11 @@ internal class EsItemRepositoryFt {
         repository.saveAll(esItems)
 
         val result = repository.search(
-            ElasticItemFilter(text = esItems[13].name), EsItemSort.DEFAULT, 10
+            EsItemGenericFilter(text = esItems[13].name), EsItemSort.DEFAULT, 10
         )
 
-        assertThat(result.content.size).isEqualTo(1)
-        assertThat(result.content[0].itemId).isEqualTo(esItems[13].itemId)
+        assertThat(result.size).isEqualTo(1)
+        assertThat(result[0].itemId).isEqualTo(esItems[13].itemId)
     }
 
     @TestFactory
@@ -208,11 +208,11 @@ internal class EsItemRepositoryFt {
                 runBlocking {
 
                     val result = repository.search(
-                        ElasticItemFilter(text = it), EsItemSort.DEFAULT, 10
+                        EsItemGenericFilter(text = it), EsItemSort.DEFAULT, 10
                     )
 
-                    assertThat(result.content.size).isEqualTo(1)
-                    assertThat(result.content[0].itemId).isEqualTo(esItem.itemId)
+                    assertThat(result.size).isEqualTo(1)
+                    assertThat(result[0].itemId).isEqualTo(esItem.itemId)
                 }
             }
         }
@@ -225,11 +225,11 @@ internal class EsItemRepositoryFt {
         repository.saveAll(esItems)
 
         val result = repository.search(
-            ElasticItemFilter(text = esItems[13].traits[1].value), EsItemSort.DEFAULT, 10
+            EsItemGenericFilter(text = esItems[13].traits[1].value), EsItemSort.DEFAULT, 10
         )
 
-        assertThat(result.content.size).isEqualTo(1)
-        assertThat(result.content[0].itemId).isEqualTo(esItems[13].itemId)
+        assertThat(result.size).isEqualTo(1)
+        assertThat(result[0].itemId).isEqualTo(esItems[13].itemId)
     }
 
     @Test
@@ -239,11 +239,11 @@ internal class EsItemRepositoryFt {
         repository.saveAll(esItems)
 
         val result = repository.search(
-            ElasticItemFilter(text = esItems[13].traits[0].value), EsItemSort.DEFAULT, 10
+            EsItemGenericFilter(text = esItems[13].traits[0].value), EsItemSort.DEFAULT, 10
         )
 
-        assertThat(result.content.size).isEqualTo(1)
-        assertThat(result.content[0].itemId).isEqualTo(esItems[13].itemId)
+        assertThat(result.size).isEqualTo(1)
+        assertThat(result[0].itemId).isEqualTo(esItems[13].itemId)
     }
 
     @Test
@@ -252,11 +252,11 @@ internal class EsItemRepositoryFt {
         val esItem = randomEsItem()
         repository.save(esItem)
         val result = repository.search(
-            ElasticItemFilter(text = esItem.traits[2].value), EsItemSort.DEFAULT, 10
+            EsItemGenericFilter(text = esItem.traits[2].value), EsItemSort.DEFAULT, 10
         )
 
-        assertThat(result.content.size).isEqualTo(1)
-        assertThat(result.content[0].itemId).isEqualTo(esItem.itemId)
+        assertThat(result.size).isEqualTo(1)
+        assertThat(result[0].itemId).isEqualTo(esItem.itemId)
     }
 
     fun randomEsItem() = EsItem(
