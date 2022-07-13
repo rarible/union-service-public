@@ -1,8 +1,6 @@
 package com.rarible.protocol.union.worker.task.search.activity
 
 import com.rarible.protocol.union.core.converter.EsActivityConverter
-import com.rarible.protocol.union.core.service.ItemService
-import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -19,7 +17,7 @@ class ActivityReindexService(
     private val activityApiMergeService: ActivityApiMergeService,
     private val esActivityRepository: EsActivityRepository,
     private val searchTaskMetricFactory: SearchTaskMetricFactory,
-    private val router: BlockchainRouter<ItemService>,
+    private val converter: EsActivityConverter,
 ) {
     fun reindex(
         blockchain: BlockchainDto,
@@ -42,7 +40,7 @@ class ActivityReindexService(
                 )
 
                 val savedActivities = esActivityRepository.saveAll(
-                    EsActivityConverter.batchConvert(res.activities, router),
+                    converter.batchConvert(res.activities),
                     index
                 )
                 continuation = res.cursor

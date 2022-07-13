@@ -7,6 +7,7 @@ import com.rarible.protocol.union.core.exception.UnionCurrencyException
 import com.rarible.protocol.union.dto.AssetTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CurrencyDto
+import com.rarible.protocol.union.dto.CurrencyIdDto
 import com.rarible.protocol.union.dto.CurrencyUsdRateDto
 import com.rarible.protocol.union.dto.ext
 import kotlinx.coroutines.async
@@ -30,9 +31,13 @@ class CurrencyService(
         it to ConcurrentHashMap<String, CurrencyUsdRateDto?>()
     }
 
+    private var cachedCurrencies: List<CurrencyDto> = emptyList()
+
     suspend fun getAllCurrencies(): List<CurrencyDto> {
-        return currencyClient.getAllCurrencies()
-            .map { CurrencyConverter.convert(it) }
+        if (this.cachedCurrencies.isEmpty()) {
+            cachedCurrencies = currencyClient.getAllCurrencies().map { CurrencyConverter.convert(it) }
+        }
+        return cachedCurrencies
     }
 
     // Read currency rate directly from Currency-Service (for API calls)
@@ -82,8 +87,20 @@ class CurrencyService(
         return rate?.let { value.multiply(it.rate) }
     }
 
+    fun getNativeCurrency(blockchain: BlockchainDto): CurrencyDto {
+        return when (blockchain) { // TODO organize in map (symbol -> currency)
+            BlockchainDto.ETHEREUM -> cachedCurrencies.find { it.symbol == "ethereum" }!!
+            BlockchainDto.POLYGON -> cachedCurrencies.find { it.symbol == "matic-network" }!!
+            BlockchainDto.FLOW -> cachedCurrencies.find { it.symbol == "flow" }!!
+            BlockchainDto.TEZOS -> cachedCurrencies.find { it.symbol == "tezos" }!!
+            BlockchainDto.SOLANA -> cachedCurrencies.find { it.symbol == "solana" }!!
+            BlockchainDto.IMMUTABLEX -> throw NotImplementedError("ImmutableX is not yet supported")
+        }
+    }
+
     fun invalidateCache() {
         caches.values.forEach { it.clear() }
+        cachedCurrencies = emptyList()
     }
 
     @Scheduled(cron = "\${common.currency.refresh.cron:0 0/30 * * * *}")
@@ -98,6 +115,7 @@ class CurrencyService(
             cachedCurrencyKeys.map {
                 async { refreshCurrency(it.first, it.second) }
             }.awaitAll()
+            cachedCurrencies = currencyClient.getAllCurrencies().map { CurrencyConverter.convert(it) }
         }
     }
 

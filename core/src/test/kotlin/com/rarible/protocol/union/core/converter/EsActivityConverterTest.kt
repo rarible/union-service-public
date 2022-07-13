@@ -4,9 +4,11 @@ import com.rarible.core.test.data.randomAddress
 import com.rarible.core.test.data.randomBigDecimal
 import com.rarible.core.test.data.randomBigInt
 import com.rarible.core.test.data.randomBoolean
+import com.rarible.core.test.data.randomDouble
 import com.rarible.core.test.data.randomInt
 import com.rarible.core.test.data.randomLong
 import com.rarible.core.test.data.randomString
+import com.rarible.protocol.union.core.converter.helper.SellActivityEnricher
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
@@ -65,7 +67,11 @@ import org.junit.jupiter.api.Test
 
 class EsActivityConverterTest {
 
-    private val converter = EsActivityConverter
+    private val router = mockk<BlockchainRouter<ItemService>>()
+
+    private val enricher = mockk<SellActivityEnricher>()
+
+    private val converter = EsActivityConverter(router, enricher)
 
     @Test
     fun `should convert activities batch`() = runBlocking<Unit> {
@@ -128,7 +134,6 @@ class EsActivityConverterTest {
         )
         val solanaListItem = randomUnionItem(solanaListItemId, solanaListColId)
 
-        val router = mockk<BlockchainRouter<ItemService>>()
         val source = listOf(ethMint, ethBurn, solanaList)
 
         coEvery {
@@ -139,7 +144,7 @@ class EsActivityConverterTest {
         } returns listOf(solanaListItem)
 
         // when
-        val actual = converter.batchConvert(source, router)
+        val actual = converter.batchConvert(source)
 
         // then
         assertThat(actual).hasSize(3)
@@ -157,7 +162,7 @@ class EsActivityConverterTest {
     }
 
     @Test
-    fun `should convert MintActivityDto`() {
+    fun `should convert MintActivityDto`() = runBlocking<Unit> {
         // given
         val source = MintActivityDto(
             id = randomActivityId(),
@@ -191,7 +196,7 @@ class EsActivityConverterTest {
     }
 
     @Test
-    fun `should convert BurnActivityDto`() {
+    fun `should convert BurnActivityDto`() = runBlocking<Unit> {
         // given
         val source = BurnActivityDto(
             id = randomActivityId(),
@@ -225,7 +230,7 @@ class EsActivityConverterTest {
     }
 
     @Test
-    fun `should convert TransferActivityDto`() {
+    fun `should convert TransferActivityDto`() = runBlocking<Unit> {
         // given
         val source = TransferActivityDto(
             id = randomActivityId(),
@@ -260,7 +265,7 @@ class EsActivityConverterTest {
     }
 
     @Test
-    fun `should convert OrderMatchSwapDto`() {
+    fun `should convert OrderMatchSwapDto`() = runBlocking<Unit> {
         // given
         val source = OrderMatchSwapDto(
             id = randomActivityId(),
@@ -284,7 +289,7 @@ class EsActivityConverterTest {
     }
 
     @Test
-    fun `should convert OrderMatchSellDto`() {
+    fun `should convert OrderMatchSellDto`() = runBlocking<Unit> {
         // given
         val source = OrderMatchSellDto(
             id = randomActivityId(),
@@ -303,8 +308,14 @@ class EsActivityConverterTest {
             source = OrderActivitySourceDto.RARIBLE,
             price = randomBigDecimal(),
             type = OrderMatchSellDto.Type.SELL,
-
             )
+        val volumeInfo = SellActivityEnricher.SellVolumeInfo(
+            sellCurrency = randomString(),
+            volumeUsd = randomDouble(),
+            volumeSell = randomDouble(),
+            volumeNative = randomDouble(),
+        )
+        coEvery { enricher.provideVolumeInfo(source) } returns volumeInfo
 
         // when
         val actual = converter.convert(source, null)!!
@@ -320,10 +331,14 @@ class EsActivityConverterTest {
         assertThat(actual.userTo).isEqualTo(source.buyer.value)
         assertThat(actual.collection).isEqualTo(source.nft.type.ext.itemId!!.extractCollection())
         assertThat(actual.item).isEqualTo(source.nft.type.ext.itemId!!.value)
+        assertThat(actual.sellCurrency).isEqualTo(volumeInfo.sellCurrency)
+        assertThat(actual.volumeUsd).isEqualTo(volumeInfo.volumeUsd)
+        assertThat(actual.volumeSell).isEqualTo(volumeInfo.volumeSell)
+        assertThat(actual.volumeNative).isEqualTo(volumeInfo.volumeNative)
     }
 
     @Test
-    fun `should convert OrderBidActivityDto`() {
+    fun `should convert OrderBidActivityDto`() = runBlocking<Unit> {
         // given
         val source = OrderBidActivityDto(
             id = randomActivityId(),
@@ -353,7 +368,7 @@ class EsActivityConverterTest {
     }
 
     @Test
-    fun `should convert OrderListActivityDto`() {
+    fun `should convert OrderListActivityDto`() = runBlocking<Unit> {
         // given
         val source = OrderListActivityDto(
             id = randomActivityId(),
@@ -383,7 +398,7 @@ class EsActivityConverterTest {
     }
 
     @Test
-    fun `should convert OrderCancelBidActivityDto`() {
+    fun `should convert OrderCancelBidActivityDto`() = runBlocking<Unit> {
         // given
         val source = OrderCancelBidActivityDto(
             id = randomActivityId(),
@@ -419,7 +434,7 @@ class EsActivityConverterTest {
     }
 
     @Test
-    fun `should convert OrderCancelListActivityDto`() {
+    fun `should convert OrderCancelListActivityDto`() = runBlocking<Unit> {
         // given
         val source = OrderCancelListActivityDto(
             id = randomActivityId(),
@@ -455,7 +470,7 @@ class EsActivityConverterTest {
     }
 
     @Test
-    fun `should convert AuctionOpenActivityDto`() {
+    fun `should convert AuctionOpenActivityDto`() = runBlocking<Unit> {
         // given
         val source = AuctionOpenActivityDto(
             id = randomActivityId(),
@@ -481,7 +496,7 @@ class EsActivityConverterTest {
     }
 
     @Test
-    fun `should convert AuctionBidActivityDto`() {
+    fun `should convert AuctionBidActivityDto`() = runBlocking<Unit> {
         // given
         val source = AuctionBidActivityDto(
             id = randomActivityId(),
@@ -508,7 +523,7 @@ class EsActivityConverterTest {
     }
 
     @Test
-    fun `should convert AuctionFinishActivityDto`() {
+    fun `should convert AuctionFinishActivityDto`() = runBlocking<Unit> {
         // given
         val source = AuctionFinishActivityDto(
             id = randomActivityId(),
@@ -534,7 +549,7 @@ class EsActivityConverterTest {
     }
 
     @Test
-    fun `should convert AuctionCancelActivityDto`() {
+    fun `should convert AuctionCancelActivityDto`() = runBlocking<Unit> {
         // given
         val source = AuctionCancelActivityDto(
             id = randomActivityId(),
@@ -560,7 +575,7 @@ class EsActivityConverterTest {
     }
 
     @Test
-    fun `should convert AuctionStartActivityDto`() {
+    fun `should convert AuctionStartActivityDto`() = runBlocking<Unit> {
         // given
         val source = AuctionStartActivityDto(
             id = randomActivityId(),
@@ -585,7 +600,7 @@ class EsActivityConverterTest {
     }
 
     @Test
-    fun `should convert AuctionEndActivityDto`() {
+    fun `should convert AuctionEndActivityDto`() = runBlocking<Unit> {
         // given
         val source = AuctionEndActivityDto(
             id = randomActivityId(),
@@ -610,7 +625,7 @@ class EsActivityConverterTest {
     }
 
     @Test
-    fun `should not fail when itemId is null`() {
+    fun `should not fail when itemId is null`() = runBlocking<Unit> {
         // given
         val source = TransferActivityDto(
             id = randomActivityId(),
@@ -628,10 +643,8 @@ class EsActivityConverterTest {
             value = randomBigInt(),
         )
 
-        // when
-        assertThatCode {
-            converter.convert(source, null)!!
-        }.doesNotThrowAnyException()
+        // when & then - nothing thrown
+        converter.convert(source, null)!!
     }
 
     private fun randomActivityId(): ActivityIdDto {

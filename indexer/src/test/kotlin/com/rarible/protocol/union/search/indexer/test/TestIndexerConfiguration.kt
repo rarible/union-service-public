@@ -7,6 +7,7 @@ import com.rarible.core.test.ext.KafkaTestExtension
 import com.rarible.protocol.flow.nft.api.client.FlowNftItemControllerApi
 import com.rarible.protocol.nft.api.client.NftItemControllerApi
 import com.rarible.protocol.union.core.FeatureFlagsProperties
+import com.rarible.protocol.union.core.converter.EsActivityConverter
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.ActivityDto
@@ -64,10 +65,10 @@ class TestIndexerConfiguration {
     fun activityHandler(
         featureFlagsProperties: FeatureFlagsProperties,
         repository: EsActivityRepository,
-        blockchainRouter: BlockchainRouter<ItemService>,
+        converter: EsActivityConverter,
         indexerMetricFactory: IndexerMetricFactory
     ): ConsumerBatchEventHandler<ActivityDto> {
-        return ActivityEventHandler(featureFlagsProperties, repository, blockchainRouter, indexerMetricFactory)
+        return ActivityEventHandler(featureFlagsProperties, repository, converter, indexerMetricFactory)
     }
 
     @Bean
