@@ -251,12 +251,14 @@ class ItemElasticService(
     }
 
     private suspend fun getItemsFromBlockchains(itemsPerBlockchain: Map<BlockchainDto, MutableList<String>>): List<UnionItem> {
+        logger.debug("Getting items from blockchains: $itemsPerBlockchain")
         val items = itemsPerBlockchain.mapAsync { element ->
             val blockchain = element.key
             val ids = element.value
             val isBlockchainEnabled = router.isBlockchainEnabled(blockchain)
             if (isBlockchainEnabled) {
                 router.getService(blockchain).getItemsByIds(ids)
+                    .also { logger.info("returned ${it.size} of ${ids.size} items from $blockchain") }
             } else emptyList()
         }.flatten()
 
