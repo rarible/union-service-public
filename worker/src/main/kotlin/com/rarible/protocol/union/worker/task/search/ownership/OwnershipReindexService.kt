@@ -44,7 +44,12 @@ class OwnershipReindexService(
         index: String?,
         cursor: String?,
     ): Flow<String> = doReindex(blockchain, target, index, cursor, EsOwnershipConverter::convert) {
-        rawOwnershipClient.getRawOwnershipsAll(blockchain, it, PageSize.OWNERSHIP.max)
+        // TODO read values from config
+        val size = when (blockchain) {
+            BlockchainDto.SOLANA -> 250
+            else -> PageSize.OWNERSHIP.max
+        }
+        rawOwnershipClient.getRawOwnershipsAll(blockchain, it, size)
     }
 
     private fun <T> doReindex(
