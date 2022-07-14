@@ -20,7 +20,7 @@ import org.springframework.stereotype.Service
 class ActivityEventHandler(
     private val featureFlagsProperties: FeatureFlagsProperties,
     private val repository: EsActivityRepository,
-    private val router: BlockchainRouter<ItemService>,
+    private val converter: EsActivityConverter,
     metricFactory: IndexerMetricFactory,
 ): ConsumerBatchEventHandler<ActivityDto> {
 
@@ -47,7 +47,7 @@ class ActivityEventHandler(
             }
         }
 
-        val convertedEvents = EsActivityConverter.batchConvert(normalEvents, router)
+        val convertedEvents = converter.batchConvert(normalEvents)
 
         if (convertedEvents.isNotEmpty()) {
             val refreshPolicy =

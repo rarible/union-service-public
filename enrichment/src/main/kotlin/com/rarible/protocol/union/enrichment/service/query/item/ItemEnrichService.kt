@@ -52,14 +52,7 @@ class ItemEnrichService(
         return enrichmentItemService.enrichItem(shortItem, unionItem)
     }
 
-    suspend fun enrich(unionItems: List<UnionItem>, continuation: String?, total: Long?): ItemsDto =
-        ItemsDto(
-            total = total,
-            continuation = continuation,
-            items = enrich(unionItems)
-        )
-
-    private suspend fun enrich(unionItems: List<UnionItem>): List<ItemDto> {
+    suspend fun enrich(unionItems: List<UnionItem>): List<ItemDto> {
         if (unionItems.isEmpty()) {
             return emptyList()
         }

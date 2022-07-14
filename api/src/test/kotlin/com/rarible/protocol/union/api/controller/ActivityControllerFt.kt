@@ -80,6 +80,9 @@ class ActivityControllerFt : AbstractIntegrationTest() {
     @Autowired
     lateinit var ethActivityConverter: EthActivityConverter
 
+    @Autowired
+    lateinit var esActivityConverter: EsActivityConverter
+
     @Test
     fun `get sync activities - solana - order type`() = runBlocking<Unit> {
         val size = 35
@@ -588,8 +591,8 @@ class ActivityControllerFt : AbstractIntegrationTest() {
 
         esActivityRepository.saveAll(
             listOf(
-                EsActivityConverter.convert(flowActivity, flowCollectionId.value)!!,
-                EsActivityConverter.convert(ethActivity, ethCollectionId.value)!!
+                esActivityConverter.convert(flowActivity, flowCollectionId.value)!!,
+                esActivityConverter.convert(ethActivity, ethCollectionId.value)!!
             )
         )
 

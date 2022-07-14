@@ -5,17 +5,20 @@ import com.rarible.core.test.data.randomBigDecimal
 import com.rarible.core.test.data.randomBigInt
 import com.rarible.core.test.data.randomString
 import com.rarible.protocol.currency.api.client.CurrencyControllerApi
+import com.rarible.protocol.currency.dto.CurrenciesDto
 import com.rarible.protocol.currency.dto.CurrencyRateDto
 import com.rarible.protocol.union.core.client.CurrencyClient
 import com.rarible.protocol.union.core.converter.ContractAddressConverter
 import com.rarible.protocol.union.core.converter.CurrencyConverter
 import com.rarible.protocol.union.core.exception.UnionCurrencyException
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.CurrencyDto
 import com.rarible.protocol.union.dto.EthErc20AssetTypeDto
 import com.rarible.protocol.union.dto.EthErc721AssetTypeDto
 import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
@@ -166,6 +169,7 @@ class CurrencyServiceTest {
 
     @Test
     fun `refresh cache`() = runBlocking<Unit> {
+        val allCurrencies = mockk<CurrenciesDto>()
         val ethRate1 = randomBigDecimal()
         val ethRate2 = randomBigDecimal()
         val ethBlockchain = BlockchainDto.ETHEREUM
@@ -177,6 +181,10 @@ class CurrencyServiceTest {
 
         mockCurrency(ethBlockchain, ethAddress, ethRate1, ethRate2)
         mockCurrency(flowBlockchain, flowAddress, flowRate1, null)
+        coEvery {
+            currencyControllerApi.allCurrencies
+        } returns allCurrencies.toMono()
+        every { allCurrencies.currencies } returns emptyList()
 
         // Filling cache with initial values
         val currentEthRate = currencyService.getCurrentRate(ethBlockchain, ethAddress)!!
