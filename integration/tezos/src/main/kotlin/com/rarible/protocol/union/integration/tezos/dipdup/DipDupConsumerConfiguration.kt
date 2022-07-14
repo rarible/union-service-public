@@ -41,7 +41,7 @@ class DipDupConsumerConfiguration(
 
     private val env = applicationEnvironmentInfo.name
     private val host = applicationEnvironmentInfo.host
-    private val workers = properties.consumer!!.workers
+    private val workers = dipDupProperties.consumer!!.workers
 
     private val daemon = properties.daemon
 
