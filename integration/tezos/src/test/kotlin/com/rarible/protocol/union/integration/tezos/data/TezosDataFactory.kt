@@ -43,9 +43,12 @@ import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.tzkt.model.Alias
 import com.rarible.tzkt.model.Contract
+import com.rarible.tzkt.model.Token
 import com.rarible.tzkt.model.TokenBalance
 import com.rarible.tzkt.model.TokenInfo
+import java.time.Instant
 import java.time.OffsetDateTime
+import java.time.ZoneOffset
 
 fun randomTezosContract() = randomString(12)
 fun randomTezosAddress() = UnionAddressConverter.convert(BlockchainDto.TEZOS, randomString())
@@ -357,6 +360,21 @@ fun randomTzktContract(address: String): Contract {
         numMigrations = 1
     )
 }
+
+fun randomTzktToken(itemId: String) = Token(
+    id = 1,
+    contract = Alias(
+        alias = "test name",
+        address = "test"
+    ),
+    tokenId = "123",
+    firstTime = Instant.now().atOffset(ZoneOffset.UTC),
+    lastTime = Instant.now().atOffset(ZoneOffset.UTC),
+    totalSupply = "1",
+    transfersCount = 1,
+    balancesCount = 1,
+    holdersCount = 1
+)
 
 fun randomTzktTokenBalance(ownerId: OwnershipIdDto): TokenBalance {
     return TokenBalance(

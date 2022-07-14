@@ -35,6 +35,18 @@ interface TzktItemService {
         TODO("Not implemented")
     }
 
+    suspend fun getItemsByOwner(owner: String, continuation: String?, size: Int): Page<UnionItem> {
+        TODO("Not implemented")
+    }
+
+    suspend fun getItemsByCreator(creator: String, continuation: String?, size: Int): Page<UnionItem> {
+        TODO("Not implemented")
+    }
+
+    suspend fun getItemsByCollection(collection: String, continuation: String?, size: Int): Page<UnionItem> {
+        TODO("Not implemented")
+    }
+
     suspend fun isNft(itemId: String): Boolean {
         TODO("Not implemented")
     }
