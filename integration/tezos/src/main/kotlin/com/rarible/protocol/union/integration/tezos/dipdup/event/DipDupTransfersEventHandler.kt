@@ -21,6 +21,9 @@ import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.TransferActivityDto
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktItemService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktOwnershipService
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
 import java.math.BigInteger
 
@@ -38,22 +41,22 @@ open class DipDupTransfersEventHandler(
         return event is MintActivityDto || event is TransferActivityDto || event is BurnActivityDto
     }
 
-    suspend fun handle(event: ActivityDto) {
+    suspend fun handle(event: ActivityDto) = coroutineScope {
         if (isNft(event)) {
             when (event) {
-                is MintActivityDto -> {
-                    sendItemEvent(event.itemId())
-                    sendOwnershipEvent(event.ownershipId())
-                }
-                is TransferActivityDto -> {
-                    sendOwnershipEvent(event.itemId()?.toOwnership(event.from.value))
-                    sendOwnershipEvent(event.ownershipId())
-                }
-                is BurnActivityDto -> {
-                    sendItemEvent(event.itemId())
-                    sendOwnershipEvent(event.itemId()?.let { it.toOwnership(event.owner.value) })
-                }
-            }
+                is MintActivityDto -> listOf(
+                    async { sendItemEvent(event.itemId()) },
+                    async { sendOwnershipEvent(event.ownershipId()) })
+                is TransferActivityDto -> listOf(
+                    async { sendOwnershipEvent(event.itemId()?.toOwnership(event.from.value)) },
+                    async { sendOwnershipEvent(event.ownershipId()) }
+                )
+                is BurnActivityDto -> listOf(
+                    async { sendItemEvent(event.itemId()) },
+                    async { sendOwnershipEvent(event.itemId()?.let { it.toOwnership(event.owner.value) }) }
+                )
+                else -> emptyList()
+            }.awaitAll()
         } else {
             logger.debug("Activity is skipped because it's not nft, ItemId: ${event.itemId()}")
         }
@@ -78,7 +81,8 @@ open class DipDupTransfersEventHandler(
     }
 
     private suspend fun getOwnership(id: OwnershipIdDto?): UnionOwnership {
-        return id?.let { ownershipService.getOwnershipById(it.value) } ?: throw UnionValidationException("Ownership is empty")
+        return id?.let { ownershipService.getOwnershipById(it.value) }
+            ?: throw UnionValidationException("Ownership is empty")
     }
 
     private suspend fun getItem(id: ItemIdDto?): UnionItem {
