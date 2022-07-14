@@ -4,7 +4,6 @@ import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.apm.SpanType
 import com.rarible.core.common.mapAsync
 import com.rarible.core.logging.Logger
-import com.rarible.protocol.union.core.continuation.UnionItemContinuation
 import com.rarible.protocol.union.core.model.EsItem
 import com.rarible.protocol.union.core.model.EsItemCursor
 import com.rarible.protocol.union.core.model.EsItemCursor.Companion.fromItem
@@ -153,11 +152,15 @@ class ItemElasticService(
             size,
         )
 
-        val dateIdContinuation = ownerships.lastOrNull()?.let { DateIdContinuation(it.date, it.ownershipId).toString() }
+        val cursor = ownerships.lastOrNull()?.let { DateIdContinuation(it.date, it.ownershipId).toString() }
 
         val items: List<UnionItem> = getItemsByOwnerships(ownerships)
 
-        return itemEnrichService.enrich(items, dateIdContinuation, null)
+        val enriched = itemEnrichService.enrich(items)
+        return ItemsDto(
+            items = enriched,
+            continuation = cursor
+        )
     }
 
     override suspend fun getItemsByOwnerWithOwnership(
@@ -173,15 +176,16 @@ class ItemElasticService(
     }
 
     suspend fun searchItems(request: ItemsSearchRequestDto): ItemsDto {
-        val cursor = DateIdContinuation.parse(request.continuation)?.let {
-            EsItemCursor(date = it.date, itemId = it.id)
-        }
+        val cursor = DateIdContinuation.parse(request.continuation)?.toString()
         val filter = itemFilterConverter.searchItems(request.filter, cursor)
         val result = esItemRepository.search(filter, EsItemSort.DEFAULT, request.size)
-        if (result.content.isEmpty()) return ItemsDto()
+        if (result.isEmpty()) return ItemsDto()
         val items = getItems(result)
-
-        return itemEnrichService.enrich(items, result.cursor, result.total)
+        val enriched = itemEnrichService.enrich(items)
+        return ItemsDto(
+            continuation = result.last().fromItem().toString(),
+            items = enriched
+        )
     }
 
 
@@ -228,7 +232,7 @@ class ItemElasticService(
         lastUpdatedTo: Long?,
         continuation: String?,
         size: Int?
-    ): List<ArgPage<UnionItem>> {
+    ): Slice<UnionItem> {
         logger.info("getAllActivities() from ElasticSearch")
         val evaluatedBlockchains = router.getEnabledBlockchains(blockchains).map { it.name }.toSet()
 
@@ -238,33 +242,12 @@ class ItemElasticService(
         logger.info("Built filter: $filter")
         val queryResult = esItemRepository.search(filter, EsItemSort.DEFAULT, size)
         logger.info("Query result: $queryResult")
-        return getItems(queryResult.content, queryResult.cursor)
-    }
-
-    private suspend fun getItems(esItems: List<EsItem>, continuation: String?): List<ArgPage<UnionItem>> {
-        if (esItems.isEmpty()) return emptyList()
-        val mapping = hashMapOf<BlockchainDto, MutableList<String>>()
-
-        esItems.forEach { item ->
-            mapping
-                .computeIfAbsent(item.blockchain) { ArrayList(esItems.size) }
-                .add(item.itemId)
-        }
-        val items = mapping.mapAsync { element ->
-            val blockchain = element.key
-            val ids = element.value
-            val isBlockchainEnabled = router.isBlockchainEnabled(blockchain)
-            if (isBlockchainEnabled) {
-                val page = router.getService(blockchain).getItemsByIds(ids)
-                ArgPage(
-                    blockchain.name,
-                    "",
-                    Page(0, continuation, page)
-                )
-            } else ArgPage(blockchain.name, null, Page(0, null, emptyList()))
-        }
-
-        return items
+        val cursor = if (queryResult.isEmpty()) null else queryResult.last().fromItem()
+        val items = getItems(queryResult)
+        return Slice(
+            entities = items,
+            continuation = cursor.toString()
+        )
     }
 
     private suspend fun getItemsFromBlockchains(itemsPerBlockchain: Map<BlockchainDto, MutableList<String>>): List<UnionItem> {
