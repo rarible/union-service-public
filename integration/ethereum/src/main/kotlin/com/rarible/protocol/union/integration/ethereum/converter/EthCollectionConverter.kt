@@ -35,6 +35,7 @@ object EthCollectionConverter {
             features = source.features.map { convert(it) },
             minters = source.minters?.let { minters -> minters.map { EthConverter.convert(it, blockchain) } },
             meta = EthMetaConverter.convert(source.meta, blockchain),
+            self = source.isRaribleContract
         )
     }
 

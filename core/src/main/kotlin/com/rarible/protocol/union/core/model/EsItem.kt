@@ -28,6 +28,7 @@ data class EsItem(
 
     @Field(type = FieldType.Date)
     val lastUpdatedAt: Instant,
+    val self: Boolean? = false
 ) {
     companion object {
         private const val VERSION: Int = 1

@@ -20,7 +20,7 @@ class CollectionEventHandler(
     private val featureFlagsProperties: FeatureFlagsProperties,
     private val repository: EsCollectionRepository,
     metricFactory: IndexerMetricFactory,
-): ConsumerBatchEventHandler<CollectionEventDto> {
+) : ConsumerBatchEventHandler<CollectionEventDto> {
 
     companion object {
         private val logger by Logger()
@@ -43,10 +43,13 @@ class CollectionEventHandler(
         val refreshPolicy =
             if (featureFlagsProperties.enableItemSaveImmediateToElasticSearch) {
                 WriteRequest.RefreshPolicy.IMMEDIATE
+            } else {
+                if (convertedEvents.any { it.self == true })
+                    WriteRequest.RefreshPolicy.IMMEDIATE
+                else
+                    WriteRequest.RefreshPolicy.NONE
             }
-            else {
-                WriteRequest.RefreshPolicy.NONE
-            }
+
         repository.saveAll(convertedEvents, refreshPolicy = refreshPolicy)
         countSaves(convertedEvents)
         val elapsedTime = nowMillis().minusMillis(startTime.toEpochMilli()).toEpochMilli()

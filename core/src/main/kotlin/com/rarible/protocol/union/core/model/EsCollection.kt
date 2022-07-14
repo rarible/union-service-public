@@ -1,10 +1,9 @@
 package com.rarible.protocol.union.core.model
 
-import com.rarible.protocol.union.core.model.elasticsearch.EsEntity
 import com.rarible.protocol.union.core.model.elasticsearch.EntityDefinition
-import com.rarible.protocol.union.core.model.elasticsearch.EsEntitiesConfig.INDEX_SETTINGS
 import com.rarible.protocol.union.core.model.elasticsearch.EsEntitiesConfig.loadMapping
 import com.rarible.protocol.union.core.model.elasticsearch.EsEntitiesConfig.loadSettings
+import com.rarible.protocol.union.core.model.elasticsearch.EsEntity
 import com.rarible.protocol.union.core.model.elasticsearch.generateSalt
 import com.rarible.protocol.union.dto.BlockchainDto
 import org.springframework.data.annotation.Id
@@ -38,6 +37,7 @@ data class EsCollection(
     val symbol: String? = null,
     val owner: String? = null,
     val meta: CollectionMeta? = null,
+    val self: Boolean? = null
 ) : EsCollectionSealed() {
 
     data class CollectionMeta(
