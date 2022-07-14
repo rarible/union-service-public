@@ -1,7 +1,5 @@
 package com.rarible.protocol.union.api.service.select
 
-import com.rarible.protocol.union.enrichment.service.query.item.ItemApiMergeService
-import com.rarible.protocol.union.enrichment.service.query.item.ItemQueryService
 import com.rarible.protocol.union.api.service.elastic.ItemElasticService
 import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -9,8 +7,10 @@ import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.ItemsDto
+import com.rarible.protocol.union.dto.ItemsSearchRequestDto
 import com.rarible.protocol.union.dto.ItemsWithOwnershipDto
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import com.rarible.protocol.union.enrichment.service.query.item.ItemApiMergeService
+import com.rarible.protocol.union.enrichment.service.query.item.ItemQueryService
 import kotlinx.coroutines.flow.Flow
 import org.springframework.stereotype.Service
 
@@ -92,10 +92,17 @@ class ItemSourceSelectService(
         return getQuerySource().getItemsByOwnerWithOwnership(owner, continuation, size)
     }
 
+    suspend fun searchItems(itemsSearchRequestDto: ItemsSearchRequestDto): ItemsDto {
+        return if (featureFlagsProperties.enableItemQueriesToElasticSearch) {
+            itemElasticService.searchItems(itemsSearchRequestDto)
+        } else ItemsDto()
+    }
+
     private fun getQuerySource(): ItemQueryService {
         return when (featureFlagsProperties.enableItemQueriesToElasticSearch) {
             true -> itemElasticService
             else -> itemApiService
         }
     }
+
 }

@@ -19,5 +19,8 @@ data class EsItemGenericFilter(
     val updatedTo: Instant? = null,
     val deleted: Boolean? = null,
     val text: String? = null,
+    val traitsKeys: Set<String>? = null,
+    val traitsValues: Set<String>? = null,
+    val descriptions: Set<String>? = null,
     override val cursor: String? = null,
 ) : EsItemFilter()

@@ -18,6 +18,7 @@ import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.ItemsDto
+import com.rarible.protocol.union.dto.ItemsSearchRequestDto
 import com.rarible.protocol.union.dto.ItemsWithOwnershipDto
 import com.rarible.protocol.union.dto.continuation.DateIdContinuation
 import com.rarible.protocol.union.dto.continuation.page.PageSize
@@ -61,34 +62,6 @@ class ItemElasticService(
             blockchains, continuation, safeSize, slice.entities.size, slice.continuation
         )
         return itemEnrichService.enrich(slice,  0)
-    }
-
-    private suspend fun getAllItemsInner(
-        blockchains: List<BlockchainDto>?,
-        showDeleted: Boolean?,
-        lastUpdatedFrom: Long?,
-        lastUpdatedTo: Long?,
-        continuation: String?,
-        size: Int?
-    ): Slice<UnionItem> {
-        logger.info("getAllItemsInner() from ElasticSearch")
-        val evaluatedBlockchains = router.getEnabledBlockchains(blockchains).map { it.name }.toSet()
-
-        val filter = itemFilterConverter.convertGetAllItems(
-            evaluatedBlockchains, showDeleted, lastUpdatedFrom, lastUpdatedTo, continuation
-        )
-        logger.info("Built filter: $filter")
-        val queryResult = esItemRepository.search(filter, EsItemSort.DEFAULT, size)
-        logger.info("Query result: $queryResult")
-
-        val cursor = if (queryResult.isEmpty()) null else queryResult.last().fromItem()
-
-        val items = getItems(queryResult)
-
-        return Slice(
-            entities = items,
-            continuation = cursor.toString()
-        )
     }
 
     override suspend fun getItemsByCollection(
@@ -162,6 +135,60 @@ class ItemElasticService(
         )
     }
 
+    override suspend fun getItemsByOwner(
+        owner: String,
+        blockchains: List<BlockchainDto>?,
+        continuation: String?,
+        size: Int?
+    ): ItemsDto {
+        val evaluatedBlockchains = router.getEnabledBlockchains(blockchains)
+        val ownerAddress = IdParser.parseAddress(owner)
+        val ownerships = esOwnershipRepository.search(
+            EsOwnershipByOwnerFilter(
+                owner = ownerAddress,
+                blockchains = evaluatedBlockchains,
+                cursor = continuation,
+            ),
+            size,
+        )
+
+        val cursor = ownerships.lastOrNull()?.let { DateIdContinuation(it.date, it.ownershipId).toString() }
+
+        val items: List<UnionItem> = getItemsByOwnerships(ownerships)
+
+        val enriched = itemEnrichService.enrich(items)
+        return ItemsDto(
+            items = enriched,
+            continuation = cursor
+        )
+    }
+
+    override suspend fun getItemsByOwnerWithOwnership(
+        owner: String,
+        continuation: String?,
+        size: Int?
+    ): ItemsWithOwnershipDto {
+        throw NotImplementedError()
+    }
+
+    override suspend fun getItemsByIds(ids: List<ItemIdDto>): List<ItemDto> {
+        throw NotImplementedError()
+    }
+
+    suspend fun searchItems(request: ItemsSearchRequestDto): ItemsDto {
+        val cursor = DateIdContinuation.parse(request.continuation)?.toString()
+        val filter = itemFilterConverter.searchItems(request.filter, cursor)
+        val result = esItemRepository.search(filter, EsItemSort.DEFAULT, request.size)
+        if (result.isEmpty()) return ItemsDto()
+        val items = getItems(result)
+        val enriched = itemEnrichService.enrich(items)
+        return ItemsDto(
+            continuation = result.last().fromItem().toString(),
+            items = enriched
+        )
+    }
+
+
     private suspend fun getItems(esItems: List<EsItem>): List<UnionItem> {
         val mapping = hashMapOf<BlockchainDto, MutableList<String>>()
 
@@ -198,43 +225,29 @@ class ItemElasticService(
         }
     }
 
-    override suspend fun getItemsByOwner(
-        owner: String,
+    private suspend fun getAllItemsInner(
         blockchains: List<BlockchainDto>?,
+        showDeleted: Boolean?,
+        lastUpdatedFrom: Long?,
+        lastUpdatedTo: Long?,
         continuation: String?,
         size: Int?
-    ): ItemsDto {
-        val evaluatedBlockchains = router.getEnabledBlockchains(blockchains)
-        val ownerAddress = IdParser.parseAddress(owner)
-        val ownerships = esOwnershipRepository.search(
-            EsOwnershipByOwnerFilter(
-                owner = ownerAddress,
-                blockchains = evaluatedBlockchains,
-                cursor = continuation,
-            ),
-            size,
+    ): Slice<UnionItem> {
+        logger.info("getAllActivities() from ElasticSearch")
+        val evaluatedBlockchains = router.getEnabledBlockchains(blockchains).map { it.name }.toSet()
+
+        val filter = itemFilterConverter.convertGetAllItems(
+            evaluatedBlockchains, showDeleted, lastUpdatedFrom, lastUpdatedTo, continuation
         )
-
-        val cursor = ownerships.lastOrNull()?.let { DateIdContinuation(it.date, it.ownershipId).toString() }
-
-        val items: List<UnionItem> = getItemsByOwnerships(ownerships)
-        val enriched = itemEnrichService.enrich(items)
-        return ItemsDto(
-            items = enriched,
-            continuation = cursor
+        logger.info("Built filter: $filter")
+        val queryResult = esItemRepository.search(filter, EsItemSort.DEFAULT, size)
+        logger.info("Query result: $queryResult")
+        val cursor = if (queryResult.isEmpty()) null else queryResult.last().fromItem()
+        val items = getItems(queryResult)
+        return Slice(
+            entities = items,
+            continuation = cursor.toString()
         )
-    }
-
-    override suspend fun getItemsByOwnerWithOwnership(
-        owner: String,
-        continuation: String?,
-        size: Int?
-    ): ItemsWithOwnershipDto {
-        throw NotImplementedError()
-    }
-
-    override suspend fun getItemsByIds(ids: List<ItemIdDto>): List<ItemDto> {
-        throw NotImplementedError()
     }
 
     private suspend fun getItemsFromBlockchains(itemsPerBlockchain: Map<BlockchainDto, MutableList<String>>): List<UnionItem> {

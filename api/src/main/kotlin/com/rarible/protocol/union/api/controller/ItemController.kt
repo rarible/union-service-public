@@ -19,6 +19,7 @@ import com.rarible.protocol.union.dto.ExtendedTraitPropertiesDto
 import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.ItemIdsDto
 import com.rarible.protocol.union.dto.ItemsDto
+import com.rarible.protocol.union.dto.ItemsSearchRequestDto
 import com.rarible.protocol.union.dto.ItemsWithOwnershipDto
 import com.rarible.protocol.union.dto.MetaContentDto
 import com.rarible.protocol.union.dto.RestrictionCheckFormDto
@@ -30,6 +31,8 @@ import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.service.ItemMetaService
+import java.net.URI
+import java.time.Duration
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.time.withTimeout
@@ -41,8 +44,6 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
-import java.net.URI
-import java.time.Duration
 
 @ExperimentalCoroutinesApi
 @RestController
@@ -175,6 +176,10 @@ class ItemController(
         }
 
         return ResponseEntity.ok().build()
+    }
+
+    override suspend fun searchItems(itemsSearchRequestDto: ItemsSearchRequestDto): ResponseEntity<ItemsDto> {
+        return ResponseEntity.ok(itemSourceSelectService.searchItems(itemsSearchRequestDto))
     }
 
     override suspend fun getItemsByCollection(

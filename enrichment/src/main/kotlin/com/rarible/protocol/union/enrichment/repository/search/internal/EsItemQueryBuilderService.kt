@@ -9,7 +9,6 @@ import org.elasticsearch.index.query.BoolQueryBuilder
 import org.elasticsearch.index.query.MultiMatchQueryBuilder
 import org.elasticsearch.index.query.Operator
 import org.elasticsearch.index.query.QueryBuilders
-import org.elasticsearch.index.query.QueryBuilders.rangeQuery
 import org.elasticsearch.index.query.QueryBuilders.termsQuery
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder
@@ -41,7 +40,10 @@ class EsItemQueryBuilderService(
         mustMatchTerms(filter.blockchains, EsItem::blockchain.name)
         mustMatchTerms(filter.itemIds, EsItem::itemId.name)
         mustMatchRange(filter.mintedFrom, filter.mintedTo, EsItem::mintedAt.name)
+        mustMatchRange(filter.updatedFrom, filter.updatedTo, EsItem::lastUpdatedAt.name)
         applyTextFilter(filter.text)
+        applyTraitsKeysFilter(filter.traitsKeys)
+        applyTraitsValuesFilter(filter.traitsValues)
     }
 
     private fun BoolQueryBuilder.applyTextFilter(text: String?) {
@@ -54,7 +56,7 @@ class EsItemQueryBuilderService(
                 )
             )
 
-            val trimmedText = text!!.trim()
+            val trimmedText = text.trim()
             val lastTerm = trimmedText.split(" ").last()
             val textForSearch = if (lastTerm == trimmedText) {
                 "($lastTerm | $lastTerm*)"
@@ -79,6 +81,30 @@ class EsItemQueryBuilderService(
                 )
 
             minimumShouldMatch(1)
+        }
+    }
+
+    private fun BoolQueryBuilder.applyTraitsKeysFilter(traitsKeys: Set<String>?) {
+        if (traitsKeys != null) {
+            should(
+                QueryBuilders.nestedQuery(
+                    "traits",
+                    QueryBuilders.boolQuery().must(termsQuery("traits.key.raw", traitsKeys)),
+                    ScoreMode.None
+                )
+            )
+        }
+    }
+
+    private fun BoolQueryBuilder.applyTraitsValuesFilter(traitsValues: Set<String>?) {
+        if (traitsValues != null) {
+            should(
+                QueryBuilders.nestedQuery(
+                    "traits",
+                    QueryBuilders.boolQuery().must(termsQuery("traits.value.raw", traitsValues)),
+                    ScoreMode.None
+                )
+            )
         }
     }
 }

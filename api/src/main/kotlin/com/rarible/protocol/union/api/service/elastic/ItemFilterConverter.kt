@@ -1,14 +1,10 @@
 package com.rarible.protocol.union.api.service.elastic
 
-import com.rarible.protocol.union.core.model.EsItemCursor
 import com.rarible.protocol.union.core.model.EsItemFilter
 import com.rarible.protocol.union.core.model.EsItemGenericFilter
-import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.ItemIdDto
-import com.rarible.protocol.union.dto.continuation.CombinedContinuation
-import com.rarible.protocol.union.dto.continuation.DateIdContinuation
-import org.springframework.stereotype.Service
+import com.rarible.protocol.union.dto.ItemsSearchFilterDto
 import java.time.Instant
+import org.springframework.stereotype.Service
 
 @Service
 class ItemFilterConverter(
@@ -60,6 +56,23 @@ class ItemFilterConverter(
         return EsItemGenericFilter(
             cursor = cursor,
             collections = setOf(collectionId)
+        )
+    }
+
+    fun searchItems(filter: ItemsSearchFilterDto, cursor: String?): EsItemFilter {
+        return EsItemGenericFilter(
+            cursor = cursor,
+            blockchains = filter.blockchains?.map { it.name }?.toSet(),
+            collections = filter.collections?.map { it.fullId() }?.toSet(),
+            creators = filter.creators?.let { addresses -> addresses.map { it.fullId() }.toSet() }.orEmpty(),
+            mintedFrom = filter.mintedAtFrom,
+            mintedTo = filter.mintedAtTo,
+            updatedFrom = filter.lastUpdatedAtFrom,
+            updatedTo = filter.lastUpdatedAtTo,
+            deleted = filter.deleted,
+            descriptions = filter.descriptions?.toSet(),
+            traitsKeys = filter.traits?.map { it.key }?.toSet(),
+            traitsValues = filter.traits?.map { it.value }?.toSet()
         )
     }
 }
