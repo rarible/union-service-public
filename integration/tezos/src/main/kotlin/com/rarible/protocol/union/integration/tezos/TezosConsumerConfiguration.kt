@@ -18,7 +18,6 @@ import com.rarible.protocol.union.core.model.UnionOwnershipEvent
 import com.rarible.protocol.union.integration.tezos.converter.TezosActivityConverter
 import com.rarible.protocol.union.integration.tezos.converter.TezosOrderConverter
 import com.rarible.protocol.union.integration.tezos.dipdup.DipDupConsumerConfiguration
-import com.rarible.protocol.union.integration.tezos.dipdup.DipDupDummyApiConfiguration
 import com.rarible.protocol.union.integration.tezos.event.TezosActivityEventHandler
 import com.rarible.protocol.union.integration.tezos.event.TezosCollectionEventHandler
 import com.rarible.protocol.union.integration.tezos.event.TezosItemEventHandler
@@ -50,6 +49,7 @@ class TezosConsumerConfiguration(
 
     private val daemon = properties.daemon
 
+    @ConditionalOnProperty(prefix = "integration.tezos.dipdup", name = ["enabled"], havingValue = "false", matchIfMissing = true)
     @Bean
     fun tezosConsumerFactory(): TezosEventsConsumerFactory {
         return TezosEventsConsumerFactory(
@@ -81,6 +81,7 @@ class TezosConsumerConfiguration(
         return TezosCollectionEventHandler(handler)
     }
 
+    @ConditionalOnProperty(prefix = "integration.tezos.dipdup", name = ["enabled"], havingValue = "false", matchIfMissing = true)
     @Bean
     fun tezosOrderEventHandler(
         handler: IncomingEventHandler<UnionOrderEvent>,
@@ -89,6 +90,7 @@ class TezosConsumerConfiguration(
         return TezosOrderEventHandler(handler, converter)
     }
 
+    @ConditionalOnProperty(prefix = "integration.tezos.dipdup", name = ["enabled"], havingValue = "false", matchIfMissing = true)
     @Bean
     fun tezosActivityEventHandler(
         handler: IncomingEventHandler<com.rarible.protocol.union.dto.ActivityDto>,
@@ -129,6 +131,7 @@ class TezosConsumerConfiguration(
         return consumerFactory.createOwnershipConsumer(consumer, handler, daemon, workers)
     }
 
+    @ConditionalOnProperty(prefix = "integration.tezos.dipdup", name = ["enabled"], havingValue = "false", matchIfMissing = true)
     @Bean
     fun tezosOrderWorker(
         factory: TezosEventsConsumerFactory,
@@ -138,6 +141,7 @@ class TezosConsumerConfiguration(
         return consumerFactory.createOrderConsumer(consumer, handler, daemon, workers)
     }
 
+    @ConditionalOnProperty(prefix = "integration.tezos.dipdup", name = ["enabled"], havingValue = "false", matchIfMissing = true)
     @Bean
     fun tezosActivityWorker(
         factory: TezosEventsConsumerFactory,

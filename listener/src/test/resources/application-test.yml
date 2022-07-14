@@ -81,7 +81,7 @@ integration:
         password:
         workers:
           item: 1
-          ownership: 1
+          activity: 1
           order: 1
   solana:
     enabled: true
