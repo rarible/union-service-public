@@ -5,11 +5,15 @@ import com.rarible.protocol.dto.NftItemIdsDto
 import com.rarible.protocol.union.api.client.ItemControllerApi
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
+import com.rarible.protocol.union.core.converter.EsOwnershipConverter
+import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.es.ElasticsearchTestBootstrapper
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ItemIdDto
+import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.continuation.page.PageSize
+import com.rarible.protocol.union.dto.parser.OwnershipIdParser
 import com.rarible.protocol.union.enrichment.converter.ShortItemConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.repository.search.EsItemRepository
@@ -18,9 +22,11 @@ import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.test.data.randomEsItem
 import com.rarible.protocol.union.integration.ethereum.converter.EthItemConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
+import com.rarible.protocol.union.integration.ethereum.converter.EthOwnershipConverter
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAddress
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthNftItemDto
+import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthV2OrderDto
 import io.mockk.coEvery
 import kotlinx.coroutines.FlowPreview
@@ -60,6 +66,9 @@ class ItemsControllerElasticFt : AbstractIntegrationTest() {
 
     @Autowired
     lateinit var enrichmentItemService: EnrichmentItemService
+
+    @Autowired
+    private lateinit var ownershipRepository: EsOwnershipRepository
 
     @Autowired
     private lateinit var elasticsearchTestBootstrapper: ElasticsearchTestBootstrapper
@@ -415,5 +424,44 @@ class ItemsControllerElasticFt : AbstractIntegrationTest() {
         assertThat(result.id).isEqualTo(ethItemId1)
         assertThat(result.id.blockchain).isEqualTo(BlockchainDto.ETHEREUM)
         assertThat(result.bestBidOrder!!.id).isEqualTo(ethUnionOrder.id)
+    }
+
+    @Test
+    fun `get items by owner with ownerships - ethereum`() = runBlocking<Unit> {
+        // given
+        val ethItemId = randomEthItemId()
+        val ethItem = randomEthNftItemDto(ethItemId)
+
+        val ethOwnership = randomEthOwnershipDto(ethItemId).copy(value = BigInteger.ONE)
+        val ethOwnerId = UnionAddressConverter.convert(BlockchainDto.ETHEREUM, ethOwnership.owner.prefixed())
+        val ethOwnershipId = OwnershipIdDto(BlockchainDto.ETHEREUM, ethItemId.value, ethOwnerId)
+        val ethUnionOwnership = EthOwnershipConverter.convert(ethOwnership, ethItemId.blockchain)
+        val esOwnership = EsOwnershipConverter.convert(ethUnionOwnership)
+        ethereumOwnershipControllerApiMock.mockGetNftOwnershipByIds(
+            listOf(OwnershipIdParser.parseFull(esOwnership.ownershipId).value),
+            listOf(ethOwnership)
+        )
+        esOwnershipRepository.save(esOwnership)
+        val esItem = randomEsItem().copy(
+            itemId = ethItemId.toString(),
+            blockchain = BlockchainDto.ETHEREUM
+        )
+        repository.save(esItem)
+        coEvery {
+            testEthereumItemApi.getNftItemsByIds(
+                NftItemIdsDto(listOf(ethItemId.value))
+            )
+        } returns listOf(ethItem).toFlux()
+
+        // when
+        val actual = itemControllerClient.getItemsByOwnerWithOwnership(
+            ethOwnerId.fullId(), continuation, size
+        ).awaitFirst()
+
+        // then
+        assertThat(actual.items).hasSize(1)
+        assertThat(actual.continuation).isNotNull()
+        assertThat(actual.items.first().item.id).isEqualTo(ethItemId)
+        assertThat(actual.items.first().ownership.id).isEqualTo(ethOwnershipId)
     }
 }

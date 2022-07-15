@@ -4,6 +4,7 @@ import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.apm.SpanType
 import com.rarible.core.common.mapAsync
 import com.rarible.core.logging.Logger
+import com.rarible.protocol.union.core.converter.ItemOwnershipConverter
 import com.rarible.protocol.union.core.model.EsItem
 import com.rarible.protocol.union.core.model.EsItemCursor
 import com.rarible.protocol.union.core.model.EsItemCursor.Companion.fromItem
@@ -17,6 +18,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.ItemIdDto
+import com.rarible.protocol.union.dto.ItemWithOwnershipDto
 import com.rarible.protocol.union.dto.ItemsDto
 import com.rarible.protocol.union.dto.ItemsSearchRequestDto
 import com.rarible.protocol.union.dto.ItemsWithOwnershipDto
@@ -38,6 +40,7 @@ class ItemElasticService(
     private val itemFilterConverter: ItemFilterConverter,
     private val esItemRepository: EsItemRepository,
     private val esOwnershipRepository: EsOwnershipRepository,
+    private val ownershipElasticHelper: OwnershipElasticHelper,
     private val router: BlockchainRouter<ItemService>,
     private val itemEnrichService: ItemEnrichService,
 ) : ItemQueryService {
@@ -168,7 +171,32 @@ class ItemElasticService(
         continuation: String?,
         size: Int?
     ): ItemsWithOwnershipDto {
-        throw NotImplementedError()
+        val ownerAddress = IdParser.parseAddress(owner)
+        val safeSize = PageSize.OWNERSHIP.limit(size)
+        val ownerships = ownershipElasticHelper.getRawOwnershipsByOwner(
+            owner = ownerAddress,
+            continuation = continuation,
+            size = safeSize,
+        )
+        val resultOwnerships = ownerships.map { ItemOwnershipConverter.convert(it) }
+        val cursor = ownerships.lastOrNull()?.let { DateIdContinuation(it.createdAt, it.id.fullId()).toString() }
+
+        val items: List<UnionItem> = getItemsByIdsInner(resultOwnerships.map { it.id.getItemId().fullId() })
+        val enriched = itemEnrichService.enrich(items)
+
+        val result = resultOwnerships.mapNotNull { ownership ->
+            val item = enriched.firstOrNull { it.id.fullId() == ownership.id.getItemId().fullId() } ?: return@mapNotNull null
+
+            ItemWithOwnershipDto(
+                item = item,
+                ownership = ownership
+            )
+        }
+
+        return ItemsWithOwnershipDto(
+            items = result,
+            continuation = cursor
+        )
     }
 
     override suspend fun getItemsByIds(ids: List<ItemIdDto>): List<ItemDto> {
@@ -207,21 +235,25 @@ class ItemElasticService(
     }
 
     private suspend fun getItemsByOwnerships(ownerships: List<EsOwnership>): List<UnionItem> {
+        return getItemsByIdsInner(ownerships.mapNotNull { it.itemId })
+    }
+
+    private suspend fun getItemsByIdsInner(itemIds: List<String>): List<UnionItem> {
         val mapping = hashMapOf<BlockchainDto, MutableList<String>>()
 
-        ownerships
-            .filter { it.itemId != null }
-            .forEach { item ->
+        itemIds
+            .forEach { itemId ->
+                val itemIdDto = IdParser.parseItemId(itemId)
                 mapping
-                    .computeIfAbsent(item.blockchain) { ArrayList(ownerships.size) }
-                    .add(IdParser.parseItemId(item.itemId!!).value)
+                    .computeIfAbsent(itemIdDto.blockchain) { ArrayList(itemIds.size) }
+                    .add(itemIdDto.value)
             }
 
         val items = getItemsFromBlockchains(mapping)
         val itemsIdMapping = items.associateBy { it.id.fullId() }
 
-        return ownerships.mapNotNull {
-            itemsIdMapping[it.itemId]
+        return itemIds.mapNotNull {
+            itemsIdMapping[it]
         }
     }
 
