@@ -2,7 +2,7 @@ package com.rarible.protocol.union.integration.tezos.service
 
 import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.logging.Logger
-import com.rarible.dipdup.client.model.DipDupContinuation
+import com.rarible.dipdup.client.model.DipDupActivityContinuation
 import com.rarible.protocol.tezos.api.client.NftActivityControllerApi
 import com.rarible.protocol.tezos.api.client.OrderActivityControllerApi
 import com.rarible.protocol.tezos.dto.NftActivitiesDto
@@ -71,7 +71,7 @@ open class TezosActivityService(
         if (dipdupOrderActivityService.enabled()) {
 
             // We try to get new activities only if we get all legacy and continuation != null
-            if (continuation != null && (isDipDupContinuation(continuation) || isTzktContinuation(continuation))) {
+            if (continuation != null && (isDipDupActivityContinuation(continuation) || isTzktContinuation(continuation))) {
                 return getDipDupAndTzktActivities(types, continuation, size, sort)
             } else {
 
@@ -157,7 +157,7 @@ open class TezosActivityService(
         if (dipdupOrderActivityService.enabled()) {
 
             // We try to get new activities only if we get all legacy and continuation != null
-            if (continuation != null && (isDipDupContinuation(continuation) || isTzktContinuation(continuation))) {
+            if (continuation != null && (isDipDupActivityContinuation(continuation) || isTzktContinuation(continuation))) {
                 return getDipDupAndTzktActivitiesByItem(types, contract, tokenId, continuation, size, sort)
             } else {
 
@@ -360,7 +360,7 @@ open class TezosActivityService(
         }
     }
 
-    private fun isDipDupContinuation(continuation: String?) = continuation?.let { DipDupContinuation.isValid(it) } ?: false
+    private fun isDipDupActivityContinuation(continuation: String?) = continuation?.let { DipDupActivityContinuation.isValid(it) } ?: false
 
     private fun isTzktContinuation(continuation: String?) = continuation?.let { TzktActivityContinuation.isValid(it) } ?: false
 
