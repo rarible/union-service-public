@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.integration.tezos.data
 
+import com.rarible.core.test.data.randomInt
 import com.rarible.core.test.data.randomLong
 import com.rarible.core.test.data.randomString
 import com.rarible.dipdup.client.core.model.Asset
@@ -23,6 +24,7 @@ import java.util.*
 fun randomDipDupActivityOrderListEvent(activityId: String): DipDupActivity {
     return DipDupOrderListActivity(
         id = activityId,
+        operationCounter = randomInt(),
         date = Instant.now().atOffset(ZoneOffset.UTC),
         reverted = false,
         hash = "",

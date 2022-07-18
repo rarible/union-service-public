@@ -121,8 +121,8 @@ integration:
         username: ${consul.tezos.dipdup.consumer.username:}
         password: ${consul.tezos.dipdup.consumer.password:}
         workers:
-          order: 1
-          activity: 1
+          order: ${consul.tezos.dipdup.consumer.workers.order:1}
+          activity: ${consul.tezos.dipdup.consumer.workers.activity:4}
     client:
       url: ${consul.tezos.api.baseUrl}
     pg:

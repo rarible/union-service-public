@@ -53,6 +53,21 @@ class TzktItemServiceImpl(val tzktTokenClient: TokenClient, val properties: DipD
         return TzktItemConverter.convert(royalty, blockchain)
     }
 
+    override suspend fun getItemsByCollection(collection: String, continuation: String?, size: Int): Page<UnionItem> {
+        val tzktPage = tzktTokenClient.tokensByCollection(collection, size, continuation)
+        return TzktItemConverter.convert(tzktPage, blockchain)
+    }
+
+    override suspend fun getItemsByCreator(creator: String, continuation: String?, size: Int): Page<UnionItem> {
+        val tzktPage = tzktTokenClient.tokensByCreator(creator, size, continuation)
+        return TzktItemConverter.convert(tzktPage, blockchain)
+    }
+
+    override suspend fun getItemsByOwner(owner: String, continuation: String?, size: Int): Page<UnionItem> {
+        val tzktPage = tzktTokenClient.tokensByOwner(owner, size, continuation)
+        return TzktItemConverter.convert(tzktPage, blockchain)
+    }
+
     override suspend fun isNft(itemId: String): Boolean {
 
         // check fungible list first

@@ -92,13 +92,17 @@ open class TezosItemService(
         continuation: String?,
         size: Int
     ): Page<UnionItem> {
-        val items = itemControllerApi.getNftItemsByCollection(
-            collection,
-            WITH_META,
-            size,
-            continuation
-        ).awaitFirst()
-        return TezosItemConverter.convert(items, blockchain)
+        return if (tzktItemService.enabled()) {
+            tzktItemService.getItemsByCollection(collection, continuation, size)
+        } else {
+            val items = itemControllerApi.getNftItemsByCollection(
+                collection,
+                WITH_META,
+                size,
+                continuation
+            ).awaitFirst()
+            TezosItemConverter.convert(items, blockchain)
+        }
     }
 
     override suspend fun getItemsByCreator(
@@ -106,13 +110,17 @@ open class TezosItemService(
         continuation: String?,
         size: Int
     ): Page<UnionItem> {
-        val items = itemControllerApi.getNftItemsByCreator(
-            creator,
-            WITH_META,
-            size,
-            continuation
-        ).awaitFirst()
-        return TezosItemConverter.convert(items, blockchain)
+        return if (tzktItemService.enabled()) {
+            tzktItemService.getItemsByCreator(creator, continuation, size)
+        } else {
+            val items = itemControllerApi.getNftItemsByCreator(
+                creator,
+                WITH_META,
+                size,
+                continuation
+            ).awaitFirst()
+            TezosItemConverter.convert(items, blockchain)
+        }
     }
 
     override suspend fun getItemsByOwner(
@@ -120,13 +128,17 @@ open class TezosItemService(
         continuation: String?,
         size: Int
     ): Page<UnionItem> {
-        val items = itemControllerApi.getNftItemsByOwner(
-            owner,
-            WITH_META,
-            size,
-            continuation
-        ).awaitFirst()
-        return TezosItemConverter.convert(items, blockchain)
+        return if (tzktItemService.enabled()) {
+            tzktItemService.getItemsByOwner(owner, continuation, size)
+        } else {
+            val items = itemControllerApi.getNftItemsByOwner(
+                owner,
+                WITH_META,
+                size,
+                continuation
+            ).awaitFirst()
+            TezosItemConverter.convert(items, blockchain)
+        }
     }
 
     override suspend fun getItemsByIds(itemIds: List<String>): List<UnionItem> {

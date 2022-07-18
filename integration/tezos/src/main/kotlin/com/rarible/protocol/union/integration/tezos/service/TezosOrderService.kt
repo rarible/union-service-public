@@ -36,10 +36,9 @@ open class TezosOrderService(
     ): Slice<OrderDto> {
 
         // We try to get new orders only if we get all legacy and continuation != null
-        if (dipdupOrderService.enabled() && continuation != null && isDipDupContinuation(continuation)) {
+        return if (dipdupOrderService.enabled() && continuation != null && isDipDupContinuation(continuation)) {
             val slice = dipdupOrderService.getOrdersAll(sort, status, continuation, size)
-            return slice
-
+            slice
         } else {
             // We should check legacy orders first
             val orders = orderControllerApi.getOrdersAll(
@@ -60,8 +59,7 @@ open class TezosOrderService(
                     entities = slice.entities + nextSlice.entities
                 )
             }
-
-            return slice
+            slice
         }
     }
 
@@ -83,20 +81,28 @@ open class TezosOrderService(
     }
 
     override suspend fun getOrdersByIds(orderIds: List<String>): List<OrderDto> {
-        if (dipdupOrderService.enabled()) {
+        return if (dipdupOrderService.enabled()) {
             val uuidIds = orderIds.filter(::isValidUUID)
-            val orders = dipdupOrderService.getOrderByIds(uuidIds)
+            val orders = if (uuidIds.isNotEmpty()) {
+                dipdupOrderService.getOrderByIds(uuidIds)
+            } else {
+                emptyList()
+            }
 
             val legacyIds = orderIds.subtract(uuidIds).toList()
-            val legacyOrders = orderControllerApi.getOrderByIds(OrderIdsDto(legacyIds))
-                .collectList().awaitFirst()
-                .map { tezosOrderConverter.convert(it, blockchain) }
+            val legacyOrders = if (legacyIds.isNotEmpty()) {
+                orderControllerApi.getOrderByIds(OrderIdsDto(legacyIds))
+                    .collectList().awaitFirst()
+                    .map { tezosOrderConverter.convert(it, blockchain) }
+            } else {
+                emptyList()
+            }
 
-            return orders + legacyOrders
+            orders + legacyOrders
         } else {
             val form = OrderIdsDto(orderIds)
             val orders = orderControllerApi.getOrderByIds(form).collectList().awaitFirst()
-            return orders.map { tezosOrderConverter.convert(it, blockchain) }
+            orders.map { tezosOrderConverter.convert(it, blockchain) }
         }
     }
 

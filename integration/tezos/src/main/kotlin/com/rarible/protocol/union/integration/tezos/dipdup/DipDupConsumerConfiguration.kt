@@ -2,6 +2,7 @@ package com.rarible.protocol.union.integration.tezos.dipdup
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.rarible.core.application.ApplicationEnvironmentInfo
+import com.rarible.core.logging.Logger
 import com.rarible.dipdup.client.core.model.DipDupActivity
 import com.rarible.dipdup.client.core.model.DipDupCollection
 import com.rarible.dipdup.client.core.model.DipDupOrder
@@ -14,7 +15,6 @@ import com.rarible.protocol.union.core.model.UnionItemEvent
 import com.rarible.protocol.union.core.model.UnionOrderEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipEvent
 import com.rarible.protocol.union.dto.ActivityDto
-import com.rarible.protocol.union.integration.tezos.TezosIntegrationProperties
 import com.rarible.protocol.union.integration.tezos.dipdup.converter.DipDupActivityConverter
 import com.rarible.protocol.union.integration.tezos.dipdup.converter.DipDupCollectionConverter
 import com.rarible.protocol.union.integration.tezos.dipdup.converter.DipDupOrderConverter
@@ -34,16 +34,15 @@ import org.springframework.context.annotation.Import
 @Import(DipDupApiConfiguration::class)
 class DipDupConsumerConfiguration(
     applicationEnvironmentInfo: ApplicationEnvironmentInfo,
-    properties: TezosIntegrationProperties,
     private val dipDupProperties: DipDupIntegrationProperties,
     private val consumerFactory: ConsumerFactory
 ) {
 
     private val env = applicationEnvironmentInfo.name
     private val host = applicationEnvironmentInfo.host
-    private val workers = properties.consumer!!.workers
+    private val workers = dipDupProperties.consumer!!.workers
 
-    private val daemon = properties.daemon
+    private val daemon = dipDupProperties.daemon
 
     @Bean
     fun dipDupConsumerFactory(): DipDupEventsConsumerFactory {
@@ -58,7 +57,6 @@ class DipDupConsumerConfiguration(
     }
 
     @Bean
-    @DependsOn("tezosOrderEventHandler")
     fun dipDupOrderEventHandler(
         handler: IncomingEventHandler<UnionOrderEvent>,
         converter: DipDupOrderConverter,
@@ -102,6 +100,7 @@ class DipDupConsumerConfiguration(
         handler: DipDupActivityEventHandler
     ): KafkaConsumerWorker<DipDupActivity> {
         val consumer = factory.createActivityConsumer(dipdupGroup(consumerFactory.activityGroup))
+        logger.info("Use ${workers} worker config for listening dipdup events")
         return consumerFactory.createActivityConsumer(consumer, handler, daemon, workers)
     }
 
@@ -125,4 +124,8 @@ class DipDupConsumerConfiguration(
     }
 
     private fun dipdupGroup(group: String) = "dipdup.$group"
+
+    companion object {
+        private val logger by Logger()
+    }
 }
