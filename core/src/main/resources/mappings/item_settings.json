@@ -2,9 +2,7 @@
   "index": {
     "number_of_shards": 6,
     "number_of_replicas": 1,
-    "refresh_interval": "1s",
-    "sort.field": [ "lastUpdatedAt", "itemId" ],
-    "sort.order": [ "desc", "desc" ]
+    "refresh_interval": "1s"
   },
   "analysis": {
     "filter": {
