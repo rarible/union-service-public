@@ -92,6 +92,7 @@ integration:
       password: ${consul.tezos.pg.password:}
       database: ${consul.tezos.pg.database:}
     auctionContracts: ${consul.tezos.auctionContracts:}
+    showLegacyOrders: ${consul.tezos.showLegacyOrders:false}
   solana:
     enabled: ${consul.solana.enabled:false}
   immutablex:

@@ -15,6 +15,7 @@ import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
+import com.rarible.protocol.union.integration.tezos.TezosIntegrationProperties
 import com.rarible.protocol.union.integration.tezos.converter.TezosConverter
 import com.rarible.protocol.union.integration.tezos.converter.TezosOrderConverter
 import com.rarible.protocol.union.integration.tezos.dipdup.service.DipdupOrderService
@@ -25,7 +26,8 @@ import java.util.regex.Pattern
 open class TezosOrderService(
     private val orderControllerApi: OrderControllerApi,
     private val tezosOrderConverter: TezosOrderConverter,
-    private val dipdupOrderService: DipdupOrderService
+    private val dipdupOrderService: DipdupOrderService,
+    private val tezosIntegrationProperties: TezosIntegrationProperties
 ) : AbstractBlockchainService(BlockchainDto.TEZOS), OrderService {
 
     override suspend fun getOrdersAll(
@@ -40,21 +42,26 @@ open class TezosOrderService(
             val slice = dipdupOrderService.getOrdersAll(sort, status, continuation, size)
             slice
         } else {
+
             // We should check legacy orders first
-            val orders = orderControllerApi.getOrdersAll(
-                null,
-                tezosOrderConverter.convert(sort),
-                tezosOrderConverter.convert(status),
-                size,
-                continuation
-            ).awaitFirst()
-            val slice = tezosOrderConverter.convert(orders, blockchain)
+            val slice = if (tezosIntegrationProperties.showLegacyOrders) {
+                val orders = orderControllerApi.getOrdersAll(
+                    null,
+                    tezosOrderConverter.convert(sort),
+                    tezosOrderConverter.convert(status),
+                    size,
+                    continuation
+                ).awaitFirst()
+                tezosOrderConverter.convert(orders, blockchain)
+            } else {
+                Slice.empty()
+            }
 
             // If legacy orders ended, we should try to get orders from new indexer
             if (dipdupOrderService.enabled() && slice.entities.size < size) {
                 val delta = size - slice.entities.size
                 val nextSlice = dipdupOrderService.getOrdersAll(sort, status, null, delta)
-                return Slice(
+                Slice(
                     continuation = nextSlice.continuation,
                     entities = slice.entities + nextSlice.entities
                 )
@@ -261,31 +268,35 @@ open class TezosOrderService(
 
         } else {
             // We should check legacy orders first
-            val orders = orderControllerApi.getSellOrderByItem(
-                contract,
-                tokenId.toString(),
-                maker,
-                origin,
-                currencyId,
-                tezosOrderConverter.convert(status),
-                null,
-                null,
-                size,
-                continuation
-            ).awaitFirst()
-            val slice = tezosOrderConverter.convert(orders, blockchain)
+            val slice = if (tezosIntegrationProperties.showLegacyOrders) {
+                val orders = orderControllerApi.getSellOrderByItem(
+                    contract,
+                    tokenId.toString(),
+                    maker,
+                    origin,
+                    currencyId,
+                    tezosOrderConverter.convert(status),
+                    null,
+                    null,
+                    size,
+                    continuation
+                ).awaitFirst()
+                tezosOrderConverter.convert(orders, blockchain)
+            } else {
+                Slice.empty()
+            }
 
             // If legacy orders ended, we should try to get orders from new indexer
-            if (dipdupOrderService.enabled() && slice.entities.size < size) {
+            return if (dipdupOrderService.enabled() && slice.entities.size < size) {
                 val delta = size - slice.entities.size
                 val nextSlice = dipdupOrderService.getSellOrdersByItem(contract, tokenId, maker, currencyId, status, null, delta)
-                return Slice(
+                Slice(
                     continuation = nextSlice.continuation,
                     entities = slice.entities + nextSlice.entities
                 )
+            } else {
+                slice
             }
-
-            return slice
         }
     }
 

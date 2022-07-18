@@ -17,7 +17,8 @@ class TezosIntegrationProperties(
     client: DefaultClientProperties?,
     daemon: DaemonWorkerProperties = DaemonWorkerProperties(),
     auctionContracts: String? = null,
-    origins: Map<String, OriginProperties> = emptyMap()
+    origins: Map<String, OriginProperties> = emptyMap(),
+    val showLegacyOrders: Boolean = false
 ) : DefaultBlockchainProperties(
     BlockchainDto.TEZOS,
     enabled,
