@@ -38,7 +38,7 @@ data class EsItem(
     val bestBidMarketplace: String? = null,
 ) {
     companion object {
-        private const val VERSION: Int = 1
+        const val VERSION: Int = 1
 
         val ENTITY_DEFINITION = EsEntity.ITEM.let {
             EntityDefinition(
