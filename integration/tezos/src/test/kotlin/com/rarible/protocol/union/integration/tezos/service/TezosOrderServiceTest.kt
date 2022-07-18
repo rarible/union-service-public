@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.integration.tezos.service
 
+import com.rarible.core.daemon.DaemonWorkerProperties
 import com.rarible.dipdup.client.OrderClient
 import com.rarible.dipdup.client.core.model.Asset
 import com.rarible.dipdup.client.core.model.DipDupOrder
@@ -11,6 +12,7 @@ import com.rarible.protocol.tezos.dto.OrderPaginationDto
 import com.rarible.protocol.union.core.service.CurrencyService
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderIdDto
+import com.rarible.protocol.union.integration.tezos.TezosIntegrationProperties
 import com.rarible.protocol.union.integration.tezos.converter.TezosOrderConverter
 import com.rarible.protocol.union.integration.tezos.data.randomTezosOrderDto
 import com.rarible.protocol.union.integration.tezos.dipdup.converter.DipDupOrderConverter
@@ -40,7 +42,16 @@ class TezosOrderServiceTest {
     private val tezosOrderConverter = TezosOrderConverter(currencyService)
     private val dipdupOrderConverter = DipDupOrderConverter(currencyService)
     private val dipdupOrderService = DipdupOrderServiceImpl(dipdupOrderClient, dipdupOrderConverter)
-    private val service = TezosOrderService(orderControllerApi, tezosOrderConverter, dipdupOrderService)
+    private val tezosIntegrationProperties = TezosIntegrationProperties(
+        enabled = true,
+        consumer = null,
+        client = null,
+        daemon = DaemonWorkerProperties(),
+        auctionContracts = null,
+        origins = emptyMap(),
+        showLegacyOrders = true
+    )
+    private val service = TezosOrderService(orderControllerApi, tezosOrderConverter, dipdupOrderService, tezosIntegrationProperties)
 
     @BeforeEach
     fun beforeEach() {
