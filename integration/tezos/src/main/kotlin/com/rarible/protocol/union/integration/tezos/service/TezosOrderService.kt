@@ -58,8 +58,9 @@ open class TezosOrderService(
                     continuation = nextSlice.continuation,
                     entities = slice.entities + nextSlice.entities
                 )
+            } else {
+                slice
             }
-            slice
         }
     }
 
