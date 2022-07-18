@@ -26,8 +26,8 @@ class EsCollectionQueryBuilderService(
 
         cursorService.applyCursor(query, filter.cursor)
 
-        builder.sortByField(EsCollection::date.name, SortOrder.DESC)
-        builder.sortByField(EsCollection::salt.name, SortOrder.DESC)
+        builder.sortByField(EsCollection::date, SortOrder.DESC)
+        builder.sortByField(EsCollection::salt, SortOrder.DESC)
 
         builder.withQuery(query)
         return builder.build()

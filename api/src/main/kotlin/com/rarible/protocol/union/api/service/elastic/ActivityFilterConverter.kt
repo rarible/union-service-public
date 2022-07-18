@@ -64,13 +64,58 @@ class ActivityFilterConverter(
         to: Instant?,
         cursor: String?,
     ): ElasticActivityFilter {
+        val parsedUsers = user.map { IdParser.parseAddress(it).value }.toSet()
+        val (userFilters, activityTypes) = activityTypeByUsers(type, parsedUsers)
+        val finalUserFilters = userFilters.finalize()
+
         return ElasticActivityQueryGenericFilter(
             blockchains = blockchains?.toSet().orEmpty(),
-            activityTypes = type.map { userActivityTypeConverter.convert(it).activityTypeDto }.toSet(), // isMaker is ignored for now
-            anyUsers = user.map { IdParser.parseAddress(it).value }.toSet(),
+            activityTypes = activityTypes, // isMaker is ignored for now
+            anyUsers = finalUserFilters.anyUsers,
+            usersFrom = finalUserFilters.fromUsers,
+            usersTo = finalUserFilters.toUsers,
             from = from,
             to = to,
             cursor = cursor,
         )
+    }
+
+    private fun activityTypeByUsers(
+        userActivityTypes: List<UserActivityTypeDto>,
+        parsedUsers: Set<String>
+    ) = userActivityTypes.foldRight(
+        UserFilters.anyUsers(parsedUsers) to emptySet<ActivityTypeDto>()
+    ) { userActivityType, (users, convertedTypes) ->
+        val convertedType = userActivityTypeConverter.convert(userActivityType).activityTypeDto
+
+        // here we set
+        val modifiedUserFilters = when (userActivityType) {
+            in listOf(UserActivityTypeDto.SELL, UserActivityTypeDto.TRANSFER_FROM) -> {
+                users.copy(fromUsers = parsedUsers, anyUsers = emptySet())
+            }
+            in listOf(UserActivityTypeDto.BUY, UserActivityTypeDto.TRANSFER_TO) -> {
+                users.copy(toUsers = parsedUsers, anyUsers = emptySet())
+            }
+            else -> users
+        }
+
+        modifiedUserFilters to (convertedTypes + convertedType)
+    }
+}
+
+private data class UserFilters(
+    val fromUsers: Set<String>,
+    val toUsers: Set<String>,
+    val anyUsers: Set<String>
+) {
+
+    fun finalize(): UserFilters {
+        return if(fromUsers == toUsers && fromUsers.isNotEmpty()) this.copy(anyUsers = fromUsers, fromUsers = emptySet(), toUsers = emptySet())
+        else this
+    }
+    companion object {
+        fun anyUsers(users: Set<String>): UserFilters {
+            return UserFilters(emptySet(), emptySet(), users)
+        }
     }
 }

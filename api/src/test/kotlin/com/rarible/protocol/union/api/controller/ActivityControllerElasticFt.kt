@@ -384,6 +384,7 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
         )
         // Flow and Ethereum user specified - request should be routed only for them, Polygon omitted
         val userEth = UnionAddressConverter.convert(BlockchainDto.ETHEREUM, randomEthAddress())
+        val userEth2 = UnionAddressConverter.convert(BlockchainDto.ETHEREUM, randomEthAddress())
         val size = 3
 
         val ethItemActivity = randomEthItemMintActivity()
@@ -395,14 +396,15 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
 
         val elasticEthItemActivity = randomEsActivity().copy(
             activityId = "${BlockchainDto.ETHEREUM}:${ethItemActivity.id}",
-            type = ActivityTypeDto.MINT,
+            type = ActivityTypeDto.TRANSFER,
             blockchain = BlockchainDto.ETHEREUM,
             date = ethItemActivity.date,
             userFrom = userEth.value,
+            userTo = userEth2.value
         )
         val elasticEthItemActivity2 = randomEsActivity().copy(
             activityId = "${BlockchainDto.ETHEREUM}:${ethItemActivity2.id}",
-            type = ActivityTypeDto.MINT,
+            type = ActivityTypeDto.SELL,
             blockchain = BlockchainDto.ETHEREUM,
             date = ethItemActivity2.date,
             userFrom = userEth.value,
@@ -439,5 +441,15 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
 
         assertThat(activities.activities).hasSize(3)
         assertThat(activities.cursor).isNotNull()
+
+        val fromActivities = activityControllerApi.getActivitiesByUser(
+            listOf(UserActivityTypeDto.SELL), listOf(userEth.fullId()), null, oneWeekAgo, now, null, null, size, sort, null,
+        ).awaitFirst()
+        assertThat(fromActivities.activities).hasSize(1)
+
+        val toActivities = activityControllerApi.getActivitiesByUser(
+            listOf(UserActivityTypeDto.TRANSFER_TO), listOf(userEth2.fullId()), null, oneWeekAgo, now, null, null, size, sort, null,
+        ).awaitFirst()
+        assertThat(toActivities.activities).hasSize(1)
     }
 }
