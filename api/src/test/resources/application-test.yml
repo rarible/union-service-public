@@ -38,6 +38,7 @@ integration:
       user: "test"
       password: "test"
       database: "test"
+    showLegacyOrders: true
   solana:
     enabled: true
 
