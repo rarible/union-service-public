@@ -64,7 +64,12 @@ class ItemElasticService(
             " Slice(size={}, continuation={})",
             blockchains, continuation, safeSize, slice.entities.size, slice.continuation
         )
-        return itemEnrichService.enrich(slice,  0)
+        val enriched = itemEnrichService.enrich(slice.entities)
+
+        return ItemsDto(
+            items = enriched,
+            continuation = slice.continuation
+        )
     }
 
     override suspend fun getItemsByCollection(
@@ -156,7 +161,6 @@ class ItemElasticService(
         )
 
         val cursor = ownerships.lastOrNull()?.let { DateIdContinuation(it.date, it.ownershipId).toString() }
-
         val items: List<UnionItem> = getItemsByOwnerships(ownerships)
 
         val enriched = itemEnrichService.enrich(items)
