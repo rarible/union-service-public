@@ -34,6 +34,7 @@ import com.rarible.protocol.union.enrichment.test.data.randomEsActivity
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAddress
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAuctionStartActivity
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemMintActivity
+import com.rarible.protocol.union.integration.ethereum.data.randomEthOrderActivityMatch
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOrderBidActivity
 import com.rarible.protocol.union.integration.flow.data.randomFlowBurnDto
 import com.rarible.protocol.union.integration.flow.data.randomFlowCancelBidActivityDto
@@ -380,7 +381,7 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
             UserActivityTypeDto.TRANSFER_FROM,
             UserActivityTypeDto.TRANSFER_TO,
             UserActivityTypeDto.MINT,
-            UserActivityTypeDto.BURN
+            UserActivityTypeDto.SELL
         )
         // Flow and Ethereum user specified - request should be routed only for them, Polygon omitted
         val userEth = UnionAddressConverter.convert(BlockchainDto.ETHEREUM, randomEthAddress())
@@ -389,10 +390,12 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
 
         val ethItemActivity = randomEthItemMintActivity()
             .copy(date = Instant.now().minusSeconds(5))
-        val ethItemActivity2 = randomEthItemMintActivity()
+        val ethItemActivity2 = randomEthOrderActivityMatch()
             .copy(date = Instant.now().minusSeconds(6))
         val polygonItemActivity = randomEthItemMintActivity()
             .copy(date = Instant.now().minusSeconds(7))
+        val sameTypeDifferentRole = randomEthOrderActivityMatch()
+            .copy(date = Instant.now().minusSeconds(6))
 
         val elasticEthItemActivity = randomEsActivity().copy(
             activityId = "${BlockchainDto.ETHEREUM}:${ethItemActivity.id}",
@@ -417,15 +420,31 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
             userFrom = userEth.value,
         )
 
+        val elasticEthItemActivity3 = randomEsActivity().copy(
+            activityId = "${BlockchainDto.ETHEREUM}:${sameTypeDifferentRole.id}",
+            type = ActivityTypeDto.SELL,
+            blockchain = BlockchainDto.ETHEREUM,
+            date = sameTypeDifferentRole.date,
+            userTo = userEth.value,
+        )
+
         repository.saveAll(
-            listOf(elasticEthItemActivity, elasticEthItemActivity2, elasticPolygonItemActivity)
+            listOf(elasticEthItemActivity, elasticEthItemActivity2, elasticPolygonItemActivity, elasticEthItemActivity3)
         )
 
         coEvery {
             testEthereumActivityItemApi.getNftActivitiesById(
-                ActivitiesByIdRequestDto(ids = listOf(ethItemActivity.id, ethItemActivity2.id))
+                ActivitiesByIdRequestDto(ids = listOf(ethItemActivity.id))
             )
-        } returns NftActivitiesDto(null, listOf(ethItemActivity, ethItemActivity2)).toMono()
+        } returns NftActivitiesDto(null, listOf(ethItemActivity)).toMono()
+
+        coEvery {
+            testEthereumActivityOrderApi.getOrderActivitiesById(eq(ActivitiesByIdRequestDto(listOf(ethItemActivity2.id, sameTypeDifferentRole.id))))
+        } returns OrderActivitiesDto(null, listOf(ethItemActivity2, sameTypeDifferentRole)).toMono()
+
+        coEvery {
+            testEthereumActivityOrderApi.getOrderActivitiesById(eq(ActivitiesByIdRequestDto(listOf(ethItemActivity2.id))))
+        } returns OrderActivitiesDto(null, listOf(ethItemActivity2)).toMono()
 
         coEvery {
             testPolygonActivityItemApi.getNftActivitiesById(
@@ -440,7 +459,7 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
         ).awaitFirst()
 
         assertThat(activities.activities).hasSize(3)
-        assertThat(activities.cursor).isNotNull()
+        assertThat(activities.cursor).isNotNull
 
         val fromActivities = activityControllerApi.getActivitiesByUser(
             listOf(UserActivityTypeDto.SELL), listOf(userEth.fullId()), null, oneWeekAgo, now, null, null, size, sort, null,

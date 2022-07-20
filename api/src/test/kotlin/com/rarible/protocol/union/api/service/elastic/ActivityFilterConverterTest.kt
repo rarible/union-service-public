@@ -146,6 +146,8 @@ class ActivityFilterConverterTest {
             assertThat(actual.activityTypes).containsExactlyInAnyOrder(ActivityTypeDto.TRANSFER, ActivityTypeDto.SELL)
             assertThat(actual.blockchains).containsExactlyInAnyOrder(*blockchains.toTypedArray())
             assertThat(actual.anyUsers).containsExactlyInAnyOrder("loupa", "poupa")
+            assertThat(actual.usersFrom).isEmpty()
+            assertThat(actual.usersTo).isEmpty()
             assertThat(actual.from).isEqualTo(from)
             assertThat(actual.to).isEqualTo(to)
             assertThat(actual.cursor).isEqualTo(cursor)
@@ -170,6 +172,30 @@ class ActivityFilterConverterTest {
             assertThat(actual.blockchains).containsExactlyInAnyOrder(*blockchains.toTypedArray())
             assertThat(actual.anyUsers).isEmpty()
             assertThat(actual.usersFrom).containsExactlyInAnyOrder("loupa", "poupa")
+            assertThat(actual.from).isEqualTo(from)
+            assertThat(actual.to).isEqualTo(to)
+            assertThat(actual.cursor).isEqualTo(cursor)
+        }
+
+        @Test
+        fun `should convert - filter by to users only`() {
+            // given
+            val userActivityTypes = listOf(UserActivityTypeDto.TRANSFER_TO, UserActivityTypeDto.BUY)
+            val users = listOf("SOLANA:loupa", "FLOW:poupa")
+            val blockchains = listOf(BlockchainDto.SOLANA, BlockchainDto.FLOW)
+            val from = Instant.ofEpochMilli(12345)
+            val to = Instant.ofEpochMilli(67890)
+            val cursor = "some cursor"
+
+            // when
+            val actual = converter.convertGetActivitiesByUser(userActivityTypes, users, blockchains, from, to, cursor)
+
+            // then
+            actual as ElasticActivityQueryGenericFilter
+            assertThat(actual.activityTypes).containsExactlyInAnyOrder(ActivityTypeDto.TRANSFER, ActivityTypeDto.SELL)
+            assertThat(actual.blockchains).containsExactlyInAnyOrder(*blockchains.toTypedArray())
+            assertThat(actual.anyUsers).isEmpty()
+            assertThat(actual.usersTo).containsExactlyInAnyOrder("loupa", "poupa")
             assertThat(actual.from).isEqualTo(from)
             assertThat(actual.to).isEqualTo(to)
             assertThat(actual.cursor).isEqualTo(cursor)

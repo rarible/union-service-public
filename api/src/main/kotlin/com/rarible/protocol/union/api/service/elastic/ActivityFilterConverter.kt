@@ -109,6 +109,10 @@ private data class UserFilters(
     val anyUsers: Set<String>
 ) {
 
+    /**
+     * This method forces usage of anyUsers filter in case of mixed activity types are used.
+     * E.g. for (SELL + BUY), anyUsers filter is used in ES
+     */
     fun finalize(): UserFilters {
         return if(fromUsers == toUsers && fromUsers.isNotEmpty()) this.copy(anyUsers = fromUsers, fromUsers = emptySet(), toUsers = emptySet())
         else this
