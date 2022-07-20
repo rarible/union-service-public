@@ -108,7 +108,7 @@ class OrderElasticService(
     override suspend fun getOrderBidsByMaker(
         blockchains: List<BlockchainDto>?,
         platform: PlatformDto?,
-        maker: String,
+        maker: List<String>,
         origin: String?,
         status: List<OrderStatusDto>?,
         start: Long?,
@@ -130,7 +130,7 @@ class OrderElasticService(
     }
 
     override suspend fun getSellOrdersByMaker(
-        maker: String,
+        maker: List<String>,
         blockchains: List<BlockchainDto>?,
         platform: PlatformDto?,
         origin: String?,

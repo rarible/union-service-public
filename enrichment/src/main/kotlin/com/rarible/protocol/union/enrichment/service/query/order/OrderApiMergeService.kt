@@ -25,6 +25,7 @@ import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.dto.ext
 import com.rarible.protocol.union.dto.group
 import com.rarible.protocol.union.dto.parser.IdParser
+import com.rarible.protocol.union.dto.subchains
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -215,7 +216,7 @@ class OrderApiMergeService(
     override suspend fun getOrderBidsByMaker(
         blockchains: List<BlockchainDto>?,
         platform: PlatformDto?,
-        maker: String,
+        maker: List<String>,
         origin: String?,
         status: List<OrderStatusDto>?,
         start: Long?,
@@ -224,10 +225,11 @@ class OrderApiMergeService(
         size: Int?
     ): OrdersDto {
         val safeSize = PageSize.ORDER.limit(size)
-        val makerAddress = IdParser.parseAddress(maker)
+        val makerAddresses = maker.map { IdParser.parseAddress(it) }
+        val makerBlockchainGroups = makerAddresses.map { it.blockchainGroup }.toSet()
         val originAddress = safeAddress(origin)
         val filter = BlockchainFilter(blockchains)
-        if (!ensureSameBlockchain(makerAddress.blockchainGroup, originAddress?.blockchainGroup)) {
+        if (originAddress != null && !ensureSameBlockchain(makerBlockchainGroups + originAddress.blockchainGroup)) {
             logger.warn(
                 "Incompatible blockchain groups specified in getOrderBidsByMaker: origin={}, maker={}",
                 origin, maker
@@ -235,10 +237,11 @@ class OrderApiMergeService(
             return empty
         }
 
-        val blockchainSlices = router.executeForAll(filter.exclude(makerAddress.blockchainGroup)) {
+        val blockchainSlices = router.executeForAll(filter.exclude(makerBlockchainGroups)) {
             it.getOrderBidsByMaker(
                 platform,
-                makerAddress.value,
+                makerAddresses.filter { address -> address.blockchainGroup.subchains().contains(it.blockchain) }
+                    .map { address -> address.value },
                 originAddress?.value,
                 status,
                 start,
@@ -296,7 +299,7 @@ class OrderApiMergeService(
     }
 
     override suspend fun getSellOrdersByMaker(
-        maker: String,
+        maker: List<String>,
         blockchains: List<BlockchainDto>?,
         platform: PlatformDto?,
         origin: String?,
@@ -305,11 +308,12 @@ class OrderApiMergeService(
         status: List<OrderStatusDto>?
     ): OrdersDto {
         val safeSize = PageSize.ORDER.limit(size)
-        val makerAddress = IdParser.parseAddress(maker)
+        val makerAddresses = maker.map { IdParser.parseAddress(it) }
+        val makerBlockchainGroups = makerAddresses.map { it.blockchainGroup }.toSet()
         val originAddress = safeAddress(origin)
         val filter = BlockchainFilter(blockchains)
 
-        if (!ensureSameBlockchain(makerAddress.blockchainGroup, originAddress?.blockchainGroup)) {
+        if (originAddress != null && !ensureSameBlockchain(makerBlockchainGroups + originAddress.blockchainGroup)) {
             logger.warn(
                 "Incompatible blockchain groups specified in getSellOrdersByMaker: origin={}, maker={}",
                 origin, maker
@@ -317,8 +321,16 @@ class OrderApiMergeService(
             return empty
         }
 
-        val blockchainSlices = router.executeForAll(filter.exclude(makerAddress.blockchainGroup)) {
-            it.getSellOrdersByMaker(platform, makerAddress.value, originAddress?.value, status, continuation, safeSize)
+        val blockchainSlices = router.executeForAll(filter.exclude(makerBlockchainGroups)) {
+            it.getSellOrdersByMaker(
+                platform,
+                makerAddresses.filter { address -> address.blockchainGroup.subchains().contains(it.blockchain) }
+                    .map { address -> address.value },
+                originAddress?.value,
+                status,
+                continuation,
+                safeSize
+            )
         }
 
         val combinedSlice = Paging(

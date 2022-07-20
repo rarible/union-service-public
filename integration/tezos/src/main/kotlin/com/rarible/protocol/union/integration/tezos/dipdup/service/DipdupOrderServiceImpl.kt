@@ -78,6 +78,24 @@ class DipdupOrderServiceImpl(
         )
     }
 
+    override suspend fun getSellOrdersByMaker(
+        maker: List<String>,
+        statuses: List<OrderStatusDto>?,
+        continuation: String?,
+        size: Int
+    ): Slice<OrderDto> {
+        val page = dipdupOrderClient.getOrdersByMakers(
+            makers = maker,
+            statuses = statuses?.let { it.map { status -> dipDupOrderConverter.convert(status) } } ?: emptyList(),
+            size = size,
+            continuation = continuation
+        )
+        return Slice(
+            continuation = page.continuation,
+            entities = page.orders.map { dipDupOrderConverter.convert(it, blockchain) }
+        )
+    }
+
     override suspend fun getSellOrderCurrenciesByItem(contract: String, tokenId: BigInteger): List<AssetTypeDto> {
         logger.info("Fetch dipdup sell order currencies by item: $contract, $tokenId")
         return dipDupOrderConverter.convert(

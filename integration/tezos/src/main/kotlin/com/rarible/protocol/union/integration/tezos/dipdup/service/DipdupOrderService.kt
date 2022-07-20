@@ -40,6 +40,15 @@ interface DipdupOrderService {
         TODO("Not implemented")
     }
 
+    suspend fun getSellOrdersByMaker(
+        maker: List<String>,
+        status: List<OrderStatusDto>?,
+        continuation: String?,
+        size: Int
+    ): Slice<OrderDto> {
+        TODO("Not implemented")
+    }
+
     suspend fun getSellOrderCurrenciesByItem(contract: String, tokenId: BigInteger): List<AssetTypeDto> {
         TODO("Not implemented")
     }
