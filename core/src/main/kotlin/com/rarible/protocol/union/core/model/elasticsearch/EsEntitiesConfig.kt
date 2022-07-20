@@ -25,6 +25,7 @@ object EsEntitiesConfig {
         EsCollection.ENTITY_DEFINITION,
         EsOwnership.ENTITY_DEFINITION,
         EsItem.ENTITY_DEFINITION,
+        EsOrder.ENTITY_DEFINITION,
     )
 
     fun loadMapping(entity: EsEntity): String {

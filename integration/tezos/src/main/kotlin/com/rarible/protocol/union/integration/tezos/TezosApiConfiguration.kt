@@ -151,10 +151,11 @@ class TezosApiConfiguration(
     fun tezosOrderService(
         controllerApi: OrderControllerApi,
         converter: TezosOrderConverter,
-        dipdupOrderService: DipdupOrderService
+        dipdupOrderService: DipdupOrderService,
+        tezosIntegrationProperties: TezosIntegrationProperties
     ): OrderService {
         return OrderProxyService(
-            TezosOrderService(controllerApi, converter, dipdupOrderService),
+            TezosOrderService(controllerApi, converter, dipdupOrderService, tezosIntegrationProperties),
             setOf(PlatformDto.RARIBLE)
         )
     }

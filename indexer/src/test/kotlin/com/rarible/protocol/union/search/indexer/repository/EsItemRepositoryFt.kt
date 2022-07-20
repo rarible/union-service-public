@@ -65,6 +65,11 @@ internal class EsItemRepositoryFt {
     }
 
     @Test
+    fun `shouldn't fail to save 0 items`() = runBlocking<Unit> {
+        repository.saveAll(emptyList())
+    }
+
+    @Test
     fun `should be able to search up to 1000 items`(): Unit = runBlocking {
         // given
         val items = List(1000) { randomEsItem() }

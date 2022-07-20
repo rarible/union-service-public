@@ -3,6 +3,7 @@ package com.rarible.protocol.union.enrichment.repository.search
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.apm.SpanType
+import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.core.elasticsearch.EsHelper
 import com.rarible.protocol.union.core.elasticsearch.EsRepository
 import com.rarible.protocol.union.core.model.elasticsearch.EntityDefinitionExtended
@@ -35,6 +36,8 @@ abstract class ElasticSearchRepository<T>(
     private val idResolver: (T) -> String
 ) : EsRepository {
 
+    private val logger by Logger()
+
     private var brokenEsState: Boolean = true
 
     @PostConstruct
@@ -63,6 +66,11 @@ abstract class ElasticSearchRepository<T>(
         indexName: String? = null,
         refreshPolicy: WriteRequest.RefreshPolicy = WriteRequest.RefreshPolicy.IMMEDIATE
     ): List<T> {
+        if (entities.isEmpty()) {
+            logger.info("No entities to save")
+            return emptyList()
+        }
+
         if (brokenEsState) {
             throw IllegalStateException("No indexes to save")
         }
