@@ -202,6 +202,25 @@ class ActivityFilterConverterTest {
         }
 
         @Test
+        fun `should convert - sell and buy should convert to anyUsers`() {
+            // given
+            val userActivityTypes = listOf(UserActivityTypeDto.SELL, UserActivityTypeDto.BUY)
+            val users = listOf("SOLANA:loupa", "FLOW:poupa")
+            val blockchains = listOf(BlockchainDto.SOLANA, BlockchainDto.FLOW)
+            val from = Instant.ofEpochMilli(12345)
+            val to = Instant.ofEpochMilli(67890)
+            val cursor = "some cursor"
+
+            // when
+            val actual = converter.convertGetActivitiesByUser(userActivityTypes, users, blockchains, from, to, cursor)
+
+            // then
+            actual as ElasticActivityQueryGenericFilter
+            assertThat(actual.activityTypes).containsExactlyInAnyOrder(ActivityTypeDto.SELL)
+            assertThat(actual.anyUsers).containsExactlyInAnyOrder("loupa", "poupa")
+        }
+
+        @Test
         fun `should convert - null blockchains`() {
             // given
             val userActivityTypes = listOf(UserActivityTypeDto.TRANSFER_FROM, UserActivityTypeDto.TRANSFER_TO, UserActivityTypeDto.BUY)
