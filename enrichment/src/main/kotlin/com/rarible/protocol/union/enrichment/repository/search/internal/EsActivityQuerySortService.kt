@@ -12,9 +12,9 @@ class EsActivityQuerySortService {
 
     fun applySort(builder: NativeSearchQueryBuilder, sort: EsActivitySort) {
         val sortOrder = if (sort.latestFirst) SortOrder.DESC else SortOrder.ASC
-        builder.sortByField(EsActivity::date.name, sortOrder)
-        builder.sortByField(EsActivity::blockNumber.name, sortOrder)
-        builder.sortByField(EsActivity::logIndex.name, sortOrder)
-        builder.sortByField(EsActivity::salt.name, sortOrder)
+        builder.sortByField(EsActivity::date, sortOrder)
+        builder.sortByField(EsActivity::blockNumber, sortOrder)
+        builder.sortByField(EsActivity::logIndex, sortOrder)
+        builder.sortByField(EsActivity::salt, sortOrder)
     }
 }
