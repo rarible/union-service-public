@@ -107,7 +107,7 @@ common:
     refresh:
       cron: "0 0/30 * * * *"
   feature-flags:
-    enableRevertedActivityEventSending: false
+    enableRevertedActivityEventSending: true
     enableOwnershipSourceEnrichment: false
     enableItemLastSaleEnrichment: true
     enableLegacyWrappedEventTopic: true
