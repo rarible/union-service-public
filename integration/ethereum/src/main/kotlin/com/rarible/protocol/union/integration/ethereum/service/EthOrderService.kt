@@ -30,11 +30,13 @@ open class EthOrderService(
         sort: OrderSortDto?,
         status: List<OrderStatusDto>?
     ): Slice<OrderDto> {
+        val filteredStatus = filterStatus(status) ?: return Slice.empty()
+
         val orders = orderControllerApi.getOrdersAllByStatus(
             ethOrderConverter.convert(sort),
             continuation,
             size,
-            ethOrderConverter.convert(status)
+            ethOrderConverter.convert(filteredStatus)
         ).awaitFirst()
         return ethOrderConverter.convert(orders, blockchain)
     }
@@ -246,6 +248,8 @@ open class EthOrderService(
         size: Int
     ): Slice<OrderDto> {
         val (contract, tokenId) = CompositeItemIdParser.split(itemId)
+        val filteredStatus = filterStatus(status) ?: return Slice.empty()
+
         val orders = orderControllerApi.getSellOrdersByItemAndByStatus(
             contract,
             tokenId.toString(),
@@ -254,7 +258,7 @@ open class EthOrderService(
             EthConverter.convert(platform),
             continuation,
             size,
-            ethOrderConverter.convert(status),
+            ethOrderConverter.convert(filteredStatus),
             currencyId
         ).awaitFirst()
         return ethOrderConverter.convert(orders, blockchain)
@@ -268,15 +272,26 @@ open class EthOrderService(
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
+        val filteredStatus = filterStatus(status) ?: return Slice.empty()
         val orders = orderControllerApi.getSellOrdersByMakerAndByStatus(
             maker,
             origin,
             EthConverter.convert(platform),
             continuation,
             size,
-            ethOrderConverter.convert(status)
+            ethOrderConverter.convert(filteredStatus)
         ).awaitFirst()
         return ethOrderConverter.convert(orders, blockchain)
+    }
+
+    /**
+     * remove HISTORICAL status from list of statuses for calls that aren't related to bids
+     * If HISTORICAL was the only status, return null then, which means call can be omitted
+     */
+    private fun filterStatus(status: List<OrderStatusDto>?): List<OrderStatusDto>? {
+        if (status.isNullOrEmpty()) return emptyList()
+        val filtered = status.filter { it != OrderStatusDto.HISTORICAL }
+        return filtered.ifEmpty { null }
     }
 }
 

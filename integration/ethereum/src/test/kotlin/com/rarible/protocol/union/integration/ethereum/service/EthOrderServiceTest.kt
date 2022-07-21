@@ -5,6 +5,7 @@ import com.rarible.core.test.data.randomString
 import com.rarible.protocol.dto.OrdersPaginationDto
 import com.rarible.protocol.order.api.client.OrderControllerApi
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOpenSeaV1OrderDto
@@ -12,6 +13,8 @@ import com.rarible.protocol.union.integration.ethereum.data.randomEthSellOrderDt
 import com.rarible.protocol.union.integration.ethereum.data.randomEthV2OrderDto
 import com.rarible.protocol.union.test.mock.CurrencyMock
 import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.confirmVerified
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
@@ -49,6 +52,26 @@ class EthOrderServiceTest {
         assertThat(result.entities).hasSize(2)
         assertThat(result.entities[0]).isEqualTo(expected1)
         assertThat(result.entities[1]).isEqualTo(expected2)
+    }
+
+    @Test
+    fun `ethereum get all - skip when only historical status is given`() = runBlocking<Unit> {
+        // given
+        val continuation = randomString()
+        val size = randomInt()
+
+        // when
+        val result = service.getOrdersAll(
+            continuation,
+            size,
+            null,
+            listOf(OrderStatusDto.HISTORICAL)
+        )
+
+        // then
+        assertThat(result.entities).isEmpty()
+        assertThat(result.continuation).isNull()
+        confirmVerified(orderControllerApi)
     }
 
     @Test
