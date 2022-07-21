@@ -267,7 +267,7 @@ fun randomOwnershipDto(ownershipId: OwnershipIdDto): OwnershipDto {
 
 fun randomEsActivity() = EsActivity(
     activityId = randomString(),
-    date = Instant.now().truncatedTo(ChronoUnit.MILLIS),
+    date = nowMillis().truncatedTo(ChronoUnit.MILLIS),
     blockNumber = randomLong(),
     logIndex = randomInt(),
     blockchain = BlockchainDto.values().random(),
@@ -280,7 +280,7 @@ fun randomEsActivity() = EsActivity(
 
 fun randomEsCollection() = EsCollection(
     collectionId = randomString(),
-    date = Instant.now(),
+    date = nowMillis(),
     blockchain = BlockchainDto.values().random(),
     name = randomString(),
     symbol = randomString(),
@@ -299,8 +299,8 @@ fun randomEsItem() = EsItem(
     description = randomString(),
     traits = listOf(EsTrait(randomString(), randomInt().toString()), EsTrait(randomString(), randomString())),
     creators = listOf(randomString()),
-    mintedAt = Instant.now(),
-    lastUpdatedAt = Instant.now()
+    mintedAt = nowMillis(),
+    lastUpdatedAt = nowMillis()
 )
 
 val EsActivity.info: EsActivityLite

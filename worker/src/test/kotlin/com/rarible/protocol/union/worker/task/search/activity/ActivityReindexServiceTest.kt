@@ -1,10 +1,9 @@
 package com.rarible.protocol.union.worker.task.search.activity
 
+import com.rarible.core.common.nowMillis
 import com.rarible.core.telemetry.metrics.RegisteredCounter
 import com.rarible.core.test.data.randomString
 import com.rarible.protocol.union.core.converter.EsActivityConverter
-import com.rarible.protocol.union.core.service.ItemService
-import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.ActivitiesDto
 import com.rarible.protocol.union.dto.ActivityIdDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
@@ -18,12 +17,10 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
-import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import randomUnionAddress
 import java.math.BigInteger
-import java.time.Instant
 
 internal class ActivityReindexServiceTest {
 
@@ -117,7 +114,7 @@ internal class ActivityReindexServiceTest {
     private fun randomActivityDto(): MintActivityDto {
         return MintActivityDto(
             id = ActivityIdDto(BlockchainDto.ETHEREUM, randomString()),
-            Instant.now(),
+            nowMillis(),
             owner = randomUnionAddress(),
             value = BigInteger.ONE,
             transactionHash = randomString()

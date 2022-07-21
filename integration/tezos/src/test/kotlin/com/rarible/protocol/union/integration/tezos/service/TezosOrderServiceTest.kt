@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.integration.tezos.service
 
+import com.rarible.core.common.nowMillis
 import com.rarible.core.daemon.DaemonWorkerProperties
 import com.rarible.dipdup.client.OrderClient
 import com.rarible.dipdup.client.core.model.Asset
@@ -29,9 +30,8 @@ import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.math.BigDecimal
 import java.math.BigInteger
-import java.time.Instant
 import java.time.ZoneOffset
-import java.util.*
+import java.util.UUID
 
 class TezosOrderServiceTest {
 
@@ -232,8 +232,8 @@ class TezosOrderServiceTest {
             startAt = null,
             endedAt = null,
             endAt = null,
-            lastUpdatedAt = Instant.now().atOffset(ZoneOffset.UTC),
-            createdAt = Instant.now().atOffset(ZoneOffset.UTC),
+            lastUpdatedAt = nowMillis().atOffset(ZoneOffset.UTC),
+            createdAt = nowMillis().atOffset(ZoneOffset.UTC),
             maker = UUID.randomUUID().toString(),
             make = Asset(
                 assetType = Asset.NFT(

@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.api.service.elastic
 
 import com.ninjasquad.springmockk.MockkBean
+import com.rarible.core.common.nowMillis
 import com.rarible.core.test.data.randomString
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.core.converter.EsItemConverter.toEsItem
@@ -24,14 +25,13 @@ import com.rarible.protocol.union.integration.flow.data.randomFlowItemId
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
-import java.time.Duration
-import java.time.Instant
-import kotlin.random.Random
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import java.time.Duration
+import kotlin.random.Random
 
 @IntegrationTest
 class ItemsSearchByRequestIt {
@@ -65,8 +65,8 @@ class ItemsSearchByRequestIt {
             repeat(10) {
                 val item = randomItemDto(randomEthItemId())
                     .copy(
-                        mintedAt = Instant.now() + Duration.ofHours(it.toLong()),
-                        lastUpdatedAt = Instant.now() + Duration.ofHours(it.toLong()),
+                        mintedAt = nowMillis() + Duration.ofHours(it.toLong()),
+                        lastUpdatedAt = nowMillis() + Duration.ofHours(it.toLong()),
                         meta = MetaDto(
                             name = randomString(),
                             attributes = listOf(
@@ -87,8 +87,8 @@ class ItemsSearchByRequestIt {
             repeat(10) {
                 val item = randomItemDto(randomFlowItemId())
                     .copy(
-                        mintedAt = Instant.now() - Duration.ofHours(it.toLong()),
-                        lastUpdatedAt = Instant.now() - Duration.ofHours(it.toLong()),
+                        mintedAt = nowMillis() - Duration.ofHours(it.toLong()),
+                        lastUpdatedAt = nowMillis() - Duration.ofHours(it.toLong()),
                         meta = MetaDto(
                             name = randomString(),
                             attributes = listOf(
@@ -208,34 +208,34 @@ class ItemsSearchByRequestIt {
                 expected = expected,
                 failMessage = "Search by traits failed"
             )
-            expected = esItems.filter { it.mintedAt < Instant.now() }
+            expected = esItems.filter { it.mintedAt < nowMillis() }
             checkResult(
                 filter = ItemsSearchFilterDto(
-                    mintedAtTo = Instant.now()
+                    mintedAtTo = nowMillis()
                 ),
                 expected = expected,
                 failMessage = "Search by mintedAtTo failed!"
             )
             checkResult(
                 filter = ItemsSearchFilterDto(
-                    mintedAtTo = Instant.now(),
+                    mintedAtTo = nowMillis(),
                     mintedAtFrom = expected.minOf { it.mintedAt }
                 ),
                 expected = expected,
                 failMessage = "Search by mintedAt from/to range is failed!"
             )
 
-            expected = esItems.filter { it.lastUpdatedAt > Instant.now() }
+            expected = esItems.filter { it.lastUpdatedAt > nowMillis() }
             checkResult(
                 filter = ItemsSearchFilterDto(
-                    lastUpdatedAtFrom = Instant.now()
+                    lastUpdatedAtFrom = nowMillis()
                 ),
                 expected = expected,
                 failMessage = "Search by lastUpdatedAtFrom failed!"
             )
             checkResult(
                 filter = ItemsSearchFilterDto(
-                    lastUpdatedAtFrom = Instant.now(),
+                    lastUpdatedAtFrom = nowMillis(),
                     lastUpdatedAtTo = expected.maxOf { it.lastUpdatedAt }
                 ),
                 expected = expected,

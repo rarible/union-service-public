@@ -2,6 +2,7 @@ package com.rarible.protocol.union.worker.task.search.item
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import com.rarible.core.common.nowMillis
 import com.rarible.core.test.data.randomAddress
 import com.rarible.core.test.data.randomBigInt
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -26,7 +27,6 @@ import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
 import java.math.BigInteger
-import java.time.Instant
 
 internal class ItemTaskTest {
 
@@ -42,8 +42,8 @@ internal class ItemTaskTest {
         blockchain = BlockchainDto.ETHEREUM,
         deleted = false,
         sellers = 1,
-        mintedAt = Instant.now(),
-        lastUpdatedAt = Instant.now(),
+        mintedAt = nowMillis(),
+        lastUpdatedAt = nowMillis(),
         lazySupply = BigInteger.ZERO,
         supply = BigInteger.ONE
     )
@@ -53,8 +53,8 @@ internal class ItemTaskTest {
         blockchain = BlockchainDto.FLOW,
         deleted = false,
         sellers = 1,
-        mintedAt = Instant.now(),
-        lastUpdatedAt = Instant.now(),
+        mintedAt = nowMillis(),
+        lastUpdatedAt = nowMillis(),
         lazySupply = BigInteger.ZERO,
         supply = BigInteger.ONE
     )

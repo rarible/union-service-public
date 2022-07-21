@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.api.controller.tezos
 
+import com.rarible.core.common.nowMillis
 import com.rarible.dipdup.client.core.model.Asset
 import com.rarible.dipdup.client.exception.DipDupNotFound
 import com.rarible.dipdup.client.model.DipDupOrdersPage
@@ -12,7 +13,6 @@ import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
@@ -33,7 +33,6 @@ import org.springframework.boot.test.context.SpringBootTest
 import reactor.core.publisher.Flux
 import reactor.kotlin.core.publisher.toMono
 import java.math.BigInteger
-import java.time.Instant
 
 @FlowPreview
 @IntegrationTest
@@ -89,7 +88,7 @@ class TezosDipDupOwnershipsControllerFt : AbstractIntegrationTest() {
             originOrders = emptySet(),
             multiCurrency = false,
             source = null,
-            lastUpdatedAt = Instant.now()
+            lastUpdatedAt = nowMillis()
         ))
 
         coEvery {
@@ -129,7 +128,7 @@ class TezosDipDupOwnershipsControllerFt : AbstractIntegrationTest() {
             originOrders = emptySet(),
             multiCurrency = false,
             source = null,
-            lastUpdatedAt = Instant.now()
+            lastUpdatedAt = nowMillis()
         ))
 
         coEvery {

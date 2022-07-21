@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.search.indexer.repository
 
+import com.rarible.core.common.nowMillis
 import com.rarible.core.test.data.randomAddress
 import com.rarible.core.test.data.randomLong
 import com.rarible.core.test.data.randomString
@@ -24,7 +25,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery
 import org.springframework.test.context.ContextConfiguration
-import java.time.Instant
 import java.time.temporal.ChronoUnit
 
 @IntegrationTest
@@ -46,7 +46,7 @@ internal class EsItemRepositoryFt {
     @Test
     fun `should save and read`(): Unit = runBlocking {
 
-        val now = Instant.now().truncatedTo(ChronoUnit.SECONDS)
+        val now = nowMillis().truncatedTo(ChronoUnit.SECONDS)
         val esItem = EsItem(
             itemId = "0x03",
             blockchain = BlockchainDto.ETHEREUM,
@@ -157,7 +157,7 @@ internal class EsItemRepositoryFt {
     @Test
     fun `should search by mintedAt range`(): Unit = runBlocking {
 
-        val now = Instant.now()
+        val now = nowMillis()
 
         (1..100).forEach {
             val esItem = randomEsItem().copy(mintedAt = now.plusSeconds(it.toLong()))
@@ -276,7 +276,7 @@ internal class EsItemRepositoryFt {
             EsTrait("testDate", "2022-05-" + (1..30).random())
         ),
         creators = listOf(randomAddress().toString()),
-        mintedAt = Instant.now(),
-        lastUpdatedAt = Instant.now()
+        mintedAt = nowMillis(),
+        lastUpdatedAt = nowMillis()
     )
 }

@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.core.converter
 
+import com.rarible.core.common.nowMillis
 import com.rarible.core.test.data.randomAddress
 import com.rarible.core.test.data.randomBigDecimal
 import com.rarible.core.test.data.randomBigInt
@@ -58,12 +59,11 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.mockk
-import java.math.BigInteger
-import java.time.Instant
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatCode
 import org.junit.jupiter.api.Test
+import java.math.BigInteger
+import java.time.Instant
 
 class EsActivityConverterTest {
 
@@ -766,8 +766,8 @@ class EsActivityConverterTest {
             id = id,
             collection = collectionIdDto,
             lazySupply = BigInteger.ONE,
-            mintedAt = Instant.now(),
-            lastUpdatedAt = Instant.now(),
+            mintedAt = nowMillis(),
+            lastUpdatedAt = nowMillis(),
             supply = BigInteger.ONE,
             deleted = false,
         )

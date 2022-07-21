@@ -90,7 +90,7 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
             BlockchainDto.ETHEREUM, BlockchainDto.POLYGON, BlockchainDto.FLOW, BlockchainDto.SOLANA, BlockchainDto.TEZOS
         )
         val size = 5
-        val now = Instant.now().truncatedToSeconds()
+        val now = nowMillis().truncatedToSeconds()
 
         // From this list of activities we expect only the oldest 5 in response ordered as:
         // flowActivity1, polygonItemActivity1, ethOrderActivity3, tezosActivity1 and solanaActivity1
@@ -104,10 +104,10 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
         val polygonOrderActivity2 = randomEthOrderBidActivity().copy(date = now.minusSeconds(3))
         val polygonItemActivity1 = randomEthItemMintActivity().copy(date = now.minusSeconds(12))
         val polygonItemActivity2 = randomEthItemMintActivity().copy(date = now.minusSeconds(2))
-        val flowActivity1 = randomFlowBurnDto().copy(date = Instant.now().minusSeconds(13))
-        val flowActivity2 = randomFlowCancelBidActivityDto().copy(date = Instant.now().minusSeconds(3))
-        val solanaActivity1 = randomSolanaMintActivity().copy(date = Instant.now().minusSeconds(8))
-        val tezosActivity1 = randomTezosItemBurnActivity().copy(date = Instant.now().minusSeconds(9))
+        val flowActivity1 = randomFlowBurnDto().copy(date = nowMillis().minusSeconds(13))
+        val flowActivity2 = randomFlowCancelBidActivityDto().copy(date = nowMillis().minusSeconds(3))
+        val solanaActivity1 = randomSolanaMintActivity().copy(date = nowMillis().minusSeconds(8))
+        val tezosActivity1 = randomTezosItemBurnActivity().copy(date = nowMillis().minusSeconds(9))
 
         val elasticEthOrderActivity1 = randomEsActivity().copy(
             activityId = "${BlockchainDto.ETHEREUM}:${ethOrderActivity1.id}",
@@ -387,11 +387,11 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
         val size = 3
 
         val ethItemActivity = randomEthItemMintActivity()
-            .copy(date = Instant.now().minusSeconds(5))
+            .copy(date = nowMillis().minusSeconds(5))
         val ethItemActivity2 = randomEthItemMintActivity()
-            .copy(date = Instant.now().minusSeconds(6))
+            .copy(date = nowMillis().minusSeconds(6))
         val polygonItemActivity = randomEthItemMintActivity()
-            .copy(date = Instant.now().minusSeconds(7))
+            .copy(date = nowMillis().minusSeconds(7))
 
         val elasticEthItemActivity = randomEsActivity().copy(
             activityId = "${BlockchainDto.ETHEREUM}:${ethItemActivity.id}",
@@ -431,7 +431,7 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
             )
         } returns NftActivitiesDto(null, listOf(polygonItemActivity)).toMono()
 
-        val now = Instant.now()
+        val now = nowMillis()
         val oneWeekAgo = now.minus(7, ChronoUnit.DAYS)
         val activities = activityControllerApi.getActivitiesByUser(
             types, listOf(userEth.fullId()), null, oneWeekAgo, now, null, null, size, sort, null,

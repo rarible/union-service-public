@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.api.service.elastic
 
 import com.ninjasquad.springmockk.MockkBean
+import com.rarible.core.common.nowMillis
 import com.rarible.core.test.data.randomLong
 import com.rarible.core.test.data.randomString
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
@@ -20,15 +21,14 @@ import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionI
 import com.rarible.protocol.union.integration.flow.data.randomFlowCollectionDto
 import io.mockk.coEvery
 import io.mockk.impl.annotations.MockK
-import java.time.Duration
-import java.time.Instant
-import kotlin.random.Random
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import randomOwnershipId
+import java.time.Duration
+import kotlin.random.Random
 
 @IntegrationTest
 class OwnershipElasticServiceIt {
@@ -73,7 +73,7 @@ class OwnershipElasticServiceIt {
                         itemId = oid.getItemId().fullId(),
                         collection = "${randomEthCollectionId()}",
                         owner = oid.owner.fullId(),
-                        date = Instant.now() + Duration.ofDays(it.toLong()),
+                        date = nowMillis() + Duration.ofDays(it.toLong()),
                         auctionId = randomString(),
                         auctionOwnershipId = randomString()
                     )
@@ -88,7 +88,7 @@ class OwnershipElasticServiceIt {
                         itemId = oid.getItemId().fullId(),
                         collection = randomFlowCollectionDto().id,
                         owner = oid.owner.fullId(),
-                        date = Instant.now() - Duration.ofDays(it.toLong()),
+                        date = nowMillis() - Duration.ofDays(it.toLong()),
                         auctionId = randomString(),
                         auctionOwnershipId = randomString()
                     )
@@ -225,20 +225,20 @@ class OwnershipElasticServiceIt {
                 failMessage = "Search by auctionsOwners failed"
             )
 
-            expectedIds = ownerships.filter { it.date < Instant.now() }.map { it.ownershipId.lowercase() }
+            expectedIds = ownerships.filter { it.date < nowMillis() }.map { it.ownershipId.lowercase() }
             check(
                 expectedIds = expectedIds,
                 filter = OwnershipSearchFilterDto(
-                    beforeDate = Instant.now()
+                    beforeDate = nowMillis()
                 ),
                 failMessage = "Search by beforeDate failed"
             )
 
-            expectedIds = ownerships.filter { it.date > Instant.now() }.map { it.ownershipId.lowercase() }
+            expectedIds = ownerships.filter { it.date > nowMillis() }.map { it.ownershipId.lowercase() }
             check(
                 expectedIds = expectedIds,
                 filter = OwnershipSearchFilterDto(
-                    afterDate = Instant.now()
+                    afterDate = nowMillis()
                 ),
                 failMessage = "Search by afterDate failed"
             )

@@ -598,8 +598,8 @@ fun randomEthAuctionDto(itemId: ItemIdDto): AuctionDto {
         endTime = Instant.MAX,
         minimalStep = BigDecimal.ONE,
         minimalPrice = BigDecimal.ONE,
-        createdAt = Instant.now(),
-        lastUpdateAt = Instant.now(),
+        createdAt = nowMillis(),
+        lastUpdateAt = nowMillis(),
         buyPrice = BigDecimal.TEN,
         pending = listOf(AuctionHistoryDto(Word.apply(randomWord()))),
         status = AuctionStatusDto.ACTIVE,
@@ -614,13 +614,13 @@ fun randomEthAuctionDto(itemId: ItemIdDto): AuctionDto {
                 originFees = listOf(PartDto(randomAddress(), 100)),
                 payouts = listOf(PartDto(randomAddress(), 100))
             ),
-            date = Instant.now(),
+            date = nowMillis(),
             status = AuctionBidDto.Status.ACTIVE
         ),
         data = RaribleAuctionV1DataV1Dto(
             originFees = listOf(PartDto(randomAddress(), 100)),
             payouts = listOf(PartDto(randomAddress(), 100)),
-            startTime = Instant.now(),
+            startTime = nowMillis(),
             duration = BigInteger.TEN,
             buyOutPrice = BigDecimal.TEN
         )
@@ -637,7 +637,7 @@ fun randomEthAuctionBidsDto(): AuctionBidsPaginationDto {
                     originFees = listOf(PartDto(randomAddress(), 100)),
                     payouts = listOf(PartDto(randomAddress(), 100))
                 ),
-                date = Instant.now(),
+                date = nowMillis(),
                 status = AuctionBidDto.Status.ACTIVE
             ),
             RaribleAuctionV1BidV1Dto(
@@ -647,7 +647,7 @@ fun randomEthAuctionBidsDto(): AuctionBidsPaginationDto {
                     originFees = listOf(PartDto(randomAddress(), 100)),
                     payouts = listOf(PartDto(randomAddress(), 100))
                 ),
-                date = Instant.now().minusSeconds(10),
+                date = nowMillis().minusSeconds(10),
                 status = AuctionBidDto.Status.HISTORICAL
             )
         ),
@@ -749,7 +749,7 @@ fun randomEthAuctionBidActivity(): AuctionActivityBidDto {
             buyer = randomAddress(),
             amount = randomBigDecimal(),
             data = RaribleAuctionV1BidDataV1Dto(listOf(randomEthPartDto()), listOf(randomEthPartDto())),
-            date = Instant.now(),
+            date = nowMillis(),
             status = AuctionBidDto.Status.ACTIVE
         ),
         reverted = false,
