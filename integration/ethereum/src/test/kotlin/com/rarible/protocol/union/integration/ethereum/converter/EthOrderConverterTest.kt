@@ -410,7 +410,7 @@ class EthOrderConverterTest {
             com.rarible.protocol.dto.OrderStatusDto.ACTIVE,
             com.rarible.protocol.dto.OrderStatusDto.FILLED,
             com.rarible.protocol.dto.OrderStatusDto.INACTIVE,
-            com.rarible.protocol.dto.OrderStatusDto.INACTIVE,
+            com.rarible.protocol.dto.OrderStatusDto.HISTORICAL,
             com.rarible.protocol.dto.OrderStatusDto.CANCELLED
         )
         val unionStatuses = listOf(

@@ -19,7 +19,6 @@ import com.rarible.protocol.dto.SeaportConsiderationDto
 import com.rarible.protocol.dto.SeaportItemTypeDto
 import com.rarible.protocol.dto.SeaportOfferDto
 import com.rarible.protocol.dto.SeaportOrderTypeDto
-import com.rarible.protocol.union.dto.EthSeaportOrderTypeDto
 import com.rarible.protocol.dto.SeaportV1OrderDto
 import com.rarible.protocol.union.core.service.CurrencyService
 import com.rarible.protocol.union.core.util.evalMakePrice
@@ -35,17 +34,18 @@ import com.rarible.protocol.union.dto.EthOrderOpenSeaV1DataV1Dto
 import com.rarible.protocol.union.dto.EthSeaportConsiderationDto
 import com.rarible.protocol.union.dto.EthSeaportItemTypeDto
 import com.rarible.protocol.union.dto.EthSeaportOfferDto
+import com.rarible.protocol.union.dto.EthSeaportOrderTypeDto
 import com.rarible.protocol.union.dto.OnChainOrderDto
 import com.rarible.protocol.union.dto.OrderDataDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
-import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.PendingOrderCancelDto
 import com.rarible.protocol.union.dto.PendingOrderDto
 import com.rarible.protocol.union.dto.PendingOrderMatchDto
 import com.rarible.protocol.union.dto.PlatformDto
+import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -338,15 +338,11 @@ class EthOrderConverter(
         )
     }
 
-    /**
-     * There is a disambiguity between OrderStatusDto and OrderBidStatusDto. The former shouldn't have HISTORICAL type
-     * More info in Jira ticket PT-760
-     */
     fun convert(source: OrderStatusDto): com.rarible.protocol.dto.OrderStatusDto {
         return when (source) {
             OrderStatusDto.ACTIVE -> com.rarible.protocol.dto.OrderStatusDto.ACTIVE
             OrderStatusDto.FILLED -> com.rarible.protocol.dto.OrderStatusDto.FILLED
-            OrderStatusDto.HISTORICAL,
+            OrderStatusDto.HISTORICAL -> com.rarible.protocol.dto.OrderStatusDto.HISTORICAL
             OrderStatusDto.INACTIVE -> com.rarible.protocol.dto.OrderStatusDto.INACTIVE
             OrderStatusDto.CANCELLED -> com.rarible.protocol.dto.OrderStatusDto.CANCELLED
         }
