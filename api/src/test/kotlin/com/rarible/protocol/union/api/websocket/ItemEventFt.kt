@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.api.websocket
 
+import com.rarible.core.common.nowMillis
 import com.rarible.core.kafka.KafkaMessage
 import com.rarible.core.test.data.randomAddress
 import com.rarible.core.test.data.randomBigInt
@@ -25,8 +26,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ContextConfiguration
 import reactor.core.publisher.Sinks
 import java.math.BigInteger
-import java.time.Instant
-import java.util.*
+import java.util.Queue
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.TimeUnit
 
@@ -78,8 +78,8 @@ internal class ItemEventFt : AbstractIntegrationTest() {
                 blockchain = BlockchainDto.ETHEREUM,
                 lazySupply = BigInteger.ONE,
                 pending = emptyList(),
-                mintedAt = Instant.now(),
-                lastUpdatedAt = Instant.now(),
+                mintedAt = nowMillis(),
+                lastUpdatedAt = nowMillis(),
                 supply = BigInteger.ONE,
                 deleted = false,
                 auctions = emptyList(),

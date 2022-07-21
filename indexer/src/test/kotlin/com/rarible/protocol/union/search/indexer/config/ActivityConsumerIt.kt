@@ -1,18 +1,18 @@
 package com.rarible.protocol.union.search.indexer.config
 
+import com.rarible.core.common.nowMillis
 import com.rarible.core.kafka.KafkaMessage
 import com.rarible.core.kafka.RaribleKafkaProducer
 import com.rarible.core.test.data.randomBigInt
 import com.rarible.core.test.data.randomInt
 import com.rarible.core.test.data.randomLong
 import com.rarible.core.test.data.randomString
-import com.rarible.protocol.union.core.test.WaitAssert
 import com.rarible.core.test.wait.Wait
 import com.rarible.protocol.dto.FlowNftItemsDto
-import com.rarible.protocol.dto.NftItemDto
 import com.rarible.protocol.flow.nft.api.client.FlowNftItemControllerApi
 import com.rarible.protocol.nft.api.client.NftItemControllerApi
 import com.rarible.protocol.union.core.es.ElasticsearchTestBootstrapper
+import com.rarible.protocol.union.core.test.WaitAssert
 import com.rarible.protocol.union.dto.ActivityBlockchainInfoDto
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivityIdDto
@@ -34,7 +34,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder
 import reactor.core.publisher.Flux
 import reactor.kotlin.core.publisher.toMono
-import java.time.Instant
 import java.time.temporal.ChronoUnit
 
 @IntegrationTest
@@ -73,7 +72,7 @@ class ActivityConsumerIt {
             id = ActivityIdDto(
                 BlockchainDto.FLOW, randomString()
             ),
-            date = Instant.now().truncatedTo(ChronoUnit.SECONDS),
+            date = nowMillis().truncatedTo(ChronoUnit.SECONDS),
             blockchainInfo = ActivityBlockchainInfoDto(
                 transactionHash = randomString(),
                 blockHash = randomString(),
@@ -117,7 +116,7 @@ class ActivityConsumerIt {
         val activity = MintActivityDto(
             id = ActivityIdDto(BlockchainDto.SOLANA, "someid"),
             reverted = true,
-            date = Instant.now(),
+            date = nowMillis(),
             blockchainInfo = ActivityBlockchainInfoDto(
                 transactionHash = randomString(),
                 blockHash = randomString(),

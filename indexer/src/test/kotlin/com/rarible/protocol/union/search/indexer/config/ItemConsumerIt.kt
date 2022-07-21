@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.search.indexer.config
 
+import com.rarible.core.common.nowMillis
 import com.rarible.core.kafka.RaribleKafkaProducer
 import com.rarible.core.test.data.randomAddress
 import com.rarible.protocol.union.core.event.KafkaEventFactory
@@ -18,7 +19,6 @@ import org.junit.Ignore
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.math.BigInteger
-import java.time.Instant
 
 @IntegrationTest
 class ItemConsumerIt {
@@ -37,8 +37,8 @@ class ItemConsumerIt {
         blockchain = BlockchainDto.ETHEREUM,
         lazySupply = BigInteger.ONE,
         pending = emptyList(),
-        mintedAt = Instant.now(),
-        lastUpdatedAt = Instant.now(),
+        mintedAt = nowMillis(),
+        lastUpdatedAt = nowMillis(),
         supply = BigInteger.ONE,
         deleted = false,
         auctions = emptyList(),

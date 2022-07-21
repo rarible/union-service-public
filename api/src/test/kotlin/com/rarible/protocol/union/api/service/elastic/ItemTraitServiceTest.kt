@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.api.service.elastic
 
+import com.rarible.core.common.nowMillis
 import com.rarible.core.test.data.randomAddress
 import com.rarible.core.test.data.randomString
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
@@ -21,7 +22,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.TestPropertySource
-import java.time.Instant
 
 @IntegrationTest
 @TestPropertySource(properties = [
@@ -260,8 +260,8 @@ internal class ItemTraitServiceTest {
         description = randomString(),
         traits = traits,
         creators = listOf(randomAddress().toString()),
-        mintedAt = Instant.now(),
-        lastUpdatedAt = Instant.now()
+        mintedAt = nowMillis(),
+        lastUpdatedAt = nowMillis()
     )
 
     private fun validateTraitEntry(traitEntry: TraitEntryDto, value: String, count: Long) {

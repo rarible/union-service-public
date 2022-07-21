@@ -1,3 +1,4 @@
+import com.rarible.core.common.nowMillis
 import com.rarible.core.test.data.randomBigDecimal
 import com.rarible.core.test.data.randomBigInt
 import com.rarible.core.test.data.randomBoolean
@@ -94,7 +95,7 @@ fun randomOrderId(
     value: String = randomString(),
 ) = OrderIdDto(blockchain, value)
 
-fun randomInstant(): Instant = Instant.now().minusMillis(randomLong(14400000)).truncatedTo(ChronoUnit.MILLIS)
+fun randomInstant(): Instant = nowMillis().minusMillis(randomLong(14400000)).truncatedTo(ChronoUnit.MILLIS)
 
 fun randomAuction(
     id: AuctionIdDto = randomAuctionId(),

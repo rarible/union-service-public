@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.integration.immutablex.service
 
+import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.BlockchainGroupDto
@@ -16,11 +17,10 @@ import com.rarible.protocol.union.integration.immutablex.dto.Token
 import com.rarible.protocol.union.integration.immutablex.dto.TokenData
 import io.mockk.coEvery
 import io.mockk.mockk
-import java.math.BigInteger
-import java.time.Instant
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
+import java.math.BigInteger
 
 internal class ImmutablexOwnershipServiceTest {
 
@@ -54,7 +54,7 @@ internal class ImmutablexOwnershipServiceTest {
                             )
                         ),
                         user = "0x6d13857ca83de08456b2b40aaf09a28e0aab056e",
-                        timestamp = Instant.now(),
+                        timestamp = nowMillis(),
                         fees = null,
                         status = null
                     )
@@ -111,7 +111,7 @@ internal class ImmutablexOwnershipServiceTest {
                             )
                         ),
                         user = "0x6d13857ca83de08456b2b40aaf09a28e0aab056e",
-                        timestamp = Instant.now(),
+                        timestamp = nowMillis(),
                         fees = null,
                         status = null
                     )

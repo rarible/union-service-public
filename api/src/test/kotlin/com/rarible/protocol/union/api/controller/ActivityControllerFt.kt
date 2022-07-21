@@ -458,7 +458,7 @@ class ActivityControllerFt : AbstractIntegrationTest() {
         auctionActivities: MutableList<AuctionActivityDto>,
         itemActivities: MutableList<NftActivityDto>
     ) {
-        var startDate = Instant.now()
+        var startDate = nowMillis()
         repeat(size) {
             startDate = startDate.plusMillis(100)
             orderActivities.add(randomEthOrderBidActivity().copy(lastUpdatedAt = startDate.plusMillis(randomLong())))
@@ -973,7 +973,7 @@ class ActivityControllerFt : AbstractIntegrationTest() {
             )
         } returns FlowActivitiesDto(1, null, listOf(flowActivity)).toMono()
 
-        val now = Instant.now()
+        val now = nowMillis()
         val oneWeekAgo = now.minus(7, ChronoUnit.DAYS)
         val activities = activityControllerApi.getActivitiesByUser(
             types, listOf(userEth.fullId(), userFlow.fullId()), null, oneWeekAgo, now, null, null, size, sort, null,
@@ -1085,7 +1085,7 @@ class ActivityControllerFt : AbstractIntegrationTest() {
             )
         } returns FlowActivitiesDto(0, null, listOf()).toMono()
 
-        val now = Instant.now()
+        val now = nowMillis()
         val oneWeekAgo = now.minus(7, ChronoUnit.DAYS)
         val activities = activityControllerApi.getActivitiesByUser(
             types, listOf(userEth.fullId(), userFlow.fullId()), null, oneWeekAgo, now, null, null, size, sort, null,

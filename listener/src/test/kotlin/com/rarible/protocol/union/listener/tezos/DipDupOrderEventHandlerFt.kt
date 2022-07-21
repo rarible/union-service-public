@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.listener.tezos
 
+import com.rarible.core.common.nowMillis
 import com.rarible.core.kafka.KafkaMessage
 import com.rarible.dipdup.client.core.model.Asset
 import com.rarible.dipdup.client.core.model.DipDupOrder
@@ -23,9 +24,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import reactor.kotlin.core.publisher.toMono
 import java.math.BigDecimal
 import java.math.BigInteger
-import java.time.Instant
 import java.time.ZoneOffset
-import java.util.*
+import java.util.UUID
 
 @IntegrationTest
 class DipDupOrderEventHandlerFt : AbstractDipDupIntegrationTest() {
@@ -78,8 +78,8 @@ class DipDupOrderEventHandlerFt : AbstractDipDupIntegrationTest() {
             holdersCount = 1,
             transfersCount = 1,
             totalSupply = "1",
-            firstTime = Instant.now().atOffset(ZoneOffset.UTC),
-            lastTime = Instant.now().atOffset(ZoneOffset.UTC)
+            firstTime = nowMillis().atOffset(ZoneOffset.UTC),
+            lastTime = nowMillis().atOffset(ZoneOffset.UTC)
         )
     }
 
@@ -99,8 +99,8 @@ class DipDupOrderEventHandlerFt : AbstractDipDupIntegrationTest() {
             firstLevel = 1,
             lastLevel = 1,
             transfersCount = 1,
-            firstTime = Instant.now().atOffset(ZoneOffset.UTC),
-            lastTime = Instant.now().atOffset(ZoneOffset.UTC)
+            firstTime = nowMillis().atOffset(ZoneOffset.UTC),
+            lastTime = nowMillis().atOffset(ZoneOffset.UTC)
         )
     }
 
@@ -115,8 +115,8 @@ class DipDupOrderEventHandlerFt : AbstractDipDupIntegrationTest() {
             startAt = null,
             endedAt = null,
             endAt = null,
-            lastUpdatedAt = Instant.now().atOffset(ZoneOffset.UTC),
-            createdAt = Instant.now().atOffset(ZoneOffset.UTC),
+            lastUpdatedAt = nowMillis().atOffset(ZoneOffset.UTC),
+            createdAt = nowMillis().atOffset(ZoneOffset.UTC),
             maker = UUID.randomUUID().toString(),
             make = Asset(
                 assetType = Asset.NFT(

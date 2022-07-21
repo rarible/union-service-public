@@ -139,7 +139,7 @@ class ActivityControllerAuctionFt : AbstractIntegrationTest() {
             testPolygonActivityAuctionApi.getAuctionActivities(any(), isNull(), eq(size), ActivitySortDto.LATEST_FIRST)
         } returns AuctionActivitiesDto(null, emptyList()).toMono()
 
-        val now = Instant.now()
+        val now = nowMillis()
         val oneWeekAgo = now.minus(7, ChronoUnit.DAYS)
         val activities = activityControllerApi.getActivitiesByUser(
             types, listOf(userEth.fullId()), null, oneWeekAgo, now, null, null, size, sort, null,

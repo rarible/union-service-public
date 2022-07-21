@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.api.controller.tezos
 
+import com.rarible.core.common.nowMillis
 import com.rarible.dipdup.client.core.model.Asset
 import com.rarible.dipdup.client.core.model.DipDupOrder
 import com.rarible.dipdup.client.core.model.OrderStatus
@@ -122,8 +123,8 @@ class TezosDipDupOrdersControllerFt : AbstractIntegrationTest() {
             startAt = null,
             endAt = null,
             endedAt = null,
-            lastUpdatedAt = Instant.now().atOffset(ZoneOffset.UTC),
-            createdAt = Instant.now().atOffset(ZoneOffset.UTC),
+            lastUpdatedAt = nowMillis().atOffset(ZoneOffset.UTC),
+            createdAt = nowMillis().atOffset(ZoneOffset.UTC),
             maker = UUID.randomUUID().toString(),
             make = Asset(
                 assetType = Asset.NFT(

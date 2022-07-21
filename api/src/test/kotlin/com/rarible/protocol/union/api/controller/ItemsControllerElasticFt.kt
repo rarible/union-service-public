@@ -88,7 +88,7 @@ class ItemsControllerElasticFt : AbstractIntegrationTest() {
             BlockchainDto.SOLANA,
             BlockchainDto.TEZOS
         )
-        val now = Instant.now()
+        val now = nowMillis()
         val contract = Address.ONE().toString()
         val ethItemId1 = ItemIdDto(BlockchainDto.ETHEREUM, contract, BigInteger.valueOf(1))
         val ethItem1 = randomEthNftItemDto(ethItemId1)

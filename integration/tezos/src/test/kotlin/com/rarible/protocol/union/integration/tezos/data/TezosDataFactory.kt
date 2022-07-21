@@ -368,8 +368,8 @@ fun randomTzktToken(itemId: String) = Token(
         address = "test"
     ),
     tokenId = "123",
-    firstTime = Instant.now().atOffset(ZoneOffset.UTC),
-    lastTime = Instant.now().atOffset(ZoneOffset.UTC),
+    firstTime = nowMillis().atOffset(ZoneOffset.UTC),
+    lastTime = nowMillis().atOffset(ZoneOffset.UTC),
     totalSupply = "1",
     transfersCount = 1,
     balancesCount = 1,
