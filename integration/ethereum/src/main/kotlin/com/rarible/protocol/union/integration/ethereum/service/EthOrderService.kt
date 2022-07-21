@@ -289,7 +289,7 @@ open class EthOrderService(
      * If HISTORICAL was the only status, return null then, which means call can be omitted
      */
     private fun filterStatus(status: List<OrderStatusDto>?): List<OrderStatusDto>? {
-        if (status == null) return emptyList()
+        if (status.isNullOrEmpty()) return emptyList()
         val filtered = status.filter { it != OrderStatusDto.HISTORICAL }
         return filtered.ifEmpty { null }
     }
