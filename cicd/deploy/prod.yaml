@@ -1,5 +1,5 @@
 protocol-union-api:
-  replicas: 3
+  replicas: 2
   service:
     nodePort: 30118
   resources:
