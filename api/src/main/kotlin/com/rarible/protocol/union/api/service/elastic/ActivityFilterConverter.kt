@@ -1,7 +1,6 @@
 package com.rarible.protocol.union.api.service.elastic
 
 import com.rarible.protocol.union.api.service.UserActivityTypeConverter
-import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.model.ActivityByCollectionFilter
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -66,7 +65,7 @@ class ActivityFilterConverter(
     ): ElasticActivityFilter {
         val parsedUsers = user.map { IdParser.parseAddress(it).value }.toSet()
         val (userFilters, activityTypes) = activityTypeByUsers(type, parsedUsers)
-        val finalUserFilters = userFilters.finalize()
+        val finalUserFilters = userFilters.normalize()
 
         return ElasticActivityQueryGenericFilter(
             blockchains = blockchains?.toSet().orEmpty(),
@@ -113,7 +112,7 @@ private data class UserFilters(
      * This method forces usage of anyUsers filter in case of mixed activity types are used.
      * E.g. for (SELL + BUY), anyUsers filter is used in ES
      */
-    fun finalize(): UserFilters {
+    fun normalize(): UserFilters {
         return if(fromUsers == toUsers && fromUsers.isNotEmpty()) this.copy(anyUsers = fromUsers, fromUsers = emptySet(), toUsers = emptySet())
         else this
     }
