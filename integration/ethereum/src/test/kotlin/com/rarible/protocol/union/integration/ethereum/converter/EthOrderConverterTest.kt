@@ -380,6 +380,7 @@ class EthOrderConverterTest {
 
     @Test
     fun `eth order status`() {
+        // given
         val unionStatuses = listOf(
             OrderStatusDto.ACTIVE,
             OrderStatusDto.FILLED,
@@ -394,16 +395,22 @@ class EthOrderConverterTest {
             com.rarible.protocol.dto.OrderStatusDto.HISTORICAL,
             com.rarible.protocol.dto.OrderStatusDto.CANCELLED
         )
-        assertEquals(ethStatuses, ethOrderConverter.convert(unionStatuses))
+
+        // when
+        val actual = ethStatuses.map { ethOrderConverter.convert(it) }
+
+        // then
+        assertThat(actual).isEqualTo(unionStatuses)
     }
 
     @Test
     fun `union order status`() {
+        // given
         val ethStatuses = listOf(
             com.rarible.protocol.dto.OrderStatusDto.ACTIVE,
             com.rarible.protocol.dto.OrderStatusDto.FILLED,
             com.rarible.protocol.dto.OrderStatusDto.INACTIVE,
-            com.rarible.protocol.dto.OrderStatusDto.HISTORICAL,
+            com.rarible.protocol.dto.OrderStatusDto.INACTIVE,
             com.rarible.protocol.dto.OrderStatusDto.CANCELLED
         )
         val unionStatuses = listOf(
@@ -413,6 +420,11 @@ class EthOrderConverterTest {
             OrderStatusDto.HISTORICAL,
             OrderStatusDto.CANCELLED
         )
-        assertEquals(ethStatuses, unionStatuses.map { ethOrderConverter.convert(it) })
+
+        // when
+        val actual = unionStatuses.map { ethOrderConverter.convert(it) }
+
+        // then
+        assertThat(actual).isEqualTo(ethStatuses)
     }
 }

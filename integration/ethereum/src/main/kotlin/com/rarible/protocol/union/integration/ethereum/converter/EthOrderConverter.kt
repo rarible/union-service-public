@@ -338,11 +338,15 @@ class EthOrderConverter(
         )
     }
 
+    /**
+     * There is a disambiguity between OrderStatusDto and OrderBidStatusDto. The former shouldn't have HISTORICAL type
+     * More info in Jira ticket PT-760
+     */
     fun convert(source: OrderStatusDto): com.rarible.protocol.dto.OrderStatusDto {
         return when (source) {
             OrderStatusDto.ACTIVE -> com.rarible.protocol.dto.OrderStatusDto.ACTIVE
             OrderStatusDto.FILLED -> com.rarible.protocol.dto.OrderStatusDto.FILLED
-            OrderStatusDto.HISTORICAL -> com.rarible.protocol.dto.OrderStatusDto.HISTORICAL
+            OrderStatusDto.HISTORICAL,
             OrderStatusDto.INACTIVE -> com.rarible.protocol.dto.OrderStatusDto.INACTIVE
             OrderStatusDto.CANCELLED -> com.rarible.protocol.dto.OrderStatusDto.CANCELLED
         }
