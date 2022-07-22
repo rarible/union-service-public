@@ -28,11 +28,12 @@ protocol-union-listener:
     CONSUL_ROOT_PATH: '{{ include "service.env" $ }}/protocol/union'
     SPRING_PROFILES_ACTIVE: 'consul,{{ include "service.env" $ }}'
     SERVICE_PREFIX: '{{ include "service.env" $ }}-union'
+    JAVA_OPTIONS: '-XX:NewRatio=1'
   nodeSelector:
     node.labels.rarible.service: true
   resources:
     jvm:
-      xmx_megabytes: 1536
+      xmx_megabytes: 1024
       max_direct_memory_megabytes: 128
   podAnnotations:
     fluentbit.io/parser: logfmt
@@ -45,6 +46,7 @@ protocol-union-meta-loader:
     CONSUL_ROOT_PATH: '{{ include "service.env" $ }}/protocol/union'
     SPRING_PROFILES_ACTIVE: 'consul,{{ include "service.env" $ }}'
     SERVICE_PREFIX: '{{ include "service.env" $ }}-union'
+    JAVA_OPTIONS: '-XX:NewRatio=1'
   nodeSelector:
     node.labels.rarible.service: true
   resources:
@@ -63,6 +65,7 @@ protocol-union-indexer:
     CONSUL_ROOT_PATH: '{{ include "service.env" $ }}/protocol/union'
     SPRING_PROFILES_ACTIVE: 'consul,{{ include "service.env" $ }}'
     SERVICE_PREFIX: '{{ include "service.env" $ }}-union'
+    JAVA_OPTIONS: '-XX:NewRatio=1'
   nodeSelector:
     node.labels.rarible.service: true
   resources:
