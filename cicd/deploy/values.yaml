@@ -7,7 +7,6 @@ protocol-union-api:
     CONSUL_ROOT_PATH: '{{ include "service.appEnv" $ }}/protocol/union'
     SPRING_PROFILES_ACTIVE: 'consul,{{ include "service.appEnv" $ }}'
     SERVICE_PREFIX: '{{ include "service.appEnv" $ }}-union'
-    JAVA_OPTIONS: '-XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp'
   nodeSelector:
     node.labels.rarible.service: true
   resources:
@@ -29,11 +28,12 @@ protocol-union-listener:
     CONSUL_ROOT_PATH: '{{ include "service.appEnv" $ }}/protocol/union'
     SPRING_PROFILES_ACTIVE: 'consul,{{ include "service.appEnv" $ }}'
     SERVICE_PREFIX: '{{ include "service.appEnv" $ }}-union'
+    JAVA_OPTIONS: '-XX:NewRatio=1'
   nodeSelector:
     node.labels.rarible.service: true
   resources:
     jvm:
-      xmx_megabytes: 1536
+      xmx_megabytes: 1024
       max_direct_memory_megabytes: 128
   networks:
     common:
@@ -47,6 +47,7 @@ protocol-union-meta-loader:
     CONSUL_ROOT_PATH: '{{ include "service.appEnv" $ }}/protocol/union'
     SPRING_PROFILES_ACTIVE: 'consul,{{ include "service.appEnv" $ }}'
     SERVICE_PREFIX: '{{ include "service.appEnv" $ }}-union'
+    JAVA_OPTIONS: '-XX:NewRatio=1'
   nodeSelector:
     node.labels.rarible.service: true
   resources:
@@ -66,6 +67,7 @@ protocol-union-indexer:
     CONSUL_ROOT_PATH: '{{ include "service.appEnv" $ }}/protocol/union'
     SPRING_PROFILES_ACTIVE: 'consul,{{ include "service.appEnv" $ }}'
     SERVICE_PREFIX: '{{ include "service.appEnv" $ }}-union'
+    JAVA_OPTIONS: '-XX:NewRatio=1'
   nodeSelector:
     node.labels.rarible.service: true
   resources:
