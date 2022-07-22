@@ -389,13 +389,13 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
         val size = 3
 
         val ethItemActivity = randomEthItemMintActivity()
-            .copy(date = Instant.now().minusSeconds(5))
+            .copy(date = Instant.now().minusSeconds(5), id = "ethItemActivity")
         val ethItemActivity2 = randomEthOrderActivityMatch()
-            .copy(date = Instant.now().minusSeconds(6))
+            .copy(date = Instant.now().minusSeconds(6), id = "ethItemActivity2")
         val polygonItemActivity = randomEthItemMintActivity()
-            .copy(date = Instant.now().minusSeconds(7))
+            .copy(date = Instant.now().minusSeconds(7), id = "polygonItemActivity")
         val sameTypeDifferentRole = randomEthOrderActivityMatch()
-            .copy(date = Instant.now().minusSeconds(6))
+            .copy(date = Instant.now().minusSeconds(6), id = "sameTypeDifferentRole")
 
         val elasticEthItemActivity = randomEsActivity().copy(
             activityId = "${BlockchainDto.ETHEREUM}:${ethItemActivity.id}",
@@ -439,12 +439,15 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
         } returns NftActivitiesDto(null, listOf(ethItemActivity)).toMono()
 
         coEvery {
-            testEthereumActivityOrderApi.getOrderActivitiesById(eq(ActivitiesByIdRequestDto(listOf(ethItemActivity2.id, sameTypeDifferentRole.id))))
-        } returns OrderActivitiesDto(null, listOf(ethItemActivity2, sameTypeDifferentRole)).toMono()
-
-        coEvery {
-            testEthereumActivityOrderApi.getOrderActivitiesById(eq(ActivitiesByIdRequestDto(listOf(ethItemActivity2.id))))
-        } returns OrderActivitiesDto(null, listOf(ethItemActivity2)).toMono()
+            testEthereumActivityOrderApi.getOrderActivitiesById(any())
+        } answers {
+            val argument = firstArg<ActivitiesByIdRequestDto>()
+            val ids = argument.ids
+            val response = listOf(ethItemActivity2, sameTypeDifferentRole).filter { act ->
+                ids.contains(act.id)
+            }
+            OrderActivitiesDto(null, response).toMono()
+        }
 
         coEvery {
             testPolygonActivityItemApi.getNftActivitiesById(
