@@ -3,6 +3,8 @@ package com.rarible.protocol.union.integration.tezos.dipdup.converter
 import com.rarible.dipdup.client.core.model.Asset
 import com.rarible.dipdup.client.core.model.DipDupOrder
 import com.rarible.dipdup.client.core.model.OrderStatus
+import com.rarible.dipdup.client.core.model.Part
+import com.rarible.dipdup.client.core.model.TezosPlatform
 import com.rarible.dipdup.client.model.DipDupOrderSort
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.service.CurrencyService
@@ -15,9 +17,13 @@ import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
+import com.rarible.protocol.union.dto.PayoutDto
 import com.rarible.protocol.union.dto.TezosOrderDataRaribleV2DataV1Dto
+import com.rarible.protocol.union.dto.TezosOrderDataRaribleV2DataV2Dto
+import com.rarible.protocol.union.dto.ext
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
+import java.math.BigDecimal
 
 @Component
 class DipDupOrderConverter(
@@ -46,8 +52,19 @@ class DipDupOrderConverter(
 
     private suspend fun convertInternal(order: DipDupOrder, blockchain: BlockchainDto): OrderDto {
 
-        val make = DipDupConverter.convert(order.make, blockchain)
-        val take = DipDupConverter.convert(order.take, blockchain)
+        var make = DipDupConverter.convert(order.make, blockchain)
+        var take = DipDupConverter.convert(order.take, blockchain)
+
+        // It's a critical bug in dupdup-indexer: there's a price for 1 item in take instead of full price of order
+        // Need to fix in the indexer lately
+        if (order.platform == TezosPlatform.RARIBLE_V2) {
+            if (make.type.ext.isNft) {
+                take = take.copy(value = take.value * make.value)
+            }
+            if (take.type.ext.isNft) {
+                make = make.copy(value = make.value * take.value)
+            }
+        }
 
         val maker = UnionAddressConverter.convert(blockchain, order.maker)
         val taker = order.taker?.let { UnionAddressConverter.convert(blockchain, it) }
@@ -72,9 +89,9 @@ class DipDupOrderConverter(
             take = take,
             status = status,
             fill = order.fill,
-            startedAt = order.startedAt?.toInstant(),
-            endedAt = order.endedAt?.toInstant(),
-            makeStock = order.makeStock,
+            startedAt = order.startAt?.toInstant(),
+            endedAt = order.endAt?.toInstant(),
+            makeStock = makeStock(order.make, order.fill),
             cancelled = order.cancelled,
             createdAt = order.createdAt.toInstant(),
             lastUpdatedAt = order.lastUpdatedAt.toInstant(),
@@ -82,16 +99,33 @@ class DipDupOrderConverter(
             takePrice = takePrice,
             makePriceUsd = makePriceUsd,
             takePriceUsd = takePriceUsd,
-            data = orderData(),
+            data = orderData(order, blockchain),
             salt = order.salt.toString(),
             pending = emptyList()
         )
     }
 
-    fun orderData(): OrderDataDto {
-        return TezosOrderDataRaribleV2DataV1Dto(
-            payouts = listOf(),
-            originFees = listOf()
+    fun makeStock(asset: Asset, fill: BigDecimal): BigDecimal {
+        return asset.assetValue - fill
+    }
+
+    fun orderData(order: DipDupOrder, blockchain: BlockchainDto): OrderDataDto {
+        return when (order.platform) {
+            TezosPlatform.RARIBLE_V2 -> TezosOrderDataRaribleV2DataV2Dto(
+                payouts = order.payouts.map { convert(it, blockchain) },
+                originFees = order.originFees.map { convert(it, blockchain) }
+            )
+            else -> TezosOrderDataRaribleV2DataV1Dto(
+                payouts = order.payouts.map { convert(it, blockchain) },
+                originFees = order.originFees.map { convert(it, blockchain) }
+            )
+        }
+    }
+
+    private fun convert(source: Part, blockchain: BlockchainDto): PayoutDto {
+        return PayoutDto(
+            account = UnionAddressConverter.convert(blockchain, source.account),
+            value = source.value
         )
     }
 

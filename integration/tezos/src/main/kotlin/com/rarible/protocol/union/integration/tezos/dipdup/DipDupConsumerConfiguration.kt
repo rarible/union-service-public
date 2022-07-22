@@ -2,22 +2,27 @@ package com.rarible.protocol.union.integration.tezos.dipdup
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.rarible.core.application.ApplicationEnvironmentInfo
+import com.rarible.core.logging.Logger
 import com.rarible.dipdup.client.core.model.DipDupActivity
+import com.rarible.dipdup.client.core.model.DipDupCollection
 import com.rarible.dipdup.client.core.model.DipDupOrder
 import com.rarible.dipdup.listener.config.DipDupEventsConsumerFactory
 import com.rarible.protocol.union.core.ConsumerFactory
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.handler.KafkaConsumerWorker
+import com.rarible.protocol.union.core.model.UnionCollectionEvent
 import com.rarible.protocol.union.core.model.UnionItemEvent
 import com.rarible.protocol.union.core.model.UnionOrderEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipEvent
 import com.rarible.protocol.union.dto.ActivityDto
-import com.rarible.protocol.union.integration.tezos.TezosIntegrationProperties
 import com.rarible.protocol.union.integration.tezos.dipdup.converter.DipDupActivityConverter
+import com.rarible.protocol.union.integration.tezos.dipdup.converter.DipDupCollectionConverter
 import com.rarible.protocol.union.integration.tezos.dipdup.converter.DipDupOrderConverter
 import com.rarible.protocol.union.integration.tezos.dipdup.event.DipDupActivityEventHandler
+import com.rarible.protocol.union.integration.tezos.dipdup.event.DipDupCollectionEventHandler
 import com.rarible.protocol.union.integration.tezos.dipdup.event.DipDupOrderEventHandler
 import com.rarible.protocol.union.integration.tezos.dipdup.event.DipDupTransfersEventHandler
+import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktCollectionService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktItemService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktOwnershipService
 import org.apache.commons.lang3.StringUtils
@@ -29,16 +34,15 @@ import org.springframework.context.annotation.Import
 @Import(DipDupApiConfiguration::class)
 class DipDupConsumerConfiguration(
     applicationEnvironmentInfo: ApplicationEnvironmentInfo,
-    properties: TezosIntegrationProperties,
     private val dipDupProperties: DipDupIntegrationProperties,
     private val consumerFactory: ConsumerFactory
 ) {
 
     private val env = applicationEnvironmentInfo.name
     private val host = applicationEnvironmentInfo.host
-    private val workers = properties.consumer!!.workers
+    private val workers = dipDupProperties.consumer!!.workers
 
-    private val daemon = properties.daemon
+    private val daemon = dipDupProperties.daemon
 
     @Bean
     fun dipDupConsumerFactory(): DipDupEventsConsumerFactory {
@@ -53,7 +57,6 @@ class DipDupConsumerConfiguration(
     }
 
     @Bean
-    @DependsOn("tezosOrderEventHandler")
     fun dipDupOrderEventHandler(
         handler: IncomingEventHandler<UnionOrderEvent>,
         converter: DipDupOrderConverter,
@@ -97,8 +100,32 @@ class DipDupConsumerConfiguration(
         handler: DipDupActivityEventHandler
     ): KafkaConsumerWorker<DipDupActivity> {
         val consumer = factory.createActivityConsumer(dipdupGroup(consumerFactory.activityGroup))
+        logger.info("Use ${workers} worker config for listening dipdup events")
         return consumerFactory.createActivityConsumer(consumer, handler, daemon, workers)
     }
 
+    @Bean
+    fun dipDupCollectionEventHandler(
+        handler: IncomingEventHandler<UnionCollectionEvent>,
+        converter: DipDupCollectionConverter,
+        mapper: ObjectMapper,
+        tzktCollectionService: TzktCollectionService
+    ): DipDupCollectionEventHandler {
+        return DipDupCollectionEventHandler(handler, converter, tzktCollectionService, mapper)
+    }
+
+    @Bean
+    fun dipDupCollectionEventWorker(
+        factory: DipDupEventsConsumerFactory,
+        handler: DipDupCollectionEventHandler
+    ): KafkaConsumerWorker<DipDupCollection> {
+        val consumer = factory.createCollectionConsumer(dipdupGroup(consumerFactory.collectionGroup))
+        return consumerFactory.createCollectionConsumer(consumer, handler, daemon, workers)
+    }
+
     private fun dipdupGroup(group: String) = "dipdup.$group"
+
+    companion object {
+        private val logger by Logger()
+    }
 }

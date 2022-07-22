@@ -4,6 +4,7 @@ import com.rarible.protocol.union.core.exception.UnionNotFoundException
 import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.continuation.page.Page
+import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.integration.tezos.dipdup.converter.TzktOwnershipConverter
 import com.rarible.tzkt.client.OwnershipClient
 import com.rarible.tzkt.model.TzktNotFound
@@ -13,6 +14,12 @@ class TzktOwnershipServiceImpl(val ownershipClient: OwnershipClient): TzktOwners
     override fun enabled() = true
 
     private val blockchain = BlockchainDto.TEZOS
+
+    override suspend fun getOwnershipsAll(continuation: String?, size: Int): Slice<UnionOwnership> {
+        val page = safeApiCall { ownershipClient.ownershipsAll(continuation, size) }
+        val ownerships = page.items.map { TzktOwnershipConverter.convert(it, blockchain) }
+        return return Slice(page.continuation, ownerships)
+    }
 
     override suspend fun getOwnershipById(ownershipId: String): UnionOwnership {
         val tzktOwnership = safeApiCall { ownershipClient.ownershipById(ownershipId) }

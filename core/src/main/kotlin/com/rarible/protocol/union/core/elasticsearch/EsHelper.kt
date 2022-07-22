@@ -17,8 +17,10 @@ object EsHelper {
         settings: String,
         mapping: String
     ) {
-        val existIndex =
-            reactiveElasticSearchOperations.execute { it.indices().existsIndex(GetIndexRequest(name)) }.awaitFirst()
+        val existIndex = reactiveElasticSearchOperations
+            .execute { it.indices().existsIndex(GetIndexRequest(name)) }
+            .awaitFirst()
+        logger.info("Index $name exists = $existIndex")
         if (existIndex) return
         val request = CreateIndexRequest(name).settings(settings, XContentType.JSON).mapping(mapping, XContentType.JSON)
         reactiveElasticSearchOperations.execute { it.indices().createIndex(request) }.awaitFirstOrNull()
@@ -72,6 +74,10 @@ object EsHelper {
             response.aliases.entries.first().key
         } else null
     }
+
+    suspend fun existsIndexesForEntity(
+        esOperations: ReactiveElasticsearchOperations, indexPrefix: String
+    ): Boolean = esOperations.execute { it.indices().existsIndex(GetIndexRequest("$indexPrefix*")) }.awaitFirst()
 
     suspend fun getIndexesByAlias(
         esOperations: ReactiveElasticsearchOperations, indexRootName: String

@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.listener.tezos
 
+import com.rarible.core.common.nowMillis
 import com.rarible.core.test.data.randomBigInt
 import com.rarible.core.test.data.randomInt
 import com.rarible.core.test.data.randomString
@@ -16,16 +17,15 @@ import com.rarible.tzkt.model.TokenBalance
 import com.rarible.tzkt.model.TokenInfo
 import java.math.BigDecimal
 import java.math.BigInteger
-import java.time.Instant
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
-import java.util.*
+import java.util.UUID
 
 
 fun randomDipDupActivityOrderListEvent(activityId: String): DipDupActivity {
     return DipDupOrderListActivity(
         id = activityId,
-        date = Instant.now().atOffset(ZoneOffset.UTC),
+        date = nowMillis().atOffset(ZoneOffset.UTC),
         reverted = false,
         hash = "",
         maker = UUID.randomUUID().toString(),
@@ -40,7 +40,7 @@ fun randomDipDupActivityOrderListEvent(activityId: String): DipDupActivity {
             assetType = Asset.XTZ(),
             assetValue = BigDecimal.ONE
         ),
-        price = BigDecimal.ONE,
+        operationCounter = randomInt(),
         source = TezosPlatform.Rarible
     )
 }
@@ -109,6 +109,9 @@ fun randomTzktTokenBalance(contract: String, tokenId: BigInteger, owner: String)
     )
 }
 
+fun randomTzktToken() =
+    randomTzktToken(randomString(), randomBigInt(), BigInteger.ONE)
+
 fun randomTzktToken(contract: String, tokenId: BigInteger, supply: BigInteger): Token {
     return Token(
         id = randomInt(),
@@ -119,6 +122,7 @@ fun randomTzktToken(contract: String, tokenId: BigInteger, supply: BigInteger): 
         balancesCount = 1,
         holdersCount = 1,
         transfersCount = 1,
+        metadata = mapOf("artifactUri" to Object()),
         totalSupply = supply.toString(),
         firstTime = OffsetDateTime.now(),
         lastTime = OffsetDateTime.now()

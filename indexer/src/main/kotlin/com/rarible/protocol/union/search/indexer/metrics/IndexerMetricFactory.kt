@@ -30,6 +30,13 @@ class IndexerMetricFactory(
             .register(meterRegistry)
     }
 
+    fun createEntitySaveCountMetric(entity: EsEntity, blockchain: BlockchainDto): Counter {
+        return Counter.builder("${properties.metrics.rootPath}.entity.save")
+            .tag(ENTITY_TAG, entity.entityName)
+            .tag(BLOCKCHAIN_TAG, blockchain.name.lowercase())
+            .register(meterRegistry)
+    }
+
     private companion object {
         const val ENTITY_TAG = "entity"
         const val BLOCKCHAIN_TAG = "blockchain"

@@ -37,6 +37,7 @@ import com.rarible.protocol.union.dto.OrderMatchSwapDto
 import com.rarible.protocol.union.dto.TransferActivityDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
 import com.rarible.protocol.union.dto.ext
+import com.rarible.protocol.union.integration.tezos.converter.TezosConverter.maker
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.time.Instant
@@ -120,7 +121,7 @@ class TezosActivityConverter(
                     priceUsd = currencyService.toUsd(blockchain, payment.type, activity.price, date),
                     source = convertSource(actType.source),
                     hash = activity.hash,
-                    maker = UnionAddressConverter.convert(blockchain, activity.maker),
+                    maker = maker(blockchain, activity.maker),
                     make = payment,
                     take = nft,
                     reverted = false
@@ -136,7 +137,7 @@ class TezosActivityConverter(
                     priceUsd = currencyService.toUsd(blockchain, payment.type, activity.price, date),
                     source = convertSource(actType.source),
                     hash = activity.hash,
-                    maker = UnionAddressConverter.convert(blockchain, activity.maker),
+                    maker = maker(blockchain, activity.maker),
                     make = nft,
                     take = payment,
                     reverted = false
@@ -148,7 +149,7 @@ class TezosActivityConverter(
                     date = date,
                     source = source,
                     hash = activity.hash,
-                    maker = UnionAddressConverter.convert(blockchain, activity.maker),
+                    maker = maker(blockchain, activity.maker),
                     make = TezosConverter.convert(activity.make, blockchain),
                     take = TezosConverter.convert(activity.take, blockchain),
                     transactionHash = activity.transactionHash,
@@ -168,7 +169,7 @@ class TezosActivityConverter(
                     date = date,
                     source = source,
                     hash = activity.hash,
-                    maker = UnionAddressConverter.convert(blockchain, activity.maker),
+                    maker = maker(blockchain, activity.maker),
                     make = TezosConverter.convert(activity.make, blockchain),
                     take = TezosConverter.convert(activity.take, blockchain),
                     transactionHash = activity.transactionHash,
@@ -383,7 +384,7 @@ class TezosActivityConverter(
         blockchain: BlockchainDto
     ): OrderActivityMatchSideDto {
         return OrderActivityMatchSideDto(
-            maker = UnionAddressConverter.convert(blockchain, source.maker),
+            maker = maker(blockchain, source.maker),
             hash = source.hash,
             asset = TezosConverter.convert(source.asset, blockchain)
         )

@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.search.indexer.test
 
+import com.rarible.core.common.nowMillis
 import com.rarible.core.test.data.randomString
 import com.rarible.protocol.union.dto.AssetDto
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -15,7 +16,6 @@ import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.UnionAddress
 import java.math.BigDecimal
 import java.math.BigInteger
-import java.time.Instant
 
 fun orderEth() = OrderDto(
     id = OrderIdDto(
@@ -29,8 +29,8 @@ fun orderEth() = OrderDto(
     endedAt = null,
     makeStock = BigDecimal.ONE,
     cancelled = false,
-    createdAt = Instant.now(),
-    lastUpdatedAt = Instant.now(),
+    createdAt = nowMillis(),
+    lastUpdatedAt = nowMillis(),
     makePrice = null,
     takePrice = null,
     makePriceUsd = null,

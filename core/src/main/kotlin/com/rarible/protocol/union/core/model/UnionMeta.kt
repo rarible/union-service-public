@@ -14,6 +14,7 @@ data class UnionMeta(
 
     val rightsUri: String? = null,
     val externalUri: String? = null,
+    val originalMetaUri: String? = null,
 
     val attributes: List<MetaAttributeDto> = emptyList(),
     val content: List<UnionMetaContent> = emptyList(),

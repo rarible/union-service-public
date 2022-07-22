@@ -1,13 +1,10 @@
 package com.rarible.protocol.union.api.service.elastic
 
-import com.rarible.protocol.union.core.model.ElasticItemFilter
-import com.rarible.protocol.union.core.model.EsItemCursor
-import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.ItemIdDto
-import com.rarible.protocol.union.dto.continuation.CombinedContinuation
-import com.rarible.protocol.union.dto.continuation.DateIdContinuation
-import org.springframework.stereotype.Service
+import com.rarible.protocol.union.core.model.EsItemFilter
+import com.rarible.protocol.union.core.model.EsItemGenericFilter
+import com.rarible.protocol.union.dto.ItemsSearchFilterDto
 import java.time.Instant
+import org.springframework.stereotype.Service
 
 @Service
 class ItemFilterConverter(
@@ -19,20 +16,9 @@ class ItemFilterConverter(
         lastUpdatedFrom: Long?,
         lastUpdatedTo: Long?,
         cursor: String?
-    ): ElasticItemFilter {
-
-        val esItemCursor = if (cursor != null) {
-            val currentContinuation = CombinedContinuation.parse(cursor)
-            val entry = currentContinuation.continuations.entries.first()
-            val dateIdContinuation = DateIdContinuation.parse(entry.value)
-            EsItemCursor(
-                date = dateIdContinuation!!.date,
-                itemId = ItemIdDto(BlockchainDto.valueOf(entry.key), dateIdContinuation!!.id).toString()
-            )
-        } else null
-
-        return ElasticItemFilter(
-            cursor = esItemCursor,
+    ): EsItemFilter {
+        return EsItemGenericFilter(
+            cursor = cursor,
             blockchains = blockchains,
             deleted = showDeleted,
             updatedFrom = lastUpdatedFrom?.let { Instant.ofEpochMilli(it) },
@@ -40,36 +26,53 @@ class ItemFilterConverter(
         )
     }
 
-    fun getItemsByCollection(collectionId: String, curor: EsItemCursor?): ElasticItemFilter {
+    fun getItemsByCollection(collectionId: String, cursor: String?): EsItemFilter {
 
-        return ElasticItemFilter(
-            cursor = curor,
+        return EsItemGenericFilter(
+            cursor = cursor,
             collections = setOf(collectionId)
         )
     }
 
-    fun getItemsByOwner(owner: String, blockchains: Set<String>?, curor: EsItemCursor?): ElasticItemFilter {
+    fun getItemsByOwner(owner: String, blockchains: Set<String>?, cursor: String?): EsItemFilter {
 
-        return ElasticItemFilter(
-            cursor = curor,
+        return EsItemGenericFilter(
+            cursor = cursor,
             owners = setOf(owner),
             blockchains = blockchains
         )
     }
 
-    fun getItemsByCreator(creator: String, curor: EsItemCursor?): ElasticItemFilter {
+    fun getItemsByCreator(creator: String, cursor: String?): EsItemFilter {
 
-        return ElasticItemFilter(
-            cursor = curor,
+        return EsItemGenericFilter(
+            cursor = cursor,
             creators = setOf(creator)
         )
     }
 
-    fun getAllItemIdsByCollection(collectionId: String, curor: EsItemCursor?): ElasticItemFilter {
+    fun getAllItemIdsByCollection(collectionId: String, cursor: String?): EsItemFilter {
 
-        return ElasticItemFilter(
-            cursor = curor,
+        return EsItemGenericFilter(
+            cursor = cursor,
             collections = setOf(collectionId)
+        )
+    }
+
+    fun searchItems(filter: ItemsSearchFilterDto, cursor: String?): EsItemFilter {
+        return EsItemGenericFilter(
+            cursor = cursor,
+            blockchains = filter.blockchains?.map { it.name }?.toSet(),
+            collections = filter.collections?.map { it.fullId() }?.toSet(),
+            creators = filter.creators?.let { addresses -> addresses.map { it.fullId() }.toSet() }.orEmpty(),
+            mintedFrom = filter.mintedAtFrom,
+            mintedTo = filter.mintedAtTo,
+            updatedFrom = filter.lastUpdatedAtFrom,
+            updatedTo = filter.lastUpdatedAtTo,
+            deleted = filter.deleted,
+            descriptions = filter.descriptions?.toSet(),
+            traitsKeys = filter.traits?.map { it.key }?.toSet(),
+            traitsValues = filter.traits?.map { it.value }?.toSet()
         )
     }
 }

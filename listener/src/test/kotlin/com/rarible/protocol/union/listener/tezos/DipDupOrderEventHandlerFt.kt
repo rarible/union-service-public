@@ -1,13 +1,13 @@
 package com.rarible.protocol.union.listener.tezos
 
+import com.rarible.core.common.nowMillis
 import com.rarible.core.kafka.KafkaMessage
-import com.rarible.core.test.wait.Wait
 import com.rarible.dipdup.client.core.model.Asset
 import com.rarible.dipdup.client.core.model.DipDupOrder
 import com.rarible.dipdup.client.core.model.OrderStatus
 import com.rarible.dipdup.client.core.model.TezosPlatform
 import com.rarible.protocol.union.core.model.UnionMeta
-import com.rarible.protocol.union.enrichment.meta.UnionMetaLoader
+import com.rarible.protocol.union.enrichment.meta.item.ItemMetaLoader
 import com.rarible.protocol.union.integration.tezos.data.randomTezosNftItemDto
 import com.rarible.protocol.union.integration.tezos.data.randomTezosOrderDto
 import com.rarible.protocol.union.integration.tezos.data.randomTezosOwnershipDto
@@ -24,15 +24,14 @@ import org.springframework.beans.factory.annotation.Autowired
 import reactor.kotlin.core.publisher.toMono
 import java.math.BigDecimal
 import java.math.BigInteger
-import java.time.Instant
 import java.time.ZoneOffset
-import java.util.*
+import java.util.UUID
 
 @IntegrationTest
 class DipDupOrderEventHandlerFt : AbstractDipDupIntegrationTest() {
 
     @Autowired
-    private lateinit var unionMetaLoader: UnionMetaLoader
+    private lateinit var itemMetaLoader: ItemMetaLoader
 
     @Test
     fun `should send dipdup order to outgoing topic`() = runWithKafka {
@@ -53,7 +52,7 @@ class DipDupOrderEventHandlerFt : AbstractDipDupIntegrationTest() {
 
         coEvery { ownershipClient.ownershipsByToken(any(), any(), any(), any()) } returns Page(emptyList(), null)
         coEvery { ownershipClient.ownershipById(any()) } returns tokenBalance()
-        coEvery { unionMetaLoader.load(any()) } returns UnionMeta("test")
+        coEvery { itemMetaLoader.load(any()) } returns UnionMeta("test")
 
         dipDupOrderProducer.send(
             KafkaMessage(
@@ -62,7 +61,7 @@ class DipDupOrderEventHandlerFt : AbstractDipDupIntegrationTest() {
             )
         ).ensureSuccess()
 
-        Wait.waitAssert {
+        waitAssert {
             val messages = findOrderUpdates(orderId)
             Assertions.assertThat(messages).hasSize(1)
         }
@@ -79,8 +78,8 @@ class DipDupOrderEventHandlerFt : AbstractDipDupIntegrationTest() {
             holdersCount = 1,
             transfersCount = 1,
             totalSupply = "1",
-            firstTime = Instant.now().atOffset(ZoneOffset.UTC),
-            lastTime = Instant.now().atOffset(ZoneOffset.UTC)
+            firstTime = nowMillis().atOffset(ZoneOffset.UTC),
+            lastTime = nowMillis().atOffset(ZoneOffset.UTC)
         )
     }
 
@@ -100,8 +99,8 @@ class DipDupOrderEventHandlerFt : AbstractDipDupIntegrationTest() {
             firstLevel = 1,
             lastLevel = 1,
             transfersCount = 1,
-            firstTime = Instant.now().atOffset(ZoneOffset.UTC),
-            lastTime = Instant.now().atOffset(ZoneOffset.UTC)
+            firstTime = nowMillis().atOffset(ZoneOffset.UTC),
+            lastTime = nowMillis().atOffset(ZoneOffset.UTC)
         )
     }
 
@@ -110,13 +109,14 @@ class DipDupOrderEventHandlerFt : AbstractDipDupIntegrationTest() {
             id = orderId,
             fill = BigDecimal.ZERO,
             platform = TezosPlatform.Hen,
+            payouts = emptyList(),
+            originFees = emptyList(),
             status = OrderStatus.ACTIVE,
-            startedAt = null,
+            startAt = null,
             endedAt = null,
-            makeStock = BigDecimal.ONE,
-            lastUpdatedAt = Instant.now().atOffset(ZoneOffset.UTC),
-            createdAt = Instant.now().atOffset(ZoneOffset.UTC),
-            makePrice = BigDecimal.ONE,
+            endAt = null,
+            lastUpdatedAt = nowMillis().atOffset(ZoneOffset.UTC),
+            createdAt = nowMillis().atOffset(ZoneOffset.UTC),
             maker = UUID.randomUUID().toString(),
             make = Asset(
                 assetType = Asset.NFT(

@@ -75,7 +75,7 @@ class ActivityControllerAuctionFt : AbstractIntegrationTest() {
         } returns AuctionActivitiesDto(null, list).toMono()
 
         val activities = activityControllerApi.getAllActivities(
-            types, blockchains, null, null, size, sort
+            types, blockchains, null, null, size, sort, null,
         ).awaitFirst()
 
         checkActivities(list, activities.activities)
@@ -92,7 +92,7 @@ class ActivityControllerAuctionFt : AbstractIntegrationTest() {
         } returns AuctionActivitiesDto(null, listOf(auctionActivity)).toMono()
 
         val activities = activityControllerApi.getActivitiesByCollection(
-            types, ethCollectionId.fullId(), null, null, size, sort
+            types, listOf(ethCollectionId.fullId()), null, null, size, sort, null,
         ).awaitFirst()
 
         assertThat(activities.activities).hasSize(1)
@@ -110,7 +110,7 @@ class ActivityControllerAuctionFt : AbstractIntegrationTest() {
         } returns AuctionActivitiesDto(null, listOf(auctionActivity)).toMono()
 
         val activities = activityControllerApi.getActivitiesByItem(
-            types, ethItemId.fullId(), null, null, size, sort
+            types, ethItemId.fullId(), null, null, size, sort, null,
         ).awaitFirst()
 
         assertThat(activities.activities).hasSize(1)
@@ -139,10 +139,10 @@ class ActivityControllerAuctionFt : AbstractIntegrationTest() {
             testPolygonActivityAuctionApi.getAuctionActivities(any(), isNull(), eq(size), ActivitySortDto.LATEST_FIRST)
         } returns AuctionActivitiesDto(null, emptyList()).toMono()
 
-        val now = Instant.now()
+        val now = nowMillis()
         val oneWeekAgo = now.minus(7, ChronoUnit.DAYS)
         val activities = activityControllerApi.getActivitiesByUser(
-            types, listOf(userEth.fullId()), null, oneWeekAgo, now, null, null, size, sort
+            types, listOf(userEth.fullId()), null, oneWeekAgo, now, null, null, size, sort, null,
         ).awaitFirst()
 
         assertThat(activities.activities).hasSize(1)

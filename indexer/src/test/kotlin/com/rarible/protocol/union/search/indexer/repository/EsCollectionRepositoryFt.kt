@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery
 import org.springframework.test.context.ContextConfiguration
+import java.time.Instant
 
 @IntegrationTest
 @EnableAutoConfiguration
@@ -36,7 +37,8 @@ class EsCollectionRepositoryFt {
     @Test
     fun `should save and read`(): Unit = runBlocking {
         val collection = EsCollection(
-            collectionId = "ETHEREUM:12345",
+            collectionId = "ETHEREUM:12x3Y4z5",
+            date = Instant.ofEpochSecond(12345),
             blockchain = BlockchainDto.ETHEREUM,
             name = "some name",
             symbol = "SMBL",

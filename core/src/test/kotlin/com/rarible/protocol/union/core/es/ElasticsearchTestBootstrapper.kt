@@ -5,7 +5,8 @@ import com.rarible.protocol.union.core.elasticsearch.EsHelper.createAlias
 import com.rarible.protocol.union.core.elasticsearch.EsHelper.createIndex
 import com.rarible.protocol.union.core.elasticsearch.EsHelper.getIndexesByAlias
 import com.rarible.protocol.union.core.elasticsearch.EsNameResolver
-import com.rarible.protocol.union.core.elasticsearch.bootstrap.metadataIndex
+import com.rarible.protocol.union.core.elasticsearch.EsRepository
+import com.rarible.protocol.union.core.elasticsearch.bootstrap.metadataMappingIndex
 import com.rarible.protocol.union.core.model.elasticsearch.EntityDefinition
 import com.rarible.protocol.union.core.model.elasticsearch.EntityDefinitionExtended
 import kotlinx.coroutines.reactive.awaitFirst
@@ -17,9 +18,10 @@ import java.util.concurrent.atomic.AtomicInteger
 class ElasticsearchTestBootstrapper(
     private val esNameResolver: EsNameResolver,
     private val esOperations: ReactiveElasticsearchOperations,
-    entityDefinitions: List<EntityDefinition>
+    entityDefinitions: List<EntityDefinition>,
+    private val repositories: List<EsRepository>,
 ) {
-    private val metadataMapping = metadataIndex()
+    private val metadataMapping = metadataMappingIndex()
     private val suffix = AtomicInteger(1)
     private val extendedEntityDefinitions: List<EntityDefinitionExtended> =
         entityDefinitions.map { esNameResolver.createEntityDefinitionExtended(it) }
@@ -38,6 +40,8 @@ class ElasticsearchTestBootstrapper(
 
             logger.info("Finished elasticsearch initialization")
         }
+
+        repositories.forEach { it.init() }
     }
 
     suspend fun removeAllIndexes(definition: EntityDefinitionExtended) {

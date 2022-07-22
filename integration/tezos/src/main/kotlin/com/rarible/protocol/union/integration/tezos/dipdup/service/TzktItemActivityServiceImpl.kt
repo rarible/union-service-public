@@ -47,11 +47,22 @@ class TzktItemActivityServiceImpl(
             ActivitySortDto.EARLIEST_FIRST -> true
             else -> false
         }
-        val page = tzktTokenClient.getActivitiesByItem(tzktTypes, contract, tokenId.toString(), limit, continuation, sortAsc)
-        return Slice(
-            continuation = page.continuation,
-            entities = page.items.map { TzktActivityConverter.convert(it, blockchain) }
-        )
+        return if (tzktTypes.size > 0) {
+            val page = tzktTokenClient.getActivitiesByItem(
+                tzktTypes,
+                contract,
+                tokenId.toString(),
+                limit,
+                continuation,
+                sortAsc
+            )
+            Slice(
+                continuation = page.continuation,
+                entities = page.items.map { TzktActivityConverter.convert(it, blockchain) }
+            )
+        } else {
+            return Slice.empty()
+        }
     }
 
     override suspend fun getByIds(ids: List<String>): List<ActivityDto> {

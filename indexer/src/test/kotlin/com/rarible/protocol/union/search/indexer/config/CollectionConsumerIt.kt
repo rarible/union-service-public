@@ -3,9 +3,9 @@ package com.rarible.protocol.union.search.indexer.config
 import com.rarible.core.kafka.RaribleKafkaProducer
 import com.rarible.core.test.data.randomAddress
 import com.rarible.core.test.data.randomString
-import com.rarible.core.test.wait.Wait
 import com.rarible.protocol.union.core.event.KafkaEventFactory
 import com.rarible.protocol.union.core.model.EsCollection
+import com.rarible.protocol.union.core.test.WaitAssert
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.dto.CollectionEventDto
@@ -18,7 +18,6 @@ import com.rarible.protocol.union.enrichment.repository.search.EsCollectionRepos
 import com.rarible.protocol.union.search.indexer.test.IntegrationTest
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.Ignore
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
@@ -49,7 +48,6 @@ class CollectionConsumerIt {
     )
 
     @Test
-    @Ignore("enable after merging ALPHA-424")
     internal fun `should save and find by id and feeRecipient`() {
         runBlocking {
 
@@ -61,7 +59,7 @@ class CollectionConsumerIt {
 
             producer.send(KafkaEventFactory.collectionEvent(event)).ensureSuccess()
 
-            Wait.waitAssert {
+            WaitAssert.wait {
                 val actualCollection = repository.findById(collectionId.fullId())
                 assert(actualCollection)
             }

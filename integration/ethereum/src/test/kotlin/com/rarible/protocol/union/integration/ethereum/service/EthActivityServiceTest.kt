@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.integration.ethereum.service
 
+import com.rarible.core.common.nowMillis
 import com.rarible.core.test.data.randomAddress
 import com.rarible.core.test.data.randomBigInt
 import com.rarible.protocol.dto.ActivitiesByIdRequestDto
@@ -78,7 +79,7 @@ internal class EthActivityServiceTest {
                 activityItemControllerApi.getNftActivities(filter, null, 10, ActivitySortDto.LATEST_FIRST)
             } returns Mono.just(response)
 
-            val dateMint = Instant.now().minusSeconds(5)
+            val dateMint = nowMillis().minusSeconds(5)
             val dateTransfer = dateMint.plusSeconds(3)
             val unionMint = mockk<ActivityDto> {
                 every { id } returns ActivityIdDto(blockchainDto, "A")

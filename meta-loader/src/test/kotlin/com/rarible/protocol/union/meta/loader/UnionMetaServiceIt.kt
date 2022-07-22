@@ -1,7 +1,7 @@
 package com.rarible.protocol.union.meta.loader
 
-import com.rarible.protocol.union.enrichment.meta.UnionMetaService
-import com.rarible.protocol.union.enrichment.test.data.randomUnionItem
+import com.rarible.protocol.union.enrichment.service.ItemMetaService
+import com.rarible.protocol.union.enrichment.test.data.randomUnionMeta
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.meta.loader.test.AbstractIntegrationTest
 import com.rarible.protocol.union.meta.loader.test.IntegrationTest
@@ -16,15 +16,15 @@ import org.springframework.beans.factory.annotation.Autowired
 class UnionMetaServiceIt : AbstractIntegrationTest() {
 
     @Autowired
-    private lateinit var unionMetaService: UnionMetaService
+    private lateinit var itemMetaService: ItemMetaService
 
     @Test
     fun `get available or schedule - null - then update - then get`() = runBlocking<Unit> {
         val itemId = randomEthItemId()
-        val meta = randomUnionItem(itemId).meta!!
+        val meta = randomUnionMeta()
         coEvery { testUnionMetaLoader.load(itemId) } returns meta
-        assertThat(unionMetaService.getAvailableMetaOrScheduleLoading(itemId)).isNull()
+        assertThat(itemMetaService.get(itemId, false, "default")).isNull()  // TODO PT-49
         delay(500)
-        assertThat(unionMetaService.getAvailableMetaOrScheduleLoading(itemId)).isEqualTo(meta)
+        assertThat(itemMetaService.get(itemId, false, "default")).isEqualTo(meta)  // TODO PT-49
     }
 }

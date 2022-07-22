@@ -2,7 +2,7 @@ package com.rarible.protocol.union.integration.tezos.service
 
 import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.logging.Logger
-import com.rarible.dipdup.client.model.DipDupContinuation
+import com.rarible.dipdup.client.model.DipDupActivityContinuation
 import com.rarible.protocol.tezos.api.client.NftActivityControllerApi
 import com.rarible.protocol.tezos.api.client.OrderActivityControllerApi
 import com.rarible.protocol.tezos.dto.NftActivitiesDto
@@ -27,6 +27,7 @@ import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.SyncSortDto
+import com.rarible.protocol.union.dto.SyncTypeDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
 import com.rarible.protocol.union.dto.continuation.ActivityContinuation
 import com.rarible.protocol.union.dto.continuation.page.Paging
@@ -70,7 +71,7 @@ open class TezosActivityService(
         if (dipdupOrderActivityService.enabled()) {
 
             // We try to get new activities only if we get all legacy and continuation != null
-            if (continuation != null && (isDipDupContinuation(continuation) || isTzktContinuation(continuation))) {
+            if (continuation != null && (isDipDupActivityContinuation(continuation) || isTzktContinuation(continuation))) {
                 return getDipDupAndTzktActivities(types, continuation, size, sort)
             } else {
 
@@ -82,7 +83,7 @@ open class TezosActivityService(
 
                 if (legacySlice.entities.size < size) {
                     val delta = size - legacySlice.entities.size
-                    val dipdupSlice = getDipDupAndTzktActivities(types, continuation, delta, sort)
+                    val dipdupSlice = getDipDupAndTzktActivities(types, null, delta, sort)
                     return Slice(
                         continuation = dipdupSlice.continuation,
                         entities = legacySlice.entities + dipdupSlice.entities
@@ -125,7 +126,8 @@ open class TezosActivityService(
     override suspend fun getAllActivitiesSync(
         continuation: String?,
         size: Int,
-        sort: SyncSortDto?
+        sort: SyncSortDto?,
+        type: SyncTypeDto?
     ): Slice<ActivityDto> = Slice.empty()
 
     override suspend fun getActivitiesByCollection(
@@ -155,7 +157,7 @@ open class TezosActivityService(
         if (dipdupOrderActivityService.enabled()) {
 
             // We try to get new activities only if we get all legacy and continuation != null
-            if (continuation != null && (isDipDupContinuation(continuation) || isTzktContinuation(continuation))) {
+            if (continuation != null && (isDipDupActivityContinuation(continuation) || isTzktContinuation(continuation))) {
                 return getDipDupAndTzktActivitiesByItem(types, contract, tokenId, continuation, size, sort)
             } else {
 
@@ -167,7 +169,7 @@ open class TezosActivityService(
 
                 if (legacySlice.entities.size < size) {
                     val delta = size - legacySlice.entities.size
-                    val dipdupSlice = getDipDupAndTzktActivitiesByItem(types, contract, tokenId, continuation, delta, sort)
+                    val dipdupSlice = getDipDupAndTzktActivitiesByItem(types, contract, tokenId, null, delta, sort)
                     return Slice(
                         continuation = dipdupSlice.continuation,
                         entities = legacySlice.entities + dipdupSlice.entities
@@ -287,7 +289,7 @@ open class TezosActivityService(
             val ids = itemActivitiesIds.filter { isValidLong(it) }
             if (tzktItemActivityService.enabled() && ids.isNotEmpty()) {
                 tzktItemActivityService.getByIds(ids)
-                    .also { logger.info("Total dipdup item activities returned: ${it.size}") }
+                    .also { logger.info("Total tzkt item activities returned: ${it.size}") }
             } else {
                 emptyList()
             }
@@ -358,7 +360,7 @@ open class TezosActivityService(
         }
     }
 
-    private fun isDipDupContinuation(continuation: String?) = continuation?.let { DipDupContinuation.isValid(it) } ?: false
+    private fun isDipDupActivityContinuation(continuation: String?) = continuation?.let { DipDupActivityContinuation.isValid(it) } ?: false
 
     private fun isTzktContinuation(continuation: String?) = continuation?.let { TzktActivityContinuation.isValid(it) } ?: false
 

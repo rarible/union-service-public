@@ -4,8 +4,6 @@ import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.CreatorDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.ItemTransferDto
-import com.rarible.protocol.union.dto.RoyaltyDto
-import com.rarible.protocol.union.dto.UnionAddress
 import java.math.BigInteger
 import java.time.Instant
 
@@ -18,6 +16,7 @@ data class UnionItem(
     val mintedAt: Instant,
     val lastUpdatedAt: Instant,
     val supply: BigInteger,
-    val meta: UnionMeta? = null,
-    val deleted: Boolean
+    val meta: UnionMeta? = null, // TODO should be removed
+    val deleted: Boolean,
+    val self: Boolean? = null,
 )

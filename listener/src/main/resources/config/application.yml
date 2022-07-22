@@ -121,8 +121,8 @@ integration:
         username: ${consul.tezos.dipdup.consumer.username:}
         password: ${consul.tezos.dipdup.consumer.password:}
         workers:
-          order: 1
-          activity: 1
+          order: ${consul.tezos.dipdup.consumer.workers.order:1}
+          activity: ${consul.tezos.dipdup.consumer.workers.activity:4}
     client:
       url: ${consul.tezos.api.baseUrl}
     pg:
@@ -140,6 +140,7 @@ integration:
         ownership: 1
         order: 1
     auctionContracts: ${consul.tezos.auctionContracts:}
+    showLegacyOrders: ${consul.tezos.showLegacyOrders:false}
   solana:
     enabled: ${consul.solana.enabled:false}
     consumer:
@@ -182,11 +183,15 @@ listener:
     itemBatchSize: 100
     ownershipBatchSize: 50
   price-update:
+    enabled: true
     rate: PT5M
-    delay: PT1M
   reconcile-marks:
+    enabled: true
     rate: PT15S
-    delay: PT1M
+  meta-scheduling:
+    item:
+      workers: 4
+      batchSize: 16
   metrics:
     root-path: "protocol.union.listener"
 

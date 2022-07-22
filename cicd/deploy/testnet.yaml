@@ -1,6 +1,5 @@
 protocol-union-api:
   service:
-    enabled: true
     nodePort: 30418
   resources:
     jvm:
@@ -19,6 +18,7 @@ protocol-union-indexer:
       max_direct_memory_megabytes: 128
 
 protocol-union-worker:
+  enabled: true
   replicas: 1
   resources:
     jvm:

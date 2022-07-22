@@ -13,10 +13,13 @@ import com.rarible.protocol.union.core.model.EsCollectionLite
 import com.rarible.protocol.union.core.model.EsItem
 import com.rarible.protocol.union.core.model.EsTrait
 import com.rarible.protocol.union.core.model.UnionCollection
+import com.rarible.protocol.union.core.model.UnionCollectionMeta
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.UnionMetaContent
 import com.rarible.protocol.union.core.model.UnionMetaContentProperties
+import com.rarible.protocol.union.core.model.download.DownloadEntry
+import com.rarible.protocol.union.core.model.download.DownloadStatus
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.BurnActivityDto
@@ -59,9 +62,9 @@ import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthPartDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthSellOrderDto
 import com.rarible.protocol.union.integration.flow.converter.FlowItemConverter
+import com.rarible.protocol.union.integration.flow.data.randomFlowNftItemDto
 import com.rarible.protocol.union.integration.solana.converter.SolanaItemConverter
 import com.rarible.protocol.union.integration.solana.data.randomSolanaTokenDto
-import com.rarible.protocol.union.test.data.randomFlowNftItemDto
 import com.rarible.protocol.union.test.mock.CurrencyMock
 import kotlinx.coroutines.runBlocking
 import java.time.Instant
@@ -114,9 +117,29 @@ fun randomUnionMeta(): UnionMeta {
         rights = randomString(),
         rightsUri = randomString(),
         externalUri = randomString(),
+        originalMetaUri = randomString(),
         attributes = listOf(randomUnionMetaAttribute()),
         content = listOf(),
         restrictions = listOf()
+    )
+}
+
+fun randomUnionCollectionMeta(): UnionCollectionMeta {
+    return UnionCollectionMeta(
+        name = randomString(),
+        description = randomString(),
+        language = randomString(2),
+        genres = listOf(randomString(), randomString()),
+        tags = listOf(randomString(), randomString()),
+        createdAt = nowMillis(),
+        rights = randomString(),
+        rightsUri = randomString(),
+        externalUri = randomString(),
+        originalMetaUri = randomString(),
+        content = listOf(),
+        feeRecipient = randomUnionAddress(),
+        sellerFeeBasisPoints = randomInt(10000),
+        externalLink = randomString() // TODO remove later
     )
 }
 
@@ -129,9 +152,9 @@ fun randomUnionMetaAttribute(): MetaAttributeDto {
     )
 }
 
-fun randomUnionContent(properties: UnionMetaContentProperties): UnionMetaContent {
+fun randomUnionContent(properties: UnionMetaContentProperties? = null): UnionMetaContent {
     return UnionMetaContent(
-        url = randomString(),
+        url = "http://localhost:8080/image/${randomString()}",
         fileName = "${randomString()}.png}",
         representation = MetaContentDto.Representation.ORIGINAL,
         properties = properties
@@ -244,7 +267,7 @@ fun randomOwnershipDto(ownershipId: OwnershipIdDto): OwnershipDto {
 
 fun randomEsActivity() = EsActivity(
     activityId = randomString(),
-    date = Instant.now().truncatedTo(ChronoUnit.MILLIS),
+    date = nowMillis().truncatedTo(ChronoUnit.MILLIS),
     blockNumber = randomLong(),
     logIndex = randomInt(),
     blockchain = BlockchainDto.values().random(),
@@ -257,6 +280,7 @@ fun randomEsActivity() = EsActivity(
 
 fun randomEsCollection() = EsCollection(
     collectionId = randomString(),
+    date = nowMillis(),
     blockchain = BlockchainDto.values().random(),
     name = randomString(),
     symbol = randomString(),
@@ -275,18 +299,48 @@ fun randomEsItem() = EsItem(
     description = randomString(),
     traits = listOf(EsTrait(randomString(), randomInt().toString()), EsTrait(randomString(), randomString())),
     creators = listOf(randomString()),
-    mintedAt = Instant.now(),
-    lastUpdatedAt = Instant.now()
+    mintedAt = nowMillis(),
+    lastUpdatedAt = nowMillis()
 )
 
 val EsActivity.info: EsActivityLite
     get() = EsActivityLite(activityId, blockchain, type, date, blockNumber, logIndex, salt)
 
 val EsCollection.info: EsCollectionLite
-    get() = EsCollectionLite(collectionId)
+    get() = EsCollectionLite(collectionId, date, salt)
 
 private val mockedEthOrderConverter = EthOrderConverter(CurrencyMock.currencyServiceMock)
 private val mockedEthAuctionConverter = EthAuctionConverter(CurrencyMock.currencyServiceMock)
 private val mockedEthActivityConverter = EthActivityConverter(
     CurrencyMock.currencyServiceMock, mockedEthAuctionConverter
 )
+
+fun randomItemMetaDownloadEntry(
+    id: String = randomEthItemId().fullId(),
+    version: Int? = null,
+    status: DownloadStatus = DownloadStatus.SUCCESS,
+    data: UnionMeta? = randomUnionMeta(),
+    downloads: Int = 1,
+    fails: Int = 1,
+    retries: Int = 0,
+    scheduledAt: Instant? = nowMillis().minusSeconds(60),
+    updatedAt: Instant? = nowMillis().minusSeconds(20),
+    succeedAt: Instant? = nowMillis().minusSeconds(20),
+    failedAt: Instant? = nowMillis().minusSeconds(40),
+    errorMessage: String? = "Error: ${randomString()}",
+): DownloadEntry<UnionMeta> {
+    return DownloadEntry(
+        id = id,
+        version = version,
+        status = status,
+        data = data,
+        downloads = downloads,
+        fails = fails,
+        retries = retries,
+        scheduledAt = scheduledAt,
+        updatedAt = updatedAt,
+        succeedAt = succeedAt,
+        failedAt = failedAt,
+        errorMessage = errorMessage
+    )
+}

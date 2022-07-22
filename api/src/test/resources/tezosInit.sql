@@ -72,6 +72,22 @@ values ('tz1aSkwEot3L2kmUvcoxzjMomb9mvBNuzFK6', 'edpkurPsQ8eUApnLUJ9ZPDvu98E8VNj
 insert into order_activities (id, match_left, match_right, hash, "transaction", block, level, main, "date",order_activity_type)
 values ('BKpJX4yv2JsxezPcvgnavyjJZBZVbQ5hicMwQLEkxv9516Qz27N_46', 'f1dad99bd88f47cecb6f6124c80f726f7b42a7ddb9e6ded3e68e40c20f49ff13', '8c3b89e350b767fa625165050abe157e6fcdd511981d238f6cbe8e47e43e603c', 'f1dad99bd88f47cecb6f6124c80f726f7b42a7ddb9e6ded3e68e40c20f49ff13', null, null, null, true, '2022-04-28 16:58:44.000000', 'match');
 
+-- SNDBX-240
+INSERT INTO order_activities (id, match_left, match_right, hash, transaction, block, level, main, date, order_activity_type)
+VALUES ('BMdUs3hgMfEHLyXtJVRaMem6kq9JAaJmhVfV69zHVpnkygrLiNi_59', '606d6c3322000cfffbed0a41c4c641241cc5a93d68f220bb7acb6f06a3c4810c', '688a049b1695af56a01e3d64d9632e32a13ca5d36dd2ed68b2e28370b38800f7', '606d6c3322000cfffbed0a41c4c641241cc5a93d68f220bb7acb6f06a3c4810c', 'op84xXAS4xXDFdt9RwAUqoe9gd7wMmMZyYoepQndsdPBSoETH8D', 'BMdUs3hgMfEHLyXtJVRaMem6kq9JAaJmhVfV69zHVpnkygrLiNi', 2264477, true, '2022-04-08 21:34:44.000000', 'match');
+INSERT INTO orders (maker, maker_edpk, taker, taker_edpk, make_asset_type_class, make_asset_type_contract, make_asset_type_token_id, make_asset_value, make_asset_decimals, take_asset_type_class, take_asset_type_contract, take_asset_type_token_id, take_asset_value, take_asset_decimals, start_date, end_date, salt, signature, created_at, last_update_at, hash)
+VALUES ('tz1ZzkVVRaip6kEmUXeWdQf7aTcyzMg9fA3w', 'edpkuveXFUfu161TZbESe4YmfuHiwMbRKMZYTEJcHNM2sHbPMYRvZX', null, null, 'MT', 'KT18c8n9jbpDRZStQRvZUC1GPBEDEcVgwGFC', '25', 1, null, 'XTZ', null, null, 5000000, 6, null, null, '20210317215322916846141579976212017611669124120135979150119163101107117962510214239', 'edsigu5zhj8WLHqZe1HrDwRqs4NKu7dD87kdQBu8JdbvD7ukuWWKfEgavbvAdjAcbXUk89Tnb7b9MwDyqGBV7xaViRmMsTE2FHP', '2022-03-27 16:33:43.000000', '2022-04-08 21:34:44.000000', '606d6c3322000cfffbed0a41c4c641241cc5a93d68f220bb7acb6f06a3c4810c');
+INSERT INTO orders (maker, maker_edpk, taker, taker_edpk, make_asset_type_class, make_asset_type_contract, make_asset_type_token_id, make_asset_value, make_asset_decimals, take_asset_type_class, take_asset_type_contract, take_asset_type_token_id, take_asset_value, take_asset_decimals, start_date, end_date, salt, signature, created_at, last_update_at, hash)
+VALUES ('tz1iLaTq7cFBgELhTzBZtRSP76AXKPCqbYGe', 'edpkv9NAho1VUAZhZhxYvy7AqJELmm2jXVYV31z6gvUJHU4w4SFB7r', null, null, 'XTZ', null, null, 5000000, 6, 'MT', 'KT18c8n9jbpDRZStQRvZUC1GPBEDEcVgwGFC', '25', 1, null, null, null, '0', 'NO_SIGNATURE', '2022-04-08 21:34:54.000000', '2022-04-08 21:34:44.000000', '688a049b1695af56a01e3d64d9632e32a13ca5d36dd2ed68b2e28370b38800f7');
+
+INSERT INTO orders (maker, maker_edpk, taker, taker_edpk, make_asset_type_class, make_asset_type_contract, make_asset_type_token_id, make_asset_value, make_asset_decimals, take_asset_type_class, take_asset_type_contract, take_asset_type_token_id, take_asset_value, take_asset_decimals, start_date, end_date, salt, signature, created_at, last_update_at, hash) VALUES ('tz1XzWGWhX8mKfqggyHt4NnoYwuNZ7qiLoNG', 'edpktiYxnjdK5PR9NbYbNNLBs3txocoNupKTNPx54d5qaN3yeoFNyC', null, null, 'XTZ', null, null, 1000000, 6, 'MT', 'KT1RuoaCbnZpMgdRpSoLfJUzSkGz1ZSiaYwj', '320', 1, null, null, null, '0', 'NO_SIGNATURE', '2022-06-10 13:28:00.000000', '2022-06-10 13:27:55.000000', '91fadb78e8df52f83695efc16d325696c829f982ce3e4206489fef4f9b0742d6');
+INSERT INTO orders (maker, maker_edpk, taker, taker_edpk, make_asset_type_class, make_asset_type_contract, make_asset_type_token_id, make_asset_value, make_asset_decimals, take_asset_type_class, take_asset_type_contract, take_asset_type_token_id, take_asset_value, take_asset_decimals, start_date, end_date, salt, signature, created_at, last_update_at, hash) VALUES ('tz1ePNX2ys72LrEiLoKRTHukjjWbUu2QaWG3', 'edpkui38uEABPWwy4zVXde5fevaBwjkdSEwpmoghb1isTvcAo2J43F', null, null, 'MT', 'KT1RuoaCbnZpMgdRpSoLfJUzSkGz1ZSiaYwj', '320', 11, null, 'XTZ', null, null, 11000000, 6, null, null, '1487621613119170120202081301751835914820576108134221121128328112901180203154021456177', 'edsigtbnQhHJh7LYWyKdqAz3Pa3Lmk6oxcVWEJB3toWULe3R5vnL7E4e2yoLsE6hsSyTatjQ7Xi9ANbXAnPeNmNGQAFNwUKGYFC', '2022-06-10 13:27:13.000000', '2022-06-10 13:28:40.000000', '0e69a1b2d5f705aff75c46570b2ed37449be83136c88d2493381d1fa365e45df');
+INSERT INTO order_activities (id, match_left, match_right, hash, transaction, block, level, main, date, order_activity_type) VALUES ('BLZqXaBVGh6WCEZNFTHgspfDbRxdQNGfZtkMXnhmGdipcqm7bxN_2', '0e69a1b2d5f705aff75c46570b2ed37449be83136c88d2493381d1fa365e45df', '91fadb78e8df52f83695efc16d325696c829f982ce3e4206489fef4f9b0742d6', '0e69a1b2d5f705aff75c46570b2ed37449be83136c88d2493381d1fa365e45df', 'onzPDwZF2mjaQKEpKfxfPUZ3fSyMHwCNURQJLKig6P6m4GUhAQh', 'BLZqXaBVGh6WCEZNFTHgspfDbRxdQNGfZtkMXnhmGdipcqm7bxN', 671229, true, '2022-06-10 13:27:55.000000', 'match');
+
+-- SNDBX-268
+insert into orders (maker, maker_edpk, taker, taker_edpk, make_asset_type_class, make_asset_type_contract, make_asset_type_token_id, make_asset_value, make_asset_decimals, take_asset_type_class, take_asset_type_contract, take_asset_type_token_id, take_asset_value, take_asset_decimals, start_date, end_date, salt, signature, created_at, last_update_at, hash) values ('tz1hHTdiDezgWNRWyY7RYSyZE11EobKQw583', 'edpktzp6HeUpCE4gjCSRGs1thNbvTPQkwgUarWvii4Qv48KJg3sDaj', null, null, 'MT', 'KT18pVpRXKPY2c4U2yFEGSH3ZnhB2kL8kwXS', '76378', 10, null, 'XTZ', null, null, 5000000, 6, null, null, '1932511171842389697101461119919153220130110108391171022391002232391251408122518812276238', 'edsigu2gZa57cjCK8AxboosqQz13phefqt9tumWGWuTr7TaK4ojhnRQgTPyT9AwhyMYSHUvRCKttbmBKybBmyC3bSk2or9tpiQq', '2022-06-24 07:50:21.000000', '2022-06-24 07:54:47.000000', '0f8b93117f4175a2039965a6281d94809c38f9d8f7ff1985c69a7b2c2e81197e');
+insert into public.order_activities (id, match_left, match_right, hash, transaction, block, level, main, date, order_activity_type) values ('95af530f9099099b89c5e54ee4bdc4dc64b17a4d85d398d897fd53403f64984cee7690cca83bd7b50f1f05b9f47a9b54e7a60958ae59d1088239919b191b353e1cdd1e6cb1af6b52fcad7710498254566702ab8676c600e79e2027ff46237b94e50979490c324f7c44b88bc7a11185c5c9287e3b59678e1550fc270cc13f1697', null, null, '0f8b93117f4175a2039965a6281d94809c38f9d8f7ff1985c69a7b2c2e81197e', null, null, null, true, '2022-06-24 07:50:21.000000', 'list');
+
 insert into orders (maker, maker_edpk, taker, taker_edpk, make_asset_type_class, make_asset_type_contract,
                     make_asset_type_token_id, make_asset_value, make_asset_decimals, take_asset_type_class,
                     take_asset_type_contract, take_asset_type_token_id, take_asset_value, take_asset_decimals,
@@ -108,3 +124,59 @@ values ('transfer', 'oo22KG27pptFtKEGJ8JcwN44teZoRMTigRaFsKiKPnwvWcg8xB6', 8, 'B
 insert into nft_activities (activity_type, "transaction", index, block, level, main, "date", contract, token_id, owner, amount, tr_from)
 values ('burn', 'ooAYipzS3MU83RKQMXVhmwcC9jgtpPpENQqNGUw9CDMyQbo13wj', 4, 'BLgNWpfjc5xWzvbY7neaE4DPFWGUZvJT77dUAHxb3YubYzMWQCA', 2320179, true, '2022-04-28 19:58:14.000000',
         'KT18pVpRXKPY2c4U2yFEGSH3ZnhB2kL8kwXS', 61026, 'tz1hFesk6GV6fT3vak68zz5JxdZ5kK81rvRB', 1, null);
+
+-- contracts
+create table if not exists contracts
+(
+    kind              varchar                      not null,
+    address           varchar                      not null
+    primary key,
+    owner             varchar,
+    block             varchar                      not null,
+    level             integer                      not null,
+    tsp               timestamp                    not null,
+    main              boolean default false        not null,
+    last_block        varchar                      not null,
+    last_level        integer                      not null,
+    last              timestamp                    not null,
+    tokens_number     bigint  default 0            not null,
+    last_token_id     zarith  default '0'::numeric not null,
+    ledger_id         varchar                      not null,
+    ledger_key        jsonb,
+    ledger_value      jsonb,
+    metadata          jsonb   default '{}'::jsonb  not null,
+    minters           character varying[],
+    uri_pattern       varchar,
+    counter           zarith  default 0            not null,
+    token_metadata_id varchar,
+    metadata_id       varchar,
+    royalties_id      varchar,
+    crawled           boolean default true         not null
+);
+create table if not exists tzip16_metadata
+(
+    contract    varchar               not null
+    primary key,
+    block       varchar               not null,
+    level       integer               not null,
+    tsp         timestamp             not null,
+    main        boolean default false not null,
+    name        varchar,
+    description varchar,
+    version     varchar,
+    license     jsonb,
+    authors     character varying[],
+    homepage    varchar,
+    source      jsonb,
+    interfaces  character varying[],
+    errors      jsonb,
+    views       jsonb
+);
+
+INSERT INTO public.contracts (kind, address, owner, block, level, tsp, main, last_block, last_level, last, tokens_number, last_token_id, ledger_id, ledger_key, ledger_value, metadata, minters, uri_pattern, counter, token_metadata_id, metadata_id, royalties_id, crawled) VALUES ('fa2', 'KT18bKocekp5ei8LvBbMjUEEc8KRpLHsJHRj', null, 'BLjCp3knpNPM4aEXUbWRgr6H6G9KZD662ZUuqoYK6EMoPf8ueLm', 2097947, '2022-02-07 17:35:14.000000', true, 'BLjCp3knpNPM4aEXUbWRgr6H6G9KZD662ZUuqoYK6EMoPf8ueLm', 2097947, '2022-02-07 17:35:14.000000', 0, 0, '101464', '"nat"', '"address"', '{"": "ipfs://QmPAdeiHxAo8f8rNq32mZvPcPsSPqbrr5irC77uDehgdVA"}', null, null, 0, '101466', '101467', null, true);
+INSERT INTO public.tzip16_metadata (contract, block, level, tsp, main, name, description, version, license, authors, homepage, source, interfaces, errors, views) VALUES ('KT18bKocekp5ei8LvBbMjUEEc8KRpLHsJHRj', 'BLjCp3knpNPM4aEXUbWRgr6H6G9KZD662ZUuqoYK6EMoPf8ueLm', 2097947, '2022-02-07 17:35:14.000000', true, 'STATION 020: SKULL CANDY OFFERINGS', 'Do you feel this skull is trying to trick us? I don’t know.', '1', '[]', null, 'https://collectible.sweet.io/series/1206', '[]', '{TZIP-012,TZIP-016,TZIP-021}', '[]', '[]');
+
+INSERT INTO public.contracts (kind, address, owner, block, level, tsp, main, last_block, last_level, last, tokens_number, last_token_id, ledger_id, ledger_key, ledger_value, metadata, minters, uri_pattern, counter, token_metadata_id, metadata_id, royalties_id, crawled) VALUES ('rarible', 'KT18exmo82JomAcRGTNpUvp1wATSqT63AYmF', 'tz1e6t4FD8zV46wsBndy5qcx1ch87hn6F98H', 'BMbA9sDJXDt98g9rJ7LCSRY6UXNQwnahoUegxYaBtFmQ1kLb3YF', 2194928, '2022-03-14 06:49:34.000000', true, 'BMbA9sDJXDt98g9rJ7LCSRY6UXNQwnahoUegxYaBtFmQ1kLb3YF', 2194928, '2022-03-14 06:49:34.000000', 0, 3, '129488', '["nat", "address"]', '"nat"', '{"name": "Spiral", "symbol": "S22", "contractURI": "https://api-mainnet.rarible.com/contractMetadata/{address}"}', null, null, 3, '129490', '129493', '129487', true);
+INSERT INTO public.tzip16_metadata (contract, block, level, tsp, main, name, description, version, license, authors, homepage, source, interfaces, errors, views) VALUES ('KT18exmo82JomAcRGTNpUvp1wATSqT63AYmF', 'BMbA9sDJXDt98g9rJ7LCSRY6UXNQwnahoUegxYaBtFmQ1kLb3YF', 2194928, '2022-03-14 06:49:34.000000', true, 'Spiral', null, null, '[]', null, null, '[]', null, '[]', '[]');
+
+INSERT INTO public.contracts (kind, address, owner, block, level, tsp, main, last_block, last_level, last, tokens_number, last_token_id, ledger_id, ledger_key, ledger_value, metadata, minters, uri_pattern, counter, token_metadata_id, metadata_id, royalties_id, crawled) VALUES ('rarible', 'KT1Gg9cdNu3cFUT2UrUZKBSvTRH8N8AsPk2i', 'tz1RahNvmiJqbymNWJt3Ss9ooNjKRvEKEhpB', 'BM4smaru1v5QWrYSjCX2aFw5UyYk51msRZdU3AwvVHAX8wtDqvp', 2244926, '2022-04-01 20:46:59.000000', true, 'BMVVWg85TKCyexEsu8c4KbWKatqWVaMnjV4yYgbUbGMtzWuZfnx', 2272072, '2022-04-11 14:35:44.000000', 0, 1663, '141400', '"nat"', '"address"', '{"": ""}', '{KT1NF8YjHkJPEfFqfQtcWAjnnrqtMHCbKWqb,KT1NLutkkpwLZ7HWKpWbYPW6FZkzZAkZPXvX}', null, 0, '141402', '141405', '141399', true);

@@ -13,6 +13,7 @@ import com.rarible.protocol.union.dto.RoyaltyDto
 import com.rarible.protocol.union.dto.continuation.page.Page
 import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthItemConverter
+import com.rarible.protocol.union.integration.ethereum.converter.EthMetaConverter
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactive.awaitSingle
@@ -52,7 +53,7 @@ open class EthItemService(
 
     override suspend fun getItemMetaById(itemId: String): UnionMeta {
         val meta = itemControllerApi.getNftItemMetaById(itemId).awaitFirst()
-        return EthItemConverter.convert(meta)
+        return EthMetaConverter.convert(meta)
     }
 
     override suspend fun resetItemMeta(itemId: String) {

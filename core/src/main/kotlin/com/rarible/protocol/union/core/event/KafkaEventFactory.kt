@@ -15,6 +15,7 @@ import com.rarible.protocol.union.core.model.UnionInternalOwnershipEvent
 import com.rarible.protocol.union.core.model.UnionItemEvent
 import com.rarible.protocol.union.core.model.UnionOrderEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipEvent
+import com.rarible.protocol.union.core.model.download.DownloadTask
 import com.rarible.protocol.union.core.model.getItemId
 import com.rarible.protocol.union.core.model.itemId
 import com.rarible.protocol.union.dto.ActivityDto
@@ -27,7 +28,7 @@ import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.UnionEventTopicProvider
 import com.rarible.protocol.union.dto.ext
-import java.util.UUID
+import java.util.*
 
 object KafkaEventFactory {
 
@@ -189,6 +190,14 @@ object KafkaEventFactory {
             id = UUID.randomUUID().toString(),
             key = collectionId.fullId(),
             value = ReconciliationMarkEvent(collectionId.fullId(), ReconciliationMarkType.COLLECTION)
+        )
+    }
+
+    fun downloadTaskEvent(task: DownloadTask): KafkaMessage<DownloadTask> {
+        return KafkaMessage(
+            id = UUID.randomUUID().toString(),
+            key = task.id,
+            value = task
         )
     }
 

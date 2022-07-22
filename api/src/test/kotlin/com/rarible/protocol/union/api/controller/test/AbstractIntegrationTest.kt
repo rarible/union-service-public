@@ -22,7 +22,7 @@ import com.rarible.protocol.order.api.client.OrderActivityControllerApi
 import com.rarible.protocol.union.dto.CollectionEventDto
 import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
-import com.rarible.protocol.union.enrichment.meta.UnionMetaLoader
+import com.rarible.protocol.union.enrichment.meta.item.ItemMetaLoader
 import com.rarible.protocol.union.integration.ethereum.mock.EthActivityControllerApiMock
 import com.rarible.protocol.union.integration.ethereum.mock.EthAuctionControllerApiMock
 import com.rarible.protocol.union.integration.ethereum.mock.EthItemControllerApiMock
@@ -74,7 +74,7 @@ abstract class AbstractIntegrationTest {
 
     @Autowired
     @Qualifier("test.union.meta.loader")
-    lateinit var testUnionMetaLoader: UnionMetaLoader
+    lateinit var testItemMetaLoader: ItemMetaLoader
 
     //--------------------- CURRENCY ---------------------//
 
@@ -216,6 +216,18 @@ abstract class AbstractIntegrationTest {
     @Autowired
     lateinit var testDipDupOrderClient: com.rarible.dipdup.client.OrderClient
 
+    @Autowired
+    lateinit var tzktTokenClient: com.rarible.tzkt.client.TokenClient
+
+    @Autowired
+    lateinit var tzktTokenActivityClient: com.rarible.tzkt.client.TokenActivityClient
+
+    @Autowired
+    lateinit var tzktCollectionClient: com.rarible.tzkt.client.CollectionClient
+
+    @Autowired
+    lateinit var tzktOwnershipClient: com.rarible.tzkt.client.OwnershipClient
+
     lateinit var tezosItemControllerApiMock: TezosItemControllerApiMock
     lateinit var tezosOwnershipControllerApiMock: TezosOwnershipControllerApiMock
     lateinit var tezosOrderControllerApiMock: TezosOrderControllerApiMock
@@ -255,7 +267,7 @@ abstract class AbstractIntegrationTest {
             testItemEventProducer,
             testOwnershipEventProducer,
 
-            testUnionMetaLoader
+            testItemMetaLoader
         )
         ethereumItemControllerApiMock = EthItemControllerApiMock(testEthereumItemApi)
         ethereumOwnershipControllerApiMock = EthOwnershipControllerApiMock(testEthereumOwnershipApi)

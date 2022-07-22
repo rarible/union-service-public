@@ -21,7 +21,6 @@ class EnrichmentAuctionService(
 ) {
 
     private val logger = LoggerFactory.getLogger(EnrichmentAuctionService::class.java)
-    private val FETCH_SIZE = 1_000
 
     suspend fun fetchOwnershipAuction(shortOwnershipId: ShortOwnershipId): AuctionDto? {
         val auctionPage = auctionServiceRouter.getService(shortOwnershipId.blockchain)
@@ -43,7 +42,7 @@ class EnrichmentAuctionService(
         val fetched = requestedIds.isNotEmpty().let {
             requestedIds.groupBy { it.blockchain }.flatMap { (k, v) ->
                 val data = auctionServiceRouter.getService(k).getAuctionsByIds(v.map { it.value })
-                logger.info("Fetched {} auctions by ids", data.size, requestedIds)
+                logger.info("Fetched {} auctions by ids", data.size)
                 data
             }
         }
@@ -99,6 +98,10 @@ class EnrichmentAuctionService(
 
         logger.info("Fetched {} auctions for seller [{}]", result.size, seller)
         return result
+    }
+
+    companion object {
+        private const val FETCH_SIZE = 1_000
     }
 
 }

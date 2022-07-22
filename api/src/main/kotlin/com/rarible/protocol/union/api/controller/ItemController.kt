@@ -1,10 +1,12 @@
 package com.rarible.protocol.union.api.controller
 
-import com.rarible.protocol.union.api.service.OwnershipApiService
+import com.rarible.core.logging.Logger
+import com.rarible.protocol.union.api.service.elastic.ItemTraitService
+import com.rarible.protocol.union.api.service.elastic.toApiDto
+import com.rarible.protocol.union.api.service.elastic.toInner
 import com.rarible.protocol.union.api.service.select.ItemSourceSelectService
 import com.rarible.protocol.union.core.exception.UnionNotFoundException
 import com.rarible.protocol.union.core.model.UnionImageProperties
-import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.UnionMetaContent
 import com.rarible.protocol.union.core.model.UnionVideoProperties
@@ -13,32 +15,35 @@ import com.rarible.protocol.union.core.service.RestrictionService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.core.util.LogUtils
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.ExtendedTraitPropertiesDto
 import com.rarible.protocol.union.dto.ItemDto
-import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.ItemIdsDto
 import com.rarible.protocol.union.dto.ItemsDto
+import com.rarible.protocol.union.dto.ItemsSearchRequestDto
 import com.rarible.protocol.union.dto.ItemsWithOwnershipDto
 import com.rarible.protocol.union.dto.MetaContentDto
 import com.rarible.protocol.union.dto.RestrictionCheckFormDto
 import com.rarible.protocol.union.dto.RestrictionCheckResultDto
 import com.rarible.protocol.union.dto.RoyaltiesDto
+import com.rarible.protocol.union.dto.TraitsDto
+import com.rarible.protocol.union.dto.TraitsRarityRequestDto
 import com.rarible.protocol.union.dto.parser.IdParser
-import com.rarible.protocol.union.enrichment.meta.UnionMetaService
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
+import com.rarible.protocol.union.enrichment.service.ItemMetaService
+import java.net.URI
+import java.time.Duration
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.time.withTimeout
-import org.slf4j.LoggerFactory
 import org.springframework.core.io.Resource
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
-import java.net.URI
-import java.time.Duration
 
 @ExperimentalCoroutinesApi
 @RestController
@@ -46,11 +51,15 @@ class ItemController(
     private val itemSourceSelectService: ItemSourceSelectService,
     private val router: BlockchainRouter<ItemService>,
     private val enrichmentItemService: EnrichmentItemService,
-    private val unionMetaService: UnionMetaService,
-    private val restrictionService: RestrictionService
+    private val itemMetaService: ItemMetaService,
+    private val restrictionService: RestrictionService,
+    private val itemTraitService: ItemTraitService,
 ) : ItemControllerApi {
 
-    private val logger = LoggerFactory.getLogger(javaClass)
+    companion object {
+        private val logger by Logger()
+        private val timeoutSyncLoadingMeta: Duration = Duration.ofSeconds(30)
+    }
 
     override suspend fun getAllItems(
         blockchains: List<BlockchainDto>?,
@@ -78,7 +87,7 @@ class ItemController(
         val meta = getAvailableMetaOrLoadSynchronously(itemId)
         val unionMetaContent = meta.content
             .find { it.properties is UnionVideoProperties && it.representation == MetaContentDto.Representation.ORIGINAL }
-            ?: throw UnionNotFoundException("No animation found for item $itemId")
+            ?: throw UnionNotFoundException("No video found for item $itemId")
         return createRedirectResponse(unionMetaContent)
     }
 
@@ -94,9 +103,10 @@ class ItemController(
     private suspend fun getAvailableMetaOrLoadSynchronously(itemId: String): UnionMeta {
         return try {
             withTimeout(timeoutSyncLoadingMeta) {
-                unionMetaService.getAvailableMetaOrLoadSynchronously(
+                itemMetaService.get(
                     itemId = IdParser.parseItemId(itemId),
-                    synchronous = true
+                    sync = true,
+                    pipeline = "default" // TODO PT-49
                 )
             }
         } catch (e: CancellationException) {
@@ -118,7 +128,7 @@ class ItemController(
         val enrichedUnionItem = enrichmentItemService.enrichItem(
             shortItem = shortItem,
             item = unionItem,
-            loadMetaSynchronously = true
+            syncMetaDownload = true
         )
         return ResponseEntity.ok(enrichedUnionItem)
     }
@@ -150,22 +160,26 @@ class ItemController(
     }
 
     override suspend fun resetItemMeta(itemId: String, sync: Boolean?): ResponseEntity<Unit> {
+        // TODO: handle sync
         val fullItemId = IdParser.parseItemId(itemId)
         val safeSync = sync ?: false
 
         LogUtils.addToMdc(fullItemId, router) {
             logger.info("Refreshing item meta for $itemId (sync=$safeSync)")
         }
-
         // TODO[meta]: when all Blockchains stop caching the meta, we can remove this endpoint call.
         router.getService(fullItemId.blockchain).resetItemMeta(fullItemId.value)
         if (safeSync) {
-            unionMetaService.loadMetaSynchronously(fullItemId)
+            itemMetaService.download(fullItemId, "default", true)  // TODO PT-49
         } else {
-            unionMetaService.scheduleLoading(fullItemId)
+            itemMetaService.schedule(fullItemId, "default", true)  // TODO PT-49
         }
 
         return ResponseEntity.ok().build()
+    }
+
+    override suspend fun searchItems(itemsSearchRequestDto: ItemsSearchRequestDto): ResponseEntity<ItemsDto> {
+        return ResponseEntity.ok(itemSourceSelectService.searchItems(itemsSearchRequestDto))
     }
 
     override suspend fun getItemsByCollection(
@@ -209,9 +223,36 @@ class ItemController(
         return ResponseEntity.ok(itemSourceSelectService.getItemsByOwnerWithOwnership(owner, continuation, size))
     }
 
-    private companion object {
-        // A timeout to avoid infinite meta loading.
-        val timeoutSyncLoadingMeta: Duration = Duration.ofSeconds(30)
+    override suspend fun queryTraits(collectionIds: List<String>, keys: List<String>?): ResponseEntity<TraitsDto> {
+        return ResponseEntity.ok(
+            itemTraitService.queryTraits(
+                collectionIds = collectionIds,
+                keys = keys
+            )
+        )
+    }
+
+    override suspend fun searchTraits(
+        @RequestParam filter: String,
+        @RequestParam collectionIds: List<String>
+    ): ResponseEntity<TraitsDto> {
+        return ResponseEntity.ok(
+            itemTraitService.searchTraits(
+                filter = filter,
+                collectionIds = collectionIds
+            )
+        )
+    }
+
+    override suspend fun queryTraitsWithRarity(request: TraitsRarityRequestDto): ResponseEntity<ExtendedTraitPropertiesDto> {
+        if (request.properties.isEmpty()) return ResponseEntity.ok(ExtendedTraitPropertiesDto())
+
+        return ResponseEntity.ok(
+            ExtendedTraitPropertiesDto(traits = itemTraitService.getTraitsWithRarity(
+                collectionId = request.collectionId,
+                properties = request.properties.map { it.toInner() }.toSet()
+            ).map { it.toApiDto() })
+        )
     }
 }
 

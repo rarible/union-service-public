@@ -1,8 +1,8 @@
 package com.rarible.protocol.union.core.model
 
 import com.rarible.protocol.union.core.model.elasticsearch.EntityDefinition
-import com.rarible.protocol.union.core.model.elasticsearch.EsEntitiesConfig.INDEX_SETTINGS
 import com.rarible.protocol.union.core.model.elasticsearch.EsEntitiesConfig.loadMapping
+import com.rarible.protocol.union.core.model.elasticsearch.EsEntitiesConfig.loadSettings
 import com.rarible.protocol.union.core.model.elasticsearch.EsEntity
 import com.rarible.protocol.union.dto.BlockchainDto
 import org.springframework.data.annotation.Id
@@ -28,16 +28,19 @@ data class EsItem(
 
     @Field(type = FieldType.Date)
     val lastUpdatedAt: Instant,
+    val self: Boolean? = false
 ) {
     companion object {
         private const val VERSION: Int = 1
 
-        val ENTITY_DEFINITION = EntityDefinition(
-            entity = EsEntity.ITEM,
-            mapping = loadMapping(EsEntity.ITEM),
-            versionData = VERSION,
-            settings = INDEX_SETTINGS
-        )
+        val ENTITY_DEFINITION = EsEntity.ITEM.let {
+            EntityDefinition(
+                entity = it,
+                mapping = loadMapping(it),
+                versionData = VERSION,
+                settings = loadSettings(it)
+            )
+        }
     }
 }
 

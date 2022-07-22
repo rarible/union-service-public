@@ -2,8 +2,9 @@ package com.rarible.protocol.union.core.model
 
 import com.rarible.protocol.union.core.model.elasticsearch.EsEntity
 import com.rarible.protocol.union.core.model.elasticsearch.EntityDefinition
-import com.rarible.protocol.union.core.model.elasticsearch.EsEntitiesConfig.INDEX_SETTINGS
 import com.rarible.protocol.union.core.model.elasticsearch.EsEntitiesConfig.loadMapping
+import com.rarible.protocol.union.core.model.elasticsearch.generateSalt
+import com.rarible.protocol.union.core.model.elasticsearch.EsEntitiesConfig.loadSettings
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import org.springframework.data.annotation.Id
@@ -42,7 +43,7 @@ data class EsActivity(
     override val date: Instant,
     override val blockNumber: Long?,
     override val logIndex: Int?,
-    override val salt: Long = kotlin.random.Random.nextLong(),
+    override val salt: Long = generateSalt(),
     // Filter fields
     override val blockchain: BlockchainDto,
     override val type: ActivityTypeDto,
@@ -50,6 +51,10 @@ data class EsActivity(
     val userTo: String?,
     val collection: String?,
     val item: String,
+    val sellCurrency: String? = null,
+    val volumeUsd: Double? = null,
+    val volumeSell: Double? = null,
+    val volumeNative: Double? = null,
 ) : EsActivitySealed() {
     companion object {
         const val VERSION: Int = 2
@@ -59,7 +64,7 @@ data class EsActivity(
                 entity = it,
                 mapping = loadMapping(it),
                 versionData = VERSION,
-                settings = INDEX_SETTINGS
+                settings = loadSettings(it),
             )
         }
     }

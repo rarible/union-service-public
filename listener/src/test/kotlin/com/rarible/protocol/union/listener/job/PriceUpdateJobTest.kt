@@ -14,6 +14,7 @@ import com.rarible.protocol.union.enrichment.util.sellCurrencyId
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
 import com.rarible.protocol.union.integration.ethereum.data.randomEthBidOrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
+import com.rarible.protocol.union.integration.ethereum.data.randomEthItemMeta
 import com.rarible.protocol.union.integration.ethereum.data.randomEthNftItemDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipId
@@ -23,16 +24,12 @@ import com.rarible.protocol.union.listener.test.IntegrationTest
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import java.math.BigDecimal
 import java.time.Instant
 
 @IntegrationTest
 internal class PriceUpdateJobTest : AbstractIntegrationTest() {
-
-    private val logger = LoggerFactory.getLogger(javaClass)
-
     @Autowired
     private lateinit var ethereumOrderConverter: EthOrderConverter
 
@@ -49,7 +46,7 @@ internal class PriceUpdateJobTest : AbstractIntegrationTest() {
     private lateinit var ownershipRepository: OwnershipRepository
 
     @Autowired
-    private lateinit var priceUpdateJob: BestOrderCheckJob
+    private lateinit var priceUpdateJob: BestOrderCheckJobHandler
 
     @Test
     fun `should update best order for multi orders items`() = runBlocking<Unit> {
@@ -83,11 +80,11 @@ internal class PriceUpdateJobTest : AbstractIntegrationTest() {
 
         val ethItem = randomEthNftItemDto()
         ethereumItemControllerApiMock.mockGetNftItemById(itemId, ethItem)
-        ethereumItemControllerApiMock.mockGetNftItemMetaById(itemId, ethItem.meta!!)
+        ethereumItemControllerApiMock.mockGetNftItemMetaById(itemId, randomEthItemMeta())
         ethereumOrderControllerApiMock.mockGetByIds(ethSellOrder1, ethBidOrder1)
 
         itemRepository.save(shortItem)
-        priceUpdateJob.updateBestOrderPrice()
+        priceUpdateJob.handle()
 
         val updatedItem = itemService.get(shortItem.id)
         assertThat(updatedItem).isNotNull
@@ -120,7 +117,7 @@ internal class PriceUpdateJobTest : AbstractIntegrationTest() {
         ethereumAuctionControllerApiMock.mockGetAuctionsByItem(shortOwnership.id.toDto().getItemId(), emptyList())
 
         ownershipRepository.save(shortOwnership)
-        priceUpdateJob.updateBestOrderPrice()
+        priceUpdateJob.handle()
 
         val updatedItem = ownershipService.get(shortOwnership.id)
         assertThat(updatedItem).isNotNull

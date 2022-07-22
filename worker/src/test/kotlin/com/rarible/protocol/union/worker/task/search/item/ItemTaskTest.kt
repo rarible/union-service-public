@@ -2,9 +2,9 @@ package com.rarible.protocol.union.worker.task.search.item
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import com.rarible.core.common.nowMillis
 import com.rarible.core.test.data.randomAddress
 import com.rarible.core.test.data.randomBigInt
-import com.rarible.protocol.union.api.client.ItemControllerApi
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ItemDto
@@ -13,8 +13,9 @@ import com.rarible.protocol.union.dto.ItemsDto
 import com.rarible.protocol.union.dto.continuation.CombinedContinuation
 import com.rarible.protocol.union.dto.continuation.page.ArgSlice
 import com.rarible.protocol.union.enrichment.repository.search.EsItemRepository
+import com.rarible.protocol.union.enrichment.service.query.item.ItemApiMergeService
 import com.rarible.protocol.union.worker.config.BlockchainReindexProperties
-import com.rarible.protocol.union.worker.config.CollectionReindexProperties
+import com.rarible.protocol.union.worker.config.ItemReindexProperties
 import com.rarible.protocol.union.worker.metrics.SearchTaskMetricFactory
 import com.rarible.protocol.union.worker.task.search.ParamFactory
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
@@ -25,15 +26,13 @@ import io.mockk.mockk
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
-import reactor.kotlin.core.publisher.toMono
 import java.math.BigInteger
-import java.time.Instant
 
 internal class ItemTaskTest {
 
     private val repo = mockk<EsItemRepository> {
         coEvery {
-            saveAll(any())
+            saveAll(any(), any(), any())
         } answers { arg(0) }
     }
 
@@ -43,8 +42,8 @@ internal class ItemTaskTest {
         blockchain = BlockchainDto.ETHEREUM,
         deleted = false,
         sellers = 1,
-        mintedAt = Instant.now(),
-        lastUpdatedAt = Instant.now(),
+        mintedAt = nowMillis(),
+        lastUpdatedAt = nowMillis(),
         lazySupply = BigInteger.ZERO,
         supply = BigInteger.ONE
     )
@@ -54,8 +53,8 @@ internal class ItemTaskTest {
         blockchain = BlockchainDto.FLOW,
         deleted = false,
         sellers = 1,
-        mintedAt = Instant.now(),
-        lastUpdatedAt = Instant.now(),
+        mintedAt = nowMillis(),
+        lastUpdatedAt = nowMillis(),
         lazySupply = BigInteger.ZERO,
         supply = BigInteger.ONE
     )
@@ -76,42 +75,50 @@ internal class ItemTaskTest {
         )
     )
 
-    private val client = mockk<ItemControllerApi> {
-        every { getAllItems(any<List<BlockchainDto>>(), null, any(), any(), any(), any()) } returns ItemsDto(
+    private val client = mockk<ItemApiMergeService> {
+        coEvery { getAllItems(any<List<BlockchainDto>>(), null, any(), any(), any(), any()) } returns ItemsDto(
             total = 1L, items = listOf(ethItem, flowItem), continuation = firstCombinedContinuation.toString()
-        ).toMono()
+        )
 
-        every {
+        coEvery {
             getAllItems(
                 any<List<BlockchainDto>>(), firstCombinedContinuation.toString(), any(), any(), any(), any()
             )
         } returns ItemsDto(
             total = 0L, items = emptyList(), continuation = completedContinuation.toString()
-        ).toMono()
+        )
     }
 
     private val searchTaskMetricFactory = SearchTaskMetricFactory(SimpleMeterRegistry(), mockk {
         every { metrics } returns mockk { every { rootPath } returns "protocol.union.worker" }
     })
 
+    private val paramFactory = ParamFactory(jacksonObjectMapper().registerKotlinModule())
+
     @Test
     internal fun `should start first task`() {
         runBlocking {
 
             val task = ItemTask(
-                CollectionReindexProperties(
+                ItemReindexProperties(
                     enabled = true,
                     blockchains = listOf(BlockchainReindexProperties(enabled = true, BlockchainDto.ETHEREUM))
-                ), client, ParamFactory(jacksonObjectMapper().registerKotlinModule()), repo, searchTaskMetricFactory
+                ), client, paramFactory, repo, searchTaskMetricFactory
             )
-            task.runLongTask(null, "ETHEREUM").toList()
+            task.runLongTask(
+                null, paramFactory.toString(
+                    ItemTaskParam(
+                        blockchain = BlockchainDto.ETHEREUM, index = "test_index"
+                    )
+                )
+            ).toList()
 
             coVerifyAll {
                 client.getAllItems(
                     listOf(BlockchainDto.ETHEREUM), null, 1000, true, Long.MIN_VALUE, Long.MAX_VALUE
                 )
 
-                repo.saveAll(any())
+                repo.saveAll(any(), any(), any())
 
                 client.getAllItems(
                     listOf(BlockchainDto.ETHEREUM),

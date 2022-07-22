@@ -10,6 +10,7 @@ import com.rarible.protocol.nft.api.client.NftItemControllerApi
 import com.rarible.protocol.nft.api.client.NftOwnershipControllerApi
 import com.rarible.protocol.solana.api.client.TokenControllerApi
 import com.rarible.protocol.solana.dto.TokenMetaEventDto
+import com.rarible.protocol.union.core.test.WaitAssert
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.CollectionEventDto
 import com.rarible.protocol.union.dto.CollectionUpdateEventDto
@@ -22,12 +23,12 @@ import com.rarible.protocol.union.dto.OwnershipDeleteEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.dto.OwnershipUpdateEventDto
 import com.rarible.protocol.union.enrichment.configuration.UnionMetaProperties
-import com.rarible.protocol.union.enrichment.meta.UnionMetaLoader
+import com.rarible.protocol.union.enrichment.meta.item.ItemMetaLoader
+import com.rarible.protocol.union.enrichment.service.ItemMetaService
 import com.rarible.protocol.union.integration.ethereum.mock.EthAuctionControllerApiMock
 import com.rarible.protocol.union.integration.ethereum.mock.EthItemControllerApiMock
 import com.rarible.protocol.union.integration.ethereum.mock.EthOrderControllerApiMock
 import com.rarible.protocol.union.integration.ethereum.mock.EthOwnershipControllerApiMock
-import com.rarible.protocol.union.enrichment.meta.UnionMetaService
 import io.mockk.clearMocks
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
@@ -46,7 +47,7 @@ abstract class AbstractIntegrationTest {
 
     @Autowired
     @Qualifier("test.union.meta.loader")
-    lateinit var testUnionMetaLoader: UnionMetaLoader
+    lateinit var testItemMetaLoader: ItemMetaLoader
 
     @Autowired
     @Qualifier("test.content.meta.receiver")
@@ -56,7 +57,7 @@ abstract class AbstractIntegrationTest {
     lateinit var unionMetaProperties: UnionMetaProperties
 
     @Autowired
-    lateinit var unionMetaService: UnionMetaService
+    lateinit var itemMetaService: ItemMetaService
 
     //--------------------- ETHEREUM ---------------------//
     @Autowired
@@ -137,7 +138,8 @@ abstract class AbstractIntegrationTest {
             testEthereumOrderApi,
             testEthereumAuctionApi,
 
-            testUnionMetaLoader
+            testItemMetaLoader,
+            testContentMetaReceiver
         )
         ethereumItemControllerApiMock = EthItemControllerApiMock(testEthereumItemApi)
         ethereumOwnershipControllerApiMock = EthOwnershipControllerApiMock(testEthereumOwnershipApi)
@@ -226,4 +228,7 @@ abstract class AbstractIntegrationTest {
             value = dto
         )
     }
+
+    suspend fun waitAssert(runnable: suspend () -> Unit) = WaitAssert.wait(runnable = runnable)
+
 }

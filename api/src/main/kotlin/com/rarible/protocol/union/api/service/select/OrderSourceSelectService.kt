@@ -1,7 +1,7 @@
 package com.rarible.protocol.union.api.service.select
 
-import com.rarible.protocol.union.api.service.OrderQueryService
-import com.rarible.protocol.union.api.service.api.OrderApiService
+import com.rarible.protocol.union.enrichment.service.query.order.OrderQueryService
+import com.rarible.protocol.union.enrichment.service.query.order.OrderApiMergeService
 import com.rarible.protocol.union.api.service.elastic.OrderElasticService
 import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service
 @Service
 class OrderSourceSelectService(
     private val featureFlagsProperties: FeatureFlagsProperties,
-    private val orderApiService: OrderApiService,
+    private val orderApiService: OrderApiMergeService,
     private val orderElasticService: OrderElasticService,
 ) : OrderQueryService {
 
@@ -93,7 +93,7 @@ class OrderSourceSelectService(
     override suspend fun getOrderBidsByMaker(
         blockchains: List<BlockchainDto>?,
         platform: PlatformDto?,
-        maker: String,
+        maker: List<String>,
         origin: String?,
         status: List<OrderStatusDto>?,
         start: Long?,
@@ -125,7 +125,7 @@ class OrderSourceSelectService(
     }
 
     override suspend fun getSellOrdersByMaker(
-        maker: String,
+        maker: List<String>,
         blockchains: List<BlockchainDto>?,
         platform: PlatformDto?,
         origin: String?,

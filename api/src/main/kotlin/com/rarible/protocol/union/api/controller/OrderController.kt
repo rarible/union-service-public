@@ -66,7 +66,7 @@ class OrderController(
     }
 
     override suspend fun getOrderBidsByMaker(
-        maker: String,
+        maker: List<String>,
         blockchains: List<BlockchainDto>?,
         platform: PlatformDto?,
         origin: String?,
@@ -128,7 +128,7 @@ class OrderController(
     }
 
     override suspend fun getSellOrdersByMaker(
-        maker: String,
+        maker: List<String>,
         blockchains: List<BlockchainDto>?,
         platform: PlatformDto?,
         origin: String?,

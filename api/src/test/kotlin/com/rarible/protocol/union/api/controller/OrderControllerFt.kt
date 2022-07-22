@@ -30,9 +30,9 @@ import com.rarible.protocol.union.integration.ethereum.data.randomEthBidOrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthSellOrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomPolygonAddress
+import com.rarible.protocol.union.integration.flow.data.randomFlowAddress
+import com.rarible.protocol.union.integration.flow.data.randomFlowV1OrderDto
 import com.rarible.protocol.union.integration.tezos.data.randomTezosOrderDto
-import com.rarible.protocol.union.test.data.randomFlowAddress
-import com.rarible.protocol.union.test.data.randomFlowV1OrderDto
 import io.mockk.coEvery
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.reactive.awaitFirst
@@ -238,12 +238,12 @@ class OrderControllerFt : AbstractIntegrationTest() {
             testEthereumOrderApi.getOrderBidsByItemAndByStatus(
                 contract,
                 tokenId.toString(),
-                emptyList(),
                 listOf(EthConverter.convertToAddress(maker.value)),
                 null,
                 ethPlatform,
                 continuation,
                 size,
+                emptyList(),
                 unionOrder.bidCurrencyId,
                 null,
                 null
@@ -390,11 +390,11 @@ class OrderControllerFt : AbstractIntegrationTest() {
         val polygonOrders = listOf(randomEthSellOrderDto())
 
         coEvery {
-            testPolygonOrderApi.getSellOrdersByMakerAndByStatus(maker.value, null, ethPlatform, continuation, size, emptyList())
+            testPolygonOrderApi.getSellOrdersByMakerAndByStatus(listOf(EthConverter.convertToAddress(maker.value)), null, ethPlatform, continuation, size, emptyList())
         } returns OrdersPaginationDto(polygonOrders, continuation).toMono()
 
         val orders = orderControllerClient.getSellOrdersByMaker(
-            maker.fullId(),
+            listOf(maker.fullId()),
             null,
             platform,
             null,
@@ -405,6 +405,39 @@ class OrderControllerFt : AbstractIntegrationTest() {
 
         assertThat(orders.orders).hasSize(1)
         assertThat(orders.orders[0]).isInstanceOf(OrderDto::class.java)
+        assertThat(orders.continuation).isNull()
+    }
+
+    @Test
+    fun `get sell orders order by maker - multiple blockchains`() = runBlocking<Unit> {
+        val maker1 = randomPolygonAddress()
+        val maker2 = randomFlowAddress()
+
+        val polygonOrders = listOf(randomEthSellOrderDto())
+        val flowOrders = listOf(randomFlowV1OrderDto())
+
+        coEvery {
+            testPolygonOrderApi.getSellOrdersByMakerAndByStatus(listOf(EthConverter.convertToAddress(maker1.value)), null, ethPlatform, continuation, size, emptyList())
+        } returns OrdersPaginationDto(polygonOrders, continuation).toMono()
+
+        coEvery {
+            testFlowOrderApi.getSellOrdersByMaker(listOf(maker2.value), null, continuation, size)
+        } returns FlowOrdersPaginationDto(flowOrders, continuation).toMono()
+
+        val orders = orderControllerClient.getSellOrdersByMaker(
+            listOf(maker1.fullId(), maker2.fullId()),
+            null,
+            platform,
+            null,
+            continuation,
+            size,
+            null
+        ).awaitFirst()
+
+        assertThat(orders.orders.map { it.id.value }).containsExactlyInAnyOrder(
+            polygonOrders[0].hash.prefixed(),
+            flowOrders[0].id.toString()
+        )
         assertThat(orders.continuation).isNull()
     }
 

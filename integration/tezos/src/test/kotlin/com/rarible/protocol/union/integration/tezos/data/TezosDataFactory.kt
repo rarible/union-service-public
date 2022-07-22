@@ -41,6 +41,14 @@ import com.rarible.protocol.union.core.util.CompositeItemIdParser
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
+import com.rarible.tzkt.model.Alias
+import com.rarible.tzkt.model.Contract
+import com.rarible.tzkt.model.Token
+import com.rarible.tzkt.model.TokenBalance
+import com.rarible.tzkt.model.TokenInfo
+import java.time.Instant
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
 
 fun randomTezosContract() = randomString(12)
 fun randomTezosAddress() = UnionAddressConverter.convert(BlockchainDto.TEZOS, randomString())
@@ -328,5 +336,66 @@ fun randomTezosOrderActivityMatchSide(): OrderActivitySideMatchDto {
         hash = randomString(16),
         asset = randomTezosAssetFT(),
         type = OrderActivitySideTypeDto.values()[randomInt(OrderActivitySideTypeDto.values().size)]
+    )
+}
+
+fun randomTzktContract(address: String): Contract {
+    return Contract(
+        type = "contract",
+        alias = "",
+        name = "test",
+        symbol = null,
+        balance = 1L,
+        address = address,
+        tzips = listOf("fa2"),
+        kind = "",
+        numContracts = 1,
+        activeTokensCount = 1,
+        tokenBalancesCount = 1,
+        tokenTransfersCount = 1,
+        numDelegations = 1,
+        numOriginations = 1,
+        numTransactions = 1,
+        numReveals = 1,
+        numMigrations = 1
+    )
+}
+
+fun randomTzktToken(itemId: String) = Token(
+    id = 1,
+    contract = Alias(
+        alias = "test name",
+        address = "test"
+    ),
+    tokenId = "123",
+    firstTime = nowMillis().atOffset(ZoneOffset.UTC),
+    lastTime = nowMillis().atOffset(ZoneOffset.UTC),
+    totalSupply = "1",
+    transfersCount = 1,
+    balancesCount = 1,
+    holdersCount = 1
+)
+
+fun randomTzktTokenBalance(ownerId: OwnershipIdDto): TokenBalance {
+    return TokenBalance(
+        id = randomInt(),
+        account = Alias(
+            alias = null,
+            address = ownerId.owner.value
+        ),
+        token = TokenInfo(
+            id = 718165,
+            contract = Alias(
+                alias = null,
+                address = ownerId.itemIdValue.split(":").first()
+            ),
+            tokenId = ownerId.itemIdValue.split(":").last(),
+        ),
+        balance = "1",
+        transfersCount = randomInt(),
+        firstLevel = 1,
+        firstTime = OffsetDateTime.now(),
+        lastLevel = 2,
+        lastTime = OffsetDateTime.now()
     )
 }

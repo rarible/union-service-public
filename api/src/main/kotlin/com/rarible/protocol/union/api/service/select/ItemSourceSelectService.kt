@@ -1,7 +1,5 @@
 package com.rarible.protocol.union.api.service.select
 
-import com.rarible.protocol.union.api.service.ItemApiService
-import com.rarible.protocol.union.api.service.ItemQueryService
 import com.rarible.protocol.union.api.service.elastic.ItemElasticService
 import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -9,19 +7,21 @@ import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.ItemsDto
+import com.rarible.protocol.union.dto.ItemsSearchRequestDto
 import com.rarible.protocol.union.dto.ItemsWithOwnershipDto
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import com.rarible.protocol.union.enrichment.service.query.item.ItemApiMergeService
+import com.rarible.protocol.union.enrichment.service.query.item.ItemQueryService
 import kotlinx.coroutines.flow.Flow
 import org.springframework.stereotype.Service
 
-@ExperimentalCoroutinesApi
 @Service
 class ItemSourceSelectService(
     private val featureFlagsProperties: FeatureFlagsProperties,
-    private val itemApiService: ItemApiService,
+    private val itemApiService: ItemApiMergeService,
     private val itemElasticService: ItemElasticService
-) : ItemQueryService {
-    override suspend fun getAllItems(
+) {
+
+    suspend fun getAllItems(
         blockchains: List<BlockchainDto>?,
         continuation: String?,
         size: Int?,
@@ -39,15 +39,15 @@ class ItemSourceSelectService(
         )
     }
 
-    override suspend fun getAllItemIdsByCollection(collectionId: CollectionIdDto): Flow<ItemIdDto> {
+    suspend fun getAllItemIdsByCollection(collectionId: CollectionIdDto): Flow<ItemIdDto> {
         return getQuerySource().getAllItemIdsByCollection(collectionId)
     }
 
-    override suspend fun getItemsByIds(ids: List<ItemIdDto>): List<ItemDto> {
+    suspend fun getItemsByIds(ids: List<ItemIdDto>): List<ItemDto> {
         return itemApiService.getItemsByIds(ids)
     }
 
-    override suspend fun getItemsByCollection(
+    suspend fun getItemsByCollection(
         collection: String,
         continuation: String?,
         size: Int?
@@ -55,7 +55,7 @@ class ItemSourceSelectService(
         return getQuerySource().getItemsByCollection(collection = collection, continuation = continuation, size = size)
     }
 
-    override suspend fun getItemsByCreator(
+    suspend fun getItemsByCreator(
         creator: String,
         blockchains: List<BlockchainDto>?,
         continuation: String?,
@@ -69,7 +69,7 @@ class ItemSourceSelectService(
         )
     }
 
-    override suspend fun getItemsByOwner(
+    suspend fun getItemsByOwner(
         owner: String,
         blockchains: List<BlockchainDto>?,
         continuation: String?,
@@ -84,12 +84,18 @@ class ItemSourceSelectService(
         )
     }
 
-    override suspend fun getItemsByOwnerWithOwnership(
+    suspend fun getItemsByOwnerWithOwnership(
         owner: String,
         continuation: String?,
         size: Int?
     ): ItemsWithOwnershipDto {
         return getQuerySource().getItemsByOwnerWithOwnership(owner, continuation, size)
+    }
+
+    suspend fun searchItems(itemsSearchRequestDto: ItemsSearchRequestDto): ItemsDto {
+        return if (featureFlagsProperties.enableItemQueriesToElasticSearch) {
+            itemElasticService.searchItems(itemsSearchRequestDto)
+        } else ItemsDto()
     }
 
     private fun getQuerySource(): ItemQueryService {
@@ -98,4 +104,5 @@ class ItemSourceSelectService(
             else -> itemApiService
         }
     }
+
 }

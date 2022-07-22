@@ -1,23 +1,23 @@
 package com.rarible.protocol.union.worker.task.search.activity
 
-import com.rarible.protocol.union.api.client.ActivityControllerApi
 import com.rarible.protocol.union.core.converter.EsActivityConverter
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.continuation.page.PageSize
 import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
+import com.rarible.protocol.union.enrichment.service.query.activity.ActivityApiMergeService
 import com.rarible.protocol.union.worker.metrics.SearchTaskMetricFactory
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.reactive.awaitFirst
 import org.springframework.stereotype.Component
 
 @Component
 class ActivityReindexService(
-    private val activityClient: ActivityControllerApi,
+    private val activityApiMergeService: ActivityApiMergeService,
     private val esActivityRepository: EsActivityRepository,
-    private val searchTaskMetricFactory: SearchTaskMetricFactory
+    private val searchTaskMetricFactory: SearchTaskMetricFactory,
+    private val converter: EsActivityConverter,
 ) {
     fun reindex(
         blockchain: BlockchainDto,
@@ -28,23 +28,25 @@ class ActivityReindexService(
         val counter = searchTaskMetricFactory.createReindexActivityCounter(blockchain, type)
 
         return flow {
+            var continuation = cursor
             do {
-                val res = activityClient.getAllActivities(
+                val res = activityApiMergeService.getAllActivities(
                     listOf(type),
                     listOf(blockchain),
-                    cursor,
-                    cursor,
+                    continuation,
+                    continuation,
                     PageSize.ACTIVITY.max,
-                    ActivitySortDto.EARLIEST_FIRST
-                ).awaitFirst()
+                    ActivitySortDto.LATEST_FIRST
+                )
 
                 val savedActivities = esActivityRepository.saveAll(
-                    res.activities.mapNotNull(EsActivityConverter::convert),
+                    converter.batchConvert(res.activities),
                     index
                 )
+                continuation = res.cursor
                 counter.increment(savedActivities.size)
                 emit(res.cursor ?: "")
-            } while (res.cursor != null)
+            } while (res.cursor.isNullOrEmpty().not())
         }
     }
 }

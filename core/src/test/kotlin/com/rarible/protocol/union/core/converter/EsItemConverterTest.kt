@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.core.converter
 
+import com.rarible.core.common.nowMillis
 import com.rarible.core.test.data.randomAddress
 import com.rarible.core.test.data.randomBoolean
 import com.rarible.core.test.data.randomInt
@@ -18,7 +19,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.DynamicTest.dynamicTest
 import org.junit.jupiter.api.TestFactory
 import java.math.BigInteger
-import java.time.Instant
 
 class EsItemConverterTest {
 
@@ -47,8 +47,8 @@ class EsItemConverterTest {
                 collection = CollectionIdDto(BlockchainDto.ETHEREUM, randomAddress().toString()),
                 lazySupply = BigInteger.ONE,
                 pending = emptyList(),
-                mintedAt = Instant.now(),
-                lastUpdatedAt = Instant.now(),
+                mintedAt = nowMillis(),
+                lastUpdatedAt = nowMillis(),
                 supply = BigInteger.ONE,
                 deleted = randomBoolean(),
                 auctions = emptyList(),
@@ -86,8 +86,8 @@ class EsItemConverterTest {
                 collection = CollectionIdDto(BlockchainDto.FLOW, randomAddress().toString()),
                 lazySupply = BigInteger.ONE,
                 pending = emptyList(),
-                mintedAt = Instant.now(),
-                lastUpdatedAt = Instant.now(),
+                mintedAt = nowMillis(),
+                lastUpdatedAt = nowMillis(),
                 supply = BigInteger.ONE,
                 deleted = randomBoolean(),
                 auctions = emptyList(),

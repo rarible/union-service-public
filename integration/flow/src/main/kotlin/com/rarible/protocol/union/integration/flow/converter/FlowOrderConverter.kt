@@ -15,10 +15,10 @@ import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PlatformDto
+import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
-import java.math.BigDecimal
 
 @Component
 class FlowOrderConverter(
@@ -68,7 +68,7 @@ class FlowOrderConverter(
             fill = order.fill,
             startedAt = order.start,
             endedAt = order.end,
-            makeStock = makeStock(order.makeStock.toBigDecimal()),
+            makeStock = order.makeStock,
             cancelled = order.cancelled,
             createdAt = order.createdAt,
             lastUpdatedAt = order.lastUpdateAt,
@@ -77,12 +77,9 @@ class FlowOrderConverter(
             makePriceUsd = makePriceUsd,
             takePriceUsd = takePriceUsd,
             data = convert(order.data, blockchain),
-            salt = ""// Not supported on Flow
+            salt = "",// Not supported on Flow
+            dbUpdatedAt = order.dbUpdatedAt
         )
-    }
-
-    private fun makeStock(intVal: BigDecimal): BigDecimal {
-        return intVal.movePointLeft(18).stripTrailingZeros() //convert to regular decimal value
     }
 
     suspend fun convert(order: FlowOrdersPaginationDto, blockchain: BlockchainDto): Slice<OrderDto> {
@@ -137,5 +134,12 @@ class FlowOrderConverter(
     enum class Sort {
         EARLIEST_FIRST, LATEST_FIRST
     }
+
+    fun convert(source: SyncSortDto?): String? =
+        when (source) {
+            SyncSortDto.DB_UPDATE_ASC -> "UPDATED_AT_ASC"
+            SyncSortDto.DB_UPDATE_DESC -> "UPDATED_AT_DESC"
+            else -> null
+        }
 }
 

@@ -1,44 +1,43 @@
 package com.rarible.protocol.union.enrichment.repository.search
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.rarible.protocol.union.core.elasticsearch.EsNameResolver
 import com.rarible.protocol.union.core.model.EsOwnership
+import com.rarible.protocol.union.core.model.EsOwnershipFilter
+import com.rarible.protocol.union.dto.continuation.page.PageSize
+import com.rarible.protocol.union.enrichment.repository.search.internal.EsOwnershipQueryBuilderService
 import kotlinx.coroutines.reactive.awaitFirst
-import kotlinx.coroutines.reactive.awaitFirstOrNull
-import org.elasticsearch.action.admin.indices.refresh.RefreshRequest
+import org.springframework.data.elasticsearch.client.reactive.ReactiveElasticsearchClient
 import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations
-import org.springframework.data.elasticsearch.core.query.Criteria
-import org.springframework.data.elasticsearch.core.query.CriteriaQuery
+import org.springframework.data.elasticsearch.core.convert.ElasticsearchConverter
 import org.springframework.stereotype.Component
-import java.io.IOException
 
 @Component
 class EsOwnershipRepository(
-    private val esOperations: ReactiveElasticsearchOperations, esNameResolver: EsNameResolver
-) : EsRepository {
-    val entityDefinition = esNameResolver.createEntityDefinitionExtended(EsOwnership.ENTITY_DEFINITION)
+    private val queryBuilderService: EsOwnershipQueryBuilderService,
+    objectMapper: ObjectMapper,
+    elasticsearchConverter: ElasticsearchConverter,
+    esOperations: ReactiveElasticsearchOperations,
+    elasticClient: ReactiveElasticsearchClient,
+    esNameResolver: EsNameResolver
+) : ElasticSearchRepository<EsOwnership>(
+    objectMapper,
+    esOperations,
+    esNameResolver.createEntityDefinitionExtended(EsOwnership.ENTITY_DEFINITION),
+    elasticsearchConverter,
+    elasticClient,
+    EsOwnership::class.java,
+    EsOwnership::ownershipId.name,
+    EsOwnership::ownershipId
+) {
 
-    suspend fun findById(id: String): EsOwnership? {
-        return esOperations.get(id, EsOwnership::class.java, entityDefinition.searchIndexCoordinates).awaitFirstOrNull()
+    suspend fun search(filter: EsOwnershipFilter, limit: Int? = null): List<EsOwnership> {
+        val query = queryBuilderService.build(filter)
+        query.maxResults = PageSize.OWNERSHIP.limit(limit)
+        query.trackTotalHits = false
+
+        return esOperations.search(query, EsOwnership::class.java, entityDefinition.searchIndexCoordinates)
+            .collectList().awaitFirst().map { it.content }
     }
 
-    suspend fun saveAll(esOwnerships: List<EsOwnership>): List<EsOwnership> {
-        return esOperations.saveAll(esOwnerships, entityDefinition.writeIndexCoordinates).collectList().awaitFirst()
-    }
-
-    suspend fun deleteAll(ownershipIds: List<String>) {
-        val query = CriteriaQuery(Criteria(EsOwnership::ownershipId.name).`in`(ownershipIds))
-        esOperations.delete(
-            query, EsOwnership::class.java, entityDefinition.writeIndexCoordinates
-        ).awaitFirstOrNull()
-    }
-
-    override suspend fun refresh() {
-        val refreshRequest = RefreshRequest().indices(entityDefinition.aliasName, entityDefinition.writeAliasName)
-
-        try {
-            esOperations.execute { it.indices().refreshIndex(refreshRequest) }.awaitFirstOrNull()
-        } catch (e: IOException) {
-            throw RuntimeException(entityDefinition.writeAliasName + " refreshModifyIndex failed", e)
-        }
-    }
 }

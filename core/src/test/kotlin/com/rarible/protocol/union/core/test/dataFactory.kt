@@ -1,3 +1,4 @@
+import com.rarible.core.common.nowMillis
 import com.rarible.core.test.data.randomBigDecimal
 import com.rarible.core.test.data.randomBigInt
 import com.rarible.core.test.data.randomBoolean
@@ -39,7 +40,7 @@ import java.time.temporal.ChronoUnit
 
 fun randomOwnershipId(
     blockchain: BlockchainDto = BlockchainDto.values().random(),
-    itemIdValue: String = randomString(),
+    itemIdValue: String = "${randomString()}:${randomLong()}",
     owner: UnionAddress = randomUnionAddress(blockchain, randomString()),
 ) = OwnershipIdDto(
     blockchain = blockchain,
@@ -94,7 +95,7 @@ fun randomOrderId(
     value: String = randomString(),
 ) = OrderIdDto(blockchain, value)
 
-fun randomInstant() = Instant.ofEpochMilli(randomLong()).truncatedTo(ChronoUnit.MILLIS)
+fun randomInstant(): Instant = nowMillis().minusMillis(randomLong(14400000)).truncatedTo(ChronoUnit.MILLIS)
 
 fun randomAuction(
     id: AuctionIdDto = randomAuctionId(),
@@ -198,10 +199,16 @@ fun randomOrderData(): OrderDataDto = EthOrderDataRaribleV2DataV1Dto(emptyList()
 fun randomEsOwnership(
     id: OwnershipIdDto = randomOwnershipId(),
 ) = EsOwnership(
-    id.fullId(),
-    id.blockchain,
-    ItemIdDto(id.blockchain, id.itemIdValue).fullId(),
-    CollectionIdDto(id.blockchain, randomString()).fullId(),
-    randomBigInt().toString(),
-    randomInstant(),
+    ownershipId = id.fullId(),
+    blockchain = id.blockchain,
+    itemId = ItemIdDto(id.blockchain, id.itemIdValue).fullId(),
+    collection = CollectionIdDto(id.blockchain, randomString()).fullId(),
+    owner = id.owner.fullId(),
+    date = randomInstant(),
+    auctionId = randomString(),
+    auctionOwnershipId = OwnershipIdDto(
+        id.blockchain,
+        id.itemIdValue,
+        randomUnionAddress(id.blockchain, randomString())
+    ).fullId(),
 )

@@ -16,6 +16,7 @@ import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
+import org.elasticsearch.client.RestHighLevelClient
 import org.elasticsearch.client.indices.GetIndexRequest
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.RepeatedTest
@@ -37,6 +38,9 @@ internal class ElasticsearchBootstrapperTest {
     private lateinit var esNameResolver: EsNameResolver
 
     @Autowired
+    private lateinit var highLevelClient: RestHighLevelClient
+
+    @Autowired
     private lateinit var indexService: IndexService
 
     private lateinit var entityDefinitions: List<EntityDefinition>
@@ -54,12 +58,15 @@ internal class ElasticsearchBootstrapperTest {
             reindexSchedulingService,
             indexService,
             forceUpdate = emptySet(),
+            repositories = emptyList(),
+            highLevelClient
         )
 
         val elasticsearchTestBootstrapper = ElasticsearchTestBootstrapper(
             esNameResolver = esNameResolver,
             esOperations = reactiveElasticSearchOperations,
-            entityDefinitions = entityDefinitions
+            entityDefinitions = entityDefinitions,
+            repositories = emptyList()
         )
 
         elasticsearchTestBootstrapper.removeAllIndexes(entityDefinitionExtended)
@@ -113,7 +120,9 @@ internal class ElasticsearchBootstrapperTest {
             entityDefinitions = listOf(entityDefinitionNew),
             reindexSchedulingService,
             indexService,
-            forceUpdate = emptySet()
+            forceUpdate = emptySet(),
+            repositories = emptyList(),
+            highLevelClient
         )
         bootstrapperNew.bootstrap()
         indexInfo =

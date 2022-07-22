@@ -35,11 +35,11 @@ class ImmutablexItemConverter(
 
     private suspend fun convertInternal(asset: ImmutablexAsset, blockchain: BlockchainDto): UnionItem {
         val deleted = asset.user!! == "${Address.ZERO()}"
-        val creator = client.getMints(pageSize = 1, itemId = asset.itemId).result.first().user
+        val creator = client.getMints(pageSize = 1, itemId = asset.itemId).result.firstOrNull()?.user
         return UnionItem(
             id = ItemIdDto(BlockchainDto.IMMUTABLEX, contract = asset.tokenAddress, tokenId = asset.tokenId()),
             collection = CollectionIdDto(blockchain, asset.tokenAddress),
-            creators = listOf(CreatorDto(account = UnionAddress(blockchain.group(), creator), 1)),
+            creators = if (creator == null) emptyList() else listOf(CreatorDto(account = UnionAddress(blockchain.group(), creator), 1)),
             lazySupply = BigInteger.ZERO,
             deleted = deleted,
             supply = if (deleted) BigInteger.ZERO else BigInteger.ONE,

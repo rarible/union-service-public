@@ -6,7 +6,9 @@ import com.rarible.core.kafka.RaribleKafkaConsumer
 import com.rarible.core.kafka.RaribleKafkaProducer
 import com.rarible.core.test.data.randomString
 import com.rarible.dipdup.client.core.model.DipDupActivity
+import com.rarible.dipdup.client.core.model.DipDupCollection
 import com.rarible.dipdup.client.core.model.DipDupOrder
+import com.rarible.protocol.union.core.test.WaitAssert
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.CollectionEventDto
 import com.rarible.protocol.union.dto.CollectionUpdateEventDto
@@ -19,7 +21,7 @@ import com.rarible.protocol.union.dto.OwnershipDeleteEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.dto.OwnershipUpdateEventDto
 import com.rarible.protocol.union.enrichment.configuration.UnionMetaProperties
-import com.rarible.protocol.union.enrichment.meta.UnionMetaLoader
+import com.rarible.protocol.union.enrichment.meta.item.ItemMetaLoader
 import com.rarible.tzkt.client.OwnershipClient
 import com.rarible.tzkt.client.TokenClient
 import io.mockk.clearMocks
@@ -40,7 +42,7 @@ abstract class AbstractDipDupIntegrationTest {
 
     @Autowired
     @Qualifier("test.union.meta.loader")
-    lateinit var testUnionMetaLoader: UnionMetaLoader
+    lateinit var testUnionMetaLoader: ItemMetaLoader
 
     @Autowired
     @Qualifier("test.content.meta.receiver")
@@ -72,6 +74,9 @@ abstract class AbstractDipDupIntegrationTest {
 
     @Autowired
     lateinit var dipDupActivityProducer: RaribleKafkaProducer<DipDupActivity>
+
+    @Autowired
+    lateinit var dipDupCollectionProducer: RaribleKafkaProducer<DipDupCollection>
 
     @Autowired
     lateinit var collectionConsumer: RaribleKafkaConsumer<CollectionEventDto>
@@ -186,4 +191,6 @@ abstract class AbstractDipDupIntegrationTest {
             value = dto
         )
     }
+
+    suspend fun waitAssert(runnable: suspend () -> Unit) = WaitAssert.wait(runnable = runnable)
 }

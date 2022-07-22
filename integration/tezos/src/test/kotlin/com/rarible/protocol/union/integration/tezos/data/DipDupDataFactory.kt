@@ -1,10 +1,14 @@
 package com.rarible.protocol.union.integration.tezos.data
 
+import com.rarible.core.common.nowMillis
 import com.rarible.core.test.data.randomInt
+import com.rarible.core.test.data.randomLong
 import com.rarible.core.test.data.randomString
 import com.rarible.dipdup.client.core.model.Asset
 import com.rarible.dipdup.client.core.model.DipDupActivity
+import com.rarible.dipdup.client.core.model.DipDupCollection
 import com.rarible.dipdup.client.core.model.DipDupOrderListActivity
+import com.rarible.dipdup.client.core.model.EventType
 import com.rarible.dipdup.client.core.model.TezosPlatform
 import com.rarible.tzkt.model.ActivityType
 import com.rarible.tzkt.model.Alias
@@ -13,15 +17,15 @@ import com.rarible.tzkt.model.TokenInfo
 import com.rarible.tzkt.model.TypedTokenActivity
 import java.math.BigDecimal
 import java.math.BigInteger
-import java.time.Instant
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
-import java.util.*
+import java.util.UUID
 
 fun randomDipDupActivityOrderListEvent(activityId: String): DipDupActivity {
     return DipDupOrderListActivity(
         id = activityId,
-        date = Instant.now().atOffset(ZoneOffset.UTC),
+        operationCounter = randomInt(),
+        date = nowMillis().atOffset(ZoneOffset.UTC),
         reverted = false,
         hash = "",
         maker = UUID.randomUUID().toString(),
@@ -36,7 +40,6 @@ fun randomDipDupActivityOrderListEvent(activityId: String): DipDupActivity {
             assetType = Asset.XTZ(),
             assetValue = BigDecimal.ONE
         ),
-        price = BigDecimal.ONE,
         source = TezosPlatform.Rarible
     )
 }
@@ -59,7 +62,24 @@ fun randomTzktItemMintActivity(activityId: String): TypedTokenActivity {
                 address = randomString()
             ),
             amount = "1",
-            transactionId = randomInt()
+            transactionId = randomLong()
         )
+    )
+}
+
+fun randomDipDupCollectionEvent(collectionId: String): DipDupCollection {
+    return DipDupCollection(
+        id = UUID.randomUUID(),
+        network = "test",
+        eventId = randomString(),
+        collection = DipDupCollection.Collection(
+            id = collectionId,
+            owner = randomString(),
+            name = randomString(),
+            minters = emptyList(),
+            standard = "fa2",
+            symbol = null
+        ),
+        type = EventType.UPDATE
     )
 }

@@ -15,12 +15,26 @@ data class SearchReindexProperties(
     val activity: ActivityReindexProperties,
     val order: OrderReindexProperties,
     val collection: CollectionReindexProperties,
-    val ownership: OwnershipReindexProperties
+    val ownership: OwnershipReindexProperties,
+    val item: ItemReindexProperties,
 )
 
 sealed class EntityReindexProperties {
     abstract val enabled: Boolean
     abstract val blockchains: List<BlockchainReindexProperties>
+
+    fun activeBlockchains(): List<BlockchainDto> {
+        if (!this.enabled) return emptyList()
+
+        return blockchains.filter { it.enabled }.map { it.blockchain }
+    }
+
+    fun isBlockchainActive(blockchain: BlockchainDto): Boolean {
+        return this.enabled && this
+            .blockchains
+            .singleOrNull { it.blockchain == blockchain }
+            ?.enabled ?: false
+    }
 }
 
 data class ActivityReindexProperties(
@@ -34,6 +48,11 @@ data class OrderReindexProperties(
 ) : EntityReindexProperties()
 
 class CollectionReindexProperties(
+    override val enabled: Boolean,
+    override val blockchains: List<BlockchainReindexProperties>
+) : EntityReindexProperties()
+
+class ItemReindexProperties(
     override val enabled: Boolean,
     override val blockchains: List<BlockchainReindexProperties>
 ) : EntityReindexProperties()

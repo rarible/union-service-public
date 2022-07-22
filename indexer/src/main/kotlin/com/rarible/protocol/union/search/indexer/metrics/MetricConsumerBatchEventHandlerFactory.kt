@@ -1,12 +1,13 @@
 package com.rarible.protocol.union.search.indexer.metrics
 
+import com.rarible.core.common.nowMillis
 import com.rarible.core.daemon.sequential.ConsumerBatchEventHandler
 import com.rarible.protocol.union.core.model.elasticsearch.EsEntity
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.CollectionEventDto
 import com.rarible.protocol.union.dto.ItemEventDto
+import com.rarible.protocol.union.dto.OrderEventDto
 import org.springframework.stereotype.Component
-import java.time.Instant
 
 @Component
 class MetricConsumerBatchEventHandlerFactory(
@@ -27,8 +28,18 @@ class MetricConsumerBatchEventHandlerFactory(
             metricFactory = metricFactory,
             delegate = handler,
             esEntity = EsEntity.COLLECTION,
-            eventTimestamp = { Instant.now() },
+            eventTimestamp = { nowMillis() },
             eventBlockchain = { event -> event.collectionId.blockchain }
+        )
+    }
+
+    fun wrapOrder(handler: ConsumerBatchEventHandler<OrderEventDto>): ConsumerBatchEventHandler<OrderEventDto> {
+        return MetricsConsumerBatchEventHandlerWrapper(
+            metricFactory = metricFactory,
+            delegate = handler,
+            esEntity = EsEntity.COLLECTION,
+            eventTimestamp = { nowMillis() },
+            eventBlockchain = { event -> event.orderId.blockchain }
         )
     }
 
@@ -37,7 +48,7 @@ class MetricConsumerBatchEventHandlerFactory(
             metricFactory = metricFactory,
             delegate = handler,
             esEntity = EsEntity.ITEM,
-            eventTimestamp = { Instant.now() },
+            eventTimestamp = { nowMillis() },
             eventBlockchain = { event -> event.itemId.blockchain }
         )
     }

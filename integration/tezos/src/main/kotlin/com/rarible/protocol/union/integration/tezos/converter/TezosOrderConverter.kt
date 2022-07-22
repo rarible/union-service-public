@@ -15,6 +15,7 @@ import com.rarible.protocol.union.dto.PayoutDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.TezosOrderDataRaribleV2DataV1Dto
 import com.rarible.protocol.union.dto.continuation.page.Slice
+import com.rarible.protocol.union.integration.tezos.converter.TezosConverter.maker
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.time.Instant
@@ -40,7 +41,7 @@ class TezosOrderConverter(
         val make = TezosConverter.convert(order.make, blockchain)
         val take = TezosConverter.convert(order.take, blockchain)
 
-        val maker = UnionAddressConverter.convert(blockchain, order.maker)
+        val maker = maker(blockchain, order.maker)
         val taker = order.taker?.let { UnionAddressConverter.convert(blockchain, it) }
 
         // For BID (make = currency, take - NFT) we're calculating prices for taker

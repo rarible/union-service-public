@@ -70,7 +70,7 @@ class DipDupActivityConverter(
                 OrderListActivityDto(
                     id = activityId,
                     date = date,
-                    price = activity.price,
+                    price = activity.take.assetValue,
                     priceUsd = currencyService.toUsd(blockchain, take.type, make.value),
                     source = convert(activity.source),
                     hash = activity.hash,
@@ -110,7 +110,7 @@ class DipDupActivityConverter(
                     nft = nft,
                     payment = payment,
                     buyer = UnionAddressConverter.convert(blockchain, activity.buyer),
-                    price = activity.price,
+                    price = activity.payment.assetValue,
                     priceUsd = currencyService.toUsd(blockchain, payment.type, payment.value),
                     type = OrderMatchSellDto.Type.SELL
                 )
@@ -163,7 +163,6 @@ class DipDupActivityConverter(
 
     private fun convertValue(bd: BigDecimal, id: ActivityIdDto): BigInteger {
         if (bd.stripTrailingZeros().scale() > 0) {
-//            throw UnionDataFormatException("Value: $bd must be BigInteger for token activity: $id")
             logger.warn("Value: $bd must be BigInteger for token activity: $id, tring to multiply by 1_000_000")
             return bd.multiply(BigDecimal(1_000_000)).toBigInteger()
         } else return bd.toBigInteger()
@@ -175,6 +174,8 @@ class DipDupActivityConverter(
             TezosPlatform.Hen -> OrderActivitySourceDto.HEN
             TezosPlatform.Objkt -> OrderActivitySourceDto.OBJKT
             TezosPlatform.Objkt_v2 -> OrderActivitySourceDto.OBJKT
+            TezosPlatform.RARIBLE_V1 -> OrderActivitySourceDto.RARIBLE
+            TezosPlatform.RARIBLE_V2 -> OrderActivitySourceDto.RARIBLE
         }
     }
 }

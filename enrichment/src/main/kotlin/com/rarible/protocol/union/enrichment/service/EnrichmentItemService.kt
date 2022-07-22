@@ -17,7 +17,7 @@ import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.enrichment.converter.EnrichedItemConverter
-import com.rarible.protocol.union.enrichment.meta.UnionMetaService
+import com.rarible.protocol.union.enrichment.meta.content.ContentMetaService
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
@@ -38,7 +38,8 @@ class EnrichmentItemService(
     private val itemRepository: ItemRepository,
     private val enrichmentOrderService: EnrichmentOrderService,
     private val enrichmentAuctionService: EnrichmentAuctionService,
-    private val unionMetaService: UnionMetaService,
+    private val itemMetaService: ItemMetaService,
+    private val contentMetaService: ContentMetaService,
     private val originService: OriginService
 ) {
 
@@ -104,7 +105,8 @@ class EnrichmentItemService(
         orders: Map<OrderIdDto, OrderDto> = emptyMap(),
         auctions: Map<AuctionIdDto, AuctionDto> = emptyMap(),
         meta: Map<ItemIdDto, UnionMeta> = emptyMap(),
-        loadMetaSynchronously: Boolean = false
+        syncMetaDownload: Boolean = false,
+        metaPipeline: String = "default" // TODO PT-49
     ) = coroutineScope {
 
         require(shortItem != null || item != null)
@@ -115,15 +117,10 @@ class EnrichmentItemService(
         val metaHint = meta[itemId]
         val itemMeta = if (metaHint != null) {
             CompletableDeferred(metaHint)
-        } else if (item?.meta != null && itemId.value.contains(USE_META_FOR_TOKEN)) {
-            CompletableDeferred(item.meta)
         } else {
+            val sync = (syncMetaDownload || item?.loadMetaSynchronously == true)
             withSpanAsync("fetchMeta", spanType = SpanType.CACHE) {
-                if (loadMetaSynchronously || item?.loadMetaSynchronously == true) {
-                    unionMetaService.getAvailableMetaOrLoadSynchronously(itemId, synchronous = true)
-                } else {
-                    unionMetaService.getAvailableMetaOrScheduleLoading(itemId)
-                }
+                itemMetaService.get(itemId, sync, metaPipeline)
             }
         }
         val bestOrders = enrichmentOrderService.fetchMissingOrders(
@@ -139,7 +136,7 @@ class EnrichmentItemService(
             item = fetchedItem.await(),
             shortItem = shortItem,
             // replacing inner IPFS urls with public urls
-            meta = unionMetaService.exposePublicIpfsUrls(itemMeta.await()),
+            meta = contentMetaService.exposePublicUrls(itemMeta.await(), itemId),
             orders = bestOrders,
             auctions = auctionsData.await()
         )
@@ -153,9 +150,4 @@ class EnrichmentItemService(
         block: suspend () -> T
     ): Deferred<T> = async { withSpan(name = spanName, type = spanType, body = block) }
 
-    private companion object {
-
-        //TODO: Need remove
-        const val USE_META_FOR_TOKEN = "0x629cdec6acc980ebeebea9e5003bcd44db9fc5ce"
-    }
 }

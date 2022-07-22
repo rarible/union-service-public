@@ -2,24 +2,14 @@ package com.rarible.protocol.union.integration.ethereum.converter
 
 import com.rarible.core.common.nowMillis
 import com.rarible.protocol.dto.NftItemDto
-import com.rarible.protocol.dto.NftItemMetaDto
 import com.rarible.protocol.dto.NftItemsDto
-import com.rarible.protocol.dto.NftMediaDto
-import com.rarible.protocol.dto.NftMediaMetaDto
 import com.rarible.protocol.union.core.converter.ContractAddressConverter
-import com.rarible.protocol.union.core.model.UnionImageProperties
 import com.rarible.protocol.union.core.model.UnionItem
-import com.rarible.protocol.union.core.model.UnionMeta
-import com.rarible.protocol.union.core.model.UnionMetaContent
-import com.rarible.protocol.union.core.model.UnionMetaContentProperties
-import com.rarible.protocol.union.core.model.UnionVideoProperties
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.ItemRoyaltyDto
 import com.rarible.protocol.union.dto.ItemTransferDto
-import com.rarible.protocol.union.dto.MetaAttributeDto
-import com.rarible.protocol.union.dto.MetaContentDto
 import com.rarible.protocol.union.dto.continuation.page.Page
 import org.slf4j.LoggerFactory
 
@@ -45,11 +35,10 @@ object EthItemConverter {
                 blockchain = blockchain
             ),
             collection = CollectionIdDto(blockchain, contract), // For ETH collection is a contract value
-            mintedAt = item.mintedAt ?: nowMillis(),
+            mintedAt = item.mintedAt ?: item.lastUpdatedAt ?: nowMillis(), // TODO entire reduce required on Eth
             lastUpdatedAt = item.lastUpdatedAt ?: nowMillis(),
             supply = item.supply,
-            // TODO: see CHARLIE-158: at some point, we will ignore meta from blockchains, and always load meta on union service.
-            meta = item.meta?.let { convert(it) },
+            meta = null, // Eth won't send us meta anymore, should be fetched via API
             deleted = item.deleted ?: false,
             creators = item.creators.map { EthConverter.convertToCreator(it, blockchain) },
             lazySupply = item.lazySupply,
@@ -85,54 +74,6 @@ object EthItemConverter {
             date = source.date,
             royalties = source.royalties.map { EthConverter.convertToRoyalty(it, blockchain) }
         )
-    }
-
-    fun convert(source: NftItemMetaDto): UnionMeta {
-        return UnionMeta(
-            name = source.name,
-            description = source.description,
-            attributes = source.attributes.orEmpty().map {
-                MetaAttributeDto(
-                    key = it.key,
-                    value = it.value,
-                    type = it.type,
-                    format = it.format
-                )
-            },
-            content = convertMetaContent(source.image) { imageMetaDto ->
-                UnionImageProperties(
-                    mimeType = imageMetaDto?.type,
-                    width = imageMetaDto?.width,
-                    height = imageMetaDto?.height,
-                    size = null // TODO ETHEREUM - get from ETH OpenAPI.
-                )
-            } + convertMetaContent(source.animation) { videoMetaDto ->
-                UnionVideoProperties(
-                    mimeType = videoMetaDto?.type,
-                    width = videoMetaDto?.width,
-                    height = videoMetaDto?.height,
-                    size = null // TODO ETHEREUM - get from ETH OpenAPI.
-                )
-            },
-            // TODO ETHEREUM - implement it
-            restrictions = emptyList()
-        )
-    }
-
-    private fun convertMetaContent(
-        source: NftMediaDto?,
-        converter: (meta: NftMediaMetaDto?) -> UnionMetaContentProperties
-    ): List<UnionMetaContent> {
-        source ?: return emptyList()
-        return source.url.map { (representationType, url) ->
-            val meta = source.meta[representationType]
-            UnionMetaContent(
-                url = url,
-                // TODO UNION handle unknown representation
-                representation = MetaContentDto.Representation.valueOf(representationType),
-                properties = converter(meta)
-            )
-        }
     }
 
 }

@@ -37,12 +37,50 @@ handler:
     enabled: ${consul.indexer.activity.enabled:true}
   collection:
     enabled: ${consul.indexer.collection.enabled:true}
+  item:
+    enabled: ${consul.indexer.item.enabled:false}
   order:
     enabled: ${consul.indexer.order.enabled:false}
   ownership:
     enabled: ${consul.indexer.ownership.enabled:false}
 
-listener:
+indexer:
   consumer:
     broker-replica-set: ${kafka.hosts}
-    worker-count: 4
+    worker-count: 3
+
+integration:
+  ethereum:
+    enabled: ${consul.ethereum.enabled:true}
+    auctionContracts: ${consul.ethereum.auctionContracts:}
+  polygon:
+    enabled: ${consul.polygon.enabled:true}
+    auctionContracts: ${consul.polygon.auctionContracts:}
+  flow:
+    enabled: ${consul.flow.enabled:true}
+    auctionContracts: ${consul.flow.auctionContracts:}
+  tezos:
+    enabled: ${consul.tezos.enabled:true}
+    dipdup:
+      enabled: ${consul.tezos.dipdup.enabled:false}
+      dipdupUrl: ${consul.tezos.dipdup.dipdupUrl:}
+      tzktUrl: ${consul.tezos.dipdup.tzktUrl:}
+    client:
+      url: ${consul.tezos.api.baseUrl:}
+    pg:
+      host: ${consul.tezos.pg.host:}
+      port: ${consul.tezos.pg.port:}
+      user: ${consul.tezos.pg.user:}
+      password: ${consul.tezos.pg.password:}
+      database: ${consul.tezos.pg.database:}
+    auctionContracts: ${consul.tezos.auctionContracts:}
+  solana:
+    enabled: ${consul.solana.enabled:false}
+  immutablex:
+    enabled: ${consul.immutablex.enabled:false}
+    client:
+      url: ${consul.immutablex.api.baseUrl:}
+    apiKey: ${consul.immutablex.api.key:}
+common:
+  producer:
+    broker-replica-set: ${kafka.hosts}

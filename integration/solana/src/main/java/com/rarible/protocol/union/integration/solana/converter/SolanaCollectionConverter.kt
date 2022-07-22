@@ -26,7 +26,10 @@ object SolanaCollectionConverter {
             name = source.name,
             symbol = source.symbol,
             owner = source.owner?.let { UnionAddressConverter.convert(blockchain, it) },
-            features = source.features.map { convert(it) },
+            features = ArrayList<CollectionDto.Features>().apply {
+                add(CollectionDto.Features.SECONDARY_SALE_FEES)
+                addAll(source.features.map { convert(it) })
+            },
             minters = source.creators?.map { UnionAddressConverter.convert(blockchain, it) } ?: emptyList(),
             meta = source.meta?.let { convert(it) }
         )

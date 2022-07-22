@@ -5,21 +5,28 @@ import com.rarible.protocol.dto.NftItemIdsDto
 import com.rarible.protocol.union.api.client.ItemControllerApi
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
+import com.rarible.protocol.union.core.converter.EsOwnershipConverter
+import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.es.ElasticsearchTestBootstrapper
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ItemIdDto
+import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.continuation.page.PageSize
+import com.rarible.protocol.union.dto.parser.OwnershipIdParser
 import com.rarible.protocol.union.enrichment.converter.ShortItemConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.repository.search.EsItemRepository
+import com.rarible.protocol.union.enrichment.repository.search.EsOwnershipRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.test.data.randomEsItem
 import com.rarible.protocol.union.integration.ethereum.converter.EthItemConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
+import com.rarible.protocol.union.integration.ethereum.converter.EthOwnershipConverter
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAddress
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthNftItemDto
+import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthV2OrderDto
 import io.mockk.coEvery
 import kotlinx.coroutines.FlowPreview
@@ -31,6 +38,7 @@ import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.TestPropertySource
+import randomEsOwnership
 import reactor.kotlin.core.publisher.toFlux
 import scalether.domain.Address
 import java.math.BigInteger
@@ -51,10 +59,16 @@ class ItemsControllerElasticFt : AbstractIntegrationTest() {
     private lateinit var repository: EsItemRepository
 
     @Autowired
+    private lateinit var esOwnershipRepository: EsOwnershipRepository
+
+    @Autowired
     lateinit var ethOrderConverter: EthOrderConverter
 
     @Autowired
     lateinit var enrichmentItemService: EnrichmentItemService
+
+    @Autowired
+    private lateinit var ownershipRepository: EsOwnershipRepository
 
     @Autowired
     private lateinit var elasticsearchTestBootstrapper: ElasticsearchTestBootstrapper
@@ -74,7 +88,7 @@ class ItemsControllerElasticFt : AbstractIntegrationTest() {
             BlockchainDto.SOLANA,
             BlockchainDto.TEZOS
         )
-        val now = Instant.now()
+        val now = nowMillis()
         val contract = Address.ONE().toString()
         val ethItemId1 = ItemIdDto(BlockchainDto.ETHEREUM, contract, BigInteger.valueOf(1))
         val ethItem1 = randomEthNftItemDto(ethItemId1)
@@ -179,9 +193,9 @@ class ItemsControllerElasticFt : AbstractIntegrationTest() {
             testEthereumItemApi.getNftItemsByIds(
                 NftItemIdsDto(
                     listOf(
-                        ethEsItem1.itemId,
-                        ethEsItem2.itemId,
-                        ethEsItem3.itemId
+                        ethItem1.id,
+                        ethItem2.id,
+                        ethItem3.id
                     )
                 )
             )
@@ -191,9 +205,9 @@ class ItemsControllerElasticFt : AbstractIntegrationTest() {
             testEthereumItemApi.getNftItemsByIds(
                 NftItemIdsDto(
                     listOf(
-                        ethEsItem4.itemId,
-                        ethEsItem5.itemId,
-                        ethEsItem6.itemId
+                        ethItem4.id,
+                        ethItem5.id,
+                        ethItem6.id
                     )
                 )
             )
@@ -203,9 +217,9 @@ class ItemsControllerElasticFt : AbstractIntegrationTest() {
             testPolygonItemApi.getNftItemsByIds(
                 NftItemIdsDto(
                     listOf(
-                        polygonEsItem1.itemId,
-                        polygonEsItem2.itemId,
-                        polygonEsItem3.itemId
+                        polygonItem1.id,
+                        polygonItem2.id,
+                        polygonItem3.id,
                     )
                 )
             )
@@ -215,15 +229,15 @@ class ItemsControllerElasticFt : AbstractIntegrationTest() {
             testPolygonItemApi.getNftItemsByIds(
                 NftItemIdsDto(
                     listOf(
-                        polygonEsItem4.itemId,
-                        polygonEsItem5.itemId,
-                        polygonEsItem6.itemId
+                        polygonItem4.id,
+                        polygonItem5.id,
+                        polygonItem6.id,
                     )
                 )
             )
         } returns listOf(polygonItem4, polygonItem5, polygonItem6).toFlux()
 
-        val showDeleted = true
+        val showDeleted: Boolean? = null
         val size = 3
         val lastUpdatedFrom = nowMillis().minusSeconds(120).toEpochMilli()
         val lastUpdatedTo = nowMillis().plusSeconds(120).toEpochMilli()
@@ -289,7 +303,7 @@ class ItemsControllerElasticFt : AbstractIntegrationTest() {
         ).awaitFirst()
 
         assertThat(result.items).hasSize(0)
-        assertThat(result.continuation).isEqualTo("")
+        assertThat(result.continuation).isEqualTo("null")
     }
 
     @Test
@@ -304,7 +318,7 @@ class ItemsControllerElasticFt : AbstractIntegrationTest() {
         )
         repository.save(ethEsItem1)
         val ethItemId = randomEthItemId()
-        val ethItem = randomEthNftItemDto(ethItemId)
+        val ethItem = randomEthNftItemDto(ethItemId1)
         val ethUnionItem = EthItemConverter.convert(ethItem, ethItemId.blockchain)
         val ethOrder = randomEthV2OrderDto(ethItemId)
         val ethUnionOrder = ethOrderConverter.convert(ethOrder, ethItemId.blockchain)
@@ -314,7 +328,7 @@ class ItemsControllerElasticFt : AbstractIntegrationTest() {
 
         coEvery {
             testEthereumItemApi.getNftItemsByIds(
-                NftItemIdsDto(listOf(ethItemId1.fullId()))
+                NftItemIdsDto(listOf(ethItemId1.value))
             )
         } returns listOf(ethItem).toFlux()
 
@@ -326,7 +340,7 @@ class ItemsControllerElasticFt : AbstractIntegrationTest() {
         assertThat(items.items).hasSize(1)
         val result = items.items[0]
 
-        assertThat(result.id).isEqualTo(ethItemId)
+        assertThat(result.id.value).isEqualTo(ethItem.id)
         assertThat(result.id.blockchain).isEqualTo(BlockchainDto.ETHEREUM)
         assertThat(result.bestBidOrder!!.id).isEqualTo(ethUnionOrder.id)
     }
@@ -335,14 +349,13 @@ class ItemsControllerElasticFt : AbstractIntegrationTest() {
     @Disabled("In another PR it will be fixed")
     fun `get items by owner - ethereum, all enriched`() = runBlocking<Unit> {
         val ethCollectionId = CollectionIdDto(BlockchainDto.ETHEREUM, randomEthAddress())
-        val owner = CollectionIdDto(BlockchainDto.ETHEREUM, randomEthAddress())
         // Enriched item
         val ethItemId1 = ItemIdDto(BlockchainDto.ETHEREUM, ethCollectionId.value, BigInteger.valueOf(1))
-        val ethEsItem1 = randomEsItem().copy(
+        val esOwnership = randomEsOwnership().copy(
             itemId = ethItemId1.toString(),
             blockchain = BlockchainDto.ETHEREUM
         )
-        repository.save(ethEsItem1)
+        esOwnershipRepository.saveAll(listOf(esOwnership))
         val ethItemId = randomEthItemId()
         val ethItem = randomEthNftItemDto(ethItemId)
         val ethUnionItem = EthItemConverter.convert(ethItem, ethItemId.blockchain)
@@ -360,7 +373,7 @@ class ItemsControllerElasticFt : AbstractIntegrationTest() {
 
         ethereumOrderControllerApiMock.mockGetByIds(ethOrder)
         val items = itemControllerClient.getItemsByOwner(
-            owner.fullId(), listOf(BlockchainDto.ETHEREUM), continuation, size
+            esOwnership.owner, listOf(BlockchainDto.ETHEREUM), continuation, size
         ).awaitFirst()
 
         assertThat(items.items).hasSize(1)
@@ -373,6 +386,7 @@ class ItemsControllerElasticFt : AbstractIntegrationTest() {
 
     @Test
     fun `get items by creator - ethereum, all enriched`() = runBlocking<Unit> {
+        // given
         val ethCollectionId = CollectionIdDto(BlockchainDto.ETHEREUM, randomEthAddress())
         val creatorId = CollectionIdDto(BlockchainDto.ETHEREUM, randomEthAddress())
         // Enriched item
@@ -384,7 +398,7 @@ class ItemsControllerElasticFt : AbstractIntegrationTest() {
         )
         repository.save(ethEsItem1)
         val ethItemId = randomEthItemId()
-        val ethItem = randomEthNftItemDto(ethItemId)
+        val ethItem = randomEthNftItemDto(ethItemId1)
         val ethUnionItem = EthItemConverter.convert(ethItem, ethItemId.blockchain)
         val ethOrder = randomEthV2OrderDto(ethItemId)
         val ethUnionOrder = ethOrderConverter.convert(ethOrder, ethItemId.blockchain)
@@ -394,10 +408,12 @@ class ItemsControllerElasticFt : AbstractIntegrationTest() {
 
         coEvery {
             testEthereumItemApi.getNftItemsByIds(
-                NftItemIdsDto(listOf(ethItemId1.fullId()))
+                NftItemIdsDto(listOf(ethItemId1.value))
             )
         } returns listOf(ethItem).toFlux()
         ethereumOrderControllerApiMock.mockGetByIds(ethOrder)
+
+        // when
         val items = itemControllerClient.getItemsByCreator(
             creatorId.fullId(), listOf(BlockchainDto.ETHEREUM), continuation, size
         ).awaitFirst()
@@ -405,8 +421,47 @@ class ItemsControllerElasticFt : AbstractIntegrationTest() {
         assertThat(items.items).hasSize(1)
         val result = items.items[0]
 
-        assertThat(result.id).isEqualTo(ethItemId)
+        assertThat(result.id).isEqualTo(ethItemId1)
         assertThat(result.id.blockchain).isEqualTo(BlockchainDto.ETHEREUM)
         assertThat(result.bestBidOrder!!.id).isEqualTo(ethUnionOrder.id)
+    }
+
+    @Test
+    fun `get items by owner with ownerships - ethereum`() = runBlocking<Unit> {
+        // given
+        val ethItemId = randomEthItemId()
+        val ethItem = randomEthNftItemDto(ethItemId)
+
+        val ethOwnership = randomEthOwnershipDto(ethItemId).copy(value = BigInteger.ONE)
+        val ethOwnerId = UnionAddressConverter.convert(BlockchainDto.ETHEREUM, ethOwnership.owner.prefixed())
+        val ethOwnershipId = OwnershipIdDto(BlockchainDto.ETHEREUM, ethItemId.value, ethOwnerId)
+        val ethUnionOwnership = EthOwnershipConverter.convert(ethOwnership, ethItemId.blockchain)
+        val esOwnership = EsOwnershipConverter.convert(ethUnionOwnership)
+        ethereumOwnershipControllerApiMock.mockGetNftOwnershipByIds(
+            listOf(OwnershipIdParser.parseFull(esOwnership.ownershipId).value),
+            listOf(ethOwnership)
+        )
+        esOwnershipRepository.save(esOwnership)
+        val esItem = randomEsItem().copy(
+            itemId = ethItemId.toString(),
+            blockchain = BlockchainDto.ETHEREUM
+        )
+        repository.save(esItem)
+        coEvery {
+            testEthereumItemApi.getNftItemsByIds(
+                NftItemIdsDto(listOf(ethItemId.value))
+            )
+        } returns listOf(ethItem).toFlux()
+
+        // when
+        val actual = itemControllerClient.getItemsByOwnerWithOwnership(
+            ethOwnerId.fullId(), continuation, size
+        ).awaitFirst()
+
+        // then
+        assertThat(actual.items).hasSize(1)
+        assertThat(actual.continuation).isNotNull()
+        assertThat(actual.items.first().item.id).isEqualTo(ethItemId)
+        assertThat(actual.items.first().ownership.id).isEqualTo(ethOwnershipId)
     }
 }

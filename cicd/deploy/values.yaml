@@ -13,12 +13,12 @@ protocol-union-api:
     jvm:
       xmx_megabytes: 384
       max_direct_memory_megabytes: 32
+  service:
+    enabled: true
   updateConfig:
     order: start-first
-  networks:
-    common:
-    - '{{ include "service.appEnv" $ }}-backend'
-    - proxy-staging
+  podAnnotations:
+    fluentbit.io/parser: logfmt
 
 protocol-union-listener:
   image:
@@ -35,9 +35,8 @@ protocol-union-listener:
     jvm:
       xmx_megabytes: 1024
       max_direct_memory_megabytes: 128
-  networks:
-    common:
-    - '{{ include "service.appEnv" $ }}-backend'
+  podAnnotations:
+    fluentbit.io/parser: logfmt
 
 protocol-union-meta-loader:
   image:
@@ -54,9 +53,8 @@ protocol-union-meta-loader:
     jvm:
       xmx_megabytes: 1024
       max_direct_memory_megabytes: 256
-  networks:
-    common:
-      - '{{ include "service.appEnv" $ }}-backend'
+  podAnnotations:
+    fluentbit.io/parser: logfmt
 
 protocol-union-indexer:
   enabled: false
@@ -73,26 +71,24 @@ protocol-union-indexer:
   resources:
     jvm:
       xmx_megabytes: 1024
-      max_direct_memory_megabytes: 512
-  networks:
-    common:
-      - '{{ include "service.appEnv" $ }}-backend'
+      max_direct_memory_megabytes: 128
+  podAnnotations:
+    fluentbit.io/parser: logfmt
 
 protocol-union-worker:
   enabled: false
   image:
     repository: union-service-worker
   environments:
-    APPLICATION_ENVIRONMENT: '{{ include "service.appEnv" $ }}'
-    CONSUL_ROOT_PATH: '{{ include "service.appEnv" $ }}/protocol/union'
-    SPRING_PROFILES_ACTIVE: 'consul,{{ include "service.appEnv" $ }}'
-    SERVICE_PREFIX: '{{ include "service.appEnv" $ }}-union'
+    APPLICATION_ENVIRONMENT: '{{ include "service.env" $ }}'
+    CONSUL_ROOT_PATH: '{{ include "service.env" $ }}/protocol/union'
+    SPRING_PROFILES_ACTIVE: 'consul,{{ include "service.env" $ }}'
+    SERVICE_PREFIX: '{{ include "service.env" $ }}-union'
   nodeSelector:
     node.labels.rarible.service: true
   resources:
     jvm:
       xmx_megabytes: 1024
-      max_direct_memory_megabytes: 512
-  networks:
-    common:
-      - '{{ include "service.appEnv" $ }}-backend'
+      max_direct_memory_megabytes: 128
+  podAnnotations:
+    fluentbit.io/parser: logfmt

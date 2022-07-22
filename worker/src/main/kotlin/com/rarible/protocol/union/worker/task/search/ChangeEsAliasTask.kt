@@ -7,7 +7,7 @@ import com.rarible.core.task.TaskRepository
 import com.rarible.core.task.TaskStatus
 import com.rarible.protocol.union.core.elasticsearch.IndexService
 import com.rarible.protocol.union.core.model.elasticsearch.EntityDefinitionExtended
-import com.rarible.protocol.union.enrichment.repository.search.EsRepository
+import com.rarible.protocol.union.core.elasticsearch.EsRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.reactor.awaitSingleOrNull
@@ -24,13 +24,15 @@ open class ChangeEsAliasTask(
     override suspend fun isAbleToRun(param: String): Boolean {
         val parameter = paramFactory.parse<ChangeAliasTaskParam>(param)
         val tasks = parameter.tasks.mapAsync { taskParam ->
-            taskRepository.findByTypeAndParam(
+            val task = taskRepository.findByTypeAndParam(
                 entityDefinition.reindexTask,
-                paramFactory.toString(taskParam)
+                taskParam
             ).awaitSingleOrNull()
-        }.filterNotNull()
+            logger.info("Search result of ${entityDefinition.reindexTask}, $taskParam = $task")
+            task
+        }
 
-        return tasks.all { it.lastStatus == TaskStatus.COMPLETED }
+        return tasks.all { it?.lastStatus == TaskStatus.COMPLETED }
     }
 
     /**

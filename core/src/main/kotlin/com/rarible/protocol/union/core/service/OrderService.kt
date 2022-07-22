@@ -55,7 +55,7 @@ interface OrderService : BlockchainService {
 
     suspend fun getOrderBidsByMaker(
         platform: PlatformDto?,
-        maker: String,
+        maker: List<String>,
         origin: String?,
         status: List<OrderStatusDto>?,
         start: Long?,
@@ -122,7 +122,7 @@ interface OrderService : BlockchainService {
 
     suspend fun getSellOrdersByMaker(
         platform: PlatformDto?,
-        maker: String,
+        maker: List<String>,
         origin: String?,
         status: List<OrderStatusDto>?,
         continuation: String?,

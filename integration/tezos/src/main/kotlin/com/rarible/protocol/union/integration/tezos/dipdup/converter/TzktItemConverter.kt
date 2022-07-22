@@ -68,6 +68,7 @@ object TzktItemConverter {
             name = meta.name,
             description = meta.description,
             attributes = meta.attributes.map(::convert),
+            tags = meta.tags,
             content = meta.content.map(::convert),
             // TODO TEZOS - implement it
             restrictions = listOf()
@@ -81,7 +82,7 @@ object TzktItemConverter {
             TokenMeta.Representation.PREVIEW -> MetaContentDto.Representation.PREVIEW
         }
         return UnionMetaContent(
-            url = content.uri,
+            url = content.uri ?: "", // sometimes people don't fill meta properly
             representation = representation,
             properties = null
         )
@@ -111,7 +112,7 @@ object TzktItemConverter {
             deleted = isDeleted(item),
             lastUpdatedAt = item.lastTime!!.toInstant(),
             lazySupply = BigInteger.ZERO,
-            meta = null,
+            meta = item.meta?.let { convertInternal(it) },
             mintedAt = item.firstTime!!.toInstant(),
             supply = BigInteger(item.totalSupply),
             pending = emptyList() // In Union we won't use this field for Tezos

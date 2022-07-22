@@ -11,6 +11,7 @@ import com.rarible.protocol.nft.api.client.NftItemControllerApi
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthItemConverter
+import com.rarible.protocol.union.integration.ethereum.converter.EthMetaConverter
 import com.rarible.protocol.union.integration.ethereum.data.randomAddressString
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemMeta
@@ -88,7 +89,7 @@ class EthItemServiceTest {
         val itemId = randomEthItemId()
         val meta = randomEthItemMeta()
 
-        val expected = EthItemConverter.convert(meta)
+        val expected = EthMetaConverter.convert(meta)
 
         coEvery { itemControllerApi.getNftItemMetaById(itemId.value) } returns meta.toMono()
 

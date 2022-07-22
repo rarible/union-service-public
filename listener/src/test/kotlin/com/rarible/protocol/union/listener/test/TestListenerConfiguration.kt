@@ -6,6 +6,7 @@ import com.rarible.core.kafka.RaribleKafkaConsumer
 import com.rarible.core.kafka.RaribleKafkaProducer
 import com.rarible.core.test.ext.KafkaTestExtension.Companion.kafkaContainer
 import com.rarible.dipdup.client.core.model.DipDupActivity
+import com.rarible.dipdup.client.core.model.DipDupCollection
 import com.rarible.dipdup.client.core.model.DipDupOrder
 import com.rarible.dipdup.listener.config.DipDupTopicProvider
 import com.rarible.protocol.currency.api.client.CurrencyControllerApi
@@ -43,7 +44,7 @@ import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.OrderEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.dto.UnionEventTopicProvider
-import com.rarible.protocol.union.enrichment.meta.UnionMetaLoader
+import com.rarible.protocol.union.enrichment.meta.item.ItemMetaLoader
 
 import com.rarible.protocol.union.subscriber.UnionKafkaJsonDeserializer
 import com.rarible.protocol.union.subscriber.UnionKafkaJsonSerializer
@@ -68,7 +69,7 @@ class TestListenerConfiguration {
     @Bean
     @Primary
     @Qualifier("test.union.meta.loader")
-    fun testUnionMetaLoader(): UnionMetaLoader = mockk()
+    fun testUnionMetaLoader(): ItemMetaLoader = mockk()
 
     @Bean
     @Primary
@@ -186,7 +187,7 @@ class TestListenerConfiguration {
     @Bean
     fun testDipDupOrderEventProducer(): RaribleKafkaProducer<DipDupOrder> {
         return RaribleKafkaProducer(
-            clientId = "test.union.ethereum.order",
+            clientId = "test.union.tezos.order",
             valueSerializerClass = UnionKafkaJsonSerializer::class.java,
             valueClass = DipDupOrder::class.java,
             defaultTopic = "${DipDupTopicProvider.ORDER}_",
@@ -197,10 +198,21 @@ class TestListenerConfiguration {
     @Bean
     fun testDipDupActivityEventProducer(): RaribleKafkaProducer<DipDupActivity> {
         return RaribleKafkaProducer(
-            clientId = "test.union.ethereum.activity",
+            clientId = "test.union.tezos.activity",
             valueSerializerClass = UnionKafkaJsonSerializer::class.java,
             valueClass = DipDupActivity::class.java,
             defaultTopic = "${DipDupTopicProvider.ACTIVITY}_",
+            bootstrapServers = kafkaContainer.kafkaBoostrapServers()
+        )
+    }
+
+    @Bean
+    fun testDipDupCollectionEventProducer(): RaribleKafkaProducer<DipDupCollection> {
+        return RaribleKafkaProducer(
+            clientId = "test.union.tezos.collection",
+            valueSerializerClass = UnionKafkaJsonSerializer::class.java,
+            valueClass = DipDupCollection::class.java,
+            defaultTopic = "${DipDupTopicProvider.COLLECTION}_",
             bootstrapServers = kafkaContainer.kafkaBoostrapServers()
         )
     }
@@ -381,4 +393,8 @@ class TestListenerConfiguration {
     @Bean
     @Primary
     fun testTezosOwnershipClient(): com.rarible.tzkt.client.OwnershipClient = mockk()
+
+    @Bean
+    @Primary
+    fun testTezosCollectionClient(): com.rarible.tzkt.client.CollectionClient = mockk()
 }

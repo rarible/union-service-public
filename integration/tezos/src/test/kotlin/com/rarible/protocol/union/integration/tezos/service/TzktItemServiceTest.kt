@@ -3,6 +3,8 @@ package com.rarible.protocol.union.integration.tezos.service
 import com.rarible.protocol.tezos.api.client.NftItemControllerApi
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
+import com.rarible.protocol.union.integration.tezos.dipdup.DipDupIntegrationProperties
+import com.rarible.protocol.union.integration.tezos.dipdup.DipDupIntegrationProperties.TzktProperties
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktItemServiceImpl
 import com.rarible.tzkt.client.TokenClient
 import com.rarible.tzkt.model.Alias
@@ -10,21 +12,25 @@ import com.rarible.tzkt.model.Page
 import com.rarible.tzkt.model.Token
 import io.mockk.clearMocks
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.mockk
-import kotlinx.coroutines.runBlocking
-import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
 import java.time.Instant.now
 import java.time.ZoneOffset
+import kotlinx.coroutines.runBlocking
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class TzktItemServiceTest {
 
     private val itemControllerApi: NftItemControllerApi = mockk()
     private val tokenClient: TokenClient = mockk()
+    private val dipdupProps: DipDupIntegrationProperties = mockk()
 
-
-    private val tzktItemService = TzktItemServiceImpl(tokenClient, mockk())
+    private val tzktItemService = TzktItemServiceImpl(tokenClient, dipdupProps)
     private val service = TezosItemService(itemControllerApi, tzktItemService)
 
     @BeforeEach
@@ -70,6 +76,66 @@ class TzktItemServiceTest {
         )
         assertThat(page.entities).hasSize(1)
         assertThat(page.continuation).isEqualTo(continuation)
+    }
+
+    @Nested
+    inner class isNftTest {
+        @BeforeEach
+        fun beforeEach() {
+            coEvery { dipdupProps.fungibleContracts } returns emptySet()
+        }
+
+        @Test
+        fun `should return true is artifactUrl is preset in meta`() = runBlocking<Unit> {
+            val itemId = "test:123"
+            coEvery { dipdupProps.tzktProperties } returns TzktProperties()
+            coEvery { tokenClient.token(itemId) } returns tzktToken(itemId).copy(
+                metadata = mapOf("artifactUri" to Object())
+            )
+
+            assertTrue(tzktItemService.isNft(itemId))
+        }
+
+        @Test
+        fun `should return false is artifactUrl is empty`() = runBlocking<Unit> {
+            val itemId = "test:123"
+            coEvery { dipdupProps.tzktProperties } returns TzktProperties(retryAttempts = 1)
+            coEvery { tokenClient.token(itemId) } returns tzktToken(itemId)
+
+            assertFalse(tzktItemService.isNft(itemId))
+        }
+
+        @Test
+        fun `should make only 1 attempt for an 'old' nft`() = runBlocking<Unit> {
+            val itemId = "test:123"
+            coEvery { dipdupProps.tzktProperties } returns TzktProperties()
+            coEvery { tokenClient.token(itemId) } returns tzktToken(itemId).copy(
+                lastTime = now().atOffset(ZoneOffset.UTC).minusDays(TzktProperties().ignorePeriod + 1)
+            )
+
+            assertFalse(tzktItemService.isNft(itemId))
+        }
+
+        @Test
+        fun `should return true after the second attempt`() = runBlocking<Unit> {
+            val itemId = "test:123"
+            coEvery { dipdupProps.tzktProperties } returns TzktProperties(retryAttempts = 5, retryDelay = 1)
+            coEvery { tokenClient.token(itemId) } returns tzktToken(itemId) andThen tzktToken(itemId).copy(
+                metadata = mapOf("artifactUri" to Object())
+            )
+
+            assertTrue(tzktItemService.isNft(itemId))
+            coVerify(exactly = 2) { tokenClient.token(itemId) }
+        }
+
+        @Test
+        fun `should skip fungible token`() = runBlocking<Unit> {
+            val itemId = "test:123"
+            coEvery { dipdupProps.fungibleContracts } returns setOf("test")
+
+            assertFalse(tzktItemService.isNft(itemId))
+            coVerify(exactly = 0) { tokenClient.token(itemId) }
+        }
     }
 
     fun tzktToken(itemId: String) = Token(

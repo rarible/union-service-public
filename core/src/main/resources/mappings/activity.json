@@ -18,7 +18,7 @@
     },
     "date": {
       "type": "date",
-      "format": "strict_date_optional_time||epoch_millis"
+      "format": "strict_date_optional_time||epoch_second"
     },
     "blockchain": {
       "type": "keyword",
@@ -43,6 +43,19 @@
     "userTo": {
       "type": "keyword",
       "ignore_above": 256
+    },
+    "sellCurrency": {
+      "type": "keyword",
+      "ignore_above": 256
+    },
+    "volumeUsd": {
+      "type": "double"
+    },
+    "volumeSell": {
+      "type": "double"
+    },
+    "volumeNative": {
+      "type": "double"
     }
   }
 }

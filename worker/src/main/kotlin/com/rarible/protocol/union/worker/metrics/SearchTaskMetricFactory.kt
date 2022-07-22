@@ -6,6 +6,7 @@ import com.rarible.protocol.union.core.model.elasticsearch.EsEntity
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.worker.config.WorkerProperties
+import com.rarible.protocol.union.worker.task.search.ownership.OwnershipTaskParam
 import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.Tag
 import org.springframework.stereotype.Component
@@ -20,9 +21,20 @@ class SearchTaskMetricFactory(
         type: ActivityTypeDto
     ): RegisteredCounter {
         return object : CountingMetric(
-            name =  getReindexEntityMetricName(EsEntity.ACTIVITY),
+            name = getReindexEntityMetricName(EsEntity.ACTIVITY),
             Tag.of("blockchain", blockchain.name.lowercase()),
             Tag.of("type", type.name.lowercase())
+        ) {}.bind(meterRegistry)
+    }
+
+    fun createReindexOwnershipCounter(
+        blockchain: BlockchainDto,
+        target: OwnershipTaskParam.Target,
+    ): RegisteredCounter {
+        return object : CountingMetric(
+            name = getReindexEntityMetricName(EsEntity.OWNERSHIP),
+            Tag.of("blockchain", blockchain.name.lowercase()),
+            Tag.of("target", target.name.lowercase())
         ) {}.bind(meterRegistry)
     }
 
@@ -30,8 +42,26 @@ class SearchTaskMetricFactory(
         blockchain: BlockchainDto
     ): RegisteredCounter {
         return object : CountingMetric(
-            name =  getReindexEntityMetricName(EsEntity.ITEM),
+            name = getReindexEntityMetricName(EsEntity.ITEM),
             Tag.of("blockchain", blockchain.name.lowercase())
+        ) {}.bind(meterRegistry)
+    }
+
+    fun createReindexOrderCounter(
+        blockchain: BlockchainDto
+    ): RegisteredCounter {
+        return object : CountingMetric(
+            name = getReindexEntityMetricName(EsEntity.ITEM),
+            Tag.of("blockchain", blockchain.name.lowercase())
+        ) {}.bind(meterRegistry)
+    }
+
+    fun createReindexCollectionCounter(
+        blockchain: BlockchainDto
+    ): RegisteredCounter {
+        return object : CountingMetric(
+            name =  getReindexEntityMetricName(EsEntity.COLLECTION),
+            Tag.of("blockchain", blockchain.name.lowercase()),
         ) {}.bind(meterRegistry)
     }
 

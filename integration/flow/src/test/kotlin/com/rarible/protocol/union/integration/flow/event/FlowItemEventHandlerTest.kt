@@ -11,8 +11,8 @@ import com.rarible.protocol.union.core.model.UnionItemUpdateEvent
 import com.rarible.protocol.union.core.util.CompositeItemIdParser
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.flow.converter.FlowItemConverter
-import com.rarible.protocol.union.test.data.randomFlowItemId
-import com.rarible.protocol.union.test.data.randomFlowNftItemDto
+import com.rarible.protocol.union.integration.flow.data.randomFlowItemId
+import com.rarible.protocol.union.integration.flow.data.randomFlowNftItemDto
 import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.coVerify

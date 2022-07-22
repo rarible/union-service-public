@@ -2,6 +2,7 @@ package com.rarible.protocol.union.listener.config
 
 import com.github.cloudyrock.spring.v5.EnableMongock
 import com.rarible.core.application.ApplicationEnvironmentInfo
+import com.rarible.core.daemon.DaemonWorkerProperties
 import com.rarible.core.kafka.RaribleKafkaConsumer
 import com.rarible.core.task.EnableRaribleTask
 import com.rarible.protocol.union.core.FeatureFlagsProperties
@@ -15,11 +16,18 @@ import com.rarible.protocol.union.core.model.OrderEventDelayMetric
 import com.rarible.protocol.union.core.model.OwnershipEventDelayMetric
 import com.rarible.protocol.union.core.model.ReconciliationMarkEvent
 import com.rarible.protocol.union.core.model.UnionInternalBlockchainEvent
+import com.rarible.protocol.union.core.model.download.DownloadTask
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.configuration.EnrichmentConsumerConfiguration
+import com.rarible.protocol.union.listener.handler.downloader.ItemMetaTaskScheduleHandler
+import com.rarible.protocol.union.listener.job.BestOrderCheckJob
+import com.rarible.protocol.union.listener.job.BestOrderCheckJobHandler
+import com.rarible.protocol.union.listener.job.ReconciliationMarkJob
+import com.rarible.protocol.union.listener.job.ReconciliationMarkJobHandler
 import com.rarible.protocol.union.subscriber.UnionKafkaJsonDeserializer
 import io.micrometer.core.instrument.MeterRegistry
 import org.apache.kafka.clients.consumer.OffsetResetStrategy
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -107,6 +115,26 @@ class UnionListenerConfiguration(
         return BatchedConsumerWorker(workers)
     }
 
+    @Bean
+    @ConditionalOnProperty(name = ["listener.price-update.enabled"], havingValue = "true")
+    fun bestOrderCheckJob(
+        handler: BestOrderCheckJobHandler,
+        properties: UnionListenerProperties,
+        meterRegistry: MeterRegistry,
+    ): BestOrderCheckJob {
+        return BestOrderCheckJob(handler, properties, meterRegistry)
+    }
+
+    @Bean
+    @ConditionalOnProperty(name = ["listener.reconcile-marks.enabled"], havingValue = "true")
+    fun reconciliationMarkJob(
+        handler: ReconciliationMarkJobHandler,
+        properties: UnionListenerProperties,
+        meterRegistry: MeterRegistry,
+    ): ReconciliationMarkJob {
+        return ReconciliationMarkJob(handler, properties, meterRegistry)
+    }
+
     private fun createUnionReconciliationMarkEventConsumer(
         index: Int
     ): RaribleKafkaConsumer<ReconciliationMarkEvent> {
@@ -130,6 +158,38 @@ class UnionListenerConfiguration(
             handler = handler,
             daemon = listenerProperties.monitoringWorker,
             workers = 1
+        )
+    }
+
+    private fun createDownloadTaskConsumer(
+        index: Int,
+        clientIdSuffix: String,
+        topic: String
+    ): RaribleKafkaConsumer<DownloadTask> {
+        return RaribleKafkaConsumer(
+            clientId = "$clientIdPrefix.union-$clientIdSuffix-$index",
+            valueDeserializerClass = UnionKafkaJsonDeserializer::class.java,
+            valueClass = DownloadTask::class.java,
+            consumerGroup = consumerGroup("internal"),
+            defaultTopic = topic,
+            bootstrapServers = properties.brokerReplicaSet,
+            offsetResetStrategy = OffsetResetStrategy.EARLIEST
+        )
+    }
+
+    @Bean
+    fun itemMetaDownloadScheduleWorker(
+        handler: ItemMetaTaskScheduleHandler
+    ): BatchedConsumerWorker<DownloadTask> {
+        val properties = listenerProperties.metaScheduling.item
+        val clientIdSuffix = "item-meta-task-scheduler"
+        val topic = UnionInternalTopicProvider.getItemMetaDownloadTaskSchedulerTopic(env)
+        return consumerFactory.createInternalBatchedConsumerWorker(
+            consumer = { index -> createDownloadTaskConsumer(index, clientIdSuffix, topic) },
+            handler = handler,
+            daemonWorkerProperties = DaemonWorkerProperties(consumerBatchSize = properties.batchSize),
+            workers = properties.workers,
+            type = "item-meta-task-scheduler"
         )
     }
 

@@ -30,11 +30,13 @@ open class EthOrderService(
         sort: OrderSortDto?,
         status: List<OrderStatusDto>?
     ): Slice<OrderDto> {
+        val filteredStatus = filterStatus(status) ?: return Slice.empty()
+
         val orders = orderControllerApi.getOrdersAllByStatus(
             ethOrderConverter.convert(sort),
             continuation,
             size,
-            ethOrderConverter.convert(status)
+            ethOrderConverter.convert(filteredStatus)
         ).awaitFirst()
         return ethOrderConverter.convert(orders, blockchain)
     }
@@ -97,12 +99,12 @@ open class EthOrderService(
         val orders = orderControllerApi.getOrderBidsByItemAndByStatus(
             contract,
             tokenId.toString(),
-            ethOrderConverter.convert(status),
             makerAddresses,
             origin,
             EthConverter.convert(platform),
             continuation,
             size,
+            ethOrderConverter.convert(status),
             currencyAddress,
             start,
             end
@@ -112,7 +114,7 @@ open class EthOrderService(
 
     override suspend fun getOrderBidsByMaker(
         platform: PlatformDto?,
-        maker: String,
+        maker: List<String>,
         origin: String?,
         status: List<OrderStatusDto>?,
         start: Long?,
@@ -121,12 +123,12 @@ open class EthOrderService(
         size: Int
     ): Slice<OrderDto> {
         val orders = orderControllerApi.getOrderBidsByMakerAndByStatus(
-            maker,
-            ethOrderConverter.convert(status),
+            maker.map { EthConverter.convertToAddress(it) },
             origin,
             EthConverter.convert(platform),
             continuation,
             size,
+            ethOrderConverter.convert(status),
             start,
             end
         ).awaitFirst()
@@ -246,6 +248,8 @@ open class EthOrderService(
         size: Int
     ): Slice<OrderDto> {
         val (contract, tokenId) = CompositeItemIdParser.split(itemId)
+        val filteredStatus = filterStatus(status) ?: return Slice.empty()
+
         val orders = orderControllerApi.getSellOrdersByItemAndByStatus(
             contract,
             tokenId.toString(),
@@ -254,7 +258,7 @@ open class EthOrderService(
             EthConverter.convert(platform),
             continuation,
             size,
-            ethOrderConverter.convert(status),
+            ethOrderConverter.convert(filteredStatus),
             currencyId
         ).awaitFirst()
         return ethOrderConverter.convert(orders, blockchain)
@@ -262,21 +266,32 @@ open class EthOrderService(
 
     override suspend fun getSellOrdersByMaker(
         platform: PlatformDto?,
-        maker: String,
+        maker: List<String>,
         origin: String?,
         status: List<OrderStatusDto>?,
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
+        val filteredStatus = filterStatus(status) ?: return Slice.empty()
         val orders = orderControllerApi.getSellOrdersByMakerAndByStatus(
-            maker,
+            maker.map { EthConverter.convertToAddress(it) },
             origin,
             EthConverter.convert(platform),
             continuation,
             size,
-            ethOrderConverter.convert(status)
+            ethOrderConverter.convert(filteredStatus)
         ).awaitFirst()
         return ethOrderConverter.convert(orders, blockchain)
+    }
+
+    /**
+     * remove HISTORICAL status from list of statuses for calls that aren't related to bids
+     * If HISTORICAL was the only status, return null then, which means call can be omitted
+     */
+    private fun filterStatus(status: List<OrderStatusDto>?): List<OrderStatusDto>? {
+        if (status.isNullOrEmpty()) return emptyList()
+        val filtered = status.filter { it != OrderStatusDto.HISTORICAL }
+        return filtered.ifEmpty { null }
     }
 }
 

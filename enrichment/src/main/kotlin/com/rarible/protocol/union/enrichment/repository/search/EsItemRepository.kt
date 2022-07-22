@@ -1,98 +1,65 @@
 package com.rarible.protocol.union.enrichment.repository.search
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.rarible.core.apm.CaptureSpan
-import com.rarible.core.apm.SpanType
 import com.rarible.protocol.union.core.elasticsearch.EsNameResolver
-import com.rarible.protocol.union.core.model.ElasticItemFilter
 import com.rarible.protocol.union.core.model.EsItem
+import com.rarible.protocol.union.core.model.EsItemFilter
 import com.rarible.protocol.union.core.model.EsItemSort
-import com.rarible.protocol.union.core.model.EsQueryResult
-import com.rarible.protocol.union.dto.continuation.page.ArgSlice
 import com.rarible.protocol.union.dto.continuation.page.PageSize
-import com.rarible.protocol.union.enrichment.repository.search.internal.EsItemBuilderService.buildQuery
+import com.rarible.protocol.union.enrichment.repository.search.internal.EsItemQueryBuilderService
 import kotlinx.coroutines.reactive.awaitFirst
-import kotlinx.coroutines.reactive.awaitFirstOrNull
-import org.elasticsearch.action.admin.indices.refresh.RefreshRequest
+import org.elasticsearch.index.query.QueryBuilders.termQuery
+import org.springframework.data.elasticsearch.client.reactive.ReactiveElasticsearchClient
 import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations
-import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates
+import org.springframework.data.elasticsearch.core.convert.ElasticsearchConverter
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery
 import org.springframework.stereotype.Component
-import java.io.IOException
 
 @Component
-@CaptureSpan(type = SpanType.DB)
 class EsItemRepository(
-    private val objectMapper: ObjectMapper,
-    private val esOperations: ReactiveElasticsearchOperations,
+    private val queryBuilderService: EsItemQueryBuilderService,
+    objectMapper: ObjectMapper,
+    elasticsearchConverter: ElasticsearchConverter,
+    esOperations: ReactiveElasticsearchOperations,
+    elasticClient: ReactiveElasticsearchClient,
     esNameResolver: EsNameResolver
-) : EsRepository {
-    val entityDefinition = esNameResolver.createEntityDefinitionExtended(EsItem.ENTITY_DEFINITION)
+) : ElasticSearchRepository<EsItem>(
+    objectMapper,
+    esOperations,
+    esNameResolver.createEntityDefinitionExtended(EsItem.ENTITY_DEFINITION),
+    elasticsearchConverter,
+    elasticClient,
+    EsItem::class.java,
+    EsItem::itemId.name,
+    EsItem::itemId
+) {
 
-    suspend fun findById(id: String): EsItem? {
-        return esOperations.get(id, EsItem::class.java, entityDefinition.searchIndexCoordinates).awaitFirstOrNull()
-    }
+    suspend fun search(filter: EsItemFilter, sort: EsItemSort, limit: Int?): List<EsItem> {
+        val query = queryBuilderService.build(filter, sort)
 
-    suspend fun save(esItem: EsItem): EsItem {
-        return esOperations.save(esItem, entityDefinition.writeIndexCoordinates).awaitFirst()
-    }
-
-    suspend fun saveAll(esItems: List<EsItem>): List<EsItem> {
-        return saveAllToIndex(esItems, entityDefinition.writeIndexCoordinates)
-    }
-
-    suspend fun saveAll(esItems: List<EsItem>, indexName: String?): List<EsItem> {
-        return if (indexName == null) {
-            saveAll(esItems)
-        } else {
-            saveAllToIndex(esItems, IndexCoordinates.of(indexName))
-        }
-    }
-
-    private suspend fun saveAllToIndex(esItems: List<EsItem>, index: IndexCoordinates): List<EsItem> {
-        return esOperations
-            .saveAll(esItems, index)
-            .collectList()
-            .awaitFirst()
-    }
-
-    suspend fun search(
-        filter: ElasticItemFilter,
-        sort: EsItemSort,
-        limit: Int?
-    ): EsQueryResult<EsItem> {
-        val query = filter.buildQuery(sort)
         query.maxResults = PageSize.ITEM.limit(limit)
+        query.trackTotalHits = false
+
         return search(query)
     }
 
-    suspend fun search(query: NativeSearchQuery): EsQueryResult<EsItem> {
-
-        val hits = esOperations.search(query, EsItem::class.java, entityDefinition.searchIndexCoordinates)
+    // TODO: return lightweight EsItem type (similarly to EsActivityLite)
+    suspend fun search(query: NativeSearchQuery): List<EsItem> {
+        return esOperations.search(query, EsItem::class.java, entityDefinition.searchIndexCoordinates)
             .collectList()
             .awaitFirst()
-        val content = hits.map { it.content }
-
-        val last = hits.lastOrNull()
-        val continuationString = if (last != null && last.sortValues.size > 0) {
-            objectMapper.writeValueAsString(
-                hits.last().sortValues.last()
-            )
-        } else ArgSlice.COMPLETED
-
-        return EsQueryResult(
-            content = content,
-            cursor = continuationString
-        )
+            .map { it.content }
     }
 
-    override suspend fun refresh() {
-        val refreshRequest = RefreshRequest().indices(entityDefinition.aliasName, entityDefinition.writeAliasName)
+    suspend fun countItemsInCollection(collectionId: String): Long {
+        val query = NativeSearchQuery(termQuery(EsItem::collection.name, collectionId))
 
-        try {
-            esOperations.execute { it.indices().refreshIndex(refreshRequest) }.awaitFirstOrNull()
-        } catch (e: IOException) {
-            throw RuntimeException(entityDefinition.writeAliasName + " refreshModifyIndex failed", e)
-        }
+        return esOperations
+            .count(
+                query,
+                EsItem::class.java,
+                entityDefinition.searchIndexCoordinates
+            )
+            .awaitFirst()
     }
 }

@@ -3,6 +3,8 @@ package com.rarible.protocol.union.api.service.elastic
 import com.ninjasquad.springmockk.MockkBean
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.core.es.ElasticsearchTestBootstrapper
+import com.rarible.protocol.union.core.model.EsActivity
+import com.rarible.protocol.union.core.model.EsActivityCursor
 import com.rarible.protocol.union.core.model.TypedActivityId
 import com.rarible.protocol.union.core.service.ActivityService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
@@ -48,6 +50,14 @@ internal class ActivityElasticServiceIntegrationTest {
     @Autowired
     private lateinit var service: ActivityElasticService
 
+    private lateinit var one: EsActivity
+    private lateinit var two: EsActivity
+    private lateinit var three: EsActivity
+    private lateinit var four: EsActivity
+    private lateinit var five: EsActivity
+    private lateinit var six: EsActivity
+    private lateinit var seven: EsActivity
+
     @Autowired
     private lateinit var elasticsearchTestBootstrapper: ElasticsearchTestBootstrapper
 
@@ -62,45 +72,45 @@ internal class ActivityElasticServiceIntegrationTest {
 
         elasticsearchTestBootstrapper.bootstrap()
         // save some elastic activities
-        val one = randomEsActivity().copy(
+        one = randomEsActivity().copy(
             activityId = "ETHEREUM:1",
             type = ActivityTypeDto.MINT,
             blockchain = BlockchainDto.ETHEREUM,
             date = Instant.ofEpochMilli(5_000),
             userFrom = "0x112233",
         )
-        val two = randomEsActivity().copy(
+        two = randomEsActivity().copy(
             activityId = "ETHEREUM:2",
             type = ActivityTypeDto.LIST,
             blockchain = BlockchainDto.ETHEREUM,
             date = Instant.ofEpochMilli(4_900),
             collection = "123",
         )
-        val three = randomEsActivity().copy(
+        three = randomEsActivity().copy(
             activityId = "FLOW:3",
             type = ActivityTypeDto.MINT,
             blockchain = BlockchainDto.FLOW,
             date = Instant.ofEpochMilli(4_800)
         )
-        val four = randomEsActivity().copy(
+        four = randomEsActivity().copy(
             activityId = "FLOW:4",
             type = ActivityTypeDto.LIST,
             blockchain = BlockchainDto.FLOW,
             date = Instant.ofEpochMilli(4_700)
         )
-        val five = randomEsActivity().copy(
+        five = randomEsActivity().copy(
             activityId = "FLOW:5",
             type = ActivityTypeDto.AUCTION_STARTED,
             blockchain = BlockchainDto.FLOW,
             date = Instant.ofEpochMilli(5_700)
         )
-        val six = randomEsActivity().copy(
+        six = randomEsActivity().copy(
             activityId = "SOLANA:6",
             type = ActivityTypeDto.LIST,
             blockchain = BlockchainDto.SOLANA,
             date = Instant.ofEpochMilli(6_700)
         )
-        val seven = randomEsActivity().copy(
+        seven = randomEsActivity().copy(
             activityId = "ETHEREUM:7",
             type = ActivityTypeDto.AUCTION_STARTED,
             blockchain = BlockchainDto.ETHEREUM,
@@ -122,15 +132,21 @@ internal class ActivityElasticServiceIntegrationTest {
             val blockchains = listOf(BlockchainDto.ETHEREUM, BlockchainDto.FLOW)
             val size = 3
             val sort = ActivitySortDto.LATEST_FIRST
+            val cursor1 = buildCursor(one)
+            val cursor2 = buildCursor(two)
+            val cursor3 = buildCursor(three)
 
             val eth1 = randomUnionActivityMint(randomEthItemId()).copy(
                 id = ActivityIdDto(BlockchainDto.ETHEREUM, "1"),
+                cursor = cursor1,
             )
             val eth2 = randomUnionActivityOrderList(BlockchainDto.ETHEREUM).copy(
                 id = ActivityIdDto(BlockchainDto.ETHEREUM, "2"),
+                cursor = cursor2,
             )
             val flow1 = randomUnionActivityMint(randomEthItemId()).copy(
                 id = ActivityIdDto(BlockchainDto.FLOW, "3"),
+                cursor = cursor3,
             )
 
             coEvery {
@@ -164,8 +180,10 @@ internal class ActivityElasticServiceIntegrationTest {
             val collection = "ETHEREUM:123"
             val size = 3
             val sort = ActivitySortDto.LATEST_FIRST
+            val cursor2 = buildCursor(two)
             val eth2 = randomUnionActivityOrderList(BlockchainDto.ETHEREUM).copy(
                 id = ActivityIdDto(BlockchainDto.ETHEREUM, "2"),
+                cursor = cursor2,
             )
             coEvery {
                 ethereumService.getActivitiesByIds(listOf(
@@ -173,7 +191,7 @@ internal class ActivityElasticServiceIntegrationTest {
                 ))
             } returns listOf(eth2)
             // when
-            val actual = service.getActivitiesByCollection(types, collection, null, null, size, sort)
+            val actual = service.getActivitiesByCollection(types, listOf(collection), null, null, size, sort)
 
             // then
             assertThat(actual.activities).containsExactly(eth2)
@@ -191,8 +209,10 @@ internal class ActivityElasticServiceIntegrationTest {
             val item = "ETHEREUM:222:333"
             val size = 3
             val sort = ActivitySortDto.LATEST_FIRST
+            val cursor7 = buildCursor(seven)
             val eth7 = randomUnionActivityOrderList(BlockchainDto.ETHEREUM).copy(
                 id = ActivityIdDto(BlockchainDto.ETHEREUM, "7"),
+                cursor = cursor7,
             )
             coEvery {
                 ethereumService.getActivitiesByIds(listOf(
@@ -220,11 +240,15 @@ internal class ActivityElasticServiceIntegrationTest {
             val size = 3
             val sort = ActivitySortDto.LATEST_FIRST
             val users = listOf("ETHEREUM:0x112233", "ETHEREUM:0x223344")
+            val cursor1 = buildCursor(one)
+            val cursor7 = buildCursor(seven)
             val eth1 = randomUnionActivityOrderList(BlockchainDto.ETHEREUM).copy(
                 id = ActivityIdDto(BlockchainDto.ETHEREUM, "1"),
+                cursor = cursor1,
             )
             val eth7 = randomUnionActivityOrderList(BlockchainDto.ETHEREUM).copy(
                 id = ActivityIdDto(BlockchainDto.ETHEREUM, "7"),
+                cursor = cursor7
             )
             coEvery {
                 ethereumService.getActivitiesByIds(listOf(
@@ -250,5 +274,9 @@ internal class ActivityElasticServiceIntegrationTest {
             assertThat(actual.activities).containsExactly(eth1, eth7)
             assertThat(actual.cursor).startsWith("4700_")
         }
+    }
+
+    private fun buildCursor(esActivity: EsActivity): String {
+        return EsActivityCursor(esActivity.date, esActivity.blockNumber!!, esActivity.logIndex!!, esActivity.salt).toString()
     }
 }

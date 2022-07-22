@@ -38,8 +38,13 @@ integration:
       user: "test"
       password: "test"
       database: "test"
+    showLegacyOrders: true
   solana:
     enabled: true
+
+meta:
+  embedded:
+    publicUrl: "http://localhost:8080/content/embedded"
 
 common:
   currency:
@@ -54,3 +59,13 @@ protocol:
   union:
     subscriber:
       broker-replica-set: ${kafka.hosts}
+
+logging:
+  level:
+    com.rarible.protocol.union: DEBUG
+    org.apache.kafka: ERROR
+    org.apache.activemq: ERROR
+    com.rarible.core.daemon: ERROR
+    com.rarible.core.loader: ERROR
+    tracer: TRACE
+    org.springframework.data.elasticsearch.core.QUERY: DEBUG

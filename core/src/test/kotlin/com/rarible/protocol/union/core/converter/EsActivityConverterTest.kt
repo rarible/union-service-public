@@ -1,12 +1,19 @@
 package com.rarible.protocol.union.core.converter
 
+import com.rarible.core.common.nowMillis
 import com.rarible.core.test.data.randomAddress
 import com.rarible.core.test.data.randomBigDecimal
 import com.rarible.core.test.data.randomBigInt
 import com.rarible.core.test.data.randomBoolean
+import com.rarible.core.test.data.randomDouble
 import com.rarible.core.test.data.randomInt
 import com.rarible.core.test.data.randomLong
 import com.rarible.core.test.data.randomString
+import com.rarible.protocol.union.core.converter.helper.SellActivityEnricher
+import com.rarible.protocol.union.core.model.UnionItem
+import com.rarible.protocol.union.core.service.ItemService
+import com.rarible.protocol.union.core.service.router.BlockchainRouter
+import com.rarible.protocol.union.core.util.truncatedToSeconds
 import com.rarible.protocol.union.dto.ActivityBlockchainInfoDto
 import com.rarible.protocol.union.dto.ActivityIdDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
@@ -27,6 +34,7 @@ import com.rarible.protocol.union.dto.AuctionStatusDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.BlockchainGroupDto
 import com.rarible.protocol.union.dto.BurnActivityDto
+import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ContractAddress
 import com.rarible.protocol.union.dto.EthErc1155AssetTypeDto
 import com.rarible.protocol.union.dto.ItemIdDto
@@ -42,21 +50,119 @@ import com.rarible.protocol.union.dto.OrderMatchSwapDto
 import com.rarible.protocol.union.dto.RaribleAuctionV1BidDataV1Dto
 import com.rarible.protocol.union.dto.RaribleAuctionV1BidV1Dto
 import com.rarible.protocol.union.dto.RaribleAuctionV1DataV1Dto
+import com.rarible.protocol.union.dto.SolanaNftAssetTypeDto
 import com.rarible.protocol.union.dto.TransferActivityDto
 import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.ext
 import com.rarible.protocol.union.dto.parser.IdParser
+import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.confirmVerified
+import io.mockk.mockk
+import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatCode
 import org.junit.jupiter.api.Test
+import java.math.BigInteger
 import java.time.Instant
 
 class EsActivityConverterTest {
 
-    private val converter = EsActivityConverter
+    private val router = mockk<BlockchainRouter<ItemService>>()
+
+    private val enricher = mockk<SellActivityEnricher>()
+
+    private val converter = EsActivityConverter(router, enricher)
 
     @Test
-    fun `should convert MintActivityDto`() {
+    fun `should convert activities batch`() = runBlocking<Unit> {
+        // given
+        val ethMintItemId = ItemIdDto(BlockchainDto.ETHEREUM, "contract1", BigInteger.ONE)
+        val ethMintId = "123"
+        val ethMintColId = CollectionIdDto(BlockchainDto.ETHEREUM, "col1")
+        val ethMint = MintActivityDto(
+            id = ActivityIdDto(BlockchainDto.ETHEREUM, ethMintId),
+            date = randomDate(),
+            blockchainInfo = ActivityBlockchainInfoDto(
+                transactionHash = randomString(),
+                blockHash = randomString(),
+                blockNumber = randomLong(),
+                logIndex = randomInt(),
+            ),
+            owner = randomUnionAddress(),
+            itemId = ethMintItemId,
+            transactionHash = randomString(),
+            value = randomBigInt(),
+        )
+        val ethMintItem = randomUnionItem(ethMintItemId, ethMintColId)
+
+        val ethBurnItemId = ItemIdDto(BlockchainDto.ETHEREUM, "contract2", BigInteger.ONE)
+        val ethBurnId = "456"
+        val ethBurnColId = CollectionIdDto(BlockchainDto.ETHEREUM, "col2")
+        val ethBurn = BurnActivityDto(
+            id = ActivityIdDto(BlockchainDto.ETHEREUM, ethBurnId),
+            date = randomDate(),
+            blockchainInfo = ActivityBlockchainInfoDto(
+                transactionHash = randomString(),
+                blockHash = randomString(),
+                blockNumber = randomLong(),
+                logIndex = randomInt(),
+            ),
+            owner = randomUnionAddress(),
+            itemId = ethBurnItemId,
+            transactionHash = randomString(),
+            value = randomBigInt(),
+        )
+        val ethBurnItem = randomUnionItem(ethBurnItemId, ethBurnColId)
+
+        val solanaListItemId = ItemIdDto(BlockchainDto.SOLANA, "contract3", BigInteger.ONE)
+        val solanaListId = "789"
+        val solanaListColId = CollectionIdDto(BlockchainDto.SOLANA, "col3")
+        val solanaList = OrderListActivityDto(
+            id = ActivityIdDto(BlockchainDto.SOLANA, solanaListId),
+            date = randomDate(),
+            maker = randomUnionAddress(),
+            make = AssetDto(
+                type = SolanaNftAssetTypeDto(
+                    solanaListItemId
+                ),
+                value = randomBigDecimal(),
+            ),
+            take = randomAsset(),
+            source = OrderActivitySourceDto.RARIBLE,
+            price = randomBigDecimal(),
+            hash = randomString(),
+        )
+        val solanaListItem = randomUnionItem(solanaListItemId, solanaListColId)
+
+        val source = listOf(ethMint, ethBurn, solanaList)
+
+        coEvery {
+            router.getService(BlockchainDto.ETHEREUM).getItemsByIds(listOf(ethMintItemId.value, ethBurnItemId.value))
+        } returns listOf(ethMintItem, ethBurnItem)
+        coEvery {
+            router.getService(BlockchainDto.SOLANA).getItemsByIds(listOf(solanaListItemId.value))
+        } returns listOf(solanaListItem)
+
+        // when
+        val actual = converter.batchConvert(source)
+
+        // then
+        assertThat(actual).hasSize(3)
+        assertThat(actual[0].activityId).isEqualTo(ethMint.id.toString())
+        assertThat(actual[0].collection).isEqualTo(ethMintColId.value)
+        assertThat(actual[1].activityId).isEqualTo(ethBurn.id.toString())
+        assertThat(actual[1].collection).isEqualTo(ethBurnColId.value)
+        assertThat(actual[2].activityId).isEqualTo(solanaList.id.toString())
+        assertThat(actual[2].collection).isEqualTo(solanaListColId.value)
+        coVerify {
+            router.getService(BlockchainDto.ETHEREUM).getItemsByIds(listOf(ethMintItemId.value, ethBurnItemId.value))
+            router.getService(BlockchainDto.SOLANA).getItemsByIds(listOf(solanaListItemId.value))
+        }
+        confirmVerified(router)
+    }
+
+    @Test
+    fun `should convert MintActivityDto`() = runBlocking<Unit> {
         // given
         val source = MintActivityDto(
             id = randomActivityId(),
@@ -74,7 +180,7 @@ class EsActivityConverterTest {
         )
 
         // when
-        val actual = converter.convert(source)!!
+        val actual = converter.convert(source, null)!!
 
         // then
         assertThat(actual.activityId).isEqualTo(source.id.toString())
@@ -90,7 +196,7 @@ class EsActivityConverterTest {
     }
 
     @Test
-    fun `should convert BurnActivityDto`() {
+    fun `should convert BurnActivityDto`() = runBlocking<Unit> {
         // given
         val source = BurnActivityDto(
             id = randomActivityId(),
@@ -108,7 +214,7 @@ class EsActivityConverterTest {
         )
 
         // when
-        val actual = converter.convert(source)!!
+        val actual = converter.convert(source, null)!!
 
         // then
         assertThat(actual.activityId).isEqualTo(source.id.toString())
@@ -124,7 +230,7 @@ class EsActivityConverterTest {
     }
 
     @Test
-    fun `should convert TransferActivityDto`() {
+    fun `should convert TransferActivityDto`() = runBlocking<Unit> {
         // given
         val source = TransferActivityDto(
             id = randomActivityId(),
@@ -143,7 +249,7 @@ class EsActivityConverterTest {
         )
 
         // when
-        val actual = converter.convert(source)!!
+        val actual = converter.convert(source, null)!!
 
         // then
         assertThat(actual.activityId).isEqualTo(source.id.toString())
@@ -159,7 +265,7 @@ class EsActivityConverterTest {
     }
 
     @Test
-    fun `should convert OrderMatchSwapDto`() {
+    fun `should convert OrderMatchSwapDto`() = runBlocking<Unit> {
         // given
         val source = OrderMatchSwapDto(
             id = randomActivityId(),
@@ -177,13 +283,13 @@ class EsActivityConverterTest {
         )
 
         // when
-        val actual = converter.convert(source)
+        val actual = converter.convert(source, null)
 
         assertThat(actual).isNull()
     }
 
     @Test
-    fun `should convert OrderMatchSellDto`() {
+    fun `should convert OrderMatchSellDto`() = runBlocking<Unit> {
         // given
         val source = OrderMatchSellDto(
             id = randomActivityId(),
@@ -202,11 +308,17 @@ class EsActivityConverterTest {
             source = OrderActivitySourceDto.RARIBLE,
             price = randomBigDecimal(),
             type = OrderMatchSellDto.Type.SELL,
-
             )
+        val volumeInfo = SellActivityEnricher.SellVolumeInfo(
+            sellCurrency = randomString(),
+            volumeUsd = randomDouble(),
+            volumeSell = randomDouble(),
+            volumeNative = randomDouble(),
+        )
+        coEvery { enricher.provideVolumeInfo(source) } returns volumeInfo
 
         // when
-        val actual = converter.convert(source)!!
+        val actual = converter.convert(source, null)!!
 
         // then
         assertThat(actual.activityId).isEqualTo(source.id.toString())
@@ -219,10 +331,14 @@ class EsActivityConverterTest {
         assertThat(actual.userTo).isEqualTo(source.buyer.value)
         assertThat(actual.collection).isEqualTo(source.nft.type.ext.itemId!!.extractCollection())
         assertThat(actual.item).isEqualTo(source.nft.type.ext.itemId!!.value)
+        assertThat(actual.sellCurrency).isEqualTo(volumeInfo.sellCurrency)
+        assertThat(actual.volumeUsd).isEqualTo(volumeInfo.volumeUsd)
+        assertThat(actual.volumeSell).isEqualTo(volumeInfo.volumeSell)
+        assertThat(actual.volumeNative).isEqualTo(volumeInfo.volumeNative)
     }
 
     @Test
-    fun `should convert OrderBidActivityDto`() {
+    fun `should convert OrderBidActivityDto`() = runBlocking<Unit> {
         // given
         val source = OrderBidActivityDto(
             id = randomActivityId(),
@@ -236,7 +352,7 @@ class EsActivityConverterTest {
         )
 
         // when
-        val actual = converter.convert(source)!!
+        val actual = converter.convert(source, null)!!
 
         // then
         assertThat(actual.activityId).isEqualTo(source.id.toString())
@@ -252,7 +368,7 @@ class EsActivityConverterTest {
     }
 
     @Test
-    fun `should convert OrderListActivityDto`() {
+    fun `should convert OrderListActivityDto`() = runBlocking<Unit> {
         // given
         val source = OrderListActivityDto(
             id = randomActivityId(),
@@ -266,7 +382,7 @@ class EsActivityConverterTest {
         )
 
         // when
-        val actual = converter.convert(source)!!
+        val actual = converter.convert(source, null)!!
 
         // then
         assertThat(actual.activityId).isEqualTo(source.id.toString())
@@ -282,7 +398,7 @@ class EsActivityConverterTest {
     }
 
     @Test
-    fun `should convert OrderCancelBidActivityDto`() {
+    fun `should convert OrderCancelBidActivityDto`() = runBlocking<Unit> {
         // given
         val source = OrderCancelBidActivityDto(
             id = randomActivityId(),
@@ -302,7 +418,7 @@ class EsActivityConverterTest {
         )
 
         // when
-        val actual = converter.convert(source)!!
+        val actual = converter.convert(source, null)!!
 
         // then
         assertThat(actual.activityId).isEqualTo(source.id.toString())
@@ -318,7 +434,7 @@ class EsActivityConverterTest {
     }
 
     @Test
-    fun `should convert OrderCancelListActivityDto`() {
+    fun `should convert OrderCancelListActivityDto`() = runBlocking<Unit> {
         // given
         val source = OrderCancelListActivityDto(
             id = randomActivityId(),
@@ -338,7 +454,7 @@ class EsActivityConverterTest {
         )
 
         // when
-        val actual = converter.convert(source)!!
+        val actual = converter.convert(source, null)!!
 
         // then
         assertThat(actual.activityId).isEqualTo(source.id.toString())
@@ -354,7 +470,7 @@ class EsActivityConverterTest {
     }
 
     @Test
-    fun `should convert AuctionOpenActivityDto`() {
+    fun `should convert AuctionOpenActivityDto`() = runBlocking<Unit> {
         // given
         val source = AuctionOpenActivityDto(
             id = randomActivityId(),
@@ -364,7 +480,7 @@ class EsActivityConverterTest {
         )
 
         // when
-        val actual = converter.convert(source)!!
+        val actual = converter.convert(source, null)!!
 
         // then
         assertThat(actual.activityId).isEqualTo(source.id.toString())
@@ -380,7 +496,7 @@ class EsActivityConverterTest {
     }
 
     @Test
-    fun `should convert AuctionBidActivityDto`() {
+    fun `should convert AuctionBidActivityDto`() = runBlocking<Unit> {
         // given
         val source = AuctionBidActivityDto(
             id = randomActivityId(),
@@ -391,7 +507,7 @@ class EsActivityConverterTest {
         )
 
         // when
-        val actual = converter.convert(source)!!
+        val actual = converter.convert(source, null)!!
 
         // then
         assertThat(actual.activityId).isEqualTo(source.id.toString())
@@ -407,7 +523,7 @@ class EsActivityConverterTest {
     }
 
     @Test
-    fun `should convert AuctionFinishActivityDto`() {
+    fun `should convert AuctionFinishActivityDto`() = runBlocking<Unit> {
         // given
         val source = AuctionFinishActivityDto(
             id = randomActivityId(),
@@ -417,7 +533,7 @@ class EsActivityConverterTest {
         )
 
         // when
-        val actual = converter.convert(source)!!
+        val actual = converter.convert(source, null)!!
 
         // then
         assertThat(actual.activityId).isEqualTo(source.id.toString())
@@ -433,7 +549,7 @@ class EsActivityConverterTest {
     }
 
     @Test
-    fun `should convert AuctionCancelActivityDto`() {
+    fun `should convert AuctionCancelActivityDto`() = runBlocking<Unit> {
         // given
         val source = AuctionCancelActivityDto(
             id = randomActivityId(),
@@ -443,7 +559,7 @@ class EsActivityConverterTest {
         )
 
         // when
-        val actual = converter.convert(source)!!
+        val actual = converter.convert(source, null)!!
 
         // then
         assertThat(actual.activityId).isEqualTo(source.id.toString())
@@ -459,7 +575,7 @@ class EsActivityConverterTest {
     }
 
     @Test
-    fun `should convert AuctionStartActivityDto`() {
+    fun `should convert AuctionStartActivityDto`() = runBlocking<Unit> {
         // given
         val source = AuctionStartActivityDto(
             id = randomActivityId(),
@@ -468,7 +584,7 @@ class EsActivityConverterTest {
         )
 
         // when
-        val actual = converter.convert(source)!!
+        val actual = converter.convert(source, null)!!
 
         // then
         assertThat(actual.activityId).isEqualTo(source.id.toString())
@@ -484,7 +600,7 @@ class EsActivityConverterTest {
     }
 
     @Test
-    fun `should convert AuctionEndActivityDto`() {
+    fun `should convert AuctionEndActivityDto`() = runBlocking<Unit> {
         // given
         val source = AuctionEndActivityDto(
             id = randomActivityId(),
@@ -493,7 +609,7 @@ class EsActivityConverterTest {
         )
 
         // when
-        val actual = converter.convert(source)!!
+        val actual = converter.convert(source, null)!!
 
         // then
         assertThat(actual.activityId).isEqualTo(source.id.toString())
@@ -509,7 +625,7 @@ class EsActivityConverterTest {
     }
 
     @Test
-    fun `should not fail when itemId is null`() {
+    fun `should not fail when itemId is null`() = runBlocking<Unit> {
         // given
         val source = TransferActivityDto(
             id = randomActivityId(),
@@ -527,10 +643,8 @@ class EsActivityConverterTest {
             value = randomBigInt(),
         )
 
-        // when
-        assertThatCode {
-            converter.convert(source)
-        }.doesNotThrowAnyException()
+        // when & then - nothing thrown
+        converter.convert(source, null)!!
     }
 
     private fun randomActivityId(): ActivityIdDto {
@@ -541,7 +655,7 @@ class EsActivityConverterTest {
     }
 
     private fun randomDate(): Instant {
-        return Instant.ofEpochMilli(randomLong())
+        return Instant.ofEpochMilli(randomLong()).truncatedToSeconds()
     }
 
     private fun randomBlockchain(): BlockchainDto {
@@ -645,5 +759,17 @@ class EsActivityConverterTest {
     private fun randomItemId(): ItemIdDto {
         return if (randomBoolean()) ItemIdDto(randomBlockchain(), randomString(), randomBigInt())
         else ItemIdDto(randomBlockchain(), randomString())
+    }
+
+    private fun randomUnionItem(id: ItemIdDto, collectionIdDto: CollectionIdDto): UnionItem {
+        return UnionItem(
+            id = id,
+            collection = collectionIdDto,
+            lazySupply = BigInteger.ONE,
+            mintedAt = nowMillis(),
+            lastUpdatedAt = nowMillis(),
+            supply = BigInteger.ONE,
+            deleted = false,
+        )
     }
 }

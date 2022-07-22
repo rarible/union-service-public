@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.enrichment.service
 
 import com.rarible.core.client.WebClientResponseProxyException
+import com.rarible.core.common.flatMapAsync
 import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
@@ -16,9 +17,6 @@ import com.rarible.protocol.union.enrichment.model.ShortOrder
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
 import com.rarible.protocol.union.enrichment.util.spent
 import com.rarible.protocol.union.enrichment.validator.BestOrderValidator
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
@@ -38,30 +36,13 @@ class EnrichmentOrderService(
         }
     }
 
-    suspend fun getByIds(ids: List<OrderIdDto>): List<OrderDto> = coroutineScope {
-        val byBlockchain = ids.groupBy { it.blockchain }
-        byBlockchain.map { pair ->
-            async {
-                val blockchain = pair.key
-                val nativeIds = pair.value.map { it.value }
+    suspend fun getByIds(ids: List<OrderIdDto>): List<OrderDto> {
+        return ids
+            .groupBy { it.blockchain }
+            .flatMapAsync { (blockchain, ids) ->
+                val nativeIds = ids.map { it.value }
                 orderServiceRouter.getService(blockchain).getOrdersByIds(nativeIds)
             }
-        }.awaitAll().flatten()
-
-    }
-
-    suspend fun fetchOrderIfDiffers(existing: ShortOrder?, orders: Map<OrderIdDto, OrderDto>): OrderDto? {
-        // Nothing to download - there is no existing short order
-        if (existing == null) {
-            return null
-        }
-        // Full order we already fetched is the same as short Order we want to download - using obtained order here
-        val theSameOrder = orders[existing.dtoId]
-        if (theSameOrder != null) {
-            return theSameOrder
-        }
-        // Downloading full order in common case
-        return getById(existing.dtoId)
     }
 
     suspend fun fetchMissingOrders(
@@ -87,9 +68,9 @@ class EnrichmentOrderService(
         val now = nowMillis()
         val result = withPreferredRariblePlatform(
             id, OrderType.SELL, OrderFilters.ITEM
-        ) { platform, continuation, size ->
+        ) { continuation, size ->
             orderServiceRouter.getService(id.blockchain).getSellOrdersByItem(
-                platform,
+                null,
                 id.toDto().value,
                 null,
                 origin,
@@ -110,9 +91,9 @@ class EnrichmentOrderService(
         val now = nowMillis()
         val result = withPreferredRariblePlatform(
             id, OrderType.SELL, OrderFilters.ITEM
-        ) { platform, continuation, size ->
+        ) { continuation, size ->
             orderServiceRouter.getService(id.blockchain).getSellOrdersByItem(
-                platform,
+                null,
                 id.toDto().itemIdValue,
                 id.owner,
                 origin,
@@ -133,9 +114,9 @@ class EnrichmentOrderService(
         val now = nowMillis()
         val result = withPreferredRariblePlatform(
             collectionId, OrderType.SELL, OrderFilters.COLLECTION
-        ) { platform, continuation, size ->
+        ) { continuation, size ->
             orderServiceRouter.getService(collectionId.blockchain).getOrderFloorSellsByCollection(
-                platform,
+                null,
                 collectionId.toDto().value,
                 origin,
                 listOf(OrderStatusDto.ACTIVE),
@@ -155,9 +136,9 @@ class EnrichmentOrderService(
         val now = nowMillis()
         val result = withPreferredRariblePlatform(
             id, OrderType.BID, OrderFilters.ITEM
-        ) { platform, continuation, size ->
+        ) { continuation, size ->
             orderServiceRouter.getService(id.blockchain).getOrderBidsByItem(
-                platform,
+                null,
                 id.toDto().value,
                 null,
                 origin,
@@ -180,9 +161,9 @@ class EnrichmentOrderService(
         val now = nowMillis()
         val result = withPreferredRariblePlatform(
             id, OrderType.BID, OrderFilters.COLLECTION
-        ) { platform, continuation, size ->
+        ) { continuation, size ->
             orderServiceRouter.getService(id.blockchain).getOrderFloorBidsByCollection(
-                platform,
+                null,
                 id.toDto().value,
                 origin,
                 listOf(OrderStatusDto.ACTIVE),
@@ -204,25 +185,16 @@ class EnrichmentOrderService(
         id: Any,
         orderType: OrderType,
         filter: OrderFilters = OrderFilters.ALL,
-        clientCall: suspend (platform: PlatformDto?, continuation: String?, size: Int) -> Slice<OrderDto>
+        clientCall: suspend (continuation: String?, size: Int) -> Slice<OrderDto>
     ): OrderDto? {
-        val bestOfAll = ignoreFilledTaker(id, clientCall, null, orderType = orderType, filter = filter)
+        val bestOfAll = ignoreFilledTaker(id, clientCall, orderType = orderType, filter = filter)
         logger.debug("Found best order from ALL platforms: [{}]", bestOfAll)
-        if (bestOfAll == null || bestOfAll.platform == PlatformDto.RARIBLE) {
-            return bestOfAll
-        }
-        logger.debug("Order [{}] is not a preferred platform order, checking preferred platform...", bestOfAll)
-        val preferredPlatformBestOrder = ignoreFilledTaker(
-            id, clientCall, PlatformDto.RARIBLE, orderType = orderType, filter = filter
-        )
-        logger.debug("Checked preferred platform for best order: [{}]")
-        return preferredPlatformBestOrder ?: bestOfAll
+        return bestOfAll
     }
 
     suspend fun ignoreFilledTaker(
         id: Any,
-        clientCall: suspend (platform: PlatformDto?, continuation: String?, size: Int) -> Slice<OrderDto>,
-        platform: PlatformDto?,
+        clientCall: suspend (continuation: String?, size: Int) -> Slice<OrderDto>,
         orderType: OrderType,
         filter: OrderFilters
     ): OrderDto? {
@@ -234,7 +206,7 @@ class EnrichmentOrderService(
         var size = 1
 
         do {
-            val slice = clientCall(platform, continuation, size)
+            val slice = clientCall(continuation, size)
             order = slice.entities.firstOrNull {
                 // TODO important! may affect performance
                 BestOrderValidator.isValid(it) && orderFilter(it, filter, orderType)

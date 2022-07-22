@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.integration.ethereum.mock
 
 import com.rarible.protocol.dto.NftOwnershipDto
+import com.rarible.protocol.dto.NftOwnershipIdsDto
 import com.rarible.protocol.dto.NftOwnershipsDto
 import com.rarible.protocol.nft.api.client.NftOwnershipControllerApi
 import com.rarible.protocol.union.core.util.CompositeItemIdParser
@@ -18,6 +19,18 @@ class EthOwnershipControllerApiMock(
         every {
             nftOwnershipControllerApi.getNftOwnershipById(ownershipId.value, false)
         } returns (if (returnOwnership == null) Mono.empty() else Mono.just(returnOwnership))
+    }
+
+    fun mockGetNftOwnershipById(ownershipId: String, returnOwnership: NftOwnershipDto?) {
+        every {
+            nftOwnershipControllerApi.getNftOwnershipById(ownershipId, false)
+        } returns (if (returnOwnership == null) Mono.empty() else Mono.just(returnOwnership))
+    }
+
+    fun mockGetNftOwnershipByIds(ownershipIds: List<String>, returnOwnerships: List<NftOwnershipDto>?) {
+        every {
+            nftOwnershipControllerApi.getNftOwnershipsByIds(NftOwnershipIdsDto(ownershipIds))
+        } returns (if (returnOwnerships == null) Mono.empty() else Mono.just(NftOwnershipsDto(ownerships = returnOwnerships)))
     }
 
     fun mockGetNftOwnershipByIdNotFound(ownershipId: OwnershipIdDto) {
@@ -67,5 +80,4 @@ class EthOwnershipControllerApiMock(
             )
         } returns Mono.just(NftOwnershipsDto(returnOwnerships.size.toLong(), null, returnOwnerships.asList()))
     }
-
 }

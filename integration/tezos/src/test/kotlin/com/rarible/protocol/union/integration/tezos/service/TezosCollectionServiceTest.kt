@@ -4,6 +4,8 @@ import com.rarible.protocol.tezos.api.client.NftCollectionControllerApi
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktCollectionServiceImpl
+import com.rarible.protocol.union.integration.tezos.entity.TezosCollection
+import com.rarible.protocol.union.integration.tezos.entity.TezosCollectionRepository
 import com.rarible.tzkt.client.CollectionClient
 import com.rarible.tzkt.model.Contract
 import com.rarible.tzkt.model.Page
@@ -14,15 +16,17 @@ import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.math.BigInteger
 
 class TezosCollectionServiceTest {
 
     private val nftCollectionApi: NftCollectionControllerApi = mockk()
     private val tzktCollectionClient: CollectionClient = mockk()
+    private val tezosCollectionRepository: TezosCollectionRepository = mockk()
 
 
-    private val tzktCollectionService = TzktCollectionServiceImpl(tzktCollectionClient)
-    private val service = TezosCollectionService(nftCollectionApi, tzktCollectionService)
+    private val tzktCollectionService = TzktCollectionServiceImpl(tzktCollectionClient, mockk(), tezosCollectionRepository)
+    private val service = TezosCollectionService(nftCollectionApi, mockk(), tzktCollectionService, mockk())
 
     @BeforeEach
     fun beforeEach() {
@@ -38,6 +42,8 @@ class TezosCollectionServiceTest {
             items = listOf(contract(address)),
             continuation = continuation
         )
+        coEvery { tezosCollectionRepository.getCollections(listOf(address)) } returns
+                listOf(TezosCollection(address, TezosCollection.Type.MT, BigInteger.ZERO))
 
         val contract = service.getAllCollections(null, 1)
 
@@ -50,6 +56,8 @@ class TezosCollectionServiceTest {
     fun `should return tzkt collections by id`() = runBlocking<Unit> {
         val address = "KT1Tu6A2NHKwEjdHTTJBys8Pu8K9Eo87P2Vy"
         coEvery { tzktCollectionClient.collection(address) } returns contract(address)
+        coEvery { tezosCollectionRepository.getCollections(listOf(address)) } returns
+                listOf(TezosCollection(address, TezosCollection.Type.MT, BigInteger.ZERO))
         val contract = service.getCollectionById(address)
 
         assertThat(contract.id).isEqualTo(CollectionIdDto(BlockchainDto.TEZOS, address))
@@ -59,6 +67,8 @@ class TezosCollectionServiceTest {
     fun `should return tzkt collections by ids`() = runBlocking<Unit> {
         val addresses = listOf("KT1Tu6A2NHKwEjdHTTJBys8Pu8K9Eo87P2Vy")
         coEvery { tzktCollectionClient.collectionsByIds(addresses) } returns addresses.map(::contract)
+        coEvery { tezosCollectionRepository.getCollections(addresses) } returns
+                addresses.map { TezosCollection(it, TezosCollection.Type.MT, BigInteger.ZERO) }
         val contracts = service.getCollectionsByIds(addresses)
 
         assertThat(contracts).hasSize(1)
@@ -67,6 +77,8 @@ class TezosCollectionServiceTest {
     fun contract(address: String): Contract = Contract(
         type = "contract",
         alias = "",
+        name = "test",
+        symbol = null,
         balance = 1L,
         address = address,
         tzips = listOf("fa2"),

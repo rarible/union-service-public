@@ -1,6 +1,11 @@
 package com.rarible.protocol.union.core.converter
 
+import com.rarible.core.common.mapAsync
+import com.rarible.protocol.union.core.converter.helper.SellActivityEnricher
 import com.rarible.protocol.union.core.model.EsActivity
+import com.rarible.protocol.union.core.service.ItemService
+import com.rarible.protocol.union.core.service.router.BlockchainRouter
+import com.rarible.protocol.union.core.util.truncatedToSeconds
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.AssetTypeExtension
@@ -10,7 +15,6 @@ import com.rarible.protocol.union.dto.AuctionEndActivityDto
 import com.rarible.protocol.union.dto.AuctionFinishActivityDto
 import com.rarible.protocol.union.dto.AuctionOpenActivityDto
 import com.rarible.protocol.union.dto.AuctionStartActivityDto
-import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.BurnActivityDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.L2DepositActivityDto
@@ -25,285 +29,348 @@ import com.rarible.protocol.union.dto.OrderMatchSwapDto
 import com.rarible.protocol.union.dto.TransferActivityDto
 import com.rarible.protocol.union.dto.ext
 import com.rarible.protocol.union.dto.parser.IdParser
+import org.springframework.stereotype.Component
 
-object EsActivityConverter {
+@Component
+class EsActivityConverter(
+    private val itemRouter: BlockchainRouter<ItemService>,
+    private val sellActivityEnricher: SellActivityEnricher,
+) {
 
-    fun convert(source: ActivityDto): EsActivity? {
-        return when (source) {
-            is MintActivityDto -> convertMint(source)
-            is BurnActivityDto -> convertBurn(source)
-            is TransferActivityDto -> convertTransfer(source)
-            is OrderMatchSwapDto -> null
-            is OrderMatchSellDto -> convertOrderMatchSell(source)
-            is OrderBidActivityDto -> convertOrderBid(source)
-            is OrderListActivityDto -> convertOrderList(source)
-            is OrderCancelBidActivityDto -> convertOrderCancelBid(source)
-            is OrderCancelListActivityDto -> convertOrderCancelList(source)
-            is AuctionOpenActivityDto -> convertAuctionOpen(source)
-            is AuctionBidActivityDto -> convertAuctionBid(source)
-            is AuctionFinishActivityDto -> convertAuctionFinish(source)
-            is AuctionCancelActivityDto -> convertAuctionCancel(source)
-            is AuctionStartActivityDto -> convertAuctionStart(source)
-            is AuctionEndActivityDto -> convertAuctionEnd(source)
-            is L2WithdrawalActivityDto -> convertL2Withdrawal(source)
-            is L2DepositActivityDto -> convertL2Deposit(source)
+    suspend fun batchConvert(source: List<ActivityDto>, ): List<EsActivity> {
+        val items = source.groupBy { it.id.blockchain }
+            .mapAsync { (blockchain, activities) ->
+                val itemIds = activities.mapNotNull { extractItemId(it)?.value }
+                itemRouter.getService(blockchain).getItemsByIds(itemIds)
+            }
+            .flatten()
+            .associateBy { it.id }
+
+        return source.mapNotNull {
+            val collection = items[extractItemId(it)]?.collection?.value
+            convert(it, collection)
         }
     }
 
-    private fun convertMint(source: MintActivityDto): EsActivity {
-        val itemId = safeItemId(source.itemId, source.id.blockchain)
+    suspend fun convert(source: ActivityDto, collection: String?): EsActivity? {
+        val itemId = extractItemId(source)
+        return when (source) {
+            is MintActivityDto -> convertMint(source, itemId, collection)
+            is BurnActivityDto -> convertBurn(source, itemId, collection)
+            is TransferActivityDto -> convertTransfer(source, itemId, collection)
+            is OrderMatchSellDto -> convertOrderMatchSell(source, itemId, collection)
+            is OrderBidActivityDto -> convertOrderBid(source, itemId, collection)
+            is OrderListActivityDto -> convertOrderList(source, itemId, collection)
+            is OrderCancelBidActivityDto -> convertOrderCancelBid(source, itemId, collection)
+            is OrderCancelListActivityDto -> convertOrderCancelList(source, itemId, collection)
+            is AuctionOpenActivityDto -> convertAuctionOpen(source, itemId, collection)
+            is AuctionBidActivityDto -> convertAuctionBid(source, itemId, collection)
+            is AuctionFinishActivityDto -> convertAuctionFinish(source, itemId, collection)
+            is AuctionCancelActivityDto -> convertAuctionCancel(source, itemId, collection)
+            is AuctionStartActivityDto -> convertAuctionStart(source, itemId, collection)
+            is AuctionEndActivityDto -> convertAuctionEnd(source, itemId, collection)
+            is L2WithdrawalActivityDto -> convertL2Withdrawal(source, itemId, collection)
+            is L2DepositActivityDto -> convertL2Deposit(source, itemId, collection)
+            is OrderMatchSwapDto -> null
+        }
+    }
+
+    private fun extractItemId(source: ActivityDto): ItemIdDto? {
+        return when (source) {
+            is MintActivityDto -> source.itemId
+            is BurnActivityDto -> source.itemId
+            is TransferActivityDto -> source.itemId
+            is OrderMatchSellDto -> source.nft.type.ext.itemId
+            is OrderBidActivityDto -> source.take.type.ext.itemId
+            is OrderListActivityDto -> source.make.type.ext.itemId
+            is OrderCancelBidActivityDto -> source.take.ext.itemId
+            is OrderCancelListActivityDto -> source.make.ext.itemId
+            is AuctionOpenActivityDto -> source.auction.sell.type.ext.itemId
+            is AuctionBidActivityDto -> source.auction.sell.type.ext.itemId
+            is AuctionFinishActivityDto -> source.auction.sell.type.ext.itemId
+            is AuctionCancelActivityDto -> source.auction.sell.type.ext.itemId
+            is AuctionStartActivityDto -> source.auction.sell.type.ext.itemId
+            is AuctionEndActivityDto -> source.auction.sell.type.ext.itemId
+            is L2WithdrawalActivityDto -> source.itemId
+            is L2DepositActivityDto -> source.itemId
+            is OrderMatchSwapDto -> null
+        }
+    }
+
+    private fun getCollection(source: ActivityDto, itemId: ItemIdDto?, collection: String?): String? {
+        if (collection != null) return collection
+        return when (source) {
+            is MintActivityDto,
+            is BurnActivityDto,
+            is L2WithdrawalActivityDto,
+            is L2DepositActivityDto,
+            is TransferActivityDto -> itemId?.let { IdParser.extractContract(itemId) }
+            is OrderMatchSellDto -> source.nft.type.ext.getCollections()
+            is OrderBidActivityDto -> source.take.type.ext.getCollections()
+            is OrderListActivityDto -> source.make.type.ext.getCollections()
+            is OrderCancelBidActivityDto -> source.take.ext.getCollections()
+            is OrderCancelListActivityDto -> source.make.ext.getCollections()
+            is AuctionOpenActivityDto -> source.auction.sell.type.ext.getCollections()
+            is AuctionBidActivityDto -> source.auction.sell.type.ext.getCollections()
+            is AuctionFinishActivityDto -> source.auction.sell.type.ext.getCollections()
+            is AuctionCancelActivityDto -> source.auction.sell.type.ext.getCollections()
+            is AuctionStartActivityDto -> source.auction.sell.type.ext.getCollections()
+            is AuctionEndActivityDto -> source.auction.sell.type.ext.getCollections()
+            is OrderMatchSwapDto -> null
+        }
+    }
+
+
+    private fun convertMint(source: MintActivityDto, itemId: ItemIdDto?, collection: String?): EsActivity {
         return EsActivity(
             activityId = source.id.toString(),
-            date = source.date,
+            date = source.date.truncatedToSeconds(),
             blockNumber = source.blockchainInfo?.blockNumber,
             logIndex = source.blockchainInfo?.logIndex,
             blockchain = source.id.blockchain,
             type = ActivityTypeDto.MINT,
             userTo = source.owner.value,
             userFrom = null,
-            collection = IdParser.extractContract(itemId),
-            item = itemId.value,
+            collection = getCollection(source, itemId, collection),
+            item = itemId?.value.orEmpty(),
         )
     }
 
-    private fun convertBurn(source: BurnActivityDto): EsActivity {
-        val itemId = safeItemId(source.itemId, source.id.blockchain)
+    private fun convertBurn(source: BurnActivityDto, itemId: ItemIdDto?, collection: String?): EsActivity {
         return EsActivity(
             activityId = source.id.toString(),
-            date = source.date,
+            date = source.date.truncatedToSeconds(),
             blockNumber = source.blockchainInfo?.blockNumber,
             logIndex = source.blockchainInfo?.logIndex,
             blockchain = source.id.blockchain,
             type = ActivityTypeDto.BURN,
             userFrom = source.owner.value,
             userTo = null,
-            collection = IdParser.extractContract(itemId),
-            item = itemId.value,
+            collection = getCollection(source, itemId, collection),
+            item = itemId?.value.orEmpty(),
         )
     }
 
-    private fun convertTransfer(source: TransferActivityDto): EsActivity {
-        val itemId = safeItemId(source.itemId, source.id.blockchain)
+    private fun convertTransfer(source: TransferActivityDto, itemId: ItemIdDto?, collection: String?): EsActivity {
         return EsActivity(
             activityId = source.id.toString(),
-            date = source.date,
+            date = source.date.truncatedToSeconds(),
             blockNumber = source.blockchainInfo?.blockNumber,
             logIndex = source.blockchainInfo?.logIndex,
             blockchain = source.id.blockchain,
             type = ActivityTypeDto.TRANSFER,
             userFrom = source.from.value,
             userTo = source.owner.value,
-            collection = IdParser.extractContract(itemId),
-            item = itemId.value,
+            collection = getCollection(source, itemId, collection),
+            item = itemId?.value.orEmpty(),
         )
     }
 
-    private fun convertOrderMatchSell(source: OrderMatchSellDto): EsActivity {
+    private suspend fun convertOrderMatchSell(source: OrderMatchSellDto, itemId: ItemIdDto?, collection: String?): EsActivity {
+        val volumeInfo = sellActivityEnricher.provideVolumeInfo(source)
         return EsActivity(
             activityId = source.id.toString(),
-            date = source.date,
+            date = source.date.truncatedToSeconds(),
             blockNumber = source.blockchainInfo?.blockNumber,
             logIndex = source.blockchainInfo?.logIndex,
             blockchain = source.id.blockchain,
             type = ActivityTypeDto.SELL,
             userFrom = source.seller.value,
             userTo = source.buyer.value,
-            collection = source.nft.type.ext.getCollections(),
-            item = source.nft.type.ext.itemId?.value.orEmpty(),
+            collection = getCollection(source, itemId, collection),
+            item = itemId?.value.orEmpty(),
+            sellCurrency = volumeInfo.sellCurrency,
+            volumeUsd = volumeInfo.volumeUsd,
+            volumeSell = volumeInfo.volumeSell,
+            volumeNative = volumeInfo.volumeNative,
         )
     }
 
-    private fun convertOrderBid(source: OrderBidActivityDto): EsActivity {
+    private fun convertOrderBid(source: OrderBidActivityDto, itemId: ItemIdDto?, collection: String?): EsActivity {
         return EsActivity(
             activityId = source.id.toString(),
-            date = source.date,
+            date = source.date.truncatedToSeconds(),
             blockNumber = null,
             logIndex = null,
             blockchain = source.id.blockchain,
             type = ActivityTypeDto.BID,
             userFrom = source.maker.value,
             userTo = null,
-            collection = source.take.type.ext.getCollections(),
-            item = source.take.type.ext.itemId?.value.orEmpty(),
+            collection = getCollection(source, itemId, collection),
+            item = itemId?.value.orEmpty(),
         )
     }
 
-    private fun convertOrderList(source: OrderListActivityDto): EsActivity {
+    private fun convertOrderList(source: OrderListActivityDto, itemId: ItemIdDto?, collection: String?): EsActivity {
         return EsActivity(
             activityId = source.id.toString(),
-            date = source.date,
+            date = source.date.truncatedToSeconds(),
             blockNumber = null,
             logIndex = null,
             blockchain = source.id.blockchain,
             type = ActivityTypeDto.LIST,
             userFrom = source.maker.value,
             userTo = null,
-            collection = source.make.type.ext.getCollections(),
-            item = source.make.type.ext.itemId?.value.orEmpty(),
+            collection = getCollection(source, itemId, collection),
+            item = itemId?.value.orEmpty(),
         )
     }
 
-    private fun convertOrderCancelBid(source: OrderCancelBidActivityDto): EsActivity {
+    private fun convertOrderCancelBid(source: OrderCancelBidActivityDto, itemId: ItemIdDto?, collection: String?): EsActivity {
         return EsActivity(
             activityId = source.id.toString(),
-            date = source.date,
+            date = source.date.truncatedToSeconds(),
             blockNumber = source.blockchainInfo?.blockNumber,
             logIndex = source.blockchainInfo?.logIndex,
             blockchain = source.id.blockchain,
             type = ActivityTypeDto.CANCEL_BID,
             userFrom = source.maker.value,
             userTo = null,
-            collection = source.take.ext.getCollections(),
-            item = source.take.ext.itemId?.value.orEmpty(),
+            collection = getCollection(source, itemId, collection),
+            item = itemId?.value.orEmpty(),
         )
     }
 
-    private fun convertOrderCancelList(source: OrderCancelListActivityDto): EsActivity {
+    private fun convertOrderCancelList(source: OrderCancelListActivityDto, itemId: ItemIdDto?, collection: String?): EsActivity {
         return EsActivity(
             activityId = source.id.toString(),
-            date = source.date,
+            date = source.date.truncatedToSeconds(),
             blockNumber = source.blockchainInfo?.blockNumber,
             logIndex = source.blockchainInfo?.logIndex,
             blockchain = source.id.blockchain,
             type = ActivityTypeDto.CANCEL_LIST,
             userFrom = source.maker.value,
             userTo = null,
-            collection = source.make.ext.getCollections(),
-            item = source.make.ext.itemId?.value.orEmpty(),
+            collection = getCollection(source, itemId, collection),
+            item = itemId?.value.orEmpty(),
         )
     }
 
-    private fun convertAuctionOpen(source: AuctionOpenActivityDto): EsActivity {
+    private fun convertAuctionOpen(source: AuctionOpenActivityDto, itemId: ItemIdDto?, collection: String?): EsActivity {
         return EsActivity(
             activityId = source.id.toString(),
-            date = source.date,
+            date = source.date.truncatedToSeconds(),
             blockNumber = null,
             logIndex = null,
             blockchain = source.id.blockchain,
             type = ActivityTypeDto.AUCTION_CREATED,
             userFrom = source.auction.seller.value,
             userTo = null,
-            collection = source.auction.sell.type.ext.getCollections(),
-            item = source.auction.sell.type.ext.itemId?.value.orEmpty(),
+            collection = getCollection(source, itemId, collection),
+            item = itemId?.value.orEmpty(),
         )
     }
 
-    private fun convertAuctionBid(source: AuctionBidActivityDto): EsActivity {
+    private fun convertAuctionBid(source: AuctionBidActivityDto, itemId: ItemIdDto?, collection: String?): EsActivity {
         return EsActivity(
             activityId = source.id.toString(),
-            date = source.date,
+            date = source.date.truncatedToSeconds(),
             blockNumber = null,
             logIndex = null,
             blockchain = source.id.blockchain,
             type = ActivityTypeDto.AUCTION_BID,
             userFrom = source.auction.seller.value,
             userTo = source.bid.buyer.value,
-            collection = source.auction.sell.type.ext.getCollections(),
-            item = source.auction.sell.type.ext.itemId?.value.orEmpty(),
+            collection = getCollection(source, itemId, collection),
+            item = itemId?.value.orEmpty(),
         )
     }
 
-    private fun convertAuctionFinish(source: AuctionFinishActivityDto): EsActivity {
+    private fun convertAuctionFinish(source: AuctionFinishActivityDto, itemId: ItemIdDto?, collection: String?): EsActivity {
         return EsActivity(
             activityId = source.id.toString(),
-            date = source.date,
+            date = source.date.truncatedToSeconds(),
             blockNumber = null,
             logIndex = null,
             blockchain = source.id.blockchain,
             type = ActivityTypeDto.AUCTION_FINISHED,
             userFrom = source.auction.seller.value,
             userTo = null,
-            collection = source.auction.sell.type.ext.getCollections(),
-            item = source.auction.sell.type.ext.itemId?.value.orEmpty(),
+            collection = getCollection(source, itemId, collection),
+            item = itemId?.value.orEmpty(),
         )
     }
 
-    private fun convertAuctionCancel(source: AuctionCancelActivityDto): EsActivity {
+    private fun convertAuctionCancel(source: AuctionCancelActivityDto, itemId: ItemIdDto?, collection: String?): EsActivity {
         return EsActivity(
             activityId = source.id.toString(),
-            date = source.date,
+            date = source.date.truncatedToSeconds(),
             blockNumber = null,
             logIndex = null,
             blockchain = source.id.blockchain,
             type = ActivityTypeDto.AUCTION_CANCEL,
             userFrom = source.auction.seller.value,
             userTo = null,
-            collection = source.auction.sell.type.ext.getCollections(),
-            item = source.auction.sell.type.ext.itemId?.value.orEmpty(),
+            collection = getCollection(source, itemId, collection),
+            item = itemId?.value.orEmpty(),
         )
     }
 
-    private fun convertAuctionStart(source: AuctionStartActivityDto): EsActivity {
+    private fun convertAuctionStart(source: AuctionStartActivityDto, itemId: ItemIdDto?, collection: String?): EsActivity {
         return EsActivity(
             activityId = source.id.toString(),
-            date = source.date,
+            date = source.date.truncatedToSeconds(),
             blockNumber = null,
             logIndex = null,
             blockchain = source.id.blockchain,
             type = ActivityTypeDto.AUCTION_STARTED,
             userFrom = source.auction.seller.value,
             userTo = null,
-            collection = source.auction.sell.type.ext.getCollections(),
-            item = source.auction.sell.type.ext.itemId?.value.orEmpty(),
+            collection = getCollection(source, itemId, collection),
+            item = itemId?.value.orEmpty(),
         )
     }
 
-    private fun convertAuctionEnd(source: AuctionEndActivityDto): EsActivity {
+    private fun convertAuctionEnd(source: AuctionEndActivityDto, itemId: ItemIdDto?, collection: String?): EsActivity {
         return EsActivity(
             activityId = source.id.toString(),
-            date = source.date,
+            date = source.date.truncatedToSeconds(),
             blockNumber = null,
             logIndex = null,
             blockchain = source.id.blockchain,
             type = ActivityTypeDto.AUCTION_ENDED,
             userFrom = source.auction.seller.value,
             userTo = null,
-            collection = source.auction.sell.type.ext.getCollections(),
-            item = source.auction.sell.type.ext.itemId?.value.orEmpty(),
+            collection = getCollection(source, itemId, collection),
+            item = itemId?.value.orEmpty(),
         )
     }
 
-    private fun convertL2Withdrawal(source: L2WithdrawalActivityDto): EsActivity {
+    private fun convertL2Withdrawal(source: L2WithdrawalActivityDto, itemId: ItemIdDto?, collection: String?): EsActivity {
         return EsActivity(
             activityId = source.id.toString(),
-            date = source.date,
+            date = source.date.truncatedToSeconds(),
             blockNumber = null,
             logIndex = null,
             blockchain = source.id.blockchain,
             type = ActivityTypeDto.TRANSFER, // TODO
             userFrom = null,
             userTo = source.user.value,
-            collection = IdParser.extractContract(source.itemId),
-            item = source.itemId.value,
+            collection = getCollection(source, itemId, collection),
+            item = itemId?.value.orEmpty(),
         )
     }
 
-    private fun convertL2Deposit(source: L2DepositActivityDto): EsActivity {
+    private fun convertL2Deposit(source: L2DepositActivityDto, itemId: ItemIdDto?, collection: String?): EsActivity {
         return EsActivity(
             activityId = source.id.toString(),
-            date = source.date,
+            date = source.date.truncatedToSeconds(),
             blockNumber = null,
             logIndex = null,
             blockchain = source.id.blockchain,
             type = ActivityTypeDto.TRANSFER, // TODO
             userFrom = source.user.value,
             userTo = null,
-            collection = IdParser.extractContract(source.itemId),
-            item = source.itemId.value,
+            collection = getCollection(source, itemId, collection),
+            item = itemId?.value.orEmpty(),
         )
-    }
-
-    private fun safeItemId(itemId: ItemIdDto?, blockchain: BlockchainDto): ItemIdDto {
-        if (itemId != null) return itemId
-        // TODO ALPHA-454: Decide how to handle activity events with itemId=null
-        return ItemIdDto(blockchain, "")
     }
 
     private fun AssetTypeExtension.getCollections(): String? {
         return when {
             isCurrency -> currencyAddress()
-            itemId != null -> IdParser.extractContract(itemId!!)
             collectionId != null -> collectionId!!.value
+            itemId != null -> IdParser.extractContract(itemId!!)
             else -> null
         }
     }
