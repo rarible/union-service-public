@@ -21,6 +21,7 @@ protocol-union-api:
     fluentbit.io/parser: logfmt
 
 protocol-union-listener:
+  replicas: 1
   image:
     repository: union-service-listener
   environments:
@@ -39,6 +40,7 @@ protocol-union-listener:
     fluentbit.io/parser: logfmt
 
 protocol-union-meta-loader:
+  replicas: 1
   image:
     repository: union-service-meta-loader
   environments:
@@ -51,13 +53,13 @@ protocol-union-meta-loader:
     node.labels.rarible.service: true
   resources:
     jvm:
-      xmx_megabytes: 1024
-      max_direct_memory_megabytes: 256
+      xmx_megabytes: 512
+      max_direct_memory_megabytes: 128
   podAnnotations:
     fluentbit.io/parser: logfmt
 
 protocol-union-indexer:
-  enabled: false
+  replicas: 1
   image:
     repository: union-service-indexer
   environments:
@@ -70,13 +72,13 @@ protocol-union-indexer:
     node.labels.rarible.service: true
   resources:
     jvm:
-      xmx_megabytes: 1024
-      max_direct_memory_megabytes: 128
+      xmx_megabytes: 256
+      max_direct_memory_megabytes: 64
   podAnnotations:
     fluentbit.io/parser: logfmt
 
 protocol-union-worker:
-  enabled: false
+  replicas: 1
   image:
     repository: union-service-worker
   environments:
@@ -88,7 +90,7 @@ protocol-union-worker:
     node.labels.rarible.service: true
   resources:
     jvm:
-      xmx_megabytes: 1024
-      max_direct_memory_megabytes: 128
+      xmx_megabytes: 256
+      max_direct_memory_megabytes: 64
   podAnnotations:
     fluentbit.io/parser: logfmt

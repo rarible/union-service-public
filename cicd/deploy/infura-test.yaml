@@ -55,12 +55,14 @@ protocol-union-meta-loader:
     <<: *sharedEnvironments
 
 protocol-union-indexer:
+  enabled: false
   tolerations:
     - *sharedTolerations
   environments:
     <<: *sharedEnvironments
 
 protocol-union-worker:
+  enabled: false
   tolerations:
     - *sharedTolerations
   environments:
