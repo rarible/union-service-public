@@ -232,11 +232,11 @@ class OrderSourceSelectServiceTest {
             // given
             every { featureFlagsProperties.enableOrderQueriesToElasticSearch } returns true
             coEvery {
-                orderElasticService.getOrderBidsByMaker(blockchains, platform, maker, origin, status, start, end, continuation, size)
+                orderElasticService.getOrderBidsByMaker(blockchains, platform, listOf(maker), origin, status, start, end, continuation, size)
             } returns elasticOrdersResponse
 
             // when
-            val actual = service.getOrderBidsByMaker(blockchains, platform, maker, origin, status, start, end, continuation, size)
+            val actual = service.getOrderBidsByMaker(blockchains, platform, listOf(maker), origin, status, start, end, continuation, size)
 
             // then
             assertThat(actual).isEqualTo(elasticOrdersResponse)
@@ -247,11 +247,11 @@ class OrderSourceSelectServiceTest {
             // given
             every { featureFlagsProperties.enableOrderQueriesToElasticSearch } returns false
             coEvery {
-                orderApiService.getOrderBidsByMaker(blockchains, platform, maker, origin, status, start, end, continuation, size)
+                orderApiService.getOrderBidsByMaker(blockchains, platform, listOf(maker), origin, status, start, end, continuation, size)
             } returns apiOrdersResponse
 
             // when
-            val actual = service.getOrderBidsByMaker(blockchains, platform, maker, origin, status, start, end, continuation, size)
+            val actual = service.getOrderBidsByMaker(blockchains, platform, listOf(maker), origin, status, start, end, continuation, size)
 
             // then
             assertThat(actual).isEqualTo(apiOrdersResponse)
@@ -299,11 +299,11 @@ class OrderSourceSelectServiceTest {
             // given
             every { featureFlagsProperties.enableOrderQueriesToElasticSearch } returns true
             coEvery {
-                orderElasticService.getSellOrdersByMaker(maker, blockchains, platform, origin, continuation, size, status)
+                orderElasticService.getSellOrdersByMaker(listOf(maker), blockchains, platform, origin, continuation, size, status)
             } returns elasticOrdersResponse
 
             // when
-            val actual = service.getSellOrdersByMaker(maker, blockchains, platform, origin, continuation, size, status)
+            val actual = service.getSellOrdersByMaker(listOf(maker), blockchains, platform, origin, continuation, size, status)
 
             // then
             assertThat(actual).isEqualTo(elasticOrdersResponse)
@@ -314,11 +314,11 @@ class OrderSourceSelectServiceTest {
             // given
             every { featureFlagsProperties.enableOrderQueriesToElasticSearch } returns false
             coEvery {
-                orderApiService.getSellOrdersByMaker(maker, blockchains, platform, origin, continuation, size, status)
+                orderApiService.getSellOrdersByMaker(listOf(maker), blockchains, platform, origin, continuation, size, status)
             } returns apiOrdersResponse
 
             // when
-            val actual = service.getSellOrdersByMaker(maker, blockchains, platform, origin, continuation, size, status)
+            val actual = service.getSellOrdersByMaker(listOf(maker), blockchains, platform, origin, continuation, size, status)
 
             // then
             assertThat(actual).isEqualTo(apiOrdersResponse)

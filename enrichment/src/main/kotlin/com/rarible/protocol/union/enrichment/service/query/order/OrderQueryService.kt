@@ -49,7 +49,7 @@ interface OrderQueryService {
     suspend fun getOrderBidsByMaker(
         blockchains: List<BlockchainDto>?,
         platform: PlatformDto?,
-        maker: String,
+        maker: List<String>,
         origin: String?,
         status: List<OrderStatusDto>?,
         start: Long?,
@@ -67,7 +67,7 @@ interface OrderQueryService {
     ): OrdersDto
 
     suspend fun getSellOrdersByMaker(
-        maker: String,
+        maker: List<String>,
         blockchains: List<BlockchainDto>?,
         platform: PlatformDto?,
         origin: String?,

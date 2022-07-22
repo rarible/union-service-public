@@ -14,6 +14,10 @@ class BlockchainFilter(
         return exclude(group.subchains())
     }
 
+    fun exclude(group: Set<BlockchainGroupDto>): List<BlockchainDto> {
+        return exclude(group.flatMap { it.subchains() })
+    }
+
     fun exclude(blockchains: List<BlockchainDto>): List<BlockchainDto> {
         if (filter == null || filter.isEmpty()) {
             return blockchains

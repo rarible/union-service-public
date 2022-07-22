@@ -114,7 +114,7 @@ open class EthOrderService(
 
     override suspend fun getOrderBidsByMaker(
         platform: PlatformDto?,
-        maker: String,
+        maker: List<String>,
         origin: String?,
         status: List<OrderStatusDto>?,
         start: Long?,
@@ -123,7 +123,7 @@ open class EthOrderService(
         size: Int
     ): Slice<OrderDto> {
         val orders = orderControllerApi.getOrderBidsByMakerAndByStatus(
-            maker,
+            maker.map { EthConverter.convertToAddress(it) },
             origin,
             EthConverter.convert(platform),
             continuation,
@@ -266,7 +266,7 @@ open class EthOrderService(
 
     override suspend fun getSellOrdersByMaker(
         platform: PlatformDto?,
-        maker: String,
+        maker: List<String>,
         origin: String?,
         status: List<OrderStatusDto>?,
         continuation: String?,
@@ -274,7 +274,7 @@ open class EthOrderService(
     ): Slice<OrderDto> {
         val filteredStatus = filterStatus(status) ?: return Slice.empty()
         val orders = orderControllerApi.getSellOrdersByMakerAndByStatus(
-            maker,
+            maker.map { EthConverter.convertToAddress(it) },
             origin,
             EthConverter.convert(platform),
             continuation,

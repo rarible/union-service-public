@@ -241,23 +241,30 @@ class ImmutablexApiClient(
     }
 
     suspend fun getSellOrdersByMaker(
-        maker: String,
+        makers: List<String>,
         status: List<OrderStatusDto>?,
         continuation: String?,
         size: Int,
     ): List<ImmutablexOrder> {
-        val params = mapOf("user" to maker)
-        if (status != null) {
-            val pages = status.map {
-                coroutineScope {
-                    async(Dispatchers.IO) {
-                        ordersByStatus(continuation, size, it, OrderSortDto.LAST_UPDATE_DESC, params)
+        val pages = makers.flatMap { maker ->
+            val params = mapOf("user" to maker)
+            if (status != null) {
+                return@flatMap status.map {
+                    coroutineScope {
+                        async(Dispatchers.IO) {
+                            ordersByStatus(continuation, size, it, OrderSortDto.LAST_UPDATE_DESC, params)
+                        }
                     }
                 }
-            }.awaitAll()
-            return pages.flatMap { it.result }.sortedByDescending { it.updatedAt }
-        }
-        return ordersByStatus(continuation, size, null, OrderSortDto.LAST_UPDATE_DESC, params).result
+            } else {
+                return@flatMap listOf(coroutineScope {
+                    async(Dispatchers.IO) {
+                        ordersByStatus(continuation, size, null, OrderSortDto.LAST_UPDATE_DESC, params)
+                    }
+                })
+            }
+        }.awaitAll()
+        return pages.flatMap { it.result }.sortedByDescending { it.updatedAt }
     }
 
     suspend fun getMints(

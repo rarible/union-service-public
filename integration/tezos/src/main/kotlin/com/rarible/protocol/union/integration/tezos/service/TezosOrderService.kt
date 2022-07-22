@@ -155,7 +155,7 @@ open class TezosOrderService(
 
     override suspend fun getOrderBidsByMaker(
         platform: PlatformDto?,
-        maker: String,
+        maker: List<String>,
         origin: String?,
         status: List<OrderStatusDto>?,
         start: Long?,
@@ -165,7 +165,7 @@ open class TezosOrderService(
     ): Slice<OrderDto> {
         // TODO TEZOS add status/start/end filtering
         val orders = orderControllerApi.getOrderBidsByMaker(
-            maker,
+            maker.first(),
             origin,
             size,
             continuation
@@ -304,20 +304,27 @@ open class TezosOrderService(
 
     override suspend fun getSellOrdersByMaker(
         platform: PlatformDto?,
-        maker: String,
+        maker: List<String>,
         origin: String?,
         status: List<OrderStatusDto>?,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto> {
+    ): Slice<OrderDto> = if (dipdupOrderService.enabled()) {
+        dipdupOrderService.getSellOrdersByMaker(
+            maker = maker,
+            status = status,
+            continuation = continuation,
+            size = size
+        )
+    } else {
         val orders = orderControllerApi.getSellOrdersByMaker(
-            maker,
+            maker.first(),
             origin,
             tezosOrderConverter.convert(status),
             size,
             continuation
         ).awaitFirst()
-        return tezosOrderConverter.convert(orders, blockchain)
+        tezosOrderConverter.convert(orders, blockchain)
     }
 
     private fun isValidUUID(str: String?): Boolean {

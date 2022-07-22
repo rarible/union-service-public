@@ -87,7 +87,7 @@ class OrderProxyService(
 
     override suspend fun getOrderBidsByMaker(
         platform: PlatformDto?,
-        maker: String,
+        maker: List<String>,
         origin: String?,
         status: List<OrderStatusDto>?,
         start: Long?,
@@ -219,7 +219,7 @@ class OrderProxyService(
 
     override suspend fun getSellOrdersByMaker(
         platform: PlatformDto?,
-        maker: String,
+        maker: List<String>,
         origin: String?,
         status: List<OrderStatusDto>?,
         continuation: String?,
