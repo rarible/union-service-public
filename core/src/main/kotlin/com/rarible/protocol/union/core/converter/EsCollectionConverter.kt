@@ -19,7 +19,8 @@ object EsCollectionConverter {
                     name = it.name,
                     description = it.description,
                 )
-            }
+            },
+            self = collection.self
         )
     }
 }

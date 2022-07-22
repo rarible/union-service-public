@@ -34,9 +34,11 @@ class ItemEventHandler(
         val refreshPolicy =
             if (featureFlagsProperties.enableItemSaveImmediateToElasticSearch) {
                 WriteRequest.RefreshPolicy.IMMEDIATE
-            }
-            else {
-                WriteRequest.RefreshPolicy.NONE
+            } else {
+                if (convertedEvents.any { it.self == true })
+                    WriteRequest.RefreshPolicy.IMMEDIATE
+                else
+                    WriteRequest.RefreshPolicy.NONE
             }
 
         repository.saveAll(convertedEvents, refreshPolicy = refreshPolicy)

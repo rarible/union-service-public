@@ -17,5 +17,6 @@ data class UnionItem(
     val lastUpdatedAt: Instant,
     val supply: BigInteger,
     val meta: UnionMeta? = null, // TODO should be removed
-    val deleted: Boolean
+    val deleted: Boolean,
+    val self: Boolean? = null,
 )
