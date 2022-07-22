@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.math.BigDecimal
 import java.math.BigInteger
+import java.math.MathContext
 
 @Component
 class DipDupActivityConverter(
@@ -58,6 +59,20 @@ class DipDupActivityConverter(
         else -> null
     }
 
+    fun price(value: BigDecimal, makeValue: BigDecimal, platform: TezosPlatform) =
+        when (platform) {
+            // remove after ECHO-180
+            TezosPlatform.RARIBLE_V2 -> value
+            else -> {
+                try {
+                    value.divide(makeValue, MathContext.DECIMAL128)
+                } catch (e: Exception) {
+                    logger.error("Failed to calculate price: $value", e)
+                    value
+                }
+            }
+        }
+
     private suspend fun convertInternal(activity: DipDupActivity, blockchain: BlockchainDto): ActivityDto {
         val activityId = ActivityIdDto(blockchain, activity.id)
         val date = activity.date.toInstant()
@@ -66,11 +81,12 @@ class DipDupActivityConverter(
             is DipDupOrderListActivity -> {
                 val make = DipDupConverter.convert(activity.make, blockchain)
                 val take = DipDupConverter.convert(activity.take, blockchain)
+                val price = price(activity.take.assetValue, activity.make.assetValue, activity.source)
 
                 OrderListActivityDto(
                     id = activityId,
                     date = date,
-                    price = activity.take.assetValue,
+                    price = price,
                     priceUsd = currencyService.toUsd(blockchain, take.type, make.value),
                     source = convert(activity.source),
                     hash = activity.hash,
