@@ -83,7 +83,10 @@ open class TezosItemService(
     }
 
     override suspend fun resetItemMeta(itemId: String) {
-        itemControllerApi.resetNftItemMetaById(itemId).awaitFirstOrNull()
+        // We can reset meta only for legacy backend
+        if (!tzktItemService.enabled()) {
+            itemControllerApi.resetNftItemMetaById(itemId).awaitFirstOrNull()
+        }
     }
 
     override suspend fun getItemsByCollection(

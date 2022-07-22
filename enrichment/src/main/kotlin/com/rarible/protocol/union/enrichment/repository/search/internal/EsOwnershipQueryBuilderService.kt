@@ -31,8 +31,8 @@ class EsOwnershipQueryBuilderService(
 
         cursorService.applyCursor(query, filter.cursor)
 
-        builder.sortByField(EsOwnership::date.name, SortOrder.DESC)
-        builder.sortByField(EsOwnership::ownershipId.name, SortOrder.DESC)
+        builder.sortByField(EsOwnership::date, SortOrder.DESC)
+        builder.sortByField(EsOwnership::ownershipId, SortOrder.DESC)
 
         builder.withQuery(query)
         return builder.build()

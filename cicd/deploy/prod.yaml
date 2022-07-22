@@ -1,5 +1,5 @@
 protocol-union-api:
-  replicas: 3
+  replicas: 2
   service:
     nodePort: 30118
   resources:
@@ -14,7 +14,7 @@ protocol-union-listener:
       max_direct_memory_megabytes: 1024
 
 protocol-union-meta-loader:
-  replicas: 8
+  replicas: 6
   resources:
     jvm:
       xmx_megabytes: 2048

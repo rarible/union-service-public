@@ -9,6 +9,7 @@ import org.elasticsearch.search.sort.SortBuilders
 import org.elasticsearch.search.sort.SortOrder
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder
 import java.time.Instant
+import kotlin.reflect.KProperty
 
 fun BoolQueryBuilder.mustMatchTerms(terms: Set<*>?, field: String) {
     if (terms != null && terms.isNotEmpty()) {
@@ -36,12 +37,12 @@ fun BoolQueryBuilder.mustMatchRange(from: Instant?, to: Instant?, field: String)
 }
 
 fun prepareTerms(terms: Set<*>): List<String> {
-    return terms.map { it.toString() /* .lowercase() */ }
+    return terms.map { it.toString() }
 }
 
-fun NativeSearchQueryBuilder.sortByField(fieldName: String, order: SortOrder) {
+fun NativeSearchQueryBuilder.sortByField(field: KProperty<*>, order: SortOrder) {
     val sort = SortBuilders
-        .fieldSort(fieldName)
+        .fieldSort(field.name)
         .order(order)
     withSort(sort)
 }

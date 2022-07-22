@@ -115,6 +115,6 @@ class EsActivityQueryBuilderService(
     }
 
     private fun prepareTerms(terms: Set<*>): List<String> {
-        return terms.map { it.toString() /* .lowercase() */ }
+        return terms.map { it.toString() }
     }
 }
