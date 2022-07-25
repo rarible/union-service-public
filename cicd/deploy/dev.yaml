@@ -2,25 +2,3 @@ protocol-union-api:
   service:
     nodePort: 30318
 
-protocol-union-meta-loader:
-  replicas: 1
-  resources:
-    jvm:
-      xmx_megabytes: 512
-      max_direct_memory_megabytes: 128
-
-protocol-union-indexer:
-  enabled: true
-  replicas: 1
-  resources:
-    jvm:
-      xmx_megabytes: 256
-      max_direct_memory_megabytes: 128
-
-protocol-union-worker:
-  enabled: true
-  replicas: 1
-  resources:
-    jvm:
-      xmx_megabytes: 256
-      max_direct_memory_megabytes: 128

@@ -17,10 +17,9 @@ protocol-union-meta-loader:
   replicas: 8
   resources:
     jvm:
-      xmx_megabytes: 2048
+      xmx_megabytes: 1536
 
 protocol-union-indexer:
-  enabled: true
   replicas: 3
   resources:
     jvm:
@@ -28,8 +27,6 @@ protocol-union-indexer:
       max_direct_memory_megabytes: 256
 
 protocol-union-worker:
-  enabled: true
-  replicas: 1
   resources:
     jvm:
       xmx_megabytes: 512
