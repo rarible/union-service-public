@@ -41,12 +41,12 @@ class UnionContentMetaLoaderIt : AbstractIntegrationTest() {
     @Test
     fun `url not resolved`() = runBlocking<Unit> {
         val content = randomUnionContent(UnionImageProperties(MimeType.JPEG_IMAGE.value))
-            .copy(url = "abc")
+            .copy(url = "1993.jpg")
 
-        val result = unionMetaConLoader.enrichContent(itemId, listOf(content))[0]
+        val result = unionMetaConLoader.enrichContent(itemId, listOf(content))
 
-        // Nothing to do here, kept as is
-        assertThat(result).isEqualTo(content)
+        // Unparseable urls should be filtered
+        assertThat(result).isEmpty()
     }
 
     @Test

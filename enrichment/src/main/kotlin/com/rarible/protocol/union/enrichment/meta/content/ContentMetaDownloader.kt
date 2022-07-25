@@ -40,13 +40,13 @@ class ContentMetaDownloader(
                 val resource = contentMetaService.parseUrl(content.url)
                 if (resource == null) {
                     metrics.onContentResolutionFailed(itemId.blockchain, "remote", "unknown_url_format")
-                    logger.warn("Unknown URL format: ${content.url}")
-                    return@async content
+                    logger.warn("Unknown URL format in content of Item $itemId: ${content.url}")
+                    return@async null
                 }
 
                 downloadContent(itemId, content, resource)
             }
-        }.awaitAll()
+        }.awaitAll().filterNotNull()
     }
 
     private suspend fun downloadContent(
