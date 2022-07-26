@@ -14,7 +14,7 @@ class ItemMetaMetrics(
     // Set of metrics to gather statistics for meta fetching from blockchains
 
     fun onMetaFetched(blockchain: BlockchainDto) {
-        increment(META_FETCH, tag(blockchain), status("ok"))
+        increment(META_FETCH, tag(blockchain), status("ok"), reason("ok")) // TODO should be separate metric
     }
 
     fun onMetaFetchNotFound(blockchain: BlockchainDto) {
