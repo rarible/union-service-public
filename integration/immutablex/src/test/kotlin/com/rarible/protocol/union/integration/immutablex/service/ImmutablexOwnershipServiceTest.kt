@@ -69,7 +69,7 @@ internal class ImmutablexOwnershipServiceTest {
                 OwnershipIdDto(
                     BlockchainDto.IMMUTABLEX,
                     ImmutablexData.itemId_1,
-                    UnionAddress(BlockchainGroupDto.IMMUTABLEX, "0x6d13857ca83de08456b2b40aaf09a28e0aab056e")
+                    UnionAddress(BlockchainGroupDto.ETHEREUM, "0x6d13857ca83de08456b2b40aaf09a28e0aab056e")
                 ),
                 CollectionIdDto(BlockchainDto.IMMUTABLEX, ImmutablexData.contract_1),
                 BigInteger.ONE,
@@ -130,7 +130,7 @@ internal class ImmutablexOwnershipServiceTest {
                         OwnershipIdDto(
                             BlockchainDto.IMMUTABLEX,
                             ImmutablexData.itemId_1,
-                            UnionAddress(BlockchainGroupDto.IMMUTABLEX, "0x6d13857ca83de08456b2b40aaf09a28e0aab056e")
+                            UnionAddress(BlockchainGroupDto.ETHEREUM, "0x6d13857ca83de08456b2b40aaf09a28e0aab056e")
                         ),
                         CollectionIdDto(BlockchainDto.IMMUTABLEX, ImmutablexData.contract_1),
                         BigInteger.ONE,
