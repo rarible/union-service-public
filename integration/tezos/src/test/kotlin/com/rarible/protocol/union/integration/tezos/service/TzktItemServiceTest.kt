@@ -65,7 +65,7 @@ class TzktItemServiceTest {
         val itemId = "test:123"
         val tzktToken = tzktToken(itemId)
         val continuation = "continuation"
-        coEvery { tokenClient.allTokensByLastUpdate(100, null, true) } returns Page(listOf(tzktToken), continuation)
+        coEvery { tokenClient.allTokensByLastUpdate(100, null, false, false) } returns Page(listOf(tzktToken), continuation)
 
         val page = service.getAllItems(
             continuation = null,
