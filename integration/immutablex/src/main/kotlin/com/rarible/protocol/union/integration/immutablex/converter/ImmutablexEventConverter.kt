@@ -100,7 +100,7 @@ class ImmutablexEventConverter(
             is ImmutablexWithdrawal -> L2WithdrawalActivityDto(
                 id = id,
                 date = event.timestamp,
-                user = UnionAddress(BlockchainGroupDto.IMMUTABLEX, event.sender),
+                user = UnionAddress(BlockchainGroupDto.ETHEREUM, event.sender),
                 status = event.status,
                 itemId = ItemIdDto(blockchain, event.token.data.tokenAddress, event.token.data.tokenId()),
                 value = event.token.data.quantity
