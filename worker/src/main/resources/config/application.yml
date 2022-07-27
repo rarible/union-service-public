@@ -141,7 +141,7 @@ common:
 worker:
   search-reindex:
     activity:
-      enabled: true
+      enabled: ${consul.worker.activity.enabled:true}
       blockchains:
         - blockchain: ETHEREUM
           enabled: true
@@ -156,7 +156,7 @@ worker:
         - blockchain: IMMUTABLEX
           enabled: false
     collection:
-      enabled: true
+      enabled: ${consul.worker.collection.enabled:true}
       blockchains:
         - blockchain: ETHEREUM
           enabled: true
@@ -171,7 +171,7 @@ worker:
         - blockchain: IMMUTABLEX
           enabled: false
     item:
-      enabled: true
+      enabled: ${consul.worker.item.enabled:false}
       blockchains:
         - blockchain: ETHEREUM
           enabled: true
@@ -186,7 +186,7 @@ worker:
         - blockchain: IMMUTABLEX
           enabled: false
     ownership:
-      enabled: true
+      enabled: ${consul.worker.ownership.enabled:false}
       blockchains:
         - blockchain: ETHEREUM
           enabled: true
@@ -201,7 +201,7 @@ worker:
         - blockchain: IMMUTABLEX
           enabled: false
     order:
-      enabled: true
+      enabled: ${consul.worker.order.enabled:false}
       blockchains:
         - blockchain: ETHEREUM
           enabled: true
