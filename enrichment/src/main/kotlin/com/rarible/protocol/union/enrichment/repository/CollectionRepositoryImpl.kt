@@ -29,7 +29,7 @@ class CollectionRepositoryImpl(
     private val template: ReactiveMongoTemplate
 ) : CollectionRepository {
 
-    private val logger = LoggerFactory.getLogger(ItemRepositoryImpl::class.java)
+    private val logger = LoggerFactory.getLogger(CollectionRepositoryImpl::class.java)
 
     private val collection: String = template.getCollectionName(ShortCollection::class.java)
 
@@ -86,5 +86,4 @@ class CollectionRepositoryImpl(
             MULTI_CURRENCY_DEFINITION
         )
     }
-
 }
