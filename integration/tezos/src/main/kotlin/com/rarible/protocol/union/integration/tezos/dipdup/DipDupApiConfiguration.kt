@@ -91,8 +91,9 @@ class DipDupApiConfiguration(
     @Bean
     fun royaltyService(
         bigMapKeyClient: BigMapKeyClient,
+        ownershipClient: OwnershipClient,
         ipfsClient: IPFSClient
-    ) = RoyaltiesHandler(bigMapKeyClient, ipfsClient, properties.knownAddresses!!)
+    ) = RoyaltiesHandler(bigMapKeyClient, ownershipClient, ipfsClient, properties.knownAddresses!!)
 
     @Bean
     fun tokenClient(metaService: MetaService, royaltiesHandler: RoyaltiesHandler) =
