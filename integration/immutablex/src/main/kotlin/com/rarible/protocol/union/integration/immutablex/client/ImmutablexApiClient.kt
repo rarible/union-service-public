@@ -12,8 +12,6 @@ import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexOrder
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexOrdersPage
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexTradesPage
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexTransfersPage
-import java.math.BigInteger
-import java.time.Instant
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -23,6 +21,8 @@ import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.toEntity
 import scalether.domain.Address
+import java.math.BigInteger
+import java.time.Instant
 
 class ImmutablexApiClient(
     private val webClient: WebClient,
@@ -31,9 +31,8 @@ class ImmutablexApiClient(
     val collectionsApi = CollectionsApi(webClient)
 
     suspend fun getAsset(itemId: String): ImmutablexAsset {
-        val (collection, tokenId) = itemId.split(":")
-        val assetId = String(tokenId.toBigInteger().toByteArray())
-        return webClient.get().uri("/assets/${collection}/${assetId}?include_fees=true")
+        val (collection, tokenId) = IdParser.split(itemId, 2)
+        return webClient.get().uri("/assets/${collection}/${tokenId}?include_fees=true")
             .accept(MediaType.APPLICATION_JSON)
             .retrieve()
             .toEntity(ImmutablexAsset::class.java)
@@ -46,22 +45,21 @@ class ImmutablexApiClient(
         lastUpdatedTo: Long?,
         lastUpdatedFrom: Long?,
     ): ImmutablexAssetsPage {
-        return webClient.get().uri { builder ->
-            builder.path("/assets")
-            builder.queryParam("order_by","updated_at")
-            builder.queryParam("direction","desc")
-            builder.queryParam("include_fees",true)
-            builder.queryParam("page_size", size)
-            lastUpdatedFrom?.let {
-                builder.queryParam("updated_max_timestamp", Instant.ofEpochMilli(it))
-            }
-            lastUpdatedTo?.let {
-                builder.queryParam("updated_min_timestamp", Instant.ofEpochMilli(it))
-            }
-            DateIdContinuation.parse(continuation)?.let {
-                builder.queryParam("updated_max_timestamp", it.date)
-            }
-            builder.build()
+        val from = lastUpdatedFrom?.let { Instant.ofEpochMilli(it) }
+        val continuationFrom = DateIdContinuation.parse(continuation)?.date
+        val queryFrom = listOfNotNull(from, continuationFrom).maxOrNull()
+
+        val to = lastUpdatedTo?.let { Instant.ofEpochMilli(it) }
+
+        return webClient.get().uri {
+            it.path("/assets")
+                .queryParam("order_by", "updated_at")
+                .queryParam("direction", "desc")
+                .queryParam("include_fees", true)
+                .queryParam("page_size", size)
+                .queryParamNotNull("updated_max_timestamp", queryFrom)
+                .queryParamNotNull("updated_min_timestamp", to)
+                .build()
         }.accept(MediaType.APPLICATION_JSON)
             .retrieve()
             .toEntity(ImmutablexAssetsPage::class.java)
@@ -75,33 +73,33 @@ class ImmutablexApiClient(
         continuation: String?,
         size: Int,
     ): ImmutablexAssetsPage {
-        val query = StringBuilder("?order_by=updated_at&direction=desc&include_fees=true")
-        query.append("&collection=$collection")
-        query.append("&page_size=$size")
-        if (!owner.isNullOrEmpty()) {
-            query.append("&user=$owner")
-        }
-        if (!continuation.isNullOrEmpty()) {
-            query.append("&cursor=$continuation")
-        }
-        return webClient.get().uri("/assets$query").accept(MediaType.APPLICATION_JSON)
+        return webClient.get().uri {
+            it.path("/assets")
+                .queryParam("order_by", "updated_at")
+                .queryParam("direction", "desc")
+                .queryParam("include_fees", true)
+                .queryParam("page_size", size)
+                .queryParam("collection", collection)
+                .queryParamNotNull("user", owner)
+                .queryParamNotNull("cursor", continuation)
+                .build()
+        }.accept(MediaType.APPLICATION_JSON)
             .retrieve()
             .toEntity(ImmutablexAssetsPage::class.java)
             .awaitSingle().body!!
     }
 
     suspend fun getAssetsByOwner(owner: String, continuation: String?, size: Int): ImmutablexAssetsPage {
-        return webClient.get().uri{ builder ->
-            builder.path("/assets")
-            builder.queryParam("order_by", "updated_at")
-            builder.queryParam("direction", "desc")
-            builder.queryParam("include_fees", true)
-            builder.queryParam("user", owner)
-            builder.queryParam("page_size", size)
-            DateIdContinuation.parse(continuation)?.let {
-                builder.queryParam("updated_max_timestamp", it.date)
-            }
-            builder.build()
+        val continuationFrom = DateIdContinuation.parse(continuation)?.date
+        return webClient.get().uri {
+            it.path("/assets")
+                .queryParam("order_by", "updated_at")
+                .queryParam("direction", "desc")
+                .queryParam("include_fees", true)
+                .queryParam("page_size", size)
+                .queryParamNotNull("user", owner)
+                .queryParamNotNull("updated_max_timestamp", continuationFrom)
+                .build()
         }.accept(MediaType.APPLICATION_JSON)
             .retrieve()
             .toEntity(ImmutablexAssetsPage::class.java)
@@ -161,7 +159,7 @@ class ImmutablexApiClient(
                 }
             }.awaitAll()
             val orders = pages.flatMap { it.result }
-            return when(direction) {
+            return when (direction) {
                 OrderSortDto.LAST_UPDATE_ASC -> orders.sortedBy { it.updatedAt }
                 OrderSortDto.LAST_UPDATE_DESC -> orders.sortedByDescending { it.updatedAt }
             }
@@ -171,6 +169,7 @@ class ImmutablexApiClient(
     }
 
     suspend fun getSellOrders(continuation: String?, size: Int): List<ImmutablexOrder> {
+        val continuationFrom = DateIdContinuation.parse(continuation)?.date
         return webClient.get().uri {
             it.path("/orders")
                 .queryParam("page_size", size)
@@ -178,17 +177,15 @@ class ImmutablexApiClient(
                 .queryParam("sell_token_type", "ERC721")
                 .queryParam("order_by", "updated_at")
                 .queryParam("direction", "desc")
-            if (!continuation.isNullOrEmpty()) {
-                val (dateStr, _) = continuation.split("_")
-                it.queryParam("updated_min_timestamp", dateStr)
-            }
-            it.build()
+                .queryParamNotNull("updated_min_timestamp", continuationFrom)
+                .build()
         }.retrieve()
             .toEntity<ImmutablexOrdersPage>()
             .awaitSingle().body!!.result
     }
 
     suspend fun getSellOrdersByCollection(collection: String, continuation: String?, size: Int): List<ImmutablexOrder> {
+        val continuationFrom = DateIdContinuation.parse(continuation)?.date
         return webClient.get().uri {
             it.path("/orders")
                 .queryParam("page_size", size)
@@ -197,11 +194,8 @@ class ImmutablexApiClient(
                 .queryParam("order_by", "updated_at")
                 .queryParam("direction", "desc")
                 .queryParam("sell_token_address", collection)
-            if (!continuation.isNullOrEmpty()) {
-                val (dateStr, _) = continuation.split("_")
-                it.queryParam("updated_min_timestamp", dateStr)
-            }
-            it.build()
+                .queryParamNotNull("updated_min_timestamp", continuationFrom)
+                .build()
         }.retrieve()
             .toEntity<ImmutablexOrdersPage>()
             .awaitSingle().body!!.result
@@ -337,10 +331,12 @@ class ImmutablexApiClient(
             uriBuilder.path("/orders")
                 .queryParam("page_size", size)
                 .queryParam("order_by", "updated_at")
-                .queryParam("direction", when(direction) {
+                .queryParam(
+                    "direction", when (direction) {
                     OrderSortDto.LAST_UPDATE_DESC -> "DESC"
                     OrderSortDto.LAST_UPDATE_ASC -> "ASC"
-                })
+                }
+                )
                 .queryParam("include_fees", true)
             if (!continuation.isNullOrEmpty()) {
                 val (dateStr, _) = continuation.split("_")
@@ -383,37 +379,37 @@ class ImmutablexApiClient(
         tokenIdParamName: String = "token_id"
     ) = webClient.get()
         .uri {
+            val continuationFrom = DateIdContinuation.parse(continuation)?.date
+            val queryFrom = listOfNotNull(from, continuationFrom).maxOrNull()
+
             it.path(path)
             it.queryParam("page_size", pageSize)
 
-            val c = listOfNotNull(from, getDateFromContinuation(continuation)).maxOrNull()
-            if (c != null) {
-                it.queryParam("min_timestamp", c)
-            }
-            if (to != null) {
-                it.queryParam("max_timestamp", to)
-            }
+            it.queryParamNotNull("min_timestamp", queryFrom)
+            it.queryParamNotNull("max_timestamp", to)
+
+            it.queryParamNotNull("user", user)
+
             if (itemId != null) {
                 val (address, id) = IdParser.split(itemId, 2)
                 it.queryParam(tokenAddressParamName, address)
-                it.queryParam(tokenIdParamName, String(id.toBigInteger().toByteArray()))
+                it.queryParam(tokenIdParamName, id)
             }
-            if (user != null) {
-                it.queryParam("user", user)
-            }
+
             if (sort != null) {
                 it.queryParam("order_by", "updated_at")
-                it.queryParam("direction", when(sort) {
+                it.queryParam(
+                    "direction", when (sort) {
                     ActivitySortDto.LATEST_FIRST -> "desc"
                     ActivitySortDto.EARLIEST_FIRST -> "asc"
-                })
+                }
+                )
             }
             it.build()
         }
         .accept(MediaType.APPLICATION_JSON)
         .retrieve()
         .toEntity(T::class.java).awaitSingle().body
-
 }
 
 private fun OrderStatusDto.immStatus(): String = when (this) {

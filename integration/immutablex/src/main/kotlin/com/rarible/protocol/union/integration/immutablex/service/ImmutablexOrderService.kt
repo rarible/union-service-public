@@ -8,8 +8,8 @@ import com.rarible.protocol.union.dto.EthEthereumAssetTypeDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
-import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.PlatformDto
+import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.continuation.OrderContinuation
 import com.rarible.protocol.union.dto.continuation.page.Paging
 import com.rarible.protocol.union.dto.continuation.page.Slice
@@ -24,6 +24,7 @@ class ImmutablexOrderService(
     private val client: ImmutablexApiClient,
     private val orderConverter: ImmutablexOrderConverter
 ) : AbstractBlockchainService(BlockchainDto.IMMUTABLEX), OrderService {
+
     override suspend fun getOrdersAll(
         continuation: String?,
         size: Int,

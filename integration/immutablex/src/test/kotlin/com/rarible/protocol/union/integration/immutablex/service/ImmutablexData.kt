@@ -8,7 +8,7 @@ import java.time.Instant
 
 object ImmutablexData {
     val contract_1 = "0x62d25241d4a5d619c1b06114210250d19d2424c0"
-    val itemId_1 = "0x62d25241d4a5d619c1b06114210250d19d2424c0:49"
+    val itemId_1 = "0x62d25241d4a5d619c1b06114210250d19d2424c0:1"
     val item_1 = ImmutablexAsset(
         tokenAddress = "0x62d25241d4a5d619c1b06114210250d19d2424c0",
         tokenId = "${BigInteger.ONE}",
