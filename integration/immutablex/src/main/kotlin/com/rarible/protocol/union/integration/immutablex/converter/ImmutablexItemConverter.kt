@@ -10,13 +10,11 @@ import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.CreatorDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.RoyaltyDto
-import com.rarible.protocol.union.dto.UnionAddress
-import com.rarible.protocol.union.dto.group
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexApiClient
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexAsset
+import scalether.domain.Address
 import java.math.BigDecimal
 import java.math.BigInteger
-import scalether.domain.Address
 
 class ImmutablexItemConverter(
     private val client: ImmutablexApiClient
@@ -35,11 +33,14 @@ class ImmutablexItemConverter(
 
     private suspend fun convertInternal(asset: ImmutablexAsset, blockchain: BlockchainDto): UnionItem {
         val deleted = asset.user!! == "${Address.ZERO()}"
+        // TODO IMMUTABLEX Performance!!!
         val creator = client.getMints(pageSize = 1, itemId = asset.itemId).result.firstOrNull()?.user
         return UnionItem(
-            id = ItemIdDto(BlockchainDto.IMMUTABLEX, contract = asset.tokenAddress, tokenId = asset.tokenId()),
+            id = ItemIdDto(BlockchainDto.IMMUTABLEX, asset.itemId),
             collection = CollectionIdDto(blockchain, asset.tokenAddress),
-            creators = if (creator == null) emptyList() else listOf(CreatorDto(account = UnionAddress(blockchain.group(), creator), 1)),
+            creators = if (creator == null) emptyList() else listOf(
+                CreatorDto(account = UnionAddressConverter.convert(blockchain, creator), 1)
+            ),
             lazySupply = BigInteger.ZERO,
             deleted = deleted,
             supply = if (deleted) BigInteger.ZERO else BigInteger.ONE,

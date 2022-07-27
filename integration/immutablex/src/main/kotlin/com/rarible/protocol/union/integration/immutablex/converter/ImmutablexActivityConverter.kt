@@ -1,28 +1,28 @@
 package com.rarible.protocol.union.integration.immutablex.converter
 
+import com.rarible.protocol.union.core.converter.ContractAddressConverter
+import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.AssetDto
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.ContractAddress
 import com.rarible.protocol.union.dto.EthErc20AssetTypeDto
 import com.rarible.protocol.union.dto.EthErc721AssetTypeDto
 import com.rarible.protocol.union.dto.EthEthereumAssetTypeDto
+import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.MintActivityDto
 import com.rarible.protocol.union.dto.OrderActivitySourceDto
 import com.rarible.protocol.union.dto.OrderMatchSellDto
 import com.rarible.protocol.union.dto.TransferActivityDto
-import com.rarible.protocol.union.dto.UnionAddress
-import com.rarible.protocol.union.dto.group
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexEvent
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexMint
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexTrade
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexTransfer
 import com.rarible.protocol.union.integration.immutablex.dto.TradeSide
 import com.rarible.protocol.union.integration.immutablex.service.ImmutablexOrderService
-import java.math.BigDecimal
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
+import java.math.BigDecimal
 
 class ImmutablexActivityConverter(
     private val orderService: ImmutablexOrderService
@@ -43,9 +43,8 @@ class ImmutablexActivityConverter(
         is ImmutablexMint -> MintActivityDto(
             id = activity.activityId,
             date = activity.timestamp,
-            owner = unionAddress(activity.user, blockchain),
-            contract = contractAddress(activity.token.data.tokenAddress, blockchain),
-            tokenId = activity.token.data.tokenId(),
+            owner = UnionAddressConverter.convert(blockchain, activity.user),
+            itemId = ItemIdDto(blockchain, activity.token.data.itemId()),
             value = activity.token.data.quantity,
             transactionHash = activity.transactionId.toString(),
             blockchainInfo = null,
@@ -53,15 +52,15 @@ class ImmutablexActivityConverter(
         is ImmutablexTransfer -> TransferActivityDto(
             id = activity.activityId,
             date = activity.timestamp,
-            from = unionAddress(activity.user, blockchain),
-            owner = unionAddress(activity.receiver, blockchain),
-            contract = contractAddress(activity.token.data.tokenAddress, blockchain),
-            tokenId = activity.token.data.tokenId(),
+            from = UnionAddressConverter.convert(blockchain, activity.user),
+            owner = UnionAddressConverter.convert(blockchain, activity.receiver),
+            itemId = ItemIdDto(blockchain, activity.token.data.itemId()),
             value = activity.token.data.quantity,
             transactionHash = activity.transactionId.toString(),
-            blockchainInfo = null,
+            blockchainInfo = null
         )
         is ImmutablexTrade -> {
+            // TODO IMMUTABLEX Performance!!!
             val (makeOrder, takeOrder) = runBlocking(Dispatchers.IO) {
                 orderService.getOrderById("${activity.make.orderId}") to orderService.getOrderById("${activity.take.orderId}")
             }
@@ -94,17 +93,18 @@ class ImmutablexActivityConverter(
                 value = asset.sold.setScale(18)
             )
             "ERC20" -> AssetDto(
-                type = EthErc20AssetTypeDto(contractAddress(asset.tokenAddress!!, blockchain)),
+                type = EthErc20AssetTypeDto(ContractAddressConverter.convert(blockchain, asset.tokenAddress!!)),
                 value = asset.sold.setScale(18)
             )
             "ERC721" -> AssetDto(
-                type = EthErc721AssetTypeDto(contractAddress(asset.tokenAddress!!, blockchain), asset.tokenId!!.toBigInteger()),
+                type = EthErc721AssetTypeDto(
+                    ContractAddressConverter.convert(blockchain, asset.tokenAddress!!),
+                    // TODO could it be UUID instead of BigInteger?
+                    asset.tokenId!!.toBigInteger()
+                ),
                 value = asset.sold
             )
             else -> throw IllegalStateException("Unsupported token type: ${asset.tokenType}")
         }
 
-    private fun unionAddress(value: String, blockchain: BlockchainDto) = UnionAddress(blockchain.group(), value)
-
-    private fun contractAddress(value: String, blockchain: BlockchainDto) = ContractAddress(blockchain, value)
 }

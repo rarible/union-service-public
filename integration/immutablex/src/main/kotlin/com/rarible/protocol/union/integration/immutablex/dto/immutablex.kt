@@ -32,9 +32,7 @@ data class ImmutablexAsset(
     val updatedAt: Instant?,
     val user: String?,
 ) {
-    val itemId = "$tokenAddress:${tokenId()}"
-
-    fun tokenId(): BigInteger = BigInteger(tokenId.toByteArray())
+    val itemId = "$tokenAddress:$tokenId"
 }
 
 data class ImmutablexCollectionShort(
@@ -100,7 +98,8 @@ data class TokenData(
     val quantity: BigInteger,
     val id: String?,
 ) {
-    fun tokenId(): BigInteger = BigInteger(tokenId.toByteArray())
+
+    fun itemId() = "$tokenAddress:$tokenId"
 }
 
 data class ImmutablexMintsPage(
@@ -143,11 +142,8 @@ data class ImmutablexOrderData(
     val tokenId: String?,
     val properties: ImmutablexDataProperties?,
 ) {
-    fun tokenId(): BigInteger? = tokenId?.let {
-        BigInteger(it.toByteArray())
-    }
 
-    fun itemId(): String = "${tokenAddress}:${tokenId()}"
+    fun itemId(): String = "${tokenAddress}:${tokenId}"
 }
 
 data class ImmutablexDataProperties(
@@ -232,7 +228,8 @@ data class ImmutablexWithdrawal(
 
 sealed class ImmutablexTokenEvent(transactionId: Long, timestamp: Instant, open val token: Token) :
     ImmutablexEvent(transactionId, timestamp) {
-        fun itemId(): String = "${token.data.tokenAddress}:${token.data.tokenId()}"
+
+    fun itemId(): String = token.data.itemId()
 }
 
 @JsonSubTypes(

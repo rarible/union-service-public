@@ -22,7 +22,6 @@ class CollectionsApi(
         }
         return webClient
             .get()
-
             .uri("/collections$query")
             .accept(MediaType.APPLICATION_JSON)
             .retrieve()

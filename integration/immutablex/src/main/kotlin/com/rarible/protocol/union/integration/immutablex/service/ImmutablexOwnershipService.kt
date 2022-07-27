@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.integration.immutablex.service
 
+import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.exception.UnionNotFoundException
 import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.core.service.OwnershipService
@@ -8,10 +9,9 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.CreatorDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
-import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.continuation.page.Page
 import com.rarible.protocol.union.dto.continuation.page.Slice
-import com.rarible.protocol.union.dto.group
+import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexApiClient
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexAsset
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexAssetsPage
@@ -22,9 +22,9 @@ class ImmutablexOwnershipService(
 ) : AbstractBlockchainService(BlockchainDto.IMMUTABLEX), OwnershipService {
 
     override suspend fun getOwnershipById(ownershipId: String): UnionOwnership {
-        val (contract, tokenId, owner) = ownershipId.split(":")
+        val (contract, tokenId, owner) = IdParser.split(ownershipId, 3)
         return getAssetsByCollection(
-            contract, owner, tokenId.toBigInteger(), null
+            contract, owner, tokenId, null
         ) { contract, owner, cursor ->
             client.getAssetsByCollection(contract, owner, cursor, 100)
         }?.let {
@@ -46,31 +46,36 @@ class ImmutablexOwnershipService(
     }
 
     override suspend fun getOwnershipsByOwner(address: String, continuation: String?, size: Int): Page<UnionOwnership> {
-        return convert(
-            client.getAssetsByOwner(address, continuation, size)
-        )
+        val assets = client.getAssetsByOwner(address, continuation, size)
+        return convert(assets)
     }
 
     private suspend fun getAssetsByCollection(
-        contract: String, owner: String, tokenId: BigInteger, cursor: String?, fn: suspend (String, String, String?) -> ImmutablexAssetsPage
+        contract: String,
+        owner: String,
+        tokenId: String,
+        cursor: String?,
+        fn: suspend (String, String, String?) -> ImmutablexAssetsPage
     ): ImmutablexAsset? {
         val page = fn(contract, owner, cursor)
-        val asset: ImmutablexAsset? = page.result.find { it.tokenId == String(tokenId.toByteArray()) }
-        return if(asset == null && page.cursor.isNotEmpty()) {
+        val asset = page.result.find { it.tokenId == tokenId }
+        return if (asset == null && page.cursor.isNotEmpty()) {
             getAssetsByCollection(contract, owner, tokenId, page.cursor, fn)
         } else asset
     }
 
     private suspend fun convert(asset: ImmutablexAsset): UnionOwnership {
         val creator = client.getMints(pageSize = 1, itemId = asset.itemId).result.first().user
+        val creatorAddress = UnionAddressConverter.convert(blockchain, creator)
+        val ownerAddress = UnionAddressConverter.convert(blockchain, asset.user!!)
         return UnionOwnership(
-            id = OwnershipIdDto(BlockchainDto.IMMUTABLEX, asset.tokenAddress, asset.tokenId(), asset.user!!),
-            collection = CollectionIdDto(BlockchainDto.IMMUTABLEX, asset.tokenAddress),
+            id = OwnershipIdDto(blockchain, asset.itemId, ownerAddress),
+            collection = CollectionIdDto(blockchain, asset.tokenAddress),
             value = BigInteger.ONE,
             lazyValue = BigInteger.ZERO,
             createdAt = asset.createdAt!!,
             lastUpdatedAt = asset.updatedAt,
-            creators = listOf(CreatorDto(account = UnionAddress(blockchain.group(), creator), 1))
+            creators = listOf(CreatorDto(creatorAddress, 1))
         )
     }
 

@@ -2,11 +2,12 @@ package com.rarible.protocol.union.integration.immutablex.converter
 
 import com.rarible.core.common.nowMillis
 import com.rarible.core.logging.Logger
+import com.rarible.protocol.union.core.converter.ContractAddressConverter
+import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.util.evalMakePrice
 import com.rarible.protocol.union.core.util.evalTakePrice
 import com.rarible.protocol.union.dto.AssetDto
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.ContractAddress
 import com.rarible.protocol.union.dto.EthErc20AssetTypeDto
 import com.rarible.protocol.union.dto.EthErc721AssetTypeDto
 import com.rarible.protocol.union.dto.EthEthereumAssetTypeDto
@@ -17,12 +18,10 @@ import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PayoutDto
 import com.rarible.protocol.union.dto.PlatformDto
-import com.rarible.protocol.union.dto.UnionAddress
-import com.rarible.protocol.union.dto.group
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexOrder
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexOrderSide
-import java.math.BigDecimal
 import org.slf4j.LoggerFactory
+import java.math.BigDecimal
 
 class ImmutablexOrderConverter {
 
@@ -49,7 +48,7 @@ class ImmutablexOrderConverter {
             id = OrderIdDto(blockchain, "${order.orderId}"),
             make = make,
             take = take,
-            maker = UnionAddress(blockchain.group(), order.creator),
+            maker = UnionAddressConverter.convert(blockchain, order.creator),
             taker = null,
             makePrice = makePrice,
             takePrice = takePrice,
@@ -76,7 +75,7 @@ class ImmutablexOrderConverter {
             "royalty" == it.type
         }.map {
             PayoutDto(
-                account = UnionAddress(blockchainGroup = blockchain.group(), value = it.address),
+                account = UnionAddressConverter.convert(blockchain, it.address),
                 value = it.amount.divide(BigDecimal.TEN.pow(it.token.data.decimals)).toBps()
             )
         }
@@ -85,7 +84,7 @@ class ImmutablexOrderConverter {
             "ecosystem" == it.type
         }.map {
             PayoutDto(
-                account = UnionAddress(blockchainGroup = blockchain.group(), value = it.address),
+                account = UnionAddressConverter.convert(blockchain, it.address),
                 value = it.amount.divide(BigDecimal.TEN.pow(it.token.data.decimals)).toBps()
             )
         }
@@ -106,14 +105,15 @@ class ImmutablexOrderConverter {
     private fun makeAsset(side: ImmutablexOrderSide, blockchain: BlockchainDto): AssetDto {
         val assetType = when (side.type) {
             "ERC721" -> EthErc721AssetTypeDto(
-                tokenId = side.data.tokenId()!!,
-                contract = ContractAddress(blockchain, side.data.tokenAddress!!)
+                // TODO could it be UUID instead of BigInteger?
+                tokenId = side.data.tokenId!!.toBigInteger(),
+                contract = ContractAddressConverter.convert(blockchain, side.data.tokenAddress!!)
             )
             "ETH" -> EthEthereumAssetTypeDto(
                 blockchain = blockchain
             )
             "ERC20" -> EthErc20AssetTypeDto(
-                contract = ContractAddress(blockchain, side.data.tokenAddress!!)
+                contract = ContractAddressConverter.convert(blockchain, side.data.tokenAddress!!)
             )
             else -> throw IllegalStateException("Unsupported asset type: ${side.type}")
         }

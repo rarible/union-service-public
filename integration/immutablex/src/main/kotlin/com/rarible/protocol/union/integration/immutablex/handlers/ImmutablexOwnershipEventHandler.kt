@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.integration.immutablex.handlers
 
+import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.handler.AbstractBlockchainEventHandler
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.model.UnionOwnership
@@ -21,10 +22,9 @@ class ImmutablexOwnershipEventHandler(
             handler.onEvent(
                 UnionOwnershipDeleteEvent(
                     ownershipId = OwnershipIdDto(
-                        blockchain = blockchain,
-                        contract = event.token.data.tokenAddress,
-                        tokenId = event.token.data.tokenId(),
-                        owner = event.user
+                        blockchain,
+                        event.token.data.itemId(),
+                        UnionAddressConverter.convert(blockchain, event.user)
                     )
                 )
             )
@@ -32,10 +32,9 @@ class ImmutablexOwnershipEventHandler(
                 UnionOwnershipUpdateEvent(
                     ownership = UnionOwnership(
                         id = OwnershipIdDto(
-                            blockchain = blockchain,
-                            contract = event.token.data.tokenAddress,
-                            tokenId = event.token.data.tokenId(),
-                            owner = event.receiver
+                            blockchain,
+                            event.token.data.itemId(),
+                            UnionAddressConverter.convert(blockchain, event.receiver)
                         ),
                         collection = CollectionIdDto(blockchain, event.token.data.tokenAddress),
                         value = event.token.data.quantity,
