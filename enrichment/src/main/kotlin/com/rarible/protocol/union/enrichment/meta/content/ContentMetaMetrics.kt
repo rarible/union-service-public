@@ -70,7 +70,8 @@ class ContentMetaMetrics(
     // We are not using cache for all types of URL, just for IPFS ATM
     // Content resolution without cache usage will be marked as "skipped"
     fun onContentCacheSkipped(blockchain: BlockchainDto) {
-        increment(CONTENT_META_CACHE, tag(blockchain), status("skip"))
+        // TODO cache_type not needed, but prom requires same tags for single metric
+        increment(CONTENT_META_CACHE, tag(blockchain), status("skip"), tag("cache_type", "none"))
     }
 
     //---------------- Content cache updates ----------------//

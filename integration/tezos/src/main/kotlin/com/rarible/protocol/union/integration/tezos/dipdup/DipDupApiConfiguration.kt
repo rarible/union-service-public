@@ -29,6 +29,7 @@ import com.rarible.tzkt.client.OwnershipClient
 import com.rarible.tzkt.client.SignatureClient
 import com.rarible.tzkt.client.TokenActivityClient
 import com.rarible.tzkt.client.TokenClient
+import com.rarible.tzkt.meta.MetaCollectionService
 import com.rarible.tzkt.meta.MetaService
 import com.rarible.tzkt.royalties.RoyaltiesHandler
 import kotlinx.coroutines.runBlocking
@@ -64,7 +65,12 @@ class DipDupApiConfiguration(
     fun tzktBigMapKeyClient() = BigMapKeyClient(tzktWebClient)
 
     @Bean
-    fun tzktCollectionClient() = CollectionClient(tzktWebClient)
+    fun collectionMetaService(ipfsClient: IPFSClient) = MetaCollectionService(tzktWebClient, ipfsClient)
+
+    @Bean
+    fun tzktCollectionClient(
+        metaCollectionService: MetaCollectionService
+    ) = CollectionClient(tzktWebClient, metaCollectionService)
 
     @Bean
     fun tzktIpfsClient(mapper: ObjectMapper) = IPFSClient(ipfsWebClient, mapper)
@@ -79,14 +85,15 @@ class DipDupApiConfiguration(
     fun signatureClient() = SignatureClient(properties.nodeAddress, properties.chainId, properties.sigChecker)
 
     @Bean
-    fun metaService(mapper: ObjectMapper, bigMapKeyClient: BigMapKeyClient) =
-        MetaService(mapper, bigMapKeyClient, properties.knownAddresses!!)
+    fun metaService(mapper: ObjectMapper, ipfsClient: IPFSClient, bigMapKeyClient: BigMapKeyClient) =
+        MetaService(mapper, bigMapKeyClient, ipfsClient, properties.knownAddresses!!)
 
     @Bean
     fun royaltyService(
         bigMapKeyClient: BigMapKeyClient,
+        ownershipClient: OwnershipClient,
         ipfsClient: IPFSClient
-    ) = RoyaltiesHandler(bigMapKeyClient, ipfsClient, properties.knownAddresses!!)
+    ) = RoyaltiesHandler(bigMapKeyClient, ownershipClient, ipfsClient, properties.knownAddresses!!)
 
     @Bean
     fun tokenClient(metaService: MetaService, royaltiesHandler: RoyaltiesHandler) =

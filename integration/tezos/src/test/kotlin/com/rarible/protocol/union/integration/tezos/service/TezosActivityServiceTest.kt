@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.integration.tezos.service
 
+import com.rarible.core.daemon.DaemonWorkerProperties
 import com.rarible.core.test.data.randomInt
 import com.rarible.core.test.data.randomString
 import com.rarible.dipdup.client.OrderActivityClient
@@ -11,6 +12,7 @@ import com.rarible.protocol.tezos.dto.OrderActivitiesDto
 import com.rarible.protocol.union.core.model.TypedActivityId
 import com.rarible.protocol.union.core.service.CurrencyService
 import com.rarible.protocol.union.dto.ActivityTypeDto
+import com.rarible.protocol.union.integration.tezos.TezosIntegrationProperties
 import com.rarible.protocol.union.integration.tezos.converter.TezosActivityConverter
 import com.rarible.protocol.union.integration.tezos.data.randomDipDupActivityOrderListEvent
 import com.rarible.protocol.union.integration.tezos.data.randomTezosOrderListActivity
@@ -45,6 +47,16 @@ class TezosActivityServiceTest {
     )
     private val tzktTokenClient: TokenActivityClient = mockk()
     private val tzktItemActivityService: TzktItemActivityService = TzktItemActivityServiceImpl(tzktTokenClient)
+    private val tezosIntegrationProperties = TezosIntegrationProperties(
+        enabled = true,
+        consumer = null,
+        client = null,
+        daemon = DaemonWorkerProperties(),
+        auctionContracts = null,
+        origins = emptyMap(),
+        showLegacyOrders = true,
+        showLegacyActivity = true
+    )
 
     private val service = TezosActivityService(
         activityItemControllerApi,
@@ -52,7 +64,8 @@ class TezosActivityServiceTest {
         tezosActivityConverter,
         pgService,
         dipdupOrderActivityService,
-        tzktItemActivityService
+        tzktItemActivityService,
+        tezosIntegrationProperties
     )
 
     @Test
