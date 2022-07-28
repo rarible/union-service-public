@@ -119,8 +119,6 @@ class OpenSeaUrlMigrationJob(
             cachedAt = entry.cachedAt
         )
 
-        logger.info("Updated meta for Item ${entry.key}")
-
         notify(updatedMeta)
 
         cUpdated.incrementAndGet()
