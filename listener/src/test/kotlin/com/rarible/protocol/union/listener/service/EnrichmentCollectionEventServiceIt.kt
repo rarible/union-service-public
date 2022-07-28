@@ -54,7 +54,8 @@ class EnrichmentCollectionEventServiceIt : AbstractIntegrationTest() {
         collectionEventService.onCollectionBestSellOrderUpdate(collectionId, unionBestSell, true)
 
         // In result event for Item we expect updated bestSellOrder
-        val expected = EnrichedCollectionConverter.convert(unionCollection).copy(bestSellOrder = unionBestSell)
+        val expected = EnrichedCollectionConverter.convert(unionCollection, shortCollection)
+            .copy(bestSellOrder = unionBestSell)
 
         val saved = collectionService.get(shortCollection.id)!!
         assertThat(saved.bestSellOrder).isEqualTo(ShortOrderConverter.convert(unionBestSell))
@@ -66,6 +67,7 @@ class EnrichmentCollectionEventServiceIt : AbstractIntegrationTest() {
             assertThat(messages[0].value.collection.id).isEqualTo(expected.id)
             assertThat(messages[0].value.collection.bestSellOrder!!.id).isEqualTo(expected.bestSellOrder!!.id)
             assertThat(messages[0].value.collection.bestBidOrder).isNull()
+            assertThat(messages[0].value.collection.statistics?.itemCount).isEqualTo(expected.statistics?.itemCount)
         }
     }
 
@@ -101,5 +103,4 @@ class EnrichmentCollectionEventServiceIt : AbstractIntegrationTest() {
             assertThat(messages[0].value.collection.bestSellOrder).isNull()
         }
     }
-
 }
