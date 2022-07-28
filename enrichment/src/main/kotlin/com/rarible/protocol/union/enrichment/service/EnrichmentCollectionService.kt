@@ -85,5 +85,4 @@ class EnrichmentCollectionService(
         logger.info("Enriched collection {}: {}", collectionId.fullId(), collectionDto)
         collectionDto
     }
-
 }

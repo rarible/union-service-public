@@ -16,6 +16,8 @@ data class ShortCollection(
     val blockchain: BlockchainDto,
     val collectionId: String,
 
+    val statistics: CollectionStatistics? = null,
+
     override val bestSellOrder: ShortOrder?,
     override val bestSellOrders: Map<String, ShortOrder>,
 
@@ -46,6 +48,8 @@ data class ShortCollection(
                 version = null,
                 blockchain = collectionId.blockchain,
                 collectionId = collectionId.collectionId,
+
+                statistics = null,
 
                 bestSellOrder = null,
                 bestSellOrders = emptyMap(),
@@ -92,5 +96,4 @@ data class ShortCollection(
     override fun getAllBestOrders(): List<ShortOrder> {
         return listOfNotNull(bestSellOrder, bestBidOrder) + getAllOriginBestOrders()
     }
-
 }
