@@ -190,7 +190,8 @@ class TezosApiConfiguration(
         converter: TezosActivityConverter,
         pgActivityService: TezosPgActivityService,
         dipdupOrderActivityService: DipdupOrderActivityService,
-        tzktItemActivityService: TzktItemActivityService
+        tzktItemActivityService: TzktItemActivityService,
+        tezosIntegrationProperties: TezosIntegrationProperties
     ): TezosActivityService {
         return TezosActivityService(
             itemActivityApi,
@@ -198,7 +199,8 @@ class TezosApiConfiguration(
             converter,
             pgActivityService,
             dipdupOrderActivityService,
-            tzktItemActivityService
+            tzktItemActivityService,
+            tezosIntegrationProperties
         )
     }
 

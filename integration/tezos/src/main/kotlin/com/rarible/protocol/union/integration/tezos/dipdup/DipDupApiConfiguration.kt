@@ -85,8 +85,8 @@ class DipDupApiConfiguration(
     fun signatureClient() = SignatureClient(properties.nodeAddress, properties.chainId, properties.sigChecker)
 
     @Bean
-    fun metaService(mapper: ObjectMapper, bigMapKeyClient: BigMapKeyClient) =
-        MetaService(mapper, bigMapKeyClient, properties.knownAddresses!!)
+    fun metaService(mapper: ObjectMapper, ipfsClient: IPFSClient, bigMapKeyClient: BigMapKeyClient) =
+        MetaService(mapper, bigMapKeyClient, ipfsClient, properties.knownAddresses!!)
 
     @Bean
     fun royaltyService(
