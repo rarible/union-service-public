@@ -4,6 +4,7 @@ import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.core.client.CurrencyClient
 import com.rarible.protocol.union.core.converter.CurrencyConverter
 import com.rarible.protocol.union.core.exception.UnionCurrencyException
+import com.rarible.protocol.union.core.model.CurrencyRate
 import com.rarible.protocol.union.dto.AssetTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CurrencyDto
@@ -37,6 +38,13 @@ class CurrencyService(
             cachedCurrencies = currencyClient.getAllCurrencies().map { CurrencyConverter.convert(it) }
         }
         return cachedCurrencies
+    }
+
+    /**
+     * Must return cached result due to performance reasons
+     */
+    suspend fun getAllCurrencyRates(): List<CurrencyRate> {
+        TODO()
     }
 
     // Read currency rate directly from Currency-Service (for API calls)
