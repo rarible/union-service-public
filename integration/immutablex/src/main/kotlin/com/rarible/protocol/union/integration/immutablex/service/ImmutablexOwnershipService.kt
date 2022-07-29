@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.integration.immutablex.service
 
+import com.rarible.core.common.mapAsync
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.exception.UnionNotFoundException
 import com.rarible.protocol.union.core.model.UnionOwnership
@@ -33,7 +34,11 @@ class ImmutablexOwnershipService(
     }
 
     override suspend fun getOwnershipsByIds(ownershipIds: List<String>): List<UnionOwnership> {
-        TODO("Not yet implemented")
+        return ownershipIds.chunked(8).map { chunk ->
+            chunk.mapAsync {
+                getOwnershipById(it)
+            }
+        }.flatten()
     }
 
     override suspend fun getOwnershipsAll(continuation: String?, size: Int): Slice<UnionOwnership> {
