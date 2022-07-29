@@ -1,11 +1,10 @@
 package com.rarible.protocol.union.integration.immutablex
 
-import com.rarible.protocol.union.api.ApiClient
-import com.rarible.protocol.union.api.client.DefaultUnionWebClientCustomizer
 import com.rarible.protocol.union.core.CoreConfiguration
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.immutablex.client.EventsApi
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexApiClient
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexWebClientFactory
 import com.rarible.protocol.union.integration.immutablex.converter.ImmutablexActivityConverter
 import com.rarible.protocol.union.integration.immutablex.converter.ImmutablexItemConverter
 import com.rarible.protocol.union.integration.immutablex.converter.ImmutablexOrderConverter
@@ -14,20 +13,10 @@ import com.rarible.protocol.union.integration.immutablex.service.ImmutablexColle
 import com.rarible.protocol.union.integration.immutablex.service.ImmutablexItemService
 import com.rarible.protocol.union.integration.immutablex.service.ImmutablexOrderService
 import com.rarible.protocol.union.integration.immutablex.service.ImmutablexOwnershipService
-import io.netty.handler.logging.LogLevel
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
-import org.springframework.http.MediaType
-import org.springframework.http.client.reactive.ReactorClientHttpConnector
-import org.springframework.http.codec.ClientCodecConfigurer
-import org.springframework.http.codec.json.Jackson2JsonDecoder
-import org.springframework.http.codec.json.Jackson2JsonEncoder
-import org.springframework.web.reactive.function.client.ExchangeStrategies
 import org.springframework.web.reactive.function.client.WebClient
-import reactor.netty.http.client.HttpClient
-import reactor.netty.transport.logging.AdvancedByteBufFormat
-
 
 @ImmutablexConfiguration
 @Import(CoreConfiguration::class)
@@ -45,27 +34,7 @@ class ImmutablexApiConfiguration {
 
     @Bean
     fun immutablexWebClient(props: ImmutablexIntegrationProperties): WebClient {
-        val mapper = ApiClient.createDefaultObjectMapper()
-        val httpClient = HttpClient.create().wiretap(
-            "reactor.netty.http.client.HttpClient",
-            LogLevel.DEBUG, AdvancedByteBufFormat.TEXTUAL
-        )
-        val strategies = ExchangeStrategies
-            .builder()
-            .codecs { configurer: ClientCodecConfigurer ->
-                configurer.defaultCodecs().jackson2JsonEncoder(Jackson2JsonEncoder(mapper, MediaType.APPLICATION_JSON))
-                configurer.defaultCodecs().jackson2JsonDecoder(Jackson2JsonDecoder(mapper, MediaType.APPLICATION_JSON))
-            }.build()
-        val webClient = WebClient.builder()
-            .exchangeStrategies(strategies)
-            .clientConnector(ReactorClientHttpConnector(httpClient))
-
-        DefaultUnionWebClientCustomizer().customize(webClient)
-        webClient.defaultHeaders {
-            it.add("x-api-key", props.apiKey)
-        }
-
-        return webClient.baseUrl(props.client!!.url!!).build()
+        return ImmutablexWebClientFactory.createClient(props.client!!.url!!, props.apiKey)
     }
 
     @Bean
