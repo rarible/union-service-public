@@ -1,9 +1,11 @@
 package com.rarible.protocol.union.integration.immutablex.service
 
+import com.rarible.protocol.union.core.test.ManualTest
 import com.rarible.protocol.union.integration.ImmutablexManualTest
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
 
+@ManualTest
 class ImmutablexOwnershipServiceMt : ImmutablexManualTest() {
 
     private val service = ImmutablexOwnershipService(client)

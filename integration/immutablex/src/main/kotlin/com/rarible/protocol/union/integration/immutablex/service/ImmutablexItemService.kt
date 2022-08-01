@@ -1,21 +1,26 @@
 package com.rarible.protocol.union.integration.immutablex.service
 
+import com.rarible.protocol.union.core.continuation.UnionItemContinuation
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
+import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.RoyaltyDto
 import com.rarible.protocol.union.dto.continuation.DateIdContinuation
 import com.rarible.protocol.union.dto.continuation.page.Page
+import com.rarible.protocol.union.dto.continuation.page.Paging
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexApiClient
 import com.rarible.protocol.union.integration.immutablex.converter.ImmutablexItemConverter
 import com.rarible.protocol.union.integration.immutablex.converter.ImmutablexItemMetaConverter
+import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexAsset
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 
 class ImmutablexItemService(
-    private val client: ImmutablexApiClient,
-    private val converter: ImmutablexItemConverter
-): AbstractBlockchainService(BlockchainDto.IMMUTABLEX), ItemService {
+    private val client: ImmutablexApiClient
+) : AbstractBlockchainService(BlockchainDto.IMMUTABLEX), ItemService {
 
     override suspend fun getAllItems(
         continuation: String?,
@@ -28,22 +33,21 @@ class ImmutablexItemService(
         val last = page.result.last()
         val cont = if (page.remaining) DateIdContinuation(last.updatedAt!!, last.itemId).toString() else null
         return Page(
-            total = page.result.size.toLong(),
+            total = 0,
             continuation = cont,
-            entities = page.result.map {
-                converter.convert(it, blockchain)
-            }
+            entities = convert(page.result)
         )
     }
 
     override suspend fun getItemById(itemId: String): UnionItem {
+        val creatorDeferred = coroutineScope { async { client.getItemCreator(itemId) } }
         val asset = client.getAsset(itemId)
-        return converter.convert(asset, blockchain)
+        return ImmutablexItemConverter.convert(asset, creatorDeferred.await(), blockchain)
     }
 
     override suspend fun getItemRoyaltiesById(itemId: String): List<RoyaltyDto> {
         val asset = client.getAsset(itemId)
-        return converter.convertToRoyaltyDto(asset, blockchain)
+        return ImmutablexItemConverter.convertToRoyaltyDto(asset, blockchain)
     }
 
     override suspend fun getItemMetaById(itemId: String): UnionMeta {
@@ -62,37 +66,49 @@ class ImmutablexItemService(
         size: Int,
     ): Page<UnionItem> {
         val page = client.getAssetsByCollection(collection, owner, continuation, size)
-        return Page(
-            total = page.result.size.toLong(),
-            continuation = if (page.remaining) page.cursor else null,
-            entities = page.result.map { converter.convert(it, blockchain) }
-        )
+        val converted = convert(page.result)
+        return Paging(UnionItemContinuation.ByLastUpdatedAndId, converted).getPage(size, 0)
     }
 
     override suspend fun getItemsByCreator(creator: String, continuation: String?, size: Int): Page<UnionItem> {
-        val page = client.getAssetsByCreator(creator, continuation, size)
-        return Page(
-            total = page.result.size.toLong(),
-            continuation = if (page.remaining) page.cursor else null,
-            entities = page.result.map { converter.convert(it, blockchain) }
-        )
+        val mints = client.getMints(
+            size,
+            continuation,
+            user = creator,
+            sort = ActivitySortDto.LATEST_FIRST
+        ).result.associateBy { it.itemId() }
+
+        // TODO what if some of items not found?
+        val converted = getItemsByIds(mints.keys.toList())
+            // TODO This is the only option to build working paging here ATM
+            .map { it.copy(lastUpdatedAt = mints[it.id.value]!!.timestamp) }
+
+        return Paging(UnionItemContinuation.ByLastUpdatedAndId, converted).getPage(size, 0)
+
     }
 
     override suspend fun getItemsByOwner(owner: String, continuation: String?, size: Int): Page<UnionItem> {
         val page = client.getAssetsByOwner(owner, continuation, size)
-        return Page(
-            total = page.result.size.toLong(),
-            continuation = if (page.remaining) page.cursor else null,
-            entities = page.result.map { converter.convert(it, blockchain) }
-        )
+        val converted = convert(page.result)
+        return Paging(UnionItemContinuation.ByLastUpdatedAndId, converted).getPage(size, 0)
     }
 
     override suspend fun getItemsByIds(itemIds: List<String>): List<UnionItem> {
-        return client.getAssetsByIds(itemIds).map { converter.convert(it, blockchain) }
+        val creators = coroutineScope { async { client.getItemCreators(itemIds) } }
+        val assets = client.getAssetsByIds(itemIds)
+        return convert(assets, creators.await())
     }
 
     override suspend fun getItemCollectionId(itemId: String): String {
-        // TODO is validation possible here?
         return itemId.substringBefore(":")
+    }
+
+    private suspend fun convert(assets: Collection<ImmutablexAsset>): List<UnionItem> {
+        val creators = client.getItemCreators(assets.map { it.itemId })
+        return convert(assets, creators)
+    }
+
+    private fun convert(assets: Collection<ImmutablexAsset>, creators: Map<String, String>): List<UnionItem> {
+        return ImmutablexItemConverter.convert(assets, creators, blockchain)
     }
 }

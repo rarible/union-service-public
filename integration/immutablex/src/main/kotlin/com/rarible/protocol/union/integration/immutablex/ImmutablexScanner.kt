@@ -9,13 +9,13 @@ import com.rarible.protocol.union.integration.immutablex.handlers.ImmutablexActi
 import com.rarible.protocol.union.integration.immutablex.handlers.ImmutablexItemEventHandler
 import com.rarible.protocol.union.integration.immutablex.handlers.ImmutablexOrderEventHandler
 import com.rarible.protocol.union.integration.immutablex.handlers.ImmutablexOwnershipEventHandler
-import java.util.concurrent.TimeUnit
-import javax.annotation.PostConstruct
 import kotlinx.coroutines.runBlocking
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.Update
 import org.springframework.scheduling.annotation.Scheduled
+import java.util.concurrent.TimeUnit
+import javax.annotation.PostConstruct
 
 class ImmutablexScanner(
     private val eventsApi: EventsApi,
@@ -148,8 +148,11 @@ class ImmutablexScanner(
             if (page.result.isNotEmpty()) {
                 handle(page.result)
             }
+            val cursor = page.cursor.ifBlank {
+                state.cursor // Keep the latest cursor if we reached the newest entity
+            }
 
-            mongo.save(state.copy(cursor = page.cursor)) //todo generate cursor if empty
+            mongo.save(state.copy(cursor = cursor))
         } catch (e: Exception) {
             mongo.save(state.copy(lastError = e.message, lastErrorStacktrace = e.stackTraceToString()))
         }
