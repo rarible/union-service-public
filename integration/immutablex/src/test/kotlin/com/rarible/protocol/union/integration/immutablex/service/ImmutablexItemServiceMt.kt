@@ -1,22 +1,11 @@
 package com.rarible.protocol.union.integration.immutablex.service
 
-import com.rarible.protocol.union.core.test.ManualTest
-import com.rarible.protocol.union.integration.immutablex.client.ImmutablexApiClient
-import com.rarible.protocol.union.integration.immutablex.client.ImmutablexWebClientFactory
+import com.rarible.protocol.union.integration.ImmutablexManualTest
 import com.rarible.protocol.union.integration.immutablex.converter.ImmutablexItemConverter
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
 
-// For manual debugging purposes
-@ManualTest
-class ImmutablexItemServiceIt {
-
-    private val webClient = ImmutablexWebClientFactory.createClient(
-        "https://api.ropsten.x.immutable.com/v1",
-        null
-    )
-
-    private val client = ImmutablexApiClient(webClient)
+class ImmutablexItemServiceMt : ImmutablexManualTest() {
 
     private val service = ImmutablexItemService(
         client, ImmutablexItemConverter(client)
