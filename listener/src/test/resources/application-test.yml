@@ -120,3 +120,12 @@ listener:
     enabled: false
     rate: PT1M
     delay: PT60M
+  collection-statistics-resync:
+    enabled: false
+    rate: PT12H
+    limit: 50
+
+clickhouse:
+  database: default
+  user: default
+  password: ""
