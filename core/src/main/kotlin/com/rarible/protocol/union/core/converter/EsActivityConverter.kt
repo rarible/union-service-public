@@ -15,6 +15,7 @@ import com.rarible.protocol.union.dto.AuctionEndActivityDto
 import com.rarible.protocol.union.dto.AuctionFinishActivityDto
 import com.rarible.protocol.union.dto.AuctionOpenActivityDto
 import com.rarible.protocol.union.dto.AuctionStartActivityDto
+import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.BurnActivityDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.L2DepositActivityDto
@@ -39,6 +40,7 @@ class EsActivityConverter(
 
     suspend fun batchConvert(source: List<ActivityDto>, ): List<EsActivity> {
         val items = source.groupBy { it.id.blockchain }
+            .filter { it.key != BlockchainDto.IMMUTABLEX }
             .mapAsync { (blockchain, activities) ->
                 val itemIds = activities.mapNotNull { extractItemId(it)?.value }
                 itemRouter.getService(blockchain).getItemsByIds(itemIds)
