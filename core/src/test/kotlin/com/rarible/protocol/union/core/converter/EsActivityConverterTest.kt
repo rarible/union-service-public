@@ -9,6 +9,7 @@ import com.rarible.core.test.data.randomDouble
 import com.rarible.core.test.data.randomInt
 import com.rarible.core.test.data.randomLong
 import com.rarible.core.test.data.randomString
+import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.converter.helper.SellActivityEnricher
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.service.ItemService
@@ -71,7 +72,7 @@ class EsActivityConverterTest {
 
     private val enricher = mockk<SellActivityEnricher>()
 
-    private val converter = EsActivityConverter(router, enricher)
+    private val converter = EsActivityConverter(router, enricher, FeatureFlagsProperties())
 
     @Test
     fun `should convert activities batch`() = runBlocking<Unit> {
