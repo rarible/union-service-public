@@ -3,12 +3,10 @@ protocol-union-api:
     repository: union-service-api
   replicas: 2
   environments:
-    APPLICATION_ENVIRONMENT: '{{ include "service.env" $ }}'
-    CONSUL_ROOT_PATH: '{{ include "service.env" $ }}/protocol/union'
-    SPRING_PROFILES_ACTIVE: 'consul,{{ include "service.env" $ }}'
-    SERVICE_PREFIX: '{{ include "service.env" $ }}-union'
-  nodeSelector:
-    node.labels.rarible.service: true
+    APPLICATION_ENVIRONMENT: '{{ include "app.env" $ }}'
+    CONSUL_ROOT_PATH: '{{ include "app.env" $ }}/protocol/union'
+    SPRING_PROFILES_ACTIVE: 'consul,{{ include "app.env" $ }}'
+    SERVICE_PREFIX: '{{ include "app.env" $ }}-union'
   resources:
     jvm:
       xmx_megabytes: 384
@@ -25,13 +23,12 @@ protocol-union-listener:
   image:
     repository: union-service-listener
   environments:
-    APPLICATION_ENVIRONMENT: '{{ include "service.env" $ }}'
-    CONSUL_ROOT_PATH: '{{ include "service.env" $ }}/protocol/union'
-    SPRING_PROFILES_ACTIVE: 'consul,{{ include "service.env" $ }}'
-    SERVICE_PREFIX: '{{ include "service.env" $ }}-union'
+    APPLICATION_ENVIRONMENT: '{{ include "app.env" $ }}'
+    CONSUL_ROOT_PATH: '{{ include "app.env" $ }}/protocol/union'
+    SPRING_PROFILES_ACTIVE: 'consul,{{ include "app.env" $ }}'
+    SERVICE_PREFIX: '{{ include "app.env" $ }}-union'
     JAVA_OPTIONS: '-XX:NewRatio=1'
-  nodeSelector:
-    node.labels.rarible.service: true
+  priorityClassName: high
   resources:
     jvm:
       xmx_megabytes: 1024
@@ -44,13 +41,11 @@ protocol-union-meta-loader:
   image:
     repository: union-service-meta-loader
   environments:
-    APPLICATION_ENVIRONMENT: '{{ include "service.env" $ }}'
-    CONSUL_ROOT_PATH: '{{ include "service.env" $ }}/protocol/union'
-    SPRING_PROFILES_ACTIVE: 'consul,{{ include "service.env" $ }}'
-    SERVICE_PREFIX: '{{ include "service.env" $ }}-union'
+    APPLICATION_ENVIRONMENT: '{{ include "app.env" $ }}'
+    CONSUL_ROOT_PATH: '{{ include "app.env" $ }}/protocol/union'
+    SPRING_PROFILES_ACTIVE: 'consul,{{ include "app.env" $ }}'
+    SERVICE_PREFIX: '{{ include "app.env" $ }}-union'
     JAVA_OPTIONS: '-XX:NewRatio=1'
-  nodeSelector:
-    node.labels.rarible.service: true
   resources:
     jvm:
       xmx_megabytes: 512
@@ -63,13 +58,12 @@ protocol-union-indexer:
   image:
     repository: union-service-indexer
   environments:
-    APPLICATION_ENVIRONMENT: '{{ include "service.env" $ }}'
-    CONSUL_ROOT_PATH: '{{ include "service.env" $ }}/protocol/union'
-    SPRING_PROFILES_ACTIVE: 'consul,{{ include "service.env" $ }}'
-    SERVICE_PREFIX: '{{ include "service.env" $ }}-union'
+    APPLICATION_ENVIRONMENT: '{{ include "app.env" $ }}'
+    CONSUL_ROOT_PATH: '{{ include "app.env" $ }}/protocol/union'
+    SPRING_PROFILES_ACTIVE: 'consul,{{ include "app.env" $ }}'
+    SERVICE_PREFIX: '{{ include "app.env" $ }}-union'
     JAVA_OPTIONS: '-XX:NewRatio=1'
-  nodeSelector:
-    node.labels.rarible.service: true
+  priorityClassName: high
   resources:
     jvm:
       xmx_megabytes: 1024
@@ -82,12 +76,10 @@ protocol-union-worker:
   image:
     repository: union-service-worker
   environments:
-    APPLICATION_ENVIRONMENT: '{{ include "service.env" $ }}'
-    CONSUL_ROOT_PATH: '{{ include "service.env" $ }}/protocol/union'
-    SPRING_PROFILES_ACTIVE: 'consul,{{ include "service.env" $ }}'
-    SERVICE_PREFIX: '{{ include "service.env" $ }}-union'
-  nodeSelector:
-    node.labels.rarible.service: true
+    APPLICATION_ENVIRONMENT: '{{ include "app.env" $ }}'
+    CONSUL_ROOT_PATH: '{{ include "app.env" $ }}/protocol/union'
+    SPRING_PROFILES_ACTIVE: 'consul,{{ include "app.env" $ }}'
+    SERVICE_PREFIX: '{{ include "app.env" $ }}-union'
   resources:
     jvm:
       xmx_megabytes: 512
