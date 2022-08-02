@@ -6,9 +6,10 @@ import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.awaitBody
 
-
-class CollectionsApi(
-    private val webClient: WebClient
+class ImmutablexCollectionClient(
+    webClient: WebClient,
+) : AbstractImmutablexClient(
+    webClient
 ) {
 
     suspend fun getAll(
@@ -34,4 +35,5 @@ class CollectionsApi(
             .retrieve()
             .awaitBody()
     }
+
 }

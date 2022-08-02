@@ -7,11 +7,11 @@ import com.rarible.protocol.union.core.service.CollectionService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.continuation.page.Page
-import com.rarible.protocol.union.integration.immutablex.client.ImmutablexApiClient
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexCollectionClient
 import com.rarible.protocol.union.integration.immutablex.converter.ImmutablexCollectionConverter
 
 class ImmutablexCollectionService(
-    private val client: ImmutablexApiClient
+    private val client: ImmutablexCollectionClient
 ): AbstractBlockchainService(BlockchainDto.IMMUTABLEX), CollectionService {
 
     override suspend fun getAllCollections(
@@ -19,13 +19,13 @@ class ImmutablexCollectionService(
         size: Int
     ): Page<UnionCollection> {
         return ImmutablexCollectionConverter.convert(
-            client.collectionsApi.getAll(continuation, size)
+            client.getAll(continuation, size)
         )
     }
 
     override suspend fun getCollectionById(collectionId: String): UnionCollection {
         return ImmutablexCollectionConverter.convert(
-            client.collectionsApi.getById(collectionId)
+            client.getById(collectionId)
         )
     }
 

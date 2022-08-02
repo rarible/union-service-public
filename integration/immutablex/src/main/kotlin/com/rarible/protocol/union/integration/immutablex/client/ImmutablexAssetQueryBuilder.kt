@@ -1,14 +1,12 @@
-package com.rarible.protocol.union.integration.immutablex.client.item
+package com.rarible.protocol.union.integration.immutablex.client
 
 import com.rarible.protocol.union.dto.continuation.DateIdContinuation
-import com.rarible.protocol.union.integration.immutablex.client.AbstractQueryBuilder
-import com.rarible.protocol.union.integration.immutablex.client.queryParamNotNull
 import org.springframework.web.util.UriBuilder
 import java.time.Instant
 
-class AssetQueryBuilder(
+class ImmutablexAssetQueryBuilder(
     builder: UriBuilder
-) : AbstractQueryBuilder(
+) : AbstractImmutablexQueryBuilder(
     builder
 ) {
 

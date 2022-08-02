@@ -106,7 +106,13 @@ data class ImmutablexMintsPage(
     val cursor: String,
     val remaining: Boolean,
     val result: List<ImmutablexMint>,
-)
+) {
+
+    companion object {
+
+        val EMPTY = ImmutablexMintsPage("", false, emptyList())
+    }
+}
 
 data class ImmutablexOrder(
     @JsonProperty("order_id")
@@ -173,7 +179,13 @@ data class ImmutablexTransfersPage(
     val cursor: String,
     val remaining: Boolean,
     val result: List<ImmutablexTransfer>,
-)
+) {
+
+    companion object {
+
+        val EMPTY = ImmutablexTransfersPage("", false, emptyList())
+    }
+}
 
 data class TradeSide(
     @JsonProperty("order_id")
@@ -202,7 +214,13 @@ data class ImmutablexTradesPage(
     val cursor: String,
     val remaining: Boolean,
     val result: List<ImmutablexTrade>,
-)
+) {
+
+    companion object {
+
+        val EMPTY = ImmutablexTradesPage("", false, emptyList())
+    }
+}
 
 data class ImmutablexDeposit(
     @JsonProperty("transaction_id")

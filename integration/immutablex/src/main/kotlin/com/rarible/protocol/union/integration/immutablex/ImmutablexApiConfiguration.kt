@@ -2,11 +2,12 @@ package com.rarible.protocol.union.integration.immutablex
 
 import com.rarible.protocol.union.core.CoreConfiguration
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.integration.immutablex.client.EventsApi
-import com.rarible.protocol.union.integration.immutablex.client.ImmutablexApiClient
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexActivityClient
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexAssetClient
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexCollectionClient
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexOrderClient
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexWebClientFactory
-import com.rarible.protocol.union.integration.immutablex.converter.ImmutablexActivityConverter
-import com.rarible.protocol.union.integration.immutablex.converter.ImmutablexOrderConverter
+import com.rarible.protocol.union.integration.immutablex.scanner.EventsApi
 import com.rarible.protocol.union.integration.immutablex.service.ImmutablexActivityService
 import com.rarible.protocol.union.integration.immutablex.service.ImmutablexCollectionService
 import com.rarible.protocol.union.integration.immutablex.service.ImmutablexItemService
@@ -22,14 +23,8 @@ import org.springframework.web.reactive.function.client.WebClient
 @EnableConfigurationProperties(ImmutablexIntegrationProperties::class)
 class ImmutablexApiConfiguration {
 
-
     @Bean
     fun immutablexBlockchain() = BlockchainDto.IMMUTABLEX
-
-    @Bean
-    fun immutablexApiClient(
-        immutablexWebClient: WebClient,
-    ) = ImmutablexApiClient(immutablexWebClient)
 
     @Bean
     fun immutablexWebClient(props: ImmutablexIntegrationProperties): WebClient {
@@ -37,38 +32,55 @@ class ImmutablexApiConfiguration {
     }
 
     @Bean
-    fun immutablexItemService(client: ImmutablexApiClient): ImmutablexItemService =
-        ImmutablexItemService(client)
+    fun immutablexAssetClient(immutablexWebClient: WebClient) = ImmutablexAssetClient(immutablexWebClient)
 
     @Bean
-    fun immutablexOrderConverter(): ImmutablexOrderConverter = ImmutablexOrderConverter()
+    fun immutablexActivityClient(immutablexWebClient: WebClient) = ImmutablexActivityClient(immutablexWebClient)
 
+    @Bean
+    fun immutablexCollectionClient(immutablexWebClient: WebClient) = ImmutablexCollectionClient(immutablexWebClient)
+
+    @Bean
+    fun immutablexOrderClient(immutablexWebClient: WebClient) = ImmutablexOrderClient(immutablexWebClient)
+
+    @Bean
+    fun immutablexItemService(
+        assetClient: ImmutablexAssetClient,
+        activityClient: ImmutablexActivityClient
+    ): ImmutablexItemService {
+        return ImmutablexItemService(assetClient, activityClient)
+    }
+
+    @Bean
+    fun immutablexOwnershipService(
+        assetClient: ImmutablexAssetClient,
+        activityClient: ImmutablexActivityClient
+    ): ImmutablexOwnershipService {
+        return ImmutablexOwnershipService(assetClient, activityClient)
+    }
+
+    @Bean
+    fun immutablexCollectionService(
+        collectionClient: ImmutablexCollectionClient
+    ): ImmutablexCollectionService {
+        return ImmutablexCollectionService(collectionClient)
+    }
 
     @Bean
     fun immutablexOrderService(
-        client: ImmutablexApiClient,
-        converter: ImmutablexOrderConverter,
-    ): ImmutablexOrderService = ImmutablexOrderService(client, converter)
-
-    @Bean
-    fun eventsApi(immutablexWebClient: WebClient) = EventsApi(immutablexWebClient)
-
-
-    @Bean
-    fun immutablexActivityConverter(orderService: ImmutablexOrderService): ImmutablexActivityConverter =
-        ImmutablexActivityConverter(orderService)
+        orderClient: ImmutablexOrderClient
+    ): ImmutablexOrderService {
+        return ImmutablexOrderService(orderClient)
+    }
 
     @Bean
     fun immutablesActivityService(
-        client: ImmutablexApiClient,
-        converter: ImmutablexActivityConverter,
-    ): ImmutablexActivityService = ImmutablexActivityService(client, converter)
+        activityClient: ImmutablexActivityClient,
+        orderService: ImmutablexOrderService
+    ): ImmutablexActivityService {
+        return ImmutablexActivityService(activityClient, orderService)
+    }
 
     @Bean
-    fun immutablexOwnershipService(immutablexApiClient: ImmutablexApiClient): ImmutablexOwnershipService =
-        ImmutablexOwnershipService(immutablexApiClient)
-
-    @Bean
-    fun immutablexCollectionService(immutablexApiClient: ImmutablexApiClient): ImmutablexCollectionService =
-        ImmutablexCollectionService(immutablexApiClient)
+    fun eventsApi(immutablexWebClient: WebClient) = EventsApi(immutablexWebClient)
 }

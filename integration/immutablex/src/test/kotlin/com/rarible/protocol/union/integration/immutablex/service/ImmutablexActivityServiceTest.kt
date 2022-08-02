@@ -8,8 +8,6 @@ import com.rarible.protocol.union.dto.MintActivityDto
 import com.rarible.protocol.union.dto.OrderMatchSellDto
 import com.rarible.protocol.union.dto.TransferActivityDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
-import com.rarible.protocol.union.integration.immutablex.converter.ImmutablexActivityConverter
-import com.rarible.protocol.union.integration.immutablex.converter.ImmutablexOrderConverter
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexMint
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexMintsPage
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexOrder
@@ -28,7 +26,8 @@ internal class ImmutablexActivityServiceTest {
     private val mapper = jacksonObjectMapper().registerModule(JavaTimeModule())
 
     private val expectedMintActivity by lazy {
-        ImmutablexMintsPage("", false,
+        ImmutablexMintsPage(
+            "", false,
             listOf(
                 mapper.readValue(
                     ImmutablexActivityServiceTest::class.java.getResourceAsStream("mint.json"),
@@ -39,7 +38,8 @@ internal class ImmutablexActivityServiceTest {
     }
 
     private val expectedTransfersActivity by lazy {
-        ImmutablexTransfersPage("", false,
+        ImmutablexTransfersPage(
+            "", false,
             listOf(
                 mapper.readValue(
                     ImmutablexActivityServiceTest::class.java.getResourceAsStream("transfer.json"),
@@ -50,7 +50,8 @@ internal class ImmutablexActivityServiceTest {
     }
 
     private val expectedTradesActivity by lazy {
-        ImmutablexTradesPage("", false,
+        ImmutablexTradesPage(
+            "", false,
             listOf(
                 mapper.readValue(
                     ImmutablexActivityServiceTest::class.java.getResourceAsStream("trade.json"),
@@ -62,20 +63,30 @@ internal class ImmutablexActivityServiceTest {
 
     private val service = ImmutablexActivityService(
         mockk {
-            coEvery { getMints(any(), any(), any(), any(), any(), any(), any()) } returns expectedMintActivity
-            coEvery { getTransfers(any(), any(), any(), any(), any(), any(), any()) } returns expectedTransfersActivity
-            coEvery { getTrades(any(), any(), any(), any(), any(), any(), any()) } returns expectedTradesActivity
+            coEvery {
+                getMints(any(), any(), any(), any(), any(), any(), any(), any())
+            } returns expectedMintActivity
+
+            coEvery {
+                getTransfers(any(), any(), any(), any(), any(), any(), any(), any())
+            } returns expectedTransfersActivity
+
+            coEvery {
+                getTrades(any(), any(), any(), any(), any(), any(), any(), any())
+            } returns expectedTradesActivity
 
         },
-        ImmutablexActivityConverter(ImmutablexOrderService(
-            client = mockk {
-                coEvery { getOrderById(any()) } returns mapper.readValue(
-                    ImmutablexActivityServiceTest::class.java.getResourceAsStream("order.json"),
-                    ImmutablexOrder::class.java
-                )
-            },
-            orderConverter = ImmutablexOrderConverter()
-        )),
+        ImmutablexOrderService(
+            orderClient = mockk {
+                coEvery { getOrderById(any()) } answers {
+                    mapper.readValue(
+                        ImmutablexActivityServiceTest::class.java.getResourceAsStream("order.json"),
+                        ImmutablexOrder::class.java
+                    ).copy(orderId = it.invocation.args[0].toString().toLong())
+                }
+            }
+        )
+
     )
 
     @Test

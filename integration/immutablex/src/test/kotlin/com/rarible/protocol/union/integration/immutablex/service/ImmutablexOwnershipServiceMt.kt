@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test
 @ManualTest
 class ImmutablexOwnershipServiceMt : ImmutablexManualTest() {
 
-    private val service = ImmutablexOwnershipService(client)
+    private val service = ImmutablexOwnershipService(assetClient, activityClient)
 
     @Test
     fun getOwnershipsByIds() = runBlocking<Unit> {

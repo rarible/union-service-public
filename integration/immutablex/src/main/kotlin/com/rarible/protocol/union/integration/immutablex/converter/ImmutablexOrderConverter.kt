@@ -23,7 +23,7 @@ import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexOrderSide
 import org.slf4j.LoggerFactory
 import java.math.BigDecimal
 
-class ImmutablexOrderConverter {
+object ImmutablexOrderConverter {
 
     private val logger by Logger()
 

@@ -11,6 +11,7 @@ import com.rarible.protocol.union.dto.EthEthereumAssetTypeDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.MintActivityDto
 import com.rarible.protocol.union.dto.OrderActivitySourceDto
+import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderMatchSellDto
 import com.rarible.protocol.union.dto.TransferActivityDto
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexEvent
@@ -18,28 +19,27 @@ import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexMint
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexTrade
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexTransfer
 import com.rarible.protocol.union.integration.immutablex.dto.TradeSide
-import com.rarible.protocol.union.integration.immutablex.service.ImmutablexOrderService
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 import java.math.BigDecimal
 
-class ImmutablexActivityConverter(
-    private val orderService: ImmutablexOrderService
-) {
+object ImmutablexActivityConverter {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    fun convert(activity: ImmutablexEvent, blockchain: BlockchainDto = BlockchainDto.IMMUTABLEX): ActivityDto {
+    fun convert(
+        activity: ImmutablexEvent, orders: Map<Long, OrderDto>, blockchain: BlockchainDto = BlockchainDto.IMMUTABLEX
+    ): ActivityDto {
         try {
-            return convertInternal(activity, blockchain)
+            return convertInternal(activity, orders, blockchain)
         } catch (e: Exception) {
             logger.error("Failed to convert {} Activity: {} \n{}", blockchain, e.message, activity)
             throw e
         }
     }
 
-    private fun convertInternal(activity: ImmutablexEvent, blockchain: BlockchainDto) = when (activity) {
+    private fun convertInternal(
+        activity: ImmutablexEvent, orders: Map<Long, OrderDto>, blockchain: BlockchainDto
+    ) = when (activity) {
         is ImmutablexMint -> MintActivityDto(
             id = activity.activityId,
             date = activity.timestamp,
@@ -60,10 +60,11 @@ class ImmutablexActivityConverter(
             blockchainInfo = null
         )
         is ImmutablexTrade -> {
-            // TODO IMMUTABLEX Performance!!!
-            val (makeOrder, takeOrder) = runBlocking(Dispatchers.IO) {
-                orderService.getOrderById("${activity.make.orderId}") to orderService.getOrderById("${activity.take.orderId}")
-            }
+            // TODO IMMUTABLEX what if null?
+            val makeOrder = orders[activity.make.orderId]
+                ?: throw NullPointerException("$blockchain make Order ${activity.make.orderId} not found")
+            val takeOrder = orders[activity.take.orderId]
+                ?: throw NullPointerException("$blockchain take Order ${activity.take.orderId} not found")
 
             OrderMatchSellDto(
                 source = OrderActivitySourceDto.RARIBLE,

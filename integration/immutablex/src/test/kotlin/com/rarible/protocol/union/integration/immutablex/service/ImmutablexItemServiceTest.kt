@@ -4,7 +4,8 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
-import com.rarible.protocol.union.integration.immutablex.client.ImmutablexApiClient
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexActivityClient
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexAssetClient
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexAsset
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexMint
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexMintsPage
@@ -41,8 +42,11 @@ class ImmutablexItemServiceTest {
 
     }
 
-    val client = mockk<ImmutablexApiClient> {
+    val assetClient = mockk<ImmutablexAssetClient> {
         coEvery { getAsset(any()) } returns expectedAsset
+    }
+
+    val activityClient = mockk<ImmutablexActivityClient> {
         coEvery { getItemCreator(itemId) } returns creator
         coEvery { getMints(any(), any(), any(), any(), any(), any(), any()) } returns ImmutablexMintsPage(
             "",
@@ -51,7 +55,7 @@ class ImmutablexItemServiceTest {
         )
     }
 
-    private val service = ImmutablexItemService(client)
+    private val service = ImmutablexItemService(assetClient, activityClient)
 
     @Test
     internal fun `get item by id`() {

@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.integration.immutablex.client.item
+package com.rarible.protocol.union.integration.immutablex.client
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -6,10 +6,10 @@ import org.junit.jupiter.api.Test
 import org.springframework.web.util.DefaultUriBuilderFactory
 import java.time.Instant
 
-class AssetQueryBuilderTest {
+class ImmutablexAssetQueryBuilderTest {
 
     private val host = "http://imx.test/api"
-    private lateinit var builder: AssetQueryBuilder
+    private lateinit var builder: ImmutablexAssetQueryBuilder
 
     private val from = Instant.parse("2022-01-01T00:00:00Z")
     private val to = Instant.parse("2022-01-01T06:00:00Z")
@@ -19,7 +19,7 @@ class AssetQueryBuilderTest {
 
     @BeforeEach
     fun beforeEach() {
-        builder = AssetQueryBuilder(DefaultUriBuilderFactory(host).builder())
+        builder = ImmutablexAssetQueryBuilder(DefaultUriBuilderFactory(host).builder())
     }
 
     @Test
