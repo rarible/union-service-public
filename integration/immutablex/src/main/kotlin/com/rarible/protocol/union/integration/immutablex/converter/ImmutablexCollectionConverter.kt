@@ -8,10 +8,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.MetaContentDto
-import com.rarible.protocol.union.dto.continuation.page.Page
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexCollection
-import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexPage
-
 
 object ImmutablexCollectionConverter {
     private val logger by Logger()
@@ -23,14 +20,6 @@ object ImmutablexCollectionConverter {
             logger.error("Failed to convert {} Collection: {} \n{}", blockchain, e.message, source)
             throw e
         }
-    }
-
-    fun convert(page: ImmutablexPage<ImmutablexCollection>): Page<UnionCollection> {
-        return Page(
-            total = 0L,
-            continuation = page.cursor,
-            entities = page.result.map { convert(it) }
-        )
     }
 
     private fun convertInternal(source: ImmutablexCollection, blockchain: BlockchainDto): UnionCollection {

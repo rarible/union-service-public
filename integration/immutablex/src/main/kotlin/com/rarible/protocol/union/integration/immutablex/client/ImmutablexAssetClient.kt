@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.integration.immutablex.client
 
-import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexAsset
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexAssetsPage
 import kotlinx.coroutines.reactor.awaitSingle
@@ -19,8 +18,8 @@ class ImmutablexAssetClient(
     private val assetsRequestChunkSize = 16
 
     suspend fun getAsset(itemId: String): ImmutablexAsset {
-        val (collection, tokenId) = IdParser.split(itemId, 2)
-        return webClient.get().uri("/assets/${collection}/${tokenId}?include_fees=true")
+        val uri = ImmutablexAssetQueryBuilder.getByIdPath(itemId)
+        return webClient.get().uri(uri)
             .accept(MediaType.APPLICATION_JSON)
             .retrieve()
             .toEntity(ImmutablexAsset::class.java)

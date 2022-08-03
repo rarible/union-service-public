@@ -1,18 +1,28 @@
 package com.rarible.protocol.union.integration.immutablex.client
 
 import com.rarible.protocol.union.dto.continuation.DateIdContinuation
+import com.rarible.protocol.union.dto.parser.IdParser
 import org.springframework.web.util.UriBuilder
 import java.time.Instant
 
 class ImmutablexAssetQueryBuilder(
     builder: UriBuilder
 ) : AbstractImmutablexQueryBuilder(
-    builder
+    builder, PATH
 ) {
 
+    companion object {
+
+        const val PATH = "/assets"
+
+        fun getByIdPath(itemId: String): String {
+            val (collection, tokenId) = IdParser.split(itemId, 2)
+            return "$PATH/${collection}/${tokenId}?include_fees=true"
+        }
+    }
+
     init {
-        builder.path("/assets")
-            .queryParam("include_fees", true)
+        builder.queryParam("include_fees", true)
     }
 
     fun collection(collection: String?) {
@@ -33,5 +43,4 @@ class ImmutablexAssetQueryBuilder(
 
         orderBy("updated_at", "desc")
     }
-
 }

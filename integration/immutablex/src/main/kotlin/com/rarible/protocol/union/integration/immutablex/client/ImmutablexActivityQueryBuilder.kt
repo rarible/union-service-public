@@ -5,7 +5,13 @@ import com.rarible.protocol.union.dto.continuation.DateIdContinuation
 import org.springframework.web.util.UriBuilder
 import java.time.Instant
 
-sealed class ImmutablexActivityQueryBuilder(builder: UriBuilder) : AbstractImmutablexQueryBuilder(builder) {
+sealed class ImmutablexActivityQueryBuilder(
+    builder: UriBuilder,
+    path: String
+) : AbstractImmutablexQueryBuilder(
+    builder,
+    path
+) {
 
     abstract val tokenIdField: String
     abstract val tokenField: String
@@ -62,7 +68,7 @@ sealed class ImmutablexActivityQueryBuilder(builder: UriBuilder) : AbstractImmut
 class MintQueryBuilder(
     builder: UriBuilder
 ) : ImmutablexActivityQueryBuilder(
-    builder.path("/mints")
+    builder, "/mints"
 ) {
 
     override val tokenIdField: String = "token_id"
@@ -75,7 +81,7 @@ class MintQueryBuilder(
 class TradeQueryBuilder(
     builder: UriBuilder
 ) : ImmutablexActivityQueryBuilder(
-    builder.path("/trades")
+    builder, "/trades"
 ) {
 
     override val tokenIdField = "party_b_token_id"
@@ -88,7 +94,7 @@ class TradeQueryBuilder(
 class TransferQueryBuilder(
     builder: UriBuilder
 ) : ImmutablexActivityQueryBuilder(
-    builder.path("/transfers")
+    builder, "/transfers"
 ) {
 
     override val tokenIdField: String = "token_id"
