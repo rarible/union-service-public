@@ -18,7 +18,7 @@ class ImmutablexCollectionServiceTest {
         val page = ImmutablexCollectionService(
             ImmutablexCollectionClient(
                 MockWebClient(
-                    "/collections?order_by=name&direction=desc&page_size=50", ALL_COLLECTIONS
+                    "/collections?order_by=address&direction=asc&page_size=50", ALL_COLLECTIONS
                 )
             )
         ).getAllCollections(null, 50)

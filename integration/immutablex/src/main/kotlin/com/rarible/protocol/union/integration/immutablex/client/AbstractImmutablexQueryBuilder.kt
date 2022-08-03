@@ -4,8 +4,13 @@ import org.springframework.web.util.UriBuilder
 import java.net.URI
 
 abstract class AbstractImmutablexQueryBuilder(
-    protected val builder: UriBuilder
+    protected val builder: UriBuilder,
+    protected val path: String
 ) {
+
+    init {
+        builder.path(path)
+    }
 
     protected fun getDefaultPageSize(): Int {
         return 50

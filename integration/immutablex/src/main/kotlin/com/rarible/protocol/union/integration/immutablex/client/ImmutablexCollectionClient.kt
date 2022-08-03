@@ -4,6 +4,7 @@ import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexCollectio
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexPage
 import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.WebClientResponseException
 import org.springframework.web.reactive.function.client.awaitBody
 
 class ImmutablexCollectionClient(
@@ -12,28 +13,40 @@ class ImmutablexCollectionClient(
     webClient
 ) {
 
+    private val collectionRequestChunkSize = 16
+
+    suspend fun getById(collectionAddress: String): ImmutablexCollection {
+        val uri = ImmutablexCollectionQueryBuilder.getByIdPath(collectionAddress)
+        return webClient.get().uri(uri)
+            .accept(MediaType.APPLICATION_JSON)
+            .retrieve()
+            .awaitBody()
+    }
+
+    suspend fun getByIds(collectionIds: List<String>): List<ImmutablexCollection> {
+        return getChunked(collectionRequestChunkSize, collectionIds) {
+            try {
+                getById(it)
+            } catch (e: WebClientResponseException.NotFound) {
+                null
+            }
+        }
+    }
+
     suspend fun getAll(
         continuation: String?,
         size: Int
     ): ImmutablexPage<ImmutablexCollection> {
-        val query = StringBuilder("?order_by=name&direction=desc")
-        query.append("&page_size=$size")
-        if (!continuation.isNullOrEmpty()) {
-            query.append("&cursor=$continuation")
-        }
         return webClient
             .get()
-            .uri("/collections$query")
+            .uri {
+                val builder = ImmutablexCollectionQueryBuilder(it)
+                builder.continuation(continuation)
+                builder.pageSize(size)
+                builder.build()
+            }
             .accept(MediaType.APPLICATION_JSON)
             .retrieve()
             .awaitBody()
     }
-
-    suspend fun getById(collectionAddress: String): ImmutablexCollection {
-        return webClient.get().uri("/collections/${collectionAddress}")
-            .accept(MediaType.APPLICATION_JSON)
-            .retrieve()
-            .awaitBody()
-    }
-
 }
