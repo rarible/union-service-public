@@ -9,12 +9,11 @@ import com.rarible.protocol.union.integration.immutablex.converter.ImmutablexOrd
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexOrder
 
 class ImmutablexOrderEventHandler(
-    override val handler: IncomingEventHandler<UnionOrderEvent>,
-    private val converter: ImmutablexOrderConverter
+    override val handler: IncomingEventHandler<UnionOrderEvent>
 ) : AbstractBlockchainEventHandler<ImmutablexOrder, UnionOrderEvent>(BlockchainDto.IMMUTABLEX) {
 
     override suspend fun handle(event: ImmutablexOrder) {
-        val order = converter.convert(event, blockchain)
+        val order = ImmutablexOrderConverter.convert(event, blockchain)
         handler.onEvent(UnionOrderUpdateEvent(order))
     }
 }
