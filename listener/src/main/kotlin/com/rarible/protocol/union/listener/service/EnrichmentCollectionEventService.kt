@@ -8,6 +8,7 @@ import com.rarible.protocol.union.core.service.ReconciliationEventService
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.CollectionUpdateEventDto
 import com.rarible.protocol.union.dto.OrderDto
+import com.rarible.protocol.union.enrichment.model.CollectionStatistics
 import com.rarible.protocol.union.enrichment.model.ShortCollection
 import com.rarible.protocol.union.enrichment.model.ShortCollectionId
 import com.rarible.protocol.union.enrichment.service.BestOrderService
@@ -16,7 +17,7 @@ import com.rarible.protocol.union.enrichment.validator.EntityValidator
 import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
-import java.util.*
+import java.util.UUID
 
 @Component
 class EnrichmentCollectionEventService(
@@ -29,7 +30,7 @@ class EnrichmentCollectionEventService(
 
     private val logger = LoggerFactory.getLogger(EnrichmentCollectionEventService::class.java)
 
-    suspend fun onCollectionUpdate(collection: UnionCollection){
+    suspend fun onCollectionUpdate(collection: UnionCollection) {
         val existing = enrichmentCollectionService.getOrEmpty(ShortCollectionId(collection.id))
         val updateEvent = buildUpdateEvent(short = existing, collection = collection)
         sendUpdate(updateEvent)
@@ -95,7 +96,9 @@ class EnrichmentCollectionEventService(
                 logger.info("Deleted Collection [{}] without enrichment data", itemId)
             }
         } else {
-            logger.info("Collection [{}] not changed after Order event [{}], event won't be published", itemId, order.id)
+            logger.info(
+                "Collection [{}] not changed after Order event [{}], event won't be published", itemId, order.id
+            )
         }
     }
 
@@ -107,6 +110,18 @@ class EnrichmentCollectionEventService(
         val exist = current != null
         val short = current ?: ShortCollection.empty(collectionId)
         return Triple(current, action(short), exist)
+    }
+
+    suspend fun onCollectionStatisticsUpdate(
+        collectionId: ShortCollectionId,
+        statistics: CollectionStatistics,
+        notificationEnabled: Boolean
+    ): Unit = optimisticLock {
+        val collection = enrichmentCollectionService.getOrEmpty(collectionId)
+        if (collection.statistics != statistics) {
+            saveAndNotify(collection.copy(statistics = statistics), notificationEnabled)
+            logger.info("Updated collection [{}] with new statistics [{}]", collection, statistics)
+        }
     }
 
     private suspend fun saveAndNotify(
