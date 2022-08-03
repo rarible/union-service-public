@@ -5,13 +5,14 @@ import com.rarible.protocol.union.core.model.UnionItemEvent
 import com.rarible.protocol.union.core.model.UnionOrderEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipEvent
 import com.rarible.protocol.union.dto.ActivityDto
-import com.rarible.protocol.union.integration.immutablex.client.EventsApi
 import com.rarible.protocol.union.integration.immutablex.converter.ImmutablexEventConverter
 import com.rarible.protocol.union.integration.immutablex.converter.ImmutablexOrderConverter
 import com.rarible.protocol.union.integration.immutablex.handlers.ImmutablexActivityEventHandler
 import com.rarible.protocol.union.integration.immutablex.handlers.ImmutablexItemEventHandler
 import com.rarible.protocol.union.integration.immutablex.handlers.ImmutablexOrderEventHandler
 import com.rarible.protocol.union.integration.immutablex.handlers.ImmutablexOwnershipEventHandler
+import com.rarible.protocol.union.integration.immutablex.scanner.EventsApi
+import com.rarible.protocol.union.integration.immutablex.scanner.ImmutablexScanner
 import com.rarible.protocol.union.integration.immutablex.service.ImmutablexOrderService
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import

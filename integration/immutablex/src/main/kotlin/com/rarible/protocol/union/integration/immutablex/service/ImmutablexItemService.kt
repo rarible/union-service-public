@@ -11,7 +11,8 @@ import com.rarible.protocol.union.dto.RoyaltyDto
 import com.rarible.protocol.union.dto.continuation.DateIdContinuation
 import com.rarible.protocol.union.dto.continuation.page.Page
 import com.rarible.protocol.union.dto.continuation.page.Paging
-import com.rarible.protocol.union.integration.immutablex.client.ImmutablexApiClient
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexActivityClient
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexAssetClient
 import com.rarible.protocol.union.integration.immutablex.converter.ImmutablexItemConverter
 import com.rarible.protocol.union.integration.immutablex.converter.ImmutablexItemMetaConverter
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexAsset
@@ -19,7 +20,8 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 
 class ImmutablexItemService(
-    private val client: ImmutablexApiClient
+    private val assetClient: ImmutablexAssetClient,
+    private val activityClient: ImmutablexActivityClient
 ) : AbstractBlockchainService(BlockchainDto.IMMUTABLEX), ItemService {
 
     override suspend fun getAllItems(
@@ -29,7 +31,7 @@ class ImmutablexItemService(
         lastUpdatedFrom: Long?,
         lastUpdatedTo: Long?,
     ): Page<UnionItem> {
-        val page = client.getAllAssets(continuation, size, lastUpdatedTo, lastUpdatedFrom)
+        val page = assetClient.getAllAssets(continuation, size, lastUpdatedTo, lastUpdatedFrom)
         val last = page.result.last()
         val cont = if (page.remaining) DateIdContinuation(last.updatedAt!!, last.itemId).toString() else null
         return Page(
@@ -40,18 +42,18 @@ class ImmutablexItemService(
     }
 
     override suspend fun getItemById(itemId: String): UnionItem {
-        val creatorDeferred = coroutineScope { async { client.getItemCreator(itemId) } }
-        val asset = client.getAsset(itemId)
+        val creatorDeferred = coroutineScope { async { activityClient.getItemCreator(itemId) } }
+        val asset = assetClient.getAsset(itemId)
         return ImmutablexItemConverter.convert(asset, creatorDeferred.await(), blockchain)
     }
 
     override suspend fun getItemRoyaltiesById(itemId: String): List<RoyaltyDto> {
-        val asset = client.getAsset(itemId)
+        val asset = assetClient.getAsset(itemId)
         return ImmutablexItemConverter.convertToRoyaltyDto(asset, blockchain)
     }
 
     override suspend fun getItemMetaById(itemId: String): UnionMeta {
-        val asset = client.getAsset(itemId)
+        val asset = assetClient.getAsset(itemId)
         return ImmutablexItemMetaConverter.convert(asset)
     }
 
@@ -65,13 +67,13 @@ class ImmutablexItemService(
         continuation: String?,
         size: Int,
     ): Page<UnionItem> {
-        val page = client.getAssetsByCollection(collection, owner, continuation, size)
+        val page = assetClient.getAssetsByCollection(collection, owner, continuation, size)
         val converted = convert(page.result)
         return Paging(UnionItemContinuation.ByLastUpdatedAndId, converted).getPage(size, 0)
     }
 
     override suspend fun getItemsByCreator(creator: String, continuation: String?, size: Int): Page<UnionItem> {
-        val mints = client.getMints(
+        val mints = activityClient.getMints(
             size,
             continuation,
             user = creator,
@@ -88,14 +90,14 @@ class ImmutablexItemService(
     }
 
     override suspend fun getItemsByOwner(owner: String, continuation: String?, size: Int): Page<UnionItem> {
-        val page = client.getAssetsByOwner(owner, continuation, size)
+        val page = assetClient.getAssetsByOwner(owner, continuation, size)
         val converted = convert(page.result)
         return Paging(UnionItemContinuation.ByLastUpdatedAndId, converted).getPage(size, 0)
     }
 
     override suspend fun getItemsByIds(itemIds: List<String>): List<UnionItem> {
-        val creators = coroutineScope { async { client.getItemCreators(itemIds) } }
-        val assets = client.getAssetsByIds(itemIds)
+        val creators = coroutineScope { async { activityClient.getItemCreators(itemIds) } }
+        val assets = assetClient.getAssetsByIds(itemIds)
         return convert(assets, creators.await())
     }
 
@@ -104,7 +106,7 @@ class ImmutablexItemService(
     }
 
     private suspend fun convert(assets: Collection<ImmutablexAsset>): List<UnionItem> {
-        val creators = client.getItemCreators(assets.map { it.itemId })
+        val creators = activityClient.getItemCreators(assets.map { it.itemId })
         return convert(assets, creators)
     }
 

@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.integration.immutablex.client.activity
+package com.rarible.protocol.union.integration.immutablex.client
 
 import com.rarible.protocol.union.dto.ActivitySortDto
 import org.assertj.core.api.Assertions.assertThat
@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.web.util.DefaultUriBuilderFactory
 import java.time.Instant
 
-class ActivityQueryBuilderTest {
+class ImmutablexActivityQueryBuilderTest {
 
     private val host = "http://imx.test/api"
     private lateinit var builder: MintQueryBuilder
@@ -26,7 +26,8 @@ class ActivityQueryBuilderTest {
     @Test
     fun `all parameters - without continuation`() {
         builder.user("u")
-        builder.itemId("a:b")
+        builder.token("a")
+        builder.tokenId("b")
         builder.continuation(from, to, ActivitySortDto.EARLIEST_FIRST, null)
 
         assertThat(builder.toString()).isEqualTo(

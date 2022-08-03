@@ -3,7 +3,7 @@ package com.rarible.protocol.union.integration.immutablex.client
 import org.springframework.web.util.UriBuilder
 import java.net.URI
 
-abstract class AbstractQueryBuilder(
+abstract class AbstractImmutablexQueryBuilder(
     protected val builder: UriBuilder
 ) {
 

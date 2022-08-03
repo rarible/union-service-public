@@ -13,7 +13,7 @@ import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.continuation.OrderContinuation
 import com.rarible.protocol.union.dto.continuation.page.Paging
 import com.rarible.protocol.union.dto.continuation.page.Slice
-import com.rarible.protocol.union.integration.immutablex.client.ImmutablexApiClient
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexOrderClient
 import com.rarible.protocol.union.integration.immutablex.converter.ImmutablexOrderConverter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -21,8 +21,7 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 
 class ImmutablexOrderService(
-    private val client: ImmutablexApiClient,
-    private val orderConverter: ImmutablexOrderConverter
+    private val orderClient: ImmutablexOrderClient
 ) : AbstractBlockchainService(BlockchainDto.IMMUTABLEX), OrderService {
 
     override suspend fun getOrdersAll(
@@ -31,8 +30,8 @@ class ImmutablexOrderService(
         sort: OrderSortDto?,
         status: List<OrderStatusDto>?,
     ): Slice<OrderDto> {
-        val orders =  client.getAllOrders(continuation, size, sort, status).map {
-            orderConverter.convert(it, blockchain)
+        val orders = orderClient.getAllOrders(continuation, size, sort, status).map {
+            ImmutablexOrderConverter.convert(it, blockchain)
         }
         return Paging(OrderContinuation.ByLastUpdatedAndIdDesc, orders).getSlice(size)
     }
@@ -44,8 +43,8 @@ class ImmutablexOrderService(
     ): Slice<OrderDto> = Slice.empty()
 
     override suspend fun getOrderById(id: String): OrderDto {
-        val order = client.getOrderById(id.toLong())
-        return orderConverter.convert(order, blockchain)
+        val order = orderClient.getOrderById(id.toLong())
+        return ImmutablexOrderConverter.convert(order, blockchain)
     }
 
     override suspend fun getOrdersByIds(orderIds: List<String>): List<OrderDto> {
@@ -101,8 +100,8 @@ class ImmutablexOrderService(
         continuation: String?,
         size: Int,
     ): Slice<OrderDto> {
-        val orders = client.getSellOrders(continuation, size).map {
-            orderConverter.convert(it, blockchain)
+        val orders = orderClient.getSellOrders(continuation, size).map {
+            ImmutablexOrderConverter.convert(it, blockchain)
         }
         return Paging(OrderContinuation.ByLastUpdatedAndIdDesc, orders).getSlice(size)
     }
@@ -114,8 +113,8 @@ class ImmutablexOrderService(
         continuation: String?,
         size: Int,
     ): Slice<OrderDto> {
-        val orders = client.getSellOrdersByCollection(collection, continuation, size).map {
-            orderConverter.convert(it, blockchain)
+        val orders = orderClient.getSellOrdersByCollection(collection, continuation, size).map {
+            ImmutablexOrderConverter.convert(it, blockchain)
         }
         return Paging(OrderContinuation.ByLastUpdatedAndIdDesc, orders).getSlice(size)
     }
@@ -144,8 +143,8 @@ class ImmutablexOrderService(
         continuation: String?,
         size: Int,
     ): Slice<OrderDto> {
-        val orders = client.getSellOrdersByItem(itemId, maker, status, currencyId, continuation, size).map {
-            orderConverter.convert(it, blockchain)
+        val orders = orderClient.getSellOrdersByItem(itemId, maker, status, currencyId, continuation, size).map {
+            ImmutablexOrderConverter.convert(it, blockchain)
         }
         return Paging(OrderContinuation.ByLastUpdatedAndIdDesc, orders).getSlice(size)
     }
@@ -158,8 +157,8 @@ class ImmutablexOrderService(
         continuation: String?,
         size: Int,
     ): Slice<OrderDto> {
-        val orders = client.getSellOrdersByMaker(maker, status, continuation, size).map {
-            orderConverter.convert(it, blockchain)
+        val orders = orderClient.getSellOrdersByMaker(maker, status, continuation, size).map {
+            ImmutablexOrderConverter.convert(it, blockchain)
         }
         return Paging(OrderContinuation.ByLastUpdatedAndIdDesc, orders).getSlice(size)
     }

@@ -6,7 +6,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.integration.MockWebClient
-import com.rarible.protocol.union.integration.immutablex.client.ImmutablexApiClient
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexCollectionClient
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
@@ -16,7 +16,7 @@ class ImmutablexCollectionServiceTest {
     @Test
     fun `should get all collections`(): Unit = runBlocking {
         val page = ImmutablexCollectionService(
-            ImmutablexApiClient(
+            ImmutablexCollectionClient(
                 MockWebClient(
                     "/collections?order_by=name&direction=desc&page_size=50", ALL_COLLECTIONS
                 )
@@ -61,7 +61,7 @@ class ImmutablexCollectionServiceTest {
     @Test
     fun `should get collection by id`(): Unit = runBlocking {
         val col = ImmutablexCollectionService(
-            ImmutablexApiClient(
+            ImmutablexCollectionClient(
                 MockWebClient(
                     "/collections/0x62d25241d4a5d619c1b06114210250d19d2424c0", ONE_COLLECTION
                 )

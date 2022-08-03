@@ -1,6 +1,5 @@
-package com.rarible.protocol.union.integration.immutablex
+package com.rarible.protocol.union.integration.immutablex.scanner
 
-import com.rarible.protocol.union.integration.immutablex.client.EventsApi
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexEvent
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexPage
 import com.rarible.protocol.union.integration.immutablex.entity.ImmutablexEntityTypes
