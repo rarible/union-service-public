@@ -9,6 +9,7 @@ import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.ItemsDto
 import com.rarible.protocol.union.dto.ItemsSearchRequestDto
 import com.rarible.protocol.union.dto.ItemsWithOwnershipDto
+import com.rarible.protocol.union.dto.SearchEngineDto
 import com.rarible.protocol.union.enrichment.service.query.item.ItemApiMergeService
 import com.rarible.protocol.union.enrichment.service.query.item.ItemQueryService
 import kotlinx.coroutines.flow.Flow
@@ -27,9 +28,10 @@ class ItemSourceSelectService(
         size: Int?,
         showDeleted: Boolean?,
         lastUpdatedFrom: Long?,
-        lastUpdatedTo: Long?
+        lastUpdatedTo: Long?,
+        searchEngine: SearchEngineDto?
     ): ItemsDto {
-        return getQuerySource().getAllItems(
+        return getQuerySource(searchEngine).getAllItems(
             blockchains,
             continuation,
             size,
@@ -39,8 +41,11 @@ class ItemSourceSelectService(
         )
     }
 
-    suspend fun getAllItemIdsByCollection(collectionId: CollectionIdDto): Flow<ItemIdDto> {
-        return getQuerySource().getAllItemIdsByCollection(collectionId)
+    suspend fun getAllItemIdsByCollection(
+        collectionId: CollectionIdDto,
+        searchEngine: SearchEngineDto?
+    ): Flow<ItemIdDto> {
+        return getQuerySource(searchEngine).getAllItemIdsByCollection(collectionId)
     }
 
     suspend fun getItemsByIds(ids: List<ItemIdDto>): List<ItemDto> {
@@ -50,18 +55,24 @@ class ItemSourceSelectService(
     suspend fun getItemsByCollection(
         collection: String,
         continuation: String?,
-        size: Int?
+        size: Int?,
+        searchEngine: SearchEngineDto?
     ): ItemsDto {
-        return getQuerySource().getItemsByCollection(collection = collection, continuation = continuation, size = size)
+        return getQuerySource(searchEngine).getItemsByCollection(
+            collection = collection,
+            continuation = continuation,
+            size = size
+        )
     }
 
     suspend fun getItemsByCreator(
         creator: String,
         blockchains: List<BlockchainDto>?,
         continuation: String?,
-        size: Int?
+        size: Int?,
+        searchEngine: SearchEngineDto?
     ): ItemsDto {
-        return getQuerySource().getItemsByCreator(
+        return getQuerySource(searchEngine).getItemsByCreator(
             creator = creator,
             blockchains = blockchains,
             continuation = continuation,
@@ -73,10 +84,11 @@ class ItemSourceSelectService(
         owner: String,
         blockchains: List<BlockchainDto>?,
         continuation: String?,
-        size: Int?
+        size: Int?,
+        searchEngine: SearchEngineDto?
     ): ItemsDto {
 
-        return getQuerySource().getItemsByOwner(
+        return getQuerySource(searchEngine).getItemsByOwner(
             owner = owner,
             blockchains = blockchains,
             continuation = continuation,
@@ -87,9 +99,10 @@ class ItemSourceSelectService(
     suspend fun getItemsByOwnerWithOwnership(
         owner: String,
         continuation: String?,
-        size: Int?
+        size: Int?,
+        searchEngine: SearchEngineDto?
     ): ItemsWithOwnershipDto {
-        return getQuerySource().getItemsByOwnerWithOwnership(owner, continuation, size)
+        return getQuerySource(searchEngine).getItemsByOwnerWithOwnership(owner, continuation, size)
     }
 
     suspend fun searchItems(itemsSearchRequestDto: ItemsSearchRequestDto): ItemsDto {
@@ -98,7 +111,13 @@ class ItemSourceSelectService(
         } else ItemsDto()
     }
 
-    private fun getQuerySource(): ItemQueryService {
+    private fun getQuerySource(searchEngine: SearchEngineDto?): ItemQueryService {
+        if (searchEngine != null) {
+            return when (searchEngine) {
+                SearchEngineDto.LEGACY -> itemApiService
+                SearchEngineDto.V1 -> itemApiService
+            }
+        }
         return when (featureFlagsProperties.enableItemQueriesToElasticSearch) {
             true -> itemElasticService
             else -> itemApiService
