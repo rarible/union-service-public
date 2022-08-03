@@ -37,7 +37,7 @@ class ImmutablexActivityQueryBuilderTest {
                 "&token_id=b" +
                 "&min_timestamp=2022-01-01T00:00:00Z" +
                 "&max_timestamp=2022-01-01T06:00:00Z" +
-                "&order_by=updated_at" +
+                "&order_by=created_at" +
                 "&direction=asc"
         )
     }
@@ -49,7 +49,7 @@ class ImmutablexActivityQueryBuilderTest {
         assertThat(builder.toString()).isEqualTo(
             "$host/mints?" +
                 "min_timestamp=2022-01-01T03:00:00Z" +
-                "&order_by=updated_at" +
+                "&order_by=created_at" +
                 "&direction=asc"
         )
     }
@@ -61,7 +61,7 @@ class ImmutablexActivityQueryBuilderTest {
         assertThat(builder.toString()).isEqualTo(
             "$host/mints?" +
                 "max_timestamp=2022-01-01T03:00:00Z" +
-                "&order_by=updated_at" +
+                "&order_by=created_at" +
                 "&direction=desc"
         )
     }
@@ -74,7 +74,7 @@ class ImmutablexActivityQueryBuilderTest {
         assertThat(builder.toString()).isEqualTo(
             "$host/mints?" +
                 "min_timestamp=2022-01-01T03:00:00Z" +
-                "&order_by=updated_at" +
+                "&order_by=created_at" +
                 "&direction=asc"
         )
     }
@@ -88,7 +88,7 @@ class ImmutablexActivityQueryBuilderTest {
             "$host/mints?" +
                 "min_timestamp=2022-01-01T03:00:00Z" +
                 "&max_timestamp=2022-01-01T06:00:00Z" +
-                "&order_by=updated_at" +
+                "&order_by=created_at" +
                 "&direction=asc"
         )
     }
@@ -102,7 +102,7 @@ class ImmutablexActivityQueryBuilderTest {
             "$host/mints?" +
                 "min_timestamp=2022-01-01T00:00:00Z" +
                 "&max_timestamp=2022-01-01T03:00:00Z" +
-                "&order_by=updated_at" +
+                "&order_by=created_at" +
                 "&direction=desc"
         )
     }
@@ -115,7 +115,7 @@ class ImmutablexActivityQueryBuilderTest {
         assertThat(builder.toString()).isEqualTo(
             "$host/mints?" +
                 "max_timestamp=2022-01-01T03:00:00Z" +
-                "&order_by=updated_at" +
+                "&order_by=created_at" +
                 "&direction=desc"
         )
     }

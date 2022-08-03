@@ -10,6 +10,8 @@ sealed class ImmutablexActivityQueryBuilder(builder: UriBuilder) : AbstractImmut
     abstract val tokenIdField: String
     abstract val tokenField: String
 
+    abstract val sortDateField: String
+
     fun token(token: String?) {
         builder.queryParamNotNull(tokenField, token)
     }
@@ -41,7 +43,7 @@ sealed class ImmutablexActivityQueryBuilder(builder: UriBuilder) : AbstractImmut
         builder.queryParamNotNull("min_timestamp", queryFrom)
         builder.queryParamNotNull("max_timestamp", queryTo)
 
-        orderBy("updated_at", direction)
+        orderBy(sortDateField, direction)
     }
 
     companion object {
@@ -66,6 +68,8 @@ class MintQueryBuilder(
     override val tokenIdField: String = "token_id"
     override val tokenField: String = "token_address"
 
+    override val sortDateField: String = "created_at"
+
 }
 
 class TradeQueryBuilder(
@@ -77,6 +81,8 @@ class TradeQueryBuilder(
     override val tokenIdField = "party_b_token_id"
     override val tokenField = "party_b_token_address"
 
+    override val sortDateField: String = "created_at"
+
 }
 
 class TransferQueryBuilder(
@@ -87,6 +93,8 @@ class TransferQueryBuilder(
 
     override val tokenIdField: String = "token_id"
     override val tokenField: String = "token_address"
+
+    override val sortDateField: String = "updated_at"
 }
 
 enum class ActivityType {
