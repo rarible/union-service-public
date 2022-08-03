@@ -60,7 +60,8 @@ open class TezosOrderService(
             // If legacy orders ended, we should try to get orders from new indexer
             if (dipdupOrderService.enabled() && slice.entities.size < size) {
                 val delta = size - slice.entities.size
-                val nextSlice = dipdupOrderService.getOrdersAll(sort, status, null, delta)
+                val dipdupContinuation = if (tezosIntegrationProperties.showLegacyActivity) null else continuation
+                val nextSlice = dipdupOrderService.getOrdersAll(sort, status, dipdupContinuation, delta)
                 Slice(
                     continuation = nextSlice.continuation,
                     entities = slice.entities + nextSlice.entities
