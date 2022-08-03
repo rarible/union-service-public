@@ -16,9 +16,6 @@ import org.springframework.web.client.RestTemplate
 class ContentControllerFt : AbstractIntegrationTest() {
 
     @Autowired
-    lateinit var testTemplate: RestTemplate
-
-    @Autowired
     lateinit var embeddedContentStorage: EmbeddedContentStorage
 
     @Test
@@ -32,7 +29,7 @@ class ContentControllerFt : AbstractIntegrationTest() {
         )
         embeddedContentStorage.save(content)
 
-        val result = testTemplate.getForEntity("$baseUri/content/embedded/${content.id}", ByteArray::class.java)
+        val result = testRestTemplate.getForEntity("$baseUri/content/embedded/${content.id}", ByteArray::class.java)
         assertThat(result.body).isEqualTo(data)
         assertThat(result.headers.getFirst(HttpHeaders.CONTENT_TYPE)).isEqualTo(content.mimeType)
         assertThat(result.headers.getFirst(HttpHeaders.CONTENT_LENGTH)).isEqualTo(content.size.toString())
