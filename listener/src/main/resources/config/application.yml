@@ -182,6 +182,10 @@ listener:
     #sellOrderFrom: "2022-02-06T00:00:00.000Z"
     itemBatchSize: 100
     ownershipBatchSize: 50
+  collection-statistics-resync:
+    enabled: false
+    rate: PT12H
+    limit: 50
   price-update:
     enabled: true
     rate: PT5M
