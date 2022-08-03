@@ -6,6 +6,7 @@ import com.rarible.protocol.union.dto.ActivitiesDto
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.SearchEngineDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
 import com.rarible.protocol.union.enrichment.service.query.activity.ActivityApiMergeService
 import io.mockk.coEvery
@@ -75,14 +76,14 @@ class ActivitySourceSelectServiceTest {
             ),
             Arguments.of(
                 true,
-                OverrideSelect.API_MERGE,
+                SearchEngineDto.LEGACY,
                 false,
                 ActivitySortDto.EARLIEST_FIRST,
                 apiMergeResponse,
             ),
             Arguments.of(
                 false,
-                OverrideSelect.ELASTIC,
+                SearchEngineDto.V1,
                 false,
                 ActivitySortDto.EARLIEST_FIRST,
                 elasticResponse,
@@ -108,7 +109,7 @@ class ActivitySourceSelectServiceTest {
     @MethodSource("testArguments")
     fun `should get all activities`(
         elasticFeatureFlag: Boolean,
-        overrideSelect: OverrideSelect?,
+        searchEngine: SearchEngineDto?,
         ascQueriesFeatureFlag: Boolean,
         sort: ActivitySortDto,
         expectedResponse: ActivitiesDto,
@@ -124,7 +125,7 @@ class ActivitySourceSelectServiceTest {
         } returns apiMergeResponse
 
         // when
-        val actual = service.getAllActivities(type, blockchains, continuation, cursor, size, sort, overrideSelect)
+        val actual = service.getAllActivities(type, blockchains, continuation, cursor, size, sort, searchEngine)
 
         // then
         assertThat(actual).isEqualTo(expectedResponse)
@@ -144,7 +145,7 @@ class ActivitySourceSelectServiceTest {
     @MethodSource("testArguments")
     fun `should get activities by collection - select elastic`(
         elasticFeatureFlag: Boolean,
-        overrideSelect: OverrideSelect?,
+        searchEngine: SearchEngineDto?,
         ascQueriesFeatureFlag: Boolean,
         sort: ActivitySortDto,
         expectedResponse: ActivitiesDto,
@@ -160,7 +161,9 @@ class ActivitySourceSelectServiceTest {
         } returns apiMergeResponse
 
         // when
-        val actual = service.getActivitiesByCollection(type, listOf(collection), continuation, cursor, size, sort, overrideSelect)
+        val actual = service.getActivitiesByCollection(
+            type, listOf(collection), continuation, cursor, size, sort, searchEngine
+        )
 
         // then
         assertThat(actual).isEqualTo(expectedResponse)
@@ -180,7 +183,7 @@ class ActivitySourceSelectServiceTest {
     @MethodSource("testArguments")
     fun `should get activities by item - select elastic`(
         elasticFeatureFlag: Boolean,
-        overrideSelect: OverrideSelect?,
+        searchEngine: SearchEngineDto?,
         ascQueriesFeatureFlag: Boolean,
         sort: ActivitySortDto,
         expectedResponse: ActivitiesDto,
@@ -196,7 +199,7 @@ class ActivitySourceSelectServiceTest {
         } returns apiMergeResponse
 
         // when
-        val actual = service.getActivitiesByItem(type, itemId, continuation, cursor, size, sort, overrideSelect)
+        val actual = service.getActivitiesByItem(type, itemId, continuation, cursor, size, sort, searchEngine)
 
         // then
         assertThat(actual).isEqualTo(expectedResponse)
@@ -216,7 +219,7 @@ class ActivitySourceSelectServiceTest {
     @MethodSource("testArguments")
     fun `should get activities by user - select elastic`(
         elasticFeatureFlag: Boolean,
-        overrideSelect: OverrideSelect?,
+        searchEngine: SearchEngineDto?,
         ascQueriesFeatureFlag: Boolean,
         sort: ActivitySortDto,
         expectedResponse: ActivitiesDto,
@@ -232,7 +235,9 @@ class ActivitySourceSelectServiceTest {
         } returns apiMergeResponse
 
         // when
-        val actual = service.getActivitiesByUser(userType, user, blockchains, from, to, continuation, cursor, size, sort, overrideSelect)
+        val actual = service.getActivitiesByUser(
+            userType, user, blockchains, from, to, continuation, cursor, size, sort, searchEngine
+        )
 
         // then
         assertThat(actual).isEqualTo(expectedResponse)

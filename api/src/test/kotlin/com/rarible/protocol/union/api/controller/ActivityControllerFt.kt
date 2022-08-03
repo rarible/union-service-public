@@ -28,6 +28,7 @@ import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.MintActivityDto
 import com.rarible.protocol.union.dto.OrderBidActivityDto
 import com.rarible.protocol.union.dto.OrderListActivityDto
+import com.rarible.protocol.union.dto.SearchEngineDto
 import com.rarible.protocol.union.dto.SyncTypeDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
 import com.rarible.protocol.union.dto.continuation.CombinedContinuation
@@ -616,7 +617,7 @@ class ActivityControllerFt : AbstractIntegrationTest() {
         val activities = activityControllerApi.getActivitiesByCollection(
             types,
             listOf(ethCollectionId.fullId(), flowCollectionId.fullId()),
-            continuation, null, 100000, sort, true
+            continuation, null, 100000, sort, SearchEngineDto.V1
         ).awaitFirst()
 
         assertThat(activities.activities).hasSize(2)

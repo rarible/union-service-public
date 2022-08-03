@@ -2,12 +2,12 @@ package com.rarible.protocol.union.api.controller
 
 import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.api.service.select.ActivitySourceSelectService
-import com.rarible.protocol.union.api.service.select.OverrideSelect
 import com.rarible.protocol.union.core.exception.UnionException
 import com.rarible.protocol.union.dto.ActivitiesDto
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.SearchEngineDto
 import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.SyncTypeDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
@@ -31,11 +31,12 @@ class ActivityController(
         cursor: String?,
         size: Int?,
         sort: ActivitySortDto?,
-        newSearchEngine: Boolean?
+        searchEngine: SearchEngineDto?
     ): ResponseEntity<ActivitiesDto> {
         logger.info("Got request to get all activities, parameters: $type, $blockchains, $continuation, $cursor, $size, $sort")
-        val overrideSelect = if (newSearchEngine == true) OverrideSelect.ELASTIC else null
-        val result = activitySourceSelector.getAllActivities(type, blockchains, continuation, cursor, size, sort, overrideSelect)
+        val result = activitySourceSelector.getAllActivities(
+            type, blockchains, continuation, cursor, size, sort, searchEngine
+        )
         return ResponseEntity.ok(result)
     }
 
@@ -58,11 +59,12 @@ class ActivityController(
         cursor: String?,
         size: Int?,
         sort: ActivitySortDto?,
-        newSearchEngine: Boolean?
+        searchEngine: SearchEngineDto?
     ): ResponseEntity<ActivitiesDto> {
-        val overrideSelect = if (newSearchEngine == true) OverrideSelect.ELASTIC else null
         if (collection.isEmpty()) throw UnionException("No any collection param in query")
-        val result = activitySourceSelector.getActivitiesByCollection(type, collection, continuation, cursor, size, sort, overrideSelect)
+        val result = activitySourceSelector.getActivitiesByCollection(
+            type, collection, continuation, cursor, size, sort, searchEngine
+        )
         return ResponseEntity.ok(result)
     }
 
@@ -74,10 +76,11 @@ class ActivityController(
         cursor: String?,
         size: Int?,
         sort: ActivitySortDto?,
-        newSearchEngine: Boolean?
+        searchEngine: SearchEngineDto?
     ): ResponseEntity<ActivitiesDto> {
-        val overrideSelect = if (newSearchEngine == true) OverrideSelect.ELASTIC else null
-        val result = activitySourceSelector.getActivitiesByItem(type, itemId, continuation, cursor, size, sort, overrideSelect)
+        val result = activitySourceSelector.getActivitiesByItem(
+            type, itemId, continuation, cursor, size, sort, searchEngine
+        )
         return ResponseEntity.ok(result)
     }
 
@@ -91,10 +94,11 @@ class ActivityController(
         cursor: String?,
         size: Int?,
         sort: ActivitySortDto?,
-        newSearchEngine: Boolean?
+        searchEngine: SearchEngineDto?
     ): ResponseEntity<ActivitiesDto> {
-        val overrideSelect = if (newSearchEngine == true) OverrideSelect.ELASTIC else null
-        val result = activitySourceSelector.getActivitiesByUser(type, user, blockchains, from, to, continuation, cursor, size, sort, overrideSelect)
+        val result = activitySourceSelector.getActivitiesByUser(
+            type, user, blockchains, from, to, continuation, cursor, size, sort, searchEngine
+        )
         return ResponseEntity.ok(result)
     }
 }
