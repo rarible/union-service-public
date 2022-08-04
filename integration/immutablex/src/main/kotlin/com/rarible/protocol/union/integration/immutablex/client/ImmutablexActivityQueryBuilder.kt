@@ -100,7 +100,8 @@ class TransferQueryBuilder(
     override val tokenIdField: String = "token_id"
     override val tokenField: String = "token_address"
 
-    override val sortDateField: String = "updated_at"
+    //override val sortDateField: String = "updated_at"
+    override val sortDateField: String = "created_at"
 }
 
 enum class ActivityType {
