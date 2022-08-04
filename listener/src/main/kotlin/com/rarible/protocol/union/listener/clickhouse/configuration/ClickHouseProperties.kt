@@ -6,8 +6,8 @@ import org.springframework.boot.context.properties.ConstructorBinding
 @ConstructorBinding
 @ConfigurationProperties("clickhouse")
 data class ClickHouseProperties(
-    val host: String,
-    val port: Int,
+    val host: String = "localhost",
+    val port: Int = 0,
     val database: String,
     val user: String,
     val password: String,
