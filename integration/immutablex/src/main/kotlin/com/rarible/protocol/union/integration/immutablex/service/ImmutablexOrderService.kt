@@ -43,7 +43,7 @@ class ImmutablexOrderService(
     ): Slice<OrderDto> = Slice.empty()
 
     override suspend fun getOrderById(id: String): OrderDto {
-        val order = orderClient.getOrderById(id.toLong())
+        val order = orderClient.getById(id.toLong())
         return ImmutablexOrderConverter.convert(order, blockchain)
     }
 

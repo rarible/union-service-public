@@ -16,8 +16,6 @@ sealed class ImmutablexActivityQueryBuilder(
     abstract val tokenIdField: String
     abstract val tokenField: String
 
-    abstract val sortDateField: String
-
     fun token(token: String?) {
         builder.queryParamNotNull(tokenField, token)
     }
@@ -49,7 +47,7 @@ sealed class ImmutablexActivityQueryBuilder(
         builder.queryParamNotNull("min_timestamp", queryFrom)
         builder.queryParamNotNull("max_timestamp", queryTo)
 
-        orderBy(sortDateField, direction)
+        orderBy("created_at", direction)
     }
 
     companion object {
@@ -68,40 +66,61 @@ sealed class ImmutablexActivityQueryBuilder(
 class MintQueryBuilder(
     builder: UriBuilder
 ) : ImmutablexActivityQueryBuilder(
-    builder, "/mints"
+    builder, PATH
 ) {
+
+    companion object {
+
+        const val PATH = "/mints"
+
+        fun getByIdPath(id: String): String {
+            return "$PATH/${id}"
+        }
+    }
 
     override val tokenIdField: String = "token_id"
     override val tokenField: String = "token_address"
-
-    override val sortDateField: String = "created_at"
 
 }
 
 class TradeQueryBuilder(
     builder: UriBuilder
 ) : ImmutablexActivityQueryBuilder(
-    builder, "/trades"
+    builder, PATH
 ) {
+
+    companion object {
+
+        const val PATH = "/trades"
+
+        fun getByIdPath(id: String): String {
+            return "$PATH/${id}"
+        }
+    }
 
     override val tokenIdField = "party_b_token_id"
     override val tokenField = "party_b_token_address"
-
-    override val sortDateField: String = "created_at"
 
 }
 
 class TransferQueryBuilder(
     builder: UriBuilder
 ) : ImmutablexActivityQueryBuilder(
-    builder, "/transfers"
+    builder, PATH
 ) {
+
+    companion object {
+
+        const val PATH = "/transfers"
+
+        fun getByIdPath(id: String): String {
+            return "$PATH/${id}"
+        }
+    }
 
     override val tokenIdField: String = "token_id"
     override val tokenField: String = "token_address"
 
-    //override val sortDateField: String = "updated_at"
-    override val sortDateField: String = "created_at"
 }
 
 enum class ActivityType {

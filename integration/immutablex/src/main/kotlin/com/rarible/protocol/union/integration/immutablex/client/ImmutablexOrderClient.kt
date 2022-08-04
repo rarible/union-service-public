@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.integration.immutablex.client
 
-import com.rarible.core.common.mapAsync
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.continuation.DateIdContinuation
@@ -11,22 +10,20 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.reactor.awaitSingle
-import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.toEntity
 import scalether.domain.Address
 import java.time.Instant
 
 class ImmutablexOrderClient(
-    private val webClient: WebClient,
+    webClient: WebClient,
+) : AbstractImmutablexClient(
+    webClient
 ) {
 
-    suspend fun getOrderById(id: Long): ImmutablexOrder {
-        return webClient.get().uri("/orders/$id?include_fees=true")
-            .accept(MediaType.APPLICATION_JSON)
-            .retrieve()
-            .toEntity(ImmutablexOrder::class.java)
-            .awaitSingle().body!!
+    suspend fun getById(id: Long): ImmutablexOrder {
+        val uri = "/orders/$id?include_fees=true"
+        return getByUri(uri)
     }
 
     suspend fun getAllOrders(
@@ -180,14 +177,6 @@ class ImmutablexOrderClient(
         }.retrieve()
             .toEntity<ImmutablexOrdersPage>()
             .awaitSingle().body!!
-    }
-
-    private suspend fun <K, V> getChunked(chuckSize: Int, keys: Collection<K>, call: suspend (K) -> V?): List<V> {
-        return coroutineScope {
-            keys.chunked(chuckSize).map { chunk ->
-                chunk.mapAsync { call(it) }
-            }
-        }.flatten().filterNotNull()
     }
 }
 

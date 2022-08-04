@@ -69,7 +69,7 @@ internal class ImmutablexOwnershipServiceTest {
         val ownership = ImmutablexOwnershipService(
             mockk {
                 coEvery {
-                    getAsset(ImmutablexData.itemId_1)
+                    getById(ImmutablexData.itemId_1)
                 } returns ImmutablexData.item_1
             },
 

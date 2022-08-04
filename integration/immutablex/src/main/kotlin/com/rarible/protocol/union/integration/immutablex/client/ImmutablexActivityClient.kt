@@ -2,10 +2,14 @@ package com.rarible.protocol.union.integration.immutablex.client
 
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.parser.IdParser
+import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexMint
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexMintsPage
+import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexTrade
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexTradesPage
+import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexTransfer
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexTransfersPage
 import kotlinx.coroutines.reactor.awaitSingle
+import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.client.WebClient
 import java.time.Instant
@@ -16,8 +20,23 @@ class ImmutablexActivityClient(
     webClient
 ) {
 
+    companion object {
+
+        val MINTS_ARRAY_TYPE = object : ParameterizedTypeReference<List<ImmutablexMint>>() {}
+    }
+
     // TODO IMMUTABLEX move out to configuration
     private val creatorsRequestChunkSize = 16
+    private val byIdsChunkSize = 16
+
+    suspend fun getMints(ids: List<String>): List<ImmutablexMint> {
+        return getChunked(byIdsChunkSize, ids) {
+            ignore404 {
+                // For some reason IMX returns array with one element instead of single object
+                getByUri(MintQueryBuilder.getByIdPath(it), MINTS_ARRAY_TYPE).firstOrNull()
+            }
+        }
+    }
 
     suspend fun getMints(
         pageSize: Int,
@@ -40,6 +59,14 @@ class ImmutablexActivityClient(
         ActivityType.MINT
     ) ?: ImmutablexMintsPage.EMPTY
 
+    suspend fun getTransfers(ids: List<String>): List<ImmutablexTransfer> {
+        return getChunked(byIdsChunkSize, ids) {
+            ignore404 {
+                getByUri<ImmutablexTransfer>(TransferQueryBuilder.getByIdPath(it))
+            }
+        }
+    }
+
     suspend fun getTransfers(
         pageSize: Int,
         continuation: String? = null,
@@ -60,6 +87,14 @@ class ImmutablexActivityClient(
         sort,
         ActivityType.TRANSFER
     ) ?: ImmutablexTransfersPage.EMPTY
+
+    suspend fun getTrades(ids: List<String>): List<ImmutablexTrade> {
+        return getChunked(byIdsChunkSize, ids) {
+            ignore404 {
+                getByUri<ImmutablexTrade>(TradeQueryBuilder.getByIdPath(it))
+            }
+        }
+    }
 
     suspend fun getTrades(
         pageSize: Int,

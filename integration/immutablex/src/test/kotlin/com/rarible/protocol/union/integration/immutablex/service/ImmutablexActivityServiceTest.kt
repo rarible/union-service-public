@@ -78,7 +78,7 @@ internal class ImmutablexActivityServiceTest {
         },
         ImmutablexOrderService(
             orderClient = mockk {
-                coEvery { getOrderById(any()) } answers {
+                coEvery { getById(any()) } answers {
                     mapper.readValue(
                         ImmutablexActivityServiceTest::class.java.getResourceAsStream("order.json"),
                         ImmutablexOrder::class.java
