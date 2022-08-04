@@ -41,7 +41,12 @@ class ImmutablexActivityService(
     private val allowedUserTypes = mapOf(
         UserActivityTypeDto.MINT to ActivityType.MINT,
         UserActivityTypeDto.TRANSFER_FROM to ActivityType.TRANSFER,
-        UserActivityTypeDto.SELL to ActivityType.TRADE,
+        //UserActivityTypeDto.SELL to ActivityType.TRADE, // TODO IMMUTABLEX filter by user is not supported
+    )
+
+    private val allowedItemAndOwnerTypes = mapOf(
+        ItemAndOwnerActivityType.MINT to ActivityType.MINT,
+        ItemAndOwnerActivityType.TRANSFER to ActivityType.TRANSFER
     )
 
     private fun mapTypes(types: List<ActivityTypeDto>) = types
@@ -52,16 +57,9 @@ class ImmutablexActivityService(
         .ifEmpty { allowedUserTypes.keys }
         .mapNotNull { allowedUserTypes[it] }
 
-    private fun mapItemAndOwnerTypes(types: List<ItemAndOwnerActivityType>): List<ActivityType> {
-        if (types.isEmpty()) return listOf(ActivityType.MINT, ActivityType.TRANSFER)
-        return types.map {
-            when (it) {
-                ItemAndOwnerActivityType.MINT -> ActivityType.MINT
-                ItemAndOwnerActivityType.TRANSFER -> ActivityType.TRANSFER
-                // TODO handle transfers with purchased = true (trades?)
-            }
-        }
-    }
+    private fun mapItemAndOwnerTypes(types: List<ItemAndOwnerActivityType>) = types
+        .ifEmpty { allowedItemAndOwnerTypes.keys }
+        .mapNotNull { allowedItemAndOwnerTypes[it] }
 
     override suspend fun getAllActivities(
         types: List<ActivityTypeDto>,
