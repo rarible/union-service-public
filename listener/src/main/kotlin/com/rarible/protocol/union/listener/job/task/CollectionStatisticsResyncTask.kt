@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import org.springframework.stereotype.Component
 import java.util.concurrent.atomic.AtomicLong
+import java.util.concurrent.atomic.AtomicReference
 
 @Component
 class CollectionStatisticsResyncTask(
@@ -23,12 +24,13 @@ class CollectionStatisticsResyncTask(
         logger.info("CollectionStatisticsResyncTask started with from={} and param={}", from, param)
         val counter = AtomicLong()
         val limit = param.toInt()
-        var statisticsMap: Map<ShortCollectionId, CollectionStatistics>
+        val lastId = AtomicReference(from)
         do {
-            statisticsMap = clickHouseCollectionStatisticsRepository.getAllStatistics(
-                fromIdExcluded = from,
-                limit = limit
-            )
+            val statisticsMap: Map<ShortCollectionId, CollectionStatistics> =
+                clickHouseCollectionStatisticsRepository.getAllStatistics(
+                    fromIdExcluded = lastId.get(),
+                    limit = limit
+                )
 
             statisticsMap.forEach { (collectionId, statistics) ->
                 enrichmentCollectionEventService.onCollectionStatisticsUpdate(
@@ -43,7 +45,9 @@ class CollectionStatisticsResyncTask(
                     from,
                     param
                 )
-                emit(it.toString())
+                val last = it.toString()
+                lastId.set(last)
+                emit(last)
             }
         } while (statisticsMap.size >= limit)
         logger.info("CollectionStatisticsResyncTask with from={} and param={} ended", from, param)
