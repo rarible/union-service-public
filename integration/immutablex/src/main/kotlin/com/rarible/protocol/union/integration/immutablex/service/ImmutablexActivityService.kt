@@ -73,7 +73,7 @@ class ImmutablexActivityService(
             size = size,
             sort = sort
         )
-        return toSliceDto(result)
+        return convert(result)
     }
 
     override suspend fun getAllActivitiesSync(
@@ -81,7 +81,25 @@ class ImmutablexActivityService(
         size: Int,
         sort: SyncSortDto?,
         type: SyncTypeDto?
-    ): Slice<ActivityDto> = Slice.empty() // TODO IMMUTABLEX is there way to implement it
+    ): Slice<ActivityDto> {
+        val activitySort = when (sort) {
+            SyncSortDto.DB_UPDATE_ASC -> ActivitySortDto.EARLIEST_FIRST
+            SyncSortDto.DB_UPDATE_DESC -> ActivitySortDto.LATEST_FIRST
+            else -> ActivitySortDto.EARLIEST_FIRST
+        }
+        val types = when (type) {
+            SyncTypeDto.NFT -> listOf(ActivityType.TRANSFER, ActivityType.MINT)
+            SyncTypeDto.ORDER -> listOf(ActivityType.TRADE)
+            else -> return Slice.empty()
+        }
+        val result = getActivities(
+            types = types,
+            continuation = continuation,
+            size = size,
+            sort = activitySort
+        )
+        return convert(result)
+    }
 
     override suspend fun getActivitiesByCollection(
         types: List<ActivityTypeDto>,
@@ -97,7 +115,7 @@ class ImmutablexActivityService(
             size = size,
             sort = sort
         )
-        return toSliceDto(result)
+        return convert(result)
     }
 
     override suspend fun getActivitiesByItem(
@@ -116,7 +134,7 @@ class ImmutablexActivityService(
             size = size,
             sort = sort
         )
-        return toSliceDto(result)
+        return convert(result)
     }
 
     override suspend fun getActivitiesByItemAndOwner(
@@ -137,7 +155,7 @@ class ImmutablexActivityService(
             continuation = continuation,
             sort = sort,
         )
-        return toSliceDto(result)
+        return convert(result)
     }
 
     override suspend fun getActivitiesByUser(
@@ -165,12 +183,23 @@ class ImmutablexActivityService(
             }.flatten()
         }
 
-        return toSliceDto(toSlice(size, sort, result))
+        return convert(toSlice(size, sort, result))
     }
 
     override suspend fun getActivitiesByIds(ids: List<TypedActivityId>): List<ActivityDto> {
-        // TODO IMMUTABLEX is there way to implement it?
-        return emptyList()
+        val grouped = ids.filter {
+            allowedTypes.containsKey(it.type)
+        }.groupBy({ allowedTypes[it.type]!! }, { it.id })
+
+        val result = grouped.mapAsync { group ->
+            when (group.key) {
+                ActivityType.MINT -> client.getMints(group.value)
+                ActivityType.TRANSFER -> client.getTransfers(group.value)
+                ActivityType.TRADE -> client.getTrades(group.value)
+            }
+        }.flatten()
+
+        return convert(result)
     }
 
     private suspend fun getActivities(
@@ -219,8 +248,16 @@ class ImmutablexActivityService(
 
     // Here we have the slice with requested size and only here we can execute additional call to
     // fulfill additional data
-    private suspend fun toSliceDto(slice: Slice<ImmutablexEvent>): Slice<ActivityDto> {
-        val orderIds = slice.entities.flatMap {
+    private suspend fun convert(slice: Slice<ImmutablexEvent>): Slice<ActivityDto> {
+        return Slice(
+            // Here continuation implemented in the same way as for DTO, we can just pass it
+            continuation = slice.continuation,
+            entities = convert(slice.entities)
+        )
+    }
+
+    private suspend fun convert(activities: List<ImmutablexEvent>): List<ActivityDto> {
+        val orderIds = activities.flatMap {
             when (it) {
                 // For 'Trade' we should get orders to fulfill sides
                 is ImmutablexTrade -> listOf(it.make.orderId.toString(), it.take.orderId.toString())
@@ -233,10 +270,7 @@ class ImmutablexActivityService(
             orderService.getOrdersByIds(orderIds).associateBy { it.id.value.toLong() }
         }
 
-        return Slice(
-            continuation = slice.continuation,
-            entities = slice.entities.map { ImmutablexActivityConverter.convert(it, orders) }
-        )
+        return activities.map { ImmutablexActivityConverter.convert(it, orders) }
     }
 
     object ByLastUpdatedAndIdDesc : ContinuationFactory<ImmutablexEvent, DateIdContinuation> {

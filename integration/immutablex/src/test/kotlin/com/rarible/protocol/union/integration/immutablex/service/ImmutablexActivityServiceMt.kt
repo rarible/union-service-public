@@ -1,8 +1,12 @@
 package com.rarible.protocol.union.integration.immutablex.service
 
+import com.rarible.protocol.union.core.model.TypedActivityId
 import com.rarible.protocol.union.core.test.ManualTest
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
+import com.rarible.protocol.union.dto.MintActivityDto
+import com.rarible.protocol.union.dto.OrderMatchSellDto
+import com.rarible.protocol.union.dto.TransferActivityDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
 import com.rarible.protocol.union.integration.ImmutablexManualTest
 import kotlinx.coroutines.runBlocking
@@ -15,6 +19,25 @@ class ImmutablexActivityServiceMt : ImmutablexManualTest() {
 
     private val orderService = ImmutablexOrderService(orderClient)
     private val service = ImmutablexActivityService(activityClient, orderService)
+
+    @Test
+    fun getByIds() = runBlocking<Unit> {
+        val ids = listOf(
+            TypedActivityId("5132646", ActivityTypeDto.TRANSFER),
+            TypedActivityId("5133012", ActivityTypeDto.MINT),
+            TypedActivityId("5132321", ActivityTypeDto.SELL),
+            TypedActivityId("5112646", ActivityTypeDto.CANCEL_LIST) // Should be not found
+        )
+
+        val result = service.getActivitiesByIds(ids)
+        val mapped = result.associateBy { it.id.value }
+
+        println(result)
+        assertThat(result).hasSize(3)
+        assertThat(mapped["5132646"]).isInstanceOf(TransferActivityDto::class.java)
+        assertThat(mapped["5133012"]).isInstanceOf(MintActivityDto::class.java)
+        assertThat(mapped["5132321"]).isInstanceOf(OrderMatchSellDto::class.java)
+    }
 
     @Test
     fun `getAllActivities - mints, desc`() = runBlocking<Unit> {

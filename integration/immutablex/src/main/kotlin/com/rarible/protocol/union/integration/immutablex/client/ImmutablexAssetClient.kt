@@ -5,7 +5,6 @@ import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexAssetsPag
 import kotlinx.coroutines.reactor.awaitSingle
 import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.client.WebClient
-import org.springframework.web.reactive.function.client.WebClientResponseException
 import java.time.Instant
 
 class ImmutablexAssetClient(
@@ -17,22 +16,14 @@ class ImmutablexAssetClient(
     // TODO IMMUTABLEX move out to configuration
     private val assetsRequestChunkSize = 16
 
-    suspend fun getAsset(itemId: String): ImmutablexAsset {
+    suspend fun getById(itemId: String): ImmutablexAsset {
         val uri = ImmutablexAssetQueryBuilder.getByIdPath(itemId)
-        return webClient.get().uri(uri)
-            .accept(MediaType.APPLICATION_JSON)
-            .retrieve()
-            .toEntity(ImmutablexAsset::class.java)
-            .awaitSingle().body!!
+        return getByUri(uri)
     }
 
-    suspend fun getAssetsByIds(itemIds: List<String>): List<ImmutablexAsset> {
+    suspend fun getByIds(itemIds: List<String>): List<ImmutablexAsset> {
         return getChunked(assetsRequestChunkSize, itemIds) {
-            try {
-                getAsset(it)
-            } catch (e: WebClientResponseException.NotFound) {
-                null
-            }
+            ignore404 { getById(it) }
         }
     }
 

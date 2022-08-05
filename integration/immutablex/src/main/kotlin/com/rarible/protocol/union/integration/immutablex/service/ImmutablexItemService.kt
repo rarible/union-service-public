@@ -43,17 +43,17 @@ class ImmutablexItemService(
 
     override suspend fun getItemById(itemId: String): UnionItem {
         val creatorDeferred = coroutineScope { async { activityClient.getItemCreator(itemId) } }
-        val asset = assetClient.getAsset(itemId)
+        val asset = assetClient.getById(itemId)
         return ImmutablexItemConverter.convert(asset, creatorDeferred.await(), blockchain)
     }
 
     override suspend fun getItemRoyaltiesById(itemId: String): List<RoyaltyDto> {
-        val asset = assetClient.getAsset(itemId)
+        val asset = assetClient.getById(itemId)
         return ImmutablexItemConverter.convertToRoyaltyDto(asset, blockchain)
     }
 
     override suspend fun getItemMetaById(itemId: String): UnionMeta {
-        val asset = assetClient.getAsset(itemId)
+        val asset = assetClient.getById(itemId)
         return ImmutablexItemMetaConverter.convert(asset)
     }
 
@@ -97,7 +97,7 @@ class ImmutablexItemService(
 
     override suspend fun getItemsByIds(itemIds: List<String>): List<UnionItem> {
         val creators = coroutineScope { async { activityClient.getItemCreators(itemIds) } }
-        val assets = assetClient.getAssetsByIds(itemIds)
+        val assets = assetClient.getByIds(itemIds)
         return convert(assets, creators.await())
     }
 

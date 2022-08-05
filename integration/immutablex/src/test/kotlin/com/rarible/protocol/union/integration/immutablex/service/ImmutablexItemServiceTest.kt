@@ -43,7 +43,7 @@ class ImmutablexItemServiceTest {
     }
 
     val assetClient = mockk<ImmutablexAssetClient> {
-        coEvery { getAsset(any()) } returns expectedAsset
+        coEvery { getById(any()) } returns expectedAsset
     }
 
     val activityClient = mockk<ImmutablexActivityClient> {

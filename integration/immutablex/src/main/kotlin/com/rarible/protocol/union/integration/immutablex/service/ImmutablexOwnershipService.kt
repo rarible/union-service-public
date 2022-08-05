@@ -48,7 +48,7 @@ class ImmutablexOwnershipService(
     }
 
     override suspend fun getOwnershipsByItem(itemId: String, continuation: String?, size: Int): Page<UnionOwnership> {
-        val asset = assetClient.getAsset(itemId)
+        val asset = assetClient.getById(itemId)
         return Page(0L, null, listOf(convert(asset)))
     }
 
