@@ -27,7 +27,6 @@ import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktItemServi
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktOwnershipService
 import org.apache.commons.lang3.StringUtils
 import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.DependsOn
 import org.springframework.context.annotation.Import
 
 @DipDupConfiguration
@@ -70,7 +69,7 @@ class DipDupConsumerConfiguration(
         factory: DipDupEventsConsumerFactory,
         handler: DipDupOrderEventHandler
     ): KafkaConsumerWorker<DipDupOrder> {
-        val consumer = factory.createOrderConsumer(dipdupGroup(consumerFactory.orderGroup))
+        val consumer = factory.createOrderConsumer(consumerFactory.orderGroup)
         return consumerFactory.createOrderConsumer(consumer, handler, daemon, workers)
     }
 
@@ -99,7 +98,7 @@ class DipDupConsumerConfiguration(
         factory: DipDupEventsConsumerFactory,
         handler: DipDupActivityEventHandler
     ): KafkaConsumerWorker<DipDupActivity> {
-        val consumer = factory.createActivityConsumer(dipdupGroup(consumerFactory.activityGroup))
+        val consumer = factory.createActivityConsumer(consumerFactory.activityGroup)
         logger.info("Use ${workers} worker config for listening dipdup events")
         return consumerFactory.createActivityConsumer(consumer, handler, daemon, workers)
     }
@@ -119,11 +118,9 @@ class DipDupConsumerConfiguration(
         factory: DipDupEventsConsumerFactory,
         handler: DipDupCollectionEventHandler
     ): KafkaConsumerWorker<DipDupCollection> {
-        val consumer = factory.createCollectionConsumer(dipdupGroup(consumerFactory.collectionGroup))
+        val consumer = factory.createCollectionConsumer(consumerFactory.collectionGroup)
         return consumerFactory.createCollectionConsumer(consumer, handler, daemon, workers)
     }
-
-    private fun dipdupGroup(group: String) = "dipdup.$group"
 
     companion object {
         private val logger by Logger()
