@@ -119,8 +119,12 @@ class EnrichmentCollectionEventService(
     ): Unit = optimisticLock {
         val collection = enrichmentCollectionService.getOrEmpty(collectionId)
         if (collection.statistics != statistics) {
-            saveAndNotify(collection.copy(statistics = statistics), notificationEnabled)
-            logger.info("Updated collection [{}] with new statistics [{}]", collection, statistics)
+            try {
+                saveAndNotify(collection.copy(statistics = statistics), notificationEnabled)
+                logger.info("Updated collection [{}] with new statistics [{}]", collection, statistics)
+            } catch (e: Exception) {
+                logger.error("Failed to update collection [$collection] with new statistics [$statistics]", e)
+            }
         }
     }
 
