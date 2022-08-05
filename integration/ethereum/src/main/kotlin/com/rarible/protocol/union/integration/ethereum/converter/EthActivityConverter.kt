@@ -619,6 +619,8 @@ class EthActivityConverter(
             OrderActivityDto.Source.OPEN_SEA -> OrderActivitySourceDto.OPEN_SEA
             OrderActivityDto.Source.RARIBLE -> OrderActivitySourceDto.RARIBLE
             OrderActivityDto.Source.CRYPTO_PUNKS -> OrderActivitySourceDto.CRYPTO_PUNKS
+            OrderActivityDto.Source.X2Y2 -> OrderActivitySourceDto.X2Y2
+            OrderActivityDto.Source.LOOKSRARE -> OrderActivitySourceDto.LOOKSRARE
         }
     }
 

@@ -1,7 +1,6 @@
 package com.rarible.protocol.union.integration.ethereum.converter
 
 import com.rarible.core.test.data.randomAddress
-import com.rarible.protocol.dto.OrderBasicSeaportDataV1Dto
 import com.rarible.protocol.dto.OrderCancelDto
 import com.rarible.protocol.dto.OrderRaribleV2DataV1Dto
 import com.rarible.protocol.dto.OrderSideMatchDto
@@ -17,6 +16,7 @@ import com.rarible.protocol.union.dto.EthOrderOpenSeaV1DataV1Dto
 import com.rarible.protocol.union.dto.EthOrderSeaportDataV1Dto
 import com.rarible.protocol.union.dto.EthSeaportItemTypeDto
 import com.rarible.protocol.union.dto.EthSeaportOrderTypeDto
+import com.rarible.protocol.union.dto.EthX2Y2OrderDataV1Dto
 import com.rarible.protocol.union.dto.OnChainOrderDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PendingOrderCancelDto
@@ -35,10 +35,10 @@ import com.rarible.protocol.union.integration.ethereum.data.randomEthSeaportOffe
 import com.rarible.protocol.union.integration.ethereum.data.randomEthSeaportV1OrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthSellOrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthV2OrderDto
+import com.rarible.protocol.union.integration.ethereum.data.randomEthX2Y2OrderDto
 import com.rarible.protocol.union.test.mock.CurrencyMock
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 class EthOrderConverterTest {
@@ -426,5 +426,47 @@ class EthOrderConverterTest {
 
         // then
         assertThat(actual).isEqualTo(ethStatuses)
+    }
+
+    @Test
+    fun `eth order x2y2`() {
+        runBlocking {
+            val dto = randomEthX2Y2OrderDto()
+            val actual = ethOrderConverter.convert(dto, BlockchainDto.ETHEREUM)
+            assertThat(actual.status.name).isEqualTo(dto.status!!.name)
+            assertThat(actual.id.value).isEqualTo(dto.hash.prefixed())
+            assertThat(actual.platform).isEqualTo(PlatformDto.X2Y2)
+            assertThat(actual.maker.value).isEqualTo(dto.maker.prefixed())
+            assertThat(actual.taker!!.value).isEqualTo(dto.taker!!.prefixed())
+            assertThat(actual.make.type).isInstanceOf(EthErc721AssetTypeDto::class.java)
+            assertThat(actual.make.value).isEqualTo(dto.make.valueDecimal)
+            assertThat(actual.take.type).isInstanceOf(EthErc20AssetTypeDto::class.java)
+            assertThat(actual.take.value).isEqualTo(dto.take.valueDecimal)
+            assertThat(actual.salt).isEqualTo(dto.salt.prefixed())
+            assertThat(actual.signature).isEqualTo(dto.signature!!.prefixed())
+            assertThat(actual.fill).isEqualTo(dto.fillValue)
+            assertThat(actual.startedAt!!.epochSecond).isEqualTo(dto.start)
+            assertThat(actual.endedAt!!.epochSecond).isEqualTo(dto.end)
+            assertThat(actual.makeStock).isEqualTo(dto.makeStockValue)
+            assertThat(actual.cancelled).isEqualTo(dto.cancelled)
+            assertThat(actual.createdAt).isEqualTo(dto.createdAt)
+            assertThat(actual.lastUpdatedAt).isEqualTo(dto.lastUpdateAt)
+            assertThat(actual.makePrice).isEqualTo(
+                dto.take.valueDecimal!!.setScale(18) / dto.make.valueDecimal!!.setScale(18)
+            )
+            assertThat(actual.takePrice).isNull()
+            // In mock we are converting price 1 to 1
+            assertThat(actual.makePriceUsd).isEqualTo(
+                dto.take.valueDecimal!!.setScale(18) / dto.make.valueDecimal!!.setScale(18)
+            )
+            assertThat(actual.takePriceUsd).isNull()
+            assertThat(actual.data).isExactlyInstanceOf(EthX2Y2OrderDataV1Dto::class.java)
+            val data = actual.data as EthX2Y2OrderDataV1Dto
+            assertThat(data.itemHash).isEqualTo(dto.data.itemHash.prefixed())
+            assertThat(data.orderId).isEqualTo(dto.data.orderId)
+            assertThat(data.isCollectionOffer).isEqualTo(dto.data.isCollectionOffer)
+            assertThat(data.isBundle).isEqualTo(dto.data.isBundle)
+            assertThat(data.side).isEqualTo(dto.data.side)
+        }
     }
 }
