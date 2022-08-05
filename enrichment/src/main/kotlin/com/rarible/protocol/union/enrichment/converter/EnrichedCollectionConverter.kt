@@ -6,6 +6,7 @@ import com.rarible.protocol.union.core.model.UnionCollectionMeta
 import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
+import com.rarible.protocol.union.enrichment.model.CollectionStatistics
 import com.rarible.protocol.union.enrichment.model.ShortCollection
 
 object EnrichedCollectionConverter {
@@ -27,6 +28,7 @@ object EnrichedCollectionConverter {
             parent = collection.parent,
             meta = (meta ?: collection.meta)?.let { EnrichedMetaConverter.convert(it) },
             type = collection.type,
+            statistics = shortCollection?.statistics?.let { CollectionStatisticsConverter.convert(it) },
             bestSellOrder = shortCollection?.bestSellOrder?.let { orders[it.dtoId] },
             bestBidOrder = shortCollection?.bestBidOrder?.let { orders[it.dtoId] },
             originOrders = shortCollection?.originOrders?.let { OriginOrdersConverter.convert(it, orders) }
@@ -34,10 +36,12 @@ object EnrichedCollectionConverter {
         )
     }
 
-    fun convertToShortCollection(collection: UnionCollection): ShortCollection {
+    // TODO Refactor me. This method must be in test package
+    fun convertToShortCollection(collection: UnionCollection, statistics: CollectionStatistics?): ShortCollection {
         return ShortCollection(
             blockchain = collection.id.blockchain,
             collectionId = collection.id.value,
+            statistics = statistics,
             bestSellOrders = emptyMap(),
             bestBidOrders = emptyMap(),
             bestSellOrder = null,
@@ -45,5 +49,4 @@ object EnrichedCollectionConverter {
             lastUpdatedAt = nowMillis()
         )
     }
-
 }

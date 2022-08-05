@@ -11,10 +11,16 @@ import org.springframework.data.annotation.Version
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.Instant
 
+/**
+ * Table with additional info about collection, e.g. best sell/bid orders or statistics.
+ * If there is no such info, related collection doesn't present in this table.
+ */
 @Document("enrichment_collection")
 data class ShortCollection(
     val blockchain: BlockchainDto,
     val collectionId: String,
+
+    val statistics: CollectionStatistics? = null,
 
     override val bestSellOrder: ShortOrder?,
     override val bestSellOrders: Map<String, ShortOrder>,
@@ -46,6 +52,8 @@ data class ShortCollection(
                 version = null,
                 blockchain = collectionId.blockchain,
                 collectionId = collectionId.collectionId,
+
+                statistics = null,
 
                 bestSellOrder = null,
                 bestSellOrders = emptyMap(),
@@ -92,5 +100,4 @@ data class ShortCollection(
     override fun getAllBestOrders(): List<ShortOrder> {
         return listOfNotNull(bestSellOrder, bestBidOrder) + getAllOriginBestOrders()
     }
-
 }

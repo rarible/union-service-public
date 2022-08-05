@@ -7,7 +7,6 @@ import com.rarible.protocol.union.core.exception.UnionCurrencyException
 import com.rarible.protocol.union.dto.AssetTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CurrencyDto
-import com.rarible.protocol.union.dto.CurrencyIdDto
 import com.rarible.protocol.union.dto.CurrencyUsdRateDto
 import com.rarible.protocol.union.dto.ext
 import kotlinx.coroutines.async
@@ -94,7 +93,7 @@ class CurrencyService(
             BlockchainDto.FLOW -> cachedCurrencies.find { it.symbol == "flow" }!!
             BlockchainDto.TEZOS -> cachedCurrencies.find { it.symbol == "tezos" }!!
             BlockchainDto.SOLANA -> cachedCurrencies.find { it.symbol == "solana" }!!
-            BlockchainDto.IMMUTABLEX -> throw NotImplementedError("ImmutableX is not yet supported")
+            BlockchainDto.IMMUTABLEX -> cachedCurrencies.find { it.symbol == "immutable-x" }!!
         }
     }
 

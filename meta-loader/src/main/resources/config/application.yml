@@ -135,6 +135,11 @@ integration:
     auctionContracts: ${consul.tezos.auctionContracts:}
   solana:
     enabled: ${consul.solana.enabled:false}
+  immutablex:
+    enabled: ${consul.immutablex.enabled:true}
+    client:
+      url: ${consul.immutablex.api.baseUrl:}
+    apiKey: ${consul.immutablex.api.key:}
 
 #  Not needed in the meta-loader module. Transitive dependency onto the "core" module
 common:

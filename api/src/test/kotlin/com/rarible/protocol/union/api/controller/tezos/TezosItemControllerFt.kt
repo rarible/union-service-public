@@ -43,7 +43,7 @@ class TezosItemControllerFt : AbstractIntegrationTest() {
             tzktTokenClient.tokensByCollection(collectionContract.value, 1, null)
         } returns Page(listOf(randomTzktToken(randomTezosAddress().value)), null)
 
-        val page = itemControllerClient.getItemsByCollection(collectionContract.fullId(), null, 1).awaitSingle()
+        val page = itemControllerClient.getItemsByCollection(collectionContract.fullId(), null, 1, null).awaitSingle()
         assertThat(page.items).hasSize(1)
     }
 
@@ -54,7 +54,7 @@ class TezosItemControllerFt : AbstractIntegrationTest() {
             tzktTokenClient.tokensByOwner(owner.value, 1, null)
         } returns Page(listOf(randomTzktToken(randomTezosAddress().value)), null)
 
-        val page = itemControllerClient.getItemsByOwner(owner.fullId(), emptyList(), null, 1).awaitSingle()
+        val page = itemControllerClient.getItemsByOwner(owner.fullId(), emptyList(), null, 1, null).awaitSingle()
         assertThat(page.items).hasSize(1)
     }
 
@@ -65,21 +65,25 @@ class TezosItemControllerFt : AbstractIntegrationTest() {
             tzktTokenClient.tokensByCreator(creator.value, 1, null)
         } returns Page(listOf(randomTzktToken(randomTezosAddress().value)), null)
 
-        val page = itemControllerClient.getItemsByCreator(creator.fullId(), emptyList(), null, 1).awaitSingle()
+        val page = itemControllerClient.getItemsByCreator(creator.fullId(), emptyList(), null, 1, null).awaitSingle()
         assertThat(page.items).hasSize(1)
     }
 
     @Test
     fun `should return item with tags and attributes`() = runBlocking<Unit> {
         val itemId = randomTezosItemId()
-        val item = randomTzktToken(itemId.value).copy(meta = TokenMeta(
-            name = "test",
-            tags = listOf("tag1"),
-            attributes = listOf(TokenMeta.Attribute(
-                "key1",
-                "val1"
-            ))
-        ))
+        val item = randomTzktToken(itemId.value).copy(
+            meta = TokenMeta(
+                name = "test",
+                tags = listOf("tag1"),
+                attributes = listOf(
+                    TokenMeta.Attribute(
+                        "key1",
+                        "val1"
+                    )
+                )
+            )
+        )
         coEvery {
             tzktTokenClient.token(itemId.value)
         } returns item

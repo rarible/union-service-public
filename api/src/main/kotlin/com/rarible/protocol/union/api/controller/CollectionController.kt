@@ -8,11 +8,11 @@ import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.dto.CollectionsDto
+import com.rarible.protocol.union.dto.SearchEngineDto
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.model.ShortCollectionId
 import com.rarible.protocol.union.enrichment.service.EnrichmentCollectionService
 import com.rarible.protocol.union.enrichment.service.ItemMetaService
-import com.rarible.protocol.union.enrichment.service.query.item.ItemApiMergeService
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collect
 import org.slf4j.LoggerFactory
@@ -58,7 +58,7 @@ class CollectionController(
         val collectionId = IdParser.parseCollectionId(collection)
         logger.info("Refreshing collection meta for '{}'", collection)
         router.getService(collectionId.blockchain).refreshCollectionMeta(collectionId.value)
-        itemSourceSelectService.getAllItemIdsByCollection(collectionId).collect {
+        itemSourceSelectService.getAllItemIdsByCollection(collectionId, SearchEngineDto.LEGACY).collect {
             itemMetaService.schedule(it, "default", true)  // TODO PT-49
         }
         return ResponseEntity.ok().build()

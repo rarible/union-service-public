@@ -32,9 +32,7 @@ data class ImmutablexAsset(
     val updatedAt: Instant?,
     val user: String?,
 ) {
-    val itemId = "$tokenAddress:${tokenId()}"
-
-    fun tokenId(): BigInteger = BigInteger(tokenId.toByteArray())
+    val itemId = "$tokenAddress:$tokenId"
 }
 
 data class ImmutablexCollectionShort(
@@ -100,14 +98,21 @@ data class TokenData(
     val quantity: BigInteger,
     val id: String?,
 ) {
-    fun tokenId(): BigInteger = BigInteger(tokenId.toByteArray())
+
+    fun itemId() = "$tokenAddress:$tokenId"
 }
 
 data class ImmutablexMintsPage(
     val cursor: String,
     val remaining: Boolean,
     val result: List<ImmutablexMint>,
-)
+) {
+
+    companion object {
+
+        val EMPTY = ImmutablexMintsPage("", false, emptyList())
+    }
+}
 
 data class ImmutablexOrder(
     @JsonProperty("order_id")
@@ -143,11 +148,8 @@ data class ImmutablexOrderData(
     val tokenId: String?,
     val properties: ImmutablexDataProperties?,
 ) {
-    fun tokenId(): BigInteger? = tokenId?.let {
-        BigInteger(it.toByteArray())
-    }
 
-    fun itemId(): String = "${tokenAddress}:${tokenId()}"
+    fun itemId(): String = "${tokenAddress}:${tokenId}"
 }
 
 data class ImmutablexDataProperties(
@@ -177,7 +179,13 @@ data class ImmutablexTransfersPage(
     val cursor: String,
     val remaining: Boolean,
     val result: List<ImmutablexTransfer>,
-)
+) {
+
+    companion object {
+
+        val EMPTY = ImmutablexTransfersPage("", false, emptyList())
+    }
+}
 
 data class TradeSide(
     @JsonProperty("order_id")
@@ -206,7 +214,13 @@ data class ImmutablexTradesPage(
     val cursor: String,
     val remaining: Boolean,
     val result: List<ImmutablexTrade>,
-)
+) {
+
+    companion object {
+
+        val EMPTY = ImmutablexTradesPage("", false, emptyList())
+    }
+}
 
 data class ImmutablexDeposit(
     @JsonProperty("transaction_id")
@@ -232,7 +246,8 @@ data class ImmutablexWithdrawal(
 
 sealed class ImmutablexTokenEvent(transactionId: Long, timestamp: Instant, open val token: Token) :
     ImmutablexEvent(transactionId, timestamp) {
-        fun itemId(): String = "${token.data.tokenAddress}:${token.data.tokenId()}"
+
+    fun itemId(): String = token.data.itemId()
 }
 
 @JsonSubTypes(

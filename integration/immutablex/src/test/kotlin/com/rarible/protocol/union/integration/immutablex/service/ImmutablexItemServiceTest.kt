@@ -4,23 +4,26 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
-import com.rarible.protocol.union.integration.immutablex.client.ImmutablexApiClient
-import com.rarible.protocol.union.integration.immutablex.converter.ImmutablexItemConverter
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexActivityClient
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexAssetClient
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexAsset
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexMint
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexMintsPage
 import io.mockk.coEvery
 import io.mockk.mockk
-import java.math.BigInteger
 import kotlinx.coroutines.runBlocking
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
+import java.math.BigInteger
 
 class ImmutablexItemServiceTest {
 
     private val mapper = jacksonObjectMapper().registerModule(JavaTimeModule())
 
     private val itemId = "0xacb3c6a43d15b907e8433077b6d38ae40936fe2c:3832899966304989233"
+    private val creator = "0x6663c6a43d15b0987e8433077b6d38ae40936fe33"
 
     private val fullItemId = "${BlockchainDto.IMMUTABLEX}:$itemId"
 
@@ -39,8 +42,12 @@ class ImmutablexItemServiceTest {
 
     }
 
-    val client = mockk<ImmutablexApiClient> {
-        coEvery { getAsset(any()) } returns expectedAsset
+    val assetClient = mockk<ImmutablexAssetClient> {
+        coEvery { getById(any()) } returns expectedAsset
+    }
+
+    val activityClient = mockk<ImmutablexActivityClient> {
+        coEvery { getItemCreator(itemId) } returns creator
         coEvery { getMints(any(), any(), any(), any(), any(), any(), any()) } returns ImmutablexMintsPage(
             "",
             false,
@@ -48,25 +55,26 @@ class ImmutablexItemServiceTest {
         )
     }
 
-    private val service = ImmutablexItemService(client, ImmutablexItemConverter(client))
-
+    private val service = ImmutablexItemService(assetClient, activityClient)
 
     @Test
     internal fun `get item by id`() {
         runBlocking {
             val item = service.getItemById(itemId)
-            Assertions.assertNotNull(item)
-            Assertions.assertEquals(fullItemId, item.id.fullId())
-            Assertions.assertFalse(item.deleted)
-            Assertions.assertEquals(CollectionIdDto(
-                BlockchainDto.IMMUTABLEX,
-                expectedAsset.tokenAddress
-            ), item.collection)
-            Assertions.assertEquals(expectedAsset.createdAt, item.mintedAt)
-            Assertions.assertEquals(expectedAsset.updatedAt, item.lastUpdatedAt)
-            Assertions.assertEquals(BigInteger.ZERO, item.lazySupply)
-            Assertions.assertEquals(BigInteger.ONE, item.supply)
-            Assertions.assertFalse(item.creators.isEmpty())
+            assertNotNull(item)
+            assertEquals(fullItemId, item.id.fullId())
+            assertFalse(item.deleted)
+            assertEquals(
+                CollectionIdDto(
+                    BlockchainDto.IMMUTABLEX,
+                    expectedAsset.tokenAddress
+                ), item.collection
+            )
+            assertEquals(expectedAsset.createdAt, item.mintedAt)
+            assertEquals(expectedAsset.updatedAt, item.lastUpdatedAt)
+            assertEquals(BigInteger.ZERO, item.lazySupply)
+            assertEquals(BigInteger.ONE, item.supply)
+            assertFalse(item.creators.isEmpty())
         }
     }
 
@@ -74,11 +82,11 @@ class ImmutablexItemServiceTest {
     internal fun `get item meta by id`() {
         runBlocking {
             val meta = service.getItemMetaById(itemId)
-            Assertions.assertNotNull(meta)
-            Assertions.assertEquals(expectedAsset.name, meta.name)
-            Assertions.assertEquals(expectedAsset.description, meta.description)
-            Assertions.assertFalse(meta.content.isEmpty())
-            Assertions.assertFalse(meta.attributes.isEmpty())
+            assertNotNull(meta)
+            assertEquals(expectedAsset.name, meta.name)
+            assertEquals(expectedAsset.description, meta.description)
+            assertFalse(meta.content.isEmpty())
+            assertFalse(meta.attributes.isEmpty())
         }
     }
 }

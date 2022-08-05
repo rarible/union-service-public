@@ -18,9 +18,9 @@ import com.rarible.protocol.union.dto.continuation.page.PageSize
 import com.rarible.protocol.union.enrichment.converter.EnrichedCollectionConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.service.EnrichmentCollectionService
+import com.rarible.protocol.union.enrichment.test.data.randomCollectionStatistics
 import com.rarible.protocol.union.integration.ethereum.converter.EthCollectionConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
-import com.rarible.protocol.union.integration.ethereum.converter.EthMetaConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAddress
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAssetErc20
@@ -73,7 +73,7 @@ class CollectionControllerFt : AbstractIntegrationTest() {
     lateinit var testTemplate: RestTemplate
 
     private fun baseUrl(): String {
-        return "http://localhost:${port}/v0.1"
+        return "http://localhost:$port/v0.1"
     }
 
     @Test
@@ -82,12 +82,13 @@ class CollectionControllerFt : AbstractIntegrationTest() {
         val collectionIdFull = EthConverter.convert(collectionId, BlockchainDto.ETHEREUM)
         val ethCollectionDto = randomEthCollectionDto(collectionId)
         val ethUnionCollection = EthCollectionConverter.convert(ethCollectionDto, BlockchainDto.ETHEREUM)
+        val statistics = randomCollectionStatistics()
         val collectionAsset = randomEthCollectionAsset(collectionId)
         val ethOrder = randomEthV2OrderDto(collectionAsset, randomAddress(), randomEthAssetErc20())
         val ethUnionOrder = ethOrderConverter.convert(ethOrder, BlockchainDto.ETHEREUM)
 
         val shortOrder = ShortOrderConverter.convert(ethUnionOrder)
-        val shortCollection = EnrichedCollectionConverter.convertToShortCollection(ethUnionCollection)
+        val shortCollection = EnrichedCollectionConverter.convertToShortCollection(ethUnionCollection, statistics)
             .copy(bestSellOrder = shortOrder)
         enrichmentCollectionService.save(shortCollection)
 
@@ -99,6 +100,7 @@ class CollectionControllerFt : AbstractIntegrationTest() {
         assertThat(unionCollection.id.value).isEqualTo(collectionIdFull.value)
         assertThat(unionCollection.id.blockchain).isEqualTo(BlockchainDto.ETHEREUM)
         assertThat(unionCollection.bestSellOrder!!.id).isEqualTo(ethUnionOrder.id)
+        assertThat(unionCollection.statistics?.itemCount).isEqualTo(statistics.itemCount)
     }
 
     @Test
