@@ -109,7 +109,7 @@ object TzktItemConverter {
                 item.contract!!.address
             ), // For TEZOS collection is a contract value
             creators = emptyList(),
-            deleted = isDeleted(item),
+            deleted = item.isDeleted(),
             lastUpdatedAt = item.lastTime!!.toInstant(),
             lazySupply = BigInteger.ZERO,
             meta = item.meta?.let { convertInternal(it) },
@@ -118,6 +118,4 @@ object TzktItemConverter {
             pending = emptyList() // In Union we won't use this field for Tezos
         )
     }
-
-    private fun isDeleted(item: Token) = BigInteger(item.totalSupply!!) == BigInteger.ZERO
 }

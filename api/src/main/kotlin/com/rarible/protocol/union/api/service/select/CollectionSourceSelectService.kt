@@ -20,7 +20,7 @@ class CollectionSourceSelectService(
         continuation: String?,
         size: Int?
     ): CollectionsDto {
-        return getQuerySource().getAllCollections(blockchains, continuation, size)
+        return collectionApiMergeService.getAllCollections(blockchains, continuation, size)
     }
 
     override suspend fun getCollectionsByOwner(

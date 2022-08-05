@@ -32,6 +32,7 @@ import com.rarible.protocol.union.dto.UserActivityTypeDto
 import com.rarible.protocol.union.dto.continuation.ActivityContinuation
 import com.rarible.protocol.union.dto.continuation.page.Paging
 import com.rarible.protocol.union.dto.continuation.page.Slice
+import com.rarible.protocol.union.integration.tezos.TezosIntegrationProperties
 import com.rarible.protocol.union.integration.tezos.converter.TezosActivityConverter
 import com.rarible.protocol.union.integration.tezos.converter.TezosConverter
 import com.rarible.protocol.union.integration.tezos.dipdup.service.DipdupOrderActivityService
@@ -52,7 +53,8 @@ open class TezosActivityService(
     private val tezosActivityConverter: TezosActivityConverter,
     private val pgService: TezosPgActivityService,
     private val dipdupOrderActivityService: DipdupOrderActivityService,
-    private val tzktItemActivityService: TzktItemActivityService
+    private val tzktItemActivityService: TzktItemActivityService,
+    private val tezosIntegrationProperties: TezosIntegrationProperties
 ) : AbstractBlockchainService(BlockchainDto.TEZOS), ActivityService {
 
     companion object {
@@ -75,15 +77,18 @@ open class TezosActivityService(
                 return getDipDupAndTzktActivities(types, continuation, size, sort)
             } else {
 
-                // We need only order activities from legacy backend
-                val orderFilter = tezosActivityConverter.convertToOrderTypes(types)?.let {
-                    OrderActivityFilterAllDto(it)
-                }
-                val legacySlice = getTezosActivities(null, orderFilter, continuation, size, sort)
+                val legacySlice = if (tezosIntegrationProperties.showLegacyActivity) {
+                    // We need only order activities from legacy backend
+                    val orderFilter = tezosActivityConverter.convertToOrderTypes(types)?.let {
+                        OrderActivityFilterAllDto(it)
+                    }
+                    getTezosActivities(null, orderFilter, continuation, size, sort)
+                } else Slice.empty()
 
                 if (legacySlice.entities.size < size) {
+                    val dipdupContinuation = if (tezosIntegrationProperties.showLegacyActivity) null else continuation
                     val delta = size - legacySlice.entities.size
-                    val dipdupSlice = getDipDupAndTzktActivities(types, null, delta, sort)
+                    val dipdupSlice = getDipDupAndTzktActivities(types, dipdupContinuation, delta, sort)
                     return Slice(
                         continuation = dipdupSlice.continuation,
                         entities = legacySlice.entities + dipdupSlice.entities
