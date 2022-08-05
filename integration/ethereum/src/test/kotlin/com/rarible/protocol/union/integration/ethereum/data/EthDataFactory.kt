@@ -22,20 +22,17 @@ import com.rarible.protocol.dto.AuctionBidsPaginationDto
 import com.rarible.protocol.dto.AuctionDto
 import com.rarible.protocol.dto.AuctionHistoryDto
 import com.rarible.protocol.dto.AuctionStatusDto
-import com.rarible.protocol.dto.AudioContentDto
 import com.rarible.protocol.dto.BurnDto
 import com.rarible.protocol.dto.CollectionAssetTypeDto
 import com.rarible.protocol.dto.CryptoPunkOrderDto
 import com.rarible.protocol.dto.Erc1155AssetTypeDto
 import com.rarible.protocol.dto.Erc20AssetTypeDto
 import com.rarible.protocol.dto.Erc721AssetTypeDto
-import com.rarible.protocol.dto.HtmlContentDto
 import com.rarible.protocol.dto.ImageContentDto
 import com.rarible.protocol.dto.ItemRoyaltyDto
 import com.rarible.protocol.dto.ItemTransferDto
 import com.rarible.protocol.dto.MetaContentDto
 import com.rarible.protocol.dto.MintDto
-import com.rarible.protocol.dto.Model3dContentDto
 import com.rarible.protocol.dto.NftCollectionDto
 import com.rarible.protocol.dto.NftCollectionMetaDto
 import com.rarible.protocol.dto.NftItemAttributeDto
@@ -62,6 +59,7 @@ import com.rarible.protocol.dto.OrderRaribleV2DataV3SellDto
 import com.rarible.protocol.dto.OrderSideDto
 import com.rarible.protocol.dto.OrderSideMatchDto
 import com.rarible.protocol.dto.OrderStatusDto
+import com.rarible.protocol.dto.OrderX2Y2DataDto
 import com.rarible.protocol.dto.PartDto
 import com.rarible.protocol.dto.RaribleAuctionV1BidDataV1Dto
 import com.rarible.protocol.dto.RaribleAuctionV1BidV1Dto
@@ -74,21 +72,19 @@ import com.rarible.protocol.dto.SeaportOfferDto
 import com.rarible.protocol.dto.SeaportOrderTypeDto
 import com.rarible.protocol.dto.SeaportV1OrderDto
 import com.rarible.protocol.dto.TransferDto
-import com.rarible.protocol.dto.UnknownContentDto
-import com.rarible.protocol.dto.VideoContentDto
+import com.rarible.protocol.dto.X2Y2OrderDto
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.util.CompositeItemIdParser
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
-import com.rarible.protocol.union.dto.EthOrderDataRaribleV2DataV3SellDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
 import io.daonomic.rpc.domain.Word
-import scalether.domain.Address
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.Instant
+import scalether.domain.Address
 
 fun randomAddressString() = EthConverter.convert(randomAddress())
 
@@ -890,5 +886,40 @@ fun randomEthOrderActivityMatchSide(): OrderActivityMatchSideDto {
         hash = Word.apply(randomWord()),
         asset = randomEthAssetErc20(),
         type = OrderActivityMatchSideDto.Type.values()[randomInt(OrderActivityMatchSideDto.Type.values().size)]
+    )
+}
+
+fun randomEthX2Y2OrderDto(): X2Y2OrderDto {
+    val makeStockValue = randomBigDecimal()
+    return X2Y2OrderDto(
+        status = OrderStatusDto.ACTIVE,
+        maker = randomAddress(),
+        taker = randomAddress(),
+        make = randomEthAssetErc721(),
+        take = randomEthAssetErc20(),
+        fill = randomBigInt(),
+        fillValue = randomBigDecimal(),
+        makeStock = makeStockValue.toBigInteger(),
+        makeStockValue = makeStockValue,
+        cancelled = false,
+        salt = Word.apply(randomWord()),
+        data = OrderX2Y2DataDto(
+            itemHash = Word.apply(randomWord()),
+            orderId = randomBigInt(),
+            isBundle = false,
+            isCollectionOffer = false,
+            side = randomInt(),
+        ),
+        signature = randomBinary(),
+        createdAt = nowMillis(),
+        lastUpdateAt = nowMillis(),
+        pending = emptyList(),
+        hash = Word.apply(randomWord()),
+        makeBalance = randomBigInt(),
+        makePriceUsd = randomBigInt().toBigDecimal(),
+        takePriceUsd = randomBigInt().toBigDecimal(),
+        start = randomInt().toLong(),
+        end = randomInt().toLong(),
+        priceHistory = listOf()
     )
 }

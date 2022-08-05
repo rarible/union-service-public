@@ -2,6 +2,7 @@ package com.rarible.protocol.union.integration.ethereum.converter
 
 import com.rarible.protocol.dto.CryptoPunkOrderDto
 import com.rarible.protocol.dto.LegacyOrderDto
+import com.rarible.protocol.dto.LooksrareOrderDto
 import com.rarible.protocol.dto.OpenSeaV1OrderDto
 import com.rarible.protocol.dto.OrderBasicSeaportDataV1Dto
 import com.rarible.protocol.dto.OrderCancelDto
@@ -20,6 +21,7 @@ import com.rarible.protocol.dto.SeaportItemTypeDto
 import com.rarible.protocol.dto.SeaportOfferDto
 import com.rarible.protocol.dto.SeaportOrderTypeDto
 import com.rarible.protocol.dto.SeaportV1OrderDto
+import com.rarible.protocol.dto.X2Y2OrderDto
 import com.rarible.protocol.union.core.service.CurrencyService
 import com.rarible.protocol.union.core.util.evalMakePrice
 import com.rarible.protocol.union.core.util.evalTakePrice
@@ -35,6 +37,7 @@ import com.rarible.protocol.union.dto.EthSeaportConsiderationDto
 import com.rarible.protocol.union.dto.EthSeaportItemTypeDto
 import com.rarible.protocol.union.dto.EthSeaportOfferDto
 import com.rarible.protocol.union.dto.EthSeaportOrderTypeDto
+import com.rarible.protocol.union.dto.EthX2Y2OrderDataV1Dto
 import com.rarible.protocol.union.dto.OnChainOrderDto
 import com.rarible.protocol.union.dto.OrderDataDto
 import com.rarible.protocol.union.dto.OrderDto
@@ -47,10 +50,10 @@ import com.rarible.protocol.union.dto.PendingOrderMatchDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
+import java.time.Instant
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import scalether.domain.Address
-import java.time.Instant
 
 @Component
 class EthOrderConverter(
@@ -253,6 +256,41 @@ class EthOrderConverter(
                     }
                 )
             }
+
+            is X2Y2OrderDto -> {
+                OrderDto(
+                    id = orderId,
+                    platform = PlatformDto.X2Y2,
+                    status = status,
+                    maker = maker,
+                    taker = taker,
+                    make = make,
+                    take = take,
+                    salt = salt,
+                    signature = signature,
+                    pending = pending,
+                    fill = order.fillValue!!,
+                    startedAt = startedAt,
+                    endedAt = endedAt,
+                    makeStock = order.makeStockValue!!,
+                    cancelled = order.cancelled,
+                    createdAt = order.createdAt,
+                    lastUpdatedAt = order.lastUpdateAt,
+                    dbUpdatedAt = order.dbUpdatedAt,
+                    makePrice = makePrice,
+                    takePrice = takePrice,
+                    makePriceUsd = makePriceUsd,
+                    takePriceUsd = takePriceUsd,
+                    data = EthX2Y2OrderDataV1Dto(
+                        itemHash = order.data.itemHash.prefixed(),
+                        orderId = order.data.orderId,
+                        isCollectionOffer = order.data.isCollectionOffer,
+                        isBundle = order.data.isBundle,
+                        side = order.data.side
+                    )
+                )
+            }
+            is LooksrareOrderDto -> TODO()
         }
     }
 
