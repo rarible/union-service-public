@@ -37,6 +37,7 @@ import org.springframework.context.ApplicationListener
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
+import org.springframework.context.annotation.Primary
 import org.springframework.core.io.buffer.DefaultDataBufferFactory
 import org.springframework.data.elasticsearch.client.ClientConfiguration
 import org.springframework.data.elasticsearch.client.reactive.DefaultReactiveElasticsearchClient
@@ -87,6 +88,7 @@ class MockContext : ApplicationListener<WebServerInitializedEvent> {
         )
     }
 
+    @Primary
     @Bean("esOperationsWithTimeout")
     fun elasticSearchOperations(
         clientConfiguration: ClientConfiguration,
