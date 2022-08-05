@@ -8,7 +8,6 @@ import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.RoyaltyDto
-import com.rarible.protocol.union.dto.continuation.DateIdContinuation
 import com.rarible.protocol.union.dto.continuation.page.Page
 import com.rarible.protocol.union.dto.continuation.page.Paging
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexActivityClient
@@ -32,13 +31,8 @@ class ImmutablexItemService(
         lastUpdatedTo: Long?,
     ): Page<UnionItem> {
         val page = assetClient.getAllAssets(continuation, size, lastUpdatedTo, lastUpdatedFrom)
-        val last = page.result.last()
-        val cont = if (page.remaining) DateIdContinuation(last.updatedAt!!, last.itemId).toString() else null
-        return Page(
-            total = 0,
-            continuation = cont,
-            entities = convert(page.result)
-        )
+        val result = convert(page.result)
+        return Paging(UnionItemContinuation.ByLastUpdatedAndId, result).getPage(size, 0)
     }
 
     override suspend fun getItemById(itemId: String): UnionItem {

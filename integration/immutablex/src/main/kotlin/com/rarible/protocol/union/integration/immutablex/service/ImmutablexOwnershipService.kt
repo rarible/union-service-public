@@ -1,23 +1,20 @@
 package com.rarible.protocol.union.integration.immutablex.service
 
-import com.rarible.core.common.mapAsync
-import com.rarible.protocol.union.core.converter.UnionAddressConverter
+import com.rarible.protocol.union.core.continuation.UnionOwnershipContinuation
 import com.rarible.protocol.union.core.exception.UnionNotFoundException
 import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.core.service.OwnershipService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.CollectionIdDto
-import com.rarible.protocol.union.dto.CreatorDto
-import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.continuation.page.Page
+import com.rarible.protocol.union.dto.continuation.page.Paging
 import com.rarible.protocol.union.dto.continuation.page.Slice
-import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexActivityClient
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexAssetClient
+import com.rarible.protocol.union.integration.immutablex.converter.ImmutablexOwnershipConverter
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexAsset
-import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexAssetsPage
-import java.math.BigInteger
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 
 class ImmutablexOwnershipService(
     private val assetClient: ImmutablexAssetClient,
@@ -25,72 +22,53 @@ class ImmutablexOwnershipService(
 ) : AbstractBlockchainService(BlockchainDto.IMMUTABLEX), OwnershipService {
 
     override suspend fun getOwnershipById(ownershipId: String): UnionOwnership {
-        val (contract, tokenId, owner) = IdParser.split(ownershipId, 3)
-        return getAssetsByCollection(
-            contract, owner, tokenId, null
-        ) { contract, owner, cursor ->
-            assetClient.getAssetsByCollection(contract, owner, cursor, 100)
-        }?.let {
-            convert(it)
-        } ?: throw UnionNotFoundException("Ownership ${blockchain}:${ownershipId} not found")
+        val itemId = ownershipId.substringBeforeLast(":")
+        val owner = ownershipId.substringAfterLast(":")
+        val asset = assetClient.getById(itemId)
+
+        if (asset.user == owner) {
+            val creator = activityClient.getItemCreator(itemId)
+            return ImmutablexOwnershipConverter.convert(asset, creator, blockchain)
+        } else {
+            throw UnionNotFoundException("Ownership ${blockchain}:${ownershipId} not found")
+        }
     }
 
     override suspend fun getOwnershipsByIds(ownershipIds: List<String>): List<UnionOwnership> {
-        return ownershipIds.chunked(8).map { chunk ->
-            chunk.mapAsync {
-                getOwnershipById(it)
-            }
-        }.flatten()
+        val itemIds = ownershipIds.map { it.substringBeforeLast(":") }.toSet()
+
+        val creators = coroutineScope { async { activityClient.getItemCreators(itemIds) } }
+        val assets = assetClient.getByIds(itemIds)
+
+        val ownershipIdsSet = HashSet(ownershipIds)
+        val found = assets.filter {
+            ownershipIdsSet.contains("${it.itemId}:${it.user}")
+        }
+
+        return ImmutablexOwnershipConverter.convert(found, creators.await(), blockchain)
     }
 
     override suspend fun getOwnershipsAll(continuation: String?, size: Int): Slice<UnionOwnership> {
-        TODO("Not yet implemented")
+        val page = assetClient.getAllAssets(continuation, size, null, null)
+        val converted = convert(page.result)
+        return Paging(UnionOwnershipContinuation.ByLastUpdatedAndId, converted).getSlice(size)
     }
 
     override suspend fun getOwnershipsByItem(itemId: String, continuation: String?, size: Int): Page<UnionOwnership> {
+        val creator = coroutineScope { async { activityClient.getItemCreator(itemId) } }
         val asset = assetClient.getById(itemId)
-        return Page(0L, null, listOf(convert(asset)))
+        val result = ImmutablexOwnershipConverter.convert(asset, creator.await(), blockchain)
+        return Page(0L, null, listOf(result))
     }
 
     override suspend fun getOwnershipsByOwner(address: String, continuation: String?, size: Int): Page<UnionOwnership> {
-        val assets = assetClient.getAssetsByOwner(address, continuation, size)
-        return convert(assets)
+        val assets = assetClient.getAssetsByOwner(address, continuation, size).result
+        val result = convert(assets)
+        return Paging(UnionOwnershipContinuation.ByLastUpdatedAndId, result).getPage(size, 0)
     }
 
-    private suspend fun getAssetsByCollection(
-        contract: String,
-        owner: String,
-        tokenId: String,
-        cursor: String?,
-        fn: suspend (String, String, String?) -> ImmutablexAssetsPage
-    ): ImmutablexAsset? {
-        val page = fn(contract, owner, cursor)
-        val asset = page.result.find { it.tokenId == tokenId }
-        return if (asset == null && page.cursor.isNotEmpty()) {
-            getAssetsByCollection(contract, owner, tokenId, page.cursor, fn)
-        } else asset
-    }
-
-    private suspend fun convert(asset: ImmutablexAsset): UnionOwnership {
-        val creator = activityClient.getItemCreator(asset.itemId)
-        val creatorAddress = creator?.let { UnionAddressConverter.convert(blockchain, creator) }
-        val ownerAddress = UnionAddressConverter.convert(blockchain, asset.user!!)
-        return UnionOwnership(
-            id = OwnershipIdDto(blockchain, asset.itemId, ownerAddress),
-            collection = CollectionIdDto(blockchain, asset.tokenAddress),
-            value = BigInteger.ONE,
-            lazyValue = BigInteger.ZERO,
-            createdAt = asset.createdAt!!,
-            lastUpdatedAt = asset.updatedAt,
-            creators = listOfNotNull(creatorAddress?.let { CreatorDto(creatorAddress, 1) })
-        )
-    }
-
-    private suspend fun convert(page: ImmutablexAssetsPage): Page<UnionOwnership> {
-        return Page(
-            0L,
-            page.cursor,
-            page.result.map { convert(it) }
-        )
+    private suspend fun convert(assets: Collection<ImmutablexAsset>): List<UnionOwnership> {
+        val creators = activityClient.getItemCreators(assets.map { it.itemId })
+        return ImmutablexOwnershipConverter.convert(assets, creators, blockchain)
     }
 }

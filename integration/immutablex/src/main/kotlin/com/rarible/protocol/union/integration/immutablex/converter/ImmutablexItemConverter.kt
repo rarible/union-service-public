@@ -30,7 +30,7 @@ object ImmutablexItemConverter {
         return try {
             convertInternal(asset, creator, blockchain)
         } catch (e: Exception) {
-            logger.error("Convert immutable x asset \n$asset\n is failed! \n${e.message}", e)
+            logger.error("Failed to convert {} Item: {} \n{}", blockchain, e.message, asset)
             throw e
         }
     }

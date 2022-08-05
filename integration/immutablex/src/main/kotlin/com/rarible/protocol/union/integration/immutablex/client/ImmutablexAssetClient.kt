@@ -21,7 +21,7 @@ class ImmutablexAssetClient(
         return getByUri(uri)
     }
 
-    suspend fun getByIds(itemIds: List<String>): List<ImmutablexAsset> {
+    suspend fun getByIds(itemIds: Collection<String>): List<ImmutablexAsset> {
         return getChunked(assetsRequestChunkSize, itemIds) {
             ignore404 { getById(it) }
         }
