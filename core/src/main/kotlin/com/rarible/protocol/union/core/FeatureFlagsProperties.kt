@@ -22,7 +22,6 @@ data class FeatureFlagsProperties(
     // orders
     var enableOrderQueriesToElasticSearch: Boolean = false,
     var enableOrderSaveImmediateToElasticSearch: Boolean = false,
-    var orderRefreshPolicy: WriteRequest.RefreshPolicy = WriteRequest.RefreshPolicy.NONE,
     // collections
     val enableCollectionQueriesToElastic: Boolean = false,
     var enableCollectionSaveImmediateToElasticSearch: Boolean = false,
@@ -32,4 +31,9 @@ data class FeatureFlagsProperties(
     // items
     var enableItemQueriesToElasticSearch: Boolean = false,
     var enableItemSaveImmediateToElasticSearch: Boolean = false,
-)
+) {
+
+    val orderRefreshPolicy: WriteRequest.RefreshPolicy = if(enableOrderSaveImmediateToElasticSearch) {
+        WriteRequest.RefreshPolicy.IMMEDIATE
+    } else WriteRequest.RefreshPolicy.NONE
+}
