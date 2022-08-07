@@ -113,11 +113,6 @@ abstract class ElasticSearchRepository<T>(
         ).awaitFirstOrNull()?.deleted
     }
 
-    //for tests
-    suspend fun deleteAll() {
-        esOperations.delete(Query.findAll(), entityType).awaitSingle()
-    }
-
     override suspend fun refresh() {
         val refreshRequest = RefreshRequest().indices(entityDefinition.aliasName, entityDefinition.writeAliasName)
 
