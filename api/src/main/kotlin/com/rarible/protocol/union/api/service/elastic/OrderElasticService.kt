@@ -191,7 +191,7 @@ class OrderElasticService(
             } else emptyList()
         }.associateBy { it.id.fullId() }
 
-        val sortedOrders = esOrders.map { slices[it.orderId]!! }
+        val sortedOrders = esOrders.mapNotNull { slices[it.orderId] }
 
         return if(esOrders.isEmpty()) {
             OrdersDto(orders = emptyList(), continuation = null)
