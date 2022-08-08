@@ -25,12 +25,14 @@ class DipdupOrderActivityServiceImpl(
             ActivitySortDto.EARLIEST_FIRST -> true
             else -> false
         }
-        logger.info("Fetch dipdup all activities: $types, $continuation, $limit, $sort")
-        val page = dipdupActivityClient.getActivitiesAll(dipdupTypes, limit, continuation, sortAsc)
-        return Slice(
-            continuation = page.continuation,
-            entities = page.activities.map { dipDupActivityConverter.convert(it, blockchain) }
-        )
+        return if (dipdupTypes.size > 0) {
+            logger.info("Fetch dipdup all activities: $types, $continuation, $limit, $sort")
+            val page = dipdupActivityClient.getActivitiesAll(dipdupTypes, limit, continuation, sortAsc)
+            Slice(
+                continuation = page.continuation,
+                entities = page.activities.map { dipDupActivityConverter.convert(it, blockchain) }
+            )
+        } else Slice.empty()
     }
 
     override suspend fun getByItem(

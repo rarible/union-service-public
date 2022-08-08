@@ -62,14 +62,6 @@ class ImmutablexEventConverter(
                     )
                 }
             }
-            is ImmutablexDeposit -> L2DepositActivityDto(
-                id = id,
-                date = event.timestamp,
-                user = UnionAddressConverter.convert(blockchain, event.user),
-                status = event.status,
-                itemId = ItemIdDto(blockchain, event.itemId()),
-                value = event.token.data.quantity
-            )
             is ImmutablexTrade -> {
                 val (makeOrder, takeOrder) = runBlocking(Dispatchers.IO) {
                     orderService.getOrderById("${event.make.orderId}") to orderService.getOrderById("${event.take.orderId}")
@@ -87,6 +79,16 @@ class ImmutablexEventConverter(
                     type = OrderMatchSellDto.Type.SELL,
                 )
             }
+
+            // We don't need these events ATM
+            is ImmutablexDeposit -> L2DepositActivityDto(
+                id = id,
+                date = event.timestamp,
+                user = UnionAddressConverter.convert(blockchain, event.user),
+                status = event.status,
+                itemId = ItemIdDto(blockchain, event.itemId()),
+                value = event.token.data.quantity
+            )
             is ImmutablexWithdrawal -> L2WithdrawalActivityDto(
                 id = id,
                 date = event.timestamp,

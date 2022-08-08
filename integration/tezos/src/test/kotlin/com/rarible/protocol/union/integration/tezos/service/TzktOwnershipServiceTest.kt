@@ -56,7 +56,7 @@ class TzktOwnershipServiceTest {
         val tzktOwnership = ownership()
         val itemId = "tz2QH8sqmgnFajFb5vN6b9KaDmd4ht2yGv6d:123"
         val continuation = "continuation"
-        coEvery { ownershipClient.ownershipsByToken(itemId, 100, null, true) } returns Page(listOf(tzktOwnership), continuation)
+        coEvery { ownershipClient.ownershipsByToken(itemId, 100, null) } returns Page(listOf(tzktOwnership), continuation)
 
         val page = service.getOwnershipsByItem(
             itemId = itemId,

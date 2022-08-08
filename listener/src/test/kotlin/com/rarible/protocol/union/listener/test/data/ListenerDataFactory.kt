@@ -5,6 +5,7 @@ import com.rarible.protocol.union.core.model.ReconciliationMarkType
 import com.rarible.protocol.union.enrichment.model.ReconciliationMark
 import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
+import com.rarible.protocol.union.listener.config.CollectionStatisticsResyncProperties
 import com.rarible.protocol.union.listener.config.InternalConsumerProperties
 import com.rarible.protocol.union.listener.config.MetaSchedulingProperties
 import com.rarible.protocol.union.listener.config.MetricsProperties
@@ -24,6 +25,7 @@ fun defaultUnionListenerProperties(): UnionListenerProperties {
         openSeaCleanup = OpenSeaCleanUpProperties(
             sellOrderFrom = nowMillis().minus(10, ChronoUnit.DAYS)
         ),
+        collectionStatisticsResync = CollectionStatisticsResyncProperties(),
         metrics = MetricsProperties(),
         metaScheduling = MetaSchedulingProperties()
     )

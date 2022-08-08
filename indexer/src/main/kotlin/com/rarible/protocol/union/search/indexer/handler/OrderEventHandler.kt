@@ -24,15 +24,17 @@ class OrderEventHandler(
             logger.info("Converting OrderDto id = ${it.orderId}")
             EsOrderConverter.convert(it)
         }
-        logger.info("Saving ${convertedEvents.size} OrderDto events to ElasticSearch")
-        val refreshPolicy =
-            if (featureFlagsProperties.enableItemSaveImmediateToElasticSearch) {
-                WriteRequest.RefreshPolicy.IMMEDIATE
-            }
-            else {
-                WriteRequest.RefreshPolicy.NONE
-            }
-        repository.saveAll(convertedEvents, refreshPolicy = refreshPolicy)
-        logger.info("Handling completed")
+        if (convertedEvents.isNotEmpty()) {
+            logger.info("Saving ${convertedEvents.size} OrderDto events to ElasticSearch")
+            val refreshPolicy =
+                if (featureFlagsProperties.enableOrderSaveImmediateToElasticSearch) {
+                    WriteRequest.RefreshPolicy.IMMEDIATE
+                }
+                else {
+                    WriteRequest.RefreshPolicy.NONE
+                }
+            val saved = repository.saveAll(convertedEvents, refreshPolicy = refreshPolicy)
+            logger.info("Handling completed, {}", saved.map { it.orderId })
+        }
     }
 }

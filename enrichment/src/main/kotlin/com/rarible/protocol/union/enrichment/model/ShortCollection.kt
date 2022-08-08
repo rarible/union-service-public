@@ -11,6 +11,10 @@ import org.springframework.data.annotation.Version
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.Instant
 
+/**
+ * Table with additional info about collection, e.g. best sell/bid orders or statistics.
+ * If there is no such info, related collection doesn't present in this table.
+ */
 @Document("enrichment_collection")
 data class ShortCollection(
     val blockchain: BlockchainDto,

@@ -13,6 +13,7 @@ data class UnionListenerProperties(
     val monitoringWorker: DaemonWorkerProperties = DaemonWorkerProperties(),
     val reconciliation: ReconciliationProperties,
     val openSeaCleanup: OpenSeaCleanUpProperties,
+    val collectionStatisticsResync: CollectionStatisticsResyncProperties,
     val priceUpdate: PriceUpdateProperties,
     val reconcileMarks: ReconcileMarksProperties,
     val metaScheduling: MetaSchedulingProperties,
@@ -42,6 +43,12 @@ class ReconcileMarksProperties(
 class PriceUpdateProperties(
     val enabled: Boolean = true,
     val rate: Duration = Duration.ofMinutes(5)
+)
+
+class CollectionStatisticsResyncProperties(
+    val enabled: Boolean = false,
+    val rate: Duration = Duration.ofHours(12),
+    val limit: Int = 50
 )
 
 data class OpenSeaCleanUpProperties(

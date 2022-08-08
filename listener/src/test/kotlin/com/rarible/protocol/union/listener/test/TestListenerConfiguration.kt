@@ -190,7 +190,7 @@ class TestListenerConfiguration {
             clientId = "test.union.tezos.order",
             valueSerializerClass = UnionKafkaJsonSerializer::class.java,
             valueClass = DipDupOrder::class.java,
-            defaultTopic = "${DipDupTopicProvider.ORDER}_",
+            defaultTopic = DipDupTopicProvider.getOrderTopic("test"),
             bootstrapServers = kafkaContainer.kafkaBoostrapServers()
         )
     }
@@ -201,7 +201,7 @@ class TestListenerConfiguration {
             clientId = "test.union.tezos.activity",
             valueSerializerClass = UnionKafkaJsonSerializer::class.java,
             valueClass = DipDupActivity::class.java,
-            defaultTopic = "${DipDupTopicProvider.ACTIVITY}_",
+            defaultTopic = DipDupTopicProvider.getActivityTopic("test"),
             bootstrapServers = kafkaContainer.kafkaBoostrapServers()
         )
     }
@@ -212,7 +212,7 @@ class TestListenerConfiguration {
             clientId = "test.union.tezos.collection",
             valueSerializerClass = UnionKafkaJsonSerializer::class.java,
             valueClass = DipDupCollection::class.java,
-            defaultTopic = "${DipDupTopicProvider.COLLECTION}_",
+            defaultTopic = DipDupTopicProvider.getCollectionTopic("test"),
             bootstrapServers = kafkaContainer.kafkaBoostrapServers()
         )
     }

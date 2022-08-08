@@ -184,7 +184,7 @@ worker:
         - blockchain: SOLANA
           enabled: true
         - blockchain: IMMUTABLEX
-          enabled: false
+          enabled: true
     ownership:
       enabled: ${consul.worker.ownership.enabled:false}
       blockchains:

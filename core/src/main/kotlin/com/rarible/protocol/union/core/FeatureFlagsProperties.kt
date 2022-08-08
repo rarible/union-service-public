@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.core
 
+import org.elasticsearch.action.support.WriteRequest
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.ConstructorBinding
 

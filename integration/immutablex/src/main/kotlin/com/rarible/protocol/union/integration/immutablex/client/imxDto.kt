@@ -10,7 +10,6 @@ import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.Instant
 
-
 data class ImmutablexAsset(
     val collection: ImmutablexCollectionShort,
     @JsonProperty("created_at")
@@ -32,6 +31,7 @@ data class ImmutablexAsset(
     val updatedAt: Instant?,
     val user: String?,
 ) {
+
     val itemId = "$tokenAddress:$tokenId"
 }
 
@@ -106,7 +106,13 @@ data class ImmutablexMintsPage(
     val cursor: String,
     val remaining: Boolean,
     val result: List<ImmutablexMint>,
-)
+) {
+
+    companion object {
+
+        val EMPTY = ImmutablexMintsPage("", false, emptyList())
+    }
+}
 
 data class ImmutablexOrder(
     @JsonProperty("order_id")
@@ -157,7 +163,19 @@ data class ImmutablexOrdersPage(
     val cursor: String,
     val remaining: Boolean,
     val result: List<ImmutablexOrder>,
-)
+) {
+
+    constructor(result: List<ImmutablexOrder>) : this(
+        "",
+        false,
+        result
+    )
+
+    companion object {
+
+        fun empty() = ImmutablexOrdersPage(emptyList())
+    }
+}
 
 data class ImmutablexTransfer(
     override val token: Token,
@@ -173,7 +191,13 @@ data class ImmutablexTransfersPage(
     val cursor: String,
     val remaining: Boolean,
     val result: List<ImmutablexTransfer>,
-)
+) {
+
+    companion object {
+
+        val EMPTY = ImmutablexTransfersPage("", false, emptyList())
+    }
+}
 
 data class TradeSide(
     @JsonProperty("order_id")
@@ -202,7 +226,13 @@ data class ImmutablexTradesPage(
     val cursor: String,
     val remaining: Boolean,
     val result: List<ImmutablexTrade>,
-)
+) {
+
+    companion object {
+
+        val EMPTY = ImmutablexTradesPage("", false, emptyList())
+    }
+}
 
 data class ImmutablexDeposit(
     @JsonProperty("transaction_id")

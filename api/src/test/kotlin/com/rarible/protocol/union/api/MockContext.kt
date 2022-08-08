@@ -27,6 +27,7 @@ import com.rarible.protocol.union.dto.UnionEventTopicProvider
 import com.rarible.protocol.union.subscriber.UnionKafkaJsonDeserializer
 import com.rarible.protocol.union.subscriber.UnionKafkaJsonSerializer
 import org.apache.kafka.clients.consumer.OffsetResetStrategy
+import org.elasticsearch.action.support.IndicesOptions
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration
@@ -36,8 +37,14 @@ import org.springframework.context.ApplicationListener
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
+import org.springframework.context.annotation.Primary
 import org.springframework.core.io.buffer.DefaultDataBufferFactory
+import org.springframework.data.elasticsearch.client.ClientConfiguration
+import org.springframework.data.elasticsearch.client.reactive.DefaultReactiveElasticsearchClient
 import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations
+import org.springframework.data.elasticsearch.core.ReactiveElasticsearchTemplate
+import org.springframework.data.elasticsearch.core.RefreshPolicy
+import org.springframework.data.elasticsearch.core.convert.ElasticsearchConverter
 import org.springframework.web.reactive.socket.WebSocketMessage
 import org.springframework.web.reactive.socket.client.ReactorNettyWebSocketClient
 import reactor.core.publisher.Sinks
@@ -67,7 +74,7 @@ class MockContext : ApplicationListener<WebServerInitializedEvent> {
     @Bean(initMethod = "bootstrap")
     @ConditionalOnMissingBean
     fun elasticsearchBootstrap(
-        reactiveElasticSearchOperations: ReactiveElasticsearchOperations,
+        @Qualifier("esOperationsWithTimeout") reactiveElasticSearchOperations: ReactiveElasticsearchOperations,
         esNameResolver: EsNameResolver,
         indexService: IndexService,
         repositories: List<EsRepository>,
@@ -81,10 +88,24 @@ class MockContext : ApplicationListener<WebServerInitializedEvent> {
         )
     }
 
-    /* @Bean
-     fun applicationEnvironmentInfo(): ApplicationEnvironmentInfo {
-         return ApplicationEnvironmentInfo("test", "test.com")
-     }*/
+    @Primary
+    @Bean("esOperationsWithTimeout")
+    fun elasticSearchOperations(
+        clientConfiguration: ClientConfiguration,
+        converter: ElasticsearchConverter,
+    ): ReactiveElasticsearchOperations {
+        val configWithTimeout = ClientConfiguration.builder()
+            .connectedTo(*clientConfiguration.endpoints.toTypedArray())
+            .withConnectTimeout(15000)
+            .withSocketTimeout(15000)
+            .build()
+        val client = DefaultReactiveElasticsearchClient.create(configWithTimeout)
+
+        val template = ReactiveElasticsearchTemplate(client, converter)
+        template.setIndicesOptions(IndicesOptions.strictExpandOpenAndForbidClosed())
+        template.refreshPolicy = RefreshPolicy.IMMEDIATE
+        return template
+    }
 
     @Bean
     fun testItemConsumer(): RaribleKafkaConsumer<ItemEventDto> {

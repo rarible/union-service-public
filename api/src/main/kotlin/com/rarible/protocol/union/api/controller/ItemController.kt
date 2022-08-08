@@ -25,14 +25,13 @@ import com.rarible.protocol.union.dto.MetaContentDto
 import com.rarible.protocol.union.dto.RestrictionCheckFormDto
 import com.rarible.protocol.union.dto.RestrictionCheckResultDto
 import com.rarible.protocol.union.dto.RoyaltiesDto
+import com.rarible.protocol.union.dto.SearchEngineDto
 import com.rarible.protocol.union.dto.TraitsDto
 import com.rarible.protocol.union.dto.TraitsRarityRequestDto
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.service.ItemMetaService
-import java.net.URI
-import java.time.Duration
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.time.withTimeout
@@ -44,6 +43,8 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import java.net.URI
+import java.time.Duration
 
 @ExperimentalCoroutinesApi
 @RestController
@@ -57,6 +58,7 @@ class ItemController(
 ) : ItemControllerApi {
 
     companion object {
+
         private val logger by Logger()
         private val timeoutSyncLoadingMeta: Duration = Duration.ofSeconds(30)
     }
@@ -67,17 +69,19 @@ class ItemController(
         size: Int?,
         showDeleted: Boolean?,
         lastUpdatedFrom: Long?,
-        lastUpdatedTo: Long?
+        lastUpdatedTo: Long?,
+        searchEngine: SearchEngineDto?
     ): ResponseEntity<ItemsDto> {
 
         return ResponseEntity.ok(
             itemSourceSelectService.getAllItems(
-                blockchains,
-                continuation,
-                size,
-                showDeleted,
-                lastUpdatedFrom,
-                lastUpdatedTo
+                blockchains = blockchains,
+                showDeleted = showDeleted,
+                lastUpdatedFrom = lastUpdatedFrom,
+                lastUpdatedTo = lastUpdatedTo,
+                continuation = continuation,
+                size = size,
+                searchEngine = searchEngine
             )
         )
     }
@@ -185,28 +189,50 @@ class ItemController(
     override suspend fun getItemsByCollection(
         collection: String,
         continuation: String?,
-        size: Int?
+        size: Int?,
+        searchEngine: SearchEngineDto?
     ): ResponseEntity<ItemsDto> {
-
-        return ResponseEntity.ok(itemSourceSelectService.getItemsByCollection(collection, continuation, size))
+        val result = itemSourceSelectService.getItemsByCollection(
+            collection = collection,
+            continuation = continuation,
+            size = size,
+            searchEngine = searchEngine
+        )
+        return ResponseEntity.ok(result)
     }
 
     override suspend fun getItemsByCreator(
         creator: String,
         blockchains: List<BlockchainDto>?,
         continuation: String?,
-        size: Int?
+        size: Int?,
+        searchEngine: SearchEngineDto?
     ): ResponseEntity<ItemsDto> {
-        return ResponseEntity.ok(itemSourceSelectService.getItemsByCreator(creator, blockchains, continuation, size))
+        val result = itemSourceSelectService.getItemsByCreator(
+            creator = creator,
+            blockchains = blockchains,
+            continuation = continuation,
+            size = size,
+            searchEngine = searchEngine
+        )
+        return ResponseEntity.ok(result)
     }
 
     override suspend fun getItemsByOwner(
         owner: String,
         blockchains: List<BlockchainDto>?,
         continuation: String?,
-        size: Int?
+        size: Int?,
+        searchEngine: SearchEngineDto?
     ): ResponseEntity<ItemsDto> {
-        return ResponseEntity.ok(itemSourceSelectService.getItemsByOwner(owner, blockchains, continuation, size))
+        val result = itemSourceSelectService.getItemsByOwner(
+            owner = owner,
+            blockchains = blockchains,
+            continuation = continuation,
+            size = size,
+            searchEngine = searchEngine
+        )
+        return ResponseEntity.ok(result)
     }
 
     private fun createRedirectResponse(unionMetaContent: UnionMetaContent): ResponseEntity<Resource> {
@@ -218,9 +244,16 @@ class ItemController(
     override suspend fun getItemsByOwnerWithOwnership(
         owner: String,
         continuation: String?,
-        size: Int?
+        size: Int?,
+        searchEngine: SearchEngineDto?
     ): ResponseEntity<ItemsWithOwnershipDto> {
-        return ResponseEntity.ok(itemSourceSelectService.getItemsByOwnerWithOwnership(owner, continuation, size))
+        val result = itemSourceSelectService.getItemsByOwnerWithOwnership(
+            owner = owner,
+            continuation = continuation,
+            size = size,
+            searchEngine = searchEngine
+        )
+        return ResponseEntity.ok(result)
     }
 
     override suspend fun queryTraits(collectionIds: List<String>, keys: List<String>?): ResponseEntity<TraitsDto> {
@@ -244,7 +277,9 @@ class ItemController(
         )
     }
 
-    override suspend fun queryTraitsWithRarity(request: TraitsRarityRequestDto): ResponseEntity<ExtendedTraitPropertiesDto> {
+    override suspend fun queryTraitsWithRarity(
+        request: TraitsRarityRequestDto
+    ): ResponseEntity<ExtendedTraitPropertiesDto> {
         if (request.properties.isEmpty()) return ResponseEntity.ok(ExtendedTraitPropertiesDto())
 
         return ResponseEntity.ok(

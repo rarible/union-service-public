@@ -1,5 +1,6 @@
-package com.rarible.protocol.union.integration.immutablex.client
+package com.rarible.protocol.union.integration.immutablex.scanner
 
+import com.rarible.protocol.union.integration.immutablex.client.queryParamNotNull
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexDeposit
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexMint
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexOrder

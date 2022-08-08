@@ -42,7 +42,6 @@ import randomEsOwnership
 import reactor.kotlin.core.publisher.toFlux
 import scalether.domain.Address
 import java.math.BigInteger
-import java.time.Instant
 
 @FlowPreview
 @IntegrationTest
@@ -243,7 +242,7 @@ class ItemsControllerElasticFt : AbstractIntegrationTest() {
         val lastUpdatedTo = nowMillis().plusSeconds(120).toEpochMilli()
 
         var result = itemControllerClient.getAllItems(
-            blockchains, null, size, showDeleted, lastUpdatedFrom, lastUpdatedTo
+            blockchains, null, size, showDeleted, lastUpdatedFrom, lastUpdatedTo, null
         ).awaitFirst()
 
         assertThat(result.items).hasSize(3)
@@ -257,7 +256,7 @@ class ItemsControllerElasticFt : AbstractIntegrationTest() {
         assertThat(result.continuation).isNotNull()
 
         result = itemControllerClient.getAllItems(
-            blockchains, result.continuation, size, showDeleted, lastUpdatedFrom, lastUpdatedTo
+            blockchains, result.continuation, size, showDeleted, lastUpdatedFrom, lastUpdatedTo, null
         ).awaitFirst()
 
         assertThat(result.items).hasSize(3)
@@ -271,7 +270,7 @@ class ItemsControllerElasticFt : AbstractIntegrationTest() {
         assertThat(result.continuation).isNotNull()
 
         result = itemControllerClient.getAllItems(
-            blockchains, result.continuation, size, showDeleted, lastUpdatedFrom, lastUpdatedTo
+            blockchains, result.continuation, size, showDeleted, lastUpdatedFrom, lastUpdatedTo, null
         ).awaitFirst()
 
         assertThat(result.items).hasSize(3)
@@ -285,7 +284,7 @@ class ItemsControllerElasticFt : AbstractIntegrationTest() {
         assertThat(result.continuation).isNotNull()
 
         result = itemControllerClient.getAllItems(
-            blockchains, result.continuation, size, showDeleted, lastUpdatedFrom, lastUpdatedTo
+            blockchains, result.continuation, size, showDeleted, lastUpdatedFrom, lastUpdatedTo, null
         ).awaitFirst()
 
         assertThat(result.items).hasSize(3)
@@ -299,7 +298,7 @@ class ItemsControllerElasticFt : AbstractIntegrationTest() {
         assertThat(result.continuation).isNotNull()
 
         result = itemControllerClient.getAllItems(
-            blockchains, result.continuation, size, showDeleted, lastUpdatedFrom, lastUpdatedTo
+            blockchains, result.continuation, size, showDeleted, lastUpdatedFrom, lastUpdatedTo, null
         ).awaitFirst()
 
         assertThat(result.items).hasSize(0)
@@ -334,7 +333,7 @@ class ItemsControllerElasticFt : AbstractIntegrationTest() {
 
         ethereumOrderControllerApiMock.mockGetByIds(ethOrder)
         val items = itemControllerClient.getItemsByCollection(
-            ethCollectionId.fullId(), continuation, size
+            ethCollectionId.fullId(), continuation, size, null
         ).awaitFirst()
 
         assertThat(items.items).hasSize(1)
@@ -373,7 +372,7 @@ class ItemsControllerElasticFt : AbstractIntegrationTest() {
 
         ethereumOrderControllerApiMock.mockGetByIds(ethOrder)
         val items = itemControllerClient.getItemsByOwner(
-            esOwnership.owner, listOf(BlockchainDto.ETHEREUM), continuation, size
+            esOwnership.owner, listOf(BlockchainDto.ETHEREUM), continuation, size, null
         ).awaitFirst()
 
         assertThat(items.items).hasSize(1)
@@ -415,7 +414,7 @@ class ItemsControllerElasticFt : AbstractIntegrationTest() {
 
         // when
         val items = itemControllerClient.getItemsByCreator(
-            creatorId.fullId(), listOf(BlockchainDto.ETHEREUM), continuation, size
+            creatorId.fullId(), listOf(BlockchainDto.ETHEREUM), continuation, size, null
         ).awaitFirst()
 
         assertThat(items.items).hasSize(1)
@@ -455,7 +454,7 @@ class ItemsControllerElasticFt : AbstractIntegrationTest() {
 
         // when
         val actual = itemControllerClient.getItemsByOwnerWithOwnership(
-            ethOwnerId.fullId(), continuation, size
+            ethOwnerId.fullId(), continuation, size, null
         ).awaitFirst()
 
         // then

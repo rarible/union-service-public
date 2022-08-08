@@ -5,6 +5,7 @@ import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.enrichment.meta.embedded.EmbeddedContentStorage
 import com.rarible.protocol.union.enrichment.meta.embedded.UnionEmbeddedContent
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -14,9 +15,6 @@ import org.springframework.web.client.RestTemplate
 
 @IntegrationTest
 class ContentControllerFt : AbstractIntegrationTest() {
-
-    @Autowired
-    lateinit var testTemplate: RestTemplate
 
     @Autowired
     lateinit var embeddedContentStorage: EmbeddedContentStorage
@@ -30,9 +28,13 @@ class ContentControllerFt : AbstractIntegrationTest() {
             size = data.size,
             data = data
         )
+
+        // Check if test depends on time of server startup
+        delay(15000)
+
         embeddedContentStorage.save(content)
 
-        val result = testTemplate.getForEntity("$baseUri/content/embedded/${content.id}", ByteArray::class.java)
+        val result = testRestTemplate.getForEntity("$baseUri/content/embedded/${content.id}", ByteArray::class.java)
         assertThat(result.body).isEqualTo(data)
         assertThat(result.headers.getFirst(HttpHeaders.CONTENT_TYPE)).isEqualTo(content.mimeType)
         assertThat(result.headers.getFirst(HttpHeaders.CONTENT_LENGTH)).isEqualTo(content.size.toString())

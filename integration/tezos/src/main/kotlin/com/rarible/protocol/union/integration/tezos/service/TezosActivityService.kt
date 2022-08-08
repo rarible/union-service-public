@@ -86,8 +86,9 @@ open class TezosActivityService(
                 } else Slice.empty()
 
                 if (legacySlice.entities.size < size) {
+                    val dipdupContinuation = if (tezosIntegrationProperties.showLegacyActivity) null else continuation
                     val delta = size - legacySlice.entities.size
-                    val dipdupSlice = getDipDupAndTzktActivities(types, null, delta, sort)
+                    val dipdupSlice = getDipDupAndTzktActivities(types, dipdupContinuation, delta, sort)
                     return Slice(
                         continuation = dipdupSlice.continuation,
                         entities = legacySlice.entities + dipdupSlice.entities

@@ -13,17 +13,15 @@ import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.continuation.OrderContinuation
 import com.rarible.protocol.union.dto.continuation.page.Paging
 import com.rarible.protocol.union.dto.continuation.page.Slice
-import com.rarible.protocol.union.integration.immutablex.client.ImmutablexApiClient
+import com.rarible.protocol.union.dto.parser.IdParser
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexOrderClient
 import com.rarible.protocol.union.integration.immutablex.converter.ImmutablexOrderConverter
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
 
 class ImmutablexOrderService(
-    private val client: ImmutablexApiClient,
-    private val orderConverter: ImmutablexOrderConverter
+    private val orderClient: ImmutablexOrderClient
 ) : AbstractBlockchainService(BlockchainDto.IMMUTABLEX), OrderService {
+
+    private val defaultCurrencies = listOf(EthEthereumAssetTypeDto(blockchain))
 
     override suspend fun getOrdersAll(
         continuation: String?,
@@ -31,66 +29,98 @@ class ImmutablexOrderService(
         sort: OrderSortDto?,
         status: List<OrderStatusDto>?,
     ): Slice<OrderDto> {
-        val orders =  client.getAllOrders(continuation, size, sort, status).map {
-            orderConverter.convert(it, blockchain)
+        val orders = orderClient.getAllOrders(
+            continuation,
+            size,
+            sort,
+            status
+        ).map { ImmutablexOrderConverter.convert(it, blockchain) }
+
+        val continuationFactory = when (sort) {
+            OrderSortDto.LAST_UPDATE_ASC -> OrderContinuation.ByLastUpdatedAndIdAsc
+            OrderSortDto.LAST_UPDATE_DESC, null -> OrderContinuation.ByLastUpdatedAndIdDesc
         }
-        return Paging(OrderContinuation.ByLastUpdatedAndIdDesc, orders).getSlice(size)
+
+        return Paging(continuationFactory, orders).getSlice(size)
     }
 
     override suspend fun getAllSync(
         continuation: String?,
         size: Int,
         sort: SyncSortDto?
-    ): Slice<OrderDto> = Slice.empty()
+    ): Slice<OrderDto> {
+        val safeSort = when (sort) {
+            SyncSortDto.DB_UPDATE_ASC -> OrderSortDto.LAST_UPDATE_ASC
+            SyncSortDto.DB_UPDATE_DESC -> OrderSortDto.LAST_UPDATE_DESC
+            null -> OrderSortDto.LAST_UPDATE_ASC
+        }
+        return getOrdersAll(continuation, size, safeSort, null)
+    }
 
     override suspend fun getOrderById(id: String): OrderDto {
-        val order = client.getOrderById(id.toLong())
-        return orderConverter.convert(order, blockchain)
+        val order = orderClient.getById(id)
+        return ImmutablexOrderConverter.convert(order, blockchain)
     }
 
     override suspend fun getOrdersByIds(orderIds: List<String>): List<OrderDto> {
-        val orders = orderIds.map {
-            coroutineScope {
-                async(Dispatchers.IO) { getOrderById(it) }
-            }
+        return orderClient.getByIds(orderIds).map {
+            ImmutablexOrderConverter.convert(it, blockchain)
         }
-        return orders.awaitAll()
     }
 
-    override suspend fun getBidCurrencies(itemId: String): List<AssetTypeDto> =
-        listOf(EthEthereumAssetTypeDto(BlockchainDto.IMMUTABLEX))
+    // TODO IMMUTABLEX we need to support ERC20 here?
+    override suspend fun getBidCurrencies(itemId: String): List<AssetTypeDto> {
+        return defaultCurrencies
+    }
 
+    // IMX doesn't support floor orders
     override suspend fun getBidCurrenciesByCollection(collectionId: String): List<AssetTypeDto> {
         return emptyList()
     }
 
+    // TODO IMMUTABLEX we can support it for non-active statuses
     override suspend fun getOrderBidsByItem(
         platform: PlatformDto?,
         itemId: String,
         makers: List<String>?,
         origin: String?,
         status: List<OrderStatusDto>?,
-        start: Long?,
-        end: Long?,
+        start: Long?, // Not supported for bids by IMX
+        end: Long?, // Not supported for bids by IMX
         currencyAddress: String,
         continuation: String?,
         size: Int,
-    ): Slice<OrderDto> = Slice.empty()
+    ): Slice<OrderDto> {
+        val (token, tokenId) = IdParser.split(itemId, 2)
+        val orders = orderClient
+            .getBuyOrdersByItem(token, tokenId, makers, status, currencyAddress, continuation, size)
+            .map { ImmutablexOrderConverter.convert(it, blockchain) }
+
+        return Paging(OrderContinuation.ByBidPriceUsdAndIdDesc, orders).getSlice(size)
+    }
 
     override suspend fun getOrderBidsByMaker(
         platform: PlatformDto?,
         maker: List<String>,
         origin: String?,
         status: List<OrderStatusDto>?,
-        start: Long?,
-        end: Long?,
+        start: Long?, // Not supported for bids by IMX
+        end: Long?, // Not supported for bids by IMX
         continuation: String?,
         size: Int,
-    ): Slice<OrderDto> = Slice.empty()
+    ): Slice<OrderDto> {
+        val orders = orderClient.getBuyOrdersByMaker(maker, status, continuation, size)
+            .map { ImmutablexOrderConverter.convert(it, blockchain) }
 
-    override suspend fun getSellCurrencies(itemId: String): List<AssetTypeDto> =
-        listOf(EthEthereumAssetTypeDto(BlockchainDto.IMMUTABLEX))
+        return Paging(OrderContinuation.ByLastUpdatedAndIdDesc, orders).getSlice(size)
+    }
 
+    // TODO IMMUTABLEX we need to support ERC20 here?
+    override suspend fun getSellCurrencies(itemId: String): List<AssetTypeDto> {
+        return defaultCurrencies
+    }
+
+    // IMX doesn't support floor orders
     override suspend fun getSellCurrenciesByCollection(collectionId: String): List<AssetTypeDto> {
         return emptyList()
     }
@@ -101,8 +131,8 @@ class ImmutablexOrderService(
         continuation: String?,
         size: Int,
     ): Slice<OrderDto> {
-        val orders = client.getSellOrders(continuation, size).map {
-            orderConverter.convert(it, blockchain)
+        val orders = orderClient.getSellOrders(continuation, size).map {
+            ImmutablexOrderConverter.convert(it, blockchain)
         }
         return Paging(OrderContinuation.ByLastUpdatedAndIdDesc, orders).getSlice(size)
     }
@@ -114,12 +144,13 @@ class ImmutablexOrderService(
         continuation: String?,
         size: Int,
     ): Slice<OrderDto> {
-        val orders = client.getSellOrdersByCollection(collection, continuation, size).map {
-            orderConverter.convert(it, blockchain)
+        val orders = orderClient.getSellOrdersByCollection(collection, continuation, size).map {
+            ImmutablexOrderConverter.convert(it, blockchain)
         }
         return Paging(OrderContinuation.ByLastUpdatedAndIdDesc, orders).getSlice(size)
     }
 
+    // IMX doesn't support floor orders
     override suspend fun getOrderFloorSellsByCollection(
         platform: PlatformDto?, collectionId: String, origin: String?, status: List<OrderStatusDto>?,
         currencyAddress: String, continuation: String?, size: Int
@@ -127,6 +158,7 @@ class ImmutablexOrderService(
         return Slice.empty()
     }
 
+    // IMX doesn't support floor orders
     override suspend fun getOrderFloorBidsByCollection(
         platform: PlatformDto?, collectionId: String, origin: String?, status: List<OrderStatusDto>?, start: Long?,
         end: Long?, currencyAddress: String, continuation: String?, size: Int
@@ -142,12 +174,20 @@ class ImmutablexOrderService(
         status: List<OrderStatusDto>?,
         currencyId: String,
         continuation: String?,
-        size: Int,
+        size: Int
     ): Slice<OrderDto> {
-        val orders = client.getSellOrdersByItem(itemId, maker, status, currencyId, continuation, size).map {
-            orderConverter.convert(it, blockchain)
-        }
-        return Paging(OrderContinuation.ByLastUpdatedAndIdDesc, orders).getSlice(size)
+        val (token, tokenId) = IdParser.split(itemId, 2)
+        val orders = orderClient.getSellOrdersByItem(
+            token,
+            tokenId,
+            maker,
+            status,
+            currencyId,
+            continuation,
+            size
+        ).map { ImmutablexOrderConverter.convert(it, blockchain) }
+
+        return Paging(OrderContinuation.BySellPriceUsdAndIdAsc, orders).getSlice(size)
     }
 
     override suspend fun getSellOrdersByMaker(
@@ -158,8 +198,8 @@ class ImmutablexOrderService(
         continuation: String?,
         size: Int,
     ): Slice<OrderDto> {
-        val orders = client.getSellOrdersByMaker(maker, status, continuation, size).map {
-            orderConverter.convert(it, blockchain)
+        val orders = orderClient.getSellOrdersByMaker(maker, status, continuation, size).map {
+            ImmutablexOrderConverter.convert(it, blockchain)
         }
         return Paging(OrderContinuation.ByLastUpdatedAndIdDesc, orders).getSlice(size)
     }

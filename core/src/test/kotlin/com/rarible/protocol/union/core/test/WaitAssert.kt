@@ -7,7 +7,7 @@ object WaitAssert {
 
     suspend fun wait(
         checkInterval: Duration = Duration.ofMillis(100),
-        timeout: Duration = Duration.ofSeconds(5),
+        timeout: Duration = Duration.ofSeconds(10),
         runnable: suspend () -> Unit
     ) {
         Wait.waitAssertWithCheckInterval(checkInterval, timeout, runnable)

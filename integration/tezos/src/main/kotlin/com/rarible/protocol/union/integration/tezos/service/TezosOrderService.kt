@@ -60,7 +60,8 @@ open class TezosOrderService(
             // If legacy orders ended, we should try to get orders from new indexer
             if (dipdupOrderService.enabled() && slice.entities.size < size) {
                 val delta = size - slice.entities.size
-                val nextSlice = dipdupOrderService.getOrdersAll(sort, status, null, delta)
+                val dipdupContinuation = if (tezosIntegrationProperties.showLegacyActivity) null else continuation
+                val nextSlice = dipdupOrderService.getOrdersAll(sort, status, dipdupContinuation, delta)
                 Slice(
                     continuation = nextSlice.continuation,
                     entities = slice.entities + nextSlice.entities
@@ -116,9 +117,13 @@ open class TezosOrderService(
 
     override suspend fun getBidCurrencies(itemId: String): List<AssetTypeDto> {
         val (contract, tokenId) = CompositeItemIdParser.split(itemId)
-        val assetTypes = orderControllerApi.getCurrenciesByBidOrdersOfItem(contract, tokenId.toString())
-            .awaitFirst()
-        return assetTypes.currencies.map { TezosConverter.convert(it, blockchain) }
+        return if (dipdupOrderService.enabled()) {
+            emptyList()
+        } else {
+            val assetTypes = orderControllerApi.getCurrenciesByBidOrdersOfItem(contract, tokenId.toString())
+                .awaitFirst()
+            assetTypes.currencies.map { TezosConverter.convert(it, blockchain) }
+        }
     }
 
     override suspend fun getBidCurrenciesByCollection(collectionId: String): List<AssetTypeDto> {
@@ -175,9 +180,11 @@ open class TezosOrderService(
 
     override suspend fun getSellCurrencies(itemId: String): List<AssetTypeDto> {
         val (contract, tokenId) = CompositeItemIdParser.split(itemId)
-        val assetTypes = orderControllerApi.getCurrenciesBySellOrdersOfItem(contract, tokenId.toString())
-            .awaitFirst()
-        val legacyList = assetTypes.currencies.map { TezosConverter.convert(it, blockchain) }
+        val legacyList = if (tezosIntegrationProperties.showLegacyOrders) {
+            val assetTypes = orderControllerApi.getCurrenciesBySellOrdersOfItem(contract, tokenId.toString())
+                .awaitFirst()
+            assetTypes.currencies.map { TezosConverter.convert(it, blockchain) }
+        } else emptyList()
         if (dipdupOrderService.enabled()) {
             val newList = dipdupOrderService.getSellOrderCurrenciesByItem(contract, tokenId)
             return (legacyList + newList).distinct()
@@ -197,12 +204,14 @@ open class TezosOrderService(
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
-        val orders = orderControllerApi.getSellOrders(
-            origin,
-            size,
-            continuation
-        ).awaitFirst()
-        return tezosOrderConverter.convert(orders, blockchain)
+        return if (tezosIntegrationProperties.showLegacyOrders) {
+            val orders = orderControllerApi.getSellOrders(
+                origin,
+                size,
+                continuation
+            ).awaitFirst()
+            tezosOrderConverter.convert(orders, blockchain)
+        } else Slice.empty()
     }
 
     override suspend fun getSellOrdersByCollection(
@@ -212,13 +221,15 @@ open class TezosOrderService(
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
-        val orders = orderControllerApi.getSellOrdersByCollection(
-            collection,
-            origin,
-            size,
-            continuation
-        ).awaitFirst()
-        return tezosOrderConverter.convert(orders, blockchain)
+        return if (tezosIntegrationProperties.showLegacyOrders) {
+            val orders = orderControllerApi.getSellOrdersByCollection(
+                collection,
+                origin,
+                size,
+                continuation
+            ).awaitFirst()
+            tezosOrderConverter.convert(orders, blockchain)
+        } else Slice.empty()
     }
 
     override suspend fun getOrderFloorSellsByCollection(
@@ -263,7 +274,8 @@ open class TezosOrderService(
 
         // We try to get new orders only if we get all legacy and continuation != null
         if (dipdupOrderService.enabled() && continuation != null && isDipDupContinuation(continuation)) {
-            val slice = dipdupOrderService.getSellOrdersByItem(contract, tokenId, maker, currencyId, status, continuation, size)
+            val slice =
+                dipdupOrderService.getSellOrdersByItem(contract, tokenId, maker, currencyId, status, continuation, size)
             return slice
 
         } else {
@@ -289,7 +301,8 @@ open class TezosOrderService(
             // If legacy orders ended, we should try to get orders from new indexer
             return if (dipdupOrderService.enabled() && slice.entities.size < size) {
                 val delta = size - slice.entities.size
-                val nextSlice = dipdupOrderService.getSellOrdersByItem(contract, tokenId, maker, currencyId, status, null, delta)
+                val nextSlice =
+                    dipdupOrderService.getSellOrdersByItem(contract, tokenId, maker, currencyId, status, null, delta)
                 Slice(
                     continuation = nextSlice.continuation,
                     entities = slice.entities + nextSlice.entities
@@ -317,14 +330,16 @@ open class TezosOrderService(
             size = size
         )
     } else {
-        val orders = orderControllerApi.getSellOrdersByMaker(
-            maker.first(),
-            origin,
-            tezosOrderConverter.convert(status),
-            size,
-            continuation
-        ).awaitFirst()
-        tezosOrderConverter.convert(orders, blockchain)
+        if (tezosIntegrationProperties.showLegacyOrders) {
+            val orders = orderControllerApi.getSellOrdersByMaker(
+                maker.first(),
+                origin,
+                tezosOrderConverter.convert(status),
+                size,
+                continuation
+            ).awaitFirst()
+            tezosOrderConverter.convert(orders, blockchain)
+        } else Slice.empty()
     }
 
     private fun isValidUUID(str: String?): Boolean {
@@ -334,6 +349,7 @@ open class TezosOrderService(
     }
 
     companion object {
-        private val UUID_REGEX_PATTERN: Pattern = Pattern.compile("^[{]?[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}[}]?$")
+        private val UUID_REGEX_PATTERN: Pattern =
+            Pattern.compile("^[{]?[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}[}]?$")
     }
 }

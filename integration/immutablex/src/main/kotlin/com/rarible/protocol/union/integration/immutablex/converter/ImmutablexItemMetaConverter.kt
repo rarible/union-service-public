@@ -7,7 +7,6 @@ import com.rarible.protocol.union.dto.MetaAttributeDto
 import com.rarible.protocol.union.dto.MetaContentDto
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexAsset
 
-
 object ImmutablexItemMetaConverter {
 
     private val logger by Logger()
@@ -24,8 +23,10 @@ object ImmutablexItemMetaConverter {
     }
 
     private fun convertInternal(asset: ImmutablexAsset): UnionMeta {
+        val collectionName = asset.collection.name
+        val assetName = asset.name ?: collectionName?.let { "$it #${asset.tokenId}" } ?: "Unknown"
         return UnionMeta(
-            name = asset.name!!,
+            name = assetName,
             description = asset.description,
             createdAt = asset.createdAt,
             content = asset.metadata?.filterKeys { it in contentKeys }?.map {

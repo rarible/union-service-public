@@ -329,7 +329,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
         )
 
         val items = itemControllerClient.getItemsByCollection(
-            ethCollectionId.fullId(), continuation, size
+            ethCollectionId.fullId(), continuation, size, null
         ).awaitFirst()
 
         assertThat(items.items).hasSize(1)
@@ -348,7 +348,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
         flowItemControllerApiMock.mockGetNftOrderItemsByCollection(flowCollectionId.value, continuation, size, item)
 
         val items = itemControllerClient.getItemsByCollection(
-            flowCollectionId.fullId(), continuation, size
+            flowCollectionId.fullId(), continuation, size, null
         ).awaitFirst()
 
         val result = items.items[0]
@@ -363,7 +363,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
         tezosItemControllerApiMock.mockGetNftOrderItemsByCollection(tezosCollectionId.value, continuation, size, item)
 
         val items = itemControllerClient.getItemsByCollection(
-            tezosCollectionId.fullId(), continuation, size
+            tezosCollectionId.fullId(), continuation, size, null
         ).awaitFirst()
 
         val result = items.items[0]
@@ -388,7 +388,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
         )
 
         val items = itemControllerClient.getItemsByOwner(
-            ethOwnerId.fullId(), null, continuation, size
+            ethOwnerId.fullId(), null, continuation, size, null
         ).awaitFirst()
 
         assertThat(items.items).hasSize(2)
@@ -414,7 +414,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
         )
 
         val items = itemControllerClient.getItemsByOwner(
-            flowOwnerId.fullId(), null, continuation, size
+            flowOwnerId.fullId(), null, continuation, size, null
         ).awaitFirst()
 
         val result = items.items[0]
@@ -431,7 +431,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
         )
 
         val items = itemControllerClient.getItemsByOwner(
-            tezosOwnerId.fullId(), null, continuation, size
+            tezosOwnerId.fullId(), null, continuation, size, null
         ).awaitFirst()
 
         val result = items.items[0]
@@ -457,7 +457,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
         polygonItemControllerApiMock.mockGetNftItemsByIds(listOf(ethItemId.value), listOf())
 
         val items = itemControllerClient.getItemsByOwnerWithOwnership(
-            ethOwnerId.fullId(), continuation, size
+            ethOwnerId.fullId(), continuation, size, null
         ).awaitFirst()
 
         assertThat(items.items).hasSize(1)
@@ -500,7 +500,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
         polygonItemControllerApiMock.mockGetNftItemsByIds(listOf(ethItemId.value), listOf())
 
         val items = itemControllerClient.getItemsByOwnerWithOwnership(
-            owner.fullId(), continuation, size
+            owner.fullId(), continuation, size, null
         ).awaitFirst()
 
         assertThat(items.items).hasSize(1)
@@ -544,7 +544,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
         polygonItemControllerApiMock.mockGetNftItemsByIds(listOf(ethItemId.value), listOf())
 
         val items = itemControllerClient.getItemsByOwnerWithOwnership(
-            owner.fullId(), continuation, size
+            owner.fullId(), continuation, size, null
         ).awaitFirst()
 
         assertThat(items.items).hasSize(1)
@@ -564,7 +564,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
         )
 
         val items = itemControllerClient.getItemsByCreator(
-            ethCreatorId.fullId(), null, continuation, size
+            ethCreatorId.fullId(), null, continuation, size, null
         ).awaitFirst()
 
         assertThat(items.items).hasSize(0)
@@ -580,7 +580,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
         )
 
         val items = itemControllerClient.getItemsByCreator(
-            flowCreatorId.fullId(), null, continuation, size
+            flowCreatorId.fullId(), null, continuation, size, null
         ).awaitFirst()
 
         val result = items.items[0]
@@ -597,7 +597,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
         )
 
         val items = itemControllerClient.getItemsByCreator(
-            tezosCreatorId.fullId(), null, continuation, size
+            tezosCreatorId.fullId(), null, continuation, size, null
         ).awaitFirst()
 
         val result = items.items[0]
@@ -641,7 +641,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
         )
 
         val items = itemControllerClient.getAllItems(
-            blockchains, cursorArg.toString(), size, showDeleted, lastUpdatedFrom, lastUpdatedTo
+            blockchains, cursorArg.toString(), size, showDeleted, lastUpdatedFrom, lastUpdatedTo, null
         ).awaitFirst()
 
         assertThat(items.items).hasSize(3)
@@ -673,7 +673,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
         )
 
         val items = itemControllerClient.getAllItems(
-            blockchains, null, size, false, null, null
+            blockchains, null, size, false, null, null, null
         ).awaitFirst().items.associateBy { it.id }
 
         assertThat(items).hasSize(3)

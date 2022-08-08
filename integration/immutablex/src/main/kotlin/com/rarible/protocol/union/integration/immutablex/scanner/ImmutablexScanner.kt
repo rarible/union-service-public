@@ -1,6 +1,5 @@
-package com.rarible.protocol.union.integration.immutablex
+package com.rarible.protocol.union.integration.immutablex.scanner
 
-import com.rarible.protocol.union.integration.immutablex.client.EventsApi
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexEvent
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexPage
 import com.rarible.protocol.union.integration.immutablex.entity.ImmutablexEntityTypes
@@ -9,13 +8,13 @@ import com.rarible.protocol.union.integration.immutablex.handlers.ImmutablexActi
 import com.rarible.protocol.union.integration.immutablex.handlers.ImmutablexItemEventHandler
 import com.rarible.protocol.union.integration.immutablex.handlers.ImmutablexOrderEventHandler
 import com.rarible.protocol.union.integration.immutablex.handlers.ImmutablexOwnershipEventHandler
-import java.util.concurrent.TimeUnit
-import javax.annotation.PostConstruct
 import kotlinx.coroutines.runBlocking
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.Update
 import org.springframework.scheduling.annotation.Scheduled
+import java.util.concurrent.TimeUnit
+import javax.annotation.PostConstruct
 
 class ImmutablexScanner(
     private val eventsApi: EventsApi,
@@ -84,6 +83,32 @@ class ImmutablexScanner(
     }
 
     @Scheduled(
+        initialDelayString = "\${integration.immutablex.scanner.job.initialDelay.orders}",
+        fixedDelayString = "\${integration.immutablex.scanner.job.fixedDelay}",
+        timeUnit = TimeUnit.SECONDS
+    )
+    fun orders() {
+        runBlocking {
+            val state = mongo.findById(ImmutablexEntityTypes.ORDERS.name, ImmutablexState::class.java) ?: mongo.save(
+                ImmutablexState(id = ImmutablexEntityTypes.ORDERS.name)
+            )
+            try {
+                val page = eventsApi.orders(state.cursor)
+                if (page.result.isNotEmpty()) {
+                    page.result.forEach {
+                        orderEventHandler.handle(it)
+                    }
+                }
+                mongo.save(state.copy(cursor = page.cursor))
+            } catch (e: Exception) {
+                mongo.save(state.copy(lastError = e.message, lastErrorStacktrace = e.stackTraceToString()))
+            }
+        }
+    }
+
+    // We don't need these events ATM
+    /*
+    @Scheduled(
         initialDelayString = "\${integration.immutablex.scanner.job.initialDelay.deposits}",
         fixedDelayString = "\${integration.immutablex.scanner.job.fixedDelay}",
         timeUnit = TimeUnit.SECONDS
@@ -114,30 +139,7 @@ class ImmutablexScanner(
             )
         }
     }
-
-    @Scheduled(
-        initialDelayString = "\${integration.immutablex.scanner.job.initialDelay.orders}",
-        fixedDelayString = "\${integration.immutablex.scanner.job.fixedDelay}",
-        timeUnit = TimeUnit.SECONDS
-    )
-    fun orders() {
-        runBlocking {
-            val state = mongo.findById(ImmutablexEntityTypes.ORDERS.name, ImmutablexState::class.java) ?: mongo.save(
-                ImmutablexState(id = ImmutablexEntityTypes.ORDERS.name)
-            )
-            try {
-                val page = eventsApi.orders(state.cursor)
-                if (page.result.isNotEmpty()) {
-                    page.result.forEach {
-                        orderEventHandler.handle(it)
-                    }
-                }
-                mongo.save(state.copy(cursor = page.cursor))
-            } catch (e: Exception) {
-                mongo.save(state.copy(lastError = e.message, lastErrorStacktrace = e.stackTraceToString()))
-            }
-        }
-    }
+    */
 
     private suspend fun <T : ImmutablexEvent> listen(
         apiMethod: suspend (cursor: String?) -> ImmutablexPage<T>,
@@ -148,8 +150,11 @@ class ImmutablexScanner(
             if (page.result.isNotEmpty()) {
                 handle(page.result)
             }
+            val cursor = page.cursor.ifBlank {
+                state.cursor // Keep the latest cursor if we reached the newest entity
+            }
 
-            mongo.save(state.copy(cursor = page.cursor)) //todo generate cursor if empty
+            mongo.save(state.copy(cursor = cursor))
         } catch (e: Exception) {
             mongo.save(state.copy(lastError = e.message, lastErrorStacktrace = e.stackTraceToString()))
         }

@@ -41,7 +41,7 @@ class CollectionEventHandler(
         }
         logger.debug("Saving ${convertedEvents.size} CollectionEventDto events to ElasticSearch")
         val refreshPolicy =
-            if (featureFlagsProperties.enableItemSaveImmediateToElasticSearch) {
+            if (featureFlagsProperties.enableCollectionSaveImmediateToElasticSearch) {
                 WriteRequest.RefreshPolicy.IMMEDIATE
             } else {
                 if (convertedEvents.any { it.self == true })
