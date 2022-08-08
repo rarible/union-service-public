@@ -77,8 +77,6 @@ integration:
       sigChecker: ""
       consumer:
         broker-replica-set: ${kafka.hosts}
-        username:
-        password:
         workers:
           item: 1
           activity: 1
