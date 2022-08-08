@@ -84,6 +84,16 @@ internal class ImmutablexActivityServiceTest {
                         ImmutablexOrder::class.java
                     ).copy(orderId = it.invocation.args[0].toString().toLong())
                 }
+                coEvery { getByIds(listOf("28307", "28308")) } answers { ans ->
+                    val orderIds = ans.invocation.args[0] as Collection<String>
+                    orderIds.map {
+                        mapper.readValue(
+                            ImmutablexActivityServiceTest::class.java.getResourceAsStream("order.json"),
+                            ImmutablexOrder::class.java
+                        ).copy(orderId = it.toLong())
+                    }
+                }
+
             }
         )
 

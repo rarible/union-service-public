@@ -10,7 +10,6 @@ import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.Instant
 
-
 data class ImmutablexAsset(
     val collection: ImmutablexCollectionShort,
     @JsonProperty("created_at")
@@ -32,6 +31,7 @@ data class ImmutablexAsset(
     val updatedAt: Instant?,
     val user: String?,
 ) {
+
     val itemId = "$tokenAddress:$tokenId"
 }
 
@@ -163,7 +163,19 @@ data class ImmutablexOrdersPage(
     val cursor: String,
     val remaining: Boolean,
     val result: List<ImmutablexOrder>,
-)
+) {
+
+    constructor(result: List<ImmutablexOrder>) : this(
+        "",
+        false,
+        result
+    )
+
+    companion object {
+
+        fun empty() = ImmutablexOrdersPage(emptyList())
+    }
+}
 
 data class ImmutablexTransfer(
     override val token: Token,

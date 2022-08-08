@@ -33,6 +33,7 @@ class ImmutablexAssetQueryBuilder(
         builder.queryParamNotNull("user", owner)
     }
 
+    // TODO ideally we need to hack the cursor here (like it done for collections)
     fun continuation(from: Instant?, to: Instant?, continuation: String?) {
         val continuationDate = DateIdContinuation.parse(continuation)?.date
 
