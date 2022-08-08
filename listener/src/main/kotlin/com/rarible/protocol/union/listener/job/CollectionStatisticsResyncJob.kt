@@ -47,7 +47,7 @@ class CollectionStatisticsResyncJob(
             }
 
             prevTask.lastStatus == TaskStatus.NONE -> {
-                logger.warn("Task with type={} has be started already", taskType)
+                logger.warn("Task with type={} has been started already", taskType)
             }
 
             else -> {
