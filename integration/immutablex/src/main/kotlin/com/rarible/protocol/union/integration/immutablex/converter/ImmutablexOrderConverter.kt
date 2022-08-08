@@ -18,14 +18,18 @@ import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PayoutDto
 import com.rarible.protocol.union.dto.PlatformDto
+import com.rarible.protocol.union.dto.ext
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexOrder
+import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexOrderFee
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexOrderSide
-import org.slf4j.LoggerFactory
 import java.math.BigDecimal
 
 object ImmutablexOrderConverter {
 
     private val logger by Logger()
+
+    private val originFees = setOf("ecosystem", "protocol")
+    private val royalties = setOf("royalty")
 
     fun convert(order: ImmutablexOrder, blockchain: BlockchainDto): OrderDto {
         return try {
@@ -37,11 +41,13 @@ object ImmutablexOrderConverter {
     }
 
     private fun convertInternal(order: ImmutablexOrder, blockchain: BlockchainDto): OrderDto {
-        val make: AssetDto = makeAsset(order.sell, blockchain)
-        val take: AssetDto = makeAsset(order.buy, blockchain)
+        val make: AssetDto = toAsset(order.sell, blockchain)
+        val take: AssetDto = toAsset(order.buy, blockchain)
 
         val makePrice = evalMakePrice(make, take)
         val takePrice = evalTakePrice(make, take)
+
+        val quantity = if (make.type.ext.isNft) take.value else make.value
 
         val status = convertStatus(order)
         return OrderDto(
@@ -60,37 +66,29 @@ object ImmutablexOrderConverter {
             createdAt = order.createdAt,
             cancelled = status == OrderStatusDto.CANCELLED,
             makeStock = order.sell.data.quantity.toBigDecimal(),
-            data = makeData(order, blockchain)
+            data = makeData(quantity, order, blockchain)
         )
     }
 
-    private fun makeData(order: ImmutablexOrder, blockchain: BlockchainDto): OrderDataDto {
-        if (order.fees.isNullOrEmpty()) {
-            return ImmutablexOrderDataV1Dto(
-                payouts = emptyList(),
-                originFees = emptyList()
-            )
-        }
-        val royalty = order.fees.filter {
-            "royalty" == it.type
-        }.map {
-            PayoutDto(
-                account = UnionAddressConverter.convert(blockchain, it.address),
-                value = it.amount.divide(BigDecimal.TEN.pow(it.token.data.decimals)).toBps()
-            )
-        }
+    private fun makeData(quantity: BigDecimal, order: ImmutablexOrder, blockchain: BlockchainDto): OrderDataDto {
+        val orderFees = order.fees ?: emptyList()
 
-        val fees = order.fees.filter {
-            "ecosystem" == it.type
-        }.map {
-            PayoutDto(
-                account = UnionAddressConverter.convert(blockchain, it.address),
-                value = it.amount.divide(BigDecimal.TEN.pow(it.token.data.decimals)).toBps()
-            )
-        }
+        val royalty = orderFees.filter { royalties.contains(it.type) }
+            .map { toPayout(quantity, it, blockchain) }
+
+        val fees = orderFees.filter { originFees.contains(it.type) }
+            .map { toPayout(quantity, it, blockchain) }
+
         return ImmutablexOrderDataV1Dto(
             originFees = fees,
             payouts = royalty
+        )
+    }
+
+    private fun toPayout(quantity: BigDecimal, fee: ImmutablexOrderFee, blockchain: BlockchainDto): PayoutDto {
+        return PayoutDto(
+            account = UnionAddressConverter.convert(blockchain, fee.address),
+            value = fee.amount.multiply(BigDecimal.valueOf(10000L)).divide(quantity).toInt()
         )
     }
 
@@ -102,7 +100,7 @@ object ImmutablexOrderConverter {
         else -> OrderStatusDto.HISTORICAL
     }
 
-    private fun makeAsset(side: ImmutablexOrderSide, blockchain: BlockchainDto): AssetDto {
+    private fun toAsset(side: ImmutablexOrderSide, blockchain: BlockchainDto): AssetDto {
         val assetType = when (side.type) {
             "ERC721" -> EthErc721AssetTypeDto(
                 // TODO could it be UUID instead of BigInteger?
@@ -119,12 +117,4 @@ object ImmutablexOrderConverter {
         }
         return AssetDto(type = assetType, value = side.data.quantity.toBigDecimal())
     }
-}
-
-private fun BigDecimal.toBps(): Int = try {
-    this.multiply(BigDecimal.valueOf(10_000)).intValueExact()
-} catch (e: Exception) {
-    val logger = LoggerFactory.getLogger(ImmutablexOrderConverter::class.java)
-    logger.warn("Unable convert BigDecimal to base-points $this")
-    10_000
 }
