@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.integration.immutablex.scanner
 
+import com.rarible.protocol.union.dto.continuation.DateIdContinuation
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexEvent
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexPage
 import com.rarible.protocol.union.integration.immutablex.entity.ImmutablexEntityTypes
@@ -94,12 +95,17 @@ class ImmutablexScanner(
             )
             try {
                 val page = eventsApi.orders(state.cursor)
-                if (page.result.isNotEmpty()) {
-                    page.result.forEach {
-                        orderEventHandler.handle(it)
-                    }
-                }
-                mongo.save(state.copy(cursor = page.cursor))
+                page.forEach { orderEventHandler.handle(it) }
+                // We can't use native cursor here, it can be too large for GET request
+                val cursor = page.lastOrNull()?.let {
+                    // originally, updatedAt is never null, but it can be equal to createdAt
+                    DateIdContinuation(it.updatedAt!!, it.orderId.toString()).toString()
+                    // We should NOT update cursor if we got the last page
+                    // in order to prevent starting cycle of scan from zero
+                } ?: state.cursor
+
+                mongo.save(state.copy(cursor = cursor.toString()))
+
             } catch (e: Exception) {
                 mongo.save(state.copy(lastError = e.message, lastErrorStacktrace = e.stackTraceToString()))
             }
