@@ -302,7 +302,7 @@ class ItemsControllerElasticFt : AbstractIntegrationTest() {
         ).awaitFirst()
 
         assertThat(result.items).hasSize(0)
-        assertThat(result.continuation).isEqualTo("null")
+        assertThat(result.continuation).isNull()
     }
 
     @Test

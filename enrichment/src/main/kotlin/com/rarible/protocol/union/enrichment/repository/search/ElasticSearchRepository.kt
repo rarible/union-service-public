@@ -37,7 +37,7 @@ abstract class ElasticSearchRepository<T>(
     private val idFieldName: String
 ) : EsRepository {
 
-    private val logger by Logger()
+    protected val logger by Logger()
 
     private var brokenEsState: Boolean = true
 
