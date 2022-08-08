@@ -51,7 +51,7 @@ class ActivityEventHandler(
 
         if (convertedEvents.isNotEmpty()) {
             val refreshPolicy =
-                if (featureFlagsProperties.enableItemSaveImmediateToElasticSearch) {
+                if (featureFlagsProperties.enableActivitySaveImmediateToElasticSearch) {
                     WriteRequest.RefreshPolicy.IMMEDIATE
                 }
                 else {

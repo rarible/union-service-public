@@ -31,9 +31,4 @@ data class FeatureFlagsProperties(
     // items
     var enableItemQueriesToElasticSearch: Boolean = false,
     var enableItemSaveImmediateToElasticSearch: Boolean = false,
-) {
-
-    val orderRefreshPolicy: WriteRequest.RefreshPolicy = if(enableOrderSaveImmediateToElasticSearch) {
-        WriteRequest.RefreshPolicy.IMMEDIATE
-    } else WriteRequest.RefreshPolicy.NONE
-}
+)

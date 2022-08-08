@@ -39,7 +39,7 @@ class OwnershipEventHandler(
                 async {
                     logger.debug("Saving ${events.size} OwnershipDto events to ElasticSearch")
                     val refreshPolicy =
-                        if (featureFlagsProperties.enableItemSaveImmediateToElasticSearch) {
+                        if (featureFlagsProperties.enableOwnershipSaveImmediateToElasticSearch) {
                             WriteRequest.RefreshPolicy.IMMEDIATE
                         }
                         else {
