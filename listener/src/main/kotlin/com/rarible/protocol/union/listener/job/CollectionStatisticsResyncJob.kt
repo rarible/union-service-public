@@ -10,6 +10,7 @@ import com.rarible.protocol.union.listener.job.task.CollectionStatisticsResyncTa
 import io.micrometer.core.instrument.MeterRegistry
 import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingleOrNull
+import kotlinx.coroutines.time.delay
 
 class CollectionStatisticsResyncJob(
     properties: UnionListenerProperties,
@@ -18,7 +19,8 @@ class CollectionStatisticsResyncJob(
 ) : SequentialDaemonWorker(
     meterRegistry = meterRegistry,
     properties = DaemonWorkerProperties().copy(
-        pollingPeriod = properties.collectionStatisticsResync.rate
+        pollingPeriod = properties.collectionStatisticsResync.rate,
+        errorDelay = properties.collectionStatisticsResync.rate
     ),
     workerName = "collection-statistics-resync-job"
 ) {
@@ -44,6 +46,10 @@ class CollectionStatisticsResyncJob(
                 logger.info("Task with type={} was started successfully", taskType)
             }
 
+            prevTask.lastStatus == TaskStatus.NONE -> {
+                logger.warn("Task with type={} has be started already", taskType)
+            }
+
             else -> {
                 logger.error(
                     "Task with type={} can't be started since previous one completed with inappropriate status={}",
@@ -52,5 +58,7 @@ class CollectionStatisticsResyncJob(
                 )
             }
         }
+
+        delay(pollingPeriod)
     }
 }
