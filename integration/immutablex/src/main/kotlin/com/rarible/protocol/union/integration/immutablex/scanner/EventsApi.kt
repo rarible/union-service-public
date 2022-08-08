@@ -1,5 +1,7 @@
 package com.rarible.protocol.union.integration.immutablex.scanner
 
+import com.rarible.protocol.union.dto.OrderSortDto
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexOrderClient
 import com.rarible.protocol.union.integration.immutablex.client.queryParamNotNull
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexDeposit
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexMint
@@ -14,7 +16,8 @@ import org.springframework.web.reactive.function.client.toEntity
 import org.springframework.web.util.UriBuilder
 
 class EventsApi(
-    private val webClient: WebClient
+    private val webClient: WebClient,
+    private val orderClient: ImmutablexOrderClient
 ) {
 
     suspend fun mints(cursor: String? = null): ImmutablexPage<ImmutablexMint> {
@@ -68,16 +71,13 @@ class EventsApi(
 
     }
 
-    suspend fun orders(cursor: String? = null): ImmutablexPage<ImmutablexOrder> {
-        return webClient.get().uri {
-            it.path("/orders")
-                .queryParam("page_size", PAGE_SIZE)
-                .queryParam("sell_token_type", "ERC721")
-                .queryParam("order_by", "created_at")
-                .queryParam("direction", "DESC")
-                .queryParamNotNull("cursor", cursor)
-                .build()
-        }.retrieve().toEntity<ImmutablexPage<ImmutablexOrder>>().awaitSingle().body!!
+    suspend fun orders(cursor: String? = null): List<ImmutablexOrder> {
+        return orderClient.getAllOrders(
+            continuation = cursor,
+            size = PAGE_SIZE,
+            sort = OrderSortDto.LAST_UPDATE_ASC,
+            statuses = null
+        )
     }
 
     private fun UriBuilder.defaultQueryParams() =
@@ -87,7 +87,7 @@ class EventsApi(
 
     companion object {
 
-        private const val PAGE_SIZE = 5000
+        private const val PAGE_SIZE = 200 // As per IMX support, that's maximum page size
         private const val ORDER_BY = "transaction_id"
         private const val ORDER_DIRECTION = "asc"
     }

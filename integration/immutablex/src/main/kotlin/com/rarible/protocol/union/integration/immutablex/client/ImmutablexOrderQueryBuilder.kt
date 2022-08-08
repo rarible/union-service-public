@@ -3,8 +3,8 @@ package com.rarible.protocol.union.integration.immutablex.client
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.continuation.DateIdContinuation
+import org.apache.commons.codec.binary.Base64
 import org.springframework.web.util.UriBuilder
-import java.time.temporal.ChronoUnit
 
 class ImmutablexOrderQueryBuilder(
     builder: UriBuilder
@@ -63,28 +63,30 @@ class ImmutablexOrderQueryBuilder(
         builder.queryParamNotNull("status", immStatus)
     }
 
-    // TODO ideally we need to hack the cursor here (like it done for collections)
     fun continuation(sort: OrderSortDto, continuation: String?) {
-        val continuationDate = DateIdContinuation.parse(continuation)?.date
+        val cursor = continuation
+            ?.let { DateIdContinuation.parse(continuation) }
+            ?.let { parsed ->
 
-        // TODO ugly hack until we haven't cursor
-        // Have no idea what to do with TS... IMX doesn't exclude date from continuation,
-        // and we're getting duplicated items on the page break
-        val queryFrom = when (sort) {
-            OrderSortDto.LAST_UPDATE_ASC -> continuationDate?.plus(1, ChronoUnit.MILLIS)
-            OrderSortDto.LAST_UPDATE_DESC -> null
-        }
-        val queryTo = when (sort) {
-            OrderSortDto.LAST_UPDATE_ASC -> null
-            OrderSortDto.LAST_UPDATE_DESC -> continuationDate?.minus(1, ChronoUnit.MILLIS)
-        }
+                val date = parsed.date
+                val orderId = parsed.id
+
+                // Since IMX using microseconds in their cursors while we're using ms,
+                // there is no way to avoid duplication on page break except increasing/decreasing date from our TS
+                val fixedDate = when (sort) {
+                    OrderSortDto.LAST_UPDATE_ASC -> date.plusMillis(1)
+                    OrderSortDto.LAST_UPDATE_DESC -> date.minusMillis(1)
+                }
+                Base64.encodeBase64String("""{"order_id":$orderId,"updated_at":"$fixedDate"}""".toByteArray())
+                    .trimEnd('=')
+            }
+
+        builder.queryParamNotNull("cursor", cursor)
+
         val direction = when (sort) {
             OrderSortDto.LAST_UPDATE_ASC -> "asc"
             OrderSortDto.LAST_UPDATE_DESC -> "desc"
         }
-
-        builder.queryParamNotNull("updated_min_timestamp", queryFrom)
-        builder.queryParamNotNull("updated_max_timestamp", queryTo)
 
         orderBy("updated_at", direction)
     }
