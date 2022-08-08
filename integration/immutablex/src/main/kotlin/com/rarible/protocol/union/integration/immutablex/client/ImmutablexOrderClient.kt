@@ -1,19 +1,13 @@
 package com.rarible.protocol.union.integration.immutablex.client
 
+import com.rarible.core.common.mapAsync
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
-import com.rarible.protocol.union.dto.continuation.DateIdContinuation
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexOrder
 import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexOrdersPage
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.reactor.awaitSingle
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.toEntity
-import scalether.domain.Address
-import java.time.Instant
 
 class ImmutablexOrderClient(
     webClient: WebClient,
@@ -21,166 +15,289 @@ class ImmutablexOrderClient(
     webClient
 ) {
 
-    suspend fun getById(id: Long): ImmutablexOrder {
-        val uri = "/orders/$id?include_fees=true"
-        return getByUri(uri)
+    // TODO IMMUTABLEX move out to configuration
+    private val orderRequestChunkSize = 16
+
+    private val supportedBuyOrderStatuses = setOf(
+        OrderStatusDto.FILLED,
+        OrderStatusDto.CANCELLED
+    )
+    private val supportedSellOrderStatuses = setOf(
+        OrderStatusDto.FILLED,
+        OrderStatusDto.CANCELLED,
+        OrderStatusDto.ACTIVE,
+        OrderStatusDto.INACTIVE
+    )
+
+    suspend fun getById(id: String): ImmutablexOrder {
+        return getByUri(ImmutablexOrderQueryBuilder.getByIdPath(id))
+    }
+
+    suspend fun getByIds(orderIds: Collection<String>): List<ImmutablexOrder> {
+        return getChunked(orderRequestChunkSize, orderIds) {
+            ignore404 { getById(it) }
+        }
     }
 
     suspend fun getAllOrders(
         continuation: String?,
         size: Int,
         sort: OrderSortDto?,
-        status: List<OrderStatusDto>?,
+        statuses: List<OrderStatusDto>?,
     ): List<ImmutablexOrder> {
-        val direction = sort ?: OrderSortDto.LAST_UPDATE_DESC
-        if (!status.isNullOrEmpty()) {
-            val pages = status.map {
-                coroutineScope {
-                    async(Dispatchers.IO) {
-                        ordersByStatus(continuation, size, it, direction)
-                    }
-                }
-            }.awaitAll()
-            val orders = pages.flatMap { it.result }
-            return when (direction) {
-                OrderSortDto.LAST_UPDATE_ASC -> orders.sortedBy { it.updatedAt }
-                OrderSortDto.LAST_UPDATE_DESC -> orders.sortedByDescending { it.updatedAt }
-            }
+        val pages = getOrdersByStatuses(statuses) { status ->
+            val safeSort = sort ?: OrderSortDto.LAST_UPDATE_DESC
+            webClient.get().uri {
+                val builder = ImmutablexOrderQueryBuilder(it)
+                builder.pageSize(size)
+                builder.continuation(safeSort, continuation)
+                builder.status(status)
+                builder.build()
+            }.retrieve()
+                .toEntity<ImmutablexOrdersPage>()
+                .awaitSingle().body!!
         }
-
-        return ordersByStatus(continuation, size, direction = direction).result
+        return mergePages(pages, sort, size)
     }
 
-    suspend fun getSellOrders(continuation: String?, size: Int): List<ImmutablexOrder> {
-        val continuationFrom = DateIdContinuation.parse(continuation)?.date
-        return webClient.get().uri {
-            it.path("/orders")
-                .queryParam("page_size", size)
-                .queryParam("include_fees", true)
-                .queryParam("sell_token_type", "ERC721")
-                .queryParam("order_by", "updated_at")
-                .queryParam("direction", "desc")
-                .queryParamNotNull("updated_min_timestamp", continuationFrom)
-                .build()
-        }.retrieve()
-            .toEntity<ImmutablexOrdersPage>()
-            .awaitSingle().body!!.result
+    suspend fun getSellOrders(
+        continuation: String?,
+        size: Int
+    ): List<ImmutablexOrder> {
+        val page = sellOrders(
+            continuation = continuation,
+            size = size
+        )
+        return mergePages(listOf(page), null, size)
     }
 
-    suspend fun getSellOrdersByCollection(collection: String, continuation: String?, size: Int): List<ImmutablexOrder> {
-        val continuationFrom = DateIdContinuation.parse(continuation)?.date
-        return webClient.get().uri {
-            it.path("/orders")
-                .queryParam("page_size", size)
-                .queryParam("include_fees", true)
-                .queryParam("sell_token_type", "ERC721")
-                .queryParam("order_by", "updated_at")
-                .queryParam("direction", "desc")
-                .queryParam("sell_token_address", collection)
-                .queryParamNotNull("updated_min_timestamp", continuationFrom)
-                .build()
-        }.retrieve()
-            .toEntity<ImmutablexOrdersPage>()
-            .awaitSingle().body!!.result
+    suspend fun getSellOrdersByCollection(
+        collection: String,
+        continuation: String?,
+        size: Int
+    ): List<ImmutablexOrder> {
+        val page = sellOrders(
+            continuation = continuation,
+            size = size,
+            collection = collection
+        )
+        return mergePages(listOf(page), null, size)
     }
 
     suspend fun getSellOrdersByItem(
-        itemId: String,
+        token: String,
+        tokenId: String,
         maker: String?,
-        status: List<OrderStatusDto>?,
+        statuses: List<OrderStatusDto>?,
         currencyId: String,
         continuation: String?,
         size: Int,
     ): List<ImmutablexOrder> {
-        val (tokenAddress, tokenId) = itemId.split(":")
-        val params = mutableMapOf<String, Any>()
-        params["sell_token_address"] = tokenAddress
-        params["sell_token_id"] = String(tokenId.toBigInteger().toByteArray())
-        if (currencyId != "${Address.ZERO()}") {
-            params["buy_token_address"] = currencyId
+        val filteredStatuses = statuses?.filter { isSupportedSellStatus(it) }
+        val pages = getOrdersByStatuses(filteredStatuses) { status ->
+            webClient.get().uri {
+                val builder = ImmutablexOrderQueryBuilder(it)
+                builder.pageSize(size)
+                builder.sellTokenType("ERC721")
+                builder.sellPriceContinuation(currencyId, continuation)
+                builder.sellToken(token)
+                builder.sellTokenId(tokenId)
+                builder.maker(maker)
+                builder.status(status)
+                builder.build()
+            }.retrieve()
+                .toEntity<ImmutablexOrdersPage>()
+                .awaitSingle().body!!
         }
 
-        if (maker != null) {
-            params["user"] = maker
-        }
-
-        if (status != null) {
-            val pages = status.map {
-                coroutineScope {
-                    async(Dispatchers.IO) {
-                        ordersByStatus(continuation, size, it, OrderSortDto.LAST_UPDATE_DESC, params)
-                    }
-                }
-            }.awaitAll()
-            return pages.flatMap { it.result }.sortedByDescending { it.updatedAt }
-        }
-        return ordersByStatus(continuation, size, null, OrderSortDto.LAST_UPDATE_DESC, params).result
+        return mergeSellPages(pages, size)
     }
 
     suspend fun getSellOrdersByMaker(
         makers: List<String>,
-        status: List<OrderStatusDto>?,
+        statuses: List<OrderStatusDto>?,
         continuation: String?,
         size: Int,
     ): List<ImmutablexOrder> {
-        val pages = makers.flatMap { maker ->
-            val params = mapOf("user" to maker)
-            if (status != null) {
-                return@flatMap status.map {
-                    coroutineScope {
-                        async(Dispatchers.IO) {
-                            ordersByStatus(continuation, size, it, OrderSortDto.LAST_UPDATE_DESC, params)
-                        }
-                    }
-                }
-            } else {
-                return@flatMap listOf(coroutineScope {
-                    async(Dispatchers.IO) {
-                        ordersByStatus(continuation, size, null, OrderSortDto.LAST_UPDATE_DESC, params)
-                    }
-                })
+        val pages = getOrdersByStatuses(statuses) { status ->
+            val makerPages = getOrdersByMaker(makers) { maker ->
+                sellOrders(
+                    continuation = continuation,
+                    size = size,
+                    maker = maker,
+                    status = status
+                )
             }
-        }.awaitAll()
-        return pages.flatMap { it.result }.sortedByDescending { it.updatedAt }
+            ImmutablexOrdersPage("", false, mergePages(makerPages, null, size))
+        }
+        return mergePages(pages, null, size)
     }
 
-    private suspend fun ordersByStatus(
+    private suspend fun sellOrders(
         continuation: String?,
         size: Int,
+        sort: OrderSortDto? = null,
         status: OrderStatusDto? = null,
-        direction: OrderSortDto,
-        additionalQueryParams: Map<String, Any> = emptyMap(),
+        maker: String? = null,
+        collection: String? = null,
+        tokenId: String? = null
     ): ImmutablexOrdersPage {
-        return webClient.get().uri { uriBuilder ->
-            uriBuilder.path("/orders")
-                .queryParam("page_size", size)
-                .queryParam("order_by", "updated_at")
-                .queryParam(
-                    "direction", when (direction) {
-                    OrderSortDto.LAST_UPDATE_DESC -> "DESC"
-                    OrderSortDto.LAST_UPDATE_ASC -> "ASC"
-                }
-                )
-                .queryParam("include_fees", true)
-            if (!continuation.isNullOrEmpty()) {
-                val (dateStr, _) = continuation.split("_")
-                uriBuilder.queryParam("updated_min_timestamp", "${Instant.ofEpochMilli(dateStr.toLong())}")
-            }
-            if (status != null) {
-                uriBuilder.queryParam("status", status.immStatus())
-            }
+        if (!isSupportedSellStatus(status)) return ImmutablexOrdersPage.empty()
 
-            additionalQueryParams.forEach { (k, v) ->
-                uriBuilder.queryParam(k, v)
-            }
-            uriBuilder.build()
+        val safeSort = sort ?: OrderSortDto.LAST_UPDATE_DESC
+        return webClient.get().uri {
+            val builder = ImmutablexOrderQueryBuilder(it)
+            builder.pageSize(size)
+            builder.sellTokenType("ERC721")
+            builder.continuation(safeSort, continuation)
+            builder.sellToken(collection)
+            builder.sellTokenId(tokenId)
+            builder.maker(maker)
+            builder.status(status)
+            builder.build()
         }.retrieve()
             .toEntity<ImmutablexOrdersPage>()
             .awaitSingle().body!!
     }
+
+    suspend fun getBuyOrdersByMaker(
+        makers: List<String>,
+        statuses: List<OrderStatusDto>?,
+        continuation: String?,
+        size: Int,
+    ): List<ImmutablexOrder> {
+
+        val pages = getOrdersByStatuses(statuses) { status ->
+            val makerPages = getOrdersByMaker(makers) { maker ->
+                buyOrders(
+                    continuation = continuation,
+                    size = size,
+                    maker = maker,
+                    status = status
+                )
+            }
+            ImmutablexOrdersPage(mergePages(makerPages, null, size))
+        }
+
+        return mergePages(pages, null, size)
+    }
+
+    suspend fun getBuyOrdersByItem(
+        token: String,
+        tokenId: String,
+        makers: List<String>?,
+        statuses: List<OrderStatusDto>?,
+        currencyId: String,
+        continuation: String?,
+        size: Int,
+    ): List<ImmutablexOrder> {
+        val filteredStatuses = statuses?.filter { isSupportedBuyStatus(it) }
+        val pages = getOrdersByStatuses(filteredStatuses) { status ->
+            val makerPages = getOrdersByMaker(makers) { maker ->
+                webClient.get().uri {
+                    val builder = ImmutablexOrderQueryBuilder(it)
+                    builder.buyTokenType("ERC721")
+                    builder.buyToken(token)
+                    builder.buyTokenId(tokenId)
+                    builder.maker(maker)
+                    builder.status(status)
+                    builder.pageSize(size)
+                    builder.buyPriceContinuation(currencyId, continuation)
+                    builder.build()
+                }.retrieve()
+                    .toEntity<ImmutablexOrdersPage>()
+                    .awaitSingle().body!!
+            }
+            ImmutablexOrdersPage(mergePages(makerPages, null, size))
+        }
+
+        return mergeSellPages(pages, size)
+    }
+
+    private suspend fun buyOrders(
+        continuation: String?,
+        size: Int,
+        sort: OrderSortDto? = null,
+        status: OrderStatusDto? = null,
+        maker: String? = null,
+        collection: String? = null,
+        tokenId: String? = null
+    ): ImmutablexOrdersPage {
+        if (!isSupportedBuyStatus(status)) return ImmutablexOrdersPage.empty()
+
+        val safeSort = sort ?: OrderSortDto.LAST_UPDATE_DESC
+        return webClient.get().uri {
+            val builder = ImmutablexOrderQueryBuilder(it)
+            builder.buyTokenType("ERC721")
+            builder.buyToken(collection)
+            builder.buyTokenId(tokenId)
+            builder.maker(maker)
+            builder.status(status)
+            builder.pageSize(size)
+            builder.continuation(safeSort, continuation)
+            builder.build()
+        }.retrieve()
+            .toEntity<ImmutablexOrdersPage>()
+            .awaitSingle().body!!
+    }
+
+    private suspend fun getOrdersByStatuses(
+        statuses: List<OrderStatusDto>?,
+        call: suspend (status: OrderStatusDto?) -> ImmutablexOrdersPage
+    ): List<ImmutablexOrdersPage> {
+        return if (statuses.isNullOrEmpty()) {
+            listOf(call(null))
+        } else {
+            statuses.mapAsync { call(it) }
+        }
+    }
+
+    private suspend fun getOrdersByMaker(
+        makers: List<String>?,
+        call: suspend (maker: String?) -> ImmutablexOrdersPage
+    ): List<ImmutablexOrdersPage> {
+        return if (makers.isNullOrEmpty()) {
+            listOf(call(null))
+        } else {
+            makers.mapAsync { call(it) }
+        }
+    }
+
+    private fun mergePages(
+        pages: Collection<ImmutablexOrdersPage>,
+        sort: OrderSortDto?,
+        size: Int
+    ): List<ImmutablexOrder> {
+        val safeSort = sort ?: OrderSortDto.LAST_UPDATE_DESC
+        val orders = pages.map { it.result }.flatten()
+
+        val sorted = when (safeSort) {
+            // TODO Ideally we should consider here ID too
+            OrderSortDto.LAST_UPDATE_ASC -> orders.sortedBy { it.updatedAt }
+            OrderSortDto.LAST_UPDATE_DESC -> orders.sortedByDescending { it.updatedAt }
+        }
+
+        return sorted.take(size)
+    }
+
+    private fun mergeSellPages(pages: Collection<ImmutablexOrdersPage>, size: Int): List<ImmutablexOrder> {
+        return pages.map { it.result }.flatten()
+            .sortedBy { it.buy.data.quantity }
+            .take(size)
+    }
+
+    private fun mergeBuyPages(pages: Collection<ImmutablexOrdersPage>, size: Int): List<ImmutablexOrder> {
+        return pages.map { it.result }.flatten()
+            .sortedByDescending { it.sell.data.quantity }
+            .take(size)
+    }
+
+    private fun isSupportedSellStatus(status: OrderStatusDto?): Boolean {
+        return status == null || supportedSellOrderStatuses.contains(status)
+    }
+
+    private fun isSupportedBuyStatus(status: OrderStatusDto?): Boolean {
+        return status == null || supportedBuyOrderStatuses.contains(status)
+    }
 }
 
-private fun OrderStatusDto.immStatus(): String = when (this) {
-    OrderStatusDto.HISTORICAL -> "expired"
-    else -> this.name.lowercase()
-}
