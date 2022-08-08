@@ -86,9 +86,12 @@ object ImmutablexOrderConverter {
     }
 
     private fun toPayout(quantity: BigDecimal, fee: ImmutablexOrderFee, blockchain: BlockchainDto): PayoutDto {
+        // TODO not really sure this is the right way to round it
+        val amountBp = fee.amount.multiply(BigDecimal.valueOf(10000L)).toBigInteger()
+        val quantityInt = quantity.toBigInteger()
         return PayoutDto(
             account = UnionAddressConverter.convert(blockchain, fee.address),
-            value = fee.amount.multiply(BigDecimal.valueOf(10000L)).divide(quantity).toInt()
+            value = amountBp.divide(quantityInt).toInt()
         )
     }
 
