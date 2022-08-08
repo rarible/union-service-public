@@ -17,7 +17,7 @@ class ImmutablexOrderServiceMt : ImmutablexManualTest() {
 
     @Test
     fun getById() = runBlocking<Unit> {
-        val orderId = "143878"
+        val orderId = "143955"
         val order = service.getOrderById(orderId)
 
         println(order)
