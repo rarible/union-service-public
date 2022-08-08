@@ -72,7 +72,7 @@ class TestIndexerConfiguration {
 
     @Bean
     fun orderHandler(repository: EsOrderRepository): ConsumerBatchEventHandler<OrderEventDto> {
-        return OrderEventHandler(FeatureFlagsProperties(orderRefreshPolicy = WriteRequest.RefreshPolicy.IMMEDIATE), repository)
+        return OrderEventHandler(FeatureFlagsProperties(enableOrderSaveImmediateToElasticSearch = true), repository)
     }
 
     @Bean
