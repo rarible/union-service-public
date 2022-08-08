@@ -31,6 +31,7 @@ import com.rarible.protocol.dto.Erc721AssetTypeDto
 import com.rarible.protocol.dto.ImageContentDto
 import com.rarible.protocol.dto.ItemRoyaltyDto
 import com.rarible.protocol.dto.ItemTransferDto
+import com.rarible.protocol.dto.LooksRareOrderDto
 import com.rarible.protocol.dto.MetaContentDto
 import com.rarible.protocol.dto.MintDto
 import com.rarible.protocol.dto.NftCollectionDto
@@ -51,6 +52,7 @@ import com.rarible.protocol.dto.OrderActivityMatchSideDto
 import com.rarible.protocol.dto.OrderBasicSeaportDataV1Dto
 import com.rarible.protocol.dto.OrderCancelDto
 import com.rarible.protocol.dto.OrderCryptoPunksDataDto
+import com.rarible.protocol.dto.OrderLooksRareDataV1Dto
 import com.rarible.protocol.dto.OrderOpenSeaV1DataV1Dto
 import com.rarible.protocol.dto.OrderRaribleV2DataDto
 import com.rarible.protocol.dto.OrderRaribleV2DataV1Dto
@@ -909,6 +911,40 @@ fun randomEthX2Y2OrderDto(): X2Y2OrderDto {
             isBundle = false,
             isCollectionOffer = false,
             side = randomInt(),
+        ),
+        signature = randomBinary(),
+        createdAt = nowMillis(),
+        lastUpdateAt = nowMillis(),
+        pending = emptyList(),
+        hash = Word.apply(randomWord()),
+        makeBalance = randomBigInt(),
+        makePriceUsd = randomBigInt().toBigDecimal(),
+        takePriceUsd = randomBigInt().toBigDecimal(),
+        start = randomInt().toLong(),
+        end = randomInt().toLong(),
+        priceHistory = listOf()
+    )
+}
+
+fun randomEthLooksRareOrderDto(): LooksRareOrderDto {
+    val makeStockValue = randomBigDecimal()
+    return LooksRareOrderDto(
+        status = OrderStatusDto.ACTIVE,
+        maker = randomAddress(),
+        taker = randomAddress(),
+        make = randomEthAssetErc721(),
+        take = randomEthAssetErc20(),
+        fill = randomBigInt(),
+        fillValue = randomBigDecimal(),
+        makeStock = makeStockValue.toBigInteger(),
+        makeStockValue = makeStockValue,
+        cancelled = false,
+        salt = Word.apply(randomWord()),
+        data = OrderLooksRareDataV1Dto(
+            minPercentageToAsk = randomInt(),
+            nonce = randomLong(),
+            params = randomBinary(),
+            strategy = randomAddress()
         ),
         signature = randomBinary(),
         createdAt = nowMillis(),

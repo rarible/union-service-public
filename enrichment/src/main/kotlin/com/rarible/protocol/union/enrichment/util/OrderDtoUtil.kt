@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.enrichment.util
 
+import com.rarible.protocol.union.dto.EthLooksRareOrderDataV1Dto
 import com.rarible.protocol.union.dto.EthOrderBasicSeaportDataV1Dto
 import com.rarible.protocol.union.dto.EthOrderCryptoPunksDataDto
 import com.rarible.protocol.union.dto.EthOrderDataLegacyDto
@@ -40,5 +41,6 @@ val OrderDto.origins: Set<String>
             is SolanaAuctionHouseDataV1Dto -> listOfNotNull(data.auctionHouse?.value)
             is ImmutablexOrderDataV1Dto -> data.originFees.map { it.account.value }
             is EthX2Y2OrderDataV1Dto -> emptyList()
+            is EthLooksRareOrderDataV1Dto -> emptyList()
         }.toSet()
     }

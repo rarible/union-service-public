@@ -2,7 +2,7 @@ package com.rarible.protocol.union.integration.ethereum.converter
 
 import com.rarible.protocol.dto.CryptoPunkOrderDto
 import com.rarible.protocol.dto.LegacyOrderDto
-import com.rarible.protocol.dto.LooksrareOrderDto
+import com.rarible.protocol.dto.LooksRareOrderDto
 import com.rarible.protocol.dto.OpenSeaV1OrderDto
 import com.rarible.protocol.dto.OrderBasicSeaportDataV1Dto
 import com.rarible.protocol.dto.OrderCancelDto
@@ -26,6 +26,7 @@ import com.rarible.protocol.union.core.service.CurrencyService
 import com.rarible.protocol.union.core.util.evalMakePrice
 import com.rarible.protocol.union.core.util.evalTakePrice
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.EthLooksRareOrderDataV1Dto
 import com.rarible.protocol.union.dto.EthOrderBasicSeaportDataV1Dto
 import com.rarible.protocol.union.dto.EthOrderCryptoPunksDataDto
 import com.rarible.protocol.union.dto.EthOrderDataLegacyDto
@@ -256,7 +257,6 @@ class EthOrderConverter(
                     }
                 )
             }
-
             is X2Y2OrderDto -> {
                 OrderDto(
                     id = orderId,
@@ -290,7 +290,38 @@ class EthOrderConverter(
                     )
                 )
             }
-            is LooksrareOrderDto -> TODO()
+            is LooksRareOrderDto -> {
+                OrderDto(
+                    id = orderId,
+                    platform = PlatformDto.LOOKSRARE,
+                    status = status,
+                    maker = maker,
+                    taker = taker,
+                    make = make,
+                    take = take,
+                    salt = salt,
+                    signature = signature,
+                    pending = pending,
+                    fill = order.fillValue!!,
+                    startedAt = startedAt,
+                    endedAt = endedAt,
+                    makeStock = order.makeStockValue!!,
+                    cancelled = order.cancelled,
+                    createdAt = order.createdAt,
+                    lastUpdatedAt = order.lastUpdateAt,
+                    dbUpdatedAt = order.dbUpdatedAt,
+                    makePrice = makePrice,
+                    takePrice = takePrice,
+                    makePriceUsd = makePriceUsd,
+                    takePriceUsd = takePriceUsd,
+                    data = EthLooksRareOrderDataV1Dto(
+                        minPercentageToAsk = order.data.minPercentageToAsk,
+                        nonce = order.data.nonce,
+                        strategy = EthConverter.convert(order.data.strategy, blockchain),
+                        params = order.data.params?.let { EthConverter.convert(it) }
+                    )
+                )
+            }
         }
     }
 
