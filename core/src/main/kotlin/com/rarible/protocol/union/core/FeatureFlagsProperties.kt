@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.core
 
+import org.elasticsearch.action.support.WriteRequest
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.ConstructorBinding
 
@@ -30,4 +31,9 @@ data class FeatureFlagsProperties(
     // items
     var enableItemQueriesToElasticSearch: Boolean = false,
     var enableItemSaveImmediateToElasticSearch: Boolean = false,
-)
+) {
+
+    val orderRefreshPolicy: WriteRequest.RefreshPolicy = if(enableOrderSaveImmediateToElasticSearch) {
+        WriteRequest.RefreshPolicy.IMMEDIATE
+    } else WriteRequest.RefreshPolicy.NONE
+}
