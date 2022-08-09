@@ -217,7 +217,7 @@ class CurrencyServiceTest {
         coEvery {
             currencyControllerApi.allCurrencies
         } returns CurrenciesDto(
-            currencies = nativeCurrencies
+            currencies = nativeTestCurrencies()
         ).toMono()
         mockCurrency(BlockchainDto.ETHEREUM, "0x0000000000000000000000000000000000000000", BigDecimal(4))
         mockCurrency(BlockchainDto.FLOW, "A.1654653399040a61.FlowToken", BigDecimal(6))
@@ -242,7 +242,7 @@ class CurrencyServiceTest {
         coEvery {
             currencyControllerApi.allCurrencies
         } returns allCurrencies.toMono()
-        every { allCurrencies.currencies } returns nativeCurrencies
+        every { allCurrencies.currencies } returns nativeTestCurrencies()
         mockCurrency(BlockchainDto.ETHEREUM, "0x0000000000000000000000000000000000000000", BigDecimal(2))
         mockCurrency(BlockchainDto.FLOW, "A.1654653399040a61.FlowToken", BigDecimal(3))
         mockCurrency(BlockchainDto.POLYGON, "0x0000000000000000000000000000000000000000", BigDecimal(4))
