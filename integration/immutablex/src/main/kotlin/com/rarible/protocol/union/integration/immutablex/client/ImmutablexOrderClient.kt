@@ -3,8 +3,6 @@ package com.rarible.protocol.union.integration.immutablex.client
 import com.rarible.core.common.mapAsync
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
-import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexOrder
-import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexOrdersPage
 import kotlinx.coroutines.reactor.awaitSingle
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.toEntity

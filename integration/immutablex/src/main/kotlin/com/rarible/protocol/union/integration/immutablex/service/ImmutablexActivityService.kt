@@ -19,9 +19,10 @@ import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.integration.immutablex.client.ActivityType
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexActivityClient
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexEvent
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexTrade
+import com.rarible.protocol.union.integration.immutablex.client.TokenIdDecoder
 import com.rarible.protocol.union.integration.immutablex.converter.ImmutablexActivityConverter
-import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexEvent
-import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexTrade
 import kotlinx.coroutines.coroutineScope
 import java.time.Instant
 
@@ -125,7 +126,8 @@ class ImmutablexActivityService(
         size: Int,
         sort: ActivitySortDto?,
     ): Slice<ActivityDto> {
-        val (token, tokenId) = IdParser.split(itemId, 2)
+        val (token, rawTokenId) = IdParser.split(itemId, 2)
+        val tokenId = TokenIdDecoder.decode(rawTokenId)
         val result = getActivities(
             types = mapTypes(types),
             token = token,
@@ -145,7 +147,8 @@ class ImmutablexActivityService(
         size: Int,
         sort: ActivitySortDto?,
     ): Slice<ActivityDto> {
-        val (token, tokenId) = IdParser.split(itemId, 2)
+        val (token, rawTokenId) = IdParser.split(itemId, 2)
+        val tokenId = TokenIdDecoder.decode(rawTokenId)
         val result = getActivities(
             types = mapItemAndOwnerTypes(types),
             token = token,

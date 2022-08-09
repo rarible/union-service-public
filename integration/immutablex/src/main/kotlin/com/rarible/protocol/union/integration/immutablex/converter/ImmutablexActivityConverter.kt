@@ -14,11 +14,11 @@ import com.rarible.protocol.union.dto.OrderActivitySourceDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderMatchSellDto
 import com.rarible.protocol.union.dto.TransferActivityDto
-import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexEvent
-import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexMint
-import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexTrade
-import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexTransfer
-import com.rarible.protocol.union.integration.immutablex.dto.TradeSide
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexEvent
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexMint
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexTrade
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexTransfer
+import com.rarible.protocol.union.integration.immutablex.client.TradeSide
 import org.slf4j.LoggerFactory
 import java.math.BigDecimal
 
@@ -44,7 +44,7 @@ object ImmutablexActivityConverter {
             id = activity.activityId,
             date = activity.timestamp,
             owner = UnionAddressConverter.convert(blockchain, activity.user),
-            itemId = ItemIdDto(blockchain, activity.token.data.itemId()),
+            itemId = ItemIdDto(blockchain, activity.token.data.encodedItemId()),
             value = activity.token.data.quantity,
             transactionHash = activity.transactionId.toString(),
             blockchainInfo = null,
@@ -54,7 +54,7 @@ object ImmutablexActivityConverter {
             date = activity.timestamp,
             from = UnionAddressConverter.convert(blockchain, activity.user),
             owner = UnionAddressConverter.convert(blockchain, activity.receiver),
-            itemId = ItemIdDto(blockchain, activity.token.data.itemId()),
+            itemId = ItemIdDto(blockchain, activity.token.data.encodedItemId()),
             value = activity.token.data.quantity,
             transactionHash = activity.transactionId.toString(),
             blockchainInfo = null
@@ -100,8 +100,7 @@ object ImmutablexActivityConverter {
             "ERC721" -> AssetDto(
                 type = EthErc721AssetTypeDto(
                     ContractAddressConverter.convert(blockchain, asset.tokenAddress!!),
-                    // TODO could it be UUID instead of BigInteger?
-                    asset.tokenId!!.toBigInteger()
+                    asset.encodedTokenId()
                 ),
                 value = asset.sold
             )

@@ -8,7 +8,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.MetaContentDto
-import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexCollection
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexCollection
 
 object ImmutablexCollectionConverter {
     private val logger by Logger()

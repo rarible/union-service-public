@@ -2,12 +2,6 @@ package com.rarible.protocol.union.integration.immutablex.client
 
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.parser.IdParser
-import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexMint
-import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexMintsPage
-import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexTrade
-import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexTradesPage
-import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexTransfer
-import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexTransfersPage
 import kotlinx.coroutines.reactor.awaitSingle
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.MediaType

@@ -2,6 +2,7 @@ package com.rarible.protocol.union.integration.immutablex.service
 
 import com.rarible.protocol.union.core.test.ManualTest
 import com.rarible.protocol.union.integration.ImmutablexManualTest
+import com.rarible.protocol.union.integration.immutablex.client.TokenIdDecoder
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -37,6 +38,18 @@ class ImmutablexItemServiceMt : ImmutablexManualTest() {
     @Test
     fun getItemById() = runBlocking<Unit> {
         val itemId = "0x5e4b4e5c90f8bd957dfdb79300d9f14bf1a7ec58:1236"
+        val result = service.getItemById(itemId)
+
+        println(result)
+        assertThat(result.id.value).isEqualTo(itemId)
+    }
+
+    @Test
+    fun `getItemById - string tokenId`() = runBlocking<Unit> {
+        val token = "0x6de6b04d630a4a41bb223815433b9ebf0da50f69"
+        val tokenId = "8e842633-fe3d-4e30-a93d-e5c0b0c940ac"
+        val tokenIdEncoded = TokenIdDecoder.encode(tokenId)
+        val itemId = "${token}:${tokenIdEncoded}"
         val result = service.getItemById(itemId)
 
         println(result)

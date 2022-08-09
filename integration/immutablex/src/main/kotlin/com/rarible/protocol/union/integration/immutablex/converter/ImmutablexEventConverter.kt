@@ -11,12 +11,12 @@ import com.rarible.protocol.union.dto.MintActivityDto
 import com.rarible.protocol.union.dto.OrderActivitySourceDto
 import com.rarible.protocol.union.dto.OrderMatchSellDto
 import com.rarible.protocol.union.dto.TransferActivityDto
-import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexDeposit
-import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexEvent
-import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexMint
-import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexTrade
-import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexTransfer
-import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexWithdrawal
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexDeposit
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexEvent
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexMint
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexTrade
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexTransfer
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexWithdrawal
 import com.rarible.protocol.union.integration.immutablex.service.ImmutablexOrderService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
@@ -35,7 +35,7 @@ class ImmutablexEventConverter(
                 owner = UnionAddressConverter.convert(blockchain, event.user),
                 value = event.token.data.quantity,
                 transactionHash = "${event.transactionId}",
-                itemId = ItemIdDto(blockchain, event.itemId())
+                itemId = ItemIdDto(blockchain, event.encodedItemId())
             )
 
             is ImmutablexTransfer -> {
@@ -48,7 +48,7 @@ class ImmutablexEventConverter(
                         owner = from,
                         value = event.token.data.quantity,
                         transactionHash = "${event.transactionId}",
-                        itemId = ItemIdDto(blockchain, event.itemId())
+                        itemId = ItemIdDto(blockchain, event.encodedItemId())
                     )
                 } else {
                     TransferActivityDto(
@@ -58,7 +58,7 @@ class ImmutablexEventConverter(
                         owner = to,
                         value = event.token.data.quantity,
                         transactionHash = "${event.transactionId}",
-                        itemId = ItemIdDto(blockchain, event.itemId())
+                        itemId = ItemIdDto(blockchain, event.encodedItemId())
                     )
                 }
             }
@@ -86,7 +86,7 @@ class ImmutablexEventConverter(
                 date = event.timestamp,
                 user = UnionAddressConverter.convert(blockchain, event.user),
                 status = event.status,
-                itemId = ItemIdDto(blockchain, event.itemId()),
+                itemId = ItemIdDto(blockchain, event.encodedItemId()),
                 value = event.token.data.quantity
             )
             is ImmutablexWithdrawal -> L2WithdrawalActivityDto(
@@ -94,7 +94,7 @@ class ImmutablexEventConverter(
                 date = event.timestamp,
                 user = UnionAddressConverter.convert(blockchain, event.sender),
                 status = event.status,
-                itemId = ItemIdDto(blockchain, event.token.data.itemId()),
+                itemId = ItemIdDto(blockchain, event.encodedItemId()),
                 value = event.token.data.quantity
             )
         }
