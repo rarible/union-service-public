@@ -52,7 +52,7 @@ class ImmutablexItemService(
     override suspend fun getItemMetaById(itemId: String): UnionMeta {
         val decodedItemId = TokenIdDecoder.decodeItemId(itemId)
         val asset = assetClient.getById(decodedItemId)
-        return ImmutablexItemMetaConverter.convert(asset)
+        return ImmutablexItemMetaConverter.convert(asset, blockchain)
     }
 
     override suspend fun resetItemMeta(itemId: String) {

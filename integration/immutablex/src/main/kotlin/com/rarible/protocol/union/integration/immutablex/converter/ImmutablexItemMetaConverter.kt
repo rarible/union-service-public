@@ -3,6 +3,7 @@ package com.rarible.protocol.union.integration.immutablex.converter
 import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.UnionMetaContent
+import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.MetaAttributeDto
 import com.rarible.protocol.union.dto.MetaContentDto
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexAsset
@@ -13,11 +14,11 @@ object ImmutablexItemMetaConverter {
 
     private val contentKeys = setOf("image_url", "image", "animation_url", "youtube_url")
 
-    fun convert(asset: ImmutablexAsset): UnionMeta {
+    fun convert(asset: ImmutablexAsset, blockchain: BlockchainDto): UnionMeta {
         return try {
             convertInternal(asset)
         } catch (e: Exception) {
-            logger.error("Convert item meta failed! ${e.message}", e)
+            logger.error("Failed to convert {} Meta: {} \n{}", blockchain, e.message, asset)
             throw e
         }
     }
