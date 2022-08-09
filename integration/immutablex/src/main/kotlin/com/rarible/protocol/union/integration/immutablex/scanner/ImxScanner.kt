@@ -15,6 +15,7 @@ import java.util.concurrent.TimeUnit
 class ImxScanner(
     private val imxEventsApi: ImxEventsApi,
     private val imxScanStateRepository: ImxScanStateRepository,
+    private val imxScanMetrics: ImxScanMetrics,
 
     private val activityHandler: ImmutablexActivityEventHandler,
     private val ownershipEventHandler: ImmutablexOwnershipEventHandler,
@@ -92,6 +93,7 @@ class ImxScanner(
                 val cursor = if (result.cursor.isNullOrBlank()) state.cursor else result.cursor
 
                 imxScanStateRepository.updateState(state, cursor, entityDate)
+                imxScanMetrics.onStateUpdated(state)
 
                 // All entities are read, now we can delay scanner a bit before try again
                 if (result.completed) {
@@ -103,6 +105,9 @@ class ImxScanner(
                 // and ELK with error logs
                 logger.error("Failed to get Immutablex events: {}", type, e)
                 imxScanStateRepository.updateState(state, e)
+
+                // TODO IMMUTABLEX i think here we can provide more details for different errors in future
+                imxScanMetrics.onScanError(state, "unknown")
                 return@runBlocking
             }
         }
