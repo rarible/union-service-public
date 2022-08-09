@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.integration.immutablex.converter
 
+import com.rarible.core.common.nowMillis
 import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.model.UnionOwnership
@@ -43,7 +44,7 @@ object ImmutablexOwnershipConverter {
             collection = CollectionIdDto(blockchain, asset.tokenAddress),
             value = BigInteger.ONE,
             lazyValue = BigInteger.ZERO,
-            createdAt = asset.createdAt!!,
+            createdAt = asset.createdAt ?: asset.updatedAt ?: nowMillis(),
             lastUpdatedAt = asset.updatedAt,
             creators = listOfNotNull(creatorAddress?.let { CreatorDto(creatorAddress, 1) })
         )

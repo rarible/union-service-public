@@ -31,9 +31,15 @@ class ImxScannerIt() {
     private val orderEventHandler: ImmutablexOrderEventHandler =
         mockk { coEvery { handle(any()) } returns Unit }
 
+    private val imxScanMetrics: ImxScanMetrics = mockk {
+        coEvery { onScanError(any(), any()) } returns Unit
+        coEvery { onStateUpdated(any()) } returns Unit
+    }
+
     private val scanner = ImxScanner(
         imxEventsApi,
         imxScanStateRepository,
+        imxScanMetrics,
         activityHandler,
         ownershipEventHandler,
         itemEventHandler,
