@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.integration.immutablex.entity
+package com.rarible.protocol.union.integration.immutablex.scanner
 
 import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.mongodb.core.mapping.Document
@@ -7,7 +7,7 @@ import org.springframework.data.mongodb.core.mapping.MongoId
 import java.time.Instant
 
 @Document("immutablex_state")
-data class ImmutablexState(
+data class ImxScanState(
     @MongoId(FieldType.STRING)
     val id: String,
     val cursor: String? = null,

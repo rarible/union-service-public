@@ -5,21 +5,27 @@ import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.AssetDto
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.BurnActivityDto
 import com.rarible.protocol.union.dto.EthErc20AssetTypeDto
 import com.rarible.protocol.union.dto.EthErc721AssetTypeDto
 import com.rarible.protocol.union.dto.EthEthereumAssetTypeDto
 import com.rarible.protocol.union.dto.ItemIdDto
+import com.rarible.protocol.union.dto.L2DepositActivityDto
+import com.rarible.protocol.union.dto.L2WithdrawalActivityDto
 import com.rarible.protocol.union.dto.MintActivityDto
 import com.rarible.protocol.union.dto.OrderActivitySourceDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderMatchSellDto
 import com.rarible.protocol.union.dto.TransferActivityDto
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexDeposit
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexEvent
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexMint
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexTrade
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexTransfer
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexWithdrawal
 import com.rarible.protocol.union.integration.immutablex.client.TradeSide
 import org.slf4j.LoggerFactory
+import scalether.domain.Address
 import java.math.BigDecimal
 
 object ImmutablexActivityConverter {
@@ -49,22 +55,37 @@ object ImmutablexActivityConverter {
             transactionHash = activity.transactionId.toString(),
             blockchainInfo = null,
         )
-        is ImmutablexTransfer -> TransferActivityDto(
-            id = activity.activityId,
-            date = activity.timestamp,
-            from = UnionAddressConverter.convert(blockchain, activity.user),
-            owner = UnionAddressConverter.convert(blockchain, activity.receiver),
-            itemId = ItemIdDto(blockchain, activity.token.data.encodedItemId()),
-            value = activity.token.data.quantity,
-            transactionHash = activity.transactionId.toString(),
-            blockchainInfo = null
-        )
+        is ImmutablexTransfer -> {
+            val from = UnionAddressConverter.convert(blockchain, activity.user)
+            val to = UnionAddressConverter.convert(blockchain, activity.receiver)
+            if (to.value == Address.ZERO().toString()) {
+                BurnActivityDto(
+                    id = activity.activityId,
+                    date = activity.timestamp,
+                    owner = from,
+                    value = activity.token.data.quantity,
+                    transactionHash = activity.transactionId.toString(),
+                    itemId = ItemIdDto(blockchain, activity.encodedItemId())
+                )
+            } else {
+                TransferActivityDto(
+                    id = activity.activityId,
+                    date = activity.timestamp,
+                    from = from,
+                    owner = to,
+                    itemId = ItemIdDto(blockchain, activity.encodedItemId()),
+                    value = activity.token.data.quantity,
+                    transactionHash = activity.transactionId.toString(),
+                    blockchainInfo = null
+                )
+            }
+        }
         is ImmutablexTrade -> {
             // TODO IMMUTABLEX what if null?
             val makeOrder = orders[activity.make.orderId]
-                ?: throw NullPointerException("$blockchain make Order ${activity.make.orderId} not found")
+                ?: throw ImxDataException("$blockchain make Order ${activity.make.orderId} not found")
             val takeOrder = orders[activity.take.orderId]
-                ?: throw NullPointerException("$blockchain take Order ${activity.take.orderId} not found")
+                ?: throw ImxDataException("$blockchain take Order ${activity.take.orderId} not found")
 
             OrderMatchSellDto(
                 source = OrderActivitySourceDto.RARIBLE,
@@ -84,7 +105,24 @@ object ImmutablexActivityConverter {
                 type = OrderMatchSellDto.Type.SELL,
             )
         }
-        else -> throw IllegalStateException("Unsupported activity type ${activity::class.simpleName}")
+
+        // We don't need these activities ATM
+        is ImmutablexDeposit -> L2DepositActivityDto(
+            id = activity.activityId,
+            date = activity.timestamp,
+            user = UnionAddressConverter.convert(blockchain, activity.user),
+            status = activity.status,
+            itemId = ItemIdDto(blockchain, activity.encodedItemId()),
+            value = activity.token.data.quantity
+        )
+        is ImmutablexWithdrawal -> L2WithdrawalActivityDto(
+            id = activity.activityId,
+            date = activity.timestamp,
+            user = UnionAddressConverter.convert(blockchain, activity.sender),
+            status = activity.status,
+            itemId = ItemIdDto(blockchain, activity.encodedItemId()),
+            value = activity.token.data.quantity
+        )
     }
 
     private fun convertAsset(asset: TradeSide, blockchain: BlockchainDto) =

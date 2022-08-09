@@ -6,7 +6,6 @@ import com.rarible.protocol.union.core.model.itemId
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexMint
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexTokenEvent
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexTransfer
-import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.params.ParameterizedTest
@@ -16,13 +15,11 @@ import java.util.stream.Stream
 
 class ImmutablexActivityConverterTest {
 
-    private val converter = ImmutablexEventConverter(mockk())
-
     @ParameterizedTest
     @MethodSource("data")
     internal fun `should convert simple token event`(source: ImmutablexTokenEvent) {
         runBlocking {
-            val activity = converter.convert(source)
+            val activity = ImmutablexActivityConverter.convert(source, emptyMap())
             assertThat(activity).isNotNull
             assertThat(activity.id).isEqualTo(source.activityId)
             assertThat(activity.date).isEqualTo(source.timestamp)

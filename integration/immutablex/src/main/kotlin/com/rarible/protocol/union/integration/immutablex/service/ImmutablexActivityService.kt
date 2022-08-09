@@ -34,6 +34,7 @@ class ImmutablexActivityService(
     // TODO IMMUTABLEX move out to configuration
     private val byUserRequestChunkSize = 8
 
+    // TODO originally, we can support BURNs here
     private val allowedTypes = mapOf(
         ActivityTypeDto.MINT to ActivityType.MINT,
         ActivityTypeDto.TRANSFER to ActivityType.TRANSFER,
@@ -259,7 +260,7 @@ class ImmutablexActivityService(
         )
     }
 
-    private suspend fun convert(activities: List<ImmutablexEvent>): List<ActivityDto> {
+    suspend fun convert(activities: List<ImmutablexEvent>): List<ActivityDto> {
         val orderIds = activities.flatMap {
             when (it) {
                 // For 'Trade' we should get orders to fulfill sides

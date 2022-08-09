@@ -7,7 +7,7 @@ import com.rarible.protocol.union.integration.immutablex.client.ImmutablexAssetC
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexCollectionClient
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexOrderClient
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexWebClientFactory
-import com.rarible.protocol.union.integration.immutablex.scanner.EventsApi
+import com.rarible.protocol.union.integration.immutablex.scanner.ImxEventsApi
 import com.rarible.protocol.union.integration.immutablex.service.ImmutablexActivityService
 import com.rarible.protocol.union.integration.immutablex.service.ImmutablexCollectionService
 import com.rarible.protocol.union.integration.immutablex.service.ImmutablexItemService
@@ -85,5 +85,5 @@ class ImmutablexApiConfiguration {
     fun eventsApi(
         immutablexWebClient: WebClient,
         orderClient: ImmutablexOrderClient
-    ) = EventsApi(immutablexWebClient, orderClient)
+    ) = ImxEventsApi(immutablexWebClient, orderClient)
 }

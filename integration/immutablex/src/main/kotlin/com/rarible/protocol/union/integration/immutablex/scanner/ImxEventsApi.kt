@@ -15,7 +15,7 @@ import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.toEntity
 import org.springframework.web.util.UriBuilder
 
-class EventsApi(
+class ImxEventsApi(
     private val webClient: WebClient,
     private val orderClient: ImmutablexOrderClient
 ) {
