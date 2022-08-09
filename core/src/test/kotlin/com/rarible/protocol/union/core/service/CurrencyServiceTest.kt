@@ -34,6 +34,39 @@ class CurrencyServiceTest {
     private val currencyControllerApi: CurrencyControllerApi = mockk()
     private val currencyService = CurrencyService(CurrencyClient(currencyControllerApi))
 
+    private val nativeCurrencies = listOf(
+        com.rarible.protocol.currency.dto.CurrencyDto(
+            currencyId = "ethereum",
+            address = "0x0000000000000000000000000000000000000000",
+            blockchain = com.rarible.protocol.currency.dto.BlockchainDto.ETHEREUM,
+        ),
+        com.rarible.protocol.currency.dto.CurrencyDto(
+            currencyId = "matic-network",
+            address = "0x0000000000000000000000000000000000000000",
+            blockchain = com.rarible.protocol.currency.dto.BlockchainDto.POLYGON,
+        ),
+        com.rarible.protocol.currency.dto.CurrencyDto(
+            currencyId = "flow",
+            address = "A.1654653399040a61.FlowToken",
+            blockchain = com.rarible.protocol.currency.dto.BlockchainDto.FLOW,
+        ),
+        com.rarible.protocol.currency.dto.CurrencyDto(
+            currencyId = "tezos",
+            address = "tz1Ke2h7sDdakHJQh8WX4Z372du1KChsksyU",
+            blockchain = com.rarible.protocol.currency.dto.BlockchainDto.TEZOS,
+        ),
+        com.rarible.protocol.currency.dto.CurrencyDto(
+            currencyId = "solana",
+            address = "So11111111111111111111111111111111111111112",
+            blockchain = com.rarible.protocol.currency.dto.BlockchainDto.SOLANA,
+        ),
+        com.rarible.protocol.currency.dto.CurrencyDto(
+            currencyId = "immutable-x",
+            address = "0x0000000000000000000000000000000000000000",
+            blockchain = com.rarible.protocol.currency.dto.BlockchainDto.IMMUTABLEX,
+        ),
+    )
+
     @BeforeEach
     fun beforeEach() {
         clearMocks(currencyControllerApi)
@@ -184,7 +217,7 @@ class CurrencyServiceTest {
         coEvery {
             currencyControllerApi.allCurrencies
         } returns allCurrencies.toMono()
-        every { allCurrencies.currencies } returns emptyList()
+        every { allCurrencies.currencies } returns nativeCurrencies
 
         // Filling cache with initial values
         val currentEthRate = currencyService.getCurrentRate(ethBlockchain, ethAddress)!!
@@ -205,6 +238,23 @@ class CurrencyServiceTest {
 
         verifyCurrency(ethBlockchain, ethAddress, 2)
         verifyCurrency(flowBlockchain, flowAddress, 2)
+    }
+
+    @Test
+    fun `should be able to retrieve native currencies for all blockchains`() = runBlocking<Unit> {
+        // given
+        val allCurrencies = mockk<CurrenciesDto>()
+        coEvery {
+            currencyControllerApi.allCurrencies
+        } returns allCurrencies.toMono()
+        every { allCurrencies.currencies } returns nativeCurrencies
+
+        // when
+        val results = BlockchainDto.values().map { currencyService.getNativeCurrency(it) }
+
+        // then
+        assertThat(results).isNotEmpty
+        assertThat(results.size).isEqualTo(results.distinct().size)
     }
 
     private fun mockCurrency(blockchain: BlockchainDto, address: String, vararg rates: BigDecimal?) {

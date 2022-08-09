@@ -30,13 +30,10 @@ class CurrencyService(
         it to ConcurrentHashMap<String, CurrencyUsdRateDto?>()
     }
 
-    private var cachedCurrencies: List<CurrencyDto> = emptyList()
+    private val currenciesHolder = CurrenciesHolder()
 
     suspend fun getAllCurrencies(): List<CurrencyDto> {
-        if (this.cachedCurrencies.isEmpty()) {
-            cachedCurrencies = currencyClient.getAllCurrencies().map { CurrencyConverter.convert(it) }
-        }
-        return cachedCurrencies
+        return currenciesHolder.getAllCurrencies()
     }
 
     // Read currency rate directly from Currency-Service (for API calls)
@@ -86,20 +83,15 @@ class CurrencyService(
         return rate?.let { value.multiply(it.rate) }
     }
 
-    fun getNativeCurrency(blockchain: BlockchainDto): CurrencyDto {
-        return when (blockchain) { // TODO organize in map (symbol -> currency)
-            BlockchainDto.ETHEREUM -> cachedCurrencies.find { it.symbol == "ethereum" }!!
-            BlockchainDto.POLYGON -> cachedCurrencies.find { it.symbol == "matic-network" }!!
-            BlockchainDto.FLOW -> cachedCurrencies.find { it.symbol == "flow" }!!
-            BlockchainDto.TEZOS -> cachedCurrencies.find { it.symbol == "tezos" }!!
-            BlockchainDto.SOLANA -> cachedCurrencies.find { it.symbol == "solana" }!!
-            BlockchainDto.IMMUTABLEX -> cachedCurrencies.find { it.symbol == "immutable-x" }!!
-        }
+    suspend fun getNativeCurrency(blockchain: BlockchainDto): CurrencyDto {
+        return currenciesHolder.getNativeCurrencies()[blockchain] ?: throw UnionCurrencyException(
+            "Native currency for ${blockchain.name} not found"
+        )
     }
 
     fun invalidateCache() {
         caches.values.forEach { it.clear() }
-        cachedCurrencies = emptyList()
+        currenciesHolder.reset()
     }
 
     @Scheduled(cron = "\${common.currency.refresh.cron:0 0/30 * * * *}")
@@ -114,7 +106,7 @@ class CurrencyService(
             cachedCurrencyKeys.map {
                 async { refreshCurrency(it.first, it.second) }
             }.awaitAll()
-            cachedCurrencies = currencyClient.getAllCurrencies().map { CurrencyConverter.convert(it) }
+            currenciesHolder.refresh()
         }
     }
 
@@ -149,4 +141,49 @@ class CurrencyService(
         return at == null || System.currentTimeMillis() - at.toEpochMilli() < 30 * 60 * 1000
     }
 
+    private inner class CurrenciesHolder {
+        @Volatile
+        private var currencies: List<CurrencyDto> = emptyList()
+        @Volatile
+        private var nativeCurrencies: Map<BlockchainDto, CurrencyDto> = emptyMap()
+
+        suspend fun getAllCurrencies(): List<CurrencyDto> {
+            if (currencies.isEmpty()) {
+                refresh()
+            }
+            return currencies
+        }
+
+        suspend fun getNativeCurrencies(): Map<BlockchainDto, CurrencyDto> {
+            if (nativeCurrencies.isEmpty()) {
+                refresh()
+            }
+            return nativeCurrencies
+        }
+
+        suspend fun refresh() {
+            currencies = currencyClient.getAllCurrencies().map { CurrencyConverter.convert(it) }
+            nativeCurrencies = BlockchainDto.values().associateWith { blockchain ->
+                val symbol = getSymbol(blockchain)
+                currencies.find { it.symbol == symbol && it.currencyId.blockchain == blockchain }
+                    ?: throw UnionCurrencyException("Currency with symbol $symbol not found in ${blockchain.name}")
+            }
+        }
+
+        fun reset() {
+            currencies = emptyList()
+            nativeCurrencies = emptyMap()
+        }
+
+        private fun getSymbol(blockchain: BlockchainDto): String {
+            return when (blockchain) {
+                BlockchainDto.ETHEREUM -> "ethereum"
+                BlockchainDto.POLYGON -> "matic-network"
+                BlockchainDto.FLOW -> "flow"
+                BlockchainDto.TEZOS -> "tezos"
+                BlockchainDto.SOLANA -> "solana"
+                BlockchainDto.IMMUTABLEX -> "immutable-x"
+            }
+        }
+    }
 }
