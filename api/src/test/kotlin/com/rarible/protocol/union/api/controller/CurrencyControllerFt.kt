@@ -10,6 +10,7 @@ import com.rarible.protocol.currency.dto.CurrencyRateDto
 import com.rarible.protocol.union.api.client.CurrencyControllerApi
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
+import com.rarible.protocol.union.core.test.nativeTestCurrencies
 import com.rarible.protocol.union.dto.CurrencyIdDto
 import com.rarible.protocol.union.integration.ethereum.data.randomAddressString
 import io.mockk.coEvery
@@ -133,24 +134,11 @@ class CurrencyControllerFt : AbstractIntegrationTest() {
 
     @Test
     fun `get all currencies`() = runBlocking<Unit> {
-        val currency = com.rarible.protocol.currency.dto.CurrencyDto(
-            currencyId = "wusd",
-            address = randomString(),
-            blockchain = BlockchainDto.SOLANA
-        )
-        coEvery { testCurrencyApi.getAllCurrencies() } returns Mono.just(CurrenciesDto(listOf(currency)))
+        coEvery { testCurrencyApi.getAllCurrencies() } returns Mono.just(CurrenciesDto(nativeTestCurrencies()))
 
         val currencies = currencyControllerApi.getAllCurrencies().awaitFirst().currencies
 
-        assertThat(currencies).hasSize(1)
-        val result = currencies[0]
-
-        assertThat(result.currencyId).isEqualTo(
-            CurrencyIdDto(
-                com.rarible.protocol.union.dto.BlockchainDto.SOLANA,
-                currency.address,
-                null
-            )
-        )
+        assertThat(currencies).hasSize(6)
+        assertThat(currencies).doesNotHaveDuplicates()
     }
 }
