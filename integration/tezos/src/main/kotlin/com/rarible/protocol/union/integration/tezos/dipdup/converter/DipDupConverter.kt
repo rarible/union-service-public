@@ -53,7 +53,7 @@ object DipDupConverter {
             TezosPlatform.Rarible -> PlatformDto.RARIBLE
             TezosPlatform.Hen -> PlatformDto.HEN
             TezosPlatform.Objkt -> PlatformDto.OBJKT
-            TezosPlatform.Objkt_v2 -> PlatformDto.OBJKT
+            TezosPlatform.OBJKT_V2 -> PlatformDto.OBJKT
             TezosPlatform.RARIBLE_V1 -> PlatformDto.RARIBLE
             TezosPlatform.RARIBLE_V2 -> PlatformDto.RARIBLE
         }
