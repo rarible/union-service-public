@@ -55,7 +55,6 @@ class CollectionControllerElasticFt : AbstractIntegrationTest() {
     }
 
     @Test
-    @Disabled("TODO fix for api merge")
     fun `get all collections`() = runBlocking<Unit> {
         // given
         val blockchains =

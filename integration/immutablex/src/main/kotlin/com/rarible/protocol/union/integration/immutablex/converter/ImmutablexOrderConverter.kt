@@ -106,7 +106,7 @@ object ImmutablexOrderConverter {
     private fun toAsset(side: ImmutablexOrderSide, blockchain: BlockchainDto): AssetDto {
         val assetType = when (side.type) {
             "ERC721" -> EthErc721AssetTypeDto(
-                tokenId = side.data.encodedTokenId(),
+                tokenId = side.data.encodedTokenId() ?: throw ImxDataException("Token ID not specified in asset"),
                 contract = ContractAddressConverter.convert(blockchain, side.data.tokenAddress!!)
             )
             "ETH" -> EthEthereumAssetTypeDto(

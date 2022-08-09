@@ -159,7 +159,7 @@ data class ImmutablexOrderData(
 
     fun itemId(): String = "${tokenAddress}:${tokenId}"
 
-    fun encodedTokenId() = TokenIdDecoder.encode(tokenId!!) // TODO what if null?
+    fun encodedTokenId() = tokenId?.let { TokenIdDecoder.encode(tokenId) }
 }
 
 data class ImmutablexDataProperties(
