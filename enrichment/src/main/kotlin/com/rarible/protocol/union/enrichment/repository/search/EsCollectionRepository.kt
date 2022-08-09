@@ -1,6 +1,8 @@
 package com.rarible.protocol.union.enrichment.repository.search
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.rarible.core.common.nowMillis
+import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.core.elasticsearch.EsNameResolver
 import com.rarible.protocol.union.core.model.EsCollection
 import com.rarible.protocol.union.core.model.EsCollectionFilter
@@ -13,6 +15,7 @@ import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperatio
 import org.springframework.data.elasticsearch.core.convert.ElasticsearchConverter
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery
 import org.springframework.stereotype.Component
+import kotlin.system.measureTimeMillis
 
 @Component
 class EsCollectionRepository(
@@ -37,8 +40,12 @@ class EsCollectionRepository(
         val query = queryBuilderService.build(filter)
         query.maxResults = PageSize.COLLECTION.limit(limit)
         query.trackTotalHits = false
-
-        return search(query)
+        var result: List<EsCollectionLite>
+        val time = measureTimeMillis {
+            result = search(query)
+        }
+        logger.info("Collection search elapsed time: ${time}ms. Filter: $filter, limit: $limit")
+        return result
     }
 
     suspend fun search(query: NativeSearchQuery): List<EsCollectionLite> {
@@ -46,5 +53,9 @@ class EsCollectionRepository(
             .collectList()
             .awaitFirst()
             .map { it.content }
+    }
+
+    companion object {
+        val logger by Logger()
     }
 }
