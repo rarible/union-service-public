@@ -3,10 +3,12 @@ package com.rarible.protocol.union.api.service.elastic
 import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.apm.SpanType
 import com.rarible.core.common.mapAsync
+import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.core.model.EsCollectionCursor.Companion.fromCollectionLite
 import com.rarible.protocol.union.enrichment.service.query.collection.CollectionQueryService
 import com.rarible.protocol.union.core.model.EsCollectionGenericFilter
 import com.rarible.protocol.union.core.model.EsCollectionLite
+import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.core.service.CollectionService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -16,6 +18,7 @@ import com.rarible.protocol.union.enrichment.model.ShortCollectionId
 import com.rarible.protocol.union.enrichment.repository.search.EsCollectionRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentCollectionService
 import org.springframework.stereotype.Service
+import kotlin.system.measureTimeMillis
 
 @Service
 @CaptureSpan(type = SpanType.APP)
@@ -66,7 +69,12 @@ class CollectionElasticService(
             .filter { enabledBlockchains.contains(it.key) }
             .mapAsync { (k, v) ->
                 val ids = v.map { IdParser.parseCollectionId(it).value }
-                router.getService(k).getCollectionsByIds(ids)
+                var mapAsyncResult: List<UnionCollection>
+                val time = measureTimeMillis {
+                    mapAsyncResult = router.getService(k).getCollectionsByIds(ids)
+                }
+                logger.info("getCollectionsByIds(), time: ${time}ms. blockchain: ${k}, size ${ids.size}")
+                return@mapAsync mapAsyncResult
             }
         .flatten().associateBy { seq[it.id.fullId()] }.toSortedMap(compareBy { it })
 
@@ -80,5 +88,9 @@ class CollectionElasticService(
                 enrichmentCollectionService.enrichCollection(shortCollection, it)
             }
         )
+    }
+
+    companion object {
+        val logger by Logger()
     }
 }
