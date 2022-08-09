@@ -9,7 +9,7 @@ import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.CreatorDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.RoyaltyDto
-import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexAsset
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexAsset
 import scalether.domain.Address
 import java.math.BigDecimal
 import java.math.BigInteger
@@ -44,7 +44,7 @@ object ImmutablexItemConverter {
         val creatorAddress = creator?.let { CreatorDto(UnionAddressConverter.convert(blockchain, creator), 1) }
 
         return UnionItem(
-            id = ItemIdDto(blockchain, asset.itemId),
+            id = ItemIdDto(blockchain, asset.encodedItemId()),
             collection = CollectionIdDto(blockchain, asset.tokenAddress),
             creators = listOfNotNull(creatorAddress),
             lazySupply = BigInteger.ZERO,

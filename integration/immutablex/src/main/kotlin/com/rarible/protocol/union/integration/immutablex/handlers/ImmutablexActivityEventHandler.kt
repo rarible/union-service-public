@@ -6,9 +6,8 @@ import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.L2DepositActivityDto
 import com.rarible.protocol.union.dto.L2WithdrawalActivityDto
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexEvent
 import com.rarible.protocol.union.integration.immutablex.converter.ImmutablexEventConverter
-import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexEvent
-
 
 class ImmutablexActivityEventHandler(
     override val handler: IncomingEventHandler<ActivityDto>,

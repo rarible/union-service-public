@@ -10,8 +10,8 @@ import com.rarible.protocol.union.core.model.UnionOwnershipUpdateEvent
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
-import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexEvent
-import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexTransfer
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexEvent
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexTransfer
 import java.math.BigInteger
 
 class ImmutablexOwnershipEventHandler(
@@ -23,7 +23,7 @@ class ImmutablexOwnershipEventHandler(
                 UnionOwnershipDeleteEvent(
                     ownershipId = OwnershipIdDto(
                         blockchain,
-                        event.token.data.itemId(),
+                        event.token.data.encodedItemId(),
                         UnionAddressConverter.convert(blockchain, event.user)
                     )
                 )
@@ -33,7 +33,7 @@ class ImmutablexOwnershipEventHandler(
                     ownership = UnionOwnership(
                         id = OwnershipIdDto(
                             blockchain,
-                            event.token.data.itemId(),
+                            event.token.data.encodedItemId(),
                             UnionAddressConverter.convert(blockchain, event.receiver)
                         ),
                         collection = CollectionIdDto(blockchain, event.token.data.tokenAddress),

@@ -11,10 +11,11 @@ import com.rarible.protocol.union.dto.RoyaltyDto
 import com.rarible.protocol.union.dto.continuation.page.Page
 import com.rarible.protocol.union.dto.continuation.page.Paging
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexActivityClient
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexAsset
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexAssetClient
+import com.rarible.protocol.union.integration.immutablex.client.TokenIdDecoder
 import com.rarible.protocol.union.integration.immutablex.converter.ImmutablexItemConverter
 import com.rarible.protocol.union.integration.immutablex.converter.ImmutablexItemMetaConverter
-import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexAsset
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 
@@ -36,18 +37,21 @@ class ImmutablexItemService(
     }
 
     override suspend fun getItemById(itemId: String): UnionItem {
-        val creatorDeferred = coroutineScope { async { activityClient.getItemCreator(itemId) } }
-        val asset = assetClient.getById(itemId)
+        val decodedItemId = TokenIdDecoder.decodeItemId(itemId)
+        val creatorDeferred = coroutineScope { async { activityClient.getItemCreator(decodedItemId) } }
+        val asset = assetClient.getById(decodedItemId)
         return ImmutablexItemConverter.convert(asset, creatorDeferred.await(), blockchain)
     }
 
     override suspend fun getItemRoyaltiesById(itemId: String): List<RoyaltyDto> {
-        val asset = assetClient.getById(itemId)
+        val decodedItemId = TokenIdDecoder.decodeItemId(itemId)
+        val asset = assetClient.getById(decodedItemId)
         return ImmutablexItemConverter.convertToRoyaltyDto(asset, blockchain)
     }
 
     override suspend fun getItemMetaById(itemId: String): UnionMeta {
-        val asset = assetClient.getById(itemId)
+        val decodedItemId = TokenIdDecoder.decodeItemId(itemId)
+        val asset = assetClient.getById(decodedItemId)
         return ImmutablexItemMetaConverter.convert(asset)
     }
 
@@ -90,8 +94,9 @@ class ImmutablexItemService(
     }
 
     override suspend fun getItemsByIds(itemIds: List<String>): List<UnionItem> {
-        val creators = coroutineScope { async { activityClient.getItemCreators(itemIds) } }
-        val assets = assetClient.getByIds(itemIds)
+        val decodedIds = itemIds.map { TokenIdDecoder.decodeItemId(it) }
+        val creators = coroutineScope { async { activityClient.getItemCreators(decodedIds) } }
+        val assets = assetClient.getByIds(decodedIds)
         return convert(assets, creators.await())
     }
 

@@ -1,7 +1,5 @@
 package com.rarible.protocol.union.integration.immutablex.client
 
-import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexCollection
-import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexPage
 import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.awaitBody

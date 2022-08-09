@@ -5,7 +5,7 @@ import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.UnionMetaContent
 import com.rarible.protocol.union.dto.MetaAttributeDto
 import com.rarible.protocol.union.dto.MetaContentDto
-import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexAsset
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexAsset
 
 object ImmutablexItemMetaConverter {
 
@@ -24,7 +24,7 @@ object ImmutablexItemMetaConverter {
 
     private fun convertInternal(asset: ImmutablexAsset): UnionMeta {
         val collectionName = asset.collection.name
-        val assetName = asset.name ?: collectionName?.let { "$it #${asset.tokenId}" } ?: "Unknown"
+        val assetName = asset.name ?: collectionName?.let { "$it #${asset.encodedTokenId()}" } ?: "Unknown"
         return UnionMeta(
             name = assetName,
             description = asset.description,

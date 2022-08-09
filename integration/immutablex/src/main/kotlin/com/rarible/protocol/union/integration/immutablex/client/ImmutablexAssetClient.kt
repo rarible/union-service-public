@@ -1,7 +1,5 @@
 package com.rarible.protocol.union.integration.immutablex.client
 
-import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexAsset
-import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexAssetsPage
 import kotlinx.coroutines.reactor.awaitSingle
 import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.client.WebClient
