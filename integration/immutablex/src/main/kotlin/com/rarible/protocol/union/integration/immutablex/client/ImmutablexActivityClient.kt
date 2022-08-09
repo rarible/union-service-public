@@ -61,6 +61,7 @@ class ImmutablexActivityClient(
         }
     }
 
+    // TODO IMMUTABLEX - transfers can contain burns, there is no way to filter them from regular transfers
     suspend fun getTransfers(
         pageSize: Int,
         continuation: String? = null,
