@@ -189,7 +189,7 @@ class DipDupActivityConverter(
             TezosPlatform.Rarible -> OrderActivitySourceDto.RARIBLE
             TezosPlatform.Hen -> OrderActivitySourceDto.HEN
             TezosPlatform.Objkt -> OrderActivitySourceDto.OBJKT
-            TezosPlatform.Objkt_v2 -> OrderActivitySourceDto.OBJKT
+            TezosPlatform.OBJKT_V2 -> OrderActivitySourceDto.OBJKT
             TezosPlatform.RARIBLE_V1 -> OrderActivitySourceDto.RARIBLE
             TezosPlatform.RARIBLE_V2 -> OrderActivitySourceDto.RARIBLE
         }
