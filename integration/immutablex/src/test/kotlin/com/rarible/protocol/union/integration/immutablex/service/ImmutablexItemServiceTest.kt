@@ -5,10 +5,10 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexActivityClient
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexAsset
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexAssetClient
-import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexAsset
-import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexMint
-import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexMintsPage
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexMint
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexMintsPage
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking

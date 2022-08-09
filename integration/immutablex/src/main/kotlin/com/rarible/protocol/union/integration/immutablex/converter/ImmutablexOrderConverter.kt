@@ -19,9 +19,9 @@ import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PayoutDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.ext
-import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexOrder
-import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexOrderFee
-import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexOrderSide
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexOrder
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexOrderFee
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexOrderSide
 import java.math.BigDecimal
 
 object ImmutablexOrderConverter {
@@ -106,8 +106,7 @@ object ImmutablexOrderConverter {
     private fun toAsset(side: ImmutablexOrderSide, blockchain: BlockchainDto): AssetDto {
         val assetType = when (side.type) {
             "ERC721" -> EthErc721AssetTypeDto(
-                // TODO could it be UUID instead of BigInteger?
-                tokenId = side.data.tokenId!!.toBigInteger(),
+                tokenId = side.data.encodedTokenId(),
                 contract = ContractAddressConverter.convert(blockchain, side.data.tokenAddress!!)
             )
             "ETH" -> EthEthereumAssetTypeDto(

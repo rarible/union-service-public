@@ -10,9 +10,10 @@ import com.rarible.protocol.union.dto.continuation.page.Page
 import com.rarible.protocol.union.dto.continuation.page.Paging
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexActivityClient
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexAsset
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexAssetClient
+import com.rarible.protocol.union.integration.immutablex.client.TokenIdDecoder
 import com.rarible.protocol.union.integration.immutablex.converter.ImmutablexOwnershipConverter
-import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexAsset
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 
@@ -22,7 +23,7 @@ class ImmutablexOwnershipService(
 ) : AbstractBlockchainService(BlockchainDto.IMMUTABLEX), OwnershipService {
 
     override suspend fun getOwnershipById(ownershipId: String): UnionOwnership {
-        val itemId = ownershipId.substringBeforeLast(":")
+        val itemId = TokenIdDecoder.decodeItemId(ownershipId.substringBeforeLast(":"))
         val owner = ownershipId.substringAfterLast(":")
         val asset = assetClient.getById(itemId)
 
@@ -35,7 +36,7 @@ class ImmutablexOwnershipService(
     }
 
     override suspend fun getOwnershipsByIds(ownershipIds: List<String>): List<UnionOwnership> {
-        val itemIds = ownershipIds.map { it.substringBeforeLast(":") }.toSet()
+        val itemIds = ownershipIds.map { TokenIdDecoder.decode(it.substringBeforeLast(":")) }.toSet()
 
         val creators = coroutineScope { async { activityClient.getItemCreators(itemIds) } }
         val assets = assetClient.getByIds(itemIds)
@@ -55,8 +56,9 @@ class ImmutablexOwnershipService(
     }
 
     override suspend fun getOwnershipsByItem(itemId: String, continuation: String?, size: Int): Page<UnionOwnership> {
-        val creator = coroutineScope { async { activityClient.getItemCreator(itemId) } }
-        val asset = assetClient.getById(itemId)
+        val decodedItemId = TokenIdDecoder.decodeItemId(itemId)
+        val creator = coroutineScope { async { activityClient.getItemCreator(decodedItemId) } }
+        val asset = assetClient.getById(decodedItemId)
         val result = ImmutablexOwnershipConverter.convert(asset, creator.await(), blockchain)
         return Page(0L, null, listOf(result))
     }

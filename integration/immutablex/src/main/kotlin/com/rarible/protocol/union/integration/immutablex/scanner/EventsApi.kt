@@ -1,15 +1,15 @@
 package com.rarible.protocol.union.integration.immutablex.scanner
 
 import com.rarible.protocol.union.dto.OrderSortDto
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexDeposit
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexMint
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexOrder
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexOrderClient
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexPage
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexTrade
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexTransfer
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexWithdrawal
 import com.rarible.protocol.union.integration.immutablex.client.queryParamNotNull
-import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexDeposit
-import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexMint
-import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexOrder
-import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexPage
-import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexTrade
-import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexTransfer
-import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexWithdrawal
 import kotlinx.coroutines.reactor.awaitSingle
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.toEntity

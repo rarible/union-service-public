@@ -1,7 +1,7 @@
 package com.rarible.protocol.union.integration.immutablex.service
 
-import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexAsset
-import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexCollectionShort
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexAsset
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexCollectionShort
 import java.math.BigInteger
 import java.time.Instant
 

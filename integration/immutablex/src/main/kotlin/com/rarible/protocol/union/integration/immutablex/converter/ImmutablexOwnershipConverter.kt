@@ -7,7 +7,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.CreatorDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
-import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexAsset
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexAsset
 import java.math.BigInteger
 
 object ImmutablexOwnershipConverter {
@@ -39,7 +39,7 @@ object ImmutablexOwnershipConverter {
         val creatorAddress = creator?.let { UnionAddressConverter.convert(blockchain, creator) }
         val ownerAddress = UnionAddressConverter.convert(blockchain, asset.user!!)
         return UnionOwnership(
-            id = OwnershipIdDto(blockchain, asset.itemId, ownerAddress),
+            id = OwnershipIdDto(blockchain, asset.encodedItemId(), ownerAddress),
             collection = CollectionIdDto(blockchain, asset.tokenAddress),
             value = BigInteger.ONE,
             lazyValue = BigInteger.ZERO,

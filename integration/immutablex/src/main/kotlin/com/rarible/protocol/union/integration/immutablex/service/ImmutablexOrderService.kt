@@ -15,6 +15,7 @@ import com.rarible.protocol.union.dto.continuation.page.Paging
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexOrderClient
+import com.rarible.protocol.union.integration.immutablex.client.TokenIdDecoder
 import com.rarible.protocol.union.integration.immutablex.converter.ImmutablexOrderConverter
 
 class ImmutablexOrderService(
@@ -91,7 +92,7 @@ class ImmutablexOrderService(
         continuation: String?,
         size: Int,
     ): Slice<OrderDto> {
-        val (token, tokenId) = IdParser.split(itemId, 2)
+        val (token, tokenId) = IdParser.split(TokenIdDecoder.decodeItemId(itemId), 2)
         val orders = orderClient
             .getBuyOrdersByItem(token, tokenId, makers, status, currencyAddress, continuation, size)
             .map { ImmutablexOrderConverter.convert(it, blockchain) }
@@ -176,7 +177,7 @@ class ImmutablexOrderService(
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
-        val (token, tokenId) = IdParser.split(itemId, 2)
+        val (token, tokenId) = IdParser.split(TokenIdDecoder.decodeItemId(itemId), 2)
         val orders = orderClient.getSellOrdersByItem(
             token,
             tokenId,

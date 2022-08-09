@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.integration.immutablex.dto
+package com.rarible.protocol.union.integration.immutablex.client
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonSubTypes
@@ -25,7 +25,7 @@ data class ImmutablexAsset(
     @JsonProperty("token_address")
     val tokenAddress: String,
     @JsonProperty("token_id")
-    val tokenId: String,
+    private val tokenId: String,
     val uri: String?,
     @JsonProperty("updated_at")
     val updatedAt: Instant?,
@@ -33,6 +33,10 @@ data class ImmutablexAsset(
 ) {
 
     val itemId = "$tokenAddress:$tokenId"
+
+    fun encodedTokenId() = TokenIdDecoder.encode(tokenId)
+
+    fun encodedItemId() = "$tokenAddress:${encodedTokenId()}"
 }
 
 data class ImmutablexCollectionShort(
@@ -90,7 +94,7 @@ data class Token(val type: String, val data: TokenData)
 
 data class TokenData(
     @JsonProperty("token_id")
-    val tokenId: String,
+    private val tokenId: String,
     @JsonProperty("token_address")
     val tokenAddress: String,
     val properties: ImmutablexDataProperties?,
@@ -100,6 +104,10 @@ data class TokenData(
 ) {
 
     fun itemId() = "$tokenAddress:$tokenId"
+
+    fun encodedTokenId() = TokenIdDecoder.encode(tokenId)
+
+    fun encodedItemId() = "$tokenAddress:${encodedTokenId()}"
 }
 
 data class ImmutablexMintsPage(
@@ -145,11 +153,13 @@ data class ImmutablexOrderData(
     @JsonProperty("token_address")
     val tokenAddress: String?,
     @JsonProperty("token_id")
-    val tokenId: String?,
+    private val tokenId: String?,
     val properties: ImmutablexDataProperties?,
 ) {
 
     fun itemId(): String = "${tokenAddress}:${tokenId}"
+
+    fun encodedTokenId() = TokenIdDecoder.encode(tokenId!!) // TODO what if null?
 }
 
 data class ImmutablexDataProperties(
@@ -206,10 +216,13 @@ data class TradeSide(
     @JsonProperty("token_address")
     val tokenAddress: String?,
     @JsonProperty("token_id")
-    val tokenId: String?,
+    private val tokenId: String?,
     @JsonProperty("token_type")
     val tokenType: String?,
-)
+) {
+
+    fun encodedTokenId() = TokenIdDecoder.encode(tokenId!!) // TODO what if null?
+}
 
 data class ImmutablexTrade(
     @JsonProperty("transaction_id")
@@ -260,6 +273,8 @@ sealed class ImmutablexTokenEvent(transactionId: Long, timestamp: Instant, open 
     ImmutablexEvent(transactionId, timestamp) {
 
     fun itemId(): String = token.data.itemId()
+
+    fun encodedItemId(): String = token.data.encodedItemId()
 }
 
 @JsonSubTypes(

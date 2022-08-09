@@ -3,16 +3,16 @@ package com.rarible.protocol.union.integration.immutablex.converter
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.rarible.protocol.union.core.model.itemId
-import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexMint
-import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexTokenEvent
-import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexTransfer
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexMint
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexTokenEvent
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexTransfer
 import io.mockk.mockk
-import java.util.stream.Stream
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
+import java.util.stream.Stream
 
 class ImmutablexActivityConverterTest {
 

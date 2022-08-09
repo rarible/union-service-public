@@ -5,8 +5,8 @@ import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.model.UnionOrderEvent
 import com.rarible.protocol.union.core.model.UnionOrderUpdateEvent
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexOrder
 import com.rarible.protocol.union.integration.immutablex.converter.ImmutablexOrderConverter
-import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexOrder
 
 class ImmutablexOrderEventHandler(
     override val handler: IncomingEventHandler<UnionOrderEvent>

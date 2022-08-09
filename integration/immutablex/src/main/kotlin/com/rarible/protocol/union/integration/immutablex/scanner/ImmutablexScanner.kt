@@ -1,8 +1,8 @@
 package com.rarible.protocol.union.integration.immutablex.scanner
 
 import com.rarible.protocol.union.dto.continuation.DateIdContinuation
-import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexEvent
-import com.rarible.protocol.union.integration.immutablex.dto.ImmutablexPage
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexEvent
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexPage
 import com.rarible.protocol.union.integration.immutablex.entity.ImmutablexEntityTypes
 import com.rarible.protocol.union.integration.immutablex.entity.ImmutablexState
 import com.rarible.protocol.union.integration.immutablex.handlers.ImmutablexActivityEventHandler
