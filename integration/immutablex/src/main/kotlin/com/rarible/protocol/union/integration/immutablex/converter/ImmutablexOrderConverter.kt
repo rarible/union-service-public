@@ -35,7 +35,7 @@ object ImmutablexOrderConverter {
         return try {
             convertInternal(order, blockchain)
         } catch (e: Exception) {
-            logger.error("Unable to convert immutablex order: ${e.message}", e)
+            logger.error("Failed to convert {} Order: {} \n{}", blockchain, e.message, order)
             throw e
         }
     }

@@ -19,6 +19,7 @@ class ImxScanStateRepository(
     suspend fun updateState(state: ImxScanState, cursor: String?, entityDate: Instant?) {
         mongo.save(
             state.copy(
+                lastDate = nowMillis(),
                 cursor = cursor,
                 entityDate = entityDate
             )
@@ -28,6 +29,7 @@ class ImxScanStateRepository(
     suspend fun updateState(state: ImxScanState, error: Exception) {
         mongo.save(
             state.copy(
+                lastDate = nowMillis(),
                 lastError = error.message,
                 lastErrorDate = nowMillis(),
                 lastErrorStacktrace = error.stackTraceToString()
