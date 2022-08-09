@@ -33,22 +33,12 @@ class CurrencyService(
 
     private val currenciesHolder = CurrenciesHolder()
 
-    @Volatile
-    private var cachedCurrencyRates: List<CurrencyRate> = emptyList()
-
     suspend fun getAllCurrencies(): List<CurrencyDto> {
         return currenciesHolder.getAllCurrencies()
     }
 
-    /**
-     * In some race condition cases at the service start it is possible to query external CurrencyService several times,
-     * but we're fine with that
-     */
     suspend fun getAllCurrencyRates(): List<CurrencyRate> {
-        if (cachedCurrencyRates.isEmpty()) {
-            cachedCurrencyRates = getCurrencyRatesInner()
-        }
-        return cachedCurrencyRates
+        return currenciesHolder.getAllCurrencyRates()
     }
 
     // Read currency rate directly from Currency-Service (for API calls)
@@ -122,7 +112,6 @@ class CurrencyService(
                 async { refreshCurrency(it.first, it.second) }
             }.awaitAll()
             currenciesHolder.refresh()
-            cachedCurrencyRates = getCurrencyRatesInner()
         }
     }
 
@@ -152,21 +141,6 @@ class CurrencyService(
         }
     }
 
-    private suspend fun getCurrencyRatesInner(): List<CurrencyRate> {
-        val currencies = getAllCurrencies()
-
-        return currencies.mapNotNull { currency ->
-            val usdRate = getCurrentRate(currency.currencyId.blockchain, currency.currencyId.value)
-                ?: return@mapNotNull null
-
-            CurrencyRate(
-                blockchain = currency.currencyId.blockchain,
-                currencyId = currency.currencyId.fullId(),
-                rate = usdRate.rate
-            )
-        }
-    }
-
     private fun canUseCurrentRate(at: Instant?): Boolean {
         // We're using current rate for historical rates if date is not greater than 30 minutes ago
         return at == null || System.currentTimeMillis() - at.toEpochMilli() < 30 * 60 * 1000
@@ -177,6 +151,8 @@ class CurrencyService(
         private var currencies: List<CurrencyDto> = emptyList()
         @Volatile
         private var nativeCurrencies: Map<BlockchainDto, CurrencyDto> = emptyMap()
+        @Volatile
+        private var currencyRates: List<CurrencyRate> = emptyList()
 
         suspend fun getAllCurrencies(): List<CurrencyDto> {
             if (currencies.isEmpty()) {
@@ -192,6 +168,13 @@ class CurrencyService(
             return nativeCurrencies
         }
 
+        suspend fun getAllCurrencyRates(): List<CurrencyRate> {
+            if (currencyRates.isEmpty()) {
+                refresh()
+            }
+            return currencyRates
+        }
+
         suspend fun refresh() {
             currencies = currencyClient.getAllCurrencies().map { CurrencyConverter.convert(it) }
             nativeCurrencies = BlockchainDto.values().associateWith { blockchain ->
@@ -199,6 +182,7 @@ class CurrencyService(
                 currencies.find { it.symbol == symbol && it.currencyId.blockchain == blockchain }
                     ?: throw UnionCurrencyException("Currency with symbol $symbol not found in ${blockchain.name}")
             }
+            refreshCurrencyRates()
         }
 
         fun reset() {
@@ -214,6 +198,19 @@ class CurrencyService(
                 BlockchainDto.TEZOS -> "tezos"
                 BlockchainDto.SOLANA -> "solana"
                 BlockchainDto.IMMUTABLEX -> "immutable-x"
+            }
+        }
+
+        private suspend fun refreshCurrencyRates() {
+            currencyRates = currencies.mapNotNull { currency ->
+                val usdRate = getCurrentRate(currency.currencyId.blockchain, currency.currencyId.value)
+                    ?: return@mapNotNull null
+
+                CurrencyRate(
+                    blockchain = currency.currencyId.blockchain,
+                    currencyId = currency.currencyId.fullId(),
+                    rate = usdRate.rate
+                )
             }
         }
     }
