@@ -7,6 +7,7 @@ import com.rarible.protocol.union.dto.ext
 import com.rarible.protocol.union.integration.ImmutablexManualTest
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import scalether.domain.Address
 
@@ -138,7 +139,8 @@ class ImmutablexOrderServiceMt : ImmutablexManualTest() {
     }
 
     // TODO doesn't work (bug at IMX API)
-    //@Test
+    @Test
+    @Disabled
     fun `getSellByItem - with continuation`() = runBlocking<Unit> {
         val itemId = "0xe8d5c55ee54eaa8e073c8bb19fc552e9fe9fd0ff:937"
         val page1 = service.getSellOrdersByItem(
