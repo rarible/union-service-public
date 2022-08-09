@@ -16,7 +16,7 @@ import com.rarible.protocol.union.integration.immutablex.service.ImmutablexOrder
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
 import org.springframework.data.mongodb.config.EnableMongoAuditing
-import org.springframework.data.mongodb.core.MongoTemplate
+import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 
 @ImmutablexConfiguration
 @Import(ImmutablexApiConfiguration::class)
@@ -47,7 +47,7 @@ class ImmutablexConsumerConfiguration {
     @Bean
     fun immutablexScanner(
         eventsApi: EventsApi,
-        mongo: MongoTemplate,
+        mongo: ReactiveMongoTemplate,
         activityHandler: ImmutablexActivityEventHandler,
         itemEventHandler: ImmutablexItemEventHandler,
         ownershipEventHandler: ImmutablexOwnershipEventHandler,
