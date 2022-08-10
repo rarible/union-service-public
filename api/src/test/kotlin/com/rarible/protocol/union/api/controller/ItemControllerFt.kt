@@ -12,6 +12,7 @@ import com.rarible.protocol.dto.NftItemRoyaltyListDto
 import com.rarible.protocol.dto.RaribleAuctionV1Dto
 import com.rarible.protocol.dto.VideoContentDto
 import com.rarible.protocol.union.api.client.ItemControllerApi
+import com.rarible.protocol.union.api.client.ItemControllerApi.ErrorSearchItems
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
@@ -19,6 +20,8 @@ import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ItemIdsDto
+import com.rarible.protocol.union.dto.ItemsSearchFilterDto
+import com.rarible.protocol.union.dto.ItemsSearchRequestDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.continuation.CombinedContinuation
 import com.rarible.protocol.union.dto.continuation.page.PageSize
@@ -59,6 +62,7 @@ import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatCode
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
@@ -186,7 +190,8 @@ class ItemControllerFt : AbstractIntegrationTest() {
 
         coEvery { testItemMetaLoader.load(itemId) } returns EthMetaConverter.convert(meta)
 
-        val response = restTemplate.getForEntity("${baseUri}/v0.1/items/${itemId.fullId()}/animation", String::class.java)
+        val response =
+            restTemplate.getForEntity("${baseUri}/v0.1/items/${itemId.fullId()}/animation", String::class.java)
         assertThat(response.statusCode).isEqualTo(HttpStatus.TEMPORARY_REDIRECT)
         assertThat(response.headers["Location"]).contains(videoUrl)
     }
@@ -447,7 +452,12 @@ class ItemControllerFt : AbstractIntegrationTest() {
         val ethOwnerId = UnionAddressConverter.convert(BlockchainDto.ETHEREUM, ethOwnership.owner.prefixed())
         val ethOwnershipId = OwnershipIdDto(BlockchainDto.ETHEREUM, ethItemId.value, ethOwnerId)
 
-        ethereumOwnershipControllerApiMock.mockGetNftOwnershipsByOwner(ethOwnerId.value, continuation, size, listOf(ethOwnership))
+        ethereumOwnershipControllerApiMock.mockGetNftOwnershipsByOwner(
+            ethOwnerId.value,
+            continuation,
+            size,
+            listOf(ethOwnership)
+        )
         polygonOwnershipControllerApiMock.mockGetNftOwnershipsByOwner(ethOwnerId.value, continuation, size, emptyList())
 
         ethereumAuctionControllerApiMock.mockGetAuctionsBySeller(ethOwnerId.value, listOf())
@@ -528,7 +538,12 @@ class ItemControllerFt : AbstractIntegrationTest() {
         val auctionOwnershipId = OwnershipIdDto(BlockchainDto.ETHEREUM, ethItemId.value, auctionContract)
         val auctionOwnership = randomEthOwnershipDto(ethItemId).copy(owner = auction.contract)
 
-        ethereumOwnershipControllerApiMock.mockGetNftOwnershipsByOwner(ethOwner, continuation, size, listOf(ethOwnership))
+        ethereumOwnershipControllerApiMock.mockGetNftOwnershipsByOwner(
+            ethOwner,
+            continuation,
+            size,
+            listOf(ethOwnership)
+        )
         polygonOwnershipControllerApiMock.mockGetNftOwnershipsByOwner(ethOwner, continuation, size, emptyList())
 
         ethereumAuctionControllerApiMock.mockGetAuctionsBySeller(ethOwner, listOf(auction))
@@ -680,5 +695,19 @@ class ItemControllerFt : AbstractIntegrationTest() {
         assertThat(items[itemIdWithMeta1]!!.meta!!.name).isEqualTo(meta1.name)
         assertThat(items[itemIdWithMeta2]!!.meta!!.name).isEqualTo(meta2.name)
         assertThat(items[itemIdWithoutMeta]!!.meta).isNull()
+    }
+
+    @Test
+    fun `should return 501 on searchItems`() {
+        val request = ItemsSearchRequestDto(
+            filter = ItemsSearchFilterDto(
+                blockchains = listOf(BlockchainDto.FLOW, BlockchainDto.ETHEREUM)
+            )
+        )
+
+        assertThatCode {
+            itemControllerClient.searchItems(request).block()
+        }.isExactlyInstanceOf(ErrorSearchItems::class.java)
+            .hasMessageContaining("501")
     }
 }

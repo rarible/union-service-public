@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.api.controller.advice
 
 import com.rarible.core.client.WebClientResponseProxyException
+import com.rarible.protocol.union.api.exception.FeatureUnderConstructionException
 import com.rarible.protocol.union.core.exception.UnionDataFormatException
 import com.rarible.protocol.union.core.exception.UnionException
 import com.rarible.protocol.union.core.exception.UnionNotFoundException
@@ -61,6 +62,15 @@ class ErrorsController {
             // In order to do not expose conversion error details, we using here dedicated message,
             // details could be found in logs
             message = "Unexpected data error"
+        )
+    }
+
+    @ExceptionHandler(FeatureUnderConstructionException::class)
+    @ResponseStatus(HttpStatus.NOT_IMPLEMENTED)
+    fun featureUnderConstructionException(ex: Exception) = mono {
+        UnionApiErrorServerErrorDto(
+            code = UnionApiErrorServerErrorDto.Code.UNKNOWN,
+            message = ex.message ?: "Feature under construction"
         )
     }
 
