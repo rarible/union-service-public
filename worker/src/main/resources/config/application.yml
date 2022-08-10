@@ -154,7 +154,7 @@ worker:
         - blockchain: SOLANA
           enabled: true
         - blockchain: IMMUTABLEX
-          enabled: false
+          enabled: true
     collection:
       enabled: ${consul.worker.collection.enabled:true}
       blockchains:
@@ -169,7 +169,7 @@ worker:
         - blockchain: SOLANA
           enabled: true
         - blockchain: IMMUTABLEX
-          enabled: false
+          enabled: true
     item:
       enabled: ${consul.worker.item.enabled:false}
       blockchains:
@@ -199,7 +199,7 @@ worker:
         - blockchain: SOLANA
           enabled: true
         - blockchain: IMMUTABLEX
-          enabled: false
+          enabled: true
     order:
       enabled: ${consul.worker.order.enabled:false}
       blockchains:
@@ -214,4 +214,4 @@ worker:
         - blockchain: SOLANA
           enabled: true
         - blockchain: IMMUTABLEX
-          enabled: false
+          enabled: true
