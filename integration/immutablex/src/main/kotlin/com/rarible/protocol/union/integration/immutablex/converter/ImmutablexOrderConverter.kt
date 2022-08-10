@@ -23,6 +23,7 @@ import com.rarible.protocol.union.integration.immutablex.client.ImmutablexOrder
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexOrderFee
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexOrderSide
 import java.math.BigDecimal
+import java.math.BigInteger
 
 object ImmutablexOrderConverter {
 
@@ -47,7 +48,11 @@ object ImmutablexOrderConverter {
         val makePrice = evalMakePrice(make, take)
         val takePrice = evalTakePrice(make, take)
 
-        val quantity = if (make.type.ext.isNft) take.value else make.value
+        val quantity = if (make.type.ext.isNft) {
+            order.buy.data.getQuantityWithFees()
+        } else {
+            order.sell.data.getQuantityWithFees()
+        }
 
         val status = convertStatus(order)
         return OrderDto(
@@ -70,8 +75,13 @@ object ImmutablexOrderConverter {
         )
     }
 
-    private fun makeData(quantity: BigDecimal, order: ImmutablexOrder, blockchain: BlockchainDto): OrderDataDto {
+    private fun makeData(
+        quantityWithFees: BigInteger, order: ImmutablexOrder, blockchain: BlockchainDto
+    ): OrderDataDto {
         val orderFees = order.fees ?: emptyList()
+
+        val totalFees = orderFees.sumOf { it.amount }.toBigInteger()
+        val quantity = quantityWithFees.minus(totalFees)
 
         val royalty = orderFees.filter { royalties.contains(it.type) }
             .map { toPayout(quantity, it, blockchain) }
@@ -85,13 +95,12 @@ object ImmutablexOrderConverter {
         )
     }
 
-    private fun toPayout(quantity: BigDecimal, fee: ImmutablexOrderFee, blockchain: BlockchainDto): PayoutDto {
+    private fun toPayout(quantity: BigInteger, fee: ImmutablexOrderFee, blockchain: BlockchainDto): PayoutDto {
         // TODO not really sure this is the right way to round it
         val amountBp = fee.amount.multiply(BigDecimal.valueOf(10000L)).toBigInteger()
-        val quantityInt = quantity.toBigInteger()
         return PayoutDto(
             account = UnionAddressConverter.convert(blockchain, fee.address),
-            value = amountBp.divide(quantityInt).toInt()
+            value = amountBp.divide(quantity).toInt()
         )
     }
 
