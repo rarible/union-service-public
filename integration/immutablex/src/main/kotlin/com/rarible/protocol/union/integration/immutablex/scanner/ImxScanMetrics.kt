@@ -32,7 +32,7 @@ class ImxScanMetrics(
     }
 
     fun onEventError(entityType: String) {
-        increment(IMX_SCAN_ERROR, tag("type", entityType))
+        increment(IMX_EVENT_ERROR, tag("type", entityType))
     }
 
     private fun increment(name: String, vararg tags: Tag) {
