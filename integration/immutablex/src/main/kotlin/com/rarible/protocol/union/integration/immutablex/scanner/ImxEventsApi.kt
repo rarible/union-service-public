@@ -1,54 +1,53 @@
 package com.rarible.protocol.union.integration.immutablex.scanner
 
 import com.rarible.protocol.union.dto.OrderSortDto
-import com.rarible.protocol.union.integration.immutablex.client.ImmutablexDeposit
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexActivityClient
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexMint
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexOrder
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexOrderClient
-import com.rarible.protocol.union.integration.immutablex.client.ImmutablexPage
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexTrade
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexTransfer
-import com.rarible.protocol.union.integration.immutablex.client.ImmutablexWithdrawal
-import com.rarible.protocol.union.integration.immutablex.client.queryParamNotNull
-import kotlinx.coroutines.reactor.awaitSingle
-import org.springframework.web.reactive.function.client.WebClient
-import org.springframework.web.reactive.function.client.toEntity
-import org.springframework.web.util.UriBuilder
+import java.time.Instant
 
 class ImxEventsApi(
-    private val webClient: WebClient,
+    private val activityClient: ImmutablexActivityClient,
     private val orderClient: ImmutablexOrderClient
 ) {
 
-    suspend fun mints(cursor: String? = null): ImmutablexPage<ImmutablexMint> {
-        return webClient.get().uri {
-            it.path("/mints")
-                .defaultQueryParams()
-                .queryParamNotNull("cursor", cursor)
-                .build()
-        }.retrieve().toEntity<ImmutablexPage<ImmutablexMint>>().awaitSingle().body!!
+    suspend fun mints(transactionId: String): List<ImmutablexMint> {
+        return activityClient.getMintEvents(
+            pageSize = PAGE_SIZE,
+            transactionId = transactionId
+        )
     }
 
-    suspend fun transfers(cursor: String? = null): ImmutablexPage<ImmutablexTransfer> {
-        return webClient.get().uri {
-            it.path("/transfers")
-                .defaultQueryParams()
-                .queryParam("token_type", "ERC721")
-                .queryParamNotNull("cursor", cursor)
-                .build()
-        }.retrieve().toEntity<ImmutablexPage<ImmutablexTransfer>>().awaitSingle().body!!
+    suspend fun lastMint(): ImmutablexMint {
+        return activityClient.getLastMint()
     }
 
-    suspend fun trades(cursor: String? = null): ImmutablexPage<ImmutablexTrade> {
-        return webClient.get().uri {
-            it.path("/trades")
-                .defaultQueryParams()
-                .queryParam("party_b_token_type", "ERC721")
-                .queryParamNotNull("cursor", cursor)
-                .build()
-        }.retrieve().toEntity<ImmutablexPage<ImmutablexTrade>>().awaitSingle().body!!
+    suspend fun transfers(transactionId: String): List<ImmutablexTransfer> {
+        return activityClient.getTransferEvents(
+            pageSize = PAGE_SIZE,
+            transactionId = transactionId
+        )
     }
 
+    suspend fun lastTransfer(): ImmutablexTransfer {
+        return activityClient.getLastTransfer()
+    }
+
+    suspend fun trades(transactionId: String): List<ImmutablexTrade> {
+        return activityClient.getTradeEvents(
+            pageSize = PAGE_SIZE,
+            transactionId = transactionId
+        )
+    }
+
+    suspend fun lastTrade(): ImmutablexTrade {
+        return activityClient.getLastTrade()
+    }
+
+    /*
     suspend fun deposits(cursor: String? = null): ImmutablexPage<ImmutablexDeposit> {
         return webClient.get().uri {
             it.path("/deposits")
@@ -57,10 +56,10 @@ class ImxEventsApi(
                 .queryParamNotNull("cursor", cursor)
                 .build()
         }.retrieve().toEntity<ImmutablexPage<ImmutablexDeposit>>().awaitSingle().body!!
-
     }
 
-    suspend fun withdrawals(cursor: String? = null): ImmutablexPage<ImmutablexWithdrawal> {
+
+    suspend fun withdrawals(date: Instant, id: String): ImmutablexPage<ImmutablexWithdrawal> {
         return webClient.get().uri {
             it.path("/withdrawals")
                 .defaultQueryParams()
@@ -68,28 +67,22 @@ class ImxEventsApi(
                 .queryParamNotNull("cursor", cursor)
                 .build()
         }.retrieve().toEntity<ImmutablexPage<ImmutablexWithdrawal>>().awaitSingle().body!!
-
     }
+    */
 
-    suspend fun orders(cursor: String? = null): List<ImmutablexOrder> {
+    suspend fun orders(date: Instant, id: String): List<ImmutablexOrder> {
         return orderClient.getAllOrders(
-            continuation = cursor,
+            continuation = "${date.toEpochMilli()}_${id}",
             size = PAGE_SIZE,
             sort = OrderSortDto.LAST_UPDATE_ASC,
             statuses = null
         )
     }
 
-    private fun UriBuilder.defaultQueryParams() =
-        this.queryParam("page_size", PAGE_SIZE)
-            .queryParam("order_by", ORDER_BY)
-            .queryParam("direction", ORDER_DIRECTION)
 
     companion object {
 
         private const val PAGE_SIZE = 200 // As per IMX support, that's maximum page size
-        private const val ORDER_BY = "transaction_id"
-        private const val ORDER_DIRECTION = "asc"
     }
 }
 

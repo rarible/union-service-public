@@ -1,7 +1,6 @@
 package com.rarible.protocol.union.integration.immutablex.scanner
 
 import com.rarible.core.common.nowMillis
-import com.rarible.protocol.union.dto.continuation.DateIdContinuation
 import com.rarible.protocol.union.integration.data.randomImxOrder
 import com.rarible.protocol.union.integration.immutablex.handlers.ImmutablexActivityEventHandler
 import com.rarible.protocol.union.integration.immutablex.handlers.ImmutablexItemEventHandler
@@ -14,7 +13,7 @@ import io.mockk.mockk
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-class ImxScannerIt() {
+class ImxScannerTest {
 
     private val imxEventsApi: ImxEventsApi = mockk()
     private val imxScanStateRepository: ImxScanStateRepository = mockk()
@@ -55,25 +54,32 @@ class ImxScannerIt() {
 
     @Test
     fun `scan orders`() {
-        val scanState = ImxScanState(ImxScanEntityType.ORDERS.name)
         val lastUpdated = nowMillis()
         val lastOrder = randomImxOrder().copy(updatedAt = lastUpdated)
+        val lastId = lastOrder.orderId.toString()
         val oldOrder = randomImxOrder().copy(updatedAt = lastUpdated.minusSeconds(1))
-        val cursor = DateIdContinuation(lastUpdated, lastOrder.orderId.toString()).toString()
+
+        val scanState = ImxScanState(
+            id = ImxScanEntityType.ORDERS.name,
+            entityId = "0",
+            entityDate = lastUpdated.minusSeconds(10)
+        )
 
         coEvery { imxScanStateRepository.getOrCreateState(ImxScanEntityType.ORDERS) }
             .returns(scanState)
-            .andThen(scanState.copy(cursor = cursor, entityDate = lastUpdated))
+            .andThen(scanState.copy(entityId = lastId, entityDate = lastUpdated))
 
-        coEvery { imxEventsApi.orders(null) } returns listOf(oldOrder, lastOrder)
-        coEvery { imxEventsApi.orders(cursor) } returns emptyList()
+        coEvery { imxEventsApi.orders(scanState.entityDate!!, scanState.entityId!!) } returns listOf(
+            oldOrder, lastOrder
+        )
+        coEvery { imxEventsApi.orders(lastUpdated, lastId) } returns emptyList()
 
         scanner.orders()
 
         // Only two orders from first request have been handled
         coVerify(exactly = 2) { orderEventHandler.handle(any()) }
         // State updated twice, after second scanning should be interrupted
-        coVerify(exactly = 2) { imxScanStateRepository.updateState(any(), cursor, lastUpdated) }
+        coVerify(exactly = 2) { imxScanStateRepository.updateState(any(), lastUpdated, lastId) }
     }
 
 }
