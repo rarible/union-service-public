@@ -34,7 +34,6 @@ import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
 import java.math.BigDecimal
 import java.math.BigInteger
-import java.time.Instant
 import java.time.ZoneOffset
 import java.util.*
 
@@ -89,7 +88,8 @@ class TezosDipDupOrdersControllerFt : AbstractIntegrationTest() {
             null,
             null,
             continuation,
-            size
+            size,
+            null
         ).awaitFirst()
 
         assertThat(orders.orders).hasSize(1)
