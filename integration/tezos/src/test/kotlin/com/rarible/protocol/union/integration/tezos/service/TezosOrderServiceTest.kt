@@ -226,7 +226,7 @@ class TezosOrderServiceTest {
         return DipDupOrder(
             id = orderId,
             fill = BigDecimal.ZERO,
-            platform = TezosPlatform.Hen,
+            platform = TezosPlatform.HEN,
             payouts = emptyList(),
             originFees = emptyList(),
             status = OrderStatus.ACTIVE,
