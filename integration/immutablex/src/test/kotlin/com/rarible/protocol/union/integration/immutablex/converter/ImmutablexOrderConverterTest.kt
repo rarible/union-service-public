@@ -16,7 +16,7 @@ class ImmutablexOrderConverterTest {
     @Test
     fun `evaluate fees - sell order`() {
         val imxOrder = randomImxOrder().copy(
-            buy = randomEmxOrderBuySide(quantity = BigInteger("100000")),
+            buy = randomEmxOrderBuySide(quantity = BigInteger("100000"), quantityWithFees = BigInteger("105000")),
             fees = listOf(randomImxOrderFee(type = "royalty", amount = BigDecimal("5000")))
         )
 
@@ -30,7 +30,7 @@ class ImmutablexOrderConverterTest {
     @Test
     fun `evaluate fees - buy order`() {
         val imxOrder = randomImxOrder().copy(
-            sell = randomEmxOrderBuySide(quantity = BigInteger("100000")),
+            sell = randomEmxOrderBuySide(quantity = BigInteger("100000"), quantityWithFees = BigInteger("105000")),
             buy = randomEmxOrderSellSide(),
             fees = listOf(randomImxOrderFee(type = "royalty", amount = BigDecimal("5000")))
         )
