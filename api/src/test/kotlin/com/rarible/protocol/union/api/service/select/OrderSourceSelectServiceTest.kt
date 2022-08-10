@@ -134,7 +134,7 @@ class OrderSourceSelectServiceTest {
             } returns elasticOrdersResponse
 
             // when
-            val actual = service.getOrdersAll(blockchains, continuation, size, sort, status)
+            val actual = service.getOrdersAll(blockchains, continuation, size, sort, status, null)
 
             // then
             assertThat(actual).isEqualTo(elasticOrdersResponse)
@@ -149,7 +149,7 @@ class OrderSourceSelectServiceTest {
             } returns apiOrdersResponse
 
             // when
-            val actual = service.getOrdersAll(blockchains, continuation, size, sort, status)
+            val actual = service.getOrdersAll(blockchains, continuation, size, sort, status, null)
 
             // then
             assertThat(actual).isEqualTo(apiOrdersResponse)
@@ -168,7 +168,7 @@ class OrderSourceSelectServiceTest {
             } returns elasticOrdersResponse
 
             // when
-            val actual = service.getSellOrdersByItem(itemId, platform, maker, origin, status, continuation, size)
+            val actual = service.getSellOrdersByItem(itemId, platform, maker, origin, status, continuation, size, null)
 
             // then
             assertThat(actual).isEqualTo(elasticOrdersResponse)
@@ -183,7 +183,7 @@ class OrderSourceSelectServiceTest {
             } returns apiOrdersResponse
 
             // when
-            val actual = service.getSellOrdersByItem(itemId, platform, maker, origin, status, continuation, size)
+            val actual = service.getSellOrdersByItem(itemId, platform, maker, origin, status, continuation, size, null)
 
             // then
             assertThat(actual).isEqualTo(apiOrdersResponse)
@@ -202,7 +202,9 @@ class OrderSourceSelectServiceTest {
             } returns elasticOrdersResponse
 
             // when
-            val actual = service.getOrderBidsByItem(itemId, platform, makers, origin, status, start, end, continuation, size)
+            val actual = service.getOrderBidsByItem(
+                itemId, platform, makers, origin, status, start, end, continuation, size, null
+            )
 
             // then
             assertThat(actual).isEqualTo(elasticOrdersResponse)
@@ -217,7 +219,9 @@ class OrderSourceSelectServiceTest {
             } returns apiOrdersResponse
 
             // when
-            val actual = service.getOrderBidsByItem(itemId, platform, makers, origin, status, start, end, continuation, size)
+            val actual = service.getOrderBidsByItem(
+                itemId, platform, makers, origin, status, start, end, continuation, size, null
+            )
 
             // then
             assertThat(actual).isEqualTo(apiOrdersResponse)
@@ -236,7 +240,9 @@ class OrderSourceSelectServiceTest {
             } returns elasticOrdersResponse
 
             // when
-            val actual = service.getOrderBidsByMaker(blockchains, platform, listOf(maker), origin, status, start, end, continuation, size)
+            val actual = service.getOrderBidsByMaker(
+                blockchains, platform, listOf(maker), origin, status, start, end, continuation, size, null
+            )
 
             // then
             assertThat(actual).isEqualTo(elasticOrdersResponse)
@@ -251,7 +257,9 @@ class OrderSourceSelectServiceTest {
             } returns apiOrdersResponse
 
             // when
-            val actual = service.getOrderBidsByMaker(blockchains, platform, listOf(maker), origin, status, start, end, continuation, size)
+            val actual = service.getOrderBidsByMaker(
+                blockchains, platform, listOf(maker), origin, status, start, end, continuation, size, null
+            )
 
             // then
             assertThat(actual).isEqualTo(apiOrdersResponse)
@@ -270,7 +278,7 @@ class OrderSourceSelectServiceTest {
             } returns elasticOrdersResponse
 
             // when
-            val actual = service.getSellOrders(blockchains, platform, origin, continuation, size)
+            val actual = service.getSellOrders(blockchains, platform, origin, continuation, size, null)
 
             // then
             assertThat(actual).isEqualTo(elasticOrdersResponse)
@@ -285,7 +293,7 @@ class OrderSourceSelectServiceTest {
             } returns apiOrdersResponse
 
             // when
-            val actual = service.getSellOrders(blockchains, platform, origin, continuation, size)
+            val actual = service.getSellOrders(blockchains, platform, origin, continuation, size, null)
 
             // then
             assertThat(actual).isEqualTo(apiOrdersResponse)
@@ -303,7 +311,9 @@ class OrderSourceSelectServiceTest {
             } returns elasticOrdersResponse
 
             // when
-            val actual = service.getSellOrdersByMaker(listOf(maker), blockchains, platform, origin, continuation, size, status)
+            val actual = service.getSellOrdersByMaker(
+                listOf(maker), blockchains, platform, origin, continuation, size, status, null
+            )
 
             // then
             assertThat(actual).isEqualTo(elasticOrdersResponse)
@@ -318,7 +328,9 @@ class OrderSourceSelectServiceTest {
             } returns apiOrdersResponse
 
             // when
-            val actual = service.getSellOrdersByMaker(listOf(maker), blockchains, platform, origin, continuation, size, status)
+            val actual = service.getSellOrdersByMaker(
+                listOf(maker), blockchains, platform, origin, continuation, size, status, null
+            )
 
             // then
             assertThat(actual).isEqualTo(apiOrdersResponse)

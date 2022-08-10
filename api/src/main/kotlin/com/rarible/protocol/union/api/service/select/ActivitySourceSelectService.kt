@@ -12,10 +12,10 @@ import com.rarible.protocol.union.dto.SyncTypeDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
 import com.rarible.protocol.union.enrichment.service.query.activity.ActivityApiMergeService
 import com.rarible.protocol.union.enrichment.service.query.activity.ActivityQueryService
-import org.springframework.stereotype.Service
+import org.springframework.stereotype.Component
 import java.time.Instant
 
-@Service
+@Component
 class ActivitySourceSelectService(
     private val featureFlagsProperties: FeatureFlagsProperties,
     private val activityApiMergeService: ActivityApiMergeService,

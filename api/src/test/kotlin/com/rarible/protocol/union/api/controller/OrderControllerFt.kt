@@ -125,7 +125,7 @@ class OrderControllerFt : AbstractIntegrationTest() {
         } returns OrdersPaginationDto(ethOrders, null).toMono()
 
         val orders = orderControllerClient.getOrdersAll(
-            blockchains, null, size, null, null
+            blockchains, null, size, null, null, null
         ).awaitFirst()
 
         assertThat(orders.orders).hasSize(5)
@@ -143,7 +143,7 @@ class OrderControllerFt : AbstractIntegrationTest() {
         } returns OrdersPaginationDto(ethOrders, null).toMono()
 
         val orders = orderControllerClient.getAllSync(
-            BlockchainDto.ETHEREUM, null, size,  null
+            BlockchainDto.ETHEREUM, null, size, null
         ).awaitFirst()
 
         assertThat(orders.orders).hasSize(2)
@@ -170,7 +170,7 @@ class OrderControllerFt : AbstractIntegrationTest() {
         } returns OrdersPaginationDto(polyOrders, null).toMono()
 
         val orders = orderControllerClient.getOrdersAll(
-            blockchains, null, size, null, null
+            blockchains, null, size, null, null, null
         ).awaitFirst()
 
         assertThat(orders.orders).hasSize(3)
@@ -197,7 +197,8 @@ class OrderControllerFt : AbstractIntegrationTest() {
         )
         val flowOrders = listOf(
             randomFlowV1OrderDto().copy(lastUpdateAt = now.minusSeconds(5)),
-            randomFlowV1OrderDto().copy(lastUpdateAt = now.plusSeconds(10)))
+            randomFlowV1OrderDto().copy(lastUpdateAt = now.plusSeconds(10))
+        )
 
         coEvery {
             testEthereumOrderApi.getOrdersAllByStatus(any(), ethContinuation, size, any())
@@ -208,13 +209,19 @@ class OrderControllerFt : AbstractIntegrationTest() {
         } returns FlowOrdersPaginationDto(flowOrders, null).toMono()
 
         val orders = orderControllerClient.getOrdersAll(
-            blockchains, continuation.toString(), size, null, null
+            blockchains, continuation.toString(), size, null, null, null
         ).awaitFirst()
 
         assertThat(orders.orders).hasSize(size)
-        assertThat(orders.orders.map { it.id }).contains(OrderIdDto(BlockchainDto.ETHEREUM, ethOrders.first().hash.prefixed()))
-        assertThat(orders.orders.map { it.id }).contains(OrderIdDto(BlockchainDto.FLOW, flowOrders.first().id.toString()))
-        assertThat(orders.orders.map { it.id }).contains(OrderIdDto(BlockchainDto.FLOW, flowOrders.last().id.toString()))
+        assertThat(orders.orders.map { it.id }).contains(
+            OrderIdDto(BlockchainDto.ETHEREUM, ethOrders.first().hash.prefixed())
+        )
+        assertThat(orders.orders.map { it.id }).contains(
+            OrderIdDto(BlockchainDto.FLOW, flowOrders.first().id.toString())
+        )
+        assertThat(orders.orders.map { it.id }).contains(
+            OrderIdDto(BlockchainDto.FLOW, flowOrders.last().id.toString())
+        )
 
         assertThat(orders.continuation).isNotNull()
         continuation = CombinedContinuation.parse(orders.continuation)
@@ -266,7 +273,8 @@ class OrderControllerFt : AbstractIntegrationTest() {
             null,
             null,
             continuation,
-            size
+            size,
+            null
         ).awaitFirst()
 
         assertThat(orders.orders).hasSize(1)
@@ -307,7 +315,7 @@ class OrderControllerFt : AbstractIntegrationTest() {
         } returns OrdersPaginationDto(ethOrders, null).toMono()
 
         val orders = orderControllerClient.getSellOrders(
-            blockchains, platform, null, continuation, size
+            blockchains, platform, null, continuation, size, null
         ).awaitFirst()
 
         assertThat(orders.orders).hasSize(4)
@@ -328,7 +336,7 @@ class OrderControllerFt : AbstractIntegrationTest() {
         } returns FlowOrdersPaginationDto(flowOrders, null).toMono()
 
         val orders = orderControllerClient.getSellOrders(
-            blockchains, platform, origin.fullId(), continuation, size
+            blockchains, platform, origin.fullId(), continuation, size, null
         ).awaitFirst()
 
         assertThat(orders.orders).hasSize(1)
@@ -375,7 +383,8 @@ class OrderControllerFt : AbstractIntegrationTest() {
             null,
             null,
             continuation,
-            size
+            size,
+            null
         ).awaitFirst()
 
         assertThat(orders.orders).hasSize(1)
@@ -390,7 +399,9 @@ class OrderControllerFt : AbstractIntegrationTest() {
         val polygonOrders = listOf(randomEthSellOrderDto())
 
         coEvery {
-            testPolygonOrderApi.getSellOrdersByMakerAndByStatus(listOf(EthConverter.convertToAddress(maker.value)), null, ethPlatform, continuation, size, emptyList())
+            testPolygonOrderApi.getSellOrdersByMakerAndByStatus(
+                listOf(EthConverter.convertToAddress(maker.value)), null, ethPlatform, continuation, size, emptyList()
+            )
         } returns OrdersPaginationDto(polygonOrders, continuation).toMono()
 
         val orders = orderControllerClient.getSellOrdersByMaker(
@@ -400,6 +411,7 @@ class OrderControllerFt : AbstractIntegrationTest() {
             null,
             continuation,
             size,
+            null,
             null
         ).awaitFirst()
 
@@ -417,7 +429,9 @@ class OrderControllerFt : AbstractIntegrationTest() {
         val flowOrders = listOf(randomFlowV1OrderDto())
 
         coEvery {
-            testPolygonOrderApi.getSellOrdersByMakerAndByStatus(listOf(EthConverter.convertToAddress(maker1.value)), null, ethPlatform, continuation, size, emptyList())
+            testPolygonOrderApi.getSellOrdersByMakerAndByStatus(
+                listOf(EthConverter.convertToAddress(maker1.value)), null, ethPlatform, continuation, size, emptyList()
+            )
         } returns OrdersPaginationDto(polygonOrders, continuation).toMono()
 
         coEvery {
@@ -431,6 +445,7 @@ class OrderControllerFt : AbstractIntegrationTest() {
             null,
             continuation,
             size,
+            null,
             null
         ).awaitFirst()
 
@@ -453,7 +468,8 @@ class OrderControllerFt : AbstractIntegrationTest() {
             null,
             null,
             continuation,
-            size
+            size,
+            null
         ).awaitFirst()
 
         // Should be 0 without sub-requests

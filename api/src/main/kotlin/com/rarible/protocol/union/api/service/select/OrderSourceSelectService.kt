@@ -1,7 +1,5 @@
 package com.rarible.protocol.union.api.service.select
 
-import com.rarible.protocol.union.enrichment.service.query.order.OrderQueryService
-import com.rarible.protocol.union.enrichment.service.query.order.OrderApiMergeService
 import com.rarible.protocol.union.api.service.elastic.OrderElasticService
 import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -9,17 +7,20 @@ import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdsDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
-import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.OrdersDto
 import com.rarible.protocol.union.dto.PlatformDto
-import org.springframework.stereotype.Service
+import com.rarible.protocol.union.dto.SearchEngineDto
+import com.rarible.protocol.union.dto.SyncSortDto
+import com.rarible.protocol.union.enrichment.service.query.order.OrderApiMergeService
+import com.rarible.protocol.union.enrichment.service.query.order.OrderQueryService
+import org.springframework.stereotype.Component
 
-@Service
+@Component
 class OrderSourceSelectService(
     private val featureFlagsProperties: FeatureFlagsProperties,
     private val orderApiService: OrderApiMergeService,
     private val orderElasticService: OrderElasticService,
-) : OrderQueryService {
+) {
 
     /**
      * Should always route to OrderApiService
@@ -35,17 +36,18 @@ class OrderSourceSelectService(
         return orderApiService.getByIds(orderIdsDto)
     }
 
-    override suspend fun getOrdersAll(
+    suspend fun getOrdersAll(
         blockchains: List<BlockchainDto>?,
         continuation: String?,
         size: Int?,
         sort: OrderSortDto?,
-        status: List<OrderStatusDto>?
+        status: List<OrderStatusDto>?,
+        searchEngine: SearchEngineDto?
     ): OrdersDto {
-        return getQuerySource().getOrdersAll(blockchains, continuation, size, sort, status)
+        return getQuerySource(searchEngine).getOrdersAll(blockchains, continuation, size, sort, status)
     }
 
-    override suspend fun getAllSync(
+    suspend fun getAllSync(
         blockchain: BlockchainDto,
         continuation: String?,
         size: Int?,
@@ -54,19 +56,22 @@ class OrderSourceSelectService(
         return orderApiService.getAllSync(blockchain, continuation, size, sort)
     }
 
-    override suspend fun getSellOrdersByItem(
+    suspend fun getSellOrdersByItem(
         itemId: String,
         platform: PlatformDto?,
         maker: String?,
         origin: String?,
         status: List<OrderStatusDto>?,
         continuation: String?,
-        size: Int?
+        size: Int?,
+        searchEngine: SearchEngineDto?
     ): OrdersDto {
-        return getQuerySource().getSellOrdersByItem(itemId, platform, maker, origin, status, continuation, size)
+        return getQuerySource(searchEngine).getSellOrdersByItem(
+            itemId, platform, maker, origin, status, continuation, size
+        )
     }
 
-    override suspend fun getOrderBidsByItem(
+    suspend fun getOrderBidsByItem(
         itemId: String,
         platform: PlatformDto?,
         maker: List<String>?,
@@ -75,9 +80,10 @@ class OrderSourceSelectService(
         start: Long?,
         end: Long?,
         continuation: String?,
-        size: Int?
+        size: Int?,
+        searchEngine: SearchEngineDto?
     ): OrdersDto {
-        return getQuerySource().getOrderBidsByItem(
+        return getQuerySource(searchEngine).getOrderBidsByItem(
             itemId,
             platform,
             maker,
@@ -90,7 +96,7 @@ class OrderSourceSelectService(
         )
     }
 
-    override suspend fun getOrderBidsByMaker(
+    suspend fun getOrderBidsByMaker(
         blockchains: List<BlockchainDto>?,
         platform: PlatformDto?,
         maker: List<String>,
@@ -99,9 +105,10 @@ class OrderSourceSelectService(
         start: Long?,
         end: Long?,
         continuation: String?,
-        size: Int?
+        size: Int?,
+        searchEngine: SearchEngineDto?
     ): OrdersDto {
-        return getQuerySource().getOrderBidsByMaker(
+        return getQuerySource(searchEngine).getOrderBidsByMaker(
             blockchains,
             platform,
             maker,
@@ -114,29 +121,40 @@ class OrderSourceSelectService(
         )
     }
 
-    override suspend fun getSellOrders(
+    suspend fun getSellOrders(
         blockchains: List<BlockchainDto>?,
         platform: PlatformDto?,
         origin: String?,
         continuation: String?,
-        size: Int?
+        size: Int?,
+        searchEngine: SearchEngineDto?
     ): OrdersDto {
-        return getQuerySource().getSellOrders(blockchains, platform, origin, continuation, size)
+        return getQuerySource(searchEngine).getSellOrders(blockchains, platform, origin, continuation, size)
     }
 
-    override suspend fun getSellOrdersByMaker(
+    suspend fun getSellOrdersByMaker(
         maker: List<String>,
         blockchains: List<BlockchainDto>?,
         platform: PlatformDto?,
         origin: String?,
         continuation: String?,
         size: Int?,
-        status: List<OrderStatusDto>?
+        status: List<OrderStatusDto>?,
+        searchEngine: SearchEngineDto?
     ): OrdersDto {
-        return getQuerySource().getSellOrdersByMaker(maker, blockchains, platform, origin, continuation, size, status)
+        return getQuerySource(searchEngine).getSellOrdersByMaker(
+            maker, blockchains, platform, origin, continuation, size, status
+        )
     }
 
-    private fun getQuerySource(): OrderQueryService {
+    private fun getQuerySource(searchEngine: SearchEngineDto?): OrderQueryService {
+        if (searchEngine != null) {
+            return when (searchEngine) {
+                SearchEngineDto.V1 -> orderElasticService
+                SearchEngineDto.LEGACY -> orderApiService
+            }
+        }
+
         return when (featureFlagsProperties.enableOrderQueriesToElasticSearch) {
             true -> orderElasticService
             else -> orderApiService
