@@ -150,6 +150,8 @@ data class ImmutablexOrderData(
     val decimals: Int,
     val id: String?,
     val quantity: BigInteger,
+    @JsonProperty("quantity_with_fees")
+    private val quantityWithFees: String?,
     @JsonProperty("token_address")
     val tokenAddress: String?,
     @JsonProperty("token_id")
@@ -160,6 +162,14 @@ data class ImmutablexOrderData(
     fun itemId(): String = "${tokenAddress}:${tokenId}"
 
     fun encodedTokenId() = tokenId?.let { TokenIdDecoder.encode(tokenId) }
+
+    fun getQuantityWithFees(): BigInteger {
+        return if (quantityWithFees.isNullOrBlank()) {
+            quantity
+        } else {
+            BigInteger(quantityWithFees)
+        }
+    }
 }
 
 data class ImmutablexDataProperties(
