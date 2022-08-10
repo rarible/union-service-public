@@ -140,9 +140,6 @@ class CoreConfiguration(
             logger.info("ActivityService for blockchain {} disabled or not implemented, replaced by dummy", it.name)
         }
         val blockchains = enabledBlockchains.toMutableList()
-        if (!featureFlagsProperties.enableImmutableXActivitiesQueries) {
-            blockchains -= BlockchainDto.IMMUTABLEX
-        }
         return BlockchainRouter(result, blockchains)
     }
 
