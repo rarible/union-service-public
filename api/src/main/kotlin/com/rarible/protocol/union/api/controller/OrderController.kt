@@ -6,9 +6,10 @@ import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdsDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
-import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.OrdersDto
 import com.rarible.protocol.union.dto.PlatformDto
+import com.rarible.protocol.union.dto.SearchEngineDto
+import com.rarible.protocol.union.dto.SyncSortDto
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.RestController
@@ -24,9 +25,12 @@ class OrderController(
         continuation: String?,
         size: Int?,
         sort: OrderSortDto?,
-        status: List<OrderStatusDto>?
+        status: List<OrderStatusDto>?,
+        searchEngine: SearchEngineDto?
     ): ResponseEntity<OrdersDto> {
-        val result = orderSourceSelector.getOrdersAll(blockchains, continuation, size, sort, status)
+        val result = orderSourceSelector.getOrdersAll(
+            blockchains, continuation, size, sort, status, searchEngine
+        )
         return ResponseEntity.ok(result)
     }
 
@@ -49,7 +53,8 @@ class OrderController(
         start: Long?,
         end: Long?,
         continuation: String?,
-        size: Int?
+        size: Int?,
+        searchEngine: SearchEngineDto?
     ): ResponseEntity<OrdersDto> {
         val result = orderSourceSelector.getOrderBidsByItem(
             itemId,
@@ -60,7 +65,8 @@ class OrderController(
             start,
             end,
             continuation,
-            size
+            size,
+            searchEngine
         )
         return ResponseEntity.ok(result)
     }
@@ -74,7 +80,8 @@ class OrderController(
         start: Long?,
         end: Long?,
         continuation: String?,
-        size: Int?
+        size: Int?,
+        searchEngine: SearchEngineDto?
     ): ResponseEntity<OrdersDto> {
         val result = orderSourceSelector.getOrderBidsByMaker(
             blockchains,
@@ -85,7 +92,8 @@ class OrderController(
             start,
             end,
             continuation,
-            size
+            size,
+            searchEngine
         )
         return ResponseEntity.ok(result)
     }
@@ -107,9 +115,12 @@ class OrderController(
         platform: PlatformDto?,
         origin: String?,
         continuation: String?,
-        size: Int?
+        size: Int?,
+        searchEngine: SearchEngineDto?
     ): ResponseEntity<OrdersDto> {
-        val result = orderSourceSelector.getSellOrders(blockchains, platform, origin, continuation, size)
+        val result = orderSourceSelector.getSellOrders(
+            blockchains, platform, origin, continuation, size, searchEngine
+        )
         return ResponseEntity.ok(result)
     }
 
@@ -120,10 +131,12 @@ class OrderController(
         origin: String?,
         status: List<OrderStatusDto>?,
         continuation: String?,
-        size: Int?
+        size: Int?,
+        searchEngine: SearchEngineDto?
     ): ResponseEntity<OrdersDto> {
-        val result =
-            orderSourceSelector.getSellOrdersByItem(itemId, platform, maker, origin, status, continuation, size)
+        val result = orderSourceSelector.getSellOrdersByItem(
+            itemId, platform, maker, origin, status, continuation, size, searchEngine
+        )
         return ResponseEntity.ok(result)
     }
 
@@ -134,10 +147,12 @@ class OrderController(
         origin: String?,
         continuation: String?,
         size: Int?,
-        status: List<OrderStatusDto>?
+        status: List<OrderStatusDto>?,
+        searchEngine: SearchEngineDto?
     ): ResponseEntity<OrdersDto> {
-        val result =
-            orderSourceSelector.getSellOrdersByMaker(maker, blockchains, platform, origin, continuation, size, status)
+        val result = orderSourceSelector.getSellOrdersByMaker(
+            maker, blockchains, platform, origin, continuation, size, status, searchEngine
+        )
         return ResponseEntity.ok(result)
     }
 }
