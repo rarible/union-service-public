@@ -9,6 +9,7 @@ import com.rarible.core.test.data.randomDouble
 import com.rarible.core.test.data.randomInt
 import com.rarible.core.test.data.randomLong
 import com.rarible.core.test.data.randomString
+import com.rarible.protocol.union.core.EsActivityEnrichmentProperties
 import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.converter.helper.SellActivityEnricher
 import com.rarible.protocol.union.core.model.UnionItem
@@ -72,7 +73,7 @@ class EsActivityConverterTest {
 
     private val enricher = mockk<SellActivityEnricher>()
 
-    private val converter = EsActivityConverter(router, enricher, FeatureFlagsProperties())
+    private val converter = EsActivityConverter(router, enricher, EsActivityEnrichmentProperties())
 
     @Test
     fun `should convert activities batch`() = runBlocking<Unit> {
@@ -137,9 +138,7 @@ class EsActivityConverterTest {
 
         val source = listOf(ethMint, ethBurn, solanaList)
 
-        coEvery {
-            router.getService(BlockchainDto.ETHEREUM).getItemsByIds(listOf(ethMintItemId.value, ethBurnItemId.value))
-        } returns listOf(ethMintItem, ethBurnItem)
+        // The only blockchain to query items is SOLANA so far
         coEvery {
             router.getService(BlockchainDto.SOLANA).getItemsByIds(listOf(solanaListItemId.value))
         } returns listOf(solanaListItem)
@@ -150,13 +149,12 @@ class EsActivityConverterTest {
         // then
         assertThat(actual).hasSize(3)
         assertThat(actual[0].activityId).isEqualTo(ethMint.id.toString())
-        assertThat(actual[0].collection).isEqualTo(ethMintColId.value)
+        assertThat(actual[0].collection).isEqualTo("contract1")
         assertThat(actual[1].activityId).isEqualTo(ethBurn.id.toString())
-        assertThat(actual[1].collection).isEqualTo(ethBurnColId.value)
+        assertThat(actual[1].collection).isEqualTo("contract2")
         assertThat(actual[2].activityId).isEqualTo(solanaList.id.toString())
         assertThat(actual[2].collection).isEqualTo(solanaListColId.value)
         coVerify {
-            router.getService(BlockchainDto.ETHEREUM).getItemsByIds(listOf(ethMintItemId.value, ethBurnItemId.value))
             router.getService(BlockchainDto.SOLANA).getItemsByIds(listOf(solanaListItemId.value))
         }
         confirmVerified(router)

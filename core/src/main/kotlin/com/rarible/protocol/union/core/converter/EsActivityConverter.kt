@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.core.converter
 
 import com.rarible.core.common.mapAsync
+import com.rarible.protocol.union.core.EsActivityEnrichmentProperties
 import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.converter.helper.SellActivityEnricher
 import com.rarible.protocol.union.core.model.EsActivity
@@ -37,12 +38,12 @@ import org.springframework.stereotype.Component
 class EsActivityConverter(
     private val itemRouter: BlockchainRouter<ItemService>,
     private val sellActivityEnricher: SellActivityEnricher,
-    private val featureFlagsProperties: FeatureFlagsProperties,
+    private val esActivityEnrichmentProperties: EsActivityEnrichmentProperties
 ) {
 
-    suspend fun batchConvert(source: List<ActivityDto>, ): List<EsActivity> {
+    suspend fun batchConvert(source: List<ActivityDto>): List<EsActivity> {
         val items = source.groupBy { it.id.blockchain }
-            .filter { (it.key != BlockchainDto.IMMUTABLEX) || featureFlagsProperties.enableImmutableXActivitiesQueries }
+            .filter { esActivityEnrichmentProperties.blockchainsToQueryItems.contains(it.key) }
             .mapAsync { (blockchain, activities) ->
                 val itemIds = activities.mapNotNull { extractItemId(it)?.value }
                 itemRouter.getService(blockchain).getItemsByIds(itemIds)
