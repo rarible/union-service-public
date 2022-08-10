@@ -7,8 +7,13 @@ import com.rarible.protocol.union.integration.ethereum.data.randomEthAssetErc20
 import com.rarible.protocol.union.integration.ethereum.data.randomEthBidOrderDto
 import com.rarible.protocol.union.listener.test.AbstractIntegrationTest
 import com.rarible.protocol.union.listener.test.IntegrationTest
+import io.mockk.confirmVerified
+import io.mockk.every
+import io.mockk.verify
 import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import reactor.kotlin.core.publisher.toMono
 
 @IntegrationTest
 class InternalOrderEventHandlerFt : AbstractIntegrationTest() {
@@ -22,7 +27,9 @@ class InternalOrderEventHandlerFt : AbstractIntegrationTest() {
 
         val orderId = order.hash.prefixed()
 
-        ethereumOrderControllerApiMock.mockGetById(order)
+        every {
+            testEthereumOrderApi.getOrderByHash(any())
+        } returns order.toMono()
 
         ethOrderProducer.send(
             KafkaMessage(
@@ -37,7 +44,11 @@ class InternalOrderEventHandlerFt : AbstractIntegrationTest() {
 
         waitAssert {
             val messages = findOrderUpdates(orderId)
-            Assertions.assertThat(messages).hasSize(1)
+            assertThat(messages).hasSize(1)
         }
+        verify {
+            testEthereumOrderApi.getOrderByHash(order.hash.prefixed())
+        }
+        confirmVerified(testEthereumOrderApi)
     }
 }
