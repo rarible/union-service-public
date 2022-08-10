@@ -2,6 +2,7 @@ package com.rarible.protocol.union.integration.immutablex.client
 
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.continuation.DateIdContinuation
+import org.apache.commons.codec.binary.Base64
 import org.springframework.web.util.UriBuilder
 import java.time.Instant
 
@@ -48,6 +49,13 @@ sealed class ImmutablexActivityQueryBuilder(
         builder.queryParamNotNull("max_timestamp", queryTo)
 
         orderBy("created_at", direction)
+    }
+
+    fun continuation(transactionId: String) {
+        val cursor = Base64.encodeBase64String("""{"transaction_id":$transactionId}""".toByteArray())
+            .trimEnd('=')
+        orderBy("transaction_id", "asc")
+        cursor(cursor)
     }
 
     companion object {
