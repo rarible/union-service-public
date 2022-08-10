@@ -66,10 +66,12 @@ class ElasticsearchTestBootstrapper(
             settings = definition.settings
         )
         createAlias(
-            reactiveElasticSearchOperations = esOperations, indexName = newIndexName, alias = definition.aliasName
+            reactiveElasticSearchOperations = esOperations, indexName = newIndexName, alias = definition.aliasName,
+            isWriteIndex = false,
         )
         createAlias(
-            reactiveElasticSearchOperations = esOperations, indexName = newIndexName, alias = definition.writeAliasName
+            reactiveElasticSearchOperations = esOperations, indexName = newIndexName, alias = definition.writeAliasName,
+            isWriteIndex = true
         )
     }
 
