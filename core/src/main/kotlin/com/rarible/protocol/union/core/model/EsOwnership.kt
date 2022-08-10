@@ -2,8 +2,10 @@ package com.rarible.protocol.union.core.model
 
 import com.rarible.protocol.union.core.model.elasticsearch.EsEntity
 import com.rarible.protocol.union.core.model.elasticsearch.EntityDefinition
+import com.rarible.protocol.union.core.model.elasticsearch.EsEntitiesConfig
 import com.rarible.protocol.union.core.model.elasticsearch.EsEntitiesConfig.INDEX_SETTINGS
 import com.rarible.protocol.union.core.model.elasticsearch.EsEntitiesConfig.loadMapping
+import com.rarible.protocol.union.core.model.elasticsearch.EsEntitiesConfig.loadSettings
 import com.rarible.protocol.union.dto.BlockchainDto
 import org.springframework.data.annotation.Id
 import org.springframework.data.elasticsearch.annotations.Field
@@ -31,7 +33,7 @@ data class EsOwnership(
                 entity = it,
                 mapping = loadMapping(it),
                 versionData = VERSION,
-                settings = INDEX_SETTINGS
+                settings = loadSettings(it)
             )
         }
     }
