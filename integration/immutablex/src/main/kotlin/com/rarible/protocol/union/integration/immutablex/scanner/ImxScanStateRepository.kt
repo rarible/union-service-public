@@ -16,12 +16,12 @@ class ImxScanStateRepository(
             ?: mongo.save(ImxScanState(id = id)).awaitFirst()
     }
 
-    suspend fun updateState(state: ImxScanState, cursor: String?, entityDate: Instant?) {
+    suspend fun updateState(state: ImxScanState, entityDate: Instant?, entityId: String?) {
         mongo.save(
             state.copy(
                 lastDate = nowMillis(),
-                cursor = cursor,
-                entityDate = entityDate
+                entityDate = entityDate,
+                entityId = entityId
             )
         ).awaitFirstOrNull()
     }

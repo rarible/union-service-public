@@ -9,7 +9,7 @@ import java.time.Instant
 data class ImxScanState(
     @MongoId(FieldType.STRING)
     val id: String,
-    val cursor: String? = null,
+    val entityId: String? = null,
     val entityDate: Instant? = null,
     val lastDate: Instant? = null,
     val lastError: String? = null,

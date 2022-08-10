@@ -83,7 +83,7 @@ class ImmutablexApiConfiguration {
 
     @Bean
     fun eventsApi(
-        immutablexWebClient: WebClient,
+        activityClient: ImmutablexActivityClient,
         orderClient: ImmutablexOrderClient
-    ) = ImxEventsApi(immutablexWebClient, orderClient)
+    ) = ImxEventsApi(activityClient, orderClient)
 }
