@@ -42,6 +42,7 @@ import org.springframework.web.reactive.function.client.WebClient
 @EnableConfigurationProperties(
     value = [
         FeatureFlagsProperties::class,
+        EsActivityEnrichmentProperties::class,
         EsProperties::class,
     ]
 )
