@@ -236,6 +236,7 @@ class TezosOrderServiceTest {
             lastUpdatedAt = nowMillis().atOffset(ZoneOffset.UTC),
             createdAt = nowMillis().atOffset(ZoneOffset.UTC),
             maker = UUID.randomUUID().toString(),
+            makePrice = null,
             make = Asset(
                 assetType = Asset.NFT(
                     contract = UUID.randomUUID().toString(),
@@ -248,6 +249,7 @@ class TezosOrderServiceTest {
                 assetType = Asset.XTZ(),
                 assetValue = BigDecimal.ONE
             ),
+            takePrice = null,
             cancelled = false,
             salt = BigInteger.ONE
         )
