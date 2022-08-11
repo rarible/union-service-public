@@ -11,6 +11,7 @@ import com.rarible.protocol.union.enrichment.service.query.item.ItemApiMergeServ
 import com.rarible.protocol.union.worker.config.ItemReindexProperties
 import com.rarible.protocol.union.worker.metrics.SearchTaskMetricFactory
 import com.rarible.protocol.union.worker.task.search.ParamFactory
+import com.rarible.protocol.union.worker.task.search.ownership.OwnershipTaskParam
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
@@ -31,7 +32,7 @@ class ItemTask(
 
     override suspend fun isAbleToRun(param: String): Boolean {
         val blockchain = paramFactory.parse<ItemTaskParam>(param).blockchain
-        return properties.enabled && properties.blockchains.single { it.blockchain == blockchain }.enabled
+        return properties.isBlockchainActive(blockchain)
     }
 
     override fun runLongTask(from: String?, param: String): Flow<String> {

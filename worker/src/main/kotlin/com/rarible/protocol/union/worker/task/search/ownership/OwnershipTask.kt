@@ -6,6 +6,7 @@ import com.rarible.protocol.union.core.model.EsOwnership
 import com.rarible.protocol.union.enrichment.repository.search.EsOwnershipRepository
 import com.rarible.protocol.union.worker.config.OwnershipReindexProperties
 import com.rarible.protocol.union.worker.task.search.ParamFactory
+import com.rarible.protocol.union.worker.task.search.order.OrderTaskParam
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import org.springframework.stereotype.Component
@@ -24,7 +25,7 @@ class OwnershipTask(
 
     override suspend fun isAbleToRun(param: String): Boolean {
         val blockchain = paramFactory.parse<OwnershipTaskParam>(param).blockchain
-        return properties.enabled && properties.blockchains.single { it.blockchain == blockchain }.enabled
+        return properties.isBlockchainActive(blockchain)
     }
 
     override fun runLongTask(from: String?, param: String): Flow<String> = when (from) {
