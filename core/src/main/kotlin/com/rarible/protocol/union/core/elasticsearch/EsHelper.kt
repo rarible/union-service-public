@@ -59,7 +59,7 @@ object EsHelper {
         logger.info("Adding alias '$alias' to '$indexName'")
         val realName = getRealName(reactiveElasticSearchOperations, indexName)
         val request = IndicesAliasesRequest().addAliasAction(
-            IndicesAliasesRequest.AliasActions.add().index(realName).alias(alias).writeIndex(false)
+            IndicesAliasesRequest.AliasActions.add().index(realName).alias(alias)
         )
         reactiveElasticSearchOperations.execute { it.indices().updateAliases(request) }.awaitFirstOrNull()
     }
