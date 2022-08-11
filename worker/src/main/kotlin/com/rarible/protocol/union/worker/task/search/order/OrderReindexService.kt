@@ -46,7 +46,7 @@ class OrderReindexService(
                 }
                 emit(res.continuation.orEmpty())
                 continuation = res.continuation
-            } while (continuation != null)
+            } while (!continuation.isNullOrEmpty())
         }
     }
 }
