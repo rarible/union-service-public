@@ -128,8 +128,8 @@ internal class ElasticsearchBootstrapperTest {
         indexInfo =
             reactiveElasticSearchOperations.execute { it.indices().getIndex(GetIndexRequest(indexName)) }.awaitFirst()
         assertThat(indexInfo.aliases.values.first().first().alias()).isEqualTo(aliasName)
-        assertThat(indexInfo.aliases.values.first()[1].alias).isEqualTo(aliasWriteName)
-        assertThat(indexInfo.aliases.values.first().size).isEqualTo(2)
+        //assertThat(indexInfo.aliases.values.first()[1].alias).isEqualTo(aliasWriteName)
+        assertThat(indexInfo.aliases.values.first().size).isEqualTo(1)
         val index2Name = entityDefinitionExtended.indexName(newVersionData)
         val index2Info =
             reactiveElasticSearchOperations.execute { it.indices().getIndex(GetIndexRequest(index2Name)) }.awaitFirst()
