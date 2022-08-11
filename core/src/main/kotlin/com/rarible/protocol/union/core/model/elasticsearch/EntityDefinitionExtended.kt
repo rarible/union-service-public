@@ -14,7 +14,7 @@ data class EntityDefinitionExtended(
 ) {
     val searchIndexCoordinates: IndexCoordinates = IndexCoordinates.of(aliasName)
 
-    val writeIndexCoordinates: IndexCoordinates = IndexCoordinates.of(aliasName, writeAliasName)
+    val writeIndexCoordinates: IndexCoordinates = IndexCoordinates.of(writeAliasName)
 
     fun indexName(minorVersion: Int) = "$indexRootName$minorVersion"
 
