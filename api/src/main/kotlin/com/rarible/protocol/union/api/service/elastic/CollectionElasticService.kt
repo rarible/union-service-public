@@ -12,8 +12,10 @@ import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.core.service.CollectionService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.CollectionsDto
 import com.rarible.protocol.union.dto.parser.IdParser
+import com.rarible.protocol.union.enrichment.model.ShortCollection
 import com.rarible.protocol.union.enrichment.model.ShortCollectionId
 import com.rarible.protocol.union.enrichment.repository.search.EsCollectionRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentCollectionService
@@ -80,11 +82,15 @@ class CollectionElasticService(
 
         val cursor = if (result.isEmpty()) null else result.last().fromCollectionLite()
 
+        val shortCollections: Map<CollectionIdDto, ShortCollection> = enrichmentCollectionService
+            .findAll(collections.map { ShortCollectionId(it.value.id) })
+            .associateBy { it.id.toDto() }
+
         return CollectionsDto(
             total = result.size.toLong(),
             continuation = cursor.toString(),
             collections = collections.values.toList().map {
-                val shortCollection = enrichmentCollectionService.get(ShortCollectionId(it.id))
+                val shortCollection = shortCollections[it.id]
                 enrichmentCollectionService.enrichCollection(shortCollection, it)
             }
         )
