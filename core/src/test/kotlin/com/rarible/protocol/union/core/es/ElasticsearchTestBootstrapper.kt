@@ -67,11 +67,9 @@ class ElasticsearchTestBootstrapper(
         )
         createAlias(
             reactiveElasticSearchOperations = esOperations, indexName = newIndexName, alias = definition.aliasName,
-            isWriteIndex = false,
         )
         createAlias(
             reactiveElasticSearchOperations = esOperations, indexName = newIndexName, alias = definition.writeAliasName,
-            isWriteIndex = true
         )
     }
 

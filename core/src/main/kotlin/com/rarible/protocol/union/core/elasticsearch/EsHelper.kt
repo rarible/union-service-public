@@ -33,7 +33,7 @@ object EsHelper {
         toIndex: String
     ) {
         removeAlias(reactiveElasticSearchOperations, fromIndex, alias)
-        createAlias(reactiveElasticSearchOperations, toIndex, alias, false)
+        createAlias(reactiveElasticSearchOperations, toIndex, alias)
     }
 
     suspend fun removeAlias(
@@ -54,7 +54,6 @@ object EsHelper {
 
     suspend fun createAlias(
         reactiveElasticSearchOperations: ReactiveElasticsearchOperations, indexName: String, alias: String,
-        isWriteIndex: Boolean,
     ) {
         logger.info("Adding alias '$alias' to '$indexName'")
         val realName = getRealName(reactiveElasticSearchOperations, indexName)
