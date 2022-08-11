@@ -84,7 +84,6 @@ class IndexService(
             ?: throw IllegalStateException("Index not found")
         if (realIndexName != newIndexName) {
             moveAlias(reactiveElasticSearchOperations, alias, realIndexName, newIndexName)
-            removeAlias(reactiveElasticSearchOperations, definition.writeAliasName, realIndexName)
         }
         updateMetadata(definition)
     }
