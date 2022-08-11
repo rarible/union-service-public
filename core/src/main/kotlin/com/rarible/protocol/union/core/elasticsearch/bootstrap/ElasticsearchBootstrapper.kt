@@ -134,12 +134,14 @@ class ElasticsearchBootstrapper(
         createAlias(
             reactiveElasticSearchOperations = esOperations,
             indexName = newIndexName,
-            alias = definition.aliasName
+            alias = definition.aliasName,
+            isWriteIndex = false,
         )
         createAlias(
             reactiveElasticSearchOperations = esOperations,
             indexName = newIndexName,
-            alias = definition.writeAliasName
+            alias = definition.writeAliasName,
+            isWriteIndex = true,
         )
         scheduleReindex(
             definition = definition,
@@ -188,7 +190,8 @@ class ElasticsearchBootstrapper(
         createAlias(
             reactiveElasticSearchOperations = esOperations,
             indexName = newIndexName,
-            alias = definition.writeAliasName
+            alias = definition.writeAliasName,
+            isWriteIndex = true,
         )
         scheduleReindex(definition, newIndexName)
     }

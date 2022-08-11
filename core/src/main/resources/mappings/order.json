@@ -58,15 +58,7 @@
       "type": "date"
     },
     "origins": {
-      "type": "nested",
-      "properties": {
-        "blockchainGroup": {
-          "type": "keyword"
-        },
-        "value": {
-          "type": "keyword"
-        }
-      }
+      "type": "keyword"
     },
     "status": {
       "type": "keyword"
