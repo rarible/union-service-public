@@ -60,17 +60,11 @@ class DipDupActivityConverter(
     }
 
     fun price(value: BigDecimal, makeValue: BigDecimal, platform: TezosPlatform) =
-        when (platform) {
-            // remove after ECHO-180
-            TezosPlatform.RARIBLE_V2 -> value
-            else -> {
-                try {
-                    value.divide(makeValue, MathContext.DECIMAL128)
-                } catch (e: Exception) {
-                    logger.error("Failed to calculate price: $value", e)
-                    value
-                }
-            }
+        try {
+            value.divide(makeValue, MathContext.DECIMAL128)
+        } catch (e: Exception) {
+            logger.error("Failed to calculate price: $value", e)
+            value
         }
 
     private suspend fun convertInternal(activity: DipDupActivity, blockchain: BlockchainDto): ActivityDto {
@@ -126,7 +120,7 @@ class DipDupActivityConverter(
                     nft = nft,
                     payment = payment,
                     buyer = UnionAddressConverter.convert(blockchain, activity.buyer),
-                    price = activity.payment.assetValue,
+                    price = price(payment.value, nft.value, activity.source),
                     priceUsd = currencyService.toUsd(blockchain, payment.type, payment.value),
                     type = OrderMatchSellDto.Type.SELL
                 )
