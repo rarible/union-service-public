@@ -125,11 +125,13 @@ class DipDupOrderEventHandlerFt : AbstractDipDupIntegrationTest() {
                 ),
                 assetValue = BigDecimal.ONE
             ),
+            makePrice = null,
             taker = null,
             take = Asset(
                 assetType = Asset.XTZ(),
                 assetValue = BigDecimal.ONE
             ),
+            takePrice = null,
             cancelled = false,
             salt = BigInteger.ONE
         )

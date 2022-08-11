@@ -4,6 +4,7 @@ import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.core.elasticsearch.EsHelper.createAlias
 import com.rarible.protocol.union.core.elasticsearch.EsHelper.createIndex
 import com.rarible.protocol.union.core.elasticsearch.EsHelper.getRealName
+import com.rarible.protocol.union.core.elasticsearch.EsHelper.moveAlias
 import com.rarible.protocol.union.core.elasticsearch.EsNameResolver
 import com.rarible.protocol.union.core.elasticsearch.EsNameResolver.Companion.METADATA_INDEX
 import com.rarible.protocol.union.core.elasticsearch.EsRepository
@@ -187,11 +188,11 @@ class ElasticsearchBootstrapper(
             mapping = definition.mapping,
             settings = definition.settings
         )
-        createAlias(
+        moveAlias(
             reactiveElasticSearchOperations = esOperations,
-            indexName = newIndexName,
             alias = definition.writeAliasName,
-            isWriteIndex = true,
+            fromIndex = realIndexName,
+            toIndex = newIndexName,
         )
         scheduleReindex(definition, newIndexName)
     }

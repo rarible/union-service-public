@@ -52,19 +52,8 @@ class DipDupOrderConverter(
 
     private suspend fun convertInternal(order: DipDupOrder, blockchain: BlockchainDto): OrderDto {
 
-        var make = DipDupConverter.convert(order.make, blockchain)
-        var take = DipDupConverter.convert(order.take, blockchain)
-
-        // It's a critical bug in dupdup-indexer: there's a price for 1 item in take instead of full price of order
-        // Need to fix in the indexer lately
-        if (order.platform == TezosPlatform.RARIBLE_V2) {
-            if (make.type.ext.isNft) {
-                take = take.copy(value = take.value * make.value)
-            }
-            if (take.type.ext.isNft) {
-                make = make.copy(value = make.value * take.value)
-            }
-        }
+        val make = DipDupConverter.convert(order.make, blockchain)
+        val take = DipDupConverter.convert(order.take, blockchain)
 
         val maker = UnionAddressConverter.convert(blockchain, order.maker)
         val taker = order.taker?.let { UnionAddressConverter.convert(blockchain, it) }
