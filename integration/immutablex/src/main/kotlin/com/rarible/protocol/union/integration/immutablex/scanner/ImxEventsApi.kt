@@ -3,23 +3,34 @@ package com.rarible.protocol.union.integration.immutablex.scanner
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.continuation.DateIdContinuation
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexAsset
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexCollection
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexMint
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexOrder
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexTrade
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexTransfer
 import com.rarible.protocol.union.integration.immutablex.client.ImxActivityClient
 import com.rarible.protocol.union.integration.immutablex.client.ImxAssetClient
+import com.rarible.protocol.union.integration.immutablex.client.ImxCollectionClient
 import com.rarible.protocol.union.integration.immutablex.client.ImxOrderClient
 import java.time.Instant
 
 class ImxEventsApi(
     private val activityClient: ImxActivityClient,
     private val assetClient: ImxAssetClient,
-    private val orderClient: ImxOrderClient
+    private val orderClient: ImxOrderClient,
+    private val collectionClient: ImxCollectionClient
 ) {
 
     suspend fun assets(date: Instant, id: String): List<ImmutablexAsset> {
         return assetClient.getAllAssets(
+            continuation = DateIdContinuation(date, id).toString(),
+            size = PAGE_SIZE,
+            sortAsc = true
+        ).result
+    }
+
+    suspend fun collections(date: Instant, id: String): List<ImmutablexCollection> {
+        return collectionClient.getAllWithUpdateAtSort(
             continuation = DateIdContinuation(date, id).toString(),
             size = PAGE_SIZE,
             sortAsc = true
@@ -90,7 +101,6 @@ class ImxEventsApi(
             statuses = null
         )
     }
-
 
     companion object {
 

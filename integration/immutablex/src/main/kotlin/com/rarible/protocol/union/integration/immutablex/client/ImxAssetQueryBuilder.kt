@@ -2,7 +2,6 @@ package com.rarible.protocol.union.integration.immutablex.client
 
 import com.rarible.protocol.union.dto.continuation.DateIdContinuation
 import com.rarible.protocol.union.dto.parser.IdParser
-import org.apache.commons.codec.binary.Base64
 import org.springframework.web.util.UriBuilder
 import java.time.Instant
 
@@ -42,24 +41,21 @@ class ImxAssetQueryBuilder(
         builder.queryParamNotNull("updated_max_timestamp", to)
     }
 
-    fun continuation(continuation: String?, sortAsc: Boolean = true) {
+    fun continuationByUpdatedAt(continuation: String?, sortAsc: Boolean = true) {
         val cursor = continuation
             ?.let { DateIdContinuation.parse(continuation) }
             ?.let { parsed ->
 
-                val date = parsed.date
-                val (token, tokenId) = IdParser.split(parsed.id, 2)
-
                 // Since IMX using microseconds in their cursors while we're using ms,
                 // there is no way to avoid duplication on page break except increasing/decreasing date from our TS
                 val fixedDate = when (sortAsc) {
-                    true -> date.plusMillis(1)
-                    false -> date.minusMillis(1)
+                    true -> parsed.date.plusMillis(1)
+                    false -> parsed.date.minusMillis(1)
                 }
-                Base64.encodeBase64String(
+                val (token, tokenId) = IdParser.split(parsed.id, 2)
+                ImxCursor.encode(
                     """{"contract_address":"$token","client_token_id":"$tokenId","updated_at":"$fixedDate"}"""
-                        .toByteArray()
-                ).trimEnd('=')
+                )
             }
 
         val direction = when (sortAsc) {

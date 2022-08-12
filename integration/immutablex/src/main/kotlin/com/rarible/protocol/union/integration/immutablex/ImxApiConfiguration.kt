@@ -85,6 +85,7 @@ class ImxApiConfiguration {
     fun eventsApi(
         assetClient: ImxAssetClient,
         activityClient: ImxActivityClient,
-        orderClient: ImxOrderClient
-    ) = ImxEventsApi(activityClient, assetClient, orderClient)
+        orderClient: ImxOrderClient,
+        collectionClient: ImxCollectionClient
+    ) = ImxEventsApi(activityClient, assetClient, orderClient, collectionClient)
 }

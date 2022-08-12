@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.integration.immutablex
 
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
+import com.rarible.protocol.union.core.model.UnionCollectionEvent
 import com.rarible.protocol.union.core.model.UnionItemEvent
 import com.rarible.protocol.union.core.model.UnionItemMetaEvent
 import com.rarible.protocol.union.core.model.UnionOrderEvent
@@ -8,6 +9,7 @@ import com.rarible.protocol.union.core.model.UnionOwnershipEvent
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.integration.immutablex.client.ImxActivityClient
 import com.rarible.protocol.union.integration.immutablex.handlers.ImxActivityEventHandler
+import com.rarible.protocol.union.integration.immutablex.handlers.ImxCollectionEventHandler
 import com.rarible.protocol.union.integration.immutablex.handlers.ImxItemEventHandler
 import com.rarible.protocol.union.integration.immutablex.handlers.ImxOrderEventHandler
 import com.rarible.protocol.union.integration.immutablex.scanner.ImxEventsApi
@@ -47,6 +49,11 @@ class ImxConsumerConfiguration {
     ) = ImxItemEventHandler(itemMetaHandler, activityClient)
 
     @Bean
+    fun imxCollectionEventHandler(
+        collectionEventHandler: IncomingEventHandler<UnionCollectionEvent>
+    ) = ImxCollectionEventHandler(collectionEventHandler)
+
+    @Bean
     fun immutablexOrderEventHandler(
         handler: IncomingEventHandler<UnionOrderEvent>,
         imxScanMetrics: ImxScanMetrics
@@ -65,13 +72,15 @@ class ImxConsumerConfiguration {
         activityHandler: ImxActivityEventHandler,
         itemEventHandler: ImxItemEventHandler,
         orderEventHandler: ImxOrderEventHandler,
+        collectionEventHandler: ImxCollectionEventHandler
     ): ImxScanner = ImxScanner(
         eventsApi,
         scanStateRepository,
         imxScanMetrics,
         activityHandler,
         itemEventHandler,
-        orderEventHandler
+        orderEventHandler,
+        collectionEventHandler
     )
 
 }

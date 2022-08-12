@@ -23,16 +23,30 @@ class ImxCollectionClient(
         }
     }
 
-    suspend fun getAll(
+    suspend fun getAllWithIdSort(
         continuation: String?,
         size: Int
+    ): ImmutablexPage<ImmutablexCollection> = getCollections {
+        it.continuationById(continuation)
+        it.pageSize(size)
+    }
+
+    suspend fun getAllWithUpdateAtSort(
+        continuation: String?,
+        size: Int,
+        sortAsc: Boolean
+    ): ImmutablexPage<ImmutablexCollection> = getCollections {
+        it.continuationByUpdatedAt(continuation, sortAsc)
+        it.pageSize(size)
+    }
+
+    private suspend fun getCollections(
+        build: (builder: ImxCollectionQueryBuilder) -> Unit
     ): ImmutablexPage<ImmutablexCollection> {
-        return webClient
-            .get()
+        return webClient.get()
             .uri {
                 val builder = ImxCollectionQueryBuilder(it)
-                builder.continuation(continuation)
-                builder.pageSize(size)
+                build(builder)
                 builder.build()
             }
             .accept(MediaType.APPLICATION_JSON)
