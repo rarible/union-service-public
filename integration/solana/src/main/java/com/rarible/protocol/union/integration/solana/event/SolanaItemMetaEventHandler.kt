@@ -31,7 +31,7 @@ open class SolanaItemMetaEventHandler(
             is TokenMetaUpdateEventDto -> {
                 val itemId = ItemIdDto(blockchain, event.tokenAddress)
                 val unionMeta = SolanaItemMetaConverter.convert(event.tokenMeta)
-                handler.onEvent(UnionItemMetaUpdateEvent(itemId, unionMeta))
+                handler.onEvent(UnionItemMetaUpdateEvent(itemId, null, unionMeta))
             }
         }
     }

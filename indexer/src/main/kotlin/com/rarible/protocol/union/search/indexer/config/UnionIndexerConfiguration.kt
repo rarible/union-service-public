@@ -6,7 +6,7 @@ import com.rarible.protocol.union.enrichment.repository.search.EsActivityReposit
 import com.rarible.protocol.union.integration.ethereum.EthereumApiConfiguration
 import com.rarible.protocol.union.integration.ethereum.PolygonApiConfiguration
 import com.rarible.protocol.union.integration.flow.FlowApiConfiguration
-import com.rarible.protocol.union.integration.immutablex.ImmutablexApiConfiguration
+import com.rarible.protocol.union.integration.immutablex.ImxApiConfiguration
 import com.rarible.protocol.union.integration.solana.SolanaApiConfiguration
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.ComponentScan
@@ -23,7 +23,7 @@ import org.springframework.context.annotation.Import
         FlowApiConfiguration::class,
         // TezosApiConfiguration::class, // TODO enable with proper config
         SolanaApiConfiguration::class,
-        ImmutablexApiConfiguration::class,
+        ImxApiConfiguration::class,
         SearchConfiguration::class,
         CoreConfiguration::class,
     ]
