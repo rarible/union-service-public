@@ -20,7 +20,7 @@ class ImxCollectionService(
         continuation: String?,
         size: Int
     ): Page<UnionCollection> {
-        val result = client.getAll(continuation, size).result
+        val result = client.getAllWithIdSort(continuation, size).result
         val converted = result.map { ImxCollectionConverter.convert(it, blockchain) }
         return Paging(UnionCollectionContinuation.ById, converted).getPage(size, 0)
     }

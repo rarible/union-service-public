@@ -28,7 +28,7 @@ class ImxActivityQueryBuilderTest {
         builder.user("u")
         builder.token("a")
         builder.tokenId("b")
-        builder.continuation(from, to, ActivitySortDto.EARLIEST_FIRST, null)
+        builder.continuationByDate(from, to, ActivitySortDto.EARLIEST_FIRST, null)
 
         assertThat(builder.toString()).isEqualTo(
             "$host/mints?" +
@@ -44,7 +44,7 @@ class ImxActivityQueryBuilderTest {
 
     @Test
     fun `without date parameters - with continuation, asc`() {
-        builder.continuation(null, null, ActivitySortDto.EARLIEST_FIRST, continuation)
+        builder.continuationByDate(null, null, ActivitySortDto.EARLIEST_FIRST, continuation)
 
         assertThat(builder.toString()).isEqualTo(
             "$host/mints?" +
@@ -56,7 +56,7 @@ class ImxActivityQueryBuilderTest {
 
     @Test
     fun `without date parameters - with continuation, desc`() {
-        builder.continuation(null, null, ActivitySortDto.LATEST_FIRST, continuation)
+        builder.continuationByDate(null, null, ActivitySortDto.LATEST_FIRST, continuation)
 
         assertThat(builder.toString()).isEqualTo(
             "$host/mints?" +
@@ -68,7 +68,7 @@ class ImxActivityQueryBuilderTest {
 
     @Test
     fun `from - with continuation, asc`() {
-        builder.continuation(from, null, ActivitySortDto.EARLIEST_FIRST, continuation)
+        builder.continuationByDate(from, null, ActivitySortDto.EARLIEST_FIRST, continuation)
 
         // min should be replaced by date from continuation
         assertThat(builder.toString()).isEqualTo(
@@ -81,7 +81,7 @@ class ImxActivityQueryBuilderTest {
 
     @Test
     fun `to - with continuation, asc`() {
-        builder.continuation(null, to, ActivitySortDto.EARLIEST_FIRST, continuation)
+        builder.continuationByDate(null, to, ActivitySortDto.EARLIEST_FIRST, continuation)
 
         // min should be added, max should be the same
         assertThat(builder.toString()).isEqualTo(
@@ -95,7 +95,7 @@ class ImxActivityQueryBuilderTest {
 
     @Test
     fun `from - with continuation, desc`() {
-        builder.continuation(from, null, ActivitySortDto.LATEST_FIRST, continuation)
+        builder.continuationByDate(from, null, ActivitySortDto.LATEST_FIRST, continuation)
 
         // max should be added, min should be the same
         assertThat(builder.toString()).isEqualTo(
@@ -109,7 +109,7 @@ class ImxActivityQueryBuilderTest {
 
     @Test
     fun `to - with continuation, desc`() {
-        builder.continuation(null, to, ActivitySortDto.LATEST_FIRST, continuation)
+        builder.continuationByDate(null, to, ActivitySortDto.LATEST_FIRST, continuation)
 
         // max should be replaced by date from continuation
         assertThat(builder.toString()).isEqualTo(
@@ -123,7 +123,7 @@ class ImxActivityQueryBuilderTest {
     @Test
     fun `transfer - from transaction Id`() {
         val transferQuery = TransferQueryBuilder(DefaultUriBuilderFactory(host).builder())
-        transferQuery.continuation("123")
+        transferQuery.continuationById("123")
 
         assertThat(transferQuery.toString()).isEqualTo(
             "$host/transfers?" +
@@ -140,7 +140,7 @@ class ImxActivityQueryBuilderTest {
 
         tradeQuery.token("a")
         tradeQuery.tokenId("b")
-        tradeQuery.continuation(null, null, ActivitySortDto.LATEST_FIRST, null)
+        tradeQuery.continuationByDate(null, null, ActivitySortDto.LATEST_FIRST, null)
 
         assertThat(tradeQuery.toString()).isEqualTo(
             "$host/trades?" +

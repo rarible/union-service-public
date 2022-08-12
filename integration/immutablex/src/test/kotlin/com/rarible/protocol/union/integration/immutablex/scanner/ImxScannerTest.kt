@@ -4,6 +4,7 @@ import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.integration.data.randomImxAsset
 import com.rarible.protocol.union.integration.data.randomImxOrder
 import com.rarible.protocol.union.integration.immutablex.handlers.ImxActivityEventHandler
+import com.rarible.protocol.union.integration.immutablex.handlers.ImxCollectionEventHandler
 import com.rarible.protocol.union.integration.immutablex.handlers.ImxItemEventHandler
 import com.rarible.protocol.union.integration.immutablex.handlers.ImxOrderEventHandler
 import io.mockk.clearMocks
@@ -25,6 +26,9 @@ class ImxScannerTest {
     private val itemEventHandler: ImxItemEventHandler =
         mockk { coEvery { handle(any()) } returns Unit }
 
+    private val collectionEventHandler: ImxCollectionEventHandler =
+        mockk { coEvery { handle(any()) } returns Unit }
+
     private val orderEventHandler: ImxOrderEventHandler =
         mockk { coEvery { handle(any()) } returns Unit }
 
@@ -39,7 +43,8 @@ class ImxScannerTest {
         imxScanMetrics,
         activityHandler,
         itemEventHandler,
-        orderEventHandler
+        orderEventHandler,
+        collectionEventHandler
     )
 
     @BeforeEach
