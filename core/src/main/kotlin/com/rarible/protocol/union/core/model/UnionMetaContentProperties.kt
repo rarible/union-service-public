@@ -16,6 +16,7 @@ sealed class UnionMetaContentProperties {
 
     abstract val mimeType: String?
     abstract val size: Long?
+    abstract val available: Boolean?
 
     abstract fun isEmpty(): Boolean
 
@@ -25,6 +26,7 @@ sealed class UnionMetaContentProperties {
 data class UnionImageProperties(
     override val mimeType: String? = null,
     override val size: Long? = null,
+    override val available: Boolean? = null,
     val width: Int? = null,
     val height: Int? = null
 ) : UnionMetaContentProperties() {
@@ -43,6 +45,7 @@ data class UnionImageProperties(
 data class UnionVideoProperties(
     override val mimeType: String? = null,
     override val size: Long? = null,
+    override val available: Boolean? = null,
     val width: Int? = null,
     val height: Int? = null
 ) : UnionMetaContentProperties() {
@@ -59,7 +62,8 @@ data class UnionVideoProperties(
 
 data class UnionAudioProperties(
     override val mimeType: String? = null,
-    override val size: Long? = null
+    override val size: Long? = null,
+    override val available: Boolean? = null,
 ) : UnionMetaContentProperties() {
 
     override fun isEmpty(): Boolean = mimeType == null
@@ -70,7 +74,8 @@ data class UnionAudioProperties(
 
 data class UnionModel3dProperties(
     override val mimeType: String? = null,
-    override val size: Long? = null
+    override val size: Long? = null,
+    override val available: Boolean? = null,
 ) : UnionMetaContentProperties() {
 
     override fun isEmpty(): Boolean = mimeType == null
@@ -81,7 +86,8 @@ data class UnionModel3dProperties(
 
 data class UnionHtmlProperties(
     override val mimeType: String? = null,
-    override val size: Long? = null
+    override val size: Long? = null,
+    override val available: Boolean? = null,
 ) : UnionMetaContentProperties() {
 
     override fun isEmpty(): Boolean = mimeType == null
@@ -92,7 +98,8 @@ data class UnionHtmlProperties(
 
 data class UnionUnknownProperties(
     override val mimeType: String? = null,
-    override val size: Long? = null
+    override val size: Long? = null,
+    override val available: Boolean? = null,
 ) : UnionMetaContentProperties() {
 
     override fun isEmpty(): Boolean = mimeType == null

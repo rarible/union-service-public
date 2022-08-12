@@ -202,6 +202,7 @@ class EmbeddedDataMigrationJob(
         val toSave = UnionEmbeddedContent(
             id = unionContentMetaService.getEmbeddedId(embedded.content),
             mimeType = properties.mimeType ?: embedded.meta.mimeType,
+            available = properties.available,
             size = embedded.content.size,
             data = embedded.content
         )
@@ -234,6 +235,7 @@ class EmbeddedDataMigrationJob(
         val embedded = UnionEmbeddedContent(
             id = unionContentMetaService.getEmbeddedId(data),
             mimeType = mimeType,
+            available = content.properties?.available,
             size = data.size,
             data = data
         )

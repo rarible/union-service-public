@@ -64,7 +64,8 @@ object EnrichedMetaConverter {
                 mimeType = properties.mimeType,
                 height = properties.height,
                 size = properties.size,
-                width = properties.width
+                width = properties.width,
+                available = properties.available,
             )
             is UnionVideoProperties -> VideoContentDto(
                 url = content.url,
@@ -73,7 +74,8 @@ object EnrichedMetaConverter {
                 mimeType = properties.mimeType,
                 height = properties.height,
                 size = properties.size,
-                width = properties.width
+                width = properties.width,
+                available = properties.available,
             )
             is UnionAudioProperties -> AudioContentDto(
                 url = content.url,
@@ -81,6 +83,7 @@ object EnrichedMetaConverter {
                 fileName = content.fileName,
                 mimeType = properties.mimeType,
                 size = properties.size,
+                available = properties.available,
             )
             is UnionModel3dProperties -> Model3dContentDto(
                 url = content.url,
@@ -88,6 +91,7 @@ object EnrichedMetaConverter {
                 fileName = content.fileName,
                 mimeType = properties.mimeType,
                 size = properties.size,
+                available = properties.available,
             )
             is UnionHtmlProperties -> HtmlContentDto(
                 url = content.url,
@@ -95,6 +99,7 @@ object EnrichedMetaConverter {
                 fileName = content.fileName,
                 mimeType = properties.mimeType,
                 size = properties.size,
+                available = properties.available,
             )
             // Fallback: consider this was an image. It is better than to return nothing.
             else -> ImageContentDto(
@@ -103,7 +108,8 @@ object EnrichedMetaConverter {
                 mimeType = null,
                 size = null,
                 width = null,
-                height = null
+                height = null,
+                available = null,
             )
         }
     }
