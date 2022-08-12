@@ -51,6 +51,8 @@ object ImxActivityConverter {
             date = activity.timestamp,
             owner = UnionAddressConverter.convert(blockchain, activity.user),
             itemId = ItemIdDto(blockchain, activity.token.data.encodedItemId()),
+            contract = ContractAddressConverter.convert(blockchain, activity.token.data.tokenAddress),
+            tokenId = activity.token.data.encodedTokenId(),
             value = activity.token.data.quantity,
             transactionHash = activity.transactionId.toString(),
             blockchainInfo = null,
@@ -65,7 +67,9 @@ object ImxActivityConverter {
                     owner = from,
                     value = activity.token.data.quantity,
                     transactionHash = activity.transactionId.toString(),
-                    itemId = ItemIdDto(blockchain, activity.encodedItemId())
+                    itemId = ItemIdDto(blockchain, activity.encodedItemId()),
+                    contract = ContractAddressConverter.convert(blockchain, activity.token.data.tokenAddress),
+                    tokenId = activity.token.data.encodedTokenId(),
                 )
             } else {
                 TransferActivityDto(
@@ -74,6 +78,8 @@ object ImxActivityConverter {
                     from = from,
                     owner = to,
                     itemId = ItemIdDto(blockchain, activity.encodedItemId()),
+                    contract = ContractAddressConverter.convert(blockchain, activity.token.data.tokenAddress),
+                    tokenId = activity.token.data.encodedTokenId(),
                     value = activity.token.data.quantity,
                     transactionHash = activity.transactionId.toString(),
                     blockchainInfo = null
@@ -102,7 +108,7 @@ object ImxActivityConverter {
                 price = BigDecimal.ZERO,
                 priceUsd = null,
                 amountUsd = null,
-                type = OrderMatchSellDto.Type.SELL,
+                type = OrderMatchSellDto.Type.SELL
             )
         }
 
