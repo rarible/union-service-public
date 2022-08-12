@@ -10,13 +10,24 @@ class ImxScanStateRepository(
     private val mongo: ReactiveMongoTemplate,
 ) {
 
-    suspend fun getOrCreateState(type: ImxScanEntityType): ImxScanState {
+    suspend fun getState(type: ImxScanEntityType): ImxScanState? {
         val id = type.name.lowercase()
         return mongo.findById(id, ImxScanState::class.java).awaitFirstOrNull()
-            ?: mongo.save(ImxScanState(id = id)).awaitFirst()
     }
 
-    suspend fun updateState(state: ImxScanState, entityDate: Instant?, entityId: String?) {
+    suspend fun createState(type: ImxScanEntityType, entityId: String): ImxScanState {
+        val id = type.name.lowercase()
+        return mongo.save(
+            ImxScanState(
+                id = id,
+                lastDate = nowMillis(),
+                entityDate = nowMillis(),
+                entityId = entityId
+            )
+        ).awaitFirst()
+    }
+
+    suspend fun updateState(state: ImxScanState, entityDate: Instant, entityId: String) {
         mongo.save(
             state.copy(
                 lastDate = nowMillis(),

@@ -9,10 +9,13 @@ import java.time.Instant
 data class ImxScanState(
     @MongoId(FieldType.STRING)
     val id: String,
-    val entityId: String? = null,
-    val entityDate: Instant? = null,
+    val entityId: String,
+    val entityDate: Instant,
     val lastDate: Instant? = null,
     val lastError: String? = null,
     val lastErrorDate: Instant? = null,
     val lastErrorStacktrace: String? = null
-)
+) {
+
+    fun isInited() = entityDate != null && entityId != null
+}

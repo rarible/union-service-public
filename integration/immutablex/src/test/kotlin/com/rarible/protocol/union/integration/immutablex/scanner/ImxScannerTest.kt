@@ -62,11 +62,11 @@ class ImxScannerTest {
             entityDate = lastUpdated.minusSeconds(10)
         )
 
-        coEvery { imxScanStateRepository.getOrCreateState(ImxScanEntityType.ORDER) }
+        coEvery { imxScanStateRepository.getState(ImxScanEntityType.ORDER) }
             .returns(scanState)
             .andThen(scanState.copy(entityId = lastId, entityDate = lastUpdated))
 
-        coEvery { imxEventsApi.orders(scanState.entityDate!!, scanState.entityId!!) } returns listOf(
+        coEvery { imxEventsApi.orders(scanState.entityDate, scanState.entityId) } returns listOf(
             oldOrder, lastOrder
         )
         coEvery { imxEventsApi.orders(lastUpdated, lastId) } returns emptyList()
@@ -93,11 +93,11 @@ class ImxScannerTest {
             entityDate = lastUpdated.minusSeconds(10)
         )
 
-        coEvery { imxScanStateRepository.getOrCreateState(ImxScanEntityType.ITEM) }
+        coEvery { imxScanStateRepository.getState(ImxScanEntityType.ITEM) }
             .returns(scanState)
             .andThen(scanState.copy(entityId = lastId, entityDate = lastUpdated))
 
-        coEvery { imxEventsApi.assets(scanState.entityDate!!, scanState.entityId!!) } returns listOf(
+        coEvery { imxEventsApi.assets(scanState.entityDate, scanState.entityId) } returns listOf(
             oldAsset, lastAsset
         )
         coEvery { imxEventsApi.assets(lastUpdated, lastId) } returns emptyList()
