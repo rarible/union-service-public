@@ -18,6 +18,7 @@ sealed class UnionItemMetaEvent {
  */
 data class UnionItemMetaUpdateEvent(
     override val itemId: ItemIdDto,
+    val unionItem: UnionItem?,
     val unionMeta: UnionMeta
 ) : UnionItemMetaEvent()
 

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategies
 import com.fasterxml.jackson.databind.annotation.JsonNaming
 import com.rarible.protocol.union.dto.ActivityIdDto
 import com.rarible.protocol.union.dto.BlockchainDto
+import scalether.domain.Address
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.Instant
@@ -205,7 +206,15 @@ data class ImmutablexTransfer(
     @JsonProperty("transaction_id")
     override val transactionId: Long,
     val user: String,
-) : ImmutablexTokenEvent(transactionId, timestamp, token)
+) : ImmutablexTokenEvent(transactionId, timestamp, token) {
+
+    val isBurn = receiver == ZERO_ADDRESS
+
+    companion object {
+
+        private val ZERO_ADDRESS = Address.ZERO().prefixed()
+    }
+}
 
 data class ImmutablexTransfersPage(
     val cursor: String,

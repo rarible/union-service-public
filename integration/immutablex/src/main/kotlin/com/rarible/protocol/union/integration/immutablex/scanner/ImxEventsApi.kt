@@ -1,18 +1,30 @@
 package com.rarible.protocol.union.integration.immutablex.scanner
 
 import com.rarible.protocol.union.dto.OrderSortDto
-import com.rarible.protocol.union.integration.immutablex.client.ImmutablexActivityClient
+import com.rarible.protocol.union.dto.continuation.DateIdContinuation
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexAsset
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexMint
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexOrder
-import com.rarible.protocol.union.integration.immutablex.client.ImmutablexOrderClient
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexTrade
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexTransfer
+import com.rarible.protocol.union.integration.immutablex.client.ImxActivityClient
+import com.rarible.protocol.union.integration.immutablex.client.ImxAssetClient
+import com.rarible.protocol.union.integration.immutablex.client.ImxOrderClient
 import java.time.Instant
 
 class ImxEventsApi(
-    private val activityClient: ImmutablexActivityClient,
-    private val orderClient: ImmutablexOrderClient
+    private val activityClient: ImxActivityClient,
+    private val assetClient: ImxAssetClient,
+    private val orderClient: ImxOrderClient
 ) {
+
+    suspend fun assets(date: Instant, id: String): List<ImmutablexAsset> {
+        return assetClient.getAllAssets(
+            continuation = DateIdContinuation(date, id).toString(),
+            size = PAGE_SIZE,
+            sortAsc = true
+        ).result
+    }
 
     suspend fun mints(transactionId: String): List<ImmutablexMint> {
         return activityClient.getMintEvents(
@@ -72,7 +84,7 @@ class ImxEventsApi(
 
     suspend fun orders(date: Instant, id: String): List<ImmutablexOrder> {
         return orderClient.getAllOrders(
-            continuation = "${date.toEpochMilli()}_${id}",
+            continuation = DateIdContinuation(date, id).toString(),
             size = PAGE_SIZE,
             sort = OrderSortDto.LAST_UPDATE_ASC,
             statuses = null
