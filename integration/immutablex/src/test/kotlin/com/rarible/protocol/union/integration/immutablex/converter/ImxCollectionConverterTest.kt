@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.integration.immutablex.converter
 
+import com.rarible.core.test.data.randomAddress
 import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexCollection
 import org.assertj.core.api.Assertions.assertThat
@@ -18,7 +19,7 @@ class ImxCollectionConverterTest {
         assertThat(actual.id.fullId()).isEqualTo("IMMUTABLEX:${source.address}")
         assertThat(actual.name).isEqualTo(source.name)
         assertThat(actual.symbol).isNull()
-        assertThat(actual.owner).isNull()
+        assertThat(actual.owner?.value).isEqualTo(source.projectOwnerAddress)
         assertThat(actual.meta).isNotNull
         assertThat(actual.meta?.name).isEqualTo(source.name)
         assertThat(actual.meta?.description).isEqualTo(source.description)
@@ -29,8 +30,8 @@ class ImxCollectionConverterTest {
         assertThat(actual.features).isEqualTo(listOf(CollectionDto.Features.APPROVE_FOR_ALL))
     }
 
-
     companion object {
+
         @JvmStatic
         fun source(): Stream<Arguments> = Stream.of(
             Arguments.of(
@@ -41,7 +42,8 @@ class ImxCollectionConverterTest {
                     iconUrl = "",
                     collectionImageUrl = "",
                     projectId = 49769L,
-                    metadataApiUrl = "https://gateway.pinata.cloud/ipfs/QmNpyHLe9g3A3WuPnRKZjkQ4K6mP5fd5y2LZYPhWksj5SD"
+                    metadataApiUrl = "https://gateway.pinata.cloud/ipfs/QmNpyHLe9g3A3WuPnRKZjkQ4K6mP5fd5y2LZYPhWksj5SD",
+                    projectOwnerAddress = randomAddress().prefixed()
                 )
             ),
             Arguments.of(
@@ -52,7 +54,8 @@ class ImxCollectionConverterTest {
                     iconUrl = null,
                     collectionImageUrl = "https://ipfs.io/ipfs/QmapEdL7C7CUoHURicwACz5wfKBGVDW84ghw7eq7CiJmWL",
                     projectId = 36456L,
-                    metadataApiUrl = "https://ipfs.io/ipfs/QmdASYWt2Ho4ixDZiMGbVdgYUsLo7SrTVtJKcLzBRoEcd8"
+                    metadataApiUrl = "https://ipfs.io/ipfs/QmdASYWt2Ho4ixDZiMGbVdgYUsLo7SrTVtJKcLzBRoEcd8",
+                    projectOwnerAddress = randomAddress().prefixed()
                 )
             ),
             Arguments.of(
@@ -63,7 +66,8 @@ class ImxCollectionConverterTest {
                     iconUrl = "TODO:",
                     collectionImageUrl = "TODO:",
                     projectId = 50067L,
-                    metadataApiUrl = "TODO:/0x058ed021ce844a91b254432ac4c1423d526ef437/"
+                    metadataApiUrl = "TODO:/0x058ed021ce844a91b254432ac4c1423d526ef437/",
+                    projectOwnerAddress = null
                 )
             ),
             Arguments.of(
@@ -74,7 +78,8 @@ class ImxCollectionConverterTest {
                     iconUrl = "https://dev.topfrags.gg/api/thumbnail",
                     collectionImageUrl = "https://dev.topfrags.gg/api/image/thumbnail",
                     projectId = 50265L,
-                    metadataApiUrl = "https://dev.topfrags.gg/api/metadata"
+                    metadataApiUrl = "https://dev.topfrags.gg/api/metadata",
+                    projectOwnerAddress = null
                 )
             )
         )
