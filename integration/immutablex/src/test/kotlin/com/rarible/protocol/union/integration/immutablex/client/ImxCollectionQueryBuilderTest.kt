@@ -18,7 +18,7 @@ class ImxCollectionQueryBuilderTest {
     @Test
     fun `all - without continuation`() {
         builder.pageSize(10)
-        builder.continuation(null)
+        builder.continuationById(null)
 
         assertThat(builder.toString()).isEqualTo(
             "$host/collections" +
@@ -32,7 +32,7 @@ class ImxCollectionQueryBuilderTest {
     fun `with continuation`() {
         val continuation = "0x001061e7b587ee12256e668c90103c09f7773938"
         builder.pageSize(10)
-        builder.continuation(continuation)
+        builder.continuationById(continuation)
 
         assertThat(builder.toString()).isEqualTo(
             "$host/collections" +

@@ -1,9 +1,11 @@
 package com.rarible.protocol.union.integration.immutablex.scanner
 
+import com.rarible.core.common.nowMillis
 import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexEvent
 import com.rarible.protocol.union.integration.immutablex.client.TokenIdDecoder
 import com.rarible.protocol.union.integration.immutablex.handlers.ImxActivityEventHandler
+import com.rarible.protocol.union.integration.immutablex.handlers.ImxCollectionEventHandler
 import com.rarible.protocol.union.integration.immutablex.handlers.ImxItemEventHandler
 import com.rarible.protocol.union.integration.immutablex.handlers.ImxOrderEventHandler
 import kotlinx.coroutines.runBlocking
@@ -19,6 +21,7 @@ class ImxScanner(
     private val activityHandler: ImxActivityEventHandler,
     private val itemEventHandler: ImxItemEventHandler,
     private val orderEventHandler: ImxOrderEventHandler,
+    private val collectionEventHandler: ImxCollectionEventHandler
 ) {
 
     private val logger by Logger()
@@ -91,6 +94,19 @@ class ImxScanner(
 
         val last = page.lastOrNull() ?: return@listen null
         ImxScanResult(last.encodedItemId(), last.updatedAt!!)
+    }
+
+    @Scheduled(
+        initialDelayString = "\${integration.immutablex.scanner.job.initialDelay.collections}",
+        fixedDelayString = "\${integration.immutablex.scanner.job.fixedDelay}",
+        timeUnit = TimeUnit.SECONDS
+    )
+    fun collections() = listen(ImxScanEntityType.COLLECTION, { Address.ZERO().prefixed() }) { state ->
+        val page = imxEventsApi.collections(state.entityDate, state.entityId)
+        page.forEach { collectionEventHandler.handle(it) }
+
+        val last = page.lastOrNull() ?: return@listen null
+        ImxScanResult(last.address, nowMillis()) // TODO replace with update_at when IMX add it
     }
 
     private fun listen(

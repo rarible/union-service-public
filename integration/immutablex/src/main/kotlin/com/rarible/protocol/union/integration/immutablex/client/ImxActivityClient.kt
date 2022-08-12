@@ -183,7 +183,7 @@ class ImxActivityClient(
             builder.user(user)
             builder.pageSize(pageSize)
             // Sorting included
-            builder.continuation(from, to, safeSort, continuation)
+            builder.continuationByDate(from, to, safeSort, continuation)
             builder.build()
         }
         .accept(MediaType.APPLICATION_JSON)
@@ -200,7 +200,7 @@ class ImxActivityClient(
 
             builder.pageSize(pageSize)
             // Sorting included
-            builder.continuation(transactionId)
+            builder.continuationById(transactionId)
             builder.build()
         }
         .accept(MediaType.APPLICATION_JSON)
