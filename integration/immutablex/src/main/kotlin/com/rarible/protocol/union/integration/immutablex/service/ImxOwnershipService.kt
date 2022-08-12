@@ -36,7 +36,7 @@ class ImxOwnershipService(
     }
 
     override suspend fun getOwnershipsByIds(ownershipIds: List<String>): List<UnionOwnership> {
-        val itemIds = ownershipIds.map { TokenIdDecoder.decode(it.substringBeforeLast(":")) }.toSet()
+        val itemIds = ownershipIds.map { TokenIdDecoder.decodeItemId(it.substringBeforeLast(":")) }.toSet()
 
         val creators = coroutineScope { async { activityClient.getItemCreators(itemIds) } }
         val assets = assetClient.getByIds(itemIds)
