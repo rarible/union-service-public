@@ -24,24 +24,24 @@ import org.springframework.web.reactive.function.client.WebClient
 class ImxApiConfiguration {
 
     @Bean
-    fun immutablexBlockchain() = BlockchainDto.IMMUTABLEX
+    fun imxBlockchain() = BlockchainDto.IMMUTABLEX
 
     @Bean
-    fun immutablexWebClient(props: ImxIntegrationProperties): WebClient {
+    fun imxWebClient(props: ImxIntegrationProperties): WebClient {
         return ImxWebClientFactory.createClient(props.client!!.url!!, props.apiKey)
     }
 
     @Bean
-    fun immutablexAssetClient(immutablexWebClient: WebClient) = ImxAssetClient(immutablexWebClient)
+    fun imxAssetClient(immutablexWebClient: WebClient) = ImxAssetClient(immutablexWebClient)
 
     @Bean
-    fun immutablexActivityClient(immutablexWebClient: WebClient) = ImxActivityClient(immutablexWebClient)
+    fun imxActivityClient(immutablexWebClient: WebClient) = ImxActivityClient(immutablexWebClient)
 
     @Bean
-    fun immutablexCollectionClient(immutablexWebClient: WebClient) = ImxCollectionClient(immutablexWebClient)
+    fun imxCollectionClient(immutablexWebClient: WebClient) = ImxCollectionClient(immutablexWebClient)
 
     @Bean
-    fun immutablexOrderClient(immutablexWebClient: WebClient) = ImxOrderClient(immutablexWebClient)
+    fun imxOrderClient(immutablexWebClient: WebClient) = ImxOrderClient(immutablexWebClient)
 
     @Bean
     fun immutablexItemService(
