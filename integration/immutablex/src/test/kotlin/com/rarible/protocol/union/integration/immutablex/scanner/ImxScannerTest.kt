@@ -1,33 +1,31 @@
 package com.rarible.protocol.union.integration.immutablex.scanner
 
 import com.rarible.core.common.nowMillis
+import com.rarible.protocol.union.integration.data.randomImxAsset
 import com.rarible.protocol.union.integration.data.randomImxOrder
-import com.rarible.protocol.union.integration.immutablex.handlers.ImmutablexActivityEventHandler
-import com.rarible.protocol.union.integration.immutablex.handlers.ImmutablexItemEventHandler
-import com.rarible.protocol.union.integration.immutablex.handlers.ImmutablexOrderEventHandler
-import com.rarible.protocol.union.integration.immutablex.handlers.ImmutablexOwnershipEventHandler
+import com.rarible.protocol.union.integration.immutablex.handlers.ImxActivityEventHandler
+import com.rarible.protocol.union.integration.immutablex.handlers.ImxItemEventHandler
+import com.rarible.protocol.union.integration.immutablex.handlers.ImxOrderEventHandler
 import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import scalether.domain.Address
 
 class ImxScannerTest {
 
     private val imxEventsApi: ImxEventsApi = mockk()
     private val imxScanStateRepository: ImxScanStateRepository = mockk()
 
-    private val activityHandler: ImmutablexActivityEventHandler =
+    private val activityHandler: ImxActivityEventHandler =
         mockk { coEvery { handle(any()) } returns Unit }
 
-    private val ownershipEventHandler: ImmutablexOwnershipEventHandler =
+    private val itemEventHandler: ImxItemEventHandler =
         mockk { coEvery { handle(any()) } returns Unit }
 
-    private val itemEventHandler: ImmutablexItemEventHandler =
-        mockk { coEvery { handle(any()) } returns Unit }
-
-    private val orderEventHandler: ImmutablexOrderEventHandler =
+    private val orderEventHandler: ImxOrderEventHandler =
         mockk { coEvery { handle(any()) } returns Unit }
 
     private val imxScanMetrics: ImxScanMetrics = mockk {
@@ -40,7 +38,6 @@ class ImxScannerTest {
         imxScanStateRepository,
         imxScanMetrics,
         activityHandler,
-        ownershipEventHandler,
         itemEventHandler,
         orderEventHandler
     )
@@ -60,12 +57,12 @@ class ImxScannerTest {
         val oldOrder = randomImxOrder().copy(updatedAt = lastUpdated.minusSeconds(1))
 
         val scanState = ImxScanState(
-            id = ImxScanEntityType.ORDERS.name,
+            id = ImxScanEntityType.ORDER.name,
             entityId = "0",
             entityDate = lastUpdated.minusSeconds(10)
         )
 
-        coEvery { imxScanStateRepository.getOrCreateState(ImxScanEntityType.ORDERS) }
+        coEvery { imxScanStateRepository.getOrCreateState(ImxScanEntityType.ORDER) }
             .returns(scanState)
             .andThen(scanState.copy(entityId = lastId, entityDate = lastUpdated))
 
@@ -80,6 +77,38 @@ class ImxScannerTest {
         coVerify(exactly = 2) { orderEventHandler.handle(any()) }
         // State updated twice, after second scanning should be interrupted
         coVerify(exactly = 2) { imxScanStateRepository.updateState(any(), lastUpdated, lastId) }
+    }
+
+    @Test
+    fun `scan assets`() {
+
+        val lastUpdated = nowMillis()
+        val lastAsset = randomImxAsset().copy(updatedAt = lastUpdated)
+        val lastId = lastAsset.itemId
+        val oldAsset = randomImxAsset().copy(updatedAt = lastUpdated.minusSeconds(1))
+
+        val scanState = ImxScanState(
+            id = ImxScanEntityType.ITEM.name,
+            entityId = "${Address.ZERO().prefixed()}:0",
+            entityDate = lastUpdated.minusSeconds(10)
+        )
+
+        coEvery { imxScanStateRepository.getOrCreateState(ImxScanEntityType.ITEM) }
+            .returns(scanState)
+            .andThen(scanState.copy(entityId = lastId, entityDate = lastUpdated))
+
+        coEvery { imxEventsApi.assets(scanState.entityDate!!, scanState.entityId!!) } returns listOf(
+            oldAsset, lastAsset
+        )
+        coEvery { imxEventsApi.assets(lastUpdated, lastId) } returns emptyList()
+
+        scanner.assets()
+
+        // Only two assets from first request have been handled
+        coVerify(exactly = 2) { itemEventHandler.handle(any()) }
+        // State updated twice, after second scanning should be interrupted
+        coVerify(exactly = 2) { imxScanStateRepository.updateState(any(), lastUpdated, lastId) }
+
     }
 
 }

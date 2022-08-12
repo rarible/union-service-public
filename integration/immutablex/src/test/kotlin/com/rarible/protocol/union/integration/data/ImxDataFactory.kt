@@ -3,10 +3,13 @@ package com.rarible.protocol.union.integration.data
 import com.rarible.core.common.nowMillis
 import com.rarible.core.test.data.randomAddress
 import com.rarible.core.test.data.randomBigDecimal
+import com.rarible.core.test.data.randomBigInt
 import com.rarible.core.test.data.randomLong
 import com.rarible.core.test.data.randomString
 import com.rarible.protocol.union.integration.immutablex.client.FeeToken
 import com.rarible.protocol.union.integration.immutablex.client.FeeTokenData
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexAsset
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexCollectionShort
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexOrder
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexOrderData
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexOrderFee
@@ -15,6 +18,39 @@ import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.Instant
 import java.time.temporal.ChronoUnit
+
+fun randomImxAsset(
+    collection: ImmutablexCollectionShort = randomImxCollectionShort(),
+    createdAt: Instant = nowMillis().minusSeconds(1),
+    token: String = randomAddress().prefixed(),
+    tokenId: String = randomBigInt(4).toString(),
+    user: String = randomAddress().prefixed(),
+    updatedAt: Instant = nowMillis()
+): ImmutablexAsset {
+    return ImmutablexAsset(
+        collection = collection,
+        createdAt = createdAt,
+        description = "Description: " + randomString(),
+        fees = emptyList(),
+        id = tokenId,
+        imageUrl = randomString(),
+        metadata = mapOf("trait" to randomString()),
+        name = "Name: " + randomString(),
+        status = "eth",
+        tokenAddress = token,
+        tokenId = tokenId,
+        uri = "http://localhost:8080/${randomString()}",
+        updatedAt = updatedAt,
+        user = user
+    )
+}
+
+fun randomImxCollectionShort(): ImmutablexCollectionShort {
+    return ImmutablexCollectionShort(
+        iconUrl = "http://localhost:8080/${randomString()}",
+        name = randomString()
+    )
+}
 
 fun randomImxOrder(
     orderId: Long = randomLong(),

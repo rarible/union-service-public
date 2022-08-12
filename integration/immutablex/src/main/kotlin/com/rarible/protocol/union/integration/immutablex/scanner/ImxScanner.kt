@@ -3,12 +3,13 @@ package com.rarible.protocol.union.integration.immutablex.scanner
 import com.rarible.core.common.nowMillis
 import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexEvent
-import com.rarible.protocol.union.integration.immutablex.handlers.ImmutablexActivityEventHandler
-import com.rarible.protocol.union.integration.immutablex.handlers.ImmutablexItemEventHandler
-import com.rarible.protocol.union.integration.immutablex.handlers.ImmutablexOrderEventHandler
-import com.rarible.protocol.union.integration.immutablex.handlers.ImmutablexOwnershipEventHandler
+import com.rarible.protocol.union.integration.immutablex.client.TokenIdDecoder
+import com.rarible.protocol.union.integration.immutablex.handlers.ImxActivityEventHandler
+import com.rarible.protocol.union.integration.immutablex.handlers.ImxItemEventHandler
+import com.rarible.protocol.union.integration.immutablex.handlers.ImxOrderEventHandler
 import kotlinx.coroutines.runBlocking
 import org.springframework.scheduling.annotation.Scheduled
+import scalether.domain.Address
 import java.util.concurrent.TimeUnit
 
 class ImxScanner(
@@ -16,10 +17,9 @@ class ImxScanner(
     private val imxScanStateRepository: ImxScanStateRepository,
     private val imxScanMetrics: ImxScanMetrics,
 
-    private val activityHandler: ImmutablexActivityEventHandler,
-    private val ownershipEventHandler: ImmutablexOwnershipEventHandler,
-    private val itemEventHandler: ImmutablexItemEventHandler,
-    private val orderEventHandler: ImmutablexOrderEventHandler,
+    private val activityHandler: ImxActivityEventHandler,
+    private val itemEventHandler: ImxItemEventHandler,
+    private val orderEventHandler: ImxOrderEventHandler,
 ) {
 
     private val logger by Logger()
@@ -29,21 +29,21 @@ class ImxScanner(
         fixedDelayString = "\${integration.immutablex.scanner.job.fixedDelay}",
         timeUnit = TimeUnit.SECONDS
     )
-    fun mints() = listenActivity(imxEventsApi::mints, imxEventsApi::lastMint, ImxScanEntityType.MINTS)
+    fun mints() = listenActivity(imxEventsApi::mints, imxEventsApi::lastMint, ImxScanEntityType.MINT)
 
     @Scheduled(
         initialDelayString = "\${integration.immutablex.scanner.job.initialDelay.transfers}",
         fixedDelayString = "\${integration.immutablex.scanner.job.fixedDelay}",
         timeUnit = TimeUnit.SECONDS
     )
-    fun transfers() = listenActivity(imxEventsApi::transfers, imxEventsApi::lastTransfer, ImxScanEntityType.TRANSFERS)
+    fun transfers() = listenActivity(imxEventsApi::transfers, imxEventsApi::lastTransfer, ImxScanEntityType.TRANSFER)
 
     @Scheduled(
         initialDelayString = "\${integration.immutablex.scanner.job.initialDelay.trades}",
         fixedDelayString = "\${integration.immutablex.scanner.job.fixedDelay}",
         timeUnit = TimeUnit.SECONDS
     )
-    fun trades() = listenActivity(imxEventsApi::trades, imxEventsApi::lastTrade, ImxScanEntityType.TRADES)
+    fun trades() = listenActivity(imxEventsApi::trades, imxEventsApi::lastTrade, ImxScanEntityType.TRADE)
 
     private fun <T : ImmutablexEvent> listenActivity(
         apiMethod: suspend (id: String) -> List<T>,
@@ -55,7 +55,7 @@ class ImxScanner(
         val transactionId = state.entityId ?: getInitialId().transactionId.toString()
 
         val page = apiMethod(transactionId)
-        handle(page)
+        page.forEach { activityHandler.handle(it) }
 
         val last = page.lastOrNull() ?: return@listen null
 
@@ -67,7 +67,7 @@ class ImxScanner(
         fixedDelayString = "\${integration.immutablex.scanner.job.fixedDelay}",
         timeUnit = TimeUnit.SECONDS
     )
-    fun orders() = listen(ImxScanEntityType.ORDERS) { state ->
+    fun orders() = listen(ImxScanEntityType.ORDER) { state ->
         val date = state.entityDate ?: nowMillis()
         val id = state.entityId ?: "0"
         val page = imxEventsApi.orders(date, id)
@@ -75,6 +75,21 @@ class ImxScanner(
 
         val last = page.lastOrNull() ?: return@listen null
         ImxScanResult(last.orderId.toString(), last.updatedAt!!)
+    }
+
+    @Scheduled(
+        initialDelayString = "\${integration.immutablex.scanner.job.initialDelay.assets}",
+        fixedDelayString = "\${integration.immutablex.scanner.job.fixedDelay}",
+        timeUnit = TimeUnit.SECONDS
+    )
+    fun assets() = listen(ImxScanEntityType.ITEM) { state ->
+        val date = state.entityDate ?: nowMillis()
+        val id = state.entityId ?: "${Address.ZERO().prefixed()}:0"
+        val page = imxEventsApi.assets(date, TokenIdDecoder.decodeItemId(id))
+        page.forEach { itemEventHandler.handle(it) }
+
+        val last = page.lastOrNull() ?: return@listen null
+        ImxScanResult(last.encodedItemId(), last.updatedAt!!)
     }
 
     private fun listen(
@@ -109,14 +124,6 @@ class ImxScanner(
                 imxScanMetrics.onScanError(state, "unknown")
                 return@runBlocking
             }
-        }
-    }
-
-    private suspend fun <T : ImmutablexEvent> handle(items: List<T>) {
-        items.forEach {
-            activityHandler.handle(it)
-            itemEventHandler.handle(it)
-            ownershipEventHandler.handle(it)
         }
     }
 

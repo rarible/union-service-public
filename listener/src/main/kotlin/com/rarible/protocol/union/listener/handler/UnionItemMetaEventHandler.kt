@@ -34,7 +34,7 @@ class UnionItemMetaEventHandler(
                 logger.info("Saving meta for item {} by MetaUpdateEvent", event.itemId)
                 itemMetaService.save(event.itemId, event.unionMeta)
 
-                val item = enrichmentItemService.fetchOrNull(ShortItemId(event.itemId))
+                val item = event.unionItem ?: enrichmentItemService.fetchOrNull(ShortItemId(event.itemId))
                 if (item != null) {
                     logger.info("Sending item {} update event caused by meta update", event.itemId)
                     handler.onEvent(UnionItemUpdateEvent(item))

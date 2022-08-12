@@ -1,15 +1,17 @@
 package com.rarible.protocol.union.integration.immutablex.scanner
 
+import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.core.test.ManualTest
-import com.rarible.protocol.union.integration.ImmutablexManualTest
+import com.rarible.protocol.union.integration.ImxManualTest
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import scalether.domain.Address
 
 @ManualTest
-class ImxEventsApiMt : ImmutablexManualTest() {
+class ImxEventsApiMt : ImxManualTest() {
 
-    private val eventsApi = ImxEventsApi(activityClient, orderClient)
+    private val eventsApi = ImxEventsApi(activityClient, assetClient, orderClient)
 
     @Test
     fun getLastMint() = runBlocking<Unit> {
@@ -61,5 +63,19 @@ class ImxEventsApiMt : ImmutablexManualTest() {
             .filter { it.transactionId < transfer.transactionId }
 
         assertThat(nothingLeft).isEmpty()
+    }
+
+    // Just to ensure this request works
+    @Test
+    fun getAssets() = runBlocking<Unit> {
+        val result = eventsApi.assets(nowMillis(), "${Address.ZERO().prefixed()}:0")
+        assertThat(result).isEmpty()
+    }
+
+    // Just to ensure this request works
+    @Test
+    fun getOrders() = runBlocking<Unit> {
+        val result = eventsApi.orders(nowMillis(), "0")
+        assertThat(result).isEmpty()
     }
 }

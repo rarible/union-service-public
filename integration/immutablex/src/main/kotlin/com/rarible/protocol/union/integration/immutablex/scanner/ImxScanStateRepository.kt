@@ -11,7 +11,7 @@ class ImxScanStateRepository(
 ) {
 
     suspend fun getOrCreateState(type: ImxScanEntityType): ImxScanState {
-        val id = type.name
+        val id = type.name.lowercase()
         return mongo.findById(id, ImxScanState::class.java).awaitFirstOrNull()
             ?: mongo.save(ImxScanState(id = id)).awaitFirst()
     }
