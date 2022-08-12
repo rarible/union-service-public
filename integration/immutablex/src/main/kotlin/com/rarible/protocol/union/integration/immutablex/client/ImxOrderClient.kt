@@ -27,6 +27,8 @@ class ImxOrderClient(
         OrderStatusDto.INACTIVE
     )
 
+    private val orderComparator = compareBy<ImmutablexOrder>({ it.updatedAt }, { it.orderId.toString() })
+
     suspend fun getById(id: String): ImmutablexOrder {
         return getByUri(ImxOrderQueryBuilder.getByIdPath(id))
     }
@@ -45,15 +47,11 @@ class ImxOrderClient(
     ): List<ImmutablexOrder> {
         val pages = getOrdersByStatuses(statuses) { status ->
             val safeSort = sort ?: OrderSortDto.LAST_UPDATE_DESC
-            webClient.get().uri {
-                val builder = ImxOrderQueryBuilder(it)
-                builder.pageSize(size)
-                builder.continuationByUpdatedAt(safeSort, continuation)
-                builder.status(status)
-                builder.build()
-            }.retrieve()
-                .toEntity<ImmutablexOrdersPage>()
-                .awaitSingle().body!!
+            getOrders {
+                it.pageSize(size)
+                it.continuationByUpdatedAt(safeSort, continuation)
+                it.status(status)
+            }
         }
         return mergePages(pages, sort, size)
     }
@@ -93,19 +91,15 @@ class ImxOrderClient(
     ): List<ImmutablexOrder> {
         val filteredStatuses = statuses?.filter { isSupportedSellStatus(it) }
         val pages = getOrdersByStatuses(filteredStatuses) { status ->
-            webClient.get().uri {
-                val builder = ImxOrderQueryBuilder(it)
-                builder.pageSize(size)
-                builder.sellTokenType("ERC721")
-                builder.continuationBySellPrice(currencyId, continuation)
-                builder.sellToken(token)
-                builder.sellTokenId(tokenId)
-                builder.maker(maker)
-                builder.status(status)
-                builder.build()
-            }.retrieve()
-                .toEntity<ImmutablexOrdersPage>()
-                .awaitSingle().body!!
+            getOrders {
+                it.pageSize(size)
+                it.sellTokenType("ERC721")
+                it.continuationBySellPrice(currencyId, continuation)
+                it.sellToken(token)
+                it.sellTokenId(tokenId)
+                it.maker(maker)
+                it.status(status)
+            }
         }
 
         return mergeSellPages(pages, size)
@@ -143,19 +137,16 @@ class ImxOrderClient(
         if (!isSupportedSellStatus(status)) return ImmutablexOrdersPage.empty()
 
         val safeSort = sort ?: OrderSortDto.LAST_UPDATE_DESC
-        return webClient.get().uri {
-            val builder = ImxOrderQueryBuilder(it)
-            builder.pageSize(size)
-            builder.sellTokenType("ERC721")
-            builder.continuationByUpdatedAt(safeSort, continuation)
-            builder.sellToken(collection)
-            builder.sellTokenId(tokenId)
-            builder.maker(maker)
-            builder.status(status)
-            builder.build()
-        }.retrieve()
-            .toEntity<ImmutablexOrdersPage>()
-            .awaitSingle().body!!
+
+        return getOrders {
+            it.pageSize(size)
+            it.sellTokenType("ERC721")
+            it.continuationByUpdatedAt(safeSort, continuation)
+            it.sellToken(collection)
+            it.sellTokenId(tokenId)
+            it.maker(maker)
+            it.status(status)
+        }
     }
 
     suspend fun getBuyOrdersByMaker(
@@ -192,24 +183,20 @@ class ImxOrderClient(
         val filteredStatuses = statuses?.filter { isSupportedBuyStatus(it) }
         val pages = getOrdersByStatuses(filteredStatuses) { status ->
             val makerPages = getOrdersByMaker(makers) { maker ->
-                webClient.get().uri {
-                    val builder = ImxOrderQueryBuilder(it)
-                    builder.buyTokenType("ERC721")
-                    builder.buyToken(token)
-                    builder.buyTokenId(tokenId)
-                    builder.maker(maker)
-                    builder.status(status)
-                    builder.pageSize(size)
-                    builder.continuationByBuyPrice(currencyId, continuation)
-                    builder.build()
-                }.retrieve()
-                    .toEntity<ImmutablexOrdersPage>()
-                    .awaitSingle().body!!
+                getOrders {
+                    it.buyTokenType("ERC721")
+                    it.buyToken(token)
+                    it.buyTokenId(tokenId)
+                    it.maker(maker)
+                    it.status(status)
+                    it.pageSize(size)
+                    it.continuationByBuyPrice(currencyId, continuation)
+                }
             }
             ImmutablexOrdersPage(mergePages(makerPages, null, size))
         }
 
-        return mergeSellPages(pages, size)
+        return mergeBuyPages(pages, size)
     }
 
     private suspend fun buyOrders(
@@ -224,19 +211,16 @@ class ImxOrderClient(
         if (!isSupportedBuyStatus(status)) return ImmutablexOrdersPage.empty()
 
         val safeSort = sort ?: OrderSortDto.LAST_UPDATE_DESC
-        return webClient.get().uri {
-            val builder = ImxOrderQueryBuilder(it)
-            builder.buyTokenType("ERC721")
-            builder.buyToken(collection)
-            builder.buyTokenId(tokenId)
-            builder.maker(maker)
-            builder.status(status)
-            builder.pageSize(size)
-            builder.continuationByUpdatedAt(safeSort, continuation)
-            builder.build()
-        }.retrieve()
-            .toEntity<ImmutablexOrdersPage>()
-            .awaitSingle().body!!
+
+        return getOrders {
+            it.buyTokenType("ERC721")
+            it.buyToken(collection)
+            it.buyTokenId(tokenId)
+            it.maker(maker)
+            it.status(status)
+            it.pageSize(size)
+            it.continuationByUpdatedAt(safeSort, continuation)
+        }
     }
 
     private suspend fun getOrdersByStatuses(
@@ -261,6 +245,16 @@ class ImxOrderClient(
         }
     }
 
+    private suspend fun getOrders(build: (builder: ImxOrderQueryBuilder) -> Unit): ImmutablexOrdersPage {
+        return webClient.get().uri {
+            val builder = ImxOrderQueryBuilder(it)
+            build(builder)
+            builder.build()
+        }.retrieve()
+            .toEntity<ImmutablexOrdersPage>()
+            .awaitSingle().body!!
+    }
+
     private fun mergePages(
         pages: Collection<ImmutablexOrdersPage>,
         sort: OrderSortDto?,
@@ -270,9 +264,8 @@ class ImxOrderClient(
         val orders = pages.map { it.result }.flatten()
 
         val sorted = when (safeSort) {
-            // TODO Ideally we should consider here ID too
-            OrderSortDto.LAST_UPDATE_ASC -> orders.sortedBy { it.updatedAt }
-            OrderSortDto.LAST_UPDATE_DESC -> orders.sortedByDescending { it.updatedAt }
+            OrderSortDto.LAST_UPDATE_ASC -> orders.sortedWith(orderComparator)
+            OrderSortDto.LAST_UPDATE_DESC -> orders.sortedWith(orderComparator.reversed())
         }
 
         return sorted.take(size)
