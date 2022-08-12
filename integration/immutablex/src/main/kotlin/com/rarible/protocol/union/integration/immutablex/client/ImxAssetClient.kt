@@ -35,7 +35,7 @@ class ImxAssetClient(
         it.pageSize(size)
         it.fromDate(lastUpdatedFrom?.let { ms -> Instant.ofEpochMilli(ms) })
         it.toDate(lastUpdatedTo?.let { ms -> Instant.ofEpochMilli(ms) })
-        it.continuation(continuation, sortAsc)
+        it.continuationByUpdatedAt(continuation, sortAsc)
     }
 
     suspend fun getAssetsByCollection(
@@ -47,7 +47,7 @@ class ImxAssetClient(
         it.owner(owner)
         it.collection(collection)
         it.pageSize(size)
-        it.continuation(continuation, false)
+        it.continuationByUpdatedAt(continuation, false)
     }
 
     suspend fun getAssetsByOwner(
@@ -57,7 +57,7 @@ class ImxAssetClient(
     ) = getAssets {
         it.owner(owner)
         it.pageSize(size)
-        it.continuation(continuation, false)
+        it.continuationByUpdatedAt(continuation, false)
     }
 
     private suspend fun getAssets(build: (builder: ImxAssetQueryBuilder) -> Unit): ImmutablexAssetsPage {
