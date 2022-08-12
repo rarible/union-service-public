@@ -9,6 +9,7 @@ import com.rarible.tzkt.client.CollectionClient
 import com.rarible.tzkt.model.CollectionType
 import io.mockk.coEvery
 import org.assertj.core.api.Assertions
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
@@ -19,6 +20,7 @@ class DipDupCollectionEventHandlerFt : AbstractDipDupIntegrationTest() {
     private lateinit var tzktCollectionClient: CollectionClient
 
     @Test
+    @Disabled("Works locally, fix under PT-953")
     fun `should send collection event to outgoing topic`() = runWithKafka {
 
         val collectionId = randomString()
