@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.integration.immutablex.scanner
 
-import com.rarible.core.common.nowMillis
 import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexEvent
 import com.rarible.protocol.union.integration.immutablex.client.TokenIdDecoder
@@ -29,32 +28,38 @@ class ImxScanner(
         fixedDelayString = "\${integration.immutablex.scanner.job.fixedDelay}",
         timeUnit = TimeUnit.SECONDS
     )
-    fun mints() = listenActivity(imxEventsApi::mints, imxEventsApi::lastMint, ImxScanEntityType.MINT)
+    fun mints() = listenActivity(ImxScanEntityType.MINT, imxEventsApi::mints) {
+        imxEventsApi.lastMint().transactionId.toString()
+    }
 
     @Scheduled(
         initialDelayString = "\${integration.immutablex.scanner.job.initialDelay.transfers}",
         fixedDelayString = "\${integration.immutablex.scanner.job.fixedDelay}",
         timeUnit = TimeUnit.SECONDS
     )
-    fun transfers() = listenActivity(imxEventsApi::transfers, imxEventsApi::lastTransfer, ImxScanEntityType.TRANSFER)
+    fun transfers() = listenActivity(ImxScanEntityType.TRANSFER, imxEventsApi::transfers) {
+        imxEventsApi.lastTransfer().transactionId.toString()
+    }
 
     @Scheduled(
         initialDelayString = "\${integration.immutablex.scanner.job.initialDelay.trades}",
         fixedDelayString = "\${integration.immutablex.scanner.job.fixedDelay}",
         timeUnit = TimeUnit.SECONDS
     )
-    fun trades() = listenActivity(imxEventsApi::trades, imxEventsApi::lastTrade, ImxScanEntityType.TRADE)
+    fun trades() = listenActivity(ImxScanEntityType.TRADE, imxEventsApi::trades) {
+        imxEventsApi.lastTrade().transactionId.toString()
+    }
 
     private fun <T : ImmutablexEvent> listenActivity(
-        apiMethod: suspend (id: String) -> List<T>,
-        getInitialId: suspend () -> T,
         type: ImxScanEntityType,
-    ) = listen(type) { state ->
+        getEvents: suspend (id: String) -> List<T>,
+        getInitialId: suspend () -> String,
+    ) = listen(type, getInitialId) { state ->
         // We want to start from last known activity, other activities will
         // be synced via jobs
-        val transactionId = state.entityId ?: getInitialId().transactionId.toString()
+        val transactionId = state.entityId
 
-        val page = apiMethod(transactionId)
+        val page = getEvents(transactionId)
         page.forEach { activityHandler.handle(it) }
 
         val last = page.lastOrNull() ?: return@listen null
@@ -67,25 +72,21 @@ class ImxScanner(
         fixedDelayString = "\${integration.immutablex.scanner.job.fixedDelay}",
         timeUnit = TimeUnit.SECONDS
     )
-    fun orders() = listen(ImxScanEntityType.ORDER) { state ->
-        val date = state.entityDate ?: nowMillis()
-        val id = state.entityId ?: "0"
-        val page = imxEventsApi.orders(date, id)
+    fun orders() = listen(ImxScanEntityType.ORDER, { "0" }, { state ->
+        val page = imxEventsApi.orders(state.entityDate, state.entityId)
         page.forEach { orderEventHandler.handle(it) }
 
         val last = page.lastOrNull() ?: return@listen null
         ImxScanResult(last.orderId.toString(), last.updatedAt!!)
-    }
+    })
 
     @Scheduled(
         initialDelayString = "\${integration.immutablex.scanner.job.initialDelay.assets}",
         fixedDelayString = "\${integration.immutablex.scanner.job.fixedDelay}",
         timeUnit = TimeUnit.SECONDS
     )
-    fun assets() = listen(ImxScanEntityType.ITEM) { state ->
-        val date = state.entityDate ?: nowMillis()
-        val id = state.entityId ?: "${Address.ZERO().prefixed()}:0"
-        val page = imxEventsApi.assets(date, TokenIdDecoder.decodeItemId(id))
+    fun assets() = listen(ImxScanEntityType.ITEM, { "${Address.ZERO().prefixed()}:0" }) { state ->
+        val page = imxEventsApi.assets(state.entityDate, TokenIdDecoder.decodeItemId(state.entityId))
         page.forEach { itemEventHandler.handle(it) }
 
         val last = page.lastOrNull() ?: return@listen null
@@ -94,11 +95,14 @@ class ImxScanner(
 
     private fun listen(
         type: ImxScanEntityType,
+        getInitialId: suspend () -> String,
         handle: suspend (state: ImxScanState) -> ImxScanResult?,
     ) = runBlocking {
         // We should download all entities without until we reach the last one
         while (true) {
-            val state = imxScanStateRepository.getOrCreateState(type)
+            val state = imxScanStateRepository.getState(type)
+                ?: imxScanStateRepository.createState(type, getInitialId())
+
             try {
                 val result = handle(state)
 
