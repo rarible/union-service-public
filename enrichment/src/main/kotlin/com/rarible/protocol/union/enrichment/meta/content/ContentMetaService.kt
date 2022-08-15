@@ -118,29 +118,33 @@ class ContentMetaService(
         mimeType = mimeType,
         width = width,
         height = height,
-        size = size
+        size = size,
+        available = available,
     )
 
     private fun ContentMeta.toImageProperties() = UnionImageProperties(
         mimeType = mimeType,
         width = width,
         height = height,
-        size = size
+        size = size,
+        available = available,
     )
 
     private fun ContentMeta.toAudioProperties() = UnionAudioProperties(
         mimeType = mimeType,
-        size = size
+        size = size,
+        available = available,
     )
 
     private fun ContentMeta.toModel3dProperties() = UnionModel3dProperties(
         mimeType = mimeType,
-        size = size
+        size = size,
+        available = available,
     )
 
     private fun ContentMeta.toHtmlProperties() = UnionHtmlProperties(
         mimeType = mimeType,
-        size = size
+        size = size,
+        available = available,
     )
-
 }

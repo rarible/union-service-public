@@ -25,6 +25,7 @@ class ContentControllerFt : AbstractIntegrationTest() {
         val content = UnionEmbeddedContent(
             id = randomString(),
             mimeType = "text/html",
+            available = true,
             size = data.size,
             data = data
         )

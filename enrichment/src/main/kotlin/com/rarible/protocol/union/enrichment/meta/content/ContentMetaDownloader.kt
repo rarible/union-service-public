@@ -99,6 +99,7 @@ class ContentMetaDownloader(
         val toSave = UnionEmbeddedContent(
             id = contentMetaService.getEmbeddedId(embedded.content),
             mimeType = properties.mimeType ?: embedded.meta.mimeType,
+            available = true,
             size = embedded.content.size,
             data = embedded.content
         )

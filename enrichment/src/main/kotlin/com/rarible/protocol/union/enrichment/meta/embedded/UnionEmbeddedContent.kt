@@ -9,5 +9,6 @@ class UnionEmbeddedContent(
     val id: String,
     val mimeType: String,
     val size: Int,
-    val data: ByteArray
+    val data: ByteArray,
+    val available: Boolean?
 )
