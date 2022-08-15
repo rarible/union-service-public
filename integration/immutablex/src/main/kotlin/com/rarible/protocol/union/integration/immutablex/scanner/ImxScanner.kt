@@ -80,7 +80,12 @@ class ImxScanner(
         page.forEach { orderEventHandler.handle(it) }
 
         val last = page.lastOrNull() ?: return@listen null
-        ImxScanResult(last.orderId.toString(), last.updatedAt!!)
+        val scanResult = ImxScanResult(last.orderId.toString(), last.updatedAt!!)
+        logger.info(
+            "Immutablex Order scan - new state: {} - {}, was {} - {}",
+            scanResult.entityDate, scanResult.entityId, state.entityDate, state.entityId
+        )
+        scanResult
     })
 
     @Scheduled(
@@ -93,7 +98,12 @@ class ImxScanner(
         page.forEach { itemEventHandler.handle(it) }
 
         val last = page.lastOrNull() ?: return@listen null
-        ImxScanResult(last.encodedItemId(), last.updatedAt!!)
+        val scanResult = ImxScanResult(last.encodedItemId(), last.updatedAt!!)
+        logger.info(
+            "Immutablex Item scan - new state: {} - {}, was {} - {}",
+            scanResult.entityDate, scanResult.entityId, state.entityDate, state.entityId
+        )
+        scanResult
     }
 
     @Scheduled(
@@ -106,7 +116,12 @@ class ImxScanner(
         page.forEach { collectionEventHandler.handle(it) }
 
         val last = page.lastOrNull() ?: return@listen null
-        ImxScanResult(last.address, nowMillis()) // TODO replace with update_at when IMX add it
+        val scanResult = ImxScanResult(last.address, nowMillis()) // TODO replace with update_at when IMX add it
+        logger.info(
+            "Immutablex Collection scan - new state: {} - {}, was {} - {}",
+            scanResult.entityDate, scanResult.entityId, state.entityDate, state.entityId
+        )
+        scanResult
     }
 
     private fun listen(

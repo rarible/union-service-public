@@ -21,12 +21,6 @@ class ImxActivityServiceMt : ImxManualTest() {
     private val service = ImxActivityService(activityClient, orderService)
 
     @Test
-    fun getByIds1() = runBlocking<Unit> {
-        val trade = service.getActivitiesByIds(listOf(TypedActivityId("4022495", ActivityTypeDto.SELL)))
-        println(trade)
-    }
-
-    @Test
     fun getByIds() = runBlocking<Unit> {
         val ids = listOf(
             TypedActivityId("5132646", ActivityTypeDto.TRANSFER),
@@ -175,6 +169,99 @@ class ImxActivityServiceMt : ImxManualTest() {
 
         println(activitiesWithWrongUser)
         assertThat(activitiesWithWrongUser).hasSize(0)
+    }
+
+    @Test
+    fun `get transfers - no burns`() = runBlocking<Unit> {
+        // This user burned 4 items (the latest transactions), they should be filtered out
+        val page1 = service.getActivitiesByUser(
+            types = listOf(UserActivityTypeDto.TRANSFER_FROM),
+            users = listOf("0x9041c8804999a4a741f10011ba284b7925c45740"),
+            from = null,
+            to = null,
+            continuation = null,
+            size = 5,
+            sort = ActivitySortDto.LATEST_FIRST
+        )
+
+        val page2 = service.getActivitiesByUser(
+            types = listOf(UserActivityTypeDto.TRANSFER_FROM),
+            users = listOf("0x9041c8804999a4a741f10011ba284b7925c45740"),
+            from = null,
+            to = null,
+            continuation = page1.continuation,
+            size = 5,
+            sort = ActivitySortDto.LATEST_FIRST
+        )
+
+        // There are 7 transfers in total (and 4 filtered burns)
+        assertThat(page1.entities).hasSize(5)
+        assertThat(page2.entities).hasSize(2)
+    }
+
+    @Test
+    fun `get transfers - burns & transfers`() = runBlocking<Unit> {
+        // We expect here single request returns burns and transfers together
+        // (this user has 4 burns and 7 transfers in total)
+        val page = service.getActivitiesByUser(
+            types = listOf(UserActivityTypeDto.TRANSFER_FROM, UserActivityTypeDto.BURN),
+            users = listOf("0x9041c8804999a4a741f10011ba284b7925c45740"),
+            from = null,
+            to = null,
+            continuation = null,
+            size = 10,
+            sort = ActivitySortDto.LATEST_FIRST
+        )
+
+        assertThat(page.entities).hasSize(10)
+    }
+
+    @Test
+    fun `get transfers - only burns`() = runBlocking<Unit> {
+        val page = service.getActivitiesByUser(
+            types = listOf(UserActivityTypeDto.BURN),
+            users = listOf("0x9041c8804999a4a741f10011ba284b7925c45740"),
+            from = null,
+            to = null,
+            continuation = null,
+            size = 5,
+            sort = ActivitySortDto.LATEST_FIRST
+        )
+
+        assertThat(page.entities).hasSize(4)
+    }
+
+    @Test
+    fun `same timestamp on page break`() = runBlocking<Unit> {
+        val continuation = "1634727056071_2240398"
+        val page1 = service.getAllActivities(
+            types = listOf(ActivityTypeDto.MINT),
+            continuation = continuation,
+            size = 2,
+            sort = ActivitySortDto.EARLIEST_FIRST
+        )
+        val page2 = service.getAllActivities(
+            types = listOf(ActivityTypeDto.MINT),
+            continuation = page1.continuation,
+            size = 2,
+            sort = ActivitySortDto.EARLIEST_FIRST
+        )
+        val page3 = service.getAllActivities(
+            types = listOf(ActivityTypeDto.MINT),
+            continuation = page2.continuation,
+            size = 2,
+            sort = ActivitySortDto.EARLIEST_FIRST
+        )
+
+        val result = page1.entities + page2.entities + page3.entities
+        val dates = result.map { it.date }.toSet()
+        // All entities have same date
+        assertThat(dates).hasSize(1)
+
+        val ids = result.map { it.id.value }
+        assertThat(ids).isEqualTo(
+            listOf("2240399", "2240400", "2240401", "2240402", "2240403", "2240404")
+        )
     }
 
 }

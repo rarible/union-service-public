@@ -48,7 +48,7 @@ class ImxAssetQueryBuilderTest {
 
         assertThat(builder.toString()).isEqualTo(
             "$host/assets?include_fees=true" +
-                "&cursor=eyJjb250cmFjdF9hZGRyZXNzIjoiYWJjIiwiY2xpZW50X3Rva2VuX2lkIjoiMSIsInVwZGF0ZWRfYXQiOiIyMDIyLTAxLTAxVDAyOjU5OjU5Ljk5OVoifQ" +
+                "&cursor=eyJjb250cmFjdF9hZGRyZXNzIjoiYWJjIiwiY2xpZW50X3Rva2VuX2lkIjoiMSIsInVwZGF0ZWRfYXQiOiIyMDIyLTAxLTAxVDAzOjAwOjAwWiJ9" +
                 "&order_by=updated_at" +
                 "&direction=desc"
         )

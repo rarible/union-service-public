@@ -37,7 +37,7 @@ class ImxActivityQueryBuilderTest {
                 "&token_id=b" +
                 "&min_timestamp=2022-01-01T00:00:00Z" +
                 "&max_timestamp=2022-01-01T06:00:00Z" +
-                "&order_by=created_at" +
+                "&order_by=transaction_id" +
                 "&direction=asc"
         )
     }
@@ -49,8 +49,9 @@ class ImxActivityQueryBuilderTest {
         assertThat(builder.toString()).isEqualTo(
             "$host/mints?" +
                 "min_timestamp=2022-01-01T03:00:00Z" +
-                "&order_by=created_at" +
-                "&direction=asc"
+                "&order_by=transaction_id" +
+                "&direction=asc" +
+                "&cursor=eyJ0cmFuc2FjdGlvbl9pZCI6MX0"
         )
     }
 
@@ -60,9 +61,10 @@ class ImxActivityQueryBuilderTest {
 
         assertThat(builder.toString()).isEqualTo(
             "$host/mints?" +
-                "max_timestamp=2022-01-01T03:00:00Z" +
-                "&order_by=created_at" +
-                "&direction=desc"
+                "max_timestamp=2022-01-01T03:00:00.001Z" +
+                "&order_by=transaction_id" +
+                "&direction=desc" +
+                "&cursor=eyJ0cmFuc2FjdGlvbl9pZCI6MX0"
         )
     }
 
@@ -74,8 +76,9 @@ class ImxActivityQueryBuilderTest {
         assertThat(builder.toString()).isEqualTo(
             "$host/mints?" +
                 "min_timestamp=2022-01-01T03:00:00Z" +
-                "&order_by=created_at" +
-                "&direction=asc"
+                "&order_by=transaction_id" +
+                "&direction=asc" +
+                "&cursor=eyJ0cmFuc2FjdGlvbl9pZCI6MX0"
         )
     }
 
@@ -88,8 +91,9 @@ class ImxActivityQueryBuilderTest {
             "$host/mints?" +
                 "min_timestamp=2022-01-01T03:00:00Z" +
                 "&max_timestamp=2022-01-01T06:00:00Z" +
-                "&order_by=created_at" +
-                "&direction=asc"
+                "&order_by=transaction_id" +
+                "&direction=asc" +
+                "&cursor=eyJ0cmFuc2FjdGlvbl9pZCI6MX0"
         )
     }
 
@@ -101,9 +105,10 @@ class ImxActivityQueryBuilderTest {
         assertThat(builder.toString()).isEqualTo(
             "$host/mints?" +
                 "min_timestamp=2022-01-01T00:00:00Z" +
-                "&max_timestamp=2022-01-01T03:00:00Z" +
-                "&order_by=created_at" +
-                "&direction=desc"
+                "&max_timestamp=2022-01-01T03:00:00.001Z" +
+                "&order_by=transaction_id" +
+                "&direction=desc" +
+                "&cursor=eyJ0cmFuc2FjdGlvbl9pZCI6MX0"
         )
     }
 
@@ -114,9 +119,10 @@ class ImxActivityQueryBuilderTest {
         // max should be replaced by date from continuation
         assertThat(builder.toString()).isEqualTo(
             "$host/mints?" +
-                "max_timestamp=2022-01-01T03:00:00Z" +
-                "&order_by=created_at" +
-                "&direction=desc"
+                "max_timestamp=2022-01-01T03:00:00.001Z" +
+                "&order_by=transaction_id" +
+                "&direction=desc" +
+                "&cursor=eyJ0cmFuc2FjdGlvbl9pZCI6MX0"
         )
     }
 
@@ -146,7 +152,7 @@ class ImxActivityQueryBuilderTest {
             "$host/trades?" +
                 "party_b_token_address=a" +
                 "&party_b_token_id=b" +
-                "&order_by=created_at" +
+                "&order_by=transaction_id" +
                 "&direction=desc"
         )
     }

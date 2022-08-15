@@ -29,7 +29,9 @@ sealed class ImxActivityQueryBuilder(
     }
 
     fun continuationByDate(from: Instant?, to: Instant?, sort: ActivitySortDto, continuation: String?) {
-        val continuationDate = DateIdContinuation.parse(continuation)?.date
+        val dateIdContinuation = DateIdContinuation.parse(continuation)
+        val continuationDate = dateIdContinuation?.date
+        val transactionId = dateIdContinuation?.id
 
         val queryFrom = when (sort) {
             ActivitySortDto.EARLIEST_FIRST -> listOfNotNull(from, continuationDate).maxOrNull()
@@ -37,19 +39,30 @@ sealed class ImxActivityQueryBuilder(
         }
         val queryTo = when (sort) {
             ActivitySortDto.EARLIEST_FIRST -> to
-            ActivitySortDto.LATEST_FIRST -> listOfNotNull(to, continuationDate).minOrNull()
+            ActivitySortDto.LATEST_FIRST -> listOfNotNull(to, continuationDate?.plusMillis(1)).minOrNull()
         }
         val direction = when (sort) {
             ActivitySortDto.EARLIEST_FIRST -> "asc"
             ActivitySortDto.LATEST_FIRST -> "desc"
         }
 
+        // We have to use such filters here despite sorting by transactionId
+        // Since IMX uses Long as id but Union consider such IDs as strings
+        // sorting might be broken without date constraints
         builder.queryParamNotNull("min_timestamp", queryFrom)
         builder.queryParamNotNull("max_timestamp", queryTo)
 
-        orderBy("created_at", direction)
+        // Activities in IMX based on transaction ID, so they are always growing
+        orderBy("transaction_id", direction)
+        transactionId?.let {
+            val cursor = ImxCursor.encode("""{"transaction_id":$transactionId}""")
+            cursor(cursor)
+        }
+
+        //orderBy("created_at", direction)
     }
 
+    // For scanner purposes only
     fun continuationById(transactionId: String) {
         val cursor = ImxCursor.encode("""{"transaction_id":$transactionId}""")
         orderBy("transaction_id", "asc")
@@ -62,7 +75,7 @@ sealed class ImxActivityQueryBuilder(
             return when (type) {
                 ActivityType.MINT -> MintQueryBuilder(uriBuilder)
                 ActivityType.TRADE -> TradeQueryBuilder(uriBuilder)
-                ActivityType.TRANSFER -> TransferQueryBuilder(uriBuilder)
+                ActivityType.TRANSFER, ActivityType.BURN -> TransferQueryBuilder(uriBuilder)
             }
         }
     }
@@ -131,10 +144,15 @@ class TransferQueryBuilder(
     override val tokenIdField: String = "token_id"
     override val tokenField: String = "token_address"
 
+    fun receiver(receiver: String?) {
+        builder.queryParamNotNull("receiver", receiver)
+    }
+
 }
 
 enum class ActivityType {
     MINT,
     TRANSFER,
-    TRADE
+    TRADE,
+    BURN
 }

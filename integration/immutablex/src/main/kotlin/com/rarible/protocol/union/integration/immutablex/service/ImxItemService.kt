@@ -8,6 +8,7 @@ import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.RoyaltyDto
+import com.rarible.protocol.union.dto.continuation.DateIdContinuation
 import com.rarible.protocol.union.dto.continuation.page.Page
 import com.rarible.protocol.union.dto.continuation.page.Paging
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexAsset
@@ -71,9 +72,13 @@ class ImxItemService(
     }
 
     override suspend fun getItemsByCreator(creator: String, continuation: String?, size: Int): Page<UnionItem> {
+        // TODO potential problem here - there can be a lot of mints in same time
+        // The only hope we won't need this request since ES will be used for such requests
+        val to = DateIdContinuation.parse(continuation)?.date
         val mints = activityClient.getMints(
-            size,
-            continuation,
+            pageSize = size,
+            continuation = null,
+            to = to,
             user = creator,
             sort = ActivitySortDto.LATEST_FIRST
         ).result.associateBy { it.itemId() }

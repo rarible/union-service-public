@@ -213,7 +213,7 @@ data class ImmutablexTransfer(
 
     companion object {
 
-        private val ZERO_ADDRESS = Address.ZERO().prefixed()
+        val ZERO_ADDRESS = Address.ZERO().prefixed()
     }
 }
 

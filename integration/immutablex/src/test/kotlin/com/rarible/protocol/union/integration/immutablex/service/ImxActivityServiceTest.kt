@@ -68,7 +68,7 @@ internal class ImxActivityServiceTest {
             } returns expectedMintActivity
 
             coEvery {
-                getTransfers(any(), any(), any(), any(), any(), any(), any(), any())
+                getTransfers(any(), any(), any(), any(), any(), any(), any(), any(), any())
             } returns expectedTransfersActivity
 
             coEvery {
