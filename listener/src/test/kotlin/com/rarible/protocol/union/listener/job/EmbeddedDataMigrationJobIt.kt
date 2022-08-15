@@ -251,7 +251,7 @@ class EmbeddedDataMigrationJobIt : AbstractIntegrationTest() {
         assertThat(updatedMeta.content).hasSize(1)
         assertThat(updatedContent.url).isEqualTo(embeddedUrl)
         assertThat(updatedContent.properties).isEqualTo(
-            UnionImageProperties(MimeType.SVG_XML_IMAGE.value, 14, true, 192, 192)
+            UnionImageProperties(MimeType.SVG_XML_IMAGE.value, 14, false, 192, 192)
         )
         assertThat(updatedMeta).isEqualTo(cache.data.copy(content = updatedMeta.content))
 
