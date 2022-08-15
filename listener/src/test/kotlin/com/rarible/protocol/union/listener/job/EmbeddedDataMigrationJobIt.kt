@@ -154,7 +154,7 @@ class EmbeddedDataMigrationJobIt : AbstractIntegrationTest() {
     @Test
     fun `update legacy ipfs url - full properties`() = runBlocking<Unit> {
         val itemId = randomEthItemId()
-        val properties = UnionImageProperties(MimeType.SVG_XML_IMAGE.value, 100, 100, 100)
+        val properties = UnionImageProperties(MimeType.SVG_XML_IMAGE.value, 100, true, 100, 100)
         val url = "https://rarible.mypinata.cloud/ipfs/$cid"
         val ipfsUrl = IpfsUrlResourceParser().parse("ipfs://$cid")!!
 
@@ -251,7 +251,7 @@ class EmbeddedDataMigrationJobIt : AbstractIntegrationTest() {
         assertThat(updatedMeta.content).hasSize(1)
         assertThat(updatedContent.url).isEqualTo(embeddedUrl)
         assertThat(updatedContent.properties).isEqualTo(
-            UnionImageProperties(MimeType.SVG_XML_IMAGE.value, 14, 192, 192)
+            UnionImageProperties(MimeType.SVG_XML_IMAGE.value, 14, true, 192, 192)
         )
         assertThat(updatedMeta).isEqualTo(cache.data.copy(content = updatedMeta.content))
 
