@@ -70,7 +70,8 @@ class ImxOrderQueryBuilder(
                 // there is no way to avoid duplication on page break except increasing/decreasing date from our TS
                 val fixedDate = when (sort) {
                     OrderSortDto.LAST_UPDATE_ASC -> parsed.date.plusMillis(1)
-                    OrderSortDto.LAST_UPDATE_DESC -> parsed.date.minusMillis(1)
+                    // Nanoseconds already trimmed here, we can keep it as is
+                    OrderSortDto.LAST_UPDATE_DESC -> parsed.date
                 }
                 ImxCursor.encode("""{"order_id":${parsed.id},"updated_at":"$fixedDate"}""")
             }

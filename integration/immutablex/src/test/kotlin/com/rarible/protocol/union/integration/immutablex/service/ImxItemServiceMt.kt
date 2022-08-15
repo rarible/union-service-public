@@ -76,7 +76,7 @@ class ImxItemServiceMt : ImxManualTest() {
         val result = service.getItemsByOwner(testOwner, null, 50)
 
         println(result)
-        assertThat(result.entities).hasSize(7)
+        assertThat(result.entities).hasSize(8)
     }
 
     @Test
@@ -90,7 +90,7 @@ class ImxItemServiceMt : ImxManualTest() {
         val page2 = service.getItemsByOwner(testOwner, page1.continuation, 10)
         println(page2)
 
-        assertThat(page2.entities).hasSize(6)
+        assertThat(page2.entities).hasSize(7)
         assertThat(page2.continuation).isNull()
     }
 
