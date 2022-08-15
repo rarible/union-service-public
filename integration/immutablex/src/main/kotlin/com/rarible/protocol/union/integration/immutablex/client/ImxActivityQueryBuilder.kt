@@ -62,7 +62,7 @@ sealed class ImxActivityQueryBuilder(
             return when (type) {
                 ActivityType.MINT -> MintQueryBuilder(uriBuilder)
                 ActivityType.TRADE -> TradeQueryBuilder(uriBuilder)
-                ActivityType.TRANSFER -> TransferQueryBuilder(uriBuilder)
+                ActivityType.TRANSFER, ActivityType.BURN -> TransferQueryBuilder(uriBuilder)
             }
         }
     }
@@ -131,10 +131,15 @@ class TransferQueryBuilder(
     override val tokenIdField: String = "token_id"
     override val tokenField: String = "token_address"
 
+    fun receiver(receiver: String?) {
+        builder.queryParamNotNull("receiver", receiver)
+    }
+
 }
 
 enum class ActivityType {
     MINT,
     TRANSFER,
-    TRADE
+    TRADE,
+    BURN
 }
