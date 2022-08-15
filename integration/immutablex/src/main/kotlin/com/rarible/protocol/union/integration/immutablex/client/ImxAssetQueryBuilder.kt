@@ -50,7 +50,8 @@ class ImxAssetQueryBuilder(
                 // there is no way to avoid duplication on page break except increasing/decreasing date from our TS
                 val fixedDate = when (sortAsc) {
                     true -> parsed.date.plusMillis(1)
-                    false -> parsed.date.minusMillis(1)
+                    // Nanoseconds already trimmed here, we can keep it as is
+                    false -> parsed.date
                 }
                 val (token, tokenId) = IdParser.split(parsed.id, 2)
                 ImxCursor.encode(

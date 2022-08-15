@@ -231,4 +231,37 @@ class ImxActivityServiceMt : ImxManualTest() {
         assertThat(page.entities).hasSize(4)
     }
 
+    @Test
+    fun `same timestamp on page break`() = runBlocking<Unit> {
+        val continuation = "1634727056071_2240398"
+        val page1 = service.getAllActivities(
+            types = listOf(ActivityTypeDto.MINT),
+            continuation = continuation,
+            size = 2,
+            sort = ActivitySortDto.EARLIEST_FIRST
+        )
+        val page2 = service.getAllActivities(
+            types = listOf(ActivityTypeDto.MINT),
+            continuation = page1.continuation,
+            size = 2,
+            sort = ActivitySortDto.EARLIEST_FIRST
+        )
+        val page3 = service.getAllActivities(
+            types = listOf(ActivityTypeDto.MINT),
+            continuation = page2.continuation,
+            size = 2,
+            sort = ActivitySortDto.EARLIEST_FIRST
+        )
+
+        val result = page1.entities + page2.entities + page3.entities
+        val dates = result.map { it.date }.toSet()
+        // All entities have same date
+        assertThat(dates).hasSize(1)
+
+        val ids = result.map { it.id.value }
+        assertThat(ids).isEqualTo(
+            listOf("2240399", "2240400", "2240401", "2240402", "2240403", "2240404")
+        )
+    }
+
 }
