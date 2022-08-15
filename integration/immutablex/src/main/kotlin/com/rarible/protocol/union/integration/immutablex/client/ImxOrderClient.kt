@@ -80,6 +80,24 @@ class ImxOrderClient(
         return mergePages(listOf(page), null, size)
     }
 
+    // Workaround to get some currencies
+    suspend fun getSellOrdersByItem(
+        token: String,
+        tokenId: String,
+        status: OrderStatusDto?,
+        continuation: String?,
+        size: Int,
+    ): ImmutablexOrdersPage {
+        return getOrders {
+            it.pageSize(size)
+            it.sellTokenType("ERC721")
+            it.sellToken(token)
+            it.sellTokenId(tokenId)
+            it.status(status)
+            it.continuationByUpdatedAt(OrderSortDto.LAST_UPDATE_DESC, continuation)
+        }
+    }
+
     suspend fun getSellOrdersByItem(
         token: String,
         tokenId: String,
@@ -171,11 +189,27 @@ class ImxOrderClient(
         return mergePages(pages, null, size)
     }
 
+    // Workaround to get some currencies
     suspend fun getBuyOrdersByItem(
         token: String,
         tokenId: String,
-        makers: List<String>?,
-        statuses: List<OrderStatusDto>?,
+        continuation: String?,
+        size: Int,
+    ): ImmutablexOrdersPage {
+        return getOrders {
+            it.buyTokenType("ERC721")
+            it.buyToken(token)
+            it.buyTokenId(tokenId)
+            it.pageSize(size)
+            it.continuationByUpdatedAt(OrderSortDto.LAST_UPDATE_DESC, continuation)
+        }
+    }
+
+    suspend fun getBuyOrdersByItem(
+        token: String,
+        tokenId: String,
+        makers: List<String>? = null,
+        statuses: List<OrderStatusDto>? = null,
         currencyId: String,
         continuation: String?,
         size: Int,
