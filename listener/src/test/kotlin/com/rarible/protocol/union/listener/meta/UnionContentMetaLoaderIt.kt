@@ -98,7 +98,7 @@ class UnionContentMetaLoaderIt : AbstractIntegrationTest() {
 
     @Test
     fun `downloaded - failed with input properties`() = runBlocking<Unit> {
-        val input = UnionImageProperties(MimeType.PNG_IMAGE.value, randomLong(), randomInt(), randomInt())
+        val input = UnionImageProperties(MimeType.PNG_IMAGE.value, randomLong(), true, randomInt(), randomInt())
         val content = randomUnionContent(input)
 
         coEvery { testContentMetaReceiver.receive(content.url) } returns null
