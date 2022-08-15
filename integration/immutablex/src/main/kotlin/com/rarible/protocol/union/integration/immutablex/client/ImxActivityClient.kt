@@ -6,6 +6,7 @@ import kotlinx.coroutines.reactor.awaitSingle
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.util.UriBuilder
 import java.time.Instant
 
 class ImxActivityClient(
@@ -78,6 +79,7 @@ class ImxActivityClient(
         }
     }
 
+    // Also, may include Burns, but for scanner it is totally fine
     suspend fun getLastTransfer(): ImmutablexTransfer {
         val result = getActivities<ImmutablexTransfersPage>(
             pageSize = 1,
@@ -95,7 +97,6 @@ class ImxActivityClient(
         )?.result ?: emptyList()
     }
 
-    // TODO IMMUTABLEX - transfers can contain burns, there is no way to filter them from regular transfers
     suspend fun getTransfers(
         pageSize: Int,
         continuation: String? = null,
@@ -104,18 +105,35 @@ class ImxActivityClient(
         from: Instant? = null,
         to: Instant? = null,
         user: String? = null,
+        transferFilter: TransferFilter,
         sort: ActivitySortDto?
-    ) = getActivities<ImmutablexTransfersPage>(
-        pageSize,
-        continuation,
-        token,
-        tokenId,
-        from,
-        to,
-        user,
-        sort,
-        ActivityType.TRANSFER
-    ) ?: ImmutablexTransfersPage.EMPTY
+    ): ImmutablexTransfersPage {
+        return when (transferFilter) {
+            // Both, Transfers and Burns will be included into response
+            TransferFilter.ALL -> {
+                getActivities<ImmutablexTransfersPage>(
+                    pageSize, continuation, token, tokenId, from, to, user, sort, ActivityType.TRANSFER
+                )
+            }
+            // Only burns will be included into the response
+            // There is no way to get transfers only without burns
+            TransferFilter.BURNS -> {
+                getActivities<ImmutablexTransfersPage> {
+                    val builder = TransferQueryBuilder(it)
+                    val safeSort = sort ?: ActivitySortDto.LATEST_FIRST
+
+                    builder.token(token)
+                    builder.tokenId(tokenId)
+                    builder.user(user)
+                    builder.receiver(ImmutablexTransfer.ZERO_ADDRESS)
+                    builder.pageSize(pageSize)
+                    builder.continuationByDate(from, to, safeSort, continuation)
+                    builder.build()
+                    builder.build()
+                }
+            }
+        } ?: ImmutablexTransfersPage.EMPTY
+    }
 
     suspend fun getTrades(ids: List<String>): List<ImmutablexTrade> {
         return getChunked(byIdsChunkSize, ids) {
@@ -173,39 +191,43 @@ class ImxActivityClient(
         user: String? = null,
         sort: ActivitySortDto? = null,
         type: ActivityType
-    ) = webClient.get()
-        .uri {
-            val builder = ImxActivityQueryBuilder.getQueryBuilder(type, it)
-            val safeSort = sort ?: ActivitySortDto.LATEST_FIRST
+    ) = getActivities<T> {
 
-            builder.token(token)
-            builder.tokenId(tokenId)
-            builder.user(user)
-            builder.pageSize(pageSize)
-            // Sorting included
-            builder.continuationByDate(from, to, safeSort, continuation)
-            builder.build()
-        }
-        .accept(MediaType.APPLICATION_JSON)
-        .retrieve()
-        .toEntity(T::class.java).awaitSingle().body
+        val builder = ImxActivityQueryBuilder.getQueryBuilder(type, it)
+        val safeSort = sort ?: ActivitySortDto.LATEST_FIRST
+
+        builder.token(token)
+        builder.tokenId(tokenId)
+        builder.user(user)
+        builder.pageSize(pageSize)
+        // Sorting included
+        builder.continuationByDate(from, to, safeSort, continuation)
+        builder.build()
+    }
 
     private suspend inline fun <reified T> getActivityEvents(
         pageSize: Int,
         transactionId: String,
         type: ActivityType
-    ) = webClient.get()
-        .uri {
-            val builder = ImxActivityQueryBuilder.getQueryBuilder(type, it)
+    ) = getActivities<T> {
 
-            builder.pageSize(pageSize)
-            // Sorting included
-            builder.continuationById(transactionId)
-            builder.build()
-        }
-        .accept(MediaType.APPLICATION_JSON)
-        .retrieve()
-        .toEntity(T::class.java).awaitSingle().body
+        val builder = ImxActivityQueryBuilder.getQueryBuilder(type, it)
+
+        builder.pageSize(pageSize)
+        // Sorting included
+        builder.continuationById(transactionId)
+        builder.build()
+    }
+
+    private suspend inline fun <reified T> getActivities(crossinline build: (builder: UriBuilder) -> Unit): T? {
+        return webClient.get().uri {
+            build(it)
+            it.build()
+        }.accept(MediaType.APPLICATION_JSON)
+            .retrieve()
+            .toEntity(T::class.java)
+            .awaitSingle().body!!
+    }
 
     suspend fun getItemCreator(itemId: String): String? {
         val (token, tokenId) = IdParser.split(itemId, 2)
@@ -217,4 +239,9 @@ class ImxActivityClient(
             getItemCreator(itemId)?.let { Pair(itemId, it) }
         }.associateBy({ it.first }, { it.second })
     }
+}
+
+enum class TransferFilter {
+    BURNS,
+    ALL
 }

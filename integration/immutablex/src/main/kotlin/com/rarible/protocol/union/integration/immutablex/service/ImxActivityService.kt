@@ -20,8 +20,10 @@ import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.integration.immutablex.client.ActivityType
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexEvent
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexTrade
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexTransfer
 import com.rarible.protocol.union.integration.immutablex.client.ImxActivityClient
 import com.rarible.protocol.union.integration.immutablex.client.TokenIdDecoder
+import com.rarible.protocol.union.integration.immutablex.client.TransferFilter
 import com.rarible.protocol.union.integration.immutablex.converter.ImxActivityConverter
 import kotlinx.coroutines.coroutineScope
 import java.time.Instant
@@ -37,11 +39,13 @@ class ImxActivityService(
     // TODO originally, we can support BURNs here
     private val allowedTypes = mapOf(
         ActivityTypeDto.MINT to ActivityType.MINT,
+        ActivityTypeDto.BURN to ActivityType.BURN,
         ActivityTypeDto.TRANSFER to ActivityType.TRANSFER,
         ActivityTypeDto.SELL to ActivityType.TRADE,
     )
     private val allowedUserTypes = mapOf(
         UserActivityTypeDto.MINT to ActivityType.MINT,
+        UserActivityTypeDto.BURN to ActivityType.BURN,
         UserActivityTypeDto.TRANSFER_FROM to ActivityType.TRANSFER,
         //UserActivityTypeDto.SELL to ActivityType.TRADE, // TODO IMMUTABLEX filter by user is not supported
     )
@@ -198,7 +202,8 @@ class ImxActivityService(
         val result = grouped.mapAsync { group ->
             when (group.key) {
                 ActivityType.MINT -> client.getMints(group.value)
-                ActivityType.TRANSFER -> client.getTransfers(group.value)
+                // Burns are originally transfers with zero 'receiver' address
+                ActivityType.TRANSFER, ActivityType.BURN -> client.getTransfers(group.value)
                 ActivityType.TRADE -> client.getTrades(group.value)
             }
         }.flatten()
@@ -219,15 +224,50 @@ class ImxActivityService(
     ): Slice<ImmutablexEvent> = coroutineScope {
 
         val safeSort = sort ?: ActivitySortDto.LATEST_FIRST
+        val containsBurns = types.contains(ActivityType.BURN)
+        val containsTransfers = types.contains(ActivityType.TRANSFER)
 
         val result = types.mapAsync {
             when (it) {
                 ActivityType.MINT ->
                     client.getMints(size, continuation, token, tokenId, from, to, user, safeSort).result
-                ActivityType.TRANSFER ->
-                    client.getTransfers(size, continuation, token, tokenId, from, to, user, safeSort).result
                 ActivityType.TRADE ->
                     client.getTrades(size, continuation, token, tokenId, from, to, user, safeSort).result
+                ActivityType.TRANSFER -> {
+                    if (containsBurns) {
+                        // Both transfers and burns requested - we can retrieve them it in a single request
+                        client.getTransfers(
+                            size, continuation, token, tokenId, from, to, user, TransferFilter.ALL, safeSort
+                        ).result
+                    } else {
+                        // If we need to get only transfers, we have to filter burns in memory
+                        val transfers = ArrayList<ImmutablexTransfer>()
+                        var transferContinuation = continuation
+                        do {
+                            val page = client.getTransfers(
+                                size, transferContinuation, token, tokenId, from, to, user, TransferFilter.ALL, safeSort
+                            )
+                            val notBurns = page.result.filter { tr -> tr.receiver != ImmutablexTransfer.ZERO_ADDRESS }
+
+                            transfers.addAll(notBurns)
+                            transferContinuation = page.result.lastOrNull()?.let { last ->
+                                DateIdContinuation(last.timestamp, last.transactionId.toString()).toString()
+                            }
+                            // Stop if page is full or returned page is the last page
+                        } while (transfers.size < size && page.result.size == size)
+                        transfers.take(size)
+                    }
+                }
+                ActivityType.BURN -> {
+                    // Will be retrieved in TRANSFER branch, together with transfers
+                    if (containsTransfers) {
+                        emptyList()
+                    } else {
+                        client.getTransfers(
+                            size, continuation, token, tokenId, from, to, user, TransferFilter.BURNS, safeSort
+                        ).result
+                    }
+                }
             }
         }.flatten()
 
