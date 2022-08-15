@@ -3,7 +3,6 @@ package com.rarible.protocol.union.integration.immutablex.client
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.continuation.DateIdContinuation
-import org.apache.commons.codec.binary.Base64
 import org.springframework.web.util.UriBuilder
 
 class ImxOrderQueryBuilder(
@@ -63,22 +62,17 @@ class ImxOrderQueryBuilder(
         builder.queryParamNotNull("status", immStatus)
     }
 
-    fun continuation(sort: OrderSortDto, continuation: String?) {
+    fun continuationByUpdatedAt(sort: OrderSortDto, continuation: String?) {
         val cursor = continuation
             ?.let { DateIdContinuation.parse(continuation) }
             ?.let { parsed ->
-
-                val date = parsed.date
-                val orderId = parsed.id
-
                 // Since IMX using microseconds in their cursors while we're using ms,
                 // there is no way to avoid duplication on page break except increasing/decreasing date from our TS
                 val fixedDate = when (sort) {
-                    OrderSortDto.LAST_UPDATE_ASC -> date.plusMillis(1)
-                    OrderSortDto.LAST_UPDATE_DESC -> date.minusMillis(1)
+                    OrderSortDto.LAST_UPDATE_ASC -> parsed.date.plusMillis(1)
+                    OrderSortDto.LAST_UPDATE_DESC -> parsed.date.minusMillis(1)
                 }
-                Base64.encodeBase64String("""{"order_id":$orderId,"updated_at":"$fixedDate"}""".toByteArray())
-                    .trimEnd('=')
+                ImxCursor.encode("""{"order_id":${parsed.id},"updated_at":"$fixedDate"}""")
             }
 
         builder.queryParamNotNull("cursor", cursor)
@@ -91,7 +85,7 @@ class ImxOrderQueryBuilder(
         orderBy("updated_at", direction)
     }
 
-    fun sellPriceContinuation(currencyId: String, continuation: String?) {
+    fun continuationBySellPrice(currencyId: String, continuation: String?) {
         val price = continuation?.substringBefore("_")
 
         when (isEth(currencyId)) {
@@ -104,7 +98,7 @@ class ImxOrderQueryBuilder(
         orderBy("buy_quantity", "asc")
     }
 
-    fun buyPriceContinuation(currencyId: String, continuation: String?) {
+    fun continuationByBuyPrice(currencyId: String, continuation: String?) {
         val price = continuation?.substringBefore("_")
 
         when (isEth(currencyId)) {

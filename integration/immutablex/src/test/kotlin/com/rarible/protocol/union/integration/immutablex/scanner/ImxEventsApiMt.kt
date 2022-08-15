@@ -11,7 +11,7 @@ import scalether.domain.Address
 @ManualTest
 class ImxEventsApiMt : ImxManualTest() {
 
-    private val eventsApi = ImxEventsApi(activityClient, assetClient, orderClient)
+    private val eventsApi = ImxEventsApi(activityClient, assetClient, orderClient, collectionClient)
 
     @Test
     fun getLastMint() = runBlocking<Unit> {
@@ -76,6 +76,13 @@ class ImxEventsApiMt : ImxManualTest() {
     @Test
     fun getOrders() = runBlocking<Unit> {
         val result = eventsApi.orders(nowMillis(), "0")
+        assertThat(result).isEmpty()
+    }
+
+    // Just to ensure this request works
+    @Test
+    fun getCollections() = runBlocking<Unit> {
+        val result = eventsApi.collections(nowMillis(), Address.ZERO().prefixed())
         assertThat(result).isEmpty()
     }
 }

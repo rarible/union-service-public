@@ -166,6 +166,7 @@ integration:
           withdrawals: 5
           orders: 6
           assets: 7
+          collections: 8
 
 listener:
   consumer:

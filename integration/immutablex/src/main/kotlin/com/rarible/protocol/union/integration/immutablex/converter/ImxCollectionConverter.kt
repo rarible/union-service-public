@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.integration.immutablex.converter
 
 import com.rarible.core.logging.Logger
+import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.core.model.UnionCollectionMeta
 import com.rarible.protocol.union.core.model.UnionMetaContent
@@ -24,12 +25,14 @@ object ImxCollectionConverter {
     }
 
     private fun convertInternal(source: ImmutablexCollection, blockchain: BlockchainDto): UnionCollection {
+        val minter = source.projectOwnerAddress?.let { UnionAddressConverter.convert(blockchain, it) }
         return UnionCollection(
             id = CollectionIdDto(blockchain, source.address),
             name = source.name,
             type = CollectionDto.Type.ERC721,
             features = listOf(CollectionDto.Features.APPROVE_FOR_ALL),
-            minters = emptyList(),
+            minters = listOfNotNull(minter),
+            owner = minter,
             meta = convertMeta(source)
         )
     }

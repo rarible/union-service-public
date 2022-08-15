@@ -28,7 +28,7 @@ class ImxAssetQueryBuilderTest {
         builder.collection("c")
         builder.fromDate(from)
         builder.toDate(to)
-        builder.continuation(
+        builder.continuationByUpdatedAt(
             null, false
         )
         assertThat(builder.toString()).isEqualTo(
@@ -44,7 +44,7 @@ class ImxAssetQueryBuilderTest {
 
     @Test
     fun `with continuation`() {
-        builder.continuation(continuation, false)
+        builder.continuationByUpdatedAt(continuation, false)
 
         assertThat(builder.toString()).isEqualTo(
             "$host/assets?include_fees=true" +

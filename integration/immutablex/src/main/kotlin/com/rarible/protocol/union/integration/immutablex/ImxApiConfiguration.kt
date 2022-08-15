@@ -13,6 +13,7 @@ import com.rarible.protocol.union.integration.immutablex.service.ImxCollectionSe
 import com.rarible.protocol.union.integration.immutablex.service.ImxItemService
 import com.rarible.protocol.union.integration.immutablex.service.ImxOrderService
 import com.rarible.protocol.union.integration.immutablex.service.ImxOwnershipService
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
@@ -24,27 +25,40 @@ import org.springframework.web.reactive.function.client.WebClient
 class ImxApiConfiguration {
 
     @Bean
-    fun immutablexBlockchain() = BlockchainDto.IMMUTABLEX
+    fun imxBlockchain() = BlockchainDto.IMMUTABLEX
 
     @Bean
-    fun immutablexWebClient(props: ImxIntegrationProperties): WebClient {
+    @Qualifier("imxWebClient")
+    fun imxWebClient(props: ImxIntegrationProperties): WebClient {
         return ImxWebClientFactory.createClient(props.client!!.url!!, props.apiKey)
     }
 
     @Bean
-    fun immutablexAssetClient(immutablexWebClient: WebClient) = ImxAssetClient(immutablexWebClient)
+    fun imxAssetClient(
+        @Qualifier("imxWebClient")
+        imxWebClient: WebClient
+    ) = ImxAssetClient(imxWebClient)
 
     @Bean
-    fun immutablexActivityClient(immutablexWebClient: WebClient) = ImxActivityClient(immutablexWebClient)
+    fun imxActivityClient(
+        @Qualifier("imxWebClient")
+        imxWebClient: WebClient
+    ) = ImxActivityClient(imxWebClient)
 
     @Bean
-    fun immutablexCollectionClient(immutablexWebClient: WebClient) = ImxCollectionClient(immutablexWebClient)
+    fun imxCollectionClient(
+        @Qualifier("imxWebClient")
+        imxWebClient: WebClient
+    ) = ImxCollectionClient(imxWebClient)
 
     @Bean
-    fun immutablexOrderClient(immutablexWebClient: WebClient) = ImxOrderClient(immutablexWebClient)
+    fun imxOrderClient(
+        @Qualifier("imxWebClient")
+        imxWebClient: WebClient
+    ) = ImxOrderClient(imxWebClient)
 
     @Bean
-    fun immutablexItemService(
+    fun imxItemService(
         assetClient: ImxAssetClient,
         activityClient: ImxActivityClient
     ): ImxItemService {
@@ -52,7 +66,7 @@ class ImxApiConfiguration {
     }
 
     @Bean
-    fun immutablexOwnershipService(
+    fun imxOwnershipService(
         assetClient: ImxAssetClient,
         activityClient: ImxActivityClient
     ): ImxOwnershipService {
@@ -60,21 +74,21 @@ class ImxApiConfiguration {
     }
 
     @Bean
-    fun immutablexCollectionService(
+    fun imxCollectionService(
         collectionClient: ImxCollectionClient
     ): ImxCollectionService {
         return ImxCollectionService(collectionClient)
     }
 
     @Bean
-    fun immutablexOrderService(
+    fun imxOrderService(
         orderClient: ImxOrderClient
     ): ImxOrderService {
         return ImxOrderService(orderClient)
     }
 
     @Bean
-    fun immutablesActivityService(
+    fun imxActivityService(
         activityClient: ImxActivityClient,
         orderService: ImxOrderService
     ): ImxActivityService {
@@ -82,9 +96,10 @@ class ImxApiConfiguration {
     }
 
     @Bean
-    fun eventsApi(
+    fun imxEventsApi(
         assetClient: ImxAssetClient,
         activityClient: ImxActivityClient,
-        orderClient: ImxOrderClient
-    ) = ImxEventsApi(activityClient, assetClient, orderClient)
+        orderClient: ImxOrderClient,
+        collectionClient: ImxCollectionClient
+    ) = ImxEventsApi(activityClient, assetClient, orderClient, collectionClient)
 }
