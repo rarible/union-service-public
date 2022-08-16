@@ -9,6 +9,7 @@ import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.SyncTypeDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
@@ -300,7 +301,7 @@ class ImxActivityService(
         )
     }
 
-    suspend fun convert(activities: List<ImmutablexEvent>): List<ActivityDto> {
+    suspend fun getTradeOrders(activities: List<ImmutablexEvent>): Map<Long, OrderDto> {
         val orderIds = activities.flatMap {
             when (it) {
                 // For 'Trade' we should get orders to fulfill sides
@@ -308,12 +309,15 @@ class ImxActivityService(
                 else -> emptyList()
             }
         }
-        val orders = if (orderIds.isEmpty()) {
+        return if (orderIds.isEmpty()) {
             emptyMap()
         } else {
             orderService.getOrdersByIds(orderIds).associateBy { it.id.value.toLong() }
         }
+    }
 
+    suspend fun convert(activities: List<ImmutablexEvent>): List<ActivityDto> {
+        val orders = getTradeOrders(activities)
         return activities.map { ImxActivityConverter.convert(it, orders) }
     }
 

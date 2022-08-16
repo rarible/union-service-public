@@ -52,11 +52,11 @@ object ImxOwnershipConverter {
         )
     }
 
-    fun convert(asset: ImmutablexTransfer, creator: String?, blockchain: BlockchainDto): UnionOwnership {
+    fun convert(transfer: ImmutablexTransfer, creator: String?, blockchain: BlockchainDto): UnionOwnership {
         return try {
-            convertInternal(asset, creator, blockchain)
+            convertInternal(transfer, creator, blockchain)
         } catch (e: Exception) {
-            logger.error("Failed to convert {} Ownership: {} \n{}", blockchain, e.message, asset)
+            logger.error("Failed to convert {} Ownership: {} \n{}", blockchain, e.message, transfer)
             throw e
         }
     }

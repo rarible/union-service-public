@@ -235,6 +235,9 @@ class ImxActivityClient(
     }
 
     suspend fun getItemCreators(assetIds: Collection<String>): Map<String, String> {
+        if (assetIds.isEmpty()) {
+            return emptyMap()
+        }
         return getChunked(creatorsRequestChunkSize, assetIds) { itemId ->
             getItemCreator(itemId)?.let { Pair(itemId, it) }
         }.associateBy({ it.first }, { it.second })

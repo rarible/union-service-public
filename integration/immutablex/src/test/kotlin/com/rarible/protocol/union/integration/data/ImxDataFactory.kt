@@ -10,10 +10,17 @@ import com.rarible.protocol.union.integration.immutablex.client.FeeToken
 import com.rarible.protocol.union.integration.immutablex.client.FeeTokenData
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexAsset
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexCollectionShort
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexDataProperties
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexMint
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexOrder
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexOrderData
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexOrderFee
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexOrderSide
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexTrade
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexTransfer
+import com.rarible.protocol.union.integration.immutablex.client.Token
+import com.rarible.protocol.union.integration.immutablex.client.TokenData
+import com.rarible.protocol.union.integration.immutablex.client.TradeSide
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.Instant
@@ -55,8 +62,8 @@ fun randomImxCollectionShort(): ImmutablexCollectionShort {
 fun randomImxOrder(
     orderId: Long = randomLong(),
     amountSold: String = "0",
-    buy: ImmutablexOrderSide = randomEmxOrderBuySide(),
-    sell: ImmutablexOrderSide = randomEmxOrderSellSide(),
+    buy: ImmutablexOrderSide = randomImxOrderBuySide(),
+    sell: ImmutablexOrderSide = randomImxOrderSellSide(),
     status: String = "active",
     createdAt: Instant = nowMillis().minusSeconds(60),
     updatedAt: Instant = nowMillis().minusSeconds(30),
@@ -76,14 +83,14 @@ fun randomImxOrder(
     )
 }
 
-fun randomEmxOrderSellSide(): ImmutablexOrderSide {
+fun randomImxOrderSellSide(): ImmutablexOrderSide {
     return ImmutablexOrderSide(
         data = randomImxOrderSideData(),
         type = "ERC721"
     )
 }
 
-fun randomEmxOrderBuySide(
+fun randomImxOrderBuySide(
     quantity: BigInteger = BigInteger("10000"),
     quantityWithFees: BigInteger = BigInteger("10000"),
 ): ImmutablexOrderSide {
@@ -122,5 +129,107 @@ fun randomImxOrderFee(
         address = address,
         amount = amount,
         token = FeeToken("ETH", FeeTokenData(null, 18))
+    )
+}
+
+fun randomImxTokenData(
+    token: String = randomAddress().prefixed(),
+    tokenId: String = randomLong().toString(),
+): TokenData {
+    return TokenData(
+        tokenId = tokenId,
+        tokenAddress = token,
+        properties = ImmutablexDataProperties(
+            name = randomString(),
+            imageUrl = "http://localhost:8080/image/${randomString()}",
+            collection = randomImxCollectionShort()
+        ),
+        decimals = 0,
+        quantity = BigInteger.ONE,
+        id = tokenId
+    )
+}
+
+fun randomImxMint(
+    transactionId: Long = randomLong(),
+    token: String = randomAddress().prefixed(),
+    tokenId: String = randomLong().toString(),
+    user: String = randomAddress().prefixed(),
+    date: Instant = nowMillis()
+): ImmutablexMint {
+    return ImmutablexMint(
+        transactionId = transactionId,
+        token = Token(
+            type = "ERC721",
+            data = randomImxTokenData(token, tokenId)
+        ),
+
+        user = user,
+        timestamp = date,
+        fees = listOf(),
+        status = "success"
+    )
+}
+
+fun randomImxTransfer(
+    transactionId: Long = randomLong(),
+    token: String = randomAddress().prefixed(),
+    tokenId: String = randomLong().toString(),
+    user: String = randomAddress().prefixed(),
+    receiver: String = randomAddress().prefixed(),
+    date: Instant = nowMillis()
+): ImmutablexTransfer {
+    return ImmutablexTransfer(
+        transactionId = transactionId,
+        token = Token(
+            type = "ERC721",
+            data = randomImxTokenData(token, tokenId)
+        ),
+        receiver = receiver,
+        status = "success",
+        timestamp = date,
+        user = user
+    )
+}
+
+fun randomImxTrade(
+    transactionId: Long = randomLong(),
+    date: Instant = nowMillis(),
+    sellOrderId: Long = randomLong(),
+    buyOrderId: Long = randomLong(),
+    sellToken: String = randomAddress().prefixed(),
+    sellTokenId: String = randomLong().toString(),
+    buyToken: String = randomAddress().prefixed(),
+    buyTokenId: String = randomLong().toString(),
+): ImmutablexTrade {
+    return ImmutablexTrade(
+        transactionId = transactionId,
+        make = randomImxTradeSide(
+            orderId = sellOrderId,
+            token = sellToken,
+            tokenId = sellTokenId
+        ),
+        take = randomImxTradeSide(
+            orderId = buyOrderId,
+            token = buyToken,
+            tokenId = buyTokenId
+        ),
+        status = "success",
+        timestamp = date
+    )
+}
+
+fun randomImxTradeSide(
+    orderId: Long = randomLong(),
+    token: String = randomAddress().prefixed(),
+    tokenId: String = randomLong().toString(),
+    tokenType: String = "ERC721"
+): TradeSide {
+    return TradeSide(
+        orderId = orderId,
+        sold = BigDecimal.ONE,
+        tokenAddress = token,
+        tokenId = tokenId,
+        tokenType = tokenType
     )
 }
