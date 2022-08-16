@@ -25,12 +25,17 @@ class CollectionReindexService(
     ): Flow<String> {
         var lastCursor = cursor
         val counter = searchTaskMetricFactory.createReindexCollectionCounter(blockchain)
+        // TODO read values from config
+        val size = when (blockchain) {
+            BlockchainDto.IMMUTABLEX -> 200 // Max size allowed by IMX
+            else -> PageSize.COLLECTION.max
+        }
         return flow {
             do {
                 val res = collectionApiMergeService.getAllCollections(
                     listOf(blockchain),
                     lastCursor,
-                    PageSize.COLLECTION.max
+                    size
                 )
                 if (res.collections.isNotEmpty()) {
                     repository.saveAll(

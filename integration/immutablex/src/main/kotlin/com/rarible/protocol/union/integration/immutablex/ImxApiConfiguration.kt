@@ -2,6 +2,7 @@ package com.rarible.protocol.union.integration.immutablex
 
 import com.rarible.protocol.union.core.CoreConfiguration
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.integration.immutablex.cache.ImxCollectionCreatorRepository
 import com.rarible.protocol.union.integration.immutablex.client.ImxActivityClient
 import com.rarible.protocol.union.integration.immutablex.client.ImxAssetClient
 import com.rarible.protocol.union.integration.immutablex.client.ImxCollectionClient
@@ -17,6 +18,7 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
+import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.web.reactive.function.client.WebClient
 
 @ImxConfiguration
@@ -61,9 +63,17 @@ class ImxApiConfiguration {
     fun imxItemService(
         assetClient: ImxAssetClient,
         activityClient: ImxActivityClient,
-        collectionClient: ImxCollectionClient
+        collectionClient: ImxCollectionClient,
+        collectionCreatorRepository: ImxCollectionCreatorRepository
     ): ImxItemService {
-        return ImxItemService(assetClient, activityClient, collectionClient)
+        return ImxItemService(assetClient, activityClient, collectionClient, collectionCreatorRepository)
+    }
+
+    @Bean
+    fun imxCollectionCreatorRepository(
+        mongo: ReactiveMongoTemplate
+    ): ImxCollectionCreatorRepository {
+        return ImxCollectionCreatorRepository(mongo)
     }
 
     @Bean

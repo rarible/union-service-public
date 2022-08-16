@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test
 @ManualTest
 class ImxItemServiceMt : ImxManualTest() {
 
-    private val service = ImxItemService(assetClient, activityClient, collectionClient)
+    private val service = ImxItemService(assetClient, activityClient, collectionClient, collectionCreatorRepository)
 
     // Data for test purposes, it is not static and can break these manual tests in any moment
     private val testOwner = "0x38b84a9518a356b85eb29ba76fd78e0d3c718fd8"

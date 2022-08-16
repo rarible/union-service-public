@@ -47,6 +47,7 @@ class OwnershipReindexService(
         // TODO read values from config
         val size = when (blockchain) {
             BlockchainDto.SOLANA -> 250
+            BlockchainDto.IMMUTABLEX -> 200 // Max size allowed by IMX
             else -> PageSize.OWNERSHIP.max
         }
         rawOwnershipClient.getRawOwnershipsAll(blockchain, it, size)

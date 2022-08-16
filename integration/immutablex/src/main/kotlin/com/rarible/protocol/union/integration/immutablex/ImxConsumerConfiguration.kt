@@ -7,6 +7,7 @@ import com.rarible.protocol.union.core.model.UnionItemMetaEvent
 import com.rarible.protocol.union.core.model.UnionOrderEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipEvent
 import com.rarible.protocol.union.dto.ActivityDto
+import com.rarible.protocol.union.integration.immutablex.cache.ImxCollectionCreatorRepository
 import com.rarible.protocol.union.integration.immutablex.handlers.ImxActivityEventHandler
 import com.rarible.protocol.union.integration.immutablex.handlers.ImxCollectionEventHandler
 import com.rarible.protocol.union.integration.immutablex.handlers.ImxItemEventHandler
@@ -58,8 +59,9 @@ class ImxConsumerConfiguration {
 
     @Bean
     fun imxCollectionEventHandler(
-        collectionEventHandler: IncomingEventHandler<UnionCollectionEvent>
-    ) = ImxCollectionEventHandler(collectionEventHandler)
+        collectionEventHandler: IncomingEventHandler<UnionCollectionEvent>,
+        collectionCreatorRepository: ImxCollectionCreatorRepository
+    ) = ImxCollectionEventHandler(collectionEventHandler, collectionCreatorRepository)
 
     @Bean
     fun immutablexOrderEventHandler(

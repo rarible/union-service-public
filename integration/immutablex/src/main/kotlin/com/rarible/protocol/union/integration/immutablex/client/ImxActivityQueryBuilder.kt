@@ -97,6 +97,11 @@ class MintQueryBuilder(
         }
     }
 
+    init {
+        builder.queryParam("status", "success")
+        builder.queryParam("token_type", "ERC721")
+    }
+
     override val tokenIdField: String = "token_id"
     override val tokenField: String = "token_address"
 
@@ -130,6 +135,7 @@ class TransferQueryBuilder(
 
     init {
         builder.queryParam("status", "success")
+        builder.queryParam("token_type", "ERC721")
     }
 
     companion object {

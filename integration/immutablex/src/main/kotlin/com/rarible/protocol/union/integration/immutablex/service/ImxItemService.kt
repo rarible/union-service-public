@@ -11,6 +11,8 @@ import com.rarible.protocol.union.dto.RoyaltyDto
 import com.rarible.protocol.union.dto.continuation.DateIdContinuation
 import com.rarible.protocol.union.dto.continuation.page.Page
 import com.rarible.protocol.union.dto.continuation.page.Paging
+import com.rarible.protocol.union.integration.immutablex.cache.ImxCollectionCreator
+import com.rarible.protocol.union.integration.immutablex.cache.ImxCollectionCreatorRepository
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexAsset
 import com.rarible.protocol.union.integration.immutablex.client.ImxActivityClient
 import com.rarible.protocol.union.integration.immutablex.client.ImxAssetClient
@@ -24,7 +26,8 @@ import kotlinx.coroutines.coroutineScope
 class ImxItemService(
     private val assetClient: ImxAssetClient,
     private val activityClient: ImxActivityClient,
-    private val collectionClient: ImxCollectionClient
+    private val collectionClient: ImxCollectionClient,
+    private val collectionCreatorRepository: ImxCollectionCreatorRepository
 ) : AbstractBlockchainService(BlockchainDto.IMMUTABLEX), ItemService {
 
     override suspend fun getAllItems(
@@ -116,18 +119,25 @@ class ImxItemService(
     }
 
     suspend fun getItemCreators(assetIds: Collection<String>): Map<String, String> {
-        // TODO add storage for collection owner
         val mappedToCollection = assetIds.associateBy({ it }, { it.substringBefore(":") })
         val collectionIds = mappedToCollection.values.toSet()
         if (assetIds.isEmpty()) {
             return emptyMap()
         }
-        val collections = collectionClient.getByIds(collectionIds.toList()).associateBy { it.address }
+        val fromCache = collectionCreatorRepository.getAll(collectionIds)
+        val missing = collectionIds - (fromCache.map { it.collection }.toSet())
+        val fromApi = collectionClient.getByIds(missing)
+            .filter { !it.projectOwnerAddress.isNullOrBlank() }
+            .map { ImxCollectionCreator(it.address, it.projectOwnerAddress!!) }
+
+        val collections = (fromCache + fromApi).associateBy { it.collection }
+
         val result = HashMap<String, String>(assetIds.size)
         mappedToCollection.forEach { (itemId, collectionId) ->
-            val creator = collections[collectionId]?.projectOwnerAddress
+            val creator = collections[collectionId]?.creator
             creator?.let { result[itemId] = it }
         }
+        collectionCreatorRepository.saveAll(fromApi)
         return result
     }
 
