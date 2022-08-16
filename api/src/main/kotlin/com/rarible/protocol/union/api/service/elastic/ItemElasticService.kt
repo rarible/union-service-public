@@ -19,6 +19,7 @@ import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.ItemWithOwnershipDto
 import com.rarible.protocol.union.dto.ItemsDto
 import com.rarible.protocol.union.dto.ItemsSearchRequestDto
+import com.rarible.protocol.union.dto.ItemsSearchSortDto
 import com.rarible.protocol.union.dto.ItemsWithOwnershipDto
 import com.rarible.protocol.union.dto.continuation.DateIdContinuation
 import com.rarible.protocol.union.dto.continuation.page.PageSize
@@ -208,7 +209,8 @@ class ItemElasticService(
     suspend fun searchItems(request: ItemsSearchRequestDto): ItemsDto {
         val cursor = DateIdContinuation.parse(request.continuation)?.toString()
         val filter = itemFilterConverter.searchItems(request.filter, cursor)
-        val result = esItemRepository.search(filter, EsItemSort.DEFAULT, request.size)
+        val sort = convertSort(request.sort)
+        val result = esItemRepository.search(filter, sort, request.size)
         if (result.entities.isEmpty()) return ItemsDto()
         val items = getItems(result.entities)
         val enriched = itemEnrichService.enrich(items)
@@ -296,5 +298,17 @@ class ItemElasticService(
         }.flatten()
 
         return items
+    }
+
+    private fun convertSort(sort: ItemsSearchSortDto?): EsItemSort {
+        if (sort == null) return EsItemSort.DEFAULT
+        return when (sort) {
+            ItemsSearchSortDto.LATEST -> EsItemSort.LATEST_FIRST
+            ItemsSearchSortDto.EARLIEST -> EsItemSort.EARLIEST_FIRST
+            ItemsSearchSortDto.HIGHEST_SELL -> EsItemSort.HIGHEST_SELL_PRICE_FIRST
+            ItemsSearchSortDto.LOWEST_SELL -> EsItemSort.LOWEST_SELL_PRICE_FIRST
+            ItemsSearchSortDto.HIGHEST_BID -> EsItemSort.HIGHEST_BID_PRICE_FIRST
+            ItemsSearchSortDto.LOWEST_BID -> EsItemSort.LOWEST_BID_PRICE_FIRST
+        }
     }
 }

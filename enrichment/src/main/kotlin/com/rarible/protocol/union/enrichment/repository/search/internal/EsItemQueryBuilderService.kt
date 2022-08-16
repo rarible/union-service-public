@@ -63,6 +63,8 @@ class EsItemQueryBuilderService(
         mustMatchTerms(filter.creators, EsItem::creators.name)
         mustMatchTerms(filter.blockchains, EsItem::blockchain.name)
         mustMatchTerms(filter.itemIds, EsItem::itemId.name)
+        mustMatchTerms(filter.sellPlatforms, EsItem::bestSellMarketplace.name)
+        mustMatchTerms(filter.bidPlatforms, EsItem::bestBidMarketplace.name)
         mustMatchRange(filter.mintedFrom, filter.mintedTo, EsItem::mintedAt.name)
         mustMatchRange(filter.updatedFrom, filter.updatedTo, EsItem::lastUpdatedAt.name)
         applyTextFilter(filter.text)

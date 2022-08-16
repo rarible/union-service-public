@@ -15,12 +15,14 @@ import com.rarible.protocol.union.dto.ItemsSearchFilterDto
 import com.rarible.protocol.union.dto.ItemsSearchRequestDto
 import com.rarible.protocol.union.dto.MetaAttributeDto
 import com.rarible.protocol.union.dto.MetaDto
+import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.TraitPropertyDto
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.repository.search.EsItemRepository
 import com.rarible.protocol.union.enrichment.test.data.randomItemDto
 import com.rarible.protocol.union.enrichment.test.data.randomUnionItem
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
+import com.rarible.protocol.union.integration.ethereum.data.randomEthSellOrderDto
 import com.rarible.protocol.union.integration.flow.data.randomFlowItemId
 import io.mockk.coEvery
 import io.mockk.every
@@ -30,6 +32,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import randomOrder
 import java.time.Duration
 import kotlin.random.Random
 
@@ -80,7 +83,9 @@ class ItemsSearchByRequestIt {
                                 )
                             ),
                             content = emptyList()
-                        )
+                        ),
+                        bestSellOrder = randomOrder(),
+                        bestBidOrder = randomOrder(),
                     )
                 esItems.add(item.toEsItem())
             }
@@ -102,8 +107,9 @@ class ItemsSearchByRequestIt {
                                 )
                             ),
                             content = emptyList()
-                        )
-
+                        ),
+                        bestSellOrder = randomOrder(),
+                        bestBidOrder = randomOrder(),
                     )
                 esItems.add(item.toEsItem())
             }
@@ -241,6 +247,31 @@ class ItemsSearchByRequestIt {
                 expected = expected,
                 failMessage = "Search by lastUpdatedAt from/to range is failed!"
             )
+
+            expected = esItems.filter {
+                setOf(PlatformDto.LOOKSRARE.name, PlatformDto.CRYPTO_PUNKS.name, PlatformDto.IMMUTABLEX.name)
+                    .contains(it.bestSellMarketplace)
+            }
+            checkResult(
+                filter = ItemsSearchFilterDto(
+                    sellPlatforms = listOf(PlatformDto.LOOKSRARE, PlatformDto.CRYPTO_PUNKS, PlatformDto.IMMUTABLEX),
+                ),
+                expected = expected,
+                failMessage = "Search by best sell platforms failed!"
+            )
+
+            expected = esItems.filter {
+                setOf(PlatformDto.RARIBLE.name, PlatformDto.OPEN_SEA.name, PlatformDto.X2Y2.name)
+                    .contains(it.bestBidMarketplace)
+            }
+            checkResult(
+                filter = ItemsSearchFilterDto(
+                    bidPlatforms = listOf(PlatformDto.RARIBLE, PlatformDto.OPEN_SEA, PlatformDto.X2Y2),
+                ),
+                expected = expected,
+                failMessage = "Search by best bid platforms failed!"
+            )
+
 
             expected = takeRandomItems()
             checkResult(

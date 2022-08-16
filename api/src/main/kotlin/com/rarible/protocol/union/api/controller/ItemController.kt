@@ -183,6 +183,7 @@ class ItemController(
     }
 
     override suspend fun searchItems(itemsSearchRequestDto: ItemsSearchRequestDto): ResponseEntity<ItemsDto> {
+        logger.info("Got request to search items: $itemsSearchRequestDto")
         return ResponseEntity.ok(itemSourceSelectService.searchItems(itemsSearchRequestDto))
     }
 

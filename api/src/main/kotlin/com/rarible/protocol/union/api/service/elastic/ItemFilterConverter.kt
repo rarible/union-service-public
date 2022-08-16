@@ -72,7 +72,9 @@ class ItemFilterConverter(
             deleted = filter.deleted,
             descriptions = filter.descriptions?.toSet(),
             traitsKeys = filter.traits?.map { it.key }?.toSet(),
-            traitsValues = filter.traits?.map { it.value }?.toSet()
+            traitsValues = filter.traits?.map { it.value }?.toSet(),
+            sellPlatforms = filter.sellPlatforms?.map { it.name }?.toSet(),
+            bidPlatforms = filter.bidPlatforms?.map { it.name }?.toSet(),
         )
     }
 }

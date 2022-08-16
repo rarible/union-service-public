@@ -23,5 +23,7 @@ data class EsItemGenericFilter(
     val traitsKeys: Set<String>? = null,
     val traitsValues: Set<String>? = null,
     val descriptions: Set<String>? = null,
+    val sellPlatforms: Set<String>? = null,
+    val bidPlatforms: Set<String>? = null,
     override val cursor: String? = null,
 ) : EsItemFilter()
