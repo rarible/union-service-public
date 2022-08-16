@@ -146,7 +146,7 @@ class ImxActivityEventHandlerTest {
     }
 
     @Test
-    fun `on trade`() = runBlocking<Unit> {
+    fun `on trade - swap`() = runBlocking<Unit> {
         val sellOrder = randomImxOrder(sell = randomImxOrderSellSide(), buy = randomImxOrderBuySide())
         val buyOrder = randomImxOrder(sell = randomImxOrderBuySide(), buy = randomImxOrderSellSide())
 
@@ -164,8 +164,10 @@ class ImxActivityEventHandlerTest {
         coVerify(exactly = 1) { activityHandler.onEvent(any()) }
         coVerify(exactly = 1) { activityHandler.onEvent(activity) }
 
-        // Nothing else emitted
+        // Nothing else emitted for items
         coVerify(exactly = 0) { itemHandler.onEvent(any()) }
-        coVerify(exactly = 0) { ownershipHandler.onEvent(any()) }
+        // 2 deletes and 2 updates on swap
+        // TODO make test more detailed
+        coVerify(exactly = 4) { ownershipHandler.onEvent(any()) }
     }
 }

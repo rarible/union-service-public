@@ -13,9 +13,13 @@ import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.L2DepositActivityDto
 import com.rarible.protocol.union.dto.L2WithdrawalActivityDto
 import com.rarible.protocol.union.dto.MintActivityDto
+import com.rarible.protocol.union.dto.OrderActivityMatchSideDto
 import com.rarible.protocol.union.dto.OrderActivitySourceDto
 import com.rarible.protocol.union.dto.OrderMatchSellDto
+import com.rarible.protocol.union.dto.OrderMatchSwapDto
 import com.rarible.protocol.union.dto.TransferActivityDto
+import com.rarible.protocol.union.dto.UnionAddress
+import com.rarible.protocol.union.dto.ext
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexDeposit
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexEvent
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexMint
@@ -89,29 +93,43 @@ object ImxActivityConverter {
             }
         }
         is ImmutablexTrade -> {
-            // TODO IMMUTABLEX what if null?
-            val makeOrder = orders[activity.make.orderId]
+            val makeAsset = convertAsset(activity.make, blockchain)
+            val makeType = makeAsset.type.ext
+            val takeAsset = convertAsset(activity.take, blockchain)
+            val takeType = takeAsset.type.ext
+
+            val maker = orders[activity.make.orderId]?.creator?.let { UnionAddressConverter.convert(blockchain, it) }
                 ?: throw ImxDataException("$blockchain make Order ${activity.make.orderId} not found")
-            val takeOrder = orders[activity.take.orderId]
+            val taker = orders[activity.take.orderId]?.creator?.let { UnionAddressConverter.convert(blockchain, it) }
                 ?: throw ImxDataException("$blockchain take Order ${activity.take.orderId} not found")
 
-            OrderMatchSellDto(
-                source = OrderActivitySourceDto.RARIBLE,
-                transactionHash = activity.transactionId.toString(),
-                blockchainInfo = null,
-                id = activity.activityId,
-                date = activity.timestamp,
-                nft = convertAsset(activity.make, blockchain),
-                payment = convertAsset(activity.take, blockchain),
-                buyer = UnionAddressConverter.convert(blockchain, takeOrder.creator),
-                seller = UnionAddressConverter.convert(blockchain, makeOrder.creator),
-                buyerOrderHash = activity.take.orderId.toString(),
-                sellerOrderHash = activity.make.orderId.toString(),
-                price = BigDecimal.ZERO,
-                priceUsd = null,
-                amountUsd = null,
-                type = OrderMatchSellDto.Type.SELL
-            )
+            if (makeType.isNft && !takeType.isNft) {
+                convertToMatch(activity, makeAsset, takeAsset, maker, taker)
+            } else if (!makeType.isNft && takeType.isNft) {
+                convertToMatch(activity, takeAsset, makeAsset, taker, maker)
+            } else {
+                OrderMatchSwapDto(
+                    id = activity.activityId,
+                    date = activity.timestamp,
+                    source = OrderActivitySourceDto.RARIBLE,
+                    transactionHash = activity.transactionId.toString(),
+                    // TODO UNION remove in 1.19
+                    blockchainInfo = null,
+                    left = OrderActivityMatchSideDto(
+                        maker = maker,
+                        hash = null,
+                        asset = makeAsset
+                    ),
+                    right = OrderActivityMatchSideDto(
+                        maker = taker,
+                        hash = null,
+                        asset = takeAsset
+                    ),
+                    reverted = false,
+                    lastUpdatedAt = activity.timestamp
+                )
+            }
+
         }
 
         // We don't need these activities ATM
@@ -130,6 +148,33 @@ object ImxActivityConverter {
             status = activity.status,
             itemId = ItemIdDto(blockchain, activity.encodedItemId()),
             value = activity.token.data.quantity
+        )
+    }
+
+    private fun convertToMatch(
+        activity: ImmutablexTrade,
+        nft: AssetDto,
+        payment: AssetDto,
+        seller: UnionAddress,
+        buyer: UnionAddress
+    ): OrderMatchSellDto {
+        // TODO IMMUTABLEX what if null?
+        return OrderMatchSellDto(
+            source = OrderActivitySourceDto.RARIBLE,
+            transactionHash = activity.transactionId.toString(),
+            blockchainInfo = null,
+            id = activity.activityId,
+            date = activity.timestamp,
+            nft = nft,
+            payment = payment,
+            buyer = buyer,
+            seller = seller,
+            buyerOrderHash = activity.take.orderId.toString(),
+            sellerOrderHash = activity.make.orderId.toString(),
+            price = BigDecimal.ZERO,
+            priceUsd = null,
+            amountUsd = null,
+            type = OrderMatchSellDto.Type.SELL
         )
     }
 
