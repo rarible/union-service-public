@@ -21,7 +21,6 @@ import com.rarible.protocol.union.integration.data.randomImxTransfer
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexTransfer
 import com.rarible.protocol.union.integration.immutablex.converter.ImxActivityConverter
 import com.rarible.protocol.union.integration.immutablex.converter.ImxItemConverter
-import com.rarible.protocol.union.integration.immutablex.converter.ImxOrderConverter
 import com.rarible.protocol.union.integration.immutablex.converter.ImxOwnershipConverter
 import com.rarible.protocol.union.integration.immutablex.scanner.ImxScanMetrics
 import com.rarible.protocol.union.integration.immutablex.service.ImxActivityService
@@ -149,14 +148,11 @@ class ImxActivityEventHandlerTest {
     @Test
     fun `on trade`() = runBlocking<Unit> {
         val sellOrder = randomImxOrder(sell = randomImxOrderSellSide(), buy = randomImxOrderBuySide())
-        val sellUnionOrder = ImxOrderConverter.convert(sellOrder, blockchain)
-
         val buyOrder = randomImxOrder(sell = randomImxOrderBuySide(), buy = randomImxOrderSellSide())
-        val buyUnionOrder = ImxOrderConverter.convert(buyOrder, blockchain)
 
         val trade = randomImxTrade(buyOrderId = buyOrder.orderId, sellOrderId = sellOrder.orderId)
 
-        val orderMap = mapOf(sellOrder.orderId to sellUnionOrder, buyOrder.orderId to buyUnionOrder)
+        val orderMap = mapOf(sellOrder.orderId to sellOrder, buyOrder.orderId to buyOrder)
         val activity = ImxActivityConverter.convert(trade, orderMap)
 
         coEvery { itemService.getItemCreators(emptyList()) } returns emptyMap()

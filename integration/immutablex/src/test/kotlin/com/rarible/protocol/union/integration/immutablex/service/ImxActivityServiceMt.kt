@@ -17,8 +17,7 @@ import java.time.Instant
 @ManualTest
 class ImxActivityServiceMt : ImxManualTest() {
 
-    private val orderService = ImxOrderService(orderClient)
-    private val service = ImxActivityService(activityClient, orderService)
+    private val service = ImxActivityService(activityClient, orderClient)
 
     @Test
     fun getByIds() = runBlocking<Unit> {
