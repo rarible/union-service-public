@@ -101,9 +101,9 @@ class ImxApiConfiguration {
     @Bean
     fun imxActivityService(
         activityClient: ImxActivityClient,
-        orderService: ImxOrderService
+        orderClient: ImxOrderClient
     ): ImxActivityService {
-        return ImxActivityService(activityClient, orderService)
+        return ImxActivityService(activityClient, orderClient)
     }
 
     @Bean

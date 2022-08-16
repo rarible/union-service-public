@@ -14,12 +14,12 @@ import com.rarible.protocol.union.dto.L2DepositActivityDto
 import com.rarible.protocol.union.dto.L2WithdrawalActivityDto
 import com.rarible.protocol.union.dto.MintActivityDto
 import com.rarible.protocol.union.dto.OrderActivitySourceDto
-import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderMatchSellDto
 import com.rarible.protocol.union.dto.TransferActivityDto
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexDeposit
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexEvent
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexMint
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexOrder
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexTrade
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexTransfer
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexWithdrawal
@@ -33,7 +33,9 @@ object ImxActivityConverter {
     private val logger = LoggerFactory.getLogger(javaClass)
 
     fun convert(
-        activity: ImmutablexEvent, orders: Map<Long, OrderDto>, blockchain: BlockchainDto = BlockchainDto.IMMUTABLEX
+        activity: ImmutablexEvent,
+        orders: Map<Long, ImmutablexOrder>,
+        blockchain: BlockchainDto = BlockchainDto.IMMUTABLEX
     ): ActivityDto {
         try {
             return convertInternal(activity, orders, blockchain)
@@ -44,7 +46,7 @@ object ImxActivityConverter {
     }
 
     private fun convertInternal(
-        activity: ImmutablexEvent, orders: Map<Long, OrderDto>, blockchain: BlockchainDto
+        activity: ImmutablexEvent, orders: Map<Long, ImmutablexOrder>, blockchain: BlockchainDto
     ) = when (activity) {
         is ImmutablexMint -> MintActivityDto(
             id = activity.activityId,
@@ -101,8 +103,8 @@ object ImxActivityConverter {
                 date = activity.timestamp,
                 nft = convertAsset(activity.make, blockchain),
                 payment = convertAsset(activity.take, blockchain),
-                buyer = takeOrder.maker,
-                seller = makeOrder.maker,
+                buyer = UnionAddressConverter.convert(blockchain, takeOrder.creator),
+                seller = UnionAddressConverter.convert(blockchain, makeOrder.creator),
                 buyerOrderHash = activity.take.orderId.toString(),
                 sellerOrderHash = activity.make.orderId.toString(),
                 price = BigDecimal.ZERO,
