@@ -17,7 +17,7 @@ class ImxCollectionClient(
         return getByUri(uri)
     }
 
-    suspend fun getByIds(collectionIds: List<String>): List<ImmutablexCollection> {
+    suspend fun getByIds(collectionIds: Collection<String>): List<ImmutablexCollection> {
         return getChunked(collectionRequestChunkSize, collectionIds) {
             ignore404 { getById(it) }
         }
