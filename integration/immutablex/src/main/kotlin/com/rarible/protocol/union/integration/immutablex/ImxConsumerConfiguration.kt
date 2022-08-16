@@ -7,7 +7,6 @@ import com.rarible.protocol.union.core.model.UnionItemMetaEvent
 import com.rarible.protocol.union.core.model.UnionOrderEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipEvent
 import com.rarible.protocol.union.dto.ActivityDto
-import com.rarible.protocol.union.integration.immutablex.client.ImxActivityClient
 import com.rarible.protocol.union.integration.immutablex.handlers.ImxActivityEventHandler
 import com.rarible.protocol.union.integration.immutablex.handlers.ImxCollectionEventHandler
 import com.rarible.protocol.union.integration.immutablex.handlers.ImxItemEventHandler
@@ -17,6 +16,7 @@ import com.rarible.protocol.union.integration.immutablex.scanner.ImxScanMetrics
 import com.rarible.protocol.union.integration.immutablex.scanner.ImxScanStateRepository
 import com.rarible.protocol.union.integration.immutablex.scanner.ImxScanner
 import com.rarible.protocol.union.integration.immutablex.service.ImxActivityService
+import com.rarible.protocol.union.integration.immutablex.service.ImxItemService
 import io.micrometer.core.instrument.MeterRegistry
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
@@ -38,14 +38,14 @@ class ImxConsumerConfiguration {
         activityHandler: IncomingEventHandler<ActivityDto>,
         itemHandler: IncomingEventHandler<UnionItemEvent>,
         ownershipHandler: IncomingEventHandler<UnionOwnershipEvent>,
-        activityClient: ImxActivityClient,
+        itemService: ImxItemService,
         activityService: ImxActivityService,
         imxScanMetrics: ImxScanMetrics
     ) = ImxActivityEventHandler(
         activityHandler,
         itemHandler,
         ownershipHandler,
-        activityClient,
+        itemService,
         activityService,
         imxScanMetrics
     )
@@ -53,8 +53,8 @@ class ImxConsumerConfiguration {
     @Bean
     fun immutablexItemEventHandler(
         itemMetaHandler: IncomingEventHandler<UnionItemMetaEvent>,
-        activityClient: ImxActivityClient
-    ) = ImxItemEventHandler(itemMetaHandler, activityClient)
+        itemService: ImxItemService
+    ) = ImxItemEventHandler(itemMetaHandler, itemService)
 
     @Bean
     fun imxCollectionEventHandler(
