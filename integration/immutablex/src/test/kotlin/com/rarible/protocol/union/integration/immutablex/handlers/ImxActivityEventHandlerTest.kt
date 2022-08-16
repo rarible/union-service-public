@@ -19,13 +19,13 @@ import com.rarible.protocol.union.integration.data.randomImxOrderSellSide
 import com.rarible.protocol.union.integration.data.randomImxTrade
 import com.rarible.protocol.union.integration.data.randomImxTransfer
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexTransfer
-import com.rarible.protocol.union.integration.immutablex.client.ImxActivityClient
 import com.rarible.protocol.union.integration.immutablex.converter.ImxActivityConverter
 import com.rarible.protocol.union.integration.immutablex.converter.ImxItemConverter
 import com.rarible.protocol.union.integration.immutablex.converter.ImxOrderConverter
 import com.rarible.protocol.union.integration.immutablex.converter.ImxOwnershipConverter
 import com.rarible.protocol.union.integration.immutablex.scanner.ImxScanMetrics
 import com.rarible.protocol.union.integration.immutablex.service.ImxActivityService
+import com.rarible.protocol.union.integration.immutablex.service.ImxItemService
 import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -46,7 +46,7 @@ class ImxActivityEventHandlerTest {
         coEvery { onEvent(any()) } returns Unit
     }
 
-    private val activityClient: ImxActivityClient = mockk()
+    private val itemService: ImxItemService = mockk()
     private val activityService: ImxActivityService = mockk()
 
     private val imxScanMetrics: ImxScanMetrics = mockk()
@@ -55,7 +55,7 @@ class ImxActivityEventHandlerTest {
         activityHandler,
         itemHandler,
         ownershipHandler,
-        activityClient,
+        itemService,
         activityService,
         imxScanMetrics
     )
@@ -64,7 +64,7 @@ class ImxActivityEventHandlerTest {
 
     @BeforeEach
     fun beforeEach() {
-        clearMocks(activityClient, activityService)
+        clearMocks(itemService, activityService)
     }
 
     @Test
@@ -75,7 +75,7 @@ class ImxActivityEventHandlerTest {
         val item = ImxItemConverter.convert(mint, blockchain)
 
         coEvery { activityService.getTradeOrders(listOf(mint)) } returns emptyMap()
-        coEvery { activityClient.getItemCreators(emptyList()) } returns emptyMap()
+        coEvery { itemService.getItemCreators(emptyList()) } returns emptyMap()
 
         imxActivityEventHandler.handle(listOf(mint))
 
@@ -99,7 +99,7 @@ class ImxActivityEventHandlerTest {
         val itemId = transfer.itemId()
 
         coEvery { activityService.getTradeOrders(listOf(transfer)) } returns emptyMap()
-        coEvery { activityClient.getItemCreators(listOf(itemId)) } returns mapOf(itemId to creator)
+        coEvery { itemService.getItemCreators(listOf(itemId)) } returns mapOf(itemId to creator)
 
         val deletedOwnershipId = OwnershipIdDto(blockchain, itemId, user)
         val activity = ImxActivityConverter.convert(transfer, emptyMap())
@@ -127,7 +127,7 @@ class ImxActivityEventHandlerTest {
         val itemId = transfer.itemId()
 
         coEvery { activityService.getTradeOrders(listOf(transfer)) } returns emptyMap()
-        coEvery { activityClient.getItemCreators(emptyList()) } returns emptyMap()
+        coEvery { itemService.getItemCreators(emptyList()) } returns emptyMap()
 
         val deletedOwnershipId = OwnershipIdDto(blockchain, itemId, user)
         val activity = ImxActivityConverter.convert(transfer, emptyMap())
@@ -159,7 +159,7 @@ class ImxActivityEventHandlerTest {
         val orderMap = mapOf(sellOrder.orderId to sellUnionOrder, buyOrder.orderId to buyUnionOrder)
         val activity = ImxActivityConverter.convert(trade, orderMap)
 
-        coEvery { activityClient.getItemCreators(emptyList()) } returns emptyMap()
+        coEvery { itemService.getItemCreators(emptyList()) } returns emptyMap()
         coEvery { activityService.getTradeOrders(listOf(trade)) } returns orderMap
 
         imxActivityEventHandler.handle(listOf(trade))

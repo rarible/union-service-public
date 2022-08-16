@@ -5,13 +5,13 @@ import com.rarible.protocol.union.core.model.UnionItemMetaEvent
 import com.rarible.protocol.union.core.model.UnionItemMetaUpdateEvent
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexAsset
-import com.rarible.protocol.union.integration.immutablex.client.ImxActivityClient
 import com.rarible.protocol.union.integration.immutablex.converter.ImxItemConverter
 import com.rarible.protocol.union.integration.immutablex.converter.ImxItemMetaConverter
+import com.rarible.protocol.union.integration.immutablex.service.ImxItemService
 
 class ImxItemEventHandler(
     private val itemMetaHandler: IncomingEventHandler<UnionItemMetaEvent>,
-    private val activityClient: ImxActivityClient
+    private val itemService: ImxItemService
 ) {
 
     private val blockchain = BlockchainDto.IMMUTABLEX
@@ -20,7 +20,7 @@ class ImxItemEventHandler(
         if (assets.isEmpty()) {
             return
         }
-        val creators = activityClient.getItemCreators(assets.map { it.itemId })
+        val creators = itemService.getItemCreators(assets.map { it.itemId })
         val items = ImxItemConverter.convert(assets, creators, blockchain)
         val meta = assets.associateBy { it.encodedItemId() }
             .mapValues { ImxItemMetaConverter.convert(it.value, blockchain) }

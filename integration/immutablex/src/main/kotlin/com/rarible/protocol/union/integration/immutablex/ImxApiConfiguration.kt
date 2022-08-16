@@ -60,17 +60,18 @@ class ImxApiConfiguration {
     @Bean
     fun imxItemService(
         assetClient: ImxAssetClient,
-        activityClient: ImxActivityClient
+        activityClient: ImxActivityClient,
+        collectionClient: ImxCollectionClient
     ): ImxItemService {
-        return ImxItemService(assetClient, activityClient)
+        return ImxItemService(assetClient, activityClient, collectionClient)
     }
 
     @Bean
     fun imxOwnershipService(
         assetClient: ImxAssetClient,
-        activityClient: ImxActivityClient
+        itemService: ImxItemService
     ): ImxOwnershipService {
-        return ImxOwnershipService(assetClient, activityClient)
+        return ImxOwnershipService(assetClient, itemService)
     }
 
     @Bean

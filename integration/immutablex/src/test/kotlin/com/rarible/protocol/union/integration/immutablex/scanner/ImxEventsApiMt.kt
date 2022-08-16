@@ -7,7 +7,6 @@ import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import scalether.domain.Address
-import java.time.Instant
 
 @ManualTest
 class ImxEventsApiMt : ImxManualTest() {
@@ -69,10 +68,8 @@ class ImxEventsApiMt : ImxManualTest() {
     // Just to ensure this request works
     @Test
     fun getAssets() = runBlocking<Unit> {
-        val result = eventsApi.assets(
-            Instant.parse("2022-08-15T00:10:55.891Z"), "0xd5f5c0c7b335dcb63488f73e022ddf9c11df524a:206234"
-        )
-        println(result.size)
+        val result = eventsApi.assets(nowMillis(), "${Address.ZERO().prefixed()}:0")
+        assertThat(result).isEmpty()
     }
 
     // Just to ensure this request works

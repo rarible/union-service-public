@@ -18,7 +18,6 @@ import com.rarible.protocol.union.integration.immutablex.client.ImmutablexMint
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexTrade
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexTransfer
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexWithdrawal
-import com.rarible.protocol.union.integration.immutablex.client.ImxActivityClient
 import com.rarible.protocol.union.integration.immutablex.converter.ImxActivityConverter
 import com.rarible.protocol.union.integration.immutablex.converter.ImxDataException
 import com.rarible.protocol.union.integration.immutablex.converter.ImxItemConverter
@@ -26,6 +25,7 @@ import com.rarible.protocol.union.integration.immutablex.converter.ImxOwnershipC
 import com.rarible.protocol.union.integration.immutablex.scanner.ImxScanEntityType
 import com.rarible.protocol.union.integration.immutablex.scanner.ImxScanMetrics
 import com.rarible.protocol.union.integration.immutablex.service.ImxActivityService
+import com.rarible.protocol.union.integration.immutablex.service.ImxItemService
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
@@ -35,7 +35,7 @@ class ImxActivityEventHandler(
     private val itemHandler: IncomingEventHandler<UnionItemEvent>,
     private val ownershipHandler: IncomingEventHandler<UnionOwnershipEvent>,
 
-    private val activityClient: ImxActivityClient,
+    private val itemService: ImxItemService,
     private val activityService: ImxActivityService,
 
     private val imxScanMetrics: ImxScanMetrics,
@@ -54,7 +54,7 @@ class ImxActivityEventHandler(
         val itemsRequiredCreators = events.filter { it is ImmutablexTransfer && !it.isBurn }
             .map { (it as ImmutablexTransfer).itemId() }
 
-        val creators = activityClient.getItemCreators(itemsRequiredCreators)
+        val creators = itemService.getItemCreators(itemsRequiredCreators)
         val orders = ordersDeferred.await()
 
         events.forEach { event ->
