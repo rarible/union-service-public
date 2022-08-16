@@ -10,7 +10,10 @@ import com.rarible.protocol.union.core.model.UnionOwnershipEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipUpdateEvent
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.OrderMatchSellDto
+import com.rarible.protocol.union.dto.OrderMatchSwapDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
+import com.rarible.protocol.union.dto.ext
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexDeposit
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexEvent
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexMint
@@ -63,20 +66,26 @@ class ImxActivityEventHandler(
                 is ImmutablexTransfer -> onTransfer(event, creators)
                 else -> Unit
             }
-            sendActivity(event, orders)
+            val converted = convertActivity(event, orders)
+            when (converted) {
+                is OrderMatchSwapDto -> onSwap(converted)
+                is OrderMatchSellDto -> onMatch(converted)
+                else -> Unit
+            }
+            converted?.let { activityHandler.onEvent(converted) }
         }
     }
 
-    private suspend fun sendActivity(event: ImmutablexEvent, orders: Map<Long, ImmutablexOrder>) {
-        try {
-            val converted = ImxActivityConverter.convert(event, orders)
-            activityHandler.onEvent(converted)
+    private fun convertActivity(event: ImmutablexEvent, orders: Map<Long, ImmutablexOrder>): ActivityDto? {
+        return try {
+            ImxActivityConverter.convert(event, orders)
         } catch (e: ImxDataException) {
             // It could happen if there is no orders specified in TRADE activity
             // It should not happen on prod, but if there is inconsistent data we can just skip it
             // and then report to IMX support
             logger.error("Failed to process Activity (invalid data), skipped: {}, error: {}", event, e.message)
             markError(event)
+            null
         }
     }
 
@@ -99,6 +108,34 @@ class ImxActivityEventHandler(
             itemHandler.onEvent(UnionItemDeleteEvent(deletedOwnershipId.getItemId()))
         } else {
             val newOwnership = ImxOwnershipConverter.convert(transfer, creators[transfer.itemId()], blockchain)
+            ownershipHandler.onEvent(UnionOwnershipUpdateEvent(newOwnership))
+        }
+    }
+
+    private suspend fun onMatch(activity: OrderMatchSellDto) {
+        val deletedOwnershipId = activity.nft.type.ext.itemId!!.toOwnership(activity.seller.value)
+        // TODO add creator
+        val newOwnership = ImxOwnershipConverter.convert(activity, null, blockchain)
+
+        ownershipHandler.onEvent(UnionOwnershipDeleteEvent(deletedOwnershipId))
+        ownershipHandler.onEvent(UnionOwnershipUpdateEvent(newOwnership))
+    }
+
+    private suspend fun onSwap(swap: OrderMatchSwapDto) {
+        val left = swap.left.asset.type.ext
+        val right = swap.right.asset.type.ext
+        if (left.isNft) {
+            val deletedOwnershipId = left.itemId!!.toOwnership(swap.left.maker.value)
+            // TODO add creator
+            val newOwnership = ImxOwnershipConverter.convert(swap, swap.right, null, blockchain)
+            ownershipHandler.onEvent(UnionOwnershipDeleteEvent(deletedOwnershipId))
+            ownershipHandler.onEvent(UnionOwnershipUpdateEvent(newOwnership))
+        }
+        if (right.isNft) {
+            val deletedOwnershipId = right.itemId!!.toOwnership(swap.right.maker.value)
+            // TODO add creator
+            val newOwnership = ImxOwnershipConverter.convert(swap, swap.left, null, blockchain)
+            ownershipHandler.onEvent(UnionOwnershipDeleteEvent(deletedOwnershipId))
             ownershipHandler.onEvent(UnionOwnershipUpdateEvent(newOwnership))
         }
     }
