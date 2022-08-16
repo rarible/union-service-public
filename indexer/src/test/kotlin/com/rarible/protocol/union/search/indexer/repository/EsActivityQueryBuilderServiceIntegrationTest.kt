@@ -72,7 +72,8 @@ internal class EsActivityQueryBuilderServiceIntegrationTest {
     @Test
     fun `should query by activity type`() = runBlocking<Unit> {
         // given
-        val filter = ElasticActivityQueryGenericFilter(activityTypes = setOf(ActivityTypeDto.SELL, ActivityTypeDto.BURN))
+        val filter =
+            ElasticActivityQueryGenericFilter(activityTypes = setOf(ActivityTypeDto.SELL, ActivityTypeDto.BURN))
         val toFind1 = randomEsActivity().copy(type = ActivityTypeDto.SELL)
         val toFind2 = randomEsActivity().copy(type = ActivityTypeDto.BURN)
         val toSkip1 = randomEsActivity().copy(type = ActivityTypeDto.BID)
@@ -209,7 +210,8 @@ internal class EsActivityQueryBuilderServiceIntegrationTest {
     @Test
     fun `should query between from and to`() = runBlocking<Unit> {
         // given
-        val filter = ElasticActivityQueryGenericFilter(from = Instant.ofEpochMilli(500), to = Instant.ofEpochMilli(1000))
+        val filter =
+            ElasticActivityQueryGenericFilter(from = Instant.ofEpochMilli(500), to = Instant.ofEpochMilli(1000))
         val toFind1 = randomEsActivity().copy(date = Instant.ofEpochMilli(500))
         val toFind2 = randomEsActivity().copy(date = Instant.ofEpochMilli(1000))
         val toSkip1 = randomEsActivity().copy(date = Instant.ofEpochMilli(250))
