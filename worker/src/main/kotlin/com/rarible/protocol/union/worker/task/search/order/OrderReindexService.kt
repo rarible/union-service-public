@@ -27,12 +27,17 @@ class OrderReindexService(
     ): Flow<String> {
         val counter = searchTaskMetricFactory.createReindexOrderCounter(blockchain)
         var continuation = cursor
+        // TODO read values from config
+        val size = when (blockchain) {
+            BlockchainDto.IMMUTABLEX -> 200 // Max size allowed by IMX
+            else -> PageSize.ORDER.max
+        }
         return flow {
             do {
                 val res = orderApiMergeService.getOrdersAll(
                     listOf(blockchain),
                     continuation,
-                    PageSize.ORDER.max,
+                    size,
                     OrderSortDto.LAST_UPDATE_DESC,
                     OrderStatusDto.values().asList()
                 )

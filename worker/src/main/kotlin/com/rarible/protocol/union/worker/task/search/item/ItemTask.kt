@@ -3,6 +3,7 @@ package com.rarible.protocol.union.worker.task.search.item
 import com.rarible.core.task.TaskHandler
 import com.rarible.protocol.union.core.converter.EsItemConverter.toEsItem
 import com.rarible.protocol.union.core.model.EsItem
+import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.continuation.CombinedContinuation
 import com.rarible.protocol.union.dto.continuation.page.ArgSlice
 import com.rarible.protocol.union.dto.continuation.page.PageSize
@@ -11,7 +12,6 @@ import com.rarible.protocol.union.enrichment.service.query.item.ItemApiMergeServ
 import com.rarible.protocol.union.worker.config.ItemReindexProperties
 import com.rarible.protocol.union.worker.metrics.SearchTaskMetricFactory
 import com.rarible.protocol.union.worker.task.search.ParamFactory
-import com.rarible.protocol.union.worker.task.search.ownership.OwnershipTaskParam
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
@@ -38,6 +38,11 @@ class ItemTask(
     override fun runLongTask(from: String?, param: String): Flow<String> {
         val blockchain = paramFactory.parse<ItemTaskParam>(param).blockchain
         val counter = searchTaskMetricFactory.createReindexItemCounter(blockchain)
+        // TODO read values from config
+        val size = when (blockchain) {
+            BlockchainDto.IMMUTABLEX -> 200 // Max size allowed by IMX
+            else -> PageSize.ITEM.max
+        }
         return if (from == "") {
             emptyFlow()
         } else {
@@ -47,7 +52,7 @@ class ItemTask(
                     val res = itemApiMergeService.getAllItems(
                         listOf(blockchain),
                         continuation,
-                        PageSize.ITEM.max,
+                        size,
                         true,
                         Long.MIN_VALUE,
                         Long.MAX_VALUE
