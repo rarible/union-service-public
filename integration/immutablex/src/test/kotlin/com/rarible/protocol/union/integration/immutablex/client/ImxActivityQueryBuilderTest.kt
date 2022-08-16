@@ -32,7 +32,9 @@ class ImxActivityQueryBuilderTest {
 
         assertThat(builder.toString()).isEqualTo(
             "$host/mints?" +
-                "user=u" +
+                "status=success" +
+                "&token_type=ERC721" +
+                "&user=u" +
                 "&token_address=a" +
                 "&token_id=b" +
                 "&min_timestamp=2022-01-01T00:00:00Z" +
@@ -48,7 +50,9 @@ class ImxActivityQueryBuilderTest {
 
         assertThat(builder.toString()).isEqualTo(
             "$host/mints?" +
-                "min_timestamp=2022-01-01T03:00:00Z" +
+                "status=success" +
+                "&token_type=ERC721" +
+                "&min_timestamp=2022-01-01T03:00:00Z" +
                 "&order_by=transaction_id" +
                 "&direction=asc" +
                 "&cursor=eyJ0cmFuc2FjdGlvbl9pZCI6MX0"
@@ -61,7 +65,9 @@ class ImxActivityQueryBuilderTest {
 
         assertThat(builder.toString()).isEqualTo(
             "$host/mints?" +
-                "max_timestamp=2022-01-01T03:00:00.001Z" +
+                "status=success" +
+                "&token_type=ERC721" +
+                "&max_timestamp=2022-01-01T03:00:00.001Z" +
                 "&order_by=transaction_id" +
                 "&direction=desc" +
                 "&cursor=eyJ0cmFuc2FjdGlvbl9pZCI6MX0"
@@ -75,7 +81,9 @@ class ImxActivityQueryBuilderTest {
         // min should be replaced by date from continuation
         assertThat(builder.toString()).isEqualTo(
             "$host/mints?" +
-                "min_timestamp=2022-01-01T03:00:00Z" +
+                "status=success" +
+                "&token_type=ERC721" +
+                "&min_timestamp=2022-01-01T03:00:00Z" +
                 "&order_by=transaction_id" +
                 "&direction=asc" +
                 "&cursor=eyJ0cmFuc2FjdGlvbl9pZCI6MX0"
@@ -89,7 +97,9 @@ class ImxActivityQueryBuilderTest {
         // min should be added, max should be the same
         assertThat(builder.toString()).isEqualTo(
             "$host/mints?" +
-                "min_timestamp=2022-01-01T03:00:00Z" +
+                "status=success" +
+                "&token_type=ERC721" +
+                "&min_timestamp=2022-01-01T03:00:00Z" +
                 "&max_timestamp=2022-01-01T06:00:00Z" +
                 "&order_by=transaction_id" +
                 "&direction=asc" +
@@ -104,7 +114,9 @@ class ImxActivityQueryBuilderTest {
         // max should be added, min should be the same
         assertThat(builder.toString()).isEqualTo(
             "$host/mints?" +
-                "min_timestamp=2022-01-01T00:00:00Z" +
+                "status=success" +
+                "&token_type=ERC721" +
+                "&min_timestamp=2022-01-01T00:00:00Z" +
                 "&max_timestamp=2022-01-01T03:00:00.001Z" +
                 "&order_by=transaction_id" +
                 "&direction=desc" +
@@ -119,7 +131,9 @@ class ImxActivityQueryBuilderTest {
         // max should be replaced by date from continuation
         assertThat(builder.toString()).isEqualTo(
             "$host/mints?" +
-                "max_timestamp=2022-01-01T03:00:00.001Z" +
+                "status=success" +
+                "&token_type=ERC721" +
+                "&max_timestamp=2022-01-01T03:00:00.001Z" +
                 "&order_by=transaction_id" +
                 "&direction=desc" +
                 "&cursor=eyJ0cmFuc2FjdGlvbl9pZCI6MX0"
@@ -134,6 +148,7 @@ class ImxActivityQueryBuilderTest {
         assertThat(transferQuery.toString()).isEqualTo(
             "$host/transfers?" +
                 "status=success" +
+                "&token_type=ERC721" +
                 "&order_by=transaction_id" +
                 "&direction=asc" +
                 "&cursor=eyJ0cmFuc2FjdGlvbl9pZCI6MTIzfQ"
