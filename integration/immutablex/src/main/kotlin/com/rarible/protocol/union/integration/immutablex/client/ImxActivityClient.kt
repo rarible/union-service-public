@@ -1,7 +1,6 @@
 package com.rarible.protocol.union.integration.immutablex.client
 
 import com.rarible.protocol.union.dto.ActivitySortDto
-import com.rarible.protocol.union.dto.parser.IdParser
 import kotlinx.coroutines.reactor.awaitSingle
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.MediaType
@@ -227,20 +226,6 @@ class ImxActivityClient(
             .retrieve()
             .toEntity(T::class.java)
             .awaitSingle().body!!
-    }
-
-    suspend fun getItemCreator(itemId: String): String? {
-        val (token, tokenId) = IdParser.split(itemId, 2)
-        return getMints(pageSize = 1, token = token, tokenId = tokenId).result.firstOrNull()?.user
-    }
-
-    suspend fun getItemCreators(assetIds: Collection<String>): Map<String, String> {
-        if (assetIds.isEmpty()) {
-            return emptyMap()
-        }
-        return getChunked(creatorsRequestChunkSize, assetIds) { itemId ->
-            getItemCreator(itemId)?.let { Pair(itemId, it) }
-        }.associateBy({ it.first }, { it.second })
     }
 }
 

@@ -10,7 +10,6 @@ import com.rarible.protocol.union.dto.continuation.page.Page
 import com.rarible.protocol.union.dto.continuation.page.Paging
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexAsset
-import com.rarible.protocol.union.integration.immutablex.client.ImxActivityClient
 import com.rarible.protocol.union.integration.immutablex.client.ImxAssetClient
 import com.rarible.protocol.union.integration.immutablex.client.TokenIdDecoder
 import com.rarible.protocol.union.integration.immutablex.converter.ImxOwnershipConverter
@@ -19,7 +18,7 @@ import kotlinx.coroutines.coroutineScope
 
 class ImxOwnershipService(
     private val assetClient: ImxAssetClient,
-    private val activityClient: ImxActivityClient
+    private val itemService: ImxItemService
 ) : AbstractBlockchainService(BlockchainDto.IMMUTABLEX), OwnershipService {
 
     override suspend fun getOwnershipById(ownershipId: String): UnionOwnership {
@@ -28,7 +27,7 @@ class ImxOwnershipService(
         val asset = assetClient.getById(itemId)
 
         if (asset.user == owner) {
-            val creator = activityClient.getItemCreator(itemId)
+            val creator = itemService.getItemCreator(itemId)
             return ImxOwnershipConverter.convert(asset, creator, blockchain)
         } else {
             throw UnionNotFoundException("Ownership ${blockchain}:${ownershipId} not found")
@@ -38,7 +37,7 @@ class ImxOwnershipService(
     override suspend fun getOwnershipsByIds(ownershipIds: List<String>): List<UnionOwnership> {
         val itemIds = ownershipIds.map { TokenIdDecoder.decodeItemId(it.substringBeforeLast(":")) }.toSet()
 
-        val creators = coroutineScope { async { activityClient.getItemCreators(itemIds) } }
+        val creators = coroutineScope { async { itemService.getItemCreators(itemIds) } }
         val assets = assetClient.getByIds(itemIds)
 
         val ownershipIdsSet = HashSet(ownershipIds)
@@ -57,7 +56,7 @@ class ImxOwnershipService(
 
     override suspend fun getOwnershipsByItem(itemId: String, continuation: String?, size: Int): Page<UnionOwnership> {
         val decodedItemId = TokenIdDecoder.decodeItemId(itemId)
-        val creator = coroutineScope { async { activityClient.getItemCreator(decodedItemId) } }
+        val creator = coroutineScope { async { itemService.getItemCreator(decodedItemId) } }
         val asset = assetClient.getById(decodedItemId)
         val result = ImxOwnershipConverter.convert(asset, creator.await(), blockchain)
         return Page(0L, null, listOf(result))
@@ -70,7 +69,7 @@ class ImxOwnershipService(
     }
 
     private suspend fun convert(assets: Collection<ImmutablexAsset>): List<UnionOwnership> {
-        val creators = activityClient.getItemCreators(assets.map { it.itemId })
+        val creators = itemService.getItemCreators(assets.map { it.itemId })
         return ImxOwnershipConverter.convert(assets, creators, blockchain)
     }
 }

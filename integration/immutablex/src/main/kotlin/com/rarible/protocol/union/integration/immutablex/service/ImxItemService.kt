@@ -14,6 +14,7 @@ import com.rarible.protocol.union.dto.continuation.page.Paging
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexAsset
 import com.rarible.protocol.union.integration.immutablex.client.ImxActivityClient
 import com.rarible.protocol.union.integration.immutablex.client.ImxAssetClient
+import com.rarible.protocol.union.integration.immutablex.client.ImxCollectionClient
 import com.rarible.protocol.union.integration.immutablex.client.TokenIdDecoder
 import com.rarible.protocol.union.integration.immutablex.converter.ImxItemConverter
 import com.rarible.protocol.union.integration.immutablex.converter.ImxItemMetaConverter
@@ -22,7 +23,8 @@ import kotlinx.coroutines.coroutineScope
 
 class ImxItemService(
     private val assetClient: ImxAssetClient,
-    private val activityClient: ImxActivityClient
+    private val activityClient: ImxActivityClient,
+    private val collectionClient: ImxCollectionClient
 ) : AbstractBlockchainService(BlockchainDto.IMMUTABLEX), ItemService {
 
     override suspend fun getAllItems(
@@ -39,7 +41,7 @@ class ImxItemService(
 
     override suspend fun getItemById(itemId: String): UnionItem {
         val decodedItemId = TokenIdDecoder.decodeItemId(itemId)
-        val creatorDeferred = coroutineScope { async { activityClient.getItemCreator(decodedItemId) } }
+        val creatorDeferred = coroutineScope { async { getItemCreator(decodedItemId) } }
         val asset = assetClient.getById(decodedItemId)
         return ImxItemConverter.convert(asset, creatorDeferred.await(), blockchain)
     }
@@ -72,7 +74,7 @@ class ImxItemService(
     }
 
     override suspend fun getItemsByCreator(creator: String, continuation: String?, size: Int): Page<UnionItem> {
-        // TODO potential problem here - there can be a lot of mints in same time
+        // TODO doesn't work in right way, creator can't be defined by mint
         // The only hope we won't need this request since ES will be used for such requests
         val to = DateIdContinuation.parse(continuation)?.date
         val mints = activityClient.getMints(
@@ -100,7 +102,7 @@ class ImxItemService(
 
     override suspend fun getItemsByIds(itemIds: List<String>): List<UnionItem> {
         val decodedIds = itemIds.map { TokenIdDecoder.decodeItemId(it) }
-        val creators = coroutineScope { async { activityClient.getItemCreators(decodedIds) } }
+        val creators = coroutineScope { async { getItemCreators(decodedIds) } }
         val assets = assetClient.getByIds(decodedIds)
         return convert(assets, creators.await())
     }
@@ -109,8 +111,28 @@ class ImxItemService(
         return itemId.substringBefore(":")
     }
 
+    suspend fun getItemCreator(itemId: String): String? {
+        return getItemCreators(listOf(itemId)).values.firstOrNull()
+    }
+
+    suspend fun getItemCreators(assetIds: Collection<String>): Map<String, String> {
+        // TODO add storage for collection owner
+        val mappedToCollection = assetIds.associateBy({ it }, { it.substringBefore(":") })
+        val collectionIds = mappedToCollection.values.toSet()
+        if (assetIds.isEmpty()) {
+            return emptyMap()
+        }
+        val collections = collectionClient.getByIds(collectionIds.toList()).associateBy { it.address }
+        val result = HashMap<String, String>(assetIds.size)
+        mappedToCollection.forEach { (itemId, collectionId) ->
+            val creator = collections[collectionId]?.projectOwnerAddress
+            creator?.let { result[itemId] = it }
+        }
+        return result
+    }
+
     private suspend fun convert(assets: Collection<ImmutablexAsset>): List<UnionItem> {
-        val creators = activityClient.getItemCreators(assets.map { it.itemId })
+        val creators = getItemCreators(assets.map { it.itemId })
         return convert(assets, creators)
     }
 
