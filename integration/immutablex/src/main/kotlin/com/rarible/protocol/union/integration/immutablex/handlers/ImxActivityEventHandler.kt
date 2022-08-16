@@ -10,11 +10,11 @@ import com.rarible.protocol.union.core.model.UnionOwnershipEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipUpdateEvent
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexDeposit
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexEvent
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexMint
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexOrder
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexTrade
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexTransfer
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexWithdrawal
@@ -67,7 +67,7 @@ class ImxActivityEventHandler(
         }
     }
 
-    private suspend fun sendActivity(event: ImmutablexEvent, orders: Map<Long, OrderDto>) {
+    private suspend fun sendActivity(event: ImmutablexEvent, orders: Map<Long, ImmutablexOrder>) {
         try {
             val converted = ImxActivityConverter.convert(event, orders)
             activityHandler.onEvent(converted)

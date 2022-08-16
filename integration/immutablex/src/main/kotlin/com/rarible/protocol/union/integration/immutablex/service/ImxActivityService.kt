@@ -9,7 +9,6 @@ import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.SyncTypeDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
@@ -20,9 +19,11 @@ import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.integration.immutablex.client.ActivityType
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexEvent
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexOrder
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexTrade
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexTransfer
 import com.rarible.protocol.union.integration.immutablex.client.ImxActivityClient
+import com.rarible.protocol.union.integration.immutablex.client.ImxOrderClient
 import com.rarible.protocol.union.integration.immutablex.client.TokenIdDecoder
 import com.rarible.protocol.union.integration.immutablex.client.TransferFilter
 import com.rarible.protocol.union.integration.immutablex.converter.ImxActivityConverter
@@ -31,7 +32,7 @@ import java.time.Instant
 
 class ImxActivityService(
     private val client: ImxActivityClient,
-    private val orderService: ImxOrderService
+    private val orderClient: ImxOrderClient
 ) : AbstractBlockchainService(BlockchainDto.IMMUTABLEX), ActivityService {
 
     // TODO IMMUTABLEX move out to configuration
@@ -301,7 +302,7 @@ class ImxActivityService(
         )
     }
 
-    suspend fun getTradeOrders(activities: List<ImmutablexEvent>): Map<Long, OrderDto> {
+    suspend fun getTradeOrders(activities: List<ImmutablexEvent>): Map<Long, ImmutablexOrder> {
         val orderIds = activities.flatMap {
             when (it) {
                 // For 'Trade' we should get orders to fulfill sides
@@ -312,7 +313,7 @@ class ImxActivityService(
         return if (orderIds.isEmpty()) {
             emptyMap()
         } else {
-            orderService.getOrdersByIds(orderIds).associateBy { it.id.value.toLong() }
+            orderClient.getByIds(orderIds).associateBy { it.orderId }
         }
     }
 

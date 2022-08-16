@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.search.indexer.config
 
+import com.rarible.core.mongo.configuration.EnableRaribleMongo
 import com.rarible.protocol.union.core.CoreConfiguration
 import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
 import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
@@ -14,6 +15,7 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
 
 @Configuration
+@EnableRaribleMongo
 @EnableConfigurationProperties(value = [KafkaProperties::class, IndexerProperties::class])
 @ComponentScan(basePackageClasses = [EsActivityRepository::class])
 @Import(
