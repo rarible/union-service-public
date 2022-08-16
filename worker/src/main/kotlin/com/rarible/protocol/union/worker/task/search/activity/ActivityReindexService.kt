@@ -27,6 +27,12 @@ class ActivityReindexService(
     ): Flow<String> {
         val counter = searchTaskMetricFactory.createReindexActivityCounter(blockchain, type)
 
+        // TODO read values from config
+        val size = when (blockchain) {
+            BlockchainDto.IMMUTABLEX -> 200 // Max size allowed by IMX
+            else -> PageSize.ACTIVITY.max
+        }
+
         return flow {
             var continuation = cursor
             do {
@@ -35,7 +41,7 @@ class ActivityReindexService(
                     listOf(blockchain),
                     continuation,
                     continuation,
-                    PageSize.ACTIVITY.max,
+                    size,
                     ActivitySortDto.LATEST_FIRST
                 )
 
