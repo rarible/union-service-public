@@ -38,9 +38,17 @@ class ImxConsumerConfiguration {
         activityHandler: IncomingEventHandler<ActivityDto>,
         itemHandler: IncomingEventHandler<UnionItemEvent>,
         ownershipHandler: IncomingEventHandler<UnionOwnershipEvent>,
+        activityClient: ImxActivityClient,
         activityService: ImxActivityService,
         imxScanMetrics: ImxScanMetrics
-    ) = ImxActivityEventHandler(activityHandler, itemHandler, ownershipHandler, activityService, imxScanMetrics)
+    ) = ImxActivityEventHandler(
+        activityHandler,
+        itemHandler,
+        ownershipHandler,
+        activityClient,
+        activityService,
+        imxScanMetrics
+    )
 
     @Bean
     fun immutablexItemEventHandler(

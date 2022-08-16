@@ -16,10 +16,17 @@ class ImxItemEventHandler(
 
     private val blockchain = BlockchainDto.IMMUTABLEX
 
-    suspend fun handle(asset: ImmutablexAsset) {
-        val creator = activityClient.getItemCreator(asset.itemId)
-        val item = ImxItemConverter.convert(asset, creator, blockchain)
-        val meta = ImxItemMetaConverter.convert(asset, blockchain)
-        itemMetaHandler.onEvent(UnionItemMetaUpdateEvent(item.id, item, meta))
+    suspend fun handle(assets: List<ImmutablexAsset>) {
+        if (assets.isEmpty()) {
+            return
+        }
+        val creators = activityClient.getItemCreators(assets.map { it.itemId })
+        val items = ImxItemConverter.convert(assets, creators, blockchain)
+        val meta = assets.associateBy { it.encodedItemId() }
+            .mapValues { ImxItemMetaConverter.convert(it.value, blockchain) }
+
+        items.forEach {
+            itemMetaHandler.onEvent(UnionItemMetaUpdateEvent(it.id, it, meta[it.id.value]!!))
+        }
     }
 }
