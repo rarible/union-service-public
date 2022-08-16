@@ -2,8 +2,8 @@ package com.rarible.protocol.union.search.indexer.repository
 
 import com.ninjasquad.springmockk.MockkBean
 import com.rarible.core.common.nowMillis
+import com.rarible.protocol.union.core.es.ElasticsearchTestBootstrapper
 import com.rarible.protocol.union.core.model.CurrencyRate
-import com.rarible.protocol.union.core.model.EsItemFilter
 import com.rarible.protocol.union.core.model.EsItemGenericFilter
 import com.rarible.protocol.union.core.model.EsItemSort
 import com.rarible.protocol.union.core.service.CurrencyService
@@ -15,12 +15,11 @@ import com.rarible.protocol.union.search.indexer.test.IntegrationTest
 import io.mockk.coEvery
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
-import org.elasticsearch.index.query.BoolQueryBuilder
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration
-import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder
 import org.springframework.test.context.ContextConfiguration
 import java.math.BigDecimal
 
@@ -34,6 +33,14 @@ class EsItemQueryCursorServiceIntegrationTest {
 
     @Autowired
     protected lateinit var repository: EsItemRepository
+
+    @Autowired
+    private lateinit var elasticsearchTestBootstrapper: ElasticsearchTestBootstrapper
+
+    @BeforeEach
+    fun setUp() = runBlocking<Unit> {
+        elasticsearchTestBootstrapper.bootstrap()
+    }
 
     @ParameterizedTest
     @ValueSource(booleans = [true, false])

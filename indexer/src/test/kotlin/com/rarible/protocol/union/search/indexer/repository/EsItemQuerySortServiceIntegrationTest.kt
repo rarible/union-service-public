@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.search.indexer.repository
 
 import com.rarible.core.common.nowMillis
+import com.rarible.protocol.union.core.es.ElasticsearchTestBootstrapper
 import com.rarible.protocol.union.core.model.EsItemSort
 import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
 import com.rarible.protocol.union.enrichment.repository.search.EsItemRepository
@@ -9,6 +10,7 @@ import com.rarible.protocol.union.enrichment.test.data.randomEsItem
 import com.rarible.protocol.union.search.indexer.test.IntegrationTest
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import org.springframework.beans.factory.annotation.Autowired
@@ -27,6 +29,14 @@ class EsItemQuerySortServiceIntegrationTest {
     // Sort by price is tested in EsItemQueryScoreServiceIntegrationTest
     @Autowired
     private lateinit var service: EsItemQuerySortService
+
+    @Autowired
+    private lateinit var elasticsearchTestBootstrapper: ElasticsearchTestBootstrapper
+
+    @BeforeEach
+    fun setUp() = runBlocking<Unit> {
+        elasticsearchTestBootstrapper.bootstrap()
+    }
 
     @ParameterizedTest
     @ValueSource(booleans = [true, false])
