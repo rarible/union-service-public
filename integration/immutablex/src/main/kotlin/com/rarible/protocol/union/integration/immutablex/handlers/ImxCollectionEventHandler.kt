@@ -13,8 +13,10 @@ class ImxCollectionEventHandler(
 
     private val blockchain = BlockchainDto.IMMUTABLEX
 
-    suspend fun handle(collection: ImmutablexCollection) {
-        val unionCollection = ImxCollectionConverter.convert(collection, blockchain)
-        collectionHandler.onEvent(UnionCollectionUpdateEvent(unionCollection))
+    suspend fun handle(collections: List<ImmutablexCollection>) {
+        collections.forEach { collection ->
+            val unionCollection = ImxCollectionConverter.convert(collection, blockchain)
+            collectionHandler.onEvent(UnionCollectionUpdateEvent(unionCollection))
+        }
     }
 }

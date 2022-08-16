@@ -126,6 +126,6 @@ object ImxOrderConverter {
             )
             else -> throw IllegalStateException("Unsupported asset type: ${side.type}")
         }
-        return AssetDto(type = assetType, value = side.data.quantity.toBigDecimal())
+        return AssetDto(type = assetType, value = side.data.quantity.toBigDecimal(side.data.decimals))
     }
 }

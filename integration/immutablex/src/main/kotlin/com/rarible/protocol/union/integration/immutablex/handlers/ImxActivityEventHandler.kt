@@ -10,6 +10,7 @@ import com.rarible.protocol.union.core.model.UnionOwnershipEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipUpdateEvent
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexDeposit
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexEvent
@@ -17,12 +18,16 @@ import com.rarible.protocol.union.integration.immutablex.client.ImmutablexMint
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexTrade
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexTransfer
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexWithdrawal
+import com.rarible.protocol.union.integration.immutablex.client.ImxActivityClient
+import com.rarible.protocol.union.integration.immutablex.converter.ImxActivityConverter
 import com.rarible.protocol.union.integration.immutablex.converter.ImxDataException
 import com.rarible.protocol.union.integration.immutablex.converter.ImxItemConverter
 import com.rarible.protocol.union.integration.immutablex.converter.ImxOwnershipConverter
 import com.rarible.protocol.union.integration.immutablex.scanner.ImxScanEntityType
 import com.rarible.protocol.union.integration.immutablex.scanner.ImxScanMetrics
 import com.rarible.protocol.union.integration.immutablex.service.ImxActivityService
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
 
 class ImxActivityEventHandler(
@@ -30,7 +35,9 @@ class ImxActivityEventHandler(
     private val itemHandler: IncomingEventHandler<UnionItemEvent>,
     private val ownershipHandler: IncomingEventHandler<UnionOwnershipEvent>,
 
+    private val activityClient: ImxActivityClient,
     private val activityService: ImxActivityService,
+
     private val imxScanMetrics: ImxScanMetrics,
 ) {
 
@@ -38,26 +45,39 @@ class ImxActivityEventHandler(
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    // TODO ideally there should be batch processing
-    suspend fun handle(event: ImmutablexEvent) {
+    suspend fun handle(events: List<ImmutablexEvent>) {
 
-        when (event) {
-            is ImmutablexMint -> onMint(event)
-            is ImmutablexTransfer -> onTransfer(event)
+        // Orders needed to fulfill trades
+        val ordersDeferred = coroutineScope { async { activityService.getTradeOrders(events) } }
+
+        // Creators needed for non-burn transfers to fulfill ownerships
+        val itemsRequiredCreators = events.filter { it is ImmutablexTransfer && !it.isBurn }
+            .map { (it as ImmutablexTransfer).itemId() }
+
+        val creators = activityClient.getItemCreators(itemsRequiredCreators)
+        val orders = ordersDeferred.await()
+
+        events.forEach { event ->
+            when (event) {
+                is ImmutablexMint -> onMint(event)
+                is ImmutablexTransfer -> onTransfer(event, creators)
+                else -> Unit
+            }
+            sendActivity(event, orders)
         }
+    }
 
-        val converted = try {
-            activityService.convert(listOf(event)).first()
+    private suspend fun sendActivity(event: ImmutablexEvent, orders: Map<Long, OrderDto>) {
+        try {
+            val converted = ImxActivityConverter.convert(event, orders)
+            activityHandler.onEvent(converted)
         } catch (e: ImxDataException) {
             // It could happen if there is no orders specified in TRADE activity
             // It should not happen on prod, but if there is inconsistent data we can just skip it
             // and then report to IMX support
             logger.error("Failed to process Activity (invalid data), skipped: {}, error: {}", event, e.message)
             markError(event)
-            return
         }
-
-        activityHandler.onEvent(converted)
     }
 
     private suspend fun onMint(mint: ImmutablexMint) {
@@ -65,7 +85,7 @@ class ImxActivityEventHandler(
         itemHandler.onEvent(UnionItemUpdateEvent(item))
     }
 
-    private suspend fun onTransfer(transfer: ImmutablexTransfer) {
+    private suspend fun onTransfer(transfer: ImmutablexTransfer, creators: Map<String, String>) {
         val deletedOwnershipId = OwnershipIdDto(
             blockchain,
             transfer.token.data.encodedItemId(),
@@ -78,7 +98,7 @@ class ImxActivityEventHandler(
         if (transfer.isBurn) {
             itemHandler.onEvent(UnionItemDeleteEvent(deletedOwnershipId.getItemId()))
         } else {
-            val newOwnership = ImxOwnershipConverter.convert(transfer, null, blockchain)
+            val newOwnership = ImxOwnershipConverter.convert(transfer, creators[transfer.itemId()], blockchain)
             ownershipHandler.onEvent(UnionOwnershipUpdateEvent(newOwnership))
         }
     }

@@ -63,7 +63,7 @@ class ImxScanner(
         val transactionId = state.entityId
 
         val page = getEvents(transactionId)
-        page.forEach { activityHandler.handle(it) }
+        activityHandler.handle(page)
 
         val last = page.lastOrNull() ?: return@listen null
 
@@ -77,7 +77,7 @@ class ImxScanner(
     )
     fun orders() = listen(ImxScanEntityType.ORDER, { "0" }, { state ->
         val page = imxEventsApi.orders(state.entityDate, state.entityId)
-        page.forEach { orderEventHandler.handle(it) }
+        orderEventHandler.handle(page)
 
         val last = page.lastOrNull() ?: return@listen null
         val scanResult = ImxScanResult(last.orderId.toString(), last.updatedAt!!)
@@ -95,7 +95,7 @@ class ImxScanner(
     )
     fun assets() = listen(ImxScanEntityType.ITEM, { "${Address.ZERO().prefixed()}:0" }) { state ->
         val page = imxEventsApi.assets(state.entityDate, TokenIdDecoder.decodeItemId(state.entityId))
-        page.forEach { itemEventHandler.handle(it) }
+        itemEventHandler.handle(page)
 
         val last = page.lastOrNull() ?: return@listen null
         val scanResult = ImxScanResult(last.encodedItemId(), last.updatedAt!!)
@@ -113,7 +113,7 @@ class ImxScanner(
     )
     fun collections() = listen(ImxScanEntityType.COLLECTION, { Address.ZERO().prefixed() }) { state ->
         val page = imxEventsApi.collections(state.entityDate, state.entityId)
-        page.forEach { collectionEventHandler.handle(it) }
+        collectionEventHandler.handle(page)
 
         val last = page.lastOrNull() ?: return@listen null
         val scanResult = ImxScanResult(last.address, nowMillis()) // TODO replace with update_at when IMX add it

@@ -2,10 +2,10 @@ package com.rarible.protocol.union.integration.immutablex.converter
 
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ImmutablexOrderDataV1Dto
-import com.rarible.protocol.union.integration.data.randomEmxOrderBuySide
-import com.rarible.protocol.union.integration.data.randomEmxOrderSellSide
 import com.rarible.protocol.union.integration.data.randomImxOrder
+import com.rarible.protocol.union.integration.data.randomImxOrderBuySide
 import com.rarible.protocol.union.integration.data.randomImxOrderFee
+import com.rarible.protocol.union.integration.data.randomImxOrderSellSide
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
@@ -16,7 +16,7 @@ class ImxOrderConverterTest {
     @Test
     fun `evaluate fees - sell order`() {
         val imxOrder = randomImxOrder().copy(
-            buy = randomEmxOrderBuySide(quantity = BigInteger("100000"), quantityWithFees = BigInteger("105000")),
+            buy = randomImxOrderBuySide(quantity = BigInteger("100000"), quantityWithFees = BigInteger("105000")),
             fees = listOf(randomImxOrderFee(type = "royalty", amount = BigDecimal("5000")))
         )
 
@@ -30,8 +30,8 @@ class ImxOrderConverterTest {
     @Test
     fun `evaluate fees - buy order`() {
         val imxOrder = randomImxOrder().copy(
-            sell = randomEmxOrderBuySide(quantity = BigInteger("100000"), quantityWithFees = BigInteger("105000")),
-            buy = randomEmxOrderSellSide(),
+            sell = randomImxOrderBuySide(quantity = BigInteger("100000"), quantityWithFees = BigInteger("105000")),
+            buy = randomImxOrderSellSide(),
             fees = listOf(randomImxOrderFee(type = "royalty", amount = BigDecimal("5000")))
         )
 
