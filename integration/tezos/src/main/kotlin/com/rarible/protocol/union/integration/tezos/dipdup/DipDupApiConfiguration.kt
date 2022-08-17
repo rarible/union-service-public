@@ -29,6 +29,7 @@ import com.rarible.tzkt.client.OwnershipClient
 import com.rarible.tzkt.client.SignatureClient
 import com.rarible.tzkt.client.TokenActivityClient
 import com.rarible.tzkt.client.TokenClient
+import com.rarible.tzkt.config.TzktSettings
 import com.rarible.tzkt.meta.MetaCollectionService
 import com.rarible.tzkt.meta.MetaService
 import com.rarible.tzkt.royalties.RoyaltiesHandler
@@ -54,6 +55,11 @@ class DipDupApiConfiguration(
     val ipfsWebClient = webClient(properties.ipfsUrl)
 
     // Clients
+    @Bean
+    fun TzktSettings() = TzktSettings(
+        useTokensBatch = properties.tzktProperties.tokenBatch,
+        useOwnershipsBatch = properties.tzktProperties.ownershipBatch,
+    )
 
     @Bean
     fun dipdupOrderApi() = OrderClient(apolloClient)
@@ -76,7 +82,7 @@ class DipDupApiConfiguration(
     fun tzktIpfsClient(mapper: ObjectMapper) = IPFSClient(ipfsWebClient, mapper)
 
     @Bean
-    fun tzktOwnershipClient() = OwnershipClient(tzktWebClient)
+    fun tzktOwnershipClient(settings: TzktSettings) = OwnershipClient(tzktWebClient, settings)
 
     @Bean
     fun tokenActivityClient() = TokenActivityClient(tzktWebClient)
@@ -96,8 +102,8 @@ class DipDupApiConfiguration(
     ) = RoyaltiesHandler(bigMapKeyClient, ownershipClient, ipfsClient, properties.knownAddresses!!)
 
     @Bean
-    fun tokenClient(metaService: MetaService, royaltiesHandler: RoyaltiesHandler) =
-        TokenClient(tzktWebClient, metaService, royaltiesHandler)
+    fun tokenClient(metaService: MetaService, royaltiesHandler: RoyaltiesHandler, settings: TzktSettings) =
+        TokenClient(tzktWebClient, metaService, royaltiesHandler, settings)
 
     // Services
 

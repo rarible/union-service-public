@@ -24,4 +24,7 @@ interface TzktOwnershipService {
         TODO("Not implemented")
     }
 
+    suspend fun getOwnershipsByIds(ids: List<String>): List<UnionOwnership> {
+        TODO("Not implemented")
+    }
 }

@@ -26,6 +26,11 @@ class TzktOwnershipServiceImpl(val ownershipClient: OwnershipClient): TzktOwners
         return TzktOwnershipConverter.convert(tzktOwnership, blockchain)
     }
 
+    override suspend fun getOwnershipsByIds(ids: List<String>): List<UnionOwnership> {
+        val tzktOwnerships = safeApiCall { ownershipClient.ownershipsByIds(ids) }
+        return tzktOwnerships.map { TzktOwnershipConverter.convert(it, blockchain) }
+    }
+
     override suspend fun getOwnershipsByItem(itemId: String, continuation: String?, size: Int): Page<UnionOwnership> {
         val tzktPage = ownershipClient.ownershipsByToken(itemId, size, continuation)
         return TzktOwnershipConverter.convert(tzktPage, blockchain)
