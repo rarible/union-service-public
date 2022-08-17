@@ -119,8 +119,8 @@ class ImxActivityEventHandler(
         val maker = orders[trade.make.orderId]?.creator
         val taker = orders[trade.take.orderId]?.creator
 
-        val lostByMakerItemId = trade.take.itemId() // for regular trade
-        val lostByTakerItemId = trade.make.itemId() // for swap case
+        val lostByMakerItemId = trade.make.itemId() // for regular trade
+        val lostByTakerItemId = trade.take.itemId() // for swap case
 
         onItemTransferred(lostByTakerItemId, taker, maker, trade.timestamp, creators)
         onItemTransferred(lostByMakerItemId, maker, taker, trade.timestamp, creators)
