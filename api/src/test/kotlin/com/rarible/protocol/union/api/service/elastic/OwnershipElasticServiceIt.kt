@@ -69,6 +69,7 @@ class OwnershipElasticServiceIt {
                 ownerships.add(
                     EsOwnership(
                         ownershipId = oid.fullId(),
+                        originalOwnershipId = null,
                         blockchain = BlockchainDto.ETHEREUM,
                         itemId = oid.getItemId().fullId(),
                         collection = "${randomEthCollectionId()}",
@@ -84,6 +85,7 @@ class OwnershipElasticServiceIt {
                 ownerships.add(
                     EsOwnership(
                         ownershipId = oid.fullId(),
+                        originalOwnershipId = null,
                         blockchain = BlockchainDto.FLOW,
                         itemId = oid.getItemId().fullId(),
                         collection = randomFlowCollectionDto().id,

@@ -48,7 +48,7 @@ class OwnershipElasticHelper(
         esOwnerships.forEach { ownership ->
             mapping
                 .computeIfAbsent(ownership.blockchain) { ArrayList(esOwnerships.size) }
-                .add(OwnershipIdParser.parseFull(ownership.ownershipId).value)
+                .add(OwnershipIdParser.parseFull(ownership.id).value)
         }
 
         val ownerships = mapping.mapAsync { (blockchain, ids) ->
@@ -57,7 +57,7 @@ class OwnershipElasticHelper(
         }.flatten()
 
         val ownershipsIdMapping = ownerships.associateBy { it.id.fullId().lowercase() }
-        return esOwnerships.mapNotNull { esOwnership -> ownershipsIdMapping[esOwnership.ownershipId.lowercase()] }
+        return esOwnerships.mapNotNull { esOwnership -> ownershipsIdMapping[esOwnership.id.lowercase()] }
     }
 
     companion object {
