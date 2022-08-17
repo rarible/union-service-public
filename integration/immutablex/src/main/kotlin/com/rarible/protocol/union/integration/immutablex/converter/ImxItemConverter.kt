@@ -56,25 +56,21 @@ object ImxItemConverter {
         )
     }
 
-    fun convert(mint: ImmutablexMint, blockchain: BlockchainDto): UnionItem {
+    fun convert(mint: ImmutablexMint, creator: String?, blockchain: BlockchainDto): UnionItem {
         return try {
-            convertInternal(mint, blockchain)
+            convertInternal(mint, creator, blockchain)
         } catch (e: Exception) {
             logger.error("Failed to convert {} Mint to Item: {} \n{}", blockchain, e.message, mint)
             throw e
         }
     }
 
-    private fun convertInternal(mint: ImmutablexMint, blockchain: BlockchainDto): UnionItem {
+    private fun convertInternal(mint: ImmutablexMint, creator: String?, blockchain: BlockchainDto): UnionItem {
+        val creatorAddress = creator?.let { CreatorDto(UnionAddressConverter.convert(blockchain, creator), 1) }
         return UnionItem(
             id = ItemIdDto(blockchain, mint.token.data.encodedItemId()),
             collection = CollectionIdDto(blockchain, mint.token.data.tokenAddress),
-            creators = listOf(
-                CreatorDto(
-                    account = UnionAddressConverter.convert(blockchain, mint.user),
-                    value = 1
-                )
-            ),
+            creators = listOfNotNull(creatorAddress),
             lazySupply = BigInteger.ZERO,
             supply = BigInteger.ONE,
             mintedAt = mint.timestamp,
