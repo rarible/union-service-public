@@ -166,7 +166,6 @@ internal class ElasticsearchBootstrapperTest {
         assertTrue(mapping?.contains("changedFieldForTest") ?: false)
 
         coVerify {
-            reindexSchedulingService.checkReindexInProgress(any())
             reindexSchedulingService.scheduleReindex(any(), any())
             reindexSchedulingService.stopTasksIfExists(any())
         }
