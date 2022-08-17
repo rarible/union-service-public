@@ -1,6 +1,8 @@
 package com.rarible.protocol.union.integration.immutablex.handlers
 
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
+import com.rarible.protocol.union.core.model.UnionItemDeleteEvent
+import com.rarible.protocol.union.core.model.UnionItemEvent
 import com.rarible.protocol.union.core.model.UnionItemMetaEvent
 import com.rarible.protocol.union.core.model.UnionItemMetaUpdateEvent
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -11,6 +13,7 @@ import com.rarible.protocol.union.integration.immutablex.service.ImxItemService
 
 class ImxItemEventHandler(
     private val itemMetaHandler: IncomingEventHandler<UnionItemMetaEvent>,
+    private val itemHandler: IncomingEventHandler<UnionItemEvent>,
     private val itemService: ImxItemService
 ) {
 
@@ -26,7 +29,11 @@ class ImxItemEventHandler(
             .mapValues { ImxItemMetaConverter.convert(it.value, blockchain) }
 
         items.forEach {
-            itemMetaHandler.onEvent(UnionItemMetaUpdateEvent(it.id, it, meta[it.id.value]!!))
+            if (it.deleted) {
+                itemHandler.onEvent(UnionItemDeleteEvent(it.id))
+            } else {
+                itemMetaHandler.onEvent(UnionItemMetaUpdateEvent(it.id, it, meta[it.id.value]!!))
+            }
         }
     }
 }
