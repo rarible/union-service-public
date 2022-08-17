@@ -96,6 +96,7 @@ class ElasticsearchBootstrapper(
         logger.info("Real index name = $realIndexName")
 
         if (realIndexName == null) {
+            reindexSchedulingService.stopTasksIfExists(definition)
             createFirstIndex(definition)
             return
         }

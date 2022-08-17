@@ -127,12 +127,13 @@ internal class ElasticsearchBootstrapperTest {
         assertThat(currentIndexVersion).isEqualTo(EsActivity.VERSION.toString())
 
         coVerify {
+            reindexSchedulingService.stopTasksIfExists(any())
             reindexSchedulingService.scheduleReindex(any(), any())
         }
 
         coVerify(exactly = 0) {
             reindexSchedulingService.checkReindexInProgress(any())
-            reindexSchedulingService.stopTasksIfExists(any())
+
         }
     }
 
