@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.worker.task.search.activity
 
+import com.rarible.core.common.nowMillis
 import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.core.converter.EsActivityConverter
 import com.rarible.protocol.union.dto.ActivitySortDto
@@ -51,12 +52,13 @@ class ActivityReindexService(
                     ActivitySortDto.LATEST_FIRST
                 )
 
+                val before = nowMillis()
                 logger.info("Saving ${res.activities.size} activities, continuation: $continuation")
                 val savedActivities = esActivityRepository.saveAll(
                     converter.batchConvert(res.activities),
                     index
                 )
-                logger.info("Saved ${res.activities.size} activities, continuation: $continuation")
+                logger.info("Saved ${res.activities.size} activities, continuation: $continuation, took ${nowMillis().toEpochMilli() - before.toEpochMilli()}ms")
                 continuation = res.cursor
                 counter.increment(savedActivities.size)
                 emit(res.cursor ?: "")
