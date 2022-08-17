@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.worker.task.search.activity
 
+import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.core.converter.EsActivityConverter
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
@@ -11,6 +12,7 @@ import com.rarible.protocol.union.worker.metrics.SearchTaskMetricFactory
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import org.springframework.stereotype.Component
+import kotlin.system.measureTimeMillis
 
 @Component
 class ActivityReindexService(
@@ -19,6 +21,10 @@ class ActivityReindexService(
     private val searchTaskMetricFactory: SearchTaskMetricFactory,
     private val converter: EsActivityConverter,
 ) {
+    companion object {
+        val logger by Logger()
+    }
+
     fun reindex(
         blockchain: BlockchainDto,
         type: ActivityTypeDto,
@@ -45,10 +51,12 @@ class ActivityReindexService(
                     ActivitySortDto.LATEST_FIRST
                 )
 
+                logger.info("Saving ${res.activities.size} activities, continuation: $continuation")
                 val savedActivities = esActivityRepository.saveAll(
                     converter.batchConvert(res.activities),
                     index
                 )
+                logger.info("Saved ${res.activities.size} activities, continuation: $continuation")
                 continuation = res.cursor
                 counter.increment(savedActivities.size)
                 emit(res.cursor ?: "")

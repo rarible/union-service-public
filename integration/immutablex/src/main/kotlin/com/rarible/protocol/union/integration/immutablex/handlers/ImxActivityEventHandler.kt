@@ -138,13 +138,13 @@ class ImxActivityEventHandler(
         }
         if (fromUser != null) {
             val fromUserAddress = UnionAddressConverter.convert(blockchain, fromUser)
-            val deletedOwnershipId = OwnershipIdDto(blockchain, itemId, fromUserAddress)
+            val deletedOwnershipId = OwnershipIdDto(blockchain, TokenIdDecoder.encodeItemId(itemId), fromUserAddress)
             ownershipHandler.onEvent(UnionOwnershipDeleteEvent(deletedOwnershipId))
         }
         if (toUser != null) {
             val newOwnership = ImxOwnershipConverter.toOwnership(
                 blockchain,
-                TokenIdDecoder.decodeItemId(itemId),
+                TokenIdDecoder.encodeItemId(itemId),
                 toUser,
                 creators[itemId],
                 date
