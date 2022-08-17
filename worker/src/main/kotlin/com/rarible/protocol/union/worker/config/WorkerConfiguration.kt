@@ -63,7 +63,6 @@ class WorkerConfiguration(
     fun elasticsearchBootstrap(
         reactiveElasticSearchOperations: ReactiveElasticsearchOperations,
         esNameResolver: EsNameResolver,
-        reindexerService: ReindexService,
         indexService: IndexService,
         esRepositories: List<EsRepository>,
         reindexService: ReindexService,

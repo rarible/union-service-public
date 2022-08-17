@@ -6,7 +6,6 @@ import com.rarible.core.task.Task
 import com.rarible.core.task.TaskRepository
 import com.rarible.core.task.TaskStatus
 import com.rarible.protocol.union.core.elasticsearch.ReindexSchedulingService
-import com.rarible.protocol.union.core.elasticsearch.bootstrap.ElasticsearchBootstrapper
 import com.rarible.protocol.union.core.model.EsActivity
 import com.rarible.protocol.union.core.model.EsCollection
 import com.rarible.protocol.union.core.model.EsItem
@@ -24,8 +23,6 @@ import org.springframework.stereotype.Component
 
 @Component
 class ReindexService(
-    // don't remove this unused dep. It used to check create bean on not test env
-    private val elasticsearchBootstrapper: ElasticsearchBootstrapper,
     workerProperties: WorkerProperties,
     private val taskRepository: TaskRepository,
     private val paramFactory: ParamFactory,
