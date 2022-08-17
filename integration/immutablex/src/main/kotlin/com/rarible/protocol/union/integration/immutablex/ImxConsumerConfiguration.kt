@@ -54,8 +54,9 @@ class ImxConsumerConfiguration {
     @Bean
     fun immutablexItemEventHandler(
         itemMetaHandler: IncomingEventHandler<UnionItemMetaEvent>,
+        itemHandler: IncomingEventHandler<UnionItemEvent>,
         itemService: ImxItemService
-    ) = ImxItemEventHandler(itemMetaHandler, itemService)
+    ) = ImxItemEventHandler(itemMetaHandler, itemHandler, itemService)
 
     @Bean
     fun imxCollectionEventHandler(

@@ -37,7 +37,8 @@ class ImxItemService(
         lastUpdatedFrom: Long?,
         lastUpdatedTo: Long?,
     ): Page<UnionItem> {
-        val page = assetClient.getAllAssets(continuation, size, lastUpdatedTo, lastUpdatedFrom, false)
+        val safeShowDeleted = showDeleted ?: false
+        val page = assetClient.getAllAssets(continuation, size, lastUpdatedTo, lastUpdatedFrom, false, safeShowDeleted)
         val result = convert(page.result)
         return Paging(UnionItemContinuation.ByLastUpdatedAndId, result).getPage(size, 0)
     }

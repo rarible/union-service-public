@@ -30,8 +30,12 @@ class ImxAssetClient(
         size: Int,
         lastUpdatedTo: Long? = null,
         lastUpdatedFrom: Long? = null,
-        sortAsc: Boolean
+        sortAsc: Boolean,
+        showDeleted: Boolean = false
     ) = getAssets {
+        if (!showDeleted) {
+            it.status("imx")
+        }
         it.pageSize(size)
         it.fromDate(lastUpdatedFrom?.let { ms -> Instant.ofEpochMilli(ms) })
         it.toDate(lastUpdatedTo?.let { ms -> Instant.ofEpochMilli(ms) })
@@ -45,6 +49,7 @@ class ImxAssetClient(
         size: Int,
     ) = getAssets {
         it.owner(owner)
+        it.status("imx")
         it.collection(collection)
         it.pageSize(size)
         it.continuationByUpdatedAt(continuation, false)
@@ -56,6 +61,7 @@ class ImxAssetClient(
         size: Int
     ) = getAssets {
         it.owner(owner)
+        it.status("imx")
         it.pageSize(size)
         it.continuationByUpdatedAt(continuation, false)
     }

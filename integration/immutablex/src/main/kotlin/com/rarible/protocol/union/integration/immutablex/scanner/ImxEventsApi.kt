@@ -25,7 +25,8 @@ class ImxEventsApi(
         return assetClient.getAllAssets(
             continuation = DateIdContinuation(date, id).toString(),
             size = PAGE_SIZE,
-            sortAsc = true
+            sortAsc = true,
+            showDeleted = true
         ).result
     }
 
