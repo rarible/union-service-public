@@ -11,7 +11,6 @@ import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.RoyaltyDto
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexAsset
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexMint
-import scalether.domain.Address
 import java.math.BigDecimal
 import java.math.BigInteger
 
@@ -41,7 +40,8 @@ object ImxItemConverter {
         creator: String?,
         blockchain: BlockchainDto
     ): UnionItem {
-        val deleted = asset.user!! == "${Address.ZERO()}"
+        //val deleted = asset.user!! == "${Address.ZERO()}"
+        val deleted = asset.status != "imx"
         val creatorAddress = creator?.let { CreatorDto(UnionAddressConverter.convert(blockchain, creator), 1) }
 
         return UnionItem(

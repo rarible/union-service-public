@@ -33,6 +33,10 @@ class ImxAssetQueryBuilder(
         builder.queryParamNotNull("user", owner)
     }
 
+    fun status(status: String?) {
+        builder.queryParamNotNull("status", status)
+    }
+
     fun fromDate(from: Instant?) {
         builder.queryParamNotNull("updated_min_timestamp", from)
     }
