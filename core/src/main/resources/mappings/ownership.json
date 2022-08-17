@@ -7,6 +7,9 @@
     "ownershipId": {
       "type": "keyword"
     },
+    "originalOwnershipId": {
+      "type": "keyword"
+    },
     "blockchain": {
       "type": "keyword",
       "ignore_above": 256
