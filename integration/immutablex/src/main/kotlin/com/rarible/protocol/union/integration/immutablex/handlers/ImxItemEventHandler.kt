@@ -25,6 +25,7 @@ class ImxItemEventHandler(
         }
         val creators = itemService.getItemCreators(assets.map { it.itemId })
         val items = ImxItemConverter.convert(assets, creators, blockchain)
+        // TODO originally we should enrich meta here if it has been changed
         val meta = assets.associateBy { it.encodedItemId() }
             .mapValues { ImxItemMetaConverter.convert(it.value, blockchain) }
 

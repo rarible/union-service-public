@@ -1,7 +1,7 @@
 package com.rarible.protocol.union.integration.immutablex.service
 
+import com.rarible.core.client.WebClientResponseProxyException
 import com.rarible.protocol.union.core.continuation.UnionOwnershipContinuation
-import com.rarible.protocol.union.core.exception.UnionNotFoundException
 import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.core.service.OwnershipService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
@@ -15,6 +15,8 @@ import com.rarible.protocol.union.integration.immutablex.client.TokenIdDecoder
 import com.rarible.protocol.union.integration.immutablex.converter.ImxOwnershipConverter
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import org.springframework.http.HttpStatus
+import org.springframework.web.reactive.function.client.WebClientResponseException
 
 class ImxOwnershipService(
     private val assetClient: ImxAssetClient,
@@ -30,7 +32,16 @@ class ImxOwnershipService(
             val creator = itemService.getItemCreator(itemId)
             return ImxOwnershipConverter.convert(asset, creator, blockchain)
         } else {
-            throw UnionNotFoundException("Ownership ${blockchain}:${ownershipId} not found")
+            // Enrichment uses such kind of exceptions in order to skip events for non-existing ownerships
+            throw WebClientResponseProxyException(
+                WebClientResponseException(
+                    HttpStatus.NOT_FOUND.value(),
+                    HttpStatus.NOT_FOUND.reasonPhrase,
+                    null,
+                    null,
+                    null,
+                )
+            )
         }
     }
 
