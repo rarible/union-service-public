@@ -7,14 +7,11 @@ import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.CreatorDto
-import com.rarible.protocol.union.dto.OrderActivityMatchSideDto
-import com.rarible.protocol.union.dto.OrderMatchSellDto
-import com.rarible.protocol.union.dto.OrderMatchSwapDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
-import com.rarible.protocol.union.dto.ext
+import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexAsset
-import com.rarible.protocol.union.integration.immutablex.client.ImmutablexTransfer
 import java.math.BigInteger
+import java.time.Instant
 
 object ImxOwnershipConverter {
 
@@ -42,109 +39,35 @@ object ImxOwnershipConverter {
         creator: String?,
         blockchain: BlockchainDto
     ): UnionOwnership {
-        val creatorAddress = creator?.let { UnionAddressConverter.convert(blockchain, creator) }
-        val ownerAddress = UnionAddressConverter.convert(blockchain, asset.user!!)
-        return UnionOwnership(
-            id = OwnershipIdDto(blockchain, asset.encodedItemId(), ownerAddress),
-            collection = CollectionIdDto(blockchain, asset.tokenAddress),
-            value = BigInteger.ONE,
-            lazyValue = BigInteger.ZERO,
-            createdAt = asset.createdAt ?: asset.updatedAt ?: nowMillis(),
-            lastUpdatedAt = asset.updatedAt,
-            creators = listOfNotNull(creatorAddress?.let { CreatorDto(creatorAddress, 1) })
+        return toOwnership(
+            blockchain = blockchain,
+            itemId = asset.encodedItemId(),
+            owner = asset.user!!,
+            creator = creator,
+            createdAt = asset.createdAt ?: asset.updatedAt,
+            updatedAt = asset.updatedAt
         )
     }
 
-    fun convert(transfer: ImmutablexTransfer, creator: String?, blockchain: BlockchainDto): UnionOwnership {
-        return try {
-            convertInternal(transfer, creator, blockchain)
-        } catch (e: Exception) {
-            logger.error("Failed to convert {} Ownership: {} \n{}", blockchain, e.message, transfer)
-            throw e
-        }
-    }
-
-    private fun convertInternal(
-        transfer: ImmutablexTransfer,
+    fun toOwnership(
+        blockchain: BlockchainDto,
+        itemId: String,
+        owner: String,
         creator: String?,
-        blockchain: BlockchainDto
+        createdAt: Instant?,
+        updatedAt: Instant? = null
     ): UnionOwnership {
+        val collection = IdParser.split(itemId, 2)[0]
         val creatorAddress = creator?.let { UnionAddressConverter.convert(blockchain, creator) }
+        val ownerAddress = UnionAddressConverter.convert(blockchain, owner)
         return UnionOwnership(
-            id = OwnershipIdDto(
-                blockchain,
-                transfer.token.data.encodedItemId(),
-                UnionAddressConverter.convert(blockchain, transfer.receiver)
-            ),
-            collection = CollectionIdDto(blockchain, transfer.token.data.tokenAddress),
-            value = transfer.token.data.quantity,
-            createdAt = transfer.timestamp,
-            lastUpdatedAt = transfer.timestamp,
-            lazyValue = BigInteger.ZERO,
-            creators = listOfNotNull(creatorAddress?.let { CreatorDto(creatorAddress, 1) })
-        )
-    }
-
-    fun convert(sell: OrderMatchSellDto, creator: String?, blockchain: BlockchainDto): UnionOwnership {
-        return try {
-            convertInternal(sell, creator, blockchain)
-        } catch (e: Exception) {
-            logger.error("Failed to convert {} Ownership: {} \n{}", blockchain, e.message, sell)
-            throw e
-        }
-    }
-
-    private fun convertInternal(
-        sell: OrderMatchSellDto,
-        creator: String?,
-        blockchain: BlockchainDto
-    ): UnionOwnership {
-        val creatorAddress = creator?.let { UnionAddressConverter.convert(blockchain, creator) }
-        val itemId = sell.nft.type.ext.itemId!!
-        val collection = itemId.value.substringBefore(":")
-        return UnionOwnership(
-            id = itemId.toOwnership(sell.buyer.value),
+            id = OwnershipIdDto(blockchain, itemId, ownerAddress),
             collection = CollectionIdDto(blockchain, collection),
             value = BigInteger.ONE,
-            createdAt = sell.date,
-            lastUpdatedAt = sell.lastUpdatedAt,
+            createdAt = createdAt ?: nowMillis(),
+            lastUpdatedAt = updatedAt ?: createdAt ?: nowMillis(),
             lazyValue = BigInteger.ZERO,
             creators = listOfNotNull(creatorAddress?.let { CreatorDto(creatorAddress, 1) })
         )
     }
-
-    fun convert(
-        swap: OrderMatchSwapDto,
-        side: OrderActivityMatchSideDto,
-        creator: String?,
-        blockchain: BlockchainDto
-    ): UnionOwnership {
-        return try {
-            convertInternal(swap, side, creator, blockchain)
-        } catch (e: Exception) {
-            logger.error("Failed to convert {} Ownership: {} \n{}", blockchain, e.message, swap)
-            throw e
-        }
-    }
-
-    private fun convertInternal(
-        swap: OrderMatchSwapDto,
-        side: OrderActivityMatchSideDto,
-        creator: String?,
-        blockchain: BlockchainDto
-    ): UnionOwnership {
-        val creatorAddress = creator?.let { UnionAddressConverter.convert(blockchain, creator) }
-        val itemId = side.asset.type.ext.itemId!!
-        val collection = itemId.value.substringBefore(":")
-        return UnionOwnership(
-            id = itemId.toOwnership(side.maker.value),
-            collection = CollectionIdDto(blockchain, collection),
-            value = BigInteger.ONE,
-            createdAt = swap.date,
-            lastUpdatedAt = swap.lastUpdatedAt,
-            lazyValue = BigInteger.ZERO,
-            creators = listOfNotNull(creatorAddress?.let { CreatorDto(creatorAddress, 1) })
-        )
-    }
-
 }

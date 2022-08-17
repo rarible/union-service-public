@@ -242,6 +242,15 @@ data class TradeSide(
 ) {
 
     fun encodedTokenId() = TokenIdDecoder.encode(tokenId!!) // TODO what if null?
+
+    fun itemId(): String? {
+        if (tokenAddress.isNullOrBlank() || tokenId.isNullOrBlank()) {
+            return null
+        }
+        return "$tokenAddress:$tokenId"
+    }
+
+    fun encodedItemId() = "$tokenAddress:${encodedTokenId()}"
 }
 
 data class ImmutablexTrade(
