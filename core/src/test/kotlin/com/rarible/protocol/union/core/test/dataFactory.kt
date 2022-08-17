@@ -200,6 +200,7 @@ fun randomEsOwnership(
     id: OwnershipIdDto = randomOwnershipId(),
 ) = EsOwnership(
     ownershipId = id.fullId(),
+    originalOwnershipId = id.fullId(),
     blockchain = id.blockchain,
     itemId = ItemIdDto(id.blockchain, id.itemIdValue).fullId(),
     collection = CollectionIdDto(id.blockchain, randomString()).fullId(),

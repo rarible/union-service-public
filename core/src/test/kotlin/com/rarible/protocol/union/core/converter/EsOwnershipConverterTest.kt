@@ -1,8 +1,10 @@
 package com.rarible.protocol.union.core.converter
 
+import com.rarible.core.test.data.randomString
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OwnershipDto
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
@@ -19,11 +21,27 @@ internal class EsOwnershipConverterTest {
     fun `should convert`(source: OwnershipDto) {
         val result = converter.convert(source)
         assertThat(result.ownershipId).isEqualTo(source.id.fullId())
+        assertThat(result.originalOwnershipId).isNull()
+        assertThat(result.id).isEqualTo(source.id.fullId())
         assertThat(result.blockchain).isEqualTo(source.blockchain)
         assertThat(result.itemId).isEqualTo(source.itemId?.fullId())
         assertThat(result.collection).isEqualTo(source.collection?.fullId())
         assertThat(result.owner).isEqualTo(source.owner.fullId())
         assertThat(result.date).isEqualTo(source.createdAt)
+    }
+
+    @Test
+    fun `should convert with long original id`() {
+        // given
+        val source = randomOwnership(id = randomOwnershipId(BlockchainDto.TEZOS, randomString(513)))
+
+        // when
+        val actual = converter.convert(source)
+
+        // then
+        assertThat(actual.ownershipId).hasSize(64)
+        assertThat(actual.originalOwnershipId).isEqualTo(source.id.fullId())
+        assertThat(actual.id).isEqualTo(source.id.fullId())
     }
 
     companion object {
