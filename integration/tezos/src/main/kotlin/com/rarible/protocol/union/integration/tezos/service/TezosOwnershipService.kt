@@ -33,7 +33,7 @@ open class TezosOwnershipService(
 
     override suspend fun getOwnershipsByIds(ownershipIds: List<String>): List<UnionOwnership> = coroutineScope {
         if (tzktOwnershipService.enabled()) {
-            ownershipIds.map { async { tzktOwnershipService.getOwnershipById(it) } }.awaitAll()
+            tzktOwnershipService.getOwnershipsByIds(ownershipIds)
         } else {
             ownershipIds.map {
                 async {

@@ -105,6 +105,8 @@ integration:
       tzktProperties:
         retryAttempts: ${consul.tezos.dipdup.tzktProperties.retryAttempts:2}
         retryDelay: ${consul.tezos.dipdup.tzktProperties.retryDelay:15000}
+        tokenBatch: ${consul.tezos.dipdup.tzktProperties.tokenBatch:false}
+        ownershipBatch: ${consul.tezos.dipdup.tzktProperties.ownershipBatch:false}
       knownAddresses:
         hen: ${consul.tezos.dipdup.knownAddresses.hen:}
         henRoyalties: ${consul.tezos.dipdup.knownAddresses.henRoyalties:}

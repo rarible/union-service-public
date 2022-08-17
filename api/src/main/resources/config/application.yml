@@ -71,6 +71,9 @@ integration:
       chainId: ${consul.tezos.dipdup.chainId:}
       sigChecker: ${consul.tezos.dipdup.sigChecker:}
       tzktUrl: ${consul.tezos.dipdup.tzktUrl:}
+      tzktProperties:
+        tokenBatch: ${consul.tezos.dipdup.tzktProperties.tokenBatch:false}
+        ownershipBatch: ${consul.tezos.dipdup.tzktProperties.ownershipBatch:false}
       ipfsUrl: ${consul.tezos.dipdup.ipfsUrl:"https://ipfs.io"}
       knownAddresses:
         hen: ${consul.tezos.dipdup.knownAddresses.hen:}
