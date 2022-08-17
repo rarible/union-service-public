@@ -269,7 +269,7 @@ class ReindexService(
     ): Boolean {
         val tasks = taskRepository.findAll()
             .filter {
-                if (entityDefinition.reindexTask == it.type && it.lastStatus != TaskStatus.COMPLETED && it.lastStatus != TaskStatus.ERROR) {
+                if (entityDefinition.reindexTask == it.type && it.lastStatus != TaskStatus.COMPLETED) {
                     val taskParam = paramFactory.parse<RawTaskParam>(it.param)
                     entityDefinition.versionData == taskParam.versionData &&
                         entityDefinition.settingsHash == taskParam.settingsHash

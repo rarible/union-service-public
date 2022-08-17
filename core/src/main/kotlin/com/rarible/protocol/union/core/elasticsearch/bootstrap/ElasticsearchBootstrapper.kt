@@ -128,6 +128,10 @@ class ElasticsearchBootstrapper(
                         ?: throw IllegalStateException("Not exists index for ${definition.writeAliasName}"),
                     definition = definition
                 )
+                if (reindexSchedulingService.checkReindexInProgress(definition)) {
+                    logger.info("Reindexing tasks for entity ${definition.entity} was started")
+                    return
+                }
                 reindexSchedulingService.stopTasksIfExists(definition)
                 scheduleReindex(definition, realIndexName)
             }
