@@ -10,10 +10,8 @@ import com.rarible.protocol.union.core.model.UnionOwnershipEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipUpdateEvent
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.OrderMatchSellDto
-import com.rarible.protocol.union.dto.OrderMatchSwapDto
+import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
-import com.rarible.protocol.union.dto.ext
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexDeposit
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexEvent
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexMint
@@ -21,6 +19,7 @@ import com.rarible.protocol.union.integration.immutablex.client.ImmutablexOrder
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexTrade
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexTransfer
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexWithdrawal
+import com.rarible.protocol.union.integration.immutablex.client.TokenIdDecoder
 import com.rarible.protocol.union.integration.immutablex.converter.ImxActivityConverter
 import com.rarible.protocol.union.integration.immutablex.converter.ImxDataException
 import com.rarible.protocol.union.integration.immutablex.converter.ImxItemConverter
@@ -32,6 +31,7 @@ import com.rarible.protocol.union.integration.immutablex.service.ImxItemService
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
+import java.time.Instant
 
 class ImxActivityEventHandler(
     private val activityHandler: IncomingEventHandler<ActivityDto>,
@@ -54,88 +54,101 @@ class ImxActivityEventHandler(
         val ordersDeferred = coroutineScope { async { activityService.getTradeOrders(events) } }
 
         // Creators needed for non-burn transfers to fulfill ownerships
-        val itemsRequiredCreators = events.filter { it is ImmutablexTransfer && !it.isBurn }
-            .map { (it as ImmutablexTransfer).itemId() }
+        val itemsRequiredCreators = LinkedHashSet<String>()
+        events.forEach { event ->
+            when (event) {
+                is ImmutablexMint -> itemsRequiredCreators.add(event.itemId())
+                is ImmutablexTransfer -> if (!event.isBurn) itemsRequiredCreators.add(event.itemId())
+                is ImmutablexTrade -> itemsRequiredCreators.addAll(
+                    listOfNotNull(event.make.itemId(), event.take.itemId())
+                )
+                else -> Unit
+            }
+        }
 
-        val creators = itemService.getItemCreators(itemsRequiredCreators)
+        val creators = itemService.getItemCreators(itemsRequiredCreators.toList())
         val orders = ordersDeferred.await()
 
         events.forEach { event ->
             when (event) {
-                is ImmutablexMint -> onMint(event)
+                is ImmutablexMint -> onMint(event, creators)
                 is ImmutablexTransfer -> onTransfer(event, creators)
+                is ImmutablexTrade -> onTrade(event, orders, creators)
                 else -> Unit
             }
-            val converted = convertActivity(event, orders)
-            when (converted) {
-                is OrderMatchSwapDto -> onSwap(converted)
-                is OrderMatchSellDto -> onMatch(converted)
-                else -> Unit
-            }
-            converted?.let { activityHandler.onEvent(converted) }
+            sendActivity(event, orders)
         }
     }
 
-    private fun convertActivity(event: ImmutablexEvent, orders: Map<Long, ImmutablexOrder>): ActivityDto? {
-        return try {
-            ImxActivityConverter.convert(event, orders)
+    private suspend fun sendActivity(event: ImmutablexEvent, orders: Map<Long, ImmutablexOrder>) {
+        try {
+            val converted = ImxActivityConverter.convert(event, orders)
+            activityHandler.onEvent(converted)
         } catch (e: ImxDataException) {
             // It could happen if there is no orders specified in TRADE activity
             // It should not happen on prod, but if there is inconsistent data we can just skip it
             // and then report to IMX support
             logger.error("Failed to process Activity (invalid data), skipped: {}, error: {}", event, e.message)
             markError(event)
-            null
         }
     }
 
-    private suspend fun onMint(mint: ImmutablexMint) {
-        val item = ImxItemConverter.convert(mint, blockchain)
+    private suspend fun onMint(mint: ImmutablexMint, creators: Map<String, String>) {
+        val item = ImxItemConverter.convert(mint, creators[mint.itemId()], blockchain)
         itemHandler.onEvent(UnionItemUpdateEvent(item))
+
+        onItemTransferred(mint.itemId(), null, mint.user, mint.timestamp, creators)
     }
 
     private suspend fun onTransfer(transfer: ImmutablexTransfer, creators: Map<String, String>) {
-        val deletedOwnershipId = OwnershipIdDto(
-            blockchain,
-            transfer.token.data.encodedItemId(),
-            UnionAddressConverter.convert(blockchain, transfer.user)
-        )
+        val itemId = transfer.token.data.itemId()
+        val receiver = if (transfer.isBurn) null else transfer.receiver
 
-        ownershipHandler.onEvent(UnionOwnershipDeleteEvent(deletedOwnershipId))
+        onItemTransferred(itemId, transfer.user, receiver, transfer.timestamp, creators)
 
-        // Send burn item event or change ownership
         if (transfer.isBurn) {
-            itemHandler.onEvent(UnionItemDeleteEvent(deletedOwnershipId.getItemId()))
-        } else {
-            val newOwnership = ImxOwnershipConverter.convert(transfer, creators[transfer.itemId()], blockchain)
-            ownershipHandler.onEvent(UnionOwnershipUpdateEvent(newOwnership))
+            itemHandler.onEvent(UnionItemDeleteEvent(ItemIdDto(blockchain, transfer.encodedItemId())))
         }
     }
 
-    private suspend fun onMatch(activity: OrderMatchSellDto) {
-        val deletedOwnershipId = activity.nft.type.ext.itemId!!.toOwnership(activity.seller.value)
-        // TODO add creator
-        val newOwnership = ImxOwnershipConverter.convert(activity, null, blockchain)
+    private suspend fun onTrade(
+        trade: ImmutablexTrade,
+        orders: Map<Long, ImmutablexOrder>,
+        creators: Map<String, String>
+    ) {
+        val maker = orders[trade.make.orderId]?.creator
+        val taker = orders[trade.take.orderId]?.creator
 
-        ownershipHandler.onEvent(UnionOwnershipDeleteEvent(deletedOwnershipId))
-        ownershipHandler.onEvent(UnionOwnershipUpdateEvent(newOwnership))
+        val lostByMakerItemId = trade.take.itemId() // for regular trade
+        val lostByTakerItemId = trade.make.itemId() // for swap case
+
+        onItemTransferred(lostByTakerItemId, taker, maker, trade.timestamp, creators)
+        onItemTransferred(lostByMakerItemId, maker, taker, trade.timestamp, creators)
     }
 
-    private suspend fun onSwap(swap: OrderMatchSwapDto) {
-        val left = swap.left.asset.type.ext
-        val right = swap.right.asset.type.ext
-        if (left.isNft) {
-            val deletedOwnershipId = left.itemId!!.toOwnership(swap.left.maker.value)
-            // TODO add creator
-            val newOwnership = ImxOwnershipConverter.convert(swap, swap.right, null, blockchain)
-            ownershipHandler.onEvent(UnionOwnershipDeleteEvent(deletedOwnershipId))
-            ownershipHandler.onEvent(UnionOwnershipUpdateEvent(newOwnership))
+    private suspend fun onItemTransferred(
+        itemId: String?,
+        fromUser: String?,
+        toUser: String?,
+        date: Instant,
+        creators: Map<String, String>
+    ) {
+        if (itemId == null) {
+            return
         }
-        if (right.isNft) {
-            val deletedOwnershipId = right.itemId!!.toOwnership(swap.right.maker.value)
-            // TODO add creator
-            val newOwnership = ImxOwnershipConverter.convert(swap, swap.left, null, blockchain)
+        if (fromUser != null) {
+            val fromUserAddress = UnionAddressConverter.convert(blockchain, fromUser)
+            val deletedOwnershipId = OwnershipIdDto(blockchain, itemId, fromUserAddress)
             ownershipHandler.onEvent(UnionOwnershipDeleteEvent(deletedOwnershipId))
+        }
+        if (toUser != null) {
+            val newOwnership = ImxOwnershipConverter.toOwnership(
+                blockchain,
+                TokenIdDecoder.decodeItemId(itemId),
+                toUser,
+                creators[itemId],
+                date
+            )
             ownershipHandler.onEvent(UnionOwnershipUpdateEvent(newOwnership))
         }
     }
