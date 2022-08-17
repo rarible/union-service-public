@@ -7,9 +7,6 @@
     "orderId": {
       "type": "keyword"
     },
-    "testUpdateMapping1": {
-      "type": "keyword"
-    },
     "lastUpdatedAt": {
       "type": "date"
     },
