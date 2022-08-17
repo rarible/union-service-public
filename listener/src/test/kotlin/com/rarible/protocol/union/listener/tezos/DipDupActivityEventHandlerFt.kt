@@ -9,6 +9,7 @@ import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.TransferActivityDto
 import com.rarible.protocol.union.integration.tezos.data.randomTezosOrderListActivity
 import com.rarible.protocol.union.listener.test.IntegrationTest
+import com.rarible.tzkt.utils.Tezos
 import io.mockk.coEvery
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions
@@ -82,7 +83,7 @@ class DipDupActivityEventHandlerFt : AbstractDipDupIntegrationTest() {
     }
 
     @Test
-    @Disabled("Works locally, fix under PT-953")
+//    @Disabled("Works locally, fix under PT-953")
     fun `should send dipdup transfer activity to outgoing topic`() = runWithKafka {
 
         val activity = randomDipDupActivityTransferEvent()
@@ -119,6 +120,41 @@ class DipDupActivityEventHandlerFt : AbstractDipDupIntegrationTest() {
 
             val ownershipsTo = findOwnershipUpdates(ownershipIdTo.value)
             Assertions.assertThat(ownershipsTo).hasSize(1)
+        }
+    }
+
+    @Test
+    @Disabled("Works locally, fix under PT-953")
+    fun `should send dipdup transfer burn activity to outgoing topic`() = runWithKafka {
+
+        val activity = randomDipDupActivityTransferEvent().copy(owner = Tezos.BURN_ADDRESS)
+        val activityId = activity.transferId
+        val ownershipId = OwnershipIdDto(
+            blockchain = BlockchainDto.TEZOS,
+            contract = activity.contract,
+            tokenId = activity.tokenId,
+            owner = activity.owner
+        )
+
+        coEvery { tokenClient.token(ownershipId.getItemId().value) } returns randomTzktToken(activity.contract, activity.tokenId, BigInteger.ZERO)
+        coEvery { ownershipClient.ownershipById(ownershipId.value) } returns randomTzktTokenBalance(activity.contract, activity.tokenId, activity.owner)
+
+        dipDupActivityProducer.send(
+            KafkaMessage(
+                key = activityId,
+                value = activity
+            )
+        ).ensureSuccess()
+
+        waitAssert {
+            val activities = findActivityUpdates(activityId, BurnActivityDto::class.java)
+            Assertions.assertThat(activities).hasSize(1)
+
+            val ownerships = findOwnershipUpdates(ownershipId.value)
+            Assertions.assertThat(ownerships).hasSize(1)
+
+            val items = findItemDeletions(ownershipId.getItemId().value)
+            Assertions.assertThat(items).hasSize(1)
         }
     }
 

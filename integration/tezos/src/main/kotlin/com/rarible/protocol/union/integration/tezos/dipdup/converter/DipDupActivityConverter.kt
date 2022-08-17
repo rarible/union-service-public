@@ -26,6 +26,7 @@ import com.rarible.protocol.union.dto.OrderCancelListActivityDto
 import com.rarible.protocol.union.dto.OrderListActivityDto
 import com.rarible.protocol.union.dto.OrderMatchSellDto
 import com.rarible.protocol.union.dto.TransferActivityDto
+import com.rarible.tzkt.utils.Tezos
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.math.BigDecimal
@@ -141,18 +142,34 @@ class DipDupActivityConverter(
             }
             is DipDupTransferActivity -> {
                 val id = ActivityIdDto(blockchain, activity.transferId)
-                TransferActivityDto(
-                    id = id,
-                    date = date,
-                    reverted = activity.reverted,
-                    from = UnionAddressConverter.convert(blockchain, activity.from),
-                    owner = UnionAddressConverter.convert(blockchain, activity.owner),
-                    transactionHash = activity.transactionId,
-                    value = convertValue(activity.value, id),
-                    tokenId = activity.tokenId,
-                    itemId = ItemIdDto(blockchain, activity.contract, activity.tokenId),
-                    contract = ContractAddress(blockchain, activity.contract)
-                )
+
+                // Workaround for non-formal burn
+                if (Tezos.NULL_ADDRESSES.contains(activity.owner)) {
+                    BurnActivityDto(
+                        id = id,
+                        date = date,
+                        reverted = activity.reverted,
+                        owner = UnionAddressConverter.convert(blockchain, activity.owner),
+                        transactionHash = activity.transactionId,
+                        value = convertValue(activity.value, id),
+                        tokenId = activity.tokenId,
+                        itemId = ItemIdDto(blockchain, activity.contract, activity.tokenId),
+                        contract = ContractAddress(blockchain, activity.contract)
+                    )
+                } else {
+                    TransferActivityDto(
+                        id = id,
+                        date = date,
+                        reverted = activity.reverted,
+                        from = UnionAddressConverter.convert(blockchain, activity.from),
+                        owner = UnionAddressConverter.convert(blockchain, activity.owner),
+                        transactionHash = activity.transactionId,
+                        value = convertValue(activity.value, id),
+                        tokenId = activity.tokenId,
+                        itemId = ItemIdDto(blockchain, activity.contract, activity.tokenId),
+                        contract = ContractAddress(blockchain, activity.contract)
+                    )
+                }
             }
             is DipDupBurnActivity -> {
                 val id = ActivityIdDto(blockchain, activity.transferId)
