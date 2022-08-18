@@ -13,6 +13,7 @@ object ImxItemMetaConverter {
     private val logger by Logger()
 
     private val contentKeys = setOf("image_url", "image", "animation_url", "youtube_url")
+    private val errorKeys = setOf("status", "message")
 
     fun convert(asset: ImmutablexAsset, blockchain: BlockchainDto): UnionMeta {
         return try {
@@ -36,7 +37,7 @@ object ImxItemMetaConverter {
                     representation = MetaContentDto.Representation.ORIGINAL
                 )
             } ?: emptyList(),
-            attributes = asset.metadata?.filterKeys { it !in contentKeys }?.map {
+            attributes = asset.metadata?.filterKeys { it !in contentKeys && it !in errorKeys }?.map {
                 MetaAttributeDto(
                     key = it.key,
                     value = "${it.value}"

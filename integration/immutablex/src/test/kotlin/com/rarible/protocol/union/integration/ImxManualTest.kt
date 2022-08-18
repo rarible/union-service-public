@@ -1,11 +1,11 @@
 package com.rarible.protocol.union.integration
 
-import com.rarible.protocol.union.integration.immutablex.cache.ImxCollectionCreatorRepository
 import com.rarible.protocol.union.integration.immutablex.client.ImxActivityClient
 import com.rarible.protocol.union.integration.immutablex.client.ImxAssetClient
 import com.rarible.protocol.union.integration.immutablex.client.ImxCollectionClient
 import com.rarible.protocol.union.integration.immutablex.client.ImxOrderClient
 import com.rarible.protocol.union.integration.immutablex.client.ImxWebClientFactory
+import com.rarible.protocol.union.integration.immutablex.repository.ImxCollectionCreatorRepository
 import io.mockk.coEvery
 import io.mockk.mockk
 

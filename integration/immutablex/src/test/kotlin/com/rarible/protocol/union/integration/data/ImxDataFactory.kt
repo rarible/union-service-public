@@ -43,7 +43,7 @@ fun randomImxAsset(
         imageUrl = randomString(),
         metadata = mapOf("trait" to randomString()),
         name = "Name: " + randomString(),
-        status = "eth",
+        status = "imx",
         tokenAddress = token,
         tokenId = tokenId,
         uri = "http://localhost:8080/${randomString()}",

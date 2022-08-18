@@ -7,14 +7,15 @@ import com.rarible.protocol.union.core.model.UnionItemMetaEvent
 import com.rarible.protocol.union.core.model.UnionOrderEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipEvent
 import com.rarible.protocol.union.dto.ActivityDto
-import com.rarible.protocol.union.integration.immutablex.cache.ImxCollectionCreatorRepository
 import com.rarible.protocol.union.integration.immutablex.handlers.ImxActivityEventHandler
 import com.rarible.protocol.union.integration.immutablex.handlers.ImxCollectionEventHandler
 import com.rarible.protocol.union.integration.immutablex.handlers.ImxItemEventHandler
 import com.rarible.protocol.union.integration.immutablex.handlers.ImxOrderEventHandler
+import com.rarible.protocol.union.integration.immutablex.repository.ImxCollectionCreatorRepository
+import com.rarible.protocol.union.integration.immutablex.repository.ImxItemMetaRepository
+import com.rarible.protocol.union.integration.immutablex.repository.ImxScanStateRepository
 import com.rarible.protocol.union.integration.immutablex.scanner.ImxEventsApi
 import com.rarible.protocol.union.integration.immutablex.scanner.ImxScanMetrics
-import com.rarible.protocol.union.integration.immutablex.scanner.ImxScanStateRepository
 import com.rarible.protocol.union.integration.immutablex.scanner.ImxScanner
 import com.rarible.protocol.union.integration.immutablex.service.ImxActivityService
 import com.rarible.protocol.union.integration.immutablex.service.ImxItemService
@@ -55,8 +56,9 @@ class ImxConsumerConfiguration {
     fun immutablexItemEventHandler(
         itemMetaHandler: IncomingEventHandler<UnionItemMetaEvent>,
         itemHandler: IncomingEventHandler<UnionItemEvent>,
-        itemService: ImxItemService
-    ) = ImxItemEventHandler(itemMetaHandler, itemHandler, itemService)
+        itemService: ImxItemService,
+        itemMetaRepository: ImxItemMetaRepository
+    ) = ImxItemEventHandler(itemMetaHandler, itemHandler, itemService, itemMetaRepository)
 
     @Bean
     fun imxCollectionEventHandler(
