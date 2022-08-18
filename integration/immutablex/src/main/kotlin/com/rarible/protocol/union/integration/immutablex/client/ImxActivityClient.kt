@@ -181,7 +181,7 @@ class ImxActivityClient(
             pageSize
         }
         val page = getActivities<ImmutablexTradesPage>(
-            pageSize,
+            hackedPageSize,
             continuation,
             token,
             tokenId,
