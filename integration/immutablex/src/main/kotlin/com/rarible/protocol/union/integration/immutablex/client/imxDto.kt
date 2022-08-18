@@ -38,6 +38,8 @@ data class ImmutablexAsset(
     fun encodedTokenId() = TokenIdDecoder.encode(tokenId)
 
     fun encodedItemId() = "$tokenAddress:${encodedTokenId()}"
+
+    fun isDeleted() = status != "imx"
 }
 
 data class ImmutablexCollectionShort(

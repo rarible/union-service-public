@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.integration.immutablex.cache
+package com.rarible.protocol.union.integration.immutablex.model
 
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.core.mapping.FieldType

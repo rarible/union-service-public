@@ -1,6 +1,8 @@
-package com.rarible.protocol.union.integration.immutablex.scanner
+package com.rarible.protocol.union.integration.immutablex.repository
 
 import com.rarible.core.common.nowMillis
+import com.rarible.protocol.union.integration.immutablex.model.ImxScanState
+import com.rarible.protocol.union.integration.immutablex.scanner.ImxScanEntityType
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate

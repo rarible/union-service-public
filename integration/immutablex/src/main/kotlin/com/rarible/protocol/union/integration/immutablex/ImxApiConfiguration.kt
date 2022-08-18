@@ -2,12 +2,13 @@ package com.rarible.protocol.union.integration.immutablex
 
 import com.rarible.protocol.union.core.CoreConfiguration
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.integration.immutablex.cache.ImxCollectionCreatorRepository
 import com.rarible.protocol.union.integration.immutablex.client.ImxActivityClient
 import com.rarible.protocol.union.integration.immutablex.client.ImxAssetClient
 import com.rarible.protocol.union.integration.immutablex.client.ImxCollectionClient
 import com.rarible.protocol.union.integration.immutablex.client.ImxOrderClient
 import com.rarible.protocol.union.integration.immutablex.client.ImxWebClientFactory
+import com.rarible.protocol.union.integration.immutablex.repository.ImxCollectionCreatorRepository
+import com.rarible.protocol.union.integration.immutablex.repository.ImxItemMetaRepository
 import com.rarible.protocol.union.integration.immutablex.scanner.ImxEventsApi
 import com.rarible.protocol.union.integration.immutablex.service.ImxActivityService
 import com.rarible.protocol.union.integration.immutablex.service.ImxCollectionService
@@ -74,6 +75,13 @@ class ImxApiConfiguration {
         mongo: ReactiveMongoTemplate
     ): ImxCollectionCreatorRepository {
         return ImxCollectionCreatorRepository(mongo)
+    }
+
+    @Bean
+    fun imxItemMetaRepository(
+        mongo: ReactiveMongoTemplate
+    ): ImxItemMetaRepository {
+        return ImxItemMetaRepository(mongo)
     }
 
     @Bean
