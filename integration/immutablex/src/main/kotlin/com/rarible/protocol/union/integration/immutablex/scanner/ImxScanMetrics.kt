@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.integration.immutablex.scanner
 
 import com.rarible.core.common.nowMillis
+import com.rarible.protocol.union.integration.immutablex.model.ImxScanState
 import io.micrometer.core.instrument.ImmutableTag
 import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.Tag

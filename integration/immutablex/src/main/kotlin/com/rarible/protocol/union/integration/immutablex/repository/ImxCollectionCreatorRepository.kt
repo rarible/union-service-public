@@ -1,5 +1,6 @@
-package com.rarible.protocol.union.integration.immutablex.cache
+package com.rarible.protocol.union.integration.immutablex.repository
 
+import com.rarible.protocol.union.integration.immutablex.model.ImxCollectionCreator
 import kotlinx.coroutines.reactive.awaitFirst
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.find

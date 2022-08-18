@@ -8,6 +8,8 @@ import com.rarible.protocol.union.integration.immutablex.handlers.ImxActivityEve
 import com.rarible.protocol.union.integration.immutablex.handlers.ImxCollectionEventHandler
 import com.rarible.protocol.union.integration.immutablex.handlers.ImxItemEventHandler
 import com.rarible.protocol.union.integration.immutablex.handlers.ImxOrderEventHandler
+import com.rarible.protocol.union.integration.immutablex.model.ImxScanState
+import com.rarible.protocol.union.integration.immutablex.repository.ImxScanStateRepository
 import kotlinx.coroutines.runBlocking
 import org.springframework.scheduling.annotation.Scheduled
 import scalether.domain.Address

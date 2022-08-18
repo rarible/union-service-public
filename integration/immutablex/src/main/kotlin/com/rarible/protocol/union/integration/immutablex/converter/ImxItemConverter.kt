@@ -41,7 +41,7 @@ object ImxItemConverter {
         blockchain: BlockchainDto
     ): UnionItem {
         //val deleted = asset.user!! == "${Address.ZERO()}"
-        val deleted = asset.status != "imx"
+        val deleted = asset.isDeleted()
         val creatorAddress = creator?.let { CreatorDto(UnionAddressConverter.convert(blockchain, creator), 1) }
 
         return UnionItem(

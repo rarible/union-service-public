@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.integration.immutablex.scanner
+package com.rarible.protocol.union.integration.immutablex.model
 
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.core.mapping.FieldType
@@ -15,7 +15,4 @@ data class ImxScanState(
     val lastError: String? = null,
     val lastErrorDate: Instant? = null,
     val lastErrorStacktrace: String? = null
-) {
-
-    fun isInited() = entityDate != null && entityId != null
-}
+)

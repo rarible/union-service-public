@@ -4,10 +4,10 @@ import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.model.UnionCollectionEvent
 import com.rarible.protocol.union.core.model.UnionCollectionUpdateEvent
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.integration.immutablex.cache.ImxCollectionCreator
-import com.rarible.protocol.union.integration.immutablex.cache.ImxCollectionCreatorRepository
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexCollection
 import com.rarible.protocol.union.integration.immutablex.converter.ImxCollectionConverter
+import com.rarible.protocol.union.integration.immutablex.model.ImxCollectionCreator
+import com.rarible.protocol.union.integration.immutablex.repository.ImxCollectionCreatorRepository
 
 class ImxCollectionEventHandler(
     private val collectionHandler: IncomingEventHandler<UnionCollectionEvent>,

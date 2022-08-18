@@ -11,8 +11,6 @@ import com.rarible.protocol.union.dto.RoyaltyDto
 import com.rarible.protocol.union.dto.continuation.DateIdContinuation
 import com.rarible.protocol.union.dto.continuation.page.Page
 import com.rarible.protocol.union.dto.continuation.page.Paging
-import com.rarible.protocol.union.integration.immutablex.cache.ImxCollectionCreator
-import com.rarible.protocol.union.integration.immutablex.cache.ImxCollectionCreatorRepository
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexAsset
 import com.rarible.protocol.union.integration.immutablex.client.ImxActivityClient
 import com.rarible.protocol.union.integration.immutablex.client.ImxAssetClient
@@ -20,6 +18,8 @@ import com.rarible.protocol.union.integration.immutablex.client.ImxCollectionCli
 import com.rarible.protocol.union.integration.immutablex.client.TokenIdDecoder
 import com.rarible.protocol.union.integration.immutablex.converter.ImxItemConverter
 import com.rarible.protocol.union.integration.immutablex.converter.ImxItemMetaConverter
+import com.rarible.protocol.union.integration.immutablex.model.ImxCollectionCreator
+import com.rarible.protocol.union.integration.immutablex.repository.ImxCollectionCreatorRepository
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 
@@ -120,11 +120,11 @@ class ImxItemService(
     }
 
     suspend fun getItemCreators(assetIds: Collection<String>): Map<String, String> {
-        val mappedToCollection = assetIds.associateBy({ it }, { it.substringBefore(":") })
-        val collectionIds = mappedToCollection.values.toSet()
         if (assetIds.isEmpty()) {
             return emptyMap()
         }
+        val mappedToCollection = assetIds.associateBy({ it }, { it.substringBefore(":") })
+        val collectionIds = mappedToCollection.values.toSet()
         val fromCache = collectionCreatorRepository.getAll(collectionIds)
         val missing = collectionIds - (fromCache.map { it.collection }.toSet())
         val fromApi = collectionClient.getByIds(missing)
