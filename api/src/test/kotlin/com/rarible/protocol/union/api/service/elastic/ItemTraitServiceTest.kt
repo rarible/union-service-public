@@ -253,6 +253,7 @@ internal class ItemTraitServiceTest {
     }
 
     fun randomEsItem(collection: String? = randomAddress().toString(), traits: List<EsTrait>) = EsItem(
+        id = randomString(),
         itemId = randomAddress().toString(),
         blockchain = BlockchainDto.values().random(),
         collection = collection,

@@ -115,6 +115,7 @@ class EsItemConverterTest {
             dynamicTest("should convert") {
                 val esItem = unionItem.toEsItem()
 
+                assertThat(esItem.id).hasSize(64)
                 assertThat(esItem.itemId).isEqualTo(unionItem.id.fullId())
                 assertThat(esItem.blockchain).isEqualTo(unionItem.blockchain)
                 assertThat(esItem.collection).isEqualTo(unionItem.collection!!.fullId())

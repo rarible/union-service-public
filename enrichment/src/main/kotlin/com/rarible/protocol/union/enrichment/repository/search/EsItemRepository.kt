@@ -42,7 +42,7 @@ class EsItemRepository(
 ) {
 
     override fun entityId(entity: EsItem): String {
-        return entity.itemId
+        return entity.id
     }
 
     suspend fun search(filter: EsItemFilter, sort: EsItemSort, limit: Int?): Slice<EsItem> {

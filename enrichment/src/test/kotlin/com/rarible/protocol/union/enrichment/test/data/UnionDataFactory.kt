@@ -294,6 +294,7 @@ fun randomEsCollection() = EsCollection(
 )
 
 fun randomEsItem() = EsItem(
+    id = randomString(),
     itemId = randomString(),
     blockchain = BlockchainDto.values().random(),
     collection = randomString(),

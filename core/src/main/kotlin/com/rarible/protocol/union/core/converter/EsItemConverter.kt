@@ -5,11 +5,13 @@ import com.rarible.protocol.union.core.model.EsTrait
 import com.rarible.protocol.union.dto.AssetDto
 import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.ext
+import org.apache.commons.codec.digest.DigestUtils
 
 object EsItemConverter {
 
     fun ItemDto.toEsItem(): EsItem {
         return EsItem(
+            id = prepareId(id.fullId()),
             itemId = id.fullId(),
             blockchain = blockchain,
             collection = collection?.fullId(),
@@ -34,5 +36,9 @@ object EsItemConverter {
         return kotlin.runCatching {
             asset?.type?.ext?.currencyAddress()
         }.getOrNull()
+    }
+
+    private fun prepareId(itemId: String): String {
+        return DigestUtils.sha256Hex(itemId)
     }
 }
