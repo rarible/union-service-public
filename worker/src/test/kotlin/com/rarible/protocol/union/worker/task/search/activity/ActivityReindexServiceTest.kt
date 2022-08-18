@@ -18,6 +18,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
+import org.elasticsearch.action.support.WriteRequest
 import org.junit.jupiter.api.Test
 import randomUnionAddress
 import java.math.BigInteger
@@ -38,7 +39,7 @@ internal class ActivityReindexServiceTest {
 
     private val esRepo = mockk<EsActivityRepository> {
         coEvery {
-            saveAll(any(), any())
+            saveAll(any(), any(), WriteRequest.RefreshPolicy.NONE)
         } answers { arg(0) }
     }
 
@@ -69,7 +70,7 @@ internal class ActivityReindexServiceTest {
         ).containsExactly("")
 
         coVerify(exactly = 1) {
-            esRepo.saveAll(emptyList(), "test_index")
+            esRepo.saveAll(emptyList(), "test_index", WriteRequest.RefreshPolicy.NONE)
             counter.increment(0)
         }
     }
@@ -106,7 +107,7 @@ internal class ActivityReindexServiceTest {
         ).containsExactly("step_1", "") // an empty string is always emitted in the end of loop
 
         coVerify(exactly = 2) {
-            esRepo.saveAll(any(), "test_index")
+            esRepo.saveAll(any(), "test_index", WriteRequest.RefreshPolicy.NONE)
             counter.increment(1)
         }
     }
