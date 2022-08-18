@@ -6,9 +6,11 @@ import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.core.service.OwnershipService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.continuation.DateIdContinuation
 import com.rarible.protocol.union.dto.continuation.page.Page
 import com.rarible.protocol.union.dto.continuation.page.Paging
 import com.rarible.protocol.union.dto.continuation.page.Slice
+import com.rarible.protocol.union.dto.parser.OwnershipIdParser
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexAsset
 import com.rarible.protocol.union.integration.immutablex.client.ImxAssetClient
 import com.rarible.protocol.union.integration.immutablex.client.TokenIdDecoder
@@ -60,7 +62,8 @@ class ImxOwnershipService(
     }
 
     override suspend fun getOwnershipsAll(continuation: String?, size: Int): Slice<UnionOwnership> {
-        val page = assetClient.getAllAssets(continuation, size, null, null, false)
+        val itemContinuation = toItemContinuation(continuation)
+        val page = assetClient.getAllAssets(itemContinuation, size, null, null, false)
         val converted = convert(page.result)
         return Paging(UnionOwnershipContinuation.ByLastUpdatedAndId, converted).getSlice(size)
     }
@@ -74,7 +77,8 @@ class ImxOwnershipService(
     }
 
     override suspend fun getOwnershipsByOwner(address: String, continuation: String?, size: Int): Page<UnionOwnership> {
-        val assets = assetClient.getAssetsByOwner(address, continuation, size).result
+        val itemContinuation = toItemContinuation(continuation)
+        val assets = assetClient.getAssetsByOwner(address, itemContinuation, size).result
         val result = convert(assets)
         return Paging(UnionOwnershipContinuation.ByLastUpdatedAndId, result).getPage(size, 0)
     }
@@ -82,5 +86,12 @@ class ImxOwnershipService(
     private suspend fun convert(assets: Collection<ImmutablexAsset>): List<UnionOwnership> {
         val creators = itemService.getItemCreators(assets.map { it.itemId })
         return ImxOwnershipConverter.convert(assets, creators, blockchain)
+    }
+
+    private fun toItemContinuation(continuation: String?): String? {
+        return DateIdContinuation.parse(continuation)?.let {
+            val itemId = OwnershipIdParser.parseShort(it.id, blockchain).itemIdValue
+            DateIdContinuation(it.date, itemId).toString()
+        }
     }
 }
