@@ -12,6 +12,7 @@ import com.rarible.protocol.union.enrichment.service.query.activity.ActivityApiM
 import com.rarible.protocol.union.worker.metrics.SearchTaskMetricFactory
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import org.elasticsearch.action.support.WriteRequest
 import org.springframework.stereotype.Component
 import kotlin.system.measureTimeMillis
 
@@ -56,7 +57,8 @@ class ActivityReindexService(
                 logger.info("Saving ${res.activities.size} activities, continuation: $continuation")
                 val savedActivities = esActivityRepository.saveAll(
                     converter.batchConvert(res.activities),
-                    index
+                    index,
+                    refreshPolicy = WriteRequest.RefreshPolicy.NONE,
                 )
                 logger.info("Saved ${res.activities.size} activities, continuation: $continuation, took ${nowMillis().toEpochMilli() - before.toEpochMilli()}ms")
                 continuation = res.cursor
