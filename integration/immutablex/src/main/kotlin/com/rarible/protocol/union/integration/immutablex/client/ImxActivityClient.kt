@@ -168,17 +168,37 @@ class ImxActivityClient(
         to: Instant? = null,
         user: String? = null,
         sort: ActivitySortDto?
-    ) = getActivities<ImmutablexTradesPage>(
-        pageSize,
-        continuation,
-        token,
-        tokenId,
-        from,
-        to,
-        user,
-        sort,
-        ActivityType.TRADE
-    ) ?: ImmutablexTradesPage.EMPTY
+    ): ImmutablexTradesPage {
+        // IMX has problems with trades requests where page_size=1 and filters by itemId,
+        // with page_size=200 it works much faster, should be fixed by IMX one day
+        val hackedPageSize = if (
+            pageSize == 1
+            && token != null
+            && tokenId != null
+            && sort == ActivitySortDto.LATEST_FIRST) {
+            200
+        } else {
+            pageSize
+        }
+        val page = getActivities<ImmutablexTradesPage>(
+            pageSize,
+            continuation,
+            token,
+            tokenId,
+            from,
+            to,
+            user,
+            sort,
+            ActivityType.TRADE
+        ) ?: ImmutablexTradesPage.EMPTY
+
+        return if (hackedPageSize == pageSize) {
+            page
+        } else {
+            val result = page.result.firstOrNull()
+            ImmutablexTradesPage("", false, listOfNotNull(result))
+        }
+    }
 
     private suspend inline fun <reified T> getActivities(
         pageSize: Int,

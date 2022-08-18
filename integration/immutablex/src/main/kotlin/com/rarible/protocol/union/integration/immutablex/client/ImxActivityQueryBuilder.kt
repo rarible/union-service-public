@@ -122,6 +122,10 @@ class TradeQueryBuilder(
         }
     }
 
+    init {
+        builder.queryParam("status", "success")
+    }
+
     override val tokenIdField = "party_b_token_id"
     override val tokenField = "party_b_token_address"
 

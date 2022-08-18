@@ -165,7 +165,8 @@ class ImxActivityQueryBuilderTest {
 
         assertThat(tradeQuery.toString()).isEqualTo(
             "$host/trades?" +
-                "party_b_token_address=a" +
+                "status=success" +
+                "&party_b_token_address=a" +
                 "&party_b_token_id=b" +
                 "&order_by=transaction_id" +
                 "&direction=desc"
