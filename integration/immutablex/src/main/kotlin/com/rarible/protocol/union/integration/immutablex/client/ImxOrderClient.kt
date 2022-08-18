@@ -129,7 +129,8 @@ class ImxOrderClient(
         continuation: String?,
         size: Int,
     ): List<ImmutablexOrder> {
-        val pages = getOrdersByStatuses(statuses) { status ->
+        val filteredStatuses = statuses?.filter { isSupportedSellStatus(it) }
+        val pages = getOrdersByStatuses(filteredStatuses) { status ->
             val makerPages = getOrdersByMaker(makers) { maker ->
                 sellOrders(
                     continuation = continuation,
@@ -173,8 +174,8 @@ class ImxOrderClient(
         continuation: String?,
         size: Int,
     ): List<ImmutablexOrder> {
-
-        val pages = getOrdersByStatuses(statuses) { status ->
+        val filteredStatuses = statuses?.filter { isSupportedBuyStatus(it) }
+        val pages = getOrdersByStatuses(filteredStatuses) { status ->
             val makerPages = getOrdersByMaker(makers) { maker ->
                 buyOrders(
                     continuation = continuation,
@@ -261,11 +262,7 @@ class ImxOrderClient(
         statuses: List<OrderStatusDto>?,
         call: suspend (status: OrderStatusDto?) -> ImmutablexOrdersPage
     ): List<ImmutablexOrdersPage> {
-        return if (statuses.isNullOrEmpty()) {
-            listOf(call(null))
-        } else {
-            statuses.mapAsync { call(it) }
-        }
+        return statuses?.mapAsync { call(it) } ?: listOf(call(null))
     }
 
     private suspend fun getOrdersByMaker(
