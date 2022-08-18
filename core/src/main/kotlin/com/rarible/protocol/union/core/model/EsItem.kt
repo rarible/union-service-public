@@ -12,6 +12,7 @@ import java.time.Instant
 
 data class EsItem(
     @Id
+    val id: String, // holds sha256 of itemId
     val itemId: String,
     val blockchain: BlockchainDto,
     val collection: String?,
