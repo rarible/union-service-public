@@ -207,7 +207,7 @@ class OrderApiMergeService(
             continuation, currencyContracts
         ) { currency, currencyContinuation ->
             router.getService(blockchain).getOrderBidsByItem(
-                platform, fullItemId.value, makers, origin, status, start, end, currency, currencyContinuation, safeSize
+                platform, fullItemId.value, makers, originAddress?.value, status, start, end, currency, currencyContinuation, safeSize
             )
         }
 
