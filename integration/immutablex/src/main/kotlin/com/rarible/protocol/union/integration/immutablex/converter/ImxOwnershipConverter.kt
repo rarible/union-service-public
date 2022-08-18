@@ -44,7 +44,7 @@ object ImxOwnershipConverter {
             itemId = asset.encodedItemId(),
             owner = asset.user!!,
             creator = creator,
-            createdAt = asset.createdAt ?: asset.updatedAt,
+            createdAt = asset.updatedAt,
             updatedAt = asset.updatedAt
         )
     }

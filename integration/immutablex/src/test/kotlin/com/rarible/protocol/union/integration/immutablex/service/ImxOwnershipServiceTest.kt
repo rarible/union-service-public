@@ -49,7 +49,7 @@ internal class ImxOwnershipServiceTest {
                         ),
                         CollectionIdDto(BlockchainDto.IMMUTABLEX, ImxData.contract_1),
                         BigInteger.ONE,
-                        ImxData.item_1.createdAt!!,
+                        ImxData.item_1.updatedAt!!,
                         lazyValue = BigInteger.ZERO,
                         lastUpdatedAt = ImxData.item_1.updatedAt!!,
                         creators = listOf(
