@@ -58,6 +58,7 @@ internal class EsItemRepositoryFt {
 
         val now = nowMillis().truncatedTo(ChronoUnit.SECONDS)
         val esItem = EsItem(
+            id = "0xFF",
             itemId = "0x03",
             blockchain = BlockchainDto.ETHEREUM,
             collection = "0x02",
@@ -279,6 +280,7 @@ internal class EsItemRepositoryFt {
     }
 
     fun randomEsItem() = EsItem(
+        id = randomString(),
         itemId = randomAddress().toString(),
         blockchain = BlockchainDto.values().random(),
         collection = randomAddress().toString(),
