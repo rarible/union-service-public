@@ -263,4 +263,17 @@ class ImxActivityServiceMt : ImxManualTest() {
         )
     }
 
+    @Test
+    fun getLastSaleByItem() = runBlocking<Unit> {
+        val trades = service.getActivitiesByItem(
+            types = listOf(ActivityTypeDto.SELL),
+            itemId = "0x673b1ae1652dd850aea52cf3f793ce86831d1b8c:1000",
+            continuation = null,
+            size = 1,
+            ActivitySortDto.LATEST_FIRST
+        ).entities
+
+        assertThat(trades).hasSize(1)
+    }
+
 }
