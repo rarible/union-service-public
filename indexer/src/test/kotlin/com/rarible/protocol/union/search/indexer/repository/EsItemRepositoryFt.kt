@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.search.indexer.repository
 
+import com.ninjasquad.springmockk.MockkBean
 import com.rarible.core.common.nowMillis
 import com.rarible.core.test.data.randomAddress
 import com.rarible.core.test.data.randomLong
@@ -10,10 +11,12 @@ import com.rarible.protocol.union.core.model.EsItem
 import com.rarible.protocol.union.core.model.EsItemGenericFilter
 import com.rarible.protocol.union.core.model.EsItemSort
 import com.rarible.protocol.union.core.model.EsTrait
+import com.rarible.protocol.union.core.service.CurrencyService
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
 import com.rarible.protocol.union.enrichment.repository.search.EsItemRepository
 import com.rarible.protocol.union.search.indexer.test.IntegrationTest
+import io.mockk.coEvery
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.elasticsearch.index.query.BoolQueryBuilder
@@ -34,6 +37,9 @@ import java.time.temporal.ChronoUnit
 @ContextConfiguration(classes = [SearchConfiguration::class])
 internal class EsItemRepositoryFt {
 
+    @MockkBean
+    private lateinit var currencyService: CurrencyService
+
     @Autowired
     protected lateinit var repository: EsItemRepository
 
@@ -51,6 +57,7 @@ internal class EsItemRepositoryFt {
     @BeforeEach
     fun setUp() = runBlocking<Unit> {
         elasticsearchTestBootstrapper.bootstrap()
+        coEvery { currencyService.getAllCurrencyRates() } returns emptyList()
     }
 
     @Test
@@ -70,7 +77,7 @@ internal class EsItemRepositoryFt {
             lastUpdatedAt = now
         )
 
-        val id = repository.save(esItem).itemId
+        val id = repository.save(esItem).id
         val found = repository.findById(id)
         assertThat(found).isEqualTo(esItem)
     }

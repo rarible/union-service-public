@@ -14,6 +14,7 @@ import com.rarible.protocol.union.dto.ItemUpdateEventDto
 import com.rarible.protocol.union.enrichment.repository.search.EsItemRepository
 import com.rarible.protocol.union.search.indexer.test.IntegrationTest
 import kotlinx.coroutines.runBlocking
+import org.apache.commons.codec.digest.DigestUtils
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Ignore
 import org.junit.jupiter.api.Test
@@ -59,7 +60,7 @@ class ItemConsumerIt {
             producer.send(KafkaEventFactory.itemEvent(event)).ensureSuccess()
 
             WaitAssert.wait {
-                val actualItem = repository.findById(itemId.fullId())
+                val actualItem = repository.findById(DigestUtils.sha256Hex(itemId.fullId()))
                 assert(actualItem)
             }
         }
