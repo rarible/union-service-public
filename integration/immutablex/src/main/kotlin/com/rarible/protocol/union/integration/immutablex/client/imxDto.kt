@@ -20,7 +20,7 @@ data class ImmutablexAsset(
     val id: String?,
     @JsonProperty("image_url")
     val imageUrl: String?,
-    val metadata: Map<String, Any>?,
+    val metadata: Map<String, Any>? = emptyMap(),
     val name: String?,
     val status: String?,
     @JsonProperty("token_address")
@@ -75,13 +75,13 @@ data class FeeTokenData(
 data class ImmutablexAssetsPage(
     val cursor: String,
     val remaining: Boolean,
-    val result: List<ImmutablexAsset>,
+    val result: List<ImmutablexAsset> = emptyList(),
 )
 
 data class ImmutablexPage<T>(
     val cursor: String,
     val remaining: Boolean,
-    val result: List<T>,
+    val result: List<T> = emptyList(),
 )
 
 data class ImmutablexMint(
@@ -117,7 +117,7 @@ data class TokenData(
 data class ImmutablexMintsPage(
     val cursor: String,
     val remaining: Boolean,
-    val result: List<ImmutablexMint>,
+    val result: List<ImmutablexMint> = emptyList(),
 ) {
 
     companion object {
@@ -153,13 +153,13 @@ data class ImmutablexOrderSide(
 data class ImmutablexOrderData(
     val decimals: Int,
     val id: String?,
-    val quantity: BigInteger,
+    val quantity: String?,
     @JsonProperty("quantity_with_fees")
-    private val quantityWithFees: String?,
+    val quantityWithFees: String?,
     @JsonProperty("token_address")
     val tokenAddress: String?,
     @JsonProperty("token_id")
-    private val tokenId: String?,
+    val tokenId: String?,
     val properties: ImmutablexDataProperties?,
 ) {
 
@@ -167,13 +167,6 @@ data class ImmutablexOrderData(
 
     fun encodedTokenId() = tokenId?.let { TokenIdDecoder.encode(tokenId) }
 
-    fun getQuantityWithFees(): BigInteger {
-        return if (quantityWithFees.isNullOrBlank()) {
-            quantity
-        } else {
-            BigInteger(quantityWithFees)
-        }
-    }
 }
 
 data class ImmutablexDataProperties(
@@ -186,7 +179,7 @@ data class ImmutablexDataProperties(
 data class ImmutablexOrdersPage(
     val cursor: String,
     val remaining: Boolean,
-    val result: List<ImmutablexOrder>,
+    val result: List<ImmutablexOrder> = emptyList(),
 ) {
 
     constructor(result: List<ImmutablexOrder>) : this(
@@ -222,7 +215,7 @@ data class ImmutablexTransfer(
 data class ImmutablexTransfersPage(
     val cursor: String,
     val remaining: Boolean,
-    val result: List<ImmutablexTransfer>,
+    val result: List<ImmutablexTransfer> = emptyList(),
 ) {
 
     companion object {
@@ -243,16 +236,12 @@ data class TradeSide(
     val tokenType: String?,
 ) {
 
-    fun encodedTokenId() = TokenIdDecoder.encode(tokenId!!) // TODO what if null?
-
     fun itemId(): String? {
         if (tokenAddress.isNullOrBlank() || tokenId.isNullOrBlank()) {
             return null
         }
         return "$tokenAddress:$tokenId"
     }
-
-    fun encodedItemId() = "$tokenAddress:${encodedTokenId()}"
 }
 
 data class ImmutablexTrade(
@@ -269,7 +258,7 @@ data class ImmutablexTrade(
 data class ImmutablexTradesPage(
     val cursor: String,
     val remaining: Boolean,
-    val result: List<ImmutablexTrade>,
+    val result: List<ImmutablexTrade> = emptyList(),
 ) {
 
     companion object {

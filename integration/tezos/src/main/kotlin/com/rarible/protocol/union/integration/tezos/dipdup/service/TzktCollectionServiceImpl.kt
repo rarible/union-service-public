@@ -35,8 +35,8 @@ class TzktCollectionServiceImpl(
         return TzktCollectionConverter.convert(tzktPage, blockchain)
     }
 
-    override suspend fun getCollectionById(collectionId: String): UnionCollection {
-        val tzktCollection = safeApiCall { collectionClient.collection(collectionId) }.run {
+    override suspend fun getCollectionById(collectionId: String, useMeta: Boolean): UnionCollection {
+        val tzktCollection = safeApiCall { collectionClient.collection(collectionId, useMeta) }.run {
             copy(collectionType = typeByAddress(address!!))
         }
         return TzktCollectionConverter.convert(tzktCollection, blockchain)

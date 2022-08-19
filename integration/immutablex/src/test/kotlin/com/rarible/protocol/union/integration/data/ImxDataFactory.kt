@@ -95,7 +95,9 @@ fun randomImxOrderBuySide(
     quantityWithFees: BigInteger = BigInteger("10000"),
 ): ImmutablexOrderSide {
     return ImmutablexOrderSide(
-        data = randomImxOrderSideData(decimals = 0, quantity = quantity, quantityWithFees = quantityWithFees),
+        data = randomImxOrderSideData(
+            decimals = 0, quantity = quantity.toString(), quantityWithFees = quantityWithFees
+        ),
         type = "ETH"
     )
 }
@@ -105,7 +107,7 @@ fun randomImxOrderSideData(
     id: String = randomString(),
     token: String = randomAddress().prefixed(),
     tokenId: String = randomLong().toString(),
-    quantity: BigInteger = BigInteger("1"),
+    quantity: String = "1",
     quantityWithFees: BigInteger = BigInteger("1")
 ): ImmutablexOrderData {
     return ImmutablexOrderData(
@@ -221,8 +223,8 @@ fun randomImxTrade(
 
 fun randomImxTradeSide(
     orderId: Long = randomLong(),
-    token: String = randomAddress().prefixed(),
-    tokenId: String = randomLong().toString(),
+    token: String? = randomAddress().prefixed(),
+    tokenId: String? = randomLong().toString(),
     tokenType: String = "ERC721"
 ): TradeSide {
     return TradeSide(
