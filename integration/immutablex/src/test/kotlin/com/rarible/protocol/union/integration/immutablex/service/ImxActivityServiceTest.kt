@@ -5,7 +5,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.rarible.protocol.union.core.model.ItemAndOwnerActivityType
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.MintActivityDto
-import com.rarible.protocol.union.dto.OrderMatchSellDto
+import com.rarible.protocol.union.dto.OrderMatchSwapDto
 import com.rarible.protocol.union.dto.TransferActivityDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexMint
@@ -106,7 +106,7 @@ internal class ImxActivityServiceTest {
             assertEquals(page.entities.size, 3)
             page.entities.any { it is MintActivityDto }
             assert(page.entities.any { it is MintActivityDto })
-            assert(page.entities.any { it is OrderMatchSellDto })
+            assert(page.entities.any { it is OrderMatchSwapDto })
             assert(page.entities.any { it is TransferActivityDto })
         }
 
@@ -122,10 +122,10 @@ internal class ImxActivityServiceTest {
         service.getAllActivities(listOf(ActivityTypeDto.SELL), null, 50, null)
             .let { page ->
                 assertEquals(page.entities.size, 1)
-                val activity = page.entities.single() as OrderMatchSellDto
+                val activity = page.entities.single() as OrderMatchSwapDto
                 val expected = expectedTradesActivity.result.single()
-                assertEquals(activity.sellerOrderHash, expected.make.orderId.toString())
-                assertEquals(activity.buyerOrderHash, expected.take.orderId.toString())
+                assertEquals(activity.left.hash, expected.make.orderId.toString())
+                assertEquals(activity.right.hash, expected.take.orderId.toString())
             }
 
         service.getAllActivities(listOf(ActivityTypeDto.TRANSFER), null, 50, null)
