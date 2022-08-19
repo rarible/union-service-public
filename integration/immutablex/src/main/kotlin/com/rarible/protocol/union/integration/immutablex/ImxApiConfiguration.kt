@@ -31,6 +31,11 @@ class ImxApiConfiguration {
     fun imxBlockchain() = BlockchainDto.IMMUTABLEX
 
     @Bean
+    fun imxClientProperties(props: ImxIntegrationProperties): ImxClientProperties {
+        return props.client as ImxClientProperties
+    }
+
+    @Bean
     @Qualifier("imxWebClient")
     fun imxWebClient(props: ImxIntegrationProperties): WebClient {
         return ImxWebClientFactory.createClient(props.client!!.url!!, props.apiKey)
@@ -39,26 +44,30 @@ class ImxApiConfiguration {
     @Bean
     fun imxAssetClient(
         @Qualifier("imxWebClient")
-        imxWebClient: WebClient
-    ) = ImxAssetClient(imxWebClient)
+        imxWebClient: WebClient,
+        clientProperties: ImxClientProperties
+    ) = ImxAssetClient(imxWebClient, clientProperties.byIdsChunkSize)
 
     @Bean
     fun imxActivityClient(
         @Qualifier("imxWebClient")
-        imxWebClient: WebClient
-    ) = ImxActivityClient(imxWebClient)
+        imxWebClient: WebClient,
+        clientProperties: ImxClientProperties
+    ) = ImxActivityClient(imxWebClient, clientProperties.byIdsChunkSize)
 
     @Bean
     fun imxCollectionClient(
         @Qualifier("imxWebClient")
-        imxWebClient: WebClient
-    ) = ImxCollectionClient(imxWebClient)
+        imxWebClient: WebClient,
+        clientProperties: ImxClientProperties
+    ) = ImxCollectionClient(imxWebClient, clientProperties.byIdsChunkSize)
 
     @Bean
     fun imxOrderClient(
         @Qualifier("imxWebClient")
-        imxWebClient: WebClient
-    ) = ImxOrderClient(imxWebClient)
+        imxWebClient: WebClient,
+        clientProperties: ImxClientProperties
+    ) = ImxOrderClient(imxWebClient, clientProperties.byIdsChunkSize)
 
     @Bean
     fun imxItemService(

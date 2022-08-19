@@ -12,14 +12,16 @@ import io.mockk.mockk
 abstract class ImxManualTest {
 
     protected val webClient = ImxWebClientFactory.createClient(
-        "https://api.ropsten.x.immutable.com/v1",
+        "https://api.x.immutable.com/v1",
         null
     )
 
-    protected val assetClient = ImxAssetClient(webClient)
-    protected val activityClient = ImxActivityClient(webClient)
-    protected val collectionClient = ImxCollectionClient(webClient)
-    protected val orderClient = ImxOrderClient(webClient)
+    private val chunkSize = 16
+
+    protected val assetClient = ImxAssetClient(webClient, chunkSize)
+    protected val activityClient = ImxActivityClient(webClient, chunkSize)
+    protected val collectionClient = ImxCollectionClient(webClient, chunkSize)
+    protected val orderClient = ImxOrderClient(webClient, chunkSize)
 
     protected val collectionCreatorRepository: ImxCollectionCreatorRepository = mockk {
         coEvery { getAll(any()) } returns emptyList()

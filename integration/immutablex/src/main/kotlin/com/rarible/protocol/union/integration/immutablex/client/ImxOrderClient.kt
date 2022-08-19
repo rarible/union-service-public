@@ -9,12 +9,10 @@ import org.springframework.web.reactive.function.client.toEntity
 
 class ImxOrderClient(
     webClient: WebClient,
+    private val byIdsChunkSize: Int
 ) : AbstractImxClient(
     webClient
 ) {
-
-    // TODO IMMUTABLEX move out to configuration
-    private val orderRequestChunkSize = 16
 
     private val supportedBuyOrderStatuses = setOf(
         OrderStatusDto.FILLED,
@@ -34,7 +32,7 @@ class ImxOrderClient(
     }
 
     suspend fun getByIds(orderIds: Collection<String>): List<ImmutablexOrder> {
-        return getChunked(orderRequestChunkSize, orderIds) {
+        return getChunked(byIdsChunkSize, orderIds) {
             ignore404 { getById(it) }
         }
     }
