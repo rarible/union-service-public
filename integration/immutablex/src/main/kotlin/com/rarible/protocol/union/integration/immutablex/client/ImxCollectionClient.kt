@@ -6,6 +6,7 @@ import org.springframework.web.reactive.function.client.awaitBody
 
 class ImxCollectionClient(
     webClient: WebClient,
+    private val byIdsChunkSize: Int
 ) : AbstractImxClient(
     webClient
 ) {
@@ -18,7 +19,7 @@ class ImxCollectionClient(
     }
 
     suspend fun getByIds(collectionIds: Collection<String>): List<ImmutablexCollection> {
-        return getChunked(collectionRequestChunkSize, collectionIds) {
+        return getChunked(byIdsChunkSize, collectionIds) {
             ignore404 { getById(it) }
         }
     }

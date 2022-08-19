@@ -7,12 +7,10 @@ import java.time.Instant
 
 class ImxAssetClient(
     webClient: WebClient,
+    private val byIdsChunkSize: Int
 ) : AbstractImxClient(
     webClient
 ) {
-
-    // TODO IMMUTABLEX move out to configuration
-    private val assetsRequestChunkSize = 16
 
     suspend fun getById(itemId: String): ImmutablexAsset {
         val uri = ImxAssetQueryBuilder.getByIdPath(itemId)
@@ -20,7 +18,7 @@ class ImxAssetClient(
     }
 
     suspend fun getByIds(itemIds: Collection<String>): List<ImmutablexAsset> {
-        return getChunked(assetsRequestChunkSize, itemIds) {
+        return getChunked(byIdsChunkSize, itemIds) {
             ignore404 { getById(it) }
         }
     }
