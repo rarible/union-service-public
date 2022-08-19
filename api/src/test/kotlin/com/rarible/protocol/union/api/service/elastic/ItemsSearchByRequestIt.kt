@@ -2,12 +2,9 @@ package com.rarible.protocol.union.api.service.elastic
 
 import com.ninjasquad.springmockk.MockkBean
 import com.rarible.core.common.nowMillis
-import com.rarible.core.test.data.randomBigDecimal
 import com.rarible.core.test.data.randomDouble
 import com.rarible.core.test.data.randomString
-import com.rarible.protocol.currency.api.client.CurrencyControllerApi
 import com.rarible.protocol.currency.dto.CurrenciesDto
-import com.rarible.protocol.currency.dto.CurrencyDto
 import com.rarible.protocol.currency.dto.CurrencyRateDto
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.core.converter.CurrencyConverter
@@ -18,7 +15,6 @@ import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.core.test.nativeTestCurrencies
 import com.rarible.protocol.union.dto.AssetDto
-import com.rarible.protocol.union.dto.AssetTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ContractAddress
 import com.rarible.protocol.union.dto.EthErc20AssetTypeDto
@@ -31,14 +27,11 @@ import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.TraitPropertyDto
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.repository.search.EsItemRepository
-import com.rarible.protocol.union.enrichment.test.data.randomEsItem
 import com.rarible.protocol.union.enrichment.test.data.randomItemDto
 import com.rarible.protocol.union.enrichment.test.data.randomUnionItem
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
-import com.rarible.protocol.union.integration.ethereum.data.randomEthSellOrderDto
 import com.rarible.protocol.union.integration.flow.data.randomFlowItemId
 import com.rarible.protocol.union.test.mock.CurrencyMock.currencyControllerApiMock
-import io.mockk.clearAllMocks
 import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.every
@@ -50,9 +43,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import randomOrder
 import reactor.kotlin.core.publisher.toMono
-import java.lang.RuntimeException
 import java.time.Duration
-import kotlin.math.exp
 import kotlin.math.pow
 import kotlin.random.Random
 
@@ -405,6 +396,64 @@ class ItemsSearchByRequestIt {
             ),
             expected = expected,
             failMessage = "Failed to filter by sell price"
+        )
+    }
+
+    @Test
+    fun `should find by bid price`() = runBlocking<Unit> {
+        // given
+        val ratesPerCurrency = mutableMapOf<String, Double>()
+
+        nativeTestCurrencies().forEachIndexed { index, currency ->
+            val rate = 1.0 + 2.0.pow(index.toDouble())
+            ratesPerCurrency["${currency.blockchain}:${currency.address}"] = rate
+            every { currencyControllerApiMock.getCurrencyRate(currency.blockchain, currency.address, any()) } returns
+                    CurrencyRateDto(
+                        fromCurrencyId = currency.currencyId,
+                        toCurrencyId = "",
+                        rate = rate.toBigDecimal(),
+                        date = nowMillis(),
+                    ).toMono()
+        }
+
+        val expected: List<EsItem> =
+            esItems.sortedBy { it.bestBidAmount?.times(ratesPerCurrency[it.bestBidCurrency]!!) }
+                .drop(esItems.size / 4)
+                .take(esItems.size / 2)
+
+        val priceFrom =
+            when (expected.first().bestBidCurrency) {
+                "ETHEREUM:0x0000000000000000000000000000000000000000" -> {
+                    expected.first().bestBidAmount!!
+                }
+                "FLOW:A.1654653399040a61.FlowToken" -> {
+                    expected.first().bestBidAmount!! * ratesPerCurrency["FLOW:A.1654653399040a61.FlowToken"]!! /
+                            ratesPerCurrency["ETHEREUM:0x0000000000000000000000000000000000000000"]!!
+                }
+                else -> throw RuntimeException("Test must be amended")
+            }
+
+        val priceTo =
+            when (expected.last().bestBidCurrency) {
+                "ETHEREUM:0x0000000000000000000000000000000000000000" -> {
+                    expected.last().bestBidAmount!!
+                }
+                "FLOW:A.1654653399040a61.FlowToken" -> {
+                    expected.last().bestBidAmount!! * ratesPerCurrency["FLOW:A.1654653399040a61.FlowToken"]!! /
+                            ratesPerCurrency["ETHEREUM:0x0000000000000000000000000000000000000000"]!!
+                }
+                else -> throw RuntimeException("Test must be amended")
+            }
+
+        // when && then
+        checkResult(
+            filter = ItemsSearchFilterDto(
+                bidPriceFrom = priceFrom,
+                bidPriceTo = priceTo,
+                bidCurrency = "ETHEREUM:0x0000000000000000000000000000000000000000"
+            ),
+            expected = expected,
+            failMessage = "Failed to filter by bid price"
         )
     }
 
