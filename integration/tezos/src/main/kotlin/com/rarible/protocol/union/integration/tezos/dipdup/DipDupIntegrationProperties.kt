@@ -30,7 +30,8 @@ data class DipDupIntegrationProperties(
         val ignorePeriod: Long = 1000 * 3600 * 24, // 1 day period
         val tokenBatch: Boolean = false,
         val ownershipBatch: Boolean = false,
-        val collectionBatch: Boolean = false
+        val collectionBatch: Boolean = false,
+        val requestedCollectionMeta: Boolean = false
     )
 
 }

@@ -5,6 +5,7 @@ import com.rarible.protocol.union.core.exception.UnionNotFoundException
 import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.continuation.page.Page
+import com.rarible.protocol.union.integration.tezos.dipdup.DipDupIntegrationProperties
 import com.rarible.protocol.union.integration.tezos.dipdup.converter.TzktCollectionConverter
 import com.rarible.protocol.union.integration.tezos.dipdup.converter.TzktCollectionConverter.convertType
 import com.rarible.protocol.union.integration.tezos.entity.TezosCollectionRepository
@@ -18,7 +19,8 @@ import java.math.BigInteger
 class TzktCollectionServiceImpl(
     val collectionClient: CollectionClient,
     val tokenClient: TokenClient,
-    val tezosCollectionRepository: TezosCollectionRepository
+    val tezosCollectionRepository: TezosCollectionRepository,
+    val tzktProperties: DipDupIntegrationProperties.TzktProperties
 ) : TzktCollectionService {
 
     private val blockchain = BlockchainDto.TEZOS
@@ -36,7 +38,8 @@ class TzktCollectionServiceImpl(
     }
 
     override suspend fun getCollectionById(collectionId: String, useMeta: Boolean): UnionCollection {
-        val tzktCollection = safeApiCall { collectionClient.collection(collectionId, useMeta) }.run {
+        val requestMeta = useMeta || tzktProperties.requestedCollectionMeta
+        val tzktCollection = safeApiCall { collectionClient.collection(collectionId, requestMeta) }.run {
             copy(collectionType = typeByAddress(address!!))
         }
         return TzktCollectionConverter.convert(tzktCollection, blockchain)

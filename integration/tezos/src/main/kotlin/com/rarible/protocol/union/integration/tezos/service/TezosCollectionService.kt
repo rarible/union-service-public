@@ -40,7 +40,7 @@ open class TezosCollectionService(
 
     override suspend fun getCollectionById(collectionId: String): UnionCollection {
         if (tzktCollectionService.enabled()) {
-            return tzktCollectionService.getCollectionById(collectionId, false)
+            return tzktCollectionService.getCollectionById(collectionId)
         }
         val collection = collectionControllerApi.getNftCollectionById(collectionId).awaitFirst()
         return TezosCollectionConverter.convert(collection, blockchain)

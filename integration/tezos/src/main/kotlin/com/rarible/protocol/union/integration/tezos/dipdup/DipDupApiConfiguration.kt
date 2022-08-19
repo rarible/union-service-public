@@ -123,7 +123,7 @@ class DipDupApiConfiguration(
 
     @Bean
     fun tzktCollectionService(tzktClient: CollectionClient, tzktTokenClient: TokenClient, tezosCollectionRepository: TezosCollectionRepository): TzktCollectionService {
-        return TzktCollectionServiceImpl(tzktClient, tzktTokenClient, tezosCollectionRepository)
+        return TzktCollectionServiceImpl(tzktClient, tzktTokenClient, tezosCollectionRepository, properties.tzktProperties)
     }
 
     @Bean
