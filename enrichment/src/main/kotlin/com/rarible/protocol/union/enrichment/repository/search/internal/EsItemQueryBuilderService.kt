@@ -21,6 +21,7 @@ class EsItemQueryBuilderService(
     private val cursorService: EsItemQueryCursorService,
     private val scoreService: EsItemQueryScoreService,
     private val sortService: EsItemQuerySortService,
+    private val priceFilterService: EsItemQueryPriceFilterService,
 ) {
     companion object {
         private val SCORE_SORT_TYPES: Set<EsItemSort> = setOf(
@@ -35,18 +36,22 @@ class EsItemQueryBuilderService(
         val builder = NativeSearchQueryBuilder()
         val isScoreSort = SCORE_SORT_TYPES.contains(sort)
 
+        val blockchains = if (filter.blockchains.isNullOrEmpty()) {
+            BlockchainDto.values().toSet()
+        } else {
+            filter.blockchains!!.map { BlockchainDto.valueOf(it) }.toSet()
+        }
+
         var query: QueryBuilder = BoolQueryBuilder()
         query as BoolQueryBuilder
         when (filter) {
-            is EsItemGenericFilter -> query.applyGenericFilter(filter)
+            is EsItemGenericFilter -> {
+                query.applyGenericFilter(filter)
+                priceFilterService.applyPriceFilter(query, filter, blockchains)
+            }
         }
 
         if (isScoreSort) {
-            val blockchains = if (filter.blockchains.isNullOrEmpty()) {
-                BlockchainDto.values().toSet()
-            } else {
-                filter.blockchains!!.map { BlockchainDto.valueOf(it) }.toSet()
-            }
             query = scoreService.buildQuery(query, sort, blockchains)
         }
 

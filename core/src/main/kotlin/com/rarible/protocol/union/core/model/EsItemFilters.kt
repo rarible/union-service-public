@@ -25,5 +25,11 @@ data class EsItemGenericFilter(
     val descriptions: Set<String>? = null,
     val sellPlatforms: Set<String>? = null,
     val bidPlatforms: Set<String>? = null,
+    val sellPriceCurrency: String? = null,
+    val sellPriceFrom: Double? = null,
+    val sellPriceTo: Double? = null,
+    val bidPriceCurrency: String? = null,
+    val bidPriceFrom: Double? = null,
+    val bidPriceTo: Double? = null,
     override val cursor: String? = null,
 ) : EsItemFilter()

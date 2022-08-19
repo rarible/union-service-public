@@ -74,7 +74,13 @@ class ItemFilterConverter(
             traitsKeys = filter.traits?.map { it.key }?.toSet(),
             traitsValues = filter.traits?.map { it.value }?.toSet(),
             sellPlatforms = filter.sellPlatforms?.map { it.name }?.toSet(),
+            sellPriceCurrency = filter.sellCurrency,
+            sellPriceFrom = filter.sellPriceFrom,
+            sellPriceTo = filter.sellPriceTo,
             bidPlatforms = filter.bidPlatforms?.map { it.name }?.toSet(),
+            bidPriceCurrency = filter.bidCurrency,
+            bidPriceFrom = filter.bidPriceFrom,
+            bidPriceTo = filter.bidPriceTo,
         )
     }
 }
