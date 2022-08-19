@@ -12,7 +12,7 @@ import io.mockk.mockk
 abstract class ImxManualTest {
 
     protected val webClient = ImxWebClientFactory.createClient(
-        "https://api.x.immutable.com/v1",
+        "https://api.ropsten.x.immutable.com/v1",
         null
     )
 
