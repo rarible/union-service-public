@@ -61,7 +61,6 @@ fun randomImxCollectionShort(): ImmutablexCollectionShort {
 
 fun randomImxOrder(
     orderId: Long = randomLong(),
-    amountSold: String = "0",
     buy: ImmutablexOrderSide = randomImxOrderBuySide(),
     sell: ImmutablexOrderSide = randomImxOrderSellSide(),
     status: String = "active",
@@ -71,7 +70,7 @@ fun randomImxOrder(
 ): ImmutablexOrder {
     return ImmutablexOrder(
         orderId = orderId,
-        amountSold = amountSold,
+        amountSold = "0",
         buy = buy,
         expirationTimestamp = nowMillis().plus(100, ChronoUnit.DAYS),
         fees = listOf(),
@@ -93,12 +92,14 @@ fun randomImxOrderSellSide(): ImmutablexOrderSide {
 fun randomImxOrderBuySide(
     quantity: BigInteger = BigInteger("10000"),
     quantityWithFees: BigInteger = BigInteger("10000"),
+    decimals: Int = 0,
+    type: String = "ETH"
 ): ImmutablexOrderSide {
     return ImmutablexOrderSide(
         data = randomImxOrderSideData(
-            decimals = 0, quantity = quantity.toString(), quantityWithFees = quantityWithFees
+            decimals = decimals, quantity = quantity.toString(), quantityWithFees = quantityWithFees
         ),
-        type = "ETH"
+        type = type
     )
 }
 

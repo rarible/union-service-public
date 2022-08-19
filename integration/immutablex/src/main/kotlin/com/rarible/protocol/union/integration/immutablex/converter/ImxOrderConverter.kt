@@ -4,8 +4,6 @@ import com.rarible.core.common.nowMillis
 import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.core.converter.ContractAddressConverter
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
-import com.rarible.protocol.union.core.util.evalMakePrice
-import com.rarible.protocol.union.core.util.evalTakePrice
 import com.rarible.protocol.union.dto.AssetDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.EthErc20AssetTypeDto
@@ -46,13 +44,10 @@ object ImxOrderConverter {
         val make: AssetDto = toAsset(order.sell, blockchain)
         val take: AssetDto = toAsset(order.buy, blockchain)
 
-        val makePrice = evalMakePrice(make, take)
-        val takePrice = evalTakePrice(make, take)
-
-        val quantity = if (make.type.ext.isNft) {
-            getQuantityWithFees(order.buy.data)
+        val (quantity, makePrice, takePrice) = if (make.type.ext.isNft) {
+            Triple(getQuantityWithFees(order.buy.data), take.value, null)
         } else {
-            getQuantityWithFees(order.sell.data)
+            Triple(getQuantityWithFees(order.sell.data), null, make.value)
         }
 
         val status = convertStatus(order)
