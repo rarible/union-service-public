@@ -10,6 +10,7 @@ import java.time.Instant
 
 class ImxActivityClient(
     webClient: WebClient,
+    private val byIdsChunkSize: Int
 ) : AbstractImxClient(
     webClient
 ) {
@@ -18,10 +19,6 @@ class ImxActivityClient(
 
         val MINTS_ARRAY_TYPE = object : ParameterizedTypeReference<List<ImmutablexMint>>() {}
     }
-
-    // TODO IMMUTABLEX move out to configuration
-    private val creatorsRequestChunkSize = 16
-    private val byIdsChunkSize = 16
 
     suspend fun getMints(ids: List<String>): List<ImmutablexMint> {
         return getChunked(byIdsChunkSize, ids) {

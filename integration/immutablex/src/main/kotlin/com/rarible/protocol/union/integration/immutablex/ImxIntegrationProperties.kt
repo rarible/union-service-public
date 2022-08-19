@@ -14,7 +14,7 @@ import org.springframework.boot.context.properties.ConstructorBinding
 class ImxIntegrationProperties(
     enabled: Boolean,
     consumer: DefaultConsumerProperties?,
-    client: DefaultClientProperties?,
+    client: ImxClientProperties?,
     daemon: DaemonWorkerProperties = DaemonWorkerProperties(),
     auctionContracts: String? = null,
     origins: Map<String, OriginProperties> = emptyMap(),
@@ -28,3 +28,8 @@ class ImxIntegrationProperties(
     auctionContracts,
     origins
 )
+
+class ImxClientProperties(
+    url: String,
+    val byIdsChunkSize: Int = 16
+) : DefaultClientProperties(url)

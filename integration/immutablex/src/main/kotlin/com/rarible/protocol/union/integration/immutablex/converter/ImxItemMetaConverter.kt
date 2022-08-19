@@ -31,9 +31,10 @@ object ImxItemMetaConverter {
             name = assetName,
             description = asset.description,
             createdAt = asset.createdAt,
-            content = asset.metadata?.filterKeys { it in contentKeys }?.map {
+            content = asset.metadata?.filterKeys { it in contentKeys }?.mapNotNull {
+                val url = it.value as String? ?: return@mapNotNull null
                 UnionMetaContent(
-                    url = it.value as String,
+                    url = url,
                     representation = MetaContentDto.Representation.ORIGINAL
                 )
             } ?: emptyList(),

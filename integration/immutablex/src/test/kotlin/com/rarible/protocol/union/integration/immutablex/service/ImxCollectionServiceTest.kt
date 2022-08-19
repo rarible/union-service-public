@@ -19,7 +19,7 @@ class ImxCollectionServiceTest {
             ImxCollectionClient(
                 MockWebClient(
                     "/collections?order_by=address&direction=asc&page_size=50", ALL_COLLECTIONS
-                )
+                ), 16
             )
         ).getAllCollections(null, 50)
 
@@ -64,7 +64,7 @@ class ImxCollectionServiceTest {
             ImxCollectionClient(
                 MockWebClient(
                     "/collections/0x62d25241d4a5d619c1b06114210250d19d2424c0", ONE_COLLECTION
-                )
+                ), 16
             )
         ).getCollectionById("0x62d25241d4a5d619c1b06114210250d19d2424c0")
 

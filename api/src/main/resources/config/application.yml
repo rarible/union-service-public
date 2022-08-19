@@ -103,6 +103,7 @@ integration:
     enabled: ${consul.immutablex.enabled:true}
     client:
       url: ${consul.immutablex.api.baseUrl:}
+      byIdsChunkSize: 16
     apiKey: ${consul.immutablex.api.key:}
 common:
   producer:
