@@ -6,9 +6,6 @@ import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.AssetDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.BurnActivityDto
-import com.rarible.protocol.union.dto.EthErc20AssetTypeDto
-import com.rarible.protocol.union.dto.EthErc721AssetTypeDto
-import com.rarible.protocol.union.dto.EthEthereumAssetTypeDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.L2DepositActivityDto
 import com.rarible.protocol.union.dto.L2WithdrawalActivityDto
@@ -27,10 +24,8 @@ import com.rarible.protocol.union.integration.immutablex.client.ImmutablexOrder
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexTrade
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexTransfer
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexWithdrawal
-import com.rarible.protocol.union.integration.immutablex.client.TradeSide
 import org.slf4j.LoggerFactory
 import scalether.domain.Address
-import java.math.BigDecimal
 
 object ImxActivityConverter {
 
@@ -93,15 +88,19 @@ object ImxActivityConverter {
             }
         }
         is ImmutablexTrade -> {
-            val makeAsset = convertAsset(activity.make, blockchain)
+            val makeOrder = orders[activity.make.orderId]
+                ?: throw ImxDataException("$blockchain make Order ${activity.make.orderId} not found")
+
+            val takeOrder = orders[activity.take.orderId]
+                ?: throw ImxDataException("$blockchain take Order ${activity.take.orderId} not found")
+
+            val makeAsset = ImxOrderConverter.toAsset(makeOrder.sell, blockchain)
             val makeType = makeAsset.type.ext
-            val takeAsset = convertAsset(activity.take, blockchain)
+            val takeAsset = ImxOrderConverter.toAsset(takeOrder.sell, blockchain)
             val takeType = takeAsset.type.ext
 
-            val maker = orders[activity.make.orderId]?.creator?.let { UnionAddressConverter.convert(blockchain, it) }
-                ?: throw ImxDataException("$blockchain make Order ${activity.make.orderId} not found")
-            val taker = orders[activity.take.orderId]?.creator?.let { UnionAddressConverter.convert(blockchain, it) }
-                ?: throw ImxDataException("$blockchain take Order ${activity.take.orderId} not found")
+            val maker = UnionAddressConverter.convert(blockchain, makeOrder.creator)
+            val taker = UnionAddressConverter.convert(blockchain, takeOrder.creator)
 
             if (makeType.isNft && !takeType.isNft) {
                 convertToMatch(activity, makeAsset, takeAsset, maker, taker)
@@ -113,20 +112,19 @@ object ImxActivityConverter {
                     date = activity.timestamp,
                     source = OrderActivitySourceDto.RARIBLE,
                     transactionHash = activity.transactionId.toString(),
-                    // TODO UNION remove in 1.19
-                    blockchainInfo = null,
                     left = OrderActivityMatchSideDto(
                         maker = maker,
-                        hash = null,
+                        hash = activity.make.orderId.toString(),
                         asset = makeAsset
                     ),
                     right = OrderActivityMatchSideDto(
                         maker = taker,
-                        hash = null,
+                        hash = activity.take.orderId.toString(),
                         asset = takeAsset
                     ),
                     reverted = false,
-                    lastUpdatedAt = activity.timestamp
+                    lastUpdatedAt = activity.timestamp,
+                    blockchainInfo = null,
                 )
             }
 
@@ -158,7 +156,6 @@ object ImxActivityConverter {
         seller: UnionAddress,
         buyer: UnionAddress
     ): OrderMatchSellDto {
-        // TODO IMMUTABLEX what if null?
         return OrderMatchSellDto(
             source = OrderActivitySourceDto.RARIBLE,
             transactionHash = activity.transactionId.toString(),
@@ -171,31 +168,10 @@ object ImxActivityConverter {
             seller = seller,
             buyerOrderHash = activity.take.orderId.toString(),
             sellerOrderHash = activity.make.orderId.toString(),
-            price = BigDecimal.ZERO,
+            price = payment.value,
             priceUsd = null,
             amountUsd = null,
             type = OrderMatchSellDto.Type.SELL
         )
     }
-
-    private fun convertAsset(asset: TradeSide, blockchain: BlockchainDto) =
-        when (asset.tokenType) {
-            "ETH" -> AssetDto(
-                type = EthEthereumAssetTypeDto(blockchain),
-                value = asset.sold.setScale(18)
-            )
-            "ERC20" -> AssetDto(
-                type = EthErc20AssetTypeDto(ContractAddressConverter.convert(blockchain, asset.tokenAddress!!)),
-                value = asset.sold.setScale(18)
-            )
-            "ERC721" -> AssetDto(
-                type = EthErc721AssetTypeDto(
-                    ContractAddressConverter.convert(blockchain, asset.tokenAddress!!),
-                    asset.encodedTokenId()
-                ),
-                value = asset.sold
-            )
-            else -> throw IllegalStateException("Unsupported token type: ${asset.tokenType}")
-        }
-
 }
