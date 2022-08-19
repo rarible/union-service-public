@@ -26,7 +26,7 @@ open class DipDupCollectionEventHandler(
             val collection = dipDupCollectionConverter.convert(event)
 
             // Enrich by meta fields, lately it's better to move it to the indexer
-            val tzktCollection = tzktCollectionService.getCollectionById(event.collection.id)
+            val tzktCollection = tzktCollectionService.getCollectionById(event.collection.id, true)
             val unionCollectionEvent = UnionCollectionUpdateEvent(
                 collection.copy(name = tzktCollection.name, symbol = tzktCollection.symbol)
             )

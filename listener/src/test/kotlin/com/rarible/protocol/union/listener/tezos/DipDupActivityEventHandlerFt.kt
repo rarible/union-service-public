@@ -83,7 +83,7 @@ class DipDupActivityEventHandlerFt : AbstractDipDupIntegrationTest() {
     }
 
     @Test
-//    @Disabled("Works locally, fix under PT-953")
+    @Disabled("Works locally, fix under PT-953")
     fun `should send dipdup transfer activity to outgoing topic`() = runWithKafka {
 
         val activity = randomDipDupActivityTransferEvent()

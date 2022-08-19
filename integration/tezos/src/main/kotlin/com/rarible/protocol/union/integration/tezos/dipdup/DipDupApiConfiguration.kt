@@ -59,6 +59,7 @@ class DipDupApiConfiguration(
     fun TzktSettings() = TzktSettings(
         useTokensBatch = properties.tzktProperties.tokenBatch,
         useOwnershipsBatch = properties.tzktProperties.ownershipBatch,
+        useCollectionBatch = properties.tzktProperties.collectionBatch
     )
 
     @Bean
@@ -75,8 +76,8 @@ class DipDupApiConfiguration(
 
     @Bean
     fun tzktCollectionClient(
-        metaCollectionService: MetaCollectionService
-    ) = CollectionClient(tzktWebClient, metaCollectionService)
+        metaCollectionService: MetaCollectionService, settings: TzktSettings
+    ) = CollectionClient(tzktWebClient, metaCollectionService, settings)
 
     @Bean
     fun tzktIpfsClient(mapper: ObjectMapper) = IPFSClient(ipfsWebClient, mapper)

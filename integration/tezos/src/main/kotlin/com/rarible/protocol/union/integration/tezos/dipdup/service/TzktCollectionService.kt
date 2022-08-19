@@ -15,7 +15,7 @@ interface TzktCollectionService {
         TODO("Not implemented")
     }
 
-    suspend fun getCollectionById(collectionId: String): UnionCollection {
+    suspend fun getCollectionById(collectionId: String, useMeta: Boolean = false): UnionCollection {
         TODO("Not implemented")
     }
 
