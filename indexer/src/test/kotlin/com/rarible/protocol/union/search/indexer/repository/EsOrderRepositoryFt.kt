@@ -233,7 +233,7 @@ internal class EsOrderRepositoryFt {
         val orders = List(100) {
             val o = randomOrder()
             o.copy(take = o.make, make = o.take)
-        }.map { EsOrderConverter.convert(it) }
+        }.map { EsOrderConverter.convert(it).copy(type = EsOrder.Type.BID) }
         repository.saveAll(orders)
 
         // when
