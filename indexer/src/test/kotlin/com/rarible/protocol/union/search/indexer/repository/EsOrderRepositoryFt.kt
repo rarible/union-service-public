@@ -299,6 +299,39 @@ internal class EsOrderRepositoryFt {
     }
 
     @Test
+    fun `EsOrdersByMakers filter with origin`(): Unit = runBlocking {
+        // given
+        val orders = List(100) {
+            val o = randomOrder()
+            o.copy(take = o.make, make = o.take)
+        }.map { EsOrderConverter.convert(it) }
+        repository.saveAll(orders)
+
+        // when
+        val query = NativeSearchQuery(BoolQueryBuilder())
+        query.maxResults = 1000
+
+        val o1 = orders.first()
+        val o2 = orders.last()
+        val exampleFilter = EsOrdersByMakers(
+            platform = null,
+            maker = listOf(o1.maker, o2.maker),
+            origin = o1.origins.first(),
+            size = 1000,
+            continuation = null,
+            sort = OrderSortDto.LAST_UPDATE_DESC,
+            status = OrderStatusDto.values().asList(),
+            type = EsOrder.Type.SELL
+        )
+
+        //then
+        val esOrders = repository.findByFilter(exampleFilter)
+        assertThat(esOrders).hasSize(1)
+        assertThat(esOrders.first().orderId).isEqualTo(o1.orderId)
+
+    }
+
+    @Test
     fun `EsOrderSellOrders filter`(): Unit = runBlocking {
         // given
         val orders = List(100) {

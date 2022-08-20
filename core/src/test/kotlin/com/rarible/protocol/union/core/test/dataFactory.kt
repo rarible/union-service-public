@@ -28,6 +28,7 @@ import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.OwnershipDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
+import com.rarible.protocol.union.dto.PayoutDto
 import com.rarible.protocol.union.dto.PendingOrderDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.RaribleAuctionV1DataV1Dto
@@ -194,7 +195,10 @@ fun randomOrder(
     data = data,
 )
 
-fun randomOrderData(): OrderDataDto = EthOrderDataRaribleV2DataV1Dto(emptyList(), emptyList())
+fun randomOrderData(): OrderDataDto = EthOrderDataRaribleV2DataV1Dto(
+    listOf(PayoutDto(randomUnionAddress(), randomInt())),
+    listOf(PayoutDto(randomUnionAddress(), randomInt()))
+)
 
 fun randomEsOwnership(
     id: OwnershipIdDto = randomOwnershipId(),

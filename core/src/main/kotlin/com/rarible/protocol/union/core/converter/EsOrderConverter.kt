@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.core.converter
 
+import com.rarible.protocol.union.core.model.EsOrder
 import com.rarible.protocol.union.dto.AssetDto
 import com.rarible.protocol.union.dto.EthCollectionAssetTypeDto
 import com.rarible.protocol.union.dto.EthCryptoPunksAssetTypeDto
@@ -10,13 +11,19 @@ import com.rarible.protocol.union.dto.EthErc721AssetTypeDto
 import com.rarible.protocol.union.dto.EthErc721LazyAssetTypeDto
 import com.rarible.protocol.union.dto.EthEthereumAssetTypeDto
 import com.rarible.protocol.union.dto.EthGenerativeArtAssetTypeDto
+import com.rarible.protocol.union.dto.EthLooksRareOrderDataV1Dto
+import com.rarible.protocol.union.dto.EthOrderBasicSeaportDataV1Dto
 import com.rarible.protocol.union.dto.EthOrderCryptoPunksDataDto
 import com.rarible.protocol.union.dto.EthOrderDataLegacyDto
 import com.rarible.protocol.union.dto.EthOrderDataRaribleV2DataV1Dto
+import com.rarible.protocol.union.dto.EthOrderDataRaribleV2DataV3BuyDto
+import com.rarible.protocol.union.dto.EthOrderDataRaribleV2DataV3SellDto
 import com.rarible.protocol.union.dto.EthOrderOpenSeaV1DataV1Dto
+import com.rarible.protocol.union.dto.EthX2Y2OrderDataV1Dto
 import com.rarible.protocol.union.dto.FlowAssetTypeFtDto
 import com.rarible.protocol.union.dto.FlowAssetTypeNftDto
 import com.rarible.protocol.union.dto.FlowOrderDataV1Dto
+import com.rarible.protocol.union.dto.ImmutablexOrderDataV1Dto
 import com.rarible.protocol.union.dto.OrderDataDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderEventDto
@@ -29,9 +36,8 @@ import com.rarible.protocol.union.dto.TezosFTAssetTypeDto
 import com.rarible.protocol.union.dto.TezosMTAssetTypeDto
 import com.rarible.protocol.union.dto.TezosNFTAssetTypeDto
 import com.rarible.protocol.union.dto.TezosOrderDataRaribleV2DataV1Dto
+import com.rarible.protocol.union.dto.TezosOrderDataRaribleV2DataV2Dto
 import com.rarible.protocol.union.dto.TezosXTZAssetTypeDto
-import com.rarible.protocol.union.dto.UnionAddress
-import com.rarible.protocol.union.core.model.EsOrder
 import com.rarible.protocol.union.dto.ext
 
 object EsOrderConverter {
@@ -44,32 +50,45 @@ object EsOrderConverter {
 
     fun convert(source: OrderDto): EsOrder {
         return EsOrder(
-                orderId = source.id.fullId(),
-                lastUpdatedAt = source.lastUpdatedAt,
-                type = orderType(source.make),
-                blockchain = source.id.blockchain,
-                platform = source.platform,
-                maker = source.maker.fullId(),
-                make = asset(source.make),
-                take = asset(source.take),
-                taker = source.taker?.fullId(),
-                start = source.startedAt,
-                end = source.endedAt,
-                origins = origins(source.data),
-                status = source.status
-            )
+            orderId = source.id.fullId(),
+            lastUpdatedAt = source.lastUpdatedAt,
+            type = orderType(source.make),
+            blockchain = source.id.blockchain,
+            platform = source.platform,
+            maker = source.maker.fullId(),
+            make = asset(source.make),
+            take = asset(source.take),
+            taker = source.taker?.fullId(),
+            start = source.startedAt,
+            end = source.endedAt,
+            origins = origins(source.data),
+            status = source.status
+        )
     }
 
     fun origins(data: OrderDataDto): List<String> {
-        return when(data) {
-            is EthOrderDataRaribleV2DataV1Dto -> data.payouts.map { it.account }
+        return when (data) {
+            is EthOrderDataRaribleV2DataV1Dto -> data.payouts.map { it.account } + data.originFees.map { it.account }
             is EthOrderOpenSeaV1DataV1Dto -> listOf(data.feeRecipient)
-            is TezosOrderDataRaribleV2DataV1Dto -> data.originFees.map { it.account }
+            is TezosOrderDataRaribleV2DataV1Dto -> data.payouts.map { it.account } + data.originFees.map { it.account }
             is FlowOrderDataV1Dto -> data.originFees.map { it.account }
+            is TezosOrderDataRaribleV2DataV2Dto ->  data.payouts.map { it.account } + data.originFees.map { it.account }
+            is ImmutablexOrderDataV1Dto -> data.payouts.map { it.account } + data.originFees.map { it.account }
+            is EthOrderDataRaribleV2DataV3SellDto -> listOfNotNull(
+                data.originFeeFirst?.account,
+                data.originFeeSecond?.account
+            )
+            is EthOrderDataRaribleV2DataV3BuyDto -> listOfNotNull(
+                data.originFeeFirst?.account,
+                data.originFeeSecond?.account
+            )
+
+            is EthOrderBasicSeaportDataV1Dto,
+            is EthX2Y2OrderDataV1Dto,
             is SolanaAuctionHouseDataV1Dto,
             is EthOrderDataLegacyDto,
-            is EthOrderCryptoPunksDataDto -> emptyList()
-            else -> emptyList()
+            is EthOrderCryptoPunksDataDto,
+            is EthLooksRareOrderDataV1Dto-> emptyList()
         }.map { it.fullId() }
     }
 
