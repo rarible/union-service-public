@@ -125,14 +125,14 @@ class OrderApiMergeService(
         continuation: String?,
         size: Int?,
         sort: OrderSortDto?,
-        status: List<OrderStatusDto>?
+        statuses: List<OrderStatusDto>?
     ): OrdersDto {
         val safeSize = PageSize.ORDER.limit(size)
         val evaluatedBlockchains = router.getEnabledBlockchains(blockchains).map(BlockchainDto::name)
         val slices: List<ArgSlice<OrderDto>> =
             getOrdersByBlockchains(continuation, evaluatedBlockchains) { blockchain, cont ->
                 val blockDto = BlockchainDto.valueOf(blockchain)
-                router.getService(blockDto).getOrdersAll(cont, safeSize, sort, status)
+                router.getService(blockDto).getOrdersAll(cont, safeSize, sort, statuses)
             }
         val slice = ArgPaging(continuationFactory(sort), slices).getSlice(safeSize)
         logger.info(

@@ -7,7 +7,6 @@ import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.enrichment.repository.search.EsOrderRepository
-import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
 import com.rarible.protocol.union.integration.ethereum.service.EthOrderService
 import io.mockk.coEvery
 import io.mockk.every
@@ -16,7 +15,6 @@ import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 
-import org.junit.jupiter.api.Assertions.*
 import randomOrder
 import randomOrderId
 
@@ -61,7 +59,7 @@ internal class OrderElasticServiceTest {
         val result = orderElasticService.fetchOrders(
             EsAllOrderFilter(
                 blockchains = listOf(BlockchainDto.ETHEREUM),
-                continuation = null,
+                cursor = null,
                 size = 100,
                 status = null,
                 sort = OrderSortDto.LAST_UPDATE_DESC

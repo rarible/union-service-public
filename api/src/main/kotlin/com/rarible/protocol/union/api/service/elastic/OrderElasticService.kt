@@ -35,17 +35,17 @@ class OrderElasticService(
         continuation: String?,
         size: Int?,
         sort: OrderSortDto?,
-        status: List<OrderStatusDto>?
+        statuses: List<OrderStatusDto>?
     ): OrdersDto {
         val safeSize = PageSize.ORDER.limit(size)
         val evaluatedBlockchains = router.getEnabledBlockchains(blockchains)
 
         val orderFilter = EsAllOrderFilter(
             blockchains = evaluatedBlockchains,
-            continuation = DateIdContinuation.parse(continuation),
+            cursor = DateIdContinuation.parse(continuation),
             size = safeSize,
             sort = sort ?: OrderSortDto.LAST_UPDATE_DESC,
-            status = status,
+            status = statuses,
         )
         return fetchOrders(orderFilter)
     }

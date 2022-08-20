@@ -14,7 +14,7 @@ interface OrderQueryService {
         continuation: String?,
         size: Int?,
         sort: OrderSortDto?,
-        status: List<OrderStatusDto>?
+        statuses: List<OrderStatusDto>?
     ): OrdersDto
 
     suspend fun getAllSync(

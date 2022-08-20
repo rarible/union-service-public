@@ -12,6 +12,7 @@ import com.rarible.protocol.union.core.model.EsOrdersByMakers
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
+import com.rarible.protocol.union.dto.continuation.DateIdContinuation
 import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
 import com.rarible.protocol.union.enrichment.repository.search.EsOrderRepository
 import com.rarible.protocol.union.search.indexer.test.IntegrationTest
@@ -25,6 +26,9 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery
 import org.springframework.test.context.ContextConfiguration
 import randomOrder
+import randomOrderId
+import java.time.Instant
+import java.time.temporal.ChronoUnit
 
 @IntegrationTest
 @EnableAutoConfiguration
@@ -55,28 +59,136 @@ internal class EsOrderRepositoryFt {
         assertThat(found?.orderId).isEqualTo(esOrder.orderId)
     }
 
-    @OptIn(ExperimentalStdlibApi::class)
     @Test
-    fun `EsAllOrderFilter should be able to search up to 1000 items`(): Unit = runBlocking {
-        // given
-        val orders = List(1000) { randomOrder() }.map { EsOrderConverter.convert(it) }
-        repository.saveAll(orders)
+    fun `EsAllOrderFilter should be able to search up to 1000 orders LAST_UPDATE_ASC`(): Unit = runBlocking {
 
+        val now = Instant.now().truncatedTo(ChronoUnit.SECONDS)
+        // given
+        val orders = List(95) {
+            randomOrder().copy(
+                id = randomOrderId(blockchain = BlockchainDto.ETHEREUM),
+                lastUpdatedAt = now.plusMillis(it.toLong())
+            )
+        }
+            .map { EsOrderConverter.convert(it) }
+        repository.saveAll(orders)
+        val blockchains = listOf(BlockchainDto.ETHEREUM)
+        var cursor: DateIdContinuation? = null
+
+        val pageSize = 10
         // when
-        val query = NativeSearchQuery(BoolQueryBuilder())
-        query.maxResults = 1000
+
+        for (i in 0..8) {
+
+            val actual = repository.findByFilter(
+                EsAllOrderFilter(
+                    blockchains = blockchains,
+                    cursor = cursor,
+                    size = pageSize,
+                    status = null,
+                    sort = OrderSortDto.LAST_UPDATE_ASC
+                )
+            )
+            val last = actual.last()
+
+            cursor = DateIdContinuation(
+                id = last.orderId,
+                date = last.lastUpdatedAt
+            )
+
+            val ids = actual.map { it.orderId }
+
+            // then
+            assertThat(actual).hasSize(pageSize)
+
+            for (j in 0 until pageSize) {
+                assertThat(ids).contains(orders[i * pageSize + j].orderId)
+            }
+        }
+
         val actual = repository.findByFilter(
             EsAllOrderFilter(
-                blockchains = BlockchainDto.values().asList(),
-                size = 1000,
-                continuation = null,
-                sort = OrderSortDto.LAST_UPDATE_DESC,
-                status = OrderStatusDto.values().asList()
+                blockchains = blockchains,
+                cursor = cursor,
+                size = pageSize,
+                status = null,
+                sort = OrderSortDto.LAST_UPDATE_ASC
             )
         )
+        val ids = actual.map { it.orderId }
 
         // then
-        assertThat(actual).hasSize(1000)
+        assertThat(actual).hasSize(5)
+
+        for (j in 0 until 5) {
+            assertThat(ids).contains(orders[9 * pageSize + j].orderId)
+        }
+    }
+
+    @Test
+    fun `EsAllOrderFilter should be able to search up to 1000 orders LAST_UPDATE_DESC`(): Unit = runBlocking {
+
+        val now = Instant.now().truncatedTo(ChronoUnit.SECONDS)
+        // given
+        val orders = List(95) {
+            randomOrder().copy(
+                id = randomOrderId(blockchain = BlockchainDto.ETHEREUM),
+                lastUpdatedAt = now.plusMillis(it.toLong())
+            )
+        }
+            .map { EsOrderConverter.convert(it) }
+        repository.saveAll(orders)
+        val blockchains = listOf(BlockchainDto.ETHEREUM)
+        var cursor: DateIdContinuation? = null
+
+        val pageSize = 10
+        // when
+
+        for (i in 0..8) {
+
+            val actual = repository.findByFilter(
+                EsAllOrderFilter(
+                    blockchains = blockchains,
+                    cursor = cursor,
+                    size = pageSize,
+                    status = null,
+                    sort = OrderSortDto.LAST_UPDATE_DESC
+                )
+            )
+            val last = actual.last()
+
+            cursor = DateIdContinuation(
+                id = last.orderId,
+                date = last.lastUpdatedAt
+            )
+
+            val ids = actual.map { it.orderId }
+
+            // then
+            assertThat(actual).hasSize(pageSize)
+
+            for (j in 0 until pageSize) {
+                assertThat(ids).contains(orders[94 - (i * pageSize + j)].orderId)
+            }
+        }
+
+        val actual = repository.findByFilter(
+            EsAllOrderFilter(
+                blockchains = blockchains,
+                cursor = cursor,
+                size = pageSize,
+                status = null,
+                sort = OrderSortDto.LAST_UPDATE_DESC
+            )
+        )
+        val ids = actual.map { it.orderId }
+
+        // then
+        assertThat(actual).hasSize(5)
+
+        for (j in 4 downTo 0) {
+            assertThat(ids).contains(orders[j].orderId)
+        }
     }
 
     @Test
