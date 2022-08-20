@@ -136,7 +136,7 @@ data class EsOrderBidOrdersByItem(
             add(
                 QueryBuilders.termsQuery(
                     EsOrder::type.name,
-                    EsOrder.Type.SELL.name
+                    EsOrder.Type.BID.name
                 )
             )
 
