@@ -46,6 +46,14 @@ class EsItemQueryCursorServiceIntegrationTest {
     @ValueSource(booleans = [true, false])
     fun `should search with cursor by date`(descending: Boolean) = runBlocking<Unit> {
         // given
+        coEvery {
+            currencyService.getAllCurrencyRates()
+        } returns listOf(
+            CurrencyRate(BlockchainDto.ETHEREUM, "ETHEREUM:0x0000000000000000000000000000000000000000", BigDecimal(1500)),
+            CurrencyRate(BlockchainDto.POLYGON, "POLYGON:0x0000000000000000000000000000000000000000", BigDecimal(150)),
+            CurrencyRate(BlockchainDto.POLYGON,"ETHEREUM:0xfca59cd816ab1ead66534d82bc21e7515ce441cf", BigDecimal(15)),
+            CurrencyRate(BlockchainDto.SOLANA,"SOLANA:So11111111111111111111111111111111111111112", BigDecimal(50)),
+        )
         val sort = if (descending) EsItemSort.LATEST_FIRST else EsItemSort.EARLIEST_FIRST
         val now = nowMillis()
         val first = randomEsItem().copy(
