@@ -31,7 +31,7 @@ object ImxOrderConverter {
     //private val originFees = setOf("ecosystem", "protocol")
     //private val royalties = setOf("royalty")
 
-    private val originFees = setOf("ecosystem", "royalty")
+    private val originFees = setOf("ecosystem", "protocol", "royalty")
     private val royalties = emptySet<String>() // TODO in IMX royalties works as originFees
 
     fun convert(order: ImmutablexOrder, blockchain: BlockchainDto): OrderDto {
