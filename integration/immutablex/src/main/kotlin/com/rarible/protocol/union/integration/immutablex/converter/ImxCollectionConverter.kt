@@ -15,7 +15,7 @@ object ImxCollectionConverter {
 
     private val logger by Logger()
 
-    fun convert(source: ImmutablexCollection, blockchain: BlockchainDto = BlockchainDto.IMMUTABLEX): UnionCollection {
+    fun convert(source: ImmutablexCollection, blockchain: BlockchainDto): UnionCollection {
         try {
             return convertInternal(source, blockchain)
         } catch (e: Exception) {

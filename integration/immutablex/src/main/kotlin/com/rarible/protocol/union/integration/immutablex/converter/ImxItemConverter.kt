@@ -18,14 +18,6 @@ object ImxItemConverter {
 
     private val logger by Logger()
 
-    fun convert(
-        assets: Collection<ImmutablexAsset>,
-        creators: Map<String, String>,
-        blockchain: BlockchainDto
-    ): List<UnionItem> {
-        return assets.map { convert(it, creators[it.itemId], blockchain) }
-    }
-
     fun convert(asset: ImmutablexAsset, creator: String?, blockchain: BlockchainDto): UnionItem {
         return try {
             convertInternal(asset, creator, blockchain)
@@ -42,7 +34,7 @@ object ImxItemConverter {
     ): UnionItem {
         //val deleted = asset.user!! == "${Address.ZERO()}"
         val deleted = asset.isDeleted()
-        val creatorAddress = creator?.let { CreatorDto(UnionAddressConverter.convert(blockchain, creator), 1) }
+        val creatorAddress = toCreator(creator, blockchain)
 
         return UnionItem(
             id = ItemIdDto(blockchain, asset.encodedItemId()),
@@ -66,7 +58,7 @@ object ImxItemConverter {
     }
 
     private fun convertInternal(mint: ImmutablexMint, creator: String?, blockchain: BlockchainDto): UnionItem {
-        val creatorAddress = creator?.let { CreatorDto(UnionAddressConverter.convert(blockchain, creator), 1) }
+        val creatorAddress = toCreator(creator, blockchain)
         return UnionItem(
             id = ItemIdDto(blockchain, mint.token.data.encodedItemId()),
             collection = CollectionIdDto(blockchain, mint.token.data.tokenAddress),
@@ -86,4 +78,10 @@ object ImxItemConverter {
                 value = it.percentage.multiply(BigDecimal(100)).toInt()
             )
         }
+
+    private fun toCreator(creator: String?, blockchain: BlockchainDto) = creator?.let {
+        CreatorDto(
+            UnionAddressConverter.convert(blockchain, creator), 10000
+        )
+    }
 }

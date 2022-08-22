@@ -70,8 +70,16 @@ class ImxActivityEventHandlerTest {
     fun `on mint`() = runBlocking<Unit> {
         val mint = randomImxMint()
 
-        val activity = ImxActivityConverter.convert(mint, emptyMap())
+        val activity = ImxActivityConverter.convert(mint, emptyMap(), blockchain)
         val item = ImxItemConverter.convert(mint, null, blockchain)
+
+        val ownership = ImxOwnershipConverter.toOwnership(
+            blockchain,
+            mint.encodedItemId(),
+            mint.user,
+            null,
+            mint.timestamp
+        )
 
         coEvery { activityService.getTradeOrders(listOf(mint)) } returns emptyMap()
         coEvery { itemService.getItemCreators(listOf(mint.itemId())) } returns emptyMap()
@@ -87,8 +95,7 @@ class ImxActivityEventHandlerTest {
         coVerify(exactly = 1) { itemHandler.onEvent(UnionItemUpdateEvent(item)) }
 
         // Initial ownership created
-        // TODO add detailed test
-        coVerify(exactly = 1) { ownershipHandler.onEvent(any()) }
+        coVerify(exactly = 1) { ownershipHandler.onEvent(UnionOwnershipUpdateEvent(ownership)) }
     }
 
     @Test
@@ -102,7 +109,7 @@ class ImxActivityEventHandlerTest {
         coEvery { itemService.getItemCreators(listOf(itemId)) } returns mapOf(itemId to creator)
 
         val deletedOwnershipId = OwnershipIdDto(blockchain, itemId, user)
-        val activity = ImxActivityConverter.convert(transfer, emptyMap())
+        val activity = ImxActivityConverter.convert(transfer, emptyMap(), blockchain)
         val ownership = ImxOwnershipConverter.toOwnership(
             blockchain,
             itemId,
@@ -136,7 +143,7 @@ class ImxActivityEventHandlerTest {
         coEvery { itemService.getItemCreators(listOf()) } returns emptyMap()
 
         val deletedOwnershipId = OwnershipIdDto(blockchain, itemId, user)
-        val activity = ImxActivityConverter.convert(transfer, emptyMap())
+        val activity = ImxActivityConverter.convert(transfer, emptyMap(), blockchain)
 
         imxActivityEventHandler.handle(listOf(transfer))
 
@@ -155,12 +162,44 @@ class ImxActivityEventHandlerTest {
     @Test
     fun `on trade - swap`() = runBlocking<Unit> {
         val sellOrder = randomImxOrder(sell = randomImxOrderSellSide(), buy = randomImxOrderBuySide())
-        val buyOrder = randomImxOrder(sell = randomImxOrderBuySide(), buy = randomImxOrderSellSide())
+        val sellUser = UnionAddressConverter.convert(blockchain, sellOrder.creator)
+        val sellItemId = sellOrder.sell.data.itemId()
 
-        val trade = randomImxTrade(buyOrderId = buyOrder.orderId, sellOrderId = sellOrder.orderId)
+        val buyOrder = randomImxOrder(sell = sellOrder.buy, buy = sellOrder.sell)
+        val buyUser = UnionAddressConverter.convert(blockchain, buyOrder.creator)
+        val buyItemId = sellOrder.buy.data.itemId()
+
+        val trade = randomImxTrade(
+            sellOrderId = sellOrder.orderId,
+            sellToken = sellOrder.sell.data.tokenAddress!!,
+            sellTokenId = sellOrder.sell.data.tokenId!!,
+            buyOrderId = buyOrder.orderId,
+            buyToken = buyOrder.sell.data.tokenAddress!!,
+            buyTokenId = buyOrder.sell.data.tokenId!!
+        )
+
+        // Deleted/obtained by seller
+        val deletedSellOwnershipId = OwnershipIdDto(blockchain, sellItemId, sellUser)
+        val newSellOwnership = ImxOwnershipConverter.toOwnership(
+            blockchain,
+            buyItemId,
+            sellUser.value,
+            null,
+            trade.timestamp
+        )
+
+        // Deleted/obtained by buyer
+        val deletedBuyOwnershipId = OwnershipIdDto(blockchain, buyItemId, buyUser)
+        val newBuyOwnership = ImxOwnershipConverter.toOwnership(
+            blockchain,
+            sellItemId,
+            buyUser.value,
+            null,
+            trade.timestamp
+        )
 
         val orderMap = mapOf(sellOrder.orderId to sellOrder, buyOrder.orderId to buyOrder)
-        val activity = ImxActivityConverter.convert(trade, orderMap)
+        val activity = ImxActivityConverter.convert(trade, orderMap, blockchain)
 
         coEvery { itemService.getItemCreators(listOf(trade.make.itemId()!!, trade.take.itemId()!!)) } returns emptyMap()
         coEvery { activityService.getTradeOrders(listOf(trade)) } returns orderMap
@@ -173,8 +212,11 @@ class ImxActivityEventHandlerTest {
 
         // Nothing else emitted for items
         coVerify(exactly = 0) { itemHandler.onEvent(any()) }
+
         // 2 deletes and 2 updates on swap
-        // TODO make test more detailed
-        coVerify(exactly = 4) { ownershipHandler.onEvent(any()) }
+        coVerify(exactly = 1) { ownershipHandler.onEvent(UnionOwnershipDeleteEvent(deletedSellOwnershipId)) }
+        coVerify(exactly = 1) { ownershipHandler.onEvent(UnionOwnershipDeleteEvent(deletedBuyOwnershipId)) }
+        coVerify(exactly = 1) { ownershipHandler.onEvent(UnionOwnershipUpdateEvent(newSellOwnership)) }
+        coVerify(exactly = 1) { ownershipHandler.onEvent(UnionOwnershipUpdateEvent(newBuyOwnership)) }
     }
 }

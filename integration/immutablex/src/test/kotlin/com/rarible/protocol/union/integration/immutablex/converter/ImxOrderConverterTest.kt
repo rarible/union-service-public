@@ -11,6 +11,7 @@ import com.rarible.protocol.union.integration.data.randomImxOrder
 import com.rarible.protocol.union.integration.data.randomImxOrderBuySide
 import com.rarible.protocol.union.integration.data.randomImxOrderFee
 import com.rarible.protocol.union.integration.data.randomImxOrderSellSide
+import com.rarible.protocol.union.integration.data.randomImxOrderSideData
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
@@ -106,13 +107,12 @@ class ImxOrderConverterTest {
 
     @Test
     fun `convert asset - eth`() {
-        val order = randomImxOrder()
         val side = randomImxOrderBuySide(
-            quantityWithFees = BigInteger("1000"),
+            quantity = BigInteger("1000"),
             decimals = 1
         )
 
-        val asset = ImxOrderConverter.toAsset(order, side, BlockchainDto.IMMUTABLEX)
+        val asset = ImxOrderConverter.toAsset(side, BlockchainDto.IMMUTABLEX)
 
         assertThat(asset.type).isInstanceOf(EthEthereumAssetTypeDto::class.java)
         assertThat(asset.value).isEqualTo(BigDecimal("100.0"))
@@ -120,14 +120,13 @@ class ImxOrderConverterTest {
 
     @Test
     fun `convert asset - erc20`() {
-        val order = randomImxOrder()
         val side = randomImxOrderBuySide(
-            quantityWithFees = BigInteger("1000"),
+            quantity = BigInteger("1000"),
             decimals = 0,
             type = "ERC20"
         )
 
-        val asset = ImxOrderConverter.toAsset(order, side, BlockchainDto.IMMUTABLEX)
+        val asset = ImxOrderConverter.toAsset(side, BlockchainDto.IMMUTABLEX)
         val type = asset.type as EthErc20AssetTypeDto
 
         assertThat(type.contract.value).isEqualTo(side.data.tokenAddress)
@@ -136,10 +135,22 @@ class ImxOrderConverterTest {
 
     @Test
     fun `convert asset - erc721`() {
-        val order = randomImxOrder()
         val side = randomImxOrderSellSide()
 
-        val asset = ImxOrderConverter.toAsset(order, side, BlockchainDto.IMMUTABLEX)
+        val asset = ImxOrderConverter.toAsset(side, BlockchainDto.IMMUTABLEX)
+        val type = asset.type as EthErc721AssetTypeDto
+
+        assertThat(type.contract.value).isEqualTo(side.data.tokenAddress)
+        assertThat(type.tokenId).isEqualTo(side.data.tokenId)
+        assertThat(asset.value).isEqualTo(BigDecimal.ONE)
+    }
+
+    @Test
+    fun `convert asset - erc721 - quantity is missing`() {
+        val data = randomImxOrderSideData(quantity = "")
+        val side = randomImxOrderSellSide().copy(data = data)
+
+        val asset = ImxOrderConverter.toAsset(side, BlockchainDto.IMMUTABLEX)
         val type = asset.type as EthErc721AssetTypeDto
 
         assertThat(type.contract.value).isEqualTo(side.data.tokenAddress)

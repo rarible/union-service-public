@@ -41,8 +41,8 @@ object ImxOrderConverter {
     }
 
     private fun convertInternal(order: ImmutablexOrder, blockchain: BlockchainDto): OrderDto {
-        val make: AssetDto = toAsset(order, order.sell, blockchain)
-        val take: AssetDto = toAsset(order, order.buy, blockchain)
+        val make: AssetDto = toAsset(order.sell, blockchain)
+        val take: AssetDto = toAsset(order.buy, blockchain)
 
         val (quantity, makePrice, takePrice) = if (make.type.ext.isNft) {
             Triple(getQuantityWithFees(order.buy.data), take.value, null)
@@ -53,7 +53,7 @@ object ImxOrderConverter {
         val status = convertStatus(order)
 
         val fill = if (status == OrderStatusDto.FILLED) BigDecimal.ONE else BigDecimal.ZERO
-        val makeStock = if (status == OrderStatusDto.FILLED) BigDecimal.ZERO else make.value
+        val makeStock = if (status == OrderStatusDto.FILLED) BigDecimal.ZERO else normalizeQuantity(order.sell)
         return OrderDto(
             id = OrderIdDto(blockchain, "${order.orderId}"),
             make = make,
@@ -114,9 +114,8 @@ object ImxOrderConverter {
         else -> OrderStatusDto.HISTORICAL
     }
 
-    fun toAsset(order: ImmutablexOrder, side: ImmutablexOrderSide, blockchain: BlockchainDto): AssetDto {
+    fun toAsset(side: ImmutablexOrderSide, blockchain: BlockchainDto): AssetDto {
         // In the Asset we should specify price WITHOUT fees
-        val totalFees = order.fees?.sumOf { it.amount }?.toBigInteger() ?: BigInteger.ZERO
         return when (side.type) {
             "ERC721" -> {
                 val tokenId = side.data.encodedTokenId() ?: throw ImxDataException("Token ID not specified in asset")
@@ -125,24 +124,24 @@ object ImxOrderConverter {
             }
             "ETH" -> {
                 val type = EthEthereumAssetTypeDto(blockchain)
-                AssetDto(type, normalizeQuantity(side, totalFees))
+                AssetDto(type, normalizeQuantity(side))
             }
             "ERC20" -> {
                 val contract = ContractAddressConverter.convert(blockchain, side.data.tokenAddress!!)
                 val type = EthErc20AssetTypeDto(contract)
-                AssetDto(type, normalizeQuantity(side, totalFees))
+                AssetDto(type, normalizeQuantity(side))
             }
             else -> throw IllegalStateException("Unsupported asset type: ${side.type}")
         }
     }
 
-    private fun normalizeQuantity(side: ImmutablexOrderSide, totalFees: BigInteger): BigDecimal {
-        val quantity = side.data.quantityWithFees
+    private fun normalizeQuantity(side: ImmutablexOrderSide): BigDecimal {
+        val quantity = side.data.quantity
         val decimals = side.data.decimals
         if (quantity.isNullOrBlank()) {
             throw ImxDataException("Quantity is not specified in Order")
         } else {
-            return quantity.toBigInteger().minus(totalFees).toBigDecimal(decimals)
+            return quantity.toBigInteger().toBigDecimal(decimals)
         }
     }
 
