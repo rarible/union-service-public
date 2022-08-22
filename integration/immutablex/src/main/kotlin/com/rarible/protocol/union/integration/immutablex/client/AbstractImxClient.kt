@@ -1,9 +1,11 @@
 package com.rarible.protocol.union.integration.immutablex.client
 
+import com.rarible.core.client.WebClientResponseProxyException
 import com.rarible.core.common.mapAsync
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.reactor.awaitSingle
 import org.springframework.core.ParameterizedTypeReference
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientResponseException
@@ -12,16 +14,19 @@ abstract class AbstractImxClient(
     protected val webClient: WebClient
 ) {
 
-    protected suspend inline fun <reified T> getByUri(uri: String): T {
-        return webClient.get().uri(uri)
+    protected suspend inline fun <reified T> getByUri(uri: String): T = wrapException {
+        webClient.get().uri(uri)
             .accept(MediaType.APPLICATION_JSON)
             .retrieve()
             .toEntity(T::class.java)
             .awaitSingle().body!!
     }
 
-    protected suspend inline fun <T> getByUri(uri: String, bodyTypeReference: ParameterizedTypeReference<T>): T {
-        return webClient.get().uri(uri)
+    protected suspend inline fun <T> getByUri(
+        uri: String,
+        bodyTypeReference: ParameterizedTypeReference<T>
+    ) = wrapException {
+        webClient.get().uri(uri)
             .accept(MediaType.APPLICATION_JSON)
             .retrieve()
             .toEntity(bodyTypeReference)
@@ -45,6 +50,12 @@ abstract class AbstractImxClient(
             call()
         } catch (e: WebClientResponseException.NotFound) {
             null
+        } catch (e: WebClientResponseProxyException) {
+            if (e.statusCode == HttpStatus.NOT_FOUND) {
+                null
+            } else {
+                throw e
+            }
         }
     }
 

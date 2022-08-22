@@ -11,8 +11,6 @@ class ImxCollectionClient(
     webClient
 ) {
 
-    private val collectionRequestChunkSize = 16
-
     suspend fun getById(collectionAddress: String): ImmutablexCollection {
         val uri = ImxCollectionQueryBuilder.getByIdPath(collectionAddress)
         return getByUri(uri)
