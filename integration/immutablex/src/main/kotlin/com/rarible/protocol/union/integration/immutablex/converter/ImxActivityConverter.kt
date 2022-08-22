@@ -94,9 +94,9 @@ object ImxActivityConverter {
             val takeOrder = orders[activity.take.orderId]
                 ?: throw ImxDataException("$blockchain take Order ${activity.take.orderId} not found")
 
-            val makeAsset = ImxOrderConverter.toAsset(makeOrder.sell, blockchain)
+            val makeAsset = ImxOrderConverter.toAsset(makeOrder, makeOrder.sell, blockchain)
             val makeType = makeAsset.type.ext
-            val takeAsset = ImxOrderConverter.toAsset(takeOrder.sell, blockchain)
+            val takeAsset = ImxOrderConverter.toAsset(takeOrder, takeOrder.sell, blockchain)
             val takeType = takeAsset.type.ext
 
             val maker = UnionAddressConverter.convert(blockchain, makeOrder.creator)
