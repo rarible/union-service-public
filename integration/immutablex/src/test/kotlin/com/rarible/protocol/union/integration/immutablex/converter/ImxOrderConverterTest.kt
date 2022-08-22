@@ -88,7 +88,7 @@ class ImxOrderConverterTest {
         val converted = ImxOrderConverter.convert(imxOrder, BlockchainDto.IMMUTABLEX)
         val data = converted.data as ImmutablexOrderDataV1Dto
 
-        assertThat(data.payouts[0].value).isEqualTo(500)
+        assertThat(data.originFees[0].value).isEqualTo(500)
     }
 
     @Test
@@ -96,13 +96,13 @@ class ImxOrderConverterTest {
         val imxOrder = randomImxOrder().copy(
             sell = randomImxOrderBuySide(quantity = BigInteger("100000"), quantityWithFees = BigInteger("105000")),
             buy = randomImxOrderSellSide(),
-            fees = listOf(randomImxOrderFee(type = "royalty", amount = BigDecimal("5000")))
+            fees = listOf(randomImxOrderFee(type = "ecosystem", amount = BigDecimal("5000")))
         )
 
         val converted = ImxOrderConverter.convert(imxOrder, BlockchainDto.IMMUTABLEX)
         val data = converted.data as ImmutablexOrderDataV1Dto
 
-        assertThat(data.payouts[0].value).isEqualTo(500)
+        assertThat(data.originFees[0].value).isEqualTo(500)
     }
 
     @Test
