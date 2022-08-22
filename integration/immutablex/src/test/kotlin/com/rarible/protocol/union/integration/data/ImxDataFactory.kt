@@ -9,6 +9,7 @@ import com.rarible.core.test.data.randomString
 import com.rarible.protocol.union.integration.immutablex.client.FeeToken
 import com.rarible.protocol.union.integration.immutablex.client.FeeTokenData
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexAsset
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexCollection
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexCollectionShort
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexDataProperties
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexMint
@@ -40,7 +41,7 @@ fun randomImxAsset(
         description = "Description: " + randomString(),
         fees = emptyList(),
         id = tokenId,
-        imageUrl = randomString(),
+        imageUrl = "http://localhost:8080/image/${randomString()}",
         metadata = mapOf("trait" to randomString()),
         name = "Name: " + randomString(),
         status = "imx",
@@ -56,6 +57,21 @@ fun randomImxCollectionShort(): ImmutablexCollectionShort {
     return ImmutablexCollectionShort(
         iconUrl = "http://localhost:8080/${randomString()}",
         name = randomString()
+    )
+}
+
+fun randomImxCollection(
+    projectOwnerAddress: String? = randomAddress().prefixed(),
+): ImmutablexCollection {
+    return ImmutablexCollection(
+        address = randomAddress().prefixed(),
+        name = randomString(),
+        description = randomString(),
+        iconUrl = "http://localhost:8080/icon/${randomString()}",
+        collectionImageUrl = "http://localhost:8080/image/${randomString()}",
+        projectId = randomLong(),
+        projectOwnerAddress = projectOwnerAddress,
+        metadataApiUrl = "http://localhost:8080/meta/collection/${randomString()}",
     )
 }
 

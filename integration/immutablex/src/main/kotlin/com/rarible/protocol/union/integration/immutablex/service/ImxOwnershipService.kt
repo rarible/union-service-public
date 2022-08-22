@@ -50,7 +50,7 @@ class ImxOwnershipService(
     override suspend fun getOwnershipsByIds(ownershipIds: List<String>): List<UnionOwnership> {
         val itemIds = ownershipIds.map { TokenIdDecoder.decodeItemId(it.substringBeforeLast(":")) }.toSet()
 
-        val creators = coroutineScope { async { itemService.getItemCreators(itemIds) } }
+        val creatorsDeferred = coroutineScope { async { itemService.getItemCreators(itemIds) } }
         val assets = assetClient.getByIds(itemIds)
 
         val ownershipIdsSet = HashSet(ownershipIds)
@@ -58,7 +58,8 @@ class ImxOwnershipService(
             ownershipIdsSet.contains("${it.itemId}:${it.user}")
         }
 
-        return ImxOwnershipConverter.convert(found, creators.await(), blockchain)
+        val creators = creatorsDeferred.await()
+        return assets.map { ImxOwnershipConverter.convert(it, creators[it.itemId], blockchain) }
     }
 
     override suspend fun getOwnershipsAll(continuation: String?, size: Int): Slice<UnionOwnership> {
@@ -85,7 +86,7 @@ class ImxOwnershipService(
 
     private suspend fun convert(assets: Collection<ImmutablexAsset>): List<UnionOwnership> {
         val creators = itemService.getItemCreators(assets.map { it.itemId })
-        return ImxOwnershipConverter.convert(assets, creators, blockchain)
+        return assets.map { ImxOwnershipConverter.convert(it, creators[it.itemId], blockchain) }
     }
 
     private fun toItemContinuation(continuation: String?): String? {

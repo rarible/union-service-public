@@ -34,7 +34,7 @@ object ImxActivityConverter {
     fun convert(
         activity: ImmutablexEvent,
         orders: Map<Long, ImmutablexOrder>,
-        blockchain: BlockchainDto = BlockchainDto.IMMUTABLEX
+        blockchain: BlockchainDto
     ): ActivityDto {
         try {
             return convertInternal(activity, orders, blockchain)
@@ -45,7 +45,9 @@ object ImxActivityConverter {
     }
 
     private fun convertInternal(
-        activity: ImmutablexEvent, orders: Map<Long, ImmutablexOrder>, blockchain: BlockchainDto
+        activity: ImmutablexEvent,
+        orders: Map<Long, ImmutablexOrder>,
+        blockchain: BlockchainDto
     ) = when (activity) {
         is ImmutablexMint -> MintActivityDto(
             id = activity.activityId,
@@ -94,9 +96,9 @@ object ImxActivityConverter {
             val takeOrder = orders[activity.take.orderId]
                 ?: throw ImxDataException("$blockchain take Order ${activity.take.orderId} not found")
 
-            val makeAsset = ImxOrderConverter.toAsset(makeOrder, makeOrder.sell, blockchain)
+            val makeAsset = ImxOrderConverter.toAsset(makeOrder.sell, blockchain)
             val makeType = makeAsset.type.ext
-            val takeAsset = ImxOrderConverter.toAsset(takeOrder, takeOrder.sell, blockchain)
+            val takeAsset = ImxOrderConverter.toAsset(takeOrder.sell, blockchain)
             val takeType = takeAsset.type.ext
 
             val maker = UnionAddressConverter.convert(blockchain, makeOrder.creator)

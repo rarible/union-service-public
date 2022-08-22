@@ -17,14 +17,6 @@ object ImxOwnershipConverter {
 
     private val logger by Logger()
 
-    fun convert(
-        assets: Collection<ImmutablexAsset>,
-        creators: Map<String, String>,
-        blockchain: BlockchainDto
-    ): List<UnionOwnership> {
-        return assets.map { convert(it, creators[it.itemId], blockchain) }
-    }
-
     fun convert(asset: ImmutablexAsset, creator: String?, blockchain: BlockchainDto): UnionOwnership {
         return try {
             convertInternal(asset, creator, blockchain)
@@ -42,8 +34,9 @@ object ImxOwnershipConverter {
         return toOwnership(
             blockchain = blockchain,
             itemId = asset.encodedItemId(),
-            owner = asset.user!!,
+            owner = asset.user ?: throw ImxDataException("User is not specified in the Item"),
             creator = creator,
+            // TODO That's not correct, originally
             createdAt = asset.updatedAt,
             updatedAt = asset.updatedAt
         )
@@ -67,7 +60,7 @@ object ImxOwnershipConverter {
             createdAt = createdAt ?: nowMillis(),
             lastUpdatedAt = updatedAt ?: createdAt ?: nowMillis(),
             lazyValue = BigInteger.ZERO,
-            creators = listOfNotNull(creatorAddress?.let { CreatorDto(creatorAddress, 1) })
+            creators = listOfNotNull(creatorAddress?.let { CreatorDto(creatorAddress, 10000) })
         )
     }
 }

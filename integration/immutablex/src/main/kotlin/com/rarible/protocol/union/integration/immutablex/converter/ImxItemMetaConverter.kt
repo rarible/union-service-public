@@ -1,8 +1,10 @@
 package com.rarible.protocol.union.integration.immutablex.converter
 
 import com.rarible.core.logging.Logger
+import com.rarible.protocol.union.core.model.UnionImageProperties
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.UnionMetaContent
+import com.rarible.protocol.union.core.model.UnionVideoProperties
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.MetaAttributeDto
 import com.rarible.protocol.union.dto.MetaContentDto
@@ -12,8 +14,11 @@ object ImxItemMetaConverter {
 
     private val logger by Logger()
 
-    private val contentKeys = setOf("image_url", "image", "animation_url", "youtube_url")
+    private val videoContentKeys = setOf("animation_url", "youtube_url")
     private val errorKeys = setOf("status", "message")
+    private val duplicatedImageKeys = setOf("image_url", "image")
+
+    private val attributesExclusions = videoContentKeys + errorKeys + duplicatedImageKeys
 
     fun convert(asset: ImmutablexAsset, blockchain: BlockchainDto): UnionMeta {
         return try {
@@ -31,20 +36,39 @@ object ImxItemMetaConverter {
             name = assetName,
             description = asset.description,
             createdAt = asset.createdAt,
-            content = asset.metadata?.filterKeys { it in contentKeys }?.mapNotNull {
-                val url = it.value as String? ?: return@mapNotNull null
-                UnionMetaContent(
-                    url = url,
-                    representation = MetaContentDto.Representation.ORIGINAL
-                )
-            } ?: emptyList(),
-            attributes = asset.metadata?.filterKeys { it !in contentKeys && it !in errorKeys }?.map {
+            content = getVideoContent(asset) + getImageContent(asset),
+            attributes = asset.metadata?.filterKeys { it !in attributesExclusions }?.map {
                 MetaAttributeDto(
                     key = it.key,
                     value = "${it.value}"
                 )
             } ?: emptyList(),
-            restrictions = emptyList()
+            restrictions = emptyList(),
+            originalMetaUri = asset.uri
+        )
+    }
+
+    private fun getVideoContent(asset: ImmutablexAsset): List<UnionMetaContent> {
+        return asset.metadata?.filterKeys { it in videoContentKeys }?.mapNotNull {
+            val url = it.value as String? ?: return@mapNotNull null
+            UnionMetaContent(
+                url = url,
+                // TODO we could get here duplicated ORIGINAL video
+                representation = MetaContentDto.Representation.ORIGINAL,
+                properties = UnionVideoProperties()
+            )
+        } ?: emptyList()
+    }
+
+    // Since there can be duplicates as image/image_url, it's safer to take root field imageUrl
+    private fun getImageContent(asset: ImmutablexAsset): List<UnionMetaContent> {
+        val imageUrl = asset.imageUrl ?: return emptyList()
+        return listOf(
+            UnionMetaContent(
+                url = imageUrl,
+                representation = MetaContentDto.Representation.ORIGINAL,
+                properties = UnionImageProperties()
+            )
         )
     }
 }
