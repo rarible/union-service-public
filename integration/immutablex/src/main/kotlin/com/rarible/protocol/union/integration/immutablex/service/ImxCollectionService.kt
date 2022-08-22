@@ -27,7 +27,7 @@ class ImxCollectionService(
 
     override suspend fun getCollectionById(collectionId: String): UnionCollection {
         val result = client.getById(collectionId)
-        return ImxCollectionConverter.convert(result)
+        return ImxCollectionConverter.convert(result, blockchain)
     }
 
     override suspend fun getCollectionsByIds(ids: List<String>): List<UnionCollection> {

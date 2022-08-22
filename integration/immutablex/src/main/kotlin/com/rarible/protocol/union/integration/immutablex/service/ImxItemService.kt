@@ -148,6 +148,6 @@ class ImxItemService(
     }
 
     private fun convert(assets: Collection<ImmutablexAsset>, creators: Map<String, String>): List<UnionItem> {
-        return ImxItemConverter.convert(assets, creators, blockchain)
+        return assets.map { ImxItemConverter.convert(it, creators[it.itemId], blockchain) }
     }
 }

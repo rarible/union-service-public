@@ -319,7 +319,7 @@ class ImxActivityService(
 
     suspend fun convert(activities: List<ImmutablexEvent>): List<ActivityDto> {
         val orders = getTradeOrders(activities)
-        return activities.map { ImxActivityConverter.convert(it, orders) }
+        return activities.map { ImxActivityConverter.convert(it, orders, blockchain) }
     }
 
     object ByLastUpdatedAndIdDesc : ContinuationFactory<ImmutablexEvent, DateIdContinuation> {
