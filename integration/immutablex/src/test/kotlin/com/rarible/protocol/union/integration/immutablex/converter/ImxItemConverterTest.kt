@@ -7,10 +7,12 @@ import com.rarible.protocol.union.integration.data.randomImxAsset
 import com.rarible.protocol.union.integration.data.randomImxCollectionShort
 import com.rarible.protocol.union.integration.data.randomImxMint
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexAsset
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexFee
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
+import java.math.BigDecimal
 import java.math.BigInteger
 
 class ImxItemConverterTest {
@@ -122,6 +124,19 @@ class ImxItemConverterTest {
         // Nothing to do, we can just use updatedAt here
         assertThat(item.mintedAt).isEqualTo(imxItem.updatedAt)
         assertThat(item.lastUpdatedAt).isEqualTo(imxItem.updatedAt)
+    }
+
+    @Test
+    fun `convert royalty`() {
+        val royalty = ImmutablexFee(randomAddress().prefixed(), BigDecimal("5"), "royalty")
+        val fee = ImmutablexFee(randomAddress().prefixed(), BigDecimal("10"), "protocol")
+        val asset = randomImxAsset().copy(fees = listOf(royalty, fee))
+
+        val fees = ImxItemConverter.convertToRoyaltyDto(asset, blockchain)
+
+        assertThat(fees).hasSize(1)
+        assertThat(fees[0].value).isEqualTo(500)
+        assertThat(fees[0].account.value).isEqualTo(royalty.address)
     }
 
 }
