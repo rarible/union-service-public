@@ -18,23 +18,22 @@
     },
     "name": {
       "type": "text",
-      "fields": {
-        "english": {
-          "type": "text",
-          "analyzer": "english"
-        },
-        "keyword": {
-          "type": "keyword"
-        }
+      "analyzer": "stemmer_analyzer",
+      "search_analyzer": "stemmer_stop_analyzer",
+      "search_quote_analyzer": "stemmer_analyzer",
+      "index_prefixes": {
+        "min_chars" : 1,
+        "max_chars" : 10
       }
     },
     "description": {
       "type": "text",
-      "fields": {
-        "english": {
-          "type": "text",
-          "analyzer": "english"
-        }
+      "analyzer": "stemmer_analyzer",
+      "search_analyzer": "stemmer_stop_analyzer",
+      "search_quote_analyzer": "stemmer_analyzer",
+      "index_prefixes": {
+        "min_chars" : 1,
+        "max_chars" : 10
       }
     },
     "owner": {
