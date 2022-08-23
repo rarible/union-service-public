@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.core.elasticsearch.bootstrap
 
 import com.rarible.core.logging.Logger
+import com.rarible.protocol.union.core.elasticsearch.EsHelper
 import com.rarible.protocol.union.core.elasticsearch.EsHelper.createAlias
 import com.rarible.protocol.union.core.elasticsearch.EsHelper.createIndex
 import com.rarible.protocol.union.core.elasticsearch.EsHelper.existsIndex
@@ -163,10 +164,12 @@ class ElasticsearchBootstrapper(
                 if (reindexSchedulingService.checkReindexInProgress(definition)) {
                     logger.info("Reindexing tasks for entity ${definition.entity} was started")
                 } else {
-                    reindexSchedulingService.stopTasksIfExists(definition)
                     val indexVersion = definition.getVersion(realIndexName)
                     val newIndexName = definition.indexName(minorVersion = indexVersion + 1)
+                    reindexSchedulingService.stopTasksIfExists(definition)
                     recreateIndex(realIndexName, newIndexName, definition)
+                    logger.info("Submit reindex task ${definition.entity} from $realIndexName to $newIndexName")
+                    EsHelper.submitReindexTask(restHighLevelClient, realIndexName, newIndexName)
                 }
             }
             .toList()

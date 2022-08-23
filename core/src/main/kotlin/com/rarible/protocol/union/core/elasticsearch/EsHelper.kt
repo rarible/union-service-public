@@ -5,9 +5,12 @@ import com.rarible.protocol.union.core.model.elasticsearch.EntityDefinitionExten
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.elasticsearch.action.admin.indices.alias.IndicesAliasesRequest
+import org.elasticsearch.client.RequestOptions
+import org.elasticsearch.client.RestHighLevelClient
 import org.elasticsearch.client.indices.CreateIndexRequest
 import org.elasticsearch.client.indices.GetIndexRequest
 import org.elasticsearch.common.xcontent.XContentType
+import org.elasticsearch.index.reindex.ReindexRequest
 import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations
 
 object EsHelper {
@@ -105,6 +108,15 @@ object EsHelper {
     suspend fun getMapping(esOperations: ReactiveElasticsearchOperations, indexName: String): String? =
         esOperations.execute { it.indices().getIndex(GetIndexRequest(indexName)) }.awaitFirst()
             .mappings[indexName]?.source()?.string()
+
+    fun submitReindexTask(restHighLevelClient: RestHighLevelClient, oldIndexName: String, indexName: String, ){
+        restHighLevelClient.submitReindexTask(
+            ReindexRequest()
+                .setSourceIndices(oldIndexName)
+                .setDestIndex(indexName),
+            RequestOptions.DEFAULT
+        )
+    }
 
     private suspend fun getAliasesOfIndex(
         reactiveElasticSearchOperations: ReactiveElasticsearchOperations, indexName: String?
