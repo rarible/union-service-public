@@ -160,10 +160,14 @@ class ElasticsearchBootstrapper(
             .asFlow()
             .catch {
                 logger.info("Failed to update index ${definition.entity} mapping. Recreating index", it)
-                reindexSchedulingService.stopTasksIfExists(definition)
-                val indexVersion = definition.getVersion(realIndexName)
-                val newIndexName = definition.indexName(minorVersion = indexVersion + 1)
-                recreateIndex(realIndexName, newIndexName, definition)
+                if (reindexSchedulingService.checkReindexInProgress(definition)) {
+                    logger.info("Reindexing tasks for entity ${definition.entity} was started")
+                } else {
+                    reindexSchedulingService.stopTasksIfExists(definition)
+                    val indexVersion = definition.getVersion(realIndexName)
+                    val newIndexName = definition.indexName(minorVersion = indexVersion + 1)
+                    recreateIndex(realIndexName, newIndexName, definition)
+                }
             }
             .toList()
     }
