@@ -17,12 +17,10 @@ import com.rarible.protocol.union.core.model.elasticsearch.EntityDefinitionExten
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.asFlow
-import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.runBlocking
 import org.elasticsearch.action.admin.cluster.settings.ClusterUpdateSettingsRequest
 import org.elasticsearch.client.RequestOptions
 import org.elasticsearch.client.RestHighLevelClient
-import org.elasticsearch.client.indices.GetIndexRequest
 import org.elasticsearch.client.indices.PutMappingRequest
 import org.elasticsearch.common.settings.Settings
 import org.elasticsearch.common.xcontent.XContentType
@@ -72,22 +70,6 @@ class ElasticsearchBootstrapper(
         logger.info("Setting up cluster with persistent settings: $persistentSettings")
         restHighLevelClient.cluster().putSettings(request, RequestOptions.DEFAULT)
         logger.info("Settings applied")
-    }
-
-    private suspend fun checkWriteIndexIsCreated(writeAlias: String): Boolean {
-        val exists = esOperations.execute { it.indices().existsIndex(GetIndexRequest(writeAlias)) }.awaitFirst()
-
-        if (!exists) return false
-
-        val currentWriteIndices =
-            esOperations.execute { it.indices().getIndex(GetIndexRequest(writeAlias)) }
-                .awaitFirst()
-                .aliases.keys
-        if (currentWriteIndices.size > 1) {
-            logger.info("Reindex already in progress for index $writeAlias")
-            return true
-        }
-        return false
     }
 
     private suspend fun updateIndexMetadata(definition: EntityDefinitionExtended) {
@@ -177,7 +159,8 @@ class ElasticsearchBootstrapper(
         }
             .asFlow()
             .catch {
-                logger.info("Failed to update index ${definition.entity} mapping. Recreating index")
+                logger.info("Failed to update index ${definition.entity} mapping. Recreating index", it)
+                reindexSchedulingService.stopTasksIfExists(definition)
                 val indexVersion = definition.getVersion(realIndexName)
                 val newIndexName = definition.indexName(minorVersion = indexVersion + 1)
                 recreateIndex(realIndexName, newIndexName, definition)
