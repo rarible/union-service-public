@@ -18,6 +18,8 @@ object ImxItemConverter {
 
     private val logger by Logger()
 
+    private val royaltyTypes = setOf("royalty")
+
     fun convert(asset: ImmutablexAsset, creator: String?, blockchain: BlockchainDto): UnionItem {
         return try {
             convertInternal(asset, creator, blockchain)
@@ -72,7 +74,7 @@ object ImxItemConverter {
     }
 
     fun convertToRoyaltyDto(asset: ImmutablexAsset, blockchain: BlockchainDto): List<RoyaltyDto> =
-        asset.fees.map {
+        asset.fees.filter { royaltyTypes.contains(it.type) }.map {
             RoyaltyDto(
                 account = UnionAddressConverter.convert(blockchain, it.address),
                 value = it.percentage.multiply(BigDecimal(100)).toInt()
