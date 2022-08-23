@@ -160,7 +160,7 @@ class ElasticsearchBootstrapper(
         }
             .asFlow()
             .catch {
-                logger.info("Failed to update index ${definition.entity} mapping. Recreating index", it)
+                logger.error("Failed to update index ${definition.entity} mapping. Recreating index", it)
                 if (reindexSchedulingService.checkReindexInProgress(definition)) {
                     logger.info("Reindexing tasks for entity ${definition.entity} was started")
                 } else {
