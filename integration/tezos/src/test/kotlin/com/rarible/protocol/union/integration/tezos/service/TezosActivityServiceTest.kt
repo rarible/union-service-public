@@ -40,67 +40,20 @@ class TezosActivityServiceTest {
     private val activityOrderControllerApi: OrderActivityControllerApi = mockk()
     private val currencyService: CurrencyService = CurrencyMock.currencyServiceMock
     private val tezosActivityConverter: TezosActivityConverter = TezosActivityConverter(currencyService)
-    private val pgService: TezosPgActivityService = mockk()
     private val testDipDupOrderActivityClient: OrderActivityClient = mockk()
     private val dipdupOrderActivityService: DipdupOrderActivityService = DipdupOrderActivityServiceImpl(
         testDipDupOrderActivityClient, DipDupActivityConverter(currencyService)
     )
     private val tzktTokenClient: TokenActivityClient = mockk()
     private val tzktItemActivityService: TzktItemActivityService = TzktItemActivityServiceImpl(tzktTokenClient)
-    private val tezosIntegrationProperties = TezosIntegrationProperties(
-        enabled = true,
-        consumer = null,
-        client = null,
-        daemon = DaemonWorkerProperties(),
-        auctionContracts = null,
-        origins = emptyMap(),
-        showLegacyOrders = true,
-        showLegacyActivity = true
-    )
 
     private val service = TezosActivityService(
         activityItemControllerApi,
         activityOrderControllerApi,
         tezosActivityConverter,
-        pgService,
         dipdupOrderActivityService,
-        tzktItemActivityService,
-        tezosIntegrationProperties
+        tzktItemActivityService
     )
-
-    @Test
-    fun `should get legacy activity plus dipdup,tzkt activitis by ids`() = runBlocking<Unit> {
-        val legacyActivity = TypedActivityId(
-            id = "BKpJX4yv2JsxezPcvgnavyjJZBZVbQ5hicMwQLEkxv9516Qz27N_46",
-            type = ActivityTypeDto.LIST
-        )
-        val orderActivity = TypedActivityId(
-            id = UUID.randomUUID().toString(),
-            type = ActivityTypeDto.LIST
-        )
-        val itemActivity = TypedActivityId(
-            id = randomInt().toString(),
-            type = ActivityTypeDto.MINT
-        )
-
-        coEvery { pgService.orderActivities(listOf(legacyActivity.id)) } returns OrderActivitiesDto(
-            items = listOf(randomTezosOrderListActivity()),
-            continuation = null
-        )
-        coEvery { testDipDupOrderActivityClient.getActivitiesByIds(listOf(orderActivity.id)) } returns listOf(
-            randomDipDupActivityOrderListEvent(orderActivity.id)
-        )
-        coEvery { tzktTokenClient.getActivitiesByIds(listOf(itemActivity.id)) } returns listOf(
-            randomTzktItemMintActivity(itemActivity.id)
-        )
-        val types = listOf(
-            legacyActivity,
-            orderActivity,
-            itemActivity
-        )
-        val activities = service.getActivitiesByIds(types)
-        Assertions.assertThat(activities).hasSize(3)
-    }
 
     @Test
     fun `should return all dipdup,tzkt activities`() = runBlocking<Unit> {
@@ -112,7 +65,7 @@ class TezosActivityServiceTest {
         coEvery {
             testDipDupOrderActivityClient.getActivitiesAll(
                 listOf(DipDupActivityType.LIST),
-                9,
+                10,
                 null,
                 false
             )
@@ -120,13 +73,13 @@ class TezosActivityServiceTest {
             continuation = null,
             activities = listOf(randomDipDupActivityOrderListEvent(randomString()))
         )
-        coEvery { tzktTokenClient.getActivitiesAll(listOf(ActivityType.MINT), 9, null, false) } returns Page(
+        coEvery { tzktTokenClient.getActivitiesAll(listOf(ActivityType.MINT), 10, null, false) } returns Page(
             continuation = null,
             items = listOf(randomTzktItemMintActivity(randomInt().toString()))
         )
 
         val activities = service.getAllActivities(listOf(ActivityTypeDto.MINT, ActivityTypeDto.LIST), null, 10, null)
-        Assertions.assertThat(activities.entities).hasSize(3)
+        Assertions.assertThat(activities.entities).hasSize(2)
     }
 
 }

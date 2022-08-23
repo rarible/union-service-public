@@ -17,6 +17,7 @@ data class DipDupIntegrationProperties(
     val chainId: String,
     val sigChecker: String,
     val knownAddresses: KnownAddresses?,
+    val marketplaces: Marketplaces = Marketplaces(),
     val consumer: DefaultConsumerProperties?,
     val network: String,
     val fungibleContracts: Set<String> = emptySet(),
@@ -32,6 +33,14 @@ data class DipDupIntegrationProperties(
         val ownershipBatch: Boolean = false,
         val collectionBatch: Boolean = false,
         val requestedCollectionMeta: Boolean = false
+    )
+
+    data class Marketplaces(
+        val hen: Boolean = false,
+        val objkt: Boolean = false,
+        val objktV2: Boolean = false,
+        val versum: Boolean = false,
+        val teia: Boolean = false
     )
 
 }

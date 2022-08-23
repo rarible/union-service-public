@@ -61,7 +61,7 @@ class DipDupConsumerConfiguration(
         converter: DipDupOrderConverter,
         mapper: ObjectMapper
     ): DipDupOrderEventHandler {
-        return DipDupOrderEventHandler(handler, converter, mapper)
+        return DipDupOrderEventHandler(handler, converter, mapper, dipDupProperties.marketplaces)
     }
 
     @Bean

@@ -53,6 +53,7 @@ object DipDupConverter {
             TezosPlatform.HEN -> PlatformDto.HEN
             TezosPlatform.OBJKT, TezosPlatform.OBJKT_V2 -> PlatformDto.OBJKT
             TezosPlatform.RARIBLE_V1, TezosPlatform.RARIBLE_V2 -> PlatformDto.RARIBLE
+            else -> throw RuntimeException("Not implemented for ${source} platform")
         }
     }
 }

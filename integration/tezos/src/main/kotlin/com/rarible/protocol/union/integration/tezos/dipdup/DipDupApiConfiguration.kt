@@ -110,7 +110,7 @@ class DipDupApiConfiguration(
 
     @Bean
     fun dipdupOrderService(orderClient: OrderClient, dipDupOrderConverter: DipDupOrderConverter): DipdupOrderService {
-        return DipdupOrderServiceImpl(orderClient, dipDupOrderConverter)
+        return DipdupOrderServiceImpl(orderClient, dipDupOrderConverter, properties.marketplaces)
     }
 
     @Bean

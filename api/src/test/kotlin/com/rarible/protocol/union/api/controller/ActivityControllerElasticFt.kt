@@ -5,6 +5,7 @@ import com.rarible.core.common.nowMillis
 import com.rarible.core.test.data.randomAddress
 import com.rarible.core.test.data.randomBigDecimal
 import com.rarible.core.test.data.randomBigInt
+import com.rarible.core.test.data.randomInt
 import com.rarible.protocol.dto.ActivitiesByIdRequestDto
 import com.rarible.protocol.dto.AssetDto
 import com.rarible.protocol.dto.AuctionActivitiesDto
@@ -40,7 +41,8 @@ import com.rarible.protocol.union.integration.flow.data.randomFlowBurnDto
 import com.rarible.protocol.union.integration.flow.data.randomFlowCancelBidActivityDto
 import com.rarible.protocol.union.integration.solana.data.randomSolanaMintActivity
 import com.rarible.protocol.union.integration.tezos.data.randomTezosItemBurnActivity
-import com.rarible.protocol.union.integration.tezos.service.TezosPgActivityService
+import com.rarible.protocol.union.integration.tezos.data.randomTzktItemBurnActivity
+import com.rarible.tzkt.client.TokenActivityClient
 import io.mockk.coEvery
 import java.time.Instant
 import java.time.temporal.ChronoUnit
@@ -60,6 +62,7 @@ import com.rarible.protocol.solana.dto.ActivitiesByIdRequestDto as SolanaActivit
 @TestPropertySource(properties = [
     "common.feature-flags.enableActivityQueriesToElasticSearch=true",
     "common.feature-flags.enableActivityAscQueriesWithApiMerge=false",
+    "integration.tezos.dipdup.enabled=true",
 ])
 class ActivityControllerElasticFt : AbstractIntegrationTest() {
 
@@ -77,7 +80,7 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
     private lateinit var elasticsearchTestBootstrapper: ElasticsearchTestBootstrapper
 
     @MockkBean
-    private lateinit var tezosPgActivityService: TezosPgActivityService
+    private lateinit var tokenActivityClient: TokenActivityClient
 
     @BeforeEach
     fun setUp() = runBlocking {
@@ -108,7 +111,7 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
         val flowActivity1 = randomFlowBurnDto().copy(date = nowMillis().minusSeconds(13))
         val flowActivity2 = randomFlowCancelBidActivityDto().copy(date = nowMillis().minusSeconds(3))
         val solanaActivity1 = randomSolanaMintActivity().copy(date = nowMillis().minusSeconds(8))
-        val tezosActivity1 = randomTezosItemBurnActivity().copy(date = nowMillis().minusSeconds(9))
+        val tezosActivity1 = randomTezosItemBurnActivity().copy(id = randomInt().toString(), date = nowMillis().minusSeconds(9))
 
         val elasticEthOrderActivity1 = randomEsActivity().copy(
             activityId = "${BlockchainDto.ETHEREUM}:${ethOrderActivity1.id}",
@@ -255,8 +258,8 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
         } returns ActivitiesDto(null, listOf(solanaActivity1)).toMono()
 
         coEvery {
-            tezosPgActivityService.nftActivities(listOf(tezosActivity1.id))
-        } returns com.rarible.protocol.tezos.dto.NftActivitiesDto(null, listOf(tezosActivity1))
+            tokenActivityClient.getActivitiesByIds(any())
+        } returns listOf(randomTzktItemBurnActivity(tezosActivity1.id))
 
         val activities = activityControllerApi.getAllActivities(
             types, blockchains, null, null, size, com.rarible.protocol.union.dto.ActivitySortDto.EARLIEST_FIRST, null,

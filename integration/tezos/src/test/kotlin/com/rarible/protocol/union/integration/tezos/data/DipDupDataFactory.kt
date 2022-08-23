@@ -67,6 +67,29 @@ fun randomTzktItemMintActivity(activityId: String): TypedTokenActivity {
     )
 }
 
+fun randomTzktItemBurnActivity(activityId: String): TypedTokenActivity {
+    return TypedTokenActivity(
+        type = ActivityType.BURN,
+        tokenActivity = TokenActivity(
+            id = activityId.toInt(),
+            token = TokenInfo(
+                id = 1,
+                contract = Alias(
+                    address = randomString()
+                ),
+                tokenId = "1"
+            ),
+            level = 1,
+            timestamp = OffsetDateTime.now(),
+            from = Alias(
+                address = randomString()
+            ),
+            amount = "1",
+            transactionId = randomLong()
+        )
+    )
+}
+
 fun randomDipDupCollectionEvent(collectionId: String): DipDupCollection {
     return DipDupCollection(
         id = UUID.randomUUID(),

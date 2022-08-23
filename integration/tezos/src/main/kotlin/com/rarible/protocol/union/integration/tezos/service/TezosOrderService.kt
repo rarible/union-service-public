@@ -36,39 +36,17 @@ open class TezosOrderService(
         sort: OrderSortDto?,
         status: List<OrderStatusDto>?
     ): Slice<OrderDto> {
-
-        // We try to get new orders only if we get all legacy and continuation != null
-        return if (dipdupOrderService.enabled() && continuation != null && isDipDupContinuation(continuation)) {
-            val slice = dipdupOrderService.getOrdersAll(sort, status, continuation, size)
-            slice
+        return if (dipdupOrderService.enabled()) {
+            dipdupOrderService.getOrdersAll(sort, status, continuation, size)
         } else {
-
-            // We should check legacy orders first
-            val slice = if (tezosIntegrationProperties.showLegacyOrders) {
-                val orders = orderControllerApi.getOrdersAll(
-                    null,
-                    tezosOrderConverter.convert(sort),
-                    tezosOrderConverter.convert(status),
-                    size,
-                    continuation
-                ).awaitFirst()
-                tezosOrderConverter.convert(orders, blockchain)
-            } else {
-                Slice.empty()
-            }
-
-            // If legacy orders ended, we should try to get orders from new indexer
-            if (dipdupOrderService.enabled() && slice.entities.size < size) {
-                val delta = size - slice.entities.size
-                val dipdupContinuation = if (tezosIntegrationProperties.showLegacyActivity) null else continuation
-                val nextSlice = dipdupOrderService.getOrdersAll(sort, status, dipdupContinuation, delta)
-                Slice(
-                    continuation = nextSlice.continuation,
-                    entities = slice.entities + nextSlice.entities
-                )
-            } else {
-                slice
-            }
+            val orders = orderControllerApi.getOrdersAll(
+                null,
+                tezosOrderConverter.convert(sort),
+                tezosOrderConverter.convert(status),
+                size,
+                continuation
+            ).awaitFirst()
+            tezosOrderConverter.convert(orders, blockchain)
         }
     }
 
