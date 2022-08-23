@@ -5,7 +5,6 @@ import com.rarible.core.common.nowMillis
 import com.rarible.core.test.data.randomAddress
 import com.rarible.core.test.data.randomLong
 import com.rarible.core.test.data.randomString
-import com.rarible.protocol.union.core.elasticsearch.EsNameResolver
 import com.rarible.protocol.union.core.es.ElasticsearchTestBootstrapper
 import com.rarible.protocol.union.core.model.EsItem
 import com.rarible.protocol.union.core.model.EsItemGenericFilter
@@ -27,7 +26,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration
-import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery
 import org.springframework.test.context.ContextConfiguration
 import java.time.temporal.ChronoUnit
@@ -46,13 +44,6 @@ internal class EsItemRepositoryFt {
     @Autowired
     private lateinit var elasticsearchTestBootstrapper: ElasticsearchTestBootstrapper
 
-    @Autowired
-    private lateinit var esNameResolver: EsNameResolver
-
-    @Autowired
-    private lateinit var esOperations: ReactiveElasticsearchOperations
-
-    private val newVersionData = EsItem.VERSION + 1
 
     @BeforeEach
     fun setUp() = runBlocking<Unit> {
