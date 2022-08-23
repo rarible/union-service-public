@@ -1,0 +1,65 @@
+package com.rarible.protocol.union.listener.job
+
+import com.rarible.loader.cache.internal.CacheRepository
+import com.rarible.protocol.union.core.handler.IncomingEventHandler
+import com.rarible.protocol.union.core.model.UnionItemMetaEvent
+import com.rarible.protocol.union.core.model.UnionItemMetaRefreshEvent
+import com.rarible.protocol.union.core.model.UnionMeta
+import com.rarible.protocol.union.dto.parser.IdParser
+import com.rarible.protocol.union.enrichment.meta.item.ItemMetaDownloader
+import com.rarible.protocol.union.integration.immutablex.service.ImxItemService
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flow
+import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.stereotype.Component
+
+@Component
+@Deprecated("Only for launch, remove later")
+class ImxMetaInitJob(
+    private val cacheRepository: CacheRepository,
+    private val imxItemService: ImxItemService,
+    private val itemMetaHandler: IncomingEventHandler<UnionItemMetaEvent>,
+    @Value("\${listener.immutablex-meta-task.delay:1000}")
+    private val delay: Long,
+    @Value("\${listener.immutablex-meta-task.enabled:false}")
+    private val enabled: Boolean
+) {
+
+    private val logger = LoggerFactory.getLogger(javaClass)
+
+    fun execute(continuation: String?): Flow<String> {
+        if (!enabled) return emptyFlow()
+
+        return flow {
+            var next = continuation
+            do {
+                next = scheduleMeta(next)
+                if (next != null) {
+                    emit(next)
+                }
+            } while (next != null)
+        }
+    }
+
+    private suspend fun scheduleMeta(continuation: String?): String? {
+        val page = imxItemService.getAllItems(continuation, 200, false, null, null)
+        val items = page.entities
+        if (items.isEmpty()) return null
+
+        val itemIds = items.map { it.id.fullId() }
+        val found = cacheRepository.getAll<UnionMeta>(ItemMetaDownloader.TYPE, itemIds).map { it.key }
+        val missing = itemIds - found.toSet()
+        missing.forEach {
+            itemMetaHandler.onEvent(UnionItemMetaRefreshEvent(IdParser.parseItemId(it)))
+        }
+        logger.info("Sent {} Immutablex meta refresh tasks", missing.size)
+        if (delay > 0) {
+            delay(delay)
+        }
+        return page.continuation
+    }
+
+}
