@@ -1,8 +1,11 @@
 package com.rarible.protocol.union.api.controller
 
+import com.ninjasquad.springmockk.MockkBean
 import com.rarible.core.common.nowMillis
 import com.rarible.core.test.data.randomInt
 import com.rarible.core.test.data.randomString
+import com.rarible.dipdup.client.OrderActivityClient
+import com.rarible.dipdup.client.model.DipDupActivitiesPage
 import com.rarible.protocol.dto.ActivitySortDto
 import com.rarible.protocol.dto.AuctionActivitiesDto
 import com.rarible.protocol.dto.AuctionActivityDto
@@ -18,6 +21,8 @@ import com.rarible.protocol.solana.dto.ActivityDto
 import com.rarible.protocol.union.api.client.ActivityControllerApi
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
+import com.rarible.protocol.union.api.data.randomDipDupListActivity
+import com.rarible.protocol.union.api.data.randomTzktItemMintActivity
 import com.rarible.protocol.union.core.converter.EsActivityConverter
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.util.CompositeItemIdParser
@@ -49,6 +54,7 @@ import com.rarible.protocol.union.integration.flow.data.randomFlowMintDto
 import com.rarible.protocol.union.integration.flow.data.randomFlowNftOrderActivityListDto
 import com.rarible.protocol.union.integration.solana.data.randomActivityOrderBid
 import com.rarible.protocol.union.integration.solana.data.randomSolanaMintActivity
+import com.rarible.tzkt.model.Page
 import io.mockk.coEvery
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.reactive.awaitFirst
@@ -56,11 +62,23 @@ import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.SpringBootTest
 import reactor.kotlin.core.publisher.toMono
 import java.time.temporal.ChronoUnit
 
 @FlowPreview
 @IntegrationTest
+@SpringBootTest(
+    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+    properties = [
+        "application.environment = test",
+        "spring.cloud.consul.config.enabled = false",
+        "spring.cloud.service-registry.auto-registration.enabled = false",
+        "spring.cloud.discovery.enabled = false",
+        "logging.logstash.tcp-socket.enabled = false",
+        "integration.tezos.dipdup.enabled = true" // turn on dipdup integration
+    ]
+)
 class ActivityControllerFt : AbstractIntegrationTest() {
 
     private val continuation: String? = null
@@ -82,6 +100,9 @@ class ActivityControllerFt : AbstractIntegrationTest() {
 
     @Autowired
     lateinit var esActivityConverter: EsActivityConverter
+
+    @MockkBean
+    lateinit var dipdupActivityClient: OrderActivityClient
 
     @Test
     fun `get sync activities - solana - order type`() = runBlocking<Unit> {
@@ -926,6 +947,47 @@ class ActivityControllerFt : AbstractIntegrationTest() {
         assertThat(cursor.continuations).containsKey(BlockchainDto.ETHEREUM.name)
         assertThat(cursor.continuations).containsKey(BlockchainDto.POLYGON.name)
         assertThat(cursor.continuations).containsEntry(BlockchainDto.FLOW.name, ArgSlice.COMPLETED)
+    }
+
+    @Test
+    fun `get activities with preserved id order - tezos`() = runBlocking<Unit> {
+
+        val nowTime = nowMillis()
+        val rawActivities = listOf(
+            randomDipDupListActivity("bace384c-74c2-5310-84a6-fbe753e2813b", nowTime),
+            randomDipDupListActivity("9bb20f90-3c67-5332-9042-659993bcf319", nowTime),
+            randomDipDupListActivity("3861c5d9-97ba-577d-ac84-b0a1c14e9bce", nowTime)
+        )
+        val rawTzktActivities = listOf(
+            randomTzktItemMintActivity("2", nowTime.minusSeconds(100)),
+            randomTzktItemMintActivity("10", nowTime.minusSeconds(100))
+        )
+
+        coEvery {
+            dipdupActivityClient.getActivitiesAll(any(), any(), any(), any())
+        } returns DipDupActivitiesPage(
+            activities = rawActivities,
+            continuation = null
+        )
+
+        coEvery {
+            tzktTokenActivityClient.getActivitiesAll(any(), any(), any(), any(), any())
+        } returns Page(
+            items = rawTzktActivities,
+            continuation = null
+        )
+
+        val activities = activityControllerApi.getAllActivities(
+            listOf(ActivityTypeDto.LIST, ActivityTypeDto.MINT),
+            listOf(BlockchainDto.TEZOS),
+            null, null, 10,
+            com.rarible.protocol.union.dto.ActivitySortDto.EARLIEST_FIRST, null,
+        ).awaitFirst()
+
+        // should have the same order as in api responses
+        assertThat(activities.activities.map { it.id.value }).isEqualTo(
+            rawTzktActivities.map { it.id.toString() } + rawActivities.map { it.id }
+        )
     }
 
     @Test
