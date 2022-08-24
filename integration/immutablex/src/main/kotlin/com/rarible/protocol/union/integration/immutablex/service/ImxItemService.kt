@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.integration.immutablex.service
 
+import com.rarible.core.common.mapAsync
 import com.rarible.protocol.union.core.continuation.UnionItemContinuation
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.UnionMeta
@@ -19,7 +20,10 @@ import com.rarible.protocol.union.integration.immutablex.client.TokenIdDecoder
 import com.rarible.protocol.union.integration.immutablex.converter.ImxItemConverter
 import com.rarible.protocol.union.integration.immutablex.converter.ImxItemMetaConverter
 import com.rarible.protocol.union.integration.immutablex.model.ImxCollectionCreator
+import com.rarible.protocol.union.integration.immutablex.model.ImxCollectionMetaSchema
+import com.rarible.protocol.union.integration.immutablex.model.ImxTrait
 import com.rarible.protocol.union.integration.immutablex.repository.ImxCollectionCreatorRepository
+import com.rarible.protocol.union.integration.immutablex.repository.ImxCollectionMetaSchemaRepository
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 
@@ -27,7 +31,8 @@ class ImxItemService(
     private val assetClient: ImxAssetClient,
     private val activityClient: ImxActivityClient,
     private val collectionClient: ImxCollectionClient,
-    private val collectionCreatorRepository: ImxCollectionCreatorRepository
+    private val collectionCreatorRepository: ImxCollectionCreatorRepository,
+    private val collectionMetaSchemaRepository: ImxCollectionMetaSchemaRepository
 ) : AbstractBlockchainService(BlockchainDto.IMMUTABLEX), ItemService {
 
     override suspend fun getAllItems(
@@ -58,8 +63,9 @@ class ImxItemService(
 
     override suspend fun getItemMetaById(itemId: String): UnionMeta {
         val decodedItemId = TokenIdDecoder.decodeItemId(itemId)
+        val attributesDeferred = coroutineScope { async { getMetaAttributeKeys(decodedItemId) } }
         val asset = assetClient.getById(decodedItemId)
-        return ImxItemMetaConverter.convert(asset, blockchain)
+        return ImxItemMetaConverter.convert(asset, attributesDeferred.await(), blockchain)
     }
 
     override suspend fun resetItemMeta(itemId: String) {
@@ -115,15 +121,51 @@ class ImxItemService(
         return itemId.substringBefore(":")
     }
 
+    private suspend fun getMetaAttributeKeys(itemId: String): Set<String> {
+        val collectionId = getItemCollectionId(itemId)
+        val metaSchema = collectionMetaSchemaRepository.getById(collectionId) ?: fetchCollectionMetaSchema(collectionId)
+
+        return metaSchema.traits.map { it.key }.toSet()
+    }
+
+    suspend fun getMetaAttributeKeys(itemIds: Collection<String>): Map<String, Set<String>> {
+        if (itemIds.isEmpty()) return emptyMap()
+
+        val mappedToCollection = itemIds.associateBy({ it }, { getItemCollectionId(it) })
+        val collectionIds = mappedToCollection.values.toSet()
+
+        val fromCache = collectionMetaSchemaRepository.getAll(collectionIds)
+        val missing = collectionIds - (fromCache.map { it.collection }.toSet())
+        val fromApi = missing.mapAsync { fetchCollectionMetaSchema(it) }
+
+        val collections = (fromCache + fromApi).associateBy { it.collection }
+
+        val result = HashMap<String, Set<String>>(itemIds.size)
+        mappedToCollection.forEach { (itemId, collectionId) ->
+            val attributes = collections[collectionId]?.traits
+            attributes?.let { result[itemId] = it.map { trait -> trait.key }.toSet() }
+        }
+        return result
+    }
+
+    private suspend fun fetchCollectionMetaSchema(collectionId: String): ImxCollectionMetaSchema {
+        val attributes = collectionClient.getMetaSchema(collectionId)
+        val schema = ImxCollectionMetaSchema(
+            collectionId,
+            attributes.filter { it.filterable }.map { ImxTrait(it.name, it.type) }
+        )
+        collectionMetaSchemaRepository.save(schema)
+        return schema
+    }
+
     suspend fun getItemCreator(itemId: String): String? {
         return getItemCreators(listOf(itemId)).values.firstOrNull()
     }
 
-    suspend fun getItemCreators(assetIds: Collection<String>): Map<String, String> {
-        if (assetIds.isEmpty()) {
-            return emptyMap()
-        }
-        val mappedToCollection = assetIds.associateBy({ it }, { it.substringBefore(":") })
+    suspend fun getItemCreators(itemIds: Collection<String>): Map<String, String> {
+        if (itemIds.isEmpty()) return emptyMap()
+
+        val mappedToCollection = itemIds.associateBy({ it }, { getItemCollectionId(it) })
         val collectionIds = mappedToCollection.values.toSet()
         val fromCache = collectionCreatorRepository.getAll(collectionIds)
         val missing = collectionIds - (fromCache.map { it.collection }.toSet())
@@ -133,7 +175,7 @@ class ImxItemService(
 
         val collections = (fromCache + fromApi).associateBy { it.collection }
 
-        val result = HashMap<String, String>(assetIds.size)
+        val result = HashMap<String, String>(itemIds.size)
         mappedToCollection.forEach { (itemId, collectionId) ->
             val creator = collections[collectionId]?.creator
             creator?.let { result[itemId] = it }

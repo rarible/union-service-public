@@ -4,9 +4,6 @@ import com.rarible.loader.cache.internal.CacheRepository
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.model.UnionItemMetaEvent
 import com.rarible.protocol.union.core.model.UnionItemMetaRefreshEvent
-import com.rarible.protocol.union.core.model.UnionMeta
-import com.rarible.protocol.union.dto.parser.IdParser
-import com.rarible.protocol.union.enrichment.meta.item.ItemMetaDownloader
 import com.rarible.protocol.union.integration.immutablex.service.ImxItemService
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -49,13 +46,10 @@ class ImxMetaInitJob(
         val items = page.entities
         if (items.isEmpty()) return null
 
-        val itemIds = items.map { it.id.fullId() }
-        val found = cacheRepository.getAll<UnionMeta>(ItemMetaDownloader.TYPE, itemIds).map { it.key }
-        val missing = itemIds - found.toSet()
-        missing.forEach {
-            itemMetaHandler.onEvent(UnionItemMetaRefreshEvent(IdParser.parseItemId(it)))
+        items.forEach {
+            itemMetaHandler.onEvent(UnionItemMetaRefreshEvent(it.id))
         }
-        logger.info("Sent {} Immutablex meta refresh tasks", missing.size)
+        logger.info("Sent {} Immutablex meta refresh tasks", items.size)
         if (delay > 0) {
             delay(delay)
         }

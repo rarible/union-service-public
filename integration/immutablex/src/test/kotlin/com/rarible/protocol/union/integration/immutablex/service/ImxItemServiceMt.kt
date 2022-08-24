@@ -10,7 +10,13 @@ import org.junit.jupiter.api.Test
 @ManualTest
 class ImxItemServiceMt : ImxManualTest() {
 
-    private val service = ImxItemService(assetClient, activityClient, collectionClient, collectionCreatorRepository)
+    private val service = ImxItemService(
+        assetClient,
+        activityClient,
+        collectionClient,
+        collectionCreatorRepository,
+        collectionMetaSchemaRepository
+    )
 
     // Data for test purposes, it is not static and can break these manual tests in any moment
     private val testOwner = "0x38b84a9518a356b85eb29ba76fd78e0d3c718fd8"
@@ -28,11 +34,11 @@ class ImxItemServiceMt : ImxManualTest() {
 
     @Test
     fun getMeta() = runBlocking<Unit> {
-        val result = service.getItemMetaById("0x1ea92417b0393eba0edddea4fb35eb4e12b3165d:518103")
+        val result = service.getItemMetaById("0x311b9817c6eec7fe104d26eae9fbaa003cc12dc8:99999")
 
         println(result)
-        // There is no 'good' meta for this item, so name generated as '{$collection #$tokenId}'
-        assertThat(result.name).isEqualTo("RN AGLET SNEAKERS #518103")
+        assertThat(result.name).isEqualTo("99999moot")
+        assertThat(result.attributes).hasSize(3) // Only 3 filtered attributes of 6 in total should be here
     }
 
     @Test
