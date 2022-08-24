@@ -125,6 +125,7 @@ class ElasticsearchBootstrapper(
     private suspend fun createFirstIndex(definition: EntityDefinitionExtended) {
         logger.info("Creating index for first time")
         val newIndexName = definition.indexName(minorVersion = definition.versionData)
+        reindexSchedulingService.stopTasksIfExists(definition)
         createIndex(
             reactiveElasticSearchOperations = esOperations,
             name = newIndexName,
