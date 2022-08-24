@@ -113,6 +113,7 @@ class ReindexService(
 
     private suspend fun scheduleItemReindex(indexName: String, definition: EntityDefinitionExtended) {
         val blockchains = searchReindexProperties.item.activeBlockchains()
+        logger.info("Active blockchains {}", blockchains)
         val taskParams = blockchains.map {
             paramFactory.toString(
                 ItemTaskParam(
@@ -201,7 +202,8 @@ class ReindexService(
             .awaitSingleOrNull()
         return if (existing == null) {
             logger.info(
-                "Scheduling activity reindexing with param: {}",
+                "Scheduling {} reindexing with param: {}",
+                taskType,
                 taskParamJson
             )
             Task(
@@ -213,8 +215,8 @@ class ReindexService(
             )
         } else {
             logger.info(
-                "Activity reindexing with param {} already exists with id={}",
-                taskParamJson, existing.id.toHexString()
+                "{} reindexing with param {} already exists with id={}",
+                taskType, taskParamJson, existing.id.toHexString()
             )
             null
         }
