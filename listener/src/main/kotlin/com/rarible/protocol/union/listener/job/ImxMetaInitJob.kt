@@ -4,12 +4,12 @@ import com.rarible.core.common.mapAsync
 import com.rarible.loader.cache.internal.CacheRepository
 import com.rarible.loader.cache.internal.MongoCacheEntry
 import com.rarible.protocol.union.core.event.KafkaEventFactory
+import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.UnionItemUpdateEvent
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.producer.UnionInternalBlockchainEventProducer
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaDownloader
-import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.service.ItemMetaService
 import com.rarible.protocol.union.integration.immutablex.service.ImxItemService
@@ -57,16 +57,20 @@ class ImxMetaInitJob(
         val items = page.entities
         if (items.isEmpty()) return null
 
-        val itemIds = items.map { it.id.fullId() }
-        val missing = itemIds.toHashSet()
+        val itemsById = items.associateBy { it.id.fullId() }
+        val missing = itemsById.keys.toHashSet()
         val schemaAttributes = imxItemService.getMetaAttributeKeys(items.map { it.id.value })
-        val found = cacheRepository.getAll<UnionMeta>(ItemMetaDownloader.TYPE, itemIds)
+        val found = cacheRepository.getAll<UnionMeta>(ItemMetaDownloader.TYPE, itemsById.keys.toList())
 
         val updated = AtomicInteger(0)
         found.chunked(16).map { batch ->
             batch.mapAsync { entry ->
                 val itemId = IdParser.parseItemId(entry.key)
-                val result = fixMetaAttributes(entry, schemaAttributes[itemId.value] ?: emptySet())
+                val result = fixMetaAttributes(
+                    itemsById[entry.key]!!,
+                    entry,
+                    schemaAttributes[itemId.value] ?: emptySet()
+                )
                 if (result) updated.incrementAndGet()
                 missing.remove(entry.key)
             }
@@ -86,7 +90,9 @@ class ImxMetaInitJob(
     }
 
     private suspend fun fixMetaAttributes(
-        entry: MongoCacheEntry<UnionMeta>, allowedAttributeKeys: Set<String>
+        item: UnionItem,
+        entry: MongoCacheEntry<UnionMeta>,
+        allowedAttributeKeys: Set<String>
     ): Boolean {
         val meta = entry.data
         val attributes = meta.attributes
@@ -99,23 +105,17 @@ class ImxMetaInitJob(
                 data = entry.data.copy(attributes = filteredAttributes),
                 cachedAt = entry.cachedAt
             )
-            notify(updated)
+            notify(item, updated)
             true
         } else {
             false
         }
     }
 
-    private suspend fun notify(entry: MongoCacheEntry<UnionMeta>) {
-        val itemId = IdParser.parseItemId(entry.key)
-        val item = enrichmentItemService.fetchOrNull(ShortItemId(itemId))
-        if (item == null) {
-            logger.info("Immutablex meta attributes fix for item ${entry.key} finished, but Item NOT_FOUND")
-            return
-        }
+    private suspend fun notify(item: UnionItem, entry: MongoCacheEntry<UnionMeta>) {
         val itemWithMeta = item.copy(meta = entry.data)
         val message = KafkaEventFactory.internalItemEvent(UnionItemUpdateEvent(itemWithMeta))
-        eventProducer.getProducer(itemId.blockchain).send(message)
+        eventProducer.getProducer(item.id.blockchain).send(message)
         logger.info("Immutablex meta attributes fix ${entry.key} finished, notification sent")
     }
 
