@@ -59,13 +59,14 @@ class ImxMetaInitJob(
 
         val itemIds = items.map { it.id.fullId() }
         val missing = itemIds.toHashSet()
-        val schemaAttributes = imxItemService.getMetaAttributeKeys(itemIds)
+        val schemaAttributes = imxItemService.getMetaAttributeKeys(items.map { it.id.value })
         val found = cacheRepository.getAll<UnionMeta>(ItemMetaDownloader.TYPE, itemIds)
 
         val updated = AtomicInteger(0)
         found.chunked(16).map { batch ->
             batch.mapAsync { entry ->
-                val result = fixMetaAttributes(entry, schemaAttributes[entry.key] ?: emptySet())
+                val itemId = IdParser.parseItemId(entry.key)
+                val result = fixMetaAttributes(entry, schemaAttributes[itemId.value] ?: emptySet())
                 if (result) updated.incrementAndGet()
                 missing.remove(entry.key)
             }
