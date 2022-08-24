@@ -42,6 +42,19 @@ class ImxItemServiceMt : ImxManualTest() {
     }
 
     @Test
+    fun getMetaSchemaAttributes() = runBlocking<Unit> {
+        val result = service.getMetaAttributeKeys(
+            listOf(
+                "0x311b9817c6eec7fe104d26eae9fbaa003cc12dc8:99999",
+                "0x4346daad2cb36f5e9f978842e741b129cae20bec:999990",
+                "0x4346daad2cb36f5e9f978842e741b129cae20bec:999991",
+            )
+        )
+
+        println(result)
+    }
+
+    @Test
     fun getItemById() = runBlocking<Unit> {
         val itemId = "0x5e4b4e5c90f8bd957dfdb79300d9f14bf1a7ec58:1236"
         val result = service.getItemById(itemId)

@@ -138,12 +138,15 @@ class ImxItemService(
         val missing = collectionIds - (fromCache.map { it.collection }.toSet())
         val fromApi = missing.mapAsync { fetchCollectionMetaSchema(it) }
 
-        val collections = (fromCache + fromApi).associateBy { it.collection }
+        val collections = (fromCache + fromApi).associateBy(
+            { it.collection },
+            { it.traits.map { trait -> trait.key }.toSet() }
+        )
 
         val result = HashMap<String, Set<String>>(itemIds.size)
         mappedToCollection.forEach { (itemId, collectionId) ->
-            val attributes = collections[collectionId]?.traits
-            attributes?.let { result[itemId] = it.map { trait -> trait.key }.toSet() }
+            val attributes = collections[collectionId]
+            attributes?.let { result[itemId] = it }
         }
         return result
     }
