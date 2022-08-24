@@ -15,9 +15,9 @@ class ImxItemMetaConverterTest {
 
     @Test
     fun `convert item meta`() {
-        val imxItem = randomImxAsset()
+        val imxItem = randomImxAsset().copy(metadata = mapOf("abc" to "1", "error" to "11"))
 
-        val meta = ImxItemMetaConverter.convert(imxItem, blockchain)
+        val meta = ImxItemMetaConverter.convert(imxItem, setOf("abc"), blockchain)
 
         assertThat(meta.name).isEqualTo(imxItem.name)
         assertThat(meta.description).isEqualTo(imxItem.description)
@@ -45,13 +45,13 @@ class ImxItemMetaConverterTest {
             // Technical info, should be also filtered
             "status" to randomString(),
             "message" to randomString(),
-            // Regular traits
+            // Filtered attributes from collection meta schema
             "size" to randomLong(),
             "color" to randomString()
         )
         val imxItem = randomImxAsset().copy(metadata = imxAttributes)
 
-        val meta = ImxItemMetaConverter.convert(imxItem, blockchain)
+        val meta = ImxItemMetaConverter.convert(imxItem, setOf("size", "color"), blockchain)
 
         assertThat(meta.attributes).hasSize(2)
         val size = meta.attributes[0]

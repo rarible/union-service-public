@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.integration.immutablex.client
 
+import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.awaitBody
@@ -10,6 +11,16 @@ class ImxCollectionClient(
 ) : AbstractImxClient(
     webClient
 ) {
+
+    companion object {
+
+        val META_ATTRIBUTES_TYPE = object : ParameterizedTypeReference<List<ImmutablexMetaAttribute>>() {}
+    }
+
+    suspend fun getMetaSchema(collectionAddress: String): List<ImmutablexMetaAttribute> {
+        val uri = ImxCollectionQueryBuilder.getMetaSchemaPath(collectionAddress)
+        return getByUri(uri, META_ATTRIBUTES_TYPE)
+    }
 
     suspend fun getById(collectionAddress: String): ImmutablexCollection {
         val uri = ImxCollectionQueryBuilder.getByIdPath(collectionAddress)

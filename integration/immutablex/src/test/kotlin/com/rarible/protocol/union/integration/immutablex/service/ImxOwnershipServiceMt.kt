@@ -11,7 +11,13 @@ class ImxOwnershipServiceMt : ImxManualTest() {
 
     private val service = ImxOwnershipService(
         assetClient,
-        ImxItemService(assetClient, activityClient, collectionClient, collectionCreatorRepository)
+        ImxItemService(
+            assetClient,
+            activityClient,
+            collectionClient,
+            collectionCreatorRepository,
+            collectionMetaSchemaRepository
+        )
     )
 
     private val itemId = "0x6b11e2eeabfa12ae875ddd9024665b7e7edeac68:30"
