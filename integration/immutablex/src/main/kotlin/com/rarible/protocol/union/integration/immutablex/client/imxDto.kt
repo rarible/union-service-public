@@ -297,6 +297,12 @@ sealed class ImmutablexTokenEvent(transactionId: Long, timestamp: Instant, open 
     fun encodedItemId(): String = token.data.encodedItemId()
 }
 
+data class ImmutablexMetaAttribute(
+    val name: String,
+    val type: String,
+    val filterable: Boolean
+)
+
 @JsonSubTypes(
     JsonSubTypes.Type(value = ImmutablexMint::class),
     JsonSubTypes.Type(value = ImmutablexTransfer::class),

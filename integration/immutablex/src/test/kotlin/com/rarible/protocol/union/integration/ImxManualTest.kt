@@ -6,6 +6,7 @@ import com.rarible.protocol.union.integration.immutablex.client.ImxCollectionCli
 import com.rarible.protocol.union.integration.immutablex.client.ImxOrderClient
 import com.rarible.protocol.union.integration.immutablex.client.ImxWebClientFactory
 import com.rarible.protocol.union.integration.immutablex.repository.ImxCollectionCreatorRepository
+import com.rarible.protocol.union.integration.immutablex.repository.ImxCollectionMetaSchemaRepository
 import io.mockk.coEvery
 import io.mockk.mockk
 
@@ -26,6 +27,12 @@ abstract class ImxManualTest {
     protected val collectionCreatorRepository: ImxCollectionCreatorRepository = mockk {
         coEvery { getAll(any()) } returns emptyList()
         coEvery { saveAll(any()) } returns Unit
+    }
+
+    protected val collectionMetaSchemaRepository: ImxCollectionMetaSchemaRepository = mockk {
+        coEvery { getAll(any()) } returns emptyList()
+        coEvery { save(any()) } returns Unit
+        coEvery { getById(any()) } returns null
     }
 
 }

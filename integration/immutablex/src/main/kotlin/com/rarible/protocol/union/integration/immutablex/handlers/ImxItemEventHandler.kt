@@ -33,11 +33,15 @@ class ImxItemEventHandler(
         val itemIds = assets.filter { !it.isDeleted() }.map { it.itemId }
 
         val creatorsDeferred = async { itemService.getItemCreators(itemIds) }
+        val metaAttributesDeferred = async { itemService.getMetaAttributeKeys(itemIds) }
+
         val currentMeta = getLastItemMeta(itemIds)
         val creators = creatorsDeferred.await()
+        val metaAttributes = metaAttributesDeferred.await()
 
-        val meta = assets.associateBy { it.itemId }
-            .mapValues { ImxItemMetaConverter.convert(it.value, blockchain) }
+        val meta = assets.associateBy { it.itemId }.mapValues {
+            ImxItemMetaConverter.convert(it.value, metaAttributes[it.key], blockchain)
+        }
 
         assets.forEach { asset ->
             val assetId = asset.itemId

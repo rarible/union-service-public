@@ -10,6 +10,8 @@ import org.apache.commons.codec.digest.DigestUtils
 
 object EsItemConverter {
 
+   const val MAX_TRAIT_LENGTH = 3000
+
     fun ItemDto.toEsItem(): EsItem {
         return EsItem(
             id = prepareId(id.fullId()),
@@ -22,7 +24,7 @@ object EsItemConverter {
             mintedAt = mintedAt,
             lastUpdatedAt = lastUpdatedAt,
             deleted = deleted,
-            traits = meta?.attributes?.map { EsTrait(it.key, it.value) } ?: emptyList(),
+            traits = meta?.attributes?.map { EsTrait(it.key.take(MAX_TRAIT_LENGTH), it.value?.take(MAX_TRAIT_LENGTH)) } ?: emptyList(),
             self = self,
             bestSellAmount = this.bestSellOrder?.take?.value?.toDouble(),
             bestSellCurrency = getCurrencyAddressOrNull(blockchain, this.bestSellOrder?.take),

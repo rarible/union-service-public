@@ -16,6 +16,7 @@ import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.integration.tezos.TezosIntegrationProperties
 import com.rarible.protocol.union.integration.tezos.converter.TezosOrderConverter
 import com.rarible.protocol.union.integration.tezos.data.randomTezosOrderDto
+import com.rarible.protocol.union.integration.tezos.dipdup.DipDupIntegrationProperties
 import com.rarible.protocol.union.integration.tezos.dipdup.converter.DipDupOrderConverter
 import com.rarible.protocol.union.integration.tezos.dipdup.service.DipdupOrderServiceImpl
 import com.rarible.protocol.union.test.mock.CurrencyMock
@@ -41,7 +42,7 @@ class TezosOrderServiceTest {
 
     private val tezosOrderConverter = TezosOrderConverter(currencyService)
     private val dipdupOrderConverter = DipDupOrderConverter(currencyService)
-    private val dipdupOrderService = DipdupOrderServiceImpl(dipdupOrderClient, dipdupOrderConverter)
+    private val dipdupOrderService = DipdupOrderServiceImpl(dipdupOrderClient, dipdupOrderConverter, DipDupIntegrationProperties.Marketplaces())
     private val tezosIntegrationProperties = TezosIntegrationProperties(
         enabled = true,
         consumer = null,
@@ -94,6 +95,7 @@ class TezosOrderServiceTest {
                 any(),
                 any(),
                 any(),
+                any(),
                 any()
             )
         } returns DipDupOrdersPage(orders = listOf(dipDupOrder), continuation = continuation)
@@ -110,40 +112,6 @@ class TezosOrderServiceTest {
     }
 
     @Test
-    fun `should return legacy + dipdup orders via ordersAll`() = runBlocking<Unit> {
-        val orderId = "ca5418bd-92aa-529c-91fa-c670a2d2d878"
-        val continuation = "1650622934000_$orderId"
-
-        val order = randomTezosOrderDto()
-        coEvery {
-            orderControllerApi.getOrdersAll(
-                any(), any(), any(), any(), any()
-            )
-        } returns Mono.just(OrderPaginationDto(listOf(order), null))
-
-        val dipDupOrder = dipDupOrder(orderId)
-        coEvery {
-            dipdupOrderClient.getOrdersAll(
-                any(),
-                any(),
-                any(),
-                any()
-            )
-        } returns DipDupOrdersPage(orders = listOf(dipDupOrder), continuation = continuation)
-
-        val orders = service.getOrdersAll(
-            sort = null,
-            continuation = "1650622934000_0b375429527dca45f800cee0847b36a4a3320c63858bd12d12f4621b8509bbf6",
-            status = null,
-            size = 2
-        )
-        assertThat(orders.entities).hasSize(2)
-        assertThat(orders.entities.first().id.value).isEqualTo(order.hash)
-        assertThat(orders.entities.last().id.value).isEqualTo(dipDupOrder.id)
-        assertThat(orders.continuation).isEqualTo(continuation)
-    }
-
-    @Test
     fun `should return dipdup orders by item`() = runBlocking<Unit> {
         val token = "test"
         val tokenId = BigInteger.valueOf(123)
@@ -155,6 +123,7 @@ class TezosOrderServiceTest {
             dipdupOrderClient.getOrdersByItem(
                 contract = token,
                 tokenId = tokenId.toString(),
+                any(),
                 any(),
                 any(),
                 any(),
@@ -198,6 +167,7 @@ class TezosOrderServiceTest {
             dipdupOrderClient.getOrdersByItem(
                 contract = token,
                 tokenId = tokenId.toString(),
+                any(),
                 any(),
                 any(),
                 any(),

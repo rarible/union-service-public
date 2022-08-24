@@ -188,19 +188,15 @@ class TezosApiConfiguration(
         itemActivityApi: NftActivityControllerApi,
         orderActivityApi: OrderActivityControllerApi,
         converter: TezosActivityConverter,
-        pgActivityService: TezosPgActivityService,
         dipdupOrderActivityService: DipdupOrderActivityService,
-        tzktItemActivityService: TzktItemActivityService,
-        tezosIntegrationProperties: TezosIntegrationProperties
+        tzktItemActivityService: TzktItemActivityService
     ): TezosActivityService {
         return TezosActivityService(
             itemActivityApi,
             orderActivityApi,
             converter,
-            pgActivityService,
             dipdupOrderActivityService,
-            tzktItemActivityService,
-            tezosIntegrationProperties
+            tzktItemActivityService
         )
     }
 

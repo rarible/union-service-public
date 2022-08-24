@@ -33,6 +33,7 @@ class ImxItemEventHandlerTest {
     }
     private val itemService: ImxItemService = mockk() {
         coEvery { getItemCreators(emptyList()) } returns emptyMap()
+        coEvery { getMetaAttributeKeys(any()) } returns emptyMap()
     }
 
     private val itemMetaRepository: ImxItemMetaRepository = mockk()
@@ -65,7 +66,7 @@ class ImxItemEventHandlerTest {
     fun `on item updated - meta not changed`() = runBlocking<Unit> {
         val asset = randomImxAsset()
         val item = ImxItemConverter.convert(asset, null, blockchain)
-        val meta = ImxItemMetaConverter.convert(asset, blockchain)
+        val meta = ImxItemMetaConverter.convert(asset, emptySet(), blockchain)
 
         mockMeta(asset.itemId, meta)
         mockCreators(asset.itemId)
@@ -82,7 +83,7 @@ class ImxItemEventHandlerTest {
     fun `on item updated - current meta is missing`() = runBlocking<Unit> {
         val asset = randomImxAsset()
         val item = ImxItemConverter.convert(asset, null, blockchain)
-        val meta = ImxItemMetaConverter.convert(asset, blockchain)
+        val meta = ImxItemMetaConverter.convert(asset, emptySet(), blockchain)
 
         mockMeta(asset.itemId, null)
         mockCreators(asset.itemId)
@@ -99,7 +100,7 @@ class ImxItemEventHandlerTest {
     fun `on item updated - meta changed`() = runBlocking<Unit> {
         val asset = randomImxAsset()
         val item = ImxItemConverter.convert(asset, null, blockchain)
-        val newMeta = ImxItemMetaConverter.convert(asset, blockchain)
+        val newMeta = ImxItemMetaConverter.convert(asset, emptySet(), blockchain)
         val currentMeta = newMeta.copy(name = randomString())
 
         mockMeta(asset.itemId, currentMeta)

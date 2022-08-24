@@ -15,21 +15,17 @@ object ImxItemMetaConverter {
     private val logger by Logger()
 
     private val videoContentKeys = setOf("animation_url", "youtube_url")
-    private val errorKeys = setOf("status", "message")
-    private val duplicatedImageKeys = setOf("image_url", "image")
 
-    private val attributesExclusions = videoContentKeys + errorKeys + duplicatedImageKeys
-
-    fun convert(asset: ImmutablexAsset, blockchain: BlockchainDto): UnionMeta {
+    fun convert(asset: ImmutablexAsset, attributes: Set<String>?, blockchain: BlockchainDto): UnionMeta {
         return try {
-            convertInternal(asset)
+            convertInternal(asset, attributes ?: emptySet())
         } catch (e: Exception) {
             logger.error("Failed to convert {} Meta: {} \n{}", blockchain, e.message, asset)
             throw e
         }
     }
 
-    private fun convertInternal(asset: ImmutablexAsset): UnionMeta {
+    private fun convertInternal(asset: ImmutablexAsset, attributes: Set<String>): UnionMeta {
         val collectionName = asset.collection.name
         val assetName = asset.name ?: collectionName?.let { "$it #${asset.encodedTokenId()}" } ?: "Unknown"
         return UnionMeta(
@@ -37,7 +33,7 @@ object ImxItemMetaConverter {
             description = asset.description,
             createdAt = asset.createdAt,
             content = getVideoContent(asset) + getImageContent(asset),
-            attributes = asset.metadata?.filterKeys { it !in attributesExclusions }?.map {
+            attributes = asset.metadata?.filterKeys { it in attributes }?.map {
                 MetaAttributeDto(
                     key = it.key,
                     value = "${it.value}"

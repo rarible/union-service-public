@@ -8,6 +8,7 @@ import com.rarible.protocol.union.integration.immutablex.client.ImxCollectionCli
 import com.rarible.protocol.union.integration.immutablex.client.ImxOrderClient
 import com.rarible.protocol.union.integration.immutablex.client.ImxWebClientFactory
 import com.rarible.protocol.union.integration.immutablex.repository.ImxCollectionCreatorRepository
+import com.rarible.protocol.union.integration.immutablex.repository.ImxCollectionMetaSchemaRepository
 import com.rarible.protocol.union.integration.immutablex.repository.ImxItemMetaRepository
 import com.rarible.protocol.union.integration.immutablex.scanner.ImxEventsApi
 import com.rarible.protocol.union.integration.immutablex.service.ImxActivityService
@@ -74,9 +75,16 @@ class ImxApiConfiguration {
         assetClient: ImxAssetClient,
         activityClient: ImxActivityClient,
         collectionClient: ImxCollectionClient,
-        collectionCreatorRepository: ImxCollectionCreatorRepository
+        collectionCreatorRepository: ImxCollectionCreatorRepository,
+        collectionMetaSchemaRepository: ImxCollectionMetaSchemaRepository
     ): ImxItemService {
-        return ImxItemService(assetClient, activityClient, collectionClient, collectionCreatorRepository)
+        return ImxItemService(
+            assetClient,
+            activityClient,
+            collectionClient,
+            collectionCreatorRepository,
+            collectionMetaSchemaRepository
+        )
     }
 
     @Bean
@@ -84,6 +92,13 @@ class ImxApiConfiguration {
         mongo: ReactiveMongoTemplate
     ): ImxCollectionCreatorRepository {
         return ImxCollectionCreatorRepository(mongo)
+    }
+
+    @Bean
+    fun imxCollectionMetaSchemaRepository(
+        mongo: ReactiveMongoTemplate
+    ): ImxCollectionMetaSchemaRepository {
+        return ImxCollectionMetaSchemaRepository(mongo)
     }
 
     @Bean

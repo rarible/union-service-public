@@ -2,6 +2,7 @@ package com.rarible.protocol.union.integration.tezos.dipdup.service
 
 import com.rarible.core.logging.Logger
 import com.rarible.dipdup.client.OrderClient
+import com.rarible.dipdup.client.core.model.TezosPlatform
 import com.rarible.dipdup.client.exception.DipDupNotFound
 import com.rarible.protocol.union.core.exception.UnionNotFoundException
 import com.rarible.protocol.union.dto.AssetTypeDto
@@ -10,17 +11,29 @@ import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
+import com.rarible.protocol.union.integration.tezos.dipdup.DipDupIntegrationProperties
 import com.rarible.protocol.union.integration.tezos.dipdup.converter.DipDupOrderConverter
 import java.math.BigInteger
 
 class DipdupOrderServiceImpl(
     private val dipdupOrderClient: OrderClient,
-    private val dipDupOrderConverter: DipDupOrderConverter
+    private val dipDupOrderConverter: DipDupOrderConverter,
+    private val marketplaces: DipDupIntegrationProperties.Marketplaces
 ) : DipdupOrderService {
 
     private val blockchain = BlockchainDto.TEZOS
 
     override fun enabled() = true
+
+    fun enabledPlatforms(): List<TezosPlatform> {
+        val platforms = listOf(TezosPlatform.RARIBLE_V2, TezosPlatform.RARIBLE_V1).toMutableList()
+        if (marketplaces.hen) platforms.add(TezosPlatform.HEN)
+        if (marketplaces.objkt) platforms.add(TezosPlatform.OBJKT)
+        if (marketplaces.objktV2) platforms.add(TezosPlatform.OBJKT_V2)
+        if (marketplaces.versum) platforms.add(TezosPlatform.VERSUM)
+        if (marketplaces.teia) platforms.add(TezosPlatform.TEIA)
+        return platforms
+    }
 
     override suspend fun getOrderById(id: String): OrderDto {
         logger.info("Fetch dipdup order by id: $id")
@@ -44,6 +57,7 @@ class DipdupOrderServiceImpl(
         val page = dipdupOrderClient.getOrdersAll(
             sort = sort?.let { dipDupOrderConverter.convert(it) },
             statuses = statuses?.let { it.map { status -> dipDupOrderConverter.convert(status) } } ?: emptyList(),
+            platforms = enabledPlatforms(),
             size = size,
             continuation = continuation
         )
@@ -69,6 +83,7 @@ class DipdupOrderServiceImpl(
             maker = maker,
             currencyId = currencyId,
             statuses = statuses?.let { it.map { status -> dipDupOrderConverter.convert(status) } } ?: emptyList(),
+            platforms = enabledPlatforms(),
             size = size,
             continuation = continuation
         )
@@ -87,6 +102,7 @@ class DipdupOrderServiceImpl(
         val page = dipdupOrderClient.getOrdersByMakers(
             makers = maker,
             statuses = statuses?.let { it.map { status -> dipDupOrderConverter.convert(status) } } ?: emptyList(),
+            platforms = enabledPlatforms(),
             size = size,
             continuation = continuation
         )

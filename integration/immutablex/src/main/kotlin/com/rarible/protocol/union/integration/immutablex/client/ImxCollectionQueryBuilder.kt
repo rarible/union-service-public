@@ -16,6 +16,10 @@ class ImxCollectionQueryBuilder(
         fun getByIdPath(collection: String): String {
             return "$PATH/${collection}"
         }
+
+        fun getMetaSchemaPath(collection: String): String {
+            return "$PATH/${collection}/metadata-schema"
+        }
     }
 
     fun continuationById(continuation: String?) {
