@@ -72,6 +72,8 @@ class ImxMetaInitJob(
                     schemaAttributes[itemId.value] ?: emptySet()
                 )
                 if (result) updated.incrementAndGet()
+            }
+            batch.forEach { entry ->
                 missing.remove(entry.key)
             }
         }
@@ -82,7 +84,9 @@ class ImxMetaInitJob(
             }
         }
 
-        logger.info("Sent {} Immutablex meta refresh tasks, {} cached meta entries updated", items.size, updated.get())
+        logger.info(
+            "Sent {} Immutablex meta refresh tasks, {} cached meta entries updated", missing.size, updated.get()
+        )
         if (delay > 0) {
             delay(delay)
         }
