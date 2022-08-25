@@ -17,6 +17,11 @@ class ImxAssetClient(
         return getByUri(uri)
     }
 
+    suspend fun getByIdOrNull(itemId: String): ImmutablexAsset? {
+        val uri = ImxAssetQueryBuilder.getByIdPath(itemId)
+        return ignore404 { getByUri(uri) }
+    }
+
     suspend fun getByIds(itemIds: Collection<String>): List<ImmutablexAsset> {
         return getChunked(byIdsChunkSize, itemIds) {
             ignore404 { getById(it) }
