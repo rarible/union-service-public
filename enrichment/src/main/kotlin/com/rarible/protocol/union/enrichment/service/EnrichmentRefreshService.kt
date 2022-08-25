@@ -37,6 +37,7 @@ import com.rarible.protocol.union.enrichment.evaluator.ItemBestBidOrderProvider
 import com.rarible.protocol.union.enrichment.evaluator.ItemBestSellOrderProvider
 import com.rarible.protocol.union.enrichment.evaluator.OwnershipBestBidOrderProvider
 import com.rarible.protocol.union.enrichment.evaluator.OwnershipBestSellOrderProvider
+import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
 import com.rarible.protocol.union.enrichment.model.OriginOrders
 import com.rarible.protocol.union.enrichment.model.ShortCollectionId
 import com.rarible.protocol.union.enrichment.model.ShortItemId
@@ -259,7 +260,8 @@ class EnrichmentRefreshService(
                 shortItem = updatedItem,
                 item = itemDto,
                 orders = ordersHint,
-                auctions = auctionsHint
+                auctions = auctionsHint,
+                metaPipeline = ItemMetaPipeline.REFRESH
             )
             notifyUpdate(enriched)
         }

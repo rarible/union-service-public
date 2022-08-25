@@ -1,10 +1,9 @@
-package com.rarible.protocol.union.enrichment.meta.downloader.executor
+package com.rarible.protocol.union.meta.loader.executor
 
 import com.rarible.protocol.union.core.model.download.DownloadEntry
 import com.rarible.protocol.union.core.model.download.DownloadException
 import com.rarible.protocol.union.core.model.download.DownloadStatus
 import com.rarible.protocol.union.core.model.download.DownloadTask
-import com.rarible.protocol.union.enrichment.configuration.DownloaderProperties
 import com.rarible.protocol.union.enrichment.meta.downloader.DownloadEntryRepository
 import com.rarible.protocol.union.enrichment.meta.downloader.DownloadNotifier
 import com.rarible.protocol.union.enrichment.meta.downloader.Downloader
@@ -21,10 +20,8 @@ class DownloadExecutor<T>(
     private val debouncer: DownloadDebouncer,
     private val notifier: DownloadNotifier<T>,
     private val pool: DownloadPool,
-    properties: DownloaderProperties,
-) {
-
-    private val maxRetries = properties.retries.size
+    private val maxRetries: Int
+) : AutoCloseable {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -61,9 +58,9 @@ class DownloadExecutor<T>(
         // For successful case we should rewrite current data anyway
         val exist = initial ?: getOrDefault(task)
         val updated = exist.withSuccessInc(data)
-        repository.save(updated)
+        val saved = repository.save(updated)
 
-        notifier.notify(updated)
+        notifier.notify(saved)
         logger.info("Data download SUCCEEDED for: {}", task.id)
 
     }
@@ -109,6 +106,10 @@ class DownloadExecutor<T>(
             status = DownloadStatus.SCHEDULED,
             scheduledAt = task.scheduledAt
         )
+    }
+
+    override fun close() {
+        pool.close()
     }
 
 }

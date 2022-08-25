@@ -4,12 +4,13 @@ import com.rarible.core.task.TaskHandler
 import com.rarible.core.task.TaskRepository
 import com.rarible.protocol.union.core.converter.EsItemConverter.toEsItem
 import com.rarible.protocol.union.core.model.EsItem
+import com.rarible.protocol.union.core.service.ItemService
+import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.continuation.CombinedContinuation
-import com.rarible.protocol.union.dto.continuation.page.ArgSlice
 import com.rarible.protocol.union.dto.continuation.page.PageSize
+import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
 import com.rarible.protocol.union.enrichment.repository.search.EsItemRepository
-import com.rarible.protocol.union.enrichment.service.query.item.ItemApiMergeService
+import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.worker.config.ItemReindexProperties
 import com.rarible.protocol.union.worker.metrics.SearchTaskMetricFactory
 import com.rarible.protocol.union.worker.task.search.ItemTaskParam
@@ -27,7 +28,8 @@ import java.util.concurrent.TimeUnit
 @Component
 class ItemTask(
     private val properties: ItemReindexProperties,
-    private val itemApiMergeService: ItemApiMergeService,
+    private val itemServiceRouter: BlockchainRouter<ItemService>,
+    private val enrichmentItemService: EnrichmentItemService,
     private val paramFactory: ParamFactory,
     private val repository: EsItemRepository,
     private val searchTaskMetricFactory: SearchTaskMetricFactory,
@@ -45,6 +47,7 @@ class ItemTask(
     override fun runLongTask(from: String?, param: String): Flow<String> {
         val blockchain = paramFactory.parse<ItemTaskParam>(param).blockchain
         val counter = searchTaskMetricFactory.createReindexItemCounter(blockchain)
+        val itemService = itemServiceRouter.getService(blockchain)
         // TODO read values from config
         val size = when (blockchain) {
             BlockchainDto.IMMUTABLEX -> 200 // Max size allowed by IMX
@@ -56,8 +59,7 @@ class ItemTask(
             var continuation = from
             flow {
                 do {
-                    val res = itemApiMergeService.getAllItems(
-                        listOf(blockchain),
+                    val res = itemService.getAllItems(
                         continuation,
                         size,
                         true,
@@ -65,19 +67,21 @@ class ItemTask(
                         Instant.now().plusSeconds(TimeUnit.DAYS.toMillis(100)).toEpochMilli()
                     )
 
-                    if (res.items.isNotEmpty()) {
+                    val enrichedItems = enrichmentItemService.enrichItems(
+                        res.entities,
+                        ItemMetaPipeline.SYNC
+                    )
+
+                    if (enrichedItems.isNotEmpty()) {
                         repository.saveAll(
-                            res.items.map { it.toEsItem() },
+                            enrichedItems.map { it.toEsItem() },
                             refreshPolicy = WriteRequest.RefreshPolicy.NONE
                         )
-                        counter.increment(res.items.size)
+                        counter.increment(enrichedItems.size)
                     }
                     emit(res.continuation.orEmpty())
-                    val continuations = CombinedContinuation.parse(res.continuation).continuations
-
-                    val stop = continuations.isEmpty() || continuations.all { it.value == ArgSlice.COMPLETED }
                     continuation = res.continuation
-                } while (!stop)
+                } while (!continuation.isNullOrBlank())
             }
                 .takeWhile { taskRepository.findByTypeAndParam(type, param).awaitSingleOrNull()?.running ?: false }
         }

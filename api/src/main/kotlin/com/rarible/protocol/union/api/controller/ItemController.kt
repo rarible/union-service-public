@@ -29,6 +29,7 @@ import com.rarible.protocol.union.dto.SearchEngineDto
 import com.rarible.protocol.union.dto.TraitsDto
 import com.rarible.protocol.union.dto.TraitsRarityRequestDto
 import com.rarible.protocol.union.dto.parser.IdParser
+import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.service.ItemMetaService
@@ -110,7 +111,7 @@ class ItemController(
                 itemMetaService.get(
                     itemId = IdParser.parseItemId(itemId),
                     sync = true,
-                    pipeline = "default" // TODO PT-49
+                    pipeline = ItemMetaPipeline.API.pipeline
                 )
             }
         } catch (e: CancellationException) {
@@ -132,7 +133,8 @@ class ItemController(
         val enrichedUnionItem = enrichmentItemService.enrichItem(
             shortItem = shortItem,
             item = unionItem,
-            syncMetaDownload = true
+            syncMetaDownload = true,
+            metaPipeline = ItemMetaPipeline.API
         )
         return ResponseEntity.ok(enrichedUnionItem)
     }
@@ -174,9 +176,9 @@ class ItemController(
         // TODO[meta]: when all Blockchains stop caching the meta, we can remove this endpoint call.
         router.getService(fullItemId.blockchain).resetItemMeta(fullItemId.value)
         if (safeSync) {
-            itemMetaService.download(fullItemId, "default", true)  // TODO PT-49
+            itemMetaService.download(fullItemId, ItemMetaPipeline.REFRESH.pipeline, true)
         } else {
-            itemMetaService.schedule(fullItemId, "default", true)  // TODO PT-49
+            itemMetaService.schedule(fullItemId, ItemMetaPipeline.REFRESH.pipeline, true)
         }
 
         return ResponseEntity.ok().build()

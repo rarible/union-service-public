@@ -13,11 +13,13 @@ import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.AuctionDto
 import com.rarible.protocol.union.dto.AuctionIdDto
 import com.rarible.protocol.union.dto.CollectionIdDto
+import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.enrichment.converter.EnrichedItemConverter
 import com.rarible.protocol.union.enrichment.meta.content.ContentMetaService
+import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
@@ -106,7 +108,7 @@ class EnrichmentItemService(
         auctions: Map<AuctionIdDto, AuctionDto> = emptyMap(),
         meta: Map<ItemIdDto, UnionMeta> = emptyMap(),
         syncMetaDownload: Boolean = false,
-        metaPipeline: String = "default" // TODO PT-49
+        metaPipeline: ItemMetaPipeline
     ) = coroutineScope {
 
         require(shortItem != null || item != null)
@@ -120,7 +122,7 @@ class EnrichmentItemService(
         } else {
             val sync = (syncMetaDownload || item?.loadMetaSynchronously == true)
             withSpanAsync("fetchMeta", spanType = SpanType.CACHE) {
-                itemMetaService.get(itemId, sync, metaPipeline)
+                itemMetaService.get(itemId, sync, metaPipeline.pipeline)
             }
         }
         val bestOrders = enrichmentOrderService.fetchMissingOrders(
@@ -142,6 +144,50 @@ class EnrichmentItemService(
         )
         logger.info("Enriched item {}: {}", itemId.fullId(), itemDto)
         itemDto
+    }
+
+    suspend fun enrichItems(
+        unionItems: List<UnionItem>,
+        metaPipeline: ItemMetaPipeline
+    ): List<ItemDto> {
+        if (unionItems.isEmpty()) {
+            return emptyList()
+        }
+        val now = nowMillis()
+
+        val enrichedItems = coroutineScope {
+
+            val meta = async {
+                itemMetaService.get(unionItems.map { it.id }, metaPipeline.pipeline)
+            }
+
+            val shortItems: Map<ItemIdDto, ShortItem> = findAll(unionItems.map { ShortItemId(it.id) })
+                .associateBy { it.id.toDto() }
+
+            // Looking for full orders for existing items in order-indexer
+            val shortOrderIds = shortItems.values
+                .map { it.getAllBestOrders() }
+                .flatten()
+                .map { it.dtoId }
+
+            val orders = enrichmentOrderService.getByIds(shortOrderIds)
+                .associateBy { it.id }
+
+            val enriched = unionItems.map {
+                val shortItem = shortItems[it.id]
+                enrichItem(
+                    shortItem = shortItem,
+                    item = it,
+                    orders = orders,
+                    meta = meta.await(),
+                    metaPipeline = metaPipeline
+                )
+            }
+            logger.info("Enriched {} of {} Items ({}ms)", shortItems.size, unionItems.size, spent(now))
+            enriched
+        }
+
+        return enrichedItems
     }
 
     private fun <T> CoroutineScope.withSpanAsync(

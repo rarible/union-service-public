@@ -6,6 +6,8 @@ import com.rarible.protocol.union.core.model.download.DownloadTask
 import com.rarible.protocol.union.enrichment.repository.ItemMetaRepository
 import com.rarible.protocol.union.enrichment.test.data.randomItemMetaDownloadEntry
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
+import com.rarible.protocol.union.listener.downloader.ItemMetaTaskRouter
+import com.rarible.protocol.union.listener.downloader.ItemMetaTaskScheduler
 import com.rarible.protocol.union.listener.test.AbstractIntegrationTest
 import com.rarible.protocol.union.listener.test.IntegrationTest
 import io.mockk.clearMocks

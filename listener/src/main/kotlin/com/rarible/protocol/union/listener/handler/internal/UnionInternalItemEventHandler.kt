@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.listener.handler.internal
 
 import com.rarible.core.apm.CaptureTransaction
+import com.rarible.protocol.union.core.model.UnionItemChangeEvent
 import com.rarible.protocol.union.core.model.UnionItemDeleteEvent
 import com.rarible.protocol.union.core.model.UnionItemEvent
 import com.rarible.protocol.union.core.model.UnionItemUpdateEvent
@@ -23,6 +24,9 @@ class UnionInternalItemEventHandler(
                 }
                 is UnionItemDeleteEvent -> {
                     itemEventService.onItemDeleted(event.itemId)
+                }
+                is UnionItemChangeEvent -> {
+                    itemEventService.onItemChanged(event.itemId)
                 }
             }
         } catch (e: Throwable) {
