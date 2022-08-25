@@ -21,8 +21,6 @@ import kotlinx.coroutines.flow.takeWhile
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.elasticsearch.action.support.WriteRequest
 import org.springframework.stereotype.Component
-import java.time.Instant
-import java.util.concurrent.TimeUnit
 
 @Component
 class ItemTask(
@@ -60,9 +58,9 @@ class ItemTask(
                         listOf(blockchain),
                         continuation,
                         size,
-                        true,
-                        Instant.EPOCH.toEpochMilli(),
-                        Instant.now().plusSeconds(TimeUnit.DAYS.toMillis(100)).toEpochMilli()
+                        showDeleted = true,
+                        lastUpdatedFrom = null,
+                        lastUpdatedTo = null
                     )
 
                     if (res.items.isNotEmpty()) {

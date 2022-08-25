@@ -57,7 +57,7 @@ class ImxItemService(
 
     override suspend fun getItemRoyaltiesById(itemId: String): List<RoyaltyDto> {
         val decodedItemId = TokenIdDecoder.decodeItemId(itemId)
-        val asset = assetClient.getById(decodedItemId)
+        val asset = assetClient.getByIdOrNull(decodedItemId) ?: return emptyList()
         return ImxItemConverter.convertToRoyaltyDto(asset, blockchain)
     }
 
