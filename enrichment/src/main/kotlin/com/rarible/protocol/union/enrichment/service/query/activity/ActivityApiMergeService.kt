@@ -277,8 +277,8 @@ class ActivityApiMergeService(
     }
 
     private fun continuationFactory(sort: ActivitySortDto?) = when (sort) {
-        ActivitySortDto.EARLIEST_FIRST -> ActivityContinuation.ByLastUpdatedAndIdAsc
-        ActivitySortDto.LATEST_FIRST, null -> ActivityContinuation.ByLastUpdatedAndIdDesc
+        ActivitySortDto.EARLIEST_FIRST -> ActivityContinuation.ByLastUpdatedAsc
+        ActivitySortDto.LATEST_FIRST, null -> ActivityContinuation.ByLastUpdatedDesc
     }
 
     private suspend fun getActivitiesByBlockchains(
