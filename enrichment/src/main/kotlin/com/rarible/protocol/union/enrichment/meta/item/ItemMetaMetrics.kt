@@ -27,7 +27,15 @@ class ItemMetaMetrics(
     }
 
     fun onMetaFetchError(blockchain: BlockchainDto) {
-        increment(META_FETCH, tag(blockchain), status("fail"), reason("error"))
+        increment(META_FETCH, tag(blockchain), status("fail"), reason("unknown_error"))
+    }
+
+    fun onMetaParseLinkError(blockchain: BlockchainDto) {
+        increment(META_FETCH, tag(blockchain), status("fail"), reason("meta_parse_link"))
+    }
+
+    fun onMetaParseJsonError(blockchain: BlockchainDto) {
+        increment(META_FETCH, tag(blockchain), status("fail"), reason("meta_parse_json"))
     }
 
     //--------------------- Meta cache ----------------------//
@@ -42,7 +50,6 @@ class ItemMetaMetrics(
     }
 
     private companion object {
-
         const val META_FETCH = "meta_fetch"
         const val META_CACHE = "meta_cache"
     }
