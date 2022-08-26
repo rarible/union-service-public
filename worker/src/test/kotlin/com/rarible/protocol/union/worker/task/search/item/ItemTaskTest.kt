@@ -102,7 +102,8 @@ internal class ItemTaskTest {
         task.runLongTask(null, param).toList()
 
         coVerifyAll {
-            itemService.getAllItems(null, 1000, true, Long.MIN_VALUE, Long.MAX_VALUE)
+            itemService.getAllItems(null, 1000, true, null, null
+                )
             repo.saveAll(any(), any(), any())
             itemService.getAllItems(firstContinuation, 1000, true, Long.MIN_VALUE, Long.MAX_VALUE)
         }
