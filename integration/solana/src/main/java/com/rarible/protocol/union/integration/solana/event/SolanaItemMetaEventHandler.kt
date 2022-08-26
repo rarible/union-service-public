@@ -3,15 +3,12 @@ package com.rarible.protocol.union.integration.solana.event
 import com.rarible.core.apm.CaptureTransaction
 import com.rarible.protocol.solana.dto.TokenMetaEventDto
 import com.rarible.protocol.solana.dto.TokenMetaTriggerEventDto
-import com.rarible.protocol.solana.dto.TokenMetaUpdateEventDto
 import com.rarible.protocol.union.core.handler.AbstractBlockchainEventHandler
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.model.UnionItemMetaEvent
 import com.rarible.protocol.union.core.model.UnionItemMetaRefreshEvent
-import com.rarible.protocol.union.core.model.UnionItemMetaUpdateEvent
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
-import com.rarible.protocol.union.integration.solana.converter.SolanaItemMetaConverter
 import org.slf4j.LoggerFactory
 
 open class SolanaItemMetaEventHandler(
@@ -27,11 +24,6 @@ open class SolanaItemMetaEventHandler(
             is TokenMetaTriggerEventDto -> {
                 val itemId = ItemIdDto(blockchain, event.tokenAddress)
                 handler.onEvent(UnionItemMetaRefreshEvent(itemId))
-            }
-            is TokenMetaUpdateEventDto -> {
-                val itemId = ItemIdDto(blockchain, event.tokenAddress)
-                val unionMeta = SolanaItemMetaConverter.convert(event.tokenMeta)
-                handler.onEvent(UnionItemMetaUpdateEvent(itemId, null, unionMeta))
             }
         }
     }

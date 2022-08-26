@@ -100,11 +100,11 @@ class DipDupOrderConverter(
 
     fun orderData(order: DipDupOrder, blockchain: BlockchainDto): OrderDataDto {
         return when (order.platform) {
-            TezosPlatform.RARIBLE_V2 -> TezosOrderDataRaribleV2DataV2Dto(
+            TezosPlatform.RARIBLE_V1 -> TezosOrderDataRaribleV2DataV1Dto(
                 payouts = order.payouts.map { convert(it, blockchain) },
                 originFees = order.originFees.map { convert(it, blockchain) }
             )
-            else -> TezosOrderDataRaribleV2DataV1Dto(
+            else -> TezosOrderDataRaribleV2DataV2Dto(
                 payouts = order.payouts.map { convert(it, blockchain) },
                 originFees = order.originFees.map { convert(it, blockchain) }
             )

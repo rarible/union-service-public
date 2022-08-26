@@ -20,6 +20,7 @@ import com.rarible.protocol.union.integration.immutablex.scanner.ImxScanner
 import com.rarible.protocol.union.integration.immutablex.service.ImxActivityService
 import com.rarible.protocol.union.integration.immutablex.service.ImxItemService
 import io.micrometer.core.instrument.MeterRegistry
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
 import org.springframework.data.mongodb.config.EnableMongoAuditing
@@ -85,7 +86,9 @@ class ImxConsumerConfiguration {
         activityHandler: ImxActivityEventHandler,
         itemEventHandler: ImxItemEventHandler,
         orderEventHandler: ImxOrderEventHandler,
-        collectionEventHandler: ImxCollectionEventHandler
+        collectionEventHandler: ImxCollectionEventHandler,
+        @Value("\${integration.immutablex.scanner.job.offset.activity:3000}")
+        activityDelay: Long
     ): ImxScanner = ImxScanner(
         eventsApi,
         scanStateRepository,
@@ -93,7 +96,8 @@ class ImxConsumerConfiguration {
         activityHandler,
         itemEventHandler,
         orderEventHandler,
-        collectionEventHandler
+        collectionEventHandler,
+        activityDelay
     )
 
 }
