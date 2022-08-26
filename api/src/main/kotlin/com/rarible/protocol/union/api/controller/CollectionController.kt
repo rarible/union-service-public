@@ -10,6 +10,7 @@ import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.dto.CollectionsDto
 import com.rarible.protocol.union.dto.SearchEngineDto
 import com.rarible.protocol.union.dto.parser.IdParser
+import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
 import com.rarible.protocol.union.enrichment.model.ShortCollectionId
 import com.rarible.protocol.union.enrichment.service.EnrichmentCollectionService
 import com.rarible.protocol.union.enrichment.service.ItemMetaService
@@ -59,7 +60,7 @@ class CollectionController(
         logger.info("Refreshing collection meta for '{}'", collection)
         router.getService(collectionId.blockchain).refreshCollectionMeta(collectionId.value)
         itemSourceSelectService.getAllItemIdsByCollection(collectionId, SearchEngineDto.LEGACY).collect {
-            itemMetaService.schedule(it, "default", true)  // TODO PT-49
+            itemMetaService.schedule(it, ItemMetaPipeline.REFRESH.pipeline, true)
         }
         return ResponseEntity.ok().build()
     }

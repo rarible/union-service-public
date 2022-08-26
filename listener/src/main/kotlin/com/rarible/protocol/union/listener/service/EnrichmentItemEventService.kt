@@ -15,6 +15,7 @@ import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.ItemUpdateEventDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.enrichment.converter.ItemLastSaleConverter
+import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
 import com.rarible.protocol.union.enrichment.model.ItemSellStats
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
@@ -113,6 +114,12 @@ class EnrichmentItemEventService(
                 saveAndNotify(existing.copy(lastSale = newLastSale), notificationEnabled, item)
             }
         }
+    }
+
+    suspend fun onItemChanged(itemId: ItemIdDto) {
+        val existing = enrichmentItemService.getOrEmpty(ShortItemId(itemId))
+        val updateEvent = buildUpdateEvent(short = existing)
+        sendUpdate(updateEvent)
     }
 
     suspend fun onItemUpdated(item: UnionItem) {
@@ -273,7 +280,8 @@ class EnrichmentItemEventService(
             shortItem = short,
             item = item,
             orders = listOfNotNull(order).associateBy { it.id },
-            auctions = listOfNotNull(auction).associateBy { it.id }
+            auctions = listOfNotNull(auction).associateBy { it.id },
+            metaPipeline = ItemMetaPipeline.EVENT
         )
 
         return ItemUpdateEventDto(

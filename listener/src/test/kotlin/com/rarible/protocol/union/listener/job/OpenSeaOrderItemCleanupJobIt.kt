@@ -42,7 +42,7 @@ class OpenSeaOrderItemCleanupJobIt {
         )
         coEvery { listener.onEvent(any()) } returns Unit
         coEvery { filter.isOld(any(), any(), any()) } returns false
-        coEvery { itemService.enrichItem(any()) } answers {
+        coEvery { itemService.enrichItem(shortItem = any(), metaPipeline = any()) } answers {
             val shortItem = it.invocation.args[0] as ShortItem
             EnrichedItemConverter.convert(randomUnionItem(shortItem.id.toDto()), shortItem)
         }

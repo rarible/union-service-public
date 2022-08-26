@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.enrichment.service.query.item
+package com.rarible.protocol.union.api.service.api
 
 import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.core.continuation.UnionItemContinuation
@@ -38,9 +38,7 @@ class ItemApiMergeService(
     private val ownershipApiService: OwnershipApiService,
 ) : ItemQueryService {
 
-    companion object {
-        private val logger by Logger()
-    }
+    private val logger by Logger()
 
     override suspend fun getAllItems(
         blockchains: List<BlockchainDto>?,
