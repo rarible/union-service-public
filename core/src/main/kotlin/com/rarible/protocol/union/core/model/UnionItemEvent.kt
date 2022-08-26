@@ -7,7 +7,8 @@ import com.rarible.protocol.union.dto.ItemIdDto
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY)
 @JsonSubTypes(
     JsonSubTypes.Type(name = "UPDATE", value = UnionItemUpdateEvent::class),
-    JsonSubTypes.Type(name = "DELETE", value = UnionItemDeleteEvent::class)
+    JsonSubTypes.Type(name = "DELETE", value = UnionItemDeleteEvent::class),
+    JsonSubTypes.Type(name = "CHANGE", value = UnionItemChangeEvent::class),
 )
 sealed class UnionItemEvent {
 
@@ -24,5 +25,9 @@ data class UnionItemUpdateEvent(
 }
 
 data class UnionItemDeleteEvent(
+    override val itemId: ItemIdDto
+) : UnionItemEvent()
+
+data class UnionItemChangeEvent(
     override val itemId: ItemIdDto
 ) : UnionItemEvent()

@@ -20,18 +20,18 @@ object UnionInternalTopicProvider {
     }
 
     fun getItemMetaDownloadTaskSchedulerTopic(environment: String): String {
-        return "protocol.$environment.union.internal.download.item-meta"
+        return "protocol.$environment.union.internal.download.meta.item"
     }
 
     fun getItemMetaDownloadTaskExecutorTopic(environment: String, pipeline: String): String {
-        return "protocol.$environment.union.internal.download.item-meta.$pipeline"
+        return "protocol.$environment.union.internal.download.meta.item.$pipeline"
     }
 
     fun getCollectionMetaDownloadTaskSchedulerTopic(environment: String): String {
-        return "protocol.$environment.union.internal.download.collection-meta"
+        return "protocol.$environment.union.internal.download.meta.collection"
     }
 
     fun getCollectionMetaDownloadTaskExecutorTopic(environment: String, pipeline: String): String {
-        return "protocol.$environment.union.internal.download.collection-meta.$pipeline"
+        return "protocol.$environment.union.internal.download.meta.collection.$pipeline"
     }
 }

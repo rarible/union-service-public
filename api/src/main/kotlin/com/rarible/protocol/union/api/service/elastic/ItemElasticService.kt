@@ -4,6 +4,8 @@ import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.apm.SpanType
 import com.rarible.core.common.mapAsync
 import com.rarible.core.logging.Logger
+import com.rarible.protocol.union.api.service.api.ItemEnrichService
+import com.rarible.protocol.union.api.service.api.ItemQueryService
 import com.rarible.protocol.union.core.converter.ItemOwnershipConverter
 import com.rarible.protocol.union.core.model.EsItem
 import com.rarible.protocol.union.core.model.EsItemSort
@@ -27,8 +29,6 @@ import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.repository.search.EsItemRepository
 import com.rarible.protocol.union.enrichment.repository.search.EsOwnershipRepository
-import com.rarible.protocol.union.enrichment.service.query.item.ItemEnrichService
-import com.rarible.protocol.union.enrichment.service.query.item.ItemQueryService
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import org.springframework.stereotype.Service

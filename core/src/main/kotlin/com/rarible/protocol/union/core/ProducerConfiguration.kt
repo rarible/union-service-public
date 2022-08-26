@@ -85,7 +85,7 @@ class ProducerConfiguration(
     @Qualifier("download.scheduler.task.producer.item-meta")
     fun itemDownloadTaskProducer(): RaribleKafkaProducer<DownloadTask> {
         val topic = UnionInternalTopicProvider.getItemMetaDownloadTaskSchedulerTopic(env)
-        return createUnionProducer("download.scheduler.item-meta", topic, DownloadTask::class.java)
+        return createUnionProducer("meta.publisher", topic, DownloadTask::class.java)
     }
 
 /*

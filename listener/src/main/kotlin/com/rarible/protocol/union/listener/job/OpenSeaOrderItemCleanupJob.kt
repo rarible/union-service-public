@@ -4,6 +4,7 @@ import com.rarible.core.client.WebClientResponseProxyException
 import com.rarible.protocol.union.core.event.OutgoingItemEventListener
 import com.rarible.protocol.union.dto.ItemUpdateEventDto
 import com.rarible.protocol.union.dto.PlatformDto
+import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
@@ -81,7 +82,10 @@ class OpenSeaOrderItemCleanupJob(
             itemRepository.delete(item.id)
         }
 
-        val dto = itemService.enrichItem(updated)
+        val dto = itemService.enrichItem(
+            shortItem = updated,
+            metaPipeline = ItemMetaPipeline.SYNC
+        )
 
         ignoreApi404 {
             val event = ItemUpdateEventDto(

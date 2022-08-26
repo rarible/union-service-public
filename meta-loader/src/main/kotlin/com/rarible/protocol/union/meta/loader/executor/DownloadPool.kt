@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.enrichment.meta.downloader.executor
+package com.rarible.protocol.union.meta.loader.executor
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
@@ -9,7 +9,7 @@ import kotlinx.coroutines.cancel
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicInteger
 
-abstract class DownloadPool(
+class DownloadPool(
     numberOfThreads: Int,
     private val threadPrefix: String
 ) : AutoCloseable {
