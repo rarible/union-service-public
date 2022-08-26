@@ -119,6 +119,12 @@ integration:
         royaltiesManager: ${consul.tezos.dipdup.knownAddresses.royaltiesManager:}
         bidou8x8: ${consul.tezos.dipdup.knownAddresses.bidou8x8:}
         bidou24x24: ${consul.tezos.dipdup.knownAddresses.bidou24x24:}
+      marketplaces:
+        hen: ${consul.tezos.dipdup.marketplaces.hen:false}
+        objkt: ${consul.tezos.dipdup.marketplaces.objkt:false}
+        objktV2: ${consul.tezos.dipdup.marketplaces.objktV2:false}
+        versum: ${consul.tezos.dipdup.marketplaces.versum:false}
+        teia: ${consul.tezos.dipdup.marketplaces.teia:false}
       consumer:
         broker-replica-set: ${consul.tezos.dipdup.consumer.hosts:}
         username: ${consul.tezos.dipdup.consumer.username:}
