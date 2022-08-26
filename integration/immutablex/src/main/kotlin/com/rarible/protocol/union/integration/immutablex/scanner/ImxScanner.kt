@@ -13,6 +13,7 @@ import com.rarible.protocol.union.integration.immutablex.repository.ImxScanState
 import kotlinx.coroutines.runBlocking
 import org.springframework.scheduling.annotation.Scheduled
 import scalether.domain.Address
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 
 class ImxScanner(
@@ -23,7 +24,8 @@ class ImxScanner(
     private val activityHandler: ImxActivityEventHandler,
     private val itemEventHandler: ImxItemEventHandler,
     private val orderEventHandler: ImxOrderEventHandler,
-    private val collectionEventHandler: ImxCollectionEventHandler
+    private val collectionEventHandler: ImxCollectionEventHandler,
+    private val activityDelay: Long
 ) {
 
     private val logger by Logger()
@@ -55,6 +57,9 @@ class ImxScanner(
         imxEventsApi.lastTrade().transactionId.toString()
     }
 
+    @Deprecated("Should be removed later")
+    val imxBugTraps = ConcurrentHashMap<ImxScanEntityType, ImxScanBugTrap>()
+
     private fun <T : ImmutablexEvent> listenActivity(
         type: ImxScanEntityType,
         getEvents: suspend (id: String) -> List<T>,
@@ -64,10 +69,15 @@ class ImxScanner(
         // be synced via jobs
         val transactionId = state.entityId
 
+        val to = nowMillis().minusMillis(activityDelay)
         val page = getEvents(transactionId)
-        activityHandler.handle(page)
+        imxBugTraps.computeIfAbsent(type) { ImxScanBugTrap(type) }
+            .onNext(transactionId.toLong(), page, to)
 
-        val last = page.lastOrNull() ?: return@listen null
+        val filteredPage = page.filter { it.timestamp.isBefore(to) }
+        val last = filteredPage.lastOrNull() ?: return@listen null
+
+        activityHandler.handle(filteredPage)
 
         ImxScanResult(last.transactionId.toString(), last.timestamp)
     }
