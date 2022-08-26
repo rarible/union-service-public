@@ -3,6 +3,7 @@ package com.rarible.protocol.union.enrichment.meta.item
 import com.rarible.core.apm.SpanType
 import com.rarible.core.apm.withSpan
 import com.rarible.core.client.WebClientResponseProxyException
+import com.rarible.protocol.union.core.exception.UnionMetaException
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.UnionMetaContent
 import com.rarible.protocol.union.core.service.ItemService
@@ -51,6 +52,14 @@ class ItemMetaLoader(
             val result = router.getService(itemId.blockchain).getItemMetaById(itemId.value)
             metrics.onMetaFetched(itemId.blockchain)
             result
+        } catch (e: UnionMetaException) {
+            when (e.code) {
+                UnionMetaException.ErrorCode.UNPARSEABLE_JSON -> metrics.onMetaParseJsonError(itemId.blockchain)
+                UnionMetaException.ErrorCode.UNPARSEABLE_LINK -> metrics.onMetaParseLinkError(itemId.blockchain)
+                UnionMetaException.ErrorCode.TIMEOUT -> metrics.onMetaFetchTimeout(itemId.blockchain)
+                UnionMetaException.ErrorCode.UNKNOWN -> metrics.onMetaFetchError(itemId.blockchain)
+            }
+            throw e
         } catch (e: WebClientResponseProxyException) {
             if (e.statusCode == HttpStatus.NOT_FOUND) {
                 // this log tagged by itemId, used in Kibana in analytics dashboards

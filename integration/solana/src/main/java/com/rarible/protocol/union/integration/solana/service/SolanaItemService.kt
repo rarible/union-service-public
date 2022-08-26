@@ -2,18 +2,24 @@ package com.rarible.protocol.union.integration.solana.service
 
 import com.rarible.core.apm.CaptureSpan
 import com.rarible.protocol.solana.api.client.TokenControllerApi
+import com.rarible.protocol.solana.dto.SolanaApiMetaErrorDto.Code.ERROR
+import com.rarible.protocol.solana.dto.SolanaApiMetaErrorDto.Code.TIMEOUT
+import com.rarible.protocol.solana.dto.SolanaApiMetaErrorDto.Code.UNPARSEABLE_JSON
+import com.rarible.protocol.solana.dto.SolanaApiMetaErrorDto.Code.UNPARSEABLE_LINK
 import com.rarible.protocol.solana.dto.TokenIdsDto
+import com.rarible.protocol.union.core.exception.UnionMetaException
+import com.rarible.protocol.union.core.exception.UnionNotFoundException
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.ItemIdsDto
 import com.rarible.protocol.union.dto.RoyaltyDto
 import com.rarible.protocol.union.dto.continuation.page.Page
 import com.rarible.protocol.union.integration.solana.converter.SolanaItemConverter
 import com.rarible.protocol.union.integration.solana.converter.SolanaItemMetaConverter
 import kotlinx.coroutines.reactive.awaitFirst
+import org.springframework.http.HttpStatus
 
 @CaptureSpan(type = "blockchain")
 open class SolanaItemService(
@@ -26,8 +32,35 @@ open class SolanaItemService(
     }
 
     override suspend fun getItemMetaById(itemId: String): UnionMeta {
-        val tokenMeta = tokenApi.getTokenMetaByAddress(itemId).awaitFirst()
-        return SolanaItemMetaConverter.convert(tokenMeta)
+        try {
+            val tokenMeta = tokenApi.getTokenMetaByAddress(itemId).awaitFirst()
+
+            return SolanaItemMetaConverter.convert(tokenMeta)
+        } catch (e: TokenControllerApi.ErrorGetTokenMetaByAddress) {
+            if (e.statusCode == HttpStatus.NOT_FOUND) throw UnionNotFoundException("Meta not found for: $itemId")
+
+            when (e.on500.code) {
+                UNPARSEABLE_LINK -> throw UnionMetaException(
+                    UnionMetaException.ErrorCode.UNPARSEABLE_LINK,
+                    "Can't parse meta url for: $itemId"
+                )
+
+                UNPARSEABLE_JSON -> throw UnionMetaException(
+                    UnionMetaException.ErrorCode.UNPARSEABLE_JSON,
+                    "Can't parse meta json for: $itemId"
+                )
+
+                TIMEOUT -> throw UnionMetaException(
+                    UnionMetaException.ErrorCode.TIMEOUT,
+                    "Timeout during loading meta for: $itemId"
+                )
+
+                ERROR -> throw UnionMetaException(
+                    UnionMetaException.ErrorCode.UNKNOWN,
+                    e.message
+                )
+            }
+        }
     }
 
     override suspend fun getAllItems(
