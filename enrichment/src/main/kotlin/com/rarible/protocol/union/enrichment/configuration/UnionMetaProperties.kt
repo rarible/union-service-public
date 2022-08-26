@@ -2,6 +2,7 @@ package com.rarible.protocol.union.enrichment.configuration
 
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.ConstructorBinding
+import java.time.Duration
 
 @ConstructorBinding
 @ConfigurationProperties("meta")
@@ -12,8 +13,21 @@ data class UnionMetaProperties(
     val mediaFetchMaxSize: Long,
     val openSeaProxyUrl: String,
     val embedded: EmbeddedContentProperties,
-    val httpClient: HttpClient = HttpClient()
-){
+    val httpClient: HttpClient = HttpClient(),
+    private val retries: String = "" //  TODO not sure it should be here
+) {
+
+    val retryIntervals = retries.split(",")
+        .filter { it.isNotBlank() }
+        .map { Duration.parse(it) }
+        .ifEmpty {
+            listOf(
+                Duration.ofMinutes(5),
+                Duration.ofHours(1),
+                Duration.ofHours(24)
+            )
+        }
+
     class HttpClient(
         val type: HttpClientType = HttpClientType.KTOR_CIO,
         val threadCount: Int = 8,

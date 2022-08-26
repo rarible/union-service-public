@@ -2,20 +2,19 @@ package com.rarible.protocol.union.worker.task.search.item
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
-import com.rarible.core.common.nowMillis
 import com.rarible.core.task.Task
 import com.rarible.core.task.TaskRepository
-import com.rarible.core.test.data.randomAddress
-import com.rarible.core.test.data.randomBigInt
+import com.rarible.protocol.union.core.service.ItemService
+import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.CollectionIdDto
-import com.rarible.protocol.union.dto.ItemDto
-import com.rarible.protocol.union.dto.ItemIdDto
-import com.rarible.protocol.union.dto.ItemsDto
-import com.rarible.protocol.union.dto.continuation.CombinedContinuation
-import com.rarible.protocol.union.dto.continuation.page.ArgSlice
+import com.rarible.protocol.union.dto.continuation.ItemContinuation
+import com.rarible.protocol.union.dto.continuation.page.Page
+import com.rarible.protocol.union.enrichment.converter.EnrichedItemConverter
+import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
 import com.rarible.protocol.union.enrichment.repository.search.EsItemRepository
-import com.rarible.protocol.union.enrichment.service.query.item.ItemApiMergeService
+import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
+import com.rarible.protocol.union.enrichment.test.data.randomUnionItem
+import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.worker.config.BlockchainReindexProperties
 import com.rarible.protocol.union.worker.config.ItemReindexProperties
 import com.rarible.protocol.union.worker.metrics.SearchTaskMetricFactory
@@ -30,7 +29,6 @@ import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactor.mono
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
-import java.math.BigInteger
 
 internal class ItemTaskTest {
 
@@ -46,99 +44,67 @@ internal class ItemTaskTest {
         } returns mono { Task(type = "", param = "", running = true) }
     }
 
-    private val ethItem = ItemDto(
-        id = ItemIdDto(BlockchainDto.ETHEREUM, "${randomAddress()}", randomBigInt()),
-        collection = CollectionIdDto(BlockchainDto.ETHEREUM, "${randomAddress()}"),
-        blockchain = BlockchainDto.ETHEREUM,
-        deleted = false,
-        sellers = 1,
-        mintedAt = nowMillis(),
-        lastUpdatedAt = nowMillis(),
-        lazySupply = BigInteger.ZERO,
-        supply = BigInteger.ONE
-    )
-    private val flowItem = ItemDto(
-        id = ItemIdDto(BlockchainDto.FLOW, "${randomAddress()}", randomBigInt()),
-        collection = CollectionIdDto(BlockchainDto.FLOW, "${randomAddress()}"),
-        blockchain = BlockchainDto.FLOW,
-        deleted = false,
-        sellers = 1,
-        mintedAt = nowMillis(),
-        lastUpdatedAt = nowMillis(),
-        lazySupply = BigInteger.ZERO,
-        supply = BigInteger.ONE
-    )
+    private val item = randomUnionItem(randomEthItemId())
+    private val enrichedItem = EnrichedItemConverter.convert(item)
+    private val firstContinuation = ItemContinuation.ByLastUpdatedAndId.getContinuation(enrichedItem).toString()
 
-    private val ethContinuation = "${ethItem.lastUpdatedAt.toEpochMilli()}_${ethItem.id}"
-    private val flowContinuation = "${flowItem.lastUpdatedAt.toEpochMilli()}_${flowItem.id}"
-    private val firstCombinedContinuation = CombinedContinuation(
-        mapOf(
-            BlockchainDto.ETHEREUM.toString() to ethContinuation,
-            BlockchainDto.FLOW.toString() to flowContinuation,
-        )
-    )
-
-    private val completedContinuation = CombinedContinuation(
-        mapOf(
-            BlockchainDto.ETHEREUM.toString() to ArgSlice.COMPLETED,
-            BlockchainDto.FLOW.toString() to ArgSlice.COMPLETED,
-        )
-    )
-
-    private val client = mockk<ItemApiMergeService> {
-        coEvery { getAllItems(any<List<BlockchainDto>>(), null, any(), any(), any(), any()) } returns ItemsDto(
-            total = 1L, items = listOf(ethItem, flowItem), continuation = firstCombinedContinuation.toString()
+    private val itemService = mockk<ItemService> {
+        coEvery { getAllItems(null, any(), any(), any(), any()) } returns Page(
+            total = 1L, entities = listOf(item), continuation = firstContinuation
         )
 
         coEvery {
-            getAllItems(
-                any<List<BlockchainDto>>(), firstCombinedContinuation.toString(), any(), any(), any(), any()
-            )
-        } returns ItemsDto(
-            total = 0L, items = emptyList(), continuation = completedContinuation.toString()
-        )
+            getAllItems(firstContinuation, any(), any(), any(), any())
+        } returns Page.empty()
+    }
+
+    private val itemServiceRouter = mockk<BlockchainRouter<ItemService>>() {
+        coEvery { getService(any()) } returns itemService
     }
 
     private val searchTaskMetricFactory = SearchTaskMetricFactory(SimpleMeterRegistry(), mockk {
         every { metrics } returns mockk { every { rootPath } returns "protocol.union.worker" }
     })
 
+    private val enrichmentItemService: EnrichmentItemService = mockk()
+
     private val paramFactory = ParamFactory(jacksonObjectMapper().registerKotlinModule())
 
+    private val itemReindexProperties = ItemReindexProperties(
+        enabled = true,
+        blockchains = listOf(BlockchainReindexProperties(enabled = true, BlockchainDto.ETHEREUM))
+    )
+
     @Test
-    internal fun `should start first task`() {
-        runBlocking {
+    fun `should start first task`() = runBlocking<Unit> {
 
-            val task = ItemTask(
-                ItemReindexProperties(
-                    enabled = true,
-                    blockchains = listOf(BlockchainReindexProperties(enabled = true, BlockchainDto.ETHEREUM))
-                ), client, paramFactory, repo, searchTaskMetricFactory, taskRepository
+        val task = ItemTask(
+            itemReindexProperties,
+            itemServiceRouter,
+            enrichmentItemService,
+            paramFactory,
+            repo,
+            searchTaskMetricFactory,
+            taskRepository
+        )
+
+        val param = paramFactory.toString(
+            ItemTaskParam(
+                versionData = 1,
+                settingsHash = "",
+                blockchain = BlockchainDto.ETHEREUM,
+                index = "test_index"
             )
-            task.runLongTask(
-                null, paramFactory.toString(
-                    ItemTaskParam(
-                        versionData = 1, settingsHash = "", blockchain = BlockchainDto.ETHEREUM, index = "test_index"
-                    )
-                )
-            ).toList()
+        )
+        coEvery { enrichmentItemService.enrichItems(listOf(item), ItemMetaPipeline.SYNC) } returns listOf(enrichedItem)
+        coEvery { enrichmentItemService.enrichItems(listOf(), ItemMetaPipeline.SYNC) } returns emptyList()
 
-            coVerifyAll {
-                client.getAllItems(
-                    listOf(BlockchainDto.ETHEREUM), null, 1000, true, Long.MIN_VALUE, Long.MAX_VALUE
-                )
+        task.runLongTask(null, param).toList()
 
-                repo.saveAll(any(), any(), any())
-
-                client.getAllItems(
-                    listOf(BlockchainDto.ETHEREUM),
-                    firstCombinedContinuation.toString(),
-                    1000,
-                    true,
-                    Long.MIN_VALUE,
-                    Long.MAX_VALUE
-                )
-            }
+        coVerifyAll {
+            itemService.getAllItems(null, 1000, true, Long.MIN_VALUE, Long.MAX_VALUE)
+            repo.saveAll(any(), any(), any())
+            itemService.getAllItems(firstContinuation, 1000, true, Long.MIN_VALUE, Long.MAX_VALUE)
         }
     }
 }

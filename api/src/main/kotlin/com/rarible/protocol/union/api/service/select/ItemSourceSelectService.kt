@@ -1,6 +1,8 @@
 package com.rarible.protocol.union.api.service.select
 
 import com.rarible.protocol.union.api.exception.FeatureUnderConstructionException
+import com.rarible.protocol.union.api.service.api.ItemApiMergeService
+import com.rarible.protocol.union.api.service.api.ItemQueryService
 import com.rarible.protocol.union.api.service.elastic.ItemElasticService
 import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -11,8 +13,6 @@ import com.rarible.protocol.union.dto.ItemsDto
 import com.rarible.protocol.union.dto.ItemsSearchRequestDto
 import com.rarible.protocol.union.dto.ItemsWithOwnershipDto
 import com.rarible.protocol.union.dto.SearchEngineDto
-import com.rarible.protocol.union.enrichment.service.query.item.ItemApiMergeService
-import com.rarible.protocol.union.enrichment.service.query.item.ItemQueryService
 import kotlinx.coroutines.flow.Flow
 import org.springframework.stereotype.Service
 
@@ -116,7 +116,7 @@ class ItemSourceSelectService(
         if (searchEngine != null) {
             return when (searchEngine) {
                 SearchEngineDto.LEGACY -> itemApiService
-                SearchEngineDto.V1 -> itemApiService
+                SearchEngineDto.V1 -> itemElasticService
             }
         }
         return when (featureFlagsProperties.enableItemQueriesToElasticSearch) {
