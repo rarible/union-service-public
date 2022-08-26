@@ -125,7 +125,7 @@ internal class ItemTaskTest {
 
             coVerifyAll {
                 client.getAllItems(
-                    listOf(BlockchainDto.ETHEREUM), null, 1000, true, Long.MIN_VALUE, Long.MAX_VALUE
+                    listOf(BlockchainDto.ETHEREUM), null, 1000, true, null, null
                 )
 
                 repo.saveAll(any(), any(), any())
