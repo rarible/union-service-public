@@ -2,6 +2,7 @@ package com.rarible.protocol.union.core.elasticsearch
 
 import com.rarible.protocol.union.core.model.EsMetadata
 import kotlinx.coroutines.reactor.awaitSingle
+import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations
 import org.springframework.stereotype.Component
 
@@ -13,7 +14,7 @@ class EsMetadataRepository(
     val metadataIndexCoordinate = esNameResolver.metadataIndexCoordinate
 
     suspend fun findById(id: String): EsMetadata? {
-        return esOperations.get(id, EsMetadata::class.java, metadataIndexCoordinate).awaitSingle()
+        return esOperations.get(id, EsMetadata::class.java, metadataIndexCoordinate).awaitSingleOrNull()
     }
 
     suspend fun save(metadata: EsMetadata): EsMetadata {

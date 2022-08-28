@@ -44,7 +44,5 @@ object EsEntitiesConfig {
             throw e
         }
 
-    val INDEX_SETTINGS = loadMapping("settings")
-
     private val logger by Logger()
 }
