@@ -88,6 +88,7 @@ class ElasticsearchBootstrapper(
         when {
             currentEntityMetadata.settings != definition.settings ||
                 currentEntityMetadata.versionData != definition.versionData -> {
+                logger.info("currentEntityMetadata.settings != definition.settings || currentEntityMetadata.versionData != definition.versionData ")
                 if (reindexSchedulingService.checkReindexInProgress(definition)) {
                     logger.info("Reindexing tasks for entity ${definition.entity} was started")
                     return
@@ -106,6 +107,7 @@ class ElasticsearchBootstrapper(
                 }
             }
             currentEntityMetadata.mapping != definition.mapping -> {
+                logger.info("currentEntityMetadata.mapping != definition.mapping")
                 updateMappings(
                     realIndexName = getRealName(esOperations, definition.writeAliasName, definition)
                         ?: throw IllegalStateException("Not exists index for ${definition.writeAliasName}"),
