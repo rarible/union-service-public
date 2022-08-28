@@ -174,6 +174,8 @@ class ElasticsearchBootstrapper(
                 }
             }
             .toList()
+
+        indexService.updateMetadata(definition)
     }
 
     private suspend fun recreateIndex(
