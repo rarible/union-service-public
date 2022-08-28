@@ -26,8 +26,8 @@ open class DipDupOrderEventHandler(
                     || (event.platform == TezosPlatform.HEN && marketplaces.hen)
                     || (event.platform == TezosPlatform.OBJKT && marketplaces.objkt)
                     || (event.platform == TezosPlatform.OBJKT_V2 && marketplaces.objktV2)
-                    || (event.platform == TezosPlatform.VERSUM && marketplaces.versum)
-                    || (event.platform == TezosPlatform.TEIA && marketplaces.teia)
+                    || (event.platform == TezosPlatform.VERSUM_V1 && marketplaces.versum)
+                    || (event.platform == TezosPlatform.TEIA_V1 && marketplaces.teia)
         if (next) {
             val unionOrder = dipDupOrderConverter.convert(event, blockchain)
             handler.onEvent(UnionOrderUpdateEvent(unionOrder))
