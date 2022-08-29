@@ -42,6 +42,7 @@ class ImxActivityEventHandler(
     private val activityService: ImxActivityService,
 
     private val imxScanMetrics: ImxScanMetrics,
+    private val imxActivityConverter: ImxActivityConverter
 ) {
 
     private val blockchain = BlockchainDto.IMMUTABLEX
@@ -82,7 +83,7 @@ class ImxActivityEventHandler(
 
     private suspend fun sendActivity(event: ImmutablexEvent, orders: Map<Long, ImmutablexOrder>) {
         try {
-            val converted = ImxActivityConverter.convert(event, orders, blockchain)
+            val converted = imxActivityConverter.convert(event, orders, blockchain)
             activityHandler.onEvent(converted)
         } catch (e: ImxDataException) {
             // It could happen if there is no orders specified in TRADE activity

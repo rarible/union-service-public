@@ -32,7 +32,8 @@ import java.time.Instant
 
 class ImxActivityService(
     private val client: ImxActivityClient,
-    private val orderClient: ImxOrderClient
+    private val orderClient: ImxOrderClient,
+    private val imxActivityConverter: ImxActivityConverter
 ) : AbstractBlockchainService(BlockchainDto.IMMUTABLEX), ActivityService {
 
     // TODO IMMUTABLEX move out to configuration
@@ -319,7 +320,9 @@ class ImxActivityService(
 
     suspend fun convert(activities: List<ImmutablexEvent>): List<ActivityDto> {
         val orders = getTradeOrders(activities)
-        return activities.map { ImxActivityConverter.convert(it, orders, blockchain) }
+        return activities.mapAsync {
+            imxActivityConverter.convert(it, orders, blockchain)
+        }
     }
 
     object ByLastUpdatedAndIdDesc : ContinuationFactory<ImmutablexEvent, DateIdContinuation> {
