@@ -81,7 +81,6 @@ class ElasticsearchTestBootstrapper(
                     request
                         .setRefresh(true)
                         .setQuery(MatchAllQueryBuilder())
-                        .setTimeout("60000")
                         .indices(index)
                 }
                     .doOnNext {
