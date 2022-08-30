@@ -19,6 +19,7 @@ import com.rarible.protocol.union.dto.EthOrderDataRaribleV2DataV1Dto
 import com.rarible.protocol.union.dto.EthOrderDataRaribleV2DataV3BuyDto
 import com.rarible.protocol.union.dto.EthOrderDataRaribleV2DataV3SellDto
 import com.rarible.protocol.union.dto.EthOrderOpenSeaV1DataV1Dto
+import com.rarible.protocol.union.dto.EthSudoSwapAmmDataV1Dto
 import com.rarible.protocol.union.dto.EthX2Y2OrderDataV1Dto
 import com.rarible.protocol.union.dto.FlowAssetTypeFtDto
 import com.rarible.protocol.union.dto.FlowAssetTypeNftDto
@@ -88,7 +89,8 @@ object EsOrderConverter {
             is SolanaAuctionHouseDataV1Dto,
             is EthOrderDataLegacyDto,
             is EthOrderCryptoPunksDataDto,
-            is EthLooksRareOrderDataV1Dto-> emptyList()
+            is EthLooksRareOrderDataV1Dto,
+            is EthSudoSwapAmmDataV1Dto -> emptyList()
         }.map { it.fullId() }
     }
 

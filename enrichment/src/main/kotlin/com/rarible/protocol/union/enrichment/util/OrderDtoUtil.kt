@@ -8,6 +8,7 @@ import com.rarible.protocol.union.dto.EthOrderDataRaribleV2DataV1Dto
 import com.rarible.protocol.union.dto.EthOrderDataRaribleV2DataV3BuyDto
 import com.rarible.protocol.union.dto.EthOrderDataRaribleV2DataV3SellDto
 import com.rarible.protocol.union.dto.EthOrderOpenSeaV1DataV1Dto
+import com.rarible.protocol.union.dto.EthSudoSwapAmmDataV1Dto
 import com.rarible.protocol.union.dto.EthX2Y2OrderDataV1Dto
 import com.rarible.protocol.union.dto.FlowOrderDataV1Dto
 import com.rarible.protocol.union.dto.ImmutablexOrderDataV1Dto
@@ -42,5 +43,6 @@ val OrderDto.origins: Set<String>
             is ImmutablexOrderDataV1Dto -> data.originFees.map { it.account.value }
             is EthX2Y2OrderDataV1Dto -> emptyList()
             is EthLooksRareOrderDataV1Dto -> emptyList()
+            is EthSudoSwapAmmDataV1Dto -> emptyList()
         }.toSet()
     }
