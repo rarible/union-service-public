@@ -621,6 +621,7 @@ class EthActivityConverter(
             OrderActivityDto.Source.CRYPTO_PUNKS -> OrderActivitySourceDto.CRYPTO_PUNKS
             OrderActivityDto.Source.X2Y2 -> OrderActivitySourceDto.X2Y2
             OrderActivityDto.Source.LOOKSRARE -> OrderActivitySourceDto.LOOKSRARE
+            OrderActivityDto.Source.SUDOSWAP -> OrderActivitySourceDto.SUDOSWAP
         }
     }
 

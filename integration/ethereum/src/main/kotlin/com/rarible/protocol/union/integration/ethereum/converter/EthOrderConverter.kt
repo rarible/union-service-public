@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.integration.ethereum.converter
 
+import com.rarible.protocol.dto.AmmOrderDto
 import com.rarible.protocol.dto.CryptoPunkOrderDto
 import com.rarible.protocol.dto.LegacyOrderDto
 import com.rarible.protocol.dto.LooksRareOrderDto
@@ -14,6 +15,7 @@ import com.rarible.protocol.dto.OrderRaribleV2DataV3BuyDto
 import com.rarible.protocol.dto.OrderRaribleV2DataV3SellDto
 import com.rarible.protocol.dto.OrderSideDto
 import com.rarible.protocol.dto.OrderSideMatchDto
+import com.rarible.protocol.dto.OrderSudoSwapAmmDataV1Dto
 import com.rarible.protocol.dto.OrdersPaginationDto
 import com.rarible.protocol.dto.RaribleV2OrderDto
 import com.rarible.protocol.dto.SeaportConsiderationDto
@@ -38,6 +40,7 @@ import com.rarible.protocol.union.dto.EthSeaportConsiderationDto
 import com.rarible.protocol.union.dto.EthSeaportItemTypeDto
 import com.rarible.protocol.union.dto.EthSeaportOfferDto
 import com.rarible.protocol.union.dto.EthSeaportOrderTypeDto
+import com.rarible.protocol.union.dto.EthSudoSwapAmmDataV1Dto
 import com.rarible.protocol.union.dto.EthX2Y2OrderDataV1Dto
 import com.rarible.protocol.union.dto.OnChainOrderDto
 import com.rarible.protocol.union.dto.OrderDataDto
@@ -320,6 +323,38 @@ class EthOrderConverter(
                         strategy = EthConverter.convert(order.data.strategy, blockchain),
                         params = order.data.params?.let { EthConverter.convert(it) }
                     )
+                )
+            }
+            is AmmOrderDto -> {
+                val (data, platform) = when (val data = order.data) {
+                    is OrderSudoSwapAmmDataV1Dto -> {
+                        EthSudoSwapAmmDataV1Dto(EthConverter.convert(data.contract, blockchain)) to PlatformDto.SUDOSWAP
+                    }
+                }
+                OrderDto(
+                    id = orderId,
+                    platform = platform,
+                    status = status,
+                    maker = maker,
+                    taker = taker,
+                    make = make,
+                    take = take,
+                    salt = salt,
+                    signature = signature,
+                    pending = pending,
+                    fill = order.fillValue!!,
+                    startedAt = startedAt,
+                    endedAt = endedAt,
+                    makeStock = order.makeStockValue!!,
+                    cancelled = order.cancelled,
+                    createdAt = order.createdAt,
+                    lastUpdatedAt = order.lastUpdateAt,
+                    dbUpdatedAt = order.dbUpdatedAt,
+                    makePrice = makePrice,
+                    takePrice = takePrice,
+                    makePriceUsd = makePriceUsd,
+                    takePriceUsd = takePriceUsd,
+                    data = data
                 )
             }
         }
