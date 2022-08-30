@@ -20,12 +20,14 @@ import com.rarible.protocol.union.integration.immutablex.service.ImxOwnershipSer
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Import
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.web.reactive.function.client.WebClient
 
 @ImxConfiguration
 @Import(CoreConfiguration::class)
+@ComponentScan(basePackageClasses = [ImxActivityConverter::class])
 @EnableConfigurationProperties(ImxIntegrationProperties::class)
 class ImxApiConfiguration {
 
