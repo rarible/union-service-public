@@ -180,7 +180,7 @@ class ImxActivityConverter(
             buyerOrderHash = activity.take.orderId.toString(),
             sellerOrderHash = activity.make.orderId.toString(),
             price = payment.value,
-            priceUsd = null,
+            priceUsd = priceUsd,
             amountUsd = null,
             type = OrderMatchSellDto.Type.SELL
         )

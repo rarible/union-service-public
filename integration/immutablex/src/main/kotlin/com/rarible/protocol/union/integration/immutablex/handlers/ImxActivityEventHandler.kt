@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.integration.immutablex.handlers
 
+import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.model.UnionItemDeleteEvent
@@ -30,7 +31,6 @@ import com.rarible.protocol.union.integration.immutablex.service.ImxActivityServ
 import com.rarible.protocol.union.integration.immutablex.service.ImxItemService
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import org.slf4j.LoggerFactory
 import java.time.Instant
 
 class ImxActivityEventHandler(
@@ -47,7 +47,7 @@ class ImxActivityEventHandler(
 
     private val blockchain = BlockchainDto.IMMUTABLEX
 
-    private val logger = LoggerFactory.getLogger(javaClass)
+    private val logger by Logger()
 
     suspend fun handle(events: List<ImmutablexEvent>) {
 
