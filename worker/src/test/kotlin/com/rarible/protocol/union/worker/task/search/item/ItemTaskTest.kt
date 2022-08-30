@@ -135,8 +135,8 @@ internal class ItemTaskTest {
                     firstCombinedContinuation.toString(),
                     1000,
                     true,
-                    Long.MIN_VALUE,
-                    Long.MAX_VALUE
+                    null,
+                    null
                 )
             }
         }
