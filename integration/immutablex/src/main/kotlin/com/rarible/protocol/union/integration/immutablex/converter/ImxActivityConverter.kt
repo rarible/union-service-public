@@ -2,6 +2,7 @@ package com.rarible.protocol.union.integration.immutablex.converter
 
 import com.rarible.protocol.union.core.converter.ContractAddressConverter
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
+import com.rarible.protocol.union.core.service.CurrencyService
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.AssetDto
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -25,13 +26,17 @@ import com.rarible.protocol.union.integration.immutablex.client.ImmutablexTrade
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexTransfer
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexWithdrawal
 import org.slf4j.LoggerFactory
+import org.springframework.stereotype.Component
 import scalether.domain.Address
 
-object ImxActivityConverter {
+@Component
+class ImxActivityConverter(
+    private val currencyService: CurrencyService
+) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    fun convert(
+    suspend fun convert(
         activity: ImmutablexEvent,
         orders: Map<Long, ImmutablexOrder>,
         blockchain: BlockchainDto
@@ -44,7 +49,7 @@ object ImxActivityConverter {
         }
     }
 
-    private fun convertInternal(
+    private suspend fun convertInternal(
         activity: ImmutablexEvent,
         orders: Map<Long, ImmutablexOrder>,
         blockchain: BlockchainDto
@@ -151,13 +156,17 @@ object ImxActivityConverter {
         )
     }
 
-    private fun convertToMatch(
+    private suspend fun convertToMatch(
         activity: ImmutablexTrade,
         nft: AssetDto,
         payment: AssetDto,
         seller: UnionAddress,
         buyer: UnionAddress
     ): OrderMatchSellDto {
+        val priceUsd = currencyService.toUsd(
+            BlockchainDto.ETHEREUM, payment.type, payment.value, activity.timestamp
+        )
+
         return OrderMatchSellDto(
             source = OrderActivitySourceDto.RARIBLE,
             transactionHash = activity.transactionId.toString(),
@@ -171,7 +180,7 @@ object ImxActivityConverter {
             buyerOrderHash = activity.take.orderId.toString(),
             sellerOrderHash = activity.make.orderId.toString(),
             price = payment.value,
-            priceUsd = null,
+            priceUsd = priceUsd,
             amountUsd = null,
             type = OrderMatchSellDto.Type.SELL
         )

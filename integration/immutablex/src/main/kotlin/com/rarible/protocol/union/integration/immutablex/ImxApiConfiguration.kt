@@ -7,6 +7,7 @@ import com.rarible.protocol.union.integration.immutablex.client.ImxAssetClient
 import com.rarible.protocol.union.integration.immutablex.client.ImxCollectionClient
 import com.rarible.protocol.union.integration.immutablex.client.ImxOrderClient
 import com.rarible.protocol.union.integration.immutablex.client.ImxWebClientFactory
+import com.rarible.protocol.union.integration.immutablex.converter.ImxActivityConverter
 import com.rarible.protocol.union.integration.immutablex.repository.ImxCollectionCreatorRepository
 import com.rarible.protocol.union.integration.immutablex.repository.ImxCollectionMetaSchemaRepository
 import com.rarible.protocol.union.integration.immutablex.repository.ImxItemMetaRepository
@@ -133,9 +134,10 @@ class ImxApiConfiguration {
     @Bean
     fun imxActivityService(
         activityClient: ImxActivityClient,
-        orderClient: ImxOrderClient
+        orderClient: ImxOrderClient,
+        converter: ImxActivityConverter
     ): ImxActivityService {
-        return ImxActivityService(activityClient, orderClient)
+        return ImxActivityService(activityClient, orderClient, converter)
     }
 
     @Bean

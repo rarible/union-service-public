@@ -116,8 +116,8 @@ open class FlowOrderService(
     ): Slice<OrderDto> {
         val result = bidControllerApi.getOrderBidsByMaker(
             maker,
-            flowOrderConverter.convert(status),
             origin,
+            flowOrderConverter.convert(status),
             start?.let { Instant.ofEpochMilli(it) },
             end?.let { Instant.ofEpochMilli(it) },
             continuation,
