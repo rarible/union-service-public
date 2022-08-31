@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.worker.task.search.order
 
+import com.rarible.core.logging.Logger
 import com.rarible.core.task.TaskHandler
 import com.rarible.core.task.TaskRepository
 import com.rarible.protocol.union.core.model.EsOrder
@@ -19,6 +20,8 @@ class OrderTask(
     private val orderReindexService: OrderReindexService,
     private val taskRepository: TaskRepository,
 ) : TaskHandler<String> {
+
+    private val logger by Logger()
 
     override val type: String
         get() = EsOrder.ENTITY_DEFINITION.reindexTask

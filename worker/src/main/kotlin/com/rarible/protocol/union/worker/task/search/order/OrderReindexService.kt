@@ -20,6 +20,7 @@ class OrderReindexService(
     private val searchTaskMetricFactory: SearchTaskMetricFactory
 ) {
 
+
     fun reindex(
         blockchain: BlockchainDto,
         index: String?,
@@ -44,7 +45,9 @@ class OrderReindexService(
 
                 if (res.orders.isNotEmpty()) {
                     repository.saveAll(
-                        res.orders.map { EsOrderConverter.convert(it) },
+                        res.orders.map {
+                            logger.info("Converting OrderDto  $it")
+                            EsOrderConverter.convert(it) },
                         refreshPolicy = WriteRequest.RefreshPolicy.NONE
                     )
                     counter.increment(res.orders.size)
