@@ -13,8 +13,10 @@ import com.rarible.protocol.union.core.model.elasticsearch.EntityDefinition
 import com.rarible.protocol.union.core.model.elasticsearch.EntityDefinitionExtended
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.reactive.awaitFirst
+import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.runBlocking
+import org.elasticsearch.action.admin.indices.refresh.RefreshRequest
 import org.elasticsearch.index.query.MatchAllQueryBuilder
 import org.springframework.data.elasticsearch.client.reactive.ReactiveElasticsearchClient
 import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations
@@ -64,8 +66,7 @@ class ElasticsearchTestBootstrapper(
             settings = definition.settings
         )
         createAlias(
-            reactiveElasticSearchOperations = esOperations, indexName = newIndexName, alias = definition.aliasName
-,
+            reactiveElasticSearchOperations = esOperations, indexName = newIndexName, alias = definition.aliasName,
         )
         createAlias(
             reactiveElasticSearchOperations = esOperations, indexName = newIndexName, alias = definition.writeAliasName,
@@ -86,6 +87,13 @@ class ElasticsearchTestBootstrapper(
                     .doOnNext {
                         logger.info("deleted all data for index '$index'")
                     }.awaitSingle()
+
+                esOperations.execute {
+                    it.indices().refreshIndex(
+                        RefreshRequest()
+                            .indices(index)
+                    )
+                }.awaitFirstOrNull()
             }
     }
 
