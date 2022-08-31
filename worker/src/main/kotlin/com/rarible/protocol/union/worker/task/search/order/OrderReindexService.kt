@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.worker.task.search.order
 
+import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.core.converter.EsOrderConverter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderSortDto
@@ -20,6 +21,7 @@ class OrderReindexService(
     private val searchTaskMetricFactory: SearchTaskMetricFactory
 ) {
 
+    private val logger by Logger()
 
     fun reindex(
         blockchain: BlockchainDto,

@@ -21,8 +21,6 @@ class OrderTask(
     private val taskRepository: TaskRepository,
 ) : TaskHandler<String> {
 
-    private val logger by Logger()
-
     override val type: String
         get() = EsOrder.ENTITY_DEFINITION.reindexTask
 
