@@ -42,6 +42,7 @@ class EsItemQuerySortServiceIntegrationTest {
     @ValueSource(booleans = [true, false])
     fun `should sort by lastUpdatedAt and id`(descending: Boolean) = runBlocking<Unit> {
         // given
+        elasticsearchTestBootstrapper.bootstrap()
         val builder = NativeSearchQueryBuilder()
         val sort = if (descending) EsItemSort.LATEST_FIRST else EsItemSort.EARLIEST_FIRST
         val first = randomEsItem().copy(lastUpdatedAt = nowMillis().plusSeconds(100), itemId = "A")
