@@ -42,6 +42,7 @@ import com.rarible.protocol.union.dto.EthSeaportOfferDto
 import com.rarible.protocol.union.dto.EthSeaportOrderTypeDto
 import com.rarible.protocol.union.dto.EthSudoSwapAmmDataV1Dto
 import com.rarible.protocol.union.dto.EthX2Y2OrderDataV1Dto
+import com.rarible.protocol.union.dto.OnChainAmmOrderDto
 import com.rarible.protocol.union.dto.OnChainOrderDto
 import com.rarible.protocol.union.dto.OrderDataDto
 import com.rarible.protocol.union.dto.OrderDto
@@ -52,6 +53,8 @@ import com.rarible.protocol.union.dto.PendingOrderCancelDto
 import com.rarible.protocol.union.dto.PendingOrderDto
 import com.rarible.protocol.union.dto.PendingOrderMatchDto
 import com.rarible.protocol.union.dto.PlatformDto
+import com.rarible.protocol.union.dto.SudoSwapCurveTypeDto
+import com.rarible.protocol.union.dto.SudoSwapPoolTypeDto
 import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import java.time.Instant
@@ -328,7 +331,16 @@ class EthOrderConverter(
             is AmmOrderDto -> {
                 val (data, platform) = when (val data = order.data) {
                     is OrderSudoSwapAmmDataV1Dto -> {
-                        EthSudoSwapAmmDataV1Dto(EthConverter.convert(data.contract, blockchain)) to PlatformDto.SUDOSWAP
+                        EthSudoSwapAmmDataV1Dto(
+                            poolAddress = EthConverter.convert(data.poolAddress, blockchain),
+                            poolType = convert(data.poolType),
+                            assetRecipient = EthConverter.convert(data.assetRecipient, blockchain),
+                            bondingCurve = EthConverter.convert(data.bondingCurve, blockchain),
+                            curveType = convert(data.curveType),
+                            delta = data.delta,
+                            fee = data.fee,
+                            feeDecimal = data.feeDecimal,
+                        ) to PlatformDto.SUDOSWAP
                     }
                 }
                 OrderDto(
@@ -518,6 +530,22 @@ class EthOrderConverter(
         }
     }
 
+    private fun convert(source: com.rarible.protocol.dto.SudoSwapCurveTypeDto): SudoSwapCurveTypeDto {
+        return when (source) {
+            com.rarible.protocol.dto.SudoSwapCurveTypeDto.LINEAR -> SudoSwapCurveTypeDto.LINEAR
+            com.rarible.protocol.dto.SudoSwapCurveTypeDto.EXPONENTIAL -> SudoSwapCurveTypeDto.EXPONENTIAL
+            com.rarible.protocol.dto.SudoSwapCurveTypeDto.UNKNOWN -> SudoSwapCurveTypeDto.UNKNOWN
+        }
+    }
+
+    private fun convert(source: com.rarible.protocol.dto.SudoSwapPoolTypeDto): SudoSwapPoolTypeDto {
+        return when (source) {
+            com.rarible.protocol.dto.SudoSwapPoolTypeDto.TOKEN -> SudoSwapPoolTypeDto.TOKEN
+            com.rarible.protocol.dto.SudoSwapPoolTypeDto.NFT -> SudoSwapPoolTypeDto.NFT
+            com.rarible.protocol.dto.SudoSwapPoolTypeDto.TRADE -> SudoSwapPoolTypeDto.TRADE
+        }
+    }
+
     private fun convert(source: OrderExchangeHistoryDto, blockchain: BlockchainDto): PendingOrderDto {
         return when (source) {
             is OrderSideMatchDto -> PendingOrderMatchDto(
@@ -551,8 +579,14 @@ class EthOrderConverter(
                 date = source.date,
                 maker = source.maker?.let { EthConverter.convert(it, blockchain) }
             )
+            is com.rarible.protocol.dto.OnChainAmmOrderDto -> OnChainAmmOrderDto(
+                id = OrderIdDto(blockchain, EthConverter.convert(source.hash)),
+                make = source.make?.let { EthConverter.convert(it, blockchain) },
+                take = source.take?.let { EthConverter.convert(it, blockchain) },
+                date = source.date,
+                maker = source.maker?.let { EthConverter.convert(it, blockchain) }
+            )
         }
     }
-
 }
 

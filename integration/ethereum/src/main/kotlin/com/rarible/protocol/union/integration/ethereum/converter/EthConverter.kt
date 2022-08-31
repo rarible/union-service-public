@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.integration.ethereum.converter
 
+import com.rarible.protocol.dto.AmmNftAssetTypeDto
 import com.rarible.protocol.dto.CollectionAssetTypeDto
 import com.rarible.protocol.dto.CryptoPunksAssetTypeDto
 import com.rarible.protocol.dto.Erc1155AssetTypeDto
@@ -23,6 +24,7 @@ import com.rarible.protocol.union.dto.AuctionSortDto
 import com.rarible.protocol.union.dto.AuctionStatusDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CreatorDto
+import com.rarible.protocol.union.dto.EthAmmNftAssetTypeDto
 import com.rarible.protocol.union.dto.EthCollectionAssetTypeDto
 import com.rarible.protocol.union.dto.EthCryptoPunksAssetTypeDto
 import com.rarible.protocol.union.dto.EthErc1155AssetTypeDto
@@ -186,6 +188,9 @@ object EthConverter {
                 contract = ContractAddressConverter.convert(blockchain, convert(source.contract))
             )
             is CollectionAssetTypeDto -> EthCollectionAssetTypeDto(
+                contract = ContractAddressConverter.convert(blockchain, convert(source.contract))
+            )
+            is AmmNftAssetTypeDto -> EthAmmNftAssetTypeDto(
                 contract = ContractAddressConverter.convert(blockchain, convert(source.contract))
             )
         }
