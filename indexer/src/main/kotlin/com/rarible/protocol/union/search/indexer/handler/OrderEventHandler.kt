@@ -18,7 +18,7 @@ class OrderEventHandler(
     private val featureFlagsProperties: FeatureFlagsProperties,
     private val repository: EsOrderRepository,
     metricFactory: IndexerMetricFactory,
-): ConsumerBatchEventHandler<OrderEventDto> {
+) : ConsumerBatchEventHandler<OrderEventDto> {
 
     private val logger by Logger()
 
@@ -30,7 +30,7 @@ class OrderEventHandler(
         logger.info("Handling ${event.size} OrderDto events")
 
         val convertedEvents = event.map {
-            logger.info("Converting OrderDto id = ${it.orderId}")
+            logger.info("Converting OrderDto  $it")
             EsOrderConverter.convert(it)
         }
         if (convertedEvents.isNotEmpty()) {
@@ -38,8 +38,7 @@ class OrderEventHandler(
             val refreshPolicy =
                 if (featureFlagsProperties.enableOrderSaveImmediateToElasticSearch) {
                     WriteRequest.RefreshPolicy.IMMEDIATE
-                }
-                else {
+                } else {
                     WriteRequest.RefreshPolicy.NONE
                 }
             val saved = repository.saveAll(convertedEvents, refreshPolicy = refreshPolicy)
