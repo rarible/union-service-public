@@ -59,7 +59,7 @@ object EsOrderConverter {
             maker = source.maker.fullId(),
             make = asset(source.make),
             take = asset(source.take),
-            taker = source.taker?.fullId(),
+            taker = source.taker?.fullId() ?: source.take.type.ext.itemId.toString(),
             start = source.startedAt,
             end = source.endedAt,
             origins = origins(source.data),
