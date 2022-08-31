@@ -10,8 +10,6 @@ import com.rarible.dipdup.client.core.model.DipDupTransferActivity
 import com.rarible.dipdup.client.core.model.TezosPlatform
 import com.rarible.dipdup.client.model.DipDupActivityType
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
-import com.rarible.protocol.union.core.converter.UnionConverter
-import com.rarible.protocol.union.core.exception.UnionDataFormatException
 import com.rarible.protocol.union.core.service.CurrencyService
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivityIdDto
@@ -200,6 +198,8 @@ class DipDupActivityConverter(
             TezosPlatform.HEN -> OrderActivitySourceDto.HEN
             TezosPlatform.OBJKT_V1, TezosPlatform.OBJKT_V2 -> OrderActivitySourceDto.OBJKT
             TezosPlatform.RARIBLE_V1, TezosPlatform.RARIBLE_V2 -> OrderActivitySourceDto.RARIBLE
+            TezosPlatform.TEIA_V1 -> OrderActivitySourceDto.TEIA
+            TezosPlatform.VERSUM_V1 -> OrderActivitySourceDto.VERSUM
             else -> throw RuntimeException("Not implemented for ${source} platform")
         }
     }
