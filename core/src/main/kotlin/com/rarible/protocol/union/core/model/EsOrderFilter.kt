@@ -2,6 +2,7 @@
 
 package com.rarible.protocol.union.core.model
 
+import com.rarible.protocol.union.core.util.CompositeItemIdParser
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
@@ -9,6 +10,7 @@ import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.continuation.DateIdContinuation
 import org.elasticsearch.index.query.QueryBuilder
 import org.elasticsearch.index.query.QueryBuilders
+import org.elasticsearch.index.query.QueryBuilders.boolQuery
 import org.elasticsearch.search.sort.SortBuilders
 import org.elasticsearch.search.sort.SortOrder
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery
@@ -79,11 +81,35 @@ data class EsOrderSellOrdersByItem(
 ) : EsOrderFilter {
     override fun asQuery(): Query {
         val list = buildList {
+
+            val (token, tokenId) = CompositeItemIdParser.splitWithBlockchain(itemId)
             add(
-                QueryBuilders.termsQuery(
-                    "${EsOrder::make.name}.${EsOrder.Asset::address.name}",
-                    itemId
-                )
+                boolQuery()
+                    .must(
+                        QueryBuilders.termsQuery(
+                            "${EsOrder::make.name}.${EsOrder.Asset::token.name}",
+                            token
+                        )
+                    )
+                    .should(
+                        QueryBuilders.termsQuery(
+                            "${EsOrder::make.name}.${EsOrder.Asset::tokenId.name}",
+                            tokenId
+                        )
+                    )
+                    .should(
+                        boolQuery().must(
+                            QueryBuilders.termsQuery(
+                                "${EsOrder::make.name}.${EsOrder.Asset::isNft.name}",
+                                true
+                            )
+                        ).mustNot(
+                            QueryBuilders.existsQuery(
+                                "${EsOrder::make.name}.${EsOrder.Asset::tokenId.name}"
+                            )
+                        )
+                    )
+
             )
 
             add(
@@ -127,12 +153,36 @@ data class EsOrderBidOrdersByItem(
 ) : EsOrderFilter {
     override fun asQuery(): Query {
         val list = buildList {
+
+            val (token, tokenId) = CompositeItemIdParser.splitWithBlockchain(itemId)
             add(
-                QueryBuilders.termsQuery(
-                    "${EsOrder::take.name}.${EsOrder.Asset::address.name}",
-                    itemId
-                )
+                boolQuery()
+                    .must(
+                        QueryBuilders.termsQuery(
+                            "${EsOrder::take.name}.${EsOrder.Asset::token.name}",
+                            token
+                        )
+                    )
+                    .should(
+                        QueryBuilders.termsQuery(
+                            "${EsOrder::take.name}.${EsOrder.Asset::tokenId.name}",
+                            tokenId
+                        )
+                    )
+                    .should(
+                        boolQuery().must(
+                            QueryBuilders.termsQuery(
+                                "${EsOrder::take.name}.${EsOrder.Asset::isNft.name}",
+                                true
+                            )
+                        ).mustNot(
+                            QueryBuilders.existsQuery(
+                                "${EsOrder::take.name}.${EsOrder.Asset::tokenId.name}"
+                            )
+                        )
+                    )
             )
+
             add(
                 QueryBuilders.termsQuery(
                     EsOrder::type.name,
