@@ -1,24 +1,32 @@
 package com.rarible.protocol.union.search.indexer.handler
 
 import com.rarible.core.daemon.sequential.ConsumerBatchEventHandler
+import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.converter.EsItemConverter.toEsItem
+import com.rarible.protocol.union.core.model.EsItem
+import com.rarible.protocol.union.core.model.elasticsearch.EsEntity
+import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemDeleteEventDto
 import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.ItemUpdateEventDto
 import com.rarible.protocol.union.enrichment.repository.search.EsItemRepository
+import com.rarible.protocol.union.search.indexer.metrics.IndexerMetricFactory
 import org.elasticsearch.action.support.WriteRequest
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
 class ItemEventHandler(
     private val featureFlagsProperties: FeatureFlagsProperties,
-    private val repository: EsItemRepository
+    private val repository: EsItemRepository,
+    metricFactory: IndexerMetricFactory,
 ) : ConsumerBatchEventHandler<ItemEventDto> {
 
-    private val logger: Logger = LoggerFactory.getLogger(ItemEventHandler::class.java)
+    private val logger by Logger()
+
+    private val entitySaveCounters = BlockchainDto.values().associateWith {
+        metricFactory.createEntitySaveCountMetric(EsEntity.ITEM, it)
+    }
 
     override suspend fun handle(event: List<ItemEventDto>) {
         logger.info("Handling ${event.size} ItemEventDto events")
@@ -42,6 +50,7 @@ class ItemEventHandler(
             }
 
         repository.saveAll(convertedEvents, refreshPolicy = refreshPolicy)
+        countSaves(convertedEvents)
 
         val deletedIds = event
             .filterIsInstance<ItemDeleteEventDto>()
@@ -51,5 +60,12 @@ class ItemEventHandler(
         logger.debug("Deleting ${deletedIds.size} ItemDeleteEventDto events to ElasticSearch")
         repository.deleteAll(deletedIds)
         logger.info("Handling completed")
+    }
+
+    private fun countSaves(items: List<EsItem>) {
+        val countByBlockchain = items.groupingBy { it.blockchain }.eachCount()
+        countByBlockchain.entries.forEach {
+            entitySaveCounters[it.key]!!.increment(it.value.toDouble())
+        }
     }
 }
