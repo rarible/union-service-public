@@ -203,7 +203,7 @@ internal class EsOrderRepositoryFt {
 
         val exampleOrder = orders.first { it.make.isNft }
         val exampleFilter = EsOrderSellOrdersByItem(
-            itemId = exampleOrder.make.address,
+            itemId = exampleOrder.make.token + ":" + exampleOrder.make.tokenId,
             platform = null,
             maker = null,
             origin = null,
@@ -242,7 +242,7 @@ internal class EsOrderRepositoryFt {
 
         val exampleOrder = orders.first()
         val exampleFilter = EsOrderBidOrdersByItem(
-            itemId = exampleOrder.take.address,
+            itemId = exampleOrder.take.token + ":" + exampleOrder.take.tokenId,
             platform = null,
             maker = null,
             origin = null,
