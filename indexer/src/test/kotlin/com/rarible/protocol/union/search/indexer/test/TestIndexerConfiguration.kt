@@ -31,7 +31,6 @@ import com.rarible.protocol.union.subscriber.UnionKafkaJsonSerializer
 import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import io.mockk.mockk
-import org.elasticsearch.action.support.WriteRequest
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Lazy
@@ -71,8 +70,8 @@ class TestIndexerConfiguration {
     }
 
     @Bean
-    fun orderHandler(repository: EsOrderRepository): ConsumerBatchEventHandler<OrderEventDto> {
-        return OrderEventHandler(FeatureFlagsProperties(enableOrderSaveImmediateToElasticSearch = true), repository)
+    fun orderHandler(repository: EsOrderRepository, metricFactory: IndexerMetricFactory): ConsumerBatchEventHandler<OrderEventDto> {
+        return OrderEventHandler(FeatureFlagsProperties(enableOrderSaveImmediateToElasticSearch = true), repository, metricFactory)
     }
 
     @Bean
@@ -84,13 +83,13 @@ class TestIndexerConfiguration {
     }
 
     @Bean
-    fun ownershipHandler(repository: EsOwnershipRepository): ConsumerBatchEventHandler<OwnershipEventDto> {
-        return OwnershipEventHandler(FeatureFlagsProperties(), repository)
+    fun ownershipHandler(repository: EsOwnershipRepository, metricFactory: IndexerMetricFactory): ConsumerBatchEventHandler<OwnershipEventDto> {
+        return OwnershipEventHandler(FeatureFlagsProperties(), repository, metricFactory)
     }
 
     @Bean
-    fun itemHandler(repository: EsItemRepository): ConsumerBatchEventHandler<ItemEventDto> {
-        return ItemEventHandler(FeatureFlagsProperties(), repository)
+    fun itemHandler(repository: EsItemRepository, metricFactory: IndexerMetricFactory): ConsumerBatchEventHandler<ItemEventDto> {
+        return ItemEventHandler(FeatureFlagsProperties(), repository, metricFactory)
     }
 
     //---------------- UNION producers ----------------//
