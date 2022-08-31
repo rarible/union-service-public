@@ -3,7 +3,6 @@ package com.rarible.protocol.union.core.elasticsearch
 import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.core.elasticsearch.EsHelper.getRealName
 import com.rarible.protocol.union.core.elasticsearch.EsHelper.moveAlias
-import com.rarible.protocol.union.core.elasticsearch.EsHelper.removeAlias
 import com.rarible.protocol.union.core.model.EsMetadata
 import com.rarible.protocol.union.core.model.elasticsearch.CurrentEntityDefinition
 import com.rarible.protocol.union.core.model.elasticsearch.EntityDefinitionExtended
@@ -56,8 +55,13 @@ class IndexService(
         realIndexName: String
     ): CurrentEntityDefinition {
         val id = EsEntityMetadataType.MAPPING.getId(definition)
-        var response: EsMetadata = esMetadataRepository.findById(id)
-            ?: throw RuntimeException("Index ${definition.entity} exists with name $realIndexName but metadata does not. Update metadata")
+        var response: EsMetadata? = esMetadataRepository.findById(id)
+
+        if (response == null) {
+            logger.warn("Index ${definition.entity} exists with name $realIndexName but metadata does not. Update metadata")
+            innerUpdateMetadata(definition)
+            response = esMetadataRepository.findById(id)!!
+        }
 
         val mapping = response.content
 

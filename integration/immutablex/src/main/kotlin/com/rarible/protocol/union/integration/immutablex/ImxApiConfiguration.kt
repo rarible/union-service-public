@@ -7,6 +7,7 @@ import com.rarible.protocol.union.integration.immutablex.client.ImxAssetClient
 import com.rarible.protocol.union.integration.immutablex.client.ImxCollectionClient
 import com.rarible.protocol.union.integration.immutablex.client.ImxOrderClient
 import com.rarible.protocol.union.integration.immutablex.client.ImxWebClientFactory
+import com.rarible.protocol.union.integration.immutablex.converter.ImxActivityConverter
 import com.rarible.protocol.union.integration.immutablex.repository.ImxCollectionCreatorRepository
 import com.rarible.protocol.union.integration.immutablex.repository.ImxCollectionMetaSchemaRepository
 import com.rarible.protocol.union.integration.immutablex.repository.ImxItemMetaRepository
@@ -19,12 +20,14 @@ import com.rarible.protocol.union.integration.immutablex.service.ImxOwnershipSer
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Import
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.web.reactive.function.client.WebClient
 
 @ImxConfiguration
 @Import(CoreConfiguration::class)
+@ComponentScan(basePackageClasses = [ImxActivityConverter::class])
 @EnableConfigurationProperties(ImxIntegrationProperties::class)
 class ImxApiConfiguration {
 
@@ -133,9 +136,10 @@ class ImxApiConfiguration {
     @Bean
     fun imxActivityService(
         activityClient: ImxActivityClient,
-        orderClient: ImxOrderClient
+        orderClient: ImxOrderClient,
+        converter: ImxActivityConverter
     ): ImxActivityService {
-        return ImxActivityService(activityClient, orderClient)
+        return ImxActivityService(activityClient, orderClient, converter)
     }
 
     @Bean

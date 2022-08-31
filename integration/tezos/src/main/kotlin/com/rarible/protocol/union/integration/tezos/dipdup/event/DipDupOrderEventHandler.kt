@@ -24,7 +24,7 @@ open class DipDupOrderEventHandler(
         logger.info("Received DipDup order event: {}", mapper.writeValueAsString(event))
         val next = (setOf(TezosPlatform.RARIBLE_V1, TezosPlatform.RARIBLE_V2).contains(event.platform))
                     || (event.platform == TezosPlatform.HEN && marketplaces.hen)
-                    || (event.platform == TezosPlatform.OBJKT && marketplaces.objkt)
+                    || (event.platform == TezosPlatform.OBJKT_V1 && marketplaces.objkt)
                     || (event.platform == TezosPlatform.OBJKT_V2 && marketplaces.objktV2)
                     || (event.platform == TezosPlatform.VERSUM_V1 && marketplaces.versum)
                     || (event.platform == TezosPlatform.TEIA_V1 && marketplaces.teia)

@@ -28,7 +28,7 @@ class DipdupOrderServiceImpl(
     fun enabledPlatforms(): List<TezosPlatform> {
         val platforms = listOf(TezosPlatform.RARIBLE_V2, TezosPlatform.RARIBLE_V1).toMutableList()
         if (marketplaces.hen) platforms.add(TezosPlatform.HEN)
-        if (marketplaces.objkt) platforms.add(TezosPlatform.OBJKT)
+        if (marketplaces.objkt) platforms.add(TezosPlatform.OBJKT_V1)
         if (marketplaces.objktV2) platforms.add(TezosPlatform.OBJKT_V2)
         if (marketplaces.versum) platforms.add(TezosPlatform.VERSUM_V1)
         if (marketplaces.teia) platforms.add(TezosPlatform.TEIA_V1)

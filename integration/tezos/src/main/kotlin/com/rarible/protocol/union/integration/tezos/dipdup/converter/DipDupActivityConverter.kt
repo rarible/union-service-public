@@ -198,7 +198,7 @@ class DipDupActivityConverter(
     private fun convert(source: TezosPlatform): OrderActivitySourceDto {
         return when(source) {
             TezosPlatform.HEN -> OrderActivitySourceDto.HEN
-            TezosPlatform.OBJKT, TezosPlatform.OBJKT_V2 -> OrderActivitySourceDto.OBJKT
+            TezosPlatform.OBJKT_V1, TezosPlatform.OBJKT_V2 -> OrderActivitySourceDto.OBJKT
             TezosPlatform.RARIBLE_V1, TezosPlatform.RARIBLE_V2 -> OrderActivitySourceDto.RARIBLE
             else -> throw RuntimeException("Not implemented for ${source} platform")
         }

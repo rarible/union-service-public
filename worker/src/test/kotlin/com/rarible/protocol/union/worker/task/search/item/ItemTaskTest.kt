@@ -105,7 +105,7 @@ internal class ItemTaskTest {
             itemService.getAllItems(null, 1000, true, null, null
                 )
             repo.saveAll(any(), any(), any())
-            itemService.getAllItems(firstContinuation, 1000, true, Long.MIN_VALUE, Long.MAX_VALUE)
+            itemService.getAllItems(firstContinuation, 1000, true, null, null)
         }
     }
 }

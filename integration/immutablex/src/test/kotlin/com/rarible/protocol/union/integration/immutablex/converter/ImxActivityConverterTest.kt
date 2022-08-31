@@ -15,6 +15,9 @@ import com.rarible.protocol.union.integration.data.randomImxOrder
 import com.rarible.protocol.union.integration.data.randomImxTrade
 import com.rarible.protocol.union.integration.data.randomImxTradeSide
 import com.rarible.protocol.union.integration.data.randomImxTransfer
+import io.mockk.coEvery
+import io.mockk.mockk
+import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import scalether.domain.Address
@@ -24,8 +27,16 @@ class ImxActivityConverterTest {
 
     private val blockchain = BlockchainDto.IMMUTABLEX
 
+    private val imxActivityConverter = ImxActivityConverter(
+        mockk() {
+            coEvery {
+                toUsd(any(), any(), any(), any())
+            } returns BigDecimal.ONE
+        }
+    )
+
     @Test
-    fun `convert trade - sell`() {
+    fun `convert trade - sell`() = runBlocking<Unit> {
         val sell = randomImxOrder()
         val buy = sell.copy(orderId = randomLong(), buy = sell.sell, sell = sell.buy)
 
@@ -43,7 +54,7 @@ class ImxActivityConverterTest {
         )
 
         val orders = mapOf(sell.orderId to sell, buy.orderId to buy)
-        val result = ImxActivityConverter.convert(trade, orders, blockchain) as OrderMatchSellDto
+        val result = imxActivityConverter.convert(trade, orders, blockchain) as OrderMatchSellDto
 
         assertThat(result.id).isEqualTo(trade.activityId)
         assertThat(result.source).isEqualTo(OrderActivitySourceDto.RARIBLE)
@@ -67,7 +78,7 @@ class ImxActivityConverterTest {
     }
 
     @Test
-    fun `convert trade - swap`() {
+    fun `convert trade - swap`() = runBlocking<Unit> {
         // Both orders with ERC721 (we met such at Ropsten)
         val sell = randomImxOrder()
         val buy = randomImxOrder()
@@ -87,7 +98,7 @@ class ImxActivityConverterTest {
         )
 
         val orders = mapOf(sell.orderId to sell, buy.orderId to buy)
-        val result = ImxActivityConverter.convert(trade, orders, blockchain) as OrderMatchSwapDto
+        val result = imxActivityConverter.convert(trade, orders, blockchain) as OrderMatchSwapDto
 
         assertThat(result.id).isEqualTo(trade.activityId)
         assertThat(result.source).isEqualTo(OrderActivitySourceDto.RARIBLE)
@@ -104,10 +115,10 @@ class ImxActivityConverterTest {
     }
 
     @Test
-    fun `convert mint`() {
+    fun `convert mint`()= runBlocking<Unit> {
         val imxMint = randomImxMint()
 
-        val mint = ImxActivityConverter.convert(imxMint, emptyMap(), blockchain) as MintActivityDto
+        val mint = imxActivityConverter.convert(imxMint, emptyMap(), blockchain) as MintActivityDto
 
         assertThat(mint.id.value).isEqualTo(imxMint.transactionId.toString())
         assertThat(mint.date).isEqualTo(imxMint.timestamp)
@@ -120,10 +131,10 @@ class ImxActivityConverterTest {
     }
 
     @Test
-    fun `convert transfer`() {
+    fun `convert transfer`() = runBlocking<Unit> {
         val imxTransfer = randomImxTransfer()
 
-        val transfer = ImxActivityConverter.convert(imxTransfer, emptyMap(), blockchain) as TransferActivityDto
+        val transfer = imxActivityConverter.convert(imxTransfer, emptyMap(), blockchain) as TransferActivityDto
 
         assertThat(transfer.id.value).isEqualTo(imxTransfer.transactionId.toString())
         assertThat(transfer.date).isEqualTo(imxTransfer.timestamp)
@@ -137,10 +148,10 @@ class ImxActivityConverterTest {
     }
 
     @Test
-    fun `convert transfer - burn`() {
+    fun `convert transfer - burn`() = runBlocking<Unit> {
         val imxTransfer = randomImxTransfer(receiver = Address.ZERO().prefixed())
 
-        val burn = ImxActivityConverter.convert(imxTransfer, emptyMap(), blockchain) as BurnActivityDto
+        val burn = imxActivityConverter.convert(imxTransfer, emptyMap(), blockchain) as BurnActivityDto
 
         assertThat(burn.id.value).isEqualTo(imxTransfer.transactionId.toString())
         assertThat(burn.date).isEqualTo(imxTransfer.timestamp)

@@ -32,6 +32,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.math.BigDecimal
 
 class ImxActivityEventHandlerTest {
 
@@ -50,13 +51,22 @@ class ImxActivityEventHandlerTest {
 
     private val imxScanMetrics: ImxScanMetrics = mockk()
 
+    private val imxActivityConverter: ImxActivityConverter = ImxActivityConverter(
+        mockk() {
+            coEvery {
+                toUsd(any(), any(), any(), any())
+            } returns BigDecimal.ONE
+        }
+    )
+
     private val imxActivityEventHandler = ImxActivityEventHandler(
         activityHandler,
         itemHandler,
         ownershipHandler,
         itemService,
         activityService,
-        imxScanMetrics
+        imxScanMetrics,
+        imxActivityConverter
     )
 
     private val blockchain = BlockchainDto.IMMUTABLEX
@@ -70,7 +80,7 @@ class ImxActivityEventHandlerTest {
     fun `on mint`() = runBlocking<Unit> {
         val mint = randomImxMint()
 
-        val activity = ImxActivityConverter.convert(mint, emptyMap(), blockchain)
+        val activity = imxActivityConverter.convert(mint, emptyMap(), blockchain)
         val item = ImxItemConverter.convert(mint, null, blockchain)
 
         val ownership = ImxOwnershipConverter.toOwnership(
@@ -109,7 +119,7 @@ class ImxActivityEventHandlerTest {
         coEvery { itemService.getItemCreators(listOf(itemId)) } returns mapOf(itemId to creator)
 
         val deletedOwnershipId = OwnershipIdDto(blockchain, itemId, user)
-        val activity = ImxActivityConverter.convert(transfer, emptyMap(), blockchain)
+        val activity = imxActivityConverter.convert(transfer, emptyMap(), blockchain)
         val ownership = ImxOwnershipConverter.toOwnership(
             blockchain,
             itemId,
@@ -143,7 +153,7 @@ class ImxActivityEventHandlerTest {
         coEvery { itemService.getItemCreators(listOf()) } returns emptyMap()
 
         val deletedOwnershipId = OwnershipIdDto(blockchain, itemId, user)
-        val activity = ImxActivityConverter.convert(transfer, emptyMap(), blockchain)
+        val activity = imxActivityConverter.convert(transfer, emptyMap(), blockchain)
 
         imxActivityEventHandler.handle(listOf(transfer))
 
@@ -199,7 +209,7 @@ class ImxActivityEventHandlerTest {
         )
 
         val orderMap = mapOf(sellOrder.orderId to sellOrder, buyOrder.orderId to buyOrder)
-        val activity = ImxActivityConverter.convert(trade, orderMap, blockchain)
+        val activity = imxActivityConverter.convert(trade, orderMap, blockchain)
 
         coEvery { itemService.getItemCreators(listOf(trade.make.itemId()!!, trade.take.itemId()!!)) } returns emptyMap()
         coEvery { activityService.getTradeOrders(listOf(trade)) } returns orderMap
