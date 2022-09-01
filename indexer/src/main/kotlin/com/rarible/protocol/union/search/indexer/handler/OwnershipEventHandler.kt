@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.search.indexer.handler
 
+import com.rarible.core.common.nowMillis
 import com.rarible.core.daemon.sequential.ConsumerBatchEventHandler
 import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.core.FeatureFlagsProperties
@@ -24,6 +25,7 @@ class OwnershipEventHandler(
 
     override suspend fun handle(event: List<OwnershipEventDto>) {
         logger.info("Handling ${event.size} OwnershipDto events")
+        val startTime = nowMillis()
 
         val events = event.filterIsInstance<OwnershipUpdateEventDto>().map {
             logger.debug("Converting OwnershipDto id = ${it.ownershipId}")
@@ -34,30 +36,24 @@ class OwnershipEventHandler(
             it.ownershipId.fullId()
         }
 
-        coroutineScope {
-            listOf(
-                async {
-                    logger.debug("Saving ${events.size} OwnershipDto events to ElasticSearch")
-                    val refreshPolicy =
-                        if (featureFlagsProperties.enableOwnershipSaveImmediateToElasticSearch) {
-                            WriteRequest.RefreshPolicy.IMMEDIATE
-                        }
-                        else {
-                            WriteRequest.RefreshPolicy.NONE
-                        }
-                    if (events.isNotEmpty()) {
-                        repository.saveAll(events, refreshPolicy = refreshPolicy)
-                    }
-                },
-                async {
-                    logger.debug("Removing ${deleted.size} OwnershipDto events from ElasticSearch")
-                    if (deleted.isNotEmpty()) {
-                        repository.deleteAll(deleted)
-                    }
-                },
-            ).awaitAll()
+        if (events.isNotEmpty()) {
+            logger.debug("Saving ${events.size} OwnershipDto events to ElasticSearch")
+            val refreshPolicy =
+                if (featureFlagsProperties.enableOwnershipSaveImmediateToElasticSearch) {
+                    WriteRequest.RefreshPolicy.IMMEDIATE
+                }
+                else {
+                    WriteRequest.RefreshPolicy.NONE
+                }
+            repository.saveAll(events, refreshPolicy = refreshPolicy)
         }
 
-        logger.info("Handling completed")
+        if (deleted.isNotEmpty()) {
+            logger.debug("Removing ${deleted.size} OwnershipDto events from ElasticSearch")
+            repository.deleteAll(deleted)
+        }
+
+        val elapsedTime = nowMillis().minusMillis(startTime.toEpochMilli()).toEpochMilli()
+        logger.info("Handling of ${event.size} OwnershipDto events completed in $elapsedTime ms")
     }
 }
