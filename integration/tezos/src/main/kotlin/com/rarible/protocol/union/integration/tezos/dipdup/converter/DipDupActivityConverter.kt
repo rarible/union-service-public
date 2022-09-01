@@ -200,6 +200,8 @@ class DipDupActivityConverter(
             TezosPlatform.HEN -> OrderActivitySourceDto.HEN
             TezosPlatform.OBJKT_V1, TezosPlatform.OBJKT_V2 -> OrderActivitySourceDto.OBJKT
             TezosPlatform.RARIBLE_V1, TezosPlatform.RARIBLE_V2 -> OrderActivitySourceDto.RARIBLE
+            TezosPlatform.TEIA_V1 -> OrderActivitySourceDto.TEIA
+            TezosPlatform.VERSUM_V1 -> OrderActivitySourceDto.VERSUM
             else -> throw RuntimeException("Not implemented for ${source} platform")
         }
     }
