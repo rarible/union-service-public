@@ -28,6 +28,7 @@ data class FeatureFlagsProperties(
     var enableOwnershipSaveImmediateToElasticSearch: Boolean = false,
     // items
     var enableItemQueriesToElasticSearch: Boolean = false,
+    var enableSearchItems: Boolean = false,
     var enableItemSaveImmediateToElasticSearch: Boolean = false,
 
     val enabledMetaPipeline: Boolean = false
