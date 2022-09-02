@@ -87,6 +87,8 @@ integration:
         royaltiesManager: ${consul.tezos.dipdup.knownAddresses.royaltiesManager:}
         bidou8x8: ${consul.tezos.dipdup.knownAddresses.bidou8x8:}
         bidou24x24: ${consul.tezos.dipdup.knownAddresses.bidou24x24:}
+        dogami: ${consul.tezos.dipdup.knownAddresses.dogami:}
+        dogamiGap: ${consul.tezos.dipdup.knownAddresses.dogamiGap:}
       marketplaces:
         hen: ${consul.tezos.dipdup.marketplaces.hen:false}
         objkt: ${consul.tezos.dipdup.marketplaces.objkt:false}
