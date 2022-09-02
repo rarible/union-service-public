@@ -61,7 +61,8 @@ class OwnershipEventHandler(
         }
 
         val elapsedTime = nowMillis().minusMillis(startTime.toEpochMilli()).toEpochMilli()
-        logger.info("Handling of ${event.size} OwnershipDto events completed in $elapsedTime ms")
+        logger.info("Handling of ${event.size} OwnershipDto events completed in $elapsedTime ms" +
+                " (saved: ${events.size}, deleted: ${deleted.size})")
     }
 
     private fun countSaves(ownerships: List<EsOwnership>) {

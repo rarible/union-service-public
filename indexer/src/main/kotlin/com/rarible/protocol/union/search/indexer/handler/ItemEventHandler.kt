@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.search.indexer.handler
 
+import com.rarible.core.common.nowMillis
 import com.rarible.core.daemon.sequential.ConsumerBatchEventHandler
 import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.core.FeatureFlagsProperties
@@ -30,6 +31,7 @@ class ItemEventHandler(
 
     override suspend fun handle(event: List<ItemEventDto>) {
         logger.info("Handling ${event.size} ItemEventDto events")
+        val startTime = nowMillis()
 
         val convertedEvents = event
             .filterIsInstance<ItemUpdateEventDto>()
@@ -57,9 +59,14 @@ class ItemEventHandler(
             .map {
                 it.itemId.fullId()
             }
-        logger.debug("Deleting ${deletedIds.size} ItemDeleteEventDto events to ElasticSearch")
-        repository.deleteAll(deletedIds)
-        logger.info("Handling completed")
+        if (deletedIds.isNotEmpty()) {
+            logger.debug("Deleting ${deletedIds.size} ItemDeleteEventDto events to ElasticSearch")
+            repository.deleteAll(deletedIds)
+        }
+
+        val elapsedTime = nowMillis().minusMillis(startTime.toEpochMilli()).toEpochMilli()
+        logger.info("Handling of ${event.size} ItemEventDto events completed in $elapsedTime ms" +
+                " (saved: ${convertedEvents.size}, deleted: ${deletedIds.size})")
     }
 
     private fun countSaves(items: List<EsItem>) {

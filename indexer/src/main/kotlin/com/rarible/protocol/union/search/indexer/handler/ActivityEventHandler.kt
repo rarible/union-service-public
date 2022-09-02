@@ -66,7 +66,8 @@ class ActivityEventHandler(
             logger.info("Deleted $deleted activities")
         }
         val elapsedTime = nowMillis().minusMillis(startTime.toEpochMilli()).toEpochMilli()
-        logger.info("Handling of ${event.size} ActivityDto events completed in $elapsedTime ms")
+        logger.info("Handling of ${event.size} ActivityDto events completed in $elapsedTime ms" +
+                "saved ${convertedEvents.size}, deleted ${revertedEvents.size}")
     }
 
     private fun countSaves(activities: List<EsActivity>) {

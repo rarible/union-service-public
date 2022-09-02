@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.enrichment.evaluator
 
+import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
@@ -17,8 +18,7 @@ class BestOrderEvaluator(
     private val name = comparator.name
 
     companion object {
-
-        private val logger = LoggerFactory.getLogger(BestOrderEvaluator::class.java)
+        private val logger by Logger()
     }
 
     suspend fun evaluateBestOrder(current: ShortOrder?, updated: OrderDto): ShortOrder? {
@@ -72,8 +72,7 @@ class BestOrderEvaluator(
 
     // Select best Order between current and updated if they are different and alive
     private fun evaluateBestOrder(current: ShortOrder, updated: ShortOrder): ShortOrder {
-        val preferredComparator = BestPreferredOrderComparator(comparator)
-        val bestOrder = preferredComparator.compare(current, updated)
+        val bestOrder = comparator.compare(current, updated)
 
         logger.info(
             "Evaluated {} for {} [{}] (current = [{}], updated = [{}], best = [{}])",
