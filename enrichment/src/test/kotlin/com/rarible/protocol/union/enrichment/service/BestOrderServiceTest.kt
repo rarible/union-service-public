@@ -76,10 +76,12 @@ class BestOrderServiceTest {
     fun `item best sell order - updated is alive, current is not the best anymore`() = runBlocking<Unit> {
         val itemId = randomEthItemId()
         val updated = randomUnionSellOrderDto(itemId).copy(
-            makePrice = randomBigDecimal(3, 1)
+            makePrice = randomBigDecimal(3, 1),
+            platform = PlatformDto.CRYPTO_PUNKS
         )
         val current = randomUnionSellOrderDto(itemId).copy(
-            makePrice = updated.makePrice!! + (BigDecimal.ONE)
+            makePrice = updated.makePrice!! + (BigDecimal.ONE),
+            platform = PlatformDto.RARIBLE
         )
         val item = randomShortItem(itemId)
             .copy(
@@ -112,33 +114,11 @@ class BestOrderServiceTest {
         val updatedShortItem = bestOrderService.updateBestSellOrder(item, updated, emptyList())
 
         // Current best Order is still better than updated
-        assertThat(updatedShortItem.bestSellOrder).isEqualTo(ShortOrderConverter.convert(current))
+        assertThat(updatedShortItem.bestSellOrder).isEqualTo(ShortOrderConverter.convert(updated))
     }
 
     @Test
-    fun `item best sell order - updated is alive, current has preferred type, different currencies`() = runBlocking<Unit> {
-        val itemId = randomEthItemId()
-        val updated = randomUnionSellOrderDto(itemId).copy(
-            makePrice = randomBigDecimal(3, 1),
-            platform = PlatformDto.CRYPTO_PUNKS
-        )
-        // Current has higher makePrice, but it has preferred type
-        val current = randomUnionSellOrderDto(itemId).copy(
-            makePrice = updated.makePrice!!.plus(BigDecimal.ONE)
-        )
-        val item = randomShortItem(itemId).copy(
-            bestSellOrders = mapOf(current.sellCurrencyId to ShortOrderConverter.convert(current)),
-            bestSellOrder = ShortOrderConverter.convert(current)
-        )
-
-        val updatedShortItem = bestOrderService.updateBestSellOrder(item, updated, emptyList())
-
-        // Current best Order is still better than updated
-        assertThat(updatedShortItem.bestSellOrder).isEqualTo(ShortOrderConverter.convert(current))
-    }
-
-    @Test
-    fun `item best sell order - updated is alive, updated has preferred type`() = runBlocking<Unit> {
+    fun `item best sell order - updated is alive, ignore that updated has preferred type`() = runBlocking<Unit> {
         val itemId = randomEthItemId()
         val updated = randomUnionSellOrderDto(itemId).copy(
             makePrice = randomBigDecimal(3, 1)
@@ -156,29 +136,7 @@ class BestOrderServiceTest {
         val updatedShortItem = bestOrderService.updateBestSellOrder(item, updated, emptyList())
 
         // Current best Order is still better than updated
-        assertThat(updatedShortItem.bestSellOrder).isEqualTo(ShortOrderConverter.convert(updated))
-    }
-
-    @Test
-    fun `item best sell order - updated is alive, updated has preferred type, different currencies`() = runBlocking<Unit> {
-        val itemId = randomEthItemId()
-        val updated = randomUnionSellOrderDto(itemId).copy(
-            makePrice = randomBigDecimal(3, 1)
-        )
-        // Current is better than updated, but updated has preferred type
-        val current = randomUnionSellOrderDto(itemId).copy(
-            makePrice = updated.makePrice!!.minus(BigDecimal.ONE),
-            platform = PlatformDto.CRYPTO_PUNKS
-        )
-        val item = randomShortItem(itemId).copy(
-            bestSellOrders = mapOf(current.sellCurrencyId to ShortOrderConverter.convert(current)),
-            bestSellOrder = ShortOrderConverter.convert(current)
-        )
-
-        val updatedShortItem = bestOrderService.updateBestSellOrder(item, updated, emptyList())
-
-        // Current best Order is still better than updated
-        assertThat(updatedShortItem.bestSellOrder).isEqualTo(ShortOrderConverter.convert(updated))
+        assertThat(updatedShortItem.bestSellOrder).isEqualTo(ShortOrderConverter.convert(current))
     }
 
     @Test
