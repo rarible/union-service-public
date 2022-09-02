@@ -8,7 +8,6 @@ import com.rarible.protocol.union.enrichment.evaluator.BestOrderComparator
 import com.rarible.protocol.union.enrichment.evaluator.BestOrderEvaluator
 import com.rarible.protocol.union.enrichment.evaluator.BestOrderProvider
 import com.rarible.protocol.union.enrichment.evaluator.BestOrderProviderFactory
-import com.rarible.protocol.union.enrichment.evaluator.BestPreferredOrderComparator
 import com.rarible.protocol.union.enrichment.evaluator.BestSellOrderComparator
 import com.rarible.protocol.union.enrichment.evaluator.BestSellOrderOwner
 import com.rarible.protocol.union.enrichment.evaluator.CollectionBestBidOrderProvider
@@ -138,8 +137,7 @@ class BestOrderService(
 
     private fun getBestOrder(orders: List<ShortOrder>, comparator: BestOrderComparator): ShortOrder? {
         if (orders.isEmpty()) return null
-        val preferredOrderComparator = BestPreferredOrderComparator(comparator)
-        return orders.reduce { current, next -> preferredOrderComparator.compare(current, next) }
+        return orders.reduce { current, next -> comparator.compare(current, next) }
     }
 
     private suspend fun updateCurrencyOrders(

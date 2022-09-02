@@ -3,6 +3,7 @@ package com.rarible.protocol.union.enrichment.evaluator
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.enrichment.model.ShortOrder
 
+@Deprecated("Consider for removal, as now we don't give orders a priority based on platform")
 class BestPreferredOrderComparator(
     private val comparator: BestOrderComparator
 ) : BestOrderComparator {
