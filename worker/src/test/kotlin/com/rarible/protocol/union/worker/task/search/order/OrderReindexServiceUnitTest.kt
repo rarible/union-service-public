@@ -6,10 +6,13 @@ import com.rarible.protocol.union.dto.OrdersDto
 import com.rarible.protocol.union.enrichment.repository.search.EsOrderRepository
 import com.rarible.protocol.union.enrichment.service.query.order.OrderApiMergeService
 import com.rarible.protocol.union.worker.metrics.SearchTaskMetricFactory
+import com.rarible.protocol.union.worker.task.search.RateLimiter
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions
@@ -56,6 +59,10 @@ class OrderReindexServiceUnitTest {
         } returns counter
     }
 
+    private val rateLimiter = mockk<RateLimiter> {
+        coEvery { waitIfNecessary(any()) } just runs
+    }
+
     @Test
     fun `should skip reindexing if there's nothing to reindex`() = runBlocking<Unit> {
         val service = OrderReindexService(
@@ -67,7 +74,8 @@ class OrderReindexServiceUnitTest {
                 } returns OrdersDto(null, emptyList())
             },
             repo,
-            searchTaskMetricFactory
+            searchTaskMetricFactory,
+            rateLimiter,
         )
         Assertions.assertThat(
             service
@@ -87,6 +95,7 @@ class OrderReindexServiceUnitTest {
             orderApiMergeService,
             repo,
             searchTaskMetricFactory,
+            rateLimiter,
         )
 
         Assertions.assertThat(
