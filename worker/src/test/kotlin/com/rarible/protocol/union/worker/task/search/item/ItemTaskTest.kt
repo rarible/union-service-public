@@ -21,11 +21,14 @@ import com.rarible.protocol.union.worker.config.ItemReindexProperties
 import com.rarible.protocol.union.worker.metrics.SearchTaskMetricFactory
 import com.rarible.protocol.union.worker.task.search.ItemTaskParam
 import com.rarible.protocol.union.worker.task.search.ParamFactory
+import com.rarible.protocol.union.worker.task.search.RateLimiter
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import io.mockk.coEvery
 import io.mockk.coVerifyAll
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactor.mono
 import kotlinx.coroutines.runBlocking
@@ -105,6 +108,10 @@ internal class ItemTaskTest {
 
     private val paramFactory = ParamFactory(jacksonObjectMapper().registerKotlinModule())
 
+    private val rateLimiter = mockk<RateLimiter> {
+        coEvery { waitIfNecessary(any()) } just runs
+    }
+
     @Test
     internal fun `should start first task`() {
         runBlocking {
@@ -113,7 +120,7 @@ internal class ItemTaskTest {
                 ItemReindexProperties(
                     enabled = true,
                     blockchains = listOf(BlockchainReindexProperties(enabled = true, BlockchainDto.ETHEREUM))
-                ), client, paramFactory, repo, searchTaskMetricFactory, taskRepository
+                ), client, paramFactory, repo, searchTaskMetricFactory, taskRepository, rateLimiter,
             )
             task.runLongTask(
                 null, paramFactory.toString(

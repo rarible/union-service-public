@@ -8,6 +8,7 @@ import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.enrichment.repository.search.EsOwnershipRepository
 import com.rarible.protocol.union.worker.metrics.SearchTaskMetricFactory
 import com.rarible.protocol.union.worker.task.search.OwnershipTaskParam
+import com.rarible.protocol.union.worker.task.search.RateLimiter
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import org.elasticsearch.action.support.WriteRequest
@@ -18,6 +19,7 @@ class OwnershipReindexService(
     private val repository: EsOwnershipRepository,
     private val searchTaskMetricFactory: SearchTaskMetricFactory,
     private val rawOwnershipClient: RawOwnershipClient,
+    private val rateLimiter: RateLimiter,
 ) {
 
     fun reindex(
@@ -36,7 +38,9 @@ class OwnershipReindexService(
         index: String?,
         cursor: String?,
     ): Flow<String> = doReindex(blockchain, target, index, cursor, EsOwnershipConverter::convert) {
-        rawOwnershipClient.getAuctionAll(blockchain, it, PageSize.OWNERSHIP.max)
+        val size = PageSize.OWNERSHIP.max
+        rateLimiter.waitIfNecessary(size)
+        rawOwnershipClient.getAuctionAll(blockchain, it, size)
     }
 
     private fun reindexOwnerships(
@@ -51,6 +55,7 @@ class OwnershipReindexService(
             BlockchainDto.IMMUTABLEX -> 200 // Max size allowed by IMX
             else -> PageSize.OWNERSHIP.max
         }
+        rateLimiter.waitIfNecessary(size)
         rawOwnershipClient.getRawOwnershipsAll(blockchain, it, size)
     }
 
