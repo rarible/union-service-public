@@ -38,6 +38,8 @@ data class ShortItem(
 
     val lastUpdatedAt: Instant,
 
+    val poolOrders: List<String> = emptyList(), // TODO maybe something with type?
+
     @Version
     val version: Long? = null
 ) : BestSellOrderOwner<ShortItem>, BestBidOrderOwner<ShortItem>, OriginOrdersOwner {

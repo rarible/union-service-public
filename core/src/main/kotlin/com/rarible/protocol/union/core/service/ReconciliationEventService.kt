@@ -37,7 +37,7 @@ class ReconciliationEventService(
     }
 
     suspend fun onFailedOrder(order: OrderDto) {
-
+        // TODO collection not supported here
         val makeAssetExt = order.make.type.ext
         val takeAssetExt = order.take.type.ext
 
