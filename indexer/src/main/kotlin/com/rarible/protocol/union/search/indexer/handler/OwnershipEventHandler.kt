@@ -9,9 +9,6 @@ import com.rarible.protocol.union.dto.OwnershipDeleteEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.dto.OwnershipUpdateEventDto
 import com.rarible.protocol.union.enrichment.repository.search.EsOwnershipRepository
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
 import org.elasticsearch.action.support.WriteRequest
 import org.springframework.stereotype.Service
 
@@ -36,25 +33,20 @@ class OwnershipEventHandler(
             it.ownershipId.fullId()
         }
 
-        if (events.isNotEmpty()) {
-            logger.debug("Saving ${events.size} OwnershipDto events to ElasticSearch")
-            val refreshPolicy =
-                if (featureFlagsProperties.enableOwnershipSaveImmediateToElasticSearch) {
-                    WriteRequest.RefreshPolicy.IMMEDIATE
-                }
-                else {
-                    WriteRequest.RefreshPolicy.NONE
-                }
-            repository.saveAll(events, refreshPolicy = refreshPolicy)
-        }
+        logger.debug("Saving ${events.size} OwnershipDto events to ElasticSearch")
+        val refreshPolicy =
+            if (featureFlagsProperties.enableOwnershipSaveImmediateToElasticSearch) {
+                WriteRequest.RefreshPolicy.IMMEDIATE
+            } else {
+                WriteRequest.RefreshPolicy.NONE
+            }
 
-        if (deleted.isNotEmpty()) {
-            logger.debug("Removing ${deleted.size} OwnershipDto events from ElasticSearch")
-            repository.deleteAll(deleted)
-        }
+        repository.bulk(events, deleted, refreshPolicy = refreshPolicy)
 
         val elapsedTime = nowMillis().minusMillis(startTime.toEpochMilli()).toEpochMilli()
-        logger.info("Handling of ${event.size} OwnershipDto events completed in $elapsedTime ms" +
-                " (saved: ${events.size}, deleted: ${deleted.size})")
+        logger.info(
+            "Handling of ${event.size} OwnershipDto events completed in $elapsedTime ms" +
+                    " (saved: ${events.size}, deleted: ${deleted.size})"
+        )
     }
 }
