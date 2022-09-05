@@ -19,24 +19,26 @@ class RateLimiter(
 
     private val lock = Mutex()
 
+    @Volatile
     private var nextPeriodReset = Instant.EPOCH
-    private var remainingEntities = props.maxEntities
+    @Volatile
+    private var remainingEntities = 0
 
     suspend fun waitIfNecessary(amount: Int) {
         val elapsedTime = measureTimeMillis {
             lock.withLock {
                 if (remainingEntities < amount) {
                     val timeToWait = nextPeriodReset.toEpochMilli() - nowMillis().toEpochMilli()
-                    delay(timeToWait)
+                    if (timeToWait > 0) {
+                        logger.info("Rate limit exceeded, waiting for $timeToWait ms")
+                        delay(timeToWait)
+                    }
                     remainingEntities = props.maxEntities
-                    nextPeriodReset = nowMillis().plusMillis(props.period)
+                    nextPeriodReset = Instant.now().plusMillis(props.period)
                 }
                 remainingEntities -= amount
-                if (nextPeriodReset < nowMillis()) {
-                    nextPeriodReset = nowMillis().plusMillis(props.period)
-                }
             }
         }
-        logger.info("Spent $elapsedTime ms waiting in rate limiter")
+        //logger.info("Spent $elapsedTime ms waiting in rate limiter")
     }
 }

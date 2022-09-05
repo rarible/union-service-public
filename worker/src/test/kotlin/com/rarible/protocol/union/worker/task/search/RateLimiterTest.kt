@@ -16,7 +16,6 @@ class RateLimiterTest {
 
     private val rateLimiter = RateLimiter(RateLimiterProperties(100, 10))
 
-
     @Test
     fun `should wait when limit is reached`() = runBlocking<Unit> {
         // given
