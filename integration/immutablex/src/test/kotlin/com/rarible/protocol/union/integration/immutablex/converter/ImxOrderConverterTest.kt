@@ -202,6 +202,8 @@ class ImxOrderConverterTest {
             )
         )
 
-        ImxOrderConverter.convert(imxOrder, BlockchainDto.IMMUTABLEX)
+        // Here we just can check that internally conversion does not fail for swap order
+        val converted = ImxOrderConverter.convert(imxOrder, BlockchainDto.IMMUTABLEX)
+        assertThat(converted).isNotNull
     }
 }
