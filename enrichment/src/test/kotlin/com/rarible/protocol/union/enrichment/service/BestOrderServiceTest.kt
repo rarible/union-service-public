@@ -2,6 +2,7 @@ package com.rarible.protocol.union.enrichment.service
 
 import com.rarible.core.common.nowMillis
 import com.rarible.core.test.data.randomBigDecimal
+import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.service.CurrencyService
 import com.rarible.protocol.union.dto.CurrencyUsdRateDto
 import com.rarible.protocol.union.dto.OrderStatusDto
@@ -40,7 +41,7 @@ class BestOrderServiceTest {
         )
     }
 
-    private val bestOrderService = BestOrderService(enrichmentOrderService, currencyService)
+    private val bestOrderService = BestOrderService(enrichmentOrderService, currencyService, FeatureFlagsProperties())
 
     @BeforeEach
     fun beforeEach() {

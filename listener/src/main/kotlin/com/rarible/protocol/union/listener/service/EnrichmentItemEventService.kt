@@ -2,6 +2,7 @@ package com.rarible.protocol.union.listener.service
 
 import com.rarible.core.common.optimisticLock
 import com.rarible.protocol.union.core.event.OutgoingEventListener
+import com.rarible.protocol.union.core.model.PoolItemAction
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.getItemId
 import com.rarible.protocol.union.core.model.itemId
@@ -14,7 +15,9 @@ import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.ItemUpdateEventDto
 import com.rarible.protocol.union.dto.OrderDto
+import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.enrichment.converter.ItemLastSaleConverter
+import com.rarible.protocol.union.enrichment.evaluator.OrderPoolEvaluator
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
 import com.rarible.protocol.union.enrichment.model.ItemSellStats
 import com.rarible.protocol.union.enrichment.model.ShortItem
@@ -40,6 +43,18 @@ class EnrichmentItemEventService(
 ) {
 
     private val logger = LoggerFactory.getLogger(EnrichmentItemEventService::class.java)
+
+    suspend fun onItemChanged(itemId: ItemIdDto) {
+        val existing = enrichmentItemService.getOrEmpty(ShortItemId(itemId))
+        val updateEvent = buildUpdateEvent(short = existing)
+        sendUpdate(updateEvent)
+    }
+
+    suspend fun onItemUpdated(item: UnionItem) {
+        val existing = enrichmentItemService.getOrEmpty(ShortItemId(item.id))
+        val updateEvent = buildUpdateEvent(short = existing, item = item)
+        sendUpdate(updateEvent)
+    }
 
     // If ownership was updated, we need to recalculate totalStock/sellers for related item,
     // also, we can specify here Order which triggered this update - ItemService
@@ -116,18 +131,6 @@ class EnrichmentItemEventService(
         }
     }
 
-    suspend fun onItemChanged(itemId: ItemIdDto) {
-        val existing = enrichmentItemService.getOrEmpty(ShortItemId(itemId))
-        val updateEvent = buildUpdateEvent(short = existing)
-        sendUpdate(updateEvent)
-    }
-
-    suspend fun onItemUpdated(item: UnionItem) {
-        val existing = enrichmentItemService.getOrEmpty(ShortItemId(item.id))
-        val updateEvent = buildUpdateEvent(short = existing, item = item)
-        sendUpdate(updateEvent)
-    }
-
     suspend fun recalculateBestOrders(item: ShortItem): Boolean {
         val updated = bestOrderService.updateBestOrders(item)
         if (updated != item) {
@@ -153,6 +156,25 @@ class EnrichmentItemEventService(
         updateOrder(itemId, order, notificationEnabled) { item ->
             val origins = enrichmentItemService.getItemOrigins(itemId)
             bestOrderService.updateBestBidOrder(item, order, origins)
+        }
+    }
+
+    suspend fun onPoolOrderUpdated(
+        itemId: ShortItemId,
+        order: OrderDto,
+        action: PoolItemAction,
+        notificationEnabled: Boolean = true
+    ) {
+        val hackedOrder = when (action) {
+            PoolItemAction.INCLUDED -> order
+            // If item excluded from the pool, we can consider this order as FILLED to recalculate actual best sell
+            PoolItemAction.EXCLUDED -> order.copy(status = OrderStatusDto.FILLED)
+        }
+
+        updateOrder(itemId, hackedOrder, notificationEnabled) { item ->
+            val updated = OrderPoolEvaluator.updatePoolOrderSet(item, hackedOrder, action)
+            // Origins might be ignored for such orders
+            bestOrderService.updateBestSellOrder(updated, hackedOrder, emptyList())
         }
     }
 

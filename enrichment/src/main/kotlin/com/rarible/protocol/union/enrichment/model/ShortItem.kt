@@ -38,7 +38,7 @@ data class ShortItem(
 
     val lastUpdatedAt: Instant,
 
-    val poolOrders: List<String> = emptyList(), // TODO maybe something with type?
+    val poolSellOrders: List<ShortPoolOrder> = emptyList(),
 
     @Version
     val version: Long? = null
@@ -80,7 +80,11 @@ data class ShortItem(
     }
 
     fun isNotEmpty(): Boolean {
-        return bestBidOrder != null || bestSellOrder != null || auctions.isNotEmpty() || lastSale != null
+        return bestBidOrder != null
+            || bestSellOrder != null
+            || auctions.isNotEmpty()
+            || lastSale != null
+            || poolSellOrders.isNotEmpty()
     }
 
     @Transient

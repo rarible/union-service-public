@@ -209,6 +209,9 @@ class EnrichmentRefreshService(
     ) = coroutineScope {
         val shortItemId = ShortItemId(itemId)
 
+        // TODO PT-1155 we need to update sudoSwap orders here first
+        val shortItem = itemService.getOrEmpty(shortItemId)
+
         logger.info("Starting to reconcile Item [{}]", shortItemId)
         val lastSaleDeferred = async {
             if (ff.enableItemLastSaleEnrichment) enrichmentActivityService.getItemLastSale(itemId) else null
@@ -216,8 +219,10 @@ class EnrichmentRefreshService(
         val itemDtoDeferred = async { itemService.fetch(shortItemId) }
         val sellStatsDeferred = async { ownershipService.getItemSellStats(shortItemId) }
 
-        val bestSellProviderFactory = ItemBestSellOrderProvider.Factory(shortItemId, enrichmentOrderService)
-        val bestBidProviderFactory = ItemBestBidOrderProvider.Factory(shortItemId, enrichmentOrderService)
+        val bestSellProviderFactory = ItemBestSellOrderProvider.Factory(
+            shortItem, enrichmentOrderService, ff.enablePoolOrders
+        )
+        val bestBidProviderFactory = ItemBestBidOrderProvider.Factory(shortItem, enrichmentOrderService)
 
         val origins = enrichmentItemService.getItemOrigins(shortItemId)
         val bestOrders = getOriginBestOrders(
@@ -229,7 +234,7 @@ class EnrichmentRefreshService(
         val itemDto = itemDtoDeferred.await()
 
         val updatedItem = optimisticLock {
-            val shortItem = itemService.getOrEmpty(shortItemId).copy(
+            val currentItem = itemService.getOrEmpty(shortItemId).copy(
                 bestSellOrders = bestOrders.global.bestSellOrders,
                 bestSellOrder = bestOrders.global.bestSellOrder,
                 bestBidOrders = bestOrders.global.bestBidOrders,
@@ -241,14 +246,14 @@ class EnrichmentRefreshService(
                 lastSale = lastSaleDeferred.await()
             )
 
-            if (shortItem.isNotEmpty()) {
-                logger.info("Saving refreshed Item [{}] with gathered enrichment data [{}]", itemId, shortItem)
-                itemService.save(shortItem)
+            if (currentItem.isNotEmpty()) {
+                logger.info("Saving refreshed Item [{}] with gathered enrichment data [{}]", itemId, currentItem)
+                itemService.save(currentItem)
             } else {
                 logger.info("Item [{}] has no enrichment data, will be deleted", itemId)
                 itemService.delete(shortItemId)
             }
-            shortItem
+            currentItem
         }
 
         val event = if (itemDto.deleted) {

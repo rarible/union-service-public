@@ -1,18 +1,20 @@
 package com.rarible.protocol.union.listener.handler.internal
 
 import com.rarible.core.apm.CaptureTransaction
+import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.exception.UnionNotFoundException
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
-import com.rarible.protocol.union.core.model.UnionAmmOrderNftUpdateEvent
-import com.rarible.protocol.union.core.model.UnionAmmOrderUpdateEvent
+import com.rarible.protocol.union.core.model.PoolItemAction
 import com.rarible.protocol.union.core.model.UnionOrderEvent
 import com.rarible.protocol.union.core.model.UnionOrderUpdateEvent
+import com.rarible.protocol.union.core.model.UnionPoolNftUpdateEvent
+import com.rarible.protocol.union.core.model.UnionPoolOrderUpdateEvent
 import com.rarible.protocol.union.core.service.ReconciliationEventService
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
-import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.enrichment.service.EnrichmentOrderService
+import com.rarible.protocol.union.enrichment.util.isPoolOrder
 import com.rarible.protocol.union.listener.service.EnrichmentOrderEventService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -22,7 +24,8 @@ class UnionInternalOrderEventHandler(
     private val orderEventService: EnrichmentOrderEventService,
     private val enrichmentOrderService: EnrichmentOrderService,
     private val reconciliationEventService: ReconciliationEventService,
-    private val handler: IncomingEventHandler<UnionOrderEvent>
+    private val handler: IncomingEventHandler<UnionOrderEvent>,
+    private val ff: FeatureFlagsProperties
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -31,15 +34,22 @@ class UnionInternalOrderEventHandler(
     suspend fun onEvent(event: UnionOrderEvent) {
         try {
             when (event) {
-                is UnionOrderUpdateEvent -> onOrderUpdate(event.order)
-                is UnionAmmOrderUpdateEvent -> onAmmOrderUpdate(event.order, event.itemId)
-                is UnionAmmOrderNftUpdateEvent -> onAmmOrderNftUpdate(event)
+                is UnionOrderUpdateEvent -> {
+                    when (event.order.isPoolOrder) {
+                        // Trigger events to all existing items placed to the pool
+                        true -> triggerPoolOrderUpdate(event.orderId)
+                        else -> onOrderUpdate(event.order)
+                    }
+                }
+                is UnionPoolOrderUpdateEvent -> onPoolOrderUpdate(event)
+                // Trigger events to all existing items placed to the pool with including/excluding items
+                is UnionPoolNftUpdateEvent -> triggerPoolOrderUpdate(event.orderId, event.inNft, event.outNft)
             }
         } catch (e: Throwable) {
             // TODO PT-1151 not really sure how to perform reconciliation for AMM orders
             val order = when (event) {
                 is UnionOrderUpdateEvent -> event.order
-                is UnionAmmOrderUpdateEvent -> event.order
+                is UnionPoolOrderUpdateEvent -> event.order
                 else -> null
             }
             order?.let { reconciliationEventService.onFailedOrder(order) }
@@ -49,12 +59,6 @@ class UnionInternalOrderEventHandler(
 
     // Regular update event
     private suspend fun onOrderUpdate(order: OrderDto) {
-        if (order.platform == PlatformDto.SUDOSWAP) {
-            // TODO PT-1151 maybe there can be better way to determine such orders?
-            updateAmmOrder(fetchOrder(order.id))
-            return
-        }
-
         if (order.taker == null) {
             orderEventService.updateOrder(fetchOrder(order.id), true)
         } else {
@@ -63,20 +67,26 @@ class UnionInternalOrderEventHandler(
     }
 
     // Synthetic update event
-    private suspend fun onAmmOrderUpdate(order: OrderDto, itemId: ItemIdDto) {
-        orderEventService.updateAmmOrder(fetchOrder(order.id), itemId)
+    private suspend fun onPoolOrderUpdate(event: UnionPoolOrderUpdateEvent) {
+        if (!ff.enablePoolOrders) {
+            return
+        }
+        // for synthetic updates it might be costly to fetch order - so use received one
+        orderEventService.updatePoolOrder(event.order, event.itemId, event.action)
     }
 
-    private suspend fun onAmmOrderNftUpdate(event: UnionAmmOrderNftUpdateEvent) {
-        // TODO PT-1151 update ShortItems then trigger synthetic events
-        updateAmmOrder(fetchOrder(event.orderId))
-    }
-
-    // I think we have to trigger updates for ALL items related to AMM order in any case
-    private suspend fun updateAmmOrder(order: OrderDto) {
-        val itemIds = emptyList<ItemIdDto>() //TODO PT-1151 find related items
+    private suspend fun triggerPoolOrderUpdate(
+        orderId: OrderIdDto,
+        included: Set<ItemIdDto> = emptySet(),
+        excluded: Set<ItemIdDto> = emptySet()
+    ) {
+        if (!ff.enablePoolOrders) {
+            return
+        }
+        val order = fetchOrder(orderId)
+        val itemIds = emptyList<ItemIdDto>() //TODO PT-1151 find related items and set action
         itemIds.forEach {
-            handler.onEvent(UnionAmmOrderUpdateEvent(order, it))
+            handler.onEvent(UnionPoolOrderUpdateEvent(order, it, PoolItemAction.INCLUDED))
         }
     }
 

@@ -9,8 +9,8 @@ import com.rarible.protocol.union.dto.OrderIdDto
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY)
 @JsonSubTypes(
     JsonSubTypes.Type(name = "UPDATE", value = UnionOrderUpdateEvent::class),
-    JsonSubTypes.Type(name = "UPDATE_AMM_NFT", value = UnionAmmOrderNftUpdateEvent::class),
-    JsonSubTypes.Type(name = "UPDATE_AMM", value = UnionAmmOrderUpdateEvent::class)
+    JsonSubTypes.Type(name = "UPDATE_POOL_NFT", value = UnionPoolNftUpdateEvent::class),
+    JsonSubTypes.Type(name = "UPDATE_POOL_ORDER", value = UnionPoolOrderUpdateEvent::class)
 )
 sealed class UnionOrderEvent {
 
@@ -26,18 +26,24 @@ data class UnionOrderUpdateEvent(
 }
 
 // Event received from blockchains
-data class UnionAmmOrderNftUpdateEvent(
+data class UnionPoolNftUpdateEvent(
     override val orderId: OrderIdDto,
-    val inNft: List<ItemIdDto>,
-    val outNft: List<ItemIdDto>
+    val inNft: Set<ItemIdDto>,
+    val outNft: Set<ItemIdDto>
 ) : UnionOrderEvent()
 
-// Synthetic event based on inNft/outNft data from UnionAmmOrderNftUpdateEvent
-data class UnionAmmOrderUpdateEvent(
+// Synthetic event based on inNft/outNft data from UnionPoolNftUpdateEvent
+data class UnionPoolOrderUpdateEvent(
     override val orderId: OrderIdDto,
     val order: OrderDto,
-    val itemId: ItemIdDto
+    val itemId: ItemIdDto,
+    val action: PoolItemAction
 ) : UnionOrderEvent() {
 
-    constructor(order: OrderDto, itemId: ItemIdDto) : this(order.id, order, itemId)
+    constructor(order: OrderDto, itemId: ItemIdDto, action: PoolItemAction) : this(order.id, order, itemId, action)
+}
+
+enum class PoolItemAction {
+    INCLUDED,
+    EXCLUDED
 }

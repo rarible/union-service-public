@@ -3,6 +3,7 @@ package com.rarible.protocol.union.listener.service
 import com.rarible.core.client.WebClientResponseProxyException
 import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.event.OutgoingEventListener
+import com.rarible.protocol.union.core.model.PoolItemAction
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OrderDto
@@ -11,7 +12,6 @@ import com.rarible.protocol.union.dto.OrderUpdateEventDto
 import com.rarible.protocol.union.dto.ext
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
-import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
@@ -28,9 +28,18 @@ class EnrichmentOrderEventService(
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    suspend fun updateAmmOrder(order: OrderDto, makeItemIdDto: ItemIdDto, notificationEnabled: Boolean = true) {
+    suspend fun updatePoolOrder(
+        order: OrderDto,
+        itemId: ItemIdDto,
+        action: PoolItemAction,
+        notificationEnabled: Boolean = true
+    ) {
         // ATM we support only sell-orders for AMM
-        onItemSellOrder(order, ShortItemId(makeItemIdDto), notificationEnabled)
+        // Order event should not be sent here
+        // Ownership updates doesn't seem reasonable here too
+        ignoreApi404 {
+            enrichmentItemEventService.onPoolOrderUpdated(ShortItemId(itemId), order, action, notificationEnabled)
+        }
     }
 
     suspend fun updateOrder(order: OrderDto, notificationEnabled: Boolean = true) {
@@ -51,7 +60,11 @@ class EnrichmentOrderEventService(
             // Floor bid
             takeAssetExt.isCollection -> onCollectionBidOrder(order, takeAssetExt.collectionId!!, notificationEnabled)
             // Direct sell order
-            (makeItemId != null && takeItemId == null) -> onItemSellOrder(order, makeItemId, notificationEnabled)
+            (makeItemId != null && takeItemId == null) -> {
+                // Item should be checked first, otherwise ownership could trigger event for outdated item
+                onItemSellOrder(order, makeItemId, notificationEnabled)
+                onOwnershipSellOrder(order, makeItemId, notificationEnabled)
+            }
             // Direct bid order
             (makeItemId == null && takeItemId != null) -> onItemBidOrder(order, takeItemId, notificationEnabled)
             // Something else, like swap order (NFT to NFT)
@@ -70,15 +83,17 @@ class EnrichmentOrderEventService(
         order: OrderDto,
         itemId: ShortItemId,
         notificationEnabled: Boolean
-    ) {
-        // Item should be checked first, otherwise ownership could trigger event for outdated item
-        ignoreApi404 {
-            enrichmentItemEventService.onItemBestSellOrderUpdated(itemId, order, notificationEnabled)
-        }
-        ignoreApi404 {
-            val ownershipId = ShortOwnershipId(itemId.blockchain, itemId.itemId, order.maker.value)
-            enrichmentOwnershipEventService.onOwnershipBestSellOrderUpdated(ownershipId, order, notificationEnabled)
-        }
+    ) = ignoreApi404 {
+        enrichmentItemEventService.onItemBestSellOrderUpdated(itemId, order, notificationEnabled)
+    }
+
+    private suspend fun onOwnershipSellOrder(
+        order: OrderDto,
+        itemId: ShortItemId,
+        notificationEnabled: Boolean
+    ) = ignoreApi404 {
+        val ownershipId = ShortOwnershipId(itemId.blockchain, itemId.itemId, order.maker.value)
+        enrichmentOwnershipEventService.onOwnershipBestSellOrderUpdated(ownershipId, order, notificationEnabled)
     }
 
     private suspend fun onItemBidOrder(
@@ -113,12 +128,6 @@ class EnrichmentOrderEventService(
             order,
             withNotification
         )
-    }
-
-    private suspend fun onPoolOrder(
-        order: OrderDto,
-        notificationEnabled: Boolean
-    ) = coroutineScope {
     }
 
     private suspend fun ignoreApi404(call: suspend () -> Unit) {

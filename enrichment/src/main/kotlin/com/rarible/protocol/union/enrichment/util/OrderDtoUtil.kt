@@ -46,3 +46,11 @@ val OrderDto.origins: Set<String>
             is EthSudoSwapAmmDataV1Dto -> emptyList()
         }.toSet()
     }
+
+val OrderDto.isPoolOrder: Boolean
+    get() {
+        return when (this.data) {
+            is EthSudoSwapAmmDataV1Dto -> true
+            else -> false
+        }
+    }

@@ -3,7 +3,6 @@ package com.rarible.protocol.union.core.event
 import com.rarible.core.kafka.KafkaMessage
 import com.rarible.protocol.union.core.model.ReconciliationMarkEvent
 import com.rarible.protocol.union.core.model.ReconciliationMarkType
-import com.rarible.protocol.union.core.model.UnionAmmOrderUpdateEvent
 import com.rarible.protocol.union.core.model.UnionAuctionEvent
 import com.rarible.protocol.union.core.model.UnionCollectionEvent
 import com.rarible.protocol.union.core.model.UnionInternalActivityEvent
@@ -17,6 +16,7 @@ import com.rarible.protocol.union.core.model.UnionItemEvent
 import com.rarible.protocol.union.core.model.UnionOrderEvent
 import com.rarible.protocol.union.core.model.UnionOrderUpdateEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipEvent
+import com.rarible.protocol.union.core.model.UnionPoolOrderUpdateEvent
 import com.rarible.protocol.union.core.model.download.DownloadTask
 import com.rarible.protocol.union.core.model.getItemId
 import com.rarible.protocol.union.core.model.itemId
@@ -131,7 +131,7 @@ object KafkaEventFactory {
     fun internalOrderEvent(event: UnionOrderEvent): KafkaMessage<UnionInternalBlockchainEvent> {
         val order = when (event) {
             is UnionOrderUpdateEvent -> event.order
-            is UnionAmmOrderUpdateEvent -> event.order
+            is UnionPoolOrderUpdateEvent -> event.order
             else -> null
         }
         val key = if (order == null) {
