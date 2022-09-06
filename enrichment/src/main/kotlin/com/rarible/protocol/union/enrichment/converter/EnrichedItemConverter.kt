@@ -4,6 +4,7 @@ import com.rarible.protocol.union.core.converter.ContractAddressConverter
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.util.CompositeItemIdParser
+import com.rarible.protocol.union.dto.AmmOrdersDto
 import com.rarible.protocol.union.dto.AuctionDto
 import com.rarible.protocol.union.dto.AuctionIdDto
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -52,7 +53,7 @@ object EnrichedItemConverter {
             bestSellOrder = shortItem?.bestSellOrder?.let { orders[it.dtoId] },
             bestBidOrder = shortItem?.bestBidOrder?.let { orders[it.dtoId] },
             originOrders = shortItem?.originOrders?.let { OriginOrdersConverter.convert(it, orders) } ?: emptyList(),
-            ammOrders = null,
+            ammOrders = AmmOrdersDto(shortItem?.poolSellOrders?.map { it.order.dtoId } ?: emptyList()),
             auctions = shortItem?.auctions?.mapNotNull { auctions[it] } ?: emptyList(),
             totalStock = shortItem?.totalStock ?: BigInteger.ZERO,
             sellers = shortItem?.sellers ?: 0,
