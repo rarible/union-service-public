@@ -1,11 +1,20 @@
 package com.rarible.protocol.union.listener.handler.internal
 
 import com.rarible.core.apm.CaptureTransaction
+import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.exception.UnionNotFoundException
+import com.rarible.protocol.union.core.handler.IncomingEventHandler
+import com.rarible.protocol.union.core.model.PoolItemAction
 import com.rarible.protocol.union.core.model.UnionOrderEvent
 import com.rarible.protocol.union.core.model.UnionOrderUpdateEvent
+import com.rarible.protocol.union.core.model.UnionPoolNftUpdateEvent
+import com.rarible.protocol.union.core.model.UnionPoolOrderUpdateEvent
 import com.rarible.protocol.union.core.service.ReconciliationEventService
+import com.rarible.protocol.union.dto.ItemIdDto
+import com.rarible.protocol.union.dto.OrderDto
+import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.enrichment.service.EnrichmentOrderService
+import com.rarible.protocol.union.enrichment.util.isPoolOrder
 import com.rarible.protocol.union.listener.service.EnrichmentOrderEventService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -14,7 +23,9 @@ import org.springframework.stereotype.Component
 class UnionInternalOrderEventHandler(
     private val orderEventService: EnrichmentOrderEventService,
     private val enrichmentOrderService: EnrichmentOrderService,
-    private val reconciliationEventService: ReconciliationEventService
+    private val reconciliationEventService: ReconciliationEventService,
+    private val handler: IncomingEventHandler<UnionOrderEvent>,
+    private val ff: FeatureFlagsProperties
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -24,22 +35,66 @@ class UnionInternalOrderEventHandler(
         try {
             when (event) {
                 is UnionOrderUpdateEvent -> {
-                    if (event.order.taker == null) {
-                        // Since there could be delay of message delivery, it's better to re-fetch order
-                        // to have it in actual state
-                        val order = enrichmentOrderService.getById(event.order.id)
-                            ?: throw UnionNotFoundException("Order [{}] not found in blockchain")
-
-                        orderEventService.updateOrder(order, true)
-                    } else {
-                        logger.info("Ignored ${event.order.id} with filled taker")
+                    when (event.order.isPoolOrder) {
+                        // Trigger events to all existing items placed to the pool
+                        true -> triggerPoolOrderUpdate(event.orderId)
+                        else -> onOrderUpdate(event.order)
                     }
                 }
+                is UnionPoolOrderUpdateEvent -> onPoolOrderUpdate(event)
+                // Trigger events to all existing items placed to the pool with including/excluding items
+                is UnionPoolNftUpdateEvent -> triggerPoolOrderUpdate(event.orderId, event.inNft, event.outNft)
             }
         } catch (e: Throwable) {
-            reconciliationEventService.onFailedOrder(event.order)
+            // TODO PT-1151 not really sure how to perform reconciliation for AMM orders
+            val order = when (event) {
+                is UnionOrderUpdateEvent -> event.order
+                is UnionPoolOrderUpdateEvent -> event.order
+                else -> null
+            }
+            order?.let { reconciliationEventService.onFailedOrder(order) }
             throw e
         }
+    }
+
+    // Regular update event
+    private suspend fun onOrderUpdate(order: OrderDto) {
+        if (order.taker == null) {
+            orderEventService.updateOrder(fetchOrder(order.id), true)
+        } else {
+            logger.info("Ignored ${order.id} with filled taker")
+        }
+    }
+
+    // Synthetic update event
+    private suspend fun onPoolOrderUpdate(event: UnionPoolOrderUpdateEvent) {
+        if (!ff.enablePoolOrders) {
+            return
+        }
+        // for synthetic updates it might be costly to fetch order - so use received one
+        orderEventService.updatePoolOrder(event.order, event.itemId, event.action)
+    }
+
+    private suspend fun triggerPoolOrderUpdate(
+        orderId: OrderIdDto,
+        included: Set<ItemIdDto> = emptySet(),
+        excluded: Set<ItemIdDto> = emptySet()
+    ) {
+        if (!ff.enablePoolOrders) {
+            return
+        }
+        val order = fetchOrder(orderId)
+        val itemIds = emptyList<ItemIdDto>() //TODO PT-1151 find related items and set action
+        itemIds.forEach {
+            handler.onEvent(UnionPoolOrderUpdateEvent(order, it, PoolItemAction.INCLUDED))
+        }
+    }
+
+    private suspend fun fetchOrder(orderId: OrderIdDto): OrderDto {
+        // Since there could be delay of message delivery, it's better to re-fetch order
+        // to have it in actual state
+        return enrichmentOrderService.getById(orderId)
+            ?: throw UnionNotFoundException("Order [{}] not found in blockchain")
     }
 
 }

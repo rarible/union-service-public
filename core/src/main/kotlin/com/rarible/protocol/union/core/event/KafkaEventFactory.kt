@@ -14,7 +14,9 @@ import com.rarible.protocol.union.core.model.UnionInternalOrderEvent
 import com.rarible.protocol.union.core.model.UnionInternalOwnershipEvent
 import com.rarible.protocol.union.core.model.UnionItemEvent
 import com.rarible.protocol.union.core.model.UnionOrderEvent
+import com.rarible.protocol.union.core.model.UnionOrderUpdateEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipEvent
+import com.rarible.protocol.union.core.model.UnionPoolOrderUpdateEvent
 import com.rarible.protocol.union.core.model.download.DownloadTask
 import com.rarible.protocol.union.core.model.getItemId
 import com.rarible.protocol.union.core.model.itemId
@@ -127,17 +129,24 @@ object KafkaEventFactory {
     }
 
     fun internalOrderEvent(event: UnionOrderEvent): KafkaMessage<UnionInternalBlockchainEvent> {
-        val order = event.order
+        val order = when (event) {
+            is UnionOrderUpdateEvent -> event.order
+            is UnionPoolOrderUpdateEvent -> event.order
+            else -> null
+        }
+        val key = if (order == null) {
+            event.orderId.fullId()
+        } else {
+            val makeAssetExt = order.make.type.ext
+            val takeAssetExt = order.take.type.ext
 
-        val makeAssetExt = order.make.type.ext
-        val takeAssetExt = order.take.type.ext
-
-        val key = when {
-            makeAssetExt.isCollection -> makeAssetExt.collectionId!!.fullId()
-            takeAssetExt.isCollection -> takeAssetExt.collectionId!!.fullId()
-            makeAssetExt.itemId != null -> makeAssetExt.itemId!!.fullId()
-            takeAssetExt.itemId != null -> takeAssetExt.itemId!!.fullId()
-            else -> order.id.fullId()
+            when {
+                makeAssetExt.isCollection -> makeAssetExt.collectionId!!.fullId()
+                takeAssetExt.isCollection -> takeAssetExt.collectionId!!.fullId()
+                makeAssetExt.itemId != null -> makeAssetExt.itemId!!.fullId()
+                takeAssetExt.itemId != null -> takeAssetExt.itemId!!.fullId()
+                else -> event.orderId.fullId()
+            }
         }
 
         return KafkaMessage(

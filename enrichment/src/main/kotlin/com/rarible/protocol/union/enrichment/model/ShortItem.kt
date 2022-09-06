@@ -38,6 +38,8 @@ data class ShortItem(
 
     val lastUpdatedAt: Instant,
 
+    val poolSellOrders: List<ShortPoolOrder> = emptyList(),
+
     @Version
     val version: Long? = null
 ) : BestSellOrderOwner<ShortItem>, BestBidOrderOwner<ShortItem>, OriginOrdersOwner {
@@ -78,7 +80,11 @@ data class ShortItem(
     }
 
     fun isNotEmpty(): Boolean {
-        return bestBidOrder != null || bestSellOrder != null || auctions.isNotEmpty() || lastSale != null
+        return bestBidOrder != null
+            || bestSellOrder != null
+            || auctions.isNotEmpty()
+            || lastSale != null
+            || poolSellOrders.isNotEmpty()
     }
 
     @Transient

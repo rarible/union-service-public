@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.enrichment.service
 
+import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.service.CurrencyService
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.enrichment.evaluator.BestBidOrderComparator
@@ -29,7 +30,8 @@ import java.util.*
 @Component
 class BestOrderService(
     private val enrichmentOrderService: EnrichmentOrderService,
-    private val currencyService: CurrencyService
+    private val currencyService: CurrencyService,
+    private val ff: FeatureFlagsProperties
 ) {
 
     //---------------------- Ownership ----------------------//
@@ -84,7 +86,7 @@ class BestOrderService(
         item: ShortItem, order: OrderDto,
         origins: List<String>
     ): ShortItem {
-        val providerFactory = ItemBestSellOrderProvider.Factory(item.id, enrichmentOrderService)
+        val providerFactory = ItemBestSellOrderProvider.Factory(item, enrichmentOrderService, ff.enablePoolOrders)
         val originOrders = updateOriginSell(item.originOrders, order, origins, providerFactory)
         val updated = updateBestSell(item, providerFactory.create(null), order)
         return updated.copy(originOrders = originOrders)
@@ -94,7 +96,7 @@ class BestOrderService(
         item: ShortItem, order: OrderDto,
         origins: List<String>
     ): ShortItem {
-        val providerFactory = ItemBestBidOrderProvider.Factory(item.id, enrichmentOrderService)
+        val providerFactory = ItemBestBidOrderProvider.Factory(item, enrichmentOrderService)
         val originOrders = updateOriginBid(item.originOrders, order, origins, providerFactory)
         val updated = updateBestBid(item, providerFactory.create(null), order)
         return updated.copy(originOrders = originOrders)
