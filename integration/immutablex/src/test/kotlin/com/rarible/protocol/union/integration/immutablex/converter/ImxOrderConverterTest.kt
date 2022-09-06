@@ -186,4 +186,24 @@ class ImxOrderConverterTest {
         assertThat(filledOrder.fill).isEqualTo(BigDecimal.ONE)
         assertThat(filledOrder.makeStock).isEqualTo(BigDecimal.ZERO)
     }
+
+    @Test
+    fun `should not throw zero length integer error`() {
+        val make = randomImxOrderSellSide()
+        val take = randomImxOrderBuySide()
+        val imxOrder = randomImxOrder(
+            sell = make.copy(
+                type = "ERC721",
+                data = make.data.copy(quantity = "", quantityWithFees = "")
+            ),
+            buy = take.copy(
+                type = "ERC721",
+                data = take.data.copy(quantity = "", quantityWithFees = "")
+            )
+        )
+
+        // Here we just can check that internally conversion does not fail for swap order
+        val converted = ImxOrderConverter.convert(imxOrder, BlockchainDto.IMMUTABLEX)
+        assertThat(converted).isNotNull
+    }
 }
