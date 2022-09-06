@@ -6,6 +6,7 @@ import com.rarible.protocol.union.core.model.EsOwnershipByItemFilter
 import com.rarible.protocol.union.core.model.EsOwnershipByOwnerFilter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
+import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.continuation.DateIdContinuation
 import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
 import com.rarible.protocol.union.enrichment.repository.search.EsOwnershipRepository
@@ -62,6 +63,26 @@ internal class EsOwnershipRepositoryFt {
 
         val deleted = repository.findById(expected.ownershipId)
         assertNull(deleted)
+    }
+
+    @Test
+    fun `should do bulk save and delete`() = runBlocking<Unit> {
+        // given
+        val initial = (1..10).map { randomEsOwnership() }
+        val toSave = (1..10).map { randomEsOwnership() }
+        repository.saveAll(initial)
+        val toDelete = initial.map { it.ownershipId }
+
+        // when
+        repository.bulk(toSave, toDelete)
+
+        // then
+        toSave.forEach {
+            assertThat(repository.findById(it.ownershipId)).isNotNull
+        }
+        toDelete.forEach {
+            assertThat(repository.findById(it)).isNull()
+        }
     }
 
     @Test

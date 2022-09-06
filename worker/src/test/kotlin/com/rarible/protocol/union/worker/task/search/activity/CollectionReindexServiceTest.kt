@@ -8,11 +8,14 @@ import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.CollectionsDto
 import com.rarible.protocol.union.enrichment.repository.search.EsCollectionRepository
 import com.rarible.protocol.union.worker.metrics.SearchTaskMetricFactory
+import com.rarible.protocol.union.worker.task.search.RateLimiter
 import com.rarible.protocol.union.worker.task.search.collection.CollectionReindexService
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions
@@ -40,6 +43,10 @@ class CollectionReindexServiceTest {
         } answers { arg(0) }
     }
 
+    private val rateLimiter = mockk<RateLimiter> {
+        coEvery { waitIfNecessary(any()) } just runs
+    }
+
     @Test
     fun `should skip reindexing if there's nothing to reindex`() = runBlocking<Unit> {
         val service = CollectionReindexService(
@@ -51,7 +58,8 @@ class CollectionReindexServiceTest {
                 } returns CollectionsDto(0, null, emptyList())
             },
             esRepo,
-            searchTaskMetricFactory
+            searchTaskMetricFactory,
+            rateLimiter,
         )
         Assertions.assertThat(
             service
@@ -87,6 +95,7 @@ class CollectionReindexServiceTest {
             },
             esRepo,
             searchTaskMetricFactory,
+            rateLimiter,
         )
 
         Assertions.assertThat(

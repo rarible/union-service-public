@@ -10,6 +10,7 @@ import com.rarible.protocol.union.dto.continuation.page.PageSize
 import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
 import com.rarible.protocol.union.enrichment.service.query.activity.ActivityApiMergeService
 import com.rarible.protocol.union.worker.metrics.SearchTaskMetricFactory
+import com.rarible.protocol.union.worker.task.search.RateLimiter
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import org.elasticsearch.action.support.WriteRequest
@@ -22,6 +23,7 @@ class ActivityReindexService(
     private val esActivityRepository: EsActivityRepository,
     private val searchTaskMetricFactory: SearchTaskMetricFactory,
     private val converter: EsActivityConverter,
+    private val rateLimiter: RateLimiter,
 ) {
     companion object {
         val logger by Logger()
@@ -44,6 +46,7 @@ class ActivityReindexService(
         return flow {
             var continuation = cursor
             do {
+                rateLimiter.waitIfNecessary(size)
                 val res = activityApiMergeService.getAllActivities(
                     listOf(type),
                     listOf(blockchain),

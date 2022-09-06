@@ -64,7 +64,7 @@ abstract class ElasticSearchRepository<T>(
 
         return esOperations.save(entity, entityDefinition.writeIndexCoordinates).awaitFirst()
     }
-
+    @Deprecated("Use bulk() instead")
     suspend fun saveAll(
         entities: List<T>,
         indexName: String? = null,
@@ -107,6 +107,49 @@ abstract class ElasticSearchRepository<T>(
             throw RuntimeException(result.buildFailureMessage())
         }
         return entities
+    }
+
+    suspend fun bulk(
+        entitiesToSave: List<T>,
+        idsToDelete: List<String>,
+        indexName: String? = null,
+        refreshPolicy: WriteRequest.RefreshPolicy = WriteRequest.RefreshPolicy.IMMEDIATE,
+    ) {
+        val bulkRequest = BulkRequest()
+            .setRefreshPolicy(refreshPolicy)
+
+        for (entity in entitiesToSave) {
+            val document = elasticsearchConverter.mapObject(entity)
+            index(indexName).indexNames.forEach { index ->
+                bulkRequest.add(
+                    Requests.indexRequest(index)
+                        .id(entityId(entity))
+                        .source(document, XContentType.JSON)
+                        .create(false)
+                )
+            }
+        }
+
+        for (id in idsToDelete) {
+            index(indexName).indexNames.forEach { index ->
+                bulkRequest.add(
+                    Requests.deleteRequest(index)
+                        .id(id)
+                )
+            }
+        }
+
+        val result = elasticClient.bulk(bulkRequest).awaitFirst()
+
+        if (result.hasFailures()) {
+            logger.error(
+                "Failed to bulk entities to index [{}] with policy {}: {}",
+                index(indexName),
+                refreshPolicy,
+                result.buildFailureMessage()
+            )
+            throw RuntimeException(result.buildFailureMessage())
+        }
     }
 
     suspend fun deleteAll(ids: List<String>): Long? {
