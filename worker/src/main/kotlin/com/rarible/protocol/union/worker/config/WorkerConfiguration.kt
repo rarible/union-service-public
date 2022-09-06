@@ -27,7 +27,7 @@ import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperatio
     ]
 )
 @EnableRaribleTask
-@EnableConfigurationProperties(WorkerProperties::class)
+@EnableConfigurationProperties(WorkerProperties::class, RateLimiterProperties::class)
 class WorkerConfiguration(
     val properties: WorkerProperties
 ) {

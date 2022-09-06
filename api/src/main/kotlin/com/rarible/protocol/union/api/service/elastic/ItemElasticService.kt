@@ -3,6 +3,7 @@ package com.rarible.protocol.union.api.service.elastic
 import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.apm.SpanType
 import com.rarible.core.common.mapAsync
+import com.rarible.core.common.nowMillis
 import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.api.service.api.ItemEnrichService
 import com.rarible.protocol.union.api.service.api.ItemQueryService
@@ -63,7 +64,9 @@ class ItemElasticService(
             " Slice(size={}, continuation={})",
             blockchains, continuation, safeSize, slice.entities.size, slice.continuation
         )
+        val before = nowMillis().toEpochMilli()
         val enriched = itemEnrichService.enrich(slice.entities)
+        logger.info("getAllItems() enrichment took ${nowMillis().minusMillis(before).toEpochMilli()} ms")
 
         return ItemsDto(
             items = enriched,
@@ -269,7 +272,7 @@ class ItemElasticService(
         continuation: String?,
         size: Int?
     ): Slice<UnionItem> {
-        logger.info("getAllActivities() from ElasticSearch")
+        logger.info("getAllItemsInner() from ElasticSearch")
         val evaluatedBlockchains = router.getEnabledBlockchains(blockchains).map { it.name }.toSet()
 
         val filter = itemFilterConverter.convertGetAllItems(
@@ -279,6 +282,7 @@ class ItemElasticService(
         val queryResult = esItemRepository.search(filter, EsItemSort.DEFAULT, size)
         logger.info("Query result: $queryResult")
         val items = getItems(queryResult.entities)
+        logger.info("Got ${items.size} items")
         return Slice(
             entities = items,
             continuation = queryResult.continuation

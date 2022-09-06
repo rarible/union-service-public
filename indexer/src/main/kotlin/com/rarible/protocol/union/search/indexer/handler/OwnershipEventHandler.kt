@@ -42,27 +42,22 @@ class OwnershipEventHandler(
             it.ownershipId.fullId()
         }
 
-        if (events.isNotEmpty()) {
-            logger.debug("Saving ${events.size} OwnershipDto events to ElasticSearch")
-            val refreshPolicy =
-                if (featureFlagsProperties.enableOwnershipSaveImmediateToElasticSearch) {
-                    WriteRequest.RefreshPolicy.IMMEDIATE
-                }
-                else {
-                    WriteRequest.RefreshPolicy.NONE
-                }
-            repository.saveAll(events, refreshPolicy = refreshPolicy)
-            countSaves(events)
-        }
+        logger.debug("Saving ${events.size} OwnershipDto events to ElasticSearch")
+        val refreshPolicy =
+            if (featureFlagsProperties.enableOwnershipSaveImmediateToElasticSearch) {
+                WriteRequest.RefreshPolicy.IMMEDIATE
+            } else {
+                WriteRequest.RefreshPolicy.NONE
+            }
 
-        if (deleted.isNotEmpty()) {
-            logger.debug("Removing ${deleted.size} OwnershipDto events from ElasticSearch")
-            repository.deleteAll(deleted)
-        }
+        repository.bulk(events, deleted, refreshPolicy = refreshPolicy)
+        countSaves(events)
 
         val elapsedTime = nowMillis().minusMillis(startTime.toEpochMilli()).toEpochMilli()
-        logger.info("Handling of ${event.size} OwnershipDto events completed in $elapsedTime ms" +
-                " (saved: ${events.size}, deleted: ${deleted.size})")
+        logger.info(
+            "Handling of ${event.size} OwnershipDto events completed in $elapsedTime ms" +
+                    " (saved: ${events.size}, deleted: ${deleted.size})"
+        )
     }
 
     private fun countSaves(ownerships: List<EsOwnership>) {

@@ -82,7 +82,7 @@ protocol-union-worker:
     SERVICE_PREFIX: '{{ include "app.env" $ }}-union'
   resources:
     jvm:
-      xmx_megabytes: 512
-      max_direct_memory_megabytes: 128
+      xmx_megabytes: 1024
+      max_direct_memory_megabytes: 256
   podAnnotations:
     fluentbit.io/parser: logfmt
