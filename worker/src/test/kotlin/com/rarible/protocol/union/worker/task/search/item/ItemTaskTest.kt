@@ -92,7 +92,8 @@ internal class ItemTaskTest {
             paramFactory,
             repo,
             searchTaskMetricFactory,
-            taskRepository
+            taskRepository,
+            rateLimiter,
         )
 
         val param = paramFactory.toString(
