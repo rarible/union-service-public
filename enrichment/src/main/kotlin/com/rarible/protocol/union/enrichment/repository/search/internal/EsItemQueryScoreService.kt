@@ -43,8 +43,9 @@ class EsItemQueryScoreService(
             )
         }
 
+        val filters = QueryBuilders.boolQuery()
         return QueryBuilders.functionScoreQuery(
-            boolQuery,
+            filters.must(QueryBuilders.matchAllQuery()).filter(boolQuery),
             functions.toTypedArray()
         )
     }

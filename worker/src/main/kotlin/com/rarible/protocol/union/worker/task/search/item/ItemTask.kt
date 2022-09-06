@@ -15,6 +15,7 @@ import com.rarible.protocol.union.worker.config.ItemReindexProperties
 import com.rarible.protocol.union.worker.metrics.SearchTaskMetricFactory
 import com.rarible.protocol.union.worker.task.search.ItemTaskParam
 import com.rarible.protocol.union.worker.task.search.ParamFactory
+import com.rarible.protocol.union.worker.task.search.RateLimiter
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
@@ -32,6 +33,7 @@ class ItemTask(
     private val repository: EsItemRepository,
     private val searchTaskMetricFactory: SearchTaskMetricFactory,
     private val taskRepository: TaskRepository,
+    private val rateLimiter: RateLimiter,
 ) : TaskHandler<String> {
 
     override val type: String
@@ -57,6 +59,7 @@ class ItemTask(
             var continuation = from
             flow {
                 do {
+                    rateLimiter.waitIfNecessary(size)
                     val res = itemService.getAllItems(
                         continuation,
                         size,

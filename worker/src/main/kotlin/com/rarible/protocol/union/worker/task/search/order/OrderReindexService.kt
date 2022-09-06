@@ -9,6 +9,7 @@ import com.rarible.protocol.union.dto.continuation.page.PageSize
 import com.rarible.protocol.union.enrichment.repository.search.EsOrderRepository
 import com.rarible.protocol.union.enrichment.service.query.order.OrderApiMergeService
 import com.rarible.protocol.union.worker.metrics.SearchTaskMetricFactory
+import com.rarible.protocol.union.worker.task.search.RateLimiter
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import org.elasticsearch.action.support.WriteRequest
@@ -18,7 +19,8 @@ import org.springframework.stereotype.Service
 class OrderReindexService(
     private val orderApiMergeService: OrderApiMergeService,
     private val repository: EsOrderRepository,
-    private val searchTaskMetricFactory: SearchTaskMetricFactory
+    private val searchTaskMetricFactory: SearchTaskMetricFactory,
+    private val rateLimiter: RateLimiter,
 ) {
 
     private val logger by Logger()
@@ -37,6 +39,7 @@ class OrderReindexService(
         }
         return flow {
             do {
+                rateLimiter.waitIfNecessary(size)
                 val res = orderApiMergeService.getOrdersAll(
                     listOf(blockchain),
                     continuation,

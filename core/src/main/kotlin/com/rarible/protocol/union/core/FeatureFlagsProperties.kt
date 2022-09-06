@@ -13,6 +13,7 @@ data class FeatureFlagsProperties(
     val enableLegacyWrappedEventTopic: Boolean = true,
     val enableContentMetaCache: Boolean = true,
     val enableEmbeddedContentMigrationJob: Boolean = true,
+    val enablePoolOrders: Boolean = false,
     // activities
     var enableActivityQueriesToElasticSearch: Boolean = false,
     var enableActivityAscQueriesWithApiMerge: Boolean = true,
@@ -28,6 +29,7 @@ data class FeatureFlagsProperties(
     var enableOwnershipSaveImmediateToElasticSearch: Boolean = false,
     // items
     var enableItemQueriesToElasticSearch: Boolean = false,
+    var enableSearchItems: Boolean = false,
     var enableItemSaveImmediateToElasticSearch: Boolean = false,
 
     val enabledMetaPipeline: Boolean = false

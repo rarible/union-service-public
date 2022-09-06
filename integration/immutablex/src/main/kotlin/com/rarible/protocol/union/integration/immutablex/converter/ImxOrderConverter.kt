@@ -24,6 +24,12 @@ import com.rarible.protocol.union.integration.immutablex.client.ImmutablexOrderS
 import java.math.BigDecimal
 import java.math.BigInteger
 
+private const val ERC721 = "ERC721"
+
+private const val ETH = "ETH"
+
+private const val ERC20 = "ERC20"
+
 object ImxOrderConverter {
 
     private val logger by Logger()
@@ -48,9 +54,9 @@ object ImxOrderConverter {
         val take: AssetDto = toAsset(order, order.buy, blockchain)
 
         val (quantity, makePrice, takePrice) = if (make.type.ext.isNft) {
-            Triple(getQuantityWithFees(order.buy.data), take.value, null)
+            Triple(getQuantityWithFees(order.buy), take.value, null)
         } else {
-            Triple(getQuantityWithFees(order.sell.data), null, make.value)
+            Triple(getQuantityWithFees(order.sell), null, make.value)
         }
 
         val status = convertStatus(order)
@@ -121,16 +127,16 @@ object ImxOrderConverter {
         // In the Asset we should specify price WITHOUT fees
         val totalFees = order.fees?.sumOf { it.amount }?.toBigInteger() ?: BigInteger.ZERO
         return when (side.type) {
-            "ERC721" -> {
+            ERC721 -> {
                 val tokenId = side.data.encodedTokenId() ?: throw ImxDataException("Token ID not specified in asset")
                 val contract = ContractAddressConverter.convert(blockchain, side.data.tokenAddress!!)
                 AssetDto(EthErc721AssetTypeDto(contract, tokenId), BigDecimal.ONE)
             }
-            "ETH" -> {
+            ETH -> {
                 val type = EthEthereumAssetTypeDto(blockchain)
                 AssetDto(type, normalizeQuantity(side, totalFees))
             }
-            "ERC20" -> {
+            ERC20 -> {
                 val contract = ContractAddressConverter.convert(blockchain, side.data.tokenAddress!!)
                 val type = EthErc20AssetTypeDto(contract)
                 AssetDto(type, normalizeQuantity(side, totalFees))
@@ -149,11 +155,15 @@ object ImxOrderConverter {
         }
     }
 
-    private fun getQuantityWithFees(data: ImmutablexOrderData): BigInteger {
-        return if (data.quantityWithFees.isNullOrBlank()) {
-            data.quantity?.toBigInteger() ?: throw ImxDataException("Quantity is not specified in Order")
+    private fun getQuantityWithFees(side: ImmutablexOrderSide): BigInteger {
+        return if (side.data.quantityWithFees.isNullOrBlank()) {
+            if (side.type == ERC721 && side.data.quantity.isNullOrBlank()) {
+                BigInteger.ONE
+            } else {
+                side.data.quantity?.toBigInteger() ?: throw ImxDataException("Quantity is not specified in Order")
+            }
         } else {
-            BigInteger(data.quantityWithFees)
+            BigInteger(side.data.quantityWithFees)
         }
     }
 }

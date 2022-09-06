@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.search.indexer.handler
 
+import com.rarible.core.common.nowMillis
 import com.rarible.core.daemon.sequential.ConsumerBatchEventHandler
 import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.core.FeatureFlagsProperties
@@ -12,9 +13,6 @@ import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.dto.OwnershipUpdateEventDto
 import com.rarible.protocol.union.enrichment.repository.search.EsOwnershipRepository
 import com.rarible.protocol.union.search.indexer.metrics.IndexerMetricFactory
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
 import org.elasticsearch.action.support.WriteRequest
 import org.springframework.stereotype.Service
 
@@ -33,6 +31,7 @@ class OwnershipEventHandler(
 
     override suspend fun handle(event: List<OwnershipEventDto>) {
         logger.info("Handling ${event.size} OwnershipDto events")
+        val startTime = nowMillis()
 
         val events = event.filterIsInstance<OwnershipUpdateEventDto>().map {
             logger.debug("Converting OwnershipDto id = ${it.ownershipId}")
@@ -43,32 +42,22 @@ class OwnershipEventHandler(
             it.ownershipId.fullId()
         }
 
-        coroutineScope {
-            listOf(
-                async {
-                    logger.debug("Saving ${events.size} OwnershipDto events to ElasticSearch")
-                    val refreshPolicy =
-                        if (featureFlagsProperties.enableOwnershipSaveImmediateToElasticSearch) {
-                            WriteRequest.RefreshPolicy.IMMEDIATE
-                        }
-                        else {
-                            WriteRequest.RefreshPolicy.NONE
-                        }
-                    if (events.isNotEmpty()) {
-                        repository.saveAll(events, refreshPolicy = refreshPolicy)
-                        countSaves(events)
-                    }
-                },
-                async {
-                    logger.debug("Removing ${deleted.size} OwnershipDto events from ElasticSearch")
-                    if (deleted.isNotEmpty()) {
-                        repository.deleteAll(deleted)
-                    }
-                },
-            ).awaitAll()
-        }
+        logger.debug("Saving ${events.size} OwnershipDto events to ElasticSearch")
+        val refreshPolicy =
+            if (featureFlagsProperties.enableOwnershipSaveImmediateToElasticSearch) {
+                WriteRequest.RefreshPolicy.IMMEDIATE
+            } else {
+                WriteRequest.RefreshPolicy.NONE
+            }
 
-        logger.info("Handling completed")
+        repository.bulk(events, deleted, refreshPolicy = refreshPolicy)
+        countSaves(events)
+
+        val elapsedTime = nowMillis().minusMillis(startTime.toEpochMilli()).toEpochMilli()
+        logger.info(
+            "Handling of ${event.size} OwnershipDto events completed in $elapsedTime ms" +
+                    " (saved: ${events.size}, deleted: ${deleted.size})"
+        )
     }
 
     private fun countSaves(ownerships: List<EsOwnership>) {

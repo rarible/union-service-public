@@ -7,6 +7,7 @@ import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.CollectionEventDto
 import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.OrderEventDto
+import com.rarible.protocol.union.dto.OwnershipEventDto
 import org.springframework.stereotype.Component
 
 @Component
@@ -37,7 +38,7 @@ class MetricConsumerBatchEventHandlerFactory(
         return MetricsConsumerBatchEventHandlerWrapper(
             metricFactory = metricFactory,
             delegate = handler,
-            esEntity = EsEntity.COLLECTION,
+            esEntity = EsEntity.ORDER,
             eventTimestamp = { nowMillis() },
             eventBlockchain = { event -> event.orderId.blockchain }
         )
@@ -50,6 +51,16 @@ class MetricConsumerBatchEventHandlerFactory(
             esEntity = EsEntity.ITEM,
             eventTimestamp = { nowMillis() },
             eventBlockchain = { event -> event.itemId.blockchain }
+        )
+    }
+
+    fun wrapOwnership(handler: ConsumerBatchEventHandler<OwnershipEventDto>): ConsumerBatchEventHandler<OwnershipEventDto> {
+        return MetricsConsumerBatchEventHandlerWrapper(
+            metricFactory = metricFactory,
+            delegate = handler,
+            esEntity = EsEntity.OWNERSHIP,
+            eventTimestamp = { nowMillis() },
+            eventBlockchain = { event -> event.ownershipId.blockchain }
         )
     }
 }

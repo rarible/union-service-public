@@ -2,23 +2,26 @@ package com.rarible.protocol.union.listener.service
 
 import com.rarible.core.test.data.randomAddress
 import com.rarible.protocol.dto.OrderStatusDto
+import com.rarible.protocol.union.core.model.PoolItemAction
 import com.rarible.protocol.union.core.model.ReconciliationMarkType
-import com.rarible.protocol.union.core.util.CompositeItemIdParser
 import com.rarible.protocol.union.dto.AuctionStatusDto
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.enrichment.converter.EnrichedItemConverter
 import com.rarible.protocol.union.enrichment.converter.ShortItemConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.model.ShortItemId
+import com.rarible.protocol.union.enrichment.model.ShortPoolOrder
 import com.rarible.protocol.union.enrichment.repository.ReconciliationMarkRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
 import com.rarible.protocol.union.enrichment.test.data.randomShortItem
 import com.rarible.protocol.union.enrichment.test.data.randomShortOwnership
+import com.rarible.protocol.union.enrichment.test.data.randomUnionBidOrderDto
 import com.rarible.protocol.union.enrichment.test.data.randomUnionItem
-import com.rarible.protocol.union.enrichment.test.data.randomUnionMeta
 import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrderDto
 import com.rarible.protocol.union.enrichment.util.bidCurrencyId
+import com.rarible.protocol.union.enrichment.util.sellCurrencyId
 import com.rarible.protocol.union.integration.ethereum.converter.EthAuctionConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthItemConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthMetaConverter
@@ -260,9 +263,52 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
     }
 
     @Test
+    fun `on best sell order updated - item added to the pool`() = runBlocking<Unit> {
+        val itemId = randomEthItemId()
+        val shortItem = randomShortItem(itemId)
+        itemService.save(shortItem)
+
+        val bestSellOrder = randomUnionSellOrderDto().copy(platform = PlatformDto.SUDOSWAP)
+        val shortOrder = ShortOrderConverter.convert(bestSellOrder)
+        val poolShortOrder = ShortPoolOrder(bestSellOrder.sellCurrencyId, shortOrder)
+
+        itemEventService.onPoolOrderUpdated(shortItem.id, bestSellOrder, PoolItemAction.INCLUDED, false)
+
+        val saved = itemService.get(shortItem.id)!!
+
+        // Since there is no best order, pool order should become the best
+        assertThat(saved.bestSellOrder).isEqualTo(shortOrder)
+        assertThat(saved.poolSellOrders).hasSize(1)
+        assertThat(saved.poolSellOrders[0]).isEqualTo(poolShortOrder)
+    }
+
+    @Test
+    fun `on best sell order updated - item removed from the pool`() = runBlocking<Unit> {
+        val bestSellOrder = randomUnionSellOrderDto().copy(platform = PlatformDto.SUDOSWAP)
+        val shortOrder = ShortOrderConverter.convert(bestSellOrder)
+        val poolShortOrder = ShortPoolOrder(bestSellOrder.sellCurrencyId, shortOrder)
+
+        val itemId = randomEthItemId()
+        val shortItem = randomShortItem(itemId).copy(
+            bestSellOrder = shortOrder,
+            bestBidOrder = ShortOrderConverter.convert(randomUnionBidOrderDto()),
+            poolSellOrders = listOf(poolShortOrder)
+        )
+        itemService.save(shortItem)
+
+        ethereumOrderControllerApiMock.mockGetSellOrdersByItemAndByStatus(itemId, bestSellOrder.sellCurrencyId)
+
+        itemEventService.onPoolOrderUpdated(shortItem.id, bestSellOrder, PoolItemAction.EXCLUDED, false)
+
+        val saved = itemService.get(shortItem.id)!!
+
+        assertThat(saved.bestSellOrder).isNull()
+        assertThat(saved.poolSellOrders).hasSize(0)
+    }
+
+    @Test
     fun `on best bid order updated - item exists with same order, order cancelled`() = runWithKafka {
         val itemId = randomEthItemId()
-        val (contract, tokenId) = CompositeItemIdParser.split(itemId.value)
 
         val bestBidOrder = randomEthBidOrderDto(itemId).copy(status = OrderStatusDto.CANCELLED)
         val unionBestBid = ethOrderConverter.convert(bestBidOrder, itemId.blockchain)

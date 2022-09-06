@@ -107,7 +107,7 @@ class ItemSourceSelectService(
     }
 
     suspend fun searchItems(itemsSearchRequestDto: ItemsSearchRequestDto): ItemsDto {
-        return if (featureFlagsProperties.enableItemQueriesToElasticSearch) {
+        return if (featureFlagsProperties.enableSearchItems) {
             itemElasticService.searchItems(itemsSearchRequestDto)
         } else throw FeatureUnderConstructionException("searchItems() feature is under construction")
     }

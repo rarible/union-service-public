@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.integration.ethereum.event
 
 import com.rarible.core.apm.CaptureTransaction
+import com.rarible.protocol.dto.AmmOrderNftUpdateEventDto
 import com.rarible.protocol.dto.OrderEventDto
 import com.rarible.protocol.union.core.handler.AbstractBlockchainEventHandler
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
@@ -26,6 +27,9 @@ abstract class EthOrderEventHandler(
                 val order = ethOrderConverter.convert(event.order, blockchain)
                 val unionEventDto = UnionOrderUpdateEvent(order)
                 handler.onEvent(unionEventDto)
+            }
+            is AmmOrderNftUpdateEventDto -> {
+                // TODO PT-1151
             }
         }
     }

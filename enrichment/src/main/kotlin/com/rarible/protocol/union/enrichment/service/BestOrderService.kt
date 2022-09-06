@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.enrichment.service
 
+import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.service.CurrencyService
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.enrichment.evaluator.BestBidOrderComparator
@@ -8,7 +9,6 @@ import com.rarible.protocol.union.enrichment.evaluator.BestOrderComparator
 import com.rarible.protocol.union.enrichment.evaluator.BestOrderEvaluator
 import com.rarible.protocol.union.enrichment.evaluator.BestOrderProvider
 import com.rarible.protocol.union.enrichment.evaluator.BestOrderProviderFactory
-import com.rarible.protocol.union.enrichment.evaluator.BestPreferredOrderComparator
 import com.rarible.protocol.union.enrichment.evaluator.BestSellOrderComparator
 import com.rarible.protocol.union.enrichment.evaluator.BestSellOrderOwner
 import com.rarible.protocol.union.enrichment.evaluator.CollectionBestBidOrderProvider
@@ -30,7 +30,8 @@ import java.util.*
 @Component
 class BestOrderService(
     private val enrichmentOrderService: EnrichmentOrderService,
-    private val currencyService: CurrencyService
+    private val currencyService: CurrencyService,
+    private val ff: FeatureFlagsProperties
 ) {
 
     //---------------------- Ownership ----------------------//
@@ -85,7 +86,7 @@ class BestOrderService(
         item: ShortItem, order: OrderDto,
         origins: List<String>
     ): ShortItem {
-        val providerFactory = ItemBestSellOrderProvider.Factory(item.id, enrichmentOrderService)
+        val providerFactory = ItemBestSellOrderProvider.Factory(item, enrichmentOrderService, ff.enablePoolOrders)
         val originOrders = updateOriginSell(item.originOrders, order, origins, providerFactory)
         val updated = updateBestSell(item, providerFactory.create(null), order)
         return updated.copy(originOrders = originOrders)
@@ -95,7 +96,7 @@ class BestOrderService(
         item: ShortItem, order: OrderDto,
         origins: List<String>
     ): ShortItem {
-        val providerFactory = ItemBestBidOrderProvider.Factory(item.id, enrichmentOrderService)
+        val providerFactory = ItemBestBidOrderProvider.Factory(item, enrichmentOrderService)
         val originOrders = updateOriginBid(item.originOrders, order, origins, providerFactory)
         val updated = updateBestBid(item, providerFactory.create(null), order)
         return updated.copy(originOrders = originOrders)
@@ -138,8 +139,7 @@ class BestOrderService(
 
     private fun getBestOrder(orders: List<ShortOrder>, comparator: BestOrderComparator): ShortOrder? {
         if (orders.isEmpty()) return null
-        val preferredOrderComparator = BestPreferredOrderComparator(comparator)
-        return orders.reduce { current, next -> preferredOrderComparator.compare(current, next) }
+        return orders.reduce { current, next -> comparator.compare(current, next) }
     }
 
     private suspend fun updateCurrencyOrders(

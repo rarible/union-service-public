@@ -119,11 +119,12 @@ class KafkaConsumerConfiguration(
     fun ownershipWorker(
         handler: ConsumerBatchEventHandler<OwnershipEventDto>,
     ): ConsumerWorkerHolder<OwnershipEventDto> {
+        val wrappedHandler = metricEventHandlerFactory.wrapOwnership(handler)
         val workers = (1..kafkaProperties.workerCount).map { index ->
             val consumer = consumerFactory.createOwnershipConsumer(consumerGroup(OWNERSHIP))
             ConsumerBatchWorker(
                 consumer = consumer,
-                eventHandler = handler,
+                eventHandler = wrappedHandler,
                 workerName = worker(OWNERSHIP, index),
                 properties = kafkaProperties.daemon,
                 retryProperties = RetryProperties(attempts = Int.MAX_VALUE, delay = Duration.ofMillis(1000)),

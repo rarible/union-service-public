@@ -3,14 +3,15 @@ package com.rarible.protocol.union.listener.service
 import com.rarible.core.client.WebClientResponseProxyException
 import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.event.OutgoingEventListener
+import com.rarible.protocol.union.core.model.PoolItemAction
+import com.rarible.protocol.union.dto.CollectionIdDto
+import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderEventDto
 import com.rarible.protocol.union.dto.OrderUpdateEventDto
 import com.rarible.protocol.union.dto.ext
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
-import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
@@ -27,7 +28,21 @@ class EnrichmentOrderEventService(
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    suspend fun updateOrder(order: OrderDto, notificationEnabled: Boolean = true) = coroutineScope {
+    suspend fun updatePoolOrder(
+        order: OrderDto,
+        itemId: ItemIdDto,
+        action: PoolItemAction,
+        notificationEnabled: Boolean = true
+    ) {
+        // ATM we support only sell-orders for AMM
+        // Order event should not be sent here
+        // Ownership updates doesn't seem reasonable here too
+        ignoreApi404 {
+            enrichmentItemEventService.onPoolOrderUpdated(ShortItemId(itemId), order, action, notificationEnabled)
+        }
+    }
+
+    suspend fun updateOrder(order: OrderDto, notificationEnabled: Boolean = true) {
 
         val makeAssetExt = order.make.type.ext
         val takeAssetExt = order.take.type.ext
@@ -38,56 +53,23 @@ class EnrichmentOrderEventService(
         val makeItemId = makeItemIdDto?.let { ShortItemId(it) }
         val takeItemId = takeItemIdDto?.let { ShortItemId(it) }
 
-        val sellUpdateFuture = makeItemId?.let {
-            async {
-                if (!makeAssetExt.isCollection) {
-                    // Item should be checked first, otherwise ownership could trigger event for outdated item
-                    ignoreApi404 {
-                        enrichmentItemEventService.onItemBestSellOrderUpdated(makeItemId, order, notificationEnabled)
-                    }
-                    ignoreApi404 {
-                        val ownershipId = ShortOwnershipId(
-                            makeItemId.blockchain, makeItemId.itemId, order.maker.value
-                        )
-                        enrichmentOwnershipEventService.onOwnershipBestSellOrderUpdated(
-                            ownershipId, order, notificationEnabled
-                        )
-                    }
-                }
+        when {
+            // TODO PT-1151 Maybe we need to ensure there is AMM order? originally they should not get here
+            // Floor sell (not present ATM)
+            makeAssetExt.isCollection -> onCollectionSellOrder(order, makeAssetExt.collectionId!!, notificationEnabled)
+            // Floor bid
+            takeAssetExt.isCollection -> onCollectionBidOrder(order, takeAssetExt.collectionId!!, notificationEnabled)
+            // Direct sell order
+            (makeItemId != null && takeItemId == null) -> {
+                // Item should be checked first, otherwise ownership could trigger event for outdated item
+                onItemSellOrder(order, makeItemId, notificationEnabled)
+                onOwnershipSellOrder(order, makeItemId, notificationEnabled)
             }
+            // Direct bid order
+            (makeItemId == null && takeItemId != null) -> onItemBidOrder(order, takeItemId, notificationEnabled)
+            // Something else, like swap order (NFT to NFT)
+            else -> logger.info("Unsupported Order's asset combination: $order")
         }
-        val bidUpdateFuture = takeItemId?.let {
-            async {
-                if (!takeAssetExt.isCollection) {
-                    ignoreApi404 {
-                        enrichmentItemEventService.onItemBestBidOrderUpdated(takeItemId, order, notificationEnabled)
-                    }
-                }
-            }
-        }
-
-        val sellCollectionUpdateFuture = if (makeAssetExt.isCollection) {
-            async {
-                val collectionId = makeAssetExt.collectionId!!
-                enrichmentCollectionEventService.onCollectionBestSellOrderUpdate(
-                    collectionId, order, notificationEnabled && ff.enableNotificationOnCollectionOrders
-                )
-            }
-        } else null
-
-        val bidCollectionUpdateFuture = if (takeAssetExt.isCollection) {
-            async {
-                val collectionId = takeAssetExt.collectionId!!
-                enrichmentCollectionEventService.onCollectionBestBidOrderUpdate(
-                    collectionId, order, notificationEnabled && ff.enableNotificationOnCollectionOrders
-                )
-            }
-        } else null
-
-        sellUpdateFuture?.await()
-        bidUpdateFuture?.await()
-        sellCollectionUpdateFuture?.await()
-        bidCollectionUpdateFuture?.await()
 
         val event = OrderUpdateEventDto(
             eventId = UUID.randomUUID().toString(),
@@ -95,6 +77,57 @@ class EnrichmentOrderEventService(
             order = order
         )
         orderEventListeners.forEach { it.onEvent(event) }
+    }
+
+    private suspend fun onItemSellOrder(
+        order: OrderDto,
+        itemId: ShortItemId,
+        notificationEnabled: Boolean
+    ) = ignoreApi404 {
+        enrichmentItemEventService.onItemBestSellOrderUpdated(itemId, order, notificationEnabled)
+    }
+
+    private suspend fun onOwnershipSellOrder(
+        order: OrderDto,
+        itemId: ShortItemId,
+        notificationEnabled: Boolean
+    ) = ignoreApi404 {
+        val ownershipId = ShortOwnershipId(itemId.blockchain, itemId.itemId, order.maker.value)
+        enrichmentOwnershipEventService.onOwnershipBestSellOrderUpdated(ownershipId, order, notificationEnabled)
+    }
+
+    private suspend fun onItemBidOrder(
+        order: OrderDto,
+        itemId: ShortItemId,
+        notificationEnabled: Boolean
+    ) = ignoreApi404 {
+        enrichmentItemEventService.onItemBestBidOrderUpdated(itemId, order, notificationEnabled)
+    }
+
+    private suspend fun onCollectionSellOrder(
+        order: OrderDto,
+        collectionId: CollectionIdDto,
+        notificationEnabled: Boolean
+    ) {
+        val withNotification = notificationEnabled && ff.enableNotificationOnCollectionOrders
+        enrichmentCollectionEventService.onCollectionBestSellOrderUpdate(
+            collectionId,
+            order,
+            withNotification
+        )
+    }
+
+    private suspend fun onCollectionBidOrder(
+        order: OrderDto,
+        collectionId: CollectionIdDto,
+        notificationEnabled: Boolean
+    ) {
+        val withNotification = notificationEnabled && ff.enableNotificationOnCollectionOrders
+        enrichmentCollectionEventService.onCollectionBestBidOrderUpdate(
+            collectionId,
+            order,
+            withNotification
+        )
     }
 
     private suspend fun ignoreApi404(call: suspend () -> Unit) {
@@ -112,5 +145,4 @@ class EnrichmentOrderEventService(
             }
         }
     }
-
 }
