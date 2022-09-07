@@ -11,9 +11,11 @@ import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortOrder
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
+import org.bson.Document
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
@@ -110,12 +112,27 @@ class ItemRepository(
         return template.find(query, ShortItem::class.java).asFlow()
     }
 
+    fun findByPoolOrder(blockchain: BlockchainDto, orderId: String): Flow<ShortItemId> {
+        val criteria = Criteria
+            .where(ShortItem::blockchain.name).isEqualTo(blockchain)
+            .and(POOL_ORDER_ID_FIELD).isEqualTo(orderId)
+
+        val query = Query(criteria)
+        query.fields().include(ShortItem::itemId.name)
+
+        return template.find(query, Document::class.java, collection).asFlow()
+            .map { ShortItemId(blockchain, it.get(ShortItem::itemId.name) as String) }
+    }
+
     suspend fun delete(itemId: ShortItemId): DeleteResult? {
         val criteria = Criteria("_id").isEqualTo(itemId)
         return template.remove(Query(criteria), collection).awaitFirstOrNull()
     }
 
     companion object {
+
+        // Not really sure why, but Mongo saves id field of SHortOrder as _id
+        private const val POOL_ORDER_ID_FIELD = "poolSellOrders.order._id"
 
         private val BLOCKCHAIN_DEFINITION = Index()
             .on(ShortItem::blockchain.name, Sort.Direction.ASC)
@@ -136,11 +153,19 @@ class ItemRepository(
             .on(ShortItem::auctions.name, Sort.Direction.DESC)
             .background()
 
+        private val POOL_ORDER_DEFINITION = Index()
+            .on(POOL_ORDER_ID_FIELD, Sort.Direction.ASC)
+            .on(ShortItem::blockchain.name, Sort.Direction.ASC) // Just for case of orderId collision
+            .on("_id", Sort.Direction.ASC)
+            .sparse()
+            .background()
+
         private val ALL_INDEXES = listOf(
             BLOCKCHAIN_DEFINITION,
             MULTI_CURRENCY_DEFINITION,
             BY_BEST_SELL_PLATFORM_DEFINITION,
-            AUCTION_DEFINITION
+            AUCTION_DEFINITION,
+            POOL_ORDER_DEFINITION
         )
     }
 }

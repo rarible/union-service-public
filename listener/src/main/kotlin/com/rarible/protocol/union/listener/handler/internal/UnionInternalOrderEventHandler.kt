@@ -13,6 +13,7 @@ import com.rarible.protocol.union.core.service.ReconciliationEventService
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
+import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOrderService
 import com.rarible.protocol.union.enrichment.util.isPoolOrder
 import com.rarible.protocol.union.listener.service.EnrichmentOrderEventService
@@ -23,6 +24,7 @@ import org.springframework.stereotype.Component
 class UnionInternalOrderEventHandler(
     private val orderEventService: EnrichmentOrderEventService,
     private val enrichmentOrderService: EnrichmentOrderService,
+    private val enrichmentItemService: EnrichmentItemService,
     private val reconciliationEventService: ReconciliationEventService,
     private val handler: IncomingEventHandler<UnionOrderEvent>,
     private val ff: FeatureFlagsProperties
@@ -83,10 +85,24 @@ class UnionInternalOrderEventHandler(
         if (!ff.enablePoolOrders) {
             return
         }
+
         val order = fetchOrder(orderId)
-        val itemIds = emptyList<ItemIdDto>() //TODO PT-1151 find related items and set action
+        val toUpdate = enrichmentItemService.findByPoolOrder(orderId)
+            .map { it.toDto() }
+            .filter { !excluded.contains(it) && !included.contains(it) }
+
+        notifyPoolUpdate(order, PoolItemAction.INCLUDED, toUpdate)
+        notifyPoolUpdate(order, PoolItemAction.INCLUDED, included)
+        notifyPoolUpdate(order, PoolItemAction.EXCLUDED, excluded)
+    }
+
+    private suspend fun notifyPoolUpdate(order: OrderDto, action: PoolItemAction, itemIds: Collection<ItemIdDto>) {
+        // TODO maybe batch sending will work faster?
+        // We should not to handle such events here directly since it could cause concurrent modification problems
+        // Instead, we send such synthetic events to this internal handler in order to consequently process
+        // all events related to each item
         itemIds.forEach {
-            handler.onEvent(UnionPoolOrderUpdateEvent(order, it, PoolItemAction.INCLUDED))
+            handler.onEvent(UnionPoolOrderUpdateEvent(order, it, action))
         }
     }
 

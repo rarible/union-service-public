@@ -83,10 +83,10 @@ import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
 import io.daonomic.rpc.domain.Word
+import scalether.domain.Address
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.Instant
-import scalether.domain.Address
 
 fun randomAddressString() = EthConverter.convert(randomAddress())
 

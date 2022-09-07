@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.enrichment.test.data
 
 import com.rarible.core.common.nowMillis
+import com.rarible.core.test.data.randomBigInt
 import com.rarible.core.test.data.randomDouble
 import com.rarible.core.test.data.randomInt
 import com.rarible.core.test.data.randomLong
@@ -23,8 +24,10 @@ import com.rarible.protocol.union.core.model.download.DownloadEntry
 import com.rarible.protocol.union.core.model.download.DownloadStatus
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.BlockchainGroupDto
 import com.rarible.protocol.union.dto.BurnActivityDto
 import com.rarible.protocol.union.dto.CollectionIdDto
+import com.rarible.protocol.union.dto.EthSudoSwapAmmDataV1Dto
 import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.MetaAttributeDto
@@ -35,6 +38,8 @@ import com.rarible.protocol.union.dto.OrderMatchSellDto
 import com.rarible.protocol.union.dto.OwnershipDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.PlatformDto
+import com.rarible.protocol.union.dto.SudoSwapCurveTypeDto
+import com.rarible.protocol.union.dto.SudoSwapPoolTypeDto
 import com.rarible.protocol.union.dto.TransferActivityDto
 import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.enrichment.converter.EnrichedItemConverter
@@ -47,6 +52,7 @@ import com.rarible.protocol.union.integration.ethereum.converter.EthItemConverte
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOwnershipConverter
 import com.rarible.protocol.union.integration.ethereum.data.randomAddressString
+import com.rarible.protocol.union.integration.ethereum.data.randomEthAddress
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAssetErc1155
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAssetErc20
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAssetErc721
@@ -351,6 +357,19 @@ fun randomItemMetaDownloadEntry(
         succeedAt = succeedAt,
         failedAt = failedAt,
         errorMessage = errorMessage
+    )
+}
+
+fun randomSudoSwapAmmDataV1Dto(): EthSudoSwapAmmDataV1Dto {
+    return EthSudoSwapAmmDataV1Dto(
+        poolAddress = UnionAddress(BlockchainGroupDto.ETHEREUM, randomEthAddress()),
+        bondingCurve = UnionAddress(BlockchainGroupDto.ETHEREUM, randomEthAddress()),
+        curveType = SudoSwapCurveTypeDto.LINEAR,
+        assetRecipient = UnionAddress(BlockchainGroupDto.ETHEREUM, randomEthAddress()),
+        poolType = SudoSwapPoolTypeDto.TRADE,
+        delta = randomBigInt(),
+        fee = randomBigInt(),
+        feeDecimal = randomInt()
     )
 }
 
