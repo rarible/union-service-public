@@ -14,8 +14,16 @@ import com.rarible.protocol.union.dto.FlowOrderDataV1Dto
 import com.rarible.protocol.union.dto.ImmutablexOrderDataV1Dto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.SolanaAuctionHouseDataV1Dto
-import com.rarible.protocol.union.dto.TezosOrderDataRaribleV2DataV1Dto
+import com.rarible.protocol.union.dto.TezosOrderDataFxhashV1Dto
+import com.rarible.protocol.union.dto.TezosOrderDataFxhashV2Dto
+import com.rarible.protocol.union.dto.TezosOrderDataHenDto
+import com.rarible.protocol.union.dto.TezosOrderDataLegacyDto
+import com.rarible.protocol.union.dto.TezosOrderDataObjktV1Dto
+import com.rarible.protocol.union.dto.TezosOrderDataObjktV2Dto
 import com.rarible.protocol.union.dto.TezosOrderDataRaribleV2DataV2Dto
+import com.rarible.protocol.union.dto.TezosOrderDataTeiaV1Dto
+import com.rarible.protocol.union.dto.TezosOrderDataV2Dto
+import com.rarible.protocol.union.dto.TezosOrderDataVersumV1Dto
 import com.rarible.protocol.union.dto.ext
 
 // TODO move to openapi
@@ -36,8 +44,16 @@ val OrderDto.origins: Set<String>
             is EthOrderOpenSeaV1DataV1Dto -> emptyList()
             is EthOrderBasicSeaportDataV1Dto -> emptyList()
             is EthOrderCryptoPunksDataDto -> emptyList()
-            is TezosOrderDataRaribleV2DataV1Dto -> data.originFees.map { it.account.value }
-            is TezosOrderDataRaribleV2DataV2Dto -> data.originFees.map { it.account.value }
+            is TezosOrderDataLegacyDto -> data.originFees.map { it.account.value }
+            is TezosOrderDataRaribleV2DataV2Dto,
+            is TezosOrderDataHenDto,
+            is TezosOrderDataVersumV1Dto,
+            is TezosOrderDataTeiaV1Dto,
+            is TezosOrderDataObjktV1Dto, is TezosOrderDataObjktV2Dto,
+            is TezosOrderDataFxhashV1Dto, is TezosOrderDataFxhashV2Dto -> {
+                val dto = data as TezosOrderDataV2Dto
+                dto.originFees.map { it.account.value }
+            }
             is FlowOrderDataV1Dto -> data.originFees.map { it.account.value }
             is SolanaAuctionHouseDataV1Dto -> listOfNotNull(data.auctionHouse?.value)
             is ImmutablexOrderDataV1Dto -> data.originFees.map { it.account.value }
