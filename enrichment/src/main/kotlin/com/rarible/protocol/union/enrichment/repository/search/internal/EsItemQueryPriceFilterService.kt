@@ -49,7 +49,10 @@ class EsItemQueryPriceFilterService(
 
 
     private fun calcPrice(currency: String?, price: Double?, currencyRates: List<CurrencyRate>): Double? {
-        if (currency == null || price == null) return null
+        if (price == null) return null
+        // assume currency is USD
+        if (currency == null) return price
+
         val currencyRate = currencyRates.find { it.currencyId == currency }
         return if (currencyRate == null) {
             logger.error("Couldn't find currency rate for $currency")
