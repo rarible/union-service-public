@@ -54,7 +54,7 @@ open class FlowItemService(
 
     override suspend fun getItemMetaById(itemId: String): UnionMeta {
         val meta = flowNftItemControllerApi.getNftItemMetaById(itemId).awaitFirst()
-        return FlowItemConverter.convert(meta)
+        return FlowItemConverter.convert(meta, itemId)
     }
 
     override suspend fun resetItemMeta(itemId: String) {

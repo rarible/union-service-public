@@ -30,6 +30,7 @@ object ImxItemMetaConverter {
         val assetName = asset.name ?: collectionName?.let { "$it #${asset.encodedTokenId()}" } ?: "Unknown"
         return UnionMeta(
             name = assetName,
+            collectionId = asset.tokenAddress,
             description = asset.description,
             createdAt = asset.createdAt,
             content = getVideoContent(asset) + getImageContent(asset),

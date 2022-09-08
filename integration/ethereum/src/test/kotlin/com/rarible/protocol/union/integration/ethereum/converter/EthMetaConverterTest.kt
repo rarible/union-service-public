@@ -22,6 +22,7 @@ import com.rarible.protocol.union.core.model.UnionUnknownProperties
 import com.rarible.protocol.union.core.model.UnionVideoProperties
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionMetaDto
+import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemMeta
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -48,7 +49,8 @@ class EthMetaConverterTest {
             content = listOf()
         )
 
-        val converted = EthMetaConverter.convert(meta)
+        val itemId = randomEthItemId()
+        val converted = EthMetaConverter.convert(meta, itemId.value)
 
         assertThat(converted.name).isEqualTo(meta.name)
         assertThat(converted.description).isEqualTo(meta.description)
@@ -124,7 +126,8 @@ class EthMetaConverterTest {
             )
         )
 
-        val converted = EthMetaConverter.convert(meta)
+        val itemId = randomEthItemId()
+        val converted = EthMetaConverter.convert(meta, itemId.value)
 
         val image = converted.content[0]
         val video = converted.content[1]
@@ -206,7 +209,8 @@ class EthMetaConverterTest {
             genres = emptyList(),
         )
 
-        val converted = EthMetaConverter.convert(meta)
+        val itemId = randomEthItemId()
+        val converted = EthMetaConverter.convert(meta, itemId.value)
 
         assertThat(converted.content).hasSize(1)
 

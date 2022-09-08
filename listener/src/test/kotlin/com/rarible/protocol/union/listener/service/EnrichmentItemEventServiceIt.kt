@@ -171,7 +171,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         val shortItem = randomShortItem(itemId).copy(sellers = 3, totalStock = 20.toBigInteger())
         val ethItem = randomEthNftItemDto(itemId)
         val ethMeta = randomEthItemMeta()
-        val unionMeta = EthMetaConverter.convert(ethMeta)
+        val unionMeta = EthMetaConverter.convert(ethMeta, itemId.value)
         val unionItem = EthItemConverter.convert(ethItem, itemId.blockchain)
         itemService.save(shortItem)
 

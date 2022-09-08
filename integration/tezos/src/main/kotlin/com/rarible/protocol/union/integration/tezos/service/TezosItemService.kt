@@ -79,7 +79,7 @@ open class TezosItemService(
             return tzktItemService.getItemMetaById(itemId)
         }
         val meta = itemControllerApi.getNftItemMetaById(itemId).awaitFirst()
-        return TezosItemConverter.convert(meta)
+        return TezosItemConverter.convert(meta, itemId)
     }
 
     override suspend fun resetItemMeta(itemId: String) {

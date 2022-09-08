@@ -20,6 +20,7 @@ class ImxItemMetaConverterTest {
         val meta = ImxItemMetaConverter.convert(imxItem, setOf("abc"), blockchain)
 
         assertThat(meta.name).isEqualTo(imxItem.name)
+        assertThat(meta.collectionId).isEqualTo(imxItem.tokenAddress)
         assertThat(meta.description).isEqualTo(imxItem.description)
         assertThat(meta.createdAt).isEqualTo(imxItem.createdAt)
         assertThat(meta.originalMetaUri).isEqualTo(imxItem.uri)

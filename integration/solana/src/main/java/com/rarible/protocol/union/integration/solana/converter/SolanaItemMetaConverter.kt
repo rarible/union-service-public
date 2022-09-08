@@ -12,6 +12,7 @@ object SolanaItemMetaConverter {
 
     fun convert(tokenMeta: TokenMetaDto): UnionMeta =
         UnionMeta(
+            collectionId = tokenMeta.collectionId,
             name = tokenMeta.name,
             description = tokenMeta.description,
             attributes = tokenMeta.attributes.map { convert(it) },

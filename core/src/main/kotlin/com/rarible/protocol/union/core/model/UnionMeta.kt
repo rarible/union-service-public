@@ -5,6 +5,7 @@ import java.time.Instant
 
 data class UnionMeta(
     val name: String,
+    val collectionId: String? = null,
     val description: String? = null,
     val createdAt: Instant? = null,
     val tags: List<String> = emptyList(),
