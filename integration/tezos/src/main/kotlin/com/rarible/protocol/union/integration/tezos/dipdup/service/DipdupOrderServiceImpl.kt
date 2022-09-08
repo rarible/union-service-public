@@ -32,6 +32,8 @@ class DipdupOrderServiceImpl(
         if (marketplaces.objktV2) platforms.add(TezosPlatform.OBJKT_V2)
         if (marketplaces.versum) platforms.add(TezosPlatform.VERSUM_V1)
         if (marketplaces.teia) platforms.add(TezosPlatform.TEIA_V1)
+        if (marketplaces.fxhashV1) platforms.add(TezosPlatform.FXHASH_V1)
+        if (marketplaces.fxhashV2) platforms.add(TezosPlatform.FXHASH_V2)
         return platforms
     }
 

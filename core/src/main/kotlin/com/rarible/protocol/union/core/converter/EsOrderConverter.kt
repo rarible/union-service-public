@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.core.converter
 
 import com.rarible.protocol.union.core.model.EsOrder
+import com.rarible.protocol.union.core.util.CompositeItemIdParser
 import com.rarible.protocol.union.dto.AssetDto
 import com.rarible.protocol.union.dto.EthCollectionAssetTypeDto
 import com.rarible.protocol.union.dto.EthCryptoPunksAssetTypeDto
@@ -36,8 +37,16 @@ import com.rarible.protocol.union.dto.SolanaSolAssetTypeDto
 import com.rarible.protocol.union.dto.TezosFTAssetTypeDto
 import com.rarible.protocol.union.dto.TezosMTAssetTypeDto
 import com.rarible.protocol.union.dto.TezosNFTAssetTypeDto
-import com.rarible.protocol.union.dto.TezosOrderDataRaribleV2DataV1Dto
+import com.rarible.protocol.union.dto.TezosOrderDataFxhashV1Dto
+import com.rarible.protocol.union.dto.TezosOrderDataFxhashV2Dto
+import com.rarible.protocol.union.dto.TezosOrderDataHenDto
+import com.rarible.protocol.union.dto.TezosOrderDataLegacyDto
+import com.rarible.protocol.union.dto.TezosOrderDataObjktV1Dto
+import com.rarible.protocol.union.dto.TezosOrderDataObjktV2Dto
 import com.rarible.protocol.union.dto.TezosOrderDataRaribleV2DataV2Dto
+import com.rarible.protocol.union.dto.TezosOrderDataTeiaV1Dto
+import com.rarible.protocol.union.dto.TezosOrderDataV2Dto
+import com.rarible.protocol.union.dto.TezosOrderDataVersumV1Dto
 import com.rarible.protocol.union.dto.TezosXTZAssetTypeDto
 import com.rarible.protocol.union.dto.ext
 
@@ -59,7 +68,7 @@ object EsOrderConverter {
             maker = source.maker.fullId(),
             make = asset(source.make),
             take = asset(source.take),
-            taker = source.taker?.fullId() ?: source.take.type.ext.itemId.toString(),
+            taker = source.taker?.fullId(),
             start = source.startedAt,
             end = source.endedAt,
             origins = origins(source.data),
@@ -71,9 +80,16 @@ object EsOrderConverter {
         return when (data) {
             is EthOrderDataRaribleV2DataV1Dto -> data.payouts.map { it.account } + data.originFees.map { it.account }
             is EthOrderOpenSeaV1DataV1Dto -> listOf(data.feeRecipient)
-            is TezosOrderDataRaribleV2DataV1Dto -> data.payouts.map { it.account } + data.originFees.map { it.account }
             is FlowOrderDataV1Dto -> data.originFees.map { it.account }
-            is TezosOrderDataRaribleV2DataV2Dto ->  data.payouts.map { it.account } + data.originFees.map { it.account }
+            is TezosOrderDataLegacyDto -> data.payouts.map { it.account } + data.originFees.map { it.account }
+            is TezosOrderDataRaribleV2DataV2Dto,
+            is TezosOrderDataHenDto,
+            is TezosOrderDataVersumV1Dto, is TezosOrderDataTeiaV1Dto,
+            is TezosOrderDataObjktV1Dto, is TezosOrderDataObjktV2Dto,
+            is TezosOrderDataFxhashV1Dto, is TezosOrderDataFxhashV2Dto -> {
+                val dto = data as TezosOrderDataV2Dto
+                dto.payouts.map { it.account } + dto.originFees.map { it.account }
+            }
             is ImmutablexOrderDataV1Dto -> data.payouts.map { it.account } + data.originFees.map { it.account }
             is EthOrderDataRaribleV2DataV3SellDto -> listOfNotNull(
                 data.originFeeFirst?.account,
@@ -95,8 +111,18 @@ object EsOrderConverter {
     }
 
     fun asset(assetDto: AssetDto): EsOrder.Asset {
+
+        val pair = if (assetDto.type.ext.itemId != null) {
+            assetDto.type.ext.itemId?.fullId()?.let {
+                CompositeItemIdParser.splitWithBlockchain(it)
+            }
+        } else {
+            assetDto.type.ext.collectionId.toString() to null
+        }
+
         return EsOrder.Asset(
-            address = assetDto.type.ext.itemId.toString(),
+            token = pair?.first,
+            tokenId = pair?.second,
             isNft = assetDto.type.ext.isNft,
             value = assetDto.value
         )

@@ -13,7 +13,7 @@ import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PayoutDto
 import com.rarible.protocol.union.dto.PlatformDto
-import com.rarible.protocol.union.dto.TezosOrderDataRaribleV2DataV1Dto
+import com.rarible.protocol.union.dto.TezosOrderDataLegacyDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.integration.tezos.converter.TezosConverter.maker
 import org.slf4j.LoggerFactory
@@ -124,8 +124,8 @@ class TezosOrderConverter(
     private fun convertData(
         source: com.rarible.protocol.tezos.dto.OrderDto,
         blockchain: BlockchainDto
-    ): TezosOrderDataRaribleV2DataV1Dto {
-        return TezosOrderDataRaribleV2DataV1Dto(
+    ): TezosOrderDataLegacyDto {
+        return TezosOrderDataLegacyDto(
             payouts = source.data.payouts.map { convert(it, blockchain) },
             originFees = source.data.originFees.map { convert(it, blockchain) },
             makerEdpk = source.makerEdpk,

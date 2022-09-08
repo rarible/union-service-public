@@ -52,7 +52,8 @@ class OrderReindexService(
                     repository.saveAll(
                         res.orders.map {
                             logger.info("Converting OrderDto  $it")
-                            EsOrderConverter.convert(it) },
+                            EsOrderConverter.convert(it)
+                        },
                         refreshPolicy = WriteRequest.RefreshPolicy.NONE
                     )
                     counter.increment(res.orders.size)

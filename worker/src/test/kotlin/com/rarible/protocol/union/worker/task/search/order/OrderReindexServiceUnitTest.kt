@@ -1,7 +1,10 @@
 package com.rarible.protocol.union.worker.task.search.order;
 
 import com.rarible.core.telemetry.metrics.RegisteredCounter
+import com.rarible.protocol.union.dto.AssetDto
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.ContractAddress
+import com.rarible.protocol.union.dto.EthCollectionAssetTypeDto
 import com.rarible.protocol.union.dto.OrdersDto
 import com.rarible.protocol.union.enrichment.repository.search.EsOrderRepository
 import com.rarible.protocol.union.enrichment.service.query.order.OrderApiMergeService
@@ -18,6 +21,7 @@ import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import randomOrder
+import java.math.BigDecimal
 
 class OrderReindexServiceUnitTest {
 
@@ -27,7 +31,16 @@ class OrderReindexServiceUnitTest {
         } answers { arg(0) }
     }
 
-    private val orderDto1 = randomOrder()
+    private val orderDto1 = randomOrder().copy(
+        take = AssetDto(
+            type = EthCollectionAssetTypeDto(
+                contract = ContractAddress(
+                    blockchain = BlockchainDto.ETHEREUM,
+                    value = "0x8584d66b25318f31baf5b0fe13e7d2486d2b2f63"
+                )
+            ), value = BigDecimal.ONE
+        )
+    )
     private val orderDto2 = randomOrder()
     private val orderDto3 = randomOrder()
     private val continuation = orderDto2.id.fullId()

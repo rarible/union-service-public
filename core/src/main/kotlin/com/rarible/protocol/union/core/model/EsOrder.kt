@@ -11,6 +11,7 @@ import org.springframework.data.annotation.Id
 import org.springframework.data.elasticsearch.annotations.Field
 import org.springframework.data.elasticsearch.annotations.FieldType
 import java.math.BigDecimal
+import java.math.BigInteger
 import java.time.Instant
 
 data class EsOrder(
@@ -34,7 +35,8 @@ data class EsOrder(
 ) {
 
     data class Asset(
-        val address: String,
+        val token: String?,
+        val tokenId: BigInteger?,
         val isNft: Boolean,
         val value: BigDecimal
     )

@@ -14,4 +14,10 @@ object CompositeItemIdParser {
         return Pair(token, tokenId)
     }
 
+    fun splitWithBlockchain(itemIdWithoutBlockchain: String): Pair<String, BigInteger> {
+        val pair = IdParser.split(itemIdWithoutBlockchain, 3)
+        val token = pair[0] + ":" + pair[1]
+        val tokenId = UnionConverter.convertToBigInteger(pair[2])
+        return Pair(token, tokenId)
+    }
 }

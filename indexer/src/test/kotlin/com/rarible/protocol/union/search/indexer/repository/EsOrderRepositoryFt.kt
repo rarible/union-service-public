@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.search.indexer.repository
 
-import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.core.converter.EsOrderConverter
 import com.rarible.protocol.union.core.es.ElasticsearchTestBootstrapper
 import com.rarible.protocol.union.core.model.EsAllOrderFilter
@@ -34,8 +33,6 @@ import java.time.temporal.ChronoUnit
 @EnableAutoConfiguration
 @ContextConfiguration(classes = [SearchConfiguration::class])
 internal class EsOrderRepositoryFt {
-
-    private val logger by Logger()
 
     @Autowired
     protected lateinit var repository: EsOrderRepository
@@ -203,7 +200,7 @@ internal class EsOrderRepositoryFt {
 
         val exampleOrder = orders.first { it.make.isNft }
         val exampleFilter = EsOrderSellOrdersByItem(
-            itemId = exampleOrder.make.address,
+            itemId = exampleOrder.make.token + ":" + exampleOrder.make.tokenId,
             platform = null,
             maker = null,
             origin = null,
@@ -242,7 +239,7 @@ internal class EsOrderRepositoryFt {
 
         val exampleOrder = orders.first()
         val exampleFilter = EsOrderBidOrdersByItem(
-            itemId = exampleOrder.take.address,
+            itemId = exampleOrder.take.token + ":" + exampleOrder.take.tokenId,
             platform = null,
             maker = null,
             origin = null,

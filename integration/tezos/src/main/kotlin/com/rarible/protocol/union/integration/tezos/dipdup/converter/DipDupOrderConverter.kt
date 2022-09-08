@@ -18,9 +18,14 @@ import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PayoutDto
-import com.rarible.protocol.union.dto.TezosOrderDataRaribleV2DataV1Dto
+import com.rarible.protocol.union.dto.TezosOrderDataFxhashV1Dto
+import com.rarible.protocol.union.dto.TezosOrderDataFxhashV2Dto
+import com.rarible.protocol.union.dto.TezosOrderDataHenDto
+import com.rarible.protocol.union.dto.TezosOrderDataObjktV1Dto
+import com.rarible.protocol.union.dto.TezosOrderDataObjktV2Dto
 import com.rarible.protocol.union.dto.TezosOrderDataRaribleV2DataV2Dto
-import com.rarible.protocol.union.dto.ext
+import com.rarible.protocol.union.dto.TezosOrderDataTeiaV1Dto
+import com.rarible.protocol.union.dto.TezosOrderDataVersumV1Dto
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.math.BigDecimal
@@ -100,11 +105,39 @@ class DipDupOrderConverter(
 
     fun orderData(order: DipDupOrder, blockchain: BlockchainDto): OrderDataDto {
         return when (order.platform) {
-            TezosPlatform.RARIBLE_V1 -> TezosOrderDataRaribleV2DataV1Dto(
+            TezosPlatform.RARIBLE_V1 -> TezosOrderDataRaribleV2DataV2Dto(
                 payouts = order.payouts.map { convert(it, blockchain) },
                 originFees = order.originFees.map { convert(it, blockchain) }
             )
-            else -> TezosOrderDataRaribleV2DataV2Dto(
+            TezosPlatform.RARIBLE_V2 -> TezosOrderDataRaribleV2DataV2Dto(
+                payouts = order.payouts.map { convert(it, blockchain) },
+                originFees = order.originFees.map { convert(it, blockchain) }
+            )
+            TezosPlatform.HEN -> TezosOrderDataHenDto(
+                payouts = order.payouts.map { convert(it, blockchain) },
+                originFees = order.originFees.map { convert(it, blockchain) }
+            )
+            TezosPlatform.VERSUM_V1 -> TezosOrderDataVersumV1Dto(
+                payouts = order.payouts.map { convert(it, blockchain) },
+                originFees = order.originFees.map { convert(it, blockchain) }
+            )
+            TezosPlatform.TEIA_V1 -> TezosOrderDataTeiaV1Dto(
+                payouts = order.payouts.map { convert(it, blockchain) },
+                originFees = order.originFees.map { convert(it, blockchain) }
+            )
+            TezosPlatform.OBJKT_V1 -> TezosOrderDataObjktV1Dto(
+                payouts = order.payouts.map { convert(it, blockchain) },
+                originFees = order.originFees.map { convert(it, blockchain) }
+            )
+            TezosPlatform.OBJKT_V2 -> TezosOrderDataObjktV2Dto(
+                payouts = order.payouts.map { convert(it, blockchain) },
+                originFees = order.originFees.map { convert(it, blockchain) }
+            )
+            TezosPlatform.FXHASH_V1 -> TezosOrderDataFxhashV1Dto(
+                payouts = order.payouts.map { convert(it, blockchain) },
+                originFees = order.originFees.map { convert(it, blockchain) }
+            )
+            TezosPlatform.FXHASH_V2 -> TezosOrderDataFxhashV2Dto(
                 payouts = order.payouts.map { convert(it, blockchain) },
                 originFees = order.originFees.map { convert(it, blockchain) }
             )
