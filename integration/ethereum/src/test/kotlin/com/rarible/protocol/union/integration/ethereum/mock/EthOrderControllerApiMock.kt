@@ -146,4 +146,17 @@ class EthOrderControllerApiMock(
         } returns Mono.just(OrderCurrenciesDto(OrderCurrenciesDto.OrderType.SELL, returnTypes.asList()))
     }
 
+    fun mockGetAmmOrdersByItem(itemId: ItemIdDto, vararg returnOrders: OrderDto) {
+        val (contract, tokenId) = CompositeItemIdParser.split(itemId.value)
+        every {
+            orderControllerApi.getAmmOrdersByItemAndByStatus(
+                eq(contract),
+                eq(tokenId.toString()),
+                any(),
+                any(),
+                any()
+            )
+        } returns Mono.just(OrdersPaginationDto(returnOrders.asList(), null))
+    }
+
 }

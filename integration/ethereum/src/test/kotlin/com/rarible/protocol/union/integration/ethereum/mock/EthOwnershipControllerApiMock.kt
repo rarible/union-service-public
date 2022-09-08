@@ -65,6 +65,7 @@ class EthOwnershipControllerApiMock(
         every {
             nftOwnershipControllerApi.getNftOwnershipsByOwner(
                 owner,
+                null,
                 continuation,
                 size
             )

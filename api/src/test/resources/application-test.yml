@@ -54,6 +54,7 @@ common:
     enableRevertedActivityEventSending: false
     enableOwnershipSourceEnrichment: true
     enableItemLastSaleEnrichment: true
+    enablePoolOrders: true
 
 protocol:
   union:

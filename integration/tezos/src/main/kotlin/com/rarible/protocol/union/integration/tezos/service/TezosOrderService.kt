@@ -9,11 +9,12 @@ import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.core.util.CompositeItemIdParser
 import com.rarible.protocol.union.dto.AssetTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
-import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.PlatformDto
+import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.integration.tezos.TezosIntegrationProperties
 import com.rarible.protocol.union.integration.tezos.converter.TezosConverter
@@ -320,6 +321,23 @@ open class TezosOrderService(
         } else Slice.empty()
     }
 
+    override suspend fun getAmmOrdersByItem(
+        itemId: String,
+        status: List<OrderStatusDto>?,
+        continuation: String?,
+        size: Int
+    ): Slice<OrderDto> {
+        return Slice.empty()
+    }
+
+    override suspend fun getAmmOrderItemIds(
+        id: String,
+        continuation: String?,
+        size: Int
+    ): Slice<ItemIdDto> {
+        return Slice.empty()
+    }
+
     private fun isValidUUID(str: String?): Boolean {
         return if (str == null) {
             false
@@ -327,6 +345,7 @@ open class TezosOrderService(
     }
 
     companion object {
+
         private val UUID_REGEX_PATTERN: Pattern =
             Pattern.compile("^[{]?[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}[}]?$")
     }
