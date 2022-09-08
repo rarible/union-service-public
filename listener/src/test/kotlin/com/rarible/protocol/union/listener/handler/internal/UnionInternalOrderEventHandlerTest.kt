@@ -53,7 +53,7 @@ class UnionInternalOrderEventHandlerTest {
             incomingEventHandler,
             reconciliationEventService
         )
-        coEvery { incomingEventHandler.onEvent(any()) } returns Unit
+        coEvery { incomingEventHandler.onEvents(any()) } returns Unit
     }
 
     @Test
@@ -119,13 +119,12 @@ class UnionInternalOrderEventHandlerTest {
 
         handler.onEvent(UnionOrderUpdateEvent(order))
 
+        val expected = listOf(
+            UnionPoolOrderUpdateEvent(order, itemId1.toDto(), PoolItemAction.INCLUDED),
+            UnionPoolOrderUpdateEvent(order, itemId2.toDto(), PoolItemAction.INCLUDED),
+        )
         // 2 events sent for items from this pool
-        coVerify(exactly = 1) {
-            incomingEventHandler.onEvent(UnionPoolOrderUpdateEvent(order, itemId1.toDto(), PoolItemAction.INCLUDED))
-        }
-        coVerify(exactly = 1) {
-            incomingEventHandler.onEvent(UnionPoolOrderUpdateEvent(order, itemId2.toDto(), PoolItemAction.INCLUDED))
-        }
+        coVerify(exactly = 1) { incomingEventHandler.onEvents(expected) }
     }
 
     @Test
@@ -148,21 +147,18 @@ class UnionInternalOrderEventHandlerTest {
 
         handler.onEvent(UnionPoolNftUpdateEvent(order.id, included, excluded))
 
-        coVerify(exactly = 5) { incomingEventHandler.onEvent(any()) }
+        val expected = listOf(
+            // Not specified in in/out, will be the first in list
+            UnionPoolOrderUpdateEvent(order, itemId3.toDto(), PoolItemAction.INCLUDED),
+            // Specified as included, will be 2nd and 3rd
+            UnionPoolOrderUpdateEvent(order, itemId1.toDto(), PoolItemAction.INCLUDED),
+            UnionPoolOrderUpdateEvent(order, itemId4.toDto(), PoolItemAction.INCLUDED),
+            // Specified as excluded, will be 4th and 5th
+            UnionPoolOrderUpdateEvent(order, itemId2.toDto(), PoolItemAction.EXCLUDED),
+            UnionPoolOrderUpdateEvent(order, itemId5.toDto(), PoolItemAction.EXCLUDED),
+        )
 
-        val expectedIncluded = listOf(itemId1, itemId3, itemId4)
-        val expectedExcluded = listOf(itemId2, itemId5)
-
-        expectedIncluded.forEach {
-            coVerify {
-                incomingEventHandler.onEvent(UnionPoolOrderUpdateEvent(order, it.toDto(), PoolItemAction.INCLUDED))
-            }
-        }
-        expectedExcluded.forEach {
-            coVerify(exactly = 1) {
-                incomingEventHandler.onEvent(UnionPoolOrderUpdateEvent(order, it.toDto(), PoolItemAction.EXCLUDED))
-            }
-        }
+        coVerify(exactly = 1) { incomingEventHandler.onEvents(expected) }
     }
 
 }
