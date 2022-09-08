@@ -4,9 +4,11 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.model.ShortOrder
+import com.rarible.protocol.union.enrichment.model.ShortPoolOrder
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
 import com.rarible.protocol.union.enrichment.test.data.randomShortItem
 import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrderDto
+import com.rarible.protocol.union.integration.ethereum.data.randomAddressString
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.listener.test.AbstractIntegrationTest
 import com.rarible.protocol.union.listener.test.IntegrationTest
@@ -66,5 +68,20 @@ internal class ItemRepositoryIt : AbstractIntegrationTest() {
             .copy(platform = platform)
 
         return ShortOrderConverter.convert(randomSellOrder)
+    }
+
+    @Test
+    fun `find items from the pool`() = runBlocking<Unit> {
+        val poolOrder1 = ShortPoolOrder(randomAddressString(), randomSellOrder(PlatformDto.SUDOSWAP))
+        val poolOrder2 = ShortPoolOrder(randomAddressString(), randomSellOrder(PlatformDto.SUDOSWAP))
+        val item1 = itemRepository.save(randomShortItem().copy(poolSellOrders = listOf(poolOrder1, poolOrder2)))
+        val item2 = itemRepository.save(randomShortItem().copy(poolSellOrders = listOf(poolOrder1)))
+        val item3 = itemRepository.save(randomShortItem().copy(poolSellOrders = listOf()))
+
+        val pool1 = itemRepository.findByPoolOrder(item1.blockchain, poolOrder1.order.id).toList()
+        assertThat(pool1).containsExactlyInAnyOrder(item1.id, item2.id)
+
+        val pool2 = itemRepository.findByPoolOrder(item1.blockchain, poolOrder2.order.id).toList()
+        assertThat(pool2).containsExactlyInAnyOrder(item1.id)
     }
 }

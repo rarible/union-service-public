@@ -7,7 +7,10 @@ import com.rarible.protocol.union.core.handler.AbstractBlockchainEventHandler
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.model.UnionOrderEvent
 import com.rarible.protocol.union.core.model.UnionOrderUpdateEvent
+import com.rarible.protocol.union.core.model.UnionPoolNftUpdateEvent
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.ItemIdDto
+import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
 import org.slf4j.LoggerFactory
 
@@ -29,7 +32,10 @@ abstract class EthOrderEventHandler(
                 handler.onEvent(unionEventDto)
             }
             is AmmOrderNftUpdateEventDto -> {
-                // TODO PT-1151
+                val orderId = OrderIdDto(blockchain, event.orderId)
+                val include = event.inNft.map { ItemIdDto(blockchain, it) }
+                val exclude = event.outNft.map { ItemIdDto(blockchain, it) }
+                handler.onEvent(UnionPoolNftUpdateEvent(orderId, include.toSet(), exclude.toSet()))
             }
         }
     }
