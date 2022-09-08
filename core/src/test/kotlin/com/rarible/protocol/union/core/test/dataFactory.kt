@@ -5,7 +5,9 @@ import com.rarible.core.test.data.randomBoolean
 import com.rarible.core.test.data.randomInt
 import com.rarible.core.test.data.randomLong
 import com.rarible.core.test.data.randomString
+import com.rarible.protocol.union.core.converter.EsOwnershipConverter
 import com.rarible.protocol.union.core.model.EsOwnership
+import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.dto.AssetDto
 import com.rarible.protocol.union.dto.AssetTypeDto
 import com.rarible.protocol.union.dto.AuctionBidDto
@@ -18,6 +20,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ContractAddress
 import com.rarible.protocol.union.dto.CreatorDto
+import com.rarible.protocol.union.dto.EthErc20AssetTypeDto
 import com.rarible.protocol.union.dto.EthErc721AssetTypeDto
 import com.rarible.protocol.union.dto.EthOrderDataRaribleV2DataV1Dto
 import com.rarible.protocol.union.dto.ItemHistoryDto
@@ -147,6 +150,10 @@ fun randomAssetType(blockchain: BlockchainDto): AssetTypeDto = EthErc721AssetTyp
     tokenId = randomBigInt(),
 )
 
+fun randomAssetTypeErc20(blockchain: BlockchainDto): AssetTypeDto = EthErc20AssetTypeDto(
+    contract = ContractAddress(blockchain, randomString()),
+)
+
 fun randomOrder(
     id: OrderIdDto = randomOrderId(),
     fill: BigDecimal = randomBigDecimal(),
@@ -217,3 +224,17 @@ fun randomEsOwnership(
         randomUnionAddress(id.blockchain, randomString())
     ).fullId(),
 )
+
+fun convertUnionOwnershipToEsOwnership(source: UnionOwnership): EsOwnership {
+    return EsOwnership(
+        ownershipId = source.id.fullId(),
+        originalOwnershipId = null,
+        blockchain = source.id.blockchain,
+        itemId = source.id.getItemId().fullId(),
+        collection = source.collection?.fullId(),
+        owner = source.id.owner.fullId(),
+        date = source.createdAt,
+        auctionId = null,
+        auctionOwnershipId = null,
+    )
+}

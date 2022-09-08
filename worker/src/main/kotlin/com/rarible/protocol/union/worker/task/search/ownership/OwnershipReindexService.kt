@@ -2,10 +2,12 @@ package com.rarible.protocol.union.worker.task.search.ownership
 
 import com.rarible.protocol.union.core.converter.EsOwnershipConverter
 import com.rarible.protocol.union.core.model.EsOwnership
+import com.rarible.protocol.union.core.model.UnionAuctionOwnershipWrapper
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.continuation.page.PageSize
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.enrichment.repository.search.EsOwnershipRepository
+import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
 import com.rarible.protocol.union.worker.metrics.SearchTaskMetricFactory
 import com.rarible.protocol.union.worker.task.search.OwnershipTaskParam
 import com.rarible.protocol.union.worker.task.search.RateLimiter
@@ -19,6 +21,7 @@ class OwnershipReindexService(
     private val repository: EsOwnershipRepository,
     private val searchTaskMetricFactory: SearchTaskMetricFactory,
     private val rawOwnershipClient: RawOwnershipClient,
+    private val enrichmentOwnershipService: EnrichmentOwnershipService,
     private val rateLimiter: RateLimiter,
 ) {
 
@@ -40,6 +43,7 @@ class OwnershipReindexService(
     ): Flow<String> = doReindex(blockchain, target, index, cursor, EsOwnershipConverter::convert) {
         val size = PageSize.OWNERSHIP.max
         rateLimiter.waitIfNecessary(size)
+        // TODO enrich auctioned ownerships with bestSellOrder when it will be live
         rawOwnershipClient.getAuctionAll(blockchain, it, size)
     }
 
@@ -56,7 +60,11 @@ class OwnershipReindexService(
             else -> PageSize.OWNERSHIP.max
         }
         rateLimiter.waitIfNecessary(size)
-        rawOwnershipClient.getRawOwnershipsAll(blockchain, it, size)
+        val unionOwnerships = rawOwnershipClient.getRawOwnershipsAll(blockchain, it, size)
+        val ownershipsDtos = enrichmentOwnershipService.enrich(unionOwnerships.entities.map { unionOwnership ->
+            UnionAuctionOwnershipWrapper(unionOwnership, null) }
+        )
+        Slice(unionOwnerships.continuation, ownershipsDtos)
     }
 
     private fun <T> doReindex(

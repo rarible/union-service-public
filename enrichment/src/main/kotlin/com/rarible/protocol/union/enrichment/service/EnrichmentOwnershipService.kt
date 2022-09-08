@@ -3,7 +3,9 @@ package com.rarible.protocol.union.enrichment.service
 import com.mongodb.client.result.DeleteResult
 import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.apm.SpanType
+import com.rarible.core.common.mapAsync
 import com.rarible.core.common.nowMillis
+import com.rarible.protocol.union.core.model.UnionAuctionOwnershipWrapper
 import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.core.model.getSellerOwnershipId
 import com.rarible.protocol.union.core.service.OwnershipService
@@ -20,6 +22,7 @@ import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortOwnership
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
 import com.rarible.protocol.union.enrichment.repository.OwnershipRepository
+import com.rarible.protocol.union.enrichment.service.query.order.OrderApiMergeService
 import com.rarible.protocol.union.enrichment.util.spent
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -33,7 +36,8 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 class EnrichmentOwnershipService(
     private val ownershipServiceRouter: BlockchainRouter<OwnershipService>,
     private val ownershipRepository: OwnershipRepository,
-    private val enrichmentOrderService: EnrichmentOrderService
+    private val enrichmentOrderService: EnrichmentOrderService,
+    private val orderApiService: OrderApiMergeService,
 ) {
 
     private val logger = LoggerFactory.getLogger(EnrichmentOwnershipService::class.java)
@@ -111,6 +115,42 @@ class EnrichmentOwnershipService(
         )
 
         EnrichedOwnershipConverter.convert(fetchedOwnership.await(), short, bestOrders)
+    }
+
+    suspend fun enrich(unionOwnerships: List<UnionAuctionOwnershipWrapper>): List<OwnershipDto> {
+        if (unionOwnerships.isEmpty()) {
+            return emptyList()
+        }
+
+        val existingEnrichedOwnerships: Map<OwnershipIdDto, ShortOwnership> =
+            findAll(unionOwnerships.mapNotNull { it.ownership?.let { ShortOwnershipId(it.id) } })
+            .associateBy { it.id.toDto() }
+
+        // Looking for full orders for existing ownerships in order-indexer
+        val shortOrderIds = existingEnrichedOwnerships.values
+            .mapNotNull { it.bestSellOrder?.dtoId }
+
+        val orders = orderApiService.getByIds(shortOrderIds)
+            .associateBy { it.id }
+
+        val result = unionOwnerships.mapAsync {
+            if (it.ownership != null) {
+                // If there is an ownership, we use it as primary entity
+                val existingEnrichedOwnership = existingEnrichedOwnerships[it.ownershipId]
+                // Enriching it if possible
+                val ownership = if (existingEnrichedOwnership == null) {
+                    EnrichedOwnershipConverter.convert(it.ownership!!)
+                } else {
+                    enrichOwnership(existingEnrichedOwnership, it.ownership, orders)
+                }
+                // Merge with related auction if possible
+                mergeWithAuction(ownership, it.auction)
+            } else {
+                // If we have fully auctioned ownership, it should be disguised as Ownership
+                disguiseAuctionWithEnrichment(it.auction!!)
+            }
+        }.filterNotNull()
+        return result
     }
 
     fun mergeWithAuction(ownership: OwnershipDto, auction: AuctionDto?): OwnershipDto {

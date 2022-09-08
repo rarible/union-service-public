@@ -28,6 +28,7 @@ import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthNftItemDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthV2OrderDto
+import convertUnionOwnershipToEsOwnership
 import io.mockk.coEvery
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.reactive.awaitFirst
@@ -435,7 +436,7 @@ class ItemsControllerElasticFt : AbstractIntegrationTest() {
         val ethOwnerId = UnionAddressConverter.convert(BlockchainDto.ETHEREUM, ethOwnership.owner.prefixed())
         val ethOwnershipId = OwnershipIdDto(BlockchainDto.ETHEREUM, ethItemId.value, ethOwnerId)
         val ethUnionOwnership = EthOwnershipConverter.convert(ethOwnership, ethItemId.blockchain)
-        val esOwnership = EsOwnershipConverter.convert(ethUnionOwnership)
+        val esOwnership = convertUnionOwnershipToEsOwnership(ethUnionOwnership)
         ethereumOwnershipControllerApiMock.mockGetNftOwnershipByIds(
             listOf(OwnershipIdParser.parseFull(esOwnership.ownershipId).value),
             listOf(ethOwnership)

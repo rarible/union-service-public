@@ -49,7 +49,6 @@ class OwnershipElasticServiceTest {
         auctionContracts = auctionContract.prefixed()
     )
 
-    private val orderApiService = mockk<OrderApiMergeService>()
     private val auctionContractService: AuctionContractService = AuctionContractService(listOf(properties))
     private val enrichmentOwnershipService: EnrichmentOwnershipService = mockk()
     private val enrichmentAuctionService: EnrichmentAuctionService = mockk()
@@ -59,7 +58,6 @@ class OwnershipElasticServiceTest {
     private val ethAuctionConverter = EthAuctionConverter(CurrencyMock.currencyServiceMock)
 
     private val apiHelper: EnrichedOwnershipApiHelper = EnrichedOwnershipApiHelper(
-        orderApiService,
         auctionContractService,
         enrichmentOwnershipService,
         enrichmentAuctionService,
@@ -74,11 +72,10 @@ class OwnershipElasticServiceTest {
 
     @BeforeEach
     fun beforeEach() {
-        clearMocks(repository, enrichmentOwnershipService, enrichmentAuctionService, orderApiService)
+        clearMocks(repository, enrichmentOwnershipService, enrichmentAuctionService)
         coEvery { enrichmentOwnershipService.findAll(any()) } returns emptyList()
         coEvery { enrichmentOwnershipService.mergeWithAuction(any<OwnershipDto>(), any()) } returnsArgument 0
         coEvery { enrichmentOwnershipService.mergeWithAuction(any<UnionOwnership>(), any()) } returnsArgument 0
-        coEvery { orderApiService.getByIds(any<List<OrderIdDto>>()) } returns emptyList()
         coEvery { repository.search(any()) } returns emptyList()
     }
 
@@ -116,6 +113,13 @@ class OwnershipElasticServiceTest {
             partialOwnership, // should be extended
             fullAuctionOwnership // should be disguised
         )
+
+        coEvery { enrichmentOwnershipService.enrich(any()) } answers {
+            listOf(
+                EnrichedOwnershipConverter.convert(disguisedFullAuctionOwnership),
+                EnrichedOwnershipConverter.convert(partialOwnership),
+            )
+        }
 
         val result = ownershipElasticService.getOwnershipsByItem(itemId, null, 2).ownerships
 
@@ -157,6 +161,13 @@ class OwnershipElasticServiceTest {
             freeOwnership,
             partialOwnership,
         )
+
+        coEvery { enrichmentOwnershipService.enrich(any()) } answers {
+            listOf(
+                EnrichedOwnershipConverter.convert(partialOwnership),
+                EnrichedOwnershipConverter.convert(freeOwnership),
+            )
+        }
 
         val result = ownershipElasticService.getOwnershipsByItem(itemId, continuation, 2).ownerships
 

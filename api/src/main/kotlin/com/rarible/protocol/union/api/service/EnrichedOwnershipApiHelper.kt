@@ -28,7 +28,6 @@ import org.springframework.stereotype.Component
 
 @Component
 class EnrichedOwnershipApiHelper(
-    private val orderApiService: OrderApiMergeService,
     private val auctionContractService: AuctionContractService,
     private val enrichmentOwnershipService: EnrichmentOwnershipService,
     private val enrichmentAuctionService: EnrichmentAuctionService,
@@ -120,39 +119,7 @@ class EnrichedOwnershipApiHelper(
     }
 
     suspend fun enrich(unionOwnerships: List<UnionAuctionOwnershipWrapper>): List<OwnershipDto> {
-        if (unionOwnerships.isEmpty()) {
-            return emptyList()
-        }
-
-        val existingEnrichedOwnerships: Map<OwnershipIdDto, ShortOwnership> = enrichmentOwnershipService
-            .findAll(unionOwnerships.mapNotNull { it.ownership?.let { ShortOwnershipId(it.id) } })
-            .associateBy { it.id.toDto() }
-
-        // Looking for full orders for existing ownerships in order-indexer
-        val shortOrderIds = existingEnrichedOwnerships.values
-            .mapNotNull { it.bestSellOrder?.dtoId }
-
-        val orders = orderApiService.getByIds(shortOrderIds)
-            .associateBy { it.id }
-
-        val result = unionOwnerships.mapAsync {
-            if (it.ownership != null) {
-                // If there is an ownership, we use it as primary entity
-                val existingEnrichedOwnership = existingEnrichedOwnerships[it.ownershipId]
-                // Enriching it if possible
-                val ownership = if (existingEnrichedOwnership == null) {
-                    EnrichedOwnershipConverter.convert(it.ownership!!)
-                } else {
-                    enrichmentOwnershipService.enrichOwnership(existingEnrichedOwnership, it.ownership, orders)
-                }
-                // Merge with related auction if possible
-                enrichmentOwnershipService.mergeWithAuction(ownership, it.auction)
-            } else {
-                // If we have fully auctioned ownership, it should be disguised as Ownership
-                enrichmentOwnershipService.disguiseAuctionWithEnrichment(it.auction!!)
-            }
-        }.filterNotNull()
-        return result
+        return enrichmentOwnershipService.enrich(unionOwnerships)
     }
 
     suspend fun merge(combined: List<UnionAuctionOwnershipWrapper>): List<UnionOwnership> =

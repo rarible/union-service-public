@@ -5,6 +5,7 @@ import com.rarible.core.test.data.randomAddress
 import com.rarible.protocol.union.api.service.api.OwnershipApiQueryService
 import com.rarible.protocol.union.enrichment.service.query.order.OrderApiMergeService
 import com.rarible.protocol.union.core.DefaultBlockchainProperties
+import com.rarible.protocol.union.core.model.UnionAuctionOwnershipWrapper
 import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.core.model.getSellerOwnershipId
 import com.rarible.protocol.union.core.service.AuctionContractService
@@ -49,7 +50,6 @@ class OwnershipApiServiceTest {
         auctionContracts = auctionContract.prefixed()
     )
 
-    private val orderApiService: OrderApiMergeService = mockk()
     private val ownershipService: OwnershipService = mockk()
     private val auctionContractService: AuctionContractService = AuctionContractService(listOf(properties))
     private val enrichmentOwnershipService: EnrichmentOwnershipService = mockk()
@@ -58,7 +58,6 @@ class OwnershipApiServiceTest {
     private val ethAuctionConverter = EthAuctionConverter(CurrencyMock.currencyServiceMock)
 
     private val helper: EnrichedOwnershipApiHelper = EnrichedOwnershipApiHelper(
-        orderApiService,
         auctionContractService,
         enrichmentOwnershipService,
         enrichmentAuctionService,
@@ -72,11 +71,10 @@ class OwnershipApiServiceTest {
 
     @BeforeEach
     fun beforeEach() {
-        clearMocks(enrichmentOwnershipService, enrichmentAuctionService, orderApiService)
+        clearMocks(enrichmentOwnershipService, enrichmentAuctionService)
         coEvery { enrichmentOwnershipService.findAll(any()) } returns emptyList()
         coEvery { enrichmentOwnershipService.mergeWithAuction(any<OwnershipDto>(), any()) } returnsArgument 0
         coEvery { enrichmentOwnershipService.mergeWithAuction(any<UnionOwnership>(), any()) } returnsArgument 0
-        coEvery { orderApiService.getByIds(any<List<OrderIdDto>>()) } returns emptyList()
     }
 
     @Test
@@ -113,6 +111,13 @@ class OwnershipApiServiceTest {
             partialOwnership, // should be extended
             fullAuctionOwnership // should be disguised
         )
+
+        coEvery { enrichmentOwnershipService.enrich(any()) } answers {
+            listOf(
+                EnrichedOwnershipConverter.convert(disguisedFullAuctionOwnership),
+                EnrichedOwnershipConverter.convert(partialOwnership),
+            )
+        }
 
         val result = this@OwnershipApiServiceTest.ownershipApiQueryService.getOwnershipsByItem(itemId, null, 2).ownerships
 
@@ -154,6 +159,13 @@ class OwnershipApiServiceTest {
             freeOwnership,
             partialOwnership,
         )
+
+        coEvery { enrichmentOwnershipService.enrich(any()) } answers {
+            listOf(
+                EnrichedOwnershipConverter.convert(partialOwnership),
+                EnrichedOwnershipConverter.convert(freeOwnership),
+            )
+        }
 
         val result = this@OwnershipApiServiceTest.ownershipApiQueryService.getOwnershipsByItem(itemId, continuation, 2).ownerships
 

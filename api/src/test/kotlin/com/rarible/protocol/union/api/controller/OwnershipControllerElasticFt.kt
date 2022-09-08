@@ -30,6 +30,7 @@ import com.rarible.protocol.union.integration.tezos.converter.TezosOwnershipConv
 import com.rarible.protocol.union.integration.tezos.data.randomTezosItemId
 import com.rarible.protocol.union.integration.tezos.data.randomTezosOwnershipDto
 import com.rarible.protocol.union.integration.tezos.data.randomTezosOwnershipId
+import convertUnionOwnershipToEsOwnership
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
@@ -171,8 +172,8 @@ class OwnershipControllerElasticFt : AbstractIntegrationTest() {
             .copy(date = Instant.ofEpochSecond(200))
         val emptyUnionOwnership = EthOwnershipConverter.convert(emptyEthOwnership, ethItemId.blockchain)
 
-        val esOwnership = EsOwnershipConverter.convert(ethUnionOwnership)
-        val emptyEsOwnership = EsOwnershipConverter.convert(emptyUnionOwnership)
+        val esOwnership = convertUnionOwnershipToEsOwnership(ethUnionOwnership)
+        val emptyEsOwnership = convertUnionOwnershipToEsOwnership(emptyUnionOwnership)
         ownershipRepository.saveAll(
             listOf(
                 esOwnership,
@@ -224,14 +225,14 @@ class OwnershipControllerElasticFt : AbstractIntegrationTest() {
         val ethOwnership = randomEthOwnershipDto(ethOwnershipId)
             .copy(date = Instant.ofEpochSecond(100))
         val ethUnionOwnership = EthOwnershipConverter.convert(ethOwnership, ethItemId.blockchain)
-        val esOwnership = EsOwnershipConverter.convert(ethUnionOwnership)
+        val esOwnership = convertUnionOwnershipToEsOwnership(ethUnionOwnership)
 
         // Part of ownership is not participating in auction
         val ethAuctionedOwnershipId = ethItemId.toOwnership(EthConverter.convert(auction.seller))
         val ethAuctionedOwnership = randomEthOwnershipDto(ethAuctionedOwnershipId)
             .copy(date = Instant.ofEpochSecond(200))
         val ethAuctionedUnionOwnership = EthOwnershipConverter.convert(ethAuctionedOwnership, ethItemId.blockchain)
-        val esAuctionedOwnership = EsOwnershipConverter.convert(ethAuctionedUnionOwnership)
+        val esAuctionedOwnership = convertUnionOwnershipToEsOwnership(ethAuctionedUnionOwnership)
 
         // Non-existing user ownership - all items set for sale
         val ethFullyAuctionedOwnershipId = ethItemId.toOwnership(EthConverter.convert(fullAuction.seller))
@@ -300,7 +301,7 @@ class OwnershipControllerElasticFt : AbstractIntegrationTest() {
         val itemId = randomTezosItemId()
         val ownership = randomTezosOwnershipDto(itemId)
         val tezosUnionOwnership = TezosOwnershipConverter.convert(ownership, itemId.blockchain)
-        val esOwnership = EsOwnershipConverter.convert(tezosUnionOwnership)
+        val esOwnership = convertUnionOwnershipToEsOwnership(tezosUnionOwnership)
         ownershipRepository.saveAll(
             listOf(
                 esOwnership

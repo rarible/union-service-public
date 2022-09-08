@@ -23,6 +23,10 @@ data class EsOwnership(
     val date: Instant,
     val auctionId: String?,
     val auctionOwnershipId: String?,
+
+    val bestSellAmount: Double? = null,
+    val bestSellCurrency: String? = null, // blockchain:currencyAddress
+    val bestSellMarketplace: String? = null,
 ) {
 
     val id: String
