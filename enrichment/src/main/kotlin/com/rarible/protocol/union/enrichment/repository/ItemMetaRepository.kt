@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.enrichment.repository
 
 import com.rarible.protocol.union.core.model.UnionMeta
+import com.rarible.protocol.union.core.model.download.DownloadEntry
 import com.rarible.protocol.union.enrichment.meta.downloader.DownloadEntryRepository
 import kotlinx.coroutines.reactive.awaitFirst
 import org.slf4j.LoggerFactory
@@ -30,7 +31,7 @@ class ItemMetaRepository(
     companion object {
 
         private val COLLECTION_DEFINITION = Index()
-            .on(UnionMeta::collectionId.name, Sort.Direction.ASC)
+            .on("${DownloadEntry<UnionMeta>::data.name}.${UnionMeta::collectionId.name}", Sort.Direction.ASC)
             .on("_id", Sort.Direction.ASC)
             .background()
 
