@@ -344,19 +344,7 @@ class ItemsSearchByRequestIt {
     @Test
     fun `should find by sell price`() = runBlocking<Unit> {
         // given
-        val ratesPerCurrency = mutableMapOf<String, Double>()
-
-        nativeTestCurrencies().forEachIndexed { index, currency ->
-            val rate = 1.0 + 2.0.pow(index.toDouble())
-            ratesPerCurrency["${currency.blockchain}:${currency.address}"] = rate
-            every { currencyControllerApiMock.getCurrencyRate(currency.blockchain, currency.address, any()) } returns
-                    CurrencyRateDto(
-                        fromCurrencyId = currency.currencyId,
-                        toCurrencyId = "",
-                        rate = rate.toBigDecimal(),
-                        date = nowMillis(),
-                    ).toMono()
-        }
+        val ratesPerCurrency = mockCurrencies()
 
         val expected: List<EsItem> =
             esItems.sortedBy { it.bestSellAmount?.times(ratesPerCurrency[it.bestSellCurrency]!!) }
@@ -402,19 +390,7 @@ class ItemsSearchByRequestIt {
     @Test
     fun `should find by bid price`() = runBlocking<Unit> {
         // given
-        val ratesPerCurrency = mutableMapOf<String, Double>()
-
-        nativeTestCurrencies().forEachIndexed { index, currency ->
-            val rate = 1.0 + 2.0.pow(index.toDouble())
-            ratesPerCurrency["${currency.blockchain}:${currency.address}"] = rate
-            every { currencyControllerApiMock.getCurrencyRate(currency.blockchain, currency.address, any()) } returns
-                    CurrencyRateDto(
-                        fromCurrencyId = currency.currencyId,
-                        toCurrencyId = "",
-                        rate = rate.toBigDecimal(),
-                        date = nowMillis(),
-                    ).toMono()
-        }
+        val ratesPerCurrency = mockCurrencies()
 
         val expected: List<EsItem> =
             esItems.sortedBy { it.bestBidAmount?.times(ratesPerCurrency[it.bestBidCurrency]!!) }
@@ -457,6 +433,54 @@ class ItemsSearchByRequestIt {
         )
     }
 
+    @Test
+    fun `should find by usd sell price`() = runBlocking<Unit> {
+        // given
+        val ratesPerCurrency = mockCurrencies()
+        val expected: List<EsItem> =
+            esItems.sortedBy { it.bestSellAmount?.times(ratesPerCurrency[it.bestSellCurrency]!!) }
+                .drop(esItems.size / 4)
+                .take(esItems.size / 2)
+
+        val priceFrom = expected.first().bestSellAmount!! * ratesPerCurrency[expected.first().bestSellCurrency]!!
+        val priceTo = expected.last().bestSellAmount!! * ratesPerCurrency[expected.last().bestSellCurrency]!!
+
+        // when && then
+        checkResult(
+            filter = ItemsSearchFilterDto(
+                sellPriceFrom = priceFrom,
+                sellPriceTo = priceTo,
+                sellCurrency = null
+            ),
+            expected = expected,
+            failMessage = "Failed to filter by sell price in usd"
+        )
+    }
+
+    @Test
+    fun `should find by usd bid price`() = runBlocking<Unit> {
+        // given
+        val ratesPerCurrency = mockCurrencies()
+        val expected: List<EsItem> =
+            esItems.sortedBy { it.bestBidAmount?.times(ratesPerCurrency[it.bestBidCurrency]!!) }
+                .drop(esItems.size / 4)
+                .take(esItems.size / 2)
+
+        val priceFrom = expected.first().bestBidAmount!! * ratesPerCurrency[expected.first().bestBidCurrency]!!
+        val priceTo = expected.last().bestBidAmount!! * ratesPerCurrency[expected.last().bestBidCurrency]!!
+
+        // when && then
+        checkResult(
+            filter = ItemsSearchFilterDto(
+                bidPriceFrom = priceFrom,
+                bidPriceTo = priceTo,
+                bidCurrency = null
+            ),
+            expected = expected,
+            failMessage = "Failed to filter by bid price in usd"
+        )
+    }
+
     private fun takeRandomItems(): List<EsItem> {
         return esItems.shuffled().take(Random.nextInt(10, 40))
     }
@@ -471,5 +495,23 @@ class ItemsSearchByRequestIt {
         assertThat(items.items).withFailMessage(failMessage).isNotEmpty
         assertThat(items.items.map { it.id.fullId().lowercase() }).withFailMessage(failMessage)
             .containsAll(expected.map { it.itemId.lowercase() })
+    }
+
+    private suspend fun mockCurrencies(): Map<String, Double> {
+        val ratesPerCurrency = mutableMapOf<String, Double>()
+
+        nativeTestCurrencies().forEachIndexed { index, currency ->
+            val rate = 1.0 + 2.0.pow(index.toDouble())
+            ratesPerCurrency["${currency.blockchain}:${currency.address}"] = rate
+            every { currencyControllerApiMock.getCurrencyRate(currency.blockchain, currency.address, any()) } returns
+                    CurrencyRateDto(
+                        fromCurrencyId = currency.currencyId,
+                        toCurrencyId = "",
+                        rate = rate.toBigDecimal(),
+                        date = nowMillis(),
+                    ).toMono()
+        }
+
+        return  ratesPerCurrency
     }
 }

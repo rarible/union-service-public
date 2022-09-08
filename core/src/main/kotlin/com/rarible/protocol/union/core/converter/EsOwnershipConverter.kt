@@ -1,6 +1,8 @@
 package com.rarible.protocol.union.core.converter
 
 import com.google.common.base.Utf8
+import com.rarible.protocol.union.core.converter.EsItemConverter.toEsItem
+import com.rarible.protocol.union.core.converter.helper.getCurrencyAddressOrNull
 import com.rarible.protocol.union.core.model.EsOwnership
 import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.core.model.getAuctionOwnershipId
@@ -24,24 +26,13 @@ object EsOwnershipConverter {
             date = source.createdAt,
             auctionId = source.auction?.id?.fullId(),
             auctionOwnershipId = source.auction?.getAuctionOwnershipId()?.fullId(),
+            bestSellAmount = source.bestSellOrder?.take?.value?.toDouble(),
+            bestSellCurrency = getCurrencyAddressOrNull(source.blockchain, source.bestSellOrder?.take),
+            bestSellMarketplace = source.bestSellOrder?.platform?.name, // getting marketplace may be more complicated
         )
     }
 
-    fun convert(source: UnionOwnership): EsOwnership {
-        val (id, original) = prepareOwnershipId(source.id.fullId())
-        return EsOwnership(
-            ownershipId = id,
-            originalOwnershipId = original,
-            blockchain = source.id.blockchain,
-            itemId = source.id.getItemId().fullId(),
-            collection = source.collection?.fullId(),
-            owner = source.id.owner.fullId(),
-            date = source.createdAt,
-            auctionId = null,
-            auctionOwnershipId = null,
-        )
-    }
-
+    @Deprecated("Use convert(OwnershipDto) instead")
     fun convert(source: AuctionDto): EsOwnership {
         val (id, original) = prepareOwnershipId(source.getSellerOwnershipId().fullId())
         return EsOwnership(

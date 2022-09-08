@@ -29,6 +29,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.toSet
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
@@ -75,6 +76,10 @@ class EnrichmentItemService(
         val result = itemRepository.delete(itemId)
         logger.info("Deleting Item [{}], deleted: {} ({}ms)", itemId.toDto().fullId(), result?.deletedCount, spent(now))
         return result
+    }
+
+    suspend fun findByPoolOrder(orderId: OrderIdDto): Set<ShortItemId> {
+        return itemRepository.findByPoolOrder(orderId.blockchain, orderId.value).toSet()
     }
 
     suspend fun findAll(ids: List<ShortItemId>): List<ShortItem> {

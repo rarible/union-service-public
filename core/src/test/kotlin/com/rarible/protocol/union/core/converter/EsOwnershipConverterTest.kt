@@ -1,13 +1,18 @@
 package com.rarible.protocol.union.core.converter
 
+import com.rarible.core.test.data.randomBigDecimal
 import com.rarible.core.test.data.randomString
+import com.rarible.protocol.union.dto.AssetDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OwnershipDto
+import com.rarible.protocol.union.dto.ext
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
+import randomAssetTypeErc20
+import randomOrder
 import randomOwnership
 import randomOwnershipId
 import java.util.stream.Stream
@@ -28,6 +33,9 @@ internal class EsOwnershipConverterTest {
         assertThat(result.collection).isEqualTo(source.collection?.fullId())
         assertThat(result.owner).isEqualTo(source.owner.fullId())
         assertThat(result.date).isEqualTo(source.createdAt)
+        assertThat(result.bestSellAmount).isEqualTo(source.bestSellOrder?.take?.value?.toDouble())
+        assertThat(result.bestSellCurrency).isEqualTo(source.blockchain.name + ":" + source.bestSellOrder?.take?.type?.ext?.currencyAddress())
+        assertThat(result.bestSellMarketplace).isEqualTo(source.bestSellOrder?.platform?.name)
     }
 
     @Test
@@ -47,7 +55,10 @@ internal class EsOwnershipConverterTest {
     companion object {
         @JvmStatic
         fun source(): Stream<Arguments> = BlockchainDto.values().map {
-            randomOwnership(id = randomOwnershipId(it))
+            randomOwnership(
+                id = randomOwnershipId(it),
+                bestSellOrder = randomOrder(take = AssetDto(randomAssetTypeErc20(it), randomBigDecimal()))
+            )
         }.map { Arguments.of(it) }.stream()
     }
 }

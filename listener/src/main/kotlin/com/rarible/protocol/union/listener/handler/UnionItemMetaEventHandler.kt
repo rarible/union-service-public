@@ -45,4 +45,8 @@ class UnionItemMetaEventHandler(
         }
     }
 
+    override suspend fun onEvents(events: Collection<UnionItemMetaEvent>) {
+        events.forEach { onEvent(it) }
+    }
+
 }

@@ -13,9 +13,12 @@ import com.rarible.protocol.union.core.service.ReconciliationEventService
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
+import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOrderService
 import com.rarible.protocol.union.enrichment.util.isPoolOrder
 import com.rarible.protocol.union.listener.service.EnrichmentOrderEventService
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
@@ -23,6 +26,7 @@ import org.springframework.stereotype.Component
 class UnionInternalOrderEventHandler(
     private val orderEventService: EnrichmentOrderEventService,
     private val enrichmentOrderService: EnrichmentOrderService,
+    private val enrichmentItemService: EnrichmentItemService,
     private val reconciliationEventService: ReconciliationEventService,
     private val handler: IncomingEventHandler<UnionOrderEvent>,
     private val ff: FeatureFlagsProperties
@@ -83,11 +87,26 @@ class UnionInternalOrderEventHandler(
         if (!ff.enablePoolOrders) {
             return
         }
-        val order = fetchOrder(orderId)
-        val itemIds = emptyList<ItemIdDto>() //TODO PT-1151 find related items and set action
-        itemIds.forEach {
-            handler.onEvent(UnionPoolOrderUpdateEvent(order, it, PoolItemAction.INCLUDED))
+
+        val orderDeferred = coroutineScope { async { fetchOrder(orderId) } }
+        val exist = enrichmentItemService.findByPoolOrder(orderId)
+        val order = orderDeferred.await()
+
+        val messages = ArrayList<UnionPoolOrderUpdateEvent>(exist.size + included.size + excluded.size)
+
+        exist.forEach {
+            val itemId = it.toDto()
+            if (!excluded.contains(itemId) && !included.contains(itemId)) {
+                messages.add(UnionPoolOrderUpdateEvent(order, itemId, PoolItemAction.INCLUDED))
+            }
         }
+        included.forEach { messages.add(UnionPoolOrderUpdateEvent(order, it, PoolItemAction.INCLUDED)) }
+        excluded.forEach { messages.add(UnionPoolOrderUpdateEvent(order, it, PoolItemAction.EXCLUDED)) }
+
+        // We should not to handle such events here directly since it could cause concurrent modification problems
+        // Instead, we send such synthetic events to this internal handler in order to consequently process
+        // all events related to each item
+        handler.onEvents(messages)
     }
 
     private suspend fun fetchOrder(orderId: OrderIdDto): OrderDto {

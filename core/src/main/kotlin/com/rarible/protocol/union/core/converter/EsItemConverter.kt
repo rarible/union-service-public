@@ -1,11 +1,9 @@
 package com.rarible.protocol.union.core.converter
 
+import com.rarible.protocol.union.core.converter.helper.getCurrencyAddressOrNull
 import com.rarible.protocol.union.core.model.EsItem
 import com.rarible.protocol.union.core.model.EsTrait
-import com.rarible.protocol.union.dto.AssetDto
-import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemDto
-import com.rarible.protocol.union.dto.ext
 import org.apache.commons.codec.digest.DigestUtils
 
 object EsItemConverter {
@@ -33,13 +31,6 @@ object EsItemConverter {
             bestBidCurrency = getCurrencyAddressOrNull(blockchain, this.bestBidOrder?.make),
             bestBidMarketplace = this.bestBidOrder?.platform?.name, // getting marketplace may be more complicated
         )
-    }
-
-    private fun getCurrencyAddressOrNull(blockchain: BlockchainDto, asset: AssetDto?): String? {
-        val address = kotlin.runCatching {
-            asset?.type?.ext?.currencyAddress()
-        }.getOrNull() ?: return null
-        return blockchain.name + ":" + address
     }
 
     private fun prepareId(itemId: String): String {

@@ -51,7 +51,7 @@ class SearchTaskMetricFactory(
         blockchain: BlockchainDto
     ): RegisteredCounter {
         return object : CountingMetric(
-            name = getReindexEntityMetricName(EsEntity.ITEM),
+            name = getReindexEntityMetricName(EsEntity.ORDER),
             Tag.of("blockchain", blockchain.name.lowercase())
         ) {}.bind(meterRegistry)
     }

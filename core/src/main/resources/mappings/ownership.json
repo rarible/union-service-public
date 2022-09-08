@@ -34,6 +34,15 @@
     },
     "auctionOwnershipId": {
       "type": "keyword"
+    },
+    "bestSellAmount": {
+      "type": "double"
+    },
+    "bestSellCurrency": {
+      "type": "keyword"
+    },
+    "bestSellMarketplace": {
+      "type": "keyword"
     }
   }
 }
