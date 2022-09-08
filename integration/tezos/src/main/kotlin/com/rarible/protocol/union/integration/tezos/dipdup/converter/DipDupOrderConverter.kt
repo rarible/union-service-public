@@ -23,11 +23,9 @@ import com.rarible.protocol.union.dto.TezosOrderDataFxhashV2Dto
 import com.rarible.protocol.union.dto.TezosOrderDataHenDto
 import com.rarible.protocol.union.dto.TezosOrderDataObjktV1Dto
 import com.rarible.protocol.union.dto.TezosOrderDataObjktV2Dto
-import com.rarible.protocol.union.dto.TezosOrderDataRaribleV2DataV1Dto
 import com.rarible.protocol.union.dto.TezosOrderDataRaribleV2DataV2Dto
 import com.rarible.protocol.union.dto.TezosOrderDataTeiaV1Dto
 import com.rarible.protocol.union.dto.TezosOrderDataVersumV1Dto
-import com.rarible.protocol.union.dto.ext
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.math.BigDecimal
@@ -107,7 +105,7 @@ class DipDupOrderConverter(
 
     fun orderData(order: DipDupOrder, blockchain: BlockchainDto): OrderDataDto {
         return when (order.platform) {
-            TezosPlatform.RARIBLE_V1 -> TezosOrderDataRaribleV2DataV1Dto(
+            TezosPlatform.RARIBLE_V1 -> TezosOrderDataRaribleV2DataV2Dto(
                 payouts = order.payouts.map { convert(it, blockchain) },
                 originFees = order.originFees.map { convert(it, blockchain) }
             )
