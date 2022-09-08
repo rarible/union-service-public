@@ -1,11 +1,12 @@
 package com.rarible.protocol.union.enrichment.evaluator
 
+import com.rarible.core.common.nowMillis
 import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.model.ShortOrder
-import org.slf4j.LoggerFactory
+import com.rarible.protocol.union.enrichment.util.spent
 
 class BestOrderEvaluator(
     private val comparator: BestOrderComparator,
@@ -97,8 +98,12 @@ class BestOrderEvaluator(
             name, updated.dtoId.fullId(), type, id
         )
         // It means, current best Order is not alive, we have to fetch actual best Order
+        val now = nowMillis()
         val fetched = provider.fetch(currencyId)
-        logger.info("Fetched {} for {} [{}] : [{}]", name, type, id, fetched?.id)
+        logger.info(
+            "Fetched {} for {} [{}] : [{}], status = {} ({}ms) ",
+            name, type, id, fetched?.id, fetched?.status, spent(now)
+        )
         return fetched?.let { ShortOrderConverter.convert(it) }
     }
 

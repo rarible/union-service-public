@@ -16,7 +16,6 @@ import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
 import com.rarible.protocol.union.enrichment.test.data.randomShortItem
 import com.rarible.protocol.union.enrichment.test.data.randomShortOwnership
 import com.rarible.protocol.union.enrichment.test.data.randomUnionItem
-import com.rarible.protocol.union.enrichment.test.data.randomUnionMeta
 import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrderDto
 import com.rarible.protocol.union.enrichment.util.bidCurrencyId
 import com.rarible.protocol.union.integration.ethereum.converter.EthAuctionConverter
@@ -31,7 +30,6 @@ import com.rarible.protocol.union.integration.ethereum.data.randomEthNftItemDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthSellOrderDto
 import com.rarible.protocol.union.listener.test.AbstractIntegrationTest
 import com.rarible.protocol.union.listener.test.IntegrationTest
-import io.mockk.coEvery
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
@@ -171,8 +169,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         val unionMeta = EthMetaConverter.convert(ethMeta)
         val unionItem = EthItemConverter.convert(ethItem, itemId.blockchain)
         itemService.save(shortItem)
-
-        coEvery { testItemMetaLoader.load(itemId) } returns unionMeta
+        itemMetaService.save(itemId, unionMeta)
 
         val bestSellOrder1 = randomUnionSellOrderDto(itemId).copy(makeStock = 20.toBigDecimal())
         val ownership1 = randomShortOwnership(itemId).copy(bestSellOrder = ShortOrderConverter.convert(bestSellOrder1))
@@ -199,12 +196,9 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
 
         waitAssert {
             val messages = findItemUpdates(itemId.value)
-            // There may be several events for item update (when meta gets loaded)
-            // TODO but since we're testing it on service level, first message
-            // sent by meta-loader with not-updated Item enrichment data
-            assertThat(messages).hasSize(2)
-            assertThat(messages[1].value.itemId).isEqualTo(itemId)
-            assertThat(messages[1].value.item).isEqualTo(expected)
+            assertThat(messages).hasSize(1)
+            assertThat(messages[0].value.itemId).isEqualTo(itemId)
+            assertThat(messages[0].value.item).isEqualTo(expected)
         }
     }
 

@@ -75,14 +75,12 @@ class EnrichmentCollectionService(
 
         val unionCollection = fetchedCollection.await()
 
-        val collectionDto = EnrichedCollectionConverter.convert(
+        EnrichedCollectionConverter.convert(
             collection = unionCollection,
             // replacing inner IPFS urls with public urls
             meta = contentMetaService.exposePublicUrls(unionCollection.meta, collectionId),
             shortCollection = shortCollection,
             orders = bestOrders
         )
-        logger.info("Enriched collection {}: {}", collectionId.fullId(), collectionDto)
-        collectionDto
     }
 }

@@ -61,18 +61,31 @@ class ActivityElasticService(
         size: Int?,
         sort: ActivitySortDto?
     ): ActivitiesDto {
-        logger.info("getAllActivities() from ElasticSearch")
         val effectiveCursor = cursor ?: continuation
         val filter = filterConverter.convertGetAllActivities(type, blockchains, effectiveCursor)
         logger.info("Built filter: $filter")
         val queryResult = esActivityRepository.search(filter, convertSort(sort), size)
-        logger.info("Query result: $queryResult")
+
         val activities = getActivities(queryResult.activities)
-        return ActivitiesDto(
+        val result = ActivitiesDto(
             continuation = null,
             cursor = queryResult.cursor,
             activities = activities
         )
+
+        logger.info(
+            "Response for ES getAllActivities(type={}, blockchains={}, continuation={}, size={}, sort={}):" +
+                " Slice(size={}, continuation={}, cursor={})",
+            type,
+            blockchains,
+            continuation,
+            size,
+            sort,
+            result.activities.size,
+            result.continuation,
+            result.cursor
+        )
+        return result
     }
 
     override suspend fun getAllActivitiesSync(
@@ -96,13 +109,22 @@ class ActivityElasticService(
         val effectiveCursor = cursor ?: continuation
         val filter = filterConverter.convertGetActivitiesByCollection(type, collection, effectiveCursor)
         val queryResult = esActivityRepository.search(filter, convertSort(sort), size)
-        logger.debug("Query result: $queryResult")
+
         val activities = getActivities(queryResult.activities)
-        return ActivitiesDto(
+
+        val result = ActivitiesDto(
             continuation = null,
             cursor = queryResult.cursor,
             activities = activities
         )
+
+        logger.info(
+            "Response for ES getActivitiesByCollection(type={}, collection={}, continuation={}, size={}, sort={}): " +
+                "Slice(size={}, continuation={}) ",
+            type, collection, continuation, size, sort, result.activities.size, result.continuation
+        )
+
+        return result
     }
 
     override suspend fun getActivitiesByItem(
@@ -117,11 +139,19 @@ class ActivityElasticService(
         val filter = filterConverter.convertGetActivitiesByItem(type, itemId, effectiveCursor)
         val queryResult = esActivityRepository.search(filter, convertSort(sort), size)
         val activities = getActivities(queryResult.activities)
-        return ActivitiesDto(
+
+        val result = ActivitiesDto(
             continuation = null,
             cursor = queryResult.cursor,
             activities = activities
         )
+
+        logger.info(
+            "Response for ES getActivitiesByItem(type={}, itemId={} continuation={}, size={}, sort={}): " +
+                "Slice(size={}, continuation={}) ",
+            type, itemId, continuation, size, sort, result.activities.size, result.continuation
+        )
+        return result
     }
 
     override suspend fun getActivitiesByUser(
@@ -139,11 +169,21 @@ class ActivityElasticService(
         val filter = filterConverter.convertGetActivitiesByUser(type, user, blockchains, from, to, effectiveCursor)
         val queryResult = esActivityRepository.search(filter, convertSort(sort), size)
         val activities = getActivities(queryResult.activities)
-        return ActivitiesDto(
+
+        val result = ActivitiesDto(
             continuation = null,
             cursor = queryResult.cursor,
             activities = activities
         )
+
+        logger.info(
+            "Response for ES getActivitiesByUser(type={}, users={}, continuation={}, size={}, sort={}):" +
+                " Slice(size={}, continuation={}, cursor={})",
+            type, user, continuation, size, sort,
+            result.activities.size, result.continuation, result.cursor
+        )
+
+        return result
     }
 
     private suspend fun getActivities(esActivities: List<EsActivityLite>): List<ActivityDto> {

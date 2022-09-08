@@ -1,7 +1,6 @@
 package com.rarible.protocol.union.enrichment.service.query.collection
 
 import com.rarible.core.common.nowMillis
-import com.rarible.protocol.union.enrichment.util.BlockchainFilter
 import com.rarible.protocol.union.core.continuation.UnionCollectionContinuation
 import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.core.service.CollectionService
@@ -23,7 +22,7 @@ import com.rarible.protocol.union.enrichment.model.ShortCollection
 import com.rarible.protocol.union.enrichment.model.ShortCollectionId
 import com.rarible.protocol.union.enrichment.service.EnrichmentCollectionService
 import com.rarible.protocol.union.enrichment.service.query.order.OrderApiMergeService
-import com.rarible.protocol.union.enrichment.util.spent
+import com.rarible.protocol.union.enrichment.util.BlockchainFilter
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -157,7 +156,7 @@ class CollectionApiMergeService(
         val orders = orderApiService.getByIds(shortOrderIds)
             .associateBy { it.id }
 
-        val enrichedCollections = unionCollections.map {
+        return unionCollections.map {
             val shortCollection = shortCollections[it.id]
             enrichmentCollectionService.enrichCollection(
                 shortCollection = shortCollection,
@@ -165,12 +164,5 @@ class CollectionApiMergeService(
                 orders = orders
             )
         }
-
-        logger.info(
-            "Enriched {} of {} Collections, {} Orders fetched ({}ms)",
-            shortCollections.size, enrichedCollections.size, orders.size, spent(now)
-        )
-
-        return enrichedCollections
     }
 }
