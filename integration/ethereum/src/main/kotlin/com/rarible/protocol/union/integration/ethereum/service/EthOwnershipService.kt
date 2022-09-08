@@ -48,7 +48,7 @@ open class EthOwnershipService(
         address: String, continuation: String?, size: Int
     ): Page<UnionOwnership> {
         val ownerships = ownershipControllerApi.getNftOwnershipsByOwner(
-            address, continuation, size
+            address, continuation, continuation, size
         ).awaitFirst()
         return EthOwnershipConverter.convert(ownerships, blockchain)
     }
