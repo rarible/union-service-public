@@ -46,7 +46,7 @@ object TezosItemConverter {
             deleted = item.deleted,
             lastUpdatedAt = item.date,
             lazySupply = item.lazySupply,
-            meta = item.meta?.let { convert(it) },
+            meta = item.meta?.let { convert(it, item.contract) },
             mintedAt = item.mintedAt,
             supply = item.supply,
             pending = emptyList() // In Union we won't use this field for Tezos
@@ -61,9 +61,10 @@ object TezosItemConverter {
         )
     }
 
-    fun convert(meta: NftItemMetaDto): UnionMeta =
+    fun convert(meta: NftItemMetaDto, itemId: String): UnionMeta =
         UnionMeta(
             name = meta.name,
+            collectionId = itemId.split(":").first(),
             description = meta.description,
             attributes = meta.attributes.orEmpty().map(::convert),
             content = listOfNotNull(

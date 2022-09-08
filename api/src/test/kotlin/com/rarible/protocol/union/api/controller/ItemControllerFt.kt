@@ -163,7 +163,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
             )
         )
 
-        coEvery { testItemMetaLoader.load(itemId) } returns EthMetaConverter.convert(meta)
+        coEvery { testItemMetaLoader.load(itemId) } returns EthMetaConverter.convert(meta, itemId.value)
 
         val response = restTemplate.getForEntity("${baseUri}/v0.1/items/${itemId.fullId()}/image", String::class.java)
         assertThat(response.statusCode).isEqualTo(HttpStatus.TEMPORARY_REDIRECT)
@@ -188,7 +188,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
             )
         )
 
-        coEvery { testItemMetaLoader.load(itemId) } returns EthMetaConverter.convert(meta)
+        coEvery { testItemMetaLoader.load(itemId) } returns EthMetaConverter.convert(meta, itemId.value)
 
         val response =
             restTemplate.getForEntity("${baseUri}/v0.1/items/${itemId.fullId()}/animation", String::class.java)

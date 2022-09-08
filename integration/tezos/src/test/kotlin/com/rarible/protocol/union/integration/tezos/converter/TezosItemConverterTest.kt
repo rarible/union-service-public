@@ -20,6 +20,7 @@ class TezosItemConverterTest {
         val converted = TezosItemConverter.convert(dto, BlockchainDto.TEZOS)
 
         assertThat(converted.id.value).isEqualTo(dto.id)
+        assertThat(converted.meta?.collectionId).isEqualTo(dto.contract)
         assertThat(converted.collection!!.value).isEqualTo(dto.contract)
         assertThat(converted.supply).isEqualTo(dto.supply)
         assertThat(converted.lastUpdatedAt).isEqualTo(dto.date)

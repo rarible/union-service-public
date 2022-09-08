@@ -53,7 +53,7 @@ open class EthItemService(
 
     override suspend fun getItemMetaById(itemId: String): UnionMeta {
         val meta = itemControllerApi.getNftItemMetaById(itemId).awaitFirst()
-        return EthMetaConverter.convert(meta)
+        return EthMetaConverter.convert(meta, itemId)
     }
 
     override suspend fun resetItemMeta(itemId: String) {

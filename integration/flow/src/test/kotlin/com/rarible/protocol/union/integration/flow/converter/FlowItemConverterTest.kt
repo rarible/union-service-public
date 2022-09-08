@@ -10,6 +10,7 @@ import com.rarible.protocol.union.core.model.UnionImageProperties
 import com.rarible.protocol.union.core.model.UnionVideoProperties
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.MetaContentDto
+import com.rarible.protocol.union.integration.flow.data.randomFlowItemId
 import com.rarible.protocol.union.integration.flow.data.randomFlowNftItemDto
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -47,9 +48,11 @@ class FlowItemConverterTest {
             )
         )
 
-        val converted = FlowItemConverter.convert(meta)
+        val itemId = randomFlowItemId()
+        val converted = FlowItemConverter.convert(meta, itemId.value)
 
         assertThat(converted.name).isEqualTo(meta.name)
+        assertThat(converted.collectionId).isEqualTo(itemId.value.split(":").first())
         assertThat(converted.description).isEqualTo(meta.description)
         assertThat(converted.content).hasSize(2)
         assertThat(converted.attributes.find { it.key == "key1" }?.value).isEqualTo("value1")
@@ -92,9 +95,11 @@ class FlowItemConverterTest {
             )
         )
 
-        val converted = FlowItemConverter.convert(meta)
+        val itemId = randomFlowItemId()
+        val converted = FlowItemConverter.convert(meta, itemId.value)
 
         assertThat(converted.name).isEqualTo(meta.name)
+        assertThat(converted.collectionId).isEqualTo(itemId.value.split(":").first())
         assertThat(converted.description).isEqualTo(meta.description)
         assertThat(converted.content).hasSize(2)
         assertThat(converted.attributes.find { it.key == "key1" }?.value).isEqualTo("value1")

@@ -23,9 +23,10 @@ import com.rarible.protocol.union.dto.MetaContentDto
 
 object EthMetaConverter {
 
-    fun convert(source: NftItemMetaDto): UnionMeta {
+    fun convert(source: NftItemMetaDto, itemId: String): UnionMeta {
         return UnionMeta(
             name = source.name,
+            collectionId = itemId.substringBefore(":"),
             description = source.description,
             language = source.language,
             genres = source.genres,

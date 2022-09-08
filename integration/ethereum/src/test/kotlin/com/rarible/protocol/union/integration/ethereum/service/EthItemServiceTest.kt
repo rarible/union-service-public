@@ -89,7 +89,7 @@ class EthItemServiceTest {
         val itemId = randomEthItemId()
         val meta = randomEthItemMeta()
 
-        val expected = EthMetaConverter.convert(meta)
+        val expected = EthMetaConverter.convert(meta, itemId.value)
 
         coEvery { itemControllerApi.getNftItemMetaById(itemId.value) } returns meta.toMono()
 
