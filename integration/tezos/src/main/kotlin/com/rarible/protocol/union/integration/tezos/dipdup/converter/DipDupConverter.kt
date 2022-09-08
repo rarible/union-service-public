@@ -51,8 +51,11 @@ object DipDupConverter {
     fun convert(source: TezosPlatform): PlatformDto {
         return when(source) {
             TezosPlatform.HEN -> PlatformDto.HEN
+            TezosPlatform.VERSUM_V1 -> PlatformDto.VERSUM
+            TezosPlatform.TEIA_V1 -> PlatformDto.TEIA
             TezosPlatform.OBJKT_V1, TezosPlatform.OBJKT_V2 -> PlatformDto.OBJKT
             TezosPlatform.RARIBLE_V1, TezosPlatform.RARIBLE_V2 -> PlatformDto.RARIBLE
+            TezosPlatform.FXHASH_V1, TezosPlatform.FXHASH_V2 -> PlatformDto.FXHASH
             else -> throw RuntimeException("Not implemented for ${source} platform")
         }
     }

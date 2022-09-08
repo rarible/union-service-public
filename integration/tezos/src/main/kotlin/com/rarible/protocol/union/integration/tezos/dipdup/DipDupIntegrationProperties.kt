@@ -40,7 +40,9 @@ data class DipDupIntegrationProperties(
         val objkt: Boolean = false,
         val objktV2: Boolean = false,
         val versum: Boolean = false,
-        val teia: Boolean = false
+        val teia: Boolean = false,
+        val fxhashV1: Boolean = false,
+        val fxhashV2: Boolean = false
     )
 
 }
