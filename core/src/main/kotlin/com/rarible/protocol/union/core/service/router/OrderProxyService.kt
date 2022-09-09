@@ -2,11 +2,12 @@ package com.rarible.protocol.union.core.service.router
 
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.dto.AssetTypeDto
+import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
-import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.PlatformDto
+import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
 
 class OrderProxyService(
@@ -234,6 +235,23 @@ class OrderProxyService(
             continuation,
             size
         )
+    }
+
+    override suspend fun getAmmOrdersByItem(
+        itemId: String,
+        status: List<OrderStatusDto>?,
+        continuation: String?,
+        size: Int
+    ): Slice<OrderDto> {
+        return orderService.getAmmOrdersByItem(itemId, status, continuation, size)
+    }
+
+    override suspend fun getAmmOrderItemIds(
+        id: String,
+        continuation: String?,
+        size: Int
+    ): Slice<ItemIdDto> {
+        return orderService.getAmmOrderItemIds(id, continuation, size)
     }
 
     private fun isPlatformSupported(platform: PlatformDto?): Boolean {

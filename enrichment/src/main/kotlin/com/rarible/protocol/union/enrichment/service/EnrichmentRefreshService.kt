@@ -24,6 +24,7 @@ import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.ItemUpdateEventDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
+import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.OwnershipDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
@@ -31,6 +32,7 @@ import com.rarible.protocol.union.dto.OwnershipUpdateEventDto
 import com.rarible.protocol.union.dto.ext
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.evaluator.BestOrderProviderFactory
+import com.rarible.protocol.union.enrichment.evaluator.BestSellOrderComparator
 import com.rarible.protocol.union.enrichment.evaluator.CollectionBestBidOrderProvider
 import com.rarible.protocol.union.enrichment.evaluator.CollectionBestSellOrderProvider
 import com.rarible.protocol.union.enrichment.evaluator.ItemBestBidOrderProvider
@@ -43,6 +45,7 @@ import com.rarible.protocol.union.enrichment.model.ShortCollectionId
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortOwnership
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
+import com.rarible.protocol.union.enrichment.model.ShortPoolOrder
 import com.rarible.protocol.union.enrichment.util.bidCurrencyId
 import com.rarible.protocol.union.enrichment.util.sellCurrencyId
 import kotlinx.coroutines.async
@@ -167,7 +170,7 @@ class EnrichmentRefreshService(
 
         val origins = originService.getOrigins(shortCollectionId.toDto())
         val bestOrders = getOriginBestOrders(
-            origins, sellCurrencies, bidCurrencies, bestSellProviderFactory, bestBidProviderFactory
+            origins, sellCurrencies, bidCurrencies, bestSellProviderFactory, bestBidProviderFactory, emptyList()
         )
 
         val updatedCollection = optimisticLock {
@@ -209,15 +212,17 @@ class EnrichmentRefreshService(
     ) = coroutineScope {
         val shortItemId = ShortItemId(itemId)
 
-        // TODO PT-1155 we need to update sudoSwap orders here first
-        val shortItem = itemService.getOrEmpty(shortItemId)
-
         logger.info("Starting to reconcile Item [{}]", shortItemId)
         val lastSaleDeferred = async {
             if (ff.enableItemLastSaleEnrichment) enrichmentActivityService.getItemLastSale(itemId) else null
         }
         val itemDtoDeferred = async { itemService.fetch(shortItemId) }
         val sellStatsDeferred = async { ownershipService.getItemSellStats(shortItemId) }
+        val ammOrders = getAmmOrders(itemId)
+        val poolSellOrders = ammOrders.map { ShortPoolOrder(it.sellCurrencyId, ShortOrderConverter.convert(it)) }
+
+        // Reset pool sell orders before recalculations in order to avoid unnecessary getOrder() calls
+        val shortItem = itemService.getOrEmpty(shortItemId).copy(poolSellOrders = emptyList())
 
         val bestSellProviderFactory = ItemBestSellOrderProvider.Factory(
             shortItem, enrichmentOrderService, ff.enablePoolOrders
@@ -226,7 +231,7 @@ class EnrichmentRefreshService(
 
         val origins = enrichmentItemService.getItemOrigins(shortItemId)
         val bestOrders = getOriginBestOrders(
-            origins, sellCurrencies, bidCurrencies, bestSellProviderFactory, bestBidProviderFactory
+            origins, sellCurrencies, bidCurrencies, bestSellProviderFactory, bestBidProviderFactory, ammOrders
         )
 
         // Waiting other operations completed
@@ -243,7 +248,8 @@ class EnrichmentRefreshService(
                 sellers = sellStats.sellers,
                 totalStock = sellStats.totalStock,
                 auctions = auctions.map { it.id }.toSet(),
-                lastSale = lastSaleDeferred.await()
+                lastSale = lastSaleDeferred.await(),
+                poolSellOrders = poolSellOrders
             )
 
             if (currentItem.isNotEmpty()) {
@@ -289,7 +295,7 @@ class EnrichmentRefreshService(
         val bestBidProviderFactory = OwnershipBestBidOrderProvider.Factory(shortOwnershipId, enrichmentOrderService)
 
         val bestOrders = getOriginBestOrders(
-            origins, currencies, emptyList(), bestSellProviderFactory, bestBidProviderFactory
+            origins, currencies, emptyList(), bestSellProviderFactory, bestBidProviderFactory, emptyList()
         )
 
         val updatedOwnership = optimisticLock {
@@ -405,22 +411,46 @@ class EnrichmentRefreshService(
         return result.map { it.ext.currencyAddress() }
     }
 
+    private suspend fun getAmmOrders(itemId: ItemIdDto): List<OrderDto> {
+        if (!ff.enablePoolOrders) {
+            return emptyList()
+        }
+        val status = listOf(OrderStatusDto.ACTIVE)
+        val result = orderServiceRouter.fetchAllBySlices(itemId.blockchain) { service, continuation ->
+            service.getAmmOrdersByItem(itemId.value, status, continuation, 200)
+        }
+        logger.info("Found ${result.size} AMM orders for the Item: $itemId")
+        return result
+    }
+
     private suspend fun getOriginBestOrders(
         origins: List<String>,
         sellCurrencies: List<String>,
         bidCurrencies: List<String>,
         bestSellProviderFactory: BestOrderProviderFactory<*>,
-        bestBidProviderFactory: BestOrderProviderFactory<*>
+        bestBidProviderFactory: BestOrderProviderFactory<*>,
+        poolOrders: List<OrderDto>
     ) = coroutineScope {
-        val originsDeferred = origins.map {
+        val poolOrdersByCurrency = poolOrders.groupBy { it.sellCurrencyId }
+        val originsDeferred = origins.map { origin ->
             async {
                 getBestOrders(
-                    null, sellCurrencies, bidCurrencies, bestSellProviderFactory, bestBidProviderFactory
+                    origin,
+                    sellCurrencies,
+                    bidCurrencies,
+                    bestSellProviderFactory,
+                    bestBidProviderFactory,
+                    emptyMap() // Origin orders should be not affected by pool orders
                 )
             }
         }
         val global = getBestOrders(
-            null, sellCurrencies, bidCurrencies, bestSellProviderFactory, bestBidProviderFactory
+            null,
+            sellCurrencies,
+            bidCurrencies,
+            bestSellProviderFactory,
+            bestBidProviderFactory,
+            poolOrdersByCurrency
         )
 
         val byOrigin = originsDeferred.awaitAll()
@@ -440,11 +470,15 @@ class EnrichmentRefreshService(
         sellCurrencies: List<String>,
         bidCurrencies: List<String>,
         bestSellProviderFactory: BestOrderProviderFactory<*>,
-        bestBidProviderFactory: BestOrderProviderFactory<*>
+        bestBidProviderFactory: BestOrderProviderFactory<*>,
+        poolOrders: Map<String, List<OrderDto>>
     ) = coroutineScope {
         // Looking for best sell orders
         val bestSellOrdersDtoDeferred = sellCurrencies.map { currencyId ->
-            async { bestSellProviderFactory.create(origin).fetch(currencyId) }
+            async {
+                val bestSellByCurrency = bestSellProviderFactory.create(origin).fetch(currencyId)
+                chooseBestOrder(currencyId, bestSellByCurrency, poolOrders)
+            }
         }
 
         // Looking for best bid orders
@@ -472,6 +506,19 @@ class EnrichmentRefreshService(
                 bestBidOrders
             )
         )
+    }
+
+    private fun chooseBestOrder(
+        currencyId: String,
+        directOrder: OrderDto?,
+        poolOrders: Map<String, List<OrderDto>>
+    ): OrderDto? {
+        val poolOrdersByCurrency = poolOrders[currencyId] ?: emptyList()
+        val allOrders = directOrder?.let { poolOrdersByCurrency + it } ?: poolOrdersByCurrency
+        val mappedAllOrders = allOrders.associateBy { it.id.value }
+        val best = allOrders.map { ShortOrderConverter.convert(it) }
+            .reduceOrNull(BestSellOrderComparator::compare)
+        return best?.let { mappedAllOrders[best.id] }
     }
 
     data class OriginBestOrders(
