@@ -149,10 +149,9 @@ class EthOrderControllerApiMock(
     fun mockGetAmmOrdersByItem(itemId: ItemIdDto, vararg returnOrders: OrderDto) {
         val (contract, tokenId) = CompositeItemIdParser.split(itemId.value)
         every {
-            orderControllerApi.getAmmOrdersByItemAndByStatus(
+            orderControllerApi.getAmmOrdersByItem(
                 eq(contract),
                 eq(tokenId.toString()),
-                any(),
                 any(),
                 any()
             )
