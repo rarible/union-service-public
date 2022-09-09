@@ -63,6 +63,7 @@ fun randomImxCollectionShort(): ImmutablexCollectionShort {
 fun randomImxCollection(
     projectOwnerAddress: String? = randomAddress().prefixed(),
 ): ImmutablexCollection {
+    val now = nowMillis()
     return ImmutablexCollection(
         address = randomAddress().prefixed(),
         name = randomString(),
@@ -72,6 +73,8 @@ fun randomImxCollection(
         projectId = randomLong(),
         projectOwnerAddress = projectOwnerAddress,
         metadataApiUrl = "http://localhost:8080/meta/collection/${randomString()}",
+        updatedAt = now,
+        createdAt = now
     )
 }
 

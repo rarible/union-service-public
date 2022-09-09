@@ -48,7 +48,9 @@ class ImxCollectionConverterTest {
             iconUrl = null,
             collectionImageUrl = null,
             projectOwnerAddress = null,
-            metadataApiUrl = null
+            metadataApiUrl = null,
+            createdAt = null,
+            updatedAt = null
         )
 
         val collection = ImxCollectionConverter.convert(imxCollection, blockchain)
