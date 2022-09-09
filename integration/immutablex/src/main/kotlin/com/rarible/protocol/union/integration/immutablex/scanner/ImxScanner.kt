@@ -128,7 +128,7 @@ class ImxScanner(
         collectionEventHandler.handle(page)
 
         val last = page.lastOrNull() ?: return@listen null
-        val scanResult = ImxScanResult(last.address, nowMillis()) // TODO replace with update_at when IMX add it
+        val scanResult = ImxScanResult(last.address, last.updatedAt ?: nowMillis())
         logger.info(
             "Immutablex Collection scan - new state: {} - {}, was {} - {}",
             scanResult.entityDate, scanResult.entityId, state.entityDate, state.entityId
