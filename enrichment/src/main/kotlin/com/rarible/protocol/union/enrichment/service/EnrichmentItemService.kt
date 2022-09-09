@@ -153,7 +153,6 @@ class EnrichmentItemService(
         if (unionItems.isEmpty()) {
             return emptyList()
         }
-        val now = nowMillis()
 
         val enrichedItems = coroutineScope {
 
@@ -173,7 +172,7 @@ class EnrichmentItemService(
             val orders = enrichmentOrderService.getByIds(shortOrderIds)
                 .associateBy { it.id }
 
-            val enriched = unionItems.map {
+            unionItems.map {
                 val shortItem = shortItems[it.id]
                 enrichItem(
                     shortItem = shortItem,
@@ -183,8 +182,6 @@ class EnrichmentItemService(
                     metaPipeline = metaPipeline
                 )
             }
-            logger.info("Enriched {} of {} Items ({}ms)", shortItems.size, unionItems.size, spent(now))
-            enriched
         }
 
         return enrichedItems
