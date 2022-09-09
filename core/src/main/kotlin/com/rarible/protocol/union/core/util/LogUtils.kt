@@ -4,7 +4,17 @@ import com.rarible.core.logging.RaribleMDCContext
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
+import com.rarible.protocol.union.dto.CollectionDto
+import com.rarible.protocol.union.dto.CollectionEventDto
+import com.rarible.protocol.union.dto.CollectionMetaDto
+import com.rarible.protocol.union.dto.CollectionUpdateEventDto
+import com.rarible.protocol.union.dto.ItemDeleteEventDto
+import com.rarible.protocol.union.dto.ItemDto
+import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.ItemIdDto
+import com.rarible.protocol.union.dto.ItemUpdateEventDto
+import com.rarible.protocol.union.dto.MetaAttributeDto
+import com.rarible.protocol.union.dto.MetaDto
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.withContext
@@ -62,6 +72,49 @@ object LogUtils {
                 "itemId" to item.id.value,
                 "collection" to (item.collection?.value ?: "")
             ), block
+        )
+    }
+
+    fun ItemEventDto.log(): String {
+        return when (this) {
+            is ItemUpdateEventDto -> copy(item = item.trim())
+            is ItemDeleteEventDto -> this
+        }.toString()
+    }
+
+    fun CollectionEventDto.log(): String {
+        return when (this) {
+            is CollectionUpdateEventDto -> copy(collection = collection.trim())
+        }.toString()
+    }
+
+    private fun CollectionDto.trim(): CollectionDto {
+        return this.copy(meta = meta?.trim())
+    }
+
+    private fun ItemDto.trim(): ItemDto {
+        return this.copy(meta = meta?.trim())
+    }
+
+    private fun MetaDto.trim(): MetaDto {
+        return this.copy(
+            name = trimToLength(name, 1000, "...")!!,
+            description = trimToLength(description, 1000, "..."),
+            attributes = attributes.take(100).map { it.trim() }
+        )
+    }
+
+    private fun CollectionMetaDto.trim(): CollectionMetaDto {
+        return this.copy(
+            name = trimToLength(name, 1000, "...")!!,
+            description = trimToLength(description, 1000, "...")
+        )
+    }
+
+    private fun MetaAttributeDto.trim(): MetaAttributeDto {
+        return this.copy(
+            key = trimToLength(key, 100, "...")!!,
+            value = trimToLength(value, 100)
         )
     }
 }

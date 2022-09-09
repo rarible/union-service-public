@@ -13,8 +13,6 @@ import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.service.ItemMetaService
 import com.rarible.protocol.union.enrichment.service.query.order.OrderApiMergeService
-import com.rarible.protocol.union.enrichment.util.spent
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import org.springframework.stereotype.Service
@@ -77,7 +75,7 @@ class ItemEnrichService(
             val orders = orderApiService.getByIds(shortOrderIds)
                 .associateBy { it.id }
 
-            val enriched = unionItems.map {
+            unionItems.map {
                 val shortItem = shortItems[it.id]
                 enrichmentItemService.enrichItem(
                     shortItem = shortItem,
@@ -86,8 +84,6 @@ class ItemEnrichService(
                     meta = meta.await()
                 )
             }
-            logger.info("Enriched {} of {} Items ({}ms)", shortItems.size, unionItems.size, spent(now))
-            enriched
         }
 
 
