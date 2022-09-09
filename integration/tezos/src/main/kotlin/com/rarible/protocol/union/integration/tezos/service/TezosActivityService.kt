@@ -210,9 +210,6 @@ open class TezosActivityService(
             }
         }
 
-        logger.info("Item Activities ids (total ${itemActivitiesIds.size}): $itemActivitiesIds")
-        logger.info("Order Activities ids (total ${orderActivitiesIds.size}): $orderActivitiesIds")
-
         val dipdupOrderRequest = async {
             val ids = orderActivitiesIds.filter { isValidUUID(it) }
             if (dipdupOrderActivityService.enabled() && ids.isNotEmpty()) {

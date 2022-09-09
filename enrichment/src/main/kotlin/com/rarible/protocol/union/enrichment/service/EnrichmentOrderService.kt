@@ -8,7 +8,6 @@ import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.OrderStatusDto
-import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.dto.ext
 import com.rarible.protocol.union.enrichment.model.ShortCollectionId
@@ -80,10 +79,6 @@ class EnrichmentOrderService(
                 size
             )
         }
-        logger.info(
-            "Fetched best sell Order for Item [{}]: [{}], status = {} ({}ms)",
-            id.toDto().fullId(), result?.id, result?.status, spent(now)
-        )
         return result
     }
 

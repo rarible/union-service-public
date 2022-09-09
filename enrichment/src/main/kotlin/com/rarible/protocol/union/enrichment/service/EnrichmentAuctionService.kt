@@ -42,7 +42,6 @@ class EnrichmentAuctionService(
         val fetched = requestedIds.isNotEmpty().let {
             requestedIds.groupBy { it.blockchain }.flatMap { (k, v) ->
                 val data = auctionServiceRouter.getService(k).getAuctionsByIds(v.map { it.value })
-                logger.info("Fetched {} auctions by ids", data.size)
                 data
             }
         }
@@ -51,8 +50,6 @@ class EnrichmentAuctionService(
     }
 
     suspend fun findByItem(itemId: ShortItemId): List<AuctionDto> {
-        logger.info("Fetching all auction for item {}", itemId)
-
         var continuation: String? = null
         val result = ArrayList<AuctionDto>()
 
@@ -77,7 +74,6 @@ class EnrichmentAuctionService(
     }
 
     suspend fun findBySeller(seller: UnionAddress): List<AuctionDto> {
-        logger.info("Fetching all auction for seller {}", seller)
 
         var continuation: String? = null
         val result = ArrayList<AuctionDto>()
