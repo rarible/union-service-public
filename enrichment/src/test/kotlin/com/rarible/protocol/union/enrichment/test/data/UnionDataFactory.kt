@@ -327,7 +327,7 @@ val EsCollection.info: EsCollectionLite
 private val mockedEthOrderConverter = EthOrderConverter(CurrencyMock.currencyServiceMock)
 private val mockedEthAuctionConverter = EthAuctionConverter(CurrencyMock.currencyServiceMock)
 private val mockedEthActivityConverter = EthActivityConverter(
-    CurrencyMock.currencyServiceMock, mockedEthAuctionConverter
+    mockedEthAuctionConverter
 )
 
 fun randomItemMetaDownloadEntry(
