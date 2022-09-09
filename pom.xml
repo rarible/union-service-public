@@ -50,13 +50,13 @@
         <rarible.ethereum.version>1.6.1</rarible.ethereum.version>
 
         <rarible.protocol.currency.version>1.31.1</rarible.protocol.currency.version>
-        <rarible.protocol.ethereum.version>1.34.13</rarible.protocol.ethereum.version>
+        <rarible.protocol.ethereum.version>1.35.3</rarible.protocol.ethereum.version>
         <rarible.protocol.flow.version>3.1.14</rarible.protocol.flow.version>
         <rarible.protocol.tezos.version>1.0.8</rarible.protocol.tezos.version>
         <rarible.protocol.solana.version>0.1.49</rarible.protocol.solana.version>
         <rarible.protocol.tezos.api.version>1.2.11</rarible.protocol.tezos.api.version>
 
-        <rarible.protocol.union.version>1.35.3</rarible.protocol.union.version>
+        <rarible.protocol.union.version>1.35.4</rarible.protocol.union.version>
 
         <dev-jna.version>5.7.0</dev-jna.version>
     </properties>
