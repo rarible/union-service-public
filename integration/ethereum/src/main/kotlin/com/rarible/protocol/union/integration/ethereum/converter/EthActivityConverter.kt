@@ -30,7 +30,6 @@ import com.rarible.protocol.dto.OrderActivityMatchDto
 import com.rarible.protocol.dto.TransferDto
 import com.rarible.protocol.union.core.converter.ContractAddressConverter
 import com.rarible.protocol.union.core.model.ItemAndOwnerActivityType
-import com.rarible.protocol.union.core.service.CurrencyService
 import com.rarible.protocol.union.dto.ActivityBlockchainInfoDto
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivityIdDto
@@ -75,7 +74,6 @@ import org.springframework.stereotype.Component
 
 @Component
 class EthActivityConverter(
-    private val currencyService: CurrencyService,
     private val auctionConverter: EthAuctionConverter
 ) {
 
@@ -353,7 +351,7 @@ class EthActivityConverter(
     ): OrderMatchSellDto {
         val unionPayment = EthConverter.convert(payment.asset, blockchain)
         val priceUsd = source.priceUsd
-        //val priceUsd = currencyService.toUsd(blockchain, unionPayment.type.ext.contract, source.price)
+
         return OrderMatchSellDto(
             id = activityId,
             date = source.date,
@@ -372,7 +370,8 @@ class EthActivityConverter(
             amountUsd = priceUsd?.multiply(nft.asset.valueDecimal),
             type = type,
             reverted = source.reverted ?: false,
-            lastUpdatedAt = source.lastUpdatedAt
+            lastUpdatedAt = source.lastUpdatedAt,
+            marketplaceMarker = source.marketplaceMarker?.toString()
         )
     }
 

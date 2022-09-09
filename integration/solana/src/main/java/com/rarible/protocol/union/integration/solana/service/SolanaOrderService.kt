@@ -7,6 +7,7 @@ import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.AssetTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
@@ -219,5 +220,21 @@ open class SolanaOrderService(
             size
         ).awaitFirst()
         return solanaOrderConverter.convert(orders, blockchain)
+    }
+
+    override suspend fun getAmmOrdersByItem(
+        itemId: String,
+        continuation: String?,
+        size: Int
+    ): Slice<OrderDto> {
+        return Slice.empty()
+    }
+
+    override suspend fun getAmmOrderItemIds(
+        id: String,
+        continuation: String?,
+        size: Int
+    ): Slice<ItemIdDto> {
+        return Slice.empty()
     }
 }

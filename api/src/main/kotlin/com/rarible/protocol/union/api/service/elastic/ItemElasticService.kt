@@ -46,6 +46,7 @@ class ItemElasticService(
 ) : ItemQueryService {
 
     companion object {
+
         private val logger by Logger()
     }
 
@@ -60,8 +61,9 @@ class ItemElasticService(
         val safeSize = PageSize.ITEM.limit(size)
         val slice = getAllItemsInner(blockchains, showDeleted, lastUpdatedFrom, lastUpdatedTo, continuation, size)
 
-        logger.info("Response for getAllItems(blockchains={}, continuation={}, size={}):" +
-            " Slice(size={}, continuation={})",
+        logger.info(
+            "Response for ES getAllItems(blockchains={}, continuation={}, size={}):" +
+                " Slice(size={}, continuation={})",
             blockchains, continuation, safeSize, slice.entities.size, slice.continuation
         )
         val before = nowMillis().toEpochMilli()
@@ -84,12 +86,11 @@ class ItemElasticService(
         val filter = itemFilterConverter.getItemsByCollection(collection, continuation)
         logger.info("Built filter: $filter")
         val queryResult = esItemRepository.search(filter, EsItemSort.DEFAULT, safeSize)
-        logger.info("Query result: $queryResult")
         val items = getItems(queryResult.entities)
         val cursor = queryResult.continuation
 
         logger.info(
-            "Response for getItemsByCollection(collection={}, continuation={}, size={}):" +
+            "Response for ES getItemsByCollection(collection={}, continuation={}, size={}):" +
                 " Page(size={}, continuation={})",
             collection, continuation, size, items.size, cursor
         )
@@ -110,7 +111,10 @@ class ItemElasticService(
                 val filter = itemFilterConverter.getAllItemIdsByCollection(collectionId.fullId(), cursor.toString())
                 logger.info("Built filter: $filter")
                 val queryResult = esItemRepository.search(filter, EsItemSort.DEFAULT, pageSize)
-                logger.info("Query result: $queryResult")
+                logger.info(
+                    "getAllItemIdsByCollection ES Query result:" +
+                        " size=${queryResult.entities.size}, continuation=${queryResult.continuation}"
+                )
                 queryResult.entities.forEach { emit(IdParser.parseItemId(it.itemId)) }
                 cursor = queryResult.continuation
                 if (cursor == null) break
@@ -133,11 +137,15 @@ class ItemElasticService(
         logger.info("Built filter: $filter")
         val queryResult = esItemRepository.search(filter, EsItemSort.DEFAULT, safeSize)
         val cursor = queryResult.continuation
-        logger.info("Query result: $queryResult")
 
         if (queryResult.entities.isEmpty()) return ItemsDto()
         val items = getItems(queryResult.entities)
         val enriched = itemEnrichService.enrich(items)
+
+        logger.info(
+            "Response for ES getItemsByCreator(creator={}, continuation={}, size={}): Page(size={}, continuation={})",
+            creator, continuation, size, items.size, cursor
+        )
 
         return ItemsDto(
             items = enriched,
@@ -166,6 +174,12 @@ class ItemElasticService(
         val items: List<UnionItem> = getItemsByOwnerships(ownerships)
 
         val enriched = itemEnrichService.enrich(items)
+
+        logger.info(
+            "Response for ES getItemsByOwner(creator={}, continuation={}, size={}): Page(size={}, continuation={})",
+            ownerAddress, continuation, size, items.size, cursor
+        )
+
         return ItemsDto(
             items = enriched,
             continuation = cursor
@@ -191,13 +205,20 @@ class ItemElasticService(
         val enriched = itemEnrichService.enrich(items)
 
         val result = resultOwnerships.mapNotNull { ownership ->
-            val item = enriched.firstOrNull { it.id.fullId() == ownership.id.getItemId().fullId() } ?: return@mapNotNull null
+            val item = enriched.firstOrNull { it.id.fullId() == ownership.id.getItemId().fullId() }
+                ?: return@mapNotNull null
 
             ItemWithOwnershipDto(
                 item = item,
                 ownership = ownership
             )
         }
+
+        logger.info(
+            "Response for ES getItemsByOwnerWithOwnership(owner={}, continuation={}, size={}):" +
+                " Page(size={}, continuation={})",
+            owner, continuation, size, items.size, cursor
+        )
 
         return ItemsWithOwnershipDto(
             items = result,
@@ -222,7 +243,6 @@ class ItemElasticService(
             items = enriched
         )
     }
-
 
     private suspend fun getItems(esItems: List<EsItem>): List<UnionItem> {
         val mapping = hashMapOf<BlockchainDto, MutableList<String>>()
@@ -272,7 +292,6 @@ class ItemElasticService(
         continuation: String?,
         size: Int?
     ): Slice<UnionItem> {
-        logger.info("getAllItemsInner() from ElasticSearch")
         val evaluatedBlockchains = router.getEnabledBlockchains(blockchains).map { it.name }.toSet()
 
         val filter = itemFilterConverter.convertGetAllItems(
@@ -280,7 +299,6 @@ class ItemElasticService(
         )
         logger.info("Built filter: $filter")
         val queryResult = esItemRepository.search(filter, EsItemSort.DEFAULT, size)
-        logger.info("Query result: $queryResult")
         val items = getItems(queryResult.entities)
         logger.info("Got ${items.size} items")
         return Slice(
@@ -289,8 +307,10 @@ class ItemElasticService(
         )
     }
 
-    private suspend fun getItemsFromBlockchains(itemsPerBlockchain: Map<BlockchainDto, MutableList<String>>): List<UnionItem> {
-        logger.debug("Getting items from blockchains: $itemsPerBlockchain")
+    private suspend fun getItemsFromBlockchains(
+        itemsPerBlockchain: Map<BlockchainDto, MutableList<String>>
+    ): List<UnionItem> {
+        logger.debug("Getting ${itemsPerBlockchain.size} items from blockchains")
         val items = itemsPerBlockchain.mapAsync { element ->
             val blockchain = element.key
             val ids = element.value

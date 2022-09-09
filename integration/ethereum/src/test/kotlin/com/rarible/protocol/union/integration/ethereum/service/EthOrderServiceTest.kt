@@ -1,19 +1,24 @@
 package com.rarible.protocol.union.integration.ethereum.service
 
+import com.rarible.core.test.data.randomBigInt
 import com.rarible.core.test.data.randomInt
 import com.rarible.core.test.data.randomString
+import com.rarible.core.test.data.randomWord
+import com.rarible.protocol.dto.HoldNftItemIdsDto
 import com.rarible.protocol.dto.OrdersPaginationDto
 import com.rarible.protocol.order.api.client.OrderControllerApi
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
+import com.rarible.protocol.union.integration.ethereum.data.randomAddressString
+import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOpenSeaV1OrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthSellOrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthV2OrderDto
 import com.rarible.protocol.union.test.mock.CurrencyMock
 import io.mockk.coEvery
-import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
@@ -87,4 +92,49 @@ class EthOrderServiceTest {
         assertThat(result).isEqualTo(expected)
     }
 
+    @Test
+    fun `ethereum get amm orders by item`() = runBlocking<Unit> {
+        val order = randomEthV2OrderDto()
+
+        val contract = randomAddressString()
+        val tokenId = randomBigInt()
+        val itemId = ItemIdDto(BlockchainDto.ETHEREUM, contract, tokenId)
+        val continuation = randomString()
+        val size = 73
+
+        coEvery {
+            orderControllerApi.getAmmOrdersByItem(
+                contract,
+                tokenId.toString(),
+                continuation,
+                size
+            )
+        } returns OrdersPaginationDto(listOf(order), null).toMono()
+
+        val result = service.getAmmOrdersByItem(
+            itemId.value,
+            continuation,
+            size
+        )
+
+        assertThat(result.entities).hasSize(1)
+        assertThat(result.entities[0].id.value).isEqualTo(order.hash.prefixed())
+    }
+
+    @Test
+    fun `ethereum get amm order item ids`() = runBlocking<Unit> {
+        val orderId = randomWord()
+        val continuation = randomString()
+        val size = 33
+
+        val itemId = randomEthItemId()
+
+        coEvery {
+            orderControllerApi.getAmmOrderItemIds(orderId, continuation, size)
+        } returns HoldNftItemIdsDto(listOf(itemId.value), null).toMono()
+
+        val result = service.getAmmOrderItemIds(orderId, continuation, size)
+
+        assertThat(result.entities).isEqualTo(listOf(itemId))
+    }
 }

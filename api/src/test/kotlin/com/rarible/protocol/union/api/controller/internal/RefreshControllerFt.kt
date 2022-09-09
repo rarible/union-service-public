@@ -2,6 +2,7 @@ package com.rarible.protocol.union.api.controller.internal
 
 import com.rarible.core.kafka.KafkaMessage
 import com.rarible.core.test.data.randomBigInt
+import com.rarible.core.test.data.randomWord
 import com.rarible.protocol.dto.ActivitySortDto
 import com.rarible.protocol.dto.NftActivityFilterByItemDto
 import com.rarible.protocol.dto.OrderActivityFilterByItemDto
@@ -49,6 +50,7 @@ import com.rarible.protocol.union.integration.ethereum.data.randomEthOrderActivi
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthSellOrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthV2OrderDto
+import io.daonomic.rpc.domain.Word
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -99,11 +101,22 @@ class RefreshControllerFt : AbstractIntegrationTest() {
         val bidCurrency = unionBestBid.bidCurrencyId
         val sellCurrency = unionBestSell.sellCurrencyId
 
+        // Amm order should be best sell, but it should not be an origin best sell order
+        val ethAmmOrder = ethBestSell.copy(
+            hash = Word.apply(randomWord()),
+            make = ethBestSell.make.copy(value = ethBestSell.make.value.minus(BigInteger.TEN))
+        )
+
+        val unionAmmOrder = ethOrderConverter.convert(ethAmmOrder, itemId.blockchain)
+        val shortAmmOrder = ShortOrderConverter.convert(unionAmmOrder)
+
         val ethOriginBestSell = randomEthSellOrderDto(itemId).copy(take = ethBestSell.take)
-        val shortOriginBestSell = ShortOrderConverter.convert(unionBestSell)
+        val unionOriginBestSell = ethOrderConverter.convert(ethOriginBestSell, itemId.blockchain)
+        val shortOriginBestSell = ShortOrderConverter.convert(unionOriginBestSell)
 
         val ethOriginBestBid = randomEthBidOrderDto(itemId).copy(make = ethBestBid.make)
-        val shorOriginBestBid = ShortOrderConverter.convert(unionBestBid)
+        val unionOriginBestBid = ethOrderConverter.convert(ethOriginBestBid, itemId.blockchain)
+        val shortOriginBestBid = ShortOrderConverter.convert(unionOriginBestBid)
 
         val ethAuction = randomEthAuctionDto(itemId)
         val auction = ethAuctionConverter.convert(ethAuction, BlockchainDto.ETHEREUM)
@@ -127,6 +140,7 @@ class RefreshControllerFt : AbstractIntegrationTest() {
         ethereumOwnershipControllerApiMock.mockGetNftOwnershipById(auctionOwnershipId, auctionOwnership)
         ethereumAuctionControllerApiMock.mockGetAuctionsByItem(itemId, listOf(ethAuction))
         ethereumItemControllerApiMock.mockGetNftItemById(itemId, ethItem)
+        ethereumOrderControllerApiMock.mockGetAmmOrdersByItem(itemId, ethAmmOrder)
         ethereumOrderControllerApiMock.mockGetCurrenciesBySellOrdersOfItem(itemId, ethBestSell.take.assetType)
         // Best sell for Item
         ethereumOrderControllerApiMock.mockGetSellOrdersByItemAndByStatus(itemId, sellCurrency, ethBestSell)
@@ -168,15 +182,17 @@ class RefreshControllerFt : AbstractIntegrationTest() {
         val itemOriginOrders = savedShortItem.originOrders.toList()[0]
         val ownershipOriginOrders = savedShortOwnership.originOrders.toList()[0]
 
-        assertThat(savedShortItem.bestSellOrder!!.id).isEqualTo(shortBestSell.id)
+        assertThat(savedShortItem.bestSellOrder!!.id).isEqualTo(shortAmmOrder.id)
         assertThat(savedShortItem.bestBidOrder!!.id).isEqualTo(shortBestBid.id)
-        assertThat(savedShortItem.bestSellOrders[unionBestSell.sellCurrencyId]!!.id).isEqualTo(shortBestSell.id)
+        assertThat(savedShortItem.bestSellOrders[unionBestSell.sellCurrencyId]!!.id).isEqualTo(shortAmmOrder.id)
         assertThat(savedShortItem.bestBidOrders[unionBestBid.bidCurrencyId]!!.id).isEqualTo(shortBestBid.id)
         assertThat(savedShortItem.auctions).isEqualTo(setOf(auction.id))
         assertThat(savedShortItem.lastSale!!.date).isEqualTo(activity.date)
+        assertThat(savedShortItem.poolSellOrders).hasSize(1)
+        assertThat(savedShortItem.poolSellOrders[0].order).isEqualTo(shortAmmOrder)
 
         assertThat(itemOriginOrders.bestSellOrder!!.id).isEqualTo(shortOriginBestSell.id)
-        assertThat(itemOriginOrders.bestBidOrder!!.id).isEqualTo(shorOriginBestBid.id)
+        assertThat(itemOriginOrders.bestBidOrder!!.id).isEqualTo(shortOriginBestBid.id)
 
         assertThat(savedShortOwnership.source).isEqualTo(OwnershipSourceDto.MINT)
         assertThat(savedShortOwnership.bestSellOrder!!.id).isEqualTo(shortBestSell.id)
@@ -184,9 +200,10 @@ class RefreshControllerFt : AbstractIntegrationTest() {
 
         assertThat(ownershipOriginOrders.bestSellOrder!!.id).isEqualTo(shortOriginBestSell.id)
 
-        assertThat(reconciled.bestSellOrder!!.id).isEqualTo(unionBestSell.id)
+        assertThat(reconciled.bestSellOrder!!.id).isEqualTo(unionAmmOrder.id)
         assertThat(reconciled.bestBidOrder!!.id).isEqualTo(unionBestBid.id)
         assertThat(reconciled.originOrders).hasSize(1)
+
 
         coVerify {
             testItemEventProducer.send(match<KafkaMessage<ItemEventDto>> { message ->
@@ -315,6 +332,7 @@ class RefreshControllerFt : AbstractIntegrationTest() {
 
         ethereumAuctionControllerApiMock.mockGetAuctionsByItem(ethItemId, emptyList())
         ethereumItemControllerApiMock.mockGetNftItemById(ethItemId, ethItem)
+        ethereumOrderControllerApiMock.mockGetAmmOrdersByItem(ethItemId)
         ethereumOrderControllerApiMock.mockGetCurrenciesBySellOrdersOfItem(ethItemId, ethBestSell.take.assetType)
         ethereumOrderControllerApiMock.mockGetSellOrdersByItemAndByStatus(
             ethItemId,
@@ -443,6 +461,7 @@ class RefreshControllerFt : AbstractIntegrationTest() {
 
         ethereumAuctionControllerApiMock.mockGetAuctionsByItem(ethItemId, emptyList())
         ethereumItemControllerApiMock.mockGetNftItemById(ethItemId, ethItem)
+        ethereumOrderControllerApiMock.mockGetAmmOrdersByItem(ethItemId)
         ethereumOrderControllerApiMock.mockGetCurrenciesBySellOrdersOfItem(ethItemId, ethBestSell.take.assetType)
         ethereumOrderControllerApiMock.mockGetSellOrdersByItemAndByStatus(
             ethItemId,
@@ -494,6 +513,7 @@ class RefreshControllerFt : AbstractIntegrationTest() {
 
         ethereumAuctionControllerApiMock.mockGetAuctionsByItem(ethItemId, emptyList())
         ethereumItemControllerApiMock.mockGetNftItemById(ethItemId, ethItem)
+        ethereumOrderControllerApiMock.mockGetAmmOrdersByItem(ethItemId)
         ethereumOrderControllerApiMock.mockGetCurrenciesBySellOrdersOfItem(
             ethItemId,
             ethBestSellWithTaker.take.assetType

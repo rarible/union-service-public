@@ -43,7 +43,7 @@ import org.junit.jupiter.api.Test
 class EthActivityConverterTest {
 
     private val ethAuctionConverter = EthAuctionConverter(CurrencyMock.currencyServiceMock)
-    private val ethActivityConverter = EthActivityConverter(CurrencyMock.currencyServiceMock, ethAuctionConverter)
+    private val ethActivityConverter = EthActivityConverter(ethAuctionConverter)
 
     @Test
     fun `eth order activity match side - swap`() = runBlocking<Unit> {

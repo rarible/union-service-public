@@ -87,10 +87,7 @@ class EnrichmentItemService(
     }
 
     suspend fun fetch(itemId: ShortItemId): UnionItem {
-        val now = nowMillis()
-        val itemDto = itemServiceRouter.getService(itemId.blockchain).getItemById(itemId.itemId)
-        logger.info("Fetched item [{}] ({} ms)", itemId.toDto().fullId(), spent(now))
-        return itemDto
+        return itemServiceRouter.getService(itemId.blockchain).getItemById(itemId.itemId)
     }
 
     suspend fun fetchOrNull(itemId: ShortItemId): UnionItem? {
@@ -139,7 +136,7 @@ class EnrichmentItemService(
 
         val auctionsData = async { enrichmentAuctionService.fetchAuctionsIfAbsent(auctionIds, auctions) }
 
-        val itemDto = EnrichedItemConverter.convert(
+        EnrichedItemConverter.convert(
             item = fetchedItem.await(),
             shortItem = shortItem,
             // replacing inner IPFS urls with public urls
@@ -147,8 +144,6 @@ class EnrichmentItemService(
             orders = bestOrders,
             auctions = auctionsData.await()
         )
-        logger.info("Enriched item {}: {}", itemId.fullId(), itemDto)
-        itemDto
     }
 
     suspend fun enrichItems(
@@ -158,7 +153,6 @@ class EnrichmentItemService(
         if (unionItems.isEmpty()) {
             return emptyList()
         }
-        val now = nowMillis()
 
         val enrichedItems = coroutineScope {
 
@@ -178,7 +172,7 @@ class EnrichmentItemService(
             val orders = enrichmentOrderService.getByIds(shortOrderIds)
                 .associateBy { it.id }
 
-            val enriched = unionItems.map {
+            unionItems.map {
                 val shortItem = shortItems[it.id]
                 enrichItem(
                     shortItem = shortItem,
@@ -188,8 +182,6 @@ class EnrichmentItemService(
                     metaPipeline = metaPipeline
                 )
             }
-            logger.info("Enriched {} of {} Items ({}ms)", shortItems.size, unionItems.size, spent(now))
-            enriched
         }
 
         return enrichedItems

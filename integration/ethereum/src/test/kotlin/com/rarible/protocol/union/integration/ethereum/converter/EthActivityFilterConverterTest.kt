@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Test
 
 class EthActivityFilterConverterTest {
 
-    private val ethActivityConverter = EthActivityConverter(mockk(), mockk())
+    private val ethActivityConverter = EthActivityConverter(mockk())
 
     @Test
     fun `eth nft activities item by all type`() {

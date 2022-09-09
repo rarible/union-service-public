@@ -158,7 +158,11 @@ class ItemApiMergeService(
     }
 
     override suspend fun getItemsByIds(ids: List<ItemIdDto>): List<ItemDto> = coroutineScope {
-        logger.info("Getting items by IDs: [{}]", ids.map { "${it.blockchain}:${it.value}" })
+        logger.info(
+            "Getting {} items by IDs: first 100 [{}]",
+            ids.size, ids.take(100).map { "${it.blockchain}:${it.value}" }
+        )
+
         val groupedIds = ids.groupBy({ it.blockchain }, { it.value })
 
         groupedIds.flatMap {
