@@ -58,6 +58,8 @@ data class ImmutablexCollection(
     val projectId: Long?,
     val projectOwnerAddress: String?,
     val metadataApiUrl: String?,
+    val createdAt: Instant?,
+    val updatedAt: Instant?
 )
 
 data class ImmutablexFee(val address: String, val percentage: BigDecimal, val type: String)
