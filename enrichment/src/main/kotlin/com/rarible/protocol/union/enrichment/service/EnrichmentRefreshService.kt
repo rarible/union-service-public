@@ -24,7 +24,6 @@ import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.ItemUpdateEventDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
-import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.OwnershipDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
@@ -415,9 +414,8 @@ class EnrichmentRefreshService(
         if (!ff.enablePoolOrders) {
             return emptyList()
         }
-        val status = listOf(OrderStatusDto.ACTIVE)
         val result = orderServiceRouter.fetchAllBySlices(itemId.blockchain) { service, continuation ->
-            service.getAmmOrdersByItem(itemId.value, status, continuation, 200)
+            service.getAmmOrdersByItem(itemId.value, continuation, 200)
         }
         logger.info("Found ${result.size} AMM orders for the Item: $itemId")
         return result

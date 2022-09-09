@@ -227,7 +227,6 @@ class ImxOrderService(
 
     override suspend fun getAmmOrdersByItem(
         itemId: String,
-        status: List<OrderStatusDto>?,
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {

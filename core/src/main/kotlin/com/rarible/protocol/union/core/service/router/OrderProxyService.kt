@@ -239,11 +239,10 @@ class OrderProxyService(
 
     override suspend fun getAmmOrdersByItem(
         itemId: String,
-        status: List<OrderStatusDto>?,
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
-        return orderService.getAmmOrdersByItem(itemId, status, continuation, size)
+        return orderService.getAmmOrdersByItem(itemId, continuation, size)
     }
 
     override suspend fun getAmmOrderItemIds(

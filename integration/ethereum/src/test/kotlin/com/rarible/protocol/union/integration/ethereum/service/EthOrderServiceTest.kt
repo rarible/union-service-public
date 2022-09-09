@@ -101,13 +101,11 @@ class EthOrderServiceTest {
         val itemId = ItemIdDto(BlockchainDto.ETHEREUM, contract, tokenId)
         val continuation = randomString()
         val size = 73
-        val statuses = listOf(OrderStatusDto.HISTORICAL, OrderStatusDto.ACTIVE)
 
         coEvery {
-            orderControllerApi.getAmmOrdersByItemAndByStatus(
+            orderControllerApi.getAmmOrdersByItem(
                 contract,
                 tokenId.toString(),
-                listOf(com.rarible.protocol.dto.OrderStatusDto.ACTIVE),
                 continuation,
                 size
             )
@@ -115,7 +113,6 @@ class EthOrderServiceTest {
 
         val result = service.getAmmOrdersByItem(
             itemId.value,
-            statuses,
             continuation,
             size
         )

@@ -287,16 +287,13 @@ open class EthOrderService(
 
     override suspend fun getAmmOrdersByItem(
         itemId: String,
-        status: List<OrderStatusDto>?,
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
         val (contract, tokenId) = CompositeItemIdParser.split(itemId)
-        val filteredStatus = filterStatus(status) ?: return Slice.empty()
-        val orders = orderControllerApi.getAmmOrdersByItemAndByStatus(
+        val orders = orderControllerApi.getAmmOrdersByItem(
             contract,
             tokenId.toString(),
-            ethOrderConverter.convert(filteredStatus),
             continuation,
             size
         ).awaitFirst()
