@@ -32,7 +32,6 @@ integration:
   tezos:
     client:
       url: "http://localhost:8080"
-    showLegacyOrders: true
   solana:
     enabled: true
 

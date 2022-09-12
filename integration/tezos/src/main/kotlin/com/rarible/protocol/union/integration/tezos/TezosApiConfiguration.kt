@@ -121,7 +121,7 @@ class TezosApiConfiguration(
         tezosIntegrationProperties: TezosIntegrationProperties
     ): OrderService {
         return OrderProxyService(
-            TezosOrderService(controllerApi, converter, dipdupOrderService, tezosIntegrationProperties),
+            TezosOrderService(dipdupOrderService),
             setOf(PlatformDto.RARIBLE)
         )
     }

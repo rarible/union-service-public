@@ -49,10 +49,9 @@ class TezosOrderServiceTest {
         client = null,
         daemon = DaemonWorkerProperties(),
         auctionContracts = null,
-        origins = emptyMap(),
-        showLegacyOrders = true
+        origins = emptyMap()
     )
-    private val service = TezosOrderService(orderControllerApi, tezosOrderConverter, dipdupOrderService, tezosIntegrationProperties)
+    private val service = TezosOrderService(dipdupOrderService)
 
     @BeforeEach
     fun beforeEach() {

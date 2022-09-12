@@ -145,7 +145,6 @@ integration:
         ownership: 1
         order: 1
     auctionContracts: ${consul.tezos.auctionContracts:}
-    showLegacyOrders: ${consul.tezos.showLegacyOrders:false}
   solana:
     enabled: ${consul.solana.enabled:false}
     consumer:
