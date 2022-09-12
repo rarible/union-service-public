@@ -27,7 +27,7 @@ class TezosCollectionServiceTest {
 
 
     private val tzktCollectionService = TzktCollectionServiceImpl(tzktCollectionClient, mockk(), tezosCollectionRepository, DipDupIntegrationProperties.TzktProperties())
-    private val service = TezosCollectionService(nftCollectionApi, mockk(), tzktCollectionService, mockk())
+    private val service = TezosCollectionService(nftCollectionApi, tzktCollectionService, mockk())
 
     @BeforeEach
     fun beforeEach() {

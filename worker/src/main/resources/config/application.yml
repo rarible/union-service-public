@@ -113,12 +113,6 @@ integration:
         dogamiGap: ${consul.tezos.dipdup.knownAddresses.dogamiGap:}
     client:
       url: ${consul.tezos.api.baseUrl}
-    pg:
-      host: ${consul.tezos.pg.host:}
-      port: ${consul.tezos.pg.port:}
-      user: ${consul.tezos.pg.user:}
-      password: ${consul.tezos.pg.password:}
-      database: ${consul.tezos.pg.database:}
     consumer:
       broker-replica-set: ${consul.tezos.kafka.hosts}
       username: ${consul.tezos.kafka.username}

@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.integration.tezos
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.rarible.protocol.tezos.api.client.FixedTezosApiServiceUriProvider
 import com.rarible.protocol.tezos.api.client.NftActivityControllerApi
 import com.rarible.protocol.tezos.api.client.NftCollectionControllerApi
@@ -21,7 +20,6 @@ import com.rarible.protocol.union.integration.tezos.converter.TezosActivityConve
 import com.rarible.protocol.union.integration.tezos.converter.TezosOrderConverter
 import com.rarible.protocol.union.integration.tezos.dipdup.DipDupApiConfiguration
 import com.rarible.protocol.union.integration.tezos.dipdup.DipDupDummyApiConfiguration
-import com.rarible.protocol.union.integration.tezos.dipdup.PGIntegrationProperties
 import com.rarible.protocol.union.integration.tezos.dipdup.service.DipdupOrderActivityService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.DipdupOrderService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktCollectionService
@@ -36,20 +34,7 @@ import com.rarible.protocol.union.integration.tezos.service.TezosCollectionServi
 import com.rarible.protocol.union.integration.tezos.service.TezosItemService
 import com.rarible.protocol.union.integration.tezos.service.TezosOrderService
 import com.rarible.protocol.union.integration.tezos.service.TezosOwnershipService
-import com.rarible.protocol.union.integration.tezos.service.TezosPgActivityService
-import com.rarible.protocol.union.integration.tezos.service.TezosPgCollectionService
 import com.rarible.protocol.union.integration.tezos.service.TezosSignatureService
-import io.r2dbc.spi.ConnectionFactories
-import io.r2dbc.spi.ConnectionFactory
-import io.r2dbc.spi.ConnectionFactoryOptions
-import io.r2dbc.spi.ConnectionFactoryOptions.DATABASE
-import io.r2dbc.spi.ConnectionFactoryOptions.DRIVER
-import io.r2dbc.spi.ConnectionFactoryOptions.HOST
-import io.r2dbc.spi.ConnectionFactoryOptions.PASSWORD
-import io.r2dbc.spi.ConnectionFactoryOptions.PORT
-import io.r2dbc.spi.ConnectionFactoryOptions.PROTOCOL
-import io.r2dbc.spi.ConnectionFactoryOptions.USER
-import io.r2dbc.spi.Option
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
@@ -61,32 +46,14 @@ import java.net.URI
 @TezosConfiguration
 @Import(value = [CoreConfiguration::class, DipDupApiConfiguration::class, DipDupDummyApiConfiguration::class])
 @ComponentScan(basePackageClasses = [TezosOrderConverter::class])
-@EnableConfigurationProperties(value = [TezosIntegrationProperties::class, PGIntegrationProperties::class])
+@EnableConfigurationProperties(value = [TezosIntegrationProperties::class])
 class TezosApiConfiguration(
-    private val properties: TezosIntegrationProperties,
-    private val pgProperties: PGIntegrationProperties
+    private val properties: TezosIntegrationProperties
 ) {
 
     @Bean
     fun tezosBlockchain(): BlockchainDto {
         return BlockchainDto.TEZOS
-    }
-
-    @Bean
-    fun connectionFactory(): ConnectionFactory {
-        return ConnectionFactories.get(
-            ConnectionFactoryOptions.builder()
-                .option(DRIVER, "pool")
-                .option(PROTOCOL, "postgresql")
-                .option(HOST, pgProperties.host)
-                .option(PORT, pgProperties.port)
-                .option(USER, pgProperties.user)
-                .option(PASSWORD, pgProperties.password)
-                .option(DATABASE, pgProperties.database)
-                .option(Option.valueOf("initialSize"), pgProperties.poolSize.toString())
-                .option(Option.valueOf("maxSize"), pgProperties.poolSize.toString())
-                .build()
-        )
     }
 
     @Bean
@@ -142,9 +109,8 @@ class TezosApiConfiguration(
         controllerApi: NftCollectionControllerApi,
         tzktCollectionService: TzktCollectionService,
         tezosCollectionRepository: TezosCollectionRepository,
-        tezosPgCollectionService: TezosPgCollectionService,
     ): TezosCollectionService {
-        return TezosCollectionService(controllerApi, tezosPgCollectionService, tzktCollectionService, tezosCollectionRepository)
+        return TezosCollectionService(controllerApi, tzktCollectionService, tezosCollectionRepository)
     }
 
     @Bean
@@ -171,16 +137,6 @@ class TezosApiConfiguration(
         tzktSignatureService: TzktSignatureService
     ): TezosSignatureService {
         return TezosSignatureService(controllerApi, tzktSignatureService)
-    }
-
-    @Bean
-    fun tezosPgActivityService(connectionFactory: ConnectionFactory): TezosPgActivityService {
-        return TezosPgActivityService(connectionFactory)
-    }
-
-    @Bean
-    fun tezosPgCollectionService(mapper: ObjectMapper, connectionFactory: ConnectionFactory): TezosPgCollectionService {
-        return TezosPgCollectionService(mapper, connectionFactory)
     }
 
     @Bean

@@ -50,8 +50,7 @@ class TezosOrderServiceTest {
         daemon = DaemonWorkerProperties(),
         auctionContracts = null,
         origins = emptyMap(),
-        showLegacyOrders = true,
-        showLegacyActivity = true
+        showLegacyOrders = true
     )
     private val service = TezosOrderService(orderControllerApi, tezosOrderConverter, dipdupOrderService, tezosIntegrationProperties)
 

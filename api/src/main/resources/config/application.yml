@@ -97,12 +97,6 @@ integration:
         teia: ${consul.tezos.dipdup.marketplaces.teia:false}
     client:
       url: ${consul.tezos.api.baseUrl:}
-    pg:
-      host: ${consul.tezos.pg.host:}
-      port: ${consul.tezos.pg.port:}
-      user: ${consul.tezos.pg.user:}
-      password: ${consul.tezos.pg.password:}
-      database: ${consul.tezos.pg.database:}
     auctionContracts: ${consul.tezos.auctionContracts:}
     showLegacyOrders: ${consul.tezos.showLegacyOrders:false}
   solana:
