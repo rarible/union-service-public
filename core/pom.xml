@@ -62,6 +62,14 @@
             <artifactId>rarible-core-apm</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.rarible.core</groupId>
+            <artifactId>rarible-core-meta-resource</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.tika</groupId>
+            <artifactId>tika-core</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.rarible.ethereum</groupId>
             <artifactId>rarible-ethereum-converters</artifactId>
         </dependency>

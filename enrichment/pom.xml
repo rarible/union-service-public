@@ -64,10 +64,6 @@
             <groupId>com.rarible.core</groupId>
             <artifactId>rarible-core-loader-cache</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.rarible.core</groupId>
-            <artifactId>rarible-core-meta-resource</artifactId>
-        </dependency>
 
         <!-- ================== Other =================== -->
         <dependency>
