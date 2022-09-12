@@ -314,6 +314,23 @@ open class EthOrderService(
         return Slice(continuation, itemIds)
     }
 
+    override suspend fun getAmmOrdersAll(
+        status: List<OrderStatusDto>?,
+        continuation: String?,
+        size: Int
+    ): Slice<OrderDto> {
+        val filteredStatus = filterStatus(status) ?: return Slice.empty()
+        val orders = orderControllerApi.getSellOrdersByStatus(
+            null,
+            com.rarible.protocol.dto.PlatformDto.SUDOSWAP, // TODO temporary solution
+            continuation,
+            size,
+            ethOrderConverter.convert(filteredStatus),
+            com.rarible.protocol.dto.OrderSortDto.LAST_UPDATE_DESC
+        ).awaitFirst()
+        return ethOrderConverter.convert(orders, blockchain)
+    }
+
     /**
      * remove HISTORICAL status from list of statuses for calls that aren't related to bids
      * If HISTORICAL was the only status, return null then, which means call can be omitted

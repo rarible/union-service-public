@@ -337,6 +337,14 @@ open class TezosOrderService(
         return Slice.empty()
     }
 
+    override suspend fun getAmmOrdersAll(
+        status: List<OrderStatusDto>?,
+        continuation: String?,
+        size: Int
+    ): Slice<OrderDto> {
+        return Slice.empty()
+    }
+
     private fun isValidUUID(str: String?): Boolean {
         return if (str == null) {
             false

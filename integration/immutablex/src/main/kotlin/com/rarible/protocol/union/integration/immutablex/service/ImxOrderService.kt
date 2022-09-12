@@ -240,4 +240,12 @@ class ImxOrderService(
     ): Slice<ItemIdDto> {
         return Slice.empty()
     }
+
+    override suspend fun getAmmOrdersAll(
+        status: List<OrderStatusDto>?,
+        continuation: String?,
+        size: Int
+    ): Slice<OrderDto> {
+        return Slice.empty()
+    }
 }

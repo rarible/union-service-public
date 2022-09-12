@@ -107,6 +107,10 @@ class UnionInternalOrderEventHandler(
         // Instead, we send such synthetic events to this internal handler in order to consequently process
         // all events related to each item
         handler.onEvents(messages)
+        logger.info(
+            "Pool Order [{}] updated, Items included: {}, Items excluded: {}, total events sent: {}",
+            orderId, included, excluded, messages.size
+        )
     }
 
     private suspend fun fetchOrder(orderId: OrderIdDto): OrderDto {
