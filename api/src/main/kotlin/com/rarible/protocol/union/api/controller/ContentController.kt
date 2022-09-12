@@ -1,7 +1,10 @@
 package com.rarible.protocol.union.api.controller
 
+import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.core.exception.UnionNotFoundException
+import com.rarible.protocol.union.core.util.ExtensionParser
 import com.rarible.protocol.union.enrichment.meta.embedded.EmbeddedContentService
+import org.springframework.http.ContentDisposition
 import org.springframework.http.HttpHeaders
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
@@ -13,6 +16,8 @@ class ContentController(
     private val embeddedContentService: EmbeddedContentService
 ) {
 
+    private val logger by Logger()
+
     @GetMapping(value = ["/content/embedded/{id}"])
     suspend fun getEmbeddedMedia(
         @PathVariable("id") id: String
@@ -20,10 +25,18 @@ class ContentController(
         val content = embeddedContentService.get(id)
             ?: throw UnionNotFoundException("Embedded content with ID $id not found")
 
+        val fileExtension = ExtensionParser.getFileExtension(content.mimeType)
+        if (fileExtension == null) {
+            logger.warn("Can't get file extension for mimeType={}", content.mimeType)
+        }
+
+        val filename = fileExtension?.let { "$id$fileExtension" } ?: id
+        val contentDisposition = ContentDisposition.attachment().filename(filename).build()
+
         return ResponseEntity.ok()
             .header(HttpHeaders.CONTENT_TYPE, content.mimeType)
             .header(HttpHeaders.CONTENT_LENGTH, content.size.toString())
+            .header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition.toString())
             .body(content.data)
     }
-
 }
