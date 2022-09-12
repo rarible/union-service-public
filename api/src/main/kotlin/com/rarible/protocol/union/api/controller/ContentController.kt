@@ -1,9 +1,9 @@
 package com.rarible.protocol.union.api.controller
 
+import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.core.exception.UnionNotFoundException
 import com.rarible.protocol.union.core.util.ExtensionParser
 import com.rarible.protocol.union.enrichment.meta.embedded.EmbeddedContentService
-import org.slf4j.LoggerFactory
 import org.springframework.http.ContentDisposition
 import org.springframework.http.HttpHeaders
 import org.springframework.http.ResponseEntity
@@ -16,7 +16,7 @@ class ContentController(
     private val embeddedContentService: EmbeddedContentService
 ) {
 
-    private val logger = LoggerFactory.getLogger(javaClass)
+    private val logger by Logger()
 
     @GetMapping(value = ["/content/embedded/{id}"])
     suspend fun getEmbeddedMedia(
