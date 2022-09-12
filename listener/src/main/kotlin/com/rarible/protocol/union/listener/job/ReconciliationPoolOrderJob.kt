@@ -25,12 +25,16 @@ class ReconciliationPoolOrderJob(
 
     private val config = properties.reconciliation
 
+    // One hand - we want to reduce amount of http requests,
+    // On other hand - each order can produce a lot of events, so let's set small batch size here
+    private val batchSize = 8
+
     override suspend fun reconcileBatch(continuation: String?, blockchain: BlockchainDto): String? {
         logger.info("Fetching pool Orders from {}: [{}]", blockchain.name, continuation)
         val page = orderServiceRouter.getService(blockchain).getAmmOrdersAll(
             listOf(OrderStatusDto.ACTIVE),
             continuation,
-            8
+            batchSize
         )
 
         if (page.entities.isEmpty()) {

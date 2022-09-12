@@ -16,7 +16,7 @@ class ReconciliationPoolOrderTaskHandler(
     private val ff: FeatureFlagsProperties
 ) : TaskHandler<String> {
 
-    override val type = "ENRICHMENT_RECONCILIATION_AMM_ORDER_JOB"
+    override val type = "ENRICHMENT_RECONCILIATION_POOL_ORDER_JOB"
 
     override suspend fun isAbleToRun(param: String): Boolean {
         return ff.enablePoolOrders
