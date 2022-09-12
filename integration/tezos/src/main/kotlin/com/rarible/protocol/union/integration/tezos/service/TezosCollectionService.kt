@@ -19,7 +19,6 @@ import java.math.BigInteger
 @CaptureSpan(type = "blockchain")
 open class TezosCollectionService(
     private val collectionControllerApi: NftCollectionControllerApi,
-    private val pgService: TezosPgCollectionService,
     private val tzktCollectionService: TzktCollectionService,
     private val tezosCollectionRepository: TezosCollectionRepository
 ) : AbstractBlockchainService(BlockchainDto.TEZOS), CollectionService {
@@ -51,10 +50,7 @@ open class TezosCollectionService(
     }
 
     override suspend fun getCollectionsByIds(ids: List<String>): List<UnionCollection> {
-        if (tzktCollectionService.enabled()) {
-            return tzktCollectionService.getCollectionByIds(ids)
-        }
-        return pgService.getCollectionsByIds(ids)
+        return tzktCollectionService.getCollectionByIds(ids)
     }
 
     override suspend fun generateNftTokenId(collectionId: String, minter: String?): TokenId {
