@@ -130,6 +130,12 @@ interface OrderService : BlockchainService {
         size: Int
     ): Slice<OrderDto>
 
+    suspend fun getAmmOrdersAll(
+        status: List<OrderStatusDto>?,
+        continuation: String?,
+        size: Int
+    ): Slice<OrderDto>
+
     suspend fun getAmmOrdersByItem(
         itemId: String,
         continuation: String?,
