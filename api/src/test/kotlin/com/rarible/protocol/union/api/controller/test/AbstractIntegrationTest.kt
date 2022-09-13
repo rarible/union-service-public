@@ -31,6 +31,7 @@ import com.rarible.protocol.union.integration.ethereum.mock.EthOwnershipControll
 import com.rarible.protocol.union.integration.flow.mock.FlowItemControllerApiMock
 import com.rarible.protocol.union.integration.flow.mock.FlowOrderControllerApiMock
 import com.rarible.protocol.union.integration.flow.mock.FlowOwnershipControllerApiMock
+import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktSignatureService
 import com.rarible.protocol.union.integration.tezos.mock.TezosItemControllerApiMock
 import com.rarible.protocol.union.integration.tezos.mock.TezosOrderControllerApiMock
 import com.rarible.protocol.union.integration.tezos.mock.TezosOwnershipControllerApiMock
@@ -212,6 +213,9 @@ abstract class AbstractIntegrationTest {
 
     @Autowired
     lateinit var tzktOwnershipClient: com.rarible.tzkt.client.OwnershipClient
+
+    @Autowired
+    lateinit var tzktSignatureClient: TzktSignatureService
 
     lateinit var tezosItemControllerApiMock: TezosItemControllerApiMock
     lateinit var tezosOwnershipControllerApiMock: TezosOwnershipControllerApiMock

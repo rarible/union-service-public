@@ -18,18 +18,23 @@ class TezosOwnershipControllerApiMock(
         } returns returnOwnership
     }
 
+    fun mockGetNftOwnershipsByIds(ownershipIds: List<OwnershipIdDto>, returnOwnerships: List<TokenBalance>) {
+        coEvery {
+            nftOwnershipControllerApi.ownershipsByIds(ownershipIds.map { it.value })
+        } returns returnOwnerships
+    }
+
     fun mockGetNftOwnershipsByItem(
         itemId: ItemIdDto,
         continuation: String?,
         size: Int?,
         vararg returnOwnerships: TokenBalance
     ) {
-        val (contract, tokenId) = CompositeItemIdParser.split(itemId.value)
         coEvery {
             nftOwnershipControllerApi.ownershipsByToken(
-                contract,
-                any(),
-                any(),
+                itemId.value,
+                size!!,
+                continuation,
                 any()
             )
         } returns Page(returnOwnerships.asList(), null)

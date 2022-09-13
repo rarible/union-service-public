@@ -111,19 +111,19 @@ class OwnershipControllerFt : AbstractIntegrationTest() {
         assertThat(unionOwnership.auction!!.id.value).isEqualTo(EthConverter.convert(auction.hash))
     }
 
-//    @Test
-//    fun `get ownership by id - tezos, not enriched`() = runBlocking<Unit> {
-//        val ownershipIdFull = randomTezosOwnershipId().fullId()
-//        val ownershipId = OwnershipIdParser.parseFull(ownershipIdFull)
-//        val ownership = randomTezosOwnershipDto(ownershipId)
-//
-//        tezosOwnershipControllerApiMock.mockGetNftOwnershipById(ownershipId, ownership)
-//
-//        val unionOwnership = ownershipControllerClient.getOwnershipById(ownershipIdFull).awaitFirst()
-//
-//        assertThat(unionOwnership.id.value).isEqualTo(ownershipId.value)
-//        assertThat(unionOwnership.id.blockchain).isEqualTo(BlockchainDto.TEZOS)
-//    }
+    @Test
+    fun `get ownership by id - tezos, not enriched`() = runBlocking<Unit> {
+        val ownershipIdFull = randomTezosOwnershipId().fullId()
+        val ownershipId = OwnershipIdParser.parseFull(ownershipIdFull)
+        val ownership = randomTezosOwnershipDto(ownershipId)
+
+        tezosOwnershipControllerApiMock.mockGetNftOwnershipById(ownershipId, ownership)
+
+        val unionOwnership = ownershipControllerClient.getOwnershipById(ownershipIdFull).awaitFirst()
+
+        assertThat(unionOwnership.id.value).isEqualTo(ownershipId.value)
+        assertThat(unionOwnership.id.blockchain).isEqualTo(BlockchainDto.TEZOS)
+    }
 
     @Test
     fun `get ownership by id - flow, enriched`() = runBlocking<Unit> {
@@ -249,19 +249,19 @@ class OwnershipControllerFt : AbstractIntegrationTest() {
         assertThat(ownerships.ownerships).hasSize(0)
     }
 
-//    @Test
-//    fun `get ownerships by item - tezos, nothing enriched`() = runBlocking<Unit> {
-//        val itemId = randomTezosItemId()
-//        val ownership = randomTezosOwnershipDto(itemId)
-//
-//        tezosOwnershipControllerApiMock.mockGetNftOwnershipsByItem(
-//            itemId, continuation, size, ownership
-//        )
-//
-//        val ownerships = ownershipControllerClient.getOwnershipsByItem(
-//            itemId.fullId(), continuation, size
-//        ).awaitFirst()
-//
-//        assertThat(ownerships.ownerships).hasSize(1)
-//    }
+    @Test
+    fun `get ownerships by item - tezos, nothing enriched`() = runBlocking<Unit> {
+        val itemId = randomTezosItemId()
+        val ownership = randomTezosOwnershipDto(itemId)
+
+        tezosOwnershipControllerApiMock.mockGetNftOwnershipsByItem(
+            itemId, continuation, size, ownership
+        )
+
+        val ownerships = ownershipControllerClient.getOwnershipsByItem(
+            itemId.fullId(), continuation, size
+        ).awaitFirst()
+
+        assertThat(ownerships.ownerships).hasSize(1)
+    }
 }

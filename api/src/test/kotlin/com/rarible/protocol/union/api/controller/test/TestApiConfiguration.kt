@@ -23,6 +23,7 @@ import com.rarible.protocol.union.dto.CollectionEventDto
 import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaLoader
+import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktSignatureService
 import com.rarible.protocol.union.test.mock.CurrencyMock
 import io.mockk.mockk
 import org.springframework.beans.factory.annotation.Qualifier
@@ -264,5 +265,9 @@ class TestApiConfiguration {
     @Bean
     @Primary
     fun testTzktCollectionClient(): com.rarible.tzkt.client.CollectionClient = mockk()
+
+    @Bean
+    @Primary
+    fun testSignatureClient(): com.rarible.tzkt.client.SignatureClient = mockk()
 
 }

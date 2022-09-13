@@ -92,6 +92,9 @@ fun randomTezosOwnershipDto(ownershipId: OwnershipIdDto) = randomTezosOwnershipD
     ownershipId.getItemId(),
     Part(ownershipId.owner.value, randomInt())
 )
+fun randomTezosOwnershipDto(itemId: ItemIdDto) = randomTezosOwnershipDto(
+    itemId.toOwnership(randomString())
+)
 fun randomTezosOwnershipDto(itemId: ItemIdDto, creator: Part): TokenBalance {
     val ownershipId = itemId.toOwnership(creator.account)
     val (contract, tokenId) = CompositeItemIdParser.split(itemId.value)

@@ -77,15 +77,15 @@ class OrderControllerFt : AbstractIntegrationTest() {
 
     @Test
     fun `get order by id - tezos`() = runBlocking<Unit> {
-//        val order = randomTezosOrderDto()
-//        val orderIdFull = OrderIdDto(BlockchainDto.TEZOS, order.hash).fullId()
-//
-////        tezosOrderControllerApiMock.mockGetById(order)
-//
-//        val unionOrder = orderControllerClient.getOrderById(orderIdFull).awaitFirst()
-//
-//        assertThat(unionOrder.id.value).isEqualTo(order.id)
-//        assertThat(unionOrder.id.blockchain).isEqualTo(BlockchainDto.TEZOS)
+        val order = randomTezosOrderDto()
+        val orderIdFull = OrderIdDto(BlockchainDto.TEZOS, order.id).fullId()
+
+        tezosOrderControllerApiMock.mockGetById(order)
+
+        val unionOrder = orderControllerClient.getOrderById(orderIdFull).awaitFirst()
+
+        assertThat(unionOrder.id.value).isEqualTo(order.id)
+        assertThat(unionOrder.id.blockchain).isEqualTo(BlockchainDto.TEZOS)
     }
 
     @Test
