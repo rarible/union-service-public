@@ -11,6 +11,7 @@ import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.meta.loader.test.AbstractIntegrationTest
 import com.rarible.protocol.union.meta.loader.test.IntegrationTest
 import com.rarible.protocol.union.meta.loader.test.data.randomFailedMetaEntry
+import com.rarible.protocol.union.meta.loader.test.data.randomMetaEntry
 import com.rarible.protocol.union.meta.loader.test.data.randomRetryMetaEntry
 import com.rarible.protocol.union.meta.loader.test.data.randomTask
 import io.mockk.coEvery
@@ -21,12 +22,10 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import java.time.Instant
 
 @IntegrationTest
 class DownloadExecutorIt : AbstractIntegrationTest() {
-
-    @Autowired
-    lateinit var debouncer: DownloadDebouncer
 
     @Autowired
     lateinit var repository: ItemMetaRepository
@@ -43,10 +42,10 @@ class DownloadExecutorIt : AbstractIntegrationTest() {
         downloadExecutor = DownloadExecutor(
             repository,
             downloader,
-            debouncer,
             notifier,
             pool,
-            maxRetries
+            maxRetries,
+            meterRegistry
         )
     }
 
@@ -208,7 +207,15 @@ class DownloadExecutorIt : AbstractIntegrationTest() {
         coVerify(exactly = 0) { notifier.notify(any()) }
     }
 
-    // TODO add test with debouncing
+    @Test
+    fun `forced task - debounce`() = runBlocking {
+        val itemId = randomEthItemId().fullId()
+
+        repository.save(randomMetaEntry(itemId))
+        downloadExecutor.execute(listOf(randomTask(itemId).copy(scheduledAt = Instant.now().minusSeconds(1))))
+
+        coVerify(exactly = 0) { downloader.download(any()) }
+    }
 
     private fun mockGetMeta(itemId: String, meta: UnionMeta) {
         coEvery { downloader.download(itemId) } returns meta

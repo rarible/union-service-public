@@ -14,7 +14,6 @@ import com.rarible.protocol.union.enrichment.meta.item.ItemMetaDownloader
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaNotifier
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
 import com.rarible.protocol.union.enrichment.repository.ItemMetaRepository
-import com.rarible.protocol.union.meta.loader.executor.DownloadDebouncer
 import com.rarible.protocol.union.meta.loader.executor.DownloadExecutor
 import com.rarible.protocol.union.meta.loader.executor.DownloadExecutorHandler
 import com.rarible.protocol.union.meta.loader.executor.DownloadExecutorManager
@@ -28,7 +27,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
-import java.util.*
+import java.util.UUID
 
 @Configuration
 @ConditionalOnProperty("common.feature-flags.enabledMetaPipeline", havingValue = "true", matchIfMissing = false)
@@ -37,7 +36,6 @@ import java.util.*
 class DownloadExecutorConfiguration(
     private val metaProperties: UnionMetaProperties,
     private val metaLoaderProperties: UnionMetaLoaderProperties,
-    private val downloadDebouncer: DownloadDebouncer, // Not really sure if we need it as bean
     private val meterRegistry: MeterRegistry,
     applicationEnvironmentInfo: ApplicationEnvironmentInfo
 ) {
@@ -64,10 +62,10 @@ class DownloadExecutorConfiguration(
             val executor = DownloadExecutor(
                 itemMetaRepository,
                 itemMetaDownloader,
-                downloadDebouncer,
                 itemMetaNotifier,
                 pool,
-                maxRetries
+                maxRetries,
+                meterRegistry
             )
             executors[pipeline] = executor
             logger.info(
