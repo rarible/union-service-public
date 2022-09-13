@@ -8,8 +8,6 @@ import java.math.BigInteger
 
 interface TzktItemActivityService {
 
-    fun enabled() = false
-
     suspend fun getAll(
         types: List<ActivityTypeDto>,
         continuation: String?,

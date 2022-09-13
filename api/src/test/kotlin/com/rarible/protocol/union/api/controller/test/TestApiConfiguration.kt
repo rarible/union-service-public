@@ -247,34 +247,6 @@ class TestApiConfiguration {
 
     @Bean
     @Primary
-    fun testTezosItemApi(): com.rarible.protocol.tezos.api.client.NftItemControllerApi = mockk()
-
-    @Bean
-    @Primary
-    fun testTezosOwnershipApi(): com.rarible.protocol.tezos.api.client.NftOwnershipControllerApi = mockk()
-
-    @Bean
-    @Primary
-    fun testTezosCollectionApi(): com.rarible.protocol.tezos.api.client.NftCollectionControllerApi = mockk()
-
-    @Bean
-    @Primary
-    fun testTezosSignatureApi(): com.rarible.protocol.tezos.api.client.OrderSignatureControllerApi = mockk()
-
-    @Bean
-    @Primary
-    fun testTezosOrderApi(): com.rarible.protocol.tezos.api.client.OrderControllerApi = mockk()
-
-    @Bean
-    @Primary
-    fun testTezosActivityItemApi(): com.rarible.protocol.tezos.api.client.NftActivityControllerApi = mockk()
-
-    @Bean
-    @Primary
-    fun testTezosActivityOrderApi(): com.rarible.protocol.tezos.api.client.OrderActivityControllerApi = mockk()
-
-    @Bean
-    @Primary
     fun testDipDupOrderClient(): com.rarible.dipdup.client.OrderClient = mockk()
 
     @Bean

@@ -39,14 +39,6 @@
 
         <dependency>
             <groupId>com.rarible.protocol.tezos</groupId>
-            <artifactId>protocol-tezos-client-starter</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.rarible.protocol.tezos</groupId>
-            <artifactId>protocol-tezos-subscriber</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.rarible.protocol.tezos</groupId>
             <artifactId>dipdup-listener</artifactId>
         </dependency>
         <dependency>

@@ -7,8 +7,6 @@ import com.rarible.dipdup.client.core.model.OrderStatus
 import com.rarible.dipdup.client.core.model.TezosPlatform
 import com.rarible.dipdup.client.exception.DipDupNotFound
 import com.rarible.dipdup.client.model.DipDupOrdersPage
-import com.rarible.protocol.tezos.dto.OrderPaginationDto
-import com.rarible.protocol.tezos.dto.OrderTypeDto
 import com.rarible.protocol.union.api.client.OrderControllerApi
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
@@ -29,9 +27,6 @@ import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
-import reactor.core.publisher.Mono
-import reactor.kotlin.core.publisher.toMono
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.ZoneOffset
@@ -39,17 +34,6 @@ import java.util.*
 
 @FlowPreview
 @IntegrationTest
-@SpringBootTest(
-    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-    properties = [
-        "application.environment = test",
-        "spring.cloud.consul.config.enabled = false",
-        "spring.cloud.service-registry.auto-registration.enabled = false",
-        "spring.cloud.discovery.enabled = false",
-        "logging.logstash.tcp-socket.enabled = false",
-        "integration.tezos.dipdup.enabled = true" // turn on dipdup integration
-    ]
-)
 class TezosDipDupOrdersControllerFt : AbstractIntegrationTest() {
 
     private val continuation: String? = null
@@ -71,12 +55,6 @@ class TezosDipDupOrdersControllerFt : AbstractIntegrationTest() {
             testDipDupOrderClient.getOrdersByItem(contract, tokenId.toString(), any(), "XTZ", any(), any(), any(), any())
         } returns DipDupOrdersPage(listOf(dipdupOrder))
 
-        coEvery {
-            testTezosOrderApi.getCurrenciesBySellOrdersOfItem(contract, tokenId.toString())
-        } returns com.rarible.protocol.tezos.dto.OrderCurrenciesDto(OrderTypeDto.SELL, emptyList()).toMono()
-        coEvery {
-            testTezosOrderApi.getSellOrderByItem(contract, tokenId.toString(), any(), any(), any(), any(), any(), any(), any(), any())
-        } returns Mono.just(OrderPaginationDto(emptyList(), null))
         coEvery {
             testDipDupOrderClient.getOrdersCurrenciesByItem(contract, tokenId.toString())
         } returns listOf(Asset.XTZ())

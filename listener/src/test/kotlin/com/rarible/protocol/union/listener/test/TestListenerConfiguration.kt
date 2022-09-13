@@ -34,9 +34,6 @@ import com.rarible.protocol.nft.api.client.NftOwnershipControllerApi
 import com.rarible.protocol.solana.api.client.TokenControllerApi
 import com.rarible.protocol.solana.dto.SolanaEventTopicProvider
 import com.rarible.protocol.solana.dto.TokenMetaEventDto
-import com.rarible.protocol.tezos.dto.TezosActivitySafeDto
-import com.rarible.protocol.tezos.dto.TezosEventTopicProvider
-import com.rarible.protocol.tezos.dto.TezosOrderSafeEventDto
 import com.rarible.protocol.union.core.CoreConfiguration
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.CollectionEventDto
@@ -285,30 +282,6 @@ class TestListenerConfiguration {
         )
     }
 
-    //----------------- TEZOS producers ------------------//
-
-    @Bean
-    fun testTezosOrderEventProducer(): RaribleKafkaProducer<TezosOrderSafeEventDto> {
-        return RaribleKafkaProducer(
-            clientId = "test.union.tezos.order",
-            valueSerializerClass = UnionKafkaJsonSerializer::class.java,
-            valueClass = TezosOrderSafeEventDto::class.java,
-            defaultTopic = TezosEventTopicProvider.ORDER,
-            bootstrapServers = kafkaContainer.kafkaBoostrapServers()
-        )
-    }
-
-    @Bean
-    fun testTezosActivityEventProducer(): RaribleKafkaProducer<TezosActivitySafeDto> {
-        return RaribleKafkaProducer(
-            clientId = "test.union.tezos.order",
-            valueSerializerClass = UnionKafkaJsonSerializer::class.java,
-            valueClass = TezosActivitySafeDto::class.java,
-            defaultTopic = TezosEventTopicProvider.ACTIVITY,
-            bootstrapServers = kafkaContainer.kafkaBoostrapServers()
-        )
-    }
-
     //---------------- SOLANA producers ----------------//
 
     @Bean
@@ -374,17 +347,6 @@ class TestListenerConfiguration {
     fun testFlowOrderApi(): FlowOrderControllerApi = mockk()
 
     //--------------------- TEZOS ---------------------//
-    @Bean
-    @Primary
-    fun testTezosItemApi(): com.rarible.protocol.tezos.api.client.NftItemControllerApi = mockk()
-
-    @Bean
-    @Primary
-    fun testTezosOwnershipApi(): com.rarible.protocol.tezos.api.client.NftOwnershipControllerApi = mockk()
-
-    @Bean
-    @Primary
-    fun testTezosOrderApi(): com.rarible.protocol.tezos.api.client.OrderControllerApi = mockk()
 
     @Bean
     @Primary

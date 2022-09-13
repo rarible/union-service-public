@@ -8,8 +8,6 @@ class TzktSignatureServiceImpl(
     val signatureClient: SignatureClient
 ) : TzktSignatureService {
 
-    override fun enabled() = true
-
     override suspend fun validate(publicKey: String, signature: String, message: String): Boolean {
         try {
             val pair = publicKey.split('_')

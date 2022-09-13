@@ -16,21 +16,9 @@ import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
 
 @FlowPreview
 @IntegrationTest
-@SpringBootTest(
-    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-    properties = [
-        "application.environment = test",
-        "spring.cloud.consul.config.enabled = false",
-        "spring.cloud.service-registry.auto-registration.enabled = false",
-        "spring.cloud.discovery.enabled = false",
-        "logging.logstash.tcp-socket.enabled = false",
-        "integration.tezos.dipdup.enabled = true" // turn on dipdup integration
-    ]
-)
 class TezosItemControllerFt : AbstractIntegrationTest() {
 
     @Autowired

@@ -1,7 +1,6 @@
 package com.rarible.protocol.union.integration.tezos.service
 
 import com.rarible.core.apm.CaptureSpan
-import com.rarible.protocol.tezos.api.client.NftCollectionControllerApi
 import com.rarible.protocol.union.core.exception.UnionException
 import com.rarible.protocol.union.core.model.TokenId
 import com.rarible.protocol.union.core.model.UnionCollection
@@ -9,16 +8,12 @@ import com.rarible.protocol.union.core.service.CollectionService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.continuation.page.Page
-import com.rarible.protocol.union.integration.tezos.converter.TezosCollectionConverter
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktCollectionService
 import com.rarible.protocol.union.integration.tezos.entity.TezosCollectionRepository
-import kotlinx.coroutines.reactive.awaitFirst
-import kotlinx.coroutines.reactive.awaitSingle
 import java.math.BigInteger
 
 @CaptureSpan(type = "blockchain")
 open class TezosCollectionService(
-    private val collectionControllerApi: NftCollectionControllerApi,
     private val tzktCollectionService: TzktCollectionService,
     private val tezosCollectionRepository: TezosCollectionRepository
 ) : AbstractBlockchainService(BlockchainDto.TEZOS), CollectionService {
@@ -27,22 +22,11 @@ open class TezosCollectionService(
         continuation: String?,
         size: Int
     ): Page<UnionCollection> {
-        if (tzktCollectionService.enabled()) {
-            return tzktCollectionService.getAllCollections(continuation, size)
-        }
-        val collections = collectionControllerApi.searchNftAllCollections(
-            size,
-            continuation
-        ).awaitFirst()
-        return TezosCollectionConverter.convert(collections, blockchain)
+        return tzktCollectionService.getAllCollections(continuation, size)
     }
 
     override suspend fun getCollectionById(collectionId: String): UnionCollection {
-        if (tzktCollectionService.enabled()) {
-            return tzktCollectionService.getCollectionById(collectionId)
-        }
-        val collection = collectionControllerApi.getNftCollectionById(collectionId).awaitFirst()
-        return TezosCollectionConverter.convert(collection, blockchain)
+        return tzktCollectionService.getCollectionById(collectionId)
     }
 
     override suspend fun refreshCollectionMeta(collectionId: String) {
@@ -54,16 +38,12 @@ open class TezosCollectionService(
     }
 
     override suspend fun generateNftTokenId(collectionId: String, minter: String?): TokenId {
-        val tokenId: BigInteger = if (tzktCollectionService.enabled()) {
-            try { // Adjust to existed count
-                val actualCount = tzktCollectionService.tokenCount(collectionId)
-                tezosCollectionRepository.adjustTokenCount(collectionId, actualCount)
-            } catch (ex: Exception) {
-                throw UnionException("Collection wasn't found")
-            }
+        val tokenId: BigInteger = try { // Adjust to existed count
+            val actualCount = tzktCollectionService.tokenCount(collectionId)
+            tezosCollectionRepository.adjustTokenCount(collectionId, actualCount)
             tezosCollectionRepository.generateTokenId(collectionId)
-        } else {
-             collectionControllerApi.generateNftTokenId(collectionId).awaitSingle().tokenId
+        } catch (ex: Exception) {
+            throw UnionException("Collection wasn't found")
         }
         return TokenId(tokenId.toString())
     }
@@ -73,14 +53,6 @@ open class TezosCollectionService(
         continuation: String?,
         size: Int
     ): Page<UnionCollection> {
-        if (tzktCollectionService.enabled()) {
-            return tzktCollectionService.getCollectionByOwner(owner, continuation, size)
-        }
-        val items = collectionControllerApi.searchNftCollectionsByOwner(
-            owner,
-            size,
-            continuation
-        ).awaitFirst()
-        return TezosCollectionConverter.convert(items, blockchain)
+        return tzktCollectionService.getCollectionByOwner(owner, continuation, size)
     }
 }

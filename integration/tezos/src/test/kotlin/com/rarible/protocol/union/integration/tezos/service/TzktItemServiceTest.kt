@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.integration.tezos.service
 
-import com.rarible.protocol.tezos.api.client.NftItemControllerApi
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.integration.tezos.dipdup.DipDupIntegrationProperties
@@ -14,8 +13,6 @@ import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
-import java.time.Instant.now
-import java.time.ZoneOffset
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -23,19 +20,19 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import java.time.Instant.now
+import java.time.ZoneOffset
 
 class TzktItemServiceTest {
 
-    private val itemControllerApi: NftItemControllerApi = mockk()
     private val tokenClient: TokenClient = mockk()
     private val dipdupProps: DipDupIntegrationProperties = mockk()
 
     private val tzktItemService = TzktItemServiceImpl(tokenClient, dipdupProps)
-    private val service = TezosItemService(itemControllerApi, tzktItemService)
+    private val service = TezosItemService(tzktItemService)
 
     @BeforeEach
     fun beforeEach() {
-        clearMocks(itemControllerApi)
         clearMocks(tokenClient)
     }
 

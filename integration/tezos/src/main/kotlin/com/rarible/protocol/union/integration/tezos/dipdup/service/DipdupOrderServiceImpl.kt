@@ -23,8 +23,6 @@ class DipdupOrderServiceImpl(
 
     private val blockchain = BlockchainDto.TEZOS
 
-    override fun enabled() = true
-
     fun enabledPlatforms(): List<TezosPlatform> {
         val platforms = listOf(TezosPlatform.RARIBLE_V2, TezosPlatform.RARIBLE_V1).toMutableList()
         if (marketplaces.hen) platforms.add(TezosPlatform.HEN)

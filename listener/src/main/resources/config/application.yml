@@ -94,7 +94,6 @@ integration:
   tezos:
     enabled: ${consul.tezos.enabled:true}
     dipdup:
-      enabled: ${consul.tezos.dipdup.enabled:false}
       network: ${consul.tezos.dipdup.network:}
       dipdupUrl: ${consul.tezos.dipdup.dipdupUrl:}
       nodeAddress: ${consul.tezos.dipdup.nodeAddress:}

@@ -25,8 +25,6 @@ class TzktCollectionServiceImpl(
 
     private val blockchain = BlockchainDto.TEZOS
 
-    override fun enabled() = true
-
     override suspend fun getAllCollections(
         continuation: String?,
         size: Int

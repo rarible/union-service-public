@@ -2,7 +2,6 @@ package com.rarible.protocol.union.integration.tezos.service
 
 import com.mongodb.assertions.Assertions.assertTrue
 import com.rarible.core.test.data.randomString
-import com.rarible.protocol.tezos.api.client.OrderSignatureControllerApi
 import com.rarible.protocol.union.core.exception.UnionValidationException
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktSignatureServiceImpl
 import com.rarible.tzkt.client.SignatureClient
@@ -15,11 +14,10 @@ import org.junit.jupiter.api.assertThrows
 
 class TezosSignatureTest {
 
-    private val signatureControllerApi: OrderSignatureControllerApi = mockk()
     private val signatureClient: SignatureClient = mockk()
     private val tzktSignatureService = TzktSignatureServiceImpl(signatureClient)
 
-    private val service = TezosSignatureService(signatureControllerApi, tzktSignatureService)
+    private val service = TezosSignatureService(tzktSignatureService)
 
     @Test
     fun `should validate signature successfully`() = runBlocking<Unit> {

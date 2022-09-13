@@ -3,7 +3,6 @@ package com.rarible.protocol.union.integration.tezos.dipdup.converter
 import com.rarible.dipdup.client.core.model.Asset
 import com.rarible.dipdup.client.core.model.TezosPlatform
 import com.rarible.protocol.union.core.converter.ContractAddressConverter
-import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.AssetDto
 import com.rarible.protocol.union.dto.AssetTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -14,13 +13,6 @@ import com.rarible.protocol.union.dto.TezosNFTAssetTypeDto
 import com.rarible.protocol.union.dto.TezosXTZAssetTypeDto
 
 object DipDupConverter {
-
-    fun convert(source: ActivitySortDto): com.rarible.protocol.tezos.dto.ActivitySortDto {
-        return when (source) {
-            ActivitySortDto.LATEST_FIRST -> com.rarible.protocol.tezos.dto.ActivitySortDto.LATEST_FIRST
-            ActivitySortDto.EARLIEST_FIRST -> com.rarible.protocol.tezos.dto.ActivitySortDto.EARLIEST_FIRST
-        }
-    }
 
     fun convert(source: Asset, blockchain: BlockchainDto): AssetDto {
         return AssetDto(

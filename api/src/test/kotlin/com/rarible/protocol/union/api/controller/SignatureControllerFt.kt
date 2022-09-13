@@ -43,51 +43,51 @@ class SignatureControllerFt : AbstractIntegrationTest() {
         assertThat(result).isEqualTo(true)
     }
 
-    @Test
-    fun `validate signature - tezos`() = runBlocking<Unit> {
-        val tezosForm = com.rarible.protocol.tezos.dto.SignatureValidationFormDto(
-            randomString(),
-            randomString(),
-            randomString(),
-            randomString(),
-            null
-        )
+//    @Test
+//    fun `validate signature - tezos`() = runBlocking<Unit> {
+//        val tezosForm = com.rarible.protocol.tezos.dto.SignatureValidationFormDto(
+//            randomString(),
+//            randomString(),
+//            randomString(),
+//            randomString(),
+//            null
+//        )
+//
+//        val unionForm = SignatureValidationFormDto(
+//            signer = UnionAddressConverter.convert(BlockchainDto.TEZOS, tezosForm.address),
+//            message = tezosForm.message,
+//            signature = tezosForm.signature,
+//            publicKey = tezosForm.edpk
+//        )
+//
+//        coEvery { testTezosSignatureApi.validate(tezosForm) } returns false.toMono()
+//        val result = signatureControllerApi.validate(unionForm).awaitFirst()
+//
+//        assertThat(result).isEqualTo(false)
+//    }
 
-        val unionForm = SignatureValidationFormDto(
-            signer = UnionAddressConverter.convert(BlockchainDto.TEZOS, tezosForm.address),
-            message = tezosForm.message,
-            signature = tezosForm.signature,
-            publicKey = tezosForm.edpk
-        )
-
-        coEvery { testTezosSignatureApi.validate(tezosForm) } returns false.toMono()
-        val result = signatureControllerApi.validate(unionForm).awaitFirst()
-
-        assertThat(result).isEqualTo(false)
-    }
-
-    @Test
-    fun `validate signature - tezos with prefix`() = runBlocking<Unit> {
-        val tezosForm = com.rarible.protocol.tezos.dto.SignatureValidationFormDto(
-            randomString(),
-            randomString(),
-            randomString(),
-            randomString(),
-            randomString()
-        )
-
-        val unionForm = SignatureValidationFormDto(
-            signer = UnionAddressConverter.convert(BlockchainDto.TEZOS, tezosForm.address),
-            message = tezosForm.message,
-            signature = tezosForm.signature,
-            publicKey = tezosForm.edpk + "_" + tezosForm.prefix
-        )
-
-        coEvery { testTezosSignatureApi.validate(tezosForm) } returns false.toMono()
-        val result = signatureControllerApi.validate(unionForm).awaitFirst()
-
-        assertThat(result).isEqualTo(false)
-    }
+//    @Test
+//    fun `validate signature - tezos with prefix`() = runBlocking<Unit> {
+//        val tezosForm = com.rarible.protocol.tezos.dto.SignatureValidationFormDto(
+//            randomString(),
+//            randomString(),
+//            randomString(),
+//            randomString(),
+//            randomString()
+//        )
+//
+//        val unionForm = SignatureValidationFormDto(
+//            signer = UnionAddressConverter.convert(BlockchainDto.TEZOS, tezosForm.address),
+//            message = tezosForm.message,
+//            signature = tezosForm.signature,
+//            publicKey = tezosForm.edpk + "_" + tezosForm.prefix
+//        )
+//
+//        coEvery { testTezosSignatureApi.validate(tezosForm) } returns false.toMono()
+//        val result = signatureControllerApi.validate(unionForm).awaitFirst()
+//
+//        assertThat(result).isEqualTo(false)
+//    }
 
     @Test
     fun `validate signature - flow`() = runBlocking<Unit> {

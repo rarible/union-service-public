@@ -13,7 +13,6 @@ class TzktItemActivityServiceImpl(
     val tzktTokenClient: TokenActivityClient
 ) : TzktItemActivityService {
 
-    override fun enabled() = true
     private val blockchain = BlockchainDto.TEZOS
 
     override suspend fun getAll(

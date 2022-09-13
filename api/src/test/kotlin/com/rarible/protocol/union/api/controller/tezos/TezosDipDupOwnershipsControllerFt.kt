@@ -4,10 +4,6 @@ import com.rarible.core.common.nowMillis
 import com.rarible.dipdup.client.core.model.Asset
 import com.rarible.dipdup.client.exception.DipDupNotFound
 import com.rarible.dipdup.client.model.DipDupOrdersPage
-import com.rarible.protocol.tezos.dto.OrderCurrenciesDto
-import com.rarible.protocol.tezos.dto.OrderPaginationDto
-import com.rarible.protocol.tezos.dto.OrderTypeDto
-import com.rarible.protocol.tezos.dto.XTZAssetTypeDto
 import com.rarible.protocol.union.api.client.OwnershipControllerApi
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
@@ -29,24 +25,10 @@ import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
-import reactor.core.publisher.Flux
-import reactor.kotlin.core.publisher.toMono
 import java.math.BigInteger
 
 @FlowPreview
 @IntegrationTest
-@SpringBootTest(
-    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-    properties = [
-        "application.environment = test",
-        "spring.cloud.consul.config.enabled = false",
-        "spring.cloud.service-registry.auto-registration.enabled = false",
-        "spring.cloud.discovery.enabled = false",
-        "logging.logstash.tcp-socket.enabled = false",
-        "integration.tezos.dipdup.enabled = true" // turn on dipdup integration
-    ]
-)
 class TezosDipDupOwnershipsControllerFt : AbstractIntegrationTest() {
 
     @Autowired
@@ -66,10 +48,6 @@ class TezosDipDupOwnershipsControllerFt : AbstractIntegrationTest() {
         coEvery {
             tzktOwnershipClient.ownershipById(ownerId.value)
         } returns tokenBalance
-
-        coEvery {
-            testTezosOrderApi.getOrderByIds(any())
-        } returns Flux.empty()
 
         ownershipRepository.save(ShortOwnership(
             blockchain = BlockchainDto.TEZOS,
@@ -130,17 +108,6 @@ class TezosDipDupOwnershipsControllerFt : AbstractIntegrationTest() {
             source = null,
             lastUpdatedAt = nowMillis()
         ))
-
-        coEvery {
-            testTezosOrderApi.getCurrenciesBySellOrdersOfItem(any(), any())
-        } returns OrderCurrenciesDto(
-            order_type = OrderTypeDto.SELL,
-            currencies = listOf(XTZAssetTypeDto())
-        ).toMono()
-
-        coEvery {
-            testTezosOrderApi.getSellOrderByItem(any(), any(), any(), any(), any(), any(), any(), any(), any(), any())
-        } returns OrderPaginationDto(emptyList(), null).toMono()
 
         coEvery {
             testDipDupOrderClient.getOrdersCurrenciesByItem(any(), any())

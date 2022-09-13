@@ -1,55 +1,47 @@
 package com.rarible.protocol.union.integration.tezos.mock
 
-import com.rarible.protocol.tezos.api.client.NftOwnershipControllerApi
-import com.rarible.protocol.tezos.dto.NftOwnershipDto
-import com.rarible.protocol.tezos.dto.NftOwnershipsDto
 import com.rarible.protocol.union.core.util.CompositeItemIdParser
-
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
-import io.mockk.every
-import reactor.core.publisher.Mono
+import com.rarible.tzkt.client.OwnershipClient
+import com.rarible.tzkt.model.Page
+import com.rarible.tzkt.model.TokenBalance
+import io.mockk.coEvery
 
 class TezosOwnershipControllerApiMock(
-    private val nftOwnershipControllerApi: NftOwnershipControllerApi
+    private val nftOwnershipControllerApi: OwnershipClient
 ) {
 
-    fun mockGetNftOwnershipById(ownershipId: OwnershipIdDto, returnOwnership: NftOwnershipDto?) {
-        every {
-            nftOwnershipControllerApi.getNftOwnershipById(ownershipId.value)
-        } returns (if (returnOwnership == null) Mono.empty() else Mono.just(returnOwnership))
-    }
-
-    fun mockGetNftOwnershipById(ownershipId: String, returnOwnership: NftOwnershipDto?) {
-        every {
-            nftOwnershipControllerApi.getNftOwnershipById(ownershipId)
-        } returns (if (returnOwnership == null) Mono.empty() else Mono.just(returnOwnership))
+    fun mockGetNftOwnershipById(ownershipId: OwnershipIdDto, returnOwnership: TokenBalance) {
+        coEvery {
+            nftOwnershipControllerApi.ownershipById(ownershipId.value)
+        } returns returnOwnership
     }
 
     fun mockGetNftOwnershipsByItem(
         itemId: ItemIdDto,
         continuation: String?,
         size: Int?,
-        vararg returnOwnerships: NftOwnershipDto
+        vararg returnOwnerships: TokenBalance
     ) {
         val (contract, tokenId) = CompositeItemIdParser.split(itemId.value)
-        every {
-            nftOwnershipControllerApi.getNftOwnershipByItem(
+        coEvery {
+            nftOwnershipControllerApi.ownershipsByToken(
                 contract,
-                tokenId.toString(),
-                size,
-                continuation
+                any(),
+                any(),
+                any()
             )
-        } returns Mono.just(NftOwnershipsDto(returnOwnerships.size, null, returnOwnerships.asList()))
+        } returns Page(returnOwnerships.asList(), null)
     }
 
-    fun mockGetNftAllOwnerships(continuation: String?, size: Int, vararg returnOwnerships: NftOwnershipDto) {
-        every {
-            nftOwnershipControllerApi.getNftAllOwnerships(
-                size,
-                continuation
+    fun mockGetNftAllOwnerships(continuation: String?, size: Int, vararg returnOwnerships: TokenBalance) {
+        coEvery {
+            nftOwnershipControllerApi.ownershipsAll(
+                any(),
+                size
             )
-        } returns Mono.just(NftOwnershipsDto(returnOwnerships.size, null, returnOwnerships.asList()))
+        } returns Page(returnOwnerships.asList(), null)
     }
 
 }

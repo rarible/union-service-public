@@ -1,19 +1,24 @@
 package com.rarible.protocol.union.integration.tezos.mock
 
-import com.rarible.protocol.tezos.api.client.OrderControllerApi
-import com.rarible.protocol.tezos.dto.OrderDto
-import io.mockk.every
-import reactor.kotlin.core.publisher.toMono
+import com.rarible.dipdup.client.OrderClient
+import com.rarible.dipdup.client.core.model.DipDupOrder
+import com.rarible.dipdup.client.model.DipDupOrdersPage
+import io.mockk.coEvery
 
 class TezosOrderControllerApiMock(
-    private val orderControllerApi: OrderControllerApi
+    private val orderControllerApi: OrderClient
 ) {
 
-    fun mockGetById(vararg orders: OrderDto) {
+    fun mockGetById(vararg orders: DipDupOrder) {
         orders.forEach {
-            every {
-                orderControllerApi.getOrderByHash(it.hash)
-            } returns it.toMono()
+            coEvery {
+                orderControllerApi.getOrderById(it.id)
+            } returns it
         }
+    }
+
+    fun mockGetAll(orders: List<DipDupOrder>) {
+        coEvery { orderControllerApi.getOrdersAll(any(), any(), any(), any(), any())
+        } returns DipDupOrdersPage(orders)
     }
 }

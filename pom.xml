@@ -52,7 +52,6 @@
         <rarible.protocol.currency.version>1.31.1</rarible.protocol.currency.version>
         <rarible.protocol.ethereum.version>1.35.3</rarible.protocol.ethereum.version>
         <rarible.protocol.flow.version>3.1.14</rarible.protocol.flow.version>
-        <rarible.protocol.tezos.version>1.0.8</rarible.protocol.tezos.version>
         <rarible.protocol.solana.version>0.1.49</rarible.protocol.solana.version>
         <rarible.protocol.tezos.api.version>1.2.11</rarible.protocol.tezos.api.version>
 
@@ -331,13 +330,6 @@
             </dependency>
 
             <!-- Tezos-client -->
-            <dependency>
-                <groupId>com.rarible.protocol.tezos</groupId>
-                <artifactId>rarible-tezos-openapi</artifactId>
-                <version>${rarible.protocol.tezos.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
             <dependency>
                 <groupId>com.rarible.protocol.tezos</groupId>
                 <artifactId>dipdup-listener</artifactId>

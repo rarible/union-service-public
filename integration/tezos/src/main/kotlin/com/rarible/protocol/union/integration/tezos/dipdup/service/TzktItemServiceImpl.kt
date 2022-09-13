@@ -26,8 +26,6 @@ class TzktItemServiceImpl(val tzktTokenClient: TokenClient, val properties: DipD
     private val logger = LoggerFactory.getLogger(javaClass)
     private val blockchain = BlockchainDto.TEZOS
 
-    override fun enabled() = true
-
     override suspend fun getAllItems(continuation: String?, size: Int): Page<UnionItem> {
         val tzktPage = tzktTokenClient.allTokensByLastUpdate(
             size = size,

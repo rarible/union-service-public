@@ -54,6 +54,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.TestPropertySource
 import reactor.kotlin.core.publisher.toMono
 import java.time.Instant
+import java.time.ZoneOffset
 import java.time.temporal.ChronoUnit
 import com.rarible.protocol.solana.dto.ActivitiesByIdRequestDto as SolanaActivitiesByIdRequestDto
 
@@ -111,7 +112,8 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
         val flowActivity1 = randomFlowBurnDto().copy(date = nowMillis().minusSeconds(13))
         val flowActivity2 = randomFlowCancelBidActivityDto().copy(date = nowMillis().minusSeconds(3))
         val solanaActivity1 = randomSolanaMintActivity().copy(date = nowMillis().minusSeconds(8))
-        val tezosActivity1 = randomTezosItemBurnActivity().copy(id = randomInt().toString(), date = nowMillis().minusSeconds(9))
+        val tezosActivity1 = randomTezosItemBurnActivity().copy(id = randomInt().toString(),
+            date = nowMillis().minusSeconds(9).atOffset(ZoneOffset.UTC))
 
         val elasticEthOrderActivity1 = randomEsActivity().copy(
             activityId = "${BlockchainDto.ETHEREUM}:${ethOrderActivity1.id}",
@@ -194,7 +196,7 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
         val elasticTezosActivity1 = randomEsActivity().copy(
             activityId = "${BlockchainDto.TEZOS}:${tezosActivity1.id}",
             type = ActivityTypeDto.BURN,
-            date = tezosActivity1.date,
+            date = tezosActivity1.date.toInstant(),
             blockchain = BlockchainDto.TEZOS,
         )
 

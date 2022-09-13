@@ -15,8 +15,6 @@ class DipdupOrderActivityServiceImpl(
     private val dipDupActivityConverter: DipDupActivityConverter
 ): DipdupOrderActivityService {
 
-    override fun enabled() = true
-
     private val blockchain = BlockchainDto.TEZOS
 
     override suspend fun getAll(types: List<ActivityTypeDto>, continuation: String?, limit: Int, sort: ActivitySortDto?): Slice<ActivityDto> {
