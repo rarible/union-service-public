@@ -3,59 +3,58 @@ package com.rarible.protocol.union.integration.tezos.converter
 import com.rarible.core.test.data.randomBigDecimal
 import com.rarible.core.test.data.randomBigInt
 import com.rarible.core.test.data.randomString
-import com.rarible.protocol.tezos.dto.AssetDto
-import com.rarible.protocol.tezos.dto.FTAssetTypeDto
-import com.rarible.protocol.tezos.dto.MTAssetTypeDto
-import com.rarible.protocol.tezos.dto.NFTAssetTypeDto
-import com.rarible.protocol.tezos.dto.XTZAssetTypeDto
+import com.rarible.dipdup.client.core.model.Asset
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.TezosFTAssetTypeDto
 import com.rarible.protocol.union.dto.TezosMTAssetTypeDto
 import com.rarible.protocol.union.dto.TezosNFTAssetTypeDto
 import com.rarible.protocol.union.dto.TezosXTZAssetTypeDto
+import com.rarible.protocol.union.integration.tezos.dipdup.converter.DipDupConverter
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import java.math.BigInteger
 
 class TezosConverterTest {
 
     @Test
     fun `asset`() {
-        val asset = AssetDto(XTZAssetTypeDto(), randomBigDecimal())
+        val asset = Asset(Asset.XTZ(), randomBigDecimal())
 
-        val converted = TezosConverter.convert(asset, BlockchainDto.TEZOS)
+        val converted = DipDupConverter.convert(asset, BlockchainDto.TEZOS)
 
-        assertThat(converted.value).isEqualTo(asset.value)
+        assertThat(converted.value).isEqualTo(asset.assetValue)
         assertThat(converted.type).isInstanceOf(TezosXTZAssetTypeDto::class.java)
     }
 
     @Test
     fun `asset type - xtz`() {
-        val assetType = XTZAssetTypeDto()
+        val assetType = Asset.XTZ()
 
-        val converted = TezosConverter.convert(assetType, BlockchainDto.TEZOS)
+        val converted = DipDupConverter.convert(assetType, BlockchainDto.TEZOS)
 
         assertThat(converted).isInstanceOf(TezosXTZAssetTypeDto::class.java)
     }
 
     @Test
     fun `asset type - ft`() {
-        val assetType = FTAssetTypeDto(
-            contract = randomString()
+        val assetType = Asset.FT(
+            contract = randomString(),
+            tokenId = BigInteger.ZERO
         )
 
-        val converted = TezosConverter.convert(assetType, BlockchainDto.TEZOS) as TezosFTAssetTypeDto
+        val converted = DipDupConverter.convert(assetType, BlockchainDto.TEZOS) as TezosFTAssetTypeDto
 
         assertThat(converted.contract.value).isEqualTo(assetType.contract)
     }
 
     @Test
     fun `asset type - nft`() {
-        val assetType = NFTAssetTypeDto(
+        val assetType = Asset.NFT(
             contract = randomString(),
             tokenId = randomBigInt()
         )
 
-        val converted = TezosConverter.convert(assetType, BlockchainDto.TEZOS) as TezosNFTAssetTypeDto
+        val converted = DipDupConverter.convert(assetType, BlockchainDto.TEZOS) as TezosNFTAssetTypeDto
 
         assertThat(converted.contract.value).isEqualTo(assetType.contract)
         assertThat(converted.tokenId).isEqualTo(assetType.tokenId)
@@ -63,12 +62,12 @@ class TezosConverterTest {
 
     @Test
     fun `asset type - mt`() {
-        val assetType = MTAssetTypeDto(
+        val assetType = Asset.MT(
             contract = randomString(),
             tokenId = randomBigInt()
         )
 
-        val converted = TezosConverter.convert(assetType, BlockchainDto.TEZOS) as TezosMTAssetTypeDto
+        val converted = DipDupConverter.convert(assetType, BlockchainDto.TEZOS) as TezosMTAssetTypeDto
 
         assertThat(converted.contract.value).isEqualTo(assetType.contract)
         assertThat(converted.tokenId).isEqualTo(assetType.tokenId)

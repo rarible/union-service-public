@@ -2,20 +2,6 @@ package com.rarible.protocol.union.integration.tezos.service
 
 import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.logging.Logger
-import com.rarible.protocol.tezos.api.client.NftActivityControllerApi
-import com.rarible.protocol.tezos.api.client.OrderActivityControllerApi
-import com.rarible.protocol.tezos.dto.NftActivitiesDto
-import com.rarible.protocol.tezos.dto.NftActivityFilterAllDto
-import com.rarible.protocol.tezos.dto.NftActivityFilterByCollectionDto
-import com.rarible.protocol.tezos.dto.NftActivityFilterByItemDto
-import com.rarible.protocol.tezos.dto.NftActivityFilterByUserDto
-import com.rarible.protocol.tezos.dto.NftActivityFilterDto
-import com.rarible.protocol.tezos.dto.OrderActivitiesDto
-import com.rarible.protocol.tezos.dto.OrderActivityFilterAllDto
-import com.rarible.protocol.tezos.dto.OrderActivityFilterByCollectionDto
-import com.rarible.protocol.tezos.dto.OrderActivityFilterByItemDto
-import com.rarible.protocol.tezos.dto.OrderActivityFilterByUserDto
-import com.rarible.protocol.tezos.dto.OrderActivityFilterDto
 import com.rarible.protocol.union.core.model.ItemAndOwnerActivityType
 import com.rarible.protocol.union.core.model.TypedActivityId
 import com.rarible.protocol.union.core.service.ActivityService
@@ -31,13 +17,10 @@ import com.rarible.protocol.union.dto.UserActivityTypeDto
 import com.rarible.protocol.union.dto.continuation.ActivityContinuation
 import com.rarible.protocol.union.dto.continuation.page.Paging
 import com.rarible.protocol.union.dto.continuation.page.Slice
-import com.rarible.protocol.union.integration.tezos.converter.TezosActivityConverter
-import com.rarible.protocol.union.integration.tezos.converter.TezosConverter
 import com.rarible.protocol.union.integration.tezos.dipdup.service.DipdupOrderActivityService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktItemActivityService
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.reactive.awaitFirst
 import java.math.BigInteger
 import java.time.Instant
 import java.util.regex.Pattern
@@ -45,18 +28,12 @@ import java.util.regex.Pattern
 // TODO UNION add tests when tezos add sorting
 @CaptureSpan(type = "blockchain")
 open class TezosActivityService(
-    private val activityItemControllerApi: NftActivityControllerApi,
-    private val activityOrderControllerApi: OrderActivityControllerApi,
-    private val tezosActivityConverter: TezosActivityConverter,
     private val dipdupOrderActivityService: DipdupOrderActivityService,
     private val tzktItemActivityService: TzktItemActivityService
 ) : AbstractBlockchainService(BlockchainDto.TEZOS), ActivityService {
 
     companion object {
         private val logger by Logger()
-
-        private val EMPTY_ORDER_ACTIVITIES = OrderActivitiesDto(listOf(), null)
-        private val EMPTY_ITEM_ACTIVITIES = NftActivitiesDto(null, listOf())
     }
 
     override suspend fun getAllActivities(
@@ -65,17 +42,7 @@ open class TezosActivityService(
         size: Int,
         sort: ActivitySortDto?
     ): Slice<ActivityDto> {
-        if (dipdupOrderActivityService.enabled()) {
-            return getDipDupAndTzktActivities(types, continuation, size, sort)
-        } else {
-            val nftFilter = tezosActivityConverter.convertToNftTypes(types)?.let {
-                NftActivityFilterAllDto(it)
-            }
-            val orderFilter = tezosActivityConverter.convertToOrderTypes(types)?.let {
-                OrderActivityFilterAllDto(it)
-            }
-            return getTezosActivities(nftFilter, orderFilter, continuation, size, sort)
-        }
+        return getDipDupAndTzktActivities(types, continuation, size, sort)
     }
 
     suspend fun getDipDupAndTzktActivities(
@@ -114,13 +81,8 @@ open class TezosActivityService(
         size: Int,
         sort: ActivitySortDto?
     ): Slice<ActivityDto> {
-        val nftFilter = tezosActivityConverter.convertToNftTypes(types)?.let {
-            NftActivityFilterByCollectionDto(it, collection)
-        }
-        val orderFilter = tezosActivityConverter.convertToOrderTypes(types)?.let {
-            OrderActivityFilterByCollectionDto(it, collection)
-        }
-        return getTezosActivities(nftFilter, orderFilter, continuation, size, sort)
+        // This method isn't implemented in the new backend
+        return Slice.empty()
     }
 
     override suspend fun getActivitiesByItem(
@@ -131,17 +93,7 @@ open class TezosActivityService(
         sort: ActivitySortDto?
     ): Slice<ActivityDto> {
         val (contract, tokenId) = CompositeItemIdParser.split(itemId)
-        if (dipdupOrderActivityService.enabled()) {
-            return getDipDupAndTzktActivitiesByItem(types, contract, tokenId, continuation, size, sort)
-        } else {
-            val nftFilter = tezosActivityConverter.convertToNftTypes(types)?.let {
-                NftActivityFilterByItemDto(it, contract, tokenId)
-            }
-            val orderFilter = tezosActivityConverter.convertToOrderTypes(types)?.let {
-                OrderActivityFilterByItemDto(it, contract, tokenId)
-            }
-            return getTezosActivities(nftFilter, orderFilter, continuation, size, sort)
-        }
+        return getDipDupAndTzktActivitiesByItem(types, contract, tokenId, continuation, size, sort)
     }
 
     suspend fun getDipDupAndTzktActivitiesByItem(
@@ -186,13 +138,8 @@ open class TezosActivityService(
         size: Int,
         sort: ActivitySortDto?
     ): Slice<ActivityDto> {
-        val nftFilter = tezosActivityConverter.convertToNftUserTypes(types)?.let {
-            NftActivityFilterByUserDto(it, users)
-        }
-        val orderFilter = tezosActivityConverter.convertToOrderUserTypes(types)?.let {
-            OrderActivityFilterByUserDto(it, users)
-        }
-        return getTezosActivities(nftFilter, orderFilter, continuation, size, sort)
+        // TODO this method isn't implemented in the new backend
+        return Slice.empty()
     }
 
     override suspend fun getActivitiesByIds(ids: List<TypedActivityId>): List<ActivityDto> = coroutineScope {
@@ -212,7 +159,7 @@ open class TezosActivityService(
 
         val dipdupOrderRequest = async {
             val ids = orderActivitiesIds.filter { isValidUUID(it) }
-            if (dipdupOrderActivityService.enabled() && ids.isNotEmpty()) {
+            if (ids.isNotEmpty()) {
                 dipdupOrderActivityService.getByIds(ids)
                     .also { logger.info("Total dipdup order activities returned: ${it.size}") }
             } else {
@@ -221,7 +168,7 @@ open class TezosActivityService(
         }
         val tzktItemRequest = async {
             val ids = itemActivitiesIds.filter { isValidLong(it) }
-            if (tzktItemActivityService.enabled() && ids.isNotEmpty()) {
+            if (ids.isNotEmpty()) {
                 tzktItemActivityService.getByIds(ids)
                     .also { logger.info("Total tzkt item activities returned: ${it.size}") }
             } else {
@@ -235,58 +182,9 @@ open class TezosActivityService(
         dipdupOrders + tzktItems
     }
 
-    private suspend fun getTezosActivities(
-        nftFilter: NftActivityFilterDto?,
-        orderFilter: OrderActivityFilterDto?,
-        continuation: String?,
-        size: Int,
-        sort: ActivitySortDto?
-    ) = coroutineScope {
-
-        val tezosSort = TezosConverter.convert(sort ?: ActivitySortDto.LATEST_FIRST)
-
-        val itemRequest = async { getItemActivities(nftFilter, continuation, size, tezosSort) }
-        val orderRequest = async { getOrderActivities(orderFilter, continuation, size, tezosSort) }
-
-        val itemActivities = itemRequest.await().items.map { tezosActivityConverter.convert(it, blockchain) }
-        val orderActivities = orderRequest.await().items.map { tezosActivityConverter.convert(it, blockchain) }
-        val allActivities = itemActivities + orderActivities
-
-        Paging(
-            continuationFactory(sort),
-            allActivities
-        ).getSlice(size)
-    }
-
     private fun continuationFactory(sort: ActivitySortDto?) = when (sort) {
         ActivitySortDto.EARLIEST_FIRST -> ActivityContinuation.ByLastUpdatedAsc
         ActivitySortDto.LATEST_FIRST, null -> ActivityContinuation.ByLastUpdatedDesc
-    }
-
-    private suspend fun getItemActivities(
-        filter: NftActivityFilterDto?,
-        continuation: String?,
-        size: Int,
-        sort: com.rarible.protocol.tezos.dto.ActivitySortDto
-    ): NftActivitiesDto {
-        return if (filter != null) {
-            activityItemControllerApi.getNftActivities(sort, size, continuation, filter).awaitFirst()
-        } else {
-            EMPTY_ITEM_ACTIVITIES
-        }
-    }
-
-    private suspend fun getOrderActivities(
-        filter: OrderActivityFilterDto?,
-        continuation: String?,
-        size: Int,
-        sort: com.rarible.protocol.tezos.dto.ActivitySortDto
-    ): OrderActivitiesDto {
-        return if (filter != null) {
-            activityOrderControllerApi.getOrderActivities(sort, size, continuation, filter).awaitFirst()
-        } else {
-            EMPTY_ORDER_ACTIVITIES
-        }
     }
 
     private fun isValidUUID(str: String?): Boolean {

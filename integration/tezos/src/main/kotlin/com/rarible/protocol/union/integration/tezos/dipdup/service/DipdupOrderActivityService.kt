@@ -8,8 +8,6 @@ import java.math.BigInteger
 
 interface DipdupOrderActivityService {
 
-    fun enabled() = false
-
     suspend fun getAll(
         types: List<ActivityTypeDto>,
         continuation: String?,

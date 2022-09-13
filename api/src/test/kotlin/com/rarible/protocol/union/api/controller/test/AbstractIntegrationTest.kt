@@ -31,6 +31,7 @@ import com.rarible.protocol.union.integration.ethereum.mock.EthOwnershipControll
 import com.rarible.protocol.union.integration.flow.mock.FlowItemControllerApiMock
 import com.rarible.protocol.union.integration.flow.mock.FlowOrderControllerApiMock
 import com.rarible.protocol.union.integration.flow.mock.FlowOwnershipControllerApiMock
+import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktSignatureService
 import com.rarible.protocol.union.integration.tezos.mock.TezosItemControllerApiMock
 import com.rarible.protocol.union.integration.tezos.mock.TezosOrderControllerApiMock
 import com.rarible.protocol.union.integration.tezos.mock.TezosOwnershipControllerApiMock
@@ -199,21 +200,6 @@ abstract class AbstractIntegrationTest {
 
     //--------------------- TEZOS ---------------------//
     @Autowired
-    lateinit var testTezosItemApi: com.rarible.protocol.tezos.api.client.NftItemControllerApi
-
-    @Autowired
-    lateinit var testTezosOwnershipApi: com.rarible.protocol.tezos.api.client.NftOwnershipControllerApi
-
-    @Autowired
-    lateinit var testTezosCollectionApi: com.rarible.protocol.tezos.api.client.NftCollectionControllerApi
-
-    @Autowired
-    lateinit var testTezosOrderApi: com.rarible.protocol.tezos.api.client.OrderControllerApi
-
-    @Autowired
-    lateinit var testTezosSignatureApi: com.rarible.protocol.tezos.api.client.OrderSignatureControllerApi
-
-    @Autowired
     lateinit var testDipDupOrderClient: com.rarible.dipdup.client.OrderClient
 
     @Autowired
@@ -227,6 +213,9 @@ abstract class AbstractIntegrationTest {
 
     @Autowired
     lateinit var tzktOwnershipClient: com.rarible.tzkt.client.OwnershipClient
+
+    @Autowired
+    lateinit var tzktSignatureClient: TzktSignatureService
 
     lateinit var tezosItemControllerApiMock: TezosItemControllerApiMock
     lateinit var tezosOwnershipControllerApiMock: TezosOwnershipControllerApiMock
@@ -286,9 +275,9 @@ abstract class AbstractIntegrationTest {
         flowOwnershipControllerApiMock = FlowOwnershipControllerApiMock(testFlowOwnershipApi)
         flowOrderControllerApiMock = FlowOrderControllerApiMock(testFlowOrderApi)
 
-        tezosItemControllerApiMock = TezosItemControllerApiMock(testTezosItemApi)
-        tezosOwnershipControllerApiMock = TezosOwnershipControllerApiMock(testTezosOwnershipApi)
-        tezosOrderControllerApiMock = TezosOrderControllerApiMock(testTezosOrderApi)
+        tezosItemControllerApiMock = TezosItemControllerApiMock(tzktTokenClient)
+        tezosOwnershipControllerApiMock = TezosOwnershipControllerApiMock(tzktOwnershipClient)
+        tezosOrderControllerApiMock = TezosOrderControllerApiMock(testDipDupOrderClient)
 
         coEvery {
             testItemEventProducer.send(any() as KafkaMessage<ItemEventDto>)

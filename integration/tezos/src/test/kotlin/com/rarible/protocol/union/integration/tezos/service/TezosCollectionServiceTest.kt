@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.integration.tezos.service
 
-import com.rarible.protocol.tezos.api.client.NftCollectionControllerApi
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.integration.tezos.dipdup.DipDupIntegrationProperties
@@ -21,17 +20,15 @@ import java.math.BigInteger
 
 class TezosCollectionServiceTest {
 
-    private val nftCollectionApi: NftCollectionControllerApi = mockk()
     private val tzktCollectionClient: CollectionClient = mockk()
     private val tezosCollectionRepository: TezosCollectionRepository = mockk()
 
 
     private val tzktCollectionService = TzktCollectionServiceImpl(tzktCollectionClient, mockk(), tezosCollectionRepository, DipDupIntegrationProperties.TzktProperties())
-    private val service = TezosCollectionService(nftCollectionApi, tzktCollectionService, mockk())
+    private val service = TezosCollectionService(tzktCollectionService, mockk())
 
     @BeforeEach
     fun beforeEach() {
-        clearMocks(nftCollectionApi)
         clearMocks(tzktCollectionClient)
     }
 

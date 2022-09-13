@@ -1,9 +1,12 @@
 package com.rarible.protocol.union.integration.tezos.converter
 
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.CreatorDto
 import com.rarible.protocol.union.integration.tezos.data.randomTezosOwnershipDto
+import com.rarible.protocol.union.integration.tezos.dipdup.converter.TzktOwnershipConverter
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import java.math.BigInteger
 
 class TezosOwnershipConverterTest {
 
@@ -11,17 +14,15 @@ class TezosOwnershipConverterTest {
     fun `tezos ownership`() {
         val dto = randomTezosOwnershipDto()
 
-        val converted = TezosOwnershipConverter.convert(dto, BlockchainDto.TEZOS)
+        val converted = TzktOwnershipConverter.convert(dto, BlockchainDto.TEZOS)
 
-        assertThat(converted.id.owner.value).isEqualTo(dto.owner)
+        assertThat(converted.id.owner.value).isEqualTo(dto.account!!.address)
 
-        assertThat(converted.collection!!.value).isEqualTo(dto.contract)
-        assertThat(converted.value).isEqualTo(dto.value)
-        assertThat(converted.createdAt).isEqualTo(dto.createdAt)
-        assertThat(converted.lastUpdatedAt).isNull()
-        assertThat(converted.lazyValue).isEqualTo(dto.lazyValue)
-        assertThat(converted.creators[0].account.value).isEqualTo(dto.creators[0].account)
-        assertThat(converted.creators[0].value).isEqualTo(dto.creators[0].value)
+        assertThat(converted.collection!!.value).isEqualTo(dto.token!!.contract!!.address)
+        assertThat(converted.value).isEqualTo(BigInteger(dto.balance))
+        assertThat(converted.createdAt).isEqualTo(dto.firstTime.toInstant())
+        assertThat(converted.lastUpdatedAt).isNotNull
+        assertThat(converted.creators).isEqualTo(emptyList<CreatorDto>())
     }
 
 }

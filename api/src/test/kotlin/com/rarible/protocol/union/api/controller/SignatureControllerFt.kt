@@ -45,45 +45,19 @@ class SignatureControllerFt : AbstractIntegrationTest() {
 
     @Test
     fun `validate signature - tezos`() = runBlocking<Unit> {
-        val tezosForm = com.rarible.protocol.tezos.dto.SignatureValidationFormDto(
-            randomString(),
-            randomString(),
-            randomString(),
-            randomString(),
-            null
-        )
+        val address = randomString()
+        val publicKey = randomString()
+        val signature = randomString()
+        val message = randomString()
 
         val unionForm = SignatureValidationFormDto(
-            signer = UnionAddressConverter.convert(BlockchainDto.TEZOS, tezosForm.address),
-            message = tezosForm.message,
-            signature = tezosForm.signature,
-            publicKey = tezosForm.edpk
+            signer = UnionAddressConverter.convert(BlockchainDto.TEZOS, address),
+            message = message,
+            signature = signature,
+            publicKey = publicKey
         )
 
-        coEvery { testTezosSignatureApi.validate(tezosForm) } returns false.toMono()
-        val result = signatureControllerApi.validate(unionForm).awaitFirst()
-
-        assertThat(result).isEqualTo(false)
-    }
-
-    @Test
-    fun `validate signature - tezos with prefix`() = runBlocking<Unit> {
-        val tezosForm = com.rarible.protocol.tezos.dto.SignatureValidationFormDto(
-            randomString(),
-            randomString(),
-            randomString(),
-            randomString(),
-            randomString()
-        )
-
-        val unionForm = SignatureValidationFormDto(
-            signer = UnionAddressConverter.convert(BlockchainDto.TEZOS, tezosForm.address),
-            message = tezosForm.message,
-            signature = tezosForm.signature,
-            publicKey = tezosForm.edpk + "_" + tezosForm.prefix
-        )
-
-        coEvery { testTezosSignatureApi.validate(tezosForm) } returns false.toMono()
+        coEvery { tzktSignatureClient.validate(publicKey, signature, message) } returns false
         val result = signatureControllerApi.validate(unionForm).awaitFirst()
 
         assertThat(result).isEqualTo(false)

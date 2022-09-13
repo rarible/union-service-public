@@ -3,7 +3,6 @@ package com.rarible.protocol.union.api.controller
 import com.rarible.protocol.union.api.client.OwnershipControllerApi
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
-import com.rarible.protocol.union.core.converter.EsOwnershipConverter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.continuation.page.PageSize
@@ -26,10 +25,10 @@ import com.rarible.protocol.union.integration.flow.converter.FlowOwnershipConver
 import com.rarible.protocol.union.integration.flow.data.randomFlowItemId
 import com.rarible.protocol.union.integration.flow.data.randomFlowNftOwnershipDto
 import com.rarible.protocol.union.integration.flow.data.randomFlowV1OrderDto
-import com.rarible.protocol.union.integration.tezos.converter.TezosOwnershipConverter
 import com.rarible.protocol.union.integration.tezos.data.randomTezosItemId
 import com.rarible.protocol.union.integration.tezos.data.randomTezosOwnershipDto
 import com.rarible.protocol.union.integration.tezos.data.randomTezosOwnershipId
+import com.rarible.protocol.union.integration.tezos.dipdup.converter.TzktOwnershipConverter
 import convertUnionOwnershipToEsOwnership
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.runBlocking
@@ -300,16 +299,16 @@ class OwnershipControllerElasticFt : AbstractIntegrationTest() {
     fun `get ownerships by item - tezos, nothing enriched`() = runBlocking<Unit> {
         val itemId = randomTezosItemId()
         val ownership = randomTezosOwnershipDto(itemId)
-        val tezosUnionOwnership = TezosOwnershipConverter.convert(ownership, itemId.blockchain)
+        val tezosUnionOwnership = TzktOwnershipConverter.convert(ownership, itemId.blockchain)
         val esOwnership = convertUnionOwnershipToEsOwnership(tezosUnionOwnership)
         ownershipRepository.saveAll(
             listOf(
                 esOwnership
             )
         )
-        tezosOwnershipControllerApiMock.mockGetNftOwnershipById(
-            OwnershipIdParser.parseFull(esOwnership.ownershipId).value,
-            ownership
+        tezosOwnershipControllerApiMock.mockGetNftOwnershipsByIds(
+            listOf(OwnershipIdParser.parseFull(esOwnership.ownershipId)),
+            listOf(ownership),
         )
 
         val ownerships = ownershipControllerClient.getOwnershipsByItem(

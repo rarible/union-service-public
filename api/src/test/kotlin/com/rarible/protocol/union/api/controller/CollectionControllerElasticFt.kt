@@ -84,7 +84,7 @@ class CollectionControllerElasticFt : AbstractIntegrationTest() {
             blockchain = BlockchainDto.SOLANA
         )
         val esTezos1 = randomEsCollection().copy(
-            collectionId = "${BlockchainDto.TEZOS}:${tezosDto1.id}",
+            collectionId = "${BlockchainDto.TEZOS}:${tezosDto1.address!!}",
             blockchain = BlockchainDto.TEZOS
         )
 
@@ -174,7 +174,7 @@ class CollectionControllerElasticFt : AbstractIntegrationTest() {
             blockchain = BlockchainDto.FLOW
         )
         val esTezos1 = randomEsCollection().copy(
-            collectionId = "${BlockchainDto.TEZOS}:${tezosDto1.id}",
+            collectionId = "${BlockchainDto.TEZOS}:${tezosDto1.address!!}",
             blockchain = BlockchainDto.TEZOS
         )
 

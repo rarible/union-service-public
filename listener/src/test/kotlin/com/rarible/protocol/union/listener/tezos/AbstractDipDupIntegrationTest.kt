@@ -54,15 +54,6 @@ abstract class AbstractDipDupIntegrationTest {
     //--------------------- TEZOS ---------------------//
 
     @Autowired
-    lateinit var testTezosOrderApi: com.rarible.protocol.tezos.api.client.OrderControllerApi
-
-    @Autowired
-    lateinit var testTezosItemApi: com.rarible.protocol.tezos.api.client.NftItemControllerApi
-
-    @Autowired
-    lateinit var testTezosOwnershipApi: com.rarible.protocol.tezos.api.client.NftOwnershipControllerApi
-
-    @Autowired
     lateinit var ownershipClient: OwnershipClient
 
     @Autowired

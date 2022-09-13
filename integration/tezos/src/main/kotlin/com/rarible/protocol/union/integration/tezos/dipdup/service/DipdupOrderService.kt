@@ -9,8 +9,6 @@ import java.math.BigInteger
 
 interface DipdupOrderService {
 
-    fun enabled() = false
-
     suspend fun getOrderById(id: String): OrderDto {
         TODO("Not implemented")
     }

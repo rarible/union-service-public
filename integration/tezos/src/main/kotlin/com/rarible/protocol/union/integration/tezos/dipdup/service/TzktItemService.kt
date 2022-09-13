@@ -1,14 +1,11 @@
 package com.rarible.protocol.union.integration.tezos.dipdup.service
 
-import com.rarible.protocol.union.core.exception.UnionNotFoundException
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.dto.RoyaltyDto
 import com.rarible.protocol.union.dto.continuation.page.Page
 
 interface TzktItemService {
-
-    fun enabled() = false
 
     suspend fun getAllItems(
         continuation: String?,

@@ -11,8 +11,6 @@ import com.rarible.tzkt.model.TzktNotFound
 
 class TzktOwnershipServiceImpl(val ownershipClient: OwnershipClient): TzktOwnershipService {
 
-    override fun enabled() = true
-
     private val blockchain = BlockchainDto.TEZOS
 
     override suspend fun getOwnershipsAll(continuation: String?, size: Int): Slice<UnionOwnership> {

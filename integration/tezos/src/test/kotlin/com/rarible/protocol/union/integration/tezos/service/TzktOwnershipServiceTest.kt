@@ -1,7 +1,6 @@
 package com.rarible.protocol.union.integration.tezos.service
 
 import com.rarible.core.test.data.randomInt
-import com.rarible.protocol.tezos.api.client.NftOwnershipControllerApi
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.BlockchainGroupDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
@@ -26,16 +25,14 @@ import java.time.ZoneOffset
 
 class TzktOwnershipServiceTest {
 
-    private val ownershipControllerApi: NftOwnershipControllerApi = mockk()
     private val ownershipClient: OwnershipClient = mockk()
 
 
     private val tzktOwnershipService = TzktOwnershipServiceImpl(ownershipClient)
-    private val service = TezosOwnershipService(ownershipControllerApi, tzktOwnershipService)
+    private val service = TezosOwnershipService(tzktOwnershipService)
 
     @BeforeEach
     fun beforeEach() {
-        clearMocks(ownershipControllerApi)
         clearMocks(ownershipClient)
     }
 

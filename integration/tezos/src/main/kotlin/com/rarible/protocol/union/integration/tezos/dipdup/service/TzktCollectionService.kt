@@ -6,8 +6,6 @@ import java.math.BigInteger
 
 interface TzktCollectionService {
 
-    fun enabled() = false
-
     suspend fun getAllCollections(
         continuation: String?,
         size: Int

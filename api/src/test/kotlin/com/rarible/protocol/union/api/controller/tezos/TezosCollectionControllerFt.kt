@@ -19,7 +19,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestTemplate
@@ -27,17 +26,6 @@ import java.math.BigInteger
 
 @FlowPreview
 @IntegrationTest
-@SpringBootTest(
-    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-    properties = [
-        "application.environment = test",
-        "spring.cloud.consul.config.enabled = false",
-        "spring.cloud.service-registry.auto-registration.enabled = false",
-        "spring.cloud.discovery.enabled = false",
-        "logging.logstash.tcp-socket.enabled = false",
-        "integration.tezos.dipdup.enabled = true" // turn on dipdup integration
-    ]
-)
 class TezosCollectionControllerFt : AbstractIntegrationTest() {
 
     @LocalServerPort

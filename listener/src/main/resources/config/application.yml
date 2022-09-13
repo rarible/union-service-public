@@ -94,7 +94,6 @@ integration:
   tezos:
     enabled: ${consul.tezos.enabled:true}
     dipdup:
-      enabled: ${consul.tezos.dipdup.enabled:false}
       network: ${consul.tezos.dipdup.network:}
       dipdupUrl: ${consul.tezos.dipdup.dipdupUrl:}
       nodeAddress: ${consul.tezos.dipdup.nodeAddress:}
@@ -145,7 +144,6 @@ integration:
         ownership: 1
         order: 1
     auctionContracts: ${consul.tezos.auctionContracts:}
-    showLegacyOrders: ${consul.tezos.showLegacyOrders:false}
   solana:
     enabled: ${consul.solana.enabled:false}
     consumer:

@@ -40,16 +40,13 @@ class DipDupOrderEventHandlerFt : AbstractDipDupIntegrationTest() {
 
         // Order without item, we don't need to check Enrichment here
         val order = randomTezosOrderDto()
-        val orderId = order.hash
-        coEvery { testTezosOrderApi.getOrderByHash(any()) } returns order.toMono()
+        val orderId = order.id
 
         val item = randomTezosNftItemDto()
-        coEvery { testTezosItemApi.getNftItemById(any(), any()) } returns item.toMono()
 
         val ownership = randomTezosOwnershipDto()
-        coEvery { testTezosOwnershipApi.getNftOwnershipById(any()) } returns ownership.toMono()
 
-        val token = token(item.contract)
+        val token = token(item.contract!!.address)
         coEvery { tokenClient.token(any()) } returns token
 
         coEvery { ownershipClient.ownershipsByToken(any(), any(), any(), any()) } returns Page(emptyList(), null)

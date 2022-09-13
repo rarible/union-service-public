@@ -6,8 +6,6 @@ import com.rarible.protocol.union.dto.continuation.page.Slice
 
 interface TzktOwnershipService {
 
-    fun enabled() = false
-
     suspend fun getOwnershipsAll(continuation: String?, size: Int): Slice<UnionOwnership> {
         TODO("Not implemented")
     }

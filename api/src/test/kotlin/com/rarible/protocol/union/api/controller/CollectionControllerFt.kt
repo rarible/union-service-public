@@ -33,6 +33,8 @@ import com.rarible.protocol.union.integration.flow.data.randomFlowAddress
 import com.rarible.protocol.union.integration.flow.data.randomFlowCollectionDto
 import com.rarible.protocol.union.integration.tezos.data.randomTezosAddress
 import com.rarible.protocol.union.integration.tezos.data.randomTezosCollectionDto
+import com.rarible.tzkt.model.CollectionType
+import com.rarible.tzkt.model.Page
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -109,7 +111,12 @@ class CollectionControllerFt : AbstractIntegrationTest() {
         val collectionIdFull = UnionAddressConverter.convert(BlockchainDto.TEZOS, collectionId)
         val collection = randomTezosCollectionDto(collectionId)
 
-        coEvery { testTezosCollectionApi.getNftCollectionById(collectionIdFull.value) } returns collection.toMono()
+        coEvery {
+            tzktCollectionClient.collection(collectionIdFull.value)
+        } returns collection
+        coEvery {
+            tzktCollectionClient.collectionType(any())
+        } returns CollectionType.MT
 
         val unionCollection = collectionControllerClient.getCollectionById(collectionIdFull.fullId()).awaitFirst()
 
@@ -154,11 +161,14 @@ class CollectionControllerFt : AbstractIntegrationTest() {
     fun `get collections by owner - tezos`() = runBlocking<Unit> {
         val tezosOwnerId = randomTezosAddress()
         val collection = randomTezosCollectionDto()
-        val collectionId = UnionAddressConverter.convert(BlockchainDto.TEZOS, collection.id)
+        val collectionId = UnionAddressConverter.convert(BlockchainDto.TEZOS, collection.address!!)
 
         coEvery {
-            testTezosCollectionApi.searchNftCollectionsByOwner(tezosOwnerId.value, size, continuation)
-        } returns com.rarible.protocol.tezos.dto.NftCollectionsDto(1, null, listOf(collection)).toMono()
+            tzktCollectionClient.collectionsByOwner(tezosOwnerId.value, any(), any(), any())
+        } returns Page(listOf(collection), null)
+        coEvery {
+            tzktCollectionClient.collectionType(any())
+        } returns CollectionType.MT
 
         val unionCollections = collectionControllerClient.getCollectionsByOwner(
             tezosOwnerId.fullId(), null, continuation, size
@@ -209,8 +219,11 @@ class CollectionControllerFt : AbstractIntegrationTest() {
         } returns NftCollectionsDto(3, null, ethCollections).toMono()
 
         coEvery {
-            testTezosCollectionApi.searchNftAllCollections(size, null)
-        } returns com.rarible.protocol.tezos.dto.NftCollectionsDto(1, null, tezosCollections).toMono()
+            tzktCollectionClient.collectionsAll(size, any(), any())
+        } returns Page(tezosCollections, null)
+        coEvery {
+            tzktCollectionClient.collectionType(any())
+        } returns CollectionType.MT
 
         val unionCollections = collectionControllerClient.getAllCollections(
             blockchains, continuation.toString(), size

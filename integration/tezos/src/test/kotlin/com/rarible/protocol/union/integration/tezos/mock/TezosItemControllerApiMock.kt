@@ -1,72 +1,51 @@
 package com.rarible.protocol.union.integration.tezos.mock
 
-import com.rarible.protocol.tezos.api.client.NftItemControllerApi
-import com.rarible.protocol.tezos.dto.NftItemDto
-import com.rarible.protocol.tezos.dto.NftItemsDto
 import com.rarible.protocol.union.dto.ItemIdDto
-import io.mockk.every
-import reactor.core.publisher.Mono
+import com.rarible.tzkt.client.TokenClient
+import com.rarible.tzkt.model.Page
+import com.rarible.tzkt.model.Token
+import io.mockk.coEvery
 
 class TezosItemControllerApiMock(
-    private val nftItemControllerApi: NftItemControllerApi
+    private val nftItemControllerApi: TokenClient
 ) {
 
-    fun mockGetNftItemById(itemId: ItemIdDto, returnItem: NftItemDto?) {
-        every {
-            nftItemControllerApi.getNftItemById(itemId.value, true)
-        } returns (if (returnItem == null) Mono.empty() else Mono.just(returnItem))
+    fun mockGetNftItemById(itemId: ItemIdDto, returnItem: Token) {
+        coEvery {
+            nftItemControllerApi.token(itemId.value, any(), any())
+        } returns returnItem
     }
-
-    // TODO uncomment when supported
-    /*fun mockGetNftAllItems(
-        continuation: String?,
-        size: Int,
-        showDeleted: Boolean,
-        lastUpdatedFrom: Long,
-        lastUpdatedTo: Long,
-        vararg returnItems: NftItemDto
-    ) {
-        every {
-            nftItemControllerApi.getNftAllItems(
-                continuation,
-                size,
-                showDeleted,
-                lastUpdatedFrom,
-                lastUpdatedTo
-            )
-        } returns Mono.just(NftItemsDto(returnItems.size, null, returnItems.asList()))
-    }*/
 
     fun mockGetNftOrderItemsByOwner(
         owner: String,
         continuation: String?,
         size: Int,
-        vararg returnItems: NftItemDto
+        vararg returnItems: Token
     ) {
-        every {
-            nftItemControllerApi.getNftItemsByOwner(owner, true, size, continuation)
-        } returns Mono.just(NftItemsDto(returnItems.size, null, returnItems.asList()))
+        coEvery {
+            nftItemControllerApi.tokensByOwner(owner, any(), any())
+        } returns Page(returnItems.asList(), null)
     }
 
     fun mockGetNftOrderItemsByCollection(
         collection: String,
         continuation: String?,
         size: Int,
-        vararg returnItems: NftItemDto
+        vararg returnItems: Token
     ) {
-        every {
-            nftItemControllerApi.getNftItemsByCollection(collection, true, size, continuation)
-        } returns Mono.just(NftItemsDto(returnItems.size, null, returnItems.asList()))
+        coEvery {
+            nftItemControllerApi.tokensByCollection(collection, any(), any())
+        } returns Page(returnItems.asList(), null)
     }
 
     fun mockGetNftOrderItemsByCreator(
         creator: String,
         continuation: String?,
         size: Int,
-        vararg returnItems: NftItemDto
+        vararg returnItems: Token
     ) {
-        every {
-            nftItemControllerApi.getNftItemsByCreator(creator, true, size, continuation)
-        } returns Mono.just(NftItemsDto(returnItems.size, null, returnItems.asList()))
+        coEvery {
+            nftItemControllerApi.tokensByCreator(creator, any(), any())
+        } returns Page(returnItems.asList(), null)
     }
 }

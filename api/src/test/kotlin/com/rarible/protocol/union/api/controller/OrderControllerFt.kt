@@ -7,7 +7,6 @@ import com.rarible.protocol.dto.Erc20AssetTypeDto
 import com.rarible.protocol.dto.FlowOrdersPaginationDto
 import com.rarible.protocol.dto.OrderCurrenciesDto
 import com.rarible.protocol.dto.OrdersPaginationDto
-import com.rarible.protocol.tezos.dto.OrderPaginationDto
 import com.rarible.protocol.union.api.client.OrderControllerApi
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
@@ -79,13 +78,13 @@ class OrderControllerFt : AbstractIntegrationTest() {
     @Test
     fun `get order by id - tezos`() = runBlocking<Unit> {
         val order = randomTezosOrderDto()
-        val orderIdFull = OrderIdDto(BlockchainDto.TEZOS, order.hash).fullId()
+        val orderIdFull = OrderIdDto(BlockchainDto.TEZOS, order.id).fullId()
 
         tezosOrderControllerApiMock.mockGetById(order)
 
         val unionOrder = orderControllerClient.getOrderById(orderIdFull).awaitFirst()
 
-        assertThat(unionOrder.id.value).isEqualTo(order.hash)
+        assertThat(unionOrder.id.value).isEqualTo(order.id)
         assertThat(unionOrder.id.blockchain).isEqualTo(BlockchainDto.TEZOS)
     }
 
@@ -116,9 +115,7 @@ class OrderControllerFt : AbstractIntegrationTest() {
             testFlowOrderApi.getOrdersAllByStatus(any(), any(), size, any())
         } returns FlowOrdersPaginationDto(flowOrders, null).toMono()
 
-        coEvery {
-            testTezosOrderApi.getOrdersAll(any(), any(), any(), size, any())
-        } returns OrderPaginationDto(tezosOrders, null).toMono()
+        tezosOrderControllerApiMock.mockGetAll(tezosOrders)
 
         coEvery {
             testEthereumOrderApi.getOrdersAllByStatus(any(), any(), size, any())
@@ -305,10 +302,6 @@ class OrderControllerFt : AbstractIntegrationTest() {
         coEvery {
             testFlowOrderApi.getSellOrders(null, continuation, size)
         } returns FlowOrdersPaginationDto(flowOrders, null).toMono()
-
-        coEvery {
-            testTezosOrderApi.getSellOrders(null, size, continuation)
-        } returns OrderPaginationDto(tezosOrders, null).toMono()
 
         coEvery {
             testEthereumOrderApi.getSellOrders(null, ethPlatform, continuation, size)

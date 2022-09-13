@@ -23,6 +23,7 @@ import com.rarible.protocol.union.dto.CollectionEventDto
 import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaLoader
+import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktSignatureService
 import com.rarible.protocol.union.test.mock.CurrencyMock
 import io.mockk.mockk
 import org.springframework.beans.factory.annotation.Qualifier
@@ -247,34 +248,6 @@ class TestApiConfiguration {
 
     @Bean
     @Primary
-    fun testTezosItemApi(): com.rarible.protocol.tezos.api.client.NftItemControllerApi = mockk()
-
-    @Bean
-    @Primary
-    fun testTezosOwnershipApi(): com.rarible.protocol.tezos.api.client.NftOwnershipControllerApi = mockk()
-
-    @Bean
-    @Primary
-    fun testTezosCollectionApi(): com.rarible.protocol.tezos.api.client.NftCollectionControllerApi = mockk()
-
-    @Bean
-    @Primary
-    fun testTezosSignatureApi(): com.rarible.protocol.tezos.api.client.OrderSignatureControllerApi = mockk()
-
-    @Bean
-    @Primary
-    fun testTezosOrderApi(): com.rarible.protocol.tezos.api.client.OrderControllerApi = mockk()
-
-    @Bean
-    @Primary
-    fun testTezosActivityItemApi(): com.rarible.protocol.tezos.api.client.NftActivityControllerApi = mockk()
-
-    @Bean
-    @Primary
-    fun testTezosActivityOrderApi(): com.rarible.protocol.tezos.api.client.OrderActivityControllerApi = mockk()
-
-    @Bean
-    @Primary
     fun testDipDupOrderClient(): com.rarible.dipdup.client.OrderClient = mockk()
 
     @Bean
@@ -292,5 +265,9 @@ class TestApiConfiguration {
     @Bean
     @Primary
     fun testTzktCollectionClient(): com.rarible.tzkt.client.CollectionClient = mockk()
+
+    @Bean
+    @Primary
+    fun testSignatureClient(): com.rarible.tzkt.client.SignatureClient = mockk()
 
 }
