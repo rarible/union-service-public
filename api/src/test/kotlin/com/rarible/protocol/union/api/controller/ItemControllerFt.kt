@@ -289,12 +289,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
     fun `reset item meta by id - tezos`() = runBlocking {
         val itemId = randomTezosItemId()
 
-//        coEvery { testTezosItemApi.resetNftItemMetaById(itemId.value) } returns Mono.empty()
-//        coEvery { testTezosItemApi.getNftItemMetaById(itemId.value) } returns Mono.just(randomTezosMetaDto())
-
         itemControllerClient.resetItemMeta(itemId.fullId(), false).awaitFirstOrNull()
-
-//        verify(exactly = 1) { testTezosItemApi.resetNftItemMetaById(itemId.value) }
     }
 
     @Test

@@ -303,10 +303,6 @@ class OrderControllerFt : AbstractIntegrationTest() {
             testFlowOrderApi.getSellOrders(null, continuation, size)
         } returns FlowOrdersPaginationDto(flowOrders, null).toMono()
 
-//        coEvery {
-//            testTezosOrderApi.getSellOrders(null, size, continuation)
-//        } returns OrderPaginationDto(tezosOrders, null).toMono()
-
         coEvery {
             testEthereumOrderApi.getSellOrders(null, ethPlatform, continuation, size)
         } returns OrdersPaginationDto(ethOrders, null).toMono()
