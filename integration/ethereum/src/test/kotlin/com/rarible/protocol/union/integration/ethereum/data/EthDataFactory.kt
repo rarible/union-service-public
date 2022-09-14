@@ -668,7 +668,9 @@ fun randomEthOrderActivityMatch(): OrderActivityMatchDto {
         logIndex = randomInt(),
         type = OrderActivityMatchDto.Type.SELL,
         reverted = false,
-        lastUpdatedAt = nowMillis()
+        lastUpdatedAt = nowMillis(),
+        marketplaceMarker = Word.apply(randomWord()),
+        counterMarketplaceMarker = Word.apply(randomWord())
     )
 }
 
