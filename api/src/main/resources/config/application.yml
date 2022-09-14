@@ -70,6 +70,7 @@ integration:
       chainId: ${consul.tezos.dipdup.chainId:}
       sigChecker: ${consul.tezos.dipdup.sigChecker:}
       tzktUrl: ${consul.tezos.dipdup.tzktUrl:}
+      useDipDupTokens: ${consul.tezos.dipdup.useDipDupTokens:false}
       tzktProperties:
         tokenBatch: ${consul.tezos.dipdup.tzktProperties.tokenBatch:false}
         ownershipBatch: ${consul.tezos.dipdup.tzktProperties.ownershipBatch:false}

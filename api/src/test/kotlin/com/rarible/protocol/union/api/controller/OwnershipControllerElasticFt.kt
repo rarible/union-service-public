@@ -26,7 +26,7 @@ import com.rarible.protocol.union.integration.flow.data.randomFlowItemId
 import com.rarible.protocol.union.integration.flow.data.randomFlowNftOwnershipDto
 import com.rarible.protocol.union.integration.flow.data.randomFlowV1OrderDto
 import com.rarible.protocol.union.integration.tezos.data.randomTezosItemId
-import com.rarible.protocol.union.integration.tezos.data.randomTezosOwnershipDto
+import com.rarible.protocol.union.integration.tezos.data.randomTezosTzktOwnershipDto
 import com.rarible.protocol.union.integration.tezos.data.randomTezosOwnershipId
 import com.rarible.protocol.union.integration.tezos.dipdup.converter.TzktOwnershipConverter
 import convertUnionOwnershipToEsOwnership
@@ -121,7 +121,7 @@ class OwnershipControllerElasticFt : AbstractIntegrationTest() {
     fun `get ownership by id - tezos, not enriched`() = runBlocking<Unit> {
         val ownershipIdFull = randomTezosOwnershipId().fullId()
         val ownershipId = OwnershipIdParser.parseFull(ownershipIdFull)
-        val ownership = randomTezosOwnershipDto(ownershipId)
+        val ownership = randomTezosTzktOwnershipDto(ownershipId)
 
         tezosOwnershipControllerApiMock.mockGetNftOwnershipById(ownershipId, ownership)
 
@@ -298,7 +298,7 @@ class OwnershipControllerElasticFt : AbstractIntegrationTest() {
     @Test
     fun `get ownerships by item - tezos, nothing enriched`() = runBlocking<Unit> {
         val itemId = randomTezosItemId()
-        val ownership = randomTezosOwnershipDto(itemId)
+        val ownership = randomTezosTzktOwnershipDto(itemId)
         val tezosUnionOwnership = TzktOwnershipConverter.convert(ownership, itemId.blockchain)
         val esOwnership = convertUnionOwnershipToEsOwnership(tezosUnionOwnership)
         ownershipRepository.saveAll(

@@ -52,8 +52,7 @@ import com.rarible.protocol.union.integration.flow.data.randomFlowNftItemDto
 import com.rarible.protocol.union.integration.tezos.data.randomTezosAddress
 import com.rarible.protocol.union.integration.tezos.data.randomTezosItemId
 import com.rarible.protocol.union.integration.tezos.data.randomTezosItemIdFullValue
-import com.rarible.protocol.union.integration.tezos.data.randomTezosNftItemDto
-import com.rarible.tzkt.model.Page
+import com.rarible.protocol.union.integration.tezos.data.randomTezosTzktItemDto
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.verify
@@ -230,7 +229,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
     fun `get item by id - tezos, not enriched`() = runBlocking<Unit> {
         val itemIdFull = randomTezosItemIdFullValue()
         val itemId = IdParser.parseItemId(itemIdFull)
-        val item = randomTezosNftItemDto(itemId)
+        val item = randomTezosTzktItemDto(itemId)
 
         tezosItemControllerApiMock.mockGetNftItemById(itemId, item)
 
@@ -358,7 +357,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
     @Test
     fun `get items by collection - tezos, nothing enriched`() = runBlocking<Unit> {
         val tezosCollectionId = randomTezosAddress()
-        val item = randomTezosNftItemDto()
+        val item = randomTezosTzktItemDto()
 
         tezosItemControllerApiMock.mockGetNftOrderItemsByCollection(tezosCollectionId.value, continuation, size, item)
 
@@ -424,7 +423,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
     @Test
     fun `get items by owner - tezos, nothing enriched`() = runBlocking<Unit> {
         val tezosOwnerId = randomTezosAddress()
-        val tezosItem = randomTezosNftItemDto()
+        val tezosItem = randomTezosTzktItemDto()
 
         tezosItemControllerApiMock.mockGetNftOrderItemsByOwner(
             tezosOwnerId.value, continuation, size, tezosItem
@@ -600,7 +599,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
     @Test
     fun `get items by creator - tezos, nothing enriched`() = runBlocking<Unit> {
         val tezosCreatorId = randomTezosAddress()
-        val tezosItem = randomTezosNftItemDto()
+        val tezosItem = randomTezosTzktItemDto()
 
         tezosItemControllerApiMock.mockGetNftOrderItemsByCreator(
             tezosCreatorId.value, continuation, size, tezosItem
