@@ -16,7 +16,7 @@ protocol-union-api:
   updateConfig:
     order: start-first
   podAnnotations:
-    fluentbit.io/parser: logfmt
+    fluentbit.io/parser_stdout: logfmt
 
 protocol-union-listener:
   replicas: 1
@@ -34,7 +34,7 @@ protocol-union-listener:
       xmx_megabytes: 1024
       max_direct_memory_megabytes: 128
   podAnnotations:
-    fluentbit.io/parser: logfmt
+    fluentbit.io/parser_stdout: logfmt
 
 protocol-union-meta-loader:
   replicas: 1
@@ -51,7 +51,7 @@ protocol-union-meta-loader:
       xmx_megabytes: 512
       max_direct_memory_megabytes: 128
   podAnnotations:
-    fluentbit.io/parser: logfmt
+    fluentbit.io/parser_stdout: logfmt
 
 protocol-union-indexer:
   replicas: 1
@@ -69,7 +69,7 @@ protocol-union-indexer:
       xmx_megabytes: 1024
       max_direct_memory_megabytes: 256
   podAnnotations:
-    fluentbit.io/parser: logfmt
+    fluentbit.io/parser_stdout: logfmt
 
 protocol-union-worker:
   replicas: 1
@@ -85,4 +85,4 @@ protocol-union-worker:
       xmx_megabytes: 1024
       max_direct_memory_megabytes: 256
   podAnnotations:
-    fluentbit.io/parser: logfmt
+    fluentbit.io/parser_stdout: logfmt
