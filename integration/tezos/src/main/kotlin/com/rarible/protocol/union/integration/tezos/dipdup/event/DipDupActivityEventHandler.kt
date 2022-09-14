@@ -1,7 +1,7 @@
 package com.rarible.protocol.union.integration.tezos.dipdup.event
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.rarible.dipdup.client.core.model.DipDupActivity
+import com.rarible.dipdup.client.core.model.*
 import com.rarible.protocol.union.core.exception.UnionDataFormatException
 import com.rarible.protocol.union.core.handler.AbstractBlockchainEventHandler
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
@@ -25,8 +25,8 @@ open class DipDupActivityEventHandler(
     override suspend fun handle(event: DipDupActivity) {
         logger.info("Received DipDup activity event: {}", mapper.writeValueAsString(event))
         try {
-            if (skip(event)) {
-                logger.warn("Activity event was skipped because activity is too old")
+            if (skip(event) || skipByType(event)) {
+                logger.warn("Activity event was skipped")
             } else {
                 val unionEvent = dipDupOrderConverter.convert(event, blockchain)
                 handler.onEvent(unionEvent)
@@ -43,6 +43,16 @@ open class DipDupActivityEventHandler(
     private fun skip(activity: DipDupActivity): Boolean {
         val ignoreDate = OffsetDateTime.now().minus(properties.tzktProperties.ignorePeriod, ChronoUnit.MILLIS)
         return activity.date < ignoreDate
+    }
+
+    // We skip fxhash because it's not supported yet
+    private fun skipByType(activity: DipDupActivity): Boolean {
+        return when(activity) {
+            is DipDupOrderListActivity -> activity.source == TezosPlatform.FXHASH_V1 || activity.source == TezosPlatform.FXHASH_V2
+            is DipDupOrderCancelActivity -> activity.source == TezosPlatform.FXHASH_V1 || activity.source == TezosPlatform.FXHASH_V2
+            is DipDupOrderSellActivity -> activity.source == TezosPlatform.FXHASH_V1 || activity.source == TezosPlatform.FXHASH_V2
+            else -> false
+        }
     }
 
 }
