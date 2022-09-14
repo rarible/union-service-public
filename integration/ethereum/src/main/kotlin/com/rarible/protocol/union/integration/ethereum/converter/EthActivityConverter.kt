@@ -371,7 +371,8 @@ class EthActivityConverter(
             type = type,
             reverted = source.reverted ?: false,
             lastUpdatedAt = source.lastUpdatedAt,
-            marketplaceMarker = source.marketplaceMarker?.toString()
+            marketplaceMarker = source.marketplaceMarker?.toString(),
+            counterMarketplaceMarker = source.counterMarketplaceMarker?.toString()
         )
     }
 
