@@ -2,24 +2,37 @@ package com.rarible.protocol.union.api.service.elastic
 
 import com.ninjasquad.springmockk.MockkBean
 import com.rarible.core.common.nowMillis
+import com.rarible.core.test.data.randomDouble
 import com.rarible.core.test.data.randomLong
 import com.rarible.core.test.data.randomString
+import com.rarible.protocol.currency.dto.CurrenciesDto
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
+import com.rarible.protocol.union.core.converter.CurrencyConverter
 import com.rarible.protocol.union.core.es.ElasticsearchTestBootstrapper
+import com.rarible.protocol.union.core.model.EsItem
 import com.rarible.protocol.union.core.model.EsOwnership
 import com.rarible.protocol.union.core.service.OwnershipService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
+import com.rarible.protocol.union.core.test.nativeTestCurrencies
+import com.rarible.protocol.union.dto.AssetDto
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.ContractAddress
+import com.rarible.protocol.union.dto.EthErc20AssetTypeDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.OwnershipSearchFilterDto
 import com.rarible.protocol.union.dto.OwnershipSearchRequestDto
+import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.repository.search.EsOwnershipRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentAuctionService
 import com.rarible.protocol.union.enrichment.test.data.randomUnionOwnership
 import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionId
 import com.rarible.protocol.union.integration.flow.data.randomFlowCollectionDto
+import com.rarible.protocol.union.test.mock.CurrencyMock
+import com.rarible.protocol.union.test.mock.CurrencyMock.mockCurrencies
+import io.mockk.clearMocks
 import io.mockk.coEvery
+import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
@@ -27,6 +40,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import randomOwnershipId
+import reactor.kotlin.core.publisher.toMono
 import java.time.Duration
 import kotlin.random.Random
 
@@ -61,7 +75,8 @@ class OwnershipElasticServiceIt {
         runBlocking {
             elasticsearchTestBootstrapper.bootstrap()
 
-            repeat(3) {
+            repeat(10) {
+                val currency = nativeTestCurrencies().find { it.currencyId == "ethereum" }!!
                 val oid = randomOwnershipId(
                     blockchain = BlockchainDto.ETHEREUM,
                     itemIdValue = "${randomString().lowercase()}:${randomLong()}",
@@ -76,11 +91,18 @@ class OwnershipElasticServiceIt {
                         owner = oid.owner.fullId(),
                         date = nowMillis() + Duration.ofDays(it.toLong()),
                         auctionId = randomString(),
-                        auctionOwnershipId = randomString()
+                        auctionOwnershipId = randomString(),
+                        bestSellAmount = randomDouble(1.0, 10.0),
+                        bestSellCurrency = ContractAddress(
+                            blockchain = CurrencyConverter.convert(currency.blockchain),
+                            value = currency.address,
+                        ).fullId(),
+                        bestSellMarketplace = PlatformDto.values().random().name,
                     )
                 )
             }
-            repeat(3) {
+            repeat(10) {
+                val currency = nativeTestCurrencies().find { it.currencyId == "flow" }!!
                 val oid = randomOwnershipId(blockchain = BlockchainDto.FLOW)
                 ownerships.add(
                     EsOwnership(
@@ -92,7 +114,13 @@ class OwnershipElasticServiceIt {
                         owner = oid.owner.fullId(),
                         date = nowMillis() - Duration.ofDays(it.toLong()),
                         auctionId = randomString(),
-                        auctionOwnershipId = randomString()
+                        auctionOwnershipId = randomString(),
+                        bestSellAmount = randomDouble(1.0, 10.0),
+                        bestSellCurrency = ContractAddress(
+                            blockchain = CurrencyConverter.convert(currency.blockchain),
+                            value = currency.address,
+                        ).fullId(),
+                        bestSellMarketplace = PlatformDto.values().random().name,
                     )
                 )
             }
@@ -156,8 +184,9 @@ class OwnershipElasticServiceIt {
             } returns emptyMap()
         }
 
+        clearMocks(CurrencyMock.currencyControllerApiMock)
+        every { CurrencyMock.currencyControllerApiMock.allCurrencies } returns CurrenciesDto(nativeTestCurrencies()).toMono()
     }
-
 
     @Test
     internal fun `search by request test`() {
@@ -268,6 +297,100 @@ class OwnershipElasticServiceIt {
                 failMessage = "Search by owners and items failed!"
             )
         }
+    }
+
+    @Test
+    fun `should find by sell price`() = runBlocking<Unit> {
+        // given
+        val ratesPerCurrency = mockCurrencies()
+        val expected: List<EsOwnership> =
+            ownerships.sortedBy { it.bestSellAmount?.times(ratesPerCurrency[it.bestSellCurrency]!!) }
+                .drop(ownerships.size / 4)
+                .take(ownerships.size / 2)
+
+        val priceFrom =
+            when (expected.first().bestSellCurrency) {
+                "ETHEREUM:0x0000000000000000000000000000000000000000" -> {
+                    expected.first().bestSellAmount!!
+                }
+
+                "FLOW:A.1654653399040a61.FlowToken" -> {
+                    expected.first().bestSellAmount!! * ratesPerCurrency["FLOW:A.1654653399040a61.FlowToken"]!! /
+                            ratesPerCurrency["ETHEREUM:0x0000000000000000000000000000000000000000"]!!
+                }
+
+                else -> throw RuntimeException("Test must be amended")
+            }
+
+        val priceTo =
+            when (expected.last().bestSellCurrency) {
+                "ETHEREUM:0x0000000000000000000000000000000000000000" -> {
+                    expected.last().bestSellAmount!!
+                }
+
+                "FLOW:A.1654653399040a61.FlowToken" -> {
+                    expected.last().bestSellAmount!! * ratesPerCurrency["FLOW:A.1654653399040a61.FlowToken"]!! /
+                            ratesPerCurrency["ETHEREUM:0x0000000000000000000000000000000000000000"]!!
+                }
+
+                else -> throw RuntimeException("Test must be amended")
+            }
+
+        // when && then
+        check(
+            expectedIds = expected.map { it.ownershipId.lowercase() },
+            filter = OwnershipSearchFilterDto(
+                sellPriceFrom = priceFrom,
+                sellPriceTo = priceTo,
+                sellCurrency = "ETHEREUM:0x0000000000000000000000000000000000000000"
+            ),
+            failMessage = "Failed to filter by sell price"
+        )
+    }
+
+    @Test
+    fun `should find by usd sell price`() = runBlocking<Unit> {
+        // given
+        val ratesPerCurrency = mockCurrencies()
+        val expected: List<EsOwnership> =
+            ownerships.sortedBy { it.bestSellAmount?.times(ratesPerCurrency[it.bestSellCurrency]!!) }
+                .drop(ownerships.size / 4)
+                .take(ownerships.size / 2)
+
+        val priceFrom = expected.first().bestSellAmount!! * ratesPerCurrency[expected.first().bestSellCurrency]!!
+        val priceTo = expected.last().bestSellAmount!! * ratesPerCurrency[expected.last().bestSellCurrency]!!
+
+        // when && then
+        check(
+            expectedIds = expected.map { it.ownershipId.lowercase() },
+            filter = OwnershipSearchFilterDto(
+                sellPriceFrom = priceFrom,
+                sellPriceTo = priceTo,
+                sellCurrency = null
+            ),
+            failMessage = "Failed to filter by usd sell price"
+        )
+    }
+
+    @Test
+    fun `should filter by marketplace`() = runBlocking<Unit> {
+        // given
+        val platforms = setOf(
+            PlatformDto.RARIBLE, PlatformDto.OPEN_SEA,
+            PlatformDto.LOOKSRARE, PlatformDto.CRYPTO_PUNKS, PlatformDto.IMMUTABLEX
+        )
+        val expected = ownerships.filter {
+            platforms.contains(PlatformDto.valueOf(it.bestSellMarketplace!!))
+        }
+
+        // when && then
+        check(
+            expectedIds = expected.map { it.ownershipId.lowercase() },
+            filter = OwnershipSearchFilterDto(
+                sellPlatforms = platforms.toList()
+            ),
+            failMessage = "Search by best sell platforms failed"
+        )
     }
 
     private fun takeRandomIds(): List<String> =
