@@ -46,7 +46,7 @@
         <postgresql.version>42.3.4</postgresql.version>
         <okhttp.version>4.9.3</okhttp.version>
 
-        <rarible.core.version>2.4.22</rarible.core.version>
+        <rarible.core.version>2.4.24</rarible.core.version>
         <rarible.ethereum.version>1.6.1</rarible.ethereum.version>
 
         <rarible.protocol.currency.version>1.31.1</rarible.protocol.currency.version>
