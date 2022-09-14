@@ -95,6 +95,8 @@ class EthActivityConverterTest {
         assertThat(converted.price).isEqualTo(swapDto.price)
         assertThat(converted.priceUsd).isEqualTo(swapDto.priceUsd)
         assertThat(converted.amountUsd).isEqualTo(swapDto.priceUsd!!.multiply(left.asset.valueDecimal))
+        assertThat(converted.marketplaceMarker).isEqualTo(swapDto.marketplaceMarker?.toString())
+        assertThat(converted.counterMarketplaceMarker).isEqualTo(swapDto.counterMarketplaceMarker?.toString())
     }
 
     @Test
