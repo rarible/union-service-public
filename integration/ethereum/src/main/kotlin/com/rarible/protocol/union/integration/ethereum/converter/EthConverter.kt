@@ -110,6 +110,9 @@ object EthConverter {
             PlatformDto.RARIBLE, PlatformDto.IMMUTABLEX -> com.rarible.protocol.dto.PlatformDto.RARIBLE
             PlatformDto.OPEN_SEA -> com.rarible.protocol.dto.PlatformDto.OPEN_SEA
             PlatformDto.CRYPTO_PUNKS -> com.rarible.protocol.dto.PlatformDto.CRYPTO_PUNKS
+            PlatformDto.X2Y2 -> com.rarible.protocol.dto.PlatformDto.X2Y2
+            PlatformDto.LOOKSRARE -> com.rarible.protocol.dto.PlatformDto.LOOKSRARE
+            PlatformDto.SUDOSWAP -> com.rarible.protocol.dto.PlatformDto.SUDOSWAP
             else -> null
         }
     }

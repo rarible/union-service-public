@@ -30,6 +30,9 @@ class EthConverterTest {
         assertThat(EthConverter.convert(PlatformDto.RARIBLE)).isEqualTo(com.rarible.protocol.dto.PlatformDto.RARIBLE)
         assertThat(EthConverter.convert(PlatformDto.OPEN_SEA)).isEqualTo(com.rarible.protocol.dto.PlatformDto.OPEN_SEA)
         assertThat(EthConverter.convert(PlatformDto.CRYPTO_PUNKS)).isEqualTo(com.rarible.protocol.dto.PlatformDto.CRYPTO_PUNKS)
+        assertThat(EthConverter.convert(PlatformDto.LOOKSRARE)).isEqualTo(com.rarible.protocol.dto.PlatformDto.LOOKSRARE)
+        assertThat(EthConverter.convert(PlatformDto.X2Y2)).isEqualTo(com.rarible.protocol.dto.PlatformDto.X2Y2)
+        assertThat(EthConverter.convert(PlatformDto.SUDOSWAP)).isEqualTo(com.rarible.protocol.dto.PlatformDto.SUDOSWAP)
     }
 
     @Test
